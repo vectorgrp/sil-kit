@@ -1,0 +1,25 @@
+configure_file("@GIT_HEAD_FILE@" ${CMAKE_CURRENT_BINARY_DIR}/git_head_file COPYONLY)
+
+file(READ ${CMAKE_CURRENT_BINARY_DIR}/git_head_file GIT_HEAD LIMIT 512)
+string(REGEX MATCH "^ref: (.*)\n" GIT_HEAD_REF ${GIT_HEAD})
+
+if (GIT_HEAD_REF)
+    configure_file(
+        "${GIT_DIR}/${CMAKE_MATCH_1}"
+        ${CMAKE_CURRENT_BINARY_DIR}/git_hash_file
+        COPYONLY)
+else()
+    configure_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/git_head_file
+        ${CMAKE_CURRENT_BINARY_DIR}/git_hash_file
+        COPYONLY)
+endif()
+
+
+file(READ ${CMAKE_CURRENT_BINARY_DIR}/git_hash_file GIT_HEAD_HASH LIMIT 512)
+string(STRIP "${GIT_HEAD_HASH}" GIT_HEAD_HASH)
+
+configure_file(
+    version_macros.hpp.in
+    ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp
+    @ONLY)

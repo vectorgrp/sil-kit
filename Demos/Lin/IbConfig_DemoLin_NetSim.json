@@ -1,0 +1,66 @@
+{
+    "ConfigVersion": "0.0.1",
+    "ConfigName": "LinDemoNetSim",
+    "Description": "Sample configuration for LIN with NetworkSimulator",
+
+    "SimulationSetup": {
+
+        "Participants": [
+            {
+                "Name": "LinMaster",
+                "Description": "LIN Master",
+                "SyncType": "DiscreteTime",
+                "IsSyncMaster": true,
+
+                "LinControllers": [ "LIN1" ]
+            },
+            {
+                "Name": "LinSlave",
+                "Description": "LIN Slave",
+                "SyncType": "DiscreteTime",
+
+                "LinControllers": [ "LIN1" ]
+            },
+            {
+                "Name": "BusSimulator",
+                "SyncType": "DiscreteTime",
+
+                "NetworkSimulators": [ "BusSimulator1" ]
+            },
+            {
+                "Name": "SystemController",
+                "SyncType": "Unsynchronized"
+            },
+            {
+                "Name": "SystemMonitor",
+                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchroniatzion.",
+                "SyncType": "Unsynchronized"
+            }
+        ],
+
+        "Links": [
+            {
+                "Name": "LIN1",
+                "Endpoints": [
+                    "LinMaster/LIN1",
+                    "LinSlave/LIN1"
+                ]
+            }
+        ],
+
+        "NetworkSimulators": [
+            {
+                "Name": "BusSimulator1",
+                "SimulatedLinks": [
+                    "LIN1"
+                ]
+            }
+        ],
+
+        "TimeSync": {
+            "SyncType": "TickTickDone",
+            "TickPeriodNs": 1000000
+        }
+
+    }
+}

@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2020
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IbDemoCan_vs140", "Can\IbDemoCan_vs140.vcxproj", "{5AC670D6-572B-4DBE-BB96-9C79DE1B934D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IbDemoCanNewSync_vs140", "Can\IbDemoCanNewSync_vs140.vcxproj", "{5AC670D6-572B-4DBE-BB96-9C79DE1B934D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IbDemoConfigBuilder_vs140", "ConfigBuilder\IbDemoConfigBuilder_vs140.vcxproj", "{0156A673-3495-42A9-B084-FF7EF63608B1}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IbDemoEthernet_vs140", "Ethernet\IbDemoEthernet_vs140.vcxproj", "{1419A5EC-102F-4E8F-914F-BB0DA5D37553}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IbDemoExecutionController_vs140", "ExecutionController\IbDemoExecutionController_vs140.vcxproj", "{455B63B9-CA84-46BA-A996-9E2EB10925FE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IbDemoExecutionControllerProxy_vs140", "ExecutionControllerProxy\IbDemoExecutionControllerProxy_vs140.vcxproj", "{455B63B9-CA84-46BA-A996-9E2EB10925FE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IbDemoFlexray_vs140", "FlexRay\IbDemoFlexray_vs140.vcxproj", "{E83549A9-6AF7-4FA3-B083-23CB4063BF28}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IbDemoGenericMessage_vs140", "GenericMessage\IbDemoGenericMessage_vs140.vcxproj", "{94AA8614-2372-44A4-AE56-D218CE6F55F5}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IbDemoIO_vs140", "IO\IbDemoIO_vs140.vcxproj", "{49C4416A-950A-4235-9FB9-DBCDE3367E2F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IbDemoLin_vs140", "Lin\IbDemoLin_vs140.vcxproj", "{104EF523-E086-42B6-87EB-60B02EF3D74A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IbDemoPassiveSystemMonitor_vs140", "SystemMonitor\IbDemoPassiveSystemMonitor_vs140.vcxproj", "{EB3D7133-8516-487B-B603-1FD382CB5FF6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IbDemoSystemController_vs140", "SystemController\IbDemoSystemController_vs140.vcxproj", "{EB3D7133-8516-487B-B603-1FD382CB5FF6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IbDemoTickTickDone_vs140", "TickTickDone\IbDemoTickTickDone_vs140.vcxproj", "{EB3D7133-8516-487B-B603-1FD382CB5FF6}"
+EndProject
+Global
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {939657C0-2C87-4F63-9BAD-858FF592DE46}
+	EndGlobalSection
+EndGlobal

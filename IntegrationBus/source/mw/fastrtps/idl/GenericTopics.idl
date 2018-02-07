@@ -1,0 +1,17 @@
+#include "Common.idl"
+
+module ib {
+module sim {
+module generic {
+module idl {
+
+    struct GenericMessage
+    {
+        @Key ib::mw::idl::EndpointAddress senderAddr;
+        sequence<octet> data;   // Message payload
+    };
+
+};
+};
+};
+};

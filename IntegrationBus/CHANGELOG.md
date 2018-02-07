@@ -1,0 +1,182 @@
+# IntegrationBus Changelog
+All notable changes to the IntegrationBus project shall be documented in this file.
+
+The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
+
+## [Unreleased] - 2018-12-19
+### Added
+### Removed
+- Demo projects ExecutionController and ExecutionControllerProxy were based on 
+  the deprecated synchronization API and were removed.
+### Changed
+- All demo projects Can, Lin, Ethernet, FlexRay, GenericMessage and Io now use the new 
+  synchronization API.
+- Revised public API:
+  - Renamed files: IoDataTypes.hpp -> IoDatatypes.hpp
+  - Fixed inconsistent naming:
+    - IComAdapter.hpp: RegisterCanBusSimulator -> IComAdapter::RegisterCanSimulator
+    - CanDatatypes.hpp: Removed 'e' prefix from enum classes CanControllerState, CanErrorState, CanTransmitStatus
+    - EthDatatypes.hpp: Removed 'e' prefix from enum classes EthTransmitStatus, EthState, EthMode
+    - IEthController.hpp: Renamed 'acticate()', 'deacticate()' -> 'Acticate()', 'Deacticate()'
+    - ISyncAdapterTtd.hpp: Renamed SetOnTickCallback -> SetTickHandler
+    - IGenericSubscriber.hpp: Renamed RegisterCallback -> SetReceiveMessageHandler
+    - ISyncMasterDt.hpp: Renamed RegisterShutdownHandler -> SetShutdownHandler
+  - Moved generic messages into subnamespace: ib::sim -> ib::sim::generic
+  - Made include namespaces reflect folder names:
+    ib::Simulation::Can|Ethernet|Flexray|Generic|Io|Lin|Kernels -> ib::sim::can|eth|fr|generic|io|lin|kernels
+
+### Fixed
+
+
+## [Sprint-19] - 2018-12-05
+### Added
+- New unified SyncMaster that replaces the SyncMasterDt and
+  SyncMasterTtd. Requires new state handling with ParticipantController
+- The participant discovery mechanism can now be configured in the
+  IbConfig.json, section "MiddlewareConfig/FastRTPS/DiscoveryType". The default
+  is Local, which limits communication to the localhost.
+- The build number of the master branches CD build is now available as
+  ib::version::BuildNumber()
+- On windows, version information is now available as metadata of the
+  IntegrationBus.dll
+
+### Removed
+- "MiddlewareConfig/FastRTPS/CommunicationMaster" has been removed and
+  replaced with the new DiscoveryType options.
+
+### Changed
+- SyncMasterDt and SyncMasterTtd are now considered deprecated.
+
+### Fixed
+- Unicast discovery is now working with DiscoveryType Unicast and a list of the
+  participants' IP-Addresses.
+
+## [Sprint-18] - 2018-11-21
+### Added
+- New IbLauncher to startup a whole IB System. See /Launcher/README.md for infos
+  on how to use (AFTMAGT-120)
+- Version information is now available in the IB library via the following API
+  calls: ib::version::Major(), ib::version::Minor(), ib::version::Patch(),
+  ib::version::String(), ib::version::SprintNumber(), ib::version::SprintName(),
+  ib::version::GitHash() (AFTMAGT-154)
+
+### Removed
+- LinkId has been removed from CAN, LIN, FlexRay and Ethernet data types, as
+  they are no longer needed (see below).
+
+### Changed
+- LIN masters now directly store slave responses to answer any request without
+  delay. Instead of emulating LIN communication over the IB, LIN slaves now send
+  newly configured response data to masters. (AFTMAGT-155) NB: calling
+  ILinController::RequestMessage() will now trigger a callback to the registered
+  MessageHandler before RequestMessage() returns!
+  
+- There is now one FastRTPS topic per link. I.e., if there are two CAN busses
+  CAN1 and CAN2 in your configuration, they will now use separate
+  topics. Previously, traffic of different links (busses) was separated by a
+  linkid field in the message data types and controllers had to filter out
+  messages accordingly. This is no longer necessary. (AFTMAGT-140)
+
+### Fixed
+
+
+## [Sprint-17] - 2018-11-07
+### Added
+- New state handling, which is provided by the following classes:
+
+-- sync::IParticipantController (cf. IComAdapter::GetParticipantController())
+   allows registering callbacks for the different phases of a participant's life
+   time (e.g., Initialization, Running, Stop, Shutdown) and replaces the old
+   sync::ISyncAdapterTtd and sync::ISyncAdapterDt.
+
+-- sync::ISystemMonitor (cf. IComAdapter::GetSystemMonitor()) is a passive
+   component, which never sends data, it allows registering callbacks to observe
+   the states of the other participants as well as the global system state.
+
+-- sync::ISystemController (cf. IComAdapter::GetSystemController()) is the
+   counterpart to the system monitor and allows manipulating the system state,
+   e.g., by initializing individual participants.
+
+-- sync::ISyncMaster (cf. IComAdapter::CreateSyncMaster()) a unified synchronization master
+   (currently only supports simple Tick/TickDone synchronization).
+
+-- Participants can now inidividually specify one of the following synchronization mechanisms:
+--- DiscreteEvent (not implemented yet)
+--- TimeQuantum (Quantum Request and Grant with variable quantum lengths)
+--- DiscreteTime (fixed interval synchronization with participant
+    acknowledgement (Tick/TickDone))
+--- DiscreteTimePassive (the participant receives Ticks but does not generate
+    TickDone messages and thus does not actively participate in the system
+    synchronization), Unsychronized (for participants that are only intended to
+    monitor or control the simulation but not participante as an active client)
+
+- GenericMessage configuration is now available at both IGenericPublisher and
+  IGenericSubscriber (AFTMAGT-137)
+
+### Removed
+
+### Changed
+- The old state handling including the old SyncAdapters is now considered deprecated!
+  This affects the following classes: sync::ISyncAdapterDt, sync::ISyncAdapterTtd,
+  sync::ISyncMasterTtd, sync::ISyncMasterDt, sync::IExecutionControllerProxy.
+  And the matching factory methods: IComAdapter::CreateSyncAdapterDt(),
+  IComAdapter::CreateSyncAdapterTtd(), IComAdapter::CreateSyncMasterTtd(),
+  IComAdapter::CreateSyncMasterDt(), IComAdapter::CreateExecutionControllerProxy().
+- The SyncType can now be configured per participant (Currently only DiscreteTime supported)
+
+### Fixed
+
+
+## [Sprint-15] - 2018-10-10
+### Added
+- Documentation for throwing behavior at API level (AFTMAGT-50)
+- Doxygen documentation for vehicle network controller APIs (AFTMAGT-126)
+- Automated CI build system for Jenkins CI, cf. folder /IntegrationBus/ci/ (AFTMAGT-55)
+- Support for custom FastRTPS XML configurations; the file name can be
+  specified in the ib config (Config.middlewareConfig.fastRtps)
+  (AFTMAGT-138)
+
+### Removed
+
+### Changed
+
+### Fixed
+- Fixed a bug that caused the FastRTPS communication to sporadically hang (AFTMAGT-126)
+- The number of links for IO ports is no longer limited (AFTMAGT-134)
+
+
+## [Sprint-14] - 2018-09-27
+### Added
+- GenericPublisher::Config() and GenericSubscriber::Config() accessors for corresponding config items. This allows retrieving the name of a Publisher or Subscriber (AFTMAGT-125)
+- ib::cfg::Config::ToJsonString() converts an integration bus config to a parsable json string.
+- CMake install target for the IntegrationBus
+- The generic message demo now uses time synchronization, i.e., an ExecutionController is required to run the demo
+
+### Removed
+
+### Changed
+- ExecutionController demo now terminates automatically unless started with --waitForKeyPress
+
+### Fixed
+- The byte order of mac addresses in ethernet frames was fixed
+
+
+## [Sprint13] - 2018-09-12
+### Added
+- Changelog :)
+- ib::cfg::ConfigBuilder to create IbConfigs programatically, cf. example in Demo/ConfigBuilder/ConfigBuilderDemo.cpp.
+- Support for Continous Integration (CI) with Jenkins, cf. /ci/
+- IO ports can now be specified and initialized via the IntegrationBus config.
+- Support for multiple GenericMessage instances (specified via IbConfig.json)
+- Added new top-level section 'MiddlewareConfig' to JSON file for settings FastRTPS/CommunicationMaster and FastRTPS/ConfigFileName; moved existing configuration tree into top-level section 'SimulationSetup'.
+- FastRTPS version bump from v1.5.0 to v1.6.0. FastRTPS is now included as a sub module
+
+### Removed
+- ib::sim::IGenericMessageController()
+- ib::mw::IComAdapter::CreateGenericMessageController()
+
+### Changed
+- Moved config headers to /include/ib/cfg to match namespace, i.e.,
+  /include/ib/Config.hpp moved to /include/ib/cfg/Config.hpp.
+- IoPorts are now type specific with direction. IComAdapter::CreateIoPort() has been replaced with: IComAdapter::CreateAnalog{In,Out}(), IComAdapter::CreateDigital{In,Out}(), IComAdapter::CreatePattern{In,Out}(), IComAdapter::CreatePwm{In,Out}()
+- IComAdapter::CreateGenericMessageController() has been replaced by IComAdapter::CreateGenericPublisher() and IComAdapter::CreateGenericSubscriber(), cf. updated demo Demo/GenericMessage/

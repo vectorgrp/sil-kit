@@ -1,0 +1,64 @@
+#include "Common.idl"
+
+module ib {
+module sim {
+module io {
+module idl {
+
+    /*! \brief I/O message for analog channels
+     */
+    struct AnalogIoMessage
+    {
+        // Meta Data
+        @Key ib::mw::idl::EndpointAddress senderAddr;
+        long long       timestampNs; // Reception time of the message. Set by the receiving ComAdapter
+        
+        // Actual analog I/O message
+        double          value;       // The analog value
+    };
+    
+    /*! \brief I/O message for digital channels
+     */
+    struct DigitalIoMessage
+    {
+        // Meta Data
+        @Key ib::mw::idl::EndpointAddress senderAddr;
+        long long       timestampNs; // Reception time of the message. Set by the receiving ComAdapter
+        
+        // Actual digital I/O message
+        boolean         value;       // The digital value
+    };
+    
+    /*! \brief I/O message of a one-dimensional data pattern
+     */
+    struct PatternIoMessage
+    {
+        // Meta Data
+        @Key ib::mw::idl::EndpointAddress senderAddr;
+        long long       timestampNs; // Reception time of the message. Set by the receiving ComAdapter
+        
+        // Actual pattern I/O message
+        sequence<octet> value;       // Array of dynamic size
+    };
+    
+    /*! \brief Pulse width modulation I/O Message
+     */
+    struct PwmValue
+    {
+        double          frequency;   // Number of cycles per second
+        double          dutyCycle;   // Fraction of one period in which this signal is high
+    };
+    struct PwmIoMessage
+    {
+        // Meta Data
+        @Key ib::mw::idl::EndpointAddress senderAddr;
+        long long       timestampNs; // Reception time of the message. Set by the receiving ComAdapter
+        
+        // Actual I/O message of a pulse-width-modulated signal
+        PwmValue        value;
+    };    
+
+};
+};
+};
+};

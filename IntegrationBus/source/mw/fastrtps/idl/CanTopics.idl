@@ -1,0 +1,106 @@
+#include "Common.idl"
+
+module ib {
+module sim {
+module can {
+module idl {
+
+    /*! \Brief CAN message flags
+     *
+     *  Used by the CAN message.
+     * 
+     *  NB: the corba idl does not allow to define concrete values for
+     *  the individual enum values. Thus, each flag is represented as
+     *  a boolean.
+     *  Alternative solution: encode flags in a octet value by hand.
+     */
+    struct CanMessageFlags
+    {
+        boolean ide; // Identifier Extension
+        boolean rtr; // Remote Transmission Request
+        boolean fdf; // FD Format Indicator
+        boolean brs; // Bit Rate Switch  (for FD Format only)
+        boolean esi; // Error State indicator (for FD Format only)
+    };
+    typedef unsigned long transmitIdT;
+
+    /*! \brief CAN Message
+     *
+     *  There are two usecass: with and without a CAN Network Simulator
+     *  1.) With Simulator:
+     *      Controller proxy sends message to simulator; after arbitration and delay simulation,
+     *      simulator sends message to all receiving controller proxies.
+     * 2.) Without Simulator:
+     *     CAN message is broadcasted from one controller to all others sharing the same link.
+     */
+    struct CanMessage
+    {
+        // Meta Data
+        @Key ib::mw::idl::EndpointAddress senderAddr;
+        unsigned long  transmitId;  // set by the CanController, used by can Network Simulator for acknowledgements
+        long long      timestampNs; // Reception time of the message. Set by the simulator;
+                                    //  w/o simulator, set by the receiving ComAdapter
+        
+        // Actual CAN Message
+        unsigned long   canId;     // CAN identifier
+        CanMessageFlags flags;     // CAN flags as defined above
+        octet           dlc;       // Data Length Code
+        sequence<octet> dataField; // array with dynamic size, up to 64 bytes of data
+    };
+
+// ================================================================================
+//  The following topics are only relevant, when using a Network Simulator
+// ================================================================================
+    
+    /*! \Brief CAN Controller Status
+     *
+     *  From: Network Simulator To: Controller Proxies
+     */
+    struct CanControllerStatus
+    {
+        @Key ib::mw::idl::EndpointAddress senderAddr;
+        long long timestampNs;  // Set by Network Simulator
+        octet controllerState;  // general State of the CAN controller
+        octet errorState;       // State of Error Handling
+    };
+
+    /*! \Brief CAN Transmit Acknowledge
+     *
+     *  From: Network Simulator To: Controller Proxies
+     *  Reports successful or erroneous transmission to the sender of a CAN message
+     */
+    struct CanTransmitAcknowledge
+    {
+        @Key ib::mw::idl::EndpointAddress senderAddr;
+        transmitIdT    transmitId;   // identifies the CanTransmitRequest, to which this Acknowledge
+        long long      timestampNS;  // Time of delivery / error; set by Network Simulator
+        octet          txStatus;     // Status of the CAN Transmit Request
+    };
+
+    /*! \Brief CAN Controller Baudrate Configuration
+     *
+     *  From: Controller Proxies To: Network Simulator
+     */
+    struct CanConfigureBaudrate
+    {
+        @Key ib::mw::idl::EndpointAddress senderAddr;
+        unsigned long baudRate;    // specifies the baud rate of the controller in bps (range 0..2000000)
+        unsigned long fdBaudRate;  // specifies the data segment baud rate of the controller in bps for CAN FD(range 0..16000000)
+    };
+
+    /*! \Brief CAN Controller Mode Configuration
+     *
+     *  From: Controller Proxies To: Network Simulator
+     */
+    struct CanSetControllerMode
+    {
+        @Key ib::mw::idl::EndpointAddress senderAddr;
+        boolean resetErrorHandling;     // reset the error counters to zero and the error state to error active.
+        boolean cancelTransmitRequests; // Cancel all outstanding transmit requests (flush transmit queue of controller)
+        octet mode;                     // state, that CAN controller should reach, e.g. start, stop, sleep
+    };
+
+};
+};
+};
+};

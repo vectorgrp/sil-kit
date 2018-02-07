@@ -1,0 +1,1 @@
+make_ib_demo(IbDemoPassiveSystemMonitor PassiveSystemMonitor.cpp)

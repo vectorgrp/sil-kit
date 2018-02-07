@@ -1,0 +1,9 @@
+#######################################################################################################################
+# IntegrationBus Launcher Plugin
+# Copyright (c)  Vector Informatik GmbH. All rights reserved.
+#######################################################################################################################
+
+# Package version
+
+VERSION = (${PROJECT_VERSION_MAJOR}, ${PROJECT_VERSION_MINOR}, ${PROJECT_VERSION_PATCH})
+__version__ = '.'.join(map(str, VERSION))

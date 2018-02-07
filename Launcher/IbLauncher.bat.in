@@ -1,0 +1,4 @@
+@echo off
+rem Assumption: This batch file is in ${INSTALL_BINDIR} and the Launcher is at ${INSTALL_CODE_DIR}
+set WorkingFolder=%~dp0
+python %WorkingFolder%\..\..\${PROJECT_NAME}\IbLauncher.py %*

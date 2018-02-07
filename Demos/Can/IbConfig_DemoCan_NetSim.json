@@ -1,0 +1,66 @@
+{
+    "ConfigVersion": "0.0.1",
+    "ConfigName": "CanDemoNetSim",
+    "Description": "Sample configuration for CAN with NetworkSimulator",
+
+    "SimulationSetup": {
+
+        "Participants": [
+            {
+                "Name": "CanWriter",
+                "Description": "Demo Writer",
+                "SyncType": "DiscreteTime",
+
+                "IsSyncMaster": true,
+                "CanControllers": [ "CAN1" ]
+            },
+            {
+                "Name": "CanReader",
+                "Description": "Demo Reader",
+                "SyncType": "DiscreteTime",
+
+                "CanControllers": [ "CAN1" ]
+            },
+            {
+                "Name": "NetworkSimulator",
+                "SyncType": "DiscreteTime",
+
+                "NetworkSimulators": [ "CAN-Simulator" ]
+            },
+            {
+                "Name": "SystemController",
+                "SyncType": "Unsynchronized"
+            },
+            {
+                "Name": "SystemMonitor",
+                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchroniatzion.",
+                "SyncType": "Unsynchronized"
+            }
+        ],
+
+        "Links": [
+            {
+                "Name": "CAN1",
+                "Endpoints": [
+                    "CanWriter/CAN1",
+                    "CanReader/CAN1"
+                ]
+            }
+        ],
+
+        "NetworkSimulators": [
+            {
+                "Name": "CAN-Simulator",
+                "SimulatedLinks": [
+                    "CAN1"
+                ]
+            }
+        ],
+        
+        "TimeSync": {
+            "SyncType": "TickTickDone",
+            "TickPeriodNs": 1000000
+        }
+
+    }
+}

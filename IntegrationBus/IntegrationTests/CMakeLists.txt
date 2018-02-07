@@ -1,0 +1,6 @@
+make_integration_test(GenericMessages)
+make_integration_test(IbConfigExample)
+make_integration_test(LargeMessages)
+make_integration_test(SocketBufferSize)
+make_integration_test(WaitForAllAcked)
+make_integration_test(IoMessages)

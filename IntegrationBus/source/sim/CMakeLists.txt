@@ -1,0 +1,7 @@
+add_subdirectory(can)
+add_subdirectory(eth)
+add_subdirectory(fr)
+add_subdirectory(generic)
+add_subdirectory(io)
+add_subdirectory(lin)
+add_subdirectory(tests)

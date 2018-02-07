@@ -1,0 +1,5 @@
+@echo off
+echo Cloning Fast-RTPS library from GitHub...
+
+rem git config http.proxy http://<USER>:<PASSWORD>@DOMAIN:8080
+git clone -b release/1.6.0_patched --recurse-submodules https://github.com/***VIB-820 Removed***/Fast-RTPS.git Fast-RTPS

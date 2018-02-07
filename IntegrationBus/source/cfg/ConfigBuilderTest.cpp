@@ -1,0 +1,357 @@
+// Copyright (c)  Vector Informatik GmbH. All rights reserved.
+
+#include "ConfigBuilder.hpp"
+
+#include <chrono>
+#include <functional>
+#include <string>
+
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
+#include "ib/util/functional.hpp"
+
+namespace {
+
+using namespace std::chrono_literals;
+using namespace std::placeholders;
+
+using testing::_;
+using testing::A;
+using testing::An;
+using testing::InSequence;
+using testing::NiceMock;
+using testing::Return;
+
+using namespace ib::mw;
+using namespace ib::cfg;
+
+class ConfigBuilderTest : public testing::Test
+{
+protected:
+    ConfigBuilderTest()
+        : configBuilder("TestBuilder")
+        , simulationSetup{configBuilder.SimulationSetup()}
+    {
+    }
+
+protected:
+    ConfigBuilder configBuilder;
+    SimulationSetupBuilder& simulationSetup;
+};
+
+
+TEST_F(ConfigBuilderTest, make_exec_controller)
+{
+    simulationSetup.SetTimeSync(TimeSync::SyncType::TickTickDone).WithTickPeriod(10ms);
+    simulationSetup.AddParticipant("ExecControllerDt").AsSyncMaster();
+
+
+    auto config = configBuilder.Build();
+    ASSERT_EQ(config.simulationSetup.participants.size(), 1u);
+
+    auto&& execController = config.simulationSetup.participants[0];
+    EXPECT_EQ(execController.name, "ExecControllerDt");
+    EXPECT_TRUE(execController.isSyncMaster);
+    EXPECT_EQ(config.simulationSetup.timeSync.syncType, TimeSync::SyncType::TickTickDone);
+    EXPECT_EQ(config.simulationSetup.timeSync.tickPeriod, 10ms);
+
+}
+
+TEST_F(ConfigBuilderTest, make_eth_controller)
+{
+    simulationSetup.AddParticipant("P1")
+        .AddEthernet("ETH1")
+            .WithEndpointId(17)
+            .WithLink("LAN0")
+            .WithMacAddress("A1:A2:A3:A4:A5:A6:");
+
+    auto config = configBuilder.Build();
+
+    ASSERT_EQ(config.simulationSetup.participants.size(), 1u);
+    auto&& participant = config.simulationSetup.participants[0];
+
+    ASSERT_EQ(participant.ethernetControllers.size(), 1u);
+    auto&& controller = participant.ethernetControllers[0];
+
+    ASSERT_EQ(config.simulationSetup.links.size(), 1u);
+    auto&& link = config.simulationSetup.links[0];
+
+    EXPECT_EQ(link.name, "LAN0");
+    EXPECT_EQ(link.endpoints.size(), 1u);
+    EXPECT_EQ(link.type, Link::Type::Ethernet);
+    EXPECT_NE(std::find(link.endpoints.begin(), link.endpoints.end(), "P1/ETH1"),
+              link.endpoints.end());
+
+
+    std::array<uint8_t, 6> expectedMac{{0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6}};
+
+    EXPECT_EQ(controller.name, "ETH1");
+    EXPECT_EQ(controller.macAddress, expectedMac);
+    EXPECT_EQ(controller.linkId, link.id);
+    EXPECT_EQ(controller.endpointId, 17);
+}
+
+TEST_F(ConfigBuilderTest, make_switch)
+{
+    simulationSetup.AddSwitch("SWITCH")
+        ->AddPort("Port0").WithVlanIds({1,2,3}).WithEndpointId(9)
+        ->AddPort("Port1").WithVlanIds({3}).WithEndpointId(10);
+
+    auto config = configBuilder.Build();
+
+    ASSERT_EQ(config.simulationSetup.switches.size(), 1u);
+    auto&& switch_ = config.simulationSetup.switches[0];
+
+    EXPECT_EQ(switch_.name, "SWITCH");
+    ASSERT_EQ(switch_.ports.size(), 2u);
+
+    auto&& p0 = switch_.ports[0];
+    decltype(p0.vlanIds) p0_vlans = {1,2,3};
+    EXPECT_EQ(p0.name, "Port0");
+    EXPECT_EQ(p0.endpointId, 9);
+    EXPECT_EQ(p0.vlanIds, p0_vlans);
+
+    auto&& p1 = switch_.ports[1];
+    decltype(p1.vlanIds) p1_vlans = {3};
+    EXPECT_EQ(p1.name, "Port1");
+    EXPECT_EQ(p1.endpointId, 10);
+    EXPECT_EQ(p1.vlanIds, p1_vlans);
+}
+
+TEST_F(ConfigBuilderTest, make_network_simulator)
+{
+    std::initializer_list<std::string> links{"P0", "P1"};
+    std::initializer_list<std::string> switches{"SW1", "SW2"};
+
+    simulationSetup.AddParticipant("NetworkSimulator")
+        .AddNetworkSimulator("BusSim")
+        .WithLinks(links)
+        .WithSwitches(switches);
+
+    auto config = configBuilder.Build();
+
+    ASSERT_EQ(config.simulationSetup.participants.size(), 1u);
+    auto&& participant = config.simulationSetup.participants[0];
+
+    std::vector<std::string> simulators{"BusSim"};
+    EXPECT_EQ(participant.networkSimulators, simulators);
+
+    
+    ASSERT_EQ(config.simulationSetup.networkSimulators.size(), 1u);
+    auto&& netsim = config.simulationSetup.networkSimulators[0];
+    EXPECT_EQ(netsim.name, "BusSim");
+    EXPECT_EQ(netsim.simulatedLinks, std::vector<std::string>(links));
+    EXPECT_EQ(netsim.simulatedSwitches, std::vector<std::string>(switches));
+}
+
+TEST_F(ConfigBuilderTest, make_pwm_port)
+{
+    simulationSetup.AddParticipant("P1")
+        .AddPwmOut("PWM_O")
+            .WithInitValue({3.4, 0.4})
+            .WithUnit("kHz")
+            .WithLink("PWM1");
+    simulationSetup.AddParticipant("P2")
+        .AddPwmIn("PWM_I")
+        .WithLink("PWM1");
+
+    auto config = configBuilder.Build();
+
+    ASSERT_EQ(config.simulationSetup.participants.size(), 2u);
+    auto&& p1 = config.simulationSetup.participants[0];
+    auto&& p2 = config.simulationSetup.participants[1];
+
+    ASSERT_EQ(p1.pwmPorts.size(), 1u);
+    auto&& pwmOut = p1.pwmPorts[0];
+
+    ASSERT_EQ(p2.pwmPorts.size(), 1u);
+    auto&& pwmIn = p2.pwmPorts[0];
+
+    ASSERT_EQ(config.simulationSetup.links.size(), 1u);
+    auto&& link = config.simulationSetup.links[0];
+
+    EXPECT_EQ(link.name, "PWM1");
+    EXPECT_EQ(link.endpoints.size(), 2u);
+    EXPECT_EQ(link.type, Link::Type::PwmIo);
+    EXPECT_NE(std::find(link.endpoints.begin(), link.endpoints.end(), "P1/PWM_O"),
+        link.endpoints.end());
+    EXPECT_NE(std::find(link.endpoints.begin(), link.endpoints.end(), "P2/PWM_I"),
+        link.endpoints.end());
+
+
+    EXPECT_EQ(pwmOut.name, "PWM_O");
+    EXPECT_EQ(pwmOut.linkId, link.id);
+    EXPECT_EQ(pwmOut.endpointId, 1);
+    EXPECT_EQ(pwmOut.direction, PortDirection::Out);
+
+    EXPECT_EQ(pwmIn.name, "PWM_I");
+    EXPECT_EQ(pwmIn.linkId, link.id);
+    EXPECT_EQ(pwmIn.endpointId, 2);
+    EXPECT_EQ(pwmIn.direction, PortDirection::In);
+}
+
+TEST_F(ConfigBuilderTest, confingure_participant_sync_type)
+{
+    simulationSetup.AddParticipant("P1").WithSyncType(SyncType::TimeQuantum);
+
+    auto config = configBuilder.Build();
+
+    ASSERT_EQ(config.simulationSetup.participants.size(), 1u);
+    auto&& p1 = config.simulationSetup.participants[0];
+    EXPECT_EQ(p1.syncType, SyncType::TimeQuantum);
+
+    auto json = config.ToJsonString();
+    auto jsonConfig = Config::FromJsonString(json);
+    EXPECT_EQ(jsonConfig.simulationSetup.participants[0].syncType, SyncType::TimeQuantum);
+}
+
+TEST_F(ConfigBuilderTest, make_generic_message_config)
+{
+    const std::string msgName{"FancyRosMessage"};
+    const std::string msgDefinition{"file://./ros/messages/FancyRosMessage.msg"};
+
+    simulationSetup.AddParticipant("Publisher")
+        .AddGenericPublisher(msgName)
+            .WithProtocolType(GenericPort::ProtocolType::ROS)
+            .WithDefinitionUri(msgDefinition);
+    simulationSetup.AddParticipant("Subscriber")
+        .AddGenericSubscriber(msgName);
+
+    auto config = configBuilder.Build();
+    auto&& simulationSetup = config.simulationSetup;
+
+
+    ASSERT_EQ(simulationSetup.participants.size(), 2u);
+    auto&& pub = simulationSetup.participants[0];
+    auto&& sub = simulationSetup.participants[1];
+
+    ASSERT_EQ(pub.genericPublishers.size(), 1u);
+    ASSERT_EQ(pub.genericSubscribers.size(), 0u);
+    ASSERT_EQ(sub.genericPublishers.size(), 0u);
+    ASSERT_EQ(sub.genericSubscribers.size(), 1u);
+
+    auto&& publisher = pub.genericPublishers[0];
+    EXPECT_EQ(publisher.name, msgName);
+    EXPECT_EQ(publisher.protocolType, GenericPort::ProtocolType::ROS);
+    EXPECT_EQ(publisher.definitionUri, msgDefinition);
+
+    auto&& subscriber = sub.genericSubscribers[0];
+    EXPECT_EQ(subscriber.name, msgName);
+    
+    ASSERT_EQ(simulationSetup.links.size(), 1u);
+    auto&& rosLink = simulationSetup.links[0];
+
+    EXPECT_EQ(rosLink.name, msgName);
+    EXPECT_EQ(rosLink.type, Link::Type::GenericMessage);
+    EXPECT_EQ(rosLink.endpoints, std::vector<std::string>({"Publisher/FancyRosMessage", "Subscriber/FancyRosMessage"}));
+}
+
+TEST_F(ConfigBuilderTest, configure_fast_rtps_default)
+{
+    auto config = configBuilder.Build();
+    auto&& fastrtpsConfig = config.middlewareConfig.fastRtps;
+    EXPECT_EQ(fastrtpsConfig.discoveryType, FastRtps::DiscoveryType::Local);
+    EXPECT_EQ(fastrtpsConfig.configFileName, std::string{});
+    EXPECT_EQ(fastrtpsConfig.unicastLocators.size(), 0u);
+}
+
+TEST_F(ConfigBuilderTest, configure_fastrtps_unicast)
+{
+    configBuilder.ConfigureFastRtps()
+        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::Unicast)
+        .AddUnicastLocator("participant1", "192.168.0.1")
+        .AddUnicastLocator("participant2", "192.168.0.2");
+
+    auto config = configBuilder.Build();
+
+    auto&& fastrtpsConfig = config.middlewareConfig.fastRtps;
+
+    EXPECT_EQ(fastrtpsConfig.discoveryType, FastRtps::DiscoveryType::Unicast);
+    EXPECT_EQ(fastrtpsConfig.configFileName, std::string{});
+    EXPECT_EQ(fastrtpsConfig.unicastLocators.size(), 2u);
+    EXPECT_EQ(fastrtpsConfig.unicastLocators["participant1"], "192.168.0.1");
+    EXPECT_EQ(fastrtpsConfig.unicastLocators["participant2"], "192.168.0.2");
+}
+
+TEST_F(ConfigBuilderTest, configure_fastrtps_unicast_without_locators_must_fail)
+{
+    configBuilder.ConfigureFastRtps()
+        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::Unicast);
+
+    EXPECT_THROW(configBuilder.Build(), ib::cfg::Misconfiguration);
+}
+
+TEST_F(ConfigBuilderTest, configure_fastrtps_unicast_with_configfile_must_fail)
+{
+    configBuilder.ConfigureFastRtps()
+        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::Unicast)
+        .WithConfigFileName("UnicastConfig.xml");
+
+    EXPECT_THROW(configBuilder.Build(), ib::cfg::Misconfiguration);
+}
+
+
+TEST_F(ConfigBuilderTest, configure_fastrtps_multicast)
+{
+    configBuilder.ConfigureFastRtps()
+        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::Multicast);
+
+    auto config = configBuilder.Build();
+
+    auto&& fastrtpsConfig = config.middlewareConfig.fastRtps;
+    EXPECT_EQ(fastrtpsConfig.discoveryType, FastRtps::DiscoveryType::Multicast);
+    EXPECT_EQ(fastrtpsConfig.configFileName, std::string{});
+    EXPECT_EQ(fastrtpsConfig.unicastLocators.size(), 0u);
+}
+
+TEST_F(ConfigBuilderTest, configure_fastrtps_multicast_with_unicastlocators_must_fail)
+{
+    configBuilder.ConfigureFastRtps()
+        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::Multicast)
+        .AddUnicastLocator("participant1", "192.168.0.1");
+
+    EXPECT_THROW(configBuilder.Build(), ib::cfg::Misconfiguration);
+}
+
+TEST_F(ConfigBuilderTest, configure_fastrtps_multicast_with_configfile_must_fail)
+{
+    configBuilder.ConfigureFastRtps()
+        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::Multicast)
+        .WithConfigFileName("MulticastConfig.xml");
+
+    EXPECT_THROW(configBuilder.Build(), ib::cfg::Misconfiguration);
+}
+
+TEST_F(ConfigBuilderTest, configure_fastrtps_configfile)
+{
+    configBuilder.ConfigureFastRtps()
+        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::ConfigFile)
+        .WithConfigFileName("MyFastrtpsConfig.xml");
+
+    auto config = configBuilder.Build();
+
+    auto&& fastrtpsConfig = config.middlewareConfig.fastRtps;
+    EXPECT_EQ(fastrtpsConfig.discoveryType, FastRtps::DiscoveryType::ConfigFile);
+    EXPECT_EQ(fastrtpsConfig.configFileName, std::string{"MyFastrtpsConfig.xml"});
+    EXPECT_EQ(fastrtpsConfig.unicastLocators.size(), 0u);
+}
+
+TEST_F(ConfigBuilderTest, configure_fastrtps_configfile_without_configfilename_must_fail)
+{
+    configBuilder.ConfigureFastRtps()
+        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::ConfigFile);
+
+    EXPECT_THROW(configBuilder.Build(), ib::cfg::Misconfiguration);
+}
+
+TEST_F(ConfigBuilderTest, configure_fastrtps_configfile_with_unicast_locators_must_fail)
+{
+    configBuilder.ConfigureFastRtps()
+        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::ConfigFile)
+        .AddUnicastLocator("participant1", "192.168.0.1");
+
+    EXPECT_THROW(configBuilder.Build(), ib::cfg::Misconfiguration);
+}
+
+} // anonymous namespace

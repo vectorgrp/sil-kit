@@ -1,0 +1,71 @@
+{
+    "$schema": "./IbConfig.schema.json",
+    "ConfigVersion": "0.0.1",
+    "ConfigName": "Generic Message Example",
+    "Description": "Sample Configuration for Generic Messages.",
+
+    "SimulationSetup": {
+
+        "Participants": [
+            {
+                "Name": "Publisher",
+                "Description": "Publishes different generic messages",
+                "GenericPublishers": [
+                    {
+                        "Name": "GroundTruth",
+                        "Protocol": "ROS",
+                        "DefinitionUri": "file://./sim/groundtruth_topic.msg"
+                    },
+                    {
+                        "Name": "VehicleModelOut",
+                        "Protocol": "ROS",
+                        "DefinitionUri": "file://./vehicle-model-out.msg"
+                    },
+                    {
+                        "Name": "MotionTrajectory",
+                        "Protocol": "ROS",
+                        "DefinitionUri": "file://./motion_planning/trajectory_for_controller.msg"
+                    }
+                ]
+            },
+            {
+                "Name": "Subscriber",
+                "Description": "Subscribes different generic messages",
+                "GenericSubscribers": [
+                    "GroundTruth",
+                    "VehicleModelOut",
+                    "MotionTrajectory"
+                ]
+            },
+            {
+                "Name": "ExecutionControllerDt",
+                "IsSyncMaster": true
+            }
+        ],
+
+        "Links": [
+            {
+                "Name": "GroundTruth",
+                "Endpoints": [
+                    "Publisher/GroundTruth",
+                    "Subscriber/GroundTruth"
+                ]
+            },
+            {
+                "Name": "VehicleModelOut",
+                "Endpoints": [
+                    "Publisher/VehicleModelOut",
+                    "Subscriber/VehicleModelOut"
+                ]
+            },
+            {
+                "Name": "MotionTrajectory",
+                "Endpoints": [
+                    "Publisher/MotionTrajectory",
+                    "Subscriber/MotionTrajectory"
+                ]
+            }
+        ]
+
+    }
+}

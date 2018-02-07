@@ -1,0 +1,553 @@
+/**
+ * IntegrationBus CI/CD configuration
+ *
+ * Jenkins configuration:
+ * * Master node 'master', slave nodes: 'linux', 'windows'
+ * * Artifactory server 'IntegrationBusArtifactory'
+ *
+ * Jenkins plugins used: 
+ * * 'Pipeline Utility Steps' for cross-platform zip command
+ * * 'Artifactory Plugin' for Artifactory.server access
+ *
+ * Copyright (c)  Vector Informatik GmbH. All rights reserved.
+ */
+
+artifactoryServer = getArtifactoryServer('IntegrationBusArtifactory')
+artifactoryBuildInfo = createArtifactoryBuildInfo()
+workspaceFoldersPerTask = [:]  // Remember 'ws' folders from build step, which might have an @<#> suffix
+
+pipeline {
+    agent { label 'master' }  // Execute on Jenkins master node
+    options { 
+        timeout(time: 60, unit: 'MINUTES')  // Auto-kill hanging builds
+        //lock('IB-Main')  // Prevent parallel builds from wasting disk space (requires 'Lockable Resources Plugin')
+    }
+    environment {
+        moduleName = 'IB-Main'
+        // Artifactory repositories of generic type
+        artifactoryRepositoryForBuildSnapshots = '***VIB-820 Removed***'
+        artifactoryRepositoryForPackages = '***VIB-820 Removed***'
+        // A BinTray repository, see https://www.jfrog.com/confluence/display/RTF/Distribution+Repository
+        artifactoryRepositoryForBinTray = '***VIB-820 Removed***'
+    }
+
+    stages {
+        // Checkout, build, test, and push build snapshots of successful builds
+        stage('Build') {
+            // Need a script step to escape the declarative pipeline into manual scripting mode so we can use functions
+            steps {
+                script {
+                    // Invoke stages in parallel
+                    parallel([
+                        'Linux gcc debug'             : buildLinuxTarget('gcc', 'Debug'),
+                        'Linux gcc release'           : buildLinuxTarget('gcc', 'Release'),
+                        'Linux clang debug'           : buildLinuxTarget('clang', 'Debug'),
+                        'Linux clang release'         : buildLinuxTarget('clang', 'Release'),
+                        'Windows VS2017 Win64 debug'  : buildWindowsTarget('VS2017', 'Debug', 'x64'),
+                        'Windows VS2017 Win64 release': buildWindowsTarget('VS2017', 'Release', 'x64'),
+                        'Windows VS2017 Win32 debug'  : buildWindowsTarget('VS2017', 'Debug', 'Win32'),
+                        'Windows VS2017 Win32 release': buildWindowsTarget('VS2017', 'Release', 'Win32'),
+                        'Windows VS2015 Win64 debug'  : buildWindowsTarget('VS2015', 'Debug', 'x64'),
+                        'Windows VS2015 Win64 release': buildWindowsTarget('VS2015', 'Release', 'x64'),
+                        'Windows VS2015 Win32 debug'  : buildWindowsTarget('VS2015', 'Debug', 'Win32'),
+                        'Windows VS2015 Win32 release': buildWindowsTarget('VS2015', 'Release', 'Win32')
+                    ])
+                }
+            }
+            post {
+                changed {
+                    // Inform the team about the new build/delivery state
+                    script {
+                        emailext subject: '$DEFAULT_SUBJECT',
+                            body: '$DEFAULT_CONTENT',
+                            recipientProviders: [
+                                [$class: 'CulpritsRecipientProvider'],
+                                [$class: 'DevelopersRecipientProvider']
+                            ],
+                            replyTo: '$DEFAULT_REPLYTO',
+                            to: '$DEFAULT_RECIPIENTS'
+                    }
+                }
+            }
+        }
+        // Always create packages but only push them if we are on the master branch
+        stage('Package') {
+            when {
+                expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'AFTMAGT-136_Provide_CD' }
+            }
+            steps {
+                script {
+                    // Invoke stages in parallel
+                    parallel([
+                        'Linux gcc': packageLinuxTarget('gcc', [
+                                'Debug', 
+                                'Release'
+                            ]),
+                        'Windows VS2017': packageWindowsTarget('VS2017', [
+                                ['Debug', 'x64'], ['Release', 'x64'], 
+                                ['Debug', 'Win32'], ['Release', 'Win32']
+                            ]),
+                        'Windows VS2015': packageWindowsTarget('VS2015', [
+                                ['Debug', 'x64'], ['Release', 'x64'], 
+                                ['Debug', 'Win32'], ['Release', 'Win32']
+                        ])
+                    ])
+                }
+            }
+        }
+        // // Wait for confirmation, then publish to BinTray
+        // stage('Deliver') {
+        //    when {
+        //        expression { env.BRANCH_NAME == 'master' }
+        //    }
+        //     steps {
+        //         script {
+        //             emailext subject: '$DEFAULT_SUBJECT',
+        //                 recipientProviders: [
+        //                     //[$class: 'CulpritsRecipientProvider'],
+        //                     [$class: 'DevelopersRecipientProvider']
+        //                 ],
+        //                 replyTo: '$DEFAULT_REPLYTO',
+        //                 to: '$DEFAULT_RECIPIENTS',
+        //                 mimeType: 'text/html',
+        //                 body: '''<p>Master build ${env.BUILD_NUMBER} succeeded and is ready for distribution. 
+        //                     Click <a href="${env.BUILD_URL}">here</a> to approve or disapprove this build for distribution to BinTray.</p>'''
+        //             try {
+        //                 timeout(time: 24, unit: 'HOURS') {
+        //                     def userInput = input id: 'userInput', message: 'Distribute to BinTray?'
+        //
+        //                     distributeBuildToBinTray(env.moduleName)
+        //                     promoteBuildInArtifactory()
+        //                 }
+        //             } catch(org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+        //                 echo "Distribution to BinTray was denied by one member of the project team"
+        //             }
+        //         }
+        //     }
+        // }
+    }
+    post {
+        always {
+            publishArtifactoryBuildInfo()
+        }
+    }
+}
+
+def buildLinuxTarget(compiler, target) {
+    return runOnNode('linux', "${compiler} ${target}", {
+        def scmVars = checkoutSources()
+        def workingFolder = workspaceFoldersPerTask["${compiler} ${target}"]
+
+        // Make sure the installation folder is empty
+        echo 'Clean content of folder \'install\' to avoid pushing stale files'
+        dir('install') { deleteDir() }
+
+        // Pull dependent build snapshots of submodules from Artifactory and install them
+        //pullSubmoduleBuildSnapshot('FastRTPS', 'ThirdParty/Fast-RTPS', compiler, target, architecture)
+
+        def buildSucceeded = false
+        try {
+            // Build the Docker image and therein, run CMake configure, build, test, and install
+            def command = "IntegrationBus/ci/linux_build.sh ${target} ${env.BUILD_NUMBER}"
+            sh "/bin/bash IntegrationBus/ci/docker_build.sh ubuntu_xenial_${compiler}"
+            sh "docker run " + 
+                "--volume ${env.WORKSPACE}/..:/repo " + // Use same base folder as for packing, to avoid rebuilds after CMake reconfiguration
+                "--workdir /repo/${workingFolder} " + // Enter the build folder
+                "--rm ubuntu_xenial_${compiler} /bin/bash ${command}"
+
+            buildSucceeded = true
+        } finally {
+            status job: "Build and tests for target 'Linux ${compiler} ${target}'", succeeded: buildSucceeded
+
+            // Publish test results
+            junit '**/*gtestresults.xml'
+        }
+
+        // Pack snapshot of this build and publish to Artifactory
+        pushModuleBuildSnapshot(env.moduleName, scmVars, compiler, target, 'x64', 'install/**')
+
+        // Make sure the installation folder is empty to save disk space (~200MB)
+        echo 'Clean content of folder \'install\' to save disk space'
+        dir('install') { deleteDir() }
+    })
+}
+
+def buildWindowsTarget(compiler, target, architecture) {
+    return runOnNode('windows', "${compiler} ${target} ${architecture}", {
+        def scmVars = checkoutSources()
+
+        // Make sure the installation folder is empty
+        echo 'Clean content of folder \'install\' to avoid pushing stale files'
+        dir('install') { deleteDir() }
+
+        // Pull dependent build snapshots of submodules from Artifactory and install them
+        //pullSubmoduleBuildSnapshot('Fast-RTPS', getSubmoduleCommit('ThirdParty/Fast-RTPS'), compiler, target, architecture)
+
+        def buildSucceeded = false
+        try {
+            // Run CMake configure, build, test, and install
+            bat "IntegrationBus\\ci\\windows_build.bat ${compiler} ${target} ${architecture} ${env.BUILD_NUMBER}"
+
+            buildSucceeded = true
+        } finally {
+            status job: "Build or tests for target 'Windows ${compiler} ${target} ${architecture}'", succeeded: buildSucceeded
+
+            // Publish test results
+            junit '**/*gtestresults.xml'
+        }
+
+        // Pack snapshot of this installation and publish to Artifactory
+        pushModuleBuildSnapshot(env.moduleName, scmVars, compiler, target, architecture, 'install/**')
+
+        // Make sure the installation folder is empty to save disk space (~200MB)
+        echo 'Clean content of folder \'install\' to save disk space'
+        dir('install') { deleteDir() }
+    })
+}
+
+def packageLinuxTarget(compiler, targets) {
+    // We need to hijack the folder of one previously built target to work from
+    def workingTarget = targets.first()
+    def workingFolder = workspaceFoldersPerTask["${compiler} ${workingTarget}"]
+
+    return runOnNode('linux', "${compiler} ${workingTarget}", {
+        // Make sure the packaging folder is empty
+        echo 'Clean content of folder \'package\' to avoid pushing stale files'
+        dir('package') { deleteDir() }
+
+        // Component groups, each will return a distinct tarball package
+        def componentGroups = [
+            'IntegrationBus-Library-Package',
+            'IntegrationBus-Contributor-Package'
+        ]
+        // Create list parameters of all other source folders and archive subfolders
+        def buildFolders = targets.collect { "../../${workspaceFoldersPerTask["${compiler} ${it}"]}/build" }
+        def packageFolders = targets.collect { '/' + it }
+
+        // Make sure the installation folder is empty
+        echo 'Clean content of folder \'install\' to avoid pushing stale files'
+        dir('install') { deleteDir() }
+
+        // Pull dependent build snapshots of submodules from Artifactory and install them
+        //pullSubmoduleBuildSnapshot('Fast-RTPS', getSubmoduleCommit('ThirdParty/Fast-RTPS'), compiler, target, architecture)
+
+        packagingSucceeded = false
+        try {
+            // Build the Docker image and therein, run CPack
+            def command = "IntegrationBus/ci/linux_package.sh " + 
+                "${env.BUILD_NUMBER} " + 
+                "\"${targets.join(';')}\" " + 
+                "\"${buildFolders.join(';')}\" " + 
+                "\"${packageFolders.join(';')}\" " + 
+                "\"${componentGroups.join(';')}\""
+            sh "/bin/bash IntegrationBus/ci/docker_build.sh ubuntu_xenial_${compiler}"
+            sh "docker run " + 
+                "--volume ${env.WORKSPACE}/..:/repo " + // For packing, we need all build folders
+                "--workdir /repo/${workingFolder} " + // Enter the hijacked build folder
+                "--rm ubuntu_xenial_${compiler} /bin/bash ${command}"
+
+            packagingSucceeded = true
+        } finally {
+            status job: "Packaging for target 'Linux ${compiler}'", succeeded: packagingSucceeded
+        }
+        if(env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'AFTMAGT-136_Provide_CD' ) {
+            // Publish archives to Artifactory
+            pushModulePackages(env.moduleName, 'package/*.tar.gz')
+        } else {
+            def foundFiles = findFiles(glob: 'package/*.tar.gz')
+            echo "Created ${foundFiles.count()} packages, but they will not be pushed to the Artifactory on this non-master branch."
+        }
+
+        // Make sure the installation folder is empty to save disk space (~200MB)
+        echo 'Clean content of folder \'install\' to save disk space'
+        dir('install') { deleteDir() }
+
+        // Make sure temporaries within the package folder are removed to save disk space (~500MB out of ~550MB)
+        echo 'Clean CPack temporaries within folder \'package\''
+        dir('package') { dir('_CPack_Packages') { deleteDir() } }
+    })
+}
+
+def packageWindowsTarget(compiler, targetsAndArchitectures) {
+    def targets = targetsAndArchitectures.collect { it[0] }
+    def architectures = targetsAndArchitectures.collect { it[1] }
+
+    // We need to hijack the folder of one previously built target/architecture pair to work from
+    def workingTarget = targets.first()
+    def workingArchitecture = architectures.first()
+
+    return runOnNode('windows', "${compiler} ${workingTarget} ${workingArchitecture}", {
+        // Make sure the packaging folder is empty
+        echo 'Clean content of folder \'package\' to avoid pushing stale files'
+        dir('package') { deleteDir() }
+
+        // Component groups, each will return a distinct zip package
+        def componentGroups = [
+            'IntegrationBus-Library-Package',
+            'IntegrationBus-Contributor-Package'
+        ]
+        // Create list parameters of all other source folders and archive subfolders
+        def buildFolders = targetsAndArchitectures.collect { "../../${workspaceFoldersPerTask["${compiler} ${it[0]} ${it[1]}"]}/build" }
+        def packageFolders = targetsAndArchitectures.collect { '/' }
+
+        // Make sure the installation folder is empty
+        echo 'Clean content of folder \'install\' to avoid pushing stale files'
+        dir('install') { deleteDir() }
+
+        // Pull dependent build snapshots of submodules from Artifactory and install them
+        //pullSubmoduleBuildSnapshot('Fast-RTPS', getSubmoduleCommit('ThirdParty/Fast-RTPS'), compiler, target, architecture)
+
+        packagingSucceeded = false
+        try {
+            // Run CPack
+            bat "IntegrationBus\\ci\\windows_package.bat " + 
+                "${compiler} " + 
+                "${env.BUILD_NUMBER} " + 
+                "\"${targets.join('#')}\" " + 
+                "\"${architectures.join('#')}\" " + 
+                "\"${buildFolders.join('#')}\" " + 
+                "\"${packageFolders.join('#')}\" " + 
+                "\"${componentGroups.join('#')}\""
+
+            packagingSucceeded = true
+        } finally {
+            status job: "Packaging for target 'Windows ${compiler}'", succeeded: packagingSucceeded
+        }
+        if(env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'AFTMAGT-136_Provide_CD') {
+            // Publish archives to Artifactory
+            pushModulePackages(env.moduleName, 'package/*.zip')
+        } else {
+            def foundFiles = findFiles(glob: 'package/*.zip')
+            echo "Created ${foundFiles.count()} packages, but they will not be pushed to the Artifactory on this non-master branch."
+        }
+
+        // Make sure the installation folder is empty to save disk space (~200MB)
+        echo 'Clean content of folder \'install\' to save disk space'
+        dir('install') { deleteDir() }
+
+        // Make sure temporaries within the package folder are removed to save disk space (~500MB out of ~550MB)
+        echo 'Clean CPack temporaries within folder \'package\' to save disk space'
+        dir('package') { dir('_CPack_Packages') { deleteDir() } }
+    })
+}
+
+// Allocate this task to the specified node, and create a distinct workspace folder there
+def runOnNode(nodeName, taskName, stepsOnNode) {
+    return {
+        stage("${nodeName.capitalize()} ${taskName}") {
+            node(nodeName) {
+                ws("workspace/${env.moduleName}/${env.BRANCH_NAME}/${taskName.replaceAll(' ', '_')}") {
+                    echo "Task runs on Jenkins node '${nodeName}' under workspace '${env.WORKSPACE}'"
+                    workspaceFoldersPerTask[taskName] = getBaseName(env.WORKSPACE)
+                    stepsOnNode()
+                }
+            }
+        }
+    }
+}
+
+// Checkout sources including submodules
+def checkoutSources() {
+    def scmVars = checkout([$class: 'GitSCM',
+        branches: scm.branches,
+        doGenerateSubmoduleConfigurations: false,
+        extensions: [
+            //[$class: 'CleanBeforeCheckout'],  // Removing existing ./build and ./install folders increases build time
+            [$class: 'SubmoduleOption',
+                disableSubmodules: false,  // Checkout submodules in case we must build ./ThirdParty libraries from source
+                parentCredentials: false,
+                recursiveSubmodules: true,
+                reference: '',
+                trackingSubmodules: false]],
+        submoduleCfg: [],
+        userRemoteConfigs: scm.userRemoteConfigs
+    ])
+    return scmVars
+}
+
+// Retrieve snapshot of a submodule's referenced build from Artifactory and unpack
+def pullSubmoduleBuildSnapshot(moduleName, commit, compiler, target, architecture) {
+    repository = env.artifactoryRepositoryForBuildSnapshots
+
+    def fileName = "${moduleName}_${compiler}_${target}_${architecture}_${commit}.zip"
+    //dir('buildcache') {
+    //    echo 'Clean content of folder \'buildcache\''
+    //    deleteDir()
+
+        // Silently catch if the snapshot is unavailable, so we may build this module from source
+        try {
+            // Note: In this pattern we can safely use a wildcard for branch and build number, 
+            //       because there will only be one (the latest) build per commit.
+            echo "Pulling ${fileName} from Artifactory repository ${repository}"
+            artifactoryServer.download buildInfo: artifactoryBuildInfo, spec: """{
+                    "files": [
+                        {
+                            "pattern": "${repository}/${moduleName}/*/*/${fileName}",
+                            "target": "./",
+                            "props": "git_commit=${commit}",
+                            "flat": "true",
+                            "explode": "true"
+                        }
+                    ]
+                }"""
+            // If we only need to extract parts of the pulled snapshot, we may use unzip instead of '"explode": "true"':
+            //echo "Unzipping installation snapshot from ${fileName}"
+            //unzip zipFile: fileName, dir: '..', glob: 'install/**'
+        } catch(e) {
+            echo "Could not download build snapshot ${fileName} from Artifactory repository ${repository}: ${e}. " +
+                "trying to build submodule ${moduleName} from sources"
+        }
+    //}
+    // Note: Currently, this build will install into the dependencies' ./install folder. Consider renaming 
+    //       the unzipped folder into ./installed, if we want to deploy IB extensions without the IB.
+}
+
+// Pack snapshot of this build and publish to Artifactory
+def pushModuleBuildSnapshot(moduleName, scmVars, compiler, target, architecture, files) {
+    repository = env.artifactoryRepositoryForBuildSnapshots
+
+    def fileName = "${moduleName}_${compiler}_${target}_${architecture}_${scmVars.GIT_COMMIT}.zip"
+    if(!fileExists('install')) {
+        error "Error uploading ${fileName} to the Artifactory repository ${repository}: Found nothing to zip."
+    }
+
+    dir('buildcache') {
+        echo 'Clean content of folder \'buildcache\''
+        deleteDir()
+
+        echo "Zipping up installation snapshot into ${fileName}"
+        zip zipFile: fileName, dir: '..', archive: false, glob: files
+        echo "Pushing ${fileName} to the artifactory ${repository}"
+        // Note: Throws on rebuilds if we are not a privileged user with 'Annotate authorization',
+        //       see https://www.jfrog.com/confluence/display/RTF/Artifactory+REST+API
+        artifactoryServer.upload buildInfo: artifactoryBuildInfo, spec: """{
+                "files": [
+                    {
+                        "pattern": "${fileName}",
+                        "target": "${repository}/${moduleName}/${env.BRANCH_NAME}/${env.BUILD_NUMBER}/",
+                        "props": "git_branch=${scmVars.GIT_BRANCH};git_commit=${scmVars.GIT_COMMIT};git_url=${scmVars.GIT_URL}"
+                    }
+                ]
+            }"""
+
+        // Make sure the buildcache file is deleted to save disk space (~30MB)
+        echo 'Clean content of folder \'buildcache\' to save disk space'
+        deleteDir()
+    }
+}
+
+// Publish package of this module to Artifactory
+def pushModulePackages(moduleName, files) {
+    repository = env.artifactoryRepositoryForPackages
+
+    def foundFiles = findFiles(glob: files)
+    if (foundFiles.size() == 0) {
+        error "No packages matching ${files} were found to push to the Artifactory repository ${repository}"
+    }
+
+    echo "Pushing ${foundFiles.size()} packages that match ${files} to the Artifactory repository ${repository}"
+    artifactoryServer.upload buildInfo: artifactoryBuildInfo, spec: """{
+            "files": [
+                {
+                    "pattern": "${files}",
+                    "target": "${repository}/${moduleName}/${env.BRANCH_NAME}/${env.BUILD_NUMBER}/"
+                }
+            ]
+        }"""
+}
+
+// Update status of published build to 'Released'
+def promoteBuildInArtifactory() {
+    def promotionConfig = [
+        'buildName'          : artifactoryBuildInfo.name,
+        'buildNumber'        : artifactoryBuildInfo.number,
+        'targetRepo'         : env.artifactoryRepositoryForPackages,
+        // Optional parameters
+        'comment'            : 'Deployed to BinTray',
+        //'sourceRepo'         : env.artifactoryRepositoryForPackages,
+        'status'             : 'Released',
+        'includeDependencies': false,
+        //'copy'               : true,
+        'failFast'           : true  // Default: true. Set it to false if you don't want the promotion to abort upon receiving the first error.
+    ]
+    artifactoryServer.promote promotionConfig
+}
+
+// Push the published release to the configured BinTray
+def distributeBuildToBinTray(moduleName) {
+    artifactoryRepository = env.artifactoryRepositoryForPackages
+    bintrayRepository = env.artifactoryRepositoryForBinTray
+
+    echo "Uploading ${fileName} to BinTray repository ${env.bintrayRepository}"
+    def distributionConfig = [
+        // Array of local or distribution repositories and corresponding paths to artifacts that should be deployed to the specified target repository in Bintray
+        'packagesRepoPaths' : [
+            "${artifactoryRepository}/${moduleName}/${env.BRANCH_NAME}/${env.BUILD_NUMBER}/", 
+            "${bintrayRepository}/${moduleName}/${env.BUILD_NUMBER}/"
+        ],
+        'publish'               : true,   // Default: true. If true, artifacts are published when deployed to Bintray.
+        'overrideExistingFiles' : false,  // Default: false. If true, Artifactory overwrites builds already existing in the target path in Bintray.
+        'async'                 : false,  // Default: false. If true, the build will be distributed asynchronously. Errors and warnings may be viewed in the Artifactory log.
+        'dryRun'                : false,  // Default: false. If true, distribution is only simulated. No files are actually moved.
+        //'gpgPassphrase'         : '<PASSPHRASE>',  // If specified, Artifactory will GPG sign the build deployed to Bintray and apply the specified passphrase.
+    ]
+    artifactoryServer.distribute distributionConfig
+}
+
+// Print a status message, bail out on failure
+def status(job, succeeded) {
+    def message = "${job} ${success?'succeeded':'failed'}"
+    if(success) echo message else error message
+}
+
+// Retrieve a git submodule's commit hash
+def getSubmoduleCommit(submodulePath) { 
+    getCommandOutput("git rev-parse @:./${submodulePath}")
+}
+
+// Execute a command and get the output (https://issues.jenkins-ci.org/browse/JENKINS-44569)
+def getCommandOutput(command) {
+    if (isUnix()) {
+        sh(script: '#!/bin/sh -e\n' + command, returnStdout: true).trim()
+    } else {
+        bat(script: '@echo off\n' + command, returnStdout: true).trim()
+    } 
+}
+
+// Retrieve base name, e.g. parent folder of a path
+def getBaseName(path) {
+    path.tokenize('/\\').last()
+}
+
+def getArtifactoryServer(serverId) {
+    // Option 1: Configure server with ID 'IntegrationBusArtifactory' under Manage Jenkins > Configure System > Artifactory
+    Artifactory.server serverId
+
+    // Option 2: Configure artifactory here
+    //Artifactory.newServer 
+    //    url: 'https://<SERVERURL>/artifactory', 
+    //    username: '<USERNAME>', 
+    //    password: '<PASSWORD>'
+}
+
+def createArtifactoryBuildInfo() {
+    artifactoryBuildInfo = Artifactory.newBuildInfo()
+    artifactoryBuildInfo.env.capture = true
+
+    // Discard older builds: This requires extra rights for the Artifactory user
+    if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'AFTMAGT-136_Provide_CD') {
+        artifactoryBuildInfo.retention maxBuilds: 100, doNotDiscardBuilds: [], deleteBuildArtifacts: true
+    } else {
+        artifactoryBuildInfo.retention maxBuilds: 2, maxDays: 50, doNotDiscardBuilds: [], deleteBuildArtifacts: true
+    }
+
+    return artifactoryBuildInfo
+}
+
+def publishArtifactoryBuildInfo() {
+    if(artifactoryBuildInfo == null) {
+        echo 'There were no artifacts to publish for this stage'
+        return
+    }
+    artifactoryServer.publishBuildInfo artifactoryBuildInfo
+}

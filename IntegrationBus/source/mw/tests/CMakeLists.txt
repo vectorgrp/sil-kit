@@ -1,0 +1,4 @@
+make_gtest(TestMwSyncMaster SyncMasterTest.cpp IbMwSync IbConfig)
+make_gtest(TestParticipantController ParticipantControllerTest.cpp IbMwSync IbConfig)
+make_gtest(TestSystemController SystemControllerTest.cpp IbMwSync)
+make_gtest(TestSystemMonitor SystemMonitorTest.cpp IbMwSync IbConfig)

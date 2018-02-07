@@ -1,0 +1,198 @@
+{
+    "ConfigVersion": "0.0.1",
+    "ConfigName": "EthernetReaderWriter",
+    "Description": "Sample configuration for Ethernet without NetworkSimulator",
+
+    "SimulationSetup": {
+
+        "Participants": [
+            {
+                "Name": "EthernetWriter",
+                "Description": "Demo Writer",
+                "SyncType": "DiscreteTime",
+                "IsSyncMaster": true,
+
+                "EthernetControllers": [
+                    {
+                        "Name": "ETH0",
+                        "MacAddr": "F6:04:68:71:AA:C1"
+                    }
+                ]
+            },
+            {
+                "Name": "EthernetReader",
+                "Description": "Demo Reader",
+                "SyncType": "DiscreteTime",
+
+                "EthernetControllers": [
+                    {
+                        "Name": "ETH0",
+                        "MacAddr": "F6:04:68:71:AA:C2"
+                    }
+                ]
+            },
+            {
+                "Name": "SystemController",
+                "SyncType": "Unsynchronized"
+            },
+            {
+                "Name": "SystemMonitor",
+                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchroniatzion.",
+                "SyncType": "Unsynchronized"
+            }
+        ],
+
+        "Links": [
+            {
+                "Name": "LAN1",
+                "Endpoints": [
+                    "EthernetWriter/ETH0",
+                    "EthernetReader/ETH0"
+                ]
+            }
+        ],
+
+        "TimeSync": {
+            "SyncType": "TickTickDone",
+            "TickPeriodNs": 1000000
+        }
+
+    },
+
+    "LaunchConfigurations": [
+        {
+            "Name": "Installation",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "EthernetWriter",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoEthernet",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% EthernetWriter %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "EthernetReader",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoEthernet",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% EthernetReader %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemMonitor",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoPassiveSystemMonitor",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+            ]
+        },
+        {
+            "Name": "Developer-WinDebug",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "EthernetWriter",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../Debug/bin/IbDemoEthernet",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% EthernetWriter %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "EthernetReader",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../Debug/bin/IbDemoEthernet",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% EthernetReader %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemMonitor",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "./Debug/IbDemoPassiveSystemMonitor",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "./Debug/IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+            ]
+        },
+        {
+            "Name": "Developer-WinRelease",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "EthernetWriter",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../Release/bin/IbDemoEthernet",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% EthernetWriter %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "EthernetReader",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../Release/bin/IbDemoEthernet",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% EthernetReader %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemMonitor",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "./Release/IbDemoPassiveSystemMonitor",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "./Release/IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+            ]
+        },
+        {
+            "Name": "Developer-Linux",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "EthernetWriter",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../bin/IbDemoEthernet",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% EthernetWriter %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "EthernetReader",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../bin/IbDemoEthernet",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% EthernetReader %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemMonitor",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "../bin/IbDemoPassiveSystemMonitor",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "../bin/IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+            ]
+        }
+
+    ]
+
+}

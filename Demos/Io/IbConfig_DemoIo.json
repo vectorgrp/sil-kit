@@ -1,0 +1,210 @@
+{
+    "ConfigVersion": "0.0.1",
+    "ConfigName": "IODemo",
+    "Description": "Sample configuration for I/O",
+
+    "SimulationSetup": {
+
+        "Participants": [
+            {
+                "Name": "IoWriter",
+                "Description": "Sends I/O values",
+                "SyncType": "DiscreteTime",
+                "IsSyncMaster": true,
+
+                "Digital-Out": [
+                    { "DIO": false }
+                ],
+                "Analog-Out": [
+                    { "AIO": {"value": 7.3, "unit": "V" }}
+                ],
+                "Pwm-Out": [
+                    { "PWM": { "freq": { "value": 2.5, "unit": "Hz"}, "duty": 0.4 } }
+                ],
+                "Pattern-Out": [
+                    { "PATTERN": "626565702d62656570" }
+                ]
+            },
+            {
+                "Name": "IoReader",
+                "Description": "Receives I/O values",
+                "SyncType": "DiscreteTime",
+
+                "Digital-In": [ "DIO" ],
+                "Analog-In": [ "AIO" ],
+                "Pwm-In": [ "PWM" ],
+                "Pattern-In": [ "PATTERN" ]
+            },
+            {
+                "Name": "SystemController",
+                "SyncType": "Unsynchronized"
+            },
+            {
+                "Name": "SystemMonitor",
+                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchroniatzion.",
+                "SyncType": "Unsynchronized"
+            }
+        ],
+
+        "Links": [
+            {
+                "Name": "DIO",
+                "Endpoints": [ "IoWriter/DIO", "IoReader/DIO" ]
+            },
+            {
+                "Name": "AIO",
+                "Endpoints": [ "IoWriter/AIO", "IoReader/AIO" ]
+            },
+            {
+                "Name": "PWM",
+                "Endpoints": [ "IoWriter/PWM", "IoReader/PWM" ]
+            },
+            {
+                "Name": "PATTERN",
+                "Endpoints": [ "IoWriter/PATTERN", "IoReader/PATTERN" ]
+            }
+        ],
+
+        "TimeSync": {
+            "SyncType": "DiscreteTimed"
+        }
+
+    },
+
+    "LaunchConfigurations": [
+        {
+            "Name": "Installation",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "IoWriter",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoIo",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% IoWriter %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "IoReader",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoIo",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% IoReader %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemMonitor",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoPassiveSystemMonitor",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+            ]
+        },
+        {
+            "Name": "Developer-WinDebug",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "IoWriter",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../Debug/bin/IbDemoIo",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% IoWriter %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "IoReader",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../Debug/bin/IbDemoIo",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% IoReader %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemMonitor",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "./Debug/IbDemoPassiveSystemMonitor",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "./Debug/IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+            ]
+        },
+        {
+            "Name": "Developer-WinRelease",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "IoWriter",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../Release/bin/IbDemoIo",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% IoWriter %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "IoReader",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../Release/bin/IbDemoIo",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% IoReader %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemMonitor",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "./Release/IbDemoPassiveSystemMonitor",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "./Release/IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+            ]
+        },
+        {
+            "Name": "Developer-Linux",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "IoWriter",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../bin/IbDemoIo",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% IoWriter %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "IoReader",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../bin/IbDemoIo",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% IoReader %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemMonitor",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "../bin/IbDemoPassiveSystemMonitor",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "../bin/IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+            ]
+        }
+
+    ]
+	
+}

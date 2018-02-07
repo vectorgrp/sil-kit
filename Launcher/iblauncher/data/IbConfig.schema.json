@@ -1,0 +1,602 @@
+{
+    "$id": "http://example.com/example.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "JSON schema for IntegrationBus configuration files",
+    "type": "object",
+
+    "definitions": {
+
+        "Description": {
+            "type": "string",
+            "title": "User readable description for easier recognition and comments.",
+            "default": ""
+        }
+
+    },
+    
+    "properties": {
+      "$schema": {
+        "$id": "/properties/$schema",
+        "type": "string",
+        "title": "The $schema Schema",
+        "default": "",
+        "examples": [
+          "./IbConfig.schema.json"
+        ]
+      },
+
+      "ConfigVersion": {
+        "$id": "/properties/ConfigVersion",
+        "type": "string",
+        "title": "Version of the Configuration Schema",
+        "default": "",
+        "examples": [
+          "0.0.1"
+        ]
+      },
+
+      "ConfigName": {
+        "$id": "/properties/ConfigName",
+        "type": "string",
+        "title": "Name of the Configuration",
+        "default": "",
+        "examples": [
+          "My Configuration"
+        ]
+      },
+
+      "Description": {
+        "$ref": "#/definitions/Description"
+      },
+
+      "SimulationSetup": {
+        "$id": "#/properties/SimulationSetup",
+        "type": "object",
+        "title": "Entities of the simulated system",
+        "properties": {
+
+          "Participants": {
+            "$id": "/properties/Participants",
+            "type": "array",
+
+            "items": {
+              "type": "object",
+              "properties": {
+                "Name": {
+                    "type": "string",
+                    "title": "Name of the Participant"
+                },
+                "Description": {
+                    "$ref": "#/definitions/Description"
+                },
+                "SyncType" :{
+                  "type": "string",
+                  "enum": [ "DiscreteEvent", "TimeQuantum", "DiscreteTime", "DiscreteTimePassive", "Unsynchronized"]
+                },
+                "CanControllers": {
+                  "type": "array",
+                  "items": {
+                      "type": "string",
+                      "title": "Names of the CAN controllers"
+                  }
+                },
+                "LinControllers": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "title": "Names of the LIN controllers"
+                  }
+                },
+                "FlexRayControllers": {
+                  "items": {
+                    "type": "string",
+                    "title": "Names of the FlexRay controllers"
+                  }
+                },
+                "EthernetControllers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Names of the Ethernet controller"
+                      },
+                      "MacAddr": {
+                        "type": "string",
+                        "pattern": "^([0-9A-Z]{2}:){5}[0-9-A-Z]{2}$",
+                        "title": "Colon-separated MAC-Address",
+                        "examples": [
+                          "F7:04:68:71:AA:A0"
+                        ]
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "Digital-Out": {
+                  "type": "array",
+                  "title": "Digital output ports",
+                  "items": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^.*$": {
+                        "type": "boolean",
+                        "title": "Name and init value of a digital output"
+                      }
+                    }
+                  }
+                },
+                "Analog-Out": {
+                  "type": "array",
+                  "title": "Analog output ports",
+                  "items": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^.*$": {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "type": "number",
+                            "title": "Initial value of the output port"
+                          },
+                          "unit": {
+                            "type": "string",
+                            "title": "Physical unit of the output port value.",
+                            "examples": [ "V", "A", "kHz" ]
+                          }
+                        },
+                        "additionalProperties": false,
+                        "title": "Name and init value of an analog output"
+                      }
+                    }
+                  }
+                },
+                "Pwm-Out": {
+                  "type": "array",
+                  "title": "PWM output ports",
+                  "items": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^.*$": {
+                        "type": "object",
+                        "properties": {
+                          "freq": {
+                            "type": "object",
+                            "title": "Frequency and unit of the PWM output.",
+                            "properties": {
+                              "value":{
+                                "type": "number"
+                              },
+                              "unit":{
+                                "type": "string",
+                                "enum": [ "Hz", "kHz", "MHz", "GHz", "THz"]
+                              }
+                            },
+                            "additionalProperties": false
+                          },
+                          "duty": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "title": "Duty cycle of the PWM output.",
+                            "examples": [ "V", "A", "kHz" ]
+                          }
+                        },
+                        "additionalProperties": false,
+                        "title": "Name and init value of an analog output"
+                      }
+                    }
+                  }
+                },
+                "Pattern-Out":{
+                  "type": "array",
+                  "title": "Pattern output ports",
+                  "items": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^.*$": {
+                        "type": "string",
+                        "pattern": "^[0-9a-zA-Z]*$",
+                        "title": "Name and hex encoded init value of a pattern output"
+                      }
+                    }
+                  }
+                },
+
+                "Digital-In": {
+                  "type": "array",
+                  "title": "Digital input ports",
+                  "items": {
+                    "type": "string",
+                    "title": "Name of the digital input port"
+                  }
+                },
+                "Analog-In": {
+                  "type": "array",
+                  "title": "Analog input ports",
+                  "items": {
+                    "type": "string",
+                    "title": "Name of the analog input port"
+                  }
+                },
+                "Pwm-In": {
+                  "type": "array",
+                  "title": "PWM input ports",
+                  "items": {
+                    "type": "string",
+                    "title": "Name of the PWM input port"
+                  }
+                },
+                "Pattern-In": {
+                  "type": "array",
+                  "title": "Pattern input ports",
+                  "items": {
+                    "type": "string",
+                    "title": "Name of the pattern input port"
+                  }
+                },
+
+                "GenericPublishers": {
+                  "type":"array",
+                  "items": {
+                    "type":"object",
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Name of the generic message publisher"
+                      },
+                      "Protocol": {
+                        "type": "string",
+                        "enum": [
+                          "Undefined",
+                          "ROS",
+                          "SOME/IP"
+                        ],
+                        "default": "Undefined"
+                      },
+                      "DefinitionUri": {
+                        "type": "string",
+                        "title": "Location of the corresponding message definition file. Relative paths refer to the location of the IbConfig file.",
+                        "format": "uri"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "required": [ "Name" ]
+                  }
+                },
+
+                "GenericSubscribers": {
+                  "type": "array",
+                  "title": "Names of generic message subscribers",
+                  "items": {
+                    "type": "string",
+                    "title": "Name of the generic message subscriber"
+                  }
+                },
+
+                "NetworkSimulators": {
+                    "type": "array",
+                    "items":{
+                      "type": "string",
+                      "title": "Names of the network simulators located at this participant"
+                    }
+                },
+                "IsSyncMaster": {
+                    "type": "boolean"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+
+          "Switches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Name": {
+                  "type": "string",
+                  "title": "Name of the Ethernet Switch",
+                  "examples": [
+                    "Switch1"
+                  ]
+                },
+                "Description": {
+                  "$ref": "#/definitions/Description"
+                },
+                "Ports": {
+                  "type": "array",
+                  "title": "Switch Ports",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Name of the Switch Port",
+                        "examples": [
+                          "Port0"
+                        ]
+                      },
+                      "VlanIds": {
+                        "type": "array",
+                        "title": "List of VLAN IDs",
+                        "items": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "Links": {
+
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Name": {
+                  "type": "string",
+                  "title": "Unique name of the Link",
+                  "examples": [
+                    "CAN1",
+                    "LIN1",
+                    "FlexRay1",
+                    "Ethernet1",
+                    "Switch0-Port0"
+                  ]
+                },
+                "Endpoints": {
+                  "type": "array",
+                  "title": "List of connected controllers, IO-ports and switch ports. Must be fully qualified.",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[^/]+/[^/]+",
+                    "default": "",
+                    "examples": [
+                      "Participant1/ETH1",
+                      "Switch1/Port0"
+                    ]
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+
+          "NetworkSimulators": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Name": {
+                  "type": "string",
+                  "title": "Name of the Network Simulator Instance"
+                },
+                "SimulatedLinks": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "SimulatedSwitches": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+
+          "TimeSync": {
+            "type": "object",
+            "title": "Time synchronization",
+            "properties": {
+              "SyncType": {
+                "type": "string",
+                "title": "Type of the synchronization.",
+                "enum": [
+                  "DiscreteTimed",
+                  "TickTickDone"
+                ],
+                "default": "",
+                "examples": [
+                  "DiscreteTimed"
+                ]
+              },
+              "TickPeriodNs":{
+                "type": "integer",
+                "title": "Tick period in nano seconds for TickTickDone synchronization"
+              }
+            },
+            "additionalProperties": false,
+            "required": ["SyncType"]
+          }
+        },
+        "additionalProperties": false
+      },
+
+      "MiddlewareConfig": {
+        "$id": "#/properties/MiddlewareConfig", 
+        "type": "object", 
+        "title": "Configuration of the simulation middleware", 
+        "properties": {
+
+          "FastRTPS": {
+            "$id": "#/properties/MiddlewareConfig/properties/FastRTPS", 
+            "type": "object", 
+            "title": "FastRTPS settings", 
+            "properties": {
+              "DiscoveryType": {
+                "type":"string",
+                "enum": [ 
+                  "Local",
+                  "Unicast",
+                  "Multicast",
+                  "ConfigFile"
+                ],
+                "default": "Local",
+                "title": "The FastRTPS participant discovery mechanism",
+                "description": "This setting determines how FastRTPS performs participant discovery; Local limits discovery to the localhost, Multicast is the FastRTPS default using dynamic discovery, Unicast allows specifying the participant IPs manually, and ConfigFile uses participant discovery according to the specified FastRTPS.xml."
+              },
+              "UnicastLocators": {
+                "type": "object",
+                "title": "The IP addresses of participants for unicast discovery.",
+                "description": "When using DiscoveryType=Unicast, the UnicastLocators must list an IP address for each participant.",
+                "patternProperties": {
+                  "^.*$": {
+                    "type": "string",
+                    "format": "ip-address",
+                    "title": "IP4-Address of a participant"
+                  }
+                }
+              },
+
+              "ConfigFileName": {
+                "$id": "#/properties/MiddlewareConfig/properties/FastRTPS/properties/ConfigFileName", 
+                "type": "string", 
+                "title": "The file name of an optional FastRTPS XML file with profiles to use for the participants, relative to the JSON config file", 
+                "default": "", 
+                "examples": [
+                  "Custom_FastRtps_Profile.xml"
+                ], 
+                "pattern": "^(.*)$"
+              }
+            },
+            "additionalProperties": false
+          }
+
+        },
+        "additionalProperties": false
+      },
+
+      "LaunchConfigurations": {
+        "$id": "#/properties/LaunchConfigurations", 
+        "type": "array", 
+        "title": "Configurations for the launcher", 
+
+        "items": {
+          "type": "object",
+          "properties": {
+            "Name": {
+              "type": "string",
+              "title": "Name of the LaunchConfiguration"
+            },
+            "Description": {
+              "$ref": "#/definitions/Description"
+            },
+            "NetworkNodes": {
+              "$id": "#/properties/LaunchConfigurations/NetworkNodes", 
+              "type": "array", 
+              "title": "Nodes to deploy to", 
+              "items": {
+                "type": "object",
+                "properties": {
+                  "Name": {
+                    "type": "string",
+                    "title": "Name of the LaunchConfiguration"
+                  },
+                  "Platform": {
+                    "type": "string",
+                    "title": "Platform of the target"
+                  },
+                  "Ipv4Address": {
+                    "type": "string",
+                    "title": "Endpoint ethernet address"
+                  },
+                  "SshPort": {
+                    "type": "string",
+                    "title": "Endpoint ethernet port for SSH access"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "ParticipantEnvironments": {
+              "$id": "#/properties/LaunchConfigurations/ParticipantEnvironments", 
+              "type": "array", 
+              "title": "Configuring the execution environment of participants", 
+              "items": {
+                "type": "object",
+                "properties": {
+                  "Participant": {
+                    "type": "string",
+                    "title": "Name of the Participant to deploy"
+                  },
+                  "Environment": {
+                    "type": "string",
+                    "title": "Type of the Environment where the Participant is executed",
+                    "enum": ["CANoe", "ExecutionController", "CustomExecutable"]
+                  },
+                  "NetworkNode": {
+                    "type": "string",
+                    "title": "Name of the NetworkNode to deploy the Participant to"
+                  }
+                },
+                "required": [ "Participant", "Environment" ],
+
+                "oneOf": [
+                  {
+                    "properties": {
+                      "Participant": { },
+                      "Environment": { "enum": [ "CANoe" ] },
+                      "NetworkNode": { },
+                      "CANoeProject": {
+                        "type": "string",
+                        "title": "The CANoeProject project file (.cfg) to load"
+                      },
+                      "WorkingFolder": {
+                        "type": "string",
+                        "title": "Name of the WorkingFolder where the Participant is executed"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "required": [ "CANoeProject", "WorkingFolder" ]
+                  },
+                  {
+                    "properties": {
+                      "Participant": { },
+                      "Environment": {"enum": ["ExecutionController"] },
+                      "NetworkNode": { }
+                    },
+                    "additionalProperties": false
+                  },
+                  {
+                    "properties": {
+                      "Participant": { },
+                      "Environment": {"enum": ["CustomExecutable"] },
+                      "NetworkNode": { },
+                      "Executable": {
+                        "type": "string",
+                        "title": "The file to execute on the shell"
+                      },
+                      "Arguments": {
+                        "type": "string",
+                        "title": "Optional command line arguments"
+                      },
+                      "WorkingFolder": {
+                        "type": "string",
+                        "title": "Name of the WorkingFolder where the Participant is executed"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "required": [ "Executable", "WorkingFolder" ]
+                  }
+                ]
+              }
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "ParticipantEnvironments" ]
+        }
+      }
+
+    },
+    "additionalProperties": false
+  }

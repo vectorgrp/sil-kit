@@ -1,0 +1,22 @@
+
+module ib {
+module mw {
+module idl {
+
+    /*! \brief EndpointAddress 
+     *
+     *  Not intended as a topic. But used to identify a sending
+     *  participant on the integration bus.
+     */
+    typedef unsigned short ParticipantIdT;
+    typedef unsigned short EndpointIdT;
+    
+    struct EndpointAddress
+    {
+        ParticipantIdT participantId;
+        EndpointIdT    endpointId;
+    };
+    
+};
+};
+};

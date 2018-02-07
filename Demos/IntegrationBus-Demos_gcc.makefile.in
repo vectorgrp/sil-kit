@@ -1,0 +1,60 @@
+# Demo project
+Source_Name=${PROJECT_SOURCE_NAME}
+Executable_Name=${PROJECT_EXECUTABLE_NAME}
+
+# Compiler flags...
+CPP_COMPILER=g++ -std=c++14
+
+# Include paths...
+Include_Path=-I"../../../../include" 
+
+# Library paths...
+Library_Path=-L"../../../../lib"
+
+# Additional libraries...
+Libraries=-Wl,--start-group -lIntegrationBus  -Wl,--end-group
+
+# Preprocessor definitions...
+Debug_Preprocessor_Definitions=-D GCC_BUILD -D _DEBUG -D _CONSOLE 
+Release_Preprocessor_Definitions=-D GCC_BUILD -D NDEBUG -D _CONSOLE 
+
+# Compiler flags...
+Debug_Compiler_Flags=-O0 -g 
+Release_Compiler_Flags=-O2 
+
+# Builds the debug configuration...
+.PHONY: debug
+debug: create_folders gcc_debug/$(Source_Name).o 
+	g++ gcc_debug/$(Source_Name).o  $(Library_Path) $(Libraries) -Wl,-rpath,./ -o ../bin/$(Executable_Name)
+
+# Compiles file $(Source_Name).cpp for the Debug configuration...
+-include gcc_debug/$(Source_Name).d
+gcc_debug/$(Source_Name).o: $(Source_Name).cpp
+	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c $(Source_Name).cpp $(Include_Path) -o gcc_debug/$(Source_Name).o
+	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM $(Source_Name).cpp $(Include_Path) > gcc_debug/$(Source_Name).d
+
+# Builds the Release configuration...
+.PHONY: release
+release: create_folders gcc_release/$(Source_Name).o 
+	g++ gcc_release/$(Source_Name).o  $(Library_Path) $(Libraries) -Wl,-rpath,./ -o ../bin/$(Executable_Name)
+
+# Compiles file $(Source_Name).cpp for the Release configuration...
+-include gcc_release/$(Source_Name).d
+gcc_release/$(Source_Name).o: $(Source_Name).cpp
+	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c $(Source_Name).cpp $(Include_Path) -o gcc_release/$(Source_Name).o
+	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM $(Source_Name).cpp $(Include_Path) > gcc_release/$(Source_Name).d
+
+# Creates the intermediate and output folders for each configuration...
+.PHONY: create_folders
+create_folders:
+	mkdir -p gcc_debug
+	mkdir -p gcc_release
+	mkdir -p ../bin
+
+# Cleans intermediate and output files (objects, libraries, executables)...
+.PHONY: clean
+clean:
+	rm -rf gcc_debug
+	rm -rf gcc_release
+	rm -f ../bin/$(Executable_Name)
+

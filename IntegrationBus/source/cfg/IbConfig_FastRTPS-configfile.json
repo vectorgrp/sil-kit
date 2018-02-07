@@ -1,0 +1,50 @@
+{
+    "$schema": "./IbConfig.schema.json",
+    "ConfigVersion": "0.0.1",
+    "ConfigName": "Example Config",
+    "Description": " Configuration that covers middleware configuration options.",
+
+    "SimulationSetup": {
+
+        "Participants": [
+            {
+                "Name": "Participant1",
+                "Description": "Participant with CAN controller",
+                "CanControllers": [ "CAN" ]
+            },
+            {
+                "Name": "Participant2",
+                "Description": "Participant with CAN controller",
+                "CanControllers": [ "CAN" ]
+            },
+            {
+                "Name": "SystemController",
+                "IsSyncMaster": true
+            }
+        ],
+
+        "Links": [
+            {
+                "Name": "CAN",
+                "Endpoints": [
+                    "Participant1/CAN",
+                    "Participant2/CAN"
+                ]
+            }
+        ],
+
+        "TimeSync": {
+            "SyncType": "DiscreteTimed"
+        }
+    },
+
+    "MiddlewareConfig": {
+
+        "FastRTPS": {
+            "DiscoveryType": "ConfigFile",
+            "ConfigFileName": "IbConfig_FastRTPS-configfile.xml"
+        }
+
+    }
+
+}

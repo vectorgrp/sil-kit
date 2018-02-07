@@ -1,0 +1,4 @@
+[submodule "ThirdParty/Fast-RTPS"]
+	path = ThirdParty/Fast-RTPS
+	url = https://github.com/***VIB-820 Removed***/Fast-RTPS.git
+	branch = release/1.6.0_patched

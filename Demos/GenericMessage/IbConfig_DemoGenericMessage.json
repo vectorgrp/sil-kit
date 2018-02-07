@@ -1,0 +1,223 @@
+{
+    "$schema": "./IbConfig.schema.json",
+    "ConfigVersion": "0.0.1",
+    "ConfigName": "GenericMessageDemo",
+    "Description": "Sample Configuration for Generic Messages",
+
+    "SimulationSetup": {
+
+        "Participants": [
+            {
+                "Name": "Publisher",
+                "Description": "Publishes different generic messages",
+                "SyncType": "DiscreteTime",
+                "IsSyncMaster": true,
+
+                "GenericPublishers": [
+                    {
+                        "Name": "GroundTruth",
+                        "Protocol": "ROS",
+                        "DefinitionUri": "file://./sim/groundtruth_topic.msg"
+                    },
+                    {
+                        "Name": "VehicleModelOut",
+                        "Protocol": "ROS",
+                        "DefinitionUri": "file://./vehicle-model-out.msg"
+                    },
+                    {
+                        "Name": "MotionTrajectory",
+                        "Protocol": "ROS",
+                        "DefinitionUri": "file://./motion_planning/trajectory_for_controller.msg"
+                    }
+                ]
+            },
+            {
+                "Name": "Subscriber",
+                "Description": "Subscribes different generic messages",
+                "SyncType": "DiscreteTime",
+
+                "GenericSubscribers": [
+                    "GroundTruth",
+                    "VehicleModelOut",
+                    "MotionTrajectory"
+                ]
+            },
+            {
+                "Name": "SystemController",
+                "SyncType": "Unsynchronized"
+            },
+            {
+                "Name": "SystemMonitor",
+                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchroniatzion.",
+                "SyncType": "Unsynchronized"
+            }
+        ],
+
+        "Links": [
+            {
+                "Name": "GroundTruth",
+                "Endpoints": [
+                    "Publisher/GroundTruth",
+                    "Subscriber/GroundTruth"
+                ]
+            },
+            {
+                "Name": "VehicleModelOut",
+                "Endpoints": [
+                    "Publisher/VehicleModelOut",
+                    "Subscriber/VehicleModelOut"
+                ]
+            },
+            {
+                "Name": "MotionTrajectory",
+                "Endpoints": [
+                    "Publisher/MotionTrajectory",
+                    "Subscriber/MotionTrajectory"
+                ]
+            }
+        ],
+
+        "TimeSync": {
+            "SyncType": "TickTickDone",
+            "TickPeriodNs": 1000000
+        }
+
+    },
+
+    "LaunchConfigurations": [
+        {
+            "Name": "Installation",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "Publisher",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoGenericMessage",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% Publisher %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "Subscriber",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoGenericMessage",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% Subscriber %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemMonitor",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoPassiveSystemMonitor",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+            ]
+        },
+        {
+            "Name": "Developer-WinDebug",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "Publisher",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../Debug/bin/IbDemoGenericMessage",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% Publisher %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "Subscriber",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../Debug/bin/IbDemoGenericMessage",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% Subscriber %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemMonitor",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "./Debug/IbDemoPassiveSystemMonitor",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "./Debug/IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+            ]
+        },
+        {
+            "Name": "Developer-WinRelease",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "Publisher",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../Release/bin/IbDemoGenericMessage",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% Publisher %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "Subscriber",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../Release/bin/IbDemoGenericMessage",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% Subscriber %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemMonitor",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "./Release/IbDemoPassiveSystemMonitor",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "./Release/IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+            ]
+        },
+        {
+            "Name": "Developer-Linux",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "Publisher",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../bin/IbDemoGenericMessage",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% Publisher %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "Subscriber",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../bin/IbDemoGenericMessage",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% Subscriber %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemMonitor",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "../bin/IbDemoPassiveSystemMonitor",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "../bin/IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+            ]
+        }
+
+    ]
+	
+}

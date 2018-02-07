@@ -1,0 +1,192 @@
+{
+    "ConfigVersion": "0.0.1",
+    "ConfigName": "LinDemo",
+    "Description": "Sample configuration for LIN without NetworkSimulator",
+
+    "SimulationSetup": {
+
+        "Participants": [
+            {
+                "Name": "LinMaster",
+                "Description": "LIN Master",
+                "SyncType": "DiscreteTime",
+                "IsSyncMaster": true,
+
+                "LinControllers": [ "LIN1" ]
+            },
+            {
+                "Name": "LinSlave",
+                "Description": "LIN Slave",
+                "SyncType": "DiscreteTime",
+
+                "LinControllers": [ "LIN1" ]
+            },
+            {
+                "Name": "SystemController",
+                "SyncType": "Unsynchronized"
+            },
+            {
+                "Name": "SystemMonitor",
+                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchroniatzion.",
+                "SyncType": "Unsynchronized"
+            }
+        ],
+
+        "Links": [
+            {
+                "Name": "LIN1",
+                "Endpoints": [
+                    "LinMaster/LIN1",
+                    "LinSlave/LIN1"
+                ]
+            }
+        ],
+
+        "TimeSync": {
+            "SyncType": "TickTickDone",
+            "TickPeriodNs": 1000000
+        }
+
+    },
+
+    "LaunchConfigurations": [
+        {
+            "Name": "Installation",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "LinMaster",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoLin",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% LinMaster %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "LinSlave",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoLin",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% LinSlave %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemMonitor",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoPassiveSystemMonitor",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+
+            ]
+        },
+        {
+            "Name": "Developer-WinDebug",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "LinMaster",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../Debug/bin/IbDemoLin",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% LinMaster %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "LinSlave",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../Debug/bin/IbDemoLin",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% LinSlave %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemMonitor",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "./Debug/IbDemoPassiveSystemMonitor",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "./Debug/IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+
+            ]
+        },
+        {
+            "Name": "Developer-WinRelease",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "LinMaster",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../Release/bin/IbDemoLin",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% LinMaster %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "LinSlave",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../Release/bin/IbDemoLin",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% LinSlave %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemMonitor",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "./Release/IbDemoPassiveSystemMonitor",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "./Release/IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+
+            ]
+        },
+        {
+            "Name": "Developer-Linux",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "LinMaster",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../bin/IbDemoLin",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% LinMaster %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "LinSlave",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "../bin/IbDemoLin",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% LinSlave %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemMonitor",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "../bin/IbDemoPassiveSystemMonitor",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "../bin/IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+
+            ]
+        }
+
+    ]
+	
+}

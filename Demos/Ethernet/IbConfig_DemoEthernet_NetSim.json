@@ -1,0 +1,98 @@
+{
+    "ConfigVersion": "0.0.1",
+    "ConfigName": "EthernetDemoNetSim",
+    "Description": "Sample configuration for Ethernet with NetworkSimulator",
+
+    "SimulationSetup": {
+
+        "Participants": [
+            {
+                "Name": "EthernetWriter",
+                "Description": "Demo Writer",
+                "SyncType": "DiscreteTime",
+                "IsSyncMaster": true,
+
+                "EthernetControllers": [
+                    {
+                        "Name": "ETH0",
+                        "MacAddr": "F6:04:68:71:AA:C1"
+                    }
+                ]
+            },
+            {
+                "Name": "EthernetReader",
+                "Description": "Demo Reader",
+                "SyncType": "DiscreteTime",
+
+                "EthernetControllers": [
+                    {
+                        "Name": "ETH0",
+                        "MacAddr": "F6:04:68:71:AA:C2"
+                    }
+                ]
+            },
+            {
+                "Name": "BusSimulator",
+                "SyncType": "DiscreteTime",
+
+                "NetworkSimulators": [ "Ethernet-Simulator" ]
+            },
+            {
+                "Name": "SystemController",
+                "SyncType": "Unsynchronized"
+            },
+            {
+                "Name": "SystemMonitor",
+                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchroniatzion.",
+                "SyncType": "Unsynchronized"
+            }
+        ],
+
+        "Switches": [
+            {
+                "Name": "FrontSwitch",
+                "Description":  "Located somehwere in the Milkyway",
+                "Ports": [
+                    {
+                        "Name": "Port0",
+                        "VlanIds":  [1]
+                    },
+                    {
+                        "Name": "Port1",
+                        "VlanIds":  [1]
+                    }
+                ]
+            }
+        ],
+
+        "Links": [
+            {
+                "Name": "FS-Port0",
+                "Endpoints": [ "FrontSwitch/Port0", "EthernetWriter/ETH0" ]
+            },
+            {
+                "Name": "FS-Port1",
+                "Endpoints": [ "FrontSwitch/Port1", "EthernetReader/ETH0" ]
+            }
+        ],
+
+        "NetworkSimulators": [
+            {
+                "Name": "Ethernet-Simulator",
+                "SimulatedLinks": [
+                    "FS-Port0",
+                    "FS-Port1"
+                ],
+                "SimulatedSwitches": [
+                    "FrontSwitch"
+                ]
+            }
+        ],
+
+        "TimeSync": {
+            "SyncType": "TickTickDone",
+            "TickPeriodNs": 1000000
+        }
+
+    }
+}
