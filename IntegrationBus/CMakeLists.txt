@@ -227,20 +227,6 @@ install(
     DESTINATION ${INSTALL_LIBDIR}
     COMPONENT IntegrationBus
 )
-if(MSVC AND IB_INSTALL_PDB_FILES)
-    install(
-        FILES $<TARGET_PDB_FILE:fastrtps>
-        CONFIGURATIONS Debug RelWithDebInfo
-        DESTINATION ${INSTALL_LIBDIR}
-        COMPONENT IntegrationBus-Developer
-    )
-    install(
-        FILES $<TARGET_PDB_FILE:fastcdr>
-        CONFIGURATIONS Debug RelWithDebInfo
-        DESTINATION ${INSTALL_LIBDIR}
-        COMPONENT IntegrationBus-Developer
-    )
-endif()
 
 # This is enough to use the IntegrationBus::IntegrationBus target from external projects.
 # Register the target so the find_package command can locate it
