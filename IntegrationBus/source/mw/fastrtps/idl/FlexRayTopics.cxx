@@ -25,7 +25,6 @@ namespace { char dummy; }
 #endif
 
 #include "FlexRayTopics.h"
-
 #include <fastcdr/Cdr.h>
 
 #include <fastcdr/exceptions/BadParamException.h>
@@ -38,25 +37,46 @@ using namespace eprosima::fastcdr::exception;
 ib::sim::fr::idl::ClusterParameters::ClusterParameters()
 {
     m_gColdstartAttempts = 0;
+
     m_gCycleCountMax = 0;
+
     m_gdActionPointOffset = 0;
+
     m_gdDynamicSlotIdlePhase = 0;
+
     m_gdMiniSlot = 0;
+
     m_gdMiniSlotActionPointOffset = 0;
+
     m_gdStaticSlot = 0;
+
     m_gdSymbolWindow = 0;
+
     m_gdSymbolWindowActionPointOffset = 0;
+
     m_gdTSSTransmitter = 0;
+
     m_gdWakeupTxActive = 0;
+
     m_gdWakeupTxIdle = 0;
+
     m_gListenNoise = 0;
+
     m_gMacroPerCycle = 0;
+
     m_gMaxWithoutClockCorrectionFatal = 0;
+
     m_gMaxWithoutClockCorrectionPassive = 0;
+
     m_gNumberOfMiniSlots = 0;
+
     m_gNumberOfStaticSlots = 0;
+
     m_gPayloadLengthStatic = 0;
+
     m_gSyncFrameIDCountMax = 0;
+
+
 }
 
 ib::sim::fr::idl::ClusterParameters::~ClusterParameters()
@@ -133,7 +153,7 @@ ib::sim::fr::idl::ClusterParameters& ib::sim::fr::idl::ClusterParameters::operat
     m_gNumberOfStaticSlots = x.m_gNumberOfStaticSlots;
     m_gPayloadLengthStatic = x.m_gPayloadLengthStatic;
     m_gSyncFrameIDCountMax = x.m_gSyncFrameIDCountMax;
-    
+
     return *this;
 }
 
@@ -159,53 +179,73 @@ ib::sim::fr::idl::ClusterParameters& ib::sim::fr::idl::ClusterParameters::operat
     m_gNumberOfStaticSlots = x.m_gNumberOfStaticSlots;
     m_gPayloadLengthStatic = x.m_gPayloadLengthStatic;
     m_gSyncFrameIDCountMax = x.m_gSyncFrameIDCountMax;
-    
+
     return *this;
 }
 
 size_t ib::sim::fr::idl::ClusterParameters::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
+
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
     return current_alignment - initial_alignment;
@@ -213,47 +253,68 @@ size_t ib::sim::fr::idl::ClusterParameters::getMaxCdrSerializedSize(size_t curre
 
 size_t ib::sim::fr::idl::ClusterParameters::getCdrSerializedSize(const ib::sim::fr::idl::ClusterParameters& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
+
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
-
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
     return current_alignment - initial_alignment;
@@ -367,28 +428,52 @@ void ib::sim::fr::idl::ClusterParameters::serializeKey(eprosima::fastcdr::Cdr &s
 ib::sim::fr::idl::NodeParameters::NodeParameters()
 {
     m_pAllowHaltDueToClock = 0;
+
     m_pAllowPassiveToActive = 0;
+
     m_pChannels = ib::sim::fr::idl::None;
+
     m_pClusterDriftDamping = 0;
+
     m_pdAcceptedStartupRange = 0;
+
     m_pdListenTimeout = 0;
+
     m_pKeySlotId = 0;
+
     m_pKeySlotOnlyEnabled = 0;
+
     m_pKeySlotUsedForStartup = 0;
+
     m_pKeySlotUsedForSync = 0;
+
     m_pLatestTx = 0;
+
     m_pMacroInitialOffsetA = 0;
+
     m_pMacroInitialOffsetB = 0;
+
     m_pMicroInitialOffsetA = 0;
+
     m_pMicroInitialOffsetB = 0;
+
     m_pMicroPerCycle = 0;
+
     m_pOffsetCorrectionOut = 0;
+
     m_pOffsetCorrectionStart = 0;
+
     m_pRateCorrectionOut = 0;
+
     m_pWakeupChannel = ib::sim::fr::idl::None;
+
     m_pWakeupPattern = 0;
+
     m_pdMicrotick = ib::sim::fr::idl::T12_5NS;
+
     m_pSamplesPerMicrotick = 0;
+
+
 }
 
 ib::sim::fr::idl::NodeParameters::~NodeParameters()
@@ -474,7 +559,7 @@ ib::sim::fr::idl::NodeParameters& ib::sim::fr::idl::NodeParameters::operator=(co
     m_pWakeupPattern = x.m_pWakeupPattern;
     m_pdMicrotick = x.m_pdMicrotick;
     m_pSamplesPerMicrotick = x.m_pSamplesPerMicrotick;
-    
+
     return *this;
 }
 
@@ -503,59 +588,82 @@ ib::sim::fr::idl::NodeParameters& ib::sim::fr::idl::NodeParameters::operator=(No
     m_pWakeupPattern = x.m_pWakeupPattern;
     m_pdMicrotick = x.m_pdMicrotick;
     m_pSamplesPerMicrotick = x.m_pSamplesPerMicrotick;
-    
+
     return *this;
 }
 
 size_t ib::sim::fr::idl::NodeParameters::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
-    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
-    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
-    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
-    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
-    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
     return current_alignment - initial_alignment;
@@ -563,53 +671,77 @@ size_t ib::sim::fr::idl::NodeParameters::getMaxCdrSerializedSize(size_t current_
 
 size_t ib::sim::fr::idl::NodeParameters::getCdrSerializedSize(const ib::sim::fr::idl::NodeParameters& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
-    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
-    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
-    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
-    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
-    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
     return current_alignment - initial_alignment;
@@ -619,7 +751,7 @@ void ib::sim::fr::idl::NodeParameters::serialize(eprosima::fastcdr::Cdr &scdr) c
 {
     scdr << m_pAllowHaltDueToClock;
     scdr << m_pAllowPassiveToActive;
-    scdr << (const uint32_t)m_pChannels;
+    scdr << (uint32_t)m_pChannels;
     scdr << m_pClusterDriftDamping;
     scdr << m_pdAcceptedStartupRange;
     scdr << m_pdListenTimeout;
@@ -636,9 +768,9 @@ void ib::sim::fr::idl::NodeParameters::serialize(eprosima::fastcdr::Cdr &scdr) c
     scdr << m_pOffsetCorrectionOut;
     scdr << m_pOffsetCorrectionStart;
     scdr << m_pRateCorrectionOut;
-    scdr << (const uint32_t)m_pWakeupChannel;
+    scdr << (uint32_t)m_pWakeupChannel;
     scdr << m_pWakeupPattern;
-    scdr << (const uint32_t)m_pdMicrotick;
+    scdr << (uint32_t)m_pdMicrotick;
     scdr << m_pSamplesPerMicrotick;
 }
 
@@ -748,12 +880,20 @@ void ib::sim::fr::idl::NodeParameters::serializeKey(eprosima::fastcdr::Cdr &scdr
 ib::sim::fr::idl::TxBufferConfig::TxBufferConfig()
 {
     m_channels = ib::sim::fr::idl::None;
+
     m_slotId = 0;
+
     m_offset = 0;
+
     m_repetition = 0;
+
     m_hasPayloadPreambleIndicator = false;
+
     m_headerCrc = 0;
+
     m_transmissionMode = ib::sim::fr::idl::SingleShot;
+
+
 }
 
 ib::sim::fr::idl::TxBufferConfig::~TxBufferConfig()
@@ -791,7 +931,7 @@ ib::sim::fr::idl::TxBufferConfig& ib::sim::fr::idl::TxBufferConfig::operator=(co
     m_hasPayloadPreambleIndicator = x.m_hasPayloadPreambleIndicator;
     m_headerCrc = x.m_headerCrc;
     m_transmissionMode = x.m_transmissionMode;
-    
+
     return *this;
 }
 
@@ -804,27 +944,34 @@ ib::sim::fr::idl::TxBufferConfig& ib::sim::fr::idl::TxBufferConfig::operator=(Tx
     m_hasPayloadPreambleIndicator = x.m_hasPayloadPreambleIndicator;
     m_headerCrc = x.m_headerCrc;
     m_transmissionMode = x.m_transmissionMode;
-    
+
     return *this;
 }
 
 size_t ib::sim::fr::idl::TxBufferConfig::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -832,21 +979,29 @@ size_t ib::sim::fr::idl::TxBufferConfig::getMaxCdrSerializedSize(size_t current_
 
 size_t ib::sim::fr::idl::TxBufferConfig::getCdrSerializedSize(const ib::sim::fr::idl::TxBufferConfig& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -854,13 +1009,13 @@ size_t ib::sim::fr::idl::TxBufferConfig::getCdrSerializedSize(const ib::sim::fr:
 
 void ib::sim::fr::idl::TxBufferConfig::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
-    scdr << (const uint32_t)m_channels;
+    scdr << (uint32_t)m_channels;
     scdr << m_slotId;
     scdr << m_offset;
     scdr << m_repetition;
     scdr << m_hasPayloadPreambleIndicator;
     scdr << m_headerCrc;
-    scdr << (const uint32_t)m_transmissionMode;
+    scdr << (uint32_t)m_transmissionMode;
 }
 
 void ib::sim::fr::idl::TxBufferConfig::deserialize(eprosima::fastcdr::Cdr &dcdr)
@@ -919,6 +1074,7 @@ ib::sim::fr::idl::ControllerConfig::ControllerConfig()
 
 
 
+
 }
 
 ib::sim::fr::idl::ControllerConfig::~ControllerConfig()
@@ -947,7 +1103,7 @@ ib::sim::fr::idl::ControllerConfig& ib::sim::fr::idl::ControllerConfig::operator
     m_clusterParams = x.m_clusterParams;
     m_nodeParams = x.m_nodeParams;
     m_bufferConfigs = x.m_bufferConfigs;
-    
+
     return *this;
 }
 
@@ -957,18 +1113,20 @@ ib::sim::fr::idl::ControllerConfig& ib::sim::fr::idl::ControllerConfig::operator
     m_clusterParams = std::move(x.m_clusterParams);
     m_nodeParams = std::move(x.m_nodeParams);
     m_bufferConfigs = std::move(x.m_bufferConfigs);
-    
+
     return *this;
 }
 
 size_t ib::sim::fr::idl::ControllerConfig::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += ib::sim::fr::idl::ClusterParameters::getMaxCdrSerializedSize(current_alignment);
     current_alignment += ib::sim::fr::idl::NodeParameters::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
     for(size_t a = 0; a < 100; ++a)
     {
         current_alignment += ib::sim::fr::idl::TxBufferConfig::getMaxCdrSerializedSize(current_alignment);}
@@ -979,12 +1137,15 @@ size_t ib::sim::fr::idl::ControllerConfig::getMaxCdrSerializedSize(size_t curren
 
 size_t ib::sim::fr::idl::ControllerConfig::getCdrSerializedSize(const ib::sim::fr::idl::ControllerConfig& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += ib::sim::fr::idl::ClusterParameters::getCdrSerializedSize(data.clusterParams(), current_alignment);
     current_alignment += ib::sim::fr::idl::NodeParameters::getCdrSerializedSize(data.nodeParams(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
     for(size_t a = 0; a < data.bufferConfigs().size(); ++a)
     {
         current_alignment += ib::sim::fr::idl::TxBufferConfig::getCdrSerializedSize(data.bufferConfigs().at(a), current_alignment);}
@@ -1038,7 +1199,10 @@ ib::sim::fr::idl::TxBufferUpdate::TxBufferUpdate()
 {
 
     m_txBufferIndex = 0;
+
     m_payloadDataValid = false;
+
+
 
 }
 
@@ -1068,7 +1232,7 @@ ib::sim::fr::idl::TxBufferUpdate& ib::sim::fr::idl::TxBufferUpdate::operator=(co
     m_txBufferIndex = x.m_txBufferIndex;
     m_payloadDataValid = x.m_payloadDataValid;
     m_payload = x.m_payload;
-    
+
     return *this;
 }
 
@@ -1078,21 +1242,25 @@ ib::sim::fr::idl::TxBufferUpdate& ib::sim::fr::idl::TxBufferUpdate::operator=(Tx
     m_txBufferIndex = x.m_txBufferIndex;
     m_payloadDataValid = x.m_payloadDataValid;
     m_payload = std::move(x.m_payload);
-    
+
     return *this;
 }
 
 size_t ib::sim::fr::idl::TxBufferUpdate::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
     current_alignment += (100 * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
 
@@ -1101,15 +1269,20 @@ size_t ib::sim::fr::idl::TxBufferUpdate::getMaxCdrSerializedSize(size_t current_
 
 size_t ib::sim::fr::idl::TxBufferUpdate::getCdrSerializedSize(const ib::sim::fr::idl::TxBufferUpdate& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
     current_alignment += (data.payload().size() * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
 
@@ -1162,6 +1335,8 @@ ib::sim::fr::idl::HostCommand::HostCommand()
 {
 
     m_command = ib::sim::fr::idl::RUN;
+
+
 }
 
 ib::sim::fr::idl::HostCommand::~HostCommand()
@@ -1184,7 +1359,7 @@ ib::sim::fr::idl::HostCommand& ib::sim::fr::idl::HostCommand::operator=(const Ho
 {
     m_senderAddr = x.m_senderAddr;
     m_command = x.m_command;
-    
+
     return *this;
 }
 
@@ -1192,16 +1367,17 @@ ib::sim::fr::idl::HostCommand& ib::sim::fr::idl::HostCommand::operator=(HostComm
 {
     m_senderAddr = std::move(x.m_senderAddr);
     m_command = x.m_command;
-    
+
     return *this;
 }
 
 size_t ib::sim::fr::idl::HostCommand::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -1209,10 +1385,12 @@ size_t ib::sim::fr::idl::HostCommand::getMaxCdrSerializedSize(size_t current_ali
 
 size_t ib::sim::fr::idl::HostCommand::getCdrSerializedSize(const ib::sim::fr::idl::HostCommand& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -1221,7 +1399,7 @@ size_t ib::sim::fr::idl::HostCommand::getCdrSerializedSize(const ib::sim::fr::id
 void ib::sim::fr::idl::HostCommand::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
     scdr << m_senderAddr;
-    scdr << (const uint32_t)m_command;
+    scdr << (uint32_t)m_command;
 }
 
 void ib::sim::fr::idl::HostCommand::deserialize(eprosima::fastcdr::Cdr &dcdr)
@@ -1258,10 +1436,16 @@ void ib::sim::fr::idl::HostCommand::serializeKey(eprosima::fastcdr::Cdr &scdr) c
 ib::sim::fr::idl::Header::Header()
 {
     m_flags = 0;
+
     m_frameId = 0;
+
     m_payloadLength = 0;
+
     m_headerCrc = 0;
+
     m_cycleCount = 0;
+
+
 }
 
 ib::sim::fr::idl::Header::~Header()
@@ -1293,7 +1477,7 @@ ib::sim::fr::idl::Header& ib::sim::fr::idl::Header::operator=(const Header &x)
     m_payloadLength = x.m_payloadLength;
     m_headerCrc = x.m_headerCrc;
     m_cycleCount = x.m_cycleCount;
-    
+
     return *this;
 }
 
@@ -1304,23 +1488,28 @@ ib::sim::fr::idl::Header& ib::sim::fr::idl::Header::operator=(Header &&x)
     m_payloadLength = x.m_payloadLength;
     m_headerCrc = x.m_headerCrc;
     m_cycleCount = x.m_cycleCount;
-    
+
     return *this;
 }
 
 size_t ib::sim::fr::idl::Header::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
     return current_alignment - initial_alignment;
@@ -1328,17 +1517,23 @@ size_t ib::sim::fr::idl::Header::getMaxCdrSerializedSize(size_t current_alignmen
 
 size_t ib::sim::fr::idl::Header::getCdrSerializedSize(const ib::sim::fr::idl::Header& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
     return current_alignment - initial_alignment;
@@ -1393,6 +1588,7 @@ ib::sim::fr::idl::Frame::Frame()
 {
 
 
+
 }
 
 ib::sim::fr::idl::Frame::~Frame()
@@ -1415,7 +1611,7 @@ ib::sim::fr::idl::Frame& ib::sim::fr::idl::Frame::operator=(const Frame &x)
 {
     m_header = x.m_header;
     m_payload = x.m_payload;
-    
+
     return *this;
 }
 
@@ -1423,17 +1619,19 @@ ib::sim::fr::idl::Frame& ib::sim::fr::idl::Frame::operator=(Frame &&x)
 {
     m_header = std::move(x.m_header);
     m_payload = std::move(x.m_payload);
-    
+
     return *this;
 }
 
 size_t ib::sim::fr::idl::Frame::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::sim::fr::idl::Header::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
     current_alignment += (254 * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
 
@@ -1442,11 +1640,14 @@ size_t ib::sim::fr::idl::Frame::getMaxCdrSerializedSize(size_t current_alignment
 
 size_t ib::sim::fr::idl::Frame::getCdrSerializedSize(const ib::sim::fr::idl::Frame& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::sim::fr::idl::Header::getCdrSerializedSize(data.header(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
     current_alignment += (data.payload().size() * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
 
@@ -1490,7 +1691,10 @@ ib::sim::fr::idl::FrMessage::FrMessage()
 {
 
     m_timeNs = 0;
+
     m_channel = ib::sim::fr::idl::None;
+
+
 
 }
 
@@ -1520,7 +1724,7 @@ ib::sim::fr::idl::FrMessage& ib::sim::fr::idl::FrMessage::operator=(const FrMess
     m_timeNs = x.m_timeNs;
     m_channel = x.m_channel;
     m_frame = x.m_frame;
-    
+
     return *this;
 }
 
@@ -1530,18 +1734,20 @@ ib::sim::fr::idl::FrMessage& ib::sim::fr::idl::FrMessage::operator=(FrMessage &&
     m_timeNs = x.m_timeNs;
     m_channel = x.m_channel;
     m_frame = std::move(x.m_frame);
-    
+
     return *this;
 }
 
 size_t ib::sim::fr::idl::FrMessage::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
     current_alignment += ib::sim::fr::idl::Frame::getMaxCdrSerializedSize(current_alignment);
 
@@ -1550,12 +1756,15 @@ size_t ib::sim::fr::idl::FrMessage::getMaxCdrSerializedSize(size_t current_align
 
 size_t ib::sim::fr::idl::FrMessage::getCdrSerializedSize(const ib::sim::fr::idl::FrMessage& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
     current_alignment += ib::sim::fr::idl::Frame::getCdrSerializedSize(data.frame(), current_alignment);
 
@@ -1566,7 +1775,7 @@ void ib::sim::fr::idl::FrMessage::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
     scdr << m_senderAddr;
     scdr << m_timeNs;
-    scdr << (const uint32_t)m_channel;
+    scdr << (uint32_t)m_channel;
     scdr << m_frame;
 }
 
@@ -1611,8 +1820,12 @@ ib::sim::fr::idl::FrMessageAck::FrMessageAck()
 {
 
     m_timeNs = 0;
+
     m_txBufferIndex = 0;
+
     m_channel = ib::sim::fr::idl::None;
+
+
 
 }
 
@@ -1645,7 +1858,7 @@ ib::sim::fr::idl::FrMessageAck& ib::sim::fr::idl::FrMessageAck::operator=(const 
     m_txBufferIndex = x.m_txBufferIndex;
     m_channel = x.m_channel;
     m_frame = x.m_frame;
-    
+
     return *this;
 }
 
@@ -1656,20 +1869,23 @@ ib::sim::fr::idl::FrMessageAck& ib::sim::fr::idl::FrMessageAck::operator=(FrMess
     m_txBufferIndex = x.m_txBufferIndex;
     m_channel = x.m_channel;
     m_frame = std::move(x.m_frame);
-    
+
     return *this;
 }
 
 size_t ib::sim::fr::idl::FrMessageAck::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
     current_alignment += ib::sim::fr::idl::Frame::getMaxCdrSerializedSize(current_alignment);
 
@@ -1678,14 +1894,18 @@ size_t ib::sim::fr::idl::FrMessageAck::getMaxCdrSerializedSize(size_t current_al
 
 size_t ib::sim::fr::idl::FrMessageAck::getCdrSerializedSize(const ib::sim::fr::idl::FrMessageAck& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
     current_alignment += ib::sim::fr::idl::Frame::getCdrSerializedSize(data.frame(), current_alignment);
 
@@ -1697,7 +1917,7 @@ void ib::sim::fr::idl::FrMessageAck::serialize(eprosima::fastcdr::Cdr &scdr) con
     scdr << m_senderAddr;
     scdr << m_timeNs;
     scdr << m_txBufferIndex;
-    scdr << (const uint32_t)m_channel;
+    scdr << (uint32_t)m_channel;
     scdr << m_frame;
 }
 
@@ -1746,8 +1966,12 @@ ib::sim::fr::idl::FrSymbol::FrSymbol()
 {
 
     m_timeNs = 0;
+
     m_channel = ib::sim::fr::idl::None;
+
     m_pattern = ib::sim::fr::idl::CasMts;
+
+
 }
 
 ib::sim::fr::idl::FrSymbol::~FrSymbol()
@@ -1776,7 +2000,7 @@ ib::sim::fr::idl::FrSymbol& ib::sim::fr::idl::FrSymbol::operator=(const FrSymbol
     m_timeNs = x.m_timeNs;
     m_channel = x.m_channel;
     m_pattern = x.m_pattern;
-    
+
     return *this;
 }
 
@@ -1786,20 +2010,23 @@ ib::sim::fr::idl::FrSymbol& ib::sim::fr::idl::FrSymbol::operator=(FrSymbol &&x)
     m_timeNs = x.m_timeNs;
     m_channel = x.m_channel;
     m_pattern = x.m_pattern;
-    
+
     return *this;
 }
 
 size_t ib::sim::fr::idl::FrSymbol::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
-    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -1807,14 +2034,18 @@ size_t ib::sim::fr::idl::FrSymbol::getMaxCdrSerializedSize(size_t current_alignm
 
 size_t ib::sim::fr::idl::FrSymbol::getCdrSerializedSize(const ib::sim::fr::idl::FrSymbol& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
-    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -1824,8 +2055,8 @@ void ib::sim::fr::idl::FrSymbol::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
     scdr << m_senderAddr;
     scdr << m_timeNs;
-    scdr << (const uint32_t)m_channel;
-    scdr << (const uint32_t)m_pattern;
+    scdr << (uint32_t)m_channel;
+    scdr << (uint32_t)m_pattern;
 }
 
 void ib::sim::fr::idl::FrSymbol::deserialize(eprosima::fastcdr::Cdr &dcdr)
@@ -1873,6 +2104,7 @@ ib::sim::fr::idl::FrSymbolAck::FrSymbolAck()
 {
 
 
+
 }
 
 ib::sim::fr::idl::FrSymbolAck::~FrSymbolAck()
@@ -1895,7 +2127,7 @@ ib::sim::fr::idl::FrSymbolAck& ib::sim::fr::idl::FrSymbolAck::operator=(const Fr
 {
     m_senderAddr = x.m_senderAddr;
     m_symbol = x.m_symbol;
-    
+
     return *this;
 }
 
@@ -1903,14 +2135,14 @@ ib::sim::fr::idl::FrSymbolAck& ib::sim::fr::idl::FrSymbolAck::operator=(FrSymbol
 {
     m_senderAddr = std::move(x.m_senderAddr);
     m_symbol = std::move(x.m_symbol);
-    
+
     return *this;
 }
 
 size_t ib::sim::fr::idl::FrSymbolAck::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += ib::sim::fr::idl::FrSymbol::getMaxCdrSerializedSize(current_alignment);
 
@@ -1919,8 +2151,9 @@ size_t ib::sim::fr::idl::FrSymbolAck::getMaxCdrSerializedSize(size_t current_ali
 
 size_t ib::sim::fr::idl::FrSymbolAck::getCdrSerializedSize(const ib::sim::fr::idl::FrSymbolAck& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += ib::sim::fr::idl::FrSymbol::getCdrSerializedSize(data.symbol(), current_alignment);
 
@@ -1965,7 +2198,10 @@ ib::sim::fr::idl::ControllerStatus::ControllerStatus()
 {
 
     m_timeNs = 0;
+
     m_pocState = ib::sim::fr::idl::DefaultConfig;
+
+
 }
 
 ib::sim::fr::idl::ControllerStatus::~ControllerStatus()
@@ -1991,7 +2227,7 @@ ib::sim::fr::idl::ControllerStatus& ib::sim::fr::idl::ControllerStatus::operator
     m_senderAddr = x.m_senderAddr;
     m_timeNs = x.m_timeNs;
     m_pocState = x.m_pocState;
-    
+
     return *this;
 }
 
@@ -2000,18 +2236,20 @@ ib::sim::fr::idl::ControllerStatus& ib::sim::fr::idl::ControllerStatus::operator
     m_senderAddr = std::move(x.m_senderAddr);
     m_timeNs = x.m_timeNs;
     m_pocState = x.m_pocState;
-    
+
     return *this;
 }
 
 size_t ib::sim::fr::idl::ControllerStatus::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -2019,12 +2257,15 @@ size_t ib::sim::fr::idl::ControllerStatus::getMaxCdrSerializedSize(size_t curren
 
 size_t ib::sim::fr::idl::ControllerStatus::getCdrSerializedSize(const ib::sim::fr::idl::ControllerStatus& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -2034,7 +2275,7 @@ void ib::sim::fr::idl::ControllerStatus::serialize(eprosima::fastcdr::Cdr &scdr)
 {
     scdr << m_senderAddr;
     scdr << m_timeNs;
-    scdr << (const uint32_t)m_pocState;
+    scdr << (uint32_t)m_pocState;
 }
 
 void ib::sim::fr::idl::ControllerStatus::deserialize(eprosima::fastcdr::Cdr &dcdr)

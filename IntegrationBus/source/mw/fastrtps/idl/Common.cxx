@@ -25,7 +25,6 @@ namespace { char dummy; }
 #endif
 
 #include "Common.h"
-
 #include <fastcdr/Cdr.h>
 
 #include <fastcdr/exceptions/BadParamException.h>
@@ -38,7 +37,10 @@ using namespace eprosima::fastcdr::exception;
 ib::mw::idl::EndpointAddress::EndpointAddress()
 {
     m_participantId = 0;
+
     m_endpointId = 0;
+
+
 }
 
 ib::mw::idl::EndpointAddress::~EndpointAddress()
@@ -61,7 +63,7 @@ ib::mw::idl::EndpointAddress& ib::mw::idl::EndpointAddress::operator=(const Endp
 {
     m_participantId = x.m_participantId;
     m_endpointId = x.m_endpointId;
-    
+
     return *this;
 }
 
@@ -69,17 +71,19 @@ ib::mw::idl::EndpointAddress& ib::mw::idl::EndpointAddress::operator=(EndpointAd
 {
     m_participantId = x.m_participantId;
     m_endpointId = x.m_endpointId;
-    
+
     return *this;
 }
 
 size_t ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
 
 
     return current_alignment - initial_alignment;
@@ -87,11 +91,14 @@ size_t ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(size_t current_alig
 
 size_t ib::mw::idl::EndpointAddress::getCdrSerializedSize(const ib::mw::idl::EndpointAddress& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
-    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
 
 
     return current_alignment - initial_alignment;

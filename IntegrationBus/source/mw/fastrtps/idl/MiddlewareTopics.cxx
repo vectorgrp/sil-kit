@@ -25,7 +25,6 @@ namespace { char dummy; }
 #endif
 
 #include "MiddlewareTopics.h"
-
 #include <fastcdr/Cdr.h>
 
 #include <fastcdr/exceptions/BadParamException.h>
@@ -37,7 +36,10 @@ ib::mw::sync::idl::QuantumRequest::QuantumRequest()
 {
 
     m_nowNs = 0;
+
     m_durationNs = 0;
+
+
 }
 
 ib::mw::sync::idl::QuantumRequest::~QuantumRequest()
@@ -63,7 +65,7 @@ ib::mw::sync::idl::QuantumRequest& ib::mw::sync::idl::QuantumRequest::operator=(
     m_senderAddr = x.m_senderAddr;
     m_nowNs = x.m_nowNs;
     m_durationNs = x.m_durationNs;
-    
+
     return *this;
 }
 
@@ -72,18 +74,20 @@ ib::mw::sync::idl::QuantumRequest& ib::mw::sync::idl::QuantumRequest::operator=(
     m_senderAddr = std::move(x.m_senderAddr);
     m_nowNs = x.m_nowNs;
     m_durationNs = x.m_durationNs;
-    
+
     return *this;
 }
 
 size_t ib::mw::sync::idl::QuantumRequest::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
 
 
     return current_alignment - initial_alignment;
@@ -91,12 +95,15 @@ size_t ib::mw::sync::idl::QuantumRequest::getMaxCdrSerializedSize(size_t current
 
 size_t ib::mw::sync::idl::QuantumRequest::getCdrSerializedSize(const ib::mw::sync::idl::QuantumRequest& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
 
 
     return current_alignment - initial_alignment;
@@ -145,8 +152,12 @@ ib::mw::sync::idl::QuantumGrant::QuantumGrant()
 
 
     m_nowNs = 0;
+
     m_durationNs = 0;
+
     m_status = ib::mw::sync::idl::QR_Invalid;
+
+
 }
 
 ib::mw::sync::idl::QuantumGrant::~QuantumGrant()
@@ -178,7 +189,7 @@ ib::mw::sync::idl::QuantumGrant& ib::mw::sync::idl::QuantumGrant::operator=(cons
     m_nowNs = x.m_nowNs;
     m_durationNs = x.m_durationNs;
     m_status = x.m_status;
-    
+
     return *this;
 }
 
@@ -189,21 +200,24 @@ ib::mw::sync::idl::QuantumGrant& ib::mw::sync::idl::QuantumGrant::operator=(Quan
     m_nowNs = x.m_nowNs;
     m_durationNs = x.m_durationNs;
     m_status = x.m_status;
-    
+
     return *this;
 }
 
 size_t ib::mw::sync::idl::QuantumGrant::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -211,15 +225,19 @@ size_t ib::mw::sync::idl::QuantumGrant::getMaxCdrSerializedSize(size_t current_a
 
 size_t ib::mw::sync::idl::QuantumGrant::getCdrSerializedSize(const ib::mw::sync::idl::QuantumGrant& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.grantee(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -231,7 +249,7 @@ void ib::mw::sync::idl::QuantumGrant::serialize(eprosima::fastcdr::Cdr &scdr) co
     scdr << m_grantee;
     scdr << m_nowNs;
     scdr << m_durationNs;
-    scdr << (const uint32_t)m_status;
+    scdr << (uint32_t)m_status;
 }
 
 void ib::mw::sync::idl::QuantumGrant::deserialize(eprosima::fastcdr::Cdr &dcdr)
@@ -278,6 +296,8 @@ ib::mw::sync::idl::Tick::Tick()
 {
 
     m_nowNs = 0;
+
+
 }
 
 ib::mw::sync::idl::Tick::~Tick()
@@ -300,7 +320,7 @@ ib::mw::sync::idl::Tick& ib::mw::sync::idl::Tick::operator=(const Tick &x)
 {
     m_senderAddr = x.m_senderAddr;
     m_nowNs = x.m_nowNs;
-    
+
     return *this;
 }
 
@@ -308,16 +328,17 @@ ib::mw::sync::idl::Tick& ib::mw::sync::idl::Tick::operator=(Tick &&x)
 {
     m_senderAddr = std::move(x.m_senderAddr);
     m_nowNs = x.m_nowNs;
-    
+
     return *this;
 }
 
 size_t ib::mw::sync::idl::Tick::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
 
 
     return current_alignment - initial_alignment;
@@ -325,10 +346,12 @@ size_t ib::mw::sync::idl::Tick::getMaxCdrSerializedSize(size_t current_alignment
 
 size_t ib::mw::sync::idl::Tick::getCdrSerializedSize(const ib::mw::sync::idl::Tick& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
 
 
     return current_alignment - initial_alignment;
@@ -369,6 +392,7 @@ void ib::mw::sync::idl::Tick::serializeKey(eprosima::fastcdr::Cdr &scdr) const
 }
 ib::mw::sync::idl::TickDone::TickDone()
 {
+
 }
 
 ib::mw::sync::idl::TickDone::~TickDone()
@@ -388,21 +412,21 @@ ib::mw::sync::idl::TickDone::TickDone(TickDone &&x)
 ib::mw::sync::idl::TickDone& ib::mw::sync::idl::TickDone::operator=(const TickDone &x)
 {
     m_senderAddr = x.m_senderAddr;
-    
+
     return *this;
 }
 
 ib::mw::sync::idl::TickDone& ib::mw::sync::idl::TickDone::operator=(TickDone &&x)
 {
     m_senderAddr = std::move(x.m_senderAddr);
-    
+
     return *this;
 }
 
 size_t ib::mw::sync::idl::TickDone::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
 
     return current_alignment - initial_alignment;
@@ -410,8 +434,9 @@ size_t ib::mw::sync::idl::TickDone::getMaxCdrSerializedSize(size_t current_align
 
 size_t ib::mw::sync::idl::TickDone::getCdrSerializedSize(const ib::mw::sync::idl::TickDone& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
 
     return current_alignment - initial_alignment;
@@ -451,7 +476,10 @@ ib::mw::sync::idl::ParticipantCommand::ParticipantCommand()
 {
 
     m_participant = 0;
+
     m_kind = ib::mw::sync::idl::PC_Invalid;
+
+
 }
 
 ib::mw::sync::idl::ParticipantCommand::~ParticipantCommand()
@@ -477,7 +505,7 @@ ib::mw::sync::idl::ParticipantCommand& ib::mw::sync::idl::ParticipantCommand::op
     m_senderAddr = x.m_senderAddr;
     m_participant = x.m_participant;
     m_kind = x.m_kind;
-    
+
     return *this;
 }
 
@@ -486,18 +514,20 @@ ib::mw::sync::idl::ParticipantCommand& ib::mw::sync::idl::ParticipantCommand::op
     m_senderAddr = std::move(x.m_senderAddr);
     m_participant = x.m_participant;
     m_kind = x.m_kind;
-    
+
     return *this;
 }
 
 size_t ib::mw::sync::idl::ParticipantCommand::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -505,12 +535,15 @@ size_t ib::mw::sync::idl::ParticipantCommand::getMaxCdrSerializedSize(size_t cur
 
 size_t ib::mw::sync::idl::ParticipantCommand::getCdrSerializedSize(const ib::mw::sync::idl::ParticipantCommand& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -520,7 +553,7 @@ void ib::mw::sync::idl::ParticipantCommand::serialize(eprosima::fastcdr::Cdr &sc
 {
     scdr << m_senderAddr;
     scdr << m_participant;
-    scdr << (const uint32_t)m_kind;
+    scdr << (uint32_t)m_kind;
 }
 
 void ib::mw::sync::idl::ParticipantCommand::deserialize(eprosima::fastcdr::Cdr &dcdr)
@@ -562,6 +595,8 @@ ib::mw::sync::idl::SystemCommand::SystemCommand()
 {
 
     m_kind = ib::mw::sync::idl::SC_Invalid;
+
+
 }
 
 ib::mw::sync::idl::SystemCommand::~SystemCommand()
@@ -584,7 +619,7 @@ ib::mw::sync::idl::SystemCommand& ib::mw::sync::idl::SystemCommand::operator=(co
 {
     m_senderAddr = x.m_senderAddr;
     m_kind = x.m_kind;
-    
+
     return *this;
 }
 
@@ -592,16 +627,17 @@ ib::mw::sync::idl::SystemCommand& ib::mw::sync::idl::SystemCommand::operator=(Sy
 {
     m_senderAddr = std::move(x.m_senderAddr);
     m_kind = x.m_kind;
-    
+
     return *this;
 }
 
 size_t ib::mw::sync::idl::SystemCommand::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -609,10 +645,12 @@ size_t ib::mw::sync::idl::SystemCommand::getMaxCdrSerializedSize(size_t current_
 
 size_t ib::mw::sync::idl::SystemCommand::getCdrSerializedSize(const ib::mw::sync::idl::SystemCommand& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -621,7 +659,7 @@ size_t ib::mw::sync::idl::SystemCommand::getCdrSerializedSize(const ib::mw::sync
 void ib::mw::sync::idl::SystemCommand::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
     scdr << m_senderAddr;
-    scdr << (const uint32_t)m_kind;
+    scdr << (uint32_t)m_kind;
 }
 
 void ib::mw::sync::idl::SystemCommand::deserialize(eprosima::fastcdr::Cdr &dcdr)
@@ -662,7 +700,10 @@ ib::mw::sync::idl::ParticipantStatus::ParticipantStatus()
 
     m_state = ib::mw::sync::idl::PS_Invalid;
 
+
     m_enterTimeUs = 0;
+
+
 }
 
 ib::mw::sync::idl::ParticipantStatus::~ParticipantStatus()
@@ -694,7 +735,7 @@ ib::mw::sync::idl::ParticipantStatus& ib::mw::sync::idl::ParticipantStatus::oper
     m_state = x.m_state;
     m_enterReason = x.m_enterReason;
     m_enterTimeUs = x.m_enterTimeUs;
-    
+
     return *this;
 }
 
@@ -705,22 +746,24 @@ ib::mw::sync::idl::ParticipantStatus& ib::mw::sync::idl::ParticipantStatus::oper
     m_state = x.m_state;
     m_enterReason = std::move(x.m_enterReason);
     m_enterTimeUs = x.m_enterTimeUs;
-    
+
     return *this;
 }
 
 size_t ib::mw::sync::idl::ParticipantStatus::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4) + 255 + 1;
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4) + 255 + 1;
 
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
 
 
     return current_alignment - initial_alignment;
@@ -728,16 +771,19 @@ size_t ib::mw::sync::idl::ParticipantStatus::getMaxCdrSerializedSize(size_t curr
 
 size_t ib::mw::sync::idl::ParticipantStatus::getCdrSerializedSize(const ib::mw::sync::idl::ParticipantStatus& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4) + data.participantName().size() + 1;
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4) + data.enterReason().size() + 1;
 
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
 
 
     return current_alignment - initial_alignment;
@@ -747,7 +793,7 @@ void ib::mw::sync::idl::ParticipantStatus::serialize(eprosima::fastcdr::Cdr &scd
 {
     scdr << m_senderAddr;
     scdr << m_participantName;
-    scdr << (const uint32_t)m_state;
+    scdr << (uint32_t)m_state;
     scdr << m_enterReason;
     scdr << m_enterTimeUs;
 }

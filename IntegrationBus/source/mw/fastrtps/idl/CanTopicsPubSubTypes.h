@@ -23,9 +23,14 @@
 #ifndef _IB_SIM_CAN_IDL_CANTOPICS_PUBSUBTYPES_H_
 #define _IB_SIM_CAN_IDL_CANTOPICS_PUBSUBTYPES_H_
 
+#include <fastrtps/config.h>
 #include <fastrtps/TopicDataType.h>
 
 #include "CanTopics.h"
+
+#if !defined(GEN_API_VER) || (GEN_API_VER != 1)
+#error Generated CanTopics is not compatible with current installed Fast-RTPS. Please, regenerate it with fastrtpsgen.
+#endif
 
 namespace ib
 {
@@ -45,12 +50,13 @@ namespace ib
 
                 	CanMessageFlagsPubSubType();
                 	virtual ~CanMessageFlagsPubSubType();
-                	bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload);
-                	bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data);
-                        std::function<uint32_t()> getSerializedSizeProvider(void* data);
-                	bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle);
-                	void* createData();
-                	void deleteData(void * data);
+                	virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
+                	virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
+                    virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
+                	virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
+                		bool force_md5 = false) override;
+                	virtual void* createData() override;
+                	virtual void deleteData(void * data) override;
                 	MD5 m_md5;
                 	unsigned char* m_keyBuffer;
                 };
@@ -65,12 +71,13 @@ namespace ib
 
                 	CanMessagePubSubType();
                 	virtual ~CanMessagePubSubType();
-                	bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload);
-                	bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data);
-                        std::function<uint32_t()> getSerializedSizeProvider(void* data);
-                	bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle);
-                	void* createData();
-                	void deleteData(void * data);
+                	virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
+                	virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
+                    virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
+                	virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
+                		bool force_md5 = false) override;
+                	virtual void* createData() override;
+                	virtual void deleteData(void * data) override;
                 	MD5 m_md5;
                 	unsigned char* m_keyBuffer;
                 };
@@ -84,12 +91,13 @@ namespace ib
 
                 	CanControllerStatusPubSubType();
                 	virtual ~CanControllerStatusPubSubType();
-                	bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload);
-                	bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data);
-                        std::function<uint32_t()> getSerializedSizeProvider(void* data);
-                	bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle);
-                	void* createData();
-                	void deleteData(void * data);
+                	virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
+                	virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
+                    virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
+                	virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
+                		bool force_md5 = false) override;
+                	virtual void* createData() override;
+                	virtual void deleteData(void * data) override;
                 	MD5 m_md5;
                 	unsigned char* m_keyBuffer;
                 };
@@ -103,12 +111,13 @@ namespace ib
 
                 	CanTransmitAcknowledgePubSubType();
                 	virtual ~CanTransmitAcknowledgePubSubType();
-                	bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload);
-                	bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data);
-                        std::function<uint32_t()> getSerializedSizeProvider(void* data);
-                	bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle);
-                	void* createData();
-                	void deleteData(void * data);
+                	virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
+                	virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
+                    virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
+                	virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
+                		bool force_md5 = false) override;
+                	virtual void* createData() override;
+                	virtual void deleteData(void * data) override;
                 	MD5 m_md5;
                 	unsigned char* m_keyBuffer;
                 };
@@ -122,12 +131,13 @@ namespace ib
 
                 	CanConfigureBaudratePubSubType();
                 	virtual ~CanConfigureBaudratePubSubType();
-                	bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload);
-                	bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data);
-                        std::function<uint32_t()> getSerializedSizeProvider(void* data);
-                	bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle);
-                	void* createData();
-                	void deleteData(void * data);
+                	virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
+                	virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
+                    virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
+                	virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
+                		bool force_md5 = false) override;
+                	virtual void* createData() override;
+                	virtual void deleteData(void * data) override;
                 	MD5 m_md5;
                 	unsigned char* m_keyBuffer;
                 };
@@ -141,12 +151,13 @@ namespace ib
 
                 	CanSetControllerModePubSubType();
                 	virtual ~CanSetControllerModePubSubType();
-                	bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload);
-                	bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data);
-                        std::function<uint32_t()> getSerializedSizeProvider(void* data);
-                	bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle);
-                	void* createData();
-                	void deleteData(void * data);
+                	virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
+                	virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
+                    virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
+                	virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
+                		bool force_md5 = false) override;
+                	virtual void* createData() override;
+                	virtual void deleteData(void * data) override;
                 	MD5 m_md5;
                 	unsigned char* m_keyBuffer;
                 };

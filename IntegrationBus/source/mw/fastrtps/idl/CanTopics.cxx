@@ -25,7 +25,6 @@ namespace { char dummy; }
 #endif
 
 #include "CanTopics.h"
-
 #include <fastcdr/Cdr.h>
 
 #include <fastcdr/exceptions/BadParamException.h>
@@ -36,10 +35,16 @@ using namespace eprosima::fastcdr::exception;
 ib::sim::can::idl::CanMessageFlags::CanMessageFlags()
 {
     m_ide = false;
+
     m_rtr = false;
+
     m_fdf = false;
+
     m_brs = false;
+
     m_esi = false;
+
+
 }
 
 ib::sim::can::idl::CanMessageFlags::~CanMessageFlags()
@@ -71,7 +76,7 @@ ib::sim::can::idl::CanMessageFlags& ib::sim::can::idl::CanMessageFlags::operator
     m_fdf = x.m_fdf;
     m_brs = x.m_brs;
     m_esi = x.m_esi;
-    
+
     return *this;
 }
 
@@ -82,23 +87,28 @@ ib::sim::can::idl::CanMessageFlags& ib::sim::can::idl::CanMessageFlags::operator
     m_fdf = x.m_fdf;
     m_brs = x.m_brs;
     m_esi = x.m_esi;
-    
+
     return *this;
 }
 
 size_t ib::sim::can::idl::CanMessageFlags::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
     return current_alignment - initial_alignment;
@@ -106,17 +116,23 @@ size_t ib::sim::can::idl::CanMessageFlags::getMaxCdrSerializedSize(size_t curren
 
 size_t ib::sim::can::idl::CanMessageFlags::getCdrSerializedSize(const ib::sim::can::idl::CanMessageFlags& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
     return current_alignment - initial_alignment;
@@ -172,10 +188,15 @@ ib::sim::can::idl::CanMessage::CanMessage()
 {
 
     m_transmitId = 0;
+
     m_timestampNs = 0;
+
     m_canId = 0;
 
+
     m_dlc = 0;
+
+
 
 }
 
@@ -214,7 +235,7 @@ ib::sim::can::idl::CanMessage& ib::sim::can::idl::CanMessage::operator=(const Ca
     m_flags = x.m_flags;
     m_dlc = x.m_dlc;
     m_dataField = x.m_dataField;
-    
+
     return *this;
 }
 
@@ -227,26 +248,32 @@ ib::sim::can::idl::CanMessage& ib::sim::can::idl::CanMessage::operator=(CanMessa
     m_flags = std::move(x.m_flags);
     m_dlc = x.m_dlc;
     m_dataField = std::move(x.m_dataField);
-    
+
     return *this;
 }
 
 size_t ib::sim::can::idl::CanMessage::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
+
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
     current_alignment += ib::sim::can::idl::CanMessageFlags::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
     current_alignment += (100 * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
 
@@ -255,20 +282,27 @@ size_t ib::sim::can::idl::CanMessage::getMaxCdrSerializedSize(size_t current_ali
 
 size_t ib::sim::can::idl::CanMessage::getCdrSerializedSize(const ib::sim::can::idl::CanMessage& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
+
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
     current_alignment += ib::sim::can::idl::CanMessageFlags::getCdrSerializedSize(data.flags(), current_alignment);
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
     current_alignment += (data.dataField().size() * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
 
@@ -332,8 +366,12 @@ ib::sim::can::idl::CanControllerStatus::CanControllerStatus()
 {
 
     m_timestampNs = 0;
+
     m_controllerState = 0;
+
     m_errorState = 0;
+
+
 }
 
 ib::sim::can::idl::CanControllerStatus::~CanControllerStatus()
@@ -362,7 +400,7 @@ ib::sim::can::idl::CanControllerStatus& ib::sim::can::idl::CanControllerStatus::
     m_timestampNs = x.m_timestampNs;
     m_controllerState = x.m_controllerState;
     m_errorState = x.m_errorState;
-    
+
     return *this;
 }
 
@@ -372,20 +410,23 @@ ib::sim::can::idl::CanControllerStatus& ib::sim::can::idl::CanControllerStatus::
     m_timestampNs = x.m_timestampNs;
     m_controllerState = x.m_controllerState;
     m_errorState = x.m_errorState;
-    
+
     return *this;
 }
 
 size_t ib::sim::can::idl::CanControllerStatus::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
     return current_alignment - initial_alignment;
@@ -393,14 +434,18 @@ size_t ib::sim::can::idl::CanControllerStatus::getMaxCdrSerializedSize(size_t cu
 
 size_t ib::sim::can::idl::CanControllerStatus::getCdrSerializedSize(const ib::sim::can::idl::CanControllerStatus& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
     return current_alignment - initial_alignment;
@@ -451,8 +496,12 @@ ib::sim::can::idl::CanTransmitAcknowledge::CanTransmitAcknowledge()
 {
 
     m_transmitId = 0;
+
     m_timestampNS = 0;
+
     m_txStatus = 0;
+
+
 }
 
 ib::sim::can::idl::CanTransmitAcknowledge::~CanTransmitAcknowledge()
@@ -481,7 +530,7 @@ ib::sim::can::idl::CanTransmitAcknowledge& ib::sim::can::idl::CanTransmitAcknowl
     m_transmitId = x.m_transmitId;
     m_timestampNS = x.m_timestampNS;
     m_txStatus = x.m_txStatus;
-    
+
     return *this;
 }
 
@@ -491,20 +540,23 @@ ib::sim::can::idl::CanTransmitAcknowledge& ib::sim::can::idl::CanTransmitAcknowl
     m_transmitId = x.m_transmitId;
     m_timestampNS = x.m_timestampNS;
     m_txStatus = x.m_txStatus;
-    
+
     return *this;
 }
 
 size_t ib::sim::can::idl::CanTransmitAcknowledge::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
+
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
     return current_alignment - initial_alignment;
@@ -512,14 +564,18 @@ size_t ib::sim::can::idl::CanTransmitAcknowledge::getMaxCdrSerializedSize(size_t
 
 size_t ib::sim::can::idl::CanTransmitAcknowledge::getCdrSerializedSize(const ib::sim::can::idl::CanTransmitAcknowledge& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
+
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
     return current_alignment - initial_alignment;
@@ -570,7 +626,10 @@ ib::sim::can::idl::CanConfigureBaudrate::CanConfigureBaudrate()
 {
 
     m_baudRate = 0;
+
     m_fdBaudRate = 0;
+
+
 }
 
 ib::sim::can::idl::CanConfigureBaudrate::~CanConfigureBaudrate()
@@ -596,7 +655,7 @@ ib::sim::can::idl::CanConfigureBaudrate& ib::sim::can::idl::CanConfigureBaudrate
     m_senderAddr = x.m_senderAddr;
     m_baudRate = x.m_baudRate;
     m_fdBaudRate = x.m_fdBaudRate;
-    
+
     return *this;
 }
 
@@ -605,18 +664,20 @@ ib::sim::can::idl::CanConfigureBaudrate& ib::sim::can::idl::CanConfigureBaudrate
     m_senderAddr = std::move(x.m_senderAddr);
     m_baudRate = x.m_baudRate;
     m_fdBaudRate = x.m_fdBaudRate;
-    
+
     return *this;
 }
 
 size_t ib::sim::can::idl::CanConfigureBaudrate::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -624,12 +685,15 @@ size_t ib::sim::can::idl::CanConfigureBaudrate::getMaxCdrSerializedSize(size_t c
 
 size_t ib::sim::can::idl::CanConfigureBaudrate::getCdrSerializedSize(const ib::sim::can::idl::CanConfigureBaudrate& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -676,8 +740,12 @@ ib::sim::can::idl::CanSetControllerMode::CanSetControllerMode()
 {
 
     m_resetErrorHandling = false;
+
     m_cancelTransmitRequests = false;
+
     m_mode = 0;
+
+
 }
 
 ib::sim::can::idl::CanSetControllerMode::~CanSetControllerMode()
@@ -706,7 +774,7 @@ ib::sim::can::idl::CanSetControllerMode& ib::sim::can::idl::CanSetControllerMode
     m_resetErrorHandling = x.m_resetErrorHandling;
     m_cancelTransmitRequests = x.m_cancelTransmitRequests;
     m_mode = x.m_mode;
-    
+
     return *this;
 }
 
@@ -716,20 +784,23 @@ ib::sim::can::idl::CanSetControllerMode& ib::sim::can::idl::CanSetControllerMode
     m_resetErrorHandling = x.m_resetErrorHandling;
     m_cancelTransmitRequests = x.m_cancelTransmitRequests;
     m_mode = x.m_mode;
-    
+
     return *this;
 }
 
 size_t ib::sim::can::idl::CanSetControllerMode::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
     return current_alignment - initial_alignment;
@@ -737,14 +808,18 @@ size_t ib::sim::can::idl::CanSetControllerMode::getMaxCdrSerializedSize(size_t c
 
 size_t ib::sim::can::idl::CanSetControllerMode::getCdrSerializedSize(const ib::sim::can::idl::CanSetControllerMode& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
     return current_alignment - initial_alignment;

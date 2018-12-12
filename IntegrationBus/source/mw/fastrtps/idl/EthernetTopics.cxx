@@ -25,7 +25,6 @@ namespace { char dummy; }
 #endif
 
 #include "EthernetTopics.h"
-
 #include <fastcdr/Cdr.h>
 
 #include <fastcdr/exceptions/BadParamException.h>
@@ -36,8 +35,12 @@ using namespace eprosima::fastcdr::exception;
 ib::sim::eth::idl::EthTagControlInformation::EthTagControlInformation()
 {
     m_pcp = 0;
+
     m_dei = 0;
+
     m_vid = 0;
+
+
 }
 
 ib::sim::eth::idl::EthTagControlInformation::~EthTagControlInformation()
@@ -63,7 +66,7 @@ ib::sim::eth::idl::EthTagControlInformation& ib::sim::eth::idl::EthTagControlInf
     m_pcp = x.m_pcp;
     m_dei = x.m_dei;
     m_vid = x.m_vid;
-    
+
     return *this;
 }
 
@@ -72,19 +75,22 @@ ib::sim::eth::idl::EthTagControlInformation& ib::sim::eth::idl::EthTagControlInf
     m_pcp = x.m_pcp;
     m_dei = x.m_dei;
     m_vid = x.m_vid;
-    
+
     return *this;
 }
 
 size_t ib::sim::eth::idl::EthTagControlInformation::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
 
 
     return current_alignment - initial_alignment;
@@ -92,13 +98,17 @@ size_t ib::sim::eth::idl::EthTagControlInformation::getMaxCdrSerializedSize(size
 
 size_t ib::sim::eth::idl::EthTagControlInformation::getCdrSerializedSize(const ib::sim::eth::idl::EthTagControlInformation& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
-    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
 
 
     return current_alignment - initial_alignment;
@@ -146,7 +156,10 @@ ib::sim::eth::idl::EthMessage::EthMessage()
 {
 
     m_transmitId = 0;
+
     m_timestampNs = 0;
+
+
 
 }
 
@@ -176,7 +189,7 @@ ib::sim::eth::idl::EthMessage& ib::sim::eth::idl::EthMessage::operator=(const Et
     m_transmitId = x.m_transmitId;
     m_timestampNs = x.m_timestampNs;
     m_rawFrame = x.m_rawFrame;
-    
+
     return *this;
 }
 
@@ -186,21 +199,25 @@ ib::sim::eth::idl::EthMessage& ib::sim::eth::idl::EthMessage::operator=(EthMessa
     m_transmitId = x.m_transmitId;
     m_timestampNs = x.m_timestampNs;
     m_rawFrame = std::move(x.m_rawFrame);
-    
+
     return *this;
 }
 
 size_t ib::sim::eth::idl::EthMessage::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
+
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
     current_alignment += (100 * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
 
@@ -209,15 +226,20 @@ size_t ib::sim::eth::idl::EthMessage::getMaxCdrSerializedSize(size_t current_ali
 
 size_t ib::sim::eth::idl::EthMessage::getCdrSerializedSize(const ib::sim::eth::idl::EthMessage& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
+
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
     current_alignment += (data.rawFrame().size() * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
 
@@ -270,8 +292,12 @@ ib::sim::eth::idl::EthTransmitAcknowledge::EthTransmitAcknowledge()
 {
 
     m_transmitId = 0;
+
     m_timestampNs = 0;
+
     m_status = ib::sim::eth::idl::Transmitted;
+
+
 }
 
 ib::sim::eth::idl::EthTransmitAcknowledge::~EthTransmitAcknowledge()
@@ -300,7 +326,7 @@ ib::sim::eth::idl::EthTransmitAcknowledge& ib::sim::eth::idl::EthTransmitAcknowl
     m_transmitId = x.m_transmitId;
     m_timestampNs = x.m_timestampNs;
     m_status = x.m_status;
-    
+
     return *this;
 }
 
@@ -310,20 +336,23 @@ ib::sim::eth::idl::EthTransmitAcknowledge& ib::sim::eth::idl::EthTransmitAcknowl
     m_transmitId = x.m_transmitId;
     m_timestampNs = x.m_timestampNs;
     m_status = x.m_status;
-    
+
     return *this;
 }
 
 size_t ib::sim::eth::idl::EthTransmitAcknowledge::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
+
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -331,14 +360,18 @@ size_t ib::sim::eth::idl::EthTransmitAcknowledge::getMaxCdrSerializedSize(size_t
 
 size_t ib::sim::eth::idl::EthTransmitAcknowledge::getCdrSerializedSize(const ib::sim::eth::idl::EthTransmitAcknowledge& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
+
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -349,7 +382,7 @@ void ib::sim::eth::idl::EthTransmitAcknowledge::serialize(eprosima::fastcdr::Cdr
     scdr << m_senderAddr;
     scdr << m_transmitId;
     scdr << m_timestampNs;
-    scdr << (const uint32_t)m_status;
+    scdr << (uint32_t)m_status;
 }
 
 void ib::sim::eth::idl::EthTransmitAcknowledge::deserialize(eprosima::fastcdr::Cdr &dcdr)
@@ -394,8 +427,12 @@ ib::sim::eth::idl::EthStatus::EthStatus()
 {
 
     m_timestampNs = 0;
+
     m_state = ib::sim::eth::idl::Inactive;
+
     m_bitRate = 0;
+
+
 }
 
 ib::sim::eth::idl::EthStatus::~EthStatus()
@@ -424,7 +461,7 @@ ib::sim::eth::idl::EthStatus& ib::sim::eth::idl::EthStatus::operator=(const EthS
     m_timestampNs = x.m_timestampNs;
     m_state = x.m_state;
     m_bitRate = x.m_bitRate;
-    
+
     return *this;
 }
 
@@ -434,20 +471,23 @@ ib::sim::eth::idl::EthStatus& ib::sim::eth::idl::EthStatus::operator=(EthStatus 
     m_timestampNs = x.m_timestampNs;
     m_state = x.m_state;
     m_bitRate = x.m_bitRate;
-    
+
     return *this;
 }
 
 size_t ib::sim::eth::idl::EthStatus::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
-    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -455,14 +495,18 @@ size_t ib::sim::eth::idl::EthStatus::getMaxCdrSerializedSize(size_t current_alig
 
 size_t ib::sim::eth::idl::EthStatus::getCdrSerializedSize(const ib::sim::eth::idl::EthStatus& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
-    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -472,7 +516,7 @@ void ib::sim::eth::idl::EthStatus::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
     scdr << m_senderAddr;
     scdr << m_timestampNs;
-    scdr << (const uint32_t)m_state;
+    scdr << (uint32_t)m_state;
     scdr << m_bitRate;
 }
 
@@ -518,6 +562,8 @@ ib::sim::eth::idl::EthSetMode::EthSetMode()
 {
 
     m_mode = ib::sim::eth::idl::ModeInactive;
+
+
 }
 
 ib::sim::eth::idl::EthSetMode::~EthSetMode()
@@ -540,7 +586,7 @@ ib::sim::eth::idl::EthSetMode& ib::sim::eth::idl::EthSetMode::operator=(const Et
 {
     m_senderAddr = x.m_senderAddr;
     m_mode = x.m_mode;
-    
+
     return *this;
 }
 
@@ -548,16 +594,17 @@ ib::sim::eth::idl::EthSetMode& ib::sim::eth::idl::EthSetMode::operator=(EthSetMo
 {
     m_senderAddr = std::move(x.m_senderAddr);
     m_mode = x.m_mode;
-    
+
     return *this;
 }
 
 size_t ib::sim::eth::idl::EthSetMode::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -565,10 +612,12 @@ size_t ib::sim::eth::idl::EthSetMode::getMaxCdrSerializedSize(size_t current_ali
 
 size_t ib::sim::eth::idl::EthSetMode::getCdrSerializedSize(const ib::sim::eth::idl::EthSetMode& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
 
 
     return current_alignment - initial_alignment;
@@ -577,7 +626,7 @@ size_t ib::sim::eth::idl::EthSetMode::getCdrSerializedSize(const ib::sim::eth::i
 void ib::sim::eth::idl::EthSetMode::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
     scdr << m_senderAddr;
-    scdr << (const uint32_t)m_mode;
+    scdr << (uint32_t)m_mode;
 }
 
 void ib::sim::eth::idl::EthSetMode::deserialize(eprosima::fastcdr::Cdr &dcdr)

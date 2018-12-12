@@ -29,6 +29,8 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <map>
+#include <bitset>
 
 #if defined(_WIN32)
 #if defined(EPROSIMA_USER_DLL_EXPORT)
@@ -118,36 +120,36 @@ namespace ib
                      * @brief Default constructor.
                      */
                     eProsima_user_DllExport LinMessage();
-                    
+
                     /*!
                      * @brief Default destructor.
                      */
                     eProsima_user_DllExport ~LinMessage();
-                    
+
                     /*!
                      * @brief Copy constructor.
                      * @param x Reference to the object ib::sim::lin::idl::LinMessage that will be copied.
                      */
                     eProsima_user_DllExport LinMessage(const LinMessage &x);
-                    
+
                     /*!
                      * @brief Move constructor.
                      * @param x Reference to the object ib::sim::lin::idl::LinMessage that will be copied.
                      */
                     eProsima_user_DllExport LinMessage(LinMessage &&x);
-                    
+
                     /*!
                      * @brief Copy assignment.
                      * @param x Reference to the object ib::sim::lin::idl::LinMessage that will be copied.
                      */
                     eProsima_user_DllExport LinMessage& operator=(const LinMessage &x);
-                    
+
                     /*!
                      * @brief Move assignment.
                      * @param x Reference to the object ib::sim::lin::idl::LinMessage that will be copied.
                      */
                     eProsima_user_DllExport LinMessage& operator=(LinMessage &&x);
-                    
+
                     /*!
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
@@ -348,7 +350,7 @@ namespace ib
                     {
                         return m_checksumModel;
                     }
-                    
+
                     /*!
                      * @brief This function returns the maximum serialized size of an object
                      * depending on the buffer alignment.
@@ -398,7 +400,7 @@ namespace ib
                      * @param cdr CDR serialization object.
                      */
                     eProsima_user_DllExport void serializeKey(eprosima::fastcdr::Cdr &cdr) const;
-                    
+
                 private:
                     ib::mw::idl::EndpointAddress m_senderAddr;
                     ib::sim::lin::idl::MessageStatus m_status;
@@ -420,36 +422,36 @@ namespace ib
                      * @brief Default constructor.
                      */
                     eProsima_user_DllExport RxRequest();
-                    
+
                     /*!
                      * @brief Default destructor.
                      */
                     eProsima_user_DllExport ~RxRequest();
-                    
+
                     /*!
                      * @brief Copy constructor.
                      * @param x Reference to the object ib::sim::lin::idl::RxRequest that will be copied.
                      */
                     eProsima_user_DllExport RxRequest(const RxRequest &x);
-                    
+
                     /*!
                      * @brief Move constructor.
                      * @param x Reference to the object ib::sim::lin::idl::RxRequest that will be copied.
                      */
                     eProsima_user_DllExport RxRequest(RxRequest &&x);
-                    
+
                     /*!
                      * @brief Copy assignment.
                      * @param x Reference to the object ib::sim::lin::idl::RxRequest that will be copied.
                      */
                     eProsima_user_DllExport RxRequest& operator=(const RxRequest &x);
-                    
+
                     /*!
                      * @brief Move assignment.
                      * @param x Reference to the object ib::sim::lin::idl::RxRequest that will be copied.
                      */
                     eProsima_user_DllExport RxRequest& operator=(RxRequest &&x);
-                    
+
                     /*!
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
@@ -563,7 +565,7 @@ namespace ib
                     {
                         return m_checksumModel;
                     }
-                    
+
                     /*!
                      * @brief This function returns the maximum serialized size of an object
                      * depending on the buffer alignment.
@@ -613,7 +615,7 @@ namespace ib
                      * @param cdr CDR serialization object.
                      */
                     eProsima_user_DllExport void serializeKey(eprosima::fastcdr::Cdr &cdr) const;
-                    
+
                 private:
                     ib::mw::idl::EndpointAddress m_senderAddr;
                     ib::sim::lin::idl::LinId m_linId;
@@ -632,36 +634,36 @@ namespace ib
                      * @brief Default constructor.
                      */
                     eProsima_user_DllExport TxAcknowledge();
-                    
+
                     /*!
                      * @brief Default destructor.
                      */
                     eProsima_user_DllExport ~TxAcknowledge();
-                    
+
                     /*!
                      * @brief Copy constructor.
                      * @param x Reference to the object ib::sim::lin::idl::TxAcknowledge that will be copied.
                      */
                     eProsima_user_DllExport TxAcknowledge(const TxAcknowledge &x);
-                    
+
                     /*!
                      * @brief Move constructor.
                      * @param x Reference to the object ib::sim::lin::idl::TxAcknowledge that will be copied.
                      */
                     eProsima_user_DllExport TxAcknowledge(TxAcknowledge &&x);
-                    
+
                     /*!
                      * @brief Copy assignment.
                      * @param x Reference to the object ib::sim::lin::idl::TxAcknowledge that will be copied.
                      */
                     eProsima_user_DllExport TxAcknowledge& operator=(const TxAcknowledge &x);
-                    
+
                     /*!
                      * @brief Move assignment.
                      * @param x Reference to the object ib::sim::lin::idl::TxAcknowledge that will be copied.
                      */
                     eProsima_user_DllExport TxAcknowledge& operator=(TxAcknowledge &&x);
-                    
+
                     /*!
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
@@ -775,7 +777,7 @@ namespace ib
                     {
                         return m_status;
                     }
-                    
+
                     /*!
                      * @brief This function returns the maximum serialized size of an object
                      * depending on the buffer alignment.
@@ -825,7 +827,7 @@ namespace ib
                      * @param cdr CDR serialization object.
                      */
                     eProsima_user_DllExport void serializeKey(eprosima::fastcdr::Cdr &cdr) const;
-                    
+
                 private:
                     ib::mw::idl::EndpointAddress m_senderAddr;
                     int64_t m_timestamp;
@@ -854,36 +856,36 @@ namespace ib
                      * @brief Default constructor.
                      */
                     eProsima_user_DllExport ControllerConfig();
-                    
+
                     /*!
                      * @brief Default destructor.
                      */
                     eProsima_user_DllExport ~ControllerConfig();
-                    
+
                     /*!
                      * @brief Copy constructor.
                      * @param x Reference to the object ib::sim::lin::idl::ControllerConfig that will be copied.
                      */
                     eProsima_user_DllExport ControllerConfig(const ControllerConfig &x);
-                    
+
                     /*!
                      * @brief Move constructor.
                      * @param x Reference to the object ib::sim::lin::idl::ControllerConfig that will be copied.
                      */
                     eProsima_user_DllExport ControllerConfig(ControllerConfig &&x);
-                    
+
                     /*!
                      * @brief Copy assignment.
                      * @param x Reference to the object ib::sim::lin::idl::ControllerConfig that will be copied.
                      */
                     eProsima_user_DllExport ControllerConfig& operator=(const ControllerConfig &x);
-                    
+
                     /*!
                      * @brief Move assignment.
                      * @param x Reference to the object ib::sim::lin::idl::ControllerConfig that will be copied.
                      */
                     eProsima_user_DllExport ControllerConfig& operator=(ControllerConfig &&x);
-                    
+
                     /*!
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
@@ -971,7 +973,7 @@ namespace ib
                     {
                         return m_baudrate;
                     }
-                    
+
                     /*!
                      * @brief This function returns the maximum serialized size of an object
                      * depending on the buffer alignment.
@@ -1021,7 +1023,7 @@ namespace ib
                      * @param cdr CDR serialization object.
                      */
                     eProsima_user_DllExport void serializeKey(eprosima::fastcdr::Cdr &cdr) const;
-                    
+
                 private:
                     ib::mw::idl::EndpointAddress m_senderAddr;
                     ib::sim::lin::idl::ControllerMode m_controllerMode;
@@ -1039,36 +1041,36 @@ namespace ib
                      * @brief Default constructor.
                      */
                     eProsima_user_DllExport SlaveResponseConfig();
-                    
+
                     /*!
                      * @brief Default destructor.
                      */
                     eProsima_user_DllExport ~SlaveResponseConfig();
-                    
+
                     /*!
                      * @brief Copy constructor.
                      * @param x Reference to the object ib::sim::lin::idl::SlaveResponseConfig that will be copied.
                      */
                     eProsima_user_DllExport SlaveResponseConfig(const SlaveResponseConfig &x);
-                    
+
                     /*!
                      * @brief Move constructor.
                      * @param x Reference to the object ib::sim::lin::idl::SlaveResponseConfig that will be copied.
                      */
                     eProsima_user_DllExport SlaveResponseConfig(SlaveResponseConfig &&x);
-                    
+
                     /*!
                      * @brief Copy assignment.
                      * @param x Reference to the object ib::sim::lin::idl::SlaveResponseConfig that will be copied.
                      */
                     eProsima_user_DllExport SlaveResponseConfig& operator=(const SlaveResponseConfig &x);
-                    
+
                     /*!
                      * @brief Move assignment.
                      * @param x Reference to the object ib::sim::lin::idl::SlaveResponseConfig that will be copied.
                      */
                     eProsima_user_DllExport SlaveResponseConfig& operator=(SlaveResponseConfig &&x);
-                    
+
                     /*!
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
@@ -1182,7 +1184,7 @@ namespace ib
                     {
                         return m_payloadLength;
                     }
-                    
+
                     /*!
                      * @brief This function returns the maximum serialized size of an object
                      * depending on the buffer alignment.
@@ -1232,7 +1234,7 @@ namespace ib
                      * @param cdr CDR serialization object.
                      */
                     eProsima_user_DllExport void serializeKey(eprosima::fastcdr::Cdr &cdr) const;
-                    
+
                 private:
                     ib::mw::idl::EndpointAddress m_senderAddr;
                     ib::sim::lin::idl::ResponseMode m_responseMode;
@@ -1251,36 +1253,36 @@ namespace ib
                      * @brief Default constructor.
                      */
                     eProsima_user_DllExport SlaveConfiguration();
-                    
+
                     /*!
                      * @brief Default destructor.
                      */
                     eProsima_user_DllExport ~SlaveConfiguration();
-                    
+
                     /*!
                      * @brief Copy constructor.
                      * @param x Reference to the object ib::sim::lin::idl::SlaveConfiguration that will be copied.
                      */
                     eProsima_user_DllExport SlaveConfiguration(const SlaveConfiguration &x);
-                    
+
                     /*!
                      * @brief Move constructor.
                      * @param x Reference to the object ib::sim::lin::idl::SlaveConfiguration that will be copied.
                      */
                     eProsima_user_DllExport SlaveConfiguration(SlaveConfiguration &&x);
-                    
+
                     /*!
                      * @brief Copy assignment.
                      * @param x Reference to the object ib::sim::lin::idl::SlaveConfiguration that will be copied.
                      */
                     eProsima_user_DllExport SlaveConfiguration& operator=(const SlaveConfiguration &x);
-                    
+
                     /*!
                      * @brief Move assignment.
                      * @param x Reference to the object ib::sim::lin::idl::SlaveConfiguration that will be copied.
                      */
                     eProsima_user_DllExport SlaveConfiguration& operator=(SlaveConfiguration &&x);
-                    
+
                     /*!
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
@@ -1351,7 +1353,7 @@ namespace ib
                     {
                         return m_responseConfigs;
                     }
-                    
+
                     /*!
                      * @brief This function returns the maximum serialized size of an object
                      * depending on the buffer alignment.
@@ -1401,7 +1403,7 @@ namespace ib
                      * @param cdr CDR serialization object.
                      */
                     eProsima_user_DllExport void serializeKey(eprosima::fastcdr::Cdr &cdr) const;
-                    
+
                 private:
                     ib::mw::idl::EndpointAddress m_senderAddr;
                     std::vector<ib::sim::lin::idl::SlaveResponseConfig> m_responseConfigs;
@@ -1418,36 +1420,36 @@ namespace ib
                      * @brief Default constructor.
                      */
                     eProsima_user_DllExport SlaveResponse();
-                    
+
                     /*!
                      * @brief Default destructor.
                      */
                     eProsima_user_DllExport ~SlaveResponse();
-                    
+
                     /*!
                      * @brief Copy constructor.
                      * @param x Reference to the object ib::sim::lin::idl::SlaveResponse that will be copied.
                      */
                     eProsima_user_DllExport SlaveResponse(const SlaveResponse &x);
-                    
+
                     /*!
                      * @brief Move constructor.
                      * @param x Reference to the object ib::sim::lin::idl::SlaveResponse that will be copied.
                      */
                     eProsima_user_DllExport SlaveResponse(SlaveResponse &&x);
-                    
+
                     /*!
                      * @brief Copy assignment.
                      * @param x Reference to the object ib::sim::lin::idl::SlaveResponse that will be copied.
                      */
                     eProsima_user_DllExport SlaveResponse& operator=(const SlaveResponse &x);
-                    
+
                     /*!
                      * @brief Move assignment.
                      * @param x Reference to the object ib::sim::lin::idl::SlaveResponse that will be copied.
                      */
                     eProsima_user_DllExport SlaveResponse& operator=(SlaveResponse &&x);
-                    
+
                     /*!
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
@@ -1570,7 +1572,7 @@ namespace ib
                     {
                         return m_payload;
                     }
-                    
+
                     /*!
                      * @brief This function returns the maximum serialized size of an object
                      * depending on the buffer alignment.
@@ -1620,7 +1622,7 @@ namespace ib
                      * @param cdr CDR serialization object.
                      */
                     eProsima_user_DllExport void serializeKey(eprosima::fastcdr::Cdr &cdr) const;
-                    
+
                 private:
                     ib::mw::idl::EndpointAddress m_senderAddr;
                     ib::sim::lin::idl::LinId m_linId;

@@ -25,7 +25,6 @@ namespace { char dummy; }
 #endif
 
 #include "IoTopics.h"
-
 #include <fastcdr/Cdr.h>
 
 #include <fastcdr/exceptions/BadParamException.h>
@@ -37,7 +36,10 @@ ib::sim::io::idl::AnalogIoMessage::AnalogIoMessage()
 {
 
     m_timestampNs = 0;
+
     m_value = 0.0;
+
+
 }
 
 ib::sim::io::idl::AnalogIoMessage::~AnalogIoMessage()
@@ -63,7 +65,7 @@ ib::sim::io::idl::AnalogIoMessage& ib::sim::io::idl::AnalogIoMessage::operator=(
     m_senderAddr = x.m_senderAddr;
     m_timestampNs = x.m_timestampNs;
     m_value = x.m_value;
-    
+
     return *this;
 }
 
@@ -72,18 +74,20 @@ ib::sim::io::idl::AnalogIoMessage& ib::sim::io::idl::AnalogIoMessage::operator=(
     m_senderAddr = std::move(x.m_senderAddr);
     m_timestampNs = x.m_timestampNs;
     m_value = x.m_value;
-    
+
     return *this;
 }
 
 size_t ib::sim::io::idl::AnalogIoMessage::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
 
 
     return current_alignment - initial_alignment;
@@ -91,12 +95,15 @@ size_t ib::sim::io::idl::AnalogIoMessage::getMaxCdrSerializedSize(size_t current
 
 size_t ib::sim::io::idl::AnalogIoMessage::getCdrSerializedSize(const ib::sim::io::idl::AnalogIoMessage& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
 
 
     return current_alignment - initial_alignment;
@@ -143,7 +150,10 @@ ib::sim::io::idl::DigitalIoMessage::DigitalIoMessage()
 {
 
     m_timestampNs = 0;
+
     m_value = false;
+
+
 }
 
 ib::sim::io::idl::DigitalIoMessage::~DigitalIoMessage()
@@ -169,7 +179,7 @@ ib::sim::io::idl::DigitalIoMessage& ib::sim::io::idl::DigitalIoMessage::operator
     m_senderAddr = x.m_senderAddr;
     m_timestampNs = x.m_timestampNs;
     m_value = x.m_value;
-    
+
     return *this;
 }
 
@@ -178,18 +188,20 @@ ib::sim::io::idl::DigitalIoMessage& ib::sim::io::idl::DigitalIoMessage::operator
     m_senderAddr = std::move(x.m_senderAddr);
     m_timestampNs = x.m_timestampNs;
     m_value = x.m_value;
-    
+
     return *this;
 }
 
 size_t ib::sim::io::idl::DigitalIoMessage::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
     return current_alignment - initial_alignment;
@@ -197,12 +209,15 @@ size_t ib::sim::io::idl::DigitalIoMessage::getMaxCdrSerializedSize(size_t curren
 
 size_t ib::sim::io::idl::DigitalIoMessage::getCdrSerializedSize(const ib::sim::io::idl::DigitalIoMessage& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
     return current_alignment - initial_alignment;
@@ -250,6 +265,8 @@ ib::sim::io::idl::PatternIoMessage::PatternIoMessage()
 
     m_timestampNs = 0;
 
+
+
 }
 
 ib::sim::io::idl::PatternIoMessage::~PatternIoMessage()
@@ -275,7 +292,7 @@ ib::sim::io::idl::PatternIoMessage& ib::sim::io::idl::PatternIoMessage::operator
     m_senderAddr = x.m_senderAddr;
     m_timestampNs = x.m_timestampNs;
     m_value = x.m_value;
-    
+
     return *this;
 }
 
@@ -284,19 +301,22 @@ ib::sim::io::idl::PatternIoMessage& ib::sim::io::idl::PatternIoMessage::operator
     m_senderAddr = std::move(x.m_senderAddr);
     m_timestampNs = x.m_timestampNs;
     m_value = std::move(x.m_value);
-    
+
     return *this;
 }
 
 size_t ib::sim::io::idl::PatternIoMessage::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
     current_alignment += (100 * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
 
@@ -305,13 +325,17 @@ size_t ib::sim::io::idl::PatternIoMessage::getMaxCdrSerializedSize(size_t curren
 
 size_t ib::sim::io::idl::PatternIoMessage::getCdrSerializedSize(const ib::sim::io::idl::PatternIoMessage& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
     current_alignment += (data.value().size() * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
 
@@ -358,7 +382,10 @@ void ib::sim::io::idl::PatternIoMessage::serializeKey(eprosima::fastcdr::Cdr &sc
 ib::sim::io::idl::PwmValue::PwmValue()
 {
     m_frequency = 0.0;
+
     m_dutyCycle = 0.0;
+
+
 }
 
 ib::sim::io::idl::PwmValue::~PwmValue()
@@ -381,7 +408,7 @@ ib::sim::io::idl::PwmValue& ib::sim::io::idl::PwmValue::operator=(const PwmValue
 {
     m_frequency = x.m_frequency;
     m_dutyCycle = x.m_dutyCycle;
-    
+
     return *this;
 }
 
@@ -389,17 +416,19 @@ ib::sim::io::idl::PwmValue& ib::sim::io::idl::PwmValue::operator=(PwmValue &&x)
 {
     m_frequency = x.m_frequency;
     m_dutyCycle = x.m_dutyCycle;
-    
+
     return *this;
 }
 
 size_t ib::sim::io::idl::PwmValue::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
-    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
+
+    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
 
 
     return current_alignment - initial_alignment;
@@ -407,11 +436,14 @@ size_t ib::sim::io::idl::PwmValue::getMaxCdrSerializedSize(size_t current_alignm
 
 size_t ib::sim::io::idl::PwmValue::getCdrSerializedSize(const ib::sim::io::idl::PwmValue& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
-    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
+
+    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
 
 
     return current_alignment - initial_alignment;
@@ -455,6 +487,8 @@ ib::sim::io::idl::PwmIoMessage::PwmIoMessage()
 
     m_timestampNs = 0;
 
+
+
 }
 
 ib::sim::io::idl::PwmIoMessage::~PwmIoMessage()
@@ -480,7 +514,7 @@ ib::sim::io::idl::PwmIoMessage& ib::sim::io::idl::PwmIoMessage::operator=(const 
     m_senderAddr = x.m_senderAddr;
     m_timestampNs = x.m_timestampNs;
     m_value = x.m_value;
-    
+
     return *this;
 }
 
@@ -489,16 +523,17 @@ ib::sim::io::idl::PwmIoMessage& ib::sim::io::idl::PwmIoMessage::operator=(PwmIoM
     m_senderAddr = std::move(x.m_senderAddr);
     m_timestampNs = x.m_timestampNs;
     m_value = std::move(x.m_value);
-    
+
     return *this;
 }
 
 size_t ib::sim::io::idl::PwmIoMessage::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
 
     current_alignment += ib::sim::io::idl::PwmValue::getMaxCdrSerializedSize(current_alignment);
 
@@ -507,10 +542,12 @@ size_t ib::sim::io::idl::PwmIoMessage::getMaxCdrSerializedSize(size_t current_al
 
 size_t ib::sim::io::idl::PwmIoMessage::getCdrSerializedSize(const ib::sim::io::idl::PwmIoMessage& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
 
     current_alignment += ib::sim::io::idl::PwmValue::getCdrSerializedSize(data.value(), current_alignment);
 

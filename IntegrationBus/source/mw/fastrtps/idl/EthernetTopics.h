@@ -29,6 +29,8 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <map>
+#include <bitset>
 
 #if defined(_WIN32)
 #if defined(EPROSIMA_USER_DLL_EXPORT)
@@ -82,36 +84,36 @@ namespace ib
                      * @brief Default constructor.
                      */
                     eProsima_user_DllExport EthTagControlInformation();
-                    
+
                     /*!
                      * @brief Default destructor.
                      */
                     eProsima_user_DllExport ~EthTagControlInformation();
-                    
+
                     /*!
                      * @brief Copy constructor.
                      * @param x Reference to the object ib::sim::eth::idl::EthTagControlInformation that will be copied.
                      */
                     eProsima_user_DllExport EthTagControlInformation(const EthTagControlInformation &x);
-                    
+
                     /*!
                      * @brief Move constructor.
                      * @param x Reference to the object ib::sim::eth::idl::EthTagControlInformation that will be copied.
                      */
                     eProsima_user_DllExport EthTagControlInformation(EthTagControlInformation &&x);
-                    
+
                     /*!
                      * @brief Copy assignment.
                      * @param x Reference to the object ib::sim::eth::idl::EthTagControlInformation that will be copied.
                      */
                     eProsima_user_DllExport EthTagControlInformation& operator=(const EthTagControlInformation &x);
-                    
+
                     /*!
                      * @brief Move assignment.
                      * @param x Reference to the object ib::sim::eth::idl::EthTagControlInformation that will be copied.
                      */
                     eProsima_user_DllExport EthTagControlInformation& operator=(EthTagControlInformation &&x);
-                    
+
                     /*!
                      * @brief This function sets a value in member pcp
                      * @param _pcp New value for member pcp
@@ -190,7 +192,7 @@ namespace ib
                     {
                         return m_vid;
                     }
-                    
+
                     /*!
                      * @brief This function returns the maximum serialized size of an object
                      * depending on the buffer alignment.
@@ -240,7 +242,7 @@ namespace ib
                      * @param cdr CDR serialization object.
                      */
                     eProsima_user_DllExport void serializeKey(eprosima::fastcdr::Cdr &cdr) const;
-                    
+
                 private:
                     uint8_t m_pcp;
                     uint8_t m_dei;
@@ -259,36 +261,36 @@ namespace ib
                      * @brief Default constructor.
                      */
                     eProsima_user_DllExport EthMessage();
-                    
+
                     /*!
                      * @brief Default destructor.
                      */
                     eProsima_user_DllExport ~EthMessage();
-                    
+
                     /*!
                      * @brief Copy constructor.
                      * @param x Reference to the object ib::sim::eth::idl::EthMessage that will be copied.
                      */
                     eProsima_user_DllExport EthMessage(const EthMessage &x);
-                    
+
                     /*!
                      * @brief Move constructor.
                      * @param x Reference to the object ib::sim::eth::idl::EthMessage that will be copied.
                      */
                     eProsima_user_DllExport EthMessage(EthMessage &&x);
-                    
+
                     /*!
                      * @brief Copy assignment.
                      * @param x Reference to the object ib::sim::eth::idl::EthMessage that will be copied.
                      */
                     eProsima_user_DllExport EthMessage& operator=(const EthMessage &x);
-                    
+
                     /*!
                      * @brief Move assignment.
                      * @param x Reference to the object ib::sim::eth::idl::EthMessage that will be copied.
                      */
                     eProsima_user_DllExport EthMessage& operator=(EthMessage &&x);
-                    
+
                     /*!
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
@@ -411,7 +413,7 @@ namespace ib
                     {
                         return m_rawFrame;
                     }
-                    
+
                     /*!
                      * @brief This function returns the maximum serialized size of an object
                      * depending on the buffer alignment.
@@ -461,7 +463,7 @@ namespace ib
                      * @param cdr CDR serialization object.
                      */
                     eProsima_user_DllExport void serializeKey(eprosima::fastcdr::Cdr &cdr) const;
-                    
+
                 private:
                     ib::mw::idl::EndpointAddress m_senderAddr;
                     uint32_t m_transmitId;
@@ -493,36 +495,36 @@ namespace ib
                      * @brief Default constructor.
                      */
                     eProsima_user_DllExport EthTransmitAcknowledge();
-                    
+
                     /*!
                      * @brief Default destructor.
                      */
                     eProsima_user_DllExport ~EthTransmitAcknowledge();
-                    
+
                     /*!
                      * @brief Copy constructor.
                      * @param x Reference to the object ib::sim::eth::idl::EthTransmitAcknowledge that will be copied.
                      */
                     eProsima_user_DllExport EthTransmitAcknowledge(const EthTransmitAcknowledge &x);
-                    
+
                     /*!
                      * @brief Move constructor.
                      * @param x Reference to the object ib::sim::eth::idl::EthTransmitAcknowledge that will be copied.
                      */
                     eProsima_user_DllExport EthTransmitAcknowledge(EthTransmitAcknowledge &&x);
-                    
+
                     /*!
                      * @brief Copy assignment.
                      * @param x Reference to the object ib::sim::eth::idl::EthTransmitAcknowledge that will be copied.
                      */
                     eProsima_user_DllExport EthTransmitAcknowledge& operator=(const EthTransmitAcknowledge &x);
-                    
+
                     /*!
                      * @brief Move assignment.
                      * @param x Reference to the object ib::sim::eth::idl::EthTransmitAcknowledge that will be copied.
                      */
                     eProsima_user_DllExport EthTransmitAcknowledge& operator=(EthTransmitAcknowledge &&x);
-                    
+
                     /*!
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
@@ -636,7 +638,7 @@ namespace ib
                     {
                         return m_status;
                     }
-                    
+
                     /*!
                      * @brief This function returns the maximum serialized size of an object
                      * depending on the buffer alignment.
@@ -686,7 +688,7 @@ namespace ib
                      * @param cdr CDR serialization object.
                      */
                     eProsima_user_DllExport void serializeKey(eprosima::fastcdr::Cdr &cdr) const;
-                    
+
                 private:
                     ib::mw::idl::EndpointAddress m_senderAddr;
                     uint32_t m_transmitId;
@@ -715,36 +717,36 @@ namespace ib
                      * @brief Default constructor.
                      */
                     eProsima_user_DllExport EthStatus();
-                    
+
                     /*!
                      * @brief Default destructor.
                      */
                     eProsima_user_DllExport ~EthStatus();
-                    
+
                     /*!
                      * @brief Copy constructor.
                      * @param x Reference to the object ib::sim::eth::idl::EthStatus that will be copied.
                      */
                     eProsima_user_DllExport EthStatus(const EthStatus &x);
-                    
+
                     /*!
                      * @brief Move constructor.
                      * @param x Reference to the object ib::sim::eth::idl::EthStatus that will be copied.
                      */
                     eProsima_user_DllExport EthStatus(EthStatus &&x);
-                    
+
                     /*!
                      * @brief Copy assignment.
                      * @param x Reference to the object ib::sim::eth::idl::EthStatus that will be copied.
                      */
                     eProsima_user_DllExport EthStatus& operator=(const EthStatus &x);
-                    
+
                     /*!
                      * @brief Move assignment.
                      * @param x Reference to the object ib::sim::eth::idl::EthStatus that will be copied.
                      */
                     eProsima_user_DllExport EthStatus& operator=(EthStatus &&x);
-                    
+
                     /*!
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
@@ -858,7 +860,7 @@ namespace ib
                     {
                         return m_bitRate;
                     }
-                    
+
                     /*!
                      * @brief This function returns the maximum serialized size of an object
                      * depending on the buffer alignment.
@@ -908,7 +910,7 @@ namespace ib
                      * @param cdr CDR serialization object.
                      */
                     eProsima_user_DllExport void serializeKey(eprosima::fastcdr::Cdr &cdr) const;
-                    
+
                 private:
                     ib::mw::idl::EndpointAddress m_senderAddr;
                     int64_t m_timestampNs;
@@ -936,36 +938,36 @@ namespace ib
                      * @brief Default constructor.
                      */
                     eProsima_user_DllExport EthSetMode();
-                    
+
                     /*!
                      * @brief Default destructor.
                      */
                     eProsima_user_DllExport ~EthSetMode();
-                    
+
                     /*!
                      * @brief Copy constructor.
                      * @param x Reference to the object ib::sim::eth::idl::EthSetMode that will be copied.
                      */
                     eProsima_user_DllExport EthSetMode(const EthSetMode &x);
-                    
+
                     /*!
                      * @brief Move constructor.
                      * @param x Reference to the object ib::sim::eth::idl::EthSetMode that will be copied.
                      */
                     eProsima_user_DllExport EthSetMode(EthSetMode &&x);
-                    
+
                     /*!
                      * @brief Copy assignment.
                      * @param x Reference to the object ib::sim::eth::idl::EthSetMode that will be copied.
                      */
                     eProsima_user_DllExport EthSetMode& operator=(const EthSetMode &x);
-                    
+
                     /*!
                      * @brief Move assignment.
                      * @param x Reference to the object ib::sim::eth::idl::EthSetMode that will be copied.
                      */
                     eProsima_user_DllExport EthSetMode& operator=(EthSetMode &&x);
-                    
+
                     /*!
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
@@ -1027,7 +1029,7 @@ namespace ib
                     {
                         return m_mode;
                     }
-                    
+
                     /*!
                      * @brief This function returns the maximum serialized size of an object
                      * depending on the buffer alignment.
@@ -1077,7 +1079,7 @@ namespace ib
                      * @param cdr CDR serialization object.
                      */
                     eProsima_user_DllExport void serializeKey(eprosima::fastcdr::Cdr &cdr) const;
-                    
+
                 private:
                     ib::mw::idl::EndpointAddress m_senderAddr;
                     ib::sim::eth::idl::EthMode m_mode;

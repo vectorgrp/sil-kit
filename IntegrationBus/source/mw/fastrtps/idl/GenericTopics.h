@@ -29,6 +29,8 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <map>
+#include <bitset>
 
 #if defined(_WIN32)
 #if defined(EPROSIMA_USER_DLL_EXPORT)
@@ -82,36 +84,36 @@ namespace ib
                      * @brief Default constructor.
                      */
                     eProsima_user_DllExport GenericMessage();
-                    
+
                     /*!
                      * @brief Default destructor.
                      */
                     eProsima_user_DllExport ~GenericMessage();
-                    
+
                     /*!
                      * @brief Copy constructor.
                      * @param x Reference to the object ib::sim::generic::idl::GenericMessage that will be copied.
                      */
                     eProsima_user_DllExport GenericMessage(const GenericMessage &x);
-                    
+
                     /*!
                      * @brief Move constructor.
                      * @param x Reference to the object ib::sim::generic::idl::GenericMessage that will be copied.
                      */
                     eProsima_user_DllExport GenericMessage(GenericMessage &&x);
-                    
+
                     /*!
                      * @brief Copy assignment.
                      * @param x Reference to the object ib::sim::generic::idl::GenericMessage that will be copied.
                      */
                     eProsima_user_DllExport GenericMessage& operator=(const GenericMessage &x);
-                    
+
                     /*!
                      * @brief Move assignment.
                      * @param x Reference to the object ib::sim::generic::idl::GenericMessage that will be copied.
                      */
                     eProsima_user_DllExport GenericMessage& operator=(GenericMessage &&x);
-                    
+
                     /*!
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
@@ -182,7 +184,7 @@ namespace ib
                     {
                         return m_data;
                     }
-                    
+
                     /*!
                      * @brief This function returns the maximum serialized size of an object
                      * depending on the buffer alignment.
@@ -232,7 +234,7 @@ namespace ib
                      * @param cdr CDR serialization object.
                      */
                     eProsima_user_DllExport void serializeKey(eprosima::fastcdr::Cdr &cdr) const;
-                    
+
                 private:
                     ib::mw::idl::EndpointAddress m_senderAddr;
                     std::vector<uint8_t> m_data;

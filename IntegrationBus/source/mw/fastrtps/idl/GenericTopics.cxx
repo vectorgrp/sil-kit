@@ -25,7 +25,6 @@ namespace { char dummy; }
 #endif
 
 #include "GenericTopics.h"
-
 #include <fastcdr/Cdr.h>
 
 #include <fastcdr/exceptions/BadParamException.h>
@@ -35,6 +34,7 @@ using namespace eprosima::fastcdr::exception;
 
 ib::sim::generic::idl::GenericMessage::GenericMessage()
 {
+
 
 
 }
@@ -59,7 +59,7 @@ ib::sim::generic::idl::GenericMessage& ib::sim::generic::idl::GenericMessage::op
 {
     m_senderAddr = x.m_senderAddr;
     m_data = x.m_data;
-    
+
     return *this;
 }
 
@@ -67,17 +67,19 @@ ib::sim::generic::idl::GenericMessage& ib::sim::generic::idl::GenericMessage::op
 {
     m_senderAddr = std::move(x.m_senderAddr);
     m_data = std::move(x.m_data);
-    
+
     return *this;
 }
 
 size_t ib::sim::generic::idl::GenericMessage::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
     current_alignment += (100 * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
 
@@ -86,11 +88,14 @@ size_t ib::sim::generic::idl::GenericMessage::getMaxCdrSerializedSize(size_t cur
 
 size_t ib::sim::generic::idl::GenericMessage::getCdrSerializedSize(const ib::sim::generic::idl::GenericMessage& data, size_t current_alignment)
 {
+    (void)data;
     size_t initial_alignment = current_alignment;
-            
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
     current_alignment += (data.data().size() * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
 
 
 
