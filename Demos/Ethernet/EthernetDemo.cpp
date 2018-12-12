@@ -29,11 +29,11 @@ void EthAckCallback(eth::IEthController* /*controller*/, const eth::EthTransmitA
 {
     if (ack.status == eth::EthTransmitStatus::Transmitted)
     {
-        std::cout << ">> ACK for ETH message with transmitId=" << ack.transmitId << std::endl;
+        std::cout << ">> ACK for ETH Message with transmitId=" << ack.transmitId << std::endl;
     }
     else
     {
-        std::cout << ">> NACK for ETH message with transmitId=" << ack.transmitId;
+        std::cout << ">> NACK for ETH Message with transmitId=" << ack.transmitId;
         switch (ack.status)
         {
         case eth::EthTransmitStatus::Transmitted:
@@ -93,7 +93,7 @@ void SendMessage(eth::IEthController* controller, const eth::EthMac& from, const
     msg.ethFrame.SetPayload(payload);
 
     auto transmitId = controller->SendMessage(std::move(msg));
-    std::cout << "<< ETH message sent with transmitId=" << transmitId << std::endl;
+    std::cout << "<< ETH Message sent with transmitId=" << transmitId << std::endl;
 }
 
 /**************************************************************************************************

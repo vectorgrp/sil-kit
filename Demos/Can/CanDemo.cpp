@@ -49,7 +49,7 @@ std::ostream& operator<<(std::ostream& out, can::CanTransmitStatus status)
 void AckCallback(can::ICanController* /*controller*/, const can::CanTransmitAcknowledge& ack)
 {
     std::cout << ">> " << ack.status
-              << " for CAN message with transmitId=" << ack.transmitId
+              << " for CAN Message with transmitId=" << ack.transmitId
               << " timestamp=" << ack.timestamp
               << std::endl;
 }
@@ -82,7 +82,7 @@ void SendMessage(can::ICanController* controller, std::chrono::nanoseconds now)
     msg.dataField.assign(payloadStr.begin(), payloadStr.end());
 
     auto transmitId = controller->SendMessage(std::move(msg));
-    std::cout << "<< CAN message sent with transmitId=" << transmitId << std::endl;
+    std::cout << "<< CAN Message sent with transmitId=" << transmitId << std::endl;
 }
 
 /**************************************************************************************************

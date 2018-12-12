@@ -77,7 +77,7 @@ struct LinMaster
 
         state = State::WaitForAck;
         controller->SendMessage(msg);
-        std::cout << "<< LIN message sent with linId=" << static_cast<unsigned int>(msg.linId) << std::endl;
+        std::cout << "<< LIN Message sent with linId=" << static_cast<unsigned int>(msg.linId) << std::endl;
     }
 
     void RequestMessage()
