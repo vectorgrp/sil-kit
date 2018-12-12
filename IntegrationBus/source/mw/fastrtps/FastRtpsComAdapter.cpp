@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "fastrtps/Domain.h"
+#include "fastrtps/utils/IPLocator.h"
 
 #include "CanController.hpp"
 #include "CanControllerProxy.hpp"
@@ -132,8 +133,8 @@ void FastRtpsComAdapter::joinDomain(uint32_t domainId)
                     continue;
 
                 Locator_t participantLocator;
-                participantLocator.set_IP4_address("127.0.0.1");
-                participantLocator.port = CalculateMetaTrafficPort(participant.id);
+                auto port = CalculateMetaTrafficPort(participant.id);
+                IPLocator::createLocator(LOCATOR_KIND_UDPv4, "127.0.0.1", port, participantLocator);
                 pParam.rtps.builtin.initialPeersList.push_back(participantLocator);
             }
             break;
@@ -150,17 +151,17 @@ void FastRtpsComAdapter::joinDomain(uint32_t domainId)
                     continue;
 
                 Locator_t participantLocator;
-                participantLocator.port = CalculateMetaTrafficPort(participant.id);
+                auto port = CalculateMetaTrafficPort(participant.id);
                 try
                 {
                     auto&& participantIp = fastRtpsCfg.unicastLocators.at(participant.name);
-                    participantLocator.set_IP4_address(participantIp);
+                    IPLocator::createLocator(LOCATOR_KIND_UDPv4, participantIp, port, participantLocator);
                 }
                 catch (const std::out_of_range&)
                 {
                     throw cfg::Misconfiguration{"No UnicastLocator configured for participant \"" + participant.name + "\""};
                 }
-                std::cout << "Adding initial peer for unicast discovery=" << participantLocator.to_IP4_string() << ":" << participantLocator.port << "\n";
+                std::cout << "Adding initial peer for unicast discovery=" << IPLocator::toIPv4string(participantLocator) << ":" << participantLocator.port << "\n";
                 pParam.rtps.builtin.initialPeersList.push_back(participantLocator);
             }
 
