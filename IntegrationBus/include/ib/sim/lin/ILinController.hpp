@@ -67,6 +67,17 @@ public:
      */
     virtual void SetResponse(LinId linId, const Payload& payload) = 0;
 
+    /*! \brief Set the response payload for a given LIN ID and update checksum configuration
+    *
+    * Set \param payload as the response for requests with LIN ID
+    * \param linId. Also, the configured checksum model is updated
+    * to \param checksumModel.
+    * NB: The corresponding LIN ID must be previoiusly
+    * configured as ResponseMode::TxUnconditional, cf. \ref
+    * SetSlaveConfiguration(const SlaveConfiguration&).
+    */
+    virtual void SetResponseWithChecksum(LinId linId, const Payload& payload, ChecksumModel checksumModel) = 0;
+
     /*! \brief Mark a LIN ID as unused
      *
      * NB: currently not supported in VIBE LIN simulation.

@@ -52,7 +52,8 @@ bool operator==(const SlaveResponseConfig& lhs, const SlaveResponseConfig& rhs)
 bool operator==(const SlaveResponse& lhs, const SlaveResponse& rhs)
 {
     return lhs.linId == rhs.linId
-        && lhs.payload == rhs.payload;
+        && lhs.payload == rhs.payload
+        && lhs.checksumModel == rhs.checksumModel;
 }
 
 

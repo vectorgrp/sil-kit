@@ -116,6 +116,7 @@ module idl {
         LinId linId;
         octet payloadLength;
         octet payload[8];
+        ChecksumModel checksumModel;
     };
     
 

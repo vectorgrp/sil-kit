@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased] - 2018-12-19
 ### Added
+- LIN: new method ILinController::SetResponseWithChecksum() to override the configured checksum
+  model. This can be used to facilitate fault injection and simulation.
+
 ### Removed
 - Demo projects ExecutionController and ExecutionControllerProxy were based on 
   the deprecated synchronization API and were removed.

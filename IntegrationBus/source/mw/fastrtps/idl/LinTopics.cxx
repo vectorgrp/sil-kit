@@ -858,6 +858,8 @@ ib::sim::lin::idl::SlaveResponse::SlaveResponse()
     m_payloadLength = 0;
 
     memset(&m_payload, 0, (8) * 1);
+    m_checksumModel = ib::sim::lin::idl::Undefined;
+
 
 }
 
@@ -871,6 +873,7 @@ ib::sim::lin::idl::SlaveResponse::SlaveResponse(const SlaveResponse &x)
     m_linId = x.m_linId;
     m_payloadLength = x.m_payloadLength;
     m_payload = x.m_payload;
+    m_checksumModel = x.m_checksumModel;
 }
 
 ib::sim::lin::idl::SlaveResponse::SlaveResponse(SlaveResponse &&x)
@@ -879,6 +882,7 @@ ib::sim::lin::idl::SlaveResponse::SlaveResponse(SlaveResponse &&x)
     m_linId = x.m_linId;
     m_payloadLength = x.m_payloadLength;
     m_payload = std::move(x.m_payload);
+    m_checksumModel = x.m_checksumModel;
 }
 
 ib::sim::lin::idl::SlaveResponse& ib::sim::lin::idl::SlaveResponse::operator=(const SlaveResponse &x)
@@ -887,6 +891,7 @@ ib::sim::lin::idl::SlaveResponse& ib::sim::lin::idl::SlaveResponse::operator=(co
     m_linId = x.m_linId;
     m_payloadLength = x.m_payloadLength;
     m_payload = x.m_payload;
+    m_checksumModel = x.m_checksumModel;
 
     return *this;
 }
@@ -897,6 +902,7 @@ ib::sim::lin::idl::SlaveResponse& ib::sim::lin::idl::SlaveResponse::operator=(Sl
     m_linId = x.m_linId;
     m_payloadLength = x.m_payloadLength;
     m_payload = std::move(x.m_payload);
+    m_checksumModel = x.m_checksumModel;
 
     return *this;
 }
@@ -913,6 +919,9 @@ size_t ib::sim::lin::idl::SlaveResponse::getMaxCdrSerializedSize(size_t current_
 
 
     current_alignment += ((8) * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
 
@@ -933,6 +942,9 @@ size_t ib::sim::lin::idl::SlaveResponse::getCdrSerializedSize(const ib::sim::lin
 
     current_alignment += ((8) * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
 
     return current_alignment - initial_alignment;
 }
@@ -943,6 +955,7 @@ void ib::sim::lin::idl::SlaveResponse::serialize(eprosima::fastcdr::Cdr &scdr) c
     scdr << m_linId;
     scdr << m_payloadLength;
     scdr << m_payload;
+    scdr << (uint32_t)m_checksumModel;
 }
 
 void ib::sim::lin::idl::SlaveResponse::deserialize(eprosima::fastcdr::Cdr &dcdr)
@@ -951,6 +964,11 @@ void ib::sim::lin::idl::SlaveResponse::deserialize(eprosima::fastcdr::Cdr &dcdr)
     dcdr >> m_linId;
     dcdr >> m_payloadLength;
     dcdr >> m_payload;
+    {
+        uint32_t enum_value = 0;
+        dcdr >> enum_value;
+        m_checksumModel = (ib::sim::lin::idl::ChecksumModel)enum_value;
+    }
 }
 
 size_t ib::sim::lin::idl::SlaveResponse::getKeyMaxCdrSerializedSize(size_t current_alignment)
@@ -958,6 +976,7 @@ size_t ib::sim::lin::idl::SlaveResponse::getKeyMaxCdrSerializedSize(size_t curre
 	size_t current_align = current_alignment;
             
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
+
 
 
 
@@ -974,6 +993,7 @@ void ib::sim::lin::idl::SlaveResponse::serializeKey(eprosima::fastcdr::Cdr &scdr
 {
 	(void) scdr;
 	 scdr << m_senderAddr;  
+	 
 	 
 	 
 	 

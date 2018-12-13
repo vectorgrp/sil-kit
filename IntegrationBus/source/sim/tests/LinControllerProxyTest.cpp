@@ -184,6 +184,40 @@ TEST_F(LinControllerProxyTest, set_slave_mode)
     proxy.SetSlaveMode();
 }
 
+TEST_F(LinControllerProxyTest, propagate_new_response)
+{
+    proxy.SetSlaveMode();
+
+    Payload payload{4,{1,2,3,4,5,6,7,8}};
+
+    SlaveResponse expectedResponse;
+    expectedResponse.linId = 17;
+    expectedResponse.payload = payload;
+    expectedResponse.checksumModel = ChecksumModel::Undefined;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, expectedResponse))
+        .Times(1);
+
+    proxy.SetResponse(17, payload);
+}
+
+TEST_F(LinControllerProxyTest, propagate_new_response_with_checksummodel)
+{
+    proxy.SetSlaveMode();
+
+    Payload payload{4,{1,2,3,4,5,6,7,8}};
+
+    SlaveResponse expectedResponse;
+    expectedResponse.linId = 17;
+    expectedResponse.payload = payload;
+    expectedResponse.checksumModel = ChecksumModel::Enhanced;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, expectedResponse))
+        .Times(1);
+
+    proxy.SetResponseWithChecksum(17, payload, ChecksumModel::Enhanced);
+}
+
 /*! \brief Ensure that master requests are ignored. They are served by the Network Simulator
  *
  * Configuring a response should only cause the response to be forwarded to the

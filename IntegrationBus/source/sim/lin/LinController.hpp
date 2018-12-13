@@ -51,6 +51,7 @@ public:
     // LIN Slaves
     void SetSlaveConfiguration(const SlaveConfiguration& config) override;
     void SetResponse(LinId linId, const Payload& payload) override;
+    void SetResponseWithChecksum(LinId linId, const Payload& payload, ChecksumModel checksumModel) override;
     void RemoveResponse(LinId linId) override;
     // LIN Masters
     void SendMessage(const LinMessage& msg) override;

@@ -34,7 +34,7 @@ enum class ResponseMode : uint8_t
     Unused, // The LIN frame is neither received not transmitted by the LIN slave
     Rx,     // The response of the LIN frame is received by the LIN slave
     TxUnconditional, // The LIN frame is an 'unconditional frame' and the
-                        // response is transmitted by the slave
+                     // response is transmitted by the slave
 };
 
 enum class MessageStatus : uint8_t
@@ -68,7 +68,7 @@ struct LinMessage
 
     LinId linId;
     Payload payload;
-    ChecksumModel checksumModel = ChecksumModel::Undefined; // must be set when using a Network Simulator
+    ChecksumModel checksumModel{ChecksumModel::Undefined}; // must be set when using a Network Simulator
 };
 
 //! \brief RxRequest issued by a Master
@@ -76,7 +76,7 @@ struct RxRequest
 {
     LinId linId; // The Requested LIN ID
     uint8_t payloadLength; // The expected length of the reply's payload
-    ChecksumModel checksumModel = ChecksumModel::Undefined; // The checksum model to be used
+    ChecksumModel checksumModel{ChecksumModel::Undefined}; // The checksum model to be used
 };
 
 //! \brief TxAcknowledge for a LIN Master
@@ -98,9 +98,9 @@ struct ControllerConfig
 // LIN ControllerProxy to LIN Network Simulator
 struct SlaveResponseConfig
 {
-    ResponseMode responseMode = ResponseMode::Unused;
-    ChecksumModel checksumModel = ChecksumModel::Enhanced;
-    uint8_t payloadLength = 0;
+    ResponseMode responseMode{ResponseMode::Unused};
+    ChecksumModel checksumModel{ChecksumModel::Enhanced};
+    uint8_t payloadLength{0};
 };
 struct SlaveConfiguration
 {
@@ -110,8 +110,9 @@ struct SlaveConfiguration
 // LIN ControllerProxy to LIN Network Simulator
 struct SlaveResponse
 {
-    LinId   linId;
+    LinId linId;
     Payload payload;
+    ChecksumModel checksumModel{ChecksumModel::Undefined};
 };
 
 } // namespace lin

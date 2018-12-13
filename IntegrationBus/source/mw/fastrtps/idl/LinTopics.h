@@ -1572,6 +1572,32 @@ namespace ib
                     {
                         return m_payload;
                     }
+                    /*!
+                     * @brief This function sets a value in member checksumModel
+                     * @param _checksumModel New value for member checksumModel
+                     */
+                    inline eProsima_user_DllExport void checksumModel(ib::sim::lin::idl::ChecksumModel _checksumModel)
+                    {
+                        m_checksumModel = _checksumModel;
+                    }
+
+                    /*!
+                     * @brief This function returns the value of member checksumModel
+                     * @return Value of member checksumModel
+                     */
+                    inline eProsima_user_DllExport ib::sim::lin::idl::ChecksumModel checksumModel() const
+                    {
+                        return m_checksumModel;
+                    }
+
+                    /*!
+                     * @brief This function returns a reference to member checksumModel
+                     * @return Reference to member checksumModel
+                     */
+                    inline eProsima_user_DllExport ib::sim::lin::idl::ChecksumModel& checksumModel()
+                    {
+                        return m_checksumModel;
+                    }
 
                     /*!
                      * @brief This function returns the maximum serialized size of an object
@@ -1628,6 +1654,7 @@ namespace ib
                     ib::sim::lin::idl::LinId m_linId;
                     uint8_t m_payloadLength;
                     std::array<uint8_t, 8> m_payload;
+                    ib::sim::lin::idl::ChecksumModel m_checksumModel;
                 };
             }
         }

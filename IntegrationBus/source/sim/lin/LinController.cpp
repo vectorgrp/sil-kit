@@ -19,13 +19,24 @@ LinController::LinController(::ib::mw::IComAdapter* comAdapter)
 
 void LinController::SetMasterMode()
 {
+    if (_controllerMode != ControllerMode::Inactive)
+    {
+        throw std::runtime_error{"LinController::SetMasterMode() must only be called on unconfigured controllers!"};
+    }
     _controllerMode = ControllerMode::Master;
 }
 
 void LinController::SetSlaveMode()
 {
+    if (_controllerMode != ControllerMode::Inactive)
+    {
+        throw std::runtime_error{"LinController::SetSlaveMode() must only be called on unconfigured controllers!"};
+    }
+
+    // set slave mode
     _controllerMode = ControllerMode::Slave;
 
+    // Announce this controller at LIN masters
     ControllerConfig config;
     config.controllerMode = _controllerMode;
 
@@ -44,9 +55,34 @@ void LinController::SetSlaveConfiguration(const SlaveConfiguration& config)
 
 void LinController::SetResponse(LinId linId, const Payload& payload)
 {
+    if (_controllerMode != ControllerMode::Slave)
+    {
+        throw std::runtime_error{"LinController::SetResponse() should only be called in SlaveMode"};
+    }
+
     SlaveResponse response;
     response.linId = linId;
     response.payload = payload;
+    response.checksumModel = ChecksumModel::Undefined;
+
+    SendIbMessage(response);
+}
+
+void LinController::SetResponseWithChecksum(LinId linId, const Payload& payload, ChecksumModel checksumModel)
+{
+    if (_controllerMode != ControllerMode::Slave)
+    {
+        throw std::runtime_error{"LinController::SetResponseWithChecksum() should only be called in SlaveMode"};
+    }
+    if (checksumModel == ChecksumModel::Undefined)
+    {
+        std::cerr << "WARNING: LinController::SetResponseWithChecksum() was called with ChecksumModel::Undefined, which does NOT alter the checksum model!\n";
+    }
+
+    SlaveResponse response;
+    response.linId = linId;
+    response.payload = payload;
+    response.checksumModel = checksumModel;
 
     SendIbMessage(response);
 }
@@ -228,6 +264,12 @@ void LinController::ReceiveIbMessage(mw::EndpointAddress from, const SlaveRespon
     }
 
     linSlave.responses[msg.linId].payload = msg.payload;
+
+    // Update ChecksumModel if defined.
+    if (msg.checksumModel != ChecksumModel::Undefined)
+    {
+        linSlave.responses[msg.linId].checksumModel = msg.checksumModel;
+    }
 }
 
 

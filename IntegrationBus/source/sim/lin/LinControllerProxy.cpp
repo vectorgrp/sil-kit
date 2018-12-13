@@ -52,6 +52,22 @@ void LinControllerProxy::SetResponse(LinId linId, const Payload& payload)
     SlaveResponse response;
     response.linId = linId;
     response.payload = payload;
+    response.checksumModel = ChecksumModel::Undefined;
+
+    SendIbMessage(response);
+}
+
+void LinControllerProxy::SetResponseWithChecksum(LinId linId, const Payload& payload, ChecksumModel checksumModel)
+{
+    if (checksumModel == ChecksumModel::Undefined)
+    {
+        std::cerr << "WARNING: LinControllerProxy::SetResponseWithChecksum() was called with ChecksumModel::Undefined, which does NOT alter the checksum model!\n";
+    }
+
+    SlaveResponse response;
+    response.linId = linId;
+    response.payload = payload;
+    response.checksumModel = checksumModel;
 
     SendIbMessage(response);
 }

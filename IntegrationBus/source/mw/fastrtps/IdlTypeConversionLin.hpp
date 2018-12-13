@@ -340,6 +340,7 @@ auto to_idl(const SlaveResponse& msg) -> idl::SlaveResponse
     idl.linId(msg.linId);
     idl.payloadLength(msg.payload.size);
     idl.payload(msg.payload.data);
+    idl.checksumModel(to_idl(msg.checksumModel));
 
     return idl;
 }
@@ -351,6 +352,7 @@ auto idl::from_idl(const idl::SlaveResponse& idl) -> lin::SlaveResponse
     msg.linId = idl.linId();
     msg.payload.size = idl.payloadLength();
     msg.payload.data = idl.payload();
+    msg.checksumModel = from_idl(idl.checksumModel());
 
     return msg;
 }

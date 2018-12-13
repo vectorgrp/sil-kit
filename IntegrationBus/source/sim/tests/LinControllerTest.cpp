@@ -98,10 +98,12 @@ TEST_F(LinControllerTest, request_lin_message_without_configured_response)
 {
     RxRequest request{};
     request.linId = 19;
+    request.checksumModel = ChecksumModel::Enhanced;
 
     LinMessage reply{};
     reply.linId = request.linId;
     reply.status = MessageStatus::RxNoResponse;
+    reply.checksumModel = ChecksumModel::Undefined;
 
 
     EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, reply))
@@ -120,12 +122,14 @@ TEST_F(LinControllerTest, request_lin_message_with_one_configured_response)
 {
     RxRequest request{};
     request.linId = 20;
+    request.checksumModel = ChecksumModel::Enhanced;
 
     LinMessage reply{};
     reply.linId = request.linId;
     reply.status = MessageStatus::RxSuccess;
     reply.payload.size = 4;
     reply.payload.data = {{1,2,3,4,5,6,7,8}};
+    reply.checksumModel = ChecksumModel::Enhanced;
 
     EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, reply))
         .Times(1);
@@ -144,12 +148,14 @@ TEST_F(LinControllerTest, request_lin_message_with_multiple_configured_responses
 {
     RxRequest request;
     request.linId = 21;
+    request.checksumModel = ChecksumModel::Enhanced;
 
     LinMessage reply;
     reply.linId = request.linId;
     reply.status = MessageStatus::RxResponseError;
     reply.payload.size = 4;
     reply.payload.data = {{1,2,3,4,5,6,7,8}};
+    reply.checksumModel = ChecksumModel::Enhanced;
 
     EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, reply))
         .Times(1);
@@ -215,6 +221,86 @@ TEST_F(LinControllerTest, trigger_slave_callbacks)
     controller.ReceiveIbMessage(otherControllerAddress, slaveTx);
 }
 
+TEST_F(LinControllerTest, propagate_new_response)
+{
+    controller.SetSlaveMode();
 
+    Payload payload{4, {1,2,3,4,5,6,7,8}};
+
+    SlaveResponse expectedResponse;
+    expectedResponse.linId = 17;
+    expectedResponse.payload = payload;
+    expectedResponse.checksumModel = ChecksumModel::Undefined;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, expectedResponse))
+        .Times(1);
+
+    controller.SetResponse(17, payload);
+}
+
+TEST_F(LinControllerTest, propagate_new_response_with_checksummodel)
+{
+    controller.SetSlaveMode();
+
+    Payload payload{4,{1,2,3,4,5,6,7,8}};
+
+    SlaveResponse expectedResponse;
+    expectedResponse.linId = 17;
+    expectedResponse.payload = payload;
+    expectedResponse.checksumModel = ChecksumModel::Enhanced;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, expectedResponse))
+        .Times(1);
+
+    controller.SetResponseWithChecksum(17, payload, ChecksumModel::Enhanced);
+}
+
+TEST_F(LinControllerTest, enable_false_checksum_emulation)
+{
+    RxRequest request{};
+    request.linId = 20;
+    request.checksumModel = ChecksumModel::Enhanced;
+
+    LinMessage goodReply{};
+    goodReply.linId = request.linId;
+    goodReply.status = MessageStatus::RxSuccess;
+    goodReply.payload.size = 4;
+    goodReply.payload.data = {{1,2,3,4,5,6,7,8}};
+    goodReply.checksumModel = ChecksumModel::Enhanced;
+
+    LinMessage falseReply = goodReply;
+    falseReply.checksumModel = ChecksumModel::Classic;
+
+    SlaveResponse configureGoodReply;
+    configureGoodReply.linId = goodReply.linId;
+    configureGoodReply.payload = goodReply.payload;
+    configureGoodReply.checksumModel = goodReply.checksumModel;
+
+
+    SlaveResponse configureFalseReply;
+    configureFalseReply.linId = falseReply.linId;
+    configureFalseReply.payload = falseReply.payload;
+    configureFalseReply.checksumModel = falseReply.checksumModel;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, goodReply))
+        .Times(2);
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, falseReply))
+        .Times(1);
+
+    EXPECT_CALL(callbacks, ReceiveMessage(&controller, goodReply))
+        .Times(2);
+    EXPECT_CALL(callbacks, ReceiveMessage(&controller, falseReply))
+        .Times(1);
+
+    controller.SetMasterMode();
+    SetupResponse(otherControllerAddress, goodReply);
+    controller.RequestMessage(request);
+
+    controller.ReceiveIbMessage(otherControllerAddress, configureFalseReply);
+    controller.RequestMessage(request);
+
+    controller.ReceiveIbMessage(otherControllerAddress, configureGoodReply);
+    controller.RequestMessage(request);
+}
 
 } // anonymous namespace
