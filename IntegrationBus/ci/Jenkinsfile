@@ -151,6 +151,7 @@ def buildLinuxTarget(compiler, target) {
             def command = "IntegrationBus/ci/linux_build.sh ${target} ${env.BUILD_NUMBER}"
             sh "/bin/bash IntegrationBus/ci/docker_build.sh ubuntu_xenial_${compiler}"
             sh "docker run " + 
+                "--network none " + // Disable communication between docker containers
                 "--volume ${env.WORKSPACE}/..:/repo " + // Use same base folder as for packing, to avoid rebuilds after CMake reconfiguration
                 "--workdir /repo/${workingFolder} " + // Enter the build folder
                 "--rm ubuntu_xenial_${compiler} /bin/bash ${command}"
@@ -242,6 +243,7 @@ def packageLinuxTarget(compiler, targets) {
                 "\"${componentGroups.join(';')}\""
             sh "/bin/bash IntegrationBus/ci/docker_build.sh ubuntu_xenial_${compiler}"
             sh "docker run " + 
+                "--network none " + // Disable communication between docker containers
                 "--volume ${env.WORKSPACE}/..:/repo " + // For packing, we need all build folders
                 "--workdir /repo/${workingFolder} " + // Enter the hijacked build folder
                 "--rm ubuntu_xenial_${compiler} /bin/bash ${command}"
