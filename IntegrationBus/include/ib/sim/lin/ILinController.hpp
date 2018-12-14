@@ -15,10 +15,14 @@ namespace lin {
 class ILinController
 {
 public:
-    template<typename MsgT>
-    using CallbackT = std::function<void(ILinController* controller, const MsgT& msg)>;
+    template<typename... MsgT>
+    using CallbackT = std::function<void(ILinController* controller, const MsgT& ...msg)>;
+
     using ReceiveMessageHandler = CallbackT<LinMessage>;
     using TxCompleteHandler     = CallbackT<MessageStatus>;
+
+    using WakupRequestHandler   = CallbackT<>;
+    using SleepCommandHandler   = CallbackT<>;
 
 public:
     virtual ~ILinController() = default;
@@ -36,7 +40,20 @@ public:
      * controller.
      */
     virtual void SetSlaveMode() = 0;
-    
+
+    /*! \brief Enable sleep mode for this LIN controller
+     *
+     * NB: SetSleepMode() must be called manually after receiving a SleepCommand.
+     */
+    virtual void SetSleepMode() = 0;
+
+    /*! \brief Make the controller operational again after sleeping
+     *
+     * NB: The SetOperational() must be called manually after receiving a WakupRequest.
+     */
+    virtual void SetOperational() = 0;
+
+
     /*! \brief Configure the baud rate of the controller
      *
      * \param rate the baud rate to be set given in kHz
@@ -121,6 +138,37 @@ public:
      */
     virtual void RequestMessage(const RxRequest& request) = 0;
 
+    /*! \brief Send a special Go-To-Sleep command to all slaves
+     *
+     * The Go-To-Sleep command is a LIN message with the special ID 0x3C
+     * and a fixed payload {0x0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}.
+     *
+     * Upon reception of the Go-To-Sleep command, the SleepCommandHandler
+     * is called at each slave. SetSleepMode() is NOT automatically called,
+     * and thus must be called manually for each slave.
+     *
+     * NB: The successful transmission of the Go-To-Sleep command is
+     *     acknowledged to the sender through the regular TxCompleteHandler.
+     *
+     * NB: Neither master not slave controllers enter sleep mode automatically.
+     *
+     * NB: Must only be called when configured as a LIN master!
+     */
+    virtual void SendGoToSleep() = 0;
+
+    /*! \brief Send a WakeupRequest to all connected controllers
+     *
+     * The wakeup request must only be sent when the controller is currently
+     * sleeping and the LIN bus is idle. A wakeup request can be sent by any
+     * LIN controller, i.e., LIN masters and slaves.
+     *
+     * Upon reception of the Wakeup request, the registered WakupRequestHandler
+     * is called for each controller. I.e., the WakeupRequestHandler indicates
+     * both successfull transmission of the wakeup signal (for the sender),
+     * and reception of the wakeup signal (for the receivers).
+     */
+    virtual void SendWakeupRequest() = 0;
+
     /*! \brief Register a callback for TX completion
      *
      * The handler is called when the previously sent LinMessage was
@@ -144,6 +192,23 @@ public:
      * NB: Must only be called when configured as a LIN master!
      */
     virtual void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) = 0;
+
+    /*! \brief Register a callback for the reception of wakeup requests.
+     *
+     * The registered handler is called for both senders and receivers
+     * of the wakeup request.
+     */
+    virtual void RegisterWakupRequestHandler(WakupRequestHandler handler) = 0;
+
+    /*! \brief Register a callback for the reception of Go-To-Sleep command
+    *
+    * The handler is called for slaves only. For masters, the successful
+    * transmission of the Go-To-Sleep command is acknowledged via the registered
+    * TxCompleteHandler. Since the Go-To-Sleep command is a regular LIN message,
+    * the registered ReceiveMessageHandler is also called.
+    */
+    virtual void RegisterSleepCommandHandler(SleepCommandHandler handler) = 0;
+
 };
     
 } // namespace lin

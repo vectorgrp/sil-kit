@@ -17,8 +17,9 @@ using LinId = uint8_t;  // (range 0-61)
 enum class ControllerMode : uint8_t
 {
     Inactive, // LIN controller is deactivated
-    Master,   // LIN controller is in LIN master mode
-    Slave     // LIN controller is in LIN slave mode
+    Master,   // LIN controller is in LIN master mode and operational
+    Slave,    // LIN controller is in LIN slave mode and operational
+    Sleep     // LIN controller is in sleep mode.
 };
 
 // This type is used to specify the Checksum model to be used for the LIN Frame

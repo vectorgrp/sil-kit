@@ -47,17 +47,25 @@ public:
     void SetMasterMode() override;
     void SetSlaveMode() override;
     void SetBaudRate(uint32_t rate) override;
+    void SetSleepMode() override {};
+    void SetOperational() override {};
 
     // LIN Slaves
     void SetSlaveConfiguration(const SlaveConfiguration& config) override;
     void SetResponse(LinId linId, const Payload& payload) override;
     void SetResponseWithChecksum(LinId linId, const Payload& payload, ChecksumModel checksumModel) override;
     void RemoveResponse(LinId linId) override;
+    void SendWakeupRequest() override {};
+
     // LIN Masters
     void SendMessage(const LinMessage& msg) override;
     void RequestMessage(const RxRequest& request) override;
+    void SendGoToSleep() override {};
+
     void RegisterTxCompleteHandler(TxCompleteHandler handler) override;
     void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) override;
+    void RegisterWakupRequestHandler(WakupRequestHandler handler) override {};
+    void RegisterSleepCommandHandler(SleepCommandHandler handler) override {};
 
      // IIbToLinController
      void ReceiveIbMessage(mw::EndpointAddress from, const LinMessage& msg) override;
