@@ -244,7 +244,7 @@ class ProcessCoordinator:
                 p = self.__processes[processName]
                 p.poll()
                 if p.returncode is not None:
-                    self.__log("Launcher: Process '" + processName + "' exited with return code " + str(p.returncode) + ".")
+                    self.__log("Launcher: Process '" + processName + "' exited with return code " + "0x{0:0{1}x}".format(p.returncode, 8) + ".")
                     try:
                         os.remove(processName)
                     except:
