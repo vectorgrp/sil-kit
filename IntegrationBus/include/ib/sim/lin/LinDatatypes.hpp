@@ -122,6 +122,15 @@ struct SlaveResponse
     ChecksumModel checksumModel{ChecksumModel::Undefined};
 };
 
+// ================================================================================
+//  Inline Implementations
+// ================================================================================
+inline bool operator==(const Payload& lhs, const Payload& rhs)
+{
+    return lhs.size == rhs.size
+        && lhs.data == rhs.data;
+}
+
 } // namespace lin
 } // namespace sim
 } // namespace ib

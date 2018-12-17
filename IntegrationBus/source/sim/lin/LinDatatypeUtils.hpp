@@ -10,7 +10,6 @@ namespace ib {
 namespace sim {
 namespace lin { 
 
-bool operator==(const Payload& lhs, const Payload& rhs);
 bool operator==(const LinMessage& lhs, const LinMessage& rhs);
 bool operator==(const RxRequest& lhs, const RxRequest& rhs);
 bool operator==(const TxAcknowledge& lhs, const TxAcknowledge& rhs);

@@ -87,6 +87,8 @@ protected:
 
 TEST_F(LinControllerTest, send_lin_message)
 {
+    controller.SetMasterMode();
+
     LinMessage msg;
     msg.status = MessageStatus::TxSuccess;
 
@@ -172,6 +174,36 @@ TEST_F(LinControllerTest, request_lin_message_with_multiple_configured_responses
     controller.SetMasterMode();
     SetupResponse(EndpointAddress{2,4}, reply);
     SetupResponse(EndpointAddress{3,5}, reply);
+    controller.RequestMessage(request);
+}
+
+TEST_F(LinControllerTest, request_lin_message_with_sleeping_slave)
+{
+    RxRequest request{};
+    request.linId = 20;
+    request.checksumModel = ChecksumModel::Enhanced;
+
+    LinMessage reply{};
+    reply.linId = request.linId;
+    reply.status = MessageStatus::RxNoResponse;
+    reply.checksumModel = ChecksumModel::Undefined;
+
+
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, reply))
+        .Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, A<const RxRequest&>()))
+        .Times(0);
+
+    EXPECT_CALL(callbacks, ReceiveMessage(&controller, reply))
+        .Times(1);
+
+    controller.SetMasterMode();
+    SetupResponse(otherControllerAddress, reply);
+
+    ControllerConfig sleepConfig;
+    sleepConfig.controllerMode = ControllerMode::Sleep;
+    controller.ReceiveIbMessage(otherControllerAddress, sleepConfig);
+
     controller.RequestMessage(request);
 }
 

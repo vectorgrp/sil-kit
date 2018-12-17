@@ -48,25 +48,25 @@ public:
     void SetSlaveMode() override;
     void SetBaudRate(uint32_t rate) override;
 
-    void SetSleepMode() override {};
-    void SetOperational() override {};
+    void SetSleepMode() override;
+    void SetOperational() override;
 
     // LIN Slaves
     void SetSlaveConfiguration(const SlaveConfiguration& config) override;
     void SetResponse(LinId linId, const Payload& payload) override;
     void SetResponseWithChecksum(LinId linId, const Payload& payload, ChecksumModel checksumModel) override;
     void RemoveResponse(LinId linId) override;
-    void SendWakeupRequest() override {};
+    void SendWakeupRequest() override;
 
     // LIN Masters
     void SendMessage(const LinMessage& msg) override;
     void RequestMessage(const RxRequest& request) override;
-    void SendGoToSleep() override {};
+    void SendGoToSleep() override;
 
     void RegisterTxCompleteHandler(TxCompleteHandler handler) override;
     void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) override;
-    void RegisterWakeupRequestHandler(WakeupRequestHandler handler) override {};
-    void RegisterSleepCommandHandler(SleepCommandHandler handler) override {};
+    void RegisterWakeupRequestHandler(WakeupRequestHandler handler) override;
+    void RegisterSleepCommandHandler(SleepCommandHandler handler) override;
 
      // IIbToLinController
      void ReceiveIbMessage(mw::EndpointAddress from, const LinMessage& msg) override;
@@ -81,8 +81,8 @@ public:
 private:
     // ----------------------------------------
     // private data types
-    template<typename MsgT>
-    using CallbackVector = std::vector<CallbackT<MsgT>>;
+    template<typename... MsgT>
+    using CallbackVector = std::vector<CallbackT<MsgT...>>;
 
     struct Response : SlaveResponseConfig
     {
@@ -99,7 +99,7 @@ private:
     // ----------------------------------------
     // private methods
     template<typename MsgT>
-    void RegisterHandler(CallbackT<MsgT> handler);
+    void RegisterHandler(CallbackT<MsgT>&& handler);
 
     template<typename MsgT>
     void CallHandlers(const MsgT& msg);
@@ -116,12 +116,15 @@ private:
     mw::IComAdapter* _comAdapter;
     mw::EndpointAddress _endpointAddr;
 
-    ControllerMode _controllerMode{ControllerMode::Inactive};
+    ControllerMode _configuredControllerMode{ControllerMode::Inactive}; // only modified by SetSlave/SetMasterMode, used to restore operational mode
+    ControllerMode _controllerMode{ControllerMode::Inactive}; // currently active controller mode
     
     std::tuple<
         CallbackVector<MessageStatus>,
         CallbackVector<LinMessage>
     > _callbacks;
+    CallbackVector<> _gotosleepHandlers;
+    CallbackVector<> _wakeuprequestHandlers;
 
     std::unordered_map<uint32_t, LinSlave> _linSlaves;
 

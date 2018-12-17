@@ -2,22 +2,13 @@
 
 #include "LinDatatypeUtils.hpp"
 
-#include <cstring>
-
 namespace ib {
 namespace sim {
 namespace lin { 
 
-bool operator==(const Payload& lhs, const Payload& rhs)
-{
-    return lhs.size == rhs.size
-        && (std::memcmp(lhs.data.data(), rhs.data.data(), lhs.size) == 0);
-}
-
 bool operator==(const LinMessage& lhs, const LinMessage& rhs)
 {
     return lhs.status == rhs.status
-        // && lhs.timestamp == rhs.timestamp
         && lhs.linId == rhs.linId
         && lhs.payload == rhs.payload
         && lhs.checksumModel == rhs.checksumModel;
