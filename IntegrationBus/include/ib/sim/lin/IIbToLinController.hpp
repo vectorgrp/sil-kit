@@ -18,6 +18,7 @@ class IIbToLinController
     : public mw::IIbEndpoint<LinMessage, ControllerConfig, SlaveConfiguration, SlaveResponse>
     , public mw::IIbSender<LinMessage, ControllerConfig, SlaveConfiguration, SlaveResponse>
 {
+    virtual void ReceiveIbMessage(mw::EndpointAddress from, const WakeupRequest& msg) = 0;
 };
 
 } // namespace lin

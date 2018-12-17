@@ -38,6 +38,8 @@ protected:
     {
         MOCK_METHOD2(ReceiveMessageStatus, void(ILinController*, MessageStatus));
         MOCK_METHOD2(ReceiveMessage, void(ILinController*, const LinMessage&));
+        MOCK_METHOD1(SleepCommand, void(ILinController*));
+        MOCK_METHOD1(WakeupRequest, void(ILinController*));
     };
 
 protected:
@@ -47,6 +49,8 @@ protected:
         controller.SetEndpointAddress(controllerAddress);
         controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
         controller.RegisterTxCompleteHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessageStatus));
+        controller.RegisterSleepCommandHandler(ib::util::bind_method(&callbacks, &Callbacks::SleepCommand));
+        controller.RegisterWakeupRequestHandler(ib::util::bind_method(&callbacks, &Callbacks::WakeupRequest));
     }
 
     void SetupResponse(EndpointAddress from, LinMessage msg)
@@ -302,5 +306,106 @@ TEST_F(LinControllerTest, enable_false_checksum_emulation)
     controller.ReceiveIbMessage(otherControllerAddress, configureGoodReply);
     controller.RequestMessage(request);
 }
+
+
+
+TEST_F(LinControllerTest, send_gotosleep_command)
+{
+    controller.SetMasterMode();
+
+    LinMessage gotosleepCmd;
+    gotosleepCmd.status  = MessageStatus::TxSuccess;
+    gotosleepCmd.linId   = LinId{0x3C};
+    gotosleepCmd.payload = Payload{8,{0x0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}};
+    gotosleepCmd.checksumModel = ChecksumModel::Classic;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, gotosleepCmd))
+        .Times(1);
+
+    controller.SendGoToSleep();
+}
+
+TEST_F(LinControllerTest, call_gotosleep_callback)
+{
+    controller.SetSlaveMode();
+
+    LinMessage gotosleepCmd;
+    gotosleepCmd.status = MessageStatus::TxSuccess;
+    gotosleepCmd.linId = LinId{0x3C};
+    gotosleepCmd.payload = Payload{8, {0x0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}};
+    gotosleepCmd.checksumModel = ChecksumModel::Classic;
+
+    EXPECT_CALL(callbacks, SleepCommand(&controller))
+        .Times(1);
+    EXPECT_CALL(callbacks, ReceiveMessage(&controller, gotosleepCmd))
+        .Times(1);
+
+    controller.ReceiveIbMessage(otherControllerAddress, gotosleepCmd);
+}
+
+TEST_F(LinControllerTest, set_sleep_mode)
+{
+    controller.SetSlaveMode();
+
+    ControllerConfig sleepCfg;
+    sleepCfg.controllerMode = ControllerMode::Sleep;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, sleepCfg))
+        .Times(1);
+
+    controller.SetSleepMode();
+}
+
+TEST_F(LinControllerTest, send_wakeup_request)
+{
+    controller.SetSlaveMode();
+
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, A<const WakeupRequest&>()))
+        .Times(1);
+
+    controller.SetSleepMode();
+    controller.SendWakeupRequest();
+}
+
+TEST_F(LinControllerTest, call_wakeup_callback)
+{
+    controller.SetMasterMode();
+
+    WakeupRequest wakeup;
+
+    EXPECT_CALL(callbacks, WakeupRequest(&controller))
+        .Times(1);
+
+    controller.ReceiveIbMessage(otherControllerAddress, wakeup);
+}
+
+TEST_F(LinControllerTest, set_master_operational)
+{
+    controller.SetMasterMode();
+    controller.SetSleepMode();
+
+    ControllerConfig operationalCfg;
+    operationalCfg.controllerMode = ControllerMode::Master;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, operationalCfg))
+        .Times(1);
+
+    controller.SetOperational();
+}
+
+TEST_F(LinControllerTest, set_slave_operational)
+{
+    controller.SetSlaveMode();
+    controller.SetSleepMode();
+
+    ControllerConfig operationalCfg;
+    operationalCfg.controllerMode = ControllerMode::Slave;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, operationalCfg))
+        .Times(1);
+
+    controller.SetOperational();
+}
+
 
 } // anonymous namespace

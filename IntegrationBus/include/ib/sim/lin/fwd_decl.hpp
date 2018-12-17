@@ -11,6 +11,7 @@ namespace lin {
 struct LinMessage;
 struct RxRequest;
 struct TxAcknowledge;
+struct WakeupRequest;
 
 struct ControllerConfig;
 struct SlaveResponseConfig;

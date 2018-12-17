@@ -100,6 +100,7 @@ public:
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::lin::LinMessage&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::lin::RxRequest&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::lin::TxAcknowledge&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::lin::WakeupRequest&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::lin::ControllerConfig&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::lin::SlaveConfiguration&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::lin::SlaveResponse&));

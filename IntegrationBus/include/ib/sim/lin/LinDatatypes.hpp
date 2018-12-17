@@ -89,6 +89,11 @@ struct TxAcknowledge
     MessageStatus status;
 };
 
+struct WakeupRequest
+{
+    std::chrono::nanoseconds timestamp; // end of frame time stamp
+};
+
 // LIN ControllerProxy to LIN Network Simulator
 struct ControllerConfig
 {
@@ -103,6 +108,7 @@ struct SlaveResponseConfig
     ChecksumModel checksumModel{ChecksumModel::Enhanced};
     uint8_t payloadLength{0};
 };
+
 struct SlaveConfiguration
 {
     std::vector<SlaveResponseConfig> responseConfigs;

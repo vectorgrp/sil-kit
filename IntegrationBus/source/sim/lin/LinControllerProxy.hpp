@@ -62,12 +62,13 @@ public:
 
     void RegisterTxCompleteHandler(TxCompleteHandler handler) override;
     void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) override;
-    void RegisterWakupRequestHandler(WakupRequestHandler handler) override {};
+    void RegisterWakeupRequestHandler(WakeupRequestHandler handler) override {};
     void RegisterSleepCommandHandler(SleepCommandHandler handler) override {};
 
      // IIbToLinController
      void ReceiveIbMessage(mw::EndpointAddress from, const LinMessage& msg) override;
      void ReceiveIbMessage(mw::EndpointAddress from, const TxAcknowledge& msg) override;
+     void ReceiveIbMessage(mw::EndpointAddress from, const WakeupRequest& msg) override;
      
      void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
      auto EndpointAddress() const -> const mw::EndpointAddress& override;

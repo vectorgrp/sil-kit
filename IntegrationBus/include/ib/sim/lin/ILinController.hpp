@@ -21,8 +21,8 @@ public:
     using ReceiveMessageHandler = CallbackT<LinMessage>;
     using TxCompleteHandler     = CallbackT<MessageStatus>;
 
-    using WakupRequestHandler   = CallbackT<>;
     using SleepCommandHandler   = CallbackT<>;
+    using WakeupRequestHandler   = CallbackT<>;
 
 public:
     virtual ~ILinController() = default;
@@ -198,7 +198,7 @@ public:
      * The registered handler is called for both senders and receivers
      * of the wakeup request.
      */
-    virtual void RegisterWakupRequestHandler(WakupRequestHandler handler) = 0;
+    virtual void RegisterWakeupRequestHandler(WakeupRequestHandler handler) = 0;
 
     /*! \brief Register a callback for the reception of Go-To-Sleep command
     *

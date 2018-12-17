@@ -18,6 +18,7 @@ class IIbToLinControllerProxy
     : public mw::IIbEndpoint<LinMessage, TxAcknowledge>
     , public mw::IIbSender<LinMessage, RxRequest, ControllerConfig, SlaveConfiguration, SlaveResponse>
 {
+    virtual void ReceiveIbMessage(mw::EndpointAddress from, const WakeupRequest& msg) = 0;
 };
 
 } // namespace lin

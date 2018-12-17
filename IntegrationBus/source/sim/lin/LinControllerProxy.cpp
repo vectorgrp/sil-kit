@@ -124,6 +124,11 @@ void LinControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const TxAckn
     CallHandlers(msg.status);
 }
 
+void LinControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const WakeupRequest& msg)
+{
+
+}
+
 void LinControllerProxy::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
     _endpointAddr = endpointAddress;

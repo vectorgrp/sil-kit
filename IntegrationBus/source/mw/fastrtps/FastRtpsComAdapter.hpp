@@ -103,6 +103,7 @@ public:
     void SendIbMessage(EndpointAddress from, const sim::lin::LinMessage& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::lin::RxRequest& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::lin::TxAcknowledge& msg) override;
+    void SendIbMessage(EndpointAddress from, const sim::lin::WakeupRequest& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::lin::ControllerConfig& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::lin::SlaveConfiguration& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::lin::SlaveResponse& msg) override;

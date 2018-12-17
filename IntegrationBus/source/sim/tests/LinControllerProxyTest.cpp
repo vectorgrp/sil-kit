@@ -38,6 +38,8 @@ protected:
     {
         MOCK_METHOD2(ReceiveMessageStatus, void(ILinController*, MessageStatus));
         MOCK_METHOD2(ReceiveMessage, void(ILinController*, const LinMessage&));
+        MOCK_METHOD1(SleepCommand, void(ILinController*));
+        MOCK_METHOD1(WakeupRequest, void(ILinController*));
     };
 
 protected:
@@ -265,6 +267,110 @@ TEST_F(LinControllerProxyTest, dont_respond_on_slave_response)
         .Times(0);
 
     proxy.ReceiveIbMessage(controllerAddress, slaveResponse);
+}
+
+TEST_F(LinControllerProxyTest, send_gotosleep_command)
+{
+    proxy.SetMasterMode();
+
+    LinMessage gotosleepCmd;
+    gotosleepCmd.status = MessageStatus::TxSuccess;
+    gotosleepCmd.linId = LinId{0x3C};
+    gotosleepCmd.payload = Payload{8,{0x0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}};
+    gotosleepCmd.checksumModel = ChecksumModel::Classic;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, gotosleepCmd))
+        .Times(1);
+
+    proxy.SendGoToSleep();
+}
+
+TEST_F(LinControllerProxyTest, call_gotosleep_callback)
+{
+    proxy.SetSlaveMode();
+
+    LinMessage gotosleepCmd;
+    gotosleepCmd.status = MessageStatus::TxSuccess;
+    gotosleepCmd.linId = LinId{0x3C};
+    gotosleepCmd.payload = Payload{8,{0x0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}};
+    gotosleepCmd.checksumModel = ChecksumModel::Classic;
+
+    EXPECT_CALL(callbacks, SleepCommand(&proxy))
+        .Times(1);
+    EXPECT_CALL(callbacks, ReceiveMessage(&proxy, gotosleepCmd))
+        .Times(1);
+
+    proxy.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
+    proxy.RegisterSleepCommandHandler(ib::util::bind_method(&callbacks, &Callbacks::SleepCommand));
+
+    proxy.ReceiveIbMessage(controllerAddress, gotosleepCmd);
+}
+
+TEST_F(LinControllerProxyTest, set_sleep_mode)
+{
+    proxy.SetSlaveMode();
+
+    ControllerConfig sleepCfg;
+    sleepCfg.controllerMode = ControllerMode::Sleep;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, sleepCfg))
+        .Times(1);
+
+    proxy.SetSleepMode();
+}
+
+TEST_F(LinControllerProxyTest, send_wakeup_request)
+{
+    proxy.SetSlaveMode();
+
+    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, A<const WakeupRequest&>()))
+        .Times(1);
+
+    proxy.SetSleepMode();
+    proxy.SendWakeupRequest();
+}
+
+
+TEST_F(LinControllerProxyTest, call_wakeup_callback)
+{
+    proxy.SetMasterMode();
+
+    WakeupRequest wakeup;
+
+    EXPECT_CALL(callbacks, WakeupRequest(&proxy))
+        .Times(1);
+
+    proxy.RegisterWakeupRequestHandler(ib::util::bind_method(&callbacks, &Callbacks::WakeupRequest));
+
+    proxy.ReceiveIbMessage(controllerAddress, wakeup);
+}
+
+TEST_F(LinControllerProxyTest, set_master_operational)
+{
+    proxy.SetMasterMode();
+    proxy.SetSleepMode();
+
+    ControllerConfig operationalCfg;
+    operationalCfg.controllerMode = ControllerMode::Master;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, operationalCfg))
+        .Times(1);
+
+    proxy.SetOperational();
+}
+
+TEST_F(LinControllerProxyTest, set_slave_operational)
+{
+    proxy.SetSlaveMode();
+    proxy.SetSleepMode();
+
+    ControllerConfig operationalCfg;
+    operationalCfg.controllerMode = ControllerMode::Slave;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, operationalCfg))
+        .Times(1);
+
+    proxy.SetOperational();
 }
 
 

@@ -47,6 +47,7 @@ public:
     void SetMasterMode() override;
     void SetSlaveMode() override;
     void SetBaudRate(uint32_t rate) override;
+
     void SetSleepMode() override {};
     void SetOperational() override {};
 
@@ -64,11 +65,12 @@ public:
 
     void RegisterTxCompleteHandler(TxCompleteHandler handler) override;
     void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) override;
-    void RegisterWakupRequestHandler(WakupRequestHandler handler) override {};
+    void RegisterWakeupRequestHandler(WakeupRequestHandler handler) override {};
     void RegisterSleepCommandHandler(SleepCommandHandler handler) override {};
 
      // IIbToLinController
      void ReceiveIbMessage(mw::EndpointAddress from, const LinMessage& msg) override;
+     void ReceiveIbMessage(mw::EndpointAddress from, const WakeupRequest& msg) override;
      void ReceiveIbMessage(mw::EndpointAddress from, const ControllerConfig& msg) override;
      void ReceiveIbMessage(mw::EndpointAddress from, const SlaveConfiguration& msg) override;
      void ReceiveIbMessage(mw::EndpointAddress from, const SlaveResponse& msg) override;
@@ -114,7 +116,7 @@ private:
     mw::IComAdapter* _comAdapter;
     mw::EndpointAddress _endpointAddr;
 
-    ControllerMode _controllerMode = ControllerMode::Inactive;
+    ControllerMode _controllerMode{ControllerMode::Inactive};
     
     std::tuple<
         CallbackVector<MessageStatus>,

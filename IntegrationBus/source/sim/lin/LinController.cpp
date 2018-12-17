@@ -197,6 +197,11 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const LinMess
     }
 }
 
+void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const WakeupRequest& msg)
+{
+
+}
+
 void LinController::ReceiveIbMessage(mw::EndpointAddress from, const ControllerConfig& msg)
 {
     if (from == _endpointAddr)
