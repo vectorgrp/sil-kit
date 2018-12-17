@@ -13,10 +13,8 @@ namespace sim {
 namespace lin {
 
 namespace {
-
-    constexpr LinId GotosleepId{0x3c};
-    constexpr Payload GotosleepPayload{8, {0x0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}};
-
+    constexpr LinId   GotosleepId{0x3c};
+    constexpr Payload GotosleepPayload{8, {0x0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
 }
 
 LinController::LinController(::ib::mw::IComAdapter* comAdapter)
@@ -46,7 +44,7 @@ void LinController::SetSlaveMode()
     _controllerMode = ControllerMode::Slave;
 
     // Announce this controller at LIN masters
-    ControllerConfig config;
+    ControllerConfig config{};
     config.controllerMode = _controllerMode;
 
     SendIbMessage(config);
@@ -66,7 +64,7 @@ void LinController::SetSleepMode()
 
     _controllerMode = ControllerMode::Sleep;
 
-    ControllerConfig config;
+    ControllerConfig config{};
     config.controllerMode = _controllerMode;
 
     SendIbMessage(config);
@@ -79,9 +77,10 @@ void LinController::SetOperational()
         throw std::runtime_error{"LinController:SetOperational() must only be called when controller is in sleep mode"};
     }
 
+    // restore configured controller mode
     _controllerMode = _configuredControllerMode;
 
-    ControllerConfig config;
+    ControllerConfig config{};
     config.controllerMode = _controllerMode;
 
     SendIbMessage(config);
@@ -266,6 +265,14 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const LinMess
     if (from == _endpointAddr)
         return;
 
+    if (msg.payload.size > 8)
+    {
+        std::cerr << "Warning: LinController received LinMessage with payload length " << static_cast<unsigned int>(msg.payload.size)
+                  << " from {" << from.participant << "," << from.endpoint << "}\n";
+        return;
+    }
+
+
     switch (_controllerMode)
     {
     case ControllerMode::Inactive:
@@ -346,7 +353,15 @@ void LinController::ReceiveIbMessage(mw::EndpointAddress from, const SlaveConfig
 
     for (size_t i = 0u; i < msg.responseConfigs.size(); i++)
     {
-        static_cast<SlaveResponseConfig&>(linSlave.responses[i]) = msg.responseConfigs[i];
+        auto&& responseConfig = msg.responseConfigs[i];
+        if (responseConfig.payloadLength > 8)
+        {
+            std::cerr << "Warning: LinController received SlaveResponseConfig with payload length " << static_cast<unsigned int>(responseConfig.payloadLength)
+                      << " from {" << from.participant << "," << from.endpoint << "}\n";
+            continue;
+        }
+
+        static_cast<SlaveResponseConfig&>(linSlave.responses[i]) = responseConfig;
     }
 }
 

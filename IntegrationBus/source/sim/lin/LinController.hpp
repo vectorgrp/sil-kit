@@ -86,7 +86,7 @@ private:
 
     struct Response : SlaveResponseConfig
     {
-        Payload payload;
+        Payload payload{0, {}};
     };
 
     struct LinSlave

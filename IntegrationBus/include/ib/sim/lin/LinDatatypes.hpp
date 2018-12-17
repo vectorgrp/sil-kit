@@ -52,8 +52,11 @@ enum class MessageStatus : uint8_t
 
 struct Payload
 {
-    uint8_t size = 0;
-    std::array<uint8_t, 8> data;
+    constexpr Payload(uint8_t size, std::array<uint8_t, 8> data) : size{size}, data{data} {}
+    Payload() = default;
+
+    uint8_t size{0};
+    std::array<uint8_t, 8> data{};
 };
 
 // With Network Simulator:
@@ -97,8 +100,8 @@ struct WakeupRequest
 // LIN ControllerProxy to LIN Network Simulator
 struct ControllerConfig
 {
-    ControllerMode controllerMode;
-    uint32_t baudrate;
+    ControllerMode controllerMode{ControllerMode::Inactive};
+    uint32_t baudrate{0};
 };
 
 // LIN ControllerProxy to LIN Network Simulator

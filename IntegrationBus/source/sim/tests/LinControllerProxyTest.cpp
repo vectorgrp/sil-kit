@@ -310,8 +310,9 @@ TEST_F(LinControllerProxyTest, set_sleep_mode)
 {
     proxy.SetSlaveMode();
 
-    ControllerConfig sleepCfg;
+    ControllerConfig sleepCfg{};
     sleepCfg.controllerMode = ControllerMode::Sleep;
+    sleepCfg.baudrate = 0;
 
     EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, sleepCfg))
         .Times(1);
@@ -350,8 +351,9 @@ TEST_F(LinControllerProxyTest, set_master_operational)
     proxy.SetMasterMode();
     proxy.SetSleepMode();
 
-    ControllerConfig operationalCfg;
+    ControllerConfig operationalCfg{};
     operationalCfg.controllerMode = ControllerMode::Master;
+    operationalCfg.baudrate = 0;
 
     EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, operationalCfg))
         .Times(1);
@@ -364,8 +366,9 @@ TEST_F(LinControllerProxyTest, set_slave_operational)
     proxy.SetSlaveMode();
     proxy.SetSleepMode();
 
-    ControllerConfig operationalCfg;
+    ControllerConfig operationalCfg{};
     operationalCfg.controllerMode = ControllerMode::Slave;
+    operationalCfg.baudrate = 0;
 
     EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, operationalCfg))
         .Times(1);

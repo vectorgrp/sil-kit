@@ -379,7 +379,7 @@ TEST_F(LinControllerTest, set_sleep_mode)
 {
     controller.SetSlaveMode();
 
-    ControllerConfig sleepCfg;
+    ControllerConfig sleepCfg{};
     sleepCfg.controllerMode = ControllerMode::Sleep;
 
     EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, sleepCfg))
@@ -416,7 +416,7 @@ TEST_F(LinControllerTest, set_master_operational)
     controller.SetMasterMode();
     controller.SetSleepMode();
 
-    ControllerConfig operationalCfg;
+    ControllerConfig operationalCfg{};
     operationalCfg.controllerMode = ControllerMode::Master;
 
     EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, operationalCfg))
@@ -430,7 +430,7 @@ TEST_F(LinControllerTest, set_slave_operational)
     controller.SetSlaveMode();
     controller.SetSleepMode();
 
-    ControllerConfig operationalCfg;
+    ControllerConfig operationalCfg{};
     operationalCfg.controllerMode = ControllerMode::Slave;
 
     EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, operationalCfg))
