@@ -15,10 +15,9 @@ namespace lin {
  *  Used by the ComAdapter, implemented by the LinController
  */
 class IIbToLinController
-    : public mw::IIbEndpoint<LinMessage, ControllerConfig, SlaveConfiguration, SlaveResponse>
-    , public mw::IIbSender<LinMessage, ControllerConfig, SlaveConfiguration, SlaveResponse>
+    : public mw::IIbEndpoint<LinMessage, WakeupRequest, ControllerConfig, SlaveConfiguration, SlaveResponse>
+    , public mw::IIbSender<LinMessage, WakeupRequest, ControllerConfig, SlaveConfiguration, SlaveResponse>
 {
-    virtual void ReceiveIbMessage(mw::EndpointAddress from, const WakeupRequest& msg) = 0;
 };
 
 } // namespace lin

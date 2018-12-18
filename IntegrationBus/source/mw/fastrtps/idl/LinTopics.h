@@ -835,6 +835,164 @@ namespace ib
                     ib::sim::lin::idl::MessageStatus m_status;
                 };
                 /*!
+                 * @brief This class represents the structure WakeupRequest defined by the user in the IDL file.
+                 * @ingroup LINTOPICS
+                 */
+                class WakeupRequest
+                {
+                public:
+
+                    /*!
+                     * @brief Default constructor.
+                     */
+                    eProsima_user_DllExport WakeupRequest();
+
+                    /*!
+                     * @brief Default destructor.
+                     */
+                    eProsima_user_DllExport ~WakeupRequest();
+
+                    /*!
+                     * @brief Copy constructor.
+                     * @param x Reference to the object ib::sim::lin::idl::WakeupRequest that will be copied.
+                     */
+                    eProsima_user_DllExport WakeupRequest(const WakeupRequest &x);
+
+                    /*!
+                     * @brief Move constructor.
+                     * @param x Reference to the object ib::sim::lin::idl::WakeupRequest that will be copied.
+                     */
+                    eProsima_user_DllExport WakeupRequest(WakeupRequest &&x);
+
+                    /*!
+                     * @brief Copy assignment.
+                     * @param x Reference to the object ib::sim::lin::idl::WakeupRequest that will be copied.
+                     */
+                    eProsima_user_DllExport WakeupRequest& operator=(const WakeupRequest &x);
+
+                    /*!
+                     * @brief Move assignment.
+                     * @param x Reference to the object ib::sim::lin::idl::WakeupRequest that will be copied.
+                     */
+                    eProsima_user_DllExport WakeupRequest& operator=(WakeupRequest &&x);
+
+                    /*!
+                     * @brief This function copies the value in member senderAddr
+                     * @param _senderAddr New value to be copied in member senderAddr
+                     */
+                    inline eProsima_user_DllExport void senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+                    {
+                        m_senderAddr = _senderAddr;
+                    }
+
+                    /*!
+                     * @brief This function moves the value in member senderAddr
+                     * @param _senderAddr New value to be moved in member senderAddr
+                     */
+                    inline eProsima_user_DllExport void senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+                    {
+                        m_senderAddr = std::move(_senderAddr);
+                    }
+
+                    /*!
+                     * @brief This function returns a constant reference to member senderAddr
+                     * @return Constant reference to member senderAddr
+                     */
+                    inline eProsima_user_DllExport const ib::mw::idl::EndpointAddress& senderAddr() const
+                    {
+                        return m_senderAddr;
+                    }
+
+                    /*!
+                     * @brief This function returns a reference to member senderAddr
+                     * @return Reference to member senderAddr
+                     */
+                    inline eProsima_user_DllExport ib::mw::idl::EndpointAddress& senderAddr()
+                    {
+                        return m_senderAddr;
+                    }
+                    /*!
+                     * @brief This function sets a value in member timestampNs
+                     * @param _timestampNs New value for member timestampNs
+                     */
+                    inline eProsima_user_DllExport void timestampNs(int64_t _timestampNs)
+                    {
+                        m_timestampNs = _timestampNs;
+                    }
+
+                    /*!
+                     * @brief This function returns the value of member timestampNs
+                     * @return Value of member timestampNs
+                     */
+                    inline eProsima_user_DllExport int64_t timestampNs() const
+                    {
+                        return m_timestampNs;
+                    }
+
+                    /*!
+                     * @brief This function returns a reference to member timestampNs
+                     * @return Reference to member timestampNs
+                     */
+                    inline eProsima_user_DllExport int64_t& timestampNs()
+                    {
+                        return m_timestampNs;
+                    }
+
+                    /*!
+                     * @brief This function returns the maximum serialized size of an object
+                     * depending on the buffer alignment.
+                     * @param current_alignment Buffer alignment.
+                     * @return Maximum serialized size.
+                     */
+                    eProsima_user_DllExport static size_t getMaxCdrSerializedSize(size_t current_alignment = 0);
+
+                    /*!
+                     * @brief This function returns the serialized size of a data depending on the buffer alignment.
+                     * @param data Data which is calculated its serialized size.
+                     * @param current_alignment Buffer alignment.
+                     * @return Serialized size.
+                     */
+                    eProsima_user_DllExport static size_t getCdrSerializedSize(const ib::sim::lin::idl::WakeupRequest& data, size_t current_alignment = 0);
+
+
+                    /*!
+                     * @brief This function serializes an object using CDR serialization.
+                     * @param cdr CDR serialization object.
+                     */
+                    eProsima_user_DllExport void serialize(eprosima::fastcdr::Cdr &cdr) const;
+
+                    /*!
+                     * @brief This function deserializes an object using CDR serialization.
+                     * @param cdr CDR serialization object.
+                     */
+                    eProsima_user_DllExport void deserialize(eprosima::fastcdr::Cdr &cdr);
+
+
+
+                    /*!
+                     * @brief This function returns the maximum serialized size of the Key of an object
+                     * depending on the buffer alignment.
+                     * @param current_alignment Buffer alignment.
+                     * @return Maximum serialized size.
+                     */
+                    eProsima_user_DllExport static size_t getKeyMaxCdrSerializedSize(size_t current_alignment = 0);
+
+                    /*!
+                     * @brief This function tells you if the Key has been defined for this type
+                     */
+                    eProsima_user_DllExport static bool isKeyDefined();
+
+                    /*!
+                     * @brief This function serializes the key members of an object using CDR serialization.
+                     * @param cdr CDR serialization object.
+                     */
+                    eProsima_user_DllExport void serializeKey(eprosima::fastcdr::Cdr &cdr) const;
+
+                private:
+                    ib::mw::idl::EndpointAddress m_senderAddr;
+                    int64_t m_timestampNs;
+                };
+                /*!
                  * @brief This class represents the enumeration ControllerMode defined by the user in the IDL file.
                  * @ingroup LINTOPICS
                  */
@@ -842,7 +1000,8 @@ namespace ib
                 {
                     Inactive,
                     Master,
-                    Slave
+                    Slave,
+                    Sleep
                 };
                 /*!
                  * @brief This class represents the structure ControllerConfig defined by the user in the IDL file.

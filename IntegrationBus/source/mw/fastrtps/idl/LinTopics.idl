@@ -71,12 +71,19 @@ module idl {
         MessageStatus status;
     };
     
+    struct WakeupRequest
+    {
+        @Key ib::mw::idl::EndpointAddress senderAddr;
+        long long timestampNs; // end of frame time stamp
+    };
+
 
     enum ControllerMode
     {
         Inactive, // LIN controller is deactivated
-        Master,   // LIN controller is in LIN master mode
-        Slave     // LIN controller is in LIN slave mode
+        Master,   // LIN controller is in LIN master mode and operational
+        Slave,    // LIN controller is in LIN slave mode and operational
+        Sleep     // LIN controller is in sleep mode.
     };
     
     // LIN ControllerProxy to LIN Network Simulator

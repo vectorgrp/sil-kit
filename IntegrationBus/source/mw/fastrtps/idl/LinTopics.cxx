@@ -488,6 +488,104 @@ void ib::sim::lin::idl::TxAcknowledge::serializeKey(eprosima::fastcdr::Cdr &scdr
 	 
 	 
 }
+ib::sim::lin::idl::WakeupRequest::WakeupRequest()
+{
+
+    m_timestampNs = 0;
+
+
+}
+
+ib::sim::lin::idl::WakeupRequest::~WakeupRequest()
+{
+}
+
+ib::sim::lin::idl::WakeupRequest::WakeupRequest(const WakeupRequest &x)
+{
+    m_senderAddr = x.m_senderAddr;
+    m_timestampNs = x.m_timestampNs;
+}
+
+ib::sim::lin::idl::WakeupRequest::WakeupRequest(WakeupRequest &&x)
+{
+    m_senderAddr = std::move(x.m_senderAddr);
+    m_timestampNs = x.m_timestampNs;
+}
+
+ib::sim::lin::idl::WakeupRequest& ib::sim::lin::idl::WakeupRequest::operator=(const WakeupRequest &x)
+{
+    m_senderAddr = x.m_senderAddr;
+    m_timestampNs = x.m_timestampNs;
+
+    return *this;
+}
+
+ib::sim::lin::idl::WakeupRequest& ib::sim::lin::idl::WakeupRequest::operator=(WakeupRequest &&x)
+{
+    m_senderAddr = std::move(x.m_senderAddr);
+    m_timestampNs = x.m_timestampNs;
+
+    return *this;
+}
+
+size_t ib::sim::lin::idl::WakeupRequest::getMaxCdrSerializedSize(size_t current_alignment)
+{
+    size_t initial_alignment = current_alignment;
+
+    current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
+    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
+
+
+    return current_alignment - initial_alignment;
+}
+
+size_t ib::sim::lin::idl::WakeupRequest::getCdrSerializedSize(const ib::sim::lin::idl::WakeupRequest& data, size_t current_alignment)
+{
+    (void)data;
+    size_t initial_alignment = current_alignment;
+
+    current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
+    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
+
+
+    return current_alignment - initial_alignment;
+}
+
+void ib::sim::lin::idl::WakeupRequest::serialize(eprosima::fastcdr::Cdr &scdr) const
+{
+    scdr << m_senderAddr;
+    scdr << m_timestampNs;
+}
+
+void ib::sim::lin::idl::WakeupRequest::deserialize(eprosima::fastcdr::Cdr &dcdr)
+{
+    dcdr >> m_senderAddr;
+    dcdr >> m_timestampNs;
+}
+
+size_t ib::sim::lin::idl::WakeupRequest::getKeyMaxCdrSerializedSize(size_t current_alignment)
+{
+	size_t current_align = current_alignment;
+            
+     current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
+
+
+    return current_align;
+}
+
+bool ib::sim::lin::idl::WakeupRequest::isKeyDefined()
+{
+    return true;
+}
+
+void ib::sim::lin::idl::WakeupRequest::serializeKey(eprosima::fastcdr::Cdr &scdr) const
+{
+	(void) scdr;
+	 scdr << m_senderAddr;  
+	 
+}
 
 ib::sim::lin::idl::ControllerConfig::ControllerConfig()
 {

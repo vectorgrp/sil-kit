@@ -230,7 +230,7 @@ void LinController::SendGoToSleep()
     gotosleep.linId = GotosleepId;
     gotosleep.payload = GotosleepPayload;
 
-    SendIbMessage(gotosleep);
+    SendMessage(gotosleep);
 }
 
 void LinController::RegisterTxCompleteHandler(TxCompleteHandler handler)
@@ -300,6 +300,10 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const LinMess
         }
         return;
 
+    case ControllerMode::Sleep:
+        std::cerr << "WARNING: Received LIN Message with ID=" << static_cast<unsigned int>(msg.linId) << " while controller is in sleep mode. Message is ignored.";
+        return;
+
     default:
         std::cerr << "WARNING: Unhandled ControllerMode in LinController::ReceiveIbMessage(..., LinMessage)\n";
         return;
@@ -320,7 +324,7 @@ void LinController::ReceiveIbMessage(mw::EndpointAddress from, const ControllerC
         return;
 
     // only controllers in master mode are responsible for managing responses.
-    if (_controllerMode != ControllerMode::Master)
+    if (_configuredControllerMode != ControllerMode::Master)
         return;
 
     if (msg.controllerMode == ControllerMode::Master)
@@ -339,7 +343,7 @@ void LinController::ReceiveIbMessage(mw::EndpointAddress from, const SlaveConfig
         return;
 
     // only controllers in master mode are responsible for managing responses.
-    if (_controllerMode != ControllerMode::Master)
+    if (_configuredControllerMode != ControllerMode::Master)
         return;
 
     if (!IsKnownSlave(from))

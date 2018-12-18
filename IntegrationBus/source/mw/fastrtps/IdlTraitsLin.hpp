@@ -17,6 +17,7 @@ namespace ib {
     DefineTopicTrait(sim::lin::idl, LinMessage);
     DefineTopicTrait(sim::lin::idl, RxRequest);
     DefineTopicTrait(sim::lin::idl, TxAcknowledge);
+    DefineTopicTrait(sim::lin::idl, WakeupRequest);
     DefineTopicTrait(sim::lin::idl, ControllerConfig);
     DefineTopicTrait(sim::lin::idl, SlaveConfiguration);
     DefineTopicTrait(sim::lin::idl, SlaveResponse);

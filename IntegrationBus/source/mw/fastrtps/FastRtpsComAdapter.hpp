@@ -286,6 +286,7 @@ private:
         RtpsTopics<sim::lin::idl::LinMessage>,
         RtpsTopics<sim::lin::idl::RxRequest>,
         RtpsTopics<sim::lin::idl::TxAcknowledge>,
+        RtpsTopics<sim::lin::idl::WakeupRequest>,
         RtpsTopics<sim::lin::idl::ControllerConfig>,
         RtpsTopics<sim::lin::idl::SlaveConfiguration>,
         RtpsTopics<sim::lin::idl::SlaveResponse>,

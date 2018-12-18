@@ -20,6 +20,7 @@ inline auto to_idl(const LinMessage& msg) -> idl::LinMessage;
 inline auto to_idl(LinMessage&& msg) -> idl::LinMessage;
 inline auto to_idl(const RxRequest& msg) -> idl::RxRequest;
 inline auto to_idl(const TxAcknowledge& msg) -> idl::TxAcknowledge;
+inline auto to_idl(const WakeupRequest& msg) -> idl::WakeupRequest;
 inline auto to_idl(const ControllerConfig& msg) -> idl::ControllerConfig;
 inline auto to_idl(const SlaveResponseConfig& msg) -> idl::SlaveResponseConfig;
 inline auto to_idl(const SlaveConfiguration& msg) -> idl::SlaveConfiguration;
@@ -33,6 +34,7 @@ inline auto from_idl(MessageStatus idl) -> lin::MessageStatus;
 inline auto from_idl(LinMessage&& idl) -> lin::LinMessage;
 inline auto from_idl(RxRequest&& idl) -> lin::RxRequest;
 inline auto from_idl(TxAcknowledge&& idl) -> lin::TxAcknowledge;
+inline auto from_idl(WakeupRequest&& idl) -> lin::WakeupRequest;
 inline auto from_idl(const ControllerConfig& idl) -> lin::ControllerConfig;
 inline auto from_idl(const SlaveResponseConfig& idl) -> lin::SlaveResponseConfig;
 inline auto from_idl(const SlaveConfiguration& idl) -> lin::SlaveConfiguration;
@@ -52,8 +54,10 @@ auto to_idl(ControllerMode msg) -> idl::ControllerMode
         return idl::Master;
     case ControllerMode::Slave:
         return idl::Slave;
+    case ControllerMode::Sleep:
+        return idl::Sleep;
     default:
-        throw std::exception();
+        throw std::runtime_error("conversion errror: Unknown lin::ControllerMode");
     }
 }
 
@@ -67,8 +71,10 @@ auto idl::from_idl(idl::ControllerMode idl) -> lin::ControllerMode
         return lin::ControllerMode::Master;
     case idl::Slave:
         return lin::ControllerMode::Slave;
+    case idl::Sleep:
+        return lin::ControllerMode::Sleep;
     default:
-        throw std::exception();
+        throw std::runtime_error("conversion errror: Unknown lin::ControllerMode");
     }
 }
 
@@ -258,6 +264,24 @@ auto idl::from_idl(idl::TxAcknowledge&& idl) -> lin::TxAcknowledge
 
     msg.linId = idl.linId();
     msg.status = from_idl(idl.status());
+
+    return msg;
+}
+
+auto to_idl(const WakeupRequest& msg) -> idl::WakeupRequest
+{
+    idl::WakeupRequest idl;
+
+    idl.timestampNs(std::chrono::duration_cast<std::chrono::nanoseconds>(msg.timestamp).count());
+
+    return idl;
+}
+
+auto idl::from_idl(idl::WakeupRequest&& idl) -> lin::WakeupRequest
+{
+    lin::WakeupRequest msg;
+
+    msg.timestamp = std::chrono::nanoseconds{idl.timestampNs()};
 
     return msg;
 }

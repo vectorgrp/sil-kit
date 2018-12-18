@@ -12,6 +12,7 @@
 #include "ib/sim/all.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/mw/sync/string_utils.hpp"
+#include "ib/util/functional.hpp"
 
 using namespace ib::mw;
 using namespace ib::sim;
@@ -74,12 +75,15 @@ std::ostream& operator<<(std::ostream& out, lin::MessageStatus status)
 
 struct LinMaster
 {
-    void doAction()
+    void doAction(std::chrono::nanoseconds now)
     {
         switch (state)
         {
         case State::SendMessage:
-            SendMessage();
+            if (now > gotoSleepTime)
+                GotoSleep();
+            else
+                SendMessage();
             return;
         case State::WaitForAck:
             return;
@@ -133,8 +137,48 @@ struct LinMaster
     void ReceiveTxComplete(lin::ILinController* /*controller*/, lin::MessageStatus status)
     {
         std::cout << ">> TX Notification: status=" << status << std::endl;
-        if (state == State::WaitForAck)
+        switch (state)
+        {
+        case State::WaitForAck:
             state = State::RequestMessage;
+            break;
+
+        case State::GotoSleep:
+            state = State::Sleeping;
+            controller->SetSleepMode();
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    void GotoSleep()
+    {
+        state = State::GotoSleep;
+        gotoSleepTime = std::chrono::nanoseconds::max();
+        std::cout << "<< Sending Go-To-Sleep Command." << std::endl;
+        controller->SendGoToSleep();
+    }
+
+    void WakeupRequest(lin::ILinController* controller)
+    {
+
+        switch (state)
+        {
+        case State::GotoSleep:
+            std::cerr << "WARNING: Received Wakeup Request in state GotoSleep. Check if the Gotosleep was not acknowledged!\n" << std::endl;
+            break;
+        case State::Sleeping:
+            std::cout << ">> Wakeup Request received" << std::endl;
+            break;
+        default:
+            std::cerr << "ERROR: Received Wakeup Request while not sleeping\n" << std::endl;
+            return;
+        }
+
+        state = State::SendMessage;
+        controller->SetOperational();
     }
 
     enum class State
@@ -142,13 +186,85 @@ struct LinMaster
         SendMessage,
         WaitForAck,
         RequestMessage,
-        WaitForReply
+        WaitForReply,
+        GotoSleep,
+        Sleeping
     };
 
     lin::ILinController* controller = nullptr;
     State state = State::SendMessage;
+    std::chrono::nanoseconds gotoSleepTime{std::chrono::nanoseconds::max()};
 
 };
+
+struct LinSlave
+{
+    void DoAction(std::chrono::nanoseconds now_)
+    {
+        now = now_;
+
+        switch (state)
+        {
+        case State::Sleeping:
+            CheckWakeup();
+            break;
+
+        default:
+            break;
+        }
+
+        if (state == State::Sleeping)
+        {
+
+        }
+    }
+
+
+    void CheckWakeup()
+    {
+        if (now < wakeupTime)
+            return;
+
+
+        std::cout << "LIN Slave sending LIN Wakupe Request" << std::endl;
+        state = State::PendingWakup;
+        linController->SendWakeupRequest();
+    }
+
+
+    void SleepCommandHandler(lin::ILinController* linController)
+    {
+        std::cout << "LIN Slave Received Sleep Command." << std::endl;
+        std::cout << "LIN Slave is entering sleep mode." << std::endl;
+        state = State::Sleeping;
+        wakeupTime = now + 20ms;
+        linController->SetSleepMode();
+    }
+
+    void WakeupRequestHandler(lin::ILinController* linController)
+    {
+        std::cout << "LIN Slave Received Wakeup Request..." << std::endl;
+        state = LinSlave::State::Operational;
+        linController->SetOperational();
+    }
+
+
+    enum class State
+    {
+        Invalid,
+        Operational,
+        Sleeping,
+        PendingWakup
+    };
+
+    State state{State::Operational};
+
+    lin::ILinController* linController{nullptr};
+    std::chrono::nanoseconds now{0ns};
+    std::chrono::nanoseconds wakeupTime{0ns};
+
+};
+
 
 /**************************************************************************************************
  * Main Function
@@ -220,28 +336,34 @@ int main(int argc, char** argv)
     });
 
     participantController->SetPeriod(1ms);
+
+    LinMaster master;
+    LinSlave slave;
+
     if (participantName == "LinMaster")
     {
-        LinMaster master;
         master.controller = linController;
+        master.gotoSleepTime = 10ms;
 
         linController->SetMasterMode();
         linController->SetBaudRate(20'000);
         linController->RegisterTxCompleteHandler(std::bind(&LinMaster::ReceiveTxComplete, &master, _1, _2));
         linController->RegisterReceiveMessageHandler(std::bind(&LinMaster::ReceiveReply, &master, _1, _2));
+        linController->RegisterWakeupRequestHandler(ib::util::bind_method(&master, &LinMaster::WakeupRequest));
 
         participantController->SetSimulationTask(
             [&master](std::chrono::nanoseconds now)
             {
                 auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                 std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-                master.doAction();
-                std::this_thread::sleep_for(1s);
+                master.doAction(now);
             }
         );
     }
     else
     {
+        slave.linController = linController;
+
         linController->SetSlaveMode();
         linController->SetBaudRate(20'000);
         linController->RegisterReceiveMessageHandler(ReceiveMessage);
@@ -270,19 +392,24 @@ int main(int argc, char** argv)
 
         linController->SetResponse(34, replyPayload);
 
-        participantController->SetSimulationTask(
-            [](std::chrono::nanoseconds now)
-            {
-                std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
-                std::this_thread::sleep_for(1s);
-            }
-        );    }
+        linController->RegisterSleepCommandHandler(ib::util::bind_method(&slave, &LinSlave::SleepCommandHandler));
+        linController->RegisterWakeupRequestHandler(ib::util::bind_method(&slave, &LinSlave::WakeupRequestHandler));
+
+        participantController->SetSimulationTask([&slave, linController](std::chrono::nanoseconds now)
+        {
+            std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
+            std::this_thread::sleep_for(500ms);
+
+            slave.DoAction(now);
+
+        });
+    }
 
 
-    //auto finalStateFuture = participantController->RunAsync();
-    //auto finalState = finalStateFuture.get();
+    auto finalStateFuture = participantController->RunAsync();
+    auto finalState = finalStateFuture.get();
 
-    auto finalState = participantController->Run();
+    //auto finalState = participantController->Run();
 
     std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
     std::cout << "Press enter to stop the process..." << std::endl;

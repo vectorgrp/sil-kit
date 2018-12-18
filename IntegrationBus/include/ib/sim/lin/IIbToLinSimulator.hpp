@@ -15,8 +15,8 @@ namespace lin {
 *  Used by the ComAdapter, implemented by the LinSimulator
 */
 class IIbToLinSimulator
-    : public mw::IIbReceiver<LinMessage, RxRequest, ControllerConfig, SlaveConfiguration, SlaveResponse>
-    , public mw::IIbSender<LinMessage, TxAcknowledge>
+    : public mw::IIbReceiver<LinMessage, RxRequest, WakeupRequest, ControllerConfig, SlaveConfiguration, SlaveResponse>
+    , public mw::IIbSender<LinMessage, TxAcknowledge, WakeupRequest>
 {
 public:
     virtual ~IIbToLinSimulator() = default;

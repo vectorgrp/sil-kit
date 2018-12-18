@@ -688,7 +688,7 @@ void FastRtpsComAdapter::SendIbMessage(EndpointAddress from, const sim::lin::TxA
 
 void FastRtpsComAdapter::SendIbMessage(EndpointAddress from, const sim::lin::WakeupRequest& msg)
 {
-    throw std::exception{};
+    SendIbMessageImpl(from, msg);
 }
 
 void FastRtpsComAdapter::SendIbMessage(EndpointAddress from, const sim::lin::ControllerConfig& msg)
