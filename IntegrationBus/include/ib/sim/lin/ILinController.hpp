@@ -49,9 +49,9 @@ public:
 
     /*! \brief Make the controller operational again after sleeping
      *
-     * NB: The SetOperational() must be called manually after receiving a WakupRequest.
+     * NB: The SetOperationalMode() must be called manually after receiving a WakupRequest.
      */
-    virtual void SetOperational() = 0;
+    virtual void SetOperationalMode() = 0;
 
 
     /*! \brief Configure the baud rate of the controller

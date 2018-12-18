@@ -422,7 +422,7 @@ TEST_F(LinControllerTest, set_master_operational)
     EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, operationalCfg))
         .Times(1);
 
-    controller.SetOperational();
+    controller.SetOperationalMode();
 }
 
 TEST_F(LinControllerTest, set_slave_operational)
@@ -436,7 +436,7 @@ TEST_F(LinControllerTest, set_slave_operational)
     EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, operationalCfg))
         .Times(1);
 
-    controller.SetOperational();
+    controller.SetOperationalMode();
 }
 
 

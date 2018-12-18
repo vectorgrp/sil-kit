@@ -178,7 +178,7 @@ struct LinMaster
         }
 
         state = State::SendMessage;
-        controller->SetOperational();
+        controller->SetOperationalMode();
     }
 
     enum class State
@@ -245,7 +245,7 @@ struct LinSlave
     {
         std::cout << "LIN Slave Received Wakeup Request..." << std::endl;
         state = LinSlave::State::Operational;
-        linController->SetOperational();
+        linController->SetOperationalMode();
     }
 
 

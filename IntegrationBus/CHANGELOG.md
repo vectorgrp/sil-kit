@@ -5,15 +5,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased] - 2018-12-19
 ### Added
-- LIN: new method ILinController::SetResponseWithChecksum() to override the configured checksum
-  model. This can be used to facilitate fault injection and simulation.
+- LIN: new method ILinController::SetResponseWithChecksum() to override the
+  configured checksum model. This can be used to facilitate fault injection and
+  simulation.
+- LIN: support for LIN network management (sleep / wakeup). See new methods
+  ILinController methods: SetSleepMode(), SetOperationalMode(), SendGoToSleep(),
+  SendWakeupRequest() and related callbacks.
 
 ### Removed
-- Demo projects ExecutionController and ExecutionControllerProxy were based on 
+- Demo projects ExecutionController and ExecutionControllerProxy were based on
   the deprecated synchronization API and were removed.
 ### Changed
-- All demo projects Can, Lin, Ethernet, FlexRay, GenericMessage and Io now use the new 
-  synchronization API.
+- All demo projects Can, Lin, Ethernet, FlexRay, GenericMessage and Io now use
+  the new synchronization API.
 - Revised public API:
   - Renamed files: IoDataTypes.hpp -> IoDatatypes.hpp
   - Fixed inconsistent naming:

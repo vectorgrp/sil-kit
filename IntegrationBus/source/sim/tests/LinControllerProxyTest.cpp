@@ -358,7 +358,7 @@ TEST_F(LinControllerProxyTest, set_master_operational)
     EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, operationalCfg))
         .Times(1);
 
-    proxy.SetOperational();
+    proxy.SetOperationalMode();
 }
 
 TEST_F(LinControllerProxyTest, set_slave_operational)
@@ -373,7 +373,7 @@ TEST_F(LinControllerProxyTest, set_slave_operational)
     EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, operationalCfg))
         .Times(1);
 
-    proxy.SetOperational();
+    proxy.SetOperationalMode();
 }
 
 

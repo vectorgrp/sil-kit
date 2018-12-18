@@ -70,11 +70,11 @@ void LinController::SetSleepMode()
     SendIbMessage(config);
 }
 
-void LinController::SetOperational()
+void LinController::SetOperationalMode()
 {
     if (_controllerMode != ControllerMode::Sleep)
     {
-        throw std::runtime_error{"LinController:SetOperational() must only be called when controller is in sleep mode"};
+        throw std::runtime_error{"LinController:SetOperationalMode() must only be called when controller is in sleep mode"};
     }
 
     // restore configured controller mode

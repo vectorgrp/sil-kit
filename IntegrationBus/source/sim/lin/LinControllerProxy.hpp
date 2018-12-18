@@ -46,7 +46,7 @@ public:
     void SetSlaveMode() override;
     void SetBaudRate(uint32_t rate) override;
     void SetSleepMode() override;
-    void SetOperational() override;
+    void SetOperationalMode() override;
 
     // LIN Slaves
     void SetSlaveConfiguration(const SlaveConfiguration& config) override;
