@@ -9,7 +9,8 @@
 #include <thread>
 
 #include "ib/IntegrationBus.hpp"
-#include "ib/sim/all.hpp"
+#include "ib/sim/lin/all.hpp"
+#include "ib/sim/lin/string_utils.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/util/functional.hpp"
@@ -37,41 +38,6 @@ void ReceiveMessage(lin::ILinController* /*controller*/, const lin::LinMessage& 
               << " \"" << msgString << "\""
               << std::endl;
 }
-
-std::ostream& operator<<(std::ostream& out, lin::MessageStatus status)
-{
-    switch (status)
-    {
-    case lin::MessageStatus::TxSuccess:
-        out << "TxSuccess";
-        break;
-    case lin::MessageStatus::RxSuccess:
-        out << "RxSuccess";
-        break;
-    case lin::MessageStatus::TxResponseError:
-        out << "TxResponseError";
-        break;
-    case lin::MessageStatus::RxResponseError:
-        out << "RxResponseError";
-        break;
-    case lin::MessageStatus::RxNoResponse:
-        out << "RxNoResponse";
-        break;
-    case lin::MessageStatus::HeaderError:
-        out << "HeaderError";
-        break;
-    case lin::MessageStatus::Canceled:
-        out << "Canceled";
-        break;
-    case lin::MessageStatus::Busy:
-        out << "Busy";
-        break;
-    default:
-        out << "statusid=" << static_cast<uint32_t>(status);
-    }
-    return out;
-}
-
 
 struct LinMaster
 {
@@ -211,11 +177,6 @@ struct LinSlave
 
         default:
             break;
-        }
-
-        if (state == State::Sleeping)
-        {
-
         }
     }
 
