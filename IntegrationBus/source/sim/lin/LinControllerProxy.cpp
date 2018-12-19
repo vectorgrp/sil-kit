@@ -112,9 +112,19 @@ void LinControllerProxy::SetResponseWithChecksum(LinId linId, const Payload& pay
     SendIbMessage(response);
 }
 
-void LinControllerProxy::RemoveResponse(LinId /*linId*/)
+void LinControllerProxy::RemoveResponse(LinId linId)
 {
-    throw std::runtime_error("LinControllerProxy::RemoveResponse not implemented");
+    SlaveConfiguration slaveConfig;
+
+    SlaveResponseConfig responseConfig;
+    responseConfig.linId = linId;
+    responseConfig.responseMode = ResponseMode::Unused;
+    responseConfig.checksumModel = ChecksumModel::Undefined;
+    responseConfig.payloadLength = 0;
+
+
+    slaveConfig.responseConfigs.emplace_back(std::move(responseConfig));
+    SendIbMessage(slaveConfig);
 }
 
 void LinControllerProxy::SendWakeupRequest()

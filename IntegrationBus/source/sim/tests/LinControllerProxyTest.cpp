@@ -87,6 +87,23 @@ TEST_F(LinControllerProxyTest, request_lin_message)
     proxy.RequestMessage(request);
 }
 
+TEST_F(LinControllerProxyTest, remove_response)
+{
+    SlaveConfiguration slaveConfig;
+    SlaveResponseConfig responseConfig;
+    responseConfig.linId = 9;
+    responseConfig.responseMode = ResponseMode::Unused;
+    responseConfig.checksumModel = ChecksumModel::Undefined;
+    responseConfig.payloadLength = 0;
+    slaveConfig.responseConfigs.emplace_back(std::move(responseConfig));
+
+    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, slaveConfig))
+        .Times(1);
+
+    proxy.SetSlaveMode();
+    proxy.RemoveResponse(9);
+}
+
 /*! \brief Passing a LinMessage to an LinControllerProxys musst trigger the registered callback
  */
 TEST_F(LinControllerProxyTest, trigger_callback_on_receive_message)

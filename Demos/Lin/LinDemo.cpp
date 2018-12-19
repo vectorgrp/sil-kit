@@ -329,20 +329,24 @@ int main(int argc, char** argv)
         linController->SetBaudRate(20'000);
         linController->RegisterReceiveMessageHandler(ReceiveMessage);
 
-        lin::SlaveConfiguration config;
-        config.responseConfigs.resize(62);
+        lin::SlaveConfiguration slaveConfig;
 
         // Configure LIN Controller to trigger a callback on LIN ID 17
-        config.responseConfigs[17].responseMode = lin::ResponseMode::Rx;
-        config.responseConfigs[17].checksumModel = lin::ChecksumModel::Enhanced;
-        config.responseConfigs[17].payloadLength = 8;
+        lin::SlaveResponseConfig response;
+        response.linId = 17;
+        response.responseMode = lin::ResponseMode::Rx;
+        response.checksumModel = lin::ChecksumModel::Enhanced;
+        response.payloadLength = 8;
+        slaveConfig.responseConfigs.push_back(response);
 
         // Configure LIN Controller to send a reply on LIN ID 34
-        config.responseConfigs[34].responseMode = lin::ResponseMode::TxUnconditional;
-        config.responseConfigs[34].checksumModel = lin::ChecksumModel::Enhanced;
-        config.responseConfigs[34].payloadLength = 6;
+        response.linId = 34;
+        response.responseMode = lin::ResponseMode::TxUnconditional;
+        response.checksumModel = lin::ChecksumModel::Enhanced;
+        response.payloadLength = 6;
+        slaveConfig.responseConfigs.push_back(response);
 
-        linController->SetSlaveConfiguration(config);
+        linController->SetSlaveConfiguration(slaveConfig);
 
 
         std::string replyString= "HELLO!";

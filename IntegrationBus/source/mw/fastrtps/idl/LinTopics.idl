@@ -102,6 +102,7 @@ module idl {
         // Meta Data
         @Key ib::mw::idl::EndpointAddress senderAddr;
         
+        LinId linId;
         ResponseMode responseMode;
         ChecksumModel checksumModel;
         octet payloadLength;

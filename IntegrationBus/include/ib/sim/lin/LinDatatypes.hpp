@@ -107,6 +107,7 @@ struct ControllerConfig
 // LIN ControllerProxy to LIN Network Simulator
 struct SlaveResponseConfig
 {
+    LinId linId;
     ResponseMode responseMode{ResponseMode::Unused};
     ChecksumModel checksumModel{ChecksumModel::Enhanced};
     uint8_t payloadLength{0};

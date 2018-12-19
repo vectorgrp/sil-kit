@@ -708,6 +708,8 @@ void ib::sim::lin::idl::ControllerConfig::serializeKey(eprosima::fastcdr::Cdr &s
 ib::sim::lin::idl::SlaveResponseConfig::SlaveResponseConfig()
 {
 
+    m_linId = 0;
+
     m_responseMode = ib::sim::lin::idl::Unused;
 
     m_checksumModel = ib::sim::lin::idl::Undefined;
@@ -724,6 +726,7 @@ ib::sim::lin::idl::SlaveResponseConfig::~SlaveResponseConfig()
 ib::sim::lin::idl::SlaveResponseConfig::SlaveResponseConfig(const SlaveResponseConfig &x)
 {
     m_senderAddr = x.m_senderAddr;
+    m_linId = x.m_linId;
     m_responseMode = x.m_responseMode;
     m_checksumModel = x.m_checksumModel;
     m_payloadLength = x.m_payloadLength;
@@ -732,6 +735,7 @@ ib::sim::lin::idl::SlaveResponseConfig::SlaveResponseConfig(const SlaveResponseC
 ib::sim::lin::idl::SlaveResponseConfig::SlaveResponseConfig(SlaveResponseConfig &&x)
 {
     m_senderAddr = std::move(x.m_senderAddr);
+    m_linId = x.m_linId;
     m_responseMode = x.m_responseMode;
     m_checksumModel = x.m_checksumModel;
     m_payloadLength = x.m_payloadLength;
@@ -740,6 +744,7 @@ ib::sim::lin::idl::SlaveResponseConfig::SlaveResponseConfig(SlaveResponseConfig 
 ib::sim::lin::idl::SlaveResponseConfig& ib::sim::lin::idl::SlaveResponseConfig::operator=(const SlaveResponseConfig &x)
 {
     m_senderAddr = x.m_senderAddr;
+    m_linId = x.m_linId;
     m_responseMode = x.m_responseMode;
     m_checksumModel = x.m_checksumModel;
     m_payloadLength = x.m_payloadLength;
@@ -750,6 +755,7 @@ ib::sim::lin::idl::SlaveResponseConfig& ib::sim::lin::idl::SlaveResponseConfig::
 ib::sim::lin::idl::SlaveResponseConfig& ib::sim::lin::idl::SlaveResponseConfig::operator=(SlaveResponseConfig &&x)
 {
     m_senderAddr = std::move(x.m_senderAddr);
+    m_linId = x.m_linId;
     m_responseMode = x.m_responseMode;
     m_checksumModel = x.m_checksumModel;
     m_payloadLength = x.m_payloadLength;
@@ -762,6 +768,9 @@ size_t ib::sim::lin::idl::SlaveResponseConfig::getMaxCdrSerializedSize(size_t cu
     size_t initial_alignment = current_alignment;
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
@@ -781,6 +790,9 @@ size_t ib::sim::lin::idl::SlaveResponseConfig::getCdrSerializedSize(const ib::si
     size_t initial_alignment = current_alignment;
 
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
@@ -797,6 +809,7 @@ size_t ib::sim::lin::idl::SlaveResponseConfig::getCdrSerializedSize(const ib::si
 void ib::sim::lin::idl::SlaveResponseConfig::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
     scdr << m_senderAddr;
+    scdr << m_linId;
     scdr << (uint32_t)m_responseMode;
     scdr << (uint32_t)m_checksumModel;
     scdr << m_payloadLength;
@@ -805,6 +818,7 @@ void ib::sim::lin::idl::SlaveResponseConfig::serialize(eprosima::fastcdr::Cdr &s
 void ib::sim::lin::idl::SlaveResponseConfig::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
     dcdr >> m_senderAddr;
+    dcdr >> m_linId;
     {
         uint32_t enum_value = 0;
         dcdr >> enum_value;
@@ -827,6 +841,7 @@ size_t ib::sim::lin::idl::SlaveResponseConfig::getKeyMaxCdrSerializedSize(size_t
 
 
 
+
     return current_align;
 }
 
@@ -839,6 +854,7 @@ void ib::sim::lin::idl::SlaveResponseConfig::serializeKey(eprosima::fastcdr::Cdr
 {
 	(void) scdr;
 	 scdr << m_senderAddr;  
+	 
 	 
 	 
 	 

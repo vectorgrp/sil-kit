@@ -14,6 +14,7 @@ bool operator==(const LinMessage& lhs, const LinMessage& rhs);
 bool operator==(const RxRequest& lhs, const RxRequest& rhs);
 bool operator==(const TxAcknowledge& lhs, const TxAcknowledge& rhs);
 bool operator==(const ControllerConfig& lhs, const ControllerConfig& rhs);
+bool operator==(const SlaveConfiguration& lhs, const SlaveConfiguration& rhs);
 bool operator==(const SlaveResponseConfig& lhs, const SlaveResponseConfig& rhs);
 bool operator==(const SlaveResponse& lhs, const SlaveResponse& rhs);
 

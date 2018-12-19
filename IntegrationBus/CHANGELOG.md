@@ -15,7 +15,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Removed
 - Demo projects ExecutionController and ExecutionControllerProxy were based on
   the deprecated synchronization API and were removed.
+
 ### Changed
+- LIN: IMPORTANT you must now specify a LIN ID for each lin::SlaveResponseConfig.
+  lin::SlaveConfig now longer identifies the lin::SlaveResponses by positions.
 - All demo projects Can, Lin, Ethernet, FlexRay, GenericMessage and Io now use
   the new synchronization API.
 - Revised public API:

@@ -311,6 +311,7 @@ auto to_idl(const SlaveResponseConfig& msg) -> idl::SlaveResponseConfig
 {
     idl::SlaveResponseConfig idl;
 
+    idl.linId(msg.linId);
     idl.responseMode(to_idl(msg.responseMode));
     idl.checksumModel(to_idl(msg.checksumModel));
     idl.payloadLength(msg.payloadLength);
@@ -322,6 +323,7 @@ auto idl::from_idl(const idl::SlaveResponseConfig& idl) -> lin::SlaveResponseCon
 {
     lin::SlaveResponseConfig msg;
 
+    msg.linId = idl.linId();
     msg.responseMode = from_idl(idl.responseMode());
     msg.checksumModel = from_idl(idl.checksumModel());
     msg.payloadLength = idl.payloadLength();

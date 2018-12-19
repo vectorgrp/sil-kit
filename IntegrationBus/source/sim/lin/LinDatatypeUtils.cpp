@@ -33,9 +33,15 @@ bool operator==(const ControllerConfig& lhs, const ControllerConfig& rhs)
         && lhs.controllerMode == rhs.controllerMode;
 }
 
+bool operator==(const SlaveConfiguration& lhs, const SlaveConfiguration& rhs)
+{
+    return lhs.responseConfigs == rhs.responseConfigs;
+}
+
 bool operator==(const SlaveResponseConfig& lhs, const SlaveResponseConfig& rhs)
 {
-    return lhs.responseMode == rhs.responseMode
+    return lhs.linId == rhs.linId
+        && lhs.responseMode == rhs.responseMode
         && lhs.checksumModel == rhs.checksumModel
         && lhs.payloadLength == rhs.payloadLength;
 }

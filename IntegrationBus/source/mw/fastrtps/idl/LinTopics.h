@@ -1266,6 +1266,32 @@ namespace ib
                         return m_senderAddr;
                     }
                     /*!
+                     * @brief This function sets a value in member linId
+                     * @param _linId New value for member linId
+                     */
+                    inline eProsima_user_DllExport void linId(ib::sim::lin::idl::LinId _linId)
+                    {
+                        m_linId = _linId;
+                    }
+
+                    /*!
+                     * @brief This function returns the value of member linId
+                     * @return Value of member linId
+                     */
+                    inline eProsima_user_DllExport ib::sim::lin::idl::LinId linId() const
+                    {
+                        return m_linId;
+                    }
+
+                    /*!
+                     * @brief This function returns a reference to member linId
+                     * @return Reference to member linId
+                     */
+                    inline eProsima_user_DllExport ib::sim::lin::idl::LinId& linId()
+                    {
+                        return m_linId;
+                    }
+                    /*!
                      * @brief This function sets a value in member responseMode
                      * @param _responseMode New value for member responseMode
                      */
@@ -1396,6 +1422,7 @@ namespace ib
 
                 private:
                     ib::mw::idl::EndpointAddress m_senderAddr;
+                    ib::sim::lin::idl::LinId m_linId;
                     ib::sim::lin::idl::ResponseMode m_responseMode;
                     ib::sim::lin::idl::ChecksumModel m_checksumModel;
                     uint8_t m_payloadLength;

@@ -127,8 +127,17 @@ void LinController::SetResponseWithChecksum(LinId linId, const Payload& payload,
 
 void LinController::RemoveResponse(LinId linId)
 {
-    // Fixme: Implement Remove Response
-    std::cerr << "LinController::RemoveResponse() is not implemented\n";
+    SlaveConfiguration slaveConfig;
+
+    SlaveResponseConfig responseConfig;
+    responseConfig.linId = linId;
+    responseConfig.responseMode = ResponseMode::Unused;
+    responseConfig.checksumModel = ChecksumModel::Undefined;
+    responseConfig.payloadLength = 0;
+
+
+    slaveConfig.responseConfigs.emplace_back(std::move(responseConfig));
+    SendIbMessage(slaveConfig);
 }
 
 void LinController::SendWakeupRequest()
@@ -353,20 +362,24 @@ void LinController::ReceiveIbMessage(mw::EndpointAddress from, const SlaveConfig
     }
 
     auto&& linSlave = GetLinSlave(from);
-    linSlave.responses.resize(msg.responseConfigs.size());
-
-    for (size_t i = 0u; i < msg.responseConfigs.size(); i++)
+    for (auto&& responseConfig : msg.responseConfigs)
     {
-        auto&& responseConfig = msg.responseConfigs[i];
-        if (responseConfig.payloadLength > 8)
+        auto linId = responseConfig.linId;
+        if (linId >= linSlave.responses.size())
         {
-            std::cerr << "Warning: LinController received SlaveResponseConfig with payload length " << static_cast<unsigned int>(responseConfig.payloadLength)
-                      << " from {" << from.participant << "," << from.endpoint << "}\n";
-            continue;
+            linSlave.responses.resize(linId + 1);
         }
 
-        static_cast<SlaveResponseConfig&>(linSlave.responses[i]) = responseConfig;
+         if (responseConfig.payloadLength > 8)
+         {
+             std::cerr << "Warning: LinController received SlaveResponseConfig with payload length " << static_cast<unsigned int>(responseConfig.payloadLength)
+                 << " from {" << from.participant << "," << from.endpoint << "}\n";
+             continue;
+         }
+
+         static_cast<SlaveResponseConfig&>(linSlave.responses[linId]) = responseConfig;
     }
+
 }
 
 void LinController::ReceiveIbMessage(mw::EndpointAddress from, const SlaveResponse& msg)
