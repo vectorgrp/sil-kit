@@ -110,6 +110,7 @@ struct LinMaster
             break;
 
         case State::GotoSleep:
+            std::cout << "Going to sleep...\n";
             state = State::Sleeping;
             controller->SetSleepMode();
             break;
