@@ -216,18 +216,6 @@ install(EXPORT IntegrationBusTargets
     COMPONENT IntegrationBus
 )
 
-# Install binaries of dependent libraries
-install(
-    FILES $<TARGET_FILE:fastrtps>
-    DESTINATION ${INSTALL_LIBDIR}
-    COMPONENT IntegrationBus
-)
-install(
-    FILES $<TARGET_FILE:fastcdr>
-    DESTINATION ${INSTALL_LIBDIR}
-    COMPONENT IntegrationBus
-)
-
 # This is enough to use the IntegrationBus::IntegrationBus target from external projects.
 # Register the target so the find_package command can locate it
 include(CMakePackageConfigHelpers)
