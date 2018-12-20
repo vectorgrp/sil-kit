@@ -94,5 +94,42 @@
             "TickPeriodNs": 1000000
         }
 
-    }
+    },
+
+    "LaunchConfigurations": [
+        {
+            "Name": "Installation",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "EthernetWriter",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoEthernet",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% EthernetWriter %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "EthernetReader",
+                    "Environment": "CustomExecutable", 
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoEthernet",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% EthernetReader %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemMonitor",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoPassiveSystemMonitor",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+            ]
+        }
+    ]
+
 }
