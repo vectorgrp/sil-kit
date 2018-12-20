@@ -90,28 +90,28 @@
                     "Participant": "CanWriter",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "./Debug/IbDemoCan",
+                    "Executable": "../Debug/bin/IbDemoCan",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% CanWriter %INTEGRATIONBUS_DOMAINID%"
                 },
                 {
                     "Participant": "CanReader",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "./Debug/IbDemoCan",
+                    "Executable": "../Debug/bin/IbDemoCan",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% CanReader %INTEGRATIONBUS_DOMAINID%"
                 },
                 {
                     "Participant": "SystemMonitor",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "./Debug/IbDemoPassiveSystemMonitor",
+                    "Executable": "../Debug/bin/IbDemoPassiveSystemMonitor",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
                 },
                 {
                     "Participant": "SystemController",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "./Debug/IbDemoSystemController",
+                    "Executable": "../Debug/bin/IbDemoSystemController",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
                 }
             ]
@@ -123,28 +123,28 @@
                     "Participant": "CanWriter",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "./Release/IbDemoCan",
+                    "Executable": "../Release/bin/IbDemoCan",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% CanWriter %INTEGRATIONBUS_DOMAINID%"
                 },
                 {
                     "Participant": "CanReader",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "./Release/IbDemoCan",
+                    "Executable": "../Release/bin/IbDemoCan",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% CanReader %INTEGRATIONBUS_DOMAINID%"
                 },
                 {
                     "Participant": "SystemMonitor",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "./Release/IbDemoPassiveSystemMonitor",
+                    "Executable": "../Release/bin/IbDemoPassiveSystemMonitor",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
                 },
                 {
                     "Participant": "SystemController",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "./Release/IbDemoSystemController",
+                    "Executable": "../Release/bin/IbDemoSystemController",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
                 }
             ]
