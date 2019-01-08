@@ -1,7 +1,7 @@
 {
     "ConfigVersion": "0.0.1",
-    "ConfigName": "CanDemoNetSim",
-    "Description": "Sample configuration for CAN with NetworkSimulator",
+    "ConfigName": "CanDemo",
+    "Description": "Sample configuration for CAN without NetworkSimulator",
 
     "SimulationSetup": {
 
@@ -10,8 +10,8 @@
                 "Name": "CanWriter",
                 "Description": "Demo Writer",
                 "SyncType": "DiscreteTime",
-
                 "IsSyncMaster": true,
+
                 "CanControllers": [ "CAN1" ]
             },
             {
@@ -20,12 +20,6 @@
                 "SyncType": "DiscreteTime",
 
                 "CanControllers": [ "CAN1" ]
-            },
-            {
-                "Name": "NetworkSimulator",
-                "SyncType": "DiscreteTime",
-
-                "NetworkSimulators": [ "CAN-Simulator" ]
             },
             {
                 "Name": "SystemController",
@@ -48,15 +42,6 @@
             }
         ],
 
-        "NetworkSimulators": [
-            {
-                "Name": "CAN-Simulator",
-                "SimulatedLinks": [
-                    "CAN1"
-                ]
-            }
-        ],
-        
         "TimeSync": {
             "SyncType": "TickTickDone",
             "TickPeriodNs": 1000000
@@ -66,7 +51,7 @@
 
     "LaunchConfigurations": [
         {
-            "Name": "Installation",
+            "Name": "Installation-Node1",
             "ParticipantEnvironments": [
                 {
                     "Participant": "CanWriter",
@@ -75,6 +60,18 @@
                     "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoCan",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% CanWriter %INTEGRATIONBUS_DOMAINID%"
                 },
+                {
+                    "Participant": "SystemController",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoSystemController",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+            ]
+        },
+        {
+            "Name": "Installation-Node2",
+            "ParticipantEnvironments": [
                 {
                     "Participant": "CanReader",
                     "Environment": "CustomExecutable",
@@ -88,16 +85,18 @@
                     "WorkingFolder": ".",
                     "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoPassiveSystemMonitor",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
-                },
-                {
-                    "Participant": "SystemController",
-                    "Environment": "CustomExecutable",
-                    "WorkingFolder": ".",
-                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoSystemController",
-                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
                 }
             ]
         }
-    ]
+
+    ],
+
+    "MiddlewareConfig": {
+
+        "FastRTPS": {
+            "DiscoveryType": "Multicast"
+        }
+
+    }
 
 }

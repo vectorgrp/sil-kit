@@ -1,6 +1,6 @@
 {
     "ConfigVersion": "0.0.1",
-    "ConfigName": "EthernetReaderWriter",
+    "ConfigName": "EthernetDemo",
     "Description": "Sample configuration for Ethernet without NetworkSimulator",
 
     "SimulationSetup": {
@@ -37,7 +37,7 @@
             },
             {
                 "Name": "SystemMonitor",
-                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchroniatzion.",
+                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
                 "SyncType": "Unsynchronized"
             }
         ],

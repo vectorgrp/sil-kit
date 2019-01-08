@@ -32,7 +32,7 @@
                 ]
             },
             {
-                "Name": "BusSimulator",
+                "Name": "NetworkSimulator",
                 "SyncType": "DiscreteTime",
 
                 "NetworkSimulators": [ "Ethernet-Simulator" ]
@@ -43,7 +43,7 @@
             },
             {
                 "Name": "SystemMonitor",
-                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchroniatzion.",
+                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
                 "SyncType": "Unsynchronized"
             }
         ],
@@ -51,7 +51,7 @@
         "Switches": [
             {
                 "Name": "FrontSwitch",
-                "Description":  "Located somehwere in the Milkyway",
+                "Description":  "Located somewhere in the Milky Way",
                 "Ports": [
                     {
                         "Name": "Port0",

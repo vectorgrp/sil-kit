@@ -22,10 +22,10 @@
                 "LinControllers": [ "LIN1" ]
             },
             {
-                "Name": "BusSimulator",
+                "Name": "NetworkSimulator",
                 "SyncType": "DiscreteTime",
 
-                "NetworkSimulators": [ "BusSimulator1" ]
+                "NetworkSimulators": [ "Lin-Simulator" ]
             },
             {
                 "Name": "SystemController",
@@ -33,7 +33,7 @@
             },
             {
                 "Name": "SystemMonitor",
-                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchroniatzion.",
+                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
                 "SyncType": "Unsynchronized"
             }
         ],
@@ -50,7 +50,7 @@
 
         "NetworkSimulators": [
             {
-                "Name": "BusSimulator1",
+                "Name": "Lin-Simulator",
                 "SimulatedLinks": [
                     "LIN1"
                 ]
