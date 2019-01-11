@@ -10,7 +10,6 @@
                 "Name": "CanWriter",
                 "Description": "Demo Writer",
                 "SyncType": "DiscreteTime",
-                "IsSyncMaster": true,
 
                 "CanControllers": [ "CAN1" ]
             },
@@ -23,7 +22,8 @@
             },
             {
                 "Name": "SystemController",
-                "SyncType": "Unsynchronized"
+                "SyncType": "Unsynchronized",
+                "IsSyncMaster": true
             },
             {
                 "Name": "SystemMonitor",

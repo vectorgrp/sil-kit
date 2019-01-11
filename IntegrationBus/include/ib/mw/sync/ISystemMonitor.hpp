@@ -20,20 +20,30 @@ public:
     using ParticipantStatusHandlerT = std::function<void(ParticipantStatus)>;
 
 public:
-    //! \brief Register a callback for SystemState changes
+    /*! \brief Register a callback for SystemState changes
+     *
+     * If the current SystemState is not SystemState::Invalid, the handler will
+     * be called immediately.
+     */
     virtual void RegisterSystemStateHandler(SystemStateHandlerT handler) = 0;
 
     /*! \brief Register a callback for ParticipantState changes
      *
-     *  NB: ParticipantStatusHandlers and ParticipantStateHandlers are
-     *  always called in combination.
+     * The handler will be called immediately for any participant that is not in
+     * ParticipantState::Invalid.
+     *
+     * NB: ParticipantStatusHandlers and ParticipantStateHandlers are
+     * always called in combination.
      */
     virtual void RegisterParticipantStateHandler(ParticipantStateHandlerT handler) = 0;
 
     /*! \brief Register a callback for ParticipantStatus changes
      *
-     *  NB: ParticipantStatusHandlers and ParticipantStateHandlers are
-     *  always called in combination.
+     * The handler will be called immediately for any participant that is not in
+     * ParticipantState::Invalid.
+     *
+     * NB: ParticipantStatusHandlers and ParticipantStateHandlers are
+     * always called in combination.
      */
     virtual void RegisterParticipantStatusHandler(ParticipantStatusHandlerT handler) = 0;
 

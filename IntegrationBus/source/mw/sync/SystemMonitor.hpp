@@ -65,9 +65,10 @@ private:
     // ----------------------------------------
     // private methods
     bool AllParticipantsInState(sync::ParticipantState state) const;
-    bool ValidParticipantState(sync::ParticipantState newState, std::initializer_list<sync::ParticipantState> validStates);
-    void UpdateSystemState(const sync::ParticipantStatus& newState);
-    void SetSystemState(sync::SystemState newState);
+    bool AllParticipantsInState(std::initializer_list<sync::ParticipantState> acceptedStates) const;
+    void ValidateParticipantStatusUpdate(const sync::ParticipantStatus& newStatus, sync::ParticipantState oldState);
+    void UpdateSystemState(const sync::ParticipantStatus& newStatus, sync::ParticipantState oldState);
+    inline void SetSystemState(sync::SystemState newState);
 
 private:
     // ----------------------------------------

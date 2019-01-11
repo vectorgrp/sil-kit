@@ -3,6 +3,7 @@
 #include "SystemMonitor.hpp"
 
 #include <algorithm>
+#include <ctime>
 
 #include "ib/mw/sync/string_utils.hpp"
 
@@ -27,16 +28,42 @@ SystemMonitor::SystemMonitor(IComAdapter* comAdapter, cfg::SimulationSetup simul
 void SystemMonitor::RegisterSystemStateHandler(SystemStateHandlerT handler)
 {
     _systemStateHandlers.emplace_back(std::move(handler));
+
+    if (_systemState != sync::SystemState::Invalid)
+    {
+        auto&& newHandler = _systemStateHandlers[_systemStateHandlers.size() - 1];
+        newHandler(_systemState);
+    }
 }
 
 void SystemMonitor::RegisterParticipantStateHandler(ParticipantStateHandlerT handler)
 {
     _participantStateHandlers.emplace_back(std::move(handler));
+
+    auto&& newHandler = _participantStateHandlers[_participantStateHandlers.size() - 1];
+    for (auto&& kv : _participantStatus)
+    {
+        auto&& participantStatus = kv.second;
+        if (participantStatus.state == sync::ParticipantState::Invalid)
+            continue;
+
+        newHandler(participantStatus.state);
+    }
 }
 
 void SystemMonitor::RegisterParticipantStatusHandler(ParticipantStatusHandlerT handler)
 {
     _participantStatusHandlers.emplace_back(std::move(handler));
+
+    auto&& newHandler = _participantStatusHandlers[_participantStatusHandlers.size() - 1];
+    for (auto&& kv : _participantStatus)
+    {
+        auto&& participantStatus = kv.second;
+        if (participantStatus.state == sync::ParticipantState::Invalid)
+            continue;
+
+        newHandler(participantStatus);
+    }
 }
 
 auto SystemMonitor::SystemState() const -> sync::SystemState
@@ -70,7 +97,7 @@ auto SystemMonitor::EndpointAddress() const -> const mw::EndpointAddress&
     return _endpointAddress;
 }
 
-void SystemMonitor::ReceiveIbMessage(mw::EndpointAddress from, const sync::ParticipantStatus& msg)
+void SystemMonitor::ReceiveIbMessage(mw::EndpointAddress from, const sync::ParticipantStatus& newParticipantStatus)
 {
     auto participantId = from.participant;
 
@@ -81,15 +108,18 @@ void SystemMonitor::ReceiveIbMessage(mw::EndpointAddress from, const sync::Parti
         return;
     }
 
-    _participantStatus[participantId] = msg;
+    auto oldParticipantState = _participantStatus[participantId].state;
     auto oldSystemState = _systemState;
-    UpdateSystemState(msg);
+
+    _participantStatus[participantId] = newParticipantStatus;
+    ValidateParticipantStatusUpdate(newParticipantStatus, oldParticipantState);
+    UpdateSystemState(newParticipantStatus, oldParticipantState);
 
     for (auto&& handler : _participantStatusHandlers)
-        handler(msg);
+        handler(newParticipantStatus);
 
     for (auto&& handler : _participantStateHandlers)
-        handler(msg.state);
+        handler(newParticipantStatus.state);
 
     if (oldSystemState != _systemState)
     {
@@ -100,200 +130,140 @@ void SystemMonitor::ReceiveIbMessage(mw::EndpointAddress from, const sync::Parti
 
 bool SystemMonitor::AllParticipantsInState(sync::ParticipantState state) const
 {
-    return
-        std::all_of(
-            begin(_participantStatus),
-            end(_participantStatus),
-            [state](auto&& kv) { return kv.second.state == state; }
-        );
+    return std::all_of(begin(_participantStatus), end(_participantStatus), [state](auto&& kv) {
+        return kv.second.state == state;
+    });
 }
 
-bool SystemMonitor::ValidParticipantState(sync::ParticipantState newState, std::initializer_list<sync::ParticipantState> validStates)
+bool SystemMonitor::AllParticipantsInState(std::initializer_list<sync::ParticipantState> acceptedStates) const
 {
-    auto isValid =
-        std::any_of(
-            begin(validStates),
-            end(validStates),
-            [newState](auto state) { return newState == state; }
-        );
-
-    if (!isValid)
+    for (auto&& participantStatus : _participantStatus)
     {
-        _invalidTransitionCount++;
-        std::cerr << "Invalid ParticipantState::" << newState << " while in SystemState::" << _systemState << "\n";
+        bool isAcceptedState = std::any_of(begin(acceptedStates), end(acceptedStates), [participantState = participantStatus.second.state](auto acceptedState) {
+            return participantState == acceptedState;
+        });
+        if (!isAcceptedState)
+            return false;
     }
-
-    return isValid;
+    return true;
 }
 
-void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus)
+void SystemMonitor::ValidateParticipantStatusUpdate(const sync::ParticipantStatus& newStatus, sync::ParticipantState oldState)
 {
-    auto newState = newStatus.state;
-    // ParticipantState::Error will always cause a switch to SystemState::Error
-    if (newState == sync::ParticipantState::Error)
+    auto is_any_of = [](sync::ParticipantState state, std::initializer_list<sync::ParticipantState> stateList)
     {
-        SetSystemState(sync::SystemState::Error);
-        return;
-    }
+        return std::any_of(begin(stateList), end(stateList), [=](auto candidate) { return candidate == state; });
+    };
 
-    switch (_systemState)
+    switch (newStatus.state)
     {
-    case sync::SystemState::Invalid:
-        // valid new participant states: idle
-        if (!ValidParticipantState(newState, {sync::ParticipantState::Idle}))
+    case sync::ParticipantState::Idle:
+        if (oldState == sync::ParticipantState::Invalid)
             return;
 
+    case sync::ParticipantState::Initializing:
+        if (is_any_of(oldState, {sync::ParticipantState::Idle, sync::ParticipantState::Error, sync::ParticipantState::Stopped}))
+            return;
+    case sync::ParticipantState::Initialized:
+        if (oldState == sync::ParticipantState::Initializing)
+            return;
+
+    case sync::ParticipantState::Running:
+        if (is_any_of(oldState, {sync::ParticipantState::Initialized, sync::ParticipantState::Paused}))
+            return;
+
+    case sync::ParticipantState::Paused:
+        if (oldState == sync::ParticipantState::Running)
+            return;
+
+    case sync::ParticipantState::Stopped:
+        if (is_any_of(oldState, {sync::ParticipantState::Running, sync::ParticipantState::Paused}))
+            return;
+
+    case sync::ParticipantState::Shutdown:
+        if (is_any_of(oldState, {sync::ParticipantState::Error, sync::ParticipantState::Stopped}))
+            return;
+    case sync::ParticipantState::Error:
+        return;
+
+    default:
+        std::cerr << "ERROR: SystemMonitor::ValidateParticipantStatusUpdate() Unhandled ParticipantState::" << oldState << "\n";
+    }
+
+    std::time_t enterTime = std::chrono::system_clock::to_time_t(newStatus.enterTime);
+    char timebuffer[32];
+    std::strftime(timebuffer, sizeof(timebuffer), "%FT%T", std::localtime(&enterTime));
+
+    std::cerr
+        << "ERROR: SystemMonitor detected invalid ParticipantState transition from " << oldState << " to " << newStatus.state
+        << " {EnterTime=" << timebuffer
+        << ", EnterReason=\"" << newStatus.enterReason
+        << "\"\n";
+
+    _invalidTransitionCount++;
+}
+
+void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus, sync::ParticipantState oldState)
+{
+    switch (newStatus.state)
+    {
+    case sync::ParticipantState::Idle:
         if (AllParticipantsInState(sync::ParticipantState::Idle))
             SetSystemState(sync::SystemState::Idle);
 
         return;
 
-    case sync::SystemState::Idle:
-        // valid new participant states: initializing
-        if (!ValidParticipantState(newState, {sync::ParticipantState::Initializing}))
-            return;
-
-        SetSystemState(sync::SystemState::Initializing);
+    case sync::ParticipantState::Initializing:
+        if (AllParticipantsInState({sync::ParticipantState::Initializing, sync::ParticipantState::Idle})
+            || AllParticipantsInState({sync::ParticipantState::Initializing, sync::ParticipantState::Stopped, sync::ParticipantState::Error}))
+        {
+            SetSystemState(sync::SystemState::Initializing);
+        }
         return;
 
-    case sync::SystemState::Initializing:
-        // valid new participant states: initialized, initializing
-        if (!ValidParticipantState(newState, {sync::ParticipantState::Initializing, sync::ParticipantState::Initialized}))
-            return;
-
+    case sync::ParticipantState::Initialized:
         if (AllParticipantsInState(sync::ParticipantState::Initialized))
             SetSystemState(sync::SystemState::Initialized);
 
         return;
 
-    case sync::SystemState::Initialized:
-        // valid new participant states: running
-        if (!ValidParticipantState(newState, {sync::ParticipantState::Running}))
-            return;
-
+    case sync::ParticipantState::Running:
         if (AllParticipantsInState(sync::ParticipantState::Running))
             SetSystemState(sync::SystemState::Running);
 
         return;
 
-    case sync::SystemState::Running:
-        // valid new participant states: paused, stopped
-        if (!ValidParticipantState(newState, {sync::ParticipantState::Paused, sync::ParticipantState::Stopped}))
-            return;
-
-        if (newState == sync::ParticipantState::Paused)
-        {
+    case sync::ParticipantState::Paused:
+        if (AllParticipantsInState({sync::ParticipantState::Paused, sync::ParticipantState::Running}))
             SetSystemState(sync::SystemState::Paused);
-        }
-        else if (newState == sync::ParticipantState::Stopped)
-        {
-            SetSystemState(sync::SystemState::Stopping);
-            // if there's only one participant, switch directly to stopped.
-            if (AllParticipantsInState(sync::ParticipantState::Stopped))
-                SetSystemState(sync::SystemState::Stopped);
-        }
 
         return;
 
-    case sync::SystemState::Paused:
-        // valid new participant states: Running, Paused
-        if (!ValidParticipantState(newState, {sync::ParticipantState::Running, sync::ParticipantState::Paused}))
-            return;
-
-        // nothing to be done when we're already in Paused and another Participant reports a Paused state.
-        if (newState == sync::ParticipantState::Paused)
-            return;
-
-        if (AllParticipantsInState(sync::ParticipantState::Running))
-            SetSystemState(sync::SystemState::Running);
-
-        return;
-
-
-    case sync::SystemState::Stopping:
-        // valid new participant states: Stopped
-        if (!ValidParticipantState(newState, {sync::ParticipantState::Stopped}))
-            return;
-
+    case sync::ParticipantState::Stopped:
         if (AllParticipantsInState(sync::ParticipantState::Stopped))
             SetSystemState(sync::SystemState::Stopped);
+        else if (AllParticipantsInState({sync::ParticipantState::Stopped, sync::ParticipantState::Paused, sync::ParticipantState::Running}))
+            SetSystemState(sync::SystemState::Stopping);
 
         return;
 
-    case sync::SystemState::Stopped:
-        // valid new participant states: Initializing, Shutdown
-        if (!ValidParticipantState(newState, {sync::ParticipantState::Initializing, sync::ParticipantState::Shutdown}))
-            return;
-
-        if (newState == sync::ParticipantState::Initializing)
-        {
-            SetSystemState(sync::SystemState::Initializing);
-        }
-        else if (newState == sync::ParticipantState::Shutdown)
-        {
-            if (AllParticipantsInState(sync::ParticipantState::Shutdown))
-                SetSystemState(sync::SystemState::Shutdown);
-            else
-                SetSystemState(sync::SystemState::ShuttingDown);
-        }
-        return;
-
-    case sync::SystemState::ShuttingDown:
-        // valid new participant states: Shutdown
-        if (!ValidParticipantState(newState, {sync::ParticipantState::Shutdown}))
-            return;
-
+    case sync::ParticipantState::Shutdown:
         if (AllParticipantsInState(sync::ParticipantState::Shutdown))
             SetSystemState(sync::SystemState::Shutdown);
-
-        return;
-
-    case sync::SystemState::Shutdown:
-        // valid new participant states: none
-
-        // log state transition attempts
-        ValidParticipantState(newState, {});
-        return;
-
-    case sync::SystemState::Error:
-        // valid new participant states: Shutdown, Initializing
-        if (!ValidParticipantState(newState, {sync::ParticipantState::Shutdown, sync::ParticipantState::Initializing}))
-            return;
-
-        // Check if all participants have reached a stable state since the
-        // detection of the error. I.e., if they are in state Error or Stopped.
-        // If not, issue a warning
-        for (auto&& statusIter : _participantStatus)
-        {
-            auto&& status = statusIter.second;
-            switch (status.state)
-            {
-            case sync::ParticipantState::Stopped:
-                continue;
-            case sync::ParticipantState::Error:
-                continue;
-            default:
-                std::cerr
-                    << "WARNING: SystemMonitor detected participant transition to " << newState
-                    << "while participant \"" << status.participantName << "\" is still in state " << status.state << "\n";
-            }
-        }
-
-        if (newState == sync::ParticipantState::Initializing)
-            SetSystemState(sync::SystemState::Initializing);
-        else if (newState == sync::ParticipantState::Shutdown)
+        else if (AllParticipantsInState({sync::ParticipantState::Shutdown, sync::ParticipantState::Stopped, sync::ParticipantState::Error, sync::ParticipantState::Idle, sync::ParticipantState::Initialized}))
             SetSystemState(sync::SystemState::ShuttingDown);
 
         return;
 
-    default:
-        // All cases must be explicitly covered. Thus, there is no valid state transition.
-        std::cerr << "WARNING SystemMonitor::UpdateSystemState(): unhandled system state: " << _systemState << "\n";
+    case sync::ParticipantState::Error:
+        SetSystemState(sync::SystemState::Error);
+        return;
 
-        // Validate state request against an empty list to log the request.
-        ValidParticipantState(newState, {});
+    default:
         return;
     }
+    
+    SetSystemState(sync::SystemState::Invalid);
 }
 
 void SystemMonitor::SetSystemState(sync::SystemState newState)
