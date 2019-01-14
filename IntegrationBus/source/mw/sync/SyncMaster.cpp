@@ -78,6 +78,8 @@ void SyncMaster::SetupDiscreteTimeClient(const cfg::Config& config)
 
     });
 
+    client->SetPendingRequest(0ns, client->tickDuration);
+
     _syncClients.push_back(client);
     _discreteTimeClient = std::move(client);
 }
@@ -146,19 +148,19 @@ void SyncMaster::SystemStateChanged(SystemState newState)
     _systemState = newState;
     if (newState == SystemState::Running)
     {
-        if (oldState == SystemState::Initialized)
+        switch (oldState)
         {
-            if (_discreteTimeClient)
-            {
-                _discreteTimeClient->SetPendingRequest(0ns, _discreteTimeClient->tickDuration);
-            }
-            SendGrants();
+        case SystemState::Initialized:
+            std::cerr << "INFO: SyncMaster: starting simulating." << std::endl;
+            break;
+        case SystemState::Paused:
+            std::cerr << "INFO: SyncMaster: continuing simulating." << std::endl;
+            break;
+        default:
+            std::cerr << "WARNING: SyncMaster: switch to SystemState::Running from unexpected state SystemState::" << oldState << ". Running/Continuing simulation anyway." << std::endl;
+        }
 
-        }
-        if (oldState == SystemState::Paused)
-        {
-            SendGrants();
-        }
+        SendGrants();
     }
 }
 
