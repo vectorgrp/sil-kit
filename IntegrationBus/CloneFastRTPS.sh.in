@@ -2,5 +2,7 @@
 
 echo "Cloning Fast-RTPS library from GitHub..."
 
-#git config http.proxy http://<USER>:<PASSWORD>@DOMAIN:8080
-git clone -b release/1.7.0 --recurse-submodules https://github.com/eProsima/Fast-RTPS.git Fast-RTPS
+workingDir="$(dirname "$0")"
+
+#git config --global http.proxy http://USER:PASSWORD@DOMAIN:8080
+git clone -b release/1.7.0 --recurse-submodules https://github.com/eProsima/Fast-RTPS.git $workingDir/Fast-RTPS
