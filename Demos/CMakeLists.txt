@@ -110,7 +110,6 @@ function(make_ib_demo executableName demoSourceFile)
                 PATTERN *.hpp 
                 PATTERN *.txt 
                 PATTERN *.idl
-                PATTERN *.xml
         )
         install(
             DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../cmake

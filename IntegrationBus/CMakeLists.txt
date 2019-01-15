@@ -253,6 +253,7 @@ install(
         PATTERN *.cmake.in 
         PATTERN CMakeLists.txt 
         PATTERN *.md
+		PATTERN *.xml
 )
 install(
     FILES 
