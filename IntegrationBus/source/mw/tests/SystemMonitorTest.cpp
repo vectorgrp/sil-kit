@@ -635,4 +635,59 @@ TEST_F(SystemMonitorTest, detect_shuttingdown_after_error)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
+TEST_F(SystemMonitorTest, detect_initializing_after_invalid)
+{
+    // Test that the monitor recovers from seemingly erroneous state transitions.
+    //
+    // Due to the distributed nature, it can occur that some participants
+    // have not matched yet, while others are already fully connected. This can lead
+    // to one participant already starting initalization while the other not having yet
+    // connected to the (local) participant, which is seemingly a wrong state transition
+    // as the whole system is not idle yet. The SystemMonitor must be able to recover
+    // from such erroneous state transitions.
+
+    SetParticipantStatus(0, ParticipantState::Idle);
+    SetParticipantStatus(0, ParticipantState::Initializing);
+
+    EXPECT_EQ(monitor.SystemState(), SystemState::Invalid);
+
+    RegisterSystemHandler();
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Initializing))
+        .Times(1);
+
+    SetParticipantStatus(1, ParticipantState::Idle);
+    SetParticipantStatus(2, ParticipantState::Idle);
+    EXPECT_EQ(monitor.SystemState(), SystemState::Initializing);
+}
+
+TEST_F(SystemMonitorTest, detect_initialized_after_invalid)
+{
+    // Test that the monitor recovers from seemingly erroneous state transitions.
+
+    SetParticipantStatus(0, ParticipantState::Idle);
+    SetParticipantStatus(0, ParticipantState::Initializing);
+    SetParticipantStatus(0, ParticipantState::Initialized);
+    EXPECT_EQ(monitor.SystemState(), SystemState::Invalid);
+
+    SetParticipantStatus(1, ParticipantState::Idle);
+    SetParticipantStatus(1, ParticipantState::Initializing);
+    SetParticipantStatus(1, ParticipantState::Initialized);
+    EXPECT_EQ(monitor.SystemState(), SystemState::Invalid);
+
+    RegisterSystemHandler();
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Initializing))
+        .Times(1);
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Initialized))
+        .Times(1);
+
+    SetParticipantStatus(2, ParticipantState::Idle);
+    EXPECT_EQ(monitor.SystemState(), SystemState::Initializing);
+
+    SetParticipantStatus(2, ParticipantState::Initializing);
+    EXPECT_EQ(monitor.SystemState(), SystemState::Initializing);
+
+    SetParticipantStatus(2, ParticipantState::Initialized);
+    EXPECT_EQ(monitor.SystemState(), SystemState::Initialized);
+}
+
 } // anonymous namespace for test

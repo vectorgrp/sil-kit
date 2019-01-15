@@ -210,7 +210,8 @@ void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus, 
     case sync::ParticipantState::Idle:
         if (AllParticipantsInState(sync::ParticipantState::Idle))
             SetSystemState(sync::SystemState::Idle);
-
+        else if (AllParticipantsInState({sync::ParticipantState::Idle, sync::ParticipantState::Initializing, sync::ParticipantState::Initialized}))
+            SetSystemState(sync::SystemState::Initializing);
         return;
 
     case sync::ParticipantState::Initializing:
