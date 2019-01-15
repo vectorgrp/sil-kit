@@ -68,14 +68,6 @@ endif()
 # Install targets
 #######################################################################################################################
 
-# Install targets for particular components, so one can simply 'cmake --build . --target install_<Name>'
-# https://stackoverflow.com/questions/9190098/for-cmakes-install-command-what-can-the-component-argument-do
-add_custom_target(install_IntegrationBus-Launcher
-    COMMAND "${CMAKE_COMMAND}" -DCOMPONENT=IntegrationBus-Launcher -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
-    COMMENT "Installing component 'IntegrationBus-Launcher'"
-    VERBATIM
-)
-
 set(VERSION_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/__version__.py.in")
 set(VERSION_PY    "${CMAKE_CURRENT_BINARY_DIR}/__version__.py")
 configure_file(${VERSION_PY_IN} ${VERSION_PY})

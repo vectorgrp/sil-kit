@@ -194,19 +194,6 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/.editorconfig DESTINATION ${CMAKE_CURRENT_
 # Install targets for the IntegrationBus
 #######################################################################################################################
 
-# Install targets for particular components, so one can simply 'cmake --build . --target install_<Name>'
-# https://stackoverflow.com/questions/9190098/for-cmakes-install-command-what-can-the-component-argument-do
-add_custom_target(install_IntegrationBus
-    COMMAND "${CMAKE_COMMAND}" -DCOMPONENT=IntegrationBus -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
-    COMMENT "Installing component 'IntegrationBus'"
-    VERBATIM
-)
-add_custom_target(install_IntegrationBus-Developer
-    COMMAND "${CMAKE_COMMAND}" -DCOMPONENT=IntegrationBus-Developer -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
-    COMMENT "Installing component 'IntegrationBus-Developer'"
-    VERBATIM
-)
-
 # Save the IntegrationBusTargets into file IntegrationBusTargets.cmake
 install(EXPORT IntegrationBusTargets
     # Without overriding the file name, these default file names will be exported:

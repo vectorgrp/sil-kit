@@ -188,19 +188,6 @@ endif(MSVC)
 #######################################################################################################################
 
 if(ib_can_install)
-    # Install targets for particular components, so one can simply 'cmake --build . --target install_<Name>'
-    # https://stackoverflow.com/questions/9190098/for-cmakes-install-command-what-can-the-component-argument-do
-    add_custom_target(install_IntegrationBus-Demos
-    COMMAND "${CMAKE_COMMAND}" -DCOMPONENT=IntegrationBus-Demos -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
-    COMMENT "Installing component 'IntegrationBus-Demos'"
-    VERBATIM
-    )
-    add_custom_target(install_IntegrationBus-Demos-Developer
-    COMMAND "${CMAKE_COMMAND}" -DCOMPONENT=IntegrationBus-Demos-Developer -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
-    COMMENT "Installing component 'IntegrationBus-Demos-Developer'"
-    VERBATIM
-    )
-
     # Install sources
     # Copy all files from the source directory to the proper destination
     install(
