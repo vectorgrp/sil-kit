@@ -1,7 +1,7 @@
 add_subdirectory(idl)
 
 add_library(IbMwFastRtps STATIC
-    IbSubListenerNg.hpp
+    IbSubListener.hpp
     FastRtpsComAdapter.hpp
     FastRtpsComAdapter.cpp
     FastRtpsGuard.hpp

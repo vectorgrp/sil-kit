@@ -12,7 +12,7 @@ namespace ib {
 namespace mw {
 
 template<class IdlMessageT>
-class IbSubListenerNg : public eprosima::fastrtps::SubscriberListener
+class IbSubListener : public eprosima::fastrtps::SubscriberListener
 {
 public:
     using IdlMessageType = IdlMessageT;
@@ -20,7 +20,7 @@ public:
     using IbReceiver = IIbMessageReceiver<IbMessageType>;
 
 public:
-    IbSubListenerNg() = default;
+    IbSubListener() = default;
 
     void addReceiver(IbReceiver* receiver);
     void clearReceivers();
@@ -36,20 +36,20 @@ private:
 //  Inline Implementations
 // ================================================================================
 template<class IdlMessageT>
-void IbSubListenerNg<IdlMessageT>::addReceiver(IbReceiver* receiver)
+void IbSubListener<IdlMessageT>::addReceiver(IbReceiver* receiver)
 {
     _receivers.push_back(receiver);
 }
     
 template<class IdlMessageT>
-void IbSubListenerNg<IdlMessageT>::clearReceivers()
+void IbSubListener<IdlMessageT>::clearReceivers()
 {
     decltype(_receivers) emptyList;
     std::swap(_receivers, emptyList);
 }
     
 template<class IdlMessageT>
-void IbSubListenerNg<IdlMessageT>::onNewDataMessage(eprosima::fastrtps::Subscriber* sub)
+void IbSubListener<IdlMessageT>::onNewDataMessage(eprosima::fastrtps::Subscriber* sub)
 {
     IdlMessageType idlMsg;
 	eprosima::fastrtps::SampleInfo_t info;
@@ -65,7 +65,26 @@ void IbSubListenerNg<IdlMessageT>::onNewDataMessage(eprosima::fastrtps::Subscrib
 
     for (auto&& receiver : _receivers)
     {
-        receiver->ReceiveIbMessage(senderAddr, msg);
+        try
+        {
+            receiver->ReceiveIbMessage(senderAddr, msg);
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr
+                << "WARNING: Callback for "
+                << sub->getAttributes().topic.topicDataType
+                << "[\"" << sub->getAttributes().topic.topicName << "\"]"
+                << " threw an exception: " << e.what() << "." << std::endl;
+        }
+        catch (...)
+        {
+            std::cerr
+                << "WARNING: Callback for "
+                << sub->getAttributes().topic.topicDataType
+                << "[\"" << sub->getAttributes().topic.topicName << "\"]"
+                << " threw an unknown exception." << std::endl;
+        }
     }
 }
 

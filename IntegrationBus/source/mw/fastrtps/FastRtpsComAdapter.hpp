@@ -20,7 +20,7 @@
 #include "idl/all.hpp"
 
 #include "IdlTypeConversion.hpp"
-#include "IbSubListenerNg.hpp"
+#include "IbSubListener.hpp"
 #include "memory_fastrtps.hpp"
 #include "FastRtpsGuard.hpp"
 
@@ -154,7 +154,7 @@ private:
     struct RtpsSubListener
     {
         using TopicType = TopicT;
-        IbSubListenerNg<TopicType> listener;
+        IbSubListener<TopicType> listener;
         FastRtps::unique_ptr<eprosima::fastrtps::Subscriber> subscriber;
     };
 
