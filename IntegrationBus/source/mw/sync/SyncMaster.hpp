@@ -148,14 +148,6 @@ private:
     IComAdapter* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddress;
 
-    // TTD RELATED -------->
-    //std::chrono::nanoseconds _now{0};
-    //std::chrono::nanoseconds _tickDuration{0};
-
-    //unsigned int _numClients{0};
-    //unsigned int _numTickDoneReceived{0};
-    // <--------- END OF TTD
-
     SystemState _systemState{SystemState::Invalid};
     std::promise<SystemState> _finalStatePromise;
 

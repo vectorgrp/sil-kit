@@ -51,7 +51,7 @@ void SyncMaster::SetupTimeQuantumClients(const cfg::Config& config)
         _timeQuantumClients[participant.id] = std::move(client);
 
     }
-    std::cout << "<<<<<< SYNCMASTER HAS " << _timeQuantumClients.size() << " Time Quantum Clients\n";
+    std::cout << "INFO: SyncMaster has " << _timeQuantumClients.size() << " TimeQuantum Clients\n";
 }
 
 void SyncMaster::SetupDiscreteTimeClient(const cfg::Config& config)
@@ -62,7 +62,7 @@ void SyncMaster::SetupDiscreteTimeClient(const cfg::Config& config)
             end(config.simulationSetup.participants),
             [](auto&& participant) { return participant.syncType == cfg::SyncType::DiscreteTime; }
     );
-    std::cout << "<<<<<< SYNCMASTER HAS " << numClients << " Discrete Time Clients\n";
+    std::cout << "INFO: SyncMaster has " << numClients << " DiscreteTime Clients\n";
     if (numClients == 0)
         return;
 
@@ -89,7 +89,12 @@ void SyncMaster::ReceiveIbMessage(mw::EndpointAddress from, const TickDone& msg)
     assert(_discreteTimeClient);
 
     _discreteTimeClient->TickDoneReceived();
-    if (_discreteTimeClient->HasPendingRequest())
+
+    // check if it was the last missing TickDone in this step
+    if (!_discreteTimeClient->HasPendingRequest())
+        return;
+
+    if (_systemState == SystemState::Running)
     {
         SendGrants();
     }
@@ -97,11 +102,6 @@ void SyncMaster::ReceiveIbMessage(mw::EndpointAddress from, const TickDone& msg)
 
 void SyncMaster::ReceiveIbMessage(mw::EndpointAddress from, const QuantumRequest& msg)
 {
-    if (_systemState != SystemState::Running)
-    {
-        std::cerr << "ERROR: Received QuantumRequest from participant " << from.participant << " in state " << _systemState << "\n";
-    }
-
     if (_timeQuantumClients.count(from.participant) != 1)
     {
         std::cerr << "ERROR: Received QuantumRequest from participant " << from.participant << ", which is unknown!\n";
@@ -122,7 +122,11 @@ void SyncMaster::ReceiveIbMessage(mw::EndpointAddress from, const QuantumRequest
     }
 
     client->SetPendingRequest(msg.now, msg.duration);
-    SendGrants();
+
+    if (_systemState == SystemState::Running)
+    {
+        SendGrants();
+    }
 }
 
 void SyncMaster::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)

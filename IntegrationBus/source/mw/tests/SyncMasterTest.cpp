@@ -114,6 +114,103 @@ TEST_F(SyncMasterTest, discrete_time_only)
     syncMaster.ReceiveIbMessage(From(ibConfig.simulationSetup.participants[2]), tickDone);
 }
 
+TEST_F(SyncMasterTest, start_running_after_systemstateInvalid)
+{
+    ib::cfg::ConfigBuilder testConfig{"TestConfig"};
+    auto&& simulationSetup = testConfig.SimulationSetup();
+    simulationSetup
+        .SetTimeSync(ib::cfg::TimeSync::SyncType::TickTickDone).WithTickPeriod(10ms);
+    simulationSetup
+        .AddParticipant("master").AsSyncMaster();
+    simulationSetup
+        .AddParticipant("client-0").WithSyncType(cfg::SyncType::DiscreteTime);
+    auto ibConfig = testConfig.Build();
+
+    SyncMaster syncMaster{&comAdapter, ibConfig, &mockMonitor};
+    syncMaster.SetEndpointAddress(From(ibConfig.simulationSetup.participants[0]));
+
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{0ns}))
+        .Times(1);
+
+    assert(mockMonitor.systemStateHandler);
+    mockMonitor.systemStateHandler(sync::SystemState::Invalid);
+    mockMonitor.systemStateHandler(sync::SystemState::Running);
+}
+
+TEST_F(SyncMasterTest, dont_generate_ticks_while_paused)
+{
+    ib::cfg::ConfigBuilder testConfig{"TestConfig"};
+    auto&& simulationSetup = testConfig.SimulationSetup();
+    simulationSetup
+        .SetTimeSync(ib::cfg::TimeSync::SyncType::TickTickDone).WithTickPeriod(10ms);
+    simulationSetup
+        .AddParticipant("master").AsSyncMaster();
+    simulationSetup
+        .AddParticipant("client-0").WithSyncType(cfg::SyncType::DiscreteTime);
+    simulationSetup
+        .AddParticipant("client-1").WithSyncType(cfg::SyncType::DiscreteTime);
+    auto ibConfig = testConfig.Build();
+
+    SyncMaster syncMaster{&comAdapter, ibConfig, &mockMonitor};
+    syncMaster.SetEndpointAddress(From(ibConfig.simulationSetup.participants[0]));
+
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{0ns}))
+        .Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{10ms}))
+        .Times(0);
+
+
+    assert(mockMonitor.systemStateHandler);
+    mockMonitor.systemStateHandler(sync::SystemState::Idle);
+    mockMonitor.systemStateHandler(sync::SystemState::Initialized);
+    // System::Running will cause the 0ns Tick
+    mockMonitor.systemStateHandler(sync::SystemState::Running);
+    // System::Paused should stop tick generation...
+    mockMonitor.systemStateHandler(sync::SystemState::Paused);
+    // ... even if the clients send a tick done
+    TickDone tickDone;
+    syncMaster.ReceiveIbMessage(From(ibConfig.simulationSetup.participants[1]), tickDone);
+    syncMaster.ReceiveIbMessage(From(ibConfig.simulationSetup.participants[2]), tickDone);
+}
+
+TEST_F(SyncMasterTest, continue_tick_generation_after_pause)
+{
+    ib::cfg::ConfigBuilder testConfig{"TestConfig"};
+    auto&& simulationSetup = testConfig.SimulationSetup();
+    simulationSetup
+        .SetTimeSync(ib::cfg::TimeSync::SyncType::TickTickDone).WithTickPeriod(10ms);
+    simulationSetup
+        .AddParticipant("master").AsSyncMaster();
+    simulationSetup
+        .AddParticipant("client-0").WithSyncType(cfg::SyncType::DiscreteTime);
+    simulationSetup
+        .AddParticipant("client-1").WithSyncType(cfg::SyncType::DiscreteTime);
+    auto ibConfig = testConfig.Build();
+
+    SyncMaster syncMaster{&comAdapter, ibConfig, &mockMonitor};
+    syncMaster.SetEndpointAddress(From(ibConfig.simulationSetup.participants[0]));
+
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{0ns}))
+        .Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{10ms}))
+        .Times(1);
+
+
+    assert(mockMonitor.systemStateHandler);
+    mockMonitor.systemStateHandler(sync::SystemState::Idle);
+    mockMonitor.systemStateHandler(sync::SystemState::Initialized);
+    // System::Running will cause the 0ns Tick
+    mockMonitor.systemStateHandler(sync::SystemState::Running);
+    // System::Paused should stop tick generation...
+    mockMonitor.systemStateHandler(sync::SystemState::Paused);
+    // ... even if the clients send a tick done
+    TickDone tickDone;
+    syncMaster.ReceiveIbMessage(From(ibConfig.simulationSetup.participants[1]), tickDone);
+    syncMaster.ReceiveIbMessage(From(ibConfig.simulationSetup.participants[2]), tickDone);
+    // But the ticks should continue after switching back to running
+    mockMonitor.systemStateHandler(sync::SystemState::Running);
+}
+
 TEST_F(SyncMasterTest, single_quantum_client)
 {
     // make a config
@@ -345,6 +442,79 @@ TEST_F(SyncMasterTest, mixed_clients)
     syncMaster.ReceiveIbMessage(From(ibConfig.simulationSetup.participants[2]), tickDone);
 
     syncMaster.ReceiveIbMessage(addr_p1, QuantumRequest{2ms, 1ms});
+}
+
+
+TEST_F(SyncMasterTest, dont_grant_quantum_requests_while_paused)
+{
+    // make a config
+    ib::cfg::ConfigBuilder testConfig{"TestConfig"};
+    auto&& simulationSetup = testConfig.SimulationSetup();
+    simulationSetup
+        .AddParticipant("master").AsSyncMaster();
+    simulationSetup
+        .AddParticipant("client-0").WithSyncType(cfg::SyncType::TimeQuantum);
+    auto ibConfig = testConfig.Build();
+
+    // Create the SyncMaster
+    SyncMaster syncMaster{&comAdapter, ibConfig, &mockMonitor};
+    syncMaster.SetEndpointAddress(From(ibConfig.simulationSetup.participants[0]));
+
+    // bring system in Paused state
+    assert(mockMonitor.systemStateHandler);
+    mockMonitor.systemStateHandler(sync::SystemState::Initialized);
+    mockMonitor.systemStateHandler(sync::SystemState::Running);
+    mockMonitor.systemStateHandler(sync::SystemState::Paused);
+
+    auto addr_p1 = EndpointAddress{ibConfig.simulationSetup.participants[1].id, 1024};
+
+    QuantumGrant grant;
+    grant.grantee = addr_p1;
+    grant.now = 0ns;
+    grant.duration = 1ms;
+    grant.status = QuantumRequestStatus::Granted;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), grant))
+        .Times(0);
+
+    syncMaster.ReceiveIbMessage(addr_p1, QuantumRequest{0ns, 1ms});
+}
+
+TEST_F(SyncMasterTest, give_grants_after_pause_ends)
+{
+    // make a config
+    ib::cfg::ConfigBuilder testConfig{"TestConfig"};
+    auto&& simulationSetup = testConfig.SimulationSetup();
+    simulationSetup
+        .AddParticipant("master").AsSyncMaster();
+    simulationSetup
+        .AddParticipant("client-0").WithSyncType(cfg::SyncType::TimeQuantum);
+    auto ibConfig = testConfig.Build();
+
+    // Create the SyncMaster
+    SyncMaster syncMaster{&comAdapter, ibConfig, &mockMonitor};
+    syncMaster.SetEndpointAddress(From(ibConfig.simulationSetup.participants[0]));
+
+    // bring system in Paused state
+    assert(mockMonitor.systemStateHandler);
+    mockMonitor.systemStateHandler(sync::SystemState::Initialized);
+    mockMonitor.systemStateHandler(sync::SystemState::Running);
+    mockMonitor.systemStateHandler(sync::SystemState::Paused);
+
+    auto addr_p1 = EndpointAddress{ibConfig.simulationSetup.participants[1].id, 1024};
+
+    QuantumGrant grant;
+    grant.grantee = addr_p1;
+    grant.now = 0ns;
+    grant.duration = 1ms;
+    grant.status = QuantumRequestStatus::Granted;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), grant))
+        .Times(1);
+
+
+    syncMaster.ReceiveIbMessage(addr_p1, QuantumRequest{0ns, 1ms});
+    mockMonitor.systemStateHandler(sync::SystemState::Running);
 }
 
 
