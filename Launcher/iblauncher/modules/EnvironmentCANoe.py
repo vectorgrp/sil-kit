@@ -142,7 +142,8 @@ class EnvironmentCANoe(Environment.Environment):
         canoeExec64DirectoryPath = EnvironmentCANoe.__getCanoeExec64DirectoryPath(verbose)
         if not canoeExec64DirectoryPath:
             return None
-        canoeExec32DirectoryPath = os.path.abspath(canoeExec64DirectoryPath + os.path.sep + ".." + os.path.sep + "Exec32")
+        canoeExec32Folder = "Exec32_Debug" if "Exec64_Debug" in canoeExec64DirectoryPath else "Exec32"
+        canoeExec32DirectoryPath = os.path.abspath(canoeExec64DirectoryPath + os.path.sep + ".." + os.path.sep + canoeExec32Folder)
         return canoeExec32DirectoryPath
 
     #######################################################################################################################
