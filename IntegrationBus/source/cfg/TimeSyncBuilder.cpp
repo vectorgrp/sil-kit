@@ -6,14 +6,31 @@ namespace ib {
 namespace cfg {
 
 
-TimeSyncBuilder::TimeSyncBuilder(TimeSync::SyncType type)
+TimeSyncBuilder::TimeSyncBuilder()
 {
-    _config.syncType = type;
 }
 
 auto TimeSyncBuilder::WithTickPeriod(std::chrono::nanoseconds period) -> TimeSyncBuilder&
 {
     _config.tickPeriod = period;
+    return *this;
+}
+
+auto TimeSyncBuilder::WithStrictSyncPolicy() -> TimeSyncBuilder&
+{
+    _config.syncPolicy = TimeSync::SyncPolicy::Strict;
+    return *this;
+}
+
+auto TimeSyncBuilder::WithLooseSyncPolicy() -> TimeSyncBuilder&
+{
+    _config.syncPolicy = TimeSync::SyncPolicy::Loose;
+        return *this;
+}
+
+auto TimeSyncBuilder::WithSyncPolicy(TimeSync::SyncPolicy syncPolicy) -> TimeSyncBuilder&
+{
+    _config.syncPolicy = syncPolicy;
     return *this;
 }
 

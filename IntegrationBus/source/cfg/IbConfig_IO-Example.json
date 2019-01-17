@@ -97,11 +97,7 @@
                 "Endpoints": [ "IO-Sender/SecretSpyCode", "IO-Receiver/SecretSpyCode" ]
             }
 
-        ],
-
-        "ExecutionController": {
-            "SyncType": "DiscreteTimed"
-        }
+        ]
 
     }
 

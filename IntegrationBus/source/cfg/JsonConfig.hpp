@@ -59,7 +59,7 @@ auto from_json<Link>(const json11::Json& json) -> Link;
 template <>
 auto from_json<NetworkSimulator>(const json11::Json& json) -> NetworkSimulator;
 template <>
-auto from_json<TimeSync::SyncType>(const json11::Json& json) -> TimeSync::SyncType;
+auto from_json<TimeSync::SyncPolicy>(const json11::Json& json) -> TimeSync::SyncPolicy;
 template <>
 auto from_json<TimeSync>(const json11::Json& json) -> TimeSync;
 template <>
@@ -99,7 +99,7 @@ auto to_json(const Switch::Port& switchPort) -> json11::Json;
 auto to_json(const Switch& switch_) -> json11::Json;
 auto to_json(const Link& link) -> json11::Json;
 auto to_json(const NetworkSimulator& networkSimulator) -> json11::Json;
-auto to_json(TimeSync::SyncType syncType) -> json11::Json;
+auto to_json(TimeSync::SyncPolicy syncPolicy) -> json11::Json;
 auto to_json(const TimeSync& controller) -> json11::Json;
 auto to_json(const SimulationSetup& simulationSetup) -> json11::Json;
 auto to_json(FastRtps::DiscoveryType discoveryType) -> json11::Json;

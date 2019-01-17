@@ -30,7 +30,7 @@ public:
 
     IntegrationBusAPI auto AddOrGetLink(Link::Type linkType, const std::string& name) -> LinkBuilder&;
 
-    IntegrationBusAPI auto SetTimeSync(TimeSync::SyncType type) -> TimeSyncBuilder&;
+    IntegrationBusAPI auto ConfigureTimeSync() -> TimeSyncBuilder&;
 
 public:
     // IB Internal 

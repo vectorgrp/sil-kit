@@ -495,7 +495,6 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
     participant.genericPublishers = from_json<std::vector<GenericPort>>(json["GenericPublishers"].array_items());
     participant.genericSubscribers = subscribers_from_json(json["GenericSubscribers"].array_items());
 
-    // FIXME: Make SyncType mandatory, once old state handling has been deprecated.
     optional_from_json(participant.syncType, json, "SyncType");
 
     participant.isSyncMaster = json["IsSyncMaster"].bool_value();
@@ -579,35 +578,35 @@ auto from_json<NetworkSimulator>(const json11::Json& json) -> NetworkSimulator
     return simulator;
 }
 
-auto to_json(TimeSync::SyncType syncType) -> json11::Json
+auto to_json(TimeSync::SyncPolicy syncPolicy) -> json11::Json
 {
-    switch (syncType)
+    try
     {
-    case TimeSync::SyncType::TickTickDone:
-        return "TickTickDone";
-    case TimeSync::SyncType::DiscreteTimed:
-        return "DiscreteTimed";
-    default:
-        return "Invalid";
+        return to_string(syncPolicy);
+    }
+    catch (const ib::type_conversion_error&)
+    {
+        return "UNKNOWN_SYNC_POLICY";
     }
 }
 
 template <>
-auto from_json<TimeSync::SyncType>(const json11::Json& json) -> TimeSync::SyncType
+auto from_json<TimeSync::SyncPolicy>(const json11::Json& json) -> TimeSync::SyncPolicy
 {
-    auto&& syncTypeName = json.string_value();
-    if (syncTypeName == "TickTickDone")
-        return TimeSync::SyncType::TickTickDone;
-    else if (syncTypeName == "DiscreteTimed")
-        return TimeSync::SyncType::DiscreteTimed;
-    else
-        return TimeSync::SyncType::Invalid;
+    auto&& syncType = json.string_value();
+
+    if (syncType == "Loose")
+        return TimeSync::SyncPolicy::Loose;
+    if (syncType == "Strict")
+        return TimeSync::SyncPolicy::Strict;
+
+    throw Misconfiguration{"Invalid Participant SyncPolicy"};
 }
 
 auto to_json(const TimeSync& timeSync) -> json11::Json
 {
     return json11::Json::object{
-        { "SyncType", to_json(timeSync.syncType) },
+        { "SyncPolicy", to_json(timeSync.syncPolicy) },
         { "TickPeriodNs", static_cast<int>(timeSync.tickPeriod.count()) }
     };
 }
@@ -617,7 +616,7 @@ auto from_json<TimeSync>(const json11::Json& json) -> TimeSync
 {
     TimeSync timeSync;
 
-    timeSync.syncType = from_json<TimeSync::SyncType>(json["SyncType"]);
+    optional_from_json(timeSync.syncPolicy, json, "SyncPolicy");
     timeSync.tickPeriod = std::chrono::nanoseconds{json["TickPeriodNs"].int_value()};
 
     return timeSync;
@@ -648,7 +647,7 @@ auto from_json<SimulationSetup>(const json11::Json& json) -> SimulationSetup
     return simulationSetup;
 }
 
-auto to_json(const FastRtps::DiscoveryType& discoveryType) -> json11::Json
+auto to_json(FastRtps::DiscoveryType discoveryType) -> json11::Json
 {
     try
     {

@@ -213,14 +213,12 @@ struct NetworkSimulator
 
 struct TimeSync
 {
-    enum class SyncType
+    enum class SyncPolicy
     {
-        TickTickDone,
-        DiscreteTimed,
-        Invalid
+        Loose, //<! There is no guarantee that data has been received before the next simulation cycle
+        Strict //<! Enforce that all sent data has been received before the next simulation cycle
     };
-
-    SyncType syncType{SyncType::Invalid};
+    SyncPolicy syncPolicy{SyncPolicy::Loose};
     std::chrono::nanoseconds tickPeriod{0};
 };
 

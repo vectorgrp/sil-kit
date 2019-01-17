@@ -370,19 +370,47 @@ TEST_F(JsonConfigTest, create_fastrtps_config_with_configfile)
     EXPECT_EQ(fastRtps.configFileName, std::string{"MyMagicFastRTPSsettings.xml"});
 }
 
-TEST_F(JsonConfigTest, UseTickTickDoneTiming)
+TEST_F(JsonConfigTest, configure_timesync_with_strict_sync_policy)
 {
     simulationSetup
-        .SetTimeSync(TimeSync::SyncType::TickTickDone)
-        .WithTickPeriod(10ms);
+        .ConfigureTimeSync()
+          .WithTickPeriod(10ms)
+          .WithStrictSyncPolicy();
 
     BuildConfigFromJson();
     EXPECT_EQ(config, referenceConfig);
 
     auto&& timeSync = config.simulationSetup.timeSync;
-    EXPECT_EQ(timeSync.syncType, TimeSync::SyncType::TickTickDone);
+    EXPECT_EQ(timeSync.syncPolicy, TimeSync::SyncPolicy::Strict);
     EXPECT_EQ(timeSync.tickPeriod, 10ms);
 }
+
+TEST_F(JsonConfigTest, configure_timesync_with_loose_sync_policy)
+{
+    simulationSetup
+        .ConfigureTimeSync()
+            .WithTickPeriod(10ms)
+            .WithLooseSyncPolicy();
+
+    BuildConfigFromJson();
+    EXPECT_EQ(config, referenceConfig);
+
+    auto&& timeSync = config.simulationSetup.timeSync;
+    EXPECT_EQ(timeSync.syncPolicy, TimeSync::SyncPolicy::Loose);
+    EXPECT_EQ(timeSync.tickPeriod, 10ms);
+}
+
+TEST_F(JsonConfigTest, default_timesync_policy_is_loose)
+{
+    simulationSetup.ConfigureTimeSync();
+
+    BuildConfigFromJson();
+    EXPECT_EQ(config, referenceConfig);
+
+    auto&& timeSync = config.simulationSetup.timeSync;
+    EXPECT_EQ(timeSync.syncPolicy, TimeSync::SyncPolicy::Loose);
+}
+
 
 TEST_F(JsonConfigTest, ConfigureExecutionMaster)
 {

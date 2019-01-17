@@ -34,7 +34,7 @@
         ],
 
         "TimeSync": {
-            "SyncType": "DiscreteTimed"
+            "SyncPolicy": "Strict"
         }
     },
 

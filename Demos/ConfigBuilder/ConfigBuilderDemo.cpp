@@ -55,7 +55,7 @@ int main(int, char**)
             ->AddPort("Port3").WithVlanIds({3,4});
 
     simulationSetup
-        .SetTimeSync(TimeSync::SyncType::DiscreteTimed);
+        .ConfigureTimeSync();
 
     auto config = myConfig.Build();
 

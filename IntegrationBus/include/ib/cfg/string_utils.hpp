@@ -15,6 +15,8 @@ namespace cfg {
 inline auto to_string(SyncType syncType) -> std::string;
 inline auto operator<<(std::ostream& out, SyncType) -> std::ostream&;
 
+inline auto to_string(TimeSync::SyncPolicy syncPolicy) -> std::string;
+
 namespace FastRtps {
 
 inline auto to_string(DiscoveryType discoveryType) -> std::string;
@@ -55,6 +57,20 @@ std::ostream& operator<<(std::ostream& out, SyncType syncType)
         return out << "SyncType{" << static_cast<uint32_t>(syncType) << "}";
     }
 }
+
+auto to_string(TimeSync::SyncPolicy syncPolicy) -> std::string
+{
+    switch (syncPolicy)
+    {
+    case TimeSync::SyncPolicy::Loose:
+        return "Loose";
+    case TimeSync::SyncPolicy::Strict:
+        return "Strict";
+    default:
+        throw ib::type_conversion_error{};
+    }
+}
+
 
 namespace FastRtps {
 

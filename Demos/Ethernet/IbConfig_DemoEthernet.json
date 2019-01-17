@@ -53,7 +53,7 @@
         ],
 
         "TimeSync": {
-            "SyncType": "TickTickDone",
+            "SyncPolicy": "Loose",
             "TickPeriodNs": 1000000
         }
 

@@ -3,7 +3,23 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - 2018-12-19
+## [Unreleased] - 2019-01-23
+### Added
+- Strict sync, i.e., calling wait_for_all_acked() between ticks, is now
+  configurable via the IbConfig.json: SimulationSetup/TimeSync/SyncPolicy.
+### Removed
+- SimulationSetup/TimeSync/SyncType has been removed from the IbConfig.json as
+  the SyncType can now be configured per participant.
+### Changed
+- The TimeSyncConfigBuilder is now accessed ib::cfg::SimulationSetupBuilder::ConfigureTimeSync().
+  Old: ib::cfg::SimulationSetupBuilder::SetSyncType(SyncType).
+
+### Fixed
+- SystemMonitor was made more robust to race conditions that could lead to a IB
+  Startup Failure (SystemState stuck in SystemState::Invalid)
+
+
+## [Sprint-20] - 2018-12-19
 ### Added
 - LIN: new method ILinController::SetResponseWithChecksum() to override the
   configured checksum model. This can be used to facilitate fault injection and

@@ -12,9 +12,13 @@ namespace cfg {
 class TimeSyncBuilder
 {
 public:
-    IntegrationBusAPI TimeSyncBuilder(TimeSync::SyncType type);
+    IntegrationBusAPI TimeSyncBuilder();
 
     IntegrationBusAPI auto WithTickPeriod(std::chrono::nanoseconds period) -> TimeSyncBuilder&;
+
+    IntegrationBusAPI auto WithStrictSyncPolicy() -> TimeSyncBuilder&;
+    IntegrationBusAPI auto WithLooseSyncPolicy() -> TimeSyncBuilder&;
+    IntegrationBusAPI auto WithSyncPolicy(TimeSync::SyncPolicy syncPolicy) -> TimeSyncBuilder&;
 
     IntegrationBusAPI auto Build() -> TimeSync;
 

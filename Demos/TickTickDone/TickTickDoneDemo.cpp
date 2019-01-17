@@ -76,7 +76,7 @@ int main(int argc, char** argv)
 
     // Set TTD Time Synchronization
     simulationSetup
-        .SetTimeSync(ib::cfg::TimeSync::SyncType::TickTickDone).WithTickPeriod(1ms);
+        .ConfigureTimeSync().WithTickPeriod(1ms);
 
     // add "master" as time sync master
     simulationSetup

@@ -88,7 +88,7 @@ TEST_F(SyncMasterTest, discrete_time_only)
     ib::cfg::ConfigBuilder testConfig{"TestConfig"};
     auto&& simulationSetup = testConfig.SimulationSetup();
     simulationSetup
-        .SetTimeSync(ib::cfg::TimeSync::SyncType::TickTickDone).WithTickPeriod(10ms);
+        .ConfigureTimeSync().WithTickPeriod(10ms);
     simulationSetup
         .AddParticipant("master").AsSyncMaster();
     simulationSetup
@@ -119,7 +119,7 @@ TEST_F(SyncMasterTest, start_running_after_systemstateInvalid)
     ib::cfg::ConfigBuilder testConfig{"TestConfig"};
     auto&& simulationSetup = testConfig.SimulationSetup();
     simulationSetup
-        .SetTimeSync(ib::cfg::TimeSync::SyncType::TickTickDone).WithTickPeriod(10ms);
+        .ConfigureTimeSync().WithTickPeriod(10ms);
     simulationSetup
         .AddParticipant("master").AsSyncMaster();
     simulationSetup
@@ -142,7 +142,7 @@ TEST_F(SyncMasterTest, dont_generate_ticks_while_paused)
     ib::cfg::ConfigBuilder testConfig{"TestConfig"};
     auto&& simulationSetup = testConfig.SimulationSetup();
     simulationSetup
-        .SetTimeSync(ib::cfg::TimeSync::SyncType::TickTickDone).WithTickPeriod(10ms);
+        .ConfigureTimeSync().WithTickPeriod(10ms);
     simulationSetup
         .AddParticipant("master").AsSyncMaster();
     simulationSetup
@@ -178,7 +178,7 @@ TEST_F(SyncMasterTest, continue_tick_generation_after_pause)
     ib::cfg::ConfigBuilder testConfig{"TestConfig"};
     auto&& simulationSetup = testConfig.SimulationSetup();
     simulationSetup
-        .SetTimeSync(ib::cfg::TimeSync::SyncType::TickTickDone).WithTickPeriod(10ms);
+        .ConfigureTimeSync().WithTickPeriod(10ms);
     simulationSetup
         .AddParticipant("master").AsSyncMaster();
     simulationSetup

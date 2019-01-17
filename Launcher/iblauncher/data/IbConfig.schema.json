@@ -398,25 +398,25 @@
             "type": "object",
             "title": "Time synchronization",
             "properties": {
-              "SyncType": {
+              "SyncPolicy": {
                 "type": "string",
-                "title": "Type of the synchronization.",
+                "title": "Synchronization Policy (Loose/Strict)",
+                "description": "This setting determines whether to wait until data is delivered to other participants (=Strict) or not (=Loose). The default is Loose.",
                 "enum": [
-                  "DiscreteTimed",
-                  "TickTickDone"
+                  "Loose",
+                  "Strict"
                 ],
-                "default": "",
+                "default": "Loose",
                 "examples": [
-                  "DiscreteTimed"
+                  "Loose"
                 ]
               },
               "TickPeriodNs":{
                 "type": "integer",
-                "title": "Tick period in nano seconds for TickTickDone synchronization"
+                "title": "Tick period in nano seconds for DiscreteTime synchronization"
               }
             },
-            "additionalProperties": false,
-            "required": ["SyncType"]
+            "additionalProperties": false            
           }
         },
         "additionalProperties": false

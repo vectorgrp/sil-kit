@@ -341,8 +341,7 @@ bool operator==(const Switch& lhs, const Switch& rhs)
 
 bool operator==(const TimeSync& lhs, const TimeSync& rhs)
 {
-    return lhs.syncType == rhs.syncType
-        && lhs.tickPeriod == rhs.tickPeriod;
+    return lhs.tickPeriod == rhs.tickPeriod;
 }
 
 bool operator==(const SimulationSetup& lhs, const SimulationSetup& rhs)

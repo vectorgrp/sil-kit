@@ -31,11 +31,7 @@
                     "Participant2/CAN"
                 ]
             }
-        ],
-
-        "TimeSync": {
-            "SyncType": "DiscreteTimed"
-        }
+        ]
     },
 
     "MiddlewareConfig": {

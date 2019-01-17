@@ -43,7 +43,7 @@ protected:
 
 TEST_F(ConfigBuilderTest, make_exec_controller)
 {
-    simulationSetup.SetTimeSync(TimeSync::SyncType::TickTickDone).WithTickPeriod(10ms);
+    simulationSetup.ConfigureTimeSync().WithTickPeriod(10ms);
     simulationSetup.AddParticipant("ExecControllerDt").AsSyncMaster();
 
 
@@ -53,7 +53,6 @@ TEST_F(ConfigBuilderTest, make_exec_controller)
     auto&& execController = config.simulationSetup.participants[0];
     EXPECT_EQ(execController.name, "ExecControllerDt");
     EXPECT_TRUE(execController.isSyncMaster);
-    EXPECT_EQ(config.simulationSetup.timeSync.syncType, TimeSync::SyncType::TickTickDone);
     EXPECT_EQ(config.simulationSetup.timeSync.tickPeriod, 10ms);
 
 }
@@ -352,6 +351,14 @@ TEST_F(ConfigBuilderTest, configure_fastrtps_configfile_with_unicast_locators_mu
         .AddUnicastLocator("participant1", "192.168.0.1");
 
     EXPECT_THROW(configBuilder.Build(), ib::cfg::Misconfiguration);
+}
+
+TEST_F(ConfigBuilderTest, configure_timesync_syncpolicy_by_parameter)
+{
+    configBuilder.SimulationSetup().ConfigureTimeSync()
+        .WithSyncPolicy(ib::cfg::TimeSync::SyncPolicy::Strict);
+
+    EXPECT_EQ(configBuilder.Build().simulationSetup.timeSync.syncPolicy, ib::cfg::TimeSync::SyncPolicy::Strict);
 }
 
 } // anonymous namespace

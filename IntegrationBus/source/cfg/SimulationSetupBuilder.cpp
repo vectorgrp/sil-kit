@@ -71,9 +71,9 @@ auto SimulationSetupBuilder::AddNetworkSimulator(std::string name) -> NetworkSim
     return *_networkSimulators[_networkSimulators.size() - 1];
 }
 
-auto SimulationSetupBuilder::SetTimeSync(TimeSync::SyncType type) -> TimeSyncBuilder&
+auto SimulationSetupBuilder::ConfigureTimeSync() -> TimeSyncBuilder&
 {
-    _timeSync = std::make_unique<TimeSyncBuilder>(type);
+    _timeSync = std::make_unique<TimeSyncBuilder>();
     return *_timeSync;
 }
 
