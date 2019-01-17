@@ -118,7 +118,7 @@ TEST_F(WaitForAllAckedITest, no_messages_must_be_lost)
             for (auto count = 0u; count < msgCount; count++)
             {
                 topic.publisher->Publish(to_payload(topic.sendIdx++));
-                pubComAdapter->WaitUntilAllMessagesTransmitted();
+                pubComAdapter->WaitForMessageDelivery();
             }
         }
     };
@@ -187,9 +187,9 @@ TEST_F(WaitForAllAckedITest, messages_must_be_delivered_in_order)
             for (auto count = 0u; count < msgCount; count++)
             {
                 topics[0].publisher->Publish(to_payload(topics[0].sendIdx++));
-                pubComAdapter->WaitUntilAllMessagesTransmitted();
+                pubComAdapter->WaitForMessageDelivery();
                 topics[1].publisher->Publish(to_payload(topics[1].sendIdx++));
-                pubComAdapter->WaitUntilAllMessagesTransmitted();
+                pubComAdapter->WaitForMessageDelivery();
             }
         }
     };

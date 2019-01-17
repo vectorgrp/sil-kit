@@ -46,7 +46,6 @@ public:
 
     void SetPeriod(std::chrono::nanoseconds period) override;
     void SetEarliestEventTime(std::chrono::nanoseconds eventTime) override;
-    void EnableStrictSync() override;
 
     auto Run() -> ParticipantState override;
     auto RunAsync() -> std::future<ParticipantState> override;
@@ -94,7 +93,6 @@ private:
     cfg::Participant _participantConfig;
 
     std::unique_ptr<ITaskRunner> _taskRunner;
-    bool _strictSync{false};
     std::chrono::nanoseconds _period{0};
 
     ParticipantStatus _status;

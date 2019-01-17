@@ -236,6 +236,8 @@ auto FastRtpsComAdapter::createPublisher(const std::string& topicName, TopicData
 
     registerTopicTypeIfNecessary(topicType);
 
+    bool usingStrictSyncPolicy = (_config.simulationSetup.timeSync.syncPolicy == cfg::TimeSync::SyncPolicy::Strict);
+
     Publisher* publisher;
     if (!_config.middlewareConfig.fastRtps.configFileName.empty())
     {
@@ -246,15 +248,27 @@ auto FastRtpsComAdapter::createPublisher(const std::string& topicName, TopicData
     {
         PublisherAttributes pubAttributes;
         SetupPubSubAttributes(pubAttributes, topicName, topicType);
-        pubAttributes.times.heartbeatPeriod.seconds = 0;
-        pubAttributes.times.heartbeatPeriod.fraction = 1000;
+
+        // We must configure the heartbeat period when using strict SyncPolicy because subscribers
+        // only send an acknowledgement in reply to a heartbeat. Thus, the hearbeat
+        // period must be set to a shorter duration than the tickPeriod when using Strict
+        // SyncPolicy. For Loose SyncPolicy, the FastRTPS default is sufficient.
+        if (usingStrictSyncPolicy)
+        {
+            auto tickPeriod = std::chrono::duration_cast<std::chrono::duration<long double, std::ratio<1>>>(_config.simulationSetup.timeSync.tickPeriod);
+            auto heartBeatPeriod = tickPeriod / 10.0;
+
+            pubAttributes.times.heartbeatPeriod = Time_t{heartBeatPeriod.count()};
+        }
         publisher = Domain::createPublisher(_fastRtpsParticipant.get(), pubAttributes, listener);
     }
 
     if (publisher == nullptr)
         throw std::exception();
 
-    _publisherToWaitFor.push_back(publisher);
+    if (usingStrictSyncPolicy)
+        _publishersToWaitFor.push_back(publisher);
+
     return publisher;
 }
 
@@ -902,9 +916,9 @@ bool FastRtpsComAdapter::isSyncMaster() const
     return _participant->isSyncMaster;
 }
 
-void FastRtpsComAdapter::WaitUntilAllMessagesTransmitted()
+void FastRtpsComAdapter::WaitForMessageDelivery()
 {
-    for (auto publisher : _publisherToWaitFor)
+    for (auto publisher : _publishersToWaitFor)
     {
         /* NB: you must not use c_TimeInfinite as the parameter to wait_for_all_acked()!
          *
@@ -914,7 +928,7 @@ void FastRtpsComAdapter::WaitUntilAllMessagesTransmitted()
          * waiting indefinitely, it causes wait_for_all_acked() to
          * return immediately.
          */
-        auto allAcked = publisher->wait_for_all_acked(Time_t{120, 0});
+        auto allAcked = publisher->wait_for_all_acked(Time_t{1200, 0});
         assert(allAcked);
     }
 }

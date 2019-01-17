@@ -10,9 +10,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Removed
 - SimulationSetup/TimeSync/SyncType has been removed from the IbConfig.json as
   the SyncType can now be configured per participant.
+- IParticipantController::EnableStrictSync() has been removed. This is now
+  handled automatically according to the configured SyncPolicy.
 ### Changed
 - The TimeSyncConfigBuilder is now accessed ib::cfg::SimulationSetupBuilder::ConfigureTimeSync().
   Old: ib::cfg::SimulationSetupBuilder::SetSyncType(SyncType).
+- ComAdapter is now configured automatically according to SyncPolicy. Only in
+  strict mode, wait_for_all_acked() is used and a short heartbeat period is used.
 
 ### Fixed
 - SystemMonitor was made more robust to race conditions that could lead to a IB

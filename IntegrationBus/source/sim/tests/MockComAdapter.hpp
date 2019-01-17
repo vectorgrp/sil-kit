@@ -122,7 +122,7 @@ public:
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::ParticipantCommand& msg));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::SystemCommand& msg));
 
-    MOCK_METHOD0(WaitUntilAllMessagesTransmitted, void());
+    MOCK_METHOD0(WaitForMessageDelivery, void());
 };
 
 // ================================================================================

@@ -77,13 +77,6 @@ public:
      */
     virtual void SetEarliestEventTime(std::chrono::nanoseconds eventTime) = 0;
 
-    /*! \brief Enforce data reception before finishing the current simulation cycle
-     *
-     * In FastRTPS, calls waitForAllAcked on all topics, which blocks
-     * until reception of all sent data has been acknowledged.
-     */
-    virtual void EnableStrictSync() = 0;
-
     /*! \brief Start blocking operation
      *
      * Executes simulation until shutdown is received. The simulation

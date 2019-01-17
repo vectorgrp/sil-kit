@@ -223,11 +223,6 @@ void ParticipantController::SetEarliestEventTime(std::chrono::nanoseconds eventT
     throw std::exception();
 }
 
-void ParticipantController::EnableStrictSync()
-{
-    _strictSync = true;
-}
-
 template <template <class> class TaskRunnerT>
 void ParticipantController::StartTaskRunner()
 {
@@ -501,15 +496,13 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress from, const Qua
 
 void ParticipantController::SendTickDone() const
 {
-    if (_strictSync)
-        _comAdapter->WaitUntilAllMessagesTransmitted();
+    _comAdapter->WaitForMessageDelivery();
     SendIbMessage(TickDone{});
 }
 
 void ParticipantController::SendQuantumRequest() const
 {
-    if (_strictSync)
-        _comAdapter->WaitUntilAllMessagesTransmitted();
+    _comAdapter->WaitForMessageDelivery();
     SendIbMessage(QuantumRequest{_now, _period});
 }
 

@@ -122,7 +122,7 @@ public:
     void SendIbMessage(EndpointAddress from, const sync::ParticipantCommand& msg) override;
     void SendIbMessage(EndpointAddress from, const sync::SystemCommand& msg) override;
 
-    void WaitUntilAllMessagesTransmitted() override;
+    void WaitForMessageDelivery() override;
 
     void SendIbMessage(EndpointAddress from, const sim::generic::GenericMessage& msg) override;
     void SendIbMessage(EndpointAddress from, sim::generic::GenericMessage&& msg) override;
@@ -304,7 +304,7 @@ private:
         RtpsTopics<sync::idl::ParticipantStatus>
     > _rtpsTopics;
 
-    std::vector<eprosima::fastrtps::Publisher*> _publisherToWaitFor;
+    std::vector<eprosima::fastrtps::Publisher*> _publishersToWaitFor;
 };
 
 // ================================================================================

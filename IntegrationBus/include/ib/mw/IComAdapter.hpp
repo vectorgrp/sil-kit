@@ -134,8 +134,10 @@ public:
     *
     *   Some middleware implementations do not inherently ensure in-order transportation, so we
     *   have to block until all messages are transmitted to obtain a determinstic simulation.
+    *
+    *   NB: The call is a no-operation if TimeSync::SyncPolicy::Loose is configured.
     */
-    virtual void WaitUntilAllMessagesTransmitted() = 0;
+    virtual void WaitForMessageDelivery() = 0;
 };
 
 } // mw
