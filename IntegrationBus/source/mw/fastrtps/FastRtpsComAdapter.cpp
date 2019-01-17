@@ -187,6 +187,17 @@ void FastRtpsComAdapter::joinDomain(uint32_t domainId)
         throw std::exception();
 
     _fastRtpsParticipant.reset(participant);
+
+    OnFastrtpsDomainJoined();
+}
+
+void FastRtpsComAdapter::OnFastrtpsDomainJoined()
+{
+    if (_participant->isSyncMaster)
+    {
+        auto* controller = GetSyncMaster();
+        (void*)controller;
+    }
 }
 
 void FastRtpsComAdapter::registerTopicTypeIfNecessary(TopicDataType* topicType)
@@ -505,58 +516,52 @@ auto FastRtpsComAdapter::CreateGenericSubscriber(const std::string& canonicalNam
     return CreateControllerForLink<sim::generic::GenericSubscriber>(config, config);
 }
 
-auto FastRtpsComAdapter::CreateSyncMaster() -> sync::ISyncMaster*
+auto FastRtpsComAdapter::GetSyncMaster() -> sync::ISyncMaster*
 {
-    assert(_participant);
-
     if (!isSyncMaster())
     {
         std::cerr << "Error: Participant " << _participant->name << " is not configured as SyncMaster!" << std::endl;
         throw std::runtime_error("Participant not configured as SyncMaster");
     }
 
-    auto* systemMonitor = GetSystemMonitor();
-    return CreateController<sync::SyncMaster>(1027, "default", _config, systemMonitor);
+    auto* controller = GetController<sync::ISyncMaster>(1027);
+    if (!controller)
+    {
+        auto* systemMonitor = GetSystemMonitor();
+        controller = CreateController<sync::SyncMaster>(1027, "default", _config, systemMonitor);
+    }
+    return controller;
 }
 
 auto FastRtpsComAdapter::GetParticipantController() -> sync::IParticipantController*
 {
+    auto* controller = GetController<sync::IParticipantController>(1024);
     auto&& controllers = std::get<ControllerMap<sync::IParticipantController>>(_controllers);
-    if (controllers.begin() != controllers.end())
+    if (!controller)
     {
-        return controllers.begin()->second.get();
+        controller = CreateController<sync::ParticipantController>(1024, "default", *_participant);
     }
-    else
-    {
-        return CreateController<sync::ParticipantController>(1024, "default", *_participant);
-    }
-
+    return controller;
 }
 
 auto FastRtpsComAdapter::GetSystemMonitor() -> sync::ISystemMonitor*
 {
-    auto&& monitors = std::get<ControllerMap<sync::ISystemMonitor>>(_controllers);
-    if (monitors.begin() != monitors.end())
+    auto* controller = GetController<sync::ISystemMonitor>(1025);
+    if (!controller)
     {
-        return monitors.begin()->second.get();
+        controller = CreateController<sync::SystemMonitor>(1025, "default", _config.simulationSetup);
     }
-    else
-    {
-        return CreateController<sync::SystemMonitor>(1025, "default", _config.simulationSetup);
-    }
+    return controller;
 }
 
 auto FastRtpsComAdapter::GetSystemController() -> sync::ISystemController*
 {
-    auto&& controllers = std::get<ControllerMap<sync::ISystemController>>(_controllers);
-    if (controllers.begin() != controllers.end())
-    {
-        return controllers.begin()->second.get();
-    }
-    else
+    auto* controller = GetController<sync::ISystemController>(1026);
+    if (!controller)
     {
         return CreateController<sync::SystemController>(1026, "default");
     }
+    return controller;
 }
 
 void FastRtpsComAdapter::RegisterCanSimulator(can::IIbToCanSimulator* busSim)
@@ -801,6 +806,20 @@ void FastRtpsComAdapter::SendIbMessageImpl(EndpointAddress from, IbMessageT&& ms
 
     auto* publisher = rtpsTopics.endpointToPublisherMap[from.endpoint];
     publisher->write(&idlMsg);
+}
+
+template<class ControllerT>
+auto FastRtpsComAdapter::GetController(EndpointId endpointId) -> ControllerT*
+{
+    auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
+    if (controllerMap.count(endpointId))
+    {
+        return controllerMap.at(endpointId).get();
+    }
+    else
+    {
+        return nullptr;
+    }
 }
 
 template<class ControllerT, typename... Arg>

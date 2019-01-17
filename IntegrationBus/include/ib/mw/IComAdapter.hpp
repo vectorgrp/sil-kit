@@ -63,7 +63,7 @@ public:
     virtual auto CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher* = 0;
     virtual auto CreateGenericSubscriber(const std::string& canonicalName) -> sim::generic::IGenericSubscriber* = 0;
 
-    virtual auto CreateSyncMaster() -> sync::ISyncMaster* = 0;
+    virtual auto GetSyncMaster() -> sync::ISyncMaster* = 0;
     virtual auto GetParticipantController() -> sync::IParticipantController* = 0;
     virtual auto GetSystemMonitor() -> sync::ISystemMonitor* = 0;
     virtual auto GetSystemController() -> sync::ISystemController* = 0;

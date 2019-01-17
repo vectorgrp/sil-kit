@@ -66,7 +66,7 @@ public:
     auto CreatePatternOut(const std::string& canonicalName) -> sim::io::IPatternOutPort* override;
     auto CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher* override;
     auto CreateGenericSubscriber(const std::string& canonicalName) -> sim::generic::IGenericSubscriber* override;
-    auto CreateSyncMaster() -> sync::ISyncMaster* override;
+    auto GetSyncMaster() -> sync::ISyncMaster* override;
     auto GetParticipantController() -> sync::IParticipantController* override;
     auto GetSystemMonitor() -> sync::ISystemMonitor* override;
     auto GetSystemController() -> sync::ISystemController* override;
@@ -178,6 +178,7 @@ private:
     // ----------------------------------------
     // private methods
     void joinDomain(uint32_t domainId);
+    void OnFastrtpsDomainJoined();
 
     void registerTopicTypeIfNecessary(eprosima::fastrtps::TopicDataType* topicType);
     template <class AttrT>
@@ -191,6 +192,8 @@ private:
     template<class MsgT, class ConfigT>
     auto CreateOutPort(const ConfigT& config) -> sim::io::IOutPort<MsgT>*;
 
+    template<class ControllerT>
+    auto GetController(EndpointId endpointId) -> ControllerT*;
     template<class ControllerT, typename... Arg>
     auto CreateController(EndpointId endpointId, const std::string& topicname, Arg&&... arg) -> ControllerT*;
 

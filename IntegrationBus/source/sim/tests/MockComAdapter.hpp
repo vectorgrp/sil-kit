@@ -64,7 +64,7 @@ public:
     MOCK_METHOD1(CreateGenericPublisher, sim::generic::IGenericPublisher*(const std::string& canonicalName));
     MOCK_METHOD1(CreateGenericSubscriber, sim::generic::IGenericSubscriber*(const std::string& canonicalName));
 
-    MOCK_METHOD0(CreateSyncMaster, sync::ISyncMaster*());
+    MOCK_METHOD0(GetSyncMaster, sync::ISyncMaster*());
     MOCK_METHOD0(GetParticipantController, sync::IParticipantController*());
     MOCK_METHOD0(GetSystemMonitor, sync::ISystemMonitor*());
     MOCK_METHOD0(GetSystemController, sync::ISystemController*());

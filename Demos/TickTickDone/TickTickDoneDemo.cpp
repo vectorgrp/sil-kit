@@ -101,7 +101,6 @@ int main(int argc, char** argv)
 
     if (participantName == "master")
     {
-        comAdapter->CreateSyncMaster();
         auto controller = comAdapter->GetSystemController();
         auto monitor = comAdapter->GetSystemMonitor();
 

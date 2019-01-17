@@ -350,15 +350,6 @@ int main(int argc, char** argv)
     auto controller = comAdapter->CreateFlexrayController("FlexRay1");
 
 
-    // Create a SyncMaster if the participant is configured to do so.
-    // NB: New SyncMaster Interface is subject to changes (cf. AFTMAGT-124)
-    auto& participantConfig = ib::cfg::get_by_name(ibConfig.simulationSetup.participants, participantName);
-    if (participantConfig.isSyncMaster)
-    {
-        comAdapter->CreateSyncMaster();
-        std::cout << "Created SyncMaster at Participant: " << participantName << std::endl;
-    }
-
     // Set an Init Handler
     auto&& participantController = comAdapter->GetParticipantController();
     participantController->SetInitHandler([&participantName](auto initCmd) {
