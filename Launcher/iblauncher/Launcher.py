@@ -4,6 +4,7 @@
 #######################################################################################################################
 import os
 import sys
+import time
 import types
 import traceback
 import collections
@@ -44,6 +45,7 @@ COMMAND_DEFAULT = COMMAND_SETUPRUNTEARDOWN
 
 DOMAINID_DEFAULT = 42
 RETRIES_DEFAULT = 0
+STARTUPDELAY_DEFAULT = 0
 
 #######################################################################################################################
 def parseArguments():
@@ -56,6 +58,7 @@ def parseArguments():
     parser.add_argument("-x", "--command", default=COMMAND_DEFAULT, dest="command", help="Command to execute. Values can be '" + "', '".join(COMMANDS) + "', default is '" + COMMAND_DEFAULT + "'.", metavar="Command", required=False)
     parser.add_argument("-l", "--logfile", dest="logFile", help="Store output of processes into file.", metavar="LogFile", required=False)
     parser.add_argument("-r", "--retries", type=int, default=RETRIES_DEFAULT, dest="retries", help="Number of retries in case of failure, default is " + str(RETRIES_DEFAULT) + ".", metavar="Retries", required=False)
+    parser.add_argument("-s", "--startupdelay", type=float, default=STARTUPDELAY_DEFAULT, dest="startupDelay", help="Delay in seconds between invocations, default is " + str(RETRIES_DEFAULT) + ".", metavar="StartupDelay", required=False)
     parser.add_argument("-q", "--quiet", default=True, action="store_false", dest="verbose", help="Do not print status messages to stdout.", required=False)
     args = parser.parse_args()
     return args
@@ -355,6 +358,11 @@ def main():
                 sys.stdout.flush()
                 succeeded = launchParticipant(participantName, environmentName, environments, args.verbose)
                 sys.stdout.flush()
+
+                if args.startupDelay > 0 and args.verbose:
+                    print("Waiting for " + str(args.startupDelay) + " seconds")
+                    sys.stdout.flush()
+                    time.sleep(args.startupDelay)
 
                 if not succeeded:
                     print("Error: Failed to launch participant '" + participantName + "'")
