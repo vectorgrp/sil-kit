@@ -10,7 +10,7 @@ import sys
 
 from iblauncher.Configuration import isIntegrationBusInstalled
 from iblauncher.Configuration import getIntegrationBusLibraryPath, getIntegrationBusBinaryPath
-from iblauncher.Configuration import resolveIntegrationBusVariables
+from iblauncher.Configuration import resolveVariables
 
 # Test case can resolve module under test when run from root folder, e.g. 
 # via 'python -m unittest discover', or 'python -m unittest tests.TestIbLauncherConfiguration'
@@ -43,17 +43,17 @@ class TestIbLauncherConfiguration(unittest.TestCase):
         configFileAbsolutePath = "./my/configFileAbsolutePath/"
         participantName = "participantName"
         domainId = 77
-        resolvedExpression = resolveIntegrationBusVariables(
+        resolvedExpression = resolveVariables(
             "^INTEGRATIONBUS_BINPATH=%INTEGRATIONBUS_BINPATH%, " + 
-            "%INTEGRATIONBUS_LIBPATH=%INTEGRATIONBUS_LIBPATH%, "
-            "$INTEGRATIONBUS_CONFIGFILE=%INTEGRATIONBUS_CONFIGFILE%, "
+            "%INTEGRATIONBUS_LIBPATH=${INTEGRATIONBUS_LIBPATH}, "
+            "?INTEGRATIONBUS_CONFIGFILE=$INTEGRATIONBUS_CONFIGFILE, "
             "&INTEGRATIONBUS_PARTICIPANTNAME=%INTEGRATIONBUS_PARTICIPANTNAME%, "
-            "/INTEGRATIONBUS_DOMAINID=%INTEGRATIONBUS_DOMAINID%.", 
+            "/INTEGRATIONBUS_DOMAINID=${INTEGRATIONBUS_DOMAINID}.", 
             configFileAbsolutePath, participantName, domainId)
         self.assertEqual(resolvedExpression, 
             "^INTEGRATIONBUS_BINPATH=" + validBinaryPath + os.path.sep + ", " + 
             "%INTEGRATIONBUS_LIBPATH=" + validLibraryPath + os.path.sep + ", "
-            "$INTEGRATIONBUS_CONFIGFILE=" + configFileAbsolutePath + ", "
+            "?INTEGRATIONBUS_CONFIGFILE=" + configFileAbsolutePath + ", "
             "&INTEGRATIONBUS_PARTICIPANTNAME=" + participantName + ", "
             "/INTEGRATIONBUS_DOMAINID=" + str(domainId) + ".")
 

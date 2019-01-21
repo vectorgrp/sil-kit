@@ -62,7 +62,7 @@ class EnvironmentCustomExecutable(Environment.Environment):
                 return False
 
             # Resolve predefined variables
-            executable = Configuration.resolveIntegrationBusVariables(executable, configFileAbsolutePath, participantName, self.__domainId)
+            executable = Configuration.resolveVariables(executable, configFileAbsolutePath, participantName, self.__domainId)
 
             workingFolderAbsolutePath = workingFolderPath if os.path.isabs(workingFolderPath) else os.path.abspath(configFileFolderPath + os.path.sep + workingFolderPath)
             if not os.path.isdir(workingFolderAbsolutePath):
@@ -111,8 +111,8 @@ class EnvironmentCustomExecutable(Environment.Environment):
         assert(configFilePath)
 
         # Resolve predefined and environment variables (the latter because we do *not* want to "subprocess.Popen(..., shell=True)")
-        executable = Configuration.resolveIntegrationBusVariables(executable, configFileAbsolutePath, participantName, self.__domainId)
-        arguments = Configuration.resolveIntegrationBusVariables(arguments, configFileAbsolutePath, participantName, self.__domainId)
+        executable = Configuration.resolveVariables(executable, configFileAbsolutePath, participantName, self.__domainId)
+        arguments = Configuration.resolveVariables(arguments, configFileAbsolutePath, participantName, self.__domainId)
 
         if self.__verbose:
             print("  Participant: " + participantName)

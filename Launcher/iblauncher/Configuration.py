@@ -129,15 +129,25 @@ def createIntegrationBusEnvironment(configFileAbsolutePath, participantName, dom
 
 #######################################################################################################################
 # Resolve predefined variables
-#def resolveIntegrationBusVariables(value: str, configFileAbsolutePath: str, participantName: str, domainId: int) -> str:
-def resolveIntegrationBusVariables(value, configFileAbsolutePath, participantName, domainId):
-    value = value.replace("%INTEGRATIONBUS_BINPATH%", getIntegrationBusBinaryPath() + os.path.sep)
-    value = value.replace("%INTEGRATIONBUS_LIBPATH%", getIntegrationBusLibraryPath() + os.path.sep)
-    value = value.replace("%INTEGRATIONBUS_CONFIGFILE%", configFileAbsolutePath)
-    value = value.replace("%INTEGRATIONBUS_PARTICIPANTNAME%", str(participantName))
-    value = value.replace("%INTEGRATIONBUS_DOMAINID%", str(domainId))
+#def resolveVariables(value: str, configFileAbsolutePath: str, participantName: str, domainId: int) -> str:
+def resolveVariables(value, configFileAbsolutePath, participantName, domainId):
+    value = resolveVariable(value, "INTEGRATIONBUS_BINPATH", getIntegrationBusBinaryPath() + os.path.sep)
+    value = resolveVariable(value, "INTEGRATIONBUS_LIBPATH", getIntegrationBusLibraryPath() + os.path.sep)
+    value = resolveVariable(value, "INTEGRATIONBUS_CONFIGFILE", configFileAbsolutePath)
+    value = resolveVariable(value, "INTEGRATIONBUS_PARTICIPANTNAME", str(participantName))
+    value = resolveVariable(value, "INTEGRATIONBUS_DOMAINID", str(domainId))
     value = os.path.expandvars(value)
+    value = os.path.expanduser(value)
     return value
+
+#######################################################################################################################
+# Replace a variable following environment variable notations '$name', '${name}', '%name%' (cf. os.path.expandvars)
+#def resolveVariable(name: str, value: str) -> str:
+def resolveVariable(text, name, value):
+    text = text.replace("%" + name + "%", value)
+    text = text.replace("${" + name + "}", value)
+    text = text.replace("$" + name, value)
+    return text
 
 #######################################################################################################################
 # Retrieve the network node section from the provided JSON configuration
