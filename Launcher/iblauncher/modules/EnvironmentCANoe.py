@@ -173,16 +173,21 @@ class EnvironmentCANoe(Environment.Environment):
             #networkNodeName = participantEnvironment["NetworkNode"] if "NetworkNode" in participantEnvironment else None
             #networkNode = Environment.getNetworkNode(networkNodeName, self.__networkNodes, self.__verbose)
             canoeProject = participantEnvironment["CANoeProject"]
-            workingFolder = participantEnvironment["WorkingFolder"] if "WorkingFolder" in participantEnvironment else "."
+            workingFolderPath = participantEnvironment["WorkingFolder"] if "WorkingFolder" in participantEnvironment else "."
             assert(environmentName == EnvironmentCANoe.getEnvironmentName())
             configFilePath = participantEnvironment["ConfigFile"]
+            configFileAbsolutePath = os.path.abspath(configFilePath)
             configFileFolderPath = os.path.dirname(configFilePath) if os.path.dirname(configFilePath) else "."
 
             if not canoeProject:
                 print("Error: No CANoe project defined for participant '" + participantName + "'")
                 return False
 
-            workingFolderAbsolutePath = workingFolder if os.path.isabs(workingFolder) else os.path.abspath(configFileFolderPath + os.path.sep + workingFolder)
+            # Resolve predefined variables
+            workingFolderPath = Configuration.resolveVariables(workingFolderPath, configFileAbsolutePath, participantName, self.__domainId)
+            canoeProjectPath = Configuration.resolveVariables(canoeProjectPath, configFileAbsolutePath, participantName, self.__domainId)
+
+            workingFolderAbsolutePath = workingFolderPath if os.path.isabs(workingFolderPath) else os.path.abspath(configFileFolderPath + os.path.sep + workingFolderPath)
             if not os.path.isdir(workingFolderAbsolutePath):
                 print("Error: Working folder '" + workingFolderAbsolutePath + "' for participant '" + participantName + "' does not exist")
                 return False
@@ -231,7 +236,7 @@ class EnvironmentCANoe(Environment.Environment):
         canoeProjectAbsolutePaths = set()
 
         for participantEnvironment in self.__participantEnvironments:
-            #participantName = participantEnvironment["Participant"]
+            participantName = participantEnvironment["Participant"]
             environmentName = participantEnvironment["Environment"]
             #networkNodeName = participantEnvironment["NetworkNode"] if "NetworkNode" in participantEnvironment else None
             #networkNode = Environment.getNetworkNode(networkNodeName, self.__networkNodes, self.__verbose)
@@ -239,7 +244,12 @@ class EnvironmentCANoe(Environment.Environment):
             workingFolder = participantEnvironment["WorkingFolder"] if "WorkingFolder" in participantEnvironment else "."
             assert(environmentName == EnvironmentCANoe.getEnvironmentName())
             configFilePath = participantEnvironment["ConfigFile"]
+            configFileAbsolutePath = os.path.abspath(configFilePath)
             configFileFolderPath = os.path.dirname(configFilePath) if os.path.dirname(configFilePath) else "."
+
+            # Resolve predefined variables
+            workingFolderPath = Configuration.resolveVariables(workingFolderPath, configFileAbsolutePath, participantName, self.__domainId)
+            canoeProjectPath = Configuration.resolveVariables(canoeProjectPath, configFileAbsolutePath, participantName, self.__domainId)
 
             workingFolderAbsolutePath = workingFolder if os.path.isabs(workingFolder) else os.path.abspath(configFileFolderPath + os.path.sep + workingFolder)
             canoeProjectAbsolutePath = canoeProject if os.path.isabs(canoeProject) else os.path.abspath(workingFolderAbsolutePath + os.path.sep + canoeProject)
@@ -304,6 +314,10 @@ class EnvironmentCANoe(Environment.Environment):
             print("  NetworkNode: " + (networkNodeName if networkNode else "None"))
             print("  CANoeProject: " + canoeProjectPath)
             print("  WorkingFolder: " + workingFolderPath)
+
+        # Resolve predefined variables
+        workingFolderPath = Configuration.resolveVariables(workingFolderPath, configFileAbsolutePath, participantName, self.__domainId)
+        canoeProjectPath = Configuration.resolveVariables(canoeProjectPath, configFileAbsolutePath, participantName, self.__domainId)
 
         integrationBusEnvironment = Configuration.createIntegrationBusEnvironment(configFileAbsolutePath, participantName, self.__domainId)
         workingFolderAbsolutePath = workingFolderPath if os.path.isabs(workingFolderPath) else os.path.abspath(configFileFolderPath + os.path.sep + workingFolderPath)
