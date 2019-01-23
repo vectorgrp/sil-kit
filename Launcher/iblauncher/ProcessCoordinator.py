@@ -181,7 +181,7 @@ class ProcessCoordinator:
                 "LD_LIBRARY_PATH": Configuration.getIntegrationBusLibraryPath() + ((os.pathsep + environment["LD_LIBRARY_PATH"]) if "LD_LIBRARY_PATH" in environment else "")
             })
             if self.__verbose:
-                print("  Windows invocation: '" + commandAbsolutePath + " " + arguments + "'")
+                print("  Linux invocation: '" + commandAbsolutePath + " " + arguments + "'")
         if shell:
             args = commandAbsolutePath + " " + arguments
         else:
