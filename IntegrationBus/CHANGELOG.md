@@ -3,17 +3,28 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - 2019-01-23
+## [Unreleased] - 2019-02-06
+### Added
+
+### Removed
+
+### Changed
+
+### Fixed
+
+## [Sprint-21] - 2019-01-23
 ### Added
 - Strict sync, i.e., calling wait_for_all_acked() between ticks, is now
   configurable via the IbConfig.json: SimulationSetup/TimeSync/SyncPolicy.
 - If a participant is configured as SyncMaster, the corresponding
   ComAdapter will now automatically create the SyncMaster instance.
+
 ### Removed
 - SimulationSetup/TimeSync/SyncType has been removed from the IbConfig.json as
   the SyncType can now be configured per participant.
 - IParticipantController::EnableStrictSync() has been removed. This is now
   handled automatically according to the configured SyncPolicy.
+
 ### Changed
 - The TimeSyncConfigBuilder is now accessed ib::cfg::SimulationSetupBuilder::ConfigureTimeSync().
   Old: ib::cfg::SimulationSetupBuilder::SetSyncType(SyncType).
