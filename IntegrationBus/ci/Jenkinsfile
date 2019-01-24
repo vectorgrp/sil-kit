@@ -70,10 +70,10 @@ pipeline {
                 }
             }
         }
-        // Always create packages but only push them if we are on the master branch
+        // Create and push packages but only if we are on the master branch
         stage('Package') {
             when {
-                expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'AFTMAGT-136_Provide_CD' }
+                expression { env.BRANCH_NAME == 'master' }
             }
             steps {
                 script {
@@ -143,7 +143,7 @@ def buildLinuxTarget(compiler, target) {
         dir('install') { deleteDir() }
 
         // Pull dependent build snapshots of submodules from Artifactory and install them
-        //pullSubmoduleBuildSnapshot('FastRTPS', 'ThirdParty/Fast-RTPS', compiler, target, architecture)
+        //pullSubmoduleBuildSnapshot('FastRTPS', getSubmoduleCommit('ThirdParty/Fast-RTPS'), compiler, target, 'x64')
 
         def buildSucceeded = false
         try {
@@ -230,7 +230,7 @@ def packageLinuxTarget(compiler, targets) {
         dir('install') { deleteDir() }
 
         // Pull dependent build snapshots of submodules from Artifactory and install them
-        //pullSubmoduleBuildSnapshot('Fast-RTPS', getSubmoduleCommit('ThirdParty/Fast-RTPS'), compiler, target, architecture)
+        //pullSubmoduleBuildSnapshot('Fast-RTPS', getSubmoduleCommit('ThirdParty/Fast-RTPS'), compiler, workingTarget, 'x64')
 
         packagingSucceeded = false
         try {
@@ -252,7 +252,7 @@ def packageLinuxTarget(compiler, targets) {
         } finally {
             status job: "Packaging for target 'Linux ${compiler}'", succeeded: packagingSucceeded
         }
-        if(env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'AFTMAGT-136_Provide_CD' ) {
+        if (env.BRANCH_NAME == 'master') {
             // Publish archives to Artifactory
             pushModulePackages(env.moduleName, 'package/*.tar.gz')
         } else {
@@ -297,7 +297,7 @@ def packageWindowsTarget(compiler, targetsAndArchitectures) {
         dir('install') { deleteDir() }
 
         // Pull dependent build snapshots of submodules from Artifactory and install them
-        //pullSubmoduleBuildSnapshot('Fast-RTPS', getSubmoduleCommit('ThirdParty/Fast-RTPS'), compiler, target, architecture)
+        //pullSubmoduleBuildSnapshot('Fast-RTPS', getSubmoduleCommit('ThirdParty/Fast-RTPS'), compiler, workingTarget, workingArchitecture)
 
         packagingSucceeded = false
         try {
@@ -315,7 +315,7 @@ def packageWindowsTarget(compiler, targetsAndArchitectures) {
         } finally {
             status job: "Packaging for target 'Windows ${compiler}'", succeeded: packagingSucceeded
         }
-        if(env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'AFTMAGT-136_Provide_CD') {
+        if (env.BRANCH_NAME == 'master') {
             // Publish archives to Artifactory
             pushModulePackages(env.moduleName, 'package/*.zip')
         } else {
@@ -409,7 +409,7 @@ def pushModuleBuildSnapshot(moduleName, scmVars, compiler, target, architecture,
     repository = env.artifactoryRepositoryForBuildSnapshots
 
     def fileName = "${moduleName}_${compiler}_${target}_${architecture}_${scmVars.GIT_COMMIT}.zip"
-    if(!fileExists('install')) {
+    if (!fileExists('install')) {
         error "Error uploading ${fileName} to the Artifactory repository ${repository}: Found nothing to zip."
     }
 
@@ -499,7 +499,7 @@ def distributeBuildToBinTray(moduleName) {
 // Print a status message, bail out on failure
 def status(job, succeeded) {
     def message = "${job} ${success?'succeeded':'failed'}"
-    if(success) echo message else error message
+    if (success) echo message else error message
 }
 
 // Retrieve a git submodule's commit hash
@@ -537,17 +537,17 @@ def createArtifactoryBuildInfo() {
     artifactoryBuildInfo.env.capture = true
 
     // Discard older builds: This requires extra rights for the Artifactory user
-    if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'AFTMAGT-136_Provide_CD') {
-        artifactoryBuildInfo.retention maxBuilds: 100, doNotDiscardBuilds: [], deleteBuildArtifacts: true
-    } else {
-        artifactoryBuildInfo.retention maxBuilds: 2, maxDays: 50, doNotDiscardBuilds: [], deleteBuildArtifacts: true
-    }
+    //if (env.BRANCH_NAME == 'master') {
+    //    artifactoryBuildInfo.retention maxBuilds: 100, doNotDiscardBuilds: [], deleteBuildArtifacts: true
+    //} else {
+    //    artifactoryBuildInfo.retention maxBuilds: 2, maxDays: 50, doNotDiscardBuilds: [], deleteBuildArtifacts: true
+    //}
 
     return artifactoryBuildInfo
 }
 
 def publishArtifactoryBuildInfo() {
-    if(artifactoryBuildInfo == null) {
+    if (artifactoryBuildInfo == null) {
         echo 'There were no artifacts to publish for this stage'
         return
     }
