@@ -172,14 +172,14 @@ class EnvironmentCANoe(Environment.Environment):
             environmentName = participantEnvironment["Environment"]
             #networkNodeName = participantEnvironment["NetworkNode"] if "NetworkNode" in participantEnvironment else None
             #networkNode = Environment.getNetworkNode(networkNodeName, self.__networkNodes, self.__verbose)
-            canoeProject = participantEnvironment["CANoeProject"]
+            canoeProjectPath = participantEnvironment["CANoeProject"]
             workingFolderPath = participantEnvironment["WorkingFolder"] if "WorkingFolder" in participantEnvironment else "."
             assert(environmentName == EnvironmentCANoe.getEnvironmentName())
             configFilePath = participantEnvironment["ConfigFile"]
             configFileAbsolutePath = os.path.abspath(configFilePath)
             configFileFolderPath = os.path.dirname(configFilePath) if os.path.dirname(configFilePath) else "."
 
-            if not canoeProject:
+            if not canoeProjectPath:
                 print("Error: No CANoe project defined for participant '" + participantName + "'")
                 return False
 
@@ -192,7 +192,7 @@ class EnvironmentCANoe(Environment.Environment):
                 print("Error: Working folder '" + workingFolderAbsolutePath + "' for participant '" + participantName + "' does not exist")
                 return False
 
-            canoeProjectAbsolutePath = canoeProject if os.path.isabs(canoeProject) else os.path.abspath(workingFolderAbsolutePath + os.path.sep + canoeProject)
+            canoeProjectAbsolutePath = canoeProjectPath if os.path.isabs(canoeProjectPath) else os.path.abspath(workingFolderAbsolutePath + os.path.sep + canoeProjectPath)
             if not os.path.isfile(canoeProjectAbsolutePath):
                 print("Error: CANoe project '" + canoeProjectAbsolutePath + "' for participant '" + participantName + "' does not exist")
                 return False
@@ -240,8 +240,8 @@ class EnvironmentCANoe(Environment.Environment):
             environmentName = participantEnvironment["Environment"]
             #networkNodeName = participantEnvironment["NetworkNode"] if "NetworkNode" in participantEnvironment else None
             #networkNode = Environment.getNetworkNode(networkNodeName, self.__networkNodes, self.__verbose)
-            canoeProject = participantEnvironment["CANoeProject"]
-            workingFolder = participantEnvironment["WorkingFolder"] if "WorkingFolder" in participantEnvironment else "."
+            canoeProjectPath = participantEnvironment["CANoeProject"]
+            workingFolderPath = participantEnvironment["WorkingFolder"] if "WorkingFolder" in participantEnvironment else "."
             assert(environmentName == EnvironmentCANoe.getEnvironmentName())
             configFilePath = participantEnvironment["ConfigFile"]
             configFileAbsolutePath = os.path.abspath(configFilePath)
@@ -251,8 +251,8 @@ class EnvironmentCANoe(Environment.Environment):
             workingFolderPath = Configuration.resolveVariables(workingFolderPath, configFileAbsolutePath, participantName, self.__domainId)
             canoeProjectPath = Configuration.resolveVariables(canoeProjectPath, configFileAbsolutePath, participantName, self.__domainId)
 
-            workingFolderAbsolutePath = workingFolder if os.path.isabs(workingFolder) else os.path.abspath(configFileFolderPath + os.path.sep + workingFolder)
-            canoeProjectAbsolutePath = canoeProject if os.path.isabs(canoeProject) else os.path.abspath(workingFolderAbsolutePath + os.path.sep + canoeProject)
+            workingFolderAbsolutePath = workingFolderPath if os.path.isabs(workingFolderPath) else os.path.abspath(configFileFolderPath + os.path.sep + workingFolderPath)
+            canoeProjectAbsolutePath = canoeProjectPath if os.path.isabs(canoeProjectPath) else os.path.abspath(workingFolderAbsolutePath + os.path.sep + canoeProjectPath)
             canoeProjectAbsolutePaths.add(canoeProjectAbsolutePath)
 
         # Getting all instances will not work until CANoe instances are registered in the RunningObjectTable
