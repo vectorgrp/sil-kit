@@ -81,6 +81,10 @@ public:
             std::cout << "Sending SystemCommand::Run" << std::endl;
             _controller->Run();
             return;
+        case SystemState::Stopping:
+            std::cout << "Sending SystemCommand::Stop due to SystemState::Stopping" << std::endl;
+            _controller->Stop();
+            return;
         case SystemState::Stopped:
             std::cout << "Sending SystemCommand::Shutdown" << std::endl;
             _controller->Shutdown();
