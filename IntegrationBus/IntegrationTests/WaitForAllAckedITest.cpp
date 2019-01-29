@@ -58,6 +58,7 @@ protected:
         simulationSetup.AddParticipant("Receiver")
             ->AddGenericSubscriber(topics[0].name)
             ->AddGenericSubscriber(topics[1].name);
+        simulationSetup.ConfigureTimeSync().WithStrictSyncPolicy().WithTickPeriod(1ms);
 
         ibConfig = cfgBuilder.Build();
 
