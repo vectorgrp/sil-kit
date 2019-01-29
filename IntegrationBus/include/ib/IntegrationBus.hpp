@@ -21,7 +21,8 @@ namespace ib {
 * \param participantName Name of the participant
 * \param fastRtpsDomainId ID of the domain
 * \return Instance of the communication adapter
-* 
+*
+* \throw ib::cfg::Misconfiguration if the config has errors
 * \throw std::runtime_error Parameter participantName does not name
 * a valid participant in the config file.
 * \throw std::exception The FastRTPS participant could not be

@@ -26,6 +26,8 @@ add_library(IbConfig STATIC
     FastRtpsConfigBuilder.cpp
     JsonConfig.hpp
     JsonConfig.cpp
+    Validation.hpp
+    Validation.cpp
 )
 
 target_link_libraries(IbConfig
@@ -34,7 +36,12 @@ target_link_libraries(IbConfig
     PRIVATE json11
 )
 
+target_include_directories(IbConfig
+    PUBLIC .
+)
+
 add_mvsc_ib_include_filter()
 
-make_gtest(TestConfigBuilder ConfigBuilderTest.cpp IbConfig)
-make_gtest(TestJsonConfig JsonConfigTest.cpp IbConfig json11)
+make_gtest(TestMwCfgConfigBuilder ConfigBuilderTest.cpp IbConfig)
+make_gtest(TestMwCfgJsonConfig JsonConfigTest.cpp IbConfig json11)
+make_gtest(TestMwCfgValidation ValidationTest.cpp IbConfig)

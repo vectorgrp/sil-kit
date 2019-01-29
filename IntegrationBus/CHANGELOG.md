@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased] - 2019-02-06
 ### Added
-
+The IbConfig is now validated before creating a ComAdapter. NB: ib::CreateFastRtpsComAdapter() will now also throw Misconfiguration exceptions!
 ### Removed
 
 ### Changed

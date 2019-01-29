@@ -112,7 +112,7 @@ int main(int argc, char** argv)
     }
     catch (const ib::cfg::Misconfiguration& error)
     {
-        std::cerr << "Invalid configuration: " << error.what() << std::endl;
+        std::cerr << "ERROR: Invalid configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
         return -2;
@@ -121,7 +121,18 @@ int main(int argc, char** argv)
     const auto sleepTimePerTick = 1000ms;
 
     std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-    auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
+    std::unique_ptr<ib::mw::IComAdapter> comAdapter;
+    try {
+        comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
+    }
+    catch (const ib::cfg::Misconfiguration& error)
+    {
+        std::cerr << "ERROR: Failed to create ComAdapter due an invalid IbConfig: " << error.what() << std::endl;
+        std::cerr << "Press enter to terminate process..." << std::endl;
+        std::cin.ignore();
+        return -3;
+    }
+
 
     auto canController = comAdapter->CreateCanController("CAN1");
     canController->RegisterTransmitStatusHandler(&AckCallback);

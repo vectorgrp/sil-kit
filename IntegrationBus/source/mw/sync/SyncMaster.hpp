@@ -108,6 +108,7 @@ public:
     SyncMaster(SyncMaster&&) = default;
     SyncMaster(IComAdapter* comAdapter, const cfg::Config& config, ISystemMonitor* monitor);
 
+
 public:
     // ----------------------------------------
     // Operator Implementations
