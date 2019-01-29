@@ -42,7 +42,7 @@ protected:
 
 protected:
     ParticipantControllerTest()
-        : controller(&comAdapter, MakeParticipantConfig())
+        : controller(&comAdapter, MakeParticipantConfig(), cfg::TimeSync{})
     {
         controller.SetEndpointAddress(addr);
     }
@@ -68,6 +68,20 @@ protected:
     ParticipantController controller;
     Callbacks callbacks;
 };
+
+TEST_F(ParticipantControllerTest, report_error_on_RunAsync_with_strict_sync)
+{
+    cfg::TimeSync timesyncConfig;
+    timesyncConfig.syncPolicy = cfg::TimeSync::SyncPolicy::Strict;
+
+    controller = ParticipantController(&comAdapter, MakeParticipantConfig(), timesyncConfig);
+    controller.SetEndpointAddress(addr);
+
+    auto finalState = controller.RunAsync();
+
+    EXPECT_TRUE(finalState.valid());
+    EXPECT_EQ(finalState.get(), ParticipantState::Error);
+}
 
 TEST_F(ParticipantControllerTest, report_commands_as_error_before_run_was_called)
 {

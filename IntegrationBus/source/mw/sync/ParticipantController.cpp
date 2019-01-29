@@ -186,9 +186,10 @@ private:
 } // anonymous namespace for local helper functions
 
 
-ParticipantController::ParticipantController(IComAdapter* comAdapter, cfg::Participant participantConfig)
+ParticipantController::ParticipantController(IComAdapter* comAdapter, cfg::Participant participantConfig, cfg::TimeSync timeyncConfig)
     : _comAdapter{comAdapter}
     , _participantConfig(std::move(participantConfig))
+    , _timesyncConfig(std::move(timeyncConfig))
 {
     _status.participantName = _participantConfig.name;
 }
@@ -261,6 +262,14 @@ auto ParticipantController::Run() -> ParticipantState
 
 auto ParticipantController::RunAsync() -> std::future<ParticipantState>
 {
+    if (_timesyncConfig.syncPolicy == cfg::TimeSync::SyncPolicy::Strict)
+    {
+        std::cerr << "ERROR: ParticipantController::RunAsync() cannot be used when SyncPolicy::Strict is configured" << std::endl;
+        ChangeState(ParticipantState::Error, "ParticipantController::RunAsync() cannot be used when SyncPolicy::Strict is configured");
+        _finalStatePromise.set_value(State());
+        return _finalStatePromise.get_future();
+    }
+
     StartTaskRunner<TaskRunnerAsync>();
     return _finalStatePromise.get_future();
 }

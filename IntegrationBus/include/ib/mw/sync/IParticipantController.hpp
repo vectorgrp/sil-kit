@@ -92,6 +92,9 @@ public:
      * Executes simulation until shutdown is received. The simulation
      * task is executed in the context of the middleware thread that
      * receives the grant or tick.
+     *
+     * NB: RunAsync() cannot be used with SyncPolicy::Strict, which
+     * will inherently lead to a deadlock!
      * 
      * \return Future that will hold the final state of the participant
      * once the ParticipantController finishes operation.

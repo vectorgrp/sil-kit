@@ -29,7 +29,7 @@ public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     ParticipantController() = default;
-    ParticipantController(IComAdapter* comAdapter, cfg::Participant participantConfig);
+    ParticipantController(IComAdapter* comAdapter, cfg::Participant participantConfig, cfg::TimeSync timeyncConfig);
     ParticipantController(const ParticipantController& other) = default;
     ParticipantController(ParticipantController&& other) = default;
     ParticipantController& operator=(const ParticipantController& other) = default;
@@ -91,6 +91,7 @@ private:
     IComAdapter* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddress{};
     cfg::Participant _participantConfig;
+    cfg::TimeSync _timesyncConfig;
 
     std::unique_ptr<ITaskRunner> _taskRunner;
     std::chrono::nanoseconds _period{0};

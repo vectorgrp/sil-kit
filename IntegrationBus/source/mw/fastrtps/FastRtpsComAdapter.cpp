@@ -195,8 +195,8 @@ void FastRtpsComAdapter::OnFastrtpsDomainJoined()
 {
     if (_participant->isSyncMaster)
     {
-        auto* controller = GetSyncMaster();
-        (void*)controller;
+        /*[[maybe_unused]]*/ auto* controller = GetSyncMaster();
+        (void)controller;
     }
 }
 
@@ -539,7 +539,7 @@ auto FastRtpsComAdapter::GetParticipantController() -> sync::IParticipantControl
     auto&& controllers = std::get<ControllerMap<sync::IParticipantController>>(_controllers);
     if (!controller)
     {
-        controller = CreateController<sync::ParticipantController>(1024, "default", *_participant);
+        controller = CreateController<sync::ParticipantController>(1024, "default", *_participant, _config.simulationSetup.timeSync);
     }
     return controller;
 }
