@@ -64,7 +64,7 @@ class ProcessCoordinator:
         self.__outputQueue = Queue()
         # Dictionaries of threads per process, monitoring their pipes
         self.__inputPipeThreads = {}
-        self.__outputThreads = {}
+        self.__outputPipeThreads = {}
 
         # File for storing output lines
         self.__logFilePath = logFilePath
@@ -91,13 +91,13 @@ class ProcessCoordinator:
             self.__logFile = None
 
     @staticmethod
-    def __readOutputFromStdout(outPipe, queue, prefix, event):
+    def __readOutputFromPipe(outPipe, queue, prefix, event):
         """Thread method for reading output from `pipe`; and whenever a line has been read, it enqueues the line to `queue`
         
         Parameters
         ----------
         outPipe: Pipe
-            The pipe to read, usually an stdout pipe
+            The pipe to read, usually an stdout/stderr pipe
         queue: Queue
             The queue to fill with string entries from the outPipe
         prefix: str
@@ -193,10 +193,13 @@ class ProcessCoordinator:
         self.__endThreadsSignal.clear()
 
         # Create thread to read output of this spawned process into a queue
-        t = Thread(target=ProcessCoordinator.__readOutputFromStdout, args=(process.stdout, self.__outputQueue, processName, self.__endThreadsSignal))
-        t.daemon = True
-        t.start()
-        self.__outputThreads[processName] = t
+        t1 = Thread(target=ProcessCoordinator.__readOutputFromPipe, args=(process.stdout, self.__outputQueue, processName, self.__endThreadsSignal))
+        t2 = Thread(target=ProcessCoordinator.__readOutputFromPipe, args=(process.stderr, self.__outputQueue, processName, self.__endThreadsSignal))
+        t1.daemon = True
+        t2.daemon = True
+        t1.start()
+        t2.start()
+        self.__outputPipeThreads[processName] = (t1, t2)
 
         # Create a name pipe and forward their input to this spawned process (Posix only)
         if os.name == "posix":
