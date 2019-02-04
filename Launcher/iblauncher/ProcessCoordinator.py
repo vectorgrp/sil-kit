@@ -209,7 +209,7 @@ class ProcessCoordinator:
             try:
                 os.mkfifo(processName)
                 if self.__verbose:
-                    print("Created input pipe '" + processName + "' that forwards input to process '" + processName + "'.")  # e.g., call 'echo "[Input]" > [ProcessName]'
+                    print("Created input pipe '" + processName + "' that forwards input to process of '" + processName + "'.")  # e.g., call 'echo "[Input]" > [ProcessName]'
             except OSError as e:
                 if self.__verbose:
                     print("Warning: Failed to create input pipe '" + processName + "' ('" + e + "').")
@@ -244,7 +244,7 @@ class ProcessCoordinator:
                 p = self.__processes[processName]
                 p.poll()
                 if p.returncode is not None:
-                    self.__log("Launcher: Process '" + processName + "' exited with return code " + "0x{0:0{1}x}".format(p.returncode, 8) + ".")
+                    self.__log("Launcher: Process of '" + processName + "' with PID " + str(p.pid) + " exited with return code " + "0x{0:0{1}x}".format(p.returncode, 8) + ".")
                     try:
                         os.remove(processName)
                     except:
@@ -279,28 +279,45 @@ class ProcessCoordinator:
 
         self.__log("Launcher: Processes that are still running are terminated.")
         sys.stdout.flush()
-        # Nicely ask the processes to stop
-        for p in self.__processes.values():
-            p.terminate()
-        time.sleep(.5)
-        # Kill if still alive
+        # On Linux, nicely ask the processes with SIGTERM to stop
+        # Under Windows there is no SIGTERM, both p.terminate() and p.kill() simply terminate
+        if os.name == "posix":
+            for p in self.__processes.values():
+                p.terminate()
+            time.sleep(.5)
+        # Kill remaining processes if still alive
         newProcesses = dict(self.__processes)
         for processName in self.__processes.keys():
             p = self.__processes[processName]
-            p.poll()
-            if p.returncode is not None:
-                try:
-                    p.kill()
-                    self.__log("Launcher: Process '" + processName + "' was unresponsive and had to be killed.")
-                except OSError:
-                    self.__log("Launcher: Process '" + processName + "' has ended.")
+            returncode = p.poll()
+            if returncode is None:
+                if os.name == "posix":
+                    # On Linux, try to send a SIGKILL to the process
+                    try:
+                        p.kill()
+                        self.__log("Launcher: Process of '" + processName + "' with PID " + str(p.pid) + " was unresponsive and thus killed.")
+                    except OSError as e:
+                        self.__log("Launcher: Process of '" + processName + "' with PID " + str(p.pid) + " was unresponsive and could not be killed (" + str(e) + ").")
+                elif os.name == "nt":
+                    # Under Windows, since p.kill() simply terminates a process without its child processes, we must rely on an OS command.
+                    # Cf. https://stackoverflow.com/questions/1230669/subprocess-deleting-child-processes-in-windows
+                    try:
+                        from subprocess import DEVNULL  # for Python 3.x
+                    except ImportError:
+                        DEVNULL = open(os.devnull, 'wb')  # for Python 2.x
+                    exitcode = subprocess.call(['taskkill', '/F', '/T', '/PID', str(p.pid)], stdout=DEVNULL, stderr=subprocess.STDOUT)
+                    if exitcode == 0 or exitcode == 128:  # Success, or 'No child processes to wait for', see http://msdn.microsoft.com/en-us/library/windows/desktop/ms681381(v=vs.85).aspx
+                        self.__log("Launcher: Process of '" + processName + "' with PID " + str(p.pid) + " was still running and thus killed.")
+                    else:  
+                        self.__log("Launcher: Process of '" + processName + "' with PID " + str(p.pid) + " is still running and could not be killed (error code " + "0x{0:0{1}x}".format(exitcode, 8) + ").")
             else:
-                self.__log("Launcher: Process '" + processName + "' exited with return code " + str(p.returncode) + ".")
+                self.__log("Launcher: Process of '" + processName + "' with PID " + str(p.pid) + " exited with return code " + "0x{0:0{1}x}".format(p.returncode, 8) + ".")
             try:
                 os.remove(processName)
             except:
                 pass
             del newProcesses[processName]
+
         self.__processes = newProcesses
 
         if len(self.__processes) > 0:
