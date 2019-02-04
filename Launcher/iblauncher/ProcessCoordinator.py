@@ -187,19 +187,16 @@ class ProcessCoordinator:
         else:
             args = [commandAbsolutePath] + (shlex.split(arguments) if os.name == "posix" else arguments.split(' '))
 
-        process = subprocess.Popen(args, env=environment, cwd=workingFolderAbsolutePath, shell=shell, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1, universal_newlines=True)
+        process = subprocess.Popen(args, env=environment, cwd=workingFolderAbsolutePath, shell=shell, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1, universal_newlines=True)
         self.__processes[processName] = process
 
         self.__endThreadsSignal.clear()
 
         # Create thread to read output of this spawned process into a queue
-        t1 = Thread(target=ProcessCoordinator.__readOutputFromPipe, args=(process.stdout, self.__outputQueue, processName, self.__endThreadsSignal))
-        t2 = Thread(target=ProcessCoordinator.__readOutputFromPipe, args=(process.stderr, self.__outputQueue, processName, self.__endThreadsSignal))
-        t1.daemon = True
-        t2.daemon = True
-        t1.start()
-        t2.start()
-        self.__outputPipeThreads[processName] = (t1, t2)
+        t = Thread(target=ProcessCoordinator.__readOutputFromPipe, args=(process.stdout, self.__outputQueue, processName, self.__endThreadsSignal))
+        t.daemon = True
+        t.start()
+        self.__outputPipeThreads[processName] = t
 
         # Create a name pipe and forward their input to this spawned process (Posix only)
         if os.name == "posix":
