@@ -90,7 +90,6 @@
         ],
 
         "TimeSync": {
-            "SyncPolicy": "Strict",
             "TickPeriodNs": 1000000
         }
 

@@ -566,22 +566,22 @@ auto FastRtpsComAdapter::GetSystemController() -> sync::ISystemController*
 
 void FastRtpsComAdapter::RegisterCanSimulator(can::IIbToCanSimulator* busSim)
 {
-    RegisterSimulator(busSim);
+    RegisterSimulator(busSim, cfg::Link::Type::CAN);
 }
 
 void FastRtpsComAdapter::RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim)
 {
-    RegisterSimulator(busSim);
+    RegisterSimulator(busSim, cfg::Link::Type::Ethernet);
 }
 
 void FastRtpsComAdapter::RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* busSim)
 {
-    RegisterSimulator(busSim);
+    RegisterSimulator(busSim, cfg::Link::Type::FlexRay);
 }
 
 void FastRtpsComAdapter::RegisterLinSimulator(sim::lin::IIbToLinSimulator* busSim)
 {
-    RegisterSimulator(busSim);
+    RegisterSimulator(busSim, cfg::Link::Type::LIN);
 }
 
 
@@ -863,7 +863,7 @@ auto FastRtpsComAdapter::CreateControllerForLink(const ConfigT& config, Arg&&...
 
 
 template<class IIbToSimulatorT>
-void FastRtpsComAdapter::RegisterSimulator(IIbToSimulatorT* busSim)
+void FastRtpsComAdapter::RegisterSimulator(IIbToSimulatorT* busSim, cfg::Link::Type linkType)
 {
     auto&& simulator = std::get<IIbToSimulatorT*>(_simulators);
     if (simulator)
@@ -894,7 +894,6 @@ void FastRtpsComAdapter::RegisterSimulator(IIbToSimulatorT* busSim)
         addToEndpointMap(ethSwitch.name, ethSwitch.ports);
     }
 
-
     // get_by_name throws if the current node is not configured as a network simulator.
     for (auto&& simulatorName : _participant->networkSimulators)
     {
@@ -902,7 +901,12 @@ void FastRtpsComAdapter::RegisterSimulator(IIbToSimulatorT* busSim)
 
         for (auto&& linkName : simulatorConfig.simulatedLinks)
         {
-            for (auto&& endpointName : get_by_name(_config.simulationSetup.links, linkName).endpoints)
+            auto&& linkConfig = get_by_name(_config.simulationSetup.links, linkName);
+
+            if (linkConfig.type != linkType)
+                continue;
+
+            for (auto&& endpointName : linkConfig.endpoints)
             {
                 try
                 {
@@ -918,7 +922,6 @@ void FastRtpsComAdapter::RegisterSimulator(IIbToSimulatorT* busSim)
             SubscribeRtpsTopics(linkName, busSim);
         }
     }
-
 
     simulator = busSim;
 }

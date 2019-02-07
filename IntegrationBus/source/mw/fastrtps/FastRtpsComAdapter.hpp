@@ -203,7 +203,7 @@ private:
     auto CreateControllerForLink(const ConfigT& config, Arg&&... arg) -> ControllerT*;
 
     template<class IIbToSimulatorT>
-    void RegisterSimulator(IIbToSimulatorT* busSim);
+    void RegisterSimulator(IIbToSimulatorT* busSim, cfg::Link::Type linkType);
 
     bool useNetworkSimulator() const;
     bool isSyncMaster() const;
