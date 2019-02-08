@@ -34,18 +34,17 @@ void SyncMaster::SetupTimeQuantumClients(const cfg::Config& config)
             continue;
 
         auto client = std::make_shared<TimeQuantumClient>();
-        client->SetGrantAction([this, client, participantId = participant.id](QuantumRequestStatus status)
-        {
+        client->SetGrantAction(
+            [this, client, participantId = participant.id](QuantumRequestStatus status)
+            {
+                QuantumGrant grant;
+                grant.grantee = mw::EndpointAddress{participantId, 1024};
+                grant.now = client->Now();
+                grant.duration = client->Duration();
+                grant.status = status;
 
-            QuantumGrant grant;
-            grant.grantee = mw::EndpointAddress{participantId, 1024};
-            grant.now = client->now;
-            grant.duration = client->endTime - client->now;
-            grant.status = status;
-
-            this->SendQuantumGrant(grant);
-
-        });
+                this->SendQuantumGrant(grant);
+            });
 
         _syncClients.push_back(client);
         _timeQuantumClients[participant.id] = std::move(client);
@@ -56,29 +55,25 @@ void SyncMaster::SetupTimeQuantumClients(const cfg::Config& config)
 
 void SyncMaster::SetupDiscreteTimeClient(const cfg::Config& config)
 {
-    auto numClients =
-        std::count_if(
-            begin(config.simulationSetup.participants),
-            end(config.simulationSetup.participants),
-            [](auto&& participant) { return participant.syncType == cfg::SyncType::DiscreteTime; }
+    auto numClients = std::count_if(
+        begin(config.simulationSetup.participants),
+        end(config.simulationSetup.participants),
+        [](auto&& participant) { return participant.syncType == cfg::SyncType::DiscreteTime; }
     );
     std::cout << "INFO: SyncMaster has " << numClients << " DiscreteTime Clients\n";
+
     if (numClients == 0)
         return;
 
-    auto client = std::make_shared<DiscreteTimeClient>();
-    client->numClients = static_cast<unsigned int>(numClients);
-    client->tickDuration = config.simulationSetup.timeSync.tickPeriod;
+    auto client = std::make_shared<DiscreteTimeClient>(config.simulationSetup.timeSync.tickPeriod);
+    client->SetNumClients(static_cast<unsigned int>(numClients));
 
-    client->SetGrantAction([this, client](QuantumRequestStatus status)
-    {
-
-        if (status == QuantumRequestStatus::Granted)
-            this->SendTick(client->now);
-
-    });
-
-    client->SetPendingRequest(0ns, client->tickDuration);
+    client->SetGrantAction(
+        [this, client](QuantumRequestStatus status)
+        {
+            if (status == QuantumRequestStatus::Granted)
+                this->SendTick(client->Now());
+        });
 
     _syncClients.push_back(client);
     _discreteTimeClient = std::move(client);
@@ -116,7 +111,7 @@ void SyncMaster::ReceiveIbMessage(mw::EndpointAddress from, const QuantumRequest
         return;
     }
 
-    if (client->endTime != msg.now)
+    if (client->EndTime() != msg.now)
     {
         std::cerr << "ERROR: QuantumRequest from participant " << from.participant << " does not match the current simulation time!\n";
     }
@@ -150,18 +145,35 @@ void SyncMaster::SystemStateChanged(SystemState newState)
 {
     auto oldState = _systemState;
     _systemState = newState;
+
     if (newState == SystemState::Running)
     {
         switch (oldState)
         {
-        case SystemState::Initialized:
-            std::cerr << "INFO: SyncMaster: starting simulating." << std::endl;
-            break;
         case SystemState::Paused:
             std::cerr << "INFO: SyncMaster: continuing simulating." << std::endl;
             break;
+
+        case SystemState::Initializing:
+            // There is a chance to go directly from Initializing to Running due
+            // to incoherent participant state transitions. We consider this also
+            // a start of simulation.
+            //[[fallthrough]]
+
+        case SystemState::Initialized:
+            std::cerr << "INFO: SyncMaster: starting simulating." << std::endl;
+            for (auto&& client : _syncClients)
+            {
+                client->Reset();
+            }
+            break;
+
         default:
-            std::cerr << "WARNING: SyncMaster: switch to SystemState::Running from unexpected state SystemState::" << oldState << ". Running/Continuing simulation anyway." << std::endl;
+            std::cerr << "WARNING: SyncMaster: switch to SystemState::Running from unexpected state SystemState::" << oldState << ". Assuming simulation start." << std::endl;
+            for (auto&& client : _syncClients)
+            {
+                client->Reset();
+            }
         }
 
         SendGrants();
@@ -170,20 +182,23 @@ void SyncMaster::SystemStateChanged(SystemState newState)
 
 void SyncMaster::SendGrants()
 {
-    auto&& minClientNow = *std::min_element(_syncClients.begin(), _syncClients.end(),
-        [](const auto& a, const auto& b) { return a->now < b->now; });
+    auto&& minClientNow =
+        *std::min_element(_syncClients.begin(), _syncClients.end(), [](const auto& a, const auto& b)
+        {
+            return a->Now() < b->Now();
+        });
 
-    auto minNow = minClientNow->now;
+    auto minNow = minClientNow->Now();
 
     for (auto&& client : _syncClients)
     {
         if (!client->HasPendingRequest())
             continue;
 
-        if (client->now == minNow || client->endTime <= _maxGrantedEndTime)
+        if (client->Now() == minNow || client->EndTime() <= _maxGrantedEndTime)
         {
             client->GiveGrant();
-            _maxGrantedEndTime = std::max(_maxGrantedEndTime, client->endTime);
+            _maxGrantedEndTime = std::max(_maxGrantedEndTime, client->EndTime());
         }
     }
 
@@ -194,7 +209,6 @@ void SyncMaster::SendTick(std::chrono::nanoseconds now)
 {
     Tick tick;
     tick.now = now;
-
     _comAdapter->SendIbMessage(_endpointAddress, tick);
 }
 

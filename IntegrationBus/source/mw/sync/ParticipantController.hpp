@@ -72,6 +72,7 @@ public:
     // Used by Policies
     void SendTickDone() const;
     void SendQuantumRequest() const;
+    void AdvanceQuantum();
     void ExecuteSimTask();
 
 private:

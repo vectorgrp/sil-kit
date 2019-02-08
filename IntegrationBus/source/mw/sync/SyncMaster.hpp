@@ -17,43 +17,77 @@ namespace mw {
 namespace sync {
 
 
-struct SyncClient
+struct SyncRequest
 {
-    std::chrono::nanoseconds now{0};
-    std::chrono::nanoseconds endTime{0};
+public:
+    SyncRequest() = default;
+    SyncRequest(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) noexcept
+        : status{Status::Pending}
+        , now {now}
+        , duration{duration}
+    {}
 
-    enum class RequestState
+    void Clear() noexcept
+    {
+        using namespace std::chrono_literals;
+        status = SyncRequest::Status::Idle;
+        now = 0ns;
+        duration = 0ns;
+    }
+
+    void MarkGranted() noexcept
+    {
+        status = SyncRequest::Status::Granted;
+    }
+    void MarkIdle() noexcept
+    {
+        status = SyncRequest::Status::Idle;
+    }
+
+public:
+    // --------------------
+    // public members
+    enum class Status
     {
         Idle,
         Pending,
         Granted
     };
-    RequestState request;
 
+    Status status{Status::Idle};
+    std::chrono::nanoseconds now{0};
+    std::chrono::nanoseconds duration{0};
+};
+
+class SyncClient
+{
+public:
     virtual ~SyncClient() = default;
 
-    bool IsRunning() const
+    auto Now() const noexcept { return request.now; }
+    auto Duration() const noexcept { return request.duration; }
+    auto EndTime() const noexcept { return request.now + request.duration; }
+
+    bool IsRunning() const noexcept
     {
-        return request == RequestState::Granted;
+        return request.status == SyncRequest::Status::Granted;
     }
-    bool HasPendingRequest() const
+    bool HasPendingRequest() const noexcept
     {
-        return request == RequestState::Pending;
+        return request.status == SyncRequest::Status::Pending;
     }
-    void SetPendingRequest(std::chrono::nanoseconds now_, std::chrono::nanoseconds quantum)
+    void SetPendingRequest(std::chrono::nanoseconds now, std::chrono::nanoseconds quantum)
     {
-        now = now_;
-        endTime = now_ + quantum;
-        request = RequestState::Pending;
+        request = SyncRequest{now, quantum};
     }
     void GiveGrant()
     {
-        request = RequestState::Granted;
+        request.MarkGranted();
         _grantAction(QuantumRequestStatus::Granted);
     }
     void RejectGrant()
     {
-        request = RequestState::Idle;
+        request.MarkIdle();
         _grantAction(QuantumRequestStatus::Rejected);
     }
 
@@ -62,20 +96,41 @@ struct SyncClient
         _grantAction = std::move(action);
     }
 
+    virtual void Reset()
+    {
+        request.Clear();
+    }
+
+protected:
+    SyncRequest request;
+
 private:
     std::function<void(QuantumRequestStatus)> _grantAction;
 };
 
-struct TimeQuantumClient : SyncClient
+class TimeQuantumClient : public SyncClient
 {
 };
 
-struct DiscreteTimeClient : SyncClient
+class DiscreteTimeClient : public SyncClient
 {
-    std::chrono::nanoseconds tickDuration{0};
+public:
+    DiscreteTimeClient(std::chrono::nanoseconds tickDuration)
+        : tickDuration{tickDuration}
+    {
+        using namespace std::chrono_literals;
+        request = SyncRequest{0ns, tickDuration};
+    }
 
-    unsigned int numClients{0};
-    unsigned int numTickDoneReceived{0};
+    void SetNumClients(unsigned int numClients_) noexcept { numClients = numClients_; }
+    auto GetNumClients() const noexcept { return numClients; }
+
+    void Reset() override
+    {
+        using namespace std::chrono_literals;
+        request = SyncRequest{0ns, tickDuration};
+        numTickDoneReceived = 0;
+    }
 
     void TickDoneReceived()
     {
@@ -83,11 +138,16 @@ struct DiscreteTimeClient : SyncClient
 
         if (numClients == numTickDoneReceived)
         {
-            SetPendingRequest(endTime, tickDuration);
+            request = SyncRequest{request.now + tickDuration, tickDuration};
             numTickDoneReceived = 0;
         }
     }
 
+private:
+    std::chrono::nanoseconds tickDuration{0};
+
+    unsigned int numClients{0};
+    unsigned int numTickDoneReceived{0};
 };
 
 

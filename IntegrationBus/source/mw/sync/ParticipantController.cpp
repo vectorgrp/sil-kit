@@ -5,6 +5,8 @@
 #include "ib/cfg/string_utils.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 
+using namespace std::chrono_literals;
+
 namespace ib {
 namespace mw {
 namespace sync {
@@ -18,7 +20,10 @@ struct SyncPolicyTimeQuantum
     {
         controller.SendQuantumRequest();
     }
-    inline static void FinishedStep(const ParticipantController& /*controller*/) {}
+    inline static void FinishedStep(ParticipantController& controller)
+    {
+        controller.AdvanceQuantum();
+    }
 };
 
 struct SyncPolicyDiscreteTime
@@ -168,7 +173,6 @@ private:
         if (_controller.State() == ParticipantState::Stopped ||
             _controller.State() == ParticipantState::Error)
         {
-            _grantPromise.set_value(false);
             return false;
         }
 
@@ -356,6 +360,7 @@ void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, c
         }
     }
 
+    _now = 0ns;
     _taskRunner->Initialize();
     ChangeState(ParticipantState::Initialized, "InitHandler completed without exception.");
 }
@@ -488,7 +493,6 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress from, const Qua
         else
         {
             _taskRunner->GrantReceived();
-            _now += _period;
         }
         break;
     case QuantumRequestStatus::Rejected:
@@ -514,6 +518,12 @@ void ParticipantController::SendQuantumRequest() const
     _comAdapter->WaitForMessageDelivery();
     SendIbMessage(QuantumRequest{_now, _period});
 }
+
+void ParticipantController::AdvanceQuantum()
+{
+    _now += _period;
+}
+
 
 void ParticipantController::ExecuteSimTask()
 {
