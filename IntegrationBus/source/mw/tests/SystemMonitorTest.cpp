@@ -71,7 +71,7 @@ protected:
         return builder.Build();
     }
 
-    void SetParticipantStatus(ParticipantId participant, ParticipantState state, std::string reason = "")
+    void SetParticipantStatus(ParticipantId participant, ParticipantState state, std::string reason = std::string{})
     {
         auto&& participantCfg = testConfig.simulationSetup.participants.at(participant);
         ParticipantStatus status;
@@ -641,6 +641,122 @@ TEST_F(SystemMonitorTest, detect_initializing_after_error)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
+TEST_F(SystemMonitorTest, detect_coldswapdone_after_coldswappending_one_swapping)
+{
+    SetAllParticipantStates(ParticipantState::Idle);
+    SetAllParticipantStates(ParticipantState::Initializing);
+    SetAllParticipantStates(ParticipantState::Initialized);
+    SetAllParticipantStates(ParticipantState::Running);
+    SetAllParticipantStates(ParticipantState::Stopping);
+    SetAllParticipantStates(ParticipantState::Stopped);
+    SetAllParticipantStates(ParticipantState::ColdswapPrepare);
+    SetAllParticipantStates(ParticipantState::ColdswapReady);
+
+    RegisterSystemHandler();
+
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::ColdswapPending)).Times(1);
+    SetParticipantStatus(0, ParticipantState::ColdswapIgnored);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapPending);
+
+    SetParticipantStatus(1, ParticipantState::ColdswapIgnored);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapPending);
+
+    SetParticipantStatus(2, ParticipantState::ColdswapShutdown);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapPending);
+
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::ColdswapDone)).Times(1);
+    SetParticipantStatus(2, ParticipantState::Idle);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapDone);
+}
+
+TEST_F(SystemMonitorTest, detect_coldswapdone_after_coldswappending_all_swapping)
+{
+    SetAllParticipantStates(ParticipantState::Idle);
+    SetAllParticipantStates(ParticipantState::Initializing);
+    SetAllParticipantStates(ParticipantState::Initialized);
+    SetAllParticipantStates(ParticipantState::Running);
+    SetAllParticipantStates(ParticipantState::Stopping);
+    SetAllParticipantStates(ParticipantState::Stopped);
+    SetAllParticipantStates(ParticipantState::ColdswapPrepare);
+    SetAllParticipantStates(ParticipantState::ColdswapReady);
+
+    RegisterSystemHandler();
+
+    // Shutdown participants one after another...
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::ColdswapPending)).Times(1);
+    SetParticipantStatus(0, ParticipantState::ColdswapShutdown);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapPending);
+
+    SetParticipantStatus(1, ParticipantState::ColdswapShutdown);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapPending);
+
+    SetParticipantStatus(2, ParticipantState::ColdswapShutdown);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapPending);
+
+    // Bring participants back online...
+    SetParticipantStatus(0, ParticipantState::Idle);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapPending);
+
+    SetParticipantStatus(1, ParticipantState::Idle);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapPending);
+
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::ColdswapDone)).Times(1);
+    SetParticipantStatus(2, ParticipantState::Idle);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapDone);
+}
+
+TEST_F(SystemMonitorTest, detect_coldswapdone_after_coldswappending_none_swapping)
+{
+    SetAllParticipantStates(ParticipantState::Idle);
+    SetAllParticipantStates(ParticipantState::Initializing);
+    SetAllParticipantStates(ParticipantState::Initialized);
+    SetAllParticipantStates(ParticipantState::Running);
+    SetAllParticipantStates(ParticipantState::Stopping);
+    SetAllParticipantStates(ParticipantState::Stopped);
+    SetAllParticipantStates(ParticipantState::ColdswapPrepare);
+    SetAllParticipantStates(ParticipantState::ColdswapReady);
+
+    RegisterSystemHandler();
+
+    // Ignore coldswap for all participants
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::ColdswapPending)).Times(1);
+    SetParticipantStatus(0, ParticipantState::ColdswapIgnored);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapPending);
+
+    SetParticipantStatus(1, ParticipantState::ColdswapIgnored);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapPending);
+
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::ColdswapDone)).Times(1);
+    SetParticipantStatus(2, ParticipantState::ColdswapIgnored);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapDone);
+}
+
+
+TEST_F(SystemMonitorTest, detect_initializing_after_coldswapdone)
+{
+    SetAllParticipantStates(ParticipantState::Idle);
+    SetAllParticipantStates(ParticipantState::Initializing);
+    SetAllParticipantStates(ParticipantState::Initialized);
+    SetAllParticipantStates(ParticipantState::Running);
+    SetAllParticipantStates(ParticipantState::Stopping);
+    SetAllParticipantStates(ParticipantState::Stopped);
+    SetAllParticipantStates(ParticipantState::ColdswapPrepare);
+    SetAllParticipantStates(ParticipantState::ColdswapReady);
+    SetAllParticipantStates(ParticipantState::ColdswapIgnored);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapDone);
+
+    RegisterSystemHandler();
+
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Initializing)).Times(1);
+    SetParticipantStatus(0, ParticipantState::Initializing);
+    EXPECT_EQ(monitor.SystemState(), SystemState::Initializing);
+
+    SetParticipantStatus(1, ParticipantState::Initializing);
+    EXPECT_EQ(monitor.SystemState(), SystemState::Initializing);
+
+    SetParticipantStatus(2, ParticipantState::Initializing);
+    EXPECT_EQ(monitor.SystemState(), SystemState::Initializing);
+}
 
 TEST_F(SystemMonitorTest, detect_shuttingdown_after_error)
 {
@@ -687,6 +803,82 @@ TEST_F(SystemMonitorTest, detect_initializing_after_invalid)
     EXPECT_EQ(monitor.SystemState(), SystemState::Initializing);
 }
 
+TEST_F(SystemMonitorTest, detect_coldswapprepare_after_stopped)
+{
+    SetAllParticipantStates(ParticipantState::Idle);
+    SetAllParticipantStates(ParticipantState::Initializing);
+    SetAllParticipantStates(ParticipantState::Initialized);
+    SetAllParticipantStates(ParticipantState::Running);
+    SetAllParticipantStates(ParticipantState::Stopping);
+    SetAllParticipantStates(ParticipantState::Stopped);
+
+
+    RegisterSystemHandler();
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::ColdswapPrepare)).Times(1);
+    SetParticipantStatus(0, ParticipantState::ColdswapPrepare);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapPrepare);
+
+    SetParticipantStatus(0, ParticipantState::ColdswapReady);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapPrepare);
+}
+
+TEST_F(SystemMonitorTest, detect_coldswapready_after_coldswapprepare)
+{
+    SetAllParticipantStates(ParticipantState::Idle);
+    SetAllParticipantStates(ParticipantState::Initializing);
+    SetAllParticipantStates(ParticipantState::Initialized);
+    SetAllParticipantStates(ParticipantState::Running);
+    SetAllParticipantStates(ParticipantState::Stopping);
+    SetAllParticipantStates(ParticipantState::Stopped);
+    SetAllParticipantStates(ParticipantState::ColdswapPrepare);
+
+
+    SetParticipantStatus(0, ParticipantState::ColdswapReady);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapPrepare);
+
+    SetParticipantStatus(1, ParticipantState::ColdswapReady);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapPrepare);
+
+    RegisterSystemHandler();
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::ColdswapReady)).Times(1);
+    SetParticipantStatus(2, ParticipantState::ColdswapReady);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapReady);
+}
+
+TEST_F(SystemMonitorTest, detect_coldswappending_after_coldswapready_due_to_coldswapignore)
+{
+    SetAllParticipantStates(ParticipantState::Idle);
+    SetAllParticipantStates(ParticipantState::Initializing);
+    SetAllParticipantStates(ParticipantState::Initialized);
+    SetAllParticipantStates(ParticipantState::Running);
+    SetAllParticipantStates(ParticipantState::Stopping);
+    SetAllParticipantStates(ParticipantState::Stopped);
+    SetAllParticipantStates(ParticipantState::ColdswapPrepare);
+    SetAllParticipantStates(ParticipantState::ColdswapReady);
+
+    RegisterSystemHandler();
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::ColdswapPending)).Times(1);
+    SetParticipantStatus(0, ParticipantState::ColdswapIgnored);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapPending);
+}
+
+TEST_F(SystemMonitorTest, detect_coldswappending_after_coldswapready_due_to_coldswapshutdown)
+{
+    SetAllParticipantStates(ParticipantState::Idle);
+    SetAllParticipantStates(ParticipantState::Initializing);
+    SetAllParticipantStates(ParticipantState::Initialized);
+    SetAllParticipantStates(ParticipantState::Running);
+    SetAllParticipantStates(ParticipantState::Stopping);
+    SetAllParticipantStates(ParticipantState::Stopped);
+    SetAllParticipantStates(ParticipantState::ColdswapPrepare);
+    SetAllParticipantStates(ParticipantState::ColdswapReady);
+
+    RegisterSystemHandler();
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::ColdswapPending)).Times(1);
+    SetParticipantStatus(0, ParticipantState::ColdswapShutdown);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ColdswapPending);
+}
+
 TEST_F(SystemMonitorTest, detect_initialized_after_invalid)
 {
     // Test that the monitor recovers from seemingly erroneous state transitions.
@@ -716,5 +908,6 @@ TEST_F(SystemMonitorTest, detect_initialized_after_invalid)
     SetParticipantStatus(2, ParticipantState::Initialized);
     EXPECT_EQ(monitor.SystemState(), SystemState::Initialized);
 }
+
 
 } // anonymous namespace for test

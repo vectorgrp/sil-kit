@@ -66,6 +66,14 @@ std::string to_string(ParticipantState state)
         return "Stopping";
     case ParticipantState::Stopped:
         return "Stopped";
+    case ParticipantState::ColdswapPrepare:
+        return "ColdswapPrepare";
+    case ParticipantState::ColdswapReady:
+        return "ColdswapReady";
+    case ParticipantState::ColdswapShutdown:
+        return "ColdswapShutdown";
+    case ParticipantState::ColdswapIgnored:
+        return "ColdswapIgnored";
     case ParticipantState::Error:
         return "Error";
     case ParticipantState::ShuttingDown:
@@ -96,6 +104,14 @@ std::string to_string(SystemState state)
         return "Stopping";
     case SystemState::Stopped:
         return "Stopped";
+    case SystemState::ColdswapPrepare:
+        return "ColdswapPrepare";
+    case SystemState::ColdswapReady:
+        return "ColdswapReady";
+    case SystemState::ColdswapPending:
+        return "ColdswapPending";
+    case SystemState::ColdswapDone:
+        return "ColdswapDone";
     case SystemState::Error:
         return "Error";
     case SystemState::ShuttingDown:
@@ -286,7 +302,7 @@ std::ostream& operator<<(std::ostream& out, const Tick& tick)
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const TickDone& tickDone)
+std::ostream& operator<<(std::ostream& out, const TickDone&)
 {
     out << "TickDone{}";
     return out;

@@ -78,6 +78,10 @@ enum class ParticipantState {
     Paused,
     Stopping,
     Stopped,
+    ColdswapPrepare,
+    ColdswapReady,
+    ColdswapShutdown,
+    ColdswapIgnored,
     Error,
     ShuttingDown,
     Shutdown
@@ -100,6 +104,10 @@ enum class SystemState {
     Paused,
     Stopping,
     Stopped,
+    ColdswapPrepare,
+    ColdswapReady,
+    ColdswapPending,
+    ColdswapDone,
     Error,
     ShuttingDown,
     Shutdown

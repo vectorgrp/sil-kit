@@ -158,12 +158,13 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const sync::ParticipantStatu
     switch (newStatus.state)
     {
     case sync::ParticipantState::Idle:
-        if (oldState == sync::ParticipantState::Invalid)
+        if (is_any_of(oldState, {sync::ParticipantState::Invalid, sync::ParticipantState::ColdswapShutdown}))
             return;
 
     case sync::ParticipantState::Initializing:
-        if (is_any_of(oldState, {sync::ParticipantState::Idle, sync::ParticipantState::Error, sync::ParticipantState::Stopped}))
+        if (is_any_of(oldState, {sync::ParticipantState::Idle, sync::ParticipantState::Error, sync::ParticipantState::Stopped, sync::ParticipantState::ColdswapIgnored}))
             return;
+
     case sync::ParticipantState::Initialized:
         if (oldState == sync::ParticipantState::Initializing)
             return;
@@ -184,6 +185,22 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const sync::ParticipantStatu
         if (oldState == sync::ParticipantState::Stopping)
             return;
 
+    case sync::ParticipantState::ColdswapPrepare:
+        if (is_any_of(oldState, {sync::ParticipantState::Stopped, sync::ParticipantState::Error}))
+            return;
+
+    case sync::ParticipantState::ColdswapReady:
+        if (oldState == sync::ParticipantState::ColdswapPrepare)
+            return;
+
+    case sync::ParticipantState::ColdswapIgnored:
+        if (oldState == sync::ParticipantState::ColdswapReady)
+            return;
+
+    case sync::ParticipantState::ColdswapShutdown:
+        if (oldState == sync::ParticipantState::ColdswapReady)
+            return;
+
     case sync::ParticipantState::ShuttingDown:
         if (is_any_of(oldState, {sync::ParticipantState::Error, sync::ParticipantState::Stopped}))
             return;
@@ -196,7 +213,7 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const sync::ParticipantStatu
         return;
 
     default:
-        std::cerr << "ERROR: SystemMonitor::ValidateParticipantStatusUpdate() Unhandled ParticipantState::" << oldState << "\n";
+        std::cerr << "ERROR: SystemMonitor::ValidateParticipantStatusUpdate() Unhandled ParticipantState::" << newStatus.state << "\n";
     }
 
     std::time_t enterTime = std::chrono::system_clock::to_time_t(newStatus.enterTime);
@@ -211,7 +228,7 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const sync::ParticipantStatu
 
     std::cerr
         << "ERROR: SystemMonitor detected invalid ParticipantState transition from " << oldState << " to " << newStatus.state
-        << " {EnterTime=" << timeString
+        << " EnterTime=" << timeString
         << ", EnterReason=\"" << newStatus.enterReason
         << "\"\n";
 
@@ -223,15 +240,28 @@ void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus)
     switch (newStatus.state)
     {
     case sync::ParticipantState::Idle:
-        if (AllParticipantsInState(sync::ParticipantState::Idle))
-            SetSystemState(sync::SystemState::Idle);
-        else if (AllParticipantsInState({sync::ParticipantState::Idle, sync::ParticipantState::Initializing, sync::ParticipantState::Initialized}))
-            SetSystemState(sync::SystemState::Initializing);
+        if (SystemState() == sync::SystemState::ColdswapPending)
+        {
+            if (AllParticipantsInState({sync::ParticipantState::Idle, sync::ParticipantState::ColdswapIgnored}))
+            {
+                SetSystemState(sync::SystemState::ColdswapDone);
+            }
+
+        }
+        else
+        {
+            if (AllParticipantsInState(sync::ParticipantState::Idle))
+                SetSystemState(sync::SystemState::Idle);
+            else if (AllParticipantsInState({sync::ParticipantState::Idle, sync::ParticipantState::Initializing, sync::ParticipantState::Initialized}))
+                SetSystemState(sync::SystemState::Initializing);
+        }
         return;
 
     case sync::ParticipantState::Initializing:
-        if (AllParticipantsInState({sync::ParticipantState::Initializing, sync::ParticipantState::Idle})
-            || AllParticipantsInState({sync::ParticipantState::Initializing, sync::ParticipantState::Stopped, sync::ParticipantState::Error}))
+        if (AllParticipantsInState({sync::ParticipantState::Initializing, sync::ParticipantState::Idle}) // regular start
+            || AllParticipantsInState({sync::ParticipantState::Initializing, sync::ParticipantState::Stopped, sync::ParticipantState::Error}) // re-initialization after one run
+            || AllParticipantsInState({sync::ParticipantState::Initializing, sync::ParticipantState::Idle, sync::ParticipantState::ColdswapIgnored}) // after coldswap
+            )
         {
             SetSystemState(sync::SystemState::Initializing);
         }
@@ -260,6 +290,28 @@ void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus)
     case sync::ParticipantState::Stopped:
         if (AllParticipantsInState(sync::ParticipantState::Stopped))
             SetSystemState(sync::SystemState::Stopped);
+        return;
+
+    case sync::ParticipantState::ColdswapPrepare:
+        if (AllParticipantsInState({sync::ParticipantState::Stopped, sync::ParticipantState::ColdswapPrepare, sync::ParticipantState::ColdswapReady, sync::ParticipantState::Error}))
+            SetSystemState(sync::SystemState::ColdswapPrepare);
+        return;
+
+    case sync::ParticipantState::ColdswapReady:
+        if (AllParticipantsInState(sync::ParticipantState::ColdswapReady))
+            SetSystemState(sync::SystemState::ColdswapReady);
+        return;
+
+    case sync::ParticipantState::ColdswapShutdown:
+        if (AllParticipantsInState({sync::ParticipantState::ColdswapReady, sync::ParticipantState::ColdswapShutdown, sync::ParticipantState::ColdswapIgnored}))
+            SetSystemState(sync::SystemState::ColdswapPending);
+        return;
+
+    case sync::ParticipantState::ColdswapIgnored:
+        if (AllParticipantsInState(sync::ParticipantState::ColdswapIgnored))
+            SetSystemState(sync::SystemState::ColdswapDone);
+        else if (AllParticipantsInState({sync::ParticipantState::ColdswapReady, sync::ParticipantState::ColdswapShutdown, sync::ParticipantState::ColdswapIgnored}))
+            SetSystemState(sync::SystemState::ColdswapPending);
         return;
 
     case sync::ParticipantState::ShuttingDown:
