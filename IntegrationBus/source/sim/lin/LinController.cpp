@@ -319,7 +319,7 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const LinMess
     }
 }
 
-void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const WakeupRequest& msg)
+void LinController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, const WakeupRequest& /*msg*/)
 {
     for (auto&& handler : _wakeuprequestHandlers)
     {

@@ -220,7 +220,7 @@ void LinControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const TxAckn
     CallHandlers(msg.status);
 }
 
-void LinControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const WakeupRequest& msg)
+void LinControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const WakeupRequest& /*msg*/)
 {
     if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
         return;

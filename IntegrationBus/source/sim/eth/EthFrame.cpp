@@ -114,7 +114,6 @@ auto EthFrame::GetDestinationMac() const -> EthMac
     if (_rawFrame.empty())
     {
         throw std::exception();
-        return EthMac{};
     }
 
     EthMac dest;
@@ -137,7 +136,6 @@ auto EthFrame::GetSourceMac() const -> EthMac
     if (_rawFrame.empty())
     {
         throw std::exception();
-        return EthMac{};
     }
 
     EthMac source;
@@ -160,7 +158,6 @@ auto EthFrame::GetVlanTag() const -> EthTagControlInformation
     if (_rawFrame.empty())
     {
         throw std::exception();
-        return EthTagControlInformation();
     }
 
     EthTagControlInformation tci;
@@ -184,7 +181,6 @@ auto EthFrame::GetEtherType() const -> uint16_t
     if (_rawFrame.empty())
     {
         throw std::exception();
-        return 0;
     }
 
     return get_value<uint16_t>(_rawFrame, EtherType::Start);

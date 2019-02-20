@@ -83,7 +83,7 @@ auto to_json(uint16_t value) -> json11::Json
 template<>
 auto from_json<uint16_t>(const json11::Json& json) -> uint16_t
 {
-    return json.int_value();
+    return static_cast<uint16_t>(json.int_value());
 }
 
 auto to_json(int32_t value) -> json11::Json

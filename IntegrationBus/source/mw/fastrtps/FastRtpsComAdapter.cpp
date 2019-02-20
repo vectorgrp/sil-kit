@@ -127,13 +127,13 @@ void FastRtpsComAdapter::joinDomain(uint32_t domainId)
             Locator_t unicastLocator;
             pParam.rtps.builtin.metatrafficUnicastLocatorList.push_back(unicastLocator);
 
-            for (auto&& participant : _config.simulationSetup.participants)
+            for (auto&& otherParticipant : _config.simulationSetup.participants)
             {
-                if (participant.id == _participantId)
+                if (otherParticipant.id == _participantId)
                     continue;
 
                 Locator_t participantLocator;
-                auto port = CalculateMetaTrafficPort(participant.id);
+                auto port = CalculateMetaTrafficPort(otherParticipant.id);
                 IPLocator::createLocator(LOCATOR_KIND_UDPv4, "127.0.0.1", port, participantLocator);
                 pParam.rtps.builtin.initialPeersList.push_back(participantLocator);
             }
@@ -145,21 +145,21 @@ void FastRtpsComAdapter::joinDomain(uint32_t domainId)
             Locator_t unicastLocator;
             pParam.rtps.builtin.metatrafficUnicastLocatorList.push_back(unicastLocator);
 
-            for (auto&& participant : _config.simulationSetup.participants)
+            for (auto&& otherParticipant : _config.simulationSetup.participants)
             {
-                if (participant.id == _participantId)
+                if (otherParticipant.id == _participantId)
                     continue;
 
                 Locator_t participantLocator;
-                auto port = CalculateMetaTrafficPort(participant.id);
+                auto port = CalculateMetaTrafficPort(otherParticipant.id);
                 try
                 {
-                    auto&& participantIp = fastRtpsCfg.unicastLocators.at(participant.name);
+                    auto&& participantIp = fastRtpsCfg.unicastLocators.at(otherParticipant.name);
                     IPLocator::createLocator(LOCATOR_KIND_UDPv4, participantIp, port, participantLocator);
                 }
                 catch (const std::out_of_range&)
                 {
-                    throw cfg::Misconfiguration{"No UnicastLocator configured for participant \"" + participant.name + "\""};
+                    throw cfg::Misconfiguration{"No UnicastLocator configured for participant \"" + otherParticipant.name + "\""};
                 }
                 std::cout << "Adding initial peer for unicast discovery=" << IPLocator::toIPv4string(participantLocator) << ":" << participantLocator.port << "\n";
                 pParam.rtps.builtin.initialPeersList.push_back(participantLocator);
@@ -536,7 +536,6 @@ auto FastRtpsComAdapter::GetSyncMaster() -> sync::ISyncMaster*
 auto FastRtpsComAdapter::GetParticipantController() -> sync::IParticipantController*
 {
     auto* controller = GetController<sync::IParticipantController>(1024);
-    auto&& controllers = std::get<ControllerMap<sync::IParticipantController>>(_controllers);
     if (!controller)
     {
         controller = CreateController<sync::ParticipantController>(1024, "default", *_participant, _config.simulationSetup.timeSync);

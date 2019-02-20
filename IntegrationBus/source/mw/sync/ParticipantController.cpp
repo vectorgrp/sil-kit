@@ -223,7 +223,7 @@ void ParticipantController::SetPeriod(std::chrono::nanoseconds period)
     _period = period;
 }
 
-void ParticipantController::SetEarliestEventTime(std::chrono::nanoseconds eventTime)
+void ParticipantController::SetEarliestEventTime(std::chrono::nanoseconds /*eventTime*/)
 {
     throw std::exception();
 }
@@ -419,7 +419,7 @@ void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, c
     ChangeState(ParticipantState::Initialized, "InitHandler completed without exception.");
 }
 
-void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress from, const SystemCommand& command)
+void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, const SystemCommand& command)
 {
     if (!_taskRunner)
     {
@@ -462,7 +462,7 @@ void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress from, const
     ReportError("Received SystemCommand::" + to_string(command.kind) + " while in ParticipantState::" + to_string(State()));
 }
 
-void ParticipantController::ReceiveIbMessage(mw::EndpointAddress from, const Tick& msg)
+void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const Tick& msg)
 {
     switch (_participantConfig.syncType)
     {
@@ -517,7 +517,7 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress from, const Tic
     }
 }
 
-void ParticipantController::ReceiveIbMessage(mw::EndpointAddress from, const QuantumGrant& msg)
+void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const QuantumGrant& msg)
 {
     if (_participantConfig.syncType != cfg::SyncType::TimeQuantum)
         return;
@@ -566,30 +566,6 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress from, const Qua
     default:
         ReportError("Received QuantumGrant in state ParticipantState::" + to_string(State()));
         return;
-    }
-
-    switch (msg.status)
-    {
-    case QuantumRequestStatus::Granted:
-        _now = msg.now;
-        if (msg.duration != _period)
-        {
-            ReportError("Granted quantum duration does not match request!");
-        }
-        else
-        {
-            _taskRunner->GrantReceived();
-        }
-        break;
-    case QuantumRequestStatus::Rejected:
-        _now = msg.now;
-        _taskRunner->Stop();
-        break;
-    case QuantumRequestStatus::Invalid:
-        ReportError("Received invalid QuantumGrant");
-        break;
-    default:
-        ReportError("Received QuantumGrant with unknown Status");
     }
 }
 

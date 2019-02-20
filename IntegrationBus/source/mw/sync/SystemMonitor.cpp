@@ -113,7 +113,7 @@ void SystemMonitor::ReceiveIbMessage(mw::EndpointAddress from, const sync::Parti
 
     _participantStatus[participantId] = newParticipantStatus;
     ValidateParticipantStatusUpdate(newParticipantStatus, oldParticipantState);
-    UpdateSystemState(newParticipantStatus, oldParticipantState);
+    UpdateSystemState(newParticipantStatus);
 
     for (auto&& handler : _participantStatusHandlers)
         handler(newParticipantStatus);
@@ -218,7 +218,7 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const sync::ParticipantStatu
     _invalidTransitionCount++;
 }
 
-void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus, sync::ParticipantState oldState)
+void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus)
 {
     switch (newStatus.state)
     {
@@ -278,8 +278,6 @@ void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus, 
     default:
         return;
     }
-    
-    SetSystemState(sync::SystemState::Invalid);
 }
 
 void SystemMonitor::SetSystemState(sync::SystemState newState)

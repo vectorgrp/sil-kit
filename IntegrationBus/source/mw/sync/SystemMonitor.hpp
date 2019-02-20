@@ -67,7 +67,7 @@ private:
     bool AllParticipantsInState(sync::ParticipantState state) const;
     bool AllParticipantsInState(std::initializer_list<sync::ParticipantState> acceptedStates) const;
     void ValidateParticipantStatusUpdate(const sync::ParticipantStatus& newStatus, sync::ParticipantState oldState);
-    void UpdateSystemState(const sync::ParticipantStatus& newStatus, sync::ParticipantState oldState);
+    void UpdateSystemState(const sync::ParticipantStatus& newStatus);
     inline void SetSystemState(sync::SystemState newState);
 
 private:
