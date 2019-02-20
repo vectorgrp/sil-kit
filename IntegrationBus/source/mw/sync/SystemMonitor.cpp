@@ -176,13 +176,22 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const sync::ParticipantStatu
         if (oldState == sync::ParticipantState::Running)
             return;
 
-    case sync::ParticipantState::Stopped:
+    case sync::ParticipantState::Stopping:
         if (is_any_of(oldState, {sync::ParticipantState::Running, sync::ParticipantState::Paused}))
             return;
 
-    case sync::ParticipantState::Shutdown:
+    case sync::ParticipantState::Stopped:
+        if (oldState == sync::ParticipantState::Stopping)
+            return;
+
+    case sync::ParticipantState::ShuttingDown:
         if (is_any_of(oldState, {sync::ParticipantState::Error, sync::ParticipantState::Stopped}))
             return;
+
+    case sync::ParticipantState::Shutdown:
+        if (oldState == sync::ParticipantState::ShuttingDown)
+            return;
+
     case sync::ParticipantState::Error:
         return;
 
@@ -191,12 +200,18 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const sync::ParticipantStatu
     }
 
     std::time_t enterTime = std::chrono::system_clock::to_time_t(newStatus.enterTime);
-    char timebuffer[32];
-    std::strftime(timebuffer, sizeof(timebuffer), "%FT%T", std::localtime(&enterTime));
+    std::tm tmBuffer;
+#if defined(_MSC_VER)
+    localtime_s(&tmBuffer, &enterTime);
+#else
+    localtime_r(&enterTime, &tmBuffer);
+#endif
+    char timeString[32];
+    std::strftime(timeString, sizeof(timeString), "%FT%T", &tmBuffer);
 
     std::cerr
         << "ERROR: SystemMonitor detected invalid ParticipantState transition from " << oldState << " to " << newStatus.state
-        << " {EnterTime=" << timebuffer
+        << " {EnterTime=" << timeString
         << ", EnterReason=\"" << newStatus.enterReason
         << "\"\n";
 
@@ -231,29 +246,29 @@ void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus, 
     case sync::ParticipantState::Running:
         if (AllParticipantsInState(sync::ParticipantState::Running))
             SetSystemState(sync::SystemState::Running);
-
         return;
 
     case sync::ParticipantState::Paused:
         if (AllParticipantsInState({sync::ParticipantState::Paused, sync::ParticipantState::Running}))
             SetSystemState(sync::SystemState::Paused);
-
         return;
+
+    case sync::ParticipantState::Stopping:
+        if (AllParticipantsInState({sync::ParticipantState::Stopping, sync::ParticipantState::Stopped, sync::ParticipantState::Paused, sync::ParticipantState::Running}))
+            SetSystemState(sync::SystemState::Stopping);
 
     case sync::ParticipantState::Stopped:
         if (AllParticipantsInState(sync::ParticipantState::Stopped))
             SetSystemState(sync::SystemState::Stopped);
-        else if (AllParticipantsInState({sync::ParticipantState::Stopped, sync::ParticipantState::Paused, sync::ParticipantState::Running}))
-            SetSystemState(sync::SystemState::Stopping);
-
         return;
+
+    case sync::ParticipantState::ShuttingDown:
+        if (AllParticipantsInState({sync::ParticipantState::ShuttingDown, sync::ParticipantState::Shutdown, sync::ParticipantState::Stopped, sync::ParticipantState::Error, sync::ParticipantState::Idle, sync::ParticipantState::Initialized}))
+            SetSystemState(sync::SystemState::ShuttingDown);
 
     case sync::ParticipantState::Shutdown:
         if (AllParticipantsInState(sync::ParticipantState::Shutdown))
             SetSystemState(sync::SystemState::Shutdown);
-        else if (AllParticipantsInState({sync::ParticipantState::Shutdown, sync::ParticipantState::Stopped, sync::ParticipantState::Error, sync::ParticipantState::Idle, sync::ParticipantState::Initialized}))
-            SetSystemState(sync::SystemState::ShuttingDown);
-
         return;
 
     case sync::ParticipantState::Error:

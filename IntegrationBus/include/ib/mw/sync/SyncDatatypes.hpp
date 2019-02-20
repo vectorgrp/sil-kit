@@ -76,8 +76,10 @@ enum class ParticipantState {
     Initialized,
     Running,
     Paused,
+    Stopping,
     Stopped,
     Error,
+    ShuttingDown,
     Shutdown
 };
 

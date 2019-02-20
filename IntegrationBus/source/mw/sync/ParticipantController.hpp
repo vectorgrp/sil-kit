@@ -85,6 +85,8 @@ private:
     void StartTaskRunner();
 
     void ChangeState(ParticipantState newState, std::string reason);
+    void Shutdown(std::string reason);
+    void ProcessQuantumGrant(const QuantumGrant& msg);
     
 private:
     // ----------------------------------------

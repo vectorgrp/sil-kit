@@ -307,12 +307,66 @@ void ParticipantController::Continue()
 
 void ParticipantController::Stop(std::string reason)
 {
-    ChangeState(ParticipantState::Stopped, std::move(reason));
-    if (_stopHandler)
-        _stopHandler();
+    ChangeState(ParticipantState::Stopping, std::move(reason));
 
     if (_taskRunner)
         _taskRunner->Stop();
+
+    if (_stopHandler)
+    {
+        try
+        {
+            _stopHandler();
+            // The handler can report an error, which overrules the default transition to ParticipantState::Stopped
+            if (State() != ParticipantState::Error)
+            {
+                reason += "; StopHandler completed successfully.";
+                ChangeState(ParticipantState::Stopped, std::move(reason));
+            }
+        }
+        catch (const std::exception& e)
+        {
+            reason += "; StopHandler threw exception: ";
+            reason += e.what();
+            ChangeState(ParticipantState::Stopped, std::move(reason));
+        }
+    }
+    else
+    {
+        reason += "; no StopHandler registered.";
+        ChangeState(ParticipantState::Stopped, reason);
+    }
+
+}
+
+void ParticipantController::Shutdown(std::string reason)
+{
+    ChangeState(ParticipantState::ShuttingDown, reason);
+
+    _taskRunner->Shutdown();
+
+    if (_shutdownHandler)
+    {
+        try
+        {
+            _shutdownHandler();
+            reason += "; ShutdownHandler completed.";
+            ChangeState(ParticipantState::Shutdown, std::move(reason));
+        }
+        catch (const std::exception& e)
+        {
+            reason += "; ShutdownHandler threw exception: ";
+            reason += e.what();
+            ChangeState(ParticipantState::Shutdown, std::move(reason));
+        }
+    }
+    else
+    {
+        reason += "; no ShutdownHandler registered.";
+        ChangeState(ParticipantState::Shutdown, std::move(reason));
+    }
+
+    _finalStatePromise.set_value(State());
 }
 
 
@@ -395,20 +449,7 @@ void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress from, const
     case SystemCommand::Kind::Shutdown:
         if (State() == ParticipantState::Error || State() == ParticipantState::Stopped)
         {
-            ChangeState(ParticipantState::Shutdown, "Received SystemCommand::Shutdown");
-            _taskRunner->Shutdown();
-            if (_shutdownHandler)
-            {
-                try
-                {
-                    _shutdownHandler();
-                }
-                catch (const std::exception& e)
-                {
-                    ReportError(std::string{"ShutdownHandler did throw an exception: "} + e.what());
-                }
-            }
-            _finalStatePromise.set_value(State());
+            Shutdown("Received SystemCommand::Shutdown");
             return;
         }
         break;
@@ -437,18 +478,39 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress from, const Tic
         ReportError("Received TICK before ParticipantController::Run() or RunAsync() was called");
         return;
     }
+
     switch (State())
     {
+    case ParticipantState::Invalid:
+        // [[fallthrough]]
+    case ParticipantState::Idle:
+        // [[fallthrough]]
+    case ParticipantState::Initializing:
+        // [[fallthrough]]
+    case ParticipantState::Initialized:
+        ReportError("Received TICK in state ParticipantState::" + to_string(State()));
+        return;
+
+    case ParticipantState::Paused:
+        // We have to process TICKS received in Paused. This can happen due to
+        // race conditions, and we can't undo a TICK. It should not occur more
+        // than once though.
+        // [[fallthrough]]
     case ParticipantState::Running:
         _now = msg.now;
         _taskRunner->GrantReceived();
         break;
-    case ParticipantState::Error:
-        // ignore
-        return;
+        
+    case ParticipantState::Stopping:
+        return; // ignore TICK during stop/shutdown procedure
     case ParticipantState::Stopped:
-        // ignore
-        return;
+        return; // ignore TICK during stop/shutdown procedure
+    case ParticipantState::Error:
+        return; // ignore TICK during stop/shutdown procedure
+    case ParticipantState::ShuttingDown:
+        return; // ignore TICK during stop/shutdown procedure
+    case ParticipantState::Shutdown:
+        return; // ignore TICK during stop/shutdown procedure
     default:
         ReportError("Received TICK in state ParticipantState::" + to_string(State()));
         return;
@@ -471,12 +533,36 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress from, const Qua
 
     switch (State())
     {
-    case ParticipantState::Running:
-        break;
-    case ParticipantState::Stopped:
-    case ParticipantState::Error:
-    case ParticipantState::Shutdown:
+    case ParticipantState::Invalid:
+        // [[fallthrough]]
+    case ParticipantState::Idle:
+        // [[fallthrough]]
+    case ParticipantState::Initializing:
+        // [[fallthrough]]
+    case ParticipantState::Initialized:
+        ReportError("Received QuantumGrant in state ParticipantState::" + to_string(State()));
         return;
+
+    case ParticipantState::Paused:
+        // We have to process QuantumGrants received in Paused. This can happen
+        // due to race conditions, and we can't undo a TICK. It should not occur
+        // more than once though.
+        // [[fallthrough]]
+    case ParticipantState::Running:
+        ProcessQuantumGrant(msg);
+        return;
+
+    case ParticipantState::Stopping:
+        return; // ignore QuantumGrants during stop/shutdown procedure
+    case ParticipantState::Stopped:
+        return; // ignore QuantumGrants during stop/shutdown procedure
+    case ParticipantState::Error:
+        return; // ignore QuantumGrants during stop/shutdown procedure
+    case ParticipantState::ShuttingDown:
+        return; // ignore QuantumGrants during stop/shutdown procedure
+    case ParticipantState::Shutdown:
+        return; // ignore QuantumGrants during stop/shutdown procedure
+
     default:
         ReportError("Received QuantumGrant in state ParticipantState::" + to_string(State()));
         return;
@@ -517,6 +603,33 @@ void ParticipantController::SendQuantumRequest() const
 {
     _comAdapter->WaitForMessageDelivery();
     SendIbMessage(QuantumRequest{_now, _period});
+}
+
+void ParticipantController::ProcessQuantumGrant(const QuantumGrant& msg)
+{
+    switch (msg.status)
+    {
+    case QuantumRequestStatus::Granted:
+        _now = msg.now;
+        if (msg.duration != _period)
+        {
+            ReportError("Granted quantum duration does not match request!");
+        }
+        else
+        {
+            _taskRunner->GrantReceived();
+        }
+        break;
+    case QuantumRequestStatus::Rejected:
+        _now = msg.now;
+        _taskRunner->Stop();
+        break;
+    case QuantumRequestStatus::Invalid:
+        ReportError("Received invalid QuantumGrant");
+        break;
+    default:
+        ReportError("Received QuantumGrant with unknown Status");
+    }
 }
 
 void ParticipantController::AdvanceQuantum()

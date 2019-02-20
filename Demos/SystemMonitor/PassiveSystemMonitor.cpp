@@ -25,23 +25,25 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const ib::mw::sync::ParticipantStatus& status)
-{
-    std::time_t enterTime = std::chrono::system_clock::to_time_t(status.enterTime);
-    char timebuffer[32];
-    std::strftime(timebuffer, sizeof(timebuffer), "%F %T", std::localtime(&enterTime));
-
-    out << timebuffer
-        << " " << status.participantName
-        << "\t State: " << status.state
-        << "\t Reason: " << status.enterReason;
-    
-    return out;
-}
-
 void ReportParticipantStatus(const ib::mw::sync::ParticipantStatus& status)
 {
-    std::cout << status << std::endl;
+    std::time_t enterTime = std::chrono::system_clock::to_time_t(status.enterTime);
+    std::tm tmBuffer;
+#if defined(_MSC_VER)
+    localtime_s(&tmBuffer, &enterTime);
+#else
+    localtime_r(&enterTime, &tmBuffer);
+#endif
+
+    char timeString[32];
+    std::strftime(timeString, sizeof(timeString), "%F %T", &tmBuffer);
+
+    std::cout
+        << timeString
+        << " " << status.participantName
+        << "\t State: " << status.state
+        << "\t Reason: " << status.enterReason
+        << std::endl;
 }
 
 void ReportSystemState(ib::mw::sync::SystemState state)
