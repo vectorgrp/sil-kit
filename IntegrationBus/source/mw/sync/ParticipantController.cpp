@@ -446,6 +446,12 @@ auto ParticipantController::Status() const -> const ParticipantStatus&
     return _status;
 }
 
+void ParticipantController::RefreshStatus()
+{
+    _status.refreshTime = std::chrono::system_clock::now();
+    SendIbMessage(_status);
+}
+
 auto ParticipantController::Now() const -> std::chrono::nanoseconds
 {
     return _now;
@@ -711,6 +717,7 @@ void ParticipantController::ChangeState(ParticipantState newState, std::string r
     _status.state = newState;
     _status.enterReason = reason;
     _status.enterTime = std::chrono::system_clock::now();
+    _status.refreshTime = _status.enterTime;
 
     SendIbMessage(_status);
 }

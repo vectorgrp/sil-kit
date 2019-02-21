@@ -1391,6 +1391,32 @@ namespace ib
                     {
                         return m_enterTimeUs;
                     }
+                    /*!
+                     * @brief This function sets a value in member refreshTimeUs
+                     * @param _refreshTimeUs New value for member refreshTimeUs
+                     */
+                    inline eProsima_user_DllExport void refreshTimeUs(int64_t _refreshTimeUs)
+                    {
+                        m_refreshTimeUs = _refreshTimeUs;
+                    }
+
+                    /*!
+                     * @brief This function returns the value of member refreshTimeUs
+                     * @return Value of member refreshTimeUs
+                     */
+                    inline eProsima_user_DllExport int64_t refreshTimeUs() const
+                    {
+                        return m_refreshTimeUs;
+                    }
+
+                    /*!
+                     * @brief This function returns a reference to member refreshTimeUs
+                     * @return Reference to member refreshTimeUs
+                     */
+                    inline eProsima_user_DllExport int64_t& refreshTimeUs()
+                    {
+                        return m_refreshTimeUs;
+                    }
 
                     /*!
                      * @brief This function returns the maximum serialized size of an object
@@ -1448,6 +1474,7 @@ namespace ib
                     ib::mw::sync::idl::ParticipantState m_state;
                     std::string m_enterReason;
                     int64_t m_enterTimeUs;
+                    int64_t m_refreshTimeUs;
                 };
                 /*!
                  * @brief This class represents the enumeration SystemState defined by the user in the IDL file.

@@ -235,4 +235,30 @@ TEST_F(ParticipantControllerTest, run_async)
 }
 
 
+TEST_F(ParticipantControllerTest, refreshstatus_must_not_modify_other_fields)
+{
+    controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
+
+    EXPECT_EQ(controller.State(), ParticipantState::Invalid);
+
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Idle)))
+        .Times(2);
+    controller.RunAsync();
+
+    auto oldStatus = controller.Status();
+    std::this_thread::sleep_for(1s);
+
+    controller.RefreshStatus();
+    auto newStatus = controller.Status();
+
+    EXPECT_TRUE(newStatus.enterTime < newStatus.refreshTime);
+    EXPECT_TRUE(oldStatus.refreshTime < newStatus.refreshTime);
+
+    // Ensure that all other fields are unchanged, i.e., the new status is the
+    // same as the old one except for the new refreshTime.
+    auto expectedStatus = oldStatus;
+    expectedStatus.refreshTime = newStatus.refreshTime;
+    EXPECT_EQ(expectedStatus, newStatus);
+}
+
 } // anonymous namespace for test

@@ -95,6 +95,7 @@ struct ParticipantStatus
     ParticipantState state{ParticipantState::Invalid};
     std::string enterReason;
     std::chrono::system_clock::time_point enterTime;
+    std::chrono::system_clock::time_point refreshTime;
 };
 
 enum class SystemState {

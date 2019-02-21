@@ -258,6 +258,7 @@ auto to_idl(const ParticipantStatus& msg) -> idl::ParticipantStatus
     idl.state(to_idl(msg.state));
     idl.enterReason(msg.enterReason);
     idl.enterTimeUs(std::chrono::duration_cast<std::chrono::microseconds>(msg.enterTime.time_since_epoch()).count());
+    idl.refreshTimeUs(std::chrono::duration_cast<std::chrono::microseconds>(msg.refreshTime.time_since_epoch()).count());
     return idl;
 }
 
@@ -269,6 +270,7 @@ auto idl::from_idl(idl::ParticipantStatus&& idl) -> sync::ParticipantStatus
     msg.state = from_idl(idl.state());
     msg.enterReason = std::move(idl.enterReason());
     msg.enterTime = std::chrono::system_clock::time_point(std::chrono::microseconds{idl.enterTimeUs()});
+    msg.refreshTime = std::chrono::system_clock::time_point(std::chrono::microseconds{idl.refreshTimeUs()});
 
     return msg;
 }

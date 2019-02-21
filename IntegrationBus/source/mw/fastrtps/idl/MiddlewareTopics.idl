@@ -95,6 +95,7 @@ struct ParticipantStatus
     string enterReason;
     
     long long enterTimeUs; // time since UNIX epoch in Microseconds
+    long long refreshTimeUs; // time since UNIX epoch in Microseconds
 };
 
 enum SystemState {

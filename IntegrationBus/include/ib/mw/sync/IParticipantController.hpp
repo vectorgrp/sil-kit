@@ -162,6 +162,15 @@ public:
     */
     virtual auto Status() const -> const ParticipantStatus& = 0;
 
+    /*! \brief Refresh the current status without modifying the state
+     *
+     * This method only refreshes the field ParticipantStatus::refreshTime
+     * to the current wall clock time. All other fields are left unchanged.
+     * This method and field can be used to indicate that the participant is
+     * still alive and operational.
+     */
+    virtual void RefreshStatus() = 0;
+
     /*! \brief Get the current simulation time
      */
     virtual auto Now() const -> std::chrono::nanoseconds = 0;

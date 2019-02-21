@@ -703,6 +703,8 @@ ib::mw::sync::idl::ParticipantStatus::ParticipantStatus()
 
     m_enterTimeUs = 0;
 
+    m_refreshTimeUs = 0;
+
 
 }
 
@@ -717,6 +719,7 @@ ib::mw::sync::idl::ParticipantStatus::ParticipantStatus(const ParticipantStatus 
     m_state = x.m_state;
     m_enterReason = x.m_enterReason;
     m_enterTimeUs = x.m_enterTimeUs;
+    m_refreshTimeUs = x.m_refreshTimeUs;
 }
 
 ib::mw::sync::idl::ParticipantStatus::ParticipantStatus(ParticipantStatus &&x)
@@ -726,6 +729,7 @@ ib::mw::sync::idl::ParticipantStatus::ParticipantStatus(ParticipantStatus &&x)
     m_state = x.m_state;
     m_enterReason = std::move(x.m_enterReason);
     m_enterTimeUs = x.m_enterTimeUs;
+    m_refreshTimeUs = x.m_refreshTimeUs;
 }
 
 ib::mw::sync::idl::ParticipantStatus& ib::mw::sync::idl::ParticipantStatus::operator=(const ParticipantStatus &x)
@@ -735,6 +739,7 @@ ib::mw::sync::idl::ParticipantStatus& ib::mw::sync::idl::ParticipantStatus::oper
     m_state = x.m_state;
     m_enterReason = x.m_enterReason;
     m_enterTimeUs = x.m_enterTimeUs;
+    m_refreshTimeUs = x.m_refreshTimeUs;
 
     return *this;
 }
@@ -746,6 +751,7 @@ ib::mw::sync::idl::ParticipantStatus& ib::mw::sync::idl::ParticipantStatus::oper
     m_state = x.m_state;
     m_enterReason = std::move(x.m_enterReason);
     m_enterTimeUs = x.m_enterTimeUs;
+    m_refreshTimeUs = x.m_refreshTimeUs;
 
     return *this;
 }
@@ -761,6 +767,9 @@ size_t ib::mw::sync::idl::ParticipantStatus::getMaxCdrSerializedSize(size_t curr
 
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4) + 255 + 1;
+
+    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
 
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
@@ -785,6 +794,9 @@ size_t ib::mw::sync::idl::ParticipantStatus::getCdrSerializedSize(const ib::mw::
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
 
+    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
+
 
     return current_alignment - initial_alignment;
 }
@@ -796,6 +808,7 @@ void ib::mw::sync::idl::ParticipantStatus::serialize(eprosima::fastcdr::Cdr &scd
     scdr << (uint32_t)m_state;
     scdr << m_enterReason;
     scdr << m_enterTimeUs;
+    scdr << m_refreshTimeUs;
 }
 
 void ib::mw::sync::idl::ParticipantStatus::deserialize(eprosima::fastcdr::Cdr &dcdr)
@@ -809,6 +822,7 @@ void ib::mw::sync::idl::ParticipantStatus::deserialize(eprosima::fastcdr::Cdr &d
     }
     dcdr >> m_enterReason;
     dcdr >> m_enterTimeUs;
+    dcdr >> m_refreshTimeUs;
 }
 
 size_t ib::mw::sync::idl::ParticipantStatus::getKeyMaxCdrSerializedSize(size_t current_alignment)
@@ -816,6 +830,7 @@ size_t ib::mw::sync::idl::ParticipantStatus::getKeyMaxCdrSerializedSize(size_t c
 	size_t current_align = current_alignment;
             
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
+
 
 
 
@@ -833,6 +848,7 @@ void ib::mw::sync::idl::ParticipantStatus::serializeKey(eprosima::fastcdr::Cdr &
 {
 	(void) scdr;
 	 scdr << m_senderAddr;  
+	 
 	 
 	 
 	 
