@@ -521,7 +521,7 @@ int main(int argc, char** argv)
     frUser.configure(std::move(config));
 
     participantController->SetSimulationTask(
-        [&frUser](std::chrono::nanoseconds now)
+        [&frUser](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/)
         {
             auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
             std::cout << "now=" << nowMs.count() << "ms" << std::endl;

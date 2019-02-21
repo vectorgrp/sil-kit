@@ -306,13 +306,14 @@ std::ostream& operator<<(std::ostream& out, const QuantumGrant& grant)
 std::ostream& operator<<(std::ostream& out, const Tick& tick)
 {
     auto now = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(tick.now);
-    out << "Tick{now=" << now.count() << "ms}";
+    auto duration = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(tick.duration);
+    out << "Tick{now=" << now.count() << "ms, duration=" << duration.count() << "}";
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const TickDone&)
+std::ostream& operator<<(std::ostream& out, const TickDone& tickDone)
 {
-    out << "TickDone{}";
+    out << "TickDone{finished=" << tickDone.finishedTick << "}";
     return out;
 }
 

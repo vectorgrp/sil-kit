@@ -215,9 +215,14 @@ void ParticipantController::SetShutdownHandler(ShutdownHandlerT handler)
     _shutdownHandler = std::move(handler);
 }
 
-void ParticipantController::SetSimulationTask(SimTaskT task)
+void ParticipantController::SetSimulationTask(std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)> task)
 {
     _simTask = std::move(task);
+}
+
+void ParticipantController::SetSimulationTask(std::function<void(std::chrono::nanoseconds now)> task)
+{
+    _simTask = [task = std::move(task)](auto now, auto /*duration*/){ task(now); };
 }
 
 void ParticipantController::EnableColdswap()
@@ -227,6 +232,12 @@ void ParticipantController::EnableColdswap()
 
 void ParticipantController::SetPeriod(std::chrono::nanoseconds period)
 {
+    if (_participantConfig.syncType != cfg::SyncType::TimeQuantum)
+    {
+        auto msPeriod = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(period);
+        std::cerr << "LOG_WARNING: ParticipantController::SetPeriod(" << msPeriod.count() << "ms) is ignored.\n";
+        std::cerr << "LOG_INFO: ParticipantController::SetPeriod() can only be used with SyncType::TimeQuantum (currently active: SyncType::" << _participantConfig.syncType << ")\n";
+    }
     _period = period;
 }
 
@@ -588,6 +599,7 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const
         // [[fallthrough]]
     case ParticipantState::Running:
         _now = msg.now;
+        _duration = msg.duration;
         _taskRunner->GrantReceived();
         break;
         
@@ -663,7 +675,7 @@ void ParticipantController::SendTickDone() const
 {
     if (_timesyncConfig.syncPolicy == cfg::TimeSync::SyncPolicy::Strict)
         _comAdapter->WaitForMessageDelivery();
-    SendIbMessage(TickDone{});
+    SendIbMessage(TickDone{Tick{_now, _duration}});
 }
 
 void ParticipantController::SendQuantumRequest() const
@@ -678,18 +690,20 @@ void ParticipantController::ProcessQuantumGrant(const QuantumGrant& msg)
     switch (msg.status)
     {
     case QuantumRequestStatus::Granted:
-        _now = msg.now;
         if (msg.duration != _period)
         {
             ReportError("Granted quantum duration does not match request!");
         }
         else
         {
+            _now = msg.now;
+            _duration = msg.duration;
             _taskRunner->GrantReceived();
         }
         break;
     case QuantumRequestStatus::Rejected:
         _now = msg.now;
+        _duration = 0ns;
         _taskRunner->Stop();
         break;
     case QuantumRequestStatus::Invalid:
@@ -709,7 +723,7 @@ void ParticipantController::AdvanceQuantum()
 void ParticipantController::ExecuteSimTask()
 {
     assert(_simTask);
-    _simTask(_now);
+    _simTask(_now, _duration);
 }
 
 void ParticipantController::ChangeState(ParticipantState newState, std::string reason)

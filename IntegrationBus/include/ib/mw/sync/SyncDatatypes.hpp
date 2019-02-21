@@ -38,10 +38,12 @@ struct QuantumGrant
 struct Tick
 {
     std::chrono::nanoseconds now;
+    std::chrono::nanoseconds duration;
 };
 
 struct TickDone
 {
+    Tick finishedTick;
 };
 
 

@@ -34,10 +34,12 @@ struct Tick
 {
     @Key ib::mw::idl::EndpointAddress senderAddr;
     long long nowNs;
+    long long durationNs;
 };
 struct TickDone
 {
     @Key ib::mw::idl::EndpointAddress senderAddr;
+    Tick finishedTick;
 };
 
 

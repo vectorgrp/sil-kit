@@ -24,7 +24,13 @@ bool operator==(const QuantumGrant& lhs, const QuantumGrant& rhs)
 
 bool operator==(const Tick& lhs, const Tick& rhs)
 {
-    return lhs.now == rhs.now;
+    return lhs.now == rhs.now
+        && lhs.duration == rhs.duration;
+}
+
+bool operator==(const TickDone& lhs, const TickDone& rhs)
+{
+    return lhs.finishedTick == rhs.finishedTick;
 }
 
 bool operator==(const ParticipantCommand& lhs, const ParticipantCommand& rhs)

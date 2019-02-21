@@ -9,6 +9,7 @@
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/sync/ISystemMonitor.hpp"
 #include "ib/mw/sync/string_utils.hpp"
+#include "SyncDatatypeUtils.hpp"
 
 using namespace std::chrono_literals;
 
@@ -68,20 +69,30 @@ void SyncMaster::SetupDiscreteTimeClient(const cfg::Config& config)
     auto client = std::make_shared<DiscreteTimeClient>(config.simulationSetup.timeSync.tickPeriod);
     client->SetNumClients(static_cast<unsigned int>(numClients));
 
+    client->SetCurrentTick(Tick{0ns, 0ns});
     client->SetGrantAction(
         [this, client](QuantumRequestStatus status)
         {
             if (status == QuantumRequestStatus::Granted)
-                this->SendTick(client->Now());
+            {
+                Tick tick{client->Now(), client->Duration()};
+                client->SetCurrentTick(tick);
+                this->SendTick(tick);
+            }
         });
 
     _syncClients.push_back(client);
     _discreteTimeClient = std::move(client);
 }
 
-void SyncMaster::ReceiveIbMessage(mw::EndpointAddress /*from*/, const TickDone& /*msg*/)
+void SyncMaster::ReceiveIbMessage(mw::EndpointAddress from, const TickDone& msg)
 {
     assert(_discreteTimeClient);
+
+    if (_discreteTimeClient->GetCurrentTick() != msg.finishedTick)
+    {
+        std::cerr << "ERROR: Received " << msg << " from participant " << from.participant << ", which does not match current " << _discreteTimeClient->GetCurrentTick() << "\n";
+    }
 
     _discreteTimeClient->TickDoneReceived();
 
@@ -205,10 +216,8 @@ void SyncMaster::SendGrants()
 }
 
 
-void SyncMaster::SendTick(std::chrono::nanoseconds now)
+void SyncMaster::SendTick(const Tick& tick)
 {
-    Tick tick;
-    tick.now = now;
     _comAdapter->SendIbMessage(_endpointAddress, tick);
 }
 

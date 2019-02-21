@@ -167,7 +167,7 @@ int main(int argc, char** argv)
         auto destinationAddr = ibConfig.simulationSetup.participants[1].ethernetControllers[0].macAddress;
 
         participantController->SetSimulationTask(
-            [ethController, &sourceAddr, &destinationAddr](std::chrono::nanoseconds now)
+            [ethController, &sourceAddr, &destinationAddr](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/)
             {
                 std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
                 SendMessage(ethController, sourceAddr, destinationAddr);
@@ -178,7 +178,7 @@ int main(int argc, char** argv)
     else
     {
         participantController->SetSimulationTask(
-            [](std::chrono::nanoseconds now)
+            [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/)
             {
                 std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
                 std::this_thread::sleep_for(1s);

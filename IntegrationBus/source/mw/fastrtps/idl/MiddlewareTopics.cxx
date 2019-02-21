@@ -297,6 +297,8 @@ ib::mw::sync::idl::Tick::Tick()
 
     m_nowNs = 0;
 
+    m_durationNs = 0;
+
 
 }
 
@@ -308,18 +310,21 @@ ib::mw::sync::idl::Tick::Tick(const Tick &x)
 {
     m_senderAddr = x.m_senderAddr;
     m_nowNs = x.m_nowNs;
+    m_durationNs = x.m_durationNs;
 }
 
 ib::mw::sync::idl::Tick::Tick(Tick &&x)
 {
     m_senderAddr = std::move(x.m_senderAddr);
     m_nowNs = x.m_nowNs;
+    m_durationNs = x.m_durationNs;
 }
 
 ib::mw::sync::idl::Tick& ib::mw::sync::idl::Tick::operator=(const Tick &x)
 {
     m_senderAddr = x.m_senderAddr;
     m_nowNs = x.m_nowNs;
+    m_durationNs = x.m_durationNs;
 
     return *this;
 }
@@ -328,6 +333,7 @@ ib::mw::sync::idl::Tick& ib::mw::sync::idl::Tick::operator=(Tick &&x)
 {
     m_senderAddr = std::move(x.m_senderAddr);
     m_nowNs = x.m_nowNs;
+    m_durationNs = x.m_durationNs;
 
     return *this;
 }
@@ -337,6 +343,9 @@ size_t ib::mw::sync::idl::Tick::getMaxCdrSerializedSize(size_t current_alignment
     size_t initial_alignment = current_alignment;
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
+    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
+
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
 
@@ -353,6 +362,9 @@ size_t ib::mw::sync::idl::Tick::getCdrSerializedSize(const ib::mw::sync::idl::Ti
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
 
+    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
+
 
     return current_alignment - initial_alignment;
 }
@@ -361,12 +373,14 @@ void ib::mw::sync::idl::Tick::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
     scdr << m_senderAddr;
     scdr << m_nowNs;
+    scdr << m_durationNs;
 }
 
 void ib::mw::sync::idl::Tick::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
     dcdr >> m_senderAddr;
     dcdr >> m_nowNs;
+    dcdr >> m_durationNs;
 }
 
 size_t ib::mw::sync::idl::Tick::getKeyMaxCdrSerializedSize(size_t current_alignment)
@@ -374,6 +388,7 @@ size_t ib::mw::sync::idl::Tick::getKeyMaxCdrSerializedSize(size_t current_alignm
 	size_t current_align = current_alignment;
             
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
+
 
 
     return current_align;
@@ -389,9 +404,12 @@ void ib::mw::sync::idl::Tick::serializeKey(eprosima::fastcdr::Cdr &scdr) const
 	(void) scdr;
 	 scdr << m_senderAddr;  
 	 
+	 
 }
 ib::mw::sync::idl::TickDone::TickDone()
 {
+
+
 
 }
 
@@ -402,16 +420,19 @@ ib::mw::sync::idl::TickDone::~TickDone()
 ib::mw::sync::idl::TickDone::TickDone(const TickDone &x)
 {
     m_senderAddr = x.m_senderAddr;
+    m_finishedTick = x.m_finishedTick;
 }
 
 ib::mw::sync::idl::TickDone::TickDone(TickDone &&x)
 {
     m_senderAddr = std::move(x.m_senderAddr);
+    m_finishedTick = std::move(x.m_finishedTick);
 }
 
 ib::mw::sync::idl::TickDone& ib::mw::sync::idl::TickDone::operator=(const TickDone &x)
 {
     m_senderAddr = x.m_senderAddr;
+    m_finishedTick = x.m_finishedTick;
 
     return *this;
 }
@@ -419,6 +440,7 @@ ib::mw::sync::idl::TickDone& ib::mw::sync::idl::TickDone::operator=(const TickDo
 ib::mw::sync::idl::TickDone& ib::mw::sync::idl::TickDone::operator=(TickDone &&x)
 {
     m_senderAddr = std::move(x.m_senderAddr);
+    m_finishedTick = std::move(x.m_finishedTick);
 
     return *this;
 }
@@ -428,6 +450,7 @@ size_t ib::mw::sync::idl::TickDone::getMaxCdrSerializedSize(size_t current_align
     size_t initial_alignment = current_alignment;
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
+    current_alignment += ib::mw::sync::idl::Tick::getMaxCdrSerializedSize(current_alignment);
 
     return current_alignment - initial_alignment;
 }
@@ -438,6 +461,7 @@ size_t ib::mw::sync::idl::TickDone::getCdrSerializedSize(const ib::mw::sync::idl
     size_t initial_alignment = current_alignment;
 
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
+    current_alignment += ib::mw::sync::idl::Tick::getCdrSerializedSize(data.finishedTick(), current_alignment);
 
     return current_alignment - initial_alignment;
 }
@@ -445,11 +469,13 @@ size_t ib::mw::sync::idl::TickDone::getCdrSerializedSize(const ib::mw::sync::idl
 void ib::mw::sync::idl::TickDone::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
     scdr << m_senderAddr;
+    scdr << m_finishedTick;
 }
 
 void ib::mw::sync::idl::TickDone::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
     dcdr >> m_senderAddr;
+    dcdr >> m_finishedTick;
 }
 
 size_t ib::mw::sync::idl::TickDone::getKeyMaxCdrSerializedSize(size_t current_alignment)
@@ -457,6 +483,7 @@ size_t ib::mw::sync::idl::TickDone::getKeyMaxCdrSerializedSize(size_t current_al
 	size_t current_align = current_alignment;
             
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
+
 
     return current_align;
 }
@@ -470,6 +497,7 @@ void ib::mw::sync::idl::TickDone::serializeKey(eprosima::fastcdr::Cdr &scdr) con
 {
 	(void) scdr;
 	 scdr << m_senderAddr;  
+	 
 }
 
 ib::mw::sync::idl::ParticipantCommand::ParticipantCommand()

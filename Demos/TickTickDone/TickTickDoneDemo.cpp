@@ -118,8 +118,8 @@ int main(int argc, char** argv)
     else
     {
         auto controller = comAdapter->GetParticipantController();
-        controller->SetSimulationTask([](std::chrono::nanoseconds now) {
-            std::cout << "now=" << now << std::endl;
+        controller->SetSimulationTask([](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+            std::cout << "now=" << now << ", duration=" << duration << std::endl;
             std::this_thread::sleep_for(100ms);
         });
         auto finalStateFuture = controller->RunAsync();

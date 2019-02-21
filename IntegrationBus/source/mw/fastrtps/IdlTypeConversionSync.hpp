@@ -50,6 +50,7 @@ auto to_idl(const Tick& msg) -> idl::Tick
 {
     idl::Tick idl;
     idl.nowNs(msg.now.count());
+    idl.durationNs(msg.duration.count());
 
     return idl;
 }
@@ -59,20 +60,25 @@ auto idl::from_idl(idl::Tick&& idl) -> ::ib::mw::sync::Tick
     ::ib::mw::sync::Tick msg;
 
     msg.now = std::chrono::nanoseconds{idl.nowNs()};
+    msg.duration = std::chrono::nanoseconds{idl.durationNs()};
 
     return msg;
 }
 
-auto to_idl(const TickDone& /*msg*/) -> idl::TickDone
+auto to_idl(const TickDone& msg) -> idl::TickDone
 {
     idl::TickDone idl;
+
+    idl.finishedTick(to_idl(msg.finishedTick));
 
     return idl;
 }
 
-auto idl::from_idl(idl::TickDone&& /*idl*/) -> ::ib::mw::sync::TickDone
+auto idl::from_idl(idl::TickDone&& idl) -> ::ib::mw::sync::TickDone
 {
     ::ib::mw::sync::TickDone msg;
+
+    msg.finishedTick = from_idl(std::move(idl.finishedTick()));
 
     return msg;
 }

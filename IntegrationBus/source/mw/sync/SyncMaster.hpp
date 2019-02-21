@@ -125,6 +125,9 @@ public:
     void SetNumClients(unsigned int numClients_) noexcept { numClients = numClients_; }
     auto GetNumClients() const noexcept { return numClients; }
 
+    void SetCurrentTick(Tick tick) noexcept { _currentTick = tick; }
+    auto GetCurrentTick() const noexcept { return _currentTick; }
+
     void Reset() override
     {
         using namespace std::chrono_literals;
@@ -145,6 +148,7 @@ public:
 
 private:
     std::chrono::nanoseconds tickDuration{0};
+    Tick _currentTick;
 
     unsigned int numClients{0};
     unsigned int numTickDoneReceived{0};
@@ -200,7 +204,7 @@ private:
     void SystemStateChanged(SystemState newState);
 
     void SendGrants();
-    void SendTick(std::chrono::nanoseconds now);
+    void SendTick(const Tick& tick);
     void SendQuantumGrant(const QuantumGrant& grant);
 
 private:

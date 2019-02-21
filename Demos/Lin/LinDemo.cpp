@@ -304,7 +304,7 @@ int main(int argc, char** argv)
         linController->RegisterWakeupRequestHandler(ib::util::bind_method(&master, &LinMaster::WakeupRequest));
 
         participantController->SetSimulationTask(
-            [&master](std::chrono::nanoseconds now)
+            [&master](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/)
             {
                 auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                 std::cout << "now=" << nowMs.count() << "ms" << std::endl;
@@ -351,7 +351,7 @@ int main(int argc, char** argv)
         linController->RegisterSleepCommandHandler(ib::util::bind_method(&slave, &LinSlave::SleepCommandHandler));
         linController->RegisterWakeupRequestHandler(ib::util::bind_method(&slave, &LinSlave::WakeupRequestHandler));
 
-        participantController->SetSimulationTask([&slave, linController](std::chrono::nanoseconds now)
+        participantController->SetSimulationTask([&slave, linController](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/)
         {
             std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
             std::this_thread::sleep_for(500ms);

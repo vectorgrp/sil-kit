@@ -106,7 +106,7 @@ int main(int argc, char** argv)
         auto* vehicleModelOut = comAdapter->CreateGenericPublisher("VehicleModelOut");
 
         participantController->SetSimulationTask(
-            [groundTruth, vehicleModelOut](std::chrono::nanoseconds now)
+            [groundTruth, vehicleModelOut](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/)
             {
                 auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                 std::cout << "now=" << nowMs.count() << "ms" << std::endl;
@@ -124,7 +124,7 @@ int main(int argc, char** argv)
         vehicleModelOut->SetReceiveMessageHandler(ReceiveMessage);
 
         participantController->SetSimulationTask(
-            [groundTruth, vehicleModelOut](std::chrono::nanoseconds now)
+            [groundTruth, vehicleModelOut](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/)
             {
                 auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                 std::cout << "now=" << nowMs.count() << "ms" << std::endl;

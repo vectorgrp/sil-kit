@@ -13,6 +13,7 @@
 #include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/mw/sync/SyncDatatypes.hpp"
 #include "ib/mw/sync/ISystemMonitor.hpp"
+#include "ib/mw/sync/string_utils.hpp"
 
 #include "SyncDatatypeUtils.hpp"
 #include "MockComAdapter.hpp"
@@ -100,9 +101,9 @@ TEST_F(SyncMasterTest, discrete_time_only)
     SyncMaster syncMaster{&comAdapter, ibConfig, &mockMonitor};
     syncMaster.SetEndpointAddress(From(ibConfig.simulationSetup.participants[0]));
 
-    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{0ns}))
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{0ns, 10ms}))
         .Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{10ms}))
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{10ms, 10ms}))
         .Times(1);
 
     assert(mockMonitor.systemStateHandler);
@@ -129,7 +130,7 @@ TEST_F(SyncMasterTest, start_running_after_systemstateInvalid)
     SyncMaster syncMaster{&comAdapter, ibConfig, &mockMonitor};
     syncMaster.SetEndpointAddress(From(ibConfig.simulationSetup.participants[0]));
 
-    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{0ns}))
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{0ns, 10ms}))
         .Times(1);
 
     assert(mockMonitor.systemStateHandler);
@@ -154,9 +155,9 @@ TEST_F(SyncMasterTest, dont_generate_ticks_while_paused)
     SyncMaster syncMaster{&comAdapter, ibConfig, &mockMonitor};
     syncMaster.SetEndpointAddress(From(ibConfig.simulationSetup.participants[0]));
 
-    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{0ns}))
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{0ns, 10ms}))
         .Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{10ms}))
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{10ms, 10ms}))
         .Times(0);
 
 
@@ -190,9 +191,9 @@ TEST_F(SyncMasterTest, continue_tick_generation_after_pause)
     SyncMaster syncMaster{&comAdapter, ibConfig, &mockMonitor};
     syncMaster.SetEndpointAddress(From(ibConfig.simulationSetup.participants[0]));
 
-    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{0ns}))
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{0ns, 10ms}))
         .Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{10ms}))
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{10ms, 10ms}))
         .Times(1);
 
 
@@ -418,11 +419,11 @@ TEST_F(SyncMasterTest, mixed_clients)
         .Times(1);
 
 
-    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{0ns}))
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{0ns, 1ms}))
         .Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{1ms}))
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{1ms, 1ms}))
         .Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{2ms}))
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), Tick{2ms, 1ms}))
         .Times(1);
 
 

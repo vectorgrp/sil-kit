@@ -43,7 +43,8 @@ public:
     void SetInitHandler(InitHandlerT handler) override;
     void SetStopHandler(StopHandlerT handler) override;
     void SetShutdownHandler(ShutdownHandlerT handler) override;
-    void SetSimulationTask(SimTaskT task) override;
+    void SetSimulationTask(std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)> task) override;
+    void SetSimulationTask(std::function<void(std::chrono::nanoseconds now)> task) override;
 
     void EnableColdswap() override;
 
@@ -111,6 +112,7 @@ private:
 
     ParticipantStatus _status;
     std::chrono::nanoseconds _now{0};
+    std::chrono::nanoseconds _duration{0};
 
     std::promise<ParticipantState> _finalStatePromise;
 

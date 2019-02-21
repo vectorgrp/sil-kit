@@ -18,7 +18,7 @@ public:
     using InitHandlerT = std::function<void(ParticipantCommand)>;
     using StopHandlerT = std::function<void()>;
     using ShutdownHandlerT = std::function<void()>;
-    using SimTaskT = std::function<void(std::chrono::nanoseconds now)>;
+    using SimTaskT = std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)>;
     
 public:
     /*! \brief Register a callback to perform initialization.
@@ -64,6 +64,8 @@ public:
      * ReportError().
      */
     virtual void SetSimulationTask(SimTaskT task) = 0;
+    //[[deprecated]]
+    virtual void SetSimulationTask(std::function<void(std::chrono::nanoseconds now)> task) = 0;
 
     /*! \brief Enable coldswap for this participant
      *

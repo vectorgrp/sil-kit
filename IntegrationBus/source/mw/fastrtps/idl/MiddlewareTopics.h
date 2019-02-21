@@ -618,6 +618,32 @@ namespace ib
                     {
                         return m_nowNs;
                     }
+                    /*!
+                     * @brief This function sets a value in member durationNs
+                     * @param _durationNs New value for member durationNs
+                     */
+                    inline eProsima_user_DllExport void durationNs(int64_t _durationNs)
+                    {
+                        m_durationNs = _durationNs;
+                    }
+
+                    /*!
+                     * @brief This function returns the value of member durationNs
+                     * @return Value of member durationNs
+                     */
+                    inline eProsima_user_DllExport int64_t durationNs() const
+                    {
+                        return m_durationNs;
+                    }
+
+                    /*!
+                     * @brief This function returns a reference to member durationNs
+                     * @return Reference to member durationNs
+                     */
+                    inline eProsima_user_DllExport int64_t& durationNs()
+                    {
+                        return m_durationNs;
+                    }
 
                     /*!
                      * @brief This function returns the maximum serialized size of an object
@@ -672,6 +698,7 @@ namespace ib
                 private:
                     ib::mw::idl::EndpointAddress m_senderAddr;
                     int64_t m_nowNs;
+                    int64_t m_durationNs;
                 };
                 /*!
                  * @brief This class represents the structure TickDone defined by the user in the IDL file.
@@ -750,6 +777,41 @@ namespace ib
                     {
                         return m_senderAddr;
                     }
+                    /*!
+                     * @brief This function copies the value in member finishedTick
+                     * @param _finishedTick New value to be copied in member finishedTick
+                     */
+                    inline eProsima_user_DllExport void finishedTick(const ib::mw::sync::idl::Tick &_finishedTick)
+                    {
+                        m_finishedTick = _finishedTick;
+                    }
+
+                    /*!
+                     * @brief This function moves the value in member finishedTick
+                     * @param _finishedTick New value to be moved in member finishedTick
+                     */
+                    inline eProsima_user_DllExport void finishedTick(ib::mw::sync::idl::Tick &&_finishedTick)
+                    {
+                        m_finishedTick = std::move(_finishedTick);
+                    }
+
+                    /*!
+                     * @brief This function returns a constant reference to member finishedTick
+                     * @return Constant reference to member finishedTick
+                     */
+                    inline eProsima_user_DllExport const ib::mw::sync::idl::Tick& finishedTick() const
+                    {
+                        return m_finishedTick;
+                    }
+
+                    /*!
+                     * @brief This function returns a reference to member finishedTick
+                     * @return Reference to member finishedTick
+                     */
+                    inline eProsima_user_DllExport ib::mw::sync::idl::Tick& finishedTick()
+                    {
+                        return m_finishedTick;
+                    }
 
                     /*!
                      * @brief This function returns the maximum serialized size of an object
@@ -803,6 +865,7 @@ namespace ib
 
                 private:
                     ib::mw::idl::EndpointAddress m_senderAddr;
+                    ib::mw::sync::idl::Tick m_finishedTick;
                 };
                 /*!
                  * @brief This class represents the enumeration ParticipantCommandKind defined by the user in the IDL file.
