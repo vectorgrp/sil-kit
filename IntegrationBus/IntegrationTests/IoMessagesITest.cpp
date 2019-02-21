@@ -71,10 +71,10 @@ protected:
 
     void Publish()
     {
-        auto dio1 = pubComAdapter->CreateDigitalOut(topics[0].name);
-        auto dio2 = pubComAdapter->CreateDigitalOut(topics[1].name);
-        auto aio1 = pubComAdapter->CreateAnalogOut(topics[2].name);
-        auto aio2 = pubComAdapter->CreateAnalogOut(topics[3].name);
+        pubComAdapter->CreateDigitalOut(topics[0].name);
+        pubComAdapter->CreateDigitalOut(topics[1].name);
+        pubComAdapter->CreateAnalogOut(topics[2].name);
+        pubComAdapter->CreateAnalogOut(topics[3].name);
     }
 
     struct Topic
@@ -88,7 +88,7 @@ protected:
     static void SetExpectation(Topic& topic, InPortT* port, const typename InPortT::ValueType& expectedValue)
     {
         port->RegisterHandler(
-            [&topic, expectedValue](InPortT* port, const typename InPortT::ValueType& data)
+            [&topic, expectedValue](InPortT* /*port*/, const typename InPortT::ValueType& data)
             {
                 EXPECT_EQ(data, expectedValue);
                 topic.testOK.set_value(data == expectedValue);

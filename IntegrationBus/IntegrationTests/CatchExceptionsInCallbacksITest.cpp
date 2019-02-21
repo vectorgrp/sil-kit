@@ -49,7 +49,7 @@ protected:
     {
         auto subscriber = subComAdapter->CreateGenericSubscriber("CrashTopic");
         subscriber->SetReceiveMessageHandler(
-            [this](auto* subscriber, const std::vector<uint8_t>& /*data*/)
+            [this](auto* /*subscriber*/, const std::vector<uint8_t>& /*data*/)
             {
                 this->testOk.set_value(true);
                 throw std::runtime_error{"CrashTest"};
