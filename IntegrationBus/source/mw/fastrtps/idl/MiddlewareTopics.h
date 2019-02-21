@@ -1008,7 +1008,9 @@ namespace ib
                     SC_Invalid,
                     SC_Run,
                     SC_Stop,
-                    SC_Shutdown
+                    SC_Shutdown,
+                    SC_PrepareColdswap,
+                    SC_ExecuteColdswap
                 };
                 /*!
                  * @brief This class represents the structure SystemCommand defined by the user in the IDL file.
@@ -1180,8 +1182,14 @@ namespace ib
                     PS_Initialized,
                     PS_Running,
                     PS_Paused,
+                    PS_Stopping,
                     PS_Stopped,
+                    PS_ColdswapPrepare,
+                    PS_ColdswapReady,
+                    PS_ColdswapShutdown,
+                    PS_ColdswapIgnored,
                     PS_Error,
+                    PS_ShuttingDown,
                     PS_Shutdown
                 };
                 /*!
@@ -1455,6 +1463,10 @@ namespace ib
                     SS_Paused,
                     SS_Stopping,
                     SS_Stopped,
+                    SS_ColdswapPrepare,
+                    SS_ColdswapReady,
+                    SS_ColdswapPending,
+                    SS_ColdswapDone,
                     SS_Error,
                     SS_ShuttingDown,
                     SS_Shutdown

@@ -43,6 +43,7 @@ void SystemController::PrepareColdswap() const
 
 void SystemController::ExecuteColdswap() const
 {
+    _comAdapter->FlushSendBuffers();
     SendSystemCommand(SystemCommand::Kind::ExecuteColdswap);
 }
 

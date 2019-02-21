@@ -17,7 +17,7 @@ class ISystemMonitor
 public:
     using SystemStateHandlerT = std::function<void(SystemState)>;
     using ParticipantStateHandlerT = std::function<void(ParticipantState)>;
-    using ParticipantStatusHandlerT = std::function<void(ParticipantStatus)>;
+    using ParticipantStatusHandlerT = std::function<void(const ParticipantStatus&)>;
 
 public:
     /*! \brief Register a callback for SystemState changes

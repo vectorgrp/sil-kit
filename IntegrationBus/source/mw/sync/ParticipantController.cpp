@@ -116,6 +116,7 @@ public:
     void Shutdown() override
     {
         SetRunPromise(false);
+        SetGrant(false);
     }
 
 private:
@@ -219,6 +220,11 @@ void ParticipantController::SetSimulationTask(SimTaskT task)
     _simTask = std::move(task);
 }
 
+void ParticipantController::EnableColdswap()
+{
+    _coldswapEnabled = true;
+}
+
 void ParticipantController::SetPeriod(std::chrono::nanoseconds period)
 {
     _period = period;
@@ -262,7 +268,7 @@ void ParticipantController::StartTaskRunner()
 auto ParticipantController::Run() -> ParticipantState
 {
     StartTaskRunner<TaskRunner>();
-    return State();
+    return _finalStatePromise.get_future().get();
 }
 
 auto ParticipantController::RunAsync() -> std::future<ParticipantState>
@@ -306,9 +312,35 @@ void ParticipantController::Continue()
     ChangeState(ParticipantState::Running, "Pause finished");
 }
 
+void ParticipantController::Initialize(const ParticipantCommand& command, std::string reason)
+{
+    ChangeState(ParticipantState::Initializing, reason);
+    if (_initHandler)
+    {
+        try
+        {
+            _initHandler(command);
+            reason += "; InitHandler completed without exception.";
+        }
+        catch (const std::exception& e)
+        {
+            ReportError(std::string{"InitHandler did throw an exception: "} +e.what());
+            return;
+        }
+    }
+    else
+    {
+        reason += "; no InitHandler registered.";
+    }
+
+    _now = 0ns;
+    _taskRunner->Initialize();
+    ChangeState(ParticipantState::Initialized, std::move(reason));
+}
+
 void ParticipantController::Stop(std::string reason)
 {
-    ChangeState(ParticipantState::Stopping, std::move(reason));
+    ChangeState(ParticipantState::Stopping, reason);
 
     if (_taskRunner)
         _taskRunner->Stop();
@@ -372,24 +404,27 @@ void ParticipantController::Shutdown(std::string reason)
 
 void ParticipantController::PrepareColdswap()
 {
+    std::cerr << "LOG_INFO: preparing coldswap..." << std::endl;
     ChangeState(ParticipantState::ColdswapPrepare, "Starting coldswap preparations.");
 
     // WaitForMessageDelivery will deadlock, if RunAsync was used.
     // Thus, we run everythin in a separate thread.
-    std::async(std::launch::async, [this] {
+    _asyncResult = std::async(std::launch::async, [this] {
         _comAdapter->WaitForMessageDelivery();
         _comAdapter->FlushSendBuffers();
         ChangeState(ParticipantState::ColdswapReady, "Finished coldswap preparations.");
+        std::cerr << "LOG_INFO: ready for coldswap..." << std::endl;
     });
 }
 
 void ParticipantController::ShutdownForColdswap()
 {
     _comAdapter->FlushSendBuffers();
-    ChangeState(ParticipantState::ColdswapIgnored, "Coldswap was enabled for this participant.");
+    ChangeState(ParticipantState::ColdswapShutdown, "Coldswap was enabled for this participant.");
+    _taskRunner->Shutdown();
     // WaitForMessageDelivery will deadlock, if RunAsync was used.
     // Thus, we run everythin in a separate thread.
-    std::async(std::launch::async, [this] {
+    _asyncResult = std::async(std::launch::async, [this] {
         _comAdapter->WaitForMessageDelivery();
         _finalStatePromise.set_value(State());
     });
@@ -431,27 +466,22 @@ void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, c
     if (command.participant != _endpointAddress.participant)
         return;
 
-    ChangeState(ParticipantState::Initializing, "Received ParticipantCommand::" + to_string(command.kind));
-    if (_initHandler)
-    {
-        try
-        {
-            _initHandler(command);
-        }
-        catch (const std::exception& e)
-        {
-            ReportError(std::string{"InitHandler did throw an exception: "} + e.what());
-            return;
-        }
-    }
-
-    _now = 0ns;
-    _taskRunner->Initialize();
-    ChangeState(ParticipantState::Initialized, "InitHandler completed without exception.");
+    Initialize(command, std::string{"Received ParticipantCommand::"} + to_string(command.kind));
 }
 
 void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, const SystemCommand& command)
 {
+    // We have to supress a SystemCommand::ExecuteColdswap during the restart
+    // After a coldswap, this command is still present in the SystemControllers
+    // history and thus retransmitted to the reconnecting participant. However,
+    // we cannot flush this change from the SystemController's history because
+    // this could happen before the command has been received by the participant,
+    // thus missing the command.
+    if (command.kind == SystemCommand::Kind::ExecuteColdswap && (State() == ParticipantState::Invalid || State() == ParticipantState::Idle))
+    {
+        return;
+    }
+
     if (!_taskRunner)
     {
         ReportError("Received SystemCommand::" + to_string(command.kind) + " before ParticipantController::Run() or RunAsync() was called");
@@ -492,6 +522,7 @@ void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, c
         if (State() == ParticipantState::Error || State() == ParticipantState::Stopped)
         {
             PrepareColdswap();
+            return;
         }
         break;
 
@@ -506,7 +537,9 @@ void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, c
             {
                 IgnoreColdswap();
             }
+            return;
         }
+        break;
     }
 
     // We should not reach this point in normal operation.

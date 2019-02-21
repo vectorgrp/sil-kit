@@ -87,9 +87,8 @@ auto to_idl(ParticipantCommand::Kind kind) -> idl::ParticipantCommandKind
         return idl::ParticipantCommandKind::PC_Initialize;
     case ParticipantCommand::Kind::ReInitialize:
         return idl::ParticipantCommandKind::PC_ReInitialize;
-    default:
-        return idl::ParticipantCommandKind::PC_Invalid;
     }
+    return idl::ParticipantCommandKind::PC_Invalid;
 }
 
 auto idl::from_idl(idl::ParticipantCommandKind kind) -> sync::ParticipantCommand::Kind
@@ -102,9 +101,8 @@ auto idl::from_idl(idl::ParticipantCommandKind kind) -> sync::ParticipantCommand
         return sync::ParticipantCommand::Kind::Initialize;
     case idl::ParticipantCommandKind::PC_ReInitialize:
         return sync::ParticipantCommand::Kind::ReInitialize;
-    default:
-        return sync::ParticipantCommand::Kind::Invalid;
     }
+    return sync::ParticipantCommand::Kind::Invalid;
 }
 
 auto to_idl(const ParticipantCommand& msg) -> idl::ParticipantCommand
@@ -135,9 +133,12 @@ auto to_idl(SystemCommand::Kind kind) -> idl::SystemCommandKind
         return idl::SystemCommandKind::SC_Stop;
     case SystemCommand::Kind::Shutdown:
         return idl::SystemCommandKind::SC_Shutdown;
-    default:
-        return idl::SystemCommandKind::SC_Invalid;
+    case SystemCommand::Kind::PrepareColdswap:
+        return idl::SystemCommandKind::SC_PrepareColdswap;
+    case SystemCommand::Kind::ExecuteColdswap:
+        return idl::SystemCommandKind::SC_ExecuteColdswap;
     }
+    return idl::SystemCommandKind::SC_Invalid;
 }
 
 auto idl::from_idl(idl::SystemCommandKind kind) -> sync::SystemCommand::Kind
@@ -152,9 +153,12 @@ auto idl::from_idl(idl::SystemCommandKind kind) -> sync::SystemCommand::Kind
         return sync::SystemCommand::Kind::Stop;
     case idl::SystemCommandKind::SC_Shutdown:
         return sync::SystemCommand::Kind::Shutdown;
-    default:
-        return sync::SystemCommand::Kind::Invalid;
+    case idl::SystemCommandKind::SC_PrepareColdswap:
+        return sync::SystemCommand::Kind::PrepareColdswap;
+    case idl::SystemCommandKind::SC_ExecuteColdswap:
+        return sync::SystemCommand::Kind::ExecuteColdswap;
     }
+    return sync::SystemCommand::Kind::Invalid;
 }
 
 auto to_idl(const SystemCommand& msg) -> idl::SystemCommand
@@ -187,15 +191,26 @@ auto to_idl(ParticipantState state) -> idl::ParticipantState
         return idl::ParticipantState::PS_Running;
     case ParticipantState::Paused:
         return idl::ParticipantState::PS_Paused;
+    case ParticipantState::Stopping:
+        return idl::ParticipantState::PS_Stopping;
     case ParticipantState::Stopped:
         return idl::ParticipantState::PS_Stopped;
+    case ParticipantState::ColdswapPrepare:
+        return idl::ParticipantState::PS_ColdswapPrepare;
+    case ParticipantState::ColdswapReady:
+        return idl::ParticipantState::PS_ColdswapReady;
+    case ParticipantState::ColdswapShutdown:
+        return idl::ParticipantState::PS_ColdswapShutdown;
+    case ParticipantState::ColdswapIgnored:
+        return idl::ParticipantState::PS_ColdswapIgnored;
     case ParticipantState::Error:
         return idl::ParticipantState::PS_Error;
     case ParticipantState::Shutdown:
         return idl::ParticipantState::PS_Shutdown;
-    default:
-        return idl::ParticipantState::PS_Invalid;
+    case ParticipantState::ShuttingDown:
+        return idl::ParticipantState::PS_ShuttingDown;
     }
+    return idl::ParticipantState::PS_Invalid;
 }
 
 auto idl::from_idl(idl::ParticipantState state) -> sync::ParticipantState
@@ -214,15 +229,26 @@ auto idl::from_idl(idl::ParticipantState state) -> sync::ParticipantState
         return sync::ParticipantState::Running;
     case idl::ParticipantState::PS_Paused:
         return sync::ParticipantState::Paused;
+    case idl::ParticipantState::PS_Stopping:
+        return sync::ParticipantState::Stopping;
     case idl::ParticipantState::PS_Stopped:
         return sync::ParticipantState::Stopped;
+    case idl::ParticipantState::PS_ColdswapPrepare:
+        return sync::ParticipantState::ColdswapPrepare;
+    case idl::ParticipantState::PS_ColdswapReady:
+        return sync::ParticipantState::ColdswapReady;
+    case idl::ParticipantState::PS_ColdswapShutdown:
+        return sync::ParticipantState::ColdswapShutdown;
+    case idl::ParticipantState::PS_ColdswapIgnored:
+        return sync::ParticipantState::ColdswapIgnored;
     case idl::ParticipantState::PS_Error:
         return sync::ParticipantState::Error;
+    case idl::ParticipantState::PS_ShuttingDown:
+        return sync::ParticipantState::ShuttingDown;
     case idl::ParticipantState::PS_Shutdown:
         return sync::ParticipantState::Shutdown;
-    default:
-        return sync::ParticipantState::Invalid;
     }
+    return sync::ParticipantState::Invalid;
 }
 
 auto to_idl(const ParticipantStatus& msg) -> idl::ParticipantStatus
@@ -267,15 +293,22 @@ auto to_idl(SystemState state) -> idl::SystemState
         return idl::SystemState::SS_Stopping;
     case SystemState::Stopped:
         return idl::SystemState::SS_Stopped;
+    case SystemState::ColdswapPrepare:
+        return idl::SystemState::SS_ColdswapPrepare;
+    case SystemState::ColdswapReady:
+        return idl::SystemState::SS_ColdswapReady;
+    case SystemState::ColdswapPending:
+        return idl::SystemState::SS_ColdswapPending;
+    case SystemState::ColdswapDone:
+        return idl::SystemState::SS_ColdswapDone;
     case SystemState::Error:
         return idl::SystemState::SS_Error;
     case SystemState::ShuttingDown:
         return idl::SystemState::SS_ShuttingDown;
     case SystemState::Shutdown:
         return idl::SystemState::SS_Shutdown;
-    default:
-        return idl::SystemState::SS_Invalid;
     }
+    return idl::SystemState::SS_Invalid;
 }
 
 auto idl::from_idl(idl::SystemState state) -> sync::SystemState
@@ -298,15 +331,22 @@ auto idl::from_idl(idl::SystemState state) -> sync::SystemState
         return sync::SystemState::Stopping;
     case idl::SystemState::SS_Stopped:
         return sync::SystemState::Stopped;
+    case idl::SystemState::SS_ColdswapPrepare:
+        return sync::SystemState::ColdswapPrepare;
+    case idl::SystemState::SS_ColdswapReady:
+        return sync::SystemState::ColdswapReady;
+    case idl::SystemState::SS_ColdswapPending:
+        return sync::SystemState::ColdswapPending;
+    case idl::SystemState::SS_ColdswapDone:
+        return sync::SystemState::ColdswapDone;
     case idl::SystemState::SS_Error:
         return sync::SystemState::Error;
     case idl::SystemState::SS_ShuttingDown:
         return sync::SystemState::ShuttingDown;
     case idl::SystemState::SS_Shutdown:
         return sync::SystemState::Shutdown;
-    default:
-        return sync::SystemState::Invalid;
     }
+    return sync::SystemState::Invalid;
 }
 
 auto to_idl(const QuantumRequest& msg) -> idl::QuantumRequest
@@ -335,9 +375,8 @@ auto to_idl(QuantumRequestStatus status) -> idl::QuantumRequestStatus
         return idl::QuantumRequestStatus::QR_Granted;
     case QuantumRequestStatus::Rejected:
         return idl::QuantumRequestStatus::QR_Rejected;
-    default:
-        return idl::QuantumRequestStatus::QR_Invalid;
     }
+    return idl::QuantumRequestStatus::QR_Invalid;
 }
 
 auto idl::from_idl(idl::QuantumRequestStatus status) -> sync::QuantumRequestStatus
@@ -350,9 +389,8 @@ auto idl::from_idl(idl::QuantumRequestStatus status) -> sync::QuantumRequestStat
         return sync::QuantumRequestStatus::Granted;
     case idl::QuantumRequestStatus::QR_Rejected:
         return sync::QuantumRequestStatus::Rejected;
-    default:
-        return sync::QuantumRequestStatus::Invalid;
     }
+    return sync::QuantumRequestStatus::Invalid;
 }
 
 auto to_idl(const QuantumGrant& msg) -> idl::QuantumGrant

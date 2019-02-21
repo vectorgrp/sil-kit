@@ -5,6 +5,7 @@
 #include "ib/mw/sync/IParticipantController.hpp"
 #include "ib/mw/sync/IIbToParticipantController.hpp"
 
+#include <future>
 #include <tuple>
 
 #include "ib/mw/IComAdapter.hpp"
@@ -44,6 +45,8 @@ public:
     void SetShutdownHandler(ShutdownHandlerT handler) override;
     void SetSimulationTask(SimTaskT task) override;
 
+    void EnableColdswap() override;
+
     void SetPeriod(std::chrono::nanoseconds period) override;
     void SetEarliestEventTime(std::chrono::nanoseconds eventTime) override;
 
@@ -62,7 +65,7 @@ public:
     // IIbToParticipantController
     void SetEndpointAddress(const mw::EndpointAddress& addr) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
-    
+
     void ReceiveIbMessage(mw::EndpointAddress from, const ParticipantCommand& msg) override;
     void ReceiveIbMessage(mw::EndpointAddress from, const SystemCommand& msg) override;
 
@@ -85,6 +88,8 @@ private:
     void StartTaskRunner();
 
     void ChangeState(ParticipantState newState, std::string reason);
+    
+    void Initialize(const ParticipantCommand& command, std::string reason);
     void Shutdown(std::string reason);
     void PrepareColdswap();
     void ShutdownForColdswap();
@@ -112,6 +117,7 @@ private:
     StopHandlerT _stopHandler;
     ShutdownHandlerT _shutdownHandler;
     SimTaskT _simTask;
+    std::future<void> _asyncResult;
 };
 
 class ITaskRunner

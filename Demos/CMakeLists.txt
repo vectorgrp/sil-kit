@@ -169,6 +169,7 @@ add_subdirectory(TickTickDone)
 add_subdirectory(ConfigBuilder)
 add_subdirectory(SystemMonitor)
 add_subdirectory(SystemController)
+add_subdirectory(SystemControllerInteractive)
 
 #######################################################################################################################
 # VisualStudio specific setup

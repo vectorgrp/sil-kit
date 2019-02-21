@@ -172,6 +172,9 @@ int main(int argc, char** argv)
             std::this_thread::sleep_for(sleepTimePerTick);
 
         });
+
+        // This process will disconnect and reconnect during a coldswap
+        participantController->EnableColdswap();
     }
     else
     {
@@ -182,6 +185,7 @@ int main(int argc, char** argv)
 
         });
     }
+
 
     //auto finalStateFuture = participantController->RunAsync();
     //auto finalState = finalStateFuture.get();

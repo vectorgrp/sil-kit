@@ -65,6 +65,17 @@ public:
      */
     virtual void SetSimulationTask(SimTaskT task) = 0;
 
+    /*! \brief Enable coldswap for this participant
+     *
+     * With coldswap enabled, Run()/RunAsyc() will finish in state
+     * ParticipantState::ColdswapShutdown to indicate that it is
+     * now safe to disconnect and reconnect.
+     *
+     * By default, coldswap is disabled, and the participant will
+     * not disconnect during a coldswap.
+     */
+    virtual void EnableColdswap() = 0;
+
     /*! \brief Set the simulation duration to be requested
      *
      * Can only be used with time quantum synchronization.
