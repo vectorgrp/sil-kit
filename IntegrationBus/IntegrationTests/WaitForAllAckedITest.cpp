@@ -98,7 +98,7 @@ TEST_F(WaitForAllAckedITest, no_messages_must_be_lost)
     // SUBSCRIBE
     topic.subscriber = subComAdapter->CreateGenericSubscriber(topic.name);
     topic.subscriber->SetReceiveMessageHandler(
-        [&topic, msgCount](auto* subscriber, auto&& data)
+        [&topic, msgCount](auto* /*subscriber*/, auto&& data)
         {
             uint32_t sendIdx = from_payload(data);
             EXPECT_EQ(sendIdx, topic.receiveIdx++);
@@ -144,7 +144,7 @@ TEST_F(WaitForAllAckedITest, messages_must_be_delivered_in_order)
     // SUBSCRIBE
     topics[0].subscriber = subComAdapter->CreateGenericSubscriber(topics[0].name);
     topics[0].subscriber->SetReceiveMessageHandler(
-        [msgCount, &topicMutex, &topics = topics](auto* subscriber, auto&& data)
+        [msgCount, &topicMutex, &topics = topics](auto* /*subscriber*/, auto&& data)
         {
             std::lock_guard<std::mutex> topicGuard{topicMutex};
             
@@ -161,7 +161,7 @@ TEST_F(WaitForAllAckedITest, messages_must_be_delivered_in_order)
     
     topics[1].subscriber = subComAdapter->CreateGenericSubscriber(topics[1].name);
     topics[1].subscriber->SetReceiveMessageHandler(
-        [msgCount, &topicMutex, &topics = topics](auto* subscriber, auto&& data)
+        [msgCount, &topicMutex, &topics = topics](auto* /*subscriber*/, auto&& data)
         {
             std::lock_guard<std::mutex> topicGuard{topicMutex};
             

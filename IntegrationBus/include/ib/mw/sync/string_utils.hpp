@@ -126,6 +126,8 @@ std::string to_string(ParticipantCommand::Kind command)
 {
     switch (command)
     {
+    case ParticipantCommand::Kind::Invalid:
+        return "Invalid";
     case ParticipantCommand::Kind::Initialize:
         return "Initialize";
     case ParticipantCommand::Kind::ReInitialize:
@@ -138,12 +140,18 @@ std::string to_string(SystemCommand::Kind command)
 {
     switch (command)
     {
+    case SystemCommand::Kind::Invalid:
+        return "Invalid";
     case SystemCommand::Kind::Run:
         return "Run";
     case SystemCommand::Kind::Stop:
         return "Stop";
     case SystemCommand::Kind::Shutdown:
         return "Shutdown";
+    case SystemCommand::Kind::PrepareColdswap:
+        return "PrepareColdswap";
+    case SystemCommand::Kind::ExecuteColdswap:
+        return "ExecuteColdswap";
     }
     throw ib::type_conversion_error{};
 }

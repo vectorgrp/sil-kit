@@ -53,7 +53,7 @@ protected:
         proxy.SetEndpointAddress(proxyAddress);
 
         referencePayload.resize(20);
-        std::iota(referencePayload.begin(), referencePayload.end(), 0);
+        std::iota(referencePayload.begin(), referencePayload.end(), '\000');
     }
 
 protected:

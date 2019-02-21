@@ -79,7 +79,7 @@ void SyncMaster::SetupDiscreteTimeClient(const cfg::Config& config)
     _discreteTimeClient = std::move(client);
 }
 
-void SyncMaster::ReceiveIbMessage(mw::EndpointAddress /*from*/, const TickDone& msg)
+void SyncMaster::ReceiveIbMessage(mw::EndpointAddress /*from*/, const TickDone& /*msg*/)
 {
     assert(_discreteTimeClient);
 

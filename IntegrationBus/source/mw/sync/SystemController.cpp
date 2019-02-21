@@ -36,6 +36,15 @@ void SystemController::Shutdown() const
     SendSystemCommand(SystemCommand::Kind::Shutdown);
 }
 
+void SystemController::PrepareColdswap() const
+{
+    SendSystemCommand(SystemCommand::Kind::PrepareColdswap);
+}
+
+void SystemController::ExecuteColdswap() const
+{
+    SendSystemCommand(SystemCommand::Kind::ExecuteColdswap);
+}
 
 void SystemController::SetEndpointAddress(const mw::EndpointAddress& addr)
 {

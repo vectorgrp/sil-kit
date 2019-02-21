@@ -63,7 +63,9 @@ struct SystemCommand
         Invalid,
         Run,
         Stop,
-        Shutdown
+        Shutdown,
+        PrepareColdswap,
+        ExecuteColdswap
     };
 
     Kind kind;

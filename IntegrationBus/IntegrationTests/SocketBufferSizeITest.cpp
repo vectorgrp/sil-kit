@@ -41,7 +41,7 @@ protected:
     {
         topic.subscriber = subComAdapter->CreateGenericSubscriber(topic.name);
         topic.subscriber->SetReceiveMessageHandler(
-            [&topic = topic](auto* subscriber, auto&& data)
+            [&topic = topic](auto* /*subscriber*/, auto&& data)
             {
                 topic.reply.set_value(data);
             }

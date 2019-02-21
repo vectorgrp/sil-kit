@@ -58,48 +58,52 @@ TEST_F(SystemControllerTest, configure_endpoint_address)
 TEST_F(SystemControllerTest, send_initialize)
 {
     ParticipantCommand cmd{5, ParticipantCommand::Kind::Initialize};
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, cmd))
-        .Times(1);
-
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, cmd)).Times(1);
     controller.Initialize(5);
 }
 
 TEST_F(SystemControllerTest, send_reinitialize)
 {
     ParticipantCommand cmd{5, ParticipantCommand::Kind::ReInitialize};
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, cmd))
-        .Times(1);
-
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, cmd)).Times(1);
     controller.ReInitialize(5);
 }
 
 TEST_F(SystemControllerTest, send_run)
 {
     SystemCommand cmd{SystemCommand::Kind::Run};
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, cmd))
-        .Times(1);
-
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, cmd)).Times(1);
     controller.Run();
 }
     
 TEST_F(SystemControllerTest, send_stop)
 {
     SystemCommand cmd{SystemCommand::Kind::Stop};
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, cmd))
-        .Times(1);
-
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, cmd)).Times(1);
     controller.Stop();
 }
     
 TEST_F(SystemControllerTest, send_shutdown)
 {
     SystemCommand cmd{SystemCommand::Kind::Shutdown};
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, cmd))
-        .Times(1);
-
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, cmd)).Times(1);
     controller.Shutdown();
 }
+
+TEST_F(SystemControllerTest, send_preparecoldswap)
+{
+    SystemCommand cmd{SystemCommand::Kind::PrepareColdswap};
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, cmd)).Times(1);
+    controller.PrepareColdswap();
+}
     
-    
+TEST_F(SystemControllerTest, send_executecoldswap)
+{
+    SystemCommand cmd{SystemCommand::Kind::ExecuteColdswap};
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, cmd)).Times(1);
+    controller.ExecuteColdswap();
+}
+
+
 
 } // anonymous namespace for test

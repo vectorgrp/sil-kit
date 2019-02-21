@@ -40,6 +40,8 @@ public:
     void Run() const override;
     void Stop() const override;
     void Shutdown() const override;
+    void PrepareColdswap() const override;
+    void ExecuteColdswap() const override;
 
     // IIbToSystemMonitor
     void SetEndpointAddress(const mw::EndpointAddress& addr) override;

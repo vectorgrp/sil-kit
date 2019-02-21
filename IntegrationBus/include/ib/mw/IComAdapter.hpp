@@ -135,9 +135,12 @@ public:
     *   Some middleware implementations do not inherently ensure in-order transportation, so we
     *   have to block until all messages are transmitted to obtain a determinstic simulation.
     *
-    *   NB: The call is a no-operation if TimeSync::SyncPolicy::Loose is configured.
+    *   NB: if WaitForMessageDelivery() is called in the context of a FastRTPS listener thread,
+    *   e.g., most callbacks, this will deadlock!
     */
     virtual void WaitForMessageDelivery() = 0;
+
+    virtual void FlushSendBuffers() = 0;
 };
 
 } // mw

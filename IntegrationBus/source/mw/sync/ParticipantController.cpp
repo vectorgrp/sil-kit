@@ -1,6 +1,7 @@
 #include "ParticipantController.hpp"
 
 #include <cassert>
+#include <future>
 
 #include "ib/cfg/string_utils.hpp"
 #include "ib/mw/sync/string_utils.hpp"
@@ -190,10 +191,10 @@ private:
 } // anonymous namespace for local helper functions
 
 
-ParticipantController::ParticipantController(IComAdapter* comAdapter, cfg::Participant participantConfig, cfg::TimeSync timeyncConfig)
+ParticipantController::ParticipantController(IComAdapter* comAdapter, cfg::Participant participantConfig, cfg::TimeSync timesyncConfig)
     : _comAdapter{comAdapter}
     , _participantConfig(std::move(participantConfig))
-    , _timesyncConfig(std::move(timeyncConfig))
+    , _timesyncConfig(std::move(timesyncConfig))
 {
     _status.participantName = _participantConfig.name;
 }
@@ -369,6 +370,36 @@ void ParticipantController::Shutdown(std::string reason)
     _finalStatePromise.set_value(State());
 }
 
+void ParticipantController::PrepareColdswap()
+{
+    ChangeState(ParticipantState::ColdswapPrepare, "Starting coldswap preparations.");
+
+    // WaitForMessageDelivery will deadlock, if RunAsync was used.
+    // Thus, we run everythin in a separate thread.
+    std::async(std::launch::async, [this] {
+        _comAdapter->WaitForMessageDelivery();
+        _comAdapter->FlushSendBuffers();
+        ChangeState(ParticipantState::ColdswapReady, "Finished coldswap preparations.");
+    });
+}
+
+void ParticipantController::ShutdownForColdswap()
+{
+    _comAdapter->FlushSendBuffers();
+    ChangeState(ParticipantState::ColdswapIgnored, "Coldswap was enabled for this participant.");
+    // WaitForMessageDelivery will deadlock, if RunAsync was used.
+    // Thus, we run everythin in a separate thread.
+    std::async(std::launch::async, [this] {
+        _comAdapter->WaitForMessageDelivery();
+        _finalStatePromise.set_value(State());
+    });
+}
+
+void ParticipantController::IgnoreColdswap()
+{
+    _comAdapter->FlushSendBuffers();
+    ChangeState(ParticipantState::ColdswapIgnored, "Coldswap was not enabled for this participant.");
+}
 
 auto ParticipantController::State() const -> ParticipantState
 {
@@ -429,6 +460,9 @@ void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, c
 
     switch (command.kind)
     {
+    case SystemCommand::Kind::Invalid:
+        break;
+
     case SystemCommand::Kind::Run:
         if (State() == ParticipantState::Initialized)
         {
@@ -454,8 +488,25 @@ void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, c
         }
         break;
 
-    default:
-        assert(false);
+    case SystemCommand::Kind::PrepareColdswap:
+        if (State() == ParticipantState::Error || State() == ParticipantState::Stopped)
+        {
+            PrepareColdswap();
+        }
+        break;
+
+    case SystemCommand::Kind::ExecuteColdswap:
+        if (State() == ParticipantState::ColdswapReady)
+        {
+            if (_coldswapEnabled)
+            {
+                ShutdownForColdswap();
+            }
+            else
+            {
+                IgnoreColdswap();
+            }
+        }
     }
 
     // We should not reach this point in normal operation.
@@ -571,13 +622,15 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const
 
 void ParticipantController::SendTickDone() const
 {
-    _comAdapter->WaitForMessageDelivery();
+    if (_timesyncConfig.syncPolicy == cfg::TimeSync::SyncPolicy::Strict)
+        _comAdapter->WaitForMessageDelivery();
     SendIbMessage(TickDone{});
 }
 
 void ParticipantController::SendQuantumRequest() const
 {
-    _comAdapter->WaitForMessageDelivery();
+    if (_timesyncConfig.syncPolicy == cfg::TimeSync::SyncPolicy::Strict)
+        _comAdapter->WaitForMessageDelivery();
     SendIbMessage(QuantumRequest{_now, _period});
 }
 

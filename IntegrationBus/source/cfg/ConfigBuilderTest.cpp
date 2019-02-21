@@ -218,12 +218,10 @@ TEST_F(ConfigBuilderTest, make_generic_message_config)
         .AddGenericSubscriber(msgName);
 
     auto config = configBuilder.Build();
-    auto&& simulationSetup = config.simulationSetup;
 
-
-    ASSERT_EQ(simulationSetup.participants.size(), 2u);
-    auto&& pub = simulationSetup.participants[0];
-    auto&& sub = simulationSetup.participants[1];
+    ASSERT_EQ(config.simulationSetup.participants.size(), 2u);
+    auto&& pub = config.simulationSetup.participants[0];
+    auto&& sub = config.simulationSetup.participants[1];
 
     ASSERT_EQ(pub.genericPublishers.size(), 1u);
     ASSERT_EQ(pub.genericSubscribers.size(), 0u);
@@ -238,8 +236,8 @@ TEST_F(ConfigBuilderTest, make_generic_message_config)
     auto&& subscriber = sub.genericSubscribers[0];
     EXPECT_EQ(subscriber.name, msgName);
     
-    ASSERT_EQ(simulationSetup.links.size(), 1u);
-    auto&& rosLink = simulationSetup.links[0];
+    ASSERT_EQ(config.simulationSetup.links.size(), 1u);
+    auto&& rosLink = config.simulationSetup.links[0];
 
     EXPECT_EQ(rosLink.name, msgName);
     EXPECT_EQ(rosLink.type, Link::Type::GenericMessage);

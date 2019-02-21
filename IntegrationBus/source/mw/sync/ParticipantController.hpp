@@ -29,7 +29,7 @@ public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     ParticipantController() = default;
-    ParticipantController(IComAdapter* comAdapter, cfg::Participant participantConfig, cfg::TimeSync timeyncConfig);
+    ParticipantController(IComAdapter* comAdapter, cfg::Participant participantConfig, cfg::TimeSync timesyncConfig);
     ParticipantController(const ParticipantController& other) = default;
     ParticipantController(ParticipantController&& other) = default;
     ParticipantController& operator=(const ParticipantController& other) = default;
@@ -86,6 +86,9 @@ private:
 
     void ChangeState(ParticipantState newState, std::string reason);
     void Shutdown(std::string reason);
+    void PrepareColdswap();
+    void ShutdownForColdswap();
+    void IgnoreColdswap();
     void ProcessQuantumGrant(const QuantumGrant& msg);
     
 private:
@@ -98,6 +101,7 @@ private:
 
     std::unique_ptr<ITaskRunner> _taskRunner;
     std::chrono::nanoseconds _period{0};
+    bool _coldswapEnabled{false};
 
     ParticipantStatus _status;
     std::chrono::nanoseconds _now{0};

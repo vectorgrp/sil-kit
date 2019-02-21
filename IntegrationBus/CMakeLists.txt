@@ -17,7 +17,7 @@ set(THIRDPARTY_DIR ${PROJECT_SOURCE_DIR}/../ThirdParty)
 option(IB_INSTALL_PDB_FILES "Enable creating multi-config packages from multiple build folders" OFF)
 
 if(MSVC)
-    add_compile_options("/MP")
+    add_compile_options("/MP;/W4;/w44062")
 endif (MSVC)
 
 add_definitions(-DEXPORT_IntegrationBusAPI)

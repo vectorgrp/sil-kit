@@ -53,7 +53,6 @@ protected:
 
 TEST_F(JsonConfigTest, CreateCanNetwork)
 {
-    auto&& simulationSetup = builder.SimulationSetup();
     simulationSetup.AddParticipant("P1")
         ->AddCan("CAN1").WithLink("CAN_A")
         ->AddCan("CAN2").WithLink("CAN_B");

@@ -247,9 +247,7 @@ auto FastRtpsComAdapter::createPublisher(const std::string& topicName, TopicData
 
     registerTopicTypeIfNecessary(topicType);
 
-    bool usingStrictSyncPolicy = (_config.simulationSetup.timeSync.syncPolicy == cfg::TimeSync::SyncPolicy::Strict);
-
-    Publisher* publisher;
+    Publisher* publisher{nullptr};
     if (!_config.middlewareConfig.fastRtps.configFileName.empty())
     {
         // Create publisher based on profile specified in file
@@ -264,7 +262,7 @@ auto FastRtpsComAdapter::createPublisher(const std::string& topicName, TopicData
         // only send an acknowledgement in reply to a heartbeat. Thus, the hearbeat
         // period must be set to a shorter duration than the tickPeriod when using Strict
         // SyncPolicy. For Loose SyncPolicy, the FastRTPS default is sufficient.
-        if (usingStrictSyncPolicy)
+        if (_config.simulationSetup.timeSync.syncPolicy == cfg::TimeSync::SyncPolicy::Strict)
         {
             auto tickPeriod = std::chrono::duration_cast<std::chrono::duration<long double, std::ratio<1>>>(_config.simulationSetup.timeSync.tickPeriod);
             auto heartBeatPeriod = tickPeriod / 10.0;
@@ -277,8 +275,7 @@ auto FastRtpsComAdapter::createPublisher(const std::string& topicName, TopicData
     if (publisher == nullptr)
         throw std::exception();
 
-    if (usingStrictSyncPolicy)
-        _publishersToWaitFor.push_back(publisher);
+    _allPublishers.push_back(publisher);
 
     return publisher;
 }
@@ -939,7 +936,7 @@ bool FastRtpsComAdapter::isSyncMaster() const
 
 void FastRtpsComAdapter::WaitForMessageDelivery()
 {
-    for (auto publisher : _publishersToWaitFor)
+    for (auto publisher : _allPublishers)
     {
         /* NB: you must not use c_TimeInfinite as the parameter to wait_for_all_acked()!
          *
@@ -951,6 +948,14 @@ void FastRtpsComAdapter::WaitForMessageDelivery()
          */
         auto allAcked = publisher->wait_for_all_acked(Time_t{1200, 0});
         assert(allAcked);
+    }
+}
+
+void FastRtpsComAdapter::FlushSendBuffers()
+{
+    for (auto publisher : _allPublishers)
+    {
+        publisher->removeAllChange(nullptr);
     }
 }
 

@@ -124,6 +124,7 @@ public:
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::SystemCommand& msg));
 
     MOCK_METHOD0(WaitForMessageDelivery, void());
+    MOCK_METHOD0(FlushSendBuffers, void());
 };
 
 // ================================================================================
