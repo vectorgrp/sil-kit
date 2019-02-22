@@ -8,9 +8,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Support to swap out participants between simulation runs. A participant can activate the so called
   coldswap feature by calling IParticipantController::EnableColdswap(). The coldswap process can be
   initiated by a system controller once the system is in state stopped.
+- Participants can now signal that they are alive by refreshing the participant status. This can be
+  done by calling IParticipantController::RefreshStatus() and is reflected in the new field
+  ParticipantStatus::refreshTime.
 
 ### Removed
+
 ### Changed
+- The signature of simulation tasks has changed from void(std::chrono::nanoseconds now) to
+  void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration). The guaranteed simulation
+  time that can be processed is [now, now+duration). The old signature is still available but is now
+  considered deprecated and will be removed in a future sprint.
+
 ### Fixed
 
 ## [Sprint-23] - 2019-02-20
