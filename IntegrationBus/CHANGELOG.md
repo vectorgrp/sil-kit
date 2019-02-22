@@ -3,14 +3,37 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - 2019-02-06
+## [Unreleased] - 2019-03-06
 ### Added
-The IbConfig is now validated before creating a ComAdapter. NB: ib::CreateFastRtpsComAdapter() will now also throw Misconfiguration exceptions!
+- Support to swap out participants between simulation runs. A participant can activate the so called
+  coldswap feature by calling IParticipantController::EnableColdswap(). The coldswap process can be
+  initiated by a system controller once the system is in state stopped.
+
+### Removed
+### Changed
+### Fixed
+
+## [Sprint-23] - 2019-02-20
+### Added
+
 ### Removed
 
 ### Changed
 
 ### Fixed
+
+
+## [Sprint-22] - 2019-02-06
+### Added
+- The IbConfig is now validated before creating a ComAdapter. NB: ib::CreateFastRtpsComAdapter()
+  will now also throw Misconfiguration exceptions!
+
+### Removed
+
+### Changed
+
+### Fixed
+- The IbLauncher now correctly shows both stdout and stderr. Previously, only stdout was shown.
 
 ## [Sprint-21] - 2019-01-23
 ### Added
