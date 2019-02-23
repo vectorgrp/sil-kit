@@ -20,8 +20,8 @@ public:
 
     /*! \brief Publish a new value
      *
-     * This is the perfered publishing method as C-style methods with
-     * pointer + size are generally disregarded in modern C++. The
+     * This is the preferred publishing method as C-style methods with
+     * pointer and size are generally disregarded in modern C++. The
      * vector is passed to the underlying middleware using std::move.
      *
      * \param data An opaque block of raw data

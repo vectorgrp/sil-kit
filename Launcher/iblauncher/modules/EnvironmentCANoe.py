@@ -206,9 +206,12 @@ class EnvironmentCANoe(Environment.Environment):
         for canoeProjectAbsolutePath in canoeProjectAbsolutePaths:
             canoeProjectFolderAbsolutePath = os.path.dirname(canoeProjectAbsolutePath)
             if self.__verbose:
-                print("Patching CANoe project at '" + canoeProjectFolderAbsolutePath + "' with IntegrationBus node-layer DLL.")
+                print("Patching CANoe project at '" + canoeProjectFolderAbsolutePath + "' with IntegrationBus node-layer DLL:")
             try:
-                shutil.copy(Configuration.getIntegrationBusLibraryPath() + os.path.sep + "IntegrationBusToSysvarAdapter.dll", canoeProjectFolderAbsolutePath)
+                shutil.copy(Configuration.getIntegrationBusLibraryPath() + os.path.sep + "IbIoToCanoeSysvarAdapter.dll", canoeProjectFolderAbsolutePath)
+                if self.__verbose: print("  Copied '" + Configuration.getIntegrationBusLibraryPath() + os.path.sep + "IbIoToCanoeSysvarAdapter.dll'")
+                shutil.copy(Configuration.getIntegrationBusLibraryPath() + os.path.sep + "IbRosToCanoeVcoAdapter.dll", canoeProjectFolderAbsolutePath)
+                if self.__verbose: print("  Copied '" + Configuration.getIntegrationBusLibraryPath() + os.path.sep + "IbRosToCanoeVcoAdapter.dll'")
             except BaseException as e:
                 print("Error: Could not patch CANoe project, '" + str(e) + "'")
                 return False
@@ -219,9 +222,10 @@ class EnvironmentCANoe(Environment.Environment):
             return False
         integrationBusDriverPath = Configuration.getIntegrationBusLibraryPath() + os.path.sep + "vcndrvms.dll"
         if self.__verbose:
-            print("Patching CANoe at '" + canoeExec32DirectoryPath + "' with IntegrationBus driver from '" + integrationBusDriverPath + "'.")
+            print("Patching CANoe installation at '" + canoeExec32DirectoryPath + "' with IntegrationBus driver:")
         try:
             shutil.copy(integrationBusDriverPath, canoeExec32DirectoryPath)
+            if self.__verbose: print("  Copied '" + integrationBusDriverPath + "'")
         except BaseException as e:
             print("Error: Could not patch CANoe, '" + str(e) + "'")
             return False
@@ -265,9 +269,12 @@ class EnvironmentCANoe(Environment.Environment):
         for canoeProjectAbsolutePath in canoeProjectAbsolutePaths:
             canoeProjectFolderAbsolutePath = os.path.dirname(canoeProjectAbsolutePath)
             if self.__verbose:
-                print("Cleaning CANoe project at '" + canoeProjectFolderAbsolutePath + "' from IntegrationBus node-layer DLL.")
+                print("Cleaning CANoe project at '" + canoeProjectFolderAbsolutePath + "' from IntegrationBus node-layer DLLs:")
             try:
-                shutil.copy(Configuration.getIntegrationBusLibraryPath() + os.path.sep + "IntegrationBusToSysvarAdapter.dll", canoeProjectFolderAbsolutePath)
+                os.remove(canoeProjectFolderAbsolutePath + os.path.sep + "IbIoToCanoeSysvarAdapter.dll")
+                if self.__verbose: print("  Removed '" + canoeProjectFolderAbsolutePath + os.path.sep + "IbIoToCanoeSysvarAdapter.dll'")
+                os.remove(canoeProjectFolderAbsolutePath + os.path.sep + "IbRosToCanoeVcoAdapter.dll")
+                if self.__verbose: print("  Removed '" + canoeProjectFolderAbsolutePath + os.path.sep + "IbRosToCanoeVcoAdapter.dll'")
             except BaseException as e:
                 print("Error: Could not clean CANoe project, '" + str(e) + "'")
                 return False
@@ -278,9 +285,10 @@ class EnvironmentCANoe(Environment.Environment):
             return False
         integrationBusDriverPath = canoeExec32DirectoryPath + os.path.sep + "vcndrvms.dll"
         if self.__verbose:
-            print("Cleaning CANoe from IntegrationBus driver '" + canoeExec32DirectoryPath + "'.")
+            print("Cleaning CANoe from IntegrationBus driver '" + canoeExec32DirectoryPath + "':")
         try:
             os.remove(integrationBusDriverPath)
+            if self.__verbose: print("  Removed '" + integrationBusDriverPath + "'")
         except BaseException as e:
             print("Error: Could not clean CANoe, '" + str(e) + "'")
             return False

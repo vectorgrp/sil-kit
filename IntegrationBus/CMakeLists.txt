@@ -203,7 +203,7 @@ add_subdirectory(source)
 add_subdirectory(IntegrationTests)
 
 #######################################################################################################################
-# Middleware
+# IDE settings
 #######################################################################################################################
 
 message(STATUS "Copying VisualStudio .editorconfig into ${CMAKE_CURRENT_BINARY_DIR}")

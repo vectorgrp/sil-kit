@@ -379,7 +379,7 @@ void LinController::ReceiveIbMessage(mw::EndpointAddress from, const SlaveConfig
 
     if (!IsKnownSlave(from))
     {
-        _logger->warn("LinController received SlaveConfiguration for unkonwn LIN Slave {{{}, {}}}", from.participant, from.endpoint);
+        _logger->warn("LinController received SlaveConfiguration for unknown LIN Slave {{{}, {}}}", from.participant, from.endpoint);
         return;
     }
 
