@@ -47,69 +47,6 @@ bool operator==(const CanConfigureBaudrate& lhs, const CanConfigureBaudrate& rhs
         && lhs.fdBaudRate == rhs.fdBaudRate;
 }
 
-std::ostream& operator<<(std::ostream& out, CanMessage::CanReceiveFlags flags)
-{
-    out << "["
-        << (flags.ide ? "ide," : "")
-        << (flags.rtr ? "rtr," : "")
-        << (flags.fdf ? "fdf," : "")
-        << (flags.brs ? "brs," : "")
-        << (flags.esi ? "esi" : "")
-        << "]";
-
-    return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const CanMessage& msg)
-{
-    out << "CanMsg{txId=" << msg.transmitId
-        << ", time=" << msg.timestamp.count() << "ns"
-        << ", canId=" << msg.canId
-        << ", flags=" << msg.flags
-        << ", dlc=" << static_cast<uint32_t>(msg.dlc)
-        << ", data=[0x" << static_cast<const void*>(msg.dataField.data()) << ", s=" << msg.dataField.size() << "]"
-        << "}";
-    return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const CanSetControllerMode& mode)
-{
-    out << "{";
-    switch (mode.mode)
-    {
-    case CanControllerState::Uninit:
-        out << "uninit";
-        break;
-    case CanControllerState::Stopped:
-        out << "stopped";
-        break;
-    case CanControllerState::Started:
-        out << "started";
-        break;
-    case CanControllerState::Sleep:
-        out << "sleep";
-        break;
-    default:
-        assert(false);
-    }
-
-    if (mode.flags.cancelTransmitRequests)
-        out << ", cancelTX";
-    if (mode.flags.resetErrorHandling)
-        out << ", resetErrorHandling";
-    out << "}";
-    return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const CanConfigureBaudrate& rate)
-{
-    out << "{" << rate.baudRate
-        << ", " << rate.fdBaudRate
-        << "}";
-    return out;
-}
-
-
 
 }
 }

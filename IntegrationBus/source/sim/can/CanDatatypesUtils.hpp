@@ -16,11 +16,6 @@ bool operator==(const CanTransmitAcknowledge& lhs, const CanTransmitAcknowledge&
 bool operator==(const CanSetControllerMode& lhs, const CanSetControllerMode& rhs);
 bool operator==(const CanConfigureBaudrate& lhs, const CanConfigureBaudrate& rhs);
 
-std::ostream& operator<<(std::ostream& out, CanMessage::CanReceiveFlags flags);
-std::ostream& operator<<(std::ostream& out, const CanMessage& msg);
-std::ostream& operator<<(std::ostream& out, const CanSetControllerMode& mode);
-std::ostream& operator<<(std::ostream& out, const CanConfigureBaudrate& rate);
-
 
 }
 }

@@ -8,6 +8,7 @@
 #include "gmock/gmock.h"
 
 #include "ib/mw/string_utils.hpp"
+#include "ib/sim/can/string_utils.hpp"
 
 #include "MockComAdapter.hpp"
 
