@@ -7,8 +7,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+#include "ib/mw/string_utils.hpp"
+
 #include "MockComAdapter.hpp"
-#include "MwTestUtils.hpp"
 
 #include "CanControllerProxy.hpp"
 #include "CanDatatypesUtils.hpp"

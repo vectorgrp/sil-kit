@@ -18,3 +18,6 @@ target_link_libraries(IbSimEthernet
 )
 
 add_mvsc_ib_include_filter()
+
+make_gtest(TestSimEthControllerProxy EthControllerProxyTest.cpp IbSimEthernet IbMwMock)
+make_gtest(TestSimEthController EthControllerTest.cpp IbSimEthernet IbMwMock)

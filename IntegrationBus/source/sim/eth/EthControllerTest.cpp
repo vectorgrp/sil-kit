@@ -9,10 +9,10 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+#include "ib/mw/string_utils.hpp"
 #include "ib/util/functional.hpp"
 
 #include "MockComAdapter.hpp"
-#include "MwTestUtils.hpp"
 
 #include "EthDatatypeUtils.hpp"
 

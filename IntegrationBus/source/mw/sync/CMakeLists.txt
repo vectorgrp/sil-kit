@@ -22,3 +22,8 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 add_mvsc_ib_include_filter()
+
+make_gtest(TestMwSyncMaster SyncMasterTest.cpp IbMwSync IbMwMock IbConfig)
+make_gtest(TestMwParticipantController ParticipantControllerTest.cpp IbMwSync IbMwMock IbConfig)
+make_gtest(TestMwSystemController SystemControllerTest.cpp IbMwSync IbMwMock)
+make_gtest(TestMwSystemMonitor SystemMonitorTest.cpp IbMwSync IbMwMock IbConfig)

@@ -16,3 +16,6 @@ target_link_libraries(IbSimGenericMessage
 )
 
 add_mvsc_ib_include_filter()
+
+make_gtest(TestGenericPublisher GenericPublisherTest.cpp IbSimGenericMessage IbConfig IbMwMock)
+make_gtest(TestGenericSubscriber GenericSubscriberTest.cpp IbSimGenericMessage IbConfig IbMwMock)

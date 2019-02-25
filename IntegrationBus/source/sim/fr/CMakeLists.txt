@@ -16,3 +16,6 @@ target_link_libraries(IbSimFlexRay
 )
 
 add_mvsc_ib_include_filter()
+
+make_gtest(TestSimFrController FrControllerTest.cpp IbSimFlexRay IbMwMock)
+make_gtest(TestSimFrControllerProxy FrControllerProxyTest.cpp IbSimFlexRay IbMwMock)

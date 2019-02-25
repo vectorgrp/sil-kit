@@ -16,3 +16,6 @@ target_link_libraries(IbSimLin
 )
 
 add_mvsc_ib_include_filter()
+
+make_gtest(TestSimLinControllerProxy LinControllerProxyTest.cpp IbSimLin IbMwMock)
+make_gtest(TestSimLinController LinControllerTest.cpp IbSimLin IbMwMock)
