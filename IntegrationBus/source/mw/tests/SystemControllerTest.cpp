@@ -9,7 +9,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 
 #include "MockComAdapter.hpp"

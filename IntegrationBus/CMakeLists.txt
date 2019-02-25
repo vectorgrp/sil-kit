@@ -124,6 +124,7 @@ function(make_gtest executableName testSourceFile)
         gmock_main
         ${ARGV2}
         ${ARGV3}
+        ${ARGV4}
     )
 
     if(NOT MSVC)

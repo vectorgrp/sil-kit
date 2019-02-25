@@ -1,4 +1,4 @@
-make_gtest(TestMwSyncMaster SyncMasterTest.cpp IbMwSync IbConfig)
-make_gtest(TestMwParticipantController ParticipantControllerTest.cpp IbMwSync IbConfig)
-make_gtest(TestMwSystemController SystemControllerTest.cpp IbMwSync)
-make_gtest(TestMwSystemMonitor SystemMonitorTest.cpp IbMwSync IbConfig)
+make_gtest(TestMwSyncMaster SyncMasterTest.cpp IbMwSync IbMwMock IbConfig)
+make_gtest(TestMwParticipantController ParticipantControllerTest.cpp IbMwSync IbMwMock IbConfig)
+make_gtest(TestMwSystemController SystemControllerTest.cpp IbMwSync IbMwMock)
+make_gtest(TestMwSystemMonitor SystemMonitorTest.cpp IbMwSync IbMwMock IbConfig)

@@ -68,6 +68,7 @@ public:
     MOCK_METHOD0(GetParticipantController, sync::IParticipantController*());
     MOCK_METHOD0(GetSystemMonitor, sync::ISystemMonitor*());
     MOCK_METHOD0(GetSystemController, sync::ISystemController*());
+
     MOCK_METHOD1(RegisterCanSimulator, void(sim::can::IIbToCanSimulator*));
     MOCK_METHOD1(RegisterEthSimulator, void(sim::eth::IIbToEthSimulator*));
     MOCK_METHOD1(RegisterFlexraySimulator, void(sim::fr::IIbToFrBusSimulator*));

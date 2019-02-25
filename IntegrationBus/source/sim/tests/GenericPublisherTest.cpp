@@ -8,7 +8,6 @@
 #include "ib/util/functional.hpp"
 
 #include "MockComAdapter.hpp"
-//#include "MwTestUtils.hpp"
 
 #include "GenericMessageDatatypeUtils.hpp"
 
