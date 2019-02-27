@@ -57,6 +57,8 @@ void EthController::RegisterBitRateChangedHandler(BitRateChangedHandler /*handle
 
 void EthController::ReceiveIbMessage(mw::EndpointAddress from, const EthMessage& msg)
 {
+    _tracer.Trace(msg);
+
     if (from == _endpointAddr)
         return;
 
@@ -81,6 +83,7 @@ void EthController::ReceiveIbMessage(mw::EndpointAddress from, const EthTransmit
 void EthController::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
     _endpointAddr = endpointAddress;
+    _tracer.SetEndpointAddress(endpointAddress);
 }
 
 auto EthController::EndpointAddress() const -> const mw::EndpointAddress&

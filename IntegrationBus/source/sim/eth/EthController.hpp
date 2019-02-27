@@ -5,6 +5,7 @@
 #include "ib/sim/eth/IEthController.hpp"
 #include "ib/sim/eth/IIbToEthController.hpp"
 #include "ib/mw/fwd_decl.hpp"
+#include "EthPcapTracer.hpp"
 
 namespace ib {
 namespace sim {
@@ -83,6 +84,8 @@ private:
         CallbackVector<EthMessage>,
         CallbackVector<EthTransmitAcknowledge>
     > _callbacks;
+
+    ::ib::sim::eth::EthPcapTracer _tracer;
 };
 
 // ================================================================================
