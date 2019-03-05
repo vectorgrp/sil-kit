@@ -48,7 +48,6 @@ void ReportSystemState(ib::mw::sync::SystemState state)
 
 int main(int argc, char** argv)
 {
-    ib::cfg::Config ibConfig;
     if (argc < 2)
     {
         std::cerr << "Missing arguments! Start demo with: " << argv[0] << " <IbConfig.json> [domainId]" << std::endl;
@@ -57,33 +56,18 @@ int main(int argc, char** argv)
 
     try
     {
-        auto jsonFilename = std::string(argv[1]);
-        ibConfig = ib::cfg::Config::FromJsonFile(jsonFilename);
-    }
-    catch (ib::cfg::Misconfiguration& error)
-    {
-        std::cerr << "Invalid configuration: " << (&error)->what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
-        std::cin.ignore();
-        return -2;
-    }
-    std::string participantName{"SystemMonitor"};
+        std::string jsonFilename(argv[1]);
+        std::string participantName{"SystemMonitor"};
 
-    uint32_t domainId = 42;
-    if (argc >= 3)
-    {
-        try
+        uint32_t domainId = 42;
+        if (argc >= 3)
         {
             domainId = static_cast<uint32_t>(std::stoul(argv[2]));
         }
-        catch (std::exception&)
-        {
-        }
-    }
 
-    std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-    try
-    {
+        auto ibConfig = ib::cfg::Config::FromJsonFile(jsonFilename);
+
+        std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
         auto comAdapter = ib::CreateFastRtpsComAdapter(std::move(ibConfig), participantName, domainId);
 
         // add a stdout sink to the logger to print all received log messages
@@ -97,11 +81,19 @@ int main(int argc, char** argv)
         std::cout << "Press enter to terminate the SystemMonitor..." << std::endl;
         std::cin.ignore();
     }
-    catch (const std::exception& e)
+    catch (const ib::cfg::Misconfiguration& error)
     {
-        std::cout << "Something went wrong: " << e.what() << std::endl;
-        std::cout << "Press enter to terminate the SystemMonitor..." << std::endl;
+        std::cerr << "Invalid configuration: " << error.what() << std::endl;
+        std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
+        return -2;
+    }
+    catch (const std::exception& error)
+    {
+        std::cerr << "Something went wrong: " << error.what() << std::endl;
+        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cin.ignore();
+        return -3;
     }
 
     return 0;

@@ -320,224 +320,226 @@ int main(int argc, char** argv)
         return -1;
     }
 
-
-    ib::cfg::Config ibConfig;
     try
     {
-        ibConfig = ib::cfg::Config::FromJsonFile(argv[1]);
+        std::string configFilename(argv[1]);
+        std::string participantName(argv[2]);
+
+        uint32_t domainId = 42;
+        if (argc >= 4)
+        {
+            domainId = static_cast<uint32_t>(std::stoul(argv[3]));
+        }   
+
+        auto ibConfig = ib::cfg::Config::FromJsonFile(configFilename);
+
+        std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
+        auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
+        auto* controller = comAdapter->CreateFlexrayController("FlexRay1");
+        auto* participantController = comAdapter->GetParticipantController();
+
+        // Set an Init Handler
+        participantController->SetInitHandler([&participantName](auto initCmd) {
+
+            std::cout << "Initializing " << participantName << std::endl;
+
+        });
+
+        // Set a Stop Handler
+        participantController->SetStopHandler([]() {
+
+            std::cout << "Stopping..." << std::endl;
+
+        });
+
+        // Set a Shutdown Handler
+        participantController->SetShutdownHandler([]() {
+
+            std::cout << "Shutting down..." << std::endl;
+
+        });
+
+        // Setup Cluster Parameters
+        fr::ClusterParameters clusterParams;
+        {
+            clusterParams.gColdstartAttempts = 8;
+            clusterParams.gCycleCountMax = 63;
+            clusterParams.gdActionPointOffset = 2;
+            clusterParams.gdDynamicSlotIdlePhase = 1;
+            clusterParams.gdMiniSlot = 5;
+            clusterParams.gdMiniSlotActionPointOffset = 2;
+            clusterParams.gdStaticSlot = 31;
+            clusterParams.gdSymbolWindow = 1;
+            clusterParams.gdSymbolWindowActionPointOffset = 1;
+            clusterParams.gdTSSTransmitter = 9;
+            clusterParams.gdWakeupTxActive = 60;
+            clusterParams.gdWakeupTxIdle = 180;
+            clusterParams.gListenNoise = 2;
+            clusterParams.gMacroPerCycle = 3636;
+            clusterParams.gMaxWithoutClockCorrectionFatal = 2;
+            clusterParams.gMaxWithoutClockCorrectionPassive = 2;
+            clusterParams.gNumberOfMiniSlots = 291;
+            clusterParams.gNumberOfStaticSlots = 70;
+            clusterParams.gPayloadLengthStatic = 16;
+            clusterParams.gSyncFrameIDCountMax = 15;
+        }
+        fr::NodeParameters nodeParams;
+        {
+            nodeParams.pAllowHaltDueToClock = 1;
+            nodeParams.pAllowPassiveToActive = 0;
+            nodeParams.pChannels = fr::Channel::AB;
+            nodeParams.pClusterDriftDamping = 2;
+            nodeParams.pdAcceptedStartupRange = 212;
+            nodeParams.pdListenTimeout = 400162;
+            nodeParams.pKeySlotId = 0;
+            nodeParams.pKeySlotOnlyEnabled = 0;
+            nodeParams.pKeySlotUsedForStartup = 0;
+            nodeParams.pKeySlotUsedForSync = 0;
+            nodeParams.pLatestTx = 249;
+            nodeParams.pMacroInitialOffsetA = 3;
+            nodeParams.pMacroInitialOffsetB = 3;
+            nodeParams.pMicroInitialOffsetA = 6;
+            nodeParams.pMicroInitialOffsetB = 6;
+            nodeParams.pMicroPerCycle = 200000;
+            nodeParams.pOffsetCorrectionOut = 127;
+            nodeParams.pOffsetCorrectionStart = 3632;
+            nodeParams.pRateCorrectionOut = 81;
+            nodeParams.pWakeupChannel = fr::Channel::A;
+            nodeParams.pWakeupPattern = 33;
+
+            nodeParams.pdMicrotick = fr::ClockPeriod::T25NS;
+            nodeParams.pSamplesPerMicrotick = 2;
+        }
+
+        std::vector<fr::TxBufferConfig> bufferConfigs;
+
+        if (participantName == "Node0")
+        {
+            // initialize bufferConfig to send some FrMessages
+            fr::TxBufferConfig cfg;
+            cfg.channels = fr::Channel::A;
+            cfg.slotId = 10;
+            cfg.offset = 0;
+            cfg.repetition = 1;
+            cfg.hasPayloadPreambleIndicator = false;
+            cfg.headerCrc = 5;
+            cfg.transmissionMode = fr::TransmissionMode::SingleShot;
+            bufferConfigs.push_back(cfg);
+
+            cfg.channels = fr::Channel::B;
+            cfg.slotId = 20;
+            bufferConfigs.push_back(cfg);
+
+            cfg.channels = fr::Channel::AB;
+            cfg.slotId = 30;
+            bufferConfigs.push_back(cfg);
+
+            // this controller performs the wakeup -> no key slots used
+            nodeParams.pKeySlotId = 10;
+            nodeParams.pKeySlotUsedForStartup = 1;
+        }
+        else if (participantName == "Node1")
+        {
+            // initialize bufferConfig to send some FrMessages
+            fr::TxBufferConfig cfg;
+            cfg.channels = fr::Channel::A;
+            cfg.slotId = 11;
+            cfg.offset = 0;
+            cfg.repetition = 1;
+            cfg.hasPayloadPreambleIndicator = false;
+            cfg.headerCrc = 5;
+            cfg.transmissionMode = fr::TransmissionMode::SingleShot;
+            bufferConfigs.push_back(cfg);
+
+            cfg.channels = fr::Channel::B;
+            cfg.slotId = 21;
+            bufferConfigs.push_back(cfg);
+
+            cfg.channels = fr::Channel::AB;
+            cfg.slotId = 31;
+            bufferConfigs.push_back(cfg);
+
+            // this controller performs the wakeup -> no key slots used
+            nodeParams.pKeySlotId = 11;
+            nodeParams.pKeySlotUsedForStartup = 1;
+        }
+        else if (participantName == "Node2")
+        {
+            // initialize bufferConfig to send some FrMessages
+            fr::TxBufferConfig cfg;
+            cfg.channels = fr::Channel::A;
+            cfg.slotId = 12;
+            cfg.offset = 0;
+            cfg.repetition = 1;
+            cfg.hasPayloadPreambleIndicator = false;
+            cfg.headerCrc = 5;
+            cfg.transmissionMode = fr::TransmissionMode::SingleShot;
+            bufferConfigs.push_back(cfg);
+
+            cfg.channels = fr::Channel::B;
+            cfg.slotId = 22;
+            bufferConfigs.push_back(cfg);
+
+            cfg.channels = fr::Channel::AB;
+            cfg.slotId = 32;
+            bufferConfigs.push_back(cfg);
+
+            // this controller performs the wakeup -> no key slots used
+            nodeParams.pKeySlotId = 12;
+            nodeParams.pKeySlotUsedForStartup = 1;
+        }
+
+        FlexRayUser frUser(controller);
+        if (participantName == "Node0")
+            frUser.busState = FlexRayUser::MasterState::PerformWakeup;
+
+        controller->RegisterControllerStatusHandler(bind_method(&frUser, &FlexRayUser::ControllerStatusHandler));
+        controller->RegisterMessageHandler(&ReceiveMessage<fr::FrMessage>);
+        controller->RegisterMessageAckHandler(&ReceiveMessage<fr::FrMessageAck>);
+        controller->RegisterWakeupHandler(bind_method(&frUser, &FlexRayUser::WakeupHandler));
+        controller->RegisterSymbolHandler(&ReceiveMessage<fr::FrSymbol>);
+        controller->RegisterSymbolAckHandler(&ReceiveMessage<fr::FrSymbolAck>);
+
+        fr::ControllerConfig config;
+        config.clusterParams = clusterParams;
+        config.nodeParams = nodeParams;
+        config.bufferConfigs = bufferConfigs;
+
+        frUser.configure(std::move(config));
+
+        participantController->SetSimulationTask(
+            [&frUser](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+                
+                auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+                std::cout << "now=" << nowMs.count() << "ms" << std::endl;
+                frUser.doAction(now);
+                std::this_thread::sleep_for(1s);
+                
+        });
+
+        //auto finalStateFuture = participantController->RunAsync();
+        //auto finalState = finalStateFuture.get();
+
+        auto finalState = participantController->Run();
+
+        std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
+        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cin.ignore();
     }
     catch (const ib::cfg::Misconfiguration& error)
     {
-        std::cerr << "Invalid configuration: " << (&error)->what() << std::endl;
+        std::cerr << "Invalid configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
         return -2;
     }
-
-
-    std::string participantName(argv[2]);
-
-
-    uint32_t domainId = 42;
-    if (argc >= 4)
+    catch (const std::exception& error)
     {
-        domainId = static_cast<uint32_t>(std::stoul(argv[3]));
+        std::cerr << "Something went wrong: " << error.what() << std::endl;
+        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cin.ignore();
+        return -3;
     }
-
-
-    std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-    auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
-    auto controller = comAdapter->CreateFlexrayController("FlexRay1");
-
-
-    // Set an Init Handler
-    auto&& participantController = comAdapter->GetParticipantController();
-    participantController->SetInitHandler([&participantName](auto initCmd) {
-
-        std::cout << "Initializing " << participantName << std::endl;
-
-    });
-
-    // Set a Stop Handler
-    participantController->SetStopHandler([]() {
-
-        std::cout << "Stopping..." << std::endl;
-
-    });
-
-    // Set a Shutdown Handler
-    participantController->SetShutdownHandler([]() {
-
-        std::cout << "Shutting down..." << std::endl;
-
-    });
-
-    // Setup Cluster Parameters
-    fr::ClusterParameters clusterParams;
-    {
-        clusterParams.gColdstartAttempts = 8;
-        clusterParams.gCycleCountMax = 63;
-        clusterParams.gdActionPointOffset = 2;
-        clusterParams.gdDynamicSlotIdlePhase = 1;
-        clusterParams.gdMiniSlot = 5;
-        clusterParams.gdMiniSlotActionPointOffset = 2;
-        clusterParams.gdStaticSlot = 31;
-        clusterParams.gdSymbolWindow = 1;
-        clusterParams.gdSymbolWindowActionPointOffset = 1;
-        clusterParams.gdTSSTransmitter = 9;
-        clusterParams.gdWakeupTxActive = 60;
-        clusterParams.gdWakeupTxIdle = 180;
-        clusterParams.gListenNoise = 2;
-        clusterParams.gMacroPerCycle = 3636;
-        clusterParams.gMaxWithoutClockCorrectionFatal = 2;
-        clusterParams.gMaxWithoutClockCorrectionPassive = 2;
-        clusterParams.gNumberOfMiniSlots = 291;
-        clusterParams.gNumberOfStaticSlots = 70;
-        clusterParams.gPayloadLengthStatic = 16;
-        clusterParams.gSyncFrameIDCountMax = 15;
-    }
-    fr::NodeParameters nodeParams;
-    {
-        nodeParams.pAllowHaltDueToClock = 1;
-        nodeParams.pAllowPassiveToActive = 0;
-        nodeParams.pChannels = fr::Channel::AB;
-        nodeParams.pClusterDriftDamping = 2;
-        nodeParams.pdAcceptedStartupRange = 212;
-        nodeParams.pdListenTimeout = 400162;
-        nodeParams.pKeySlotId = 0;
-        nodeParams.pKeySlotOnlyEnabled = 0;
-        nodeParams.pKeySlotUsedForStartup = 0;
-        nodeParams.pKeySlotUsedForSync = 0;
-        nodeParams.pLatestTx = 249;
-        nodeParams.pMacroInitialOffsetA = 3;
-        nodeParams.pMacroInitialOffsetB = 3;
-        nodeParams.pMicroInitialOffsetA = 6;
-        nodeParams.pMicroInitialOffsetB = 6;
-        nodeParams.pMicroPerCycle = 200000;
-        nodeParams.pOffsetCorrectionOut = 127;
-        nodeParams.pOffsetCorrectionStart = 3632;
-        nodeParams.pRateCorrectionOut = 81;
-        nodeParams.pWakeupChannel = fr::Channel::A;
-        nodeParams.pWakeupPattern = 33;
-
-        nodeParams.pdMicrotick = fr::ClockPeriod::T25NS;
-        nodeParams.pSamplesPerMicrotick = 2;
-    }
-
-    std::vector<fr::TxBufferConfig> bufferConfigs;
-
-    if (participantName == "Node0")
-    {
-        // initialize bufferConfig to send some FrMessages
-        fr::TxBufferConfig cfg;
-        cfg.channels = fr::Channel::A;
-        cfg.slotId = 10;
-        cfg.offset = 0;
-        cfg.repetition = 1;
-        cfg.hasPayloadPreambleIndicator = false;
-        cfg.headerCrc = 5;
-        cfg.transmissionMode = fr::TransmissionMode::SingleShot;
-        bufferConfigs.push_back(cfg);
-
-        cfg.channels = fr::Channel::B;
-        cfg.slotId = 20;
-        bufferConfigs.push_back(cfg);
-
-        cfg.channels = fr::Channel::AB;
-        cfg.slotId = 30;
-        bufferConfigs.push_back(cfg);
-
-        // this controller performs the wakeup -> no key slots used
-        nodeParams.pKeySlotId = 10;
-        nodeParams.pKeySlotUsedForStartup = 1;
-    }
-    else if (participantName == "Node1")
-    {
-        // initialize bufferConfig to send some FrMessages
-        fr::TxBufferConfig cfg;
-        cfg.channels = fr::Channel::A;
-        cfg.slotId = 11;
-        cfg.offset = 0;
-        cfg.repetition = 1;
-        cfg.hasPayloadPreambleIndicator = false;
-        cfg.headerCrc = 5;
-        cfg.transmissionMode = fr::TransmissionMode::SingleShot;
-        bufferConfigs.push_back(cfg);
-
-        cfg.channels = fr::Channel::B;
-        cfg.slotId = 21;
-        bufferConfigs.push_back(cfg);
-
-        cfg.channels = fr::Channel::AB;
-        cfg.slotId = 31;
-        bufferConfigs.push_back(cfg);
-
-        // this controller performs the wakeup -> no key slots used
-        nodeParams.pKeySlotId = 11;
-        nodeParams.pKeySlotUsedForStartup = 1;
-    }
-    else if (participantName == "Node2")
-    {
-        // initialize bufferConfig to send some FrMessages
-        fr::TxBufferConfig cfg;
-        cfg.channels = fr::Channel::A;
-        cfg.slotId = 12;
-        cfg.offset = 0;
-        cfg.repetition = 1;
-        cfg.hasPayloadPreambleIndicator = false;
-        cfg.headerCrc = 5;
-        cfg.transmissionMode = fr::TransmissionMode::SingleShot;
-        bufferConfigs.push_back(cfg);
-
-        cfg.channels = fr::Channel::B;
-        cfg.slotId = 22;
-        bufferConfigs.push_back(cfg);
-
-        cfg.channels = fr::Channel::AB;
-        cfg.slotId = 32;
-        bufferConfigs.push_back(cfg);
-
-        // this controller performs the wakeup -> no key slots used
-        nodeParams.pKeySlotId = 12;
-        nodeParams.pKeySlotUsedForStartup = 1;
-    }
-
-    FlexRayUser frUser(controller);
-    if (participantName == "Node0")
-        frUser.busState = FlexRayUser::MasterState::PerformWakeup;
-
-    controller->RegisterControllerStatusHandler(bind_method(&frUser, &FlexRayUser::ControllerStatusHandler));
-    controller->RegisterMessageHandler(&ReceiveMessage<fr::FrMessage>);
-    controller->RegisterMessageAckHandler(&ReceiveMessage<fr::FrMessageAck>);
-    controller->RegisterWakeupHandler(bind_method(&frUser, &FlexRayUser::WakeupHandler));
-    controller->RegisterSymbolHandler(&ReceiveMessage<fr::FrSymbol>);
-    controller->RegisterSymbolAckHandler(&ReceiveMessage<fr::FrSymbolAck>);
-
-    fr::ControllerConfig config;
-    config.clusterParams = clusterParams;
-    config.nodeParams = nodeParams;
-    config.bufferConfigs = bufferConfigs;
-
-    frUser.configure(std::move(config));
-
-    participantController->SetSimulationTask(
-        [&frUser](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/)
-        {
-            auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-            std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-            frUser.doAction(now);
-            std::this_thread::sleep_for(1s);
-        }
-    );
-
-    //auto finalStateFuture = participantController->RunAsync();
-    //auto finalState = finalStateFuture.get();
-
-    auto finalState = participantController->Run();
-
-    std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
-    std::cout << "Press enter to stop the process..." << std::endl;
-    std::cin.ignore();
 
     return 0;
 }

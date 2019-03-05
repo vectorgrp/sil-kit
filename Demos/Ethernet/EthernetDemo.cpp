@@ -108,93 +108,98 @@ int main(int argc, char** argv)
         return -1;
     }
 
-
-    ib::cfg::Config ibConfig;
     try
     {
-        ibConfig = ib::cfg::Config::FromJsonFile(argv[1]);
+        std::string configFilename(argv[1]);
+        std::string participantName(argv[2]);
+
+        uint32_t domainId = 42;
+        if (argc >= 4)
+        {
+            domainId = static_cast<uint32_t>(std::stoul(argv[3]));
+        }
+
+        auto ibConfig = ib::cfg::Config::FromJsonFile(configFilename);
+
+        std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
+        auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
+        auto* ethController = comAdapter->CreateEthController("ETH0");
+        auto* participantController = comAdapter->GetParticipantController();
+
+        ethController->RegisterReceiveMessageHandler(&ReceiveEthMessage);
+        ethController->RegisterMessageAckHandler(&EthAckCallback);
+        ethController->Activate();
+
+        // Set an Init Handler
+        participantController->SetInitHandler([&participantName](auto initCmd) {
+
+            std::cout << "Initializing " << participantName << std::endl;
+
+        });
+
+        // Set a Stop Handler
+        participantController->SetStopHandler([]() {
+
+            std::cout << "Stopping..." << std::endl;
+
+        });
+
+        // Set a Shutdown Handler
+        participantController->SetShutdownHandler([]() {
+
+            std::cout << "Shutting down..." << std::endl;
+
+        });
+
+        participantController->SetPeriod(1ms);
+        if (participantName == "EthernetWriter")
+        {
+            auto sourceAddr = ibConfig.simulationSetup.participants[0].ethernetControllers[0].macAddress;
+            auto destinationAddr = ibConfig.simulationSetup.participants[1].ethernetControllers[0].macAddress;
+
+            participantController->SetSimulationTask(
+                [ethController, &sourceAddr, &destinationAddr](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+
+                    std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
+                    SendMessage(ethController, sourceAddr, destinationAddr);
+                    std::this_thread::sleep_for(1s);
+
+            });
+        }
+        else
+        {
+            participantController->SetSimulationTask(
+                [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+
+                    std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
+                    std::this_thread::sleep_for(1s);
+
+            });
+        }
+
+        //auto finalStateFuture = participantController->RunAsync();
+        //auto finalState = finalStateFuture.get();
+
+        auto finalState = participantController->Run();
+
+        std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
+        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cin.ignore();
     }
     catch (const ib::cfg::Misconfiguration& error)
     {
-        std::cerr << "Invalid configuration: " << (&error)->what() << std::endl;
+        std::cerr << "Invalid configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
         return -2;
     }
-
-    std::string participantName(argv[2]);
-
-    uint32_t domainId = 42;
-    if (argc >= 4)
+    catch (const std::exception& error)
     {
-        domainId = static_cast<uint32_t>(std::stoul(argv[3]));
+        std::cerr << "Something went wrong: " << error.what() << std::endl;
+        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cin.ignore();
+        return -3;
     }
-
-    std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-    auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
-
-    auto* ethController = comAdapter->CreateEthController("ETH0");
-    ethController->RegisterReceiveMessageHandler(&ReceiveEthMessage);
-    ethController->RegisterMessageAckHandler(&EthAckCallback);
-    ethController->Activate();
-
-    // Set an Init Handler
-    auto&& participantController = comAdapter->GetParticipantController();
-    participantController->SetInitHandler([&participantName](auto initCmd) {
-
-        std::cout << "Initializing " << participantName << std::endl;
-
-    });
-
-    // Set a Stop Handler
-    participantController->SetStopHandler([]() {
-
-        std::cout << "Stopping..." << std::endl;
-
-    });
-
-    // Set a Shutdown Handler
-    participantController->SetShutdownHandler([]() {
-
-        std::cout << "Shutting down..." << std::endl;
-
-    });
-
-    participantController->SetPeriod(1ms);
-    if (participantName == "EthernetWriter")
-    {
-        auto sourceAddr = ibConfig.simulationSetup.participants[0].ethernetControllers[0].macAddress;
-        auto destinationAddr = ibConfig.simulationSetup.participants[1].ethernetControllers[0].macAddress;
-
-        participantController->SetSimulationTask(
-            [ethController, &sourceAddr, &destinationAddr](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/)
-            {
-                std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
-                SendMessage(ethController, sourceAddr, destinationAddr);
-                std::this_thread::sleep_for(1s);
-            }
-        );
-    }
-    else
-    {
-        participantController->SetSimulationTask(
-            [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/)
-            {
-                std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
-                std::this_thread::sleep_for(1s);
-            }
-        );
-    }
-
-
-    //auto finalStateFuture = participantController->RunAsync();
-    //auto finalState = finalStateFuture.get();
-
-    auto finalState = participantController->Run();
-
-    std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
-    std::cout << "Press enter to stop the process..." << std::endl;
-    std::cin.ignore();
 
     return 0;
 }

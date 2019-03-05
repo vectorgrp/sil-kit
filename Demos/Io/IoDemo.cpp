@@ -120,101 +120,111 @@ int main(int argc, char** argv)
         std::cerr << "Missing arguments! Start demo with: " << argv[0] << " <IbConfig.json> <ParticipantName> [domainId]" << std::endl;
         return -1;
     }
+    
     try
     {
-        ibConfig = ib::cfg::Config::FromJsonFile(argv[1]);
+        std::string configFilename(argv[1]);
+        std::string participantName(argv[2]);
+
+        uint32_t domainId = 42;
+        if (argc >= 4)
+        {
+            domainId = static_cast<uint32_t>(std::stoul(argv[3]));
+        }   
+
+        auto ibConfig = ib::cfg::Config::FromJsonFile(configFilename);
+        
+        std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
+        auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
+        auto* participantController = comAdapter->GetParticipantController();
+
+        // Set an Init Handler
+        participantController->SetInitHandler([&participantName](auto initCmd)
+        {
+
+            std::cout << "Initializing " << participantName << std::endl;
+
+        });
+
+        // Set a Stop Handler
+        participantController->SetStopHandler([]() {
+
+            std::cout << "Stopping..." << std::endl;
+
+        });
+
+        // Set a Shutdown Handler
+        participantController->SetShutdownHandler([]() {
+
+            std::cout << "Shutting down..." << std::endl;
+
+        });
+
+        participantController->SetPeriod(1ms);
+        if (participantName == "IoWriter")
+        {
+            auto* dio = comAdapter->CreateDigitalOut("DIO");
+            auto* aio = comAdapter->CreateAnalogOut("AIO");
+            auto* pwm = comAdapter->CreatePwmOut("PWM");
+            auto* pattern = comAdapter->CreatePatternOut("PATTERN");
+
+            participantController->SetSimulationTask(
+                [dio, aio, pwm, pattern](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+
+                    auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+                    std::cout << "now=" << nowMs.count() << "ms" << std::endl;
+                    SendMessage(dio, now);
+                    SendMessage(aio, now);
+                    SendMessage(pwm, now);
+                    SendMessage(pattern, now);
+                    std::this_thread::sleep_for(1s);
+
+            });
+        }
+        else
+        {
+            auto* dio = comAdapter->CreateDigitalIn("DIO");
+            auto* aio = comAdapter->CreateAnalogIn("AIO");
+            auto* pwm = comAdapter->CreatePwmIn("PWM");
+            auto* pattern = comAdapter->CreatePatternIn("PATTERN");
+
+            dio->RegisterHandler(&ReceiveDigitalIoMessage);
+            aio->RegisterHandler(&ReceiveAnalogIoMessage);
+            pwm->RegisterHandler(&ReceivePwmIoMessage);
+            pattern->RegisterHandler(&ReceivePatternIoMessage);
+
+            participantController->SetSimulationTask(
+                [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+
+                    std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
+                    std::this_thread::sleep_for(1s);
+
+            });
+        }
+
+        //auto finalStateFuture = participantController->RunAsync();
+        //auto finalState = finalStateFuture.get();
+
+        auto finalState = participantController->Run();
+
+        std::cout << "Simulation stopped. Final State: " << finalState  << std::endl;
+        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cin.ignore();
     }
     catch (const ib::cfg::Misconfiguration& error)
     {
-        std::cerr << "Invalid configuration: " << (&error)->what() << std::endl;
+        std::cerr << "Invalid configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
         return -2;
     }
-    std::string participantName = argv[2];
-
-    uint32_t domainId = 42;
-    if (argc >= 4)
+    catch (const std::exception& error)
     {
-        domainId = static_cast<uint32_t>(std::stoul(argv[3]));
+        std::cerr << "Something went wrong: " << error.what() << std::endl;
+        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cin.ignore();
+        return -3;
     }
-
-    std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-    auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
-
-
-    // Set an Init Handler
-    auto&& participantController = comAdapter->GetParticipantController();
-    participantController->SetInitHandler([&participantName](auto initCmd) {
-
-        std::cout << "Initializing " << participantName << std::endl;
-
-    });
-
-    // Set a Stop Handler
-    participantController->SetStopHandler([]() {
-
-        std::cout << "Stopping..." << std::endl;
-
-    });
-
-    // Set a Shutdown Handler
-    participantController->SetShutdownHandler([]() {
-
-        std::cout << "Shutting down..." << std::endl;
-
-    });
-
-    participantController->SetPeriod(1ms);
-    if (participantName == "IoWriter")
-    {
-        auto* dio = comAdapter->CreateDigitalOut("DIO");
-        auto* aio = comAdapter->CreateAnalogOut("AIO");
-        auto* pwm = comAdapter->CreatePwmOut("PWM");
-        auto* pattern = comAdapter->CreatePatternOut("PATTERN");
-
-        participantController->SetSimulationTask(
-            [dio, aio, pwm, pattern](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/)
-            {
-                auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-                std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-                SendMessage(dio, now);
-                SendMessage(aio, now);
-                SendMessage(pwm, now);
-                SendMessage(pattern, now);
-                std::this_thread::sleep_for(1s);
-            }
-        );
-    }
-    else
-    {
-        auto* dio = comAdapter->CreateDigitalIn("DIO");
-        auto* aio = comAdapter->CreateAnalogIn("AIO");
-        auto* pwm = comAdapter->CreatePwmIn("PWM");
-        auto* pattern = comAdapter->CreatePatternIn("PATTERN");
-
-        dio->RegisterHandler(&ReceiveDigitalIoMessage);
-        aio->RegisterHandler(&ReceiveAnalogIoMessage);
-        pwm->RegisterHandler(&ReceivePwmIoMessage);
-        pattern->RegisterHandler(&ReceivePatternIoMessage);
-
-        participantController->SetSimulationTask(
-            [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/)
-            {
-                std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
-                std::this_thread::sleep_for(1s);
-            }
-        );
-    }
-
-    //auto finalStateFuture = participantController->RunAsync();
-    //auto finalState = finalStateFuture.get();
-
-    auto finalState = participantController->Run();
-
-    std::cout << "Simulation stopped. Final State: " << finalState  << std::endl;
-    std::cout << "Press enter to stop the process..." << std::endl;
-    std::cin.ignore();
 
     return 0;
 }

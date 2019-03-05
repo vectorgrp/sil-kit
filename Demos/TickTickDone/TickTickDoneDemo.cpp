@@ -61,71 +61,91 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    auto numClients = std::stoul(argv[1]);
-    std::string participantName(argv[2]);
-    uint32_t domainId = 42;
-
-    if (argc >= 4)
+    try
     {
-        domainId = static_cast<uint32_t>(std::stoul(argv[3]));
-    }
+        auto numClients = std::stoul(argv[1]);
+        auto participantName = std::string(argv[2]);
 
-    // Build TTD Configuration using Config Builder Pattern
-    ib::cfg::ConfigBuilder configBuilder{"TTD-Demo"};
-    auto&& simulationSetup = configBuilder.SimulationSetup();
+        uint32_t domainId = 42;
+        if (argc >= 4)
+        {
+            domainId = static_cast<uint32_t>(std::stoul(argv[3]));
+        }
 
-    // Set TTD Time Synchronization
-    simulationSetup
-        .ConfigureTimeSync().WithTickPeriod(1ms);
+        // Build TTD Configuration using Config Builder Pattern
+        ib::cfg::ConfigBuilder configBuilder{"TTD-Demo"};
+        auto&& simulationSetup = configBuilder.SimulationSetup();
 
-    // add "master" as time sync master
-    simulationSetup
-        .AddParticipant("master")
-        .AsSyncMaster();
-
-    // add "client-0" .. "client-<n-1>" as clients
-    for (unsigned long i = 0; i < numClients; i++)
-    {
-        std::stringstream clientName;
-        clientName << "client-" << i;
-
+        // Set TTD Time Synchronization
         simulationSetup
-            .AddParticipant(clientName.str())
-            .WithSyncType(ib::cfg::SyncType::DiscreteTime);
+            .ConfigureTimeSync().WithTickPeriod(1ms);
+
+        // add "master" as time sync master
+        simulationSetup
+            .AddParticipant("master")
+            .AsSyncMaster();
+
+        // add "client-0" .. "client-<n-1>" as clients
+        for (unsigned long i = 0; i < numClients; i++)
+        {
+            std::stringstream clientName;
+            clientName << "client-" << i;
+
+            simulationSetup
+                .AddParticipant(clientName.str())
+                .WithSyncType(ib::cfg::SyncType::DiscreteTime);
+        }
+
+        auto ibConfig = configBuilder.Build();
+
+        std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
+        auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
+
+        if (participantName == "master")
+        {
+            auto controller = comAdapter->GetSystemController();
+            auto monitor = comAdapter->GetSystemMonitor();
+
+            monitor->RegisterSystemStateHandler([controller, &ibConfig](sync::SystemState newState) {
+
+                SystemStateHandler(controller, newState, ibConfig);
+
+            });
+
+            std::cout << "Press enter to stop and shutdown!" << std::endl;
+            std::cin.ignore();
+            controller->Stop();
+            std::this_thread::sleep_for(1s);
+            std::cout << "exiting..." << std::endl;
+
+        }
+        else
+        {
+            auto controller = comAdapter->GetParticipantController();
+            controller->SetSimulationTask([](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+
+                std::cout << "now=" << now << ", duration=" << duration << std::endl;
+                std::this_thread::sleep_for(100ms);
+
+            });
+            auto finalStateFuture = controller->RunAsync();
+            finalStateFuture.wait();
+        }
     }
-
-    auto ibConfig = configBuilder.Build();
-
-    std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-    auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
-
-    if (participantName == "master")
+    catch (const ib::cfg::Misconfiguration& error)
     {
-        auto controller = comAdapter->GetSystemController();
-        auto monitor = comAdapter->GetSystemMonitor();
-
-        monitor->RegisterSystemStateHandler([controller, &ibConfig](sync::SystemState newState) {
-            SystemStateHandler(controller, newState, ibConfig);
-        });
-
-        std::cout << "Press enter to stop and shutdown!" << std::endl;
+        std::cerr << "Invalid configuration: " << error.what() << std::endl;
+        std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
-        controller->Stop();
-        std::this_thread::sleep_for(1s);
-        std::cout << "exiting..." << std::endl;
-
+        return -2;
     }
-    else
+    catch (const std::exception& error)
     {
-        auto controller = comAdapter->GetParticipantController();
-        controller->SetSimulationTask([](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
-            std::cout << "now=" << now << ", duration=" << duration << std::endl;
-            std::this_thread::sleep_for(100ms);
-        });
-        auto finalStateFuture = controller->RunAsync();
-        finalStateFuture.wait();
+        std::cerr << "Something went wrong: " << error.what() << std::endl;
+        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cin.ignore();
+        return -3;
     }
-
 
     return 0;
 }

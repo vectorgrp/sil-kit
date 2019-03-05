@@ -172,7 +172,6 @@ public:
 
 int main(int argc, char** argv)
 {
-    ib::cfg::Config ibConfig;
     if (argc < 2)
     {
         std::cerr << "Missing arguments! Start demo with: " << argv[0] << " <IbConfig.json> [domainId]" << std::endl;
@@ -181,49 +180,51 @@ int main(int argc, char** argv)
     
     try
     {
-        auto jsonFilename = std::string(argv[1]);
-        ibConfig = ib::cfg::Config::FromJsonFile(jsonFilename);
+        std::string jsonFilename(argv[1]);
+        std::string participantName{"SystemController"};
+
+        uint32_t domainId = 42;
+        if (argc >= 3)
+        {
+            domainId = static_cast<uint32_t>(std::stoul(argv[2]));
+        }
+
+        auto ibConfig = ib::cfg::Config::FromJsonFile(jsonFilename);
+
+        std::cout << "Creating SystemController for IB domain=" << domainId << std::endl;
+        auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
+
+        IbController ibController(comAdapter.get(), ibConfig);
+
+        // Set numRestarts to values larger than zero to test the restart functionality.
+        int numRestarts = 0;
+        for (int i = numRestarts; i > 0; i--)
+        {
+            std::cout << "Press enter to restart the Integration Bus..." << std::endl;
+            std::cin.ignore();
+
+            ibController.StopAndRestart();
+        }
+
+        std::cout << "Press enter to Shutdown the Integration Bus..." << std::endl;
+        std::cin.ignore();
+
+        ibController.Shutdown();
     }
-    catch (ib::cfg::Misconfiguration& error)
+    catch (const ib::cfg::Misconfiguration& error)
     {
-        std::cerr << "Invalid configuration: " << (&error)->what() << std::endl;
+        std::cerr << "Invalid configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
         return -2;
     }
-    std::string participantName{"SystemController"};
-
-    uint32_t domainId = 42;
-    if (argc >= 3)
+    catch (const std::exception& error)
     {
-        try
-        {
-            domainId = static_cast<uint32_t>(std::stoul(argv[2]));
-        }
-        catch (std::exception&)
-        {
-        }
-    }
-
-    std::cout << "Creating SystemController for IB domain=" << domainId << std::endl;
-    auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
-
-    IbController ibController(comAdapter.get(), ibConfig);
-
-    // Set numRestarts to values larger than zero to test the restart functionality.
-    int numRestarts = 0;
-    for (int i = numRestarts; i > 0; i--)
-    {
-        std::cout << "Press enter to restart the Integration Bus..." << std::endl;
+        std::cerr << "Something went wrong: " << error.what() << std::endl;
+        std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
-
-        ibController.StopAndRestart();
+        return -3;
     }
-
-    std::cout << "Press enter to Shutdown the Integration Bus..." << std::endl;
-    std::cin.ignore();
-
-    ibController.Shutdown();
 
     return 0;
 }

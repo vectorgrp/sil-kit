@@ -240,136 +240,144 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    ib::cfg::Config ibConfig;
     try
     {
-        ibConfig = ib::cfg::Config::FromJsonFile(argv[1]);
+        std::string configFilename(argv[1]);
+        std::string participantName(argv[2]);
+
+        uint32_t domainId = 42;
+        if (argc >= 4)
+        {
+            domainId = static_cast<uint32_t>(std::stoul(argv[3]));
+        }
+
+        auto ibConfig = ib::cfg::Config::FromJsonFile(configFilename);
+
+        std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
+        auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
+        auto* linController = comAdapter->CreateLinController("LIN1");
+        auto* participantController = comAdapter->GetParticipantController();
+
+        // Set an Init Handler
+        participantController->SetInitHandler([&participantName](auto initCmd) {
+
+            std::cout << "Initializing " << participantName << std::endl;
+
+        });
+
+        // Set a Stop Handler
+        participantController->SetStopHandler([]() {
+
+            std::cout << "Stopping..." << std::endl;
+
+        });
+
+        // Set a Shutdown Handler
+        participantController->SetShutdownHandler([]() {
+
+            std::cout << "Shutting down..." << std::endl;
+
+        });
+
+        participantController->SetPeriod(1ms);
+
+        LinMaster master;
+        LinSlave slave;
+
+        if (participantName == "LinMaster")
+        {
+            master.controller = linController;
+            master.gotoSleepTime = 10ms;
+
+            linController->SetMasterMode();
+            linController->SetBaudRate(20'000);
+            linController->RegisterTxCompleteHandler(std::bind(&LinMaster::ReceiveTxComplete, &master, _1, _2));
+            linController->RegisterReceiveMessageHandler(std::bind(&LinMaster::ReceiveReply, &master, _1, _2));
+            linController->RegisterWakeupRequestHandler(ib::util::bind_method(&master, &LinMaster::WakeupRequest));
+
+            participantController->SetSimulationTask(
+                [&master](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+                    
+                    auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+                    std::cout << "now=" << nowMs.count() << "ms" << std::endl;
+                    
+                    master.doAction(now);
+                    
+            });
+        }
+        else
+        {
+            slave.linController = linController;
+
+            linController->SetSlaveMode();
+            linController->SetBaudRate(20'000);
+            linController->RegisterReceiveMessageHandler(ReceiveMessage);
+
+            lin::SlaveConfiguration slaveConfig;
+
+            // Configure LIN Controller to trigger a callback on LIN ID 17
+            lin::SlaveResponseConfig response;
+            response.linId = 17;
+            response.responseMode = lin::ResponseMode::Rx;
+            response.checksumModel = lin::ChecksumModel::Enhanced;
+            response.payloadLength = 8;
+            slaveConfig.responseConfigs.push_back(response);
+
+            // Configure LIN Controller to send a reply on LIN ID 34
+            response.linId = 34;
+            response.responseMode = lin::ResponseMode::TxUnconditional;
+            response.checksumModel = lin::ChecksumModel::Enhanced;
+            response.payloadLength = 6;
+            slaveConfig.responseConfigs.push_back(response);
+
+            linController->SetSlaveConfiguration(slaveConfig);
+
+
+            std::string replyString= "HELLO!";
+
+            lin::Payload replyPayload;
+            replyPayload.size = static_cast<uint8_t>(replyString.length());
+            std::copy(replyString.begin(), replyString.end(), replyPayload.data.begin());
+
+            linController->SetResponse(34, replyPayload);
+
+            linController->RegisterSleepCommandHandler(ib::util::bind_method(&slave, &LinSlave::SleepCommandHandler));
+            linController->RegisterWakeupRequestHandler(ib::util::bind_method(&slave, &LinSlave::WakeupRequestHandler));
+
+            participantController->SetSimulationTask(
+                [&slave, linController](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+                
+                    std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
+                    std::this_thread::sleep_for(500ms);
+
+                    slave.DoAction(now);
+
+            });
+        }
+
+        auto finalStateFuture = participantController->RunAsync();
+        auto finalState = finalStateFuture.get();
+
+        //auto finalState = participantController->Run();
+
+        std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
+        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cin.ignore();
     }
     catch (const ib::cfg::Misconfiguration& error)
     {
-        std::cerr << "Invalid configuration: " << (&error)->what() << std::endl;
+        std::cerr << "Invalid configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
         return -2;
     }
-
-    std::string participantName(argv[2]);
-
-    uint32_t domainId = 42;
-    if (argc >= 4)
+    catch (const std::exception& error)
     {
-        domainId = static_cast<uint32_t>(std::stoul(argv[3]));
+        std::cerr << "Something went wrong: " << error.what() << std::endl;
+        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cin.ignore();
+        return -3;
     }
-
-    std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-    auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
-    auto* linController = comAdapter->CreateLinController("LIN1");
-
-    // Set an Init Handler
-    auto&& participantController = comAdapter->GetParticipantController();
-    participantController->SetInitHandler([&participantName](auto initCmd) {
-
-        std::cout << "Initializing " << participantName << std::endl;
-
-    });
-
-    // Set a Stop Handler
-    participantController->SetStopHandler([]() {
-
-        std::cout << "Stopping..." << std::endl;
-
-    });
-
-    // Set a Shutdown Handler
-    participantController->SetShutdownHandler([]() {
-
-        std::cout << "Shutting down..." << std::endl;
-
-    });
-
-    participantController->SetPeriod(1ms);
-
-    LinMaster master;
-    LinSlave slave;
-
-    if (participantName == "LinMaster")
-    {
-        master.controller = linController;
-        master.gotoSleepTime = 10ms;
-
-        linController->SetMasterMode();
-        linController->SetBaudRate(20'000);
-        linController->RegisterTxCompleteHandler(std::bind(&LinMaster::ReceiveTxComplete, &master, _1, _2));
-        linController->RegisterReceiveMessageHandler(std::bind(&LinMaster::ReceiveReply, &master, _1, _2));
-        linController->RegisterWakeupRequestHandler(ib::util::bind_method(&master, &LinMaster::WakeupRequest));
-
-        participantController->SetSimulationTask(
-            [&master](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/)
-            {
-                auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-                std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-                master.doAction(now);
-            }
-        );
-    }
-    else
-    {
-        slave.linController = linController;
-
-        linController->SetSlaveMode();
-        linController->SetBaudRate(20'000);
-        linController->RegisterReceiveMessageHandler(ReceiveMessage);
-
-        lin::SlaveConfiguration slaveConfig;
-
-        // Configure LIN Controller to trigger a callback on LIN ID 17
-        lin::SlaveResponseConfig response;
-        response.linId = 17;
-        response.responseMode = lin::ResponseMode::Rx;
-        response.checksumModel = lin::ChecksumModel::Enhanced;
-        response.payloadLength = 8;
-        slaveConfig.responseConfigs.push_back(response);
-
-        // Configure LIN Controller to send a reply on LIN ID 34
-        response.linId = 34;
-        response.responseMode = lin::ResponseMode::TxUnconditional;
-        response.checksumModel = lin::ChecksumModel::Enhanced;
-        response.payloadLength = 6;
-        slaveConfig.responseConfigs.push_back(response);
-
-        linController->SetSlaveConfiguration(slaveConfig);
-
-
-        std::string replyString= "HELLO!";
-
-        lin::Payload replyPayload;
-        replyPayload.size = static_cast<uint8_t>(replyString.length());
-        std::copy(replyString.begin(), replyString.end(), replyPayload.data.begin());
-
-        linController->SetResponse(34, replyPayload);
-
-        linController->RegisterSleepCommandHandler(ib::util::bind_method(&slave, &LinSlave::SleepCommandHandler));
-        linController->RegisterWakeupRequestHandler(ib::util::bind_method(&slave, &LinSlave::WakeupRequestHandler));
-
-        participantController->SetSimulationTask([&slave, linController](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/)
-        {
-            std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
-            std::this_thread::sleep_for(500ms);
-
-            slave.DoAction(now);
-
-        });
-    }
-
-
-    auto finalStateFuture = participantController->RunAsync();
-    auto finalState = finalStateFuture.get();
-
-    //auto finalState = participantController->Run();
-
-    std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
-    std::cout << "Press enter to stop the process..." << std::endl;
-    std::cin.ignore();
 
     return 0;
 }
