@@ -22,6 +22,8 @@ add_library(IbMwFastRtps STATIC
     IdlTypeConversionIo.hpp
     IdlTypeConversionMw.hpp
     IdlTypeConversionSync.hpp
+    IdlTypeConversionLogging.hpp
+    IdlTypeConversionLogging_impl.hpp
     memory_fastrtps.hpp
     ReportMatchingListener.hpp
 )
@@ -30,6 +32,7 @@ target_link_libraries(IbMwFastRtps
     PRIVATE IbInterface
     IbUtil
     IbMwFastRtpsIdl
+    IbMwLogging
     IbMwSync
     IbSimCan
     IbSimEthernet

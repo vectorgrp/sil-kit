@@ -90,6 +90,18 @@
          <name>SystemCommand</name>
       </topic>
    </subscriber>
+   <publisher profile_name="Participant1-LogMsg-default">
+      <topic>
+         <dataType>ib::mw::logging::idl::LogMsg</dataType>
+         <name>SystemCommand</name>
+      </topic>
+   </publisher>
+   <subscriber profile_name="Participant1-LogMsg-default">
+      <topic>
+         <dataType>ib::mw::logging::idl::LogMsg</dataType>
+         <name>SystemCommand</name>
+      </topic>
+   </subscriber>
 
    <participant profile_name="Participant2">
       <rtps>
@@ -177,6 +189,18 @@
    <subscriber profile_name="Participant2-SystemCommand-default">
       <topic>
          <dataType>ib::mw::sync::idl::SystemCommand</dataType>
+         <name>SystemCommand</name>
+      </topic>
+   </subscriber>
+   <publisher profile_name="Participant2-LogMsg-default">
+      <topic>
+         <dataType>ib::mw::logging::idl::LogMsg</dataType>
+         <name>SystemCommand</name>
+      </topic>
+   </publisher>
+   <subscriber profile_name="Participant2-LogMsg-default">
+      <topic>
+         <dataType>ib::mw::logging::idl::LogMsg</dataType>
          <name>SystemCommand</name>
       </topic>
    </subscriber>
@@ -270,4 +294,17 @@
          <name>SystemCommand</name>
       </topic>
    </subscriber>
+      <publisher profile_name="SystemController-LogMsg-default">
+      <topic>
+         <dataType>ib::mw::logging::idl::LogMsg</dataType>
+         <name>SystemCommand</name>
+      </topic>
+   </publisher>
+   <subscriber profile_name="SystemController-LogMsg-default">
+      <topic>
+         <dataType>ib::mw::logging::idl::LogMsg</dataType>
+         <name>SystemCommand</name>
+      </topic>
+   </subscriber>
+
 </profiles>

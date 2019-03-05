@@ -5,3 +5,4 @@
 #include "IdlTraitsIo.hpp"
 #include "IdlTraitsLin.hpp"
 #include "IdlTraitsSync.hpp"
+#include "IdlTraitsLogging.hpp"

@@ -14,6 +14,13 @@
 #include "ib/mw/sync/all.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 
+#include "spdlog/logger.h"
+#ifdef SendMessage
+#undef SendMessage
+#endif
+#include "spdlog/fmt/ostr.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
+
 
 using namespace ib::mw;
 using namespace std::chrono_literals;
@@ -90,6 +97,9 @@ int main(int argc, char** argv)
     try
     {
         auto comAdapter = ib::CreateFastRtpsComAdapter(std::move(ibConfig), participantName, domainId);
+
+        // add a stdout sink to the logger to print all received log messages
+        comAdapter->GetLogger()->sinks().push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
 
         auto systemMonitor = comAdapter->GetSystemMonitor();
         systemMonitor->RegisterParticipantStatusHandler(&ReportParticipantStatus);

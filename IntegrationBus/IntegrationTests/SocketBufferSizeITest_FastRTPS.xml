@@ -55,6 +55,18 @@
          </reliability>
       </qos>
    </publisher>   
+   <subscriber profile_name="Publisher-LogMsg-default">
+      <topic>
+         <dataType>ib::mw::logging::idl::LogMsg</dataType>
+         <name>default</name>
+      </topic>
+   </subscriber>
+   <publisher profile_name="Publisher-LogMsg-default">
+      <topic>
+         <dataType>ib::mw::logging::idl::LogMsg</dataType>
+         <name>default</name>
+      </topic>
+   </publisher>   
    
    <participant profile_name="Subscriber">
       <rtps>
@@ -102,4 +114,16 @@
          </reliability>
       </qos>
    </subscriber>
+   <subscriber profile_name="Subscriber-LogMsg-default">
+      <topic>
+         <dataType>ib::mw::logging::idl::LogMsg</dataType>
+         <name>default</name>
+      </topic>
+   </subscriber>
+   <publisher profile_name="Subscriber-LogMsg-default">
+      <topic>
+         <dataType>ib::mw::logging::idl::LogMsg</dataType>
+         <name>default</name>
+      </topic>
+   </publisher>   
 </profiles>

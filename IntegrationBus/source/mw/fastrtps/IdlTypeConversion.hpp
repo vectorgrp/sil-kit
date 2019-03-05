@@ -1,5 +1,6 @@
 #include "IdlTypeConversionMw.hpp"
 #include "IdlTypeConversionSync.hpp"
+#include "IdlTypeConversionLogging.hpp"
 #include "IdlTypeConversionCan.hpp"
 #include "IdlTypeConversionEth.hpp"
 #include "IdlTypeConversionFlexray.hpp"

@@ -16,6 +16,11 @@ target_include_directories(IbInterface
         $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}>
 )
 
+target_link_libraries(IbInterface
+    INTERFACE spdlog
+)
+
+
 #######################################################################################################################
 # add to install targets of the IntegrationBus
 #######################################################################################################################

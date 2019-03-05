@@ -62,7 +62,6 @@ protected:
         GetParticipantController(*comAdapter, participantCfg);
         GetSystemMonitor(*comAdapter, participantCfg);
         GetSystemController(*comAdapter, participantCfg);
-        comAdapters.emplace_back(std::move(comAdapter));
     }
     void CreateCanControllers(mw::IComAdapter& comAdapter, const cfg::Participant& participantCfg)
     {
@@ -164,7 +163,6 @@ protected:
 protected:
     const uint32_t domainId = 4242;
     ib::cfg::Config ibConfig;
-    std::vector<std::unique_ptr<ib::mw::IComAdapter>> comAdapters;
 };
 
 TEST_F(IbConfigExampleITest, build_participants_from_IbConfig_Example)

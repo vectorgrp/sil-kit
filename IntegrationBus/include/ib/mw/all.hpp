@@ -7,3 +7,4 @@
 
 // also include subdirectories
 #include "sync/all.hpp"
+#include "logging/all.hpp"

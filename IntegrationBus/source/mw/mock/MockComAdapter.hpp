@@ -4,6 +4,8 @@
 
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/sync/SyncDatatypes.hpp"
+#include "ib/mw/logging/LoggingDatatypes.hpp"
+#include "spdlog/details/log_msg.h"
 
 #include "ib/sim/fwd_decl.hpp"
 #include "ib/sim/can/CanDatatypes.hpp"
@@ -16,6 +18,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+#ifdef SendMessage
+#undef SendMessage
+#endif
 
 namespace ib {
 namespace mw {
@@ -48,6 +53,10 @@ public:
     {
         SendIbMessage_proxy(from, msg);
     }
+    void SendIbMessage(EndpointAddress from, logging::LogMsg&& msg) override
+    {
+        SendIbMessage_proxy(from, msg);
+    }
 
     MOCK_METHOD1(CreateCanController, sim::can::ICanController*(const std::string& canonicalName));
     MOCK_METHOD1(CreateEthController, sim::eth::IEthController*(const std::string& canonicalName));
@@ -68,6 +77,7 @@ public:
     MOCK_METHOD0(GetParticipantController, sync::IParticipantController*());
     MOCK_METHOD0(GetSystemMonitor, sync::ISystemMonitor*());
     MOCK_METHOD0(GetSystemController, sync::ISystemController*());
+    MOCK_METHOD0(GetLogger, std::shared_ptr<spdlog::logger>&());
 
     MOCK_METHOD1(RegisterCanSimulator, void(sim::can::IIbToCanSimulator*));
     MOCK_METHOD1(RegisterEthSimulator, void(sim::eth::IIbToEthSimulator*));
@@ -122,6 +132,9 @@ public:
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::ParticipantStatus& msg));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::ParticipantCommand& msg));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::SystemCommand& msg));
+
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const logging::LogMsg& msg));
+    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const logging::LogMsg& msg));
 
     MOCK_METHOD0(WaitForMessageDelivery, void());
     MOCK_METHOD0(FlushSendBuffers, void());

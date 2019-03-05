@@ -8,9 +8,11 @@
 #include <thread>
 
 #include "ib/IntegrationBus.hpp"
-#include "ib/sim/all.hpp"
+#include "ib/mw/logging/spdlog.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/mw/sync/string_utils.hpp"
+#include "ib/sim/can/all.hpp"
+#include "ib/sim/can/string_utils.hpp"
 
 using namespace ib::mw;
 using namespace ib::sim;
@@ -24,34 +26,13 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, can::CanTransmitStatus status)
-{
-    switch (status)
-    {
-    case can::CanTransmitStatus::Canceled:
-        out << "NACK(canceled)";
-        break;
-    case can::CanTransmitStatus::DuplicatedTransmitId:
-        out << "NACK(duplicatedTransmitId)";
-        break;
-    case can::CanTransmitStatus::TransmitQueueFull:
-        out << "NACK(transmitQueueFull)";
-        break;
-    case can::CanTransmitStatus::Transmitted:
-        out << "ACK";
-        break;
-    default:
-        assert(false);
-    }
-    return out;
-}
-
 void AckCallback(can::ICanController* /*controller*/, const can::CanTransmitAcknowledge& ack)
 {
     std::cout << ">> " << ack.status
               << " for CAN Message with transmitId=" << ack.transmitId
               << " timestamp=" << ack.timestamp
               << std::endl;
+    spdlog::info(">> {} for CAN Message with transmitId={} timestamp={}", ack.timestamp, ack.status, ack.transmitId);
 }
 
 void ReceiveMessage(can::ICanController* /*controller*/, const can::CanMessage& msg)
@@ -61,6 +42,7 @@ void ReceiveMessage(can::ICanController* /*controller*/, const can::CanMessage& 
               << " timestamp=" << msg.timestamp
               << " \"" << payload << "\""
               << std::endl;
+    spdlog::info(">> CAN Message: canId={} timestamp={} \"{}\"", msg.canId, msg.timestamp, payload);
 }
 
 void SendMessage(can::ICanController* controller, std::chrono::nanoseconds now)
@@ -83,6 +65,7 @@ void SendMessage(can::ICanController* controller, std::chrono::nanoseconds now)
 
     auto transmitId = controller->SendMessage(std::move(msg));
     std::cout << "<< CAN Message sent with transmitId=" << transmitId << std::endl;
+    spdlog::info("<< CAN Message sent with transmitId={}", transmitId);
 }
 
 /**************************************************************************************************
@@ -132,6 +115,10 @@ int main(int argc, char** argv)
         std::cin.ignore();
         return -3;
     }
+
+    // NB: if you want to use the default spd logger, e.g., via spdlog::info(...), 
+    // you have to register the logger created by the comAdapter as the default logger.
+    spdlog::set_default_logger(comAdapter->GetLogger());
 
 
     auto canController = comAdapter->CreateCanController("CAN1");

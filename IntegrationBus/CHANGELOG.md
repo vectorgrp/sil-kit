@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Participants can now signal that they are alive by refreshing the participant status. This can be
   done by calling IParticipantController::RefreshStatus() and is reflected in the new field
   ParticipantStatus::refreshTime.
+- Logging is finally here. We've integrated spdlog and enabled distributed logging with a new spdlog
+  sink. The FastRtpsComAdapter automatically creates an spdlogger with this sink. You can access
+  this logger via IComAdapter::GetLogger() and add any further sinks, e.g., to print logging
+  messages to std out. Examples for this can be found in the CAN demo and in the PassiveSystemMonitor.
 
 ### Removed
 

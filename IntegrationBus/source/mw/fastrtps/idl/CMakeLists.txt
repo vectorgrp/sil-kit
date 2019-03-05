@@ -30,6 +30,10 @@ add_library(${PROJECT_NAME} STATIC
     LinTopics.h
     LinTopicsPubSubTypes.cxx
     LinTopicsPubSubTypes.h
+    LoggingTopics.cxx
+    LoggingTopics.h
+    LoggingTopicsPubSubTypes.cxx
+    LoggingTopicsPubSubTypes.h
     MiddlewareTopics.cxx
     MiddlewareTopics.h
     MiddlewareTopicsPubSubTypes.cxx

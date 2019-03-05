@@ -24,6 +24,13 @@
 #include "memory_fastrtps.hpp"
 #include "FastRtpsGuard.hpp"
 
+#include "ILogmsgRouter.hpp"
+#include "IIbToLogmsgRouter.hpp"
+
+namespace spdlog {
+    class logger;
+} // namespace spdlog
+
 namespace ib {
 namespace mw {
 
@@ -70,6 +77,7 @@ public:
     auto GetParticipantController() -> sync::IParticipantController* override;
     auto GetSystemMonitor() -> sync::ISystemMonitor* override;
     auto GetSystemController() -> sync::ISystemController* override;
+    auto GetLogger() -> std::shared_ptr<spdlog::logger>& override;
 
     void RegisterCanSimulator(sim::can::IIbToCanSimulator* busSim) override;
     void RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim) override;
@@ -121,6 +129,9 @@ public:
     void SendIbMessage(EndpointAddress from, const sync::ParticipantStatus& msg) override;
     void SendIbMessage(EndpointAddress from, const sync::ParticipantCommand& msg) override;
     void SendIbMessage(EndpointAddress from, const sync::SystemCommand& msg) override;
+
+    void SendIbMessage(EndpointAddress from, const logging::LogMsg& msg) override;
+    void SendIbMessage(EndpointAddress from, logging::LogMsg&& msg) override;
 
     void SendIbMessage(EndpointAddress from, const sim::generic::GenericMessage& msg) override;
     void SendIbMessage(EndpointAddress from, sim::generic::GenericMessage&& msg) override;
@@ -234,7 +245,9 @@ private:
     const cfg::Participant* _participant{nullptr};
     std::string _participantName;
     ParticipantId _participantId{0};
-           
+
+    std::shared_ptr<spdlog::logger> _logger;
+
     std::tuple<
         ControllerMap<sim::can::IIbToCanController>,
         ControllerMap<sim::can::IIbToCanControllerProxy>,
@@ -254,10 +267,11 @@ private:
         ControllerMap<sim::io::IIbToOutPort<sim::io::AnalogIoMessage>>,
         ControllerMap<sim::io::IIbToOutPort<sim::io::PwmIoMessage>>,
         ControllerMap<sim::io::IIbToOutPort<sim::io::PatternIoMessage>>,
-        ControllerMap<sync::IParticipantController>,
-        ControllerMap<sync::ISystemMonitor>,
-        ControllerMap<sync::ISystemController>,
-        ControllerMap<sync::ISyncMaster>
+        ControllerMap<logging::IIbToLogmsgRouter>,
+        ControllerMap<sync::IIbToParticipantController>,
+        ControllerMap<sync::IIbToSystemMonitor>,
+        ControllerMap<sync::IIbToSystemController>,
+        ControllerMap<sync::IIbToSyncMaster>
     > _controllers;
 
     std::tuple<
@@ -305,7 +319,8 @@ private:
         RtpsTopics<sync::idl::TickDone>,
         RtpsTopics<sync::idl::QuantumGrant>,
         RtpsTopics<sync::idl::QuantumRequest>,
-        RtpsTopics<sync::idl::ParticipantStatus>
+        RtpsTopics<sync::idl::ParticipantStatus>,
+        RtpsTopics<logging::idl::LogMsg>
     > _rtpsTopics;
 
     std::vector<eprosima::fastrtps::Publisher*> _allPublishers;

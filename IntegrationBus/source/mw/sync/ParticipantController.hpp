@@ -61,7 +61,7 @@ public:
 
     auto State() const -> ParticipantState override;
     auto Status() const -> const ParticipantStatus& override;
-    void RefreshStatus();
+    void RefreshStatus() override;
     auto Now() const -> std::chrono::nanoseconds override;
 
     // IIbToParticipantController

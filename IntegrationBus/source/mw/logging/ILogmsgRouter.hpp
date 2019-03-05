@@ -4,15 +4,12 @@
 
 namespace ib {
 namespace mw {
+namespace logging {
 
-struct EndpointAddress;
+class ILogmsgRouter
+{
+};
 
-class IComAdapter;
-    
+} // namespace logging
 } // namespace mw
 } // namespace ib
-
-// also include subdirectories
-#include "sync/fwd_decl.hpp"
-#include "logging/fwd_decl.hpp"
-

@@ -1,4 +1,5 @@
 #include "IIbToParticipantController.hpp"
+#include "IIbToSyncMaster.hpp"
 #include "IIbToSystemController.hpp"
 #include "IIbToSystemMonitor.hpp"
 #include "IParticipantController.hpp"

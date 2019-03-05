@@ -3,6 +3,7 @@
 #pragma once
 
 #include "IIbMessageReceiver.hpp"
+#include <tuple>
 
 namespace ib {
 namespace mw {

@@ -24,8 +24,10 @@
 #include "SystemController.hpp"
 #include "SystemMonitor.hpp"
 #include "SyncMaster.hpp"
+#include "LogmsgRouter.hpp"
 
 #include "IdlTraits.hpp"
+#include "IdlTypeConversionLogging_impl.hpp"
 
 #include "ReportMatchingListener.hpp"
 
@@ -34,6 +36,10 @@
 #include "tuple_tools/predicative_get.hpp"
 
 #include "ib/cfg/string_utils.hpp"
+
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/null_sink.h"
+
 
 namespace ib {
 namespace mw {
@@ -62,9 +68,16 @@ namespace {
 FastRtpsComAdapter::FastRtpsComAdapter(cfg::Config config, const std::string& participantName)
     : _config{std::move(config)}
     , _participantName(participantName)
+    , _logger{spdlog::create<spdlog::sinks::null_sink_st>(_participantName)}
 {
     _participant = &get_by_name(_config.simulationSetup.participants, participantName);
     _participantId = _participant->id;
+
+    // we immediately drop the logger from the spdlog registry, because this cannot be controlled
+    // by a user of the IntegrationBus.dll(!), which can have strange side effects, e.g., a stale
+    // but logger even after the ComAdapter was destroyed. A user of the IntegrationBus.dll can
+    // easily add the Logger to the global registry again so that it is under his control.
+    spdlog::drop(_participantName);
 }
 
 void FastRtpsComAdapter::joinIbDomain(uint32_t domainId)
@@ -189,6 +202,8 @@ void FastRtpsComAdapter::joinDomain(uint32_t domainId)
     _fastRtpsParticipant.reset(participant);
 
     OnFastrtpsDomainJoined();
+
+    _logger->info("Participant {} has successfully joined the IB-Domain {}", _participantName, domainId);
 }
 
 void FastRtpsComAdapter::OnFastrtpsDomainJoined()
@@ -198,6 +213,9 @@ void FastRtpsComAdapter::OnFastrtpsDomainJoined()
         /*[[maybe_unused]]*/ auto* controller = GetSyncMaster();
         (void)controller;
     }
+
+    auto&& logMsgRouter = CreateController<logging::LogmsgRouter>(1028, "default");
+    logMsgRouter->SetLogger(_logger);
 }
 
 void FastRtpsComAdapter::registerTopicTypeIfNecessary(TopicDataType* topicType)
@@ -521,7 +539,7 @@ auto FastRtpsComAdapter::GetSyncMaster() -> sync::ISyncMaster*
         throw std::runtime_error("Participant not configured as SyncMaster");
     }
 
-    auto* controller = GetController<sync::ISyncMaster>(1027);
+    auto* controller = GetController<sync::SyncMaster>(1027);
     if (!controller)
     {
         auto* systemMonitor = GetSystemMonitor();
@@ -532,7 +550,7 @@ auto FastRtpsComAdapter::GetSyncMaster() -> sync::ISyncMaster*
 
 auto FastRtpsComAdapter::GetParticipantController() -> sync::IParticipantController*
 {
-    auto* controller = GetController<sync::IParticipantController>(1024);
+    auto* controller = GetController<sync::ParticipantController>(1024);
     if (!controller)
     {
         controller = CreateController<sync::ParticipantController>(1024, "default", *_participant, _config.simulationSetup.timeSync);
@@ -542,7 +560,7 @@ auto FastRtpsComAdapter::GetParticipantController() -> sync::IParticipantControl
 
 auto FastRtpsComAdapter::GetSystemMonitor() -> sync::ISystemMonitor*
 {
-    auto* controller = GetController<sync::ISystemMonitor>(1025);
+    auto* controller = GetController<sync::SystemMonitor>(1025);
     if (!controller)
     {
         controller = CreateController<sync::SystemMonitor>(1025, "default", _config.simulationSetup);
@@ -552,12 +570,17 @@ auto FastRtpsComAdapter::GetSystemMonitor() -> sync::ISystemMonitor*
 
 auto FastRtpsComAdapter::GetSystemController() -> sync::ISystemController*
 {
-    auto* controller = GetController<sync::ISystemController>(1026);
+    auto* controller = GetController<sync::SystemController>(1026);
     if (!controller)
     {
         return CreateController<sync::SystemController>(1026, "default");
     }
     return controller;
+}
+
+auto FastRtpsComAdapter::GetLogger() -> std::shared_ptr<spdlog::logger>&
+{
+    return _logger;
 }
 
 void FastRtpsComAdapter::RegisterCanSimulator(can::IIbToCanSimulator* busSim)
@@ -791,6 +814,16 @@ void FastRtpsComAdapter::SendIbMessage(EndpointAddress from, const sync::SystemC
     SendIbMessageImpl(from, msg);
 }
 
+void FastRtpsComAdapter::SendIbMessage(EndpointAddress from, const logging::LogMsg& msg)
+{
+    SendIbMessageImpl(from, msg);
+}
+
+void FastRtpsComAdapter::SendIbMessage(EndpointAddress from, logging::LogMsg&& msg)
+{
+    SendIbMessageImpl(from, std::move(msg));
+}
+
 template<typename IbMessageT>
 void FastRtpsComAdapter::SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
 {
@@ -810,7 +843,7 @@ auto FastRtpsComAdapter::GetController(EndpointId endpointId) -> ControllerT*
     auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
     if (controllerMap.count(endpointId))
     {
-        return controllerMap.at(endpointId).get();
+        return static_cast<ControllerT*>(controllerMap.at(endpointId).get());
     }
     else
     {

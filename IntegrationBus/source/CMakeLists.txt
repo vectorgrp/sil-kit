@@ -40,6 +40,7 @@ target_link_libraries(IntegrationBus
     PUBLIC  IbInterface
     PRIVATE IbConfig
     PRIVATE IbMwFastRtps
+    PRIVATE IbMwLogging
     PRIVATE fastrtps
     PRIVATE fastcdr
 )
