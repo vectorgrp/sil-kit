@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "ib/mw/IComAdapter.hpp"
+#include "ib/mw/logging/spdlog.hpp"
 
 namespace ib {
 namespace sim {
@@ -16,7 +17,8 @@ namespace {
 }
 
 LinControllerProxy::LinControllerProxy(mw::IComAdapter* comAdapter)
-: _comAdapter(comAdapter)
+    : _comAdapter{comAdapter}
+    , _logger{comAdapter->GetLogger()}
 {
 }
 
@@ -101,7 +103,7 @@ void LinControllerProxy::SetResponseWithChecksum(LinId linId, const Payload& pay
 {
     if (checksumModel == ChecksumModel::Undefined)
     {
-        std::cerr << "WARNING: LinControllerProxy::SetResponseWithChecksum() was called with ChecksumModel::Undefined, which does NOT alter the checksum model!\n";
+        _logger->warn("LinControllerProxy::SetResponseWithChecksum() was called with ChecksumModel::Undefined, which does NOT alter the checksum model!");
     }
 
     SlaveResponse response;
@@ -131,8 +133,9 @@ void LinControllerProxy::SendWakeupRequest()
 {
     if (_controllerMode != ControllerMode::Sleep)
     {
-        std::cerr << "ERROR: LinController::SendWakeupRequest() must only be called in sleep mode!" << std::endl;
-        throw std::logic_error("LinController::SendWakeupRequest() must only be called in sleep mode!");
+        std::string errorMsg{"LinController::SendWakeupRequest() must only be called in sleep mode!"};
+        _logger->error(errorMsg);
+        throw std::logic_error(errorMsg);
     }
 
     SendIbMessage(WakeupRequest{});
@@ -155,8 +158,9 @@ void LinControllerProxy::SendGoToSleep()
 {
     if (_controllerMode != ControllerMode::Master)
     {
-        std::cerr << "ERROR: LinControllerProxy::SendGoToSleep() must only be called in master mode!" << std::endl;
-        throw std::logic_error("LinControllerProxy::SendGoToSleep() must only be called in master mode!");
+        std::string errorMsg{"LinControllerProxy::SendGoToSleep() must only be called in master mode!"};
+        _logger->error(errorMsg);
+        throw std::logic_error(errorMsg);
     }
 
     LinMessage gotosleep;
@@ -211,9 +215,10 @@ void LinControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const TxAckn
 
     if (_controllerMode != ControllerMode::Master)
     {
-        std::cerr << "LinControllerProxy"
-                  << "{P=" << _endpointAddr.participant << ", E=" << _endpointAddr.endpoint << "}"
-                  << " in non-Master mode received TxAcknowledge!";
+        _logger->error(
+            "LinControllerProxy{{P={}, E={}}} in non-Master mode received TxAcknowledge!",
+            _endpointAddr.participant,
+            _endpointAddr.endpoint);
         return;
     }
 
@@ -227,7 +232,7 @@ void LinControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const Wakeup
 
     if (_controllerMode != ControllerMode::Sleep)
     {
-        std::cerr << "WARNING: Received WakeupRequest while not in sleep mode\n";
+        _logger->warn("Received WakeupRequest while not in sleep mode");
     }
 
     for (auto&& handler : _wakeuprequestCallbacks)

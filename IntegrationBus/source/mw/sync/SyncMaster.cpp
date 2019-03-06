@@ -7,6 +7,7 @@
 
 #include "ib/cfg/Config.hpp"
 #include "ib/mw/IComAdapter.hpp"
+#include "ib/mw/logging/spdlog.hpp"
 #include "ib/mw/sync/ISystemMonitor.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 #include "SyncDatatypeUtils.hpp"
@@ -19,6 +20,7 @@ namespace sync {
 
 SyncMaster::SyncMaster(IComAdapter* comAdapter, const cfg::Config& config, ISystemMonitor* monitor)
     : _comAdapter{comAdapter}
+    , _logger{comAdapter->GetLogger()}
 {
     assert(monitor);
     monitor->RegisterSystemStateHandler([this](auto state) { this->SystemStateChanged(state); });
@@ -51,7 +53,7 @@ void SyncMaster::SetupTimeQuantumClients(const cfg::Config& config)
         _timeQuantumClients[participant.id] = std::move(client);
 
     }
-    std::cout << "INFO: SyncMaster has " << _timeQuantumClients.size() << " TimeQuantum Clients\n";
+    _logger->info("SyncMaster is serving {} TimeQuantum Clients", _timeQuantumClients.size());
 }
 
 void SyncMaster::SetupDiscreteTimeClient(const cfg::Config& config)
@@ -61,7 +63,7 @@ void SyncMaster::SetupDiscreteTimeClient(const cfg::Config& config)
         end(config.simulationSetup.participants),
         [](auto&& participant) { return participant.syncType == cfg::SyncType::DiscreteTime; }
     );
-    std::cout << "INFO: SyncMaster has " << numClients << " DiscreteTime Clients\n";
+    _logger->info("SyncMaster is serving {} DiscreteTime Clients", numClients);
 
     if (numClients == 0)
         return;
@@ -91,7 +93,7 @@ void SyncMaster::ReceiveIbMessage(mw::EndpointAddress from, const TickDone& msg)
 
     if (_discreteTimeClient->GetCurrentTick() != msg.finishedTick)
     {
-        std::cerr << "ERROR: Received " << msg << " from participant " << from.participant << ", which does not match current " << _discreteTimeClient->GetCurrentTick() << "\n";
+        _logger->error("Received {} from participant {}, which does not match current {}", msg, from.participant, _discreteTimeClient->GetCurrentTick());
     }
 
     _discreteTimeClient->TickDoneReceived();
@@ -110,7 +112,7 @@ void SyncMaster::ReceiveIbMessage(mw::EndpointAddress from, const QuantumRequest
 {
     if (_timeQuantumClients.count(from.participant) != 1)
     {
-        std::cerr << "ERROR: Received QuantumRequest from participant " << from.participant << ", which is unknown!\n";
+        _logger->error("Received QuantumRequest from participant {}, which is unknown!", from.participant);
         return;
     }
 
@@ -118,13 +120,13 @@ void SyncMaster::ReceiveIbMessage(mw::EndpointAddress from, const QuantumRequest
 
     if (client->HasPendingRequest())
     {
-        std::cerr << "ERROR: Received QuantumRequest from participant " << from.participant << ", which already has a pending request!\n";
+        _logger->error("Received QuantumRequest from participant {}, which already has a pending request!", from.participant);
         return;
     }
 
     if (client->EndTime() != msg.now)
     {
-        std::cerr << "ERROR: QuantumRequest from participant " << from.participant << " does not match the current simulation time!\n";
+        _logger->error("QuantumRequest from participant {} does not match the current simulation time!", from.participant);
     }
 
     client->SetPendingRequest(msg.now, msg.duration);
@@ -162,7 +164,7 @@ void SyncMaster::SystemStateChanged(SystemState newState)
         switch (oldState)
         {
         case SystemState::Paused:
-            std::cerr << "INFO: SyncMaster: continuing simulating." << std::endl;
+            _logger->info("SyncMaster: continuing simulating.");
             break;
 
         case SystemState::Initializing:
@@ -172,7 +174,7 @@ void SyncMaster::SystemStateChanged(SystemState newState)
             //[[fallthrough]]
 
         case SystemState::Initialized:
-            std::cerr << "INFO: SyncMaster: starting simulating." << std::endl;
+            _logger->info("SyncMaster: starting simulating.");
             for (auto&& client : _syncClients)
             {
                 client->Reset();
@@ -180,7 +182,7 @@ void SyncMaster::SystemStateChanged(SystemState newState)
             break;
 
         default:
-            std::cerr << "WARNING: SyncMaster: switch to SystemState::Running from unexpected state SystemState::" << oldState << ". Assuming simulation start." << std::endl;
+            _logger->warn("SyncMaster: switch to SystemState::Running from unexpected state SystemState::{}. Assuming simulation start.", oldState);
             for (auto&& client : _syncClients)
             {
                 client->Reset();

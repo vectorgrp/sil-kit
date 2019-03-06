@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <ctime>
 
+#include "ib/mw/logging/spdlog.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 
 namespace ib {
@@ -104,7 +105,7 @@ void SystemMonitor::ReceiveIbMessage(mw::EndpointAddress from, const sync::Parti
     auto&& statusIter = _participantStatus.find(participantId);
     if (statusIter == _participantStatus.end())
     {
-        std::cerr << "Received ParticipantStatus from unknown ParticipantID=" << participantId << "\n";
+        _logger->warn("Received ParticipantStatus from unknown ParticipantID={}", participantId);
         return;
     }
 
@@ -213,7 +214,7 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const sync::ParticipantStatu
         return;
 
     default:
-        std::cerr << "ERROR: SystemMonitor::ValidateParticipantStatusUpdate() Unhandled ParticipantState::" << newStatus.state << "\n";
+        _logger->error("SystemMonitor::ValidateParticipantStatusUpdate() Unhandled ParticipantState::{}", newStatus.state);
     }
 
     std::time_t enterTime = std::chrono::system_clock::to_time_t(newStatus.enterTime);
@@ -226,11 +227,12 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const sync::ParticipantStatu
     char timeString[32];
     std::strftime(timeString, sizeof(timeString), "%FT%T", &tmBuffer);
 
-    std::cerr
-        << "ERROR: SystemMonitor detected invalid ParticipantState transition from " << oldState << " to " << newStatus.state
-        << " EnterTime=" << timeString
-        << ", EnterReason=\"" << newStatus.enterReason
-        << "\"\n";
+    _logger->error(
+        "SystemMonitor detected invalid ParticipantState transition from {} to {} EnterTime={}, EnterReason=\"{}\"",
+        oldState,
+        newStatus.state,
+        timeString,
+        newStatus.enterReason);
 
     _invalidTransitionCount++;
 }

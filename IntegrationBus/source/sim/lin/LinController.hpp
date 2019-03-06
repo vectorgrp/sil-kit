@@ -5,12 +5,17 @@
 #include "ib/sim/lin/ILinController.hpp"
 #include "ib/sim/lin/IIbToLinController.hpp"
 
+#include <memory>
 #include <tuple>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/sim/datatypes.hpp"
+
+namespace spdlog {
+class logger;
+} // namespace spdlog
 
 namespace ib {
 namespace sim {
@@ -115,6 +120,7 @@ private:
     // private members
     mw::IComAdapter* _comAdapter;
     mw::EndpointAddress _endpointAddr;
+    std::shared_ptr<spdlog::logger> _logger;
 
     ControllerMode _configuredControllerMode{ControllerMode::Inactive}; // only modified by SetSlave/SetMasterMode, used to restore operational mode
     ControllerMode _controllerMode{ControllerMode::Inactive}; // currently active controller mode

@@ -3,6 +3,7 @@
 #pragma once
 
 #include <map>
+#include <memory>
 
 #include "ib/mw/sync/ISystemMonitor.hpp"
 #include "ib/mw/sync/IIbToSystemMonitor.hpp"
@@ -10,10 +11,13 @@
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/cfg/Config.hpp"
 
+namespace spdlog {
+class logger;
+} // namespace spdlog
+
 namespace ib {
 namespace mw {
 namespace sync {
-
 
 class SystemMonitor
     : public ISystemMonitor
@@ -76,6 +80,7 @@ private:
     IComAdapter* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddress{};
     cfg::SimulationSetup _simulationSetup;
+    std::shared_ptr<spdlog::logger> _logger;
 
     std::map<mw::ParticipantId, sync::ParticipantStatus> _participantStatus;
     sync::SystemState _systemState{sync::SystemState::Invalid};

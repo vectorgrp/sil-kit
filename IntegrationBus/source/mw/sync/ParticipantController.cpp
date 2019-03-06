@@ -4,6 +4,7 @@
 #include <future>
 
 #include "ib/cfg/string_utils.hpp"
+#include "ib/mw/logging/spdlog.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 
 using namespace std::chrono_literals;
@@ -196,6 +197,7 @@ ParticipantController::ParticipantController(IComAdapter* comAdapter, cfg::Parti
     : _comAdapter{comAdapter}
     , _participantConfig(std::move(participantConfig))
     , _timesyncConfig(std::move(timesyncConfig))
+    , _logger{comAdapter->GetLogger()}
 {
     _status.participantName = _participantConfig.name;
 }
@@ -235,8 +237,8 @@ void ParticipantController::SetPeriod(std::chrono::nanoseconds period)
     if (_participantConfig.syncType != cfg::SyncType::TimeQuantum)
     {
         auto msPeriod = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(period);
-        std::cerr << "LOG_WARNING: ParticipantController::SetPeriod(" << msPeriod.count() << "ms) is ignored.\n";
-        std::cerr << "LOG_INFO: ParticipantController::SetPeriod() can only be used with SyncType::TimeQuantum (currently active: SyncType::" << _participantConfig.syncType << ")\n";
+        _logger->warn("ParticipantController::SetPeriod({}ms) is ignored", msPeriod.count());
+        _logger->info("ParticipantController::SetPeriod() can only be used with SyncType::TimeQuantum (currently active: SyncType::{})", _participantConfig.syncType);
     }
     _period = period;
 }
@@ -251,6 +253,7 @@ void ParticipantController::StartTaskRunner()
 {
     if (!_simTask)
     {
+        _logger->error("ParticipantController::Run() was called without having set a SimTask!");
         ReportError("ParticipantController::Run() was called without having set a SimTask!");
         throw std::exception();
     }
@@ -258,6 +261,7 @@ void ParticipantController::StartTaskRunner()
     switch (_participantConfig.syncType)
     {
     case cfg::SyncType::DiscreteEvent:
+        _logger->critical("Unsupported SyncType {}", to_string(_participantConfig.syncType));
         throw std::runtime_error("Unsupported SyncType " + to_string(_participantConfig.syncType));
     case cfg::SyncType::TimeQuantum:
         _taskRunner = std::make_unique<TaskRunnerT<SyncPolicyTimeQuantum>>(*this);
@@ -269,6 +273,7 @@ void ParticipantController::StartTaskRunner()
         _taskRunner = std::make_unique<TaskRunnerT<SyncPolicyDiscreteTimePassive>>(*this);
         break;
     default:
+        _logger->critical("Invalid SyncType {}", to_string(_participantConfig.syncType));
         throw ib::cfg::Misconfiguration("Invalid SyncType " + to_string(_participantConfig.syncType));
     }
 
@@ -286,7 +291,7 @@ auto ParticipantController::RunAsync() -> std::future<ParticipantState>
 {
     if (_timesyncConfig.syncPolicy == cfg::TimeSync::SyncPolicy::Strict)
     {
-        std::cerr << "ERROR: ParticipantController::RunAsync() cannot be used when SyncPolicy::Strict is configured" << std::endl;
+        _logger->error("ParticipantController::RunAsync() cannot be used when SyncPolicy::Strict is configured");
         ChangeState(ParticipantState::Error, "ParticipantController::RunAsync() cannot be used when SyncPolicy::Strict is configured");
         _finalStatePromise.set_value(State());
         return _finalStatePromise.get_future();
@@ -306,6 +311,7 @@ void ParticipantController::Pause(std::string reason)
     if (State() != ParticipantState::Running)
     {
         std::string errorMessage{"ParticipantController::Pause() was called in state ParticipantState::" + to_string(State())};
+        _logger->error(errorMessage);
         ReportError(errorMessage);
         throw std::runtime_error(errorMessage);
     }
@@ -317,6 +323,7 @@ void ParticipantController::Continue()
     if (State() != ParticipantState::Paused)
     {
         std::string errorMessage{"ParticipantController::Continue() was called in state ParticipantState::" + to_string(State())};
+        _logger->error(errorMessage);
         ReportError(errorMessage);
         throw std::runtime_error(errorMessage);
     }
@@ -331,17 +338,19 @@ void ParticipantController::Initialize(const ParticipantCommand& command, std::s
         try
         {
             _initHandler(command);
-            reason += "; InitHandler completed without exception.";
+            reason += " and InitHandler completed without exception";
         }
         catch (const std::exception& e)
         {
-            ReportError(std::string{"InitHandler did throw an exception: "} +e.what());
+            std::string errorMessage{"InitHandler did throw an exception: " + std::string{e.what()}};
+            _logger->error(errorMessage);
+            ReportError(errorMessage);
             return;
         }
     }
     else
     {
-        reason += "; no InitHandler registered.";
+        reason += " and no InitHandler was registered";
     }
 
     _now = 0ns;
@@ -364,20 +373,20 @@ void ParticipantController::Stop(std::string reason)
             // The handler can report an error, which overrules the default transition to ParticipantState::Stopped
             if (State() != ParticipantState::Error)
             {
-                reason += "; StopHandler completed successfully.";
+                reason += " and StopHandler completed successfully";
                 ChangeState(ParticipantState::Stopped, std::move(reason));
             }
         }
         catch (const std::exception& e)
         {
-            reason += "; StopHandler threw exception: ";
+            reason += " and StopHandler threw exception: ";
             reason += e.what();
             ChangeState(ParticipantState::Stopped, std::move(reason));
         }
     }
     else
     {
-        reason += "; no StopHandler registered.";
+        reason += " and no StopHandler registered";
         ChangeState(ParticipantState::Stopped, reason);
     }
 
@@ -394,19 +403,19 @@ void ParticipantController::Shutdown(std::string reason)
         try
         {
             _shutdownHandler();
-            reason += "; ShutdownHandler completed.";
+            reason += " and ShutdownHandler completed";
             ChangeState(ParticipantState::Shutdown, std::move(reason));
         }
         catch (const std::exception& e)
         {
-            reason += "; ShutdownHandler threw exception: ";
+            reason += " and ShutdownHandler threw exception: ";
             reason += e.what();
             ChangeState(ParticipantState::Shutdown, std::move(reason));
         }
     }
     else
     {
-        reason += "; no ShutdownHandler registered.";
+        reason += " and no ShutdownHandler was registered";
         ChangeState(ParticipantState::Shutdown, std::move(reason));
     }
 
@@ -415,8 +424,8 @@ void ParticipantController::Shutdown(std::string reason)
 
 void ParticipantController::PrepareColdswap()
 {
-    std::cerr << "LOG_INFO: preparing coldswap..." << std::endl;
-    ChangeState(ParticipantState::ColdswapPrepare, "Starting coldswap preparations.");
+    _logger->info("preparing coldswap...");
+    ChangeState(ParticipantState::ColdswapPrepare, "Starting coldswap preparations");
 
     // WaitForMessageDelivery will deadlock, if RunAsync was used.
     // Thus, we run everythin in a separate thread.
@@ -424,7 +433,7 @@ void ParticipantController::PrepareColdswap()
         _comAdapter->WaitForMessageDelivery();
         _comAdapter->FlushSendBuffers();
         ChangeState(ParticipantState::ColdswapReady, "Finished coldswap preparations.");
-        std::cerr << "LOG_INFO: ready for coldswap..." << std::endl;
+        _logger->info("ready for coldswap...");
     });
 }
 

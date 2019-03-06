@@ -203,7 +203,7 @@ void FastRtpsComAdapter::joinDomain(uint32_t domainId)
 
     OnFastrtpsDomainJoined();
 
-    _logger->info("Participant {} has successfully joined the IB-Domain {}", _participantName, domainId);
+    _logger->info("Participant {} has joined the IB-Domain {}", _participantName, domainId);
 }
 
 void FastRtpsComAdapter::OnFastrtpsDomainJoined()
@@ -535,7 +535,7 @@ auto FastRtpsComAdapter::GetSyncMaster() -> sync::ISyncMaster*
 {
     if (!isSyncMaster())
     {
-        std::cerr << "Error: Participant " << _participant->name << " is not configured as SyncMaster!" << std::endl;
+        _logger->error("FastRtpsComAdapter::GetSyncMaster(): Participant is not configured as SyncMaster!");
         throw std::runtime_error("Participant not configured as SyncMaster");
     }
 
@@ -857,7 +857,7 @@ auto FastRtpsComAdapter::CreateController(EndpointId endpointId, const std::stri
     auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
     if (controllerMap.count(endpointId))
     {
-        std::cerr << "ERROR: FastRtpsComAdapter already has a controller with endpointid=" << endpointId << std::endl;
+        _logger->error("FastRtpsComAdapter already has a controller with endpointId={}", endpointId);
         throw std::runtime_error("Duplicate EndpointId");
     }
 
@@ -897,7 +897,7 @@ void FastRtpsComAdapter::RegisterSimulator(IIbToSimulatorT* busSim, cfg::Link::T
     auto&& simulator = std::get<IIbToSimulatorT*>(_simulators);
     if (simulator)
     {
-        std::cerr << "ERROR: A " << typeid(IIbToSimulatorT).name() << " is already registered" << std::endl;
+        _logger->error("A {} is already registered", typeid(IIbToSimulatorT).name());
         return;
     }
 
@@ -944,7 +944,7 @@ void FastRtpsComAdapter::RegisterSimulator(IIbToSimulatorT* busSim, cfg::Link::T
                 }
                 catch (const std::exception& e)
                 {
-                    std::cerr << "ERROR: Cannot register simulator topics for link \"" << linkName << "\": " << e.what() << std::endl;
+                    _logger->error("Cannot register simulator topics for link \"{}\": {}", linkName, e.what());
                     continue;
                 }
             }

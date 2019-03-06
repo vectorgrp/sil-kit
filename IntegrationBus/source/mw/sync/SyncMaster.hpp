@@ -12,6 +12,10 @@
 #include "ib/mw/sync/IIbToSyncMaster.hpp"
 #include "ib/cfg/fwd_decl.hpp"
 
+namespace spdlog {
+class logger;
+} // namespace spdlog
+
 namespace ib {
 namespace mw {
 namespace sync {
@@ -212,6 +216,7 @@ private:
     // private members
     IComAdapter* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddress;
+    std::shared_ptr<spdlog::logger> _logger;
 
     SystemState _systemState{SystemState::Invalid};
     std::promise<SystemState> _finalStatePromise;

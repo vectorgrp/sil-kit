@@ -19,11 +19,15 @@ using namespace ib::sim;
 
 using namespace std::chrono_literals;
 
-std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
+namespace std {
+namespace chrono {
+std::ostream& operator<<(std::ostream& out, nanoseconds timestamp)
 {
     auto seconds = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(timestamp);
     out << seconds.count() << "s";
     return out;
+}
+}
 }
 
 void AckCallback(can::ICanController* /*controller*/, const can::CanTransmitAcknowledge& ack)

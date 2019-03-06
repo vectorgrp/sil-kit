@@ -134,6 +134,9 @@ function(make_gtest executableName testSourceFile)
         ${ARGV4}
     )
 
+    if (MSVC)
+        target_compile_options(${executableName} PRIVATE "/bigobj")
+    endif (MSVC)
     if(NOT MSVC)
         target_compile_options(${executableName} PUBLIC "-Wno-inconsistent-missing-override")
     endif()

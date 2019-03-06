@@ -46,6 +46,7 @@ protected:
     LinControllerTest()
         : controller(&comAdapter)
     {
+        comAdapter.logger = spdlog::default_logger();
         controller.SetEndpointAddress(controllerAddress);
         controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
         controller.RegisterTxCompleteHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessageStatus));

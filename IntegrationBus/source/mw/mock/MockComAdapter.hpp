@@ -5,7 +5,7 @@
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/sync/SyncDatatypes.hpp"
 #include "ib/mw/logging/LoggingDatatypes.hpp"
-#include "spdlog/details/log_msg.h"
+#include "ib/mw/logging/spdlog.hpp"
 
 #include "ib/sim/fwd_decl.hpp"
 #include "ib/sim/can/CanDatatypes.hpp"
@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "spdlog/sinks/null_sink.h"
 
 #ifdef SendMessage
 #undef SendMessage
@@ -29,6 +30,11 @@ namespace test {
 class MockComAdapter : public IComAdapter
 {
 public:
+    MockComAdapter()
+    {
+        logger = spdlog::default_logger();
+    }
+
     void SendIbMessage(EndpointAddress from, sim::can::CanMessage&& msg) override
     {
         SendIbMessage_proxy(from, msg);
@@ -77,7 +83,7 @@ public:
     MOCK_METHOD0(GetParticipantController, sync::IParticipantController*());
     MOCK_METHOD0(GetSystemMonitor, sync::ISystemMonitor*());
     MOCK_METHOD0(GetSystemController, sync::ISystemController*());
-    MOCK_METHOD0(GetLogger, std::shared_ptr<spdlog::logger>&());
+    auto GetLogger() -> std::shared_ptr<spdlog::logger>& override { return logger; }
 
     MOCK_METHOD1(RegisterCanSimulator, void(sim::can::IIbToCanSimulator*));
     MOCK_METHOD1(RegisterEthSimulator, void(sim::eth::IIbToEthSimulator*));
@@ -138,6 +144,8 @@ public:
 
     MOCK_METHOD0(WaitForMessageDelivery, void());
     MOCK_METHOD0(FlushSendBuffers, void());
+
+    std::shared_ptr<spdlog::logger> logger;
 };
 
 // ================================================================================

@@ -105,6 +105,7 @@ private:
     mw::EndpointAddress _endpointAddress{};
     cfg::Participant _participantConfig;
     cfg::TimeSync _timesyncConfig;
+    std::shared_ptr<spdlog::logger> _logger;
 
     std::unique_ptr<ITaskRunner> _taskRunner;
     std::chrono::nanoseconds _period{0};

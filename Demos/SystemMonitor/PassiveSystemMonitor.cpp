@@ -34,28 +34,16 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 
 void ReportParticipantStatus(const ib::mw::sync::ParticipantStatus& status)
 {
-    std::time_t enterTime = std::chrono::system_clock::to_time_t(status.enterTime);
-    std::tm tmBuffer;
-#if defined(_MSC_VER)
-    localtime_s(&tmBuffer, &enterTime);
-#else
-    localtime_r(&enterTime, &tmBuffer);
-#endif
-
-    char timeString[32];
-    std::strftime(timeString, sizeof(timeString), "%F %T", &tmBuffer);
-
-    std::cout
-        << timeString
-        << " " << status.participantName
-        << "\t State: " << status.state
-        << "\t Reason: " << status.enterReason
-        << std::endl;
+    spdlog::info(
+        "New ParticipantState: {},\tReason: {}",
+        status.state,
+        status.enterReason
+    );
 }
 
 void ReportSystemState(ib::mw::sync::SystemState state)
 {
-    std::cout << "New SystemState: " << state << std::endl;
+    spdlog::info("New SystemState: {}", state);
 }
 
 int main(int argc, char** argv)
@@ -100,6 +88,7 @@ int main(int argc, char** argv)
 
         // add a stdout sink to the logger to print all received log messages
         comAdapter->GetLogger()->sinks().push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
+        spdlog::set_default_logger(comAdapter->GetLogger());
 
         auto systemMonitor = comAdapter->GetSystemMonitor();
         systemMonitor->RegisterParticipantStatusHandler(&ReportParticipantStatus);
