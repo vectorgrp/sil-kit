@@ -102,7 +102,16 @@ add_subdirectory(${THIRDPARTY_DIR}/Fast-RTPS
 #######################################################################################################################
 add_subdirectory(${THIRDPARTY_DIR}/spdlog
     ThirdParty/spdlog
+    EXCLUDE_FROM_ALL
 )
+
+# install spdlog headers
+install(
+    DIRECTORY "${THIRDPARTY_DIR}/spdlog/include/spdlog"
+    DESTINATION ${INSTALL_INCLUDE_DIR}
+    COMPONENT IntegrationBus
+)
+
 
 #######################################################################################################################
 # Helper Functions
