@@ -57,15 +57,25 @@
    </publisher>   
    <subscriber profile_name="Publisher-LogMsg-default">
       <topic>
+         <kind>WITH_KEY</kind>
          <dataType>ib::mw::logging::idl::LogMsg</dataType>
          <name>default</name>
       </topic>
    </subscriber>
    <publisher profile_name="Publisher-LogMsg-default">
       <topic>
+         <kind>WITH_KEY</kind>
          <dataType>ib::mw::logging::idl::LogMsg</dataType>
          <name>default</name>
       </topic>
+      <times>
+        <heartbeatPeriod>
+          <durationbyval>
+            <seconds>1</seconds>
+            <fraction>0</fraction>
+          </durationbyval>
+        </heartbeatPeriod>
+      </times>
    </publisher>   
    
    <participant profile_name="Subscriber">
@@ -116,14 +126,24 @@
    </subscriber>
    <subscriber profile_name="Subscriber-LogMsg-default">
       <topic>
+         <kind>WITH_KEY</kind>
          <dataType>ib::mw::logging::idl::LogMsg</dataType>
          <name>default</name>
       </topic>
    </subscriber>
    <publisher profile_name="Subscriber-LogMsg-default">
       <topic>
+         <kind>WITH_KEY</kind>
          <dataType>ib::mw::logging::idl::LogMsg</dataType>
          <name>default</name>
       </topic>
+      <times>
+        <heartbeatPeriod>
+          <durationbyval>
+            <seconds>1</seconds>
+            <fraction>0</fraction>
+          </durationbyval>
+        </heartbeatPeriod>
+      </times>
    </publisher>   
 </profiles>

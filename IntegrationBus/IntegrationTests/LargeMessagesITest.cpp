@@ -84,7 +84,7 @@ TEST_F(LargeMessagesITest, publish_and_subscribe_large_messages)
     std::thread publishThread{[this, &data]() { this->Publish(data); }};
 
     auto&& reply = topic.reply.get_future();
-    auto ready = reply.wait_for(5s);
+    auto ready = reply.wait_for(10min);
     ASSERT_EQ(ready, std::future_status::ready);
     EXPECT_EQ(reply.get(), data);
     
