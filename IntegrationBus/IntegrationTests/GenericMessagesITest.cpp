@@ -102,7 +102,7 @@ TEST_F(GenericMessageITest, publish_and_subscribe_generic_messages)
     for (auto&& topic : topics)
     {
         auto&& reply = topic.reply.get_future();
-        auto ready = reply.wait_for(5s);
+        auto ready = reply.wait_for(10min);
         ASSERT_EQ(ready, std::future_status::ready);
         EXPECT_EQ(reply.get(), topic.name);
     }

@@ -65,7 +65,13 @@
                     "Subscriber/MotionTrajectory"
                 ]
             }
-        ]
+        ],
+
+        "TimeSync": {
+            "SyncPolicy": "Strict",
+            "TickPeriodNs": 1000000000
+        }
+
 
     }
 }
