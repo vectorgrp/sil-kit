@@ -9,6 +9,11 @@
 #include "idl/LoggingTopics.h"
 
 #include "spdlog/details/log_msg.h"
+#ifdef SendMessage
+#if SendMessage == SendMessageA
+#undef SendMessage
+#endif
+#endif
 
 
 namespace spdlog {

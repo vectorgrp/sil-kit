@@ -2,24 +2,23 @@
 
 #pragma once
 
-//#include "ib/mw/IComAdapter.hpp"
-//
 #include <memory>
 #include <vector>
 #include <unordered_map>
 #include <tuple>
 
 #include "ib/cfg/Config.hpp"
-//#include "ib/mw/all.hpp"
-//#include "ib/sim/all.hpp"
-//
+
 #include "fastrtps_fwd.h"
 #include "fastrtps/publisher/PublisherListener.h"
 #include "fastrtps/subscriber/SubscriberListener.h"
-//
+
 #include "idl/all.hpp"
-//
+
+#include "IdlTraits.hpp"
 #include "IdlTypeConversion.hpp"
+#include "IdlTypeConversionLogging_impl.hpp"
+
 #include "IbSubListener.hpp"
 #include "memory_fastrtps.hpp"
 #include "FastRtpsGuard.hpp"
@@ -27,6 +26,11 @@
 
 namespace ib {
 namespace mw {
+
+
+template<typename TopicT>
+using PubSubType = typename TopicTrait<TopicT>::PubSubType;
+
 
 class FastRtpsComAdapterBottom
 {
@@ -40,6 +44,7 @@ public:
     FastRtpsComAdapterBottom() = default;
     FastRtpsComAdapterBottom(const FastRtpsComAdapterBottom&) = default;
     FastRtpsComAdapterBottom(FastRtpsComAdapterBottom&&) = default;
+    FastRtpsComAdapterBottom(cfg::Config config, std::string participantName);
 
 public:
     // ----------------------------------------
@@ -49,24 +54,20 @@ public:
 
 public:
     // ----------------------------------------
-    // Public interface methods
+    // Public methods
     //
+    void joinDomain(uint32_t domainId);
+
+    template <class IControllerT>
+    void PublishRtpsTopics(const std::string& topicName, EndpointId endpointId);
+    template<class EndpointT>
+    void SubscribeRtpsTopics(const std::string& topicName, EndpointT* receiver);
+
+    template<typename IbMessageT>
+    void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg);
+
     void WaitForMessageDelivery();
     void FlushSendBuffers();
-
-public:
-    // ----------------------------------------
-    // Public methods
-
-    /*! \brief Join the middleware domain as a participant.
-    * 
-    * Join the middleware domain and become a participant.
-    * \param domainId ID of the domain
-    * 
-    * \throw std::exception A participant was created previously, or a
-    * participant could not be created.
-    */
-    void joinIbDomain(uint32_t domainId);
 
 private:
     // ----------------------------------------
@@ -104,9 +105,6 @@ private:
 private:
     // ----------------------------------------
     // private methods
-    void joinDomain(uint32_t domainId);
-    void OnFastrtpsDomainJoined();
-
     void registerTopicTypeIfNecessary(eprosima::fastrtps::TopicDataType* topicType);
     template <class AttrT>
     void SetupPubSubAttributes(AttrT& attributes, const std::string& topicName, eprosima::fastrtps::TopicDataType* topicType);
@@ -121,14 +119,6 @@ private:
     void PublishRtpsTopic(const std::string& topicName, EndpointId endpointId);
     template <class IdlMessageT>
     void SubscribeRtpsTopic(const std::string& topicName, IIbMessageReceiver<to_ib_message_t<IdlMessageT>>* receiver);
-
-    template <class IControllerT>
-    void PublishRtpsTopics(const std::string& topicName, EndpointId endpointId);
-    template<class EndpointT>
-    void SubscribeRtpsTopics(const std::string& topicName, EndpointT* receiver);
-
-    template<typename IbMessageT>
-    void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg);
 
 private:
     // ----------------------------------------
@@ -187,6 +177,103 @@ private:
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
+template <class AttrT>
+void FastRtpsComAdapterBottom::SetupPubSubAttributes(AttrT& attributes, const std::string& topicName, eprosima::fastrtps::TopicDataType* topicType)
+{
+    attributes.topic.topicKind = (topicType->m_isGetKeyDefined)
+        ? WITH_KEY
+        : NO_KEY;
+    attributes.topic.topicDataType = topicType->getName();
+    attributes.topic.topicName = topicName.c_str();
+    attributes.topic.historyQos.kind = KEEP_LAST_HISTORY_QOS;
+    attributes.topic.historyQos.depth = 5;
+    attributes.topic.resourceLimitsQos.max_instances = 64;
+    attributes.topic.resourceLimitsQos.max_samples_per_instance = 5;
+    attributes.topic.resourceLimitsQos.max_samples = 320;  // Constraint when m_isGetKeyDefined == WITH_KEY: max_samples >= max_samples_per_instance*max_instances
+    attributes.topic.resourceLimitsQos.allocated_samples = 40;
+    attributes.historyMemoryPolicy = PREALLOCATED_WITH_REALLOC_MEMORY_MODE;  // https://github.com/eProsima/Fast-RTPS/issues/74
+    attributes.qos.m_durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
+    attributes.qos.m_reliability.kind = RELIABLE_RELIABILITY_QOS;
+}
+
+template<class IdlMessageT>
+void FastRtpsComAdapterBottom::PublishRtpsTopic(const std::string& topicName, EndpointId endpointId)
+{
+    auto&& rtpsTopics = std::get<RtpsTopics<IdlMessageT>>(_rtpsTopics);
+
+    if (!rtpsTopics.pubSubType)
+    {
+        rtpsTopics.pubSubType = std::make_unique<PubSubType<IdlMessageT>>();
+    }
+
+    if (rtpsTopics.pubListeners.find(topicName) == rtpsTopics.pubListeners.end())
+    {
+        auto&& rtpsPublisher = rtpsTopics.pubListeners[topicName];
+        rtpsPublisher.listener = std::make_unique<PubMatchedListener>();
+        rtpsPublisher.publisher.reset(createPublisher(topicName, rtpsTopics.pubSubType.get(), rtpsPublisher.listener.get()));
+    }
+    rtpsTopics.endpointToPublisherMap[endpointId] = rtpsTopics.pubListeners[topicName].publisher.get();
+}
+
+template <class IdlMessageT>
+void FastRtpsComAdapterBottom::SubscribeRtpsTopic(const std::string& topicName, IIbMessageReceiver<to_ib_message_t<IdlMessageT>>* receiver)
+{
+    auto&& rtpsTopics = std::get<RtpsTopics<IdlMessageT>>(_rtpsTopics);
+
+    if (!rtpsTopics.pubSubType)
+    {
+        rtpsTopics.pubSubType = std::make_unique<PubSubType<IdlMessageT>>();
+    }
+
+    if (rtpsTopics.subListeners.find(topicName) == rtpsTopics.subListeners.end())
+    {
+        // create a subscriber entry
+        auto&& rtpsSubscriber = rtpsTopics.subListeners[topicName];
+        rtpsSubscriber.subscriber.reset(createSubscriber(topicName, rtpsTopics.pubSubType.get(), &rtpsSubscriber.listener));
+    }
+    rtpsTopics.subListeners[topicName].listener.addReceiver(receiver);
+}
+
+template<class IbSenderT>
+void FastRtpsComAdapterBottom::PublishRtpsTopics(const std::string& topicName, EndpointId endpointId)
+{
+    typename IbSenderT::IbSendMessagesTypes sendMessageTypes{};
+
+    tt::for_each(sendMessageTypes,
+        [this, &topicName, &endpointId](auto&& ibMessage)
+    {
+        using IbMessageT = std::decay_t<decltype(ibMessage)>;
+        this->PublishRtpsTopic<to_idl_message_t<IbMessageT>>(topicName, endpointId);
+    }
+    );
+}
+
+template<class EndpointT>
+void FastRtpsComAdapterBottom::SubscribeRtpsTopics(const std::string& topicName, EndpointT* receiver)
+{
+    typename EndpointT::IbReceiveMessagesTypes receiveMessageTypes{};
+
+    tt::for_each(receiveMessageTypes,
+        [this, &topicName, receiver](auto&& ibMessage)
+    {
+        using IbMessageT = std::decay_t<decltype(ibMessage)>;
+        this->SubscribeRtpsTopic<to_idl_message_t<IbMessageT>>(topicName, receiver);
+    }
+    );
+}
+
+template<typename IbMessageT>
+void FastRtpsComAdapterBottom::SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
+{
+    auto idlMsg = to_idl(std::forward<IbMessageT>(msg));
+    idlMsg.senderAddr(to_idl(from));
+
+    auto& rtpsTopics = std::get<RtpsTopics<decltype(idlMsg)>>(_rtpsTopics);
+    assert(rtpsTopics.endpointToPublisherMap.find(from.endpoint) != rtpsTopics.endpointToPublisherMap.end());
+
+    auto* publisher = rtpsTopics.endpointToPublisherMap[from.endpoint];
+    publisher->write(&idlMsg);
+}
 
 } // mw
 } // namespace ib
