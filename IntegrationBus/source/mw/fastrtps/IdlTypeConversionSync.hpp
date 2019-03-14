@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "ib/mw/sync/SyncDatatypes.hpp"
 #include "idl/MiddlewareTopics.h"
 
 #include "IdlTypeConversionMw.hpp"

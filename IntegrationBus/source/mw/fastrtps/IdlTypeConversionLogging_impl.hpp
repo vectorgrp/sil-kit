@@ -13,7 +13,7 @@
 
 namespace spdlog {
 namespace level {
-auto to_idl(level_enum level) -> ib::mw::logging::idl::level::level_enum
+inline auto to_idl(level_enum level) -> ib::mw::logging::idl::level::level_enum
 {
     namespace idl = ib::mw::logging::idl::level;
     switch (level)
@@ -89,27 +89,27 @@ auto to_idl(LogMsg&& msg) -> idl::LogMsg
 
 namespace idl {
 namespace level {
-    auto from_idl(level_enum level) -> spdlog::level::level_enum
+inline auto from_idl(level_enum level) -> spdlog::level::level_enum
+{
+    switch (level)
     {
-        switch (level)
-        {
-        case trace:
-            return spdlog::level::trace;
-        case debug:
-            return spdlog::level::debug;
-        case info:
-            return spdlog::level::info;
-        case warn:
-            return spdlog::level::warn;
-        case err:
-            return spdlog::level::err;
-        case critical:
-            return spdlog::level::critical;
-        case off:
-            return spdlog::level::off;
-        }
-        throw ib::type_conversion_error{};
+    case trace:
+        return spdlog::level::trace;
+    case debug:
+        return spdlog::level::debug;
+    case info:
+        return spdlog::level::info;
+    case warn:
+        return spdlog::level::warn;
+    case err:
+        return spdlog::level::err;
+    case critical:
+        return spdlog::level::critical;
+    case off:
+        return spdlog::level::off;
     }
+    throw ib::type_conversion_error{};
+}
 }
 }
 

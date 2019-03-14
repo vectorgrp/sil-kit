@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "ib/mw/IIbMessageReceiver.hpp"
+
 #include "fastrtps/subscriber/SubscriberListener.h"
 #include "fastrtps/subscriber/Subscriber.h"
 #include "fastrtps/subscriber/SampleInfo.h"

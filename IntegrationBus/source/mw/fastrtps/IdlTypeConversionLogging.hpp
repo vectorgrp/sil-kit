@@ -9,15 +9,15 @@ namespace ib {
 namespace mw {
 namespace logging {
 
-auto to_idl(const SourceLoc& idl) -> idl::SourceLoc;
-auto to_idl(SourceLoc&& idl)->idl::SourceLoc;
-auto to_idl(const LogMsg& idl) -> idl::LogMsg;
-auto to_idl(LogMsg&& idl)->idl::LogMsg;
+inline auto to_idl(const SourceLoc& idl) -> idl::SourceLoc;
+inline auto to_idl(SourceLoc&& idl)->idl::SourceLoc;
+inline auto to_idl(const LogMsg& idl) -> idl::LogMsg;
+inline auto to_idl(LogMsg&& idl)->idl::LogMsg;
 
 namespace idl {
 
-auto from_idl(idl::SourceLoc&& idl) -> logging::SourceLoc;
-auto from_idl(idl::LogMsg&& idl) -> logging::LogMsg;
+inline auto from_idl(idl::SourceLoc&& idl) -> logging::SourceLoc;
+inline auto from_idl(idl::LogMsg&& idl) -> logging::LogMsg;
         
 } // namespace idl
 } // namespace logging
