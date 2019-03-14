@@ -16,7 +16,7 @@
 #include "ILogmsgRouter.hpp"
 #include "IIbToLogmsgRouter.hpp"
 
-#include "FastRtpsComAdapterBottom.hpp"
+#include "FastRtpsConnection.hpp"
 
 namespace ib {
 namespace mw {
@@ -219,7 +219,7 @@ private:
         sim::lin::IIbToLinSimulator*
     > _simulators {nullptr, nullptr, nullptr, nullptr};
 
-    FastRtpsComAdapterBottom _fastrtpsConnection;
+    FastRtpsConnection _fastrtpsConnection;
 };
 
 // ================================================================================

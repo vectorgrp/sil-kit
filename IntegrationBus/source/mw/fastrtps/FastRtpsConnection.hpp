@@ -10,6 +10,7 @@
 #include "ib/cfg/Config.hpp"
 
 #include "fastrtps_fwd.h"
+#include "fastrtps/publisher/Publisher.h"
 #include "fastrtps/publisher/PublisherListener.h"
 #include "fastrtps/subscriber/SubscriberListener.h"
 
@@ -20,19 +21,16 @@
 #include "IdlTypeConversionLogging_impl.hpp"
 
 #include "IbSubListener.hpp"
+#include "ReportMatchingListener.hpp"
 #include "memory_fastrtps.hpp"
 #include "FastRtpsGuard.hpp"
 
+#include "tuple_tools/for_each.hpp"
 
 namespace ib {
 namespace mw {
 
-
-template<typename TopicT>
-using PubSubType = typename TopicTrait<TopicT>::PubSubType;
-
-
-class FastRtpsComAdapterBottom
+class FastRtpsConnection
 {
 public:
     // ----------------------------------------
@@ -41,16 +39,16 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    FastRtpsComAdapterBottom() = default;
-    FastRtpsComAdapterBottom(const FastRtpsComAdapterBottom&) = default;
-    FastRtpsComAdapterBottom(FastRtpsComAdapterBottom&&) = default;
-    FastRtpsComAdapterBottom(cfg::Config config, std::string participantName);
+    FastRtpsConnection() = default;
+    FastRtpsConnection(const FastRtpsConnection&) = default;
+    FastRtpsConnection(FastRtpsConnection&&) = default;
+    FastRtpsConnection(cfg::Config config, std::string participantName);
 
 public:
     // ----------------------------------------
     // Operator Implementations
-    FastRtpsComAdapterBottom& operator=(FastRtpsComAdapterBottom& other) = default;
-    FastRtpsComAdapterBottom& operator=(FastRtpsComAdapterBottom&& other) = default;
+    FastRtpsConnection& operator=(FastRtpsConnection& other) = default;
+    FastRtpsConnection& operator=(FastRtpsConnection&& other) = default;
 
 public:
     // ----------------------------------------
@@ -78,24 +76,22 @@ private:
         FastRtps::unique_ptr<eprosima::fastrtps::Publisher> publisher;
     };
 
-    template<typename TopicT>
+    template<class TopicT>
     struct RtpsSubListener
     {
-        using TopicType = TopicT;
-        IbSubListener<TopicType> listener;
+        IbSubListener<TopicT> listener;
         FastRtps::unique_ptr<eprosima::fastrtps::Subscriber> subscriber;
     };
 
-    template<typename TopicT>
+    template<class TopicT>
     struct RtpsTopics
     {
         using TopicType = TopicT;
+        using PubSubType = typename TopicTrait<TopicT>::PubSubType;
 
-        std::unique_ptr<eprosima::fastrtps::TopicDataType> pubSubType;
-
+        PubSubType pubSubType;
         std::unordered_map<std::string, RtpsPubListener> pubListeners;
-        std::unordered_map<std::string, RtpsSubListener<TopicType>> subListeners;
-
+        std::unordered_map<std::string, RtpsSubListener<TopicT>> subListeners;
         std::unordered_map<EndpointId, eprosima::fastrtps::Publisher*> endpointToPublisherMap;
     };
 
@@ -145,6 +141,7 @@ private:
         RtpsTopics<sim::fr::idl::FrMessageAck>,
         RtpsTopics<sim::fr::idl::FrSymbol>,
         RtpsTopics<sim::fr::idl::FrSymbolAck>,
+        RtpsTopics<sim::fr::idl::CycleStart>,
         RtpsTopics<sim::fr::idl::HostCommand>,
         RtpsTopics<sim::fr::idl::ControllerConfig>,
         RtpsTopics<sim::fr::idl::TxBufferUpdate>,
@@ -178,8 +175,11 @@ private:
 //  Inline Implementations
 // ================================================================================
 template <class AttrT>
-void FastRtpsComAdapterBottom::SetupPubSubAttributes(AttrT& attributes, const std::string& topicName, eprosima::fastrtps::TopicDataType* topicType)
+void FastRtpsConnection::SetupPubSubAttributes(AttrT& attributes, const std::string& topicName, eprosima::fastrtps::TopicDataType* topicType)
 {
+    using namespace eprosima::fastrtps;
+    using namespace eprosima::fastrtps::rtps;
+
     attributes.topic.topicKind = (topicType->m_isGetKeyDefined)
         ? WITH_KEY
         : NO_KEY;
@@ -197,73 +197,63 @@ void FastRtpsComAdapterBottom::SetupPubSubAttributes(AttrT& attributes, const st
 }
 
 template<class IdlMessageT>
-void FastRtpsComAdapterBottom::PublishRtpsTopic(const std::string& topicName, EndpointId endpointId)
+void FastRtpsConnection::PublishRtpsTopic(const std::string& topicName, EndpointId endpointId)
 {
     auto&& rtpsTopics = std::get<RtpsTopics<IdlMessageT>>(_rtpsTopics);
-
-    if (!rtpsTopics.pubSubType)
-    {
-        rtpsTopics.pubSubType = std::make_unique<PubSubType<IdlMessageT>>();
-    }
 
     if (rtpsTopics.pubListeners.find(topicName) == rtpsTopics.pubListeners.end())
     {
         auto&& rtpsPublisher = rtpsTopics.pubListeners[topicName];
         rtpsPublisher.listener = std::make_unique<PubMatchedListener>();
-        rtpsPublisher.publisher.reset(createPublisher(topicName, rtpsTopics.pubSubType.get(), rtpsPublisher.listener.get()));
+        rtpsPublisher.publisher.reset(createPublisher(topicName, &rtpsTopics.pubSubType, rtpsPublisher.listener.get()));
     }
     rtpsTopics.endpointToPublisherMap[endpointId] = rtpsTopics.pubListeners[topicName].publisher.get();
 }
 
 template <class IdlMessageT>
-void FastRtpsComAdapterBottom::SubscribeRtpsTopic(const std::string& topicName, IIbMessageReceiver<to_ib_message_t<IdlMessageT>>* receiver)
+void FastRtpsConnection::SubscribeRtpsTopic(const std::string& topicName, IIbMessageReceiver<to_ib_message_t<IdlMessageT>>* receiver)
 {
     auto&& rtpsTopics = std::get<RtpsTopics<IdlMessageT>>(_rtpsTopics);
-
-    if (!rtpsTopics.pubSubType)
-    {
-        rtpsTopics.pubSubType = std::make_unique<PubSubType<IdlMessageT>>();
-    }
 
     if (rtpsTopics.subListeners.find(topicName) == rtpsTopics.subListeners.end())
     {
         // create a subscriber entry
         auto&& rtpsSubscriber = rtpsTopics.subListeners[topicName];
-        rtpsSubscriber.subscriber.reset(createSubscriber(topicName, rtpsTopics.pubSubType.get(), &rtpsSubscriber.listener));
+        rtpsSubscriber.subscriber.reset(createSubscriber(topicName, &rtpsTopics.pubSubType, &rtpsSubscriber.listener));
     }
     rtpsTopics.subListeners[topicName].listener.addReceiver(receiver);
 }
 
 template<class IbSenderT>
-void FastRtpsComAdapterBottom::PublishRtpsTopics(const std::string& topicName, EndpointId endpointId)
+void FastRtpsConnection::PublishRtpsTopics(const std::string& topicName, EndpointId endpointId)
 {
     typename IbSenderT::IbSendMessagesTypes sendMessageTypes{};
 
-    tt::for_each(sendMessageTypes,
+    util::tuple_tools::for_each(sendMessageTypes,
         [this, &topicName, &endpointId](auto&& ibMessage)
-    {
-        using IbMessageT = std::decay_t<decltype(ibMessage)>;
-        this->PublishRtpsTopic<to_idl_message_t<IbMessageT>>(topicName, endpointId);
-    }
+        {
+            using IbMessageT = std::decay_t<decltype(ibMessage)>;
+            this->PublishRtpsTopic<to_idl_message_t<IbMessageT>>(topicName, endpointId);
+        }
     );
 }
 
 template<class EndpointT>
-void FastRtpsComAdapterBottom::SubscribeRtpsTopics(const std::string& topicName, EndpointT* receiver)
+void FastRtpsConnection::SubscribeRtpsTopics(const std::string& topicName, EndpointT* receiver)
 {
     typename EndpointT::IbReceiveMessagesTypes receiveMessageTypes{};
 
-    tt::for_each(receiveMessageTypes,
+    util::tuple_tools::for_each(receiveMessageTypes,
         [this, &topicName, receiver](auto&& ibMessage)
-    {
-        using IbMessageT = std::decay_t<decltype(ibMessage)>;
-        this->SubscribeRtpsTopic<to_idl_message_t<IbMessageT>>(topicName, receiver);
-    }
+        {
+            using IbMessageT = std::decay_t<decltype(ibMessage)>;
+            this->SubscribeRtpsTopic<to_idl_message_t<IbMessageT>>(topicName, receiver);
+        }
     );
 }
 
 template<typename IbMessageT>
-void FastRtpsComAdapterBottom::SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
+void FastRtpsConnection::SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
 {
     auto idlMsg = to_idl(std::forward<IbMessageT>(msg));
     idlMsg.senderAddr(to_idl(from));

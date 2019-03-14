@@ -4,8 +4,8 @@ add_library(IbMwFastRtps STATIC
     IbSubListener.hpp
     FastRtpsComAdapter.hpp
     FastRtpsComAdapter.cpp
-    FastRtpsComAdapterBottom.hpp
-    FastRtpsComAdapterBottom.cpp
+    FastRtpsConnection.hpp
+    FastRtpsConnection.cpp
     FastRtpsGuard.hpp
     FastRtpsGuard.cpp
     fastrtps_fwd.h

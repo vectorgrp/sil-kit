@@ -27,7 +27,7 @@ public:
     void addReceiver(IbReceiver* receiver);
     void clearReceivers();
     
-    void onNewDataMessage(eprosima::fastrtps::Subscriber* sub) override;
+    inline void onNewDataMessage(eprosima::fastrtps::Subscriber* sub) override;
 
 private:
     std::vector<IbReceiver*> _receivers;

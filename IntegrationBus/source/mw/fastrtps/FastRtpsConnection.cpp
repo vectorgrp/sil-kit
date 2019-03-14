@@ -1,18 +1,12 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "FastRtpsComAdapterBottom.hpp"
+#include "FastRtpsConnection.hpp"
 
 #include <cassert>
 #include <sstream>
 
 #include "fastrtps/Domain.h"
 #include "fastrtps/utils/IPLocator.h"
-
-#include "ReportMatchingListener.hpp"
-
-#include "tuple_tools/bind.hpp"
-#include "tuple_tools/for_each.hpp"
-#include "tuple_tools/predicative_get.hpp"
 
 #include "ib/cfg/string_utils.hpp"
 
@@ -27,14 +21,14 @@ using namespace eprosima::fastrtps::rtps;
 
 namespace tt = util::tuple_tools;
 
-FastRtpsComAdapterBottom::FastRtpsComAdapterBottom(cfg::Config config, std::string participantName)
+FastRtpsConnection::FastRtpsConnection(cfg::Config config, std::string participantName)
     : _config{std::move(config)}
     , _participantName{std::move(participantName)}
     , _participantId{get_by_name(_config.simulationSetup.participants, _participantName).id}
 {
 }
 
-void FastRtpsComAdapterBottom::joinDomain(uint32_t domainId)
+void FastRtpsConnection::joinDomain(uint32_t domainId)
 {
     if (_fastRtpsParticipant)
         throw std::exception();
@@ -81,7 +75,7 @@ void FastRtpsComAdapterBottom::joinDomain(uint32_t domainId)
             //return portParams.portBase + portParams.domainIDGain * domainId + portParams.participantIDGain * participantId;
         };
 
-        std::cout << "FastRtpsComAdapterBottom is using DiscoverType: " << fastRtpsCfg.discoveryType << "\n";
+        std::cout << "FastRtpsConnection is using DiscoverType: " << fastRtpsCfg.discoveryType << "\n";
         switch (fastRtpsCfg.discoveryType)
         {
         case cfg::FastRtps::DiscoveryType::Local:
@@ -152,7 +146,7 @@ void FastRtpsComAdapterBottom::joinDomain(uint32_t domainId)
 }
 
 
-void FastRtpsComAdapterBottom::registerTopicTypeIfNecessary(TopicDataType* topicType)
+void FastRtpsConnection::registerTopicTypeIfNecessary(TopicDataType* topicType)
 {
     auto* participant = _fastRtpsParticipant.get();
     TopicDataType* registeredType = nullptr;
@@ -163,7 +157,7 @@ void FastRtpsComAdapterBottom::registerTopicTypeIfNecessary(TopicDataType* topic
     assert(registeredType);
 }
 
-auto FastRtpsComAdapterBottom::MakeFastrtpsProfileName(const std::string& topicName, eprosima::fastrtps::TopicDataType* topicType) -> std::string
+auto FastRtpsConnection::MakeFastrtpsProfileName(const std::string& topicName, eprosima::fastrtps::TopicDataType* topicType) -> std::string
 {
     std::string shortTypeName{topicType->getName()};
     auto colonPos = shortTypeName.rfind(':');
@@ -174,7 +168,7 @@ auto FastRtpsComAdapterBottom::MakeFastrtpsProfileName(const std::string& topicN
     return _participantName + '-' + shortTypeName + '-' + topicName;
 }
 
-auto FastRtpsComAdapterBottom::createPublisher(const std::string& topicName, TopicDataType* topicType, PublisherListener* listener) -> Publisher*
+auto FastRtpsConnection::createPublisher(const std::string& topicName, TopicDataType* topicType, PublisherListener* listener) -> Publisher*
 {
     assert(_fastRtpsParticipant);
 
@@ -213,7 +207,7 @@ auto FastRtpsComAdapterBottom::createPublisher(const std::string& topicName, Top
     return publisher;
 }
 
-auto FastRtpsComAdapterBottom::createSubscriber(const std::string& topicName, TopicDataType* topicType, SubscriberListener* listener) -> Subscriber*
+auto FastRtpsConnection::createSubscriber(const std::string& topicName, TopicDataType* topicType, SubscriberListener* listener) -> Subscriber*
 {
     assert(_fastRtpsParticipant);
 
@@ -238,7 +232,7 @@ auto FastRtpsComAdapterBottom::createSubscriber(const std::string& topicName, To
     return subscriber;
 }
 
-void FastRtpsComAdapterBottom::WaitForMessageDelivery()
+void FastRtpsConnection::WaitForMessageDelivery()
 {
     for (auto publisher : _allPublishers)
     {
@@ -255,7 +249,7 @@ void FastRtpsComAdapterBottom::WaitForMessageDelivery()
     }
 }
 
-void FastRtpsComAdapterBottom::FlushSendBuffers()
+void FastRtpsConnection::FlushSendBuffers()
 {
     for (auto publisher : _allPublishers)
     {

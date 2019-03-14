@@ -43,6 +43,7 @@ target_link_libraries(IntegrationBus
     PRIVATE IbMwLogging
     PRIVATE fastrtps
     PRIVATE fastcdr
+    PRIVATE IbUtil
 )
 
 add_mvsc_ib_include_filter()
