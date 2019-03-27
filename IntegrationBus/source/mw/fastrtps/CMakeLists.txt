@@ -2,8 +2,6 @@ add_subdirectory(idl)
 
 add_library(IbMwFastRtps STATIC
     IbSubListener.hpp
-    FastRtpsComAdapter.hpp
-    FastRtpsComAdapter.cpp
     FastRtpsConnection.hpp
     FastRtpsConnection.cpp
     FastRtpsGuard.hpp
@@ -31,19 +29,11 @@ add_library(IbMwFastRtps STATIC
 )
 
 target_link_libraries(IbMwFastRtps
-    PRIVATE IbInterface
-    IbUtil
+    PUBLIC IbUtil
+    PUBLIC IbInterface
+    PUBLIC fastrtps
+    PUBLIC fastcdr
     IbMwFastRtpsIdl
-    IbMwLogging
-    IbMwSync
-    IbSimCan
-    IbSimEthernet
-    IbSimFlexRay
-    IbSimLin
-    IbSimIO
-    IbSimGenericMessage
-    fastrtps
-    fastcdr
 )
 
 target_include_directories(IbMwFastRtps

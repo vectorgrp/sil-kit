@@ -39,11 +39,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(IntegrationBus
     PUBLIC  IbInterface
     PRIVATE IbConfig
-    PRIVATE IbMwFastRtps
-    PRIVATE IbMwLogging
-    PRIVATE fastrtps
-    PRIVATE fastcdr
-    PRIVATE IbUtil
+    PRIVATE IbMwComAdapter
 )
 
 add_mvsc_ib_include_filter()

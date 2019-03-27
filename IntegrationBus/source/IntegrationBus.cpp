@@ -4,17 +4,23 @@
 
 #include "Validation.hpp"
 
-#include "FastRtpsComAdapter.hpp"
-
+#include "ComAdapter.hpp"
 
 namespace ib {
-    auto CreateFastRtpsComAdapter(ib::cfg::Config config, const std::string& participantName, const uint32_t fastRtpsDomainId) -> std::unique_ptr<mw::IComAdapter>
+
+    template <class IbConnectionT>
+    auto connect(ib::cfg::Config config, const std::string& participantName, const uint32_t domainId) -> std::unique_ptr<mw::IComAdapter>
     {
         Validate(config);
-        auto fastRtpsComAdapter = std::make_unique<mw::FastRtpsComAdapter>(std::move(config), participantName);
-        fastRtpsComAdapter->joinIbDomain(fastRtpsDomainId);
+        auto comAdapter = std::make_unique<mw::ComAdapter<IbConnectionT>>(std::move(config), participantName);
+        comAdapter->joinIbDomain(domainId);
 
-        return std::move(fastRtpsComAdapter);
+        return std::move(comAdapter);
+    }
+
+    auto CreateFastRtpsComAdapter(ib::cfg::Config config, const std::string& participantName, const uint32_t domainId) -> std::unique_ptr<mw::IComAdapter>
+    {
+        return connect<mw::FastRtpsConnection>(std::move(config), participantName, domainId);
     }
 }
 

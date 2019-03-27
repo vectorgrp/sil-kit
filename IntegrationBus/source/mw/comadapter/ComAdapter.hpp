@@ -16,12 +16,16 @@
 #include "ILogmsgRouter.hpp"
 #include "IIbToLogmsgRouter.hpp"
 
+
+// Add connection types here and make sure they are instantiated in ComAdapter.cpp
 #include "FastRtpsConnection.hpp"
+
 
 namespace ib {
 namespace mw {
 
-class FastRtpsComAdapter : public IComAdapter
+template <class IbConnectionT>
+class ComAdapter : public IComAdapter
 {
 public:
     // ----------------------------------------
@@ -30,16 +34,16 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    FastRtpsComAdapter() = default;
-    FastRtpsComAdapter(const FastRtpsComAdapter&) = default;
-    FastRtpsComAdapter(FastRtpsComAdapter&&) = default;
-    FastRtpsComAdapter(cfg::Config config, const std::string& participantName);
+    ComAdapter() = default;
+    ComAdapter(const ComAdapter&) = default;
+    ComAdapter(ComAdapter&&) = default;
+    ComAdapter(cfg::Config config, const std::string& participantName);
 
 public:
     // ----------------------------------------
     // Operator Implementations
-    FastRtpsComAdapter& operator=(FastRtpsComAdapter& other) = default;
-    FastRtpsComAdapter& operator=(FastRtpsComAdapter&& other) = default;
+    ComAdapter& operator=(ComAdapter& other) = default;
+    ComAdapter& operator=(ComAdapter&& other) = default;
 
 public:
     // ----------------------------------------
@@ -219,7 +223,7 @@ private:
         sim::lin::IIbToLinSimulator*
     > _simulators {nullptr, nullptr, nullptr, nullptr};
 
-    FastRtpsConnection _fastrtpsConnection;
+    IbConnectionT _ibConnection;
 };
 
 // ================================================================================
@@ -228,3 +232,4 @@ private:
 
 } // mw
 } // namespace ib
+
