@@ -56,16 +56,17 @@ public:
     //
     void joinDomain(uint32_t domainId);
 
-    template <class IControllerT>
-    void PublishRtpsTopics(const std::string& topicName, EndpointId endpointId);
-    template<class EndpointT>
-    void SubscribeRtpsTopics(const std::string& topicName, EndpointT* receiver);
+    template<class IbServiceT>
+    inline void RegisterIbService(const std::string& topicName, EndpointId endpointId, IbServiceT* receiver);
 
     template<typename IbMessageT>
     void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg);
 
     void WaitForMessageDelivery();
     void FlushSendBuffers();
+
+    void Run() {};
+    void Stop() {};
 
 private:
     // ----------------------------------------
@@ -113,8 +114,14 @@ private:
     // --------------------------------------------------------------------------------
     template <class IdlMessageT>
     void PublishRtpsTopic(const std::string& topicName, EndpointId endpointId);
+    template <class IControllerT>
+    void PublishRtpsTopics(const std::string& topicName, EndpointId endpointId);
+
     template <class IdlMessageT>
     void SubscribeRtpsTopic(const std::string& topicName, IIbMessageReceiver<to_ib_message_t<IdlMessageT>>* receiver);
+    template<class EndpointT>
+    void SubscribeRtpsTopics(const std::string& topicName, EndpointId endpointId, EndpointT* receiver);
+
 
 private:
     // ----------------------------------------
@@ -174,6 +181,26 @@ private:
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
+template<class IbServiceT>
+void FastRtpsConnection::RegisterIbService(const std::string& topicName, EndpointId endpointId, IbServiceT* receiver)
+{
+    PublishRtpsTopics<IbServiceT>(topicName, endpointId);
+    SubscribeRtpsTopics(topicName, endpointId, receiver);
+}
+
+template<typename IbMessageT>
+void FastRtpsConnection::SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
+{
+    auto idlMsg = to_idl(std::forward<IbMessageT>(msg));
+    idlMsg.senderAddr(to_idl(from));
+
+    auto& rtpsTopics = std::get<RtpsTopics<decltype(idlMsg)>>(_rtpsTopics);
+    assert(rtpsTopics.endpointToPublisherMap.find(from.endpoint) != rtpsTopics.endpointToPublisherMap.end());
+
+    auto * publisher = rtpsTopics.endpointToPublisherMap[from.endpoint];
+    publisher->write(&idlMsg);
+}
+
 template <class AttrT>
 void FastRtpsConnection::SetupPubSubAttributes(AttrT& attributes, const std::string& topicName, eprosima::fastrtps::TopicDataType* topicType)
 {
@@ -239,7 +266,7 @@ void FastRtpsConnection::PublishRtpsTopics(const std::string& topicName, Endpoin
 }
 
 template<class EndpointT>
-void FastRtpsConnection::SubscribeRtpsTopics(const std::string& topicName, EndpointT* receiver)
+void FastRtpsConnection::SubscribeRtpsTopics(const std::string& topicName, EndpointId /*endpointId*/, EndpointT* receiver)
 {
     typename EndpointT::IbReceiveMessagesTypes receiveMessageTypes{};
 
@@ -252,18 +279,6 @@ void FastRtpsConnection::SubscribeRtpsTopics(const std::string& topicName, Endpo
     );
 }
 
-template<typename IbMessageT>
-void FastRtpsConnection::SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
-{
-    auto idlMsg = to_idl(std::forward<IbMessageT>(msg));
-    idlMsg.senderAddr(to_idl(from));
-
-    auto& rtpsTopics = std::get<RtpsTopics<decltype(idlMsg)>>(_rtpsTopics);
-    assert(rtpsTopics.endpointToPublisherMap.find(from.endpoint) != rtpsTopics.endpointToPublisherMap.end());
-
-    auto* publisher = rtpsTopics.endpointToPublisherMap[from.endpoint];
-    publisher->write(&idlMsg);
-}
 
 } // mw
 } // namespace ib

@@ -145,6 +145,9 @@ public:
     */
     void joinIbDomain(uint32_t domainId);
 
+    void Run() override { _ibConnection.Run(); }
+    void Stop() override { _ibConnection.Stop(); }
+
 private:
     // ----------------------------------------
     // private datatypes
@@ -154,7 +157,7 @@ private:
 private:
     // ----------------------------------------
     // private methods
-    void OnFastrtpsDomainJoined();
+    void onIbDomainJoined();
 
     template<typename IbMessageT>
     void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg);

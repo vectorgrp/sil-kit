@@ -153,6 +153,9 @@ public:
     virtual void WaitForMessageDelivery() = 0;
 
     virtual void FlushSendBuffers() = 0;
+
+    virtual void Run() = 0;
+    virtual void Stop() = 0;
 };
 
 } // mw

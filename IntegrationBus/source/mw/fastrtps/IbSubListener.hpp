@@ -40,6 +40,9 @@ private:
 template<class IdlMessageT>
 void IbSubListener<IdlMessageT>::addReceiver(IbReceiver* receiver)
 {
+    if (std::find(_receivers.begin(), _receivers.end(), receiver) != _receivers.end())
+        return;
+
     _receivers.push_back(receiver);
 }
     

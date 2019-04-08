@@ -70,12 +70,12 @@ template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::joinIbDomain(uint32_t domainId)
 {
     _ibConnection.joinDomain(domainId);
-    OnFastrtpsDomainJoined();
+    onIbDomainJoined();
     _logger->info("Participant {} has joined the IB-Domain {}", _participantName, domainId);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::OnFastrtpsDomainJoined()
+void ComAdapter<IbConnectionT>::onIbDomainJoined()
 {
     if (_participant->isSyncMaster)
     {
@@ -634,8 +634,7 @@ auto ComAdapter<IbConnectionT>::CreateController(EndpointId endpointId, const st
     auto controllerPtr = controller.get();
     controller->SetEndpointAddress(EndpointAddress{_participantId, endpointId});
 
-    _ibConnection.template PublishRtpsTopics<ControllerT>(topicname, endpointId);
-    _ibConnection.SubscribeRtpsTopics(topicname, controllerPtr);
+    _ibConnection.RegisterIbService(topicname, endpointId, controllerPtr);
 
     controllerMap[endpointId] = std::move(controller);
     return controllerPtr;
@@ -712,7 +711,7 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
                 try
                 {
                     auto proxyEndpoint = endpointMap.at(endpointName);
-                    _ibConnection.template PublishRtpsTopics<IIbToSimulatorT>(linkName, proxyEndpoint);
+                    _ibConnection.RegisterIbService(linkName, proxyEndpoint, busSim);
                 }
                 catch (const std::exception& e)
                 {
@@ -720,7 +719,6 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
                     continue;
                 }
             }
-            _ibConnection.SubscribeRtpsTopics(linkName, busSim);
         }
     }
 

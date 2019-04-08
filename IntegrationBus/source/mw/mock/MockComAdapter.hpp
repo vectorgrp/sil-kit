@@ -145,6 +145,8 @@ public:
 
     MOCK_METHOD0(WaitForMessageDelivery, void());
     MOCK_METHOD0(FlushSendBuffers, void());
+    MOCK_METHOD0(Run, void());
+    MOCK_METHOD0(Stop, void());
 
     std::shared_ptr<spdlog::logger> logger;
 };

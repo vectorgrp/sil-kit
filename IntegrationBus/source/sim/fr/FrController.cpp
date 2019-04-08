@@ -2,6 +2,8 @@
 
 #include "FrController.hpp"
 
+#include <stdexcept>
+
 #include "ib/sim/exceptions.hpp"
 #include "ib/mw/IComAdapter.hpp"
 
