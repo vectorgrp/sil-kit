@@ -8,6 +8,7 @@ target_link_libraries(IbMwComAdapter
     PUBLIC  IbInterface
     PUBLIC  IbMwLogging
     PUBLIC  IbMwFastRtps
+    PUBLIC  IbMwVAsio
     PRIVATE IbConfig
     PRIVATE IbUtil
     PRIVATE IbMwSync

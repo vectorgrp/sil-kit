@@ -12,13 +12,13 @@ namespace ib {
 namespace mw {
 namespace sync {
 
-MessageBuffer& operator<<(MessageBuffer& buffer, const QuantumRequest& request)
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const QuantumRequest& request)
 {
     buffer << request.now
            << request.duration;
     return buffer;
 }
-MessageBuffer& operator>>(MessageBuffer& buffer, QuantumRequest& request)
+inline MessageBuffer& operator>>(MessageBuffer& buffer, QuantumRequest& request)
 {
     buffer >> request.now
            >> request.duration;
@@ -26,7 +26,7 @@ MessageBuffer& operator>>(MessageBuffer& buffer, QuantumRequest& request)
 }
 
     
-MessageBuffer& operator<<(MessageBuffer& buffer, const QuantumGrant& grant)
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const QuantumGrant& grant)
 {
     buffer << grant.grantee
            << grant.now
@@ -34,7 +34,7 @@ MessageBuffer& operator<<(MessageBuffer& buffer, const QuantumGrant& grant)
            << grant.status;
     return buffer;
 }
-MessageBuffer& operator>>(MessageBuffer& buffer, QuantumGrant& grant)
+inline MessageBuffer& operator>>(MessageBuffer& buffer, QuantumGrant& grant)
 {
     buffer >> grant.grantee
            >> grant.now
@@ -44,13 +44,13 @@ MessageBuffer& operator>>(MessageBuffer& buffer, QuantumGrant& grant)
 }
 
     
-MessageBuffer& operator<<(MessageBuffer& buffer, const Tick& tick)
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const Tick& tick)
 {
     buffer << tick.now
            << tick.duration;
     return buffer;
 }
-MessageBuffer& operator>>(MessageBuffer& buffer, Tick& tick)
+inline MessageBuffer& operator>>(MessageBuffer& buffer, Tick& tick)
 {
     buffer >> tick.now
            >> tick.duration;
@@ -58,25 +58,25 @@ MessageBuffer& operator>>(MessageBuffer& buffer, Tick& tick)
 }
 
     
-MessageBuffer& operator<<(MessageBuffer& buffer, const TickDone& tick)
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const TickDone& tick)
 {
     buffer << tick.finishedTick;
     return buffer;
 }
-MessageBuffer& operator>>(MessageBuffer& buffer, TickDone& tick)
+inline MessageBuffer& operator>>(MessageBuffer& buffer, TickDone& tick)
 {
     buffer >> tick.finishedTick;
     return buffer;
 }
 
     
-MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantCommand& cmd)
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantCommand& cmd)
 {
     buffer << cmd.participant
            << cmd.kind;
     return buffer;
 }
-MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantCommand& cmd)
+inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantCommand& cmd)
 {
     buffer >> cmd.participant
            >> cmd.kind;
@@ -84,19 +84,19 @@ MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantCommand& cmd)
 }
 
     
-MessageBuffer& operator<<(MessageBuffer& buffer, const SystemCommand& cmd)
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const SystemCommand& cmd)
 {
     buffer << cmd.kind;
     return buffer;
 }
-MessageBuffer& operator>>(MessageBuffer& buffer, SystemCommand& cmd)
+inline MessageBuffer& operator>>(MessageBuffer& buffer, SystemCommand& cmd)
 {
     buffer >> cmd.kind;
     return buffer;
 }
     
 
-MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantStatus& status)
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantStatus& status)
 {
     buffer << status.participantName
            << status.state
@@ -105,7 +105,7 @@ MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantStatus& status
            << status.refreshTime;
     return buffer;
 }
-MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantStatus& status)
+inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantStatus& status)
 {
     buffer >> status.participantName
            >> status.state

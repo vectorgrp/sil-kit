@@ -9,7 +9,7 @@
 namespace ib {
 namespace mw {
 
-MessageBuffer& operator<<(MessageBuffer& buffer, const EndpointAddress& addr)
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const EndpointAddress& addr)
 {
     buffer << addr.participant
            << addr.endpoint;
@@ -17,7 +17,7 @@ MessageBuffer& operator<<(MessageBuffer& buffer, const EndpointAddress& addr)
 }
     
 
-MessageBuffer& operator>>(MessageBuffer& buffer, EndpointAddress& addr)
+inline MessageBuffer& operator>>(MessageBuffer& buffer, EndpointAddress& addr)
 {
     buffer >> addr.participant
            >> addr.endpoint;

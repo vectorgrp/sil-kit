@@ -10,6 +10,8 @@ add_library(IbMwVAsio STATIC
 target_link_libraries(IbMwVAsio
     PUBLIC IbUtil
     PUBLIC IbInterface
+    PUBLIC IbMwSync
+    PUBLIC IbSimCan
 )
 
 target_include_directories(IbMwVAsio
@@ -26,3 +28,4 @@ add_vib_test(TestMwVAsio_MessageBuffer SOURCES MessageBufferTest.cpp)
 add_vib_test(TestMwVAsio_SerdesMw SOURCES SerdesMwTest.cpp)
 add_vib_test(TestMwVAsio_SerdesMwSync SOURCES SerdesMwSyncTest.cpp)
 add_vib_test(TestMwVAsio_SerdesSimCan SOURCES SerdesSimCanTest.cpp)
+add_vib_test(TestMwVAsioConnection SOURCES VAsioConnectionTest.cpp LIBS IbMwVAsio IbMwComAdapter IbConfig gmock)

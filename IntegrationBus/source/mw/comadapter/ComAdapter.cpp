@@ -7,6 +7,7 @@ namespace ib {
 namespace mw {
 
 template class ComAdapter<FastRtpsConnection>;
+template class ComAdapter<VAsioConnection>;
 
 } // namespace mw
 } // namespace ib

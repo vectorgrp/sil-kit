@@ -17,7 +17,7 @@ VAsioConnection::VAsioConnection(cfg::Config config, std::string participantName
 {
 }
 
-void VAsioConnection::joinDomain(uint32_t domainId)
+void VAsioConnection::joinDomain(uint32_t /*domainId*/)
 {
 }
 

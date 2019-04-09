@@ -10,7 +10,7 @@ namespace ib {
 namespace sim {
 namespace can {
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanMessage& msg)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanMessage& msg)
 {
     buffer << msg.transmitId
            << msg.timestamp
@@ -20,7 +20,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanMessag
            << msg.dataField;
     return buffer;
 }
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanMessage& msg)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanMessage& msg)
 {
     uint8_t flags;
     uint8_t dlc;
@@ -35,14 +35,14 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanMessage& msg
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanTransmitAcknowledge& ack)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanTransmitAcknowledge& ack)
 {
     buffer << ack.transmitId
            << ack.timestamp
            << ack.status;
     return buffer;
 }
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanTransmitAcknowledge& ack)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanTransmitAcknowledge& ack)
 {
     buffer >> ack.transmitId
            >> ack.timestamp
