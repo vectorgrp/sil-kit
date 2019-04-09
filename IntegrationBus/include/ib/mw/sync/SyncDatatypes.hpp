@@ -18,7 +18,7 @@ struct QuantumRequest
     std::chrono::nanoseconds duration;
 };
 
-enum class QuantumRequestStatus
+enum class QuantumRequestStatus : uint8_t
 {
     Invalid, //!< Conversion Error
     Granted, //!< Request was granted.
@@ -49,7 +49,7 @@ struct TickDone
 
 struct ParticipantCommand
 {
-    enum class Kind {
+    enum class Kind : uint8_t {
         Invalid,
         Initialize,
         ReInitialize
@@ -61,7 +61,7 @@ struct ParticipantCommand
 
 struct SystemCommand
 {
-    enum class Kind {
+    enum class Kind : uint8_t {
         Invalid,
         Run,
         Stop,
@@ -73,7 +73,7 @@ struct SystemCommand
     Kind kind;
 };
 
-enum class ParticipantState {
+enum class ParticipantState : uint8_t{
     Invalid,
     Idle,
     Initializing,
@@ -100,7 +100,7 @@ struct ParticipantStatus
     std::chrono::system_clock::time_point refreshTime;
 };
 
-enum class SystemState {
+enum class SystemState : uint8_t{
     Invalid,
     Idle,
     Initializing,

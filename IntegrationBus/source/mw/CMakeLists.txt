@@ -1,5 +1,6 @@
 add_subdirectory(comadapter)
 add_subdirectory(fastrtps)
+add_subdirectory(vasio)
 add_subdirectory(mock)
 add_subdirectory(sync)
 add_subdirectory(logging)
