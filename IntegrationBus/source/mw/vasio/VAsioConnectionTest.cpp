@@ -53,10 +53,10 @@ TEST(MwVAsioConnection, does_this_work_at_all)
     can2->RegisterReceiveMessageHandler([&can2callbacks](auto* controller, auto& message) { can2callbacks.ReceiveMessage(controller, message); });
     can2->RegisterTransmitStatusHandler([&can2callbacks](auto* controller, auto& message) { can2callbacks.ReceiveAck(controller, message); });
 
-    ib::mw::VAsioConnectionPeer peer1(&comAdapter1.GetIbConnection());
-    ib::mw::VAsioConnectionPeer peer2(&comAdapter2.GetIbConnection());
+    //ib::mw::VAsioConnectionPeer peer1(&comAdapter1.GetIbConnection());
+    //ib::mw::VAsioConnectionPeer peer2(&comAdapter2.GetIbConnection());
 
-    peer1.Connect(&peer2);
+    //peer1.Connect(&peer2);
 
 
     ib::sim::can::CanMessage msg;

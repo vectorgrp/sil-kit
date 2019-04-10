@@ -29,5 +29,6 @@ namespace ib {
 * created.
 */
 IntegrationBusAPI auto CreateFastRtpsComAdapter(ib::cfg::Config config, const std::string& participantName, const uint32_t fastRtpsDomainId) -> std::unique_ptr<mw::IComAdapter>;
+IntegrationBusAPI auto CreateVAsioComAdapter(ib::cfg::Config config, const std::string& participantName, const uint32_t fastRtpsDomainId) -> std::unique_ptr<mw::IComAdapter>;
 
 } // namespace ib

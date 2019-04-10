@@ -5,6 +5,14 @@ add_library(IbMwVAsio STATIC
     SerdesMw.hpp
     SerdesMwSync.hpp
     SerdesSimCan.hpp
+
+    IVAsioPeer.hpp
+    VAsioTcpPeer.hpp
+    VAsioTcpPeer.cpp
+    VAsioReceiver.hpp
+    VAsioSender.hpp
+    VAsioMsgKind.hpp
+    VAsioMessageSubscriber.hpp
 )
 
 target_link_libraries(IbMwVAsio
@@ -16,10 +24,17 @@ target_link_libraries(IbMwVAsio
 
 target_include_directories(IbMwVAsio
     PUBLIC .
+    PUBLIC ${THIRDPARTY_DIR}/Fast-RTPS/thirdparty/asio/asio/include/
 )
+
+target_compile_definitions(IbMwVAsio
+    PUBLIC ASIO_STANDALONE
+)
+
 
 if (MSVC)
     target_compile_options(IbMwVAsio PRIVATE "/bigobj")
+    target_compile_definitions(IbMwVAsio PUBLIC _WIN32_WINNT=0x0601)
 endif (MSVC)
 
 add_mvsc_ib_include_filter()

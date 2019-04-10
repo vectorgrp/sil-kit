@@ -22,5 +22,11 @@ namespace ib {
     {
         return connect<mw::FastRtpsConnection>(std::move(config), participantName, domainId);
     }
+
+    auto CreateVAsioComAdapter(ib::cfg::Config config, const std::string& participantName, const uint32_t domainId) -> std::unique_ptr<mw::IComAdapter>
+    {
+        return connect<mw::VAsioConnection>(std::move(config), participantName, domainId);
+    }
+    
 }
 

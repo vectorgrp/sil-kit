@@ -24,6 +24,19 @@
 #include "SerdesMwSync.hpp"
 #include "SerdesSimCan.hpp"
 
+#include "IVAsioPeer.hpp"
+#include "VAsioTcpPeer.hpp"
+#include "VAsioReceiver.hpp"
+#include "VAsioSender.hpp"
+#include "VAsioMessageSubscriber.hpp"
+#include "VAsioMsgKind.hpp"
+
+#include "ib/mw/sync/string_utils.hpp"
+#include "ib/sim/can/string_utils.hpp"
+
+#include "asio.hpp"
+
+
 namespace ib {
 namespace mw {
 
@@ -44,122 +57,12 @@ DefineIbMsgTraits(ib::sim::can, CanTransmitAcknowledge)
 #define DefineRegisterServiceMethod(IbServiceT) template<> void RegisterIbService<IbServiceT>(const std::string& link, EndpointId endpointId, IbServiceT* service) { RegisterIbService__<IbServiceT>(link, endpointId, service); }
 #define DefineSendIbMessageMethod(IbMsgT) template<> void SendIbMessageImpl<IbMsgT>(EndpointAddress from, const IbMsgT& msg) { SendIbMessageImpl__(from, msg); }
 
-struct VAsioMsgSubscriber
-{
-    uint16_t    receiverIdx;
-    std::string linkName;
-    std::string msgTypeName;
-};
-
-inline MessageBuffer& operator<<(MessageBuffer& buffer, const VAsioMsgSubscriber& subscriber)
-{
-    buffer << subscriber.receiverIdx
-           << subscriber.linkName
-           << subscriber.msgTypeName;
-    return buffer;
-}
-
-inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioMsgSubscriber& subscriber)
-{
-    buffer >> subscriber.receiverIdx
-           >> subscriber.linkName
-           >> subscriber.msgTypeName;
-    return buffer;
-}
-
-enum class VAsioMsgKind
-{
-    Invalid = 0,
-    AnnounceSubscription = 1,
-    IbMwMsg = 2,
-    IbSimMsg = 3
-};
-
-struct IVAsioPeer
-{
-    virtual ~IVAsioPeer() = default;
-    virtual void SendIbMsg(MessageBuffer buffer) = 0;
-    virtual void Subscribe(VAsioMsgSubscriber subscriber) = 0;
-};
-
-class VAsioConnection;
-struct VAsioConnectionPeer : public IVAsioPeer
-{
-    inline VAsioConnectionPeer(VAsioConnection* connection);
-    inline void SendIbMsg(MessageBuffer buffer) override;
-    inline void Subscribe(VAsioMsgSubscriber subscriber) override;
-    inline void Connect(VAsioConnectionPeer* other);
-private:
-    VAsioConnection* _connection;
-    VAsioConnectionPeer* _other;
-};
-
-
-
-struct IVAsioReceiver
-{
-    virtual ~IVAsioReceiver() = default;
-    auto& GetDescriptor() const { return _subscriber; }
-    auto& GetDescriptor() { return _subscriber; }
-    void SetReceiverIdx(uint16_t receiverIdx) { _subscriber.receiverIdx = receiverIdx; }
-
-    virtual void ReceiveMsg(MessageBuffer&& buffer) = 0;
-
-private:
-    VAsioMsgSubscriber _subscriber;
-};
-
-template <class MsgT>
-struct VAsioReceiver : public IVAsioReceiver
-{
-    auto AddReceiver(ib::mw::IIbMessageReceiver<MsgT>* receiver)
-    {
-        _receivers.push_back(receiver);
-    }
-    virtual void ReceiveMsg(MessageBuffer&& buffer)
-    {
-        EndpointAddress from;
-        MsgT msg;
-        buffer >> from >> msg;
-        for (auto&& receiver : _receivers)
-        {
-            receiver->ReceiveIbMessage(from, msg);
-        }
-    }
-    std::vector<ib::mw::IIbMessageReceiver<MsgT>*> _receivers;
-};
-
-template <class MsgT>
-struct VAsioSender {
-    template <class MsgT>
-    void SendIbMessage(EndpointAddress from, const MsgT& msg)
-    {
-        for (auto&& remote : _remoteReceivers)
-        {
-            ib::mw::MessageBuffer buffer;
-            buffer << VAsioMsgKind::IbSimMsg << remote.receiverIdx << from << msg;
-            remote.peer->SendIbMsg(std::move(buffer));
-        }
-    }
-    void AddSubscriber(uint16_t receiverIdx, IVAsioPeer* peer)
-    {
-        _remoteReceivers.emplace_back(RemoteReceiver{receiverIdx, peer});
-    }
-private:
-    struct RemoteReceiver {
-        uint16_t receiverIdx;
-        IVAsioPeer* peer;
-    };
-    std::vector<RemoteReceiver> _remoteReceivers;
-};
-
 template <class MsgT>
 struct VAsioLink
 {
     std::shared_ptr<VAsioReceiver<MsgT>> receiver;
     std::shared_ptr<VAsioSender<MsgT>>   sender;
 };
-
 
 class VAsioConnection
 {
@@ -218,12 +121,12 @@ public:
     void WaitForMessageDelivery() {};
     void FlushSendBuffers() {};
 
-    void Run() {};
+    void Run();
     void Stop() {};
 
     // Temporary Helpers
     inline void OnSocketData(MessageBuffer&& buffer, IVAsioPeer* peer);
-    inline void OnConnect(IVAsioPeer* peer);
+
 
 private:
     // ----------------------------------------
@@ -245,6 +148,9 @@ private:
     template<class IbMessageT>
     void RegisterIbMsgSender(const std::string& link, EndpointId endpointId);
 
+    // TCP Related
+    void AcceptConnection();
+    void AddPeer(std::shared_ptr<VAsioTcpPeer> peer);
 
 private:
     // ----------------------------------------
@@ -279,47 +185,15 @@ private:
 
     std::vector<std::shared_ptr<IVAsioReceiver>> _rawMsgReceivers;
 
-    std::vector<IVAsioPeer*> _peers;
+    std::vector<std::shared_ptr<IVAsioPeer>> _peers;
+
+    asio::io_context _ioContext;
+    std::unique_ptr<asio::ip::tcp::acceptor> _tcpAcceptor;
 };
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-VAsioConnectionPeer::VAsioConnectionPeer(VAsioConnection* connection)
-    : _connection{connection}
-{
-}
-void VAsioConnectionPeer::SendIbMsg(MessageBuffer buffer)
-{
-    _connection->OnSocketData(std::move(buffer), _other);
-}
-void VAsioConnectionPeer::Subscribe(VAsioMsgSubscriber subscriber)
-{
-    MessageBuffer buffer;
-    buffer << VAsioMsgKind::AnnounceSubscription
-           << subscriber;
-    _connection->OnSocketData(std::move(buffer), _other);
-}
-
-void VAsioConnectionPeer::Connect(VAsioConnectionPeer* other)
-{
-    _other = other;
-    other->_other = this;
-    _connection->OnConnect(other);
-    other->_connection->OnConnect(this);
-}
-
-//template<class IbServiceT>
-//void VAsioConnection::RegisterIbService(const std::string& /*link*/, EndpointId /*endpointId*/, IbServiceT* /*receiver*/)
-//{
-//}
-//
-//template<typename IbMessageT>
-//void VAsioConnection::SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
-//{
-//}
-
-
 void VAsioConnection::ReceiveRawIbMessage(MessageBuffer&& buffer)
 {
     uint16_t receiverIdx;
@@ -337,8 +211,17 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(MessageBuffer&& buffer, IV
     VAsioMsgSubscriber subscriber;
     buffer >> subscriber;
 
+    if (TryAddSubscriber<sync::Tick>(subscriber, peer)) return;
+    if (TryAddSubscriber<sync::TickDone>(subscriber, peer)) return;
+    if (TryAddSubscriber<sync::QuantumRequest>(subscriber, peer)) return;
+    if (TryAddSubscriber<sync::QuantumGrant>(subscriber, peer)) return;
+    if (TryAddSubscriber<sync::ParticipantCommand>(subscriber, peer)) return;
+    if (TryAddSubscriber<sync::SystemCommand>(subscriber, peer)) return;
+    if (TryAddSubscriber<sync::ParticipantStatus>(subscriber, peer)) return;
     if (TryAddSubscriber<sim::can::CanMessage>(subscriber, peer)) return;
     if (TryAddSubscriber<sim::can::CanTransmitAcknowledge>(subscriber, peer)) return;
+
+    std::cout << "Cannot register subscription for: " << subscriber.linkName << " - " << subscriber.msgTypeName << "\n";
 }
 
 void VAsioConnection::OnSocketData(MessageBuffer&& buffer, IVAsioPeer* peer)
@@ -360,22 +243,19 @@ void VAsioConnection::OnSocketData(MessageBuffer&& buffer, IVAsioPeer* peer)
     }
 }
 
-void VAsioConnection::OnConnect(IVAsioPeer* peer)
-{
-    _peers.push_back(peer);
-    for (auto&& localReceiver : _rawMsgReceivers)
-    {
-        peer->Subscribe(localReceiver->GetDescriptor());
-    }
-}
-
 template<class IbMessageT>
 bool VAsioConnection::TryAddSubscriber(const VAsioMsgSubscriber& subscriber, IVAsioPeer* peer)
 {
     if (subscriber.msgTypeName == IbMsgTraits<IbMessageT>::TypeName())
     {
+        std::cout << "Adding Subscriber on Link " << subscriber.linkName << " for " << IbMsgTraits<IbMessageT>::TypeName() << "\n";
         auto&& ibLink = std::get<VAsioLink<IbMessageT>>(_links[subscriber.linkName]);
+        if (!ibLink.sender)
+        {
+            ibLink.sender = std::make_shared<VAsioSender<IbMessageT>>();
+        }
         ibLink.sender->AddSubscriber(subscriber.receiverIdx, peer);
+        return true;
     }
     return false;
 }

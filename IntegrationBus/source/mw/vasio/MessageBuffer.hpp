@@ -2,30 +2,49 @@
 
 #pragma once
 
-#include <cassert>
-
 #include <chrono>
 #include <string>
-#include <chrono>
-#include <vector>
 #include <type_traits>
+#include <vector>
 
 namespace ib {
 namespace mw {
 
 struct end_of_buffer : public std::exception {};    
-    
-struct MessageBuffer
+
+class MessageBuffer
 {
+public:
+    // ----------------------------------------
+    // Public Data Types
+
+public:
+    // ----------------------------------------
+    // Constructors and Destructor
     inline MessageBuffer() = default;
+    inline MessageBuffer(std::vector<uint8_t> data);
 
     MessageBuffer(const MessageBuffer& other) = default;
     MessageBuffer(MessageBuffer&& other) = default;
 
+public:
+    // ----------------------------------------
+    // Operator Implementations
     MessageBuffer& operator=(const MessageBuffer& other) = default;
     MessageBuffer& operator=(MessageBuffer&& other) = default;
 
-    // --------------------------------------------------------------------------------
+public:
+    // ----------------------------------------
+    // Public methods
+
+    //! \brief Return the underlying data storage by std::move and reset pointers
+    inline auto ReleaseStorage()->std::vector<uint8_t>;
+
+public:
+    // ----------------------------------------
+    // Elementary streaming operators
+
+    // ----------------------------------------
     // Integral Types
     template<typename IntegerT, typename std::enable_if_t<std::is_integral_v<IntegerT>, int> = 0>
     inline MessageBuffer& operator<<(IntegerT t);
@@ -63,39 +82,54 @@ struct MessageBuffer
     inline MessageBuffer& operator>>(std::chrono::system_clock::time_point& time);
 
 private:
-    std::vector<uint8_t> store;
-    std::size_t wPos{0u};
-    std::size_t rPos{0u};
+    // ----------------------------------------
+    // private members
+    std::vector<uint8_t> _storage;
+    std::size_t _wPos{0u};
+    std::size_t _rPos{0u};
 };
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
+MessageBuffer::MessageBuffer(std::vector<uint8_t> data)
+    : _storage{std::move(data)}
+    , _wPos{_storage.size()}
+    , _rPos{0u}
+{
+}
+
+auto MessageBuffer::ReleaseStorage() -> std::vector<uint8_t>
+{
+    _wPos = 0u;
+    _rPos = 0u;
+    return std::move(_storage);
+}
 
 // --------------------------------------------------------------------------------
 // Integral Types
 template<typename IntegerT, typename std::enable_if_t<std::is_integral_v<IntegerT>, int>>
 MessageBuffer& MessageBuffer::operator<<(IntegerT t)
 {
-    if (wPos + sizeof(IntegerT) > store.size())
+    if (_wPos + sizeof(IntegerT) > _storage.size())
     {
-        store.resize(store.size() + sizeof(IntegerT));
+        _storage.resize(_storage.size() + sizeof(IntegerT));
     }
-    IntegerT* dst = reinterpret_cast<IntegerT*>(store.data() + wPos);
+    IntegerT* dst = reinterpret_cast<IntegerT*>(_storage.data() + _wPos);
     *dst = t;
-    wPos += sizeof(IntegerT);
+    _wPos += sizeof(IntegerT);
 
     return *this;
 }
 template<typename IntegerT, typename std::enable_if_t<std::is_integral_v<IntegerT>, int>>
 MessageBuffer& MessageBuffer::operator>>(IntegerT& t)
 {
-    if (rPos + sizeof(IntegerT) > store.size())
+    if (_rPos + sizeof(IntegerT) > _storage.size())
         throw end_of_buffer{};
 
-    const IntegerT* src = reinterpret_cast<const IntegerT*>(store.data() + rPos);
+    const IntegerT* src = reinterpret_cast<const IntegerT*>(_storage.data() + _rPos);
     t = *src;
-    rPos += sizeof(IntegerT);
+    _rPos += sizeof(IntegerT);
 
     return *this;
 }
@@ -117,16 +151,18 @@ MessageBuffer& MessageBuffer::operator>>(T& t)
 // std::string
 MessageBuffer& MessageBuffer::operator<<(const std::string& str)
 {
-    assert(str.size() <= std::numeric_limits<uint32_t>::max());
+    if (str.size() > std::numeric_limits<uint32_t>::max())
+        throw end_of_buffer{};
+
     *this << static_cast<uint32_t>(str.length());
 
-    if (wPos + str.size() > store.size())
+    if (_wPos + str.size() > _storage.size())
     {
-        store.resize(store.size() + str.size());
+        _storage.resize(_wPos + str.size());
     }
 
-    std::copy(str.begin(), str.end(), store.begin() + wPos);
-    wPos += str.size();
+    std::copy(str.begin(), str.end(), _storage.begin() + _wPos);
+    _wPos += str.size();
 
     return *this;
 }
@@ -135,11 +171,11 @@ MessageBuffer& MessageBuffer::operator>>(std::string& str)
     uint32_t strLength{0u};
     *this >> strLength;
 
-    if (rPos + strLength > store.size())
+    if (_rPos + strLength > _storage.size())
         throw end_of_buffer{};
 
-    str = std::string(store.begin() + rPos, store.begin() + rPos + strLength);
-    rPos += strLength;
+    str = std::string(_storage.begin() + _rPos, _storage.begin() + _rPos + strLength);
+    _rPos += strLength;
 
     return *this;
 }
@@ -148,16 +184,18 @@ MessageBuffer& MessageBuffer::operator>>(std::string& str)
 // std::vector<uint8_t>
 MessageBuffer& MessageBuffer::operator<<(const std::vector<uint8_t>& vector)
 {
-    assert(vector.size() <= std::numeric_limits<uint32_t>::max());
+    if (vector.size() > std::numeric_limits<uint32_t>::max())
+        throw end_of_buffer{};
+
     *this << static_cast<uint32_t>(vector.size());
 
-    if (wPos + vector.size() > store.size())
+    if (_wPos + vector.size() > _storage.size())
     {
-        store.resize(store.size() + vector.size());
+        _storage.resize(_wPos + vector.size());
     }
 
-    std::copy(vector.begin(), vector.end(), store.begin() + wPos);
-    wPos += vector.size();
+    std::copy(vector.begin(), vector.end(), _storage.begin() + _wPos);
+    _wPos += vector.size();
 
     return *this;
 }
@@ -166,11 +204,11 @@ MessageBuffer& MessageBuffer::operator>>(std::vector<uint8_t>& vector)
     uint32_t vectorSize{0u};
     *this >> vectorSize;
 
-    if (rPos + vectorSize > store.size())
+    if (_rPos + vectorSize > _storage.size())
         throw end_of_buffer{};
 
-    vector = std::vector<uint8_t>(store.begin() + rPos, store.begin() + rPos + vectorSize);
-    rPos += vectorSize;
+    vector = std::vector<uint8_t>(_storage.begin() + _rPos, _storage.begin() + _rPos + vectorSize);
+    _rPos += vectorSize;
 
     return *this;
 }
@@ -180,7 +218,9 @@ MessageBuffer& MessageBuffer::operator>>(std::vector<uint8_t>& vector)
 template<typename ValueT>
 MessageBuffer& MessageBuffer::operator<<(const std::vector<ValueT>& vector)
 {
-    assert(vector.size() <= std::numeric_limits<uint32_t>::max());
+    if (vector.size() > std::numeric_limits<uint32_t>::max())
+        throw end_of_buffer{};
+
     *this << static_cast<uint32_t>(vector.size());
 
     for (auto&& value : vector)
