@@ -49,7 +49,7 @@ void VAsioTcpPeer::Subscribe(VAsioMsgSubscriber subscriber)
         << VAsioMsgKind::AnnounceSubscription
         << subscriber;
 
-    std::cout << "Announcing Subscription for: [" << subscriber.linkName << "] " << subscriber.msgTypeName << "\n";
+    std::cout << "INFO: Announcing subscription for: [" << subscriber.linkName << "] " << subscriber.msgTypeName << "\n";
 
     SendIbMsg(std::move(buffer));
 }

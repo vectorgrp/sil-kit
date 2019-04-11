@@ -19,6 +19,7 @@ target_link_libraries(IbMwVAsio
     PUBLIC IbUtil
     PUBLIC IbInterface
     PUBLIC IbMwSync
+    PUBLIC IbMwLogging
     PUBLIC IbSimCan
 )
 

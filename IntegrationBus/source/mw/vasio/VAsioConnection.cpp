@@ -9,6 +9,8 @@ namespace mw {
 
 namespace tt = util::tuple_tools;
 
+template <class T> struct Zero { using Type = T; };
+
 using asio::ip::tcp;
 
 VAsioConnection::VAsioConnection(cfg::Config config, std::string participantName)
@@ -84,6 +86,60 @@ void VAsioConnection::AddPeer(std::shared_ptr<VAsioTcpPeer> peer)
 
     _peers.emplace_back(std::move(peer));
 }
+
+
+void VAsioConnection::OnSocketData(MessageBuffer&& buffer, IVAsioPeer* peer)
+{
+    VAsioMsgKind msgKind;
+    buffer >> msgKind;
+    switch (msgKind)
+    {
+    case VAsioMsgKind::Invalid:
+        std::cerr << "WARNING: Received message with VAsioMsgKind::Invalid\n";
+        break;
+    case VAsioMsgKind::AnnounceSubscription:
+        return ReceiveSubscriptionAnnouncement(std::move(buffer), peer);
+        break;
+    case VAsioMsgKind::IbMwMsg:
+        return ReceiveRawIbMessage(std::move(buffer));
+    case VAsioMsgKind::IbSimMsg:
+        return ReceiveRawIbMessage(std::move(buffer));
+    }
+}
+
+void VAsioConnection::ReceiveSubscriptionAnnouncement(MessageBuffer&& buffer, IVAsioPeer* peer)
+{
+    VAsioMsgSubscriber subscriber;
+    buffer >> subscriber;
+
+    bool wasAdded = false;
+
+    tt::wrapped_tuple<Zero, IbMessageTypes> supportedTypes;
+    tt::for_each(supportedTypes, [&](auto zero) {
+
+        using IbMessageT = decltype(zero)::Type;
+        wasAdded |= TryAddSubscriber<IbMessageT>(subscriber, peer);
+
+        });
+
+    if (!wasAdded)
+    {
+        std::cout << "WARNING: Cannot register subscriber for: [" << subscriber.linkName << "] " << subscriber.msgTypeName << "\n";
+    }
+}
+
+void VAsioConnection::ReceiveRawIbMessage(MessageBuffer&& buffer)
+{
+    uint16_t receiverIdx;
+    buffer >> receiverIdx;
+    if (receiverIdx >= _rawMsgReceivers.size())
+    {
+        std::cerr << "WARNING: Ignoring RawIbMessage for unknown receiverIdx=" << receiverIdx << "\n";
+        return;
+    }
+    _rawMsgReceivers[receiverIdx]->ReceiveMsg(std::move(buffer));
+}
+
 
 
 } // namespace mw
