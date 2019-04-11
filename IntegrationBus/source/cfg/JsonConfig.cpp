@@ -190,16 +190,134 @@ auto from_json<EthernetController>(const json11::Json& json) -> EthernetControll
     return controller;
 }
 
+auto to_json(const sim::fr::ClusterParameters& clusterParameters) -> json11::Json
+{
+    return json11::Json::object{
+        { "gColdstartAttempts", clusterParameters.gColdstartAttempts },
+        { "gCycleCountMax", clusterParameters.gCycleCountMax },
+        { "gdActionPointOffset", clusterParameters.gdActionPointOffset },
+        { "gdDynamicSlotIdlePhase", clusterParameters.gdDynamicSlotIdlePhase },
+        { "gdMiniSlot", clusterParameters.gdMiniSlot },
+        { "gdMiniSlotActionPointOffset", clusterParameters.gdMiniSlotActionPointOffset },
+        { "gdStaticSlot", clusterParameters.gdStaticSlot },
+        { "gdSymbolWindow", clusterParameters.gdSymbolWindow },
+        { "gdSymbolWindowActionPointOffset", clusterParameters.gdSymbolWindowActionPointOffset },
+        { "gdTSSTransmitter", clusterParameters.gdTSSTransmitter },
+        { "gdWakeupTxActive", clusterParameters.gdWakeupTxActive },
+        { "gdWakeupTxIdle", clusterParameters.gdWakeupTxIdle },
+        { "gListenNoise", clusterParameters.gListenNoise },
+        { "gMacroPerCycle", clusterParameters.gMacroPerCycle },
+        { "gMaxWithoutClockCorrectionFatal", clusterParameters.gMaxWithoutClockCorrectionFatal },
+        { "gMaxWithoutClockCorrectionPassive", clusterParameters.gMaxWithoutClockCorrectionPassive },
+        { "gNumberOfMiniSlots", clusterParameters.gNumberOfMiniSlots },
+        { "gNumberOfStaticSlots", clusterParameters.gNumberOfStaticSlots },
+        { "gPayloadLengthStatic", clusterParameters.gPayloadLengthStatic },
+        { "gSyncFrameIDCountMax", clusterParameters.gSyncFrameIDCountMax }
+    };
+}
+
+template <>
+auto from_json<sim::fr::ClusterParameters>(const json11::Json& json) -> sim::fr::ClusterParameters
+{
+    sim::fr::ClusterParameters clusterParameters;
+    clusterParameters.gColdstartAttempts = static_cast<uint8_t>(json["gColdstartAttempts"].int_value());
+    clusterParameters.gCycleCountMax = static_cast<uint8_t>(json["gCycleCountMax"].int_value());
+    clusterParameters.gdActionPointOffset = static_cast<uint16_t>(json["gdActionPointOffset"].int_value());
+    clusterParameters.gdDynamicSlotIdlePhase = static_cast<uint16_t>(json["gdDynamicSlotIdlePhase"].int_value());
+    clusterParameters.gdMiniSlot = static_cast<uint16_t>(json["gdMiniSlot"].int_value());
+    clusterParameters.gdMiniSlotActionPointOffset = static_cast<uint16_t>(json["gdMiniSlotActionPointOffset"].int_value());
+    clusterParameters.gdStaticSlot = static_cast<uint16_t>(json["gdStaticSlot"].int_value());
+    clusterParameters.gdSymbolWindow = static_cast<uint16_t>(json["gdSymbolWindow"].int_value());
+    clusterParameters.gdSymbolWindowActionPointOffset = static_cast<uint16_t>(json["gdSymbolWindowActionPointOffset"].int_value());
+    clusterParameters.gdTSSTransmitter = static_cast<uint16_t>(json["gdTSSTransmitter"].int_value());
+    clusterParameters.gdWakeupTxActive = static_cast<uint16_t>(json["gdWakeupTxActive"].int_value());
+    clusterParameters.gdWakeupTxIdle = static_cast<uint16_t>(json["gdWakeupTxIdle"].int_value());
+    clusterParameters.gListenNoise = static_cast<uint8_t>(json["gListenNoise"].int_value());
+    clusterParameters.gMacroPerCycle = static_cast<uint16_t>(json["gMacroPerCycle"].int_value());
+    clusterParameters.gMaxWithoutClockCorrectionFatal = static_cast<uint8_t>(json["gMaxWithoutClockCorrectionFatal"].int_value());
+    clusterParameters.gMaxWithoutClockCorrectionPassive = static_cast<uint8_t>(json["gMaxWithoutClockCorrectionPassive"].int_value());
+    clusterParameters.gNumberOfMiniSlots = static_cast<uint16_t>(json["gNumberOfMiniSlots"].int_value());
+    clusterParameters.gNumberOfStaticSlots = static_cast<uint16_t>(json["gNumberOfStaticSlots"].int_value());
+    clusterParameters.gPayloadLengthStatic = static_cast<uint16_t>(json["gPayloadLengthStatic"].int_value());
+    clusterParameters.gSyncFrameIDCountMax = static_cast<uint8_t>(json["gSyncFrameIDCountMax"].int_value());
+    return clusterParameters;
+}
+
+auto to_json(const sim::fr::NodeParameters& nodeParameters) -> json11::Json
+{
+    return json11::Json::object{
+        { "pAllowHaltDueToClock", nodeParameters.pAllowHaltDueToClock },
+        { "pAllowPassiveToActive", nodeParameters.pAllowPassiveToActive },
+        { "pChannels", static_cast<uint8_t>(nodeParameters.pChannels) },
+        { "pClusterDriftDamping", nodeParameters.pClusterDriftDamping },
+        { "pdAcceptedStartupRange", nodeParameters.pdAcceptedStartupRange },
+        { "pdListenTimeout", nodeParameters.pdListenTimeout },
+        { "pKeySlotId", nodeParameters.pKeySlotId },
+        { "pKeySlotOnlyEnabled", nodeParameters.pKeySlotOnlyEnabled },
+        { "pKeySlotUsedForStartup", nodeParameters.pKeySlotUsedForStartup },
+        { "pKeySlotUsedForSync", nodeParameters.pKeySlotUsedForSync },
+        { "pLatestTx", nodeParameters.pLatestTx },
+        { "pMacroInitialOffsetA", nodeParameters.pMacroInitialOffsetA },
+        { "pMacroInitialOffsetB", nodeParameters.pMacroInitialOffsetB },
+        { "pMicroInitialOffsetA", nodeParameters.pMicroInitialOffsetA },
+        { "pMicroInitialOffsetB", nodeParameters.pMicroInitialOffsetB },
+        { "pMicroPerCycle", nodeParameters.pMicroPerCycle },
+        { "pOffsetCorrectionOut", nodeParameters.pOffsetCorrectionOut },
+        { "pOffsetCorrectionStart", nodeParameters.pOffsetCorrectionStart },
+        { "pRateCorrectionOut", nodeParameters.pRateCorrectionOut },
+        { "pWakeupChannel", static_cast<uint8_t>(nodeParameters.pWakeupChannel) },
+        { "pWakeupPattern", nodeParameters.pWakeupPattern },
+        { "pdMicrotick", static_cast<uint8_t>(nodeParameters.pdMicrotick) },
+        { "pSamplesPerMicrotick", nodeParameters.pSamplesPerMicrotick }
+    };
+}
+
+template <>
+auto from_json<sim::fr::NodeParameters>(const json11::Json& json) -> sim::fr::NodeParameters
+{
+    sim::fr::NodeParameters nodeParameters;
+    nodeParameters.pAllowHaltDueToClock = static_cast<uint8_t>(json["pAllowHaltDueToClock"].int_value());
+    nodeParameters.pAllowPassiveToActive = static_cast<uint8_t>(json["pAllowPassiveToActive"].int_value());
+    nodeParameters.pChannels = static_cast<sim::fr::Channel>(json["pChannels"].int_value());
+    nodeParameters.pClusterDriftDamping = static_cast<uint8_t>(json["pClusterDriftDamping"].int_value());
+    nodeParameters.pdAcceptedStartupRange = static_cast<sim::fr::FrMickroTick>(json["pdAcceptedStartupRange"].int_value());
+    nodeParameters.pdListenTimeout = static_cast<sim::fr::FrMickroTick>(json["pdListenTimeout"].int_value());
+    nodeParameters.pKeySlotId = static_cast<uint16_t>(json["pKeySlotId"].int_value());
+    nodeParameters.pKeySlotOnlyEnabled = static_cast<uint8_t>(json["pKeySlotOnlyEnabled"].int_value());
+    nodeParameters.pKeySlotUsedForStartup = static_cast<uint8_t>(json["pKeySlotUsedForStartup"].int_value());
+    nodeParameters.pKeySlotUsedForSync = static_cast<uint8_t>(json["pKeySlotUsedForSync"].int_value());
+    nodeParameters.pLatestTx = static_cast<uint16_t>(json["pLatestTx"].int_value());
+    nodeParameters.pMacroInitialOffsetA = static_cast<uint8_t>(json["pMacroInitialOffsetA"].int_value());
+    nodeParameters.pMacroInitialOffsetB = static_cast<uint8_t>(json["pMacroInitialOffsetB"].int_value());
+    nodeParameters.pMicroInitialOffsetA = static_cast<sim::fr::FrMickroTick>(json["pMicroInitialOffsetA"].int_value());
+    nodeParameters.pMicroInitialOffsetB = static_cast<sim::fr::FrMickroTick>(json["pMicroInitialOffsetB"].int_value());
+    nodeParameters.pMicroPerCycle = static_cast<sim::fr::FrMickroTick>(json["pMicroPerCycle"].int_value());
+    nodeParameters.pOffsetCorrectionOut = static_cast<sim::fr::FrMickroTick>(json["pOffsetCorrectionOut"].int_value());
+    nodeParameters.pOffsetCorrectionStart = static_cast<uint16_t>(json["pOffsetCorrectionStart"].int_value());
+    nodeParameters.pRateCorrectionOut = static_cast<sim::fr::FrMickroTick>(json["pRateCorrectionOut"].int_value());
+    nodeParameters.pWakeupChannel = static_cast<sim::fr::Channel>(json["pWakeupChannel"].int_value());
+    nodeParameters.pWakeupPattern = static_cast<uint8_t>(json["pWakeupPattern"].int_value());
+    nodeParameters.pdMicrotick = static_cast<sim::fr::ClockPeriod>(json["pdMicrotick"].int_value());
+    nodeParameters.pSamplesPerMicrotick = static_cast<uint8_t>(json["pSamplesPerMicrotick"].int_value());
+    return nodeParameters;
+}
+
 auto to_json(const FlexrayController& controller) -> json11::Json
 {
-    return json11::Json(controller.name);
+    return json11::Json::object{
+        { "Name", controller.name },
+        { "ClusterParameters",  to_json(controller.clusterParameters) },
+        { "NodeParameters", to_json(controller.nodeParameters) }
+    };
 }
 
 template <>
 auto from_json<FlexrayController>(const json11::Json& json) -> FlexrayController
 {
     FlexrayController controller;
-    controller.name = json.string_value();
+    controller.name = json["Name"].string_value();
+    controller.clusterParameters = from_json<sim::fr::ClusterParameters>(json["ClusterParameters"]);
+    controller.nodeParameters = from_json<sim::fr::NodeParameters>(json["ClusterParameters"]);
     return controller;
 }
 

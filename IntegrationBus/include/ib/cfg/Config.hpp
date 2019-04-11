@@ -14,6 +14,7 @@
 #include "ib/IbMacros.hpp"
 #include "ib/mw/EndpointAddress.hpp"
 #include "ib/sim/io/IoDatatypes.hpp"
+#include "ib/sim/fr/FrDatatypes.hpp"
 
 namespace ib {
 namespace cfg {
@@ -87,6 +88,9 @@ struct FlexrayController
     std::string name;
     mw::EndpointId endpointId;
     int16_t linkId{-1};
+
+    sim::fr::ClusterParameters clusterParameters;
+    sim::fr::NodeParameters nodeParameters;
 };
 
 enum class PortDirection : uint8_t
