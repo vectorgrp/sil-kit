@@ -1,6 +1,4 @@
-project("IbMwSync" CXX)
-
-add_library(${PROJECT_NAME}
+add_library("IbMwSync"
     ParticipantController.hpp
     ParticipantController.cpp
     SyncDatatypeUtils.hpp
@@ -13,12 +11,13 @@ add_library(${PROJECT_NAME}
     SystemMonitor.cpp
 )
 
-target_include_directories(${PROJECT_NAME}
-    PUBLIC ${PROJECT_SOURCE_DIR}
+target_include_directories("IbMwSync"
+    PUBLIC .
 )
 
-target_link_libraries(${PROJECT_NAME}
-    PRIVATE IbInterface
+target_link_libraries("IbMwSync"
+    PUBLIC IbInterface
+    PUBLIC IbUtil
 )
 
 add_mvsc_ib_include_filter()

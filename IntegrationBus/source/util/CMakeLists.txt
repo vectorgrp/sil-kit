@@ -1,6 +1,7 @@
 add_library(IbUtil INTERFACE)
 
 target_sources(IbUtil INTERFACE 
+    ${CMAKE_CURRENT_LIST_DIR}/PerformanceMonitor.hpp
     ${CMAKE_CURRENT_LIST_DIR}/tuple_tools/bind.hpp
     ${CMAKE_CURRENT_LIST_DIR}/tuple_tools/conditional.hpp
     ${CMAKE_CURRENT_LIST_DIR}/tuple_tools/for_each.hpp

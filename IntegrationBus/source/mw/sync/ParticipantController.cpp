@@ -477,6 +477,33 @@ auto ParticipantController::Now() const -> std::chrono::nanoseconds
     return _now;
 }
 
+void ParticipantController::LogCurrentPerformanceStats()
+{
+    using DoubleMSecs = std::chrono::duration<double, std::milli>;
+    auto toMSecs = [](auto duration) { return std::chrono::duration_cast<DoubleMSecs>(duration).count(); };
+
+    if (_execTimeMonitor.SampleCount() == 0u)
+    {
+        _logger->info("TotalTaskTime: -.--ms [-.--, -.--] \tWaitTime: -.--ms [-.--, -.--]  \tCpuTime: -.--ms, [-.--, -.--] \t(avg [min,max])");
+    }
+    else
+    {
+        _logger->info("TotalTaskTime: {:.2f}ms [{:.2f}, {:.2f}] \tWaitTime: {:.2f}ms [{:.2f}, {:.2f}]  \tCpuTime: {:.2f}, [{:.2f}, {:.2f}] \t(avg [min,max])",
+            toMSecs(_execTimeMonitor.AvgDuration<DoubleMSecs>() + _waitTimeMonitor.AvgDuration<DoubleMSecs>()),
+            toMSecs(_execTimeMonitor.MinDuration() + _waitTimeMonitor.MinDuration()),
+            toMSecs(_execTimeMonitor.MaxDuration() + _waitTimeMonitor.MaxDuration()),
+
+            toMSecs(_waitTimeMonitor.AvgDuration<DoubleMSecs>()),
+            toMSecs(_waitTimeMonitor.MinDuration()),
+            toMSecs(_waitTimeMonitor.MaxDuration()),
+
+            toMSecs(_execTimeMonitor.AvgDuration<DoubleMSecs>()),
+            toMSecs(_execTimeMonitor.MinDuration()),
+            toMSecs(_execTimeMonitor.MaxDuration())
+        );
+    }
+}
+
 void ParticipantController::SetEndpointAddress(const mw::EndpointAddress& addr)
 {
     _endpointAddress = addr;
@@ -523,6 +550,7 @@ void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, c
         if (State() == ParticipantState::Initialized)
         {
             ChangeState(ParticipantState::Running, "Received SystemCommand::Run");
+            _waitTimeMonitor.StartMeasurement();
             _taskRunner->Run();
             return;
         }
@@ -737,7 +765,11 @@ void ParticipantController::AdvanceQuantum()
 void ParticipantController::ExecuteSimTask()
 {
     assert(_simTask);
+    _waitTimeMonitor.StopMeasurement();
+    _execTimeMonitor.StartMeasurement();
     _simTask(_now, _duration);
+    _execTimeMonitor.StopMeasurement();
+    _waitTimeMonitor.StartMeasurement();
 }
 
 void ParticipantController::ChangeState(ParticipantState newState, std::string reason)

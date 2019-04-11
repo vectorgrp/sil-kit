@@ -176,6 +176,10 @@ public:
     /*! \brief Get the current simulation time
      */
     virtual auto Now() const -> std::chrono::nanoseconds = 0;
+
+
+    //! \brief Experimental API - Not final yet.
+    virtual void LogCurrentPerformanceStats() = 0;
 };
 
 } // namespace sync

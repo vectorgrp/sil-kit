@@ -11,6 +11,7 @@
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/cfg/Config.hpp"
 
+#include "PerformanceMonitor.hpp"
 
 namespace ib {
 namespace mw {
@@ -63,6 +64,8 @@ public:
     auto Status() const -> const ParticipantStatus& override;
     void RefreshStatus() override;
     auto Now() const -> std::chrono::nanoseconds override;
+
+    void LogCurrentPerformanceStats() override;
 
     // IIbToParticipantController
     void SetEndpointAddress(const mw::EndpointAddress& addr) override;
@@ -122,6 +125,9 @@ private:
     ShutdownHandlerT _shutdownHandler;
     SimTaskT _simTask;
     std::future<void> _asyncResult;
+
+    util::PerformanceMonitor _execTimeMonitor;
+    util::PerformanceMonitor _waitTimeMonitor;
 };
 
 class ITaskRunner
