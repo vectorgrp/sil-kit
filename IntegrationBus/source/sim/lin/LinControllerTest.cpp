@@ -76,6 +76,28 @@ protected:
         controller.ReceiveIbMessage(from, response);
     }
 
+    void SetupResponseOutOfOrder(EndpointAddress from, LinMessage msg)
+    {
+        ControllerConfig ctrlConfig;
+        ctrlConfig.controllerMode = ControllerMode::Slave;
+
+        SlaveConfiguration slaveConfig;
+        SlaveResponseConfig responseConfig;
+        responseConfig.linId = msg.linId;
+        responseConfig.responseMode = ResponseMode::TxUnconditional;
+        responseConfig.payloadLength = msg.payload.size;
+        responseConfig.checksumModel = msg.checksumModel;
+        slaveConfig.responseConfigs.emplace_back(std::move(responseConfig));
+
+        SlaveResponse response;
+        response.linId = msg.linId;
+        response.payload = msg.payload;
+
+        controller.ReceiveIbMessage(from, response);
+        controller.ReceiveIbMessage(from, slaveConfig);
+        controller.ReceiveIbMessage(from, ctrlConfig);
+    }
+
     void RemoveResponse(EndpointAddress from, LinId linId)
     {
         SlaveConfiguration slaveConfig;
@@ -161,6 +183,58 @@ TEST_F(LinControllerTest, request_lin_message_with_one_configured_response)
 
     controller.SetMasterMode();
     SetupResponse(otherControllerAddress, reply);
+    controller.RequestMessage(request);
+}
+
+TEST_F(LinControllerTest, request_lin_message_with_one_configured_response_late_master_mode)
+{
+    RxRequest request{};
+    request.linId = 20;
+    request.checksumModel = ChecksumModel::Enhanced;
+
+    LinMessage reply{};
+    reply.linId = request.linId;
+    reply.status = MessageStatus::RxSuccess;
+    reply.payload.size = 4;
+    reply.payload.data = {{1,2,3,4,5,6,7,8}};
+    reply.checksumModel = ChecksumModel::Enhanced;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, reply))
+        .Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, A<const RxRequest&>()))
+        .Times(0);
+
+    EXPECT_CALL(callbacks, ReceiveMessage(&controller, reply))
+        .Times(1);
+
+    SetupResponse(otherControllerAddress, reply);
+    controller.SetMasterMode();
+    controller.RequestMessage(request);
+}
+
+TEST_F(LinControllerTest, request_lin_message_with_one_configured_response_out_of_order)
+{
+    RxRequest request{};
+    request.linId = 20;
+    request.checksumModel = ChecksumModel::Enhanced;
+
+    LinMessage reply{};
+    reply.linId = request.linId;
+    reply.status = MessageStatus::RxSuccess;
+    reply.payload.size = 4;
+    reply.payload.data = {{1,2,3,4,5,6,7,8}};
+    reply.checksumModel = ChecksumModel::Enhanced;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, reply))
+        .Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, A<const RxRequest&>()))
+        .Times(0);
+
+    EXPECT_CALL(callbacks, ReceiveMessage(&controller, reply))
+        .Times(1);
+
+    controller.SetMasterMode();
+    SetupResponseOutOfOrder(otherControllerAddress, reply);
     controller.RequestMessage(request);
 }
 
@@ -315,13 +389,21 @@ TEST_F(LinControllerTest, dont_acknowledge_slave_responses)
 TEST_F(LinControllerTest, trigger_slave_callbacks)
 {
     controller.SetSlaveMode();
-
+    SlaveConfiguration config;
+    SlaveResponseConfig responseConfig;
+    responseConfig.responseMode = ResponseMode::Rx;
+    responseConfig.linId = 0;
+    config.responseConfigs.push_back(responseConfig);
+    responseConfig.linId = 1;
+    config.responseConfigs.push_back(responseConfig);
+    controller.SetSlaveConfiguration(config);
 
     LinMessage masterTx;
     masterTx.status = MessageStatus::TxSuccess;
-    
+    masterTx.linId = 0;
     LinMessage slaveTx;
     slaveTx.status = MessageStatus::RxSuccess;
+    slaveTx.linId = 1;
     
     EXPECT_CALL(callbacks, ReceiveMessage(&controller, masterTx)).Times(1);
     EXPECT_CALL(callbacks, ReceiveMessage(&controller, slaveTx)).Times(1);
@@ -433,6 +515,13 @@ TEST_F(LinControllerTest, send_gotosleep_command)
 TEST_F(LinControllerTest, call_gotosleep_callback)
 {
     controller.SetSlaveMode();
+
+    SlaveConfiguration config;
+    SlaveResponseConfig responseConfig;
+    responseConfig.responseMode = ResponseMode::Rx;
+    responseConfig.linId = 0x3C;
+    config.responseConfigs.push_back(responseConfig);
+    controller.SetSlaveConfiguration(config);
 
     LinMessage gotosleepCmd;
     gotosleepCmd.status = MessageStatus::TxSuccess;

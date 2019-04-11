@@ -97,7 +97,7 @@ private:
     struct LinSlave
     {
         ControllerConfig config;
-        std::vector<Response> responses;
+        std::array<Response, 64> responses;
     };
 
 private:
@@ -112,8 +112,9 @@ private:
     template <typename MsgT>
     inline void SendIbMessage(MsgT&& msg);
 
+    void UpdateSlaveConfiguration(mw::EndpointAddress from, const SlaveConfiguration& config);
+
     inline auto GetLinSlave(mw::EndpointAddress addr) -> LinSlave&;
-    inline bool IsKnownSlave(mw::EndpointAddress addr) const;
     
 private:
     // ----------------------------------------
@@ -147,12 +148,6 @@ auto LinController::GetLinSlave(mw::EndpointAddress addr) -> LinSlave&
 {
     uint32_t slaveKey = (addr.participant << sizeof(mw::EndpointAddress::endpoint) * 8) | addr.endpoint;
     return _linSlaves[slaveKey];
-}
-
-bool LinController::IsKnownSlave(mw::EndpointAddress addr) const
-{
-    uint32_t slaveKey = (addr.participant << sizeof(mw::EndpointAddress::endpoint) * 8) | addr.endpoint;
-    return _linSlaves.count(slaveKey) == 1;
 }
 
 } // namespace lin

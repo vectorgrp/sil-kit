@@ -26,11 +26,9 @@ LinController::LinController(mw::IComAdapter* comAdapter)
 
 void LinController::SetMasterMode()
 {
-    if (_controllerMode != ControllerMode::Inactive)
+    if (_controllerMode == ControllerMode::Slave)
     {
-        std::string errorMsg{"LinController::SetMasterMode() must only be called on unconfigured controllers!"};
-        _logger->error(errorMsg);
-        throw std::runtime_error{errorMsg};
+        _logger->warn("LinController::SetMasterMode() called for slave!");
     }
     _configuredControllerMode = ControllerMode::Master;
     _controllerMode = ControllerMode::Master;
@@ -38,11 +36,9 @@ void LinController::SetMasterMode()
 
 void LinController::SetSlaveMode()
 {
-    if (_controllerMode != ControllerMode::Inactive)
+    if (_controllerMode == ControllerMode::Master)
     {
-        std::string errorMsg{"LinController::SetSlaveMode() must only be called on unconfigured controllers!"};
-        _logger->error(errorMsg);
-        throw std::runtime_error{errorMsg};
+        _logger->warn("LinController::SetSlaveMode() called for master!");
     }
 
     // set slave mode
@@ -96,8 +92,39 @@ void LinController::SetOperationalMode()
     SendIbMessage(config);
 }
 
+void LinController::UpdateSlaveConfiguration(mw::EndpointAddress from, const SlaveConfiguration& config)
+{
+    auto&& linSlave = GetLinSlave(from);
+    for (auto&& responseConfig : config.responseConfigs)
+    {
+        auto linId = responseConfig.linId;
+        if (linId >= linSlave.responses.size())
+        {
+            _logger->warn(
+                "LinController received SlaveConfiguration from {{{}, {}}} for invalid LIN ID {}",
+                from.participant,
+                from.endpoint,
+                linId);
+            return;
+        }
+
+        if (responseConfig.payloadLength > 8)
+        {
+            _logger->warn(
+                "LinController received SlaveResponseConfig with payload length {} from {{{}, {}}}",
+                static_cast<unsigned int>(responseConfig.payloadLength),
+                from.participant,
+                from.endpoint);
+            continue;
+        }
+
+        static_cast<SlaveResponseConfig&>(linSlave.responses[linId]) = responseConfig;
+    }
+}
+
 void LinController::SetSlaveConfiguration(const SlaveConfiguration& config)
 {
+    UpdateSlaveConfiguration(_endpointAddr, config);
     SendIbMessage(config);
 }
 
@@ -303,6 +330,15 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const LinMess
         return;
     }
 
+    if (msg.linId >= 64)
+    {
+        _logger->warn(
+            "LinController received LinMessage with lin ID {} from {{{}, {}}}",
+            msg.linId,
+            from.participant,
+            from.endpoint);
+        return;
+    }
 
     switch (_controllerMode)
     {
@@ -314,7 +350,10 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const LinMess
         //[[fallthrough]]
 
     case ControllerMode::Slave:
-        CallHandlers(msg);
+        if (GetLinSlave(_endpointAddr).responses[msg.linId].responseMode == ResponseMode::Rx)
+        {
+            CallHandlers(msg);
+        }
         if (msg.linId == GotosleepId)
         {
             if (msg.payload == GotosleepPayload)
@@ -330,7 +369,7 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const LinMess
             }
         }
         return;
-
+   
     case ControllerMode::Sleep:
         _logger->warn("LinController received LIN Message with id={} while controller is in sleep mode. Message is ignored.", static_cast<unsigned int>(msg.linId));
         return;
@@ -354,10 +393,6 @@ void LinController::ReceiveIbMessage(mw::EndpointAddress from, const ControllerC
     if (from == _endpointAddr)
         return;
 
-    // only controllers in master mode are responsible for managing responses.
-    if (_configuredControllerMode != ControllerMode::Master)
-        return;
-
     if (msg.controllerMode == ControllerMode::Master)
     {
         _logger->warn("LinController received ControllerConfig with master mode, which will be ignored");
@@ -373,38 +408,7 @@ void LinController::ReceiveIbMessage(mw::EndpointAddress from, const SlaveConfig
     if (from == _endpointAddr)
         return;
 
-    // only controllers in master mode are responsible for managing responses.
-    if (_configuredControllerMode != ControllerMode::Master)
-        return;
-
-    if (!IsKnownSlave(from))
-    {
-        _logger->warn("LinController received SlaveConfiguration for unknown LIN Slave {{{}, {}}}", from.participant, from.endpoint);
-        return;
-    }
-
-    auto&& linSlave = GetLinSlave(from);
-    for (auto&& responseConfig : msg.responseConfigs)
-    {
-        auto linId = responseConfig.linId;
-        if (linId >= linSlave.responses.size())
-        {
-            linSlave.responses.resize(linId + 1);
-        }
-
-         if (responseConfig.payloadLength > 8)
-         {
-             _logger->warn(
-                 "LinController received SlaveResponseConfig with payload length {} from {{{}, {}}}",
-                 static_cast<unsigned int>(responseConfig.payloadLength),
-                 from.participant,
-                 from.endpoint);
-             continue;
-         }
-
-         static_cast<SlaveResponseConfig&>(linSlave.responses[linId]) = responseConfig;
-    }
-
+    UpdateSlaveConfiguration(from, msg);
 }
 
 void LinController::ReceiveIbMessage(mw::EndpointAddress from, const SlaveResponse& msg)
@@ -412,22 +416,11 @@ void LinController::ReceiveIbMessage(mw::EndpointAddress from, const SlaveRespon
     if (from == _endpointAddr)
         return;
 
-
-    // only controllers in master mode are responsible for managing responses.
-    if (_controllerMode != ControllerMode::Master)
-        return;
-
-    if (!IsKnownSlave(from))
-    {
-        _logger->warn("LinController received SlaveConfiguration for unkonwn LIN Slave {{{}, {}}}", from.participant, from.endpoint);
-        return;
-    }
-
     auto&& linSlave = GetLinSlave(from);
     if (msg.linId >= linSlave.responses.size())
     {
         _logger->warn(
-            "LinController received SlaveResponse configuration from {{{}, {}}} for unconfigured LIN ID {}",
+            "LinController received SlaveResponse configuration from {{{}, {}}} for invalid LIN ID {}",
             from.participant,
             from.endpoint,
             msg.linId);
