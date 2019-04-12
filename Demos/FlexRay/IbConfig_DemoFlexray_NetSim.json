@@ -11,13 +11,115 @@
                 "SyncType": "DiscreteTime",
                 "IsSyncMaster": true,
 
-                "FlexRayControllers": [ "FlexRay1" ]
+                "FlexRayControllers": [
+                    {
+                        "Name": "FlexRay1",
+                        "ClusterParameters": {
+                            "gColdstartAttempts": 8,
+                            "gCycleCountMax": 63,
+                            "gdActionPointOffset": 2,
+                            "gdDynamicSlotIdlePhase": 1,
+                            "gdMiniSlot": 5,
+                            "gdMiniSlotActionPointOffset": 2,
+                            "gdStaticSlot": 31,
+                            "gdSymbolWindow": 1,
+                            "gdSymbolWindowActionPointOffset": 1,
+                            "gdTSSTransmitter": 9,
+                            "gdWakeupTxActive": 60,
+                            "gdWakeupTxIdle": 180,
+                            "gListenNoise": 2,
+                            "gMacroPerCycle": 3636,
+                            "gMaxWithoutClockCorrectionFatal": 2,
+                            "gMaxWithoutClockCorrectionPassive": 2,
+                            "gNumberOfMiniSlots": 291,
+                            "gNumberOfStaticSlots": 70,
+                            "gPayloadLengthStatic": 16,
+                            "gSyncFrameIDCountMax": 15
+                        },
+                        "NodeParameters": {
+                            "pAllowHaltDueToClock": 1,
+                            "pAllowPassiveToActive": 0,
+                            "pChannels": 3,
+                            "pClusterDriftDamping": 2,
+                            "pdAcceptedStartupRange": 212,
+                            "pdListenTimeout": 400162,
+                            "pKeySlotId": 10,
+                            "pKeySlotOnlyEnabled": 0,
+                            "pKeySlotUsedForStartup": 1,
+                            "pKeySlotUsedForSync": 0,
+                            "pLatestTx": 249,
+                            "pMacroInitialOffsetA": 3,
+                            "pMacroInitialOffsetB": 3,
+                            "pMicroInitialOffsetA": 6,
+                            "pMicroInitialOffsetB": 6,
+                            "pMicroPerCycle": 200000,
+                            "pOffsetCorrectionOut": 127,
+                            "pOffsetCorrectionStart": 3632,
+                            "pRateCorrectionOut": 81,
+                            "pWakeupChannel": 1,
+                            "pWakeupPattern": 33,
+                            "pdMicrotick": 2,
+                            "pSamplesPerMicrotick": 2
+                        }
+                    }
+                ]
             },
             {
                 "Name": "Node1",
                 "SyncType": "DiscreteTime",
 
-                "FlexRayControllers": [ "FlexRay1" ]
+                "FlexRayControllers": [
+                    {
+                        "Name": "FlexRay1",
+                        "ClusterParameters": {
+                            "gColdstartAttempts": 8,
+                            "gCycleCountMax": 63,
+                            "gdActionPointOffset": 2,
+                            "gdDynamicSlotIdlePhase": 1,
+                            "gdMiniSlot": 5,
+                            "gdMiniSlotActionPointOffset": 2,
+                            "gdStaticSlot": 31,
+                            "gdSymbolWindow": 1,
+                            "gdSymbolWindowActionPointOffset": 1,
+                            "gdTSSTransmitter": 9,
+                            "gdWakeupTxActive": 60,
+                            "gdWakeupTxIdle": 180,
+                            "gListenNoise": 2,
+                            "gMacroPerCycle": 3636,
+                            "gMaxWithoutClockCorrectionFatal": 2,
+                            "gMaxWithoutClockCorrectionPassive": 2,
+                            "gNumberOfMiniSlots": 291,
+                            "gNumberOfStaticSlots": 70,
+                            "gPayloadLengthStatic": 16,
+                            "gSyncFrameIDCountMax": 15
+                        },
+                        "NodeParameters": {
+                            "pAllowHaltDueToClock": 1,
+                            "pAllowPassiveToActive": 0,
+                            "pChannels": 3,
+                            "pClusterDriftDamping": 2,
+                            "pdAcceptedStartupRange": 212,
+                            "pdListenTimeout": 400162,
+                            "pKeySlotId": 11,
+                            "pKeySlotOnlyEnabled": 0,
+                            "pKeySlotUsedForStartup": 1,
+                            "pKeySlotUsedForSync": 0,
+                            "pLatestTx": 249,
+                            "pMacroInitialOffsetA": 3,
+                            "pMacroInitialOffsetB": 3,
+                            "pMicroInitialOffsetA": 6,
+                            "pMicroInitialOffsetB": 6,
+                            "pMicroPerCycle": 200000,
+                            "pOffsetCorrectionOut": 127,
+                            "pOffsetCorrectionStart": 3632,
+                            "pRateCorrectionOut": 81,
+                            "pWakeupChannel": 1,
+                            "pWakeupPattern": 33,
+                            "pdMicrotick": 2,
+                            "pSamplesPerMicrotick": 2
+                        }
+                    }
+                ]
             },
             {
                 "Name": "NetworkSimulator",
@@ -54,7 +156,7 @@
                 ]
             }
         ],
-        
+
         "TimeSync": {
             "SyncPolicy": "Loose",
             "TickPeriodNs": 1000000
@@ -68,14 +170,14 @@
             "ParticipantEnvironments": [
                 {
                     "Participant": "Node0",
-                    "Environment": "CustomExecutable", 
+                    "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
                     "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoFlexray",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% Node0 %INTEGRATIONBUS_DOMAINID%"
                 },
                 {
                     "Participant": "Node1",
-                    "Environment": "CustomExecutable", 
+                    "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
                     "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoFlexray",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% Node1 %INTEGRATIONBUS_DOMAINID%"

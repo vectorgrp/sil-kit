@@ -315,9 +315,17 @@ template <>
 auto from_json<FlexrayController>(const json11::Json& json) -> FlexrayController
 {
     FlexrayController controller;
+
+    // backward compatibility to old json config files with only name of controller
+    if (json.is_string())
+    {
+        controller.name = json.string_value();
+        return controller;
+    }
+
     controller.name = json["Name"].string_value();
     controller.clusterParameters = from_json<sim::fr::ClusterParameters>(json["ClusterParameters"]);
-    controller.nodeParameters = from_json<sim::fr::NodeParameters>(json["ClusterParameters"]);
+    controller.nodeParameters = from_json<sim::fr::NodeParameters>(json["NodeParameters"]);
     return controller;
 }
 

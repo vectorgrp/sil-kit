@@ -16,8 +16,6 @@ bool operator==(const FrMessage& lhs, const FrMessage& rhs);
 bool operator==(const FrMessageAck& lhs, const FrMessageAck& rhs);
 bool operator==(const FrSymbol& lhs, const FrSymbol& rhs);
 bool operator==(const TxBufferUpdate& lhs, const TxBufferUpdate& rhs);
-bool operator==(const ClusterParameters& lhs, const ClusterParameters& rhs);
-bool operator==(const NodeParameters& lhs, const NodeParameters& rhs);
 bool operator==(const TxBufferConfig& lhs, const TxBufferConfig& rhs);
 bool operator==(const ControllerConfig& lhs, const ControllerConfig& rhs);
 bool operator==(const HostCommand& lhs, const HostCommand& rhs);

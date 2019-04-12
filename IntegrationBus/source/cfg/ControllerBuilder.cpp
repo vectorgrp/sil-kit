@@ -15,6 +15,20 @@ auto ControllerBuilder<EthernetController>::WithMacAddress(std::string macAddres
     return *this;
 }
 
+template<>
+auto ControllerBuilder<FlexrayController>::WithClusterParameters(const sim::fr::ClusterParameters& clusterParameters) -> ControllerBuilder&
+{
+    _controller.clusterParameters = clusterParameters;
+    return *this;
+}
+
+template<>
+auto ControllerBuilder<FlexrayController>::WithNodeParameters(const sim::fr::NodeParameters& nodeParameters) -> ControllerBuilder&
+{
+    _controller.nodeParameters = nodeParameters;
+    return *this;
+}
+
 } // namespace cfg
 } // namespace ib
 

@@ -456,6 +456,57 @@ void Header::Set(Flag flag, bool condition)
         Clear(flag);
 }
 
+inline bool operator==(const ClusterParameters& lhs, const ClusterParameters& rhs)
+{
+    return lhs.gColdstartAttempts == rhs.gColdstartAttempts
+        && lhs.gCycleCountMax == rhs.gCycleCountMax
+        && lhs.gdActionPointOffset == rhs.gdActionPointOffset
+        && lhs.gdDynamicSlotIdlePhase == rhs.gdDynamicSlotIdlePhase
+        && lhs.gdMiniSlot == rhs.gdMiniSlot
+        && lhs.gdMiniSlotActionPointOffset == rhs.gdMiniSlotActionPointOffset
+        && lhs.gdStaticSlot == rhs.gdStaticSlot
+        && lhs.gdSymbolWindow == rhs.gdSymbolWindow
+        && lhs.gdSymbolWindowActionPointOffset == rhs.gdSymbolWindowActionPointOffset
+        && lhs.gdTSSTransmitter == rhs.gdTSSTransmitter
+        && lhs.gdWakeupTxActive == rhs.gdWakeupTxActive
+        && lhs.gdWakeupTxIdle == rhs.gdWakeupTxIdle
+        && lhs.gListenNoise == rhs.gListenNoise
+        && lhs.gMacroPerCycle == rhs.gMacroPerCycle
+        && lhs.gMaxWithoutClockCorrectionFatal == rhs.gMaxWithoutClockCorrectionFatal
+        && lhs.gMaxWithoutClockCorrectionPassive == rhs.gMaxWithoutClockCorrectionPassive
+        && lhs.gNumberOfMiniSlots == rhs.gNumberOfMiniSlots
+        && lhs.gNumberOfStaticSlots == rhs.gNumberOfStaticSlots
+        && lhs.gPayloadLengthStatic == rhs.gPayloadLengthStatic
+        && lhs.gSyncFrameIDCountMax == rhs.gSyncFrameIDCountMax;
+}
+
+inline bool operator==(const NodeParameters& lhs, const NodeParameters& rhs)
+{
+    return lhs.pAllowHaltDueToClock == rhs.pAllowHaltDueToClock
+        && lhs.pAllowPassiveToActive == rhs.pAllowPassiveToActive
+        && lhs.pChannels == rhs.pChannels
+        && lhs.pClusterDriftDamping == rhs.pClusterDriftDamping
+        && lhs.pdAcceptedStartupRange == rhs.pdAcceptedStartupRange
+        && lhs.pdListenTimeout == rhs.pdListenTimeout
+        && lhs.pKeySlotId == rhs.pKeySlotId
+        && lhs.pKeySlotOnlyEnabled == rhs.pKeySlotOnlyEnabled
+        && lhs.pKeySlotUsedForStartup == rhs.pKeySlotUsedForStartup
+        && lhs.pKeySlotUsedForSync == rhs.pKeySlotUsedForSync
+        && lhs.pLatestTx == rhs.pLatestTx
+        && lhs.pMacroInitialOffsetA == rhs.pMacroInitialOffsetA
+        && lhs.pMacroInitialOffsetB == rhs.pMacroInitialOffsetB
+        && lhs.pMicroInitialOffsetA == rhs.pMicroInitialOffsetA
+        && lhs.pMicroInitialOffsetB == rhs.pMicroInitialOffsetB
+        && lhs.pMicroPerCycle == rhs.pMicroPerCycle
+        && lhs.pOffsetCorrectionOut == rhs.pOffsetCorrectionOut
+        && lhs.pOffsetCorrectionStart == rhs.pOffsetCorrectionStart
+        && lhs.pRateCorrectionOut == rhs.pRateCorrectionOut
+        && lhs.pWakeupChannel == rhs.pWakeupChannel
+        && lhs.pWakeupPattern == rhs.pWakeupPattern
+        && lhs.pdMicrotick == rhs.pdMicrotick
+        && lhs.pSamplesPerMicrotick == rhs.pSamplesPerMicrotick;
+}
+
 } // namespace fr
 } // namespace sim
 } // namespace ib

@@ -395,7 +395,9 @@ bool operator==(const EthernetController& lhs, const EthernetController& rhs)
 bool operator==(const FlexrayController& lhs, const FlexrayController& rhs)
 {
     return lhs.name == rhs.name
-        && lhs.endpointId == rhs.endpointId;
+        && lhs.endpointId == rhs.endpointId
+        && lhs.clusterParameters == rhs.clusterParameters
+        && lhs.nodeParameters == rhs.nodeParameters;
 }
 
 bool operator==(const DigitalIoPort& lhs, const DigitalIoPort& rhs)

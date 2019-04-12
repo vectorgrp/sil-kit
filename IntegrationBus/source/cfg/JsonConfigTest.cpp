@@ -39,7 +39,7 @@ protected:
     void BuildConfigFromJson()
     {
         referenceConfig = builder.Build();
-        auto jsonString = referenceConfig.ToJsonString();
+        auto jsonString = referenceConfig.ToJsonString();      
         config = ib::cfg::Config::FromJsonString(jsonString);
     }
 
@@ -276,6 +276,72 @@ TEST_F(JsonConfigTest, CreateFlexrayNetwork)
     EXPECT_EQ(p2.flexrayControllers[1].linkId, linkB.id);
 }
 
+auto getClusterParameters() -> ib::sim::fr::ClusterParameters
+{
+    ib::sim::fr::ClusterParameters clusterParams;
+    clusterParams.gColdstartAttempts = 8;
+    clusterParams.gCycleCountMax = 63;
+    clusterParams.gdActionPointOffset = 2;
+    clusterParams.gdDynamicSlotIdlePhase = 1;
+    clusterParams.gdMiniSlot = 5;
+    clusterParams.gdMiniSlotActionPointOffset = 2;
+    clusterParams.gdStaticSlot = 31;
+    clusterParams.gdSymbolWindow = 1;
+    clusterParams.gdSymbolWindowActionPointOffset = 1;
+    clusterParams.gdTSSTransmitter = 9;
+    clusterParams.gdWakeupTxActive = 60;
+    clusterParams.gdWakeupTxIdle = 180;
+    clusterParams.gListenNoise = 2;
+    clusterParams.gMacroPerCycle = 3636;
+    clusterParams.gMaxWithoutClockCorrectionFatal = 2;
+    clusterParams.gMaxWithoutClockCorrectionPassive = 2;
+    clusterParams.gNumberOfMiniSlots = 291;
+    clusterParams.gNumberOfStaticSlots = 70;
+    clusterParams.gPayloadLengthStatic = 16;
+    clusterParams.gSyncFrameIDCountMax = 15;
+    return clusterParams;
+}
+
+auto getNodeParameters() -> ib::sim::fr::NodeParameters
+{
+    ib::sim::fr::NodeParameters nodeParams;
+    nodeParams.pAllowHaltDueToClock = 1;
+    nodeParams.pAllowPassiveToActive = 0;
+    nodeParams.pChannels = ib::sim::fr::Channel::AB;
+    nodeParams.pClusterDriftDamping = 2;
+    nodeParams.pdAcceptedStartupRange = 212;
+    nodeParams.pdListenTimeout = 400162;
+    nodeParams.pKeySlotId = 0;
+    nodeParams.pKeySlotOnlyEnabled = 0;
+    nodeParams.pKeySlotUsedForStartup = 0;
+    nodeParams.pKeySlotUsedForSync = 0;
+    nodeParams.pLatestTx = 249;
+    nodeParams.pMacroInitialOffsetA = 3;
+    nodeParams.pMacroInitialOffsetB = 3;
+    nodeParams.pMicroInitialOffsetA = 6;
+    nodeParams.pMicroInitialOffsetB = 6;
+    nodeParams.pMicroPerCycle = 200000;
+    nodeParams.pOffsetCorrectionOut = 127;
+    nodeParams.pOffsetCorrectionStart = 3632;
+    nodeParams.pRateCorrectionOut = 81;
+    nodeParams.pWakeupChannel = ib::sim::fr::Channel::A;
+    nodeParams.pWakeupPattern = 33;
+    nodeParams.pdMicrotick = ib::sim::fr::ClockPeriod::T25NS;
+    nodeParams.pSamplesPerMicrotick = 2;
+    return nodeParams;
+}
+
+TEST_F(JsonConfigTest, CreateFlexrayParametersNetwork)
+{
+    simulationSetup.AddParticipant("P1")->AddFlexray("FR1")
+        .WithLink("FR_A")
+        .WithClusterParameters(getClusterParameters())
+        .WithNodeParameters(getNodeParameters());
+
+    BuildConfigFromJson();
+    EXPECT_EQ(config, referenceConfig);
+}
+
 TEST_F(JsonConfigTest, CreateGenericMessageConfig)
 {
     const std::string msgName{"FancyRosMessage"};
@@ -424,7 +490,5 @@ TEST_F(JsonConfigTest, ConfigureExecutionMaster)
 
     EXPECT_TRUE(participants[0].isSyncMaster);
 }
-
-
 
 } // anonymous namespace

@@ -22,6 +22,8 @@ public:
     auto WithLinkId(int16_t linkId) -> ControllerBuilder&;
     auto WithEndpointId(mw::EndpointId id) -> ControllerBuilder&;
     IntegrationBusAPI auto WithMacAddress(std::string macAddress) -> ControllerBuilder&;
+    auto WithClusterParameters(const sim::fr::ClusterParameters& clusterParameters) -> ControllerBuilder&;
+    auto WithNodeParameters(const sim::fr::NodeParameters& nodeParameters) -> ControllerBuilder&;
 
     auto operator->() -> ParticipantBuilder*;
 
