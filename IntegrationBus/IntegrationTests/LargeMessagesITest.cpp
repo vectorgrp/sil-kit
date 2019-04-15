@@ -1,4 +1,4 @@
-// Copyright (c)  Vector Informatik GmbH. All rights reserved.
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include <chrono>
 #include <thread>
@@ -76,7 +76,6 @@ TEST_F(LargeMessagesITest, publish_and_subscribe_large_messages)
 {
     Subscribe();
 
-    // https://asc..com/jira/browse/AFTMAGT-121
     // Maximum payload size is 65416, beyond that we are testing the ASYNCHRONOUS_PUBLISH_MODE of FastRTPS.
     size_t sizeInBytes = 114793;
     std::vector<uint8_t> data(sizeInBytes, 'D');

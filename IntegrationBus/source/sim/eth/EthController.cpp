@@ -1,4 +1,4 @@
-// Copyright (c)  Vector Informatik GmbH. All rights reserved.
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "EthController.hpp"
 

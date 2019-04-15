@@ -2,7 +2,7 @@
 
 #######################################################################################################################
 # IntegrationBus Launcher Plugin
-# Copyright (c)  Vector Informatik GmbH. All rights reserved.
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 #######################################################################################################################
 
 from iblauncher import Launcher

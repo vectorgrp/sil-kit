@@ -1,4 +1,4 @@
-// Copyright (c)  Vector Informatik GmbH. All rights reserved.
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #define _CRT_SECURE_NO_WARNINGS 1
 

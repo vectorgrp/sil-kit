@@ -9,7 +9,7 @@
  * * 'Pipeline Utility Steps' for cross-platform zip command
  * * 'Artifactory Plugin' for Artifactory.server access
  *
- * Copyright (c)  Vector Informatik GmbH. All rights reserved.
+ * Copyright (c) Vector Informatik GmbH. All rights reserved.
  */
 
 artifactoryServer = getArtifactoryServer('IntegrationBusArtifactory')

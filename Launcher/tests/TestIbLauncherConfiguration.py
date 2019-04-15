@@ -1,6 +1,6 @@
 # #######################################################################################################################
 # IntegrationBus Launcher
-# Copyright (c)  Vector Informatik GmbH. All rights reserved.
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 #######################################################################################################################
 
 import unittest

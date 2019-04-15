@@ -1,4 +1,4 @@
-// Copyright (c)  Vector Informatik GmbH. All rights reserved.
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include <chrono>
 #include <thread>
@@ -76,10 +76,9 @@ TEST_F(SocketBufferSizeITest, use_custom_socket_buffer_size)
 {
     Subscribe();
 
-    // https://asc..com/jira/browse/AFTMAGT-138
     // We cannot easily black-box test if the configured sendSocketBufferSize/listenSocketBufferSize is actually used by FastRTPS.
-	// By transmitting some basic message we simply ensure that FastRTPS did not abort due to some bad XML format.
-	// In addition, one can manually use a debugger to ensure if the values are read by FastRTPS into its internal runtime configuration data.
+    // By transmitting some basic message we simply ensure that FastRTPS did not abort due to some bad XML format.
+    // In addition, one can manually use a debugger to ensure if the values are read by FastRTPS into its internal runtime configuration data.
     std::vector<uint8_t> data(123, 'D');
 
     std::thread publishThread{[this, &data]() { this->Publish(data); }};

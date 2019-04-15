@@ -1,6 +1,6 @@
 #######################################################################################################################
 # IntegrationBus Launcher
-# Copyright (c)  Vector Informatik GmbH. All rights reserved.
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 #######################################################################################################################
 import os
 import sys
@@ -50,7 +50,7 @@ STARTUPDELAY_DEFAULT = 0
 #######################################################################################################################
 def parseArguments():
     """Create a commandline parser"""
-    parser = ArgumentParser(description="IntegrationBus simulation setup launcher", epilog="Copyright (c)  Vector Informatik GmbH. All rights reserved.")
+    parser = ArgumentParser(description="IntegrationBus simulation setup launcher", epilog="Copyright (c) Vector Informatik GmbH. All rights reserved.")
     parser.add_argument("configFile", nargs='+', help="ConfigFile is a JSON file with launch configurations and the simulation setup to use. It must adhere to IbConfig.schema.json.", metavar="ConfigFile")
     parser.add_argument("-c", "--configuration", dest="launchConfiguration", help="Use the specified LaunchConfiguration. Required if there are more than one defined.", metavar="LaunchConfiguration", required=False)
     parser.add_argument("-n", "--node", dest="networkNode", help="NetworkNode this machine will represent.", metavar="NetworkNode", required=False)

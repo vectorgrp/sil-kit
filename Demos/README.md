@@ -30,4 +30,4 @@ Supported target platforms and build tools:
   * Run 'cmake --build . --config Debug' to execute the previously generated build scripts for target 'Debug'.
   You can check CMake's man pages or the [online help](https://cmake.org/documentation/) on how to set further options.
 
-Copyright (c)  Vector Informatik GmbH. All rights reserved.
+Copyright (c) Vector Informatik GmbH. All rights reserved.
