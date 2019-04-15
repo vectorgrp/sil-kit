@@ -31,6 +31,41 @@ using namespace ib::mw;
 using namespace ib::sim;
 using namespace ib::sim::lin;
 
+auto MakeControllerConfig(ControllerMode mode) -> ControllerConfig
+{
+    ControllerConfig ctrlConfig;
+    ctrlConfig.controllerMode = mode;
+
+    return ctrlConfig;
+}
+
+auto MakeSlaveConfiguration(std::initializer_list<SlaveResponseConfig> configs) -> SlaveConfiguration
+{
+    SlaveConfiguration slaveConfig;
+    slaveConfig.responseConfigs = configs;
+    return slaveConfig;
+}
+
+auto MakeSlaveResponseConfig(LinMessage msg, ResponseMode mode) -> SlaveResponseConfig
+{
+    SlaveResponseConfig responseConfig;
+    responseConfig.linId = msg.linId;
+    responseConfig.responseMode = mode;
+    responseConfig.payloadLength = msg.payload.size;
+    responseConfig.checksumModel = msg.checksumModel;
+    return responseConfig;
+}
+
+auto MakeSlaveResponse(LinMessage msg) -> SlaveResponse
+{
+    SlaveResponse response;
+    response.linId = msg.linId;
+    response.payload = msg.payload;
+    response.checksumModel = msg.checksumModel;
+    return response;
+}
+
+
 class LinControllerTest : public testing::Test
 {
 protected:
@@ -54,62 +89,6 @@ protected:
         controller.RegisterWakeupRequestHandler(ib::util::bind_method(&callbacks, &Callbacks::WakeupRequest));
     }
 
-    void SetupResponse(EndpointAddress from, LinMessage msg)
-    {
-        ControllerConfig ctrlConfig;
-        ctrlConfig.controllerMode = ControllerMode::Slave;
-
-        SlaveConfiguration slaveConfig;
-        SlaveResponseConfig responseConfig;
-        responseConfig.linId = msg.linId;
-        responseConfig.responseMode = ResponseMode::TxUnconditional;
-        responseConfig.payloadLength = msg.payload.size;
-        responseConfig.checksumModel = msg.checksumModel;
-        slaveConfig.responseConfigs.emplace_back(std::move(responseConfig));
-
-        SlaveResponse response;
-        response.linId = msg.linId;
-        response.payload = msg.payload;
-
-        controller.ReceiveIbMessage(from, ctrlConfig);
-        controller.ReceiveIbMessage(from, slaveConfig);
-        controller.ReceiveIbMessage(from, response);
-    }
-
-    void SetupResponseOutOfOrder(EndpointAddress from, LinMessage msg)
-    {
-        ControllerConfig ctrlConfig;
-        ctrlConfig.controllerMode = ControllerMode::Slave;
-
-        SlaveConfiguration slaveConfig;
-        SlaveResponseConfig responseConfig;
-        responseConfig.linId = msg.linId;
-        responseConfig.responseMode = ResponseMode::TxUnconditional;
-        responseConfig.payloadLength = msg.payload.size;
-        responseConfig.checksumModel = msg.checksumModel;
-        slaveConfig.responseConfigs.emplace_back(std::move(responseConfig));
-
-        SlaveResponse response;
-        response.linId = msg.linId;
-        response.payload = msg.payload;
-
-        controller.ReceiveIbMessage(from, response);
-        controller.ReceiveIbMessage(from, slaveConfig);
-        controller.ReceiveIbMessage(from, ctrlConfig);
-    }
-
-    void RemoveResponse(EndpointAddress from, LinId linId)
-    {
-        SlaveConfiguration slaveConfig;
-        SlaveResponseConfig responseConfig;
-        responseConfig.linId = linId;
-        responseConfig.responseMode = ResponseMode::Unused;
-        responseConfig.checksumModel = ChecksumModel::Undefined;
-        responseConfig.payloadLength = 0;
-        slaveConfig.responseConfigs.emplace_back(std::move(responseConfig));
-
-        controller.ReceiveIbMessage(from, slaveConfig);
-    }
 
 protected:
     const EndpointAddress controllerAddress{4, 5};
@@ -182,59 +161,10 @@ TEST_F(LinControllerTest, request_lin_message_with_one_configured_response)
         .Times(1);
 
     controller.SetMasterMode();
-    SetupResponse(otherControllerAddress, reply);
-    controller.RequestMessage(request);
-}
+    controller.ReceiveIbMessage(otherControllerAddress, MakeControllerConfig(ControllerMode::Slave));
+    controller.ReceiveIbMessage(otherControllerAddress, MakeSlaveConfiguration({MakeSlaveResponseConfig(reply, ResponseMode::TxUnconditional)}));
+    controller.ReceiveIbMessage(otherControllerAddress, MakeSlaveResponse(reply));
 
-TEST_F(LinControllerTest, request_lin_message_with_one_configured_response_late_master_mode)
-{
-    RxRequest request{};
-    request.linId = 20;
-    request.checksumModel = ChecksumModel::Enhanced;
-
-    LinMessage reply{};
-    reply.linId = request.linId;
-    reply.status = MessageStatus::RxSuccess;
-    reply.payload.size = 4;
-    reply.payload.data = {{1,2,3,4,5,6,7,8}};
-    reply.checksumModel = ChecksumModel::Enhanced;
-
-    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, reply))
-        .Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, A<const RxRequest&>()))
-        .Times(0);
-
-    EXPECT_CALL(callbacks, ReceiveMessage(&controller, reply))
-        .Times(1);
-
-    SetupResponse(otherControllerAddress, reply);
-    controller.SetMasterMode();
-    controller.RequestMessage(request);
-}
-
-TEST_F(LinControllerTest, request_lin_message_with_one_configured_response_out_of_order)
-{
-    RxRequest request{};
-    request.linId = 20;
-    request.checksumModel = ChecksumModel::Enhanced;
-
-    LinMessage reply{};
-    reply.linId = request.linId;
-    reply.status = MessageStatus::RxSuccess;
-    reply.payload.size = 4;
-    reply.payload.data = {{1,2,3,4,5,6,7,8}};
-    reply.checksumModel = ChecksumModel::Enhanced;
-
-    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, reply))
-        .Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, A<const RxRequest&>()))
-        .Times(0);
-
-    EXPECT_CALL(callbacks, ReceiveMessage(&controller, reply))
-        .Times(1);
-
-    controller.SetMasterMode();
-    SetupResponseOutOfOrder(otherControllerAddress, reply);
     controller.RequestMessage(request);
 }
 
@@ -259,9 +189,19 @@ TEST_F(LinControllerTest, request_lin_message_with_multiple_configured_responses
     EXPECT_CALL(callbacks, ReceiveMessage(&controller, reply))
         .Times(1);
 
+
     controller.SetMasterMode();
-    SetupResponse(EndpointAddress{2,4}, reply);
-    SetupResponse(EndpointAddress{3,5}, reply);
+
+    EndpointAddress slave1{2,4};
+    controller.ReceiveIbMessage(slave1, MakeControllerConfig(ControllerMode::Slave));
+    controller.ReceiveIbMessage(slave1, MakeSlaveConfiguration({MakeSlaveResponseConfig(reply, ResponseMode::TxUnconditional)}));
+    controller.ReceiveIbMessage(slave1, MakeSlaveResponse(reply));
+
+    EndpointAddress slave2{3,5};
+    controller.ReceiveIbMessage(slave2, MakeControllerConfig(ControllerMode::Slave));
+    controller.ReceiveIbMessage(slave2, MakeSlaveConfiguration({MakeSlaveResponseConfig(reply, ResponseMode::TxUnconditional)}));
+    controller.ReceiveIbMessage(slave2, MakeSlaveResponse(reply));
+
     controller.RequestMessage(request);
 }
 
@@ -286,11 +226,12 @@ TEST_F(LinControllerTest, request_lin_message_with_sleeping_slave)
         .Times(1);
 
     controller.SetMasterMode();
-    SetupResponse(otherControllerAddress, reply);
 
-    ControllerConfig sleepConfig;
-    sleepConfig.controllerMode = ControllerMode::Sleep;
-    controller.ReceiveIbMessage(otherControllerAddress, sleepConfig);
+    controller.ReceiveIbMessage(otherControllerAddress, MakeControllerConfig(ControllerMode::Slave));
+    controller.ReceiveIbMessage(otherControllerAddress, MakeSlaveConfiguration({MakeSlaveResponseConfig(reply, ResponseMode::TxUnconditional)}));
+    controller.ReceiveIbMessage(otherControllerAddress, MakeSlaveResponse(reply));
+
+    controller.ReceiveIbMessage(otherControllerAddress, MakeControllerConfig(ControllerMode::Sleep));
 
     controller.RequestMessage(request);
 }
@@ -308,8 +249,6 @@ TEST_F(LinControllerTest, request_lin_message_after_remove_response)
     reply.payload.data = {{1,2,3,4,5,6,7,8}};
     reply.checksumModel = ChecksumModel::Enhanced;
 
-    SetupResponse(otherControllerAddress, reply);
-
     LinMessage noReply{};
     noReply.linId = request.linId;
     noReply.status = MessageStatus::RxNoResponse;
@@ -317,23 +256,21 @@ TEST_F(LinControllerTest, request_lin_message_after_remove_response)
 
     EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, reply))
         .Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, noReply))
-        .Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, A<const RxRequest&>()))
-        .Times(0);
-
     EXPECT_CALL(callbacks, ReceiveMessage(&controller, reply))
+        .Times(1);
+
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, noReply))
         .Times(1);
     EXPECT_CALL(callbacks, ReceiveMessage(&controller, noReply))
         .Times(1);
 
-
     controller.SetMasterMode();
-
-    SetupResponse(otherControllerAddress, reply);
+    controller.ReceiveIbMessage(otherControllerAddress, MakeControllerConfig(ControllerMode::Slave));
+    controller.ReceiveIbMessage(otherControllerAddress, MakeSlaveConfiguration({MakeSlaveResponseConfig(reply, ResponseMode::TxUnconditional)}));
+    controller.ReceiveIbMessage(otherControllerAddress, MakeSlaveResponse(reply));
     controller.RequestMessage(request);
 
-    RemoveResponse(otherControllerAddress, request.linId);
+    controller.ReceiveIbMessage(otherControllerAddress, MakeSlaveConfiguration({MakeSlaveResponseConfig(noReply, ResponseMode::Unused)}));
     controller.RequestMessage(request);
 }
 
@@ -462,17 +399,6 @@ TEST_F(LinControllerTest, enable_false_checksum_emulation)
     LinMessage falseReply = goodReply;
     falseReply.checksumModel = ChecksumModel::Classic;
 
-    SlaveResponse configureGoodReply;
-    configureGoodReply.linId = goodReply.linId;
-    configureGoodReply.payload = goodReply.payload;
-    configureGoodReply.checksumModel = goodReply.checksumModel;
-
-
-    SlaveResponse configureFalseReply;
-    configureFalseReply.linId = falseReply.linId;
-    configureFalseReply.payload = falseReply.payload;
-    configureFalseReply.checksumModel = falseReply.checksumModel;
-
     EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, goodReply))
         .Times(2);
     EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, falseReply))
@@ -484,17 +410,17 @@ TEST_F(LinControllerTest, enable_false_checksum_emulation)
         .Times(1);
 
     controller.SetMasterMode();
-    SetupResponse(otherControllerAddress, goodReply);
+    controller.ReceiveIbMessage(otherControllerAddress, MakeControllerConfig(ControllerMode::Slave));
+    controller.ReceiveIbMessage(otherControllerAddress, MakeSlaveConfiguration({MakeSlaveResponseConfig(goodReply, ResponseMode::TxUnconditional)}));
+    controller.ReceiveIbMessage(otherControllerAddress, MakeSlaveResponse(goodReply));
     controller.RequestMessage(request);
 
-    controller.ReceiveIbMessage(otherControllerAddress, configureFalseReply);
+    controller.ReceiveIbMessage(otherControllerAddress, MakeSlaveResponse(falseReply));
     controller.RequestMessage(request);
 
-    controller.ReceiveIbMessage(otherControllerAddress, configureGoodReply);
+    controller.ReceiveIbMessage(otherControllerAddress, MakeSlaveResponse(goodReply));
     controller.RequestMessage(request);
 }
-
-
 
 TEST_F(LinControllerTest, send_gotosleep_command)
 {
@@ -599,6 +525,65 @@ TEST_F(LinControllerTest, set_slave_operational)
         .Times(1);
 
     controller.SetOperationalMode();
+}
+
+
+TEST_F(LinControllerTest, configure_master_after_slave)
+{
+    RxRequest request{};
+    request.linId = 20;
+    request.checksumModel = ChecksumModel::Enhanced;
+
+    LinMessage reply{};
+    reply.linId = request.linId;
+    reply.status = MessageStatus::RxSuccess;
+    reply.payload.size = 4;
+    reply.payload.data = {{1,2,3,4,5,6,7,8}};
+    reply.checksumModel = ChecksumModel::Enhanced;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, reply))
+        .Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, A<const RxRequest&>()))
+        .Times(0);
+
+    EXPECT_CALL(callbacks, ReceiveMessage(&controller, reply))
+        .Times(1);
+
+    controller.ReceiveIbMessage(otherControllerAddress, MakeControllerConfig(ControllerMode::Slave));
+    controller.ReceiveIbMessage(otherControllerAddress, MakeSlaveConfiguration({MakeSlaveResponseConfig(reply, ResponseMode::TxUnconditional)}));
+    controller.ReceiveIbMessage(otherControllerAddress, MakeSlaveResponse(reply));
+    controller.SetMasterMode();
+    controller.RequestMessage(request);
+}
+
+TEST_F(LinControllerTest, set_slave_response_before_slaveconfiguration)
+{
+    // Ensure that the slave configuration is properly processed even
+    // if the middleware does not ensure in-order data delivery.
+    RxRequest request{};
+    request.linId = 20;
+    request.checksumModel = ChecksumModel::Enhanced;
+
+    LinMessage reply{};
+    reply.linId = request.linId;
+    reply.status = MessageStatus::RxSuccess;
+    reply.payload.size = 4;
+    reply.payload.data = {{1,2,3,4,5,6,7,8}};
+    reply.checksumModel = ChecksumModel::Enhanced;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, reply))
+        .Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, A<const RxRequest&>()))
+        .Times(0);
+
+    EXPECT_CALL(callbacks, ReceiveMessage(&controller, reply))
+        .Times(1);
+
+    controller.SetMasterMode();
+    controller.ReceiveIbMessage(otherControllerAddress, MakeSlaveResponse(reply));
+    controller.ReceiveIbMessage(otherControllerAddress, MakeSlaveConfiguration({MakeSlaveResponseConfig(reply, ResponseMode::TxUnconditional)}));
+    controller.ReceiveIbMessage(otherControllerAddress, MakeControllerConfig(ControllerMode::Slave));
+    controller.RequestMessage(request);
 }
 
 
