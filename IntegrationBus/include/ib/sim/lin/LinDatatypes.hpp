@@ -32,7 +32,7 @@ enum class ChecksumModel : uint8_t
 
 enum class ResponseMode : uint8_t
 {
-    Unused, // The LIN frame is neither received not transmitted by the LIN slave
+    Unused, // The LIN frame is neither received nor transmitted by the LIN slave
     Rx,     // The response of the LIN frame is received by the LIN slave
     TxUnconditional, // The LIN frame is an 'unconditional frame' and the
                      // response is transmitted by the slave

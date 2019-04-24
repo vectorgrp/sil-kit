@@ -127,7 +127,7 @@ public:
      *  - payloadLength (VIBE)
      *  - checksummodel (VIBE)
      *
-     * NB: in VIBE simulation, RequesetMessage(const RxRequest&) must not
+     * NB: in VIBE simulation, RequestMessage(const RxRequest&) must not
      * be called when there is still an ongoing transmission on the
      * LIN bus. Otherwise, the SendMessage call will be answered with
      * MessageStatus::Busy (cf. \ref

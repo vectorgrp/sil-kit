@@ -57,9 +57,6 @@ auto SystemController::EndpointAddress() const -> const mw::EndpointAddress&
     return _endpointAddress;
 }
 
-        
-
-
 } // namespace sync
 } // namespace mw
 } // namespace ib

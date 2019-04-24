@@ -527,7 +527,6 @@ TEST_F(LinControllerTest, set_slave_operational)
     controller.SetOperationalMode();
 }
 
-
 TEST_F(LinControllerTest, configure_master_after_slave)
 {
     RxRequest request{};
@@ -586,5 +585,32 @@ TEST_F(LinControllerTest, set_slave_response_before_slaveconfiguration)
     controller.RequestMessage(request);
 }
 
+TEST_F(LinControllerTest, request_lin_message_from_master_with_configured_response)
+{
+    LinMessage reply{};
+    reply.linId = 17;
+    reply.status = MessageStatus::RxSuccess;
+    reply.payload.size = 4;
+    reply.payload.data = { { 1,2,3,4,5,6,7,8 } };
+    reply.checksumModel = ChecksumModel::Undefined;
+
+    RxRequest request{};
+    request.linId = reply.linId;
+    request.checksumModel = reply.checksumModel;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, MakeSlaveConfiguration({ MakeSlaveResponseConfig(reply, ResponseMode::TxUnconditional) })))
+        .Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, MakeSlaveResponse(reply)))
+        .Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, reply))
+        .Times(1);
+    EXPECT_CALL(callbacks, ReceiveMessage(&controller, reply))
+        .Times(1);
+
+    controller.SetMasterMode();
+    controller.SetSlaveConfiguration(MakeSlaveConfiguration({ MakeSlaveResponseConfig(reply, ResponseMode::TxUnconditional) }));
+    controller.SetResponse(reply.linId, reply.payload);
+    controller.RequestMessage(request);
+}
 
 } // anonymous namespace

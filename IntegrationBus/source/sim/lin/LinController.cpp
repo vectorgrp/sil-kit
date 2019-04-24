@@ -32,6 +32,13 @@ void LinController::SetMasterMode()
     }
     _configuredControllerMode = ControllerMode::Master;
     _controllerMode = ControllerMode::Master;
+
+    // enable this master to further play the slave role
+    ControllerConfig config{};
+    config.controllerMode = ControllerMode::Master;
+
+    auto&& linSlave = GetLinSlave(_endpointAddr);
+    linSlave.config = config;
 }
 
 void LinController::SetSlaveMode()
@@ -45,7 +52,7 @@ void LinController::SetSlaveMode()
     _configuredControllerMode = ControllerMode::Slave;
     _controllerMode = ControllerMode::Slave;
 
-    // Announce this controller at LIN masters
+    // announce this slave at the master
     ControllerConfig config{};
     config.controllerMode = _controllerMode;
 
@@ -92,7 +99,7 @@ void LinController::SetOperationalMode()
     SendIbMessage(config);
 }
 
-void LinController::UpdateSlaveConfiguration(mw::EndpointAddress from, const SlaveConfiguration& config)
+void LinController::UpdateSlaveConfigurationImpl(mw::EndpointAddress from, const SlaveConfiguration& config)
 {
     auto&& linSlave = GetLinSlave(from);
     for (auto&& responseConfig : config.responseConfigs)
@@ -124,35 +131,23 @@ void LinController::UpdateSlaveConfiguration(mw::EndpointAddress from, const Sla
 
 void LinController::SetSlaveConfiguration(const SlaveConfiguration& config)
 {
-    UpdateSlaveConfiguration(_endpointAddr, config);
+    UpdateSlaveConfigurationImpl(_endpointAddr, config);
     SendIbMessage(config);
 }
 
 void LinController::SetResponse(LinId linId, const Payload& payload)
 {
-    if (_controllerMode != ControllerMode::Slave)
-    {
-        std::string errorMsg{"LinController::SetResponse() should only be called in SlaveMode"};
-        _logger->error(errorMsg);
-        throw std::runtime_error{errorMsg};
-    }
-
     SlaveResponse response;
     response.linId = linId;
     response.payload = payload;
     response.checksumModel = ChecksumModel::Undefined;
 
+    SetSlaveResponseImpl(_endpointAddr, response);
     SendIbMessage(response);
 }
 
 void LinController::SetResponseWithChecksum(LinId linId, const Payload& payload, ChecksumModel checksumModel)
 {
-    if (_controllerMode != ControllerMode::Slave)
-    {
-        std::string errorMsg{"LinController::SetResponseWithChecksum() should only be called in SlaveMode"};
-        _logger->error(errorMsg);
-        throw std::runtime_error{errorMsg};
-    }
     if (checksumModel == ChecksumModel::Undefined)
     {
         std::string warnMsg("LinController::SetResponseWithChecksum() was called with ChecksumModel::Undefined, which does NOT alter the checksum model");
@@ -164,6 +159,7 @@ void LinController::SetResponseWithChecksum(LinId linId, const Payload& payload,
     response.payload = payload;
     response.checksumModel = checksumModel;
 
+    SetSlaveResponseImpl(_endpointAddr, response);
     SendIbMessage(response);
 }
 
@@ -179,6 +175,7 @@ void LinController::RemoveResponse(LinId linId)
 
 
     slaveConfig.responseConfigs.emplace_back(std::move(responseConfig));
+    UpdateSlaveConfigurationImpl(_endpointAddr, slaveConfig);
     SendIbMessage(slaveConfig);
 }
 
@@ -232,8 +229,9 @@ void LinController::RequestMessage(const RxRequest& msg)
     {
         auto&& slave = keyValue.second;
 
-        if (slave.config.controllerMode != ControllerMode::Slave)
-            continue; // only operational slaves are considered.
+        if (slave.config.controllerMode != ControllerMode::Slave &&
+            slave.config.controllerMode != ControllerMode::Master)
+            continue; // only operational slaves and an operational master are considered
 
         if (msg.linId >= slave.responses.size())
             continue;
@@ -408,7 +406,7 @@ void LinController::ReceiveIbMessage(mw::EndpointAddress from, const SlaveConfig
     if (from == _endpointAddr)
         return;
 
-    UpdateSlaveConfiguration(from, msg);
+    UpdateSlaveConfigurationImpl(from, msg);
 }
 
 void LinController::ReceiveIbMessage(mw::EndpointAddress from, const SlaveResponse& msg)
@@ -416,6 +414,11 @@ void LinController::ReceiveIbMessage(mw::EndpointAddress from, const SlaveRespon
     if (from == _endpointAddr)
         return;
 
+    SetSlaveResponseImpl(from, msg);
+}
+
+void LinController::SetSlaveResponseImpl(mw::EndpointAddress from, const SlaveResponse& msg)
+{
     auto&& linSlave = GetLinSlave(from);
     if (msg.linId >= linSlave.responses.size())
     {

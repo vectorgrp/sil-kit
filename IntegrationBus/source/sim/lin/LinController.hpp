@@ -112,7 +112,8 @@ private:
     template <typename MsgT>
     inline void SendIbMessage(MsgT&& msg);
 
-    void UpdateSlaveConfiguration(mw::EndpointAddress from, const SlaveConfiguration& config);
+    void UpdateSlaveConfigurationImpl(mw::EndpointAddress from, const SlaveConfiguration& config);
+    void LinController::SetSlaveResponseImpl(mw::EndpointAddress from, const SlaveResponse& msg);
 
     inline auto GetLinSlave(mw::EndpointAddress addr) -> LinSlave&;
     
