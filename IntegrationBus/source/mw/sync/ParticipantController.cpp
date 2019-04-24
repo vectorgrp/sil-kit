@@ -529,7 +529,12 @@ void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, c
         break;
 
     case SystemCommand::Kind::Stop:
-        if (State() == ParticipantState::Running)
+        if (State() == ParticipantState::Stopped)
+        {
+            _logger->warn("Received SystemCommand::Stop, but ignored since already ParticipantState::Stopped");
+            return;
+        }
+        else if (State() == ParticipantState::Running)
         {
             Stop("Received SystemCommand::Stop");
             return;
