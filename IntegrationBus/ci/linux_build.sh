@@ -53,7 +53,7 @@ echo
 echo "---------------------------------------------------------------------------------------------------"
 echo "Running tests on project..."
 set -x
-ctest -C $target -VV || stop
+ctest -C %target% -VV -R '^Test' || stop
 { set +x; } 2>&-
 
 echo

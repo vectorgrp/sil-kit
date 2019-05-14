@@ -5,6 +5,8 @@
 #include "ib/sim/exceptions.hpp"
 #include "ib/mw/IComAdapter.hpp"
 
+#include "spdlog/spdlog.h"
+
 namespace ib {
 namespace sim {
 namespace fr {
@@ -156,6 +158,7 @@ void FrController::RegisterSymbolAckHandler(SymbolAckHandler handler)
 void FrController::RegisterCycleStartHandler(CycleStartHandler handler)
 {
     // Only supported in VIBE simulation
+    _comAdapter->GetLogger()->info("CycleStartHandler callback is not supported in basic FlexRay simulation.");
 }
 
 void FrController::ReceiveIbMessage(mw::EndpointAddress from, const FrMessage& msg)
