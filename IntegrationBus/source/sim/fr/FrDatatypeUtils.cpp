@@ -75,6 +75,12 @@ bool operator==(const ControllerStatus& lhs, const ControllerStatus& rhs)
     return lhs.pocState == rhs.pocState;
 }
 
+bool operator==(const CycleStart& lhs, const CycleStart& rhs)
+{
+    return lhs.cycleCounter == rhs.cycleCounter
+        && lhs.timestamp == rhs.timestamp;
+}
+
 std::ostream& operator<<(std::ostream& out, Channel channel)
 {
     switch (channel)

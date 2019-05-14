@@ -17,7 +17,7 @@ namespace fr {
  */
 class IIbToFrBusSimulator
     : public mw::IIbReceiver<HostCommand, ControllerConfig, TxBufferUpdate>
-    , public mw::IIbSender<FrMessage, FrMessageAck, FrSymbol, FrSymbolAck, ControllerStatus>
+    , public mw::IIbSender<FrMessage, FrMessageAck, FrSymbol, FrSymbolAck, CycleStart, ControllerStatus>
 {
 public:
     ~IIbToFrBusSimulator() = default;

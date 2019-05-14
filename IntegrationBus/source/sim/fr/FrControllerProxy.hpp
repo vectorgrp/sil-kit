@@ -16,7 +16,7 @@ namespace fr {
 
 /*! \brief FlexRay Controller implementation for Network Simulator usage
  *
- * Acts as a proxy to the controllers implementend and simulated by the Network Simulator. For operation
+ * Acts as a proxy to the controllers implemented and simulated by the Network Simulator. For operation
  * without a Network Simulator cf. FrController.
  */
 class FrControllerProxy :
@@ -50,8 +50,8 @@ public:
 
     /*! \brief Update the content of a previously configured TX buffer.
      *
-     * The FlexRay message will be sent immediatly and only once.
-     * I.e., the configuration according to cycle, repetition, and transmissionmode is
+     * The FlexRay message will be sent immediately and only once.
+     * I.e., the configuration according to cycle, repetition, and transmission mode is
      * ignored. In particular, even with TransmissionMode::Continuous, the message will be
      * sent only once.
      *
@@ -72,12 +72,14 @@ public:
     void RegisterControllerStatusHandler(ControllerStatusHandler handler) override;
     void RegisterSymbolHandler(SymbolHandler handler) override;
     void RegisterSymbolAckHandler(SymbolAckHandler handler) override;
+    void RegisterCycleStartHandler(CycleStartHandler handler) override;
 
     // IIbToFrController
     void ReceiveIbMessage(mw::EndpointAddress from, const FrMessage& msg) override;
     void ReceiveIbMessage(mw::EndpointAddress from, const FrMessageAck& msg) override;
     void ReceiveIbMessage(mw::EndpointAddress from, const FrSymbol& msg) override;
     void ReceiveIbMessage(mw::EndpointAddress from, const FrSymbolAck& msg) override;
+    void ReceiveIbMessage(mw::EndpointAddress from, const CycleStart& msg) override;
     void ReceiveIbMessage(mw::EndpointAddress from, const ControllerStatus& msg) override;
 
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
@@ -114,6 +116,7 @@ private:
         CallbackVector<FrMessageAck>,
         CallbackVector<FrSymbol>,
         CallbackVector<FrSymbolAck>,
+        CallbackVector<CycleStart>,
         CallbackVector<ControllerStatus>
     > _callbacks;
 

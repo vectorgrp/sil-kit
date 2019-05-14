@@ -406,6 +406,15 @@ struct FrSymbolAck : FrSymbol
 };
 
 /*!
+ * \brief Indicate the start of a FlexRay cycle.
+ */
+struct CycleStart
+{
+    std::chrono::nanoseconds timestamp;
+    uint8_t cycleCounter;
+};
+
+/*!
  * \brief Protocol Operation Control (POC) state of the FlexRay communication controller
  */
 enum class PocState : uint8_t

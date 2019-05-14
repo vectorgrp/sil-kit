@@ -108,6 +108,7 @@ public:
     virtual void SendIbMessage(EndpointAddress from, sim::fr::FrMessageAck&& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sim::fr::FrSymbol& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sim::fr::FrSymbolAck& msg) = 0;
+    virtual void SendIbMessage(EndpointAddress from, const sim::fr::CycleStart& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sim::fr::HostCommand& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sim::fr::ControllerConfig& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sim::fr::TxBufferUpdate& msg) = 0;

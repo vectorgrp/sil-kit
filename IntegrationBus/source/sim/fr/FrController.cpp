@@ -153,6 +153,11 @@ void FrController::RegisterSymbolAckHandler(SymbolAckHandler handler)
     RegisterHandler(handler);
 }
 
+void FrController::RegisterCycleStartHandler(CycleStartHandler handler)
+{
+    // Only supported in VIBE simulation
+}
+
 void FrController::ReceiveIbMessage(mw::EndpointAddress from, const FrMessage& msg)
 {
     if (from == _endpointAddr)

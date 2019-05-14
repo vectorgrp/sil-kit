@@ -95,6 +95,11 @@ void FrControllerProxy::RegisterSymbolAckHandler(SymbolAckHandler handler)
     RegisterHandler(handler);
 }
 
+void FrControllerProxy::RegisterCycleStartHandler(CycleStartHandler handler)
+{
+    RegisterHandler(handler);
+}
+
 void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const FrMessage& msg)
 {
     if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
@@ -134,6 +139,14 @@ void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const FrS
 }
 
 void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const FrSymbolAck& msg)
+{
+    if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
+        return;
+
+    CallHandlers(msg);
+}
+
+void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const CycleStart& msg)
 {
     if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
         return;

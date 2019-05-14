@@ -103,6 +103,7 @@ public:
     void SendIbMessage(EndpointAddress from, sim::fr::FrMessageAck&& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::fr::FrSymbol& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::fr::FrSymbolAck& msg) override;
+    void SendIbMessage(EndpointAddress from, const sim::fr::CycleStart& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::fr::HostCommand& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::fr::ControllerConfig& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::fr::TxBufferUpdate& msg) override;
@@ -297,6 +298,7 @@ private:
         RtpsTopics<sim::fr::idl::FrMessageAck>,
         RtpsTopics<sim::fr::idl::FrSymbol>,
         RtpsTopics<sim::fr::idl::FrSymbolAck>,
+        RtpsTopics<sim::fr::idl::CycleStart>,
         RtpsTopics<sim::fr::idl::HostCommand>,
         RtpsTopics<sim::fr::idl::ControllerConfig>,
         RtpsTopics<sim::fr::idl::TxBufferUpdate>,

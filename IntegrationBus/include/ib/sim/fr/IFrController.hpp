@@ -29,6 +29,7 @@ public:
     //! \brief Notification that the POC state has changed.
     using ControllerStatusHandler = CallbackT<ControllerStatus>;
 
+
     /*! \brief Notification that the controller has received a symbol.
      *
      * This callback is primarily intended for tracing. There is no need to react on it.
@@ -45,6 +46,12 @@ public:
      *  - Run() will cause the transmission of CasMts if configured to coldstart the bus.
      */
     using SymbolAckHandler = CallbackT<FrSymbolAck>;
+
+    /*! \brief Notification that a new FlexRay cycle did start.
+     *
+     *  Only supported in VIBE simulation.
+     */
+    using CycleStartHandler = CallbackT<CycleStart>;
 
 public:
     virtual ~IFrController() = default;
@@ -63,8 +70,8 @@ public:
      * as TransmissionMode::Continuous, the content is sent repeatedly according to the
      * offset and repetition configuration.
      *
-     * Without a Network Simulator, a FlexRay message will be sent immediatly and only once.
-     * I.e., the configuration according to cycle, repetition, and transmissionmode is
+     * Without a Network Simulator, a FlexRay message will be sent immediately and only once.
+     * I.e., the configuration according to cycle, repetition, and transmission mode is
      * ignored. In particular, even with TransmissionMode::Continuous, the message will be
      * sent only once.
      *
@@ -102,6 +109,12 @@ public:
     virtual void RegisterSymbolHandler(SymbolHandler handler) = 0;
     //! \brief Notification that the controller has sent a symbol.
     virtual void RegisterSymbolAckHandler(SymbolAckHandler handler) = 0;
+
+    /*! \brief Notification that a new FlexRay cycle did start.
+    *
+    *  Only supported in VIBE simulation.
+    */
+    virtual void RegisterCycleStartHandler(CycleStartHandler handler) = 0;
 };
 
 } // namespace fr

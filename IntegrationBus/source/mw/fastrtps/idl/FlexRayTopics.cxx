@@ -2193,6 +2193,120 @@ void ib::sim::fr::idl::FrSymbolAck::serializeKey(eprosima::fastcdr::Cdr &scdr) c
 	 scdr << m_senderAddr;  
 	 
 }
+ib::sim::fr::idl::CycleStart::CycleStart()
+{
+
+    m_timeNs = 0;
+
+    m_cycleCounter = 0;
+
+
+}
+
+ib::sim::fr::idl::CycleStart::~CycleStart()
+{
+}
+
+ib::sim::fr::idl::CycleStart::CycleStart(const CycleStart &x)
+{
+    m_senderAddr = x.m_senderAddr;
+    m_timeNs = x.m_timeNs;
+    m_cycleCounter = x.m_cycleCounter;
+}
+
+ib::sim::fr::idl::CycleStart::CycleStart(CycleStart &&x)
+{
+    m_senderAddr = std::move(x.m_senderAddr);
+    m_timeNs = x.m_timeNs;
+    m_cycleCounter = x.m_cycleCounter;
+}
+
+ib::sim::fr::idl::CycleStart& ib::sim::fr::idl::CycleStart::operator=(const CycleStart &x)
+{
+    m_senderAddr = x.m_senderAddr;
+    m_timeNs = x.m_timeNs;
+    m_cycleCounter = x.m_cycleCounter;
+
+    return *this;
+}
+
+ib::sim::fr::idl::CycleStart& ib::sim::fr::idl::CycleStart::operator=(CycleStart &&x)
+{
+    m_senderAddr = std::move(x.m_senderAddr);
+    m_timeNs = x.m_timeNs;
+    m_cycleCounter = x.m_cycleCounter;
+
+    return *this;
+}
+
+size_t ib::sim::fr::idl::CycleStart::getMaxCdrSerializedSize(size_t current_alignment)
+{
+    size_t initial_alignment = current_alignment;
+
+    current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
+    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+
+    return current_alignment - initial_alignment;
+}
+
+size_t ib::sim::fr::idl::CycleStart::getCdrSerializedSize(const ib::sim::fr::idl::CycleStart& data, size_t current_alignment)
+{
+    (void)data;
+    size_t initial_alignment = current_alignment;
+
+    current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
+    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+
+    return current_alignment - initial_alignment;
+}
+
+void ib::sim::fr::idl::CycleStart::serialize(eprosima::fastcdr::Cdr &scdr) const
+{
+    scdr << m_senderAddr;
+    scdr << m_timeNs;
+    scdr << m_cycleCounter;
+}
+
+void ib::sim::fr::idl::CycleStart::deserialize(eprosima::fastcdr::Cdr &dcdr)
+{
+    dcdr >> m_senderAddr;
+    dcdr >> m_timeNs;
+    dcdr >> m_cycleCounter;
+}
+
+size_t ib::sim::fr::idl::CycleStart::getKeyMaxCdrSerializedSize(size_t current_alignment)
+{
+	size_t current_align = current_alignment;
+            
+     current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
+
+
+
+    return current_align;
+}
+
+bool ib::sim::fr::idl::CycleStart::isKeyDefined()
+{
+    return true;
+}
+
+void ib::sim::fr::idl::CycleStart::serializeKey(eprosima::fastcdr::Cdr &scdr) const
+{
+	(void) scdr;
+	 scdr << m_senderAddr;  
+	 
+	 
+}
 
 ib::sim::fr::idl::ControllerStatus::ControllerStatus()
 {

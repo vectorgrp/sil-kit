@@ -387,6 +387,18 @@ struct FrSymbolAck
     FrSymbol symbol;
 };
 
+// Indicate the start of a FlexRay cycle
+struct CycleStart
+{
+    @Key ib::mw::idl::EndpointAddress senderAddr;
+
+    // Time of the FlexRay Cycle Start
+    long long timeNs;
+
+    // The number of the current cycle
+    octet cycleCounter;
+};
+
 
 // Protocol Operation Control (POC) state of the FlexRay communication controller
 enum PocState

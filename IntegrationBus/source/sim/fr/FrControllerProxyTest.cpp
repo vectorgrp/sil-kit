@@ -44,6 +44,7 @@ protected:
         MOCK_METHOD2(ControllerStatusHandler, void(IFrController*, const ControllerStatus&));
         MOCK_METHOD2(SymbolHandler, void(IFrController*, const FrSymbol&));
         MOCK_METHOD2(SymbolAckHandler, void(IFrController*, const FrSymbolAck&));
+        MOCK_METHOD2(CycleStartHandler, void(IFrController*, const CycleStart&));
     };
 
 protected:
@@ -289,6 +290,19 @@ TEST_F(FrControllerProxyTest, call_symbol_ack_handler)
     proxy.ReceiveIbMessage(controllerAddress, ack);
 }
 
+TEST_F(FrControllerProxyTest, call_cyclestart_handler)
+{
+    proxy.RegisterCycleStartHandler(bind_method(&callbacks, &Callbacks::CycleStartHandler));
+
+    CycleStart cycleStart;
+    cycleStart.timestamp = 15ns;
+    cycleStart.cycleCounter = 5u;
+
+    EXPECT_CALL(callbacks, CycleStartHandler(&proxy, cycleStart))
+        .Times(1);
+
+    proxy.ReceiveIbMessage(controllerAddress, cycleStart);
+}
 
 
 } // namespace

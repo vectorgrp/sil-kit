@@ -25,6 +25,8 @@ struct FrMessageAck;
 struct FrSymbol;
 struct FrSymbolAck;
 
+struct CycleStart;
+
 struct HostCommand;
 struct ControllerStatus;
 

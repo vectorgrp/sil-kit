@@ -109,6 +109,7 @@ public:
     MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const sim::fr::FrMessageAck&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::FrSymbol&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::FrSymbolAck&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::CycleStart&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::HostCommand&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::ControllerConfig&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::TxBufferUpdate&));

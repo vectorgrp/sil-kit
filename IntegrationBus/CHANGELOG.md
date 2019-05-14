@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased] - 2019-05-28
 ### Added
+- New FlexRay controller callback IFrController::CycleStartHandler, which is called at the start of
+  each FlexRay cycle. Only available VIBE simulation.
 ### Removed
 ### Changed
 ### Fixed

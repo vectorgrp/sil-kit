@@ -18,6 +18,7 @@ namespace ib {
     DefineTopicTrait(sim::fr::idl, FrMessageAck);
     DefineTopicTrait(sim::fr::idl, FrSymbol);
     DefineTopicTrait(sim::fr::idl, FrSymbolAck);
+    DefineTopicTrait(sim::fr::idl, CycleStart);
     DefineTopicTrait(sim::fr::idl, HostCommand);
     DefineTopicTrait(sim::fr::idl, ControllerConfig);
     DefineTopicTrait(sim::fr::idl, TxBufferUpdate);

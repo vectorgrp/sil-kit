@@ -50,8 +50,8 @@ public:
 
     /*! \brief Update the content of a previously configured TX buffer.
      *
-     * The FlexRay message will be sent immediatly and only once.
-     * I.e., the configuration according to cycle, repetition, and transmissionmode is
+     * The FlexRay message will be sent immediately and only once.
+     * I.e., the configuration according to cycle, repetition, and transmission mode is
      * ignored. In particular, even with TransmissionMode::Continuous, the message will be
      * sent only once.
      *
@@ -72,6 +72,7 @@ public:
     void RegisterControllerStatusHandler(ControllerStatusHandler handler) override;
     void RegisterSymbolHandler(SymbolHandler handler) override;
     void RegisterSymbolAckHandler(SymbolAckHandler handler) override;
+    void RegisterCycleStartHandler(CycleStartHandler handler) override;
 
     // IIbToFrController
     void ReceiveIbMessage(mw::EndpointAddress from, const FrMessage& msg) override;

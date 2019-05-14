@@ -177,6 +177,15 @@ std::ostream& operator<<(std::ostream& out, const fr::FrSymbolAck& symbol)
     return out;
 }
 
+std::ostream& operator<<(std::ostream& out, const fr::CycleStart& cycleStart)
+{
+    return out
+        << "CycleStart{t=" << cycleStart.timestamp
+        << ", cycleCounter=" << static_cast<uint32_t>(cycleStart.cycleCounter)
+        << "}";
+};
+
+
 
 template<typename T>
 void ReceiveMessage(fr::IFrController* /*controller*/, const T& t)
@@ -414,6 +423,7 @@ int main(int argc, char** argv)
         controller->RegisterWakeupHandler(bind_method(&frUser, &FlexRayUser::WakeupHandler));
         controller->RegisterSymbolHandler(&ReceiveMessage<fr::FrSymbol>);
         controller->RegisterSymbolAckHandler(&ReceiveMessage<fr::FrSymbolAck>);
+        controller->RegisterCycleStartHandler(&ReceiveMessage<fr::CycleStart>);
 
         fr::ControllerConfig config;
         config.bufferConfigs = bufferConfigs;

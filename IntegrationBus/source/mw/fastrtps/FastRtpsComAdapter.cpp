@@ -689,6 +689,10 @@ void FastRtpsComAdapter::SendIbMessage(EndpointAddress from, const sim::fr::FrSy
     SendIbMessageImpl(from, msg);
 }
 
+void FastRtpsComAdapter::SendIbMessage(EndpointAddress from, const sim::fr::CycleStart& msg)
+{
+    SendIbMessageImpl(from, msg);
+}
 void FastRtpsComAdapter::SendIbMessage(EndpointAddress from, const sim::fr::HostCommand& msg)
 {
     SendIbMessageImpl(from, msg);

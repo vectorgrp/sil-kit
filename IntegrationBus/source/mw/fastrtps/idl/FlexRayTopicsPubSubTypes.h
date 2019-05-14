@@ -285,6 +285,26 @@ namespace ib
                 	MD5 m_md5;
                 	unsigned char* m_keyBuffer;
                 };
+                /*!
+                 * @brief This class represents the TopicDataType of the type CycleStart defined by the user in the IDL file.
+                 * @ingroup FLEXRAYTOPICS
+                 */
+                class CycleStartPubSubType : public eprosima::fastrtps::TopicDataType {
+                public:
+                        typedef CycleStart type;
+
+                	CycleStartPubSubType();
+                	virtual ~CycleStartPubSubType();
+                	virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
+                	virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
+                    virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
+                	virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
+                		bool force_md5 = false) override;
+                	virtual void* createData() override;
+                	virtual void deleteData(void * data) override;
+                	MD5 m_md5;
+                	unsigned char* m_keyBuffer;
+                };
 
                 /*!
                  * @brief This class represents the TopicDataType of the type ControllerStatus defined by the user in the IDL file.

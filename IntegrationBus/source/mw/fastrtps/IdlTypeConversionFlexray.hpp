@@ -30,6 +30,7 @@ inline auto to_idl(const FrMessageAck& msg) -> idl::FrMessageAck;
 inline auto to_idl(FrMessageAck&& msg) -> idl::FrMessageAck;
 inline auto to_idl(const FrSymbol& msg) -> idl::FrSymbol;
 inline auto to_idl(const FrSymbolAck& msg) -> idl::FrSymbolAck;
+inline auto to_idl(const CycleStart& msg) -> idl::CycleStart;
 inline auto to_idl(const HostCommand& msg) -> idl::HostCommand;
 inline auto to_idl(const ClusterParameters& msg) -> idl::ClusterParameters;
 inline auto to_idl(const NodeParameters& msg) -> idl::NodeParameters;
@@ -54,6 +55,7 @@ inline auto from_idl(FrMessage&& idl) -> fr::FrMessage;
 inline auto from_idl(FrMessageAck&& idl) -> fr::FrMessageAck;
 inline auto from_idl(FrSymbol&& idl) -> fr::FrSymbol;
 inline auto from_idl(FrSymbolAck&& idl) -> fr::FrSymbolAck;
+inline auto from_idl(CycleStart&& idl) -> fr::CycleStart;
 inline auto from_idl(HostCommand&& idl) -> fr::HostCommand;
 inline auto from_idl(ClusterParameters&& idl) -> fr::ClusterParameters;
 inline auto from_idl(NodeParameters&& idl) -> fr::NodeParameters;
@@ -442,6 +444,26 @@ auto idl::from_idl(idl::FrSymbolAck&& idl) -> fr::FrSymbolAck
     msg.timestamp = std::chrono::nanoseconds{ idl.symbol().timeNs() };
     msg.channel = from_idl(idl.symbol().channel());
     msg.pattern = from_idl(idl.symbol().pattern());
+
+    return msg;
+}
+
+auto to_idl(const CycleStart& msg) -> idl::CycleStart
+{
+    idl::CycleStart idl;
+
+    idl.timeNs(std::chrono::duration_cast<std::chrono::nanoseconds>(msg.timestamp).count());
+    idl.cycleCounter(msg.cycleCounter);
+
+    return idl;
+}
+
+auto idl::from_idl(idl::CycleStart&& idl) -> fr::CycleStart
+{
+    fr::CycleStart msg;
+
+    msg.timestamp = std::chrono::nanoseconds{idl.timeNs()};
+    msg.cycleCounter = idl.cycleCounter();
 
     return msg;
 }
