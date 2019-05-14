@@ -3,7 +3,26 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - 2019-03-06
+## [Unreleased] - 2019-05-28
+### Added
+### Removed
+### Changed
+### Fixed
+
+## [Sprint-25] - 2019-05-14
+### Added
+- The FlexRay cluster and node configuration can now be specified in the IbConfig.json.
+- It is now possible to use ILinController::SetResponse(...) and ILinController::RequestMessage(...)
+  on LIN Controllers configured as master. This can be used to send a LIN message from a master to
+  slaves instead of the ILinController::SendMessage(...).
+### Removed
+### Changed
+### Fixed
+- LIN Controller models are now robust to out-of-order configuration. It is no longer necessary to
+  configure the master node before the slaves. And the master can handle an out-of-order
+  configuration, e.g., if a response reaches the master before the response configuration.
+
+## [Sprint-24] - 2019-03-13
 ### Added
 - Support to swap out participants between simulation runs. A participant can activate the so called
   coldswap feature by calling IParticipantController::EnableColdswap(). The coldswap process can be
