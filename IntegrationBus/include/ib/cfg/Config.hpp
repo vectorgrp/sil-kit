@@ -91,6 +91,7 @@ struct FlexrayController
 
     sim::fr::ClusterParameters clusterParameters;
     sim::fr::NodeParameters nodeParameters;
+    std::vector<sim::fr::TxBufferConfig> txBufferConfigs;
 };
 
 enum class PortDirection : uint8_t

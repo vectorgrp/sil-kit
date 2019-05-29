@@ -24,6 +24,7 @@ public:
     IntegrationBusAPI auto WithMacAddress(std::string macAddress) -> ControllerBuilder&;
     auto WithClusterParameters(const sim::fr::ClusterParameters& clusterParameters) -> ControllerBuilder&;
     auto WithNodeParameters(const sim::fr::NodeParameters& nodeParameters) -> ControllerBuilder&;
+    auto WithTxBufferConfigs(const std::vector<sim::fr::TxBufferConfig>& txBufferConfigs) -> ControllerBuilder&;
 
     auto operator->() -> ParticipantBuilder*;
 

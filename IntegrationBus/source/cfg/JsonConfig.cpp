@@ -302,12 +302,42 @@ auto from_json<sim::fr::NodeParameters>(const json11::Json& json) -> sim::fr::No
     return nodeParameters;
 }
 
+auto to_json(const sim::fr::TxBufferConfig& txBufferConfig) -> json11::Json
+{
+    return json11::Json::object{
+        { "channels", static_cast<uint8_t>(txBufferConfig.channels) },
+        { "slotId", txBufferConfig.slotId },
+        { "offset", txBufferConfig.offset },
+        { "repetition", txBufferConfig.repetition },
+        { "PPindicator", txBufferConfig.hasPayloadPreambleIndicator },
+        { "headerCrc", txBufferConfig.headerCrc },
+        { "transmissionMode", static_cast<uint8_t>(txBufferConfig.transmissionMode) }
+    };
+}
+
+template <>
+auto from_json<sim::fr::TxBufferConfig>(const json11::Json& json) -> sim::fr::TxBufferConfig
+{
+    sim::fr::TxBufferConfig txBufferConfig;
+
+    txBufferConfig.channels = static_cast<sim::fr::Channel>(json["channels"].int_value());
+    txBufferConfig.slotId = static_cast<uint16_t>(json["slotId"].int_value());
+    txBufferConfig.offset = static_cast<uint8_t>(json["offset"].int_value());
+    txBufferConfig.repetition = static_cast<uint8_t>(json["repetition"].int_value());
+    txBufferConfig.hasPayloadPreambleIndicator = json["PPindicator"].bool_value();
+    txBufferConfig.headerCrc = static_cast<uint16_t>(json["headerCrc"].int_value());
+    txBufferConfig.transmissionMode = static_cast<sim::fr::TransmissionMode>(json["transmissionMode"].int_value());
+
+    return txBufferConfig;
+}
+
 auto to_json(const FlexrayController& controller) -> json11::Json
 {
     return json11::Json::object{
         { "Name", controller.name },
         { "ClusterParameters",  to_json(controller.clusterParameters) },
-        { "NodeParameters", to_json(controller.nodeParameters) }
+        { "NodeParameters", to_json(controller.nodeParameters) },
+        { "TxBufferConfigs", to_json(controller.txBufferConfigs) }
     };
 }
 
@@ -326,6 +356,7 @@ auto from_json<FlexrayController>(const json11::Json& json) -> FlexrayController
     controller.name = json["Name"].string_value();
     controller.clusterParameters = from_json<sim::fr::ClusterParameters>(json["ClusterParameters"]);
     controller.nodeParameters = from_json<sim::fr::NodeParameters>(json["NodeParameters"]);
+    controller.txBufferConfigs = from_json<std::vector<sim::fr::TxBufferConfig>>(json["TxBufferConfigs"].array_items());
     return controller;
 }
 

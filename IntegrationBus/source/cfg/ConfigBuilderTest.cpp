@@ -145,17 +145,38 @@ auto getNodeParameters() -> ib::sim::fr::NodeParameters
     return nodeParams;
 }
 
+auto getTxBufferConfig() -> ib::sim::fr::TxBufferConfig
+{
+    ib::sim::fr::TxBufferConfig txBufferConfig;
+    txBufferConfig.channels = ib::sim::fr::Channel::A;
+    txBufferConfig.slotId = 0;
+    txBufferConfig.offset = 0;
+    txBufferConfig.repetition = 0;
+    txBufferConfig.hasPayloadPreambleIndicator = false;
+    txBufferConfig.headerCrc = 0;
+    txBufferConfig.transmissionMode = ib::sim::fr::TransmissionMode::SingleShot;
+    return txBufferConfig;
+}
+
 TEST_F(ConfigBuilderTest, make_fr_controller)
 {
+    auto txBufferConfigs = std::vector<ib::sim::fr::TxBufferConfig>{
+        getTxBufferConfig(),
+        getTxBufferConfig(),
+        getTxBufferConfig()
+    };
+
     simulationSetup.AddParticipant("FR").AddFlexray("FR1")
         .WithClusterParameters(getClusterParameters())
-        .WithNodeParameters(getNodeParameters());
+        .WithNodeParameters(getNodeParameters())
+        .WithTxBufferConfigs(txBufferConfigs);
 
     auto config = configBuilder.Build();
 
     auto&& participant = config.simulationSetup.participants[0];
     EXPECT_EQ(participant.flexrayControllers[0].clusterParameters, getClusterParameters());
     EXPECT_EQ(participant.flexrayControllers[0].nodeParameters, getNodeParameters());
+    EXPECT_EQ(participant.flexrayControllers[0].txBufferConfigs, txBufferConfigs);
 }
 
 TEST_F(ConfigBuilderTest, make_switch)

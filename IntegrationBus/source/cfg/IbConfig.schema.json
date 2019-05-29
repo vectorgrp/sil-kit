@@ -363,6 +363,52 @@
                             "title": "Number of samples per microtick (values 1 or 2)"
                           }
                         }
+                      },
+                      "TxBufferConfigs": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "channels": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 3,
+                              "title": "values (1) Channel::A, (2) Channel::B, (3) Channel::AB"
+                            },
+                            "slotId": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 65535,
+                              "title": "The slot Id of frame"
+                            },
+                            "offset": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 63,
+                              "title": "Base offset for cycle multiplexing (values 0-63)"
+                            },
+                            "repetition": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 64,
+                              "title": "Repetition for cycle multiplexing (values 1,2,4,8,16,32,64)"
+                            },
+                            "PPindicator": {
+                              "type": "boolean",
+                              "title": "Set the PPindicator"
+                            },
+                            "headerCrc": {
+                              "type": "integer",
+                              "title": "Header CRC, 11 bits"
+                            },
+                            "transmissionMode": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 1,
+                              "title": "TransmissionMode::SingleShot or TransmissionMode::Continuous"
+                            }
+                          }
+                        }
                       }
                     },
                     "additionalProperties": false

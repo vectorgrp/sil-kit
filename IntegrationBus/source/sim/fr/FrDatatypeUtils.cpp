@@ -47,17 +47,6 @@ bool operator==(const TxBufferUpdate& lhs, const TxBufferUpdate& rhs)
         && lhs.payload == rhs.payload;
 }
 
-bool operator==(const TxBufferConfig& lhs, const TxBufferConfig& rhs)
-{
-    return lhs.channels == rhs.channels
-        && lhs.slotId == rhs.slotId
-        && lhs.offset == rhs.offset
-        && lhs.repetition == rhs.repetition
-        && lhs.hasPayloadPreambleIndicator == rhs.hasPayloadPreambleIndicator
-        && lhs.headerCrc == rhs.headerCrc
-        && lhs.transmissionMode == rhs.transmissionMode;
-}
-
 bool operator==(const ControllerConfig& lhs, const ControllerConfig& rhs)
 {
     return lhs.clusterParams == rhs.clusterParams

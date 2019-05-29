@@ -516,6 +516,17 @@ inline bool operator==(const NodeParameters& lhs, const NodeParameters& rhs)
         && lhs.pSamplesPerMicrotick == rhs.pSamplesPerMicrotick;
 }
 
+inline bool operator==(const TxBufferConfig& lhs, const TxBufferConfig& rhs)
+{
+    return lhs.channels == rhs.channels
+        && lhs.slotId == rhs.slotId
+        && lhs.offset == rhs.offset
+        && lhs.repetition == rhs.repetition
+        && lhs.hasPayloadPreambleIndicator == rhs.hasPayloadPreambleIndicator
+        && lhs.headerCrc == rhs.headerCrc
+        && lhs.transmissionMode == rhs.transmissionMode;
+}
+
 } // namespace fr
 } // namespace sim
 } // namespace ib

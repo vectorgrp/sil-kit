@@ -331,12 +331,32 @@ auto getNodeParameters() -> ib::sim::fr::NodeParameters
     return nodeParams;
 }
 
+auto getTxBufferConfig() -> ib::sim::fr::TxBufferConfig
+{
+    ib::sim::fr::TxBufferConfig txBufferConfig;
+    txBufferConfig.channels = ib::sim::fr::Channel::A;
+    txBufferConfig.slotId = 0;
+    txBufferConfig.offset = 0;
+    txBufferConfig.repetition = 0;
+    txBufferConfig.hasPayloadPreambleIndicator = false;
+    txBufferConfig.headerCrc = 0;
+    txBufferConfig.transmissionMode = ib::sim::fr::TransmissionMode::SingleShot;
+    return txBufferConfig;
+}
+
 TEST_F(JsonConfigTest, CreateFlexrayParametersNetwork)
 {
+    auto&& txBufferConfigs = std::vector<ib::sim::fr::TxBufferConfig>{
+        getTxBufferConfig(),
+        getTxBufferConfig(),
+        getTxBufferConfig()
+    };
+
     simulationSetup.AddParticipant("P1")->AddFlexray("FR1")
         .WithLink("FR_A")
         .WithClusterParameters(getClusterParameters())
-        .WithNodeParameters(getNodeParameters());
+        .WithNodeParameters(getNodeParameters())
+        .WithTxBufferConfigs(txBufferConfigs);
 
     BuildConfigFromJson();
     EXPECT_EQ(config, referenceConfig);

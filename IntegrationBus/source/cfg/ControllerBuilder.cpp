@@ -29,6 +29,13 @@ auto ControllerBuilder<FlexrayController>::WithNodeParameters(const sim::fr::Nod
     return *this;
 }
 
+template<>
+auto ControllerBuilder<FlexrayController>::WithTxBufferConfigs(const std::vector<sim::fr::TxBufferConfig>& txBufferConfigs) -> ControllerBuilder&
+{
+    _controller.txBufferConfigs = txBufferConfigs;
+    return *this;
+}
+
 } // namespace cfg
 } // namespace ib
 
