@@ -49,7 +49,7 @@ macro(configure_ib_install project_name)
         set(INSTALL_CODE_DIR ${SYSTEM_TAG}/${project_name})
 
         # This path must be compliant to find_package, which already encodes the configuration into the targets file ('IntegrationBusTargets-${CONFIG_TAG}.cmake')
-        set(INSTALL_CONFIG_DIR ${SYSTEM_TAG}/cmake)
+        set(INSTALL_CONFIG_DIR ${SYSTEM_TAG}/cmake)#/${project_name})
     else()
         message(FATAL_ERROR "Platform '${CMAKE_SYSTEM_NAME}' is not supported")
     endif()

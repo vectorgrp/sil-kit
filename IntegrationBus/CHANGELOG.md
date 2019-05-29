@@ -14,7 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - New FlexRay controller callback IFrController::CycleStartHandler, which is called at the start of
   each FlexRay cycle. Only available VIBE simulation.
 - New config option for FastRTPS middleware to configure SocketBuffer sizes
-- New config options to confiugre FlexRay TxBuffers
+- New config options to configure FlexRay TxBuffers
 ### Removed
 ### Changed
 ### Fixed

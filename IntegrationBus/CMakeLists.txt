@@ -100,20 +100,23 @@ add_subdirectory(${THIRDPARTY_DIR}/Fast-RTPS
 #######################################################################################################################
 # Logging
 #######################################################################################################################
+
 # Temporarily patch some CMake variables to trick spdlog's install commands into using our custom folder structure
 set(CMAKE_INSTALL_LIBDIR_backup "${CMAKE_INSTALL_LIBDIR}")
 set(CMAKE_INSTALL_INCLUDEDIR_backup "${CMAKE_INSTALL_INCLUDEDIR}")
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-    # Files ./lib/cmake/spdlog/spdlog*.cmake should rather go to ./share/cmake/spdlog/spdlog*.cmake
-    # File ./pkgconfig/spdlog.pc should rather go to ./share/pkgconfig/spdlog.pc
-    set(CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_DATAROOTDIR})
+    # Files ./lib/cmake/spdlog/spdlog*.cmake should rather go to ./<Config>/share/cmake/spdlog/spdlog*.cmake
+    # File ./pkgconfig/spdlog.pc should rather go to ./<Config>/share/pkgconfig/spdlog.pc
+    set(CMAKE_INSTALL_LIBDIR ${INSTALL_CONFIG_DIR}/../..)
+    # Folder ./include/spdlog/**/*.h should rather go to ./<Config>/include/spdlog/**/*.h on Windows
+    set(CMAKE_INSTALL_INCLUDEDIR ${INSTALL_INCLUDE_DIR})
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-    # Files ./lib/cmake/spdlog/spdlog*.cmake should rather go to ./Win32/cmake/spdlog/spdlog*.cmake
-    # File ./pkgconfig/spdlog.pc should rather go to ./Win32/pkgconfig/spdlog.pc
+    # Files ./lib/cmake/spdlog/spdlog*.cmake should rather go to ./<System>/cmake/spdlog/spdlog*.cmake
+    # File ./pkgconfig/spdlog.pc should rather go to ./<System>/pkgconfig/spdlog.pc
     set(CMAKE_INSTALL_LIBDIR ${SYSTEM_TAG})
+    # Folder ./include/spdlog/**/*.h should rather go to ./<System>/include/spdlog/**/*.h on Windows
+    set(CMAKE_INSTALL_INCLUDEDIR ${INSTALL_INCLUDE_DIR})
 endif()
-# Folder ./include/spdlog/**/*.h should rather go to ./<Target>/include/spdlog/**/*.h on Windows
-set(CMAKE_INSTALL_INCLUDEDIR ${INSTALL_INCLUDE_DIR})
 
 add_subdirectory(${THIRDPARTY_DIR}/spdlog
     ThirdParty/spdlog
