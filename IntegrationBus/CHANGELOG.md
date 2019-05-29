@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Removed
 ### Changed
 ### Fixed
+- Fixed broken CMake target for installed IntegrationBus target:
+  With the introduction of spdlog, the IntegrationBus cmake target depends on spdlog::spdlog target. 
+  However, the spdlog::spdlog target was not installed (only header files were copied, but no cmake 
+  config file was generated). Thus, the installed IntegrationBus target could not be used from cmake.
 
 ## [Sprint-25] - 2019-05-14
 ### Added

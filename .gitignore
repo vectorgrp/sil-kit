@@ -1,5 +1,6 @@
 # ignore cmake-generated path directories
 build*/
+install*/
 .vscode
 
 # ignore CLion files

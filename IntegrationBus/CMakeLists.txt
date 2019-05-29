@@ -100,18 +100,28 @@ add_subdirectory(${THIRDPARTY_DIR}/Fast-RTPS
 #######################################################################################################################
 # Logging
 #######################################################################################################################
+# Temporarily patch some CMake variables to trick spdlog's install commands into using our custom folder structure
+set(CMAKE_INSTALL_LIBDIR_backup "${CMAKE_INSTALL_LIBDIR}")
+set(CMAKE_INSTALL_INCLUDEDIR_backup "${CMAKE_INSTALL_INCLUDEDIR}")
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+    # Files ./lib/cmake/spdlog/spdlog*.cmake should rather go to ./share/cmake/spdlog/spdlog*.cmake
+    # File ./pkgconfig/spdlog.pc should rather go to ./share/pkgconfig/spdlog.pc
+    set(CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_DATAROOTDIR})
+elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+    # Files ./lib/cmake/spdlog/spdlog*.cmake should rather go to ./Win32/cmake/spdlog/spdlog*.cmake
+    # File ./pkgconfig/spdlog.pc should rather go to ./Win32/pkgconfig/spdlog.pc
+    set(CMAKE_INSTALL_LIBDIR ${SYSTEM_TAG})
+endif()
+# Folder ./include/spdlog/**/*.h should rather go to ./<Target>/include/spdlog/**/*.h on Windows
+set(CMAKE_INSTALL_INCLUDEDIR ${INSTALL_INCLUDE_DIR})
+
 add_subdirectory(${THIRDPARTY_DIR}/spdlog
     ThirdParty/spdlog
-    EXCLUDE_FROM_ALL
 )
 
-# install spdlog headers
-install(
-    DIRECTORY "${THIRDPARTY_DIR}/spdlog/include/spdlog"
-    DESTINATION ${INSTALL_INCLUDE_DIR}
-    COMPONENT IntegrationBus
-)
-
+# Restore previously patched CMake variables
+set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_LIBDIR_backup}")
+set(CMAKE_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR_backup}")
 
 #######################################################################################################################
 # Helper Functions

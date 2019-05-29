@@ -25,6 +25,7 @@ elseif("${CPACK_COMPONENT_GROUP}" STREQUAL "IntegrationBus-Contributor-Package")
         IntegrationBus-Demos
         IntegrationBus-Developer
         IntegrationBus-Demos-Developer
+        Unspecified  # Install commands of third-party libraries like spdlog do not specify a component, they end up here
     )
 else()
     message(FATAL_ERROR "Call 'cpack -D CPACK_COMPONENT_GROUP=<group name>' with one of 'IntegrationBus-Library-Package' or 'IntegrationBus-Contributor-Package'")
