@@ -3,7 +3,13 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - 2019-05-28
+## [Unreleased] - 2019-??-??
+### Added
+### Removed
+### Changed
+### Fixed
+
+## [Sprint-26] - 2019-05-29
 ### Added
 - New FlexRay controller callback IFrController::CycleStartHandler, which is called at the start of
   each FlexRay cycle. Only available VIBE simulation.
