@@ -868,6 +868,11 @@ auto from_json<FastRtps::Config>(const json11::Json& json) -> FastRtps::Config
         throw Misconfiguration{"Invalid FastRTPS discovery type: " + to_string(fastRtps.discoveryType)};
     }
 
+    fastRtps.sendSocketBufferSize = -1;
+    optional_from_json(fastRtps.sendSocketBufferSize, json, "SendSocketBufferSize");
+    fastRtps.listenSocketBufferSize = -1;
+    optional_from_json(fastRtps.listenSocketBufferSize, json, "ListenSocketBufferSize");
+
     return fastRtps;
 }
 
@@ -877,7 +882,9 @@ auto to_json(const FastRtps::Config& fastRtps) -> json11::Json
     {
         {"DiscoveryType", to_string(fastRtps.discoveryType)},
         {"UnicastLocators", fastRtps.unicastLocators},
-        {"ConfigFileName", to_json(fastRtps.configFileName)}
+        {"ConfigFileName", to_json(fastRtps.configFileName)},
+        {"SendSocketBufferSize", to_json(fastRtps.sendSocketBufferSize)},
+        {"ListenSocketBufferSize", to_json(fastRtps.listenSocketBufferSize)}
     };
 }
 

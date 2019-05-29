@@ -119,6 +119,14 @@ void FastRtpsComAdapter::joinDomain(uint32_t domainId)
         pParam.rtps.builtin.m_simpleEDP.use_PublicationReaderANDSubscriptionWriter = true;
         pParam.rtps.builtin.m_simpleEDP.use_PublicationWriterANDSubscriptionReader = true;
         pParam.rtps.builtin.leaseDuration = c_TimeInfinite;
+        if (fastRtpsCfg.sendSocketBufferSize != -1)
+        {
+            pParam.rtps.sendSocketBufferSize = fastRtpsCfg.sendSocketBufferSize;
+        }
+        if (fastRtpsCfg.listenSocketBufferSize != -1)
+        {
+            pParam.rtps.listenSocketBufferSize = fastRtpsCfg.listenSocketBufferSize;
+        }
 
         auto CalculateMetaTrafficPort = [domainId, &portParams = pParam.rtps.port](auto participantId)
         {

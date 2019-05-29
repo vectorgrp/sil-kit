@@ -88,9 +88,330 @@
                   }
                 },
                 "FlexRayControllers": {
+                  "type": "array",
                   "items": {
-                    "type": "string",
-                    "title": "Names of the FlexRay controllers"
+                    "type": "object",
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Names of the FlexRay controllers"
+                      },
+                      "ClusterParameters": {
+                        "type": "object",
+                        "properties": {
+                          "gColdstartAttempts": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 31,
+                            "title": "Number of attempts for a cold start before giving up (range 2 -31)"
+                          },
+                          "gCycleCountMax": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 255,
+                            "title": "Max number for cycle count (number of cycles - 1)"
+                          },
+                          "gdActionPointOffset": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 63,
+                            "title": "time offset for a static slot in MacroTicks (MT) (range 1-63)"
+                          },
+                          "gdDynamicSlotIdlePhase": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 2,
+                            "title": "Duration of the idle phase within a dynamic slot in gdMiniSlots (range 0 - 2)"
+                          },
+                          "gdMiniSlot": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 63,
+                            "title": "Duration of a mini slot in MacroTicks (MT) (2-63)"
+                          },
+                          "gdMiniSlotActionPointOffset": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 31,
+                            "title": "Time offset for a mini slot in MacroTicks (MT) (range 1- 31)"
+                          },
+                          "gdStaticSlot": {
+                            "type": "integer",
+                            "minimum": 3,
+                            "maximum": 664,
+                            "title": "Duration of a static slot in MacroTicks (MT) (3-664)"
+                          },
+                          "gdSymbolWindow": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 139,
+                            "title": "Duration of the symbol window in MacroTicks (MT) (range1 - 139)"
+                          },
+                          "gdSymbolWindowActionPointOffset": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 63,
+                            "title": "Time offset for a static symbol windows in MacroTicks (MT) (range 1-63)"
+                          },
+                          "gdTSSTransmitter": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 15,
+                            "title": "Duration of TSS (Transmission Start Sequence) in gdBits (range 1-15)"
+                          },
+                          "gdWakeupTxActive": {
+                            "type": "integer",
+                            "minimum": 15,
+                            "maximum": 60,
+                            "title": "Duration of LOW Phase of a wakeup symbol in gdBit (range 15 - 60)"
+                          },
+                          "gdWakeupTxIdle": {
+                            "type": "integer",
+                            "minimum": 45,
+                            "maximum": 180,
+                            "title": "Duration of the idle of a wakeup symbol in gdBit (45 - 180)"
+                          },
+                          "gListenNoise": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 16,
+                            "title": "Upper limit for the startup listen timeout and wakeup listen timeout in the presence of noise. Used as a multiplier of pdListenTimeout. (range 2 - 16)"
+                          },
+                          "gMacroPerCycle": {
+                            "type": "integer",
+                            "minimum": 8,
+                            "maximum": 16000,
+                            "title": "Number of MacroTicks (MT) per cycle, (range 8 - 16000)"
+                          },
+                          "gMaxWithoutClockCorrectionFatal": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 15,
+                            "title": "Threshold used for testing the vClockCorrectionFailed counter (range 1-15)"
+                          },
+                          "gMaxWithoutClockCorrectionPassive": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 15,
+                            "title": "Threshold used for testing the vClockCorrectionFailed counter (range 1-15)"
+                          },
+                          "gNumberOfMiniSlots": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 7988,
+                            "title": "Number of mini slots (range 0-7988)"
+                          },
+                          "gNumberOfStaticSlots": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 1023,
+                            "title": "Number of static slots in a cycle (range 2-1023)"
+                          },
+                          "gPayloadLengthStatic": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 127,
+                            "title": "Length of the payload of a static frame in 16-Bits words (range 0 - 127)"
+                          },
+                          "gSyncFrameIDCountMax": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 15,
+                            "title": "Max number of distinct sync frame identifiers present in a given cluster. (range 2 - 15)"
+                          }
+                        }
+                      },
+                      "NodeParameters": {
+                        "type": "object",
+                        "properties": {
+                          "pAllowHaltDueToClock": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "title": "Controls the transition to halt state due to clock synchronization errors. (0,1)"
+                          },
+                          "pAllowPassiveToActive": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 31,
+                            "title": "Required number of consecutive even / odd cycle pairs for normal passive to normal active (range 0-31)"
+                          },
+                          "pChannels": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 3,
+                            "title": "Channel(s) to which the controller is connected (values (1) Channel::A, (2) Channel::B, (3) Channel::AB)"
+                          },
+                          "pClusterDriftDamping": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 10,
+                            "title": "Cluster drift damping factor for rate correction in Microticks (range 0 - 10)"
+                          },
+                          "pdAcceptedStartupRange": {
+                            "type": "integer",
+                            "minimum": 29,
+                            "maximum": 2743,
+                            "title": "Allowed deviation for startup frames during integration in MicroTicks (range 29 - 2743)"
+                          },
+                          "pdListenTimeout": {
+                            "type": "integer",
+                            "minimum": 1926,
+                            "maximum": 2567692,
+                            "title": "Duration of listen phase in MicroTicks (range 1926 - 2567692)"
+                          },
+                          "pKeySlotId": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 1023,
+                            "title": "Slot ID of the key slot (range 0-1023, value 0 means that there is no key slot)"
+                          },
+                          "pKeySlotOnlyEnabled": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "title": "Shall the node enter key slot only mode after startup. (values 0, 1) (AUTOSAR pSingleSlotEnabled)"
+                          },
+                          "pKeySlotUsedForStartup": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "title": "Key slot is used for startup (range 0, 1)"
+                          },
+                          "pKeySlotUsedForSync": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "title": "Key slot is used for sync (range 0, 1)"
+                          },
+                          "pLatestTx": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 7981,
+                            "title": "Last mini slot which can be transmitted (range 0 -7981)"
+                          },
+                          "pMacroInitialOffsetA": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 68,
+                            "title": "Initial startup offset for frame reference point on channel A (rang 2-68 MacroTicks (MT))"
+                          },
+                          "pMacroInitialOffsetB": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 68,
+                            "title": "Initial startup offset for frame reference point on channel B (rang 2-68 MacroTicks (MT))"
+                          },
+                          "pMicroInitialOffsetA": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 239,
+                            "title": "Offset between secondary time reference and MT boundary (range 0 - 239 Microticks)"
+                          },
+                          "pMicroInitialOffsetB": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 239,
+                            "title": "Offset between secondary time reference and MT boundary (range 0 - 239 Microticks)"
+                          },
+                          "pMicroPerCycle": {
+                            "type": "integer",
+                            "minimum": 960,
+                            "maximum": 1280000,
+                            "title": "Nominal number of microticks in the communication cycle (range 960 - 1280000)"
+                          },
+                          "pOffsetCorrectionOut": {
+                            "type": "integer",
+                            "minimum": 15,
+                            "maximum": 16082,
+                            "title": "Maximum permissible offset correction value (range 15 - 16082 Microticks)"
+                          },
+                          "pOffsetCorrectionStart": {
+                            "type": "integer",
+                            "minimum": 7,
+                            "maximum": 15999,
+                            "title": "Start of the offset correction phase within the NIT, (7 - 15999 MT)"
+                          },
+                          "pRateCorrectionOut": {
+                            "type": "integer",
+                            "minimum": 3,
+                            "maximum": 3846,
+                            "title": "Maximum permissible rate correction value (range 3 - 3846 Microticks)"
+                          },
+                          "pWakeupChannel": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 2,
+                            "title": "Channel used by the node to send a wakeup pattern (values (1) Channel::A, (2) Channel::B)"
+                          },
+                          "pWakeupPattern": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 63,
+                            "title": "Number of repetitions of the wakeup symbol (range 0-63, value 0 prevents sending of WUP)"
+                          },
+                          "pdMicrotick": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 3,
+                            "title": "Duration of a FlexRay microtick ((1) 12.5ns, (2) 25ns or (3) 50ns)"
+                          },
+                          "pSamplesPerMicrotick": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 2,
+                            "title": "Number of samples per microtick (values 1 or 2)"
+                          }
+                        }
+                      },
+                      "TxBufferConfigs": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "channels": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 3,
+                              "title": "values (1) Channel::A, (2) Channel::B, (3) Channel::AB"
+                            },
+                            "slotId": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 65535,
+                              "title": "The slot Id of frame"
+                            },
+                            "offset": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 63,
+                              "title": "Base offset for cycle multiplexing (values 0-63)"
+                            },
+                            "repetition": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 64,
+                              "title": "Repetition for cycle multiplexing (values 1,2,4,8,16,32,64)"
+                            },
+                            "PPindicator": {
+                              "type": "boolean",
+                              "title": "Set the PPindicator"
+                            },
+                            "headerCrc": {
+                              "type": "integer",
+                              "title": "Header CRC, 11 bits"
+                            },
+                            "transmissionMode": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 1,
+                              "title": "TransmissionMode::SingleShot or TransmissionMode::Continuous"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "additionalProperties": false
                   }
                 },
                 "EthernetControllers": {
@@ -467,6 +788,15 @@
                   "Custom_FastRtps_Profile.xml"
                 ], 
                 "pattern": "^(.*)$"
+              },
+
+              "SendSocketBufferSize": {
+                "type": "integer",
+                "default": -1
+              },
+              "ListenSocketBufferSize": {
+                "type": "integer",
+                "default": -1
               }
             },
             "additionalProperties": false

@@ -254,6 +254,8 @@ struct Config
     DiscoveryType discoveryType{DiscoveryType::Local};
     std::map<std::string, std::string> unicastLocators;
     std::string configFileName;
+    int sendSocketBufferSize;
+    int listenSocketBufferSize;
 };
 
 } // namespace FastRTPS

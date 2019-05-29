@@ -357,7 +357,9 @@ bool operator==(const FastRtps::Config &lhs, const FastRtps::Config& rhs)
 {
     return lhs.discoveryType == rhs.discoveryType
         && lhs.unicastLocators == rhs.unicastLocators
-        && lhs.configFileName == rhs.configFileName;
+        && lhs.configFileName == rhs.configFileName
+        && lhs.sendSocketBufferSize == rhs.sendSocketBufferSize
+        && lhs.listenSocketBufferSize == rhs.listenSocketBufferSize;
 }
 
 bool operator==(const MiddlewareConfig &lhs, const MiddlewareConfig& rhs)

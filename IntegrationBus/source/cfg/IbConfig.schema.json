@@ -742,6 +742,15 @@
                   "Custom_FastRtps_Profile.xml"
                 ], 
                 "pattern": "^(.*)$"
+              },
+
+              "SendSocketBufferSize": {
+                "type": "integer",
+                "default": -1
+              },
+              "ListenSocketBufferSize": {
+                "type": "integer",
+                "default": -1
               }
             },
             "additionalProperties": false
