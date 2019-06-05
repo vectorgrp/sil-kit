@@ -73,6 +73,191 @@ namespace ib
             namespace idl
             {
                 /*!
+                 * @brief This class represents the structure NextSimTask defined by the user in the IDL file.
+                 * @ingroup MIDDLEWARETOPICS
+                 */
+                class NextSimTask
+                {
+                public:
+
+                    /*!
+                     * @brief Default constructor.
+                     */
+                    eProsima_user_DllExport NextSimTask();
+
+                    /*!
+                     * @brief Default destructor.
+                     */
+                    eProsima_user_DllExport ~NextSimTask();
+
+                    /*!
+                     * @brief Copy constructor.
+                     * @param x Reference to the object ib::mw::sync::idl::NextSimTask that will be copied.
+                     */
+                    eProsima_user_DllExport NextSimTask(const NextSimTask &x);
+
+                    /*!
+                     * @brief Move constructor.
+                     * @param x Reference to the object ib::mw::sync::idl::NextSimTask that will be copied.
+                     */
+                    eProsima_user_DllExport NextSimTask(NextSimTask &&x);
+
+                    /*!
+                     * @brief Copy assignment.
+                     * @param x Reference to the object ib::mw::sync::idl::NextSimTask that will be copied.
+                     */
+                    eProsima_user_DllExport NextSimTask& operator=(const NextSimTask &x);
+
+                    /*!
+                     * @brief Move assignment.
+                     * @param x Reference to the object ib::mw::sync::idl::NextSimTask that will be copied.
+                     */
+                    eProsima_user_DllExport NextSimTask& operator=(NextSimTask &&x);
+
+                    /*!
+                     * @brief This function copies the value in member senderAddr
+                     * @param _senderAddr New value to be copied in member senderAddr
+                     */
+                    inline eProsima_user_DllExport void senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+                    {
+                        m_senderAddr = _senderAddr;
+                    }
+
+                    /*!
+                     * @brief This function moves the value in member senderAddr
+                     * @param _senderAddr New value to be moved in member senderAddr
+                     */
+                    inline eProsima_user_DllExport void senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+                    {
+                        m_senderAddr = std::move(_senderAddr);
+                    }
+
+                    /*!
+                     * @brief This function returns a constant reference to member senderAddr
+                     * @return Constant reference to member senderAddr
+                     */
+                    inline eProsima_user_DllExport const ib::mw::idl::EndpointAddress& senderAddr() const
+                    {
+                        return m_senderAddr;
+                    }
+
+                    /*!
+                     * @brief This function returns a reference to member senderAddr
+                     * @return Reference to member senderAddr
+                     */
+                    inline eProsima_user_DllExport ib::mw::idl::EndpointAddress& senderAddr()
+                    {
+                        return m_senderAddr;
+                    }
+                    /*!
+                     * @brief This function sets a value in member timePointNs
+                     * @param _timePointNs New value for member timePointNs
+                     */
+                    inline eProsima_user_DllExport void timePointNs(int64_t _timePointNs)
+                    {
+                        m_timePointNs = _timePointNs;
+                    }
+
+                    /*!
+                     * @brief This function returns the value of member timePointNs
+                     * @return Value of member timePointNs
+                     */
+                    inline eProsima_user_DllExport int64_t timePointNs() const
+                    {
+                        return m_timePointNs;
+                    }
+
+                    /*!
+                     * @brief This function returns a reference to member timePointNs
+                     * @return Reference to member timePointNs
+                     */
+                    inline eProsima_user_DllExport int64_t& timePointNs()
+                    {
+                        return m_timePointNs;
+                    }
+                    /*!
+                     * @brief This function sets a value in member durationNs
+                     * @param _durationNs New value for member durationNs
+                     */
+                    inline eProsima_user_DllExport void durationNs(int64_t _durationNs)
+                    {
+                        m_durationNs = _durationNs;
+                    }
+
+                    /*!
+                     * @brief This function returns the value of member durationNs
+                     * @return Value of member durationNs
+                     */
+                    inline eProsima_user_DllExport int64_t durationNs() const
+                    {
+                        return m_durationNs;
+                    }
+
+                    /*!
+                     * @brief This function returns a reference to member durationNs
+                     * @return Reference to member durationNs
+                     */
+                    inline eProsima_user_DllExport int64_t& durationNs()
+                    {
+                        return m_durationNs;
+                    }
+
+                    /*!
+                     * @brief This function returns the maximum serialized size of an object
+                     * depending on the buffer alignment.
+                     * @param current_alignment Buffer alignment.
+                     * @return Maximum serialized size.
+                     */
+                    eProsima_user_DllExport static size_t getMaxCdrSerializedSize(size_t current_alignment = 0);
+
+                    /*!
+                     * @brief This function returns the serialized size of a data depending on the buffer alignment.
+                     * @param data Data which is calculated its serialized size.
+                     * @param current_alignment Buffer alignment.
+                     * @return Serialized size.
+                     */
+                    eProsima_user_DllExport static size_t getCdrSerializedSize(const ib::mw::sync::idl::NextSimTask& data, size_t current_alignment = 0);
+
+
+                    /*!
+                     * @brief This function serializes an object using CDR serialization.
+                     * @param cdr CDR serialization object.
+                     */
+                    eProsima_user_DllExport void serialize(eprosima::fastcdr::Cdr &cdr) const;
+
+                    /*!
+                     * @brief This function deserializes an object using CDR serialization.
+                     * @param cdr CDR serialization object.
+                     */
+                    eProsima_user_DllExport void deserialize(eprosima::fastcdr::Cdr &cdr);
+
+
+
+                    /*!
+                     * @brief This function returns the maximum serialized size of the Key of an object
+                     * depending on the buffer alignment.
+                     * @param current_alignment Buffer alignment.
+                     * @return Maximum serialized size.
+                     */
+                    eProsima_user_DllExport static size_t getKeyMaxCdrSerializedSize(size_t current_alignment = 0);
+
+                    /*!
+                     * @brief This function tells you if the Key has been defined for this type
+                     */
+                    eProsima_user_DllExport static bool isKeyDefined();
+
+                    /*!
+                     * @brief This function serializes the key members of an object using CDR serialization.
+                     * @param cdr CDR serialization object.
+                     */
+                    eProsima_user_DllExport void serializeKey(eprosima::fastcdr::Cdr &cdr) const;
+
+                private:
+                    ib::mw::idl::EndpointAddress m_senderAddr;
+                    int64_t m_timePointNs;
+                    int64_t m_durationNs;
+                };
+                /*!
                  * @brief This class represents the structure QuantumRequest defined by the user in the IDL file.
                  * @ingroup MIDDLEWARETOPICS
                  */

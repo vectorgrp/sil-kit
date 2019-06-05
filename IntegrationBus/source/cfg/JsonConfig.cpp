@@ -625,6 +625,8 @@ auto from_json<SyncType>(const json11::Json& json) -> SyncType
 {
     auto&& syncType = json.string_value();
 
+    if (syncType == "DistributedTimeQuantum")
+        return SyncType::DistributedTimeQuantum;
     if (syncType == "DiscreteEvent")
         return SyncType::DiscreteEvent;
     if (syncType == "TimeQuantum")
@@ -702,7 +704,7 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
             return result;
         };
 
-    // assing Input Ports
+    // assign Input Ports
     // Input Ports are specified simply by name. So we have to infer the corresponding *IoPort objects.
     auto inports_from_json =
         [json](auto&& portList, auto&& propertyName)

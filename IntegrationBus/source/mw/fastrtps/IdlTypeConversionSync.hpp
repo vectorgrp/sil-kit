@@ -11,6 +11,7 @@ namespace ib {
 namespace mw {
 namespace sync {
 
+inline auto to_idl(const NextSimTask& msg) -> idl::NextSimTask;
 inline auto to_idl(const QuantumRequest& msg) -> idl::QuantumRequest;
 inline auto to_idl(QuantumRequestStatus status) -> idl::QuantumRequestStatus;
 inline auto to_idl(const QuantumGrant& msg) -> idl::QuantumGrant;
@@ -27,6 +28,7 @@ inline auto to_idl(SystemState state) -> idl::SystemState;
 
 namespace idl {
 
+inline auto from_idl(NextSimTask&& msg) -> sync::NextSimTask;
 inline auto from_idl(QuantumRequest&& msg) -> sync::QuantumRequest;
 inline auto from_idl(QuantumRequestStatus status) -> sync::QuantumRequestStatus;
 inline auto from_idl(QuantumGrant&& msg) -> sync::QuantumGrant;
@@ -47,6 +49,25 @@ inline auto from_idl(SystemState state) -> sync::SystemState;
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
+auto to_idl(const NextSimTask& msg) -> idl::NextSimTask
+{
+    idl::NextSimTask idl;
+    idl.timePointNs(std::chrono::duration_cast<std::chrono::nanoseconds>(msg.timePoint).count());
+    idl.durationNs(std::chrono::duration_cast<std::chrono::nanoseconds>(msg.duration).count());
+
+    return idl;
+}
+
+auto idl::from_idl(idl::NextSimTask&& idl) -> ::ib::mw::sync::NextSimTask
+{
+    ::ib::mw::sync::NextSimTask msg;
+
+    msg.timePoint = std::chrono::nanoseconds{idl.timePointNs()};
+    msg.duration = std::chrono::nanoseconds{idl.durationNs()};
+
+    return msg;
+}
+
 auto to_idl(const Tick& msg) -> idl::Tick
 {
     idl::Tick idl;

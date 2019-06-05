@@ -17,24 +17,6 @@ namespace ib {
 namespace mw {
 namespace sync {
 
-class ParticipantController;
-
-class TaskRunner
-{
-public:
-    TaskRunner(ParticipantController& controller);
-    virtual ~TaskRunner() {}
-    
-    void Run();
-    void GrantReceived();
-
-    virtual void RequestStep(ParticipantController& controller) = 0;
-    virtual void FinishedStep(ParticipantController& controller) = 0;
-
-private:
-    ParticipantController& _controller;
-};
-
 class ParticipantController
     : public IParticipantController
     , public IIbToParticipantController
@@ -42,12 +24,17 @@ class ParticipantController
 public:
     // ----------------------------------------
     // Public Data Types
+    struct ISyncAdapter
+    {
+        virtual void RequestStep(ParticipantController& controller) = 0;
+        virtual void FinishedStep(ParticipantController& controller) = 0;
+    };
     
 public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     ParticipantController() = default;
-    ParticipantController(IComAdapter* comAdapter, cfg::Participant participantConfig, cfg::TimeSync timesyncConfig);
+    ParticipantController(IComAdapter* comAdapter, const cfg::SimulationSetup& simulationSetup, const cfg::Participant& participantConfig);
     ParticipantController(const ParticipantController& other) = default;
     ParticipantController(ParticipantController&& other) = default;
     ParticipantController& operator=(const ParticipantController& other) = default;
@@ -93,10 +80,12 @@ public:
     void ReceiveIbMessage(mw::EndpointAddress from, const Tick& msg) override;
     void ReceiveIbMessage(mw::EndpointAddress from, const QuantumGrant& msg) override;
 
+    void ReceiveIbMessage(mw::EndpointAddress from, const NextSimTask& task) override;
+
     // Used by Policies
     void SendTickDone() const;
     void SendQuantumRequest() const;
-    void AdvanceQuantum();
+    void SendNextSimTask();
     void ExecuteSimTask();
 
 private:
@@ -105,7 +94,7 @@ private:
     template <class MsgT>
     void SendIbMessage(MsgT&& msg) const;
 
-    void StartTaskRunner();
+    static auto MakeSyncAdapter(ib::cfg::SyncType syncType)->std::unique_ptr<ParticipantController::ISyncAdapter>;
 
     void ChangeState(ParticipantState newState, std::string reason);
     
@@ -115,23 +104,24 @@ private:
     void ShutdownForColdswap();
     void IgnoreColdswap();
     void ProcessQuantumGrant(const QuantumGrant& msg);
+    void CheckDistributedTimeAdvanceGrant();
     
 private:
     // ----------------------------------------
     // private members
     IComAdapter* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddress{};
-    cfg::Participant _participantConfig;
+    cfg::SyncType _syncType;
     cfg::TimeSync _timesyncConfig;
     std::shared_ptr<spdlog::logger> _logger;
 
-    std::unique_ptr<TaskRunner> _taskRunner;
-    std::chrono::nanoseconds _period{0};
+    std::unique_ptr<ISyncAdapter> _syncAdapter;
     bool _coldswapEnabled{false};
 
     ParticipantStatus _status;
-    std::chrono::nanoseconds _now{0};
-    std::chrono::nanoseconds _duration{0};
+    NextSimTask _currentTask;
+    NextSimTask _myNextTask;
+    std::map<ParticipantId, NextSimTask> _otherNextTasks;
 
     std::promise<ParticipantState> _finalStatePromise;
 

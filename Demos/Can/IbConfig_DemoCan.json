@@ -9,14 +9,14 @@
             {
                 "Name": "CanWriter",
                 "Description": "Demo Writer",
-                "SyncType": "DiscreteTime",
+                "SyncType": "DistributedTimeQuantum",
 
                 "CanControllers": [ "CAN1" ]
             },
             {
                 "Name": "CanReader",
                 "Description": "Demo Reader",
-                "SyncType": "DiscreteTime",
+                "SyncType": "DistributedTimeQuantum",
 
                 "CanControllers": [ "CAN1" ]
             },
@@ -43,7 +43,6 @@
         ],
 
         "TimeSync": {
-            "SyncPolicy": "Loose",
             "TickPeriodNs": 1000000
         }
 

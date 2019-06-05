@@ -31,6 +31,8 @@ auto to_string(SyncType syncType) -> std::string
 {
     switch (syncType)
     {
+    case SyncType::DistributedTimeQuantum:
+        return "DistributedTimeQuantum";
     case SyncType::DiscreteEvent:
         return "DiscreteEvent";
     case SyncType::TimeQuantum:
@@ -41,9 +43,8 @@ auto to_string(SyncType syncType) -> std::string
         return "DiscreteTimePassive";
     case SyncType::Unsynchronized:
         return "Unsynchronized";
-    default:
-        throw ib::type_conversion_error{};
     }
+    throw ib::type_conversion_error{};
 }
 
 std::ostream& operator<<(std::ostream& out, SyncType syncType)

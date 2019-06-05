@@ -12,6 +12,19 @@ namespace ib {
 namespace mw {
 namespace sync {
 
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const NextSimTask& task)
+{
+    buffer << task.timePoint
+           << task.duration;
+    return buffer;
+}
+inline MessageBuffer& operator>>(MessageBuffer& buffer, NextSimTask& task)
+{
+    buffer >> task.timePoint
+           >> task.duration;
+    return buffer;
+}
+
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const QuantumRequest& request)
 {
     buffer << request.now

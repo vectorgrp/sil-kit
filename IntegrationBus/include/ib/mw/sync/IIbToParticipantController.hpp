@@ -11,8 +11,8 @@ namespace mw {
 namespace sync {
 
 class IIbToParticipantController
-    : public mw::IIbEndpoint<ParticipantCommand, SystemCommand, Tick, QuantumGrant>
-    , public mw::IIbSender<ParticipantStatus, TickDone, QuantumRequest>
+    : public mw::IIbEndpoint<ParticipantCommand, SystemCommand, Tick, QuantumGrant, NextSimTask>
+    , public mw::IIbSender<ParticipantStatus, TickDone, QuantumRequest, NextSimTask>
 {
 };
 

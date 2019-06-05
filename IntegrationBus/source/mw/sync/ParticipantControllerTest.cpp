@@ -42,17 +42,23 @@ protected:
 
 protected:
     ParticipantControllerTest()
-        : controller(&comAdapter, MakeParticipantConfig(), cfg::TimeSync{})
     {
-        controller.SetEndpointAddress(addr);
+        MakeConfig(cfg::SyncType::TimeQuantum);
     }
 
-    static auto MakeParticipantConfig() -> cfg::Participant
+    void MakeConfig(cfg::SyncType syncType)
     {
-        cfg::Participant cfg;
-        cfg.syncType = cfg::SyncType::TimeQuantum;
-        return cfg;
+        cfg::ConfigBuilder builder{"TestConfig"};
+        auto&& sim = builder.SimulationSetup();
+
+        sim.ConfigureTimeSync().WithTickPeriod(1ms);
+        sim.AddParticipant("SUT").WithSyncType(syncType);
+        sim.AddParticipant("P2").WithSyncType(syncType);
+
+        auto config = builder.Build();
+        simulationSetup = std::move(config.simulationSetup);
     }
+
 
 protected:
     // ----------------------------------------
@@ -61,12 +67,13 @@ protected:
 protected:
     // ----------------------------------------
     // Members
-    EndpointAddress addr{19, 13};
-    EndpointAddress masterAddr{1024, 0};
+    EndpointAddress addr{1, 1024};
+    EndpointAddress addrP2{2, 1024};
+    EndpointAddress masterAddr{3, 1027};
 
     MockComAdapter comAdapter;
-    ParticipantController controller;
     Callbacks callbacks;
+    cfg::SimulationSetup simulationSetup;
 };
 
 // Factory method to create a ParticipantStatus matcher that checks the state field
@@ -75,9 +82,11 @@ auto AParticipantStatusWithState(ParticipantState expected)
     return MatcherCast<const ParticipantStatus&>(Field(&ParticipantStatus::state, expected));
 };
 
-
 TEST_F(ParticipantControllerTest, report_commands_as_error_before_run_was_called)
 {
+    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    controller.SetEndpointAddress(addr);
+
     EXPECT_CALL(comAdapter, SendIbMessage(addr, A<const ParticipantStatus&>()))
         .Times(1);
 
@@ -89,6 +98,8 @@ TEST_F(ParticipantControllerTest, report_commands_as_error_before_run_was_called
 
 TEST_F(ParticipantControllerTest, call_init_handler)
 {
+    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    controller.SetEndpointAddress(addr);
     controller.SetInitHandler(bind_method(&callbacks, &Callbacks::InitHandler));
     controller.SetSimulationTask([](auto){});
 
@@ -102,6 +113,8 @@ TEST_F(ParticipantControllerTest, call_init_handler)
 
 TEST_F(ParticipantControllerTest, call_stop_handler)
 {
+    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    controller.SetEndpointAddress(addr);
     controller.SetSimulationTask([](auto) {});
 
     controller.RunAsync();
@@ -124,6 +137,8 @@ TEST_F(ParticipantControllerTest, call_stop_handler)
 
 TEST_F(ParticipantControllerTest, dont_switch_to_stopped_if_stop_handler_reported_an_error)
 {
+    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    controller.SetEndpointAddress(addr);
     controller.SetSimulationTask([](auto) {});
 
     controller.RunAsync();
@@ -146,12 +161,16 @@ TEST_F(ParticipantControllerTest, dont_switch_to_stopped_if_stop_handler_reporte
 
 TEST_F(ParticipantControllerTest, must_set_simtask_before_calling_run)
 {
+    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    controller.SetEndpointAddress(addr);
     EXPECT_THROW(controller.Run(), std::exception);
     EXPECT_EQ(controller.State(), ParticipantState::Error);
 }
 
 TEST_F(ParticipantControllerTest, calling_run_announces_idle_state)
 {
+    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    controller.SetEndpointAddress(addr);
     controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
 
     EXPECT_EQ(controller.State(), ParticipantState::Invalid);
@@ -166,6 +185,8 @@ TEST_F(ParticipantControllerTest, calling_run_announces_idle_state)
 
 TEST_F(ParticipantControllerTest, run_async)
 {
+    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    controller.SetEndpointAddress(addr);
     auto grantRequest = [&controller = controller, &masterAddr = masterAddr](auto addr, const QuantumRequest& request)
     {
         QuantumGrant grant;
@@ -222,6 +243,8 @@ TEST_F(ParticipantControllerTest, run_async)
 
 TEST_F(ParticipantControllerTest, refreshstatus_must_not_modify_other_fields)
 {
+    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    controller.SetEndpointAddress(addr);
     controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
 
     EXPECT_EQ(controller.State(), ParticipantState::Invalid);
@@ -245,5 +268,59 @@ TEST_F(ParticipantControllerTest, refreshstatus_must_not_modify_other_fields)
     expectedStatus.refreshTime = newStatus.refreshTime;
     EXPECT_EQ(expectedStatus, newStatus);
 }
+
+
+TEST_F(ParticipantControllerTest, run_async_with_synctype_distributedtimequantum)
+{
+    MakeConfig(cfg::SyncType::DistributedTimeQuantum);
+    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    controller.SetEndpointAddress(addr);
+    controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
+
+    controller.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
+    controller.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
+    controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
+
+    // Run() --> Idle
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
+    auto finalState = controller.RunAsync();
+
+    // Cmd::Initialize --> Initializing --> Initialized
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Initializing))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Initialized))).Times(1);
+    controller.ReceiveIbMessage(masterAddr, ParticipantCommand{addr.participant, ParticipantCommand::Kind::Initialize});
+    EXPECT_EQ(controller.State(), ParticipantState::Initialized);
+
+    // Cmd::Run --> Running --> Call SimTask()
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Running))).Times(1);
+    EXPECT_CALL(callbacks, SimTask(_)).Times(2);
+    controller.ReceiveIbMessage(masterAddr, SystemCommand{SystemCommand::Kind::Run});
+    EXPECT_EQ(controller.State(), ParticipantState::Running);
+    NextSimTask nextTask;
+    nextTask.timePoint = 0ms;
+    nextTask.duration = 1ms;
+    controller.ReceiveIbMessage(addrP2, nextTask);
+    nextTask.timePoint = 1ms;
+    nextTask.duration = 1ms;
+    controller.ReceiveIbMessage(addrP2, nextTask);
+
+    // Cmd::Stop --> Stopping --> Call StopHandler() --> Stopped
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
+    EXPECT_CALL(callbacks, StopHandler()).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Stopped))).Times(1);
+    controller.ReceiveIbMessage(masterAddr, SystemCommand{SystemCommand::Kind::Stop});
+    EXPECT_EQ(controller.State(), ParticipantState::Stopped);
+
+    // Cmd::Shutdown --> ShuttingDown --> Call ShutdownHandler() --> Shutdown
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::ShuttingDown))).Times(1);
+    EXPECT_CALL(callbacks, ShutdownHandler()).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Shutdown))).Times(1);
+    controller.ReceiveIbMessage(masterAddr, SystemCommand{SystemCommand::Kind::Shutdown});
+    EXPECT_EQ(controller.State(), ParticipantState::Shutdown);
+
+    ASSERT_EQ(finalState.wait_for(1ms), std::future_status::ready);
+    EXPECT_EQ(finalState.get(), ParticipantState::Shutdown);
+}
+
 
 } // anonymous namespace for test

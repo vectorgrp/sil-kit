@@ -111,16 +111,15 @@ private:
     // --------------------------------------------------------------------------------
     // Manage RtpsTopics, which supports multiple topics with the same topic type.
     // --------------------------------------------------------------------------------
-    template <class IdlMessageT>
+    template <class IbMessageT>
     void PublishRtpsTopic(const std::string& topicName, EndpointId endpointId);
     template <class IControllerT>
     void PublishRtpsTopics(const std::string& topicName, EndpointId endpointId);
 
-    template <class IdlMessageT>
-    void SubscribeRtpsTopic(const std::string& topicName, IIbMessageReceiver<to_ib_message_t<IdlMessageT>>* receiver);
+    template <class IbMessageT>
+    void SubscribeRtpsTopic(const std::string& topicName, IIbMessageReceiver<IbMessageT>* receiver);
     template<class EndpointT>
     void SubscribeRtpsTopics(const std::string& topicName, EndpointId endpointId, EndpointT* receiver);
-
 
 private:
     // ----------------------------------------
@@ -165,6 +164,7 @@ private:
         RtpsTopics<sim::io::idl::PwmIoMessage>,
         RtpsTopics<sync::idl::ParticipantCommand>,
         RtpsTopics<sync::idl::SystemCommand>,
+        RtpsTopics<sync::idl::NextSimTask>,
         RtpsTopics<sync::idl::Tick>,
         RtpsTopics<sync::idl::TickDone>,
         RtpsTopics<sync::idl::QuantumGrant>,
@@ -223,9 +223,10 @@ void FastRtpsConnection::SetupPubSubAttributes(AttrT& attributes, const std::str
     attributes.qos.m_reliability.kind = RELIABLE_RELIABILITY_QOS;
 }
 
-template<class IdlMessageT>
+template<class IbMessageT>
 void FastRtpsConnection::PublishRtpsTopic(const std::string& topicName, EndpointId endpointId)
 {
+    using IdlMessageT = to_idl_message_t<IbMessageT>;
     auto&& rtpsTopics = std::get<RtpsTopics<IdlMessageT>>(_rtpsTopics);
 
     if (rtpsTopics.pubListeners.find(topicName) == rtpsTopics.pubListeners.end())
@@ -237,9 +238,10 @@ void FastRtpsConnection::PublishRtpsTopic(const std::string& topicName, Endpoint
     rtpsTopics.endpointToPublisherMap[endpointId] = rtpsTopics.pubListeners[topicName].publisher.get();
 }
 
-template <class IdlMessageT>
-void FastRtpsConnection::SubscribeRtpsTopic(const std::string& topicName, IIbMessageReceiver<to_ib_message_t<IdlMessageT>>* receiver)
+template <class IbMessageT>
+void FastRtpsConnection::SubscribeRtpsTopic(const std::string& topicName, IIbMessageReceiver<IbMessageT>* receiver)
 {
+    using IdlMessageT = to_idl_message_t<IbMessageT>;
     auto&& rtpsTopics = std::get<RtpsTopics<IdlMessageT>>(_rtpsTopics);
 
     if (rtpsTopics.subListeners.find(topicName) == rtpsTopics.subListeners.end())
@@ -260,7 +262,7 @@ void FastRtpsConnection::PublishRtpsTopics(const std::string& topicName, Endpoin
         [this, &topicName, &endpointId](auto&& ibMessage)
         {
             using IbMessageT = std::decay_t<decltype(ibMessage)>;
-            this->PublishRtpsTopic<to_idl_message_t<IbMessageT>>(topicName, endpointId);
+            this->PublishRtpsTopic<IbMessageT>(topicName, endpointId);
         }
     );
 }
@@ -274,7 +276,7 @@ void FastRtpsConnection::SubscribeRtpsTopics(const std::string& topicName, Endpo
         [this, &topicName, receiver](auto&& ibMessage)
         {
             using IbMessageT = std::decay_t<decltype(ibMessage)>;
-            this->SubscribeRtpsTopic<to_idl_message_t<IbMessageT>>(topicName, receiver);
+            this->SubscribeRtpsTopic<IbMessageT>(topicName, receiver);
         }
     );
 }

@@ -75,7 +75,7 @@ public:
     template<class IbMessageT>
     inline void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg);
 
-    void OnAllMessagesDelivered(std::function<void()> callback) {};
+    inline void OnAllMessagesDelivered(std::function<void()> callback);
     void FlushSendBuffers() {};
     void RegisterNewPeerCallback(std::function<void()> callback);
 
@@ -104,6 +104,7 @@ private:
 
     using IbMessageTypes = std::tuple<
         logging::LogMsg,
+        sync::NextSimTask,
         sync::Tick,
         sync::TickDone,
         sync::QuantumRequest,
@@ -307,6 +308,10 @@ void VAsioConnection::SendIbMessageImpl_(EndpointAddress from, IbMessageT&& msg)
     linkMap[from.endpoint]->DistributeLocalIbMessage(from, std::forward<IbMessageT>(msg));
 }
 
+void VAsioConnection::OnAllMessagesDelivered(std::function<void()> callback)
+{
+    callback();
+}
 
 template <typename... MethodArgs, typename... Args>
 void VAsioConnection::ExecuteOnIoThread(void (VAsioConnection::*method)(MethodArgs...), Args&&... args)

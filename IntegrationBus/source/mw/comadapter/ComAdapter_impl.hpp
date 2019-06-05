@@ -267,7 +267,7 @@ auto ComAdapter<IbConnectionT>::GetParticipantController() -> sync::IParticipant
     auto* controller = GetController<sync::ParticipantController>(1024);
     if (!controller)
     {
-        controller = CreateController<sync::ParticipantController>(1024, "default", *_participant, _config.simulationSetup.timeSync);
+        controller = CreateController<sync::ParticipantController>(1024, "default", _config.simulationSetup, *_participant);
         RegisterNewPeerCallback([controller]() { controller->RefreshStatus(); });
     }
     return controller;
@@ -546,6 +546,12 @@ template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(EndpointAddress from, sim::generic::GenericMessage&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(EndpointAddress from, const sync::NextSimTask& msg)
+{
+    SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>

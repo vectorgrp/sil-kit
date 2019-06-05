@@ -13,48 +13,26 @@ namespace ib {
 namespace mw {
 namespace sync {
 
-TaskRunner::TaskRunner(ParticipantController& controller)
-    : _controller(controller)
-{}
-
-void TaskRunner::Run()
+struct DistributedTimeQuantumAdapter : ParticipantController::ISyncAdapter
 {
-    RequestStep(_controller);
-}
+    void RequestStep(ParticipantController& controller) override
+    {
+        controller.SendNextSimTask();
+    }
+    void FinishedStep(ParticipantController& /*controller*/) override {}
+};
 
-void TaskRunner::GrantReceived()
+struct TimeQuantumAdapter : ParticipantController::ISyncAdapter
 {
-    _controller.ExecuteSimTask();
-    FinishedStep(_controller);
-    RequestStep(_controller);
-}
-
-class TimeQuantumTaskRunner
-    : public TaskRunner
-{
-public:
-    TimeQuantumTaskRunner(ParticipantController& controller)
-        : TaskRunner::TaskRunner(controller)
-    {}
-
     void RequestStep(ParticipantController& controller) override
     {
         controller.SendQuantumRequest();
     }
-    void FinishedStep(ParticipantController& controller) override
-    {
-        controller.AdvanceQuantum();
-    }
+    void FinishedStep(ParticipantController& /*controller*/) override {}
 };
 
-class DiscreteTimeTaskRunner
-    : public TaskRunner
+struct DiscreteTimeAdapter : ParticipantController::ISyncAdapter
 {
-public:
-    DiscreteTimeTaskRunner(ParticipantController& controller)
-        : TaskRunner::TaskRunner(controller)
-    {}
-
     void RequestStep(ParticipantController& /*controller*/) override {}
     void FinishedStep(ParticipantController& controller) override
     {
@@ -62,26 +40,33 @@ public:
     }
 };
 
-class DiscreteTimePassiveTaskRunner
-    : public TaskRunner
+struct DiscreteTimePassiveAdapter : ParticipantController::ISyncAdapter
 {
-public:
-    DiscreteTimePassiveTaskRunner(ParticipantController& controller)
-        : TaskRunner::TaskRunner(controller)
-    {}
-
     void RequestStep(ParticipantController& /*controller*/) override {}
     void FinishedStep(ParticipantController& /*controller*/) override {}
 };
 
-
-ParticipantController::ParticipantController(IComAdapter* comAdapter, cfg::Participant participantConfig, cfg::TimeSync timesyncConfig)
+ParticipantController::ParticipantController(IComAdapter* comAdapter, const cfg::SimulationSetup& simulationSetup, const cfg::Participant& participantConfig)
     : _comAdapter{comAdapter}
-    , _participantConfig(std::move(participantConfig))
-    , _timesyncConfig(std::move(timesyncConfig))
+    , _timesyncConfig{simulationSetup.timeSync}
+    , _syncType{participantConfig.syncType}
     , _logger{comAdapter->GetLogger()}
 {
-    _status.participantName = _participantConfig.name;
+    _status.participantName = participantConfig.name;
+    _currentTask = {-1ns, 0ns};
+    _myNextTask = {0ns, _timesyncConfig.tickPeriod};
+
+
+    for (auto&& participant : simulationSetup.participants)
+    {
+        if (participant.name == participantConfig.name)
+            continue;
+
+        if (participant.syncType == cfg::SyncType::DistributedTimeQuantum)
+        {
+            _otherNextTasks[participant.id] = {-1ns, 0ns};
+        }
+    }
 }
 
 void ParticipantController::SetInitHandler(InitHandlerT handler)
@@ -116,13 +101,13 @@ void ParticipantController::EnableColdswap()
 
 void ParticipantController::SetPeriod(std::chrono::nanoseconds period)
 {
-    if (_participantConfig.syncType != cfg::SyncType::TimeQuantum)
+    if (_syncType != cfg::SyncType::TimeQuantum)
     {
         auto msPeriod = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(period);
         _logger->warn("ParticipantController::SetPeriod({}ms) is ignored", msPeriod.count());
-        _logger->info("ParticipantController::SetPeriod() can only be used with SyncType::TimeQuantum (currently active: SyncType::{})", _participantConfig.syncType);
+        _logger->info("ParticipantController::SetPeriod() can only be used with SyncType::TimeQuantum (currently active: SyncType::{})", _syncType);
     }
-    _period = period;
+    _myNextTask.duration = period;
 }
 
 void ParticipantController::SetEarliestEventTime(std::chrono::nanoseconds /*eventTime*/)
@@ -130,35 +115,23 @@ void ParticipantController::SetEarliestEventTime(std::chrono::nanoseconds /*even
     throw std::exception();
 }
 
-void ParticipantController::StartTaskRunner()
+auto ParticipantController::MakeSyncAdapter(ib::cfg::SyncType syncType) -> std::unique_ptr<ParticipantController::ISyncAdapter>
 {
-    if (!_simTask)
+    switch (syncType)
     {
-        _logger->error("ParticipantController::Run() was called without having set a SimTask!");
-        ReportError("ParticipantController::Run() was called without having set a SimTask!");
-        throw std::exception();
-    }
-
-    switch (_participantConfig.syncType)
-    {
+    case cfg::SyncType::DistributedTimeQuantum:
+        return std::make_unique<DistributedTimeQuantumAdapter>();
     case cfg::SyncType::DiscreteEvent:
-        _logger->critical("Unsupported SyncType {}", to_string(_participantConfig.syncType));
-        throw std::runtime_error("Unsupported SyncType " + to_string(_participantConfig.syncType));
+        throw std::runtime_error("Unsupported SyncType " + to_string(syncType));
     case cfg::SyncType::TimeQuantum:
-        _taskRunner = std::make_unique<TimeQuantumTaskRunner>(*this);
-        break;
+        return std::make_unique<TimeQuantumAdapter>();
     case cfg::SyncType::DiscreteTime:
-        _taskRunner = std::make_unique<DiscreteTimeTaskRunner>(*this);
-        break;
+        return std::make_unique<DiscreteTimeAdapter>();
     case cfg::SyncType::DiscreteTimePassive:
-        _taskRunner = std::make_unique<DiscreteTimePassiveTaskRunner>(*this);
-        break;
+        return std::make_unique<DiscreteTimePassiveAdapter>();
     default:
-        _logger->critical("Invalid SyncType {}", to_string(_participantConfig.syncType));
-        throw ib::cfg::Misconfiguration("Invalid SyncType " + to_string(_participantConfig.syncType));
+        throw ib::cfg::Misconfiguration("Invalid SyncType " + to_string(syncType));
     }
-
-    ChangeState(ParticipantState::Idle, "ParticipantController::Run() was called");
 }
 
 auto ParticipantController::Run() -> ParticipantState
@@ -168,12 +141,30 @@ auto ParticipantController::Run() -> ParticipantState
 
 auto ParticipantController::RunAsync() -> std::future<ParticipantState>
 {
-    StartTaskRunner();
+    if (!_simTask)
+    {
+        const std::string errorMsg{"ParticipantController::Run() was called without having set a SimTask!"};
+        ReportError(errorMsg);
+        throw std::runtime_error{errorMsg};
+    }
+
+    try
+    {
+        _syncAdapter = MakeSyncAdapter(_syncType);
+    }
+    catch (const std::exception& e)
+    {
+        _logger->critical(e.what());
+        throw;
+    }
+
+    ChangeState(ParticipantState::Idle, "ParticipantController::Run() was called");
     return _finalStatePromise.get_future();
 }
 
 void ParticipantController::ReportError(std::string errorMsg)
 {
+    _logger->error(errorMsg);
     ChangeState(ParticipantState::Error, std::move(errorMsg));
 }
 
@@ -181,8 +172,7 @@ void ParticipantController::Pause(std::string reason)
 {
     if (State() != ParticipantState::Running)
     {
-        std::string errorMessage{"ParticipantController::Pause() was called in state ParticipantState::" + to_string(State())};
-        _logger->error(errorMessage);
+        const std::string errorMessage{"ParticipantController::Pause() was called in state ParticipantState::" + to_string(State())};
         ReportError(errorMessage);
         throw std::runtime_error(errorMessage);
     }
@@ -193,8 +183,7 @@ void ParticipantController::Continue()
 {
     if (State() != ParticipantState::Paused)
     {
-        std::string errorMessage{"ParticipantController::Continue() was called in state ParticipantState::" + to_string(State())};
-        _logger->error(errorMessage);
+        const std::string errorMessage{"ParticipantController::Continue() was called in state ParticipantState::" + to_string(State())};
         ReportError(errorMessage);
         throw std::runtime_error(errorMessage);
     }
@@ -213,8 +202,7 @@ void ParticipantController::Initialize(const ParticipantCommand& command, std::s
         }
         catch (const std::exception& e)
         {
-            std::string errorMessage{"InitHandler did throw an exception: " + std::string{e.what()}};
-            _logger->error(errorMessage);
+            const std::string errorMessage{"InitHandler did throw an exception: " + std::string{e.what()}};
             ReportError(errorMessage);
             return;
         }
@@ -224,7 +212,9 @@ void ParticipantController::Initialize(const ParticipantCommand& command, std::s
         reason += " and no InitHandler was registered";
     }
 
-    _now = 0ns;
+    _currentTask.timePoint = -1ns;
+    _currentTask.duration = 0ns;
+    _myNextTask.timePoint = 0ns;
     ChangeState(ParticipantState::Initialized, std::move(reason));
 }
 
@@ -337,7 +327,7 @@ void ParticipantController::RefreshStatus()
 
 auto ParticipantController::Now() const -> std::chrono::nanoseconds
 {
-    return _now;
+    return _currentTask.timePoint;
 }
 
 void ParticipantController::LogCurrentPerformanceStats()
@@ -398,7 +388,7 @@ void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, c
         return;
     }
 
-    if (!_taskRunner)
+    if (!_syncAdapter)
     {
         ReportError("Received SystemCommand::" + to_string(command.kind) + " before ParticipantController::Run() or RunAsync() was called");
         return;
@@ -414,7 +404,7 @@ void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, c
         {
             ChangeState(ParticipantState::Running, "Received SystemCommand::Run");
             _waitTimeMonitor.StartMeasurement();
-            _taskRunner->Run();
+            _syncAdapter->RequestStep(*this);
             return;
         }
         break;
@@ -470,7 +460,7 @@ void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, c
 
 void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const Tick& msg)
 {
-    switch (_participantConfig.syncType)
+    switch (_syncType)
     {
     case cfg::SyncType::DiscreteTime:
     case cfg::SyncType::DiscreteTimePassive:
@@ -479,7 +469,7 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const
         return;
     }
 
-    if (!_taskRunner)
+    if (!_syncAdapter)
     {
         ReportError("Received TICK before ParticipantController::Run() or RunAsync() was called");
         return;
@@ -487,12 +477,10 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const
 
     switch (State())
     {
-    case ParticipantState::Invalid:
-        // [[fallthrough]]
-    case ParticipantState::Idle:
-        // [[fallthrough]]
-    case ParticipantState::Initializing:
-        // [[fallthrough]]
+    // TICKs during initialization are considered as an error
+    case ParticipantState::Invalid:      // [[fallthrough]]
+    case ParticipantState::Idle:         // [[fallthrough]]
+    case ParticipantState::Initializing: // [[fallthrough]]
     case ParticipantState::Initialized:
         ReportError("Received TICK in state ParticipantState::" + to_string(State()));
         return;
@@ -503,21 +491,18 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const
         // than once though.
         // [[fallthrough]]
     case ParticipantState::Running:
-        _now = msg.now;
-        _duration = msg.duration;
-        _taskRunner->GrantReceived();
+        _currentTask.timePoint = msg.now;
+        _currentTask.duration = msg.duration;
+        ExecuteSimTask();
         break;
-        
-    case ParticipantState::Stopping:
-        return; // ignore TICK during stop/shutdown procedure
-    case ParticipantState::Stopped:
-        return; // ignore TICK during stop/shutdown procedure
-    case ParticipantState::Error:
-        return; // ignore TICK during stop/shutdown procedure
-    case ParticipantState::ShuttingDown:
-        return; // ignore TICK during stop/shutdown procedure
-    case ParticipantState::Shutdown:
-        return; // ignore TICK during stop/shutdown procedure
+
+    // TICK during stop/shutdown procedure and Errors are ignored
+    case ParticipantState::Stopping:     // [[fallthrough]]
+    case ParticipantState::Stopped:      // [[fallthrough]]
+    case ParticipantState::Error:        // [[fallthrough]]
+    case ParticipantState::ShuttingDown: // [[fallthrough]]
+    case ParticipantState::Shutdown:     // [[fallthrough]]
+        return;
     default:
         ReportError("Received TICK in state ParticipantState::" + to_string(State()));
         return;
@@ -526,13 +511,13 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const
 
 void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const QuantumGrant& msg)
 {
-    if (_participantConfig.syncType != cfg::SyncType::TimeQuantum)
+    if (_syncType != cfg::SyncType::TimeQuantum)
         return;
 
     if (_endpointAddress != msg.grantee)
         return;
 
-    if (!_taskRunner)
+    if (!_syncAdapter)
     {
         ReportError("Received QuantumGrant before ParticipantController::Run() or RunAsync() was called");
         return;
@@ -540,12 +525,10 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const
 
     switch (State())
     {
-    case ParticipantState::Invalid:
-        // [[fallthrough]]
-    case ParticipantState::Idle:
-        // [[fallthrough]]
-    case ParticipantState::Initializing:
-        // [[fallthrough]]
+    // QuantumGrant during initialization are considered as an error
+    case ParticipantState::Invalid:      // [[fallthrough]]
+    case ParticipantState::Idle:         // [[fallthrough]]
+    case ParticipantState::Initializing: // [[fallthrough]]
     case ParticipantState::Initialized:
         ReportError("Received QuantumGrant in state ParticipantState::" + to_string(State()));
         return;
@@ -559,21 +542,25 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const
         ProcessQuantumGrant(msg);
         return;
 
-    case ParticipantState::Stopping:
-        return; // ignore QuantumGrants during stop/shutdown procedure
-    case ParticipantState::Stopped:
-        return; // ignore QuantumGrants during stop/shutdown procedure
-    case ParticipantState::Error:
-        return; // ignore QuantumGrants during stop/shutdown procedure
-    case ParticipantState::ShuttingDown:
-        return; // ignore QuantumGrants during stop/shutdown procedure
-    case ParticipantState::Shutdown:
-        return; // ignore QuantumGrants during stop/shutdown procedure
+    // QuantumGrant during stop/shutdown procedure and Errors are ignored
+    case ParticipantState::Stopping:     // [[fallthrough]]
+    case ParticipantState::Stopped:      // [[fallthrough]]
+    case ParticipantState::Error:        // [[fallthrough]]
+    case ParticipantState::ShuttingDown: // [[fallthrough]]
+    case ParticipantState::Shutdown:     // [[fallthrough]]
+        return;
 
     default:
         ReportError("Received QuantumGrant in state ParticipantState::" + to_string(State()));
         return;
     }
+}
+
+void ParticipantController::ReceiveIbMessage(mw::EndpointAddress from, const NextSimTask& task)
+{
+    _otherNextTasks[from.participant] = task;
+    if (task.timePoint >= _myNextTask.timePoint)
+        CheckDistributedTimeAdvanceGrant();
 }
 
 void ParticipantController::SendTickDone() const
@@ -582,13 +569,13 @@ void ParticipantController::SendTickDone() const
     {
         _comAdapter->OnAllMessagesDelivered([this]() {
 
-            SendIbMessage(TickDone{ Tick{_now, _duration} });
+            SendIbMessage(TickDone{Tick{_currentTask.timePoint, _currentTask.duration}});
 
         });
     }
     else
     {
-        SendIbMessage(TickDone{ Tick{ _now, _duration } });
+        SendIbMessage(TickDone{Tick{_currentTask.timePoint, _currentTask.duration}});
     }
 }
 
@@ -598,13 +585,13 @@ void ParticipantController::SendQuantumRequest() const
     {
         _comAdapter->OnAllMessagesDelivered([this]() {
 
-            SendIbMessage(QuantumRequest{ _now, _period });
+            SendIbMessage(QuantumRequest{_myNextTask.timePoint, _myNextTask.duration});
 
         });
     }
     else
     {
-        SendIbMessage(QuantumRequest{ _now, _period });
+        SendIbMessage(QuantumRequest{_myNextTask.timePoint, _myNextTask.duration});
     }
 }
 
@@ -613,20 +600,18 @@ void ParticipantController::ProcessQuantumGrant(const QuantumGrant& msg)
     switch (msg.status)
     {
     case QuantumRequestStatus::Granted:
-        if (msg.duration != _period)
+        if (msg.now != _myNextTask.timePoint || msg.duration != _myNextTask.duration)
         {
             ReportError("Granted quantum duration does not match request!");
         }
         else
         {
-            _now = msg.now;
-            _duration = msg.duration;
-            _taskRunner->GrantReceived();
+            _currentTask = _myNextTask;
+            _myNextTask.timePoint = _currentTask.timePoint + _currentTask.duration;
+            ExecuteSimTask();
         }
         break;
     case QuantumRequestStatus::Rejected:
-        _now = msg.now;
-        _duration = 0ns;
         break;
     case QuantumRequestStatus::Invalid:
         ReportError("Received invalid QuantumGrant");
@@ -636,20 +621,49 @@ void ParticipantController::ProcessQuantumGrant(const QuantumGrant& msg)
     }
 }
 
-void ParticipantController::AdvanceQuantum()
+void ParticipantController::SendNextSimTask()
 {
-    _now += _period;
+    if (_timesyncConfig.syncPolicy == cfg::TimeSync::SyncPolicy::Strict)
+    {
+        _comAdapter->OnAllMessagesDelivered([this]() {
+
+            SendIbMessage(_myNextTask);
+            CheckDistributedTimeAdvanceGrant();
+
+        });
+    }
+    else
+    {
+        SendIbMessage(_myNextTask);
+        CheckDistributedTimeAdvanceGrant();
+    }
 }
 
+void ParticipantController::CheckDistributedTimeAdvanceGrant()
+{
+    for (auto&& otherTask : _otherNextTasks)
+    {
+        if (_myNextTask.timePoint > otherTask.second.timePoint)
+            return;
+    }
+
+    // No SimTask has a lower timePoint
+    _currentTask = _myNextTask;
+    _myNextTask.timePoint = _currentTask.timePoint + _currentTask.duration;
+    ExecuteSimTask();
+}
 
 void ParticipantController::ExecuteSimTask()
 {
     assert(_simTask);
     _waitTimeMonitor.StopMeasurement();
     _execTimeMonitor.StartMeasurement();
-    _simTask(_now, _duration);
+    _simTask(_currentTask.timePoint, _currentTask.duration);
     _execTimeMonitor.StopMeasurement();
     _waitTimeMonitor.StartMeasurement();
+
+    _syncAdapter->FinishedStep(*this);
+    _syncAdapter->RequestStep(*this);
 }
 
 void ParticipantController::ChangeState(ParticipantState newState, std::string reason)

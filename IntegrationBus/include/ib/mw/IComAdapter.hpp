@@ -125,6 +125,7 @@ public:
     virtual void SendIbMessage(EndpointAddress from, const sim::generic::GenericMessage& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, sim::generic::GenericMessage&& msg) = 0;
 
+    virtual void SendIbMessage(EndpointAddress from, const sync::NextSimTask& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sync::Tick& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sync::TickDone& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sync::QuantumRequest& msg) = 0;

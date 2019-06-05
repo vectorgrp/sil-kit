@@ -32,6 +32,120 @@ using namespace eprosima::fastcdr::exception;
 
 #include <utility>
 
+ib::mw::sync::idl::NextSimTask::NextSimTask()
+{
+
+    m_timePointNs = 0;
+
+    m_durationNs = 0;
+
+
+}
+
+ib::mw::sync::idl::NextSimTask::~NextSimTask()
+{
+}
+
+ib::mw::sync::idl::NextSimTask::NextSimTask(const NextSimTask &x)
+{
+    m_senderAddr = x.m_senderAddr;
+    m_timePointNs = x.m_timePointNs;
+    m_durationNs = x.m_durationNs;
+}
+
+ib::mw::sync::idl::NextSimTask::NextSimTask(NextSimTask &&x)
+{
+    m_senderAddr = std::move(x.m_senderAddr);
+    m_timePointNs = x.m_timePointNs;
+    m_durationNs = x.m_durationNs;
+}
+
+ib::mw::sync::idl::NextSimTask& ib::mw::sync::idl::NextSimTask::operator=(const NextSimTask &x)
+{
+    m_senderAddr = x.m_senderAddr;
+    m_timePointNs = x.m_timePointNs;
+    m_durationNs = x.m_durationNs;
+
+    return *this;
+}
+
+ib::mw::sync::idl::NextSimTask& ib::mw::sync::idl::NextSimTask::operator=(NextSimTask &&x)
+{
+    m_senderAddr = std::move(x.m_senderAddr);
+    m_timePointNs = x.m_timePointNs;
+    m_durationNs = x.m_durationNs;
+
+    return *this;
+}
+
+size_t ib::mw::sync::idl::NextSimTask::getMaxCdrSerializedSize(size_t current_alignment)
+{
+    size_t initial_alignment = current_alignment;
+
+    current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
+    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
+
+    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
+
+
+    return current_alignment - initial_alignment;
+}
+
+size_t ib::mw::sync::idl::NextSimTask::getCdrSerializedSize(const ib::mw::sync::idl::NextSimTask& data, size_t current_alignment)
+{
+    (void)data;
+    size_t initial_alignment = current_alignment;
+
+    current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
+    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
+
+    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
+
+
+    return current_alignment - initial_alignment;
+}
+
+void ib::mw::sync::idl::NextSimTask::serialize(eprosima::fastcdr::Cdr &scdr) const
+{
+    scdr << m_senderAddr;
+    scdr << m_timePointNs;
+    scdr << m_durationNs;
+}
+
+void ib::mw::sync::idl::NextSimTask::deserialize(eprosima::fastcdr::Cdr &dcdr)
+{
+    dcdr >> m_senderAddr;
+    dcdr >> m_timePointNs;
+    dcdr >> m_durationNs;
+}
+
+size_t ib::mw::sync::idl::NextSimTask::getKeyMaxCdrSerializedSize(size_t current_alignment)
+{
+	size_t current_align = current_alignment;
+            
+     current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
+
+
+
+    return current_align;
+}
+
+bool ib::mw::sync::idl::NextSimTask::isKeyDefined()
+{
+    return true;
+}
+
+void ib::mw::sync::idl::NextSimTask::serializeKey(eprosima::fastcdr::Cdr &scdr) const
+{
+	(void) scdr;
+	 scdr << m_senderAddr;  
+	 
+	 
+}
 ib::mw::sync::idl::QuantumRequest::QuantumRequest()
 {
 

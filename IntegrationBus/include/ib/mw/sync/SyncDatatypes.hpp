@@ -9,9 +9,14 @@
 
 namespace ib {
 namespace mw {
-//! The synchronisation namespace
+//! The synchronization namespace
 namespace sync {
 
+struct NextSimTask
+{
+    std::chrono::nanoseconds timePoint{0};
+    std::chrono::nanoseconds duration{0};
+};
 
 struct QuantumRequest
 {

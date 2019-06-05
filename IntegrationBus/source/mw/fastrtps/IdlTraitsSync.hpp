@@ -14,6 +14,7 @@ namespace ib {
     template<typename IdlT>
     struct TopicTrait;
 
+    DefineTopicTrait(mw::sync::idl, NextSimTask);
     DefineTopicTrait(mw::sync::idl, QuantumRequest);
     DefineTopicTrait(mw::sync::idl, QuantumGrant);
     DefineTopicTrait(mw::sync::idl, Tick);

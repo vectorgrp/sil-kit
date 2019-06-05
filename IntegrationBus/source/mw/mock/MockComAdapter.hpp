@@ -132,7 +132,8 @@ public:
 
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::generic::GenericMessage&));
     MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const sim::generic::GenericMessage&));
-    
+
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::NextSimTask&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::Tick&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::TickDone&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::QuantumRequest& msg));

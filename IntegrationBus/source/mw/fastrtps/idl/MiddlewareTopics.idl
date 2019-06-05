@@ -6,6 +6,13 @@ module sync {
 module idl {
 
 
+struct NextSimTask
+{
+    @Key ib::mw::idl::EndpointAddress senderAddr;
+    long long timePointNs;
+    long long durationNs;
+};
+    
 struct QuantumRequest
 {
     @Key ib::mw::idl::EndpointAddress senderAddr;

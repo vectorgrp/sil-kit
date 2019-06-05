@@ -116,6 +116,7 @@ public:
     void SendIbMessage(EndpointAddress from, sim::io::PatternIoMessage&& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::io::PwmIoMessage& msg) override;
 
+    void SendIbMessage(EndpointAddress from, const sync::NextSimTask& msg) override;
     void SendIbMessage(EndpointAddress from, const sync::Tick& msg) override;
     void SendIbMessage(EndpointAddress from, const sync::TickDone& msg) override;
     void SendIbMessage(EndpointAddress from, const sync::QuantumRequest& msg) override;
