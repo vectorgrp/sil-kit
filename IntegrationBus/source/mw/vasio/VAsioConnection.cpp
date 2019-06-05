@@ -68,7 +68,7 @@ void VAsioConnection::AcceptConnection()
         {
             if (!error)
             {
-                std::cout << "New Connection!! WOOHOO!!!\n";
+                std::cout << "Established new Connection!\n";
                 AddPeer(std::move(newConnection));
             }
             AcceptConnection();

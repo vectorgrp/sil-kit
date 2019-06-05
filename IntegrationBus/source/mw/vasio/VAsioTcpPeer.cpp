@@ -28,16 +28,11 @@ void VAsioTcpPeer::SendIbMsg(MessageBuffer buffer)
     *reinterpret_cast<uint32_t*>(sendBuffer.data()) = static_cast<uint32_t>(sendBuffer.size());
 
     auto asioBuffer = asio::buffer(sendBuffer.data(), sendBuffer.size());
-    asio::async_write(
+    asio::write(
         _socket,
-        std::move(asioBuffer),
-        [buffer{std::move(sendBuffer)}](const asio::error_code& error, std::size_t bytes_transferred) {
-            if (error)
-                std::cerr << "something went wrong:" << error.message() << "!!\n";
-            if (buffer.size() < bytes_transferred)
-                std::cerr << "Oh Oh... only transfered " << buffer.size() << " of " << bytes_transferred << "bytes\n";
-        }
+        std::move(asioBuffer)
     );
+
 }
 
 void VAsioTcpPeer::Subscribe(VAsioMsgSubscriber subscriber)

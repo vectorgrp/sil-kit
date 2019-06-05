@@ -20,12 +20,15 @@
 #include "SystemController.hpp"
 #include "ParticipantController.hpp"
 #include "CanController.hpp"
+#include "GenericPublisher.hpp"
+#include "GenericSubscriber.hpp"
 #include "LogmsgRouter.hpp"
 
 #include "SerdesMw.hpp"
 #include "SerdesMwLogging.hpp"
 #include "SerdesMwSync.hpp"
 #include "SerdesSimCan.hpp"
+#include "SerdesSimGeneric.hpp"
 
 #include "IVAsioPeer.hpp"
 #include "VAsioTcpPeer.hpp"
@@ -57,6 +60,7 @@ DefineIbMsgTraits(ib::mw::sync, SystemCommand)
 DefineIbMsgTraits(ib::mw::sync, ParticipantStatus)
 DefineIbMsgTraits(ib::sim::can, CanMessage)
 DefineIbMsgTraits(ib::sim::can, CanTransmitAcknowledge)
+DefineIbMsgTraits(ib::sim::generic, GenericMessage)
 
 #define DefineRegisterServiceMethod(IbServiceT) template<> void RegisterIbService<IbServiceT>(const std::string& link, EndpointId endpointId, IbServiceT* service) { RegisterIbService__<IbServiceT>(link, endpointId, service); }
 #define DefineSendIbMessageMethod(IbMsgT) template<> void SendIbMessageImpl<IbMsgT>(EndpointAddress from, const IbMsgT& msg) { SendIbMessageImpl__(from, msg); }
@@ -98,6 +102,8 @@ public:
     DefineRegisterServiceMethod(ib::mw::sync::SystemMonitor)
     DefineRegisterServiceMethod(ib::mw::sync::SystemController)
     DefineRegisterServiceMethod(ib::sim::can::CanController)
+    DefineRegisterServiceMethod(ib::sim::generic::GenericPublisher)
+    DefineRegisterServiceMethod(ib::sim::generic::GenericSubscriber)
 
     template<class IbMessageT>
     void SendIbMessageImpl__(EndpointAddress from, IbMessageT&& msg);
@@ -116,6 +122,7 @@ public:
     DefineSendIbMessageMethod(sync::ParticipantStatus)
     DefineSendIbMessageMethod(sim::can::CanMessage)
     DefineSendIbMessageMethod(sim::can::CanTransmitAcknowledge)
+    DefineSendIbMessageMethod(sim::generic::GenericMessage)
 
 
     void WaitForMessageDelivery() {};
@@ -153,7 +160,8 @@ private:
         sync::ParticipantCommand,
         sync::ParticipantStatus,
         sim::can::CanMessage,
-        sim::can::CanTransmitAcknowledge
+        sim::can::CanTransmitAcknowledge,
+        sim::generic::GenericMessage
     >;
 
 private:
