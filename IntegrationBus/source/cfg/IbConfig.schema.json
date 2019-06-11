@@ -237,10 +237,9 @@
                             "title": "Required number of consecutive even / odd cycle pairs for normal passive to normal active (range 0-31)"
                           },
                           "pChannels": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 3,
-                            "title": "Channel(s) to which the controller is connected (values (1) Channel::A, (2) Channel::B, (3) Channel::AB)"
+                            "type": "string",
+                            "enum": ["A", "B", "AB", "None"],
+                            "title": "Channel(s) to which the controller is connected"
                           },
                           "pClusterDriftDamping": {
                             "type": "integer",
@@ -339,10 +338,9 @@
                             "title": "Maximum permissible rate correction value (range 3 - 3846 Microticks)"
                           },
                           "pWakeupChannel": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 2,
-                            "title": "Channel used by the node to send a wakeup pattern (values (1) Channel::A, (2) Channel::B)"
+                            "type" : "string",
+                            "enum": ["A", "B", "AB", "None"],
+                            "title": "Channel used by the node to send a wakeup pattern"
                           },
                           "pWakeupPattern": {
                             "type": "integer",
@@ -370,10 +368,9 @@
                           "type": "object",
                           "properties": {
                             "channels": {
-                              "type": "integer",
-                              "minimum": 1,
-                              "maximum": 3,
-                              "title": "values (1) Channel::A, (2) Channel::B, (3) Channel::AB"
+                              "type": "string",
+                              "enum": ["A", "B", "AB", "None"],
+                              "title": "Channel(s)"
                             },
                             "slotId": {
                               "type": "integer",
@@ -402,10 +399,9 @@
                               "title": "Header CRC, 11 bits"
                             },
                             "transmissionMode": {
-                              "type": "integer",
-                              "minimum": 0,
-                              "maximum": 1,
-                              "title": "TransmissionMode::SingleShot or TransmissionMode::Continuous"
+                              "type": "string",
+                              "enum" : ["SingleShot", "Continuous"],
+                              "title": "SingleShot or Continuous transmission mode"
                             }
                           }
                         }

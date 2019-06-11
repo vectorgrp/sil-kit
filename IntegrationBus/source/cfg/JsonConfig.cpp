@@ -243,12 +243,74 @@ auto from_json<sim::fr::ClusterParameters>(const json11::Json& json) -> sim::fr:
     return clusterParameters;
 }
 
+auto to_json(const sim::fr::Channel& channel) -> json11::Json
+{
+    switch (channel)
+    {
+    case sim::fr::Channel::A:
+        return "A";
+    case sim::fr::Channel::B:
+        return "B";
+    case sim::fr::Channel::AB:
+        return "AB";
+    case sim::fr::Channel::None:
+        return "None";
+    default:
+        return "";
+    }
+}
+
+template <>
+auto from_json<sim::fr::Channel>(const json11::Json& json) -> sim::fr::Channel
+{
+    auto&& str = json.string_value();
+    if (str == "A")
+        return sim::fr::Channel::A;
+    if (str == "B")
+        return sim::fr::Channel::B;
+    if (str == "AB")
+        return sim::fr::Channel::AB;
+    if (str == "None" || str == "")
+        return sim::fr::Channel::None;
+
+    throw Misconfiguration{ "Unknown Channel" };
+}
+
+auto to_json(const sim::fr::ClockPeriod& clockPeriod) -> json11::Json
+{
+    switch (clockPeriod)
+    {
+    case sim::fr::ClockPeriod::T12_5NS:
+        return "12.5ns";
+    case sim::fr::ClockPeriod::T25NS:
+        return "25ns";
+    case sim::fr::ClockPeriod::T50NS:
+        return "50ns";
+    }
+
+    throw Misconfiguration{ "Unknown ClockPeriod in to_json" };
+}
+
+template <>
+auto from_json<sim::fr::ClockPeriod>(const json11::Json& json) -> sim::fr::ClockPeriod
+{
+    auto&& str = json.string_value();
+    if (str == "12.5ns")
+        return sim::fr::ClockPeriod::T12_5NS;
+    if (str == "25ns")
+        return sim::fr::ClockPeriod::T25NS;
+    if (str == "50ns")
+        return sim::fr::ClockPeriod::T50NS;
+
+    throw Misconfiguration{ "Unknown ClockPeriod in from_json" };
+}
+
 auto to_json(const sim::fr::NodeParameters& nodeParameters) -> json11::Json
 {
     return json11::Json::object{
         { "pAllowHaltDueToClock", nodeParameters.pAllowHaltDueToClock },
         { "pAllowPassiveToActive", nodeParameters.pAllowPassiveToActive },
-        { "pChannels", static_cast<uint8_t>(nodeParameters.pChannels) },
+        { "pChannels", to_json(nodeParameters.pChannels) },
         { "pClusterDriftDamping", nodeParameters.pClusterDriftDamping },
         { "pdAcceptedStartupRange", nodeParameters.pdAcceptedStartupRange },
         { "pdListenTimeout", nodeParameters.pdListenTimeout },
@@ -265,9 +327,9 @@ auto to_json(const sim::fr::NodeParameters& nodeParameters) -> json11::Json
         { "pOffsetCorrectionOut", nodeParameters.pOffsetCorrectionOut },
         { "pOffsetCorrectionStart", nodeParameters.pOffsetCorrectionStart },
         { "pRateCorrectionOut", nodeParameters.pRateCorrectionOut },
-        { "pWakeupChannel", static_cast<uint8_t>(nodeParameters.pWakeupChannel) },
+        { "pWakeupChannel", to_json(nodeParameters.pWakeupChannel) },
         { "pWakeupPattern", nodeParameters.pWakeupPattern },
-        { "pdMicrotick", static_cast<uint8_t>(nodeParameters.pdMicrotick) },
+        { "pdMicrotick", to_json(nodeParameters.pdMicrotick) },
         { "pSamplesPerMicrotick", nodeParameters.pSamplesPerMicrotick }
     };
 }
@@ -278,7 +340,7 @@ auto from_json<sim::fr::NodeParameters>(const json11::Json& json) -> sim::fr::No
     sim::fr::NodeParameters nodeParameters;
     nodeParameters.pAllowHaltDueToClock = static_cast<uint8_t>(json["pAllowHaltDueToClock"].int_value());
     nodeParameters.pAllowPassiveToActive = static_cast<uint8_t>(json["pAllowPassiveToActive"].int_value());
-    nodeParameters.pChannels = static_cast<sim::fr::Channel>(json["pChannels"].int_value());
+    nodeParameters.pChannels = from_json<sim::fr::Channel>(json["pChannels"]);
     nodeParameters.pClusterDriftDamping = static_cast<uint8_t>(json["pClusterDriftDamping"].int_value());
     nodeParameters.pdAcceptedStartupRange = static_cast<sim::fr::FrMickroTick>(json["pdAcceptedStartupRange"].int_value());
     nodeParameters.pdListenTimeout = static_cast<sim::fr::FrMickroTick>(json["pdListenTimeout"].int_value());
@@ -295,23 +357,48 @@ auto from_json<sim::fr::NodeParameters>(const json11::Json& json) -> sim::fr::No
     nodeParameters.pOffsetCorrectionOut = static_cast<sim::fr::FrMickroTick>(json["pOffsetCorrectionOut"].int_value());
     nodeParameters.pOffsetCorrectionStart = static_cast<uint16_t>(json["pOffsetCorrectionStart"].int_value());
     nodeParameters.pRateCorrectionOut = static_cast<sim::fr::FrMickroTick>(json["pRateCorrectionOut"].int_value());
-    nodeParameters.pWakeupChannel = static_cast<sim::fr::Channel>(json["pWakeupChannel"].int_value());
+    nodeParameters.pWakeupChannel = from_json<sim::fr::Channel>(json["pWakeupChannel"]);
     nodeParameters.pWakeupPattern = static_cast<uint8_t>(json["pWakeupPattern"].int_value());
-    nodeParameters.pdMicrotick = static_cast<sim::fr::ClockPeriod>(json["pdMicrotick"].int_value());
+    nodeParameters.pdMicrotick = from_json<sim::fr::ClockPeriod>(json["pdMicrotick"]);
     nodeParameters.pSamplesPerMicrotick = static_cast<uint8_t>(json["pSamplesPerMicrotick"].int_value());
     return nodeParameters;
+}
+
+auto to_json(const sim::fr::TransmissionMode& transmissionMode) -> json11::Json
+{
+    switch (transmissionMode)
+    {
+    case sim::fr::TransmissionMode::Continuous:
+        return "Continuous";
+    case sim::fr::TransmissionMode::SingleShot:
+        return "SingleShot";
+    }
+
+    throw Misconfiguration{ "Unknown TransmissionMode in to_json" };
+}
+
+template <>
+auto from_json<sim::fr::TransmissionMode>(const json11::Json& json) -> sim::fr::TransmissionMode
+{
+    auto&& str = json.string_value();
+    if (str == "Continuous")
+        return sim::fr::TransmissionMode::Continuous;
+    if (str == "SingleShot")
+        return sim::fr::TransmissionMode::SingleShot;
+
+    throw Misconfiguration{ "Unknown TransmissionMode in from_json" };
 }
 
 auto to_json(const sim::fr::TxBufferConfig& txBufferConfig) -> json11::Json
 {
     return json11::Json::object{
-        { "channels", static_cast<uint8_t>(txBufferConfig.channels) },
+        { "channels", to_json(txBufferConfig.channels) },
         { "slotId", txBufferConfig.slotId },
         { "offset", txBufferConfig.offset },
         { "repetition", txBufferConfig.repetition },
         { "PPindicator", txBufferConfig.hasPayloadPreambleIndicator },
         { "headerCrc", txBufferConfig.headerCrc },
-        { "transmissionMode", static_cast<uint8_t>(txBufferConfig.transmissionMode) }
+        { "transmissionMode", to_json(txBufferConfig.transmissionMode) }
     };
 }
 
@@ -320,13 +407,13 @@ auto from_json<sim::fr::TxBufferConfig>(const json11::Json& json) -> sim::fr::Tx
 {
     sim::fr::TxBufferConfig txBufferConfig;
 
-    txBufferConfig.channels = static_cast<sim::fr::Channel>(json["channels"].int_value());
+    txBufferConfig.channels = from_json<sim::fr::Channel>(json["channels"]);
     txBufferConfig.slotId = static_cast<uint16_t>(json["slotId"].int_value());
     txBufferConfig.offset = static_cast<uint8_t>(json["offset"].int_value());
     txBufferConfig.repetition = static_cast<uint8_t>(json["repetition"].int_value());
     txBufferConfig.hasPayloadPreambleIndicator = json["PPindicator"].bool_value();
     txBufferConfig.headerCrc = static_cast<uint16_t>(json["headerCrc"].int_value());
-    txBufferConfig.transmissionMode = static_cast<sim::fr::TransmissionMode>(json["transmissionMode"].int_value());
+    txBufferConfig.transmissionMode = from_json<sim::fr::TransmissionMode>(json["transmissionMode"]);
 
     return txBufferConfig;
 }

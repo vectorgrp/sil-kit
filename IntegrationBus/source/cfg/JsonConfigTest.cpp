@@ -43,6 +43,10 @@ protected:
         config = ib::cfg::Config::FromJsonString(jsonString);
     }
 
+    auto getClusterParameters() -> ib::sim::fr::ClusterParameters;
+    auto getNodeParameters() -> ib::sim::fr::NodeParameters;
+    auto getTxBufferConfig() -> ib::sim::fr::TxBufferConfig;
+
 protected:
     ConfigBuilder builder;
     SimulationSetupBuilder& simulationSetup;
@@ -237,11 +241,11 @@ TEST_F(JsonConfigTest, CreateEthernetNetworkWithSwitch)
 TEST_F(JsonConfigTest, CreateFlexrayNetwork)
 {
     simulationSetup.AddParticipant("P1")
-        ->AddFlexray("FR1").WithLink("FR_A")
-        ->AddFlexray("FR2").WithLink("FR_B");
+        ->AddFlexray("FR1").WithLink("FR_A").WithNodeParameters(getNodeParameters())
+        ->AddFlexray("FR2").WithLink("FR_B").WithNodeParameters(getNodeParameters());
     simulationSetup.AddParticipant("P2")
-        ->AddFlexray("FR1").WithLink("FR_A")
-        ->AddFlexray("FR2").WithLink("FR_B");
+        ->AddFlexray("FR1").WithLink("FR_A").WithNodeParameters(getNodeParameters())
+        ->AddFlexray("FR2").WithLink("FR_B").WithNodeParameters(getNodeParameters());
 
     BuildConfigFromJson();
     EXPECT_EQ(config, referenceConfig);
@@ -276,7 +280,7 @@ TEST_F(JsonConfigTest, CreateFlexrayNetwork)
     EXPECT_EQ(p2.flexrayControllers[1].linkId, linkB.id);
 }
 
-auto getClusterParameters() -> ib::sim::fr::ClusterParameters
+auto JsonConfigTest::getClusterParameters() -> ib::sim::fr::ClusterParameters
 {
     ib::sim::fr::ClusterParameters clusterParams;
     clusterParams.gColdstartAttempts = 8;
@@ -302,7 +306,7 @@ auto getClusterParameters() -> ib::sim::fr::ClusterParameters
     return clusterParams;
 }
 
-auto getNodeParameters() -> ib::sim::fr::NodeParameters
+auto JsonConfigTest::getNodeParameters() -> ib::sim::fr::NodeParameters
 {
     ib::sim::fr::NodeParameters nodeParams;
     nodeParams.pAllowHaltDueToClock = 1;
@@ -331,7 +335,7 @@ auto getNodeParameters() -> ib::sim::fr::NodeParameters
     return nodeParams;
 }
 
-auto getTxBufferConfig() -> ib::sim::fr::TxBufferConfig
+auto JsonConfigTest::getTxBufferConfig() -> ib::sim::fr::TxBufferConfig
 {
     ib::sim::fr::TxBufferConfig txBufferConfig;
     txBufferConfig.channels = ib::sim::fr::Channel::A;
