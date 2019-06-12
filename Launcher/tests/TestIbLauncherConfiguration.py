@@ -53,7 +53,7 @@ class TestIbLauncherConfiguration(unittest.TestCase):
         self.assertEqual(resolvedExpression, 
             "^INTEGRATIONBUS_BINPATH=" + validBinaryPath + os.path.sep + ", " + 
             "%INTEGRATIONBUS_LIBPATH=" + validLibraryPath + os.path.sep + ", "
-            "?INTEGRATIONBUS_CONFIGFILE=" + configFileAbsolutePath + ", "
+            "?INTEGRATIONBUS_CONFIGFILE=\"" + configFileAbsolutePath + "\", "
             "&INTEGRATIONBUS_PARTICIPANTNAME=" + participantName + ", "
             "/INTEGRATIONBUS_DOMAINID=" + str(domainId) + ".")
 

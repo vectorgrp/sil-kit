@@ -7,6 +7,7 @@ import subprocess
 import threading
 import sys
 import os
+import re
 import time
 import datetime
 import atexit
@@ -142,6 +143,66 @@ class ProcessCoordinator:
             self.__logFile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S - ") + line)
             self.__logFile.flush()
 
+    @staticmethod
+    def __cmdline_split(s, platform='this'):
+        """Multi-platform variant of shlex.split() for command-line splitting.
+        For use with subprocess, for argv injection etc. Using fast REGEX.
+        This is a smarter alternative for expression "(shlex.split(arguments) if os.name == "posix" else arguments.split(' '))".
+        Source: https://stackoverflow.com/questions/33560364/python-windows-parsing-command-lines-with-shlex
+
+        Parameters
+        ----------
+        s: str
+            The command line string containing command plus command-line arguments to split
+        platform: 'this' = auto from current platform;
+                  1 = POSIX; 
+                  0 = Windows/CMD
+                  (other values reserved)
+
+        Returns
+        -------
+        list
+            The list of strings, one element per command or argument
+        """
+        if platform == 'this':
+            platform = (sys.platform != 'win32')
+        if platform == 1:
+            RE_CMD_LEX = r'''"((?:\\["\\]|[^"])*)"|'([^']*)'|(\\.)|(&&?|\|\|?|\d?\>|[<])|([^\s'"\\&|<>]+)|(\s+)|(.)'''
+        elif platform == 0:
+            RE_CMD_LEX = r'''"((?:""|\\["\\]|[^"])*)"?()|(\\\\(?=\\*")|\\")|(&&?|\|\|?|\d?>|[<])|([^\s"&|<>]+)|(\s+)|(.)'''
+        else:
+            raise AssertionError('unkown platform %r' % platform)
+
+        args = []
+        accu = None   # collects pieces of one arg
+        for qs, qss, esc, pipe, word, white, fail in re.findall(RE_CMD_LEX, s):
+            if word:
+                pass   # most frequent
+            elif esc:
+                word = esc[1]
+            elif white or pipe:
+                if accu is not None:
+                    args.append(accu)
+                if pipe:
+                    args.append(pipe)
+                accu = None
+                continue
+            elif fail:
+                raise ValueError("invalid or incomplete shell string")
+            elif qs:
+                word = qs.replace('\\"', '"').replace('\\\\', '\\')
+                if platform == 0:
+                    word = word.replace('""', '"')
+            else:
+                word = qss   # may be even empty; must be last
+
+            accu = (accu or '') + word
+
+        if accu is not None:
+            args.append(accu)
+
+        return args
+
     #######################################################################################################################
     #def launchProcess(self: object, processName: str, commandAbsolutePath: str, arguments: str, workingFolderAbsolutePath: str, integrationBusEnvironment: list, shell: bool, verbose: bool) -> object:
     def launchProcess(self, processName, commandAbsolutePath, arguments, workingFolderAbsolutePath, integrationBusEnvironment, shell):
@@ -175,17 +236,18 @@ class ProcessCoordinator:
                 "PATH": Configuration.getIntegrationBusLibraryPath() + ((os.pathsep + environment["PATH"]) if "PATH" in environment else "")
             })
             if self.__verbose:
-                print("  Windows invocation: '" + commandAbsolutePath + " " + arguments + "'")
+                print("  Windows invocation: '" + '"' + commandAbsolutePath + '"' + " " + arguments + "'")
         elif os.name == "posix":
             environment.update({
                 "LD_LIBRARY_PATH": Configuration.getIntegrationBusLibraryPath() + ((os.pathsep + environment["LD_LIBRARY_PATH"]) if "LD_LIBRARY_PATH" in environment else "")
             })
             if self.__verbose:
-                print("  Linux invocation: '" + commandAbsolutePath + " " + arguments + "'")
+                print("  Linux invocation: '" + '"' + commandAbsolutePath + '"' + " " + arguments + "'")
         if shell:
-            args = commandAbsolutePath + " " + arguments
+            # Enquote absolute command path to support paths with spaces
+            args = '"' + commandAbsolutePath + '"' + ' ' + arguments
         else:
-            args = [commandAbsolutePath] + (shlex.split(arguments) if os.name == "posix" else arguments.split(' '))
+            args = [commandAbsolutePath] + ProcessCoordinator.__cmdline_split(arguments)
 
         process = subprocess.Popen(args, env=environment, cwd=workingFolderAbsolutePath, shell=shell, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1, universal_newlines=True)
         self.__processes[processName] = process

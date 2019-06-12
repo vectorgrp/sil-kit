@@ -313,7 +313,8 @@ def resolveVariables(text, configFileAbsolutePath, participantName, domainId):
     """
     text = __resolveVariable(text, "INTEGRATIONBUS_BINPATH", getIntegrationBusBinaryPath() + os.path.sep)
     text = __resolveVariable(text, "INTEGRATIONBUS_LIBPATH", getIntegrationBusLibraryPath() + os.path.sep)
-    text = __resolveVariable(text, "INTEGRATIONBUS_CONFIGFILE", configFileAbsolutePath)
+    # Enquote file path so it can be used as a command line argument even if the path contains spaces
+    text = __resolveVariable(text, "INTEGRATIONBUS_CONFIGFILE", '"' + configFileAbsolutePath + '"')
     text = __resolveVariable(text, "INTEGRATIONBUS_PARTICIPANTNAME", str(participantName))
     text = __resolveVariable(text, "INTEGRATIONBUS_DOMAINID", str(domainId))
     text = os.path.expandvars(text)
