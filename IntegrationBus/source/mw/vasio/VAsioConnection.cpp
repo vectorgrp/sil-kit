@@ -117,8 +117,8 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(MessageBuffer&& buffer, IV
     tt::wrapped_tuple<Zero, IbMessageTypes> supportedTypes;
     tt::for_each(supportedTypes, [&](auto zero) {
 
-        using IbMessageT = decltype(zero)::Type;
-        wasAdded |= TryAddSubscriber<IbMessageT>(subscriber, peer);
+        using IbMessageT = typename decltype(zero)::Type;
+        wasAdded |= this->TryAddSubscriber<IbMessageT>(subscriber, peer);
 
         });
 

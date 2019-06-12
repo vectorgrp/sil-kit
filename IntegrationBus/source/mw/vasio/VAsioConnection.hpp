@@ -43,12 +43,16 @@
 #include "asio.hpp"
 
 
+#define DefineIbMsgTraits(Namespace, MsgName) template<> struct IbMsgTraits<Namespace::MsgName> { static constexpr const char* TypeName() { return #Namespace "::" #MsgName; } };
+
+#define DefineRegisterServiceMethod(IbServiceT) template<> inline void VAsioConnection::RegisterIbService<IbServiceT>(const std::string& link, EndpointId endpointId, IbServiceT* service) { RegisterIbService__<IbServiceT>(link, endpointId, service); }
+#define DefineSendIbMessageMethod(IbMsgT) template<> inline void VAsioConnection::SendIbMessageImpl<IbMsgT>(EndpointAddress from, const IbMsgT& msg) { SendIbMessageImpl__(from, msg); }
+
+
 namespace ib {
 namespace mw {
 
 template <class MsgT> struct IbMsgTraits;
-
-#define DefineIbMsgTraits(Namespace, MsgName) template<> struct IbMsgTraits<Namespace::MsgName> { static constexpr const char* TypeName() { return #Namespace "::" #MsgName; } };
 
 DefineIbMsgTraits(ib::mw::logging, LogMsg)
 DefineIbMsgTraits(ib::mw::sync, Tick)
@@ -61,9 +65,6 @@ DefineIbMsgTraits(ib::mw::sync, ParticipantStatus)
 DefineIbMsgTraits(ib::sim::can, CanMessage)
 DefineIbMsgTraits(ib::sim::can, CanTransmitAcknowledge)
 DefineIbMsgTraits(ib::sim::generic, GenericMessage)
-
-#define DefineRegisterServiceMethod(IbServiceT) template<> void RegisterIbService<IbServiceT>(const std::string& link, EndpointId endpointId, IbServiceT* service) { RegisterIbService__<IbServiceT>(link, endpointId, service); }
-#define DefineSendIbMessageMethod(IbMsgT) template<> void SendIbMessageImpl<IbMsgT>(EndpointAddress from, const IbMsgT& msg) { SendIbMessageImpl__(from, msg); }
 
 
 class VAsioConnection
@@ -96,14 +97,6 @@ public:
 
     template<class IbServiceT>
     inline void RegisterIbService(const std::string& /*link*/, EndpointId /*endpointId*/, IbServiceT* /*receiver*/) {}
-    DefineRegisterServiceMethod(ib::mw::logging::LogmsgRouter)
-    DefineRegisterServiceMethod(ib::mw::sync::ParticipantController)
-    DefineRegisterServiceMethod(ib::mw::sync::SyncMaster)
-    DefineRegisterServiceMethod(ib::mw::sync::SystemMonitor)
-    DefineRegisterServiceMethod(ib::mw::sync::SystemController)
-    DefineRegisterServiceMethod(ib::sim::can::CanController)
-    DefineRegisterServiceMethod(ib::sim::generic::GenericPublisher)
-    DefineRegisterServiceMethod(ib::sim::generic::GenericSubscriber)
 
     template<class IbMessageT>
     void SendIbMessageImpl__(EndpointAddress from, IbMessageT&& msg);
@@ -111,19 +104,7 @@ public:
     //template<class IbMessageT>
     //void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg);
     template<class IbMessageT>
-    void SendIbMessageImpl(EndpointAddress /*from*/, const IbMessageT& /*msg*/) {}
-    DefineSendIbMessageMethod(logging::LogMsg)
-    DefineSendIbMessageMethod(sync::Tick)
-    DefineSendIbMessageMethod(sync::TickDone)
-    DefineSendIbMessageMethod(sync::QuantumRequest)
-    DefineSendIbMessageMethod(sync::QuantumGrant)
-    DefineSendIbMessageMethod(sync::ParticipantCommand)
-    DefineSendIbMessageMethod(sync::SystemCommand)
-    DefineSendIbMessageMethod(sync::ParticipantStatus)
-    DefineSendIbMessageMethod(sim::can::CanMessage)
-    DefineSendIbMessageMethod(sim::can::CanTransmitAcknowledge)
-    DefineSendIbMessageMethod(sim::generic::GenericMessage)
-
+    inline void SendIbMessageImpl(EndpointAddress /*from*/, const IbMessageT& /*msg*/) {}
 
     void WaitForMessageDelivery() {};
     void FlushSendBuffers() {};
@@ -226,6 +207,15 @@ bool VAsioConnection::TryAddSubscriber(const VAsioMsgSubscriber& subscriber, IVA
     return true;
 }
 
+DefineRegisterServiceMethod(ib::mw::logging::LogmsgRouter)
+DefineRegisterServiceMethod(ib::mw::sync::ParticipantController)
+DefineRegisterServiceMethod(ib::mw::sync::SyncMaster)
+DefineRegisterServiceMethod(ib::mw::sync::SystemMonitor)
+DefineRegisterServiceMethod(ib::mw::sync::SystemController)
+DefineRegisterServiceMethod(ib::sim::can::CanController)
+DefineRegisterServiceMethod(ib::sim::generic::GenericPublisher)
+DefineRegisterServiceMethod(ib::sim::generic::GenericSubscriber)
+    
 template <class IbServiceT>
 void VAsioConnection::RegisterIbService__(const std::string& link, EndpointId endpointId, IbServiceT* service)
 {
@@ -295,6 +285,17 @@ void VAsioConnection::SendIbMessageImpl__(EndpointAddress from, IbMessageT&& msg
     senderMap[from.endpoint]->SendIbMessage(from, std::forward<IbMessageT>(msg));
 }
 
+DefineSendIbMessageMethod(logging::LogMsg)
+DefineSendIbMessageMethod(sync::Tick)
+DefineSendIbMessageMethod(sync::TickDone)
+DefineSendIbMessageMethod(sync::QuantumRequest)
+DefineSendIbMessageMethod(sync::QuantumGrant)
+DefineSendIbMessageMethod(sync::ParticipantCommand)
+DefineSendIbMessageMethod(sync::SystemCommand)
+DefineSendIbMessageMethod(sync::ParticipantStatus)
+DefineSendIbMessageMethod(sim::can::CanMessage)
+DefineSendIbMessageMethod(sim::can::CanTransmitAcknowledge)
+DefineSendIbMessageMethod(sim::generic::GenericMessage)
 
 
 } // mw

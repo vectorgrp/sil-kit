@@ -2,12 +2,13 @@
 
 #pragma once
 
+#include "VAsioMsgKind.hpp"
+
 namespace ib {
 namespace mw {
 
 template <class MsgT>
 struct VAsioSender {
-    template <class MsgT>
     void SendIbMessage(EndpointAddress from, const MsgT& msg)
     {
         for (auto&& remote : _remoteReceivers)

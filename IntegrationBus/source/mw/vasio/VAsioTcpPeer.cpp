@@ -1,7 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#pragma once
-
 #include "VAsioTcpPeer.hpp"
 #include "VAsioMsgKind.hpp"
 #include "VAsioConnection.hpp"
