@@ -29,8 +29,13 @@ TEST(MwVAsioSerdes, MwSync_QuantumGrant)
     using namespace ib::mw::sync;
     ib::mw::MessageBuffer buffer;
 
-    QuantumGrant in{{3,7}, 5ns, 10ns, QuantumRequestStatus::Granted};
-    QuantumGrant out{{1,1}, 0ns, 0ns, QuantumRequestStatus::Invalid};
+    QuantumGrant in;
+    QuantumGrant out{};
+
+    in.grantee = ib::mw::EndpointAddress{3,7};
+    in.now = 5ns;
+    in.duration = 10ns;
+    in.status = QuantumRequestStatus::Granted;
 
     buffer << in;
     buffer >> out;
@@ -109,8 +114,14 @@ TEST(MwVAsioSerdes, MwSync_ParticipantStatus)
     decltype(now) nowUs = std::chrono::system_clock::time_point{std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch())};
     decltype(now) outNow;
 
-    ParticipantStatus in{"Name", ParticipantState::Initialized, "Finished initialization", nowUs, nowUs};
-    ParticipantStatus out{std::string{}, ParticipantState::Invalid, std::string{}, outNow, outNow};
+    ParticipantStatus in;
+    ParticipantStatus out{};
+
+    in.participantName = "Name";
+    in.state = ParticipantState::Initialized;
+    in.enterReason = "Finished initialization";
+    in.enterTime = nowUs;
+    in.refreshTime = nowUs;
 
     buffer << in;
     buffer >> out;

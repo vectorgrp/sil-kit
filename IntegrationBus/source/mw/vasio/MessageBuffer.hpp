@@ -47,16 +47,43 @@ public:
     // ----------------------------------------
     // Integral Types
     template<typename IntegerT, typename std::enable_if_t<std::is_integral_v<IntegerT>, int> = 0>
-    inline MessageBuffer& operator<<(IntegerT t);
+    inline MessageBuffer& operator<<(IntegerT t)
+    {
+        if (_wPos + sizeof(IntegerT) > _storage.size())
+        {
+            _storage.resize(_storage.size() + sizeof(IntegerT));
+        }
+        IntegerT* dst = reinterpret_cast<IntegerT*>(_storage.data() + _wPos);
+        *dst = t;
+        _wPos += sizeof(IntegerT);
+
+        return *this;
+    }
     template<typename IntegerT, typename std::enable_if_t<std::is_integral_v<IntegerT>, int> = 0>
-    inline MessageBuffer& operator>>(IntegerT& t);
+    inline MessageBuffer& operator>>(IntegerT& t)
+    {
+        if (_rPos + sizeof(IntegerT) > _storage.size())
+            throw end_of_buffer{};
+
+        const IntegerT* src = reinterpret_cast<const IntegerT*>(_storage.data() + _rPos);
+        t = *src;
+        _rPos += sizeof(IntegerT);
+
+        return *this;
+    }
 
     // --------------------------------------------------------------------------------
     // Enums
     template<typename T, typename std::enable_if_t<std::is_enum_v<T>, int> = 0>
-    inline MessageBuffer& operator<<(T t);
+    inline MessageBuffer& operator<<(T t)
+    {
+        return operator<<(static_cast<std::underlying_type_t<T>>(t));
+    }
     template<typename T, typename std::enable_if_t<std::is_enum_v<T>, int> = 0>
-    inline MessageBuffer& operator>>(T& t);
+    inline MessageBuffer& operator>>(T& t)
+    {
+        return operator>>(reinterpret_cast<std::underlying_type_t<T>&>(t));
+    }
 
     // --------------------------------------------------------------------------------
     // std::string
@@ -104,47 +131,6 @@ auto MessageBuffer::ReleaseStorage() -> std::vector<uint8_t>
     _wPos = 0u;
     _rPos = 0u;
     return std::move(_storage);
-}
-
-// --------------------------------------------------------------------------------
-// Integral Types
-template<typename IntegerT, typename std::enable_if_t<std::is_integral_v<IntegerT>, int>>
-MessageBuffer& MessageBuffer::operator<<(IntegerT t)
-{
-    if (_wPos + sizeof(IntegerT) > _storage.size())
-    {
-        _storage.resize(_storage.size() + sizeof(IntegerT));
-    }
-    IntegerT* dst = reinterpret_cast<IntegerT*>(_storage.data() + _wPos);
-    *dst = t;
-    _wPos += sizeof(IntegerT);
-
-    return *this;
-}
-template<typename IntegerT, typename std::enable_if_t<std::is_integral_v<IntegerT>, int>>
-MessageBuffer& MessageBuffer::operator>>(IntegerT& t)
-{
-    if (_rPos + sizeof(IntegerT) > _storage.size())
-        throw end_of_buffer{};
-
-    const IntegerT* src = reinterpret_cast<const IntegerT*>(_storage.data() + _rPos);
-    t = *src;
-    _rPos += sizeof(IntegerT);
-
-    return *this;
-}
-
-// --------------------------------------------------------------------------------
-// Enums
-template<typename T, typename std::enable_if_t<std::is_enum_v<T>, int>>
-MessageBuffer& MessageBuffer::operator<<(T t)
-{
-    return operator<<(static_cast<std::underlying_type_t<T>>(t));
-}
-template<typename T, typename std::enable_if_t<std::is_enum_v<T>, int>>
-MessageBuffer& MessageBuffer::operator>>(T& t)
-{
-    return operator>>(reinterpret_cast<std::underlying_type_t<T>&>(t));
 }
 
 // --------------------------------------------------------------------------------
