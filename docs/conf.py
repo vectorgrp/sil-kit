@@ -24,6 +24,7 @@ author = 'Marcus Eggenberger and Andreas Rentschler'
 # The full version, including alpha/beta/rc tags
 release = '1.0.0'
 
+master_doc = 'index'
 
 # -- General configuration ---------------------------------------------------
 
