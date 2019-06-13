@@ -29,11 +29,14 @@ public:
 
     IntegrationBusAPI auto ConfigureFastRtps() -> FastRtps::ConfigBuilder&;
 
+    IntegrationBusAPI auto WithActiveMiddleware(Middleware middleware) -> ConfigBuilder&;
+
 private:
     Config _config;
     SimulationSetupBuilder _simulationSetup;
 
     std::unique_ptr<FastRtps::ConfigBuilder> _fastRtpsConfig;
+    MiddlewareConfig _middlewareConfig;
 };
 
 } // namespace cfg

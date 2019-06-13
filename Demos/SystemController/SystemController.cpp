@@ -192,7 +192,7 @@ int main(int argc, char** argv)
         auto ibConfig = ib::cfg::Config::FromJsonFile(jsonFilename);
 
         std::cout << "Creating SystemController for IB domain=" << domainId << std::endl;
-        auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
+        auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
 
         IbController ibController(comAdapter.get(), ibConfig);
 

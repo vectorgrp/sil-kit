@@ -239,7 +239,7 @@ int main(int argc, char** argv)
     }
 
     std::cout << "Creating interactive SystemController for IB domain=" << domainId << std::endl;
-    auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
+    auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
 
     auto systemMonitor = comAdapter->GetSystemMonitor();
     systemMonitor->RegisterParticipantStatusHandler(&ReportParticipantStatus);

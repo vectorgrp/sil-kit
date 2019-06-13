@@ -100,7 +100,7 @@ int main(int argc, char** argv)
         auto sleepTimePerTick = 1000ms;
 
         std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-        auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
+        auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
 
         // NB: If you want to use the default spd logger, e.g., via spdlog::info(...), 
         // you have to register the logger created by the comAdapter as the default logger.

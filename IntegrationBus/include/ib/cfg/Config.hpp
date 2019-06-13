@@ -261,8 +261,16 @@ struct Config
 
 } // namespace FastRTPS
 
+enum class Middleware
+{
+    NotConfigured = 0,
+    FastRTPS = 1,
+    VAsio = 2
+};
+
 struct MiddlewareConfig
 {
+    Middleware activeMiddleware = Middleware::NotConfigured;
     FastRtps::Config fastRtps;
 };
 

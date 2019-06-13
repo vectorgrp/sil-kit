@@ -61,7 +61,7 @@ int main(int argc, char** argv)
         auto ibConfig = ib::cfg::Config::FromJsonFile(configFilename);
 
         std::cout << "Creating GenericAdapter for participant=" << participantName << " in domain " << domainId << std::endl;
-        auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
+        auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
 
         // Set an Init Handler
         auto&& participantController = comAdapter->GetParticipantController();

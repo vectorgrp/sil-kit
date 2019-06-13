@@ -18,6 +18,7 @@ auto ConfigBuilder::Build() -> Config
 {
     _config.simulationSetup = _simulationSetup.Build();
 
+    _config.middlewareConfig = _middlewareConfig;
     if (_fastRtpsConfig)
         _config.middlewareConfig.fastRtps = _fastRtpsConfig->Build();
 
@@ -39,7 +40,13 @@ auto ConfigBuilder::ConfigureFastRtps() -> FastRtps::ConfigBuilder&
     return *_fastRtpsConfig;
 }
 
-
+auto ConfigBuilder::WithActiveMiddleware(Middleware middleware) -> ConfigBuilder&
+{
+    MiddlewareConfig mwCfg;
+    mwCfg.activeMiddleware = middleware;
+    _middlewareConfig = std::move(mwCfg);
+    return *this;
+}
 
 } // namespace cfg
 } // namespace ib

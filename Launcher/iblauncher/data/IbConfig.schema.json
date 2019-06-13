@@ -738,6 +738,12 @@
         "title": "Configuration of the simulation middleware", 
         "properties": {
 
+          "ActiveMiddleware" :
+          {
+            "type": "string",
+            "enum": ["FastRTPS", "VAsio"]
+          },
+
           "FastRTPS": {
             "type": "object", 
             "title": "FastRTPS settings", 

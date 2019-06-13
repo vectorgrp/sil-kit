@@ -459,6 +459,14 @@ TEST_F(JsonConfigTest, create_fastrtps_config_with_configfile)
     EXPECT_EQ(fastRtps.configFileName, std::string{"MyMagicFastRTPSsettings.xml"});
 }
 
+TEST_F(JsonConfigTest, select_middleware_from_config)
+{
+    builder.WithActiveMiddleware(ib::cfg::Middleware::VAsio);
+
+    BuildConfigFromJson();
+    EXPECT_EQ(config, referenceConfig);
+}
+
 TEST_F(JsonConfigTest, configure_timesync_with_strict_sync_policy)
 {
     simulationSetup

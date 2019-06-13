@@ -99,7 +99,7 @@ int main(int argc, char** argv)
         auto ibConfig = configBuilder.Build();
 
         std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-        auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
+        auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
 
         if (participantName == "master")
         {

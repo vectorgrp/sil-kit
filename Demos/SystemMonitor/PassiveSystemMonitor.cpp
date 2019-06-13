@@ -68,7 +68,7 @@ int main(int argc, char** argv)
         auto ibConfig = ib::cfg::Config::FromJsonFile(jsonFilename);
 
         std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-        auto comAdapter = ib::CreateFastRtpsComAdapter(std::move(ibConfig), participantName, domainId);
+        auto comAdapter = ib::CreateComAdapter(std::move(ibConfig), participantName, domainId);
 
         // add a stdout sink to the logger to print all received log messages
         comAdapter->GetLogger()->sinks().push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());

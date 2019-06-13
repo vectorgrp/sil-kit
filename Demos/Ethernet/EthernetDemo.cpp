@@ -122,7 +122,7 @@ int main(int argc, char** argv)
         auto ibConfig = ib::cfg::Config::FromJsonFile(configFilename);
 
         std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-        auto comAdapter = ib::CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
+        auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
         auto* ethController = comAdapter->CreateEthController("ETH0");
         auto* participantController = comAdapter->GetParticipantController();
 
