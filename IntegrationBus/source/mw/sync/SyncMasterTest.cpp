@@ -518,5 +518,35 @@ TEST_F(SyncMasterTest, give_grants_after_pause_ends)
     mockMonitor.systemStateHandler(sync::SystemState::Running);
 }
 
+TEST_F(SyncMasterTest, no_grants_for_empty_client_list)
+{
+    ib::cfg::ConfigBuilder testConfig{ "TestConfig" };
+    auto&& simulationSetup = testConfig.SimulationSetup();
+    simulationSetup
+        .AddParticipant("master").AsSyncMaster();
+    simulationSetup
+        .AddParticipant("client-0").WithSyncType(cfg::SyncType::Unsynchronized);
+    auto ibConfig = testConfig.Build();
+
+    SyncMaster syncMaster{ &comAdapter, ibConfig, &mockMonitor };
+    syncMaster.SetEndpointAddress(From(ibConfig.simulationSetup.participants[0]));
+
+    assert(mockMonitor.systemStateHandler);
+    mockMonitor.systemStateHandler(sync::SystemState::Initialized);
+    mockMonitor.systemStateHandler(sync::SystemState::Running);
+
+    auto addr_p1 = EndpointAddress{ ibConfig.simulationSetup.participants[1].id, 1024 };
+
+    QuantumGrant grant;
+    grant.grantee = addr_p1;
+    grant.now = 0ns;
+    grant.duration = 1ms;
+    grant.status = QuantumRequestStatus::Granted;
+    
+    EXPECT_CALL(comAdapter, SendIbMessage(syncMaster.EndpointAddress(), grant))
+        .Times(0);
+
+    syncMaster.ReceiveIbMessage(addr_p1, QuantumRequest{ 0ns, 1ms });
+}
 
 } // namespace (anonymous)

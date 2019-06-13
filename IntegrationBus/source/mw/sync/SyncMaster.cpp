@@ -195,13 +195,17 @@ void SyncMaster::SystemStateChanged(SystemState newState)
 
 void SyncMaster::SendGrants()
 {
-    auto&& minClientNow =
-        *std::min_element(_syncClients.begin(), _syncClients.end(), [](const auto& a, const auto& b)
+    auto minClientNowIterator =
+        std::min_element(_syncClients.begin(), _syncClients.end(), [](const auto& a, const auto& b)
         {
             return a->Now() < b->Now();
         });
-
-    auto minNow = minClientNow->Now();
+    if (minClientNowIterator == _syncClients.end())
+    {
+        // _syncClients is empty. No Grants to send
+        return;
+    }
+    auto minNow = (*minClientNowIterator)->Now();
 
     for (auto&& client : _syncClients)
     {
