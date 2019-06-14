@@ -19,8 +19,8 @@ RUN apt-get update -y &&\
         git \
         python \
         zip \
-		doxygen \
-		python3-breathe
+        doxygen \
+        python3-breathe
 # Install additional prerequisites on top of the base image
 RUN apt-get install clang -y
 

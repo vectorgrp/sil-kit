@@ -9,74 +9,136 @@ Welcome to IntegrationBus's documentation!
 Welcome to the documentation for the Vector Integration Bus (IB), a library for a 
 virtual protection platform for HAF/AF functions written in C++.
 
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
+If you want to improve or extend the documentation, have a look at :doc:`How to write reStructuredText?<documentation>`.
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`search`
 
-Docs
-====
 
-Important stuff
-===============
+.. _getting-started-index:
 
-	.. doxygenstruct:: ib::mw::EndpointAddress
-	   :members:
+Getting Started
+---------------
 
-	.. doxygenclass:: ib::mw::IComAdapter
-	   :members:
+This is an introduction.
+
+.. toctree::
+  :maxdepth: 1
+  
+  introduction
+  architecture
+  documentation
+
+
+Requirements
+------------
+
+* `Python`_ 2.x.x
+
+.. _Python: http://docs.python.org/reference/
+
+These are the specific versions IntegrationBus is tested and built against. 
+Use other versions at your own risk.
 	
-	.. doxygenstruct:: ib::cfg::Config
-	   :members:
-	   
-	.. doxygenstruct:: ib::cfg::GenericPort
-	   :members:	
 
-   
-All possible Controllers
-========================
+IntegrationBusAPI
+-----------------
 
-	.. doxygenclass:: ib::sim::can::ICanController
-	   :members:
-	   
-	.. doxygenclass:: ib::sim::eth::IEthController
-	   :members:
+    .. doxygenfunction:: ib::CreateFastRtpsComAdapter
 
-	.. doxygenclass:: ib::sim::fr::IFrController
-	   :members:
-	   
-	.. doxygenclass:: ib::sim::lin::ILinController
-	   :members:
+    .. doxygenclass:: ib::mw::IComAdapter
+       :members:
 
-	   
-Generic Publish-Subscribe
-=========================
 
-	.. doxygenclass:: ib::sim::generic::IGenericPublisher
-	   :members:
-	   
-	.. doxygenclass:: ib::sim::generic::IGenericSubscriber
-	   :members:
+Simulation Namespace
+--------------------
 
-	.. doxygenstruct:: ib::sim::generic::GenericMessage
-	   :members: 
-	   
-	   
-Sync Interfaces
-========================
-	   
-	.. doxygenclass:: ib::mw::sync::ISystemMonitor
-	   :members:
-	   
-	.. doxygenclass:: ib::mw::sync::ISystemController
-	   :members:
+    .. doxygenclass:: ib::sim::can::ICanController
+       :members:
 
-	      
+    .. doxygenclass:: ib::sim::eth::IEthController
+       :members:
+
+    .. doxygenclass:: ib::sim::eth::EthFrame
+       :members:
+
+    .. doxygenclass:: ib::sim::io::IInPort
+       :members:
+
+    .. doxygenclass:: ib::sim::io::IOutPort
+       :members:
+
+    .. doxygenclass:: ib::sim::fr::IFrController
+       :members:
+
+    .. doxygenclass:: ib::sim::lin::ILinController
+       :members:
+
+    .. doxygenclass:: ib::sim::generic::IGenericPublisher
+       :members:
+
+    .. doxygenclass:: ib::sim::generic::IGenericSubscriber
+       :members:
+
+    .. doxygenstruct:: ib::sim::generic::GenericMessage
+       :members: 
+
+
+Middleware Namespace
+--------------------
+
+    .. doxygenclass:: ib::mw::sync::IParticipantController
+       :members:
+
+    .. doxygenclass:: ib::mw::sync::ISystemMonitor
+       :members:
+
+    .. doxygenclass:: ib::mw::sync::ISystemController
+       :members:
+
+
+Config Namespace
+----------------
+
+    .. doxygenfunction:: ib::cfg::find_by_name
+
+    .. doxygenfunction:: ib::cfg::get_by_name
+
+    .. doxygenstruct:: ib::cfg::Config
+       :members:
+
+    .. doxygenclass:: ib::cfg::ConfigBuilder
+       :members:
+
+    .. doxygenclass:: ib::cfg::ControllerBuilder
+       :members:
+
+    .. doxygenclass:: ib::cfg::GenericPortBuilder
+       :members:
+
+    .. doxygenclass:: ib::cfg::IoPortBuilder
+       :members:
+
+    .. doxygenclass:: ib::cfg::LinkBuilder
+       :members:
+
+    .. doxygenclass:: ib::cfg::NetworkSimulatorBuilder
+       :members:
+
+    .. doxygenclass:: ib::cfg::ParentBuilder
+       :members:
+
+    .. doxygenclass:: ib::cfg::ParticipantBuilder
+       :members:
+
+    .. doxygenclass:: ib::cfg::SimulationSetupBuilder
+       :members:
+
+    .. doxygenclass:: ib::cfg::SwitchBuilder
+       :members:
+
+    .. doxygenclass:: ib::cfg::TimeSyncBuilder
+       :members:
