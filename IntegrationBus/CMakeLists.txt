@@ -151,9 +151,9 @@ function(make_gtest executableName testSourceFile)
         PRIVATE IbInterface
         gtest
         gmock_main
-        ${ARGV2}
-        ${ARGV3}
-        ${ARGV4}
+        ${ARGV2} ${ARGV3} ${ARGV4} ${ARGV5}
+        ${ARGV6} ${ARGV7} ${ARGV8} ${ARGV9}
+        ${ARGV10} ${ARGV11} ${ARGV12} ${ARGV13}
     )
 
     if (MSVC)

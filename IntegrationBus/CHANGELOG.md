@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Added
 ### Removed
 ### Changed
+- NetworkSimulator VIBE is now only used for configured links. For all other links, 
+  the trivial simulation is used.
 ### Fixed
 
 ## [Sprint-26] - 2019-05-29

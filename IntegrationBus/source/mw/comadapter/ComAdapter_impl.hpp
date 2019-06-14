@@ -94,7 +94,7 @@ auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonical
 
     auto&& config = get_by_name(_participant->canControllers, canonicalName);
 
-    if (useNetworkSimulator())
+    if (ControllerUsesNetworkSimulator(config.name))
     {
         return CreateControllerForLink<can::CanControllerProxy>(config);
     }
@@ -110,7 +110,7 @@ auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonical
     assert(_participant);
 
     auto&& config = get_by_name(_participant->ethernetControllers, canonicalName);
-    if (useNetworkSimulator())
+    if (ControllerUsesNetworkSimulator(config.name))
     {
         return CreateControllerForLink<eth::EthControllerProxy>(config);
     }
@@ -126,7 +126,7 @@ auto ComAdapter<IbConnectionT>::CreateFlexrayController(const std::string& canon
     assert(_participant);
 
     auto&& config = get_by_name(_participant->flexrayControllers, canonicalName);
-    if (useNetworkSimulator())
+    if (ControllerUsesNetworkSimulator(config.name))
     {
         return CreateControllerForLink<fr::FrControllerProxy>(config);
     }
@@ -142,7 +142,7 @@ auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonical
     assert(_participant);
 
     auto&& config = get_by_name(_participant->linControllers, canonicalName);
-    if (useNetworkSimulator())
+    if (ControllerUsesNetworkSimulator(config.name))
     {
         return CreateControllerForLink<lin::LinControllerProxy>(config);
     }
@@ -726,9 +726,26 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
 }
 
 template <class IbConnectionT>
-bool ComAdapter<IbConnectionT>::useNetworkSimulator() const
+bool ComAdapter<IbConnectionT>::ControllerUsesNetworkSimulator(const std::string& controllerName) const
 {
-    return !_config.simulationSetup.networkSimulators.empty();
+    auto endpointName = _participantName + "/" + controllerName;
+
+    for (auto&& link : _config.simulationSetup.links)
+    {
+        auto endpointIter = std::find(link.endpoints.begin(), link.endpoints.end(), endpointName);
+
+        if (endpointIter == link.endpoints.end())
+            continue;
+
+        for (auto&& simulator : _config.simulationSetup.networkSimulators)
+        {
+            auto linkIter = std::find(simulator.simulatedLinks.begin(), simulator.simulatedLinks.end(), link.name);
+            if (linkIter != simulator.simulatedLinks.end())
+                return true;
+        }
+    }
+
+    return false;
 }
 
 template <class IbConnectionT>

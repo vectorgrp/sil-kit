@@ -180,7 +180,7 @@ private:
     template<class IIbToSimulatorT>
     void RegisterSimulator(IIbToSimulatorT* busSim, cfg::Link::Type linkType);
 
-    bool useNetworkSimulator() const;
+    bool ControllerUsesNetworkSimulator(const std::string& controllerName) const;
     bool isSyncMaster() const;
 
 private:

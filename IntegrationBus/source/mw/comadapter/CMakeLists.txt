@@ -8,6 +8,7 @@ target_link_libraries(IbMwComAdapter
     PUBLIC  IbInterface
     PUBLIC  IbMwLogging
     PUBLIC  IbMwFastRtps
+    PRIVATE IbConfig
     PRIVATE IbUtil
     PRIVATE IbMwSync
     PRIVATE IbSimCan
@@ -27,3 +28,16 @@ if (MSVC)
 endif (MSVC)
 
 add_mvsc_ib_include_filter()
+
+make_gtest(TestMwComAdapter ComAdapterTest.cpp
+    IbMwComAdapter
+    IbConfig
+    IbUtil
+    IbMwSync
+    IbSimCan
+    IbSimEthernet
+    IbSimFlexRay
+    IbSimLin
+    IbSimIO
+    IbSimGenericMessage
+)
