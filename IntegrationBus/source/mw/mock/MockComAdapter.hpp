@@ -143,7 +143,7 @@ public:
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const logging::LogMsg& msg));
     MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const logging::LogMsg& msg));
 
-    MOCK_METHOD0(WaitForMessageDelivery, void());
+    MOCK_METHOD1(OnAllMessagesDelivered, void(std::function<void(void)>));
     MOCK_METHOD0(FlushSendBuffers, void());
     MOCK_METHOD0(Run, void());
     MOCK_METHOD0(Stop, void());

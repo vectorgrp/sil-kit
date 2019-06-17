@@ -124,7 +124,14 @@ TEST_F(WaitForAllAckedITest, no_messages_must_be_lost)
             for (auto count = 0u; count < msgCount; count++)
             {
                 topic.publisher->Publish(to_payload(topic.sendIdx++));
-                pubComAdapter->WaitForMessageDelivery();
+                std::promise<void> messagesDelivered;
+                auto future = messagesDelivered.get_future();
+                pubComAdapter->OnAllMessagesDelivered([&messagesDelivered]() {
+
+                    messagesDelivered.set_value();
+
+                });
+                future.wait();
             }
         }
     };
@@ -192,10 +199,18 @@ TEST_F(WaitForAllAckedITest, messages_must_be_delivered_in_order)
             std::this_thread::sleep_for(2s);
             for (auto count = 0u; count < msgCount; count++)
             {
-                topics[0].publisher->Publish(to_payload(topics[0].sendIdx++));
-                pubComAdapter->WaitForMessageDelivery();
-                topics[1].publisher->Publish(to_payload(topics[1].sendIdx++));
-                pubComAdapter->WaitForMessageDelivery();
+                for (int i = 0; i < 2; i++)
+                {
+                    topics[i].publisher->Publish(to_payload(topics[i].sendIdx++));
+                    std::promise<void> messagesDelivered;
+                    auto future = messagesDelivered.get_future();
+                    pubComAdapter->OnAllMessagesDelivered([&messagesDelivered]() {
+
+                        messagesDelivered.set_value();
+
+                    });
+                    future.wait();
+                }
             }
         }
     };

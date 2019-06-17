@@ -129,7 +129,7 @@ public:
     void SendIbMessage(EndpointAddress from, const sim::generic::GenericMessage& msg) override;
     void SendIbMessage(EndpointAddress from, sim::generic::GenericMessage&& msg) override;
 
-    void WaitForMessageDelivery() override;
+    void OnAllMessagesDelivered(std::function<void(void)> callback) override;
     void FlushSendBuffers() override;
 
 public:

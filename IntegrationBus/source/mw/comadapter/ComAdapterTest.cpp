@@ -29,7 +29,7 @@ struct MockIbConnection
     template<typename IbMessageT>
     void SendIbMessageImpl(EndpointAddress /*from*/, IbMessageT&& /*msg*/) {};
 
-    void WaitForMessageDelivery() {};
+    void OnAllMessagesDelivered(std::function<void()> /*callback*/) {};
     void FlushSendBuffers() {};
 
     void Run() {};

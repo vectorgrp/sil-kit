@@ -6,6 +6,8 @@
 #include <vector>
 #include <unordered_map>
 #include <tuple>
+#include <functional>
+#include <future>
 
 #include "ib/cfg/Config.hpp"
 
@@ -62,7 +64,7 @@ public:
     template<typename IbMessageT>
     void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg);
 
-    void WaitForMessageDelivery();
+    void OnAllMessagesDelivered(std::function<void(void)> callback);
     void FlushSendBuffers();
 
     void Run() {};
@@ -176,6 +178,8 @@ private:
     > _rtpsTopics;
 
     std::vector<eprosima::fastrtps::Publisher*> _allPublishers;
+
+    std::future<void> _messagesDelivered;
 };
 
 // ================================================================================

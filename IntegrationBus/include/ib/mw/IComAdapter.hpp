@@ -5,6 +5,7 @@
 #include <chrono>
 #include <memory>
 #include <string>
+#include <functional>
 
 #include "EndpointAddress.hpp"
 
@@ -141,17 +142,8 @@ public:
 
     virtual void SendIbMessage(EndpointAddress from, const logging::LogMsg& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, logging::LogMsg&& msg) = 0;
-    
-    /*! \brief Block until all bus messages are transmitted and acknowledged.
-    *
-    *   Some middleware implementations do not inherently ensure in-order transportation, so we
-    *   have to block until all messages are transmitted to obtain a determinstic simulation.
-    *
-    *   NB: if WaitForMessageDelivery() is called in the context of a FastRTPS listener thread,
-    *   e.g., most callbacks, this will deadlock!
-    */
-    virtual void WaitForMessageDelivery() = 0;
 
+    virtual void OnAllMessagesDelivered(std::function<void(void)> callback) = 0;
     virtual void FlushSendBuffers() = 0;
 
     virtual void Run() = 0;

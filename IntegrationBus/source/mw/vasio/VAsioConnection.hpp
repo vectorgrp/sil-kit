@@ -106,7 +106,7 @@ public:
     template<class IbMessageT>
     inline void SendIbMessageImpl(EndpointAddress /*from*/, const IbMessageT& /*msg*/) {}
 
-    void WaitForMessageDelivery() {};
+    void OnAllMessagesDelivered(std::function<void(void)> callback) {};
     void FlushSendBuffers() {};
 
     void Run();

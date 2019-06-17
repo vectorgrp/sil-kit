@@ -289,14 +289,6 @@ auto ParticipantController::Run() -> ParticipantState
 
 auto ParticipantController::RunAsync() -> std::future<ParticipantState>
 {
-    if (_timesyncConfig.syncPolicy == cfg::TimeSync::SyncPolicy::Strict)
-    {
-        _logger->error("ParticipantController::RunAsync() cannot be used when SyncPolicy::Strict is configured");
-        ChangeState(ParticipantState::Error, "ParticipantController::RunAsync() cannot be used when SyncPolicy::Strict is configured");
-        _finalStatePromise.set_value(State());
-        return _finalStatePromise.get_future();
-    }
-
     StartTaskRunner<TaskRunnerAsync>();
     return _finalStatePromise.get_future();
 }
@@ -427,13 +419,12 @@ void ParticipantController::PrepareColdswap()
     _logger->info("preparing coldswap...");
     ChangeState(ParticipantState::ColdswapPrepare, "Starting coldswap preparations");
 
-    // WaitForMessageDelivery will deadlock, if RunAsync was used.
-    // Thus, we run everythin in a separate thread.
-    _asyncResult = std::async(std::launch::async, [this] {
-        _comAdapter->WaitForMessageDelivery();
+    _comAdapter->OnAllMessagesDelivered([this]() {
+
         _comAdapter->FlushSendBuffers();
         ChangeState(ParticipantState::ColdswapReady, "Finished coldswap preparations.");
         _logger->info("ready for coldswap...");
+
     });
 }
 
@@ -442,11 +433,11 @@ void ParticipantController::ShutdownForColdswap()
     _comAdapter->FlushSendBuffers();
     ChangeState(ParticipantState::ColdswapShutdown, "Coldswap was enabled for this participant.");
     _taskRunner->Shutdown();
-    // WaitForMessageDelivery will deadlock, if RunAsync was used.
-    // Thus, we run everythin in a separate thread.
-    _asyncResult = std::async(std::launch::async, [this] {
-        _comAdapter->WaitForMessageDelivery();
+
+    _comAdapter->OnAllMessagesDelivered([this]() {
+
         _finalStatePromise.set_value(State());
+
     });
 }
 
@@ -716,15 +707,33 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const
 void ParticipantController::SendTickDone() const
 {
     if (_timesyncConfig.syncPolicy == cfg::TimeSync::SyncPolicy::Strict)
-        _comAdapter->WaitForMessageDelivery();
-    SendIbMessage(TickDone{Tick{_now, _duration}});
+    {
+        _comAdapter->OnAllMessagesDelivered([this]() {
+
+            SendIbMessage(TickDone{ Tick{_now, _duration} });
+
+        });
+    }
+    else
+    {
+        SendIbMessage(TickDone{ Tick{ _now, _duration } });
+    }
 }
 
 void ParticipantController::SendQuantumRequest() const
 {
     if (_timesyncConfig.syncPolicy == cfg::TimeSync::SyncPolicy::Strict)
-        _comAdapter->WaitForMessageDelivery();
-    SendIbMessage(QuantumRequest{_now, _period});
+    {
+        _comAdapter->OnAllMessagesDelivered([this]() {
+
+            SendIbMessage(QuantumRequest{ _now, _period });
+
+        });
+    }
+    else
+    {
+        SendIbMessage(QuantumRequest{ _now, _period });
+    }
 }
 
 void ParticipantController::ProcessQuantumGrant(const QuantumGrant& msg)

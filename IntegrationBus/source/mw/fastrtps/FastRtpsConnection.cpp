@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <sstream>
+#include <future>
 
 #include "fastrtps/Domain.h"
 #include "fastrtps/utils/IPLocator.h"
@@ -232,21 +233,27 @@ auto FastRtpsConnection::createSubscriber(const std::string& topicName, TopicDat
     return subscriber;
 }
 
-void FastRtpsConnection::WaitForMessageDelivery()
+void FastRtpsConnection::OnAllMessagesDelivered(std::function<void(void)> callback)
 {
-    for (auto publisher : _allPublishers)
-    {
-        /* NB: you must not use c_TimeInfinite as the parameter to wait_for_all_acked()!
-         *
-         * FastRTPS converts the parameter to std::chrono::microseconds
-         * and passes it on to std::condition_variable::wait_for().
-         * However, this causes an integer overflow. Instead of
-         * waiting indefinitely, it causes wait_for_all_acked() to
-         * return immediately.
-         */
-        auto allAcked = publisher->wait_for_all_acked(Time_t{1200, 0});
-        assert(allAcked);
-    }
+    _messagesDelivered = std::async(std::launch::async,
+        [this, callback]() {
+            for (auto publisher : _allPublishers)
+            {
+                /* NB: you must not use c_TimeInfinite as the parameter to wait_for_all_acked()!
+                *
+                * FastRTPS converts the parameter to std::chrono::microseconds
+                * and passes it on to std::condition_variable::wait_for().
+                * However, this causes an integer overflow. Instead of
+                * waiting indefinitely, it causes wait_for_all_acked() to
+                * return immediately.
+                */
+                auto allAcked = publisher->wait_for_all_acked(Time_t{ 1200, 0 });
+                assert(allAcked);
+            }
+
+            callback();
+        }
+    );
 }
 
 void FastRtpsConnection::FlushSendBuffers()
