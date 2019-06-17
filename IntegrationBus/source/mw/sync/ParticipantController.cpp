@@ -13,184 +13,66 @@ namespace ib {
 namespace mw {
 namespace sync {
 
-// anonymous namespace for local helper functions
-namespace {
+TaskRunner::TaskRunner(ParticipantController& controller)
+    : _controller(controller)
+{}
 
-struct SyncPolicyTimeQuantum
+void TaskRunner::Run()
 {
-    inline static void RequestStep(const ParticipantController& controller)
+    RequestStep(_controller);
+}
+
+void TaskRunner::GrantReceived()
+{
+    _controller.ExecuteSimTask();
+    FinishedStep(_controller);
+    RequestStep(_controller);
+}
+
+class TimeQuantumTaskRunner
+    : public TaskRunner
+{
+public:
+    TimeQuantumTaskRunner(ParticipantController& controller)
+        : TaskRunner::TaskRunner(controller)
+    {}
+
+    void RequestStep(ParticipantController& controller) override
     {
         controller.SendQuantumRequest();
     }
-    inline static void FinishedStep(ParticipantController& controller)
+    void FinishedStep(ParticipantController& controller) override
     {
         controller.AdvanceQuantum();
     }
 };
 
-struct SyncPolicyDiscreteTime
+class DiscreteTimeTaskRunner
+    : public TaskRunner
 {
-    inline static void RequestStep(const ParticipantController& /*controller*/) {}
-    inline static void FinishedStep(const ParticipantController& controller)
+public:
+    DiscreteTimeTaskRunner(ParticipantController& controller)
+        : TaskRunner::TaskRunner(controller)
+    {}
+
+    void RequestStep(ParticipantController& /*controller*/) override {}
+    void FinishedStep(ParticipantController& controller) override
     {
         controller.SendTickDone();
     }
 };
 
-struct SyncPolicyDiscreteTimePassive
-{
-    inline static void RequestStep(const ParticipantController& /*controller*/) {}
-    inline static void FinishedStep(const ParticipantController& /*controller*/) {}
-};
-
-
-template <class SyncPolicy>
-class TaskRunnerAsync
-    : public ITaskRunner
-    , public SyncPolicy
+class DiscreteTimePassiveTaskRunner
+    : public TaskRunner
 {
 public:
-    TaskRunnerAsync(ParticipantController& controller)
-        : _controller{controller}
-    {
-    }
-    void Start() override {}
-    void Initialize() override {}
-    void Run() override
-    {
-        SyncPolicy::RequestStep(_controller);
-    }
-    void GrantReceived() override
-    {
-        _controller.ExecuteSimTask();
-        SyncPolicy::FinishedStep(_controller);
-        SyncPolicy::RequestStep(_controller);
-    }
-    void Stop() override {}
-    void Shutdown() override {}
+    DiscreteTimePassiveTaskRunner(ParticipantController& controller)
+        : TaskRunner::TaskRunner(controller)
+    {}
 
-private:
-    ParticipantController& _controller;
+    void RequestStep(ParticipantController& /*controller*/) override {}
+    void FinishedStep(ParticipantController& /*controller*/) override {}
 };
-
-template <class SyncPolicy>
-class TaskRunner
-    : public ITaskRunner
-    , public SyncPolicy
-{
-public:
-    TaskRunner(ParticipantController& controller)
-        : _controller{controller}
-    {
-    }
-    void Start() override
-    {
-        while (WaitForRunCommand())
-        {
-            while (true)
-            {
-                SyncPolicy::RequestStep(_controller);
-
-                if (!GetGrant())
-                    break;
-
-                _controller.ExecuteSimTask();
-                SyncPolicy::FinishedStep(_controller);
-            }
-        }
-    }
-    void Initialize() override
-    {
-    }
-    void Run() override
-    {
-        SetRunPromise(true);
-    }
-    void GrantReceived() override
-    {
-        SetGrant(true);
-    }
-    void Stop() override
-    {
-        SetGrant(false);
-    }
-    void Shutdown() override
-    {
-        SetRunPromise(false);
-        SetGrant(false);
-    }
-
-private:
-    inline bool WaitForRunCommand()
-    {
-        auto future = _runPromise.get_future();
-        auto running = future.get();
-
-        // Make New Promise
-        std::lock_guard<std::mutex> guard{_runMutex};
-        _runPromise = std::promise<bool>{};
-        if (_controller.State() == ParticipantState::Shutdown)
-        {
-            _runPromise.set_value(false);
-            return false;
-        }
-        return running;
-    }
-    inline void SetRunPromise(bool running)
-    {
-        std::lock_guard<std::mutex> guard{_runMutex};
-        try
-        {
-            _runPromise.set_value(running);
-        }
-        catch (const std::future_error& e)
-        {
-            // we accept that the promise is already set by another thread or callback.
-            if (e.code() != std::future_errc::promise_already_satisfied)
-                throw e;
-        }
-    }
-
-    inline void SetGrant(bool grant)
-    {
-        std::lock_guard<std::mutex> guard{_grantMutex};
-        try
-        {
-            _grantPromise.set_value(grant);
-        }
-        catch (const std::future_error& e)
-        {
-            // we accept that the promise is already set by another thread or callback.
-            if (e.code() != std::future_errc::promise_already_satisfied)
-                throw e;
-        }
-    }
-    inline bool GetGrant()
-    {
-        auto future = _grantPromise.get_future();
-        auto grant = future.get();
-
-        // Make New Promise
-        std::lock_guard<std::mutex> guard{_grantMutex};
-        _grantPromise = std::promise<bool>{};
-        if (_controller.State() == ParticipantState::Stopped ||
-            _controller.State() == ParticipantState::Error)
-        {
-            return false;
-        }
-
-        return grant;
-    }
-
-    ParticipantController& _controller;
-    std::promise<bool> _runPromise;
-    std::mutex _runMutex;
-    std::promise<bool> _grantPromise;
-    std::mutex _grantMutex;
-    bool _shutdown{false};
-};
-
-} // anonymous namespace for local helper functions
 
 
 ParticipantController::ParticipantController(IComAdapter* comAdapter, cfg::Participant participantConfig, cfg::TimeSync timesyncConfig)
@@ -248,7 +130,6 @@ void ParticipantController::SetEarliestEventTime(std::chrono::nanoseconds /*even
     throw std::exception();
 }
 
-template <template <class> class TaskRunnerT>
 void ParticipantController::StartTaskRunner()
 {
     if (!_simTask)
@@ -264,13 +145,13 @@ void ParticipantController::StartTaskRunner()
         _logger->critical("Unsupported SyncType {}", to_string(_participantConfig.syncType));
         throw std::runtime_error("Unsupported SyncType " + to_string(_participantConfig.syncType));
     case cfg::SyncType::TimeQuantum:
-        _taskRunner = std::make_unique<TaskRunnerT<SyncPolicyTimeQuantum>>(*this);
+        _taskRunner = std::make_unique<TimeQuantumTaskRunner>(*this);
         break;
     case cfg::SyncType::DiscreteTime:
-        _taskRunner = std::make_unique<TaskRunnerT<SyncPolicyDiscreteTime>>(*this);
+        _taskRunner = std::make_unique<DiscreteTimeTaskRunner>(*this);
         break;
     case cfg::SyncType::DiscreteTimePassive:
-        _taskRunner = std::make_unique<TaskRunnerT<SyncPolicyDiscreteTimePassive>>(*this);
+        _taskRunner = std::make_unique<DiscreteTimePassiveTaskRunner>(*this);
         break;
     default:
         _logger->critical("Invalid SyncType {}", to_string(_participantConfig.syncType));
@@ -278,18 +159,16 @@ void ParticipantController::StartTaskRunner()
     }
 
     ChangeState(ParticipantState::Idle, "ParticipantController::Run() was called");
-    _taskRunner->Start();
 }
 
 auto ParticipantController::Run() -> ParticipantState
 {
-    StartTaskRunner<TaskRunner>();
-    return _finalStatePromise.get_future().get();
+    return RunAsync().get();
 }
 
 auto ParticipantController::RunAsync() -> std::future<ParticipantState>
 {
-    StartTaskRunner<TaskRunnerAsync>();
+    StartTaskRunner();
     return _finalStatePromise.get_future();
 }
 
@@ -346,16 +225,12 @@ void ParticipantController::Initialize(const ParticipantCommand& command, std::s
     }
 
     _now = 0ns;
-    _taskRunner->Initialize();
     ChangeState(ParticipantState::Initialized, std::move(reason));
 }
 
 void ParticipantController::Stop(std::string reason)
 {
     ChangeState(ParticipantState::Stopping, reason);
-
-    if (_taskRunner)
-        _taskRunner->Stop();
 
     if (_stopHandler)
     {
@@ -387,8 +262,6 @@ void ParticipantController::Stop(std::string reason)
 void ParticipantController::Shutdown(std::string reason)
 {
     ChangeState(ParticipantState::ShuttingDown, reason);
-
-    _taskRunner->Shutdown();
 
     if (_shutdownHandler)
     {
@@ -432,7 +305,6 @@ void ParticipantController::ShutdownForColdswap()
 {
     _comAdapter->FlushSendBuffers();
     ChangeState(ParticipantState::ColdswapShutdown, "Coldswap was enabled for this participant.");
-    _taskRunner->Shutdown();
 
     _comAdapter->OnAllMessagesDelivered([this]() {
 
@@ -755,7 +627,6 @@ void ParticipantController::ProcessQuantumGrant(const QuantumGrant& msg)
     case QuantumRequestStatus::Rejected:
         _now = msg.now;
         _duration = 0ns;
-        _taskRunner->Stop();
         break;
     case QuantumRequestStatus::Invalid:
         ReportError("Received invalid QuantumGrant");

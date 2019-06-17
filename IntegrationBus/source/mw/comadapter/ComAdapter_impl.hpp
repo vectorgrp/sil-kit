@@ -757,7 +757,7 @@ bool ComAdapter<IbConnectionT>::isSyncMaster() const
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::OnAllMessagesDelivered(std::function<void(void)> callback)
+void ComAdapter<IbConnectionT>::OnAllMessagesDelivered(std::function<void()> callback)
 {
     _ibConnection.OnAllMessagesDelivered(std::move(callback));
 }

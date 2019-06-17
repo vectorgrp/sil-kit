@@ -17,7 +17,22 @@ namespace ib {
 namespace mw {
 namespace sync {
 
-class ITaskRunner;
+class ParticipantController;
+
+class TaskRunner
+{
+public:
+    TaskRunner(ParticipantController& controller);
+    
+    void Run();
+    void GrantReceived();
+
+    virtual void RequestStep(ParticipantController& controller) = 0;
+    virtual void FinishedStep(ParticipantController& controller) = 0;
+
+private:
+    ParticipantController & _controller;
+};
 
 class ParticipantController
     : public IParticipantController
@@ -89,7 +104,6 @@ private:
     template <class MsgT>
     void SendIbMessage(MsgT&& msg) const;
 
-    template <template <class> class TaskRunnerT>
     void StartTaskRunner();
 
     void ChangeState(ParticipantState newState, std::string reason);
@@ -110,7 +124,7 @@ private:
     cfg::TimeSync _timesyncConfig;
     std::shared_ptr<spdlog::logger> _logger;
 
-    std::unique_ptr<ITaskRunner> _taskRunner;
+    std::unique_ptr<TaskRunner> _taskRunner;
     std::chrono::nanoseconds _period{0};
     bool _coldswapEnabled{false};
 
@@ -128,18 +142,6 @@ private:
 
     util::PerformanceMonitor _execTimeMonitor;
     util::PerformanceMonitor _waitTimeMonitor;
-};
-
-class ITaskRunner
-{
-public:
-    virtual ~ITaskRunner() = default;
-    virtual void Start() = 0;
-    virtual void Initialize() = 0;
-    virtual void Run() = 0;
-    virtual void GrantReceived() = 0;
-    virtual void Stop() = 0;
-    virtual void Shutdown() = 0;
 };
 
 // ================================================================================

@@ -80,6 +80,7 @@ public:
     VAsioConnection(const VAsioConnection&) = default;
     VAsioConnection(VAsioConnection&&) = default;
     VAsioConnection(cfg::Config config, std::string participantName);
+    ~VAsioConnection();
 
 public:
     // ----------------------------------------
@@ -106,11 +107,8 @@ public:
     template<class IbMessageT>
     inline void SendIbMessageImpl(EndpointAddress /*from*/, const IbMessageT& /*msg*/) {}
 
-    void OnAllMessagesDelivered(std::function<void(void)> callback) {};
+    void OnAllMessagesDelivered(std::function<void()> callback) {};
     void FlushSendBuffers() {};
-
-    void Run();
-    void Stop() {};
 
     // Temporary Helpers
     void OnSocketData(MessageBuffer&& buffer, IVAsioPeer* peer);
@@ -184,6 +182,7 @@ private:
     std::vector<std::shared_ptr<IVAsioPeer>> _peers;
 
     asio::io_context _ioContext;
+    std::thread _ioWorker;
     std::unique_ptr<asio::ip::tcp::acceptor> _tcpAcceptor;
 };
 

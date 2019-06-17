@@ -145,9 +145,6 @@ public:
 
     virtual void OnAllMessagesDelivered(std::function<void(void)> callback) = 0;
     virtual void FlushSendBuffers() = 0;
-
-    virtual void Run() = 0;
-    virtual void Stop() = 0;
 };
 
 } // mw

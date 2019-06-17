@@ -67,9 +67,6 @@ public:
     void OnAllMessagesDelivered(std::function<void(void)> callback);
     void FlushSendBuffers();
 
-    void Run() {};
-    void Stop() {};
-
 private:
     // ----------------------------------------
     // private datatypes

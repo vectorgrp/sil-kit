@@ -17,21 +17,14 @@ VAsioConnection::VAsioConnection(cfg::Config config, std::string participantName
     : _config{std::move(config)}
     , _participantName{std::move(participantName)}
     , _participantId{get_by_name(_config.simulationSetup.participants, _participantName).id}
-{
-}
+{}
 
-void VAsioConnection::Run()
+VAsioConnection::~VAsioConnection()
 {
-    using namespace std::chrono_literals;
-    static int callCount = 0;
-    if (callCount == 0)
+    if (_ioWorker.joinable())
     {
-        _ioContext.run_for(2s);
-        callCount++;
-    }
-    else
-    {
-        _ioContext.run();
+        _ioContext.stop();
+        _ioWorker.join();
     }
 }
 
@@ -56,6 +49,11 @@ void VAsioConnection::joinDomain(uint32_t domainId)
         peer->Socket().connect(tcp::endpoint(asio::ip::address::from_string("127.0.0.1"), toPort(otherId)));
         AddPeer(std::move(peer));
     }
+
+    _ioWorker = std::thread{ [this] {
+        _ioContext.run();
+    } };
+
 }
 
 void VAsioConnection::AcceptConnection()

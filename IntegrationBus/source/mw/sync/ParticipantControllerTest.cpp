@@ -76,20 +76,6 @@ auto AParticipantStatusWithState(ParticipantState expected)
 };
 
 
-TEST_F(ParticipantControllerTest, report_error_on_RunAsync_with_strict_sync)
-{
-    cfg::TimeSync timesyncConfig;
-    timesyncConfig.syncPolicy = cfg::TimeSync::SyncPolicy::Strict;
-
-    controller = ParticipantController(&comAdapter, MakeParticipantConfig(), timesyncConfig);
-    controller.SetEndpointAddress(addr);
-
-    auto finalState = controller.RunAsync();
-
-    EXPECT_TRUE(finalState.valid());
-    EXPECT_EQ(finalState.get(), ParticipantState::Error);
-}
-
 TEST_F(ParticipantControllerTest, report_commands_as_error_before_run_was_called)
 {
     EXPECT_CALL(comAdapter, SendIbMessage(addr, A<const ParticipantStatus&>()))

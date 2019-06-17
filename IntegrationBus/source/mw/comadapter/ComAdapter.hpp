@@ -129,7 +129,7 @@ public:
     void SendIbMessage(EndpointAddress from, const sim::generic::GenericMessage& msg) override;
     void SendIbMessage(EndpointAddress from, sim::generic::GenericMessage&& msg) override;
 
-    void OnAllMessagesDelivered(std::function<void(void)> callback) override;
+    void OnAllMessagesDelivered(std::function<void()> callback) override;
     void FlushSendBuffers() override;
 
 public:
@@ -145,9 +145,6 @@ public:
     * participant could not be created.
     */
     void joinIbDomain(uint32_t domainId);
-
-    void Run() override { _ibConnection.Run(); }
-    void Stop() override { _ibConnection.Stop(); }
 
     // For Testing Purposes:
     inline auto GetIbConnection() -> IbConnectionT& { return _ibConnection; }
