@@ -15,7 +15,11 @@
 
                 "CanControllers": [ "CAN1", "CAN2", "CAN3", "CAN4" ],
                 "LinControllers": [ "LIN1", "LIN2", "LIN3", "LIN4" ],
-                "FlexRayControllers": [ "FlexRay1", "FlexRay2", "FlexRay3", "FlexRay4" ],
+                "FlexRayControllers": [ 
+                    {
+                        "Name": "FlexRay1"
+                    }
+                ],
                 "EthernetControllers": [
                     {
                         "Name": "ETH1",
@@ -42,7 +46,11 @@
 
                 "CanControllers": [ "CAN1", "CAN2", "CAN3", "CAN4" ],
                 "LinControllers": [ "LIN1", "LIN2", "LIN3", "LIN4" ],
-                "FlexRayControllers": [ "FlexRay1", "FlexRay2", "FlexRay3", "FlexRay4" ],
+                "FlexRayControllers": [ 
+                    {
+                        "Name": "FlexRay1"
+                    }
+                ],
                 "EthernetControllers": [
                     {
                         "Name": "ETH1",

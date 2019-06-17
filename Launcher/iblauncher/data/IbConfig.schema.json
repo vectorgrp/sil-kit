@@ -1,5 +1,5 @@
 {
-    "$id": "http://example.com/example.json",
+    "$id": "http://vector.com/#",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "JSON schema for IntegrationBus configuration files",
     "type": "object",
@@ -16,7 +16,6 @@
     
     "properties": {
       "$schema": {
-        "$id": "/properties/$schema",
         "type": "string",
         "title": "The $schema Schema",
         "default": "",
@@ -26,7 +25,6 @@
       },
 
       "ConfigVersion": {
-        "$id": "/properties/ConfigVersion",
         "type": "string",
         "title": "Version of the Configuration Schema",
         "default": "",
@@ -36,7 +34,6 @@
       },
 
       "ConfigName": {
-        "$id": "/properties/ConfigName",
         "type": "string",
         "title": "Name of the Configuration",
         "default": "",
@@ -50,13 +47,11 @@
       },
 
       "SimulationSetup": {
-        "$id": "#/properties/SimulationSetup",
         "type": "object",
         "title": "Entities of the simulated system",
         "properties": {
 
           "Participants": {
-            "$id": "/properties/Participants",
             "type": "array",
 
             "items": {
@@ -740,13 +735,11 @@
       },
 
       "MiddlewareConfig": {
-        "$id": "#/properties/MiddlewareConfig", 
         "type": "object", 
         "title": "Configuration of the simulation middleware", 
         "properties": {
 
           "FastRTPS": {
-            "$id": "#/properties/MiddlewareConfig/properties/FastRTPS", 
             "type": "object", 
             "title": "FastRTPS settings", 
             "properties": {
@@ -776,7 +769,6 @@
               },
 
               "ConfigFileName": {
-                "$id": "#/properties/MiddlewareConfig/properties/FastRTPS/properties/ConfigFileName", 
                 "type": "string", 
                 "title": "The file name of an optional FastRTPS XML file with profiles to use for the participants, relative to the JSON config file", 
                 "default": "", 
@@ -803,7 +795,6 @@
       },
 
       "LaunchConfigurations": {
-        "$id": "#/properties/LaunchConfigurations", 
         "type": "array", 
         "title": "Configurations for the launcher", 
 
@@ -818,7 +809,6 @@
               "$ref": "#/definitions/Description"
             },
             "NetworkNodes": {
-              "$id": "#/properties/LaunchConfigurations/NetworkNodes", 
               "type": "array", 
               "title": "Nodes to deploy to", 
               "items": {
@@ -845,7 +835,6 @@
               }
             },
             "ParticipantEnvironments": {
-              "$id": "#/properties/LaunchConfigurations/ParticipantEnvironments", 
               "type": "array", 
               "title": "Configuring the execution environment of participants", 
               "items": {
@@ -863,6 +852,10 @@
                   "NetworkNode": {
                     "type": "string",
                     "title": "Name of the NetworkNode to deploy the Participant to"
+                  },
+                  "WorkingFolder": {
+                    "type": "string",
+                    "title": "Name of the WorkingFolder where the Participant is executed"
                   }
                 },
                 "required": [ "Participant", "Environment" ],
@@ -877,10 +870,7 @@
                         "type": "string",
                         "title": "The CANoeProject project file (.cfg) to load"
                       },
-                      "WorkingFolder": {
-                        "type": "string",
-                        "title": "Name of the WorkingFolder where the Participant is executed"
-                      }
+                      "WorkingFolder": { }
                     },
                     "additionalProperties": false,
                     "required": [ "CANoeProject", "WorkingFolder" ]
@@ -906,10 +896,7 @@
                         "type": "string",
                         "title": "Optional command line arguments"
                       },
-                      "WorkingFolder": {
-                        "type": "string",
-                        "title": "Name of the WorkingFolder where the Participant is executed"
-                      }
+                      "WorkingFolder": { }
                     },
                     "additionalProperties": false,
                     "required": [ "Executable", "WorkingFolder" ]
@@ -919,7 +906,7 @@
             }
           },
           "additionalProperties": false,
-          "required": [ "ParticipantEnvironments" ]
+          "required": [ "Name", "ParticipantEnvironments" ]
         }
       }
 
