@@ -344,10 +344,9 @@
                             "title": "Number of repetitions of the wakeup symbol (range 0-63, value 0 prevents sending of WUP)"
                           },
                           "pdMicrotick": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 3,
-                            "title": "Duration of a FlexRay microtick ((1) 12.5ns, (2) 25ns or (3) 50ns)"
+                            "type": "string",
+                            "enum": ["12.5ns", "25ns", "50ns"],
+                            "title": "Duration of a FlexRay microtick"
                           },
                           "pSamplesPerMicrotick": {
                             "type": "integer",

@@ -39,7 +39,7 @@
                         "NodeParameters": {
                             "pAllowHaltDueToClock": 1,
                             "pAllowPassiveToActive": 0,
-                            "pChannels": 3,
+                            "pChannels": "AB",
                             "pClusterDriftDamping": 2,
                             "pdAcceptedStartupRange": 212,
                             "pdListenTimeout": 400162,
@@ -56,9 +56,9 @@
                             "pOffsetCorrectionOut": 127,
                             "pOffsetCorrectionStart": 3632,
                             "pRateCorrectionOut": 81,
-                            "pWakeupChannel": 1,
+                            "pWakeupChannel": "A",
                             "pWakeupPattern": 33,
-                            "pdMicrotick": 2,
+                            "pdMicrotick": "25ns",
                             "pSamplesPerMicrotick": 2
                         }
                     }
@@ -96,7 +96,7 @@
                         "NodeParameters": {
                             "pAllowHaltDueToClock": 1,
                             "pAllowPassiveToActive": 0,
-                            "pChannels": 3,
+                            "pChannels": "AB",
                             "pClusterDriftDamping": 2,
                             "pdAcceptedStartupRange": 212,
                             "pdListenTimeout": 400162,
@@ -113,9 +113,9 @@
                             "pOffsetCorrectionOut": 127,
                             "pOffsetCorrectionStart": 3632,
                             "pRateCorrectionOut": 81,
-                            "pWakeupChannel": 1,
+                            "pWakeupChannel": "A",
                             "pWakeupPattern": 33,
-                            "pdMicrotick": 2,
+                            "pdMicrotick": "25ns",
                             "pSamplesPerMicrotick": 2
                         }
                     }
