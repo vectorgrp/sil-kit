@@ -184,7 +184,7 @@ function(make_integration_test testName)
         PRIVATE IntegrationBus
         gtest
         gmock_main
-        )
+    )
 
     if(NOT MSVC)
         target_compile_options(${executableName} PUBLIC "-Wno-inconsistent-missing-override")
@@ -194,10 +194,53 @@ function(make_integration_test testName)
         NAME ${executableName}
         COMMAND ${CMAKE_COMMAND} -DPATH=$<TARGET_FILE_DIR:IntegrationBus>\;$<TARGET_FILE_DIR:fastrtps>\;$<TARGET_FILE_DIR:fastcdr> -P ${make_integration_test_caller_dir}/cmake/GTestRunner.cmake $<TARGET_FILE:${executableName}>
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        )
+    )
 
     add_mvsc_ib_include_filter()
 endfunction(make_integration_test executableName)
+
+function(add_vib_test executableName)
+    set(multiValueArgs SOURCES LIBS CONFIGS)
+
+    cmake_parse_arguments(PARSE_ARGV 1
+        PARSED_ARGS
+        ""
+        ""
+        "${multiValueArgs}"
+    )
+
+    if(NOT PARSED_ARGS_SOURCES)
+        message(FATAL_ERROR "add_ib_test for ${executableName} has an empty source list.")
+    endif()
+
+    add_executable(${executableName}
+        ${PARSED_ARGS_SOURCES}
+    )
+
+    set_property(TARGET ${executableName} PROPERTY FOLDER "Tests")
+
+    target_link_libraries(${executableName}
+        PRIVATE IbInterface
+        gtest
+        gmock_main
+        ${PARSED_ARGS_LIBS}
+    )
+
+    foreach(config ${PARSED_ARGS_CONFIGS})
+        get_filename_component(configFileName ${config} NAME)
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${config} ${CMAKE_CURRENT_BINARY_DIR}/${configFileName} COPYONLY)
+    endforeach()
+
+    if (MSVC)
+        target_compile_options(${executableName} PRIVATE "/bigobj")
+	else()
+        target_compile_options(${executableName} PUBLIC "-Wno-inconsistent-missing-override")
+    endif(MSVC)
+
+    add_test(${executableName} ${executableName} --gtest_output=xml:${executableName}_gtestresults.xml)
+
+    add_mvsc_ib_include_filter()
+endfunction(add_ib_test executableName)
 
 include(CTest)
 
