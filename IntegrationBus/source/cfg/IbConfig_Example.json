@@ -18,6 +18,15 @@
                 "FlexRayControllers": [ 
                     {
                         "Name": "FlexRay1"
+                    },
+                    {
+                        "Name": "FlexRay2"
+                    },
+                    {
+                        "Name": "FlexRay3"
+                    },
+                    {
+                        "Name": "FlexRay4"
                     }
                 ],
                 "EthernetControllers": [
@@ -49,6 +58,15 @@
                 "FlexRayControllers": [ 
                     {
                         "Name": "FlexRay1"
+                    },
+                    {
+                        "Name": "FlexRay2"
+                    },
+                    {
+                        "Name": "FlexRay3"
+                    },
+                    {
+                        "Name": "FlexRay4"
                     }
                 ],
                 "EthernetControllers": [

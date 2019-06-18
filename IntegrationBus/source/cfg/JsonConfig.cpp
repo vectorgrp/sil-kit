@@ -441,9 +441,10 @@ auto from_json<FlexrayController>(const json11::Json& json) -> FlexrayController
     }
 
     controller.name = json["Name"].string_value();
-    controller.clusterParameters = from_json<sim::fr::ClusterParameters>(json["ClusterParameters"]);
-    controller.nodeParameters = from_json<sim::fr::NodeParameters>(json["NodeParameters"]);
-    controller.txBufferConfigs = from_json<std::vector<sim::fr::TxBufferConfig>>(json["TxBufferConfigs"].array_items());
+    optional_from_json(controller.clusterParameters, json, "ClusterParameters");
+    optional_from_json(controller.nodeParameters, json, "NodeParameters");
+    if (json.object_items().count("TxBufferConfigs"))
+        controller.txBufferConfigs = from_json<std::vector<sim::fr::TxBufferConfig>>(json["TxBufferConfigs"].array_items());
     return controller;
 }
 

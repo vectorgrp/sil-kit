@@ -17,7 +17,16 @@
                 "LinControllers": [ "LIN1", "LIN2", "LIN3", "LIN4" ],
                 "FlexRayControllers": [ 
                     {
-                        "Name": "FlexRay1"
+                        "Name": "FR1"
+                    },
+                    {
+                        "Name": "FR2"
+                    },
+                    {
+                        "Name": "FR3"
+                    },
+                    {
+                        "Name": "FR4"
                     }
                 ],
                 "EthernetControllers": [
@@ -53,7 +62,16 @@
                 "LinControllers": [ "LIN1", "LIN2", "LIN3", "LIN4" ],
                 "FlexRayControllers": [ 
                     {
-                        "Name": "FlexRay1"
+                        "Name": "FR1"
+                    },
+                    {
+                        "Name": "FR2"
+                    },
+                    {
+                        "Name": "FR3"
+                    },
+                    {
+                        "Name": "FR4"
                     }
                 ],
                 "EthernetControllers": [
