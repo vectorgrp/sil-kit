@@ -139,18 +139,24 @@ function(add_mvsc_ib_include_filter)
     endif()
 endfunction(add_mvsc_ib_include_filter)
 
-function(add_vib_test executableName)
+function(add_vib_test)
     set(multiValueArgs SOURCES LIBS CONFIGS)
 
-    cmake_parse_arguments(PARSE_ARGV 1
-        PARSED_ARGS
+    cmake_parse_arguments(PARSED_ARGS
         ""
         ""
         "${multiValueArgs}"
+        ${ARGN}
     )
 
+    if(NOT PARSED_ARGS_UNPARSED_ARGUMENTS)
+        message(FATAL_ERROR "add_ib_test function failed because no executable name was specified (UNPARSED_ARGUMENTS were empty).")
+    endif()
+
+    list(GET PARSED_ARGS_UNPARSED_ARGUMENTS 0 executableName)
+
     if(NOT PARSED_ARGS_SOURCES)
-        message(FATAL_ERROR "add_ib_test for ${executableName} has an empty source list.")
+        message(FATAL_ERROR "add_ib_test function for ${executableName} has an empty source list.")
     endif()
 
     add_executable(${executableName}
@@ -180,7 +186,7 @@ function(add_vib_test executableName)
     add_test(${executableName} ${executableName} --gtest_output=xml:${executableName}_gtestresults.xml)
 
     add_mvsc_ib_include_filter()
-endfunction(add_ib_test executableName)
+endfunction(add_ib_test)
 
 include(CTest)
 
