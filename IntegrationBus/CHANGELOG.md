@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Removed
 ### Changed
 ### Fixed
+- IbLauncher can now be started from every directory location on Linux and Windows. The global 
+IntegrationBus-BinPath and IntegrationBus-LibPath are now set to absolute paths inside the IbLauncher
+project. Furthermore, the IbLauncher shell script now sets absolute paths for the bin and lib path.
+
 ### Interface compatibility with Sprint-27:
 * Application binary interface (ABI): Yes/No
 * Application software interface (API): Yes/No

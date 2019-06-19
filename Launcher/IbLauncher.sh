@@ -1,6 +1,6 @@
 #!/bin/bash
 
-workingDir="$(dirname "$0")"
+workingDir=$(dirname "$(realpath -s "$0")")
 
 # Hint at local installation
 export INTEGRATIONBUS_BINPATH="$workingDir"
