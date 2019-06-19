@@ -42,6 +42,6 @@ target_include_directories(IbConfig
 
 add_mvsc_ib_include_filter()
 
-make_gtest(TestMwCfgConfigBuilder ConfigBuilderTest.cpp IbConfig)
-make_gtest(TestMwCfgJsonConfig JsonConfigTest.cpp IbConfig json11)
-make_gtest(TestMwCfgValidation ValidationTest.cpp IbConfig)
+add_vib_test(TestMwCfgConfigBuilder SOURCES ConfigBuilderTest.cpp LIBS IbConfig)
+add_vib_test(TestMwCfgJsonConfig SOURCES JsonConfigTest.cpp LIBS IbConfig json11)
+add_vib_test(TestMwCfgValidation SOURCES ValidationTest.cpp LIBS IbConfig)

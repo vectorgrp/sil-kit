@@ -15,5 +15,5 @@ target_link_libraries(IbSimIO
 
 add_mvsc_ib_include_filter()
 
-make_gtest(TestSimInPort InPortTest.cpp IbSimIO IbMwMock)
-make_gtest(TestSimOutPort OutPortTest.cpp IbSimIO IbMwMock)
+add_vib_test(TestSimInPort SOURCES InPortTest.cpp LIBS IbSimIO IbMwMock)
+add_vib_test(TestSimOutPort SOURCES OutPortTest.cpp LIBS IbSimIO IbMwMock)

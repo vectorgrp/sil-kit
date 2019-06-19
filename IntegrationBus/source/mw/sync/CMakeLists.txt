@@ -22,7 +22,7 @@ target_link_libraries("IbMwSync"
 
 add_mvsc_ib_include_filter()
 
-make_gtest(TestMwSyncMaster SyncMasterTest.cpp IbMwSync IbMwMock IbConfig)
-make_gtest(TestMwParticipantController ParticipantControllerTest.cpp IbMwSync IbMwMock IbConfig)
-make_gtest(TestMwSystemController SystemControllerTest.cpp IbMwSync IbMwMock)
-make_gtest(TestMwSystemMonitor SystemMonitorTest.cpp IbMwSync IbMwMock IbConfig)
+add_vib_test(TestMwSyncMaster SOURCES SyncMasterTest.cpp LIBS IbMwSync IbMwMock IbConfig )
+add_vib_test(TestMwParticipantController SOURCES ParticipantControllerTest.cpp LIBS IbMwSync IbMwMock IbConfig )
+add_vib_test(TestMwSystemController SOURCES SystemControllerTest.cpp LIBS IbMwSync IbMwMock)
+add_vib_test(TestMwSystemMonitor SOURCES SystemMonitorTest.cpp LIBS IbMwSync IbMwMock IbConfig)

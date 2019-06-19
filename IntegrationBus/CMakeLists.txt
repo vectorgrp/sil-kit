@@ -139,34 +139,6 @@ function(add_mvsc_ib_include_filter)
     endif()
 endfunction(add_mvsc_ib_include_filter)
 
-# Generate Gtest Project
-function(make_gtest executableName testSourceFile)
-    add_executable(${executableName}
-        ${testSourceFile}
-    )
-    
-    set_property(TARGET ${executableName} PROPERTY FOLDER "Tests")
-
-    target_link_libraries(${executableName}
-        PRIVATE IbInterface
-        gtest
-        gmock_main
-        ${ARGV2} ${ARGV3} ${ARGV4} ${ARGV5}
-        ${ARGV6} ${ARGV7} ${ARGV8} ${ARGV9}
-        ${ARGV10} ${ARGV11} ${ARGV12} ${ARGV13}
-    )
-
-    if (MSVC)
-        target_compile_options(${executableName} PRIVATE "/bigobj")
-    endif (MSVC)
-    if(NOT MSVC)
-        target_compile_options(${executableName} PUBLIC "-Wno-inconsistent-missing-override")
-    endif()
-
-    add_test(${executableName} ${executableName} --gtest_output=xml:${executableName}_gtestresults.xml)
-  
-    add_mvsc_ib_include_filter()
-endfunction(make_gtest)
 
 set(make_integration_test_caller_dir ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
 

@@ -1,1 +1,1 @@
-make_gtest(TestUtilsVectorView vector_view_test.cpp)
+add_vib_test(TestUtilsVectorView SOURCES vector_view_test.cpp)

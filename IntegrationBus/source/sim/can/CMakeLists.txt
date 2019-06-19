@@ -17,5 +17,5 @@ target_link_libraries(IbSimCan
 
 add_mvsc_ib_include_filter()
 
-make_gtest(TestSimCanControllerProxy CanControllerProxyTest.cpp IbSimCan IbMwMock)
-make_gtest(TestSimCanController CanControllerTest.cpp IbSimCan IbMwMock)
+add_vib_test(TestSimCanControllerProxy SOURCES CanControllerProxyTest.cpp LIBS IbSimCan IbMwMock)
+add_vib_test(TestSimCanController SOURCES CanControllerTest.cpp LIBS IbSimCan IbMwMock)
