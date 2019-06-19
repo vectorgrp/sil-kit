@@ -125,6 +125,8 @@ def __determineIntegrationBusPaths(verbose=True):
             if __isIntegrationBusInstalled(__integrationBusBinaryPath, __integrationBusLibraryPath):
                 if verbose: print("Found IntegrationBus installation from environment variables 'INTEGRATIONBUS_LIBPATH', 'INTEGRATIONBUS_BINPATH'")
                 installationFound = True
+                __integrationBusLibraryPath = os.path.abspath(__integrationBusLibraryPath)
+                __integrationBusBinaryPath = os.path.abspath(__integrationBusBinaryPath)
             else:
                 if verbose:
                     print("IntegrationBus installation defined by environment variables 'INTEGRATIONBUS_LIBPATH', 'INTEGRATIONBUS_BINPATH' is invalid. Continuing search.")
