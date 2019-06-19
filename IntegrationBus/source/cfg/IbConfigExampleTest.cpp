@@ -5,14 +5,13 @@
 #include <thread>
 #include <future>
 
-#include "ib/IntegrationBus.hpp"
+#include "ComAdapter.hpp"
+#include "ComAdapter_impl.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
-#include "GetTestPid.hpp"
 
 namespace {
 
@@ -27,13 +26,29 @@ using testing::Return;
 
 using namespace ib;
 
+struct MockIbConnection
+{
+    MockIbConnection(ib::cfg::Config /*config*/, std::string /*participantName*/) {};
+
+    void joinDomain(uint32_t /*domainId*/) {};
+
+    template<class IbServiceT>
+    inline void RegisterIbService(const std::string& /*topicName*/, mw::EndpointId /*endpointId*/, IbServiceT* /*receiver*/) {};
+
+    template<typename IbMessageT>
+    void SendIbMessageImpl(mw::EndpointAddress /*from*/, IbMessageT&& /*msg*/) {};
+
+    void WaitForMessageDelivery() {};
+    void FlushSendBuffers() {};
+
+    void Run() {};
+    void Stop() {};
+};
+
 class IbConfigExampleITest : public testing::Test
 {
 protected:
-    IbConfigExampleITest()
-        : domainId{static_cast<uint32_t>(GetTestPid())}
-    {
-    }
+    IbConfigExampleITest() { }
 
     void VerifyParticipants(const std::vector<cfg::Participant>& participants)
     {
@@ -50,18 +65,18 @@ protected:
         std::cout << "Verifying participant " << participantName << '\n';
         auto&& participantCfg = cfg::get_by_name(ibConfig.simulationSetup.participants, participantName);
 
-        auto&& comAdapter = CreateFastRtpsComAdapter(ibConfig, participantName, domainId);
+        mw::ComAdapter<MockIbConnection> comAdapter(ibConfig, participantName);
 
-        CreateCanControllers(*comAdapter, participantCfg);
-        CreateLinControllers(*comAdapter, participantCfg);
-        CreateEthernetControllers(*comAdapter, participantCfg);
-        CreateFlexrayControllers(*comAdapter, participantCfg);
-        CreateIoPorts(*comAdapter, participantCfg);
-        CreateGenericPubSub(*comAdapter, participantCfg);
-        GetSyncMaster(*comAdapter, participantCfg);
-        GetParticipantController(*comAdapter, participantCfg);
-        GetSystemMonitor(*comAdapter, participantCfg);
-        GetSystemController(*comAdapter, participantCfg);
+        CreateCanControllers(comAdapter, participantCfg);
+        CreateLinControllers(comAdapter, participantCfg);
+        CreateEthernetControllers(comAdapter, participantCfg);
+        CreateFlexrayControllers(comAdapter, participantCfg);
+        CreateIoPorts(comAdapter, participantCfg);
+        CreateGenericPubSub(comAdapter, participantCfg);
+        GetSyncMaster(comAdapter, participantCfg);
+        GetParticipantController(comAdapter, participantCfg);
+        GetSystemMonitor(comAdapter, participantCfg);
+        GetSystemController(comAdapter, participantCfg);
     }
     void CreateCanControllers(mw::IComAdapter& comAdapter, const cfg::Participant& participantCfg)
     {
@@ -161,49 +176,48 @@ protected:
 
 
 protected:
-    const uint32_t domainId = 4242;
     ib::cfg::Config ibConfig;
 };
 
 TEST_F(IbConfigExampleITest, build_participants_from_IbConfig_Example)
 {
-    ibConfig = cfg::Config::FromJsonFile("../source/cfg/IbConfig_Example.json");
+    ibConfig = cfg::Config::FromJsonFile("IbConfig_Example.json");
     VerifyParticipants(ibConfig.simulationSetup.participants);
 }
 
 TEST_F(IbConfigExampleITest, build_participants_from_IbConfig_IO_Example)
 {
-    ibConfig = cfg::Config::FromJsonFile("../source/cfg/IbConfig_IO-Example.json");
+    ibConfig = cfg::Config::FromJsonFile("IbConfig_IO-Example.json");
     VerifyParticipants(ibConfig.simulationSetup.participants);
 }
 
 TEST_F(IbConfigExampleITest, build_participants_from_IbConfig_CANoe)
 {
-    ibConfig = cfg::Config::FromJsonFile("../source/cfg/IbConfig_Canoe.json");
+    ibConfig = cfg::Config::FromJsonFile("IbConfig_Canoe.json");
     VerifyParticipants(ibConfig.simulationSetup.participants);
 }
 
 TEST_F(IbConfigExampleITest, build_participants_from_IbConfig_FastRTPS_local)
 {
-    ibConfig = cfg::Config::FromJsonFile("../source/cfg/IbConfig_FastRTPS-local.json");
+    ibConfig = cfg::Config::FromJsonFile("IbConfig_FastRTPS-local.json");
     VerifyParticipants(ibConfig.simulationSetup.participants);
 }
 
 TEST_F(IbConfigExampleITest, build_participants_from_IbConfig_FastRTPS_multicast)
 {
-    ibConfig = cfg::Config::FromJsonFile("../source/cfg/IbConfig_FastRTPS-multicast.json");
+    ibConfig = cfg::Config::FromJsonFile("IbConfig_FastRTPS-multicast.json");
     VerifyParticipants(ibConfig.simulationSetup.participants);
 }
 
 TEST_F(IbConfigExampleITest, build_participants_from_IbConfig_FastRTPS_unicast)
 {
-    ibConfig = cfg::Config::FromJsonFile("../source/cfg/IbConfig_FastRTPS-unicast.json");
+    ibConfig = cfg::Config::FromJsonFile("IbConfig_FastRTPS-unicast.json");
     VerifyParticipants(ibConfig.simulationSetup.participants);
 }
 
 TEST_F(IbConfigExampleITest, build_participants_from_IbConfig_FastRTPS_configfile)
 {
-    ibConfig = cfg::Config::FromJsonFile("../source/cfg/IbConfig_FastRTPS-configfile.json");
+    ibConfig = cfg::Config::FromJsonFile("IbConfig_FastRTPS-configfile.json");
     VerifyParticipants(ibConfig.simulationSetup.participants);
 }
 

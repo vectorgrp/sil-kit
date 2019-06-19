@@ -139,38 +139,6 @@ function(add_mvsc_ib_include_filter)
     endif()
 endfunction(add_mvsc_ib_include_filter)
 
-
-set(make_integration_test_caller_dir ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
-
-function(make_integration_test testName)
-    set(executableName ITest${testName})
-    
-    add_executable(${executableName}
-        ${testName}ITest.cpp
-        )
-
-    set_property(TARGET ${executableName} PROPERTY FOLDER "Tests")
-
-    target_link_libraries(${executableName}
-        PRIVATE IbInterface
-        PRIVATE IntegrationBus
-        gtest
-        gmock_main
-    )
-
-    if(NOT MSVC)
-        target_compile_options(${executableName} PUBLIC "-Wno-inconsistent-missing-override")
-    endif()
-
-    add_test(
-        NAME ${executableName}
-        COMMAND ${CMAKE_COMMAND} -DPATH=$<TARGET_FILE_DIR:IntegrationBus>\;$<TARGET_FILE_DIR:fastrtps>\;$<TARGET_FILE_DIR:fastcdr> -P ${make_integration_test_caller_dir}/cmake/GTestRunner.cmake $<TARGET_FILE:${executableName}>
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    )
-
-    add_mvsc_ib_include_filter()
-endfunction(make_integration_test executableName)
-
 function(add_vib_test executableName)
     set(multiValueArgs SOURCES LIBS CONFIGS)
 

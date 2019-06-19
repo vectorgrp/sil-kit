@@ -5,7 +5,8 @@
 #include <thread>
 #include <future>
 
-#include "ib/IntegrationBus.hpp"
+#include "ComAdapter.hpp"
+#include "ComAdapter_impl.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
 
@@ -17,6 +18,7 @@
 namespace {
 
 using namespace std::chrono_literals;
+using namespace ib::mw;
 
 using testing::_;
 using testing::A;
@@ -43,8 +45,11 @@ protected:
 
         ibConfig = ib::cfg::Config::FromJsonFile("GenericMessagesITest_IbConfig.json");
         
-        pubComAdapter = ib::CreateFastRtpsComAdapter(ibConfig, "Publisher", domainId);
-        subComAdapter = ib::CreateFastRtpsComAdapter(ibConfig, "Subscriber", domainId);
+        pubComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Publisher");
+        pubComAdapter->joinIbDomain(domainId);
+
+        subComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Subscriber");
+        subComAdapter->joinIbDomain(domainId);
     }
 
     void Subscribe()
@@ -89,8 +94,8 @@ protected:
     Callbacks callbacks;
     std::vector<Topic> topics;
 
-    std::unique_ptr<ib::mw::IComAdapter> pubComAdapter;
-    std::unique_ptr<ib::mw::IComAdapter> subComAdapter;
+    std::unique_ptr<ComAdapter<FastRtpsConnection>> pubComAdapter;
+    std::unique_ptr<ComAdapter<FastRtpsConnection>> subComAdapter;
 };
     
 TEST_F(GenericMessageITest, publish_and_subscribe_generic_messages)

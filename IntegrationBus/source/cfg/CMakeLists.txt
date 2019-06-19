@@ -45,3 +45,24 @@ add_mvsc_ib_include_filter()
 add_vib_test(TestMwCfgConfigBuilder SOURCES ConfigBuilderTest.cpp LIBS IbConfig)
 add_vib_test(TestMwCfgJsonConfig SOURCES JsonConfigTest.cpp LIBS IbConfig json11)
 add_vib_test(TestMwCfgValidation SOURCES ValidationTest.cpp LIBS IbConfig)
+add_vib_test(TestIbConfigExample SOURCES IbConfigExampleTest.cpp
+    LIBS
+        IbMwComAdapter
+        IbConfig
+        IbUtil
+        IbMwSync
+        IbSimCan
+        IbSimEthernet
+        IbSimFlexRay
+        IbSimLin
+        IbSimIO
+        IbSimGenericMessage
+    CONFIGS
+        IbConfig_Example.json
+        IbConfig_IO-Example.json
+        IbConfig_Canoe.json
+        IbConfig_FastRTPS-local.json
+        IbConfig_FastRTPS-multicast.json
+        IbConfig_FastRTPS-unicast.json
+        IbConfig_FastRTPS-configfile.json
+)

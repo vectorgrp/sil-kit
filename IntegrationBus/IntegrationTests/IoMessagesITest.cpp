@@ -5,7 +5,9 @@
 #include <thread>
 #include <future>
 
-#include "ib/IntegrationBus.hpp"
+#include "ComAdapter.hpp"
+#include "ComAdapter_impl.hpp"
+#include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
 
@@ -17,6 +19,7 @@
 namespace {
 
 using namespace std::chrono_literals;
+using namespace ib::mw;
 
 using testing::_;
 using testing::A;
@@ -52,8 +55,11 @@ protected:
 
         ibConfig = cfgBuilder.Build();
         
-        pubComAdapter = ib::CreateFastRtpsComAdapter(ibConfig, "Sender", domainId);
-        subComAdapter = ib::CreateFastRtpsComAdapter(ibConfig, "Receiver", domainId);
+        pubComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Sender");
+        pubComAdapter->joinIbDomain(domainId);
+
+        subComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Receiver");
+        subComAdapter->joinIbDomain(domainId);
     }
 
 
@@ -102,8 +108,8 @@ protected:
 
     std::vector<Topic> topics;
 
-    std::unique_ptr<ib::mw::IComAdapter> pubComAdapter;
-    std::unique_ptr<ib::mw::IComAdapter> subComAdapter;
+    std::unique_ptr<ComAdapter<FastRtpsConnection>> pubComAdapter;
+    std::unique_ptr<ComAdapter<FastRtpsConnection>> subComAdapter;
 };
     
 TEST_F(IoMessageITest, receive_init_values)
