@@ -47,7 +47,7 @@ struct Link
     };
 
     std::string name;
-    int16_t id;
+    int16_t id{-1};
     Type type = Type::Undefined;
 
     std::vector<std::string> endpoints;
@@ -58,7 +58,7 @@ struct CanController
     static constexpr Link::Type linkType = Link::Type::CAN;
 
     std::string name;
-    mw::EndpointId endpointId;
+    mw::EndpointId endpointId{0};
     int16_t linkId{-1};
 };
 
@@ -67,7 +67,7 @@ struct LinController
     static constexpr Link::Type linkType = Link::Type::LIN;
 
     std::string name;
-    mw::EndpointId endpointId;
+    mw::EndpointId endpointId{0};
     int16_t linkId{-1};
 };
 
@@ -76,7 +76,7 @@ struct EthernetController
     static constexpr Link::Type linkType = Link::Type::Ethernet;
 
     std::string name;
-    mw::EndpointId endpointId;
+    mw::EndpointId endpointId{0};
     int16_t linkId{-1};
     std::array<uint8_t, 6> macAddress{};
 };
@@ -86,7 +86,7 @@ struct FlexrayController
     static constexpr Link::Type linkType = Link::Type::FlexRay;
 
     std::string name;
-    mw::EndpointId endpointId;
+    mw::EndpointId endpointId{0};
     int16_t linkId{-1};
 
     sim::fr::ClusterParameters clusterParameters;
@@ -118,9 +118,9 @@ struct IoPort
     static constexpr Link::Type linkType = get_io_link_type<ValueT>();
 
     std::string name;
-    mw::EndpointId endpointId;
+    mw::EndpointId endpointId{0};
     int16_t linkId{-1};
-    PortDirection direction;
+    PortDirection direction{PortDirection::InOut};
 
     ValueT initvalue;
     std::string unit;
@@ -200,7 +200,7 @@ struct Switch
         static constexpr Link::Type linkType{Link::Type::Ethernet};
 
         std::string name;
-        mw::EndpointId endpointId;
+        mw::EndpointId endpointId{0};
         std::vector<uint16_t> vlanIds;
     };
     std::string name;
@@ -255,8 +255,8 @@ struct Config
     DiscoveryType discoveryType{DiscoveryType::Local};
     std::map<std::string, std::string> unicastLocators;
     std::string configFileName;
-    int sendSocketBufferSize;
-    int listenSocketBufferSize;
+    int sendSocketBufferSize{-1};
+    int listenSocketBufferSize{-1};
 };
 
 } // namespace FastRTPS
