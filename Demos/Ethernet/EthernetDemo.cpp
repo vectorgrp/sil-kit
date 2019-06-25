@@ -154,8 +154,8 @@ int main(int argc, char** argv)
         participantController->SetPeriod(1ms);
         if (participantName == "EthernetWriter")
         {
-            auto sourceAddr = ibConfig.simulationSetup.participants[0].ethernetControllers[0].macAddress;
-            auto destinationAddr = ibConfig.simulationSetup.participants[1].ethernetControllers[0].macAddress;
+            auto sourceAddr = get_by_name(ibConfig.simulationSetup.participants, "EthernetWriter").ethernetControllers[0].macAddress;
+            auto destinationAddr = get_by_name(ibConfig.simulationSetup.participants, "EthernetReader").ethernetControllers[0].macAddress;
 
             participantController->SetSimulationTask(
                 [ethController, &sourceAddr, &destinationAddr](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
