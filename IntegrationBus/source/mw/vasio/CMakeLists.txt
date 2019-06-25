@@ -6,6 +6,7 @@ add_library(IbMwVAsio STATIC
     SerdesMwSync.hpp
     SerdesSimCan.hpp
     SerdesSimGeneric.hpp
+    SerdesSimEthernet.hpp
 
     IVAsioPeer.hpp
     VAsioTcpPeer.hpp
@@ -23,6 +24,7 @@ target_link_libraries(IbMwVAsio
     PUBLIC IbMwLogging
     PUBLIC IbSimCan
     PUBLIC IbSimGenericMessage
+    PUBLIC IbSimEthernet
 )
 
 target_include_directories(IbMwVAsio
@@ -46,5 +48,6 @@ add_vib_test(TestMwVAsio_MessageBuffer SOURCES MessageBufferTest.cpp)
 add_vib_test(TestMwVAsio_SerdesMw SOURCES SerdesMwTest.cpp)
 add_vib_test(TestMwVAsio_SerdesMwSync SOURCES SerdesMwSyncTest.cpp)
 add_vib_test(TestMwVAsio_SerdesSimCan SOURCES SerdesSimCanTest.cpp)
+add_vib_test(TestMwVAsio_SerdesSimEthernet SOURCES SerdesSimEthernetTest.cpp LIBS IbSimEthernet)
 add_vib_test(TestMwVAsio_SerdesSimGeneric SOURCES SerdesSimGenericTest.cpp)
 add_vib_test(TestMwVAsioConnection SOURCES VAsioConnectionTest.cpp LIBS IbMwVAsio IbMwComAdapter IbConfig gmock)

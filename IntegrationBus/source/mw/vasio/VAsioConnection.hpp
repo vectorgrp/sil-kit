@@ -23,12 +23,14 @@
 #include "GenericPublisher.hpp"
 #include "GenericSubscriber.hpp"
 #include "LogmsgRouter.hpp"
+#include "EthController.hpp"
 
 #include "SerdesMw.hpp"
 #include "SerdesMwLogging.hpp"
 #include "SerdesMwSync.hpp"
 #include "SerdesSimCan.hpp"
 #include "SerdesSimGeneric.hpp"
+#include "SerdesSimEthernet.hpp"
 
 #include "IVAsioPeer.hpp"
 #include "VAsioTcpPeer.hpp"
@@ -65,6 +67,10 @@ DefineIbMsgTraits(ib::mw::sync, ParticipantStatus)
 DefineIbMsgTraits(ib::sim::can, CanMessage)
 DefineIbMsgTraits(ib::sim::can, CanTransmitAcknowledge)
 DefineIbMsgTraits(ib::sim::generic, GenericMessage)
+DefineIbMsgTraits(ib::sim::eth, EthMessage)
+DefineIbMsgTraits(ib::sim::eth, EthTransmitAcknowledge)
+DefineIbMsgTraits(ib::sim::eth, EthStatus)
+DefineIbMsgTraits(ib::sim::eth, EthSetMode)
 
 
 class VAsioConnection
@@ -140,7 +146,11 @@ private:
         sync::ParticipantStatus,
         sim::can::CanMessage,
         sim::can::CanTransmitAcknowledge,
-        sim::generic::GenericMessage
+        sim::generic::GenericMessage,
+        sim::eth::EthMessage,
+        sim::eth::EthTransmitAcknowledge,
+        sim::eth::EthStatus,
+        sim::eth::EthSetMode
     >;
 
 private:
@@ -214,7 +224,8 @@ DefineRegisterServiceMethod(ib::mw::sync::SystemController)
 DefineRegisterServiceMethod(ib::sim::can::CanController)
 DefineRegisterServiceMethod(ib::sim::generic::GenericPublisher)
 DefineRegisterServiceMethod(ib::sim::generic::GenericSubscriber)
-    
+DefineRegisterServiceMethod(ib::sim::eth::EthController)
+
 template <class IbServiceT>
 void VAsioConnection::RegisterIbService__(const std::string& link, EndpointId endpointId, IbServiceT* service)
 {
@@ -295,7 +306,10 @@ DefineSendIbMessageMethod(sync::ParticipantStatus)
 DefineSendIbMessageMethod(sim::can::CanMessage)
 DefineSendIbMessageMethod(sim::can::CanTransmitAcknowledge)
 DefineSendIbMessageMethod(sim::generic::GenericMessage)
-
+DefineSendIbMessageMethod(sim::eth::EthMessage)
+DefineSendIbMessageMethod(sim::eth::EthTransmitAcknowledge)
+DefineSendIbMessageMethod(sim::eth::EthStatus)
+DefineSendIbMessageMethod(sim::eth::EthSetMode)
 
 } // mw
 } // namespace ib
