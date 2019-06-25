@@ -13,42 +13,28 @@ namespace eth {
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthMessage& msg)
 {
     buffer << msg.transmitId
-           << msg.timestamp;
-
-    for (const auto& value : msg.ethFrame.GetSourceMac()) {
-        buffer << value;
-    }
-
-    for (const auto& value : msg.ethFrame.GetDestinationMac()) {
-        buffer << value;
-    }
-
-    buffer << msg.ethFrame.GetVlanTag().pcp
+           << msg.timestamp
+           << msg.ethFrame.GetSourceMac()
+           << msg.ethFrame.GetDestinationMac()
+           << msg.ethFrame.GetVlanTag().pcp
            << msg.ethFrame.GetVlanTag().dei
            << msg.ethFrame.GetVlanTag().vid
-           << reinterpret_cast<const char*>(msg.ethFrame.GetPayload().data());
+           << msg.ethFrame.GetPayload();
 
     return buffer;
 }
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthMessage& msg)
 {
-    std::array<uint8_t, 6> sourceMac, destinationMac;
+    EthMac sourceMac, destinationMac;
     uint8_t pcp, dei;
-    uint16_t vid;
+    EthVid vid;
     std::vector<uint8_t> payload;
 
     buffer >> msg.transmitId
-           >> msg.timestamp;
-
-    for (size_t i = 0; i < 6; i++) {
-        buffer >> sourceMac[i];
-    }
-
-    for (size_t i = 0; i < 6; i++) {
-        buffer >> destinationMac[i];
-    }
-
-    buffer >> pcp
+           >> msg.timestamp
+           >> sourceMac
+           >> destinationMac
+           >> pcp
            >> dei
            >> vid
            >> payload;
@@ -85,15 +71,15 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthTrans
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthStatus& msg)
 {
     buffer << msg.timestamp
-        << msg.state
-        << msg.bitRate;
+           << msg.state
+           << msg.bitRate;
     return buffer;
 }
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthStatus& msg)
 {
     buffer >> msg.timestamp
-        >> msg.state
-        >> msg.bitRate;
+           >> msg.state
+           >> msg.bitRate;
     return buffer;
 }
 

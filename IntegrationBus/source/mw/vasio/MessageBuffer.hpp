@@ -7,6 +7,8 @@
 #include <type_traits>
 #include <vector>
 
+#include "ib/util/vector_view.hpp"
+
 namespace ib {
 namespace mw {
 
@@ -99,6 +101,20 @@ public:
     inline MessageBuffer& operator<<(const std::vector<ValueT>& vector);
     template<typename ValueT>
     inline MessageBuffer& operator>>(std::vector<ValueT>& vector);
+    // util::vector_view<uint8_t>
+    inline MessageBuffer& operator<<(const util::vector_view<const uint8_t>& vector_view);
+    // --------------------------------------------------------------------------------
+    // std::array<uint8_t, SIZE>
+    template<size_t SIZE>
+    inline MessageBuffer& operator<<(const std::array<uint8_t, SIZE>& array);
+    template<size_t SIZE>
+    inline MessageBuffer& operator>>(std::array<uint8_t, SIZE>& array);
+    // --------------------------------------------------------------------------------
+    // std::array<T, SIZE>
+    template<typename ValueT, size_t SIZE>
+    inline MessageBuffer& operator<<(const std::array<ValueT, SIZE>& array);
+    template<typename ValueT, size_t SIZE>
+    inline MessageBuffer& operator>>(std::array<ValueT, SIZE>& array);
     // --------------------------------------------------------------------------------
     // std::chrono::duration<Rep, Period> and system_clock::time_point
     template <class Rep, class Period>
@@ -185,6 +201,25 @@ MessageBuffer& MessageBuffer::operator<<(const std::vector<uint8_t>& vector)
 
     return *this;
 }
+// util::vector_view<uint8_t>
+MessageBuffer& MessageBuffer::operator<<(const util::vector_view<const uint8_t>& vector_view)
+{
+    if (vector_view.size() > std::numeric_limits<uint32_t>::max())
+        throw end_of_buffer{};
+
+    *this << static_cast<uint32_t>(vector_view.size());
+
+    if (_wPos + vector_view.size() > _storage.size())
+    {
+        _storage.resize(_wPos + vector_view.size());
+    }
+
+    std::copy(vector_view.begin(), vector_view.end(), _storage.begin() + _wPos);
+    _wPos += vector_view.size();
+
+    return *this;
+}
+// Deserialization for std::vector<uint8_t> and util::vector_view<uint8_t>
 MessageBuffer& MessageBuffer::operator>>(std::vector<uint8_t>& vector)
 {
     uint32_t vectorSize{0u};
@@ -220,10 +255,70 @@ MessageBuffer& MessageBuffer::operator>>(std::vector<ValueT>& vector)
     uint32_t vectorSize{0u};
     *this >> vectorSize;
 
+    if (_rPos + vectorSize > _storage.size())
+        throw end_of_buffer{};
+
     vector.resize(vectorSize);
     for (uint32_t i = 0; i < vectorSize; i++)
     {
         *this >> vector[i];
+    }
+
+    return *this;
+}
+
+// --------------------------------------------------------------------------------
+// std::array<uint8_t, SIZE>
+template<size_t SIZE>
+MessageBuffer& MessageBuffer::operator<<(const std::array<uint8_t, SIZE>& array)
+{
+    if (array.size() > std::numeric_limits<uint32_t>::max())
+        throw end_of_buffer{};
+
+    if (_wPos + array.size() > _storage.size())
+    {
+        _storage.resize(_wPos + array.size());
+    }
+
+    std::copy(array.begin(), array.end(), _storage.begin() + _wPos);
+    _wPos += array.size();
+
+    return *this;
+}
+template<size_t SIZE>
+MessageBuffer& MessageBuffer::operator>>(std::array<uint8_t, SIZE>& array)
+{
+    if (_rPos + array.size() > _storage.size())
+        throw end_of_buffer{};
+
+    std::copy(_storage.begin() + _rPos, _storage.begin() + _rPos + array.size(), array.begin());
+    _rPos += array.size();
+
+    return *this;
+}
+
+// --------------------------------------------------------------------------------
+// std::array<T, SIZE>
+template<typename ValueT, size_t SIZE>
+MessageBuffer& MessageBuffer::operator<<(const std::array<ValueT, SIZE>& array)
+{
+    if (array.size() > std::numeric_limits<uint32_t>::max())
+        throw end_of_buffer{};
+
+    for (auto&& value : array)
+        *this << value;
+
+    return *this;
+}
+template<typename ValueT, size_t SIZE>
+MessageBuffer& MessageBuffer::operator>>(std::array<ValueT, SIZE>& array)
+{
+    if (_rPos + array.size() > _storage.size())
+        throw end_of_buffer{};
+
+    for (auto&& value : array)
+    {
+        *this >> value;
     }
 
     return *this;
