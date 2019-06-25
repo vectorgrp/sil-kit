@@ -174,7 +174,11 @@ function(add_vib_test)
 
     foreach(config ${PARSED_ARGS_CONFIGS})
         get_filename_component(configFileName ${config} NAME)
-        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${config} ${CMAKE_CURRENT_BINARY_DIR}/${configFileName} COPYONLY)
+        add_custom_command(
+            TARGET ${executableName} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_CURRENT_SOURCE_DIR}/${config} $<TARGET_FILE_DIR:${executableName}>/${configFileName}
+        )
     endforeach()
 
     if (MSVC)
@@ -183,7 +187,10 @@ function(add_vib_test)
         target_compile_options(${executableName} PUBLIC "-Wno-inconsistent-missing-override")
     endif(MSVC)
 
-    add_test(${executableName} ${executableName} --gtest_output=xml:${executableName}_gtestresults.xml)
+    add_test(NAME ${executableName}
+             COMMAND ${executableName} --gtest_output=xml:${executableName}_gtestresults.xml
+             WORKING_DIRECTORY $<TARGET_FILE_DIR:${executableName}>
+    )
 
     add_mvsc_ib_include_filter()
 endfunction(add_ib_test)
