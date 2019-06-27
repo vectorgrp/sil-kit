@@ -40,9 +40,7 @@ struct MockIbConnection
 
     void OnAllMessagesDelivered(std::function<void(void)> /*callback*/) {};
     void FlushSendBuffers() {};
-
-    void Run() {};
-    void Stop() {};
+    void RegisterNewPeerCallback(std::function<void()> callback) {}
 };
 
 class IbConfigExampleITest : public testing::Test

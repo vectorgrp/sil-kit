@@ -144,6 +144,7 @@ public:
     virtual void SendIbMessage(EndpointAddress from, logging::LogMsg&& msg) = 0;
 
     virtual void OnAllMessagesDelivered(std::function<void(void)> callback) = 0;
+    virtual void RegisterNewPeerCallback(std::function<void()> callback) = 0;
     virtual void FlushSendBuffers() = 0;
 };
 

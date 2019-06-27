@@ -29,7 +29,7 @@ FastRtpsConnection::FastRtpsConnection(cfg::Config config, std::string participa
 {
 }
 
-void FastRtpsConnection::joinDomain(uint32_t domainId)
+void FastRtpsConnection::JoinDomain(uint32_t domainId)
 {
     if (_fastRtpsParticipant)
         throw std::exception();
@@ -262,6 +262,10 @@ void FastRtpsConnection::FlushSendBuffers()
     {
         publisher->removeAllChange(nullptr);
     }
+}
+
+void FastRtpsConnection::RegisterNewPeerCallback(std::function<void()> /*callback*/)
+{
 }
 
 } // namespace mw

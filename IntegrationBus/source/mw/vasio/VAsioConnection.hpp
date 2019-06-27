@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include <tuple>
+#include <future>
 
 #include "ib/cfg/Config.hpp"
 
@@ -28,6 +29,7 @@
 #include "OutPort.hpp"
 
 #include "SerdesMw.hpp"
+#include "SerdesMwRegistry.hpp"
 #include "SerdesMwLogging.hpp"
 #include "SerdesMwSync.hpp"
 #include "SerdesSimGeneric.hpp"
@@ -107,7 +109,7 @@ public:
 public:
     // ----------------------------------------
     // Public methods
-    void joinDomain(uint32_t domainId);
+    void JoinDomain(uint32_t domainId);
 
     template <class IbServiceT>
     inline void RegisterIbService__(const std::string& link, EndpointId endpointId, IbServiceT* service);
@@ -125,9 +127,11 @@ public:
 
     void OnAllMessagesDelivered(std::function<void()> callback) {};
     void FlushSendBuffers() {};
+    void RegisterNewPeerCallback(std::function<void()> callback);
 
     // Temporary Helpers
     void OnSocketData(MessageBuffer&& buffer, IVAsioPeer* peer);
+    virtual void PeerIsShuttingDown(IVAsioPeer* /*peer*/) {};
 
 private:
     // ----------------------------------------
@@ -170,11 +174,21 @@ private:
         sim::io::PwmIoMessage
     >;
 
+protected:
+    void StartIoWorker();
+    void AcceptConnection();
+    virtual auto ReceiveParticipantAnnoucement(MessageBuffer&& buffer, IVAsioPeer* peer) -> VAsioPeerInfo;
+
 private:
     // ----------------------------------------
     // private methods
     void ReceiveRawIbMessage(MessageBuffer&& buffer);
     void ReceiveSubscriptionAnnouncement(MessageBuffer&& buffer, IVAsioPeer* peer);
+    void ReceiveRegistryMessage(MessageBuffer&& buffer, IVAsioPeer* peer);
+
+    void ReceiveKnownParticpants(MessageBuffer&& buffer);
+    void SendParticipantAnnoucement(IVAsioPeer* peer);
+    void ReceiveSubscriptionSentEvent();
 
     template<class IbMessageT>
     bool TryAddSubscriber(const VAsioMsgSubscriber& subscriber, IVAsioPeer* peer);
@@ -185,13 +199,17 @@ private:
     void RegisterIbMsgSender(const std::string& link, EndpointId endpointId);
 
     // TCP Related
-    void AcceptConnection();
     void AddPeer(std::shared_ptr<VAsioTcpPeer> peer);
+
+protected:
+    asio::io_context _ioContext;
+    std::unique_ptr<asio::ip::tcp::acceptor> _tcpAcceptor;
+    std::vector<std::shared_ptr<IVAsioPeer>> _peers;
+    cfg::Config _config;
 
 private:
     // ----------------------------------------
     // private members
-    cfg::Config _config;
     std::string _participantName;
     ParticipantId _participantId{0};
 
@@ -203,14 +221,13 @@ private:
     // An std::tuple<IbSenderMap<IbMsgT>...> for all supported IbMessageTypes
     util::tuple_tools::wrapped_tuple<IbSenderMap, IbMessageTypes> _endpointToSenderMap;
 
-
     std::vector<std::shared_ptr<IVAsioReceiver>> _rawMsgReceivers;
 
-    std::vector<std::shared_ptr<IVAsioPeer>> _peers;
+    std::unique_ptr<IVAsioPeer> _registry{nullptr};
 
-    asio::io_context _ioContext;
     std::thread _ioWorker;
-    std::unique_ptr<asio::ip::tcp::acceptor> _tcpAcceptor;
+
+    std::function<void()> _newPeerCallback{nullptr};
 };
 
 // ================================================================================

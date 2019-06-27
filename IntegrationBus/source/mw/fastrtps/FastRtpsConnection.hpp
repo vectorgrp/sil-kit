@@ -56,7 +56,7 @@ public:
     // ----------------------------------------
     // Public methods
     //
-    void joinDomain(uint32_t domainId);
+    void JoinDomain(uint32_t domainId);
 
     template<class IbServiceT>
     inline void RegisterIbService(const std::string& topicName, EndpointId endpointId, IbServiceT* receiver);
@@ -66,6 +66,7 @@ public:
 
     void OnAllMessagesDelivered(std::function<void(void)> callback);
     void FlushSendBuffers();
+    void RegisterNewPeerCallback(std::function<void()> callback);
 
 private:
     // ----------------------------------------

@@ -145,8 +145,7 @@ public:
 
     MOCK_METHOD1(OnAllMessagesDelivered, void(std::function<void(void)>));
     MOCK_METHOD0(FlushSendBuffers, void());
-    MOCK_METHOD0(Run, void());
-    MOCK_METHOD0(Stop, void());
+    MOCK_METHOD1(RegisterNewPeerCallback, void(std::function<void(void)>));
 
     std::shared_ptr<spdlog::logger> logger;
 };

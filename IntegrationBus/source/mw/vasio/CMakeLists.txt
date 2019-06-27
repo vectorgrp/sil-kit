@@ -8,10 +8,12 @@ add_library(IbMwVAsio STATIC
     SerdesSimCan.hpp
     SerdesSimEthernet.hpp
     SerdesSimIo.hpp
+    SerdesMwRegistry.hpp
 
     IVAsioPeer.hpp
     VAsioTcpPeer.hpp
     VAsioTcpPeer.cpp
+    VAsioPeerInfo.hpp
     VAsioReceiver.hpp
     VAsioSender.hpp
     VAsioMsgKind.hpp

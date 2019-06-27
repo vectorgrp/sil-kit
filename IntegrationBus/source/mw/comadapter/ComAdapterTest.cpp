@@ -31,9 +31,7 @@ struct MockIbConnection
 
     void OnAllMessagesDelivered(std::function<void()> /*callback*/) {};
     void FlushSendBuffers() {};
-
-    void Run() {};
-    void Stop() {};
+    void RegisterNewPeerCallback(std::function<void()> /*callback*/) {};
 };
 
 class ComAdapterTest : public testing::Test

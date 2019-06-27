@@ -8,6 +8,8 @@
 
 #include "asio.hpp"
 #include "MessageBuffer.hpp"
+#include "ib/mw/EndpointAddress.hpp"
+#include "VAsioPeerInfo.hpp"
 
 namespace ib {
 namespace mw {

@@ -69,7 +69,7 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& par
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::joinIbDomain(uint32_t domainId)
 {
-    _ibConnection.joinDomain(domainId);
+    _ibConnection.JoinDomain(domainId);
     onIbDomainJoined();
     _logger->info("Participant {} has joined the IB-Domain {}", _participantName, domainId);
 }
@@ -766,6 +766,12 @@ template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::FlushSendBuffers()
 {
     _ibConnection.FlushSendBuffers();
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::RegisterNewPeerCallback(std::function<void()> callback)
+{
+    _ibConnection.RegisterNewPeerCallback(callback);
 }
 
 } // namespace mw

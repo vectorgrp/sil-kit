@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "VAsioPeerInfo.hpp"
+
 namespace ib {
 namespace mw {
 
@@ -14,6 +16,7 @@ public:
     virtual ~IVAsioPeer() = default;
     virtual void SendIbMsg(MessageBuffer buffer) = 0;
     virtual void Subscribe(VAsioMsgSubscriber subscriber) = 0;
+    VAsioPeerInfo _info;
 };
 
 } // mw

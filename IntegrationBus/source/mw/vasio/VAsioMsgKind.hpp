@@ -10,7 +10,8 @@ enum class VAsioMsgKind
     Invalid = 0,
     AnnounceSubscription = 1,
     IbMwMsg = 2,
-    IbSimMsg = 3
+    IbSimMsg = 3,
+    IbRegistryMessage = 4,
 };
 
 
