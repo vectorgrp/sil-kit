@@ -46,8 +46,10 @@ public:
 private:
     // ----------------------------------------
     // Private Methods
+    static bool IsErrorToTryAgain(const asio::error_code & ec);
     void ReadSomeAsync();
     void DispatchBuffer();
+    void Shutdown();
 
 private:
     // ----------------------------------------

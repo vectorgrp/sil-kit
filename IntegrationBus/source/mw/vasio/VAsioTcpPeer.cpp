@@ -17,6 +17,24 @@ VAsioTcpPeer::VAsioTcpPeer(asio::io_context& io_context, VAsioConnection* ibConn
 {
 }
 
+bool VAsioTcpPeer::IsErrorToTryAgain(const asio::error_code& ec)
+{
+    return ec == asio::error::no_descriptors
+        || ec == asio::error::no_buffer_space
+        || ec == asio::error::no_memory
+        || ec == asio::error::timed_out
+        || ec == asio::error::try_again;
+}
+
+void VAsioTcpPeer::Shutdown()
+{
+    if (_socket.is_open())
+    {
+        std::cout << "Shutdown connection to " << _info._participantName << std::endl;
+        _socket.close();
+    }
+}
+
 void VAsioTcpPeer::SendIbMsg(MessageBuffer buffer)
 {
     auto sendBuffer = buffer.ReleaseStorage();
@@ -66,16 +84,9 @@ void VAsioTcpPeer::ReadSomeAsync()
     _socket.async_read_some(asio::buffer(wPtr, size),
         [this](const asio::error_code& error, std::size_t bytesRead)
         {
-            if (error)
+            if (error && !IsErrorToTryAgain(error))
             {
-                std::cerr << "SOMETHING BAD HAPPENED!!!\n";
-                return;
-            }
-
-            if (bytesRead == 0)
-            {
-                std::cerr << "VAsioTcpPeer::ReadSomeAsync: No Bytes Read. But no Error!?\n";
-                ReadSomeAsync();
+                Shutdown();
                 return;
             }
 
@@ -109,8 +120,7 @@ void VAsioTcpPeer::DispatchBuffer()
     if (_currentMsgSize == 0 || _currentMsgSize > 256 * 1024)
     {
         std::cout << "Received invalid Message Size: " << _currentMsgSize << "\n";
-        std::cout << "Closing connection\n";
-        _socket.close();
+        Shutdown();
     }
 
 
