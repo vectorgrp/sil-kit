@@ -1,0 +1,68 @@
+{
+    "ConfigVersion": "0.0.1",
+    "ConfigName": "GenericMessageITest",
+    "Description": "Sample Configuration for Generic Messages",
+
+    "SimulationSetup": {
+
+        "Participants": [
+            {
+                "Name": "Publisher",
+                "Description": "Publishes different generic messages",
+                "SyncType": "DiscreteTime",
+                "IsSyncMaster": true,
+
+                "GenericPublishers": [
+                    {
+                        "Name": "GenericData"
+                    }
+                ]
+            },
+            {
+                "Name": "Subscriber",
+                "Description": "Subscribes different generic messages",
+                "SyncType": "DiscreteTime",
+
+                "GenericSubscribers": [
+                    "GenericData"
+                ]
+            },
+            {
+                "Name": "SystemController",
+                "SyncType": "Unsynchronized"
+            }
+        ],
+
+        "Links": [
+            {
+                "Name": "GenericData",
+                "Endpoints": [
+                    "Publisher/GenericData",
+                    "Subscriber/GenericData"
+                ]
+            }
+        ],
+
+        "TimeSync": {
+            "SyncPolicy": "Strict",
+            "TickPeriodNs": 1000000
+        }
+
+    },
+
+    "LaunchConfigurations": [
+        {
+            "Name": "Installation",
+            "ParticipantEnvironments": [
+                {
+                    "Participant": "IntegrationTest",
+                    "Environment": "CustomExecutable",
+                    "WorkingFolder": ".",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoGenericMessageITest",
+                    "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+                }
+            ]
+        }
+    ]
+
+}
