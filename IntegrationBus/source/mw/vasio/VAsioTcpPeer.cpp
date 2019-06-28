@@ -30,9 +30,15 @@ void VAsioTcpPeer::Shutdown()
 {
     if (_socket.is_open())
     {
-        std::cout << "Shutdown connection to " << _info._participantName << std::endl;
+        std::cout << "Shutdown connection to " << _info.participantName << std::endl;
+        _ibConnection->PeerIsShuttingDown(this);
         _socket.close();
     }
+}
+
+auto VAsioTcpPeer::GetInfo() -> VAsioPeerInfo&
+{
+    return _info;
 }
 
 void VAsioTcpPeer::SendIbMsg(MessageBuffer buffer)
@@ -43,12 +49,61 @@ void VAsioTcpPeer::SendIbMsg(MessageBuffer buffer)
 
     *reinterpret_cast<uint32_t*>(sendBuffer.data()) = static_cast<uint32_t>(sendBuffer.size());
 
-    auto asioBuffer = asio::buffer(sendBuffer.data(), sendBuffer.size());
-    asio::write(
-        _socket,
-        std::move(asioBuffer)
-    );
+    std::unique_lock<std::mutex> lock{ _sendingQueueLock };
+    if (_sendingQueue.size() >= _sendingQueueMaxSize)
+    {
+        std::cout << "Sending Queue is full. Dropping messages!" << std::endl;
+    }
+    else
+    {
+        _sendingQueue.push(std::move(sendBuffer));
+    }
+    lock.unlock();
 
+    _socket.get_io_context().dispatch([this]() { StartAsyncWrite(); });
+}
+
+void VAsioTcpPeer::StartAsyncWrite()
+{
+    if (_sending)
+        return;
+
+    std::unique_lock<std::mutex> lock{ _sendingQueueLock };
+    if (_sendingQueue.empty())
+        return;
+
+    _sending = true;
+
+    _currentSendingBufferData = std::move(_sendingQueue.front());
+    _sendingQueue.pop();
+    lock.unlock();
+
+    _currentSendingBuffer = asio::buffer(_currentSendingBufferData.data(), _currentSendingBufferData.size());
+    WriteSomeAsync();
+}
+
+void VAsioTcpPeer::WriteSomeAsync()
+{
+    _socket.async_write_some(_currentSendingBuffer,
+        [this](const asio::error_code& error, std::size_t bytesWritten) {
+            if (error && !IsErrorToTryAgain(error))
+            {
+                Shutdown();
+                _sending = false;
+                return;
+            }
+
+            if (bytesWritten < _currentSendingBuffer.size())
+            {
+                _currentSendingBuffer += bytesWritten;
+                WriteSomeAsync();
+                return;
+            }
+
+            _sending = false;
+            StartAsyncWrite();
+        }
+    );
 }
 
 void VAsioTcpPeer::Subscribe(VAsioMsgSubscriber subscriber)
