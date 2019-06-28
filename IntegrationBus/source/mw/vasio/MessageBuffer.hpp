@@ -6,6 +6,7 @@
 #include <string>
 #include <type_traits>
 #include <vector>
+#include <array>
 
 #include "ib/util/vector_view.hpp"
 

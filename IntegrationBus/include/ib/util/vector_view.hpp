@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <vector>
+#include <stdexcept>
 
 namespace ib {
 namespace util {
