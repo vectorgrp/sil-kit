@@ -50,6 +50,49 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanTrans
     return buffer;
 }
 
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanControllerStatus& msg)
+{
+    buffer << msg.timestamp
+           << msg.controllerState
+           << msg.errorState;
+    return buffer;
+}
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanControllerStatus& msg)
+{
+    buffer >> msg.timestamp
+           >> msg.controllerState
+           >> msg.errorState;
+    return buffer;
+}
+
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanConfigureBaudrate& msg)
+{
+    buffer << msg.baudRate
+           << msg.fdBaudRate;
+    return buffer;
+}
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanConfigureBaudrate& msg)
+{
+    buffer >> msg.baudRate
+           >> msg.fdBaudRate;
+    return buffer;
+}
+
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanSetControllerMode& msg)
+{
+    buffer << *reinterpret_cast<const uint8_t*>(&msg.flags)
+           << msg.mode;
+    return buffer;
+}
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanSetControllerMode& msg)
+{
+    uint8_t flags;
+    buffer >> flags
+           >> msg.mode;
+    *reinterpret_cast<uint8_t*>(&msg.flags) = flags;
+    return buffer;
+}
+
 
 } // namespace can    
 } // namespace sim

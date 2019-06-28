@@ -66,6 +66,9 @@ DefineIbMsgTraits(ib::mw::sync, SystemCommand)
 DefineIbMsgTraits(ib::mw::sync, ParticipantStatus)
 DefineIbMsgTraits(ib::sim::can, CanMessage)
 DefineIbMsgTraits(ib::sim::can, CanTransmitAcknowledge)
+DefineIbMsgTraits(ib::sim::can, CanControllerStatus)
+DefineIbMsgTraits(ib::sim::can, CanConfigureBaudrate)
+DefineIbMsgTraits(ib::sim::can, CanSetControllerMode)
 DefineIbMsgTraits(ib::sim::generic, GenericMessage)
 DefineIbMsgTraits(ib::sim::eth, EthMessage)
 DefineIbMsgTraits(ib::sim::eth, EthTransmitAcknowledge)
@@ -146,6 +149,9 @@ private:
         sync::ParticipantStatus,
         sim::can::CanMessage,
         sim::can::CanTransmitAcknowledge,
+        sim::can::CanControllerStatus,
+        sim::can::CanConfigureBaudrate,
+        sim::can::CanSetControllerMode,
         sim::generic::GenericMessage,
         sim::eth::EthMessage,
         sim::eth::EthTransmitAcknowledge,
@@ -305,6 +311,9 @@ DefineSendIbMessageMethod(sync::SystemCommand)
 DefineSendIbMessageMethod(sync::ParticipantStatus)
 DefineSendIbMessageMethod(sim::can::CanMessage)
 DefineSendIbMessageMethod(sim::can::CanTransmitAcknowledge)
+DefineSendIbMessageMethod(sim::can::CanControllerStatus)
+DefineSendIbMessageMethod(sim::can::CanConfigureBaudrate)
+DefineSendIbMessageMethod(sim::can::CanSetControllerMode)
 DefineSendIbMessageMethod(sim::generic::GenericMessage)
 DefineSendIbMessageMethod(sim::eth::EthMessage)
 DefineSendIbMessageMethod(sim::eth::EthTransmitAcknowledge)

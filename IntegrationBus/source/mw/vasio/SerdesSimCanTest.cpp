@@ -62,3 +62,61 @@ TEST(MwVAsioSerdes, SimCan_CanTransmitAcknowledge)
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.status, out.status);
 }
+
+TEST(MwVAsioSerdes, SimCan_CanControllerStatus)
+{
+    using namespace ib::sim::can;
+    ib::mw::MessageBuffer buffer;
+
+    CanControllerStatus in;
+    CanControllerStatus out;
+
+    in.timestamp = 13ns;
+    in.controllerState = CanControllerState::Started;
+    in.errorState = CanErrorState::ErrorActive;
+
+    buffer << in;
+    buffer >> out;
+
+    EXPECT_EQ(in.timestamp, out.timestamp);
+    EXPECT_EQ(in.controllerState, out.controllerState);
+    EXPECT_EQ(in.errorState, out.errorState);
+}
+
+TEST(MwVAsioSerdes, SimCan_CanConfigureBaudrate)
+{
+    using namespace ib::sim::can;
+    ib::mw::MessageBuffer buffer;
+
+    CanConfigureBaudrate in;
+    CanConfigureBaudrate out;
+
+    in.baudRate = 123;
+    in.fdBaudRate = 4294967295;
+
+    buffer << in;
+    buffer >> out;
+
+    EXPECT_EQ(in.baudRate, out.baudRate);
+    EXPECT_EQ(in.fdBaudRate, out.fdBaudRate);
+}
+
+TEST(MwVAsioSerdes, SimCan_CanSetControllerMode)
+{
+    using namespace ib::sim::can;
+    ib::mw::MessageBuffer buffer;
+
+    CanSetControllerMode in;
+    CanSetControllerMode out;
+
+    in.flags.resetErrorHandling = 1;
+    in.flags.cancelTransmitRequests = 0;
+    in.mode = CanControllerState::Started;
+
+    buffer << in;
+    buffer >> out;
+
+    EXPECT_EQ(in.flags.resetErrorHandling, out.flags.resetErrorHandling);
+    EXPECT_EQ(in.flags.cancelTransmitRequests, out.flags.cancelTransmitRequests);
+    EXPECT_EQ(in.mode, out.mode);
+}
