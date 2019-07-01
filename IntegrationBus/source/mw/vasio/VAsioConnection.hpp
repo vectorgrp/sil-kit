@@ -19,18 +19,21 @@
 #include "SystemMonitor.hpp"
 #include "SystemController.hpp"
 #include "ParticipantController.hpp"
-#include "CanController.hpp"
 #include "GenericPublisher.hpp"
 #include "GenericSubscriber.hpp"
 #include "LogmsgRouter.hpp"
+#include "CanController.hpp"
 #include "EthController.hpp"
+#include "InPort.hpp"
+#include "OutPort.hpp"
 
 #include "SerdesMw.hpp"
 #include "SerdesMwLogging.hpp"
 #include "SerdesMwSync.hpp"
-#include "SerdesSimCan.hpp"
 #include "SerdesSimGeneric.hpp"
+#include "SerdesSimCan.hpp"
 #include "SerdesSimEthernet.hpp"
+#include "SerdesSimIo.hpp"
 
 #include "IVAsioPeer.hpp"
 #include "VAsioTcpPeer.hpp"
@@ -64,16 +67,20 @@ DefineIbMsgTraits(ib::mw::sync, QuantumGrant)
 DefineIbMsgTraits(ib::mw::sync, ParticipantCommand)
 DefineIbMsgTraits(ib::mw::sync, SystemCommand)
 DefineIbMsgTraits(ib::mw::sync, ParticipantStatus)
+DefineIbMsgTraits(ib::sim::generic, GenericMessage)
 DefineIbMsgTraits(ib::sim::can, CanMessage)
 DefineIbMsgTraits(ib::sim::can, CanTransmitAcknowledge)
 DefineIbMsgTraits(ib::sim::can, CanControllerStatus)
 DefineIbMsgTraits(ib::sim::can, CanConfigureBaudrate)
 DefineIbMsgTraits(ib::sim::can, CanSetControllerMode)
-DefineIbMsgTraits(ib::sim::generic, GenericMessage)
 DefineIbMsgTraits(ib::sim::eth, EthMessage)
 DefineIbMsgTraits(ib::sim::eth, EthTransmitAcknowledge)
 DefineIbMsgTraits(ib::sim::eth, EthStatus)
 DefineIbMsgTraits(ib::sim::eth, EthSetMode)
+DefineIbMsgTraits(ib::sim::io, AnalogIoMessage)
+DefineIbMsgTraits(ib::sim::io, DigitalIoMessage)
+DefineIbMsgTraits(ib::sim::io, PatternIoMessage)
+DefineIbMsgTraits(ib::sim::io, PwmIoMessage)
 
 
 class VAsioConnection
@@ -147,16 +154,20 @@ private:
         sync::SystemCommand,
         sync::ParticipantCommand,
         sync::ParticipantStatus,
+        sim::generic::GenericMessage,
         sim::can::CanMessage,
         sim::can::CanTransmitAcknowledge,
         sim::can::CanControllerStatus,
         sim::can::CanConfigureBaudrate,
         sim::can::CanSetControllerMode,
-        sim::generic::GenericMessage,
         sim::eth::EthMessage,
         sim::eth::EthTransmitAcknowledge,
         sim::eth::EthStatus,
-        sim::eth::EthSetMode
+        sim::eth::EthSetMode,
+        sim::io::AnalogIoMessage,
+        sim::io::DigitalIoMessage,
+        sim::io::PatternIoMessage,
+        sim::io::PwmIoMessage
     >;
 
 private:
@@ -227,10 +238,18 @@ DefineRegisterServiceMethod(ib::mw::sync::ParticipantController)
 DefineRegisterServiceMethod(ib::mw::sync::SyncMaster)
 DefineRegisterServiceMethod(ib::mw::sync::SystemMonitor)
 DefineRegisterServiceMethod(ib::mw::sync::SystemController)
-DefineRegisterServiceMethod(ib::sim::can::CanController)
 DefineRegisterServiceMethod(ib::sim::generic::GenericPublisher)
 DefineRegisterServiceMethod(ib::sim::generic::GenericSubscriber)
+DefineRegisterServiceMethod(ib::sim::can::CanController)
 DefineRegisterServiceMethod(ib::sim::eth::EthController)
+DefineRegisterServiceMethod(ib::sim::io::InPort<ib::sim::io::AnalogIoMessage>)
+DefineRegisterServiceMethod(ib::sim::io::InPort<ib::sim::io::DigitalIoMessage>)
+DefineRegisterServiceMethod(ib::sim::io::InPort<ib::sim::io::PatternIoMessage>)
+DefineRegisterServiceMethod(ib::sim::io::InPort<ib::sim::io::PwmIoMessage>)
+DefineRegisterServiceMethod(ib::sim::io::OutPort<ib::sim::io::AnalogIoMessage>)
+DefineRegisterServiceMethod(ib::sim::io::OutPort<ib::sim::io::DigitalIoMessage>)
+DefineRegisterServiceMethod(ib::sim::io::OutPort<ib::sim::io::PatternIoMessage>)
+DefineRegisterServiceMethod(ib::sim::io::OutPort<ib::sim::io::PwmIoMessage>)
 
 template <class IbServiceT>
 void VAsioConnection::RegisterIbService__(const std::string& link, EndpointId endpointId, IbServiceT* service)
@@ -309,16 +328,20 @@ DefineSendIbMessageMethod(sync::QuantumGrant)
 DefineSendIbMessageMethod(sync::ParticipantCommand)
 DefineSendIbMessageMethod(sync::SystemCommand)
 DefineSendIbMessageMethod(sync::ParticipantStatus)
+DefineSendIbMessageMethod(sim::generic::GenericMessage)
 DefineSendIbMessageMethod(sim::can::CanMessage)
 DefineSendIbMessageMethod(sim::can::CanTransmitAcknowledge)
 DefineSendIbMessageMethod(sim::can::CanControllerStatus)
 DefineSendIbMessageMethod(sim::can::CanConfigureBaudrate)
 DefineSendIbMessageMethod(sim::can::CanSetControllerMode)
-DefineSendIbMessageMethod(sim::generic::GenericMessage)
 DefineSendIbMessageMethod(sim::eth::EthMessage)
 DefineSendIbMessageMethod(sim::eth::EthTransmitAcknowledge)
 DefineSendIbMessageMethod(sim::eth::EthStatus)
 DefineSendIbMessageMethod(sim::eth::EthSetMode)
+DefineSendIbMessageMethod(sim::io::AnalogIoMessage)
+DefineSendIbMessageMethod(sim::io::DigitalIoMessage)
+DefineSendIbMessageMethod(sim::io::PatternIoMessage)
+DefineSendIbMessageMethod(sim::io::PwmIoMessage)
 
 } // mw
 } // namespace ib

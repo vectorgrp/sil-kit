@@ -7,6 +7,8 @@
 #include <type_traits>
 #include <vector>
 #include <array>
+#include <limits>
+#include <cstring>
 
 #include "ib/util/vector_view.hpp"
 
@@ -71,6 +73,37 @@ public:
         const IntegerT* src = reinterpret_cast<const IntegerT*>(_storage.data() + _rPos);
         t = *src;
         _rPos += sizeof(IntegerT);
+
+        return *this;
+    }
+
+    // ----------------------------------------
+    // Floating-Point Types
+    template<typename DoubleT, typename std::enable_if_t<std::is_floating_point<DoubleT>::value, int> = 0>
+    inline MessageBuffer& operator<<(DoubleT t)
+    {
+        static_assert(std::numeric_limits<double>::is_iec559, "This compiler does not support IEEE 754 standard for floating points.");
+
+        if (_wPos + sizeof(DoubleT) > _storage.size())
+        {
+            _storage.resize(_storage.size() + sizeof(DoubleT));
+        }
+
+        std::memcpy(_storage.data() + _wPos, &t, sizeof(DoubleT));
+        _wPos += sizeof(DoubleT);
+
+        return *this;
+    }
+    template<typename DoubleT, typename std::enable_if_t<std::is_floating_point<DoubleT>::value, int> = 0>
+    inline MessageBuffer& operator>>(DoubleT& t)
+    {
+        static_assert(std::numeric_limits<double>::is_iec559, "This compiler does not support IEEE 754 standard for floating points.");
+
+        if (_rPos + sizeof(DoubleT) > _storage.size())
+            throw end_of_buffer{};
+
+        std::memcpy(&t, _storage.data() + _rPos, sizeof(DoubleT));
+        _rPos += sizeof(DoubleT);
 
         return *this;
     }
