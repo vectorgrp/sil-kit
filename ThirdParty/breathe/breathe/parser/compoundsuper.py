@@ -1301,6 +1301,13 @@ class memberdefType(GeneratedsSuper):
             argsstring_ = ''
             for text__content_ in child_.childNodes:
                 argsstring_ += text__content_.nodeValue
+            if 'auto' in self.definition and '->' in argsstring_:
+                index = argsstring_.find('->') + 3
+                autoReturnType = argsstring_[index:]
+                if '=' in autoReturnType:
+                    index = len(autoReturnType) - (autoReturnType.find('='))
+                    autoReturnType = autoReturnType[:-index]
+                self.definition = self.definition.replace('auto', autoReturnType)
             self.argsstring = argsstring_
         elif child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'name':
