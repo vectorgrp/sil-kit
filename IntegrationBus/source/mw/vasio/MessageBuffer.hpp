@@ -43,7 +43,7 @@ public:
     // Public methods
 
     //! \brief Return the underlying data storage by std::move and reset pointers
-    inline auto ReleaseStorage()->std::vector<uint8_t>;
+    inline auto ReleaseStorage() -> std::vector<uint8_t>;
 
 public:
     // ----------------------------------------
@@ -125,6 +125,11 @@ public:
     // std::string
     inline MessageBuffer& operator<<(const std::string& str);
     inline MessageBuffer& operator>>(std::string& str);
+    // Prohibit C-strings to avoid improper serialization of blobs, which are not null terminated
+    MessageBuffer& operator<<(const char*) = delete;
+    MessageBuffer& operator<<(char*) = delete;
+    MessageBuffer& operator>>(const char*) = delete;
+    MessageBuffer& operator>>(char*) = delete;
     // --------------------------------------------------------------------------------
     // std::vector<uint8_t>
     inline MessageBuffer& operator<<(const std::vector<uint8_t>& vector);
