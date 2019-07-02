@@ -20,7 +20,7 @@ RUN apt-get update -y &&\
         python \
         zip \
         doxygen \
-        python3-breathe
+        python3-sphinx
 # Install additional prerequisites on top of the base image
 RUN apt-get install g++ -y
 
