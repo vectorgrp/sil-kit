@@ -3,6 +3,17 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [Sprint-29] - 2019-07-17
+### Added
+### Removed
+### Changed
+### Fixed
+
+### Interface compatibility with Sprint-28:
+* Application binary interface (ABI): Yes/No
+* Application software interface (API): Yes/No
+* Application middleware interface: Yes/No
+
 ## [Sprint-28] - 2019-07-03
 ### Added
 - New demo that shows how integration tests can be written for the Vector Integration Bus.
