@@ -193,7 +193,7 @@ function(add_vib_test)
     )
 
     add_mvsc_ib_include_filter()
-endfunction(add_ib_test)
+endfunction(add_vib_test)
 
 include(CTest)
 
