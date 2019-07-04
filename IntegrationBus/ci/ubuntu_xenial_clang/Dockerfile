@@ -17,10 +17,12 @@ RUN apt-get update -y &&\
     apt-get install -y \
         cmake \
         git \
-        python \
+        python3 \
+        python3-pip \
         zip \
-        doxygen \
-        python3-sphinx
+        doxygen
+RUN pip3 install sphinx==2.0.1
+
 # Install additional prerequisites on top of the base image
 RUN apt-get install clang -y
 
