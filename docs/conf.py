@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('../ThirdParty/breathe/'))
 project = 'IntegrationBus'
 copyright = 'Copyright (c) Vector Informatik GmbH. All rights reserved.'
 author = 'Vector Informatik GmbH'
-
+version = '1.0.0'
 # The full version, including alpha/beta/rc tags
 release = '1.0.0'
 
@@ -55,6 +55,11 @@ pygments_style = 'sphinx'
 # a list of builtin themes.
 #
 html_theme = 'nature'
+
+html_sidebars = {
+   '**': ['globaltoc.html', 'sourcelink.html', 'searchbox.html'],
+   'using/windows': ['windowssidebar.html', 'searchbox.html'],
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
