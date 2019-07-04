@@ -23,9 +23,10 @@ configure_ib_install(${PROJECT_NAME})
 #######################################################################################################################
 # Dependencies
 #######################################################################################################################
-
-include(FindPythonInterp)
-find_package(PythonInterp 2.7)
+# we prefer python3 over python2
+unset(PYTHON_EXECUTABLE CACHE)
+set(Python_ADDITIONAL_VERSIONS "2.7")
+find_package(PythonInterp 3)
 
 # Try to resolve from installed packages only if not defined previously via add_library
 if(NOT TARGET IntegrationBus)
@@ -57,7 +58,7 @@ if(PYTHONINTERP_FOUND)
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
     else()
-        message(WARNING "The IntegrationBus Launcher tests cannot be executed, because a Python distribution 3.0+ was not found.")
+        message(WARNING "The IntegrationBus Launcher tests cannot be executed, because a Python distribution 3.0+ was not found: ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
     endif()
 else()
     message(WARNING "The IntegrationBus Launcher tests cannot be executed, because a Python distribution 2.7+ was not found.")
