@@ -10,20 +10,20 @@
                 "Name": "LinMaster",
                 "Description": "LIN Master",
                 "SyncType": "DiscreteTime",
-                "IsSyncMaster": true,
-
+                
                 "LinControllers": [ "LIN1" ]
             },
             {
                 "Name": "LinSlave",
                 "Description": "LIN Slave",
                 "SyncType": "DiscreteTime",
-
+                
                 "LinControllers": [ "LIN1" ]
             },
             {
                 "Name": "SystemController",
-                "SyncType": "Unsynchronized"
+                "SyncType": "Unsynchronized",
+                "IsSyncMaster": true
             },
             {
                 "Name": "SystemMonitor",
@@ -187,6 +187,11 @@
             ]
         }
 
-    ]
+    ],
+
+    "MiddlewareConfig" : 
+    {
+        "ActiveMiddleware" : "VAsio"
+    }
 
 }

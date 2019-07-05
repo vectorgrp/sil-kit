@@ -9,6 +9,7 @@ add_library(IbMwVAsio STATIC
     SerdesSimEthernet.hpp
     SerdesSimIo.hpp
     SerdesMwRegistry.hpp
+    SerdesSimLin.hpp
 
     IVAsioPeer.hpp
     VAsioTcpPeer.hpp
@@ -28,7 +29,8 @@ target_link_libraries(IbMwVAsio
     PUBLIC IbSimGenericMessage
     PUBLIC IbSimCan
     PUBLIC IbSimEthernet
-    PUBLIC IbSimIO
+    PUBLIC IbSimIO    
+    PUBLIC IbSimLin
 )
 
 target_include_directories(IbMwVAsio

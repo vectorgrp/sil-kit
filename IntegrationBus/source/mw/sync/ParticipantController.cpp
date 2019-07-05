@@ -82,7 +82,6 @@ ParticipantController::ParticipantController(IComAdapter* comAdapter, cfg::Parti
     , _logger{comAdapter->GetLogger()}
 {
     _status.participantName = _participantConfig.name;
-    _comAdapter->RegisterNewPeerCallback(std::bind(&ParticipantController::RefreshStatus, this));
 }
 
 void ParticipantController::SetInitHandler(InitHandlerT handler)

@@ -259,11 +259,6 @@ int main(int argc, char** argv)
         auto* participantController = comAdapter->GetParticipantController();
 
         // Set an Init Handler
-        participantController->SetInitHandler([&participantName](auto initCmd) {
-
-            std::cout << "Initializing " << participantName << std::endl;
-
-        });
 
         // Set a Stop Handler
         participantController->SetStopHandler([]() {
@@ -289,8 +284,14 @@ int main(int argc, char** argv)
             master.controller = linController;
             master.gotoSleepTime = 10ms;
 
-            linController->SetMasterMode();
-            linController->SetBaudRate(20'000);
+            participantController->SetInitHandler([&participantName, linController](auto initCmd) {
+
+                std::cout << "Initializing " << participantName << std::endl;
+                linController->SetMasterMode();
+                linController->SetBaudRate(20'000);
+
+            });
+
             linController->RegisterTxCompleteHandler(std::bind(&LinMaster::ReceiveTxComplete, &master, _1, _2));
             linController->RegisterReceiveMessageHandler(std::bind(&LinMaster::ReceiveReply, &master, _1, _2));
             linController->RegisterWakeupRequestHandler(ib::util::bind_method(&master, &LinMaster::WakeupRequest));
@@ -309,8 +310,14 @@ int main(int argc, char** argv)
         {
             slave.linController = linController;
 
-            linController->SetSlaveMode();
-            linController->SetBaudRate(20'000);
+            participantController->SetInitHandler([&participantName, linController](auto initCmd) {
+
+                std::cout << "Initializing " << participantName << std::endl;
+                linController->SetSlaveMode();
+                linController->SetBaudRate(20'000);
+
+            });
+
             linController->RegisterReceiveMessageHandler(ReceiveMessage);
 
             lin::SlaveConfiguration slaveConfig;

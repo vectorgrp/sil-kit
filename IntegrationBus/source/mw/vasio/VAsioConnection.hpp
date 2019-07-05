@@ -27,6 +27,7 @@
 #include "EthController.hpp"
 #include "InPort.hpp"
 #include "OutPort.hpp"
+#include "LinController.hpp"
 
 #include "SerdesMw.hpp"
 #include "SerdesMwRegistry.hpp"
@@ -36,6 +37,7 @@
 #include "SerdesSimCan.hpp"
 #include "SerdesSimEthernet.hpp"
 #include "SerdesSimIo.hpp"
+#include "SerdesSimLin.hpp"
 
 #include "IVAsioPeer.hpp"
 #include "VAsioTcpPeer.hpp"
@@ -83,7 +85,13 @@ DefineIbMsgTraits(ib::sim::io, AnalogIoMessage)
 DefineIbMsgTraits(ib::sim::io, DigitalIoMessage)
 DefineIbMsgTraits(ib::sim::io, PatternIoMessage)
 DefineIbMsgTraits(ib::sim::io, PwmIoMessage)
-
+DefineIbMsgTraits(ib::sim::lin, LinMessage)
+DefineIbMsgTraits(ib::sim::lin, RxRequest)
+DefineIbMsgTraits(ib::sim::lin, TxAcknowledge)
+DefineIbMsgTraits(ib::sim::lin, WakeupRequest)
+DefineIbMsgTraits(ib::sim::lin, ControllerConfig)
+DefineIbMsgTraits(ib::sim::lin, SlaveConfiguration)
+DefineIbMsgTraits(ib::sim::lin, SlaveResponse)
 
 class VAsioConnection
 {
@@ -171,7 +179,14 @@ private:
         sim::io::AnalogIoMessage,
         sim::io::DigitalIoMessage,
         sim::io::PatternIoMessage,
-        sim::io::PwmIoMessage
+        sim::io::PwmIoMessage,
+        sim::lin::LinMessage,
+        sim::lin::RxRequest,
+        sim::lin::TxAcknowledge,
+        sim::lin::WakeupRequest,
+        sim::lin::ControllerConfig,
+        sim::lin::SlaveConfiguration,
+        sim::lin::SlaveResponse
     >;
 
 protected:
@@ -267,6 +282,7 @@ DefineRegisterServiceMethod(ib::sim::io::OutPort<ib::sim::io::AnalogIoMessage>)
 DefineRegisterServiceMethod(ib::sim::io::OutPort<ib::sim::io::DigitalIoMessage>)
 DefineRegisterServiceMethod(ib::sim::io::OutPort<ib::sim::io::PatternIoMessage>)
 DefineRegisterServiceMethod(ib::sim::io::OutPort<ib::sim::io::PwmIoMessage>)
+DefineRegisterServiceMethod(ib::sim::lin::LinController)
 
 template <class IbServiceT>
 void VAsioConnection::RegisterIbService__(const std::string& link, EndpointId endpointId, IbServiceT* service)
@@ -359,6 +375,14 @@ DefineSendIbMessageMethod(sim::io::AnalogIoMessage)
 DefineSendIbMessageMethod(sim::io::DigitalIoMessage)
 DefineSendIbMessageMethod(sim::io::PatternIoMessage)
 DefineSendIbMessageMethod(sim::io::PwmIoMessage)
+DefineSendIbMessageMethod(sim::lin::LinMessage)
+DefineSendIbMessageMethod(sim::lin::RxRequest)
+DefineSendIbMessageMethod(sim::lin::TxAcknowledge)
+DefineSendIbMessageMethod(sim::lin::WakeupRequest)
+DefineSendIbMessageMethod(sim::lin::ControllerConfig)
+DefineSendIbMessageMethod(sim::lin::SlaveConfiguration)
+DefineSendIbMessageMethod(sim::lin::SlaveResponse)
+
 
 } // mw
 } // namespace ib

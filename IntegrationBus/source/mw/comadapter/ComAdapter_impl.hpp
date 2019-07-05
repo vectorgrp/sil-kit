@@ -270,6 +270,7 @@ auto ComAdapter<IbConnectionT>::GetParticipantController() -> sync::IParticipant
     if (!controller)
     {
         controller = CreateController<sync::ParticipantController>(1024, "default", *_participant, _config.simulationSetup.timeSync);
+        RegisterNewPeerCallback([controller]() { controller->RefreshStatus(); });
     }
     return controller;
 }
