@@ -9,8 +9,7 @@
             {
                 "Name": "Node0",
                 "SyncType": "DiscreteTime",
-                "IsSyncMaster": true,
-
+                
                 "FlexRayControllers": [
                     {
                         "Name": "FlexRay1",
@@ -67,7 +66,7 @@
             {
                 "Name": "Node1",
                 "SyncType": "DiscreteTime",
-
+                
                 "FlexRayControllers": [
                     {
                         "Name": "FlexRay1",
@@ -123,7 +122,8 @@
             },
             {
                 "Name": "SystemController",
-                "SyncType": "Unsynchronized"
+                "SyncType": "Unsynchronized",
+                "IsSyncMaster": true
             },
             {
                 "Name": "SystemMonitor",
@@ -131,7 +131,7 @@
                 "SyncType": "Unsynchronized"
             }
         ],
-
+        
         "Links": [
             {
                 "Name": "FlexRay-Cluster-1",
@@ -141,7 +141,7 @@
                 ]
             }
         ],
-
+        
         "TimeSync": {
             "SyncPolicy": "Loose",
             "TickPeriodNs": 1000000
@@ -283,6 +283,11 @@
             ]
         }
 
-    ]
+    ],
+
+    "MiddlewareConfig" :
+    {
+        "ActiveMiddleware" : "VAsio"
+    }
 
 }

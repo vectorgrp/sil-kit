@@ -28,6 +28,7 @@
 #include "InPort.hpp"
 #include "OutPort.hpp"
 #include "LinController.hpp"
+#include "FrController.hpp"
 
 #include "SerdesMw.hpp"
 #include "SerdesMwRegistry.hpp"
@@ -38,6 +39,7 @@
 #include "SerdesSimEthernet.hpp"
 #include "SerdesSimIo.hpp"
 #include "SerdesSimLin.hpp"
+#include "SerdesSimFlexray.hpp"
 
 #include "IVAsioPeer.hpp"
 #include "VAsioTcpPeer.hpp"
@@ -92,6 +94,15 @@ DefineIbMsgTraits(ib::sim::lin, WakeupRequest)
 DefineIbMsgTraits(ib::sim::lin, ControllerConfig)
 DefineIbMsgTraits(ib::sim::lin, SlaveConfiguration)
 DefineIbMsgTraits(ib::sim::lin, SlaveResponse)
+DefineIbMsgTraits(ib::sim::fr, FrMessage)
+DefineIbMsgTraits(ib::sim::fr, FrMessageAck)
+DefineIbMsgTraits(ib::sim::fr, FrSymbol)
+DefineIbMsgTraits(ib::sim::fr, FrSymbolAck)
+DefineIbMsgTraits(ib::sim::fr, CycleStart)
+DefineIbMsgTraits(ib::sim::fr, HostCommand)
+DefineIbMsgTraits(ib::sim::fr, ControllerConfig)
+DefineIbMsgTraits(ib::sim::fr, TxBufferUpdate)
+DefineIbMsgTraits(ib::sim::fr, ControllerStatus)
 
 class VAsioConnection
 {
@@ -186,7 +197,16 @@ private:
         sim::lin::WakeupRequest,
         sim::lin::ControllerConfig,
         sim::lin::SlaveConfiguration,
-        sim::lin::SlaveResponse
+        sim::lin::SlaveResponse,
+        sim::fr::FrMessage,
+        sim::fr::FrMessageAck,
+        sim::fr::FrSymbol,
+        sim::fr::FrSymbolAck,
+        sim::fr::CycleStart,
+        sim::fr::HostCommand,
+        sim::fr::ControllerConfig,
+        sim::fr::TxBufferUpdate,
+        sim::fr::ControllerStatus
     >;
 
 protected:
@@ -283,6 +303,7 @@ DefineRegisterServiceMethod(ib::sim::io::OutPort<ib::sim::io::DigitalIoMessage>)
 DefineRegisterServiceMethod(ib::sim::io::OutPort<ib::sim::io::PatternIoMessage>)
 DefineRegisterServiceMethod(ib::sim::io::OutPort<ib::sim::io::PwmIoMessage>)
 DefineRegisterServiceMethod(ib::sim::lin::LinController)
+DefineRegisterServiceMethod(ib::sim::fr::FrController)
 
 template <class IbServiceT>
 void VAsioConnection::RegisterIbService__(const std::string& link, EndpointId endpointId, IbServiceT* service)
@@ -382,6 +403,15 @@ DefineSendIbMessageMethod(sim::lin::WakeupRequest)
 DefineSendIbMessageMethod(sim::lin::ControllerConfig)
 DefineSendIbMessageMethod(sim::lin::SlaveConfiguration)
 DefineSendIbMessageMethod(sim::lin::SlaveResponse)
+DefineSendIbMessageMethod(sim::fr::FrMessage)
+DefineSendIbMessageMethod(sim::fr::FrMessageAck)
+DefineSendIbMessageMethod(sim::fr::FrSymbol)
+DefineSendIbMessageMethod(sim::fr::FrSymbolAck)
+DefineSendIbMessageMethod(sim::fr::CycleStart)
+DefineSendIbMessageMethod(sim::fr::HostCommand)
+DefineSendIbMessageMethod(sim::fr::ControllerConfig)
+DefineSendIbMessageMethod(sim::fr::TxBufferUpdate)
+DefineSendIbMessageMethod(sim::fr::ControllerStatus)
 
 
 } // mw
