@@ -9,10 +9,11 @@
 
 namespace ib {
 namespace sim {
+//! The FlexRay namespace
 namespace fr {
 
-using FrMickroTick     = int32_t;
-using FrMacroTick      = int32_t;
+using FrMicroTick      = int32_t; //!< FlexRay micro tick
+using FrMacroTick      = int32_t; //!< FlexRay macro tick
 
 //! Type and constants for the FlexRay channel parameter A, B, or AB
 enum class Channel : uint8_t
@@ -140,7 +141,7 @@ struct NodeParameters
     uint8_t pClusterDriftDamping;
 
     //! Allowed deviation for startup frames during integration in MicroTicks (range 29 - 2743 �T)
-    FrMickroTick pdAcceptedStartupRange;
+    FrMicroTick pdAcceptedStartupRange;
 
     ////! Not used by Network Simulator
     //pDecodingCorrection
@@ -152,7 +153,7 @@ struct NodeParameters
     //pDelayCompensationB
 
     //! Duration of listen phase in MicroTicks (range 1926 - 2567692)
-    FrMickroTick pdListenTimeout;
+    FrMicroTick pdListenTimeout;
 
     ////! Not used by Network Simulator
     //pExternalSync
@@ -188,22 +189,22 @@ struct NodeParameters
     uint8_t pMacroInitialOffsetB;
 
     //! Offset between secondary time reference and MT boundary (range 0 - 239 Microticks)
-    FrMickroTick pMicroInitialOffsetA;
+    FrMicroTick pMicroInitialOffsetA;
 
     //! Offset between secondary time reference and MT boundary (range 0 - 239 Microticks)
-    FrMickroTick pMicroInitialOffsetB;
+    FrMicroTick pMicroInitialOffsetB;
 
     //! Nominal number of microticks in the communication cycle (range 960 - 1280000)
-    FrMickroTick pMicroPerCycle;
+    FrMicroTick pMicroPerCycle;
 
     //! Maximum permissible offset correction value (range 15 - 16082 Microticks)
-    FrMickroTick pOffsetCorrectionOut;
+    FrMicroTick pOffsetCorrectionOut;
 
     //! Start of the offset correction phase within the NIT, (7 - 15999 MT)
     uint16_t pOffsetCorrectionStart;
 
     //! Maximum permissible rate correction value (range 3 - 3846 Microticks)
-    FrMickroTick pRateCorrectionOut;
+    FrMicroTick pRateCorrectionOut;
 
     ////! Not used by Network Simulator
     //pSecondKeySlotID
@@ -268,9 +269,12 @@ struct TxBufferConfig
 //! Configure the communication parameters of the FlexRay controller.
 struct ControllerConfig
 {
+    //! FlexRay cluster parameters
     ClusterParameters clusterParams;
+    //! FlexRay node parameters
     NodeParameters nodeParams;
 
+    //! FlexRay buffer configs
     std::vector<TxBufferConfig> bufferConfigs;
 };
 
@@ -314,16 +318,14 @@ struct HostCommand
 struct Header
 {
     /*!
-     * \brief Flags bit map according to FlagMask
-     * 
-     * Description:
-     * [7-5]: unused
-     * [4]: Reserved bit
-	 * [3]: PPIndicator: 0, regular payload; 1, NM vector or message ID
-	 * [2]: NFIndicator: 0, no valid payload data and PPIndicator = 0; 1, valid payload data
-	 * [1]: SyFIndicator: 0, frame not used for synchronization; 1, frame shall be used for sync
-	 * [0]: SuFIndicator: 0, not a startup frame; 1, a startup frame
-	 */
+     * \brief Flags bit map according to FlagMask. Description:
+     *  - [7-5]: unused
+     *  - [4]: Reserved bit
+     *  - [3]: PPIndicator: 0, regular payload; 1, NM vector or message ID
+     *  - [2]: NFIndicator: 0, no valid payload data and PPIndicator = 0; 1, valid payload data
+     *  - [1]: SyFIndicator: 0, frame not used for synchronization; 1, frame shall be used for sync
+     *  - [0]: SuFIndicator: 0, not a startup frame; 1, a startup frame
+     */
     uint8_t flags = 0;
     uint16_t frameId = 0; //!< Slot ID in which the frame was sent: 1 - 2047
     uint8_t payloadLength = 0; //!< Payload length, 7 bits
@@ -367,13 +369,9 @@ struct Frame
 // Direction: from Network Simulator to simulated ecu
 struct FrMessage
 {
-    // Time at end of frame transmission
-    std::chrono::nanoseconds timestamp;
-
-    // FlexRay channel A or B. (Valid values: Channel::A, Channel::B)
-    Channel channel;
-
-    Frame frame;
+    std::chrono::nanoseconds timestamp; //!< Time at end of frame transmission
+    Channel channel; //!< FlexRay channel A or B. (Valid values: Channel::A, Channel::B)
+    Frame frame; //!< Received FlexRay frame
 };
 
 /*!
@@ -419,8 +417,8 @@ struct FrSymbolAck : FrSymbol
  */
 struct CycleStart
 {
-    std::chrono::nanoseconds timestamp;
-    uint8_t cycleCounter;
+    std::chrono::nanoseconds timestamp; //!< Cycle starting time.
+    uint8_t cycleCounter; //!< Counter of FlexRay cycles.
 };
 
 /*!

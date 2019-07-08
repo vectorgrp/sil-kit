@@ -4,6 +4,10 @@ Flexray API
     .. doxygenclass:: ib::sim::fr::IFrController
        :members:
 
+    .. doxygentypedef:: ib::sim::fr::FrMicroTick
+
+    .. doxygentypedef:: ib::sim::fr::FrMacroTick
+
     .. doxygenenum:: ib::sim::fr::Channel
 
     .. doxygenenum:: ib::sim::fr::ClockPeriod

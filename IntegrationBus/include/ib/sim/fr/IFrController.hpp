@@ -42,7 +42,7 @@ public:
      *
      * This callback is primarily intended for tracing. There is no need to react on it.
      * Currently, the following SymbolPatterns can occur:
-     *  - Wakeup() will cause sending the SymbolPattern::Wus, if the bus is idle
+     *  - Wakeup() will cause sending the SymbolPattern::Wus, if the bus is idle.
      *  - Run() will cause the transmission of CasMts if configured to coldstart the bus.
      */
     using SymbolAckHandler = CallbackT<FrSymbolAck>;

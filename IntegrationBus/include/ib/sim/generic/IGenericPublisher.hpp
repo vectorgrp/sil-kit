@@ -31,7 +31,7 @@ public:
     /*! \brief Publish a new value
      *
      * Convenience method to publish data. Creates a new std::vector
-     * with content copied from \param data. For highest efficiency,
+     * with content copied from \p data. For highest efficiency,
      * use \ref Publish(std::vector<uint8_t>) in combination with
      * std::move.
      *

@@ -79,9 +79,6 @@ public:
 
     /*! \brief Request the transmission of a CanMessage
      *
-     * \return Unique TX identifier to relate the request to following
-     * CanTransmitAcknowledge messages.
-     *
      * NB: In VIBE simulation, the CanMessage must provide a valid CAN
      * ID and valid flags. The data length code is optional and is
      * automatically derived by the VIBE CAN simulator based on the
@@ -92,14 +89,14 @@ public:
      * are not enforced. I.e., CanMessages are distributed to
      * connected controllers regardless of the content and controller
      * states are not checked.
+     *
+     * \return Unique TX identifier to relate the request to following
+     * CanTransmitAcknowledge messages.
      */
     virtual auto SendMessage(const CanMessage& msg) -> CanTxId = 0;
 
     /*! \brief Request the transmission of a CanMessage
      *
-     * \return Unique TX identifier to relate the request to following
-     * CanTransmitAcknowledge messages.
-     *
      * NB: In VIBE simulation, the CanMessage must provide a valid CAN
      * ID and valid flags. The data length code is optional and is
      * automatically derived by the VIBE CAN simulator based on the
@@ -110,6 +107,9 @@ public:
      * are not enforced. I.e., CanMessages are distributed to
      * connected controllers regardless of the content and controller
      * states are not checked.
+     *
+     * \return Unique TX identifier to relate the request to following
+     * CanTransmitAcknowledge messages.
      */
     virtual auto SendMessage(CanMessage&& msg) -> CanTxId = 0;
 

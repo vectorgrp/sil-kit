@@ -42,3 +42,6 @@ How to specify a valid Config
 
     .. doxygenclass:: ib::cfg::TimeSyncBuilder
        :members:
+
+    .. doxygenstruct:: ib::cfg::TimeSync
+       :members:

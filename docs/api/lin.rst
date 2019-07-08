@@ -4,6 +4,8 @@ Lin API
     .. doxygenclass:: ib::sim::lin::ILinController
        :members:
 
+    .. doxygentypedef:: ib::sim::lin::LinId
+
     .. doxygenenum:: ib::sim::lin::ControllerMode
 
     .. doxygenenum:: ib::sim::lin::ChecksumModel

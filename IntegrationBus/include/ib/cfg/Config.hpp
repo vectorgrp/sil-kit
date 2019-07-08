@@ -17,6 +17,7 @@
 #include "ib/sim/fr/FrDatatypes.hpp"
 
 namespace ib {
+//! The config namespace
 namespace cfg {
 
 struct Version
@@ -218,13 +219,14 @@ struct NetworkSimulator
 
 struct TimeSync
 {
+    //! FIXME: doxygen
     enum class SyncPolicy
     {
-        Loose, //<! There is no guarantee that data has been received before the next simulation cycle
-        Strict //<! Enforce that all sent data has been received before the next simulation cycle
+        Loose, //!< There is no guarantee that data has been received before the next simulation cycle
+        Strict //!< Enforce that all sent data has been received before the next simulation cycle
     };
-    SyncPolicy syncPolicy{SyncPolicy::Loose};
-    std::chrono::nanoseconds tickPeriod{0};
+    SyncPolicy syncPolicy{SyncPolicy::Loose}; //!< FIXME: doxygen
+    std::chrono::nanoseconds tickPeriod{0}; //!< FIXME: doxygen
 };
 
 struct SimulationSetup
