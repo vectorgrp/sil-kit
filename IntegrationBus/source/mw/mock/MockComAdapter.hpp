@@ -112,6 +112,7 @@ public:
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::CycleStart&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::HostCommand&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::ControllerConfig&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::TxBufferConfigUpdate&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::TxBufferUpdate&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::ControllerStatus&));
 

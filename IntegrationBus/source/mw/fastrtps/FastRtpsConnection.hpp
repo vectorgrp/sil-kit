@@ -151,6 +151,7 @@ private:
         RtpsTopics<sim::fr::idl::CycleStart>,
         RtpsTopics<sim::fr::idl::HostCommand>,
         RtpsTopics<sim::fr::idl::ControllerConfig>,
+        RtpsTopics<sim::fr::idl::TxBufferConfigUpdate>,
         RtpsTopics<sim::fr::idl::TxBufferUpdate>,
         RtpsTopics<sim::fr::idl::ControllerStatus>,
         RtpsTopics<sim::lin::idl::LinMessage>,

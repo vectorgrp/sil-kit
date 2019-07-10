@@ -21,6 +21,7 @@ namespace ib {
     DefineTopicTrait(sim::fr::idl, CycleStart);
     DefineTopicTrait(sim::fr::idl, HostCommand);
     DefineTopicTrait(sim::fr::idl, ControllerConfig);
+    DefineTopicTrait(sim::fr::idl, TxBufferConfigUpdate);
     DefineTopicTrait(sim::fr::idl, TxBufferUpdate);
     DefineTopicTrait(sim::fr::idl, ControllerStatus);
 

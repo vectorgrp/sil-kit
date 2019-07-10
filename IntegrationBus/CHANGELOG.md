@@ -5,12 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Sprint-29] - 2019-07-17
 ### Added
+- It is now possible to reconfigure FlexRay TX-Buffers during the simulation, e.g., to change offset
+  and repetition. Cf., IFrController::ReconfigureTxBuffer(uint16_t, const TxBufferConfig&)
 ### Removed
 ### Changed
 ### Fixed
 
 ### Interface compatibility with Sprint-28:
-* Application binary interface (ABI): Yes/No
+* Application binary interface (ABI): No
 * Application software interface (API): Yes/No
 * Application middleware interface: Yes/No
 

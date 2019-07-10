@@ -31,11 +31,23 @@ void FrController::Configure(const ControllerConfig& config)
     CallHandlers(status);
 }
 
+void FrController::ReconfigureTxBuffer(uint16_t txBufferIdx, const TxBufferConfig& config)
+{
+    if (txBufferIdx >= _bufferConfigs.size())
+    {
+        _comAdapter->GetLogger()->error("FrController::ReconfigureTxBuffer() was called with unconfigured txBufferIdx={}", txBufferIdx);
+        throw std::out_of_range{"Unconfigured txBufferIdx!"};
+    }
+    _bufferConfigs[txBufferIdx] = config;
+}
 
 void FrController::UpdateTxBuffer(const TxBufferUpdate& update)
 {
     if (update.txBufferIndex >= _bufferConfigs.size())
+    {
+        _comAdapter->GetLogger()->error("FrController::UpdateTxBuffer() was called with unconfigured txBufferIndex={}", update.txBufferIndex);
         throw std::out_of_range{"Unconfigured txBufferIndex!"};
+    }
 
     auto&& config = _bufferConfigs[update.txBufferIndex];
 

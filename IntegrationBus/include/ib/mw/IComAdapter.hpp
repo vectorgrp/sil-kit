@@ -111,6 +111,7 @@ public:
     virtual void SendIbMessage(EndpointAddress from, const sim::fr::CycleStart& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sim::fr::HostCommand& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sim::fr::ControllerConfig& msg) = 0;
+    virtual void SendIbMessage(EndpointAddress from, const sim::fr::TxBufferConfigUpdate& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sim::fr::TxBufferUpdate& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sim::fr::ControllerStatus& msg) = 0;
 

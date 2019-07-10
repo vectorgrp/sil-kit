@@ -48,6 +48,8 @@ public:
     // IEthController
     void Configure(const ControllerConfig& config) override;
 
+    void ReconfigureTxBuffer(uint16_t txBufferIdx, const TxBufferConfig& config) override;
+
     /*! \brief Update the content of a previously configured TX buffer.
      *
      * The FlexRay message will be sent immediately and only once.

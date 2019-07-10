@@ -16,7 +16,7 @@ namespace fr {
  */
 class IIbToFrControllerProxy
     : public ib::mw::IIbEndpoint<FrMessage, FrMessageAck, FrSymbol, FrSymbolAck, CycleStart, ControllerStatus>
-    , public ib::mw::IIbSender<HostCommand, ControllerConfig, TxBufferUpdate>
+    , public ib::mw::IIbSender<HostCommand, ControllerConfig, TxBufferConfigUpdate, TxBufferUpdate>
 {
 };
 

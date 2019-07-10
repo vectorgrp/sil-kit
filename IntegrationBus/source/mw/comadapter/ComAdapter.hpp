@@ -97,6 +97,7 @@ public:
     void SendIbMessage(EndpointAddress from, const sim::fr::CycleStart& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::fr::HostCommand& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::fr::ControllerConfig& msg) override;
+    void SendIbMessage(EndpointAddress from, const sim::fr::TxBufferConfigUpdate& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::fr::TxBufferUpdate& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::fr::ControllerStatus& msg) override;
 

@@ -13,7 +13,7 @@ struct NodeParameters;
 struct TxBufferConfig;
 
 struct ControllerConfig;
-
+struct TxBufferConfigUpdate;
 struct TxBufferUpdate;
 
 struct Header;

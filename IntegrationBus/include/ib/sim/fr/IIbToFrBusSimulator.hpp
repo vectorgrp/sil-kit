@@ -16,7 +16,7 @@ namespace fr {
  *  Used by the ComAdapter
  */
 class IIbToFrBusSimulator
-    : public mw::IIbReceiver<HostCommand, ControllerConfig, TxBufferUpdate>
+    : public mw::IIbReceiver<HostCommand, ControllerConfig, TxBufferConfigUpdate, TxBufferUpdate>
     , public mw::IIbSender<FrMessage, FrMessageAck, FrSymbol, FrSymbolAck, CycleStart, ControllerStatus>
 {
 public:
