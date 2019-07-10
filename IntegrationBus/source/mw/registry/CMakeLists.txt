@@ -1,3 +1,5 @@
+find_package(Threads REQUIRED)
+
 add_executable(IbMwRegistry
     Registry.hpp
     Registry.cpp
@@ -5,6 +7,7 @@ add_executable(IbMwRegistry
 )
 
 target_link_libraries(IbMwRegistry
-    PRIVATE IbMwVAsio
-    PRIVATE IbConfig
+    IbMwVAsio
+    IbConfig
+    Threads::Threads
 )
