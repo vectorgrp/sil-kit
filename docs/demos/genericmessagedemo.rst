@@ -1,2 +1,2 @@
-Generic Message Demo
-====================
+Generic Messages
+================

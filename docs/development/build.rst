@@ -1,11 +1,13 @@
 Getting Started as a VIB contributor
 ====================================
 
+.. contents::
+
 
 Build Requirements
 ~~~~~~~~~~~~~~~~~~
 
-* Visual C++ 15 / 17, G++, Clang
+* Visual Studio 2015 / 2017, GCC, Clang
 * CMake
 * Submodules: 
 
@@ -17,7 +19,7 @@ Build Requirements
 .. _Googletest: https://github.com/google/googletest/blob/master/googletest/docs/primer.md
 .. _Json11: https://github.com/dropbox/json11
 
-These are the specific versions IntegrationBus is tested and built against.
+These are the specific versions Integration Bus is tested and built against.
 
 
 Architecture
