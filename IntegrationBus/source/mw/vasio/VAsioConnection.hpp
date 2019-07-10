@@ -15,21 +15,6 @@
 
 #include "MessageBuffer.hpp"
 
-// FIXME: remove includes and dependencies once everything has been templated
-#include "SyncMaster.hpp"
-#include "SystemMonitor.hpp"
-#include "SystemController.hpp"
-#include "ParticipantController.hpp"
-#include "GenericPublisher.hpp"
-#include "GenericSubscriber.hpp"
-#include "LogmsgRouter.hpp"
-#include "CanController.hpp"
-#include "EthController.hpp"
-#include "InPort.hpp"
-#include "OutPort.hpp"
-#include "LinController.hpp"
-#include "FrController.hpp"
-
 #include "SerdesMw.hpp"
 #include "SerdesMwRegistry.hpp"
 #include "SerdesMwLogging.hpp"
@@ -55,10 +40,6 @@
 
 
 #define DefineIbMsgTraits(Namespace, MsgName) template<> struct IbMsgTraits<Namespace::MsgName> { static constexpr const char* TypeName() { return #Namespace "::" #MsgName; } };
-
-#define DefineRegisterServiceMethod(IbServiceT) template<> inline void VAsioConnection::RegisterIbService<IbServiceT>(const std::string& link, EndpointId endpointId, IbServiceT* service) { RegisterIbService__<IbServiceT>(link, endpointId, service); }
-#define DefineSendIbMessageMethod(IbMsgT) template<> inline void VAsioConnection::SendIbMessageImpl<IbMsgT>(EndpointAddress from, const IbMsgT& msg) { SendIbMessageImpl__(from, msg); }
-
 
 namespace ib {
 namespace mw {
@@ -131,18 +112,10 @@ public:
     void JoinDomain(uint32_t domainId);
 
     template <class IbServiceT>
-    inline void RegisterIbService__(const std::string& link, EndpointId endpointId, IbServiceT* service);
-
-    template<class IbServiceT>
-    inline void RegisterIbService(const std::string& /*link*/, EndpointId /*endpointId*/, IbServiceT* /*receiver*/) {}
+    inline void RegisterIbService(const std::string& link, EndpointId endpointId, IbServiceT* service);
 
     template<class IbMessageT>
-    void SendIbMessageImpl__(EndpointAddress from, IbMessageT&& msg);
-
-    //template<class IbMessageT>
-    //void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg);
-    template<class IbMessageT>
-    inline void SendIbMessageImpl(EndpointAddress /*from*/, const IbMessageT& /*msg*/) {}
+    void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg);
 
     void OnAllMessagesDelivered(std::function<void()> callback) {};
     void FlushSendBuffers() {};
@@ -285,28 +258,8 @@ bool VAsioConnection::TryAddSubscriber(const VAsioMsgSubscriber& subscriber, IVA
     return true;
 }
 
-DefineRegisterServiceMethod(ib::mw::logging::LogmsgRouter)
-DefineRegisterServiceMethod(ib::mw::sync::ParticipantController)
-DefineRegisterServiceMethod(ib::mw::sync::SyncMaster)
-DefineRegisterServiceMethod(ib::mw::sync::SystemMonitor)
-DefineRegisterServiceMethod(ib::mw::sync::SystemController)
-DefineRegisterServiceMethod(ib::sim::generic::GenericPublisher)
-DefineRegisterServiceMethod(ib::sim::generic::GenericSubscriber)
-DefineRegisterServiceMethod(ib::sim::can::CanController)
-DefineRegisterServiceMethod(ib::sim::eth::EthController)
-DefineRegisterServiceMethod(ib::sim::io::InPort<ib::sim::io::AnalogIoMessage>)
-DefineRegisterServiceMethod(ib::sim::io::InPort<ib::sim::io::DigitalIoMessage>)
-DefineRegisterServiceMethod(ib::sim::io::InPort<ib::sim::io::PatternIoMessage>)
-DefineRegisterServiceMethod(ib::sim::io::InPort<ib::sim::io::PwmIoMessage>)
-DefineRegisterServiceMethod(ib::sim::io::OutPort<ib::sim::io::AnalogIoMessage>)
-DefineRegisterServiceMethod(ib::sim::io::OutPort<ib::sim::io::DigitalIoMessage>)
-DefineRegisterServiceMethod(ib::sim::io::OutPort<ib::sim::io::PatternIoMessage>)
-DefineRegisterServiceMethod(ib::sim::io::OutPort<ib::sim::io::PwmIoMessage>)
-DefineRegisterServiceMethod(ib::sim::lin::LinController)
-DefineRegisterServiceMethod(ib::sim::fr::FrController)
-
 template <class IbServiceT>
-void VAsioConnection::RegisterIbService__(const std::string& link, EndpointId endpointId, IbServiceT* service)
+void VAsioConnection::RegisterIbService(const std::string& link, EndpointId endpointId, IbServiceT* service)
 {
     typename IbServiceT::IbReceiveMessagesTypes receiveMessageTypes{};
     typename IbServiceT::IbSendMessagesTypes sendMessageTypes{};
@@ -368,51 +321,11 @@ void VAsioConnection::RegisterIbMsgSender(const std::string& link, EndpointId en
 
 
 template <class IbMessageT>
-void VAsioConnection::SendIbMessageImpl__(EndpointAddress from, IbMessageT&& msg)
+void VAsioConnection::SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
 {
     auto&& senderMap = std::get<IbSenderMap<std::decay_t<IbMessageT>>>(_endpointToSenderMap);
     senderMap[from.endpoint]->SendIbMessage(from, std::forward<IbMessageT>(msg));
 }
-
-DefineSendIbMessageMethod(logging::LogMsg)
-DefineSendIbMessageMethod(sync::Tick)
-DefineSendIbMessageMethod(sync::TickDone)
-DefineSendIbMessageMethod(sync::QuantumRequest)
-DefineSendIbMessageMethod(sync::QuantumGrant)
-DefineSendIbMessageMethod(sync::ParticipantCommand)
-DefineSendIbMessageMethod(sync::SystemCommand)
-DefineSendIbMessageMethod(sync::ParticipantStatus)
-DefineSendIbMessageMethod(sim::generic::GenericMessage)
-DefineSendIbMessageMethod(sim::can::CanMessage)
-DefineSendIbMessageMethod(sim::can::CanTransmitAcknowledge)
-DefineSendIbMessageMethod(sim::can::CanControllerStatus)
-DefineSendIbMessageMethod(sim::can::CanConfigureBaudrate)
-DefineSendIbMessageMethod(sim::can::CanSetControllerMode)
-DefineSendIbMessageMethod(sim::eth::EthMessage)
-DefineSendIbMessageMethod(sim::eth::EthTransmitAcknowledge)
-DefineSendIbMessageMethod(sim::eth::EthStatus)
-DefineSendIbMessageMethod(sim::eth::EthSetMode)
-DefineSendIbMessageMethod(sim::io::AnalogIoMessage)
-DefineSendIbMessageMethod(sim::io::DigitalIoMessage)
-DefineSendIbMessageMethod(sim::io::PatternIoMessage)
-DefineSendIbMessageMethod(sim::io::PwmIoMessage)
-DefineSendIbMessageMethod(sim::lin::LinMessage)
-DefineSendIbMessageMethod(sim::lin::RxRequest)
-DefineSendIbMessageMethod(sim::lin::TxAcknowledge)
-DefineSendIbMessageMethod(sim::lin::WakeupRequest)
-DefineSendIbMessageMethod(sim::lin::ControllerConfig)
-DefineSendIbMessageMethod(sim::lin::SlaveConfiguration)
-DefineSendIbMessageMethod(sim::lin::SlaveResponse)
-DefineSendIbMessageMethod(sim::fr::FrMessage)
-DefineSendIbMessageMethod(sim::fr::FrMessageAck)
-DefineSendIbMessageMethod(sim::fr::FrSymbol)
-DefineSendIbMessageMethod(sim::fr::FrSymbolAck)
-DefineSendIbMessageMethod(sim::fr::CycleStart)
-DefineSendIbMessageMethod(sim::fr::HostCommand)
-DefineSendIbMessageMethod(sim::fr::ControllerConfig)
-DefineSendIbMessageMethod(sim::fr::TxBufferUpdate)
-DefineSendIbMessageMethod(sim::fr::ControllerStatus)
-
 
 } // mw
 } // namespace ib
