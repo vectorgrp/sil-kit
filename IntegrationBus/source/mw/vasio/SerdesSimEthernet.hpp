@@ -14,41 +14,19 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Et
 {
     buffer << msg.transmitId
            << msg.timestamp
-           << msg.ethFrame.GetSourceMac()
-           << msg.ethFrame.GetDestinationMac()
-           << msg.ethFrame.GetVlanTag().pcp
-           << msg.ethFrame.GetVlanTag().dei
-           << msg.ethFrame.GetVlanTag().vid
-           << msg.ethFrame.GetPayload();
+           << msg.ethFrame.RawFrame();
 
     return buffer;
 }
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthMessage& msg)
 {
-    EthMac sourceMac, destinationMac;
-    uint8_t pcp, dei;
-    EthVid vid;
-    std::vector<uint8_t> payload;
+    std::vector<uint8_t> rawFrame;
 
     buffer >> msg.transmitId
            >> msg.timestamp
-           >> sourceMac
-           >> destinationMac
-           >> pcp
-           >> dei
-           >> vid
-           >> payload;
+           >> rawFrame;
 
-    msg.ethFrame.SetSourceMac(sourceMac);
-    msg.ethFrame.SetDestinationMac(destinationMac);
-
-    eth::EthTagControlInformation tci;
-    tci.pcp = pcp;
-    tci.dei = dei;
-    tci.vid = vid;
-
-    msg.ethFrame.SetVlanTag(tci);
-    msg.ethFrame.SetPayload(payload);
+    msg.ethFrame = EthFrame{std::move(rawFrame)};
 
     return buffer;
 }
