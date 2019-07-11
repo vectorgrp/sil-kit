@@ -35,3 +35,11 @@ Development
 
   development/guidelines
   development/build
+
+Licenses
+--------
+
+.. toctree::
+  :maxdepth: 1
+
+  license
