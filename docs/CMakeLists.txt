@@ -53,7 +53,7 @@ if(Doxygen_FOUND)
         add_custom_target(Sphinx ALL DEPENDS ${SPHINX_INDEX_FILE})
 		
         include(GNUInstallDirs)
-        install(DIRECTORY ${SPHINX_BUILD}
+        install(DIRECTORY ${SPHINX_BUILD}/
         DESTINATION ${CMAKE_INSTALL_DOCDIR})
     endif()
 endif()
