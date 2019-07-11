@@ -9,14 +9,14 @@
 #include <thread>
 
 #include "ib/IntegrationBus.hpp"
-#include "ib/sim/all.hpp"
-#include "ib/util/functional.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/mw/sync/string_utils.hpp"
+#include "ib/sim/fr/all.hpp"
+#include "ib/util/functional.hpp"
 
 using namespace ib::mw;
-using namespace ib::util;
 using namespace ib::sim;
+using namespace ib::util;
 
 using namespace std::chrono_literals;
 using namespace std::placeholders;
@@ -25,98 +25,6 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 {
     auto seconds = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(timestamp);
     out << seconds.count() << "s";
-    return out;
-}
-
-std::ostream& operator<<(std::ostream& out, fr::PocState state)
-{
-    switch (state)
-    {
-    case  fr::PocState::DefaultConfig:
-        out << "DefaultConfig";
-        break;
-    case  fr::PocState::Config:
-        out << "Config";
-        break;
-    case  fr::PocState::Ready:
-        out << "Ready";
-        break;
-    case  fr::PocState::Startup:
-        out << "Startup";
-        break;
-    case  fr::PocState::Wakeup:
-        out << "Wakeup";
-        break;
-    case  fr::PocState::NormalActive:
-        out << "NormalActive";
-        break;
-    case  fr::PocState::NormalPassive:
-        out << "NormalPassive";
-        break;
-    case  fr::PocState::Halt:
-        out << "Halt";
-        break;
-    default:
-        out << "state=" << static_cast<uint32_t>(state);
-    }
-
-    return out;
-}
-
-std::ostream& operator<<(std::ostream& out, fr::Channel channel)
-{
-    switch (channel)
-    {
-    case  fr::Channel::None:
-        out << "None";
-        break;
-    case  fr::Channel::A:
-        out << "A";
-        break;
-    case  fr::Channel::B:
-        out << "B";
-        break;
-    case  fr::Channel::AB:
-        out << "AB";
-        break;
-    default:
-        out << "channel=" << static_cast<uint32_t>(channel);
-    }
-
-    return out;
-}
-
-std::ostream& operator<<(std::ostream& out, fr::SymbolPattern symbolPattern)
-{
-    switch (symbolPattern)
-    {
-    case fr::SymbolPattern::CasMts:
-        out << "CasMts";
-        break;
-    case fr::SymbolPattern::Wus:
-        out << "Wus";
-        break;
-    case fr::SymbolPattern::Wudop:
-        out << "Wudop";
-        break;
-    default:
-        out << "pattern=" << static_cast<uint8_t>(symbolPattern);
-    }
-    return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const fr::Header& header)
-{
-    out << "Header{f=["
-        << (header.IsSet(fr::Header::Flag::SuFIndicator) ? "U" : "-")
-        << (header.IsSet(fr::Header::Flag::SyFIndicator) ? "Y" : "-")
-        << (header.IsSet(fr::Header::Flag::NFIndicator) ? "-" : "N")
-        << (header.IsSet(fr::Header::Flag::PPIndicator) ? "P" : "-")
-        << "],s=" << header.frameId
-        << ",l=" << (uint32_t)header.payloadLength
-        << ",crc=" << std::hex << header.headerCrc << std::dec
-        << ",c=" << (uint32_t)header.cycleCount
-        << "}";
     return out;
 }
 
@@ -157,47 +65,16 @@ std::ostream& operator<<(std::ostream& out, const fr::FrMessageAck& msg)
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const fr::FrSymbol& symbol)
-{
-    out << "FrSymbol{t=" << symbol.timestamp
-        << ", channel=" << symbol.channel
-        << ", pattern=" << symbol.pattern
-        << "}";
-
-    return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const fr::FrSymbolAck& symbol)
-{
-    out << "FrSymbolAck{t=" << symbol.timestamp
-        << ", channel=" << symbol.channel
-        << ", pattern=" << symbol.pattern
-        << "}";
-
-    return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const fr::CycleStart& cycleStart)
-{
-    return out
-        << "CycleStart{t=" << cycleStart.timestamp
-        << ", cycleCounter=" << static_cast<uint32_t>(cycleStart.cycleCounter)
-        << "}";
-};
-
-
 
 template<typename T>
 void ReceiveMessage(fr::IFrController* /*controller*/, const T& t)
 {
-    std::cout << ">> " << t << std::endl;
+    std::cout << ">> " << t << "\n";
 }
 
-
-
-struct FlexRayUser
+struct FlexRayNode
 {
-    FlexRayUser(fr::IFrController* controller)
+    FlexRayNode(fr::IFrController* controller)
         : controller{controller}
     {
     }
@@ -205,9 +82,7 @@ struct FlexRayUser
     void configure(fr::ControllerConfig&& config)
     {
         controllerConfig = std::move(config);
-
         controller->Configure(controllerConfig);
-        
     }
 
     void doAction(std::chrono::nanoseconds now)
@@ -215,11 +90,16 @@ struct FlexRayUser
         switch (state)
         {
         case fr::PocState::Ready:
-            pocReady(now);
-            break;
+            return pocReady(now);
         case fr::PocState::NormalActive:
-            txBufferUpdate(now);
-            break;
+            if (now == 100ms)
+            {
+                return ReconfigureTxBuffers();
+            }
+            else
+            {
+                return txBufferUpdate(now);
+            }
         case fr::PocState::DefaultConfig:
         case fr::PocState::Config:
         case fr::PocState::Startup:
@@ -274,6 +154,29 @@ struct FlexRayUser
         //update.payload[payloadString.size()] = 0;
 
         controller->UpdateTxBuffer(update);
+    }
+
+    // Reconfigure buffers: Swap Channels A and B
+    void ReconfigureTxBuffers()
+    {
+        std::cout << "Reconfiguring TxBuffers. Swapping Channel::A and Channel::B\n";
+        for (uint16_t idx = 0; idx < controllerConfig.bufferConfigs.size(); idx++)
+        {
+            auto&& bufferConfig = controllerConfig.bufferConfigs[idx];
+            switch (bufferConfig.channels)
+            {
+            case fr::Channel::A:
+                bufferConfig.channels = fr::Channel::B;
+                controller->ReconfigureTxBuffer(idx, bufferConfig);
+                break;
+            case fr::Channel::B:
+                bufferConfig.channels = fr::Channel::A;
+                controller->ReconfigureTxBuffer(idx, bufferConfig);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     void ControllerStatusHandler(fr::IFrController* /*controller*/, const fr::ControllerStatus& status)
@@ -354,27 +257,13 @@ int main(int argc, char** argv)
 
         });
 
-        // Set a Stop Handler
-        participantController->SetStopHandler([]() {
-
-            std::cout << "Stopping..." << std::endl;
-
-        });
-
-        // Set a Shutdown Handler
-        participantController->SetShutdownHandler([]() {
-
-            std::cout << "Shutting down..." << std::endl;
-
-        });
-
         std::vector<fr::TxBufferConfig> bufferConfigs;
 
         if (participantName == "Node0")
         {
             // initialize bufferConfig to send some FrMessages
             fr::TxBufferConfig cfg;
-            cfg.channels = fr::Channel::A;
+            cfg.channels = fr::Channel::AB;
             cfg.slotId = 10;
             cfg.offset = 0;
             cfg.repetition = 1;
@@ -383,11 +272,11 @@ int main(int argc, char** argv)
             cfg.transmissionMode = fr::TransmissionMode::SingleShot;
             bufferConfigs.push_back(cfg);
 
-            cfg.channels = fr::Channel::B;
+            cfg.channels = fr::Channel::A;
             cfg.slotId = 20;
             bufferConfigs.push_back(cfg);
 
-            cfg.channels = fr::Channel::AB;
+            cfg.channels = fr::Channel::B;
             cfg.slotId = 30;
             bufferConfigs.push_back(cfg);
         }
@@ -395,7 +284,7 @@ int main(int argc, char** argv)
         {
             // initialize bufferConfig to send some FrMessages
             fr::TxBufferConfig cfg;
-            cfg.channels = fr::Channel::A;
+            cfg.channels = fr::Channel::AB;
             cfg.slotId = 11;
             cfg.offset = 0;
             cfg.repetition = 1;
@@ -404,23 +293,23 @@ int main(int argc, char** argv)
             cfg.transmissionMode = fr::TransmissionMode::SingleShot;
             bufferConfigs.push_back(cfg);
 
-            cfg.channels = fr::Channel::B;
+            cfg.channels = fr::Channel::A;
             cfg.slotId = 21;
             bufferConfigs.push_back(cfg);
 
-            cfg.channels = fr::Channel::AB;
+            cfg.channels = fr::Channel::B;
             cfg.slotId = 31;
             bufferConfigs.push_back(cfg);
         }
         
-        FlexRayUser frUser(controller);
+        FlexRayNode frNode(controller);
         if (participantName == "Node0")
-            frUser.busState = FlexRayUser::MasterState::PerformWakeup;
+            frNode.busState = FlexRayNode::MasterState::PerformWakeup;
 
-        controller->RegisterControllerStatusHandler(bind_method(&frUser, &FlexRayUser::ControllerStatusHandler));
+        controller->RegisterControllerStatusHandler(bind_method(&frNode, &FlexRayNode::ControllerStatusHandler));
         controller->RegisterMessageHandler(&ReceiveMessage<fr::FrMessage>);
         controller->RegisterMessageAckHandler(&ReceiveMessage<fr::FrMessageAck>);
-        controller->RegisterWakeupHandler(bind_method(&frUser, &FlexRayUser::WakeupHandler));
+        controller->RegisterWakeupHandler(bind_method(&frNode, &FlexRayNode::WakeupHandler));
         controller->RegisterSymbolHandler(&ReceiveMessage<fr::FrSymbol>);
         controller->RegisterSymbolAckHandler(&ReceiveMessage<fr::FrSymbolAck>);
         controller->RegisterCycleStartHandler(&ReceiveMessage<fr::CycleStart>);
@@ -431,15 +320,15 @@ int main(int argc, char** argv)
         config.clusterParams = participantConfig.flexrayControllers[0].clusterParameters;
         config.nodeParams = participantConfig.flexrayControllers[0].nodeParameters;
 
-        frUser.configure(std::move(config));
+        frNode.configure(std::move(config));
 
         participantController->SetSimulationTask(
-            [&frUser](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+            [&frNode](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                 
                 auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                 std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-                frUser.doAction(now);
-                std::this_thread::sleep_for(1s);
+                frNode.doAction(now);
+                std::this_thread::sleep_for(500ms);
                 
         });
 
