@@ -99,12 +99,18 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FrSymbol
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FrSymbolAck& /*symbol*/)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FrSymbolAck& ack)
 {
+    auto&& symbol = static_cast<const FrSymbol&>(ack);
+    buffer
+        << symbol;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FrSymbolAck& /*symbol*/)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FrSymbolAck& ack)
 {
+    auto&& symbol = static_cast<FrSymbol&>(ack);
+    buffer
+        >> symbol;
     return buffer;
 }
 
