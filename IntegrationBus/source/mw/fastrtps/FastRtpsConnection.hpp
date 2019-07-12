@@ -102,6 +102,8 @@ private:
 private:
     // ----------------------------------------
     // private methods
+    template<typename... Args>
+    static auto CreateFastrtpsParticipant(Args&&... args) -> eprosima::fastrtps::Participant*;
     void registerTopicTypeIfNecessary(eprosima::fastrtps::TopicDataType* topicType);
     template <class AttrT>
     void SetupPubSubAttributes(AttrT& attributes, const std::string& topicName, eprosima::fastrtps::TopicDataType* topicType);

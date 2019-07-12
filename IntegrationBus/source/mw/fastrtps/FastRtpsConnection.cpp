@@ -28,6 +28,16 @@ FastRtpsConnection::FastRtpsConnection(cfg::Config config, std::string participa
 {
 }
 
+
+template<typename... Args>
+auto FastRtpsConnection::CreateFastrtpsParticipant(Args&&... args) -> eprosima::fastrtps::Participant*
+{
+    static std::mutex createFastRtpsParticipantMutex;
+    std::unique_lock<std::mutex> mutexGuard{createFastRtpsParticipantMutex};
+
+    return Domain::createParticipant(std::forward<Args>(args)...);
+}
+
 void FastRtpsConnection::joinDomain(uint32_t domainId)
 {
     if (_fastRtpsParticipant)
@@ -45,7 +55,7 @@ void FastRtpsConnection::joinDomain(uint32_t domainId)
         auto configFilePath = _config.configPath + fastRtpsCfg.configFileName;
         if (Domain::loadXMLProfilesFile(configFilePath))
         {
-            participant = Domain::createParticipant(_participantName);
+            participant = CreateFastrtpsParticipant(_participantName);
         }
     }
     else
@@ -136,7 +146,7 @@ void FastRtpsConnection::joinDomain(uint32_t domainId)
             throw cfg::Misconfiguration{"Invalid FastRTPS configuration"};
         }
 
-        participant = Domain::createParticipant(pParam);
+        participant = CreateFastrtpsParticipant(pParam);
     }
 
     if (participant == nullptr)
@@ -144,7 +154,6 @@ void FastRtpsConnection::joinDomain(uint32_t domainId)
 
     _fastRtpsParticipant.reset(participant);
 }
-
 
 void FastRtpsConnection::registerTopicTypeIfNecessary(TopicDataType* topicType)
 {
@@ -186,7 +195,7 @@ auto FastRtpsConnection::createPublisher(const std::string& topicName, TopicData
         SetupPubSubAttributes(pubAttributes, topicName, topicType);
 
         // We must configure the heartbeat period when using strict SyncPolicy because subscribers
-        // only send an acknowledgement in reply to a heartbeat. Thus, the hearbeat
+        // only send an acknowledgment in reply to a heartbeat. Thus, the heartbeat
         // period must be set to a shorter duration than the tickPeriod when using Strict
         // SyncPolicy. For Loose SyncPolicy, the FastRTPS default is sufficient.
         if (_config.simulationSetup.timeSync.syncPolicy == cfg::TimeSync::SyncPolicy::Strict)

@@ -30,12 +30,6 @@ using testing::Return;
 class GenericMessageITest : public testing::Test
 {
 protected:
-    struct Callbacks
-    {
-        MOCK_METHOD2(ReceiveData, void(ib::sim::generic::IGenericSubscriber*, const std::vector<uint8_t>&));
-    };
-
-protected:
     GenericMessageITest()
         : domainId{static_cast<uint32_t>(GetTestPid())}
         , topics(2)
@@ -44,55 +38,56 @@ protected:
         topics[1].name = "VehicleModelOut";
 
         ibConfig = ib::cfg::Config::FromJsonFile("GenericMessagesITest_IbConfig.json");
-        
-        pubComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Publisher");
-        pubComAdapter->joinIbDomain(domainId);
-
-        subComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Subscriber");
-        subComAdapter->joinIbDomain(domainId);
     }
 
     void Subscribe()
     {
+        subComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Subscriber");
+        subComAdapter->joinIbDomain(domainId);
+
         for (auto&& topic: topics)
         {
-            topic.subscriber = subComAdapter->CreateGenericSubscriber(topic.name);
-            topic.subscriber->SetReceiveMessageHandler(
-                [&topic = topic, &callbacks = callbacks](auto* subscriber, auto&& data)
+            auto subscriber = subComAdapter->CreateGenericSubscriber(topic.name);
+
+            subscriber->SetReceiveMessageHandler(
+                [&topic = topic, this](auto* /*subscriber*/, auto&& data)
                 {
-                    callbacks.ReceiveData(subscriber, data);
-                    topic.reply.set_value(std::string{data.begin(), data.end()});
+                    topic.reply = std::string{data.begin(), data.end()};
+
+                    if (topics.size() == ++receiveCount)
+                        allReceivedPromise.set_value();
                 }
             );
-
-            std::vector<uint8_t> expectedPayload{topic.name.begin(), topic.name.end()};
-            EXPECT_CALL(callbacks, ReceiveData(topic.subscriber, expectedPayload));
         }
     }
 
     void Publish()
     {
+        pubComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Publisher");
+        pubComAdapter->joinIbDomain(domainId);
+
         for (auto&& topic: topics)
         {
-            topic.publisher = pubComAdapter->CreateGenericPublisher(topic.name);
-            topic.publisher->Publish({topic.name.begin(), topic.name.end()});
+            auto publisher = pubComAdapter->CreateGenericPublisher(topic.name);
+
+            publisher->Publish({topic.name.begin(), topic.name.end()});
         }
     }
 
     struct Topic
     {
         std::string name;
-        std::promise<std::string> reply;
-        ib::sim::generic::IGenericPublisher* publisher;
-        ib::sim::generic::IGenericSubscriber* subscriber;
+        std::string reply;
     };
 
 protected:
     const uint32_t domainId;
     ib::cfg::Config ibConfig;
 
-    Callbacks callbacks;
     std::vector<Topic> topics;
+
+    unsigned int receiveCount{0};
+    std::promise<void> allReceivedPromise;
 
     std::unique_ptr<ComAdapter<FastRtpsConnection>> pubComAdapter;
     std::unique_ptr<ComAdapter<FastRtpsConnection>> subComAdapter;
@@ -100,19 +95,19 @@ protected:
     
 TEST_F(GenericMessageITest, publish_and_subscribe_generic_messages)
 {
-    Subscribe();
+    std::thread subscribeThread{[this] { Subscribe(); }};
+    std::thread publishThread{[this]{ Publish(); }};
 
-    std::thread publishThread{[this]() { this->Publish(); }};
+    auto allReceived = allReceivedPromise.get_future();
+    allReceived.wait_for(10min);
+
+    publishThread.join();
+    subscribeThread.join();
 
     for (auto&& topic : topics)
     {
-        auto&& reply = topic.reply.get_future();
-        auto ready = reply.wait_for(10min);
-        ASSERT_EQ(ready, std::future_status::ready);
-        EXPECT_EQ(reply.get(), topic.name);
+        EXPECT_EQ(topic.name, topic.reply);
     }
-    
-    publishThread.join();
 }
 
 } // anonymous namespace
