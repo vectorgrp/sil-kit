@@ -1,13 +1,33 @@
 find_package(Threads REQUIRED)
 
-add_executable(IbMwRegistry
+add_library(IbMwRegistry STATIC
     Registry.hpp
     Registry.cpp
     ../vasio/VAsioConnection.hpp
 )
 
+target_include_directories(IbMwRegistry
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+	$<INSTALL_INTERFACE:include>
+)
+
+if (MSVC)
+    target_compile_options(IbMwRegistry PRIVATE "/bigobj")
+endif (MSVC)
+
+add_mvsc_ib_include_filter()
+
 target_link_libraries(IbMwRegistry
     IbMwVAsio
     IbConfig
     Threads::Threads
+)
+
+add_executable(IbMwRegistryDemo
+    RegistryDemo.cpp
+)
+
+target_link_libraries(IbMwRegistryDemo
+	IbMwRegistry
 )
