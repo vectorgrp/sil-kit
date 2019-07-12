@@ -39,7 +39,26 @@ struct VAsioReceiver : public IVAsioReceiver
 
         for (auto&& receiver : _receivers)
         {
-            receiver->ReceiveIbMessage(from, msg);
+            try
+            {
+                receiver->ReceiveIbMessage(from, msg);
+            }
+            catch (const std::exception& e)
+            {
+                std::cerr
+                    << "WARNING: Callback for "
+                    << GetDescriptor().msgTypeName
+                    << "[\"" << GetDescriptor().linkName << "\"]"
+                    << " threw an exception: " << e.what() << "." << std::endl;
+            }
+            catch (...)
+            {
+                std::cerr
+                    << "WARNING: Callback for "
+                    << GetDescriptor().msgTypeName
+                    << "[\"" << GetDescriptor().linkName << "\"]"
+                    << " threw an unknown exception." << std::endl;
+            }
         }
     }
     std::vector<ib::mw::IIbMessageReceiver<MsgT>*> _receivers;
