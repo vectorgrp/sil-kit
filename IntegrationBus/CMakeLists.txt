@@ -296,6 +296,8 @@ install(
     COMPONENT IntegrationBus-Developer
     # Rational: Fast-RTPS cannot be delivered from source, as it requires its own submodules to be actual Git repositories.
     REGEX "/ThirdParty/Fast-RTPS" EXCLUDE
+    # Breathe is just required for generating the documentation
+    REGEX "/ThirdParty/Breathe" EXCLUDE
 )
 # Instead of the Fast-RTPS library, deploy a script to clone Fast-RTPS. 
 # It should only be used from package deployments, thus the '.in' disguise.

@@ -20,22 +20,9 @@ Using Vector Integration Bus
 ============================
 
 .. toctree::
-  :maxdepth: 2
+  :maxdepth: 3
 
-  ../usage/quickstart
   ../usage/demo-usage
-  ../usage/services  
-  ../usage/integrationbus-api
-
-
-Development
-=====================
-
-.. toctree::
-  :maxdepth: 2
-
-  ../development/guidelines
-  ../development/build
 
 
 Licenses
