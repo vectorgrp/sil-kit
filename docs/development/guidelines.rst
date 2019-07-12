@@ -1,5 +1,6 @@
-Contributing Guidelines
-=======================
+========================
+Developer Guidelines
+========================
 
 .. toctree::
   :maxdepth: 2

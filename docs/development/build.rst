@@ -1,4 +1,5 @@
-Getting Started as a VIB contributor
+====================================
+Getting Started as a VIB Developer
 ====================================
 
 .. contents::

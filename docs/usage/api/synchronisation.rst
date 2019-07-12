@@ -1,5 +1,6 @@
-IB Synchronisation
-------------------
+===============
+Synchronisation
+===============
 
     .. doxygenclass:: ib::mw::sync::IParticipantController
        :members:

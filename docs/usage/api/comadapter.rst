@@ -1,4 +1,5 @@
-IB ComAdapter
+=============
+ComAdapter
 =============
 
     .. doxygenfunction:: ib::CreateFastRtpsComAdapter

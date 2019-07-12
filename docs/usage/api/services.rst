@@ -1,4 +1,5 @@
-Services API
+============
+Services
 ============
 
 .. toctree::

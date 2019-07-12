@@ -23,7 +23,13 @@ version = '1.0.0'
 # The full version, including alpha/beta/rc tags
 release = '1.0.0'
 
-master_doc = 'index'
+###  The master toctree document. ###
+# This is used mainly for the html_sidebars: globaltoc.html to show a
+# static self-defined ToC at every page.
+# ATTENTION: The main (entry) page is STILL the index.rst and therefore
+# a layout.html template was added in _templates/ which extends 
+# the navigation header line of the layout.html
+master_doc = 'overview/contents'
 
 # -- General configuration ---------------------------------------------------
 
