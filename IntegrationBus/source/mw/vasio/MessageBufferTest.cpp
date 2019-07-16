@@ -34,8 +34,36 @@ TEST(MwVAsio_MessageBuffer, integral_types_multiple)
 
     for (auto& o : out)
         buffer >> o;
-
     
+    EXPECT_EQ(in, out);
+}
+
+TEST(MwVAsio_MessageBuffer, floating_types)
+{
+    ib::mw::MessageBuffer buffer;
+
+    double in{7};
+    double out{1};
+
+    buffer << in;
+    buffer >> out;
+
+    EXPECT_EQ(in, out);
+}
+
+TEST(MwVAsio_MessageBuffer, floating_types_multiple)
+{
+    ib::mw::MessageBuffer buffer;
+
+    std::vector<double> in{1,2,3,4,5,6,7};
+    std::vector<double> out(in.size(), -1);
+
+    for (auto i : in)
+        buffer << i;
+
+    for (auto& o : out)
+        buffer >> o;
+
     EXPECT_EQ(in, out);
 }
 
@@ -157,9 +185,9 @@ TEST(MwVAsio_MessageBuffer, std_chrono_system_time)
     EXPECT_EQ(in, out);
 }
 
-
 namespace {
 struct TestData {
+    double doub;
     uint32_t ui32;
     int16_t i16;
     TestEnumT e;
@@ -181,8 +209,8 @@ TEST(MwVAsio_MessageBuffer, mixed_types)
 {
     ib::mw::MessageBuffer buffer;
 
-    TestData in{std::numeric_limits<uint32_t>::max() - 1, -13, TestEnumT::A, 17ns, "This looks nice!"};
-    TestData out{0, 0, TestEnumT::B, 0ns, std::string{}};
+    TestData in{3.333, std::numeric_limits<uint32_t>::max() - 1, -13, TestEnumT::A, 17ns, "This looks nice!"};
+    TestData out{0.01, 0, 0, TestEnumT::B, 0ns, std::string{}};
 
     buffer << in.ui32 << in.i16 << in.e << in.duration << in.str;
     buffer >> out.ui32 >> out.i16 >> out.e >> out.duration >> out.str;
