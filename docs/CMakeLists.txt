@@ -1,7 +1,9 @@
-find_package(Doxygen)
-find_package(Sphinx)
+set(BUILD_DOCS FALSE CACHE BOOL "Enables automated building and installing of the documentation")
 
-if(Doxygen_FOUND)
+if(${BUILD_DOCS})
+    find_package(Doxygen REQUIRED)
+    find_package(Sphinx REQUIRED)
+
     # Find all the public headers
     get_target_property(INTEGRATION_BUS_PUBLIC_HEADER_DIR IntegrationBus INTERFACE_INCLUDE_DIRECTORIES)
     file(GLOB_RECURSE INTEGRATION_BUS_PUBLIC_HEADERS ${INTEGRATION_BUS_PUBLIC_HEADER_DIR}/include/ib/*.h)
@@ -25,35 +27,33 @@ if(Doxygen_FOUND)
                        COMMENT "Generating docs"
                        VERBATIM)
 
-    add_custom_target(Doxygen DEPENDS ${DOXYGEN_INDEX_FILE})
+    add_custom_target(Doxygen ALL DEPENDS ${DOXYGEN_INDEX_FILE})
 
-    if(Sphinx_FOUND)
-        set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
-        set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sphinx)
-        set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
+    set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
+    set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sphinx)
+    set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
 
-        # Only regenerate Sphinx when:
-        # - Doxygen has rerun
-        # - Our doc files have been updated
-        # - The Sphinx config has been updated
-        add_custom_command(OUTPUT ${SPHINX_INDEX_FILE}
-                           COMMAND
-                               ${SPHINX_EXECUTABLE} -b html
-                               # Tell Breathe where to find the Doxygen output
-                               -Dbreathe_projects.IntegrationBus=${DOXYGEN_OUTPUT_DIR}/xml
-                               ${SPHINX_SOURCE} ${SPHINX_BUILD}
-                           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                           DEPENDS
-                           # Other docs files you want to track should go here (or in some variable)
-                           ${CMAKE_CURRENT_SOURCE_DIR}/index.rst
-                           ${DOXYGEN_INDEX_FILE}
-                           MAIN_DEPENDENCY ${SPHINX_SOURCE}/conf.py
-                           COMMENT "Generating documentation with Sphinx")
+    # Only regenerate Sphinx when:
+    # - Doxygen has rerun
+    # - Our doc files have been updated
+    # - The Sphinx config has been updated
+    add_custom_command(OUTPUT ${SPHINX_INDEX_FILE}
+                       COMMAND
+                           ${SPHINX_EXECUTABLE} -b html
+                           # Tell Breathe where to find the Doxygen output
+                           -Dbreathe_projects.IntegrationBus=${DOXYGEN_OUTPUT_DIR}/xml
+                           ${SPHINX_SOURCE} ${SPHINX_BUILD}
+                       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                       DEPENDS
+                       # Other docs files you want to track should go here (or in some variable)
+                       ${CMAKE_CURRENT_SOURCE_DIR}/index.rst
+                       ${DOXYGEN_INDEX_FILE}
+                       MAIN_DEPENDENCY ${SPHINX_SOURCE}/conf.py
+                       COMMENT "Generating documentation with Sphinx")
 
-        add_custom_target(Sphinx DEPENDS ${SPHINX_INDEX_FILE})
+    add_custom_target(Sphinx ALL DEPENDS ${SPHINX_INDEX_FILE})
 
-        include(GNUInstallDirs)
-        install(DIRECTORY ${SPHINX_BUILD}/
-        DESTINATION ${CMAKE_INSTALL_DOCDIR})
-    endif()
+    include(GNUInstallDirs)
+    install(DIRECTORY ${SPHINX_BUILD}/
+    DESTINATION ${CMAKE_INSTALL_DOCDIR})
 endif()
