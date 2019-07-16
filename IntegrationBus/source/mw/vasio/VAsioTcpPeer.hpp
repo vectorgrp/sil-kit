@@ -40,7 +40,11 @@ public:
     // Public Methods
     void SendIbMsg(MessageBuffer buffer) override;
     void Subscribe(VAsioMsgSubscriber subscriber) override;
-    auto GetInfo() -> VAsioPeerInfo& override;
+
+    auto GetInfo() const -> const VAsioPeerInfo& override;
+    void SetInfo(VAsioPeerInfo info) override;
+
+    void Connect(VAsioPeerInfo info);
 
     inline auto Socket() -> asio::ip::tcp::socket& { return _socket; }
 

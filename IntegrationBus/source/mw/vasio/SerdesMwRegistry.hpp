@@ -10,14 +10,14 @@
 namespace ib {
 namespace mw {
 
-inline MessageBuffer& operator<<(MessageBuffer& buffer, const registry::RegistryMessageHeader& header)
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const registry::MessageHeader& header)
 {
     buffer << header.preambel
            << header.versionHigh
            << header.versionLow;
     return buffer;
 }
-inline MessageBuffer& operator>>(MessageBuffer& buffer, registry::RegistryMessageHeader& header)
+inline MessageBuffer& operator>>(MessageBuffer& buffer, registry::MessageHeader& header)
 {
     buffer >> header.preambel
            >> header.versionHigh
@@ -44,27 +44,27 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioPeerInfo& peerInfo)
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const registry::ParticipantAnnouncement& announcement)
 {
-    buffer << dynamic_cast<const registry::RegistryMessageHeader&>(announcement)
-           << announcement.localInfo;
+    buffer << announcement.messageHeader
+           << announcement.peerInfo;
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, registry::ParticipantAnnouncement& announcement)
 {
-    buffer >> dynamic_cast<registry::RegistryMessageHeader&>(announcement)
-           >> announcement.localInfo;
+    buffer >> announcement.messageHeader
+           >> announcement.peerInfo;
     return buffer;
 }
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const registry::KnownParticipants& participants)
 {
-    buffer << dynamic_cast<const registry::RegistryMessageHeader&>(participants)
-           << participants.participantInfos;
+    buffer << participants.messageHeader
+           << participants.peerInfos;
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, registry::KnownParticipants& participants)
 {
-    buffer >> dynamic_cast<registry::RegistryMessageHeader&>(participants)
-           >> participants.participantInfos;
+    buffer >> participants.messageHeader
+           >> participants.peerInfos;
     return buffer;
 }
 

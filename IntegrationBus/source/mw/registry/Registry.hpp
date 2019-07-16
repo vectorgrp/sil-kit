@@ -1,14 +1,13 @@
 #pragma once
 
 #include <list>
-#include "../vasio/VAsioConnection.hpp"
+#include "VAsioConnection.hpp"
 
 namespace ib {
 namespace mw {
 namespace registry {
 
 class Registry
-    : public VAsioConnection
 {
 public:
     Registry() = delete;
@@ -18,12 +17,20 @@ public:
 
     std::future<void> ProvideDomain(uint32_t domainId);
 
-    void PeerIsShuttingDown(IVAsioPeer* peer) override;
+    void PeerIsShuttingDown(IVAsioPeer* peer);
+
+    bool AllParticipantsUp() const;
 
 private:
-    auto ReceiveParticipantAnnoucement(MessageBuffer&& buffer, IVAsioPeer* peer) -> VAsioPeerInfo override;
+    // ----------------------------------------
+    // private methods
+    void OnParticipantAnnouncement(IVAsioPeer* from, const registry::ParticipantAnnouncement& announcement);
+    void SendKnownParticipants(IVAsioPeer* peer);
 
 private:
+    // ----------------------------------------
+    // private members
+    VAsioConnection _connection;
     std::unordered_map<ParticipantId, ib::mw::VAsioPeerInfo> _connectedParticipants;
     std::promise<void> _allParticipantsDown;
 };

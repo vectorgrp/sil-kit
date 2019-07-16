@@ -97,7 +97,7 @@ public:
     VAsioConnection() = default;
     VAsioConnection(const VAsioConnection&) = default;
     VAsioConnection(VAsioConnection&&) = default;
-    VAsioConnection(cfg::Config config, std::string participantName);
+    VAsioConnection(cfg::Config config, std::string participantName, ParticipantId participantId);
     ~VAsioConnection();
 
 public:
@@ -115,15 +115,23 @@ public:
     inline void RegisterIbService(const std::string& link, EndpointId endpointId, IbServiceT* service);
 
     template<class IbMessageT>
-    void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg);
+    inline void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg);
 
     void OnAllMessagesDelivered(std::function<void()> callback) {};
     void FlushSendBuffers() {};
     void RegisterNewPeerCallback(std::function<void()> callback);
 
+    inline auto Config() const -> const ib::cfg::Config&;
+
     // Temporary Helpers
+    void RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, registry::ParticipantAnnouncement)> callback);
     void OnSocketData(MessageBuffer&& buffer, IVAsioPeer* peer);
-    virtual void PeerIsShuttingDown(IVAsioPeer* /*peer*/) {};
+
+    void AcceptConnectionsOn(asio::ip::tcp::endpoint endpoint);
+    void StartIoWorker();
+
+    void RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> callback);
+    void OnPeerShutdown(IVAsioPeer* peer);
 
 private:
     // ----------------------------------------
@@ -140,6 +148,9 @@ private:
 
     template <class MsgT>
     using IbSenderMap = std::map<EndpointId, std::shared_ptr<VAsioSender<MsgT>>>;
+
+    using ParticipantAnnouncementReceiver = std::function<void(IVAsioPeer* peer, registry::ParticipantAnnouncement)>;
+
 
     using IbMessageTypes = std::tuple<
         logging::LogMsg,
@@ -183,9 +194,7 @@ private:
     >;
 
 protected:
-    void StartIoWorker();
-    void AcceptConnection();
-    virtual auto ReceiveParticipantAnnoucement(MessageBuffer&& buffer, IVAsioPeer* peer) -> VAsioPeerInfo;
+
 
 private:
     // ----------------------------------------
@@ -194,8 +203,10 @@ private:
     void ReceiveSubscriptionAnnouncement(MessageBuffer&& buffer, IVAsioPeer* peer);
     void ReceiveRegistryMessage(MessageBuffer&& buffer, IVAsioPeer* peer);
 
-    void ReceiveKnownParticpants(MessageBuffer&& buffer);
+    // Registry related send / receive methods
     void SendParticipantAnnoucement(IVAsioPeer* peer);
+    void ReceiveKnownParticpants(MessageBuffer&& buffer);
+    void ReceiveParticipantAnnouncement(MessageBuffer&& buffer, IVAsioPeer* peer);
     void ReceiveSubscriptionSentEvent();
 
     template<class IbMessageT>
@@ -209,15 +220,12 @@ private:
     // TCP Related
     void AddPeer(std::shared_ptr<VAsioTcpPeer> peer);
 
-protected:
-    asio::io_context _ioContext;
-    std::unique_ptr<asio::ip::tcp::acceptor> _tcpAcceptor;
-    std::vector<std::shared_ptr<IVAsioPeer>> _peers;
-    cfg::Config _config;
+    void AcceptNextConnection(asio::ip::tcp::acceptor& acceptor);
 
 private:
     // ----------------------------------------
     // private members
+    cfg::Config _config;
     std::string _participantName;
     ParticipantId _participantId{0};
 
@@ -231,16 +239,28 @@ private:
 
     std::vector<std::shared_ptr<IVAsioReceiver>> _rawMsgReceivers;
 
+    // FIXME: generalize the reception of registry data
+    std::vector<ParticipantAnnouncementReceiver> _participantAnnouncementReceivers;
+
+    std::vector<std::shared_ptr<IVAsioPeer>> _peers;
     std::unique_ptr<IVAsioPeer> _registry{nullptr};
 
+    asio::io_context _ioContext;
     std::thread _ioWorker;
+    std::unique_ptr<asio::ip::tcp::acceptor> _tcpAcceptor;
 
+    std::vector<std::function<void(IVAsioPeer*)>> _peerShutdownCallbacks;
     std::function<void()> _newPeerCallback{nullptr};
 };
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
+auto VAsioConnection::Config() const -> const ib::cfg::Config&
+{
+    return _config;
+}
+
 template<class IbMessageT>
 bool VAsioConnection::TryAddSubscriber(const VAsioMsgSubscriber& subscriber, IVAsioPeer* peer)
 {

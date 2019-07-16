@@ -22,10 +22,10 @@ using namespace eprosima::fastrtps::rtps;
 
 namespace tt = util::tuple_tools;
 
-FastRtpsConnection::FastRtpsConnection(cfg::Config config, std::string participantName)
+FastRtpsConnection::FastRtpsConnection(cfg::Config config, std::string participantName, ParticipantId participantId)
     : _config{std::move(config)}
     , _participantName{std::move(participantName)}
-    , _participantId{get_by_name(_config.simulationSetup.participants, _participantName).id}
+    , _participantId{participantId}
 {
 }
 

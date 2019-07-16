@@ -7,7 +7,7 @@ using namespace ib::mw::registry;
 
 using asio::ip::tcp;
 
-int main(int argc, char** argv)
+int main(int argc, char** argv) try
 {
     if (argc < 2)
     {
@@ -15,41 +15,37 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    try
+    std::string jsonFilename(argv[1]);
+
+    uint32_t domainId = 42;
+    if (argc >= 3)
     {
-        std::string jsonFilename(argv[1]);
-
-        uint32_t domainId = 42;
-        if (argc >= 3)
-        {
-            domainId = static_cast<uint32_t>(std::stoul(argv[2]));
-        }
-
-        auto ibConfig = ib::cfg::Config::FromJsonFile(jsonFilename);
-
-        std::cout << "Creating Registry for IB domain=" << domainId << std::endl;
-
-        Registry registry{ibConfig};
-        auto future = registry.ProvideDomain(domainId);
-        future.wait();
-
-        std::cout << "Press enter to shutdown registry" << std::endl;
-        std::cin.ignore();
+        domainId = static_cast<uint32_t>(std::stoul(argv[2]));
     }
-    catch (const ib::cfg::Misconfiguration& error)
-    {
-        std::cerr << "Invalid configuration: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
-        std::cin.ignore();
-        return -2;
-    }
-    catch (const std::exception& error)
-    {
-        std::cerr << "Something went wrong: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
-        std::cin.ignore();
-        return -3;
-    }
+
+    auto ibConfig = ib::cfg::Config::FromJsonFile(jsonFilename);
+
+    std::cout << "Creating Registry for IB domain=" << domainId << std::endl;
+    Registry registry{ibConfig};
+    auto future = registry.ProvideDomain(domainId);
+    future.wait();
+
+    std::cout << "Press enter to shutdown registry" << std::endl;
+    std::cin.ignore();
 
     return 0;
+}
+catch (const ib::cfg::Misconfiguration& error)
+{
+    std::cerr << "Invalid configuration: " << error.what() << std::endl;
+    std::cout << "Press enter to stop the process..." << std::endl;
+    std::cin.ignore();
+    return -2;
+}
+catch (const std::exception& error)
+{
+    std::cerr << "Something went wrong: " << error.what() << std::endl;
+    std::cout << "Press enter to stop the process..." << std::endl;
+    std::cin.ignore();
+    return -3;
 }

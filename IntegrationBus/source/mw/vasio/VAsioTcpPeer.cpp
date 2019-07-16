@@ -7,6 +7,7 @@
 #include <iostream>
 #include <iomanip>
 
+using namespace asio::ip;
 
 namespace ib {
 namespace mw {
@@ -31,14 +32,61 @@ void VAsioTcpPeer::Shutdown()
     if (_socket.is_open())
     {
         std::cout << "Shutdown connection to " << _info.participantName << std::endl;
-        _ibConnection->PeerIsShuttingDown(this);
+        _ibConnection->OnPeerShutdown(this);
         _socket.close();
     }
 }
 
-auto VAsioTcpPeer::GetInfo() -> VAsioPeerInfo&
+auto VAsioTcpPeer::GetInfo() const -> const VAsioPeerInfo&
 {
     return _info;
+}
+
+void VAsioTcpPeer::SetInfo(VAsioPeerInfo peerInfo)
+{
+    _info = std::move(peerInfo);
+}
+
+void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
+{
+    SetInfo(std::move(peerInfo));
+
+    // Resolve the host name using DNS
+    tcp::resolver resolver(_socket.get_io_context());
+
+    try
+    {
+        auto resolverEntries = resolver.resolve(GetInfo().acceptorHost, std::to_string(GetInfo().acceptorPort));
+
+        for (auto&& resolverEntry : resolverEntries)
+        {
+            try
+            {
+                _socket.connect(resolverEntry);
+                return;
+            }
+            catch (asio::system_error& /*err*/)
+            {
+                // reset the socket
+                _socket = asio::ip::tcp::socket{_socket.get_io_context()};
+            }
+        }
+
+        std::cerr << "ERROR: failed to connect to host " << GetInfo().acceptorHost << ". Tried the following addresses:\n";
+        for (auto&& resolverEntry : resolverEntries)
+        {
+            std::cerr << " - " << tcp::endpoint{resolverEntry} << "\n";
+        }
+        return;
+    }
+    catch (asio::system_error& err)
+    {
+        std::cerr
+            << "ERROR: Unable to resolve hostname \"" << GetInfo().acceptorHost << "\""
+            << ": " << err.what()
+            << "\n";
+        return;
+    }
 }
 
 void VAsioTcpPeer::SendIbMsg(MessageBuffer buffer)

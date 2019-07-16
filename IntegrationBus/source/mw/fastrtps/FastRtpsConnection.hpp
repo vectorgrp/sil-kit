@@ -44,7 +44,7 @@ public:
     FastRtpsConnection() = default;
     FastRtpsConnection(const FastRtpsConnection&) = default;
     FastRtpsConnection(FastRtpsConnection&&) = default;
-    FastRtpsConnection(cfg::Config config, std::string participantName);
+    FastRtpsConnection(cfg::Config config, std::string participantName, ParticipantId participantId);
 
 public:
     // ----------------------------------------

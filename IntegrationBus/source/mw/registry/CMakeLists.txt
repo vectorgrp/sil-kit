@@ -3,7 +3,6 @@ find_package(Threads REQUIRED)
 add_library(IbMwRegistry STATIC
     Registry.hpp
     Registry.cpp
-    ../vasio/VAsioConnection.hpp
 )
 
 target_include_directories(IbMwRegistry
@@ -19,6 +18,7 @@ endif (MSVC)
 add_mvsc_ib_include_filter()
 
 target_link_libraries(IbMwRegistry
+	PUBLIC
     IbMwVAsio
     IbConfig
     Threads::Threads

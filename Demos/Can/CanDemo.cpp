@@ -96,7 +96,6 @@ int main(int argc, char** argv)
         }   
 
         auto ibConfig = ib::cfg::Config::FromJsonFile(configFilename);
-
         auto sleepTimePerTick = 1000ms;
 
         std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
@@ -111,13 +110,13 @@ int main(int argc, char** argv)
 
         canController->RegisterTransmitStatusHandler(&AckCallback);
         canController->RegisterReceiveMessageHandler(&ReceiveMessage);
-        canController->SetBaudRate(10'000, 1'000'000);
-        canController->Start();
 
         // Set an Init Handler
-        participantController->SetInitHandler([&participantName](auto initCmd) {
+        participantController->SetInitHandler([canController, &participantName](auto initCmd) {
 
             std::cout << "Initializing " << participantName << std::endl;
+            canController->SetBaudRate(10'000, 1'000'000);
+            canController->Start();
 
         });
 

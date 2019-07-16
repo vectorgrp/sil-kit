@@ -14,11 +14,12 @@ template <class T> struct Zero { using Type = T; };
 
 using asio::ip::tcp;
 
-VAsioConnection::VAsioConnection(cfg::Config config, std::string participantName)
+VAsioConnection::VAsioConnection(cfg::Config config, std::string participantName, ParticipantId participantId)
     : _config{std::move(config)}
     , _participantName{std::move(participantName)}
-    , _participantId{get_by_name(_config.simulationSetup.participants, _participantName).id}
-{}
+    , _participantId{participantId}
+{
+}
 
 VAsioConnection::~VAsioConnection()
 {
@@ -31,53 +32,48 @@ VAsioConnection::~VAsioConnection()
 
 void VAsioConnection::JoinDomain(uint32_t domainId)
 {
-    assert(!_tcpAcceptor);
-
     // accept connection from other peers
     // let the operating system choose a free port
-    _tcpAcceptor = std::make_unique<asio::ip::tcp::acceptor>(
-        _ioContext,
-        tcp::endpoint(asio::ip::address::from_string("127.0.0.1"), 0)
-    );
-    AcceptConnection();
-    std::cout << "Listening on " << _tcpAcceptor->local_endpoint() << std::endl;
+    AcceptConnectionsOn(tcp::endpoint(asio::ip::address::from_string("127.0.0.1"), 0));
+
+    VAsioPeerInfo registryInfo;
+    registryInfo.participantName = "VibRegistry";
+    registryInfo.participantId = 0;
+    registryInfo.acceptorHost = "127.0.0.1";
+    registryInfo.acceptorPort = static_cast<uint16_t>(42000 + domainId);
+
+    std::cout << "INFO: Connecting to registry\n";
 
     auto registry = std::make_unique<VAsioTcpPeer>(_ioContext, this);
-
-    registry->GetInfo().participantName = "Registry";
-    registry->GetInfo().participantId = 0;
-    registry->GetInfo().acceptorHost = "127.0.0.1";
-    registry->GetInfo().acceptorPort = static_cast<uint16_t>(42000 + domainId);
-
-    std::cout << "Connecting to registry!" << std::endl;
-    auto remoteEndpoint = tcp::endpoint(
-        asio::ip::address::from_string(registry->GetInfo().acceptorHost),
-        registry->GetInfo().acceptorPort
-    );
-    registry->Socket().connect(remoteEndpoint);
+    registry->Connect(std::move(registryInfo));
+    // FIXME: throw on connection failure!
     registry->StartAsyncRead();
+
     SendParticipantAnnoucement(registry.get());
     _registry = std::move(registry);
     
     StartIoWorker();    
 }
 
-auto VAsioConnection::ReceiveParticipantAnnoucement(MessageBuffer&& buffer, IVAsioPeer* peer) -> VAsioPeerInfo
+void VAsioConnection::ReceiveParticipantAnnouncement(MessageBuffer&& buffer, IVAsioPeer* peer)
 {
     registry::ParticipantAnnouncement announcement;
     buffer >> announcement;
 
-    registry::RegistryMessageHeader reference;
-    if (dynamic_cast<registry::RegistryMessageHeader&>(announcement) != reference)
+    registry::MessageHeader reference;
+    if (announcement.messageHeader != reference)
     {
-        std::cout << "Received participant announcement message with unsupported protocol specification"
-                  << std::endl;
+        std::cerr << "WARNING: Received participant announcement message with unsupported protocol specification\n";
+        return;
     }
 
-    peer->GetInfo() = announcement.localInfo;
-    std::cout << "Received participant announcement of " << peer->GetInfo().participantName << std::endl;
+    std::cout << "INFO: Received participant announcement from " << announcement.peerInfo.participantName << std::endl;
 
-    return announcement.localInfo;
+    peer->SetInfo(announcement.peerInfo);
+    for (auto&& receiver : _participantAnnouncementReceivers)
+    {
+        receiver(peer, announcement);
+    }
 }
 
 void VAsioConnection::SendParticipantAnnoucement(IVAsioPeer* peer)
@@ -88,19 +84,20 @@ void VAsioConnection::SendParticipantAnnoucement(IVAsioPeer* peer)
         _tcpAcceptor->local_endpoint().address().to_string(),
         _tcpAcceptor->local_endpoint().port()
     };
+
     registry::ParticipantAnnouncement announcement;
-    announcement.localInfo = localInfo;
+    announcement.peerInfo = localInfo;
 
     MessageBuffer buffer;
-    uint32_t msgSizePlaceholder{ 0u };
+    uint32_t msgSizePlaceholder{0u};
 
     buffer << msgSizePlaceholder
            << VAsioMsgKind::IbRegistryMessage
            << registry::RegistryMessageKind::ParticipantAnnouncement
            << announcement;
 
+    std::cout << "Sending participant announcement to " << peer->GetInfo().participantName << std::endl;
     peer->SendIbMsg(std::move(buffer));
-    std::cout << "Send participant announcement to " << peer->GetInfo().participantName << std::endl;
 }
 
 void VAsioConnection::ReceiveSubscriptionSentEvent()
@@ -116,8 +113,8 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
     registry::KnownParticipants participantsMsg;
     buffer >> participantsMsg;
 
-    registry::RegistryMessageHeader reference;
-    if (dynamic_cast<registry::RegistryMessageHeader&>(participantsMsg) != reference)
+    registry::MessageHeader reference;
+    if (participantsMsg.messageHeader != reference)
     {
         std::cout << "Received known participant message with unsupported protocol specification"
                   << std::endl;
@@ -126,25 +123,18 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
 
     std::cout << "Received known participant message" << std::endl;
 
-    for (auto otherInfo : participantsMsg.participantInfos)
+    for (auto&& peerInfo : participantsMsg.peerInfos)
     {
         std::cout
-            << "Connecting to " << otherInfo.participantName
-            << " with Id " << otherInfo.participantId
-            << " on " << otherInfo.acceptorHost << ":" << otherInfo.acceptorPort
+            << "Connecting to " << peerInfo.participantName
+            << " with Id " << peerInfo.participantId
+            << " on " << peerInfo.acceptorHost << ":" << peerInfo.acceptorPort
             << std::endl;
 
-        // make dns resolve
-        tcp::resolver resolver(_ioContext);
-        auto endpoints = resolver.resolve(otherInfo.acceptorHost, std::to_string(otherInfo.acceptorPort));
-        tcp::endpoint remoteEndpoint = *endpoints.begin();
-        
         auto peer = std::make_unique<VAsioTcpPeer>(_ioContext, this);
-        peer->Socket().connect(remoteEndpoint);
+        peer->Connect(std::move(peerInfo));
 
-        peer->GetInfo() = otherInfo;
-
-        // we connected to other peer. tell him who we are.
+        // We connected to the other peer. tell him who we are.
         SendParticipantAnnoucement(peer.get());
 
         AddPeer(std::move(peer));
@@ -153,7 +143,7 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
 
 void VAsioConnection::StartIoWorker()
 {
-    _ioWorker = std::thread{ [this]() {
+    _ioWorker = std::thread{[this]() {
         try
         {
             _ioContext.run();
@@ -166,23 +156,36 @@ void VAsioConnection::StartIoWorker()
             std::cin.ignore();
             return -1;
         }
-    } };
+    }};
 }
 
-void VAsioConnection::AcceptConnection()
+void VAsioConnection::AcceptConnectionsOn(asio::ip::tcp::endpoint endpoint)
 {
-    assert(_tcpAcceptor);
-    auto newConnection = std::make_shared<VAsioTcpPeer>(_tcpAcceptor->get_executor().context(), this);
+    assert(!_tcpAcceptor);
 
-    _tcpAcceptor->async_accept(newConnection->Socket(),
-        [this, newConnection](const asio::error_code& error) mutable
+    _tcpAcceptor = std::make_unique<asio::ip::tcp::acceptor>(
+        _ioContext,
+        std::move(endpoint)
+        );
+
+    std::cout << "INFO: VAsioConnection is listening on " << _tcpAcceptor->local_endpoint() << std::endl;
+
+    AcceptNextConnection(*_tcpAcceptor);
+}
+
+void VAsioConnection::AcceptNextConnection(asio::ip::tcp::acceptor& acceptor)
+{
+    auto newConnection = std::make_shared<VAsioTcpPeer>(acceptor.get_executor().context(), this);
+
+    acceptor.async_accept(newConnection->Socket(),
+        [this, newConnection, &acceptor](const asio::error_code& error) mutable
         {
             if (!error)
             {
                 std::cout << newConnection->Socket().remote_endpoint() << " connected to me!" << std::endl;
                 AddPeer(std::move(newConnection));
             }
-            AcceptConnection();
+            AcceptNextConnection(acceptor);
         }
     );
 }
@@ -212,9 +215,21 @@ void VAsioConnection::AddPeer(std::shared_ptr<VAsioTcpPeer> newPeer)
 
 void VAsioConnection::RegisterNewPeerCallback(std::function<void()> callback)
 {
-    _newPeerCallback = callback;
+    _newPeerCallback = std::move(callback);
 }
 
+void VAsioConnection::RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> callback)
+{
+    _peerShutdownCallbacks.emplace_back(std::move(callback));
+}
+
+void VAsioConnection::OnPeerShutdown(IVAsioPeer* peer)
+{
+    for (auto&& callback : _peerShutdownCallbacks)
+    {
+        callback(peer);
+    }
+}
 
 void VAsioConnection::OnSocketData(MessageBuffer&& buffer, IVAsioPeer* peer)
 {
@@ -269,6 +284,11 @@ void VAsioConnection::ReceiveRawIbMessage(MessageBuffer&& buffer)
     _rawMsgReceivers[receiverIdx]->ReceiveMsg(std::move(buffer));
 }
 
+void VAsioConnection::RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, registry::ParticipantAnnouncement)> callback)
+{
+    _participantAnnouncementReceivers.emplace_back(std::move(callback));
+}
+
 void VAsioConnection::ReceiveRegistryMessage(MessageBuffer&& buffer, IVAsioPeer* peer)
 {
     registry::RegistryMessageKind kind;
@@ -277,16 +297,13 @@ void VAsioConnection::ReceiveRegistryMessage(MessageBuffer&& buffer, IVAsioPeer*
     {
     case registry::RegistryMessageKind::Invalid:
         std::cerr << "WARNING: Received message with RegistryMessageKind::Invalid\n";
-        break;
+        return;
     case registry::RegistryMessageKind::ParticipantAnnouncement:
-        ReceiveParticipantAnnoucement(std::move(buffer), peer);
-        break;
+        return ReceiveParticipantAnnouncement(std::move(buffer), peer);
     case registry::RegistryMessageKind::KnownParticipants:
-        ReceiveKnownParticpants(std::move(buffer));
-        break;
+        return ReceiveKnownParticpants(std::move(buffer));
     case registry::RegistryMessageKind::SubscriptionSent:
-        ReceiveSubscriptionSentEvent();
-        break;
+        return ReceiveSubscriptionSentEvent();
     }
 }
 

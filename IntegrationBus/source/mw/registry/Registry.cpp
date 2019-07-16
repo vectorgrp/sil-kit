@@ -8,58 +8,61 @@ using namespace ib::mw::registry;
 using asio::ip::tcp;
 
 Registry::Registry(ib::cfg::Config cfg)
+    : _connection{std::move(cfg), "VibRegistry", 0}
 {
-    _config = cfg;
+    _connection.RegisterMessageReceiver([this](IVAsioPeer* from, const registry::ParticipantAnnouncement& announcement)
+    {
+        this->OnParticipantAnnouncement(from, announcement);
+    });
+
+    _connection.RegisterPeerShutdownCallback([this](IVAsioPeer* peer) { PeerIsShuttingDown(peer); });
 }
 
 std::future<void> Registry::ProvideDomain(uint32_t domainId)
 {
-    assert(!_tcpAcceptor);
-
     // accept connection from all participants
     // at the moment registry listens on 0.0.0.0:(42000+domainId)
     auto registryPort = static_cast<uint16_t>(42000 + domainId);
-    _tcpAcceptor = std::make_unique<asio::ip::tcp::acceptor>(_ioContext, tcp::endpoint(tcp::v4(), registryPort));
-    AcceptConnection();
-    std::cout << "Listening on " << _tcpAcceptor->local_endpoint() << std::endl;
-
-    StartIoWorker();
+    _connection.AcceptConnectionsOn(tcp::endpoint(tcp::v4(), registryPort));
+    // FIXME also accept connections on V6
+    _connection.StartIoWorker();
 
     return _allParticipantsDown.get_future();
 }
 
-auto Registry::ReceiveParticipantAnnoucement(MessageBuffer&& buffer, IVAsioPeer* peer) -> VAsioPeerInfo
+void Registry::OnParticipantAnnouncement(IVAsioPeer* from, const registry::ParticipantAnnouncement& announcement)
 {
-    auto info = VAsioConnection::ReceiveParticipantAnnoucement(std::move(buffer), peer);
+    SendKnownParticipants(from);
+
+    _connectedParticipants[announcement.peerInfo.participantId] = announcement.peerInfo;
+
+    if (AllParticipantsUp())
+    {
+        std::cout << "INFO: All Participants up" << std::endl;
+    }
+}
+
+void Registry::SendKnownParticipants(IVAsioPeer* peer)
+{
+    std::cout << "INFO: Sending known participant message to " << peer->GetInfo().participantName << "\n";
 
     registry::KnownParticipants knownParticipantsMsg;
-    for (auto && connectedParticipant : _connectedParticipants)
-    {
-        knownParticipantsMsg.participantInfos.push_back(connectedParticipant.second);
-    }
 
-    _connectedParticipants[info.participantId] = info;
+    for (auto&& connectedParticipant : _connectedParticipants)
+    {
+        auto&& peerInfo = connectedParticipant.second;
+        knownParticipantsMsg.peerInfos.push_back(peerInfo);
+    }
 
     MessageBuffer sendBuffer;
-    uint32_t msgSizePlaceholder{ 0u };
-    sendBuffer << msgSizePlaceholder
-               << VAsioMsgKind::IbRegistryMessage
-               << registry::RegistryMessageKind::KnownParticipants
-               << knownParticipantsMsg;
+    uint32_t msgSizePlaceholder{0u};
+    sendBuffer
+        << msgSizePlaceholder
+        << VAsioMsgKind::IbRegistryMessage
+        << registry::RegistryMessageKind::KnownParticipants
+        << knownParticipantsMsg;
+
     peer->SendIbMsg(std::move(sendBuffer));
-    std::cout << "Send known participant message" << std::endl;
-
-    bool allParticipantsUp = true;
-    for (auto&& participant : _config.simulationSetup.participants)
-    {
-        allParticipantsUp &= _connectedParticipants.find(participant.id) != _connectedParticipants.end();
-    }
-    if (allParticipantsUp)
-    {
-        std::cout << "All Participants up" << std::endl;
-    }
-
-    return info;
 }
 
 void Registry::PeerIsShuttingDown(IVAsioPeer* peer)
@@ -68,6 +71,19 @@ void Registry::PeerIsShuttingDown(IVAsioPeer* peer)
 
     if (_connectedParticipants.empty())
     {
-        std::cout << "All Participants down" << std::endl;
+        std::cout << "INFO: All Participants down" << std::endl;
+        _allParticipantsDown.set_value();
     }
+}
+
+bool Registry::AllParticipantsUp() const
+{
+    for (auto&& participant : _connection.Config().simulationSetup.participants)
+    {
+        if (_connectedParticipants.count(participant.id) != 1)
+        {
+            return false;
+        }
+    }
+    return true;
 }

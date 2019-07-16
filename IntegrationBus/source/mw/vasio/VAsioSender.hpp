@@ -34,5 +34,6 @@ private:
     std::vector<RemoteReceiver> _remoteReceivers;
 };
 
+
 } // mw
 } // namespace ib

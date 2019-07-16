@@ -41,24 +41,22 @@ namespace tt = util::tuple_tools;
 // Anonymous namespace for Helper Traits and Functions
 namespace {
 
-    template<class T, class U>
-    struct IsControllerMap : std::false_type {};
-    template<class T, class U>
-    struct IsControllerMap<std::unordered_map<EndpointId, std::unique_ptr<T>>, U> : std::is_base_of<T, U> {};
+template<class T, class U>
+struct IsControllerMap : std::false_type {};
+template<class T, class U>
+struct IsControllerMap<std::unordered_map<EndpointId, std::unique_ptr<T>>, U> : std::is_base_of<T, U> {};
 
 } // namespace anonymous
 
 template <class IbConnectionT>
 ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& participantName)
     : _config{std::move(config)}
-    , _participantName(participantName)
+    , _participant{&get_by_name(_config.simulationSetup.participants, participantName)}
+    , _participantName{participantName}
+    , _participantId{_participant->id}
     , _logger{spdlog::create<spdlog::sinks::null_sink_st>(_participantName)}
-    , _ibConnection(_config, participantName)
+    , _ibConnection{_config, participantName, _participantId}
 {
-    // FIXME: move to initialize list
-    _participant = &get_by_name(_config.simulationSetup.participants, participantName);
-    _participantId = _participant->id;
-
     // we immediately drop the logger from the spdlog registry, because this cannot be controlled
     // by a user of the IntegrationBus.dll(!), which can have strange side effects, e.g., a stale
     // but logger even after the ComAdapter was destroyed. A user of the IntegrationBus.dll can

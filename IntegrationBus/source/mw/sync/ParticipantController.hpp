@@ -23,6 +23,7 @@ class TaskRunner
 {
 public:
     TaskRunner(ParticipantController& controller);
+    virtual ~TaskRunner() {}
     
     void Run();
     void GrantReceived();
@@ -31,7 +32,7 @@ public:
     virtual void FinishedStep(ParticipantController& controller) = 0;
 
 private:
-    ParticipantController & _controller;
+    ParticipantController& _controller;
 };
 
 class ParticipantController

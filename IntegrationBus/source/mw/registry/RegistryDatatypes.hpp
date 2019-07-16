@@ -11,15 +11,15 @@ namespace ib {
 namespace mw {
 namespace registry {
 
-struct RegistryMessageHeader
+struct MessageHeader
 {
-    // Integration Bus Participant Announcment
-    std::array<char, 4> preambel{{'I', 'B', 'P', 'A'}};
+    // Integration Bus Participant Announcement
+    std::array<char, 5> preambel{{'V', 'I', 'B', 'P', 'A'}};
     uint16_t versionHigh = 1;
     uint16_t versionLow = 0;
 };
 
-inline bool operator!=(const registry::RegistryMessageHeader& lhs, const registry::RegistryMessageHeader& rhs)
+inline bool operator!=(const registry::MessageHeader& lhs, const registry::MessageHeader& rhs)
 {
     return lhs.preambel != rhs.preambel
         || lhs.versionHigh != rhs.versionHigh
@@ -27,18 +27,18 @@ inline bool operator!=(const registry::RegistryMessageHeader& lhs, const registr
 }
 
 struct ParticipantAnnouncement
-    : public RegistryMessageHeader
 {
-    ib::mw::VAsioPeerInfo localInfo;
+    MessageHeader messageHeader;
+    ib::mw::VAsioPeerInfo peerInfo;
 };
 
 struct KnownParticipants
-    : public RegistryMessageHeader
 {
-    std::vector<ib::mw::VAsioPeerInfo> participantInfos;
+    MessageHeader messageHeader;
+    std::vector<ib::mw::VAsioPeerInfo> peerInfos;
 };
 
-enum class RegistryMessageKind
+enum class RegistryMessageKind : uint8_t
 {
     Invalid = 0,
     ParticipantAnnouncement = 1,

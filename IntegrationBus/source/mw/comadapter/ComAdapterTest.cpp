@@ -19,7 +19,7 @@ using namespace ib::cfg;
 
 struct MockIbConnection
 {
-    MockIbConnection(Config /*config*/, std::string /*participantName*/) {};
+    MockIbConnection(Config /*config*/, std::string /*participantName*/, ParticipantId /*participantId*/) {};
 
     void joinDomain(uint32_t /*domainId*/) {};
 
