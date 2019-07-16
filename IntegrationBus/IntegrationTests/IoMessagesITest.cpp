@@ -7,6 +7,7 @@
 
 #include "ComAdapter.hpp"
 #include "ComAdapter_impl.hpp"
+#include "Registry.hpp"
 #include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
@@ -20,6 +21,7 @@ namespace {
 
 using namespace std::chrono_literals;
 using namespace ib::mw;
+using namespace ib::mw::registry;
 
 using testing::_;
 using testing::A;
@@ -32,8 +34,7 @@ class IoMessageITest : public testing::Test
 {
 protected:
     IoMessageITest()
-        : domainId{static_cast<uint32_t>(GetTestPid())}
-        , topics(4)
+        : topics(4)
     {
         topics[0].name = "DIO1";
         topics[1].name = "DIO2";
@@ -54,33 +55,6 @@ protected:
             ->AddAnalogIn(topics[3].name);
 
         ibConfig = cfgBuilder.Build();
-        
-        pubComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Sender");
-        pubComAdapter->joinIbDomain(domainId);
-
-        subComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Receiver");
-        subComAdapter->joinIbDomain(domainId);
-    }
-
-
-    void Subscribe()
-    {
-        auto dio1 = subComAdapter->CreateDigitalIn(topics[0].name);
-        SetExpectation(topics[0], dio1 , true);
-        auto dio2 = subComAdapter->CreateDigitalIn(topics[1].name);
-        SetExpectation(topics[1], dio2, false);
-        auto aio1 = subComAdapter->CreateAnalogIn(topics[2].name);
-        SetExpectation(topics[2], aio1, 5.0);
-        auto aio2 = subComAdapter->CreateAnalogIn(topics[3].name);
-        SetExpectation(topics[3], aio2, 17.3);
-    }
-
-    void Publish()
-    {
-        pubComAdapter->CreateDigitalOut(topics[0].name);
-        pubComAdapter->CreateDigitalOut(topics[1].name);
-        pubComAdapter->CreateAnalogOut(topics[2].name);
-        pubComAdapter->CreateAnalogOut(topics[3].name);
     }
 
     struct Topic
@@ -88,7 +62,6 @@ protected:
         std::string name;
         std::promise<bool> testOK;
     };
-
 
     template<class InPortT>
     static void SetExpectation(Topic& topic, InPortT* port, const typename InPortT::ValueType& expectedValue)
@@ -103,20 +76,38 @@ protected:
     }
 
 protected:
-    const uint32_t domainId;
     ib::cfg::Config ibConfig;
 
     std::vector<Topic> topics;
-
-    std::unique_ptr<ComAdapter<FastRtpsConnection>> pubComAdapter;
-    std::unique_ptr<ComAdapter<FastRtpsConnection>> subComAdapter;
 };
     
 TEST_F(IoMessageITest, receive_init_values)
 {
-    Subscribe();
+    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
-    std::thread publishThread{[this]() { this->Publish(); }};
+    std::unique_ptr<ComAdapter<FastRtpsConnection>> pubComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Sender");
+    pubComAdapter->joinIbDomain(domainId);
+
+    std::unique_ptr<ComAdapter<FastRtpsConnection>> subComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Receiver");
+    subComAdapter->joinIbDomain(domainId);
+
+    auto dio1 = subComAdapter->CreateDigitalIn(topics[0].name);
+    SetExpectation(topics[0], dio1, true);
+    auto dio2 = subComAdapter->CreateDigitalIn(topics[1].name);
+    SetExpectation(topics[1], dio2, false);
+    auto aio1 = subComAdapter->CreateAnalogIn(topics[2].name);
+    SetExpectation(topics[2], aio1, 5.0);
+    auto aio2 = subComAdapter->CreateAnalogIn(topics[3].name);
+    SetExpectation(topics[3], aio2, 17.3);
+
+    std::thread publishThread{
+        [this, &pubComAdapter]()
+    {
+        pubComAdapter->CreateDigitalOut(topics[0].name);
+        pubComAdapter->CreateDigitalOut(topics[1].name);
+        pubComAdapter->CreateAnalogOut(topics[2].name);
+        pubComAdapter->CreateAnalogOut(topics[3].name);
+    }};
 
     for (auto&& topic : topics)
     {
@@ -126,6 +117,50 @@ TEST_F(IoMessageITest, receive_init_values)
         EXPECT_TRUE(testOK.get());
     }
     
+    publishThread.join();
+}
+
+TEST_F(IoMessageITest, receive_init_values_vasio)
+{
+    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+
+    std::unique_ptr<Registry> registry = std::make_unique<Registry>(ibConfig);
+    registry->ProvideDomain(domainId);
+
+    std::unique_ptr<ComAdapter<VAsioConnection>> pubComAdapter = std::make_unique<ComAdapter<VAsioConnection>>(ibConfig, "Sender");
+    pubComAdapter->joinIbDomain(domainId);
+
+    std::unique_ptr<ComAdapter<VAsioConnection>> subComAdapter = std::make_unique<ComAdapter<VAsioConnection>>(ibConfig, "Receiver");
+    subComAdapter->joinIbDomain(domainId);
+
+    auto dio1 = subComAdapter->CreateDigitalIn(topics[0].name);
+    SetExpectation(topics[0], dio1, true);
+    auto dio2 = subComAdapter->CreateDigitalIn(topics[1].name);
+    SetExpectation(topics[1], dio2, false);
+    auto aio1 = subComAdapter->CreateAnalogIn(topics[2].name);
+    SetExpectation(topics[2], aio1, 5.0);
+    auto aio2 = subComAdapter->CreateAnalogIn(topics[3].name);
+    SetExpectation(topics[3], aio2, 17.3);
+
+    std::this_thread::sleep_for(500ms);
+
+    std::thread publishThread{
+        [this, &pubComAdapter]()
+    {
+        pubComAdapter->CreateDigitalOut(topics[0].name);
+        pubComAdapter->CreateDigitalOut(topics[1].name);
+        pubComAdapter->CreateAnalogOut(topics[2].name);
+        pubComAdapter->CreateAnalogOut(topics[3].name);
+    }};
+
+    for (auto&& topic : topics)
+    {
+        auto&& testOK = topic.testOK.get_future();
+        auto futureStatus = testOK.wait_for(5s);
+        ASSERT_EQ(futureStatus, std::future_status::ready);
+        EXPECT_TRUE(testOK.get());
+    }
+
     publishThread.join();
 }
 

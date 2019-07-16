@@ -7,6 +7,7 @@
 
 #include "ComAdapter.hpp"
 #include "ComAdapter_impl.hpp"
+#include "Registry.hpp"
 #include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
@@ -20,6 +21,7 @@ namespace {
 
 using namespace std::chrono_literals;
 using namespace ib::mw;
+using namespace ib::mw::registry;
 
 using testing::_;
 using testing::A;
@@ -32,7 +34,6 @@ class CatchExceptionsInCallbacksITest : public testing::Test
 {
 protected:
     CatchExceptionsInCallbacksITest()
-        : domainId{static_cast<uint32_t>(GetTestPid())}
     {
         ib::cfg::ConfigBuilder cfgBuilder("CatchMeIfYouCanTestConfig");
         auto&& simulationSetup = cfgBuilder.SimulationSetup();
@@ -42,18 +43,10 @@ protected:
             ->AddGenericSubscriber("CrashTopic");
 
         ibConfig = cfgBuilder.Build();
-        
-        pubComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Sender");
-        pubComAdapter->joinIbDomain(domainId);
-
-        subComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Receiver");
-        subComAdapter->joinIbDomain(domainId);
     }
-
 
     void Subscribe()
     {
-        auto subscriber = subComAdapter->CreateGenericSubscriber("CrashTopic");
         subscriber->SetReceiveMessageHandler(
             [this](auto* /*subscriber*/, const std::vector<uint8_t>& /*data*/)
             {
@@ -65,26 +58,62 @@ protected:
 
     void Publish()
     {
-        auto publisher = pubComAdapter->CreateGenericPublisher("CrashTopic");
         std::vector<uint8_t> dummyPayload;
         publisher->Publish(std::move(dummyPayload));
     }
 
 protected:
-    const uint32_t domainId;
     ib::cfg::Config ibConfig;
-
+    ib::sim::generic::IGenericPublisher* publisher{nullptr};
+    ib::sim::generic::IGenericSubscriber* subscriber{nullptr};
     std::promise<bool> testOk;
-
-    std::unique_ptr<ComAdapter<FastRtpsConnection>> pubComAdapter;
-    std::unique_ptr<ComAdapter<FastRtpsConnection>> subComAdapter;
 };
     
 TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash)
 {
+    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+
+    std::unique_ptr<ComAdapter<FastRtpsConnection>> pubComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Sender");
+    pubComAdapter->joinIbDomain(domainId);
+
+    std::unique_ptr<ComAdapter<FastRtpsConnection>> subComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Receiver");
+    subComAdapter->joinIbDomain(domainId);
+
+    publisher = pubComAdapter->CreateGenericPublisher("CrashTopic");
+    subscriber = subComAdapter->CreateGenericSubscriber("CrashTopic");
+
     Subscribe();
 
     std::thread publishThread{[this]{ this->Publish(); }};
+
+    auto&& future = testOk.get_future();
+    auto futureStatus = future.wait_for(5s);
+    ASSERT_EQ(futureStatus, std::future_status::ready);
+    EXPECT_TRUE(future.get());
+
+    publishThread.join();
+}
+
+TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
+{
+    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+
+    std::unique_ptr<Registry> registry = std::make_unique<Registry>(ibConfig);
+    registry->ProvideDomain(domainId);
+
+    std::unique_ptr<ComAdapter<VAsioConnection>> pubComAdapter = std::make_unique<ComAdapter<VAsioConnection>>(ibConfig, "Sender");
+    pubComAdapter->joinIbDomain(domainId);
+
+    std::unique_ptr<ComAdapter<VAsioConnection>> subComAdapter = std::make_unique<ComAdapter<VAsioConnection>>(ibConfig, "Receiver");
+    subComAdapter->joinIbDomain(domainId);
+
+    publisher = pubComAdapter->CreateGenericPublisher("CrashTopic");
+    subscriber = subComAdapter->CreateGenericSubscriber("CrashTopic");
+
+    Subscribe();
+    std::this_thread::sleep_for(500ms);
+
+    std::thread publishThread{[this] { this->Publish(); }};
 
     auto&& future = testOk.get_future();
     auto futureStatus = future.wait_for(5s);
