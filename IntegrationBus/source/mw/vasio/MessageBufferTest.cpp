@@ -102,6 +102,33 @@ TEST(MwVAsio_MessageBuffer, std_vector_string)
 
     EXPECT_EQ(in, out);
 }
+
+TEST(MwVAsio_MessageBuffer, std_array_uint8_t)
+{
+    ib::mw::MessageBuffer buffer;
+
+    std::array<uint8_t, 8> in{ 'A', 2, 3, 4, '.'};
+    std::array<uint8_t, 8> out;
+
+    buffer << in;
+    buffer >> out;
+
+    EXPECT_EQ(in, out);
+}
+
+TEST(MwVAsio_MessageBuffer, std_array_string)
+{
+    ib::mw::MessageBuffer buffer;
+
+    std::array<std::string, 6> in{"this", "is", "a", "test", "string"};
+    std::array<std::string, 6> out;
+
+    buffer << in;
+    buffer >> out;
+
+    EXPECT_EQ(in, out);
+}
+
 TEST(MwVAsio_MessageBuffer, std_chrono_nanoseconds)
 {
     ib::mw::MessageBuffer buffer;

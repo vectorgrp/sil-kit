@@ -140,8 +140,6 @@ public:
     inline MessageBuffer& operator<<(const std::vector<ValueT>& vector);
     template<typename ValueT>
     inline MessageBuffer& operator>>(std::vector<ValueT>& vector);
-    // util::vector_view<uint8_t>
-    inline MessageBuffer& operator<<(const util::vector_view<const uint8_t>& vector_view);
     // --------------------------------------------------------------------------------
     // std::array<uint8_t, SIZE>
     template<size_t SIZE>
@@ -240,25 +238,6 @@ MessageBuffer& MessageBuffer::operator<<(const std::vector<uint8_t>& vector)
 
     return *this;
 }
-// util::vector_view<uint8_t>
-MessageBuffer& MessageBuffer::operator<<(const util::vector_view<const uint8_t>& vector_view)
-{
-    if (vector_view.size() > std::numeric_limits<uint32_t>::max())
-        throw end_of_buffer{};
-
-    *this << static_cast<uint32_t>(vector_view.size());
-
-    if (_wPos + vector_view.size() > _storage.size())
-    {
-        _storage.resize(_wPos + vector_view.size());
-    }
-
-    std::copy(vector_view.begin(), vector_view.end(), _storage.begin() + _wPos);
-    _wPos += vector_view.size();
-
-    return *this;
-}
-// Deserialization for std::vector<uint8_t> and util::vector_view<uint8_t>
 MessageBuffer& MessageBuffer::operator>>(std::vector<uint8_t>& vector)
 {
     uint32_t vectorSize{0u};
