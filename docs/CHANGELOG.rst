@@ -5,36 +5,55 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on [Keep a Changelog] (http://keepachangelog.com/en/1.0.0/).
 
-[Unreleased] - 2019-??-??
--------------------------
-
+[Sprint-29] - 2019-07-17
+------------------------
 Added
 ~~~~~
-
-Removed
-~~~~~~~
+- It is now possible to reconfigure FlexRay TX-Buffers during the simulation, e.g., to change offset
+  and repetition. Cf., :cpp:func:`IFrController::ReconfigureTxBuffer()<ib::sim::fr::IFrController::ReconfigureTxBuffer()>`
 
 Changed
 ~~~~~~~
 - This is the last entry to CHANGELOG.md. From now on, the changelog
-  will be maintained in docs/overview/CHANGELOG.rst.
+  will be maintained in docs/CHANGELOG.rst.
 - The IB API Headers are no longer added to every project. Instead, a dedicated
   header project IbApi has been added.
-
+- The IbLauncher now prefers Python 3 if available
 
 Fixed
 ~~~~~
+- Fix logger nullptr bug in SystemMonitor
+- Fast-RTPS ComAdapter creation is now thread safe
 
-- IbLauncher can now be started from every directory location on Linux and Windows. The global 
-  IntegrationBus-BinPath and IntegrationBus-LibPath are now set to absolute paths inside the IbLauncher
-  project. Furthermore, the IbLauncher shell script now sets absolute paths for the bin and lib path.
+Interface compatibility with Sprint-28
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): No
+- Application software interface (API): Yes
+- Application middleware interface: Yes
+
+
+[Sprint-28] - 2019-07-03
+-------------------------
+
+Added
+~~~~~
+- New demo that shows how integration tests can be written for the Vector Integration Bus.
+
+Fixed
+~~~~~
+- IbLauncher can now be started from every directory location on Linux and Windows. The global
+  IntegrationBus-BinPath and IntegrationBus-LibPath are now set to absolute paths inside the
+  IbLauncher project. Furthermore, the IbLauncher shell script now sets absolute paths for the bin
+  and lib path.
+- FastRTPS socket buffer sizes now use default values when not set in IbConfig. This could lead to
+  random socket buffer sizes in release builds.
+- VIB integration tests now can be launched directly from the Visual Studio test runner.
 
 Interface compatibility with Sprint-27:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-* Application binary interface (ABI): Yes/No
-* Application software interface (API): Yes/No
-* Application middleware interface: Yes/No
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Application middleware interface: Yes
 
 
 [Sprint-27] - 2019-06-19
@@ -42,13 +61,11 @@ Interface compatibility with Sprint-27:
 
 Changed
 ~~~~~~~
-
-- NetworkSimulator VIBE is now only used for configured links. For all other links, 
+- NetworkSimulator VIBE is now only used for configured links. For all other links,
   the trivial simulation is used.
 
 Fixed
 ~~~~~
-
 - The IB Launcher will now work if installed in a path containing spaces.
 - The FlexRay configuration will now use strings to represent the enumeration values of pChannels,
   pWakeupChannel, and pdMicrotick, as well as channels and transmissionMode for the TxBuffers. The
@@ -59,11 +76,10 @@ Fixed
   * transmissionMode: "Continuous" or "SingleShot"
 
 Interface compatibility with previous version:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-* Application binary interface (ABI): No
-* Application software interface (API): Yes
-* Application middleware interface: Yes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): No
+- Application software interface (API): Yes
+- Application middleware interface: Yes
 
 
 [Sprint-26] - 2019-05-29
@@ -72,8 +88,10 @@ Interface compatibility with previous version:
 Added
 ~~~~~
 
-- New FlexRay controller callback IFrController::CycleStartHandler, which is called at the start of
-  each FlexRay cycle. Only available VIBE simulation.
+- New FlexRay controller callback
+  :cpp:type:`IFrController::CycleStartHandler()<ib::sim::fr::IFrController::CycleStartHandler>`,
+  which is called at the start of each FlexRay cycle. Only available
+  VIBE simulation.
 - New config option for FastRTPS middleware to configure SocketBuffer sizes
 - New config options to configure FlexRay TxBuffers
 
@@ -81,8 +99,8 @@ Fixed
 ~~~~~
 
 - Fixed broken CMake target for installed IntegrationBus target:
-  With the introduction of spdlog, the IntegrationBus cmake target depends on spdlog::spdlog target. 
-  However, the spdlog::spdlog target was not installed (only header files were copied, but no cmake 
+  With the introduction of spdlog, the IntegrationBus cmake target depends on spdlog::spdlog target.
+  However, the spdlog::spdlog target was not installed (only header files were copied, but no cmake
   config file was generated). Thus, the installed IntegrationBus target could not be used from cmake.
 
 [Sprint-25] - 2019-05-14
@@ -92,9 +110,13 @@ Added
 ~~~~~
 
 - The FlexRay cluster and node configuration can now be specified in the IbConfig.json.
-- It is now possible to use ILinController::SetResponse(...) and ILinController::RequestMessage(...)
-  on LIN Controllers configured as master. This can be used to send a LIN message from a master to
-  slaves instead of the ILinController::SendMessage(...).
+- It is now possible to use
+  :cpp:func:`SetResponse()<ib::sim::lin::ILinController::SetResponse()>`
+  and
+  :cpp:func:`RequestMessage()<ib::sim::lin::ILinController::RequestMessage()>`
+  on LIN :cpp:class:`Controllers<ib::sim::lin::ILinController>` configured as master. This can be used to send a
+  LIN message from a master to slaves instead of the
+  :cpp:func:`SendMessage()<ib::sim::lin::ILinController::SendMessage>`.
 
 Fixed
 ~~~~~
@@ -103,7 +125,7 @@ Fixed
   configure the master node before the slaves. And the master can handle an out-of-order
   configuration, e.g., if a response reaches the master before the response configuration.
 
-  
+
 [Sprint-24] - 2019-03-13
 ------------------------
 
@@ -111,15 +133,18 @@ Added
 ~~~~~
 
 - Support to swap out participants between simulation runs. A participant can activate the so called
-  coldswap feature by calling IParticipantController::EnableColdswap(). The coldswap process can be
-  initiated by a system controller once the system is in state stopped.
+  coldswap feature by calling
+  :cpp:func:`IParticipantController::EnableColdswap()<ib::mw::sync::IParticipantController::EnableColdswap()>`.
+  The coldswap process can be initiated by a system controller once the system is in state stopped.
 - Participants can now signal that they are alive by refreshing the participant status. This can be
-  done by calling IParticipantController::RefreshStatus() and is reflected in the new field
-  ParticipantStatus::refreshTime.
+  done by calling
+  :cpp:func:`IParticipantController::RefreshStatus()<ib::mw::sync::IParticipantController::RefreshStatus()>` and
+  is reflected in the new field ParticipantStatus::refreshTime.
 - Logging is finally here. We've integrated spdlog and enabled distributed logging with a new spdlog
   sink. The FastRtpsComAdapter automatically creates an spdlogger with this sink. You can access
-  this logger via IComAdapter::GetLogger() and add any further sinks, e.g., to print logging
-  messages to std out. Examples for this can be found in the CAN demo and in the PassiveSystemMonitor.
+  this logger via :cpp:func:`IComAdapter::GetLogger()<ib::mw::IComAdapter::GetLogger()>` and add
+  any further sinks, e.g., to print logging messages to std out. Examples for this can be found in
+  the CAN demo and in the PassiveSystemMonitor.
 
 Changed
 ~~~~~~~
@@ -247,7 +272,7 @@ Added
 Removed
 ~~~~~~~
 
-- "MiddlewareConfig/FastRTPS/CommunicationMaster" has been removed 
+- "MiddlewareConfig/FastRTPS/CommunicationMaster" has been removed
   and replaced with the new DiscoveryType options.
 
 Changed

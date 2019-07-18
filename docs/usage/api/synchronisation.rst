@@ -2,9 +2,6 @@
 Synchronisation
 ===============
 
-    .. doxygenclass:: ib::mw::sync::IParticipantController
-       :members:
-
     .. doxygenclass:: ib::mw::sync::ISystemMonitor
        :members:
 
