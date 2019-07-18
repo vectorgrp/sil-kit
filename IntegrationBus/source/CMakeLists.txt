@@ -46,8 +46,6 @@ set_target_properties(IntegrationBus
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/
 )
 
-add_mvsc_ib_include_filter()
-
 #######################################################################################################################
 # Add to install targets of the IntegrationBus
 #######################################################################################################################

@@ -15,7 +15,5 @@ target_link_libraries(IbSimFlexRay
     PRIVATE IbInterface
 )
 
-add_mvsc_ib_include_filter()
-
 add_vib_test(TestSimFrController SOURCES FrControllerTest.cpp LIBS IbSimFlexRay IbMwMock)
 add_vib_test(TestSimFrControllerProxy SOURCES FrControllerProxyTest.cpp LIBS IbSimFlexRay IbMwMock)

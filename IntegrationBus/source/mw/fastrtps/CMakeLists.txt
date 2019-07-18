@@ -43,5 +43,3 @@ target_include_directories(IbMwFastRtps
 if (MSVC)
     target_compile_options(IbMwFastRtps PRIVATE "/bigobj")
 endif (MSVC)
-
-add_mvsc_ib_include_filter()

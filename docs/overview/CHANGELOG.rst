@@ -16,8 +16,11 @@ Removed
 
 Changed
 ~~~~~~~
+- This is the last entry to CHANGELOG.md. From now on, the changelog
+  will be maintained in docs/overview/CHANGELOG.rst.
+- The IB API Headers are no longer added to every project. Instead, a dedicated
+  header project IbApi has been added.
 
-The CHANGELOG.md will in future be maintained in the folder "docs/" as CHANGELOG.rst.
 
 Fixed
 ~~~~~
@@ -26,7 +29,8 @@ Fixed
   IntegrationBus-BinPath and IntegrationBus-LibPath are now set to absolute paths inside the IbLauncher
   project. Furthermore, the IbLauncher shell script now sets absolute paths for the bin and lib path.
 
-**Interface compatibility with Sprint-27:**
+Interface compatibility with Sprint-27:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Application binary interface (ABI): Yes/No
 * Application software interface (API): Yes/No
@@ -54,7 +58,8 @@ Fixed
   * pdMicrotick: "12.5ns", "25ns", or "50ns"
   * transmissionMode: "Continuous" or "SingleShot"
 
-**Interface compatibility with previous version:**
+Interface compatibility with previous version:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Application binary interface (ABI): No
 * Application software interface (API): Yes

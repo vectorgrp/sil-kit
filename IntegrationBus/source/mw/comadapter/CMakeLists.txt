@@ -27,8 +27,6 @@ if (MSVC)
     target_compile_options(IbMwComAdapter PRIVATE "/bigobj")
 endif (MSVC)
 
-add_mvsc_ib_include_filter()
-
 add_vib_test(TestMwComAdapter SOURCES ComAdapterTest.cpp LIBS
     IbMwComAdapter
     IbConfig
