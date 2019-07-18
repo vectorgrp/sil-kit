@@ -5,12 +5,11 @@ if(${BUILD_DOCS})
     find_package(Sphinx REQUIRED)
 
     # Find all the public headers
-    get_target_property(INTEGRATION_BUS_PUBLIC_HEADER_DIR IntegrationBus INTERFACE_INCLUDE_DIRECTORIES)
-    file(GLOB_RECURSE INTEGRATION_BUS_PUBLIC_HEADERS ${INTEGRATION_BUS_PUBLIC_HEADER_DIR}/include/ib/*.h)
+    get_target_property(IB_API_HEADERS IbApi SOURCES)
 
-    set(DOXYGEN_INPUT_DIR ${PROJECT_SOURCE_DIR}/IntegrationBus/include/ib)
+    set(DOXYGEN_INPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/../IntegrationBus/include/ib)
     set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/doxygen)
-    set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/xml/index.html)
+    set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/xml/index.xml)
     set(DOXYFILE_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
     set(DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
@@ -21,8 +20,8 @@ if(${BUILD_DOCS})
     file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT_DIR})
 
     add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
-                       DEPENDS ${INTEGRATION_BUS_PUBLIC_HEADERS}
                        COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
+                       DEPENDS ${IB_API_HEADERS}
                        MAIN_DEPENDENCY ${DOXYFILE_OUT} ${DOXYFILE_IN}
                        COMMENT "Generating docs"
                        VERBATIM)
@@ -37,6 +36,7 @@ if(${BUILD_DOCS})
     # - Doxygen has rerun
     # - Our doc files have been updated
     # - The Sphinx config has been updated
+    file(GLOB_RECURSE SPHINX_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.rst)
     add_custom_command(OUTPUT ${SPHINX_INDEX_FILE}
                        COMMAND
                            ${SPHINX_EXECUTABLE} -b html
@@ -46,7 +46,7 @@ if(${BUILD_DOCS})
                        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                        DEPENDS
                        # Other docs files you want to track should go here (or in some variable)
-                       ${CMAKE_CURRENT_SOURCE_DIR}/index.rst
+                       ${SPHINX_SOURCE_FILES}
                        ${DOXYGEN_INDEX_FILE}
                        MAIN_DEPENDENCY ${SPHINX_SOURCE}/conf.py
                        COMMENT "Generating documentation with Sphinx")
@@ -54,6 +54,7 @@ if(${BUILD_DOCS})
     add_custom_target(Sphinx ALL DEPENDS ${SPHINX_INDEX_FILE})
 
     include(GNUInstallDirs)
+
     install(DIRECTORY ${SPHINX_BUILD}/
-    DESTINATION ${CMAKE_INSTALL_DOCDIR})
+            DESTINATION ${CMAKE_INSTALL_DOCDIR})
 endif()
