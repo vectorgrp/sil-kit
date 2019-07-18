@@ -8,15 +8,54 @@
 
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/logging/spdlog.hpp"
+#include "ib/sim/lin/string_utils.hpp"
 
 namespace ib {
 namespace sim {
 namespace lin {
 
 namespace {
-    constexpr LinId   GotosleepId{0x3c};
-    constexpr Payload GotosleepPayload{8, {0x0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
+
+inline auto ToFrameResponseMode(FrameResponseType responseType) -> FrameResponseMode
+{
+    switch (responseType) {
+    case FrameResponseType::MasterResponse:
+        return FrameResponseMode::TxUnconditional;
+    case FrameResponseType::SlaveResponse:
+        return FrameResponseMode::Rx;
+    case FrameResponseType::SlaveToSlave:
+        return FrameResponseMode::Unused;
+    }
+    return FrameResponseMode::Unused;
+};
+
+inline auto ToTxFrameStatus(FrameStatus status) -> FrameStatus
+{
+    switch (status)
+    {
+    case FrameStatus::LIN_RX_BUSY:
+        return FrameStatus::LIN_TX_BUSY;
+    case FrameStatus::LIN_RX_ERROR:
+        return FrameStatus::LIN_TX_ERROR;
+    case FrameStatus::LIN_RX_NO_RESPONSE:
+        return FrameStatus::LIN_TX_ERROR;
+    case FrameStatus::LIN_RX_OK:
+        return FrameStatus::LIN_TX_OK;
+    default:
+        return status;
+    }
 }
+
+template <class CallbackRangeT, typename... Args>
+void CallHandlers(CallbackRangeT& callbacks, const Args&... args)
+{
+    for (auto& callback : callbacks)
+    {
+        callback(args...);
+    }
+}
+
+} // namespace anonymous
 
 LinController::LinController(mw::IComAdapter* comAdapter)
     : _comAdapter{comAdapter}
@@ -24,317 +63,192 @@ LinController::LinController(mw::IComAdapter* comAdapter)
 {
 }
 
-void LinController::SetMasterMode()
+void LinController::Init(ControllerConfig config)
 {
-    if (_controllerMode == ControllerMode::Slave)
-    {
-        _logger->warn("LinController::SetMasterMode() called for slave!");
-    }
-    _configuredControllerMode = ControllerMode::Master;
-    _controllerMode = ControllerMode::Master;
+    auto& node = GetLinNode(_endpointAddr);
+    node.controllerMode = config.controllerMode;
+    node.controllerStatus = ControllerStatus::Operational;
+    node.UpdateResponses(config.frameResponses);
 
-    // enable this master to further play the slave role
-    ControllerConfig config{};
-    config.controllerMode = ControllerMode::Master;
-
-    auto&& linSlave = GetLinSlave(_endpointAddr);
-    linSlave.config = config;
-}
-
-void LinController::SetSlaveMode()
-{
-    if (_controllerMode == ControllerMode::Master)
-    {
-        _logger->warn("LinController::SetSlaveMode() called for master!");
-    }
-
-    // set slave mode
-    _configuredControllerMode = ControllerMode::Slave;
-    _controllerMode = ControllerMode::Slave;
-
-    // announce this slave at the master
-    ControllerConfig config{};
-    config.controllerMode = _controllerMode;
-
+    _controllerMode = config.controllerMode;
+    _controllerStatus = ControllerStatus::Operational;
     SendIbMessage(config);
 }
 
-void LinController::SetBaudRate(uint32_t /*rate*/)
+auto LinController::Status() const noexcept -> ControllerStatus
 {
-    // Baudrate is only considered when using a LIN Network Simulator, i.e., in the LinControllerProxy
+    return _controllerStatus;
 }
 
-void LinController::SetSleepMode()
+void LinController::SendFrame(Frame frame, FrameResponseType responseType)
 {
-    if (_configuredControllerMode == ControllerMode::Inactive)
-    {
-        std::string errorMsg{"LinController:SetSleepMode() must not be called before SetMasterMode() or SetSlaveMode()"};
-        _logger->error(errorMsg);
-        throw std::runtime_error{errorMsg};
-    }
-
-    _controllerMode = ControllerMode::Sleep;
-
-    ControllerConfig config{};
-    config.controllerMode = _controllerMode;
-
-    SendIbMessage(config);
+    SetFrameResponse(frame, ToFrameResponseMode(responseType));
+    SendFrameHeader(frame.id);
 }
 
-void LinController::SetOperationalMode()
-{
-    if (_controllerMode != ControllerMode::Sleep)
-    {
-        std::string errorMsg{"LinController:SetOperationalMode() must only be called when controller is in sleep mode"};
-        _logger->error(errorMsg);
-        throw std::runtime_error{errorMsg};
-    }
-
-    // restore configured controller mode
-    _controllerMode = _configuredControllerMode;
-
-    ControllerConfig config{};
-    config.controllerMode = _controllerMode;
-
-    SendIbMessage(config);
-}
-
-void LinController::UpdateSlaveConfigurationImpl(mw::EndpointAddress from, const SlaveConfiguration& config)
-{
-    auto&& linSlave = GetLinSlave(from);
-    for (auto&& responseConfig : config.responseConfigs)
-    {
-        auto linId = responseConfig.linId;
-        if (linId >= linSlave.responses.size())
-        {
-            _logger->warn(
-                "LinController received SlaveConfiguration from {{{}, {}}} for invalid LIN ID {}",
-                from.participant,
-                from.endpoint,
-                linId);
-            return;
-        }
-
-        if (responseConfig.payloadLength > 8)
-        {
-            _logger->warn(
-                "LinController received SlaveResponseConfig with payload length {} from {{{}, {}}}",
-                static_cast<unsigned int>(responseConfig.payloadLength),
-                from.participant,
-                from.endpoint);
-            continue;
-        }
-
-        static_cast<SlaveResponseConfig&>(linSlave.responses[linId]) = responseConfig;
-    }
-}
-
-void LinController::SetSlaveConfiguration(const SlaveConfiguration& config)
-{
-    UpdateSlaveConfigurationImpl(_endpointAddr, config);
-    SendIbMessage(config);
-}
-
-void LinController::SetResponse(LinId linId, const Payload& payload)
-{
-    SlaveResponse response;
-    response.linId = linId;
-    response.payload = payload;
-    response.checksumModel = ChecksumModel::Undefined;
-
-    SetSlaveResponseImpl(_endpointAddr, response);
-    SendIbMessage(response);
-}
-
-void LinController::SetResponseWithChecksum(LinId linId, const Payload& payload, ChecksumModel checksumModel)
-{
-    if (checksumModel == ChecksumModel::Undefined)
-    {
-        std::string warnMsg("LinController::SetResponseWithChecksum() was called with ChecksumModel::Undefined, which does NOT alter the checksum model");
-        _logger->warn(warnMsg);
-    }
-
-    SlaveResponse response;
-    response.linId = linId;
-    response.payload = payload;
-    response.checksumModel = checksumModel;
-
-    SetSlaveResponseImpl(_endpointAddr, response);
-    SendIbMessage(response);
-}
-
-void LinController::RemoveResponse(LinId linId)
-{
-    SlaveConfiguration slaveConfig;
-
-    SlaveResponseConfig responseConfig;
-    responseConfig.linId = linId;
-    responseConfig.responseMode = ResponseMode::Unused;
-    responseConfig.checksumModel = ChecksumModel::Undefined;
-    responseConfig.payloadLength = 0;
-
-
-    slaveConfig.responseConfigs.emplace_back(std::move(responseConfig));
-    UpdateSlaveConfigurationImpl(_endpointAddr, slaveConfig);
-    SendIbMessage(slaveConfig);
-}
-
-void LinController::SendWakeupRequest()
-{
-    if (_controllerMode != ControllerMode::Sleep)
-    {
-        std::string errorMsg{"LinController::SendWakeupRequest() must only be called in sleep mode!"};
-        _logger->error(errorMsg);
-        throw std::logic_error{errorMsg};
-    }
-
-    SendIbMessage(WakeupRequest{});
-}
-
-void LinController::SendMessage(const LinMessage& msg)
+void LinController::SendFrameHeader(LinIdT linId)
 {
     if (_controllerMode != ControllerMode::Master)
     {
-        std::string errorMsg{"LinController::SendMessage() must only be called in master mode!"};
+        std::string errorMsg{"LinController::SendFrameHeader() must only be called in master mode!"};
         _logger->error(errorMsg);
-        throw std::logic_error{errorMsg};
-    }
-
-    auto msgCopy{msg};
-
-    msgCopy.status = MessageStatus::TxSuccess;
-
-    SendIbMessage(msgCopy);
-
-    // We always indicate that the Frame has been transmitted successfully, i.e., there are no conflicts.
-    CallHandlers(MessageStatus::TxSuccess);
-}
-
-void LinController::RequestMessage(const RxRequest& msg)
-{
-    if (_controllerMode != ControllerMode::Master)
-    {
-        std::string errorMsg{"LinController::RequestMessage() must only be called in master mode!"};
-        _logger->error(errorMsg);
-        throw std::logic_error{errorMsg};
+        throw std::runtime_error{errorMsg};
     }
 
     // we answer the call immediately based on the cached responses
     // setup a reply
-    LinMessage reply{};
-    reply.linId = msg.linId;
+    Transmission transmission;
+    transmission.frame.id = linId;
 
     auto numResponses = 0;
-    for (auto&& keyValue: _linSlaves)
+    for (auto&& node : _linNodes)
     {
-        auto&& slave = keyValue.second;
-
-        if (slave.config.controllerMode != ControllerMode::Slave &&
-            slave.config.controllerMode != ControllerMode::Master)
-            continue; // only operational slaves and an operational master are considered
-
-        if (msg.linId >= slave.responses.size())
+        if (node.controllerMode == ControllerMode::Inactive)
+            continue;
+        if (node.controllerStatus != ControllerStatus::Operational)
             continue;
 
-        const auto& response = slave.responses[msg.linId];
-
-        if (response.responseMode == ResponseMode::TxUnconditional)
+        auto& response = node.responses[linId];
+        if (response.responseMode == FrameResponseMode::TxUnconditional)
         {
-            reply.payload = response.payload;
-            reply.checksumModel = response.checksumModel;
-
+            transmission.frame = response.frame;
             numResponses++;
         }
     }
 
     if (numResponses == 0)
     {
-        reply.status = MessageStatus::RxNoResponse;
+        transmission.status = FrameStatus::LIN_RX_NO_RESPONSE;
     }
     else if (numResponses == 1)
     {
-        reply.status = MessageStatus::RxSuccess;
+        transmission.status = FrameStatus::LIN_RX_OK;
     }
     else if (numResponses > 1)
     {
-        reply.status = MessageStatus::RxResponseError;
+        transmission.status = FrameStatus::LIN_RX_ERROR;
     }
 
+    // Dispatch the LIN transmission to all connected nodes
+    SendIbMessage(transmission);
+
+    // Dispatch the LIN transmission to our own callbacks
+    FrameResponseMode masterResponseMode = GetLinNode(_endpointAddr).responses[linId].responseMode;
+    FrameStatus masterFrameStatus = transmission.status;
+    if (masterResponseMode != FrameResponseMode::Rx)
+        masterFrameStatus = ToTxFrameStatus(masterFrameStatus);
+
     // dispatch the reply locally...
-    CallHandlers(reply);
-    // ... and remotely
-    SendIbMessage(reply);
+    CallHandlers(_frameStatusHandler, this, transmission.frame, masterFrameStatus, transmission.timestamp);
 }
 
-void LinController::SendGoToSleep()
+void LinController::SetFrameResponse(Frame frame, FrameResponseMode mode)
+{
+    FrameResponse response;
+    response.frame = std::move(frame);
+    response.responseMode = mode;
+
+    std::vector<FrameResponse> responses{1, response};
+    SetFrameResponses(std::move(responses));
+}
+
+void LinController::SetFrameResponses(std::vector<FrameResponse> responses)
+{
+    auto& node = GetLinNode(_endpointAddr);
+    node.UpdateResponses(responses);
+
+    FrameResponseUpdate frameResponseUpdate;
+    frameResponseUpdate.frameResponses = std::move(responses);
+    SendIbMessage(frameResponseUpdate);
+}
+
+void LinController::GoToSleep()
 {
     if (_controllerMode != ControllerMode::Master)
     {
-        std::string errorMsg{"LinController::SendGoToSleep() must only be called in master mode!"};
+        std::string errorMsg{"LinController::GoToSleep() must only be called in master mode!"};
         _logger->error(errorMsg);
         throw std::logic_error{errorMsg};
     }
 
+    Transmission gotosleepTx;
+    gotosleepTx.frame = GoToSleepFrame();
+    gotosleepTx.status = FrameStatus::LIN_RX_OK;
 
-    LinMessage gotosleep;
-
-    gotosleep.status = MessageStatus::TxSuccess;
-    gotosleep.checksumModel = ChecksumModel::Classic;
-    gotosleep.linId = GotosleepId;
-    gotosleep.payload = GotosleepPayload;
-
-    SendMessage(gotosleep);
+    SendIbMessage(gotosleepTx);
+    GoToSleepInternal();
 }
 
-void LinController::RegisterTxCompleteHandler(TxCompleteHandler handler)
+void LinController::GoToSleepInternal()
 {
-    RegisterHandler(std::move(handler));
+    SetControllerStatus(ControllerStatus::Sleep);
 }
 
-void LinController::RegisterReceiveMessageHandler(ReceiveMessageHandler handler)
+void LinController::Wakeup()
 {
-    RegisterHandler(std::move(handler));
+    WakeupPulse pulse;
+    SendIbMessage(pulse);
+    WakeupInternal();
 }
 
-template<typename MsgT>
-void LinController::RegisterHandler(CallbackT<MsgT>&& handler)
+void LinController::WakeupInternal()
 {
-    auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
-    handlers.emplace_back(std::move(handler));
+    SetControllerStatus(ControllerStatus::Operational);
 }
 
-void LinController::RegisterWakeupRequestHandler(WakeupRequestHandler handler)
+void LinController::RegisterFrameStatusHandler(FrameStatusHandler handler)
 {
-    _wakeuprequestHandlers.emplace_back(std::move(handler));
+    _frameStatusHandler.emplace_back(std::move(handler));
 }
 
-void LinController::RegisterSleepCommandHandler(SleepCommandHandler handler)
+void LinController::RegisterGoToSleepHandler(GoToSleepHandler handler)
 {
-    _gotosleepHandlers.emplace_back(std::move(handler));
+    _goToSleepHandler.emplace_back(std::move(handler));
 }
 
-void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const LinMessage& msg)
+void LinController::RegisterWakeupHandler(WakeupHandler handler)
 {
-    if (from == _endpointAddr)
-        return;
+    _wakeupHandler.emplace_back(std::move(handler));
+}
 
-    if (msg.payload.size > 8)
+void LinController::RegisterFrameResponseUpdateHandler(FrameResponseUpdateHandler handler)
+{
+    _frameResponseUpdateHandler.emplace_back(std::move(handler));
+}
+
+void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const Transmission& msg)
+{
+    if (from == _endpointAddr) return;
+
+    auto& frame = msg.frame;
+
+    if (frame.dataLength > 8)
     {
         _logger->warn(
-            "LinController received LinMessage with payload length {} from {{{}, {}}}",
-            static_cast<unsigned int>(msg.payload.size),
+            "LinController received transmission with payload length {} from {{{}, {}}}",
+            static_cast<unsigned int>(frame.dataLength),
             from.participant,
             from.endpoint);
         return;
     }
 
-    if (msg.linId >= 64)
+    if (frame.id >= 64)
     {
         _logger->warn(
-            "LinController received LinMessage with lin ID {} from {{{}, {}}}",
-            msg.linId,
+            "LinController received transmission with invalid LIN ID {} from {{{}, {}}}",
+            frame.id,
             from.participant,
             from.endpoint);
+        return;
+    }
+
+    if (_controllerStatus != ControllerStatus::Operational)
+    {
+        _logger->warn(
+            "LinController received transmission with LIN ID {} while controller is in {} mode. Message is ignored.",
+            static_cast<unsigned int>(frame.id),
+            to_string(_controllerStatus)
+        );
         return;
     }
 
@@ -344,101 +258,82 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const LinMess
         return;
 
     case ControllerMode::Master:
-        _logger->warn("LinController in MasterMode received a LinMessage, probably originating from another master. This indicates an erroneous setup!");
+        _logger->warn("LinController in MasterMode received a transmission from {{{}, {}}}. This indicates an erroneous setup as there should be only one LIN master!",
+            from.participant,
+            from.endpoint);
         //[[fallthrough]]
 
     case ControllerMode::Slave:
-        if (GetLinSlave(_endpointAddr).responses[msg.linId].responseMode == ResponseMode::Rx)
+        auto& thisLinNode = GetLinNode(_endpointAddr);
+        switch (thisLinNode.responses[frame.id].responseMode)
         {
-            CallHandlers(msg);
+        case FrameResponseMode::Unused:
+            break;
+        case FrameResponseMode::Rx:
+            CallHandlers(_frameStatusHandler, this, frame, VeriyChecksum(frame, msg.status), msg.timestamp);
+            break;
+        case FrameResponseMode::TxUnconditional:
+            // Transmissions are always sent with FrameStatus::RX_xxx so we have to
+            // convert the status to a TX_xxx if we sent this frame.
+            CallHandlers(_frameStatusHandler, this, frame, ToTxFrameStatus(msg.status), msg.timestamp);
+            break;
         }
-        if (msg.linId == GotosleepId)
+        // Always dispatch GoToSleep frames
+        if (frame.id == GoToSleepFrame().id)
         {
-            if (msg.payload == GotosleepPayload)
+            if (frame.data != GoToSleepFrame().data)
             {
-                for (auto&& handler : _gotosleepHandlers)
-                {
-                    handler(this);
-                }
+                _logger->warn("LinController received diagnostic frame, which does not match expected GoToSleep payload");
             }
-            else
-            {
-                _logger->warn("LinController received diagnostic message with unsupported payload");
-            }
-        }
-        return;
-   
-    case ControllerMode::Sleep:
-        _logger->warn("LinController received LIN Message with id={} while controller is in sleep mode. Message is ignored.", static_cast<unsigned int>(msg.linId));
-        return;
 
-    default:
-        _logger->warn("Unhandled ControllerMode in LinController::ReceiveIbMessage(..., LinMessage)");
+            CallHandlers(_goToSleepHandler, this);
+        }
         return;
     }
 }
 
-void LinController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, const WakeupRequest& /*msg*/)
+void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const WakeupPulse& /*msg*/)
 {
-    for (auto&& handler : _wakeuprequestHandlers)
-    {
-        handler(this);
-    }
+    if (from == _endpointAddr) return;
+    CallHandlers(_wakeupHandler, this);
 }
 
 void LinController::ReceiveIbMessage(mw::EndpointAddress from, const ControllerConfig& msg)
 {
-    if (from == _endpointAddr)
-        return;
+    if (from == _endpointAddr) return;
 
-    if (msg.controllerMode == ControllerMode::Master)
+    auto& linNode = GetLinNode(from);
+
+    linNode.controllerMode = msg.controllerMode;
+    linNode.controllerStatus = ControllerStatus::Operational;
+    linNode.UpdateResponses(msg.frameResponses);
+
+    for (auto& response : msg.frameResponses)
     {
-        _logger->warn("LinController received ControllerConfig with master mode, which will be ignored");
-        return;
-    }
-
-    auto&& linSlave = GetLinSlave(from);
-    linSlave.config = msg;
-}
-
-void LinController::ReceiveIbMessage(mw::EndpointAddress from, const SlaveConfiguration& msg)
-{
-    if (from == _endpointAddr)
-        return;
-
-    UpdateSlaveConfigurationImpl(from, msg);
-}
-
-void LinController::ReceiveIbMessage(mw::EndpointAddress from, const SlaveResponse& msg)
-{
-    if (from == _endpointAddr)
-        return;
-
-    SetSlaveResponseImpl(from, msg);
-}
-
-void LinController::SetSlaveResponseImpl(mw::EndpointAddress from, const SlaveResponse& msg)
-{
-    auto&& linSlave = GetLinSlave(from);
-    if (msg.linId >= linSlave.responses.size())
-    {
-        _logger->warn(
-            "LinController received SlaveResponse configuration from {{{}, {}}} for invalid LIN ID {}",
-            from.participant,
-            from.endpoint,
-            msg.linId);
-        return;
-    }
-
-    linSlave.responses[msg.linId].payload = msg.payload;
-
-    // Update ChecksumModel if defined.
-    if (msg.checksumModel != ChecksumModel::Undefined)
-    {
-        linSlave.responses[msg.linId].checksumModel = msg.checksumModel;
+        CallHandlers(_frameResponseUpdateHandler, this, from, response);
     }
 }
 
+void LinController::ReceiveIbMessage(mw::EndpointAddress from, const ControllerStatusUpdate& msg)
+{
+    if (from == _endpointAddr) return;
+
+    auto& linNode = GetLinNode(from);
+    linNode.controllerStatus = msg.status;
+}
+
+void LinController::ReceiveIbMessage(mw::EndpointAddress from, const FrameResponseUpdate& msg)
+{
+    if (from == _endpointAddr) return;
+
+    auto& linNode = GetLinNode(from);
+    linNode.UpdateResponses(msg.frameResponses);
+
+    for (auto& response : msg.frameResponses)
+    {
+        CallHandlers(_frameResponseUpdateHandler, this, from, response);
+    }
+}
 
 void LinController::SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress)
 {
@@ -450,20 +345,66 @@ auto LinController::EndpointAddress() const -> const ::ib::mw::EndpointAddress&
     return _endpointAddr;
 }
 
-template<typename MsgT>
-void LinController::CallHandlers(const MsgT& msg)
+void LinController::SetControllerStatus(ControllerStatus status)
 {
-    auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
-    for (auto&& handler : handlers)
+    if (_controllerMode == ControllerMode::Inactive)
     {
-        handler(this, msg);
+        std::string errorMsg{"LinController::Wakeup()/Sleep() must not be called before LinController::Init()"};
+        _logger->error(errorMsg);
+        throw std::runtime_error{errorMsg};
     }
+
+    if (_controllerStatus == status)
+    {
+        spdlog::warn("LinController::SetControllerStatus() - controller is already in {} mode.", to_string(status));
+    }
+
+    _controllerStatus = status;
+
+    ControllerStatusUpdate msg;
+    msg.status = status;
+
+    SendIbMessage(msg);
 }
+
+auto LinController::VeriyChecksum(const Frame& frame, FrameStatus status) -> FrameStatus
+{
+    if (status != FrameStatus::LIN_RX_OK)
+        return status;
+
+    auto& node = GetLinNode(_endpointAddr);
+    auto& expectedFrame = node.responses[frame.id].frame;
+
+    if (expectedFrame.dataLength != frame.dataLength || expectedFrame.checksumModel != frame.checksumModel)
+    {
+        return FrameStatus::LIN_RX_ERROR;
+    }
+
+    return status;
+}
+
 
 template <typename MsgT>
 void LinController::SendIbMessage(MsgT&& msg)
 {
     _comAdapter->SendIbMessage(_endpointAddr, std::forward<MsgT>(msg));
+}
+
+// ================================================================================
+//  LinController::LinNode
+// ================================================================================
+void LinController::LinNode::UpdateResponses(std::vector<FrameResponse> responses_)
+{
+    for (auto&& response : responses_)
+    {
+        auto linId = response.frame.id;
+        if (linId >= responses.size())
+        {
+            spdlog::warn("Ignoring FrameResponse update for linId={}", static_cast<uint16_t>(linId));
+            continue;
+        }
+        responses[linId] = std::move(response);
+    }
 }
 
 

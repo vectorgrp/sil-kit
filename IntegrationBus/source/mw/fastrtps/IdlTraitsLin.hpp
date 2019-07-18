@@ -14,12 +14,13 @@ namespace ib {
     template <typename IdlT>
     struct TopicTrait;
 
-    DefineTopicTrait(sim::lin::idl, LinMessage);
-    DefineTopicTrait(sim::lin::idl, RxRequest);
-    DefineTopicTrait(sim::lin::idl, TxAcknowledge);
-    DefineTopicTrait(sim::lin::idl, WakeupRequest);
+    DefineTopicTrait(sim::lin::idl, SendFrameRequest);
+    DefineTopicTrait(sim::lin::idl, SendFrameHeaderRequest);
+    DefineTopicTrait(sim::lin::idl, Transmission);
+    DefineTopicTrait(sim::lin::idl, WakeupPulse);
     DefineTopicTrait(sim::lin::idl, ControllerConfig);
-    DefineTopicTrait(sim::lin::idl, SlaveConfiguration);
-    DefineTopicTrait(sim::lin::idl, SlaveResponse);
+    DefineTopicTrait(sim::lin::idl, ControllerStatusUpdate);
+    DefineTopicTrait(sim::lin::idl, FrameResponseUpdate);
+
 
 } // namespace ib

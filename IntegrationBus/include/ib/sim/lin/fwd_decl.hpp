@@ -8,15 +8,13 @@ namespace ib {
 namespace sim {
 namespace lin { 
 
-struct LinMessage;
-struct RxRequest;
-struct TxAcknowledge;
-struct WakeupRequest;
-
+struct Transmission;
+struct WakeupPulse;
+struct SendFrameRequest;
+struct SendFrameHeaderRequest;
 struct ControllerConfig;
-struct SlaveResponseConfig;
-struct SlaveConfiguration;
-struct SlaveResponse;
+struct ControllerStatusUpdate;
+struct FrameResponseUpdate;
 
 class ILinController;
 class IIbToLinController;

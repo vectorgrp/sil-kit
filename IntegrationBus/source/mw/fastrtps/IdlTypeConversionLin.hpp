@@ -12,72 +12,52 @@ namespace ib {
 namespace sim {
 namespace lin {
 
-inline auto to_idl(ControllerMode msg) -> idl::ControllerMode;
 inline auto to_idl(ChecksumModel msg) -> idl::ChecksumModel;
-inline auto to_idl(ResponseMode msg) -> idl::ResponseMode;
-inline auto to_idl(MessageStatus msg) -> idl::MessageStatus;
-inline auto to_idl(const LinMessage& msg) -> idl::LinMessage;
-inline auto to_idl(LinMessage&& msg) -> idl::LinMessage;
-inline auto to_idl(const RxRequest& msg) -> idl::RxRequest;
-inline auto to_idl(const TxAcknowledge& msg) -> idl::TxAcknowledge;
-inline auto to_idl(const WakeupRequest& msg) -> idl::WakeupRequest;
+inline auto to_idl(const Frame& msg) -> idl::Frame;
+inline auto to_idl(Frame&& msg) -> idl::Frame;
+inline auto to_idl(FrameResponseType msg) -> idl::FrameResponseType;
+inline auto to_idl(FrameResponseMode msg) -> idl::FrameResponseMode;
+inline auto to_idl(const FrameResponse& msg) -> idl::FrameResponse;
+inline auto to_idl(FrameStatus msg) -> idl::FrameStatus;
+inline auto to_idl(ControllerMode msg) -> idl::ControllerMode;
 inline auto to_idl(const ControllerConfig& msg) -> idl::ControllerConfig;
-inline auto to_idl(const SlaveResponseConfig& msg) -> idl::SlaveResponseConfig;
-inline auto to_idl(const SlaveConfiguration& msg) -> idl::SlaveConfiguration;
-inline auto to_idl(const SlaveResponse& msg) -> idl::SlaveResponse;
+inline auto to_idl(ControllerStatus msg) -> idl::ControllerStatus;
+inline auto to_idl(const Transmission& msg) -> idl::Transmission;
+inline auto to_idl(SendFrameRequest&& msg) -> idl::SendFrameRequest;
+inline auto to_idl(const SendFrameRequest& msg) -> idl::SendFrameRequest;
+inline auto to_idl(SendFrameHeaderRequest&& msg)->idl::SendFrameHeaderRequest;
+inline auto to_idl(const SendFrameHeaderRequest& msg) -> idl::SendFrameHeaderRequest;
+inline auto to_idl(Transmission&& msg)->idl::Transmission;
+inline auto to_idl(const Transmission& msg) -> idl::Transmission;
+inline auto to_idl(Transmission&& msg)->idl::Transmission;
+inline auto to_idl(const FrameResponseUpdate& msg) -> idl::FrameResponseUpdate;
+inline auto to_idl(FrameResponseUpdate&& msg)->idl::FrameResponseUpdate;
+inline auto to_idl(const ControllerStatusUpdate& msg) -> idl::ControllerStatusUpdate;
+inline auto to_idl(ControllerStatusUpdate&& msg)->idl::ControllerStatusUpdate;
+inline auto to_idl(const WakeupPulse& msg) -> idl::WakeupPulse;
+inline auto to_idl(WakeupPulse&& msg)->idl::WakeupPulse;
 
 namespace idl {
-inline auto from_idl(ControllerMode idl) -> lin::ControllerMode;
-inline auto from_idl(ChecksumModel idl) -> lin::ChecksumModel;
-inline auto from_idl(ResponseMode idl) -> lin::ResponseMode;
-inline auto from_idl(MessageStatus idl) -> lin::MessageStatus;
-inline auto from_idl(LinMessage&& idl) -> lin::LinMessage;
-inline auto from_idl(RxRequest&& idl) -> lin::RxRequest;
-inline auto from_idl(TxAcknowledge&& idl) -> lin::TxAcknowledge;
-inline auto from_idl(WakeupRequest&& idl) -> lin::WakeupRequest;
-inline auto from_idl(const ControllerConfig& idl) -> lin::ControllerConfig;
-inline auto from_idl(const SlaveResponseConfig& idl) -> lin::SlaveResponseConfig;
-inline auto from_idl(const SlaveConfiguration& idl) -> lin::SlaveConfiguration;
-inline auto from_idl(const SlaveResponse& idl) -> lin::SlaveResponse;
+inline auto from_idl(ChecksumModel msg) -> lin::ChecksumModel;
+inline auto from_idl(Frame&& msg) -> lin::Frame;
+inline auto from_idl(FrameResponseType msg) -> lin::FrameResponseType;
+inline auto from_idl(FrameResponseMode msg) -> lin::FrameResponseMode;
+inline auto from_idl(FrameResponse&& msg) -> lin::FrameResponse;
+inline auto from_idl(FrameStatus msg) -> lin::FrameStatus;
+inline auto from_idl(ControllerMode msg) -> lin::ControllerMode;
+inline auto from_idl(ControllerConfig&& msg) -> lin::ControllerConfig;
+inline auto from_idl(ControllerStatus msg) -> lin::ControllerStatus;
+inline auto from_idl(SendFrameRequest&& msg) -> lin::SendFrameRequest;
+inline auto from_idl(SendFrameHeaderRequest&& msg) -> lin::SendFrameHeaderRequest;
+inline auto from_idl(Transmission&& msg) -> lin::Transmission;
+inline auto from_idl(FrameResponseUpdate&& msg) -> lin::FrameResponseUpdate;
+inline auto from_idl(ControllerStatusUpdate&& msg) -> lin::ControllerStatusUpdate;
+inline auto from_idl(WakeupPulse&& msg) -> lin::WakeupPulse;
 } // namespace idl
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-auto to_idl(ControllerMode msg) -> idl::ControllerMode
-{
-    switch (msg)
-    {
-    case ControllerMode::Inactive:
-        return idl::Inactive;
-    case ControllerMode::Master:
-        return idl::Master;
-    case ControllerMode::Slave:
-        return idl::Slave;
-    case ControllerMode::Sleep:
-        return idl::Sleep;
-    default:
-        throw std::runtime_error("conversion errror: Unknown lin::ControllerMode");
-    }
-}
-
-auto idl::from_idl(idl::ControllerMode idl) -> lin::ControllerMode
-{
-    switch (idl)
-    {
-    case idl::Inactive:
-        return lin::ControllerMode::Inactive;
-    case idl::Master:
-        return lin::ControllerMode::Master;
-    case idl::Slave:
-        return lin::ControllerMode::Slave;
-    case idl::Sleep:
-        return lin::ControllerMode::Sleep;
-    default:
-        throw std::runtime_error("conversion errror: Unknown lin::ControllerMode");
-    }
-}
-
 auto to_idl(ChecksumModel msg) -> idl::ChecksumModel
 {
     switch (msg)
@@ -88,11 +68,9 @@ auto to_idl(ChecksumModel msg) -> idl::ChecksumModel
         return idl::Enhanced;
     case ChecksumModel::Classic:
         return idl::Classic;
-    default:
-        throw std::exception();
     }
+    throw std::runtime_error("conversion errror: Unknown lin::ChecksumModel");
 }
-
 auto idl::from_idl(idl::ChecksumModel idl) -> lin::ChecksumModel
 {
     switch (idl)
@@ -103,187 +81,186 @@ auto idl::from_idl(idl::ChecksumModel idl) -> lin::ChecksumModel
         return lin::ChecksumModel::Enhanced;
     case idl::Classic:
         return lin::ChecksumModel::Classic;
-    default:
-        throw std::exception();
     }
+    throw std::runtime_error("conversion errror: Unknown lin::ChecksumModel");
 }
 
-auto to_idl(ResponseMode msg) -> idl::ResponseMode
+auto to_idl(const Frame& msg) -> idl::Frame
+{
+    idl::Frame idl;
+
+    idl.id(msg.id);
+    idl.checksumModel(to_idl(msg.checksumModel));
+    idl.dataLength(msg.dataLength);
+    idl.data(msg.data);
+
+    return idl;
+}
+auto to_idl(Frame&& msg) -> idl::Frame
+{
+    return to_idl(msg);
+}
+auto idl::from_idl(idl::Frame&& idl) -> lin::Frame
+{
+    lin::Frame msg;
+
+    msg.id = idl.id();
+    msg.checksumModel = from_idl(idl.checksumModel());
+    msg.dataLength = idl.dataLength();
+    msg.data = idl.data();
+
+    return msg;
+}
+
+auto to_idl(FrameResponseType msg) -> idl::FrameResponseType
 {
     switch (msg)
     {
-    case ResponseMode::Unused:
-        return idl::Unused;
-    case ResponseMode::Rx:
-        return idl::Rx;
-    case ResponseMode::TxUnconditional:
-        return idl::TxUnconditional;
-    default:
-        throw std::exception();
+    case FrameResponseType::MasterResponse:
+        return idl::MasterResponse;
+    case FrameResponseType::SlaveResponse:
+        return idl::SlaveResponse;
+    case FrameResponseType::SlaveToSlave:
+        return idl::SlaveToSlave;
     }
+    throw std::runtime_error("conversion errror: Unknown lin::FrameResponseType");
+}
+auto idl::from_idl(idl::FrameResponseType idl) -> lin::FrameResponseType
+{
+    switch (idl)
+    {
+    case idl::MasterResponse:
+        return lin::FrameResponseType::MasterResponse;
+    case idl::SlaveResponse:
+        return lin::FrameResponseType::SlaveResponse;
+    case idl::SlaveToSlave:
+        return lin::FrameResponseType::SlaveToSlave;
+    }
+    throw std::runtime_error("conversion errror: Unknown lin::FrameResponseType");
 }
 
-auto idl::from_idl(idl::ResponseMode idl) -> lin::ResponseMode
+auto to_idl(FrameResponseMode msg) -> idl::FrameResponseMode
+{
+    switch (msg)
+    {
+    case FrameResponseMode::Unused:
+        return idl::Unused;
+    case FrameResponseMode::Rx:
+        return idl::Rx;
+    case FrameResponseMode::TxUnconditional:
+        return idl::TxUnconditional;
+    }
+    throw std::runtime_error("conversion errror: Unknown lin::FrameResponseMode");
+}
+auto idl::from_idl(idl::FrameResponseMode idl) -> lin::FrameResponseMode
 {
     switch (idl)
     {
     case idl::Unused:
-        return lin::ResponseMode::Unused;
+        return lin::FrameResponseMode::Unused;
     case idl::Rx:
-        return lin::ResponseMode::Rx;
+        return lin::FrameResponseMode::Rx;
     case idl::TxUnconditional:
-        return lin::ResponseMode::TxUnconditional;
-    default:
-        throw std::exception();
+        return lin::FrameResponseMode::TxUnconditional;
     }
+    throw std::runtime_error("conversion errror: Unknown lin::FrameResponseMode");
 }
 
-auto to_idl(MessageStatus msg) -> idl::MessageStatus
+auto to_idl(const FrameResponse& msg) -> idl::FrameResponse
+{
+    idl::FrameResponse idl;
+
+    idl.frame(to_idl(msg.frame));
+    idl.responseMode(to_idl(msg.responseMode));
+
+    return idl;
+}
+auto idl::from_idl(idl::FrameResponse&& idl) -> lin::FrameResponse
+{
+    lin::FrameResponse msg;
+
+    msg.frame = from_idl(std::move(idl.frame()));
+    msg.responseMode = from_idl(idl.responseMode());
+
+    return msg;
+}
+
+auto to_idl(FrameStatus msg) -> idl::FrameStatus
 {
     switch (msg)
     {
-    case MessageStatus::TxSuccess:
-        return idl::TxSuccess;
-    case MessageStatus::RxSuccess:
-        return idl::RxSuccess;
-    case MessageStatus::TxResponseError:
-        return idl::TxResponseError;
-    case MessageStatus::RxResponseError:
-        return idl::RxResponseError;
-    case MessageStatus::RxNoResponse:
-        return idl::RxNoResponse;
-    case MessageStatus::HeaderError:
-        return idl::HeaderError;
-    case MessageStatus::Canceled:
-        return idl::Canceled;
-    case MessageStatus::Busy:
-        return idl::Busy;
-    default:
-        throw std::exception();
+    case FrameStatus::NOT_OK:
+        return idl::NOT_OK;
+    case FrameStatus::LIN_TX_OK:
+        return idl::LIN_TX_OK;
+    case FrameStatus::LIN_TX_BUSY:
+        return idl::LIN_TX_BUSY;
+    case FrameStatus::LIN_TX_HEADER_ERROR:
+        return idl::LIN_TX_HEADER_ERROR;
+    case FrameStatus::LIN_TX_ERROR:
+        return idl::LIN_TX_ERROR;
+    case FrameStatus::LIN_RX_OK:
+        return idl::LIN_RX_OK;
+    case FrameStatus::LIN_RX_BUSY:
+        return idl::LIN_RX_BUSY;
+    case FrameStatus::LIN_RX_ERROR:
+        return idl::LIN_RX_ERROR;
+    case FrameStatus::LIN_RX_NO_RESPONSE:
+        return idl::LIN_RX_NO_RESPONSE;
     }
+    throw std::runtime_error("conversion errror: Unknown lin::FrameStatus");
 }
-
-auto idl::from_idl(idl::MessageStatus idl) -> lin::MessageStatus
+auto idl::from_idl(idl::FrameStatus idl) -> lin::FrameStatus
 {
     switch (idl)
     {
-    case idl::TxSuccess:
-        return lin::MessageStatus::TxSuccess;
-    case idl::RxSuccess:
-        return lin::MessageStatus::RxSuccess;
-    case idl::TxResponseError:
-        return lin::MessageStatus::TxResponseError;
-    case idl::RxResponseError:
-        return lin::MessageStatus::RxResponseError;
-    case idl::RxNoResponse:
-        return lin::MessageStatus::RxNoResponse;
-    case idl::HeaderError:
-        return lin::MessageStatus::HeaderError;
-    case idl::Canceled:
-        return lin::MessageStatus::Canceled;
-    case idl::Busy:
-        return lin::MessageStatus::Busy;
-    default:
-        throw std::exception();
+    case idl::NOT_OK:
+        return lin::FrameStatus::NOT_OK;
+    case idl::LIN_TX_OK:
+        return lin::FrameStatus::LIN_TX_OK;
+    case idl::LIN_TX_BUSY:
+        return lin::FrameStatus::LIN_TX_BUSY;
+    case idl::LIN_TX_HEADER_ERROR:
+        return lin::FrameStatus::LIN_TX_HEADER_ERROR;
+    case idl::LIN_TX_ERROR:
+        return lin::FrameStatus::LIN_TX_ERROR;
+    case idl::LIN_RX_OK:
+        return lin::FrameStatus::LIN_RX_OK;
+    case idl::LIN_RX_BUSY:
+        return lin::FrameStatus::LIN_RX_BUSY;
+    case idl::LIN_RX_ERROR:
+        return lin::FrameStatus::LIN_RX_ERROR;
+    case idl::LIN_RX_NO_RESPONSE:
+        return lin::FrameStatus::LIN_RX_NO_RESPONSE;
     }
+    throw std::runtime_error("conversion errror: Unknown lin::FrameStatus");
 }
 
-auto to_idl(const LinMessage& msg) -> idl::LinMessage
+auto to_idl(ControllerMode msg) -> idl::ControllerMode
 {
-    idl::LinMessage idl;
-
-    idl.status(to_idl(msg.status));
-    idl.timestamp(msg.timestamp.count());
-
-    idl.linId(msg.linId);
-    idl.payloadLength(msg.payload.size);
-    idl.payload(msg.payload.data);
-    idl.checksumModel(to_idl(msg.checksumModel));
-
-    return idl;
+    switch (msg)
+    {
+    case ControllerMode::Inactive:
+        return idl::Inactive;
+    case ControllerMode::Master:
+        return idl::Master;
+    case ControllerMode::Slave:
+        return idl::Slave;
+    }
+    throw std::runtime_error("conversion errror: Unknown lin::ControllerMode");
 }
-
-auto to_idl(LinMessage&& msg) -> idl::LinMessage
+auto idl::from_idl(idl::ControllerMode idl) -> lin::ControllerMode
 {
-    return to_idl(msg);
-}
-
-auto idl::from_idl(idl::LinMessage&& idl) -> lin::LinMessage
-{
-    lin::LinMessage msg;
-
-    msg.status = from_idl(idl.status());
-    msg.timestamp = std::chrono::nanoseconds{idl.timestamp()};
-
-    msg.linId = idl.linId();
-    msg.payload.size = idl.payloadLength();
-    msg.payload.data = idl.payload();
-    msg.checksumModel = from_idl(idl.checksumModel());
-
-    return msg;
-}
-
-auto to_idl(const RxRequest& msg) -> idl::RxRequest
-{
-    idl::RxRequest idl;
-
-    idl.linId(msg.linId);
-    idl.payloadLength(msg.payloadLength);
-    idl.checksumModel(to_idl(msg.checksumModel));
-
-    return idl;
-}
-
-auto idl::from_idl(idl::RxRequest&& idl) -> lin::RxRequest
-{
-    lin::RxRequest msg;
-
-    msg.linId = idl.linId();
-    msg.payloadLength = idl.payloadLength();
-    msg.checksumModel = from_idl(idl.checksumModel());
-
-    return msg;
-}
-
-auto to_idl(const TxAcknowledge& msg) -> idl::TxAcknowledge
-{
-    idl::TxAcknowledge idl;
-
-    idl.timestamp(msg.timestamp.count());
-    idl.linId(msg.linId);
-    idl.status(to_idl(msg.status));
-
-    return idl;
-}
-
-auto idl::from_idl(idl::TxAcknowledge&& idl) -> lin::TxAcknowledge
-{
-    lin::TxAcknowledge msg;
-
-    msg.timestamp = std::chrono::nanoseconds{idl.timestamp()};
-
-    msg.linId = idl.linId();
-    msg.status = from_idl(idl.status());
-
-    return msg;
-}
-
-auto to_idl(const WakeupRequest& msg) -> idl::WakeupRequest
-{
-    idl::WakeupRequest idl;
-
-    idl.timestampNs(std::chrono::duration_cast<std::chrono::nanoseconds>(msg.timestamp).count());
-
-    return idl;
-}
-
-auto idl::from_idl(idl::WakeupRequest&& idl) -> lin::WakeupRequest
-{
-    lin::WakeupRequest msg;
-
-    msg.timestamp = std::chrono::nanoseconds{idl.timestampNs()};
-
-    return msg;
+    switch (idl)
+    {
+    case idl::Inactive:
+        return lin::ControllerMode::Inactive;
+    case idl::Master:
+        return lin::ControllerMode::Master;
+    case idl::Slave:
+        return lin::ControllerMode::Slave;
+    }
+    throw std::runtime_error("conversion errror: Unknown lin::ControllerMode");
 }
 
 auto to_idl(const ControllerConfig& msg) -> idl::ControllerConfig
@@ -291,94 +268,185 @@ auto to_idl(const ControllerConfig& msg) -> idl::ControllerConfig
     idl::ControllerConfig idl;
 
     idl.controllerMode(to_idl(msg.controllerMode));
-    idl.baudrate(msg.baudrate);
+    idl.baudRate(msg.baudRate);
+    for (auto& response : msg.frameResponses)
+        idl.frameResponses().push_back(to_idl(response));
 
     return idl;
 }
-
-auto idl::from_idl(const idl::ControllerConfig& idl) -> lin::ControllerConfig
+auto idl::from_idl(idl::ControllerConfig&& idl) -> lin::ControllerConfig
 {
     lin::ControllerConfig msg;
 
     msg.controllerMode = from_idl(idl.controllerMode());
-    msg.baudrate = idl.baudrate();
+    msg.baudRate = idl.baudRate();
+    for (auto& response : idl.frameResponses())
+        msg.frameResponses.emplace_back(from_idl(std::move(response)));
 
     return msg;
 }
 
-
-auto to_idl(const SlaveResponseConfig& msg) -> idl::SlaveResponseConfig
+auto to_idl(ControllerStatus msg) -> idl::ControllerStatus
 {
-    idl::SlaveResponseConfig idl;
-
-    idl.linId(msg.linId);
-    idl.responseMode(to_idl(msg.responseMode));
-    idl.checksumModel(to_idl(msg.checksumModel));
-    idl.payloadLength(msg.payloadLength);
-
-    return idl;
-}
-
-auto idl::from_idl(const idl::SlaveResponseConfig& idl) -> lin::SlaveResponseConfig
-{
-    lin::SlaveResponseConfig msg;
-
-    msg.linId = idl.linId();
-    msg.responseMode = from_idl(idl.responseMode());
-    msg.checksumModel = from_idl(idl.checksumModel());
-    msg.payloadLength = idl.payloadLength();
-
-    return msg;
-}
-
-auto to_idl(const SlaveConfiguration& msg) -> idl::SlaveConfiguration
-{
-    std::vector<idl::SlaveResponseConfig> idlResponses;
-    idlResponses.reserve(msg.responseConfigs.size());
-
-    for (auto&& response : msg.responseConfigs)
+    switch (msg)
     {
-        idlResponses.push_back(to_idl(response));
+    case ControllerStatus::Unknown:
+        return idl::Unknown;
+    case ControllerStatus::Operational:
+        return idl::Operational;
+    case ControllerStatus::Sleep:
+        return idl::Sleep;
     }
-
-    idl::SlaveConfiguration idl;
-    idl.responseConfigs(std::move(idlResponses));
-    return idl;
+    throw std::runtime_error("conversion errror: Unknown lin::ControllerStatus");
+}
+auto idl::from_idl(idl::ControllerStatus idl) -> lin::ControllerStatus
+{
+    switch (idl)
+    {
+    case idl::Unknown:
+        return lin::ControllerStatus::Unknown;
+    case idl::Operational:
+        return lin::ControllerStatus::Operational;
+    case idl::Sleep:
+        return lin::ControllerStatus::Sleep;
+    }
+    throw std::runtime_error("conversion errror: Unknown lin::ControllerStatus");
 }
 
-auto idl::from_idl(const idl::SlaveConfiguration& idl) -> lin::SlaveConfiguration
+auto to_idl(SendFrameRequest&& msg) -> idl::SendFrameRequest
 {
-    lin::SlaveConfiguration msg;
-    msg.responseConfigs.reserve(idl.responseConfigs().size());
+    idl::SendFrameRequest idl;
+    idl.frame(to_idl(std::move(msg.frame)));
+    idl.responseType(to_idl(msg.responseType));
+    return idl;
+}
+auto to_idl(const SendFrameRequest& msg) -> idl::SendFrameRequest
+{
+    idl::SendFrameRequest idl;
+    idl.frame(to_idl(msg.frame));
+    idl.responseType(to_idl(msg.responseType));
+    return idl;
+}
+auto idl::from_idl(SendFrameRequest&& idl) -> lin::SendFrameRequest
+{
+    lin::SendFrameRequest msg;
 
-    for (auto&& idlResponse : idl.responseConfigs())
-    {
-        msg.responseConfigs.push_back(from_idl(idlResponse));
-    }
+    msg.frame = from_idl(std::move(idl.frame()));
+    msg.responseType = from_idl(idl.responseType());
 
     return msg;
 }
 
-auto to_idl(const SlaveResponse& msg) -> idl::SlaveResponse
+auto to_idl(SendFrameHeaderRequest&& msg) -> idl::SendFrameHeaderRequest
 {
-    idl::SlaveResponse idl;
+    idl::SendFrameHeaderRequest idl;
+    idl.id(msg.id);
+    return idl;
+}
+auto to_idl(const SendFrameHeaderRequest& msg) -> idl::SendFrameHeaderRequest
+{
+    idl::SendFrameHeaderRequest idl;
+    idl.id(msg.id);
+    return idl;
+}
+auto idl::from_idl(SendFrameHeaderRequest&& idl) -> lin::SendFrameHeaderRequest
+{
+    lin::SendFrameHeaderRequest msg;
 
-    idl.linId(msg.linId);
-    idl.payloadLength(msg.payload.size);
-    idl.payload(msg.payload.data);
-    idl.checksumModel(to_idl(msg.checksumModel));
+    msg.id = idl.id();
+
+    return msg;
+}
+
+
+auto to_idl(const Transmission& msg) -> idl::Transmission
+{
+    idl::Transmission idl;
+
+    idl.timestampNs(std::chrono::duration_cast<std::chrono::nanoseconds>(msg.timestamp).count());
+    idl.frame(to_idl(msg.frame));
+    idl.status(to_idl(msg.status));
 
     return idl;
 }
-
-auto idl::from_idl(const idl::SlaveResponse& idl) -> lin::SlaveResponse
+auto to_idl(Transmission&& msg) -> idl::Transmission
 {
-    lin::SlaveResponse msg;
+    return to_idl(msg);
+}
+auto idl::from_idl(idl::Transmission&& idl) -> lin::Transmission
+{
+    lin::Transmission msg;
 
-    msg.linId = idl.linId();
-    msg.payload.size = idl.payloadLength();
-    msg.payload.data = idl.payload();
-    msg.checksumModel = from_idl(idl.checksumModel());
+    msg.timestamp = std::chrono::nanoseconds{idl.timestampNs()};
+    msg.frame = from_idl(std::move(idl.frame()));
+    msg.status = from_idl(idl.status());
+
+    return msg;
+}
+
+auto to_idl(const FrameResponseUpdate& msg) -> idl::FrameResponseUpdate
+{
+    idl::FrameResponseUpdate idl;
+
+    for (auto& response : msg.frameResponses)
+        idl.frameResponses().push_back(to_idl(response));
+
+    return idl;
+}
+auto to_idl(FrameResponseUpdate&& msg) -> idl::FrameResponseUpdate
+{
+    return to_idl(msg);
+}
+auto idl::from_idl(idl::FrameResponseUpdate&& idl) -> lin::FrameResponseUpdate
+{
+    lin::FrameResponseUpdate msg;
+
+    for (auto&& response : idl.frameResponses())
+        msg.frameResponses.emplace_back(from_idl(std::move(response)));
+
+    return msg;
+}
+
+auto to_idl(const ControllerStatusUpdate& msg) -> idl::ControllerStatusUpdate
+{
+    idl::ControllerStatusUpdate idl;
+
+    idl.timestampNs(std::chrono::duration_cast<std::chrono::nanoseconds>(msg.timestamp).count());
+    idl.status(to_idl(msg.status));
+
+    return idl;
+}
+auto to_idl(ControllerStatusUpdate&& msg) -> idl::ControllerStatusUpdate
+{
+    return to_idl(msg);
+}
+auto idl::from_idl(idl::ControllerStatusUpdate&& idl) -> lin::ControllerStatusUpdate
+{
+    lin::ControllerStatusUpdate msg;
+
+    msg.timestamp = std::chrono::nanoseconds{idl.timestampNs()};
+    msg.status = from_idl(idl.status());
+
+    return msg;
+}
+
+auto to_idl(const WakeupPulse& msg) -> idl::WakeupPulse
+{
+    idl::WakeupPulse idl;
+
+    idl.timestampNs(std::chrono::duration_cast<std::chrono::nanoseconds>(msg.timestamp).count());
+
+    return idl;
+}
+auto to_idl(WakeupPulse&& msg) -> idl::WakeupPulse
+{
+    return to_idl(msg);
+}
+auto idl::from_idl(idl::WakeupPulse&& idl) -> lin::WakeupPulse
+{
+    lin::WakeupPulse msg;
+
+    msg.timestamp = std::chrono::nanoseconds{idl.timestampNs()};
 
     return msg;
 }

@@ -102,13 +102,13 @@ public:
     void SendIbMessage(EndpointAddress from, const sim::fr::TxBufferUpdate& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::fr::ControllerStatus& msg) override;
 
-    void SendIbMessage(EndpointAddress from, const sim::lin::LinMessage& msg) override;
-    void SendIbMessage(EndpointAddress from, const sim::lin::RxRequest& msg) override;
-    void SendIbMessage(EndpointAddress from, const sim::lin::TxAcknowledge& msg) override;
-    void SendIbMessage(EndpointAddress from, const sim::lin::WakeupRequest& msg) override;
+    void SendIbMessage(EndpointAddress from, const sim::lin::SendFrameRequest& msg) override;
+    void SendIbMessage(EndpointAddress from, const sim::lin::SendFrameHeaderRequest& msg) override;
+    void SendIbMessage(EndpointAddress from, const sim::lin::Transmission& msg) override;
+    void SendIbMessage(EndpointAddress from, const sim::lin::WakeupPulse& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::lin::ControllerConfig& msg) override;
-    void SendIbMessage(EndpointAddress from, const sim::lin::SlaveConfiguration& msg) override;
-    void SendIbMessage(EndpointAddress from, const sim::lin::SlaveResponse& msg) override;
+    void SendIbMessage(EndpointAddress from, const sim::lin::ControllerStatusUpdate& msg) override;
+    void SendIbMessage(EndpointAddress from, const sim::lin::FrameResponseUpdate& msg) override;
 
     void SendIbMessage(EndpointAddress from, const sim::io::AnalogIoMessage& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::io::DigitalIoMessage& msg) override;

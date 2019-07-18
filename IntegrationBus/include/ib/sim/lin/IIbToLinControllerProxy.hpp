@@ -15,8 +15,8 @@ namespace lin {
  *  Used by the ComAdapter, implemented by the LinControllerProxy
  */
 class IIbToLinControllerProxy
-    : public mw::IIbEndpoint<LinMessage, TxAcknowledge, WakeupRequest>
-    , public mw::IIbSender<LinMessage, RxRequest, WakeupRequest, ControllerConfig, SlaveConfiguration, SlaveResponse>
+    : public mw::IIbEndpoint<Transmission, WakeupPulse, ControllerConfig, FrameResponseUpdate>
+    , public mw::IIbSender<SendFrameRequest, SendFrameHeaderRequest, WakeupPulse, ControllerConfig, ControllerStatusUpdate, FrameResponseUpdate>
 {
 };
 
