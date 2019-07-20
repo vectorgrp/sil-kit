@@ -5,6 +5,27 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on [Keep a Changelog] (http://keepachangelog.com/en/1.0.0/).
 
+[Sprint-30] - unreleased
+------------------------
+Added
+~~~~~
+
+Removed
+~~~~~~~
+
+Changed
+~~~~~~~
+
+Fixed
+~~~~~
+
+Interface compatibility with Sprint-29
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Application middleware interface: Yes
+
+
 [Sprint-29] - 2019-07-17
 ------------------------
 Added
