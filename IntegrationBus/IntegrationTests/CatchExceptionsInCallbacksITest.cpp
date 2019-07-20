@@ -5,8 +5,7 @@
 #include <thread>
 #include <future>
 
-#include "ComAdapter.hpp"
-#include "ComAdapter_impl.hpp"
+#include "CreateComAdapter.hpp"
 #include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
@@ -43,10 +42,10 @@ protected:
 
         ibConfig = cfgBuilder.Build();
         
-        pubComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Sender");
+        pubComAdapter = CreateFastRtpsComAdapterImpl(ibConfig, "Sender");
         pubComAdapter->joinIbDomain(domainId);
 
-        subComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Receiver");
+        subComAdapter = CreateFastRtpsComAdapterImpl(ibConfig, "Receiver");
         subComAdapter->joinIbDomain(domainId);
     }
 
@@ -76,8 +75,8 @@ protected:
 
     std::promise<bool> testOk;
 
-    std::unique_ptr<ComAdapter<FastRtpsConnection>> pubComAdapter;
-    std::unique_ptr<ComAdapter<FastRtpsConnection>> subComAdapter;
+    std::unique_ptr<IComAdapterInternal> pubComAdapter;
+    std::unique_ptr<IComAdapterInternal> subComAdapter;
 };
     
 TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash)

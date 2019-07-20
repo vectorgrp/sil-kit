@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "ib/mw/IComAdapter.hpp"
+#include "IComAdapter_internal.hpp"
 
 #include <memory>
 #include <vector>
@@ -25,7 +25,7 @@ namespace ib {
 namespace mw {
 
 template <class IbConnectionT>
-class ComAdapter : public IComAdapter
+class ComAdapter : public IComAdapterInternal
 {
 public:
     // ----------------------------------------
@@ -144,7 +144,7 @@ public:
     * \throw std::exception A participant was created previously, or a
     * participant could not be created.
     */
-    void joinIbDomain(uint32_t domainId);
+    void joinIbDomain(uint32_t domainId) override;
 
     void Run() override { _ibConnection.Run(); }
     void Stop() override { _ibConnection.Stop(); }

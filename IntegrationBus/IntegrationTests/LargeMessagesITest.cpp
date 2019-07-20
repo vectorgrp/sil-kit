@@ -4,8 +4,7 @@
 #include <thread>
 #include <future>
 
-#include "ComAdapter.hpp"
-#include "ComAdapter_impl.hpp"
+#include "CreateComAdapter.hpp"
 #include "ib/sim/all.hpp"
 
 #include "gmock/gmock.h"
@@ -35,10 +34,10 @@ protected:
 
         ibConfig = ib::cfg::Config::FromJsonFile("LargeMessagesITest_IbConfig.json");
         
-        pubComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Publisher");
+        pubComAdapter = CreateFastRtpsComAdapterImpl(ibConfig, "Publisher");
         pubComAdapter->joinIbDomain(domainId);
 
-        subComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Subscriber");
+        subComAdapter = CreateFastRtpsComAdapterImpl(ibConfig, "Subscriber");
         subComAdapter->joinIbDomain(domainId);
     }
 
@@ -73,8 +72,8 @@ protected:
 
     Topic topic;
 
-    std::unique_ptr<ComAdapter<FastRtpsConnection>> pubComAdapter;
-    std::unique_ptr<ComAdapter<FastRtpsConnection>> subComAdapter;
+    std::unique_ptr<IComAdapterInternal> pubComAdapter;
+    std::unique_ptr<IComAdapterInternal> subComAdapter;
 };
     
 TEST_F(LargeMessagesITest, publish_and_subscribe_large_messages)

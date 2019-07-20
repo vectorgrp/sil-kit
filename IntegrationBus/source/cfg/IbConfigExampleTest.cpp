@@ -5,8 +5,7 @@
 #include <thread>
 #include <future>
 
-#include "ComAdapter.hpp"
-#include "ComAdapter_impl.hpp"
+#include "NullConnectionComAdapter.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
 
@@ -25,25 +24,6 @@ using testing::NiceMock;
 using testing::Return;
 
 using namespace ib;
-
-struct MockIbConnection
-{
-    MockIbConnection(ib::cfg::Config /*config*/, std::string /*participantName*/) {};
-
-    void joinDomain(uint32_t /*domainId*/) {};
-
-    template<class IbServiceT>
-    inline void RegisterIbService(const std::string& /*topicName*/, mw::EndpointId /*endpointId*/, IbServiceT* /*receiver*/) {};
-
-    template<typename IbMessageT>
-    void SendIbMessageImpl(mw::EndpointAddress /*from*/, IbMessageT&& /*msg*/) {};
-
-    void WaitForMessageDelivery() {};
-    void FlushSendBuffers() {};
-
-    void Run() {};
-    void Stop() {};
-};
 
 class IbConfigExampleITest : public testing::Test
 {
@@ -65,18 +45,18 @@ protected:
         std::cout << "Verifying participant " << participantName << '\n';
         auto&& participantCfg = cfg::get_by_name(ibConfig.simulationSetup.participants, participantName);
 
-        mw::ComAdapter<MockIbConnection> comAdapter(ibConfig, participantName);
+        auto comAdapter = ib::mw::CreateNullConnectionComAdapterImpl(ibConfig, participantName);
 
-        CreateCanControllers(comAdapter, participantCfg);
-        CreateLinControllers(comAdapter, participantCfg);
-        CreateEthernetControllers(comAdapter, participantCfg);
-        CreateFlexrayControllers(comAdapter, participantCfg);
-        CreateIoPorts(comAdapter, participantCfg);
-        CreateGenericPubSub(comAdapter, participantCfg);
-        GetSyncMaster(comAdapter, participantCfg);
-        GetParticipantController(comAdapter, participantCfg);
-        GetSystemMonitor(comAdapter, participantCfg);
-        GetSystemController(comAdapter, participantCfg);
+        CreateCanControllers(*comAdapter, participantCfg);
+        CreateLinControllers(*comAdapter, participantCfg);
+        CreateEthernetControllers(*comAdapter, participantCfg);
+        CreateFlexrayControllers(*comAdapter, participantCfg);
+        CreateIoPorts(*comAdapter, participantCfg);
+        CreateGenericPubSub(*comAdapter, participantCfg);
+        GetSyncMaster(*comAdapter, participantCfg);
+        GetParticipantController(*comAdapter, participantCfg);
+        GetSystemMonitor(*comAdapter, participantCfg);
+        GetSystemController(*comAdapter, participantCfg);
     }
     void CreateCanControllers(mw::IComAdapter& comAdapter, const cfg::Participant& participantCfg)
     {
