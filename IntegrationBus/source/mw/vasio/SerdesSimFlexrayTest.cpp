@@ -281,6 +281,29 @@ TEST(MwVAsioSerdes, SimFlexray_ControllerConfig) {
     }
 }
 
+TEST(MwVAsioSerdes, SimFlexray_TxBufferConfigUpdate) {
+    using namespace ib::sim::fr;
+    ib::mw::MessageBuffer buffer;
+
+    TxBufferConfigUpdate in;
+    TxBufferConfigUpdate out;
+
+    in.txBufferIndex = 23000;
+    in.txBufferConfig.channels = Channel::AB;
+    in.txBufferConfig.hasPayloadPreambleIndicator = true;
+    in.txBufferConfig.headerCrc = 1704;
+    in.txBufferConfig.offset = 3;
+    in.txBufferConfig.repetition = 4;
+    in.txBufferConfig.slotId = 7;
+    in.txBufferConfig.transmissionMode = TransmissionMode::Continuous;
+
+    buffer << in;
+    buffer >> out;
+
+    EXPECT_EQ(in.txBufferIndex, out.txBufferIndex);
+    EXPECT_EQ(in.txBufferConfig, out.txBufferConfig);
+}
+
 TEST(MwVAsioSerdes, SimFlexray_TxBufferUpdate) {
     using namespace ib::sim::fr;
     ib::mw::MessageBuffer buffer;

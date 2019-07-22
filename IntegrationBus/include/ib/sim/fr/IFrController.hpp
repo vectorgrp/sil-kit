@@ -42,7 +42,7 @@ public:
      *
      * This callback is primarily intended for tracing. There is no need to react on it.
      * Currently, the following SymbolPatterns can occur:
-     *  - Wakeup() will cause sending the SymbolPattern::Wus, if the bus is idle
+     *  - Wakeup() will cause sending the SymbolPattern::Wus, if the bus is idle.
      *  - Run() will cause the transmission of CasMts if configured to coldstart the bus.
      */
     using SymbolAckHandler = CallbackT<FrSymbolAck>;
@@ -58,6 +58,9 @@ public:
 
     //! \brief Configure the controller and switch to ready state
     virtual void Configure(const ControllerConfig& config) = 0;
+
+    //! \brief Reconfigure a TX-Buffer that was previously setup with IFrController::Configure(const ControllerConfig&)
+    virtual void ReconfigureTxBuffer(uint16_t txBufferIdx, const TxBufferConfig& config) = 0;
 
     /*! \brief Update the content of a previously configured TX buffer.
      *

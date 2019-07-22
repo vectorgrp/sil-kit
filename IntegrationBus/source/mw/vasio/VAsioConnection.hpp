@@ -82,6 +82,7 @@ DefineIbMsgTraits(ib::sim::fr, FrSymbolAck)
 DefineIbMsgTraits(ib::sim::fr, CycleStart)
 DefineIbMsgTraits(ib::sim::fr, HostCommand)
 DefineIbMsgTraits(ib::sim::fr, ControllerConfig)
+DefineIbMsgTraits(ib::sim::fr, TxBufferConfigUpdate)
 DefineIbMsgTraits(ib::sim::fr, TxBufferUpdate)
 DefineIbMsgTraits(ib::sim::fr, ControllerStatus)
 
@@ -189,6 +190,7 @@ private:
         sim::fr::CycleStart,
         sim::fr::HostCommand,
         sim::fr::ControllerConfig,
+        sim::fr::TxBufferConfigUpdate,
         sim::fr::TxBufferUpdate,
         sim::fr::ControllerStatus
     >;

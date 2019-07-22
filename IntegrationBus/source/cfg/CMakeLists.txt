@@ -40,23 +40,11 @@ target_include_directories(IbConfig
     PUBLIC .
 )
 
-add_mvsc_ib_include_filter()
-
 add_vib_test(TestMwCfgConfigBuilder SOURCES ConfigBuilderTest.cpp LIBS IbConfig)
 add_vib_test(TestMwCfgJsonConfig SOURCES JsonConfigTest.cpp LIBS IbConfig json11)
 add_vib_test(TestMwCfgValidation SOURCES ValidationTest.cpp LIBS IbConfig)
 add_vib_test(TestIbConfigExample SOURCES IbConfigExampleTest.cpp
-    LIBS
-        IbMwComAdapter
-        IbConfig
-        IbUtil
-        IbMwSync
-        IbSimCan
-        IbSimEthernet
-        IbSimFlexRay
-        IbSimLin
-        IbSimIO
-        IbSimGenericMessage
+    LIBS IbMwMock
     CONFIGS
         IbConfig_Example.json
         IbConfig_IO-Example.json

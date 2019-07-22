@@ -36,6 +36,8 @@ inline auto to_idl(const ClusterParameters& msg) -> idl::ClusterParameters;
 inline auto to_idl(const NodeParameters& msg) -> idl::NodeParameters;
 inline auto to_idl(const TxBufferConfig& msg) -> idl::TxBufferConfig;
 inline auto to_idl(const ControllerConfig& msg) -> idl::ControllerConfig;
+inline auto to_idl(const TxBufferConfigUpdate& msg) -> idl::TxBufferConfigUpdate;
+inline auto to_idl(TxBufferConfigUpdate&& msg) -> idl::TxBufferConfigUpdate;
 inline auto to_idl(const TxBufferUpdate& msg) -> idl::TxBufferUpdate;
 inline auto to_idl(TxBufferUpdate&& msg)->idl::TxBufferUpdate;
 inline auto to_idl(const ControllerStatus& msg) -> idl::ControllerStatus;
@@ -61,6 +63,7 @@ inline auto from_idl(ClusterParameters&& idl) -> fr::ClusterParameters;
 inline auto from_idl(NodeParameters&& idl) -> fr::NodeParameters;
 inline auto from_idl(TxBufferConfig&& idl) -> fr::TxBufferConfig;
 inline auto from_idl(ControllerConfig&& idl) -> fr::ControllerConfig;
+inline auto from_idl(TxBufferConfigUpdate&& idl) -> fr::TxBufferConfigUpdate;
 inline auto from_idl(TxBufferUpdate&& idl) -> fr::TxBufferUpdate;
 inline auto from_idl(ControllerStatus&& idl) -> fr::ControllerStatus;
 
@@ -662,6 +665,36 @@ auto idl::from_idl(idl::ControllerConfig&& idl) -> fr::ControllerConfig
     msg.clusterParams = from_idl(std::move(idl.clusterParams()));
     msg.nodeParams = from_idl(std::move(idl.nodeParams()));
     msg.bufferConfigs = std::move(bufferConfigs);
+
+    return msg;
+}
+
+auto to_idl(const TxBufferConfigUpdate& msg) -> idl::TxBufferConfigUpdate
+{
+    idl::TxBufferConfigUpdate idl;
+
+    idl.txBufferIndex(msg.txBufferIndex);
+    idl.txBufferConfig(to_idl(msg.txBufferConfig));
+
+    return idl;
+}
+
+auto to_idl(TxBufferConfigUpdate&& msg) -> idl::TxBufferConfigUpdate
+{
+    idl::TxBufferConfigUpdate idl;
+
+    idl.txBufferIndex(msg.txBufferIndex);
+    idl.txBufferConfig(to_idl(std::move(msg.txBufferConfig)));
+
+    return idl;
+}
+
+auto idl::from_idl(idl::TxBufferConfigUpdate&& idl) -> fr::TxBufferConfigUpdate
+{
+    fr::TxBufferConfigUpdate msg;
+
+    msg.txBufferIndex = idl.txBufferIndex();
+    msg.txBufferConfig = from_idl(std::move(idl.txBufferConfig()));
 
     return msg;
 }

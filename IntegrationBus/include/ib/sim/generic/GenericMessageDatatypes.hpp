@@ -7,6 +7,7 @@
 
 namespace ib {
 namespace sim {
+//! The namespace for Generic Message
 namespace generic {
 
 /*! \brief A generic message

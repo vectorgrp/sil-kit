@@ -5,8 +5,7 @@
 #include <thread>
 #include <future>
 
-#include "ComAdapter.hpp"
-#include "ComAdapter_impl.hpp"
+#include "CreateComAdapter.hpp"
 #include "Registry.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
@@ -32,233 +31,170 @@ using testing::Return;
 class GenericMessageITest : public testing::Test
 {
 protected:
-    struct Callbacks
-    {
-        MOCK_METHOD2(ReceiveData, void(ib::sim::generic::IGenericSubscriber*, const std::vector<uint8_t>&));
-    };
 
-protected:
-    GenericMessageITest()
-        : topics(2)
+    void Subscribe()
     {
+        auto subComAdapter = CreateComAdapterImpl(ibConfig, "Subscriber");
+        subComAdapter->joinIbDomain(domainId);
+
+        std::promise<void> threadFinishedPromise{};
+
+        unsigned int receiveCount{0};
+
+        for (auto&& topic: topics)
+        {
+            auto subscriber = subComAdapter->CreateGenericSubscriber(topic.name);
+
+            subscriber->SetReceiveMessageHandler(
+                [&topic = topic, &threadFinishedPromise, &receiveCount, this](auto* /*subscriber*/, const auto& data)
+                {
+                    topic.receivedData = data;
+
+                    if (topics.size() == ++receiveCount)
+                    {
+                        allReceivedPromise.set_value();
+                        threadFinishedPromise.set_value();
+                    }
+                }
+            );
+        }
+
+        auto threadFinished = threadFinishedPromise.get_future();
+        threadFinished.wait_for(10min);
+    }
+
+    void Publish()
+    {
+        auto pubComAdapter = CreateComAdapterImpl(ibConfig, "Publisher");
+        pubComAdapter->joinIbDomain(domainId);
+
+        for (auto&& topic: topics)
+        {
+            auto publisher = pubComAdapter->CreateGenericPublisher(topic.name);
+            std::this_thread::sleep_for(200ms);
+            publisher->Publish(topic.expectedData);
+        }
+
+        auto allReceived = allReceivedPromise.get_future();
+        allReceived.wait_for(10min);
     }
 
     struct Topic
     {
         std::string name;
-        std::promise<std::vector<uint8_t>> reply;
-        ib::sim::generic::IGenericPublisher* publisher;
-        ib::sim::generic::IGenericSubscriber* subscriber;
+        std::vector<uint8_t> expectedData;
+        std::vector<uint8_t> receivedData;
     };
 
 protected:
-    Callbacks callbacks;
+    uint32_t domainId;
+    ib::cfg::Config ibConfig;
+
     std::vector<Topic> topics;
+
+    std::promise<void> allReceivedPromise;
 };
-    
-TEST_F(GenericMessageITest, publish_and_subscribe_generic_messages)
+
+TEST_F(GenericMessageITest, publish_and_subscribe_generic_messages_fastrtps)
 {
-    // Test setup
+    topics.resize(2);
     topics[0].name = "GroundTruth";
+    topics[0].expectedData = std::vector<uint8_t>{topics[0].name.begin(), topics[0].name.end()};
     topics[1].name = "VehicleModelOut";
-    auto ibConfig = ib::cfg::Config::FromJsonFile("GenericMessagesITest_IbConfig.json");
+    topics[1].expectedData = std::vector<uint8_t>{topics[1].name.begin(), topics[1].name.end()};
 
-    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+    ibConfig = ib::cfg::Config::FromJsonFile("GenericMessagesITest_IbConfig.json");
+    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::FastRTPS;
 
-    auto pubComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Publisher");
-    pubComAdapter->joinIbDomain(domainId);
+    std::thread subscribeThread{[this] { Subscribe(); }};
+    std::thread publishThread{[this]{ Publish(); }};
 
-    auto subComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Subscriber");
-    subComAdapter->joinIbDomain(domainId);
-
-    // Subscribe Generic Messages
-    for (auto&& topic : topics)
-    {
-        topic.subscriber = subComAdapter->CreateGenericSubscriber(topic.name);
-        topic.subscriber->SetReceiveMessageHandler(
-            [&topic = topic, &callbacks = callbacks](auto* subscriber, auto&& data) {
-            callbacks.ReceiveData(subscriber, data);
-            topic.reply.set_value(data);
-        });
-
-        std::vector<uint8_t> expectedPayload{topic.name.begin(), topic.name.end()};
-        EXPECT_CALL(callbacks, ReceiveData(topic.subscriber, expectedPayload));
-    }
-
-    // Publish Generic Messages
-    std::thread publishThread{[&topics = topics, &pubComAdapter = pubComAdapter]() {
-        for (auto&& topic : topics)
-        {
-            topic.publisher = pubComAdapter->CreateGenericPublisher(topic.name);
-            topic.publisher->Publish({topic.name.begin(), topic.name.end()});
-        }
-    }};
+    publishThread.join();
+    subscribeThread.join();
 
     // Test expectations
     for (auto&& topic : topics)
     {
-        auto&& reply = topic.reply.get_future();
-        auto ready = reply.wait_for(10min);
-        ASSERT_EQ(ready, std::future_status::ready);
-
-        auto&& replyData = reply.get();
-        EXPECT_EQ(std::string(replyData.begin(), replyData.end()), topic.name);
+        EXPECT_EQ(topic.expectedData, topic.receivedData);
     }
-    
-    publishThread.join();
 }
 
-TEST_F(GenericMessageITest, publish_and_subscribe_large_messages)
+TEST_F(GenericMessageITest, publish_and_subscribe_large_messages_fastrtps)
 {
-    // Test setup
+    topics.resize(1);
     topics[0].name = "LargeDataBlobTopic";
-    auto ibConfig = ib::cfg::Config::FromJsonFile("LargeMessagesITest_IbConfig.json");
-
-    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
-
-    auto pubComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Publisher");
-    pubComAdapter->joinIbDomain(domainId);
-
-    auto subComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Subscriber");
-    subComAdapter->joinIbDomain(domainId);
-
     // Maximum payload size is 65416, beyond that we are testing the ASYNCHRONOUS_PUBLISH_MODE of FastRTPS.
     size_t sizeInBytes = 114793;
-    std::vector<uint8_t> data(sizeInBytes, 'D');
+    topics[0].expectedData = std::vector<uint8_t>(sizeInBytes, 'D');
 
-    // Subscribe Generic Message
-    auto&& topic = topics[0];
+    ibConfig = ib::cfg::Config::FromJsonFile("LargeMessagesITest_IbConfig.json");
+    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::FastRTPS;
 
-    topic.subscriber = subComAdapter->CreateGenericSubscriber(topic.name);
-    topic.subscriber->SetReceiveMessageHandler(
-        [&topic = topic, &callbacks = callbacks](auto* subscriber, auto&& data) {
-        callbacks.ReceiveData(subscriber, data);
-        topic.reply.set_value(data);
-    });
-
-    EXPECT_CALL(callbacks, ReceiveData(topic.subscriber, data));
-
-    // Publish large Generic Message
-    topic.publisher = pubComAdapter->CreateGenericPublisher(topic.name);
-    std::thread publishThread{[&topic = topic, &data = data]() {
-        topic.publisher->Publish(data);
-    }};
-
-    // Test expectations
-    auto&& reply = topic.reply.get_future();
-    auto ready = reply.wait_for(10min);
-    ASSERT_EQ(ready, std::future_status::ready);
-    EXPECT_EQ(reply.get(), data);
+    std::thread subscribeThread{[this] { Subscribe(); }};
+    std::thread publishThread{[this] { Publish(); }};
 
     publishThread.join();
+    subscribeThread.join();
+
+    // Test expectations
+    for (auto&& topic : topics)
+    {
+        EXPECT_EQ(topic.expectedData, topic.receivedData);
+    }
 }
 
 TEST_F(GenericMessageITest, publish_and_subscribe_generic_messages_vasio)
 {
-    // Test setup
+    topics.resize(2);
     topics[0].name = "GroundTruth";
+    topics[0].expectedData = std::vector<uint8_t>{topics[0].name.begin(), topics[0].name.end()};
     topics[1].name = "VehicleModelOut";
-    auto ibConfig = ib::cfg::Config::FromJsonFile("GenericMessagesITest_IbConfig.json");
+    topics[1].expectedData = std::vector<uint8_t>{topics[1].name.begin(), topics[1].name.end()};
 
-    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+    ibConfig = ib::cfg::Config::FromJsonFile("GenericMessagesITest_IbConfig.json");
+    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::FastRTPS;
 
     auto registry = std::make_unique<Registry>(ibConfig);
     registry->ProvideDomain(domainId);
 
-    auto pubComAdapter = std::make_unique<ComAdapter<VAsioConnection>>(ibConfig, "Publisher");
-    pubComAdapter->joinIbDomain(domainId);
+    std::thread subscribeThread{[this] { Subscribe(); }};
+    std::thread publishThread{[this] { Publish(); }};
 
-    auto subComAdapter = std::make_unique<ComAdapter<VAsioConnection>>(ibConfig, "Subscriber");
-    subComAdapter->joinIbDomain(domainId);
-
-    // Subscribe Generic Messages
-    for (auto&& topic : topics)
-    {
-        topic.subscriber = subComAdapter->CreateGenericSubscriber(topic.name);
-        topic.subscriber->SetReceiveMessageHandler(
-            [&topic = topic, &callbacks = callbacks](auto* subscriber, auto&& data) {
-            callbacks.ReceiveData(subscriber, data);
-            topic.reply.set_value(data);
-        });
-
-        std::vector<uint8_t> expectedPayload{topic.name.begin(), topic.name.end()};
-        EXPECT_CALL(callbacks, ReceiveData(topic.subscriber, expectedPayload));
-    }
-
-    std::this_thread::sleep_for(200ms);
-
-    // Publish Generic Messages
-    std::thread publishThread{[&topics = topics, &pubComAdapter = pubComAdapter]() {
-        for (auto&& topic : topics)
-        {
-            topic.publisher = pubComAdapter->CreateGenericPublisher(topic.name);
-            topic.publisher->Publish({topic.name.begin(), topic.name.end()});
-        }
-    }};
+    publishThread.join();
+    subscribeThread.join();
 
     // Test expectations
     for (auto&& topic : topics)
     {
-        auto&& reply = topic.reply.get_future();
-        auto ready = reply.wait_for(10s);
-        ASSERT_EQ(ready, std::future_status::ready);
-
-        auto&& replyData = reply.get();
-        EXPECT_EQ(std::string(replyData.begin(), replyData.end()), topic.name);
+        EXPECT_EQ(topic.expectedData, topic.receivedData);
     }
-
-    publishThread.join();
 }
 
 TEST_F(GenericMessageITest, publish_and_subscribe_large_messages_vasio)
 {
-    // Test setup
-    topics[0].name = "GroundTruth";
-    topics[1].name = "VehicleModelOut";
-    auto ibConfig = ib::cfg::Config::FromJsonFile("GenericMessagesITest_IbConfig.json");
+    topics.resize(1);
+    topics[0].name = "LargeDataBlobTopic";
+    // Maximum payload size is 65416, beyond that we are testing the ASYNCHRONOUS_PUBLISH_MODE of FastRTPS.
+    size_t sizeInBytes = 114793;
+    topics[0].expectedData = std::vector<uint8_t>(sizeInBytes, 'D');
 
-    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+    ibConfig = ib::cfg::Config::FromJsonFile("LargeMessagesITest_IbConfig.json");
+    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
 
     auto registry = std::make_unique<Registry>(ibConfig);
     registry->ProvideDomain(domainId);
 
-    auto pubComAdapter = std::make_unique<ComAdapter<VAsioConnection>>(ibConfig, "Publisher");
-    pubComAdapter->joinIbDomain(domainId);
-
-    auto subComAdapter = std::make_unique<ComAdapter<VAsioConnection>>(ibConfig, "Subscriber");
-    subComAdapter->joinIbDomain(domainId);
-
-    // Large Message
-    size_t sizeInBytes = 114793;
-    std::vector<uint8_t> data(sizeInBytes, 'D');
-
-    // Subscribe Generic Message
-    auto&& topic = topics[0];
-
-    topic.subscriber = subComAdapter->CreateGenericSubscriber(topic.name);
-    topic.subscriber->SetReceiveMessageHandler(
-        [&topic = topic, &callbacks = callbacks](auto* subscriber, auto&& data) {
-        callbacks.ReceiveData(subscriber, data);
-        topic.reply.set_value(data);
-    });
-
-    EXPECT_CALL(callbacks, ReceiveData(topic.subscriber, data));
-
-    std::this_thread::sleep_for(200ms);
-
-    // Publish large Generic Message
-    topic.publisher = pubComAdapter->CreateGenericPublisher(topic.name);
-    std::thread publishThread{[&topic = topic, &data = data]() {
-        topic.publisher->Publish(data);
-    }};
-
-    // Test expectations
-    auto&& reply = topic.reply.get_future();
-    auto ready = reply.wait_for(10s);
-    ASSERT_EQ(ready, std::future_status::ready);
-    EXPECT_EQ(reply.get(), data);
+    std::thread subscribeThread{[this] { Subscribe(); }};
+    std::thread publishThread{[this] { Publish(); }};
 
     publishThread.join();
+    subscribeThread.join();
+
+    // Test expectations
+    for (auto&& topic : topics)
+    {
+        EXPECT_EQ(topic.expectedData, topic.receivedData);
+    }
 }
 
 } // anonymous namespace

@@ -1,24 +1,23 @@
-file(GLOB_RECURSE IB_INCLUDES_ALL ${IB_PROJECT_DIR}/include *.hpp)
-
 add_library(IbInterface INTERFACE)
-
-# Only add headers as sources for builds, so that IDEs list them when a project depends on this library
-# https://cmake.org/pipermail/cmake/2016-July/063907.html
-target_sources(IbInterface
-    INTERFACE
-        $<BUILD_INTERFACE:${IB_INCLUDES_ALL}>
-)
 
 # Use generator expression to have a different set of include paths when the target is built versus when the target is installed somewhere
 target_include_directories(IbInterface
     INTERFACE
-        $<BUILD_INTERFACE:${IB_PROJECT_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
         $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}>
 )
 
 target_link_libraries(IbInterface
     INTERFACE spdlog
 )
+
+# Add a custom project IbApi for quick access to IB Headers in Visual Studio
+file(GLOB_RECURSE IB_INTERFACE_SOURCES ${CMAKE_CURRENT_LIST_DIR}/*.hpp)
+add_custom_target(IbApi SOURCES ${IB_INTERFACE_SOURCES})
+if(CMAKE_VERSION VERSION_GREATER 3.8.0)
+    # Easy access to IntegrationBus includes for Visual Studio
+    source_group(TREE ${CMAKE_CURRENT_LIST_DIR}/ib PREFIX "ib" FILES ${IB_INTERFACE_SOURCES})
+endif()
 
 
 #######################################################################################################################
@@ -35,7 +34,7 @@ install(
 
 # Copy all headers from the source directory to the proper destination
 install(
-    DIRECTORY ${IB_PROJECT_DIR}/include/
+    DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/
     DESTINATION ${INSTALL_INCLUDE_DIR}
     COMPONENT IntegrationBus
     FILES_MATCHING PATTERN *.hpp

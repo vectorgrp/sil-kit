@@ -3,6 +3,7 @@
 #include "FrControllerProxy.hpp"
 
 #include "ib/mw/IComAdapter.hpp"
+#include "ib/mw/logging/spdlog.hpp"
 
 namespace ib {
 namespace sim {
@@ -15,11 +16,32 @@ FrControllerProxy::FrControllerProxy(mw::IComAdapter* comAdapter)
 
 void FrControllerProxy::Configure(const ControllerConfig& config)
 {
+    _bufferConfigs = config.bufferConfigs;
     SendIbMessage(config);
+}
+
+void FrControllerProxy::ReconfigureTxBuffer(uint16_t txBufferIdx, const TxBufferConfig& config)
+{
+    if (txBufferIdx >= _bufferConfigs.size())
+    {
+        _comAdapter->GetLogger()->error("FrControllerProxy::ReconfigureTxBuffer() was called with unconfigured txBufferIdx={}", txBufferIdx);
+        throw std::out_of_range{"Unconfigured txBufferIdx!"};
+    }
+
+    TxBufferConfigUpdate update;
+    update.txBufferIndex = txBufferIdx;
+    update.txBufferConfig = config;
+    SendIbMessage(update);
 }
 
 void FrControllerProxy::UpdateTxBuffer(const TxBufferUpdate& update)
 {
+    if (update.txBufferIndex >= _bufferConfigs.size())
+    {
+        _comAdapter->GetLogger()->error("FrControllerProxy::UpdateTxBuffer() was called with unconfigured txBufferIndex={}", update.txBufferIndex);
+        throw std::out_of_range{"Unconfigured txBufferIndex!"};
+    }
+
     SendIbMessage(update);
 }
 

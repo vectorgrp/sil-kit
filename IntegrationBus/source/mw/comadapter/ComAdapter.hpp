@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "ib/mw/IComAdapter.hpp"
+#include "IComAdapter_internal.hpp"
 
 #include <memory>
 #include <vector>
@@ -26,7 +26,7 @@ namespace ib {
 namespace mw {
 
 template <class IbConnectionT>
-class ComAdapter : public IComAdapter
+class ComAdapter : public IComAdapterInternal
 {
 public:
     // ----------------------------------------
@@ -98,6 +98,7 @@ public:
     void SendIbMessage(EndpointAddress from, const sim::fr::CycleStart& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::fr::HostCommand& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::fr::ControllerConfig& msg) override;
+    void SendIbMessage(EndpointAddress from, const sim::fr::TxBufferConfigUpdate& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::fr::TxBufferUpdate& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::fr::ControllerStatus& msg) override;
 
@@ -145,7 +146,7 @@ public:
     * \throw std::exception A participant was created previously, or a
     * participant could not be created.
     */
-    void joinIbDomain(uint32_t domainId);
+    void joinIbDomain(uint32_t domainId) override;
 
     // For Testing Purposes:
     inline auto GetIbConnection() -> IbConnectionT& { return _ibConnection; }

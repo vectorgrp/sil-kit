@@ -82,14 +82,6 @@ public:
     virtual void RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* busSim) = 0;
     virtual void RegisterLinSimulator(sim::lin::IIbToLinSimulator* busSim) = 0;
 
-
-    /*! \brief Send interface.
-     *
-     *   Publishes a serializable message
-     *
-     *   \param from The publishing endpoint identified by its global address
-     *   \param msg  The message to be sent. Must be serializable by the employed middleware.
-     */
     virtual void SendIbMessage(EndpointAddress from, const sim::can::CanMessage& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, sim::can::CanMessage&& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sim::can::CanTransmitAcknowledge& msg) = 0;
@@ -112,6 +104,7 @@ public:
     virtual void SendIbMessage(EndpointAddress from, const sim::fr::CycleStart& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sim::fr::HostCommand& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sim::fr::ControllerConfig& msg) = 0;
+    virtual void SendIbMessage(EndpointAddress from, const sim::fr::TxBufferConfigUpdate& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sim::fr::TxBufferUpdate& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sim::fr::ControllerStatus& msg) = 0;
 

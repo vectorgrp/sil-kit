@@ -65,9 +65,10 @@ public:
      * The SlaveConfiguration contains a vector of
      * SlaveResponseConfigs. The length of the vector determines the
      * range of relevant LIN IDs for the slave. Each entry corresponds
-     * to a LIN ID and states how the LIN ID shall be treated (\ref
-     * ResponseMode), the expected checksum model (\ref
-     * ChecksumModel), and the expected payload length in bytes.
+     * to a LIN ID and states how the LIN ID
+     * shall be treated (::ResponseMode),
+     * the expected checksum model (::ChecksumModel),
+     * and the expected payload length in bytes.
      *
      * The SlaveConfiguration does not contain payload data for
      * responses. Response payload must be set using \ref
@@ -77,22 +78,22 @@ public:
 
     /*! \brief Set the response payload for a given LIN ID
      *
-     * Set \param payload as the response for requests with LIN ID
-     * \param linId. The corresponding LIN ID must be previoiusly
+     * Set \p payload as the response for requests with LIN ID
+     * \p linId. The corresponding LIN ID must be previoiusly
      * configured as ResponseMode::TxUnconditional, cf. \ref
      * SetSlaveConfiguration(const SlaveConfiguration&).
      */
     virtual void SetResponse(LinId linId, const Payload& payload) = 0;
 
     /*! \brief Set the response payload for a given LIN ID and update checksum configuration
-    *
-    * Set \param payload as the response for requests with LIN ID
-    * \param linId. Also, the configured checksum model is updated
-    * to \param checksumModel.
-    * NB: The corresponding LIN ID must be previoiusly
-    * configured as ResponseMode::TxUnconditional, cf. \ref
-    * SetSlaveConfiguration(const SlaveConfiguration&).
-    */
+     *
+     * Set \p payload as the response for requests with LIN ID
+     * \p linId. Also, the configured checksum model is updated
+     * to \p checksumModel.
+     * NB: The corresponding LIN ID must be previoiusly
+     * configured as #ResponseMode::TxUnconditional, cf. \ref
+     * SetSlaveConfiguration(const SlaveConfiguration&).
+     */
     virtual void SetResponseWithChecksum(LinId linId, const Payload& payload, ChecksumModel checksumModel) = 0;
 
     /*! \brief Mark a LIN ID as unused

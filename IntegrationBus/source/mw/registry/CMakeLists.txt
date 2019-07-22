@@ -7,18 +7,16 @@ add_library(IbMwRegistry STATIC
 
 target_include_directories(IbMwRegistry
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-	$<INSTALL_INTERFACE:include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:include>
 )
 
 if (MSVC)
     target_compile_options(IbMwRegistry PRIVATE "/bigobj")
 endif (MSVC)
 
-add_mvsc_ib_include_filter()
-
 target_link_libraries(IbMwRegistry
-	PUBLIC
+    PUBLIC
     IbMwVAsio
     IbConfig
     Threads::Threads
@@ -29,5 +27,5 @@ add_executable(IbMwRegistryDemo
 )
 
 target_link_libraries(IbMwRegistryDemo
-	IbMwRegistry
+    IbMwRegistry
 )

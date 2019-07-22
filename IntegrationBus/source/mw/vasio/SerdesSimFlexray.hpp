@@ -292,6 +292,21 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, Controll
     return buffer;
 }
 
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const TxBufferConfigUpdate& update)
+{
+    buffer
+        << update.txBufferIndex
+        << update.txBufferConfig;
+    return buffer;
+}
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, TxBufferConfigUpdate& update)
+{
+    buffer
+        >> update.txBufferIndex
+        >> update.txBufferConfig;
+    return buffer;
+}
+
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const TxBufferUpdate& update)
 {
     buffer

@@ -22,15 +22,15 @@ public:
 public:
     /*! \brief Register a callback for SystemState changes
      *
-     * If the current SystemState is not SystemState::Invalid, the handler will
-     * be called immediately.
+     * If the current SystemState is not \ref SystemState::Invalid,
+     * the handler will be called immediately.
      */
     virtual void RegisterSystemStateHandler(SystemStateHandlerT handler) = 0;
 
     /*! \brief Register a callback for ParticipantState changes
      *
-     * The handler will be called immediately for any participant that is not in
-     * ParticipantState::Invalid.
+     * The handler will be called immediately for any participant that is
+     * not in \ref ParticipantState::Invalid.
      *
      * NB: ParticipantStatusHandlers and ParticipantStateHandlers are
      * always called in combination.
@@ -39,8 +39,8 @@ public:
 
     /*! \brief Register a callback for ParticipantStatus changes
      *
-     * The handler will be called immediately for any participant that is not in
-     * ParticipantState::Invalid.
+     * The handler will be called immediately for any participant that is
+     * not in \ref ParticipantState::Invalid.
      *
      * NB: ParticipantStatusHandlers and ParticipantStateHandlers are
      * always called in combination.

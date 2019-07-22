@@ -130,15 +130,6 @@ set(CMAKE_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR_backup}")
 # Helper Functions
 #######################################################################################################################
 
-# Add IntegrationBus Headers to VS Projects
-function(add_mvsc_ib_include_filter)
-    if(CMAKE_VERSION VERSION_GREATER 3.8.0)
-        # Easy access to IntegrationBus includes for Visual Studio
-        file(GLOB_RECURSE IB_INCLUDES_ALL ${IB_PROJECT_DIR}/include/ib/*.hpp)
-        source_group(TREE ${IB_PROJECT_DIR}/include/ib PREFIX "Header Files (IB)" FILES ${IB_INCLUDES_ALL})
-    endif()
-endfunction(add_mvsc_ib_include_filter)
-
 function(add_vib_test)
     set(multiValueArgs SOURCES LIBS CONFIGS)
 
@@ -192,8 +183,7 @@ function(add_vib_test)
              WORKING_DIRECTORY $<TARGET_FILE_DIR:${executableName}>
     )
 
-    add_mvsc_ib_include_filter()
-endfunction(add_ib_test)
+endfunction(add_vib_test)
 
 include(CTest)
 
@@ -296,6 +286,8 @@ install(
     COMPONENT IntegrationBus-Developer
     # Rational: Fast-RTPS cannot be delivered from source, as it requires its own submodules to be actual Git repositories.
     REGEX "/ThirdParty/Fast-RTPS" EXCLUDE
+    # Breathe is just required for generating the documentation
+    REGEX "/ThirdParty/Breathe" EXCLUDE
 )
 # Instead of the Fast-RTPS library, deploy a script to clone Fast-RTPS. 
 # It should only be used from package deployments, thus the '.in' disguise.

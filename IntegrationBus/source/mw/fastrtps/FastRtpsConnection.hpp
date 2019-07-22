@@ -24,8 +24,7 @@
 
 #include "IbSubListener.hpp"
 #include "ReportMatchingListener.hpp"
-#include "memory_fastrtps.hpp"
-#include "FastRtpsGuard.hpp"
+#include "FastRtpsUtils.hpp"
 
 #include "tuple_tools/for_each.hpp"
 
@@ -74,14 +73,14 @@ private:
     struct RtpsPubListener
     {
         std::unique_ptr<eprosima::fastrtps::PublisherListener> listener;
-        FastRtps::unique_ptr<eprosima::fastrtps::Publisher> publisher;
+        std::unique_ptr<eprosima::fastrtps::Publisher, FastRtps::RemovePublisher> publisher;
     };
 
     template<class TopicT>
     struct RtpsSubListener
     {
         IbSubListener<TopicT> listener;
-        FastRtps::unique_ptr<eprosima::fastrtps::Subscriber> subscriber;
+        std::unique_ptr<eprosima::fastrtps::Subscriber, FastRtps::RemoveSubscriber> subscriber;
     };
 
     template<class TopicT>
@@ -126,13 +125,11 @@ private:
 private:
     // ----------------------------------------
     // private members
-    FastRtps::FastRtpsGuard _fastRtpsGuard;
-
     cfg::Config _config;
     std::string _participantName;
     ParticipantId _participantId{0};
 
-    FastRtps::unique_ptr<eprosima::fastrtps::Participant> _fastRtpsParticipant;
+    std::unique_ptr<eprosima::fastrtps::Participant, FastRtps::RemoveParticipant> _fastRtpsParticipant;
 
     std::tuple<
         RtpsTopics<sim::can::idl::CanMessage>,
@@ -151,6 +148,7 @@ private:
         RtpsTopics<sim::fr::idl::CycleStart>,
         RtpsTopics<sim::fr::idl::HostCommand>,
         RtpsTopics<sim::fr::idl::ControllerConfig>,
+        RtpsTopics<sim::fr::idl::TxBufferConfigUpdate>,
         RtpsTopics<sim::fr::idl::TxBufferUpdate>,
         RtpsTopics<sim::fr::idl::ControllerStatus>,
         RtpsTopics<sim::lin::idl::LinMessage>,
@@ -199,7 +197,7 @@ void FastRtpsConnection::SendIbMessageImpl(EndpointAddress from, IbMessageT&& ms
     auto& rtpsTopics = std::get<RtpsTopics<decltype(idlMsg)>>(_rtpsTopics);
     assert(rtpsTopics.endpointToPublisherMap.find(from.endpoint) != rtpsTopics.endpointToPublisherMap.end());
 
-    auto * publisher = rtpsTopics.endpointToPublisherMap[from.endpoint];
+    auto* publisher = rtpsTopics.endpointToPublisherMap[from.endpoint];
     publisher->write(&idlMsg);
 }
 

@@ -9,13 +9,14 @@
 
 namespace ib {
 namespace mw {
+//! The synchronisation namespace
 namespace sync {
 
 
 struct QuantumRequest
 {
-    std::chrono::nanoseconds now;
-    std::chrono::nanoseconds duration;
+    std::chrono::nanoseconds now; //!< Quantum request time
+    std::chrono::nanoseconds duration; //!< Requested quantum duration
 };
 
 enum class QuantumRequestStatus : uint8_t
@@ -27,95 +28,96 @@ enum class QuantumRequestStatus : uint8_t
 
 struct QuantumGrant
 {
-    EndpointAddress grantee;
-    std::chrono::nanoseconds now;
-    std::chrono::nanoseconds duration;
+    EndpointAddress grantee; //!< Endpoint of the grantee
+    std::chrono::nanoseconds now; //!< Quantum grant time
+    std::chrono::nanoseconds duration; //!< Granted quantum duration
 
-    QuantumRequestStatus status{QuantumRequestStatus::Invalid};
+    QuantumRequestStatus status{QuantumRequestStatus::Invalid}; //!< Status of the quantum request
 };
 
 
 struct Tick
 {
-    std::chrono::nanoseconds now;
-    std::chrono::nanoseconds duration;
+    std::chrono::nanoseconds now; //!< Current tick time
+    std::chrono::nanoseconds duration; //!< Tick duration
 };
 
 struct TickDone
 {
-    Tick finishedTick;
+    Tick finishedTick; //!< Represents a finished tick
 };
-
 
 struct ParticipantCommand
 {
+    //! The different kinds of a ParticipantCommand
     enum class Kind : uint8_t {
-        Invalid,
-        Initialize,
-        ReInitialize
+        Invalid, //!< An invalid command
+        Initialize, //!< The initialize command
+        ReInitialize //!< The re-inizialize command
     };
 
-    ParticipantId participant;
-    Kind kind;
+    ParticipantId participant; //!< The specific participant that receives this command.
+    Kind kind; //!< The kind of participant command that is sent.
 };
 
 struct SystemCommand
 {
+    //! The different kinds of a SystemCommand
     enum class Kind : uint8_t {
-        Invalid,
-        Run,
-        Stop,
-        Shutdown,
-        PrepareColdswap,
-        ExecuteColdswap
+        Invalid, //!< An invalid command
+        Run, //!< The run command
+        Stop, //!< The stop command
+        Shutdown, //!< The shutdown command
+        PrepareColdswap, //!< The prepare coldswap command
+        ExecuteColdswap //!< The execute coldswap command
     };
 
-    Kind kind;
+    Kind kind; //!< The kind of system command that is sent.
 };
 
-enum class ParticipantState : uint8_t{
-    Invalid,
-    Idle,
-    Initializing,
-    Initialized,
-    Running,
-    Paused,
-    Stopping,
-    Stopped,
-    ColdswapPrepare,
-    ColdswapReady,
-    ColdswapShutdown,
-    ColdswapIgnored,
-    Error,
-    ShuttingDown,
-    Shutdown
+enum class ParticipantState : uint8_t {
+    Invalid, //!< An invalid participant state
+    Idle, //!< The idle state
+    Initializing, //!< The initializing state
+    Initialized, //!< The initialized state
+    Running, //!< The running state
+    Paused, //!< The paused state
+    Stopping, //!< The stopping state
+    Stopped, //!< The stopped state
+    ColdswapPrepare, //!< The ColdswapPrepare state
+    ColdswapReady, //!< The ColdswapReady state
+    ColdswapShutdown, //!< The ColdswapShutdown state
+    ColdswapIgnored, //!< The ColdswapIgnored state
+    Error, //!< The error state
+    ShuttingDown, //!< The ShuttingDown state
+    Shutdown //!< The shutdown state
 };
 
 struct ParticipantStatus
 {
-    std::string participantName;
-    ParticipantState state{ParticipantState::Invalid};
-    std::string enterReason;
-    std::chrono::system_clock::time_point enterTime;
-    std::chrono::system_clock::time_point refreshTime;
+    std::string participantName; //!< Name of the participant.
+    ParticipantState state{ParticipantState::Invalid}; //!< The new state of the participant.
+    std::string enterReason; //!< The reason for the participant to enter the new state.
+    std::chrono::system_clock::time_point enterTime; //!< The enter time of the participant.
+    std::chrono::system_clock::time_point refreshTime; //!< The refresh time.
 };
 
-enum class SystemState : uint8_t{
-    Invalid,
-    Idle,
-    Initializing,
-    Initialized,
-    Running,
-    Paused,
-    Stopping,
-    Stopped,
-    ColdswapPrepare,
-    ColdswapReady,
-    ColdswapPending,
-    ColdswapDone,
-    Error,
-    ShuttingDown,
-    Shutdown
+enum class SystemState : uint8_t {
+    Invalid, //!< An invalid system state
+    Idle, //!< The idle state
+    Initializing, //!< The initializing state
+    Initialized, //!< The initialized state
+    Running, //!< The running state
+    Paused, //!< The paused state
+    Stopping, //!< The stopping state
+    Stopped, //!< The stopped state
+    ColdswapPrepare, //!< The ColdswapPrepare state
+    ColdswapReady, //!< The ColdswapReady state
+    ColdswapPending, //!< The ColdswapPending state
+    ColdswapDone, //!< The ColdswapDone state
+    Error, //!< The error state
+    ShuttingDown, //!< The ShuttingDown state
+    Shutdown //!< The shutdown state
 };
 
 

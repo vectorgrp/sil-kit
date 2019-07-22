@@ -20,8 +20,6 @@ target_link_libraries("IbMwSync"
     PUBLIC IbUtil
 )
 
-add_mvsc_ib_include_filter()
-
 add_vib_test(TestMwSyncMaster SOURCES SyncMasterTest.cpp LIBS IbMwSync IbMwMock IbConfig )
 add_vib_test(TestMwParticipantController SOURCES ParticipantControllerTest.cpp LIBS IbMwSync IbMwMock IbConfig )
 add_vib_test(TestMwSystemController SOURCES SystemControllerTest.cpp LIBS IbMwSync IbMwMock)

@@ -1195,6 +1195,115 @@ void ib::sim::fr::idl::ControllerConfig::serializeKey(eprosima::fastcdr::Cdr &sc
 	 
 	 
 }
+ib::sim::fr::idl::TxBufferConfigUpdate::TxBufferConfigUpdate()
+{
+
+    m_txBufferIndex = 0;
+
+
+
+}
+
+ib::sim::fr::idl::TxBufferConfigUpdate::~TxBufferConfigUpdate()
+{
+}
+
+ib::sim::fr::idl::TxBufferConfigUpdate::TxBufferConfigUpdate(const TxBufferConfigUpdate &x)
+{
+    m_senderAddr = x.m_senderAddr;
+    m_txBufferIndex = x.m_txBufferIndex;
+    m_txBufferConfig = x.m_txBufferConfig;
+}
+
+ib::sim::fr::idl::TxBufferConfigUpdate::TxBufferConfigUpdate(TxBufferConfigUpdate &&x)
+{
+    m_senderAddr = std::move(x.m_senderAddr);
+    m_txBufferIndex = x.m_txBufferIndex;
+    m_txBufferConfig = std::move(x.m_txBufferConfig);
+}
+
+ib::sim::fr::idl::TxBufferConfigUpdate& ib::sim::fr::idl::TxBufferConfigUpdate::operator=(const TxBufferConfigUpdate &x)
+{
+    m_senderAddr = x.m_senderAddr;
+    m_txBufferIndex = x.m_txBufferIndex;
+    m_txBufferConfig = x.m_txBufferConfig;
+
+    return *this;
+}
+
+ib::sim::fr::idl::TxBufferConfigUpdate& ib::sim::fr::idl::TxBufferConfigUpdate::operator=(TxBufferConfigUpdate &&x)
+{
+    m_senderAddr = std::move(x.m_senderAddr);
+    m_txBufferIndex = x.m_txBufferIndex;
+    m_txBufferConfig = std::move(x.m_txBufferConfig);
+
+    return *this;
+}
+
+size_t ib::sim::fr::idl::TxBufferConfigUpdate::getMaxCdrSerializedSize(size_t current_alignment)
+{
+    size_t initial_alignment = current_alignment;
+
+    current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += ib::sim::fr::idl::TxBufferConfig::getMaxCdrSerializedSize(current_alignment);
+
+    return current_alignment - initial_alignment;
+}
+
+size_t ib::sim::fr::idl::TxBufferConfigUpdate::getCdrSerializedSize(const ib::sim::fr::idl::TxBufferConfigUpdate& data, size_t current_alignment)
+{
+    (void)data;
+    size_t initial_alignment = current_alignment;
+
+    current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
+    current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
+
+
+    current_alignment += ib::sim::fr::idl::TxBufferConfig::getCdrSerializedSize(data.txBufferConfig(), current_alignment);
+
+    return current_alignment - initial_alignment;
+}
+
+void ib::sim::fr::idl::TxBufferConfigUpdate::serialize(eprosima::fastcdr::Cdr &scdr) const
+{
+    scdr << m_senderAddr;
+    scdr << m_txBufferIndex;
+    scdr << m_txBufferConfig;
+}
+
+void ib::sim::fr::idl::TxBufferConfigUpdate::deserialize(eprosima::fastcdr::Cdr &dcdr)
+{
+    dcdr >> m_senderAddr;
+    dcdr >> m_txBufferIndex;
+    dcdr >> m_txBufferConfig;
+}
+
+size_t ib::sim::fr::idl::TxBufferConfigUpdate::getKeyMaxCdrSerializedSize(size_t current_alignment)
+{
+	size_t current_align = current_alignment;
+            
+     current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
+
+
+
+    return current_align;
+}
+
+bool ib::sim::fr::idl::TxBufferConfigUpdate::isKeyDefined()
+{
+    return true;
+}
+
+void ib::sim::fr::idl::TxBufferConfigUpdate::serializeKey(eprosima::fastcdr::Cdr &scdr) const
+{
+	(void) scdr;
+	 scdr << m_senderAddr;  
+	 
+	 
+}
 ib::sim::fr::idl::TxBufferUpdate::TxBufferUpdate()
 {
 

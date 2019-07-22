@@ -260,6 +260,17 @@ struct ControllerConfig
 };
 
 
+//! Update the configuration of a particular FlexRay TX-Buffer
+struct TxBufferConfigUpdate
+{
+    @Key ib::mw::idl::EndpointAddress senderAddr;
+    
+    // Index of the TX Buffers according to the configured buffers (cf. ControllerConfig)
+    unsigned short txBufferIndex;
+    // The new configuration of the Tx-Buffer
+    TxBufferConfig txBufferConfig;
+};
+
 // Update the content of a FlexRay TX-Buffer
 struct TxBufferUpdate
 {

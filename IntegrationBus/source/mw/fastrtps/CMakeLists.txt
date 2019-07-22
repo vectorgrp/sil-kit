@@ -4,8 +4,8 @@ add_library(IbMwFastRtps STATIC
     IbSubListener.hpp
     FastRtpsConnection.hpp
     FastRtpsConnection.cpp
-    FastRtpsGuard.hpp
-    FastRtpsGuard.cpp
+    FastRtpsUtils.hpp
+    FastRtpsUtils.cpp
     fastrtps_fwd.h
     IdlTraitMacro.hpp
     IdlTraitsCan.hpp
@@ -24,7 +24,6 @@ add_library(IbMwFastRtps STATIC
     IdlTypeConversionSync.hpp
     IdlTypeConversionLogging.hpp
     IdlTypeConversionLogging_impl.hpp
-    memory_fastrtps.hpp
     ReportMatchingListener.hpp
 )
 
@@ -43,5 +42,3 @@ target_include_directories(IbMwFastRtps
 if (MSVC)
     target_compile_options(IbMwFastRtps PRIVATE "/bigobj")
 endif (MSVC)
-
-add_mvsc_ib_include_filter()

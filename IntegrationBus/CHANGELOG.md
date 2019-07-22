@@ -3,6 +3,23 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [Sprint-29] - 2019-07-17
+### Added
+- It is now possible to reconfigure FlexRay TX-Buffers during the simulation, e.g., to change offset
+  and repetition. Cf., IFrController::ReconfigureTxBuffer(uint16_t, const TxBufferConfig&)
+### Removed
+### Changed
+- This is the last entry to CHANGELOG.md. From now on, the changelog
+  will be maintained in docs/CHANGELOG.rst.
+- The IB API Headers are no longer added to every project. Instead, a dedicated
+  header project IbApi has been added.
+### Fixed
+
+### Interface compatibility with Sprint-28:
+* Application binary interface (ABI): No
+* Application software interface (API): Yes
+* Application middleware interface: Yes
+
 ## [Sprint-28] - 2019-07-03
 ### Added
 - New demo that shows how integration tests can be written for the Vector Integration Bus.

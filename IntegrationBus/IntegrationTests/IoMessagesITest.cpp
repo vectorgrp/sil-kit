@@ -5,8 +5,7 @@
 #include <thread>
 #include <future>
 
-#include "ComAdapter.hpp"
-#include "ComAdapter_impl.hpp"
+#include "CreateComAdapter.hpp"
 #include "Registry.hpp"
 #include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/sim/all.hpp"
@@ -85,10 +84,10 @@ TEST_F(IoMessageITest, receive_init_values)
 {
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
-    std::unique_ptr<ComAdapter<FastRtpsConnection>> pubComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Sender");
+    auto pubComAdapter = CreateFastRtpsComAdapterImpl(ibConfig, "Sender");
     pubComAdapter->joinIbDomain(domainId);
 
-    std::unique_ptr<ComAdapter<FastRtpsConnection>> subComAdapter = std::make_unique<ComAdapter<FastRtpsConnection>>(ibConfig, "Receiver");
+    auto subComAdapter = CreateFastRtpsComAdapterImpl(ibConfig, "Receiver");
     subComAdapter->joinIbDomain(domainId);
 
     auto dio1 = subComAdapter->CreateDigitalIn(topics[0].name);
@@ -127,10 +126,10 @@ TEST_F(IoMessageITest, receive_init_values_vasio)
     std::unique_ptr<Registry> registry = std::make_unique<Registry>(ibConfig);
     registry->ProvideDomain(domainId);
 
-    std::unique_ptr<ComAdapter<VAsioConnection>> pubComAdapter = std::make_unique<ComAdapter<VAsioConnection>>(ibConfig, "Sender");
+    auto pubComAdapter = CreateVAsioComAdapterImpl(ibConfig, "Sender");
     pubComAdapter->joinIbDomain(domainId);
 
-    std::unique_ptr<ComAdapter<VAsioConnection>> subComAdapter = std::make_unique<ComAdapter<VAsioConnection>>(ibConfig, "Receiver");
+    auto subComAdapter = CreateVAsioComAdapterImpl(ibConfig, "Receiver");
     subComAdapter->joinIbDomain(domainId);
 
     auto dio1 = subComAdapter->CreateDigitalIn(topics[0].name);

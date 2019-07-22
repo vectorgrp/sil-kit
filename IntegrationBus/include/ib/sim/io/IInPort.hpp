@@ -11,6 +11,11 @@ namespace ib {
 namespace sim {
 namespace io {
 
+ /*!
+ * \brief In-Port implementation.
+ *
+ * \tparam MsgT The I/O message type.
+ */
 template<typename MsgT>
 class IInPort
 {
@@ -19,6 +24,7 @@ public:
     using ValueType = decltype(MsgT::value);
     using ConfigType = cfg::IoPort<ValueType>;
 
+    //! \brief Generic callback type for the IInPort
     template<typename T>
     using CallbackT = std::function<void(IInPort* port, const T& t)>;
 
@@ -43,6 +49,7 @@ public:
      * has access to the whole message including its timestamp.
      */
     virtual void RegisterHandler(MessageHandler handler) = 0;
+
     /*! \brief Register a handler for new IO value
      *
      * The handler is called upon reception of a new IO messages. It
@@ -52,9 +59,13 @@ public:
     virtual void RegisterHandler(ValueHandler handler) = 0;
 };
 
+//! \brief IInPort for DigitalIoMessage
 using IDigitalInPort = IInPort<DigitalIoMessage>;
+//! \brief IInPort for AnalogIoMessage
 using IAnalogInPort  = IInPort<AnalogIoMessage>;
+//! \brief IInPort for PwmIoMessage
 using IPwmInPort     = IInPort<PwmIoMessage>;
+//! \brief IInPort for PatternIoMessage
 using IPatternInPort = IInPort<PatternIoMessage>;
 
 } // namespace io
