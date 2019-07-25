@@ -5,6 +5,11 @@
 
 #include "ib/cfg/string_utils.hpp"
 
+#include <thread>
+#include <chrono>
+
+using namespace std::chrono_literals;
+
 namespace ib {
 namespace mw {
 
@@ -32,8 +37,7 @@ VAsioConnection::~VAsioConnection()
 
 void VAsioConnection::JoinDomain(uint32_t domainId)
 {
-    // accept connection from other peers
-    // let the operating system choose a free port
+    // We let the operating system choose a free port
     AcceptConnectionsOn(tcp::endpoint(asio::ip::address::from_string("127.0.0.1"), 0));
 
     VAsioPeerInfo registryInfo;
@@ -55,7 +59,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     StartIoWorker();    
 }
 
-void VAsioConnection::ReceiveParticipantAnnouncement(MessageBuffer&& buffer, IVAsioPeer* peer)
+void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer)
 {
     registry::ParticipantAnnouncement announcement;
     buffer >> announcement;
@@ -69,10 +73,10 @@ void VAsioConnection::ReceiveParticipantAnnouncement(MessageBuffer&& buffer, IVA
 
     std::cout << "INFO: Received participant announcement from " << announcement.peerInfo.participantName << std::endl;
 
-    peer->SetInfo(announcement.peerInfo);
+    from->SetInfo(announcement.peerInfo);
     for (auto&& receiver : _participantAnnouncementReceivers)
     {
-        receiver(peer, announcement);
+        receiver(from, announcement);
     }
 }
 
@@ -163,10 +167,15 @@ void VAsioConnection::AcceptConnectionsOn(asio::ip::tcp::endpoint endpoint)
 {
     assert(!_tcpAcceptor);
 
-    _tcpAcceptor = std::make_unique<asio::ip::tcp::acceptor>(
-        _ioContext,
-        std::move(endpoint)
-        );
+    try
+    {
+        _tcpAcceptor = std::make_unique<asio::ip::tcp::acceptor>(_ioContext, endpoint);
+    }
+    catch (std::exception& e)
+    {
+        std::cout << "ERROR: VAsioConnection failed to listening on " << endpoint << ": " << e.what() << std::endl;
+        throw e;
+    }
 
     std::cout << "INFO: VAsioConnection is listening on " << _tcpAcceptor->local_endpoint() << std::endl;
 
@@ -175,7 +184,16 @@ void VAsioConnection::AcceptConnectionsOn(asio::ip::tcp::endpoint endpoint)
 
 void VAsioConnection::AcceptNextConnection(asio::ip::tcp::acceptor& acceptor)
 {
-    auto newConnection = std::make_shared<VAsioTcpPeer>(acceptor.get_executor().context(), this);
+    std::shared_ptr<VAsioTcpPeer> newConnection;
+    try
+    {
+        newConnection = std::make_shared<VAsioTcpPeer>(acceptor.get_executor().context(), this);
+    }
+    catch (std::exception& e)
+    {
+        std::cout << "ERROR: VAsioConnection cannot create listener socket!" << std::endl;
+        throw e;
+    }
 
     acceptor.async_accept(newConnection->Socket(),
         [this, newConnection, &acceptor](const asio::error_code& error) mutable
@@ -192,7 +210,7 @@ void VAsioConnection::AcceptNextConnection(asio::ip::tcp::acceptor& acceptor)
 
 void VAsioConnection::AddPeer(std::shared_ptr<VAsioTcpPeer> newPeer)
 {
-    for (auto&& localReceiver : _rawMsgReceivers)
+    for (auto&& localReceiver : _vasioReceivers)
     {
         newPeer->Subscribe(localReceiver->GetDescriptor());
     }
@@ -215,12 +233,16 @@ void VAsioConnection::AddPeer(std::shared_ptr<VAsioTcpPeer> newPeer)
 
 void VAsioConnection::RegisterNewPeerCallback(std::function<void()> callback)
 {
-    _newPeerCallback = std::move(callback);
+    ExecuteOnIoThread([this, callback{std::move(callback)}]{
+        _newPeerCallback = std::move(callback);
+    });
 }
 
 void VAsioConnection::RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> callback)
 {
-    _peerShutdownCallbacks.emplace_back(std::move(callback));
+    ExecuteOnIoThread([this, callback{std::move(callback)}]{
+        _peerShutdownCallbacks.emplace_back(std::move(callback));
+    });
 }
 
 void VAsioConnection::OnPeerShutdown(IVAsioPeer* peer)
@@ -231,7 +253,7 @@ void VAsioConnection::OnPeerShutdown(IVAsioPeer* peer)
     }
 }
 
-void VAsioConnection::OnSocketData(MessageBuffer&& buffer, IVAsioPeer* peer)
+void VAsioConnection::OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer)
 {
     VAsioMsgKind msgKind;
     buffer >> msgKind;
@@ -241,47 +263,59 @@ void VAsioConnection::OnSocketData(MessageBuffer&& buffer, IVAsioPeer* peer)
         std::cerr << "WARNING: Received message with VAsioMsgKind::Invalid\n";
         break;
     case VAsioMsgKind::AnnounceSubscription:
-        return ReceiveSubscriptionAnnouncement(std::move(buffer), peer);
+        return ReceiveSubscriptionAnnouncement(from, std::move(buffer));
     case VAsioMsgKind::IbMwMsg:
         return ReceiveRawIbMessage(std::move(buffer));
     case VAsioMsgKind::IbSimMsg:
         return ReceiveRawIbMessage(std::move(buffer));
     case VAsioMsgKind::IbRegistryMessage:
-        return ReceiveRegistryMessage(std::move(buffer), peer);
+        return ReceiveRegistryMessage(from, std::move(buffer));
     }
 }
 
-void VAsioConnection::ReceiveSubscriptionAnnouncement(MessageBuffer&& buffer, IVAsioPeer* peer)
+void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer)
 {
     VAsioMsgSubscriber subscriber;
     buffer >> subscriber;
 
     bool wasAdded = false;
 
-    tt::wrapped_tuple<Zero, IbMessageTypes> supportedTypes;
-    tt::for_each(supportedTypes, [&](auto zero) {
+    tt::for_each(_ibLinks, [&](auto&& linkMap) {
 
-        using IbMessageT = typename decltype(zero)::Type;
-        wasAdded |= this->TryAddSubscriber<IbMessageT>(subscriber, peer);
+        using LinkType = typename std::decay_t<decltype(linkMap)>::mapped_type::element_type;
+
+        if (subscriber.msgTypeName != LinkType::MsgTypeName())
+            return;
+
+        auto& ibLink = linkMap[subscriber.linkName];
+        if (!ibLink)
+        {
+            ibLink = std::make_shared<LinkType>(subscriber.linkName);
+        }
+
+        ibLink->AddRemoteReceiver(from, subscriber.receiverIdx);
+
+        wasAdded = true;
 
     });
 
-    if (!wasAdded)
-    {
+
+    if (wasAdded)
+        std::cout << "INFO: Registered subscriber for: [" << subscriber.linkName << "] " << subscriber.msgTypeName << "\n";
+    else
         std::cout << "WARNING: Cannot register subscriber for: [" << subscriber.linkName << "] " << subscriber.msgTypeName << "\n";
-    }
 }
 
 void VAsioConnection::ReceiveRawIbMessage(MessageBuffer&& buffer)
 {
     uint16_t receiverIdx;
     buffer >> receiverIdx;
-    if (receiverIdx >= _rawMsgReceivers.size())
+    if (receiverIdx >= _vasioReceivers.size())
     {
         std::cerr << "WARNING: Ignoring RawIbMessage for unknown receiverIdx=" << receiverIdx << "\n";
         return;
     }
-    _rawMsgReceivers[receiverIdx]->ReceiveMsg(std::move(buffer));
+    _vasioReceivers[receiverIdx]->ReceiveRawMsg(std::move(buffer));
 }
 
 void VAsioConnection::RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, registry::ParticipantAnnouncement)> callback)
@@ -289,7 +323,7 @@ void VAsioConnection::RegisterMessageReceiver(std::function<void(IVAsioPeer* pee
     _participantAnnouncementReceivers.emplace_back(std::move(callback));
 }
 
-void VAsioConnection::ReceiveRegistryMessage(MessageBuffer&& buffer, IVAsioPeer* peer)
+void VAsioConnection::ReceiveRegistryMessage(IVAsioPeer* from, MessageBuffer&& buffer)
 {
     registry::RegistryMessageKind kind;
     buffer >> kind;
@@ -299,7 +333,7 @@ void VAsioConnection::ReceiveRegistryMessage(MessageBuffer&& buffer, IVAsioPeer*
         std::cerr << "WARNING: Received message with RegistryMessageKind::Invalid\n";
         return;
     case registry::RegistryMessageKind::ParticipantAnnouncement:
-        return ReceiveParticipantAnnouncement(std::move(buffer), peer);
+        return ReceiveParticipantAnnouncement(from, std::move(buffer));
     case registry::RegistryMessageKind::KnownParticipants:
         return ReceiveKnownParticpants(std::move(buffer));
     case registry::RegistryMessageKind::SubscriptionSent:

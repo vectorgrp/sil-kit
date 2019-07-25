@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "ib/mw/IIbMessageReceiver.hpp"
+#include "IbLink.hpp"
 
 #include "VAsioMessageSubscriber.hpp"
 
@@ -11,58 +11,62 @@ namespace mw {
 
 class MessageBuffer;
 
-struct IVAsioReceiver
+class IVAsioReceiver
 {
+public:
+    // ----------------------------------------
+    // Public interface methods
     virtual ~IVAsioReceiver() = default;
-    auto& GetDescriptor() const { return _subscriber; }
-    auto& GetDescriptor() { return _subscriber; }
-    void SetReceiverIdx(uint16_t receiverIdx) { _subscriber.receiverIdx = receiverIdx; }
-
-    virtual void ReceiveMsg(MessageBuffer&& buffer) = 0;
-
-private:
-    VAsioMsgSubscriber _subscriber;
+    virtual auto GetDescriptor() const -> const VAsioMsgSubscriber& = 0;
+    virtual void ReceiveRawMsg(MessageBuffer&& buffer) = 0;
 };
 
 template <class MsgT>
-struct VAsioReceiver : public IVAsioReceiver
+class VAsioReceiver : public IVAsioReceiver
 {
-    auto AddReceiver(ib::mw::IIbMessageReceiver<MsgT>* receiver)
-    {
-        _receivers.push_back(receiver);
-    }
-    virtual void ReceiveMsg(MessageBuffer&& buffer)
-    {
-        EndpointAddress from;
-        MsgT msg;
-        buffer >> from >> msg;
+public:
+    // ----------------------------------------
+    // Constructors and Destructor
+    VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::shared_ptr<IbLink<MsgT>> link);
 
-        for (auto&& receiver : _receivers)
-        {
-            try
-            {
-                receiver->ReceiveIbMessage(from, msg);
-            }
-            catch (const std::exception& e)
-            {
-                std::cerr
-                    << "WARNING: Callback for "
-                    << GetDescriptor().msgTypeName
-                    << "[\"" << GetDescriptor().linkName << "\"]"
-                    << " threw an exception: " << e.what() << "." << std::endl;
-            }
-            catch (...)
-            {
-                std::cerr
-                    << "WARNING: Callback for "
-                    << GetDescriptor().msgTypeName
-                    << "[\"" << GetDescriptor().linkName << "\"]"
-                    << " threw an unknown exception." << std::endl;
-            }
-        }
-    }
-    std::vector<ib::mw::IIbMessageReceiver<MsgT>*> _receivers;
+public:
+    // ----------------------------------------
+    // Public interface methods
+    auto GetDescriptor() const -> const VAsioMsgSubscriber& override;
+    void ReceiveRawMsg(MessageBuffer&& buffer) override;
+
+private:
+    // ----------------------------------------
+    // private members
+    VAsioMsgSubscriber _subscriptionInfo;
+    std::shared_ptr<IbLink<MsgT>> _link;
 };
 
+
+// ================================================================================
+//  Inline Implementations
+// ================================================================================
+template <class MsgT>
+VAsioReceiver<MsgT>::VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::shared_ptr<IbLink<MsgT>> link)
+    : _subscriptionInfo{std::move(subscriberInfo)}
+    , _link{link}
+{
+}
+
+template <class MsgT>
+auto VAsioReceiver<MsgT>::GetDescriptor() const -> const VAsioMsgSubscriber&
+{
+    return _subscriptionInfo;
+}
+
+template <class MsgT>
+void VAsioReceiver<MsgT>::ReceiveRawMsg(MessageBuffer&& buffer)
+{
+    EndpointAddress endpoint;
+    MsgT msg;
+    buffer >> endpoint >> msg;
+
+    _link->DistributeRemoteIbMessage(endpoint, msg);
+}
 } // mw
 } // namespace ib

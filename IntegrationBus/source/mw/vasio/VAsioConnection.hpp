@@ -25,11 +25,13 @@
 #include "SerdesSimIo.hpp"
 #include "SerdesSimLin.hpp"
 #include "SerdesSimFlexray.hpp"
+#include "IbMsgTraits.hpp"
 
+#include "IbLink.hpp"
 #include "IVAsioPeer.hpp"
 #include "VAsioTcpPeer.hpp"
 #include "VAsioReceiver.hpp"
-#include "VAsioSender.hpp"
+#include "VAsioTransmitter.hpp"
 #include "VAsioMessageSubscriber.hpp"
 #include "VAsioMsgKind.hpp"
 
@@ -38,53 +40,8 @@
 
 #include "asio.hpp"
 
-
-#define DefineIbMsgTraits(Namespace, MsgName) template<> struct IbMsgTraits<Namespace::MsgName> { static constexpr const char* TypeName() { return #Namespace "::" #MsgName; } };
-
 namespace ib {
 namespace mw {
-
-template <class MsgT> struct IbMsgTraits;
-
-DefineIbMsgTraits(ib::mw::logging, LogMsg)
-DefineIbMsgTraits(ib::mw::sync, Tick)
-DefineIbMsgTraits(ib::mw::sync, TickDone)
-DefineIbMsgTraits(ib::mw::sync, QuantumRequest)
-DefineIbMsgTraits(ib::mw::sync, QuantumGrant)
-DefineIbMsgTraits(ib::mw::sync, ParticipantCommand)
-DefineIbMsgTraits(ib::mw::sync, SystemCommand)
-DefineIbMsgTraits(ib::mw::sync, ParticipantStatus)
-DefineIbMsgTraits(ib::sim::generic, GenericMessage)
-DefineIbMsgTraits(ib::sim::can, CanMessage)
-DefineIbMsgTraits(ib::sim::can, CanTransmitAcknowledge)
-DefineIbMsgTraits(ib::sim::can, CanControllerStatus)
-DefineIbMsgTraits(ib::sim::can, CanConfigureBaudrate)
-DefineIbMsgTraits(ib::sim::can, CanSetControllerMode)
-DefineIbMsgTraits(ib::sim::eth, EthMessage)
-DefineIbMsgTraits(ib::sim::eth, EthTransmitAcknowledge)
-DefineIbMsgTraits(ib::sim::eth, EthStatus)
-DefineIbMsgTraits(ib::sim::eth, EthSetMode)
-DefineIbMsgTraits(ib::sim::io, AnalogIoMessage)
-DefineIbMsgTraits(ib::sim::io, DigitalIoMessage)
-DefineIbMsgTraits(ib::sim::io, PatternIoMessage)
-DefineIbMsgTraits(ib::sim::io, PwmIoMessage)
-DefineIbMsgTraits(ib::sim::lin, LinMessage)
-DefineIbMsgTraits(ib::sim::lin, RxRequest)
-DefineIbMsgTraits(ib::sim::lin, TxAcknowledge)
-DefineIbMsgTraits(ib::sim::lin, WakeupRequest)
-DefineIbMsgTraits(ib::sim::lin, ControllerConfig)
-DefineIbMsgTraits(ib::sim::lin, SlaveConfiguration)
-DefineIbMsgTraits(ib::sim::lin, SlaveResponse)
-DefineIbMsgTraits(ib::sim::fr, FrMessage)
-DefineIbMsgTraits(ib::sim::fr, FrMessageAck)
-DefineIbMsgTraits(ib::sim::fr, FrSymbol)
-DefineIbMsgTraits(ib::sim::fr, FrSymbolAck)
-DefineIbMsgTraits(ib::sim::fr, CycleStart)
-DefineIbMsgTraits(ib::sim::fr, HostCommand)
-DefineIbMsgTraits(ib::sim::fr, ControllerConfig)
-DefineIbMsgTraits(ib::sim::fr, TxBufferConfigUpdate)
-DefineIbMsgTraits(ib::sim::fr, TxBufferUpdate)
-DefineIbMsgTraits(ib::sim::fr, ControllerStatus)
 
 class VAsioConnection
 {
@@ -126,7 +83,7 @@ public:
 
     // Temporary Helpers
     void RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, registry::ParticipantAnnouncement)> callback);
-    void OnSocketData(MessageBuffer&& buffer, IVAsioPeer* peer);
+    void OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer);
 
     void AcceptConnectionsOn(asio::ip::tcp::endpoint endpoint);
     void StartIoWorker();
@@ -136,22 +93,14 @@ public:
 
 private:
     // ----------------------------------------
-    // private datatypes
+    // private data types
     template <class MsgT>
-    struct IbLink
-    {
-        std::shared_ptr<VAsioReceiver<MsgT>> receiver;
-        std::shared_ptr<VAsioSender<MsgT>>   sender;
-    };
+    using IbLinkMap = std::map<std::string, std::shared_ptr<IbLink<MsgT>>>;
 
     template <class MsgT>
-    using IbLinkMap = std::map<std::string, IbLink<MsgT>>;
-
-    template <class MsgT>
-    using IbSenderMap = std::map<EndpointId, std::shared_ptr<VAsioSender<MsgT>>>;
+    using IbEndpointToLinkMap = std::map<EndpointId, std::shared_ptr<IbLink<MsgT>>>;
 
     using ParticipantAnnouncementReceiver = std::function<void(IVAsioPeer* peer, registry::ParticipantAnnouncement)>;
-
 
     using IbMessageTypes = std::tuple<
         logging::LogMsg,
@@ -195,33 +144,39 @@ private:
         sim::fr::ControllerStatus
     >;
 
-protected:
-
-
 private:
     // ----------------------------------------
     // private methods
     void ReceiveRawIbMessage(MessageBuffer&& buffer);
-    void ReceiveSubscriptionAnnouncement(MessageBuffer&& buffer, IVAsioPeer* peer);
-    void ReceiveRegistryMessage(MessageBuffer&& buffer, IVAsioPeer* peer);
+    void ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer);
+    void ReceiveRegistryMessage(IVAsioPeer* from, MessageBuffer&& buffer);
 
     // Registry related send / receive methods
     void SendParticipantAnnoucement(IVAsioPeer* peer);
     void ReceiveKnownParticpants(MessageBuffer&& buffer);
-    void ReceiveParticipantAnnouncement(MessageBuffer&& buffer, IVAsioPeer* peer);
+    void ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer);
     void ReceiveSubscriptionSentEvent();
 
     template<class IbMessageT>
-    bool TryAddSubscriber(const VAsioMsgSubscriber& subscriber, IVAsioPeer* peer);
+    auto GetLinkByName(const std::string& linkName) ->std::shared_ptr<IbLink<IbMessageT>>;
 
     template<class IbMessageT>
     void RegisterIbMsgReceiver(const std::string& link, ib::mw::IIbMessageReceiver<IbMessageT>* receiver);
     template<class IbMessageT>
     void RegisterIbMsgSender(const std::string& link, EndpointId endpointId);
 
+    template<class IbServiceT>
+    inline void RegisterIbServiceImpl(const std::string& link, EndpointId endpointId, IbServiceT* service);
+
+    template <class IbMessageT>
+    void SendIbMessageImpl_(EndpointAddress from, IbMessageT&& msg);
+
+    template <typename... MethodArgs, typename... Args>
+    inline void ExecuteOnIoThread(void (VAsioConnection::*method)(MethodArgs...), Args&&... args);
+    inline void ExecuteOnIoThread(std::function<void()> function);
+
     // TCP Related
     void AddPeer(std::shared_ptr<VAsioTcpPeer> peer);
-
     void AcceptNextConnection(asio::ip::tcp::acceptor& acceptor);
 
 private:
@@ -232,14 +187,11 @@ private:
     ParticipantId _participantId{0};
 
     //! \brief Virtual IB links by linkName according to IbConfig.
-    // An std::tuple<IbLinkMap<IbMsgT>...> for all supported IbMessageTypes
     util::tuple_tools::wrapped_tuple<IbLinkMap, IbMessageTypes> _ibLinks;
-
     //! \brief Lookup for sender objects by ID.
-    // An std::tuple<IbSenderMap<IbMsgT>...> for all supported IbMessageTypes
-    util::tuple_tools::wrapped_tuple<IbSenderMap, IbMessageTypes> _endpointToSenderMap;
+    util::tuple_tools::wrapped_tuple<IbEndpointToLinkMap, IbMessageTypes> _endpointToLinkMap;
 
-    std::vector<std::shared_ptr<IVAsioReceiver>> _rawMsgReceivers;
+    std::vector<std::unique_ptr<IVAsioReceiver>> _vasioReceivers;
 
     // FIXME: generalize the reception of registry data
     std::vector<ParticipantAnnouncementReceiver> _participantAnnouncementReceivers;
@@ -247,12 +199,14 @@ private:
     std::vector<std::shared_ptr<IVAsioPeer>> _peers;
     std::unique_ptr<IVAsioPeer> _registry{nullptr};
 
+    std::vector<std::function<void(IVAsioPeer*)>> _peerShutdownCallbacks;
+    std::function<void()> _newPeerCallback{nullptr};
+
+    // IO context and worker thread should be the last members in this class.
+    // This ensures that they are destroyed before the callbacks.
     asio::io_context _ioContext;
     std::thread _ioWorker;
     std::unique_ptr<asio::ip::tcp::acceptor> _tcpAcceptor;
-
-    std::vector<std::function<void(IVAsioPeer*)>> _peerShutdownCallbacks;
-    std::function<void()> _newPeerCallback{nullptr};
 };
 
 // ================================================================================
@@ -264,24 +218,24 @@ auto VAsioConnection::Config() const -> const ib::cfg::Config&
 }
 
 template<class IbMessageT>
-bool VAsioConnection::TryAddSubscriber(const VAsioMsgSubscriber& subscriber, IVAsioPeer* peer)
+auto VAsioConnection::GetLinkByName(const std::string& linkName) -> std::shared_ptr<IbLink<IbMessageT>>
 {
-    if (subscriber.msgTypeName != IbMsgTraits<IbMessageT>::TypeName())
-        return false;
-
-    auto&& ibLink = std::get<IbLinkMap<IbMessageT>>(_ibLinks)[subscriber.linkName];
-    if (!ibLink.sender)
+    auto& ibLink = std::get<IbLinkMap<IbMessageT>>(_ibLinks)[linkName];
+    if (!ibLink)
     {
-        ibLink.sender = std::make_shared<VAsioSender<IbMessageT>>();
+        ibLink = std::make_shared<IbLink<IbMessageT>>(linkName);
     }
-    ibLink.sender->AddSubscriber(subscriber.receiverIdx, peer);
-
-    std::cout << "INFO: Registered subscriber for: [" << subscriber.linkName << "] " << IbMsgTraits<IbMessageT>::TypeName() << "\n";
-    return true;
+    return ibLink;
 }
 
 template <class IbServiceT>
 void VAsioConnection::RegisterIbService(const std::string& link, EndpointId endpointId, IbServiceT* service)
+{
+    ExecuteOnIoThread(&VAsioConnection::RegisterIbServiceImpl<IbServiceT>, link, endpointId, service);
+}
+
+template <class IbServiceT>
+void VAsioConnection::RegisterIbServiceImpl(const std::string& link, EndpointId endpointId, IbServiceT* service)
 {
     typename IbServiceT::IbReceiveMessagesTypes receiveMessageTypes{};
     typename IbServiceT::IbSendMessagesTypes sendMessageTypes{};
@@ -301,52 +255,82 @@ void VAsioConnection::RegisterIbService(const std::string& link, EndpointId endp
             this->RegisterIbMsgSender<IbMessageT>(link, endpointId);
         }
     );
-
 }
 
 template<class IbMessageT>
-void VAsioConnection::RegisterIbMsgReceiver(const std::string& link, ib::mw::IIbMessageReceiver<IbMessageT>* receiver)
+void VAsioConnection::RegisterIbMsgReceiver(const std::string& linkName, ib::mw::IIbMessageReceiver<IbMessageT>* receiver)
 {
-    auto&& ibLink = std::get<IbLinkMap<IbMessageT>>(_ibLinks)[link];
-    if (!ibLink.receiver)
-    {
-        ibLink.receiver = std::make_shared<VAsioReceiver<IbMessageT>>();
-        ibLink.receiver->SetReceiverIdx(static_cast<uint16_t>(_rawMsgReceivers.size()));
-        ibLink.receiver->GetDescriptor().linkName = link;
-        ibLink.receiver->GetDescriptor().msgTypeName = IbMsgTraits<IbMessageT>::TypeName();
-        ibLink.receiver->AddReceiver(receiver);
+    auto link = GetLinkByName<IbMessageT>(linkName);
+    link->AddLocalReceiver(receiver);
 
-        _rawMsgReceivers.push_back(ibLink.receiver);
+    auto vasioReceiver = std::find_if(_vasioReceivers.begin(), _vasioReceivers.end(),
+        [&linkName](auto& receiver) {
+            return receiver->GetDescriptor().linkName == linkName
+                && receiver->GetDescriptor().msgTypeName == IbMsgTraits<IbMessageT>::TypeName();
+        });
+    if (vasioReceiver == _vasioReceivers.end())
+    {
+        // we have to subscribe to messages from other peers
+        VAsioMsgSubscriber subscriptionInfo;
+        subscriptionInfo.receiverIdx = static_cast<uint16_t>(_vasioReceivers.size());
+        subscriptionInfo.linkName = linkName;
+        subscriptionInfo.msgTypeName = IbMsgTraits<IbMessageT>::TypeName();
+
+        std::unique_ptr<IVAsioReceiver> rawReceiver = std::make_unique<VAsioReceiver<IbMessageT>>(subscriptionInfo, link);
+        _vasioReceivers.emplace_back(std::move(rawReceiver));
+
         for (auto&& peer : _peers)
         {
-            peer->Subscribe(ibLink.receiver->GetDescriptor());
+            peer->Subscribe(subscriptionInfo);
         }
-    }
-    else
-    {
-        ibLink.receiver->AddReceiver(receiver);
     }
 }
 
 template<class IbMessageT>
 void VAsioConnection::RegisterIbMsgSender(const std::string& link, EndpointId endpointId)
 {
-    auto&& ibLink = std::get<IbLinkMap<IbMessageT>>(_ibLinks)[link];
-
-    if (!ibLink.sender)
-    {
-        ibLink.sender = std::make_shared<VAsioSender<IbMessageT>>();
-    }
-    auto&& senderMap = std::get<IbSenderMap<IbMessageT>>(_endpointToSenderMap);
-    senderMap[endpointId] = ibLink.sender;
+    auto ibLink = GetLinkByName<IbMessageT>(link);
+    auto&& linkMap = std::get<IbEndpointToLinkMap<IbMessageT>>(_endpointToLinkMap);
+    linkMap[endpointId] = ibLink;
 }
-
 
 template <class IbMessageT>
 void VAsioConnection::SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
 {
-    auto&& senderMap = std::get<IbSenderMap<std::decay_t<IbMessageT>>>(_endpointToSenderMap);
-    senderMap[from.endpoint]->SendIbMessage(from, std::forward<IbMessageT>(msg));
+    ExecuteOnIoThread(&VAsioConnection::SendIbMessageImpl_<IbMessageT>, from, std::forward<IbMessageT>(msg));
+}
+
+template <class IbMessageT>
+void VAsioConnection::SendIbMessageImpl_(EndpointAddress from, IbMessageT&& msg)
+{
+    auto& linkMap = std::get<IbEndpointToLinkMap<std::decay_t<IbMessageT>>>(_endpointToLinkMap);
+    linkMap[from.endpoint]->DistributeLocalIbMessage(from, std::forward<IbMessageT>(msg));
+}
+
+
+template <typename... MethodArgs, typename... Args>
+void VAsioConnection::ExecuteOnIoThread(void (VAsioConnection::*method)(MethodArgs...), Args&&... args)
+{
+    if (std::this_thread::get_id() == _ioWorker.get_id())
+    {
+        (this->*method)(std::forward<Args>(args)...);
+    }
+    else
+    {
+        _ioContext.dispatch([=] () mutable { (this->*method)(std::move(args)...); });
+    }
+}
+
+inline void VAsioConnection::ExecuteOnIoThread(std::function<void()> function)
+{
+    if (std::this_thread::get_id() == _ioWorker.get_id())
+    {
+        function();
+    }
+    else
+    {
+        _ioContext.dispatch(std::move(function));
+    }
 }
 
 } // mw

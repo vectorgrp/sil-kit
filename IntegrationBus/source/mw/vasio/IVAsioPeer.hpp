@@ -13,8 +13,13 @@ struct VAsioMsgSubscriber;
 class IVAsioPeer
 {
 public:
+    // ----------------------------------------
+    // Constructors and Destructor
     virtual ~IVAsioPeer() = default;
 
+public:
+    // ----------------------------------------
+    // Public interface methods
     virtual void SendIbMsg(MessageBuffer buffer) = 0;
     virtual void Subscribe(VAsioMsgSubscriber subscriber) = 0;
 

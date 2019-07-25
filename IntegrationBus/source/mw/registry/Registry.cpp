@@ -23,8 +23,20 @@ std::future<void> Registry::ProvideDomain(uint32_t domainId)
     // accept connection from all participants
     // at the moment registry listens on 0.0.0.0:(42000+domainId)
     auto registryPort = static_cast<uint16_t>(42000 + domainId);
-    _connection.AcceptConnectionsOn(tcp::endpoint(tcp::v4(), registryPort));
-    // FIXME also accept connections on V6
+    tcp::endpoint registryEndpoint(tcp::v4(), registryPort);
+    try
+    {
+        // FIXME: also accept connections on V6
+        _connection.AcceptConnectionsOn(registryEndpoint);
+    }
+    catch (std::exception& e)
+    {
+        std::cout
+            << "ERROR: Registry failed to create listening socket: " << registryEndpoint
+            << " for domainId=" << domainId
+            << ". Reason:" << e.what() << std::endl;
+        throw e;
+    }
     _connection.StartIoWorker();
 
     return _allParticipantsDown.get_future();

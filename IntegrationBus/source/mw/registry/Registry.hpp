@@ -30,9 +30,10 @@ private:
 private:
     // ----------------------------------------
     // private members
-    VAsioConnection _connection;
     std::unordered_map<ParticipantId, ib::mw::VAsioPeerInfo> _connectedParticipants;
     std::promise<void> _allParticipantsDown;
+
+    VAsioConnection _connection;
 };
 
 } // namespace registry

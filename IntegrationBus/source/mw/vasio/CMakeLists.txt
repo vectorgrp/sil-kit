@@ -11,13 +11,14 @@ add_library(IbMwVAsio STATIC
     SerdesMwRegistry.hpp
     SerdesSimLin.hpp
     SerdesSimFlexray.hpp
-
+    IbMsgTraits.hpp
+    IbLink.hpp
     IVAsioPeer.hpp
     VAsioTcpPeer.hpp
     VAsioTcpPeer.cpp
     VAsioPeerInfo.hpp
     VAsioReceiver.hpp
-    VAsioSender.hpp
+    VAsioTransmitter.hpp
     VAsioMsgKind.hpp
     VAsioMessageSubscriber.hpp
 )

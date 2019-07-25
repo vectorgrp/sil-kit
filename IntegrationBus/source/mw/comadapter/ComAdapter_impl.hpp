@@ -401,7 +401,7 @@ void ComAdapter<IbConnectionT>::SendIbMessage(EndpointAddress from, const sim::f
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(EndpointAddress from, sim::fr::FrMessage&& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
@@ -413,7 +413,7 @@ void ComAdapter<IbConnectionT>::SendIbMessage(EndpointAddress from, const sim::f
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(EndpointAddress from, sim::fr::FrMessageAck&& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>

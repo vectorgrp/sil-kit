@@ -5,12 +5,11 @@
 #include <thread>
 #include <future>
 
-#include "ComAdapter.hpp"
-#include "ComAdapter_impl.hpp"
+#include "CreateComAdapter.hpp"
 #include "Registry.hpp"
 
 #include "ib/cfg/ConfigBuilder.hpp"
-#include "ib/sim/all.hpp"
+#include "ib/mw/sync/all.hpp"
 #include "ib/util/functional.hpp"
 
 #include "gmock/gmock.h"
@@ -92,7 +91,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     registry->ProvideDomain(domainId);
 
     // Setup ComAdapter for TestController
-    auto comAdapterController = std::make_unique<ComAdapter<VAsioConnection>>(ibConfig, "TestController");
+    auto comAdapterController = CreateVAsioComAdapterImpl(ibConfig, "TestController");
     comAdapterController->joinIbDomain(domainId);
     auto systemController = comAdapterController->GetSystemController();
     auto monitor = comAdapterController->GetSystemMonitor();
@@ -103,7 +102,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     });
 
     // Setup ComAdapter for Test Unit
-    auto comAdapterTestUnit = std::make_unique<ComAdapter<VAsioConnection>>(ibConfig, "TestUnit");
+    auto comAdapterTestUnit = CreateVAsioComAdapterImpl(ibConfig, "TestUnit");
     comAdapterTestUnit->joinIbDomain(domainId);
     auto participantController = comAdapterTestUnit->GetParticipantController();
 

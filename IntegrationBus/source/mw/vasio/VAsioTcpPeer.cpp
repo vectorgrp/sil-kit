@@ -242,7 +242,7 @@ void VAsioTcpPeer::DispatchBuffer()
         MessageBuffer msgBuffer{std::move(_msgBuffer)};
         uint32_t msgSize{0u};
         msgBuffer >> msgSize;
-        _ibConnection->OnSocketData(std::move(msgBuffer), this);
+        _ibConnection->OnSocketData(this, std::move(msgBuffer));
 
         _msgBuffer = std::move(newBuffer);
         _wPos = newWPos;
