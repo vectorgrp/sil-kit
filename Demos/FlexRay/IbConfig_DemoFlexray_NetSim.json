@@ -164,6 +164,10 @@
 
     },
 
+    "MiddlewareConfig": {
+        "ActiveMiddleware": "VAsio"
+    },
+
     "LaunchConfigurations": [
         {
             "Name": "Installation",

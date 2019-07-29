@@ -128,12 +128,12 @@ int main(int argc, char** argv)
 
         ethController->RegisterReceiveMessageHandler(&ReceiveEthMessage);
         ethController->RegisterMessageAckHandler(&EthAckCallback);
-        ethController->Activate();
 
         // Set an Init Handler
-        participantController->SetInitHandler([&participantName](auto initCmd) {
+        participantController->SetInitHandler([&participantName, ethController](auto initCmd) {
 
             std::cout << "Initializing " << participantName << std::endl;
+            ethController->Activate();
 
         });
 

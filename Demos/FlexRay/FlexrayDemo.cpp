@@ -74,14 +74,14 @@ void ReceiveMessage(fr::IFrController* /*controller*/, const T& t)
 
 struct FlexRayNode
 {
-    FlexRayNode(fr::IFrController* controller)
+    FlexRayNode(fr::IFrController* controller, fr::ControllerConfig config)
         : controller{controller}
+        , controllerConfig{std::move(config)}
     {
     }
 
-    void configure(fr::ControllerConfig&& config)
+    void Init()
     {
-        controllerConfig = std::move(config);
         controller->Configure(controllerConfig);
     }
 
@@ -250,13 +250,6 @@ int main(int argc, char** argv)
         auto* controller = comAdapter->CreateFlexrayController("FlexRay1");
         auto* participantController = comAdapter->GetParticipantController();
 
-        // Set an Init Handler
-        participantController->SetInitHandler([&participantName](auto initCmd) {
-
-            std::cout << "Initializing " << participantName << std::endl;
-
-        });
-
         std::vector<fr::TxBufferConfig> bufferConfigs;
 
         if (participantName == "Node0")
@@ -301,8 +294,14 @@ int main(int argc, char** argv)
             cfg.slotId = 31;
             bufferConfigs.push_back(cfg);
         }
+
+        fr::ControllerConfig config;
+        config.bufferConfigs = bufferConfigs;
+        auto& participantConfig = get_by_name(ibConfig.simulationSetup.participants, participantName);
+        config.clusterParams = participantConfig.flexrayControllers[0].clusterParameters;
+        config.nodeParams = participantConfig.flexrayControllers[0].nodeParameters;
         
-        FlexRayNode frNode(controller);
+        FlexRayNode frNode(controller, std::move(config));
         if (participantName == "Node0")
             frNode.busState = FlexRayNode::MasterState::PerformWakeup;
 
@@ -314,13 +313,14 @@ int main(int argc, char** argv)
         controller->RegisterSymbolAckHandler(&ReceiveMessage<fr::FrSymbolAck>);
         controller->RegisterCycleStartHandler(&ReceiveMessage<fr::CycleStart>);
 
-        fr::ControllerConfig config;
-        config.bufferConfigs = bufferConfigs;
-        auto& participantConfig = get_by_name(ibConfig.simulationSetup.participants, participantName);
-        config.clusterParams = participantConfig.flexrayControllers[0].clusterParameters;
-        config.nodeParams = participantConfig.flexrayControllers[0].nodeParameters;
+        // Set an Init Handler
+        participantController->SetInitHandler([&participantName, &frNode](auto initCmd) {
 
-        frNode.configure(std::move(config));
+            std::cout << "Initializing " << participantName << std::endl;
+            frNode.Init();
+
+        });
+
 
         participantController->SetSimulationTask(
             [&frNode](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
