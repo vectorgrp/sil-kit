@@ -369,7 +369,7 @@ inline auto get_by_name(T&& range, const std::string& name) -> decltype(*range.b
 {
     auto&& iter = find_by_name(std::forward<T>(range), name);
     if (iter == range.end())
-        throw std::runtime_error("Missing ConfigItem with name '" + name + "'");
+        throw ib::cfg::Misconfiguration{"Missing ConfigItem with name '" + name + "'"};
     else
         return *iter;
 }

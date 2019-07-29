@@ -18,6 +18,9 @@ Changed
 
 Fixed
 ~~~~~
+- Attempting to create a ComAdapter with an empty name will now throw
+  a misconfiguration exception with a proper error message.
+
 
 Interface compatibility with Sprint-29
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

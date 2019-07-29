@@ -188,7 +188,7 @@ private:
     // ----------------------------------------
     // private members
     cfg::Config _config;
-    const cfg::Participant* _participant{nullptr};
+    const cfg::Participant& _participant{nullptr};
     std::string _participantName;
     ParticipantId _participantId{0};
 
@@ -230,9 +230,26 @@ private:
     IbConnectionT _ibConnection;
 };
 
+inline auto GetParticipantByName(const cfg::Config& config, const std::string& participantName) -> const cfg::Participant&;
+
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
+auto GetParticipantByName(const cfg::Config& config, const std::string& participantName) -> const cfg::Participant&
+{
+    if (participantName.size() == 0)
+    {
+        throw ib::cfg::Misconfiguration{"Cannot create a ComAdapter with empty name."};
+    }
+    try
+    {
+        return get_by_name(config.simulationSetup.participants, participantName);
+    }
+    catch (const ib::cfg::Misconfiguration&)
+    {
+        throw ib::cfg::Misconfiguration{"ParticipantName '" + participantName + "' does not exist in IbConfig{name='" + config.name + "'}"};
+    }
+}
 
 } // mw
 } // namespace ib
