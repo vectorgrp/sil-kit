@@ -5,17 +5,8 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on [Keep a Changelog] (http://keepachangelog.com/en/1.0.0/).
 
-[Sprint-30] - unreleased
+[Sprint-30] - 2019-07-31
 ------------------------
-Added
-~~~~~
-
-Removed
-~~~~~~~
-
-Changed
-~~~~~~~
-
 Fixed
 ~~~~~
 - Attempting to create a ComAdapter with an empty name will now throw
