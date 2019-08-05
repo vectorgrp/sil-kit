@@ -28,6 +28,10 @@ add_library(IbConfig STATIC
     JsonConfig.cpp
     Validation.hpp
     Validation.cpp
+    VAsioConfigBuilder.cpp
+    VAsioConfigBuilder.hpp
+    VAsioRegistryBuilder.cpp
+    VAsioRegistryBuilder.hpp
 )
 
 target_link_libraries(IbConfig

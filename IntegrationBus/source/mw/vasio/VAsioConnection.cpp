@@ -1,7 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "VAsioConnection.hpp"
-#include "../registry/RegistryDatatypes.hpp"
 
 #include "ib/cfg/string_utils.hpp"
 
@@ -40,11 +39,13 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     // We let the operating system choose a free port
     AcceptConnectionsOn(tcp::endpoint(asio::ip::address::from_string("127.0.0.1"), 0));
 
+    auto& vasioConfig = _config.middlewareConfig.vasio;
+
     VAsioPeerInfo registryInfo;
     registryInfo.participantName = "VibRegistry";
     registryInfo.participantId = 0;
-    registryInfo.acceptorHost = "127.0.0.1";
-    registryInfo.acceptorPort = static_cast<uint16_t>(42000 + domainId);
+    registryInfo.acceptorHost = vasioConfig.registry.hostname;
+    registryInfo.acceptorPort = static_cast<uint16_t>(vasioConfig.registry.port + domainId);
 
     std::cout << "INFO: Connecting to registry\n";
 
@@ -200,7 +201,7 @@ void VAsioConnection::AcceptNextConnection(asio::ip::tcp::acceptor& acceptor)
         {
             if (!error)
             {
-                std::cout << newConnection->Socket().remote_endpoint() << " connected to me!" << std::endl;
+                std::cerr << "INFO: New connection from " << newConnection->Socket().remote_endpoint() << std::endl;
                 AddPeer(std::move(newConnection));
             }
             AcceptNextConnection(acceptor);

@@ -459,12 +459,39 @@ TEST_F(JsonConfigTest, create_fastrtps_config_with_configfile)
     EXPECT_EQ(fastRtps.configFileName, std::string{"MyMagicFastRTPSsettings.xml"});
 }
 
-TEST_F(JsonConfigTest, select_middleware_from_config)
+TEST_F(JsonConfigTest, default_middlware_is_fastrtps)
+{
+    BuildConfigFromJson();
+    EXPECT_EQ(config.middlewareConfig.activeMiddleware, Middleware::NotConfigured);
+}
+
+TEST_F(JsonConfigTest, select_fastrtps_as_middleware)
+{
+    builder.WithActiveMiddleware(ib::cfg::Middleware::FastRTPS);
+
+    BuildConfigFromJson();
+    EXPECT_EQ(config.middlewareConfig.activeMiddleware, ib::cfg::Middleware::FastRTPS);
+}
+
+TEST_F(JsonConfigTest, select_vasio_as_middleware)
 {
     builder.WithActiveMiddleware(ib::cfg::Middleware::VAsio);
 
     BuildConfigFromJson();
+    EXPECT_EQ(config.middlewareConfig.activeMiddleware, ib::cfg::Middleware::VAsio);
+}
+
+TEST_F(JsonConfigTest, configure_vasio_registry)
+{
+    builder.ConfigureVAsio().ConfigureRegistry()
+        .WithHostname("NotLocalhost")
+        .WithPort(1701);
+
+    BuildConfigFromJson();
     EXPECT_EQ(config, referenceConfig);
+    EXPECT_EQ(config.middlewareConfig.vasio.registry.hostname, "NotLocalhost");
+    EXPECT_EQ(config.middlewareConfig.vasio.registry.port, 1701);
+    EXPECT_EQ(config.middlewareConfig.activeMiddleware, ib::cfg::Middleware::VAsio);
 }
 
 TEST_F(JsonConfigTest, configure_timesync_with_strict_sync_policy)
@@ -509,9 +536,9 @@ TEST_F(JsonConfigTest, default_timesync_policy_is_loose)
 }
 
 
-TEST_F(JsonConfigTest, ConfigureExecutionMaster)
+TEST_F(JsonConfigTest, configure_participant_as_syncmaster)
 {
-    simulationSetup.AddParticipant("ExecutionMaster")
+    simulationSetup.AddParticipant("SyncMaster")
         .AsSyncMaster();
 
     BuildConfigFromJson();

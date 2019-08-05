@@ -69,6 +69,10 @@ auto from_json<FastRtps::DiscoveryType>(const json11::Json& json) -> FastRtps::D
 template <>
 auto from_json<FastRtps::Config>(const json11::Json& json) -> FastRtps::Config;
 template <>
+auto from_json<VAsio::RegistryConfig>(const json11::Json& json) -> VAsio::RegistryConfig;
+template <>
+auto from_json<VAsio::Config>(const json11::Json& json) -> VAsio::Config;
+template <>
 auto from_json<MiddlewareConfig>(const json11::Json& json) -> MiddlewareConfig;
 template <>
 auto from_json<Config>(const json11::Json& json) -> Config;
@@ -104,6 +108,8 @@ auto to_json(const TimeSync& controller) -> json11::Json;
 auto to_json(const SimulationSetup& simulationSetup) -> json11::Json;
 auto to_json(FastRtps::DiscoveryType discoveryType) -> json11::Json;
 auto to_json(const FastRtps::Config& fastRtps) -> json11::Json;
+auto to_json(const VAsio::RegistryConfig& config) -> json11::Json;
+auto to_json(const VAsio::Config& config) -> json11::Json;
 auto to_json(const MiddlewareConfig& simulationMiddleware) -> json11::Json;
 auto to_json(const Config& cfg) -> json11::Json;
 

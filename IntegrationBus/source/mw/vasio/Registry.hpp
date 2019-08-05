@@ -33,6 +33,7 @@ private:
     std::unordered_map<ParticipantId, ib::mw::VAsioPeerInfo> _connectedParticipants;
     std::promise<void> _allParticipantsDown;
 
+    ib::cfg::VAsio::Config _vasioConfig;
     VAsioConnection _connection;
 };
 

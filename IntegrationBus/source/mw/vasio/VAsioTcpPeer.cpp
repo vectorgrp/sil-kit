@@ -31,7 +31,7 @@ void VAsioTcpPeer::Shutdown()
 {
     if (_socket.is_open())
     {
-        std::cout << "Shutdown connection to " << _info.participantName << std::endl;
+        std::cout << "INFO: Shutting down connection to " << _info.participantName << std::endl;
         _ibConnection->OnPeerShutdown(this);
         _socket.close();
     }
@@ -53,31 +53,10 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
 
     // Resolve the host name using DNS
     tcp::resolver resolver(_socket.get_io_context());
-
+    tcp::resolver::results_type resolverResults;
     try
     {
-        auto resolverEntries = resolver.resolve(GetInfo().acceptorHost, std::to_string(GetInfo().acceptorPort));
-
-        for (auto&& resolverEntry : resolverEntries)
-        {
-            try
-            {
-                _socket.connect(resolverEntry);
-                return;
-            }
-            catch (asio::system_error& /*err*/)
-            {
-                // reset the socket
-                _socket = asio::ip::tcp::socket{_socket.get_io_context()};
-            }
-        }
-
-        std::cerr << "ERROR: failed to connect to host " << GetInfo().acceptorHost << ". Tried the following addresses:\n";
-        for (auto&& resolverEntry : resolverEntries)
-        {
-            std::cerr << " - " << tcp::endpoint{resolverEntry} << "\n";
-        }
-        return;
+        resolverResults = resolver.resolve(GetInfo().acceptorHost, std::to_string(GetInfo().acceptorPort));
     }
     catch (asio::system_error& err)
     {
@@ -86,6 +65,27 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
             << ": " << err.what()
             << "\n";
         return;
+    }
+
+
+    for (auto&& resolverEntry : resolverResults)
+    {
+        try
+        {
+            _socket.connect(resolverEntry);
+            return;
+        }
+        catch (asio::system_error& /*err*/)
+        {
+            // reset the socket
+            _socket = asio::ip::tcp::socket{_socket.get_io_context()};
+        }
+    }
+
+    std::cerr << "ERROR: failed to connect to host " << GetInfo().acceptorHost << ". Tried the following addresses:\n";
+    for (auto&& resolverEntry : resolverResults)
+    {
+        std::cerr << " - " << tcp::endpoint{resolverEntry} << "\n";
     }
 }
 

@@ -1,7 +1,12 @@
+find_package(Threads REQUIRED)
+
 add_library(IbMwVAsio STATIC
     VAsioConnection.hpp
     VAsioConnection.cpp
     MessageBuffer.hpp
+    Registry.hpp
+    Registry.cpp
+    RegistryDatatypes.hpp
     SerdesMw.hpp
     SerdesMwSync.hpp
     SerdesSimGeneric.hpp
@@ -23,21 +28,24 @@ add_library(IbMwVAsio STATIC
     VAsioMessageSubscriber.hpp
 )
 
-target_link_libraries(IbMwVAsio
-    PUBLIC IbUtil
-    PUBLIC IbInterface
-    PUBLIC IbMwSync
-    PUBLIC IbMwLogging
-    PUBLIC IbSimGenericMessage
-    PUBLIC IbSimCan
-    PUBLIC IbSimEthernet
-    PUBLIC IbSimIO    
-    PUBLIC IbSimLin
-    PUBLIC IbSimFlexRay
+target_link_libraries(IbMwVAsio 
+    PUBLIC
+        IbUtil
+        IbInterface
+        IbMwSync
+        IbMwLogging
+        IbSimGenericMessage
+        IbSimCan
+        IbSimEthernet
+        IbSimIO    
+        IbSimLin
+        IbSimFlexRay
+        Threads::Threads
 )
 
+# we use the asio installation that comes with Fast-RTPS
 target_include_directories(IbMwVAsio
-    PUBLIC .
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
     PUBLIC ${THIRDPARTY_DIR}/Fast-RTPS/thirdparty/asio/asio/include/
 )
 

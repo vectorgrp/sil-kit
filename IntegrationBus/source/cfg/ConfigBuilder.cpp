@@ -17,10 +17,8 @@ ConfigBuilder::ConfigBuilder(std::string name)
 auto ConfigBuilder::Build() -> Config
 {
     _config.simulationSetup = _simulationSetup.Build();
-
-    _config.middlewareConfig = _middlewareConfig;
-    if (_fastRtpsConfig)
-        _config.middlewareConfig.fastRtps = _fastRtpsConfig->Build();
+    _config.middlewareConfig.fastRtps = _fastRtpsConfig.Build();
+    _config.middlewareConfig.vasio = _vasioConfig.Build();
 
     // Post-processing steps
     // Note: Some steps (AssignEndpointAddresses, AssignLinkIds) are done by this builder on-the-fly
@@ -36,15 +34,19 @@ auto ConfigBuilder::SimulationSetup() -> SimulationSetupBuilder&
 
 auto ConfigBuilder::ConfigureFastRtps() -> FastRtps::ConfigBuilder&
 {
-    _fastRtpsConfig = std::make_unique<FastRtps::ConfigBuilder>();
-    return *_fastRtpsConfig;
+    _config.middlewareConfig.activeMiddleware = Middleware::FastRTPS;
+    return _fastRtpsConfig;
+}
+
+auto ConfigBuilder::ConfigureVAsio() -> VAsio::ConfigBuilder&
+{
+    _config.middlewareConfig.activeMiddleware = Middleware::VAsio;
+    return _vasioConfig;
 }
 
 auto ConfigBuilder::WithActiveMiddleware(Middleware middleware) -> ConfigBuilder&
 {
-    MiddlewareConfig mwCfg;
-    mwCfg.activeMiddleware = middleware;
-    _middlewareConfig = std::move(mwCfg);
+    _config.middlewareConfig.activeMiddleware = middleware;
     return *this;
 }
 

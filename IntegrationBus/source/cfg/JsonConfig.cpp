@@ -944,8 +944,9 @@ auto to_json(const MiddlewareConfig& middlewareConfig) -> json11::Json
 {
     return json11::Json::object
     {
-        { "ActiveMiddleware", to_json(middlewareConfig.activeMiddleware) },
-        { "FastRTPS", to_json(middlewareConfig.fastRtps) }
+        {"ActiveMiddleware", to_json(middlewareConfig.activeMiddleware)},
+        {"FastRTPS", to_json(middlewareConfig.fastRtps)},
+        {"VAsio", to_json(middlewareConfig.vasio)}
     };
 }
 
@@ -1025,6 +1026,44 @@ auto to_json(const FastRtps::Config& fastRtps) -> json11::Json
     };
 }
 
+template <>
+auto from_json<VAsio::RegistryConfig>(const json11::Json& json) -> VAsio::RegistryConfig
+{
+    VAsio::RegistryConfig registry;
+
+    optional_from_json(registry.hostname, json, "Hostname");
+    optional_from_json(registry.port, json, "Port");
+    
+    return registry;
+}
+
+auto to_json(const VAsio::RegistryConfig& registry) -> json11::Json
+{
+    return json11::Json::object
+    {
+        {"Hostname", registry.hostname},
+        {"Port", registry.port}
+    };
+}
+
+template <>
+auto from_json<VAsio::Config>(const json11::Json& json) -> VAsio::Config
+{
+    VAsio::Config config;
+
+    optional_from_json(config.registry, json, "Registry");
+    
+    return config;
+}
+
+auto to_json(const VAsio::Config& config) -> json11::Json
+{
+    return json11::Json::object
+    {
+        {"Registry", to_json(config.registry)}
+    }; 
+}
+
 template<>
 auto from_json<Middleware>(const json11::Json& json) -> Middleware
 {
@@ -1047,6 +1086,7 @@ auto from_json<MiddlewareConfig>(const json11::Json& json) -> MiddlewareConfig
 
     middlewareConfig.activeMiddleware = from_json<Middleware>(json["ActiveMiddleware"]);
     middlewareConfig.fastRtps = from_json<FastRtps::Config>(json["FastRTPS"]);
+    middlewareConfig.vasio = from_json<VAsio::Config>(json["VAsio"]);
 
     return middlewareConfig;
 }

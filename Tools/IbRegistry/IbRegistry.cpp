@@ -49,3 +49,4 @@ catch (const std::exception& error)
     std::cin.ignore();
     return -3;
 }
+

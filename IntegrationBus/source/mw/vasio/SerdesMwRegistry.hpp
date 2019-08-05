@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../registry/RegistryDatatypes.hpp"
+#include "RegistryDatatypes.hpp"
 #include "VAsioPeerInfo.hpp"
 
 #include "MessageBuffer.hpp"

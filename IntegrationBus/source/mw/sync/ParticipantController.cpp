@@ -53,9 +53,10 @@ ParticipantController::ParticipantController(IComAdapter* comAdapter, const cfg:
     , _logger{comAdapter->GetLogger()}
 {
     _status.participantName = participantConfig.name;
-    _currentTask = {-1ns, 0ns};
-    _myNextTask = {0ns, _timesyncConfig.tickPeriod};
-
+    _currentTask.timePoint = -1ns;
+    _currentTask.duration = 0ns;
+    _myNextTask.timePoint = 0ns;
+    _myNextTask.duration = _timesyncConfig.tickPeriod;
 
     for (auto&& participant : simulationSetup.participants)
     {
@@ -64,7 +65,10 @@ ParticipantController::ParticipantController(IComAdapter* comAdapter, const cfg:
 
         if (participant.syncType == cfg::SyncType::DistributedTimeQuantum)
         {
-            _otherNextTasks[participant.id] = {-1ns, 0ns};
+            NextSimTask task;
+            task.timePoint = -1ns;
+            task.duration = 0ns;
+            _otherNextTasks[participant.id] = task;
         }
     }
 }

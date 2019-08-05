@@ -243,8 +243,7 @@ struct SimulationSetup
 // ================================================================================
 //  Middleware Config
 // ================================================================================
-namespace FastRtps
-{
+namespace FastRtps {
 enum class DiscoveryType
 {
     Local,
@@ -261,8 +260,19 @@ struct Config
     int sendSocketBufferSize{-1};
     int listenSocketBufferSize{-1};
 };
-
 } // namespace FastRTPS
+
+namespace VAsio {
+struct RegistryConfig
+{
+    std::string hostname{"localhost"};
+    uint16_t port{8500};
+};
+struct Config
+{
+    RegistryConfig registry;
+};
+} // namespace VAsio
 
 enum class Middleware
 {
@@ -275,6 +285,7 @@ struct MiddlewareConfig
 {
     Middleware activeMiddleware = Middleware::NotConfigured;
     FastRtps::Config fastRtps;
+    VAsio::Config vasio;
 };
 
 // ================================================================================

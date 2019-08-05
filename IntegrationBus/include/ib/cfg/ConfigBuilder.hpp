@@ -13,6 +13,7 @@
 #include "LinkBuilder.hpp"
 #include "TimeSyncBuilder.hpp"
 #include "FastRtpsConfigBuilder.hpp"
+#include "VAsioConfigBuilder.hpp"
 #include "SimulationSetupBuilder.hpp"
 
 namespace ib {
@@ -28,6 +29,7 @@ public:
     IntegrationBusAPI auto SimulationSetup() -> SimulationSetupBuilder&;
 
     IntegrationBusAPI auto ConfigureFastRtps() -> FastRtps::ConfigBuilder&;
+    IntegrationBusAPI auto ConfigureVAsio() -> VAsio::ConfigBuilder&;
 
     IntegrationBusAPI auto WithActiveMiddleware(Middleware middleware) -> ConfigBuilder&;
 
@@ -35,7 +37,8 @@ private:
     Config _config;
     SimulationSetupBuilder _simulationSetup;
 
-    std::unique_ptr<FastRtps::ConfigBuilder> _fastRtpsConfig;
+    FastRtps::ConfigBuilder _fastRtpsConfig;
+    VAsio::ConfigBuilder _vasioConfig;
     MiddlewareConfig _middlewareConfig;
 };
 

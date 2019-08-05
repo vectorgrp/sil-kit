@@ -8,7 +8,8 @@ using namespace ib::mw::registry;
 using asio::ip::tcp;
 
 Registry::Registry(ib::cfg::Config cfg)
-    : _connection{std::move(cfg), "VibRegistry", 0}
+    : _vasioConfig{cfg.middlewareConfig.vasio}
+    , _connection{std::move(cfg), "VibRegistry", 0}
 {
     _connection.RegisterMessageReceiver([this](IVAsioPeer* from, const registry::ParticipantAnnouncement& announcement)
     {
@@ -20,9 +21,8 @@ Registry::Registry(ib::cfg::Config cfg)
 
 std::future<void> Registry::ProvideDomain(uint32_t domainId)
 {
-    // accept connection from all participants
-    // at the moment registry listens on 0.0.0.0:(42000+domainId)
-    auto registryPort = static_cast<uint16_t>(42000 + domainId);
+    // accept connection from participants on any interface
+    auto registryPort = static_cast<uint16_t>(_vasioConfig.registry.port + domainId);
     tcp::endpoint registryEndpoint(tcp::v4(), registryPort);
     try
     {
