@@ -6,7 +6,7 @@
 #include <future>
 
 #include "CreateComAdapter.hpp"
-#include "Registry.hpp"
+#include "VAsioRegistry.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
 
@@ -19,7 +19,6 @@ namespace {
 
 using namespace std::chrono_literals;
 using namespace ib::mw;
-using namespace ib::mw::registry;
 
 using testing::_;
 using testing::A;
@@ -154,7 +153,7 @@ TEST_F(GenericMessageITest, publish_and_subscribe_generic_messages_vasio)
     ibConfig = ib::cfg::Config::FromJsonFile("GenericMessagesITest_IbConfig.json");
     ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::FastRTPS;
 
-    auto registry = std::make_unique<Registry>(ibConfig);
+    auto registry = std::make_unique<VAsioRegistry>(ibConfig);
     registry->ProvideDomain(domainId);
 
     std::thread subscribeThread{[this] { Subscribe(); }};
@@ -181,7 +180,7 @@ TEST_F(GenericMessageITest, publish_and_subscribe_large_messages_vasio)
     ibConfig = ib::cfg::Config::FromJsonFile("LargeMessagesITest_IbConfig.json");
     ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
 
-    auto registry = std::make_unique<Registry>(ibConfig);
+    auto registry = std::make_unique<VAsioRegistry>(ibConfig);
     registry->ProvideDomain(domainId);
 
     std::thread subscribeThread{[this] { Subscribe(); }};

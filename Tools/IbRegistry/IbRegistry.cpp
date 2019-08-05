@@ -1,9 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "Registry.hpp"
+#include "VAsioRegistry.hpp"
 
 using namespace ib::mw;
-using namespace ib::mw::registry;
 
 using asio::ip::tcp;
 
@@ -25,8 +24,8 @@ int main(int argc, char** argv) try
 
     auto ibConfig = ib::cfg::Config::FromJsonFile(jsonFilename);
 
-    std::cout << "Creating Registry for IB domain=" << domainId << std::endl;
-    Registry registry{ibConfig};
+    std::cout << "Creating VAsioRegistry for IB domain=" << domainId << std::endl;
+    VAsioRegistry registry{ibConfig};
     auto future = registry.ProvideDomain(domainId);
     future.wait();
 

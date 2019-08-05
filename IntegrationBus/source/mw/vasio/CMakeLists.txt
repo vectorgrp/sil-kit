@@ -4,43 +4,43 @@ add_library(IbMwVAsio STATIC
     VAsioConnection.hpp
     VAsioConnection.cpp
     MessageBuffer.hpp
-    Registry.hpp
-    Registry.cpp
-    RegistryDatatypes.hpp
     SerdesMw.hpp
     SerdesMwSync.hpp
+    SerdesMwVAsio.hpp
     SerdesSimGeneric.hpp
     SerdesSimCan.hpp
     SerdesSimEthernet.hpp
     SerdesSimIo.hpp
-    SerdesMwRegistry.hpp
     SerdesSimLin.hpp
     SerdesSimFlexray.hpp
     IbMsgTraits.hpp
     IbLink.hpp
     IVAsioPeer.hpp
-    VAsioTcpPeer.hpp
-    VAsioTcpPeer.cpp
+    VAsioDatatypes.hpp
+    VAsioMessageSubscriber.hpp
+    VAsioMsgKind.hpp
     VAsioPeerInfo.hpp
     VAsioReceiver.hpp
+    VAsioRegistry.hpp
+    VAsioRegistry.cpp
+    VAsioTcpPeer.hpp
+    VAsioTcpPeer.cpp
     VAsioTransmitter.hpp
-    VAsioMsgKind.hpp
-    VAsioMessageSubscriber.hpp
 )
 
 target_link_libraries(IbMwVAsio 
     PUBLIC
-        IbUtil
-        IbInterface
-        IbMwSync
-        IbMwLogging
-        IbSimGenericMessage
-        IbSimCan
-        IbSimEthernet
-        IbSimIO    
-        IbSimLin
-        IbSimFlexRay
-        Threads::Threads
+      IbUtil
+      IbInterface
+      IbMwSync
+      IbMwLogging
+      IbSimGenericMessage
+      IbSimCan
+      IbSimEthernet
+      IbSimIO    
+      IbSimLin
+      IbSimFlexRay
+      Threads::Threads
 )
 
 # we use the asio installation that comes with Fast-RTPS

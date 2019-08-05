@@ -6,7 +6,7 @@
 #include <future>
 
 #include "CreateComAdapter.hpp"
-#include "Registry.hpp"
+#include "VAsioRegistry.hpp"
 #include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
@@ -20,7 +20,6 @@ namespace {
 
 using namespace std::chrono_literals;
 using namespace ib::mw;
-using namespace ib::mw::registry;
 
 using testing::_;
 using testing::A;
@@ -123,7 +122,7 @@ TEST_F(IoMessageITest, receive_init_values_vasio)
 {
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
-    std::unique_ptr<Registry> registry = std::make_unique<Registry>(ibConfig);
+    auto registry = std::make_unique<VAsioRegistry>(ibConfig);
     registry->ProvideDomain(domainId);
 
     auto pubComAdapter = CreateVAsioComAdapterImpl(ibConfig, "Sender");

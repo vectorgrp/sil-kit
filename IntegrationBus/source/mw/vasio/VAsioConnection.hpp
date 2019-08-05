@@ -16,9 +16,9 @@
 #include "MessageBuffer.hpp"
 
 #include "SerdesMw.hpp"
-#include "SerdesMwRegistry.hpp"
 #include "SerdesMwLogging.hpp"
 #include "SerdesMwSync.hpp"
+#include "SerdesMwVAsio.hpp"
 #include "SerdesSimGeneric.hpp"
 #include "SerdesSimCan.hpp"
 #include "SerdesSimEthernet.hpp"
@@ -82,7 +82,7 @@ public:
     inline auto Config() const -> const ib::cfg::Config&;
 
     // Temporary Helpers
-    void RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, registry::ParticipantAnnouncement)> callback);
+    void RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)> callback);
     void OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer);
 
     void AcceptConnectionsOn(asio::ip::tcp::endpoint endpoint);
@@ -100,7 +100,7 @@ private:
     template <class MsgT>
     using IbEndpointToLinkMap = std::map<EndpointId, std::shared_ptr<IbLink<MsgT>>>;
 
-    using ParticipantAnnouncementReceiver = std::function<void(IVAsioPeer* peer, registry::ParticipantAnnouncement)>;
+    using ParticipantAnnouncementReceiver = std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)>;
 
     using IbMessageTypes = std::tuple<
         logging::LogMsg,

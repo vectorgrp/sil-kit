@@ -6,7 +6,7 @@
 #include <future>
 
 #include "CreateComAdapter.hpp"
-#include "Registry.hpp"
+#include "VAsioRegistry.hpp"
 
 #include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/mw/sync/all.hpp"
@@ -22,7 +22,6 @@ namespace {
 using namespace std::chrono_literals;
 using namespace ib::mw;
 using namespace ib::mw::sync;
-using namespace ib::mw::registry;
 
 using testing::_;
 using testing::A;
@@ -86,8 +85,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
 
     auto ibConfig = builder.Build();
 
-    // Create VIB Registry
-    auto registry = std::make_unique<Registry>(ibConfig);
+    auto registry = std::make_unique<VAsioRegistry>(ibConfig);
     registry->ProvideDomain(domainId);
 
     // Setup ComAdapter for TestController

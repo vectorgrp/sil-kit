@@ -62,10 +62,10 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
 
 void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer)
 {
-    registry::ParticipantAnnouncement announcement;
+    ParticipantAnnouncement announcement;
     buffer >> announcement;
 
-    registry::MessageHeader reference;
+    RegistryMsgHeader reference;
     if (announcement.messageHeader != reference)
     {
         std::cerr << "WARNING: Received participant announcement message with unsupported protocol specification\n";
@@ -90,7 +90,7 @@ void VAsioConnection::SendParticipantAnnoucement(IVAsioPeer* peer)
         _tcpAcceptor->local_endpoint().port()
     };
 
-    registry::ParticipantAnnouncement announcement;
+    ParticipantAnnouncement announcement;
     announcement.peerInfo = localInfo;
 
     MessageBuffer buffer;
@@ -98,7 +98,7 @@ void VAsioConnection::SendParticipantAnnoucement(IVAsioPeer* peer)
 
     buffer << msgSizePlaceholder
            << VAsioMsgKind::IbRegistryMessage
-           << registry::RegistryMessageKind::ParticipantAnnouncement
+           << RegistryMessageKind::ParticipantAnnouncement
            << announcement;
 
     std::cout << "Sending participant announcement to " << peer->GetInfo().participantName << std::endl;
@@ -115,10 +115,10 @@ void VAsioConnection::ReceiveSubscriptionSentEvent()
 
 void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
 {
-    registry::KnownParticipants participantsMsg;
+    KnownParticipants participantsMsg;
     buffer >> participantsMsg;
 
-    registry::MessageHeader reference;
+    RegistryMsgHeader reference;
     if (participantsMsg.messageHeader != reference)
     {
         std::cout << "Received known participant message with unsupported protocol specification"
@@ -225,7 +225,7 @@ void VAsioConnection::AddPeer(std::shared_ptr<VAsioTcpPeer> newPeer)
     buffer
         << msgSizePlaceholder
         << VAsioMsgKind::IbRegistryMessage
-        << registry::RegistryMessageKind::SubscriptionSent;
+        << RegistryMessageKind::SubscriptionSent;
     for (auto&& peer : _peers)
     {
         peer->SendIbMsg(buffer);
@@ -319,25 +319,25 @@ void VAsioConnection::ReceiveRawIbMessage(MessageBuffer&& buffer)
     _vasioReceivers[receiverIdx]->ReceiveRawMsg(std::move(buffer));
 }
 
-void VAsioConnection::RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, registry::ParticipantAnnouncement)> callback)
+void VAsioConnection::RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)> callback)
 {
     _participantAnnouncementReceivers.emplace_back(std::move(callback));
 }
 
 void VAsioConnection::ReceiveRegistryMessage(IVAsioPeer* from, MessageBuffer&& buffer)
 {
-    registry::RegistryMessageKind kind;
+    RegistryMessageKind kind;
     buffer >> kind;
     switch (kind)
     {
-    case registry::RegistryMessageKind::Invalid:
+    case RegistryMessageKind::Invalid:
         std::cerr << "WARNING: Received message with RegistryMessageKind::Invalid\n";
         return;
-    case registry::RegistryMessageKind::ParticipantAnnouncement:
+    case RegistryMessageKind::ParticipantAnnouncement:
         return ReceiveParticipantAnnouncement(from, std::move(buffer));
-    case registry::RegistryMessageKind::KnownParticipants:
+    case RegistryMessageKind::KnownParticipants:
         return ReceiveKnownParticpants(std::move(buffer));
-    case registry::RegistryMessageKind::SubscriptionSent:
+    case RegistryMessageKind::SubscriptionSent:
         return ReceiveSubscriptionSentEvent();
     }
 }

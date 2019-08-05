@@ -5,15 +5,14 @@
 
 namespace ib {
 namespace mw {
-namespace registry {
 
-class Registry
+class VAsioRegistry
 {
 public:
-    Registry() = delete;
-    Registry(const Registry&) = delete;
-    Registry(Registry&&) = delete;
-    Registry(ib::cfg::Config cfg);
+    VAsioRegistry() = delete;
+    VAsioRegistry(const VAsioRegistry&) = delete;
+    VAsioRegistry(VAsioRegistry&&) = delete;
+    VAsioRegistry(ib::cfg::Config cfg);
 
     std::future<void> ProvideDomain(uint32_t domainId);
 
@@ -24,7 +23,7 @@ public:
 private:
     // ----------------------------------------
     // private methods
-    void OnParticipantAnnouncement(IVAsioPeer* from, const registry::ParticipantAnnouncement& announcement);
+    void OnParticipantAnnouncement(IVAsioPeer* from, const ParticipantAnnouncement& announcement);
     void SendKnownParticipants(IVAsioPeer* peer);
 
 private:
@@ -37,6 +36,5 @@ private:
     VAsioConnection _connection;
 };
 
-} // namespace registry
 } // namespace mw
 } // namespace ib

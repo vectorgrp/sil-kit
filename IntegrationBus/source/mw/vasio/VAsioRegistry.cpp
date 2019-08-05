@@ -1,17 +1,17 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "Registry.hpp"
-
-using namespace ib::mw;
-using namespace ib::mw::registry;
+#include "VAsioRegistry.hpp"
 
 using asio::ip::tcp;
 
-Registry::Registry(ib::cfg::Config cfg)
+namespace ib {
+namespace mw {
+
+VAsioRegistry::VAsioRegistry(ib::cfg::Config cfg)
     : _vasioConfig{cfg.middlewareConfig.vasio}
-    , _connection{std::move(cfg), "VibRegistry", 0}
+    , _connection{std::move(cfg), "VasioRegistry", 0}
 {
-    _connection.RegisterMessageReceiver([this](IVAsioPeer* from, const registry::ParticipantAnnouncement& announcement)
+    _connection.RegisterMessageReceiver([this](IVAsioPeer* from, const ParticipantAnnouncement& announcement)
     {
         this->OnParticipantAnnouncement(from, announcement);
     });
@@ -19,7 +19,7 @@ Registry::Registry(ib::cfg::Config cfg)
     _connection.RegisterPeerShutdownCallback([this](IVAsioPeer* peer) { PeerIsShuttingDown(peer); });
 }
 
-std::future<void> Registry::ProvideDomain(uint32_t domainId)
+std::future<void> VAsioRegistry::ProvideDomain(uint32_t domainId)
 {
     // accept connection from participants on any interface
     auto registryPort = static_cast<uint16_t>(_vasioConfig.registry.port + domainId);
@@ -32,7 +32,7 @@ std::future<void> Registry::ProvideDomain(uint32_t domainId)
     catch (std::exception& e)
     {
         std::cout
-            << "ERROR: Registry failed to create listening socket: " << registryEndpoint
+            << "ERROR: VAsioRegistry failed to create listening socket: " << registryEndpoint
             << " for domainId=" << domainId
             << ". Reason:" << e.what() << std::endl;
         throw e;
@@ -42,7 +42,7 @@ std::future<void> Registry::ProvideDomain(uint32_t domainId)
     return _allParticipantsDown.get_future();
 }
 
-void Registry::OnParticipantAnnouncement(IVAsioPeer* from, const registry::ParticipantAnnouncement& announcement)
+void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const ParticipantAnnouncement& announcement)
 {
     SendKnownParticipants(from);
 
@@ -54,11 +54,11 @@ void Registry::OnParticipantAnnouncement(IVAsioPeer* from, const registry::Parti
     }
 }
 
-void Registry::SendKnownParticipants(IVAsioPeer* peer)
+void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
 {
     std::cout << "INFO: Sending known participant message to " << peer->GetInfo().participantName << "\n";
 
-    registry::KnownParticipants knownParticipantsMsg;
+    KnownParticipants knownParticipantsMsg;
 
     for (auto&& connectedParticipant : _connectedParticipants)
     {
@@ -71,13 +71,13 @@ void Registry::SendKnownParticipants(IVAsioPeer* peer)
     sendBuffer
         << msgSizePlaceholder
         << VAsioMsgKind::IbRegistryMessage
-        << registry::RegistryMessageKind::KnownParticipants
+        << RegistryMessageKind::KnownParticipants
         << knownParticipantsMsg;
 
     peer->SendIbMsg(std::move(sendBuffer));
 }
 
-void Registry::PeerIsShuttingDown(IVAsioPeer* peer)
+void VAsioRegistry::PeerIsShuttingDown(IVAsioPeer* peer)
 {
     _connectedParticipants.erase(peer->GetInfo().participantId);
 
@@ -88,7 +88,7 @@ void Registry::PeerIsShuttingDown(IVAsioPeer* peer)
     }
 }
 
-bool Registry::AllParticipantsUp() const
+bool VAsioRegistry::AllParticipantsUp() const
 {
     for (auto&& participant : _connection.Config().simulationSetup.participants)
     {
@@ -99,3 +99,7 @@ bool Registry::AllParticipantsUp() const
     }
     return true;
 }
+
+} // namespace mw
+} // namespace ib
+
