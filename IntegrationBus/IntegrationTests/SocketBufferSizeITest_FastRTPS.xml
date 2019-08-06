@@ -4,7 +4,7 @@
    <participant profile_name="Publisher">
       <rtps>
          <name>Publisher</name>
-         <defaultSendPort>10042</defaultSendPort>
+         <port>10042</port>
          <builtin>
             <domainId>42</domainId>
             <leaseDuration>INFINITE</leaseDuration>
@@ -39,10 +39,7 @@
       </topic>
       <times>
         <heartbeatPeriod>
-          <durationbyval>
-            <seconds>2</seconds>
-            <fraction>200000000</fraction> <!-- 200 * 1000 * 1000 -->
-          </durationbyval>
+            <sec>2</sec>
         </heartbeatPeriod>
       </times>
       <historyMemoryPolicy>PREALLOCATED_WITH_REALLOC</historyMemoryPolicy> <!-- PREALLOCATED_WITH_REALLOC_MEMORY_MODE -->
@@ -70,10 +67,7 @@
       </topic>
       <times>
         <heartbeatPeriod>
-          <durationbyval>
-            <seconds>1</seconds>
-            <fraction>0</fraction>
-          </durationbyval>
+            <sec>1</sec>
         </heartbeatPeriod>
       </times>
    </publisher>   
@@ -81,7 +75,7 @@
    <participant profile_name="Subscriber">
       <rtps>
          <name>Subscriber</name>
-         <defaultSendPort>10042</defaultSendPort>
+         <port>10042</port>
          <builtin>
             <domainId>42</domainId>
             <leaseDuration>INFINITE</leaseDuration>
@@ -139,10 +133,7 @@
       </topic>
       <times>
         <heartbeatPeriod>
-          <durationbyval>
-            <seconds>1</seconds>
-            <fraction>0</fraction>
-          </durationbyval>
+            <sec>1</sec>
         </heartbeatPeriod>
       </times>
    </publisher>   

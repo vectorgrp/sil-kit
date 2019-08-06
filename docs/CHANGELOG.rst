@@ -13,6 +13,8 @@ Removed
 ~~~~~~~
 Changed
 ~~~~~~~
+- Upgrade Fast-RTPS to version v1.8.1. This improves stability on Linux.
+
 Fixed
 ~~~~~
 
