@@ -19,7 +19,7 @@ workspaceFoldersPerTask = [:]  // Remember 'ws' folders from build step, which m
 pipeline {
     agent { label 'master' }  // Execute on Jenkins master node
     options { 
-        timeout(time: 60, unit: 'MINUTES')  // Auto-kill hanging builds
+        timeout(time: 90, unit: 'MINUTES')  // Auto-kill hanging builds
         //lock('IB-Main')  // Prevent parallel builds from wasting disk space (requires 'Lockable Resources Plugin')
     }
     environment {
