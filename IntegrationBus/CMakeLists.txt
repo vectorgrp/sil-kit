@@ -6,9 +6,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project("IntegrationBus-Library" LANGUAGES CXX C)
 
-set(CMAKE_CXX_STANDARD 14)
-
-include(${PROJECT_SOURCE_DIR}/../cmake/IntegrationBusVersion.cmake)
+include(IntegrationBusVersion)
 configure_ib_version(${PROJECT_NAME})
 
 set(IB_PROJECT_DIR ${PROJECT_SOURCE_DIR})
@@ -25,17 +23,14 @@ add_definitions(-DEXPORT_IntegrationBusAPI)
 # Globally add -fPIC compiler option
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-## Allow Linux debug libraries to be installed side-by-side with their release variant
-#if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-#    set(CMAKE_DEBUG_POSTFIX d)
-#endif()
+## Allow debug libraries to be installed side-by-side with their release variant
+set(CMAKE_DEBUG_POSTFIX d)
 
 ################################################################################
 # Install definitions
 ################################################################################
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/IntegrationBusInstall.cmake)
-configure_ib_install(${PROJECT_NAME})
+include(IntegrationBusInstall)
 
 ################################################################################
 # Include thirdparty libraries to be built
@@ -90,6 +85,27 @@ option(IB_BIN_FASTRTPS_ENABLE
         " (set IB_BIN_FASTRTPS_REPOSITORY for download URL)"
 )
 
+# Check if we are in deployed stated, ie fastrtps binaries are already present in the 
+# source tree
+set(DEPLOYED_FASTRTPS_DIR ${THIRDPARTY_DIR}/bin/fastrtps-${IB_BIN_FASTRTPS_VERSION})
+if(EXISTS ${DEPLOYED_FASTRTPS_DIR})
+    message(STATUS "using deployed pre-built fastrtps binaries!")
+    find_package(fastcdr 
+        REQUIRED
+        CONFIG
+        PATHS ${DEPLOYED_FASTRTPS_DIR}/share/fastcdr/cmake
+        NO_CMAKE_PACKAGE_REGISTRY
+        NO_DEFAULT_PATH
+    )
+    find_package(fastrtps 
+        REQUIRED
+        CONFIG
+        PATHS ${DEPLOYED_FASTRTPS_DIR}/share/fastrtps/cmake
+        NO_CMAKE_PACKAGE_REGISTRY
+        NO_DEFAULT_PATH
+    )
+endif()
+
 if(IB_BIN_FASTRTPS_ENABLE)
     include(get_compiler_arch)
     include(GetExternalProject)
@@ -116,6 +132,8 @@ if(IB_BIN_FASTRTPS_ENABLE)
             "${CMAKE_COMMAND}" -E copy_directory 
             ${CMAKE_BINARY_DIR}/fastrtps-download/Release ${FASTRTPS_BIN_DIR}
         )
+    #TODO we need to bundle Debug and Release, but they are mostly the same
+    #TODO: we should only copy the cmake exports and the library files ?
     get_external_project(fastrtps-debug
         URL ${IB_BIN_FASTRTPS_REPOSITORY}/${binname}-Debug.zip
         WORKING_DIR ${CMAKE_BINARY_DIR}/fastrtps-download/work-Debug
@@ -140,11 +158,21 @@ if(IB_BIN_FASTRTPS_ENABLE)
         PATHS ${FASTRTPS_BIN_DIR}
         )
     message(STATUS "bundling fastrtps-${IB_BIN_FASTRTPS_VERSION} from ${FASTRTPS_BIN_DIR}")
+	#will install to ./bin, ./lib, ./include etc.
     install(DIRECTORY
-            ${FASTRTPS_BIN_DIR}
+            ${FASTRTPS_BIN_DIR}/
             DESTINATION
-            ThirdParty/bin
+            ${INSTALL_TOP_DIR}
      )
+    # NB: we use the ASIO shipped with FastRTPS right now
+    # the binary distribution lacks the Asio sources
+    # but it should be included/deployed by our packaging tools
+    set(ASIO_INCLUDE_DIR ${THIRDPARTY_DIR}/Fast-RTPS/thirdparty/asio/asio/include)
+    if(NOT EXISTS ${ASIO_INCLUDE_DIR})
+        message(WARNING "Asio include directory not found: ${ASIO_INCLUDE_DIR}")
+    else()
+        message(STATUS "Asio include directory found:${ASIO_INCLUDE_DIR}")
+    endif()
 else()
     ### build from submodule or fetch sources from external mirror or use pre-built binaries (deployed mode)
     option(THIRDPARTY_fastcdr "Activate the use of Fast-RTPS internal thirdparty fastcdr" ON)
@@ -211,23 +239,9 @@ endif(IB_BIN_FASTRTPS_ENABLE)
 ################################################################################
 # Logging
 ################################################################################
-
 # We use fmtlib to offer a convenient logging interface
-message(STATUS "Add subdirectory ThirdParty/fmt-5.3.0")
-add_subdirectory(${THIRDPARTY_DIR}/fmt-5.3.0
-    ThirdParty/fmt-6.0.0
-    EXCLUDE_FROM_ALL
-)
-
-message(STATUS "Add subdirectory ThirdParty/spdlog")
-add_subdirectory(${THIRDPARTY_DIR}/spdlog
-    ThirdParty/spdlog
-    EXCLUDE_FROM_ALL
-)
-
-# Restore previously patched CMake variables
-set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_LIBDIR_backup}")
-set(CMAKE_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR_backup}")
+include(${THIRDPARTY_DIR}/fmt.cmake)
+include(${THIRDPARTY_DIR}/spdlog.cmake)
 
 ################################################################################
 # Helper Functions
@@ -307,105 +321,25 @@ add_subdirectory(include)
 add_subdirectory(source)
 add_subdirectory(IntegrationTests)
 
-################################################################################
-# IDE settings
-################################################################################
+set(_DEPLOY_CMAKE_DIR  ${INSTALL_LIB_DIR}/cmake/IntegrationBus/)
 
-message(STATUS "Copying VisualStudio .editorconfig into ${CMAKE_CURRENT_BINARY_DIR}")
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/.editorconfig DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-#configure_file(.editorconfig .editorconfig COPYONLY)
-
-################################################################################
-# Install targets for the IntegrationBus
-################################################################################
-
-# Save the IntegrationBusTargets into file IntegrationBusTargets.cmake
-install(EXPORT IntegrationBusTargets
-    # Without overriding the file name, these default file names will be exported:
-    #FILE IntegrationBusTargets.cmake
-    #FILE IntegrationBusTargets-${CONFIG_TAG}.cmake
-    DESTINATION ${INSTALL_CONFIG_DIR}
-    COMPONENT IntegrationBus
-)
-
-# This is enough to use the IntegrationBus::IntegrationBus target from external projects.
-# Register the target so the find_package command can locate it
+# export our library version for usage in find_package() by a user of the library
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
     ${CMAKE_CURRENT_BINARY_DIR}/IntegrationBusConfigVersion.cmake
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY AnyNewerVersion
 )
-configure_package_config_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/IntegrationBusConfig.cmake.in
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/IntegrationBusConfigVersion.cmake
+    DESTINATION ${_DEPLOY_CMAKE_DIR}
+    )
+#create a portable packageConfig.cmake
+configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/cmake/IntegrationBusConfig.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/IntegrationBusConfig.cmake
-    INSTALL_DESTINATION ${INSTALL_CONFIG_DIR}
+    NO_CHECK_REQUIRED_COMPONENTS_MACRO
+    INSTALL_DESTINATION ${_DEPLOY_CMAKE_DIR}
 )
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/IntegrationBusConfig.cmake
+    DESTINATION ${_DEPLOY_CMAKE_DIR}
+    )
 
-# Install sources
-# Copy all files from the source directory to the proper destination
-# Filter by file types in case someone spoiled this source folder by calling "cmake ."
-install(
-    DIRECTORY 
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/source
-        ${CMAKE_CURRENT_SOURCE_DIR}/IntegrationTests
-    DESTINATION ${INSTALL_SOURCE_DIR}
-    COMPONENT IntegrationBus-Developer
-    FILES_MATCHING 
-        PATTERN *.cpp 
-        PATTERN *.cxx 
-        PATTERN *.rc 
-        PATTERN *.h 
-        PATTERN *.hpp 
-        PATTERN *.hpp.in 
-        PATTERN *.json 
-        PATTERN *.cmake 
-        PATTERN *.cmake.in 
-        PATTERN CMakeLists.txt 
-        PATTERN *.md
-        PATTERN *.xml
-)
-install(
-    FILES 
-        .editorconfig
-        CMakeLists.txt 
-        LICENSE 
-    DESTINATION ${INSTALL_SOURCE_DIR}
-    COMPONENT IntegrationBus-Developer
-)
-install(
-    DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../cmake
-    DESTINATION ${INSTALL_SOURCE_DIR}/../
-    COMPONENT IntegrationBus-Developer
-    FILES_MATCHING 
-        PATTERN *.cmake
-)
-# Full installation of checked in third party libraries
-install(
-    DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty
-    DESTINATION ${INSTALL_SOURCE_DIR}/../
-    COMPONENT IntegrationBus-Developer
-    # Rational: Fast-RTPS cannot be delivered from source, as it requires its own submodules to be actual Git repositories.
-    REGEX "/ThirdParty/Fast-RTPS" EXCLUDE
-    # Breathe is just required for generating the documentation
-    REGEX "/ThirdParty/breathe" EXCLUDE
-)
-
-# Install all the helper files
-install(
-    FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/IntegrationBusConfig.cmake
-        ${CMAKE_CURRENT_BINARY_DIR}/IntegrationBusConfigVersion.cmake
-    DESTINATION ${INSTALL_CONFIG_DIR}
-    COMPONENT IntegrationBus
-)
-
-# Install supplementary files
-install(
-    FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE
-    DESTINATION ${INSTALL_DOCDIR}
-    COMPONENT IntegrationBus
-)

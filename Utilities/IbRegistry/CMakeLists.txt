@@ -2,8 +2,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 project("IntegrationBus-Registry" LANGUAGES CXX C)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/IntegrationBusInstall.cmake)
-configure_ib_install(${PROJECT_NAME})
+include(IntegrationBusInstall)
 
 add_executable(IbRegistry
     IbRegistry.cpp
@@ -25,6 +24,5 @@ target_link_libraries(IbRegistry
 
 #NB: currently COMPONENT is required to be IntegrationBus or VIB-CANoe packages break
 install(TARGETS IbRegistry
-    RUNTIME DESTINATION ${INSTALL_BINDIR}
-    COMPONENT IntegrationBus
+    RUNTIME DESTINATION ${INSTALL_BIN_DIR}
 )

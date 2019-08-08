@@ -35,12 +35,15 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(IntegrationBus
     PUBLIC  IbInterface
+    INTERFACE  IbInterface
     PRIVATE IbConfig
     PRIVATE IbMwComAdapter
 )
 set_target_properties(IntegrationBus
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/
+    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/
 )
 
 add_library(IbVersion STATIC
@@ -52,51 +55,35 @@ target_link_libraries(IbVersion
     PUBLIC  IbInterface
 )
 
-#######################################################################################################################
-# Add to install targets of the IntegrationBus
-#######################################################################################################################
+#add an alias for the exported name which includes a namespace
+add_library(IntegrationBus::IntegrationBus ALIAS IntegrationBus)
 
-# Mark the IntegrationBus sources for export by adding it to the target container IntegrationBusTargets
+###############################################################################
+# Add to install targets of the IntegrationBus
+###############################################################################
+# we adhere to standard find_package layout
+# refer to https://cmake.org/cmake/help/v3.15/manual/cmake-packages.7.html#package-configuration-file
+
 install(
     TARGETS IntegrationBus
     EXPORT IntegrationBusTargets
-    DESTINATION ${INSTALL_LIBDIR}
-    #LIBRARY DESTINATION ${INSTALL_LIBDIR} # Destination for Linux shared object libraries (.so)
-    #ARCHIVE DESTINATION ${INSTALL_LIBDIR} # Destination for static libraries (.lib/.a)
-    #RUNTIME DESTINATION ${INSTALL_LIBDIR} # Destination for executables and dynamic libraries (.dll)
-    PUBLIC_HEADER DESTINATION ${INSTALL_INCLUDEDIR} # Destination for header files
-    COMPONENT IntegrationBus
+    DESTINATION ${INSTALL_LIB_DIR}
+    LIBRARY DESTINATION ${INSTALL_LIB_DIR} # for Linux shared object libraries (.so)
+    ARCHIVE DESTINATION ${INSTALL_LIB_DIR} # for static libraries (.lib/.a)
+    RUNTIME DESTINATION ${INSTALL_BIN_DIR} # for executables and dynamic libraries (.dll)
+    PUBLIC_HEADER DESTINATION ${INSTALL_INCLUDE_DIR} # Destination for header files
 )
-# Note: When we use multiple destinations in a single command, all are installed but only the first is packaged.
-#       See https://cmake.org/pipermail/cmake/2009-November/033309.html, this being the proposed fix/workaround.
-if(MSVC)
-    # Install the Windows import library (.lib) and the dynamic library itself (.dll)
-    install(
-        TARGETS IntegrationBus
-        DESTINATION ${INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${INSTALL_LIBDIR} # Destination for static libraries (.lib/.a)
-        COMPONENT IntegrationBus
+# portable installation  definitions
+install(EXPORT IntegrationBusTargets
+    DESTINATION ${INSTALL_LIB_DIR}/cmake/IntegrationBus
+    NAMESPACE "IntegrationBus::"
+    FILE IntegrationBusTargets.cmake
+)
+#make our local build dir usable for other projects
+export(EXPORT IntegrationBusTargets
+    NAMESPACE "IntegrationBus::"
+    FILE IntegrationBusTargets.cmake
     )
-    install(
-        TARGETS IntegrationBus
-        DESTINATION ${INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${INSTALL_LIBDIR} # Destination for executables and dynamic libraries (.dll)
-        COMPONENT IntegrationBus
-    )
-    if(IB_INSTALL_PDB_FILES)
-        install(
-            FILES $<TARGET_PDB_FILE:IntegrationBus>
-            CONFIGURATIONS Debug RelWithDebInfo
-            DESTINATION ${INSTALL_LIBDIR}
-            COMPONENT IntegrationBus-Developer
-        )
-    endif()
-else()
-    # Install the Linux shared object library (.so)
-    install(
-        TARGETS IntegrationBus
-        DESTINATION ${INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${INSTALL_LIBDIR} # Destination for Linux shared object libraries (.so)
-        COMPONENT IntegrationBus
-    )
-endif()
+#register in CMake user registry
+# the following sets registry keys on windows, not good for developing cmake
+#export(PACKAGE IntegrationBus)

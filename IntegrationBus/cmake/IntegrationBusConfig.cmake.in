@@ -1,7 +1,6 @@
+set(IntegrationBus_VERSION @PROJECT_VERSION@)
 include(CMakeFindDependencyMacro)
 
 @PACKAGE_INIT@
-
-include("${CMAKE_CURRENT_LIST_DIR}/IntegrationBusTargets.cmake")
-
-check_required_components("@PROJECT_NAME@")
+get_filename_component(IB_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+include("${IB_CMAKE_DIR}/IntegrationBusTargets.cmake")

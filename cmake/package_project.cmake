@@ -40,20 +40,16 @@ function(package_project pro)
     set(PRO_COMPONENT ALL)
     set(PRO_DIR "/")
     set(PRO_ARCH "${_plat}")
-	set(PRO_TOOL "${_comp}")
-	set(PRO_PKG_FMT "ZIP")
+    set(PRO_TOOL "${_comp}")
+    set(PRO_PKG_FMT "ZIP")
     configure_file(${IntegrationBus_SOURCE_DIR}/cmake/CPackConfig.cmake.in ${_pro_workdir}/CPackConfig.cmake @ONLY)
-    set(PRO_FILE_NAME "${PRO_NAME}-${PRO_TOOL}-${_pro_cfg}-${PRO_ARCH}")
+    set(PRO_FILE_NAME "${PRO_NAME}-${PROJECT_VERSION}-${PRO_TOOL}-${_pro_cfg}-${PRO_ARCH}")
     add_custom_target(package-${pro}
         COMMAND ${_cp_command}  -C "${_pro_cfg}"
         ALL
         WORKING_DIRECTORY ${_pro_workdir}
         COMMENT "Running cpack for ${pro} for build config ${_pro_cfg}"
         BYPRODUCTS "${_pro_workdir}/${PRO_FILE_NAME}"
-    )
-    install(FILES
-        "${_pro_workdir}/${PRO_FILE_NAME}.zip"
-        DESTINATION ${INSTALL_SOURCE_DIR}/../ThirdParty/bin/
     )
     add_dependencies(package-${pro} ${pro})
 endfunction()

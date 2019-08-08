@@ -1,4 +1,7 @@
 if(${IB_BUILD_DOCS})
+    Project(IBDocs NONE)
+    include(IntegrationBusVersion)
+    configure_ib_version(${PROJECT_NAME})
     find_package(Doxygen REQUIRED)
     find_package(Sphinx REQUIRED)
 
@@ -52,16 +55,16 @@ if(${IB_BUILD_DOCS})
 
     add_custom_target(Sphinx ALL DEPENDS ${SPHINX_INDEX_FILE})
 
-    include(GNUInstallDirs)
-
+    add_custom_target(IBDocs ALL DEPENDS Sphinx Doxygen)
     install(DIRECTORY ${SPHINX_BUILD}/
-        DESTINATION ${CMAKE_INSTALL_DOCDIR}
-        COMPONENT IntegrationBus-Developer
-    )
+            DESTINATION ${INSTALL_DOC_DIR})
     install(
         FILES
             CHANGELOG.rst
         DESTINATION .
         COMPONENT IntegrationBus-Developer
     )
+    #for standalone packaging just build target "package-IBDocs"
+    include(package_project)
+    package_project(IBDocs)
 endif()

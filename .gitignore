@@ -16,3 +16,6 @@ Products/*
 
 # ignore auto generated pycache
 *__pycache__*
+
+#ci/build_all generates a lot of build directories
+_build_*/

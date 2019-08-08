@@ -19,13 +19,13 @@ Use the argument '-h' to get help:
 On the Windows command prompt, type
 
 ```cmd
-IbLauncher.bat -h
+IbLauncher.py -h
 ```
 
 Or, on a Linux bash terminal:
 
 ```bash
-./IbLauncher
+./IbLauncher.py
 ```
 
 ## Basic use

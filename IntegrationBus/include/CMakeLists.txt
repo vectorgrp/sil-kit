@@ -8,16 +8,20 @@ target_include_directories(IbInterface
 )
 
 
-if (TARGET fmt::fmt-header-only)
-    message(STATUS "have fmt::fmt-header-only")
+if (TARGET fmt-header-only)
+    message(STATUS "have fmt-header-only")
     target_link_libraries(IbInterface
         INTERFACE
-            $<BUILD_INTERFACE:fmt::fmt-header-only>
+            $<BUILD_INTERFACE:fmt-header-only>
+            $<INSTALL_INTERFACE:fmt-header-only>
     )
     target_compile_definitions(IbInterface
         INTERFACE
             $<BUILD_INTERFACE:HAVE_FMTLIB>
+            $<BUILD_INTERFACE:FMT_HEADER_ONLY>
     )
+else()
+    message(FATAL_ERROR "Foo")
 endif()
 
 # Add a custom project IbApi for quick access to IB Headers in Visual Studio
@@ -40,7 +44,6 @@ install(
     COMPONENT IntegrationBus
     INCLUDES DESTINATION ${INSTALL_INCLUDE_DIR} # Destination for header files
 )
-
 # Copy all headers from the source directory to the proper destination
 install(
     DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/
