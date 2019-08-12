@@ -1,5 +1,10 @@
 set(CMAKE_CXX_STANDARD 14)
 
+project("IntegrationBus-Registry" LANGUAGES CXX C)
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/IntegrationBusInstall.cmake)
+configure_ib_install(${PROJECT_NAME})
+
 add_executable(IbRegistry
     IbRegistry.cpp
 )
@@ -19,5 +24,5 @@ target_link_libraries(IbRegistry
 )
 
 install(TARGETS IbRegistry
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    RUNTIME DESTINATION ${INSTALL_BINDIR}
 )

@@ -306,7 +306,18 @@ def main():
     if not launchConfiguration:
         sys.exit(1)
 
+    # Setup list of used launch environments
     participantEnvironments = launchConfiguration["ParticipantEnvironments"]
+
+    # If the active Middleware is VAsio, we inject a launch environment for the registry at the position 0
+    if config["MiddlewareConfig"]["ActiveMiddleware"] == "VAsio":
+        ibRegistryEnv = {
+            "Environment": "IbRegistry",
+            "Participant": "IbRegistry",
+            "ConfigFile": args.configFile[0]
+            }
+        participantEnvironments.insert(0, ibRegistryEnv)
+        
     networkNodes = launchConfiguration["NetworkNodes"] if "NetworkNodes" in launchConfiguration else list()
     if args.verbose:
         print("Launch configuration '" + launchConfiguration["Name"] + "' defines " + str(len(participantEnvironments)) + " participants")
@@ -321,7 +332,7 @@ def main():
     environments = loadEnvironments(participantEnvironments, networkNodes, processCoordinator, args.domainId, args.verbose)
 
     # Prepare environments that are used
-    participantEnvironmentsByName = map(lambda x: x["Environment"], participantEnvironments)
+    participantEnvironmentsByName = [env["Environment"] for env in participantEnvironments]
     # Note: https://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-whilst-preserving-order
     usedEnvironmentsByName = list(collections.OrderedDict.fromkeys(participantEnvironmentsByName))
 

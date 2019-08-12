@@ -9,7 +9,7 @@ namespace mw {
 
 VAsioRegistry::VAsioRegistry(ib::cfg::Config cfg)
     : _vasioConfig{cfg.middlewareConfig.vasio}
-    , _connection{std::move(cfg), "VasioRegistry", 0}
+    , _connection{std::move(cfg), "IbRegistry", 0}
 {
     _connection.RegisterMessageReceiver([this](IVAsioPeer* from, const ParticipantAnnouncement& announcement)
     {

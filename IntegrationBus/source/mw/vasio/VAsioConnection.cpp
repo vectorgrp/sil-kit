@@ -42,7 +42,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     auto& vasioConfig = _config.middlewareConfig.vasio;
 
     VAsioPeerInfo registryInfo;
-    registryInfo.participantName = "VibRegistry";
+    registryInfo.participantName = "IbRegistry";
     registryInfo.participantId = 0;
     registryInfo.acceptorHost = vasioConfig.registry.hostname;
     registryInfo.acceptorPort = static_cast<uint16_t>(vasioConfig.registry.port + domainId);
