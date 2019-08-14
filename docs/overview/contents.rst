@@ -15,6 +15,13 @@ Overview
 
   vibes
 
+Middleware Configuration
+============================
+
+.. toctree::
+  :maxdepth: 3
+
+  ../usage/middleware-configuration
 
 Using Vector Integration Bus
 ============================
