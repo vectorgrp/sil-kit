@@ -5,25 +5,25 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on [Keep a Changelog] (http://keepachangelog.com/en/1.0.0/).
 
-[unreleased] - 2019-xx-xx
+[Sprint-31] - 2019-08-14
 ------------------------
 Added
 ~~~~~
-Removed
-~~~~~~~
+- New VAsio middleware as an alternative to Fast-RTPS, the VAsio middleware was
+  specifically developped for the integration bus to provide high performance and
+  stability. Cf. :doc:`../usage/middleware-configuration`.
+
 Changed
 ~~~~~~~
 - Upgrade Fast-RTPS to version v1.8.1. This improves stability on Linux.
 
-Fixed
-~~~~~
 
-
-Interface compatibility with Sprint-30
+Compatibility with Sprint-30
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-- Application binary interface (ABI): Yes
+- Application binary interface (ABI): No
 - Application software interface (API): Yes
-- Application middleware interface: Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): No
 
 
 [Sprint-30] - 2019-07-31
@@ -46,7 +46,7 @@ Interface compatibility with Sprint-29
 Added
 ~~~~~
 - It is now possible to reconfigure FlexRay TX-Buffers during the simulation, e.g., to change offset
-  and repetition. Cf., :cpp:func:`IFrController::ReconfigureTxBuffer()<ib::sim::fr::IFrController::ReconfigureTxBuffer()>`
+  and repetition. Cf. :cpp:func:`IFrController::ReconfigureTxBuffer()<ib::sim::fr::IFrController::ReconfigureTxBuffer()>`
 
 Changed
 ~~~~~~~
