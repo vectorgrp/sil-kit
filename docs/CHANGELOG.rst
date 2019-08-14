@@ -5,19 +5,34 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on [Keep a Changelog] (http://keepachangelog.com/en/1.0.0/).
 
-[Sprint-30] - unreleased
+[unreleased] - 2019-xx-xx
 ------------------------
 Added
 ~~~~~
-
 Removed
 ~~~~~~~
-
 Changed
 ~~~~~~~
+- Upgrade Fast-RTPS to version v1.8.1. This improves stability on Linux.
 
 Fixed
 ~~~~~
+
+
+Interface compatibility with Sprint-30
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Application middleware interface: Yes
+
+
+[Sprint-30] - 2019-07-31
+------------------------
+Fixed
+~~~~~
+- Attempting to create a ComAdapter with an empty name will now throw
+  a misconfiguration exception with a proper error message.
+
 
 Interface compatibility with Sprint-29
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

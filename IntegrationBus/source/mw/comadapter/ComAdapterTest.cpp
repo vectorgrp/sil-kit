@@ -33,6 +33,23 @@ protected:
     SimulationSetupBuilder& simulationSetup;
 };
 
+TEST_F(ComAdapterTest, throw_on_empty_participant_name)
+{
+    simulationSetup.AddParticipant("TestParticipant");
+    auto config = configBuilder.Build();
+
+    EXPECT_THROW(CreateNullConnectionComAdapterImpl(config, ""), ib::cfg::Misconfiguration);
+}
+
+TEST_F(ComAdapterTest, throw_on_unconfigured_participant_name)
+{
+    simulationSetup.AddParticipant("TestParticipant");
+    auto config = configBuilder.Build();
+
+    EXPECT_THROW(CreateNullConnectionComAdapterImpl(config, "NotInConfig"), ib::cfg::Misconfiguration);
+}
+
+
 TEST_F(ComAdapterTest, make_basic_controller)
 {
     auto participantName = "CANcontroller";

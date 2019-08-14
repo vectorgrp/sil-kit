@@ -51,17 +51,15 @@ struct IsControllerMap<std::unordered_map<EndpointId, std::unique_ptr<T>>, U> : 
 template <class IbConnectionT>
 ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& participantName)
     : _config{std::move(config)}
-    , _participant{&get_by_name(_config.simulationSetup.participants, participantName)}
+    , _participant{GetParticipantByName(_config, participantName)} // throws if participantName is not found in _config
     , _participantName{participantName}
-    , _participantId{_participant->id}
-    , _logger{spdlog::create<spdlog::sinks::null_sink_st>(_participantName)}
+    , _participantId{_participant.id}
     , _ibConnection{_config, participantName, _participantId}
 {
-    // we immediately drop the logger from the spdlog registry, because this cannot be controlled
-    // by a user of the IntegrationBus.dll(!), which can have strange side effects, e.g., a stale
-    // but logger even after the ComAdapter was destroyed. A user of the IntegrationBus.dll can
-    // easily add the Logger to the global registry again so that it is under his control.
-    spdlog::drop(_participantName);
+    // NB: do not create the _logger in the initializer list. If participantName is empty,
+    //  this will cause a fairly unintuitive exception in spdlog.
+    _logger = spdlog::create<spdlog::sinks::null_sink_st>(_participantName);
+    spdlog::set_default_logger(_logger);
 }
 
 template <class IbConnectionT>
@@ -75,7 +73,7 @@ void ComAdapter<IbConnectionT>::joinIbDomain(uint32_t domainId)
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::onIbDomainJoined()
 {
-    if (_participant->isSyncMaster)
+    if (_participant.isSyncMaster)
     {
         /*[[maybe_unused]]*/ auto* controller = GetSyncMaster();
         (void)controller;
@@ -88,9 +86,7 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonicalName) -> can::ICanController*
 {
-    assert(_participant);
-
-    auto&& config = get_by_name(_participant->canControllers, canonicalName);
+    auto&& config = get_by_name(_participant.canControllers, canonicalName);
 
     if (ControllerUsesNetworkSimulator(config.name))
     {
@@ -105,9 +101,7 @@ auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonical
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonicalName) -> eth::IEthController*
 {
-    assert(_participant);
-
-    auto&& config = get_by_name(_participant->ethernetControllers, canonicalName);
+    auto&& config = get_by_name(_participant.ethernetControllers, canonicalName);
     if (ControllerUsesNetworkSimulator(config.name))
     {
         return CreateControllerForLink<eth::EthControllerProxy>(config);
@@ -121,9 +115,7 @@ auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonical
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFrController*
 {
-    assert(_participant);
-
-    auto&& config = get_by_name(_participant->flexrayControllers, canonicalName);
+    auto&& config = get_by_name(_participant.flexrayControllers, canonicalName);
     if (ControllerUsesNetworkSimulator(config.name))
     {
         return CreateControllerForLink<fr::FrControllerProxy>(config);
@@ -137,9 +129,7 @@ auto ComAdapter<IbConnectionT>::CreateFlexrayController(const std::string& canon
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonicalName) -> lin::ILinController*
 {
-    assert(_participant);
-
-    auto&& config = get_by_name(_participant->linControllers, canonicalName);
+    auto&& config = get_by_name(_participant.linControllers, canonicalName);
     if (ControllerUsesNetworkSimulator(config.name))
     {
         return CreateControllerForLink<lin::LinControllerProxy>(config);
@@ -153,56 +143,56 @@ auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonical
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateAnalogIn(const std::string& canonicalName) -> sim::io::IAnalogInPort*
 {
-    auto&& config = get_by_name(_participant->analogIoPorts, canonicalName);
+    auto&& config = get_by_name(_participant.analogIoPorts, canonicalName);
     return CreateInPort<io::AnalogIoMessage>(config);
 }
 
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateDigitalIn(const std::string& canonicalName) -> sim::io::IDigitalInPort*
 {
-    auto&& config = get_by_name(_participant->digitalIoPorts, canonicalName);
+    auto&& config = get_by_name(_participant.digitalIoPorts, canonicalName);
     return CreateInPort<io::DigitalIoMessage>(config);
 }
 
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreatePwmIn(const std::string& canonicalName) -> sim::io::IPwmInPort*
 {
-    auto&& config = get_by_name(_participant->pwmPorts, canonicalName);
+    auto&& config = get_by_name(_participant.pwmPorts, canonicalName);
     return CreateInPort<io::PwmIoMessage>(config);
 }
 
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreatePatternIn(const std::string& canonicalName) -> sim::io::IPatternInPort*
 {
-    auto&& config = get_by_name(_participant->patternPorts, canonicalName);
+    auto&& config = get_by_name(_participant.patternPorts, canonicalName);
     return CreateInPort<io::PatternIoMessage>(config);
 }
 
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateAnalogOut(const std::string& canonicalName) -> sim::io::IAnalogOutPort*
 {
-    auto&& config = get_by_name(_participant->analogIoPorts, canonicalName);
+    auto&& config = get_by_name(_participant.analogIoPorts, canonicalName);
     return CreateOutPort<io::AnalogIoMessage>(config);
 }
 
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateDigitalOut(const std::string& canonicalName) -> sim::io::IDigitalOutPort*
 {
-    auto&& config = get_by_name(_participant->digitalIoPorts, canonicalName);
+    auto&& config = get_by_name(_participant.digitalIoPorts, canonicalName);
     return CreateOutPort<io::DigitalIoMessage>(config);
 }
 
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreatePwmOut(const std::string& canonicalName) -> sim::io::IPwmOutPort*
 {
-    auto&& config = get_by_name(_participant->pwmPorts, canonicalName);
+    auto&& config = get_by_name(_participant.pwmPorts, canonicalName);
     return CreateOutPort<io::PwmIoMessage>(config);
 }
 
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreatePatternOut(const std::string& canonicalName) -> sim::io::IPatternOutPort*
 {
-    auto&& config = get_by_name(_participant->patternPorts, canonicalName);
+    auto&& config = get_by_name(_participant.patternPorts, canonicalName);
     return CreateOutPort<io::PatternIoMessage>(config);
 }
 
@@ -232,14 +222,14 @@ auto ComAdapter<IbConnectionT>::CreateOutPort(const ConfigT& config) -> io::IOut
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher*
 {
-    auto&& config = get_by_name(_participant->genericPublishers, canonicalName);
+    auto&& config = get_by_name(_participant.genericPublishers, canonicalName);
     return CreateControllerForLink<sim::generic::GenericPublisher>(config, config);
 }
 
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateGenericSubscriber(const std::string& canonicalName) -> sim::generic::IGenericSubscriber*
 {
-    auto&& config = get_by_name(_participant->genericSubscribers, canonicalName);
+    auto&& config = get_by_name(_participant.genericSubscribers, canonicalName);
     return CreateControllerForLink<sim::generic::GenericSubscriber>(config, config);
 }
 
@@ -267,7 +257,7 @@ auto ComAdapter<IbConnectionT>::GetParticipantController() -> sync::IParticipant
     auto* controller = GetController<sync::ParticipantController>(1024);
     if (!controller)
     {
-        controller = CreateController<sync::ParticipantController>(1024, "default", _config.simulationSetup, *_participant);
+        controller = CreateController<sync::ParticipantController>(1024, "default", _config.simulationSetup, _participant);
         RegisterNewPeerCallback([controller]() { controller->RefreshStatus(); });
     }
     return controller;
@@ -706,7 +696,7 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
     }
 
     // get_by_name throws if the current node is not configured as a network simulator.
-    for (auto&& simulatorName : _participant->networkSimulators)
+    for (auto&& simulatorName : _participant.networkSimulators)
     {
         auto&& simulatorConfig = get_by_name(_config.simulationSetup.networkSimulators, simulatorName);
 
@@ -762,9 +752,7 @@ bool ComAdapter<IbConnectionT>::ControllerUsesNetworkSimulator(const std::string
 template <class IbConnectionT>
 bool ComAdapter<IbConnectionT>::isSyncMaster() const
 {
-    assert(_participant);
-
-    return _participant->isSyncMaster;
+    return _participant.isSyncMaster;
 }
 
 template <class IbConnectionT>
