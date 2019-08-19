@@ -59,7 +59,11 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& par
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
     _logger = spdlog::create<spdlog::sinks::null_sink_st>(_participantName);
-    spdlog::set_default_logger(_logger);
+    // NB: logger gets dropped from registry immediately after creating so that two comAdapter with the same
+    // participantName won't lead to a spdlog exception because a logger with this name does already exist.
+    spdlog::drop(_participantName);
+    // set_default_logger should not be used here, as there can only be one default logger and if another comAdapter
+    // gets created, the first default logger will be dropped from the registry as well.
 }
 
 template <class IbConnectionT>
