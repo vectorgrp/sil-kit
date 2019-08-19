@@ -1,6 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "FrController.hpp"
+#include "Validation.hpp"
 
 #include <stdexcept>
 
@@ -21,6 +22,9 @@ FrController::FrController(mw::IComAdapter* comAdapter)
 
 void FrController::Configure(const ControllerConfig& config)
 {
+    Validate(config.clusterParams);
+    Validate(config.nodeParams);
+
     _clusterParams = config.clusterParams;
     _nodeParams = config.nodeParams;
     _bufferConfigs = config.bufferConfigs;

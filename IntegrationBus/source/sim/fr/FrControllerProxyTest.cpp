@@ -66,6 +66,63 @@ protected:
     ib::mw::test::MockComAdapter comAdapter;
     FrControllerProxy proxy;
     Callbacks callbacks;
+
+    auto MakeValidClusterParams() -> ClusterParameters
+    {
+        ClusterParameters clusterParams;
+        clusterParams.gColdstartAttempts = 2;
+        clusterParams.gCycleCountMax = 0;
+        clusterParams.gdActionPointOffset = 1;
+        clusterParams.gdDynamicSlotIdlePhase = 0;
+        clusterParams.gdMiniSlot = 2;
+        clusterParams.gdMiniSlotActionPointOffset = 1;
+        clusterParams.gdStaticSlot = 3;
+        clusterParams.gdSymbolWindow = 1;
+        clusterParams.gdSymbolWindowActionPointOffset = 1;
+        clusterParams.gdTSSTransmitter = 1;
+        clusterParams.gdWakeupTxActive = 15;
+        clusterParams.gdWakeupTxIdle = 45;
+        clusterParams.gListenNoise = 2;
+        clusterParams.gMacroPerCycle = 8;
+        clusterParams.gMaxWithoutClockCorrectionFatal = 1;
+        clusterParams.gMaxWithoutClockCorrectionPassive = 1;
+        clusterParams.gNumberOfMiniSlots = 0;
+        clusterParams.gNumberOfStaticSlots = 2;
+        clusterParams.gPayloadLengthStatic = 0;
+        clusterParams.gSyncFrameIDCountMax = 2;
+
+        return clusterParams;
+    }
+
+    auto MakeValidNodeParams() -> NodeParameters
+    {
+        NodeParameters nodeParams;
+        nodeParams.pAllowHaltDueToClock = 0;
+        nodeParams.pAllowPassiveToActive = 0;
+        nodeParams.pChannels = Channel::A;
+        nodeParams.pClusterDriftDamping = 0;
+        nodeParams.pdAcceptedStartupRange = 29;
+        nodeParams.pdListenTimeout = 1926;
+        nodeParams.pdMicrotick = ClockPeriod::T12_5NS;
+        nodeParams.pKeySlotId = 0;
+        nodeParams.pKeySlotOnlyEnabled = 0;
+        nodeParams.pKeySlotUsedForStartup = 0;
+        nodeParams.pKeySlotUsedForSync = 0;
+        nodeParams.pLatestTx = 0;
+        nodeParams.pMacroInitialOffsetA = 2;
+        nodeParams.pMacroInitialOffsetB = 2;
+        nodeParams.pMicroInitialOffsetA = 0;
+        nodeParams.pMicroInitialOffsetB = 0;
+        nodeParams.pMicroPerCycle = 960;
+        nodeParams.pOffsetCorrectionOut = 15;
+        nodeParams.pOffsetCorrectionStart = 7;
+        nodeParams.pRateCorrectionOut = 3;
+        nodeParams.pSamplesPerMicrotick = 1;
+        nodeParams.pWakeupChannel = Channel::A;
+        nodeParams.pWakeupPattern = 0;
+
+        return nodeParams;
+    }
 };
 
 TEST_F(FrControllerProxyTest, send_controller_config)
@@ -80,16 +137,8 @@ TEST_F(FrControllerProxyTest, send_controller_config)
 
     // Configure Controller
     ControllerConfig controllerCfg;
-    controllerCfg.clusterParams.gCycleCountMax = 5;
-    controllerCfg.clusterParams.gdSymbolWindowActionPointOffset = 100;
-    controllerCfg.clusterParams.gdMiniSlotActionPointOffset= 9;
-    controllerCfg.clusterParams.gMacroPerCycle = 42;
-    controllerCfg.clusterParams.gdSymbolWindow = 11;
-
-    controllerCfg.nodeParams.pAllowHaltDueToClock = 13;
-    controllerCfg.nodeParams.pdMicrotick = ClockPeriod::T25NS;
-    controllerCfg.nodeParams.pKeySlotId = 99;
-    controllerCfg.nodeParams.pLatestTx = 50;
+    controllerCfg.clusterParams = MakeValidClusterParams();
+    controllerCfg.nodeParams = MakeValidNodeParams();
 
     controllerCfg.bufferConfigs.push_back(bufferCfg);
 
@@ -110,6 +159,8 @@ TEST_F(FrControllerProxyTest, send_txbuffer_configupdate)
     bufferCfg.transmissionMode = TransmissionMode::SingleShot;
 
     ControllerConfig controllerCfg;
+    controllerCfg.clusterParams = MakeValidClusterParams();
+    controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.push_back(bufferCfg);
 
     EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, controllerCfg)).Times(1);
@@ -134,6 +185,8 @@ TEST_F(FrControllerProxyTest, send_txbuffer_configupdate)
 TEST_F(FrControllerProxyTest, throw_on_unconfigured_tx_buffer_configupdate)
 {
     ControllerConfig controllerCfg;
+    controllerCfg.clusterParams = MakeValidClusterParams();
+    controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.resize(5);
 
     EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, controllerCfg)).Times(1);
@@ -151,6 +204,8 @@ TEST_F(FrControllerProxyTest, send_txbuffer_update)
     TxBufferConfig bufferCfg;
 
     ControllerConfig controllerCfg;
+    controllerCfg.clusterParams = MakeValidClusterParams();
+    controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.push_back(bufferCfg);
 
     EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, controllerCfg)).Times(1);
@@ -171,6 +226,8 @@ TEST_F(FrControllerProxyTest, send_txbuffer_update)
 TEST_F(FrControllerProxyTest, throw_on_unconfigured_tx_buffer_update)
 {
     ControllerConfig controllerCfg;
+    controllerCfg.clusterParams = MakeValidClusterParams();
+    controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.resize(1);
 
     EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, controllerCfg)).Times(1);
@@ -357,6 +414,5 @@ TEST_F(FrControllerProxyTest, call_cyclestart_handler)
 
     proxy.ReceiveIbMessage(controllerAddress, cycleStart);
 }
-
 
 } // namespace

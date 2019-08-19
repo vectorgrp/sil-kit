@@ -66,11 +66,67 @@ protected:
     ib::mw::test::MockComAdapter comAdapter;
     FrController controller;
     Callbacks callbacks;
+
+    auto MakeValidClusterParams() -> ClusterParameters
+    {
+        ClusterParameters clusterParams;
+        clusterParams.gColdstartAttempts = 2;
+        clusterParams.gCycleCountMax = 0;
+        clusterParams.gdActionPointOffset = 1;
+        clusterParams.gdDynamicSlotIdlePhase = 0;
+        clusterParams.gdMiniSlot = 2;
+        clusterParams.gdMiniSlotActionPointOffset = 1;
+        clusterParams.gdStaticSlot = 3;
+        clusterParams.gdSymbolWindow = 1;
+        clusterParams.gdSymbolWindowActionPointOffset = 1;
+        clusterParams.gdTSSTransmitter = 1;
+        clusterParams.gdWakeupTxActive = 15;
+        clusterParams.gdWakeupTxIdle = 45;
+        clusterParams.gListenNoise = 2;
+        clusterParams.gMacroPerCycle = 8;
+        clusterParams.gMaxWithoutClockCorrectionFatal = 1;
+        clusterParams.gMaxWithoutClockCorrectionPassive = 1;
+        clusterParams.gNumberOfMiniSlots = 0;
+        clusterParams.gNumberOfStaticSlots = 2;
+        clusterParams.gPayloadLengthStatic = 0;
+        clusterParams.gSyncFrameIDCountMax = 2;
+
+        return clusterParams;
+    }
+
+    auto MakeValidNodeParams() -> NodeParameters
+    {
+        NodeParameters nodeParams;
+        nodeParams.pAllowHaltDueToClock = 0;
+        nodeParams.pAllowPassiveToActive = 0;
+        nodeParams.pChannels = Channel::A;
+        nodeParams.pClusterDriftDamping = 0;
+        nodeParams.pdAcceptedStartupRange = 29;
+        nodeParams.pdListenTimeout = 1926;
+        nodeParams.pdMicrotick = ClockPeriod::T12_5NS;
+        nodeParams.pKeySlotId = 0;
+        nodeParams.pKeySlotOnlyEnabled = 0;
+        nodeParams.pKeySlotUsedForStartup = 0;
+        nodeParams.pKeySlotUsedForSync = 0;
+        nodeParams.pLatestTx = 0;
+        nodeParams.pMacroInitialOffsetA = 2;
+        nodeParams.pMacroInitialOffsetB = 2;
+        nodeParams.pMicroInitialOffsetA = 0;
+        nodeParams.pMicroInitialOffsetB = 0;
+        nodeParams.pMicroPerCycle = 960;
+        nodeParams.pOffsetCorrectionOut = 15;
+        nodeParams.pOffsetCorrectionStart = 7;
+        nodeParams.pRateCorrectionOut = 3;
+        nodeParams.pSamplesPerMicrotick = 1;
+        nodeParams.pWakeupChannel = Channel::A;
+        nodeParams.pWakeupPattern = 0;
+
+        return nodeParams;
+    }
 };
 
 TEST_F(FrControllerTest, send_message)
 {
-
     // Sending a FlexRay message is triggered by UpdateTxBuffer, which requires a previous
     // configuration of the controller, which, in turn, consists of TxBufferConfigs
     TxBufferConfig bufferCfg;
@@ -84,6 +140,8 @@ TEST_F(FrControllerTest, send_message)
 
     // Configure Controller
     ControllerConfig controllerCfg;
+    controllerCfg.clusterParams = MakeValidClusterParams();
+    controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.push_back(bufferCfg);
     controller.Configure(controllerCfg);
 
@@ -118,6 +176,8 @@ TEST_F(FrControllerTest, dont_send_controller_config)
     EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, A<const ControllerConfig&>())).Times(0);
 
     ControllerConfig controllerCfg;
+    controllerCfg.clusterParams = MakeValidClusterParams();
+    controllerCfg.nodeParams = MakeValidNodeParams();
     controller.Configure(controllerCfg);
 }
 
@@ -132,6 +192,8 @@ TEST_F(FrControllerTest, set_poc_ready_after_controller_config)
         .Times(1);
 
     ControllerConfig controllerCfg;
+    controllerCfg.clusterParams = MakeValidClusterParams();
+    controllerCfg.nodeParams = MakeValidNodeParams();
     controller.Configure(controllerCfg);
 }
 
@@ -233,6 +295,9 @@ TEST_F(FrControllerTest, send_wus_a_on_wakeup)
     const auto testChannel = Channel::A;
 
     ControllerConfig config;
+    config.clusterParams = MakeValidClusterParams();
+    config.nodeParams = MakeValidNodeParams();
+
     config.nodeParams.pWakeupChannel = testChannel;
     controller.Configure(config);
 
@@ -250,6 +315,9 @@ TEST_F(FrControllerTest, send_wus_b_on_wakeup)
     const auto testChannel = Channel::B;
 
     ControllerConfig config;
+    config.clusterParams = MakeValidClusterParams();
+    config.nodeParams = MakeValidNodeParams();
+
     config.nodeParams.pWakeupChannel = testChannel;
     controller.Configure(config);
 
