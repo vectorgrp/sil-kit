@@ -31,4 +31,4 @@ if (MSVC)
     target_compile_options(IbMwComAdapter PRIVATE "/bigobj")
 endif (MSVC)
 
-add_vib_test(TestMwComAdapter SOURCES ComAdapterTest.cpp LIBS IbMwMock)
+add_vib_test(TestMwComAdapter SOURCES ComAdapterTest.cpp LIBS IbMwMockNullConnection)

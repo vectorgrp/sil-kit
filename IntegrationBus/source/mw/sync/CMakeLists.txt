@@ -20,7 +20,7 @@ target_link_libraries("IbMwSync"
     PUBLIC IbUtil
 )
 
-add_vib_test(TestMwSyncMaster SOURCES SyncMasterTest.cpp LIBS IbMwSync IbMwMock IbConfig )
-add_vib_test(TestMwParticipantController SOURCES ParticipantControllerTest.cpp LIBS IbMwSync IbMwMock IbConfig )
-add_vib_test(TestMwSystemController SOURCES SystemControllerTest.cpp LIBS IbMwSync IbMwMock)
-add_vib_test(TestMwSystemMonitor SOURCES SystemMonitorTest.cpp LIBS IbMwSync IbMwMock IbConfig)
+add_vib_test(TestMwSyncMaster SOURCES SyncMasterTest.cpp LIBS IbMwSync IbMwMockComAdapter IbConfig )
+add_vib_test(TestMwParticipantController SOURCES ParticipantControllerTest.cpp LIBS IbMwSync IbMwMockComAdapter IbConfig )
+add_vib_test(TestMwSystemController SOURCES SystemControllerTest.cpp LIBS IbMwSync IbMwMockComAdapter)
+add_vib_test(TestMwSystemMonitor SOURCES SystemMonitorTest.cpp LIBS IbMwSync IbMwMockComAdapter IbConfig)

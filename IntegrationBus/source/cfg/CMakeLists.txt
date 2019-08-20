@@ -48,7 +48,7 @@ add_vib_test(TestMwCfgConfigBuilder SOURCES ConfigBuilderTest.cpp LIBS IbConfig)
 add_vib_test(TestMwCfgJsonConfig SOURCES JsonConfigTest.cpp LIBS IbConfig json11)
 add_vib_test(TestMwCfgValidation SOURCES ValidationTest.cpp LIBS IbConfig)
 add_vib_test(TestIbConfigExample SOURCES IbConfigExampleTest.cpp
-    LIBS IbMwMock
+    LIBS IbMwMockNullConnection
     CONFIGS
         IbConfig_Example.json
         IbConfig_IO-Example.json
