@@ -18,5 +18,4 @@ target_link_libraries(IbSimFlexRay
 )
 
 add_vib_test(TestSimFrValidation SOURCES ValidationTest.cpp LIBS IbSimFlexRay)
-add_vib_test(TestSimFrController SOURCES FrControllerTest.cpp LIBS IbSimFlexRay IbMwMock)
-add_vib_test(TestSimFrControllerProxy SOURCES FrControllerProxyTest.cpp LIBS IbSimFlexRay IbMwMock)
+add_vib_test(TestSimFrController SOURCES FrControllerTest.cpp FrControllerProxyTest.cpp LIBS IbSimFlexRay IbMwMock)

@@ -15,5 +15,4 @@ target_link_libraries(IbSimLin
     PRIVATE IbInterface
 )
 
-add_vib_test(TestSimLinControllerProxy SOURCES LinControllerProxyTest.cpp LIBS IbSimLin IbMwMock)
-add_vib_test(TestSimLinController SOURCES LinControllerTest.cpp LIBS IbSimLin IbMwMock)
+add_vib_test(TestSimLinController SOURCES LinControllerTest.cpp LinControllerProxyTest.cpp LIBS IbSimLin IbMwMock)

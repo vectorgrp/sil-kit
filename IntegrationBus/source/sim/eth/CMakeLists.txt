@@ -17,5 +17,4 @@ target_link_libraries(IbSimEthernet
     PRIVATE IbInterface
 )
 
-add_vib_test(TestSimEthControllerProxy SOURCES EthControllerProxyTest.cpp LIBS IbSimEthernet IbMwMock)
-add_vib_test(TestSimEthController SOURCES EthControllerTest.cpp LIBS IbSimEthernet IbMwMock)
+add_vib_test(TestSimEthController SOURCES EthControllerTest.cpp EthControllerProxyTest.cpp LIBS IbSimEthernet IbMwMock)
