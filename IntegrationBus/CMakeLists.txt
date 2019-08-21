@@ -237,7 +237,13 @@ set(CMAKE_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR_backup}")
 # Helper Functions
 #######################################################################################################################
 
+set(BUILD_TESTS TRUE CACHE BOOL "Enables building of unit and integration tests")
+
 function(add_vib_test)
+    if(NOT ${BUILD_TESTS})
+        return()
+    endif()
+
     set(multiValueArgs SOURCES LIBS CONFIGS)
 
     cmake_parse_arguments(PARSED_ARGS
@@ -281,7 +287,7 @@ function(add_vib_test)
 
     if (MSVC)
         target_compile_options(${executableName} PRIVATE "/bigobj")
-	else()
+    else()
         target_compile_options(${executableName} PUBLIC "-Wno-inconsistent-missing-override")
     endif(MSVC)
 
@@ -289,7 +295,6 @@ function(add_vib_test)
              COMMAND ${executableName} --gtest_output=xml:${executableName}_gtestresults.xml
              WORKING_DIRECTORY $<TARGET_FILE_DIR:${executableName}>
     )
-
 endfunction(add_vib_test)
 
 include(CTest)
