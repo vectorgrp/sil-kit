@@ -21,6 +21,20 @@ using namespace ib;
 using namespace ib::mw;
 using namespace ib::sim::generic;
 
+using ::ib::mw::test::DummyComAdapter;
+
+class MockComAdapter : public DummyComAdapter
+{
+public:
+    void SendIbMessage(EndpointAddress from, GenericMessage&& msg) override
+    {
+        SendIbMessage_proxy(from, msg);
+    }
+
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const GenericMessage&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const GenericMessage&));
+};
+
 class GenericPublisherTest : public ::testing::Test
 {
 protected:
@@ -48,7 +62,7 @@ protected:
     const EndpointAddress portAddress{4, 5};
     const std::vector<uint8_t> sampleData{0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u};
 
-    test::MockComAdapter comAdapter;
+    MockComAdapter comAdapter;
     GenericPublisher publisher;
 };
 

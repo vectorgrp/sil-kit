@@ -12,7 +12,6 @@
 
 #include "IoDatatypeUtils.hpp"
 
-
 namespace {
 
 using namespace std::chrono_literals;
@@ -21,13 +20,22 @@ using namespace testing;
 
 using namespace ib::mw;
 using namespace ib::sim;
+using namespace ib::sim::io;
+
+using ::ib::mw::test::DummyComAdapter;
+
+class MockComAdapter : public DummyComAdapter
+{
+public:
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const AnalogIoMessage&));
+};
 
 class OutPortTest : public ::testing::Test
 {
 protected:
-    using MessageType = io::AnalogIoMessage;
-    using ValueType = io::IOutPort<MessageType>::ValueType;
-    using InterfaceType = io::IOutPort<MessageType>;
+    using MessageType = AnalogIoMessage;
+    using ValueType = IOutPort<MessageType>::ValueType;
+    using InterfaceType = IOutPort<MessageType>;
 
 protected:
     OutPortTest()
@@ -40,8 +48,8 @@ protected:
     const EndpointAddress portAddress{4, 5};
     const EndpointAddress otherPortAddress{5, 10};
 
-    test::MockComAdapter comAdapter;
-    io::OutPort<MessageType> port;
+    MockComAdapter comAdapter;
+    OutPort<MessageType> port;
 };
 
 TEST_F(OutPortTest, check_endpoint_address)

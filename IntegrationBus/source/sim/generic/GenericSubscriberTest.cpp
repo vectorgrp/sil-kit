@@ -56,7 +56,7 @@ protected:
     const EndpointAddress endpointAddress{4, 5};
     const EndpointAddress otherEndpointAddress{5, 7};
 
-    test::MockComAdapter comAdapter;
+    test::DummyComAdapter comAdapter;
     Callbacks callbacks;
     GenericSubscriber subscriber;
 };

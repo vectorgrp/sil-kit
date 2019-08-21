@@ -33,6 +33,17 @@ using namespace ib::mw;
 using namespace ib::util;
 using namespace ib::sim::fr;
 
+using ::ib::mw::test::DummyComAdapter;
+
+class MockComAdapter : public DummyComAdapter
+{
+public:
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const HostCommand&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const ControllerConfig&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const TxBufferConfigUpdate&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const TxBufferUpdate&));
+};
+
 class FrControllerProxyTest : public testing::Test
 {
 protected:
@@ -63,7 +74,7 @@ protected:
 
     decltype(TxBufferUpdate::payload) referencePayload;
 
-    ib::mw::test::MockComAdapter comAdapter;
+    MockComAdapter comAdapter;
     FrControllerProxy proxy;
     Callbacks callbacks;
 

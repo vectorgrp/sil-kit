@@ -32,6 +32,22 @@ using namespace ib::mw;
 using namespace ib::sim;
 using namespace ib::sim::eth;
 
+using ::ib::mw::test::DummyComAdapter;
+
+class MockComAdapter : public DummyComAdapter
+{
+public:
+    void SendIbMessage(EndpointAddress from, EthMessage&& msg) override
+    {
+        SendIbMessage_proxy(from, msg);
+    }
+
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthMessage&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const EthMessage&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthTransmitAcknowledge&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthStatus&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthSetMode&));
+};
 
 class EthernetControllerProxyTest : public testing::Test
 {
@@ -61,7 +77,7 @@ protected:
     const EndpointAddress controllerAddress = {7, 8};
     const EndpointAddress otherControllerAddress = { 7, 125 };
 
-    ib::mw::test::MockComAdapter comAdapter;
+    MockComAdapter comAdapter;
     Callbacks callbacks;
 
     EthControllerProxy proxy;

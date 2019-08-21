@@ -27,8 +27,9 @@ using namespace testing;
 using namespace ib;
 using namespace ib::mw;
 using namespace ib::mw::sync;
-using namespace ib::mw::test;
 using namespace ib::util;
+
+using ::ib::mw::test::DummyComAdapter;
 
 class SystemMonitorTest : public testing::Test
 {
@@ -105,7 +106,7 @@ protected:
     // Members
     EndpointAddress addr{19, 1025};
 
-    MockComAdapter comAdapter;
+    DummyComAdapter comAdapter;
     cfg::Config testConfig;
     SystemMonitor monitor;
     Callbacks callbacks;

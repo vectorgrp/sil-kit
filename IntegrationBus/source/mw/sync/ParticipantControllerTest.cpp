@@ -26,8 +26,16 @@ using namespace testing;
 using namespace ib;
 using namespace ib::mw;
 using namespace ib::mw::sync;
-using namespace ib::mw::test;
 using namespace ib::util;
+
+using ::ib::mw::test::DummyComAdapter;
+
+class MockComAdapter : public DummyComAdapter
+{
+public:
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const QuantumRequest& msg));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const ParticipantStatus& msg));
+};
 
 class ParticipantControllerTest : public testing::Test
 {

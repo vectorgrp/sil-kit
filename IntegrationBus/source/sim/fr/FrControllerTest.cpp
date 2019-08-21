@@ -34,6 +34,24 @@ using namespace ib::util;
 using namespace ib::sim;
 using namespace ib::sim::fr;
 
+using ::ib::mw::test::DummyComAdapter;
+
+class MockComAdapter : public DummyComAdapter
+{
+public:
+    void SendIbMessage(EndpointAddress from, FrMessageAck&& msg)
+    {
+        SendIbMessage_proxy(from, msg);
+    }
+
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const FrMessage&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const FrSymbol&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const FrMessageAck&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const FrSymbolAck&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const HostCommand&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const ControllerConfig&));
+};
+
 class FrControllerTest : public testing::Test
 {
 protected:
@@ -63,7 +81,7 @@ protected:
 
     decltype(TxBufferUpdate::payload) referencePayload;
 
-    ib::mw::test::MockComAdapter comAdapter;
+    MockComAdapter comAdapter;
     FrController controller;
     Callbacks callbacks;
 

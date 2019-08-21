@@ -33,6 +33,20 @@ using testing::Return;
 using namespace ib::mw;
 using namespace ib::sim::lin;
 
+using ::ib::mw::test::DummyComAdapter;
+
+class MockComAdapter : public DummyComAdapter
+{
+public:
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const LinMessage&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const RxRequest&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const TxAcknowledge&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const WakeupRequest&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const ControllerConfig&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const SlaveConfiguration&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const SlaveResponse&));
+};
+
 class LinControllerProxyTest : public testing::Test
 {
 protected:
@@ -56,7 +70,7 @@ protected:
     const EndpointAddress proxyAddress {7, 5};
     const EndpointAddress otherControllerAddress{ 4, 10 };
 
-    ib::mw::test::MockComAdapter comAdapter;
+    MockComAdapter comAdapter;
     LinControllerProxy proxy;
     Callbacks callbacks;
 };

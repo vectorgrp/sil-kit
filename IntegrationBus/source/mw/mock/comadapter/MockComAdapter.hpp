@@ -15,8 +15,6 @@
 #include "ib/sim/io/IoDatatypes.hpp"
 #include "ib/sim/generic/GenericMessageDatatypes.hpp"
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
 #include "spdlog/sinks/null_sink.h"
 
 #ifdef SendMessage
@@ -27,127 +25,99 @@ namespace ib {
 namespace mw {
 namespace test {
 
-class MockComAdapter : public IComAdapter
+class DummyComAdapter : public IComAdapter
 {
 public:
-    MockComAdapter()
+    DummyComAdapter()
     {
         logger = spdlog::default_logger();
     }
 
-    void SendIbMessage(EndpointAddress from, sim::can::CanMessage&& msg) override
-    {
-        SendIbMessage_proxy(from, msg);
-    }
-    void SendIbMessage(EndpointAddress from, sim::eth::EthMessage&& msg) override
-    {
-        SendIbMessage_proxy(from, msg);
-    }
-    void SendIbMessage(EndpointAddress from, sim::fr::FrMessage&& msg) override
-    {
-        SendIbMessage_proxy(from, msg);
-    }
-    void SendIbMessage(EndpointAddress from, sim::fr::FrMessageAck&& msg) override
-    {
-        SendIbMessage_proxy(from, msg);
-    }
-    void SendIbMessage(EndpointAddress from, sim::io::PatternIoMessage&& msg) override
-    {
-        SendIbMessage_proxy(from, msg);
-    }
-    void SendIbMessage(EndpointAddress from, sim::generic::GenericMessage&& msg) override
-    {
-        SendIbMessage_proxy(from, msg);
-    }
-    void SendIbMessage(EndpointAddress from, logging::LogMsg&& msg) override
-    {
-        SendIbMessage_proxy(from, msg);
-    }
+    auto CreateCanController(const std::string& /*canonicalName*/) -> sim::can::ICanController* { return nullptr; }
+    auto CreateEthController(const std::string& /*canonicalName*/) -> sim::eth::IEthController* { return nullptr; }
+    auto CreateFlexrayController(const std::string& /*canonicalName*/) -> sim::fr::IFrController* { return nullptr; }
+    auto CreateLinController(const std::string& /*canonicalName*/) -> sim::lin::ILinController* { return nullptr; }
+    auto CreateAnalogIn(const std::string& /*canonicalName*/) -> sim::io::IAnalogInPort* { return nullptr; }
+    auto CreateDigitalIn(const std::string& /*canonicalName*/) -> sim::io::IDigitalInPort* { return nullptr; }
+    auto CreatePwmIn(const std::string& /*canonicalName*/) -> sim::io::IPwmInPort* { return nullptr; }
+    auto CreatePatternIn(const std::string& /*canonicalName*/) -> sim::io::IPatternInPort* { return nullptr; }
+    auto CreateAnalogOut(const std::string& /*canonicalName*/) -> sim::io::IAnalogOutPort* { return nullptr; }
+    auto CreateDigitalOut(const std::string& /*canonicalName*/) -> sim::io::IDigitalOutPort* { return nullptr; }
+    auto CreatePwmOut(const std::string& /*canonicalName*/) -> sim::io::IPwmOutPort* { return nullptr; }
+    auto CreatePatternOut(const std::string& /*canonicalName*/) -> sim::io::IPatternOutPort* { return nullptr; }
+    auto CreateGenericPublisher(const std::string& /*canonicalName*/) -> sim::generic::IGenericPublisher* { return nullptr; }
+    auto CreateGenericSubscriber(const std::string& /*canonicalName*/) -> sim::generic::IGenericSubscriber* { return nullptr; }
 
-    MOCK_METHOD1(CreateCanController, sim::can::ICanController*(const std::string& canonicalName));
-    MOCK_METHOD1(CreateEthController, sim::eth::IEthController*(const std::string& canonicalName));
-    MOCK_METHOD1(CreateFlexrayController, sim::fr::IFrController*(const std::string& canonicalName));
-    MOCK_METHOD1(CreateLinController, sim::lin::ILinController*(const std::string& canonicalName));
-    MOCK_METHOD1(CreateAnalogIn, sim::io::IAnalogInPort*(const std::string& canonicalName));
-    MOCK_METHOD1(CreateDigitalIn, sim::io::IDigitalInPort*(const std::string& canonicalName));
-    MOCK_METHOD1(CreatePwmIn, sim::io::IPwmInPort*(const std::string& canonicalName));
-    MOCK_METHOD1(CreatePatternIn, sim::io::IPatternInPort*(const std::string& canonicalName));
-    MOCK_METHOD1(CreateAnalogOut, sim::io::IAnalogOutPort*(const std::string& canonicalName));
-    MOCK_METHOD1(CreateDigitalOut, sim::io::IDigitalOutPort*(const std::string& canonicalName));
-    MOCK_METHOD1(CreatePwmOut, sim::io::IPwmOutPort*(const std::string& canonicalName));
-    MOCK_METHOD1(CreatePatternOut, sim::io::IPatternOutPort*(const std::string& canonicalName));
-    MOCK_METHOD1(CreateGenericPublisher, sim::generic::IGenericPublisher*(const std::string& canonicalName));
-    MOCK_METHOD1(CreateGenericSubscriber, sim::generic::IGenericSubscriber*(const std::string& canonicalName));
+    auto GetSyncMaster() -> sync::ISyncMaster* { return nullptr; }
+    auto GetParticipantController() -> sync::IParticipantController* { return nullptr; }
+    auto GetSystemMonitor() -> sync::ISystemMonitor* { return nullptr; }
+    auto GetSystemController() -> sync::ISystemController* { return nullptr; }
+    auto GetLogger() -> std::shared_ptr<spdlog::logger>& { return logger; }
 
-    MOCK_METHOD0(GetSyncMaster, sync::ISyncMaster*());
-    MOCK_METHOD0(GetParticipantController, sync::IParticipantController*());
-    MOCK_METHOD0(GetSystemMonitor, sync::ISystemMonitor*());
-    MOCK_METHOD0(GetSystemController, sync::ISystemController*());
-    auto GetLogger() -> std::shared_ptr<spdlog::logger>& override { return logger; }
+    void RegisterCanSimulator(sim::can::IIbToCanSimulator* /*canonicalName*/) {}
+    void RegisterEthSimulator(sim::eth::IIbToEthSimulator* /*canonicalName*/) {}
+    void RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* /*canonicalName*/) {}
+    void RegisterLinSimulator(sim::lin::IIbToLinSimulator* /*canonicalName*/) {}
 
-    MOCK_METHOD1(RegisterCanSimulator, void(sim::can::IIbToCanSimulator*));
-    MOCK_METHOD1(RegisterEthSimulator, void(sim::eth::IIbToEthSimulator*));
-    MOCK_METHOD1(RegisterFlexraySimulator, void(sim::fr::IIbToFrBusSimulator*));
-    MOCK_METHOD1(RegisterLinSimulator, void(sim::lin::IIbToLinSimulator*));
+    void SendIbMessage(EndpointAddress /*from*/, sim::can::CanMessage&& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::can::CanMessage& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::can::CanTransmitAcknowledge& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::can::CanControllerStatus& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::can::CanConfigureBaudrate& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::can::CanSetControllerMode& /*msg*/) {}
 
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::can::CanMessage&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const sim::can::CanMessage&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::can::CanTransmitAcknowledge&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::can::CanControllerStatus&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::can::CanConfigureBaudrate&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::can::CanSetControllerMode&));
+    void SendIbMessage(EndpointAddress /*from*/, sim::eth::EthMessage&& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::eth::EthMessage& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::eth::EthTransmitAcknowledge& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::eth::EthStatus& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::eth::EthSetMode& /*msg*/) {}
 
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::eth::EthMessage&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const sim::eth::EthMessage&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::eth::EthTransmitAcknowledge&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::eth::EthStatus&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::eth::EthSetMode&));
+    void SendIbMessage(EndpointAddress /*from*/, sim::fr::FrMessage&& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::fr::FrMessage& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, sim::fr::FrMessageAck&& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::fr::FrMessageAck& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::fr::FrSymbol& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::fr::FrSymbolAck& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::fr::CycleStart& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::fr::HostCommand& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::fr::ControllerConfig& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::fr::TxBufferConfigUpdate& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::fr::TxBufferUpdate& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::fr::ControllerStatus& /*msg*/) {}
 
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::FrMessage&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const sim::fr::FrMessage&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::FrMessageAck&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const sim::fr::FrMessageAck&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::FrSymbol&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::FrSymbolAck&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::CycleStart&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::HostCommand&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::ControllerConfig&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::TxBufferConfigUpdate&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::TxBufferUpdate&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::fr::ControllerStatus&));
+    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::LinMessage& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::RxRequest& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::TxAcknowledge& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::WakeupRequest& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::ControllerConfig& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::SlaveConfiguration& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::SlaveResponse& /*msg*/) {}
 
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::lin::LinMessage&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::lin::RxRequest&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::lin::TxAcknowledge&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::lin::WakeupRequest&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::lin::ControllerConfig&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::lin::SlaveConfiguration&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::lin::SlaveResponse&));
+    void SendIbMessage(EndpointAddress /*from*/, const sim::io::AnalogIoMessage& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::io::DigitalIoMessage& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, sim::io::PatternIoMessage&& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::io::PatternIoMessage& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::io::PwmIoMessage& /*msg*/) {}
 
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::io::AnalogIoMessage&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::io::DigitalIoMessage&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::io::PatternIoMessage&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const sim::io::PatternIoMessage&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::io::PwmIoMessage&));
+    void SendIbMessage(EndpointAddress /*from*/, sim::generic::GenericMessage&& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::generic::GenericMessage& /*msg*/) {}
+    void SendIbMessage_proxy(EndpointAddress /*from*/, const sim::generic::GenericMessage& /*msg*/) {}
 
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sim::generic::GenericMessage&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const sim::generic::GenericMessage&));
+    void SendIbMessage(EndpointAddress /*from*/, const sync::NextSimTask& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sync::Tick& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sync::TickDone& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sync::QuantumRequest& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sync::QuantumGrant& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sync::ParticipantStatus& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sync::ParticipantCommand& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sync::SystemCommand& /*msg*/) {}
 
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::NextSimTask&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::Tick&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::TickDone&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::QuantumRequest& msg));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::QuantumGrant& msg));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::ParticipantStatus& msg));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::ParticipantCommand& msg));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const sync::SystemCommand& msg));
+    void SendIbMessage(EndpointAddress /*from*/, logging::LogMsg&& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const logging::LogMsg& /*msg*/) {}
 
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const logging::LogMsg& msg));
-    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const logging::LogMsg& msg));
-
-    MOCK_METHOD1(OnAllMessagesDelivered, void(std::function<void(void)>));
-    MOCK_METHOD0(FlushSendBuffers, void());
-    MOCK_METHOD1(RegisterNewPeerCallback, void(std::function<void(void)>));
+    void OnAllMessagesDelivered(std::function<void(void)> /*callback*/) {}
+    void FlushSendBuffers() {}
+    void RegisterNewPeerCallback(std::function<void(void)> /*callback*/) {}
 
     std::shared_ptr<spdlog::logger> logger;
 };

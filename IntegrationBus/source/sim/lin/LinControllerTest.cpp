@@ -31,6 +31,20 @@ using namespace ib::mw;
 using namespace ib::sim;
 using namespace ib::sim::lin;
 
+using ::ib::mw::test::DummyComAdapter;
+
+class MockComAdapter : public DummyComAdapter
+{
+public:
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const LinMessage&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const RxRequest&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const TxAcknowledge&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const WakeupRequest&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const ControllerConfig&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const SlaveConfiguration&));
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const SlaveResponse&));
+};
+
 auto MakeControllerConfig(ControllerMode mode) -> ControllerConfig
 {
     ControllerConfig ctrlConfig;
@@ -94,7 +108,7 @@ protected:
     const EndpointAddress controllerAddress{4, 5};
     const EndpointAddress otherControllerAddress{5, 10};
 
-    ib::mw::test::MockComAdapter comAdapter;
+    MockComAdapter comAdapter;
     LinController controller;
     Callbacks callbacks;
 };
