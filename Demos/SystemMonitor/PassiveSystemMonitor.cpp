@@ -69,10 +69,6 @@ int main(int argc, char** argv)
         std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
         auto comAdapter = ib::CreateComAdapter(std::move(ibConfig), participantName, domainId);
 
-        // add a stdout sink to the logger to print all received log messages
-        // FIXME@json configuration: comAdapter->GetLogger()->sinks().push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
-        // FIXME@...: spdlog::set_default_logger(comAdapter->GetLogger());
-
         auto systemMonitor = comAdapter->GetSystemMonitor();
         systemMonitor->RegisterParticipantStatusHandler(&ReportParticipantStatus);
         systemMonitor->RegisterSystemStateHandler(&ReportSystemState);

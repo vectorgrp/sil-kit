@@ -15,6 +15,7 @@ add_library(IbConfig STATIC
     Config.cpp
     ConfigBuilder.cpp
     ControllerBuilder.cpp
+    LoggerBuilder.cpp
     GenericPortBuilder.cpp
     LinkBuilder.cpp
     NetworkSimulatorBuilder.cpp

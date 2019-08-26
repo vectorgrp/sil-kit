@@ -6,6 +6,7 @@
 
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/mw/logging/LoggingDatatypes.hpp"
+#include "ib/cfg/Config.hpp"
 
 #include "SpdlogTypeConversion.hpp"
 
@@ -18,7 +19,7 @@ class Logger : public ILogger
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    Logger(const std::string& participantName);
+    Logger(const std::string& participantName, const std::vector<cfg::Logger>& config);
 
     // ----------------------------------------
     // Public interface methods
@@ -47,6 +48,8 @@ public:
     // Public methods
     void Distribute(const LogMsg& msg);
     void Distribute(LogMsg&& msg);
+
+    auto GetSinks() -> const std::vector<spdlog::sink_ptr>&;
 
 private:
     // ----------------------------------------

@@ -10,6 +10,12 @@
                 "Name": "LinMaster",
                 "Description": "LIN Master",
                 "SyncType": "DiscreteTime",
+                "Logger": [
+                    {
+                        "Type": "Remote",
+                        "Level": "Info"
+                    }
+                ],
                 
                 "LinControllers": [ "LIN1" ]
             },
@@ -17,18 +23,41 @@
                 "Name": "LinSlave",
                 "Description": "LIN Slave",
                 "SyncType": "DiscreteTime",
+                "Logger": [
+                    {
+                        "Type": "Remote",
+                        "Level": "Info"
+                    }
+                ],
                 
                 "LinControllers": [ "LIN1" ]
             },
             {
                 "Name": "SystemController",
                 "SyncType": "Unsynchronized",
-                "IsSyncMaster": true
+                "IsSyncMaster": true,
+                "Logger": [
+                    {
+                        "Type": "Remote",
+                        "Level": "Info"
+                    }
+                ]
             },
             {
                 "Name": "SystemMonitor",
                 "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
-                "SyncType": "Unsynchronized"
+                "SyncType": "Unsynchronized",
+                "Logger": [
+                    {
+                        "Type": "Stdout",
+                        "Level": "Info"
+                    },
+                    {
+                        "Type": "File",
+                        "Level": "Trace",
+                        "Filename": "SystemMonitorLog"
+                    }
+                ]
             }
         ],
 
@@ -191,11 +220,6 @@
             ]
         }
 
-    ],
-
-    "MiddlewareConfig" : 
-    {
-        "ActiveMiddleware" : "VAsio"
-    }
+    ]
 
 }

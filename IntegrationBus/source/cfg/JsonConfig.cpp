@@ -126,6 +126,102 @@ auto from_json<Version>(const json11::Json& json) -> Version
     return version;
 }
 
+auto to_json(const Logger::Type& type) -> json11::Json
+{
+    switch (type)
+    {
+    case Logger::Type::Remote:
+        return "Remote";
+    case Logger::Type::Stdout:
+        return "Stdout";
+    case Logger::Type::File:
+        return "File";
+    default:
+        return "";
+    }
+}
+
+template <>
+auto from_json<Logger::Type>(const json11::Json& json) -> Logger::Type
+{
+    auto&& str = json.string_value();
+    if (str == "Remote" || str == "")
+        return Logger::Type::Remote;
+    if (str == "Stdout")
+        return Logger::Type::Stdout;
+    if (str == "File")
+        return Logger::Type::File;
+
+    throw Misconfiguration{"Unknown Logger Type"};
+}
+
+auto to_json(const mw::logging::Level& level) -> json11::Json
+{
+    switch (level)
+    {
+    case mw::logging::Level::critical:
+        return "Critical";
+    case mw::logging::Level::warn:
+        return "Warn";
+    case mw::logging::Level::info:
+        return "Info";
+    case mw::logging::Level::debug:
+        return "Debug";
+    case mw::logging::Level::trace:
+        return "Trace";
+    case mw::logging::Level::off:
+        return "Off";
+    default:
+        return "";
+    }
+}
+
+template <>
+auto from_json<mw::logging::Level>(const json11::Json& json) -> mw::logging::Level
+{
+    auto&& str = json.string_value();
+    if (str == "Critical")
+        return mw::logging::Level::critical;
+    if (str == "Warn")
+        return mw::logging::Level::warn;
+    if (str == "Info" || str == "")
+        return mw::logging::Level::info;
+    if (str == "Debug")
+        return mw::logging::Level::debug;
+    if (str == "Trace")
+        return mw::logging::Level::trace;
+    if (str == "Off")
+        return mw::logging::Level::off;
+
+    throw Misconfiguration{"Unknown Log Level"};
+}
+
+auto to_json(const Logger& logger) -> json11::Json
+{
+    return json11::Json::object{
+        {"Type", to_json(logger.type)},
+        {"Level", to_json(logger.level)},
+        {"Filename", to_json(logger.filename)}
+    };
+}
+
+template <>
+auto from_json<Logger>(const json11::Json& json) -> Logger
+{
+    Logger logger;
+    logger.type = from_json<Logger::Type>(json["Type"].string_value());
+    logger.level = from_json<mw::logging::Level>(json["Level"].string_value());
+
+    if (logger.type == Logger::Type::File)
+    {
+        if (!json.object_items().count("Filename"))
+            throw Misconfiguration("Filename of file logger is not specified");
+        logger.filename = json["Filename"].string_value();
+    }
+
+    return logger;
+}
+
 auto to_json(const CanController& controller) -> json11::Json
 {
     return json11::Json(controller.name);
@@ -664,6 +760,7 @@ auto to_json(const Participant& participant) -> json11::Json
 
     return json11::Json::object{
         {"Name", participant.name},
+        {"Logger", to_json(participant.logger)},
         {"CanControllers", to_json(participant.canControllers)},
         {"LinControllers", to_json(participant.linControllers)},
         {"EthernetControllers", to_json(participant.ethernetControllers)},
@@ -722,6 +819,7 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
 
     participant.name = json["Name"].string_value();
 
+    participant.logger = from_json<std::vector<Logger>>(json["Logger"].array_items());
     participant.canControllers = from_json<std::vector<CanController>>(json["CanControllers"].array_items());
     participant.linControllers = from_json<std::vector<LinController>>(json["LinControllers"].array_items());
     participant.ethernetControllers = from_json<std::vector<EthernetController>>(json["EthernetControllers"].array_items());

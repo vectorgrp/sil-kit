@@ -60,7 +60,8 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& par
 {
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
-    _logger = std::make_unique<logging::Logger>(_participantName);
+    auto&& participantConfig = get_by_name(_config.simulationSetup.participants, _participantName);
+    _logger = std::make_unique<logging::Logger>(_participantName, participantConfig.logger);
 }
 
 template <class IbConnectionT>
@@ -69,6 +70,9 @@ void ComAdapter<IbConnectionT>::joinIbDomain(uint32_t domainId)
     _ibConnection.JoinDomain(domainId);
     onIbDomainJoined();
 
+    std::stringstream ss;
+    ss << "Participant " << _participantName << " has joined the IB-Domain " << domainId;
+    _logger->Info(ss.str());
     // FIXME@fmt: _logger->Info("Participant {} has joined the IB-Domain {}", _participantName, domainId);
 }
 

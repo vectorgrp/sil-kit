@@ -1,9 +1,14 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
+#include <chrono>
+#include <iomanip>
+#include <sstream>
+
 #include "Logger.hpp"
 
 #include "spdlog/sinks/null_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
+#include "spdlog/sinks/basic_file_sink.h"
 
 namespace ib {
 namespace mw {
@@ -34,7 +39,7 @@ private:
 } // anonymous namespace
 
 
-Logger::Logger(const std::string& participantName)
+Logger::Logger(const std::string& participantName, const std::vector<cfg::Logger>& config)
     : _ibRemoteSink{std::make_shared<IbRemoteSink>(this)}
 {
     // NB: do not create the _logger in the initializer list. If participantName is empty,
@@ -47,8 +52,34 @@ Logger::Logger(const std::string& participantName)
     // set_default_logger should not be used here, as there can only be one default logger and if another comAdapter
     // gets created, the first default logger will be dropped from the registry as well.
 
-    _logger->sinks().push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
-    _logger->sinks().push_back(_ibRemoteSink);
+    for (auto logger : config)
+    {
+        if (logger.type == cfg::Logger::Type::Remote)
+        {
+            _ibRemoteSink->set_level(to_spdlog(logger.level));
+            _logger->sinks().push_back(_ibRemoteSink);
+        }
+
+        if (logger.type == cfg::Logger::Type::Stdout)
+        {
+            auto stdoutSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+            stdoutSink->set_level(to_spdlog(logger.level));
+            _logger->sinks().push_back(stdoutSink);
+        }
+
+        if (logger.type == cfg::Logger::Type::File)
+        {
+            // Generate Timestamp for log file.
+            auto now = std::chrono::system_clock::now();
+            auto itt = std::chrono::system_clock::to_time_t(now);
+            std::ostringstream string_stream;
+            string_stream << logger.filename << "_" << std::put_time(localtime(&itt), "%FT%H-%M-%S") << ".txt";
+
+            auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(string_stream.str());
+            fileSink->set_level(to_spdlog(logger.level));
+            _logger->sinks().push_back(fileSink);
+        }
+    }
 }
 
 void Logger::Log(Level level, const std::string& msg)
@@ -93,14 +124,14 @@ void Logger::RegisterLogMsgHandler(LogMsgHandlerT handler)
 
 void Logger::LogReceivedMsg(const LogMsg& msg)
 {
-    if (to_spdlog(msg.level) < _logger->level())
-        return;
-
     auto spdlog_msg = to_spdlog(msg);
 
     for (auto&& sink : _logger->sinks())
     {
         if (sink.get() == _ibRemoteSink.get())
+            continue;
+
+        if (to_spdlog(msg.level) < sink->level())
             continue;
 
         sink->log(spdlog_msg);
@@ -115,6 +146,11 @@ void Logger::Distribute(const LogMsg& msg)
 void Logger::Distribute(LogMsg&& msg)
 {
     _logMsgHandler(std::move(msg));
+}
+
+auto Logger::GetSinks() -> const std::vector<spdlog::sink_ptr>&
+{
+    return _logger->sinks();
 }
 
 } // namespace logging

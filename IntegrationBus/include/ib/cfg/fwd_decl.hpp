@@ -7,6 +7,7 @@ namespace cfg {
 
 struct Version;
 struct Link;
+struct Logger;
 struct CanController;
 struct LinController;
 struct EthernetController;

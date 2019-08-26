@@ -11,6 +11,12 @@
                 "Description": "Sends I/O values",
                 "SyncType": "DiscreteTime",
                 "IsSyncMaster": true,
+                "Logger": [
+                    {
+                        "Type": "Remote",
+                        "Level": "Info"
+                    }
+                ],
 
                 "Digital-Out": [
                     { "DIO": false }
@@ -29,6 +35,12 @@
                 "Name": "IoReader",
                 "Description": "Receives I/O values",
                 "SyncType": "DiscreteTime",
+                "Logger": [
+                    {
+                        "Type": "Remote",
+                        "Level": "Info"
+                    }
+                ],
 
                 "Digital-In": [ "DIO" ],
                 "Analog-In": [ "AIO" ],
@@ -37,12 +49,29 @@
             },
             {
                 "Name": "SystemController",
-                "SyncType": "Unsynchronized"
+                "SyncType": "Unsynchronized",
+                "Logger": [
+                    {
+                        "Type": "Remote",
+                        "Level": "Info"
+                    }
+                ]
             },
             {
                 "Name": "SystemMonitor",
                 "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
-                "SyncType": "Unsynchronized"
+                "SyncType": "Unsynchronized",
+                "Logger": [
+                    {
+                        "Type": "Stdout",
+                        "Level": "Info"
+                    },
+                    {
+                        "Type": "File",
+                        "Level": "Trace",
+                        "Filename": "SystemMonitorLog"
+                    }
+                ]
             }
         ],
 

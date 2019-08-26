@@ -19,6 +19,11 @@ ParticipantBuilder::ParticipantBuilder(SimulationSetupBuilder* ibConfig, std::st
 
 auto ParticipantBuilder::Build() -> Participant
 {
+    for (auto&& builder : _logger)
+    {
+        config.logger.emplace_back(builder.Build());
+    }
+
     BuildControllers(config.canControllers);
     BuildControllers(config.linControllers);
     BuildControllers(config.ethernetControllers);
@@ -44,6 +49,11 @@ auto ParticipantBuilder::operator->() -> ParticipantBuilder*
     return this;
 }
 
+auto ParticipantBuilder::AddLogger(cfg::Logger::Type type, mw::logging::Level level) -> LoggerBuilder&
+{
+    _logger.emplace_back(this, type, level);
+    return _logger[_logger.size() - 1];
+}
 auto ParticipantBuilder::AddCan(std::string name) -> ControllerBuilder<CanController>&
 {
     return AddController<CanController>(std::move(name), Parent()->GetFreeEndpointId());
