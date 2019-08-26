@@ -88,7 +88,7 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
 
     });
 
-    auto&& logMsgRouter = CreateController<logging::LogMsgReceiver>(1028, "default");
+    auto&& logMsgRouter = CreateController<logging::LogMsgReceiver>(1029, "default");
     logMsgRouter->SetLogger(_logger.get());
 }
 

@@ -18,7 +18,7 @@ void LogMsgReceiver::SetLogger(logging::ILogger* logger)
 
 void LogMsgReceiver::ReceiveIbMessage(mw::EndpointAddress from, const LogMsg& msg)
 {
-    if (from == _endpointAddress)
+    if (from.participant == _endpointAddress.participant)
         return;
 
     _logger->LogReceivedMsg(msg);
