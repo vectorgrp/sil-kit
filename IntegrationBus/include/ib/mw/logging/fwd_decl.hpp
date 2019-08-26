@@ -9,6 +9,8 @@ namespace logging {
 struct SourceLoc;
 struct LogMsg;
 
+class ILogger;
+
 } // namespace logging
 } // namespace mw
 } // namespace ib

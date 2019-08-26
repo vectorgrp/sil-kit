@@ -12,9 +12,10 @@
 #include "ib/cfg/Config.hpp"
 #include "ib/mw/all.hpp"
 #include "ib/sim/all.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 
-#include "ILogmsgRouter.hpp"
-#include "IIbToLogmsgRouter.hpp"
+#include "IIbToLogMsgDistributor.hpp"
+#include "IIbToLogMsgReceiver.hpp"
 
 
 // Add connection types here and make sure they are instantiated in ComAdapter.cpp
@@ -69,7 +70,7 @@ public:
     auto GetParticipantController() -> sync::IParticipantController* override;
     auto GetSystemMonitor() -> sync::ISystemMonitor* override;
     auto GetSystemController() -> sync::ISystemController* override;
-    auto GetLogger() -> std::shared_ptr<spdlog::logger>& override;
+    auto GetLogger() -> logging::ILogger* override;
 
     void RegisterCanSimulator(sim::can::IIbToCanSimulator* busSim) override;
     void RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim) override;
@@ -195,7 +196,7 @@ private:
     std::string _participantName;
     ParticipantId _participantId{0};
 
-    std::shared_ptr<spdlog::logger> _logger;
+    std::unique_ptr<logging::ILogger> _logger;
 
     std::tuple<
         ControllerMap<sim::can::IIbToCanController>,
@@ -216,7 +217,8 @@ private:
         ControllerMap<sim::io::IIbToOutPort<sim::io::AnalogIoMessage>>,
         ControllerMap<sim::io::IIbToOutPort<sim::io::PwmIoMessage>>,
         ControllerMap<sim::io::IIbToOutPort<sim::io::PatternIoMessage>>,
-        ControllerMap<logging::IIbToLogmsgRouter>,
+        ControllerMap<logging::IIbToLogMsgDistributor>,
+        ControllerMap<logging::IIbToLogMsgReceiver>,
         ControllerMap<sync::IIbToParticipantController>,
         ControllerMap<sync::IIbToSystemMonitor>,
         ControllerMap<sync::IIbToSystemController>,

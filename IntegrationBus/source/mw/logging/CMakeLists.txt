@@ -1,10 +1,15 @@
 project("IbMwLogging" CXX)
 
 add_library(${PROJECT_NAME}
-    ILogmsgRouter.hpp
-    IIbToLogmsgRouter.hpp
-    LogmsgRouter.hpp
-    LogmsgRouter.cpp
+    IIbToLogMsgDistributor.hpp
+    IIbToLogMsgReceiver.hpp
+    LogMsgDistributor.hpp
+    LogMsgDistributor.cpp
+    LogMsgReceiver.hpp
+    LogMsgReceiver.cpp
+    SpdlogTypeConversion.hpp
+    Logger.hpp
+    Logger.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -12,5 +17,6 @@ target_include_directories(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME}
-    PRIVATE IbInterface
+    PUBLIC IbInterface
+    PUBLIC spdlog
 )

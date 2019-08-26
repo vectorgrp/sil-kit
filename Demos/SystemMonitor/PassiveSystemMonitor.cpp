@@ -13,13 +13,11 @@
 #include "ib/IntegrationBus.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/mw/sync/string_utils.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 
-#include "spdlog/logger.h"
 #ifdef SendMessage
 #undef SendMessage
 #endif
-#include "spdlog/fmt/ostr.h"
-#include "spdlog/sinks/stdout_color_sinks.h"
 
 
 using namespace ib::mw;
@@ -34,16 +32,17 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 
 void ReportParticipantStatus(const ib::mw::sync::ParticipantStatus& status)
 {
-    spdlog::info(
-        "New ParticipantState: {},\tReason: {}",
-        status.state,
-        status.enterReason
-    );
+    // FIXME@fmt:
+    //spdlog::info(
+    //    "New ParticipantState: {},\tReason: {}",
+    //    status.state,
+    //    status.enterReason
+    //);
 }
 
 void ReportSystemState(ib::mw::sync::SystemState state)
 {
-    spdlog::info("New SystemState: {}", state);
+    // FIXME@fmt: spdlog::info("New SystemState: {}", state);
 }
 
 int main(int argc, char** argv)
@@ -71,8 +70,8 @@ int main(int argc, char** argv)
         auto comAdapter = ib::CreateComAdapter(std::move(ibConfig), participantName, domainId);
 
         // add a stdout sink to the logger to print all received log messages
-        comAdapter->GetLogger()->sinks().push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
-        spdlog::set_default_logger(comAdapter->GetLogger());
+        // FIXME@json configuration: comAdapter->GetLogger()->sinks().push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
+        // FIXME@...: spdlog::set_default_logger(comAdapter->GetLogger());
 
         auto systemMonitor = comAdapter->GetSystemMonitor();
         systemMonitor->RegisterParticipantStatusHandler(&ReportParticipantStatus);

@@ -7,17 +7,13 @@
 
 #include "ib/mw/logging/LoggingDatatypes.hpp"
 
-namespace spdlog {
-    struct log_msg;
-}
-
 namespace ib {
 namespace mw {
 namespace logging {
 
-class IIbToLogmsgRouter
+class IIbToLogMsgReceiver
     : public mw::IIbEndpoint<LogMsg>
-    , public mw::IIbSender<LogMsg>
+    , public mw::IIbSender<>
 {
 };
 

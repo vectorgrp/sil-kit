@@ -3,6 +3,7 @@
 #pragma once
 
 #include "IdlTypeConversionLogging.hpp"
+#include "SpdlogTypeConversion.hpp"
 
 #include "ib/exception.hpp"
 #include "ib/mw/logging/LoggingDatatypes.hpp"
@@ -71,7 +72,7 @@ auto to_idl(const LogMsg& msg) -> idl::LogMsg
     idl::LogMsg idl;
 
     idl.logger_name(msg.logger_name);
-    idl.level(to_idl(msg.level));
+    idl.level(to_idl(to_spdlog(msg.level)));
     idl.timeUs(std::chrono::duration_cast<std::chrono::microseconds>(msg.time.time_since_epoch()).count());
     idl.source(to_idl(msg.source));
     idl.payload(msg.payload);
@@ -84,7 +85,7 @@ auto to_idl(LogMsg&& msg) -> idl::LogMsg
     idl::LogMsg idl;
 
     idl.logger_name(std::move(msg.logger_name));
-    idl.level(to_idl(msg.level));
+    idl.level(to_idl(to_spdlog(msg.level)));
     idl.timeUs(std::chrono::duration_cast<std::chrono::microseconds>(msg.time.time_since_epoch()).count());
     idl.source(to_idl(std::move(msg.source)));
     idl.payload(std::move(msg.payload));
@@ -132,7 +133,7 @@ auto idl::from_idl(idl::LogMsg&& idl) -> logging::LogMsg
     logging::LogMsg msg;
 
     msg.logger_name = std::move(idl.logger_name());
-    msg.level = from_idl(idl.level());
+    msg.level = from_spdlog(from_idl(idl.level()));
     msg.time = spdlog::log_clock::time_point(std::chrono::microseconds{idl.timeUs()});
     msg.source = from_idl(std::move(idl.source()));
     msg.payload = std::move(idl.payload());

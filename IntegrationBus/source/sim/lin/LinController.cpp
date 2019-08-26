@@ -7,7 +7,6 @@
 #include <iostream>
 
 #include "ib/mw/IComAdapter.hpp"
-#include "ib/mw/logging/spdlog.hpp"
 
 namespace ib {
 namespace sim {
@@ -28,7 +27,7 @@ void LinController::SetMasterMode()
 {
     if (_controllerMode == ControllerMode::Slave)
     {
-        _logger->warn("LinController::SetMasterMode() called for slave!");
+        _logger->Warn("LinController::SetMasterMode() called for slave!");
     }
     _configuredControllerMode = ControllerMode::Master;
     _controllerMode = ControllerMode::Master;
@@ -45,7 +44,7 @@ void LinController::SetSlaveMode()
 {
     if (_controllerMode == ControllerMode::Master)
     {
-        _logger->warn("LinController::SetSlaveMode() called for master!");
+        _logger->Warn("LinController::SetSlaveMode() called for master!");
     }
 
     // set slave mode
@@ -69,7 +68,7 @@ void LinController::SetSleepMode()
     if (_configuredControllerMode == ControllerMode::Inactive)
     {
         std::string errorMsg{"LinController:SetSleepMode() must not be called before SetMasterMode() or SetSlaveMode()"};
-        _logger->error(errorMsg);
+        _logger->Error(errorMsg);
         throw std::runtime_error{errorMsg};
     }
 
@@ -86,7 +85,7 @@ void LinController::SetOperationalMode()
     if (_controllerMode != ControllerMode::Sleep)
     {
         std::string errorMsg{"LinController:SetOperationalMode() must only be called when controller is in sleep mode"};
-        _logger->error(errorMsg);
+        _logger->Error(errorMsg);
         throw std::runtime_error{errorMsg};
     }
 
@@ -107,21 +106,23 @@ void LinController::UpdateSlaveConfigurationImpl(mw::EndpointAddress from, const
         auto linId = responseConfig.linId;
         if (linId >= linSlave.responses.size())
         {
-            _logger->warn(
-                "LinController received SlaveConfiguration from {{{}, {}}} for invalid LIN ID {}",
-                from.participant,
-                from.endpoint,
-                linId);
+            // FIXME@fmt:
+            //_logger->Warn(
+            //    "LinController received SlaveConfiguration from {{{}, {}}} for invalid LIN ID {}",
+            //    from.participant,
+            //    from.endpoint,
+            //    linId);
             return;
         }
 
         if (responseConfig.payloadLength > 8)
         {
-            _logger->warn(
-                "LinController received SlaveResponseConfig with payload length {} from {{{}, {}}}",
-                static_cast<unsigned int>(responseConfig.payloadLength),
-                from.participant,
-                from.endpoint);
+            // FIXME@fmt:
+            //_logger->Warn(
+            //    "LinController received SlaveResponseConfig with payload length {} from {{{}, {}}}",
+            //    static_cast<unsigned int>(responseConfig.payloadLength),
+            //    from.participant,
+            //    from.endpoint);
             continue;
         }
 
@@ -151,7 +152,7 @@ void LinController::SetResponseWithChecksum(LinId linId, const Payload& payload,
     if (checksumModel == ChecksumModel::Undefined)
     {
         std::string warnMsg("LinController::SetResponseWithChecksum() was called with ChecksumModel::Undefined, which does NOT alter the checksum model");
-        _logger->warn(warnMsg);
+        _logger->Warn(warnMsg);
     }
 
     SlaveResponse response;
@@ -184,7 +185,7 @@ void LinController::SendWakeupRequest()
     if (_controllerMode != ControllerMode::Sleep)
     {
         std::string errorMsg{"LinController::SendWakeupRequest() must only be called in sleep mode!"};
-        _logger->error(errorMsg);
+        _logger->Error(errorMsg);
         throw std::logic_error{errorMsg};
     }
 
@@ -196,7 +197,7 @@ void LinController::SendMessage(const LinMessage& msg)
     if (_controllerMode != ControllerMode::Master)
     {
         std::string errorMsg{"LinController::SendMessage() must only be called in master mode!"};
-        _logger->error(errorMsg);
+        _logger->Error(errorMsg);
         throw std::logic_error{errorMsg};
     }
 
@@ -215,7 +216,7 @@ void LinController::RequestMessage(const RxRequest& msg)
     if (_controllerMode != ControllerMode::Master)
     {
         std::string errorMsg{"LinController::RequestMessage() must only be called in master mode!"};
-        _logger->error(errorMsg);
+        _logger->Error(errorMsg);
         throw std::logic_error{errorMsg};
     }
 
@@ -271,7 +272,7 @@ void LinController::SendGoToSleep()
     if (_controllerMode != ControllerMode::Master)
     {
         std::string errorMsg{"LinController::SendGoToSleep() must only be called in master mode!"};
-        _logger->error(errorMsg);
+        _logger->Error(errorMsg);
         throw std::logic_error{errorMsg};
     }
 
@@ -320,21 +321,23 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const LinMess
 
     if (msg.payload.size > 8)
     {
-        _logger->warn(
-            "LinController received LinMessage with payload length {} from {{{}, {}}}",
-            static_cast<unsigned int>(msg.payload.size),
-            from.participant,
-            from.endpoint);
+        // FIXME@fmt:
+        //_logger->warn(
+        //    "LinController received LinMessage with payload length {} from {{{}, {}}}",
+        //    static_cast<unsigned int>(msg.payload.size),
+        //    from.participant,
+        //    from.endpoint);
         return;
     }
 
     if (msg.linId >= 64)
     {
-        _logger->warn(
-            "LinController received LinMessage with lin ID {} from {{{}, {}}}",
-            msg.linId,
-            from.participant,
-            from.endpoint);
+        // FIXME@fmt:
+        //_logger->warn(
+        //    "LinController received LinMessage with lin ID {} from {{{}, {}}}",
+        //    msg.linId,
+        //    from.participant,
+        //    from.endpoint);
         return;
     }
 
@@ -344,7 +347,7 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const LinMess
         return;
 
     case ControllerMode::Master:
-        _logger->warn("LinController in MasterMode received a LinMessage, probably originating from another master. This indicates an erroneous setup!");
+        _logger->Warn("LinController in MasterMode received a LinMessage, probably originating from another master. This indicates an erroneous setup!");
         //[[fallthrough]]
 
     case ControllerMode::Slave:
@@ -363,17 +366,17 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const LinMess
             }
             else
             {
-                _logger->warn("LinController received diagnostic message with unsupported payload");
+                _logger->Warn("LinController received diagnostic message with unsupported payload");
             }
         }
         return;
    
     case ControllerMode::Sleep:
-        _logger->warn("LinController received LIN Message with id={} while controller is in sleep mode. Message is ignored.", static_cast<unsigned int>(msg.linId));
+        // FIXME@fmt: _logger->warn("LinController received LIN Message with id={} while controller is in sleep mode. Message is ignored.", static_cast<unsigned int>(msg.linId));
         return;
 
     default:
-        _logger->warn("Unhandled ControllerMode in LinController::ReceiveIbMessage(..., LinMessage)");
+        _logger->Warn("Unhandled ControllerMode in LinController::ReceiveIbMessage(..., LinMessage)");
         return;
     }
 }
@@ -393,7 +396,7 @@ void LinController::ReceiveIbMessage(mw::EndpointAddress from, const ControllerC
 
     if (msg.controllerMode == ControllerMode::Master)
     {
-        _logger->warn("LinController received ControllerConfig with master mode, which will be ignored");
+        _logger->Warn("LinController received ControllerConfig with master mode, which will be ignored");
         return;
     }
 
@@ -422,11 +425,12 @@ void LinController::SetSlaveResponseImpl(mw::EndpointAddress from, const SlaveRe
     auto&& linSlave = GetLinSlave(from);
     if (msg.linId >= linSlave.responses.size())
     {
-        _logger->warn(
-            "LinController received SlaveResponse configuration from {{{}, {}}} for invalid LIN ID {}",
-            from.participant,
-            from.endpoint,
-            msg.linId);
+        // FIXME@fmt:
+        //_logger->warn(
+        //    "LinController received SlaveResponse configuration from {{{}, {}}} for invalid LIN ID {}",
+        //    from.participant,
+        //    from.endpoint,
+        //    msg.linId);
         return;
     }
 

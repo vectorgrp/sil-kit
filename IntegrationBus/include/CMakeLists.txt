@@ -7,10 +7,6 @@ target_include_directories(IbInterface
         $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}>
 )
 
-target_link_libraries(IbInterface
-    INTERFACE spdlog
-)
-
 # Add a custom project IbApi for quick access to IB Headers in Visual Studio
 file(GLOB_RECURSE IB_INTERFACE_SOURCES ${CMAKE_CURRENT_LIST_DIR}/*.hpp)
 add_custom_target(IbApi SOURCES ${IB_INTERFACE_SOURCES})

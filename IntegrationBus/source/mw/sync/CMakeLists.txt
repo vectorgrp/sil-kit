@@ -18,6 +18,7 @@ target_include_directories("IbMwSync"
 target_link_libraries("IbMwSync"
     PUBLIC IbInterface
     PUBLIC IbUtil
+    IbMwLogging
 )
 
 add_vib_test(TestMwSyncMaster SOURCES SyncMasterTest.cpp LIBS IbMwSync IbMwMockComAdapter IbConfig )

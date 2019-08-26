@@ -16,8 +16,6 @@
 
 #include "LinDatatypeUtils.hpp"
 
-#include "spdlog/sinks/stdout_sinks.h"
-
 namespace {
 
 using namespace std::chrono_literals;
@@ -408,6 +406,5 @@ TEST_F(LinControllerProxyTest, set_slave_operational)
 
     proxy.SetOperationalMode();
 }
-
 
 } // namespace

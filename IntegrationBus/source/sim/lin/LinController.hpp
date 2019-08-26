@@ -13,6 +13,8 @@
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/sim/datatypes.hpp"
 
+#include "ib/mw/logging/ILogger.hpp"
+
 namespace spdlog {
 class logger;
 } // namespace spdlog
@@ -122,7 +124,7 @@ private:
     // private members
     mw::IComAdapter* _comAdapter;
     mw::EndpointAddress _endpointAddr;
-    std::shared_ptr<spdlog::logger> _logger;
+    mw::logging::ILogger* _logger;
 
     ControllerMode _configuredControllerMode{ControllerMode::Inactive}; // only modified by SetSlave/SetMasterMode, used to restore operational mode
     ControllerMode _controllerMode{ControllerMode::Inactive}; // currently active controller mode

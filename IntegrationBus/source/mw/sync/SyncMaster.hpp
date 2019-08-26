@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "ib/mw/logging/ILogger.hpp"
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/mw/sync/ISyncMaster.hpp"
 #include "ib/mw/sync/IIbToSyncMaster.hpp"
@@ -216,7 +217,7 @@ private:
     // private members
     IComAdapter* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddress;
-    std::shared_ptr<spdlog::logger> _logger;
+    logging::ILogger* _logger{nullptr};
 
     SystemState _systemState{SystemState::Invalid};
     std::promise<SystemState> _finalStatePromise;

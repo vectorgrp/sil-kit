@@ -5,7 +5,6 @@
 #include <iostream>
 
 #include "ib/mw/IComAdapter.hpp"
-#include "ib/mw/logging/spdlog.hpp"
 
 namespace ib {
 namespace sim {
@@ -103,7 +102,7 @@ void LinControllerProxy::SetResponseWithChecksum(LinId linId, const Payload& pay
 {
     if (checksumModel == ChecksumModel::Undefined)
     {
-        _logger->warn("LinControllerProxy::SetResponseWithChecksum() was called with ChecksumModel::Undefined, which does NOT alter the checksum model!");
+        _logger->Warn("LinControllerProxy::SetResponseWithChecksum() was called with ChecksumModel::Undefined, which does NOT alter the checksum model!");
     }
 
     SlaveResponse response;
@@ -134,7 +133,7 @@ void LinControllerProxy::SendWakeupRequest()
     if (_controllerMode != ControllerMode::Sleep)
     {
         std::string errorMsg{"LinController::SendWakeupRequest() must only be called in sleep mode!"};
-        _logger->error(errorMsg);
+        _logger->Error(errorMsg);
         throw std::logic_error(errorMsg);
     }
 
@@ -159,7 +158,7 @@ void LinControllerProxy::SendGoToSleep()
     if (_controllerMode != ControllerMode::Master)
     {
         std::string errorMsg{"LinControllerProxy::SendGoToSleep() must only be called in master mode!"};
-        _logger->error(errorMsg);
+        _logger->Error(errorMsg);
         throw std::logic_error(errorMsg);
     }
 
@@ -215,10 +214,11 @@ void LinControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const TxAckn
 
     if (_controllerMode != ControllerMode::Master)
     {
-        _logger->error(
-            "LinControllerProxy{{P={}, E={}}} in non-Master mode received TxAcknowledge!",
-            _endpointAddr.participant,
-            _endpointAddr.endpoint);
+        // FIXME@fmt:
+        //_logger->error(
+        //    "LinControllerProxy{{P={}, E={}}} in non-Master mode received TxAcknowledge!",
+        //    _endpointAddr.participant,
+        //    _endpointAddr.endpoint);
         return;
     }
 
@@ -232,7 +232,7 @@ void LinControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const Wakeup
 
     if (_controllerMode != ControllerMode::Sleep)
     {
-        _logger->warn("Received WakeupRequest while not in sleep mode");
+        _logger->Warn("Received WakeupRequest while not in sleep mode");
     }
 
     for (auto&& handler : _wakeuprequestCallbacks)

@@ -8,7 +8,7 @@
 #include <thread>
 
 #include "ib/IntegrationBus.hpp"
-#include "ib/mw/logging/spdlog.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/sim/can/all.hpp"
@@ -36,7 +36,7 @@ void AckCallback(can::ICanController* /*controller*/, const can::CanTransmitAckn
               << " for CAN Message with transmitId=" << ack.transmitId
               << " timestamp=" << ack.timestamp
               << std::endl;
-    spdlog::info(">> {} for CAN Message with transmitId={} timestamp={}", ack.timestamp, ack.status, ack.transmitId);
+    // FIXME@fmt: spdlog::info(">> {} for CAN Message with transmitId={} timestamp={}", ack.timestamp, ack.status, ack.transmitId);
 }
 
 void ReceiveMessage(can::ICanController* /*controller*/, const can::CanMessage& msg)
@@ -46,7 +46,7 @@ void ReceiveMessage(can::ICanController* /*controller*/, const can::CanMessage& 
               << " timestamp=" << msg.timestamp
               << " \"" << payload << "\""
               << std::endl;
-    spdlog::info(">> CAN Message: canId={} timestamp={} \"{}\"", msg.canId, msg.timestamp, payload);
+    // FIXME@fmt: spdlog::info(">> CAN Message: canId={} timestamp={} \"{}\"", msg.canId, msg.timestamp, payload);
 }
 
 void SendMessage(can::ICanController* controller, std::chrono::nanoseconds now)
@@ -69,7 +69,7 @@ void SendMessage(can::ICanController* controller, std::chrono::nanoseconds now)
 
     auto transmitId = controller->SendMessage(std::move(msg));
     std::cout << "<< CAN Message sent with transmitId=" << transmitId << std::endl;
-    spdlog::info("<< CAN Message sent with transmitId={}", transmitId);
+    // FIXME@fmt: spdlog::info("<< CAN Message sent with transmitId={}", transmitId);
 }
 
 /**************************************************************************************************
@@ -103,7 +103,7 @@ int main(int argc, char** argv)
 
         // NB: If you want to use the default spd logger, e.g., via spdlog::info(...), 
         // you have to register the logger created by the comAdapter as the default logger.
-        spdlog::set_default_logger(comAdapter->GetLogger());
+        // FIXME@...: spdlog::set_default_logger(comAdapter->GetLogger());
 
         auto* canController = comAdapter->CreateCanController("CAN1");
         auto* participantController = comAdapter->GetParticipantController();

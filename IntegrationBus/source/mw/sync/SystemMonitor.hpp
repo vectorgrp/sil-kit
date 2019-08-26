@@ -7,6 +7,7 @@
 
 #include "ib/mw/sync/ISystemMonitor.hpp"
 #include "ib/mw/sync/IIbToSystemMonitor.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/cfg/Config.hpp"
@@ -80,7 +81,7 @@ private:
     IComAdapter* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddress{};
     cfg::SimulationSetup _simulationSetup;
-    std::shared_ptr<spdlog::logger> _logger;
+    logging::ILogger* _logger{nullptr};
 
     std::map<mw::ParticipantId, sync::ParticipantStatus> _participantStatus;
     sync::SystemState _systemState{sync::SystemState::Invalid};
