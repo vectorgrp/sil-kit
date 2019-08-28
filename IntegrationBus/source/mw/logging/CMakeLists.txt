@@ -20,3 +20,5 @@ target_link_libraries(${PROJECT_NAME}
     PUBLIC IbInterface
     PUBLIC spdlog
 )
+
+add_vib_test(TestMwLoggingLogger SOURCES LoggerTest.cpp LIBS IbMwLogging IbConfig IbMwMockComAdapter)

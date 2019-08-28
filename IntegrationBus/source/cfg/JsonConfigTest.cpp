@@ -55,6 +55,29 @@ protected:
     ib::cfg::Config config;
 };
 
+TEST_F(JsonConfigTest, ConfigureLogger)
+{
+    simulationSetup.AddParticipant("P1")
+        ->AddLogger(Logger::Type::Stdout, logging::Level::info)
+        ->AddLogger(Logger::Type::File, logging::Level::trace)
+        .WithFilename("FileLogger");
+
+    BuildConfigFromJson();
+    EXPECT_EQ(config, referenceConfig);
+    EXPECT_EQ(config.name, "TestConfig");
+
+    auto&& participants = config.simulationSetup.participants;
+    ASSERT_EQ(participants.size(), 1u);
+    auto&& p1 = participants[0];
+
+    ASSERT_EQ(p1.name, "P1");
+    EXPECT_EQ(p1.logger.size(), 2u);
+    EXPECT_EQ(p1.logger[0].type, Logger::Type::Stdout);
+    EXPECT_EQ(p1.logger[0].level, logging::Level::info);
+    EXPECT_EQ(p1.logger[1].type, Logger::Type::File);
+    EXPECT_EQ(p1.logger[1].level, logging::Level::trace);
+}
+
 TEST_F(JsonConfigTest, CreateCanNetwork)
 {
     simulationSetup.AddParticipant("P1")
