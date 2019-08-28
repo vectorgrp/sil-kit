@@ -1,4 +1,4 @@
-Vector Integration Bus Changelog
+VIB Changelog
 ================================
 
 All notable changes to the IntegrationBus project shall be documented in this file.

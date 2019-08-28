@@ -15,9 +15,39 @@ Using the LIN Controller
 Initialization
 ~~~~~~~~~~~~~~~~~~~~
 
-FIXME: write somthing about initialization
+Before the LIN Controller can be used, it must be initialized. The
+initialization is performed by setting up a
+:cpp:class:`ControllerConfig<ib::sim::lin::ControllerConfig>` and passing it to
+:cpp:func:`ILinController::Init()<ib::sim::lin::ILinController::Init>`.
 
-Initiating LIN Transmissions (Master view)
+At a minimum, the controllerMode must be set to either ControllerMode::Master or
+ControllerMode::Slave. If the VIBE NetworkSimulator is used, also a baud rate
+must be specified. In addition, the
+:cpp:class:`ControllerConfig<ib::sim::lin::ControllerConfig>` allows providing
+an initial set of :cpp:class:`FrameResponses<ib::sim::lin::FrameResponse>`,
+which is particularly useful for LIN slaves.
+
+The following example configures a LIN controller as a LIN slave with a baud
+rate of 20'000 baud. Further more, LIN ID 0x11 is configured for transmission::
+
+    Frame slaveFrame;
+    slaveFrame.id = 0x11;
+    slaveFrame.checksumModel = ChecksumModel::Enhanced;
+    slaveFrame.dataLength = 8;
+    slaveFrame.data = {1,2,3,4,5,6,7,8};
+    
+    ControllerConfig slaveConfig;
+    slaveConfig.controllerMode = ControllerMode::Slave;
+    slaveConfig.baudRate = 20000;
+    slaveConfig.frameResponses.push_back(slaveFrame);
+    
+    linController->Init(slaveConfig);
+
+Note that :cpp:func:`ILinController::Init()<ib::sim::lin::ILinController::Init>`
+should be called in the InitHandler of a ParticipantController.
+
+
+Initiating LIN Transmissions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Data is transfered in the form of a LIN
@@ -47,7 +77,8 @@ To be notified for the success or failure of the transmission, a FrameStatusHand
 be registered::
   
   // Register FrameStatusHandler to receive data from the LIN slave
-  auto frameStatusHandler = [](ILinController*, const Frame&, FrameStatus, std::chrono::nanoseconds) {};
+  auto frameStatusHandler =
+      [](ILinController*, const Frame&, FrameStatus, std::chrono::nanoseconds) {};
   master->RegisterFrameStatusHandler(frameStatusHandler);
 
 The transmission of the frame can be initiated using either the AUTOSAR interface or the
@@ -93,7 +124,8 @@ To receive data from a LIN slave, a FrameStatusHandler must be registered, which
 controller whenever a frame was received::
 
     // Register FrameStatusHandler to receive data from the LIN slave
-    auto frameStatusHandler = [](ILinController*, const Frame&, FrameStatus, std::chrono::nanoseconds) {};
+    auto frameStatusHandler =
+        [](ILinController*, const Frame&, FrameStatus, std::chrono::nanoseconds) {};
     master->RegisterFrameStatusHandler(frameStatusHandler);
 
 To initiate the data transfer from slave to master, the master must provide the LIN ID as
@@ -174,6 +206,131 @@ Enumerations and Typedefs
 .. doxygenenum:: ib::sim::lin::ControllerStatus
      
 
+Examples LIN Controller Interaction
+----------------------------------------------------
+
+This section contains more complex examples that show the interaction of two or
+more LIN controllers. Although the LIN controllers would typically belong to
+different participants and reside in different processes, their interaction is
+shown here sequentially
+
+Assumptions:
+
+- *master*, *slave*, *slave1*, and *slave2* are of type
+  :cpp:class:`ILinController*<ib::sim::lin::ILinController>`.
+- *timeEndOfFrame* indicates the end of frame time stamp when using the VIBE
+  NetworkSimulator. Otherwise the value of *timeEndofFrame* is undefined.
+- *UseAutosarInterface* is a boolean variable that indicates whether to use the
+  AUTOSAR API or the non-AUTOSAR API.
+  
+
+Successful Transmission from Master to Slave
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows a successful data transfer from a LIN master to a LIN
+slave. The transmission must be initiated by the master.
+
+.. literalinclude::
+   examples/lin/Master_to_Slave_LIN_TX_OK.cpp
+   :language: cpp
+   
+Successful Transmission from Slave to Master
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows a successful data transfer from a LIN Slave to a LIN
+master. The transmission must be initiated by the master.
+
+.. literalinclude::
+   examples/lin/Slave_to_Master_LIN_RX_OK.cpp
+   :language: cpp
+
+Successful Transmission from Slave to Slave
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows how data is transferred from one LIN slave to another
+one. The data transfer must be initiated by a LIN master.
+
+.. literalinclude::
+   examples/lin/Slave_to_Slave_LIN_TX_OK.cpp
+   :language: cpp
+              
+Erroneous Transmission from Master to Slave - Multiple Responses
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows what happens when a master atempts to send a Frame while
+there is slave that has configured a TX response for the same LIN ID.
+
+.. literalinclude::
+   examples/lin/Master_to_Slave_LIN_TX_ERROR.cpp
+   :language: cpp
+   
+Erroneous Transmission from Slave to Master - No Response
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows what happens when a master initiates a transmission and no
+slave hasconfigured a TX response for the this LIN ID.
+
+.. literalinclude::
+   examples/lin/Slave_to_Master_LIN_RX_NO_RESPONSE.cpp
+   :language: cpp
+
+.. admonition:: Note
+
+   For simplicity, this example only uses the AUTOSAR interface, the
+   behavior and error code would be the same for the non-AUTOSAR
+   interface.
+
+Erroneous Transmission from Slave to Master - Multiple Responses
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows what happens when a master initiates a transmission where
+multiple slaves have configured TX responses for the same LIN ID.
+
+.. literalinclude::
+   examples/lin/Slave_to_Master_LIN_RX_ERROR.cpp
+   :language: cpp
+
+Go To Sleep
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows how to initiate a Go To Sleep and when the controller switch
+from operational to sleep mode.
+
+.. literalinclude::
+   examples/lin/Go_To_Sleep.cpp
+   :language: cpp
+
+.. admonition:: Note
+    
+    The GoToSleepHandler is triggered even without configuring
+    ID 0x3C for reception. However, the FrameStatusHandler is
+    only called if ID 0x3C is configured for reception.
+
+Wake Up
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows how to wake up a LIN bus. The example assumes that both
+master and slave are currently in sleep mode. I.e., the situation corresponds to
+the end of the previous example.
+
+.. literalinclude::
+   examples/lin/Wake_Up.cpp
+   :language: cpp
+
+FrameResponseUpdateHandler
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows how the FrameResponseUpdate handler provides direct access to
+the FrameResponse configuration of all slaves. It is primarily intended for
+diagnostic purposes and not required for regular operation of a LIN controller.
+
+.. literalinclude::
+   examples/lin/FrameResponseUpdateHandler.cpp
+   :language: cpp
+
+
+
+              
 The new LIN Controller API
 ----------------------------------------------------
 
@@ -228,7 +385,7 @@ benefits:
 Overview of Data Type Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   - :cpp:type:`LinId` has been renamed to :cpp:type:`LinIdT<ib::sim::lin::LinIdT>`.
-  - the old enum ControllerMode, which combined master, slave, and sleep states, has been
+  - The old enum :cpp:enum:`ControllerMode<ib::sim::lin::ControllerMode_>`, which combined master, slave, and sleep states, has been
     split into :cpp:enum:`ControllerMode<ib::sim::lin::ControllerMode>` (indicating Master
     or Slave operation) and :cpp:enum:`ControllerStatus<ib::sim::lin::ControllerStatus>`
     (indicating operational and sleep states).

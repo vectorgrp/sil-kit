@@ -79,13 +79,3 @@ VIB Prerequisites for Usage
     * Clang 3.8.0-2ubuntu4
 
 These are the specific versions VIB is tested and built against.
-
-
-Version History
----------------
-
-.. toctree::
-  :maxdepth: 2
-
-  CHANGELOG
-
