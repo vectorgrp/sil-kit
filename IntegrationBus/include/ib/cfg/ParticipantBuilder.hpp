@@ -43,7 +43,7 @@ public:
 
     IntegrationBusAPI auto WithParticipantId(mw::ParticipantId id) -> ParticipantBuilder&;
     IntegrationBusAPI auto WithSyncType(SyncType syncType) -> ParticipantBuilder&;
-    IntegrationBusAPI void AsSyncMaster();
+    IntegrationBusAPI auto AsSyncMaster() -> ParticipantBuilder&;
 
     IntegrationBusAPI auto operator->() -> ParticipantBuilder*;
 
