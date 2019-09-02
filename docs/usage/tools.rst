@@ -38,6 +38,40 @@ Launcher
       -  INTEGRATIONBUS_BINPATH & INTEGRATIONBUS_LIBPATH may be defined as environment variables.
 
 
+VAsio Registry
+~~~~~~~~~~~~~~
+
+.. list-table::
+   :widths: 17 205
+   :stub-columns: 1
+
+   *  - Abstract
+      - The Registry enables discovery between IB participants when using the
+        VAsio middleware. It is mandatory, when using the VAsio middleware.
+
+   *  - Source location
+      - Tools/IbRegistry
+   *  - Requirements
+      - None
+   *  - Parameters
+      - There are up to two positional arguments:
+
+        #. Filename of the IB Configuration to be used (IB config file).
+        #. IntegrationBus domain ID (optional); defaults to 42.
+
+   *  - Parameter Example
+      - .. code-block:: powershell
+
+            # Launch CAN demo w/o Network Simulator VIBE:
+            build/Tools/bin/IbRegistry Demos/Can/IbConfig_DemoCan.json 42
+
+   *  - Notes
+      - The IbRegistry must be started before the IB participants. When using
+        the Launcher, the IbRegistry is automatically started if the IbConfig
+        specifies VAsio as the :doc:`active
+        middleware<../configuration/middleware-configuration>`.
+
+
 SystemController
 ~~~~~~~~~~~~~~~~
 
