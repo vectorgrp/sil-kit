@@ -13,7 +13,7 @@ namespace sim {
 //! The LIN namespace
 namespace lin {
 
-/*! \brief The LIN identifier of a \ref Frame
+/*! \brief The identifier of a LIN \ref Frame
  *
  * This type represents all valid identifier used by ILinController::SendFrame(), ILinController::SendFrameHeader().
  *
@@ -44,6 +44,12 @@ enum class ChecksumModel : uint8_t
  */
 using DataLengthT = uint8_t;
 
+/*! \brief A LIN Frame
+*
+* This Type is used to provide LIN ID, checksum model, data length and data.
+*
+* *AUTOSAR Name:* Lin_PduType
+*/
 struct Frame
 {
     LinIdT                 id{0}; //!< Lin Identifier
@@ -56,7 +62,7 @@ struct Frame
 inline auto GoToSleepFrame() -> Frame;
 
 
-/*! \brief Controls the behavior of \ref ILinController::SendFrame()
+/*! \brief Controls the behavior of ILinController::SendFrame()
  *
  * Determines whether the master also provides a frame response or if the frame
  * response is expected to be provided from a slave.
@@ -78,6 +84,7 @@ enum class FrameResponseType : uint8_t
     SlaveToSlave = 2
 };
 
+//! \brief Controls the behavior of a LIN Slave task for a particular LIN ID
 enum class FrameResponseMode : uint8_t
 {
     //! The FrameResponse corresponding to the ID is neither received nor
@@ -92,6 +99,8 @@ enum class FrameResponseMode : uint8_t
     TxUnconditional = 2
 };
 
+/*! \brief Configuration data for a LIN Slave task for a particular LIN ID.
+ */
 struct FrameResponse
 {
     /*! frame must provide the LIN \ref LinIdT for which the response is
@@ -257,44 +266,57 @@ enum class ControllerStatus
 // ================================================================================
 //  Messages used at the ComAdapter Interface
 // ================================================================================
+//! \brief Data type representing a finished LIN transmission, independent of success or error.
 struct Transmission
 {
-    std::chrono::nanoseconds timestamp;
-    Frame frame;
-    FrameStatus status;
+    std::chrono::nanoseconds timestamp; //!< Time at the end of the transmission. Only valid in VIBE simulation.
+    Frame frame;                        //!< The transmitted frame
+    FrameStatus status;                 //!< Tthe status of the transmitted frame
 };
 
+/*! \brief Data type representing a request to perform an AUTOSAR SendFrame operation.
+ *
+ * Sent from LinController proxies to the VIBE NetworkSimulator.
+ */
 struct SendFrameRequest
 {
-    Frame frame;
-    FrameResponseType responseType;
+    Frame frame;                    //!< Provide the LIN ID, checksum model, expected data length and optional data.
+    FrameResponseType responseType; //!< Determines whether to provide a frame response or not.
 };
 
+/*! \brief Data type representing a request to perform an non-AUTOSAR send operation.
+*
+* Sent from LinController proxies to the VIBE NetworkSimulator.
+*/
 struct SendFrameHeaderRequest
 {
-    LinIdT id;
+    LinIdT id; //!< The LinIdT of the header to be transmitted
 };
 
+//! \brief Data type used to inform other LIN participants (LIN controllers and VIBE Simulator) about changed FrameResponse data.
 struct FrameResponseUpdate
 {
-    std::vector<FrameResponse> frameResponses;
+    std::vector<FrameResponse> frameResponses; //!< Vector of new FrameResponses.
 };
 
+//! \brief Data type used to inform other LIN participants (LIN controllers and VIBE Simulator) about changed ControllerStatus.
 struct ControllerStatusUpdate
 {
-    std::chrono::nanoseconds timestamp;
-    ControllerStatus status;
+    std::chrono::nanoseconds timestamp; //!< Time of the controller status change.
+    ControllerStatus status;            //!< The new controller status
 };
 
+//! \brief Data type representing a LIN WakeUp pulse.
 struct WakeupPulse
 {
-    std::chrono::nanoseconds timestamp;
+    std::chrono::nanoseconds timestamp; //!< Time of the WakeUp pulse. Only valid in VIBE Simulation.
 };
 
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
+//! \brief Factory method for a Frame representing a Go-To-Sleep signal
 inline auto GoToSleepFrame() -> Frame
 {
     Frame frame;
@@ -304,7 +326,7 @@ inline auto GoToSleepFrame() -> Frame
     frame.data = {0x0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
     return frame;
 }
-
+//! \brief operator== for Frame
 inline bool operator==(const Frame& lhs, const Frame& rhs)
 {
     return lhs.id == rhs.id
@@ -312,43 +334,49 @@ inline bool operator==(const Frame& lhs, const Frame& rhs)
         && lhs.dataLength == rhs.dataLength
         && lhs.data == rhs.data;
 }
-
+//! \brief operator== for SendFrameRequest
 inline bool operator==(const SendFrameRequest& lhs, const SendFrameRequest& rhs)
 {
     return lhs.frame == rhs.frame
         && lhs.responseType == rhs.responseType;
 }
+//! \brief operator== for SendFrameHeaderRequest
 inline bool operator==(const SendFrameHeaderRequest& lhs, const SendFrameHeaderRequest& rhs)
 {
     return lhs.id == rhs.id;
 }
-
+//! \brief operator== for Transmission
 inline bool operator==(const Transmission& lhs, const Transmission& rhs)
 {
     return lhs.timestamp == rhs.timestamp
         && lhs.frame == rhs.frame
         && lhs.status == rhs.status;
 }
+//! \brief operator== for WakeupPulse
 inline bool operator==(const WakeupPulse& lhs, const WakeupPulse& rhs)
 {
     return lhs.timestamp == rhs.timestamp;
 }
+//! \brief operator== for FrameResponse
 inline bool operator==(const FrameResponse& lhs, const FrameResponse& rhs)
 {
     return lhs.frame == rhs.frame
         && lhs.responseMode == rhs.responseMode;
 }
+//! \brief operator== for ControllerConfig
 inline bool operator==(const ControllerConfig& lhs, const ControllerConfig& rhs)
 {
     return lhs.controllerMode == rhs.controllerMode
         && lhs.baudRate == rhs.baudRate
         && lhs.frameResponses == rhs.frameResponses;
 }
+//! \brief operator== for ControllerStatusUpdate
 inline bool operator==(const ControllerStatusUpdate& lhs, const ControllerStatusUpdate& rhs)
 {
     return lhs.timestamp == rhs.timestamp
         && lhs.status == rhs.status;
 }
+//! \brief operator== for FrameResponseUpdate
 inline bool operator==(const FrameResponseUpdate& lhs, const FrameResponseUpdate& rhs)
 {
     return lhs.frameResponses == rhs.frameResponses;

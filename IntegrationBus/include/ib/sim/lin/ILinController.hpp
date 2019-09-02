@@ -78,7 +78,7 @@ public:
      * response. The responseType determines if frame.data is used for
      * the frame response or if a different node has to provide it:
      *
-     * \li MasterResponse: \ref frame is sent from this controller to
+     * \li MasterResponse: \ref Frame is sent from this controller to
      *     all connected slaves.
      * \li SlaveResponse: the frame response must be provided by a
      *     connected slave and is received by this controller.
@@ -140,7 +140,7 @@ public:
      *
      * The FrameStatusHandler is called for all participating LIN
      * controllers. I.e., for LIN masters, it is always called, and
-     * for LIN slaves, it is called if the corresponding \ref PidT is
+     * for LIN slaves, it is called if the corresponding \ref LinIdT is
      * configured SlaveFrameResponseMode::Rx or
      * SlaveFrameResponseMode::TxUnconditional.
      *
@@ -164,7 +164,7 @@ public:
      * \ref FrameResponseMode configuration for LIN ID 0x3C. However,
      * regarding the FrameStatusHandler, the go-to-sleep frame is
      * treated like every other frame, i.e. the FrameStatusHandler is
-     * only called for LIN PID 0x3C if configured as
+     * only called for LIN ID 0x3C if configured as
      * FrameResponseMode::Rx.
      */
     virtual void RegisterGoToSleepHandler(GoToSleepHandler handler) = 0;
