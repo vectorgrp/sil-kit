@@ -25,7 +25,7 @@ enable_testing()
 
 # Have both IntegrationBus library and demo project in a single solution (for debugging purposes and packaging)
 add_subdirectory(${PROJECT_SOURCE_DIR}/IntegrationBus)
-add_subdirectory(${PROJECT_SOURCE_DIR}/Tools)
+add_subdirectory(${PROJECT_SOURCE_DIR}/Utilities)
 add_subdirectory(${PROJECT_SOURCE_DIR}/Demos)
 # Include the Python-implemented launcher tool for testing and installation
 add_subdirectory(${PROJECT_SOURCE_DIR}/Launcher)

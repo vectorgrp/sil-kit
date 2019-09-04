@@ -1,5 +1,5 @@
 ==============
-VIB Tools
+VIB Utilities
 ==============
 
 Launcher
@@ -50,7 +50,7 @@ VAsio Registry
         VAsio middleware. It is mandatory, when using the VAsio middleware.
 
    *  - Source location
-      - Tools/IbRegistry
+      - Utilities/IbRegistry
    *  - Requirements
       - None
    *  - Parameters
@@ -62,8 +62,8 @@ VAsio Registry
    *  - Parameter Example
       - .. code-block:: powershell
 
-            # Launch CAN demo w/o Network Simulator VIBE:
-            build/Tools/bin/IbRegistry Demos/Can/IbConfig_DemoCan.json 42
+            # Start the IbRegistry using the CAN demo configuration
+            build/Utilities/bin/IbRegistry Demos/Can/IbConfig_DemoCan.json 42
 
    *  - Notes
       - The IbRegistry must be started before the IB participants. When using

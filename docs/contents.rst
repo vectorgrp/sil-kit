@@ -9,7 +9,7 @@ Contents
   vibes/overview
   configuration/configuration
   api/api
-  usage/tools
+  usage/utilities
   usage/demos
   CHANGELOG
   licenses/license
