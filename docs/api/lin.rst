@@ -177,7 +177,7 @@ registered frameStatusHandler will be called as follows::
     used.
 
      
-LIN Controller API and Data Type Reference
+API and Data Type Reference
 --------------------------------------------------
 LIN Controller API
 ~~~~~~~~~~~~~~~~~~~~
@@ -206,13 +206,13 @@ Enumerations and Typedefs
 .. doxygenenum:: ib::sim::lin::ControllerStatus
      
 
-Examples LIN Controller Interaction
+Usage Examples
 ----------------------------------------------------
 
 This section contains more complex examples that show the interaction of two or
 more LIN controllers. Although the LIN controllers would typically belong to
 different participants and reside in different processes, their interaction is
-shown here sequentially
+shown here sequentially to demonstrate cause and effect.
 
 Assumptions:
 
@@ -220,10 +220,12 @@ Assumptions:
   :cpp:class:`ILinController*<ib::sim::lin::ILinController>`.
 - *timeEndOfFrame* indicates the end of frame time stamp when using the VIBE
   NetworkSimulator. Otherwise the value of *timeEndofFrame* is undefined.
-- *UseAutosarInterface* is a boolean variable that indicates whether to use the
-  AUTOSAR API or the non-AUTOSAR API.
-  
+- *UseAutosarInterface* is a boolean variable that indicates whether
+  to use the AUTOSAR API or the non-AUTOSAR API. It will most likely
+  not be used in practice and it merely intended to show the different
+  usages of the API.
 
+  
 Successful Transmission from Master to Slave
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -385,18 +387,20 @@ benefits:
 Overview of Data Type Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   - :cpp:type:`LinId` has been renamed to :cpp:type:`LinIdT<ib::sim::lin::LinIdT>`.
-  - The old enum :cpp:enum:`ControllerMode<ib::sim::lin::ControllerMode_>`, which combined master, slave, and sleep states, has been
-    split into :cpp:enum:`ControllerMode<ib::sim::lin::ControllerMode>` (indicating Master
-    or Slave operation) and :cpp:enum:`ControllerStatus<ib::sim::lin::ControllerStatus>`
-    (indicating operational and sleep states).
+  - The old enum :cpp:enum:`ControllerMode<ib::sim::lin::ControllerMode_>`,
+    which combined master, slave, and sleep states, has been split into
+    :cpp:enum:`ControllerMode<ib::sim::lin::ControllerMode>` (indicating Master
+    or Slave operation) and
+    :cpp:enum:`ControllerStatus<ib::sim::lin::ControllerStatus>` (indicating
+    operational and sleep states).
   - :cpp:enum:`ChecksumModel<ib::sim::lin::ChecksumModel>` is unchanged.
   - :cpp:enum:`ResponseMode` has been renamed to
     :cpp:enum:`FrameResponseMode<ib::sim::lin::FrameResponseMode>`; the enumeration
     values habe been left unchanged.
   - The old :cpp:class:`Payload` data type, which combined a fixed size
     std::array<uint8_t> and a size value, has been removed. The
-    :cpp:class:`Frame<ib::sim::lin::Frame>` now provides size dataLength and data fields
-    directly.
+    :cpp:class:`Frame<ib::sim::lin::Frame>` now provides dataLength and data
+    fields directly.
   - :cpp:enum:`MessageStatus` has been renamed to
     :cpp:enum:`FrameStatus<ib::sim::lin::FrameStatus>` and the enumeration names have been
     changed to AUTOSAR naming. For details, check the following conversion table:
