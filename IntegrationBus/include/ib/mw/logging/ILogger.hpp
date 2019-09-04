@@ -8,6 +8,13 @@
 
 #include "LoggingDatatypes.hpp"
 
+#ifdef HAVE_FMTLIB
+#    ifndef FMT_USE_WINDOWS_H
+#        define FMT_USE_WINDOWS_H 0
+#    endif
+#    include "fmt/format.h"
+#endif //HAVE_FMTLIB
+
 namespace ib {
 namespace mw {
 namespace logging {
@@ -50,6 +57,42 @@ public:
     /*! \brief Log a received remote message.
     */
     virtual void LogReceivedMsg(const LogMsg& msg) = 0;
+
+#ifdef HAVE_FMTLIB
+    template<typename... Args>
+    void Log(Level level, const char* fmt, const Args&... args)
+    {
+        std::string msg = fmt::format(fmt, args...);
+        Log(level, msg);
+
+    }
+    template<typename... Args>
+    void Debug(const char* fmt, const Args&... args)
+    {
+        Log(Level::debug, fmt, args...);
+    }
+    template<typename... Args>
+    void Info(const char* fmt, const Args&... args)
+    {
+        Log(Level::info, fmt, args...);
+    }
+    template<typename... Args>
+    void Warn(const char* fmt, const Args&... args)
+    {
+        Log(Level::warn, fmt, args...);
+    }
+    template<typename... Args>
+    void Error(const char* fmt, const Args&... args)
+    {
+        Log(Level::error, fmt, args...);
+    }
+    template<typename... Args>
+    void Critical(const char* fmt, const Args&... args)
+    {
+        Log(Level::critical, fmt, args...);
+    }
+#endif //HAVE_FMTLIB
+
 };
 
 } // logging

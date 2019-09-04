@@ -53,6 +53,7 @@ void SyncMaster::SetupTimeQuantumClients(const cfg::Config& config)
 
     }
     // FIXME@fmt: _logger->Info("SyncMaster is serving {} TimeQuantum Clients", _timeQuantumClients.size());
+    _logger->Info("SyncMaster is serving {} TimeQuantum Clients", _timeQuantumClients.size());
 }
 
 void SyncMaster::SetupDiscreteTimeClient(const cfg::Config& config)

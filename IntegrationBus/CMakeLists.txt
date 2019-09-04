@@ -72,6 +72,7 @@ function(addTestProject)
     set(PROJECT_VERSION_MINOR)
     set(PROJECT_VERSION_PATCH)
 
+    message(STATUS "Add subdirectory ThirdParty/googletest-1.8.0")
     add_subdirectory(${THIRDPARTY_DIR}/googletest-1.8.0
         ThirdParty/googletest-1.8.0
         EXCLUDE_FROM_ALL
@@ -153,6 +154,7 @@ else()
     if(EXISTS ${THIRDPARTY_DIR}/Fast-RTPS/CMakeLists.txt)
         #local source tree -- we export this as binary packages
         message(STATUS "Building Fast-RTPS from local submodule")
+        message(STATUS "Add subdirectory ThirdParty/Fast-RTPS")
         add_subdirectory(${THIRDPARTY_DIR}/Fast-RTPS
             ThirdParty/Fast-RTPS
             EXCLUDE_FROM_ALL
@@ -208,6 +210,13 @@ endif(IB_BIN_FASTRTPS_ENABLE)
 # Logging
 #######################################################################################################################
 
+# We use fmtlib to offer a convenient logging interface
+message(STATUS "Add subdirectory ThirdParty/fmt-6.0.0")
+add_subdirectory(${THIRDPARTY_DIR}/fmt-6.0.0
+    ThirdParty/fmt-6.0.0
+    EXCLUDE_FROM_ALL
+)
+
 # Temporarily patch some CMake variables to trick spdlog's install commands into using our custom folder structure
 set(CMAKE_INSTALL_LIBDIR_backup "${CMAKE_INSTALL_LIBDIR}")
 set(CMAKE_INSTALL_INCLUDEDIR_backup "${CMAKE_INSTALL_INCLUDEDIR}")
@@ -225,6 +234,7 @@ elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     set(CMAKE_INSTALL_INCLUDEDIR ${INSTALL_INCLUDE_DIR})
 endif()
 
+message(STATUS "Add subdirectory ThirdParty/spdlog")
 add_subdirectory(${THIRDPARTY_DIR}/spdlog
     ThirdParty/spdlog
 )
@@ -371,7 +381,7 @@ install(
         PATTERN *.cmake.in 
         PATTERN CMakeLists.txt 
         PATTERN *.md
-		PATTERN *.xml
+        PATTERN *.xml
 )
 install(
     FILES 
