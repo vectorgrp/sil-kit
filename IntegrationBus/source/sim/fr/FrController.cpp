@@ -7,6 +7,7 @@
 
 #include "ib/sim/exceptions.hpp"
 #include "ib/mw/IComAdapter.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 
 namespace ib {
 namespace sim {
@@ -37,7 +38,7 @@ void FrController::ReconfigureTxBuffer(uint16_t txBufferIdx, const TxBufferConfi
 {
     if (txBufferIdx >= _bufferConfigs.size())
     {
-        // FIXME@fmt: _comAdapter->GetLogger()->Error("FrController::ReconfigureTxBuffer() was called with unconfigured txBufferIdx={}", txBufferIdx);
+        _comAdapter->GetLogger()->Error("FrController::ReconfigureTxBuffer() was called with unconfigured txBufferIdx={}", txBufferIdx);
         throw std::out_of_range{"Unconfigured txBufferIdx!"};
     }
     _bufferConfigs[txBufferIdx] = config;
@@ -47,7 +48,7 @@ void FrController::UpdateTxBuffer(const TxBufferUpdate& update)
 {
     if (update.txBufferIndex >= _bufferConfigs.size())
     {
-        // FIXME@fmt: _comAdapter->GetLogger()->Error("FrController::UpdateTxBuffer() was called with unconfigured txBufferIndex={}", update.txBufferIndex);
+        _comAdapter->GetLogger()->Error("FrController::UpdateTxBuffer() was called with unconfigured txBufferIndex={}", update.txBufferIndex);
         throw std::out_of_range{"Unconfigured txBufferIndex!"};
     }
 
@@ -174,7 +175,7 @@ void FrController::RegisterSymbolAckHandler(SymbolAckHandler handler)
 void FrController::RegisterCycleStartHandler(CycleStartHandler handler)
 {
     // Only supported in VIBE simulation
-    // FIXME@fmt: _comAdapter->GetLogger()->Info("CycleStartHandler callback is not supported in basic FlexRay simulation.");
+    _comAdapter->GetLogger()->Info("CycleStartHandler callback is not supported in basic FlexRay simulation.");
 }
 
 void FrController::ReceiveIbMessage(mw::EndpointAddress from, const FrMessage& msg)

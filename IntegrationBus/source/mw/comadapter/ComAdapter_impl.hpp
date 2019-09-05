@@ -70,10 +70,7 @@ void ComAdapter<IbConnectionT>::joinIbDomain(uint32_t domainId)
     _ibConnection.JoinDomain(domainId);
     onIbDomainJoined();
 
-    std::stringstream ss;
-    ss << "Participant " << _participantName << " has joined the IB-Domain " << domainId;
-    _logger->Info(ss.str());
-    // FIXME@fmt: _logger->Info("Participant {} has joined the IB-Domain {}", _participantName, domainId);
+    _logger->Info("Participant {} has joined the IB-Domain {}", _participantName, domainId);
 }
 
 template <class IbConnectionT>
@@ -640,7 +637,7 @@ auto ComAdapter<IbConnectionT>::CreateController(EndpointId endpointId, const st
     auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
     if (controllerMap.count(endpointId))
     {
-        // FIXME@fmt: _logger->Error("ComAdapter already has a controller with endpointId={}", endpointId);
+        _logger->Error("ComAdapter already has a controller with endpointId={}", endpointId);
         throw std::runtime_error("Duplicate EndpointId");
     }
 
@@ -682,7 +679,7 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
     auto&& simulator = std::get<IIbToSimulatorT*>(_simulators);
     if (simulator)
     {
-        // FIXME@fmt: _logger->Error("A {} is already registered", typeid(IIbToSimulatorT).name());
+        _logger->Error("A {} is already registered", typeid(IIbToSimulatorT).name());
         return;
     }
 
@@ -729,7 +726,7 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
                 }
                 catch (const std::exception& e)
                 {
-                    // FIXME@fmt: _logger->Error("Cannot register simulator topics for link \"{}\": {}", linkName, e.what());
+                    _logger->Error("Cannot register simulator topics for link \"{}\": {}", linkName, e.what());
                     continue;
                 }
             }

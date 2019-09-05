@@ -7,7 +7,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "ib/mw/logging/ILogger.hpp"
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/mw/sync/ISyncMaster.hpp"
 #include "ib/mw/sync/IIbToSyncMaster.hpp"

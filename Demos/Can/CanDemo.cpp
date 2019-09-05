@@ -30,26 +30,26 @@ std::ostream& operator<<(std::ostream& out, nanoseconds timestamp)
 }
 }
 
-void AckCallback(can::ICanController* /*controller*/, const can::CanTransmitAcknowledge& ack)
+void AckCallback(const can::CanTransmitAcknowledge& ack, logging::ILogger* logger)
 {
-    std::cout << ">> " << ack.status
-              << " for CAN Message with transmitId=" << ack.transmitId
-              << " timestamp=" << ack.timestamp
-              << std::endl;
-    // FIXME@fmt: spdlog::info(">> {} for CAN Message with transmitId={} timestamp={}", ack.timestamp, ack.status, ack.transmitId);
+    std::stringstream buffer;
+    buffer << ">> " << ack.status
+           << " for CAN Message with transmitId=" << ack.transmitId
+           << " timestamp=" << ack.timestamp;
+    logger->Info(buffer.str());
 }
 
-void ReceiveMessage(can::ICanController* /*controller*/, const can::CanMessage& msg)
+void ReceiveMessage(const can::CanMessage& msg, logging::ILogger* logger)
 {
     std::string payload(msg.dataField.begin(), msg.dataField.end());
-    std::cout << ">> CAN Message: canId=" << msg.canId
-              << " timestamp=" << msg.timestamp
-              << " \"" << payload << "\""
-              << std::endl;
-    // FIXME@fmt: spdlog::info(">> CAN Message: canId={} timestamp={} \"{}\"", msg.canId, msg.timestamp, payload);
+    std::stringstream buffer;
+    buffer << ">> CAN Message: canId=" << msg.canId
+           << " timestamp=" << msg.timestamp
+           << " \"" << payload << "\"";
+    logger->Info(buffer.str());
 }
 
-void SendMessage(can::ICanController* controller, std::chrono::nanoseconds now)
+void SendMessage(can::ICanController* controller, std::chrono::nanoseconds now, logging::ILogger* logger)
 {
     can::CanMessage msg;
     msg.timestamp = now;
@@ -68,8 +68,9 @@ void SendMessage(can::ICanController* controller, std::chrono::nanoseconds now)
     msg.dataField.assign(payloadStr.begin(), payloadStr.end());
 
     auto transmitId = controller->SendMessage(std::move(msg));
-    std::cout << "<< CAN Message sent with transmitId=" << transmitId << std::endl;
-    // FIXME@fmt: spdlog::info("<< CAN Message sent with transmitId={}", transmitId);
+    std::stringstream buffer;
+    buffer << "<< CAN Message sent with transmitId=" << transmitId;
+    logger->Info(buffer.str());
 }
 
 /**************************************************************************************************
@@ -100,16 +101,18 @@ int main(int argc, char** argv)
 
         std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
         auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
-
-        // NB: If you want to use the default spd logger, e.g., via spdlog::info(...), 
-        // you have to register the logger created by the comAdapter as the default logger.
-        // FIXME@...: spdlog::set_default_logger(comAdapter->GetLogger());
-
-        auto* canController = comAdapter->CreateCanController("CAN1");
+        auto* logger = comAdapter->GetLogger();
         auto* participantController = comAdapter->GetParticipantController();
+        auto* canController = comAdapter->CreateCanController("CAN1");
 
-        canController->RegisterTransmitStatusHandler(&AckCallback);
-        canController->RegisterReceiveMessageHandler(&ReceiveMessage);
+        canController->RegisterTransmitStatusHandler(
+            [logger](can::ICanController* /*ctrl*/, const can::CanTransmitAcknowledge& ack) {
+                AckCallback(ack, logger);
+            });
+        canController->RegisterReceiveMessageHandler(
+            [logger](can::ICanController* /*ctrl*/, const can::CanMessage& msg) {
+                ReceiveMessage(msg, logger);
+            });
 
         // Set an Init Handler
         participantController->SetInitHandler([canController, &participantName](auto initCmd) {
@@ -138,10 +141,10 @@ int main(int argc, char** argv)
         if (participantName == "CanWriter")
         {
             participantController->SetSimulationTask(
-                [canController, sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+                [canController, logger, sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
 
                     std::cout << "now=" << now << ", duration=" << duration << std::endl;
-                    SendMessage(canController, now);
+                    SendMessage(canController, now, logger);
                     std::this_thread::sleep_for(sleepTimePerTick);
 
             });

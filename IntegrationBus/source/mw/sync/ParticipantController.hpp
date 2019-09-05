@@ -4,7 +4,6 @@
 
 #include "ib/mw/sync/IParticipantController.hpp"
 #include "ib/mw/sync/IIbToParticipantController.hpp"
-#include "ib/mw/logging/ILogger.hpp"
 
 #include <future>
 #include <tuple>

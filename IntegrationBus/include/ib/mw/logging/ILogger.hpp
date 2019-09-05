@@ -13,6 +13,7 @@
 #        define FMT_USE_WINDOWS_H 0
 #    endif
 #    include "fmt/format.h"
+#    include "fmt/ostream.h"
 #endif //HAVE_FMTLIB
 
 namespace ib {

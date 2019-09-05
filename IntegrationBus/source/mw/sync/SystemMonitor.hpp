@@ -5,12 +5,10 @@
 #include <map>
 #include <memory>
 
+#include "ib/cfg/Config.hpp"
+#include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/sync/ISystemMonitor.hpp"
 #include "ib/mw/sync/IIbToSystemMonitor.hpp"
-#include "ib/mw/logging/ILogger.hpp"
-
-#include "ib/mw/IComAdapter.hpp"
-#include "ib/cfg/Config.hpp"
 
 namespace spdlog {
 class logger;

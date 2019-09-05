@@ -9,6 +9,7 @@
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/sync/ISystemMonitor.hpp"
 #include "ib/mw/sync/string_utils.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 #include "SyncDatatypeUtils.hpp"
 
 using namespace std::chrono_literals;
@@ -52,7 +53,6 @@ void SyncMaster::SetupTimeQuantumClients(const cfg::Config& config)
         _timeQuantumClients[participant.id] = std::move(client);
 
     }
-    // FIXME@fmt: _logger->Info("SyncMaster is serving {} TimeQuantum Clients", _timeQuantumClients.size());
     _logger->Info("SyncMaster is serving {} TimeQuantum Clients", _timeQuantumClients.size());
 }
 
@@ -63,7 +63,7 @@ void SyncMaster::SetupDiscreteTimeClient(const cfg::Config& config)
         end(config.simulationSetup.participants),
         [](auto&& participant) { return participant.syncType == cfg::SyncType::DiscreteTime; }
     );
-    // FIXME@fmt: _logger->Info("SyncMaster is serving {} DiscreteTime Clients", numClients);
+    _logger->Info("SyncMaster is serving {} DiscreteTime Clients", numClients);
 
     if (numClients == 0)
         return;
@@ -93,7 +93,7 @@ void SyncMaster::ReceiveIbMessage(mw::EndpointAddress from, const TickDone& msg)
 
     if (_discreteTimeClient->GetCurrentTick() != msg.finishedTick)
     {
-        // FIXME@fmt: _logger->Error("Received {} from participant {}, which does not match current {}", msg, from.participant, _discreteTimeClient->GetCurrentTick());
+        _logger->Error("Received {} from participant {}, which does not match current {}", msg, from.participant, _discreteTimeClient->GetCurrentTick());
     }
 
     _discreteTimeClient->TickDoneReceived();
@@ -112,7 +112,7 @@ void SyncMaster::ReceiveIbMessage(mw::EndpointAddress from, const QuantumRequest
 {
     if (_timeQuantumClients.count(from.participant) != 1)
     {
-        // FIXME@fmt: _logger->Error("Received QuantumRequest from participant {}, which is unknown!", from.participant);
+        _logger->Error("Received QuantumRequest from participant {}, which is unknown!", from.participant);
         return;
     }
 
@@ -120,13 +120,13 @@ void SyncMaster::ReceiveIbMessage(mw::EndpointAddress from, const QuantumRequest
 
     if (client->HasPendingRequest())
     {
-        // FIXME@fmt: _logger->Error("Received QuantumRequest from participant {}, which already has a pending request!", from.participant);
+        _logger->Error("Received QuantumRequest from participant {}, which already has a pending request!", from.participant);
         return;
     }
 
     if (client->EndTime() != msg.now)
     {
-        // FIXME@fmt: _logger->Error("QuantumRequest from participant {} does not match the current simulation time!", from.participant);
+        _logger->Error("QuantumRequest from participant {} does not match the current simulation time!", from.participant);
     }
 
     client->SetPendingRequest(msg.now, msg.duration);
@@ -184,7 +184,7 @@ void SyncMaster::SystemStateChanged(SystemState newState)
             break;
 
         default:
-            // FIXME@fmt: _logger->Warn("SyncMaster: switch to SystemState::Running from unexpected state SystemState::{}. Assuming simulation start.", oldState);
+            _logger->Warn("SyncMaster: switch to SystemState::Running from unexpected state SystemState::{}. Assuming simulation start.", oldState);
             for (auto&& client : _syncClients)
             {
                 client->Reset();

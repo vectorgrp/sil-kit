@@ -4,6 +4,7 @@
 #include <future>
 
 #include "ib/cfg/string_utils.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 
 using namespace std::chrono_literals;
@@ -107,8 +108,8 @@ void ParticipantController::SetPeriod(std::chrono::nanoseconds period)
     if (_syncType != cfg::SyncType::TimeQuantum)
     {
         auto msPeriod = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(period);
-        // FIXME@fmt: _logger->Warn("ParticipantController::SetPeriod({}ms) is ignored", msPeriod.count());
-        // FIXME@fmt: _logger->Info("ParticipantController::SetPeriod() can only be used with SyncType::TimeQuantum (currently active: SyncType::{})", _syncType);
+        _logger->Warn("ParticipantController::SetPeriod({}ms) is ignored", msPeriod.count());
+        _logger->Info("ParticipantController::SetPeriod() can only be used with SyncType::TimeQuantum (currently active: SyncType::{})", _syncType);
     }
     _myNextTask.duration = period;
 }
@@ -344,20 +345,19 @@ void ParticipantController::LogCurrentPerformanceStats()
     }
     else
     {
-        // FIXME@fmt:
-        //_logger->Info("TotalTaskTime: {:.2f}ms [{:.2f}, {:.2f}] \tWaitTime: {:.2f}ms [{:.2f}, {:.2f}]  \tCpuTime: {:.2f}, [{:.2f}, {:.2f}] \t(avg [min,max])",
-        //    toMSecs(_execTimeMonitor.AvgDuration<DoubleMSecs>() + _waitTimeMonitor.AvgDuration<DoubleMSecs>()),
-        //    toMSecs(_execTimeMonitor.MinDuration() + _waitTimeMonitor.MinDuration()),
-        //    toMSecs(_execTimeMonitor.MaxDuration() + _waitTimeMonitor.MaxDuration()),
+        _logger->Info("TotalTaskTime: {:.2f}ms [{:.2f}, {:.2f}] \tWaitTime: {:.2f}ms [{:.2f}, {:.2f}]  \tCpuTime: {:.2f}, [{:.2f}, {:.2f}] \t(avg [min,max])",
+            toMSecs(_execTimeMonitor.AvgDuration<DoubleMSecs>() + _waitTimeMonitor.AvgDuration<DoubleMSecs>()),
+            toMSecs(_execTimeMonitor.MinDuration() + _waitTimeMonitor.MinDuration()),
+            toMSecs(_execTimeMonitor.MaxDuration() + _waitTimeMonitor.MaxDuration()),
 
-        //    toMSecs(_waitTimeMonitor.AvgDuration<DoubleMSecs>()),
-        //    toMSecs(_waitTimeMonitor.MinDuration()),
-        //    toMSecs(_waitTimeMonitor.MaxDuration()),
+            toMSecs(_waitTimeMonitor.AvgDuration<DoubleMSecs>()),
+            toMSecs(_waitTimeMonitor.MinDuration()),
+            toMSecs(_waitTimeMonitor.MaxDuration()),
 
-        //    toMSecs(_execTimeMonitor.AvgDuration<DoubleMSecs>()),
-        //    toMSecs(_execTimeMonitor.MinDuration()),
-        //    toMSecs(_execTimeMonitor.MaxDuration())
-        //);
+            toMSecs(_execTimeMonitor.AvgDuration<DoubleMSecs>()),
+            toMSecs(_execTimeMonitor.MinDuration()),
+            toMSecs(_execTimeMonitor.MaxDuration())
+        );
     }
 }
 
