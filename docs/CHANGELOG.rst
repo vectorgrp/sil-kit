@@ -1,9 +1,36 @@
-Vector Integration Bus Changelog
+VIB Changelog
 ================================
 
 All notable changes to the IntegrationBus project shall be documented in this file.
 
 The format is based on [Keep a Changelog] (http://keepachangelog.com/en/1.0.0/).
+
+[unreleased] - yyyy-mm-dd
+------------------------
+Added
+~~~~~
+
+Changed
+~~~~~~~
+- The LIN API was redesigned to provide a clearer and simpler interface. To make
+  the transition to the new API as simple as possible, we provided extensive
+  documentation on the new API itself including usage examples and information
+  about what changed in the new API: :doc:`../api/lin`
+
+Fixed
+~~~~~
+- Fixed a crash in the IbLauncher when the IbConfig did not specify a
+  MiddlewareConfig or an ActiveMiddleware.
+- Fixed a crash when creating a ComAdapter with the same participant name as a
+  previously destroyed one. The crash originated in spdlog.
+
+Compatibility with Sprint-31
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): No
+- Application software interface (API): No
+- Middleware network protocol (FastRTPS): Partially (Everything except LIN is compatible)
+- Middleware network protocol (VAsio): Partially (Everything except LIN is compatible)
+
 
 [Sprint-31] - 2019-08-14
 ------------------------
@@ -11,11 +38,16 @@ Added
 ~~~~~
 - New VAsio middleware as an alternative to Fast-RTPS, the VAsio middleware was
   specifically developped for the integration bus to provide high performance and
-  stability. Cf. :doc:`../usage/middleware-configuration`.
+  stability. Cf. :doc:`../configuration/middleware-configuration`.
 
 Changed
 ~~~~~~~
 - Upgrade Fast-RTPS to version v1.8.1. This improves stability on Linux.
+
+Fixed
+~~~~~
+- Fixed a crash in the IbLauncher when the IbConfig did not specify a
+  MiddlewareConfig or an ActiveMiddleware.
 
 
 Compatibility with Sprint-30

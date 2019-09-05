@@ -8,88 +8,115 @@
 
 using namespace std::chrono_literals;
 
-TEST(MwVAsioSerdes, SimLin_LinMessage)
+TEST(MwVAsioSerdes, SimLin_Frame)
 {
     using namespace ib::sim::lin;
     ib::mw::MessageBuffer buffer;
 
-    LinMessage in;
-    LinMessage out;
+    Frame in;
+    Frame out;
 
-    std::array<uint8_t, 8> data{ 'A', 2, 3, 6, 'c' };
-
-    in.status = MessageStatus::RxSuccess;
-    in.timestamp = 13ns;
-
-    in.linId = 7;
-    in.payload.size = 5;
-    in.payload.data = data;
+    in.id = 7;
     in.checksumModel = ChecksumModel::Classic;
+    in.dataLength = 6;
+    in.data = std::array<uint8_t, 8>{'V', 'E', 'C', 'T', 'O', 'R', 0, 0};
 
     buffer << in;
     buffer >> out;
 
-    EXPECT_EQ(in.status, out.status);
-    EXPECT_EQ(in.timestamp, out.timestamp);
-    EXPECT_EQ(in.linId, out.linId);
-    EXPECT_EQ(in.payload, out.payload);
-    EXPECT_EQ(in.checksumModel, out.checksumModel);
+    EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsioSerdes, SimLin_RxRequest)
+TEST(MwVAsioSerdes, SimLin_SendFrameRequest)
 {
     using namespace ib::sim::lin;
     ib::mw::MessageBuffer buffer;
 
-    RxRequest in;
-    RxRequest out;
+    SendFrameRequest in;
+    SendFrameRequest out;
 
-    in.linId = 3;
-    in.payloadLength = 7;
-    in.checksumModel = ChecksumModel::Classic;
+    in.frame.id = 19;
+    in.frame.checksumModel = ChecksumModel::Enhanced;
+    in.frame.dataLength = 8;
+    in.frame.data = std::array<uint8_t, 8>{'A', 2, 3, 6, 'c', 'Z', 'K'};
+    in.responseType = FrameResponseType::SlaveToSlave;
 
     buffer << in;
     buffer >> out;
 
-    EXPECT_EQ(in.linId, out.linId);
-    EXPECT_EQ(in.payloadLength, out.payloadLength);
-    EXPECT_EQ(in.checksumModel, out.checksumModel);
+    EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsioSerdes, SimLin_TxAcknowledge)
+TEST(MwVAsioSerdes, SimLin_SendFrameHeaderRequest)
 {
     using namespace ib::sim::lin;
     ib::mw::MessageBuffer buffer;
 
-    TxAcknowledge in;
-    TxAcknowledge out;
+    SendFrameHeaderRequest in;
+    SendFrameHeaderRequest out;
+
+    in.id = 49;
+
+    buffer << in;
+    buffer >> out;
+
+    EXPECT_EQ(in, out);
+}
+TEST(MwVAsioSerdes, SimLin_Transmission)
+{
+    using namespace ib::sim::lin;
+    ib::mw::MessageBuffer buffer;
+
+    Transmission in;
+    Transmission out;
 
     in.timestamp = 13ns;
-    in.linId = 3;
-    in.status = MessageStatus::TxResponseError;
+    in.frame.id = 19;
+    in.frame.checksumModel = ChecksumModel::Enhanced;
+    in.frame.dataLength = 8;
+    in.frame.data = std::array<uint8_t, 8>{'A', 2, 3, 6, 'c', 'Z', 'K'};
+    in.status = FrameStatus::LIN_TX_OK;
 
     buffer << in;
     buffer >> out;
 
-    EXPECT_EQ(in.timestamp, out.timestamp);
-    EXPECT_EQ(in.linId, out.linId);
-    EXPECT_EQ(in.status, out.status);
+    EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsioSerdes, SimLin_WakeupRequest)
+TEST(MwVAsioSerdes, SimLin_WakeupPulse)
 {
     using namespace ib::sim::lin;
     ib::mw::MessageBuffer buffer;
 
-    WakeupRequest in;
-    WakeupRequest out;
+    WakeupPulse in;
+    WakeupPulse out;
 
     in.timestamp = 13ns;
 
     buffer << in;
     buffer >> out;
 
-    EXPECT_EQ(in.timestamp, out.timestamp);
+    EXPECT_EQ(in, out);
+}
+
+TEST(MwVAsioSerdes, SimLin_FrameResponse)
+{
+    using namespace ib::sim::lin;
+    ib::mw::MessageBuffer buffer;
+
+    FrameResponse in;
+    FrameResponse out;
+
+    in.frame.id = 50;
+    in.frame.checksumModel = ChecksumModel::Enhanced;
+    in.frame.dataLength = 2;
+    in.frame.data = std::array<uint8_t, 8>{'A', 'B', 'E', 'c', 'A', 'B', 'E', 'c'};
+    in.responseMode = FrameResponseMode::TxUnconditional;
+
+    buffer << in;
+    buffer >> out;
+
+    EXPECT_EQ(in, out);
 }
 
 TEST(MwVAsioSerdes, SimLin_ControllerConfig)
@@ -97,76 +124,73 @@ TEST(MwVAsioSerdes, SimLin_ControllerConfig)
     using namespace ib::sim::lin;
     ib::mw::MessageBuffer buffer;
 
+    FrameResponse response1;
+    response1.frame.id = 50;
+    response1.frame.checksumModel = ChecksumModel::Enhanced;
+    response1.frame.dataLength = 2;
+    response1.frame.data = std::array<uint8_t, 8>{'A', 'B', 'E', 'c', 'A', 'B', 'E', 'c'};
+    response1.responseMode = FrameResponseMode::TxUnconditional;
+    FrameResponse response2;
+    response1.frame.id = 36;
+    response1.frame.checksumModel = ChecksumModel::Classic;
+    response1.responseMode = FrameResponseMode::Rx;
+
+
     ControllerConfig in;
     ControllerConfig out;
-
     in.controllerMode = ControllerMode::Slave;
-    in.baudrate = 1235345;
+    in.baudRate = 1235345;
+    in.frameResponses.push_back(response1);
+    in.frameResponses.push_back(response2);
 
     buffer << in;
     buffer >> out;
 
-    EXPECT_EQ(in.controllerMode, out.controllerMode);
-    EXPECT_EQ(in.baudrate, out.baudrate);
+    EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsioSerdes, SimLin_SlaveConfiguration)
+TEST(MwVAsioSerdes, SimLin_ControllerStatusUpdate)
 {
     using namespace ib::sim::lin;
     ib::mw::MessageBuffer buffer;
 
-    SlaveConfiguration in;
-    SlaveConfiguration out;
+    ControllerStatusUpdate in;
+    ControllerStatusUpdate out;
 
-    SlaveResponseConfig conf1;
-    conf1.linId = 5;
-    conf1.responseMode = ResponseMode::TxUnconditional;
-    conf1.checksumModel = ChecksumModel::Undefined;
-    conf1.payloadLength = 5;
-
-    SlaveResponseConfig conf2;
-    conf2.linId = 2;
-    conf2.responseMode = ResponseMode::Rx;
-    conf2.checksumModel = ChecksumModel::Classic;
-    conf2.payloadLength = 2;
-
-    std::vector<SlaveResponseConfig> configs{conf1, conf2};
-
-    in.responseConfigs = configs;
+    in.timestamp = 10s;
+    in.status = ControllerStatus::Sleep;
 
     buffer << in;
     buffer >> out;
 
-    EXPECT_EQ(in.responseConfigs.size(), out.responseConfigs.size());
-
-    for (uint8_t i = 0; i < in.responseConfigs.size(); i++)
-    {
-        EXPECT_EQ(in.responseConfigs[i].linId, out.responseConfigs[i].linId);
-        EXPECT_EQ(in.responseConfigs[i].responseMode, out.responseConfigs[i].responseMode);
-        EXPECT_EQ(in.responseConfigs[i].checksumModel, out.responseConfigs[i].checksumModel);
-        EXPECT_EQ(in.responseConfigs[i].payloadLength, out.responseConfigs[i].payloadLength);
-    }
+    EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsioSerdes, SimLin_SlaveResponse)
+TEST(MwVAsioSerdes, SimLin_FrameResponseUpdate)
 {
     using namespace ib::sim::lin;
     ib::mw::MessageBuffer buffer;
 
-    SlaveResponse in;
-    SlaveResponse out;
+    FrameResponse response1;
+    response1.frame.id = 50;
+    response1.frame.checksumModel = ChecksumModel::Enhanced;
+    response1.frame.dataLength = 2;
+    response1.frame.data = std::array<uint8_t, 8>{'A', 'B', 'E', 'c', 'A', 'B', 'E', 'c'};
+    response1.responseMode = FrameResponseMode::TxUnconditional;
+    FrameResponse response2;
+    response1.frame.id = 36;
+    response1.frame.checksumModel = ChecksumModel::Classic;
+    response1.responseMode = FrameResponseMode::Rx;
 
-    std::array<uint8_t, 8> data{'A', 2, 3};
 
-    in.linId = 10;
-    in.payload.size = 3;
-    in.payload.data = data;
-    in.checksumModel = ChecksumModel::Undefined;
+    FrameResponseUpdate in;
+    FrameResponseUpdate out;
+
+    in.frameResponses.push_back(response1);
+    in.frameResponses.push_back(response2);
 
     buffer << in;
     buffer >> out;
 
-    EXPECT_EQ(in.linId, out.linId);
-    EXPECT_EQ(in.payload, out.payload);
-    EXPECT_EQ(in.checksumModel, out.checksumModel);
+    EXPECT_EQ(in, out);
 }

@@ -5,126 +5,128 @@ module sim {
 module lin {
 module idl {
 
-    typedef octet LinId;
+    typedef octet LinIdT;
 
     enum ChecksumModel
     {
         Undefined,
-        Enhanced, // Enhanced checksum model
-        Classic   // Classic checksum model
+        Enhanced,
+        Classic
     };
     
-    
-    enum ResponseMode
-    {
-        Unused, // The LIN frame is neither received not transmitted by the LIN slave
-        Rx,     // The response of the LIN frame is received by the LIN slave
-        TxUnconditional // The LIN frame is an 'unconditional frame' and the
-                        // response is transmitted by the slave
-    };
+    typedef octet DataLengthT;
 
-    enum MessageStatus
+    struct Frame
     {
-        TxSuccess, // The LIN header and the response was sent successfully on the bus
-        RxSuccess, // The LIN header was sent successfully on the bus and a LIN response
-                   // was successfully received
-        TxResponseError, // Erroneous response transmission. Only used with Network Simulator
-        RxResponseError, // Erroneous response reception. Only used with Network Simulator
-        RxNoResponse, // No response byte has been received. Only used with Network Simulator
-        HeaderError,  // Erroneous header transmission. Only used with Network Simulator
-        Canceled, // The Transmit operation was aborted. E.g., the controller mode was set
-                  // to inactive before the transmission was completed. Only used with
-                  // Network Simulator
-        Busy // The transmit request was rejected, because another transmission is already
-             // running. Only used with Network Simulator
-    };
-    
-    struct LinMessage
-    {
-        // Meta Data
-        @Key ib::mw::idl::EndpointAddress senderAddr;
-        MessageStatus status;
-        long long timestamp; // end of frame time stamp
-
-        LinId linId;
-        octet payloadLength;
-        octet payload[8];
+        LinIdT        id;
         ChecksumModel checksumModel;
+        DataLengthT   dataLength;
+        octet         data[8];
     };
 
-    struct RxRequest
+    enum FrameResponseType
     {
-        @Key ib::mw::idl::EndpointAddress senderAddr;
-
-        LinId linId;
-        octet payloadLength;
-        ChecksumModel checksumModel;
-    };
-
-    struct TxAcknowledge
-    {
-        @Key ib::mw::idl::EndpointAddress senderAddr;
-        long long timestamp; // end of frame time stamp
-
-
-        LinId linId;
-        MessageStatus status;
+        MasterResponse,
+        SlaveResponse,
+        SlaveToSlave
     };
     
-    struct WakeupRequest
+    enum FrameResponseMode
     {
-        @Key ib::mw::idl::EndpointAddress senderAddr;
-        long long timestampNs; // end of frame time stamp
+        Unused,
+        Rx,
+        TxUnconditional
     };
 
-
+    enum FrameStatus
+    {
+        NOT_OK,
+        LIN_TX_OK,
+        LIN_TX_BUSY,
+        LIN_TX_HEADER_ERROR,
+        LIN_TX_ERROR,
+        LIN_RX_OK,
+        LIN_RX_BUSY,
+        LIN_RX_ERROR,
+        LIN_RX_NO_RESPONSE
+    };
+    
+    struct FrameResponse
+    {
+        Frame frame;
+        FrameResponseMode responseMode;
+    };
+    
     enum ControllerMode
     {
-        Inactive, // LIN controller is deactivated
-        Master,   // LIN controller is in LIN master mode and operational
-        Slave,    // LIN controller is in LIN slave mode and operational
-        Sleep     // LIN controller is in sleep mode.
+        Inactive,
+        Master,
+        Slave
     };
-    
-    // LIN ControllerProxy to LIN Network Simulator
+
+    typedef unsigned long BaudRateT;
+
     struct ControllerConfig
     {
-        // Meta Data
         @Key ib::mw::idl::EndpointAddress senderAddr;
         
         ControllerMode controllerMode;
-        unsigned long baudrate;
+        BaudRateT baudRate;
+        sequence<FrameResponse> frameResponses; 
     };
 
-    // LIN ControllerProxy to LIN Network Simulator
-    struct SlaveResponseConfig
+    enum ControllerStatus
     {
-        // Meta Data
-        @Key ib::mw::idl::EndpointAddress senderAddr;
-        
-        LinId linId;
-        ResponseMode responseMode;
-        ChecksumModel checksumModel;
-        octet payloadLength;
-    };
-    struct SlaveConfiguration
-    {
-        // Meta Data
-        @Key ib::mw::idl::EndpointAddress senderAddr;
-        
-        sequence<SlaveResponseConfig> responseConfigs;
+        Unknown,
+        Operational,
+        Sleep
     };
 
-    // LIN ControllerProxy to LIN Network Simulator
-    struct SlaveResponse
+    struct Transmission
     {
-        // Meta Data
         @Key ib::mw::idl::EndpointAddress senderAddr;
         
-        LinId linId;
-        octet payloadLength;
-        octet payload[8];
-        ChecksumModel checksumModel;
+        long long timestampNs;
+        Frame frame;
+        FrameStatus status;
+    };
+
+    struct SendFrameRequest
+    {
+        @Key ib::mw::idl::EndpointAddress senderAddr;
+        
+        Frame frame;
+        FrameResponseType responseType;
+    };
+
+    struct SendFrameHeaderRequest
+    {
+        @Key ib::mw::idl::EndpointAddress senderAddr;
+        
+        LinIdT id;
+    };
+
+    
+    struct FrameResponseUpdate
+    {
+        @Key ib::mw::idl::EndpointAddress senderAddr;
+        
+        sequence<FrameResponse> frameResponses;
+    };
+
+    struct ControllerStatusUpdate
+    {
+        @Key ib::mw::idl::EndpointAddress senderAddr;
+        
+        long long timestampNs;
+        ControllerStatus status;
+    };
+
+    struct WakeupPulse
+    {
+        @Key ib::mw::idl::EndpointAddress senderAddr;
+        
+        long long timestampNs;
     };
     
 

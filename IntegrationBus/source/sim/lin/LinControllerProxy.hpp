@@ -12,12 +12,6 @@
 
 #include "ib/mw/fwd_decl.hpp"
 
-#include "ib/mw/logging/ILogger.hpp"
-
-namespace spdlog {
-class logger;
-} // namespace spdlog
-
 namespace ib {
 namespace sim {
 namespace lin {
@@ -49,57 +43,45 @@ public:
     // Public interface methods
     //
     // ILinController
-    void SetMasterMode() override;
-    void SetSlaveMode() override;
-    void SetBaudRate(uint32_t rate) override;
-    void SetSleepMode() override;
-    void SetOperationalMode() override;
+    void Init(ControllerConfig config) override;
+    auto Status() const noexcept->ControllerStatus override;
 
-    // LIN Slaves
-    void SetSlaveConfiguration(const SlaveConfiguration& config) override;
-    void SetResponse(LinId linId, const Payload& payload) override;
-    void SetResponseWithChecksum(LinId linId, const Payload& payload, ChecksumModel checksumModel) override;
-    void RemoveResponse(LinId linId) override;
-    void SendWakeupRequest() override;
+    void SendFrame(Frame frame, FrameResponseType responseType) override;
+    void SendFrameHeader(LinIdT linId) override;
+    void SetFrameResponse(Frame frame, FrameResponseMode mode) override;
+    void SetFrameResponses(std::vector<FrameResponse> responses) override;
 
-    // LIN Masters
-    void SendMessage(const LinMessage& msg) override;
-    void RequestMessage(const RxRequest& request) override;
-    void SendGoToSleep() override;
+    void GoToSleep() override;
+    void GoToSleepInternal() override;
+    void Wakeup() override;
+    void WakeupInternal() override;
 
-    void RegisterTxCompleteHandler(TxCompleteHandler handler) override;
-    void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) override;
-    void RegisterWakeupRequestHandler(WakeupRequestHandler handler) override;
-    void RegisterSleepCommandHandler(SleepCommandHandler handler) override;
+    void RegisterFrameStatusHandler(FrameStatusHandler handler) override;
+    void RegisterGoToSleepHandler(GoToSleepHandler handler) override;
+    void RegisterWakeupHandler(WakeupHandler handler) override;
+    void RegisterFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) override;
 
-     // IIbToLinController
-     void ReceiveIbMessage(mw::EndpointAddress from, const LinMessage& msg) override;
-     void ReceiveIbMessage(mw::EndpointAddress from, const TxAcknowledge& msg) override;
-     void ReceiveIbMessage(mw::EndpointAddress from, const WakeupRequest& msg) override;
-     
-     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
-     auto EndpointAddress() const -> const mw::EndpointAddress& override;
+    // IIbToLinController
+    void ReceiveIbMessage(mw::EndpointAddress from, const Transmission& msg) override;
+    void ReceiveIbMessage(mw::EndpointAddress from, const WakeupPulse& msg) override;
+    void ReceiveIbMessage(mw::EndpointAddress from, const ControllerConfig& msg) override;
+    void ReceiveIbMessage(mw::EndpointAddress from, const FrameResponseUpdate& msg) override;
+
+    void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
+    auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
 public:
     // ----------------------------------------
     // Public interface methods
 
 private:
-    // ----------------------------------------
-    // private data types
-    template<typename... MsgT>
-    using CallbackVector = std::vector<CallbackT<MsgT...>>;
+//    // ----------------------------------------
+//    // private data types
 
 private:
     // ----------------------------------------
     // private methods
-    template<typename MsgT>
-    void RegisterHandler(CallbackT<MsgT>&& handler);
-
-    template<typename MsgT>
-    void CallHandlers(const MsgT& msg);
-
-    void sendControllerConfig();
+    void SetControllerStatus(ControllerStatus status);
 
     template <typename MsgT>
     inline void SendIbMessage(MsgT&& msg);
@@ -111,16 +93,13 @@ private:
     mw::EndpointAddress _endpointAddr;
     mw::logging::ILogger* _logger;
 
-    ControllerMode _configuredControllerMode{ControllerMode::Inactive}; // only modified by SetSlave/SetMasterMode, used to restore operational mode
-    ControllerMode _controllerMode{ControllerMode::Inactive}; // currently active controller mode
-    uint32_t _baudrate{0};
+    ControllerMode   _controllerMode{ControllerMode::Inactive};
+    ControllerStatus _controllerStatus{ControllerStatus::Unknown};
 
-    std::tuple<
-        CallbackVector<MessageStatus>,
-        CallbackVector<LinMessage>
-    > _callbacks;
-    CallbackVector<> _gotosleepCallbacks;
-    CallbackVector<> _wakeuprequestCallbacks;
+    std::vector<FrameStatusHandler>         _frameStatusHandler;
+    std::vector<GoToSleepHandler>           _goToSleepHandler;
+    std::vector<WakeupHandler>              _wakeupHandler;
+    std::vector<FrameResponseUpdateHandler> _frameResponseUpdateHandler;
 };
 
 // ================================================================================

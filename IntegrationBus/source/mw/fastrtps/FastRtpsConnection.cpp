@@ -32,7 +32,7 @@ FastRtpsConnection::FastRtpsConnection(cfg::Config config, std::string participa
 void FastRtpsConnection::JoinDomain(uint32_t domainId)
 {
     if (_fastRtpsParticipant)
-        throw std::exception();
+        throw std::runtime_error{"ERROR: FastRtpsComAdapter is already connected."};
 
     //CREATE RTPSParticipant
 
@@ -143,7 +143,7 @@ void FastRtpsConnection::JoinDomain(uint32_t domainId)
     }
 
     if (participant == nullptr)
-        throw std::exception();
+        throw std::runtime_error{"ERROR: Failed to create FastRTPS Participant"};
 
     _fastRtpsParticipant = std::unique_ptr<eprosima::fastrtps::Participant, FastRtps::RemoveParticipant>(participant);
 }

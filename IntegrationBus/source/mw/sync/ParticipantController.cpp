@@ -562,9 +562,40 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const
 
 void ParticipantController::ReceiveIbMessage(mw::EndpointAddress from, const NextSimTask& task)
 {
+    if (from == _endpointAddress) return;
+
     _otherNextTasks[from.participant] = task;
-    if (task.timePoint >= _myNextTask.timePoint)
+
+    switch (State())
+    {
+        // QuantumGrant during initialization are considered as an error
+    case ParticipantState::Invalid:      // [[fallthrough]]
+    case ParticipantState::Idle:         // [[fallthrough]]
+    case ParticipantState::Initializing: // [[fallthrough]]
+    case ParticipantState::Initialized:
+        return;
+
+    case ParticipantState::Paused:
+        // We have to process QuantumGrants received in Paused. This can happen
+        // due to race conditions, and we can't undo a TICK. It should not occur
+        // more than once though.
+        // [[fallthrough]]
+    case ParticipantState::Running:
         CheckDistributedTimeAdvanceGrant();
+        return;
+
+        // QuantumGrant during stop/shutdown procedure and Errors are ignored
+    case ParticipantState::Stopping:     // [[fallthrough]]
+    case ParticipantState::Stopped:      // [[fallthrough]]
+    case ParticipantState::Error:        // [[fallthrough]]
+    case ParticipantState::ShuttingDown: // [[fallthrough]]
+    case ParticipantState::Shutdown:     // [[fallthrough]]
+        return;
+
+    default:
+        ReportError("Received NextSimTask in state ParticipantState::" + to_string(State()));
+        return;
+    }
 }
 
 void ParticipantController::SendTickDone() const
@@ -632,29 +663,30 @@ void ParticipantController::SendNextSimTask()
         _comAdapter->OnAllMessagesDelivered([this]() {
 
             SendIbMessage(_myNextTask);
-            CheckDistributedTimeAdvanceGrant();
 
         });
     }
     else
     {
         SendIbMessage(_myNextTask);
-        CheckDistributedTimeAdvanceGrant();
     }
 }
 
 void ParticipantController::CheckDistributedTimeAdvanceGrant()
 {
-    for (auto&& otherTask : _otherNextTasks)
+    while (true)
     {
-        if (_myNextTask.timePoint > otherTask.second.timePoint)
-            return;
-    }
+        for (auto&& otherTask : _otherNextTasks)
+        {
+            if (_myNextTask.timePoint > otherTask.second.timePoint)
+                return;
+        }
 
-    // No SimTask has a lower timePoint
-    _currentTask = _myNextTask;
-    _myNextTask.timePoint = _currentTask.timePoint + _currentTask.duration;
-    ExecuteSimTask();
+        // No SimTask has a lower timePoint
+        _currentTask = _myNextTask;
+        _myNextTask.timePoint = _currentTask.timePoint + _currentTask.duration;
+        ExecuteSimTask();
+    }
 }
 
 void ParticipantController::ExecuteSimTask()

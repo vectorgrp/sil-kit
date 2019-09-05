@@ -58,6 +58,7 @@ IbLink<MsgT>::IbLink(std::string name)
 template <class MsgT>
 void IbLink<MsgT>::AddLocalReceiver(ReceiverT* receiver)
 {
+    if (std::find(_localReceivers.begin(), _localReceivers.end(), receiver) != _localReceivers.end()) return;
     _localReceivers.push_back(receiver);
 }
 

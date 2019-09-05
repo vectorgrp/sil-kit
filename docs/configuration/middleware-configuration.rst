@@ -1,9 +1,8 @@
 ===================================================
-VIB Middleware Configuration
+Middleware Config
 ===================================================
 
-.. contents::
-   :local:
+.. contents:: :local:
    :depth: 3
 
 Overview

@@ -96,13 +96,13 @@ public:
     void SendIbMessage(EndpointAddress /*from*/, const sim::fr::TxBufferUpdate& /*msg*/) {}
     void SendIbMessage(EndpointAddress /*from*/, const sim::fr::ControllerStatus& /*msg*/) {}
 
-    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::LinMessage& /*msg*/) {}
-    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::RxRequest& /*msg*/) {}
-    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::TxAcknowledge& /*msg*/) {}
-    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::WakeupRequest& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::SendFrameRequest& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::SendFrameHeaderRequest& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::Transmission& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::FrameResponseUpdate& /*msg*/) {}
     void SendIbMessage(EndpointAddress /*from*/, const sim::lin::ControllerConfig& /*msg*/) {}
-    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::SlaveConfiguration& /*msg*/) {}
-    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::SlaveResponse& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::ControllerStatusUpdate& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::lin::WakeupPulse& /*msg*/) {}
 
     void SendIbMessage(EndpointAddress /*from*/, const sim::io::AnalogIoMessage& /*msg*/) {}
     void SendIbMessage(EndpointAddress /*from*/, const sim::io::DigitalIoMessage& /*msg*/) {}

@@ -5,213 +5,189 @@
 #include <functional>
 
 #include "LinDatatypes.hpp"
+#include "ib/mw/EndpointAddress.hpp"
 
 namespace ib {
 namespace sim {
 namespace lin {
 
-/*! \brief Abstract LIN Controller API to be used by vECUs
+/*! 
+ * The LIN controller can assume the role of a LIN master or a LIN
+ * slave. It provides two kinds of interfaces to perform data
+ * transfers and provide frame responses:
+ *
+ * AUTOSAR-like LIN master interface:
+ *
+ * - \ref SendFrame() transfers a frame from or to a LIN
+ * master. Requires \ref ControllerMode::Master.
+ *
+ *
+ * non-AUTOSAR interface:
+ *
+ * - \ref SetFrameResponse() configures
+ * the response for a particular LIN identifier. Can be used with \ref
+ * ControllerMode::Master and \ref ControllerMode::Slave.
+ *
+ * - \ref SendFrameHeader() initiates the transmission of a
+ * LIN frame for a particular LIN identifier. For a successful
+ * transmission, exactly one LIN slave or master must have previously
+ * set a corresponding frame response for unconditional
+ * transmission. Requires \ref ControllerMode::Master.
+ * 
  */
 class ILinController
 {
 public:
-    template<typename... MsgT>
-    using CallbackT = std::function<void(ILinController* controller, const MsgT& ...msg)>;
+    /*! Callback type to indicate the end of a LIN Frame transmission.
+     *  Cf., \ref RegisterFrameStatusHandler(FrameStatusHandler);
+     */
+    using FrameStatusHandler = std::function<void(ILinController*, const Frame&, FrameStatus, std::chrono::nanoseconds timestamp)>;
+    
+    /*! Callback type to indicate that a go-to-sleep frame has been received.
+     *  Cf., \ref RegisterGoToSleepHandler(GoToSleepHandler);
+     */
+    using GoToSleepHandler = std::function<void(ILinController*)>;
 
-    using ReceiveMessageHandler = CallbackT<LinMessage>;
-    using TxCompleteHandler     = CallbackT<MessageStatus>;
-
-    using SleepCommandHandler   = CallbackT<>;
-    using WakeupRequestHandler   = CallbackT<>;
-
+    /*! Callback type to indicate that a wakeup pulse has been received.
+     *  Cf., \ref RegisterWakeupHandler(WakeupHandler);
+     */
+    using WakeupHandler = std::function<void(ILinController*)>;
+    
+    using FrameResponseUpdateHandler = std::function<void(ILinController*, mw::EndpointAddress, const FrameResponse&)>;
+    
 public:
     virtual ~ILinController() = default;
 
-    /*! \brief Configure the controller as a LIN master
-     *
-     * Configures the controller as a LIN master and activates the
-     * controller.
-     */
-    virtual void SetMasterMode() = 0;
-
-    /*! \brief Configure the controller as a LIN slave
-     *
-     * Configures the controller as a LIN slave and activates the
-     * controller.
-     */
-    virtual void SetSlaveMode() = 0;
-
-    /*! \brief Enable sleep mode for this LIN controller
-     *
-     * NB: SetSleepMode() must be called manually after receiving a SleepCommand.
-     */
-    virtual void SetSleepMode() = 0;
-
-    /*! \brief Make the controller operational again after sleeping
-     *
-     * NB: The SetOperationalMode() must be called manually after receiving a WakupRequest.
-     */
-    virtual void SetOperationalMode() = 0;
-
-
-    /*! \brief Configure the baud rate of the controller
-     *
-     * \param rate the baud rate to be set given in kHz
-     */
-    virtual void SetBaudRate(uint32_t rate) = 0;
-
-    /*! \brief Configure the responses of a LIN slave
-     *
-     * The SlaveConfiguration contains a vector of
-     * SlaveResponseConfigs. The length of the vector determines the
-     * range of relevant LIN IDs for the slave. Each entry corresponds
-     * to a LIN ID and states how the LIN ID
-     * shall be treated (::ResponseMode),
-     * the expected checksum model (::ChecksumModel),
-     * and the expected payload length in bytes.
-     *
-     * The SlaveConfiguration does not contain payload data for
-     * responses. Response payload must be set using \ref
-     * SetResponse(LinId, const Payload&) per LIN ID.
-     */
-    virtual void SetSlaveConfiguration(const SlaveConfiguration& config) = 0;
-
-    /*! \brief Set the response payload for a given LIN ID
-     *
-     * Set \p payload as the response for requests with LIN ID
-     * \p linId. The corresponding LIN ID must be previoiusly
-     * configured as ResponseMode::TxUnconditional, cf. \ref
-     * SetSlaveConfiguration(const SlaveConfiguration&).
-     */
-    virtual void SetResponse(LinId linId, const Payload& payload) = 0;
-
-    /*! \brief Set the response payload for a given LIN ID and update checksum configuration
-     *
-     * Set \p payload as the response for requests with LIN ID
-     * \p linId. Also, the configured checksum model is updated
-     * to \p checksumModel.
-     * NB: The corresponding LIN ID must be previoiusly
-     * configured as #ResponseMode::TxUnconditional, cf. \ref
-     * SetSlaveConfiguration(const SlaveConfiguration&).
-     */
-    virtual void SetResponseWithChecksum(LinId linId, const Payload& payload, ChecksumModel checksumModel) = 0;
-
-    /*! \brief Mark a LIN ID as unused
-     *
-     * NB: currently not supported in VIBE LIN simulation.
-     */
-    virtual void RemoveResponse(LinId linId) = 0;
-
-
-    /*! \brief Send a LIN message to the connected slaves
-     *
-     * The following fields of the message must be set:
-     *  - linId (always)
-     *  - payload (always)
-     *  - checksumModel (VIBE)
-     *
-     * NB: in VIBE simulation, SendMessage(const LinMessage&) must not
-     * be called when there is still an ongoing transmission on the
-     * LIN bus. Otherwise, the SendMessage call will be answered with
-     * MessageStatus::Busy (cf. \ref
-     * RegisterTxCompleteHandler(TxCompleteHandler)). This limitation
-     * is not enforced in the simple simulation.
-     *
-     * NB: Must only be called when configured as a LIN master!
-     */
-    virtual void SendMessage(const LinMessage& msg) = 0;
-    
-    /*! \brief Request a LIN message from the connected slaves
-     *
-     * The following fields of the request must be set:
-     *  - linId (always)
-     *  - payloadLength (VIBE)
-     *  - checksummodel (VIBE)
-     *
-     * NB: in VIBE simulation, RequestMessage(const RxRequest&) must not
-     * be called when there is still an ongoing transmission on the
-     * LIN bus. Otherwise, the SendMessage call will be answered with
-     * MessageStatus::Busy (cf. \ref
-     * RegisterTxCompleteHandler(TxCompleteHandler)). This limitation
-     * is not enforced in the simple simulation.
-     *
-     * NB: Must only be called when configured as a LIN master!
-     */
-    virtual void RequestMessage(const RxRequest& request) = 0;
-
-    /*! \brief Send a special Go-To-Sleep command to all slaves
-     *
-     * The Go-To-Sleep command is a LIN message with the special ID 0x3C
-     * and a fixed payload {0x0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}.
-     *
-     * Upon reception of the Go-To-Sleep command, the SleepCommandHandler
-     * is called at each slave. SetSleepMode() is NOT automatically called,
-     * and thus must be called manually for each slave.
-     *
-     * NB: The successful transmission of the Go-To-Sleep command is
-     *     acknowledged to the sender through the regular TxCompleteHandler.
-     *
-     * NB: Neither master not slave controllers enter sleep mode automatically.
-     *
-     * NB: Must only be called when configured as a LIN master!
-     */
-    virtual void SendGoToSleep() = 0;
-
-    /*! \brief Send a WakeupRequest to all connected controllers
-     *
-     * The wakeup request must only be sent when the controller is currently
-     * sleeping and the LIN bus is idle. A wakeup request can be sent by any
-     * LIN controller, i.e., LIN masters and slaves.
-     *
-     * Upon reception of the Wakeup request, the registered WakupRequestHandler
-     * is called for each controller. I.e., the WakeupRequestHandler indicates
-     * both successfull transmission of the wakeup signal (for the sender),
-     * and reception of the wakeup signal (for the receivers).
-     */
-    virtual void SendWakeupRequest() = 0;
-
-    /*! \brief Register a callback for TX completion
-     *
-     * The handler is called when the previously sent LinMessage was
-     * successfully transmitted on the LIN bus. Check MessageStatus to
-     * see if the bus is free and a new message can be sent or
-     * requested.
+    /*! \brief Initialize the LIN controller
      * 
-     * NB: supported in simple LIN simulation and in VIBE LIN
-     * simulation.
+     * \param config The Controller configuration contains:
+     *  - controllerMode, either sets LIN master or LIN slave mode
+     *  - baudRate, determine transmission speeds (only used for VIBE simulation)
+     *  - frameResponses, an optional set of initial FrameResponses
      *
-     * NB: Must only be called when configured as a LIN master!
+     * *AUTOSAR Name:* Lin_Init
      */
-    virtual void RegisterTxCompleteHandler(TxCompleteHandler handler) = 0;
+    virtual void Init(ControllerConfig config) = 0;
 
-    /*! \brief Register a callback for LIN message reception
+    //! \brief Get the current status of the LIN Controller, i.e., Operational or Sleep.
+    virtual auto Status() const noexcept -> ControllerStatus = 0;
+
+    /*! \brief AUTOSAR LIN master interface
      *
-     * The handler is called when the master received a reply from a
-     * LIN slave following a previous call to \ref
-     * RequestMessage(const RxRequest&).
+     * Perform a full LIN data transfer, i.e., frame header + frame
+     * response. The responseType determines if frame.data is used for
+     * the frame response or if a different node has to provide it:
      *
-     * NB: Must only be called when configured as a LIN master!
+     * \li MasterResponse: \ref Frame is sent from this controller to
+     *     all connected slaves.
+     * \li SlaveResponse: the frame response must be provided by a
+     *     connected slave and is received by this controller.
+     * \li SlaveToSlave: the frame response must be provided by a
+     *     connected slave and is ignored by this controller.
+     *
+     * *AUTOSAR Name:* Lin_SendFrame
+     *
+     * \param frame provides the LIN identifier, checksum model, and optional data
+     * \param responseType determines if *frame.data* must is used for the frame response.
      */
-    virtual void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) = 0;
+    virtual void SendFrame(Frame frame, FrameResponseType responseType) = 0;
 
-    /*! \brief Register a callback for the reception of wakeup requests.
+    //! Send Interface for a non-AUTOSAR LIN Master
+    virtual void SendFrameHeader(LinIdT linId) = 0;
+    /*! FrameResponse configuration for Slaves or non-AUTOSAR LIN
+     *  Masters The corresponding LIN ID does not need to be
+     *  previously configured. */
+    virtual void SetFrameResponse(Frame frame, FrameResponseMode mode) = 0;
+    /*! FrameResponse configuration for Slaves or non-AUTOSAR LIN Masters.
+     * 
+     * Configures multiple responses at once. Corresponding IDs do not
+     * need to be previously configured.
      *
-     * The registered handler is called for both senders and receivers
-     * of the wakeup request.
+     * NB: only configures responses for the provided LIN IDs. I.e.,
+     * an empty vector does not clear or reset the currently
+     * configured FrameResponses.
      */
-    virtual void RegisterWakeupRequestHandler(WakeupRequestHandler handler) = 0;
+    virtual void SetFrameResponses(std::vector<FrameResponse> responses) = 0;
 
-    /*! \brief Register a callback for the reception of Go-To-Sleep command
-    *
-    * The handler is called for slaves only. For masters, the successful
-    * transmission of the Go-To-Sleep command is acknowledged via the registered
-    * TxCompleteHandler. Since the Go-To-Sleep command is a regular LIN message,
-    * the registered ReceiveMessageHandler is also called.
-    */
-    virtual void RegisterSleepCommandHandler(SleepCommandHandler handler) = 0;
+    /*! \brief Transmit a go-to-sleep-command and set ControllerState::Sleep and enable wake-up
+     *
+     * *AUTOSAR Name:* Lin_GoToSleep
+     */
+    virtual void GoToSleep() = 0;
+    /*! \brief Set ControllerState::Sleep without sending a go-to-sleep command.
+     *
+     * *AUTOSAR Name:* Lin_GoToSleepInternal
+     */
+    virtual void GoToSleepInternal() = 0;
+    /*! \brief Generate a wake up pulse and set ControllerState::Operational.
+     *
+     * *AUTOSAR Name:* Lin_Wakeup
+     */
+    virtual void Wakeup() = 0;
+    /*! Set ControllerState::Operational without generating a wake up pulse.
+     *
+     * *AUTOSAR Name:* Lin_WakeupInternal
+     */
+    virtual void WakeupInternal() = 0;
 
+    /*! \brief Report the \ref FrameStatus of a LIN \ref Frame
+     * transmission and provides the transmitted frame.
+     *
+     * The FrameStatusHandler is called once per call to
+     * SendFrame() or call to
+     * SendFrameHeader(). The handler is called independently
+     * of the transmission's success or failure.
+     *
+     * The FrameStatusHandler is called for all participating LIN
+     * controllers. I.e., for LIN masters, it is always called, and
+     * for LIN slaves, it is called if the corresponding \ref LinIdT is
+     * configured SlaveFrameResponseMode::Rx or
+     * SlaveFrameResponseMode::TxUnconditional.
+     *
+     * <em>Note: this is one of the major changes to the previous version.
+     * Previously, frame transmission was indicated using different
+     * means. For Masters, a TX was confirmed using the
+     * TxCompleteHandler while an RX was handled using
+     * ReceiveMessageHandler. For LIN slaves the confirmation varied
+     * for simple simulation and VIBE simulation.</em>
+     */
+    virtual void RegisterFrameStatusHandler(FrameStatusHandler) = 0;
+
+    /*! \brief The GoToSleepHandler is called whenever a go-to-sleep frame
+     * was received.
+     *
+     * Note: The LIN controller does not automatically enter sleep
+     * mode up reception of a go-to-sleep frame. I.e.,
+     * GoToSleepInternal() must be called manually
+     *
+     * NB: This handler will always be called, independently of the
+     * \ref FrameResponseMode configuration for LIN ID 0x3C. However,
+     * regarding the FrameStatusHandler, the go-to-sleep frame is
+     * treated like every other frame, i.e. the FrameStatusHandler is
+     * only called for LIN ID 0x3C if configured as
+     * FrameResponseMode::Rx.
+     */
+    virtual void RegisterGoToSleepHandler(GoToSleepHandler handler) = 0;
+
+    /*! \brief The WakeupHandler is called whenever a wake up pulse is received
+     *
+     * Note: The LIN controller does not automatically enter
+     * operational mode on wake up pulse detection. I.e.,
+     * WakeInternal() must be called manually.
+     */
+    virtual void RegisterWakeupHandler(WakeupHandler handler) = 0;
+
+    /*! \brief The FrameResponseUpdateHandler provides direct access
+     * to the FrameResponse configuration of other LIN controllers.
+     *
+     * NB: This callback is mainly for diagnostic purposes and is NOT
+     * needed for regular LIN controller operation.
+     */
+    virtual void RegisterFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) = 0;
 };
-    
+
 } // namespace lin
 } // namespace sim
 } // namespace ib
+
+
