@@ -38,7 +38,7 @@ inline auto ToTxFrameStatus(FrameStatus status) -> FrameStatus
     case FrameStatus::LIN_RX_ERROR:
         return FrameStatus::LIN_TX_ERROR;
     case FrameStatus::LIN_RX_NO_RESPONSE:
-        return FrameStatus::LIN_TX_ERROR;
+        return FrameStatus::LIN_RX_NO_RESPONSE;
     case FrameStatus::LIN_RX_OK:
         return FrameStatus::LIN_TX_OK;
     default:
@@ -135,7 +135,7 @@ void LinController::SendFrameHeader(LinIdT linId)
     // Dispatch the LIN transmission to our own callbacks
     FrameResponseMode masterResponseMode = GetLinNode(_endpointAddr).responses[linId].responseMode;
     FrameStatus masterFrameStatus = transmission.status;
-    if (masterResponseMode != FrameResponseMode::Rx)
+    if (masterResponseMode == FrameResponseMode::TxUnconditional)
         masterFrameStatus = ToTxFrameStatus(masterFrameStatus);
 
     // dispatch the reply locally...

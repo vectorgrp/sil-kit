@@ -272,8 +272,7 @@ TEST_F(LinControllerTest, send_frame_header_remove_master_response)
         .Times(1);
     EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(FrameStatus::LIN_RX_NO_RESPONSE)))
         .Times(1);
-    // FIXME: should this really raise a LIN_TX_ERROR or rather a LIN_RX_NO_RESPONSE?
-    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, AFrameWithId(17), FrameStatus::LIN_TX_ERROR))
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, AFrameWithId(17), FrameStatus::LIN_RX_NO_RESPONSE))
         .Times(1);
     controller.SetFrameResponse(frame, FrameResponseMode::Unused);
     controller.SendFrameHeader(17);
