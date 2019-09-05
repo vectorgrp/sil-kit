@@ -23,6 +23,8 @@ Fixed
   MiddlewareConfig or an ActiveMiddleware.
 - Fixed a crash when creating a ComAdapter with the same participant name as a
   previously destroyed one. The crash originated in spdlog.
+- Fixed a crash in the VAsioConnection destructor due to a wrong member order.
+
 
 Compatibility with Sprint-31
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

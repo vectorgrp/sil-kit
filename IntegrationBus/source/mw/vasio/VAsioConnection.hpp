@@ -196,18 +196,21 @@ private:
 
     // FIXME: generalize the reception of registry data
     std::vector<ParticipantAnnouncementReceiver> _participantAnnouncementReceivers;
-
-    std::vector<std::shared_ptr<IVAsioPeer>> _peers;
-    std::unique_ptr<IVAsioPeer> _registry{nullptr};
-
     std::vector<std::function<void(IVAsioPeer*)>> _peerShutdownCallbacks;
     std::function<void()> _newPeerCallback{nullptr};
 
-    // IO context and worker thread should be the last members in this class.
-    // This ensures that they are destroyed before the callbacks.
+    // NB: The IO context must be listed before anything socket related.
     asio::io_context _ioContext;
-    std::thread _ioWorker;
+
+    // NB: peers and acceptors must be listed AFTER the io_context. Otherwise,
+    // their destructor will crash!
+    std::unique_ptr<IVAsioPeer> _registry{nullptr};
+    std::vector<std::shared_ptr<IVAsioPeer>> _peers;
     std::unique_ptr<asio::ip::tcp::acceptor> _tcpAcceptor;
+
+    // The worker thread should be the last members in this class. This ensures
+    // that no callback is destroyed before the thread finishes.
+    std::thread _ioWorker;
 };
 
 // ================================================================================
