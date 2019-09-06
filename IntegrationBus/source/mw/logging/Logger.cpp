@@ -10,6 +10,10 @@
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/sinks/basic_file_sink.h"
 
+#include "SpdlogTypeConversion.hpp"
+
+#include "fmt/chrono.h"
+
 namespace ib {
 namespace mw {
 namespace logging {
@@ -20,27 +24,26 @@ class IbRemoteSink
 {
 public:
     IbRemoteSink() = delete;
-    IbRemoteSink(Logger* logger)
-        : _logger{logger}
+    IbRemoteSink(const Logger::LogMsgHandlerT& handler)
+        : _logMsgHandler{handler}
     {
     }
 
 protected:
     void sink_it_(const spdlog::details::log_msg& msg) override
     {
-        _logger->Distribute(std::move(from_spdlog(msg)));
+        _logMsgHandler(std::move(from_spdlog(msg)));
     }
 
     void flush_() override {}
 
 private:
-    Logger* _logger{nullptr};
+    Logger::LogMsgHandlerT _logMsgHandler;
 };
 } // anonymous namespace
 
 
 Logger::Logger(const std::string& participantName, const std::vector<cfg::Logger>& config)
-    : _ibRemoteSink{std::make_shared<IbRemoteSink>(this)}
 {
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
@@ -49,35 +52,47 @@ Logger::Logger(const std::string& participantName, const std::vector<cfg::Logger
     // NB: logger gets dropped from registry immediately after creating so that two comAdapter with the same
     // participantName won't lead to a spdlog exception because a logger with this name does already exist.
     spdlog::drop(participantName);
+    
     // set_default_logger should not be used here, as there can only be one default logger and if another comAdapter
     // gets created, the first default logger will be dropped from the registry as well.
 
+    // Generate a tm object for the timestamp once, so that all file loggers will have the very same timestamp.
+    auto timeNow = std::time(nullptr);
+    std::tm tmBuffer{};
+#if defined(_MSC_VER)
+    localtime_s(&tmBuffer, &timeNow);
+#else
+    localtime_r(&timeNow, &tmBuffer);
+#endif
+    
     for (auto logger : config)
     {
-        if (logger.type == cfg::Logger::Type::Remote)
-        {
-            _ibRemoteSink->set_level(to_spdlog(logger.level));
-            _logger->sinks().push_back(_ibRemoteSink);
-        }
+        auto log_level = to_spdlog(logger.level);
+        if (log_level < _logger->level())
+            _logger->set_level(log_level);
 
-        if (logger.type == cfg::Logger::Type::Stdout)
+        switch (logger.type)
+        {
+        case cfg::Logger::Type::Remote:
+            // The remote sink is instantiated and added later together with setting up
+            // all necessary connection logic to avoid segmentation errors if sth. goes wrong
+            _remoteLogLevel = log_level;
+            break;
+
+        case cfg::Logger::Type::Stdout:
         {
             auto stdoutSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-            stdoutSink->set_level(to_spdlog(logger.level));
-            _logger->sinks().push_back(stdoutSink);
+            stdoutSink->set_level(log_level);
+            _logger->sinks().emplace_back(std::move(stdoutSink));
+            break;
         }
-
-        if (logger.type == cfg::Logger::Type::File)
+        case cfg::Logger::Type::File:
         {
-            // Generate Timestamp for log file.
-            auto now = std::chrono::system_clock::now();
-            auto itt = std::chrono::system_clock::to_time_t(now);
-            std::ostringstream string_stream;
-            string_stream << logger.filename << "_" << std::put_time(localtime(&itt), "%FT%H-%M-%S") << ".txt";
-
-            auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(string_stream.str());
-            fileSink->set_level(to_spdlog(logger.level));
+            auto filename = fmt::format("{}_{:%FT%H-%M-%S}.txt", logger.filename, tmBuffer);
+            auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
+            fileSink->set_level(log_level);
             _logger->sinks().push_back(fileSink);
+        }
         }
     }
 }
@@ -117,9 +132,11 @@ void Logger::Critical(const std::string& msg)
     Log(Level::critical, msg);
 }
 
-void Logger::RegisterLogMsgHandler(LogMsgHandlerT handler)
+void Logger::RegisterRemoteLogging(const LogMsgHandlerT& handler)
 {
-    _logMsgHandler = std::move(handler);
+    _ibRemoteSink = std::make_shared<IbRemoteSink>(handler);
+    _ibRemoteSink->set_level(_remoteLogLevel);
+    _logger->sinks().push_back(_ibRemoteSink);
 }
 
 void Logger::LogReceivedMsg(const LogMsg& msg)
@@ -128,30 +145,16 @@ void Logger::LogReceivedMsg(const LogMsg& msg)
 
     for (auto&& sink : _logger->sinks())
     {
-        if (sink.get() == _ibRemoteSink.get())
+        if (to_spdlog(msg.level) < sink->level())
             continue;
 
-        if (to_spdlog(msg.level) < sink->level())
+        if (sink.get() == _ibRemoteSink.get())
             continue;
 
         sink->log(spdlog_msg);
     }
 }
 
-void Logger::Distribute(const LogMsg& msg)
-{
-    _logMsgHandler(msg);
-}
-
-void Logger::Distribute(LogMsg&& msg)
-{
-    _logMsgHandler(std::move(msg));
-}
-
-auto Logger::GetSinks() -> const std::vector<spdlog::sink_ptr>&
-{
-    return _logger->sinks();
-}
 
 } // namespace logging
 } // namespace mw

@@ -38,6 +38,26 @@ struct LogMsg
     std::string payload;
 };
 
+// ================================================================================
+//  Inline Implementations
+// ================================================================================
+inline bool operator==(const SourceLoc& lhs, const SourceLoc& rhs)
+{
+    return lhs.filename == rhs.filename
+        && lhs.line == rhs.line
+        && lhs.funcname == rhs.funcname;
+}
+
+inline bool operator==(const LogMsg& lhs, const LogMsg& rhs)
+{
+    return lhs.logger_name == rhs.logger_name
+        && lhs.level == rhs.level
+        && lhs.time == rhs.time
+        && lhs.source == rhs.source
+        && lhs.payload == rhs.payload;
+}
+
+
 } // namespace logging
 } // namespace mw
 } // namespace ib

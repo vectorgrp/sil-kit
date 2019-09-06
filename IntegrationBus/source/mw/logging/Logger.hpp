@@ -8,7 +8,14 @@
 #include "ib/mw/logging/LoggingDatatypes.hpp"
 #include "ib/cfg/Config.hpp"
 
-#include "SpdlogTypeConversion.hpp"
+#include "spdlog/details/log_msg.h"
+
+namespace spdlog {
+class logger;
+namespace sinks {
+class sink;
+} // sinks
+} // spdlog
 
 namespace ib {
 namespace mw {
@@ -39,43 +46,17 @@ public:
 
     void Critical(const std::string& msg) override;
 
-    void RegisterLogMsgHandler(LogMsgHandlerT handler) override;
+    void RegisterRemoteLogging(const LogMsgHandlerT& handler) override;
 
     void LogReceivedMsg(const LogMsg& msg) override;
-
-public:
-    // ----------------------------------------
-    // Public methods
-    void Distribute(const LogMsg& msg);
-    void Distribute(LogMsg&& msg);
-
-    auto GetSinks() -> const std::vector<spdlog::sink_ptr>&;
 
 private:
     // ----------------------------------------
     // private members
     std::shared_ptr<spdlog::logger> _logger;
     std::shared_ptr<spdlog::sinks::sink> _ibRemoteSink;
-
-    LogMsgHandlerT _logMsgHandler;
+    spdlog::level::level_enum _remoteLogLevel = spdlog::level::info;
 };
-
-inline bool operator==(const SourceLoc& lhs, const SourceLoc& rhs)
-{
-    return lhs.filename == rhs.filename
-        && lhs.line == rhs.line
-        && lhs.funcname == rhs.funcname;
-}
-
-inline bool operator==(const LogMsg& lhs, const LogMsg& rhs)
-{
-    return lhs.source == rhs.source
-        && lhs.time == rhs.time
-        && lhs.logger_name == rhs.logger_name
-
-        && lhs.level == rhs.level
-        && lhs.payload == rhs.payload;
-}
 
 } // namespace logging
 } // namespace mw

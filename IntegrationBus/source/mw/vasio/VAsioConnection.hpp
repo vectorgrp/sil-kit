@@ -29,7 +29,6 @@
 
 #include "IbLink.hpp"
 #include "IVAsioPeer.hpp"
-#include "VAsioTcpPeer.hpp"
 #include "VAsioReceiver.hpp"
 #include "VAsioTransmitter.hpp"
 #include "VAsioMessageSubscriber.hpp"
@@ -40,8 +39,16 @@
 
 #include "asio.hpp"
 
+#ifdef SendMessage
+#if SendMessage == SendMessageA
+#undef SendMessage
+#endif
+#endif
+
 namespace ib {
 namespace mw {
+
+class VAsioTcpPeer;
 
 class VAsioConnection
 {

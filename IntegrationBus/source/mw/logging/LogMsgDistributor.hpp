@@ -28,8 +28,6 @@ public:
 private:
     // ----------------------------------------
     // private methods
-    template <class MsgT>
-    void SendIbMessage(MsgT&& msg) const;
 
 private:
     // ----------------------------------------

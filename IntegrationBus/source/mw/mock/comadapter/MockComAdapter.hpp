@@ -33,7 +33,7 @@ public:
     void Warn(const std::string& /*msg*/) {}
     void Error(const std::string& /*msg*/) {}
     void Critical(const std::string& /*msg*/) {}
-    void RegisterLogMsgHandler(LogMsgHandlerT /*handler*/) {}
+    void RegisterRemoteLogging(const LogMsgHandlerT& /*handler*/) {}
     void LogReceivedMsg(const logging::LogMsg& /*msg*/) {}
 };
 

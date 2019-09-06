@@ -10,10 +10,6 @@
 #include "ib/mw/sync/ISystemMonitor.hpp"
 #include "ib/mw/sync/IIbToSystemMonitor.hpp"
 
-namespace spdlog {
-class logger;
-} // namespace spdlog
-
 namespace ib {
 namespace mw {
 namespace sync {

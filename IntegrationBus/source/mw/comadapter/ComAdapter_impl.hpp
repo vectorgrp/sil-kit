@@ -29,8 +29,11 @@
 
 #include "ib/cfg/string_utils.hpp"
 
-#include "spdlog/spdlog.h"
-#include "spdlog/sinks/null_sink.h"
+#ifdef SendMessage
+#if SendMessage == SendMessageA
+#undef SendMessage
+#endif
+#endif //SendMessage
 
 
 namespace ib {
@@ -82,15 +85,22 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
         (void)controller;
     }
 
+    auto&& logMsgRouter = CreateController<logging::LogMsgReceiver>(1029, "default");
+    logMsgRouter->SetLogger(_logger.get());
+
+    auto&& participantConfig = get_by_name(_config.simulationSetup.participants, _participantName);
+    auto loggerIter = std::find_if(participantConfig.logger.begin(), participantConfig.logger.end(),
+        [](const cfg::Logger& logger) { return logger.type == cfg::Logger::Type::Remote; });
+
+    if (loggerIter == participantConfig.logger.end())
+        return;
+
     auto&& logMsgDistributor = CreateController<logging::LogMsgDistributor>(1028, "default");
-    _logger->RegisterLogMsgHandler([logMsgDistributor](logging::LogMsg logMsg) {
+    _logger->RegisterRemoteLogging([logMsgDistributor](logging::LogMsg logMsg) {
 
         logMsgDistributor->SendLogMsg(std::move(logMsg));
 
     });
-
-    auto&& logMsgRouter = CreateController<logging::LogMsgReceiver>(1029, "default");
-    logMsgRouter->SetLogger(_logger.get());
 }
 
 template <class IbConnectionT>

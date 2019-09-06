@@ -12,10 +12,6 @@
 #include "ib/mw/sync/IIbToSyncMaster.hpp"
 #include "ib/cfg/fwd_decl.hpp"
 
-namespace spdlog {
-class logger;
-} // namespace spdlog
-
 namespace ib {
 namespace mw {
 namespace sync {

@@ -21,12 +21,6 @@ void LogMsgDistributor::SendLogMsg(LogMsg&& msg)
     _comAdapter->SendIbMessage(_endpointAddress, std::move(msg));
 }
 
-template <class MsgT>
-void LogMsgDistributor::SendIbMessage(MsgT&& msg) const
-{
-    _comAdapter->SendIbMessage(_endpointAddress, std::forward<MsgT>(msg));
-}
-
 void LogMsgDistributor::SetEndpointAddress(const ib::mw::EndpointAddress &address)
 {
     _endpointAddress = address;

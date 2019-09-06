@@ -101,34 +101,13 @@ TEST(LoggerTest, receive_log_message_with_receiver)
     logMsgReceiver.ReceiveIbMessage(senderAddress, msg);
 }
 
-TEST(LoggerTest, create_logger_sinks)
-{
-    cfg::ConfigBuilder configBuilder("TestBuilder");
-
-    configBuilder.SimulationSetup().AddParticipant("L1")
-        ->AddLogger(cfg::Logger::Type::Remote, logging::Level::warn)
-        ->AddLogger(cfg::Logger::Type::File, logging::Level::trace)
-        .WithFilename("FileLogger");
-
-    auto config = configBuilder.Build();
-
-    auto&& participantConfig = cfg::get_by_name(config.simulationSetup.participants, "L1");
-    Logger logger{"L1", participantConfig.logger};
-
-    ASSERT_EQ(logger.GetSinks().size(), 3u);
-    auto&& sinks = logger.GetSinks();
-    
-    EXPECT_EQ(sinks[1]->level(), spdlog::level::warn);
-    EXPECT_EQ(sinks[2]->level(), spdlog::level::trace);
-}
-
 TEST(LoggerTest, send_log_message_from_logger)
 {
     std::string loggerName{"ParticipantAndLogger"};
 
     cfg::ConfigBuilder configBuilder("TestBuilder");
     configBuilder.SimulationSetup().AddParticipant(loggerName)
-        ->AddLogger(cfg::Logger::Type::Remote, logging::Level::debug);
+        .AddLogger(cfg::Logger::Type::Remote, logging::Level::debug);
 
     auto config = configBuilder.Build();
     auto&& participantConfig = cfg::get_by_name(config.simulationSetup.participants, loggerName);
@@ -139,7 +118,7 @@ TEST(LoggerTest, send_log_message_from_logger)
     LogMsgDistributor logMsgDistributor(&mockComAdapter);
     logMsgDistributor.SetEndpointAddress(controllerAddress);
 
-    logger.RegisterLogMsgHandler([&logMsgDistributor](logging::LogMsg logMsg) {
+    logger.RegisterRemoteLogging([&logMsgDistributor](logging::LogMsg logMsg) {
 
         logMsgDistributor.SendLogMsg(std::move(logMsg));
 

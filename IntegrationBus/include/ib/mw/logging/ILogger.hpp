@@ -53,7 +53,7 @@ public:
 
     /*! \brief Register a callback for remote logging.
     */
-    virtual void RegisterLogMsgHandler(LogMsgHandlerT handler) = 0;
+    virtual void RegisterRemoteLogging(const LogMsgHandlerT& handler) = 0;
 
     /*! \brief Log a received remote message.
     */
