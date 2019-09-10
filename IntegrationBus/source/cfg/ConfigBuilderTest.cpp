@@ -58,24 +58,25 @@ TEST_F(ConfigBuilderTest, make_exec_controller)
 
 TEST_F(ConfigBuilderTest, configure_logger_config)
 {
-    simulationSetup.AddParticipant("L1")
-        ->AddLogger(Logger::Type::Remote, logging::Level::warn)
-        ->AddLogger(Logger::Type::File, logging::Level::debug)
-        .WithFilename("FileLogger");
+    simulationSetup.AddParticipant("L1").AddLogger().WhichSubscribesToRemoteLogs().WithFlushLevel(logging::Level::critical)
+        ->AddSink(Sink::Type::Remote).WithLogLevel(logging::Level::warn)
+        ->AddSink(Sink::Type::File).WithLogLevel(logging::Level::debug).WithFilename("FileLogger");
 
     auto config = configBuilder.Build();
 
     ASSERT_EQ(config.simulationSetup.participants.size(), 1u);
     auto&& participant = config.simulationSetup.participants[0];
 
-    ASSERT_EQ(participant.logger.size(), 2u);
-    auto&& logger1 = participant.logger[0];
-    auto&& logger2 = participant.logger[1];
+    EXPECT_TRUE(participant.logger.subscribeToRemoteLogs);
+    EXPECT_EQ(participant.logger.flush_level, logging::Level::critical);
+    ASSERT_EQ(participant.logger.sinks.size(), 2u);
+    auto&& sink1 = participant.logger.sinks[0];
+    auto&& sink2 = participant.logger.sinks[1];
 
-    EXPECT_EQ(logger1.type, Logger::Type::Remote);
-    EXPECT_EQ(logger1.level, logging::Level::warn);
-    EXPECT_EQ(logger2.type, Logger::Type::File);
-    EXPECT_EQ(logger2.level, logging::Level::debug);
+    EXPECT_EQ(sink1.type, Sink::Type::Remote);
+    EXPECT_EQ(sink1.level, logging::Level::warn);
+    EXPECT_EQ(sink2.type, Sink::Type::File);
+    EXPECT_EQ(sink2.level, logging::Level::debug);
 }
 
 TEST_F(ConfigBuilderTest, make_eth_controller)

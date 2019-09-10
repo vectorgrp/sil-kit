@@ -11,13 +11,15 @@
                 "Description": "Publishes different generic messages",
                 "SyncType": "DiscreteTime",
                 "IsSyncMaster": true,
-                "Logger": [
-                    {
-                        "Type": "Remote",
-                        "Level": "Info"
-                    }
-                ],
-
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote",
+                            "Level": "Trace"
+                        }
+                    ]
+                },
                 "GenericPublishers": [
                     {
                         "Name": "GroundTruth",
@@ -40,12 +42,15 @@
                 "Name": "Subscriber",
                 "Description": "Subscribes different generic messages",
                 "SyncType": "DiscreteTime",
-                "Logger": [
-                    {
-                        "Type": "Remote",
-                        "Level": "Info"
-                    }
-                ],
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote",
+                            "Level": "Trace"
+                        }
+                    ]
+                },
 
                 "GenericSubscribers": [
                     "GroundTruth",
@@ -56,31 +61,35 @@
             {
                 "Name": "SystemController",
                 "SyncType": "Unsynchronized",
-                "Logger": [
-                    {
-                        "Type": "Remote",
-                        "Level": "Info"
-                    }
-                ]
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote"
+                        }
+                    ]
+                }
             },
             {
                 "Name": "SystemMonitor",
                 "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
                 "SyncType": "Unsynchronized",
-                "Logger": [
-                    {
-                        "Type": "Stdout",
-                        "Level": "Info"
-                    },
-                    {
-                        "Type": "File",
-                        "Level": "Trace",
-                        "Filename": "SystemMonitorLog"
-                    }
-                ]
+                "Logger": {
+                    "SubscribeToRemoteLogs": true,
+                    "FlushLevel": "Info",
+                    "Sinks": [
+                        {
+                            "Type": "Stdout"
+                        },
+                        {
+                            "Type": "File",
+                            "Level": "Trace",
+                            "Filename": "SystemMonitorLog"
+                        }
+                    ]
+                }
             }
         ],
-
         "Links": [
             {
                 "Name": "GroundTruth",

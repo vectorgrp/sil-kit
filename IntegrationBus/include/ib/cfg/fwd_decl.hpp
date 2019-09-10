@@ -19,6 +19,7 @@ struct TimeSync;
 struct Config;
 class Misconfiguration;
 
+class LoggerBuilder;
 class ParticipantBuilder;
 template<class ControllerCfg>
 class ControllerBuilder;

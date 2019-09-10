@@ -3,32 +3,48 @@
 #include "LoggerBuilder.hpp"
 
 #include "ParticipantBuilder.hpp"
-#include "SimulationSetupBuilder.hpp"
 
 namespace ib {
 namespace cfg {
 
-LoggerBuilder::LoggerBuilder(ParticipantBuilder *participant, cfg::Logger::Type type, mw::logging::Level level)
+LoggerBuilder::LoggerBuilder(ParticipantBuilder *participant)
     : ParentBuilder<ParticipantBuilder>{participant}
 {
-    _logger.type = type;
-    _logger.level = level;
 }
 
-auto LoggerBuilder::WithFilename(std::string filename) -> LoggerBuilder&
-{
-    _logger.filename = filename;
-    return *this;
-}
-
-auto LoggerBuilder::operator->() -> ParticipantBuilder*
-{
-    return Parent();
-}
+LoggerBuilder::~LoggerBuilder() = default;
 
 auto LoggerBuilder::Build() -> Logger
 {
+    for (auto&& builder : _sinks)
+    {
+        _logger.sinks.emplace_back(builder.Build());
+    }
+
     return std::move(_logger);
+}
+
+auto LoggerBuilder::AddSink(Sink::Type type) -> SinkBuilder&
+{
+    _sinks.emplace_back(this, type);
+    return _sinks[_sinks.size() - 1];
+}
+
+auto LoggerBuilder::WhichSubscribesToRemoteLogs() -> LoggerBuilder&
+{
+    _logger.subscribeToRemoteLogs = true;
+    return *this;
+}
+
+auto LoggerBuilder::WithFlushLevel(mw::logging::Level level) -> LoggerBuilder&
+{
+    _logger.flush_level = level;
+    return *this;
+}
+
+auto LoggerBuilder::operator->() -> LoggerBuilder*
+{
+    return this;
 }
 
 } // namespace cfg

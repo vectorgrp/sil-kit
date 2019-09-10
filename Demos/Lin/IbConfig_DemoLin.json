@@ -10,12 +10,15 @@
                 "Name": "LinMaster",
                 "Description": "LIN Master",
                 "SyncType": "DiscreteTime",
-                "Logger": [
-                    {
-                        "Type": "Remote",
-                        "Level": "Info"
-                    }
-                ],
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote",
+                            "Level": "Trace"
+                        }
+                    ]
+                },
                 
                 "LinControllers": [ "LIN1" ]
             },
@@ -23,12 +26,15 @@
                 "Name": "LinSlave",
                 "Description": "LIN Slave",
                 "SyncType": "DiscreteTime",
-                "Logger": [
-                    {
-                        "Type": "Remote",
-                        "Level": "Info"
-                    }
-                ],
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote",
+                            "Level": "Trace"
+                        }
+                    ]
+                },
                 
                 "LinControllers": [ "LIN1" ]
             },
@@ -36,28 +42,33 @@
                 "Name": "SystemController",
                 "SyncType": "Unsynchronized",
                 "IsSyncMaster": true,
-                "Logger": [
-                    {
-                        "Type": "Remote",
-                        "Level": "Info"
-                    }
-                ]
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote"
+                        }
+                    ]
+                }
             },
             {
                 "Name": "SystemMonitor",
                 "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
                 "SyncType": "Unsynchronized",
-                "Logger": [
-                    {
-                        "Type": "Stdout",
-                        "Level": "Info"
-                    },
-                    {
-                        "Type": "File",
-                        "Level": "Trace",
-                        "Filename": "SystemMonitorLog"
-                    }
-                ]
+                "Logger": {
+                    "SubscribeToRemoteLogs": true,
+                    "FlushLevel": "Info",
+                    "Sinks": [
+                        {
+                            "Type": "Stdout"
+                        },
+                        {
+                            "Type": "File",
+                            "Level": "Trace",
+                            "Filename": "SystemMonitorLog"
+                        }
+                    ]
+                }
             }
         ],
 

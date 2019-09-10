@@ -10,54 +10,63 @@
                 "Name": "CanWriter",
                 "Description": "Demo Writer",
                 "SyncType": "DistributedTimeQuantum",
-                "Logger": [
-                    {
-                        "Type": "Remote",
-                        "Level": "Info"
-                    }
-                ],
-
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote",
+                            "Level": "Trace"
+                        }
+                    ]
+                },
                 "CanControllers": [ "CAN1" ]
             },
             {
                 "Name": "CanReader",
                 "Description": "Demo Reader",
                 "SyncType": "DistributedTimeQuantum",
-                "Logger": [
-                    {
-                        "Type": "Remote",
-                        "Level": "Info"
-                    }
-                ],
-
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote",
+                            "Level": "Trace"
+                        }
+                    ]
+                },
                 "CanControllers": [ "CAN1" ]
             },
             {
                 "Name": "SystemController",
                 "SyncType": "Unsynchronized",
                 "IsSyncMaster": true,
-                "Logger": [
-                    {
-                        "Type": "Remote",
-                        "Level": "Info"
-                    }
-                ]
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote"
+                        }
+                    ]
+                }
             },
             {
                 "Name": "SystemMonitor",
                 "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
                 "SyncType": "Unsynchronized",
-                "Logger": [
-                    {
-                        "Type": "Stdout",
-                        "Level": "Info"
-                    },
-                    {
-                        "Type": "File",
-                        "Level": "Trace",
-                        "Filename": "SystemMonitorLog"
-                    }
-                ]
+                "Logger": {
+                    "SubscribeToRemoteLogs": true,
+                    "FlushLevel": "Info",
+                    "Sinks": [
+                        {
+                            "Type": "Stdout"
+                        },
+                        {
+                            "Type": "File",
+                            "Level": "Trace",
+                            "Filename": "SystemMonitorLog"
+                        }
+                    ]
+                }
             }
         ],
 

@@ -26,7 +26,7 @@ class Logger : public ILogger
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    Logger(const std::string& participantName, const std::vector<cfg::Logger>& config);
+    Logger(const std::string& participantName, const cfg::Logger& config);
 
     // ----------------------------------------
     // Public interface methods

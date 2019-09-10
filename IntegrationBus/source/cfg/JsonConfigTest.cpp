@@ -57,10 +57,9 @@ protected:
 
 TEST_F(JsonConfigTest, ConfigureLogger)
 {
-    simulationSetup.AddParticipant("P1")
-        ->AddLogger(Logger::Type::Stdout, logging::Level::info)
-        ->AddLogger(Logger::Type::File, logging::Level::trace)
-        .WithFilename("FileLogger");
+    simulationSetup.AddParticipant("P1").AddLogger().WhichSubscribesToRemoteLogs().WithFlushLevel(logging::Level::critical)
+        ->AddSink(Sink::Type::Stdout).WithLogLevel(logging::Level::info)
+        ->AddSink(Sink::Type::File).WithLogLevel(logging::Level::trace).WithFilename("FileLogger");
 
     BuildConfigFromJson();
     EXPECT_EQ(config, referenceConfig);
@@ -71,11 +70,13 @@ TEST_F(JsonConfigTest, ConfigureLogger)
     auto&& p1 = participants[0];
 
     ASSERT_EQ(p1.name, "P1");
-    EXPECT_EQ(p1.logger.size(), 2u);
-    EXPECT_EQ(p1.logger[0].type, Logger::Type::Stdout);
-    EXPECT_EQ(p1.logger[0].level, logging::Level::info);
-    EXPECT_EQ(p1.logger[1].type, Logger::Type::File);
-    EXPECT_EQ(p1.logger[1].level, logging::Level::trace);
+    EXPECT_TRUE(p1.logger.subscribeToRemoteLogs);
+    EXPECT_EQ(p1.logger.flush_level, logging::Level::critical);
+    EXPECT_EQ(p1.logger.sinks.size(), 2u);
+    EXPECT_EQ(p1.logger.sinks[0].type, Sink::Type::Stdout);
+    EXPECT_EQ(p1.logger.sinks[0].level, logging::Level::info);
+    EXPECT_EQ(p1.logger.sinks[1].type, Sink::Type::File);
+    EXPECT_EQ(p1.logger.sinks[1].level, logging::Level::trace);
 }
 
 TEST_F(JsonConfigTest, CreateCanNetwork)

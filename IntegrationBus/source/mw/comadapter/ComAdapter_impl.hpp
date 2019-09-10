@@ -85,14 +85,17 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
         (void)controller;
     }
 
-    auto&& logMsgRouter = CreateController<logging::LogMsgReceiver>(1029, "default");
-    logMsgRouter->SetLogger(_logger.get());
-
     auto&& participantConfig = get_by_name(_config.simulationSetup.participants, _participantName);
-    auto loggerIter = std::find_if(participantConfig.logger.begin(), participantConfig.logger.end(),
-        [](const cfg::Logger& logger) { return logger.type == cfg::Logger::Type::Remote; });
+    if (participantConfig.logger.subscribeToRemoteLogs)
+    {
+        auto&& logMsgRouter = CreateController<logging::LogMsgReceiver>(1029, "default");
+        logMsgRouter->SetLogger(_logger.get());
+    }
 
-    if (loggerIter == participantConfig.logger.end())
+    auto sinkIter = std::find_if(participantConfig.logger.sinks.begin(), participantConfig.logger.sinks.end(),
+        [](const cfg::Sink& sink) { return sink.type == cfg::Sink::Type::Remote; });
+
+    if (sinkIter == participantConfig.logger.sinks.end())
         return;
 
     auto&& logMsgDistributor = CreateController<logging::LogMsgDistributor>(1028, "default");

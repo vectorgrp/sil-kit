@@ -43,7 +43,7 @@ private:
 } // anonymous namespace
 
 
-Logger::Logger(const std::string& participantName, const std::vector<cfg::Logger>& config)
+Logger::Logger(const std::string& participantName, const cfg::Logger& config)
 {
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
@@ -64,37 +64,39 @@ Logger::Logger(const std::string& participantName, const std::vector<cfg::Logger
 #else
     localtime_r(&timeNow, &tmBuffer);
 #endif
-    
-    for (auto logger : config)
+
+    for (auto sink : config.sinks)
     {
-        auto log_level = to_spdlog(logger.level);
+        auto log_level = to_spdlog(sink.level);
         if (log_level < _logger->level())
             _logger->set_level(log_level);
 
-        switch (logger.type)
+        switch (sink.type)
         {
-        case cfg::Logger::Type::Remote:
+        case cfg::Sink::Type::Remote:
             // The remote sink is instantiated and added later together with setting up
             // all necessary connection logic to avoid segmentation errors if sth. goes wrong
             _remoteLogLevel = log_level;
             break;
 
-        case cfg::Logger::Type::Stdout:
+        case cfg::Sink::Type::Stdout:
         {
             auto stdoutSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
             stdoutSink->set_level(log_level);
             _logger->sinks().emplace_back(std::move(stdoutSink));
             break;
         }
-        case cfg::Logger::Type::File:
+        case cfg::Sink::Type::File:
         {
-            auto filename = fmt::format("{}_{:%FT%H-%M-%S}.txt", logger.filename, tmBuffer);
+            auto filename = fmt::format("{}_{:%FT%H-%M-%S}.txt", sink.filename, tmBuffer);
             auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
             fileSink->set_level(log_level);
             _logger->sinks().push_back(fileSink);
         }
         }
     }
+
+    _logger->flush_on(to_spdlog(config.flush_level));
 }
 
 void Logger::Log(Level level, const std::string& msg)

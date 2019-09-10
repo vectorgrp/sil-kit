@@ -15,7 +15,10 @@ add_library(IbConfig STATIC
     Config.cpp
     ConfigBuilder.cpp
     ControllerBuilder.cpp
+    LoggerBuilder.hpp
     LoggerBuilder.cpp
+    SinkBuilder.hpp
+    SinkBuilder.cpp
     GenericPortBuilder.cpp
     LinkBuilder.cpp
     NetworkSimulatorBuilder.cpp
@@ -52,6 +55,7 @@ add_vib_test(TestIbConfigExample SOURCES IbConfigExampleTest.cpp
     LIBS IbMwMockNullConnection
     CONFIGS
         IbConfig_Example.json
+        IbConfig_Bad_FileLogger.json
         IbConfig_IO-Example.json
         IbConfig_Canoe.json
         IbConfig_FastRTPS-local.json

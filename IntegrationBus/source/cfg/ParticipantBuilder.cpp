@@ -19,10 +19,8 @@ ParticipantBuilder::ParticipantBuilder(SimulationSetupBuilder* ibConfig, std::st
 
 auto ParticipantBuilder::Build() -> Participant
 {
-    for (auto&& builder : _logger)
-    {
-        config.logger.emplace_back(builder.Build());
-    }
+    if (_logger)
+        config.logger = _logger->Build();
 
     BuildControllers(config.canControllers);
     BuildControllers(config.linControllers);
@@ -49,10 +47,10 @@ auto ParticipantBuilder::operator->() -> ParticipantBuilder*
     return this;
 }
 
-auto ParticipantBuilder::AddLogger(cfg::Logger::Type type, mw::logging::Level level) -> LoggerBuilder&
+auto ParticipantBuilder::AddLogger() -> LoggerBuilder&
 {
-    _logger.emplace_back(this, type, level);
-    return _logger[_logger.size() - 1];
+    _logger = std::make_unique<LoggerBuilder>(this);
+    return *_logger;
 }
 auto ParticipantBuilder::AddCan(std::string name) -> ControllerBuilder<CanController>&
 {

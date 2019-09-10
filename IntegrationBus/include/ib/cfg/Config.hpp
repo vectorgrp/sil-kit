@@ -55,7 +55,7 @@ struct Link
     std::vector<std::string> endpoints;
 };
 
-struct Logger
+struct Sink
 {
     enum class Type
     {
@@ -65,8 +65,15 @@ struct Logger
     };
 
     Type type = Type::Remote;
-    mw::logging::Level level = mw::logging::Level::off;
+    mw::logging::Level level = mw::logging::Level::info;
     std::string filename;
+};
+
+struct Logger
+{
+    bool subscribeToRemoteLogs{false};
+    mw::logging::Level flush_level = mw::logging::Level::off;
+    std::vector<Sink> sinks;
 };
 
 struct CanController
@@ -193,7 +200,7 @@ struct Participant
 
     mw::ParticipantId id{0};
 
-    std::vector<Logger> logger;
+    Logger logger;
     std::vector<CanController> canControllers;
     std::vector<LinController> linControllers;
     std::vector<EthernetController> ethernetControllers;

@@ -106,8 +106,10 @@ TEST(LoggerTest, send_log_message_from_logger)
     std::string loggerName{"ParticipantAndLogger"};
 
     cfg::ConfigBuilder configBuilder("TestBuilder");
-    configBuilder.SimulationSetup().AddParticipant(loggerName)
-        .AddLogger(cfg::Logger::Type::Remote, logging::Level::debug);
+    configBuilder.SimulationSetup()
+        .AddParticipant(loggerName)
+        .AddLogger()
+        .AddSink(cfg::Sink::Type::Remote).WithLogLevel(logging::Level::debug);
 
     auto config = configBuilder.Build();
     auto&& participantConfig = cfg::get_by_name(config.simulationSetup.participants, loggerName);

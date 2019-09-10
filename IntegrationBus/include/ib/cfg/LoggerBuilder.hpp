@@ -9,22 +9,30 @@
 #include "fwd_decl.hpp"
 #include "ParentBuilder.hpp"
 
+#include "SinkBuilder.hpp"
+
 namespace ib {
 namespace cfg {
 
 class LoggerBuilder : public ParentBuilder<ParticipantBuilder>
 {
 public:
-    IntegrationBusAPI LoggerBuilder(ParticipantBuilder *participant, cfg::Logger::Type type, mw::logging::Level level);
+    IntegrationBusAPI LoggerBuilder(ParticipantBuilder *participant);
+    IntegrationBusAPI ~LoggerBuilder();
 
-    IntegrationBusAPI auto WithFilename(std::string filename) -> LoggerBuilder&;
+    IntegrationBusAPI auto AddSink(Sink::Type type) -> SinkBuilder&;
 
-    IntegrationBusAPI auto operator->() -> ParticipantBuilder*;
+    IntegrationBusAPI auto WhichSubscribesToRemoteLogs() -> LoggerBuilder&;
+    IntegrationBusAPI auto WithFlushLevel(mw::logging::Level level) -> LoggerBuilder&;
+
+    IntegrationBusAPI auto operator->() -> LoggerBuilder*;
 
     IntegrationBusAPI auto Build() -> Logger;
 
 private:
     Logger _logger;
+
+    std::vector<SinkBuilder> _sinks;
 };
 
 // ================================================================================
