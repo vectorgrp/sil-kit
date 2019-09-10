@@ -43,7 +43,8 @@ private:
 } // anonymous namespace
 
 
-Logger::Logger(const std::string& participantName, const cfg::Logger& config)
+Logger::Logger(const std::string& participantName, cfg::Logger config)
+    : _config{std::move(config)}
 {
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
@@ -65,7 +66,7 @@ Logger::Logger(const std::string& participantName, const cfg::Logger& config)
     localtime_r(&timeNow, &tmBuffer);
 #endif
 
-    for (auto sink : config.sinks)
+    for (auto sink : _config.sinks)
     {
         auto log_level = to_spdlog(sink.level);
         if (log_level < _logger->level())
@@ -76,7 +77,6 @@ Logger::Logger(const std::string& participantName, const cfg::Logger& config)
         case cfg::Sink::Type::Remote:
             // The remote sink is instantiated and added later together with setting up
             // all necessary connection logic to avoid segmentation errors if sth. goes wrong
-            _remoteLogLevel = log_level;
             break;
 
         case cfg::Sink::Type::Stdout:
@@ -96,7 +96,7 @@ Logger::Logger(const std::string& participantName, const cfg::Logger& config)
         }
     }
 
-    _logger->flush_on(to_spdlog(config.flush_level));
+    _logger->flush_on(to_spdlog(_config.flush_level));
 }
 
 void Logger::Log(Level level, const std::string& msg)
@@ -136,8 +136,11 @@ void Logger::Critical(const std::string& msg)
 
 void Logger::RegisterRemoteLogging(const LogMsgHandlerT& handler)
 {
+    auto remoteSinkRef = std::find_if(_config.sinks.begin(), _config.sinks.end(),
+        [](const cfg::Sink& sink) { return sink.type == cfg::Sink::Type::Remote; });
+
     _ibRemoteSink = std::make_shared<IbRemoteSink>(handler);
-    _ibRemoteSink->set_level(_remoteLogLevel);
+    _ibRemoteSink->set_level(to_spdlog(remoteSinkRef->level));
     _logger->sinks().push_back(_ibRemoteSink);
 }
 
@@ -154,6 +157,9 @@ void Logger::LogReceivedMsg(const LogMsg& msg)
             continue;
 
         sink->log(spdlog_msg);
+
+        if (_config.flush_level <= msg.level)
+            sink->flush();
     }
 }
 

@@ -8,8 +8,6 @@
 #include "ib/mw/logging/LoggingDatatypes.hpp"
 #include "ib/cfg/Config.hpp"
 
-#include "spdlog/details/log_msg.h"
-
 namespace spdlog {
 class logger;
 namespace sinks {
@@ -26,7 +24,7 @@ class Logger : public ILogger
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    Logger(const std::string& participantName, const cfg::Logger& config);
+    Logger(const std::string& participantName, cfg::Logger config);
 
     // ----------------------------------------
     // Public interface methods
@@ -53,9 +51,10 @@ public:
 private:
     // ----------------------------------------
     // private members
+    cfg::Logger _config;
+
     std::shared_ptr<spdlog::logger> _logger;
     std::shared_ptr<spdlog::sinks::sink> _ibRemoteSink;
-    spdlog::level::level_enum _remoteLogLevel = spdlog::level::info;
 };
 
 } // namespace logging
