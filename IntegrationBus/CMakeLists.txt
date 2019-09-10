@@ -211,8 +211,8 @@ endif(IB_BIN_FASTRTPS_ENABLE)
 #######################################################################################################################
 
 # We use fmtlib to offer a convenient logging interface
-message(STATUS "Add subdirectory ThirdParty/fmt-6.0.0")
-add_subdirectory(${THIRDPARTY_DIR}/fmt-6.0.0
+message(STATUS "Add subdirectory ThirdParty/fmt-5.3.0")
+add_subdirectory(${THIRDPARTY_DIR}/fmt-5.3.0
     ThirdParty/fmt-6.0.0
     EXCLUDE_FROM_ALL
 )

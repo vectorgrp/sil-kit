@@ -12,7 +12,7 @@
 
 #include "SpdlogTypeConversion.hpp"
 
-#include "fmt/chrono.h"
+#include "fmt/time.h"
 
 namespace ib {
 namespace mw {
