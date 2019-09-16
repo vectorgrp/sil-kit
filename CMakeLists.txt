@@ -6,15 +6,15 @@ cmake_minimum_required(VERSION 3.5)
 
 project("IntegrationBus")
 
-include(${PROJECT_SOURCE_DIR}/cmake/IntegrationBusVersion.cmake)
-configure_ib_version(${PROJECT_NAME})
+option(IB_BUILD_TESTS "Enable unit and integration tests for the Integration Bus" ON)
+option(IB_BUILD_DOCS "Build documentation for the Integration Bus (requires Doxygen and Sphinx)" OFF)
 
 # Add the cmake folder so the FindSphinx module is found
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
-#######################################################################################################################
-# Include thirdparty libraries to be built
-#######################################################################################################################
+include(${PROJECT_SOURCE_DIR}/cmake/IntegrationBusVersion.cmake)
+configure_ib_version(${PROJECT_NAME})
+
 
 ######################################################################################################################
 # Include the IntegrationBus projects to be built

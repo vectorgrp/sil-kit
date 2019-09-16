@@ -1,6 +1,4 @@
-set(BUILD_DOCS FALSE CACHE BOOL "Enables automated building and installing of the documentation")
-
-if(${BUILD_DOCS})
+if(${IB_BUILD_DOCS})
     find_package(Doxygen REQUIRED)
     find_package(Sphinx REQUIRED)
 

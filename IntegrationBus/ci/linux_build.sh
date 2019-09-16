@@ -35,7 +35,7 @@ cmake .. \
     -DCMAKE_BUILD_TYPE=$target \
     -DIB_BUILD_NUMBER=$buildNumber \
     -DIB_INSTALL_PDB_FILES=ON \
-    -DBUILD_DOCS=ON \
+    -DIB_BUILD_DOCS=ON \
     -DCMAKE_INSTALL_PREFIX=../install \
     -DCMAKE_PREFIX_PATH=./install \
     -DCMAKE_INSTALL_SYMLINKS=OFF \
