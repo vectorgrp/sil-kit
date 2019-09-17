@@ -43,10 +43,14 @@ target_link_libraries(IbMwVAsio
       Threads::Threads
 )
 
-# we use the asio installation that comes with Fast-RTPS
+# For the time being, we use the asio installation that comes with Fast-RTPS
+if(NOT ASIO_INCLUDE_DIR)
+    message(ERROR "Unable to find Asio include directory as expected from Fast-RTPS.")
+endif()
+
 target_include_directories(IbMwVAsio
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-    PUBLIC ${THIRDPARTY_DIR}/Fast-RTPS/thirdparty/asio/asio/include/
+    PUBLIC ${ASIO_INCLUDE_DIR}
 )
 
 target_compile_definitions(IbMwVAsio
