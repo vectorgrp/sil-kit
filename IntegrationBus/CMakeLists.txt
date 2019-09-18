@@ -379,8 +379,6 @@ install(
         CHANGELOG.md
         CMakeLists.txt 
         LICENSE 
-        CloneFastRTPS.bat.in 
-        CloneFastRTPS.sh.in 
     DESTINATION ${INSTALL_SOURCE_DIR}
     COMPONENT IntegrationBus-Developer
 )
@@ -401,34 +399,6 @@ install(
     # Breathe is just required for generating the documentation
     REGEX "/ThirdParty/Breathe" EXCLUDE
 )
-# Instead of the Fast-RTPS library, deploy a script to clone Fast-RTPS. 
-# It should only be used from package deployments, thus the '.in' disguise.
-if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-    configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/CloneFastRTPS.sh.in
-        ${CMAKE_CURRENT_BINARY_DIR}/CloneFastRTPS.sh
-        COPYONLY
-    )
-    install(
-        FILES
-            ${CMAKE_CURRENT_BINARY_DIR}/CloneFastRTPS.sh
-        DESTINATION ${INSTALL_SOURCE_DIR}/../ThirdParty/
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE  # chmod +x
-        COMPONENT IntegrationBus-Developer
-    )
-else()
-    configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/CloneFastRTPS.bat.in
-        ${CMAKE_CURRENT_BINARY_DIR}/CloneFastRTPS.bat
-        COPYONLY
-    )
-    install(
-        FILES
-            ${CMAKE_CURRENT_BINARY_DIR}/CloneFastRTPS.bat
-        DESTINATION ${INSTALL_SOURCE_DIR}/../ThirdParty/
-        COMPONENT IntegrationBus-Developer
-    )
-endif()
 
 # Install all the helper files
 install(
