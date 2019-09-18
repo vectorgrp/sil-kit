@@ -830,6 +830,29 @@
               }
             },
             "additionalProperties": false
+          },
+
+          "VAsio": {
+            "type": "object",
+            "title": "VAsio settings",
+            "properties": {
+              "Registry": {
+                "type": "object",
+                "title": "The registry used for the VAsio middleware.",
+                "properties": {
+                  "Hostname": {
+                    "type": "string",
+                    "default": "localhost"
+                  },
+                  "Port": {
+                    "type": "integer",
+                    "default": "8500"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
           }
 
         },
