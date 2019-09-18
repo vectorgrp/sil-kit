@@ -113,7 +113,7 @@ private:
     mw::EndpointAddress _endpointAddress{};
     cfg::SyncType _syncType;
     cfg::TimeSync _timesyncConfig;
-    std::shared_ptr<spdlog::logger> _logger;
+    logging::ILogger* _logger{nullptr};
 
     std::unique_ptr<ISyncAdapter> _syncAdapter;
     bool _coldswapEnabled{false};

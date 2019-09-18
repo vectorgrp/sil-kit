@@ -87,7 +87,7 @@ private:
         ControllerStatus              controllerStatus{ControllerStatus::Unknown};
         std::array<FrameResponse, 64> responses;
 
-        void UpdateResponses(std::vector<FrameResponse> responses_);
+        void UpdateResponses(std::vector<FrameResponse> responses_, mw::logging::ILogger* logger);
     };
 
 private:
@@ -106,7 +106,7 @@ private:
     // private members
     mw::IComAdapter* _comAdapter;
     mw::EndpointAddress _endpointAddr;
-    std::shared_ptr<spdlog::logger> _logger;
+    mw::logging::ILogger* _logger;
 
     ControllerMode   _controllerMode{ControllerMode::Inactive};
     ControllerStatus _controllerStatus{ControllerStatus::Unknown};

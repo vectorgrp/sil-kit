@@ -64,9 +64,46 @@
                 "Description": {
                     "$ref": "#/definitions/Description"
                 },
-                "SyncType" :{
+                "SyncType" : {
                   "type": "string",
                     "enum": [ "DistributedTimeQuantum", "DiscreteEvent", "TimeQuantum", "DiscreteTime", "DiscreteTimePassive", "Unsynchronized"]
+                },
+                "Logger" : {
+                  "type": "object",
+                  "properties": {
+                    "LogFromRemotes": {
+                      "type": "boolean",
+                      "title": "Enables receiving of remote log messages from other participants"
+                    },
+                    "FlushLevel": {
+                      "type": "string",
+                      "enum": [ "Critical", "Warn", "Info", "Debug", "Trace", "Off"]
+                    },
+                    "Sinks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "Type": {
+                            "type": "string",
+                              "enum": [ "Remote", "File", "Stdout"]
+                          },
+                          "Level": {
+                            "type": "string",
+                              "enum": [ "Critical", "Warn", "Info", "Debug", "Trace", "Off"]
+                          },
+                          "Logname": {
+                            "type": "string",
+                            "title": "Logname of a file logger. The logname results in the following filename: <Logname>_%y-%m-%dT%h-%m-%s.txt"
+                          }
+                        },
+                        "additionalProperties": false,
+                        "required": [ "Type" ]
+                      }
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [ "Sinks" ]
                 },
                 "CanControllers": {
                   "type": "array",

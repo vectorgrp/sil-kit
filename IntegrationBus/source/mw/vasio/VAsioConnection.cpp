@@ -2,10 +2,12 @@
 
 #include "VAsioConnection.hpp"
 
-#include "ib/cfg/string_utils.hpp"
-
 #include <thread>
 #include <chrono>
+
+#include "ib/cfg/string_utils.hpp"
+
+#include "VAsioTcpPeer.hpp"
 
 using namespace std::chrono_literals;
 

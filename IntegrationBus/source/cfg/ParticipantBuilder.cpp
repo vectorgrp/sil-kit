@@ -19,6 +19,9 @@ ParticipantBuilder::ParticipantBuilder(SimulationSetupBuilder* ibConfig, std::st
 
 auto ParticipantBuilder::Build() -> Participant
 {
+    if (_logger)
+        config.logger = _logger->Build();
+
     BuildControllers(config.canControllers);
     BuildControllers(config.linControllers);
     BuildControllers(config.ethernetControllers);
@@ -44,6 +47,11 @@ auto ParticipantBuilder::operator->() -> ParticipantBuilder*
     return this;
 }
 
+auto ParticipantBuilder::ConfigureLogger() -> LoggerBuilder&
+{
+    _logger = std::make_unique<LoggerBuilder>(this);
+    return *_logger;
+}
 auto ParticipantBuilder::AddCan(std::string name) -> ControllerBuilder<CanController>&
 {
     return AddController<CanController>(std::move(name), Parent()->GetFreeEndpointId());

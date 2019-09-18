@@ -7,9 +7,9 @@
 
 #include "ib/cfg/Config.hpp"
 #include "ib/mw/IComAdapter.hpp"
-#include "ib/mw/logging/spdlog.hpp"
 #include "ib/mw/sync/ISystemMonitor.hpp"
 #include "ib/mw/sync/string_utils.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 #include "SyncDatatypeUtils.hpp"
 
 using namespace std::chrono_literals;
@@ -53,7 +53,7 @@ void SyncMaster::SetupTimeQuantumClients(const cfg::Config& config)
         _timeQuantumClients[participant.id] = std::move(client);
 
     }
-    _logger->info("SyncMaster is serving {} TimeQuantum Clients", _timeQuantumClients.size());
+    _logger->Info("SyncMaster is serving {} TimeQuantum Clients", _timeQuantumClients.size());
 }
 
 void SyncMaster::SetupDiscreteTimeClient(const cfg::Config& config)
@@ -63,7 +63,7 @@ void SyncMaster::SetupDiscreteTimeClient(const cfg::Config& config)
         end(config.simulationSetup.participants),
         [](auto&& participant) { return participant.syncType == cfg::SyncType::DiscreteTime; }
     );
-    _logger->info("SyncMaster is serving {} DiscreteTime Clients", numClients);
+    _logger->Info("SyncMaster is serving {} DiscreteTime Clients", numClients);
 
     if (numClients == 0)
         return;
@@ -93,7 +93,7 @@ void SyncMaster::ReceiveIbMessage(mw::EndpointAddress from, const TickDone& msg)
 
     if (_discreteTimeClient->GetCurrentTick() != msg.finishedTick)
     {
-        _logger->error("Received {} from participant {}, which does not match current {}", msg, from.participant, _discreteTimeClient->GetCurrentTick());
+        _logger->Error("Received {} from participant {}, which does not match current {}", msg, from.participant, _discreteTimeClient->GetCurrentTick());
     }
 
     _discreteTimeClient->TickDoneReceived();
@@ -112,7 +112,7 @@ void SyncMaster::ReceiveIbMessage(mw::EndpointAddress from, const QuantumRequest
 {
     if (_timeQuantumClients.count(from.participant) != 1)
     {
-        _logger->error("Received QuantumRequest from participant {}, which is unknown!", from.participant);
+        _logger->Error("Received QuantumRequest from participant {}, which is unknown!", from.participant);
         return;
     }
 
@@ -120,13 +120,13 @@ void SyncMaster::ReceiveIbMessage(mw::EndpointAddress from, const QuantumRequest
 
     if (client->HasPendingRequest())
     {
-        _logger->error("Received QuantumRequest from participant {}, which already has a pending request!", from.participant);
+        _logger->Error("Received QuantumRequest from participant {}, which already has a pending request!", from.participant);
         return;
     }
 
     if (client->EndTime() != msg.now)
     {
-        _logger->error("QuantumRequest from participant {} does not match the current simulation time!", from.participant);
+        _logger->Error("QuantumRequest from participant {} does not match the current simulation time!", from.participant);
     }
 
     client->SetPendingRequest(msg.now, msg.duration);
@@ -165,7 +165,7 @@ void SyncMaster::SystemStateChanged(SystemState newState)
         switch (oldState)
         {
         case SystemState::Paused:
-            _logger->info("SyncMaster: continuing simulating.");
+            _logger->Info("SyncMaster: continuing simulating.");
             break;
 
         case SystemState::Initializing:
@@ -176,7 +176,7 @@ void SyncMaster::SystemStateChanged(SystemState newState)
 
         case SystemState::Initialized:
             std::cout << "SyncMaster:: starting simulation" << std::endl;
-            _logger->info("SyncMaster: starting simulating.");
+            _logger->Info("SyncMaster: starting simulating.");
             for (auto&& client : _syncClients)
             {
                 client->Reset();
@@ -184,7 +184,7 @@ void SyncMaster::SystemStateChanged(SystemState newState)
             break;
 
         default:
-            _logger->warn("SyncMaster: switch to SystemState::Running from unexpected state SystemState::{}. Assuming simulation start.", oldState);
+            _logger->Warn("SyncMaster: switch to SystemState::Running from unexpected state SystemState::{}. Assuming simulation start.", oldState);
             for (auto&& client : _syncClients)
             {
                 client->Reset();

@@ -126,6 +126,124 @@ auto from_json<Version>(const json11::Json& json) -> Version
     return version;
 }
 
+auto to_json(const Sink::Type& type) -> json11::Json
+{
+    switch (type)
+    {
+    case Sink::Type::Remote:
+        return "Remote";
+    case Sink::Type::Stdout:
+        return "Stdout";
+    case Sink::Type::File:
+        return "File";
+    default:
+        return "";
+    }
+}
+
+template <>
+auto from_json<Sink::Type>(const json11::Json& json) -> Sink::Type
+{
+    auto&& str = json.string_value();
+    if (str == "Remote" || str == "")
+        return Sink::Type::Remote;
+    if (str == "Stdout")
+        return Sink::Type::Stdout;
+    if (str == "File")
+        return Sink::Type::File;
+
+    throw Misconfiguration{"Unknown Logger Type"};
+}
+
+auto to_json(const mw::logging::Level& level) -> json11::Json
+{
+    switch (level)
+    {
+    case mw::logging::Level::Critical:
+        return "Critical";
+    case mw::logging::Level::Warn:
+        return "Warn";
+    case mw::logging::Level::Info:
+        return "Info";
+    case mw::logging::Level::Debug:
+        return "Debug";
+    case mw::logging::Level::Trace:
+        return "Trace";
+    case mw::logging::Level::Off:
+        return "Off";
+    default:
+        return "";
+    }
+}
+
+template <>
+auto from_json<mw::logging::Level>(const json11::Json& json) -> mw::logging::Level
+{
+    auto&& str = json.string_value();
+    if (str == "Critical")
+        return mw::logging::Level::Critical;
+    if (str == "Warn")
+        return mw::logging::Level::Warn;
+    if (str == "Info")
+        return mw::logging::Level::Info;
+    if (str == "Debug")
+        return mw::logging::Level::Debug;
+    if (str == "Trace")
+        return mw::logging::Level::Trace;
+    if (str == "Off")
+        return mw::logging::Level::Off;
+
+    throw Misconfiguration{"Unknown Log Level"};
+}
+
+auto to_json(const Sink& sink) -> json11::Json
+{
+    return json11::Json::object{
+        {"Type", to_json(sink.type)},
+        {"Level", to_json(sink.level)},
+        {"Logname", to_json(sink.logname)}
+    };
+}
+
+template <>
+auto from_json<Sink>(const json11::Json& json) -> Sink
+{
+    Sink sink;
+    sink.type = from_json<Sink::Type>(json["Type"].string_value());
+    optional_from_json(sink.level, json, "Level");
+
+    if (sink.type == Sink::Type::File)
+    {
+        if (!json.object_items().count("Logname"))
+            throw Misconfiguration("Logname of file logger is not specified");
+        sink.logname = json["Logname"].string_value();
+    }
+
+    return sink;
+}
+
+auto to_json(const Logger& logger) -> json11::Json
+{
+    return json11::Json::object{
+        {"LogFromRemotes", logger.logFromRemotes},
+        {"FlushLevel", to_json(logger.flush_level)},
+        {"Sinks", to_json(logger.sinks)}
+    };
+}
+
+template <>
+auto from_json<Logger>(const json11::Json& json) -> Logger
+{
+    Logger logger;
+    if (json.object_items().count("LogFromRemotes"))
+        logger.logFromRemotes = json["LogFromRemotes"].bool_value();
+
+    optional_from_json(logger.flush_level, json, "FlushLevel");
+    logger.sinks = from_json<std::vector<Sink>>(json["Sinks"].array_items());
+
+    return logger;
+}
+
 auto to_json(const CanController& controller) -> json11::Json
 {
     return json11::Json(controller.name);
@@ -664,6 +782,7 @@ auto to_json(const Participant& participant) -> json11::Json
 
     return json11::Json::object{
         {"Name", participant.name},
+        {"Logger", to_json(participant.logger)},
         {"CanControllers", to_json(participant.canControllers)},
         {"LinControllers", to_json(participant.linControllers)},
         {"EthernetControllers", to_json(participant.ethernetControllers)},
@@ -722,6 +841,7 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
 
     participant.name = json["Name"].string_value();
 
+    optional_from_json(participant.logger, json, "Logger");
     participant.canControllers = from_json<std::vector<CanController>>(json["CanControllers"].array_items());
     participant.linControllers = from_json<std::vector<LinController>>(json["LinControllers"].array_items());
     participant.ethernetControllers = from_json<std::vector<EthernetController>>(json["EthernetControllers"].array_items());

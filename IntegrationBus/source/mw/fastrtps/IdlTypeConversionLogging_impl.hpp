@@ -8,42 +8,6 @@
 #include "ib/mw/logging/LoggingDatatypes.hpp"
 #include "idl/LoggingTopics.h"
 
-#include "spdlog/details/log_msg.h"
-#ifdef SendMessage
-#if SendMessage == SendMessageA
-#undef SendMessage
-#endif
-#endif
-
-
-namespace spdlog {
-namespace level {
-inline auto to_idl(level_enum level) -> ib::mw::logging::idl::level::level_enum
-{
-    namespace idl = ib::mw::logging::idl::level;
-    switch (level)
-    {
-    case trace:
-        return idl::trace;
-    case debug:
-        return idl::debug;
-    case info:
-        return idl::info;
-    case warn:
-        return idl::warn;
-    case err:
-        return idl::err;
-    case critical:
-        return idl::critical;
-    case off:
-        return idl::off;
-    }
-    throw ib::type_conversion_error{};
-}
-} // namespace spdlog
-} // namespace level
-
-
 namespace ib {
 namespace mw {
 namespace logging {
@@ -92,26 +56,49 @@ auto to_idl(LogMsg&& msg) -> idl::LogMsg
     return idl;
 }
 
+inline auto to_idl(Level level) -> idl::level::level_enum
+{
+    namespace idl = idl::level;
+    switch (level)
+    {
+    case Level::Trace:
+        return idl::trace;
+    case Level::Debug:
+        return idl::debug;
+    case Level::Info:
+        return idl::info;
+    case Level::Warn:
+        return idl::warn;
+    case Level::Error:
+        return idl::err;
+    case Level::Critical:
+        return idl::critical;
+    case Level::Off:
+        return idl::off;
+    }
+    throw ib::type_conversion_error{};
+}
+
 namespace idl {
 namespace level {
-inline auto from_idl(level_enum level) -> spdlog::level::level_enum
+inline auto from_idl(level_enum level) -> Level
 {
     switch (level)
     {
     case trace:
-        return spdlog::level::trace;
+        return Level::Trace;
     case debug:
-        return spdlog::level::debug;
+        return Level::Debug;
     case info:
-        return spdlog::level::info;
+        return Level::Info;
     case warn:
-        return spdlog::level::warn;
+        return Level::Warn;
     case err:
-        return spdlog::level::err;
+        return Level::Error;
     case critical:
-        return spdlog::level::critical;
+        return Level::Critical;
     case off:
-        return spdlog::level::off;
+        return Level::Off;
     }
     throw ib::type_conversion_error{};
 }
@@ -133,7 +120,7 @@ auto idl::from_idl(idl::LogMsg&& idl) -> logging::LogMsg
 
     msg.logger_name = std::move(idl.logger_name());
     msg.level = from_idl(idl.level());
-    msg.time = spdlog::log_clock::time_point(std::chrono::microseconds{idl.timeUs()});
+    msg.time = log_clock::time_point(std::chrono::microseconds{idl.timeUs()});
     msg.source = from_idl(std::move(idl.source()));
     msg.payload = std::move(idl.payload());
 

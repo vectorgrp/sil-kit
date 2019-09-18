@@ -111,7 +111,7 @@
                     }
                 ]
             },
-                        {
+            {
                 "Name": "GenericMessageSubscriber",
                 "Description": "Subscribes different generic messages",
                 "SyncType": "DiscreteTime",

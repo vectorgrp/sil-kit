@@ -47,7 +47,6 @@ protected:
         , monitor{&comAdapter, testConfig.simulationSetup}
     {
         monitor.SetEndpointAddress(addr);
-        comAdapter.logger = spdlog::default_logger();
     }
 
     void RegisterSystemHandler()

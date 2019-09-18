@@ -12,13 +12,6 @@
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/sim/fwd_decl.hpp"
 
-namespace spdlog {
-namespace details {
-    struct log_msg;
-}
-    class logger;
-}
-
 namespace ib {
 namespace mw {
 
@@ -75,7 +68,7 @@ public:
     virtual auto GetParticipantController() -> sync::IParticipantController* = 0;
     virtual auto GetSystemMonitor() -> sync::ISystemMonitor* = 0;
     virtual auto GetSystemController() -> sync::ISystemController* = 0;
-    virtual auto GetLogger() -> std::shared_ptr<spdlog::logger>& = 0;
+    virtual auto GetLogger() -> logging::ILogger* = 0;
 
     virtual void RegisterCanSimulator(sim::can::IIbToCanSimulator* busSim) = 0;
     virtual void RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim) = 0;

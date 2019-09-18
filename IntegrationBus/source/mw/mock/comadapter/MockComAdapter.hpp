@@ -5,7 +5,7 @@
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/sync/SyncDatatypes.hpp"
 #include "ib/mw/logging/LoggingDatatypes.hpp"
-#include "ib/mw/logging/spdlog.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 
 #include "ib/sim/fwd_decl.hpp"
 #include "ib/sim/can/CanDatatypes.hpp"
@@ -15,8 +15,6 @@
 #include "ib/sim/io/IoDatatypes.hpp"
 #include "ib/sim/generic/GenericMessageDatatypes.hpp"
 
-#include "spdlog/sinks/null_sink.h"
-
 #ifdef SendMessage
 #undef SendMessage
 #endif
@@ -25,12 +23,25 @@ namespace ib {
 namespace mw {
 namespace test {
 
+class DummyLogger : public logging::ILogger
+{
+public:
+    void Log(logging::Level /*level*/, const std::string& /*msg*/) override {}
+    void Trace(const std::string& /*msg*/) override {}
+    void Debug(const std::string& /*msg*/) override {}
+    void Info(const std::string& /*msg*/) override {}
+    void Warn(const std::string& /*msg*/) override {}
+    void Error(const std::string& /*msg*/) override {}
+    void Critical(const std::string& /*msg*/) override {}
+    void RegisterRemoteLogging(const LogMsgHandlerT& /*handler*/) {}
+    void LogReceivedMsg(const logging::LogMsg& /*msg*/) {}
+};
+
 class DummyComAdapter : public IComAdapter
 {
 public:
     DummyComAdapter()
     {
-        logger = spdlog::default_logger();
     }
 
     auto CreateCanController(const std::string& /*canonicalName*/) -> sim::can::ICanController* { return nullptr; }
@@ -52,7 +63,7 @@ public:
     auto GetParticipantController() -> sync::IParticipantController* { return nullptr; }
     auto GetSystemMonitor() -> sync::ISystemMonitor* { return nullptr; }
     auto GetSystemController() -> sync::ISystemController* { return nullptr; }
-    auto GetLogger() -> std::shared_ptr<spdlog::logger>& { return logger; }
+    auto GetLogger() -> logging::ILogger* { return &logger; }
 
     void RegisterCanSimulator(sim::can::IIbToCanSimulator* /*canonicalName*/) {}
     void RegisterEthSimulator(sim::eth::IIbToEthSimulator* /*canonicalName*/) {}
@@ -119,7 +130,7 @@ public:
     void FlushSendBuffers() {}
     void RegisterNewPeerCallback(std::function<void(void)> /*callback*/) {}
 
-    std::shared_ptr<spdlog::logger> logger;
+    DummyLogger logger;
 };
 
 // ================================================================================

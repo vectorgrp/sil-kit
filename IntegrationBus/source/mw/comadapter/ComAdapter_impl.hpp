@@ -19,7 +19,9 @@
 #include "SystemController.hpp"
 #include "SystemMonitor.hpp"
 #include "SyncMaster.hpp"
-#include "LogmsgRouter.hpp"
+#include "LogMsgSender.hpp"
+#include "LogMsgReceiver.hpp"
+#include "Logger.hpp"
 
 #include "tuple_tools/bind.hpp"
 #include "tuple_tools/for_each.hpp"
@@ -27,8 +29,11 @@
 
 #include "ib/cfg/string_utils.hpp"
 
-#include "spdlog/spdlog.h"
-#include "spdlog/sinks/null_sink.h"
+#ifdef SendMessage
+#if SendMessage == SendMessageA
+#undef SendMessage
+#endif
+#endif //SendMessage
 
 
 namespace ib {
@@ -58,12 +63,8 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& par
 {
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
-    _logger = spdlog::create<spdlog::sinks::null_sink_st>(_participantName);
-    // NB: logger gets dropped from registry immediately after creating so that two comAdapter with the same
-    // participantName won't lead to a spdlog exception because a logger with this name does already exist.
-    spdlog::drop(_participantName);
-    // set_default_logger should not be used here, as there can only be one default logger and if another comAdapter
-    // gets created, the first default logger will be dropped from the registry as well.
+    auto&& participantConfig = get_by_name(_config.simulationSetup.participants, _participantName);
+    _logger = std::make_unique<logging::Logger>(_participantName, participantConfig.logger);
 }
 
 template <class IbConnectionT>
@@ -71,20 +72,57 @@ void ComAdapter<IbConnectionT>::joinIbDomain(uint32_t domainId)
 {
     _ibConnection.JoinDomain(domainId);
     onIbDomainJoined();
-    _logger->info("Participant {} has joined the IB-Domain {}", _participantName, domainId);
+
+    _logger->Info("Participant {} has joined the IB-Domain {}", _participantName, domainId);
 }
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::onIbDomainJoined()
+{
+    SetupSyncMaster();
+    SetupRemoteLogging();
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SetupSyncMaster()
 {
     if (_participant.isSyncMaster)
     {
         /*[[maybe_unused]]*/ auto* controller = GetSyncMaster();
         (void)controller;
     }
+}
 
-    auto&& logMsgRouter = CreateController<logging::LogmsgRouter>(1028, "default");
-    logMsgRouter->SetLogger(_logger);
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SetupRemoteLogging()
+{
+    auto* logger = dynamic_cast<logging::Logger*>(_logger.get());
+    if (logger)
+    {
+        if (_participant.logger.logFromRemotes)
+        {
+            auto&& logMsgRouter = CreateController<logging::LogMsgReceiver>(1029, "default");
+            logMsgRouter->SetLogger(logger);
+        }
+
+        auto sinkIter = std::find_if(_participant.logger.sinks.begin(), _participant.logger.sinks.end(),
+            [](const cfg::Sink& sink) { return sink.type == cfg::Sink::Type::Remote; });
+
+        if (sinkIter != _participant.logger.sinks.end())
+        {
+            auto&& logMsgSender = CreateController<logging::LogMsgSender>(1028, "default");
+
+            logger->RegisterRemoteLogging([logMsgSender](logging::LogMsg logMsg) {
+
+                logMsgSender->SendLogMsg(std::move(logMsg));
+
+            });
+        }
+    }
+    else
+    {
+        _logger->Warn("Failed to setup remote logging. Participant {} will not send and receive remote logs.", _participantName);
+    }
 }
 
 template <class IbConnectionT>
@@ -240,9 +278,9 @@ auto ComAdapter<IbConnectionT>::CreateGenericSubscriber(const std::string& canon
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::GetSyncMaster() -> sync::ISyncMaster*
 {
-    if (!isSyncMaster())
+    if (!_participant.isSyncMaster)
     {
-        _logger->error("ComAdapter::GetSyncMaster(): Participant is not configured as SyncMaster!");
+        _logger->Error("ComAdapter::GetSyncMaster(): Participant is not configured as SyncMaster!");
         throw std::runtime_error("Participant not configured as SyncMaster");
     }
 
@@ -290,9 +328,9 @@ auto ComAdapter<IbConnectionT>::GetSystemController() -> sync::ISystemController
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::GetLogger() -> std::shared_ptr<spdlog::logger>&
+auto ComAdapter<IbConnectionT>::GetLogger() -> logging::ILogger*
 {
-    return _logger;
+    return _logger.get();
 }
 
 template <class IbConnectionT>
@@ -631,7 +669,7 @@ auto ComAdapter<IbConnectionT>::CreateController(EndpointId endpointId, const st
     auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
     if (controllerMap.count(endpointId))
     {
-        _logger->error("ComAdapter already has a controller with endpointId={}", endpointId);
+        _logger->Error("ComAdapter already has a controller with endpointId={}", endpointId);
         throw std::runtime_error("Duplicate EndpointId");
     }
 
@@ -673,7 +711,7 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
     auto&& simulator = std::get<IIbToSimulatorT*>(_simulators);
     if (simulator)
     {
-        _logger->error("A {} is already registered", typeid(IIbToSimulatorT).name());
+        _logger->Error("A {} is already registered", typeid(IIbToSimulatorT).name());
         return;
     }
 
@@ -720,7 +758,7 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
                 }
                 catch (const std::exception& e)
                 {
-                    _logger->error("Cannot register simulator topics for link \"{}\": {}", linkName, e.what());
+                    _logger->Error("Cannot register simulator topics for link \"{}\": {}", linkName, e.what());
                     continue;
                 }
             }
@@ -751,12 +789,6 @@ bool ComAdapter<IbConnectionT>::ControllerUsesNetworkSimulator(const std::string
     }
 
     return false;
-}
-
-template <class IbConnectionT>
-bool ComAdapter<IbConnectionT>::isSyncMaster() const
-{
-    return _participant.isSyncMaster;
 }
 
 template <class IbConnectionT>

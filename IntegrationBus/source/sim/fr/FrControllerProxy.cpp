@@ -4,7 +4,7 @@
 #include "Validation.hpp"
 
 #include "ib/mw/IComAdapter.hpp"
-#include "ib/mw/logging/spdlog.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 
 namespace ib {
 namespace sim {
@@ -28,7 +28,7 @@ void FrControllerProxy::ReconfigureTxBuffer(uint16_t txBufferIdx, const TxBuffer
 {
     if (txBufferIdx >= _bufferConfigs.size())
     {
-        _comAdapter->GetLogger()->error("FrControllerProxy::ReconfigureTxBuffer() was called with unconfigured txBufferIdx={}", txBufferIdx);
+        _comAdapter->GetLogger()->Error("FrControllerProxy::ReconfigureTxBuffer() was called with unconfigured txBufferIdx={}", txBufferIdx);
         throw std::out_of_range{"Unconfigured txBufferIdx!"};
     }
 
@@ -42,7 +42,7 @@ void FrControllerProxy::UpdateTxBuffer(const TxBufferUpdate& update)
 {
     if (update.txBufferIndex >= _bufferConfigs.size())
     {
-        _comAdapter->GetLogger()->error("FrControllerProxy::UpdateTxBuffer() was called with unconfigured txBufferIndex={}", update.txBufferIndex);
+        _comAdapter->GetLogger()->Error("FrControllerProxy::UpdateTxBuffer() was called with unconfigured txBufferIndex={}", update.txBufferIndex);
         throw std::out_of_range{"Unconfigured txBufferIndex!"};
     }
 

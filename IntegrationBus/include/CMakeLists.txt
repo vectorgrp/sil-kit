@@ -7,9 +7,18 @@ target_include_directories(IbInterface
         $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}>
 )
 
-target_link_libraries(IbInterface
-    INTERFACE spdlog
-)
+
+if (TARGET fmt::fmt-header-only)
+    message(STATUS "have fmt::fmt-header-only")
+    target_link_libraries(IbInterface
+        INTERFACE
+            $<BUILD_INTERFACE:fmt::fmt-header-only>
+    )
+    target_compile_definitions(IbInterface
+        INTERFACE
+            $<BUILD_INTERFACE:HAVE_FMTLIB>
+    )
+endif()
 
 # Add a custom project IbApi for quick access to IB Headers in Visual Studio
 file(GLOB_RECURSE IB_INTERFACE_SOURCES ${CMAKE_CURRENT_LIST_DIR}/*.hpp)

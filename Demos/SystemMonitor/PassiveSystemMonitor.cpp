@@ -13,14 +13,7 @@
 #include "ib/IntegrationBus.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/mw/sync/string_utils.hpp"
-
-#include "spdlog/logger.h"
-#ifdef SendMessage
-#undef SendMessage
-#endif
-#include "spdlog/fmt/ostr.h"
-#include "spdlog/sinks/stdout_color_sinks.h"
-
+#include "ib/mw/logging/ILogger.hpp"
 
 using namespace ib::mw;
 using namespace std::chrono_literals;
@@ -32,21 +25,7 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
     return out;
 }
 
-void ReportParticipantStatus(const ib::mw::sync::ParticipantStatus& status)
-{
-    spdlog::info(
-        "New ParticipantState: {},\tReason: {}",
-        status.state,
-        status.enterReason
-    );
-}
-
-void ReportSystemState(ib::mw::sync::SystemState state)
-{
-    spdlog::info("New SystemState: {}", state);
-}
-
-int main(int argc, char** argv)
+int main(int argc, char** argv) try
 {
     if (argc < 2)
     {
@@ -54,47 +33,53 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    try
+    std::string jsonFilename(argv[1]);
+    std::string participantName{"SystemMonitor"};
+
+    uint32_t domainId = 42;
+    if (argc >= 3)
     {
-        std::string jsonFilename(argv[1]);
-        std::string participantName{"SystemMonitor"};
-
-        uint32_t domainId = 42;
-        if (argc >= 3)
-        {
-            domainId = static_cast<uint32_t>(std::stoul(argv[2]));
-        }
-
-        auto ibConfig = ib::cfg::Config::FromJsonFile(jsonFilename);
-
-        std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-        auto comAdapter = ib::CreateComAdapter(std::move(ibConfig), participantName, domainId);
-
-        // add a stdout sink to the logger to print all received log messages
-        comAdapter->GetLogger()->sinks().push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
-        spdlog::set_default_logger(comAdapter->GetLogger());
-
-        auto systemMonitor = comAdapter->GetSystemMonitor();
-        systemMonitor->RegisterParticipantStatusHandler(&ReportParticipantStatus);
-        systemMonitor->RegisterSystemStateHandler(&ReportSystemState);
-
-        std::cout << "Press enter to terminate the SystemMonitor..." << std::endl;
-        std::cin.ignore();
-    }
-    catch (const ib::cfg::Misconfiguration& error)
-    {
-        std::cerr << "Invalid configuration: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
-        std::cin.ignore();
-        return -2;
-    }
-    catch (const std::exception& error)
-    {
-        std::cerr << "Something went wrong: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
-        std::cin.ignore();
-        return -3;
+        domainId = static_cast<uint32_t>(std::stoul(argv[2]));
     }
 
+    auto ibConfig = ib::cfg::Config::FromJsonFile(jsonFilename);
+
+    std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
+    auto comAdapter = ib::CreateComAdapter(std::move(ibConfig), participantName, domainId);
+    auto* logger = comAdapter->GetLogger();
+    auto* systemMonitor = comAdapter->GetSystemMonitor();
+    
+    systemMonitor->RegisterParticipantStatusHandler(
+        [logger](const sync::ParticipantStatus& status) {
+            std::stringstream buffer;
+            buffer
+                << "New ParticipantState: " << status.participantName << " is " << status.state
+                << ",\tReason: " << status.enterReason;
+            logger->Info(buffer.str());
+        });
+    
+    systemMonitor->RegisterSystemStateHandler(
+        [logger](sync::SystemState state) {
+            std::stringstream buffer;
+            buffer << "New SystemState: " << state;
+            logger->Info(buffer.str());
+        });
+
+    std::cout << "Press enter to terminate the SystemMonitor..." << std::endl;
+    std::cin.ignore();
     return 0;
+}
+catch (const ib::cfg::Misconfiguration& error)
+{
+    std::cerr << "Invalid configuration: " << error.what() << std::endl;
+    std::cout << "Press enter to stop the process..." << std::endl;
+    std::cin.ignore();
+    return -2;
+}
+catch (const std::exception& error)
+{
+    std::cerr << "Something went wrong: " << error.what() << std::endl;
+    std::cout << "Press enter to stop the process..." << std::endl;
+    std::cin.ignore();
+    return -3;
 }

@@ -11,6 +11,7 @@ target_include_directories(IbSimLin
 
 target_link_libraries(IbSimLin
     PRIVATE IbInterface
+    IbMwLogging
 )
 
 add_vib_test(TestSimLin

@@ -313,5 +313,4 @@ TEST_F(LinControllerProxyTest, call_wakeup_handler)
     proxy.ReceiveIbMessage(addr1_vibe, wakeupPulse);
 }
 
-
 } // namespace

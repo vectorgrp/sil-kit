@@ -165,6 +165,11 @@ TEST_F(IbConfigExampleITest, build_participants_from_IbConfig_Example)
     VerifyParticipants(ibConfig.simulationSetup.participants);
 }
 
+TEST_F(IbConfigExampleITest, throw_if_file_logger_without_filename)
+{
+    EXPECT_THROW(cfg::Config::FromJsonFile("IbConfig_Bad_FileLogger.json"), cfg::Misconfiguration);
+}
+
 TEST_F(IbConfigExampleITest, build_participants_from_IbConfig_IO_Example)
 {
     ibConfig = cfg::Config::FromJsonFile("IbConfig_IO-Example.json");

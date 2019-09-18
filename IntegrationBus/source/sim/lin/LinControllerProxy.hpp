@@ -12,10 +12,6 @@
 
 #include "ib/mw/fwd_decl.hpp"
 
-namespace spdlog {
-class logger;
-} // namespace spdlog
-
 namespace ib {
 namespace sim {
 namespace lin {
@@ -95,7 +91,7 @@ private:
     // private members
     mw::IComAdapter* _comAdapter;
     mw::EndpointAddress _endpointAddr;
-    std::shared_ptr<spdlog::logger> _logger;
+    mw::logging::ILogger* _logger;
 
     ControllerMode   _controllerMode{ControllerMode::Inactive};
     ControllerStatus _controllerStatus{ControllerStatus::Unknown};

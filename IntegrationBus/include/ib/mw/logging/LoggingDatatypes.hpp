@@ -5,11 +5,22 @@
 #include <chrono>
 #include <string>
 
-#include "spdlog/common.h"
-
 namespace ib {
 namespace mw {
 namespace logging {
+
+using log_clock = std::chrono::system_clock;
+
+enum class Level : uint32_t
+{
+    Trace,
+    Debug,
+    Info,
+    Warn,
+    Error,
+    Critical,
+    Off
+};
 
 struct SourceLoc
 {
@@ -21,11 +32,31 @@ struct SourceLoc
 struct LogMsg
 {
     std::string logger_name;
-    spdlog::level::level_enum level{spdlog::level::off};
-    spdlog::log_clock::time_point time;
+    Level level{Level::Off};
+    log_clock::time_point time;
     SourceLoc source;
     std::string payload;
 };
+
+// ================================================================================
+//  Inline Implementations
+// ================================================================================
+inline bool operator==(const SourceLoc& lhs, const SourceLoc& rhs)
+{
+    return lhs.filename == rhs.filename
+        && lhs.line == rhs.line
+        && lhs.funcname == rhs.funcname;
+}
+
+inline bool operator==(const LogMsg& lhs, const LogMsg& rhs)
+{
+    return lhs.logger_name == rhs.logger_name
+        && lhs.level == rhs.level
+        && lhs.time == rhs.time
+        && lhs.source == rhs.source
+        && lhs.payload == rhs.payload;
+}
+
 
 } // namespace logging
 } // namespace mw

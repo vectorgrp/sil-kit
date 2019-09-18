@@ -5,7 +5,7 @@
 #include <iostream>
 
 #include "ib/mw/IComAdapter.hpp"
-#include "ib/mw/logging/spdlog.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 #include "ib/sim/lin/string_utils.hpp"
 
 namespace ib {
@@ -51,7 +51,7 @@ void LinControllerProxy::SendFrame(Frame frame, FrameResponseType responseType)
     if (_controllerMode != ControllerMode::Master)
     {
         std::string errorMsg{"LinController::SendFrame() must only be called in master mode!"};
-        _logger->error(errorMsg);
+        _logger->Error(errorMsg);
         throw std::runtime_error{errorMsg};
     }
     SendFrameRequest sendFrame;
@@ -65,7 +65,7 @@ void LinControllerProxy::SendFrameHeader(LinIdT linId)
     if (_controllerMode != ControllerMode::Master)
     {
         std::string errorMsg{"LinController::SendFrameHeader() must only be called in master mode!"};
-        _logger->error(errorMsg);
+        _logger->Error(errorMsg);
         throw std::runtime_error{errorMsg};
     }
     SendFrameHeaderRequest header;
@@ -95,7 +95,7 @@ void LinControllerProxy::GoToSleep()
     if (_controllerMode != ControllerMode::Master)
     {
         std::string errorMsg{"LinController::GoToSleep() must only be called in master mode!"};
-        _logger->error(errorMsg);
+        _logger->Error(errorMsg);
         throw std::logic_error{errorMsg};
     }
 
@@ -152,7 +152,7 @@ void LinControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Tr
 
     if (frame.dataLength > 8)
     {
-        _logger->warn(
+        _logger->Warn(
             "LinController received transmission with payload length {} from {{{}, {}}}",
             static_cast<unsigned int>(frame.dataLength),
             from.participant,
@@ -162,7 +162,7 @@ void LinControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Tr
 
     if (frame.id >= 64)
     {
-        _logger->warn(
+        _logger->Warn(
             "LinController received transmission with invalid LIN ID {} from {{{}, {}}}",
             frame.id,
             from.participant,
@@ -171,7 +171,7 @@ void LinControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Tr
     }
 
     if (_controllerMode == ControllerMode::Inactive)
-        _logger->warn("Inactive LinControllerProxy received a transmission.");
+        _logger->Warn("Inactive LinControllerProxy received a transmission.");
 
     // Dispatch frame to handlers
     CallEach(_frameStatusHandler, this, frame, msg.status, msg.timestamp);
@@ -181,7 +181,7 @@ void LinControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Tr
     {
         if (frame.data != GoToSleepFrame().data)
         {
-            _logger->warn("LinController received diagnostic frame, which does not match expected GoToSleep payload");
+            _logger->Warn("LinController received diagnostic frame, which does not match expected GoToSleep payload");
         }
 
         // only call GoToSleepHandlers for slaves, i.e., not for the master that issued the GoToSleep command.
@@ -235,13 +235,13 @@ void LinControllerProxy::SetControllerStatus(ControllerStatus status)
     if (_controllerMode == ControllerMode::Inactive)
     {
         std::string errorMsg{"LinController::Wakeup()/Sleep() must not be called before LinController::Init()"};
-        _logger->error(errorMsg);
+        _logger->Error(errorMsg);
         throw std::runtime_error{errorMsg};
     }
 
     if (_controllerStatus == status)
     {
-        spdlog::warn("LinController::SetControllerStatus() - controller is already in {} mode.", to_string(status));
+        _logger->Warn("LinController::SetControllerStatus() - controller is already in {} mode.", to_string(status));
     }
 
     _controllerStatus = status;

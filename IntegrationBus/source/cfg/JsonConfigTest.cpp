@@ -55,6 +55,30 @@ protected:
     ib::cfg::Config config;
 };
 
+TEST_F(JsonConfigTest, ConfigureLogger)
+{
+    simulationSetup.AddParticipant("P1").ConfigureLogger().EnableLogFromRemotes().WithFlushLevel(logging::Level::Critical)
+        ->AddSink(Sink::Type::Stdout).WithLogLevel(logging::Level::Info)
+        ->AddSink(Sink::Type::File).WithLogLevel(logging::Level::Trace).WithLogname("FileLogger");
+
+    BuildConfigFromJson();
+    EXPECT_EQ(config, referenceConfig);
+    EXPECT_EQ(config.name, "TestConfig");
+
+    auto&& participants = config.simulationSetup.participants;
+    ASSERT_EQ(participants.size(), 1u);
+    auto&& p1 = participants[0];
+
+    ASSERT_EQ(p1.name, "P1");
+    EXPECT_TRUE(p1.logger.logFromRemotes);
+    EXPECT_EQ(p1.logger.flush_level, logging::Level::Critical);
+    EXPECT_EQ(p1.logger.sinks.size(), 2u);
+    EXPECT_EQ(p1.logger.sinks[0].type, Sink::Type::Stdout);
+    EXPECT_EQ(p1.logger.sinks[0].level, logging::Level::Info);
+    EXPECT_EQ(p1.logger.sinks[1].type, Sink::Type::File);
+    EXPECT_EQ(p1.logger.sinks[1].level, logging::Level::Trace);
+}
+
 TEST_F(JsonConfigTest, CreateCanNetwork)
 {
     simulationSetup.AddParticipant("P1")

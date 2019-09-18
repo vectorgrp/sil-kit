@@ -10,25 +10,58 @@
                 "Name": "CanWriter",
                 "Description": "Demo Writer",
                 "SyncType": "DistributedTimeQuantum",
-
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote",
+                            "Level": "Trace"
+                        }
+                    ]
+                },
                 "CanControllers": [ "CAN1" ]
             },
             {
                 "Name": "CanReader",
                 "Description": "Demo Reader",
                 "SyncType": "DistributedTimeQuantum",
-
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote",
+                            "Level": "Trace"
+                        }
+                    ]
+                },
                 "CanControllers": [ "CAN1" ]
             },
             {
                 "Name": "SystemController",
                 "SyncType": "Unsynchronized",
-                "IsSyncMaster": true
+                "IsSyncMaster": true,
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote"
+                        }
+                    ]
+                }
             },
             {
                 "Name": "SystemMonitor",
                 "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
-                "SyncType": "Unsynchronized"
+                "SyncType": "Unsynchronized",
+                "Logger": {
+                    "LogFromRemotes": true,
+                    "FlushLevel": "Info",
+                    "Sinks": [
+                        {
+                            "Type": "Stdout"
+                        }
+                    ]
+                }
             }
         ],
 

@@ -1,0 +1,27 @@
+{
+    "$schema": "./IbConfig.schema.json",
+    "ConfigVersion": "0.0.1",
+    "ConfigName": "Example Config",
+    "Description": "Sample Configuration that should cover most use cases.",
+
+    "SimulationSetup": {
+
+        "Participants": [
+            {
+                "Name": "SystemMonitor",
+                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
+                "SyncType": "Unsynchronized",
+                "Logger": {
+                    "LogFromRemotes": true,
+                    "FlushLevel": "Info",
+                    "Sinks": [
+                        {
+                            "Type": "File",
+                            "Level": "Trace"
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

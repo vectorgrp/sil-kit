@@ -18,7 +18,7 @@ namespace mw {
 
 class VAsioConnection;
 
-struct VAsioTcpPeer : public IVAsioPeer
+class VAsioTcpPeer : public IVAsioPeer
 {
 public:
     // ----------------------------------------

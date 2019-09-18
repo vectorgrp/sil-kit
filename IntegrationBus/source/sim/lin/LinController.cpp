@@ -7,7 +7,7 @@
 #include <iostream>
 
 #include "ib/mw/IComAdapter.hpp"
-#include "ib/mw/logging/spdlog.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 #include "ib/sim/lin/string_utils.hpp"
 
 namespace ib {
@@ -68,7 +68,7 @@ void LinController::Init(ControllerConfig config)
     auto& node = GetLinNode(_endpointAddr);
     node.controllerMode = config.controllerMode;
     node.controllerStatus = ControllerStatus::Operational;
-    node.UpdateResponses(config.frameResponses);
+    node.UpdateResponses(config.frameResponses, _logger);
 
     _controllerMode = config.controllerMode;
     _controllerStatus = ControllerStatus::Operational;
@@ -91,7 +91,7 @@ void LinController::SendFrameHeader(LinIdT linId)
     if (_controllerMode != ControllerMode::Master)
     {
         std::string errorMsg{"LinController::SendFrameHeader() must only be called in master mode!"};
-        _logger->error(errorMsg);
+        _logger->Error(errorMsg);
         throw std::runtime_error{errorMsg};
     }
 
@@ -155,7 +155,7 @@ void LinController::SetFrameResponse(Frame frame, FrameResponseMode mode)
 void LinController::SetFrameResponses(std::vector<FrameResponse> responses)
 {
     auto& node = GetLinNode(_endpointAddr);
-    node.UpdateResponses(responses);
+    node.UpdateResponses(responses, _logger);
 
     FrameResponseUpdate frameResponseUpdate;
     frameResponseUpdate.frameResponses = std::move(responses);
@@ -167,7 +167,7 @@ void LinController::GoToSleep()
     if (_controllerMode != ControllerMode::Master)
     {
         std::string errorMsg{"LinController::GoToSleep() must only be called in master mode!"};
-        _logger->error(errorMsg);
+        _logger->Error(errorMsg);
         throw std::logic_error{errorMsg};
     }
 
@@ -224,7 +224,7 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const Transmi
 
     if (frame.dataLength > 8)
     {
-        _logger->warn(
+        _logger->Warn(
             "LinController received transmission with payload length {} from {{{}, {}}}",
             static_cast<unsigned int>(frame.dataLength),
             from.participant,
@@ -234,7 +234,7 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const Transmi
 
     if (frame.id >= 64)
     {
-        _logger->warn(
+        _logger->Warn(
             "LinController received transmission with invalid LIN ID {} from {{{}, {}}}",
             frame.id,
             from.participant,
@@ -244,7 +244,7 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const Transmi
 
     if (_controllerStatus != ControllerStatus::Operational)
     {
-        _logger->warn(
+        _logger->Warn(
             "LinController received transmission with LIN ID {} while controller is in {} mode. Message is ignored.",
             static_cast<unsigned int>(frame.id),
             to_string(_controllerStatus)
@@ -258,7 +258,7 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const Transmi
         return;
 
     case ControllerMode::Master:
-        _logger->warn("LinController in MasterMode received a transmission from {{{}, {}}}. This indicates an erroneous setup as there should be only one LIN master!",
+        _logger->Warn("LinController in MasterMode received a transmission from {{{}, {}}}. This indicates an erroneous setup as there should be only one LIN master!",
             from.participant,
             from.endpoint);
         //[[fallthrough]]
@@ -283,7 +283,7 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const Transmi
         {
             if (frame.data != GoToSleepFrame().data)
             {
-                _logger->warn("LinController received diagnostic frame, which does not match expected GoToSleep payload");
+                _logger->Warn("LinController received diagnostic frame, which does not match expected GoToSleep payload");
             }
 
             CallHandlers(_goToSleepHandler, this);
@@ -306,7 +306,7 @@ void LinController::ReceiveIbMessage(mw::EndpointAddress from, const ControllerC
 
     linNode.controllerMode = msg.controllerMode;
     linNode.controllerStatus = ControllerStatus::Operational;
-    linNode.UpdateResponses(msg.frameResponses);
+    linNode.UpdateResponses(msg.frameResponses, _logger);
 
     for (auto& response : msg.frameResponses)
     {
@@ -327,7 +327,7 @@ void LinController::ReceiveIbMessage(mw::EndpointAddress from, const FrameRespon
     if (from == _endpointAddr) return;
 
     auto& linNode = GetLinNode(from);
-    linNode.UpdateResponses(msg.frameResponses);
+    linNode.UpdateResponses(msg.frameResponses, _logger);
 
     for (auto& response : msg.frameResponses)
     {
@@ -350,13 +350,13 @@ void LinController::SetControllerStatus(ControllerStatus status)
     if (_controllerMode == ControllerMode::Inactive)
     {
         std::string errorMsg{"LinController::Wakeup()/Sleep() must not be called before LinController::Init()"};
-        _logger->error(errorMsg);
+        _logger->Error(errorMsg);
         throw std::runtime_error{errorMsg};
     }
 
     if (_controllerStatus == status)
     {
-        spdlog::warn("LinController::SetControllerStatus() - controller is already in {} mode.", to_string(status));
+        _logger->Warn("LinController::SetControllerStatus() - controller is already in {} mode.", to_string(status));
     }
 
     _controllerStatus = status;
@@ -393,14 +393,14 @@ void LinController::SendIbMessage(MsgT&& msg)
 // ================================================================================
 //  LinController::LinNode
 // ================================================================================
-void LinController::LinNode::UpdateResponses(std::vector<FrameResponse> responses_)
+void LinController::LinNode::UpdateResponses(std::vector<FrameResponse> responses_, mw::logging::ILogger* logger)
 {
     for (auto&& response : responses_)
     {
         auto linId = response.frame.id;
         if (linId >= responses.size())
         {
-            spdlog::warn("Ignoring FrameResponse update for linId={}", static_cast<uint16_t>(linId));
+            logger->Warn("Ignoring FrameResponse update for linId={}", static_cast<uint16_t>(linId));
             continue;
         }
         responses[linId] = std::move(response);

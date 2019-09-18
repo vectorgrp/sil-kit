@@ -7,6 +7,7 @@ namespace cfg {
 
 struct Version;
 struct Link;
+struct Logger;
 struct CanController;
 struct LinController;
 struct EthernetController;
@@ -18,6 +19,7 @@ struct TimeSync;
 struct Config;
 class Misconfiguration;
 
+class LoggerBuilder;
 class ParticipantBuilder;
 template<class ControllerCfg>
 class ControllerBuilder;
