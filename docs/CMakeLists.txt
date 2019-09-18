@@ -55,4 +55,9 @@ if(${IB_BUILD_DOCS})
 
     install(DIRECTORY ${SPHINX_BUILD}/
             DESTINATION ${CMAKE_INSTALL_DOCDIR})
+    install(
+        FILES
+            CHANGELOG.rst
+        DESTINATION ${CMAKE_INSTALL_PREFIX}
+    )
 endif()

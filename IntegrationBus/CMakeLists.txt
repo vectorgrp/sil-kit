@@ -370,7 +370,6 @@ install(
 install(
     FILES 
         .editorconfig
-        CHANGELOG.md
         CMakeLists.txt 
         LICENSE 
     DESTINATION ${INSTALL_SOURCE_DIR}
@@ -407,7 +406,6 @@ install(
 install(
     FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE
-        ${CMAKE_CURRENT_SOURCE_DIR}/CHANGELOG.md
     DESTINATION ${INSTALL_DOCDIR}
     COMPONENT IntegrationBus
 )

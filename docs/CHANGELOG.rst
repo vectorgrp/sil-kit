@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog] (http://keepachangelog.com/en/1.0.0/).
 ------------------------
 Added
 ~~~~~
+- The logging facilities can now be configured per participant using the IB
+  config. E.g., different sinks and log levels can be configured.
 
 Changed
 ~~~~~~~
@@ -16,6 +18,14 @@ Changed
   the transition to the new API as simple as possible, we provided extensive
   documentation on the new API itself including usage examples and information
   about what changed in the new API: :doc:`../api/lin`
+- Removed spdlog from the public IB API. Spdlog is still used internally but it
+  has been removed from the public API to avoid conflicts with user specific
+  spdlog installations.
+- The CMake build options BUILD_TESTS and BUILD_DOCS were renamed to
+  IB_BUILD_TESTS and IB_BUILD_DOCS.
+- The Tools folder has been renamed to Utilities to differentiate it more
+  clearly from build tools. For the time being, the IbRegistry is the only
+  utility.
 
 Fixed
 ~~~~~
@@ -24,8 +34,12 @@ Fixed
 - Fixed a crash when creating a ComAdapter with the same participant name as a
   previously destroyed one. The crash originated in spdlog.
 - Fixed a crash in the VAsioConnection destructor due to a wrong member order.
+- Fixed the Fast-RTPS submodule from v1.7.0 to v1.8.1, which got broken during a
+  merge.
+- The old, unmaintained CHANGELOG.md is no longer installed. Instead, the
+  CHANGELOG.rst is installed in addition to the HTML documentation.
 
-
+  
 Compatibility with Sprint-31
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Application binary interface (ABI): No
