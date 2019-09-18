@@ -65,14 +65,14 @@ struct Sink
     };
 
     Type type = Type::Remote;
-    mw::logging::Level level = mw::logging::Level::info;
-    std::string filename;
+    mw::logging::Level level = mw::logging::Level::Info;
+    std::string logname;
 };
 
 struct Logger
 {
-    bool subscribeToRemoteLogs{false};
-    mw::logging::Level flush_level = mw::logging::Level::off;
+    bool logFromRemotes{false};
+    mw::logging::Level flush_level = mw::logging::Level::Off;
     std::vector<Sink> sinks;
 };
 

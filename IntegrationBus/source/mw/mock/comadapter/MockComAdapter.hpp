@@ -26,13 +26,13 @@ namespace test {
 class DummyLogger : public logging::ILogger
 {
 public:
-    void Log(logging::Level /*level*/, const std::string& /*msg*/) {}
-    void Trace(const std::string& /*msg*/) {}
-    void Debug(const std::string& /*msg*/) {}
-    void Info(const std::string& /*msg*/) {}
-    void Warn(const std::string& /*msg*/) {}
-    void Error(const std::string& /*msg*/) {}
-    void Critical(const std::string& /*msg*/) {}
+    void Log(logging::Level /*level*/, const std::string& /*msg*/) override {}
+    void Trace(const std::string& /*msg*/) override {}
+    void Debug(const std::string& /*msg*/) override {}
+    void Info(const std::string& /*msg*/) override {}
+    void Warn(const std::string& /*msg*/) override {}
+    void Error(const std::string& /*msg*/) override {}
+    void Critical(const std::string& /*msg*/) override {}
     void RegisterRemoteLogging(const LogMsgHandlerT& /*handler*/) {}
     void LogReceivedMsg(const logging::LogMsg& /*msg*/) {}
 };

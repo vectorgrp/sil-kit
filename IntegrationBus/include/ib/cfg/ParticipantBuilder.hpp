@@ -24,7 +24,7 @@ class ParticipantBuilder : public ParentBuilder<SimulationSetupBuilder>
 public:
     IntegrationBusAPI ParticipantBuilder(SimulationSetupBuilder* ibConfig, std::string name, mw::ParticipantId id);
 
-    IntegrationBusAPI auto AddLogger() -> LoggerBuilder&;
+    IntegrationBusAPI auto ConfigureLogger() -> LoggerBuilder&;
     IntegrationBusAPI auto AddCan(std::string name) -> ControllerBuilder<CanController>&;
     IntegrationBusAPI auto AddLin(std::string name) -> ControllerBuilder<LinController>&;
     IntegrationBusAPI auto AddEthernet(std::string name) -> ControllerBuilder<EthernetController>&;

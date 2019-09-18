@@ -1,10 +1,10 @@
 project("IbMwLogging" CXX)
 
 add_library(${PROJECT_NAME}
-    IIbToLogMsgDistributor.hpp
+    IIbToLogMsgSender.hpp
     IIbToLogMsgReceiver.hpp
-    LogMsgDistributor.hpp
-    LogMsgDistributor.cpp
+    LogMsgSender.hpp
+    LogMsgSender.cpp
     LogMsgReceiver.hpp
     LogMsgReceiver.cpp
     SpdlogTypeConversion.hpp

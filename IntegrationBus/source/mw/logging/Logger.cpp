@@ -88,7 +88,7 @@ Logger::Logger(const std::string& participantName, cfg::Logger config)
         }
         case cfg::Sink::Type::File:
         {
-            auto filename = fmt::format("{}_{:%FT%H-%M-%S}.txt", sink.filename, tmBuffer);
+            auto filename = fmt::format("{}_{:%FT%H-%M-%S}.txt", sink.logname, tmBuffer);
             auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
             fileSink->set_level(log_level);
             _logger->sinks().push_back(fileSink);
@@ -106,32 +106,32 @@ void Logger::Log(Level level, const std::string& msg)
 
 void Logger::Trace(const std::string& msg)
 {
-    Log(Level::trace, msg);
+    Log(Level::Trace, msg);
 }
 
 void Logger::Debug(const std::string& msg)
 {
-    Log(Level::debug, msg);
+    Log(Level::Debug, msg);
 }
 
 void Logger::Info(const std::string& msg)
 {
-    Log(Level::info, msg);
+    Log(Level::Info, msg);
 }
 
 void Logger::Warn(const std::string& msg)
 {
-    Log(Level::warn, msg);
+    Log(Level::Warn, msg);
 }
 
 void Logger::Error(const std::string& msg)
 {
-    Log(Level::error, msg);
+    Log(Level::Error, msg);
 }
 
 void Logger::Critical(const std::string& msg)
 {
-    Log(Level::critical, msg);
+    Log(Level::Critical, msg);
 }
 
 void Logger::RegisterRemoteLogging(const LogMsgHandlerT& handler)

@@ -33,31 +33,23 @@ public:
     */
     virtual void Log(Level level, const std::string& msg) = 0;
 
-    //! \brief Log a message with the trace level.
+    //! \brief Log a message with log level trace.
     virtual void Trace(const std::string& msg) = 0;
 
-    //! \brief Log a message with the debug level.
+    //! \brief Log a message with log level debug.
     virtual void Debug(const std::string& msg) = 0;
 
-    //! \brief Log a message with the info level.
+    //! \brief Log a message with log level info.
     virtual void Info(const std::string& msg) = 0;
 
-    //! \brief Log a message with the warn level.
+    //! \brief Log a message with log level warn.
     virtual void Warn(const std::string& msg) = 0;
 
-    //! \brief Log a message with the error level.
+    //! \brief Log a message with log level error.
     virtual void Error(const std::string& msg) = 0;
 
-    //! \brief Log a message with the critical level.
+    //! \brief Log a message with log level critical.
     virtual void Critical(const std::string& msg) = 0;
-
-    /*! \brief Register a callback for remote logging.
-    */
-    virtual void RegisterRemoteLogging(const LogMsgHandlerT& handler) = 0;
-
-    /*! \brief Log a received remote message.
-    */
-    virtual void LogReceivedMsg(const LogMsg& msg) = 0;
 
 #ifdef HAVE_FMTLIB
     template<typename... Args>
@@ -70,27 +62,27 @@ public:
     template<typename... Args>
     void Debug(const char* fmt, const Args&... args)
     {
-        Log(Level::debug, fmt, args...);
+        Log(Level::Debug, fmt, args...);
     }
     template<typename... Args>
     void Info(const char* fmt, const Args&... args)
     {
-        Log(Level::info, fmt, args...);
+        Log(Level::Info, fmt, args...);
     }
     template<typename... Args>
     void Warn(const char* fmt, const Args&... args)
     {
-        Log(Level::warn, fmt, args...);
+        Log(Level::Warn, fmt, args...);
     }
     template<typename... Args>
     void Error(const char* fmt, const Args&... args)
     {
-        Log(Level::error, fmt, args...);
+        Log(Level::Error, fmt, args...);
     }
     template<typename... Args>
     void Critical(const char* fmt, const Args&... args)
     {
-        Log(Level::critical, fmt, args...);
+        Log(Level::Critical, fmt, args...);
     }
 #endif //HAVE_FMTLIB
 

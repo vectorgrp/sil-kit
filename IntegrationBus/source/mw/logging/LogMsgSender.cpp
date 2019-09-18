@@ -1,31 +1,31 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "LogMsgDistributor.hpp"
+#include "LogMsgSender.hpp"
 
 namespace ib {
 namespace mw {
 namespace logging {
 
-LogMsgDistributor::LogMsgDistributor(IComAdapter* comAdapter)
+LogMsgSender::LogMsgSender(IComAdapter* comAdapter)
     : _comAdapter{comAdapter}
 {
 }
 
-void LogMsgDistributor::SendLogMsg(const LogMsg& msg)
+void LogMsgSender::SendLogMsg(const LogMsg& msg)
 {
     _comAdapter->SendIbMessage(_endpointAddress, msg);
 }
 
-void LogMsgDistributor::SendLogMsg(LogMsg&& msg)
+void LogMsgSender::SendLogMsg(LogMsg&& msg)
 {
     _comAdapter->SendIbMessage(_endpointAddress, std::move(msg));
 }
 
-void LogMsgDistributor::SetEndpointAddress(const ib::mw::EndpointAddress &address)
+void LogMsgSender::SetEndpointAddress(const ib::mw::EndpointAddress &address)
 {
     _endpointAddress = address;
 }
-auto LogMsgDistributor::EndpointAddress(void) const -> const ib::mw::EndpointAddress&
+auto LogMsgSender::EndpointAddress(void) const -> const ib::mw::EndpointAddress&
 {
     return _endpointAddress;
 }

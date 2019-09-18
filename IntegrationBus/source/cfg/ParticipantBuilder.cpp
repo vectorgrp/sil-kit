@@ -47,7 +47,7 @@ auto ParticipantBuilder::operator->() -> ParticipantBuilder*
     return this;
 }
 
-auto ParticipantBuilder::AddLogger() -> LoggerBuilder&
+auto ParticipantBuilder::ConfigureLogger() -> LoggerBuilder&
 {
     _logger = std::make_unique<LoggerBuilder>(this);
     return *_logger;

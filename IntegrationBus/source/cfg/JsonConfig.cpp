@@ -159,17 +159,17 @@ auto to_json(const mw::logging::Level& level) -> json11::Json
 {
     switch (level)
     {
-    case mw::logging::Level::critical:
+    case mw::logging::Level::Critical:
         return "Critical";
-    case mw::logging::Level::warn:
+    case mw::logging::Level::Warn:
         return "Warn";
-    case mw::logging::Level::info:
+    case mw::logging::Level::Info:
         return "Info";
-    case mw::logging::Level::debug:
+    case mw::logging::Level::Debug:
         return "Debug";
-    case mw::logging::Level::trace:
+    case mw::logging::Level::Trace:
         return "Trace";
-    case mw::logging::Level::off:
+    case mw::logging::Level::Off:
         return "Off";
     default:
         return "";
@@ -181,17 +181,17 @@ auto from_json<mw::logging::Level>(const json11::Json& json) -> mw::logging::Lev
 {
     auto&& str = json.string_value();
     if (str == "Critical")
-        return mw::logging::Level::critical;
+        return mw::logging::Level::Critical;
     if (str == "Warn")
-        return mw::logging::Level::warn;
+        return mw::logging::Level::Warn;
     if (str == "Info")
-        return mw::logging::Level::info;
+        return mw::logging::Level::Info;
     if (str == "Debug")
-        return mw::logging::Level::debug;
+        return mw::logging::Level::Debug;
     if (str == "Trace")
-        return mw::logging::Level::trace;
+        return mw::logging::Level::Trace;
     if (str == "Off")
-        return mw::logging::Level::off;
+        return mw::logging::Level::Off;
 
     throw Misconfiguration{"Unknown Log Level"};
 }
@@ -201,7 +201,7 @@ auto to_json(const Sink& sink) -> json11::Json
     return json11::Json::object{
         {"Type", to_json(sink.type)},
         {"Level", to_json(sink.level)},
-        {"Filename", to_json(sink.filename)}
+        {"Logname", to_json(sink.logname)}
     };
 }
 
@@ -214,9 +214,9 @@ auto from_json<Sink>(const json11::Json& json) -> Sink
 
     if (sink.type == Sink::Type::File)
     {
-        if (!json.object_items().count("Filename"))
-            throw Misconfiguration("Filename of file logger is not specified");
-        sink.filename = json["Filename"].string_value();
+        if (!json.object_items().count("Logname"))
+            throw Misconfiguration("Logname of file logger is not specified");
+        sink.logname = json["Logname"].string_value();
     }
 
     return sink;
@@ -225,7 +225,7 @@ auto from_json<Sink>(const json11::Json& json) -> Sink
 auto to_json(const Logger& logger) -> json11::Json
 {
     return json11::Json::object{
-        {"SubscribeToRemoteLogs", logger.subscribeToRemoteLogs},
+        {"LogFromRemotes", logger.logFromRemotes},
         {"FlushLevel", to_json(logger.flush_level)},
         {"Sinks", to_json(logger.sinks)}
     };
@@ -235,8 +235,8 @@ template <>
 auto from_json<Logger>(const json11::Json& json) -> Logger
 {
     Logger logger;
-    if (json.object_items().count("SubscribeToRemoteLogs"))
-        logger.subscribeToRemoteLogs = json["SubscribeToRemoteLogs"].bool_value();
+    if (json.object_items().count("LogFromRemotes"))
+        logger.logFromRemotes = json["LogFromRemotes"].bool_value();
 
     optional_from_json(logger.flush_level, json, "FlushLevel");
     logger.sinks = from_json<std::vector<Sink>>(json["Sinks"].array_items());

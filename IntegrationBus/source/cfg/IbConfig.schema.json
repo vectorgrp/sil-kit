@@ -71,7 +71,7 @@
                 "Logger" : {
                   "type": "object",
                   "properties": {
-                    "SubscribeToRemoteLogs": {
+                    "LogFromRemotes": {
                       "type": "boolean",
                       "title": "Enables receiving of remote log messages from other participants"
                     },
@@ -92,9 +92,9 @@
                             "type": "string",
                               "enum": [ "Critical", "Warn", "Info", "Debug", "Trace", "Off"]
                           },
-                          "Filename": {
+                          "Logname": {
                             "type": "string",
-                            "title": "Filename of a file logger"
+                            "title": "Logname of a file logger. The logname results in the following filename: <Logname>_%y-%m-%dT%h-%m-%s.txt"
                           }
                         },
                         "additionalProperties": false,

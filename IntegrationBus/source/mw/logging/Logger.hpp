@@ -44,9 +44,9 @@ public:
 
     void Critical(const std::string& msg) override;
 
-    void RegisterRemoteLogging(const LogMsgHandlerT& handler) override;
+    void RegisterRemoteLogging(const LogMsgHandlerT& handler);
 
-    void LogReceivedMsg(const LogMsg& msg) override;
+    void LogReceivedMsg(const LogMsg& msg);
 
 private:
     // ----------------------------------------

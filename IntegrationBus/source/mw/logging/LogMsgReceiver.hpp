@@ -3,9 +3,9 @@
 #pragma once
 
 #include "ib/mw/IComAdapter.hpp"
-#include "ib/mw/logging/ILogger.hpp"
 
 #include "IIbToLogMsgReceiver.hpp"
+#include "Logger.hpp"
 
 namespace ib {
 namespace mw {
@@ -20,7 +20,7 @@ public:
     LogMsgReceiver(IComAdapter* comAdapter);
 
 public:
-    void SetLogger(logging::ILogger* logger);
+    void SetLogger(Logger* logger);
 
     void ReceiveIbMessage(mw::EndpointAddress from, const LogMsg& msg) override;
 
@@ -33,7 +33,7 @@ private:
     IComAdapter* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddress{};
     
-    logging::ILogger* _logger;
+    logging::Logger* _logger;
 };
 
 } // namespace logging

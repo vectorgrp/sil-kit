@@ -13,13 +13,13 @@ using log_clock = std::chrono::system_clock;
 
 enum class Level : uint32_t
 {
-    trace,
-    debug,
-    info,
-    warn,
-    error,
-    critical,
-    off
+    Trace,
+    Debug,
+    Info,
+    Warn,
+    Error,
+    Critical,
+    Off
 };
 
 struct SourceLoc
@@ -32,7 +32,7 @@ struct SourceLoc
 struct LogMsg
 {
     std::string logger_name;
-    Level level{Level::off};
+    Level level{Level::Off};
     log_clock::time_point time;
     SourceLoc source;
     std::string payload;

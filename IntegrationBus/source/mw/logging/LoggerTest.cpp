@@ -12,10 +12,7 @@
 #include "MockComAdapter.hpp"
 
 #include "Logger.hpp"
-#include "LogMsgDistributor.hpp"
-#include "LogMsgReceiver.hpp"
-
-#include "spdlog/sinks/sink.h"
+#include "LogMsgSender.hpp"
 
 namespace {
 
@@ -34,7 +31,6 @@ using namespace ib::mw;
 using namespace ib::mw::logging;
 
 using ib::mw::test::DummyComAdapter;
-using ib::mw::test::DummyLogger;
 
 class MockComAdapter : public DummyComAdapter
 {
@@ -48,12 +44,6 @@ public:
     MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const LogMsg&));
 };
 
-class MockLogger : public DummyLogger
-{
-public:
-    MOCK_METHOD1(LogReceivedMsg, void(const LogMsg&));
-};
-
 auto ALogMsgWith(std::string logger_name, Level level, std::string payload) -> Matcher<const LogMsg&>
 {
     return AllOf(
@@ -63,42 +53,24 @@ auto ALogMsgWith(std::string logger_name, Level level, std::string payload) -> M
     );
 }
 
-TEST(LoggerTest, send_log_message_with_distributor)
+TEST(LoggerTest, send_log_message_with_sender)
 {
     EndpointAddress controllerAddress = {3, 8};
 
     MockComAdapter mockComAdapter;
 
-    LogMsgDistributor logMsgDistributor(&mockComAdapter);
-    logMsgDistributor.SetEndpointAddress(controllerAddress);
+    LogMsgSender logMsgSender(&mockComAdapter);
+    logMsgSender.SetEndpointAddress(controllerAddress);
 
     LogMsg msg;
     msg.logger_name = "Logger";
-    msg.level = Level::info;
+    msg.level = Level::Info;
     msg.payload = std::string{"some payload"};
 
     EXPECT_CALL(mockComAdapter, SendIbMessage(controllerAddress, msg))
         .Times(1);
 
-    logMsgDistributor.SendLogMsg(msg);
-}
-
-TEST(LoggerTest, receive_log_message_with_receiver)
-{
-    EndpointAddress senderAddress{17, 4};
-
-    MockComAdapter mockComAdapter;
-    MockLogger mockLogger;
-
-    LogMsgReceiver logMsgReceiver(&mockComAdapter);
-    logMsgReceiver.SetLogger(&mockLogger);
-
-    LogMsg msg;
-
-    EXPECT_CALL(mockLogger, LogReceivedMsg(msg))
-        .Times(1);
-
-    logMsgReceiver.ReceiveIbMessage(senderAddress, msg);
+    logMsgSender.SendLogMsg(msg);
 }
 
 TEST(LoggerTest, send_log_message_from_logger)
@@ -108,8 +80,8 @@ TEST(LoggerTest, send_log_message_from_logger)
     cfg::ConfigBuilder configBuilder("TestBuilder");
     configBuilder.SimulationSetup()
         .AddParticipant(loggerName)
-        .AddLogger()
-        .AddSink(cfg::Sink::Type::Remote).WithLogLevel(logging::Level::debug);
+        .ConfigureLogger()
+        .AddSink(cfg::Sink::Type::Remote).WithLogLevel(logging::Level::Debug);
 
     auto config = configBuilder.Build();
     auto&& participantConfig = cfg::get_by_name(config.simulationSetup.participants, loggerName);
@@ -117,25 +89,25 @@ TEST(LoggerTest, send_log_message_from_logger)
 
     EndpointAddress controllerAddress = {3, 8};
     MockComAdapter mockComAdapter;
-    LogMsgDistributor logMsgDistributor(&mockComAdapter);
-    logMsgDistributor.SetEndpointAddress(controllerAddress);
+    LogMsgSender logMsgSender(&mockComAdapter);
+    logMsgSender.SetEndpointAddress(controllerAddress);
 
-    logger.RegisterRemoteLogging([&logMsgDistributor](logging::LogMsg logMsg) {
+    logger.RegisterRemoteLogging([&logMsgSender](logging::LogMsg logMsg) {
 
-        logMsgDistributor.SendLogMsg(std::move(logMsg));
+        logMsgSender.SendLogMsg(std::move(logMsg));
 
     });
 
     std::string payload{"Test log message"};
 
     EXPECT_CALL(mockComAdapter, SendIbMessage_proxy(controllerAddress,
-        ALogMsgWith(loggerName, Level::info, payload)))
+        ALogMsgWith(loggerName, Level::Info, payload)))
         .Times(1);
 
     logger.Info(payload);
 
     EXPECT_CALL(mockComAdapter, SendIbMessage_proxy(controllerAddress,
-        ALogMsgWith(loggerName, Level::critical, payload)))
+        ALogMsgWith(loggerName, Level::Critical, payload)))
         .Times(1);
 
     logger.Critical(payload);

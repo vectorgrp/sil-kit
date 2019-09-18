@@ -61,19 +61,19 @@ inline auto to_idl(Level level) -> idl::level::level_enum
     namespace idl = idl::level;
     switch (level)
     {
-    case Level::trace:
+    case Level::Trace:
         return idl::trace;
-    case Level::debug:
+    case Level::Debug:
         return idl::debug;
-    case Level::info:
+    case Level::Info:
         return idl::info;
-    case Level::warn:
+    case Level::Warn:
         return idl::warn;
-    case Level::error:
+    case Level::Error:
         return idl::err;
-    case Level::critical:
+    case Level::Critical:
         return idl::critical;
-    case Level::off:
+    case Level::Off:
         return idl::off;
     }
     throw ib::type_conversion_error{};
@@ -86,19 +86,19 @@ inline auto from_idl(level_enum level) -> Level
     switch (level)
     {
     case trace:
-        return Level::trace;
+        return Level::Trace;
     case debug:
-        return Level::debug;
+        return Level::Debug;
     case info:
-        return Level::info;
+        return Level::Info;
     case warn:
-        return Level::warn;
+        return Level::Warn;
     case err:
-        return Level::error;
+        return Level::Error;
     case critical:
-        return Level::critical;
+        return Level::Critical;
     case off:
-        return Level::off;
+        return Level::Off;
     }
     throw ib::type_conversion_error{};
 }

@@ -64,16 +64,11 @@
                 "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
                 "SyncType": "Unsynchronized",
                 "Logger": {
-                    "SubscribeToRemoteLogs": true,
+                    "LogFromRemotes": true,
                     "FlushLevel": "Info",
                     "Sinks": [
                         {
                             "Type": "Stdout"
-                        },
-                        {
-                            "Type": "File",
-                            "Level": "Trace",
-                            "Filename": "SystemMonitorLog"
                         }
                     ]
                 }

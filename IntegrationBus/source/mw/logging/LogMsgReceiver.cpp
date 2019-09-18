@@ -11,7 +11,7 @@ LogMsgReceiver::LogMsgReceiver(IComAdapter* comAdapter)
 {
 }
 
-void LogMsgReceiver::SetLogger(logging::ILogger* logger)
+void LogMsgReceiver::SetLogger(Logger* logger)
 {
     _logger = logger;
 }

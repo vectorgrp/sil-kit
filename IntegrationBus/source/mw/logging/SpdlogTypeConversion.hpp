@@ -22,19 +22,19 @@ inline auto to_spdlog(Level level) -> spdlog::level::level_enum
 {
     switch (level)
     {
-    case Level::trace:
+    case Level::Trace:
         return spdlog::level::trace;
-    case Level::debug:
+    case Level::Debug:
         return spdlog::level::debug;
-    case Level::info:
+    case Level::Info:
         return spdlog::level::info;
-    case Level::warn:
+    case Level::Warn:
         return spdlog::level::warn;
-    case Level::error:
+    case Level::Error:
         return spdlog::level::err;
-    case Level::critical:
+    case Level::Critical:
         return spdlog::level::critical;
-    case Level::off:
+    case Level::Off:
         return spdlog::level::off;
     }
     throw ib::type_conversion_error{};
@@ -45,19 +45,19 @@ inline auto from_spdlog(spdlog::level::level_enum level) -> Level
     switch (level)
     {
     case spdlog::level::trace:
-        return Level::trace;
+        return Level::Trace;
     case spdlog::level::debug:
-        return Level::debug;
+        return Level::Debug;
     case spdlog::level::info:
-        return Level::info;
+        return Level::Info;
     case spdlog::level::warn:
-        return Level::warn;
+        return Level::Warn;
     case spdlog::level::err:
-        return Level::error;
+        return Level::Error;
     case spdlog::level::critical:
-        return Level::critical;
+        return Level::Critical;
     case spdlog::level::off:
-        return Level::off;
+        return Level::Off;
     }
     throw ib::type_conversion_error{};
 }

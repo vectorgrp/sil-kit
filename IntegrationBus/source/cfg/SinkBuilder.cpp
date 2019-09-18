@@ -19,9 +19,9 @@ auto SinkBuilder::WithLogLevel(mw::logging::Level level) -> SinkBuilder&
     return *this;
 }
 
-auto SinkBuilder::WithFilename(std::string filename) -> SinkBuilder&
+auto SinkBuilder::WithLogname(std::string logname) -> SinkBuilder&
 {
-    _sink.filename = filename;
+    _sink.logname = logname;
     return *this;
 }
 
@@ -32,8 +32,8 @@ auto SinkBuilder::operator->() -> LoggerBuilder*
 
 auto SinkBuilder::Build() -> Sink
 {
-    if (_sink.type == cfg::Sink::Type::File && _sink.filename.empty())
-        throw Misconfiguration("A file sink needs a filename to be set!");
+    if (_sink.type == cfg::Sink::Type::File && _sink.logname.empty())
+        throw Misconfiguration("A file sink needs a logname to be set!");
     return std::move(_sink);
 }
 

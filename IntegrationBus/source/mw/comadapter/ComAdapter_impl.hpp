@@ -19,7 +19,7 @@
 #include "SystemController.hpp"
 #include "SystemMonitor.hpp"
 #include "SyncMaster.hpp"
-#include "LogMsgDistributor.hpp"
+#include "LogMsgSender.hpp"
 #include "LogMsgReceiver.hpp"
 #include "Logger.hpp"
 
@@ -79,31 +79,50 @@ void ComAdapter<IbConnectionT>::joinIbDomain(uint32_t domainId)
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::onIbDomainJoined()
 {
+    SetupSyncMaster();
+    SetupRemoteLogging();
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SetupSyncMaster()
+{
     if (_participant.isSyncMaster)
     {
         /*[[maybe_unused]]*/ auto* controller = GetSyncMaster();
         (void)controller;
     }
+}
 
-    auto&& participantConfig = get_by_name(_config.simulationSetup.participants, _participantName);
-    if (participantConfig.logger.subscribeToRemoteLogs)
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SetupRemoteLogging()
+{
+    auto* logger = dynamic_cast<logging::Logger*>(_logger.get());
+    if (logger)
     {
-        auto&& logMsgRouter = CreateController<logging::LogMsgReceiver>(1029, "default");
-        logMsgRouter->SetLogger(_logger.get());
+        if (_participant.logger.logFromRemotes)
+        {
+            auto&& logMsgRouter = CreateController<logging::LogMsgReceiver>(1029, "default");
+            logMsgRouter->SetLogger(logger);
+        }
+
+        auto sinkIter = std::find_if(_participant.logger.sinks.begin(), _participant.logger.sinks.end(),
+            [](const cfg::Sink& sink) { return sink.type == cfg::Sink::Type::Remote; });
+
+        if (sinkIter != _participant.logger.sinks.end())
+        {
+            auto&& logMsgSender = CreateController<logging::LogMsgSender>(1028, "default");
+
+            logger->RegisterRemoteLogging([logMsgSender](logging::LogMsg logMsg) {
+
+                logMsgSender->SendLogMsg(std::move(logMsg));
+
+            });
+        }
     }
-
-    auto sinkIter = std::find_if(participantConfig.logger.sinks.begin(), participantConfig.logger.sinks.end(),
-        [](const cfg::Sink& sink) { return sink.type == cfg::Sink::Type::Remote; });
-
-    if (sinkIter == participantConfig.logger.sinks.end())
-        return;
-
-    auto&& logMsgDistributor = CreateController<logging::LogMsgDistributor>(1028, "default");
-    _logger->RegisterRemoteLogging([logMsgDistributor](logging::LogMsg logMsg) {
-
-        logMsgDistributor->SendLogMsg(std::move(logMsg));
-
-    });
+    else
+    {
+        _logger->Warn("Failed to setup remote logging. Participant {} will not send and receive remote logs.", _participantName);
+    }
 }
 
 template <class IbConnectionT>
@@ -259,7 +278,7 @@ auto ComAdapter<IbConnectionT>::CreateGenericSubscriber(const std::string& canon
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::GetSyncMaster() -> sync::ISyncMaster*
 {
-    if (!isSyncMaster())
+    if (!_participant.isSyncMaster)
     {
         _logger->Error("ComAdapter::GetSyncMaster(): Participant is not configured as SyncMaster!");
         throw std::runtime_error("Participant not configured as SyncMaster");
@@ -770,12 +789,6 @@ bool ComAdapter<IbConnectionT>::ControllerUsesNetworkSimulator(const std::string
     }
 
     return false;
-}
-
-template <class IbConnectionT>
-bool ComAdapter<IbConnectionT>::isSyncMaster() const
-{
-    return _participant.isSyncMaster;
 }
 
 template <class IbConnectionT>

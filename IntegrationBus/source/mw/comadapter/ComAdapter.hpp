@@ -14,7 +14,7 @@
 #include "ib/sim/all.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 
-#include "IIbToLogMsgDistributor.hpp"
+#include "IIbToLogMsgSender.hpp"
 #include "IIbToLogMsgReceiver.hpp"
 
 
@@ -164,6 +164,9 @@ private:
     // private methods
     void onIbDomainJoined();
 
+    void SetupSyncMaster();
+    void SetupRemoteLogging();
+
     template<typename IbMessageT>
     void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg);
 
@@ -186,7 +189,6 @@ private:
     void RegisterSimulator(IIbToSimulatorT* busSim, cfg::Link::Type linkType);
 
     bool ControllerUsesNetworkSimulator(const std::string& controllerName) const;
-    bool isSyncMaster() const;
 
 private:
     // ----------------------------------------
@@ -217,7 +219,7 @@ private:
         ControllerMap<sim::io::IIbToOutPort<sim::io::AnalogIoMessage>>,
         ControllerMap<sim::io::IIbToOutPort<sim::io::PwmIoMessage>>,
         ControllerMap<sim::io::IIbToOutPort<sim::io::PatternIoMessage>>,
-        ControllerMap<logging::IIbToLogMsgDistributor>,
+        ControllerMap<logging::IIbToLogMsgSender>,
         ControllerMap<logging::IIbToLogMsgReceiver>,
         ControllerMap<sync::IIbToParticipantController>,
         ControllerMap<sync::IIbToSystemMonitor>,

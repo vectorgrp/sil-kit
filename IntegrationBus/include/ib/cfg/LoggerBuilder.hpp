@@ -22,7 +22,7 @@ public:
 
     IntegrationBusAPI auto AddSink(Sink::Type type) -> SinkBuilder&;
 
-    IntegrationBusAPI auto WhichSubscribesToRemoteLogs() -> LoggerBuilder&;
+    IntegrationBusAPI auto EnableLogFromRemotes() -> LoggerBuilder&;
     IntegrationBusAPI auto WithFlushLevel(mw::logging::Level level) -> LoggerBuilder&;
 
     IntegrationBusAPI auto operator->() -> LoggerBuilder*;

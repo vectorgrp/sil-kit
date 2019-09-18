@@ -30,9 +30,9 @@ auto LoggerBuilder::AddSink(Sink::Type type) -> SinkBuilder&
     return _sinks[_sinks.size() - 1];
 }
 
-auto LoggerBuilder::WhichSubscribesToRemoteLogs() -> LoggerBuilder&
+auto LoggerBuilder::EnableLogFromRemotes() -> LoggerBuilder&
 {
-    _logger.subscribeToRemoteLogs = true;
+    _logger.logFromRemotes = true;
     return *this;
 }
 

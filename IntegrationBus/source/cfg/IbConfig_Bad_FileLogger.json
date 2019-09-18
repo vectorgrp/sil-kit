@@ -12,7 +12,7 @@
                 "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
                 "SyncType": "Unsynchronized",
                 "Logger": {
-                    "SubscribeToRemoteLogs": true,
+                    "LogFromRemotes": true,
                     "FlushLevel": "Info",
                     "Sinks": [
                         {

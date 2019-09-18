@@ -4,19 +4,19 @@
 
 #include "ib/mw/IComAdapter.hpp"
 
-#include "IIbToLogMsgDistributor.hpp"
+#include "IIbToLogMsgSender.hpp"
 
 namespace ib {
 namespace mw {
 namespace logging {
 
-class LogMsgDistributor
-    : public IIbToLogMsgDistributor
+class LogMsgSender
+    : public IIbToLogMsgSender
 {
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    LogMsgDistributor(IComAdapter* comAdapter);
+    LogMsgSender(IComAdapter* comAdapter);
 
 public:
     void SendLogMsg(const LogMsg& msg);

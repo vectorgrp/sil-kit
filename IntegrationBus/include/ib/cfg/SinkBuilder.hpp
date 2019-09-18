@@ -19,7 +19,7 @@ public:
 
     IntegrationBusAPI auto WithLogLevel(mw::logging::Level level) -> SinkBuilder&;
 
-    IntegrationBusAPI auto WithFilename(std::string filename) -> SinkBuilder&;
+    IntegrationBusAPI auto WithLogname(std::string logname) -> SinkBuilder&;
 
     IntegrationBusAPI auto operator->() -> LoggerBuilder*;
 

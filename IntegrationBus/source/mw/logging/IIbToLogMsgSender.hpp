@@ -11,7 +11,7 @@ namespace ib {
 namespace mw {
 namespace logging {
 
-class IIbToLogMsgDistributor
+class IIbToLogMsgSender
     : public mw::IIbEndpoint<>
     , public mw::IIbSender<LogMsg>
 {
