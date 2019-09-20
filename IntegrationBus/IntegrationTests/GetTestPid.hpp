@@ -7,7 +7,7 @@
     #include <process.h>
     inline auto GetTestPid()
     {
-        return _getpid();
+        return _getpid() & 232;
     }
 
 #else // hopefully a posix OS

@@ -30,6 +30,11 @@ using testing::Return;
 class GenericMessageITest : public testing::Test
 {
 protected:
+    GenericMessageITest()
+    {
+        domainId = static_cast<uint32_t>(GetTestPid());
+    }
+
 
     void Subscribe()
     {
