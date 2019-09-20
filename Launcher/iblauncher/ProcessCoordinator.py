@@ -260,26 +260,6 @@ class ProcessCoordinator:
         t.start()
         self.__outputPipeThreads[processName] = t
 
-        # Create a name pipe and forward their input to this spawned process (Posix only)
-        if os.name == "posix":
-            # Create OS-wide named pipes, so the user can 'echo "Hello!" > Process1' from another terminal
-            # Start threads to read input from the named pipes
-            try:
-                os.remove(processName)
-            except:
-                pass
-            try:
-                os.mkfifo(processName)
-                if self.__verbose:
-                    print("Created input pipe '" + processName + "' that forwards input to process of '" + processName + "'.")  # e.g., call 'echo "[Input]" > [ProcessName]'
-            except OSError as e:
-                if self.__verbose:
-                    print("Warning: Failed to create input pipe '" + processName + "' ('" + e + "').")
-            t = Thread(target=ProcessCoordinator.__forwardInputFromNamedPipeToStdin, args=(process.stdin, processName, self.__endThreadsSignal))
-            t.daemon = True
-            t.start()
-            self.__inputPipeThreads[processName] = t
-
         return process
 
     #######################################################################################################################
@@ -307,10 +287,6 @@ class ProcessCoordinator:
                 p.poll()
                 if p.returncode is not None:
                     self.__log("Launcher: Process of '" + processName + "' with PID " + str(p.pid) + " exited with return code " + "0x{0:0{1}x}".format(p.returncode, 8) + ".")
-                    try:
-                        os.remove(processName)
-                    except:
-                        pass
                     del newProcesses[processName]
                     if p.returncode != 0:
                         return False
@@ -374,10 +350,6 @@ class ProcessCoordinator:
                         self.__log("Launcher: Process of '" + processName + "' with PID " + str(p.pid) + " is still running and could not be killed (error code " + "0x{0:0{1}x}".format(exitcode, 8) + ").")
             else:
                 self.__log("Launcher: Process of '" + processName + "' with PID " + str(p.pid) + " exited with return code " + "0x{0:0{1}x}".format(p.returncode, 8) + ".")
-            try:
-                os.remove(processName)
-            except:
-                pass
             del newProcesses[processName]
 
         self.__processes = newProcesses
