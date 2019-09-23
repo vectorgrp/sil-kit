@@ -11,6 +11,15 @@
                 "Description": "Demo Writer",
                 "SyncType": "DiscreteTime",
                 "IsSyncMaster": true,
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote",
+                            "Level": "Trace"
+                        }
+                    ]
+                },
 
                 "EthernetControllers": [
                     {
@@ -23,6 +32,15 @@
                 "Name": "EthernetReader",
                 "Description": "Demo Reader",
                 "SyncType": "DiscreteTime",
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote",
+                            "Level": "Trace"
+                        }
+                    ]
+                },
 
                 "EthernetControllers": [
                     {
@@ -39,12 +57,29 @@
             },
             {
                 "Name": "SystemController",
-                "SyncType": "Unsynchronized"
+                "SyncType": "Unsynchronized",
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote"
+                        }
+                    ]
+                }
             },
             {
                 "Name": "SystemMonitor",
                 "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
-                "SyncType": "Unsynchronized"
+                "SyncType": "Unsynchronized",
+                "Logger": {
+                    "LogFromRemotes": true,
+                    "FlushLevel": "Info",
+                    "Sinks": [
+                        {
+                            "Type": "Stdout"
+                        }
+                    ]
+                }
             }
         ],
 

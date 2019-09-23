@@ -11,6 +11,15 @@
                 "Description": "LIN Master",
                 "SyncType": "DiscreteTime",
                 "IsSyncMaster": true,
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote",
+                            "Level": "Trace"
+                        }
+                    ]
+                },
 
                 "LinControllers": [ "LIN1" ]
             },
@@ -18,6 +27,15 @@
                 "Name": "LinSlave",
                 "Description": "LIN Slave",
                 "SyncType": "DiscreteTime",
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote",
+                            "Level": "Trace"
+                        }
+                    ]
+                },
 
                 "LinControllers": [ "LIN1" ]
             },
@@ -29,12 +47,29 @@
             },
             {
                 "Name": "SystemController",
-                "SyncType": "Unsynchronized"
+                "SyncType": "Unsynchronized",
+                "Logger": {
+                    "FlushLevel": "Warn",
+                    "Sinks": [
+                        {
+                            "Type": "Remote"
+                        }
+                    ]
+                }
             },
             {
                 "Name": "SystemMonitor",
                 "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
-                "SyncType": "Unsynchronized"
+                "SyncType": "Unsynchronized",
+                "Logger": {
+                    "LogFromRemotes": true,
+                    "FlushLevel": "Info",
+                    "Sinks": [
+                        {
+                            "Type": "Stdout"
+                        }
+                    ]
+                }
             }
         ],
 
