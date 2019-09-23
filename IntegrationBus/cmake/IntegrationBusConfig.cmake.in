@@ -1,5 +1,4 @@
 include(CMakeFindDependencyMacro)
-find_dependency(spdlog CONFIG REQUIRED)
 
 @PACKAGE_INIT@
 
