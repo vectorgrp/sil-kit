@@ -56,7 +56,7 @@ void SendMessage(can::ICanController* controller, std::chrono::nanoseconds now, 
     msg.canId = 17;
     msg.flags.ide = 0; // Identifier Extension
     msg.flags.rtr = 0; // Remote Transmission Request
-    msg.flags.fdf = 1; // FD Format Indicator
+    msg.flags.fdf = 0; // FD Format Indicator
     msg.flags.brs = 1; // Bit Rate Switch  (for FD Format only)
     msg.flags.esi = 0; // Error State indicator (for FD Format only)
 
@@ -66,6 +66,7 @@ void SendMessage(can::ICanController* controller, std::chrono::nanoseconds now, 
     auto payloadStr = payloadBuilder.str();
 
     msg.dataField.assign(payloadStr.begin(), payloadStr.end());
+    msg.dlc = msg.dataField.size();
 
     auto transmitId = controller->SendMessage(std::move(msg));
     std::stringstream buffer;
