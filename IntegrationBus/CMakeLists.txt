@@ -390,7 +390,7 @@ install(
     # Rational: Fast-RTPS cannot be delivered from source, as it requires its own submodules to be actual Git repositories.
     REGEX "/ThirdParty/Fast-RTPS" EXCLUDE
     # Breathe is just required for generating the documentation
-    REGEX "/ThirdParty/Breathe" EXCLUDE
+    REGEX "/ThirdParty/breathe" EXCLUDE
 )
 
 # Install all the helper files
