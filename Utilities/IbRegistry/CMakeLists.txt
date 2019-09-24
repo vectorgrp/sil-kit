@@ -23,6 +23,8 @@ target_link_libraries(IbRegistry
     IbConfig
 )
 
+#NB: currently COMPONENT is required to be IntegrationBus or VIB-CANoe packages break
 install(TARGETS IbRegistry
     RUNTIME DESTINATION ${INSTALL_BINDIR}
+    COMPONENT IntegrationBus
 )
