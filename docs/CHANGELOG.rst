@@ -5,8 +5,8 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on [Keep a Changelog] (http://keepachangelog.com/en/1.0.0/).
 
-[unreleased] - yyyy-mm-dd
-------------------------
+[1.0.0 (Sprint-32)] - 2019-09-25
+--------------------------------
 Added
 ~~~~~
 - The logging facilities can now be configured per participant using the IB
