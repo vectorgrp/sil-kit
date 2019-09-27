@@ -81,7 +81,7 @@ SystemController
 
    *  -  Abstract
       -  The SystemController implements state handling for the participants of a Integration Bus system.
-         Examples for stage change commands called by the SystemController are 'Run','Stop','Shutdown' etc.
+         Examples for state change commands called by the SystemController are 'Run','Stop','Shutdown' etc.
    *  -  Source location
       -  Demos/SystemController
    *  -  Requirements

@@ -8,12 +8,12 @@ Middleware Config
 Overview
 --------------------
 
-Since Sprint-31, the Vector Integration Bus offers a second middlewares to chose
-from. Besides the established Fast-RTPS middleware, you can now chose the VAsio
+Since Sprint-31, the Vector Integration Bus offers a second middlewares to choose
+from. Besides the established Fast-RTPS middleware, you can now choose the VAsio
 middleware, a boost ASIO based middleware that was specifically designed for the Vector
 Integration Bus.
 
-By and large, the two middlewares are interchangable with almost no necessary changes to
+By and large, the two middlewares are interchangeable with almost no necessary changes to
 the applications using the VIB. In particular, applications that once have been
 :ref:`enabled<sec:mwcfg-enable-vasio>` for the new VAsio middleware also work with the old
 Fast-RTPS one. From that point on, the :ref:`active middleware<sec:mwcfg-active-middleware>` can
