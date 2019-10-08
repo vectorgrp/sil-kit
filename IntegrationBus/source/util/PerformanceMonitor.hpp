@@ -15,6 +15,7 @@ public:
     inline void StartMeasurement();
     inline void StopMeasurement();
 
+    inline auto CurrentDuration() -> std::chrono::nanoseconds;
     inline auto SampleCount() -> std::size_t;
     inline auto MinDuration() -> std::chrono::nanoseconds;
     inline auto MaxDuration() -> std::chrono::nanoseconds;
@@ -23,6 +24,7 @@ public:
 
 private:
     std::chrono::high_resolution_clock::time_point _start;
+    std::chrono::nanoseconds _currentDuration{0};
 
     std::chrono::nanoseconds _maxDuration{0};
     std::chrono::nanoseconds _minDuration{std::chrono::nanoseconds::max()};
@@ -38,11 +40,11 @@ void PerformanceMonitor::StartMeasurement()
 }
 void PerformanceMonitor::StopMeasurement()
 {
-    auto duration = std::chrono::high_resolution_clock::now() - _start;
+    _currentDuration = std::chrono::high_resolution_clock::now() - _start;
 
-    _minDuration = std::min(duration, _minDuration);
-    _maxDuration = std::max(duration, _maxDuration);
-    _durationSum += duration;
+    _minDuration = std::min(_currentDuration, _minDuration);
+    _maxDuration = std::max(_currentDuration, _maxDuration);
+    _durationSum += _currentDuration;
     _sampleCount++;
 }
 
@@ -53,6 +55,10 @@ auto PerformanceMonitor::SampleCount() -> std::size_t
 auto PerformanceMonitor::MinDuration() -> std::chrono::nanoseconds
 {
     return _minDuration;
+}
+auto PerformanceMonitor::CurrentDuration() -> std::chrono::nanoseconds
+{
+    return _currentDuration;
 }
 auto PerformanceMonitor::MaxDuration() -> std::chrono::nanoseconds {
     return _maxDuration;

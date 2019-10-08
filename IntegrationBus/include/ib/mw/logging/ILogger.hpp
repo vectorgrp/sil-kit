@@ -60,6 +60,11 @@ public:
 
     }
     template<typename... Args>
+    void Trace(const char* fmt, const Args&... args)
+    {
+        Log(Level::Trace, fmt, args...);
+    }
+    template<typename... Args>
     void Debug(const char* fmt, const Args&... args)
     {
         Log(Level::Debug, fmt, args...);

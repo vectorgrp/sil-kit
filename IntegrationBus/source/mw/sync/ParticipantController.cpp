@@ -1,3 +1,5 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 #include "ParticipantController.hpp"
 
 #include <cassert>
@@ -692,10 +694,16 @@ void ParticipantController::CheckDistributedTimeAdvanceGrant()
 void ParticipantController::ExecuteSimTask()
 {
     assert(_simTask);
+    using DoubleMSecs = std::chrono::duration<double, std::milli>;
+
     _waitTimeMonitor.StopMeasurement();
+    _logger->Trace("Starting next Simulation Task. Waiting time was: {}ms", std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count());
+
     _execTimeMonitor.StartMeasurement();
     _simTask(_currentTask.timePoint, _currentTask.duration);
     _execTimeMonitor.StopMeasurement();
+
+    _logger->Trace("Finished Simulation Task. Execution time was: {}ms", std::chrono::duration_cast<DoubleMSecs>(_execTimeMonitor.CurrentDuration()).count());
     _waitTimeMonitor.StartMeasurement();
 
     _syncAdapter->FinishedStep(*this);
