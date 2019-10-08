@@ -9,6 +9,7 @@ add_library(IbMwComAdapter STATIC
 
 target_link_libraries(IbMwComAdapter
     PUBLIC  IbInterface
+    PUBLIC  IbVersion
     PUBLIC  IbMwLogging
     PUBLIC  IbMwFastRtps
     PUBLIC  IbMwVAsio

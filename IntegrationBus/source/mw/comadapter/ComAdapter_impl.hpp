@@ -28,6 +28,7 @@
 #include "tuple_tools/predicative_get.hpp"
 
 #include "ib/cfg/string_utils.hpp"
+#include "ib/version.hpp"
 
 #ifdef SendMessage
 #if SendMessage == SendMessageA
@@ -65,6 +66,8 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& par
     //  this will cause a fairly unintuitive exception in spdlog.
     auto&& participantConfig = get_by_name(_config.simulationSetup.participants, _participantName);
     _logger = std::make_unique<logging::Logger>(_participantName, participantConfig.logger);
+
+    _logger->Info("Creating ComAdapter for Participant {}, IntegrationBus-Version: {} {}", _participantName, version::String(), version::SprintName());
 }
 
 template <class IbConnectionT>

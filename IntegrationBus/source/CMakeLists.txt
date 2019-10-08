@@ -24,9 +24,6 @@ add_library(IntegrationBus SHARED
     IntegrationBus.hpp
     IntegrationBus.cpp
     IbForceIncludes.cpp
-    version.cpp
-    version.hpp
-    ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp
 )
 
 if (MSVC)
@@ -44,6 +41,15 @@ target_link_libraries(IntegrationBus
 set_target_properties(IntegrationBus
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/
+)
+
+add_library(IbVersion STATIC
+    version.cpp
+    version.hpp
+    ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp
+)
+target_link_libraries(IbVersion
+    PUBLIC  IbInterface
 )
 
 #######################################################################################################################
