@@ -66,6 +66,7 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& par
     //  this will cause a fairly unintuitive exception in spdlog.
     auto&& participantConfig = get_by_name(_config.simulationSetup.participants, _participantName);
     _logger = std::make_unique<logging::Logger>(_participantName, participantConfig.logger);
+    _ibConnection.SetLogger(_logger.get());
 
     _logger->Info("Creating ComAdapter for Participant {}, IntegrationBus-Version: {} {}", _participantName, version::String(), version::SprintName());
 }

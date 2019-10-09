@@ -2,6 +2,8 @@
 
 #include "NullConnectionComAdapter.hpp"
 
+#include "ib/mw/logging/ILogger.hpp"
+
 #include "ComAdapter.hpp"
 #include "ComAdapter_impl.hpp"
 
@@ -13,6 +15,7 @@ struct NullConnection
 {
     NullConnection(ib::cfg::Config /*config*/, std::string /*participantName*/, ib::mw::ParticipantId /*participantId*/) {};
 
+    void SetLogger(logging::ILogger* /*logger*/) {};
     void JoinDomain(uint32_t /*domainId*/) {};
 
     template<class IbServiceT>

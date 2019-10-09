@@ -10,6 +10,7 @@
 #include <future>
 
 #include "ib/cfg/Config.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 
 #include "fastrtps_fwd.h"
 #include "fastrtps/publisher/Publisher.h"
@@ -55,13 +56,18 @@ public:
     // ----------------------------------------
     // Public methods
     //
+    void SetLogger(logging::ILogger* logger);
     void JoinDomain(uint32_t domainId);
 
     template<class IbServiceT>
     inline void RegisterIbService(const std::string& topicName, EndpointId endpointId, IbServiceT* receiver);
 
     template<typename IbMessageT>
+    void SendIbMessageImpl(EndpointAddress from, const IbMessageT& msg);
+    template<typename IbMessageT>
     void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg);
+    inline void SendIbMessageImpl(EndpointAddress from, const logging::LogMsg& msg);
+    inline void SendIbMessageImpl(EndpointAddress from, logging::LogMsg&& msg);
 
     void OnAllMessagesDelivered(std::function<void(void)> callback);
     void FlushSendBuffers();
@@ -126,6 +132,7 @@ private:
     cfg::Config _config;
     std::string _participantName;
     ParticipantId _participantId{0};
+    logging::ILogger* _logger{nullptr};
 
     std::unique_ptr<eprosima::fastrtps::Participant, FastRtps::RemoveParticipant> _fastRtpsParticipant;
 
@@ -188,9 +195,50 @@ void FastRtpsConnection::RegisterIbService(const std::string& topicName, Endpoin
 }
 
 template<typename IbMessageT>
+void FastRtpsConnection::SendIbMessageImpl(EndpointAddress from, const IbMessageT& msg)
+{
+    auto idlMsg = to_idl(msg);
+    idlMsg.senderAddr(to_idl(from));
+
+    _logger->Trace("Sending {} Message from Endpoint Address ({}, {})", TopicTrait<decltype(idlMsg)>::TypeName(), from.participant, from.endpoint);
+
+    auto& rtpsTopics = std::get<RtpsTopics<decltype(idlMsg)>>(_rtpsTopics);
+    assert(rtpsTopics.endpointToPublisherMap.find(from.endpoint) != rtpsTopics.endpointToPublisherMap.end());
+
+    auto* publisher = rtpsTopics.endpointToPublisherMap[from.endpoint];
+    publisher->write(&idlMsg);
+}
+
+template<typename IbMessageT>
 void FastRtpsConnection::SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
 {
     auto idlMsg = to_idl(std::forward<IbMessageT>(msg));
+    idlMsg.senderAddr(to_idl(from));
+
+    _logger->Trace("Sending {} Message from Endpoint Address ({}, {})", TopicTrait<decltype(idlMsg)>::TypeName(), from.participant, from.endpoint);
+
+    auto& rtpsTopics = std::get<RtpsTopics<decltype(idlMsg)>>(_rtpsTopics);
+    assert(rtpsTopics.endpointToPublisherMap.find(from.endpoint) != rtpsTopics.endpointToPublisherMap.end());
+
+    auto* publisher = rtpsTopics.endpointToPublisherMap[from.endpoint];
+    publisher->write(&idlMsg);
+}
+
+void FastRtpsConnection::SendIbMessageImpl(EndpointAddress from, const logging::LogMsg& msg)
+{
+    auto idlMsg = to_idl(msg);
+    idlMsg.senderAddr(to_idl(from));
+
+    auto& rtpsTopics = std::get<RtpsTopics<decltype(idlMsg)>>(_rtpsTopics);
+    assert(rtpsTopics.endpointToPublisherMap.find(from.endpoint) != rtpsTopics.endpointToPublisherMap.end());
+
+    auto* publisher = rtpsTopics.endpointToPublisherMap[from.endpoint];
+    publisher->write(&idlMsg);
+}
+
+void FastRtpsConnection::SendIbMessageImpl(EndpointAddress from, logging::LogMsg&& msg)
+{
+    auto idlMsg = to_idl(std::forward<logging::LogMsg>(msg));
     idlMsg.senderAddr(to_idl(from));
 
     auto& rtpsTopics = std::get<RtpsTopics<decltype(idlMsg)>>(_rtpsTopics);
@@ -240,6 +288,9 @@ void FastRtpsConnection::PublishRtpsTopic(const std::string& topicName, Endpoint
 template <class IbMessageT>
 void FastRtpsConnection::SubscribeRtpsTopic(const std::string& topicName, IIbMessageReceiver<IbMessageT>* receiver)
 {
+    // check if logger is set, otherwise trace logging for the IbSubListener cannot be activated.
+    assert(_logger);
+
     using IdlMessageT = to_idl_message_t<IbMessageT>;
     auto&& rtpsTopics = std::get<RtpsTopics<IdlMessageT>>(_rtpsTopics);
 
@@ -247,6 +298,7 @@ void FastRtpsConnection::SubscribeRtpsTopic(const std::string& topicName, IIbMes
     {
         // create a subscriber entry
         auto&& rtpsSubscriber = rtpsTopics.subListeners[topicName];
+        rtpsSubscriber.listener.SetLogger(_logger);
         rtpsSubscriber.subscriber.reset(createSubscriber(topicName, &rtpsTopics.pubSubType, &rtpsSubscriber.listener));
     }
     rtpsTopics.subListeners[topicName].listener.addReceiver(receiver);

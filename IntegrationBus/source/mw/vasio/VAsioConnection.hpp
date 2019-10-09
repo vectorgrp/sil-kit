@@ -9,6 +9,7 @@
 #include <future>
 
 #include "ib/cfg/Config.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 
 #include "tuple_tools/for_each.hpp"
 #include "tuple_tools/wrapped_tuple.hpp"
@@ -74,18 +75,48 @@ public:
 public:
     // ----------------------------------------
     // Public methods
+    void SetLogger(logging::ILogger* logger);
     void JoinDomain(uint32_t domainId);
 
     template <class IbServiceT>
-    inline void RegisterIbService(const std::string& link, EndpointId endpointId, IbServiceT* service);
+    void RegisterIbService(const std::string& link, EndpointId endpointId, IbServiceT* service)
+    {
+        ExecuteOnIoThread(&VAsioConnection::RegisterIbServiceImpl<IbServiceT>, link, endpointId, service);
+    }
 
-    template<class IbMessageT>
-    inline void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg);
+    template<typename IbMessageT>
+    void SendIbMessageImpl(EndpointAddress from, const IbMessageT& msg)
+    {
+        _logger->Trace("Sending {} Message from Endpoint Address ({}, {})", IbMsgTraits<IbMessageT>::TypeName(), from.participant, from.endpoint);
 
-    inline void OnAllMessagesDelivered(std::function<void()> callback);
+        ExecuteOnIoThread(&VAsioConnection::SendIbMessageImpl_<const IbMessageT&>, from, msg);
+    }
+    template<typename IbMessageT>
+    void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
+    {
+        _logger->Trace("Sending {} Message from Endpoint Address ({}, {})", IbMsgTraits<IbMessageT>::TypeName(), from.participant, from.endpoint);
+
+        ExecuteOnIoThread(&VAsioConnection::SendIbMessageImpl_<IbMessageT>, from, std::forward<IbMessageT>(msg));
+    }
+    inline void SendIbMessageImpl(EndpointAddress from, const logging::LogMsg& msg)
+    {
+        ExecuteOnIoThread(&VAsioConnection::SendIbMessageImpl_<const logging::LogMsg&>, from, msg);
+    }
+    inline void SendIbMessageImpl(EndpointAddress from, logging::LogMsg&& msg)
+    {
+        ExecuteOnIoThread(&VAsioConnection::SendIbMessageImpl_<logging::LogMsg>, from, std::forward<logging::LogMsg>(msg));
+    }
+
+    inline void OnAllMessagesDelivered(std::function<void()> callback)
+    {
+        callback();
+    }
     void FlushSendBuffers() {};
 
-    inline auto Config() const -> const ib::cfg::Config&;
+    inline auto Config() const -> const ib::cfg::Config&
+    {
+        return _config;
+    }
 
     // Temporary Helpers
     void RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)> callback);
@@ -165,22 +196,107 @@ private:
     void ReceiveSubscriptionSentEvent();
 
     template<class IbMessageT>
-    auto GetLinkByName(const std::string& linkName) ->std::shared_ptr<IbLink<IbMessageT>>;
+    auto GetLinkByName(const std::string& linkName) -> std::shared_ptr<IbLink<IbMessageT>>
+    {
+        auto& ibLink = std::get<IbLinkMap<IbMessageT>>(_ibLinks)[linkName];
+        if (!ibLink)
+        {
+            ibLink = std::make_shared<IbLink<IbMessageT>>(linkName);
+        }
+        return ibLink;
+    }
 
     template<class IbMessageT>
-    void RegisterIbMsgReceiver(const std::string& link, ib::mw::IIbMessageReceiver<IbMessageT>* receiver);
+    void RegisterIbMsgReceiver(const std::string& linkName, ib::mw::IIbMessageReceiver<IbMessageT>* receiver)
+    {
+        assert(_logger);
+
+        auto link = GetLinkByName<IbMessageT>(linkName);
+        link->AddLocalReceiver(receiver);
+
+        auto vasioReceiver = std::find_if(_vasioReceivers.begin(), _vasioReceivers.end(),
+            [&linkName](auto& receiver) {
+            return receiver->GetDescriptor().linkName == linkName
+                && receiver->GetDescriptor().msgTypeName == IbMsgTraits<IbMessageT>::TypeName();
+        });
+        if (vasioReceiver == _vasioReceivers.end())
+        {
+            // we have to subscribe to messages from other peers
+            VAsioMsgSubscriber subscriptionInfo;
+            subscriptionInfo.receiverIdx = static_cast<uint16_t>(_vasioReceivers.size());
+            subscriptionInfo.linkName = linkName;
+            subscriptionInfo.msgTypeName = IbMsgTraits<IbMessageT>::TypeName();
+
+            std::unique_ptr<IVAsioReceiver> rawReceiver = std::make_unique<VAsioReceiver<IbMessageT>>(subscriptionInfo, link, _logger);
+            _vasioReceivers.emplace_back(std::move(rawReceiver));
+
+            for (auto&& peer : _peers)
+            {
+                peer->Subscribe(subscriptionInfo);
+            }
+        }
+    }
     template<class IbMessageT>
-    void RegisterIbMsgSender(const std::string& link, EndpointId endpointId);
+    void RegisterIbMsgSender(const std::string& linkName, EndpointId endpointId)
+    {
+        auto ibLink = GetLinkByName<IbMessageT>(linkName);
+        auto&& linkMap = std::get<IbEndpointToLinkMap<IbMessageT>>(_endpointToLinkMap);
+        linkMap[endpointId] = ibLink;
+    }
 
     template<class IbServiceT>
-    inline void RegisterIbServiceImpl(const std::string& link, EndpointId endpointId, IbServiceT* service);
+    inline void RegisterIbServiceImpl(const std::string& link, EndpointId endpointId, IbServiceT* service)
+    {
+        typename IbServiceT::IbReceiveMessagesTypes receiveMessageTypes{};
+        typename IbServiceT::IbSendMessagesTypes sendMessageTypes{};
+
+        util::tuple_tools::for_each(receiveMessageTypes,
+            [this, &link, service](auto&& ibMessage)
+        {
+            using IbMessageT = std::decay_t<decltype(ibMessage)>;
+            this->RegisterIbMsgReceiver<IbMessageT>(link, service);
+        }
+        );
+
+        util::tuple_tools::for_each(sendMessageTypes,
+            [this, &link, &endpointId](auto&& ibMessage)
+        {
+            using IbMessageT = std::decay_t<decltype(ibMessage)>;
+            this->RegisterIbMsgSender<IbMessageT>(link, endpointId);
+        }
+        );
+    }
 
     template <class IbMessageT>
-    void SendIbMessageImpl_(EndpointAddress from, IbMessageT&& msg);
+    void SendIbMessageImpl_(EndpointAddress from, IbMessageT&& msg)
+    {
+        auto& linkMap = std::get<IbEndpointToLinkMap<std::decay_t<IbMessageT>>>(_endpointToLinkMap);
+        linkMap[from.endpoint]->DistributeLocalIbMessage(from, std::forward<IbMessageT>(msg));
+    }
 
     template <typename... MethodArgs, typename... Args>
-    inline void ExecuteOnIoThread(void (VAsioConnection::*method)(MethodArgs...), Args&&... args);
-    inline void ExecuteOnIoThread(std::function<void()> function);
+    inline void ExecuteOnIoThread(void (VAsioConnection::*method)(MethodArgs...), Args&&... args)
+    {
+        if (std::this_thread::get_id() == _ioWorker.get_id())
+        {
+            (this->*method)(std::forward<Args>(args)...);
+        }
+        else
+        {
+            _ioContext.dispatch([=]() mutable { (this->*method)(std::move(args)...); });
+        }
+    }
+    inline void ExecuteOnIoThread(std::function<void()> function)
+    {
+        if (std::this_thread::get_id() == _ioWorker.get_id())
+        {
+            function();
+        }
+        else
+        {
+            _ioContext.dispatch(std::move(function));
+        }
+    }
 
     // TCP Related
     void AddPeer(std::shared_ptr<VAsioTcpPeer> peer);
@@ -192,6 +308,7 @@ private:
     cfg::Config _config;
     std::string _participantName;
     ParticipantId _participantId{0};
+    logging::ILogger* _logger{nullptr};
 
     //! \brief Virtual IB links by linkName according to IbConfig.
     util::tuple_tools::wrapped_tuple<IbLinkMap, IbMessageTypes> _ibLinks;
@@ -218,134 +335,6 @@ private:
     // that no callback is destroyed before the thread finishes.
     std::thread _ioWorker;
 };
-
-// ================================================================================
-//  Inline Implementations
-// ================================================================================
-auto VAsioConnection::Config() const -> const ib::cfg::Config&
-{
-    return _config;
-}
-
-template<class IbMessageT>
-auto VAsioConnection::GetLinkByName(const std::string& linkName) -> std::shared_ptr<IbLink<IbMessageT>>
-{
-    auto& ibLink = std::get<IbLinkMap<IbMessageT>>(_ibLinks)[linkName];
-    if (!ibLink)
-    {
-        ibLink = std::make_shared<IbLink<IbMessageT>>(linkName);
-    }
-    return ibLink;
-}
-
-template <class IbServiceT>
-void VAsioConnection::RegisterIbService(const std::string& link, EndpointId endpointId, IbServiceT* service)
-{
-    ExecuteOnIoThread(&VAsioConnection::RegisterIbServiceImpl<IbServiceT>, link, endpointId, service);
-}
-
-template <class IbServiceT>
-void VAsioConnection::RegisterIbServiceImpl(const std::string& link, EndpointId endpointId, IbServiceT* service)
-{
-    typename IbServiceT::IbReceiveMessagesTypes receiveMessageTypes{};
-    typename IbServiceT::IbSendMessagesTypes sendMessageTypes{};
-
-    util::tuple_tools::for_each(receiveMessageTypes,
-        [this, &link, service](auto&& ibMessage)
-        {
-            using IbMessageT = std::decay_t<decltype(ibMessage)>;
-            this->RegisterIbMsgReceiver<IbMessageT>(link, service);
-        }
-    );
-
-    util::tuple_tools::for_each(sendMessageTypes,
-        [this, &link, &endpointId](auto&& ibMessage)
-        {
-            using IbMessageT = std::decay_t<decltype(ibMessage)>;
-            this->RegisterIbMsgSender<IbMessageT>(link, endpointId);
-        }
-    );
-}
-
-template<class IbMessageT>
-void VAsioConnection::RegisterIbMsgReceiver(const std::string& linkName, ib::mw::IIbMessageReceiver<IbMessageT>* receiver)
-{
-    auto link = GetLinkByName<IbMessageT>(linkName);
-    link->AddLocalReceiver(receiver);
-
-    auto vasioReceiver = std::find_if(_vasioReceivers.begin(), _vasioReceivers.end(),
-        [&linkName](auto& receiver) {
-            return receiver->GetDescriptor().linkName == linkName
-                && receiver->GetDescriptor().msgTypeName == IbMsgTraits<IbMessageT>::TypeName();
-        });
-    if (vasioReceiver == _vasioReceivers.end())
-    {
-        // we have to subscribe to messages from other peers
-        VAsioMsgSubscriber subscriptionInfo;
-        subscriptionInfo.receiverIdx = static_cast<uint16_t>(_vasioReceivers.size());
-        subscriptionInfo.linkName = linkName;
-        subscriptionInfo.msgTypeName = IbMsgTraits<IbMessageT>::TypeName();
-
-        std::unique_ptr<IVAsioReceiver> rawReceiver = std::make_unique<VAsioReceiver<IbMessageT>>(subscriptionInfo, link);
-        _vasioReceivers.emplace_back(std::move(rawReceiver));
-
-        for (auto&& peer : _peers)
-        {
-            peer->Subscribe(subscriptionInfo);
-        }
-    }
-}
-
-template<class IbMessageT>
-void VAsioConnection::RegisterIbMsgSender(const std::string& link, EndpointId endpointId)
-{
-    auto ibLink = GetLinkByName<IbMessageT>(link);
-    auto&& linkMap = std::get<IbEndpointToLinkMap<IbMessageT>>(_endpointToLinkMap);
-    linkMap[endpointId] = ibLink;
-}
-
-template <class IbMessageT>
-void VAsioConnection::SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
-{
-    ExecuteOnIoThread(&VAsioConnection::SendIbMessageImpl_<IbMessageT>, from, std::forward<IbMessageT>(msg));
-}
-
-template <class IbMessageT>
-void VAsioConnection::SendIbMessageImpl_(EndpointAddress from, IbMessageT&& msg)
-{
-    auto& linkMap = std::get<IbEndpointToLinkMap<std::decay_t<IbMessageT>>>(_endpointToLinkMap);
-    linkMap[from.endpoint]->DistributeLocalIbMessage(from, std::forward<IbMessageT>(msg));
-}
-
-void VAsioConnection::OnAllMessagesDelivered(std::function<void()> callback)
-{
-    callback();
-}
-
-template <typename... MethodArgs, typename... Args>
-void VAsioConnection::ExecuteOnIoThread(void (VAsioConnection::*method)(MethodArgs...), Args&&... args)
-{
-    if (std::this_thread::get_id() == _ioWorker.get_id())
-    {
-        (this->*method)(std::forward<Args>(args)...);
-    }
-    else
-    {
-        _ioContext.dispatch([=] () mutable { (this->*method)(std::move(args)...); });
-    }
-}
-
-inline void VAsioConnection::ExecuteOnIoThread(std::function<void()> function)
-{
-    if (std::this_thread::get_id() == _ioWorker.get_id())
-    {
-        function();
-    }
-    else
-    {
-        _ioContext.dispatch(std::move(function));
-    }
-}
 
 } // mw
 } // namespace ib

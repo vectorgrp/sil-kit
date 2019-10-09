@@ -36,6 +36,11 @@ VAsioConnection::~VAsioConnection()
     }
 }
 
+void VAsioConnection::SetLogger(logging::ILogger* logger)
+{
+    _logger = logger;
+}
+
 void VAsioConnection::JoinDomain(uint32_t domainId)
 {
     // We let the operating system choose a free port

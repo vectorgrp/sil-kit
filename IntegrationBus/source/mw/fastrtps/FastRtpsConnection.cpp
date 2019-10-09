@@ -29,6 +29,11 @@ FastRtpsConnection::FastRtpsConnection(cfg::Config config, std::string participa
 {
 }
 
+void FastRtpsConnection::SetLogger(logging::ILogger* logger)
+{
+    _logger = logger;
+}
+
 void FastRtpsConnection::JoinDomain(uint32_t domainId)
 {
     if (_fastRtpsParticipant)
