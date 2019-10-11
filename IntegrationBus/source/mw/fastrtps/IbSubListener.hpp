@@ -7,14 +7,16 @@
 #include "fastrtps/subscriber/SubscriberListener.h"
 #include "fastrtps/subscriber/Subscriber.h"
 #include "fastrtps/subscriber/SampleInfo.h"
+#include "fastrtps/rtps/common/MatchingInfo.h"
 
 #include <vector>
+#include <map>
 
 namespace ib {
 namespace mw {
 
 template<class IdlMessageT>
-class IbSubListener : public eprosima::fastrtps::SubscriberListener
+class IbSubListenerBase
 {
 public:
     using IdlMessageType = IdlMessageT;
@@ -22,65 +24,56 @@ public:
     using IbReceiver = IIbMessageReceiver<IbMessageType>;
 
 public:
-    IbSubListener() = default;
+    inline void SetLogger(logging::ILogger* logger);
+    inline void addReceiver(IbReceiver* receiver);
+    inline void clearReceivers();
 
-    void SetLogger(logging::ILogger* logger);
-    void addReceiver(IbReceiver* receiver);
-    void clearReceivers();
-    
-    inline void onNewDataMessage(eprosima::fastrtps::Subscriber* sub) override;
+protected:
+    inline void dispatchToReceivers(
+        eprosima::fastrtps::Subscriber* sub,
+        EndpointAddress senderAddr,
+        const IbMessageType& msg
+    );
 
-private:
+protected:
     logging::ILogger* _logger{nullptr};
     std::vector<IbReceiver*> _receivers;
 };
 
-
-// ================================================================================
-//  Inline Implementations
-// ================================================================================
 template<class IdlMessageT>
-void IbSubListener<IdlMessageT>::SetLogger(logging::ILogger* logger)
+void IbSubListenerBase<IdlMessageT>::SetLogger(logging::ILogger* logger)
 {
     _logger = logger;
 }
 
 template<class IdlMessageT>
-void IbSubListener<IdlMessageT>::addReceiver(IbReceiver* receiver)
+void IbSubListenerBase<IdlMessageT>::addReceiver(IbReceiver* receiver)
 {
     if (std::find(_receivers.begin(), _receivers.end(), receiver) != _receivers.end())
         return;
 
     _receivers.push_back(receiver);
 }
-    
+
 template<class IdlMessageT>
-void IbSubListener<IdlMessageT>::clearReceivers()
+void IbSubListenerBase<IdlMessageT>::clearReceivers()
 {
     decltype(_receivers) emptyList;
     std::swap(_receivers, emptyList);
 }
-    
+
 template<class IdlMessageT>
-void IbSubListener<IdlMessageT>::onNewDataMessage(eprosima::fastrtps::Subscriber* sub)
+void IbSubListenerBase<IdlMessageT>::dispatchToReceivers(
+    eprosima::fastrtps::Subscriber* sub,
+    EndpointAddress senderAddr,
+    const IbMessageType& msg
+)
 {
-    IdlMessageType idlMsg;
-	eprosima::fastrtps::SampleInfo_t info;
-
-    if (!sub->takeNextData(&idlMsg, &info))
-        return;
-
-    if (info.sampleKind != eprosima::fastrtps::rtps::ALIVE)
-        return;
-
-    auto senderAddr = from_idl(idlMsg.senderAddr());
-    auto msg = from_idl(std::move(idlMsg));
-
+    _logger->Trace("Receiving {} Message from Endpoint Address ({}, {})", TopicTrait<IdlMessageT>::TypeName(), senderAddr.participant, senderAddr.endpoint);
     for (auto&& receiver : _receivers)
     {
         try
         {
-            _logger->Trace("Receiving {} Message from Endpoint Address ({}, {})", TopicTrait<decltype(idlMsg)>::TypeName(), senderAddr.participant, senderAddr.endpoint);
             receiver->ReceiveIbMessage(senderAddr, msg);
         }
         catch (const std::exception& e)
@@ -102,53 +95,111 @@ void IbSubListener<IdlMessageT>::onNewDataMessage(eprosima::fastrtps::Subscriber
     }
 }
 
-
-template<>
-class IbSubListener<logging::idl::LogMsg> : public eprosima::fastrtps::SubscriberListener
+// ================================================================================
+template<class IdlMessageT>
+class IbSubListener
+    : public eprosima::fastrtps::SubscriberListener
+    , public IbSubListenerBase<IdlMessageT>
 {
-public:
-    using IdlMessageType = logging::idl::LogMsg;
-    using IbMessageType = to_ib_message_t<IdlMessageType>;
-    using IbReceiver = IIbMessageReceiver<IbMessageType>;
-
 public:
     IbSubListener() = default;
 
-    inline void SetLogger(logging::ILogger* logger);
-    inline void addReceiver(IbReceiver* receiver);
-    inline void clearReceivers();
-
     inline void onNewDataMessage(eprosima::fastrtps::Subscriber* sub) override;
-
-private:
-    std::vector<IbReceiver*> _receivers;
 };
 
-
-// ================================================================================
-//  Inline Implementations
-// ================================================================================
-void IbSubListener<logging::idl::LogMsg>::SetLogger(logging::ILogger* /*logger*/)
+template<class IdlMessageT>
+void IbSubListener<IdlMessageT>::onNewDataMessage(eprosima::fastrtps::Subscriber* sub)
 {
-}
+    typename IbSubListenerBase<IdlMessageT>::IdlMessageType idlMsg;
+    eprosima::fastrtps::SampleInfo_t info;
 
-void IbSubListener<logging::idl::LogMsg>::addReceiver(IbReceiver* receiver)
-{
-    if (std::find(_receivers.begin(), _receivers.end(), receiver) != _receivers.end())
+    if (!sub->takeNextData(&idlMsg, &info))
         return;
 
-    _receivers.push_back(receiver);
+    if (info.sampleKind != eprosima::fastrtps::rtps::ALIVE)
+        return;
+
+    auto senderAddr = from_idl(idlMsg.senderAddr());
+    auto msg = from_idl(std::move(idlMsg));
+    IbSubListenerBase<IdlMessageT>::dispatchToReceivers(sub, senderAddr, msg);
 }
 
-void IbSubListener<logging::idl::LogMsg>::clearReceivers()
+// ================================================================================
+template<>
+class IbSubListener<sync::idl::ParticipantStatus>
+    : public eprosima::fastrtps::SubscriberListener
+    , public IbSubListenerBase<sync::idl::ParticipantStatus>
 {
-    decltype(_receivers) emptyList;
-    std::swap(_receivers, emptyList);
+public:
+    IbSubListener() = default;
+
+    inline void onNewDataMessage(eprosima::fastrtps::Subscriber* sub) override;
+    inline void onSubscriptionMatched(eprosima::fastrtps::Subscriber* sub, eprosima::fastrtps::rtps::MatchingInfo& info) override;
+
+private:
+    struct ParticipantStatusWithSenderAddr {
+        EndpointAddress senderAddr;
+        sync::ParticipantStatus msg;
+    };
+
+    std::map<eprosima::fastrtps::rtps::GUID_t, ParticipantStatusWithSenderAddr> _lastParticipantStatus;
+};
+
+void IbSubListener<sync::idl::ParticipantStatus>::onNewDataMessage(eprosima::fastrtps::Subscriber* sub)
+{
+    sync::idl::ParticipantStatus idlMsg;
+    eprosima::fastrtps::SampleInfo_t info;
+
+    if (!sub->takeNextData(&idlMsg, &info))
+        return;
+
+    if (info.sampleKind != eprosima::fastrtps::rtps::ALIVE)
+        return;
+
+    auto senderAddr = from_idl(idlMsg.senderAddr());
+    auto msg = from_idl(std::move(idlMsg));
+
+    _lastParticipantStatus[sub->getGuid()] = { senderAddr, msg };
+
+    IbSubListenerBase<sync::idl::ParticipantStatus>::dispatchToReceivers(sub, senderAddr, msg);
 }
+
+void IbSubListener<sync::idl::ParticipantStatus>::onSubscriptionMatched(eprosima::fastrtps::Subscriber* sub, eprosima::fastrtps::rtps::MatchingInfo& info)
+{
+    if (info.status == eprosima::fastrtps::rtps::MatchingStatus::REMOVED_MATCHING)
+    {
+        auto iter = _lastParticipantStatus.find(sub->getGuid());
+        if (iter != _lastParticipantStatus.end())
+        {
+            auto& msgWithAddr = iter->second;
+            auto senderAddr = msgWithAddr.senderAddr;
+
+            auto msg = msgWithAddr.msg;
+            msg.state = sync::ParticipantState::Error;
+            msg.enterReason = std::string{"Shutdown"};
+            msg.enterTime = std::chrono::system_clock::now();
+            msg.refreshTime = std::chrono::system_clock::now();
+
+            IbSubListenerBase<sync::idl::ParticipantStatus>::dispatchToReceivers(sub, senderAddr, msg);
+        }
+    }
+}
+
+// ================================================================================
+template<>
+class IbSubListener<logging::idl::LogMsg>
+    : public eprosima::fastrtps::SubscriberListener
+    , public IbSubListenerBase<logging::idl::LogMsg>
+{
+public:
+    IbSubListener() = default;
+
+    inline void onNewDataMessage(eprosima::fastrtps::Subscriber* sub) override;
+};
 
 void IbSubListener<logging::idl::LogMsg>::onNewDataMessage(eprosima::fastrtps::Subscriber* sub)
 {
-    IdlMessageType idlMsg;
+    logging::idl::LogMsg idlMsg;
     eprosima::fastrtps::SampleInfo_t info;
 
     if (!sub->takeNextData(&idlMsg, &info))
