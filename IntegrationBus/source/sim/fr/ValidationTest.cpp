@@ -137,14 +137,12 @@ TEST(TestSimFrValidation, valid_node_parameters_upper_boundary_must_not_throw)
     nodeParams.pOffsetCorrectionOut = 16082;
     nodeParams.pOffsetCorrectionStart = 15999;
     nodeParams.pRateCorrectionOut = 3846;
-    nodeParams.pWakeupChannel = Channel::AB;
+    nodeParams.pWakeupChannel = Channel::B;
     nodeParams.pWakeupPattern = 63;
     nodeParams.pdMicrotick = ClockPeriod::T50NS;
     nodeParams.pSamplesPerMicrotick = 2;
 
     EXPECT_NO_THROW(Validate(nodeParams));
 }
-
-
 
 } // anonymous namespace

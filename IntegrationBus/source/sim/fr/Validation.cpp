@@ -130,6 +130,9 @@ void Validate(const NodeParameters& nodeParameters)
     if (nodeParameters.pRateCorrectionOut < 3 || nodeParameters.pRateCorrectionOut > 3846)
         throw ib::cfg::Misconfiguration{"pRateCorrectionOut must be in range 3 - 3846"};
 
+    if (nodeParameters.pWakeupChannel != Channel::A && nodeParameters.pWakeupChannel != Channel::B)
+        throw ib::cfg::Misconfiguration{"pWakeupChannel must be either Channel A or Channel B"};
+
     if (nodeParameters.pWakeupPattern < 0 || nodeParameters.pWakeupPattern > 63)
         throw ib::cfg::Misconfiguration{"pWakeupPattern must be in range 0 - 63"};
 

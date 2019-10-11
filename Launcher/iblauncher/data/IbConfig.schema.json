@@ -135,13 +135,13 @@
                             "type": "integer",
                             "minimum": 2,
                             "maximum": 31,
-                            "title": "Number of attempts for a cold start before giving up (range 2 -31)"
+                            "title": "Number of attempts for a cold start before giving up (range 2-31)"
                           },
                           "gCycleCountMax": {
                             "type": "integer",
-                            "minimum": 0,
-                            "maximum": 255,
-                            "title": "Max number for cycle count (number of cycles - 1)"
+                            "minimum": 7,
+                            "maximum": 63,
+                            "title": "Max cycle count value in a given cluster (range 7-63, must be an odd integer)"
                           },
                           "gdActionPointOffset": {
                             "type": "integer",
@@ -175,9 +175,9 @@
                           },
                           "gdSymbolWindow": {
                             "type": "integer",
-                            "minimum": 1,
-                            "maximum": 139,
-                            "title": "Duration of the symbol window in MacroTicks (MT) (range1 - 139)"
+                            "minimum": 0,
+                            "maximum": 162,
+                            "title": "Duration of the symbol window in MacroTicks (MT) (range 0-162)"
                           },
                           "gdSymbolWindowActionPointOffset": {
                             "type": "integer",
@@ -318,8 +318,8 @@
                           "pLatestTx": {
                             "type": "integer",
                             "minimum": 0,
-                            "maximum": 7981,
-                            "title": "Last mini slot which can be transmitted (range 0 -7981)"
+                            "maximum": 7988,
+                            "title": "Last mini slot which can be transmitted (range 0-7988)"
                           },
                           "pMacroInitialOffsetA": {
                             "type": "integer",
@@ -371,14 +371,14 @@
                           },
                           "pWakeupChannel": {
                             "type" : "string",
-                            "enum": ["A", "B", "AB", "None"],
+                            "enum": ["A", "B"],
                             "title": "Channel used by the node to send a wakeup pattern"
                           },
                           "pWakeupPattern": {
                             "type": "integer",
                             "minimum": 0,
                             "maximum": 63,
-                            "title": "Number of repetitions of the wakeup symbol (range 0-63, value 0 prevents sending of WUP)"
+                            "title": "Number of repetitions of the wakeup symbol (range 0-63, value 0 or 1 prevents sending of WUP)"
                           },
                           "pdMicrotick": {
                             "type": "string",
