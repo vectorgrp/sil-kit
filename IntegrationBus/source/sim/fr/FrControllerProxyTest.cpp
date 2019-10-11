@@ -82,7 +82,7 @@ protected:
     {
         ClusterParameters clusterParams;
         clusterParams.gColdstartAttempts = 2;
-        clusterParams.gCycleCountMax = 0;
+        clusterParams.gCycleCountMax = 7;
         clusterParams.gdActionPointOffset = 1;
         clusterParams.gdDynamicSlotIdlePhase = 0;
         clusterParams.gdMiniSlot = 2;

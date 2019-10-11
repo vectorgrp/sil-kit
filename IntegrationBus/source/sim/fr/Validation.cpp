@@ -13,8 +13,11 @@ void Validate(const ClusterParameters& clusterParameters)
     if (clusterParameters.gColdstartAttempts < 2 || clusterParameters.gColdstartAttempts > 31)
         throw ib::cfg::Misconfiguration{"gColdstartAttempts must be in range 2 - 31"};
 
-    if (clusterParameters.gCycleCountMax < 0 || clusterParameters.gCycleCountMax > 255)
-        throw ib::cfg::Misconfiguration{"gCycleCountMax must be in range 0 - 255"};
+    if (clusterParameters.gCycleCountMax % 2 != 1)
+        throw ib::cfg::Misconfiguration{"gCycleCountMax must be an odd value"};
+        
+    if (clusterParameters.gCycleCountMax < 7 || clusterParameters.gCycleCountMax > 63)
+        throw ib::cfg::Misconfiguration{"gCycleCountMax must be in range 7, 9, ..., 63"};
 
     if (clusterParameters.gdActionPointOffset < 1 || clusterParameters.gdActionPointOffset > 63)
         throw ib::cfg::Misconfiguration{"gdActionPointOffset must be in range 1 - 63"};
@@ -31,8 +34,8 @@ void Validate(const ClusterParameters& clusterParameters)
     if (clusterParameters.gdStaticSlot < 3 || clusterParameters.gdStaticSlot > 664)
         throw ib::cfg::Misconfiguration{"gdStaticSlot must be in range 3 - 664"};
 
-    if (clusterParameters.gdSymbolWindow < 1 || clusterParameters.gdSymbolWindow > 139)
-        throw ib::cfg::Misconfiguration{"gdSymbolWindow must be in range 1 - 139"};
+    if (clusterParameters.gdSymbolWindow < 0 || clusterParameters.gdSymbolWindow > 162)
+        throw ib::cfg::Misconfiguration{"gdSymbolWindow must be in range 0 - 162"};
 
     if (clusterParameters.gdSymbolWindowActionPointOffset < 1 || clusterParameters.gdSymbolWindowActionPointOffset > 63)
         throw ib::cfg::Misconfiguration{"gdSymbolWindowActionPointOffset must be in range 1 - 63"};
@@ -100,8 +103,8 @@ void Validate(const NodeParameters& nodeParameters)
     if (nodeParameters.pKeySlotUsedForSync < 0 || nodeParameters.pKeySlotUsedForSync > 1)
         throw ib::cfg::Misconfiguration{"pKeySlotUsedForSync must be 0 or 1"};
 
-    if (nodeParameters.pLatestTx < 0 || nodeParameters.pLatestTx > 7981)
-        throw ib::cfg::Misconfiguration{"pLatestTx must be in range 0 - 7981"};
+    if (nodeParameters.pLatestTx < 0 || nodeParameters.pLatestTx > 7988)
+        throw ib::cfg::Misconfiguration{"pLatestTx must be in range 0 - 7988"};
 
     if (nodeParameters.pMacroInitialOffsetA < 2 || nodeParameters.pMacroInitialOffsetA > 68)
         throw ib::cfg::Misconfiguration{"pMacroInitialOffsetA must be in range 2 - 68"};
