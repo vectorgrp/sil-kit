@@ -128,7 +128,6 @@ public:
 
     void OnAllMessagesDelivered(std::function<void(void)> /*callback*/) {}
     void FlushSendBuffers() {}
-    void RegisterNewPeerCallback(std::function<void(void)> /*callback*/) {}
 
     DummyLogger logger;
 };

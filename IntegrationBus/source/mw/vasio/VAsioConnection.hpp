@@ -84,7 +84,6 @@ public:
 
     inline void OnAllMessagesDelivered(std::function<void()> callback);
     void FlushSendBuffers() {};
-    void RegisterNewPeerCallback(std::function<void()> callback);
 
     inline auto Config() const -> const ib::cfg::Config&;
 

@@ -133,7 +133,6 @@ public:
     void SendIbMessage(EndpointAddress from, sim::generic::GenericMessage&& msg) override;
 
     void OnAllMessagesDelivered(std::function<void()> callback) override;
-    void RegisterNewPeerCallback(std::function<void()> callback) override;
     void FlushSendBuffers() override;
 
 public:

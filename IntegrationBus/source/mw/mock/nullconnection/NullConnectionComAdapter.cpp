@@ -23,7 +23,6 @@ struct NullConnection
 
     void OnAllMessagesDelivered(std::function<void(void)> /*callback*/) {};
     void FlushSendBuffers() {};
-    void RegisterNewPeerCallback(std::function<void()> callback) {}
 };
 } // anonymous namespace
     

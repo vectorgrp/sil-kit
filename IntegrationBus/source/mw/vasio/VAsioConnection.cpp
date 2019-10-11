@@ -257,13 +257,6 @@ void VAsioConnection::AddPeer(std::shared_ptr<VAsioTcpPeer> newPeer)
     }
 }
 
-void VAsioConnection::RegisterNewPeerCallback(std::function<void()> callback)
-{
-    ExecuteOnIoThread([this, callback{std::move(callback)}]{
-        _newPeerCallback = std::move(callback);
-    });
-}
-
 void VAsioConnection::RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> callback)
 {
     ExecuteOnIoThread([this, callback{std::move(callback)}]{

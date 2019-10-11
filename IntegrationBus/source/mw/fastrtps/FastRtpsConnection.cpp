@@ -265,9 +265,5 @@ void FastRtpsConnection::FlushSendBuffers()
     }
 }
 
-void FastRtpsConnection::RegisterNewPeerCallback(std::function<void()> /*callback*/)
-{
-}
-
 } // namespace mw
 } // namespace ib

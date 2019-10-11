@@ -6,51 +6,67 @@
 namespace ib {
 namespace mw {
 
-template <class MsgT> struct IbMsgTraits;
+// the ib messages type traits
+template <class MsgT> struct IbMsgTraitTypeName { static constexpr const char *TypeName(); };
+template <class MsgT> struct IbMsgTraitHistSize { static constexpr std::size_t HistSize() { return 0; } };
 
+// The final message traits
+template <class MsgT> struct IbMsgTraits
+    : IbMsgTraitTypeName<MsgT>
+    , IbMsgTraitHistSize<MsgT>
+{
+};
 
-#define DefineIbMsgTraits(Namespace, MsgName) template<> struct IbMsgTraits<Namespace::MsgName> { static constexpr const char* TypeName() { return #Namespace "::" #MsgName; } };
+#define DefineIbMsgTrait_TypeName(Namespace, MsgName) template<> struct IbMsgTraitTypeName<Namespace::MsgName>{\
+    static constexpr const  char* TypeName() { return #Namespace "::" #MsgName;}\
+    };
+#define DefineIbMsgTrait_HistSize(Namespace, MsgName, HistorySize) template<> struct IbMsgTraitHistSize<Namespace::MsgName>{\
+    static constexpr std::size_t HistSize() { return HistorySize;} \
+    };
 
-DefineIbMsgTraits(ib::mw::logging, LogMsg)
-DefineIbMsgTraits(ib::mw::sync, Tick)
-DefineIbMsgTraits(ib::mw::sync, TickDone)
-DefineIbMsgTraits(ib::mw::sync, QuantumRequest)
-DefineIbMsgTraits(ib::mw::sync, QuantumGrant)
-DefineIbMsgTraits(ib::mw::sync, ParticipantCommand)
-DefineIbMsgTraits(ib::mw::sync, SystemCommand)
-DefineIbMsgTraits(ib::mw::sync, ParticipantStatus)
-DefineIbMsgTraits(ib::mw::sync, NextSimTask)
-DefineIbMsgTraits(ib::sim::generic, GenericMessage)
-DefineIbMsgTraits(ib::sim::can, CanMessage)
-DefineIbMsgTraits(ib::sim::can, CanTransmitAcknowledge)
-DefineIbMsgTraits(ib::sim::can, CanControllerStatus)
-DefineIbMsgTraits(ib::sim::can, CanConfigureBaudrate)
-DefineIbMsgTraits(ib::sim::can, CanSetControllerMode)
-DefineIbMsgTraits(ib::sim::eth, EthMessage)
-DefineIbMsgTraits(ib::sim::eth, EthTransmitAcknowledge)
-DefineIbMsgTraits(ib::sim::eth, EthStatus)
-DefineIbMsgTraits(ib::sim::eth, EthSetMode)
-DefineIbMsgTraits(ib::sim::io, AnalogIoMessage)
-DefineIbMsgTraits(ib::sim::io, DigitalIoMessage)
-DefineIbMsgTraits(ib::sim::io, PatternIoMessage)
-DefineIbMsgTraits(ib::sim::io, PwmIoMessage)
-DefineIbMsgTraits(ib::sim::lin, SendFrameRequest)
-DefineIbMsgTraits(ib::sim::lin, SendFrameHeaderRequest)
-DefineIbMsgTraits(ib::sim::lin, Transmission)
-DefineIbMsgTraits(ib::sim::lin, WakeupPulse)
-DefineIbMsgTraits(ib::sim::lin, ControllerConfig)
-DefineIbMsgTraits(ib::sim::lin, ControllerStatusUpdate)
-DefineIbMsgTraits(ib::sim::lin, FrameResponseUpdate)
-DefineIbMsgTraits(ib::sim::fr, FrMessage)
-DefineIbMsgTraits(ib::sim::fr, FrMessageAck)
-DefineIbMsgTraits(ib::sim::fr, FrSymbol)
-DefineIbMsgTraits(ib::sim::fr, FrSymbolAck)
-DefineIbMsgTraits(ib::sim::fr, CycleStart)
-DefineIbMsgTraits(ib::sim::fr, HostCommand)
-DefineIbMsgTraits(ib::sim::fr, ControllerConfig)
-DefineIbMsgTraits(ib::sim::fr, TxBufferConfigUpdate)
-DefineIbMsgTraits(ib::sim::fr, TxBufferUpdate)
-DefineIbMsgTraits(ib::sim::fr, ControllerStatus)
+DefineIbMsgTrait_TypeName(ib::mw::logging, LogMsg)
+DefineIbMsgTrait_TypeName(ib::mw::sync, Tick)
+DefineIbMsgTrait_TypeName(ib::mw::sync, TickDone)
+DefineIbMsgTrait_TypeName(ib::mw::sync, QuantumRequest)
+DefineIbMsgTrait_TypeName(ib::mw::sync, QuantumGrant)
+DefineIbMsgTrait_TypeName(ib::mw::sync, ParticipantCommand)
+DefineIbMsgTrait_TypeName(ib::mw::sync, SystemCommand)
+DefineIbMsgTrait_TypeName(ib::mw::sync, ParticipantStatus)
+DefineIbMsgTrait_TypeName(ib::mw::sync, NextSimTask)
+DefineIbMsgTrait_TypeName(ib::sim::generic, GenericMessage)
+DefineIbMsgTrait_TypeName(ib::sim::can, CanMessage)
+DefineIbMsgTrait_TypeName(ib::sim::can, CanTransmitAcknowledge)
+DefineIbMsgTrait_TypeName(ib::sim::can, CanControllerStatus)
+DefineIbMsgTrait_TypeName(ib::sim::can, CanConfigureBaudrate)
+DefineIbMsgTrait_TypeName(ib::sim::can, CanSetControllerMode)
+DefineIbMsgTrait_TypeName(ib::sim::eth, EthMessage)
+DefineIbMsgTrait_TypeName(ib::sim::eth, EthTransmitAcknowledge)
+DefineIbMsgTrait_TypeName(ib::sim::eth, EthStatus)
+DefineIbMsgTrait_TypeName(ib::sim::eth, EthSetMode)
+DefineIbMsgTrait_TypeName(ib::sim::io, AnalogIoMessage)
+DefineIbMsgTrait_TypeName(ib::sim::io, DigitalIoMessage)
+DefineIbMsgTrait_TypeName(ib::sim::io, PatternIoMessage)
+DefineIbMsgTrait_TypeName(ib::sim::io, PwmIoMessage)
+DefineIbMsgTrait_TypeName(ib::sim::lin, SendFrameRequest)
+DefineIbMsgTrait_TypeName(ib::sim::lin, SendFrameHeaderRequest)
+DefineIbMsgTrait_TypeName(ib::sim::lin, Transmission)
+DefineIbMsgTrait_TypeName(ib::sim::lin, WakeupPulse)
+DefineIbMsgTrait_TypeName(ib::sim::lin, ControllerConfig)
+DefineIbMsgTrait_TypeName(ib::sim::lin, ControllerStatusUpdate)
+DefineIbMsgTrait_TypeName(ib::sim::lin, FrameResponseUpdate)
+DefineIbMsgTrait_TypeName(ib::sim::fr, FrMessage)
+DefineIbMsgTrait_TypeName(ib::sim::fr, FrMessageAck)
+DefineIbMsgTrait_TypeName(ib::sim::fr, FrSymbol)
+DefineIbMsgTrait_TypeName(ib::sim::fr, FrSymbolAck)
+DefineIbMsgTrait_TypeName(ib::sim::fr, CycleStart)
+DefineIbMsgTrait_TypeName(ib::sim::fr, HostCommand)
+DefineIbMsgTrait_TypeName(ib::sim::fr, ControllerConfig)
+DefineIbMsgTrait_TypeName(ib::sim::fr, TxBufferConfigUpdate)
+DefineIbMsgTrait_TypeName(ib::sim::fr, TxBufferUpdate)
+DefineIbMsgTrait_TypeName(ib::sim::fr, ControllerStatus)
+
+//Messages with history
+DefineIbMsgTrait_HistSize(ib::mw::sync, ParticipantStatus, 1)
 
 
 } // mw

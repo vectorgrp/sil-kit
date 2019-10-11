@@ -300,7 +300,6 @@ auto ComAdapter<IbConnectionT>::GetParticipantController() -> sync::IParticipant
     if (!controller)
     {
         controller = CreateController<sync::ParticipantController>(1024, "default", _config.simulationSetup, _participant);
-        RegisterNewPeerCallback([controller]() { controller->RefreshStatus(); });
     }
     return controller;
 }
@@ -803,11 +802,6 @@ void ComAdapter<IbConnectionT>::FlushSendBuffers()
     _ibConnection.FlushSendBuffers();
 }
 
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::RegisterNewPeerCallback(std::function<void()> callback)
-{
-    _ibConnection.RegisterNewPeerCallback(callback);
-}
 
 } // namespace mw
 } // namespace ib
