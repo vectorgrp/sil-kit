@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog] (http://keepachangelog.com/en/1.0.0/).
 --------------------------------
 Added
 ~~~~~
+- Added a connection loss mechanism in FastRTPS and VAsio middleware. Lossing the 
+  connection of one participant will lead the system to go into Error state.
 
 Changed
 ~~~~~~~
