@@ -55,8 +55,8 @@ auto ControllerBuilder<ControllerCfg>::operator->() -> ParticipantBuilder*
 template<class ControllerCfg>
 auto ControllerBuilder<ControllerCfg>::WithLink(const std::string& linkname) -> ControllerBuilder&
 {
-    auto&& qualifiedName = Parent()->MakeQualifiedName(_controller.name);
-    auto&& link = Parent()->Parent()->AddOrGetLink(_controller.linkType, linkname);
+    auto&& qualifiedName = ParticipantMakeQualifiedName(*this, _controller.name);
+    auto&& link = ParticipantBuilderAddOrGetLink(*this, _controller.linkType, linkname);
     link.AddEndpoint(qualifiedName);
 
     return WithLinkId(link.LinkId());

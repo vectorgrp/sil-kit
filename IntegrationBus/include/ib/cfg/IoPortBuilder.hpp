@@ -57,8 +57,8 @@ auto IoPortBuilder<IoPortCfg>::operator->() -> ParticipantBuilder*
 template<class IoPortCfg>
 auto IoPortBuilder<IoPortCfg>::WithLink(const std::string& linkname) -> IoPortBuilder&
 {
-    auto&& qualifiedName = Parent()->MakeQualifiedName(_port.name);
-    auto&& link = Parent()->Parent()->AddOrGetLink(_port.linkType, linkname);
+    auto&& qualifiedName = ParticipantMakeQualifiedName(*this,_port.name);
+    auto&& link = ParticipantBuilderAddOrGetLink(*this, _port.linkType, linkname);
     link.AddEndpoint(qualifiedName);
 
     return WithLinkId(link.LinkId());
