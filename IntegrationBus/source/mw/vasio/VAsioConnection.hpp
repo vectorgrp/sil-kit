@@ -189,6 +189,8 @@ private:
     void ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer);
     void ReceiveRegistryMessage(IVAsioPeer* from, MessageBuffer&& buffer);
 
+    void UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer);
+
     // Registry related send / receive methods
     void SendParticipantAnnoucement(IVAsioPeer* peer);
     void ReceiveKnownParticpants(MessageBuffer&& buffer);

@@ -25,6 +25,7 @@ VAsioConnection::VAsioConnection(cfg::Config config, std::string participantName
     , _participantName{std::move(participantName)}
     , _participantId{participantId}
 {
+    RegisterPeerShutdownCallback([this](IVAsioPeer* peer) { UpdateParticipantStatusOnConnectionLoss(peer); });
 }
 
 VAsioConnection::~VAsioConnection()
@@ -275,6 +276,23 @@ void VAsioConnection::OnPeerShutdown(IVAsioPeer* peer)
     {
         callback(peer);
     }
+}
+
+void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
+{
+    auto& info = peer->GetInfo();
+
+    EndpointAddress address{info.participantId, 1024};
+
+    ib::mw::sync::ParticipantStatus msg;
+    msg.participantName = info.participantName;
+    msg.state = ib::mw::sync::ParticipantState::Error;
+    msg.enterReason = "Shutdown";
+    msg.enterTime = std::chrono::system_clock::now();
+    msg.refreshTime = std::chrono::system_clock::now();
+
+    auto&& link = GetLinkByName<ib::mw::sync::ParticipantStatus>("default");
+    link->DistributeRemoteIbMessage(std::move(address), msg);
 }
 
 void VAsioConnection::OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer)
