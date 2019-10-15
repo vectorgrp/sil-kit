@@ -26,6 +26,7 @@ public:
     using LogMsgHandlerT = std::function<void(LogMsg)>;
 
 public:
+    virtual ~ILogger() = default;
     /*! \brief Log a message with a specified level
     *
     * \param level The log level for the message

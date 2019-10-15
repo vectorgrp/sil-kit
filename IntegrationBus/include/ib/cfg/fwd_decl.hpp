@@ -40,8 +40,8 @@ auto ParticipantMakeQualifiedName(Builder<BuilderCfg> &builder, const std::strin
     return builder.Parent()->MakeQualifiedName(controllerName);
 }
 //helper template for double deref
-template<template<class> class Builder, typename BuilderCfg, typename LinkType>
-auto __SimBuilderAddOrGetLink(Builder<BuilderCfg> *builder, LinkType linkType, const std::string& linkName) -> LinkBuilder&
+template<class Builder, typename LinkType>
+auto __SimBuilderAddOrGetLink(Builder *builder, LinkType linkType, const std::string& linkName) -> LinkBuilder&
 {
     return builder->Parent()->AddOrGetLink(linkType, linkName);
 }
