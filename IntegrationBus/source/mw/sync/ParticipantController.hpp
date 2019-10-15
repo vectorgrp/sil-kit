@@ -26,6 +26,7 @@ public:
     // Public Data Types
     struct ISyncAdapter
     {
+        virtual ~ISyncAdapter() = default;
         virtual void RequestStep(ParticipantController& controller) = 0;
         virtual void FinishedStep(ParticipantController& controller) = 0;
     };
