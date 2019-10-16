@@ -5,21 +5,31 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on [Keep a Changelog] (http://keepachangelog.com/en/1.0.0/).
 
-[unreleased] - yyyy-mm-dd
+[1.0.0 (Sprint-33)] - 2019-09-16
 --------------------------------
 Added
 ~~~~~
-- Added a connection loss mechanism in FastRTPS and VAsio middleware. Lossing the 
+- Added a connection loss mechanism in FastRTPS and VAsio middleware. Lossing the
   connection of one participant will lead the system to go into Error state.
-
-Changed
-~~~~~~~
+- When logging at trace level, a log entry is now written for each incoming and
+  outgoing IbMessage.
+- When logging at trace level, the wait times and execution times per tick are
+  now logged.
+- The creation of a ComAdapter is now logged. The log entry includes the used
+  VIB version.
+- Connection losses during the simulation are now detected. The are reported as
+  an updated ParticipantStatus with State Error and a note that the connection
+  was lost.
 
 Fixed
 ~~~~~
+- Fixed FlexRay parameter validation, which could cause valid parameter sets to
+  be rejected. E.g., gdSymbolWindows has a valid range from 0 to 162, but we
+  check for 1 to 139.
+- Fixed a racecondition when starting up a VAsio simulation. As VAsio does not
+  have a history, it could happen that some participants did not receive all
+  ParticipantStatus values.
 
-Removed
-~~~~~~~
 
 [1.0.0 (Sprint-32)] - 2019-09-25
 --------------------------------
@@ -55,7 +65,7 @@ Fixed
 - The old, unmaintained CHANGELOG.md is no longer installed. Instead, the
   CHANGELOG.rst is installed in addition to the HTML documentation.
 
-  
+
 Compatibility with Sprint-31
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Application binary interface (ABI): No
