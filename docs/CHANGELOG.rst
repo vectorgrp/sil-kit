@@ -5,6 +5,20 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on [Keep a Changelog] (http://keepachangelog.com/en/1.0.0/).
 
+[unreleased] - yyyy-mm-dd
+--------------------------------
+Added
+~~~~~
+
+Changed
+~~~~~~~
+
+Fixed
+~~~~~
+
+Removed
+~~~~~~~
+
 [1.0.0 (Sprint-33)] - 2019-09-16
 --------------------------------
 Added
