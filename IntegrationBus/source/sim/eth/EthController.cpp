@@ -57,10 +57,10 @@ void EthController::RegisterBitRateChangedHandler(BitRateChangedHandler /*handle
 
 void EthController::ReceiveIbMessage(mw::EndpointAddress from, const EthMessage& msg)
 {
-    _tracer.Trace(msg);
-
     if (from == _endpointAddr)
         return;
+
+    _tracer.Trace(msg);
 
     CallHandlers(msg);
 
