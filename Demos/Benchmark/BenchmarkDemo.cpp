@@ -17,6 +17,13 @@ using namespace ib::mw;
 using namespace ib::sim::generic;
 using namespace std::chrono_literals;
 
+std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
+{
+	auto seconds = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(timestamp);
+	out << seconds.count() << "s";
+	return out;
+}
+
 void PublishMessage(IGenericPublisher* publisher, unsigned int payloadSize)
 {
 	std::vector<uint8_t> data(payloadSize, '*');
@@ -27,11 +34,22 @@ void ReceiveMessage(IGenericSubscriber* subscriber, const std::vector<uint8_t>& 
 {
 	std::string message{ data.begin(), data.end() };
 
-	std::cout
-		<< ">> Received new " << subscriber->Config().name
-		<< " Message: with data=\"" << message << "\"" << std::endl;
+	//std::cout
+	//	<< ">> Received new " << subscriber->Config().name
+	//	<< " Message: with data=\"" << message << "\"" << std::endl;
 
-	//std::cout << ".";
+	// std::cout << ".";
+}
+
+void ParticipantStatusHandler(sync::ISystemController* controller, const sync::ParticipantStatus& newStatus)
+{
+	switch (newStatus.state)
+	{
+	case sync::ParticipantState::Stopped:
+		{
+			controller->Stop();
+		}
+	}
 }
 
 void SystemStateHandler(sync::ISystemController* controller, sync::SystemState newState, const ib::cfg::Config& ibConfig)
@@ -129,9 +147,12 @@ auto buildConfig(unsigned int participantCount) -> ib::cfg::Config
 
 int main(int argc, char** argv)
 {
-	std::this_thread::sleep_for(5s);  // DEBUG
+	// std::this_thread::sleep_for(5s);  // DEBUG
 
-	auto ibConfig = buildConfig(20);
+	auto startTimestamp = std::chrono::system_clock::now();
+
+	auto ibConfig = buildConfig(4);
+	auto simulationTime = 1s;
 
 	try
 	{
@@ -147,32 +168,13 @@ int main(int argc, char** argv)
 		{
 			if (thisParticipant.name == "Master")
 			{
-				threads.push_back(std::thread([&ibConfig, &thisParticipant, &domainId] {
-
-					auto comAdapter = ib::CreateComAdapter(ibConfig, thisParticipant.name, domainId);
-
-					auto controller = comAdapter->GetSystemController();
-					auto monitor = comAdapter->GetSystemMonitor();
-
-					monitor->RegisterSystemStateHandler([controller, &ibConfig](sync::SystemState newState) {
-						SystemStateHandler(controller, newState, ibConfig);
-					});
-
-					std::cout << "Press enter to stop and shutdown!" << std::endl;
-					std::cin.ignore();
-					controller->Stop();
-					std::this_thread::sleep_for(1s);
-					std::cout << "exiting..." << std::endl;
-
-				}));
-
 				continue;
 			}
 
-			threads.push_back(std::thread([&ibConfig, &thisParticipant, &domainId] {
+			threads.push_back(std::thread([simulationTime, &ibConfig, &thisParticipant, &domainId] {
 
 				auto comAdapter = ib::CreateComAdapter(ibConfig, thisParticipant.name, domainId);
-				auto&& participantController = comAdapter->GetParticipantController();
+				auto participantController = comAdapter->GetParticipantController();
 				participantController->SetPeriod(1ms);
 
 				std::vector<ib::sim::generic::IGenericPublisher*> publishers;
@@ -189,10 +191,15 @@ int main(int argc, char** argv)
 					subscribers.push_back(subscriber); // TODO: look at reference and move semantic again
 				}
 
-				participantController->SetSimulationTask([&publishers](std::chrono::nanoseconds now) {
+				participantController->SetSimulationTask([simulationTime, participantController, &publishers](std::chrono::nanoseconds now) {
 					for (auto &publisher : publishers)
 					{
 						PublishMessage(publisher, 100); // TODO: make changeable payload size
+
+						if (now > simulationTime)
+						{
+							participantController->Stop("Time is up");
+						}
 					}
 				});
 
@@ -200,16 +207,31 @@ int main(int argc, char** argv)
 			}));
 		}
 
-		//std::cout << "Press enter to stop and shutdown!" << std::endl;
-		//std::cin.ignore();
-		//controller->Stop();
-		//std::this_thread::sleep_for(1s);
-		//std::cout << "exiting..." << std::endl;
+		auto comAdapter = ib::CreateComAdapter(ibConfig, "Master", domainId);
+
+		auto controller = comAdapter->GetSystemController();
+		auto monitor = comAdapter->GetSystemMonitor();
+
+		monitor->RegisterSystemStateHandler([controller, &ibConfig](sync::SystemState newState) {
+			SystemStateHandler(controller, newState, ibConfig);
+		});
+
+		monitor->RegisterParticipantStatusHandler([controller](const sync::ParticipantStatus& newStatus) {
+			ParticipantStatusHandler(controller, newStatus);
+		});
 
 		for (auto &thread : threads)
 		{
 			thread.join();
 		}
+
+		auto endTimestamp = std::chrono::system_clock::now();
+		auto duration = endTimestamp - startTimestamp;
+		std::cout << "==================================" << std::endl;
+		std::cout << "Simulation duration: " << simulationTime << std::endl;
+		std::cout << "Real duration: " << duration << std::endl;
+
+		return 0;
 	}
 	catch (const ib::cfg::Misconfiguration& error)
 	{
