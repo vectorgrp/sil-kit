@@ -4,6 +4,7 @@
 #include <sstream>
 #include <thread>
 #include <fstream>
+#include <numeric>
 
 #include "ib/IntegrationBus.hpp"
 #include "ib/sim/all.hpp"
@@ -11,9 +12,9 @@
 #include "ib/mw/sync/string_utils.hpp"
 
 #include "ib/cfg/Config.hpp"
-#include "ib/cfg/FastRtpsConfigBuilder.hpp"
 
 using namespace ib::mw;
+using namespace ib::cfg;
 using namespace ib::sim::generic;
 using namespace std::chrono_literals;
 
@@ -24,21 +25,15 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 	return out;
 }
 
-void PublishMessage(IGenericPublisher* publisher, unsigned int payloadSize)
+void PublishMessage(IGenericPublisher* publisher, unsigned int payloadSizeInBytes)
 {
-	std::vector<uint8_t> data(payloadSize, '*');
+	std::vector<uint8_t> data(payloadSizeInBytes, '*');
 	publisher->Publish(std::move(data));
 }
 
 void ReceiveMessage(IGenericSubscriber* subscriber, const std::vector<uint8_t>& data)
 {
-	std::string message{ data.begin(), data.end() };
-
-	//std::cout
-	//	<< ">> Received new " << subscriber->Config().name
-	//	<< " Message: with data=\"" << message << "\"" << std::endl;
-
-	// std::cout << ".";
+	// do nothing
 }
 
 void ParticipantStatusHandler(sync::ISystemController* controller, const sync::ParticipantStatus& newStatus)
@@ -46,9 +41,8 @@ void ParticipantStatusHandler(sync::ISystemController* controller, const sync::P
 	switch (newStatus.state)
 	{
 	case sync::ParticipantState::Stopped:
-		{
-			controller->Stop();
-		}
+		controller->Stop();
+		break;
 	}
 }
 
@@ -64,7 +58,6 @@ void SystemStateHandler(sync::ISystemController* controller, sync::SystemState n
 				continue;
 			controller->Initialize(participant.id);
 		}
-
 		break;
 	}
 
@@ -83,12 +76,10 @@ void SystemStateHandler(sync::ISystemController* controller, sync::SystemState n
 
 auto buildConfig(unsigned int participantCount) -> ib::cfg::Config
 {
-	using namespace ib::cfg;
-
 	ConfigBuilder benchmarkConfig("BenchmarkConfigGenerated");
 	auto&& simulationSetup = benchmarkConfig.SimulationSetup();
 
-	for (unsigned int participantCounter = 0; participantCounter < participantCount; ++participantCounter)
+	for (unsigned int participantCounter = 0; participantCounter < participantCount; participantCounter++)
 	{
 		std::stringstream participantNameBuilder;
 		participantNameBuilder << "Participant";
@@ -98,13 +89,10 @@ auto buildConfig(unsigned int participantCount) -> ib::cfg::Config
 		participantBuilder.WithParticipantId(participantCounter);
 		participantBuilder.WithSyncType(ib::cfg::SyncType::DiscreteTime);
 
-		for (unsigned int otherParticipantsCounter = 0; otherParticipantsCounter < participantCount; ++otherParticipantsCounter)
+		for (unsigned int otherParticipantsCounter = 0; otherParticipantsCounter < participantCount; otherParticipantsCounter++)
 		{
-			// skip self
 			if (participantCounter == otherParticipantsCounter)
-			{
 				continue;
-			}
 
 			std::stringstream publisherNameBuilder;
 			publisherNameBuilder << "PublisherOfParticipant";
@@ -147,91 +135,129 @@ auto buildConfig(unsigned int participantCount) -> ib::cfg::Config
 
 int main(int argc, char** argv)
 {
-	// std::this_thread::sleep_for(5s);  // DEBUG
-
-	auto startTimestamp = std::chrono::system_clock::now();
-
-	auto ibConfig = buildConfig(4);
-	auto simulationTime = 1s;
-
 	try
 	{
+		std::vector<std::chrono::nanoseconds> measuredRealDurations;
+
+		std::chrono::seconds simulationDuration = 1s;
+		uint32_t simulationRepeats = 5;
+		uint32_t payloadSizeInBytes = 100;
 		uint32_t domainId = 42;
-		//if (argc >= 2)
-		//{
-		//	domainId = static_cast<uint32_t>(std::stoul(argv[1]));
-		//}
 
-		std::vector<std::thread> threads;
-
-		for (auto &&thisParticipant : ibConfig.simulationSetup.participants)
+		if (argc > 5)
 		{
-			if (thisParticipant.name == "Master")
+			std::cout << "Too many arguments." << std::endl;
+			std::cout << "Start benchmark with " << argv[0] << " [simulationDuration] [simulationRepeats] [payloadSizeInBytes] [domainId]" << std::endl;
+			return -1;
+		}
+
+		switch (argc)
+		{
+		case 5: domainId = domainId = static_cast<uint32_t>(std::stoul(argv[4]));
+			// [[fallthrough]]
+		case 4: payloadSizeInBytes = static_cast<uint32_t>(std::stoul(argv[3]));
+			// [[fallthrough]]
+		case 3: simulationRepeats = static_cast<uint32_t>(std::stoul(argv[2]));
+			// [[fallthrough]]
+		case 2: simulationDuration = std::chrono::seconds(static_cast<uint32_t>(std::stoul(argv[1])));
+			// [[fallthrough]]
+		default:
+			std::cout << "Using default benchmark parameters (1 second, 5 repeats, 100 bytes, domainId 42);" << std::endl;
+		}
+
+		for (uint32_t simulationRun = 1; simulationRun <= simulationRepeats; simulationRun++)
+		{
+			auto startTimestamp = std::chrono::system_clock::now();
+			auto ibConfig = buildConfig(4);
+			auto simulationTime = 1s;
+			std::vector<std::thread> threads;
+
+			for (auto &&thisParticipant : ibConfig.simulationSetup.participants)
 			{
-				continue;
+				if (thisParticipant.name == "Master")
+					continue;
+
+				threads.push_back(std::thread([payloadSizeInBytes, simulationDuration, &ibConfig, &thisParticipant, &domainId] {
+
+					auto comAdapter = ib::CreateComAdapter(ibConfig, thisParticipant.name, domainId);
+					auto participantController = comAdapter->GetParticipantController();
+					participantController->SetPeriod(1ms);
+
+					std::vector<ib::sim::generic::IGenericPublisher*> publishers;
+					std::vector<ib::sim::generic::IGenericSubscriber*> subscribers;
+
+					for (auto &genericPublisher : thisParticipant.genericPublishers)
+					{
+						publishers.push_back(comAdapter->CreateGenericPublisher(genericPublisher.name));
+					}
+					for (auto &genericSubscriber : thisParticipant.genericSubscribers)
+					{
+						auto subscriber = comAdapter->CreateGenericSubscriber(genericSubscriber.name);
+						subscriber->SetReceiveMessageHandler(ReceiveMessage);
+						subscribers.push_back(subscriber);
+					}
+
+					participantController->SetSimulationTask([payloadSizeInBytes, simulationDuration, participantController, &publishers](std::chrono::nanoseconds now) {
+						for (auto &publisher : publishers)
+						{
+							PublishMessage(publisher, payloadSizeInBytes);
+
+							if (now > simulationDuration)
+							{
+								participantController->Stop("Simulation done");
+							}
+						}
+					});
+
+					participantController->Run();
+				}));
 			}
 
-			threads.push_back(std::thread([simulationTime, &ibConfig, &thisParticipant, &domainId] {
+			auto comAdapter = ib::CreateComAdapter(ibConfig, "Master", domainId);
 
-				auto comAdapter = ib::CreateComAdapter(ibConfig, thisParticipant.name, domainId);
-				auto participantController = comAdapter->GetParticipantController();
-				participantController->SetPeriod(1ms);
+			auto controller = comAdapter->GetSystemController();
+			auto monitor = comAdapter->GetSystemMonitor();
 
-				std::vector<ib::sim::generic::IGenericPublisher*> publishers;
-				std::vector<ib::sim::generic::IGenericSubscriber*> subscribers;
+			monitor->RegisterSystemStateHandler([controller, &ibConfig](sync::SystemState newState) {
+				SystemStateHandler(controller, newState, ibConfig);
+			});
 
-				for (auto &genericPublisher : thisParticipant.genericPublishers)
-				{
-					publishers.push_back(comAdapter->CreateGenericPublisher(genericPublisher.name));
-				}
-				for (auto &genericSubscriber : thisParticipant.genericSubscribers)
-				{
-					auto subscriber = comAdapter->CreateGenericSubscriber(genericSubscriber.name);
-					subscriber->SetReceiveMessageHandler(ReceiveMessage);
-					subscribers.push_back(subscriber); // TODO: look at reference and move semantic again
-				}
+			monitor->RegisterParticipantStatusHandler([controller](const sync::ParticipantStatus& newStatus) {
+				ParticipantStatusHandler(controller, newStatus);
+			});
 
-				participantController->SetSimulationTask([simulationTime, participantController, &publishers](std::chrono::nanoseconds now) {
-					for (auto &publisher : publishers)
-					{
-						PublishMessage(publisher, 100); // TODO: make changeable payload size
+			for (auto &thread : threads)
+			{
+				thread.join();
+			}
 
-						if (now > simulationTime)
-						{
-							participantController->Stop("Time is up");
-						}
-					}
-				});
+			auto endTimestamp = std::chrono::system_clock::now();
+			auto duration = endTimestamp - startTimestamp;
 
-				participantController->Run();
-			}));
+			measuredRealDurations.push_back(duration);
 		}
 
-		auto comAdapter = ib::CreateComAdapter(ibConfig, "Master", domainId);
-
-		auto controller = comAdapter->GetSystemController();
-		auto monitor = comAdapter->GetSystemMonitor();
-
-		monitor->RegisterSystemStateHandler([controller, &ibConfig](sync::SystemState newState) {
-			SystemStateHandler(controller, newState, ibConfig);
-		});
-
-		monitor->RegisterParticipantStatusHandler([controller](const sync::ParticipantStatus& newStatus) {
-			ParticipantStatusHandler(controller, newStatus);
-		});
-
-		for (auto &thread : threads)
+		auto averageDuration = 0ns;
+		for (auto&& duration : measuredRealDurations)
 		{
-			thread.join();
+			averageDuration += duration;
 		}
+		averageDuration /= measuredRealDurations.size();
 
-		auto endTimestamp = std::chrono::system_clock::now();
-		auto duration = endTimestamp - startTimestamp;
-		std::cout << "==================================" << std::endl;
-		std::cout << "Simulation duration: " << simulationTime << std::endl;
-		std::cout << "Real duration: " << duration << std::endl;
+		std::cout << "\n========================================" << std::endl;
+		std::cout << "Simulation duration: " << simulationDuration;
+		std::cout << " with " << simulationRepeats << " repeats (";
+		std::cout << payloadSizeInBytes << " bytes / message)" << std::endl;
+		std::cout << "Average realtime duration: " << averageDuration << std::endl << std::endl;
 
-		return 0;
+		uint32_t runNumber = 1;
+		for (auto&& duration : measuredRealDurations)
+		{
+			std::cout << "Simulation run " << runNumber << ": ";
+			std::cout << "Realtime duration: " << duration << std::endl;
+
+			runNumber++;
+		}
 	}
 	catch (const ib::cfg::Misconfiguration& error)
 	{
