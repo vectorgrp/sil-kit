@@ -21,61 +21,47 @@ void PublishMessage(IGenericPublisher* publisher, unsigned int payloadSize)
 {
 	std::vector<uint8_t> data(payloadSize, '*');
 	publisher->Publish(std::move(data));
-	// std::this_thread::sleep_for(1s);  // DEBUG
 }
 
 void ReceiveMessage(IGenericSubscriber* subscriber, const std::vector<uint8_t>& data)
 {
 	std::string message{ data.begin(), data.end() };
+
 	std::cout
 		<< ">> Received new " << subscriber->Config().name
 		<< " Message: with data=\"" << message << "\"" << std::endl;
+
+	//std::cout << ".";
 }
 
-//void InitializeAllParticipants(sync::ISystemController* controller, const ib::cfg::Config& ibConfig)
-//{
-//	for (auto&& participant : ibConfig.simulationSetup.participants)
-//	{
-//		if (participant.syncType == ib::cfg::SyncType::Unsynchronized)
-//			continue;
-//
-//		std::cout << "Sending ParticipantCommand::Init to participant \"" << participant.name << "\"" << std::endl;
-//		controller->Initialize(participant.id);
-//	}
-//}
+void SystemStateHandler(sync::ISystemController* controller, sync::SystemState newState, const ib::cfg::Config& ibConfig)
+{
+	switch (newState)
+	{
+	case ib::mw::sync::SystemState::Idle:
+	{
+		for (auto&& participant : ibConfig.simulationSetup.participants)
+		{
+			if (participant.name == "master")
+				continue;
+			controller->Initialize(participant.id);
+		}
 
-//void SystemStateHandler(sync::ISystemController* controller, sync::SystemState newState, const ib::cfg::Config& ibConfig)
-//{
-//	switch (newState)
-//	{
-//	case ib::mw::sync::SystemState::Idle:
-//	{
-//		//for (auto&& participant : ibConfig.simulationSetup.participants)
-//		//{
-//		//	if (participant.name == "master")
-//		//		continue;
-//		//	std::cout << "\n\n\n\n\n\n###############################Sending INIT" << std::endl;
-//		//	controller->Initialize(participant.id);
-//		//}
-//
-//		InitializeAllParticipants(controller, ibConfig);
-//
-//		break;
-//	}
-//
-//	case ib::mw::sync::SystemState::Initialized:
-//		std::cout << "\n\n\n\n\n\n###############################Sending SystemCommand::Run" << std::endl;
-//		controller->Run();
-//		break;
-//
-//	case ib::mw::sync::SystemState::Stopped:
-//		controller->Shutdown();
-//		break;
-//
-//	default:
-//		std::cout << "New SystemState " << to_string(newState) << std::endl;
-//	}
-//}
+		break;
+	}
+
+	case ib::mw::sync::SystemState::Initialized:
+		controller->Run();
+		break;
+
+	case ib::mw::sync::SystemState::Stopped:
+		controller->Shutdown();
+		break;
+
+	default:
+		std::cout << "New SystemState " << to_string(newState) << std::endl;
+	}
+}
 
 auto buildConfig(unsigned int participantCount) -> ib::cfg::Config
 {
@@ -83,9 +69,6 @@ auto buildConfig(unsigned int participantCount) -> ib::cfg::Config
 
 	ConfigBuilder benchmarkConfig("BenchmarkConfigGenerated");
 	auto&& simulationSetup = benchmarkConfig.SimulationSetup();
-
-	//simulationSetup.AddParticipant("Master")
-	//	.AsSyncMaster();
 
 	for (unsigned int participantCounter = 0; participantCounter < participantCount; ++participantCounter)
 	{
@@ -96,13 +79,6 @@ auto buildConfig(unsigned int participantCount) -> ib::cfg::Config
 		auto &&participantBuilder = simulationSetup.AddParticipant(participantNameBuilder.str());
 		participantBuilder.WithParticipantId(participantCounter);
 		participantBuilder.WithSyncType(ib::cfg::SyncType::DiscreteTime);
-
-		static auto first = true;
-		if (first)
-		{
-			first = false;
-			participantBuilder.AsSyncMaster();
-		}
 
 		for (unsigned int otherParticipantsCounter = 0; otherParticipantsCounter < participantCount; ++otherParticipantsCounter)
 		{
@@ -135,30 +111,14 @@ auto buildConfig(unsigned int participantCount) -> ib::cfg::Config
 		}
 	}
 
-	// DEBUG
-	simulationSetup.AddParticipant("SystemController")
-		.WithSyncType(ib::cfg::SyncType::Unsynchronized);
-	simulationSetup.AddParticipant("SystemMonitor")
-		.WithSyncType(ib::cfg::SyncType::Unsynchronized);
-
+	simulationSetup.AddParticipant("Master")
+		.AsSyncMaster();
 
 	simulationSetup.ConfigureTimeSync()
 		.WithLooseSyncPolicy()
 		.WithTickPeriod(1000000ns);
 
 	auto config = benchmarkConfig.Build();
-
-	// DEBUG
-	auto jsonString = config.ToJsonString();
-	//
-	jsonString.pop_back();
-	jsonString += ", \"LaunchConfigurations\": [ { \"Name\": \"Installation\", \"ParticipantEnvironments\": [ { \"Participant\": \"All Participants\", \"Environment\": \"CustomExecutable\", \"WorkingFolder\": \".\", \"Executable\": \"%INTEGRATIONBUS_BINPATH%IbDemoBenchmark\", \"Arguments\": \"%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%\" }, { \"Participant\": \"SystemMonitor\", \"Environment\": \"CustomExecutable\", \"WorkingFolder\": \".\", \"Executable\": \"%INTEGRATIONBUS_BINPATH%IbDemoPassiveSystemMonitor\", \"Arguments\": \"%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%\" }, { \"Participant\": \"SystemController\", \"Environment\": \"CustomExecutable\", \"WorkingFolder\": \".\", \"Executable\": \"%INTEGRATIONBUS_BINPATH%IbDemoSystemController\", \"Arguments\": \"%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%\" } ] } ] }";
-	//
-	std::ofstream jsonFile;
-	jsonFile.open("IbConfig_DemoBenchmarkGenerated.json");
-	jsonFile << jsonString;
-	jsonFile.flush();
-	jsonFile.close();
 
 	return config;
 }
@@ -171,11 +131,7 @@ int main(int argc, char** argv)
 {
 	std::this_thread::sleep_for(5s);  // DEBUG
 
-	// auto ibConfig = buildConfig(4);
-
-	// DEBUG
-	buildConfig(8);
-	auto ibConfig = ib::cfg::Config::FromJsonFile(argv[1]);
+	auto ibConfig = buildConfig(20);
 
 	try
 	{
@@ -189,41 +145,31 @@ int main(int argc, char** argv)
 
 		for (auto &&thisParticipant : ibConfig.simulationSetup.participants)
 		{
-			// std::this_thread::sleep_for(1s);  // DEBUG
-
-			//if (thisParticipant.name == "Master")
-			//{
-			//	threads.push_back(std::thread([&ibConfig, &thisParticipant, &domainId] {
-
-			//		auto comAdapter = ib::CreateComAdapter(ibConfig, thisParticipant.name, domainId);
-
-			//		auto controller = comAdapter->GetSystemController();
-			//		auto monitor = comAdapter->GetSystemMonitor();
-
-			//		monitor->RegisterSystemStateHandler([controller, &ibConfig](sync::SystemState newState) {
-			//			SystemStateHandler(controller, newState, ibConfig);
-			//		});
-
-			//		std::cout << "Press enter to stop and shutdown!" << std::endl;
-			//		std::cin.ignore();
-			//		controller->Stop();
-			//		std::this_thread::sleep_for(1s);
-			//		std::cout << "exiting..." << std::endl;
-
-			//	}));
-
-			//	continue;
-			//}
-
-			// DEBUG
-			if (thisParticipant.name == "SystemController" || thisParticipant.name == "SystemMonitor")
+			if (thisParticipant.name == "Master")
 			{
+				threads.push_back(std::thread([&ibConfig, &thisParticipant, &domainId] {
+
+					auto comAdapter = ib::CreateComAdapter(ibConfig, thisParticipant.name, domainId);
+
+					auto controller = comAdapter->GetSystemController();
+					auto monitor = comAdapter->GetSystemMonitor();
+
+					monitor->RegisterSystemStateHandler([controller, &ibConfig](sync::SystemState newState) {
+						SystemStateHandler(controller, newState, ibConfig);
+					});
+
+					std::cout << "Press enter to stop and shutdown!" << std::endl;
+					std::cin.ignore();
+					controller->Stop();
+					std::this_thread::sleep_for(1s);
+					std::cout << "exiting..." << std::endl;
+
+				}));
+
 				continue;
 			}
 
 			threads.push_back(std::thread([&ibConfig, &thisParticipant, &domainId] {
-
-				std::cout << "\n\n\n\n###### CREATED" << thisParticipant.name << std::endl; // DEBUG
 
 				auto comAdapter = ib::CreateComAdapter(ibConfig, thisParticipant.name, domainId);
 				auto&& participantController = comAdapter->GetParticipantController();
