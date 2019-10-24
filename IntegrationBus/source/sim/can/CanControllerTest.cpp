@@ -146,8 +146,8 @@ TEST(CanControllerTest, receive_ack)
 
     ASSERT_NE(txId1, txId2);
 
-    CanTransmitAcknowledge ack1{txId1, 0ns, CanTransmitStatus::Transmitted};
-    CanTransmitAcknowledge ack2{txId2, 0ns, CanTransmitStatus::Transmitted};
+    CanTransmitAcknowledge ack1{txId1, msg.canId, 0ns, CanTransmitStatus::Transmitted};
+    CanTransmitAcknowledge ack2{txId2, msg.canId, 0ns, CanTransmitStatus::Transmitted};
 
     EXPECT_CALL(callbackProvider, ReceiveAck(&canController, ack1))
         .Times(1);
@@ -178,7 +178,7 @@ TEST(CanControllerTest, generate_ack)
     canController.SetEndpointAddress(controllerAddress);
 
     CanMessage msg{};
-    CanTransmitAcknowledge ack{msg.transmitId, msg.timestamp, CanTransmitStatus::Transmitted};
+    CanTransmitAcknowledge ack{msg.transmitId, msg.canId, msg.timestamp, CanTransmitStatus::Transmitted};
 
     EXPECT_CALL(mockComAdapter, SendIbMessage(controllerAddress, ack))
         .Times(1);

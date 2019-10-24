@@ -107,6 +107,7 @@ auto to_idl(const CanTransmitAcknowledge& msg) -> idl::CanTransmitAcknowledge
 {
     idl::CanTransmitAcknowledge idl;
 
+    idl.canId(msg.canId);
     idl.transmitId(msg.transmitId);
     idl.timestampNS(msg.timestamp.count());
     idl.txStatus(static_cast<std::underlying_type_t<decltype(msg.status)>>(msg.status));
@@ -119,6 +120,7 @@ auto idl::from_idl(CanTransmitAcknowledge&& idl) -> ::ib::sim::can::CanTransmitA
     ::ib::sim::can::CanTransmitAcknowledge msg;
 
     msg.transmitId = idl.transmitId();
+    msg.canId = idl.canId();
     msg.timestamp = std::chrono::nanoseconds(idl.timestampNS());
     msg.status = static_cast<decltype(msg.status)>(idl.txStatus());
 

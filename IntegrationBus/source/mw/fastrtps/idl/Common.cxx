@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*! 
+/*!
  * @file Common.cpp
  * This source file contains the definition of the described types in the IDL file.
  *
@@ -37,14 +37,14 @@ using namespace eprosima::fastcdr::exception;
 ib::mw::idl::EndpointAddress::EndpointAddress()
 {
     m_participantId = 0;
-
     m_endpointId = 0;
-
 
 }
 
 ib::mw::idl::EndpointAddress::~EndpointAddress()
 {
+
+
 }
 
 ib::mw::idl::EndpointAddress::EndpointAddress(const EndpointAddress &x)
@@ -61,6 +61,7 @@ ib::mw::idl::EndpointAddress::EndpointAddress(EndpointAddress &&x)
 
 ib::mw::idl::EndpointAddress& ib::mw::idl::EndpointAddress::operator=(const EndpointAddress &x)
 {
+
     m_participantId = x.m_participantId;
     m_endpointId = x.m_endpointId;
 
@@ -69,6 +70,7 @@ ib::mw::idl::EndpointAddress& ib::mw::idl::EndpointAddress::operator=(const Endp
 
 ib::mw::idl::EndpointAddress& ib::mw::idl::EndpointAddress::operator=(EndpointAddress &&x)
 {
+
     m_participantId = x.m_participantId;
     m_endpointId = x.m_endpointId;
 
@@ -78,6 +80,7 @@ ib::mw::idl::EndpointAddress& ib::mw::idl::EndpointAddress::operator=(EndpointAd
 size_t ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
@@ -94,6 +97,7 @@ size_t ib::mw::idl::EndpointAddress::getCdrSerializedSize(const ib::mw::idl::End
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
 
@@ -106,20 +110,76 @@ size_t ib::mw::idl::EndpointAddress::getCdrSerializedSize(const ib::mw::idl::End
 
 void ib::mw::idl::EndpointAddress::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_participantId;
     scdr << m_endpointId;
 }
 
 void ib::mw::idl::EndpointAddress::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_participantId;
     dcdr >> m_endpointId;
+}
+
+/*!
+ * @brief This function sets a value in member participantId
+ * @param _participantId New value for member participantId
+ */
+void ib::mw::idl::EndpointAddress::participantId(ib::mw::idl::ParticipantIdT _participantId)
+{
+m_participantId = _participantId;
+}
+
+/*!
+ * @brief This function returns the value of member participantId
+ * @return Value of member participantId
+ */
+ib::mw::idl::ParticipantIdT ib::mw::idl::EndpointAddress::participantId() const
+{
+    return m_participantId;
+}
+
+/*!
+ * @brief This function returns a reference to member participantId
+ * @return Reference to member participantId
+ */
+ib::mw::idl::ParticipantIdT& ib::mw::idl::EndpointAddress::participantId()
+{
+    return m_participantId;
+}
+/*!
+ * @brief This function sets a value in member endpointId
+ * @param _endpointId New value for member endpointId
+ */
+void ib::mw::idl::EndpointAddress::endpointId(ib::mw::idl::EndpointIdT _endpointId)
+{
+m_endpointId = _endpointId;
+}
+
+/*!
+ * @brief This function returns the value of member endpointId
+ * @return Value of member endpointId
+ */
+ib::mw::idl::EndpointIdT ib::mw::idl::EndpointAddress::endpointId() const
+{
+    return m_endpointId;
+}
+
+/*!
+ * @brief This function returns a reference to member endpointId
+ * @return Reference to member endpointId
+ */
+ib::mw::idl::EndpointIdT& ib::mw::idl::EndpointAddress::endpointId()
+{
+    return m_endpointId;
 }
 
 size_t ib::mw::idl::EndpointAddress::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
 
 
 
@@ -128,7 +188,7 @@ size_t ib::mw::idl::EndpointAddress::getKeyMaxCdrSerializedSize(size_t current_a
 
 bool ib::mw::idl::EndpointAddress::isKeyDefined()
 {
-    return false;
+   return false;
 }
 
 void ib::mw::idl::EndpointAddress::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -137,5 +197,6 @@ void ib::mw::idl::EndpointAddress::serializeKey(eprosima::fastcdr::Cdr &scdr) co
 	 
 	 
 }
+
 
 

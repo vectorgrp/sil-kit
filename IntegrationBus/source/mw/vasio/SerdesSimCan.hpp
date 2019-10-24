@@ -38,6 +38,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanMessa
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanTransmitAcknowledge& ack)
 {
     buffer << ack.transmitId
+           << ack.canId
            << ack.timestamp
            << ack.status;
     return buffer;
@@ -45,6 +46,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Ca
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanTransmitAcknowledge& ack)
 {
     buffer >> ack.transmitId
+           >> ack.canId
            >> ack.timestamp
            >> ack.status;
     return buffer;

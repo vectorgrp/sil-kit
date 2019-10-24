@@ -18,6 +18,10 @@ Changed
 
 Fixed
 ~~~~~
+- Fixed CAN acknowledge callback behaviour in the simple / trivial CAN simulation.
+  In a simulation with more than 2 CAN controller, a CAN controller could receive 
+  a CAN acknowledge (in the callback) without even sending a CAN message. Now, only
+  the Controller who did send a message will invoke the callback for the Acknowledge.
 
 Removed
 ~~~~~~~

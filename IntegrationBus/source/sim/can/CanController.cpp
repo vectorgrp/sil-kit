@@ -2,6 +2,7 @@
 
 #include "CanController.hpp"
 
+#include <algorithm>
 #include "ib/mw/IComAdapter.hpp"
 
 namespace ib {
@@ -38,6 +39,12 @@ auto CanController::SendMessage(const CanMessage& msg) -> CanTxId
 {
     auto msgCopy = msg;
     msgCopy.transmitId = MakeTxId();
+
+    MessageId messageId;
+    messageId.canId = msg.canId;
+    messageId.transmitId = msgCopy.transmitId;
+    _pendingAcks.push_back(messageId);
+
     _comAdapter->SendIbMessage(_endpointAddr, msgCopy);
     return msgCopy.transmitId;
 }
@@ -45,10 +52,14 @@ auto CanController::SendMessage(const CanMessage& msg) -> CanTxId
 auto CanController::SendMessage(CanMessage&& msg) -> CanTxId
 {
     auto txId = MakeTxId();
-
     msg.transmitId = txId;
-    _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
 
+    MessageId messageId;
+    messageId.canId = msg.canId;
+    messageId.transmitId = txId;
+    _pendingAcks.push_back(messageId);
+
+    _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
     return txId;
 }
 
@@ -84,7 +95,7 @@ void CanController::ReceiveIbMessage(ib::mw::EndpointAddress from, const CanMess
 
     CallHandlers(msg);
 
-    CanTransmitAcknowledge ack{msg.transmitId, msg.timestamp, CanTransmitStatus::Transmitted};
+    CanTransmitAcknowledge ack{msg.transmitId, msg.canId, msg.timestamp, CanTransmitStatus::Transmitted};
     _comAdapter->SendIbMessage(_endpointAddr, ack);
 }
 
@@ -93,7 +104,14 @@ void CanController::ReceiveIbMessage(ib::mw::EndpointAddress from, const CanTran
     if (from == _endpointAddr)
         return;
 
-    CallHandlers(msg);
+    auto pendingAcksIter = std::find_if(_pendingAcks.begin(), _pendingAcks.end(),
+        [&msg](const MessageId& msgId) { return msgId.canId == msg.canId && msgId.transmitId == msg.transmitId; });
+
+    if (pendingAcksIter != _pendingAcks.end())
+    {
+        _pendingAcks.erase(pendingAcksIter);
+        CallHandlers(msg);
+    }
 }
 
 template<typename MsgT>

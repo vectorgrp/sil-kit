@@ -91,6 +91,7 @@ enum class CanTransmitStatus : uint8_t
 struct CanTransmitAcknowledge
 {
     CanTxId transmitId; //!< Identifies the CanTransmitRequest to which this CanTransmitAcknowledge refers to.
+    uint32_t canId; //!< Identifies the CAN id to which this CanTransmitAcknowledge refers to.
     std::chrono::nanoseconds timestamp; //!< Timestamp of the CAN acknowledge.
     CanTransmitStatus status; //!< Status of the CanTransmitRequest.
 };

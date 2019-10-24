@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*! 
+/*!
  * @file CanTopicsPubSubTypes.h
  * This header file contains the declaration of the serialization functions.
  *
@@ -46,19 +46,20 @@ namespace ib
                  */
                 class CanMessageFlagsPubSubType : public eprosima::fastrtps::TopicDataType {
                 public:
-                        typedef CanMessageFlags type;
+                    typedef CanMessageFlags type;
 
-                	CanMessageFlagsPubSubType();
-                	virtual ~CanMessageFlagsPubSubType();
-                	virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
-                	virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
-                    virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
-                	virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
-                		bool force_md5 = false) override;
-                	virtual void* createData() override;
-                	virtual void deleteData(void * data) override;
-                	MD5 m_md5;
-                	unsigned char* m_keyBuffer;
+                    eProsima_user_DllExport CanMessageFlagsPubSubType();
+
+                    eProsima_user_DllExport virtual ~CanMessageFlagsPubSubType();
+                    eProsima_user_DllExport virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
+                    eProsima_user_DllExport virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
+                    eProsima_user_DllExport virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
+                    eProsima_user_DllExport virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
+                        bool force_md5 = false) override;
+                    eProsima_user_DllExport virtual void* createData() override;
+                    eProsima_user_DllExport virtual void deleteData(void * data) override;
+                    MD5 m_md5;
+                    unsigned char* m_keyBuffer;
                 };
                 typedef uint32_t transmitIdT;
                 /*!
@@ -67,19 +68,20 @@ namespace ib
                  */
                 class CanMessagePubSubType : public eprosima::fastrtps::TopicDataType {
                 public:
-                        typedef CanMessage type;
+                    typedef CanMessage type;
 
-                	CanMessagePubSubType();
-                	virtual ~CanMessagePubSubType();
-                	virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
-                	virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
-                    virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
-                	virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
-                		bool force_md5 = false) override;
-                	virtual void* createData() override;
-                	virtual void deleteData(void * data) override;
-                	MD5 m_md5;
-                	unsigned char* m_keyBuffer;
+                    eProsima_user_DllExport CanMessagePubSubType();
+
+                    eProsima_user_DllExport virtual ~CanMessagePubSubType();
+                    eProsima_user_DllExport virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
+                    eProsima_user_DllExport virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
+                    eProsima_user_DllExport virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
+                    eProsima_user_DllExport virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
+                        bool force_md5 = false) override;
+                    eProsima_user_DllExport virtual void* createData() override;
+                    eProsima_user_DllExport virtual void deleteData(void * data) override;
+                    MD5 m_md5;
+                    unsigned char* m_keyBuffer;
                 };
                 /*!
                  * @brief This class represents the TopicDataType of the type CanControllerStatus defined by the user in the IDL file.
@@ -87,19 +89,20 @@ namespace ib
                  */
                 class CanControllerStatusPubSubType : public eprosima::fastrtps::TopicDataType {
                 public:
-                        typedef CanControllerStatus type;
+                    typedef CanControllerStatus type;
 
-                	CanControllerStatusPubSubType();
-                	virtual ~CanControllerStatusPubSubType();
-                	virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
-                	virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
-                    virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
-                	virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
-                		bool force_md5 = false) override;
-                	virtual void* createData() override;
-                	virtual void deleteData(void * data) override;
-                	MD5 m_md5;
-                	unsigned char* m_keyBuffer;
+                    eProsima_user_DllExport CanControllerStatusPubSubType();
+
+                    eProsima_user_DllExport virtual ~CanControllerStatusPubSubType();
+                    eProsima_user_DllExport virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
+                    eProsima_user_DllExport virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
+                    eProsima_user_DllExport virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
+                    eProsima_user_DllExport virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
+                        bool force_md5 = false) override;
+                    eProsima_user_DllExport virtual void* createData() override;
+                    eProsima_user_DllExport virtual void deleteData(void * data) override;
+                    MD5 m_md5;
+                    unsigned char* m_keyBuffer;
                 };
                 /*!
                  * @brief This class represents the TopicDataType of the type CanTransmitAcknowledge defined by the user in the IDL file.
@@ -107,19 +110,20 @@ namespace ib
                  */
                 class CanTransmitAcknowledgePubSubType : public eprosima::fastrtps::TopicDataType {
                 public:
-                        typedef CanTransmitAcknowledge type;
+                    typedef CanTransmitAcknowledge type;
 
-                	CanTransmitAcknowledgePubSubType();
-                	virtual ~CanTransmitAcknowledgePubSubType();
-                	virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
-                	virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
-                    virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
-                	virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
-                		bool force_md5 = false) override;
-                	virtual void* createData() override;
-                	virtual void deleteData(void * data) override;
-                	MD5 m_md5;
-                	unsigned char* m_keyBuffer;
+                    eProsima_user_DllExport CanTransmitAcknowledgePubSubType();
+
+                    eProsima_user_DllExport virtual ~CanTransmitAcknowledgePubSubType();
+                    eProsima_user_DllExport virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
+                    eProsima_user_DllExport virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
+                    eProsima_user_DllExport virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
+                    eProsima_user_DllExport virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
+                        bool force_md5 = false) override;
+                    eProsima_user_DllExport virtual void* createData() override;
+                    eProsima_user_DllExport virtual void deleteData(void * data) override;
+                    MD5 m_md5;
+                    unsigned char* m_keyBuffer;
                 };
                 /*!
                  * @brief This class represents the TopicDataType of the type CanConfigureBaudrate defined by the user in the IDL file.
@@ -127,19 +131,20 @@ namespace ib
                  */
                 class CanConfigureBaudratePubSubType : public eprosima::fastrtps::TopicDataType {
                 public:
-                        typedef CanConfigureBaudrate type;
+                    typedef CanConfigureBaudrate type;
 
-                	CanConfigureBaudratePubSubType();
-                	virtual ~CanConfigureBaudratePubSubType();
-                	virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
-                	virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
-                    virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
-                	virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
-                		bool force_md5 = false) override;
-                	virtual void* createData() override;
-                	virtual void deleteData(void * data) override;
-                	MD5 m_md5;
-                	unsigned char* m_keyBuffer;
+                    eProsima_user_DllExport CanConfigureBaudratePubSubType();
+
+                    eProsima_user_DllExport virtual ~CanConfigureBaudratePubSubType();
+                    eProsima_user_DllExport virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
+                    eProsima_user_DllExport virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
+                    eProsima_user_DllExport virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
+                    eProsima_user_DllExport virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
+                        bool force_md5 = false) override;
+                    eProsima_user_DllExport virtual void* createData() override;
+                    eProsima_user_DllExport virtual void deleteData(void * data) override;
+                    MD5 m_md5;
+                    unsigned char* m_keyBuffer;
                 };
                 /*!
                  * @brief This class represents the TopicDataType of the type CanSetControllerMode defined by the user in the IDL file.
@@ -147,19 +152,20 @@ namespace ib
                  */
                 class CanSetControllerModePubSubType : public eprosima::fastrtps::TopicDataType {
                 public:
-                        typedef CanSetControllerMode type;
+                    typedef CanSetControllerMode type;
 
-                	CanSetControllerModePubSubType();
-                	virtual ~CanSetControllerModePubSubType();
-                	virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
-                	virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
-                    virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
-                	virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
-                		bool force_md5 = false) override;
-                	virtual void* createData() override;
-                	virtual void deleteData(void * data) override;
-                	MD5 m_md5;
-                	unsigned char* m_keyBuffer;
+                    eProsima_user_DllExport CanSetControllerModePubSubType();
+
+                    eProsima_user_DllExport virtual ~CanSetControllerModePubSubType();
+                    eProsima_user_DllExport virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
+                    eProsima_user_DllExport virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
+                    eProsima_user_DllExport virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
+                    eProsima_user_DllExport virtual bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle,
+                        bool force_md5 = false) override;
+                    eProsima_user_DllExport virtual void* createData() override;
+                    eProsima_user_DllExport virtual void deleteData(void * data) override;
+                    MD5 m_md5;
+                    unsigned char* m_keyBuffer;
                 };
             }
         }

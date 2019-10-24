@@ -72,6 +72,7 @@ module idl {
     struct CanTransmitAcknowledge
     {
         @Key ib::mw::idl::EndpointAddress senderAddr;
+        unsigned long  canId;   // identifies the CAN id, to which this Acknowledge refers to
         transmitIdT    transmitId;   // identifies the CanTransmitRequest, to which this Acknowledge
         long long      timestampNS;  // Time of delivery / error; set by Network Simulator
         octet          txStatus;     // Status of the CAN Transmit Request

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*! 
+/*!
  * @file CanTopics.cpp
  * This source file contains the definition of the described types in the IDL file.
  *
@@ -35,20 +35,20 @@ using namespace eprosima::fastcdr::exception;
 ib::sim::can::idl::CanMessageFlags::CanMessageFlags()
 {
     m_ide = false;
-
     m_rtr = false;
-
     m_fdf = false;
-
     m_brs = false;
-
     m_esi = false;
-
 
 }
 
 ib::sim::can::idl::CanMessageFlags::~CanMessageFlags()
 {
+
+
+
+
+
 }
 
 ib::sim::can::idl::CanMessageFlags::CanMessageFlags(const CanMessageFlags &x)
@@ -71,6 +71,7 @@ ib::sim::can::idl::CanMessageFlags::CanMessageFlags(CanMessageFlags &&x)
 
 ib::sim::can::idl::CanMessageFlags& ib::sim::can::idl::CanMessageFlags::operator=(const CanMessageFlags &x)
 {
+
     m_ide = x.m_ide;
     m_rtr = x.m_rtr;
     m_fdf = x.m_fdf;
@@ -82,6 +83,7 @@ ib::sim::can::idl::CanMessageFlags& ib::sim::can::idl::CanMessageFlags::operator
 
 ib::sim::can::idl::CanMessageFlags& ib::sim::can::idl::CanMessageFlags::operator=(CanMessageFlags &&x)
 {
+
     m_ide = x.m_ide;
     m_rtr = x.m_rtr;
     m_fdf = x.m_fdf;
@@ -94,6 +96,7 @@ ib::sim::can::idl::CanMessageFlags& ib::sim::can::idl::CanMessageFlags::operator
 size_t ib::sim::can::idl::CanMessageFlags::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
@@ -119,6 +122,7 @@ size_t ib::sim::can::idl::CanMessageFlags::getCdrSerializedSize(const ib::sim::c
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
 
@@ -140,6 +144,7 @@ size_t ib::sim::can::idl::CanMessageFlags::getCdrSerializedSize(const ib::sim::c
 
 void ib::sim::can::idl::CanMessageFlags::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_ide;
     scdr << m_rtr;
     scdr << m_fdf;
@@ -149,6 +154,7 @@ void ib::sim::can::idl::CanMessageFlags::serialize(eprosima::fastcdr::Cdr &scdr)
 
 void ib::sim::can::idl::CanMessageFlags::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_ide;
     dcdr >> m_rtr;
     dcdr >> m_fdf;
@@ -156,10 +162,142 @@ void ib::sim::can::idl::CanMessageFlags::deserialize(eprosima::fastcdr::Cdr &dcd
     dcdr >> m_esi;
 }
 
+/*!
+ * @brief This function sets a value in member ide
+ * @param _ide New value for member ide
+ */
+void ib::sim::can::idl::CanMessageFlags::ide(bool _ide)
+{
+m_ide = _ide;
+}
+
+/*!
+ * @brief This function returns the value of member ide
+ * @return Value of member ide
+ */
+bool ib::sim::can::idl::CanMessageFlags::ide() const
+{
+    return m_ide;
+}
+
+/*!
+ * @brief This function returns a reference to member ide
+ * @return Reference to member ide
+ */
+bool& ib::sim::can::idl::CanMessageFlags::ide()
+{
+    return m_ide;
+}
+/*!
+ * @brief This function sets a value in member rtr
+ * @param _rtr New value for member rtr
+ */
+void ib::sim::can::idl::CanMessageFlags::rtr(bool _rtr)
+{
+m_rtr = _rtr;
+}
+
+/*!
+ * @brief This function returns the value of member rtr
+ * @return Value of member rtr
+ */
+bool ib::sim::can::idl::CanMessageFlags::rtr() const
+{
+    return m_rtr;
+}
+
+/*!
+ * @brief This function returns a reference to member rtr
+ * @return Reference to member rtr
+ */
+bool& ib::sim::can::idl::CanMessageFlags::rtr()
+{
+    return m_rtr;
+}
+/*!
+ * @brief This function sets a value in member fdf
+ * @param _fdf New value for member fdf
+ */
+void ib::sim::can::idl::CanMessageFlags::fdf(bool _fdf)
+{
+m_fdf = _fdf;
+}
+
+/*!
+ * @brief This function returns the value of member fdf
+ * @return Value of member fdf
+ */
+bool ib::sim::can::idl::CanMessageFlags::fdf() const
+{
+    return m_fdf;
+}
+
+/*!
+ * @brief This function returns a reference to member fdf
+ * @return Reference to member fdf
+ */
+bool& ib::sim::can::idl::CanMessageFlags::fdf()
+{
+    return m_fdf;
+}
+/*!
+ * @brief This function sets a value in member brs
+ * @param _brs New value for member brs
+ */
+void ib::sim::can::idl::CanMessageFlags::brs(bool _brs)
+{
+m_brs = _brs;
+}
+
+/*!
+ * @brief This function returns the value of member brs
+ * @return Value of member brs
+ */
+bool ib::sim::can::idl::CanMessageFlags::brs() const
+{
+    return m_brs;
+}
+
+/*!
+ * @brief This function returns a reference to member brs
+ * @return Reference to member brs
+ */
+bool& ib::sim::can::idl::CanMessageFlags::brs()
+{
+    return m_brs;
+}
+/*!
+ * @brief This function sets a value in member esi
+ * @param _esi New value for member esi
+ */
+void ib::sim::can::idl::CanMessageFlags::esi(bool _esi)
+{
+m_esi = _esi;
+}
+
+/*!
+ * @brief This function returns the value of member esi
+ * @return Value of member esi
+ */
+bool ib::sim::can::idl::CanMessageFlags::esi() const
+{
+    return m_esi;
+}
+
+/*!
+ * @brief This function returns a reference to member esi
+ * @return Reference to member esi
+ */
+bool& ib::sim::can::idl::CanMessageFlags::esi()
+{
+    return m_esi;
+}
+
 size_t ib::sim::can::idl::CanMessageFlags::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
 
 
 
@@ -171,7 +309,7 @@ size_t ib::sim::can::idl::CanMessageFlags::getKeyMaxCdrSerializedSize(size_t cur
 
 bool ib::sim::can::idl::CanMessageFlags::isKeyDefined()
 {
-    return false;
+   return false;
 }
 
 void ib::sim::can::idl::CanMessageFlags::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -184,24 +322,28 @@ void ib::sim::can::idl::CanMessageFlags::serializeKey(eprosima::fastcdr::Cdr &sc
 	 
 }
 
+
 ib::sim::can::idl::CanMessage::CanMessage()
 {
 
     m_transmitId = 0;
-
     m_timestampNs = 0;
-
     m_canId = 0;
 
-
     m_dlc = 0;
-
 
 
 }
 
 ib::sim::can::idl::CanMessage::~CanMessage()
 {
+
+
+
+
+
+
+
 }
 
 ib::sim::can::idl::CanMessage::CanMessage(const CanMessage &x)
@@ -228,6 +370,7 @@ ib::sim::can::idl::CanMessage::CanMessage(CanMessage &&x)
 
 ib::sim::can::idl::CanMessage& ib::sim::can::idl::CanMessage::operator=(const CanMessage &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_transmitId = x.m_transmitId;
     m_timestampNs = x.m_timestampNs;
@@ -241,6 +384,7 @@ ib::sim::can::idl::CanMessage& ib::sim::can::idl::CanMessage::operator=(const Ca
 
 ib::sim::can::idl::CanMessage& ib::sim::can::idl::CanMessage::operator=(CanMessage &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_transmitId = x.m_transmitId;
     m_timestampNs = x.m_timestampNs;
@@ -255,6 +399,7 @@ ib::sim::can::idl::CanMessage& ib::sim::can::idl::CanMessage::operator=(CanMessa
 size_t ib::sim::can::idl::CanMessage::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
@@ -285,6 +430,7 @@ size_t ib::sim::can::idl::CanMessage::getCdrSerializedSize(const ib::sim::can::i
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
@@ -311,6 +457,7 @@ size_t ib::sim::can::idl::CanMessage::getCdrSerializedSize(const ib::sim::can::i
 
 void ib::sim::can::idl::CanMessage::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_transmitId;
     scdr << m_timestampNs;
@@ -322,6 +469,7 @@ void ib::sim::can::idl::CanMessage::serialize(eprosima::fastcdr::Cdr &scdr) cons
 
 void ib::sim::can::idl::CanMessage::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_transmitId;
     dcdr >> m_timestampNs;
@@ -331,10 +479,221 @@ void ib::sim::can::idl::CanMessage::deserialize(eprosima::fastcdr::Cdr &dcdr)
     dcdr >> m_dataField;
 }
 
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::can::idl::CanMessage::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::can::idl::CanMessage::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::can::idl::CanMessage::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::can::idl::CanMessage::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member transmitId
+ * @param _transmitId New value for member transmitId
+ */
+void ib::sim::can::idl::CanMessage::transmitId(uint32_t _transmitId)
+{
+m_transmitId = _transmitId;
+}
+
+/*!
+ * @brief This function returns the value of member transmitId
+ * @return Value of member transmitId
+ */
+uint32_t ib::sim::can::idl::CanMessage::transmitId() const
+{
+    return m_transmitId;
+}
+
+/*!
+ * @brief This function returns a reference to member transmitId
+ * @return Reference to member transmitId
+ */
+uint32_t& ib::sim::can::idl::CanMessage::transmitId()
+{
+    return m_transmitId;
+}
+/*!
+ * @brief This function sets a value in member timestampNs
+ * @param _timestampNs New value for member timestampNs
+ */
+void ib::sim::can::idl::CanMessage::timestampNs(int64_t _timestampNs)
+{
+m_timestampNs = _timestampNs;
+}
+
+/*!
+ * @brief This function returns the value of member timestampNs
+ * @return Value of member timestampNs
+ */
+int64_t ib::sim::can::idl::CanMessage::timestampNs() const
+{
+    return m_timestampNs;
+}
+
+/*!
+ * @brief This function returns a reference to member timestampNs
+ * @return Reference to member timestampNs
+ */
+int64_t& ib::sim::can::idl::CanMessage::timestampNs()
+{
+    return m_timestampNs;
+}
+/*!
+ * @brief This function sets a value in member canId
+ * @param _canId New value for member canId
+ */
+void ib::sim::can::idl::CanMessage::canId(uint32_t _canId)
+{
+m_canId = _canId;
+}
+
+/*!
+ * @brief This function returns the value of member canId
+ * @return Value of member canId
+ */
+uint32_t ib::sim::can::idl::CanMessage::canId() const
+{
+    return m_canId;
+}
+
+/*!
+ * @brief This function returns a reference to member canId
+ * @return Reference to member canId
+ */
+uint32_t& ib::sim::can::idl::CanMessage::canId()
+{
+    return m_canId;
+}
+/*!
+ * @brief This function copies the value in member flags
+ * @param _flags New value to be copied in member flags
+ */
+void ib::sim::can::idl::CanMessage::flags(const ib::sim::can::idl::CanMessageFlags &_flags)
+{
+m_flags = _flags;
+}
+
+/*!
+ * @brief This function moves the value in member flags
+ * @param _flags New value to be moved in member flags
+ */
+void ib::sim::can::idl::CanMessage::flags(ib::sim::can::idl::CanMessageFlags &&_flags)
+{
+m_flags = std::move(_flags);
+}
+
+/*!
+ * @brief This function returns a constant reference to member flags
+ * @return Constant reference to member flags
+ */
+const ib::sim::can::idl::CanMessageFlags& ib::sim::can::idl::CanMessage::flags() const
+{
+    return m_flags;
+}
+
+/*!
+ * @brief This function returns a reference to member flags
+ * @return Reference to member flags
+ */
+ib::sim::can::idl::CanMessageFlags& ib::sim::can::idl::CanMessage::flags()
+{
+    return m_flags;
+}
+/*!
+ * @brief This function sets a value in member dlc
+ * @param _dlc New value for member dlc
+ */
+void ib::sim::can::idl::CanMessage::dlc(uint8_t _dlc)
+{
+m_dlc = _dlc;
+}
+
+/*!
+ * @brief This function returns the value of member dlc
+ * @return Value of member dlc
+ */
+uint8_t ib::sim::can::idl::CanMessage::dlc() const
+{
+    return m_dlc;
+}
+
+/*!
+ * @brief This function returns a reference to member dlc
+ * @return Reference to member dlc
+ */
+uint8_t& ib::sim::can::idl::CanMessage::dlc()
+{
+    return m_dlc;
+}
+/*!
+ * @brief This function copies the value in member dataField
+ * @param _dataField New value to be copied in member dataField
+ */
+void ib::sim::can::idl::CanMessage::dataField(const std::vector<uint8_t> &_dataField)
+{
+m_dataField = _dataField;
+}
+
+/*!
+ * @brief This function moves the value in member dataField
+ * @param _dataField New value to be moved in member dataField
+ */
+void ib::sim::can::idl::CanMessage::dataField(std::vector<uint8_t> &&_dataField)
+{
+m_dataField = std::move(_dataField);
+}
+
+/*!
+ * @brief This function returns a constant reference to member dataField
+ * @return Constant reference to member dataField
+ */
+const std::vector<uint8_t>& ib::sim::can::idl::CanMessage::dataField() const
+{
+    return m_dataField;
+}
+
+/*!
+ * @brief This function returns a reference to member dataField
+ * @return Reference to member dataField
+ */
+std::vector<uint8_t>& ib::sim::can::idl::CanMessage::dataField()
+{
+    return m_dataField;
+}
+
 size_t ib::sim::can::idl::CanMessage::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -348,7 +707,7 @@ size_t ib::sim::can::idl::CanMessage::getKeyMaxCdrSerializedSize(size_t current_
 
 bool ib::sim::can::idl::CanMessage::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::can::idl::CanMessage::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -362,20 +721,22 @@ void ib::sim::can::idl::CanMessage::serializeKey(eprosima::fastcdr::Cdr &scdr) c
 	 
 	 
 }
+
 ib::sim::can::idl::CanControllerStatus::CanControllerStatus()
 {
 
     m_timestampNs = 0;
-
     m_controllerState = 0;
-
     m_errorState = 0;
-
 
 }
 
 ib::sim::can::idl::CanControllerStatus::~CanControllerStatus()
 {
+
+
+
+
 }
 
 ib::sim::can::idl::CanControllerStatus::CanControllerStatus(const CanControllerStatus &x)
@@ -396,6 +757,7 @@ ib::sim::can::idl::CanControllerStatus::CanControllerStatus(CanControllerStatus 
 
 ib::sim::can::idl::CanControllerStatus& ib::sim::can::idl::CanControllerStatus::operator=(const CanControllerStatus &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_timestampNs = x.m_timestampNs;
     m_controllerState = x.m_controllerState;
@@ -406,6 +768,7 @@ ib::sim::can::idl::CanControllerStatus& ib::sim::can::idl::CanControllerStatus::
 
 ib::sim::can::idl::CanControllerStatus& ib::sim::can::idl::CanControllerStatus::operator=(CanControllerStatus &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_timestampNs = x.m_timestampNs;
     m_controllerState = x.m_controllerState;
@@ -417,6 +780,7 @@ ib::sim::can::idl::CanControllerStatus& ib::sim::can::idl::CanControllerStatus::
 size_t ib::sim::can::idl::CanControllerStatus::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
@@ -437,6 +801,7 @@ size_t ib::sim::can::idl::CanControllerStatus::getCdrSerializedSize(const ib::si
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
@@ -453,6 +818,7 @@ size_t ib::sim::can::idl::CanControllerStatus::getCdrSerializedSize(const ib::si
 
 void ib::sim::can::idl::CanControllerStatus::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_timestampNs;
     scdr << m_controllerState;
@@ -461,16 +827,132 @@ void ib::sim::can::idl::CanControllerStatus::serialize(eprosima::fastcdr::Cdr &s
 
 void ib::sim::can::idl::CanControllerStatus::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_timestampNs;
     dcdr >> m_controllerState;
     dcdr >> m_errorState;
 }
 
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::can::idl::CanControllerStatus::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::can::idl::CanControllerStatus::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::can::idl::CanControllerStatus::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::can::idl::CanControllerStatus::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member timestampNs
+ * @param _timestampNs New value for member timestampNs
+ */
+void ib::sim::can::idl::CanControllerStatus::timestampNs(int64_t _timestampNs)
+{
+m_timestampNs = _timestampNs;
+}
+
+/*!
+ * @brief This function returns the value of member timestampNs
+ * @return Value of member timestampNs
+ */
+int64_t ib::sim::can::idl::CanControllerStatus::timestampNs() const
+{
+    return m_timestampNs;
+}
+
+/*!
+ * @brief This function returns a reference to member timestampNs
+ * @return Reference to member timestampNs
+ */
+int64_t& ib::sim::can::idl::CanControllerStatus::timestampNs()
+{
+    return m_timestampNs;
+}
+/*!
+ * @brief This function sets a value in member controllerState
+ * @param _controllerState New value for member controllerState
+ */
+void ib::sim::can::idl::CanControllerStatus::controllerState(uint8_t _controllerState)
+{
+m_controllerState = _controllerState;
+}
+
+/*!
+ * @brief This function returns the value of member controllerState
+ * @return Value of member controllerState
+ */
+uint8_t ib::sim::can::idl::CanControllerStatus::controllerState() const
+{
+    return m_controllerState;
+}
+
+/*!
+ * @brief This function returns a reference to member controllerState
+ * @return Reference to member controllerState
+ */
+uint8_t& ib::sim::can::idl::CanControllerStatus::controllerState()
+{
+    return m_controllerState;
+}
+/*!
+ * @brief This function sets a value in member errorState
+ * @param _errorState New value for member errorState
+ */
+void ib::sim::can::idl::CanControllerStatus::errorState(uint8_t _errorState)
+{
+m_errorState = _errorState;
+}
+
+/*!
+ * @brief This function returns the value of member errorState
+ * @return Value of member errorState
+ */
+uint8_t ib::sim::can::idl::CanControllerStatus::errorState() const
+{
+    return m_errorState;
+}
+
+/*!
+ * @brief This function returns a reference to member errorState
+ * @return Reference to member errorState
+ */
+uint8_t& ib::sim::can::idl::CanControllerStatus::errorState()
+{
+    return m_errorState;
+}
+
 size_t ib::sim::can::idl::CanControllerStatus::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -481,7 +963,7 @@ size_t ib::sim::can::idl::CanControllerStatus::getKeyMaxCdrSerializedSize(size_t
 
 bool ib::sim::can::idl::CanControllerStatus::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::can::idl::CanControllerStatus::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -492,25 +974,30 @@ void ib::sim::can::idl::CanControllerStatus::serializeKey(eprosima::fastcdr::Cdr
 	 
 	 
 }
+
 ib::sim::can::idl::CanTransmitAcknowledge::CanTransmitAcknowledge()
 {
 
+    m_canId = 0;
     m_transmitId = 0;
-
     m_timestampNS = 0;
-
     m_txStatus = 0;
-
 
 }
 
 ib::sim::can::idl::CanTransmitAcknowledge::~CanTransmitAcknowledge()
 {
+
+
+
+
+
 }
 
 ib::sim::can::idl::CanTransmitAcknowledge::CanTransmitAcknowledge(const CanTransmitAcknowledge &x)
 {
     m_senderAddr = x.m_senderAddr;
+    m_canId = x.m_canId;
     m_transmitId = x.m_transmitId;
     m_timestampNS = x.m_timestampNS;
     m_txStatus = x.m_txStatus;
@@ -519,6 +1006,7 @@ ib::sim::can::idl::CanTransmitAcknowledge::CanTransmitAcknowledge(const CanTrans
 ib::sim::can::idl::CanTransmitAcknowledge::CanTransmitAcknowledge(CanTransmitAcknowledge &&x)
 {
     m_senderAddr = std::move(x.m_senderAddr);
+    m_canId = x.m_canId;
     m_transmitId = x.m_transmitId;
     m_timestampNS = x.m_timestampNS;
     m_txStatus = x.m_txStatus;
@@ -526,7 +1014,9 @@ ib::sim::can::idl::CanTransmitAcknowledge::CanTransmitAcknowledge(CanTransmitAck
 
 ib::sim::can::idl::CanTransmitAcknowledge& ib::sim::can::idl::CanTransmitAcknowledge::operator=(const CanTransmitAcknowledge &x)
 {
+
     m_senderAddr = x.m_senderAddr;
+    m_canId = x.m_canId;
     m_transmitId = x.m_transmitId;
     m_timestampNS = x.m_timestampNS;
     m_txStatus = x.m_txStatus;
@@ -536,7 +1026,9 @@ ib::sim::can::idl::CanTransmitAcknowledge& ib::sim::can::idl::CanTransmitAcknowl
 
 ib::sim::can::idl::CanTransmitAcknowledge& ib::sim::can::idl::CanTransmitAcknowledge::operator=(CanTransmitAcknowledge &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
+    m_canId = x.m_canId;
     m_transmitId = x.m_transmitId;
     m_timestampNS = x.m_timestampNS;
     m_txStatus = x.m_txStatus;
@@ -548,7 +1040,11 @@ size_t ib::sim::can::idl::CanTransmitAcknowledge::getMaxCdrSerializedSize(size_t
 {
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
@@ -567,7 +1063,11 @@ size_t ib::sim::can::idl::CanTransmitAcknowledge::getCdrSerializedSize(const ib:
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
@@ -583,7 +1083,9 @@ size_t ib::sim::can::idl::CanTransmitAcknowledge::getCdrSerializedSize(const ib:
 
 void ib::sim::can::idl::CanTransmitAcknowledge::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
+    scdr << m_canId;
     scdr << m_transmitId;
     scdr << m_timestampNS;
     scdr << m_txStatus;
@@ -591,17 +1093,161 @@ void ib::sim::can::idl::CanTransmitAcknowledge::serialize(eprosima::fastcdr::Cdr
 
 void ib::sim::can::idl::CanTransmitAcknowledge::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
+    dcdr >> m_canId;
     dcdr >> m_transmitId;
     dcdr >> m_timestampNS;
     dcdr >> m_txStatus;
 }
 
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::can::idl::CanTransmitAcknowledge::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::can::idl::CanTransmitAcknowledge::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::can::idl::CanTransmitAcknowledge::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::can::idl::CanTransmitAcknowledge::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member canId
+ * @param _canId New value for member canId
+ */
+void ib::sim::can::idl::CanTransmitAcknowledge::canId(uint32_t _canId)
+{
+m_canId = _canId;
+}
+
+/*!
+ * @brief This function returns the value of member canId
+ * @return Value of member canId
+ */
+uint32_t ib::sim::can::idl::CanTransmitAcknowledge::canId() const
+{
+    return m_canId;
+}
+
+/*!
+ * @brief This function returns a reference to member canId
+ * @return Reference to member canId
+ */
+uint32_t& ib::sim::can::idl::CanTransmitAcknowledge::canId()
+{
+    return m_canId;
+}
+/*!
+ * @brief This function sets a value in member transmitId
+ * @param _transmitId New value for member transmitId
+ */
+void ib::sim::can::idl::CanTransmitAcknowledge::transmitId(ib::sim::can::idl::transmitIdT _transmitId)
+{
+m_transmitId = _transmitId;
+}
+
+/*!
+ * @brief This function returns the value of member transmitId
+ * @return Value of member transmitId
+ */
+ib::sim::can::idl::transmitIdT ib::sim::can::idl::CanTransmitAcknowledge::transmitId() const
+{
+    return m_transmitId;
+}
+
+/*!
+ * @brief This function returns a reference to member transmitId
+ * @return Reference to member transmitId
+ */
+ib::sim::can::idl::transmitIdT& ib::sim::can::idl::CanTransmitAcknowledge::transmitId()
+{
+    return m_transmitId;
+}
+/*!
+ * @brief This function sets a value in member timestampNS
+ * @param _timestampNS New value for member timestampNS
+ */
+void ib::sim::can::idl::CanTransmitAcknowledge::timestampNS(int64_t _timestampNS)
+{
+m_timestampNS = _timestampNS;
+}
+
+/*!
+ * @brief This function returns the value of member timestampNS
+ * @return Value of member timestampNS
+ */
+int64_t ib::sim::can::idl::CanTransmitAcknowledge::timestampNS() const
+{
+    return m_timestampNS;
+}
+
+/*!
+ * @brief This function returns a reference to member timestampNS
+ * @return Reference to member timestampNS
+ */
+int64_t& ib::sim::can::idl::CanTransmitAcknowledge::timestampNS()
+{
+    return m_timestampNS;
+}
+/*!
+ * @brief This function sets a value in member txStatus
+ * @param _txStatus New value for member txStatus
+ */
+void ib::sim::can::idl::CanTransmitAcknowledge::txStatus(uint8_t _txStatus)
+{
+m_txStatus = _txStatus;
+}
+
+/*!
+ * @brief This function returns the value of member txStatus
+ * @return Value of member txStatus
+ */
+uint8_t ib::sim::can::idl::CanTransmitAcknowledge::txStatus() const
+{
+    return m_txStatus;
+}
+
+/*!
+ * @brief This function returns a reference to member txStatus
+ * @return Reference to member txStatus
+ */
+uint8_t& ib::sim::can::idl::CanTransmitAcknowledge::txStatus()
+{
+    return m_txStatus;
+}
+
 size_t ib::sim::can::idl::CanTransmitAcknowledge::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
+
 
 
 
@@ -611,7 +1257,7 @@ size_t ib::sim::can::idl::CanTransmitAcknowledge::getKeyMaxCdrSerializedSize(siz
 
 bool ib::sim::can::idl::CanTransmitAcknowledge::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::can::idl::CanTransmitAcknowledge::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -621,19 +1267,22 @@ void ib::sim::can::idl::CanTransmitAcknowledge::serializeKey(eprosima::fastcdr::
 	 
 	 
 	 
+	 
 }
+
 ib::sim::can::idl::CanConfigureBaudrate::CanConfigureBaudrate()
 {
 
     m_baudRate = 0;
-
     m_fdBaudRate = 0;
-
 
 }
 
 ib::sim::can::idl::CanConfigureBaudrate::~CanConfigureBaudrate()
 {
+
+
+
 }
 
 ib::sim::can::idl::CanConfigureBaudrate::CanConfigureBaudrate(const CanConfigureBaudrate &x)
@@ -652,6 +1301,7 @@ ib::sim::can::idl::CanConfigureBaudrate::CanConfigureBaudrate(CanConfigureBaudra
 
 ib::sim::can::idl::CanConfigureBaudrate& ib::sim::can::idl::CanConfigureBaudrate::operator=(const CanConfigureBaudrate &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_baudRate = x.m_baudRate;
     m_fdBaudRate = x.m_fdBaudRate;
@@ -661,6 +1311,7 @@ ib::sim::can::idl::CanConfigureBaudrate& ib::sim::can::idl::CanConfigureBaudrate
 
 ib::sim::can::idl::CanConfigureBaudrate& ib::sim::can::idl::CanConfigureBaudrate::operator=(CanConfigureBaudrate &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_baudRate = x.m_baudRate;
     m_fdBaudRate = x.m_fdBaudRate;
@@ -671,6 +1322,7 @@ ib::sim::can::idl::CanConfigureBaudrate& ib::sim::can::idl::CanConfigureBaudrate
 size_t ib::sim::can::idl::CanConfigureBaudrate::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
@@ -688,6 +1340,7 @@ size_t ib::sim::can::idl::CanConfigureBaudrate::getCdrSerializedSize(const ib::s
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
@@ -701,6 +1354,7 @@ size_t ib::sim::can::idl::CanConfigureBaudrate::getCdrSerializedSize(const ib::s
 
 void ib::sim::can::idl::CanConfigureBaudrate::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_baudRate;
     scdr << m_fdBaudRate;
@@ -708,15 +1362,105 @@ void ib::sim::can::idl::CanConfigureBaudrate::serialize(eprosima::fastcdr::Cdr &
 
 void ib::sim::can::idl::CanConfigureBaudrate::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_baudRate;
     dcdr >> m_fdBaudRate;
 }
 
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::can::idl::CanConfigureBaudrate::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::can::idl::CanConfigureBaudrate::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::can::idl::CanConfigureBaudrate::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::can::idl::CanConfigureBaudrate::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member baudRate
+ * @param _baudRate New value for member baudRate
+ */
+void ib::sim::can::idl::CanConfigureBaudrate::baudRate(uint32_t _baudRate)
+{
+m_baudRate = _baudRate;
+}
+
+/*!
+ * @brief This function returns the value of member baudRate
+ * @return Value of member baudRate
+ */
+uint32_t ib::sim::can::idl::CanConfigureBaudrate::baudRate() const
+{
+    return m_baudRate;
+}
+
+/*!
+ * @brief This function returns a reference to member baudRate
+ * @return Reference to member baudRate
+ */
+uint32_t& ib::sim::can::idl::CanConfigureBaudrate::baudRate()
+{
+    return m_baudRate;
+}
+/*!
+ * @brief This function sets a value in member fdBaudRate
+ * @param _fdBaudRate New value for member fdBaudRate
+ */
+void ib::sim::can::idl::CanConfigureBaudrate::fdBaudRate(uint32_t _fdBaudRate)
+{
+m_fdBaudRate = _fdBaudRate;
+}
+
+/*!
+ * @brief This function returns the value of member fdBaudRate
+ * @return Value of member fdBaudRate
+ */
+uint32_t ib::sim::can::idl::CanConfigureBaudrate::fdBaudRate() const
+{
+    return m_fdBaudRate;
+}
+
+/*!
+ * @brief This function returns a reference to member fdBaudRate
+ * @return Reference to member fdBaudRate
+ */
+uint32_t& ib::sim::can::idl::CanConfigureBaudrate::fdBaudRate()
+{
+    return m_fdBaudRate;
+}
+
 size_t ib::sim::can::idl::CanConfigureBaudrate::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -726,7 +1470,7 @@ size_t ib::sim::can::idl::CanConfigureBaudrate::getKeyMaxCdrSerializedSize(size_
 
 bool ib::sim::can::idl::CanConfigureBaudrate::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::can::idl::CanConfigureBaudrate::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -736,20 +1480,22 @@ void ib::sim::can::idl::CanConfigureBaudrate::serializeKey(eprosima::fastcdr::Cd
 	 
 	 
 }
+
 ib::sim::can::idl::CanSetControllerMode::CanSetControllerMode()
 {
 
     m_resetErrorHandling = false;
-
     m_cancelTransmitRequests = false;
-
     m_mode = 0;
-
 
 }
 
 ib::sim::can::idl::CanSetControllerMode::~CanSetControllerMode()
 {
+
+
+
+
 }
 
 ib::sim::can::idl::CanSetControllerMode::CanSetControllerMode(const CanSetControllerMode &x)
@@ -770,6 +1516,7 @@ ib::sim::can::idl::CanSetControllerMode::CanSetControllerMode(CanSetControllerMo
 
 ib::sim::can::idl::CanSetControllerMode& ib::sim::can::idl::CanSetControllerMode::operator=(const CanSetControllerMode &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_resetErrorHandling = x.m_resetErrorHandling;
     m_cancelTransmitRequests = x.m_cancelTransmitRequests;
@@ -780,6 +1527,7 @@ ib::sim::can::idl::CanSetControllerMode& ib::sim::can::idl::CanSetControllerMode
 
 ib::sim::can::idl::CanSetControllerMode& ib::sim::can::idl::CanSetControllerMode::operator=(CanSetControllerMode &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_resetErrorHandling = x.m_resetErrorHandling;
     m_cancelTransmitRequests = x.m_cancelTransmitRequests;
@@ -791,6 +1539,7 @@ ib::sim::can::idl::CanSetControllerMode& ib::sim::can::idl::CanSetControllerMode
 size_t ib::sim::can::idl::CanSetControllerMode::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
@@ -811,6 +1560,7 @@ size_t ib::sim::can::idl::CanSetControllerMode::getCdrSerializedSize(const ib::s
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
@@ -827,6 +1577,7 @@ size_t ib::sim::can::idl::CanSetControllerMode::getCdrSerializedSize(const ib::s
 
 void ib::sim::can::idl::CanSetControllerMode::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_resetErrorHandling;
     scdr << m_cancelTransmitRequests;
@@ -835,16 +1586,132 @@ void ib::sim::can::idl::CanSetControllerMode::serialize(eprosima::fastcdr::Cdr &
 
 void ib::sim::can::idl::CanSetControllerMode::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_resetErrorHandling;
     dcdr >> m_cancelTransmitRequests;
     dcdr >> m_mode;
 }
 
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::can::idl::CanSetControllerMode::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::can::idl::CanSetControllerMode::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::can::idl::CanSetControllerMode::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::can::idl::CanSetControllerMode::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member resetErrorHandling
+ * @param _resetErrorHandling New value for member resetErrorHandling
+ */
+void ib::sim::can::idl::CanSetControllerMode::resetErrorHandling(bool _resetErrorHandling)
+{
+m_resetErrorHandling = _resetErrorHandling;
+}
+
+/*!
+ * @brief This function returns the value of member resetErrorHandling
+ * @return Value of member resetErrorHandling
+ */
+bool ib::sim::can::idl::CanSetControllerMode::resetErrorHandling() const
+{
+    return m_resetErrorHandling;
+}
+
+/*!
+ * @brief This function returns a reference to member resetErrorHandling
+ * @return Reference to member resetErrorHandling
+ */
+bool& ib::sim::can::idl::CanSetControllerMode::resetErrorHandling()
+{
+    return m_resetErrorHandling;
+}
+/*!
+ * @brief This function sets a value in member cancelTransmitRequests
+ * @param _cancelTransmitRequests New value for member cancelTransmitRequests
+ */
+void ib::sim::can::idl::CanSetControllerMode::cancelTransmitRequests(bool _cancelTransmitRequests)
+{
+m_cancelTransmitRequests = _cancelTransmitRequests;
+}
+
+/*!
+ * @brief This function returns the value of member cancelTransmitRequests
+ * @return Value of member cancelTransmitRequests
+ */
+bool ib::sim::can::idl::CanSetControllerMode::cancelTransmitRequests() const
+{
+    return m_cancelTransmitRequests;
+}
+
+/*!
+ * @brief This function returns a reference to member cancelTransmitRequests
+ * @return Reference to member cancelTransmitRequests
+ */
+bool& ib::sim::can::idl::CanSetControllerMode::cancelTransmitRequests()
+{
+    return m_cancelTransmitRequests;
+}
+/*!
+ * @brief This function sets a value in member mode
+ * @param _mode New value for member mode
+ */
+void ib::sim::can::idl::CanSetControllerMode::mode(uint8_t _mode)
+{
+m_mode = _mode;
+}
+
+/*!
+ * @brief This function returns the value of member mode
+ * @return Value of member mode
+ */
+uint8_t ib::sim::can::idl::CanSetControllerMode::mode() const
+{
+    return m_mode;
+}
+
+/*!
+ * @brief This function returns a reference to member mode
+ * @return Reference to member mode
+ */
+uint8_t& ib::sim::can::idl::CanSetControllerMode::mode()
+{
+    return m_mode;
+}
+
 size_t ib::sim::can::idl::CanSetControllerMode::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -855,7 +1722,7 @@ size_t ib::sim::can::idl::CanSetControllerMode::getKeyMaxCdrSerializedSize(size_
 
 bool ib::sim::can::idl::CanSetControllerMode::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::can::idl::CanSetControllerMode::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -866,6 +1733,7 @@ void ib::sim::can::idl::CanSetControllerMode::serializeKey(eprosima::fastcdr::Cd
 	 
 	 
 }
+
 
 
 

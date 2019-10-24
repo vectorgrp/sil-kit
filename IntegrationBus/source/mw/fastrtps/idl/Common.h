@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*! 
+/*!
  * @file Common.h
  * This header file contains the declaration of the described types in the IDL file.
  *
@@ -87,7 +87,7 @@ namespace ib
                 /*!
                  * @brief Default destructor.
                  */
-                eProsima_user_DllExport ~EndpointAddress();
+                eProsima_user_DllExport virtual ~EndpointAddress();
 
                 /*!
                  * @brief Copy constructor.
@@ -117,54 +117,36 @@ namespace ib
                  * @brief This function sets a value in member participantId
                  * @param _participantId New value for member participantId
                  */
-                inline eProsima_user_DllExport void participantId(ib::mw::idl::ParticipantIdT _participantId)
-                {
-                    m_participantId = _participantId;
-                }
+                eProsima_user_DllExport void participantId(ib::mw::idl::ParticipantIdT _participantId);
 
                 /*!
                  * @brief This function returns the value of member participantId
                  * @return Value of member participantId
                  */
-                inline eProsima_user_DllExport ib::mw::idl::ParticipantIdT participantId() const
-                {
-                    return m_participantId;
-                }
+                eProsima_user_DllExport ib::mw::idl::ParticipantIdT participantId() const;
 
                 /*!
                  * @brief This function returns a reference to member participantId
                  * @return Reference to member participantId
                  */
-                inline eProsima_user_DllExport ib::mw::idl::ParticipantIdT& participantId()
-                {
-                    return m_participantId;
-                }
+                eProsima_user_DllExport ib::mw::idl::ParticipantIdT& participantId();
                 /*!
                  * @brief This function sets a value in member endpointId
                  * @param _endpointId New value for member endpointId
                  */
-                inline eProsima_user_DllExport void endpointId(ib::mw::idl::EndpointIdT _endpointId)
-                {
-                    m_endpointId = _endpointId;
-                }
+                eProsima_user_DllExport void endpointId(ib::mw::idl::EndpointIdT _endpointId);
 
                 /*!
                  * @brief This function returns the value of member endpointId
                  * @return Value of member endpointId
                  */
-                inline eProsima_user_DllExport ib::mw::idl::EndpointIdT endpointId() const
-                {
-                    return m_endpointId;
-                }
+                eProsima_user_DllExport ib::mw::idl::EndpointIdT endpointId() const;
 
                 /*!
                  * @brief This function returns a reference to member endpointId
                  * @return Reference to member endpointId
                  */
-                inline eProsima_user_DllExport ib::mw::idl::EndpointIdT& endpointId()
-                {
-                    return m_endpointId;
-                }
+                eProsima_user_DllExport ib::mw::idl::EndpointIdT& endpointId();
 
                 /*!
                  * @brief This function returns the maximum serialized size of an object

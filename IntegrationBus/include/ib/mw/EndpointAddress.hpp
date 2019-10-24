@@ -19,7 +19,7 @@ using ParticipantId = uint16_t;
 /*! \brief Participant specific identifier for its communication endpoints.
  *
  *   One Integration Bus participant can have multiple communication objects,
- *   e.g., multiple CAN controllers attached to differen buses. A EndpointId
+ *   e.g., multiple CAN controllers attached to different buses. A EndpointId
  *   is only valid in the scope of a specific Instruction Bus participant.
  */
 using EndpointId = uint16_t;
