@@ -10,6 +10,14 @@ add_vib_test(ITestGenericMessages
       LargeMessagesITest_FastRTPS.xml
 )
 
+add_vib_test(ITestThreeCanController
+    SOURCES
+      ThreeCanControllerITest.cpp
+    LIBS
+      IbMwComAdapter
+      IbMwVAsio
+)
+
 add_vib_test(ITestSocketBufferSize
     SOURCES
       SocketBufferSizeITest.cpp

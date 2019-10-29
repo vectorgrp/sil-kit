@@ -156,7 +156,7 @@ TEST_F(GenericMessageITest, publish_and_subscribe_generic_messages_vasio)
     topics[1].expectedData = std::vector<uint8_t>{topics[1].name.begin(), topics[1].name.end()};
 
     ibConfig = ib::cfg::Config::FromJsonFile("GenericMessagesITest_IbConfig.json");
-    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::FastRTPS;
+    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
 
     auto registry = std::make_unique<VAsioRegistry>(ibConfig);
     registry->ProvideDomain(domainId);
