@@ -8,7 +8,7 @@
 
 #include "fwd_decl.hpp"
 #include "ParentBuilder.hpp"
-#include "ParticipantBuilder_Helper.hpp"
+#include "ParticipantBuilder_detail.hpp"
 
 namespace ib {
 namespace cfg {
@@ -58,8 +58,8 @@ auto IoPortBuilder<IoPortCfg>::operator->() -> ParticipantBuilder*
 template<class IoPortCfg>
 auto IoPortBuilder<IoPortCfg>::WithLink(const std::string& linkname) -> IoPortBuilder&
 {
-    auto&& qualifiedName = ParticipantBuilder_MakeQualifiedName(*this,_port.name);
-    auto&& link = ParticipantBuilder_AddOrGetLink(*this, _port.linkType, linkname);
+    auto&& qualifiedName = detail::ParticipantBuilder_MakeQualifiedName(*this,_port.name);
+    auto&& link = detail::ParticipantBuilder_AddOrGetLink(*this, _port.linkType, linkname);
     link.AddEndpoint(qualifiedName);
 
     return WithLinkId(link.LinkId());

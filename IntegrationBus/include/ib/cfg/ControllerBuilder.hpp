@@ -8,7 +8,7 @@
 
 #include "fwd_decl.hpp"
 #include "ParentBuilder.hpp"
-#include "ParticipantBuilder_Helper.hpp"
+#include "ParticipantBuilder_detail.hpp"
 
 namespace ib {
 namespace cfg {
@@ -56,8 +56,8 @@ auto ControllerBuilder<ControllerCfg>::operator->() -> ParticipantBuilder*
 template<class ControllerCfg>
 auto ControllerBuilder<ControllerCfg>::WithLink(const std::string& linkname) -> ControllerBuilder&
 {
-    auto&& qualifiedName = ParticipantBuilder_MakeQualifiedName(*this, _controller.name);
-    auto&& link = ParticipantBuilder_AddOrGetLink(*this, _controller.linkType, linkname);
+    auto&& qualifiedName = detail::ParticipantBuilder_MakeQualifiedName(*this, _controller.name);
+    auto&& link = detail::ParticipantBuilder_AddOrGetLink(*this, _controller.linkType, linkname);
     link.AddEndpoint(qualifiedName);
 
     return WithLinkId(link.LinkId());

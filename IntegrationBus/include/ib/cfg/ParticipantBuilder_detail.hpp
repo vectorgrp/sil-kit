@@ -8,6 +8,8 @@ namespace cfg {
 
 class LinkBuilder;
 
+namespace detail {
+
 // IB Internal: resolve cyclic dependencies by not de-referencing Parent() (ie., an incomplete type at declaration point) in the children directly
 template<template<class> class Builder, typename BuilderCfg>
 auto ParticipantBuilder_MakeQualifiedName(Builder<BuilderCfg> &builder, const std::string controllerName) -> std::string
@@ -21,5 +23,6 @@ auto ParticipantBuilder_AddOrGetLink(Builder<BuilderCfg> &builder, LinkType link
     return builder->Parent()->AddOrGetLink(linkType, linkName);
 }
 
+} // namespace detail
 } // namespace cfg
 } // namespace ib
