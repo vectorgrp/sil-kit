@@ -171,6 +171,12 @@ auto ParticipantController::RunAsync() -> std::future<ParticipantState>
 void ParticipantController::ReportError(std::string errorMsg)
 {
     _logger->Error(errorMsg);
+
+    if (State() == ParticipantState::Shutdown)
+    {
+        _logger->Warn("ParticipantController::ReportError() was called in terminal state ParticipantState::Shutdown; transition to ParticipantState::Error is ignored.");
+        return;
+    }
     ChangeState(ParticipantState::Error, std::move(errorMsg));
 }
 

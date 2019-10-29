@@ -601,27 +601,6 @@ TEST_F(SystemMonitorTest, detect_error_from_shuttingdown)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_error_from_shutdown)
-{
-    SetAllParticipantStates(ParticipantState::Idle);
-    SetAllParticipantStates(ParticipantState::Initializing);
-    SetAllParticipantStates(ParticipantState::Initialized);
-    SetAllParticipantStates(ParticipantState::Running);
-    SetAllParticipantStates(ParticipantState::Stopped);
-    SetAllParticipantStates(ParticipantState::Shutdown);
-    EXPECT_EQ(monitor.SystemState(), SystemState::Shutdown);
-
-    RegisterSystemHandler();
-    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Error))
-        .Times(1);
-
-    SetParticipantStatus(0, ParticipantState::Error);
-    EXPECT_EQ(monitor.ParticipantState(0), ParticipantState::Error);
-    EXPECT_EQ(monitor.SystemState(), SystemState::Error);
-
-    EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
-}
-
 TEST_F(SystemMonitorTest, detect_initializing_after_error)
 {
     SetAllParticipantStates(ParticipantState::Idle);

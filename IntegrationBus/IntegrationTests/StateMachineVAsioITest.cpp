@@ -122,8 +122,8 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     EXPECT_CALL(callbacks, InitHandler(initCommand.participant, initCommand.kind)).Times(1);
     EXPECT_CALL(callbacks, StopHandler()).Times(1);
     EXPECT_CALL(callbacks, ShutdownHandler()).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Invalid)).Times(AnyNumber());
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Idle)).Times(AtLeast(1));
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Invalid)).Times(0);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Idle)).Times(1);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Initializing)).Times(1);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Initialized)).Times(1);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Running)).Times(1);
@@ -131,6 +131,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopped)).Times(1);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ShuttingDown)).Times(1);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Shutdown)).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Error)).Times(0);
 
     // Perform the actual test
     auto stateReached = SetTargetState(ParticipantState::Idle);

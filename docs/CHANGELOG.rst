@@ -12,6 +12,9 @@ Added
 
 Changed
 ~~~~~~~
+- Transitions from the shutdown state to the error state are no longer allowed.
+  With the last added connection loss mechanism, participants could also enter
+  the error state after a normal shutdown, which is now prevented.
 
 Fixed
 ~~~~~

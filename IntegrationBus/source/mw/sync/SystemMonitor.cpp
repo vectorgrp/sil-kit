@@ -113,6 +113,13 @@ void SystemMonitor::ReceiveIbMessage(mw::EndpointAddress from, const sync::Parti
     auto oldParticipantState = _participantStatus[participantId].state;
     auto oldSystemState = _systemState;
 
+    if (oldParticipantState == sync::ParticipantState::Shutdown)
+    {
+        _logger->Debug("Ignoring ParticipantState update from participant {} to ParticipantState::{} because participant is already in terminal state ParticipantState::Shutdown.",
+            newParticipantStatus.participantName, newParticipantStatus.state);
+        return;
+    }
+
     _participantStatus[participantId] = newParticipantStatus;
     ValidateParticipantStatusUpdate(newParticipantStatus, oldParticipantState);
     UpdateSystemState(newParticipantStatus);
