@@ -134,7 +134,8 @@ void ParticipantsThread(
 	std::chrono::seconds simulationDuration,
 	Config ibConfig,
 	Participant thisParticipant,
-	uint32_t domainId)
+	uint32_t domainId,
+	bool isVerbose)
 {
 	auto comAdapter = ib::CreateComAdapter(ibConfig, thisParticipant.name, domainId);
 	auto participantController = comAdapter->GetParticipantController();
@@ -153,15 +154,27 @@ void ParticipantsThread(
 		subscribers.push_back(thisSubscriber);
 	}
 
-	participantController->SetSimulationTask([payloadSizeInBytes, simulationDuration, participantController, &publishers](std::chrono::nanoseconds now) {
+	participantController->SetSimulationTask([payloadSizeInBytes, simulationDuration, participantController, &publishers, isVerbose](std::chrono::nanoseconds now) {
+
+		if (now > simulationDuration)
+		{
+			participantController->Stop("Simulation done");
+		}
+
+		if (isVerbose)
+		{
+			auto simulationDurationInNs = std::chrono::duration_cast<std::chrono::nanoseconds>(simulationDuration);
+			auto durationOfOneSimulationPercentile = simulationDurationInNs / 100;
+
+			if (now % durationOfOneSimulationPercentile < 1000000ns)
+			{
+				std::cout << ".";
+			}
+		}
+
 		for (auto &publisher : publishers)
 		{
 			PublishMessage(publisher, payloadSizeInBytes);
-
-			if (now > simulationDuration)
-			{
-				participantController->Stop("Simulation done");
-			}
 		}
 	});
 
@@ -179,7 +192,7 @@ int main(int argc, char** argv)
 	{
 		std::vector<std::chrono::nanoseconds> measuredRealDurations;
 
-		uint32_t numberOfParticipants = 3;
+		uint32_t numberOfParticipants = 4;
 		std::chrono::seconds simulationDuration = 1s;
 		uint32_t simulationRepeats = 5;
 		uint32_t payloadSizeInBytes = 100;
@@ -205,7 +218,7 @@ int main(int argc, char** argv)
 		case 2: numberOfParticipants = static_cast<uint32_t>(std::stoul(argv[1]));
 			break;
 		default:
-			std::cout << "Using default benchmark parameters (3 participants, 1 second, 5 repeats, 100 bytes, domainId 42);" << std::endl;
+			std::cout << "Using default benchmark parameters (4 participants, 1 second, 5 repeats, 100 bytes, domainId 42);" << std::endl;
 		}
 
 		if (numberOfParticipants < 2 || simulationDuration < 1s || simulationRepeats < 1 || payloadSizeInBytes < 1)
@@ -226,13 +239,18 @@ int main(int argc, char** argv)
 				if (thisParticipant.name == "Master")
 					continue;
 
-				threads.push_back(std::thread([payloadSizeInBytes, simulationDuration, ibConfig, thisParticipant, domainId] {
+				bool isVerbose = false;
+				if (thisParticipant.id == 0)
+					isVerbose = true;
+
+				threads.push_back(std::thread([payloadSizeInBytes, simulationDuration, ibConfig, thisParticipant, domainId, isVerbose] {
 
 					ParticipantsThread(payloadSizeInBytes,
 						simulationDuration,
 						ibConfig,
 						thisParticipant,
-						domainId);
+						domainId,
+						isVerbose);
 				}));
 			}
 
