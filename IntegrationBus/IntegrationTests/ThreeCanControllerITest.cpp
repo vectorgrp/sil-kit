@@ -8,6 +8,7 @@
 #include "CreateComAdapter.hpp"
 #include "VAsioRegistry.hpp"
 
+#include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
 
@@ -60,6 +61,20 @@ protected:
             messageBuilder << "Test Message " << index;
             testMessages[index].expectedData = messageBuilder.str();
         }
+
+        ib::cfg::ConfigBuilder builder{"TestConfig"};
+
+        builder.SimulationSetup()
+            .AddParticipant("CanWriter")
+            .AddCan("CAN1").WithLink("CAN1");
+        builder.SimulationSetup()
+            .AddParticipant("CanReader1")
+            .AddCan("CAN1").WithLink("CAN1");
+        builder.SimulationSetup()
+            .AddParticipant("CanReader2")
+            .AddCan("CAN1").WithLink("CAN1");
+
+        ibConfig = builder.Build();
     }
 
     void Sender()
@@ -123,6 +138,31 @@ protected:
         ASSERT_EQ(finishedFuture.wait_for(15s), std::future_status::ready);
     }
 
+    void ExecuteTest()
+    {
+        std::shared_future<void> finishedFuture(allReceivedPromise.get_future());
+        std::thread receiver1Thread{[this, &finishedFuture] { Receiver("CanReader1", finishedFuture); }};
+        std::thread receiver2Thread{[this, &finishedFuture] { Receiver("CanReader2", finishedFuture); }};
+
+        for (auto index = 1; index <= testMessages.size(); index++)
+        {
+            EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(index, 1))).Times(1);
+        }
+        EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(0, 1))).Times(0);
+        EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(6, 1))).Times(0);
+
+        std::thread senderThread{[this] { Sender(); }};
+
+        senderThread.join();
+        receiver1Thread.join();
+        receiver2Thread.join();
+
+        for (auto&& message : testMessages)
+        {
+            EXPECT_EQ(message.expectedData, message.receivedData);
+        }
+    }
+
     struct TestMessage
     {
         std::string expectedData;
@@ -141,61 +181,19 @@ protected:
 
 TEST_F(ThreeCanControllerITest, test_can_ack_callbacks_fastrtps)
 {
-    ibConfig = ib::cfg::Config::FromJsonFile("ThreeCanControllerITest_IbConfig.json");
     ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::FastRTPS;
 
-    std::shared_future<void> finishedFuture(allReceivedPromise.get_future());
-    std::thread receiver1Thread{[this, &finishedFuture] { Receiver("CanReader1", finishedFuture); }};
-    std::thread receiver2Thread{[this, &finishedFuture] { Receiver("CanReader2", finishedFuture); }};
-
-    for (auto index = 1; index <= testMessages.size(); index++)
-    {
-        EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(index, 1))).Times(1);
-    }
-    EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(0, 1))).Times(0);
-    EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(6, 1))).Times(0);
-
-    std::thread senderThread{[this] { Sender(); }};
-
-    senderThread.join();
-    receiver1Thread.join();
-    receiver2Thread.join();
-
-    for (auto&& message : testMessages)
-    {
-        EXPECT_EQ(message.expectedData, message.receivedData);
-    }
+    ExecuteTest();
 }
 
 TEST_F(ThreeCanControllerITest, test_can_ack_callbacks_vasio)
 {
-    ibConfig = ib::cfg::Config::FromJsonFile("ThreeCanControllerITest_IbConfig.json");
     ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
 
     auto registry = std::make_unique<VAsioRegistry>(ibConfig);
     registry->ProvideDomain(domainId);
 
-    std::shared_future<void> finishedFuture(allReceivedPromise.get_future());
-    std::thread receiver1Thread{[this, &finishedFuture] { Receiver("CanReader1", finishedFuture); }};
-    std::thread receiver2Thread{[this, &finishedFuture] { Receiver("CanReader2", finishedFuture); }};
-
-    for (auto index = 1; index <= testMessages.size(); index++)
-    {
-        EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(index, 1))).Times(1);
-    }
-    EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(0, 1))).Times(0);
-    EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(6, 1))).Times(0);
-
-    std::thread senderThread{[this] { Sender(); }};
-
-    senderThread.join();
-    receiver1Thread.join();
-    receiver2Thread.join();
-
-    for (auto&& message : testMessages)
-    {
-        EXPECT_EQ(message.expectedData, message.receivedData);
-    }
+    ExecuteTest();
 }
 
 } // anonymous namespace

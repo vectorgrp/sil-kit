@@ -40,10 +40,7 @@ auto CanController::SendMessage(const CanMessage& msg) -> CanTxId
     auto msgCopy = msg;
     msgCopy.transmitId = MakeTxId();
 
-    MessageId messageId;
-    messageId.canId = msg.canId;
-    messageId.transmitId = msgCopy.transmitId;
-    _pendingAcks.push_back(messageId);
+    _pendingAcks.emplace_back(std::pair<uint32_t, CanTxId>(msgCopy.canId, msgCopy.transmitId));
 
     _comAdapter->SendIbMessage(_endpointAddr, msgCopy);
     return msgCopy.transmitId;
@@ -54,10 +51,7 @@ auto CanController::SendMessage(CanMessage&& msg) -> CanTxId
     auto txId = MakeTxId();
     msg.transmitId = txId;
 
-    MessageId messageId;
-    messageId.canId = msg.canId;
-    messageId.transmitId = txId;
-    _pendingAcks.push_back(messageId);
+    _pendingAcks.emplace_back(std::pair<uint32_t, CanTxId>(msg.canId, msg.transmitId));
 
     _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
     return txId;
@@ -104,9 +98,7 @@ void CanController::ReceiveIbMessage(ib::mw::EndpointAddress from, const CanTran
     if (from == _endpointAddr)
         return;
 
-    auto pendingAcksIter = std::find_if(_pendingAcks.begin(), _pendingAcks.end(),
-        [&msg](const MessageId& msgId) { return msgId.canId == msg.canId && msgId.transmitId == msg.transmitId; });
-
+    auto pendingAcksIter = std::find(_pendingAcks.begin(), _pendingAcks.end(), std::make_pair(msg.canId, msg.transmitId));
     if (pendingAcksIter != _pendingAcks.end())
     {
         _pendingAcks.erase(pendingAcksIter);

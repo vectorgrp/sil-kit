@@ -19,12 +19,22 @@ Changed
 Fixed
 ~~~~~
 - Fixed CAN acknowledge callback behaviour in the simple / trivial CAN simulation.
-  In a simulation with more than 2 CAN controller, a CAN controller could receive 
-  a CAN acknowledge (in the callback) without even sending a CAN message. Now, only
-  the Controller who did send a message will invoke the callback for the Acknowledge.
+  In a simulation with more than 2 CAN controllers, a CAN controller could receive
+  a CAN acknowledge (in the callback) without even sending a CAN message.
+  Now, the callback for the acknowledge will only be called by the controller
+  that did send the corresponding CAN message.
 
 Removed
 ~~~~~~~
+
+
+Compatibility with Sprint-33
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): No
+- Application software interface (API): No
+- Middleware network protocol (FastRTPS): Partially (Everything except CAN is compatible)
+- Middleware network protocol (VAsio): Partially (Everything except CAN is compatible)
+
 
 [1.0.0 (Sprint-33)] - 2019-09-16
 --------------------------------

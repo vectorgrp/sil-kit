@@ -75,12 +75,6 @@ private:
     template<typename MsgT>
     using CallbackVector = std::vector<CallbackT<MsgT>>;
 
-    struct MessageId
-    {
-        uint32_t canId;
-        CanTxId transmitId;
-    };
-
 private:
     // ----------------------------------------
     // private methods
@@ -105,7 +99,7 @@ private:
         CallbackVector<CanTransmitAcknowledge>
     > _callbacks;
 
-    std::vector<MessageId> _pendingAcks;
+    std::vector<std::pair<uint32_t, CanTxId>> _pendingAcks;
 };
 
 // ================================================================================
