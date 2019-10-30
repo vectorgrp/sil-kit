@@ -64,7 +64,4 @@ if(${IB_BUILD_DOCS})
         DESTINATION .
         COMPONENT IntegrationBus-Developer
     )
-    #for standalone packaging just build target "package-IBDocs"
-    include(package_project)
-    package_project(IBDocs)
 endif()

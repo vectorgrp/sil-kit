@@ -6,6 +6,8 @@ cmake_minimum_required(VERSION 3.5)
 
 project("IntegrationBus-Library" LANGUAGES CXX C)
 
+set(CMAKE_CXX_STANDARD 14)
+
 include(IntegrationBusVersion)
 configure_ib_version(${PROJECT_NAME})
 
@@ -24,7 +26,7 @@ add_definitions(-DEXPORT_IntegrationBusAPI)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 ## Allow debug libraries to be installed side-by-side with their release variant
-set(CMAKE_DEBUG_POSTFIX d)
+set(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Make sure debug binaries differ from release binaries by a suffix 'd'" FORCE)
 
 ################################################################################
 # Install definitions

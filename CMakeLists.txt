@@ -8,9 +8,9 @@ project("IntegrationBus")
 
 option(IB_BUILD_TESTS "Enable unit and integration tests for the Integration Bus" ON)
 option(IB_BUILD_DOCS "Build documentation for the Integration Bus (requires Doxygen and Sphinx)" OFF)
-option(IB_RELEASE_DIST "Build a release distribution (include Source and docs)" ON)
-if(IB_RELEASE_DIST)
-    set(IB_BUILD_DOCS ON CACHE BOOL "Force IB_BUILD_DOCS ON due to IB_RELEASE_DIST" FORCE)
+option(IB_INSTALL_SOURCE "Install and package the source tree" OFF)
+if(IB_INSTALL_SOURCE)
+    set(IB_BUILD_DOCS ON CACHE BOOL "Force IB_BUILD_DOCS ON due to IB_INSTALL_SOURCE" FORCE)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${CMAKE_CURRENT_LIST_DIR}/IntegrationBus/cmake)
@@ -40,17 +40,14 @@ add_subdirectory (${PROJECT_SOURCE_DIR}/docs)
 # Install sources
 # Copy all files from the source directory to the proper destination
 # Filter by file types in case someone spoiled this source folder by calling "cmake ."
-if(IB_RELEASE_DIST)
+if(IB_INSTALL_SOURCE)
     install(
         DIRECTORY
             ${CMAKE_CURRENT_SOURCE_DIR}/cmake
             ${CMAKE_CURRENT_SOURCE_DIR}/IntegrationBus
             ${CMAKE_CURRENT_SOURCE_DIR}/Demos
             ${CMAKE_CURRENT_SOURCE_DIR}/Utilities
-            #XXX only distribute pre-built docs?
-            #${CMAKE_CURRENT_SOURCE_DIR}/docs
         DESTINATION ${INSTALL_SOURCE_DIR}
-        COMPONENT IntegrationBus-Developer
         FILES_MATCHING
             PATTERN *.cpp
             PATTERN *.cxx
@@ -64,9 +61,13 @@ if(IB_RELEASE_DIST)
             PATTERN CMakeLists.txt
             PATTERN *.md
             PATTERN *.xml
-        REGEX "/ci/" EXCLUDE
-        #vim swap files
-        REGEX "\..*\.sw.*" EXCLUDE
+        REGEX "/ci/.*" EXCLUDE
+    )
+    install(
+        DIRECTORY
+            ${CMAKE_CURRENT_SOURCE_DIR}/Launcher
+            ${CMAKE_CURRENT_SOURCE_DIR}/docs
+        DESTINATION ${INSTALL_SOURCE_DIR}
     )
     install(
         DIRECTORY
@@ -75,7 +76,6 @@ if(IB_RELEASE_DIST)
         REGEX "breathe" EXCLUDE
         REGEX "Fast-RTPS" EXCLUDE
         REGEX "\.git$" EXCLUDE
-        REGEX "\..*\.sw.*" EXCLUDE
     )
     #bundle ASIO
     install(
@@ -88,10 +88,11 @@ if(IB_RELEASE_DIST)
     install(
         FILES
             CMakeLists.txt
+            CMakeSettings.json
         DESTINATION ${INSTALL_SOURCE_DIR}
         COMPONENT IntegrationBus-Developer
     )
-endif(IB_RELEASE_DIST)
+endif(IB_INSTALL_SOURCE)
 ###############################################################################
 # Packaging
 ###############################################################################

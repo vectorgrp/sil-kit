@@ -1,0 +1,38 @@
+﻿{
+  "environments": [
+    { "BuildDir": "${workspaceRoot}\\_build" },
+    { "InstallDir": "${workspaceRoot}\\_install" }
+  ],
+  "configurations": [
+    {
+      "name": "x64-Debug",
+      "generator": "Visual Studio 15 2017 Win64",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "buildRoot": "${env.BuildDir}\\${name}",
+      "intelliSenseMode": "windows-msvc-x64"
+    },
+    {
+      "name": "x64-Release",
+      "generator": "Visual Studio 15 2017 Win64",
+      "inheritEnvironments": [ "x64-Debug" ],
+      "buildRoot": "${env.BuildDir}\\${name}",
+      "configurationType": "Release"
+    },
+    {
+      "name": "Debug",
+      "generator": "Visual Studio 15 2017",
+      "inheritEnvironments": [ "msvc_x86" ],
+      "configurationType": "Debug",
+      "buildRoot": "${env.BuildDir}\\${name}",
+      "intelliSenseMode": "windows-msvc-x86"
+    },
+    {
+      "name": "Release",
+      "generator": "Visual Studio 15 2017",
+      "inheritEnvironments": [ "Debug" ],
+      "buildRoot": "${env.BuildDir}\\${name}",
+      "configurationType": "Release"
+    }
+  ]
+}
