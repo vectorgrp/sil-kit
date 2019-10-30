@@ -24,7 +24,7 @@ public:
 
     // ----------------------------------------
     // Factory method
-    static auto make(const std::string& name) -> Ptr;
+    static auto Create(const std::string& name) -> Ptr;
 };
 
 }

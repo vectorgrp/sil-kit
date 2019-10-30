@@ -1,7 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#pragma once
-
 #include "NamedPipe.hpp"
 
 #include <iostream>
@@ -94,7 +92,7 @@ private:
     bool isValid() const { return _pipeHandle != INVALID_HANDLE_VALUE; }
 };
 
-std::unique_ptr<NamedPipe> NamedPipe::make(const std::string& name)
+std::unique_ptr<NamedPipe> NamedPipe::Create(const std::string& name)
 {
     return std::make_unique<NamedPipeWin>(name);
 }

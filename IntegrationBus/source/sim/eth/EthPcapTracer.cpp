@@ -32,7 +32,7 @@ void EthPcapTracer::SetEndpointAddress(const ib::mw::EndpointAddress& endpointAd
 
     if (endpointAddress.participant == 2)
     {
-        _pipe = NamedPipe::make("wireshark");
+        _pipe = NamedPipe::Create("wireshark");
         _pipe->Write(reinterpret_cast<char*>(&_pcapGlobalHeader), sizeof(_pcapGlobalHeader));
     }
 }
