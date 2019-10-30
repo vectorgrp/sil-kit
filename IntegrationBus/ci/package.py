@@ -149,17 +149,29 @@ def parseArgs():
     if args.debug:
         global DEBUG
         DEBUG=1
+    files =[]
     for cpack in cpackfiles:
+        # check if glob pattern
+        if cpack.count("*") > 0 :
+            tmp = glob.glob(cpack)
+            if len(tmp) == 1:
+                files.append(tmp[0])
+                continue
+            else:
+                die(1, "zip pattern \"{}\" match error: {}", cpack, tmp)
+
         if not os.path.exists(cpack):
             die(1, "zip file does not exist: {}", cpack)
-    if len(cpackfiles) != len(build_types):
+        else:
+            files.append(cpack)
+    if len(files) != len(build_types):
         die(2, "sanity check failed: more cpack files than supported build types"
         "given as argument (expected: {}".format(build_types))
-    if not isCompatibleCpack(cpackfiles[0], cpackfiles[1]):
+    if not isCompatibleCpack(files[0], files[1]):
         die(3, "incompatible cpack files (based on name schema) detected!")
 
 
-    return cpackfiles, args.projectroot, workdir
+    return files, args.projectroot, workdir
 
 def makeDistribution(workdir, projectroot, deploy_dirs, excludes):
     """ create an easy to use package containing support 
@@ -205,7 +217,7 @@ def unpack(workdir, cpackfiles):
                             fout.write(zf.read(mem))
                         count += 1
             log("{}: {} files written.", top, count)
-            assert count != 0
+            #assert count != 0
 
 
 def setupWorkdir(workdir):

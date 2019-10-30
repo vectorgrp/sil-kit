@@ -1,0 +1,53 @@
+FROM ubuntu:18.04
+
+RUN apt-get update &&\
+    apt-get install -y \
+    doxygen \
+    cmake \
+    git \
+    subversion \
+    libc-dev \
+    make \
+    cppcheck \
+    manpages \
+    sysstat \
+    strace \
+    gdb \
+    ninja-build \
+    man \
+    wget \
+    curl  \
+    g++ \
+    build-essential \
+    python3 \
+    openssl \
+    libssl-dev \
+    clang \
+    python3-pip &&\
+    rm -rf /var/lib/apt/lists/*
+
+# Sphinx documentation system
+RUN pip3 install --system sphinx
+
+################################################################################
+# prepare our shell overlay
+# we install all custom packages as if they were installed with the prefix /opt/vector
+RUN mkdir -p /opt/vector
+ENV PATH="/opt/vector/bin:${PATH}"
+
+ARG ARTIFACTORY
+ENV CMAKE_VERSION="3.15.0"
+ENV BOOST_ROOT=/opt/vector
+
+# install download scripts to bin folder
+COPY fetch_cmake.sh /opt/vector/bin/
+COPY fetch_boost.sh /opt/vector/bin/
+
+RUN fetch_cmake.sh
+RUN fetch_boost.sh
+
+################################################################################
+# 3. Step: Setup our build user: jenkins
+################################################################################
+RUN useradd -r -g users -u 500 jenkins
+USER jenkins

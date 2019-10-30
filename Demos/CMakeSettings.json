@@ -40,7 +40,7 @@
     }
   ],
   "environments": [
-    { "BuildDir": "${workspaceRoot}\\_build" },
-    { "InstallDir": "${workspaceRoot}\\_install" }
+    { "BuildDir": "_build" },
+    { "InstallDir": "_install" }
   ]
 }
