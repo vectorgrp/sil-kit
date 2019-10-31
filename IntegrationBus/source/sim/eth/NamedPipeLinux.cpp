@@ -2,12 +2,14 @@
 #include "NamedPipe.hpp"
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include <cstring>
 #include <fstream>
 #include <sstream>
 #include <cerrno>
 #include <exception>
+#include <iostream>
 
 namespace ib {
 namespace sim {
@@ -17,12 +19,13 @@ struct NamedPipeLinux: public NamedPipe
 {
     std::string _name;
     std::fstream _file;
+    bool _isOwner{false};
 
     int _fd = -1;
     NamedPipeLinux(const std::string &name)
     :_name(name)
     {
-        int err = ::mkfifo(name.c_str(), 0644);
+        int err = ::mkfifo(_name.c_str(), 0644);
         if(err == -1)
         {
             std::stringstream ss;
@@ -41,8 +44,23 @@ struct NamedPipeLinux: public NamedPipe
 
             throw std::runtime_error(ss.str());
         }
+        _isOwner=true;
     }
+    ~NamedPipeLinux()
+    {
+        if(_isOwner)
+        {
+            int err = ::unlink(_name.c_str());
+            if(err == -1)
+            {
+                std::cerr  << "Error creating pipe \"" << _name << "\""
+                    << ": errno: " << err
+                    << ": " << strerror(errno)
+                    ;
 
+            }
+        }
+    }
     bool Write(const char *buffer, size_t bufferSize) override
     {
         _file.write(buffer, bufferSize);
