@@ -53,6 +53,7 @@ ParticipantController::ParticipantController(IComAdapter* comAdapter, const cfg:
     , _timesyncConfig{simulationSetup.timeSync}
     , _syncType{participantConfig.syncType}
     , _logger{comAdapter->GetLogger()}
+    , _watchDog{1005ms, 1500ms}
 {
     _watchDog.SetWarnHandler(
         [](std::chrono::milliseconds timeout)
@@ -61,7 +62,7 @@ ParticipantController::ParticipantController(IComAdapter* comAdapter, const cfg:
             std::cout << "    Time out occurred after " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count() << "ms\n";
         }
     );
-    _watchDog.SetKillHandler(
+    _watchDog.SetErrorHandler(
         [](std::chrono::milliseconds timeout)
         {
             std::cout << "OK, we're dead now... :(\n";

@@ -10,10 +10,12 @@ namespace ib {
 namespace mw {
 namespace sync {
 
-WatchDog::WatchDog()
+WatchDog::WatchDog(std::chrono::milliseconds warnTimeout, std::chrono::milliseconds errorTimeout)
+    : _warnTimeout{warnTimeout}
+    , _errorTimeout{errorTimeout}
+    , _warnHandler{[](std::chrono::milliseconds) {}}
+    , _errorHandler{[](std::chrono::milliseconds) {}}
 {
-    _warnHandler = [](std::chrono::milliseconds) {};
-    _killHandler = [](std::chrono::milliseconds) {};
     _watchThread = std::thread{&WatchDog::Run, this};
 }
 
@@ -38,22 +40,18 @@ void WatchDog::SetWarnHandler(std::function<void(std::chrono::milliseconds)> han
     _warnHandler = std::move(handler);
 }
 
-void WatchDog::SetKillHandler(std::function<void(std::chrono::milliseconds)> handler)
+void WatchDog::SetErrorHandler(std::function<void(std::chrono::milliseconds)> handler)
 {
-    _killHandler = std::move(handler);
+    _errorHandler = std::move(handler);
 }
 
 void WatchDog::Run()
 {
-    const auto Resolution = 2ms;
-    const auto warnDuration = 1005ms;
-    const auto killDuration = 1500ms;
-
     enum class WatchDogState
     {
         Healthy,
-        Warned,
-        Killed
+        Warn,
+        Error
     };
     
     WatchDogState state = WatchDogState::Healthy;
@@ -61,7 +59,7 @@ void WatchDog::Run()
     
     while (true)
     {
-        auto futureStatus = stopFuture.wait_for(Resolution);
+        auto futureStatus = stopFuture.wait_for(_resolution);
 
         if (futureStatus == std::future_status::ready)
         {
@@ -71,7 +69,7 @@ void WatchDog::Run()
         
         auto startTime = _startTime.load();
         auto now = std::chrono::steady_clock::now();
-        auto currentRunDuration = now - startTime;
+        auto currentRunDuration = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime);
 
         // We only communicate with the "main thread" via the atomic _startTime.
         // If _startTime is time_point::min(), Start() has not yet been called.
@@ -84,27 +82,27 @@ void WatchDog::Run()
         }
 
 
-        if (currentRunDuration <= warnDuration)
+        if (currentRunDuration <= _warnTimeout)
         {
             state = WatchDogState::Healthy;
             continue;
         }
-        if (currentRunDuration > warnDuration && currentRunDuration <= killDuration)
+        if (currentRunDuration > _warnTimeout && currentRunDuration <= _errorTimeout)
         {
             if (state == WatchDogState::Healthy)
             {
-                _warnHandler(std::chrono::duration_cast<std::chrono::milliseconds>(currentRunDuration));
-                state = WatchDogState::Warned;
+                _warnHandler(currentRunDuration);
+                state = WatchDogState::Warn;
             }
             continue;
         }
 
-        if (currentRunDuration > killDuration)
+        if (currentRunDuration > _errorTimeout)
         {
-            if (state != WatchDogState::Killed)
+            if (state != WatchDogState::Error)
             {
-                _killHandler(std::chrono::duration_cast<std::chrono::milliseconds>(currentRunDuration));
-                state = WatchDogState::Killed;
+                _errorHandler(currentRunDuration);
+                state = WatchDogState::Error;
             }
             continue;
         }

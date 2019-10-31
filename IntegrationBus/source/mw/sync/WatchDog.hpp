@@ -14,7 +14,7 @@ class WatchDog
 public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
-    WatchDog();
+    WatchDog(std::chrono::milliseconds warnTimeout, std::chrono::milliseconds errorTimeout);
     ~WatchDog();
 
 public:
@@ -24,7 +24,7 @@ public:
     void Reset();
 
     void SetWarnHandler(std::function<void(std::chrono::milliseconds)> handler);
-    void SetKillHandler(std::function<void(std::chrono::milliseconds)> handler);
+    void SetErrorHandler(std::function<void(std::chrono::milliseconds)> handler);
 
 private:
     // ----------------------------------------
@@ -35,11 +35,14 @@ private:
     // ----------------------------------------
     // private members
     std::promise<void> _stopPromise;
-
     std::atomic<std::chrono::steady_clock::time_point> _startTime = std::chrono::steady_clock::time_point::min();
 
+    std::chrono::milliseconds _resolution = std::chrono::milliseconds{2};
+    std::chrono::milliseconds _warnTimeout = std::chrono::milliseconds::max();
+    std::chrono::milliseconds _errorTimeout = std::chrono::milliseconds::max();
+
     std::function<void(std::chrono::milliseconds)> _warnHandler;
-    std::function<void(std::chrono::milliseconds)> _killHandler;
+    std::function<void(std::chrono::milliseconds)> _errorHandler;
     
     std::thread _watchThread;
 };
