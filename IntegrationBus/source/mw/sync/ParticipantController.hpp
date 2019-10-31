@@ -12,6 +12,7 @@
 #include "ib/cfg/Config.hpp"
 
 #include "PerformanceMonitor.hpp"
+#include "WatchDog.hpp"
 
 namespace ib {
 namespace mw {
@@ -134,6 +135,7 @@ private:
 
     util::PerformanceMonitor _execTimeMonitor;
     util::PerformanceMonitor _waitTimeMonitor;
+    WatchDog _watchDog;
 };
 
 // ================================================================================

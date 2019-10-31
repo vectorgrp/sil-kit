@@ -9,6 +9,8 @@ add_library("IbMwSync"
     SystemController.cpp
     SystemMonitor.hpp
     SystemMonitor.cpp
+    WatchDog.hpp
+    WatchDog.cpp
 )
 
 target_include_directories("IbMwSync"

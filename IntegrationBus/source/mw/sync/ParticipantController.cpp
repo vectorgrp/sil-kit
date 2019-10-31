@@ -54,6 +54,22 @@ ParticipantController::ParticipantController(IComAdapter* comAdapter, const cfg:
     , _syncType{participantConfig.syncType}
     , _logger{comAdapter->GetLogger()}
 {
+    _watchDog.SetWarnHandler(
+        [](std::chrono::milliseconds timeout)
+        {
+            std::cout << "We are too slow... :-(\n";
+            std::cout << "    Time out occurred after " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count() << "ms\n";
+        }
+    );
+    _watchDog.SetKillHandler(
+        [](std::chrono::milliseconds timeout)
+        {
+            std::cout << "OK, we're dead now... :(\n";
+            std::cout << "    Time out occurred after " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count() << "ms\n";
+        }
+    );
+
+
     _status.participantName = participantConfig.name;
     _currentTask.timePoint = -1ns;
     _currentTask.duration = 0ns;
@@ -706,7 +722,9 @@ void ParticipantController::ExecuteSimTask()
     _logger->Trace("Starting next Simulation Task. Waiting time was: {}ms", std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count());
 
     _execTimeMonitor.StartMeasurement();
+    _watchDog.Start();
     _simTask(_currentTask.timePoint, _currentTask.duration);
+    _watchDog.Reset();
     _execTimeMonitor.StopMeasurement();
 
     _logger->Trace("Finished Simulation Task. Execution time was: {}ms", std::chrono::duration_cast<DoubleMSecs>(_execTimeMonitor.CurrentDuration()).count());
@@ -725,8 +743,8 @@ void ParticipantController::ChangeState(ParticipantState newState, std::string r
 
     SendIbMessage(_status);
 }
-    
-    
+
+
 } // namespace sync
 } // namespace mw
 } // namespace ib
