@@ -21,7 +21,7 @@ slave1Frame.data = {'S', 'L', 'A', 'V', 'E', '1', 0, 0};
 slave1->SetFrameResponse(slave1Frame, FrameResponseMode::TxUnconditional);
 
 // ------------------------------------------------------------
-// Slave 2 Setup (Receiver)
+// Slave 2 Setup (Second Sender)
 ControllerConfig slave2Config;
 slave2Config.controllerMode = ControllerMode::Slave;
 slave2Config.baudRate = 20000;
@@ -40,7 +40,7 @@ slave2Frame.checksumModel = ChecksumModel::Enhanced;
 slave2Frame.dataLength = 8;
 slave2Frame.data = {'S', 'L', 'A', 'V', 'E', '2', 0, 0};
 
-slave1->SetFrameResponse(slave1Frame, FrameResponseMode::TxUnconditional);
+slave2->SetFrameResponse(slave2Frame, FrameResponseMode::TxUnconditional);
 
 // ------------------------------------------------------------
 // Master Setup

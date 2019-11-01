@@ -1,45 +1,25 @@
 // ------------------------------------------------------------
-// Slave 1 Setup (Sender)
+// Slave Setup (Sender)
 ControllerConfig slaveConfig;
 slaveConfig.controllerMode = ControllerMode::Slave;
 slaveConfig.baudRate = 20000;
 
-slave1->Init(slaveConfig);
+slave->Init(slaveConfig);
 
 // Register FrameStatusHandler to receive data
-auto slave1_FrameStatusHandler =
+auto slave_FrameStatusHandler =
     [](ILinController*, const Frame&, FrameStatus, std::chrono::nanoseconds) {};
-slave1->RegisterFrameStatusHandler(slave1_FrameStatusHandler);
+slave->RegisterFrameStatusHandler(slave_FrameStatusHandler);
 
-// Setup a TX Response for LIN ID 0x11
-Frame slave1Frame;
-slave1Frame.id = 0x11;
-slave1Frame.checksumModel = ChecksumModel::Enhanced;
-slave1Frame.dataLength = 8;
-slave1Frame.data = {'S', 'L', 'A', 'V', 'E', '1', 0, 0};
+// Setup a TX Response for LIN ID 0x10
+Frame slaveFrame;
+slaveFrame.id = 0x10;
+slaveFrame.checksumModel = ChecksumModel::Enhanced;
+slaveFrame.dataLength = 8;
+slaveFrame.data = {'S', 'L', 'A', 'V', 'E', 0, 0, 0};
 
-slave1->SetFrameResponse(slave1Frame, FrameResponseMode::TxUnconditional);
+slave->SetFrameResponse(slaveFrame, FrameResponseMode::TxUnconditional);
 
-// ------------------------------------------------------------
-// Slave 2 Setup (Receiver)
-ControllerConfig slave2Config;
-slave2Config.controllerMode = ControllerMode::Slave;
-slave2Config.baudRate = 20000;
-
-slave2->Init(slave2Config);
-
-// Register FrameStatusHandler to receive data
-auto slave2_FrameStatusHandler =
-    [](ILinController*, const Frame&, FrameStatus, std::chrono::nanoseconds) {};
-slave2->RegisterFrameStatusHandler(slave2_FrameStatusHandler);
-
-// Setup LIN ID 0x11 as RX
-Frame slave2Frame;
-slave2Frame.id = 0x11;
-slave2Frame.checksumModel = ChecksumModel::Enhanced;
-slave2Frame.dataLength = 8;
-
-slave1->SetFrameResponse(slave1Frame, FrameResponseMode::Rx);
 
 // ------------------------------------------------------------
 // Master Setup
@@ -55,38 +35,32 @@ auto master_FrameStatusHandler =
 master->RegisterFrameStatusHandler(master_FrameStatusHandler);
 
 // ------------------------------------------------------------
-// Perform TX from slave to slave, i.e., slave1 provides the response, slave2 receives it.
+// Perform TX from master to slave for LIN ID 0x10, i.e., the master also
+// provides a frame response for the same LIN ID.
+Frame masterFrame;
+masterFrame.id = 0x10;
+masterFrame.checksumModel = ChecksumModel::Enhanced;
+masterFrame.dataLength = 8;
+masterFrame.data = {'M', 'A', 'S', 'T', 'E', 'R', 0, 0};
+
 if (UseAutosarInterface)
 {
     // AUTOSAR API
-    Frame frameRequest;
-    frameRequest.id = 0x11;
-    frameRequest.checksumModel = ChecksumModel::Enhanced;
-
-    master->SendFrame(frameRequest, FrameResponseType::SlaveToSlave);
+    master->SendFrame(masterFrame, FrameResponseType::MasterResponse);
 }
 else
 {
     // alternative, non-AUTOSAR API
 
     // 1. setup the master response
-    Frame frameRequest;
-    frameRequest.id = 0x11;
-    frameRequest.checksumModel = ChecksumModel::Enhanced;
-    master->SetFrameResponse(frameRequest, FrameResponseMode::Unused);
-
-    // 2. transmit the frame header, the *slave* response will be transmitted automatically.
-    master->SendFrameHeader(0x11);
+    master->SetFrameResponse(masterFrame, FrameResponseMode::TxUnconditional);
+    // 2. transmit the frame header, the master response will be transmitted automatically.
+    master->SendFrameHeader(0x10);
 
     // Note: SendFrameHeader() can be called again without setting a new FrameResponse
 }
 
-
 // In both cases (AUTOSAR and non-AUTOSAR), the following callbacks will be triggered:
-//  - TX confirmation for the master, who initiated the slave to slave transmission
-master_FrameStatusHandler(master, slave1Frame, FrameStatus::LIN_TX_OK, timeEndOfFrame);
-//  - TX confirmation for slave1, who provided the frame response
-slave1_FrameStatusHandler(master, slave1Frame, FrameStatus::LIN_TX_OK, timeEndOfFrame);
-//  - RX for slave2, who received the frame response
-slave2_FrameStatusHandler(master, slave1Frame, FrameStatus::LIN_RX_OK, timeEndOfFrame);
-
+//  - LIN_TX_ERROR for the master and the slave as both provided a response for the same LIN ID.
+master_FrameStatusHandler(master, masterFrame, FrameStatus::LIN_TX_ERROR, timeEndOfFrame);
+slave_FrameStatusHandler(slave, masterFrame, FrameStatus::LIN_TX_ERROR, timeEndOfFrame);

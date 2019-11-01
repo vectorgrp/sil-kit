@@ -66,4 +66,4 @@ else
 //  - RX for the master, who received the frame response
 master_FrameStatusHandler(master, slaveFrame, FrameStatus::LIN_RX_OK, timeEndOfFrame);
 //  - TX confirmation for the slave, who provided the frame response
-slave_FrameStatusHandler(master, slaveFrame, FrameStatus::LIN_TX_OK, timeEndOfFrame);
+slave_FrameStatusHandler(slave, slaveFrame, FrameStatus::LIN_TX_OK, timeEndOfFrame);

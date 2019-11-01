@@ -39,7 +39,7 @@ slave2Frame.id = 0x11;
 slave2Frame.checksumModel = ChecksumModel::Enhanced;
 slave2Frame.dataLength = 8;
 
-slave1->SetFrameResponse(slave1Frame, FrameResponseMode::Rx);
+slave2->SetFrameResponse(slave2Frame, FrameResponseMode::Rx);
 
 // ------------------------------------------------------------
 // Master Setup
@@ -85,6 +85,6 @@ else
 //  - TX confirmation for the master, who initiated the slave to slave transmission
 master_FrameStatusHandler(master, slave1Frame, FrameStatus::LIN_TX_OK, timeEndOfFrame);
 //  - TX confirmation for slave1, who provided the frame response
-slave1_FrameStatusHandler(master, slave1Frame, FrameStatus::LIN_TX_OK, timeEndOfFrame);
+slave1_FrameStatusHandler(slave1, slave1Frame, FrameStatus::LIN_TX_OK, timeEndOfFrame);
 //  - RX for slave2, who received the frame response
-slave2_FrameStatusHandler(master, slave1Frame, FrameStatus::LIN_RX_OK, timeEndOfFrame);
+slave2_FrameStatusHandler(slave2, slave1Frame, FrameStatus::LIN_RX_OK, timeEndOfFrame);
