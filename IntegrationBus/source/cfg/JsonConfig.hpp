@@ -48,6 +48,8 @@ template <>
 auto from_json(const json11::Json& json) -> GenericPort;
 template <>
 auto from_json<SyncType>(const json11::Json& json) -> SyncType;
+template<>
+auto from_json<ParticipantController>(const json11::Json& json) -> ParticipantController;
 template <>
 auto from_json<Participant>(const json11::Json& json) -> Participant;
 template <>

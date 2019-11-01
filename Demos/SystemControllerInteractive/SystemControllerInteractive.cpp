@@ -105,7 +105,7 @@ public:
             if (participantCfg.name == _myParticipantName)
                 std::cout << "(this process)\t";
 
-            std::cout << "SyncType: " << participantCfg.syncType << std::endl;
+            std::cout << "SyncType: " << participantCfg.participantController.syncType << std::endl;
         }
     }
 

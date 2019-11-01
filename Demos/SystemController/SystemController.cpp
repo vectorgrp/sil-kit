@@ -111,7 +111,7 @@ public:
     {
         for (auto&& participant : ibConfig.simulationSetup.participants)
         {
-            if (participant.syncType == cfg::SyncType::Unsynchronized)
+            if (!participant.participantController._is_configured)
                 continue;
 
             std::cout << "Sending ParticipantCommand::Init to participant \"" << participant.name << "\"" << std::endl;

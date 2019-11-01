@@ -56,7 +56,7 @@ public:
     {
         for (auto&& participant : ibConfig.simulationSetup.participants)
         {
-            if (participant.syncType == cfg::SyncType::Unsynchronized)
+            if (!participant.participantController._is_configured)
                 continue;
 
             _systemController->Initialize(participant.id);

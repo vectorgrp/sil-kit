@@ -22,6 +22,8 @@ void Validate(const Config& config);
 
 void Validate(const SimulationSetup& testConfig, const Config& ibConfig);
 
+void Validate(const Participant& participant, const Config& ibConfig);
+
 void Validate(const TimeSync& testConfig, const Config& ibConfig);
 
 

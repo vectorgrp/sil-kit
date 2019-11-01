@@ -135,7 +135,8 @@ auto ParticipantBuilder::WithParticipantId(mw::ParticipantId id) -> ParticipantB
 
 auto ParticipantBuilder::WithSyncType(SyncType syncType) -> ParticipantBuilder&
 {
-    config.syncType = syncType;
+    config.participantController._is_configured = true;
+    config.participantController.syncType = syncType;
     return *this;
 }
 

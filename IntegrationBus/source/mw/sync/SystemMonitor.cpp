@@ -19,7 +19,7 @@ SystemMonitor::SystemMonitor(IComAdapter* comAdapter, cfg::SimulationSetup simul
 {
     for (auto&& participant : _simulationSetup.participants)
     {
-        if (participant.syncType == cfg::SyncType::Unsynchronized)
+        if (!participant.participantController._is_configured)
             continue;
 
         _participantStatus[participant.id] = sync::ParticipantStatus{};

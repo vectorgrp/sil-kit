@@ -9,7 +9,13 @@
             {
                 "Name": "CanWriter",
                 "Description": "Demo Writer",
-                "SyncType": "DistributedTimeQuantum",
+
+                "ParticipantController": {
+                    "SyncType": "DistributedTimeQuantum",
+
+                    "ExecTimeLimitSoftMs": 1010,
+                    "ExecTimeLimitHardMs": 1500
+                },
                 "Logger": {
                     "FlushLevel": "Warn",
                     "Sinks": [
@@ -24,7 +30,6 @@
             {
                 "Name": "CanReader",
                 "Description": "Demo Reader",
-                "SyncType": "DistributedTimeQuantum",
                 "Logger": {
                     "FlushLevel": "Warn",
                     "Sinks": [
@@ -34,11 +39,13 @@
                         }
                     ]
                 },
+                "ParticipantController": {
+                    "SyncType": "DistributedTimeQuantum"
+                },
                 "CanControllers": [ "CAN1" ]
             },
             {
                 "Name": "SystemController",
-                "SyncType": "Unsynchronized",
                 "IsSyncMaster": true,
                 "Logger": {
                     "FlushLevel": "Warn",
@@ -52,7 +59,6 @@
             {
                 "Name": "SystemMonitor",
                 "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
-                "SyncType": "Unsynchronized",
                 "Logger": {
                     "LogFromRemotes": true,
                     "FlushLevel": "Info",

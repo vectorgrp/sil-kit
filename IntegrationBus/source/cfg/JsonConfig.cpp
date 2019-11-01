@@ -759,6 +759,40 @@ auto from_json<SyncType>(const json11::Json& json) -> SyncType
     throw Misconfiguration{"Invalid Participant SyncType"};
 }
 
+auto to_json(const ParticipantController& controller) -> json11::Json
+{
+    if (!controller._is_configured)
+        throw std::logic_error{"to_json(constParticipantController) must only be called on configured controllers!" };
+
+    json11::Json::object json{
+        {"SyncType", to_json(controller.syncType)}
+    };
+
+    if (controller.execTimeLimitSoft == decltype(controller.execTimeLimitSoft)::max()) 
+        json["ExecTimeLimitSoftMs"] = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(controller.execTimeLimitSoft).count());
+    if (controller.execTimeLimitHard == decltype(controller.execTimeLimitHard)::max())
+        json["ExecTimeLimitHardMs"] = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(controller.execTimeLimitHard).count());
+    return json;
+}
+
+template<>
+auto from_json<ParticipantController>(const json11::Json& json) -> ParticipantController
+{
+    ParticipantController controller;
+    controller._is_configured = !json.is_null();
+    
+    if (controller._is_configured)
+    {
+        optional_from_json(controller.syncType, json, "SyncType");
+        if (!json["ExecTimeLimitSoftMs"].is_null())
+            controller.execTimeLimitSoft = std::chrono::milliseconds{json["ExecTimeLimitSoftMs"].int_value()};
+        if (!json["ExecTimeLimitHardMs"].is_null())
+            controller.execTimeLimitHard = std::chrono::milliseconds{json["ExecTimeLimitHardMs"].int_value()};
+    }
+
+    return controller;
+}
+
 auto to_json(const Participant& participant) -> json11::Json
 {
     auto makePortList =
@@ -798,7 +832,7 @@ auto to_json(const Participant& participant) -> json11::Json
         {"Pattern-Out", makePortList(participant.analogIoPorts, PortDirection::Out)},
         {"GenericPublishers", to_json(participant.genericPublishers)},
         {"GenericSubscribers", subscribers_to_json(participant.genericSubscribers)},
-        {"SyncType", to_json(participant.syncType)},
+        // FIXME: optional ParticipantController
         {"IsSyncMaster", participant.isSyncMaster}
     };
 }
@@ -841,19 +875,61 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
 
     participant.name = json["Name"].string_value();
 
+    // FIXME: do we really need the optional here?
     optional_from_json(participant.logger, json, "Logger");
+
+    participant.participantController = from_json<ParticipantController>(json["ParticipantController"]);
+
+    // Participant.SyncType is deprecated. Report to user.
+    if (!json["SyncType"].is_null())
+    {
+        std::string syncTypeString = json["SyncType"].string_value();
+
+        // Participant.SyncType is deprecated.
+        //  - We treat this as an error, when already using a ParticipantController configuration
+        if (participant.participantController._is_configured)
+        {
+            std::cerr << "ERROR: SyncType must no longer be specified directly on the Participant.\n";
+        }
+        // - Otherwise, we treat it as a deprecation warning.
+        else
+        {
+            std::cerr << "WARNING: specifying the SyncType directly on the Participant is deprecated.\n";
+        }
+        std::cerr
+            << "  SyncType has been moved to the ParticipantController configuration.\n"
+            << "  In your IbConfig.json, replace:\n"
+            << "    \"SyncType\": \"" << syncTypeString << "\"\n"
+            << "  with:\n"
+            << "    \"ParticipantController\" : {\n"
+            << "        \"SyncType\": \"" << syncTypeString << "\"\n"
+            << "    }\n";
+        if (participant.participantController._is_configured)
+        {
+            throw Misconfiguration{"SyncType configuration moved to ParticipantController"};
+        }
+        else
+        {
+            participant.participantController._is_configured = true;
+            participant.participantController.syncType = from_json<SyncType>(json["SyncType"]);
+        }
+    }
+    participant.isSyncMaster = json["IsSyncMaster"].bool_value();
+
+    // Configure Vehicle Network Controllers
     participant.canControllers = from_json<std::vector<CanController>>(json["CanControllers"].array_items());
     participant.linControllers = from_json<std::vector<LinController>>(json["LinControllers"].array_items());
     participant.ethernetControllers = from_json<std::vector<EthernetController>>(json["EthernetControllers"].array_items());
     participant.flexrayControllers = from_json<std::vector<FlexrayController>>(json["FlexRayControllers"].array_items());
     participant.networkSimulators = from_json<std::vector<std::string>>(json["NetworkSimulators"].array_items());
 
-    // assign Output Ports
+    // Configure Output Ports
     participant.digitalIoPorts = from_json<std::vector<DigitalIoPort>>(json["Digital-Out"].array_items());
     participant.analogIoPorts = from_json<std::vector<AnalogIoPort>>(json["Analog-Out"].array_items());
     participant.pwmPorts = from_json<std::vector<PwmPort>>(json["Pwm-Out"].array_items());
     participant.patternPorts = from_json<std::vector<PatternPort>>(json["Pattern-Out"].array_items());
 
+    // Configure Input Ports
     inports_from_json(participant.digitalIoPorts, "Digital-In");
     inports_from_json(participant.analogIoPorts, "Analog-In");
     inports_from_json(participant.pwmPorts, "Pwm-In");
@@ -861,10 +937,6 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
 
     participant.genericPublishers = from_json<std::vector<GenericPort>>(json["GenericPublishers"].array_items());
     participant.genericSubscribers = subscribers_from_json(json["GenericSubscribers"].array_items());
-
-    optional_from_json(participant.syncType, json, "SyncType");
-
-    participant.isSyncMaster = json["IsSyncMaster"].bool_value();
 
     return participant;
 }

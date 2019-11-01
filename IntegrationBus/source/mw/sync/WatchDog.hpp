@@ -35,7 +35,7 @@ private:
     // ----------------------------------------
     // private members
     std::promise<void> _stopPromise;
-    std::atomic<std::chrono::steady_clock::time_point> _startTime = std::chrono::steady_clock::time_point::min();
+    std::atomic<std::chrono::steady_clock::time_point> _startTime{std::chrono::steady_clock::time_point::min()};
 
     std::chrono::milliseconds _resolution = std::chrono::milliseconds{2};
     std::chrono::milliseconds _warnTimeout = std::chrono::milliseconds::max();

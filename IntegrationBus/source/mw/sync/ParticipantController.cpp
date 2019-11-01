@@ -51,22 +51,26 @@ struct DiscreteTimePassiveAdapter : ParticipantController::ISyncAdapter
 ParticipantController::ParticipantController(IComAdapter* comAdapter, const cfg::SimulationSetup& simulationSetup, const cfg::Participant& participantConfig)
     : _comAdapter{comAdapter}
     , _timesyncConfig{simulationSetup.timeSync}
-    , _syncType{participantConfig.syncType}
+    , _syncType{participantConfig.participantController.syncType}
     , _logger{comAdapter->GetLogger()}
-    , _watchDog{1005ms, 1500ms}
+    , _watchDog{participantConfig.participantController.execTimeLimitSoft, participantConfig.participantController.execTimeLimitHard}
 {
     _watchDog.SetWarnHandler(
-        [](std::chrono::milliseconds timeout)
+        [logger = _logger](std::chrono::milliseconds timeout)
         {
-            std::cout << "We are too slow... :-(\n";
-            std::cout << "    Time out occurred after " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count() << "ms\n";
+            logger->Warn("SimTask did not finish within soft limit. Timeout detected after {} ms",
+                std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count());
         }
     );
     _watchDog.SetErrorHandler(
-        [](std::chrono::milliseconds timeout)
+        [this](std::chrono::milliseconds timeout)
         {
-            std::cout << "OK, we're dead now... :(\n";
-            std::cout << "    Time out occurred after " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count() << "ms\n";
+            std::stringstream buffer;
+            buffer
+                << "SimTask did not finish within hard limit. Timeout detected after "
+                << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count()
+                << "ms";
+            this->ReportError(buffer.str());
         }
     );
 
@@ -82,7 +86,7 @@ ParticipantController::ParticipantController(IComAdapter* comAdapter, const cfg:
         if (participant.name == participantConfig.name)
             continue;
 
-        if (participant.syncType == cfg::SyncType::DistributedTimeQuantum)
+        if (participant.participantController.syncType == cfg::SyncType::DistributedTimeQuantum)
         {
             NextSimTask task;
             task.timePoint = -1ns;

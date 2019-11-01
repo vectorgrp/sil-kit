@@ -191,16 +191,33 @@ enum class SyncType
     Unsynchronized           //!< The participant does not participate in time synchronization and is not publish a participant state.
 };
 
+struct ParticipantController
+{
+    // ParticipantControllers are optional configuration items of a Participant
+    // configuration. In C++17, this would be modeled with a
+    // std::optional<ParticipantController>
+    // participantController. Unfortunately, we are currently limited to
+    // C++14. To keep things simple, we added a boolean member _is_configured to
+    // ParticipantController, which is intended to mimic std::optional's
+    // has_value(). I.e., if _is_configured == true, a ParticipantController was
+    // configured.
+    bool _is_configured = false;
+
+    SyncType syncType = SyncType::Unsynchronized;
+
+    std::chrono::milliseconds execTimeLimitSoft = std::chrono::milliseconds::max();
+    std::chrono::milliseconds execTimeLimitHard = std::chrono::milliseconds::max();
+};
+
 struct Participant
 {
     std::string name;
     std::string description;
 
-    SyncType syncType{SyncType::Unsynchronized};
-
     mw::ParticipantId id{0};
 
     Logger logger;
+    ParticipantController participantController; //!< "optional" member.
     std::vector<CanController> canControllers;
     std::vector<LinController> linControllers;
     std::vector<EthernetController> ethernetControllers;
