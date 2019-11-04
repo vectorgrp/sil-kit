@@ -154,7 +154,7 @@ def doBuild(buildName, buildAgent, buildTool) {
     return runOnNode(buildName, buildAgent, {
         def scmEnv = []
         stage("${buildName}: scm checkout") {
-            scmVars = shallowCheckoutGit()
+            scmVars = checkoutGit()
             scmEnv.add("GIT_BRANCH=${scmVars.GIT_BRANCH}")
             scmEnv.add("GIT_COMMIT=${scmVars.GIT_COMMIT}")
             scmEnv.add("GIT_URL=${scmVars.GIT_URL}")
