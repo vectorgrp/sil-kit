@@ -1,5 +1,6 @@
 # ignore cmake-generated path directories
 build*/
+_build*/
 install*/
 .vscode
 

@@ -384,6 +384,7 @@ class Misconfiguration : public std::runtime_error
 
 IntegrationBusAPI bool operator==(const Version& lhs, const Version& rhs);
 IntegrationBusAPI bool operator==(const Participant& lhs, const Participant& rhs);
+IntegrationBusAPI bool operator==(const ParticipantController& lhs, const ParticipantController& rhs);
 IntegrationBusAPI bool operator==(const Link& lhs, const Link& rhs);
 IntegrationBusAPI bool operator==(const NetworkSimulator& lhs, const NetworkSimulator& rhs);
 IntegrationBusAPI bool operator==(const Switch::Port& lhs, const Switch::Port& rhs);
@@ -393,6 +394,9 @@ IntegrationBusAPI bool operator==(const SimulationSetup& lhs, const SimulationSe
 IntegrationBusAPI bool operator==(const FastRtps::Config& lhs, const FastRtps::Config& rhs);
 IntegrationBusAPI bool operator==(const MiddlewareConfig& lhs, const MiddlewareConfig& rhs);
 IntegrationBusAPI bool operator==(const Config& lhs, const Config& rhs);
+IntegrationBusAPI bool operator==(const Sink& lhs, const Sink& rhs);
+IntegrationBusAPI bool operator==(const Logger& lhs, const Logger& rhs);
+IntegrationBusAPI bool operator==(const ParticipantController& lhs, const ParticipantController& rhs);
 IntegrationBusAPI bool operator==(const CanController& lhs, const CanController& rhs);
 IntegrationBusAPI bool operator==(const LinController& lhs, const LinController& rhs);
 IntegrationBusAPI bool operator==(const EthernetController& lhs, const EthernetController& rhs);

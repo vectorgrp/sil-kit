@@ -11,6 +11,7 @@
 #include "NetworkSimulatorBuilder.hpp"
 #include "ParentBuilder.hpp"
 #include "ParticipantBuilder.hpp"
+#include "ParticipantControllerBuilder.hpp"
 #include "SwitchBuilder.hpp"
 #include "SwitchPortBuilder.hpp"
 #include "TimeSyncBuilder.hpp"

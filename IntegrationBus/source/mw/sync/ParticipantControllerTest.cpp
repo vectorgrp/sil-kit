@@ -60,8 +60,8 @@ protected:
         auto&& sim = builder.SimulationSetup();
 
         sim.ConfigureTimeSync().WithTickPeriod(1ms);
-        sim.AddParticipant("SUT").WithSyncType(syncType);
-        sim.AddParticipant("P2").WithSyncType(syncType);
+        sim.AddParticipant("SUT").AddParticipantController().WithSyncType(syncType);
+        sim.AddParticipant("P2").AddParticipantController().WithSyncType(syncType);
 
         auto config = builder.Build();
         simulationSetup = std::move(config.simulationSetup);

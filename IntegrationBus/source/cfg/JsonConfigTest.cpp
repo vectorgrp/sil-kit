@@ -574,4 +574,50 @@ TEST_F(JsonConfigTest, configure_participant_as_syncmaster)
     EXPECT_TRUE(participants[0].isSyncMaster);
 }
 
+TEST_F(JsonConfigTest, configure_participant_controller)
+{
+    simulationSetup.AddParticipant("P1").AddParticipantController()
+        .WithSyncType(SyncType::DiscreteTime)
+        .WithExecTimeLimitSoft(10ms)
+        .WithExecTimeLimitHard(20ms);
+
+    BuildConfigFromJson();
+    EXPECT_EQ(config, referenceConfig);
+
+    auto&& controller = config.simulationSetup.participants[0].participantController;
+    EXPECT_EQ(controller._is_configured, true);
+    EXPECT_EQ(controller.syncType, SyncType::DiscreteTime);
+    EXPECT_EQ(controller.execTimeLimitSoft, 10ms);
+    EXPECT_EQ(controller.execTimeLimitHard, 20ms);
+}
+
+TEST_F(JsonConfigTest, configure_participant_controller_without_exec_time_limits)
+{
+    simulationSetup.AddParticipant("P1").AddParticipantController()
+        .WithSyncType(SyncType::DiscreteTime);
+
+    BuildConfigFromJson();
+    EXPECT_EQ(config, referenceConfig);
+
+    auto&& controller = config.simulationSetup.participants[0].participantController;
+    EXPECT_EQ(controller._is_configured, true);
+    EXPECT_EQ(controller.syncType, SyncType::DiscreteTime);
+    EXPECT_EQ(controller.execTimeLimitSoft, std::chrono::milliseconds::max());
+    EXPECT_EQ(controller.execTimeLimitHard, std::chrono::milliseconds::max());
+}
+
+TEST_F(JsonConfigTest, configure_participant_without_participant_controller)
+{
+    simulationSetup.AddParticipant("P1");
+
+    BuildConfigFromJson();
+    EXPECT_EQ(config, referenceConfig);
+
+    auto&& controller = config.simulationSetup.participants[0].participantController;
+    EXPECT_EQ(controller._is_configured, false);
+}
+
+
+
+
 } // anonymous namespace

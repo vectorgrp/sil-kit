@@ -23,6 +23,8 @@ add_library(IbConfig STATIC
     LinkBuilder.cpp
     NetworkSimulatorBuilder.cpp
     ParticipantBuilder.cpp
+    ParticipantControllerBuilder.cpp
+    ParticipantControllerBuilder.hpp
     SimulationSetupBuilder.cpp
     SwitchBuilder.cpp
     SwitchPortBuilder.cpp

@@ -297,6 +297,8 @@ bool operator==(const Participant& lhs, const Participant& rhs)
 {
     return lhs.name == rhs.name
         && lhs.id == rhs.id
+        && lhs.logger == rhs.logger
+        && lhs.participantController == rhs.participantController
         && lhs.canControllers == rhs.canControllers
         && lhs.linControllers == rhs.linControllers
         && lhs.ethernetControllers == rhs.ethernetControllers
@@ -307,7 +309,8 @@ bool operator==(const Participant& lhs, const Participant& rhs)
         && lhs.pwmPorts == rhs.pwmPorts
         && lhs.patternPorts == rhs.patternPorts
         && lhs.genericPublishers == rhs.genericPublishers
-        && lhs.genericSubscribers == rhs.genericSubscribers;
+        && lhs.genericSubscribers == rhs.genericSubscribers
+        && lhs.isSyncMaster == rhs.isSyncMaster;
 }
 
 bool operator==(const Link& lhs, const Link& rhs)
@@ -373,6 +376,28 @@ bool operator==(const Config& lhs, const Config& rhs)
         && lhs.name == rhs.name
         && lhs.simulationSetup == rhs.simulationSetup
         && lhs.middlewareConfig == rhs.middlewareConfig;
+}
+
+bool operator==(const Sink& lhs, const Sink& rhs)
+{
+    return lhs.type == rhs.type
+        && lhs.level == rhs.level
+        && lhs.logname == rhs.logname;
+}
+
+bool operator==(const Logger& lhs, const Logger& rhs)
+{
+    return lhs.logFromRemotes == rhs.logFromRemotes
+        && lhs.flush_level == rhs.flush_level
+        && lhs.sinks == rhs.sinks;
+}
+
+bool operator==(const ParticipantController& lhs, const ParticipantController& rhs)
+{
+    return lhs._is_configured == rhs._is_configured
+        && lhs.syncType == rhs.syncType
+        && lhs.execTimeLimitSoft == rhs.execTimeLimitSoft
+        && lhs.execTimeLimitHard == rhs.execTimeLimitHard;
 }
 
 bool operator==(const CanController& lhs, const CanController& rhs)

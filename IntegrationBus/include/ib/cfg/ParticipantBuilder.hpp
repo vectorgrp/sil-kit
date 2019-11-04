@@ -15,6 +15,7 @@
 #include "IoPortBuilder.hpp"
 #include "GenericPortBuilder.hpp"
 #include "LoggerBuilder.hpp"
+#include "ParticipantControllerBuilder.hpp"
 
 namespace ib {
 namespace cfg {
@@ -25,6 +26,7 @@ public:
     IntegrationBusAPI ParticipantBuilder(SimulationSetupBuilder* ibConfig, std::string name, mw::ParticipantId id);
 
     IntegrationBusAPI auto ConfigureLogger() -> LoggerBuilder&;
+    IntegrationBusAPI auto AddParticipantController() -> ParticipantControllerBuilder&;
     IntegrationBusAPI auto AddCan(std::string name) -> ControllerBuilder<CanController>&;
     IntegrationBusAPI auto AddLin(std::string name) -> ControllerBuilder<LinController>&;
     IntegrationBusAPI auto AddEthernet(std::string name) -> ControllerBuilder<EthernetController>&;
@@ -76,6 +78,7 @@ private:
     Participant config;
 
     std::unique_ptr<LoggerBuilder> _logger;
+    std::unique_ptr<ParticipantControllerBuilder> _participantController;
 
     std::tuple<
         std::vector<ControllerBuilder<CanController>>,

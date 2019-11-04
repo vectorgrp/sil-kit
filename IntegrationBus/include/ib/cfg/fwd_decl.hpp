@@ -21,6 +21,7 @@ class Misconfiguration;
 
 class LoggerBuilder;
 class ParticipantBuilder;
+class ParticipantControllerBuilder;
 template<class ControllerCfg>
 class ControllerBuilder;
 class ConfigBuilder;

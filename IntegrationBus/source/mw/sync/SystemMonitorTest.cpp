@@ -66,9 +66,9 @@ protected:
     {
         cfg::ConfigBuilder builder{"TestConfig"};
         auto&& simulationSetup = builder.SimulationSetup();
-        simulationSetup.AddParticipant("P0").WithParticipantId(0).WithSyncType(cfg::SyncType::TimeQuantum);
-        simulationSetup.AddParticipant("P1").WithParticipantId(1).WithSyncType(cfg::SyncType::TimeQuantum);
-        simulationSetup.AddParticipant("P2").WithParticipantId(2).WithSyncType(cfg::SyncType::TimeQuantum);
+        simulationSetup.AddParticipant("P0").WithParticipantId(0).AddParticipantController().WithSyncType(cfg::SyncType::TimeQuantum);
+        simulationSetup.AddParticipant("P1").WithParticipantId(1).AddParticipantController().WithSyncType(cfg::SyncType::TimeQuantum);
+        simulationSetup.AddParticipant("P2").WithParticipantId(2).AddParticipantController().WithSyncType(cfg::SyncType::TimeQuantum);
         return builder.Build();
     }
 

@@ -3,9 +3,11 @@
 #include "ParticipantBuilder.hpp"
 
 #include <sstream>
+#include <thread>
 
 #include "ib/cfg/SimulationSetupBuilder.hpp"
 
+using namespace std::chrono_literals;
 
 namespace ib {
 namespace cfg {
@@ -20,7 +22,16 @@ ParticipantBuilder::ParticipantBuilder(SimulationSetupBuilder* ibConfig, std::st
 auto ParticipantBuilder::Build() -> Participant
 {
     if (_logger)
+    {
         config.logger = _logger->Build();
+        _logger.reset();
+    }
+
+    if (_participantController)
+    {
+        config.participantController = _participantController->Build();
+        _participantController.reset();
+    }
 
     BuildControllers(config.canControllers);
     BuildControllers(config.linControllers);
@@ -51,6 +62,11 @@ auto ParticipantBuilder::ConfigureLogger() -> LoggerBuilder&
 {
     _logger = std::make_unique<LoggerBuilder>(this);
     return *_logger;
+}
+auto ParticipantBuilder::AddParticipantController() -> ParticipantControllerBuilder&
+{
+    _participantController = std::make_unique<ParticipantControllerBuilder>(this);
+    return *_participantController;
 }
 auto ParticipantBuilder::AddCan(std::string name) -> ControllerBuilder<CanController>&
 {
@@ -135,6 +151,13 @@ auto ParticipantBuilder::WithParticipantId(mw::ParticipantId id) -> ParticipantB
 
 auto ParticipantBuilder::WithSyncType(SyncType syncType) -> ParticipantBuilder&
 {
+    std::cerr << R"deprecation(WARNING: ParticipantBuilder::WithSyncType(SyncType) is deprecated
+    INFO: SyncType configuration is now part of the ParticipantController configuration.
+    INFO: Replace participantBuilder.WithSyncType(syncType);
+    INFO: with    participantBuilder.AddParticipantController().WithSyncType(syncType);
+)deprecation";
+    std::this_thread::sleep_for(3s);
+    
     config.participantController._is_configured = true;
     config.participantController.syncType = syncType;
     return *this;

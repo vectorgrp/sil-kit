@@ -77,10 +77,10 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
 
     builder.SimulationSetup()
         .AddParticipant("TestUnit")
-            .WithSyncType(ib::cfg::SyncType::DiscreteTime);
+            .AddParticipantController()
+                .WithSyncType(ib::cfg::SyncType::DiscreteTime);
     builder.SimulationSetup()
         .AddParticipant("TestController")
-            .WithSyncType(ib::cfg::SyncType::Unsynchronized)
             .AsSyncMaster();
 
     auto ibConfig = builder.Build();

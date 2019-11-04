@@ -100,9 +100,9 @@ TEST_F(SyncMasterTest, discrete_time_only)
     simulationSetup
         .AddParticipant("master").AsSyncMaster();
     simulationSetup
-        .AddParticipant("client-0").WithSyncType(cfg::SyncType::DiscreteTime);
+        .AddParticipant("client-0").AddParticipantController().WithSyncType(cfg::SyncType::DiscreteTime);
     simulationSetup
-        .AddParticipant("client-1").WithSyncType(cfg::SyncType::DiscreteTime);
+        .AddParticipant("client-1").AddParticipantController().WithSyncType(cfg::SyncType::DiscreteTime);
     auto ibConfig = testConfig.Build();
 
     SyncMaster syncMaster{&comAdapter, ibConfig, &mockMonitor};
@@ -131,7 +131,7 @@ TEST_F(SyncMasterTest, start_running_after_systemstateInvalid)
     simulationSetup
         .AddParticipant("master").AsSyncMaster();
     simulationSetup
-        .AddParticipant("client-0").WithSyncType(cfg::SyncType::DiscreteTime);
+        .AddParticipant("client-0").AddParticipantController().WithSyncType(cfg::SyncType::DiscreteTime);
     auto ibConfig = testConfig.Build();
 
     SyncMaster syncMaster{&comAdapter, ibConfig, &mockMonitor};
@@ -154,9 +154,9 @@ TEST_F(SyncMasterTest, dont_generate_ticks_while_paused)
     simulationSetup
         .AddParticipant("master").AsSyncMaster();
     simulationSetup
-        .AddParticipant("client-0").WithSyncType(cfg::SyncType::DiscreteTime);
+        .AddParticipant("client-0").AddParticipantController().WithSyncType(cfg::SyncType::DiscreteTime);
     simulationSetup
-        .AddParticipant("client-1").WithSyncType(cfg::SyncType::DiscreteTime);
+        .AddParticipant("client-1").AddParticipantController().WithSyncType(cfg::SyncType::DiscreteTime);
     auto ibConfig = testConfig.Build();
 
     SyncMaster syncMaster{&comAdapter, ibConfig, &mockMonitor};
@@ -190,9 +190,9 @@ TEST_F(SyncMasterTest, continue_tick_generation_after_pause)
     simulationSetup
         .AddParticipant("master").AsSyncMaster();
     simulationSetup
-        .AddParticipant("client-0").WithSyncType(cfg::SyncType::DiscreteTime);
+        .AddParticipant("client-0").AddParticipantController().WithSyncType(cfg::SyncType::DiscreteTime);
     simulationSetup
-        .AddParticipant("client-1").WithSyncType(cfg::SyncType::DiscreteTime);
+        .AddParticipant("client-1").AddParticipantController().WithSyncType(cfg::SyncType::DiscreteTime);
     auto ibConfig = testConfig.Build();
 
     SyncMaster syncMaster{&comAdapter, ibConfig, &mockMonitor};
@@ -227,7 +227,7 @@ TEST_F(SyncMasterTest, single_quantum_client)
     simulationSetup
         .AddParticipant("master").AsSyncMaster();
     simulationSetup
-        .AddParticipant("client-0").WithSyncType(cfg::SyncType::TimeQuantum);
+        .AddParticipant("client-0").AddParticipantController().WithSyncType(cfg::SyncType::TimeQuantum);
     auto ibConfig = testConfig.Build();
 
     // Create the SyncMaster
@@ -270,9 +270,9 @@ TEST_F(SyncMasterTest, two_quantum_clients)
     simulationSetup
         .AddParticipant("master").AsSyncMaster();
     simulationSetup
-        .AddParticipant("client-0").WithSyncType(cfg::SyncType::TimeQuantum);
+        .AddParticipant("client-0").AddParticipantController().WithSyncType(cfg::SyncType::TimeQuantum);
     simulationSetup
-        .AddParticipant("client-1").WithSyncType(cfg::SyncType::TimeQuantum);
+        .AddParticipant("client-1").AddParticipantController().WithSyncType(cfg::SyncType::TimeQuantum);
     auto ibConfig = testConfig.Build();
 
     // Create the SyncMaster
@@ -330,9 +330,9 @@ TEST_F(SyncMasterTest, two_quantum_clients_different_periods)
     simulationSetup
         .AddParticipant("master").AsSyncMaster();
     simulationSetup
-        .AddParticipant("client-0").WithSyncType(cfg::SyncType::TimeQuantum);
+        .AddParticipant("client-0").AddParticipantController().WithSyncType(cfg::SyncType::TimeQuantum);
     simulationSetup
-        .AddParticipant("client-1").WithSyncType(cfg::SyncType::TimeQuantum);
+        .AddParticipant("client-1").AddParticipantController().WithSyncType(cfg::SyncType::TimeQuantum);
     auto ibConfig = testConfig.Build();
 
     // Create the SyncMaster
@@ -397,9 +397,9 @@ TEST_F(SyncMasterTest, mixed_clients)
     simulationSetup
         .AddParticipant("master").AsSyncMaster();
     simulationSetup
-        .AddParticipant("client-0").WithSyncType(cfg::SyncType::TimeQuantum);
+        .AddParticipant("client-0").AddParticipantController().WithSyncType(cfg::SyncType::TimeQuantum);
     simulationSetup
-        .AddParticipant("client-1").WithSyncType(cfg::SyncType::DiscreteTime);
+        .AddParticipant("client-1").AddParticipantController().WithSyncType(cfg::SyncType::DiscreteTime);
     auto ibConfig = testConfig.Build();
     ibConfig.simulationSetup.timeSync.tickPeriod = 1ms;
 
@@ -461,7 +461,7 @@ TEST_F(SyncMasterTest, dont_grant_quantum_requests_while_paused)
     simulationSetup
         .AddParticipant("master").AsSyncMaster();
     simulationSetup
-        .AddParticipant("client-0").WithSyncType(cfg::SyncType::TimeQuantum);
+        .AddParticipant("client-0").AddParticipantController().WithSyncType(cfg::SyncType::TimeQuantum);
     auto ibConfig = testConfig.Build();
 
     // Create the SyncMaster
@@ -496,7 +496,7 @@ TEST_F(SyncMasterTest, give_grants_after_pause_ends)
     simulationSetup
         .AddParticipant("master").AsSyncMaster();
     simulationSetup
-        .AddParticipant("client-0").WithSyncType(cfg::SyncType::TimeQuantum);
+        .AddParticipant("client-0").AddParticipantController().WithSyncType(cfg::SyncType::TimeQuantum);
     auto ibConfig = testConfig.Build();
 
     // Create the SyncMaster
@@ -532,7 +532,7 @@ TEST_F(SyncMasterTest, no_grants_for_empty_client_list)
     simulationSetup
         .AddParticipant("master").AsSyncMaster();
     simulationSetup
-        .AddParticipant("client-0").WithSyncType(cfg::SyncType::Unsynchronized);
+        .AddParticipant("client-0");
     auto ibConfig = testConfig.Build();
 
     SyncMaster syncMaster{ &comAdapter, ibConfig, &mockMonitor };

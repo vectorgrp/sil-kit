@@ -2,11 +2,14 @@
 
 #include <algorithm>
 #include <sstream>
+#include <thread>
 #include <unordered_map>
 #include <unordered_set>
 
 #include "ib/cfg/string_utils.hpp"
 #include "ib/exception.hpp"
+
+using namespace std::chrono_literals;
 
 namespace ib {
 namespace cfg {
@@ -768,9 +771,9 @@ auto to_json(const ParticipantController& controller) -> json11::Json
         {"SyncType", to_json(controller.syncType)}
     };
 
-    if (controller.execTimeLimitSoft == decltype(controller.execTimeLimitSoft)::max()) 
+    if (controller.execTimeLimitSoft != decltype(controller.execTimeLimitSoft)::max()) 
         json["ExecTimeLimitSoftMs"] = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(controller.execTimeLimitSoft).count());
-    if (controller.execTimeLimitHard == decltype(controller.execTimeLimitHard)::max())
+    if (controller.execTimeLimitHard != decltype(controller.execTimeLimitHard)::max())
         json["ExecTimeLimitHardMs"] = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(controller.execTimeLimitHard).count());
     return json;
 }
@@ -814,7 +817,7 @@ auto to_json(const Participant& participant) -> json11::Json
             return result;
         };
 
-    return json11::Json::object{
+    json11::Json::object json{
         {"Name", participant.name},
         {"Logger", to_json(participant.logger)},
         {"CanControllers", to_json(participant.canControllers)},
@@ -835,6 +838,11 @@ auto to_json(const Participant& participant) -> json11::Json
         // FIXME: optional ParticipantController
         {"IsSyncMaster", participant.isSyncMaster}
     };
+    if (participant.participantController._is_configured)
+    {
+        json["ParticipantController"] = to_json(participant.participantController);
+    }
+    return json;
 }
 
 template <>
@@ -904,6 +912,7 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
             << "    \"ParticipantController\" : {\n"
             << "        \"SyncType\": \"" << syncTypeString << "\"\n"
             << "    }\n";
+        std::this_thread::sleep_for(3s);
         if (participant.participantController._is_configured)
         {
             throw Misconfiguration{"SyncType configuration moved to ParticipantController"};
