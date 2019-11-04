@@ -9,12 +9,28 @@ The format is based on [Keep a Changelog] (http://keepachangelog.com/en/1.0.0/).
 --------------------------------
 Added
 ~~~~~
+- New watchdog functionality for SimTasks with soft and hard limits. Whenever a
+  SimTask runs longer than the soft limit, a warning is logged. If it runs
+  longer than the hard limit, the participant switches to the error state.
+- New config section for ParticipantControllers. Here, you can specify the execution time limits for SimTasks and specify the SyncType. E.g.,
+  
+    .. code-block:: javascript
+                    
+       "ParticipantController": {
+           "SyncType": "DiscreteTime",
+           "ExecTimeLimitSoftMs": 1010,
+           "ExecTimeLimitHardMs": 1500
+       }
+   
+- New ParticipantControllerBuilder. When using the builder pattern to generate
+  an Ib Config, the ParticipantController can be configured via
+  ParticipantBuilder::AddParticipantController().
 
 Changed
 ~~~~~~~
 - Transitions from the shutdown state to the error state are no longer allowed.
-  With the last added connection loss mechanism, participants could also enter
-  the error state after a normal shutdown, which is now prevented.
+  With the recently added connection loss detection, participants could also
+  enter the error state after a normal shutdown, which is now prevented.
 
 Fixed
 ~~~~~
@@ -26,6 +42,47 @@ Fixed
 
 Removed
 ~~~~~~~
+
+Deprecated
+~~~~~~~~~~~~~~
+- The Participant config setting SyncType has been deprecated. The SyncType is
+  now configured in the ParticipantController section.
+
+  + old:
+    
+    .. code-block:: javascript
+                    
+       "SyncType": "DiscreteTime"
+
+  + new:
+  
+    .. code-block:: javascript
+                    
+       "ParticipantController": {
+           "SyncType": "DiscreteTime"
+       }
+
+- The SyncType::Unsynchronized is no longer used. Only participants with a
+  ParticipantController configuration are synchronized. I.e., you can simple
+  remove the "SyncType": "Unsynchronized" from SystemMonitors.
+   
+- The ParticipantBuilder::WithSyncType() has been deprecated. Use
+  ParticipantConfigBuilder::WithSyncType() instead.
+
+  + old:
+    
+    .. code-block:: c++
+                    
+      simulationSetup.AddParticipant("P1")
+          .WithSyncType(SyncType::DiscreteTime);
+    
+  + new:
+    
+    .. code-block:: c++
+                    
+      simulationSetup.AddParticipant("P1")
+          .AddParticipantController().WithSyncType(SyncType::DiscreteTime);
+
 
 
 Compatibility with Sprint-33
