@@ -213,7 +213,7 @@ TEST_F(JsonConfigTest, CreateEthernetNetworkWithSwitch)
     simulationSetup.AddParticipant("P1")
         ->AddEthernet("ETH1").WithLink("Port0");
     simulationSetup.AddParticipant("P2")
-        ->AddEthernet("ETH1").WithLink("Port1");
+        ->AddEthernet("ETH1").WithLink("Port1").WithPcapFile("File").WithPcapPipe("Pipe");
     simulationSetup.AddSwitch("FrontSwitch")
         ->AddPort("Port0").WithVlanIds({1})
         ->AddPort("Port1").WithVlanIds({2});
@@ -248,10 +248,14 @@ TEST_F(JsonConfigTest, CreateEthernetNetworkWithSwitch)
     ASSERT_EQ(p1.ethernetControllers.size(), 1u);
     EXPECT_EQ(p1.ethernetControllers[0].name, "ETH1");
     EXPECT_EQ(p1.ethernetControllers[0].linkId, linkA.id);
+    EXPECT_EQ(p1.ethernetControllers[0].pcapFile, "");
+    EXPECT_EQ(p1.ethernetControllers[0].pcapPipe, "");
 
     ASSERT_EQ(p2.ethernetControllers.size(), 1u);
     EXPECT_EQ(p2.ethernetControllers[0].name, "ETH1");
     EXPECT_EQ(p2.ethernetControllers[0].linkId, linkB.id);
+    EXPECT_EQ(p2.ethernetControllers[0].pcapFile, "File");
+    EXPECT_EQ(p2.ethernetControllers[0].pcapPipe,"Pipe");
 
     
     ASSERT_EQ(ethSwitch.ports.size(), 2u);

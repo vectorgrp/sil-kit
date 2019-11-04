@@ -4,14 +4,18 @@
 
 #include <string>
 #include <ctime>
-#include <iostream>
 
 namespace ib {
 namespace sim {
 namespace eth {
 
-EthPcapTracer::EthPcapTracer()
+EthPcapTracer::EthPcapTracer(const std::string& pcapFile, const std::string& pcapPipe)
 {
+    if (!pcapFile.empty())
+        _fileName = pcapFile + ".pcap";
+
+    if (!pcapPipe.empty())
+        _pipeName = pcapPipe;
 }
 
 EthPcapTracer::~EthPcapTracer()
@@ -19,44 +23,49 @@ EthPcapTracer::~EthPcapTracer()
     _file.close();
 }
 
-void EthPcapTracer::SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress)
+void EthPcapTracer::OpenStreams()
 {
-    if (_file.is_open())
+    if (!_fileName.empty())
     {
-        _file.close();
+        if (_file.is_open())
+        {
+            _file.close();
+        }
+
+        _file.open(_fileName, std::ios::out | std::ios::binary);
+        _file.write(reinterpret_cast<char*>(&_pcapGlobalHeader), sizeof(_pcapGlobalHeader));
     }
 
-    auto path = std::to_string(endpointAddress.participant) + ".pcap";
-    _file.open(path, std::ios::out | std::ios::binary);
-    _file.write(reinterpret_cast<char*>(&_pcapGlobalHeader), sizeof(_pcapGlobalHeader));
-
-    if (endpointAddress.participant == 2)
+    if (!_pipeName.empty())
     {
-        _pipe = NamedPipe::Create("wireshark");
+        _pipe = NamedPipe::Create(_pipeName);
         _pipe->Write(reinterpret_cast<char*>(&_pcapGlobalHeader), sizeof(_pcapGlobalHeader));
     }
 }
 
 void EthPcapTracer::Trace(const EthMessage& message)
 {
+    if (_fileName.empty() && _pipeName.empty())
+    {
+        return;
+    }
+
     _lock.lock();
 
     _pcapPacketHeader.incl_len = _pcapPacketHeader.orig_len = static_cast<uint32_t>(message.ethFrame.GetFrameSize());
     _pcapPacketHeader.ts_sec = static_cast<uint32_t>(std::time(nullptr));
     _pcapPacketHeader.ts_usec = 0;
-    
-    _file.write(reinterpret_cast<char*>(&_pcapPacketHeader), sizeof(_pcapPacketHeader));
-    _file.write(reinterpret_cast<const char*>(&message.ethFrame.RawFrame().at(0)), message.ethFrame.GetFrameSize());
+
+    if (_file.is_open())
+    {
+        _file.write(reinterpret_cast<char*>(&_pcapPacketHeader), sizeof(_pcapPacketHeader));
+        _file.write(reinterpret_cast<const char*>(&message.ethFrame.RawFrame().at(0)), message.ethFrame.GetFrameSize());
+    }
 
     if (_pipe)
     {
-        auto success = _pipe->Write(reinterpret_cast<const char*>(&_pcapPacketHeader), sizeof(_pcapPacketHeader));
-        success |= _pipe->Write(reinterpret_cast<const char*>(&message.ethFrame.RawFrame().at(0)), message.ethFrame.GetFrameSize());
-
-        if (!success)
-        {
-            std::cout << "NamedPipe::Write was not successfull!" << std::endl;
-        }
+        _pipe->Write(reinterpret_cast<char*>(&_pcapPacketHeader), sizeof(_pcapPacketHeader));
+        _pipe->Write(reinterpret_cast<const char*>(&message.ethFrame.RawFrame().at(0)), message.ethFrame.GetFrameSize());
     }
 
     _lock.unlock();

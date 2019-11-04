@@ -8,8 +8,9 @@ namespace ib {
 namespace sim {
 namespace eth {
 
-EthControllerProxy::EthControllerProxy(mw::IComAdapter* comAdapter)
+EthControllerProxy::EthControllerProxy(mw::IComAdapter* comAdapter, const std::string& pcapFile, const std::string& pcapPipe)
     : _comAdapter(comAdapter)
+    , _tracer(pcapFile, pcapPipe)
 {
 }
 
@@ -67,6 +68,8 @@ void EthControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const EthMes
     if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
         return;
 
+    _tracer.Trace(msg);
+
     CallHandlers(msg);
 }
 
@@ -99,6 +102,8 @@ void EthControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const EthSta
 void EthControllerProxy::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
     _endpointAddr = endpointAddress;
+
+    _tracer.OpenStreams();
 }
 
 auto EthControllerProxy::EndpointAddress() const -> const mw::EndpointAddress&

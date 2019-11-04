@@ -62,7 +62,7 @@ protected:
 
 protected:
     EthernetControllerProxyTest()
-        : proxy(&comAdapter)
+        : proxy(&comAdapter, "", "")
     {
         proxy.SetEndpointAddress(proxyAddress);
 

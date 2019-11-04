@@ -212,7 +212,7 @@ template <>
 auto from_json<Sink>(const json11::Json& json) -> Sink
 {
     Sink sink;
-    sink.type = from_json<Sink::Type>(json["Type"].string_value());
+    sink.type = from_json<Sink::Type>(json["Type"]);
     optional_from_json(sink.level, json, "Level");
 
     if (sink.type == Sink::Type::File)
@@ -292,13 +292,14 @@ auto macaddress_from_json(const json11::Json& json) -> std::array<uint8_t, 6>
     return macAddress;
 }
 
-
 auto to_json(const EthernetController& controller) -> json11::Json
 {
     return json11::Json::object {
-        { "Name", controller.name },
+        {"Name", controller.name},
         // endopintId is not serialized
-        { "MacAddr",  macaddress_to_json(controller.macAddress) }
+        {"MacAddr",  macaddress_to_json(controller.macAddress)},
+        {"PcapFile", controller.pcapFile},
+        {"PcapPipe", controller.pcapPipe}
     };
 }
 
@@ -308,6 +309,8 @@ auto from_json<EthernetController>(const json11::Json& json) -> EthernetControll
     EthernetController controller;
     controller.name = json["Name"].string_value();
     controller.macAddress = macaddress_from_json(json["MacAddr"]);
+    controller.pcapFile = json["PcapFile"].string_value();
+    controller.pcapPipe = json["PcapPipe"].string_value();
     return controller;
 }
 

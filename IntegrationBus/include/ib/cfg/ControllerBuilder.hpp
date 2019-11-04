@@ -23,6 +23,8 @@ public:
     auto WithLinkId(int16_t linkId) -> ControllerBuilder&;
     auto WithEndpointId(mw::EndpointId id) -> ControllerBuilder&;
     IntegrationBusAPI auto WithMacAddress(std::string macAddress) -> ControllerBuilder&;
+    auto WithPcapFile(const std::string& pcapFile)->ControllerBuilder&;
+    auto WithPcapPipe(const std::string& pcapPipe)->ControllerBuilder&;
     auto WithClusterParameters(const sim::fr::ClusterParameters& clusterParameters) -> ControllerBuilder&;
     auto WithNodeParameters(const sim::fr::NodeParameters& nodeParameters) -> ControllerBuilder&;
     auto WithTxBufferConfigs(const std::vector<sim::fr::TxBufferConfig>& txBufferConfigs) -> ControllerBuilder&;

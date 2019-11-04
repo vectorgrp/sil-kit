@@ -61,7 +61,7 @@ protected:
 
 protected:
     EthernetControllerTest()
-        : controller(&comAdapter)
+        : controller(&comAdapter, "", "")
     {
         controller.SetEndpointAddress(controllerAddress);
 

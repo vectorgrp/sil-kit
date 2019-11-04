@@ -150,11 +150,11 @@ auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonical
     auto&& config = get_by_name(_participant.ethernetControllers, canonicalName);
     if (ControllerUsesNetworkSimulator(config.name))
     {
-        return CreateControllerForLink<eth::EthControllerProxy>(config);
+        return CreateControllerForLink<eth::EthControllerProxy>(config, config.pcapFile, config.pcapPipe);
     }
     else
     {
-        return CreateControllerForLink<eth::EthController>(config);
+        return CreateControllerForLink<eth::EthController>(config, config.pcapFile, config.pcapPipe);
     }
 }
 

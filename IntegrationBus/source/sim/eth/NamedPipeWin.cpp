@@ -54,13 +54,7 @@ public:
 
     ~NamedPipeWin()
     {
-        if (isValid())
-        {
-            BOOL ok = FALSE;
-            ok = FlushFileBuffers(_pipeHandle);
-            ok = DisconnectNamedPipe(_pipeHandle);
-            ok = CloseHandle(_pipeHandle);
-        }
+        closeConnection();
     }
 
 public:
@@ -73,9 +67,13 @@ public:
         if (isValid())
         {
             auto ok = WriteFile(_pipeHandle, buffer, static_cast<DWORD>(size), &cbWritten, NULL);
-            if (!ok || cbWritten != size)
+            if (!ok && GetLastError() == ERROR_NO_DATA)
             {
-                throw std::runtime_error("NamedPipeImpl::Write returned error: " + GetPipeError());
+                closeConnection();
+            }
+            else if (!ok || cbWritten != size)
+            {
+                throw std::runtime_error("NamedPipeWin::Write returned error: " + GetPipeError());
             }
         }
         return cbWritten == size;
@@ -90,6 +88,17 @@ private:
     // ----------------------------------------
     // private methods
     bool isValid() const { return _pipeHandle != INVALID_HANDLE_VALUE; }
+    void closeConnection()
+    {
+        if (isValid())
+        {
+            BOOL ok = FALSE;
+            ok = FlushFileBuffers(_pipeHandle);
+            ok = DisconnectNamedPipe(_pipeHandle);
+            ok = CloseHandle(_pipeHandle);
+            _pipeHandle = INVALID_HANDLE_VALUE;
+        }
+    }
 };
 
 std::unique_ptr<NamedPipe> NamedPipe::Create(const std::string& name)

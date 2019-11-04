@@ -49,7 +49,9 @@
                 "EthernetControllers": [
                     {
                         "Name": "ETH0",
-                        "MacAddr": "F6:04:68:71:AA:C2"
+                        "MacAddr": "F6:04:68:71:AA:C2",
+                        "PcapFile": "ethernet_reader",
+                        "PcapPipe": "ethernet_reader"
                     }
                 ]
             },

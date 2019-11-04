@@ -14,7 +14,6 @@ namespace sim {
 namespace eth {
 namespace pcap
 {
-#pragma pack(push, 1)
 struct GlobalHeader {
     uint32_t magic_number = 0xa1b23c4d;  /* magic number */
     uint16_t version_major = 2;          /* major version number */
@@ -23,16 +22,23 @@ struct GlobalHeader {
     uint32_t sigfigs = 0;                /* accuracy of timestamps */
     uint32_t snaplen = 65535;            /* max length of captured packets, in octets */
     uint32_t network = 1;                /* data link type */
+
+    GlobalHeader()
+    {
+        static_assert(sizeof(GlobalHeader) == 24, "GlobalHeader size must be equal to 24 bytes");
+    }
 };
-#pragma pack(pop)
-#pragma pack(push, 1)
 struct PacketHeader {
     uint32_t ts_sec;         /* timestamp seconds */
     uint32_t ts_usec;        /* timestamp microseconds */
     uint32_t incl_len;       /* number of octets of packet saved in file */
     uint32_t orig_len;       /* actual length of packet */
+
+    PacketHeader()
+    {
+        static_assert(sizeof(PacketHeader) == 16, "PacketHeader size must be equal to 16 bytes");
+    }
 };
-#pragma pack(pop)
 }
 
 
@@ -41,23 +47,29 @@ class EthPcapTracer
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    EthPcapTracer();
+    EthPcapTracer(const std::string& pcapFile, const std::string& pcapPipe);
     EthPcapTracer(const EthPcapTracer&) = default;
     EthPcapTracer(EthPcapTracer&&) = default;
     ~EthPcapTracer();
 
-    void SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress);
+    // ----------------------------------------
+    // Public methods
+    void OpenStreams();
     void Trace(const EthMessage& message);
 
 private:
+    // ----------------------------------------
+    // Private members
+    std::string _fileName;
+    std::string _pipeName;
+
+    std::ofstream _file;
+    NamedPipe::Ptr _pipe;
+
+    std::mutex _lock;
 
     pcap::PacketHeader _pcapPacketHeader;
     pcap::GlobalHeader _pcapGlobalHeader;
-
-    std::ofstream _file;
-    std::mutex _lock;
-
-    NamedPipe::Ptr _pipe;
 };
 
 }

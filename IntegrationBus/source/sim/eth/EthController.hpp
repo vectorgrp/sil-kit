@@ -5,6 +5,7 @@
 #include "ib/sim/eth/IEthController.hpp"
 #include "ib/sim/eth/IIbToEthController.hpp"
 #include "ib/mw/fwd_decl.hpp"
+#include "ib/cfg/Config.hpp"
 #include "EthPcapTracer.hpp"
 
 namespace ib {
@@ -25,7 +26,7 @@ public:
     EthController() = delete;
     EthController(const EthController&) = default;
     EthController(EthController&&) = default;
-    EthController(mw::IComAdapter* comAdapter);
+    EthController(mw::IComAdapter* comAdapter, const std::string& pcapFile, const std::string& pcapPipe);
 
 public:
     // ----------------------------------------

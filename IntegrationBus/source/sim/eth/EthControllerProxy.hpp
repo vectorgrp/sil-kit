@@ -5,6 +5,9 @@
 #include "ib/sim/eth/IEthController.hpp"
 #include "ib/sim/eth/IIbToEthControllerProxy.hpp"
 #include "ib/mw/fwd_decl.hpp"
+#include "ib/cfg/Config.hpp"
+
+#include "EthPcapTracer.hpp"
 
 namespace ib {
 namespace sim {
@@ -24,7 +27,7 @@ public:
     EthControllerProxy() = delete;
     EthControllerProxy(const EthControllerProxy&) = default;
     EthControllerProxy(EthControllerProxy&&) = default;
-    EthControllerProxy(mw::IComAdapter* comAdapter);
+    EthControllerProxy(mw::IComAdapter* comAdapter, const std::string& pcapFile, const std::string& pcapPipe);
 
 public:
     // ----------------------------------------
@@ -88,6 +91,8 @@ private:
         CallbackVector<EthState>,
         CallbackVector<uint32_t>
     > _callbacks;
+
+    EthPcapTracer _tracer;
 };
 
 // ================================================================================

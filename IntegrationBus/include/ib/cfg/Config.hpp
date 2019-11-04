@@ -104,6 +104,9 @@ struct EthernetController
     mw::EndpointId endpointId{0};
     int16_t linkId{-1};
     std::array<uint8_t, 6> macAddress{};
+
+    std::string pcapFile;
+    std::string pcapPipe;
 };
 
 struct FlexrayController

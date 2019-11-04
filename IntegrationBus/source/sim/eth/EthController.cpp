@@ -9,8 +9,9 @@ namespace sim {
 namespace eth {
 
 
-EthController::EthController(mw::IComAdapter* comAdapter)
+EthController::EthController(mw::IComAdapter* comAdapter, const std::string& pcapFile, const std::string& pcapPipe)
     : _comAdapter(comAdapter)
+    , _tracer(pcapFile, pcapPipe)
 {
 }
 
@@ -83,7 +84,8 @@ void EthController::ReceiveIbMessage(mw::EndpointAddress from, const EthTransmit
 void EthController::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
     _endpointAddr = endpointAddress;
-    _tracer.SetEndpointAddress(endpointAddress);
+
+    _tracer.OpenStreams();
 }
 
 auto EthController::EndpointAddress() const -> const mw::EndpointAddress&

@@ -85,7 +85,9 @@ TEST_F(ConfigBuilderTest, make_eth_controller)
         .AddEthernet("ETH1")
             .WithEndpointId(17)
             .WithLink("LAN0")
-            .WithMacAddress("A1:A2:A3:A4:A5:A6:");
+            .WithMacAddress("A1:A2:A3:A4:A5:A6:")
+            .WithPcapFile("PcapTraceFile")
+            .WithPcapPipe("PcapTracePipe");
 
     auto config = configBuilder.Build();
 
@@ -104,13 +106,14 @@ TEST_F(ConfigBuilderTest, make_eth_controller)
     EXPECT_NE(std::find(link.endpoints.begin(), link.endpoints.end(), "P1/ETH1"),
               link.endpoints.end());
 
-
     std::array<uint8_t, 6> expectedMac{{0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6}};
 
     EXPECT_EQ(controller.name, "ETH1");
     EXPECT_EQ(controller.macAddress, expectedMac);
     EXPECT_EQ(controller.linkId, link.id);
     EXPECT_EQ(controller.endpointId, 17);
+    EXPECT_EQ(controller.pcapFile, "PcapTraceFile");
+    EXPECT_EQ(controller.pcapPipe, "PcapTracePipe");
 }
 
 auto getClusterParameters() -> ib::sim::fr::ClusterParameters
