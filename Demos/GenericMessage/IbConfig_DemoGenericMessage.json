@@ -9,8 +9,7 @@
             {
                 "Name": "Publisher",
                 "Description": "Publishes different generic messages",
-                "SyncType": "DiscreteTime",
-                "IsSyncMaster": true,
+
                 "Logger": {
                     "FlushLevel": "Warn",
                     "Sinks": [
@@ -19,6 +18,10 @@
                             "Level": "Trace"
                         }
                     ]
+                },
+                "IsSyncMaster": true,
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
                 },
                 "GenericPublishers": [
                     {
@@ -41,7 +44,7 @@
             {
                 "Name": "Subscriber",
                 "Description": "Subscribes different generic messages",
-                "SyncType": "DiscreteTime",
+
                 "Logger": {
                     "FlushLevel": "Warn",
                     "Sinks": [
@@ -52,6 +55,9 @@
                     ]
                 },
 
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
+                },
                 "GenericSubscribers": [
                     "GroundTruth",
                     "VehicleModelOut",
@@ -60,7 +66,7 @@
             },
             {
                 "Name": "SystemController",
-                "SyncType": "Unsynchronized",
+
                 "Logger": {
                     "FlushLevel": "Warn",
                     "Sinks": [
@@ -73,7 +79,7 @@
             {
                 "Name": "SystemMonitor",
                 "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
-                "SyncType": "Unsynchronized",
+
                 "Logger": {
                     "LogFromRemotes": true,
                     "FlushLevel": "Info",

@@ -10,9 +10,10 @@
             {
                 "Name": "Participant1-CANoeDriver",
                 "Description": "Participant with 4 controllers of each bus type",
-                "SyncType": "DiscreteTime",
                 "IsSyncMaster": true,
-
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
+                },
                 "CanControllers": [ "CAN1", "CAN2", "CAN3", "CAN4" ],
                 "LinControllers": [ "LIN1", "LIN2", "LIN3", "LIN4" ],
                 "FlexRayControllers": [ 
@@ -51,12 +52,16 @@
             {
                 "Name": "Participant1-CANoeNodeLayer",
                 "Description": "Participant for mapping network I/O to CANoe SysVars",
-                "SyncType": "DiscreteTime"
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
+                }
             },
             {
                 "Name": "Participant2-CANoeDriver",
                 "Description": "Participant with 4 controllers of each bus type",
-                "SyncType": "DiscreteTime",
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
+                },
 
                 "CanControllers": [ "CAN1", "CAN2", "CAN3", "CAN4" ],
                 "LinControllers": [ "LIN1", "LIN2", "LIN3", "LIN4" ],
@@ -96,16 +101,16 @@
             {
                 "Name": "Participant2-CANoeNodeLayer",
                 "Description": "Participant for mapping network I/O to CANoe SysVars",
-                "SyncType": "DiscreteTime"
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
+                }
             },
             {
-                "Name": "SystemController",
-                "SyncType": "Unsynchronized"
+                "Name": "SystemController"
             },
             {
                 "Name": "SystemMonitor",
-                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
-                "SyncType": "Unsynchronized"
+                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization."
             }
         ],
 

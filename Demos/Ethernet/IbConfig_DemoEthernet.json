@@ -9,7 +9,7 @@
             {
                 "Name": "EthernetWriter",
                 "Description": "Demo Writer",
-                "SyncType": "DiscreteTime",
+
                 "IsSyncMaster": true,
                 "Logger": {
                     "FlushLevel": "Warn",
@@ -19,6 +19,9 @@
                             "Level": "Trace"
                         }
                     ]
+                },
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
                 },
                 "EthernetControllers": [
                     {
@@ -30,7 +33,7 @@
             {
                 "Name": "EthernetReader",
                 "Description": "Demo Reader",
-                "SyncType": "DiscreteTime",
+
                 "Logger": {
                     "FlushLevel": "Warn",
                     "Sinks": [
@@ -39,6 +42,9 @@
                             "Level": "Trace"
                         }
                     ]
+                },
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
                 },
                 "EthernetControllers": [
                     {
@@ -49,7 +55,7 @@
             },
             {
                 "Name": "SystemController",
-                "SyncType": "Unsynchronized",
+
                 "Logger": {
                     "FlushLevel": "Warn",
                     "Sinks": [
@@ -62,7 +68,7 @@
             {
                 "Name": "SystemMonitor",
                 "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
-                "SyncType": "Unsynchronized",
+
                 "Logger": {
                     "LogFromRemotes": true,
                     "FlushLevel": "Info",

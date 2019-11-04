@@ -105,6 +105,25 @@
                   "additionalProperties": false,
                   "required": [ "Sinks" ]
                 },
+                "ParticipantController" : {
+                  "type": "object",
+                  "properties": {
+                    "SyncType" : {
+                      "type": "string",
+                        "enum": [ "DistributedTimeQuantum", "DiscreteEvent", "TimeQuantum", "DiscreteTime", "DiscreteTimePassive"]
+                    },
+                    "ExecTimeLimitSoftMs": {
+                      "type": "integer",
+                      "title": "When a SimTask is not finished before this limit, a warning is logged."
+                    },
+                    "ExecTimeLimitHardMs": {
+                      "type": "integer",
+                      "title": "When a SimTask is not finished before this limit, the participant controller switches to error state."
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [ "SyncType" ]
+                },
                 "CanControllers": {
                   "type": "array",
                   "items": {

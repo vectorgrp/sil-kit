@@ -8,7 +8,7 @@
         "Participants": [
             {
                 "Name": "Node0",
-                "SyncType": "DiscreteTime",
+
                 "Logger": {
                     "FlushLevel": "Warn",
                     "Sinks": [
@@ -17,6 +17,9 @@
                             "Level": "Trace"
                         }
                     ]
+                },
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
                 },
                 "FlexRayControllers": [
                     {
@@ -73,7 +76,7 @@
             },
             {
                 "Name": "Node1",
-                "SyncType": "DiscreteTime",
+
                 "Logger": {
                     "FlushLevel": "Warn",
                     "Sinks": [
@@ -84,6 +87,9 @@
                     ]
                 },
                 
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
+                },
                 "FlexRayControllers": [
                     {
                         "Name": "FlexRay1",
@@ -139,7 +145,7 @@
             },
             {
                 "Name": "SystemController",
-                "SyncType": "Unsynchronized",
+
                 "IsSyncMaster": true,
                 "Logger": {
                     "FlushLevel": "Warn",
@@ -153,7 +159,7 @@
             {
                 "Name": "SystemMonitor",
                 "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
-                "SyncType": "Unsynchronized",
+
                 "Logger": {
                     "LogFromRemotes": true,
                     "FlushLevel": "Info",

@@ -10,9 +10,11 @@
             {
                 "Name": "Participant1",
                 "Description": "Participant with 4 controllers of each bus type",
-                "SyncType": "DiscreteTime",
                 "IsSyncMaster": true,
 
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
+                },
                 "CanControllers": [ "CAN1", "CAN2", "CAN3", "CAN4" ],
                 "LinControllers": [ "LIN1", "LIN2", "LIN3", "LIN4" ],
                 "FlexRayControllers": [ 
@@ -51,8 +53,10 @@
             {
                 "Name": "Participant2",
                 "Description": "Participant with 4 controllers of each bus type",
-                "SyncType": "DiscreteTime",
 
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
+                },
                 "CanControllers": [ "CAN1", "CAN2", "CAN3", "CAN4" ],
                 "LinControllers": [ "LIN1", "LIN2", "LIN3", "LIN4" ],
                 "FlexRayControllers": [ 
@@ -91,8 +95,10 @@
             {
                 "Name": "GenericMessagePublisher",
                 "Description": "Publishes different generic messages",
-                "SyncType": "DiscreteTime",
 
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
+                },
                 "GenericPublishers": [
                     {
                         "Name": "GroundTruth",
@@ -114,8 +120,10 @@
             {
                 "Name": "GenericMessageSubscriber",
                 "Description": "Subscribes different generic messages",
-                "SyncType": "DiscreteTime",
 
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
+                },
                 "GenericSubscribers": [
                     "GroundTruth",
                     "VehicleModelOut",
@@ -124,18 +132,18 @@
             },
             {
                 "Name": "NetworkSimulator",
-                "SyncType": "DiscreteTime",
 
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
+                },
                 "NetworkSimulators": [ "NetworkSimulator1" ]
             },
             {
-                "Name": "SystemController",
-                "SyncType": "Unsynchronized"
+                "Name": "SystemController"
             },
             {
                 "Name": "SystemMonitor",
-                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
-                "SyncType": "Unsynchronized"
+                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization."
             }
         ],
 

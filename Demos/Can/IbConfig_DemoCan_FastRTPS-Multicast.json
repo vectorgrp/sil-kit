@@ -9,26 +9,28 @@
             {
                 "Name": "CanWriter",
                 "Description": "Demo Writer",
-                "SyncType": "DiscreteTime",
                 "IsSyncMaster": true,
 
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
+                },
                 "CanControllers": [ "CAN1" ]
             },
             {
                 "Name": "CanReader",
                 "Description": "Demo Reader",
-                "SyncType": "DiscreteTime",
 
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
+                },
                 "CanControllers": [ "CAN1" ]
             },
             {
-                "Name": "SystemController",
-                "SyncType": "Unsynchronized"
+                "Name": "SystemController"
             },
             {
                 "Name": "SystemMonitor",
-                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
-                "SyncType": "Unsynchronized"
+                "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization."
             }
         ],
 

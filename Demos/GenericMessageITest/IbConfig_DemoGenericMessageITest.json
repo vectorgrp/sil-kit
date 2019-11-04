@@ -9,9 +9,11 @@
             {
                 "Name": "Publisher",
                 "Description": "Publishes different generic messages",
-                "SyncType": "DiscreteTime",
                 "IsSyncMaster": true,
 
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
+                },
                 "GenericPublishers": [
                     {
                         "Name": "GenericData"
@@ -21,15 +23,16 @@
             {
                 "Name": "Subscriber",
                 "Description": "Subscribes different generic messages",
-                "SyncType": "DiscreteTime",
 
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
+                },
                 "GenericSubscribers": [
                     "GenericData"
                 ]
             },
             {
-                "Name": "SystemController",
-                "SyncType": "Unsynchronized"
+                "Name": "SystemController"
             }
         ],
 

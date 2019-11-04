@@ -9,7 +9,7 @@
             {
                 "Name": "IoWriter",
                 "Description": "Sends I/O values",
-                "SyncType": "DiscreteTime",
+
                 "IsSyncMaster": true,
                 "Logger": {
                     "FlushLevel": "Warn",
@@ -19,6 +19,9 @@
                             "Level": "Trace"
                         }
                     ]
+                },
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
                 },
                 "Digital-Out": [
                     { "DIO": false }
@@ -36,7 +39,7 @@
             {
                 "Name": "IoReader",
                 "Description": "Receives I/O values",
-                "SyncType": "DiscreteTime",
+
                 "Logger": {
                     "FlushLevel": "Warn",
                     "Sinks": [
@@ -46,6 +49,9 @@
                         }
                     ]
                 },
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
+                },
                 "Digital-In": [ "DIO" ],
                 "Analog-In": [ "AIO" ],
                 "Pwm-In": [ "PWM" ],
@@ -53,7 +59,7 @@
             },
             {
                 "Name": "SystemController",
-                "SyncType": "Unsynchronized",
+
                 "Logger": {
                     "FlushLevel": "Warn",
                     "Sinks": [
@@ -66,7 +72,7 @@
             {
                 "Name": "SystemMonitor",
                 "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
-                "SyncType": "Unsynchronized",
+
                 "Logger": {
                     "LogFromRemotes": true,
                     "FlushLevel": "Info",
