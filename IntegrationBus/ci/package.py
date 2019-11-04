@@ -39,6 +39,7 @@ build_types=["Debug", "Release"]
 archs=["Win32", "Win64", "Linux", "ubuntu"]
 
 DEBUG=0
+KEEP_TOP_DIRS=False
 
 def log(fmt, *args):
     print(fmt.format(*args))
@@ -52,7 +53,7 @@ def die(status, fmt, *args):
     sys.exit(status)
 
 #expected cpack filename: Project-major.minor.build-TOOL-ARCH-BUILD_TYPE.zip
-expfn = r'(?P<name>\w+)-(?P<version>\d+\.\d+\.\d+)-(?P<tool>\w+)-(?P<arch>\w+)-(?P<buildtype>\w+)'
+expfn = r'(?P<name>.*)-(?P<version>\d+\.\d+\.\d+)-(?P<tool>\w+)-(?P<arch>\w+)-(?P<buildtype>\w+)'
 rc = re.compile(expfn)
 def extractDistInfos(filename):
     """ split the filename into its component like version, tool, arch, build type etc.
@@ -65,6 +66,8 @@ def extractDistInfos(filename):
 def isCompatibleCpack(cpack1, cpack2):  #type: (str, str) -> bool:
     v1 = extractDistInfos(cpack1)
     v2 = extractDistInfos(cpack2)
+    log("{} distinfos: {}", cpack1, v1)
+    log("{} distinfos: {}", cpack2, v2)
     assert v1 != None and v2 != None
     assert len(v1) == len(v2)
     ok = True
@@ -133,22 +136,28 @@ def hashFile(fname):
 #################################################
 def parseArgs():
     abspath = os.path.abspath
-    parser = argparse.ArgumentParser(description='VIB distribution packaging tool')
+    parser = argparse.ArgumentParser(description='VIB distribution packaging tool. It allows bundling and merging multiple CPack generated zip files into a single release zip file')
     parser.add_argument('--projectroot', metavar='PROJECT_ROOT', type=str,
             help="the toplevel project directory containing the source")
     parser.add_argument('zipfiles', metavar='IntegrationBus-<CONFIG>.zip', type=str,
             help="""Zip files which contain the IB binaries and are packaged by CPack.
             The distribution will contain all merged zipfiles. 
+            The pattern of <name>-<sem_version>-<compiler>-<arch>-<buildtype> is significant for computing the output name.
             For Example: IntegrationBus-1.0.0-VS2015-Win32-Debug.zip IntegrationBus-1.0.0-VS2015-Win32-Release.zip""",
             nargs="+")
     parser.add_argument('--work-dir', type=str, help="Specify the work directory", default="_package")
     parser.add_argument('-d','--debug', action="store_true", help="enable debugging output")
+    parser.add_argument('--keep-top-directory', action="store_true", help="""keep a top level directory for each zip file.
+            That is, merge the CPack zip files into the same root directory and create a distribution zip file.""")
     args = parser.parse_args()
     cpackfiles = [abspath(x) for x in args.zipfiles]
     workdir=abspath(args.work_dir)
     if args.debug:
         global DEBUG
         DEBUG=1
+    if args.keep_top_directory:
+        global KEEP_TOP_DIRS
+        KEEP_TOP_DIRS=True
     files =[]
     for cpack in cpackfiles:
         # check if glob pattern
@@ -192,6 +201,7 @@ def makeDistribution(workdir, projectroot, deploy_dirs, excludes):
 def unpack(workdir, cpackfiles):
     """ unzip all the cpackfiles into the workdir """
     # ZipInfo.is_dir is introduced in Python 3.6: compat hack
+    global KEEP_TOP_DIRS
     def is_dir(zipinfo):
         return zipinfo.filename[-1] == '/'
     for cpack in sorted(cpackfiles):
@@ -205,7 +215,10 @@ def unpack(workdir, cpackfiles):
                 # strip toplevel folder from member filepaths
                 el = mem.filename.split("/") #zip contains unix paths
                 assert top == el[0] #sanity check
-                fn = "/".join(el[1:])
+                if KEEP_TOP_DIRS:
+                    fn = mem.filename
+                else:
+                    fn = "/".join(el[1:])
                 out = os.path.join(workdir, os.path.normpath(fn))
                 if is_dir(mem) and not os.path.exists(out):
                     os.makedirs(out)

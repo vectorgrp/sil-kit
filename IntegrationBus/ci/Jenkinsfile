@@ -11,6 +11,7 @@ keepNumBuilds=5
 publishToArtifactory=true
 //debug binaries are only build when doing a release to customers
 buildDebugBin=true
+cleanBuild=true
 
 // add new build targets here
 buildTargets = [
@@ -86,7 +87,7 @@ def archiveToArtifactory(pattern) {
         spec = """{
             "files": [{
                 "pattern": "${files[0]}",
-                "target" : "${artifactoryRepo}/${projectName}/${env.BRANCH_NAME}/${env.BUILD_NUMBER}/${fileName}",
+                "target" : "${artifactoryRepo}/${projectName}/${env.GIT_COMMIT}/${fileName}",
                 "props"  : "git_commit=${env.GIT_COMMIT};git_branch=${env.GIT_BRANCH};git_url=${env.GIT_URL}"
         }]}"""
         print("artifactory spec=${spec}")
@@ -130,6 +131,7 @@ def runOnNode(buildName, buildAgent, userStages) {
 def runCmake(buildTool, buildType, extraArgs="") {
     cmakeBuild(
         installation: 'InSearchPath',
+        cleanBuild: cleanBuild,
         buildType: "${buildType}",
         buildDir: "_build_${buildType}",
         generator: "${buildTool}",
@@ -191,10 +193,12 @@ def doBuild(buildName, buildAgent, buildTool) {
             stage("${buildName}: Integration Tests Release ") {
                 dir("_build_Release") {
                     try {
-                        ctest(
-                            installation: 'InSearchPath',
-                            arguments: "--build-config Release -R '^ITest.*'"
-                        )
+                        timeout(time: 2, unit: 'MINUTES') {
+                            ctest(
+                                installation: 'InSearchPath',
+                                arguments: "--build-config Release -R '^ITest.*'"
+                            )
+                        }
                         junit("**/*gtestresults.xml")
                     } catch(e) {
                         print("WARNING: integration tests failed with: ${e}")
@@ -207,8 +211,8 @@ def doBuild(buildName, buildAgent, buildTool) {
                     archiveToArtifactory("_build_Release/${artifactName}-*.zip")
                 } catch(e) {
                     //make sure we save the finished artifacts before failing the build 
-                    print("WARNING: archiving to artifactory failed, archiving to jenkins instead and failing!")
-                    archiveArtifact(artifacts: "_build_Release/${artifactName}-*.zip", fingerprint: true)
+                    print("WARNING: archiving to artifactory failed, archiving to jenkins instead and failing: exception: ${e}")
+                    archiveArtifacts(artifacts: "_build_Release/${artifactName}-*.zip", fingerprint: true)
                     throw e
                 }
             }
