@@ -83,7 +83,7 @@ protected:
         comAdapter->joinIbDomain(domainId);
 
         std::promise<void> threadFinishedPromise{};
-        unsigned int receiveCount{ 0 };
+        unsigned int receiveCount{0};
 
         auto* controller = comAdapter->CreateEthController("ETH1");
         controller->RegisterMessageAckHandler(

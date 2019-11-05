@@ -3,6 +3,7 @@
 #include "EthController.hpp"
 
 #include "ib/mw/IComAdapter.hpp"
+#include <algorithm>
 
 namespace ib {
 namespace sim {

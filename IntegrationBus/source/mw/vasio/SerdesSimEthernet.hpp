@@ -34,6 +34,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthMessa
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthTransmitAcknowledge& ack)
 {
     buffer << ack.transmitId
+           << ack.sourceMac
            << ack.timestamp
            << ack.status;
     return buffer;
@@ -41,6 +42,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Et
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthTransmitAcknowledge& ack)
 {
     buffer >> ack.transmitId
+           >> ack.sourceMac
            >> ack.timestamp
            >> ack.status;
     return buffer;
