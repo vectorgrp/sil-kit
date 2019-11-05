@@ -28,7 +28,7 @@ public:
     IntegrationBusAPI auto Build() -> ParticipantController;
 
 private:
-    ParticipantController config;
+    ParticipantController _config;
 };
 
 } // namespace cfg

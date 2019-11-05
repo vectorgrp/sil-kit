@@ -585,10 +585,10 @@ TEST_F(JsonConfigTest, configure_participant_controller)
     EXPECT_EQ(config, referenceConfig);
 
     auto&& controller = config.simulationSetup.participants[0].participantController;
-    EXPECT_EQ(controller._is_configured, true);
-    EXPECT_EQ(controller.syncType, SyncType::DiscreteTime);
-    EXPECT_EQ(controller.execTimeLimitSoft, 10ms);
-    EXPECT_EQ(controller.execTimeLimitHard, 20ms);
+    ASSERT_TRUE(controller.has_value());
+    EXPECT_EQ(controller->syncType, SyncType::DiscreteTime);
+    EXPECT_EQ(controller->execTimeLimitSoft, 10ms);
+    EXPECT_EQ(controller->execTimeLimitHard, 20ms);
 }
 
 TEST_F(JsonConfigTest, configure_participant_controller_without_exec_time_limits)
@@ -600,10 +600,10 @@ TEST_F(JsonConfigTest, configure_participant_controller_without_exec_time_limits
     EXPECT_EQ(config, referenceConfig);
 
     auto&& controller = config.simulationSetup.participants[0].participantController;
-    EXPECT_EQ(controller._is_configured, true);
-    EXPECT_EQ(controller.syncType, SyncType::DiscreteTime);
-    EXPECT_EQ(controller.execTimeLimitSoft, std::chrono::milliseconds::max());
-    EXPECT_EQ(controller.execTimeLimitHard, std::chrono::milliseconds::max());
+    ASSERT_TRUE(controller.has_value());
+    EXPECT_EQ(controller->syncType, SyncType::DiscreteTime);
+    EXPECT_EQ(controller->execTimeLimitSoft, std::chrono::milliseconds::max());
+    EXPECT_EQ(controller->execTimeLimitHard, std::chrono::milliseconds::max());
 }
 
 TEST_F(JsonConfigTest, configure_participant_without_participant_controller)
@@ -614,7 +614,7 @@ TEST_F(JsonConfigTest, configure_participant_without_participant_controller)
     EXPECT_EQ(config, referenceConfig);
 
     auto&& controller = config.simulationSetup.participants[0].participantController;
-    EXPECT_EQ(controller._is_configured, false);
+    EXPECT_FALSE(controller.has_value());
 }
 
 

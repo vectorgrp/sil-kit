@@ -8,18 +8,26 @@ template <typename T>
 struct is_std_vector : std::false_type {} ;
 template <typename T>
 struct is_std_vector<std::vector<T>> : std::true_type {} ;
-template <typename T>
-using enable_if_std_vector = std::enable_if_t<is_std_vector<T>::value>;
 
 template <typename T>
 struct is_map : std::false_type {} ;
 template <typename T>
 struct is_map<std::map<std::string, T>> : std::true_type {} ;
+
 template <typename T>
-using enable_if_map = std::enable_if_t<is_map<T>::value>;
+struct is_optional : std::false_type{};
+template <typename T>
+struct is_optional<OptionalCfg<T>> : std::true_type{};
 
 
-template<typename T> auto from_json(const json11::Json&) -> T;
+template<typename T,
+    std::enable_if_t<
+        !is_optional<T>::value &&
+        !is_map<T>::value &&
+        !is_std_vector<T>::value,
+    int> = 0
+>
+auto from_json(const json11::Json&) -> T {}
 template <>
 auto from_json<uint16_t>(const json11::Json& json) -> uint16_t;
 template <>
@@ -79,12 +87,6 @@ auto from_json<MiddlewareConfig>(const json11::Json& json) -> MiddlewareConfig;
 template <>
 auto from_json<Config>(const json11::Json& json) -> Config;
 
-template<typename T, typename = enable_if_std_vector<T>>
-auto from_json(const json11::Json::array& array) -> T;
-template<typename T, typename = enable_if_map<T>>
-auto from_json(const json11::Json::object& object) -> T;
-
-
 auto to_json(uint16_t value) -> json11::Json;
 auto to_json(int32_t value) -> json11::Json;
 auto to_json(const std::string& value) -> json11::Json;
@@ -114,6 +116,41 @@ auto to_json(const VAsio::RegistryConfig& config) -> json11::Json;
 auto to_json(const VAsio::Config& config) -> json11::Json;
 auto to_json(const MiddlewareConfig& simulationMiddleware) -> json11::Json;
 auto to_json(const Config& cfg) -> json11::Json;
+
+
+template<typename T, std::enable_if_t<is_std_vector<T>::value, int> = 0>
+auto from_json(const json11::Json::array& array) -> T
+{
+    T vector;
+    vector.reserve(array.size());
+    std::transform(array.begin(), array.end(),
+                   std::back_inserter(vector),
+                   [](auto&& t) { return from_json<typename T::value_type>(t); });
+    return vector;
+}
+
+template<typename T, std::enable_if_t<is_optional<T>::value, int> = 0>
+auto from_json(const json11::Json& json) -> T
+{
+    if (json.is_null())
+        return T{};
+    else
+        return T{from_json<typename T::value_type>(json)};
+}
+
+template<typename T, std::enable_if_t<is_map<T>::value, int> = 0>
+auto from_json(const json11::Json& json) -> T
+{
+    T map;
+    for (auto&& kv : json.object_items())
+    {
+        map[kv.first] = from_json<typename T::mapped_type>(kv.second);
+    }
+
+    return map;
+}
+
+
 
 template<typename T>
 auto to_json(const std::vector<T>& vector) -> json11::Json::array;

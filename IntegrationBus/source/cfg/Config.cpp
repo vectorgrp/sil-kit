@@ -394,8 +394,7 @@ bool operator==(const Logger& lhs, const Logger& rhs)
 
 bool operator==(const ParticipantController& lhs, const ParticipantController& rhs)
 {
-    return lhs._is_configured == rhs._is_configured
-        && lhs.syncType == rhs.syncType
+    return lhs.syncType == rhs.syncType
         && lhs.execTimeLimitSoft == rhs.execTimeLimitSoft
         && lhs.execTimeLimitHard == rhs.execTimeLimitHard;
 }

@@ -9,33 +9,32 @@ namespace cfg {
 ParticipantControllerBuilder::ParticipantControllerBuilder(ParticipantBuilder* parent)
     : ParentBuilder<ParticipantBuilder>{parent}
 {
-    config._is_configured = true;
 }
 
 auto ParticipantControllerBuilder::Build() -> ParticipantController
 {
-    if (config.syncType == SyncType::Unsynchronized)
+    if (_config.syncType == SyncType::Unsynchronized)
         throw Misconfiguration{"ParticipantController must specify valid SyncType"};
     
     ParticipantController newConfig;
-    std::swap(config, newConfig);
+    std::swap(_config, newConfig);
     return std::move(newConfig);
 }
 
 auto ParticipantControllerBuilder::WithSyncType(SyncType syncType) -> ParticipantControllerBuilder&
 {
-    config.syncType = syncType;
+    _config.syncType = syncType;
     return *this;
 }
 
 auto ParticipantControllerBuilder::WithExecTimeLimitSoft(std::chrono::milliseconds limit) -> ParticipantControllerBuilder&
 {
-    config.execTimeLimitSoft = limit;
+    _config.execTimeLimitSoft = limit;
     return *this;
 }
 auto ParticipantControllerBuilder::WithExecTimeLimitHard(std::chrono::milliseconds limit) -> ParticipantControllerBuilder&
 {
-    config.execTimeLimitHard = limit;
+    _config.execTimeLimitHard = limit;
     return *this;
 }
 

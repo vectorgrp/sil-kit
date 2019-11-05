@@ -34,16 +34,16 @@ void SyncMaster::SetupTimeQuantumClients(const cfg::Config& config)
     for (auto&& participant : config.simulationSetup.participants)
     {
         auto& participantController = participant.participantController;
-        if (!participantController._is_configured)
+        if (!participantController)
             continue;
 
-        if (participantController.syncType == cfg::SyncType::Unsynchronized)
+        if (participantController->syncType == cfg::SyncType::Unsynchronized)
         {
             _logger->Error("Participant {} uses a ParticipantController, which has not configured a SyncType!", participant.name);
             continue;
         }
 
-        if (participantController.syncType != cfg::SyncType::TimeQuantum)
+        if (participantController->syncType != cfg::SyncType::TimeQuantum)
             continue;
 
         auto client = std::make_shared<TimeQuantumClient>();
@@ -71,7 +71,10 @@ void SyncMaster::SetupDiscreteTimeClient(const cfg::Config& config)
     auto numClients = std::count_if(
         begin(config.simulationSetup.participants),
         end(config.simulationSetup.participants),
-        [](auto&& participant) { return participant.participantController.syncType == cfg::SyncType::DiscreteTime; }
+        [](auto&& participant) {
+            return participant.participantController.has_value()
+                && (participant.participantController->syncType == cfg::SyncType::DiscreteTime);
+        }
     );
     _logger->Info("SyncMaster is serving {} DiscreteTime Clients", numClients);
 

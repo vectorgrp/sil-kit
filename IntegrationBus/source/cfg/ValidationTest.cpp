@@ -44,8 +44,9 @@ TEST(TestMwCfgValidation, throw_if_tickperiod_is_unconfigured_when_using_Discret
     ibConfig.simulationSetup.timeSync.tickPeriod = 0ns;
 
     Participant participantConfig;
-    participantConfig.participantController._is_configured = true;
-    participantConfig.participantController.syncType = SyncType::DiscreteTime;
+    ParticipantController controller;
+    controller.syncType = SyncType::DiscreteTime;
+    participantConfig.participantController = controller;
 
     ibConfig.simulationSetup.participants.emplace_back(std::move(participantConfig));
 
@@ -59,8 +60,9 @@ TEST(TestMwCfgValidation, throw_if_tickperiod_is_unconfigured_when_using_Discret
     ibConfig.simulationSetup.timeSync.tickPeriod = 0ns;
 
     Participant participantConfig;
-    participantConfig.participantController._is_configured = true;
-    participantConfig.participantController.syncType = SyncType::DiscreteTimePassive;
+    ParticipantController controller;
+    controller.syncType = SyncType::DiscreteTimePassive;
+    participantConfig.participantController = controller;
 
     ibConfig.simulationSetup.participants.emplace_back(std::move(participantConfig));
 

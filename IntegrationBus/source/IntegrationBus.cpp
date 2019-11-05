@@ -18,10 +18,10 @@ void PatchConfigForVAsio(cfg::Config& config)
     for (auto& participant : config.simulationSetup.participants)
     {
         auto& participantController = participant.participantController;
-        if (!participantController._is_configured)
+        if (!participantController)
             continue;
 
-        switch (participantController.syncType)
+        switch (participantController->syncType)
         {
         case cfg::SyncType::DistributedTimeQuantum: // [[fallthrough]]
         case cfg::SyncType::Unsynchronized:
@@ -34,11 +34,11 @@ void PatchConfigForVAsio(cfg::Config& config)
             static bool warnOnce = true;
             if (warnOnce)
             {
-                std::cout << "WARNING: Usage of SyncType::" << to_string(participantController.syncType) << " is deprecated when using VAsio middleware\n";
+                std::cout << "WARNING: Usage of SyncType::" << to_string(participantController->syncType) << " is deprecated when using VAsio middleware\n";
                 warnOnce = false;
             }
             std::cout << "INFO: overriding SyncType for participant \"" << participant.name << "\" to SyncType::DistributedTimeQuantum\n";
-            participantController.syncType = cfg::SyncType::DistributedTimeQuantum;
+            participantController->syncType = cfg::SyncType::DistributedTimeQuantum;
         }
         }
     }

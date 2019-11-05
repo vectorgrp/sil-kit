@@ -51,9 +51,9 @@ struct DiscreteTimePassiveAdapter : ParticipantController::ISyncAdapter
 ParticipantController::ParticipantController(IComAdapter* comAdapter, const cfg::SimulationSetup& simulationSetup, const cfg::Participant& participantConfig)
     : _comAdapter{comAdapter}
     , _timesyncConfig{simulationSetup.timeSync}
-    , _syncType{participantConfig.participantController.syncType}
+    , _syncType{participantConfig.participantController->syncType}
     , _logger{comAdapter->GetLogger()}
-    , _watchDog{participantConfig.participantController.execTimeLimitSoft, participantConfig.participantController.execTimeLimitHard}
+    , _watchDog{participantConfig.participantController->execTimeLimitSoft, participantConfig.participantController->execTimeLimitHard}
 {
     _watchDog.SetWarnHandler(
         [logger = _logger](std::chrono::milliseconds timeout)
@@ -86,7 +86,7 @@ ParticipantController::ParticipantController(IComAdapter* comAdapter, const cfg:
         if (participant.name == participantConfig.name)
             continue;
 
-        if (participant.participantController.syncType == cfg::SyncType::DistributedTimeQuantum)
+        if (participant.participantController->syncType == cfg::SyncType::DistributedTimeQuantum)
         {
             NextSimTask task;
             task.timePoint = -1ns;

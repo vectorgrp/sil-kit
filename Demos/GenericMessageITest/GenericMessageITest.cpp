@@ -56,7 +56,7 @@ public:
     {
         for (auto&& participant : ibConfig.simulationSetup.participants)
         {
-            if (!participant.participantController._is_configured)
+            if (!participant.participantController)
                 continue;
 
             _systemController->Initialize(participant.id);

@@ -24,10 +24,10 @@ void Validate(const SimulationSetup& testConfig, const Config& ibConfig)
 void Validate(const Participant& participant, const Config& /*ibConfig*/)
 {
     auto& participantController = participant.participantController;
-    if (!participantController._is_configured)
+    if (!participantController)
         return;
 
-    if (participantController.syncType == SyncType::Unsynchronized)
+    if (participantController->syncType == SyncType::Unsynchronized)
     {
         std::cerr << "ERROR: Participant " << participant.name << " uses ParticipantController but did not specify a SyncType!" << std::endl;
         throw ib::cfg::Misconfiguration{"SyncType of ParticipantControllers must not be SyncType::Unsynchronized"};
@@ -50,10 +50,10 @@ void Validate(const TimeSync& testConfig, const Config& ibConfig)
         for (auto&& participant : ibConfig.simulationSetup.participants)
         {
             auto& participantController = participant.participantController;
-            if (!participantController._is_configured)
+            if (!participantController)
                 continue;
 
-            if (participantController.syncType == SyncType::DiscreteTime || participantController.syncType == SyncType::DiscreteTimePassive)
+            if (participantController->syncType == SyncType::DiscreteTime || participantController->syncType == SyncType::DiscreteTimePassive)
             {
                 std::cerr << "ERROR: Invalid TimeSync configuration! TickPeriod must not be 0 when using SyncType::DiscreteTime!" << std::endl;
                 throw ib::cfg::Misconfiguration{"TickPeriod must not be 0"};

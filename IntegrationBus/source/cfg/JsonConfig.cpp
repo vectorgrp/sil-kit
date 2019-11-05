@@ -764,9 +764,6 @@ auto from_json<SyncType>(const json11::Json& json) -> SyncType
 
 auto to_json(const ParticipantController& controller) -> json11::Json
 {
-    if (!controller._is_configured)
-        throw std::logic_error{"to_json(constParticipantController) must only be called on configured controllers!" };
-
     json11::Json::object json{
         {"SyncType", to_json(controller.syncType)}
     };
@@ -782,16 +779,12 @@ template<>
 auto from_json<ParticipantController>(const json11::Json& json) -> ParticipantController
 {
     ParticipantController controller;
-    controller._is_configured = !json.is_null();
-    
-    if (controller._is_configured)
-    {
-        optional_from_json(controller.syncType, json, "SyncType");
-        if (!json["ExecTimeLimitSoftMs"].is_null())
-            controller.execTimeLimitSoft = std::chrono::milliseconds{json["ExecTimeLimitSoftMs"].int_value()};
-        if (!json["ExecTimeLimitHardMs"].is_null())
-            controller.execTimeLimitHard = std::chrono::milliseconds{json["ExecTimeLimitHardMs"].int_value()};
-    }
+
+    controller.syncType = from_json<SyncType>(json["SyncType"]);
+    if (!json["ExecTimeLimitSoftMs"].is_null())
+        controller.execTimeLimitSoft = std::chrono::milliseconds{json["ExecTimeLimitSoftMs"].int_value()};
+    if (!json["ExecTimeLimitHardMs"].is_null())
+        controller.execTimeLimitHard = std::chrono::milliseconds{json["ExecTimeLimitHardMs"].int_value()};
 
     return controller;
 }
@@ -838,9 +831,9 @@ auto to_json(const Participant& participant) -> json11::Json
         // FIXME: optional ParticipantController
         {"IsSyncMaster", participant.isSyncMaster}
     };
-    if (participant.participantController._is_configured)
+    if (participant.participantController)
     {
-        json["ParticipantController"] = to_json(participant.participantController);
+        json["ParticipantController"] = to_json(*participant.participantController);
     }
     return json;
 }
@@ -883,10 +876,9 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
 
     participant.name = json["Name"].string_value();
 
-    // FIXME: do we really need the optional here?
     optional_from_json(participant.logger, json, "Logger");
 
-    participant.participantController = from_json<ParticipantController>(json["ParticipantController"]);
+    participant.participantController = from_json<OptionalCfg<ParticipantController>>(json["ParticipantController"]);
 
     // Participant.SyncType is deprecated. Report to user.
     if (!json["SyncType"].is_null())
@@ -895,7 +887,7 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
 
         // Participant.SyncType is deprecated.
         //  - We treat this as an error, when already using a ParticipantController configuration
-        if (participant.participantController._is_configured)
+        if (participant.participantController)
         {
             std::cerr << "ERROR: SyncType must no longer be specified directly on the Participant.\n";
         }
@@ -913,14 +905,15 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
             << "        \"SyncType\": \"" << syncTypeString << "\"\n"
             << "    }\n";
         std::this_thread::sleep_for(3s);
-        if (participant.participantController._is_configured)
+        if (participant.participantController)
         {
             throw Misconfiguration{"SyncType configuration moved to ParticipantController"};
         }
         else
         {
-            participant.participantController._is_configured = true;
-            participant.participantController.syncType = from_json<SyncType>(json["SyncType"]);
+            ParticipantController controller;
+            controller.syncType = from_json<SyncType>(json["SyncType"]);
+            participant.participantController = controller;
         }
     }
     participant.isSyncMaster = json["IsSyncMaster"].bool_value();
@@ -1158,12 +1151,7 @@ auto from_json<FastRtps::Config>(const json11::Json& json) -> FastRtps::Config
 
     optional_from_json(fastRtps.discoveryType, json, "DiscoveryType");
     fastRtps.configFileName = from_json<std::string>(json["ConfigFileName"]);
-
-    for (auto&& kv : json["UnicastLocators"].object_items())
-    {
-        fastRtps.unicastLocators[kv.first] = kv.second.string_value();
-    }
-
+    fastRtps.unicastLocators = from_json<std::map<std::string, std::string>>(json["UnicastLocators"]);
 
     switch (fastRtps.discoveryType)
     {
@@ -1345,17 +1333,6 @@ auto to_json_array(const std::vector<T>& vector, FUNC&& conversion) -> json11::J
     return array;
 }
 
-template<typename T, typename>
-auto from_json(const json11::Json::array& array) -> T
-{
-    T vector;
-    vector.reserve(array.size());
-    std::transform(array.begin(), array.end(),
-                   std::back_inserter(vector),
-                   [](auto&& t) { return from_json<typename T::value_type>(t); });
-    return vector;
-}
-
 template<typename T>
 auto to_json(const std::map<std::string, T>& map) -> json11::Json::object
 {
@@ -1366,16 +1343,6 @@ auto to_json(const std::map<std::string, T>& map) -> json11::Json::object
     return object;
 }
 
-
-template<typename T, typename>
-auto from_json(const json11::Json::object& object) -> T
-{
-    T map;
-    std::transform(object.begin(), object.end(),
-                   std::inserter(map, map.end()),
-                   [](auto&& kv) { return std::make_tuple(kv.first, from_json<typename T::mapped_type>(kv.second)); });
-    return map;
-}
 
 } // namespace cfg
 } // namespace ib

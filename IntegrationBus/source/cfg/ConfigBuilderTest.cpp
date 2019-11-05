@@ -309,11 +309,13 @@ TEST_F(ConfigBuilderTest, configure_participant_sync_type)
 
     ASSERT_EQ(config.simulationSetup.participants.size(), 1u);
     auto&& p1 = config.simulationSetup.participants[0];
-    EXPECT_EQ(p1.participantController.syncType, SyncType::TimeQuantum);
+    ASSERT_TRUE(p1.participantController);
+    EXPECT_EQ(p1.participantController->syncType, SyncType::TimeQuantum);
 
     auto json = config.ToJsonString();
     auto jsonConfig = Config::FromJsonString(json);
-    EXPECT_EQ(jsonConfig.simulationSetup.participants[0].participantController.syncType, SyncType::TimeQuantum);
+    ASSERT_TRUE(jsonConfig.simulationSetup.participants[0].participantController.has_value());
+    EXPECT_EQ(jsonConfig.simulationSetup.participants[0].participantController->syncType, SyncType::TimeQuantum);
 }
 
 TEST_F(ConfigBuilderTest, make_generic_message_config)

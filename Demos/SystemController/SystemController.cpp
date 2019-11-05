@@ -111,7 +111,7 @@ public:
     {
         for (auto&& participant : ibConfig.simulationSetup.participants)
         {
-            if (!participant.participantController._is_configured)
+            if (!participant.participantController)
                 continue;
 
             std::cout << "Sending ParticipantCommand::Init to participant \"" << participant.name << "\"" << std::endl;

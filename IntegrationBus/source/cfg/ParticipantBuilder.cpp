@@ -157,9 +157,10 @@ auto ParticipantBuilder::WithSyncType(SyncType syncType) -> ParticipantBuilder&
     INFO: with    participantBuilder.AddParticipantController().WithSyncType(syncType);
 )deprecation";
     std::this_thread::sleep_for(3s);
-    
-    config.participantController._is_configured = true;
-    config.participantController.syncType = syncType;
+
+    ParticipantController controller;
+    controller.syncType = syncType;
+    config.participantController = controller;
     return *this;
 }
 
