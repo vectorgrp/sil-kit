@@ -107,11 +107,13 @@ TEST_F(EthernetControllerTest, trigger_callback_on_receive_message)
  */
 TEST_F(EthernetControllerTest, trigger_callback_on_receive_ack)
 {
-    EthTransmitAcknowledge ack{17, 42ms, EthTransmitStatus::Transmitted};
+    EthTransmitAcknowledge ack{17, 0x0, 42ms, EthTransmitStatus::Transmitted};
 
     EXPECT_CALL(callbacks, MessageAck(&controller, ack))
         .Times(1);
-
+    EthMessage msg;
+    msg.ethFrame.SetSourceMac(EthMac{ 0,0,0,0,0,0 });
+    controller.SendMessage(msg);
     controller.ReceiveIbMessage(otherAddress, ack);
 }
 
@@ -127,11 +129,12 @@ TEST_F(EthernetControllerTest, generate_ack_on_receive_msg)
     EthMessage msg;
     msg.timestamp  = 42ms;
     msg.transmitId = 17;
+    msg.ethFrame.SetSourceMac(EthMac{ 0,0,0,0,0,0 });
 
-    EthTransmitAcknowledge expectedAck{msg.transmitId, msg.timestamp, EthTransmitStatus::Transmitted};
+    EthTransmitAcknowledge expectedAck{msg.transmitId, 0x0, msg.timestamp, EthTransmitStatus::Transmitted};
 
-    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, expectedAck))
-        .Times(1);
+
+    controller.SendMessage(msg);
 
     controller.ReceiveIbMessage(otherAddress, msg);
 }

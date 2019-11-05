@@ -17,6 +17,13 @@ add_vib_test(ITestThreeCanController
       IbMwComAdapter
       IbMwVAsio
 )
+add_vib_test(ITestThreeEthController
+    SOURCES
+      ThreeEthControllerITest.cpp
+    LIBS
+      IbMwComAdapter
+      IbMwVAsio
+)
 
 add_vib_test(ITestSocketBufferSize
     SOURCES

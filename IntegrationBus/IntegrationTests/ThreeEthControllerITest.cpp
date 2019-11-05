@@ -5,6 +5,8 @@
 #include <thread>
 #include <future>
 
+#include <iostream>
+
 #include "CreateComAdapter.hpp"
 #include "VAsioRegistry.hpp"
 
@@ -21,7 +23,8 @@ namespace {
 
 using namespace std::chrono_literals;
 using namespace ib::mw;
-using namespace ib::sim::can;
+using namespace ib::cfg;
+using namespace ib::sim::eth;
 
 using testing::_;
 using testing::A;
@@ -32,25 +35,24 @@ using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
 
-auto AnAckWithTxIdAndCanId(CanTxId transmitId, uint32_t canId) -> testing::Matcher<const CanTransmitAcknowledge&>
+auto MatchTxId(EthTxId transmitId) -> testing::Matcher<const EthTransmitAcknowledge&>
 {
     using namespace testing;
-    return AllOf(
-        Field(&CanTransmitAcknowledge::transmitId, transmitId),
-        Field(&CanTransmitAcknowledge::canId, canId)
-    );
+    return
+        Field(&EthTransmitAcknowledge::transmitId, transmitId)
+        ;
 }
 
-class ThreeCanControllerITest : public testing::Test
+class ThreeEthControllerITest : public testing::Test
 {
 protected:
     struct Callbacks
     {
-        MOCK_METHOD1(AckHandler, void(const CanTransmitAcknowledge&));
+        MOCK_METHOD1(AckHandler, void(const EthTransmitAcknowledge&));
     };
 
 protected:
-    ThreeCanControllerITest()
+    ThreeEthControllerITest()
     {
         domainId = static_cast<uint32_t>(GetTestPid());
 
@@ -63,34 +65,33 @@ protected:
         }
 
         ib::cfg::ConfigBuilder builder{"TestConfig"};
-
-        builder.SimulationSetup()
-            .AddParticipant("CanWriter")
-            .AddCan("CAN1").WithLink("CAN1");
-        builder.SimulationSetup()
-            .AddParticipant("CanReader1")
-            .AddCan("CAN1").WithLink("CAN1");
-        builder.SimulationSetup()
-            .AddParticipant("CanReader2")
-            .AddCan("CAN1").WithLink("CAN1");
+        auto &&setup = builder.SimulationSetup();
+        setup.AddParticipant("EthWriter")
+            ->AddEthernet("ETH1").WithLink("LINK1");
+        setup.AddParticipant("EthReader1")
+            ->AddEthernet("ETH1").WithLink("LINK1");
+        setup.AddParticipant("EthReader2")
+            ->AddEthernet("ETH1").WithLink("LINK1");
 
         ibConfig = builder.Build();
     }
 
     void Sender()
     {
-        auto comAdapter = CreateComAdapterImpl(ibConfig, "CanWriter");
+        std::cout << " Sender init" << std::endl;
+        auto comAdapter = CreateComAdapterImpl(ibConfig, "EthWriter");
         comAdapter->joinIbDomain(domainId);
 
         std::promise<void> threadFinishedPromise{};
-        unsigned int receiveCount{0};
+        unsigned int receiveCount{ 0 };
 
-        auto* controller = comAdapter->CreateCanController("CAN1");
-        controller->RegisterTransmitStatusHandler(
-            [this, &threadFinishedPromise, &receiveCount](ICanController* /*ctrl*/, const CanTransmitAcknowledge& ack) {
+        auto* controller = comAdapter->CreateEthController("ETH1");
+        controller->RegisterMessageAckHandler(
+            [this, &threadFinishedPromise, &receiveCount](IEthController*, const EthTransmitAcknowledge& ack) {
+            std::cout << "<- EthTransmitAck" << std::endl;
             callbacks.AckHandler(ack);
-
-            if (testMessages.size() == ++receiveCount)
+            ++receiveCount;
+            if (testMessages.size() == receiveCount)
             {
                 allReceivedPromise.set_value();
                 threadFinishedPromise.set_value();
@@ -99,10 +100,13 @@ protected:
 
         for (auto&& message : testMessages)
         {
-            CanMessage msg;
-            msg.canId = 1;
-            msg.dataField.assign(message.expectedData.begin(), message.expectedData.end());
-            msg.dlc = msg.dataField.size();
+            EthMessage msg;
+            msg.ethFrame.SetDestinationMac(EthMac{ 0x12,0x23,0x45,0x67,0x89,0x9a });
+            msg.ethFrame.SetSourceMac(EthMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12});
+            msg.ethFrame.SetEtherType(0x8100);
+            msg.ethFrame.SetPayload(reinterpret_cast<const uint8_t*>(message.expectedData.c_str()), message.expectedData.size());
+
+            std::cout << "<- SendMesg" << std::endl;
 
             std::this_thread::sleep_for(100ms);
             controller->SendMessage(std::move(msg));
@@ -114,42 +118,51 @@ protected:
 
     void Receiver(const std::string& participantName, const std::shared_future<void>& finishedFuture)
     {
+        std::cout << " Receiver init " << participantName << std::endl;
         auto comAdapter = CreateComAdapterImpl(ibConfig, participantName);
         comAdapter->joinIbDomain(domainId);
 
         unsigned int receiveCount{0};
 
-        auto* controller = comAdapter->CreateCanController("CAN1");
-        controller->RegisterTransmitStatusHandler(
-            [this](ICanController* /*ctrl*/, const CanTransmitAcknowledge& ack) {
+        auto* controller = comAdapter->CreateEthController("ETH1");
+        controller->RegisterMessageAckHandler(
+            [this](IEthController* , const EthTransmitAcknowledge& ack) {
             callbacks.AckHandler(ack);
         });
-
         controller->RegisterReceiveMessageHandler(
-            [this, &receiveCount, &participantName](ICanController* /*ctrl*/, const CanMessage& msg) {
-
-            if (participantName == "CanReader1")
-            {
-                std::string message(msg.dataField.begin(), msg.dataField.end());
-                testMessages[receiveCount++].receivedData = message;
-            }
+            [this, &receiveCount, &participantName](IEthController* , const EthMessage& msg) {
+                if (participantName == "EthReader1")
+                {
+                    const auto &pl = msg.ethFrame.GetPayload();
+                    std::string message(pl.begin(), pl.end());
+                    std::cout << " <- received message on " << participantName
+                        << " ethframe size=" << pl.size()
+                        << ": testMessages size=" << testMessages.size()
+                        << ": receiveCount=" << receiveCount
+                        << ": " << message
+                        << std::endl;
+                    testMessages[receiveCount].receivedData = message;
+                    receiveCount++;
+                }
         });
-
+        //blocking
         ASSERT_EQ(finishedFuture.wait_for(15s), std::future_status::ready);
+        if (participantName == "EthReader1")
+        {
+            ASSERT_EQ(receiveCount, testMessages.size());
+        }
     }
 
     void ExecuteTest()
     {
         std::shared_future<void> finishedFuture(allReceivedPromise.get_future());
-        std::thread receiver1Thread{[this, &finishedFuture] { Receiver("CanReader1", finishedFuture); }};
-        std::thread receiver2Thread{[this, &finishedFuture] { Receiver("CanReader2", finishedFuture); }};
-
+        std::thread receiver1Thread{[this, &finishedFuture] { Receiver("EthReader1", finishedFuture); }};
+        std::thread receiver2Thread{[this, &finishedFuture] { Receiver("EthReader2", finishedFuture); }};
         for (auto index = 1u; index <= testMessages.size(); index++)
         {
-            EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(index, 1))).Times(1);
+            EXPECT_CALL(callbacks, AckHandler(MatchTxId(index))).Times(1);
         }
-        EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(0, 1))).Times(0);
-        EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(6, 1))).Times(0);
+        EXPECT_CALL(callbacks, AckHandler(MatchTxId(0))).Times(0);
 
         std::thread senderThread{[this] { Sender(); }};
 
@@ -179,14 +192,14 @@ protected:
     Callbacks callbacks;
 };
 
-TEST_F(ThreeCanControllerITest, test_can_ack_callbacks_fastrtps)
+TEST_F(ThreeEthControllerITest, test_eth_ack_callbacks_fastrtps)
 {
     ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::FastRTPS;
 
     ExecuteTest();
 }
 
-TEST_F(ThreeCanControllerITest, test_can_ack_callbacks_vasio)
+TEST_F(ThreeEthControllerITest, test_eth_ack_callbacks_vasio)
 {
     ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
 

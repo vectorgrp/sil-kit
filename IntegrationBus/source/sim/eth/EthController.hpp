@@ -86,8 +86,12 @@ private:
         CallbackVector<EthTransmitAcknowledge>
     > _callbacks;
 
+
     PcapTracer _tracer;
     bool _tracingIsEnabled{false};
+
+     std::vector<std::pair<uint64_t, EthTxId>> _pendingAcks;
+
 };
 
 // ================================================================================
