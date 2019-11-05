@@ -480,11 +480,19 @@
                       },
                       "PcapFile": {
                         "type": "string",
-                        "title": "Name of the file capturing the PCAP trace"
+                        "title": "Name of the file capturing the PCAP trace",
+                        "examples": [
+                          "Eth0.pcap",
+                          "EthernetWriter.pcap"
+                        ]
                       },
                       "PcapPipe": {
                         "type": "string",
-                        "title": "Name of the pipe capturing the PCAP trace"
+                        "title": "Name of the pipe capturing the PCAP trace",
+                        "examples": [
+                          "eth0_pipe",
+                          "ethernet_writer_pipe"
+                        ]
                       }
                     },
                     "additionalProperties": false

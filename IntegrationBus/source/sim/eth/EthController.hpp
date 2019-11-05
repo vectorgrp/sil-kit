@@ -26,7 +26,7 @@ public:
     EthController() = delete;
     EthController(const EthController&) = default;
     EthController(EthController&&) = default;
-    EthController(mw::IComAdapter* comAdapter, const std::string& pcapFile, const std::string& pcapPipe);
+    EthController(mw::IComAdapter* comAdapter, cfg::EthernetController config);
 
 public:
     // ----------------------------------------
@@ -87,6 +87,7 @@ private:
     > _callbacks;
 
     ::ib::sim::eth::EthPcapTracer _tracer;
+    bool _tracingIsEnabled{false};
 };
 
 // ================================================================================

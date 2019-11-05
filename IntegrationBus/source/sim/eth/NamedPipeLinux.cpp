@@ -1,5 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 #include "NamedPipe.hpp"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -15,13 +17,11 @@ namespace ib {
 namespace sim {
 namespace eth {
 
-struct NamedPipeLinux: public NamedPipe
+class NamedPipeLinux: public NamedPipe
 {
-    std::string _name;
-    std::fstream _file;
-    bool _isOwner{false};
-
-    int _fd = -1;
+public:
+    // ----------------------------------------
+    // Constructors and Destructor
     NamedPipeLinux(const std::string &name)
     :_name(name)
     {
@@ -44,7 +44,7 @@ struct NamedPipeLinux: public NamedPipe
 
             throw std::runtime_error(ss.str());
         }
-        _isOwner=true;
+        _isOwner = true;
     }
     ~NamedPipeLinux()
     {
@@ -53,7 +53,7 @@ struct NamedPipeLinux: public NamedPipe
             int err = ::unlink(_name.c_str());
             if(err == -1)
             {
-                std::cerr  << "Error creating pipe \"" << _name << "\""
+                std::cerr  << "Error deleting pipe \"" << _name << "\""
                     << ": errno: " << err
                     << ": " << strerror(errno)
                     ;
@@ -61,12 +61,25 @@ struct NamedPipeLinux: public NamedPipe
             }
         }
     }
+
+public:
+    // ----------------------------------------
+    // Public interface methods
     bool Write(const char *buffer, size_t bufferSize) override
     {
         _file.write(buffer, bufferSize);
         _file.flush();
         return _file.good();
     }
+    
+private:
+    // ----------------------------------------
+    // private members
+    std::string _name;
+    std::fstream _file;
+    bool _isOwner{false};
+
+    int _fd = -1;
 };
 
 std::unique_ptr<NamedPipe> NamedPipe::Create(const std::string& name)

@@ -9,10 +9,14 @@ namespace sim {
 namespace eth {
 
 
-EthController::EthController(mw::IComAdapter* comAdapter, const std::string& pcapFile, const std::string& pcapPipe)
+EthController::EthController(mw::IComAdapter* comAdapter, cfg::EthernetController config)
     : _comAdapter(comAdapter)
-    , _tracer(pcapFile, pcapPipe)
 {
+    _tracingIsEnabled = (!config.pcapFile.empty() || !config.pcapPipe.empty());
+    if (_tracingIsEnabled)
+    {
+        _tracer.OpenStreams(config.pcapFile, config.pcapPipe);
+    }
 }
 
 void EthController::Activate()
@@ -61,7 +65,7 @@ void EthController::ReceiveIbMessage(mw::EndpointAddress from, const EthMessage&
     if (from == _endpointAddr)
         return;
 
-    _tracer.Trace(msg);
+    if (_tracingIsEnabled) _tracer.Trace(msg);
 
     CallHandlers(msg);
 
@@ -84,8 +88,6 @@ void EthController::ReceiveIbMessage(mw::EndpointAddress from, const EthTransmit
 void EthController::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
     _endpointAddr = endpointAddress;
-
-    _tracer.OpenStreams();
 }
 
 auto EthController::EndpointAddress() const -> const mw::EndpointAddress&

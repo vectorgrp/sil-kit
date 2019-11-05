@@ -39,12 +39,15 @@ public:
         ss << "\\\\.\\pipe\\" << name;
 
         _pipeHandle = CreateNamedPipe(
-            ss.str().c_str(),
-            PIPE_ACCESS_OUTBOUND,
-            PIPE_TYPE_MESSAGE | PIPE_WAIT,
-            1, 65536, 65536,
-            300,
-            NULL);
+            ss.str().c_str(),              /* The unique pipe name. Must have form \.\pipe<i>pipename. The pipename: is case-insensitive
+                                              and no backslashes are allowed. The pipename can be up to 256 characters long. */
+            PIPE_ACCESS_OUTBOUND,          /* Open mode: PIPE_ACCESS_OUTBOUND -> The flow of data in the pipe goes from server to client only. */
+            PIPE_TYPE_MESSAGE | PIPE_WAIT, /* Pipe mode: PIPE_TYPE_MESSAGE -> Data is written as a stream of messages.
+                                                         PIPE_WAIT -> Blocking mode is enabled. WriteFile and ConnectNamedPipe are blocking the process */
+            1,                             /* Max number of instances that can be created for this pipe */
+            65536, 65536,                  /* Number of bytes to reserve for input and output buffer */
+            300,                           /* Timeout for the NamedPipe. A value of zero will result in a default timeout of 50 ms */
+            NULL);                         /* Pointer to security attributes. NULL -> default security descriptor */
         if (!isValid())
         {
             throw std::runtime_error(GetPipeError());
@@ -92,10 +95,12 @@ private:
     {
         if (isValid())
         {
-            BOOL ok = FALSE;
-            ok = FlushFileBuffers(_pipeHandle);
-            ok = DisconnectNamedPipe(_pipeHandle);
-            ok = CloseHandle(_pipeHandle);
+            BOOL isClosed = TRUE;
+            isClosed &= FlushFileBuffers(_pipeHandle);
+            isClosed &= DisconnectNamedPipe(_pipeHandle);
+            isClosed &= CloseHandle(_pipeHandle);
+            if (!isClosed) std::cerr << "ERROR: Closing the PCAP pipe handle was not successful." << std::endl;
+
             _pipeHandle = INVALID_HANDLE_VALUE;
         }
     }

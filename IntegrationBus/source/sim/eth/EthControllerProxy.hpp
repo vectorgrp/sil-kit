@@ -27,7 +27,7 @@ public:
     EthControllerProxy() = delete;
     EthControllerProxy(const EthControllerProxy&) = default;
     EthControllerProxy(EthControllerProxy&&) = default;
-    EthControllerProxy(mw::IComAdapter* comAdapter, const std::string& pcapFile, const std::string& pcapPipe);
+    EthControllerProxy(mw::IComAdapter* comAdapter, cfg::EthernetController config);
 
 public:
     // ----------------------------------------
@@ -93,6 +93,7 @@ private:
     > _callbacks;
 
     EthPcapTracer _tracer;
+    bool _tracingIsEnabled{false};
 };
 
 // ================================================================================

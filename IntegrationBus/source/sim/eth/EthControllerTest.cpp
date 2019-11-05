@@ -61,7 +61,7 @@ protected:
 
 protected:
     EthernetControllerTest()
-        : controller(&comAdapter, "", "")
+        : controller(&comAdapter, _config)
     {
         controller.SetEndpointAddress(controllerAddress);
 
@@ -76,6 +76,7 @@ protected:
     MockComAdapter comAdapter;
     Callbacks callbacks;
 
+    ib::cfg::EthernetController _config;
     EthController controller;
 };
 

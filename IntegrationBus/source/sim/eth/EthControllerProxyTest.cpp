@@ -62,7 +62,7 @@ protected:
 
 protected:
     EthernetControllerProxyTest()
-        : proxy(&comAdapter, "", "")
+        : proxy(&comAdapter, _config)
     {
         proxy.SetEndpointAddress(proxyAddress);
 
@@ -80,6 +80,7 @@ protected:
     MockComAdapter comAdapter;
     Callbacks callbacks;
 
+    ib::cfg::EthernetController _config;
     EthControllerProxy proxy;
 };
 

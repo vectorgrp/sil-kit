@@ -27,9 +27,4 @@ target_include_directories(IbSimEthernet
     PUBLIC .
 )
 
-if (MSVC)
-    target_compile_options(IbSimEthernet PRIVATE "/bigobj")
-    target_compile_definitions(IbSimEthernet PUBLIC _WIN32_WINNT=0x0601)
-endif (MSVC)
-
 add_vib_test(TestSimEthController SOURCES EthControllerTest.cpp EthControllerProxyTest.cpp LIBS IbSimEthernet IbMwMockComAdapter)
