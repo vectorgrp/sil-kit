@@ -9,16 +9,6 @@ namespace ib {
 namespace sim {
 namespace eth {
 
-static auto macToInt(const EthMac &mac) -> uint64_t {
-    return static_cast<uint64_t>(mac[5]) << 40
-        | static_cast<uint64_t>(mac[4]) << 32
-        | static_cast<uint64_t>(mac[3]) << 24
-        | static_cast<uint64_t>(mac[2]) << 16
-        | static_cast<uint64_t>(mac[1]) << 8
-        | static_cast<uint64_t>(mac[0])
-        ;
-}
-
 EthController::EthController(mw::IComAdapter* comAdapter, cfg::EthernetController config)
     : _comAdapter(comAdapter)
 {
@@ -48,8 +38,7 @@ void EthController::Deactivate()
 auto EthController::SendMessage(EthMessage msg) -> EthTxId
 {
     auto txId = MakeTxId();
-    auto srcMac = macToInt(msg.ethFrame.GetSourceMac());
-    _pendingAcks.emplace_back(srcMac, txId);
+    _pendingAcks.emplace_back(msg.ethFrame.GetSourceMac(), txId);
 
     msg.transmitId = txId;
     _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
@@ -90,7 +79,7 @@ void EthController::ReceiveIbMessage(mw::EndpointAddress from, const EthMessage&
     EthTransmitAcknowledge ack;
     ack.timestamp  = msg.timestamp;
     ack.transmitId = msg.transmitId;
-    ack.sourceMac = macToInt(msg.ethFrame.GetSourceMac());
+    ack.sourceMac = msg.ethFrame.GetSourceMac();
     ack.status     = EthTransmitStatus::Transmitted;
 
     _comAdapter->SendIbMessage(_endpointAddr, ack);

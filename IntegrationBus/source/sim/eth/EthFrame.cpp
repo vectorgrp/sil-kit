@@ -3,6 +3,7 @@
 #include "EthFrame.hpp"
 
 #include <cassert>
+#include <exception>
 
 namespace ib {
 namespace sim {
@@ -113,7 +114,7 @@ auto EthFrame::GetDestinationMac() const -> EthMac
 {
     if (_rawFrame.empty())
     {
-        throw std::exception();
+        throw std::runtime_error("EthFrame:GetDestinationMac(): empty raw frame!");
     }
 
     EthMac dest;
@@ -135,7 +136,7 @@ auto EthFrame::GetSourceMac() const -> EthMac
 {
     if (_rawFrame.empty())
     {
-        throw std::exception();
+        throw std::runtime_error("EthFrame:GetSourceMac(): empty raw frame!");
     }
 
     EthMac source;

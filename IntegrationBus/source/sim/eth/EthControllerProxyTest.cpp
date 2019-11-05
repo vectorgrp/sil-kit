@@ -146,7 +146,7 @@ TEST_F(EthernetControllerProxyTest, trigger_callback_on_receive_message)
  */
 TEST_F(EthernetControllerProxyTest, trigger_callback_on_receive_ack)
 {
-    EthTransmitAcknowledge expectedAck{17,  0x0, 42ms, EthTransmitStatus::Transmitted };
+    EthTransmitAcknowledge expectedAck{ 17,  EthMac{}, 42ms, EthTransmitStatus::Transmitted };
 
     EXPECT_CALL(callbacks, MessageAck(&proxy, expectedAck))
         .Times(1);

@@ -131,7 +131,7 @@ enum class EthTransmitStatus : uint8_t
 struct EthTransmitAcknowledge
 {
     EthTxId transmitId;   //!< Identifies the EthTransmitRequest, to which this EthTransmitAcknowledge refers to.
-    uint64_t sourceMac; //!< The source MAC address encoded as integral datatype
+    EthMac sourceMac; //!< The source MAC address encoded as integral datatype
     std::chrono::nanoseconds timestamp; //!< Timestamp of the Ethernet acknowledge.
     EthTransmitStatus status; //!< Status of the EthTransmitRequest.
 };

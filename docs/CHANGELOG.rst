@@ -58,6 +58,7 @@ Fixed
   a CAN acknowledge (in the callback) without even sending a CAN message.
   Now, the callback for the acknowledge will only be called by the controller
   that did send the corresponding CAN message.
+- Similarly, the Ethernet acknowledge mechanism was fixed.
 
 Removed
 ~~~~~~~

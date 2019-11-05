@@ -38,9 +38,7 @@ using testing::Return;
 auto MatchTxId(EthTxId transmitId) -> testing::Matcher<const EthTransmitAcknowledge&>
 {
     using namespace testing;
-    return
-        Field(&EthTransmitAcknowledge::transmitId, transmitId)
-        ;
+    return Field(&EthTransmitAcknowledge::transmitId, transmitId);
 }
 
 class ThreeEthControllerITest : public testing::Test
