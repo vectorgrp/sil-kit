@@ -23,6 +23,15 @@ Build Requirements
 These are the specific versions Integration Bus is tested and built against.
 
 
+Building Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+To build the documentation you'll need to install:
+
+* Python 3
+* Sphinx (via pip)
+
+
 Architecture
 ~~~~~~~~~~~~
 
