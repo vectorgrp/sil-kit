@@ -47,7 +47,8 @@ module idl {
     struct EthTransmitAcknowledge
     {
         @Key ib::mw::idl::EndpointAddress senderAddr;
-        unsigned long transmitId; // identifies the EthTransmitRequest, to which this Acknowledge 
+        unsigned long transmitId; // identifies the EthTransmitRequest, to which this Acknowledge
+        unsigned long long sourceMac; //The source MAC address encoded as integral datatype
         long long timestampNs;
         EthTransmitStatus status; // Status of the Eth Transmit Request
     };
