@@ -31,7 +31,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/Demos)
 # Include the Python-implemented launcher tool for testing and installation
 add_subdirectory(${PROJECT_SOURCE_DIR}/Launcher)
 # Include automated documentation with doxygen and sphinx
-add_subdirectory (${PROJECT_SOURCE_DIR}/docs)
+add_subdirectory(${PROJECT_SOURCE_DIR}/docs)
 
 
 ################################################################################

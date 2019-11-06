@@ -6,12 +6,13 @@
 #include <fstream>
 #include <numeric>
 
-#include "ib/IntegrationBus.hpp"
+#include "CreateComAdapter.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 
 #include "ib/cfg/Config.hpp"
+#include "ib/cfg/ConfigBuilder.hpp"
 
 using namespace ib::mw;
 using namespace ib::cfg;
@@ -137,7 +138,8 @@ void ParticipantsThread(
 	uint32_t domainId,
 	bool isVerbose)
 {
-	auto comAdapter = ib::CreateComAdapter(ibConfig, thisParticipant.name, domainId);
+	auto comAdapter = CreateComAdapterImpl(ibConfig, thisParticipant.name);
+	comAdapter->joinIbDomain(domainId);
 	auto participantController = comAdapter->GetParticipantController();
 
 	std::vector<ib::sim::generic::IGenericPublisher*> publishers;
@@ -154,7 +156,8 @@ void ParticipantsThread(
 		subscribers.push_back(thisSubscriber);
 	}
 
-	participantController->SetSimulationTask([payloadSizeInBytes, simulationDuration, participantController, &publishers, isVerbose](std::chrono::nanoseconds now) {
+	participantController->SetSimulationTask(
+		[payloadSizeInBytes, simulationDuration, participantController, &publishers, isVerbose](std::chrono::nanoseconds now) {
 
 		if (now > simulationDuration)
 		{
@@ -185,7 +188,6 @@ void ParticipantsThread(
 /**************************************************************************************************
 * Main Function
 **************************************************************************************************/
-
 int main(int argc, char** argv)
 {
 	try
@@ -201,7 +203,8 @@ int main(int argc, char** argv)
 		if (argc >= 7)
 		{
 			std::cout << "Too many arguments." << std::endl;
-			std::cout << "Start benchmark with " << argv[0] << " [numberOfParticipants] [simulationDuration] [simulationRepeats] [payloadSizeInBytes] [domainId]" << std::endl;
+			std::cout << "Start benchmark with " << argv[0];
+			std::cout << " [numberOfParticipants] [simulationDuration] [simulationRepeats] [payloadSizeInBytes] [domainId]" << std::endl;
 			return -1;
 		}
 
@@ -224,7 +227,8 @@ int main(int argc, char** argv)
 		if (numberOfParticipants < 2 || simulationDuration < 1s || simulationRepeats < 1 || payloadSizeInBytes < 1)
 		{
 			std::cout << "Invalid argument." << std::endl;
-			std::cout << "Start benchmark with " << argv[0] << " [numberOfParticipants] [simulationDuration] [simulationRepeats] [payloadSizeInBytes] [domainId]" << std::endl;
+			std::cout << "Start benchmark with " << argv[0];
+			std::cout << " [numberOfParticipants] [simulationDuration] [simulationRepeats] [payloadSizeInBytes] [domainId]" << std::endl;
 			return -1;
 		}
 
@@ -254,7 +258,8 @@ int main(int argc, char** argv)
 				}));
 			}
 
-			auto comAdapter = ib::CreateComAdapter(ibConfig, "Master", domainId);
+			auto comAdapter = CreateComAdapterImpl(ibConfig, "Master");
+			comAdapter->joinIbDomain(domainId);
 
 			auto controller = comAdapter->GetSystemController();
 			auto monitor = comAdapter->GetSystemMonitor();
