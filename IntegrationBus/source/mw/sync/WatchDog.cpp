@@ -16,6 +16,11 @@ WatchDog::WatchDog(std::chrono::milliseconds warnTimeout, std::chrono::milliseco
     , _warnHandler{[](std::chrono::milliseconds) {}}
     , _errorHandler{[](std::chrono::milliseconds) {}}
 {
+    if (warnTimeout <= 0ms)
+        throw std::runtime_error{"WatchDog requires warnTimeout > 0ms"};
+    if (errorTimeout <= 0ms)
+        throw std::runtime_error{"WatchDog requires errorTimeout > 0ms"};
+        
     _watchThread = std::thread{&WatchDog::Run, this};
 }
 

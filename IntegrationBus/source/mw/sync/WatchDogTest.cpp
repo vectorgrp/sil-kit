@@ -49,6 +49,16 @@ protected:
     Callbacks callbacks;
 };
 
+TEST_F(WatchDogTest, throw_if_warn_timeout_is_zero)
+{
+    EXPECT_THROW(WatchDog(0ms,10ms), std::runtime_error);
+}
+
+TEST_F(WatchDogTest, throw_if_error_timeout_is_zero)
+{
+    EXPECT_THROW(WatchDog(10ms,0ms), std::runtime_error);
+}
+
 TEST_F(WatchDogTest, warn_after_timeout)
 {
     WatchDog watchDog{10ms, std::chrono::milliseconds::max()};
