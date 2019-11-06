@@ -7,14 +7,20 @@ add_library(IbSimEthernet STATIC
     EthDatatypeUtils.hpp
     EthFrame.cpp
     EthFrame.hpp
-    EthPcapTracer.cpp
-    EthPcapTracer.hpp
+    PcapTracer.cpp
+    PcapTracer.hpp
     NamedPipe.hpp
 )
 if(WIN32)
-    target_sources(IbSimEthernet PRIVATE NamedPipeWin.cpp)
+    target_sources(IbSimEthernet PRIVATE
+        NamedPipeWin.hpp
+        NamedPipeWin.cpp
+        )
 elseif(UNIX)
-    target_sources(IbSimEthernet PRIVATE NamedPipeLinux.cpp)
+    target_sources(IbSimEthernet PRIVATE
+        NamedPipeLinux.hpp
+        NamedPipeLinux.cpp
+        )
 else()
     message(FATAL_ERROR "ERROR: unsupported platform for NamedPipe!")
 endif()

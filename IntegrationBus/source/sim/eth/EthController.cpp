@@ -13,9 +13,15 @@ EthController::EthController(mw::IComAdapter* comAdapter, cfg::EthernetControlle
     : _comAdapter(comAdapter)
 {
     _tracingIsEnabled = (!config.pcapFile.empty() || !config.pcapPipe.empty());
-    if (_tracingIsEnabled)
+
+    if (!config.pcapFile.empty())
     {
-        _tracer.OpenStreams(config.pcapFile, config.pcapPipe);
+        _tracer.OpenFile(config.pcapFile);
+    }
+
+    if (!config.pcapPipe.empty())
+    {
+        _tracer.OpenPipe(config.pcapPipe);
     }
 }
 

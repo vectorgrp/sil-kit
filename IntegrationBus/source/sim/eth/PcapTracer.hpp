@@ -32,22 +32,23 @@ struct PacketHeader {
     uint32_t orig_len;       /* actual length of packet */
 };
 static_assert(sizeof(PacketHeader) == 16, "PacketHeader size must be equal to 16 bytes");
-}
+} // namespace pcap
 
 
-class EthPcapTracer
+class PcapTracer
 {
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    EthPcapTracer();
-    EthPcapTracer(const EthPcapTracer&) = default;
-    EthPcapTracer(EthPcapTracer&&) = default;
-    ~EthPcapTracer();
+    PcapTracer() = default;
+    PcapTracer(const PcapTracer&) = delete;
+    PcapTracer(PcapTracer&&) = default;
+    ~PcapTracer() = default;
 
     // ----------------------------------------
     // Public methods
-    void OpenStreams(const std::string& pcapFile, const std::string& pcapPipe);
+    void OpenFile(const std::string& pcapFile);
+    void OpenPipe(const std::string& pcapPipe);
     void Trace(const EthMessage& message);
 
 private:
@@ -61,6 +62,6 @@ private:
     pcap::GlobalHeader _pcapGlobalHeader;
 };
 
-}
-}
-}
+} // namespace eth
+} // namespace sim
+} // namespace ib

@@ -26,24 +26,21 @@ Added
   an Ib Config, the ParticipantController can be configured via
   ParticipantBuilder::AddParticipantController().
 
-- New Ethernet Trace Logging in the PCAP Format. Trace logs for ethernet can either
-  be written into a file and / or written into a named pipe.
+- New Ethernet Trace Logging in the PCAP Format. Trace logs can be written to files
+  or named pipes.
 - New config parameters are added for EthernetControllers. Here, you can specify
-  either the PCAP trace filename (without file excension) and / or the name of
-  of the pipe. E.g.:
+  the PCAP trace filename or the name of the pipe. E.g.:
   
     .. code-block:: javascript
-                    
+
        "EthernetControllers": [
            {
                "Name": "ETH0",
                "MacAddr": "F6:04:68:71:AA:C2",
-               "PcapFile": "ethernet_reader",
-               "PcapPipe": "ethernet_reader"
+               "PcapFile": "EthernetReader.pcap",
+               "PcapPipe": "EthernetReaderPipe"
            }
        ]
-
-  If one or both attributes are missing, the PCAP tracing will be disabled respectively.
 - Added WithPcapFile and WithPcapPipe methods for ControllerBuilder<EthernetController>.
   When using the builder pattern to generate an Ib Config, PCAP tracing can be configured
   with the new methods.

@@ -53,7 +53,7 @@
                         "Name": "ETH0",
                         "MacAddr": "F6:04:68:71:AA:C2",
                         "PcapFile": "EthernetReaderTrace.pcap",
-                        "PcapPipe": "ethernet_reader_pipe"
+                        "PcapPipe": "EthernetReaderPipe"
                     }
                 ]
             },

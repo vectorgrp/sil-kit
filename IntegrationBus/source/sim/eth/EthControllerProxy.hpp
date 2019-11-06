@@ -7,7 +7,7 @@
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/cfg/Config.hpp"
 
-#include "EthPcapTracer.hpp"
+#include "PcapTracer.hpp"
 
 namespace ib {
 namespace sim {
@@ -92,7 +92,7 @@ private:
         CallbackVector<uint32_t>
     > _callbacks;
 
-    EthPcapTracer _tracer;
+    PcapTracer _tracer;
     bool _tracingIsEnabled{false};
 };
 

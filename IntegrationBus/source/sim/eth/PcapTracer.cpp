@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "EthPcapTracer.hpp"
+#include "PcapTracer.hpp"
 
 #include <string>
 #include <ctime>
@@ -9,36 +9,33 @@ namespace ib {
 namespace sim {
 namespace eth {
 
-EthPcapTracer::EthPcapTracer()
+void PcapTracer::OpenFile(const std::string& pcapFile)
 {
-}
-
-EthPcapTracer::~EthPcapTracer()
-{
-    _file.close();
-}
-
-void EthPcapTracer::OpenStreams(const std::string& pcapFile, const std::string& pcapPipe)
-{
-    if (!pcapFile.empty())
+    if (pcapFile.empty())
     {
-        if (_file.is_open())
-        {
-            _file.close();
-        }
-
-        _file.open(pcapFile, std::ios::out | std::ios::binary);
-        _file.write(reinterpret_cast<char*>(&_pcapGlobalHeader), sizeof(_pcapGlobalHeader));
+        throw std::runtime_error("PcapTracer::OpenFile: Filename must not be empty!");
     }
 
-    if (!pcapPipe.empty())
+    if (_file.is_open())
     {
-        _pipe = NamedPipe::Create(pcapPipe);
-        _pipe->Write(reinterpret_cast<char*>(&_pcapGlobalHeader), sizeof(_pcapGlobalHeader));
+        _file.close();
     }
+    _file.open(pcapFile, std::ios::out | std::ios::binary);
+    _file.write(reinterpret_cast<char*>(&_pcapGlobalHeader), sizeof(_pcapGlobalHeader));
 }
 
-void EthPcapTracer::Trace(const EthMessage& message)
+void PcapTracer::OpenPipe(const std::string& pcapPipe)
+{
+    if (pcapPipe.empty())
+    {
+        throw std::runtime_error("PcapTracer::OpenPipe: Pipe name must not be empty!");
+    }
+
+    _pipe = NamedPipe::Create(pcapPipe);
+    _pipe->Write(reinterpret_cast<char*>(&_pcapGlobalHeader), sizeof(_pcapGlobalHeader));
+}
+
+void PcapTracer::Trace(const EthMessage& message)
 {
     std::unique_lock<decltype(_lock)> lock;
 

@@ -6,7 +6,7 @@
 #include "ib/sim/eth/IIbToEthController.hpp"
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/cfg/Config.hpp"
-#include "EthPcapTracer.hpp"
+#include "PcapTracer.hpp"
 
 namespace ib {
 namespace sim {
@@ -86,7 +86,7 @@ private:
         CallbackVector<EthTransmitAcknowledge>
     > _callbacks;
 
-    ::ib::sim::eth::EthPcapTracer _tracer;
+    PcapTracer _tracer;
     bool _tracingIsEnabled{false};
 };
 
@@ -99,5 +99,5 @@ auto EthController::MakeTxId() -> EthTxId
 }
 
 } // namespace eth
-} // SimModels
+} // namespace sim
 } // namespace ib

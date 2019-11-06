@@ -1,14 +1,10 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "NamedPipe.hpp"
+#include "NamedPipeWin.hpp"
 
 #include <iostream>
 #include <sstream>
 #include <windows.h>
-
-namespace ib {
-namespace sim {
-namespace eth {
 
 static std::string GetPipeError()
 {
@@ -27,84 +23,70 @@ static std::string GetPipeError()
     return rv;
 }
 
+namespace ib {
+namespace sim {
+namespace eth {
 
-class NamedPipeWin : public NamedPipe
+NamedPipeWin::NamedPipeWin(const std::string& name)
 {
-public:
-    // ----------------------------------------
-    // Constructors and Destructor
-    NamedPipeWin(const std::string& name)
-    {
-        std::stringstream ss;
-        ss << "\\\\.\\pipe\\" << name;
+    std::stringstream ss;
+    ss << "\\\\.\\pipe\\" << name;
 
-        _pipeHandle = CreateNamedPipe(
-            ss.str().c_str(),              /* The unique pipe name. Must have form \.\pipe<i>pipename. The pipename: is case-insensitive
-                                              and no backslashes are allowed. The pipename can be up to 256 characters long. */
-            PIPE_ACCESS_OUTBOUND,          /* Open mode: PIPE_ACCESS_OUTBOUND -> The flow of data in the pipe goes from server to client only. */
-            PIPE_TYPE_MESSAGE | PIPE_WAIT, /* Pipe mode: PIPE_TYPE_MESSAGE -> Data is written as a stream of messages.
-                                                         PIPE_WAIT -> Blocking mode is enabled. WriteFile and ConnectNamedPipe are blocking the process */
-            1,                             /* Max number of instances that can be created for this pipe */
-            65536, 65536,                  /* Number of bytes to reserve for input and output buffer */
-            300,                           /* Timeout for the NamedPipe. A value of zero will result in a default timeout of 50 ms */
-            NULL);                         /* Pointer to security attributes. NULL -> default security descriptor */
-        if (!isValid())
+    _pipeHandle = CreateNamedPipe(
+        ss.str().c_str(),
+        PIPE_ACCESS_OUTBOUND,
+        //we use message buffering, in a blocking manner
+        PIPE_TYPE_MESSAGE | PIPE_WAIT,
+        //single instance only
+        1,
+        //allow for very large messages
+        65536, 65536,
+        //raise the default 50ms timeout, just in case
+        300,
+        NULL);
+    if (!isValid())
+    {
+        throw std::runtime_error(GetPipeError());
+    }
+    ConnectNamedPipe(_pipeHandle, NULL);
+}
+
+NamedPipeWin::~NamedPipeWin()
+{
+    closeConnection();
+}
+bool NamedPipeWin::Write(const char* buffer, size_t size)
+{
+    DWORD cbWritten = 0;
+    if (size == 0) return false;
+    if (isValid())
+    {
+        auto ok = WriteFile(_pipeHandle, buffer, static_cast<DWORD>(size), &cbWritten, NULL);
+        if (!ok && GetLastError() == ERROR_NO_DATA)
         {
-            throw std::runtime_error(GetPipeError());
+            closeConnection();
         }
-        ConnectNamedPipe(_pipeHandle, NULL);
-    }
-
-    ~NamedPipeWin()
-    {
-        closeConnection();
-    }
-
-public:
-    // ----------------------------------------
-    // Public interface methods
-    bool Write(const char *buffer, size_t size) override
-    {
-        DWORD cbWritten = 0;
-        if (size == 0) return false;
-        if (isValid())
+        else if (!ok || cbWritten != size)
         {
-            auto ok = WriteFile(_pipeHandle, buffer, static_cast<DWORD>(size), &cbWritten, NULL);
-            if (!ok && GetLastError() == ERROR_NO_DATA)
-            {
-                closeConnection();
-            }
-            else if (!ok || cbWritten != size)
-            {
-                throw std::runtime_error("NamedPipeWin::Write returned error: " + GetPipeError());
-            }
-        }
-        return cbWritten == size;
-    }
-
-private:
-    // ----------------------------------------
-    // private members
-    HANDLE _pipeHandle{INVALID_HANDLE_VALUE};
-
-private:
-    // ----------------------------------------
-    // private methods
-    bool isValid() const { return _pipeHandle != INVALID_HANDLE_VALUE; }
-    void closeConnection()
-    {
-        if (isValid())
-        {
-            BOOL isClosed = TRUE;
-            isClosed &= FlushFileBuffers(_pipeHandle);
-            isClosed &= DisconnectNamedPipe(_pipeHandle);
-            isClosed &= CloseHandle(_pipeHandle);
-            if (!isClosed) std::cerr << "ERROR: Closing the PCAP pipe handle was not successful." << std::endl;
-
-            _pipeHandle = INVALID_HANDLE_VALUE;
+            throw std::runtime_error("NamedPipeWin::Write returned error: " + GetPipeError());
         }
     }
-};
+    return cbWritten == size;
+}
+
+void NamedPipeWin::closeConnection()
+{
+    if (isValid())
+    {
+        BOOL isClosed = TRUE;
+        isClosed &= FlushFileBuffers(_pipeHandle);
+        isClosed &= DisconnectNamedPipe(_pipeHandle);
+        isClosed &= CloseHandle(_pipeHandle);
+        if (!isClosed) std::cerr << "ERROR: Closing the PCAP pipe handle was not successful." << std::endl;
+
+        _pipeHandle = INVALID_HANDLE_VALUE;
+    }
+}
 
 std::unique_ptr<NamedPipe> NamedPipe::Create(const std::string& name)
 {

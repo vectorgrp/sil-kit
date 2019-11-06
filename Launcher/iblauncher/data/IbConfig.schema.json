@@ -482,7 +482,6 @@
                         "type": "string",
                         "title": "Name of the file capturing the PCAP trace",
                         "examples": [
-                          "Eth0.pcap",
                           "EthernetWriter.pcap"
                         ]
                       },
@@ -490,8 +489,7 @@
                         "type": "string",
                         "title": "Name of the pipe capturing the PCAP trace",
                         "examples": [
-                          "eth0_pipe",
-                          "ethernet_writer_pipe"
+                          "EthernetWriterPipe"
                         ]
                       }
                     },
