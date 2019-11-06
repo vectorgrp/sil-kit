@@ -512,7 +512,7 @@ ib::sim::eth::idl::EthTransmitAcknowledge::EthTransmitAcknowledge()
 {
 
     m_transmitId = 0;
-    m_sourceMac = 0;
+    memset(&m_sourceMac, 0, (6) * 1);
     m_timestampNs = 0;
     m_status = ib::sim::eth::idl::Transmitted;
 
@@ -540,7 +540,7 @@ ib::sim::eth::idl::EthTransmitAcknowledge::EthTransmitAcknowledge(EthTransmitAck
 {
     m_senderAddr = std::move(x.m_senderAddr);
     m_transmitId = x.m_transmitId;
-    m_sourceMac = x.m_sourceMac;
+    m_sourceMac = std::move(x.m_sourceMac);
     m_timestampNs = x.m_timestampNs;
     m_status = x.m_status;
 }
@@ -562,7 +562,7 @@ ib::sim::eth::idl::EthTransmitAcknowledge& ib::sim::eth::idl::EthTransmitAcknowl
 
     m_senderAddr = std::move(x.m_senderAddr);
     m_transmitId = x.m_transmitId;
-    m_sourceMac = x.m_sourceMac;
+    m_sourceMac = std::move(x.m_sourceMac);
     m_timestampNs = x.m_timestampNs;
     m_status = x.m_status;
 
@@ -578,7 +578,7 @@ size_t ib::sim::eth::idl::EthTransmitAcknowledge::getMaxCdrSerializedSize(size_t
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
-    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+    current_alignment += ((6) * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
 
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
@@ -601,8 +601,7 @@ size_t ib::sim::eth::idl::EthTransmitAcknowledge::getCdrSerializedSize(const ib:
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
-    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
-
+    current_alignment += ((6) * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
@@ -701,19 +700,28 @@ uint32_t& ib::sim::eth::idl::EthTransmitAcknowledge::transmitId()
     return m_transmitId;
 }
 /*!
- * @brief This function sets a value in member sourceMac
- * @param _sourceMac New value for member sourceMac
+ * @brief This function copies the value in member sourceMac
+ * @param _sourceMac New value to be copied in member sourceMac
  */
-void ib::sim::eth::idl::EthTransmitAcknowledge::sourceMac(uint64_t _sourceMac)
+void ib::sim::eth::idl::EthTransmitAcknowledge::sourceMac(const std::array<uint8_t, 6> &_sourceMac)
 {
 m_sourceMac = _sourceMac;
 }
 
 /*!
- * @brief This function returns the value of member sourceMac
- * @return Value of member sourceMac
+ * @brief This function moves the value in member sourceMac
+ * @param _sourceMac New value to be moved in member sourceMac
  */
-uint64_t ib::sim::eth::idl::EthTransmitAcknowledge::sourceMac() const
+void ib::sim::eth::idl::EthTransmitAcknowledge::sourceMac(std::array<uint8_t, 6> &&_sourceMac)
+{
+m_sourceMac = std::move(_sourceMac);
+}
+
+/*!
+ * @brief This function returns a constant reference to member sourceMac
+ * @return Constant reference to member sourceMac
+ */
+const std::array<uint8_t, 6>& ib::sim::eth::idl::EthTransmitAcknowledge::sourceMac() const
 {
     return m_sourceMac;
 }
@@ -722,7 +730,7 @@ uint64_t ib::sim::eth::idl::EthTransmitAcknowledge::sourceMac() const
  * @brief This function returns a reference to member sourceMac
  * @return Reference to member sourceMac
  */
-uint64_t& ib::sim::eth::idl::EthTransmitAcknowledge::sourceMac()
+std::array<uint8_t, 6>& ib::sim::eth::idl::EthTransmitAcknowledge::sourceMac()
 {
     return m_sourceMac;
 }

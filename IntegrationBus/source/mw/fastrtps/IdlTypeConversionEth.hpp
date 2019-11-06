@@ -92,7 +92,7 @@ auto to_idl(const EthTransmitAcknowledge& msg) -> idl::EthTransmitAcknowledge
     idl::EthTransmitAcknowledge idl;
 
     idl.transmitId(msg.transmitId);
-    //idl.sourceMac(msg.sourceMac);
+    idl.sourceMac(msg.sourceMac);
     idl.timestampNs(msg.timestamp.count());
     idl.status(static_cast<std::decay<decltype(idl.status())>::type>(msg.status));
 
@@ -104,7 +104,7 @@ auto idl::from_idl(EthTransmitAcknowledge&& idl) -> ::ib::sim::eth::EthTransmitA
     ::ib::sim::eth::EthTransmitAcknowledge msg;
 
     msg.transmitId = idl.transmitId();
-    //msg.sourceMac = idl.sourceMac();
+    msg.sourceMac = idl.sourceMac();
     msg.timestamp = std::chrono::nanoseconds{idl.timestampNs()};
     msg.status = static_cast<decltype(msg.status)>(idl.status());
 

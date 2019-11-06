@@ -497,22 +497,28 @@ namespace ib
                      */
                     eProsima_user_DllExport uint32_t& transmitId();
                     /*!
-                     * @brief This function sets a value in member sourceMac
-                     * @param _sourceMac New value for member sourceMac
+                     * @brief This function copies the value in member sourceMac
+                     * @param _sourceMac New value to be copied in member sourceMac
                      */
-                    eProsima_user_DllExport void sourceMac(uint64_t _sourceMac);
+                    eProsima_user_DllExport void sourceMac(const std::array<uint8_t, 6> &_sourceMac);
 
                     /*!
-                     * @brief This function returns the value of member sourceMac
-                     * @return Value of member sourceMac
+                     * @brief This function moves the value in member sourceMac
+                     * @param _sourceMac New value to be moved in member sourceMac
                      */
-                    eProsima_user_DllExport uint64_t sourceMac() const;
+                    eProsima_user_DllExport void sourceMac(std::array<uint8_t, 6> &&_sourceMac);
+
+                    /*!
+                     * @brief This function returns a constant reference to member sourceMac
+                     * @return Constant reference to member sourceMac
+                     */
+                    eProsima_user_DllExport const std::array<uint8_t, 6>& sourceMac() const;
 
                     /*!
                      * @brief This function returns a reference to member sourceMac
                      * @return Reference to member sourceMac
                      */
-                    eProsima_user_DllExport uint64_t& sourceMac();
+                    eProsima_user_DllExport std::array<uint8_t, 6>& sourceMac();
                     /*!
                      * @brief This function sets a value in member timestampNs
                      * @param _timestampNs New value for member timestampNs
@@ -601,7 +607,7 @@ namespace ib
                 private:
                     ib::mw::idl::EndpointAddress m_senderAddr;
                     uint32_t m_transmitId;
-                    uint64_t m_sourceMac;
+                    std::array<uint8_t, 6> m_sourceMac;
                     int64_t m_timestampNs;
                     ib::sim::eth::idl::EthTransmitStatus m_status;
                 };

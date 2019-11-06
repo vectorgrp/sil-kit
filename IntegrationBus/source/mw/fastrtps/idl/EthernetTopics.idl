@@ -48,7 +48,7 @@ module idl {
     {
         @Key ib::mw::idl::EndpointAddress senderAddr;
         unsigned long transmitId; // identifies the EthTransmitRequest, to which this Acknowledge
-        octet[6] sourceMac; //The source MAC address encoded as integral datatype
+        octet sourceMac[6]; //The source MAC address encoded as integral datatype
         long long timestampNs;
         EthTransmitStatus status; // Status of the Eth Transmit Request
     };
