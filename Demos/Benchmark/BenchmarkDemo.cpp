@@ -47,7 +47,7 @@ void ParticipantStatusHandler(sync::ISystemController* controller, const sync::P
 	}
 }
 
-void SystemStateHandler(sync::ISystemController* controller, sync::SystemState newState, const ib::cfg::Config& ibConfig)
+void SystemStateHandler(sync::ISystemController* controller, sync::SystemState newState, const Config& ibConfig)
 {
 	switch (newState)
 	{
@@ -133,8 +133,8 @@ auto BuildConfig(uint32_t participantCount) -> ib::cfg::Config
 void ParticipantsThread(
 	uint32_t payloadSizeInBytes,
 	std::chrono::seconds simulationDuration,
-	Config ibConfig,
-	Participant thisParticipant,
+	const Config& ibConfig,
+	const Participant& thisParticipant,
 	uint32_t domainId,
 	bool isVerbose)
 {
@@ -145,11 +145,11 @@ void ParticipantsThread(
 	std::vector<ib::sim::generic::IGenericPublisher*> publishers;
 	std::vector<ib::sim::generic::IGenericSubscriber*> subscribers;
 
-	for (auto &genericPublisher : thisParticipant.genericPublishers)
+	for (auto& genericPublisher : thisParticipant.genericPublishers)
 	{
 		publishers.push_back(comAdapter->CreateGenericPublisher(genericPublisher.name));
 	}
-	for (auto &genericSubscriber : thisParticipant.genericSubscribers)
+	for (auto& genericSubscriber : thisParticipant.genericSubscribers)
 	{
 		auto thisSubscriber = comAdapter->CreateGenericSubscriber(genericSubscriber.name);
 		thisSubscriber->SetReceiveMessageHandler(ReceiveMessage);
@@ -272,7 +272,7 @@ int main(int argc, char** argv)
 				ParticipantStatusHandler(controller, newStatus);
 			});
 
-			for (auto &thread : threads)
+			for (auto&& thread : threads)
 			{
 				thread.join();
 			}
