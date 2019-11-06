@@ -158,6 +158,39 @@ TEST(CanControllerTest, receive_ack)
     canController.ReceiveIbMessage(senderAddress, ack2);
 }
 
+TEST(CanControllerTest, ignore_unknown_acks)
+{
+    using namespace std::placeholders;
+
+    EndpointAddress controllerAddress = {3, 8};
+    EndpointAddress senderAddress = {4, 9};
+
+    MockComAdapter mockComAdapter;
+    CanControllerCallbacks callbackProvider;
+
+    CanController canController(&mockComAdapter);
+    canController.SetEndpointAddress(controllerAddress);
+    canController.RegisterTransmitStatusHandler(std::bind(&CanControllerCallbacks::ReceiveAck, &callbackProvider, _1, _2));
+
+    CanMessage msg;
+    msg.canId = 3;
+    auto txId1 = canController.SendMessage(msg);
+    auto txId2 = canController.SendMessage(msg);
+
+    ASSERT_NE(txId1, txId2);
+
+    CanTransmitAcknowledge ack1{txId1, 4, 0ns, CanTransmitStatus::Transmitted};
+    CanTransmitAcknowledge ack2{txId2, 4, 0ns, CanTransmitStatus::Transmitted};
+
+    EXPECT_CALL(callbackProvider, ReceiveAck(&canController, ack1))
+        .Times(0);
+    EXPECT_CALL(callbackProvider, ReceiveAck(&canController, ack2))
+        .Times(0);
+
+    canController.ReceiveIbMessage(senderAddress, ack1);
+    canController.ReceiveIbMessage(senderAddress, ack2);
+}
+
 /*! \brief Ensure that the reception of a message generates a matching Ack
 *
 *  Rationale:
