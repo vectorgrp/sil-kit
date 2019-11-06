@@ -5,7 +5,7 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on [Keep a Changelog] (http://keepachangelog.com/en/1.0.0/).
 
-[unreleased] - yyyy-mm-dd
+[2.0.0] - 2019-11-06
 --------------------------------
 Added
 ~~~~~
@@ -51,17 +51,29 @@ Changed
   With the recently added connection loss detection, participants could also
   enter the error state after a normal shutdown, which is now prevented.
 
+- Implemented new versioning schema. As of now, the following semantic
+  versioning schema is applied:
+  
+  + major number changes indicate breaks on a network layer
+  + minor number changes indicate API of config format breaks
+  + patch number changes indicate any other non-breaking changes.
+
+- Added a canId field to the CanTransmitAcknowledge data type. This was required
+  for a bug fix and is a breaking change on the network layer.
+  
+- Added a sourceMac field to the EthTransmitAcknowledge data type. This was
+  required for a bug fix and is breaking change on the network layer.
+  
 Fixed
 ~~~~~
-- Fixed CAN acknowledge callback behaviour in the simple / trivial CAN simulation.
-  In a simulation with more than 2 CAN controllers, a CAN controller could receive
-  a CAN acknowledge (in the callback) without even sending a CAN message.
-  Now, the callback for the acknowledge will only be called by the controller
-  that did send the corresponding CAN message.
-- Similarly, the Ethernet acknowledge mechanism was fixed.
+- CAN controllers now only call the TransmitStatusHandler if they did send the
+  corresponding CAN message. Previously, in a simulation with more than two CAN
+  controllers, the callback could be triggered without having sent a message.
 
-Removed
-~~~~~~~
+- Ethernet controllers now only call the MessageAckHandler if they did send the
+  corresponding ethernet message. Previously, in a simulation with more than two
+  ethernet controllers, the callback could be triggered without having sent a
+  message.
 
 Deprecated
 ~~~~~~~~~~~~~~
@@ -104,16 +116,15 @@ Deprecated
           .AddParticipantController().WithSyncType(SyncType::DiscreteTime);
 
 
-
-Compatibility with Sprint-33
+Compatibility with 1.1.0
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Application binary interface (ABI): No
-- Application software interface (API): No
-- Middleware network protocol (FastRTPS): Partially (Everything except CAN is compatible)
-- Middleware network protocol (VAsio): Partially (Everything except CAN is compatible)
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Partially (Everything except for CAN and Ethernet is compatible)
+- Middleware network protocol (VAsio): Partially (Everything except CAN and Ethernet is compatible)
 
 
-[1.0.0 (Sprint-33)] - 2019-09-16
+[1.1.0] - 2019-09-16
 --------------------------------
 Added
 ~~~~~
@@ -138,8 +149,23 @@ Fixed
   have a history, it could happen that some participants did not receive all
   ParticipantStatus values.
 
+.. _changelog:1.0.0_removed:
 
-[1.0.0 (Sprint-32)] - 2019-09-25
+Removed
+~~~~~~~
+- IComAdapter::RegisterNewPeerCallback() was removed. This method was only
+  intended as an IB-internal helper method and never officially announced as
+  part of the public API.
+  
+Compatibility with 1.0.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): No
+- Application software interface (API): No (cf. :ref:`Removed<changelog:1.0.0_removed>`)
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+  
+
+[1.0.0] - 2019-09-25
 --------------------------------
 Added
 ~~~~~
