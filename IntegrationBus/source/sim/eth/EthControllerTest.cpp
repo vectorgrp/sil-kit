@@ -105,7 +105,7 @@ TEST_F(EthernetControllerTest, trigger_callback_on_receive_message)
     controller.ReceiveIbMessage(otherAddress, msg);
 }
 
-/*! \brief Passing an Ack to an EthControllers must trigger the registered callback, iff
+/*! \brief Passing an Ack to an EthControllers must trigger the registered callback, if
  *         it sent a message with corresponding transmit ID and source MAC
  */
 TEST_F(EthernetControllerTest, trigger_callback_on_receive_ack)
@@ -117,6 +117,22 @@ TEST_F(EthernetControllerTest, trigger_callback_on_receive_ack)
     EthTransmitAcknowledge ack{tid, EthMac{1,2,3,4,5,6}, 42ms, EthTransmitStatus::Transmitted};
     EXPECT_CALL(callbacks, MessageAck(&controller, ack))
         .Times(1);
+
+    controller.ReceiveIbMessage(otherAddress, ack);
+}
+
+/*!\brief Passing an Ack to an EthControllers must NOT trigger the registered callback, if
+ * it did not send a message with corresponding source MAC
+ */
+TEST_F(EthernetControllerTest, dont_trigger_callback_for_unknown_acks)
+{
+    EthMessage msg;
+    msg.ethFrame.SetSourceMac(EthMac{1,2,3,4,5,6});
+    auto tid = controller.SendMessage(msg);
+
+    EthTransmitAcknowledge ack{tid, EthMac{3,4,5,6,7,8}, 42ms, EthTransmitStatus::Transmitted};
+    EXPECT_CALL(callbacks, MessageAck(&controller, ack))
+        .Times(0);
 
     controller.ReceiveIbMessage(otherAddress, ack);
 }
