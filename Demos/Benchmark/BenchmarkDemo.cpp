@@ -5,6 +5,7 @@
 #include <thread>
 #include <fstream>
 #include <numeric>
+#include <algorithm>
 
 #include "CreateComAdapter.hpp"
 #include "ib/sim/all.hpp"
@@ -283,30 +284,33 @@ int main(int argc, char** argv)
 			measuredRealDurations.push_back(duration);
 		}
 
-		auto averageDuration = 0ns;
-		for (auto&& duration : measuredRealDurations)
-		{
-			averageDuration += duration;
-		}
-		averageDuration /= measuredRealDurations.size();
+		auto minDuration = *std::max_element(measuredRealDurations.begin(), measuredRealDurations.end());
+		auto maxDuration = *std::min_element(measuredRealDurations.begin(), measuredRealDurations.end());
+		auto averageDuration = std::accumulate(measuredRealDurations.begin(), measuredRealDurations.end(), 0ns) / measuredRealDurations.size();
 
-		std::cout << "\n========================================" << std::endl;
-		std::cout << "Simulation duration: " << simulationDuration;
+		std::cout << "\nSimulation duration: " << simulationDuration;
 		std::cout << " with " << numberOfParticipants << " partcipants, " << simulationRepeats << " repeats, ";
-		std::cout << payloadSizeInBytes << " bytes / message" << std::endl;
-		std::cout << "Average realtime duration: " << averageDuration << std::endl << std::endl;
+		std::cout << payloadSizeInBytes << " bytes / message\n\n";
 
 		if (simulationRepeats > 1)
 		{
 			uint32_t runNumber = 1;
 			for (auto&& duration : measuredRealDurations)
 			{
-				std::cout << "Simulation run " << runNumber << ": ";
-				std::cout << "Realtime duration: " << duration << std::endl;
+				std::cout << "Simulation run " << runNumber << ": " << duration << "\n";
 
 				runNumber++;
 			}
+			std::cout << std::endl;
 		}
+
+		std::cout << "Average realtime duration: " << averageDuration;
+
+		if (simulationRepeats > 1)
+		{
+			std::cout << " (min " << minDuration << ", max " << maxDuration << ")";
+		}
+		std::cout << std::endl;
 	}
 	catch (const ib::cfg::Misconfiguration& error)
 	{
