@@ -32,12 +32,12 @@ WatchDog::~WatchDog()
 
 void WatchDog::Start()
 {
-    _startTime.store(std::chrono::steady_clock::now());
+    _startTime.store(std::chrono::steady_clock::now().time_since_epoch());
 }
 
 void WatchDog::Reset()
 {
-    _startTime.store(std::chrono::steady_clock::time_point::min());
+    _startTime.store(std::chrono::steady_clock::duration::min());
 }
 
 void WatchDog::SetWarnHandler(std::function<void(std::chrono::milliseconds)> handler)
@@ -72,14 +72,14 @@ void WatchDog::Run()
             return;
         }
         
-        auto startTime = _startTime.load();
-        auto now = std::chrono::steady_clock::now();
-        auto currentRunDuration = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime);
+        const auto startTime = _startTime.load();
+        const auto now = std::chrono::steady_clock::now().time_since_epoch();
+        const auto currentRunDuration = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime);
 
         // We only communicate with the "main thread" via the atomic _startTime.
-        // If _startTime is time_point::min(), Start() has not yet been called.
-        // Otherwise, _startTime is the time point when the Start() was called.
-        if (startTime == std::chrono::steady_clock::time_point::min())
+        // If _startTime is duration::min(), Start() has not yet been called.
+        // Otherwise, _startTime is the duration since epoch when the Start() was called.
+        if (startTime == std::chrono::steady_clock::duration::min())
         {
             // no job is currently running. Reset state and continue.
             state = WatchDogState::Healthy;
@@ -96,7 +96,7 @@ void WatchDog::Run()
         {
             if (state == WatchDogState::Healthy)
             {
-                _warnHandler(currentRunDuration);
+                _warnHandler(std::chrono::duration_cast<std::chrono::milliseconds>(currentRunDuration));
                 state = WatchDogState::Warn;
             }
             continue;
@@ -106,7 +106,7 @@ void WatchDog::Run()
         {
             if (state != WatchDogState::Error)
             {
-                _errorHandler(currentRunDuration);
+                _errorHandler(std::chrono::duration_cast<std::chrono::milliseconds>(currentRunDuration));
                 state = WatchDogState::Error;
             }
             continue;

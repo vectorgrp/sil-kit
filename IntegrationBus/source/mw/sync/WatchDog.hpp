@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <future>
 #include <chrono>
 
@@ -35,7 +36,8 @@ private:
     // ----------------------------------------
     // private members
     std::promise<void> _stopPromise;
-    std::atomic<std::chrono::steady_clock::time_point> _startTime{std::chrono::steady_clock::time_point::min()};
+    // we use a duration instead of a timepoint to avoid a bug in clang6 (up to v9.0)
+    std::atomic<std::chrono::steady_clock::duration> _startTime{std::chrono::steady_clock::duration::min()};
 
     std::chrono::milliseconds _resolution = std::chrono::milliseconds{2};
     std::chrono::milliseconds _warnTimeout = std::chrono::milliseconds::max();
