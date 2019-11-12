@@ -91,27 +91,6 @@ option(IB_BIN_FASTRTPS_ENABLE
         " (set IB_BIN_FASTRTPS_REPOSITORY for download URL)"
 )
 
-# Check if we are in deployed stated, ie fastrtps binaries are already present in the 
-# source tree
-set(DEPLOYED_FASTRTPS_DIR ${THIRDPARTY_DIR}/bin/fastrtps-${IB_BIN_FASTRTPS_VERSION})
-if(EXISTS ${DEPLOYED_FASTRTPS_DIR})
-    message(STATUS "using deployed pre-built fastrtps binaries!")
-    find_package(fastcdr 
-        REQUIRED
-        CONFIG
-        PATHS ${DEPLOYED_FASTRTPS_DIR}/share/fastcdr/cmake
-        NO_CMAKE_PACKAGE_REGISTRY
-        NO_DEFAULT_PATH
-    )
-    find_package(fastrtps 
-        REQUIRED
-        CONFIG
-        PATHS ${DEPLOYED_FASTRTPS_DIR}/share/fastrtps/cmake
-        NO_CMAKE_PACKAGE_REGISTRY
-        NO_DEFAULT_PATH
-    )
-endif()
-
 if(IB_BIN_FASTRTPS_ENABLE)
     include(get_compiler_arch)
     include(GetExternalProject)

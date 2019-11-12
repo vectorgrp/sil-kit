@@ -1,6 +1,6 @@
-set(CMAKE_CXX_STANDARD 14)
-
+cmake_minimum_required(VERSION 3.8)
 project("IntegrationBus-Registry" LANGUAGES CXX C)
+set(CMAKE_CXX_STANDARD 14)
 
 include(IntegrationBusInstall)
 
@@ -21,8 +21,6 @@ target_link_libraries(IbRegistry
     IbMwVAsio
     IbConfig
 )
-
-#NB: currently COMPONENT is required to be IntegrationBus or VIB-CANoe packages break
 install(TARGETS IbRegistry
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}
 )

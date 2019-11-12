@@ -1,8 +1,8 @@
 ################################################################################
 # Install definitions
 ################################################################################
-# Goal: we adhere to the GNU standard layout as much as possible:
-# /+
+# Goal: we adhere to the GNU standard layout for the binary distribution as much as possible:
+# /IntegrationBus/+
 #  |- bin/+
 #         |- *{.exe,dll}
 #         |- IbLauncher
@@ -13,28 +13,27 @@
 #  |- share/+
 #           |- cmake/ <exports>
 #           |- doc/ <docs+readme>
-#/////// -- uses ci/package.py to include the following into the tarball
-#  |- Demos/ <Demo sources, CMakeLists.txt adjusted, easily opens in vstudio>
-#  |- Source/+
-#            |- cmake/ <macro, modules>
-#            |- IntegrationBus/ <complete sources>
-#            |- ThirdParty/ <external sources>
-#            |- CMakeSettings.json
-#            |- CMakeLists.txt  <deployment toplevel>
-#  |
+#### The source, documentation and demo source distribution follows a more user-friendly approach
 #  |- LICENSE.txt
 #  |- ThirdParty-LICENSE.txt
-#  |- README.rst
-#/////// --- package.py end
+#  |- CHANGELOG.rst
+#  |- IntegrationBus-Source
+#  |- IntegrationBus-Demos
+#  |- IntegrationBus-Documentation
+#
+#
+### package.py is used to merge zip files together, see package.py --help for more infos
 
 include(GNUInstallDirs)
-set(INSTALL_TOP_DIR .)
-set(INSTALL_BIN_DIR ${CMAKE_INSTALL_BINDIR})
-set(INSTALL_LIB_DIR ${CMAKE_INSTALL_LIBDIR})
+set(INSTALL_TOP_DIR IntegrationBus)
+
+set(INSTALL_BIN_DIR ${INSTALL_TOP_DIR}/${CMAKE_INSTALL_BINDIR})
+set(INSTALL_LIB_DIR ${INSTALL_TOP_DIR}/${CMAKE_INSTALL_LIBDIR})
 set(INSTALL_PYTHON_LIB_DIR ${INSTALL_LIB_DIR}/python/site-packages)
-set(INSTALL_CODE_DIR ${CMAKE_INSTALL_DATADIR})
-set(INSTALL_SOURCE_DIR Source)
-set(INSTALL_DEMO_DIR ${INSTALL_SOURCE_DIR}/Demos)
+set(INSTALL_CODE_DIR ${INSTALL_TOP_DIR}/${CMAKE_INSTALL_DATADIR})
 set(INSTALL_CONFIG_DIR ${CMAKE_INSTALL_DATADIR}/cmake)
-set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR})
-set(INSTALL_DOC_DIR ${CMAKE_INSTALL_DOCDIR})
+set(INSTALL_INCLUDE_DIR ${INSTALL_TOP_DIR}/${CMAKE_INSTALL_INCLUDEDIR})
+
+set(INSTALL_SOURCE_DIR IntegrationBus-Source)
+set(INSTALL_DEMO_DIR IntegrationBus-Demos)
+set(INSTALL_DOC_DIR IntegrationBus-Documentation)

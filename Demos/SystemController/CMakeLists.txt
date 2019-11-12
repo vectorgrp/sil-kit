@@ -1,1 +1,0 @@
-make_ib_demo(IbDemoSystemController SystemController.cpp)

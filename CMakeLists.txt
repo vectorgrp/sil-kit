@@ -44,8 +44,8 @@ if(IB_INSTALL_SOURCE)
     install(
         DIRECTORY
             ${CMAKE_CURRENT_SOURCE_DIR}/cmake
-            ${CMAKE_CURRENT_SOURCE_DIR}/IntegrationBus
             ${CMAKE_CURRENT_SOURCE_DIR}/Demos
+            ${CMAKE_CURRENT_SOURCE_DIR}/IntegrationBus
             ${CMAKE_CURRENT_SOURCE_DIR}/Utilities
         DESTINATION ${INSTALL_SOURCE_DIR}
         FILES_MATCHING
@@ -62,6 +62,11 @@ if(IB_INSTALL_SOURCE)
             PATTERN *.md
             PATTERN *.xml
         REGEX "/ci/.*" EXCLUDE
+    )
+    install(
+        DIRECTORY
+            ${CMAKE_CURRENT_SOURCE_DIR}/Demos/
+        DESTINATION ${INSTALL_DEMO_DIR}
     )
     install(
         DIRECTORY

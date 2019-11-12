@@ -102,21 +102,26 @@ def archiveToArtifactory(pattern) {
 // i.e., this allows running the same stages on docker and windows
 def runOnNode(buildName, buildAgent, userStages) {
     return {
-           
         node(buildAgent) {
-            //debugging
+            // make sure the steps/stages are executed in a separate, clean workspace
+            wsDir = "workspace/${env.JOB_NAME}/${env.BUILD_NUMBER}/" + buildName.replaceAll(" ", "_")
             if(isDockerNode(buildAgent)) {
+                //the built image should be cached and shared anyway
                 stage("${buildName}: build docker image") {
                     // initial checkout in master node so we can access the ci files
                     shallowCheckoutGit()
                     docker.build(dockerImage,  //XXX this might require a checkout for ./ci to be present
                             "--build-arg ARTIFACTORY=${artifactoryServer.url} -f ${dockerImageFile} ${dockerImageDir}")
                 }
-                docker.image(dockerImage).inside {
-                    userStages()
+                ws(wsDir) {
+                    curDir=pwd()
+                    print("Calling docker inside in ${curDir}")
+                    docker.image(dockerImage).inside {
+                        userStages()
+                        cleanWs()
+                    }
                 }
             } else {
-                wsDir = "workspace/${env.JOB_NAME}" + buildName.replaceAll(" ", "_")
                 ws(wsDir) {
                     curDir=pwd()
                     print("Working in ${curDir}")
