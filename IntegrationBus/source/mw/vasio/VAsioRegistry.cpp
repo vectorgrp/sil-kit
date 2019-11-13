@@ -31,10 +31,10 @@ std::future<void> VAsioRegistry::ProvideDomain(uint32_t domainId)
     }
     catch (std::exception& e)
     {
-        std::cout
-            << "ERROR: VAsioRegistry failed to create listening socket: " << registryEndpoint
-            << " for domainId=" << domainId
-            << ". Reason:" << e.what() << std::endl;
+        _connection.GetLogger()->Error("VAsioRegistry failed to create listening socket {} for domainId={}. Reason: {}",
+            registryEndpoint,
+            domainId,
+            e.what());
         throw e;
     }
     _connection.StartIoWorker();
@@ -50,13 +50,13 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
 
     if (AllParticipantsUp())
     {
-        std::cout << "INFO: All Participants up" << std::endl;
+        _connection.GetLogger()->Info("All Participants up");
     }
 }
 
 void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
 {
-    std::cout << "INFO: Sending known participant message to " << peer->GetInfo().participantName << "\n";
+    _connection.GetLogger()->Info("Sending known participant message to {}", peer->GetInfo().participantName);
 
     KnownParticipants knownParticipantsMsg;
 
@@ -83,7 +83,7 @@ void VAsioRegistry::PeerIsShuttingDown(IVAsioPeer* peer)
 
     if (_connectedParticipants.empty())
     {
-        std::cout << "INFO: All Participants down" << std::endl;
+        _connection.GetLogger()->Info("All Participants down");
         _allParticipantsDown.set_value();
     }
 }
