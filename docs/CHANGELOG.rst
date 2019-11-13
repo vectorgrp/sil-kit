@@ -12,7 +12,27 @@ Added
 
 Changed
 ~~~~~~~
+- The VIB distribution uses a new directory layout for packages:
 
+  IntegrationBus
+    Contains the pre-built binary distribution of the IntegrationBus, including the C++ header files and CMake export targets.
+    
+  IntegrationBus-Demos
+    The VIB demos are now distributed in source form.
+    They can be easily compiled against the distributed VIB binaries: e.g, on Windows just right-click and "open in visual studio"
+    
+  IntegrationBus-Documentation
+    Contains the documentation in HTML and text format.
+    
+  IntegrationBus-Source
+     The VIB source tree, with notable changes:
+     
+     - The SystemController and SystemMonitor demos were moved to the Utilities/ directory. 
+       They are also distributed in binary form.
+     - Fast-RTPS is no longer distributed in source form. 
+       The CMake build infrastructure automatically downloads a git snapshot if needed (requires git).
+       
+  
 Fixed
 ~~~~~
 
