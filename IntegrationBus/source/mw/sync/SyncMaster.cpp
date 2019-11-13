@@ -169,7 +169,7 @@ void SyncMaster::WaitForShutdown()
     
 void SyncMaster::SystemStateChanged(SystemState newState)
 {
-    std::cout << "New SystemState::" << newState << std::endl;
+    _logger->Info("New SystemState::{}", newState);
     auto oldState = _systemState;
     _systemState = newState;
 
@@ -188,7 +188,6 @@ void SyncMaster::SystemStateChanged(SystemState newState)
             //[[fallthrough]]
 
         case SystemState::Initialized:
-            std::cout << "SyncMaster:: starting simulation" << std::endl;
             _logger->Info("SyncMaster: starting simulating.");
             for (auto&& client : _syncClients)
             {
