@@ -6,6 +6,8 @@
 
 #include "VAsioMessageSubscriber.hpp"
 
+#include "MessageTracing.hpp"
+
 namespace ib {
 namespace mw {
 
@@ -68,7 +70,7 @@ void VAsioReceiver<MsgT>::ReceiveRawMsg(MessageBuffer&& buffer)
     MsgT msg;
     buffer >> endpoint >> msg;
 
-    _logger->Trace("Receiving {} Message from Endpoint Address ({}, {})", _subscriptionInfo.msgTypeName, endpoint.participant, endpoint.endpoint);
+    TraceRx(_logger, endpoint, msg);
     _link->DistributeRemoteIbMessage(endpoint, msg);
 }
 

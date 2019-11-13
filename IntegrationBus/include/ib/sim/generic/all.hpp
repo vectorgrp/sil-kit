@@ -3,3 +3,4 @@
 #include "IIbToGenericPublisher.hpp"
 #include "IGenericSubscriber.hpp"
 #include "IIbToGenericSubscriber.hpp"
+#include "string_utils.hpp"

@@ -9,8 +9,14 @@
 #include "fastrtps/subscriber/SampleInfo.h"
 #include "fastrtps/rtps/common/MatchingInfo.h"
 
+#include "ib/mw/sync/string_utils.hpp"
+#include "ib/sim/can/string_utils.hpp"
+#include "ib/sim/lin/string_utils.hpp"
+
 #include <vector>
 #include <map>
+
+#include "MessageTracing.hpp"
 
 namespace ib {
 namespace mw {
@@ -69,7 +75,8 @@ void IbSubListenerBase<IdlMessageT>::dispatchToReceivers(
     const IbMessageType& msg
 )
 {
-    _logger->Trace("Receiving {} Message from Endpoint Address ({}, {})", TopicTrait<IdlMessageT>::TypeName(), senderAddr.participant, senderAddr.endpoint);
+    TraceRx(_logger, senderAddr, msg);
+
     for (auto&& receiver : _receivers)
     {
         try

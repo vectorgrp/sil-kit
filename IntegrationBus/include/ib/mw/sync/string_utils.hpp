@@ -21,6 +21,7 @@ inline std::string to_string(ParticipantCommand::Kind command);
 inline std::string to_string(SystemCommand::Kind command);
 inline std::string to_string(QuantumRequestStatus status);
 
+inline std::string to_string(const NextSimTask& nextTask);
 inline std::string to_string(const QuantumRequest& request);
 inline std::string to_string(const QuantumGrant& grant);
 inline std::string to_string(const Tick& tick);
@@ -29,12 +30,15 @@ inline std::string to_string(const ParticipantCommand& command);
 inline std::string to_string(const SystemCommand& command);
 inline std::string to_string(const ParticipantStatus& status);
 
+
+
 inline std::ostream& operator<<(std::ostream& out, ParticipantState state);
 inline std::ostream& operator<<(std::ostream& out, SystemState state);
 inline std::ostream& operator<<(std::ostream& out, ParticipantCommand::Kind command);
 inline std::ostream& operator<<(std::ostream& out, SystemCommand::Kind command);
 inline std::ostream& operator<<(std::ostream& out, QuantumRequestStatus status);
 
+inline std::ostream& operator<<(std::ostream& out, const NextSimTask& nextTask);
 inline std::ostream& operator<<(std::ostream& out, const QuantumRequest& request);
 inline std::ostream& operator<<(std::ostream& out, const QuantumGrant& grant);
 inline std::ostream& operator<<(std::ostream& out, const Tick& tick);
@@ -170,6 +174,12 @@ inline std::string to_string(QuantumRequestStatus status)
     throw ib::type_conversion_error{};
 }
 
+std::string to_string(const NextSimTask& nextTask)
+{
+    std::stringstream outStream;
+    outStream << nextTask;
+    return outStream.str();
+}
 
 std::string to_string(const QuantumRequest& request)
 {
@@ -279,6 +289,17 @@ std::ostream& operator<<(std::ostream& out, QuantumRequestStatus status)
         return out << "QuantumRequestStatus{" << static_cast<uint32_t>(status) << "}";
     }
 }
+
+std::ostream& operator<<(std::ostream& out, const NextSimTask& nextTask)
+{
+    auto tp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(nextTask.timePoint);
+    auto duration = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(nextTask.duration);
+    out << "NextSimTask{tp=" << tp.count()
+        << "ms, duration=" << duration.count()
+        << "ms}";
+    return out;
+}
+
 
 std::ostream& operator<<(std::ostream& out, const QuantumRequest& request)
 {

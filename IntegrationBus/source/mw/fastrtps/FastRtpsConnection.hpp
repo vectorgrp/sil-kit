@@ -27,6 +27,8 @@
 #include "ReportMatchingListener.hpp"
 #include "FastRtpsUtils.hpp"
 
+#include "MessageTracing.hpp"
+
 #include "tuple_tools/for_each.hpp"
 
 namespace ib {
@@ -200,7 +202,7 @@ void FastRtpsConnection::SendIbMessageImpl(EndpointAddress from, const IbMessage
     auto idlMsg = to_idl(msg);
     idlMsg.senderAddr(to_idl(from));
 
-    _logger->Trace("Sending {} Message from Endpoint Address ({}, {})", TopicTrait<decltype(idlMsg)>::TypeName(), from.participant, from.endpoint);
+    TraceTx(_logger, from, msg);
 
     auto& rtpsTopics = std::get<RtpsTopics<decltype(idlMsg)>>(_rtpsTopics);
     assert(rtpsTopics.endpointToPublisherMap.find(from.endpoint) != rtpsTopics.endpointToPublisherMap.end());
@@ -215,7 +217,7 @@ void FastRtpsConnection::SendIbMessageImpl(EndpointAddress from, IbMessageT&& ms
     auto idlMsg = to_idl(std::forward<IbMessageT>(msg));
     idlMsg.senderAddr(to_idl(from));
 
-    _logger->Trace("Sending {} Message from Endpoint Address ({}, {})", TopicTrait<decltype(idlMsg)>::TypeName(), from.participant, from.endpoint);
+    TraceTx(_logger, from, msg);
 
     auto& rtpsTopics = std::get<RtpsTopics<decltype(idlMsg)>>(_rtpsTopics);
     assert(rtpsTopics.endpointToPublisherMap.find(from.endpoint) != rtpsTopics.endpointToPublisherMap.end());

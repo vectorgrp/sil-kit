@@ -3,6 +3,7 @@
 #pragma once
 
 #include <iomanip>
+#include <sstream>
 
 #include "LinDatatypes.hpp"
 
@@ -17,7 +18,16 @@ inline std::string to_string(FrameResponseType responseType);
 inline std::string to_string(FrameResponseMode responseMode);
 inline std::string to_string(FrameStatus frameStatus);
 inline std::string to_string(ControllerMode mode);
-inline std::string to_string(ControllerStatus status);       
+inline std::string to_string(ControllerStatus status);
+
+inline std::string to_string(const Frame& frame);
+inline std::string to_string(const SendFrameRequest& request);
+inline std::string to_string(const SendFrameHeaderRequest& request);
+inline std::string to_string(const Transmission& transmission);
+inline std::string to_string(const WakeupPulse& pulse);
+inline std::string to_string(const ControllerConfig& controllerConfig);
+inline std::string to_string(const ControllerStatusUpdate& controllerStatusUpdate);
+inline std::string to_string(const FrameResponseUpdate& frameResponseUpdate);
 
 inline std::ostream& operator<<(std::ostream& out, ChecksumModel model);
 inline std::ostream& operator<<(std::ostream& out, FrameResponseType responseType);
@@ -27,6 +37,14 @@ inline std::ostream& operator<<(std::ostream& out, ControllerMode mode);
 inline std::ostream& operator<<(std::ostream& out, ControllerStatus status);
 
 inline std::ostream& operator<<(std::ostream& out, const Frame& frame);
+inline std::ostream& operator<<(std::ostream& out, const SendFrameRequest& request);
+inline std::ostream& operator<<(std::ostream& out, const SendFrameHeaderRequest& request);
+inline std::ostream& operator<<(std::ostream& out, const Transmission& transmission);
+inline std::ostream& operator<<(std::ostream& out, const WakeupPulse& pulse);
+inline std::ostream& operator<<(std::ostream& out, const ControllerConfig& controllerConfig);
+inline std::ostream& operator<<(std::ostream& out, const ControllerStatusUpdate& controllerStatusUpdate);
+inline std::ostream& operator<<(std::ostream& out, const FrameResponseUpdate& frameResponseUpdate);
+
 
 // ================================================================================
 //  Inline Implementations
@@ -128,6 +146,65 @@ std::string to_string(ControllerStatus status)
     throw ib::type_conversion_error{};
 };
 
+
+std::string to_string(const Frame& frame)
+{
+    std::stringstream out;
+    out << frame;
+    return out.str();
+}
+
+std::string to_string(const SendFrameRequest& request)
+{
+    std::stringstream out;
+    out << request;
+    return out.str();
+}
+
+std::string to_string(const SendFrameHeaderRequest& request)
+{
+    std::stringstream out;
+    out << request;
+    return out.str();
+}
+
+std::string to_string(const Transmission& transmission)
+{
+    std::stringstream out;
+    out << transmission;
+    return out.str();
+}
+
+std::string to_string(const WakeupPulse& pulse)
+{
+    std::stringstream out;
+    out << pulse;
+    return out.str();
+}
+
+std::string to_string(const ControllerConfig& controllerConfig)
+{
+    std::stringstream out;
+    out << controllerConfig;
+    return out.str();
+}
+
+std::string to_string(const ControllerStatusUpdate& controllerStatusUpdate)
+{
+    std::stringstream out;
+    out << controllerStatusUpdate;
+    return out.str();
+}
+
+std::string to_string(const FrameResponseUpdate& frameResponseUpdate)
+{
+    std::stringstream out;
+    out << frameResponseUpdate;
+    return out.str();
+}
+
+
+
 std::ostream& operator<<(std::ostream& out, ChecksumModel model)
 {
     try
@@ -151,7 +228,7 @@ std::ostream& operator<<(std::ostream& out, FrameResponseType responseType)
     }
 }
 
-inline std::ostream& operator<<(std::ostream& out, FrameResponseMode responseMode)
+std::ostream& operator<<(std::ostream& out, FrameResponseMode responseMode)
     {
     try
     {
@@ -163,7 +240,7 @@ inline std::ostream& operator<<(std::ostream& out, FrameResponseMode responseMod
     }
 }
 
-inline std::ostream& operator<<(std::ostream& out, FrameStatus frameStatus)
+std::ostream& operator<<(std::ostream& out, FrameStatus frameStatus)
 {
     try
     {
@@ -175,7 +252,7 @@ inline std::ostream& operator<<(std::ostream& out, FrameStatus frameStatus)
     }
 }
 
-inline std::ostream& operator<<(std::ostream& out, ControllerMode mode)
+std::ostream& operator<<(std::ostream& out, ControllerMode mode)
 {
     try
     {
@@ -187,7 +264,7 @@ inline std::ostream& operator<<(std::ostream& out, ControllerMode mode)
     }
 }
 
-inline std::ostream& operator<<(std::ostream& out, ControllerStatus status)
+std::ostream& operator<<(std::ostream& out, ControllerStatus status)
 {
     try
     {
@@ -199,13 +276,13 @@ inline std::ostream& operator<<(std::ostream& out, ControllerStatus status)
     }
 }
 
-inline std::ostream& operator<<(std::ostream& out, const Frame& frame)
+std::ostream& operator<<(std::ostream& out, const Frame& frame)
 {
     std::ios oldState(nullptr);
     oldState.copyfmt(out);
 
     out
-        << "Frame{id=" << static_cast<uint16_t>(frame.id)
+        << "lin::Frame{id=" << static_cast<uint16_t>(frame.id)
         << ", cs=" << to_string(frame.checksumModel)
         << ", dl=" << static_cast<uint16_t>(frame.dataLength)
         << ", d={" << std::hex << std::setfill('0')
@@ -220,6 +297,79 @@ inline std::ostream& operator<<(std::ostream& out, const Frame& frame)
     out.copyfmt(oldState);
     return out;
 }
+
+std::ostream& operator<<(std::ostream& out, const SendFrameRequest& request)
+{
+    return out
+        << "lin::SendFrameRequest{fr=" << request.frame
+        << ", rt=" << request.responseType
+        << "}";
+}
+
+std::ostream& operator<<(std::ostream& out, const SendFrameHeaderRequest& request)
+{
+    return out << "LinSendHeaderRequest{id=" << request.id << "}";
+}
+
+std::ostream& operator<<(std::ostream& out, const Transmission& transmission)
+{
+    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(transmission.timestamp);
+    return out
+        << "lin::Transmission{" << transmission.frame
+        << ", status= " << transmission.status
+        << ", time=" << timestamp.count()
+        << "ms}";
+}
+std::ostream& operator<<(std::ostream& out, const WakeupPulse& pulse)
+{
+    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(pulse.timestamp);
+    return out << "LinWakeupPulse{@" << pulse.timestamp.count() << "ms}";
+}
+
+std::ostream& operator<<(std::ostream& out, const ControllerConfig& controllerConfig)
+{
+    out << "lin::ControllerConfig{br=" << controllerConfig.baudRate
+        << ", mode=" << controllerConfig.controllerMode
+        << ", responses=[";
+    if (controllerConfig.frameResponses.size() > 0)
+    {
+        out << controllerConfig.frameResponses[0].frame.id;
+        for (int i = 1; i < controllerConfig.frameResponses.size(); ++i)
+        {
+            out << "," << controllerConfig.frameResponses[1].frame.id;
+        }
+    }
+    out << "]}";
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const ControllerStatusUpdate& controllerStatusUpdate)
+{
+    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(controllerStatusUpdate.timestamp);
+    return out
+        << "lin::ControllerStatusUpdate{" << controllerStatusUpdate.status
+        << " @" << timestamp.count() << "ms}";
+}
+
+std::ostream& operator<<(std::ostream& out, const FrameResponseUpdate& frameResponseUpdate)
+{
+    auto& responses = frameResponseUpdate.frameResponses;
+    out << "LinFrameResponseUpdate{[";
+
+    if (responses.size() > 0)
+    {
+        out << responses[0].frame.id;
+        for (int i = 1; i < responses.size(); ++i)
+        {
+            out << "," << responses[1].frame.id;
+        }
+    }
+
+    out << "]}";
+    return out;
+}
+
+
     
 } // namespace lin
 } // namespace sim

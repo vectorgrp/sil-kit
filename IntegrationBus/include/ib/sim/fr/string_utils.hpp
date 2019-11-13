@@ -23,6 +23,15 @@ inline std::string to_string(const Header& header);
 inline std::string to_string(const FrSymbol& symbol);
 inline std::string to_string(const FrSymbolAck& symbol);
 inline std::string to_string(const CycleStart& cycleStart);
+inline std::string to_string(const FrMessage& msg);
+inline std::string to_string(const FrMessageAck& msg);
+inline std::string to_string(const HostCommand& msg);
+inline std::string to_string(const ControllerConfig& msg);
+inline std::string to_string(const TxBufferConfig& msg);
+inline std::string to_string(const TxBufferConfigUpdate& msg);
+inline std::string to_string(const TxBufferUpdate& msg);
+inline std::string to_string(const ControllerStatus& msg);
+
 
 inline std::ostream& operator<<(std::ostream& out, Channel channel);
 inline std::ostream& operator<<(std::ostream& out, ClockPeriod period);
@@ -30,10 +39,19 @@ inline std::ostream& operator<<(std::ostream& out, TransmissionMode mode);
 inline std::ostream& operator<<(std::ostream& out, ChiCommand command);
 inline std::ostream& operator<<(std::ostream& out, SymbolPattern pattern);
 inline std::ostream& operator<<(std::ostream& out, PocState state);
+
 inline std::ostream& operator<<(std::ostream& out, const Header& header);
 inline std::ostream& operator<<(std::ostream& out, const FrSymbol& symbol);
 inline std::ostream& operator<<(std::ostream& out, const FrSymbolAck& symbol);
 inline std::ostream& operator<<(std::ostream& out, const CycleStart& cycleStart);
+inline std::ostream& operator<<(std::ostream& out, const FrMessage& msg);
+inline std::ostream& operator<<(std::ostream& out, const FrMessageAck& msg);
+inline std::ostream& operator<<(std::ostream& out, const HostCommand& msg);
+inline std::ostream& operator<<(std::ostream& out, const ControllerConfig& msg);
+inline std::ostream& operator<<(std::ostream& out, const TxBufferConfig& msg);
+inline std::ostream& operator<<(std::ostream& out, const TxBufferConfigUpdate& msg);
+inline std::ostream& operator<<(std::ostream& out, const TxBufferUpdate& msg);
+inline std::ostream& operator<<(std::ostream& out, const ControllerStatus& msg);
     
 
 // ================================================================================
@@ -167,6 +185,63 @@ std::string to_string(const CycleStart& cycleStart)
     return out.str();
 }
 
+std::string to_string(const FrMessage& msg)
+{
+    std::stringstream out;
+    out << msg;
+    return out.str();
+}
+
+std::string to_string(const FrMessageAck& msg)
+{
+    std::stringstream out;
+    out << msg;
+    return out.str();
+}
+
+std::string to_string(const HostCommand& msg)
+{
+    std::stringstream out;
+    out << msg;
+    return out.str();
+}
+
+std::string to_string(const ControllerConfig& msg)
+{
+    std::stringstream out;
+    out << msg;
+    return out.str();
+}
+
+std::string to_string(const TxBufferConfig& msg)
+{
+    std::stringstream out;
+    out << msg;
+    return out.str();
+}
+
+std::string to_string(const TxBufferConfigUpdate& msg)
+{
+    std::stringstream out;
+    out << msg;
+    return out.str();
+}
+
+std::string to_string(const TxBufferUpdate& msg)
+{
+    std::stringstream out;
+    out << msg;
+    return out.str();
+}
+
+std::string to_string(const ControllerStatus& msg)
+{
+    std::stringstream out;
+    out << msg;
+    return out.str();
+}
+
+
     
 std::ostream& operator<<(std::ostream& out, Channel channel)
 {
@@ -195,7 +270,7 @@ std::ostream& operator<<(std::ostream& out, PocState state)
 std::ostream& operator<<(std::ostream& out, const Header& header)
 {
     return out
-        << "Header{f=["
+        << "fr::Header{f=["
         << (header.IsSet(Header::Flag::SuFIndicator) ? "U" : "-")
         << (header.IsSet(Header::Flag::SyFIndicator) ? "Y" : "-")
         << (header.IsSet(Header::Flag::NFIndicator) ? "-" : "N")
@@ -210,30 +285,100 @@ std::ostream& operator<<(std::ostream& out, const FrSymbol& symbol)
 {
     auto seconds = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(symbol.timestamp);
     return out
-        << "FrSymbol{t=" << seconds.count()
+        << "fr::FrSymbol{t=" << seconds.count()
         << "s, channel=" << symbol.channel
         << ", pattern=" << symbol.pattern
         << "}";
 }
 
-std::ostream& operator<<(std::ostream& out, const fr::FrSymbolAck& symbol)
+std::ostream& operator<<(std::ostream& out, const FrSymbolAck& symbol)
 {
     auto seconds = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(symbol.timestamp);
     return out
-        << "FrSymbolAck{t=" << seconds.count()
+        << "fr::FrSymbolAck{t=" << seconds.count()
         << "s, channel=" << symbol.channel
         << ", pattern=" << symbol.pattern
         << "}";
 }
 
-std::ostream& operator<<(std::ostream& out, const fr::CycleStart& cycleStart)
+std::ostream& operator<<(std::ostream& out, const CycleStart& cycleStart)
 {
     auto seconds = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(cycleStart.timestamp);
     return out
-        << "CycleStart{t=" << seconds.count()
+        << "fr::CycleStart{t=" << seconds.count()
         << "s, cycleCounter=" << static_cast<uint32_t>(cycleStart.cycleCounter)
         << "}";
 };
+
+std::ostream& operator<<(std::ostream& out, const FrMessage& msg)
+{
+    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
+    return out << "fr::FrMessage{"
+        << "ch=" << msg.channel
+        << ", " << msg.frame.header
+        << " @" << timestamp.count() << "ms}";
+}
+
+std::ostream& operator<<(std::ostream& out, const FrMessageAck& msg)
+{
+    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
+    return out << "fr::FrMessageAck{"
+        << msg.frame.header
+        << ", ch=" << msg.channel
+        << ", txBuffer=" << msg.txBufferIndex
+        << " @" << timestamp.count() << "ms}";
+}
+
+std::ostream& operator<<(std::ostream& out, const HostCommand& msg)
+{
+    return out << "fr::HostCommand{"
+        << msg.command
+        << "}";
+}
+
+std::ostream& operator<<(std::ostream& out, const ControllerConfig& /*msg*/)
+{
+    return out << "fr::ControllerConfig{}";
+}
+
+std::ostream& operator<<(std::ostream& out, const TxBufferConfig& msg)
+{
+    return out << "fr::TxBufferConfig{"
+        << "ch=" << msg.channels
+        << ", slot=" << msg.slotId
+        << (msg.hasPayloadPreambleIndicator ? ", PP" : "")
+        << ", crc=" << msg.headerCrc
+        << ", off=" << msg.offset
+        << ", rep=" << msg.repetition
+        << ", txMode=" << msg.transmissionMode
+        << "}";
+}
+
+std::ostream& operator<<(std::ostream& out, const TxBufferConfigUpdate& msg)
+{
+    return out << "fr::TxBufferConfigUpdate{"
+        << "idx=" << msg.txBufferIndex
+        << "" << msg.txBufferConfig
+        << "}";
+}
+
+std::ostream& operator<<(std::ostream& out, const TxBufferUpdate& msg)
+{
+    return out << "fr::TxBufferUpdate{"
+        << "idx=" << msg.txBufferIndex
+        << ", payloadValid=" << (msg.payloadDataValid ? "t" : "f")
+        << ", payloadSize=" << msg.payload.size()
+        << "}";
+}
+
+std::ostream& operator<<(std::ostream& out, const ControllerStatus& msg)
+{
+    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
+    return out << "fr::ControllerStatus{"
+        << msg.pocState
+        << " @" << timestamp.count() << "ms}";
+}
+
 
 
 

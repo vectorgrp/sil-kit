@@ -38,6 +38,8 @@
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/sim/can/string_utils.hpp"
 
+#include "MessageTracing.hpp"
+
 #include "asio.hpp"
 
 #ifdef SendMessage
@@ -46,8 +48,10 @@
 #endif
 #endif
 
+
 namespace ib {
 namespace mw {
+
 
 class VAsioTcpPeer;
 
@@ -87,15 +91,13 @@ public:
     template<typename IbMessageT>
     void SendIbMessageImpl(EndpointAddress from, const IbMessageT& msg)
     {
-        _logger->Trace("Sending {} Message from Endpoint Address ({}, {})", IbMsgTraits<IbMessageT>::TypeName(), from.participant, from.endpoint);
-
+        TraceTx(_logger, from, msg);
         ExecuteOnIoThread(&VAsioConnection::SendIbMessageImpl_<const IbMessageT&>, from, msg);
     }
     template<typename IbMessageT>
     void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
     {
-        _logger->Trace("Sending {} Message from Endpoint Address ({}, {})", IbMsgTraits<IbMessageT>::TypeName(), from.participant, from.endpoint);
-
+        TraceTx(_logger, from, msg);
         ExecuteOnIoThread(&VAsioConnection::SendIbMessageImpl_<IbMessageT>, from, std::forward<IbMessageT>(msg));
     }
     inline void SendIbMessageImpl(EndpointAddress from, const logging::LogMsg& msg)
