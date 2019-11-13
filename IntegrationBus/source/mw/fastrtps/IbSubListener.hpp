@@ -85,19 +85,16 @@ void IbSubListenerBase<IdlMessageT>::dispatchToReceivers(
         }
         catch (const std::exception& e)
         {
-            std::cerr
-                << "WARNING: Callback for "
-                << sub->getAttributes().topic.topicDataType
-                << "[\"" << sub->getAttributes().topic.topicName << "\"]"
-                << " threw an exception: " << e.what() << "." << std::endl;
+            _logger->Warn("Callback for {}[\"{}\"] threw an exception: ",
+                sub->getAttributes().topic.topicDataType,
+                sub->getAttributes().topic.topicName,
+                e.what());
         }
         catch (...)
         {
-            std::cerr
-                << "WARNING: Callback for "
-                << sub->getAttributes().topic.topicDataType
-                << "[\"" << sub->getAttributes().topic.topicName << "\"]"
-                << " threw an unknown exception." << std::endl;
+            _logger->Warn("Callback for {}[\"{}\"] threw an unknown exception",
+                sub->getAttributes().topic.topicDataType,
+                sub->getAttributes().topic.topicName);
         }
     }
 }
