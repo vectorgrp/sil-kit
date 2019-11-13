@@ -60,13 +60,16 @@ function(make_ib_demo executableName demoSourceFile)
     )
     if(_is_standalone)
         set_target_properties(${executableName} PROPERTIES EXCLUDE_FROM_ALL FALSE)
+        set(_DEMO_OUTPUT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../IntegrationBus/bin")
+    else()
+        set(_DEMO_OUTPUT_DIR "${CMAKE_BINARY_DIR}/Demos/$<CONFIG>/bin")
     endif()
     remove_definitions(-DEXPORT_IntegrationBusAPI)
     
     # Group this demo project into a folder
     set_target_properties(${executableName} PROPERTIES
         FOLDER "Demos"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Demos/$<CONFIG>/bin"
+        RUNTIME_OUTPUT_DIRECTORY "${_DEMO_OUTPUT_DIR}"
         )
 
     target_link_libraries(${executableName}
