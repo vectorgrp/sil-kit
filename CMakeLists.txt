@@ -97,6 +97,17 @@ if(IB_INSTALL_SOURCE)
         DESTINATION ${INSTALL_SOURCE_DIR}
         COMPONENT IntegrationBus-Developer
     )
+
+    # create a top-level README.txt with some pointers to the contained packages
+    configure_file(
+        cmake/README.txt.in
+        TOP_LEVEL_README.txt
+        @ONLY
+        )
+    install(FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/TOP_LEVEL_README.txt
+        DESTINATION .
+        RENAME README.txt)
 endif(IB_INSTALL_SOURCE)
 ###############################################################################
 # Packaging
