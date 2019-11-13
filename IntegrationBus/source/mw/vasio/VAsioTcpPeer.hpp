@@ -11,6 +11,7 @@
 #include "asio.hpp"
 #include "MessageBuffer.hpp"
 #include "ib/mw/EndpointAddress.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 #include "VAsioPeerInfo.hpp"
 
 namespace ib {
@@ -28,7 +29,7 @@ public:
     // ----------------------------------------
     // Constructors and Destructor
     VAsioTcpPeer() = delete;
-    VAsioTcpPeer(asio::io_context& io_context, VAsioConnection* ibConnection);
+    VAsioTcpPeer(asio::io_context& io_context, VAsioConnection* ibConnection, logging::ILogger* logger);
     VAsioTcpPeer(const VAsioTcpPeer& other) = delete;
     VAsioTcpPeer(VAsioTcpPeer&& other) = default;
 
@@ -66,6 +67,8 @@ private:
     asio::ip::tcp::socket _socket;
     VAsioConnection* _ibConnection{nullptr};
     VAsioPeerInfo _info;
+
+    logging::ILogger* _logger;
 
     // receiving
     uint32_t _currentMsgSize{0u};

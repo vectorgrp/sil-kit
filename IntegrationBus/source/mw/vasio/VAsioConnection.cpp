@@ -44,6 +44,8 @@ void VAsioConnection::SetLogger(logging::ILogger* logger)
 
 void VAsioConnection::JoinDomain(uint32_t domainId)
 {
+    assert(_logger);
+
     // We let the operating system choose a free port
     AcceptConnectionsOn(tcp::endpoint(asio::ip::address::from_string("127.0.0.1"), 0));
 
@@ -57,7 +59,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
 
     _logger->Info("Connecting to VAsio registry");
 
-    auto registry = std::make_unique<VAsioTcpPeer>(_ioContext, this);
+    auto registry = std::make_unique<VAsioTcpPeer>(_ioContext, this, _logger);
 
     try
     {
@@ -157,7 +159,7 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
             peerInfo.acceptorHost,
             peerInfo.acceptorPort);
 
-        auto peer = std::make_unique<VAsioTcpPeer>(_ioContext, this);
+        auto peer = std::make_unique<VAsioTcpPeer>(_ioContext, this, _logger);
         try
         {
             peer->Connect(std::move(peerInfo));
@@ -214,7 +216,7 @@ void VAsioConnection::AcceptNextConnection(asio::ip::tcp::acceptor& acceptor)
     std::shared_ptr<VAsioTcpPeer> newConnection;
     try
     {
-        newConnection = std::make_shared<VAsioTcpPeer>(acceptor.get_executor().context(), this);
+        newConnection = std::make_shared<VAsioTcpPeer>(acceptor.get_executor().context(), this, _logger);
     }
     catch (std::exception& e)
     {

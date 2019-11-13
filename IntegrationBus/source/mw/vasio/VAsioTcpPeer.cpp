@@ -13,9 +13,10 @@ using namespace asio::ip;
 namespace ib {
 namespace mw {
 
-VAsioTcpPeer::VAsioTcpPeer(asio::io_context& io_context, VAsioConnection* ibConnection)
+VAsioTcpPeer::VAsioTcpPeer(asio::io_context& io_context, VAsioConnection* ibConnection, logging::ILogger* logger)
     : _socket{io_context}
     , _ibConnection{ibConnection}
+    , _logger{logger}
 {
 }
 
@@ -32,7 +33,7 @@ void VAsioTcpPeer::Shutdown()
 {
     if (_socket.is_open())
     {
-        std::cout << "INFO: Shutting down connection to " << _info.participantName << std::endl;
+        _logger->Info("Shutting down connection to {}", _info.participantName);
         _ibConnection->OnPeerShutdown(this);
         _socket.close();
     }
@@ -61,13 +62,9 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
     }
     catch (asio::system_error& err)
     {
-        std::cerr
-            << "ERROR: Unable to resolve hostname \"" << GetInfo().acceptorHost << "\""
-            << ": " << err.what()
-            << "\n";
+        _logger->Error("Unable to resolve hostname \"{}\": {}", GetInfo().acceptorHost, err.what());
         return;
     }
-
 
     for (auto&& resolverEntry : resolverResults)
     {
@@ -83,16 +80,15 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
         }
     }
 
-    // FIXME: replace with fmt call
-    std::stringstream errorMsgBuilder;
-    errorMsgBuilder << "ERROR: failed to connect to host " << GetInfo().acceptorHost;
-    auto errorMsg = errorMsgBuilder.str();
+    auto errorMsg = fmt::format("Failed to connect to host {}", GetInfo().acceptorHost);
+    _logger->Error(errorMsg);
+    _logger->Info("Tried the following addresses:");
 
-    std::cerr << errorMsg << ". Tried the following addresses:\n";
     for (auto&& resolverEntry : resolverResults)
     {
-        std::cerr << " - " << tcp::endpoint{resolverEntry} << "\n";
+        _logger->Info(" - {}", tcp::endpoint{ resolverEntry });
     }
+
     throw std::runtime_error{errorMsg};
 }
 
@@ -107,7 +103,7 @@ void VAsioTcpPeer::SendIbMsg(MessageBuffer buffer)
     std::unique_lock<std::mutex> lock{ _sendingQueueLock };
     if (_sendingQueue.size() >= _sendingQueueMaxSize)
     {
-        std::cout << "Sending Queue is full. Dropping messages!" << std::endl;
+        _logger->Warn("Sending Queue is full. Dropping messages!");
     }
     else
     {
@@ -170,7 +166,7 @@ void VAsioTcpPeer::Subscribe(VAsioMsgSubscriber subscriber)
         << VAsioMsgKind::AnnounceSubscription
         << subscriber;
 
-    std::cout << "INFO: Announcing subscription for: [" << subscriber.linkName << "] " << subscriber.msgTypeName << "\n";
+    _logger->Debug("Announcing subscription for [{}] {}", subscriber.linkName, subscriber.msgTypeName);
 
     SendIbMsg(std::move(buffer));
 }
@@ -229,7 +225,7 @@ void VAsioTcpPeer::DispatchBuffer()
     // validate the received size
     if (_currentMsgSize == 0 || _currentMsgSize > 256 * 1024)
     {
-        std::cout << "Received invalid Message Size: " << _currentMsgSize << "\n";
+        _logger->Error("Received invalid Message Size: {}", _currentMsgSize);
         Shutdown();
     }
 
