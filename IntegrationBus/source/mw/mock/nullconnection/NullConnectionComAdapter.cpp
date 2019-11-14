@@ -22,7 +22,7 @@ struct NullConnection
     inline void RegisterIbService(const std::string& /*topicName*/, mw::EndpointId /*endpointId*/, IbServiceT* /*receiver*/) {};
 
     template<typename IbMessageT>
-    void SendIbMessageImpl(mw::EndpointAddress /*from*/, IbMessageT&& /*msg*/) {};
+    void SendIbMessage(mw::EndpointAddress /*from*/, IbMessageT&& /*msg*/) {};
 
     void OnAllMessagesDelivered(std::function<void(void)> /*callback*/) {};
     void FlushSendBuffers() {};

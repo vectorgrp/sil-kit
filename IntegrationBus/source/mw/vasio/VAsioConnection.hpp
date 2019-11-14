@@ -38,8 +38,6 @@
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/sim/can/string_utils.hpp"
 
-#include "MessageTracing.hpp"
-
 #include "asio.hpp"
 
 #ifdef SendMessage
@@ -87,26 +85,10 @@ public:
     {
         ExecuteOnIoThread(&VAsioConnection::RegisterIbServiceImpl<IbServiceT>, link, endpointId, service);
     }
-
     template<typename IbMessageT>
-    void SendIbMessageImpl(EndpointAddress from, const IbMessageT& msg)
+    void SendIbMessage(EndpointAddress from, IbMessageT&& msg)
     {
-        TraceTx(_logger, from, msg);
-        ExecuteOnIoThread(&VAsioConnection::SendIbMessageImpl_<const IbMessageT&>, from, msg);
-    }
-    template<typename IbMessageT>
-    void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
-    {
-        TraceTx(_logger, from, msg);
-        ExecuteOnIoThread(&VAsioConnection::SendIbMessageImpl_<IbMessageT>, from, std::forward<IbMessageT>(msg));
-    }
-    inline void SendIbMessageImpl(EndpointAddress from, const logging::LogMsg& msg)
-    {
-        ExecuteOnIoThread(&VAsioConnection::SendIbMessageImpl_<const logging::LogMsg&>, from, msg);
-    }
-    inline void SendIbMessageImpl(EndpointAddress from, logging::LogMsg&& msg)
-    {
-        ExecuteOnIoThread(&VAsioConnection::SendIbMessageImpl_<logging::LogMsg>, from, std::forward<logging::LogMsg>(msg));
+        ExecuteOnIoThread(&VAsioConnection::SendIbMessageImpl<IbMessageT>, from, std::forward<IbMessageT>(msg));
     }
 
     inline void OnAllMessagesDelivered(std::function<void()> callback)
@@ -272,7 +254,7 @@ private:
     }
 
     template <class IbMessageT>
-    void SendIbMessageImpl_(EndpointAddress from, IbMessageT&& msg)
+    void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
     {
         auto& linkMap = std::get<IbEndpointToLinkMap<std::decay_t<IbMessageT>>>(_endpointToLinkMap);
         linkMap[from.endpoint]->DistributeLocalIbMessage(from, std::forward<IbMessageT>(msg));

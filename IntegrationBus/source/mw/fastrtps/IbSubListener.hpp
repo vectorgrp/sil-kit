@@ -192,44 +192,6 @@ void IbSubListener<sync::idl::ParticipantStatus>::onSubscriptionMatched(eprosima
     }
 }
 
-// ================================================================================
-template<>
-class IbSubListener<logging::idl::LogMsg>
-    : public eprosima::fastrtps::SubscriberListener
-    , public IbSubListenerBase<logging::idl::LogMsg>
-{
-public:
-    IbSubListener() = default;
-
-    inline void onNewDataMessage(eprosima::fastrtps::Subscriber* sub) override;
-};
-
-void IbSubListener<logging::idl::LogMsg>::onNewDataMessage(eprosima::fastrtps::Subscriber* sub)
-{
-    logging::idl::LogMsg idlMsg;
-    eprosima::fastrtps::SampleInfo_t info;
-
-    if (!sub->takeNextData(&idlMsg, &info))
-        return;
-
-    if (info.sampleKind != eprosima::fastrtps::rtps::ALIVE)
-        return;
-
-    auto senderAddr = from_idl(idlMsg.senderAddr());
-    auto msg = from_idl(std::move(idlMsg));
-
-    for (auto&& receiver : _receivers)
-    {
-        try
-        {
-            receiver->ReceiveIbMessage(senderAddr, msg);
-        }
-        catch (...)
-        {
-            std::cerr << "WARNING: Callback for remote logging threw an unknown exception." << std::endl;
-        }
-    }
-}
 
 } // mw
 } // namespace ib

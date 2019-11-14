@@ -27,8 +27,6 @@
 #include "ReportMatchingListener.hpp"
 #include "FastRtpsUtils.hpp"
 
-#include "MessageTracing.hpp"
-
 #include "tuple_tools/for_each.hpp"
 
 namespace ib {
@@ -65,11 +63,7 @@ public:
     inline void RegisterIbService(const std::string& topicName, EndpointId endpointId, IbServiceT* receiver);
 
     template<typename IbMessageT>
-    void SendIbMessageImpl(EndpointAddress from, const IbMessageT& msg);
-    template<typename IbMessageT>
-    void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg);
-    inline void SendIbMessageImpl(EndpointAddress from, const logging::LogMsg& msg);
-    inline void SendIbMessageImpl(EndpointAddress from, logging::LogMsg&& msg);
+    void SendIbMessage(EndpointAddress from, IbMessageT&& msg);
 
     void OnAllMessagesDelivered(std::function<void(void)> callback);
     void FlushSendBuffers();
@@ -197,50 +191,9 @@ void FastRtpsConnection::RegisterIbService(const std::string& topicName, Endpoin
 }
 
 template<typename IbMessageT>
-void FastRtpsConnection::SendIbMessageImpl(EndpointAddress from, const IbMessageT& msg)
-{
-    auto idlMsg = to_idl(msg);
-    idlMsg.senderAddr(to_idl(from));
-
-    TraceTx(_logger, from, msg);
-
-    auto& rtpsTopics = std::get<RtpsTopics<decltype(idlMsg)>>(_rtpsTopics);
-    assert(rtpsTopics.endpointToPublisherMap.find(from.endpoint) != rtpsTopics.endpointToPublisherMap.end());
-
-    auto* publisher = rtpsTopics.endpointToPublisherMap[from.endpoint];
-    publisher->write(&idlMsg);
-}
-
-template<typename IbMessageT>
-void FastRtpsConnection::SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
+void FastRtpsConnection::SendIbMessage(EndpointAddress from, IbMessageT&& msg)
 {
     auto idlMsg = to_idl(std::forward<IbMessageT>(msg));
-    idlMsg.senderAddr(to_idl(from));
-
-    TraceTx(_logger, from, msg);
-
-    auto& rtpsTopics = std::get<RtpsTopics<decltype(idlMsg)>>(_rtpsTopics);
-    assert(rtpsTopics.endpointToPublisherMap.find(from.endpoint) != rtpsTopics.endpointToPublisherMap.end());
-
-    auto* publisher = rtpsTopics.endpointToPublisherMap[from.endpoint];
-    publisher->write(&idlMsg);
-}
-
-void FastRtpsConnection::SendIbMessageImpl(EndpointAddress from, const logging::LogMsg& msg)
-{
-    auto idlMsg = to_idl(msg);
-    idlMsg.senderAddr(to_idl(from));
-
-    auto& rtpsTopics = std::get<RtpsTopics<decltype(idlMsg)>>(_rtpsTopics);
-    assert(rtpsTopics.endpointToPublisherMap.find(from.endpoint) != rtpsTopics.endpointToPublisherMap.end());
-
-    auto* publisher = rtpsTopics.endpointToPublisherMap[from.endpoint];
-    publisher->write(&idlMsg);
-}
-
-void FastRtpsConnection::SendIbMessageImpl(EndpointAddress from, logging::LogMsg&& msg)
-{
-    auto idlMsg = to_idl(std::forward<logging::LogMsg>(msg));
     idlMsg.senderAddr(to_idl(from));
 
     auto& rtpsTopics = std::get<RtpsTopics<decltype(idlMsg)>>(_rtpsTopics);

@@ -28,42 +28,42 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const fr::FrMessage& msg)
-{
-    out << "FrMessage:    channel=" << msg.channel
-        << " " << msg.frame.header;
-
-    if (msg.frame.header.IsSet(fr::Header::Flag::NFIndicator))
-    {
-        std::string payloadString(msg.frame.payload.begin(), msg.frame.payload.end());
-        out << " payload=\"" << payloadString << "\"";
-    }
-
-    std::chrono::nanoseconds ignoreTime;
-    if (msg.timestamp != ignoreTime)
-        out << " @t=" << msg.timestamp;
-
-    return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const fr::FrMessageAck& msg)
-{
-    out << "FrMessageAck: channel=" << msg.channel
-        << " " << msg.frame.header;
-
-    if (msg.frame.header.IsSet(fr::Header::Flag::NFIndicator))
-    {
-        std::string payloadString(msg.frame.payload.begin(), msg.frame.payload.end());
-        out << " payload=\"" << payloadString << "\"";
-    }
-
-    std::chrono::nanoseconds ignoreTime;
-    if (msg.timestamp != ignoreTime)
-        out << " @t=" << msg.timestamp;
-
-    out << " txBufferId=" << msg.txBufferIndex;
-    return out;
-}
+//std::ostream& operator<<(std::ostream& out, const fr::FrMessage& msg)
+//{
+//    out << "FrMessage:    channel=" << msg.channel
+//        << " " << msg.frame.header;
+//
+//    if (msg.frame.header.IsSet(fr::Header::Flag::NFIndicator))
+//    {
+//        std::string payloadString(msg.frame.payload.begin(), msg.frame.payload.end());
+//        out << " payload=\"" << payloadString << "\"";
+//    }
+//
+//    std::chrono::nanoseconds ignoreTime;
+//    if (msg.timestamp != ignoreTime)
+//        out << " @t=" << msg.timestamp;
+//
+//    return out;
+//}
+//
+//std::ostream& operator<<(std::ostream& out, const fr::FrMessageAck& msg)
+//{
+//    out << "FrMessageAck: channel=" << msg.channel
+//        << " " << msg.frame.header;
+//
+//    if (msg.frame.header.IsSet(fr::Header::Flag::NFIndicator))
+//    {
+//        std::string payloadString(msg.frame.payload.begin(), msg.frame.payload.end());
+//        out << " payload=\"" << payloadString << "\"";
+//    }
+//
+//    std::chrono::nanoseconds ignoreTime;
+//    if (msg.timestamp != ignoreTime)
+//        out << " @t=" << msg.timestamp;
+//
+//    out << " txBufferId=" << msg.txBufferIndex;
+//    return out;
+//}
 
 
 template<typename T>

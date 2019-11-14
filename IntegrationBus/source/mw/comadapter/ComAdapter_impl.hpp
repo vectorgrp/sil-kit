@@ -30,6 +30,8 @@
 #include "ib/cfg/string_utils.hpp"
 #include "ib/version.hpp"
 
+#include "MessageTracing.hpp"
+
 #ifdef SendMessage
 #if SendMessage == SendMessageA
 #undef SendMessage
@@ -647,7 +649,8 @@ template <class IbConnectionT>
 template <typename IbMessageT>
 void ComAdapter<IbConnectionT>::SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
 {
-    _ibConnection.SendIbMessageImpl(from, std::forward<IbMessageT>(msg));
+    TraceTx(_logger.get(), from, msg);
+    _ibConnection.SendIbMessage(from, std::forward<IbMessageT>(msg));
 }
 
 template <class IbConnectionT>
