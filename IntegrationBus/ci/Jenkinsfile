@@ -189,7 +189,7 @@ def doBuild(buildName, buildAgent, buildTool) {
                 dir("_build_Release") {
                     ctest(
                         installation: 'InSearchPath',
-                        arguments: "--build-config Release -R '^Test.*'"
+                        arguments: "--verbose --build-config Release -R '^Test.*'"
                     )
                     junit("**/*gtestresults.xml")
 
@@ -201,7 +201,7 @@ def doBuild(buildName, buildAgent, buildTool) {
                         timeout(time: 2, unit: 'MINUTES') {
                             ctest(
                                 installation: 'InSearchPath',
-                                arguments: "--build-config Release -R '^ITest.*'"
+                                arguments: "--verbose --build-config Release -R '^ITest.*'"
                             )
                         }
                         junit("**/*gtestresults.xml")
