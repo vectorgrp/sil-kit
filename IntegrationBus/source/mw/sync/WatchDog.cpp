@@ -96,7 +96,7 @@ void WatchDog::Run()
         {
             if (state == WatchDogState::Healthy)
             {
-                _warnHandler(std::chrono::duration_cast<std::chrono::milliseconds>(currentRunDuration));
+                _warnHandler(currentRunDuration);
                 state = WatchDogState::Warn;
             }
             continue;
@@ -106,7 +106,7 @@ void WatchDog::Run()
         {
             if (state != WatchDogState::Error)
             {
-                _errorHandler(std::chrono::duration_cast<std::chrono::milliseconds>(currentRunDuration));
+                _errorHandler(currentRunDuration);
                 state = WatchDogState::Error;
             }
             continue;

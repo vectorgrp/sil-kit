@@ -164,23 +164,53 @@ else()
     option(THIRDPARTY_Asio "Activate the use of Fast-RTPS internal thirdparty Asio" ON)
     option(TINYXML2_FROM_SOURCE "Integrate TinyXML2 source code inside Fast RTPS" ON)
     option(THIRDPARTY_TinyXML2 "Activate the use of Fast-RTPS internal thirdparty TinyXML2" ON)
+    ##################
+    #local source tree 
+    ##################
     if(EXISTS ${THIRDPARTY_DIR}/Fast-RTPS/CMakeLists.txt)
-        #local source tree -- we export this as binary packages
-        message(STATUS "Building Fast-RTPS from local submodule")
-        message(STATUS "Add subdirectory ThirdParty/Fast-RTPS")
-        add_subdirectory(${THIRDPARTY_DIR}/Fast-RTPS
-            ThirdParty/Fast-RTPS
-            EXCLUDE_FROM_ALL
-        )
-    elseif(TARGET fastcdr AND TARGET fastrtps)
-        # the binary targets have already been defined in the deployed top-level CMakeLists
-        message(STATUS "fastcdr and fastrtps targets are already defined")
+        function(include_fastrtps_with_install_prefix)
+            message(STATUS "Building Fast-RTPS from local submodule")
+            message(STATUS "Add subdirectory ThirdParty/Fast-RTPS")
+            set(BIN_INSTALL_DIR "${INSTALL_BIN_DIR}")
+            set(INCLUDE_INSTALL_DIR "${INSTALL_INCLUDE_DIR}")
+            set(LIB_INSTALL_DIR "${INSTALL_LIB_DIR}")
+            set(DATA_INSTALL_DIR "${INSTALL_DATA_DIR}")
+            set(LICENSE_INSTALL_DIR "${INSTALL_DATA_DIR}/Fast-RTPS")
+            add_subdirectory(${THIRDPARTY_DIR}/Fast-RTPS
+                ThirdParty/Fast-RTPS
+            )
+        endfunction()
+        include_fastrtps_with_install_prefix()
+    ##################
+    # We are part of a VIB distribution bundle -- use deployed FastRTPS binaries
+    ##################
+    elseif(EXISTS ${CMAKE_CURRENT_LIST_DIR}/../../${INSTALL_LIB_DIR}/)
+        # NB the current FastRTPS 1.8.x binaries deploy their cmake config into the share instead of lib folder
+        set(_release_bin_fastrtps "${CMAKE_CURRENT_LIST_DIR}/../../${INSTALL_TOP_DIR}/share")
+        message(STATUS "------------------------------------------------------------------")
+        message(STATUS "Using pre-built binary FastRTPS package from ${_release_bin_fastrtps}")
+        message(STATUS "------------------------------------------------------------------")
+        find_package(fastcdr CONFIG
+            REQUIRED
+            PATHS ${_release_bin_fastrtps}
+            )
+        find_package(fastrtps CONFIG
+            REQUIRED
+            PATHS ${_release_bin_fastrtps}
+            )
+        if(NOT fastrtps_FOUND)
+            message(FATAL_ERROR
+                "Can't load the pre-built fastrtps binaries from \"${_release_bin_fastrtps}\""
+                " and neither build Fast-RTPS from source via \"${THIRDPARTY_DIR}/Fast-RTPS/CMakeLists.txt!\"")
+        endif()
+    ##################
+    # Use git to fetch the Fast-RTPS source tree
+    ##################
     else()
-        message("--------------------------------------------------------------------")
-        message("--           Fetching missing Fast-RTPS sources via git")
-        message("--")
-        message("--           This make take several minutes...")
-        message("--------------------------------------------------------------------")
+        message(STATUS "------------------------------------------------------------------")
+        message(STATUS "          Fetching missing Fast-RTPS sources via git")
+        message(STATUS "          This make take several minutes...")
+        message(STATUS "------------------------------------------------------------------")
         set(FASTRTPS_URL "https://github.com/eProsima/Fast-RTPS")
         set(FASTRTPS_TAG "release/${IB_BIN_FASTRTPS_VERSION}")
 

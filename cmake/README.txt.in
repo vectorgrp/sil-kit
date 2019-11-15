@@ -13,6 +13,9 @@ The layout of this release bundle is as follows:
   - Integrationbus Demos in source form. The demos are preconfigured to use
     the pre-built binary distribution of the IntegrationBus/ directory.
 
++ IntegrationBus-Documentation/
+  - Documentation in HTML and text format.
+
 + IntegrationBus-Source/
   - The complete source tree of the IntegrationBus with a limited set of
     third-party components.

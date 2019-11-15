@@ -35,7 +35,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(IntegrationBus
     PUBLIC  IbInterface
-    INTERFACE  IbInterface
     PRIVATE IbConfig
     PRIVATE IbMwComAdapter
 )

@@ -56,7 +56,7 @@ install(
     COMPONENT IntegrationBus-Launcher
 )
 
-#TODO setup.py is still work in progress, the following should work though
+# the following encodes the version number in the python module
 function(make_version_py destdir)
 	configure_file(
 		"${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
