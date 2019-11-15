@@ -3,6 +3,8 @@
 #pragma once
 
 #include "ib/mw/IIbMessageReceiver.hpp"
+#include "ib/mw/logging/ILogger.hpp"
+
 #include "VAsioTransmitter.hpp"
 #include "IbMsgTraits.hpp"
 
@@ -18,7 +20,7 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    IbLink(std::string name);
+    IbLink(std::string name, logging::ILogger* logger);
 
 public:
     // ----------------------------------------
@@ -41,6 +43,7 @@ private:
     // ----------------------------------------
     // private members
     std::string _name;
+    logging::ILogger* _logger;
 
     std::vector<ReceiverT*> _localReceivers;
     VAsioTransmitter<MsgT> _vasioTransmitter;
@@ -50,8 +53,9 @@ private:
 //  Inline Implementations
 // ================================================================================
 template <class MsgT>
-IbLink<MsgT>::IbLink(std::string name)
+IbLink<MsgT>::IbLink(std::string name, logging::ILogger* logger)
     : _name{std::move(name)}
+    , _logger{logger}
 {
 }
 
@@ -96,19 +100,11 @@ void IbLink<MsgT>::DispatchIbMessage(ReceiverT* to, EndpointAddress from, const 
     }
     catch (const std::exception& e)
     {
-        std::cerr
-            << "WARNING: Callback for "
-            << MsgTypeName()
-            << "[\"" << Name() << "\"]"
-            << " threw an exception: " << e.what() << "." << std::endl;
+        _logger->Warn("Callback for {}[\"{}\"] threw an exception: {}", MsgTypeName(), Name(), e.what());
     }
     catch (...)
     {
-        std::cerr
-            << "WARNING: Callback for "
-            << MsgTypeName()
-            << "[\"" << Name() << "\"]"
-            << " threw an unknown exception." << std::endl;
+        _logger->Warn("Callback for {}[\"{}\"] threw an unknown exception", MsgTypeName(), Name());
     }
 }
     

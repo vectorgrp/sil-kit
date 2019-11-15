@@ -187,7 +187,7 @@ private:
         auto& ibLink = std::get<IbLinkMap<IbMessageT>>(_ibLinks)[linkName];
         if (!ibLink)
         {
-            ibLink = std::make_shared<IbLink<IbMessageT>>(linkName);
+            ibLink = std::make_shared<IbLink<IbMessageT>>(linkName, _logger);
         }
         return ibLink;
     }

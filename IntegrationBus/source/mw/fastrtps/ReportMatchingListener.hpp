@@ -2,63 +2,58 @@
 
 #pragma once
 
+#include "ib/mw/logging/ILogger.hpp"
 #include "fastrtps/publisher/PublisherListener.h"
 #include "fastrtps/publisher/Publisher.h"
 #include "fastrtps/subscriber/SubscriberListener.h"
 #include "fastrtps/subscriber/Subscriber.h"
+#include "fastrtps/subscriber/SampleInfo.h"
+#include "fastrtps/rtps/common/MatchingInfo.h"
 
 class PubMatchedListener : public eprosima::fastrtps::PublisherListener
 {
 public:
-    PubMatchedListener() = default;
+    PubMatchedListener(::ib::mw::logging::ILogger* logger)
+        : _logger{logger}
+    {
+    }
 
     void onPublicationMatched(eprosima::fastrtps::Publisher* pub, eprosima::fastrtps::rtps::MatchingInfo& info) override
     {
         if (info.status == eprosima::fastrtps::rtps::MATCHED_MATCHING)
         {
-            _numMatched++;
-            std::cout << "Publisher matched: "
-                << pub->getAttributes().topic.topicDataType
-                << "[\"" << pub->getAttributes().topic.topicName << "\"]"
-                << std::endl;
+            _logger->Debug("FastRTPS publisher [{}] {} matched", pub->getAttributes().topic.topicName, pub->getAttributes().topic.topicDataType);
         }
         else
         {
-            _numMatched--;
-            std::cout << "Publisher unmatched: "
-                << pub->getAttributes().topic.topicDataType
-                << "[\"" << pub->getAttributes().topic.topicName << "\"]"
-                << std::endl;
+            _logger->Debug("FastRTPS publisher [{}] {} unmatched", pub->getAttributes().topic.topicName, pub->getAttributes().topic.topicDataType);
         }
     }
 
-    auto numMatched() const { return _numMatched; }
-
 private:
-    int _numMatched = 0;
+    ::ib::mw::logging::ILogger* _logger;
 };
 
 class SubMatchedListener : public eprosima::fastrtps::SubscriberListener
 {
 public:
-    SubMatchedListener() = default;
+    SubMatchedListener(::ib::mw::logging::ILogger* logger)
+        : _logger{logger}
+    {
+    }
 
-    void onSubscriptionMatched(eprosima::fastrtps::Subscriber* /*pub*/, eprosima::fastrtps::rtps::MatchingInfo& info) override
+    void onSubscriptionMatched(eprosima::fastrtps::Subscriber* sub, eprosima::fastrtps::rtps::MatchingInfo& info) override
     {
         if (info.status == eprosima::fastrtps::rtps::MATCHED_MATCHING)
         {
-            _numMatched++;
-            std::cout << "Subscriber matched" << std::endl;
+            _logger->Debug("FastRTPS subscriber [{}] {} matched", sub->getAttributes().topic.topicName, sub->getAttributes().topic.topicDataType);
         }
         else
         {
-            _numMatched--;
-            std::cout << "Subscriber unmatched" << std::endl;
+            _logger->Debug("FastRTPS subscriber [{}] {} unmatched", sub->getAttributes().topic.topicName, sub->getAttributes().topic.topicDataType);
         }
     }
 
-    auto numMatched() const { return _numMatched; }
-
 private:
-    int _numMatched = 0;
+    ::ib::mw::logging::ILogger* _logger;
 };

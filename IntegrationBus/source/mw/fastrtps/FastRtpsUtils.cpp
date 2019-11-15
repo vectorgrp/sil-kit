@@ -75,7 +75,6 @@ RemoveParticipant::ShutdownGuard::~ShutdownGuard()
     //     https://stackoverflow.com/questions/39241400/cleaning-up-threads-in-a-dll-endthreadex-vs-terminatethread
     //     https://stackoverflow.com/questions/10915233/stdthreadjoin-hangs-if-called-after-main-exits-when-using-vs2012-rc
 
-    std::cout << "Domain::stopAll();" << std::endl;
     eprosima::fastrtps::Domain::stopAll();
 }
 

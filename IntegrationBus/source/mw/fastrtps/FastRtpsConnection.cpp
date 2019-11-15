@@ -83,7 +83,7 @@ void FastRtpsConnection::JoinDomain(uint32_t domainId)
             //return portParams.portBase + portParams.domainIDGain * domainId + portParams.participantIDGain * participantId;
         };
 
-        _logger->Info("FastRtpsConnection is using DiscoverType {}", fastRtpsCfg.discoveryType);
+        _logger->Debug("FastRtpsConnection is using DiscoverType {}", fastRtpsCfg.discoveryType);
 
         switch (fastRtpsCfg.discoveryType)
         {
@@ -126,7 +126,7 @@ void FastRtpsConnection::JoinDomain(uint32_t domainId)
                 {
                     throw cfg::Misconfiguration{"No UnicastLocator configured for participant \"" + otherParticipant.name + "\""};
                 }
-                _logger->Info("Adding initial peer for unicast discovery={}:{}", IPLocator::toIPv4string(participantLocator), participantLocator.port);
+                _logger->Debug("Adding initial peer for unicast discovery={}:{}", IPLocator::toIPv4string(participantLocator), participantLocator.port);
                 pParam.rtps.builtin.initialPeersList.push_back(participantLocator);
             }
 

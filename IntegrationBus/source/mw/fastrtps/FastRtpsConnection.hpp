@@ -80,7 +80,7 @@ private:
     template<class TopicT>
     struct RtpsSubListener
     {
-        IbSubListener<TopicT> listener;
+        std::unique_ptr<IbSubListener<TopicT>> listener;
         std::unique_ptr<eprosima::fastrtps::Subscriber, FastRtps::RemoveSubscriber> subscriber;
     };
 
@@ -234,7 +234,7 @@ void FastRtpsConnection::PublishRtpsTopic(const std::string& topicName, Endpoint
     if (rtpsTopics.pubListeners.find(topicName) == rtpsTopics.pubListeners.end())
     {
         auto&& rtpsPublisher = rtpsTopics.pubListeners[topicName];
-        rtpsPublisher.listener = std::make_unique<PubMatchedListener>();
+        rtpsPublisher.listener = std::make_unique<PubMatchedListener>(_logger);
         rtpsPublisher.publisher.reset(createPublisher(topicName, &rtpsTopics.pubSubType, rtpsPublisher.listener.get()));
     }
     rtpsTopics.endpointToPublisherMap[endpointId] = rtpsTopics.pubListeners[topicName].publisher.get();
@@ -253,10 +253,10 @@ void FastRtpsConnection::SubscribeRtpsTopic(const std::string& topicName, IIbMes
     {
         // create a subscriber entry
         auto&& rtpsSubscriber = rtpsTopics.subListeners[topicName];
-        rtpsSubscriber.listener.SetLogger(_logger);
-        rtpsSubscriber.subscriber.reset(createSubscriber(topicName, &rtpsTopics.pubSubType, &rtpsSubscriber.listener));
+        rtpsSubscriber.listener = std::make_unique<IbSubListener<IdlMessageT>>(_logger);
+        rtpsSubscriber.subscriber.reset(createSubscriber(topicName, &rtpsTopics.pubSubType, rtpsSubscriber.listener.get()));
     }
-    rtpsTopics.subListeners[topicName].listener.addReceiver(receiver);
+    rtpsTopics.subListeners[topicName].listener->addReceiver(receiver);
 }
 
 template<class IbSenderT>

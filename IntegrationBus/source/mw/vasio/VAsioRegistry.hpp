@@ -1,7 +1,9 @@
 #pragma once
 
 #include <list>
+
 #include "VAsioConnection.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 
 namespace ib {
 namespace mw {
@@ -29,6 +31,7 @@ private:
 private:
     // ----------------------------------------
     // private members
+    std::unique_ptr<logging::ILogger> _logger;
     std::unordered_map<ParticipantId, ib::mw::VAsioPeerInfo> _connectedParticipants;
     std::promise<void> _allParticipantsDown;
 

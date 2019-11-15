@@ -57,7 +57,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     registryInfo.acceptorHost = vasioConfig.registry.hostname;
     registryInfo.acceptorPort = static_cast<uint16_t>(vasioConfig.registry.port + domainId);
 
-    _logger->Info("Connecting to VAsio registry");
+    _logger->Debug("Connecting to VAsio registry");
 
     auto registry = std::make_unique<VAsioTcpPeer>(_ioContext, this, _logger);
 
@@ -67,11 +67,12 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     }
     catch (const std::exception&)
     {
-        _logger->Error("Failed to connect to VAsio registry\n");
-        _logger->Info("Make sure that the IbRegistry is up and running and is listening on port {}", registryInfo.acceptorPort);
-        _logger->Info("Make sure that the hostname \"{}\" can be resolved and is reachable", registryInfo.acceptorHost);
-        _logger->Info("You can configure the IbRegistry hostname and port via the IbConfig");
-        _logger->Info("The IbRegistry executable can be found in your IB installation folder: INSTALL_DIR/bin/IbRegistry[.exe]");
+        _logger->Error("Failed to connect to VAsio registry");
+        _logger->Info("   Make sure that the IbRegistry is up and running and is listening on port {}.", registryInfo.acceptorPort);
+        _logger->Info("   Make sure that the hostname \"{}\" can be resolved and is reachable.", registryInfo.acceptorHost);
+        _logger->Info("   You can configure the IbRegistry hostname and port via the IbConfig.");
+        _logger->Info("   The IbRegistry executable can be found in your IB installation folder:");
+        _logger->Info("     INSTALL_DIR/bin/IbRegistry[.exe]");
 
         throw std::runtime_error{"ERROR: Failed to connect to VAsio registry"};
     }
@@ -96,7 +97,7 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
         return;
     }
 
-    _logger->Info("Received participant announcement from {}", announcement.peerInfo.participantName);
+    _logger->Debug("Received participant announcement from {}", announcement.peerInfo.participantName);
 
     from->SetInfo(announcement.peerInfo);
     for (auto&& receiver : _participantAnnouncementReceivers)
@@ -125,7 +126,7 @@ void VAsioConnection::SendParticipantAnnoucement(IVAsioPeer* peer)
            << RegistryMessageKind::ParticipantAnnouncement
            << announcement;
 
-    _logger->Info("Sending participant announcement to {}", peer->GetInfo().participantName);
+    _logger->Debug("Sending participant announcement to {}", peer->GetInfo().participantName);
     peer->SendIbMsg(std::move(buffer));
 }
 
@@ -149,11 +150,11 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
         return;
     }
 
-    _logger->Info("Received known participant message");
+    _logger->Debug("Received known participant message from IbRegistry");
 
     for (auto&& peerInfo : participantsMsg.peerInfos)
     {
-        _logger->Info("Connecting to {} with Id {} on {}:{}",
+        _logger->Debug("Connecting to {} with Id {} on {}:{}",
             peerInfo.participantName,
             peerInfo.participantId,
             peerInfo.acceptorHost,
@@ -206,7 +207,7 @@ void VAsioConnection::AcceptConnectionsOn(asio::ip::tcp::endpoint endpoint)
         throw e;
     }
 
-    _logger->Info("VAsioConnection is listening on {}", _tcpAcceptor->local_endpoint());
+    _logger->Debug("VAsioConnection is listening on {}", _tcpAcceptor->local_endpoint());
 
     AcceptNextConnection(*_tcpAcceptor);
 }
@@ -229,7 +230,7 @@ void VAsioConnection::AcceptNextConnection(asio::ip::tcp::acceptor& acceptor)
         {
             if (!error)
             {
-                _logger->Info("New connection from {}", newConnection->Socket().remote_endpoint());
+                _logger->Debug("New connection from {}", newConnection->Socket().remote_endpoint());
                 AddPeer(std::move(newConnection));
             }
             AcceptNextConnection(acceptor);
@@ -329,7 +330,7 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageB
         auto& ibLink = linkMap[subscriber.linkName];
         if (!ibLink)
         {
-            ibLink = std::make_shared<LinkType>(subscriber.linkName);
+            ibLink = std::make_shared<LinkType>(subscriber.linkName, _logger);
         }
 
         ibLink->AddRemoteReceiver(from, subscriber.receiverIdx);
@@ -340,9 +341,9 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageB
 
 
     if (wasAdded)
-        _logger->Info("Registered subscriber for: [{}] {}", subscriber.linkName, subscriber.msgTypeName);
+        _logger->Debug("Registered subscription for [{}] {} from {}", subscriber.linkName, subscriber.msgTypeName, from->GetInfo().participantName);
     else
-        _logger->Warn("Cannot register subscriber for: [{}] {}", subscriber.linkName, subscriber.msgTypeName);
+        _logger->Warn("Cannot register subscription for [{}] {} from {}", subscriber.linkName, subscriber.msgTypeName, from->GetInfo().participantName);
 }
 
 void VAsioConnection::ReceiveRawIbMessage(MessageBuffer&& buffer)

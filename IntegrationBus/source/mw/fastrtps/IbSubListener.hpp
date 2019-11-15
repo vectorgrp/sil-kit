@@ -3,11 +3,7 @@
 #pragma once
 
 #include "ib/mw/IIbMessageReceiver.hpp"
-
-#include "fastrtps/subscriber/SubscriberListener.h"
-#include "fastrtps/subscriber/Subscriber.h"
-#include "fastrtps/subscriber/SampleInfo.h"
-#include "fastrtps/rtps/common/MatchingInfo.h"
+#include "ReportMatchingListener.hpp"
 
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/sim/can/string_utils.hpp"
@@ -30,7 +26,7 @@ public:
     using IbReceiver = IIbMessageReceiver<IbMessageType>;
 
 public:
-    inline void SetLogger(logging::ILogger* logger);
+    IbSubListenerBase(logging::ILogger* logger);
     inline void addReceiver(IbReceiver* receiver);
     inline void clearReceivers();
 
@@ -47,9 +43,9 @@ protected:
 };
 
 template<class IdlMessageT>
-void IbSubListenerBase<IdlMessageT>::SetLogger(logging::ILogger* logger)
+IbSubListenerBase<IdlMessageT>::IbSubListenerBase(logging::ILogger* logger)
+    : _logger{logger}
 {
-    _logger = logger;
 }
 
 template<class IdlMessageT>
@@ -85,7 +81,7 @@ void IbSubListenerBase<IdlMessageT>::dispatchToReceivers(
         }
         catch (const std::exception& e)
         {
-            _logger->Warn("Callback for {}[\"{}\"] threw an exception: ",
+            _logger->Warn("Callback for {}[\"{}\"] threw an exception: {}",
                 sub->getAttributes().topic.topicDataType,
                 sub->getAttributes().topic.topicName,
                 e.what());
@@ -102,14 +98,21 @@ void IbSubListenerBase<IdlMessageT>::dispatchToReceivers(
 // ================================================================================
 template<class IdlMessageT>
 class IbSubListener
-    : public eprosima::fastrtps::SubscriberListener
+    : public SubMatchedListener
     , public IbSubListenerBase<IdlMessageT>
 {
 public:
-    IbSubListener() = default;
+    IbSubListener(logging::ILogger* logger);
 
     inline void onNewDataMessage(eprosima::fastrtps::Subscriber* sub) override;
 };
+
+template<class IdlMessageT>
+IbSubListener<IdlMessageT>::IbSubListener(logging::ILogger* logger)
+    : SubMatchedListener(logger)
+    , IbSubListenerBase<IdlMessageT>(logger)
+{
+}
 
 template<class IdlMessageT>
 void IbSubListener<IdlMessageT>::onNewDataMessage(eprosima::fastrtps::Subscriber* sub)
@@ -131,11 +134,11 @@ void IbSubListener<IdlMessageT>::onNewDataMessage(eprosima::fastrtps::Subscriber
 // ================================================================================
 template<>
 class IbSubListener<sync::idl::ParticipantStatus>
-    : public eprosima::fastrtps::SubscriberListener
+    : public SubMatchedListener
     , public IbSubListenerBase<sync::idl::ParticipantStatus>
 {
 public:
-    IbSubListener() = default;
+    inline IbSubListener(logging::ILogger* logger);
 
     inline void onNewDataMessage(eprosima::fastrtps::Subscriber* sub) override;
     inline void onSubscriptionMatched(eprosima::fastrtps::Subscriber* sub, eprosima::fastrtps::rtps::MatchingInfo& info) override;
@@ -148,6 +151,12 @@ private:
 
     std::map<eprosima::fastrtps::rtps::GUID_t, ParticipantStatusWithSenderAddr> _lastParticipantStatus;
 };
+
+IbSubListener<sync::idl::ParticipantStatus>::IbSubListener(logging::ILogger* logger)
+    : SubMatchedListener(logger)
+    , IbSubListenerBase<sync::idl::ParticipantStatus>(logger)
+{
+}
 
 void IbSubListener<sync::idl::ParticipantStatus>::onNewDataMessage(eprosima::fastrtps::Subscriber* sub)
 {
@@ -170,6 +179,7 @@ void IbSubListener<sync::idl::ParticipantStatus>::onNewDataMessage(eprosima::fas
 
 void IbSubListener<sync::idl::ParticipantStatus>::onSubscriptionMatched(eprosima::fastrtps::Subscriber* sub, eprosima::fastrtps::rtps::MatchingInfo& info)
 {
+    SubMatchedListener::onSubscriptionMatched(sub, info);
     if (info.status == eprosima::fastrtps::rtps::MatchingStatus::REMOVED_MATCHING)
     {
         auto iter = _lastParticipantStatus.find(sub->getGuid());

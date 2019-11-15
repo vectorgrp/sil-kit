@@ -2,6 +2,9 @@
 
 #include "VAsioRegistry.hpp"
 
+#include "ib/cfg/Config.hpp"
+#include "Logger.hpp"
+
 using asio::ip::tcp;
 
 namespace ib {
@@ -11,6 +14,14 @@ VAsioRegistry::VAsioRegistry(ib::cfg::Config cfg)
     : _vasioConfig{cfg.middlewareConfig.vasio}
     , _connection{std::move(cfg), "IbRegistry", 0}
 {
+    ib::cfg::Logger loggerCfg;
+    ib::cfg::Sink stdoutSinkCfg;
+    stdoutSinkCfg.type = ib::cfg::Sink::Type::Stdout;
+    loggerCfg.sinks.push_back(stdoutSinkCfg);
+
+    _logger = std::make_unique<logging::Logger>("IbRegistry", loggerCfg);
+    _connection.SetLogger(_logger.get());
+
     _connection.RegisterMessageReceiver([this](IVAsioPeer* from, const ParticipantAnnouncement& announcement)
     {
         this->OnParticipantAnnouncement(from, announcement);
@@ -31,7 +42,7 @@ std::future<void> VAsioRegistry::ProvideDomain(uint32_t domainId)
     }
     catch (std::exception& e)
     {
-        _connection.GetLogger()->Error("VAsioRegistry failed to create listening socket {} for domainId={}. Reason: {}",
+        _logger->Error("VAsioRegistry failed to create listening socket {} for domainId={}. Reason: {}",
             registryEndpoint,
             domainId,
             e.what());
@@ -50,13 +61,13 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
 
     if (AllParticipantsUp())
     {
-        _connection.GetLogger()->Info("All Participants up");
+        _logger->Info("All Participants up");
     }
 }
 
 void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
 {
-    _connection.GetLogger()->Info("Sending known participant message to {}", peer->GetInfo().participantName);
+    _logger->Info("Sending known participant message to {}", peer->GetInfo().participantName);
 
     KnownParticipants knownParticipantsMsg;
 
@@ -83,7 +94,7 @@ void VAsioRegistry::PeerIsShuttingDown(IVAsioPeer* peer)
 
     if (_connectedParticipants.empty())
     {
-        _connection.GetLogger()->Info("All Participants down");
+        _logger->Info("All Participants down");
         _allParticipantsDown.set_value();
     }
 }
