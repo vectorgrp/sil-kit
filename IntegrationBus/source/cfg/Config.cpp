@@ -226,15 +226,6 @@ void AssignLinkIds(Config& config)
     }
 }
 
-inline std::string path_separator()
-{
-#ifdef _WIN32
-    return "\\/";
-#else
-    return "/";
-#endif
-}
-
 } // anonymous namespace
 
 void UpdateGenericSubscribers(Config& config)
@@ -532,8 +523,7 @@ auto Config::FromJsonString(const std::string& jsonString) -> Config
     }
 
     auto config = from_json<Config>(json);
-
-    config.configPath.clear();
+    config.configFilePath.clear();
 
     // Post-processing steps
     AssignEndpointAddresses(config);
@@ -545,7 +535,6 @@ auto Config::FromJsonString(const std::string& jsonString) -> Config
 
 auto Config::FromJsonFile(const std::string& jsonFilename) -> Config
 {
-    std::cout << "Opening file '" << jsonFilename << "'" << std::endl;
     std::ifstream jsonStream(jsonFilename);
 
     if (!jsonStream.is_open())
@@ -556,12 +545,7 @@ auto Config::FromJsonFile(const std::string& jsonFilename) -> Config
     jsonBuffer << jsonStream.rdbuf();
 
     auto&& config = FromJsonString(jsonBuffer.str());
-
-    auto lastSeparatorPos = jsonFilename.find_last_of(path_separator(), jsonFilename.length());
-    if (lastSeparatorPos != std::string::npos)
-    {
-        config.configPath = jsonFilename.substr(0, lastSeparatorPos + 1);
-    }
+    config.configFilePath = jsonFilename;
 
     return config;
 }

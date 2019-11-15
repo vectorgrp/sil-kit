@@ -331,7 +331,7 @@ struct Config
     Version version;
     std::string name;
     std::string description;
-    std::string configPath;
+    std::string configFilePath;
 
     SimulationSetup simulationSetup;
     MiddlewareConfig middlewareConfig;

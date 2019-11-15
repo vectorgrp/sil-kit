@@ -71,6 +71,8 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& par
     _ibConnection.SetLogger(_logger.get());
 
     _logger->Info("Creating ComAdapter for Participant {}, IntegrationBus-Version: {} {}", _participantName, version::String(), version::SprintName());
+    if (!_config.configFilePath.empty())
+        _logger->Info("Using IbConfig: {}", _config.configFilePath);
 }
 
 template <class IbConnectionT>

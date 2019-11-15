@@ -11,6 +11,18 @@
 
 #include "ib/cfg/string_utils.hpp"
 
+namespace {
+
+inline std::string path_separator()
+{
+#ifdef _WIN32
+    return "\\/";
+#else
+    return "/";
+#endif
+}
+
+}
 
 namespace ib {
 namespace mw {
@@ -48,7 +60,20 @@ void FastRtpsConnection::JoinDomain(uint32_t domainId)
     if (fastRtpsCfg.discoveryType == cfg::FastRtps::DiscoveryType::ConfigFile)
     {
         // Create participant based on profile specified in file
-        auto configFilePath = _config.configPath + fastRtpsCfg.configFileName;
+
+        // extract configPath from config.configFilePath
+        auto configDirectory = _config.configFilePath;
+        auto lastSeparatorPos = configDirectory.find_last_of(path_separator(), configDirectory.length());
+        if (lastSeparatorPos != std::string::npos)
+        {
+            configDirectory = configDirectory.substr(0, lastSeparatorPos + 1);
+        }
+        else
+        {
+            configDirectory = "";
+        }
+        
+        auto configFilePath = configDirectory + fastRtpsCfg.configFileName;
         auto domainLock{FastRtps::GetFastRtpsDomainLock()};
         if (Domain::loadXMLProfilesFile(configFilePath))
         {
