@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "ib/exception.hpp"
+#include "ib/util/PrintableHexString.hpp"
 
 #include "GenericMessageDatatypes.hpp"
 
@@ -29,7 +30,10 @@ std::string to_string(const GenericMessage& msg)
 }
 std::ostream& operator<<(std::ostream& out, const GenericMessage& msg)
 {
-    return out << "generic::GenericMessage{size=" << msg.data.size() << "}";
+    return out << "generic::GenericMessage{data="
+               << util::AsHexString(msg.data).WithSeparator(" ").WithMaxLength(16)
+               << ", size=" << msg.data.size()
+               << "}";
 }
 
 } // namespace generic

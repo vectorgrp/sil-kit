@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "ib/exception.hpp"
+#include "ib/util/PrintableHexString.hpp"
 
 #include "FrDatatypes.hpp"
 
@@ -283,30 +284,28 @@ std::ostream& operator<<(std::ostream& out, const Header& header)
 }
 std::ostream& operator<<(std::ostream& out, const FrSymbol& symbol)
 {
-    auto seconds = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(symbol.timestamp);
+    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(symbol.timestamp);
     return out
-        << "fr::FrSymbol{t=" << seconds.count()
-        << "s, channel=" << symbol.channel
-        << ", pattern=" << symbol.pattern
-        << "}";
+        << "fr::FrSymbol{pattern=" << symbol.pattern
+        << ", channel=" << symbol.channel
+        << " @ " << timestamp.count() << "ms}";
 }
 
 std::ostream& operator<<(std::ostream& out, const FrSymbolAck& symbol)
 {
-    auto seconds = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(symbol.timestamp);
+    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(symbol.timestamp);
     return out
-        << "fr::FrSymbolAck{t=" << seconds.count()
-        << "s, channel=" << symbol.channel
-        << ", pattern=" << symbol.pattern
-        << "}";
+        << "fr::FrSymbolAck{pattern=" << symbol.pattern
+        << ", channel=" << symbol.channel
+        << " @ " << timestamp.count() << "ms}";
 }
 
 std::ostream& operator<<(std::ostream& out, const CycleStart& cycleStart)
 {
-    auto seconds = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(cycleStart.timestamp);
+    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(cycleStart.timestamp);
     return out
-        << "fr::CycleStart{t=" << seconds.count()
-        << "s, cycleCounter=" << static_cast<uint32_t>(cycleStart.cycleCounter)
+        << "fr::CycleStart{t=" << timestamp.count()
+        << "ms, cycleCounter=" << static_cast<uint32_t>(cycleStart.cycleCounter)
         << "}";
 };
 
@@ -338,7 +337,7 @@ std::ostream& operator<<(std::ostream& out, const HostCommand& msg)
 
 std::ostream& operator<<(std::ostream& out, const ControllerConfig& /*msg*/)
 {
-    return out << "fr::ControllerConfig{}";
+    return out << "fr::ControllerConfig{...}";
 }
 
 std::ostream& operator<<(std::ostream& out, const TxBufferConfig& msg)
@@ -358,17 +357,27 @@ std::ostream& operator<<(std::ostream& out, const TxBufferConfigUpdate& msg)
 {
     return out << "fr::TxBufferConfigUpdate{"
         << "idx=" << msg.txBufferIndex
-        << "" << msg.txBufferConfig
+        << " " << msg.txBufferConfig
         << "}";
 }
 
 std::ostream& operator<<(std::ostream& out, const TxBufferUpdate& msg)
 {
-    return out << "fr::TxBufferUpdate{"
+    out << "fr::TxBufferUpdate{"
         << "idx=" << msg.txBufferIndex
-        << ", payloadValid=" << (msg.payloadDataValid ? "t" : "f")
-        << ", payloadSize=" << msg.payload.size()
-        << "}";
+        << ", payloadValid=";
+
+    if (msg.payloadDataValid)
+    {
+        out << "t, payload=["
+            << util::AsHexString(msg.payload).WithSeparator(" ").WithMaxLength(8)
+            << "], payloadSize=" << msg.payload.size();
+    }
+    else
+    {
+        out << "f";
+    }
+    return out;
 }
 
 std::ostream& operator<<(std::ostream& out, const ControllerStatus& msg)

@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "ib/exception.hpp"
+#include "ib/util/PrintableHexString.hpp"
 
 #include "IoDatatypes.hpp"
 
@@ -78,7 +79,8 @@ std::ostream& operator<<(std::ostream& out, const PatternIoMessage& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     return out
-        << "io::PatternIoMessage{value=" // FIXME << msg.value
+        << "io::PatternIoMessage{value="
+        << util::AsHexString(msg.value).WithSeparator(" ").WithMaxLength(16)
         << " @" << timestamp.count() << "ms"
         << "}";
 }

@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "ib/exception.hpp"
+#include "ib/util/PrintableHexString.hpp"
 
 #include "EthDatatypes.hpp"
 
@@ -33,7 +34,6 @@ inline std::ostream& operator<<(std::ostream& out, const EthMessage& msg);
 inline std::ostream& operator<<(std::ostream& out, const EthTransmitAcknowledge& msg);
 inline std::ostream& operator<<(std::ostream& out, const EthStatus& msg);
 inline std::ostream& operator<<(std::ostream& out, const EthSetMode& msg);
-    
 
 // ================================================================================
 //  Inline Implementations
@@ -137,7 +137,12 @@ std::ostream& operator<<(std::ostream& out, EthMode value)
 
 std::ostream& operator<<(std::ostream& out, const EthFrame& msg)
 {
-    return out;
+    return out
+        << "EthFrame{src=" << util::AsHexString(msg.GetSourceMac()).WithSeparator(":")
+        << ", dst=" << util::AsHexString(msg.GetDestinationMac()).WithSeparator(":")
+        << ", size=" << msg.GetFrameSize()
+        << ", payload=[" << util::AsHexString(msg.GetPayload()).WithSeparator(" ").WithMaxLength(8)
+        << "]}";
 }
 
 std::ostream& operator<<(std::ostream& out, const EthMessage& msg)
@@ -153,12 +158,14 @@ std::ostream& operator<<(std::ostream& out, const EthMessage& msg)
 std::ostream& operator<<(std::ostream& out, const EthTransmitAcknowledge& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
-    return out
+    out
         << "eth::EthTransmitAcknowledge{txId=" << msg.transmitId
-        << ", source="
+        << ", src=" << util::AsHexString(msg.sourceMac).WithSeparator(":")
         << ", status=" << msg.status
         << " @" << timestamp.count() << "ms"
         << "}";
+
+    return out;
 }
 
 std::ostream& operator<<(std::ostream& out, const EthStatus& msg)
@@ -177,9 +184,6 @@ std::ostream& operator<<(std::ostream& out, const EthSetMode& msg)
     return out
         << "eth::EthSetMode{" << msg.mode << "}";
 }
-
-
-
 
 
 } // namespace eth

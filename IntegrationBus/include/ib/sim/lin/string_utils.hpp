@@ -8,6 +8,7 @@
 #include "LinDatatypes.hpp"
 
 #include "ib/exception.hpp"
+#include "ib/util/PrintableHexString.hpp"
 
 namespace ib {
 namespace sim {
@@ -285,15 +286,8 @@ std::ostream& operator<<(std::ostream& out, const Frame& frame)
         << "lin::Frame{id=" << static_cast<uint16_t>(frame.id)
         << ", cs=" << to_string(frame.checksumModel)
         << ", dl=" << static_cast<uint16_t>(frame.dataLength)
-        << ", d={" << std::hex << std::setfill('0')
-        << std::setw(2) << static_cast<uint16_t>(frame.data[0]) << " "
-        << std::setw(2) << static_cast<uint16_t>(frame.data[1]) << " "
-        << std::setw(2) << static_cast<uint16_t>(frame.data[2]) << " "
-        << std::setw(2) << static_cast<uint16_t>(frame.data[3]) << " "
-        << std::setw(2) << static_cast<uint16_t>(frame.data[4]) << " "
-        << std::setw(2) << static_cast<uint16_t>(frame.data[5]) << " "
-        << std::setw(2) << static_cast<uint16_t>(frame.data[6]) << " "
-        << std::setw(2) << static_cast<uint16_t>(frame.data[7]) << "}}";
+        << ", d={" << util::AsHexString(frame.data).WithSeparator(" ")
+        << "}}";
     out.copyfmt(oldState);
     return out;
 }
@@ -308,7 +302,7 @@ std::ostream& operator<<(std::ostream& out, const SendFrameRequest& request)
 
 std::ostream& operator<<(std::ostream& out, const SendFrameHeaderRequest& request)
 {
-    return out << "LinSendHeaderRequest{id=" << request.id << "}";
+    return out << "lin::SendFrameHeaderRequest{id=" << static_cast<uint16_t>(request.id) << "}";
 }
 
 std::ostream& operator<<(std::ostream& out, const Transmission& transmission)
@@ -316,14 +310,13 @@ std::ostream& operator<<(std::ostream& out, const Transmission& transmission)
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(transmission.timestamp);
     return out
         << "lin::Transmission{" << transmission.frame
-        << ", status= " << transmission.status
-        << ", time=" << timestamp.count()
-        << "ms}";
+        << ", status=" << transmission.status
+        << ", time=" << timestamp.count() << "ms}";
 }
 std::ostream& operator<<(std::ostream& out, const WakeupPulse& pulse)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(pulse.timestamp);
-    return out << "LinWakeupPulse{@" << pulse.timestamp.count() << "ms}";
+    return out << "lin::WakeupPulse{@" << pulse.timestamp.count() << "ms}";
 }
 
 std::ostream& operator<<(std::ostream& out, const ControllerConfig& controllerConfig)
@@ -333,10 +326,10 @@ std::ostream& operator<<(std::ostream& out, const ControllerConfig& controllerCo
         << ", responses=[";
     if (controllerConfig.frameResponses.size() > 0)
     {
-        out << controllerConfig.frameResponses[0].frame.id;
+        out << static_cast<uint16_t>(controllerConfig.frameResponses[0].frame.id);
         for (int i = 1; i < controllerConfig.frameResponses.size(); ++i)
         {
-            out << "," << controllerConfig.frameResponses[1].frame.id;
+            out << "," << static_cast<uint16_t>(controllerConfig.frameResponses[1].frame.id);
         }
     }
     out << "]}";
@@ -354,14 +347,14 @@ std::ostream& operator<<(std::ostream& out, const ControllerStatusUpdate& contro
 std::ostream& operator<<(std::ostream& out, const FrameResponseUpdate& frameResponseUpdate)
 {
     auto& responses = frameResponseUpdate.frameResponses;
-    out << "LinFrameResponseUpdate{[";
+    out << "lin::FrameResponseUpdate{ids=[";
 
     if (responses.size() > 0)
     {
-        out << responses[0].frame.id;
+        out << static_cast<uint16_t>(responses[0].frame.id);
         for (int i = 1; i < responses.size(); ++i)
         {
-            out << "," << responses[1].frame.id;
+            out << "," << static_cast<uint16_t>(responses[1].frame.id);
         }
     }
 

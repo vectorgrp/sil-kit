@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "ib/exception.hpp"
+#include "ib/util/PrintableHexString.hpp"
 
 #include "CanDatatypes.hpp"
 
@@ -32,7 +33,7 @@ inline std::ostream& operator<<(std::ostream& out, const CanControllerStatus& st
 inline std::ostream& operator<<(std::ostream& out, const CanTransmitAcknowledge& status);
 inline std::ostream& operator<<(std::ostream& out, const CanConfigureBaudrate& rate);
 inline std::ostream& operator<<(std::ostream& out, const CanSetControllerMode& mode);
-    
+
 
 // ================================================================================
 //  Inline Implementations
@@ -68,7 +69,7 @@ std::string to_string(CanErrorState state)
     }
     throw ib::type_conversion_error{};
 }
-    
+
 std::string to_string(CanMessage::CanReceiveFlags flags)
 {
     std::stringstream outStream;
@@ -133,12 +134,12 @@ std::ostream& operator<<(std::ostream& out, CanControllerState state)
 {
     return out << to_string(state);
 }
-    
+
 std::ostream& operator<<(std::ostream& out, CanErrorState state)
 {
     return out << to_string(state);
 }
-    
+
 std::ostream& operator<<(std::ostream& out, CanMessage::CanReceiveFlags flags)
 {
     out << "["
@@ -159,45 +160,46 @@ std::ostream& operator<<(std::ostream& out, CanTransmitStatus status)
 
 std::ostream& operator<<(std::ostream& out, const CanMessage& msg)
 {
-    out << "CanMsg{txId=" << msg.transmitId
-        << ", time=" << msg.timestamp.count() << "ns"
+    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
+    return out
+        << "can::CanMessage{txId=" << msg.transmitId
         << ", canId=" << msg.canId
         << ", flags=" << msg.flags
         << ", dlc=" << static_cast<uint32_t>(msg.dlc)
-        << ", data=[0x" << static_cast<const void*>(msg.dataField.data()) << ", s=" << msg.dataField.size() << "]"
-        << "}";
-    return out;
+        << ", data=[" << util::AsHexString(msg.dataField).WithSeparator(" ").WithMaxLength(8)
+        << "], data.size=" << msg.dataField.size()
+        << " @" << timestamp.count() << "ms}";
 }
 
 std::ostream& operator<<(std::ostream& out, const CanControllerStatus& status)
 {
-    out << "ControllerStatus{time=" << status.timestamp.count() << "ns"
-        << ", CtrlState=" << status.controllerState
+    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(status.timestamp);
+    return out
+        << "can::CanControllerStatus{CtrlState=" << status.controllerState
         << ", ErrorState=" << status.errorState
-        << "}";
-    return out;
+        << " @" << timestamp.count() << "ms}";
 }
 
 std::ostream& operator<<(std::ostream& out, const CanTransmitAcknowledge& status)
 {
-    out << "TxAcknowledge{time=" << status.timestamp.count() << "ns"
-        << ", txId=" << status.transmitId
+    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(status.timestamp);
+    return out
+        << "can::CanTtransmitAcknowledge{txId=" << status.transmitId
         << ", status=" << status.status
-        << "}";
-    return out;
+        << " @" << timestamp.count() << "ms}";
 }
 
 std::ostream& operator<<(std::ostream& out, const CanConfigureBaudrate& rate)
 {
-    out << "ConfigureBaudrate{" << rate.baudRate
+    return out
+        << "can::CanConfigureBaudrate{" << rate.baudRate
         << ", " << rate.fdBaudRate
         << "}";
-    return out;
 }
 
 std::ostream& operator<<(std::ostream& out, const CanSetControllerMode& mode)
 {
-    out << "SetControllerMode{" << mode.mode;
+    out << "can::CanSetControllerMode{" << mode.mode;
 
     if (mode.flags.cancelTransmitRequests)
         out << ", cancelTX";

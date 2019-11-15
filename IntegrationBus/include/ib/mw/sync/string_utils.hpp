@@ -294,7 +294,7 @@ std::ostream& operator<<(std::ostream& out, const NextSimTask& nextTask)
 {
     auto tp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(nextTask.timePoint);
     auto duration = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(nextTask.duration);
-    out << "NextSimTask{tp=" << tp.count()
+    out << "sync::NextSimTask{tp=" << tp.count()
         << "ms, duration=" << duration.count()
         << "ms}";
     return out;
@@ -306,7 +306,7 @@ std::ostream& operator<<(std::ostream& out, const QuantumRequest& request)
     auto now = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(request.now);
     auto duration = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(request.duration);
 
-    out << "QuantumRequest{now=" << now.count()
+    out << "sync::QuantumRequest{now=" << now.count()
         << "ms, duration=" << duration.count()
         << "ms}";
     return out;
@@ -317,7 +317,7 @@ std::ostream& operator<<(std::ostream& out, const QuantumGrant& grant)
     auto now = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(grant.now);
     auto duration = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(grant.duration);
 
-    out << "QuantumGrant{grantee={" << grant.grantee.participant << "," << grant.grantee.endpoint
+    out << "sync::QuantumGrant{grantee={" << grant.grantee.participant << "," << grant.grantee.endpoint
         << "}, status=" << grant.status
         << "ms, duration=" << duration.count()
         << "ms}";
@@ -328,25 +328,25 @@ std::ostream& operator<<(std::ostream& out, const Tick& tick)
 {
     auto now = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(tick.now);
     auto duration = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(tick.duration);
-    out << "Tick{now=" << now.count() << "ms, duration=" << duration.count() << "}";
+    out << "sync::Tick{now=" << now.count() << "ms, duration=" << duration.count() << "}";
     return out;
 }
 
 std::ostream& operator<<(std::ostream& out, const TickDone& tickDone)
 {
-    out << "TickDone{finished=" << tickDone.finishedTick << "}";
+    out << "sync::TickDone{finished=" << tickDone.finishedTick << "}";
     return out;
 }
 
 std::ostream& operator<<(std::ostream& out, const ParticipantCommand& command)
 {
-    out << "ParticipantCommand{" << command.kind << "}";
+    out << "sync::ParticipantCommand{" << command.kind << "}";
     return out;
 }
 
 std::ostream& operator<<(std::ostream& out, const SystemCommand& command)
 {
-    out << "SystemCommand{" << command.kind << "}";
+    out << "sync::SystemCommand{" << command.kind << "}";
     return out;
 }
 
@@ -363,7 +363,7 @@ std::ostream& operator<<(std::ostream& out, const ParticipantStatus& status)
     char timeString[32];
     std::strftime(timeString, sizeof(timeString), "%FT%T", &tmBuffer);
 
-    out << "ParticipantStatus{" << status.participantName
+    out << "sync::ParticipantStatus{" << status.participantName
         << ", State=" << status.state
         << ", Reason=" << status.enterReason
         << ", Time=" << timeString
