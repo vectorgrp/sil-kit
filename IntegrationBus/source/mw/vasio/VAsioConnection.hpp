@@ -83,7 +83,13 @@ public:
     template <class IbServiceT>
     void RegisterIbService(const std::string& link, EndpointId endpointId, IbServiceT* service)
     {
-        ExecuteOnIoThread(&VAsioConnection::RegisterIbServiceImpl<IbServiceT>, link, endpointId, service);
+        std::promise<void> promise;
+        auto result = promise.get_future();
+        _ioContext.dispatch([this, link, endpointId, service, &promise]() mutable {
+                    this->RegisterIbServiceImpl<IbServiceT>(link, endpointId, service);
+                    promise.set_value();
+                });
+        result.wait();
     }
     template<typename IbMessageT>
     void SendIbMessage(EndpointAddress from, IbMessageT&& msg)
