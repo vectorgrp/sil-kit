@@ -149,15 +149,6 @@ if(IB_BIN_FASTRTPS_ENABLE)
             DESTINATION
             ${INSTALL_TOP_DIR}
      )
-    # NB: we use the ASIO shipped with FastRTPS right now
-    # the binary distribution lacks the Asio sources
-    # but it should be included/deployed by our packaging tools
-    set(ASIO_INCLUDE_DIR ${THIRDPARTY_DIR}/Fast-RTPS/thirdparty/asio/asio/include)
-    if(NOT EXISTS ${ASIO_INCLUDE_DIR})
-        message(WARNING "Asio include directory not found: ${ASIO_INCLUDE_DIR}")
-    else()
-        message(STATUS "Asio include directory found:${ASIO_INCLUDE_DIR}")
-    endif()
 else()
     ### build from submodule or fetch sources from external mirror or use pre-built binaries (deployed mode)
     option(THIRDPARTY_fastcdr "Activate the use of Fast-RTPS internal thirdparty fastcdr" ON)
@@ -250,6 +241,16 @@ else()
         endif()
     endif()
 endif(IB_BIN_FASTRTPS_ENABLE)
+
+# NB: we use the ASIO shipped with FastRTPS right now
+# the binary distribution lacks the Asio sources
+# but it should be included/deployed by our packaging tools
+set(ASIO_INCLUDE_DIR ${THIRDPARTY_DIR}/Fast-RTPS/thirdparty/asio/asio/include)
+if(NOT EXISTS ${ASIO_INCLUDE_DIR})
+    message(WARNING "Asio include directory not found: ${ASIO_INCLUDE_DIR}")
+else()
+    message(STATUS "Asio include directory found:${ASIO_INCLUDE_DIR}")
+endif()
 
 ################################################################################
 # Logging

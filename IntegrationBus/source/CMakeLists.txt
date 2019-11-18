@@ -28,6 +28,10 @@ add_library(IntegrationBus SHARED
 
 if (MSVC)
     target_sources(IntegrationBus PRIVATE IntegrationBus.rc)
+    #disable 'truncated names' warnings on visual studio 2015 v14
+    if(MSVC_VERSION EQUAL 1900)
+        target_compile_options(IntegrationBus PUBLIC "/wd4503")
+    endif()
 endif (MSVC)
 
 
