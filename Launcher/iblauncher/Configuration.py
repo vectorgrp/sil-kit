@@ -10,9 +10,13 @@ import json
 __integrationBusBinaryPath = None
 __integrationBusLibraryPath = None
 
+def __isWindows():
+    """ helper to detect OS"""
+    return os.name == "nt"
+
 #######################################################################################################################
 #def __findDllOnWindowsPath() -> list:
-def __getIntegrationBusLibraryName():
+def __libName():
     """Get the IntegrationBus library file name for the current platform
 
         Returns
@@ -20,8 +24,21 @@ def __getIntegrationBusLibraryName():
         str
             Library file name (no path)
     """
-    return ("libIntegrationBus.so" if os.name == "posix" else "IntegrationBus.dll")
+    return ("libIntegrationBus.so" if not __isWindows() else "IntegrationBus.dll")
 
+def __relativeParentDir(basePath, numLevels, suffix):
+    """ return relative path with numLevels traversed upwards in the directory hierarchy"""
+    lvls=[]
+    for i in range(0, numLevels):
+        lvls.append("..")
+    return os.path.abspath(os.path.join(basePath, *lvls, suffix))
+
+def __libDir():
+    """ get platform dependent library dir """
+    if __isWindows():
+        return "bin"
+    else:
+        return "lib"
 #######################################################################################################################
 #def __isIntegrationBusInstalled(integrationBusBinaryPath: str, integrationBusLibraryPath: str) -> bool:
 def __isIntegrationBusInstalled(integrationBusBinaryPath, integrationBusLibraryPath):
@@ -39,7 +56,8 @@ def __isIntegrationBusInstalled(integrationBusBinaryPath, integrationBusLibraryP
         bool
             True iff specified paths exist and are tested for the IntegrationBus library
     """
-    integrationBusLibraryFilePath = integrationBusLibraryPath + os.path.sep + __getIntegrationBusLibraryName()
+    integrationBusLibraryFilePath = os.path.join(integrationBusLibraryPath, __libName())
+    print("checking for {}".format(integrationBusLibraryFilePath))
     exists = (os.path.exists(integrationBusBinaryPath) and 
         os.path.exists(integrationBusLibraryPath) and 
         os.path.isfile(integrationBusLibraryFilePath))
@@ -55,7 +73,7 @@ def __findLibraryOnWindowsPath():
         list
             Absolute paths that contain the specified file
     """
-    if os.name != "nt":
+    if not __isWindows():
         return []
 
     # Windows search heuristics according to https://docs.microsoft.com/en-us/windows/desktop/dlls/dynamic-link-library-search-order
@@ -63,7 +81,7 @@ def __findLibraryOnWindowsPath():
     searchPaths = [] #[os.getcwd(), win32api.GetSystemDirectory(), win32api.GetWindowsDirectory()]
     searchPaths += os.environ['PATH'].split(os.pathsep)
     for searchPath in searchPaths:
-        filePath = os.path.join(searchPath, __getIntegrationBusLibraryName())
+        filePath = os.path.join(searchPath, __libName())
         if os.path.exists(filePath):
             if searchPath not in paths:
                 paths.append(searchPath)
@@ -101,12 +119,12 @@ def __determineIntegrationBusPaths(verbose=True):
     installationFound = False
 
     # 1. Search the library on the Windows PATH environment
-    if os.name == "nt":
+    if __isWindows():
         paths = __findLibraryOnWindowsPath()
         if paths:
-            # The folder where the DLL is found is where the libraries are expected, and '../bin' is where the binaries are expected
+            # The folder where the DLL is found is where the libraries are expected, and 'IntegrationBus/lib/python/site-packages/../../../bin' is where the binaries are expected
             __integrationBusLibraryPath = paths[0]
-            __integrationBusBinaryPath = os.path.abspath(__integrationBusLibraryPath + os.path.sep + ".." + os.path.sep + "bin" + os.path.sep)
+            __integrationBusBinaryPath =  __relativeParentDir(__integrationBusLibraryPath, 4, __libDir())
             if verbose: print("Found IntegrationBus library on the Windows PATH environment")
             # => Just warn if binary folder does not exist; Since the user is tinkering with the Windows PATH environment, we assume that
             #    variable INTEGRATIONBUS_BINPATH will not be used in the selected LaunchConfiguration.
@@ -121,7 +139,7 @@ def __determineIntegrationBusPaths(verbose=True):
             if 'INTEGRATIONBUS_BINPATH' in os.environ:
                 __integrationBusBinaryPath = os.environ['INTEGRATIONBUS_BINPATH']
             else:
-                __integrationBusBinaryPath = os.path.abspath(__integrationBusLibraryPath + os.path.sep + ".." + os.path.sep + "bin" + os.path.sep)
+                __integrationBusBinaryPath = __relativeParentDir(__integrationBusLibraryPath, 1, "bin")
             if __isIntegrationBusInstalled(__integrationBusBinaryPath, __integrationBusLibraryPath):
                 if verbose: print("Found IntegrationBus installation from environment variables 'INTEGRATIONBUS_LIBPATH', 'INTEGRATIONBUS_BINPATH'")
                 installationFound = True
@@ -135,7 +153,7 @@ def __determineIntegrationBusPaths(verbose=True):
 
     # 3. Read paths from file './data/IbInstallation.json'. This file is injected by CMake install and points to the install location.
     if not installationFound:
-        installationFilePath = launcherDirectoryPath + os.path.sep + "data" + os.path.sep + "IbInstallation.json"
+        installationFilePath = os.path.join(launcherDirectoryPath, "data", "IbInstallation.json")
         try:
             with open(installationFilePath, 'r') as f:
                 installationData = f.read()
@@ -147,12 +165,15 @@ def __determineIntegrationBusPaths(verbose=True):
             try:
                 installation = json.loads(installationData)
             except BaseException as e:
-                print("Error: Installation configuration '" + installationFilePath + "' invalid ('" + str(e) + "')")
+                print("Error: Installation configuration '{}' invalid ('{}')".format(installationFilePath, str(e)))
                 installation = {}
         else:
             installation = {}
 
-        if "INTEGRATIONBUS_BINPATH" in installation and "INTEGRATIONBUS_LIBPATH" in installation and installation["INTEGRATIONBUS_BINPATH"] and installation["INTEGRATIONBUS_LIBPATH"]:
+        if "INTEGRATIONBUS_BINPATH" in installation \
+                and "INTEGRATIONBUS_LIBPATH" in installation \
+                and installation["INTEGRATIONBUS_BINPATH"] \
+                and installation["INTEGRATIONBUS_LIBPATH"]:
             # Normalize paths (convert os-specific separator, cast off a potential types.UnicodeType originating from json)
             __integrationBusBinaryPath = str(os.path.abspath(installation["INTEGRATIONBUS_BINPATH"]))
             __integrationBusLibraryPath = str(os.path.abspath(installation["INTEGRATIONBUS_LIBPATH"]))
@@ -163,8 +184,8 @@ def __determineIntegrationBusPaths(verbose=True):
     # 4. Check path relative to Launcher
     if not installationFound:
         # This python script's path is where the binaries are expected, and '../lib' is where the libraries are expected
-        __integrationBusBinaryPath = os.path.abspath(launcherDirectoryPath)
-        __integrationBusLibraryPath = os.path.abspath(__integrationBusBinaryPath + os.path.sep + ".." + os.path.sep + "lib" + os.path.sep)
+        __integrationBusBinaryPath = __relativeParentDir(launcherDirectoryPath, 4, "bin")
+        __integrationBusLibraryPath =  __relativeParentDir(launcherDirectoryPath, 4, __libDir())
         if __isIntegrationBusInstalled(__integrationBusBinaryPath, __integrationBusLibraryPath):
             if verbose: print("Found IntegrationBus installation at local paths")
             installationFound = True
@@ -173,23 +194,25 @@ def __determineIntegrationBusPaths(verbose=True):
     if not installationFound:
         if os.name == "posix":
             # Try '../../../../bin|lib' on Linux (./share/doc/IntegrationBus-Launcher/iblauncher -> ./bin|lib)
-            __integrationBusBinaryPath = os.path.abspath(launcherDirectoryPath + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "bin")
-            __integrationBusLibraryPath = os.path.abspath(launcherDirectoryPath + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "lib")
+            __integrationBusBinaryPath =  __relativeParentDir(launcherDirectoryPath, 4, "bin")
+            __integrationBusLibraryPath = __relativeParentDir(launcherDirectoryPath, 4, __libDir())
         else:
             # Try '../../Release/bin' and '../../Release/lib' on Windows (./Win32|Win64/Release/bin/Launcher/iblauncher -> ./Win32|Win64/Release/bin|lib)
-            __integrationBusBinaryPath = os.path.abspath(launcherDirectoryPath + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "Release" + os.path.sep + "bin")
-            __integrationBusLibraryPath = os.path.abspath(launcherDirectoryPath + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "Release" + os.path.sep + "lib")
+            __integrationBusBinaryPath = __relativeParentDir(launcherDirectoryPath, 4, os.path.join("Release", "bin"))
+            __integrationBusLibraryPath = __relativeParentDir(launcherDirectoryPath, 4, os.path.join("Release", __libDir()))
             if not __isIntegrationBusInstalled(__integrationBusBinaryPath, __integrationBusLibraryPath):
                 # Try '../../Debug/bin' and '../../Debug/lib' on Windows (./Win32|Win64/Debug/bin/Launcher/iblauncher -> ./Win32|Win64/Debug/bin|lib)
-                __integrationBusBinaryPath = os.path.abspath(launcherDirectoryPath + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "Debug" + os.path.sep + "bin")
-                __integrationBusLibraryPath = os.path.abspath(launcherDirectoryPath + os.path.sep + ".." + os.path.sep + ".." + os.path.sep + "Debug" + os.path.sep + "lib")
+                __integrationBusBinaryPath = __relativeParentDir(launcherDirectoryPath, 4, os.path.join("Debug", "bin"))
+                __integrationBusLibraryPath = __relativeParentDir(launcherDirectoryPath, 4, os.path.join("Debug", __libDir()))
         if __isIntegrationBusInstalled(__integrationBusBinaryPath, __integrationBusLibraryPath):
             if verbose: print("Found IntegrationBus installation that was installed with this Launcher")
             installationFound = True
 
     if not installationFound:
         print("Error: No IntegrationBus installation found, neither from configuration nor at local paths.")
-        if verbose: print("  Try to configure environment variables 'INTEGRATIONBUS_LIBPATH' and 'INTEGRATIONBUS_BINPATH', or file '" + installationFilePath + "'.")
+        if verbose: 
+            print("  Try to configure environment variables 'INTEGRATIONBUS_LIBPATH'"
+                " and 'INTEGRATIONBUS_BINPATH', or file '{}'" .format(installationFilePath))
     elif verbose:
         print("  Location for IntegrationBus binaries: '" + __integrationBusBinaryPath + "'")
         print("  Location for IntegrationBus libraries: '" + __integrationBusLibraryPath + "'")

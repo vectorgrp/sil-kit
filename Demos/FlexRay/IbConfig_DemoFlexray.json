@@ -211,14 +211,14 @@
                     "Participant": "SystemMonitor",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoPassiveSystemMonitor",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbSystemMonitor",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
                 },
                 {
                     "Participant": "SystemController",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoSystemController",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbSystemController",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
                 }
             ]
@@ -244,14 +244,14 @@
                     "Participant": "SystemMonitor",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "../Debug/bin/IbDemoPassiveSystemMonitor",
+                    "Executable": "../Debug/bin/IbSystemMonitor",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
                 },
                 {
                     "Participant": "SystemController",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "../Debug/bin/IbDemoSystemController",
+                    "Executable": "../Debug/bin/IbSystemController",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
                 }
             ]
@@ -277,14 +277,14 @@
                     "Participant": "SystemMonitor",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "../Release/bin/IbDemoPassiveSystemMonitor",
+                    "Executable": "../Release/bin/IbSystemMonitor",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
                 },
                 {
                     "Participant": "SystemController",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "../Release/bin/IbDemoSystemController",
+                    "Executable": "../Release/bin/IbSystemController",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
                 }
             ]
@@ -310,14 +310,14 @@
                     "Participant": "SystemMonitor",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "../bin/IbDemoPassiveSystemMonitor",
+                    "Executable": "../bin/IbSystemMonitor",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
                 },
                 {
                     "Participant": "SystemController",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "../bin/IbDemoSystemController",
+                    "Executable": "../bin/IbSystemController",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
                 }
             ]

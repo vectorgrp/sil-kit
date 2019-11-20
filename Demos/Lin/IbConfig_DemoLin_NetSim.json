@@ -133,14 +133,14 @@
                     "Participant": "SystemMonitor",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoPassiveSystemMonitor",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbSystemMonitor",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
                 },
                 {
                     "Participant": "SystemController",
                     "Environment": "CustomExecutable",
                     "WorkingFolder": ".",
-                    "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoSystemController",
+                    "Executable": "%INTEGRATIONBUS_BINPATH%IbSystemController",
                     "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
                 }
 
