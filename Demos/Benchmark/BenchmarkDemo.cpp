@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "CreateComAdapter.hpp"
+#include "VAsioRegistry.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/mw/sync/string_utils.hpp"
@@ -76,7 +77,7 @@ void SystemStateHandler(sync::ISystemController* controller, sync::SystemState n
 	}
 }
 
-auto BuildConfig(uint32_t participantCount) -> ib::cfg::Config
+auto BuildConfig(uint32_t participantCount, Middleware middleware) -> ib::cfg::Config
 {
 	ConfigBuilder benchmarkConfig("BenchmarkConfigGenerated");
 	auto&& simulationSetup = benchmarkConfig.SimulationSetup();
@@ -89,7 +90,7 @@ auto BuildConfig(uint32_t participantCount) -> ib::cfg::Config
 
 		auto &&participantBuilder = simulationSetup.AddParticipant(participantNameBuilder.str());
 		participantBuilder.WithParticipantId(participantCounter);
-		participantBuilder.WithSyncType(ib::cfg::SyncType::DiscreteTime);
+        participantBuilder.AddParticipantController().WithSyncType(ib::cfg::SyncType::DiscreteTime);
 
 		for (unsigned int otherParticipantsCounter = 0; otherParticipantsCounter < participantCount; otherParticipantsCounter++)
 		{
@@ -125,6 +126,8 @@ auto BuildConfig(uint32_t participantCount) -> ib::cfg::Config
 	simulationSetup.ConfigureTimeSync()
 		.WithLooseSyncPolicy()
 		.WithTickPeriod(1000000ns);
+
+    benchmarkConfig.WithActiveMiddleware(middleware);
 
 	auto config = benchmarkConfig.Build();
 
@@ -200,17 +203,20 @@ int main(int argc, char** argv)
 		uint32_t simulationRepeats = 5;
 		uint32_t payloadSizeInBytes = 100;
 		uint32_t domainId = 42;
+        Middleware usedMiddleware = Middleware::VAsio;
 
-		if (argc >= 7)
+		if (argc >= 8)
 		{
 			std::cout << "Too many arguments." << std::endl;
 			std::cout << "Start benchmark with " << argv[0];
-			std::cout << " [numberOfParticipants] [simulationDuration] [simulationRepeats] [payloadSizeInBytes] [domainId]" << std::endl;
+			std::cout << " [numberOfParticipants] [simulationDuration] [simulationRepeats] [payloadSizeInBytes] [domainId] [useFastRTPS]" << std::endl;
 			return -1;
 		}
 
 		switch (argc)
 		{
+        case 7: if (std::stoul(argv[6])) { usedMiddleware = Middleware::FastRTPS; }
+            // [[fallthrough]]
 		case 6: domainId = domainId = static_cast<uint32_t>(std::stoul(argv[5]));
 			// [[fallthrough]]
 		case 5: payloadSizeInBytes = static_cast<uint32_t>(std::stoul(argv[4]));
@@ -222,22 +228,32 @@ int main(int argc, char** argv)
 		case 2: numberOfParticipants = static_cast<uint32_t>(std::stoul(argv[1]));
 			break;
 		default:
-			std::cout << "Using default benchmark parameters (4 participants, 1 second, 5 repeats, 100 bytes, domainId 42);" << std::endl;
+			std::cout << "Using default benchmark parameters (4 participants, 1 second, 5 repeats, 100 bytes, domainId 42, 0);" << std::endl;
 		}
 
 		if (numberOfParticipants < 2 || simulationDuration < 1s || simulationRepeats < 1 || payloadSizeInBytes < 1)
 		{
 			std::cout << "Invalid argument." << std::endl;
 			std::cout << "Start benchmark with " << argv[0];
-			std::cout << " [numberOfParticipants] [simulationDuration] [simulationRepeats] [payloadSizeInBytes] [domainId]" << std::endl;
+			std::cout << " [numberOfParticipants] [simulationDuration] [simulationRepeats] [payloadSizeInBytes] [domainId] [useFastRTPS]" << std::endl;
 			return -1;
 		}
 
 		for (uint32_t simulationRun = 1; simulationRun <= simulationRepeats; simulationRun++)
 		{
 			auto startTimestamp = std::chrono::system_clock::now();
-			auto ibConfig = BuildConfig(numberOfParticipants);
+			auto ibConfig = BuildConfig(numberOfParticipants, usedMiddleware);
 			std::vector<std::thread> threads;
+            std::thread VAsioRegistryThread;
+
+            if (usedMiddleware == Middleware::VAsio)
+            {
+                VAsioRegistryThread = std::thread([ibConfig, domainId] {
+                    VAsioRegistry registry{ ibConfig };
+                    auto future = registry.ProvideDomain(domainId);
+                    future.wait();
+                });
+            }
 
 			for (auto &&thisParticipant : ibConfig.simulationSetup.participants)
 			{
@@ -245,8 +261,10 @@ int main(int argc, char** argv)
 					continue;
 
 				bool isVerbose = false;
-				if (thisParticipant.id == 0)
-					isVerbose = true;
+                if (thisParticipant.id == 0)
+                {
+                    isVerbose = true;
+                }
 
 				threads.push_back(std::thread([payloadSizeInBytes, simulationDuration, ibConfig, thisParticipant, domainId, isVerbose] {
 
@@ -277,6 +295,12 @@ int main(int argc, char** argv)
 			{
 				thread.join();
 			}
+
+            if (usedMiddleware == Middleware::VAsio)
+            {
+                comAdapter.reset();
+                VAsioRegistryThread.join();
+            }
 
 			auto endTimestamp = std::chrono::system_clock::now();
 			auto duration = endTimestamp - startTimestamp;
