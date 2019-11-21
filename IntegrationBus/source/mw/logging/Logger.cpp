@@ -32,13 +32,19 @@ public:
 protected:
     void sink_it_(const spdlog::details::log_msg& msg) override
     {
-        _logMsgHandler(std::move(from_spdlog(msg)));
+        // ignore recursive calls to the remote logger
+        if (_in_sink_it_call) return;
+
+        _in_sink_it_call = true;
+        _logMsgHandler(from_spdlog(msg));
+        _in_sink_it_call = false;
     }
 
     void flush_() override {}
 
 private:
     Logger::LogMsgHandlerT _logMsgHandler;
+    bool _in_sink_it_call{false};
 };
 } // anonymous namespace
 
