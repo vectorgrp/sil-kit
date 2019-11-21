@@ -3,6 +3,7 @@
 #include "EthController.hpp"
 
 #include "ib/mw/IComAdapter.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 #include <algorithm>
 
 namespace ib {
@@ -21,7 +22,9 @@ EthController::EthController(mw::IComAdapter* comAdapter, cfg::EthernetControlle
 
     if (!config.pcapPipe.empty())
     {
+        _comAdapter->GetLogger()->Info("Waiting for a reader to connect to PCAP pipe {} ... ", config.pcapPipe);
         _tracer.OpenPipe(config.pcapPipe);
+        _comAdapter->GetLogger()->Debug("PCAP pipe: {} is connected successfully", config.pcapPipe);
     }
 }
 
