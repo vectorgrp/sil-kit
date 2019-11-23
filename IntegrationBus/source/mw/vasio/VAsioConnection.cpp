@@ -2,8 +2,9 @@
 
 #include "VAsioConnection.hpp"
 
-#include <thread>
+#include <algorithm>
 #include <chrono>
+#include <thread>
 
 #include "ib/cfg/string_utils.hpp"
 
@@ -82,7 +83,11 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     SendParticipantAnnoucement(registry.get());
     _registry = std::move(registry);
     
-    StartIoWorker();    
+    StartIoWorker();
+
+    auto receivedKnownParticipants = _receivedKnownParticipants.get_future();
+    receivedKnownParticipants.wait(); // FIXME: add a timeout?
+    _logger->Debug("Received announcement replies from all participants.");
 }
 
 void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer)
@@ -104,6 +109,7 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
     {
         receiver(from, announcement);
     }
+    SendParticipantAnnoucementReply(from);
 }
 
 void VAsioConnection::SendParticipantAnnoucement(IVAsioPeer* peer)
@@ -130,12 +136,45 @@ void VAsioConnection::SendParticipantAnnoucement(IVAsioPeer* peer)
     peer->SendIbMsg(std::move(buffer));
 }
 
-void VAsioConnection::ReceiveSubscriptionSentEvent()
+void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, MessageBuffer&& buffer)
 {
-    if (_newPeerCallback)
+    ParticipantAnnouncementReply reply;
+    buffer >> reply;
+
+    for (auto& subscriber : reply.subscribers)
     {
-        _newPeerCallback();
+        AddRemoteSubscriber(from, subscriber);
     }
+
+    _logger->Debug("Received participant announcement reply from {}", from->GetInfo().participantName);
+
+    auto iter = std::find(_pendingReplies.begin(), _pendingReplies.end(), from);
+    if (iter != _pendingReplies.end())
+    {
+        _pendingReplies.erase(iter);
+        if (_pendingReplies.empty())
+        {
+            _receivedKnownParticipants.set_value();
+        }
+    }
+}
+
+void VAsioConnection::SendParticipantAnnoucementReply(IVAsioPeer* peer)
+{
+    ParticipantAnnouncementReply reply;
+    std::transform(_vasioReceivers.begin(), _vasioReceivers.end(), std::back_inserter(reply.subscribers),
+                   [](const auto& subscriber) { return subscriber->GetDescriptor(); });
+
+    MessageBuffer buffer;
+    uint32_t msgSizePlaceholder{0u};
+
+    buffer << msgSizePlaceholder
+           << VAsioMsgKind::IbRegistryMessage
+           << RegistryMessageKind::ParticipantAnnouncementReply
+           << reply;
+
+    _logger->Debug("Sending participant announcement reply to {}", peer->GetInfo().participantName);
+    peer->SendIbMsg(std::move(buffer));
 }
 
 void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
@@ -171,10 +210,16 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
         }
 
         // We connected to the other peer. tell him who we are.
+        _pendingReplies.push_back(peer.get());
         SendParticipantAnnoucement(peer.get());
 
         AddPeer(std::move(peer));
     }
+    if (_pendingReplies.empty())
+    {
+        _receivedKnownParticipants.set_value();
+    }
+    _logger->Info("Waiting for {} ParticipantAnnouncementReplies", _pendingReplies.size());
 }
 
 void VAsioConnection::StartIoWorker()
@@ -240,25 +285,9 @@ void VAsioConnection::AcceptNextConnection(asio::ip::tcp::acceptor& acceptor)
 
 void VAsioConnection::AddPeer(std::shared_ptr<VAsioTcpPeer> newPeer)
 {
-    for (auto&& localReceiver : _vasioReceivers)
-    {
-        newPeer->Subscribe(localReceiver->GetDescriptor());
-    }
     newPeer->StartAsyncRead();
 
     _peers.emplace_back(std::move(newPeer));   
-
-    // notify all connected peers that new subscriptions were sent
-    MessageBuffer buffer;
-    uint32_t msgSizePlaceholder{0u};
-    buffer
-        << msgSizePlaceholder
-        << VAsioMsgKind::IbRegistryMessage
-        << RegistryMessageKind::SubscriptionSent;
-    for (auto&& peer : _peers)
-    {
-        peer->SendIbMsg(buffer);
-    }
 }
 
 void VAsioConnection::RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> callback)
@@ -317,7 +346,11 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageB
 {
     VAsioMsgSubscriber subscriber;
     buffer >> subscriber;
+    AddRemoteSubscriber(from, subscriber);
+}
 
+void VAsioConnection::AddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSubscriber& subscriber)
+{
     bool wasAdded = false;
 
     tt::for_each(_ibLinks, [&](auto&& linkMap) {
@@ -374,10 +407,10 @@ void VAsioConnection::ReceiveRegistryMessage(IVAsioPeer* from, MessageBuffer&& b
         return;
     case RegistryMessageKind::ParticipantAnnouncement:
         return ReceiveParticipantAnnouncement(from, std::move(buffer));
+    case RegistryMessageKind::ParticipantAnnouncementReply:
+        return ReceiveParticipantAnnouncementReply(from, std::move(buffer));
     case RegistryMessageKind::KnownParticipants:
         return ReceiveKnownParticpants(std::move(buffer));
-    case RegistryMessageKind::SubscriptionSent:
-        return ReceiveSubscriptionSentEvent();
     }
 }
 

@@ -32,7 +32,6 @@
 #include "IVAsioPeer.hpp"
 #include "VAsioReceiver.hpp"
 #include "VAsioTransmitter.hpp"
-#include "VAsioMessageSubscriber.hpp"
 #include "VAsioMsgKind.hpp"
 
 #include "ib/mw/sync/string_utils.hpp"
@@ -179,13 +178,17 @@ private:
     void ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer);
     void ReceiveRegistryMessage(IVAsioPeer* from, MessageBuffer&& buffer);
 
+    void AddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSubscriber& subscriber);
+
+
     void UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer);
 
     // Registry related send / receive methods
-    void SendParticipantAnnoucement(IVAsioPeer* peer);
     void ReceiveKnownParticpants(MessageBuffer&& buffer);
+    void SendParticipantAnnoucement(IVAsioPeer* peer);
     void ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer);
-    void ReceiveSubscriptionSentEvent();
+    void SendParticipantAnnoucementReply(IVAsioPeer* peer);
+    void ReceiveParticipantAnnouncementReply(IVAsioPeer* from, MessageBuffer&& buffer);
 
     template<class IbMessageT>
     auto GetLinkByName(const std::string& linkName) -> std::shared_ptr<IbLink<IbMessageT>>
@@ -312,7 +315,6 @@ private:
     // FIXME: generalize the reception of registry data
     std::vector<ParticipantAnnouncementReceiver> _participantAnnouncementReceivers;
     std::vector<std::function<void(IVAsioPeer*)>> _peerShutdownCallbacks;
-    std::function<void()> _newPeerCallback{nullptr};
 
     // NB: The IO context must be listed before anything socket related.
     asio::io_context _ioContext;
@@ -323,6 +325,10 @@ private:
     std::vector<std::shared_ptr<IVAsioPeer>> _peers;
     std::unique_ptr<asio::ip::tcp::acceptor> _tcpAcceptor;
 
+    //
+    std::promise<void> _receivedKnownParticipants;
+    std::vector<IVAsioPeer*> _pendingReplies;
+    
     // The worker thread should be the last members in this class. This ensures
     // that no callback is destroyed before the thread finishes.
     std::thread _ioWorker;

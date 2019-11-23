@@ -42,6 +42,22 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioPeerInfo& peerInfo)
     return buffer;
 }
 
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const VAsioMsgSubscriber& subscriber)
+{
+    buffer << subscriber.receiverIdx
+           << subscriber.linkName
+           << subscriber.msgTypeName;
+    return buffer;
+}
+
+inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioMsgSubscriber& subscriber)
+{
+    buffer >> subscriber.receiverIdx
+           >> subscriber.linkName
+           >> subscriber.msgTypeName;
+    return buffer;
+}
+
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnouncement& announcement)
 {
     buffer << announcement.messageHeader
@@ -52,6 +68,17 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncement&
 {
     buffer >> announcement.messageHeader
            >> announcement.peerInfo;
+    return buffer;
+}
+
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnouncementReply& reply)
+{
+    buffer << reply.subscribers;
+    return buffer;
+}
+inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncementReply& reply)
+{
+    buffer >> reply.subscribers;
     return buffer;
 }
 

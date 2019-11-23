@@ -17,7 +17,6 @@ add_library(IbMwVAsio STATIC
     IbLink.hpp
     IVAsioPeer.hpp
     VAsioDatatypes.hpp
-    VAsioMessageSubscriber.hpp
     VAsioMsgKind.hpp
     VAsioPeerInfo.hpp
     VAsioReceiver.hpp

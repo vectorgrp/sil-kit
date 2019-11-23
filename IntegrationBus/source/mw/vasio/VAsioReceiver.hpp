@@ -4,7 +4,7 @@
 
 #include "IbLink.hpp"
 
-#include "VAsioMessageSubscriber.hpp"
+#include "VAsioDatatypes.hpp"
 
 #include "MessageTracing.hpp"
 

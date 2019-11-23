@@ -3,12 +3,12 @@
 #pragma once
 
 #include "VAsioPeerInfo.hpp"
+#include "VAsioDatatypes.hpp"
 
 namespace ib {
 namespace mw {
 
 class MessageBuffer;
-struct VAsioMsgSubscriber;
 
 class IVAsioPeer
 {

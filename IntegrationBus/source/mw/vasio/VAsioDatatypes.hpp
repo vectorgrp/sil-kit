@@ -13,14 +13,26 @@ namespace mw {
 struct RegistryMsgHeader
 {
     std::array<char, 4> preambel{{'V', 'I', 'B', '-'}};
-    uint16_t versionHigh = 1;
+    uint16_t versionHigh = 2;
     uint16_t versionLow = 0;
+};
+
+struct VAsioMsgSubscriber
+{
+    uint16_t    receiverIdx;
+    std::string linkName;
+    std::string msgTypeName;
 };
 
 struct ParticipantAnnouncement
 {
     RegistryMsgHeader messageHeader;
     ib::mw::VAsioPeerInfo peerInfo;
+};
+
+struct ParticipantAnnouncementReply
+{
+    std::vector<VAsioMsgSubscriber> subscribers;
 };
 
 struct KnownParticipants
@@ -32,9 +44,16 @@ struct KnownParticipants
 enum class RegistryMessageKind : uint8_t
 {
     Invalid = 0,
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // !! DO NOT CHANGE THE VALUE OF ParticipantAnnouncement !!
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // The ParticipantAnnouncement is the first message transmitted over a new
+    // connection and carries the protocol version. Thus, changing the enum
+    // value of ParticipantAnnouncement will break protocol break detections
+    // with older participants.
     ParticipantAnnouncement = 1,
-    KnownParticipants = 2,
-    SubscriptionSent = 3
+    ParticipantAnnouncementReply = 2,
+    KnownParticipants = 3
 };
 
 
