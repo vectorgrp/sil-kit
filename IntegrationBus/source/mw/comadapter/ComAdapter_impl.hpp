@@ -109,8 +109,7 @@ void ComAdapter<IbConnectionT>::SetupRemoteLogging()
     {
         if (_participant.logger.logFromRemotes)
         {
-            auto&& logMsgRouter = CreateController<logging::LogMsgReceiver>(1029, "default");
-            logMsgRouter->SetLogger(logger);
+            CreateController<logging::LogMsgReceiver>(1029, "default", logger);
         }
 
         auto sinkIter = std::find_if(_participant.logger.sinks.begin(), _participant.logger.sinks.end(),

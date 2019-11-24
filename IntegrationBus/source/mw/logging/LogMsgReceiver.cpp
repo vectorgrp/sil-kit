@@ -6,14 +6,10 @@ namespace ib {
 namespace mw {
 namespace logging {
 
-LogMsgReceiver::LogMsgReceiver(IComAdapter* comAdapter)
+LogMsgReceiver::LogMsgReceiver(IComAdapter* comAdapter, Logger* logger)
     : _comAdapter{comAdapter}
+    , _logger{logger}
 {
-}
-
-void LogMsgReceiver::SetLogger(Logger* logger)
-{
-    _logger = logger;
 }
 
 void LogMsgReceiver::ReceiveIbMessage(mw::EndpointAddress from, const LogMsg& msg)

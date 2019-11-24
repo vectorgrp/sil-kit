@@ -17,11 +17,9 @@ class LogMsgReceiver
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    LogMsgReceiver(IComAdapter* comAdapter);
+    LogMsgReceiver(IComAdapter* comAdapter, Logger* logger);
 
 public:
-    void SetLogger(Logger* logger);
-
     void ReceiveIbMessage(mw::EndpointAddress from, const LogMsg& msg) override;
 
     void SetEndpointAddress(const mw::EndpointAddress &address) override;
