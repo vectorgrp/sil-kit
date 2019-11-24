@@ -58,6 +58,20 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioMsgSubscriber& subs
     return buffer;
 }
 
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const SubscriptionAcknowledge& ack)
+{
+    buffer << ack.status
+           << ack.subscriber;
+    return buffer;
+}
+
+inline MessageBuffer& operator>>(MessageBuffer& buffer, SubscriptionAcknowledge& ack)
+{
+    buffer >> ack.status
+           >> ack.subscriber;
+    return buffer;
+}
+
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnouncement& announcement)
 {
     buffer << announcement.messageHeader

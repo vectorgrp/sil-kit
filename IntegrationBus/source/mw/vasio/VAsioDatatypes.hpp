@@ -24,6 +24,16 @@ struct VAsioMsgSubscriber
     std::string msgTypeName;
 };
 
+struct SubscriptionAcknowledge
+{
+    enum class Status : uint8_t {
+        Failed = 0,
+        Success = 1
+    };
+    Status status;
+    VAsioMsgSubscriber subscriber;
+};
+
 struct ParticipantAnnouncement
 {
     RegistryMsgHeader messageHeader;
@@ -67,7 +77,12 @@ inline bool operator!=(const RegistryMsgHeader& lhs, const RegistryMsgHeader& rh
         || lhs.versionLow != rhs.versionLow;
 }
 
-
+inline bool operator==(const VAsioMsgSubscriber& lhs, const VAsioMsgSubscriber& rhs)
+{
+    return lhs.receiverIdx == rhs.receiverIdx 
+        && lhs.linkName == rhs.linkName
+        && lhs.msgTypeName == rhs.msgTypeName;
+};
 
 } // namespace mw
 } // namespace ib

@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include <tuple>
+#include <typeinfo>
 #include <future>
 
 #include "ib/cfg/Config.hpp"
@@ -82,13 +83,15 @@ public:
     template <class IbServiceT>
     void RegisterIbService(const std::string& link, EndpointId endpointId, IbServiceT* service)
     {
-        std::promise<void> promise;
-        auto result = promise.get_future();
-        _ioContext.dispatch([this, link, endpointId, service, &promise]() mutable {
+        assert(_pendingSubscriptionAcknowledges.empty());
+        _receivedAllSubscriptionAcknowledges = std::promise<void>{};
+        auto allAcked = _receivedAllSubscriptionAcknowledges.get_future();
+        _ioContext.dispatch([this, link, endpointId, service]() {
                     this->RegisterIbServiceImpl<IbServiceT>(link, endpointId, service);
-                    promise.set_value();
                 });
-        result.wait();
+        _logger->Trace("VAsio waiting for subscription acknowledges for IbService {}.", typeid(*service).name());
+        allAcked.wait();
+        _logger->Trace("VAsio received all subscription acknowledges for IbService {}.", typeid(*service).name());
     }
     template<typename IbMessageT>
     void SendIbMessage(EndpointAddress from, IbMessageT&& msg)
@@ -176,9 +179,10 @@ private:
     // private methods
     void ReceiveRawIbMessage(MessageBuffer&& buffer);
     void ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer);
+    void ReceiveSubscriptionAcknowledge(IVAsioPeer* from, MessageBuffer&& buffer);
     void ReceiveRegistryMessage(IVAsioPeer* from, MessageBuffer&& buffer);
 
-    void AddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSubscriber& subscriber);
+    bool TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSubscriber& subscriber);
 
 
     void UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer);
@@ -227,6 +231,7 @@ private:
 
             for (auto&& peer : _peers)
             {
+                _pendingSubscriptionAcknowledges.emplace_back(peer.get(), subscriptionInfo);
                 peer->Subscribe(subscriptionInfo);
             }
         }
@@ -260,6 +265,11 @@ private:
             this->RegisterIbMsgSender<IbMessageT>(link, endpointId);
         }
         );
+
+        if (_pendingSubscriptionAcknowledges.empty())
+        {
+            _receivedAllSubscriptionAcknowledges.set_value();
+        }
     }
 
     template <class IbMessageT>
@@ -325,9 +335,16 @@ private:
     std::vector<std::shared_ptr<IVAsioPeer>> _peers;
     std::unique_ptr<asio::ip::tcp::acceptor> _tcpAcceptor;
 
-    //
-    std::promise<void> _receivedKnownParticipants;
-    std::vector<IVAsioPeer*> _pendingReplies;
+    // After receiving the list of known participants from the registry, we keep
+    // track of the sent ParticipantAnnouncements and wait for the corresponding
+    // replies.
+    std::vector<IVAsioPeer*> _pendingParticipantReplies;
+    std::promise<void> _receivedAllParticipantReplies;
+
+    // Keep track of the sent Subscriptions when Registering an IB Service
+    std::vector<std::pair<IVAsioPeer*, VAsioMsgSubscriber>> _pendingSubscriptionAcknowledges;
+    std::promise<void> _receivedAllSubscriptionAcknowledges;
+    
     
     // The worker thread should be the last members in this class. This ensures
     // that no callback is destroyed before the thread finishes.

@@ -163,7 +163,7 @@ void VAsioTcpPeer::Subscribe(VAsioMsgSubscriber subscriber)
     uint32_t rawMsgSize{0};
     buffer
         << rawMsgSize
-        << VAsioMsgKind::AnnounceSubscription
+        << VAsioMsgKind::SubscriptionAnnouncement
         << subscriber;
 
     _logger->Debug("Announcing subscription for [{}] {}", subscriber.linkName, subscriber.msgTypeName);

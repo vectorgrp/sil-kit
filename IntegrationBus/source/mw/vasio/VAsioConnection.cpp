@@ -85,9 +85,10 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     
     StartIoWorker();
 
-    auto receivedKnownParticipants = _receivedKnownParticipants.get_future();
-    receivedKnownParticipants.wait(); // FIXME: add a timeout?
-    _logger->Debug("Received announcement replies from all participants.");
+    auto receivedAllReplies = _receivedAllParticipantReplies.get_future();
+    _logger->Debug("VAsio is waiting for announcement replies from {} participants.", _pendingParticipantReplies.size());
+    receivedAllReplies.wait();
+    _logger->Trace("VAsio received announcement replies from all participants.");
 }
 
 void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer)
@@ -143,18 +144,21 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Mess
 
     for (auto& subscriber : reply.subscribers)
     {
-        AddRemoteSubscriber(from, subscriber);
+        TryAddRemoteSubscriber(from, subscriber);
     }
 
     _logger->Debug("Received participant announcement reply from {}", from->GetInfo().participantName);
 
-    auto iter = std::find(_pendingReplies.begin(), _pendingReplies.end(), from);
-    if (iter != _pendingReplies.end())
+    auto iter = std::find(
+        _pendingParticipantReplies.begin(),
+        _pendingParticipantReplies.end(),
+        from);
+    if (iter != _pendingParticipantReplies.end())
     {
-        _pendingReplies.erase(iter);
-        if (_pendingReplies.empty())
+        _pendingParticipantReplies.erase(iter);
+        if (_pendingParticipantReplies.empty())
         {
-            _receivedKnownParticipants.set_value();
+            _receivedAllParticipantReplies.set_value();
         }
     }
 }
@@ -210,16 +214,16 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
         }
 
         // We connected to the other peer. tell him who we are.
-        _pendingReplies.push_back(peer.get());
+        _pendingParticipantReplies.push_back(peer.get());
         SendParticipantAnnoucement(peer.get());
 
         AddPeer(std::move(peer));
     }
-    if (_pendingReplies.empty())
+    if (_pendingParticipantReplies.empty())
     {
-        _receivedKnownParticipants.set_value();
+        _receivedAllParticipantReplies.set_value();
     }
-    _logger->Info("Waiting for {} ParticipantAnnouncementReplies", _pendingReplies.size());
+    _logger->Trace("VAsio Waiting for {} ParticipantAnnouncementReplies", _pendingParticipantReplies.size());
 }
 
 void VAsioConnection::StartIoWorker()
@@ -331,8 +335,10 @@ void VAsioConnection::OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer)
     case VAsioMsgKind::Invalid:
         _logger->Warn("Received message with VAsioMsgKind::Invalid");
         break;
-    case VAsioMsgKind::AnnounceSubscription:
+    case VAsioMsgKind::SubscriptionAnnouncement:
         return ReceiveSubscriptionAnnouncement(from, std::move(buffer));
+    case VAsioMsgKind::SubscriptionAcknowledge:
+        return ReceiveSubscriptionAcknowledge(from, std::move(buffer));
     case VAsioMsgKind::IbMwMsg:
         return ReceiveRawIbMessage(std::move(buffer));
     case VAsioMsgKind::IbSimMsg:
@@ -346,10 +352,53 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageB
 {
     VAsioMsgSubscriber subscriber;
     buffer >> subscriber;
-    AddRemoteSubscriber(from, subscriber);
+    bool wasAdded = TryAddRemoteSubscriber(from, subscriber);
+
+    // send acknowledge
+    SubscriptionAcknowledge ack;
+    ack.subscriber = std::move(subscriber);
+    ack.status = wasAdded
+        ? SubscriptionAcknowledge::Status::Success
+        : SubscriptionAcknowledge::Status::Failed;
+
+    MessageBuffer ackBuffer;
+    uint32_t msgSizePlaceholder{0u};
+    ackBuffer
+        << msgSizePlaceholder
+        << VAsioMsgKind::SubscriptionAcknowledge
+        << ack;
+
+    from->SendIbMsg(std::move(ackBuffer));
 }
 
-void VAsioConnection::AddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSubscriber& subscriber)
+void VAsioConnection::ReceiveSubscriptionAcknowledge(IVAsioPeer* from, MessageBuffer&& buffer)
+{
+    SubscriptionAcknowledge ack;
+    buffer >> ack;
+
+    if (ack.status != SubscriptionAcknowledge::Status::Success)
+    {
+        _logger->Error("Failed to subscribe [{}] {} from {}"
+            , ack.subscriber.linkName
+            , ack.subscriber.msgTypeName
+            , from->GetInfo().participantName);
+    }
+
+    // we remove the pending subscription in any case. As there will not follow a new, successful acknowledge
+    auto iter = std::find(_pendingSubscriptionAcknowledges.begin(),
+                          _pendingSubscriptionAcknowledges.end(),
+                          std::make_pair(from, ack.subscriber));
+    if (iter != _pendingSubscriptionAcknowledges.end())
+    {
+        _pendingSubscriptionAcknowledges.erase(iter);
+        if (_pendingSubscriptionAcknowledges.empty())
+        {
+            _receivedAllSubscriptionAcknowledges.set_value();
+        }
+    }
+}
+
+bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSubscriber& subscriber)
 {
     bool wasAdded = false;
 
@@ -377,6 +426,8 @@ void VAsioConnection::AddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSubscr
         _logger->Debug("Registered subscription for [{}] {} from {}", subscriber.linkName, subscriber.msgTypeName, from->GetInfo().participantName);
     else
         _logger->Warn("Cannot register subscription for [{}] {} from {}", subscriber.linkName, subscriber.msgTypeName, from->GetInfo().participantName);
+
+    return wasAdded;
 }
 
 void VAsioConnection::ReceiveRawIbMessage(MessageBuffer&& buffer)
