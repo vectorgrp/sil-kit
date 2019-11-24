@@ -27,9 +27,13 @@ template<typename MsgT> struct MessageHistory<MsgT, 1>
     {
         _from = from;
         _last = msg;
+        _hasValue = true;
     }
     void NotifyPeer(IVAsioPeer* peer, uint16_t remoteIdx)
     {
+        if (!_hasValue)
+            return;
+        
         ib::mw::MessageBuffer buffer;
         uint32_t msgSizePlaceholder{ 0u };
         buffer
@@ -44,6 +48,7 @@ template<typename MsgT> struct MessageHistory<MsgT, 1>
 private:
     MsgT _last;
     EndpointAddress _from;
+    bool _hasValue{false};
 };
 
 
