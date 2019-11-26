@@ -72,6 +72,14 @@ function(make_ib_demo executableName demoSourceFile)
         RUNTIME_OUTPUT_DIRECTORY "${_DEMO_OUTPUT_DIR}"
         )
 
+	foreach(_build_type ${CMAKE_CONFIGURATION_TYPES})
+		string( TOUPPER ${_build_type} _build_type )
+		set_target_properties(${executableName} PROPERTIES
+			"RUNTIME_OUTPUT_DIRECTORY_${_build_type}" "${_DEMO_OUTPUT_DIR}"
+			"LIBRARY_OUTPUT_DIRECTORY_${_build_type}" "${_DEMO_OUTPUT_DIR}"
+			"ARCHIVE_OUTPUT_DIRECTORY_${_build_type}" "${_DEMO_OUTPUT_DIR}")
+	endforeach()
+
     target_link_libraries(${executableName}
         PRIVATE IntegrationBus::IntegrationBus
     )

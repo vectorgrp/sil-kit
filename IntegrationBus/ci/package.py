@@ -120,7 +120,7 @@ def copyWithExcludes(src, dest, exlist=[]):
                 os.makedirs(adir)
                 debug("staging mkdir {}".format(adir))
             debug("staging copy {} -> {}".format(fpath, apath))
-            shutil.copyfile(fpath, apath)
+            shutil.copy2(fpath, apath)
 
 def hashFile(fname):
     alg = hashlib.sha256()
