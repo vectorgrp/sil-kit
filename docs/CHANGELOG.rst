@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog] (http://keepachangelog.com/en/1.0.0/).
 --------------------------------
 Added
 ~~~~~
+- The logging mechanism now includes the most important elements of sent and received IB messages (AFTMAGT-217).
 
 Changed
 ~~~~~~~
@@ -31,6 +32,10 @@ Changed
        They are also distributed in binary form.
      - Fast-RTPS is no longer distributed in source form. 
        The CMake build infrastructure automatically downloads a git snapshot if needed (requires git).
+
+- CMake packaging was simplified (AFTMAGT-195).
+- A notification is shown when writing to a PCAP pipe is enabled, as the default behavior is to block until the pipe is read by another process (AFTMAGT-221).
+- Logging output to std::cerr and std::cout is replaced by calls to the internal logging mechanism (AFTMAGT-210).
        
   
 Fixed
