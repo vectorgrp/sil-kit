@@ -7,6 +7,9 @@
 #include <numeric>
 #include <algorithm>
 
+// DEBUG
+#include <fstream>
+
 #include "CreateComAdapter.hpp"
 #include "VAsioRegistry.hpp"
 #include "ib/sim/all.hpp"
@@ -77,10 +80,11 @@ void SystemStateHandler(sync::ISystemController* controller, sync::SystemState n
 	}
 }
 
-auto BuildConfig(uint32_t participantCount, Middleware middleware) -> ib::cfg::Config
+auto BuildConfig(uint32_t participantCount, Middleware middleware, bool useNetworkSimulator) -> ib::cfg::Config
 {
 	ConfigBuilder benchmarkConfig("BenchmarkConfigGenerated");
 	auto&& simulationSetup = benchmarkConfig.SimulationSetup();
+    std::vector<std::string> networkSimulatorNames;
 
 	for (unsigned int participantCounter = 0; participantCounter < participantCount; participantCounter++)
 	{
@@ -90,7 +94,12 @@ auto BuildConfig(uint32_t participantCount, Middleware middleware) -> ib::cfg::C
 
 		auto &&participantBuilder = simulationSetup.AddParticipant(participantNameBuilder.str());
 		participantBuilder.WithParticipantId(participantCounter);
-        participantBuilder.AddParticipantController().WithSyncType(ib::cfg::SyncType::DiscreteTime);
+        participantBuilder.AddParticipantController().WithSyncType(ib::cfg::SyncType::DistributedTimeQuantum);
+
+        participantBuilder.ConfigureLogger()
+            .WithFlushLevel(ib::mw::logging::Level::Trace)
+            .AddSink(ib::cfg::Sink::Type::Stdout)
+                .WithLogLevel(ib::mw::logging::Level::Trace);
 
 		for (unsigned int otherParticipantsCounter = 0; otherParticipantsCounter < participantCount; otherParticipantsCounter++)
 		{
@@ -115,13 +124,41 @@ auto BuildConfig(uint32_t participantCount, Middleware middleware) -> ib::cfg::C
 			linkNameBuilder << "AndParticipant";
 			linkNameBuilder << otherParticipantsCounter;
 
+            if (useNetworkSimulator)
+            {
+                std::stringstream networkSimulatorNameBuilder;
+                networkSimulatorNameBuilder << "NetworkSimulatorFor";
+                networkSimulatorNameBuilder << linkNameBuilder.str();
+
+                networkSimulatorNames.push_back(networkSimulatorNameBuilder.str());
+
+                participantBuilder.AddNetworkSimulator(networkSimulatorNameBuilder.str()).WithLinks({ linkNameBuilder.str() });
+            }
+
 			participantBuilder->AddGenericPublisher(publisherNameBuilder.str()).WithLink(linkNameBuilder.str());
 			participantBuilder->AddGenericSubscriber(subscriberNameBuilder.str()).WithLink(linkNameBuilder.str());
 		}
 	}
 
+    if (useNetworkSimulator)
+    {
+        for (auto&& name : networkSimulatorNames)
+        {
+            auto&& participant = simulationSetup.AddParticipant(name);
+            participant.AddParticipantController().WithSyncType(ib::cfg::SyncType::DistributedTimeQuantum).Parent()->AddNetworkSimulator(name);
+            participant.ConfigureLogger()
+                .WithFlushLevel(ib::mw::logging::Level::Trace)
+                .AddSink(ib::cfg::Sink::Type::Stdout)
+                .WithLogLevel(ib::mw::logging::Level::Trace);
+        }
+    }
+
 	simulationSetup.AddParticipant("Master")
-		.AsSyncMaster();
+		.AsSyncMaster()
+            .ConfigureLogger()
+                .WithFlushLevel(ib::mw::logging::Level::Trace)
+                .AddSink(ib::cfg::Sink::Type::Stdout)
+                    .WithLogLevel(ib::mw::logging::Level::Trace);
 
 	simulationSetup.ConfigureTimeSync()
 		.WithLooseSyncPolicy()
@@ -130,6 +167,12 @@ auto BuildConfig(uint32_t participantCount, Middleware middleware) -> ib::cfg::C
     benchmarkConfig.WithActiveMiddleware(middleware);
 
 	auto config = benchmarkConfig.Build();
+
+    // DEBUG
+    std::ofstream fileOut;
+    fileOut.open("C:\\Users\\vikatik\\Desktop\\temp_config.json");
+    fileOut << config.ToJsonString() << std::endl;
+    fileOut.close();
 
 	return config;
 }
@@ -204,6 +247,7 @@ int main(int argc, char** argv)
 		uint32_t payloadSizeInBytes = 100;
 		uint32_t domainId = 42;
         Middleware usedMiddleware = Middleware::VAsio;
+        bool useNetworkSimulator = true;
 
 		if (argc >= 8)
 		{
@@ -241,11 +285,10 @@ int main(int argc, char** argv)
 
 		for (uint32_t simulationRun = 1; simulationRun <= simulationRepeats; simulationRun++)
 		{
-			auto startTimestamp = std::chrono::system_clock::now();
-			auto ibConfig = BuildConfig(numberOfParticipants, usedMiddleware);
-			std::vector<std::thread> threads;
+            auto ibConfig = BuildConfig(numberOfParticipants, usedMiddleware, useNetworkSimulator);
+            std::vector<std::thread> threads;
             std::thread VAsioRegistryThread;
-
+            
             if (usedMiddleware == Middleware::VAsio)
             {
                 VAsioRegistryThread = std::thread([ibConfig, domainId] {
@@ -255,19 +298,32 @@ int main(int argc, char** argv)
                 });
             }
 
+            if (useNetworkSimulator == true)
+            {
+                std::cout << "Please start all participating network simulators now." << std::endl;
+                std::cout << "Press enter to continue." << std::endl;
+                std::cin.ignore();
+            }
+
+			auto startTimestamp = std::chrono::system_clock::now();
+
 			for (auto &&thisParticipant : ibConfig.simulationSetup.participants)
 			{
-				if (thisParticipant.name == "Master")
-					continue;
+                if (thisParticipant.name == "Master")
+                {
+                    continue;
+                }
+                if (thisParticipant.name.rfind("NetworkSimulator", 0) == 0)
+                {
+                    continue;
+                }
 
 				bool isVerbose = false;
                 if (thisParticipant.id == 0)
                 {
                     isVerbose = true;
                 }
-
 				threads.push_back(std::thread([payloadSizeInBytes, simulationDuration, ibConfig, thisParticipant, domainId, isVerbose] {
-
 					ParticipantsThread(payloadSizeInBytes,
 						simulationDuration,
 						ibConfig,
