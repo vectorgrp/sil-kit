@@ -86,7 +86,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     StartIoWorker();
 
     auto receivedAllReplies = _receivedAllParticipantReplies.get_future();
-    _logger->Debug("VAsio is waiting for announcement replies from {} participants.", _pendingParticipantReplies.size());
+    _logger->Debug("VAsio is waiting for known participants list from registry.");
     receivedAllReplies.wait();
     _logger->Trace("VAsio received announcement replies from all participants.");
 }
@@ -193,7 +193,7 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
         return;
     }
 
-    _logger->Debug("Received known participant message from IbRegistry");
+    _logger->Debug("Received known participants list from IbRegistry");
 
     for (auto&& peerInfo : participantsMsg.peerInfos)
     {
@@ -223,7 +223,7 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
     {
         _receivedAllParticipantReplies.set_value();
     }
-    _logger->Trace("VAsio Waiting for {} ParticipantAnnouncementReplies", _pendingParticipantReplies.size());
+    _logger->Trace("VAsio is waiting for {} ParticipantAnnouncementReplies", _pendingParticipantReplies.size());
 }
 
 void VAsioConnection::StartIoWorker()

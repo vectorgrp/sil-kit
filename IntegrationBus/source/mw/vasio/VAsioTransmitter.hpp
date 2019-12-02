@@ -52,6 +52,11 @@ private:
 };
 
 
+struct RemoteReceiver {
+    IVAsioPeer* peer;
+    uint16_t remoteIdx;
+};
+
 template <class MsgT>
 class VAsioTransmitter : public IIbMessageReceiver<MsgT>
 {
@@ -62,7 +67,14 @@ public:
     // Public methods
     void AddRemoteReceiver(IVAsioPeer* peer, uint16_t remoteIdx)
     {
-        _remoteReceivers.push_back({peer, remoteIdx});
+        RemoteReceiver remoteReceiver;
+        remoteReceiver.peer = peer;
+        remoteReceiver.remoteIdx = remoteIdx;
+
+        if (_remoteReceivers.end() != std::find(_remoteReceivers.begin(), _remoteReceivers.end(), remoteReceiver))
+            return;
+
+        _remoteReceivers.push_back(remoteReceiver);
         _hist.NotifyPeer(peer, remoteIdx);
     }
 
@@ -88,17 +100,19 @@ public:
 
 private:
     // ----------------------------------------
-    // private data types
-    struct RemoteReceiver {
-        IVAsioPeer* peer;
-        uint16_t remoteIdx;
-    };
-
-private:
-    // ----------------------------------------
     // private members
     std::vector<RemoteReceiver> _remoteReceivers;
 };
+
+// ================================================================================
+//  Inline Implementations
+// ================================================================================
+inline bool operator==(const RemoteReceiver& lhs, const RemoteReceiver& rhs)
+{
+    return lhs.peer == rhs.peer
+        && lhs.remoteIdx == rhs.remoteIdx;
+}
+
 
 } // mw
 } // namespace ib
