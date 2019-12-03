@@ -9,6 +9,15 @@ The format is based on [Keep a Changelog] (http://keepachangelog.com/en/1.0.0/).
 --------------------------------
 Added
 ~~~~~
+Changed
+~~~~~~~
+Fixed
+~~~~~
+
+[3.0.0] - 2019-12-03
+--------------------------------
+Added
+~~~~~
 - The logging mechanism now includes the most important elements of sent and received IB messages (AFTMAGT-217).
 
 Changed
@@ -36,10 +45,19 @@ Changed
 - CMake packaging was simplified (AFTMAGT-195).
 - A notification is shown when writing to a PCAP pipe is enabled, as the default behavior is to block until the pipe is read by another process (AFTMAGT-221).
 - Logging output to std::cerr and std::cout is replaced by calls to the internal logging mechanism (AFTMAGT-210).
+- Warn user when a PCAP pipe is opened (AFTMAGT-221).
        
   
 Fixed
 ~~~~~
+- Fixed the Participant subscription in VASio (AFTMAGT-216). Creating an IB service will now block until all the necessary subscriptions have been acknowledged by all known participants.
+
+Compatibility with 2.0.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): No
+- Application software interface (API): No
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): No
 
 [2.0.0] - 2019-11-06
 --------------------------------
