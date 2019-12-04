@@ -94,7 +94,15 @@ auto BuildConfig(uint32_t participantCount, Middleware middleware, bool useNetwo
 
 		auto &&participantBuilder = simulationSetup.AddParticipant(participantNameBuilder.str());
 		participantBuilder.WithParticipantId(participantCounter);
-        participantBuilder.AddParticipantController().WithSyncType(ib::cfg::SyncType::DistributedTimeQuantum);
+
+        if (middleware == ib::cfg::Middleware::FastRTPS)
+        {
+            participantBuilder.AddParticipantController().WithSyncType(ib::cfg::SyncType::DiscreteTime);
+        }
+        else
+        {
+            participantBuilder.AddParticipantController().WithSyncType(ib::cfg::SyncType::DistributedTimeQuantum);
+        }
 
         participantBuilder.ConfigureLogger()
             .WithFlushLevel(ib::mw::logging::Level::Trace)
@@ -145,7 +153,16 @@ auto BuildConfig(uint32_t participantCount, Middleware middleware, bool useNetwo
         for (auto&& name : networkSimulatorNames)
         {
             auto&& participant = simulationSetup.AddParticipant(name);
-            participant.AddParticipantController().WithSyncType(ib::cfg::SyncType::DistributedTimeQuantum).Parent()->AddNetworkSimulator(name);
+            
+            if (middleware == ib::cfg::Middleware::FastRTPS)
+            {
+                participant.AddParticipantController().WithSyncType(ib::cfg::SyncType::DiscreteTime).Parent()->AddNetworkSimulator(name);
+            }
+            else
+            {
+                participant.AddParticipantController().WithSyncType(ib::cfg::SyncType::DistributedTimeQuantum).Parent()->AddNetworkSimulator(name);
+            }
+
             participant.ConfigureLogger()
                 .WithFlushLevel(ib::mw::logging::Level::Trace)
                 .AddSink(ib::cfg::Sink::Type::Stdout)
