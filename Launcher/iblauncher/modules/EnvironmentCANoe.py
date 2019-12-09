@@ -3,6 +3,7 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 #######################################################################################################################
 import sys
+from os.path import join, abspath, isabs, dirname, isfile, isdir
 import os
 import shlex
 import time
@@ -13,12 +14,14 @@ import shutil
 #    import comtypes.client
 #except ImportError:
 #    pass
-
 sys.path.append("..")  # Satisfy importlib.import_module
 from iblauncher import Environment, Configuration, ProcessCoordinator
 
 class EnvironmentCANoe(Environment.Environment):
-
+    def log(self, *args):
+        if len(args) > 0 and self.__verbose:
+            print(*args)
+            sys.stdout.flush()
     #__participantEnvironments: list
     #__networkNodes: list
     #__processCoordinator: object
@@ -42,68 +45,6 @@ class EnvironmentCANoe(Environment.Environment):
         """Return provided environment"""
         return "CANoe"
 
-    # #######################################################################################################################
-    # #def __getCanoeApps(verbose: bool) -> list:
-    # @staticmethod
-    # def __getCanoeApps(verbose):
-    #     """Finding running CANoe processes with COM => Approach is unfeasible until CANoe registers at the ROT"""
-    #     # Pick the COM object of the instantiated process
-    #     # cf. https://stackoverflow.com/questions/50534113/pythoncom-interface-cast
-    #     # Note: Must run with same privileges as the previously started COM server
-    #     # Why this approach does not work with CANoe:
-    #     # * CANoe does not register at the ROT (https://docs.microsoft.com/en-us/windows/desktop/com/registering-objects-in-the-rot)
-    #     # * Encoding a process ID into the name is by convention
-    #     runningObjectTable = pythoncom.GetRunningObjectTable()
-    #     canoeApp = None
-    #     for moniker in runningObjectTable.EnumRunning():
-    #         bindCtx = pythoncom.CreateBindCtx()
-    #         displayName = moniker.GetDisplayName(bindCtx, None)
-    #         print(str(moniker) + ": " + displayName)
-    #         # By convention
-    #         if not displayName.startsWith("!CANoe.Application")
-    #             continue
-    #         canoeApp = win32com.client.Dispatch(obj.QueryInterface(pythoncom.IID_IDispatch))
-    #         canoeApps += canoeApp
-    #     return canoeApps
-
-    # #######################################################################################################################
-    # #def __shutdownCanoeProcesses(verbose: bool):
-    # @staticmethod
-    # def __shutdownCanoeProcesses(verbose):
-    #     """Shutdown running CANoe processes via COM"""
-    #     if verbose:
-    #         print("Shutting down CANoe processes via COM.")
-    #     canoeApps = self.__getCanoeApps()
-    #     for canoeApp in canoeApps:
-    #         # Try to shutdown CANoe via COM
-    #         try:
-    #         isMeasurementRunning = canoeApp.Measurement.Running
-    #         except comtypes.COMError:
-    #         isMeasurementRunning = False
-    #         if isMeasurementRunning:
-    #         try:
-    #             canoeApp.Measurement.Stop()
-    #         except comtypes.COMError as e:
-    #             print("Warning: Could not stop measurement for participant '" + participantName + "', '" + e.args[1] + "'")
-    #             try:
-    #                 canoeApp.UI.Write.Output("IbLauncher could not stop measurement, '" + e.args[1] + "'")
-    #             except:
-    #                 pass
-    #         try:
-    #         canoeApp.Quit()
-    #         except comtypes.COMError as e:
-    #         print("Warning: Could not quit CANoe for participant '" + participantName + "', '" + e.args[1] + "'")
-    #         try:
-    #             canoeApp.UI.Write.Output("IbLauncher could not quit this CANoe instance, '" + e.args[1] + "'")
-    #         except:
-    #             pass
-    #         # Kill after 5 seconds if process didn't terminate
-    #         #time.sleep(5)
-    #         #if process.poll() is None:
-    #         #    print("Warning: Could not quit CANoe for participant '" + participantName + "', killing the process with ID " + process.pid)
-    #         #    process.kill()
-    
-    # #######################################################################################################################
     #def __killCanoeProcesses(verbose: bool):
     @staticmethod
     def __killCanoeProcesses(verbose):
@@ -143,7 +84,7 @@ class EnvironmentCANoe(Environment.Environment):
         if not canoeExec64DirectoryPath:
             return None
         canoeExec32Folder = "Exec32_Debug" if "Exec64_Debug" in canoeExec64DirectoryPath else "Exec32"
-        canoeExec32DirectoryPath = os.path.abspath(canoeExec64DirectoryPath + os.path.sep + ".." + os.path.sep + canoeExec32Folder)
+        canoeExec32DirectoryPath = abspath(join(canoeExec64DirectoryPath, "..", canoeExec32Folder))
         return canoeExec32DirectoryPath
 
     #######################################################################################################################
@@ -176,8 +117,8 @@ class EnvironmentCANoe(Environment.Environment):
             workingFolderPath = participantEnvironment["WorkingFolder"] if "WorkingFolder" in participantEnvironment else "."
             assert(environmentName == EnvironmentCANoe.getEnvironmentName())
             configFilePath = participantEnvironment["ConfigFile"]
-            configFileAbsolutePath = os.path.abspath(configFilePath)
-            configFileFolderPath = os.path.dirname(configFilePath) if os.path.dirname(configFilePath) else "."
+            configFileAbsolutePath = abspath(configFilePath)
+            configFileFolderPath = dirname(configFilePath) if dirname(configFilePath) else "."
 
             if not canoeProjectPath:
                 print("Error: No CANoe project defined for participant '" + participantName + "'")
@@ -187,13 +128,13 @@ class EnvironmentCANoe(Environment.Environment):
             workingFolderPath = Configuration.resolveVariables(workingFolderPath, configFileAbsolutePath, participantName, self.__domainId)
             canoeProjectPath = Configuration.resolveVariables(canoeProjectPath, configFileAbsolutePath, participantName, self.__domainId)
 
-            workingFolderAbsolutePath = workingFolderPath if os.path.isabs(workingFolderPath) else os.path.abspath(configFileFolderPath + os.path.sep + workingFolderPath)
-            if not os.path.isdir(workingFolderAbsolutePath):
+            workingFolderAbsolutePath = workingFolderPath if isabs(workingFolderPath) else abspath(join(configFileFolderPath, workingFolderPath))
+            if not isdir(workingFolderAbsolutePath):
                 print("Error: Working folder '" + workingFolderAbsolutePath + "' for participant '" + participantName + "' does not exist")
                 return False
 
-            canoeProjectAbsolutePath = canoeProjectPath if os.path.isabs(canoeProjectPath) else os.path.abspath(workingFolderAbsolutePath + os.path.sep + canoeProjectPath)
-            if not os.path.isfile(canoeProjectAbsolutePath):
+            canoeProjectAbsolutePath = canoeProjectPath if isabs(canoeProjectPath) else abspath(join(workingFolderAbsolutePath, canoeProjectPath))
+            if not isfile(canoeProjectAbsolutePath):
                 print("Error: CANoe project '" + canoeProjectAbsolutePath + "' for participant '" + participantName + "' does not exist")
                 return False
 
@@ -204,28 +145,32 @@ class EnvironmentCANoe(Environment.Environment):
 
         # Patch CANoe project with IntegrationBus NLDLL (may throw when locked)
         for canoeProjectAbsolutePath in canoeProjectAbsolutePaths:
-            canoeProjectFolderAbsolutePath = os.path.dirname(canoeProjectAbsolutePath)
-            if self.__verbose:
-                print("Patching CANoe project at '" + canoeProjectFolderAbsolutePath + "' with IntegrationBus node-layer DLL:")
+            canoeProjectFolderAbsolutePath = dirname(canoeProjectAbsolutePath)
+            self.log("Patching CANoe project at '{}' with IntegrationBus node-layer DLL:".format(canoeProjectFolderAbsolutePath))
             try:
-                shutil.copy(Configuration.getIntegrationBusLibraryPath() + os.path.sep + "IbIoToCanoeSysvarAdapter.dll", canoeProjectFolderAbsolutePath)
-                if self.__verbose: print("  Copied '" + Configuration.getIntegrationBusLibraryPath() + os.path.sep + "IbIoToCanoeSysvarAdapter.dll'")
-                shutil.copy(Configuration.getIntegrationBusLibraryPath() + os.path.sep + "IbRosToCanoeVcoAdapter.dll", canoeProjectFolderAbsolutePath)
-                if self.__verbose: print("  Copied '" + Configuration.getIntegrationBusLibraryPath() + os.path.sep + "IbRosToCanoeVcoAdapter.dll'")
+                what = join(Configuration.getIntegrationBusLibraryPath(), "IbIoToCanoeSysvarAdapter.dll")
+                shutil.copy(what, canoeProjectFolderAbsolutePath)
+                self.log("  Copied '{}' -> '{}'".format(what, canoeProjectFolderAbsolutePath))
             except BaseException as e:
                 print("Error: Could not patch CANoe project, '" + str(e) + "'")
                 return False
+            #ROS is legacy, so we copy optionally
+            try:
+                what= join(Configuration.getIntegrationBusLibraryPath(),"IbRosToCanoeVcoAdapter.dll")
+                shutil.copy(what, canoeProjectFolderAbsolutePath)
+                self.log("  Copied '{}'".format(what))
+            except BaseException as e:
+                print("Warning: Could not patch CANoe project for ROS adapter DLL: '" + str(e) + "'")
 
         # Patch CANoe with IntegrationBus driver (may throw without admin rights)
         canoeExec32DirectoryPath = self.__getCanoeExec32DirectoryPath(False)
         if not canoeExec32DirectoryPath:
             return False
-        integrationBusDriverPath = Configuration.getIntegrationBusLibraryPath() + os.path.sep + "vcndrvms.dll"
-        if self.__verbose:
-            print("Patching CANoe installation at '" + canoeExec32DirectoryPath + "' with IntegrationBus driver:")
+        integrationBusDriverPath = join(Configuration.getIntegrationBusLibraryPath(), "vcndrvms.dll")
+        self.log("Patching CANoe installation at '{}' with IntegrationBus driver:".format(canoeExec32DirectoryPath))
         try:
             shutil.copy(integrationBusDriverPath, canoeExec32DirectoryPath)
-            if self.__verbose: print("  Copied '" + integrationBusDriverPath + "'")
+            self.log("  Copied '{}'".format(integrationBusDriverPath))
         except BaseException as e:
             print("Error: Could not patch CANoe, '" + str(e) + "'")
             return False
@@ -248,52 +193,52 @@ class EnvironmentCANoe(Environment.Environment):
             workingFolderPath = participantEnvironment["WorkingFolder"] if "WorkingFolder" in participantEnvironment else "."
             assert(environmentName == EnvironmentCANoe.getEnvironmentName())
             configFilePath = participantEnvironment["ConfigFile"]
-            configFileAbsolutePath = os.path.abspath(configFilePath)
-            configFileFolderPath = os.path.dirname(configFilePath) if os.path.dirname(configFilePath) else "."
+            configFileAbsolutePath = abspath(configFilePath)
+            configFileFolderPath = dirname(configFilePath) if dirname(configFilePath) else "."
 
             # Resolve predefined variables
             workingFolderPath = Configuration.resolveVariables(workingFolderPath, configFileAbsolutePath, participantName, self.__domainId)
             canoeProjectPath = Configuration.resolveVariables(canoeProjectPath, configFileAbsolutePath, participantName, self.__domainId)
 
-            workingFolderAbsolutePath = workingFolderPath if os.path.isabs(workingFolderPath) else os.path.abspath(configFileFolderPath + os.path.sep + workingFolderPath)
-            canoeProjectAbsolutePath = canoeProjectPath if os.path.isabs(canoeProjectPath) else os.path.abspath(workingFolderAbsolutePath + os.path.sep + canoeProjectPath)
+            workingFolderAbsolutePath = workingFolderPath if isabs(workingFolderPath) else abspath(join(configFileFolderPath, workingFolderPath))
+            canoeProjectAbsolutePath = canoeProjectPath if isabs(canoeProjectPath) else abspath(join(workingFolderAbsolutePath, canoeProjectPath))
             canoeProjectAbsolutePaths.add(canoeProjectAbsolutePath)
 
-        # Getting all instances will not work until CANoe instances are registered in the RunningObjectTable
-        #self.__shutdownCanoeProcesses(self._verbose)
-
-        # Kill running CANoe processes which might prevent us from removing the driver
-        #self.__killCanoeProcesses(self.__verbose)
-
+        success=True
         # Patch CANoe project with IntegrationBus NLDLL (may throw when locked)
         for canoeProjectAbsolutePath in canoeProjectAbsolutePaths:
-            canoeProjectFolderAbsolutePath = os.path.dirname(canoeProjectAbsolutePath)
-            if self.__verbose:
-                print("Cleaning CANoe project at '" + canoeProjectFolderAbsolutePath + "' from IntegrationBus node-layer DLLs:")
+            canoeProjectFolderAbsolutePath = dirname(canoeProjectAbsolutePath)
+            self.log("Cleaning CANoe project at '{}' from IntegrationBus node-layer DLLs:".format(canoeProjectFolderAbsolutePath))
+
             try:
-                os.remove(canoeProjectFolderAbsolutePath + os.path.sep + "IbIoToCanoeSysvarAdapter.dll")
-                if self.__verbose: print("  Removed '" + canoeProjectFolderAbsolutePath + os.path.sep + "IbIoToCanoeSysvarAdapter.dll'")
-                os.remove(canoeProjectFolderAbsolutePath + os.path.sep + "IbRosToCanoeVcoAdapter.dll")
-                if self.__verbose: print("  Removed '" + canoeProjectFolderAbsolutePath + os.path.sep + "IbRosToCanoeVcoAdapter.dll'")
+                what=join(canoeProjectFolderAbsolutePath, "IbIoToCanoeSysvarAdapter.dll")
+                os.remove(what)
+                self.log("  Removed '{}'".format(what)) 
             except BaseException as e:
-                print("Error: Could not clean CANoe project, '" + str(e) + "'")
-                return False
+                print("Error: Could not clean CANoe project, '{}'".format(str(e)))
+                success &= False
+            try:
+                what=join(canoeProjectFolderAbsolutePath,"IbRosToCanoeVcoAdapter.dll")
+                os.remove(what)
+                self.log("  Removed '{}'".format(what)) 
+            except BaseException as e:
+                print("WARNING: Could not clean CANoe project: ROS DLL could not be removed: '{}'".format(str(e)))
+                success &= False
 
         # Clean CANoe from IntegrationBus driver (may throw without admin rights)
         canoeExec32DirectoryPath = self.__getCanoeExec32DirectoryPath(self.__verbose)
         if not canoeExec32DirectoryPath:
             return False
-        integrationBusDriverPath = canoeExec32DirectoryPath + os.path.sep + "vcndrvms.dll"
-        if self.__verbose:
-            print("Cleaning CANoe from IntegrationBus driver '" + canoeExec32DirectoryPath + "':")
+        integrationBusDriverPath = join(canoeExec32DirectoryPath, "vcndrvms.dll")
+        self.log("Cleaning CANoe: removing IntegrationBus driver '{}':".format(canoeExec32DirectoryPath))
         try:
             os.remove(integrationBusDriverPath)
-            if self.__verbose: print("  Removed '" + integrationBusDriverPath + "'")
+            self.log("  Removed '{}'".format(integrationBusDriverPath))
         except BaseException as e:
-            print("Error: Could not clean CANoe, '" + str(e) + "'")
-            return False
+            print("Error: Could not clean CANoe: removing integration bus driver failed: '{}'".format(str(e)))
+            success &= False
 
-        return True
+        return success
 
     #######################################################################################################################
     #def launchParticipant(self: object, participantName: str) -> object:
@@ -301,8 +246,7 @@ class EnvironmentCANoe(Environment.Environment):
         """Launch the named participant"""
         participantEnvironment = next(iter(filter(lambda x: x["Participant"] == participantName, self.__participantEnvironments)), None)
         if not participantEnvironment:
-            if self.__verbose:
-                print("Error: Participant '" + participantName + "' not found")
+            self.log("Error: Participant '" + participantName + "' not found")
             return None
 
         environmentName = participantEnvironment["Environment"]
@@ -311,100 +255,36 @@ class EnvironmentCANoe(Environment.Environment):
         canoeProjectPath = participantEnvironment["CANoeProject"]
         workingFolderPath = participantEnvironment["WorkingFolder"] if "WorkingFolder" in participantEnvironment else "."
         configFilePath = participantEnvironment["ConfigFile"]
-        configFileAbsolutePath = os.path.abspath(configFilePath)
-        configFileFolderPath = os.path.dirname(configFilePath) if os.path.dirname(configFilePath) else "."
+        configFileAbsolutePath = abspath(configFilePath)
+        configFileFolderPath = dirname(configFilePath) if dirname(configFilePath) else "."
         assert(environmentName == EnvironmentCANoe.getEnvironmentName())
         assert(configFilePath)
         #assert("comtypes" in sys.modules)
 
-        if self.__verbose:
-            print("  Participant: " + participantName)
-            print("  NetworkNode: " + (networkNodeName if networkNode else "None"))
-            print("  CANoeProject: " + canoeProjectPath)
-            print("  WorkingFolder: " + workingFolderPath)
+        self.log("  Participant: {}".format(participantName))
+        self.log("  NetworkNode: {}".format(networkNodeName))
+        self.log("  CANoeProject: {}".format(canoeProjectPath))
+        self.log("  WorkingFolder: {}".format(workingFolderPath))
 
         # Resolve predefined variables
         workingFolderPath = Configuration.resolveVariables(workingFolderPath, configFileAbsolutePath, participantName, self.__domainId)
         canoeProjectPath = Configuration.resolveVariables(canoeProjectPath, configFileAbsolutePath, participantName, self.__domainId)
 
         integrationBusEnvironment = Configuration.createIntegrationBusEnvironment(configFileAbsolutePath, participantName, self.__domainId)
-        workingFolderAbsolutePath = workingFolderPath if os.path.isabs(workingFolderPath) else os.path.abspath(configFileFolderPath + os.path.sep + workingFolderPath)
-        canoeProjectAbsolutePath = canoeProjectPath if os.path.isabs(canoeProjectPath) else os.path.abspath(workingFolderAbsolutePath + os.path.sep + canoeProjectPath)
+        workingFolderAbsolutePath = workingFolderPath if isabs(workingFolderPath) else abspath(join(configFileFolderPath, workingFolderPath))
+        canoeProjectAbsolutePath = canoeProjectPath if isabs(canoeProjectPath) else abspath(join(workingFolderAbsolutePath, canoeProjectPath))
 
         canoeExec64DirectoryPath = self.__getCanoeExec64DirectoryPath(self.__verbose)
         if not canoeExec64DirectoryPath:
             return None
-        executableAbsolutePath = canoeExec64DirectoryPath + "CANoe64.exe"
+        executableAbsolutePath = join(canoeExec64DirectoryPath, "CANoe64.exe")
         arguments = canoeProjectAbsolutePath  # "-Embedding"
 
         # Start CANoe process (should be the RuntimeKernel.exe in the future): start "" "%CANoeFolder%CANoe64.exe" %1
         try:
             process = self.__processCoordinator.launchProcess(participantName, executableAbsolutePath, arguments, workingFolderAbsolutePath, integrationBusEnvironment, False)
         except BaseException as e:
-            print("Error: Could not start CANoe for participant '" + participantName + "', '" + str(e) + "'")
+            print("Error: Could not start CANoe for participant '{}': {}".format(participantName, str(e)))
             return None
-
-        #time.sleep(1)  # Wait a few seconds to avoid a COM timeout
-        #
-        #try:
-        #    canoeApp = comtypes.client.CreateObject("CANoe.Application")
-        #except comtypes.COMError as e:
-        #    print("Could not access CANoe instance with process ID " + str(process.pid) + " via COM interface, '" + str(e) + "'")
-        #    process.terminate()
-        #    return None
-        #
-        #try:
-        #    canoeApp.UI.Write.Output("IbLauncher created this CANoe instance with process ID " + str(process.pid) + " for participant " + participantName + " on domain ID'" + str(self.__domainId) + "'.")
-        #    #canoeApp.Visible = False  # Minimize to tray
-        #except:
-        #    pass
-        #
-        #try:
-        #    canoeApp.Open(os.path.abspath(workingFolderAbsolutePath + os.path.sep + canoeProjectPath))
-        #except comtypes.COMError as e:
-        #    print("Error: Could not load project '" + canoeProjectPath + "' for participant '" + participantName + "', '" + e.args[1] + "'")
-        #    try:
-        #        canoeApp.UI.Write.Output("IbLauncher could not load project '" + canoeProjectPath + "', '" + e.args[1] + "'")
-        #    except:
-        #        pass
-        #    process.terminate()
-        #    return None
-        #
-        #try:
-        #    canoeApp.UI.Write.Output("IbLauncher loaded project '" + canoeProjectPath + "'.")
-        #except:
-        #    pass
-        #
-        ##time.sleep(1)  # Wait a few seconds to avoid a COM timeout
-
-        # Note: To avoid NLDLLs timing out, starting the CANoe measurement must be done only when everything is setup, e.g., as part of a 'start' command.
-        # TODO: Since we cannot reconnect via COM, consider making the launcher run until the system halts intrinsically.
-        #try:
-        #  canoeApp.Measurement.Start()
-        #except comtypes.COMError as e:
-        #  print("Error: Could not start measurement for participant '" + participantName + "', '" + e.args[1] + "'")
-        #  try:
-        #    canoeApp.UI.Write.Output("IbLauncher could not start measurement, '" + e.args[1] + "'")
-        #  except:
-        #    pass
-        #  process.terminate()
-        #  return None
-        #
-        #time.sleep(1)  # Wait a few seconds to avoid a COM timeout
-        #
-        #try:
-        #  isRunning = canoeApp.Measurement.Running
-        #except comtypes.COMError as e:
-        #  print("Error: Could not query measurement status for participant '" + participantName + "', '" + e.args[1] + "'")
-        #  try:
-        #    canoeApp.UI.Write.Output("IbLauncher could not query measurement status, '" + e.args[1] + "'")
-        #  except:
-        #    pass
-        #  process.terminate()
-        #  return None
-        #if not isRunning:
-        #  print("Error: Measurement for participant '" + participantName + "' could not be started")
-        #  process.terminate()
-        #  return None
 
         return process

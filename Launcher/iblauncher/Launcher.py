@@ -47,6 +47,13 @@ DOMAINID_DEFAULT = 42
 RETRIES_DEFAULT = 0
 STARTUPDELAY_DEFAULT = 0
 
+
+#make sure log output is flushed to stdout
+import builtins
+def print(*args, **kwargs):
+    builtins.print(*args, **kwargs)
+    sys.stdout.flush()
+
 #######################################################################################################################
 def parseArguments():
     """Create a commandline parser"""
@@ -364,7 +371,6 @@ def main():
         for retry in range(0, args.retries + 1):
             if retry > 0 and args.verbose:
                 print("Retrying another time (retry #" + str(retry) + " of " + str(args.retries) + ")")
-                sys.stdout.flush()
 
             # Launch participants subsequently
             for participantEnvironment in participantEnvironments:
@@ -377,7 +383,6 @@ def main():
 
                 if args.startupDelay > 0 and args.verbose:
                     print("Waiting for " + str(args.startupDelay) + " seconds")
-                    sys.stdout.flush()
                     time.sleep(args.startupDelay)
 
                 if not succeeded:
@@ -390,14 +395,12 @@ def main():
             if args.verbose:
                 print("All processes started.")
                 print("  Note: Press ^C to terminate before all processes are done.")
-                sys.stdout.flush()
 
             try:
                 succeeded = processCoordinator.monitorProcesses()
             except (EOFError, KeyboardInterrupt):
                 # User pressed ^D or ^C
                 print("Error: User pressed ^C to halt processes.")
-                sys.stdout.flush()
                 processCoordinator.terminateProcesses()
                 succeeded = False
                 break
