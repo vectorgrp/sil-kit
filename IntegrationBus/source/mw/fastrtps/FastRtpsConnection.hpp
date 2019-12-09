@@ -215,10 +215,11 @@ void FastRtpsConnection::SetupPubSubAttributes(AttrT& attributes, const std::str
     attributes.topic.topicDataType = topicType->getName();
     attributes.topic.topicName = topicName.c_str();
     attributes.topic.historyQos.kind = KEEP_LAST_HISTORY_QOS;
-    attributes.topic.historyQos.depth = 5;
+    attributes.topic.historyQos.depth = _config.middlewareConfig.fastRtps.historyDepth;
     attributes.topic.resourceLimitsQos.max_instances = 64;
-    attributes.topic.resourceLimitsQos.max_samples_per_instance = 5;
-    attributes.topic.resourceLimitsQos.max_samples = 320;  // Constraint when m_isGetKeyDefined == WITH_KEY: max_samples >= max_samples_per_instance*max_instances
+    attributes.topic.resourceLimitsQos.max_samples_per_instance = _config.middlewareConfig.fastRtps.historyDepth;
+    // Constraint when m_isGetKeyDefined == WITH_KEY: max_samples >= max_samples_per_instance*max_instances
+    attributes.topic.resourceLimitsQos.max_samples = _config.middlewareConfig.fastRtps.historyDepth * 64;
     attributes.topic.resourceLimitsQos.allocated_samples = 40;
     attributes.historyMemoryPolicy = PREALLOCATED_WITH_REALLOC_MEMORY_MODE;  // https://github.com/eProsima/Fast-RTPS/issues/74
     attributes.qos.m_durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;

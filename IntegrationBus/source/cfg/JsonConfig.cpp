@@ -1202,24 +1202,39 @@ auto from_json<FastRtps::Config>(const json11::Json& json) -> FastRtps::Config
         throw Misconfiguration{"Invalid FastRTPS discovery type: " + to_string(fastRtps.discoveryType)};
     }
 
-    fastRtps.sendSocketBufferSize = -1;
     optional_from_json(fastRtps.sendSocketBufferSize, json, "SendSocketBufferSize");
-    fastRtps.listenSocketBufferSize = -1;
     optional_from_json(fastRtps.listenSocketBufferSize, json, "ListenSocketBufferSize");
+
+
+    if (json.object_items().count("HistoryDepth"))
+    {
+        fastRtps.historyDepth = json["HistoryDepth"].int_value();
+    }
+    else
+    {
+        fastRtps.historyDepth = 5; // for backwards compatibility
+    }
+    if (fastRtps.historyDepth <= 0)
+        throw Misconfiguration{"FastRTPS HistoryDepth must be above 0"};
 
     return fastRtps;
 }
 
 auto to_json(const FastRtps::Config& fastRtps) -> json11::Json
 {
-    return json11::Json::object
-    {
+    json11::Json::object json{
         {"DiscoveryType", to_string(fastRtps.discoveryType)},
         {"UnicastLocators", fastRtps.unicastLocators},
         {"ConfigFileName", to_json(fastRtps.configFileName)},
-        {"SendSocketBufferSize", to_json(fastRtps.sendSocketBufferSize)},
-        {"ListenSocketBufferSize", to_json(fastRtps.listenSocketBufferSize)}
     };
+
+    if (fastRtps.sendSocketBufferSize != -1)
+        json["SendSocketBufferSize"] = to_json(fastRtps.sendSocketBufferSize);
+    if (fastRtps.listenSocketBufferSize != -1)
+        json["ListenSocketBufferSize"] = to_json(fastRtps.listenSocketBufferSize);
+    if (fastRtps.historyDepth != -1)
+        json["HistoryDepth"] = to_json(fastRtps.historyDepth);
+    return json;
 }
 
 template <>

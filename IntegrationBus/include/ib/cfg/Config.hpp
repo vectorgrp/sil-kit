@@ -294,6 +294,7 @@ struct Config
     std::string configFileName;
     int sendSocketBufferSize{-1};
     int listenSocketBufferSize{-1};
+    int historyDepth{-1};
 };
 } // namespace FastRTPS
 

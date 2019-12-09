@@ -18,6 +18,7 @@ public:
     IntegrationBusAPI auto WithDiscoveryType(DiscoveryType discoveryType) -> ConfigBuilder&;
     IntegrationBusAPI auto AddUnicastLocator(std::string participantName, std::string ipAddress) -> ConfigBuilder&;
     IntegrationBusAPI auto WithConfigFileName(std::string fileName) -> ConfigBuilder&;
+    IntegrationBusAPI auto WithHistoryDepth(int historyDepth) -> ConfigBuilder&;
 
     IntegrationBusAPI auto Build() -> Config;
 

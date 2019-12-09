@@ -30,6 +30,15 @@ auto ConfigBuilder::WithConfigFileName(std::string fileName) -> ConfigBuilder&
     return *this;
 }
 
+auto ConfigBuilder::WithHistoryDepth(int historyDepth) -> ConfigBuilder&
+{
+    if (historyDepth <= 0)
+        throw Misconfiguration{"FastRTPS HistoryDepth must be above 0"};
+
+    _config.historyDepth = historyDepth;
+    return *this;
+}
+
 auto ConfigBuilder::Build() -> Config
 {
     switch (_config.discoveryType)
@@ -73,6 +82,9 @@ auto ConfigBuilder::Build() -> Config
     default:
         throw Misconfiguration{"Invalid FastRTPS discovery type: " + to_string(_config.discoveryType)};
     }
+
+    if (_config.historyDepth == -1)
+        _config.historyDepth = 5; // for backwards compability
 
     return std::move(_config);
 }

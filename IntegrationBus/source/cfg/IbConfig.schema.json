@@ -861,6 +861,10 @@
               "ListenSocketBufferSize": {
                 "type": "integer",
                 "default": -1
+              },
+              "HistoryDepth": {
+                "type": "integer",
+                "default": -1
               }
             },
             "additionalProperties": false
