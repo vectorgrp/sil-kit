@@ -438,7 +438,7 @@ TEST_F(JsonConfigTest, create_fastrtps_config_default)
     EXPECT_EQ(fastRtps.discoveryType, FastRtps::DiscoveryType::Local);
     EXPECT_EQ(fastRtps.unicastLocators.size(), 0u);
     EXPECT_EQ(fastRtps.configFileName, std::string{});
-    EXPECT_EQ(fastRtps.historyDepth, 5);
+    EXPECT_EQ(fastRtps.historyDepth, -1);
 }
 
 TEST_F(JsonConfigTest, create_fastrtps_history_depth)

@@ -15,6 +15,11 @@ Fixed
 --------------------------------
 Added
 ~~~~~
+- New config parameter "HistoryDepth" added to FastRTPS config section. This value is used to
+  set the history size for all FastRTPS topics.
+- New WithHistoryDepth method for FastRtpsConfigBuilder. When using the builder pattern to
+  generate an Ib Config, the new FastRTPS HistoryDepth can be configured this way.
+
 Changed
 ~~~~~~~
 - The IbLauncher CANoe environment module was adapted to the new CANoe Extensions packaging format.

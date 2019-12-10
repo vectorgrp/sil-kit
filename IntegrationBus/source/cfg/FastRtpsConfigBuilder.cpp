@@ -83,9 +83,6 @@ auto ConfigBuilder::Build() -> Config
         throw Misconfiguration{"Invalid FastRTPS discovery type: " + to_string(_config.discoveryType)};
     }
 
-    if (_config.historyDepth == -1)
-        _config.historyDepth = 5; // for backwards compability
-
     return std::move(_config);
 }
 

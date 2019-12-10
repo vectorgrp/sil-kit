@@ -1208,14 +1208,12 @@ auto from_json<FastRtps::Config>(const json11::Json& json) -> FastRtps::Config
 
     if (json.object_items().count("HistoryDepth"))
     {
-        fastRtps.historyDepth = json["HistoryDepth"].int_value();
+        auto historyDepth = json["HistoryDepth"].int_value();
+        if (historyDepth <= 0)
+            throw Misconfiguration{"FastRTPS HistoryDepth must be above 0"};
+
+        fastRtps.historyDepth = historyDepth;
     }
-    else
-    {
-        fastRtps.historyDepth = 5; // for backwards compatibility
-    }
-    if (fastRtps.historyDepth <= 0)
-        throw Misconfiguration{"FastRTPS HistoryDepth must be above 0"};
 
     return fastRtps;
 }

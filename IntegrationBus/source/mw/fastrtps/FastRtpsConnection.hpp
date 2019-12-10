@@ -209,6 +209,11 @@ void FastRtpsConnection::SetupPubSubAttributes(AttrT& attributes, const std::str
     using namespace eprosima::fastrtps;
     using namespace eprosima::fastrtps::rtps;
 
+    if (_config.middlewareConfig.fastRtps.historyDepth == -1)
+    {
+        _config.middlewareConfig.fastRtps.historyDepth = 5; // for backwards compability
+    }
+
     attributes.topic.topicKind = (topicType->m_isGetKeyDefined)
         ? WITH_KEY
         : NO_KEY;
