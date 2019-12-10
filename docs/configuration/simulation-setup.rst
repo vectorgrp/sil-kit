@@ -221,10 +221,23 @@ logs to a file, the following configuration could be used:
 
 Ethernet Controllers
 ----------------------------------------
+The Ethernet controller configuration is part of the :ref:`participant
+configuration<sec:cfg-participant>`.
 
-TBD: short intro
+.. code-block:: javascript
+    
+    "EthernetControllers": [
+        {
+            "Name": "ETH0",
+            "MacAddr": "00:08:15:ab:cd:ef"
+        },
+        {
+            "Name": "ETH1",
+            "MacAddr": "00:08:15:ab:cd:f0",
+            "PcapFile": "pcap_output_trace.pcap"
+        }
+    ]
 
-TBD: short example (based on: Demos/Ethernet/IbConfig_DemoEthernet.json)
 
 .. list-table:: Ethernet Controller Configuration
    :widths: 15 85
@@ -233,9 +246,15 @@ TBD: short example (based on: Demos/Ethernet/IbConfig_DemoEthernet.json)
    * - Property Name
      - Description
    * - Name
-     - TBD
+     - The name of the Ethernet controller
    * - MacAddr
-     - TBD
+     - The colon-separated Ethernet MAC address
+   * - PcapFile
+     - Name of the file capturing the PCAP trace
+   * - PcapPipe
+     - Name of the named pipe capturing the PCAP trace.
+       Execution is suspended until the pipe is opened for reading by another process.
+
 
      
 .. _sec:cfg-participant-flexray:
