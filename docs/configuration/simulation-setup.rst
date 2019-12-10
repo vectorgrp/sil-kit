@@ -22,7 +22,7 @@ general outline is as follows:
 
         "Participants": [ ... ],
 
-        "EthernetSwitches": [ ... ],
+        "Switches": [ ... ],
 
         "Links": [ ... ],
 
@@ -290,18 +290,17 @@ TBD: short example (based on: Demos/GenericMessage/IbConfig_DemoGenericMessage.j
 Digital-Out Ports
 ----------------------------------------
 
-TBD: short intro
+The Digital-Out Ports configuration is part of the :ref:`participant
+configuration<sec:cfg-participant>`. The name and initial state of the participant's 
+digital output port instances can be configured in this section:
 
-TBD: short example (based on: Demos/IO/IbConfig_DemoIo.json)
+.. code-block:: javascript
 
-.. list-table:: Digital-Out Configuration
-   :widths: 15 85
-   :header-rows: 1
+  "Digital-Out": [
+      { "DO-Port-Name": false }
+  ]
 
-   * - Property Name
-     - Description
-   * - <Name>
-     - <Initial Value>
+A Digital-Out Port is specified by giving the name and initial state.
 
 
 .. _sec:cfg-participant-analog-out:
@@ -309,9 +308,16 @@ TBD: short example (based on: Demos/IO/IbConfig_DemoIo.json)
 Analog-Out Ports
 ----------------------------------------
 
-TBD: short intro
+The Analog-Out Ports configuration is part of the :ref:`participant
+configuration<sec:cfg-participant>`. The name and initial behavior of the participant's 
+analog output port instances can be configured in this section:
 
-TBD: short example (based on: Demos/IO/IbConfig_DemoIo.json)
+.. code-block:: javascript
+
+  "Analog-Out": [
+      { "AO-Port-Name": { "value": 7.3, "unit": "V" } }
+  ]
+
 
 .. list-table:: Analog-Out Configuration
    :widths: 15 85
@@ -319,8 +325,10 @@ TBD: short example (based on: Demos/IO/IbConfig_DemoIo.json)
 
    * - Property Name
      - Description
-   * - <Name>
-     - <Initial Value and Unit>
+   * - value
+     - The initial voltage value
+   * - unit
+     - The unit of the voltage value ("mV", "V", "kV")
 
        
 .. _sec:cfg-participant-pwm-out:
@@ -328,9 +336,16 @@ TBD: short example (based on: Demos/IO/IbConfig_DemoIo.json)
 Pwm-Out Ports
 ----------------------------------------
 
-TBD: short intro
+The Pwm-Out Ports configuration is part of the :ref:`participant
+configuration<sec:cfg-participant>`. The name and initial behavior of the participant's 
+pulse-width modulation output port instances can be configured in this section:
 
-TBD: short example (based on: Demos/IO/IbConfig_DemoIo.json)
+.. code-block:: javascript
+
+  "Pwm-Out": [
+    { "PWM-Port-Name": { "freq": { "value": 2.5, "unit": "Hz" }, "duty": 0.4 } }
+  ]
+
 
 .. list-table:: Pwm-Out Configuration
    :widths: 15 85
@@ -338,8 +353,11 @@ TBD: short example (based on: Demos/IO/IbConfig_DemoIo.json)
 
    * - Property Name
      - Description
-   * - <Name>
-     - <Initial Frequency and Duty cycle>
+   * - freq
+     - The initial frequency is specified by its unit ("Hz", "kHz", "MHz", "GHz", "THz") and value.
+   * - duty
+     - The duty cycle specifies the percentage of time of each cycle that the signal stays in the
+       active state. The value range is between 0 (always off) and 1 (always on)
 
        
 .. _sec:cfg-participant-pattern-out:
@@ -347,23 +365,22 @@ TBD: short example (based on: Demos/IO/IbConfig_DemoIo.json)
 Pattern-Out Ports
 ----------------------------------------
 
-TBD: short intro
+The Pattern-Out Ports configuration is part of the :ref:`participant
+configuration<sec:cfg-participant>`. 
 
-TBD: short example (based on: Demos/IO/IbConfig_DemoIo.json)
+TBD: What are Pattern-Out Ports?
+
+.. codeblock:: javascript
+  
+  "Pattern-Out": [
+      { "Pattern-Name": "626565702d62656570" }
+  ]
 
 
-.. list-table:: Pattern-Out Configuration
-   :widths: 15 85
-   :header-rows: 1
+The pattern-out port instances are specified by giving their name and hexadecimal pattern string.
 
-   * - Property Name
-     - Description
-   * - <Name>
-     - <Initial Frequency and Duty cycle>
+.. _sec:cfg-switches:
 
-       
-       
-        
 Switches
 ========================================
 
@@ -374,13 +391,40 @@ TBD: short intro
 TBD: short example (based on: Demos/Ethernet/IbConfig_DemoEthernet_NetSim.json)
 
 
+.. _sec:cfg-links:
+
 Links
 ========================================
 
-TBD: short intro
+The Links section of the SimulationSetup configuration describes how
+the components of the simulation are connected.
 
-TBD: short example (based on: Demos/Ethernet/IbConfig_Can.json)
+.. code-block:: javascript
 
+  "Links": [
+    {
+        "Name": "CAN1",
+        "Endpoints": [
+            "Participant1/CAN1",
+            "Participant2/CAN1",
+            ...
+        ]
+    }, ...
+  ]
+
+.. list-table:: Link Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+   * - Name
+     - The name of the link
+   * - Endpoints
+     - List of endpoints (can be Participants' Controllers, IO Ports and Switch Ports)
+       that are connected to the link.
+
+.. _sec:cfg-network-simulators:
 
 NetworkSimulators
 ========================================
@@ -391,6 +435,8 @@ TBD: short intro
 
 TBD: short example (based on: Demos/FlexRay/IbConfig_DemoFlexray_NetSim.json)
 
+
+.. _sec:cfg-time-sync:
 
 TimeSync
 ========================================
