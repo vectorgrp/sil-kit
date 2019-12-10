@@ -5,6 +5,25 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on [Keep a Changelog] (http://keepachangelog.com/en/1.0.0/).
 
+
+[3.0.1] - 2019-12-10
+--------------------------------
+Added
+~~~~~
+Changed
+~~~~~~~
+- The IbLauncher CANoe environment module was adapted to the new CANoe Extensions packaging format.
+
+Fixed
+~~~~~
+
+Compatibility with 3.0.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): No
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
 [3.0.0] - 2019-12-03
 --------------------------------
 Added

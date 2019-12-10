@@ -20,8 +20,6 @@ if (TARGET fmt-header-only)
             $<BUILD_INTERFACE:HAVE_FMTLIB>
             $<BUILD_INTERFACE:FMT_HEADER_ONLY>
     )
-else()
-    message(FATAL_ERROR "Foo")
 endif()
 
 # Add a custom project IbApi for quick access to IB Headers in Visual Studio
