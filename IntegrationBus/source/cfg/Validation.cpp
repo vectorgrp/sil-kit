@@ -19,6 +19,40 @@ void Validate(const SimulationSetup& testConfig, const Config& ibConfig)
     for (auto& participant : testConfig.participants)
         Validate(participant, ibConfig);
     Validate(testConfig.timeSync, ibConfig);
+
+    std::vector<mw::EndpointId> endpointIds;
+
+    auto add_to_endpoints =
+        [&endpointIds](const auto& services)
+        {
+            for (auto& service : services)
+                endpointIds.push_back(service.endpointId);
+        };
+
+    for (auto& participant : testConfig.participants)
+    {
+        add_to_endpoints(participant.analogIoPorts);
+        add_to_endpoints(participant.digitalIoPorts);
+        add_to_endpoints(participant.patternPorts);
+        add_to_endpoints(participant.pwmPorts);
+        add_to_endpoints(participant.genericPublishers);
+        add_to_endpoints(participant.genericSubscribers);
+        add_to_endpoints(participant.canControllers);
+        add_to_endpoints(participant.ethernetControllers);
+        add_to_endpoints(participant.flexrayControllers);
+        add_to_endpoints(participant.linControllers);
+    }
+
+    for (auto& sw : testConfig.switches)
+        add_to_endpoints(sw.ports);
+
+    std::sort(endpointIds.begin(), endpointIds.end());
+    auto result = std::unique(endpointIds.begin(), endpointIds.end());
+    if (result != endpointIds.end())
+    {
+        std::cerr << "ERROR: EndpointId " << *result << " is not unique!" << std::endl;
+        throw ib::cfg::Misconfiguration{ "EndpointIds must be unique" };
+    }
 }
 
 void Validate(const Participant& participant, const Config& /*ibConfig*/)
@@ -26,6 +60,12 @@ void Validate(const Participant& participant, const Config& /*ibConfig*/)
     auto& participantController = participant.participantController;
     if (!participantController)
         return;
+
+    if (participant.id == 0)
+    {
+        std::cerr << "ERROR: Participant " << participant.name << " uses ParticipantId 0!" << std::endl;
+        throw ib::cfg::Misconfiguration{ "ParticipantId must not be 0" };
+    }
 
     if (participantController->syncType == SyncType::Unsynchronized)
     {

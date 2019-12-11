@@ -145,6 +145,9 @@ auto ParticipantBuilder::AddNetworkSimulator(std::string name) -> NetworkSimulat
 
 auto ParticipantBuilder::WithParticipantId(mw::ParticipantId id) -> ParticipantBuilder&
 {
+    if (id == 0)
+        throw Misconfiguration{ "ParticipantId must not be 0" };
+
     config.id = id;
     return *this;
 }
