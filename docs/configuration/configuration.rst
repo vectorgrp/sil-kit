@@ -79,7 +79,7 @@ Configuration Options
        configure particular details of the Fast-RTPS or Vector VAsio
        middleware. If this section is omitted, Fast-RTPS will be used.
 
-   * - :doc:`LaunchConfigurations<launch-configurations>`
+   * - LaunchConfigurations
      - This optional section contains information to start all necessary
        processes to perform the configured simulation. It is only used by the
        IbLauncher.
