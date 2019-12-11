@@ -7,7 +7,6 @@ Simulation Setup
 
 Overview
 ========================================
-
 The SimulationSetup is a mandatory section in the IbConfig.json. It configures
 all the participants of an VIB simulation and determines how the participants
 are interconnected.
@@ -30,14 +29,14 @@ general outline is as follows:
 
         "TimeSync": { ... }
 
-    },
+    }
+
 
 
 .. _sec:cfg-participant:
     
 Participants
 ========================================
-
 The Participants section is a list of two or more participant
 configuration. Each participant configuration contains general information,
 e.g., its name and a description, the controller instances used to communication
@@ -81,7 +80,7 @@ logging.
             "Name": "Participant2",
             ...
         },
-    ],
+    ]
 
 
 .. list-table:: Participant Configuration
@@ -139,8 +138,7 @@ logging.
    * - Analog-In
      - A list of analog input port names, e.g., [ "AI1", "AI2", "AI3"].
    * - Pwm-In
-     - A list of PWM input port names, e.g., [ "PWMI1", "PWMI2",
-       "PWMI3"].
+     - A list of PWM input port names, e.g., [ "PWMI1", "PWMI2", "PWMI3"].
    * - Pattern-In
      - A list of pattern input port names, e.g., [
        "PATTERN-IN-1", "PATTERN-IN-2", "PATTERN-IN-3"].
@@ -150,11 +148,11 @@ logging.
      - A list NetworkSimulator names simulated by this participant.
 
 
+
 .. _sec:cfg-participant-logger:
        
 Logger
 ----------------------------------------
-
 The Logger configuration is part of the :ref:`participant
 configuration<sec:cfg-participant>`, which allows individual logging behavior
 per participant. The Logger uses so called sinks to store log messages and
@@ -163,22 +161,22 @@ messages with log level Debug or higher to a remote logger and write Trace level
 logs to a file, the following configuration could be used:
 
 .. code-block:: javascript
-                
-   "Logger": {
-       "Sinks": [
-           {
-               "Type": "Remote",
-               "Level": "Debug"
-           },
-           {
-               "Type": "File",
-               "Level": "Trace"
-               "Logname": "ParticipantLog"
-           }
-       ]
-   }
 
-   
+  "Logger": {
+      "Sinks": [
+          {
+              "Type": "Remote",
+              "Level": "Debug"
+          },
+          {
+              "Type": "File",
+              "Level": "Trace"
+              "Logname": "ParticipantLog"
+          }
+      ]
+  }
+
+
 .. list-table:: Logger Configuration
    :widths: 15 85
    :header-rows: 1
@@ -191,11 +189,13 @@ logs to a file, the following configuration could be used:
      - The log level at which flushes are triggered.
    * - LogFromRemotes
      - A boolean flag whether to log messages from other participants with
-       remote sinks. Log messages received from other participants are only sent to local sinks, i.e., *Stdout* and *File*
+       remote sinks. Log messages received from other participants are only 
+       sent to local sinks, i.e., *Stdout* and *File*
+
 
 
 .. _sec:cfg-participant-logsink:
-       
+
 .. list-table:: Sink Configuration
    :widths: 15 85
    :header-rows: 1
@@ -217,26 +217,27 @@ logs to a file, the following configuration could be used:
        resulting filename is <Logname>_<iso-timestamp>.txt.
 
 
+
 .. _sec:cfg-participant-ethernet:
 
-Ethernet Controllers
+EthernetControllers
 ----------------------------------------
 The Ethernet controller configuration is part of the :ref:`participant
 configuration<sec:cfg-participant>`.
 
 .. code-block:: javascript
     
-    "EthernetControllers": [
-        {
-            "Name": "ETH0",
-            "MacAddr": "00:08:15:ab:cd:ef"
-        },
-        {
-            "Name": "ETH1",
-            "MacAddr": "00:08:15:ab:cd:f0",
-            "PcapFile": "pcap_output_trace.pcap"
-        }
-    ]
+  "EthernetControllers": [
+      {
+          "Name": "ETH0",
+          "MacAddr": "00:08:15:ab:cd:ef"
+      },
+      {
+          "Name": "ETH1",
+          "MacAddr": "00:08:15:ab:cd:f0",
+          "PcapFile": "pcap_output_trace.pcap"
+      }
+  ]
 
 
 .. list-table:: Ethernet Controller Configuration
@@ -246,7 +247,7 @@ configuration<sec:cfg-participant>`.
    * - Property Name
      - Description
    * - Name
-     - The name of the Ethernet controller
+     - The name of the Ethernet Controller
    * - MacAddr
      - The colon-separated Ethernet MAC address
    * - PcapFile
@@ -256,15 +257,30 @@ configuration<sec:cfg-participant>`.
        Execution is suspended until the pipe is opened for reading by another process.
 
 
-     
+
 .. _sec:cfg-participant-flexray:
 
-FlexRay Controllers
+FlexRayControllers
 ----------------------------------------
+The Ethernet controller configuration is part of the :ref:`participant
+configuration<sec:cfg-participant>`.
 
-TBD: short intro
+.. code-block:: javascript
+    
+  "FlexRayControllers": [
+      {
+          "Name": "FlexRay1",
+          "ClusterParameters": {
+              "gColdstartAttempts": 8,
+              ...
+          },
+          "NodeParameters": {
+              "pChannels": "AB",
+              ...
+          }
+      }
+  ]
 
-TBD: short example (based on: Demos/FlexRay/IbConfig_DemoFlexray.json)
 
 .. list-table:: FlexRay Controller Configuration
    :widths: 15 85
@@ -273,22 +289,35 @@ TBD: short example (based on: Demos/FlexRay/IbConfig_DemoFlexray.json)
    * - Property Name
      - Description
    * - Name
-     - TBD
+     - The name of the FlexRay Controller
    * - ClusterParameters
-     - TBD
+     - Allows to configure cluster specific settings.
    * - NodeParameters
-     - TBD
+     - Allows to configure node specific settings.
    * - TxBufferConfigs
-     - TBD
+     - Allows to configure TXBuffers by specifying "channels" (A, B, AB, None), 
+       "slotId", "offset", "repetition", "PPindicator", "headerCrc" 
+       and "transmissionMode" (SingleShot, Continuous).
+
+
 
 .. _sec:cfg-participant-genericpublisher:
 
-Generic Publishers
+GenericPublishers
 ----------------------------------------
+The Generic Publisher configuration is part of the :ref:`participant
+configuration<sec:cfg-participant>`.
 
-TBD: short intro
-
-TBD: short example (based on: Demos/GenericMessage/IbConfig_DemoGenericMessage.json)
+.. code-block:: javascript
+    
+    "GenericPublishers": [
+        {
+            "Name": "VehicleModelOut",
+            "Protocol": "ROS",
+            "DefinitionUri": "file://./vehicle-model-out.msg"
+        },
+        ...
+    ]
 
 .. list-table:: Generic Publisher Configuration
    :widths: 15 85
@@ -297,18 +326,19 @@ TBD: short example (based on: Demos/GenericMessage/IbConfig_DemoGenericMessage.j
    * - Property Name
      - Description
    * - Name
-     - TBD
+     - Name of the Generic Message Publisher
    * - Protocol
-     - TBD
+     - Specifies the protocol ("Undefined", "ROS", "SOME/IP").
    * - DefinitionUri
-     - TBD
+     - Location of the corresponding message definition file. 
+       Relative paths are resolved relative to the location of the IbConfig file.
+
 
 
 .. _sec:cfg-participant-digital-out:
 
-Digital-Out Ports
+Digital-Out (Ports)
 ----------------------------------------
-
 The Digital-Out Ports configuration is part of the :ref:`participant
 configuration<sec:cfg-participant>`. The name and initial state of the participant's 
 digital output port instances can be configured in this section:
@@ -322,11 +352,11 @@ digital output port instances can be configured in this section:
 A Digital-Out Port is specified by giving the name and initial state.
 
 
+
 .. _sec:cfg-participant-analog-out:
 
-Analog-Out Ports
+Analog-Out (Ports)
 ----------------------------------------
-
 The Analog-Out Ports configuration is part of the :ref:`participant
 configuration<sec:cfg-participant>`. The name and initial behavior of the participant's 
 analog output port instances can be configured in this section:
@@ -349,12 +379,12 @@ analog output port instances can be configured in this section:
    * - unit
      - The unit of the voltage value ("mV", "V", "kV")
 
-       
+
+
 .. _sec:cfg-participant-pwm-out:
 
-Pwm-Out Ports
+Pwm-Out (Ports)
 ----------------------------------------
-
 The Pwm-Out Ports configuration is part of the :ref:`participant
 configuration<sec:cfg-participant>`. The name and initial behavior of the participant's 
 pulse-width modulation output port instances can be configured in this section:
@@ -378,43 +408,72 @@ pulse-width modulation output port instances can be configured in this section:
      - The duty cycle specifies the percentage of time of each cycle that the signal stays in the
        active state. The value range is between 0 (always off) and 1 (always on)
 
-       
+
+
 .. _sec:cfg-participant-pattern-out:
 
-Pattern-Out Ports
+Pattern-Out (Ports)
 ----------------------------------------
-
 The Pattern-Out Ports configuration is part of the :ref:`participant
-configuration<sec:cfg-participant>`. 
+configuration<sec:cfg-participant>`.
 
-TBD: What are Pattern-Out Ports?
-
-.. codeblock:: javascript
+.. code-block:: javascript
   
   "Pattern-Out": [
-      { "Pattern-Name": "626565702d62656570" }
+      { "Pattern-Port-Name": "626565702d62656570" }
   ]
 
 
-The pattern-out port instances are specified by giving their name and hexadecimal pattern string.
+The pattern-out port instances are specified by giving their name 
+and a hexadecimal pattern string.
+
+
 
 .. _sec:cfg-switches:
 
 Switches
 ========================================
-
+The Switches section describes the Ethernet Switches that can be simulated
+by the :ref:`Network Simulators<sec:cfg-network-simulators>`. 
 This section is optional.
 
-TBD: short intro
+.. code-block:: javascript
 
-TBD: short example (based on: Demos/Ethernet/IbConfig_DemoEthernet_NetSim.json)
+  "Switches": [
+      {
+          "Name": "FrontSwitch",
+          "Description":  "Located in the front of the car",
+          "Ports": [
+              {
+                  "Name": "Port0",
+                  "VlanIds": [1]
+              },
+              ...
+          ]
+      },
+      ...
+  ]
+
+.. list-table:: Switch Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+   * - Name
+     - The name of the network switch
+   * - Description
+     - A human readable description of the switch
+   * - Ports
+     - List of the Ports of the switch. Each port should be assigned a "Name" and
+       a list of "VlanIds" can be specified.
+
 
 
 .. _sec:cfg-links:
 
 Links
 ========================================
-
 The Links section of the SimulationSetup configuration describes how
 the components of the simulation are connected.
 
@@ -428,7 +487,8 @@ the components of the simulation are connected.
             "Participant2/CAN1",
             ...
         ]
-    }, ...
+    },
+    ...
   ]
 
 .. list-table:: Link Configuration
@@ -443,25 +503,72 @@ the components of the simulation are connected.
      - List of endpoints (can be Participants' Controllers, IO Ports and Switch Ports)
        that are connected to the link.
 
+
+
 .. _sec:cfg-network-simulators:
 
 NetworkSimulators
 ========================================
-
+The Network Simulators section of the SimulationSetup allows to configure 
+which `Links`_ and `Switches`_ should be simulated by a NetworkSimulator. 
 This section is optional.
 
-TBD: short intro
+.. code-block:: javascript
 
-TBD: short example (based on: Demos/FlexRay/IbConfig_DemoFlexray_NetSim.json)
+  "NetworkSimulators": [
+      {
+          "Name": "Ethernet-Simulator",
+          "SimulatedLinks": [
+              "FS-Port0",
+              "FS-Port1",
+              ...
+          ],
+          "SimulatedSwitches": [
+              "FrontSwitch",
+              ...
+          ]
+      },
+      ...
+  ],
+
+.. list-table:: NetworkSimulator Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+   * - Name
+     - The name of the simulator
+   * - SimulatedLinks
+     - List of links that should be simulated by this network simulator.
+   * - SimulatedSwitches
+     - List of switches that should be simulated by this network simulator.
+
 
 
 .. _sec:cfg-time-sync:
 
 TimeSync
 ========================================
+The TimeSync section of the SimulationSetup configuration allows to configure
+how participants should be synchronized.
 
-This section is optional.
+.. code-block:: javascript
 
-TBD: short intro
+  "TimeSync": {
+      "SyncPolicy": "Loose",
+      "TickPeriodNs": 1000000
+  }
 
-TBD: short example 
+.. list-table:: TimeSync Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+   * - SyncPolicy
+     - The time sync policy that is used. Allowed values are "Loose" and "Strict".
+       This setting determines whether to wait until data is delivered to other participants 
+       (=Strict) or not (=Loose). The default is Loose.
+   * - TickPeriodNs
+     - Tick period in nano seconds for DiscreteTime synchronization.
