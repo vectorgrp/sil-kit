@@ -6,8 +6,6 @@
 #include <fstream>
 #include <numeric>
 #include <algorithm>
-
-// DEBUG
 #include <fstream>
 
 #include "CreateComAdapter.hpp"
@@ -84,98 +82,67 @@ auto BuildConfig(uint32_t participantCount, Middleware middleware, bool useNetwo
 {
     ConfigBuilder benchmarkConfig("BenchmarkConfigGenerated");
     auto&& simulationSetup = benchmarkConfig.SimulationSetup();
-    std::vector<std::string> networkSimulatorNames;
+    std::vector<ib::cfg::ParticipantBuilder*> participants;
 
     for (unsigned int participantCounter = 0; participantCounter < participantCount; participantCounter++)
     {
-        std::stringstream participantNameBuilder;
-        participantNameBuilder << "Participant";
-        participantNameBuilder << participantCounter;
+        std::stringstream linkName;
+        linkName << "LinkOfPubOfPart";
+        linkName << participantCounter;
+        simulationSetup.AddOrGetLink(ib::cfg::Link::Type::GenericMessage, linkName.str());
 
-        auto &&participantBuilder = simulationSetup.AddParticipant(participantNameBuilder.str());
-        participantBuilder.WithParticipantId(participantCounter);
+        std::stringstream participantName;
+        participantName << "Participant";
+        participantName << participantCounter;
+        auto&& participant = simulationSetup.AddParticipant(participantName.str());
+
+        participant.ConfigureLogger()
+            .WithFlushLevel(ib::mw::logging::Level::Critical)
+            .AddSink(ib::cfg::Sink::Type::Stdout)
+            .WithLogLevel(ib::mw::logging::Level::Critical);
 
         if (middleware == ib::cfg::Middleware::FastRTPS)
-        {
-            participantBuilder.AddParticipantController().WithSyncType(ib::cfg::SyncType::DiscreteTime);
-        }
+            participant.AddParticipantController().WithSyncType(ib::cfg::SyncType::DiscreteTime);
         else
-        {
-            participantBuilder.AddParticipantController().WithSyncType(ib::cfg::SyncType::DistributedTimeQuantum);
-        }
+            participant.AddParticipantController().WithSyncType(ib::cfg::SyncType::DistributedTimeQuantum);
 
-        participantBuilder.ConfigureLogger()
-            .WithFlushLevel(ib::mw::logging::Level::Trace)
-            .AddSink(ib::cfg::Sink::Type::Stdout)
-            .WithLogLevel(ib::mw::logging::Level::Trace);
-
-        for (unsigned int otherParticipantsCounter = 0; otherParticipantsCounter < participantCount; otherParticipantsCounter++)
-        {
-            if (participantCounter == otherParticipantsCounter)
-                continue;
-
-            std::stringstream publisherNameBuilder;
-            publisherNameBuilder << "PublisherOfParticipant";
-            publisherNameBuilder << participantCounter;
-            publisherNameBuilder << "ToParticipant";
-            publisherNameBuilder << otherParticipantsCounter;
-
-            std::stringstream subscriberNameBuilder;
-            subscriberNameBuilder << "SubscriberOfParticipant";
-            subscriberNameBuilder << participantCounter;
-            subscriberNameBuilder << "FromParticipant";
-            subscriberNameBuilder << otherParticipantsCounter;
-
-            std::stringstream linkNameBuilder;
-            linkNameBuilder << "LinkBetweenParticipant";
-            linkNameBuilder << participantCounter;
-            linkNameBuilder << "AndParticipant";
-            linkNameBuilder << otherParticipantsCounter;
-
-            if (useNetworkSimulator)
-            {
-                std::stringstream networkSimulatorNameBuilder;
-                networkSimulatorNameBuilder << "NetworkSimulatorFor";
-                networkSimulatorNameBuilder << linkNameBuilder.str();
-
-                networkSimulatorNames.push_back(networkSimulatorNameBuilder.str());
-
-                participantBuilder.AddNetworkSimulator(networkSimulatorNameBuilder.str()).WithLinks({ linkNameBuilder.str() });
-            }
-
-            participantBuilder->AddGenericPublisher(publisherNameBuilder.str()).WithLink(linkNameBuilder.str());
-            participantBuilder->AddGenericSubscriber(subscriberNameBuilder.str()).WithLink(linkNameBuilder.str());
-        }
+        std::stringstream publisherName;
+        publisherName << "PubOfPart";
+        publisherName << participantCounter;
+        participant.AddGenericPublisher(publisherName.str()).WithLink(linkName.str());
+        participants.push_back(&participant);
     }
 
-    if (useNetworkSimulator)
+    if (participants.size() != participantCount)
+        throw std::exception("Not all participants were created");
+
+    for (unsigned int participantCounter = 0; participantCounter < participantCount; participantCounter++)
     {
-        for (auto&& name : networkSimulatorNames)
+        for (unsigned int otherParticipantCounter = 0; otherParticipantCounter < participantCount; otherParticipantCounter++)
         {
-            auto&& participant = simulationSetup.AddParticipant(name);
+            if (participantCounter == otherParticipantCounter)
+                continue;
 
-            if (middleware == ib::cfg::Middleware::FastRTPS)
-            {
-                participant.AddParticipantController().WithSyncType(ib::cfg::SyncType::DiscreteTime).Parent()->AddNetworkSimulator(name);
-            }
-            else
-            {
-                participant.AddParticipantController().WithSyncType(ib::cfg::SyncType::DistributedTimeQuantum).Parent()->AddNetworkSimulator(name);
-            }
+            std::stringstream linkName;
+            linkName << "LinkOfPubOfPart";
+            linkName << participantCounter;
 
-            participant.ConfigureLogger()
-                .WithFlushLevel(ib::mw::logging::Level::Trace)
-                .AddSink(ib::cfg::Sink::Type::Stdout)
-                .WithLogLevel(ib::mw::logging::Level::Trace);
+            std::stringstream subscriberName;
+            subscriberName << "SubOfPart";
+            subscriberName << otherParticipantCounter;
+            subscriberName << "fromPart";
+            subscriberName << participantCounter;
+
+            participants.at(otherParticipantCounter)->AddGenericSubscriber(subscriberName.str()).WithLink(linkName.str());
         }
     }
 
     simulationSetup.AddParticipant("Master")
         .AsSyncMaster()
         .ConfigureLogger()
-        .WithFlushLevel(ib::mw::logging::Level::Trace)
+        .WithFlushLevel(ib::mw::logging::Level::Critical)
         .AddSink(ib::cfg::Sink::Type::Stdout)
-        .WithLogLevel(ib::mw::logging::Level::Trace);
+        .WithLogLevel(ib::mw::logging::Level::Critical);
 
     simulationSetup.ConfigureTimeSync()
         .WithLooseSyncPolicy()
@@ -183,13 +150,38 @@ auto BuildConfig(uint32_t participantCount, Middleware middleware, bool useNetwo
 
     benchmarkConfig.WithActiveMiddleware(middleware);
 
+    if (useNetworkSimulator)
+    {
+        auto&& netSim = simulationSetup.AddParticipant("NetworkSimulator");
+        netSim.AddNetworkSimulator("NetworkSimulator");
+
+        if (middleware == ib::cfg::Middleware::FastRTPS)
+            netSim.AddParticipantController().WithSyncType(ib::cfg::SyncType::DiscreteTime);
+        else
+            netSim.AddParticipantController().WithSyncType(ib::cfg::SyncType::DistributedTimeQuantum);
+
+        netSim.ConfigureLogger()
+            .WithFlushLevel(ib::mw::logging::Level::Critical)
+            .AddSink(ib::cfg::Sink::Type::Stdout)
+            .WithLogLevel(ib::mw::logging::Level::Critical);
+    }
+
     auto config = benchmarkConfig.Build();
 
-    // DEBUG
-    std::ofstream fileOut;
-    fileOut.open("C:\\Users\\vikatik\\Desktop\\temp_config.json");
-    fileOut << config.ToJsonString() << std::endl;
-    fileOut.close();
+    if (useNetworkSimulator)
+    {
+        // assign links to NetworkSimulator, since AddNetworkSimulator().WithLinks() does not allow dynamically created linknames
+        for (auto&& link : config.simulationSetup.links)
+        {
+            if (config.simulationSetup.networkSimulators.size() != 0)
+                config.simulationSetup.networkSimulators.at(0).simulatedLinks.push_back(link.name);
+        }
+
+        std::ofstream configOfstream;
+        configOfstream.open("IbConfig_Benchmark.json");
+        configOfstream << config.ToJsonString() << std::endl;
+        configOfstream.close();
+    }
 
     return config;
 }
@@ -236,13 +228,13 @@ void ParticipantsThread(
             if (now % durationOfOneSimulationPercentile < 1000000ns)
             {
                 std::cout << ".";
+                if (now >(simulationDurationInNs - durationOfOneSimulationPercentile))
+                    std::cout << std::endl;
             }
         }
 
         for (auto &publisher : publishers)
-        {
             PublishMessage(publisher, payloadSizeInBytes);
-        }
     });
 
     participantController->Run();
@@ -264,7 +256,7 @@ int main(int argc, char** argv)
         uint32_t payloadSizeInBytes = 100;
         uint32_t domainId = 42;
         Middleware usedMiddleware = Middleware::VAsio;
-        bool useNetworkSimulator = true;
+        bool useNetworkSimulator = false;
 
         if (argc >= 8)
         {
@@ -303,6 +295,7 @@ int main(int argc, char** argv)
         for (uint32_t simulationRun = 1; simulationRun <= simulationRepeats; simulationRun++)
         {
             auto ibConfig = BuildConfig(numberOfParticipants, usedMiddleware, useNetworkSimulator);
+
             std::vector<std::thread> threads;
             std::thread VAsioRegistryThread;
 
@@ -326,20 +319,13 @@ int main(int argc, char** argv)
 
             for (auto &&thisParticipant : ibConfig.simulationSetup.participants)
             {
-                if (thisParticipant.name == "Master")
-                {
+                if (thisParticipant.name == "Master" || thisParticipant.name.rfind("NetworkSimulator", 0) == 0)
                     continue;
-                }
-                if (thisParticipant.name.rfind("NetworkSimulator", 0) == 0)
-                {
-                    continue;
-                }
 
                 bool isVerbose = false;
-                if (thisParticipant.id == 0)
-                {
+                if (thisParticipant.id == 1)
                     isVerbose = true;
-                }
+
                 threads.push_back(std::thread([payloadSizeInBytes, simulationDuration, ibConfig, thisParticipant, domainId, isVerbose] {
                     ParticipantsThread(payloadSizeInBytes,
                         simulationDuration,
@@ -365,9 +351,7 @@ int main(int argc, char** argv)
             });
 
             for (auto&& thread : threads)
-            {
                 thread.join();
-            }
 
             if (usedMiddleware == Middleware::VAsio)
             {
@@ -404,9 +388,8 @@ int main(int argc, char** argv)
         std::cout << "Average realtime duration: " << averageDuration;
 
         if (simulationRepeats > 1)
-        {
             std::cout << " (min " << minDuration << ", max " << maxDuration << ")";
-        }
+
         std::cout << std::endl;
     }
     catch (const ib::cfg::Misconfiguration& error)
