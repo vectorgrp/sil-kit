@@ -15,11 +15,29 @@ namespace can {
 class ICanController
 {
 public:
+    /*! \brief Generic CAN callback method
+    */
     template<typename MsgT>
     using CallbackT = std::function<void(ICanController* controller, const MsgT& msg)>;
+
+    /*! Callback type to indicate that a CanMessage has been received.
+    *  Cf., \ref RegisterReceiveMessageHandler(ReceiveMessageHandler);
+    */
     using ReceiveMessageHandler    = CallbackT<CanMessage>;
+
+    /*! Callback type to indicate that the ::CanControllerState has changed.
+    *  Cf., \ref RegisterStateChangedHandler(StateChangedHandler);
+    */
     using StateChangedHandler      = CallbackT<CanControllerState>;
+
+    /*! Callback type to indicate that the controller ::CanErrorState has changed.
+    *  Cf., \ref RegisterErrorStateChangedHandler(ErrorStateChangedHandler);
+    */
     using ErrorStateChangedHandler = CallbackT<CanErrorState>;
+
+    /*! Callback type to indicate that a CanTransmitAcknowledge has been received.
+    *  Cf., \ref RegisterTransmitStatusHandler(MessageStatusHandler);
+    */
     using MessageStatusHandler     = CallbackT<CanTransmitAcknowledge>;
 
 public:
@@ -41,7 +59,12 @@ public:
      */
     virtual void SetBaudRate(uint32_t rate, uint32_t fdRate) = 0;
 
-    /*! \brief Reset the controller
+    /*! \brief Reset the CAN controller
+     *
+     * Resets the controller's Transmit Error Count (TEC) and the
+     * Receive Error Count (REC). Furthermore, sets the
+     * CAN controller state to CanControllerState::Uninit and the
+     * controller's error state to CanErrorState::NotAvailable.
      *
      * NB: Only supported in VIBE simulation, the command is ignored
      * in simple simulation.
@@ -50,7 +73,7 @@ public:
      */
     virtual void Reset() = 0;
 
-    /*! \brief Start the controller
+    /*! \brief Start the CAN controller
      *
      * NB: Only supported in VIBE simulation, the command is ignored
      * in simple simulation.
@@ -59,7 +82,7 @@ public:
      */
     virtual void Start() = 0;
 
-    /*! \brief Stop the controller
+    /*! \brief Stop the CAN controller
      *
      * NB: Only supported in VIBE simulation, the command is ignored
      * in simple simulation.
@@ -68,7 +91,7 @@ public:
      */
     virtual void Stop() = 0;
 
-    /*! \brief Put the controller in sleep mode
+    /*! \brief Put the CAN controller in sleep mode
      *
      * NB: Only supported in VIBE simulation, the command is ignored
      * in simple simulation.
@@ -116,24 +139,28 @@ public:
     /*! \brief Register a callback for CAN message reception
      *
      * The registered handler is called when the controller receives a
-     * new CAN message.
+     * new CanMessage.
      */
     virtual void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) = 0;
 
     /*! \brief Register a callback for controller state changes
      *
-     * The registered handler is called when the state of the
-     * controller changes. E.g., after starting the controller, the
-     * state changes from Stopped to Started.
+     * The registered handler is called when the ::CanControllerState of
+     * the controller changes. E.g., after starting the controller, the
+     * state changes from CanControllerState::Uninit to
+     * CanControllerState::Started.
+     * 
+     * NB: Only supported in VIBE simulation. In simple simulation,
+     * the handler is never called.
      */
     virtual void RegisterStateChangedHandler(StateChangedHandler handler) = 0;
 
     /*! \brief Register a callback for changes of the controller's error state
      *
-     * The registered handler is called when the error state of the
+     * The registered handler is called when the ::CanErrorState of the
      * controller changes. During normal operation, the controller
-     * should be in state ErrorActive. The states correspond to the
-     * error state handling protocol of the CAN specification.
+     * should be in state CanErrorState::ErrorActive. The states correspond
+     * to the error state handling protocol of the CAN specification.
      *
      * NB: Only supported in VIBE simulation. In simple simulation,
      * the handler is never called.
@@ -145,7 +172,7 @@ public:
      * The registered handler is called when a CAN message was
      * successfully transmitted on the bus or when an error occurred.
      *
-     * NB: Full support in VIBE simulation; in simple simulation, all
+     * NB: Full support in VIBE simulation. In simple simulation, all
      * messages are automatically positively acknowledged.
      */
     virtual void RegisterTransmitStatusHandler(MessageStatusHandler handler) = 0;

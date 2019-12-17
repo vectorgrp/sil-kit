@@ -17,11 +17,7 @@ namespace can {
 
 using CanTxId = uint32_t;
 
-/*! \brief A CAN message, sent in both directions
- * 
- * Directions:
- * - From: Controller To: Simulator
- * - From: Simulator  To: Controller
+/*! \brief A CAN message
  */
 struct CanMessage
 {
@@ -47,25 +43,49 @@ struct CanMessage
  */
 enum class CanControllerState : uint8_t
 {
-  Uninit = 0,  //!< CAN controller is not initialized (initial state after reset).
-  Stopped = 1, //!< CAN controller is initialized, but not participating on the CAN bus.
-  Started = 2, //!< CAN controller is in normal operation mode.
-  Sleep = 3,   //!< CAN controller is in sleep mode.
+  /*! CAN controller is not initialized (initial state after reset).
+  */
+  Uninit = 0,
+
+  /*! CAN controller is initialized but does not participate on the CAN bus.
+  */
+  Stopped = 1,
+
+  /*! CAN controller is in normal operation mode.
+  */
+  Started = 2,
+
+  /*! CAN controller is in sleep mode which is similar to the Stopped state.
+  */
+  Sleep = 3,
 };
+
 /*! \brief Error state of a CAN node according to CAN specification.
  */
 enum class CanErrorState : uint8_t
 {
-  NotAvailable = 0, //!< Error State is not available, because can controller is in state Uninit.
-  ErrorActive = 1,  //!< Error Active Mode, the CAN controller is allowed to send messages and active error flags.
-  ErrorPassive = 2, //!< Error passive Mode, the CAN controller is still allowed to send messages, but must not send active error flags.
-  BusOff = 3,       //!< Bus Off Mode, the CAN controller must not have any influence on the bus. It can neither send messages nor active error flags.
+  /*! Error State is Not Available, because CAN controller is in state Uninit.
+  *
+  * *AUTOSAR Doc:* Successful transmission.
+  */
+  NotAvailable = 0,
+
+  /*! Error Active Mode, the CAN controller is allowed to send messages and active error flags.
+  */
+  ErrorActive = 1,
+
+  /*! Error Passive Mode, the CAN controller is still allowed to send messages, but must not send active error flags.
+  */
+  ErrorPassive = 2,
+
+  /*! (currently not in use)
+   *
+   * *AUTOSAR Doc:* Bus Off Mode, the CAN controller does not take part in communication.
+  */
+  BusOff = 3,
 };
 
 /*! \brief The CAN controller status, sent to the controller
- * 
- * Directions:
- * - From: Simulator  To: Controller
  */
 struct CanControllerStatus
 {
@@ -77,16 +97,28 @@ struct CanControllerStatus
  */
 enum class CanTransmitStatus : uint8_t
 {
-  Transmitted = 0, //!< The message was successfully transmitted on the CAN bus.
-  Canceled = 1, //!< The transmit queue was reset (see CanSetControllerMode field cancelTransmitRequests).
-  TransmitQueueFull = 2, //!< The transmit request was rejected, because the transmit queue is full.
-  DuplicatedTransmitId = 3, //!< The  transmit request was rejected, because there is already another request with the same transmitId.
+  /*! The message was successfully transmitted on the CAN bus.
+  */
+  Transmitted = 0,
+
+  /*! (currently not in use)
+   *
+   * The transmit queue was reset.
+  */
+  Canceled = 1,
+
+  /*! The transmit request was rejected, because the transmit queue is full.
+  */
+  TransmitQueueFull = 2,
+
+  /*! (currently not in use)
+   *
+   * The transmit request was rejected, because there is already another request with the same transmitId.
+  */
+  DuplicatedTransmitId = 3,
 };
 
 /*! \brief The acknowledgment of a CAN message, sent to the controller
- * 
- * Directions:
- * - From: Simulator  To: Controller
  */
 struct CanTransmitAcknowledge
 {
@@ -97,9 +129,6 @@ struct CanTransmitAcknowledge
 };
 
 /*! \brief The baud rate, sent to the simulator
- * 
- * Directions:
- * - From: Controller  To: Simulator
  */
 struct CanConfigureBaudrate
 {
@@ -108,9 +137,6 @@ struct CanConfigureBaudrate
 };
 
 /*! \brief The CAN controller mode, sent to the simulator
- * 
- * Directions:
- * - From: Controller  To: Simulator
  */
 struct CanSetControllerMode
 {
