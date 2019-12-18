@@ -164,6 +164,8 @@ auto to_json(const mw::logging::Level& level) -> json11::Json
     {
     case mw::logging::Level::Critical:
         return "Critical";
+    case mw::logging::Level::Error:
+        return "Error";
     case mw::logging::Level::Warn:
         return "Warn";
     case mw::logging::Level::Info:
@@ -185,6 +187,8 @@ auto from_json<mw::logging::Level>(const json11::Json& json) -> mw::logging::Lev
     auto&& str = json.string_value();
     if (str == "Critical")
         return mw::logging::Level::Critical;
+    if (str == "Error")
+        return mw::logging::Level::Error;
     if (str == "Warn")
         return mw::logging::Level::Warn;
     if (str == "Info")

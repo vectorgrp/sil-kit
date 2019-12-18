@@ -77,7 +77,7 @@
                     },
                     "FlushLevel": {
                       "type": "string",
-                      "enum": [ "Critical", "Warn", "Info", "Debug", "Trace", "Off"]
+                      "enum": [ "Critical", "Error", "Warn", "Info", "Debug", "Trace", "Off"]
                     },
                     "Sinks": {
                       "type": "array",
@@ -90,7 +90,7 @@
                           },
                           "Level": {
                             "type": "string",
-                              "enum": [ "Critical", "Warn", "Info", "Debug", "Trace", "Off"],
+                              "enum": [ "Critical", "Error", "Warn", "Info", "Debug", "Trace", "Off"],
                               "default": "Info"
                           },
                           "Logname": {
