@@ -106,7 +106,7 @@ class EnvironmentCANoe(Environment.Environment):
         #    # TODO: Backup and patch CAN.ini at HKEY_LOCAL_MACHINE\SOFTWARE\VECTOR\CANoe\11.0\SettingsFolder, 
         #    #   https://stackoverflow.com/questions/8884188/how-to-read-and-write-ini-file-with-python3
 
-        canoeProjectAbsolutePaths = set()
+        canoeProjectFolderAbsolutePaths = set()
 
         for participantEnvironment in self.__participantEnvironments:
             participantName = participantEnvironment["Participant"]
@@ -138,14 +138,13 @@ class EnvironmentCANoe(Environment.Environment):
                 print("Error: CANoe project '" + canoeProjectAbsolutePath + "' for participant '" + participantName + "' does not exist")
                 return False
 
-            canoeProjectAbsolutePaths.add(canoeProjectAbsolutePath)
+            canoeProjectFolderAbsolutePaths.add(dirname(canoeProjectAbsolutePath))
 
         # Kill running CANoe processes which might prevent us from patching CANoe with the driver and interfere when simulating later
         #self.__killCanoeProcesses(self.__verbose)
 
         # Patch CANoe project with IntegrationBus NLDLL (may throw when locked)
-        for canoeProjectAbsolutePath in canoeProjectAbsolutePaths:
-            canoeProjectFolderAbsolutePath = dirname(canoeProjectAbsolutePath)
+        for canoeProjectFolderAbsolutePath in canoeProjectFolderAbsolutePaths:
             self.log("Patching CANoe project at '{}' with IntegrationBus node-layer DLL:".format(canoeProjectFolderAbsolutePath))
             try:
                 what = join(Configuration.getIntegrationBusLibraryPath(), "IbIoToCanoeSysvarAdapter.dll")
@@ -182,7 +181,7 @@ class EnvironmentCANoe(Environment.Environment):
     def teardownEnvironment(self):
         """Teardown actions after simulation was halted, invoked once for this type of environment"""
 
-        canoeProjectAbsolutePaths = set()
+        canoeProjectFolderAbsolutePaths = set()
 
         for participantEnvironment in self.__participantEnvironments:
             participantName = participantEnvironment["Participant"]
@@ -202,12 +201,11 @@ class EnvironmentCANoe(Environment.Environment):
 
             workingFolderAbsolutePath = workingFolderPath if isabs(workingFolderPath) else abspath(join(configFileFolderPath, workingFolderPath))
             canoeProjectAbsolutePath = canoeProjectPath if isabs(canoeProjectPath) else abspath(join(workingFolderAbsolutePath, canoeProjectPath))
-            canoeProjectAbsolutePaths.add(canoeProjectAbsolutePath)
+            canoeProjectFolderAbsolutePaths.add(dirname(canoeProjectAbsolutePath))
 
         success=True
         # Patch CANoe project with IntegrationBus NLDLL (may throw when locked)
-        for canoeProjectAbsolutePath in canoeProjectAbsolutePaths:
-            canoeProjectFolderAbsolutePath = dirname(canoeProjectAbsolutePath)
+        for canoeProjectFolderAbsolutePath in canoeProjectFolderAbsolutePaths:
             self.log("Cleaning CANoe project at '{}' from IntegrationBus node-layer DLLs:".format(canoeProjectFolderAbsolutePath))
 
             try:
