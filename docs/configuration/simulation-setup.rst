@@ -251,8 +251,8 @@ logs to a file, the following configuration could be used:
        simulation performance, in particular when using a low log level.
    * - Level
      - The minimum log level of a message to be logged by the sink. All messages
-       with a lower log level are ignored. Valid options are *Critical*, *Warn*,
-       *Info*, *Debug*, *Trace*, and *Off*.
+       with a lower log level are ignored. Valid options are *Critical*,
+       *Error*, *Warn*, *Info*, *Debug*, *Trace*, and *Off*.
    * - Logname
      - The logname determines the filename used by sinks of type *File*. The
        resulting filename is <Logname>_<iso-timestamp>.txt.

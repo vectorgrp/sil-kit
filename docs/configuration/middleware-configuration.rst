@@ -62,6 +62,7 @@ The default value for ActiveMiddleware is FastRTPS, so that
     deprecated and is only intended for backwards compatibility with previous versions of
     the VIB.
 
+    
 Configuring the VAsio Middleware
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -86,10 +87,90 @@ running on localhost listening on Port 8500. These values can be changed via the
         }
     }
 
+.. list-table:: VAsio Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+
+   * - Registry
+     - The optional Registry section allows specifying the hostname and a base
+       port to be used by participants when connecting to the IbRegistry. By
+       default, the registry is expected to be running on "localhost" and is
+       listening on port 8500 + *IbDomainId*.
+
+    
 Configuring the FastRTPS Middleware
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-TBD
+FastRTPS offers many configuration options. The most common ones can be directly
+configured via the IbConfig.json. Detailed, fine grained FastRTPS configuration
+can be performed using a FastRTPS XML config file.
+
+The following example shows how to enable unicast discovery with four
+participants running on four different hosts. And the history of each FastRTPS
+topic instance is set to 100.
+
+.. code-block:: javascript
+
+    {
+        ...
+        "MiddlewareConfig": {
+            "FastRTPS": {
+                "DiscoveryType": "Unicast",
+                "UnicastLocators": {
+                    "CanWriter": "192.168.190.1",
+                    "CanReader": "192.168.190.2",
+                    "SystemController": "192.168.190.3",
+                    "SystemMonitor": "192.168.190.4"
+                },
+                "HistoryDepth": 100
+            }
+    }
+
+
+.. list-table:: FastRTPS Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+
+   * - DiscoveryType
+     - The optional DiscoveryType determines how discovery between the
+       individual participants is performed. The options are *Local*, *Unicast*,
+       *Multicast*, and *ConfigFile*. *Local* performs a unicast discovery on
+       localhost only, *Unicast* performs unicast discovery with explicit IP
+       configurations per participant (cf. *UnicastLocators* list below),
+       *Multicast* performs multicast discovery on all network interfaces
+       (**warning** Multicast discovery can result in multiple IB instances
+       interfering with each other!), *ConfigFile* will perform discovery
+       according to the FastRTPS XML config file given by *ConfigFileName*
+       below.
+
+   * - UnicastLocators
+     - A list of "ParticipantName": "IP-Address" pairs, one for each
+       participant. All participants in the configuration must be
+       specified. Mandatory if *DiscoveryType* is set to *Unicast*.
+
+   * - ConfigFileName
+     - An optional FastRTPS XML configuration file. Paths are relative to the
+       IbConfig file.
+
+   * - SendSocketBufferSize
+     - The optional buffer size of the FastRTPS send socket. If not specified,
+       FastRTPS will use it's internal default value.
+   * - ListenSocketBufferSize
+     - The buffer size of the FastRTPS listen socket. If not specified,
+       FastRTPS will use it's internal default value.
+   * - HistoryDepth
+     - The optional HistoryDepth specifies the number of items FastRTPS keeps
+       for each send and receive history of each topic instance. By default a
+       depth of 5 items is used. If you are sending many items per SimTask
+       execution, you might need to set a larger history depth to avoid items
+       being overwritten before they are transmitted.
+
 
 .. _sec:mwcfg-enable-vasio:
 
