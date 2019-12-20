@@ -49,8 +49,11 @@ logging.
         {
             "Name": "EthernetWriter",
             "Description": "Demo Writer",
-            "SyncType": "DiscreteTime",
             "IsSyncMaster": true,
+
+            "ParticipantController": {
+                ...
+            },
             "Logger": {
                 ...
             },
@@ -96,14 +99,6 @@ logging.
    * - Description
      - A human readable description of the participant (optional)
 
-   * - SyncType
-     - The synchronization mechanism used by the participant
-       (mandatory). Currently supported options are *DistributedTimeQuantum*,
-       *TimeQuantum*, *DiscreteTime*, *DiscreteTimePassive*,
-       *Unsynchronized*. If a participant does not take part in the actual
-       simulation, it should be configured as *Unsynchronized*. This is, for
-       example, the case for the SystemController or the SystemMonitor.
-
    * - IsSyncMaster
      - A boolean flag that identifies the participant as synchronization master.
 
@@ -148,6 +143,52 @@ logging.
      - A list NetworkSimulator names simulated by this participant.
 
 
+
+.. _sec:cfg-participant-controller:
+       
+ParticipantController
+----------------------------------------
+
+The optional ParticipantController section enables synchronization with other
+participants. If no ParticipantController section is specified, the participant
+does not synchronize time with other participants and it does not contribute to
+the global system state. The ParticipantController also allows specifying soft
+and hard limits for the execution of each simulation task.
+
+The following example enables DiscreteTime synchronization, with a soft
+execution limit of 1.010 seconds and a hard limit of 1.5 seconds:
+
+.. code-block:: javascript
+
+    "ParticipantController": {
+        "SyncType": "DiscreteTime",
+        
+        "ExecTimeLimitSoftMs": 1010,
+        "ExecTimeLimitHardMs": 1500
+    }
+
+.. list-table:: Logger Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+   * - SyncType
+     - The synchronization mechanism used by the participant
+       (mandatory). Currently supported options are *DistributedTimeQuantum*,
+       *TimeQuantum*, *DiscreteTime*, *DiscreteTimePassive*. If a participant
+       should not take part in the actual simulation (e.g., SystemMonitor), it
+       must not specify a ParticipantController at all.
+   * - ExecTimeLimitSoftMs
+     - The (optional) soft limit for the execution of a simulation task given in
+       miliseconds. If the simulation task does not finish within this limit, a warning
+       message is logged. This limit is checked for each execution of the simulation
+       task. 
+   * - ExecTimeLimitHardMs
+     - The (optional) hard limit for the execution of a simulation task given in
+       miliseconds. If the simulation task does not finish within this limit, an
+       error message is logged and the participant switches to the Error state,
+       which suspends further execution of the simulation.
 
 .. _sec:cfg-participant-logger:
        
