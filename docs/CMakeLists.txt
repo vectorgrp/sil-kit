@@ -20,15 +20,6 @@ if(${IB_BUILD_DOCS})
     #Doxygen won't create this for us
     file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT_DIR})
 
-    add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
-                       COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
-                       DEPENDS ${IB_API_HEADERS}
-                       MAIN_DEPENDENCY ${DOXYFILE_OUT} ${DOXYFILE_IN}
-                       COMMENT "Generating docs"
-                       VERBATIM)
-
-    add_custom_target(Doxygen ALL DEPENDS ${DOXYGEN_INDEX_FILE})
-
     set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
     set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sphinx)
     set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
@@ -38,24 +29,27 @@ if(${IB_BUILD_DOCS})
     # - Our doc files have been updated
     # - The Sphinx config has been updated
     file(GLOB_RECURSE SPHINX_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.rst)
-    add_custom_command(OUTPUT ${SPHINX_INDEX_FILE}
-                       COMMAND
-                           ${SPHINX_EXECUTABLE} -b html
+
+    add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
+                       COMMENT "Generating docs"
+                       MAIN_DEPENDENCY
+                           ${DOXYFILE_OUT}
+                           ${DOXYFILE_IN}
+                           ${SPHINX_SOURCE}/conf.py
+                       DEPENDS
+                           ${IB_API_HEADERS}
+                           ${SPHINX_SOURCE_FILES}
+                       COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
+                       COMMAND ${SPHINX_EXECUTABLE} -b html
                            # Tell Breathe where to find the Doxygen output
                            -Dbreathe_projects.IntegrationBus=${DOXYGEN_OUTPUT_DIR}/xml
                            -d${CMAKE_CURRENT_BINARY_DIR}/sphinx-doctree
                            ${SPHINX_SOURCE} ${SPHINX_BUILD}
                        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                       DEPENDS
-                       # Other docs files you want to track should go here (or in some variable)
-                       ${SPHINX_SOURCE_FILES}
-                       ${DOXYGEN_INDEX_FILE}
-                       MAIN_DEPENDENCY ${SPHINX_SOURCE}/conf.py
-                       COMMENT "Generating documentation with Sphinx")
+                       VERBATIM
+                       )
 
-    add_custom_target(Sphinx ALL DEPENDS ${SPHINX_INDEX_FILE})
-
-    add_custom_target(IBDocs ALL DEPENDS Sphinx Doxygen)
+    add_custom_target(Doxygen ALL DEPENDS ${DOXYGEN_INDEX_FILE})
     install(DIRECTORY ${SPHINX_BUILD}/
             DESTINATION ${INSTALL_DOC_DIR})
     install(
