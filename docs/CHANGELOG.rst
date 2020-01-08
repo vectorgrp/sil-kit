@@ -3,15 +3,10 @@ VIB Changelog
 
 All notable changes to the IntegrationBus project shall be documented in this file.
 
-The format is based on [Keep a Changelog] (http://keepachangelog.com/en/1.0.0/).
+The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[unreleased] - yyyy-mm-dd
---------------------------------
-Fixed
-~~~~~
-- Check was added to prevent participants from using ParticipantID 0, since this ID is reserved for the Registry when VAsio is used.
 
-[3.0.1] - 2019-12-10
+[3.0.1] - 2020-01-08
 --------------------------------
 Added
 ~~~~~
@@ -19,6 +14,9 @@ Added
   set the history size for all FastRTPS topics.
 - New WithHistoryDepth method for FastRtpsConfigBuilder. When using the builder pattern to
   generate an Ib Config, the new FastRTPS HistoryDepth can be configured this way.
+- New documentation for the configuration mechanism, cf. :doc:`../configuration/configuration`
+- New documentation for FastRTPS configuration, cf. :doc:`../configuration/middleware-configuration`
+- Extend the simulation setup documentation, cf. :doc:`../configuration/simulation-setup`
 
 Changed
 ~~~~~~~
@@ -26,6 +24,7 @@ Changed
 
 Fixed
 ~~~~~
+- A check was added to prevent participants from using ParticipantID 0, since this ID is reserved for the Registry when VAsio is used.
 
 Compatibility with 3.0.0
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
