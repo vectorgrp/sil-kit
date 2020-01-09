@@ -22,6 +22,8 @@ automotive applications. For this, the Vector Integration Bus provides:
   and synchronization needs
 
 
+For getting started developing with the Vector Integration Bus, see the :doc:`quickstart guide <usage/quickstart>`
+
 .. _base-architecture:
 
 VIB Architecture
@@ -31,7 +33,6 @@ The Vector Integration Bus implements a layered architecture comprising three la
 
 .. figure:: _static/IntegrationBusArchitecture.png
     :align: center
-
 
 Supported Services
 ------------------
@@ -48,7 +49,7 @@ Vehicle Networks
 The VIB provides means to simulate CAN / CAN FD, Ethernet, FlexRay, and LIN networks.
 All networks can be simulated with two different levels of detail: simple, functional simulation
 or high detail, timing accurate simulation. Timing accurate simulation requires the Vector Network
-Simulator, which is part of the :doc:`Vector Integration Bus Extensions (VIBEs) <overview/vibes>`.
+Simulator, which is part of the :doc:`Vector Integration Bus Extensions (VIBEs) <../vibes/overview>`.
 
 Vehicle Network Controllers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -6,6 +6,7 @@ Contents
   :maxdepth: 2
 
   index
+  usage/quickstart
   vibes/overview
   configuration/configuration
   api/api
