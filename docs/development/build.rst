@@ -56,6 +56,7 @@ The documentation target is called *Doxygen*::
 
     cmake --build . --target Doxygen 
 
+Refer to :doc:`rst-help` for guidelines on formatting the documentation.
 
 Packaging
 ~~~~~~~~~

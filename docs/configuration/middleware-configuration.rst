@@ -62,7 +62,9 @@ The default value for ActiveMiddleware is FastRTPS, so that
     deprecated and is only intended for backwards compatibility with previous versions of
     the VIB.
 
-    
+
+.. _sec:mwcfg-vasio:
+
 Configuring the VAsio Middleware
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -232,6 +234,7 @@ For example, the necessary changes for the CAN demo are as follows
     
     });
 
+.. _sec:comadapter-api:
 
 ComAdapter Factory Methods
 ----------------------------------------

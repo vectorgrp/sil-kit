@@ -9,7 +9,9 @@ VIB Configuration
    middleware-configuration
    launch-configurations
 
-   
+
+.. _sec:ibconfig-json:
+
 The IbConfig.json File
 ----------------------------------------
 

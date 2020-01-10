@@ -7,3 +7,4 @@ VIB API
               
    CAN Controllers <can>
    LIN Controllers <lin>
+   Generic Messages <genericmessage>

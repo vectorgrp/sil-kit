@@ -2,6 +2,8 @@
 VIB Utilities
 ==============
 
+.. _sec:util-launcher:
+
 Launcher
 ~~~~~~~~
 
@@ -38,6 +40,8 @@ Launcher
       -  INTEGRATIONBUS_BINPATH & INTEGRATIONBUS_LIBPATH may be defined as environment variables.
 
 
+.. _sec:util-registry:
+
 VAsio Registry
 ~~~~~~~~~~~~~~
 
@@ -71,6 +75,7 @@ VAsio Registry
         specifies VAsio as the :doc:`active
         middleware<../configuration/middleware-configuration>`.
 
+.. _sec:util-system-controller:
 
 SystemController
 ~~~~~~~~~~~~~~~~
@@ -101,6 +106,7 @@ SystemController
       -  | For RTPS: The above command will not be successful, unless the reader and writer participant of the CAN Demo are established upfront (see below).
          | For VAsio: The above command will not be successful, unless the reader and writer participant of the CAN Demo are established afterwards.
 
+.. _sec:util-system-monitor:
 
 SystemMonitor
 ~~~~~~~~~~~~~
