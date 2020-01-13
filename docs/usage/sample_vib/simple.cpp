@@ -1,6 +1,7 @@
 #include <thread>
 #include <string>
 #include <sstream>
+#include <fstream>
 #include <chrono>
 #include <exception>
 
@@ -17,94 +18,112 @@ const auto domainId = 123;
 
 void run_participant(const std::string &participant_name, Config config)
 {
-  auto&& comAdapter = ib::CreateComAdapter(std::move(config), participant_name, domainId);
-  if (!comAdapter)
-  {
-    std::cerr << "Cannot create " << participant_name << "!" << std::endl;
-    return;
-  }
-  auto&& partCtrl = comAdapter->GetParticipantController();
-  // callbacks for participant life cycle
-  partCtrl->SetInitHandler([&participant_name](auto initCmd){
-    std::cout << participant_name << " Init" << std::endl;
-  });
-
-  partCtrl->SetStopHandler([&participant_name](){
-    std::cout << participant_name << " Stop" << std::endl;
-  });
-
-  partCtrl->SetShutdownHandler([&participant_name](){
-    std::cout << participant_name << " Shutdown" << std::endl;
-  });
-
-  // access to the generic message 
-  if (participant_name == "PublisherParticipant")
-  {
-    auto&& pubData = comAdapter->CreateGenericPublisher("DataService");
-    partCtrl->SetSimulationTask([&pubData, &partCtrl](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
-      static auto msgIdx = 0;
-      //generate some random data
-      std::string message = "DataService Msg" + std::to_string(msgIdx++);
-      //publish the raw bytes of the message to all subscribers
-      std::vector<uint8_t> data{ message.begin(), message.end() };
-      pubData->Publish(std::move(data)); 
-      //don't run forever
-      if (msgIdx > 9) {
-        partCtrl->Stop("Demo finished");
-      }
-      std::this_thread::sleep_for(1s);
+    auto&& comAdapter = ib::CreateComAdapter(std::move(config), participant_name, domainId);
+    if (!comAdapter)
+    {
+        std::cerr << "Cannot create " << participant_name << "!" << std::endl;
+        return;
+    }
+    auto&& partCtrl = comAdapter->GetParticipantController();
+    // callbacks for participant life cycle
+    partCtrl->SetInitHandler([&participant_name](auto initCmd){
+            std::cout << participant_name << " Init" << std::endl;
     });
-  }
-  else {
-    //Register callback for reception of messages
-    auto&& subData = comAdapter->CreateGenericSubscriber("DataService");
-    subData->SetReceiveMessageHandler([&partCtrl](IGenericSubscriber* subscriber, const std::vector<uint8_t>& data) {
-      std::string message{ data.begin(), data.end() };
-      auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(partCtrl->Now());
-      std::cout << nowMs.count() << "ms "<< subscriber->Config().name << " <- Received data=\"" << message << "\"" << std::endl;
+
+    partCtrl->SetStopHandler([&participant_name](){
+            std::cout << participant_name << " Stop" << std::endl;
     });
-    //simulation task must be defined
-    partCtrl->SetSimulationTask([](std::chrono::nanoseconds) {
-      std::this_thread::sleep_for(1s);
+
+    partCtrl->SetShutdownHandler([&participant_name](){
+            std::cout << participant_name << " Shutdown" << std::endl;
     });
-  }
-  //run the simulation main loop until finished
-  try {
-    auto result = partCtrl->Run();
-    std::cout << participant_name << ": result: " << result << std::endl;
-  }
-  catch (const std::exception &e) {
-    std::cout << "ERROR: exception caught: " << e.what() << std::endl;
-  }
+
+    // access to the generic message 
+    if (participant_name == "PublisherParticipant")
+    {
+        auto&& pubData = comAdapter->CreateGenericPublisher("DataService");
+        partCtrl->SetSimulationTask([&pubData, &partCtrl](std::chrono::nanoseconds now,
+                                std::chrono::nanoseconds /*duration*/) {
+            static auto msgIdx = 0;
+            //generate some random data
+            std::string message = "DataService Msg" + std::to_string(msgIdx++);
+            //publish the raw bytes of the message to all subscribers
+            std::vector<uint8_t> data{ message.begin(), message.end() };
+            pubData->Publish(std::move(data)); 
+            //don't run forever
+            if (msgIdx > 9) {
+                partCtrl->Stop("Demo finished");
+            }
+            std::this_thread::sleep_for(1s);
+        });
+    }
+    else {
+        //Register callback for reception of messages
+        auto&& subData = comAdapter->CreateGenericSubscriber("DataService");
+        subData->SetReceiveMessageHandler([&partCtrl](IGenericSubscriber* subscriber,
+                    const std::vector<uint8_t>& data) {
+            using namespace std::chrono;
+            std::string message{ data.begin(), data.end() };
+            auto nowMs = duration_cast<milliseconds>(partCtrl->Now());
+            std::cout << nowMs.count() << "ms "<< subscriber->Config().name 
+                << " <- Received data=\"" << message << "\"" << std::endl;
+        });
+        //simulation task must be defined
+        partCtrl->SetSimulationTask([](std::chrono::nanoseconds) {
+            std::this_thread::sleep_for(1s);
+        });
+    }
+    //run the simulation main loop until finished
+    try {
+        auto result = partCtrl->Run();
+        std::cout << participant_name << ": result: " << result << std::endl;
+    }
+    catch (const std::exception &e) {
+        std::cout << "ERROR: exception caught: " << e.what() << std::endl;
+    }
 }
+
 int main(int argc, char *argv[])
 {
-  //create a configuration
-  ConfigBuilder configBuilder("simple app");
-  auto&& simulationSetup = configBuilder
-    .WithActiveMiddleware(Middleware::FastRTPS)
-    .SimulationSetup();
-  auto&& pubCfg = simulationSetup.AddParticipant("PublisherParticipant");
-  pubCfg.ConfigureLogger().AddSink(Sink::Type::Stdout);
-  pubCfg.AddParticipantController().WithSyncType(SyncType::DiscreteTime);
-  pubCfg.AddGenericPublisher("DataService").WithLink("DataService");
+    //create a configuration
+    ConfigBuilder configBuilder("simple app");
+    auto&& simulationSetup = configBuilder
+        .WithActiveMiddleware(Middleware::VAsio)
+        .SimulationSetup();
+    auto&& pubCfg = simulationSetup
+        .AddParticipant("PublisherParticipant")
+        .AsSyncMaster();
+    pubCfg.ConfigureLogger().AddSink(Sink::Type::Stdout);
+    pubCfg.AddParticipantController().WithSyncType(SyncType::DiscreteTime);
+    pubCfg.AddGenericPublisher("DataService").WithLink("DataService");
 
-  auto&& subCfg = simulationSetup.AddParticipant("SubscriberParticipant");
-  subCfg.ConfigureLogger().AddSink(Sink::Type::Stdout);
-  subCfg.AddParticipantController().WithSyncType(SyncType::DiscreteTime);
-  subCfg.AddGenericSubscriber("DataService").WithLink("DataService");
+    auto&& subCfg = simulationSetup.AddParticipant("SubscriberParticipant");
+    subCfg.ConfigureLogger().AddSink(Sink::Type::Stdout);
+    subCfg.AddParticipantController().WithSyncType(SyncType::DiscreteTime);
+    subCfg.AddGenericSubscriber("DataService").WithLink("DataService");
 
-  //set up simulation type and granularity
-  simulationSetup
-    .ConfigureTimeSync()
-    .WithSyncPolicy(TimeSync::SyncPolicy::Loose)
-    .WithTickPeriod(10ms)
-    ;
-  auto&& config = configBuilder.Build();
-  std::thread publisher{ run_participant, "PublisherParticipant", config };
-  std::thread subscriber{ run_participant, "SubscriberParticipant", config };
+    simulationSetup.AddParticipant("SystemController");
+    //set up simulation type and granularity
+    simulationSetup
+        .ConfigureTimeSync()
+        .WithSyncPolicy(TimeSync::SyncPolicy::Loose)
+        .WithTickPeriod(10ms)
+        ;
+    auto&& config = configBuilder.Build();
+    
+    {
+        //save the config for utility invocation
+        std::ofstream configFile("simple.json");
+        if (!configFile.good()) {
+            std::cout << "ERROR: cannot create config file" << std::endl;
+            return 1;
+        }
+        configFile << config.ToJsonString() << std::endl;
+    }
+    std::thread publisher{ run_participant, "PublisherParticipant", config };
+    std::thread subscriber{ run_participant, "SubscriberParticipant", config };
 
-  if (publisher.joinable()) publisher.join();
-  if (subscriber.joinable()) subscriber.join();
-  return 0;
+    if (subscriber.joinable()) subscriber.join();
+    if (publisher.joinable()) publisher.join();
+    return 0;
 }

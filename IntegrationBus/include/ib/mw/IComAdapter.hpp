@@ -60,8 +60,9 @@ public:
     virtual auto CreatePwmOut(const std::string& canonicalName) -> sim::io::IPwmOutPort* = 0;
     //! \brief Create a pattern output port at this IB participant.
     virtual auto CreatePatternOut(const std::string& canonicalName) -> sim::io::IPatternOutPort* = 0;
-
+    //! \brief Create a generic message publisher at this IB participant.
     virtual auto CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher* = 0;
+    //! \brief Create a generic message subscriber at this IB participant.
     virtual auto CreateGenericSubscriber(const std::string& canonicalName) -> sim::generic::IGenericSubscriber* = 0;
 
     virtual auto GetSyncMaster() -> sync::ISyncMaster* = 0;

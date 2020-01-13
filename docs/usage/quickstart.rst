@@ -24,9 +24,13 @@ Have a look at our :ref:`architecture overview <base-architecture>` to get a hig
  :widths: 20 80
 
  * - :ref:`Participant<sec:cfg-participant>`
-   - A communication node in the distributed simulation. Every VIB application must at least define one participant.
+   - A communication node in the distributed simulation. Every simulation must at least define one participant.
+ * - :doc:`Configuration<../configuration/simulation-setup>`
+   - A simulation is defined by its configuration.
  * - Domain
-   - A numerical label to uniquely identify a simulation run. This allows running multiple simulatons on the same hosts.
+   - A numerical label to uniquely identify a simulation run. This allows running multiple simulations on the same hosts.
+ * - :ref:`Links<sec:cfg-links>`
+   - A virtual connection between the components of a simulation, e.g. between a participant and a service.
  * - :doc:`Middleware<../configuration/middleware-configuration>`
    - The concrete distributed communication implementation. That is, the software layer implementing the distributed message passing mechanism.
  * - :ref:`ComAdapter<sec:comadapter-api>`
@@ -68,17 +72,52 @@ For example, the following CMakeLists.txt is able to import the IntegrationBus l
 Properties, like include directories and compile flags, are automatically handled by the imported target.
 If you use another method to build your software you can directly use the ``IntegrationBus/include`` and ``IntegrationBus/lib`` directories for C++ headers and libraries.
 
+.. _sec:quickstart-simple:
 
-A simple VIB application
-~~~~~~~~~~~~~~~~~~~~~~~~
+A simple publish / subscribe application
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 We'll create a simple, self-contained VIB application that uses a :doc:`generic publish/subscribe mechanism<../api/genericmessage>` to exchange messages among its participants.
 To use the VIB you first have to create a valid configuration.
-This can either be done by loading a :ref:`JSON file<sec:ibconfig-json>` or by using the configuration builder :doc:`API<../api/config>` -- we'll use the API.
+This can either be done by loading a :ref:`JSON file<sec:ibconfig-json>` or by using the configuration builder :doc:`API<../api/config>` to create one programmatically.
+
+We use the API to create a configuration and save it to a file, for later use with supporting :doc:`utilities`.
+
+.. literalinclude::
+   sample_vib/simple.cpp
+   :lines: 89-112
+   :language: cpp
+
+The configuration consists of the middleware, the two participants that make up 
+the simulation (``PublisherParticipant`` and ``SubscriberParticipant``) and the synchronization mode and granularity.
+The participants both have links to the ``SharedService`` generic message.
+
+The application will run two participants concurrently, each in their own thread.
+The threads use the same code but differentiate the behavior based on the participants name: the publisher creates new a new generic message every 10ms.
 
 
 .. literalinclude::
    sample_vib/simple.cpp
+   :lines: 19-84
+   :linenos:
    :language: cpp
 
-We created a configuration with the two participants ``PublisherParticipant`` and ``SubscriberParticipant``.
-They both have links to the ``SharedService`` generic message.
+To manage the participants lifecycle different handlers can be attached, cf. line 11.
+The participants core simulation logic is in the simulation task callback (line 27), which is evoked by the VIB runtime.
+The subscribers simulation task is left empty, as new generic messages are handled by the receive message handler callback (line 45).
+Publishing data is accomplished by creating a IGenericPublisher interface from the com adapter and invoking its Publish method.
+Generic message subscription is done via the IGenericSubscriber interface and registering a callback.
+
+To run this sample you have to use the  :ref:`sec:util-registry` and :ref:`sec:util-system-controller` processes.
+The registry is required by the :ref:`VAsio middleware<sec:mwcfg-vasio>` for connecting the participants and setting up the distributed services.
+The SystemController implements the state machine for the distributed simulation.
+It takes care of starting the simulation when all required participants are connected and properly configured -- this is a task that is required in every simulation.
+For convenience and to reduce code duplication, these utility programs are implemented in separate executables and distributed in binary forms.
+
+The complete source code of this sample: :download:`CMakeLists.txt<sample_vib/CMakeLists.txt>` :download:`simple.cpp<sample_vib/simple.cpp>` 
+
+
+Further Reading
+---------------
+
+More real-world examples can be found in the :doc:`API<../api/api>` sections for the simulated automotive networks.
+Also, studying the source code and mode of operation of the bundled :doc:`demo applications<demos>` is a good start.
