@@ -2,10 +2,12 @@
 VIB Quick Start
 ===============
 
+.. |ComAdapter| replace:: :ref:`ComAdapter<sec:comadapter-api>`
+
 .. contents::
    :depth: 3
 
-The Vector Integration Bus (VIB) is a C++ library for distributed simulation of automotive networks.
+The Vector Integration Bus (VIB) is a C++ library for the distributed simulation of automotive networks.
 It is designed to work on Windows and Linux.
 This quick start demonstrates how to get started using the pre-built VIB release distribution.
 
@@ -33,7 +35,7 @@ Have a look at our :ref:`architecture overview <base-architecture>` to get a hig
    - A virtual connection between the components of a simulation, e.g. between a participant and a service.
  * - :doc:`Middleware<../configuration/middleware-configuration>`
    - The concrete distributed communication implementation. That is, the software layer implementing the distributed message passing mechanism.
- * - :ref:`ComAdapter<sec:comadapter-api>`
+ * - |ComAdapter|
    - Entry point to the VIB library. Abstracts away the underlying middleware.
  * - :doc:`Synchronization<../configuration/simulation-setup>`
    - A configuration option that determines if and how a participant synchronizes with all other participants.
@@ -47,11 +49,11 @@ The simulation is identified by its domain among all network hosts taking part i
 .. admonition:: Note
 
     For the FastRTPS middleware the domain ID must be in the range [1, 232].
+
 Thus, it is feasible to have multiple simulations running in parallel on the same host computer.
 Some participants have special roles, depending on the configuration of the middleware, syncronization protocol or :doc:`../vibes/overview`.
-
 Some configurations require auxiliary programs to run on your host computer(s), for example the :ref:`VAsio Middleware<sec:mwcfg-vasio>` requires the :ref:`sec:util-registry` to work properly.
-The :ref:`sec:util-launcher` is designed to simplify starting ensembles of programs that make up elaborate simulations.
+The :ref:`sec:util-launcher` is designed to simplify starting ensembles of programs that make up elaborate simulations environments.
 
 Writing your first VIB application
 ----------------------------------
@@ -63,7 +65,7 @@ The VIB distribution contains a self-contained and deployable installation in th
 The  CMake build configuration required is exported to ``IntegrationBus/lib/cmake/IntegrationBus`` and defines the ``IntegrationBus::IntegrationBus`` target. 
 
 From CMake this can be easily used via the  ``find_package(IntegrationBus CONFIG)`` mechanism.
-For example, the following CMakeLists.txt is able to import the IntegrationBus library based on its filesystem path (VIB_DIR)
+For example, the following CMakeLists.txt is able to import the IntegrationBus library based on its filesystem path.
 
 .. literalinclude::
    sample_vib/CMakeLists.txt
@@ -74,50 +76,77 @@ If you use another method to build your software you can directly use the ``Inte
 
 .. _sec:quickstart-simple:
 
-A simple publish / subscribe application
+A simple Generic Message application
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-We'll create a simple, self-contained VIB application that uses a :doc:`generic publish/subscribe mechanism<../api/genericmessage>` to exchange messages among its participants.
+We'll create a simple, self-contained VIB application that uses :doc:`Generic messages<../api/genericmessage>` to exchange user-defined data among its participants.
+The messages are exchanged using a publish / subscribe pattern.
+
 To use the VIB you first have to create a valid configuration.
-This can either be done by loading a :ref:`JSON file<sec:ibconfig-json>` or by using the configuration builder :doc:`API<../api/config>` to create one programmatically.
+This can either be done by loading an existing :ref:`JSON file<sec:ibconfig-json>` or 
+by using the :doc:`configuration builder API<../api/config>` to create one programmatically.
 
-We use the API to create a configuration and save it to a file, for later use with supporting :doc:`utilities`.
+We use a configuration file ``simple.json`` for creating our simulation.
+The file will be loaded by our application and from helper :doc:`utilities`::
 
-.. literalinclude::
-   sample_vib/simple.cpp
-   :lines: 89-112
-   :language: cpp
+    auto config = Config::FromJsonFile("simple.json")
 
-The configuration consists of the middleware, the two participants that make up 
-the simulation (``PublisherParticipant`` and ``SubscriberParticipant``) and the synchronization mode and granularity.
-The participants both have links to the ``SharedService`` generic message.
+
+The configuration consists of the active middleware, two participants that make up 
+our simulation (``PublisherParticipant`` and ``SubscriberParticipant``), and additional
+information like the synchronization mode and granularity.
+The participants both have links to the ``DataService`` generic message resource.
+These configured names will also be referenced directly in the C++ code.
 
 The application will run two participants concurrently, each in their own thread.
-The threads use the same code but differentiate the behavior based on the participants name: the publisher creates new a new generic message every 10ms.
-
+One thread will act as a publisher by sending a test string to its subscribers:
 
 .. literalinclude::
    sample_vib/simple.cpp
-   :lines: 19-84
-   :linenos:
    :language: cpp
+   :lines: 16-41
 
-To manage the participants lifecycle different handlers can be attached, cf. line 11.
-The participants core simulation logic is in the simulation task callback (line 27), which is evoked by the VIB runtime.
-The subscribers simulation task is left empty, as new generic messages are handled by the receive message handler callback (line 45).
-Publishing data is accomplished by creating a IGenericPublisher interface from the com adapter and invoking its Publish method.
-Generic message subscription is done via the IGenericSubscriber interface and registering a callback.
+
+First the configured middleware domain is joined as the named participant using the
+|ComAdapter|.
+Creating the ComAdapter properly initializes the VIB library and allows to instantiate
+:doc:`services<../api/api>` and :doc:`participant controllers<../api/participantcontroller>`.
+
+Next, we create a :cpp:class:`publisher<ib::sim::generic::IGenericPublisher>` for the ``DataService`` resource.
+This allows sending data through its :cpp:func:`Publish()<ib::sim::generic::IGenericPublisher::Publish()>`
+method, when we are in an active simulation.
+
+The actual simulation is performed in the simulation task.
+This task is a callback that has to be registered with the participant controller's 
+:cpp:func:`SetSimulationTask()<ib::mw::sync::IParticipantController::SetSimulationTask()>`.
+The task is then evoked by the VIB runtime.
+
+To start the runtime and perform the actual simulation work in the current thread,
+the blocking :cpp:func:`Run()<ib::mw::sync::IParticipantController::Run()>`
+method must be invoked.
+
+The subscriber runs in its own thread, too:
+
+.. literalinclude::
+   sample_vib/simple.cpp
+   :language: cpp
+   :lines: 43-69
+
+The setup is similar to the publisher, except that we instantiate a 
+:cpp:class:`subscriber<ib::sim::generic::IGenericSubscriber>` interface.
+This allows us to register a
+:cpp:func:`SetReceiveMessageHandler()<ib::sim::generic::IGenericSubscriber::SetReceiveMessageHandler()>`
+callback to receive data value updates.
+The simulation task has to be defined, even though no simulation work is performed.
 
 To run this sample you have to use the  :ref:`sec:util-registry` and :ref:`sec:util-system-controller` processes.
 The registry is required by the :ref:`VAsio middleware<sec:mwcfg-vasio>` for connecting the participants and setting up the distributed services.
-The SystemController implements the state machine for the distributed simulation.
-It takes care of starting the simulation when all required participants are connected and properly configured -- this is a task that is required in every simulation.
+The SystemController takes care of starting the simulation when all required participants are connected and properly configured and in a well defined state -- this is a task that is required in every simulation.
 For convenience and to reduce code duplication, these utility programs are implemented in separate executables and distributed in binary forms.
 
-The complete source code of this sample: :download:`CMakeLists.txt<sample_vib/CMakeLists.txt>` :download:`simple.cpp<sample_vib/simple.cpp>` 
+The complete source code of this sample: :download:`CMakeLists.txt<sample_vib/CMakeLists.txt>` :download:`simple.cpp<sample_vib/simple.cpp>` :download:`simple.json<sample_vib/simple.json>`
 
 
 Further Reading
 ---------------
-
 More real-world examples can be found in the :doc:`API<../api/api>` sections for the simulated automotive networks.
 Also, studying the source code and mode of operation of the bundled :doc:`demo applications<demos>` is a good start.

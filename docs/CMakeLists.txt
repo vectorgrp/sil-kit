@@ -59,4 +59,8 @@ if(${IB_BUILD_DOCS})
         DESTINATION .
         COMPONENT IntegrationBus-Developer
     )
+
+    #add sample code so it shows in the IDE, but don't build or install it
+    add_executable(sample_vib EXCLUDE_FROM_ALL usage/sample_vib/simple.cpp)
+    target_link_libraries(sample_vib PRIVATE IntegrationBus)
 endif()

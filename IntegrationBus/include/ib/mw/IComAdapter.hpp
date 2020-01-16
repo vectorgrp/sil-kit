@@ -66,6 +66,7 @@ public:
     virtual auto CreateGenericSubscriber(const std::string& canonicalName) -> sim::generic::IGenericSubscriber* = 0;
 
     virtual auto GetSyncMaster() -> sync::ISyncMaster* = 0;
+    //! \brief Return the  IParticipantController for the current participant.
     virtual auto GetParticipantController() -> sync::IParticipantController* = 0;
     virtual auto GetSystemMonitor() -> sync::ISystemMonitor* = 0;
     virtual auto GetSystemController() -> sync::ISystemController* = 0;
