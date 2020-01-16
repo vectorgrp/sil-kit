@@ -27,6 +27,7 @@ endif()
 
 target_link_libraries(IbSimEthernet
     PRIVATE IbInterface
+    PRIVATE IbMwLogging
 )
 
 target_include_directories(IbSimEthernet
