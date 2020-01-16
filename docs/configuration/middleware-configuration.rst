@@ -234,7 +234,7 @@ For example, the necessary changes for the CAN demo are as follows
     
     });
 
-.. _sec:comadapter-api:
+.. _sec:comadapter-factory:
 
 ComAdapter Factory Methods
 ----------------------------------------
