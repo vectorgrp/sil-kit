@@ -2,9 +2,6 @@
 Synchronisation
 ===============
 
-    .. doxygenclass:: ib::mw::sync::ISystemMonitor
-       :members:
-
     .. doxygenclass:: ib::mw::sync::ISystemController
        :members:
 
@@ -30,10 +27,3 @@ Synchronisation
 
     .. doxygenstruct:: ib::mw::sync::SystemCommand
        :members:
-
-    .. doxygenenum:: ib::mw::sync::ParticipantState
-
-    .. doxygenstruct:: ib::mw::sync::ParticipantStatus
-       :members:
-
-    .. doxygenenum:: ib::mw::sync::SystemState

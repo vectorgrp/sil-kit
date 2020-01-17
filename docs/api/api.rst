@@ -63,7 +63,7 @@ state and system handling.
 
   participantcontroller
   The System Controller <synchronisation>
-  The System Monitor <synchronisation>
+  The System Monitor <systemmonitor>
 
 Developer Documentation
 -----------------------

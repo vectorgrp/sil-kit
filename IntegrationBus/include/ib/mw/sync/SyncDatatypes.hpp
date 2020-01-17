@@ -94,7 +94,7 @@ enum class ParticipantState : uint8_t {
     ColdswapShutdown, //!< The ColdswapShutdown state
     ColdswapIgnored, //!< The ColdswapIgnored state
     Error, //!< The error state
-    ShuttingDown, //!< The ShuttingDown state
+    ShuttingDown, //!< The shutting down state
     Shutdown //!< The shutdown state
 };
 
@@ -121,7 +121,7 @@ enum class SystemState : uint8_t {
     ColdswapPending, //!< The ColdswapPending state
     ColdswapDone, //!< The ColdswapDone state
     Error, //!< The error state
-    ShuttingDown, //!< The ShuttingDown state
+    ShuttingDown, //!< The shutting down state
     Shutdown //!< The shutdown state
 };
 
