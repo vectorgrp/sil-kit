@@ -2,7 +2,7 @@
 VIB Quick Start
 ===============
 
-.. |ComAdapter| replace:: :ref:`ComAdapter<sec:comadapter-api>`
+.. |ComAdapter| replace:: :ref:`ComAdapter<sec:comadapter-factory>`
 
 .. contents::
    :depth: 3
