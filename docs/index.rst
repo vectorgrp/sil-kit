@@ -49,7 +49,7 @@ Vehicle Networks
 The VIB provides means to simulate CAN / CAN FD, Ethernet, FlexRay, and LIN networks.
 All networks can be simulated with two different levels of detail: simple, functional simulation
 or high detail, timing accurate simulation. Timing accurate simulation requires the Vector Network
-Simulator, which is part of the :doc:`Vector Integration Bus Extensions (VIBEs) <../vibes/overview>`.
+Simulator, which is part of the :doc:`Vector Integration Bus Extensions (VIBEs) <vibes/overview>`.
 
 Vehicle Network Controllers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
