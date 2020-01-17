@@ -22,13 +22,11 @@ void CanControllerProxy::SetBaudRate(uint32_t rate, uint32_t fdRate)
 
 void CanControllerProxy::Reset()
 {
-    _controllerState = CanControllerState::Uninit;
-
     // prepare message to be sent
     CanSetControllerMode mode;
     mode.flags.cancelTransmitRequests = 1;
     mode.flags.resetErrorHandling = 1;
-    mode.mode = _controllerState;
+    mode.mode = CanControllerState::Uninit;
 
     _comAdapter->SendIbMessage(_endpointAddr, mode);
 }
@@ -50,8 +48,6 @@ void CanControllerProxy::Sleep()
 
 void CanControllerProxy::ChangeControllerMode(CanControllerState state)
 {
-    _controllerState = state;
-
     // prepare message to be sent
     CanSetControllerMode mode;
     mode.flags.cancelTransmitRequests = 0;

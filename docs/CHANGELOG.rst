@@ -5,6 +5,16 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[unreleased] - yyyy-mm-dd
+--------------------------------
+Added
+~~~~~
+- Documentation for the CAN controller API: :doc:`CAN Vehicle Network Controllers <api/can>`.
+
+Fixed
+~~~~~
+- Fixed a bug that prevented the CAN controller state callback from being called
+  when using VIBE NetworkSimulator.
 
 [3.0.1] - 2020-01-08
 --------------------------------
