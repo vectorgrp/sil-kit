@@ -10,6 +10,13 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 Added
 ~~~~~
 - Documentation for the CAN controller API: :doc:`CAN Vehicle Network Controllers <api/can>`.
+- Documentation for the Participant Controller API: :doc:`api/participantcontroller` (AFTMAGT-206).
+- Documentation for the IO Port services: :doc:`api/io` (AFTMAGT-201).
+- Documented Generic Messages API: :doc:`api/genericmessage` (AFTMAGT-204).
+- Documented the simulation state machine and synchronization types: :doc:`vib-simulation`
+- Added docs for the ComAdapter: :doc:`api/comadapter`
+- Added quick start guide: :doc:`usage/quickstart`
+- Elaborate the user APIs and overview pages: :doc:`api/api`
 
 Changed
 ~~~~~~~

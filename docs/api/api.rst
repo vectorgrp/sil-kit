@@ -6,8 +6,6 @@ VIB API
 
 .. _sec:api-services:
 
-Services
---------
 This document describes the user available programming interfaces of the Vector
 Integration Bus (VIB).
 If you are not yet familiar with the VIB, have a look at the :doc:`Quick Start<../usage/quickstart>`.
@@ -18,7 +16,7 @@ The main entry points into the Integration Bus API are discussed in |ComAdapter|
 and in the |header| documents.
 
 User API
-~~~~~~~~~
+--------
 The main programming interfaces for configuration and  accessing of the
 Integration Bus services and controllers are listed below.
 
@@ -29,7 +27,8 @@ Integration Bus services and controllers are listed below.
    config
    comadapter
 
-
+Services
+--------
 Vehicle Network Controller
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 Several different vehicular networks are supported by corresponding
@@ -65,3 +64,14 @@ state and system handling.
   participantcontroller
   The System Controller <synchronisation>
   The System Monitor <synchronisation>
+
+Developer Documentation
+-----------------------
+The following documentation is intended for developers working on the 
+Integration Bus itself.
+
+.. toctree::
+   :maxdepth: 1
+
+   Building from Source <../development/build>
+   Writing Documentation<../development/rst-help>

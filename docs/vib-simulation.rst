@@ -41,6 +41,7 @@ The protocol itself is stateless.
 A user accesible API allows introspection of |Participant| and |System| states, and
 also sending commands to transition the system or participants into new states.
 
+.. _sec:sim-participant-lifecycle:
 
 The participant lifecycle
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -81,11 +82,12 @@ From a ``Stopped`` state the participant can be reinitialized, in contrast to th
 This allows for restarting a simulation and, e.g. saving simulation results in the
 user's code after reaching the stopped state.
 
-Allthough the |SystemController| interface can be used by every participant,  the
+Allthough the |SystemController| interface can be used by every participant, the
 control of all participants of a simulation is usually delegated to a single
 dedicated system controller.
 The |SystemControllerExe| implements such a dedicated participant.
 
+.. _sec:sim-system-lifecycle:
 
 The system lifecycle
 ~~~~~~~~~~~~~~~~~~~~
@@ -100,7 +102,7 @@ The whole system remains in this state until all participants have finished
 their simulation tasks and entered their ``Stopped`` states.
 Only then the whole system transitions in to the ``Stopped`` state.
 Thus, the additional intermediate states (marked green in the
-:ref:`figure below<fig-system-states>`  ) have been added to model the period of
+:ref:`figure below<fig-system-states>`) have been added to model the period of
 time until stable states are reached for all participants in the distributed
 simulation.
 
@@ -118,13 +120,24 @@ transitions of the system and individual participants.
 There is also a :ref:`sec:util-system-monitor` utility, which prints participant
 and system state updates, and is a handy tool to debug simulations.
 
+.. _sec:sim-coldswap:
+
+ColdSwap support
+""""""""""""""""
+The coldswap mechanism was introduced to accommodate for shortcomings in the 
+FastRTPS backend.
+It allows disconnecting and re-connecting participants during runtime.
+This is a legacy feature only affecting the FastRTPS middleware.
+
+.. _sec:sim-time-sync:
+
 Time Synchronization
 --------------------
 The Integration Bus supports several different simulation time synchronization
 policies and algorithms.
 Note that the simulation time only advances when system state is ``running``.
-The :ref:`time synchronization<sec:cfg-time-sync>` and the
-:ref:`synchronization policy<sec:cfg-participant-controller>` can be configured
+The :ref:`synchronization policy<sec:cfg-time-sync>` and the
+:ref:`time synchronization type<sec:cfg-participant-controller>` can be configured
 using the :doc:`simulation configuration<../configuration/simulation-setup>`.
 
 The available synchronization types are listed in the :ref:`table<sync-types>`
@@ -154,7 +167,8 @@ below.
     * - TimeQuantum
       - Dynamic length time quanta requested by the participants.
 
-
+Creating an unsynchronized participant is supported by not declaring a 
+participant controller for a given participant in the configuration mechanism.
 
 Synchronization Policies
 ~~~~~~~~~~~~~~~~~~~~~~~~
