@@ -28,7 +28,7 @@ an initial set of :cpp:class:`FrameResponses<ib::sim::lin::FrameResponse>`,
 which is particularly useful for LIN slaves.
 
 The following example configures a LIN controller as a LIN slave with a baud
-rate of 20'000 baud. Further more, LIN ID 0x11 is configured for transmission::
+rate of 20'000 baud. Furthermore, LIN ID 0x11 is configured for transmission::
 
     Frame slaveFrame;
     slaveFrame.id = 0x11;

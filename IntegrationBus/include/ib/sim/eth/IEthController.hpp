@@ -15,12 +15,29 @@ namespace eth {
 class IEthController
 {
 public:
+    /*! \brief Generic Ethernet callback method
+    */
     template<typename MsgT>
     using CallbackT = std::function<void(IEthController* controller, const MsgT& msg)>;
 
+    /*! Callback type to indicate that an EthMessage has been received.
+    *  Cf. \ref RegisterReceiveMessageHandler(ReceiveMessageHandler);
+    */
     using ReceiveMessageHandler = CallbackT<EthMessage>;
+
+    /*! Callback type to indicate that an EthTransmitAcknowledge has been received.
+    *  Cf. \ref RegisterMessageAckHandler(MessageAckHandler);
+    */
     using MessageAckHandler     = CallbackT<EthTransmitAcknowledge>;
+
+    /*! Callback type to indicate that the ::EthState has changed.
+    *  Cf. \ref RegisterStateChangedHandler(StateChangedHandler);
+    */
     using StateChangedHandler   = CallbackT<EthState>;
+
+    /*! Callback type to indicate that the link bit rate has changed.
+    *  Cf. \ref RegisterBitRateChangedHandler(BitRateChangedHandler);
+    */
     using BitRateChangedHandler = CallbackT<uint32_t>;
 
 public:
@@ -31,11 +48,10 @@ public:
      * Upon activation of the controller, the controller attempts to
      * establish a link. Messages can only be sent once the link has
      * been successfully established,
-     * cf. RegisterStateChangedHandler() and
-     * RegisterBitRateChangedHandler().
+     * cf. RegisterStateChangedHandler() and RegisterBitRateChangedHandler().
      *
      * NB: Only supported in VIBE simulation! In simple simulation,
-     * Messages can be sent without need to call Activate()
+     * messages can be sent without need to call Activate()
      */
     virtual void Activate() = 0;
 
@@ -62,7 +78,7 @@ public:
      * simple simulation. In this case, the message is simply passed
      * on to all connected controllers without performing any check.
      *
-     * \return Unique identify to identify corresponding
+     * \return Unique transmit id to identify corresponding
      * acknowledgement.
      */
     virtual auto SendMessage(EthMessage msg) -> EthTxId = 0;
@@ -82,8 +98,7 @@ public:
      *
      * NB: Full support in VIBE Ethernet simulation. In simple
      * simulation, all messages are immediately positively
-     * acknowledged by all receiving controllers. Note that this might
-     * result in multiple acknowledgements for a single message!
+     * acknowledged by a receiving controller.
      */
     virtual void RegisterMessageAckHandler(MessageAckHandler handler) = 0;
 
@@ -91,9 +106,9 @@ public:
      *
      * The handler is called when the state of the controller
      * changes. E.g., a call to Activate() causes the controller to
-     * change from state Inactive to LinkDown. Later, when the link
-     * has ben established, the state changes again from LinkDown to
-     * LinkUp. Similarly, the status changes back to Inactive upon a
+     * change from state ::Inactive to ::LinkDown. Later, when the link
+     * has been established, the state changes again from ::LinkDown to
+     * ::LinkUp. Similarly, the status changes back to ::Inactive upon a
      * call to Deactivate().
      *
      * NB: Only supported in VIBE Ethernet simulation.

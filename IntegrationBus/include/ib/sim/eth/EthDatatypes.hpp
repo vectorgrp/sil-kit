@@ -98,11 +98,7 @@ private:
 //! \brief An Ethernet transmit id
 using EthTxId = uint32_t;
 
-/*! \brief An Ethernet frame including ID and timestamp, sent in both directions
- * 
- * Directions:
- * - From: Ethernet Controller  To: Network Simulator
- * - From: Network Simulator    To: Ethernet Controller
+/*! \brief An Ethernet frame including ID and timestamp
  */
 struct EthMessage
 {
@@ -115,18 +111,34 @@ struct EthMessage
 //! \brief Acknowledgement status for an EthTransmitRequest
 enum class EthTransmitStatus : uint8_t
 {
-    Transmitted = 0, //!< The message was successfully transmitted on the Ethernet link.
-    ControllerInactive = 1, //!< The transmit request was rejected, because the Ethernet controller is not active.
-    LinkDown = 2, //!< The transmit request was rejected, because the Ethernet link is down.
-    Dropped = 3, //!< The transmit request was dropped, because the transmit queue is full.
-    DuplicatedTransmitId = 4, //!< The  transmit request was rejected, because there is already another request with the same transmitId.
-    InvalidFrameFormat = 5 //!< The given raw Ethernet frame is ill formated (For example frame length is too small or too large, wrong order of VLAN tags).
+    /*! The message was successfully transmitted on the Ethernet link.
+    */
+    Transmitted = 0,
+
+    /*! The transmit request was rejected, because the Ethernet controller is not active.
+    */
+    ControllerInactive = 1,
+
+    /*! The transmit request was rejected, because the Ethernet link is down.
+    */
+    LinkDown = 2,
+
+    /*! The transmit request was dropped, because the transmit queue is full.
+    */
+    Dropped = 3,
+
+    /*! (currently not in use)
+     *
+     * The transmit request was rejected, because there is already another request with the same transmitId.
+    */
+    DuplicatedTransmitId = 4,
+
+    /*! The given raw Ethernet frame is ill formated (e.g. frame length is too small or too large, wrong order of VLAN tags).
+    */
+    InvalidFrameFormat = 5
 };
 
 /*! \brief Publishes status of the simulated Ethernet controller
- * 
- * Directions:
- * - From: Network Simulator  To: Ethernet Controller
  */
 struct EthTransmitAcknowledge
 {
@@ -145,9 +157,6 @@ enum class EthState : uint8_t
 };
 
 /*! \brief Publishes status of the simulated Ethernet controller
- * 
- * Directions:
- * - From: Network Simulator  To: Ethernet Controller
  */
 struct EthStatus
 {
@@ -165,9 +174,6 @@ enum class EthMode : uint8_t
 };
 
 /*! \brief Set the Mode of the Ethernet Controller.
- * 
- * Directions:
- * - From: Ethernet Controller  To: Network Simulator
  */
 struct EthSetMode
 {
