@@ -1,6 +1,6 @@
-=============================
-How to specify a valid Config
-=============================
+===============================
+The VIB Configuration Mechanism
+===============================
 This document describes how to programmatically create a VIB configuration.
 For a general discussion of the VIB configuration refer to :doc:`../configuration/configuration`.
 

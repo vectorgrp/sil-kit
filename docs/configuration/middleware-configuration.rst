@@ -102,7 +102,8 @@ running on localhost listening on Port 8500. These values can be changed via the
        default, the registry is expected to be running on "localhost" and is
        listening on port 8500 + *IbDomainId*.
 
-    
+.. _sec:mwcfg-fastrtps:
+
 Configuring the FastRTPS Middleware
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
