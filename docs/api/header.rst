@@ -49,5 +49,5 @@ and its functions, e.g. by using the
 
 Further Reading
 ---------------
-Refer to the :doc:`API overview<api>` for a description of the availabled 
+Refer to the :doc:`API overview<api>` for a description of the available
 services and interfaces.

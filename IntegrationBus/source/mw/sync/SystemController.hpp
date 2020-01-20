@@ -89,9 +89,7 @@ void SystemController::SendSystemCommand(SystemCommand::Kind kind) const
 
     SendIbMessage(std::move(cmd));
 }
-    
 
-    
 } // namespace sync
 } // namespace mw
 } // namespace ib

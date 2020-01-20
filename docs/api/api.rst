@@ -62,8 +62,8 @@ state and system handling.
   :maxdepth: 1
 
   participantcontroller
-  The System Controller <synchronisation>
-  The System Monitor <systemmonitor>
+  systemcontroller
+  systemmonitor
 
 Developer Documentation
 -----------------------

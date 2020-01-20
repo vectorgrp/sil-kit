@@ -86,3 +86,11 @@ different processes, their interaction is shown sequentially to demonstrate caus
 .. literalinclude::
    examples/sync/SystemMonitorTwoParticipants.cpp
    :language: cpp
+   :lines: 1-29
+
+This might lead to the following function call invocations at runtime:
+
+.. literalinclude::
+   examples/sync/SystemMonitorTwoParticipants.cpp
+   :language: cpp
+   :lines: 29-

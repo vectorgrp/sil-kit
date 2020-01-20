@@ -327,14 +327,23 @@ struct MiddlewareConfig
 // ================================================================================
 //  Main Config
 // ================================================================================
+//! \brief Config is the main configuration data object for the VIB.
 struct Config
 {
+    //! \brief the version of the configuration data.
     Version version;
+    //! \brief the name for this configuration object.
     std::string name;
+    //! \brief  a short description for documentation purposes.
     std::string description;
+    //! \brief  an optional file path, if loaded from a JSON file.
     std::string configFilePath;
 
+    /*! \brief the simulation setup describes the simulation participants and their connectivity,
+    * the network components (such as switches and simulators),  and the synchronization mode.
+    */
     SimulationSetup simulationSetup;
+    //! \brief the middleware config contains the backend settings
     MiddlewareConfig middlewareConfig;
 
     /*! \brief Parse configuration from a JSON string.

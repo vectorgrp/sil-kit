@@ -17,6 +17,8 @@ Added
 - Added docs for the ComAdapter: :doc:`api/comadapter`
 - Added quick start guide: :doc:`usage/quickstart`
 - Elaborate the user APIs and overview pages: :doc:`api/api`
+- Add docs for :doc:`api/systemcontroller` (AFTMAGT-242).
+- Add docs for :doc:`api/systemmonitor` (AFTMAGT-242).
 
 Changed
 ~~~~~~~

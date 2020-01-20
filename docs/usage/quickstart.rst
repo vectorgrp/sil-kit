@@ -37,6 +37,7 @@ Have a look at our :ref:`architecture overview <base-architecture>` to get a hig
    - The concrete distributed communication implementation. That is, the software layer implementing the distributed message passing mechanism.
  * - |ComAdapter|
    - Entry point to the VIB library. Abstracts away the underlying middleware.
+     Allows creation of network controllers and services.
  * - :doc:`Synchronization<../configuration/simulation-setup>`
    - A configuration option that determines if and how a participant synchronizes with all other participants.
  * - :ref:`Simulation Time <sec:cfg-time-sync>`
@@ -148,5 +149,9 @@ The complete source code of this sample: :download:`CMakeLists.txt<sample_vib/CM
 
 Further Reading
 ---------------
-More real-world examples can be found in the :doc:`API<../api/api>` sections for the simulated automotive networks.
-Also, studying the source code and mode of operation of the bundled :doc:`demo applications<demos>` is a good start.
+More real-world examples, involving time synchronization and simulated
+automotive networks, can be found in the :doc:`API<../api/api>` sections.
+Also, studying the source code and mode of operation of the bundled
+:doc:`demo applications<demos>` is a good start.
+The simulation lifecycle and supported simulation time synchronization
+is discussed in :doc:`../vib-simulation`.

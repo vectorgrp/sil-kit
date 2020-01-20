@@ -24,7 +24,7 @@ A configuration can be built incrementally, starting with an instance of |Config
 The builder pattern allows chaining multiple methods to write a configuration in
 a declarative style.
 When done, a :cpp:class:`Config<ib::cfg::Config>` object can be created
-from the |ConfigBuilder| by calling the :cpp::func:`Build()<ib::cfg::ConfigBuilder::Build()>`
+from the |ConfigBuilder| by calling the :cpp:func:`Build()<ib::cfg::ConfigBuilder::Build()>`
 method.
 
 A configuration can also be loaded from a JSON file using |FromJsonFile|
@@ -34,10 +34,6 @@ Likewise, it can be exported to a JSON data using |ToJsonString|.
 
 Configuration API
 -----------------
-    .. doxygenfunction:: ib::cfg::find_by_name
-
-    .. doxygenfunction:: ib::cfg::get_by_name
-
     .. doxygenstruct:: ib::cfg::Config
        :members:
 
