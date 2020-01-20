@@ -10,17 +10,15 @@
                 "Name": "EthernetWriter",
                 "Description": "Demo Writer",
 
+                "IsSyncMaster": true,
                 "Logger": {
                     "FlushLevel": "Warn",
                     "Sinks": [
                         {
-                            "Type": "Remote",
-                            "Level": "Trace"
+                            "Type": "Remote"
                         }
                     ]
                 },
-
-                "IsSyncMaster": true,
                 "ParticipantController": {
                     "SyncType": "DiscreteTime"
                 },
@@ -39,21 +37,17 @@
                     "FlushLevel": "Warn",
                     "Sinks": [
                         {
-                            "Type": "Remote",
-                            "Level": "Trace"
+                            "Type": "Remote"
                         }
                     ]
                 },
-
                 "ParticipantController": {
                     "SyncType": "DiscreteTime"
                 },
                 "EthernetControllers": [
                     {
                         "Name": "ETH0",
-                        "MacAddr": "F6:04:68:71:AA:C2",
-                        "PcapFile": "EthernetReaderTrace.pcap",
-                        "PcapPipe": "EthernetReaderPipe"
+                        "MacAddr": "F6:04:68:71:AA:C2"
                     }
                 ]
             },
