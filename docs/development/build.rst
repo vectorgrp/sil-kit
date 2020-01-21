@@ -65,6 +65,52 @@ It can be packaged using the *package* target::
     
     cmake --build . --target package
 
+The generated package adheres to the following template 
+``IntegrationBus-<VERSION>-<compiler>-<OS>-<TYPE>.zip``.
+Its contents are as follows:
+
+.. list-table:: package contents
+   :widths: 25 10 65
+   :header-rows: 1
+   
+   * - Zip Path
+     - CMake Option
+     - Description
+   * - CHANGELOG.rst
+     - 
+     - documented changes
+   * - IntegrationBus/
+     - 
+     - the integration bus binaries and cmake config export
+   * - IntegrationBus-Demos/
+     - IB_INSTALL_SOURCE
+     - source code of the demos. builds against ../IntegrationBus
+   * - IntegrationBus-Source/
+     - IB_INSTALL_SOURCE
+     - the integration bus sources.
+   * - IntegrationBus-Documentation/
+     - IB_BUILD_DOCS
+     - html documentation
+
+
+.. _sec:build-demos:
+
+Building the Demos
+~~~~~~~~~~~~~~~~~~
+
+Building the demos from within the source tree is straight forward: 
+just build the  ``Demos`` CMake target.
+The individual demos are build as a dependency.
+
+The distributed Demos, as packaged by CPack, are preconfigured to build against 
+a copy of the VIB binaries in ``../IntegrationBus/`` .
+This can be overriden by providing your own ``IntegrationBus`` CMake target library,
+before the demos are configured by cmake.
+Or by changing the ``find_package(IntegrationBus ... PATHS path/to/VIB)`` statement directly
+in the ``IntegrationBus-Demos/CMakeLists.txt`` directory.
+
+
+
 Architecture
 ~~~~~~~~~~~~
 

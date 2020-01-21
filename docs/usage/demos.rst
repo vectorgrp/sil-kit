@@ -20,6 +20,8 @@ the GIT repository in the folder Demos.
    Utilities are build in  ``build/Utilities/<CONFIG>/bin`` where '<CONFIG>' is the current cmake build configuration. For simplicity's sake all paths assume a Release configuration.
 
 
+To build the demos, please refer to :ref:`sec:build-demos`.
+
 CAN Demo
 ~~~~~~~~
 
