@@ -5,9 +5,10 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.0.2] - 2020-mm-dd
+[3.0.2] - 2020-02-10
 --------------------------------
-This is Sprint 37.
+
+This is a Quality Assured Release.
 
 Added
 ~~~~~
@@ -21,26 +22,45 @@ Added
 - Elaborate the user APIs and overview pages: :doc:`api/api`
 - Add docs for :doc:`api/systemcontroller` (AFTMAGT-242).
 - Add docs for :doc:`api/systemmonitor` (AFTMAGT-242).
+- Add docs for :doc:`api/ethernet` (AFTMAGT-239).
 
 Changed
 ~~~~~~~
-- Removed the upper limit of the sendingQueue for VAsio which could result in IbMessages
-  that are critical for synchronization being thrown away.
+- Removed the upper limit of the VAsio send Queue, to avoid that critical
+  IbMessages are thrown away. (AFTMAGT-240)
+- VIB Utilities are now distributed in Release build configuration (AFTMAGT-245)
+- The interactive system controller has been promoted from demo to
+  utility. I.e., it is now part of the binary delivery.
 
 Fixed
 ~~~~~
-- Fixed a bug that prevented the CAN controller state callback from being called
-  when using VIBE NetworkSimulator.
-- Removed a false warning for VAsio with syncType::DistributedTimeQuantum which 
-  incorrectly informed a user that IParticipantController::setPeriod() has no effect for this syncType.
-- The LIN controller now only calls the goToSleepHandler if the frame id and also the data field
-  of a received LIN frame matches the id and data of a valid "GoToSleep" frame.
+- The LIN controller now only calls the goToSleepHandler if the frame id and
+  also the data field of a received LIN frame matches the id and data of a valid
+  "GoToSleep" frame (AFTMAGT-244).
 - VIB applications built in RelWithDebInfo or MinSizeRel will no longer link
   against the VIB Debug installation, which crashes under windows. (AFTMAGT-246)
+- Fixed compilation errors caused by windows.h, which broke std::min/max calls
+  in VIB headers. (AFTMAGT-248)
+- Fixed a crash when move assigning the ConfigBuilder. (AFTMAGT-24)
+- Fixed the cmake exported targets. CMake users should be able to use
+  find_package(CONFIG) to integrate with the IntegrationBus library.
+- Fixed a bug that prevented the CAN controller state callback from being called
+  when using VIBE NetworkSimulator.
+- Removed a false warning for VAsio with syncType::DistributedTimeQuantum, which
+  incorrectly informed a user that IParticipantController::setPeriod() has no
+  effect for this syncType.
+
+Compatibility with 3.0.1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
 
 
 [3.0.1] - 2020-01-08
 --------------------------------
+
 Added
 ~~~~~
 - New config parameter "HistoryDepth" added to FastRTPS config section. This value is used to
