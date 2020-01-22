@@ -203,7 +203,7 @@ else()
         message(STATUS "          This make take several minutes...")
         message(STATUS "------------------------------------------------------------------")
         set(FASTRTPS_URL "https://github.com/eProsima/Fast-RTPS")
-        set(FASTRTPS_TAG "release/${IB_BIN_FASTRTPS_VERSION}")
+        set(FASTRTPS_TAG "v${IB_BIN_FASTRTPS_VERSION}")
 
         if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_LESS "3.11")
             message("-- Using fallback for old cmake < 3.11")
