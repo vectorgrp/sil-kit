@@ -108,6 +108,11 @@ if(IB_INSTALL_SOURCE)
         ${CMAKE_CURRENT_BINARY_DIR}/TOP_LEVEL_README.txt
         DESTINATION .
         RENAME README.txt)
+
+    # make sure we have our license and copyright infos packaged
+    install(FILES
+        IntegrationBus/LICENSE
+        DESTINATION .)
 endif(IB_INSTALL_SOURCE)
 ###############################################################################
 # Packaging
