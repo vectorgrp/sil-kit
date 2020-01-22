@@ -16,50 +16,56 @@ namespace fr {
 class IFrController
 {
 public:
+    /*! \brief Generic FleyRay callback method
+    */
     template<typename MsgT>
     using CallbackT = std::function<void(IFrController* controller, const MsgT& msg)>;
 
-    //! \brief Receive a FlexRay message from a different controller.
+    /*! Callback type to indicate that a FlexRay message has been received.
+    *  Cf. \ref RegisterMessageHandler();
+    */
     using MessageHandler = CallbackT<FrMessage>;
-    //! \brief Notification that a FlexRay message has been successfully sent.
+
+    /*! Callback type to indicate that a FrMessageAck has been received.
+    *  Cf. \ref RegisterMessageAckHandler();
+    */
     using MessageAckHandler = CallbackT<FrMessageAck>;
-    //! \brief Notification that a wakeup has been received.
-    //! Should be answered by a call to Run().
+
+    /*! Callback type to indicate that a wakeup has been received.
+    *   Should be answered by a call to Run(). Cf. \ref RegisterWakeupHandler();
+    */
     using WakeupHandler = CallbackT<FrSymbol>;
-    //! \brief Notification that the POC state has changed.
+
+    /*! Callback type to indicate that the POC state has changed.
+    *   Cf. \ref RegisterControllerStatusHandler();
+    */
     using ControllerStatusHandler = CallbackT<ControllerStatus>;
 
 
-    /*! \brief Notification that the controller has received a symbol.
-     *
-     * This callback is primarily intended for tracing. There is no need to react on it.
-     * The symbols relevant for interaction trigger also an additional callback,
-     * e.g., WakeupHandler.
+    /*! Callback type to indicate that the controller has received a symbol.
+     *  Cf. \ref RegisterSymbolHandler();
      */
     using SymbolHandler = CallbackT<FrSymbol>;
 
-    /*! \brief Notification that the controller has sent a symbol.
-     *
-     * This callback is primarily intended for tracing. There is no need to react on it.
-     * Currently, the following SymbolPatterns can occur:
-     *  - Wakeup() will cause sending the SymbolPattern::Wus, if the bus is idle.
-     *  - Run() will cause the transmission of CasMts if configured to coldstart the bus.
+    /*! Callback type to indicate that the controller has sent a symbol.
+     *  Cf. \ref RegisterSymbolAckHandler();
      */
     using SymbolAckHandler = CallbackT<FrSymbolAck>;
 
-    /*! \brief Notification that a new FlexRay cycle did start.
+    /*! Callback type to indicate that a new FlexRay cycle did start.
+     *  Cf. \ref RegisterCycleStartHandler();
      *
-     *  Only supported in VIBE simulation.
+     *  NB: Only supported in VIBE simulation.
      */
     using CycleStartHandler = CallbackT<CycleStart>;
 
 public:
     virtual ~IFrController() = default;
 
-    //! \brief Configure the controller and switch to ready state
+    //! \brief Configure the controller and switch to ::Ready state
     virtual void Configure(const ControllerConfig& config) = 0;
 
-    //! \brief Reconfigure a TX-Buffer that was previously setup with IFrController::Configure(const ControllerConfig&)
+    //! \brief Reconfigure a TX Buffer that was previously setup with IFrController::Configure(const ControllerConfig&)
     virtual void ReconfigureTxBuffer(uint16_t txBufferIdx, const TxBufferConfig& config) = 0;
 
     /*! \brief Update the content of a previously configured TX buffer.
@@ -68,10 +74,9 @@ public:
      * quite different when using a detailed Network Simulator or not.
      *
      * If a Network Simulator is used, a FlexRay message will be sent at the time matching to
-     * the configured Slot ID. If the buffer was configured with
-     * TransmissionMode::SingleShot, the content is sent exactly once. If it is configured
-     * as TransmissionMode::Continuous, the content is sent repeatedly according to the
-     * offset and repetition configuration.
+     * the configured Slot ID. If the buffer was configured with TransmissionMode::SingleShot,
+     * the content is sent exactly once. If it is configured as TransmissionMode::Continuous,
+     * the content is sent repeatedly according to the offset and repetition configuration.
      *
      * Without a Network Simulator, a FlexRay message will be sent immediately and only once.
      * I.e., the configuration according to cycle, repetition, and transmission mode is
@@ -82,40 +87,71 @@ public:
      */
     virtual void UpdateTxBuffer(const TxBufferUpdate& update) = 0;
 
-    //! \brief Send the CHI command RUN
+    /*! \brief Send the ChiCommand::RUN
+    *
+    *  NB: Only supported in VIBE simulation. In simple simulation, this command
+    *  simply sends a dummy symbol to emulate the control flow at startup amd
+    *  calls the ControllerStateHandler with PocState::NormalActive.
+    */
     virtual void Run() = 0;
 
-    //! \brief Send the CHI command DEFERRED_HALT
+    /*! \brief Send the ChiCommand::DEFERRED_HALT
+    *
+    *  NB: Only supported in VIBE simulation.
+    */
     virtual void DeferredHalt() = 0;
 
-    //! \brief Send the CHI command FREEZE
+    /*! \brief Send the ChiCommand::FREEZE
+    *
+    *  NB: Only supported in VIBE simulation.
+    */
     virtual void Freeze() = 0;
 
-    //! \brief Send the CHI command ALLOW_COLDSTART
+    /*! \brief Send the ChiCommand::ALLOW_COLDSTART
+    *
+    *  NB: Only supported in VIBE simulation.
+    */
     virtual void AllowColdstart() = 0;
 
-    //! \brief Send the CHI command ALL_SLOTS
+    /*! \brief Send the ChiCommand::ALL_SLOTS
+    *
+    *  NB: Only supported in VIBE simulation.
+    */
     virtual void AllSlots() = 0;
 
-    //! \brief Send the CHI command WAKEUP
+    //! \brief Send the ChiCommand::WAKEUP
     virtual void Wakeup() = 0;
 
     //! \brief Receive a FlexRay message from a different controller.
     virtual void RegisterMessageHandler(MessageHandler handler) = 0;
     //! \brief Notification that a FlexRay message has been successfully sent.
     virtual void RegisterMessageAckHandler(MessageAckHandler handler) = 0;
-    //! \brief Notification that a wakeup has been received
+    //! \brief Notification that a wakeup has been received.
     virtual void RegisterWakeupHandler(WakeupHandler handler) = 0;
     //! \brief Notification that the POC state has changed.
     virtual void RegisterControllerStatusHandler(ControllerStatusHandler handler) = 0;
-    //! \brief Notification that the controller has received a symbol.
+
+
+    /*! \brief Notification that the controller has received a symbol.
+    *
+    * This callback is primarily intended for tracing. There is no need to react on it.
+    * The symbols relevant for interaction trigger also an additional callback,
+    * e.g., \ref WakeupHandler.
+    */
     virtual void RegisterSymbolHandler(SymbolHandler handler) = 0;
-    //! \brief Notification that the controller has sent a symbol.
+
+    /*! \brief Notification that the controller has sent a symbol.
+    *
+    * This callback is primarily intended for tracing. There is no need to react on it.
+    * Currently, the following SymbolPatterns can occur:
+    *  - Wakeup() will cause sending the SymbolPattern::Wus, if the bus is idle.
+    *  - Run() will cause the transmission of SymbolPattern::CasMts if configured to coldstart the bus.
+    */
     virtual void RegisterSymbolAckHandler(SymbolAckHandler handler) = 0;
 
     /*! \brief Notification that a new FlexRay cycle did start.
     *
-    *  Only supported in VIBE simulation.
+    *  NB: Only supported in VIBE simulation.
     */
     virtual void RegisterCycleStartHandler(CycleStartHandler handler) = 0;
 };
