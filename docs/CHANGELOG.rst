@@ -5,8 +5,10 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[unreleased] - yyyy-mm-dd
+[3.0.2] - 2020-mm-dd
 --------------------------------
+This is Sprint 37.
+
 Added
 ~~~~~
 - Documentation for the CAN controller API: :doc:`CAN Vehicle Network Controllers <api/can>`.
