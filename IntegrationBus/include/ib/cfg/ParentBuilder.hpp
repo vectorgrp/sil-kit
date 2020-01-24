@@ -17,6 +17,7 @@ class ParentBuilder
 public:
     ParentBuilder() = default;
     ParentBuilder(ParentT* parent);
+    virtual ~ParentBuilder() = default;
 
     auto Parent() -> ParentT*;
 

@@ -43,10 +43,10 @@ public:
 
 private:
     Config _config;
-    SimulationSetupBuilder _simulationSetup;
+    std::unique_ptr<SimulationSetupBuilder> _simulationSetup;
 
-    FastRtps::ConfigBuilder _fastRtpsConfig;
-    VAsio::ConfigBuilder _vasioConfig;
+    std::unique_ptr<FastRtps::ConfigBuilder> _fastRtpsConfig;
+    std::unique_ptr<VAsio::ConfigBuilder> _vasioConfig;
     MiddlewareConfig _middlewareConfig;
 };
 

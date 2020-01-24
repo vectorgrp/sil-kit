@@ -475,4 +475,43 @@ TEST_F(ConfigBuilderTest, configure_timesync_syncpolicy_by_parameter)
     EXPECT_EQ(configBuilder.Build().simulationSetup.timeSync.syncPolicy, ib::cfg::TimeSync::SyncPolicy::Strict);
 }
 
+static ConfigBuilder DefineBuilder()
+{
+    ConfigBuilder config_builder("ConfigBuilder on stack");
+    auto& simulation_setup = config_builder.SimulationSetup();
+    simulation_setup.ConfigureTimeSync().WithStrictSyncPolicy().WithTickPeriod(1ms);
+
+    simulation_setup.AddOrGetLink(Link::Type::GenericMessage, "topic_a")
+        .AddEndpoint("publisher/topic_a")
+        .AddEndpoint("subscriber/topic_a");
+
+    simulation_setup.AddOrGetLink(Link::Type::GenericMessage, "topic_b")
+        .AddEndpoint("publisher/topic_b")
+        .AddEndpoint("subscriber/topic_b");
+
+    simulation_setup.AddParticipant("publisher")
+        ->WithParticipantId(1)
+        ->AddGenericPublisher("topic_a")
+        ->AddGenericPublisher("topic_b")
+        ->AsSyncMaster()
+        ->AddParticipantController()
+        ->WithSyncType(SyncType::DiscreteTime);
+
+
+    simulation_setup.AddParticipant("subscriber")
+        ->WithParticipantId(2)
+        ->AddGenericSubscriber("topic_a")
+        ->AddGenericSubscriber("topic_b")
+        ->AddParticipantController()
+        ->WithSyncType(SyncType::DiscreteTime);
+    return config_builder;
+}
+
+TEST_F(ConfigBuilderTest, ensure_configbuilder_is_movable)
+{
+    auto builder = DefineBuilder();
+    auto config = builder.Build();
+    auto json = config.ToJsonString();
+    EXPECT_TRUE(json.size() > 0);
+}
 } // anonymous namespace
