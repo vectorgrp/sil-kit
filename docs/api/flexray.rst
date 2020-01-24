@@ -25,7 +25,7 @@ _______________________________________
 The configuration is performed by setting up a :cpp:class:`ControllerConfig<ib::sim::fr::ControllerConfig>` and passing it to
 :cpp:func:`IFrController::Configure()<ib::sim::fr::IFrController::Configure>`. Furthermore,
 :cpp:func:`IFrController::Configure()<ib::sim::fr::IFrController::Configure>` switches the controller
-to :cpp:func:`PocState::Ready<ib::sim::fr::Ready>` signaling that it is ready for startup.
+to :cpp:enumerator:`PocState::Ready<ib::sim::fr::Ready>` signaling that it is ready for startup.
 
 The :cpp:class:`ControllerConfig<ib::sim::fr::ControllerConfig>` consists of global
 :cpp:class:`ClusterParameters<ib::sim::fr::ClusterParameters>` and node-specific

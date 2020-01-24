@@ -1,7 +1,6 @@
 ==============================
 The Participant Controller
 ==============================
-.. cpp:namespace:: ib::mw::sync
 .. |IParticipantController| replace:: :cpp:class:`IParticipantController<ib::mw::sync::IParticipantController>`
 .. |ComAdapter| replace:: :doc:`ComAdapter<comadapter>`
 
@@ -17,8 +16,8 @@ for state changes.
 For an overview of a participants state and its relation to the simulation
 refer to the :ref:`participant lifecycle<sec:sim-participant-lifecycle>` section.
 
-Using the ParticipantController
--------------------------------
+Using the Participant Controller
+-------------------------------------
 An |IParticipantController| instance can be retrieved from a connected |ComAdapter|::
    
     auto* participantController = comAdapter->GetParticipantController();
@@ -43,14 +42,14 @@ in the middleware's worker thread::
 
     participantController->SetStopHandler(
         []() {
-            std::cout << "Stopping" << std::endl
+            std::cout << "Stopping" << std::endl;
         }
     );
 
 
     participantController->SetShutdownHandler(
         []() {
-            std::cout << "Shutting down" << std::endl
+            std::cout << "Shutting down" << std::endl;
         }
     );
 
@@ -71,7 +70,7 @@ The ``Init`` handler should be used to intialize and configure other
 
 Controlling the Participant
 """""""""""""""""""""""""""
-After successful initialization, the participant will enter the ``running`` state.
+After successful initialization, the participant will enter the :cpp:enumerator:`Running<ib::mw::sync::Running>` state.
 The participant can now access the current simulation time using the
 :cpp:func:`Now()<ib::mw::sync::IParticipantController::Now()>` method.
 :cpp:func:`State()<ib::mw::sync::IParticipantController::State()>` returns the
@@ -89,14 +88,15 @@ method.
 
 To abort the simulation and report an error message use the 
 :cpp:func:`ReportError()<ib::mw::sync::IParticipantController::ReportError()>` method.
-This will change the current participant state to ``Error`` and report the error message
+This will change the current participant state to :cpp:enumerator:`Error<ib::mw::sync::Error>` and report the error message
 to the VIB runtime system.
 ReportError is also called when the invocation of a registered handler throws an exception.
 
 To stop a particular participant, use the :cpp:func:`Stop()<ib::mw::sync::IParticipantController::Stop()>`
 method.
-This will exit the ``RunAsync`` loop, call a registered StopHandler and switch to
-the ``Stopped`` state.
+This will exit the :cpp:func:`RunAsync<ib::mw::sync::IParticipantController::RunAsync()>` loop,
+call a registered StopHandler and switch to
+the :cpp:enumerator:`Stopped<ib::mw::sync::Stopped>` state.
 
 .. admonition:: Note
 
@@ -131,8 +131,8 @@ By default, this feature is disabled.
 API and Data Type Reference
 -------------------------------
 
-    .. doxygenclass:: ib::mw::sync::IParticipantController
-       :members:
+.. doxygenclass:: ib::mw::sync::IParticipantController
+   :members:
 
 Usage Example
 --------------

@@ -13,13 +13,14 @@ This quick start demonstrates how to get started using the pre-built VIB release
 
 For building from the source tree, refer to :doc:`../development/build`.
 
-This guide will walk you through setting up a VIB project from scratch.
-First the terminology required to understand the function is briefly discussed, then the build process and the actual code.
+This guide will walk you through setting up a VIB project from scratch. First, the terminology
+required to understand the function is briefly discussed, then the build process and the actual code.
 
 
 Introduction
 ------------
-Have a look at our :ref:`architecture overview <base-architecture>` to get a high level introduction to the VIB and its features.
+Have a look at our :ref:`architecture overview <base-architecture>`
+to get a high level introduction to the VIB and its features.
 
 
 .. list-table:: Terminology
@@ -30,11 +31,13 @@ Have a look at our :ref:`architecture overview <base-architecture>` to get a hig
  * - :doc:`Configuration<../configuration/simulation-setup>`
    - A simulation is defined by its configuration.
  * - Domain
-   - A numerical label to uniquely identify a simulation run. This allows running multiple simulations on the same hosts.
+   - A numerical label to uniquely identify a simulation run.
+     This allows running multiple simulations on the same hosts.
  * - :ref:`Links<sec:cfg-links>`
    - A virtual connection between the components of a simulation, e.g. between a participant and a service.
  * - :doc:`Middleware<../configuration/middleware-configuration>`
-   - The concrete distributed communication implementation. That is, the software layer implementing the distributed message passing mechanism.
+   - The concrete distributed communication implementation. That is, the software layer
+     implementing the distributed message passing mechanism.
  * - |ComAdapter|
    - Entry point to the VIB library. Abstracts away the underlying middleware.
      Allows creation of network controllers and services.
@@ -52,9 +55,12 @@ The simulation is identified by its domain among all network hosts taking part i
     For the FastRTPS middleware the domain ID must be in the range [1, 232].
 
 Thus, it is feasible to have multiple simulations running in parallel on the same host computer.
-Some participants have special roles, depending on the configuration of the middleware, syncronization protocol or :doc:`../vibes/overview`.
-Some configurations require auxiliary programs to run on your host computer(s), for example the :ref:`VAsio Middleware<sec:mwcfg-vasio>` requires the :ref:`sec:util-registry` to work properly.
-The :ref:`sec:util-launcher` is designed to simplify starting ensembles of programs that make up elaborate simulations environments.
+Some participants have special roles, depending on the configuration of the middleware,
+syncronization protocol or :doc:`../vibes/overview`.
+Some configurations require auxiliary programs to run on your host computer(s),
+for example the :ref:`VAsio Middleware<sec:mwcfg-vasio>` requires the :ref:`sec:util-registry` to work properly.
+The :ref:`sec:util-launcher` is designed to simplify starting ensembles of programs
+that make up elaborate simulations environments.
 
 Writing your first VIB application
 ----------------------------------
@@ -63,7 +69,8 @@ This tutorial assumes that you are familiar with `CMake (https://cmake.org) <htt
 Using the VIB package
 ~~~~~~~~~~~~~~~~~~~~~
 The VIB distribution contains a self-contained and deployable installation in the *IntegrationBus* directory.
-The  CMake build configuration required is exported to ``IntegrationBus/lib/cmake/IntegrationBus`` and defines the ``IntegrationBus::IntegrationBus`` target. 
+The  CMake build configuration required is exported to ``IntegrationBus/lib/cmake/IntegrationBus`` and
+defines the ``IntegrationBus::IntegrationBus`` target. 
 
 From CMake this can be easily used via the  ``find_package(IntegrationBus CONFIG)`` mechanism.
 For example, the following CMakeLists.txt is able to import the IntegrationBus library based on its filesystem path.
@@ -73,13 +80,15 @@ For example, the following CMakeLists.txt is able to import the IntegrationBus l
    :language: cmake
 
 Properties, like include directories and compile flags, are automatically handled by the imported target.
-If you use another method to build your software you can directly use the ``IntegrationBus/include`` and ``IntegrationBus/lib`` directories for C++ headers and libraries.
+If you use another method to build your software you can directly use the ``IntegrationBus/include`` and
+``IntegrationBus/lib`` directories for C++ headers and libraries.
 
 .. _sec:quickstart-simple:
 
 A simple Generic Message application
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-We'll create a simple, self-contained VIB application that uses :doc:`Generic messages<../api/genericmessage>` to exchange user-defined data among its participants.
+We'll create a simple, self-contained VIB application that uses :doc:`Generic messages<../api/genericmessage>`
+to exchange user-defined data among its participants.
 The messages are exchanged using a publish / subscribe pattern.
 
 To use the VIB you first have to create a valid configuration.
@@ -107,7 +116,7 @@ One thread will act as a publisher by sending a test string to its subscribers:
    :lines: 16-41
 
 
-First the configured middleware domain is joined as the named participant using the
+First, the configured middleware domain is joined as the named participant using the
 |ComAdapter|.
 Creating the ComAdapter properly initializes the VIB library and allows to instantiate
 :doc:`services<../api/api>` and :doc:`participant controllers<../api/participantcontroller>`.
@@ -140,11 +149,15 @@ callback to receive data value updates.
 The simulation task has to be defined, even though no simulation work is performed.
 
 To run this sample you have to use the  :ref:`sec:util-registry` and :ref:`sec:util-system-controller` processes.
-The registry is required by the :ref:`VAsio middleware<sec:mwcfg-vasio>` for connecting the participants and setting up the distributed services.
-The SystemController takes care of starting the simulation when all required participants are connected and properly configured and in a well defined state -- this is a task that is required in every simulation.
-For convenience and to reduce code duplication, these utility programs are implemented in separate executables and distributed in binary forms.
+The registry is required by the :ref:`VAsio middleware<sec:mwcfg-vasio>` for connecting the participants and
+setting up the distributed services.
+The SystemController takes care of starting the simulation when all required participants are connected and
+properly configured and in a well defined state -- this is a task that is required in every simulation.
+For convenience and to reduce code duplication, these utility programs are implemented in separate executables
+and distributed in binary forms.
 
-The complete source code of this sample: :download:`CMakeLists.txt<sample_vib/CMakeLists.txt>` :download:`simple.cpp<sample_vib/simple.cpp>` :download:`simple.json<sample_vib/simple.json>`
+The complete source code of this sample can be found here: :download:`CMakeLists.txt<sample_vib/CMakeLists.txt>`
+:download:`simple.cpp<sample_vib/simple.cpp>` :download:`simple.json<sample_vib/simple.json>`
 
 
 Further Reading
