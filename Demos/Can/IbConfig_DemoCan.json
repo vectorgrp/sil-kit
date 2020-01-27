@@ -11,21 +11,12 @@
                 "Description": "Demo Writer",
 
                 "ParticipantController": {
-                    "SyncType": "DistributedTimeQuantum",
-
-                    "ExecTimeLimitSoftMs": 1010,
-                    "ExecTimeLimitHardMs": 1500
+                    "SyncType": "DistributedTimeQuantum"
                 },
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
-                            "Type": "Remote",
-                            "Level": "Trace"
-                        },
-                        {
-                            "Type": "Stdout",
-                            "Level": "Trace"
+                            "Type": "Remote"
                         }
                     ]
                 },
@@ -35,15 +26,9 @@
                 "Name": "CanReader",
                 "Description": "Demo Reader",
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
-                            "Type": "Remote",
-                            "Level": "Trace"
-                        },
-                        {
-                            "Type": "Stdout",
-                            "Level": "Trace"
+                            "Type": "Remote"
                         }
                     ]
                 },
@@ -56,7 +41,6 @@
                 "Name": "SystemController",
                 "IsSyncMaster": true,
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
                             "Type": "Remote"
@@ -96,13 +80,7 @@
     },
 
     "MiddlewareConfig": {
-        "ActiveMiddleware": "VAsio",
-        "VAsio": {
-            "Registry": {
-                "Hostname": "localhost",
-                "Port": 8500
-            }
-        }
+        "ActiveMiddleware": "VAsio"
     },
 
     "LaunchConfigurations": [

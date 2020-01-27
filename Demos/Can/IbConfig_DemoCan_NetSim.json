@@ -15,8 +15,7 @@
                     "FlushLevel": "Warn",
                     "Sinks": [
                         {
-                            "Type": "Remote",
-                            "Level": "Trace"
+                            "Type": "Remote"
                         }
                     ]
                 },
@@ -32,8 +31,7 @@
                     "FlushLevel": "Warn",
                     "Sinks": [
                         {
-                            "Type": "Remote",
-                            "Level": "Trace"
+                            "Type": "Remote"
                         }
                     ]
                 },

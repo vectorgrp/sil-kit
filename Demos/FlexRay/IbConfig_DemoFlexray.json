@@ -10,11 +10,9 @@
                 "Name": "Node0",
 
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
-                            "Type": "Remote",
-                            "Level": "Trace"
+                            "Type": "Remote"
                         }
                     ]
                 },
@@ -78,11 +76,9 @@
                 "Name": "Node1",
 
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
-                            "Type": "Remote",
-                            "Level": "Trace"
+                            "Type": "Remote"
                         }
                     ]
                 },
@@ -148,7 +144,6 @@
 
                 "IsSyncMaster": true,
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
                             "Type": "Remote"
@@ -183,7 +178,6 @@
         ],
         
         "TimeSync": {
-            "SyncPolicy": "Loose",
             "TickPeriodNs": 1000000
         }
 
@@ -329,5 +323,4 @@
     {
         "ActiveMiddleware" : "VAsio"
     }
-
 }

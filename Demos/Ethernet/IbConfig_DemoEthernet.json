@@ -12,7 +12,6 @@
 
                 "IsSyncMaster": true,
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
                             "Type": "Remote"
@@ -34,7 +33,6 @@
                 "Description": "Demo Reader",
 
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
                             "Type": "Remote"
@@ -55,7 +53,6 @@
                 "Name": "SystemController",
 
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
                             "Type": "Remote"
@@ -90,7 +87,6 @@
         ],
 
         "TimeSync": {
-            "SyncPolicy": "Loose",
             "TickPeriodNs": 1000000
         }
 

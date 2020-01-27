@@ -11,11 +11,9 @@
                 "Description": "LIN Master",
 
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
-                            "Type": "Remote",
-                            "Level": "Trace"
+                            "Type": "Remote"
                         }
                     ]
                 },
@@ -30,11 +28,9 @@
                 "Description": "LIN Slave",
 
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
-                            "Type": "Remote",
-                            "Level": "Trace"
+                            "Type": "Remote"
                         }
                     ]
                 },
@@ -49,7 +45,6 @@
 
                 "IsSyncMaster": true,
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
                             "Type": "Remote"
@@ -84,7 +79,6 @@
         ],
 
         "TimeSync": {
-            "SyncPolicy": "Strict",
             "TickPeriodNs": 1000000
         }
 

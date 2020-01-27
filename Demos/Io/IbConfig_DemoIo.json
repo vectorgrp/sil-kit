@@ -12,11 +12,9 @@
 
                 "IsSyncMaster": true,
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
-                            "Type": "Remote",
-                            "Level": "Trace"
+                            "Type": "Remote"
                         }
                     ]
                 },
@@ -41,11 +39,9 @@
                 "Description": "Receives I/O values",
 
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
-                            "Type": "Remote",
-                            "Level": "Trace"
+                            "Type": "Remote"
                         }
                     ]
                 },
@@ -61,7 +57,6 @@
                 "Name": "SystemController",
 
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
                             "Type": "Remote"
@@ -105,10 +100,13 @@
         ],
 
         "TimeSync": {
-            "SyncPolicy": "Loose",
             "TickPeriodNs": 1000000
         }
 
+    },
+
+    "MiddlewareConfig": {
+        "ActiveMiddleware": "VAsio"
     },
 
     "LaunchConfigurations": [

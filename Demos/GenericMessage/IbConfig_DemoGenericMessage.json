@@ -11,11 +11,9 @@
                 "Description": "Publishes different generic messages",
 
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
-                            "Type": "Remote",
-                            "Level": "Trace"
+                            "Type": "Remote"
                         }
                     ]
                 },
@@ -46,11 +44,9 @@
                 "Description": "Subscribes different generic messages",
 
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
-                            "Type": "Remote",
-                            "Level": "Trace"
+                            "Type": "Remote"
                         }
                     ]
                 },
@@ -68,7 +64,6 @@
                 "Name": "SystemController",
 
                 "Logger": {
-                    "FlushLevel": "Warn",
                     "Sinks": [
                         {
                             "Type": "Remote"
@@ -114,9 +109,11 @@
                 ]
             }
         ],
+        "MiddlewareConfig": {
+            "ActiveMiddleware": "VAsio"
+        },
 
         "TimeSync": {
-            "SyncPolicy": "Loose",
             "TickPeriodNs": 1000000
         }
 
