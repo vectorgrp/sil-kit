@@ -34,7 +34,7 @@ struct CanMessage
         uint8_t fdf : 1; //!< FD Format Indicator
         uint8_t brs : 1; //!< Bit Rate Switch  (for FD Format only)
         uint8_t esi : 1; //!< Error State indicator (for FD Format only)
-    } flags;
+    } flags; //!< CAN Arbitration and Control Field Flags
     uint8_t dlc : 4; //!< Data Length Code - determined by the Network Simulator
     std::vector<uint8_t> dataField; //!< CAN Datafield
 };

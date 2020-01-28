@@ -26,8 +26,14 @@ Then, the controller is started::
     canController->SetBaudRate(10000, 1000000);
     canController->Start();
 
-Note that :cpp:func:`ICanController::Start()<ib::sim::can::ICanController::Start>`
-should be called in the InitHandler of a ParticipantController.
+.. admonition:: Note
+
+   Both :cpp:func:`ICanController::SetBaudRate()<ib::sim::can::ICanController::SetBaudRate>`
+   and :cpp:func:`ICanController::Start()<ib::sim::can::ICanController::Start>`
+   should not be called earlier than in the participant controller's
+   :cpp:func:`init handler<ib::mw::synd::IParticipantController::SetInitHandler()>`. Otherwise,
+   it is not guaranteed that all participants are already connected, which can cause the call
+   to have no effect.
 
 
 Sending CAN Messages
