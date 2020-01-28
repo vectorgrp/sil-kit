@@ -1,38 +1,23 @@
 {
   "ConfigName": "simple app",
   "ConfigVersion": "0.0.0",
-  "Description": "",
+  "Description": "My simple VIB application",
   "MiddlewareConfig": {
     "ActiveMiddleware": "VAsio",
-    "FastRTPS": {
-      "ConfigFileName": "",
-      "DiscoveryType": "Local",
-      "UnicastLocators": {}
-    },
-    "VAsio": {
-      "Registry": {
-        "Hostname": "localhost",
-        "Port": 8500
-      }
-    }
   },
   "SimulationSetup": {
     "Links": [
       {
-        "Endpoints": [ "PublisherParticipant/DataService", "SubscriberParticipant/DataService" ],
         "Name": "DataService"
+        "Endpoints": [ "PublisherParticipant/DataService", "SubscriberParticipant/DataService" ],
       }
     ],
-    "NetworkSimulators": [],
     "Participants": [
       {
-        "Analog-In": [],
-        "Analog-Out": [],
-        "CanControllers": [],
-        "Digital-In": [],
-        "Digital-Out": [],
-        "EthernetControllers": [],
-        "FlexRayControllers": [],
+        "Name": "PublisherParticipant",
+        "ParticipantController": {
+          "SyncType": "DiscreteTime"
+        },
         "GenericPublishers": [
           {
             "DefinitionUri": "",
@@ -40,87 +25,32 @@
             "Protocol": ""
           }
         ],
-        "GenericSubscribers": [],
         "IsSyncMaster": true,
-        "LinControllers": [],
         "Logger": {
-          "FlushLevel": "Off",
-          "LogFromRemotes": false,
           "Sinks": [
             {
-              "Level": "Info",
-              "Logname": "",
               "Type": "Stdout"
             }
           ]
-        },
-        "Name": "PublisherParticipant",
-        "NetworkSimulators": [],
-        "ParticipantController": { "SyncType": "DiscreteTime" },
-        "Pattern-In": [],
-        "Pattern-Out": [],
-        "Pwm-In": [],
-        "Pwm-Out": []
+        }
       },
       {
-        "Analog-In": [],
-        "Analog-Out": [],
-        "CanControllers": [],
-        "Digital-In": [],
-        "Digital-Out": [],
-        "EthernetControllers": [],
-        "FlexRayControllers": [],
-        "GenericPublishers": [],
-        "GenericSubscribers": [ "DataService" ],
-        "IsSyncMaster": false,
-        "LinControllers": [],
-        "Logger": {
-          "FlushLevel": "Off",
-          "LogFromRemotes": false,
-          "Sinks": [
-            {
-              "Level": "Info",
-              "Logname": "",
-              "Type": "Stdout"
-            }
-          ]
-        },
         "Name": "SubscriberParticipant",
-        "NetworkSimulators": [],
-        "ParticipantController": { "SyncType": "DiscreteTime" },
-        "Pattern-In": [],
-        "Pattern-Out": [],
-        "Pwm-In": [],
-        "Pwm-Out": []
+        "ParticipantController": { "SyncType": "DiscreteTime" }
+        "GenericSubscribers": [ "DataService" ],
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Stdout"
+            }
+          ]
+        }
       },
       {
-        "Analog-In": [],
-        "Analog-Out": [],
-        "CanControllers": [],
-        "Digital-In": [],
-        "Digital-Out": [],
-        "EthernetControllers": [],
-        "FlexRayControllers": [],
-        "GenericPublishers": [],
-        "GenericSubscribers": [],
-        "IsSyncMaster": false,
-        "LinControllers": [],
-        "Logger": {
-          "FlushLevel": "Off",
-          "LogFromRemotes": false,
-          "Sinks": []
-        },
-        "Name": "SystemController",
-        "NetworkSimulators": [],
-        "Pattern-In": [],
-        "Pattern-Out": [],
-        "Pwm-In": [],
-        "Pwm-Out": []
+        "Name": "SystemController"
       }
     ],
-    "Switches": [],
     "TimeSync": {
-      "SyncPolicy": "Loose",
       "TickPeriodNs": 10000000
     }
   }

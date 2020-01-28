@@ -245,11 +245,20 @@ CreateComAdapter
 .. doxygenfunction:: ib::CreateComAdapter
 
 
-CreateFastRtpsComAdapter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygenfunction:: ib::CreateFastRtpsComAdapter
-
 CreateVAsioComAdapter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. doxygenfunction:: ib::CreateVAsioComAdapter
+
+.. admonition:: Note
+
+   :cpp:func:`ib::CreateVAsioComAdapter()` is deprecated. Use :cpp:func:`ib::CreateComAdapter()` instead.
+
+CreateFastRtpsComAdapter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. doxygenfunction:: ib::CreateFastRtpsComAdapter
+
+.. admonition:: Note
+
+   :cpp:func:`ib::CreateFastRtpsComAdapter()` is deprecated. Use :cpp:func:`ib::CreateComAdapter()` instead.

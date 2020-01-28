@@ -19,7 +19,7 @@ namespace ib {
 *
 * \param config Configuration of the participant
 * \param participantName Name of the participant
-* \param fastRtpsDomainId ID of the domain
+* \param fastRtpsDomainId ID of the domain; must be in the range [1, 232]
 * \return Instance of the communication adapter
 *
 * \throw ib::cfg::Misconfiguration if the config has errors
@@ -53,7 +53,7 @@ IntegrationBusAPI auto CreateVAsioComAdapter(ib::cfg::Config config, const std::
 *
 * \param config Configuration of the participant
 * \param participantName Name of the participant
-* \param domainId ID of the domain
+* \param domainId ID of the domain; when using FastRTPS, domainId must be in the range [1, 232]
 * \return Instance of the communication adapter
 *
 * \throw ib::cfg::Misconfiguration if the config has errors
