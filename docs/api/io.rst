@@ -2,10 +2,10 @@
 IO Service API
 ==============
 
-The IO service API allows the creation of input and ouput ports.
-The IO Ports are connected in a point to point fashion and allow 
-the exchange of data values between participants.
-A number of different data types are supported for the IO ports:
+The IO service API allows the creation of input and ouput ports. The IO Ports
+are connected in a 1-to-N fashion, i.e., the values of one outport can be
+distributed to multiple input ports. A number of different data types are
+supported for the IO ports:
 
 .. list-table:: I/O Port Data Type
  :widths: 20 80
@@ -19,14 +19,20 @@ A number of different data types are supported for the IO ports:
  * - Pattern
    - Byte vector
 
-The connection between the input and output side is made by the canonical name of the port given at creation time.
-Participants can write new values to the *out* ports and receive value updates on the *in* ports.
-That is, an instance of :cpp:class:`IOutPort<template\<typename MsgT>ib::sim::io::IOutPort>` is
-connected to an instance of :cpp:class:`IInPort<template\<typename MsgT>ib::sim::io::IInPort>`.
+Output and input ports are connected by
+:ref:`links<sec:cfg-links>`. Participants can write new values to the *out*
+ports and receive value updates on the *in* ports. That is, an instance of
+:cpp:class:`IOutPort<template\<typename MsgT>ib::sim::io::IOutPort>` is
+connected to one or more instances of :cpp:class:`IInPort<template\<typename
+MsgT>ib::sim::io::IInPort>`.
 
-The generic ports exchange simulation messages of type 
-:cpp:class:`IoMessage<template\<typename ValueT> ib::sim::io::IoMessage>` to model the value changes.
-The IO port messages are subject to timing effects, in contrast to :doc:`Generic Messages<genericmessage>`.
+Both OutPorts and InPorts are implemented as C++ templates, and exchange
+simulation messages of type :cpp:class:`IoMessage\<T\><template\<typename
+ValueT> ib::sim::io::IoMessage>` to model the value changes.  In contrast to
+generic messages, IoMessages can be annotated with timing information. However,
+IoMessages are always delivered immediately to connected InPorts independently
+of the annotated delay. I.e., it is up to the receivers implementation to honor
+the timing information if desired.
 
 
 Using the IO Service API

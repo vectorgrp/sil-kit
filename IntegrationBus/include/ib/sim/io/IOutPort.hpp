@@ -39,8 +39,8 @@ public:
 
     /*! \brief Get the most recently written value
      *
-     *  Returns the initial value according to the IB config if,
-     *  otherwise, no value was written yet.
+     *  Returns the initial value according to the IB config if no value was
+     *  written yet.
      */
     virtual auto Read() const -> const ValueType& = 0;
 };
