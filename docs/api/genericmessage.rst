@@ -15,14 +15,14 @@ Generic Message API
    
 Using the Generic Message API
 -----------------------------
-A Generic Message is a plain byte vector which contains arbitrary user data.
+A Generic Message is a plain byte vector containing arbitrary user data.
 It can be distributed among the participants of a simulation using a publish / subscribe mechanism.
 One publisher can be connected to several subscribers, without modelling an underlying network or bus.
 Published messages are immediately transmitted to all connected subscribers, that is, without any
 modelled latency.
 
 Publishers and subscribers are identified by a name and are connected by links.
-For each link there is exactly one publisher, and possibly many subscribers.
+For each link, there is exactly one publisher, and possibly many subscribers.
 Publisher and subscribers may only be connected by a single link.
 That is, a susbcriber may not be served by mutliple publishers.
 
@@ -34,7 +34,7 @@ Additionally, publishers can specify a protocol and a datatype definition URI, w
 queried by the subscriber.
 
 Data can be transmitted using the |Publish| method.
-The data is received asynchronously and delivered via a callback, which can 
+The data is received and delivered via a callback, which can 
 be set on a subscriber using the |SetReceiveMessageHandler| method.
 
 Usage Examples

@@ -476,7 +476,7 @@ Switches
 ========================================
 The Switches section describes the Ethernet Switches that can be simulated
 by the :ref:`Network Simulators<sec:cfg-network-simulators>`. 
-This section is optional.
+In simulations without Network Simulator, this section is not needed.
 
 .. code-block:: javascript
 
