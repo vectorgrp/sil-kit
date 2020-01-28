@@ -29,14 +29,17 @@ to :cpp:enumerator:`PocState::Ready<ib::sim::fr::Ready>` signaling that it is re
 
 The :cpp:class:`ControllerConfig<ib::sim::fr::ControllerConfig>` consists of global
 :cpp:class:`ClusterParameters<ib::sim::fr::ClusterParameters>` and node-specific
-:cpp:class:`NodeParameters<ib::sim::fr::NodeParameters>` which are both best set
+:cpp:class:`NodeParameters<ib::sim::fr::NodeParameters>`, which are both best set
 in the JSON config (see config section :ref:`FlexRayControllers<sec:cfg-participant-flexray>`).
-Furthermore, it contains one or more :cpp:class:`TxBufferConfigs<ib::sim::fr::TxBufferConfig>`
-that can be specified in the JSON config, but can also be added manually at runtime.
+Furthermore, the :cpp:class:`ControllerConfig<ib::sim::fr::ControllerConfig>`
+contains one or more :cpp:class:`TxBufferConfigs<ib::sim::fr::TxBufferConfig>`,
+which can either be specified in the JSON config or added manually at
+runtime. TxBuffers are used to initiate a transmission from one FlexRay
+controller to another.
 
 The following example configures a FlexRay controller with two
 :cpp:class:`TxBufferConfigs<ib::sim::fr::TxBufferConfig>` specifying two
-:cpp:class:`FrMessages<ib::sim::fr::FrMessage>` that will be sent during simulation. The 
+:cpp:class:`FrMessages<ib::sim::fr::FrMessage>`, which will be sent during simulation. The 
 :cpp:class:`ClusterParameters<ib::sim::fr::ClusterParameters>` and the
 :cpp:class:`NodeParameters<ib::sim::fr::NodeParameters>` are assumed to be set in the JSON config::
 
@@ -106,9 +109,10 @@ directly in a registered handler like the ControllerStateHandler.
 Tx Buffer Update (Sending FlexRay Messages)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In each FlexRay cycle data can be sent with FlexRay by using the
+In each FlexRay cycle, data can be sent by using the
 :cpp:func:`IFrController::UpdateTxBuffer()<ib::sim::fr::IFrController::UpdateTxBuffer>`.
-It must be setup with an existing txBufferIndex, a payload and the payloadDataValid flag::
+For this, an existing txBufferIndex, a payload and the
+payloadDataValid flag must be provided::
 
   std::string payloadString{"FlexRay message"};
 
@@ -143,7 +147,7 @@ is received::
 
 .. admonition:: Note
 
-  For a successful Startup also the ControllerStatusHandler, the WakeupHandler, the SymbolHandler
+  For a successful Startup, also the ControllerStatusHandler, the WakeupHandler, the SymbolHandler
   and the SymbolAckHandler should be registered to invoke the different necessary commands.
 
 
