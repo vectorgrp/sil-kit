@@ -11,17 +11,15 @@ Integration Bus (VIB). If you are not yet familiar with the VIB, have a look at
 the :doc:`Quick Start<../usage/quickstart>`.
 
 
-User API
---------
+VIB Entry Point and API Organization
+------------------------------------
 
-The ComAdapter including its configuration constitute the main entry point into
-the Integration Bus API.
+The ComAdapter constitutes the main entry point into the Integration Bus API.
 
 .. toctree::
    :maxdepth: 1
    
    comadapter
-   config
    header
 
 Services

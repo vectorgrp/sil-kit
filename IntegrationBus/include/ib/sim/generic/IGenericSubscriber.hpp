@@ -21,7 +21,11 @@ public:
 public:
     virtual ~IGenericSubscriber() = default;
 
-    //! \brief Get the config struct used to setup this IGenericSubscriber
+    /*! \brief Get the config struct used to setup this IGenericSubscriber
+     *
+     * The protocolType and definitionUri are as configured at the corresponding
+     * \ref IGenericPublisher.
+     */
     virtual auto Config() const -> const cfg::GenericPort& = 0;
 
     /*! \brief Register a callback for new data reception

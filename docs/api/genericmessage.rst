@@ -2,17 +2,17 @@
 Generic Message API
 ===================
 .. Macros for docs use
-.. |IComAdapter| replace:: :cpp:class:`IComAdapter<ib::mw::IComAdapter>` 
+.. |IComAdapter| replace:: :cpp:class:`IComAdapter<ib::mw::IComAdapter>`
 .. |CreateGenericPublisher| replace:: :cpp:func:`CreateGenericPublisher<ib::mw::IComAdapter::CreateGenericPublisher()>`
 .. |CreateGenericSubscriber| replace:: :cpp:func:`CreateGenericSubscriber<ib::mw::IComAdapter::CreateGenericSubscriber()>`
-.. |Publish| replace:: :cpp:func:`Publish()<ib::sim::generic::IGenericPublisher::Publish()>` 
+.. |Publish| replace:: :cpp:func:`Publish()<ib::sim::generic::IGenericPublisher::Publish()>`
 .. |SetReceiveMessageHandler| replace:: :cpp:func:`SetReceiveMessageHandler()<ib::sim::generic::IGenericSubscriber::SetReceiveMessageHandler()>`
 .. |IGenericPublisher| replace:: :cpp:class:`IGenericPublisher<ib::sim::generic::IGenericPublisher>`
 .. |IGenericSubscriber| replace:: :cpp:class:`IGenericPublisher<ib::sim::generic::IGenericSubscriber>`
 .. contents::
    :local:
    :depth: 3
-   
+
 Using the Generic Message API
 -----------------------------
 A Generic Message is a plain byte vector containing arbitrary user data.
@@ -27,14 +27,14 @@ Publisher and subscribers may only be connected by a single link.
 That is, a susbcriber may not be served by mutliple publishers.
 
 
-The Publisher and Subscriber interfaces are instantiated from an |IComAdapter| 
+The Publisher and Subscriber interfaces are instantiated from an |IComAdapter|
 interface by calling |CreateGenericPublisher| and |CreateGenericSubscriber|, respectively.
 Their name is used in the configuration and instantiation of the interfaces.
 Additionally, publishers can specify a protocol and a datatype definition URI, which can be
 queried by the subscriber.
 
 Data can be transmitted using the |Publish| method.
-The data is received and delivered via a callback, which can 
+The data is received and delivered via a callback, which can
 be set on a subscriber using the |SetReceiveMessageHandler| method.
 
 Usage Examples
@@ -53,9 +53,9 @@ The interfaces for the publish/subscribe mechanism can be instantiated from an I
         //handle data
     });
 
-For a full example refer to the :ref:`VIB Quick Start Guide<sec:quickstart-simple>` 
-which contains a simple application that demonstrates the usage of the Generic Message 
-API in detail. 
+For a full example refer to the :ref:`VIB Quick Start Guide<sec:quickstart-simple>`
+which contains a simple application that demonstrates the usage of the Generic Message
+API in detail.
 
 API and Data Type Reference
 --------------------------------------------------
@@ -78,4 +78,11 @@ Generic Subscriber API
 ~~~~~~~~~~~~~~~~~~~~~~
 
     .. doxygenclass:: ib::sim::generic::IGenericSubscriber
+       :members:
+
+
+Data Structures
+~~~~~~~~~~~~~~~
+
+    .. doxygenstruct:: ib::cfg::GenericPort
        :members:

@@ -159,6 +159,13 @@ using DigitalIoPort = IoPort<bool>;
 using PwmPort       = IoPort<sim::io::PwmValue>;
 using PatternPort   = IoPort<std::vector<uint8_t>>;
 
+/*! \brief Configuration structure to setup ib::sim::generic::IGenericPublisher
+ * and ib::sim::generic::IGenericSubscriber
+ *
+ * The GenericPort::protocolType and GenericPort::definitionUri can only be
+ * configured at the Publisher, but the configured values are made available at
+ * connected Subscribers as well.
+*/
 struct GenericPort
 {
     static constexpr Link::Type linkType = Link::Type::GenericMessage;
