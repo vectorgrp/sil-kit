@@ -199,3 +199,79 @@ while minimizing the synchronization overhead.
 The ``strict`` policy, on the other hand, guarantees that data is received
 orderly before a new simulation cycles starts.
 This comes at the cost of a considerable slowdown, when using the FastRTPS middleware.
+
+
+
+FastRTPS Middleware with loose policy
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+When using the FastRTPS middleware, a ``Loose`` synchronization policy can be configured.
+FastRTPS does not ensure in-order delivery of messages.
+Consider the following figure.
+The communication of three participants (Part A, Part B, Part C) and the
+progress of real time from left to right is depicted.
+The simulation time is represented by the timeline of SyncMaster -- the ``Tick`` and
+``TickDone`` points represent start and end of a simulation cycle of a
+``DiscreteTime`` synchronization type.
+Thick lines represent time that a simulation task (SimTask) is being processed.
+The annotated milliseconds refer to the current simulation time cycle.
+Thin arrows depict data communication between participants.
+Dashed lines depict time synchronization messages:
+
+.. figure:: _static/sim-fastrtps-loose.png
+   :alt: FastRTPS with a loose policy
+   :align: center
+   :width: 90%
+
+   FastRTPS with a Loose policy.
+
+At the end of a simulation cycle all participants send a ``TickDone`` message to the
+synchronization master.
+
+There is no guarantee that sent messages are received before the next simulation task
+(cf. :ref:`sec:sim-participant-lifecycle`) is executed.
+For example, the messages ``A2`` and ``B2`` are received during the second SimTask
+execution, allthough they have been sent in a previous ``tick`` of the simulation
+time (yellow circle in the figure).
+
+
+FastRTPS Middleware with strict policy
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Now, in contrast to the previous figure, we discuss the FastRTPS middleware with a 
+strict synchronization policy.
+
+.. figure:: _static/sim-fastrtps-strict.png
+   :alt: FastRTPS with a strict policy
+   :align: center
+   :width: 90%
+
+   FastRTPS with a strict policy.
+
+The transmission of the ``TickDone`` messages is deferred until the reception 
+of sent messages has been acknowledged by all participants (yellow circles in the figure).
+
+
+VAsio Middleware 
+~~~~~~~~~~~~~~~~
+The VAsio middleware guarantees message delivery to always be in-order.
+This enables the usage of a distributed synchronization algorithm, which
+is inherently strict.
+The following figure shows the VAsio algorithm:
+
+
+.. figure:: _static/sim-vasio-inorder-strict.png
+   :alt: VAsio with a in-order, strict policy
+   :align: center
+   :width: 90%
+
+   VAsio with strict, in-order delivery of messages.
+
+The algorithm works by reporting the start time of the next due SimTask to all
+other participants (``next@`` messages in the figure).
+Based on this knowledge a participant knows when it is allowed to execute its next
+SimTask.That is, when the earliest "foreign" SimTask is not earlier than its own
+next SimTask.
+
+VAsio is inherently strict because messages are delivered *in-order* and the
+``next-SimTask`` message is delivered *in-line* with the data.
+That is, when the ``next-SimTask`` message is received, it is guaranteed that all previous
+data messages were received.
