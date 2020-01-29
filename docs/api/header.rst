@@ -29,7 +29,7 @@ As a rule of thumb, each component has a subdirectory with its own namespace:
       - Generic programming utiltiies
     * - ib/cfg
       - ``ib::cfg``
-      - The configuration mechanism, the :doc:`ConfigBuilder<../api/config>` in particular.
+      - Data structures representing the VIB :doc:`../configuration/configuration`.
 
 The subdirectory layout follows mostly a uniform scheme for substantial VIB components:
  - `ib/<component>/all.hpp` is sufficient to use the component.

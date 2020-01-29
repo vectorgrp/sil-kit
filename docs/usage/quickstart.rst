@@ -93,9 +93,9 @@ We'll create a simple, self-contained VIB application that uses :doc:`Generic me
 to exchange user-defined data among its participants.
 The messages are exchanged using a publish / subscribe pattern.
 
-To use the VIB you first have to create a valid configuration.
-This can either be done by loading an existing :ref:`JSON file<sec:ibconfig-json>` or 
-by using the :doc:`configuration builder API<../api/config>` to create one programmatically.
+To use the VIB you first have to create a valid configuration.  This can either
+be done by loading an existing :ref:`JSON file<sec:ibconfig-json>` or by using
+the ConfigBuilder to create one programmatically.
 
 We use a configuration file ``simple.json`` for creating our simulation.
 The file will be loaded by our application and from helper :doc:`utilities`::
@@ -171,4 +171,5 @@ More real-world examples, involving time synchronization and simulated
 automotive networks, can be found in the :doc:`API sections<../api/api>`.  Also,
 studying the source code of the bundled :doc:`demo applications<demos>` is a
 good start. The simulation lifecycle and supported simulation time
-synchronization are discussed in :doc:`../vib-simulation`.
+synchronization are discussed in :doc:`../simulation/statehandling` and
+:doc:`../simulation/synchronization` .

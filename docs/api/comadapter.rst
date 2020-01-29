@@ -28,11 +28,21 @@ configuration, a participant name and a domain ID.
 
 The IComAdapter API
 ~~~~~~~~~~~~~~~~~~~
+
 The instantiated |IComAdapter| can then be used to access the other services
 of the VIB.
 
-    .. doxygenclass:: ib::mw::IComAdapter
-       :members:
+.. admonition:: Warning.
+
+    Services must NOT be created in callbacks. E.g., it is an error to call
+    CreateCanController() in the registered callbacks for
+    :cpp:func:`InitHandler<ib::mw::sync::IParticipantController::SetInitHandler()>`
+    or even
+    :cpp:func:`SimTask<ib::mw::sync::IParticipantController::SetSimulationTask()>`.
+
+
+.. doxygenclass:: ib::mw::IComAdapter
+   :members:
 
 
 VIB Version

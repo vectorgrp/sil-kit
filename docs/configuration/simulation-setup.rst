@@ -102,6 +102,10 @@ logging.
    * - IsSyncMaster
      - A boolean flag that identifies the participant as synchronization master.
 
+   * - :ref:`ParticipantController<sec:cfg-participant-controller>`
+     - The participant controller enables synchronization with other
+       participants.
+       
    * - :ref:`Logger<sec:cfg-participant-logger>`
      - The logger configuration for this participant.
 

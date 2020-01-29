@@ -64,10 +64,11 @@ a high detail simulation using the Network Simulator. However, applications that
 with Network Simulator, will also work without it. The CAN, LIN, Ethernet, and FlexRay demos 
 provided with the VIB have all been tested both with and without the Network Simulator.
 
-In Section :doc:`Vector Integration Bus Services <usage/services>` it is described how to configure and use
-Vehicle Network Controllers and pointed out which differences for simple simulation and
-high detail VIBE simulation with the Network Simulator exists. Furthermore, the usage of
-the other services (IO, Generic Message, ...) will also be presented in detail.
+In Section :ref:`Vector Integration Bus Services<sec:api-services>`, it is
+described how to configure and use Vehicle Network Controllers and pointed out
+which differences for simple simulation and high detail VIBE simulation with the
+Network Simulator exists. Furthermore, the usage of the other services (IO,
+Generic Message, ...) will also be presented in detail.
 
 
 VIB Prerequisites for Usage

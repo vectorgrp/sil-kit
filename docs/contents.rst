@@ -10,7 +10,7 @@ Contents
   vibes/overview
   configuration/configuration
   api/api
-  vib-simulation
+  simulation/simulation
   usage/utilities
   usage/demos
   CHANGELOG

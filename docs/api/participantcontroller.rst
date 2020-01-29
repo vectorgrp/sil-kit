@@ -118,15 +118,14 @@ When using time quantum synchronization (see :ref:`sec:sim-time-sync`), the simu
 duration that is being requested can be set using 
 :cpp:func:`SetPeriod()<ib::mw::sync::IParticipantController::SetPeriod()>`.
 
-For event triggered synchronization the simulation time for the next pending event 
-can be set using :cpp:func:`SetEarliestEventTime<ib::mw::sync::IParticipantController::SetEarliestEventTime()>`.
-
-When configured for the :ref:`FastRTPS middleware<sec:mwcfg-fastrtps>`, the 
-participant's lifecycle also supports addiitonal :ref:`Coldswap<sec:sim-coldswap>` states, which 
-can be enabled using the 
-:cpp:func:`EnableColdswap<ib::mw::sync::IParticipantController::EnableColdswap()>`
-method.
-By default, this feature is disabled.
+It is possible to disconnect and reconnect individual participants between
+consecutive simulation runs. This is referred to as a cold swap. If a
+participant is
+:cpp:func:`enabled<ib::mw::sync::IParticipantController::EnableColdswap()>` for
+cold swap, the participant can shutdown when executing a cold swap / restart
+routine. By default, this feature is disabled. The actual cold swapping is
+initiated by the
+:cpp:func:`SystemController<ib::mw::sync::ISystemController::PrepareColdswap()>`.
 
 API and Data Type Reference
 -------------------------------

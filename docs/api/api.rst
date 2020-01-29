@@ -4,8 +4,6 @@ VIB API
 .. |ComAdapter| replace:: :doc:`ComAdapter<comadapter>`
 .. |header| replace:: :doc:`header<header>`
 
-.. _sec:api-services:
-
 This document describes the user available programming interfaces of the Vector
 Integration Bus (VIB). If you are not yet familiar with the VIB, have a look at
 the :doc:`Quick Start<../usage/quickstart>`.
@@ -21,6 +19,8 @@ The ComAdapter constitutes the main entry point into the Integration Bus API.
    
    comadapter
    header
+
+.. _sec:api-services:
 
 Services
 --------
