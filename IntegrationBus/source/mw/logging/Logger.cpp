@@ -7,7 +7,10 @@
 #include "Logger.hpp"
 
 #include "spdlog/sinks/null_sink.h"
-#include "spdlog/sinks/stdout_color_sinks.h"
+// NB: we do not use the windows color sink, as that will open "CONOUT$" and
+//     we won't be able to trivially capture its output in IbLauncher.
+#include "spdlog/sinks/ansicolor_sink.h"
+#include "spdlog/sinks/stdout_sinks.h"
 #include "spdlog/sinks/basic_file_sink.h"
 
 #include "SpdlogTypeConversion.hpp"
@@ -87,7 +90,11 @@ Logger::Logger(const std::string& participantName, cfg::Logger config)
 
         case cfg::Sink::Type::Stdout:
         {
-            auto stdoutSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+#if _WIN32
+            auto stdoutSink = std::make_shared<spdlog::sinks::stdout_sink_mt>();
+#else
+            auto stdoutSink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
+#endif
             stdoutSink->set_level(log_level);
             _logger->sinks().emplace_back(std::move(stdoutSink));
             break;
