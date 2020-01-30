@@ -225,9 +225,11 @@ def unpack(workdir, cpackfiles):
                     debug("-> mkdir {}", out)
                 else:
                     if not os.path.exists(out):
-                        debug("-> {}", out)
+                        extattr = mem.external_attr >> 16
+                        debug("-> {} (mode={})", out, oct(extattr))
                         with open(out, "wb") as fout:
                             fout.write(zf.read(mem))
+                        os.chmod(out, extattr)
                         count += 1
             log("{}: {} files written.", top, count)
             #assert count != 0
