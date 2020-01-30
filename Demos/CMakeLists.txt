@@ -12,8 +12,10 @@ if(NOT TARGET IntegrationBus)
     #so the source release should be located in ../${INSTALL_SOURCE_DIR}
     message(STATUS "<-> no IntegrationBus-Library target found. working in distribution mode")
     message(STATUS "<-> using deployed IntegrationBus")
-    #XXX kludge to make fmt dependencies of exported target work
-    include(${CMAKE_CURRENT_LIST_DIR}/../IntegrationBus-Source/ThirdParty/fmt.cmake)
+    #NB: as of VIB 3.0.2 FMT is optional
+    include(
+        ${CMAKE_CURRENT_LIST_DIR}/../IntegrationBus-Source/ThirdParty/fmt.cmake
+        OPTIONAL)
     find_package(IntegrationBus
         REQUIRED
         CONFIG

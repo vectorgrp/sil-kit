@@ -1,33 +1,54 @@
 # IntegrationBus Demos
 
-This folder contains sample projects that demonstrate how the IntegrationBus API can be used to:
+This directory contains sample projects that demonstrate how the IntegrationBus
+API can be used:
 
-* *Can, Lin, FlexRay, Ethernet, IO, GenericMessage*:
-  Write participants that are able to connect to IntegrationBus and use buses of all supported protocols,
-  including CAN, LIN, FlexRay, Ethernet, I/O (analog, digital, pattern signals and PWM), and a Generic Messages.
-* *ExecutionController, ExecutionControllerProxy*:
-  Instantiating a participant that serves as a timing master for controlling the simulation execution via a quantum-based approach.
-  Instantiating a participant that transmits commands to start/stop the simulation.
-* *TickTickDone*:
-  Installing a Tick-TickDone-based synchronization mechanism.
-* *ConfigBuilder*:
-  Processing JSON configuration files that adhere to the IbConfig.schema.json format.
+* **Can, Lin, FlexRay, Ethernet, IO, GenericMessage**:
+  Write or read participants that are able to connect to IntegrationBus and use buses of
+  all supported protocols including CAN, LIN, FlexRay, Ethernet, I/O (analog,
+  digital, pattern signals and PWM), and the Generic Message service.
 
+* **TickTickDone**:
+  Installing a Tick-Tick-Done-based synchronization mechanism.
+
+* **ConfigBuilder**:
+  Processing JSON configuration files that adhere to the IbConfig.schema.json
+  format.
+
+The build system is based on cmake.
 Supported target platforms and build tools:
+* Ubuntu 18.04 (GCC 7 or later)
+* Visual Studio 2015 / 2017
 
-* *Linux: GCC 4.9 or later*
-  Run 'make' from within this folder to execute the provided GNU Makefiles
-* *Windows: VisualStudio 2015 and VisualStudio 2017*
-  Open IntegrationBus-Demos_vs140.sln
-* *Linux and Windows: CMake 3.5 or later*
-  * Run 'cmake . -DCMAKE_PREFIX_PATH=..' to determine available build systems and create build scripts for one of them.
-    Note:
-      The 'CMAKE_PREFIX_PATH' hints CMake to package config files (usually a folder that contains the ./cmake subfolder), 
-      so that building against the IntegrationBus library of the matching target architecture is possible.
-    To set the build system and target system, you can append further arguments, for example:
-    * '-A Win32 -T v141' for 32bit executables and the VisualStudio 2017 compiler under Windows
-    * '-A x64 -T v140' for 64bit executables and the VisualStudio 2015 compiler under Windows
-  * Run 'cmake --build . --config Debug' to execute the previously generated build scripts for target 'Debug'.
-  You can check CMake's man pages or the [online help](https://cmake.org/documentation/) on how to set further options.
 
-Copyright (c) Vector Informatik GmbH. All rights reserved.
+## Build Instructions
+The cmake build should work on all supported platforms in a similar way:
+> mkdir build
+
+> cd build
+
+> cmake ../
+
+> cmake --build .
+
+On CMake version >=3.12 the '--parallel' flag can be used to speed up
+compilation.
+
+* **Note:**
+  By default, the demo build system assumes that it resides next to a binary
+  release of the VIB in a directory 'IntegrationBus' which contains a properly
+  exported build of the VIB. You can override this by providing your own
+  IntegrationBus::IntegrationBus target in cmake.
+
+* **Windows: VisualStudio 2015 and VisualStudio 2017**
+  It is possible to use Visual Studio directly, without project files or
+  solutions, thanks to the built-in CMake support.
+  Open this directory in Explorer, right click and select 'open in Visual
+  Studio'. This should start CMake implicitly from Visual Studio.
+  Please note that using cmake from command line requires specifying a
+  '--config' flag when using a Visual Studio generator, e.g.:
+
+  > cmake --build . --config Debug
+
+
+Copyright (c) 2020 Vector Informatik GmbH. All rights reserved.
