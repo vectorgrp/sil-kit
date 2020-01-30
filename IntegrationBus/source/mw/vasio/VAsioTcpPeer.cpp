@@ -101,14 +101,9 @@ void VAsioTcpPeer::SendIbMsg(MessageBuffer buffer)
     *reinterpret_cast<uint32_t*>(sendBuffer.data()) = static_cast<uint32_t>(sendBuffer.size());
 
     std::unique_lock<std::mutex> lock{ _sendingQueueLock };
-    if (_sendingQueue.size() >= _sendingQueueMaxSize)
-    {
-        _logger->Warn("Sending Queue is full. Dropping messages!");
-    }
-    else
-    {
-        _sendingQueue.push(std::move(sendBuffer));
-    }
+
+    _sendingQueue.push(std::move(sendBuffer));
+
     lock.unlock();
 
     _socket.get_io_context().dispatch([this]() { StartAsyncWrite(); });

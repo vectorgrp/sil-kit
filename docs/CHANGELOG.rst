@@ -11,10 +11,17 @@ Added
 ~~~~~
 - Documentation for the CAN controller API: :doc:`CAN Vehicle Network Controllers <api/can>`.
 
+Changed
+~~~~~~~
+- Removed the upper limit of the sendingQueue for VAsio which could result in IbMessages
+  that are critical for synchronization being thrown away.
+
 Fixed
 ~~~~~
 - Fixed a bug that prevented the CAN controller state callback from being called
   when using VIBE NetworkSimulator.
+- Removed a false warning for VAsio with syncType::DistributedTimeQuantum which 
+  incorrectly informed a user that IParticipantController::setPeriod() has no effect for this syncType.
 
 [3.0.1] - 2020-01-08
 --------------------------------

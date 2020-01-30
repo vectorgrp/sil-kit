@@ -80,7 +80,6 @@ private:
     asio::mutable_buffer _currentSendingBuffer;
     std::vector<uint8_t> _currentSendingBufferData;
     std::mutex _sendingQueueLock;
-    std::size_t _sendingQueueMaxSize{100u};
     bool _sending{false};
 };
 

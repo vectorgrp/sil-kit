@@ -128,7 +128,7 @@ void ParticipantController::EnableColdswap()
 
 void ParticipantController::SetPeriod(std::chrono::nanoseconds period)
 {
-    if (_syncType != cfg::SyncType::TimeQuantum)
+    if (_syncType != cfg::SyncType::TimeQuantum && _syncType != cfg::SyncType::DistributedTimeQuantum)
     {
         auto msPeriod = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(period);
         _logger->Warn("ParticipantController::SetPeriod({}ms) is ignored", msPeriod.count());
