@@ -207,7 +207,7 @@ TEST_F(LinControllerProxyTest, trigger_frame_response_update_handler_for_slave_c
     proxy.ReceiveIbMessage(addr2_proxy, slaveCfg);
 }
 
-TEST_F(LinControllerProxyTest, got_to_sleep)
+TEST_F(LinControllerProxyTest, go_to_sleep)
 {
     // Configure Master
     EXPECT_CALL(comAdapter, SendIbMessage(addr1_proxy, A<const ControllerConfig&>()));
@@ -219,9 +219,6 @@ TEST_F(LinControllerProxyTest, got_to_sleep)
     expectedMsg.frame = GoToSleepFrame();
     expectedMsg.responseType = FrameResponseType::MasterResponse;
 
-    ControllerStatusUpdate expectedStatus;
-    expectedStatus.status = ControllerStatus::Sleep;
-
     EXPECT_CALL(comAdapter, SendIbMessage(addr1_proxy, expectedMsg))
         .Times(1);
     EXPECT_CALL(comAdapter, SendIbMessage(addr1_proxy, AControllerStatusUpdateWith(ControllerStatus::Sleep)))
@@ -230,7 +227,7 @@ TEST_F(LinControllerProxyTest, got_to_sleep)
     proxy.GoToSleep();
 }
 
-TEST_F(LinControllerProxyTest, got_to_sleep_internal)
+TEST_F(LinControllerProxyTest, go_to_sleep_internal)
 {
     // Configure Master
     EXPECT_CALL(comAdapter, SendIbMessage(addr1_proxy, A<const ControllerConfig&>()));
@@ -259,6 +256,26 @@ TEST_F(LinControllerProxyTest, call_gotosleep_handler)
 
     Transmission goToSleep;
     goToSleep.frame = GoToSleepFrame();
+    goToSleep.status = FrameStatus::LIN_RX_OK;
+
+    proxy.ReceiveIbMessage(addr1_vibe, goToSleep);
+}
+
+TEST_F(LinControllerProxyTest, not_call_gotosleep_handler)
+{
+    // Configure Master
+    EXPECT_CALL(comAdapter, SendIbMessage(addr1_proxy, A<const ControllerConfig&>()));
+    ControllerConfig config = MakeControllerConfig(ControllerMode::Slave);
+    proxy.Init(config);
+    proxy.RegisterFrameStatusHandler(frameStatusHandler);
+    proxy.RegisterGoToSleepHandler(bind_method(&callbacks, &Callbacks::GoToSleepHandler));
+
+    EXPECT_CALL(callbacks, FrameStatusHandler(&proxy, A<const Frame&>(), _)).Times(1);
+    EXPECT_CALL(callbacks, GoToSleepHandler(&proxy)).Times(0);
+
+    Transmission goToSleep;
+    goToSleep.frame = GoToSleepFrame();
+    goToSleep.frame.data[0] = 1;
     goToSleep.status = FrameStatus::LIN_RX_OK;
 
     proxy.ReceiveIbMessage(addr1_vibe, goToSleep);

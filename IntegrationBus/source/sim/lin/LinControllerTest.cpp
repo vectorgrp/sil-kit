@@ -379,20 +379,12 @@ TEST_F(LinControllerTest, trigger_frame_response_update_handler)
     controller.ReceiveIbMessage(ibAddr2, responseUpdate);
 }
 
-TEST_F(LinControllerTest, got_to_sleep)
+TEST_F(LinControllerTest, go_to_sleep)
 {
     // Configure Master
     EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
     controller.Init(config);
-
-
-    Transmission expectedTx;
-    expectedTx.frame = GoToSleepFrame();
-    expectedTx.status = FrameStatus::LIN_RX_OK;
-
-    ControllerStatusUpdate expectedStatus;
-    expectedStatus.status = ControllerStatus::Sleep;
 
     EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(GoToSleepFrame(), FrameStatus::LIN_RX_OK)))
         .Times(1);
@@ -402,13 +394,12 @@ TEST_F(LinControllerTest, got_to_sleep)
     controller.GoToSleep();
 }
 
-TEST_F(LinControllerTest, got_to_sleep_internal)
+TEST_F(LinControllerTest, go_to_sleep_internal)
 {
     // Configure Master
     EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
     controller.Init(config);
-
 
     EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(GoToSleepFrame(), FrameStatus::LIN_RX_OK)))
         .Times(0);
@@ -432,6 +423,26 @@ TEST_F(LinControllerTest, call_gotosleep_handler)
 
     Transmission goToSleep;
     goToSleep.frame = GoToSleepFrame();
+    goToSleep.status = FrameStatus::LIN_RX_OK;
+
+    controller.ReceiveIbMessage(ibAddr2, goToSleep);
+}
+
+TEST_F(LinControllerTest, not_call_gotosleep_handler)
+{
+    // Configure Master
+    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, A<const ControllerConfig&>()));
+    ControllerConfig config = MakeControllerConfig(ControllerMode::Slave);
+    controller.Init(config);
+    controller.RegisterFrameStatusHandler(frameStatusHandler);
+    controller.RegisterGoToSleepHandler(bind_method(&callbacks, &Callbacks::GoToSleepHandler));
+
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, A<const Frame&>(), _)).Times(0);
+    EXPECT_CALL(callbacks, GoToSleepHandler(&controller)).Times(0);
+
+    Transmission goToSleep;
+    goToSleep.frame = GoToSleepFrame();
+    goToSleep.frame.data[0] = 1;
     goToSleep.status = FrameStatus::LIN_RX_OK;
 
     controller.ReceiveIbMessage(ibAddr2, goToSleep);

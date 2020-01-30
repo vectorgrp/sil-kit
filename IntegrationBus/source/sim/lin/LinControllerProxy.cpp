@@ -177,16 +177,13 @@ void LinControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Tr
     CallEach(_frameStatusHandler, this, frame, msg.status, msg.timestamp);
 
     // Dispatch GoToSleep frames to dedicated handlers
-    if (frame.id == GoToSleepFrame().id)
+    if (frame.id == GoToSleepFrame().id && frame.data == GoToSleepFrame().data)
     {
-        if (frame.data != GoToSleepFrame().data)
-        {
-            _logger->Warn("LinController received diagnostic frame, which does not match expected GoToSleep payload");
-        }
-
         // only call GoToSleepHandlers for slaves, i.e., not for the master that issued the GoToSleep command.
         if (_controllerMode == ControllerMode::Slave)
+        {
             CallEach(_goToSleepHandler, this);
+        }
     }
 }
 

@@ -278,17 +278,12 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const Transmi
             CallHandlers(_frameStatusHandler, this, frame, ToTxFrameStatus(msg.status), msg.timestamp);
             break;
         }
-        // Always dispatch GoToSleep frames
-        if (frame.id == GoToSleepFrame().id)
-        {
-            if (frame.data != GoToSleepFrame().data)
-            {
-                _logger->Warn("LinController received diagnostic frame, which does not match expected GoToSleep payload");
-            }
 
+        // Dispatch GoToSleep frames
+        if (frame.id == GoToSleepFrame().id && frame.data == GoToSleepFrame().data)
+        {
             CallHandlers(_goToSleepHandler, this);
         }
-        return;
     }
 }
 

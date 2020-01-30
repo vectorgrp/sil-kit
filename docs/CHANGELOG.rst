@@ -22,6 +22,8 @@ Fixed
   when using VIBE NetworkSimulator.
 - Removed a false warning for VAsio with syncType::DistributedTimeQuantum which 
   incorrectly informed a user that IParticipantController::setPeriod() has no effect for this syncType.
+- The LIN controller now only calls the goToSleepHandler if the frame id and also the data field
+  of a received LIN frame matches the id and data of a valid "GoToSleep" frame.
 
 [3.0.1] - 2020-01-08
 --------------------------------
