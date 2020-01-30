@@ -98,7 +98,6 @@ add_subdirectory(Io)
 add_subdirectory(GenericMessage)
 add_subdirectory(TickTickDone)
 add_subdirectory(ConfigBuilder)
-add_subdirectory(SystemControllerInteractive)
 add_subdirectory(GenericMessageITest)
 
 message(STATUS "Demos available: ${demo_list}")

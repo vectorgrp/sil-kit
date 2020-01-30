@@ -1,0 +1,22 @@
+cmake_minimum_required(VERSION 3.8)
+project("IntegrationBus-SystemController-Interactive" LANGUAGES CXX C)
+set(CMAKE_CXX_STANDARD 14)
+
+include(IntegrationBusInstall)
+
+add_executable(IbSystemControllerInteractive
+    SystemControllerInteractive.cpp
+)
+
+# Group this demo project into a folder
+set_target_properties(IbSystemControllerInteractive PROPERTIES
+     FOLDER "Utilities"
+     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Utilities/$<CONFIG>/bin"
+)
+
+target_link_libraries(IbSystemControllerInteractive
+    IntegrationBus
+)
+install(TARGETS IbSystemControllerInteractive
+    RUNTIME DESTINATION ${INSTALL_BIN_DIR}
+)

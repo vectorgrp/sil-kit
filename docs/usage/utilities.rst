@@ -2,6 +2,20 @@
 VIB Utilities
 ==============
 
+.. contents::
+   :local:
+   :depth: 1
+
+Running an IntegrationBus system is supported by several utilities.
+The launcher's purpose is to simplify starting ensembles  of participants
+and other simulation utilities from a given configuration file.
+The registry is a mandatory part of the VAsio middleware -- it implements
+connection and service discovery for participants.
+The system monitor and controller are provided for convenience. They implement
+a simulation-wide state tracking and system command handling which is required
+in every simulation. However, using these processes is not mandatory -- users
+of the VIB are free to implement their own system and state handling.
+
 .. _sec:util-launcher:
 
 Launcher
@@ -12,32 +26,41 @@ Launcher
    :stub-columns: 1
 
    *  -  Abstract
-      -  The Launcher batch script implements scripting in order to start up an Integration Bus system.
-         Nevertheless, all Demos may be executed manually as described in the corresponding section.
+      -  The Launcher script allows starting multiple participants of an
+         IntegrationBus system.
+         Nevertheless, all participants, e.g. the Demos, may be executed
+         manually as described in the corresponding section.
    *  -  Source location
-      -  Launcher
+      -  ``Launcher``
    *  -  Requirements
-      -  * `Python <https://www.python.org/downloads/>`_ v2.7+ / v3.x+
-         * Adaptation of executable directories in section "Developer-Linux" or "Developer-Windows" in Demos/Can/IbConfig_DemoCan.json
-         * Adaptation of INTEGRATIONBUS_BINPATH & INTEGRATIONBUS_LIBPATH in IbInstallation.json of Launcher/iblauncher/data
+      -  * `Python <https://www.python.org/downloads/>`_  v3.x+
+         * Adaptation of the ``LaunchConfigurations`` sections in the
+           IntegrationBus config (e.g. Demos/Can/IbConfig_DemoCan.json).
+         * Adaptation of INTEGRATIONBUS_BINPATH & INTEGRATIONBUS_LIBPATH
+           in process environment. Default is to
+           infer the IntegrationBus paths from the path of IbLauncher.py.
    *  -  Parameters
       -  There are eight arguments:
 
          #. Filename of the IB Configuration to be used (IB config file).
-         #. Launch configuration [-c] (e.g. Installation/Developer-WinDebug/Developer-WinRelease/Developer-Linux)
-         #. Network node [-n], optional
-         #. FastRTPS domain ID (optional); defaults to 42.
-         #. Command [-x] (e.g. setup/run/teardown/setup-run-teardown(default)), optional
-         #. Logfile [-l], optional
-         #. Retries [-r], optional
-         #. Quiet execution [-q], optional
-   *  -  Parameter Example
+         #. Launch configuration ``[-c] CONFIG`` (e.g. Installation/Developer-WinDebug/Developer-WinRelease/Developer-Linux)
+         #. Network node ``[-n NODE]``, optional
+         #. FastRTPS domain ID (optional); defaults to ``42``.
+         #. Command ``[-x COMMAND]`` (e.g. setup/run/teardown/setup-run-teardown(default)), optional
+         #. Logfile ``[-l LOGFILE]``, optional
+         #. Retries ``[-r RETRIES]``, optional
+         #. Quiet execution ``[-q]``, optional
+   *  -  Usage Example
       -  .. code-block:: powershell
 
             # Launch CAN demo w/o Network Simulator VIBE:
-            Launcher/IbLauncher.sh Demos/Can/IbConfig_DemoCan.json -c Developer-Linux
+            IbLauncher.py Demos/Can/IbConfig_DemoCan.json -c Installation
+
    *  -  Notes
-      -  INTEGRATIONBUS_BINPATH & INTEGRATIONBUS_LIBPATH may be defined as environment variables.
+      -  * The distribution package contains the launcher in the
+           ``Integrationbus/bin/`` directory.
+         * INTEGRATIONBUS_BINPATH & INTEGRATIONBUS_LIBPATH may be defined
+           as environment variables.
 
 
 .. _sec:util-registry:
@@ -54,7 +77,7 @@ VAsio Registry
         VAsio middleware. It is mandatory, when using the VAsio middleware.
 
    *  - Source location
-      - Utilities/IbRegistry
+      - ``Utilities/IbRegistry``
    *  - Requirements
       - None
    *  - Parameters
@@ -63,17 +86,19 @@ VAsio Registry
         #. Filename of the IB Configuration to be used (IB config file).
         #. IntegrationBus domain ID (optional); defaults to 42.
 
-   *  - Parameter Example
+   *  - Usage Example
       - .. code-block:: powershell
 
             # Start the IbRegistry using the CAN demo configuration
-            build/Utilities/bin/IbRegistry Demos/Can/IbConfig_DemoCan.json 42
+            IbRegistry Demos/Can/IbConfig_DemoCan.json 42
 
    *  - Notes
-      - The IbRegistry must be started before the IB participants. When using
-        the Launcher, the IbRegistry is automatically started if the IbConfig
-        specifies VAsio as the :doc:`active
-        middleware<../configuration/middleware-configuration>`.
+      -  * The distribution package contains the IbRegistry in the
+           ``Integrationbus/bin/`` directory.
+         * When using the VAsio middleware, the IbRegistry must be started
+           before the IB participants. When using the Launcher, the IbRegistry
+           is automatically started if the IbConfig specifies VAsio as the
+           :doc:`active middleware<../configuration/middleware-configuration>`.
 
 .. _sec:util-system-controller:
 
@@ -85,10 +110,12 @@ SystemController
    :stub-columns: 1
 
    *  -  Abstract
-      -  The SystemController implements state handling for the participants of a Integration Bus system.
-         Examples for state change commands called by the SystemController are 'Run','Stop','Shutdown' etc.
+      -  The SystemController implements state handling for the participants of
+         a Integration Bus system.
+         Examples for state change commands called by the SystemController are
+         'Run','Stop','Shutdown' etc.
    *  -  Source location
-      -  Demos/SystemController
+      -  ``Utilities/IbSystemController``
    *  -  Requirements
       -  The SystemController requires an established Integration Bus System.
          Thus, it has to be started after other (active) participants.
@@ -97,14 +124,50 @@ SystemController
 
          #. Filename of the IB Configuration to be used (IB config file).
          #. FastRTPS domain ID (optional); defaults to 42.
-   *  -  Parameter Example
+   *  -  Usage Example
       -  .. code-block:: powershell
 
             # Start SystemController for CAN Demo w/o Network Simulator VIBE:
-            build/Demos/SystemController/IbDemoSystemController Demos/Can/IbConfig_DemoCan.json
+            IbSystemController Demos/Can/IbConfig_DemoCan.json
    *  -  Notes
-      -  | For RTPS: The above command will not be successful, unless the reader and writer participant of the CAN Demo are established upfront (see below).
-         | For VAsio: The above command will not be successful, unless the reader and writer participant of the CAN Demo are established afterwards.
+      -  * The distribution package contains the IbSystemController in the
+           ``Integrationbus/bin/`` directory.
+
+
+
+.. _sec:util-system-controller-interactive:
+
+SystemControllerInteractive
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :widths: 17 205
+   :stub-columns: 1
+
+   *  -  Abstract
+      -  This variant of the system controller allows setting the system states
+         manually via a command line interface. A user can enter commands on
+         standard input, e.g. "Run", "Stop", "Shutdown".
+   *  -  Source location
+      -  ``Utilities/IbSystemControllerInteractive``
+   *  -  Requirements
+      -  The SystemControllerInteractive requires an established Integration Bus
+         System.
+         Thus, it has to be started after other (active) participants.
+   *  -  Parameters
+      -  There are up to two positional argument:
+
+         #. Filename of the IB Configuration to be used (IB config file).
+         #. FastRTPS domain ID (optional); defaults to 42.
+   *  -  Usage Example
+      -  .. code-block:: powershell
+
+            # Start SystemControllerInteractive for CAN Demo w/o Network Simulator VIBE:
+            IbSystemControllerInteractive Demos/Can/IbConfig_DemoCan.json
+   *  -  Notes
+      -  * The distribution package contains the IbSystemControllerInteractive
+           in the ``Integrationbus/bin/`` directory.
+
 
 .. _sec:util-system-monitor:
 
@@ -116,9 +179,10 @@ SystemMonitor
    :stub-columns: 1
 
    *  -  Abstract
-      -  The SystemMonitor visualizes the states of the participants of a Integration Bus system.
+      -  The SystemMonitor visualizes the states of the participants of a
+         Integration Bus system.
    *  -  Source location
-      -  Demos/SysteMonitor
+      -  ``Utilities/IbSystemMonitor``
    *  -  Requirements
       -  None
    *  -  Parameters
@@ -126,10 +190,13 @@ SystemMonitor
           
          #. Filename of the IB Configuration to be used (IB config file).
          #. FastRTPS domain ID (optional); defaults to 42.
-   *  -  Parameter Example
+   *  -  Usage Example
       -  .. code-block:: powershell
             
             # Start SystemMonitor for CAN Demo w/o Network Simulator VIBE:
-            build/Demos/SystemMonitor/IbDemoSystemMonitor Demos/Can/IbConfig_DemoCan.json
+            IbSystemMonitor Demos/Can/IbConfig_DemoCan.json
    *  -  Notes
-      -  The SystemMonitor represents a passive participant in an Integration Bus system. Thus, it can be (re)started at any time.
+      -  * The distribution package contains the IbSystemMonitor in the
+           ``Integrationbus/bin/`` directory.
+         * The SystemMonitor represents a passive participant in an Integration
+           Bus system. Thus, it can be (re)started at any time.
