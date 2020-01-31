@@ -1,7 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include <iostream>
-#include <sstream>
 #include <thread>
 
 #include "ib/IntegrationBus.hpp"
@@ -81,14 +80,14 @@ public:
     {
     }
 
-    void SetupParticipant(const std::string participantName)
+    void SetupParticipant()
     {
         auto&& participantController = _comAdapter->GetParticipantController();
 
         auto* publisher = _comAdapter->CreateGenericPublisher("GenericData");
 
         participantController->SetSimulationTask(
-            [this, publisher](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+            [this, publisher](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
 
             if (_messageIndex < _testMessages.size())
             {
@@ -128,7 +127,7 @@ public:
         _systemController = _comAdapter->GetSystemController();
     }
 
-    void SetupParticipant(const std::string participantName)
+    void SetupParticipant()
     {
         auto&& participantController = _comAdapter->GetParticipantController();
 
@@ -139,7 +138,7 @@ public:
         });
 
         participantController->SetSimulationTask(
-            [this, subscriber](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+            [this](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
 
             _tickCount++;
             if (_tickCount > _messageIndex + 3)
@@ -157,7 +156,7 @@ public:
 
     void ReceiveMessage(IGenericSubscriber* subscriber, const std::vector<uint8_t>& data)
     {
-        std::string receivedMessage{data.begin(), data.end()};
+        const std::string receivedMessage{data.begin(), data.end()};
 
         // Exactly one message should be sent and received in the same simulation tick.
         // _tickCount is incremented in each simulation tick, so _messageIndex should
@@ -173,11 +172,9 @@ public:
             std::cout << "Test unsuccessful: The received message did not match the sent test message." << std::endl;
         }
 
-        if (_messageIndex < _testMessages.size())
-        {
-            _messageIndex++;
-        }
-        else
+        _messageIndex++;
+
+        if (_messageIndex == _testMessages.size())
         {
             _systemController->Stop();
         }
@@ -218,7 +215,6 @@ int main(int argc, char** argv) try
     }
 
     auto ibConfig = ib::cfg::Config::FromJsonFile(configFilename);
-    auto tickPeriod = ibConfig.simulationSetup.timeSync.tickPeriod;
 
     auto comAdapterPublisher = ib::CreateFastRtpsComAdapter(ibConfig, participantNamePublisher, domainId);
     auto comAdapterSubscriber = ib::CreateFastRtpsComAdapter(ibConfig, participantNameSubscriber, domainId);
@@ -242,13 +238,13 @@ int main(int argc, char** argv) try
     IbPublisher publisher(comAdapterPublisher.get(), testData);
     IbSubscriber subscriber(comAdapterSubscriber.get(), testData);
 
-    std::thread t1(&IbPublisher::SetupParticipant, &publisher, participantNamePublisher);
-    std::thread t2(&IbSubscriber::SetupParticipant, &subscriber, participantNameSubscriber);
+    std::thread t1(&IbPublisher::SetupParticipant, &publisher);
+    std::thread t2(&IbSubscriber::SetupParticipant, &subscriber);
 
     t1.join();
     t2.join();
 
-    std::cout << "---------------------------------------------------------------------\n";
+    std::cout << "\n---------------------------------------------------------------------\n";
     std::cout << "Test Run Finished: "
               << unsigned(publisher._messageIndex)  << " messages sent, "
               << unsigned(subscriber._messageIndex) << " messages received, "
@@ -258,7 +254,7 @@ int main(int argc, char** argv) try
 
     return 0;
 }
-catch (const ib::cfg::Misconfiguration& error)
+catch (const cfg::Misconfiguration& error)
 {
     std::cerr << "Invalid configuration: " << error.what() << std::endl;
     return -2;
