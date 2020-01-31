@@ -106,6 +106,62 @@ must be registered, which is called whenever the status changes::
   State changes are only supported when using the VIBE NetworkSimulator.
 
 
+PCAP Tracing
+~~~~~~~~~~~~~~~
+
+For the Ethernet Controller, it is possible to track all received Ethernet messages in PCAP format either
+in a dedicated file or to write all messages directly into a named pipe. By default, PCAP tracing is
+disabled, but you can enable it in the specific settings of an Ethernet Controller (see:
+:ref:`Ethernet Controller Configuration<sec:cfg-participant-ethernet>`).
+
+PCAP File
+______________
+
+To trace all received Ethernet messages in a PCAP file, you only have to specify the according setting
+in the configuration of the Ethernet Controller:
+
+.. code-block:: javascript
+    
+  "EthernetControllers": [
+      {
+          "Name": "ETH0",
+          "MacAddr": "00:08:15:ab:cd:f0",
+          "PcapFile": "pcap_output_trace.pcap"
+      }
+  ]
+
+After you successfully run and stopped the simulation, you can search for the file
+"pcap_output_trace.pcap" and load it into a tool like
+`wireshark <https://www.wireshark.org/>`_ where you can examine the Ethernet trace.
+
+PCAP Named Pipe
+_________________
+
+In order to directly track all received Ethernet messages in a Named Pipe, you must specify
+again the corresponding setting in the configuration of the Ethernet Controller:
+
+.. code-block:: javascript
+    
+  "EthernetControllers": [
+      {
+          "Name": "ETH0",
+          "MacAddr": "00:08:15:ab:cd:f0",
+          "PcapPipe": "pcap_output_reader"
+      }
+  ]
+
+The process responsible for the Ethernet Controller "ETH0" will try to open a Named Pipe
+"pcap_output_reader" during start up of the ComAdapter. The process will be blocked until
+another process connects to the Named Pipe and is ready to read any incoming Ethernet message.
+
+The reading process could be a tool like `wireshark <https://www.wireshark.org/>`_, for example.
+Under Windows, you can start wireshark in a console with a dedicated Named Pipe
+and then connect to the Named Pipe by double-clicking on it::
+
+  // Start wireshark with a dedicated Named Pipe
+  wireshark -ni \\.\pipe\pcap_output_reader
+
+
 API and Data Type Reference
 --------------------------------------------------
 Ethernet Controller API
