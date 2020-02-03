@@ -8,9 +8,7 @@ Synchronization
 .. |System| replace:: :doc:`System<../api/synchronisation>`
 .. |SystemController| replace:: :cpp:class:`ISystemController<ib::mw::sim::ISystemController>`
 .. |SystemMonitor| replace:: :cpp:class:`ISystemMonitor<ib::mw::sim::ISystemMonitor>`
-.. |SystemControllerExe| replace:: :ref:`VIB SystemController Utility<sec:util-registry>`
-
-.. |Run| replace:: :cpp:func:`Run()<ib::mw::sync::IParticipantController::Run()>`
+.. |Running| replace:: :cpp:enumerator:`Running<ib::mw::sync::Running>`
 
 
 .. contents::
@@ -21,7 +19,7 @@ This document discusses the synchronization of the simulation time and how it is
 affected by the underlying middleware.
 
 The simulation time in the VIB only advances if the system is in the state
-``Running``, and different synchronization algorithms ensure that simulation
+|Running|, and different synchronization algorithms ensure that simulation
 time advances in a coordinated manner. These synchronization algorithms are
 either governed by a dedicated ``SyncMaster`` or executed in a distributed way.
 
@@ -51,7 +49,7 @@ following table.
         not send a "TickDone".
 
     * - TimeQuantum
-      - Participants request simulation time for a individual time periods
+      - Participants request simulation time for individual time periods
         (=quanta), which are granted by the central SyncMaster.
 
     * - DistributedTimeQuantum
@@ -102,7 +100,7 @@ when using the FastRTPS middleware.
 
 FastRTPS Middleware with loose policy
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-When using the FastRTPS middleware, a ``Loose`` synchronization policy can be configured.
+When using the FastRTPS middleware, a ``loose`` synchronization policy can be configured.
 FastRTPS does not ensure in-order delivery of messages.
 Consider the following figure.
 The communication of three participants (Part A, Part B, Part C) and the
@@ -135,7 +133,7 @@ time (yellow circle in the figure).
 FastRTPS Middleware with strict policy
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Now, in contrast to the previous figure, we discuss the FastRTPS middleware with a 
-strict synchronization policy.
+``strict`` synchronization policy.
 
 .. figure:: ../_static/sim-fastrtps-strict.png
    :alt: FastRTPS with a strict policy

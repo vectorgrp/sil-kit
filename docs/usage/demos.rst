@@ -30,19 +30,19 @@ CAN Demo
    :stub-columns: 1
 
    *  -  Abstract
-      -  CAN Reader/Writer with or without Network Simulator VIBE
+      -  CAN Reader/Writer with or without VIBE Network Simulator
    *  -  Source location
       -  Demos/Can
    *  -  Requirements
       -  * :ref:`SystemController<sec:util-system-controller>`
          * :ref:`SystemMonitor (optional)<sec:util-system-monitor>`
-         * NetworkSimulator (optional)
+         * :doc:`NetworkSimulator<../vibes/networksimulator>` (optional)
    *  -  Parameters
       -  There are up to 3 positional arguments:
          
          #. Filename of the IB Configuration to be used; must be either of the two provided DemoCan configs.
          #. Name of the participant in the configuration; must be either CanWriter or CanReader.
-         #. FastRTPS domain ID (optional); defaults to 42.
+         #. Domain ID (optional); defaults to ``42``.
    *  -  Parameter Example
       -  .. parsed-literal:: 
             
@@ -51,7 +51,7 @@ CAN Demo
    *  -  System Example
       -  .. parsed-literal:: 
 
-            # Network Simulator VIBE (assumed to be in PATH, optional):
+            # VIBE Network Simulator (assumed to be in PATH, optional):
             NetworkSimulator BusSimulator Demos/Can/IbConfig_DemoCan_NetSim.json
 
             # System Monitor (optional):
@@ -75,19 +75,19 @@ Ethernet Demo
    :stub-columns: 1
 
    *  -  Abstract
-      -  Ethernet Reader / Writer with or without Network Simulator VIBE
+      -  Ethernet Reader / Writer with or without VIBE Network Simulator
    *  -  Source location
       -  Demos/Ethernet
    *  -  Requirements
       -  * :ref:`SystemController<sec:util-system-controller>`
          * :ref:`SystemMonitor (optional)<sec:util-system-monitor>`
-         * NetworkSimulator (optional)
+         * :doc:`NetworkSimulator<../vibes/networksimulator>` (optional)
    *  -  Parameters
       -  There are up to 3 positional arguments:
          
          #. Filename of the IB Configuration to be used; must be either of the two provided DemoEthernet configs.
          #. Name of the participant in the configuration; must be either EthernetWriter or EthernetReader.
-         #. FastRTPS domain ID (optional); defaults to 42.
+         #. Domain ID (optional); defaults to ``42``.
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
@@ -96,7 +96,7 @@ Ethernet Demo
    *  -  System Example
       -  .. parsed-literal:: 
 
-            # Network Simulator VIBE (assumed to be in PATH, optional):
+            # VIBE Network Simulator (assumed to be in PATH, optional):
             NetworkSimulator BusSimulator Demos/Ethernet/IbConfig_DemoEthernet_NetSim.json
 
             # System Monitor (optional):
@@ -129,13 +129,13 @@ LIN Demo
    *  -  Requirements
       -  * :ref:`SystemController<sec:util-system-controller>`
          * :ref:`SystemMonitor (optional)<sec:util-system-monitor>`
-         * NetworkSimulator (optional)
+         * :doc:`NetworkSimulator<../vibes/networksimulator>` (optional)
    *  -  Parameters
       -  There are up to 3 positional arguments:
          
          #. Filename of the IB Configuration to be used; must be either of the two provided DemoLin configs.
          #. Name of the participant in the configuration; must be either LinMaster or LinSlave.
-         #. FastRTPS domain ID (optional); defaults to 42.
+         #. Domain ID (optional); defaults to ``42``.
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
@@ -144,7 +144,7 @@ LIN Demo
    *  -  System Example
       -  .. parsed-literal:: 
 
-            # Network Simulator VIBE (assumed to be in PATH, optional):
+            # VIBE Network Simulator (assumed to be in PATH, optional):
             NetworkSimulator BusSimulator Demos/Lin/IbConfig_DemoLin_NetSim.json
 
             # System Monitor (optional):
@@ -178,13 +178,13 @@ FlexRay Demo
    *  -  Requirements
       -  * :ref:`SystemController<sec:util-system-controller>`
          * :ref:`SystemMonitor (optional)<sec:util-system-monitor>`
-         * NetworkSimulator (optional)
+         * :doc:`NetworkSimulator<../vibes/networksimulator>` (optional)
    *  -  Parameters
       -  There are up to 3 positional arguments:
          
          #. Filename of the IB Configuration to be used; must be either of the two provided DemoFlexray configs.
          #. Name of the participant in the configuration; must be either Node0 or Node1.
-         #. FastRTPS domain ID (optional); defaults to 42.
+         #. Domain ID (optional); defaults to ``42``.
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
@@ -193,7 +193,7 @@ FlexRay Demo
    *  -  System Example
       -  .. parsed-literal:: 
 
-            # Network Simulator VIBE (assumed to be in PATH, optional):
+            # VIBE Network Simulator (assumed to be in PATH, optional):
             NetworkSimulator BusSimulator Demos/FlexRay/IbConfig_DemoFlexray_NetSim.json
 
             # System Monitor (optional):
@@ -231,7 +231,7 @@ Generic Message Demo
          
          #. Filename of the IB Configuration to be used; must be the provided IbConfig_DemoGenericMessage.json config. 
          #. Name of the participant in the configuration; must be either Publisher or Subscriber.
-         #. FastRTPS domain ID (optional); defaults to 42.
+         #. Domain ID (optional); defaults to ``42``.
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
@@ -276,7 +276,7 @@ IO Port Demo
          
          #. Filename of the IB Configuration to be used; must be the provided IbConfig_DemoIo.json config. 
          #. Name of the participant in the configuration; must be either IoWriter or IoReader.
-         #. FastRTPS domain ID (optional); defaults to 42.
+         #. Domain ID (optional); defaults to ``42``.
    *  -  Parameter Example
       -  .. parsed-literal:: 
 

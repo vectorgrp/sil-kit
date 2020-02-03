@@ -114,8 +114,8 @@ the :cpp:enumerator:`Stopped<ib::mw::sync::Stopped>` state.
 
 Setup Dependent Configuration
 """""""""""""""""""""""""""""
-When using time quantum synchronization (see :ref:`sec:sim-time-sync`), the simulation
-duration that is being requested can be set using 
+When using time quantum or distributed time quantum synchronization (see :ref:`sec:sim-time-sync`),
+the simulation duration that is being requested can be set using 
 :cpp:func:`SetPeriod()<ib::mw::sync::IParticipantController::SetPeriod()>`.
 
 It is possible to disconnect and reconnect individual participants between

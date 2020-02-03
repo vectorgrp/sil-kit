@@ -15,7 +15,7 @@ VIB Configuration
 The IbConfig.json File
 ----------------------------------------
 
-The Vector Integration Bus is configured via a json config file, which is often
+The Vector Integration Bus is configured via a json config file, often
 referred to as IbConfig.json. The IbConfig.json begins with some general
 information about the configuration file itself followed by three subsections.
 
@@ -81,7 +81,7 @@ Configuration Options
        configure particular details of the Fast-RTPS or Vector VAsio
        middleware. If this section is omitted, Fast-RTPS will be used.
 
-   * - LaunchConfigurations
+   * - :doc:`LaunchConfigurations<launch-configurations>`
      - This optional section contains information to start all necessary
        processes to perform the configured simulation. It is only used by the
        IbLauncher.

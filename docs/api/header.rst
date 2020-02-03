@@ -14,7 +14,7 @@ As a rule of thumb, each component has a subdirectory with its own namespace:
       - Description
     * - ib/
       - ``ib``
-      - Main header, version and macros
+      - Main header, version and macros.
     * - ib/mw
       - ``ib::mw``
       - :doc:`Middleware<../configuration/middleware-configuration>` specific interfaces, data types and exceptions.
@@ -26,7 +26,7 @@ As a rule of thumb, each component has a subdirectory with its own namespace:
       - :ref:`Simulation and Service<sec:api-services>` specific definitions.
     * - ib/util
       - ``ib::util``
-      - Generic programming utiltiies
+      - Generic programming utilities
     * - ib/cfg
       - ``ib::cfg``
       - Data structures representing the VIB :doc:`../configuration/configuration`.

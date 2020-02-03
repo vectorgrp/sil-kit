@@ -5,6 +5,7 @@ VIB Quick Start
 .. |ComAdapter| replace:: :ref:`ComAdapter<sec:comadapter-factory>`
 
 .. contents::
+   :local:
    :depth: 3
 
 The Vector Integration Bus (VIB) is a C++ library for the distributed simulation of automotive networks.
@@ -14,7 +15,7 @@ This quick start demonstrates how to get started using the pre-built VIB release
 For building from the source tree, refer to :doc:`../development/build`.
 
 This guide will walk you through setting up a VIB project from scratch. First, the terminology
-required to understand the function is briefly discussed, then the build process and the actual code.
+required to understand the functionality is briefly discussed, then the build process and the actual code.
 
 
 Terminology
@@ -32,9 +33,9 @@ Terminology
      participant has its own ComAdapter instance.
  * - :ref:`Services<sec:api-services>`
    - Participants interact with each other through the means of services, e.g.,
-     a :doc:`CAN controller<../api/can>` or a :doc:`Generic message
-     publisher<../api/genericmessage>`. A special service is the
-     :doc:`participant controllers<../api/participantcontroller>`, which
+     a :doc:`CAN Controller<../api/can>` or a :doc:`Generic Message
+     Publisher<../api/genericmessage>`. A special service is the
+     :doc:`Participant Controller<../api/participantcontroller>`, which
      provides state handling and time synchronization.
  * - :ref:`Links<sec:cfg-links>`
    - A virtual connection between services of different participants. A link can, e.g., represent a CAN bus.
@@ -47,9 +48,9 @@ Terminology
  * - :doc:`Middleware<../configuration/middleware-configuration>`
    - The concrete distributed communication implementation. That is, the software layer
      implementing the distributed message passing mechanism.
- * - :doc:`Synchronization<../configuration/simulation-setup>`
+ * - :ref:`Synchronization (SyncType) <sec:cfg-participant-controller>`
    - A configuration option that determines if and how a participant synchronizes with all other participants.
- * - :ref:`Simulation Time <sec:cfg-time-sync>`
+ * - :ref:`Simulation Time (TimeSync) <sec:cfg-time-sync>`
    - The granularity of the simulation time depends on the configured protocol.
 
 A simulation consists of participants, which all share the same domain identifier.
@@ -89,11 +90,11 @@ If you use another method to build your software you can directly use the ``Inte
 
 A simple Generic Message application
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-We'll create a simple, self-contained VIB application that uses :doc:`Generic messages<../api/genericmessage>`
+We'll create a simple, self-contained VIB application that uses :doc:`Generic Messages<../api/genericmessage>`
 to exchange user-defined data among its participants.
 The messages are exchanged using a publish / subscribe pattern.
 
-To use the VIB you first have to create a valid configuration.  This can either
+To use the VIB, you first have to create a valid configuration.  This can either
 be done by loading an existing :ref:`JSON file<sec:ibconfig-json>` or by using
 the ConfigBuilder to create one programmatically.
 
@@ -122,7 +123,8 @@ One thread will act as a publisher by sending a test string to its subscribers:
 First, the configured middleware domain is joined as the named participant using the
 |ComAdapter|.
 Creating the ComAdapter properly initializes the VIB library and allows to instantiate
-:doc:`services<../api/api>` and :doc:`participant controllers<../api/participantcontroller>`.
+:doc:`Services<../api/api>` and offers access to the
+:doc:`Participant Controller<../api/participantcontroller>`.
 
 Next, we create a :cpp:class:`publisher<ib::sim::generic::IGenericPublisher>` for the ``DataService`` resource.
 This allows sending data through its :cpp:func:`Publish()<ib::sim::generic::IGenericPublisher::Publish()>`
@@ -152,10 +154,10 @@ This allows us to register a
 callback to receive data value updates.
 The simulation task has to be defined, even though no simulation work is performed.
 
-To run this sample you, have to use the :ref:`sec:util-registry` and
+To run this sample, you have to use the :ref:`sec:util-registry` and
 :ref:`sec:util-system-controller` processes.  The registry is required by the
 :ref:`VAsio middleware<sec:mwcfg-vasio>` for connecting the participants.  The
-SystemController innitializes the connected participants and starts the
+:ref:`sec:util-system-controller` initializes the connected participants and starts the
 simulation until the return key is pressed. For convenience and to reduce code
 duplication, these utility programs are implemented in separate executables and
 distributed in binary forms.

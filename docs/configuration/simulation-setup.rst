@@ -171,7 +171,7 @@ execution limit of 1.010 seconds and a hard limit of 1.5 seconds:
         "ExecTimeLimitHardMs": 1500
     }
 
-.. list-table:: Logger Configuration
+.. list-table:: Participant Controller Configuration
    :widths: 15 85
    :header-rows: 1
 
@@ -229,7 +229,7 @@ logs to a file, the following configuration could be used:
    * - Property Name
      - Description
    * - Sinks
-     - A list of logger sink :ref:`configurations<sec:cfg-participant-logsink>`
+     - A list of logger :ref:`sink configurations<sec:cfg-participant-logsink>`
    * - FlushLevel
      - The log level at which flushes are triggered.
    * - LogFromRemotes

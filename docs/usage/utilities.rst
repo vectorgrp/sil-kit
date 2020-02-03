@@ -6,7 +6,7 @@ VIB Utilities
    :local:
    :depth: 1
 
-Running an IntegrationBus system is supported by several utilities.
+Running a Vector Integration Bus (VIB) system is supported by several utilities.
 The launcher's purpose is to simplify starting ensembles  of participants
 and other simulation utilities from a given configuration file.
 The registry is a mandatory part of the VAsio middleware -- it implements
@@ -26,16 +26,16 @@ Launcher
    :stub-columns: 1
 
    *  -  Abstract
-      -  The Launcher script allows starting multiple participants of an
-         IntegrationBus system.
+      -  The Launcher script allows starting multiple participants of a
+         VIB system.
          Nevertheless, all participants, e.g. the Demos, may be executed
          manually as described in the corresponding section.
    *  -  Source location
       -  ``Launcher``
    *  -  Requirements
       -  * `Python <https://www.python.org/downloads/>`_  v3.x+
-         * Adaptation of the ``LaunchConfigurations`` sections in the
-           IntegrationBus config (e.g. Demos/Can/IbConfig_DemoCan.json).
+         * Adaptation of the :doc:`LaunchConfigurations <../configuration/launch-configurations>` section in the
+           Integration Bus config (e.g. Demos/Can/IbConfig_DemoCan.json).
          * Adaptation of INTEGRATIONBUS_BINPATH & INTEGRATIONBUS_LIBPATH
            in process environment. Default is to
            infer the IntegrationBus paths from the path of IbLauncher.py.
@@ -45,7 +45,7 @@ Launcher
          #. Filename of the IB Configuration to be used (IB config file).
          #. Launch configuration ``[-c] CONFIG`` (e.g. Installation/Developer-WinDebug/Developer-WinRelease/Developer-Linux)
          #. Network node ``[-n NODE]``, optional
-         #. FastRTPS domain ID (optional); defaults to ``42``.
+         #. Domain ID (optional); defaults to ``42``.
          #. Command ``[-x COMMAND]`` (e.g. setup/run/teardown/setup-run-teardown(default)), optional
          #. Logfile ``[-l LOGFILE]``, optional
          #. Retries ``[-r RETRIES]``, optional
@@ -84,7 +84,7 @@ VAsio Registry
       - There are up to two positional arguments:
 
         #. Filename of the IB Configuration to be used (IB config file).
-        #. IntegrationBus domain ID (optional); defaults to 42.
+        #. Domain ID (optional); defaults to ``42``.
 
    *  - Usage Example
       - .. code-block:: powershell
@@ -111,9 +111,9 @@ SystemController
 
    *  -  Abstract
       -  The SystemController implements state handling for the participants of
-         a Integration Bus system.
+         an Integration Bus system.
          Examples for state change commands called by the SystemController are
-         'Run','Stop','Shutdown' etc.
+         'Run' or 'Stop'.
    *  -  Source location
       -  ``Utilities/IbSystemController``
    *  -  Requirements
@@ -123,7 +123,7 @@ SystemController
       -  There are up to two positional argument:
 
          #. Filename of the IB Configuration to be used (IB config file).
-         #. FastRTPS domain ID (optional); defaults to 42.
+         #. Domain ID (optional); defaults to ``42``.
    *  -  Usage Example
       -  .. code-block:: powershell
 
@@ -158,7 +158,7 @@ SystemControllerInteractive
       -  There are up to two positional argument:
 
          #. Filename of the IB Configuration to be used (IB config file).
-         #. FastRTPS domain ID (optional); defaults to 42.
+         #. Domain ID (optional); defaults to ``42``.
    *  -  Usage Example
       -  .. code-block:: powershell
 
@@ -179,7 +179,7 @@ SystemMonitor
    :stub-columns: 1
 
    *  -  Abstract
-      -  The SystemMonitor visualizes the states of the participants of a
+      -  The SystemMonitor visualizes the states of the participants of an
          Integration Bus system.
    *  -  Source location
       -  ``Utilities/IbSystemMonitor``
@@ -189,7 +189,7 @@ SystemMonitor
       -  There are up to two positional arguments:
           
          #. Filename of the IB Configuration to be used (IB config file).
-         #. FastRTPS domain ID (optional); defaults to 42.
+         #. Domain ID (optional); defaults to ``42``.
    *  -  Usage Example
       -  .. code-block:: powershell
             

@@ -18,11 +18,11 @@ automotive applications. For this, the Vector Integration Bus provides:
   * Event based synchronization according to lower bound event time
 
 * State handling to control and observe execution of the simulated system
-* System configuration from a single JSON file to specify the simulated including communication
+* System configuration from a single JSON file to specify the simulated participants including communication
   and synchronization needs
 
 
-For getting started developing with the Vector Integration Bus, see the :doc:`quickstart guide <usage/quickstart>`
+For getting started developing with the Vector Integration Bus, see the :doc:`quickstart guide <usage/quickstart>`.
 
 .. _base-architecture:
 
@@ -39,9 +39,9 @@ Supported Services
 
 The currently supported services of the VIB consist of the following categories:
 
-* **IO Ports:** Analog IO, digital IO, Pattern IO and Pulse-width modulation (PWM) IO
 * **Vehicle Network Controllers:** CAN / CAN FD, Ethernet, FlexRay and LIN
 * **Generic Messages:** without any data type constraints
+* **IO Ports:** Analog IO, Digital IO, Pattern IO and Pulse-width modulation (PWM) IO
 
 Vehicle Networks
 ~~~~~~~~~~~~~~~~
@@ -64,11 +64,9 @@ a high detail simulation using the Network Simulator. However, applications that
 with Network Simulator, will also work without it. The CAN, LIN, Ethernet, and FlexRay demos 
 provided with the VIB have all been tested both with and without the Network Simulator.
 
-In Section :ref:`Vector Integration Bus Services<sec:api-services>`, it is
-described how to configure and use Vehicle Network Controllers and pointed out
-which differences for simple simulation and high detail VIBE simulation with the
-Network Simulator exists. Furthermore, the usage of the other services (IO,
-Generic Message, ...) will also be presented in detail.
+The section :ref:`sec:api-services` describes how to configure and use Vehicle Network Controllers
+and points out the differences between simple simulation and high detail VIBE simulation with the
+Network Simulator. In addition, the use of other services (Generic Message, IO, ...) is presented in detail.
 
 
 VIB Prerequisites for Usage
@@ -80,4 +78,4 @@ VIB Prerequisites for Usage
     * GCC 5.4.0-6ubuntu1~16.04.10 **or**
     * Clang 3.8.0-2ubuntu4
 
-These are the specific versions VIB is tested and built against.
+These are specific versions the Vector Integration Bus is tested and built against.

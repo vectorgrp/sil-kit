@@ -5,7 +5,7 @@ Getting Started as a VIB Developer
 .. contents::
 
 
-Build Preqrequisites
+Build Prerequisites
 ~~~~~~~~~~~~~~~~~~~~
 To get started developing you'll need the following prerequisites:
  - `Git`_
@@ -17,7 +17,7 @@ To get started developing you'll need the following prerequisites:
 
 As a user convenience, the cmake build system will attempt to download a git checkout of FastRTPS from github if it can't find the submodule.
 
-For generating the documentation you'll require:
+For generating the documentation, you will require:
  - Python3
  - Sphinx  (e.g. install with *pip install sphinx*)
  - doxygen
@@ -41,7 +41,7 @@ The following options are available:
  * - IB_INSTALL_SOURCE
    - Installs the source-tree (used for packaging releases). Implies IB_BUILD_DOCS.
 
-In general the options can be combined and set using the cmake-gui, your IDE, or command line::
+In general, the options can be combined and set using the cmake-gui, your IDE, or command line::
 
     cmake .. -D IB_BUILD_TESTS=ON -D IB_BUILD_DOCS=ON 
 
@@ -49,7 +49,7 @@ In general the options can be combined and set using the cmake-gui, your IDE, or
 Building Documentation
 ~~~~~~~~~~~~~~~~~~~~~~
 
-You'll need to set the IB_BUILD_DOCS option::
+You will need to set the IB_BUILD_DOCS option::
     
     cmake $source_dir -D IB_BUILD_DOCS=ON
 

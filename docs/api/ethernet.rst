@@ -1,6 +1,6 @@
-=====================
-Ethernet API
-=====================
+====================
+Ethernet Service API
+====================
 
 
 .. contents::
@@ -156,9 +156,11 @@ another process connects to the Named Pipe and is ready to read any incoming Eth
 
 The reading process could be a tool like `wireshark <https://www.wireshark.org/>`_, for example.
 Under Windows, you can start wireshark in a console with a dedicated Named Pipe
-and then connect to the Named Pipe by double-clicking on it::
+and then connect to the Named Pipe by double-clicking on it:
 
-  // Start wireshark with a dedicated Named Pipe
+.. code-block:: powershell
+
+  # Start wireshark with a dedicated Named Pipe
   wireshark -ni \\.\pipe\pcap_output_reader
 
 
