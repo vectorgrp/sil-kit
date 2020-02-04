@@ -85,4 +85,3 @@ Configuration Options
      - This optional section contains information to start all necessary
        processes to perform the configured simulation. It is only used by the
        IbLauncher.
-

@@ -22,6 +22,8 @@ the GIT repository in the folder Demos.
 
 To build the demos, please refer to :ref:`sec:build-demos`.
 
+.. _sec:util-can-demo:
+
 CAN Demo
 ~~~~~~~~
 
