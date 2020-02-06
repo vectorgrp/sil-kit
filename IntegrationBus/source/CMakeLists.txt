@@ -76,6 +76,20 @@ install(EXPORT IntegrationBusTargets
     NAMESPACE "IntegrationBus::"
     FILE IntegrationBusTargets.cmake
 )
+
+# Also install CmakeTargets for MinSizeRel and RelWithDebInfo
+#
+#   These files map the targets to the Release build. Without them, applications
+#   that are built as MinSizeRel or RelWithDebInfo will link against the Debug
+#   build of the VIB and will crash.
+install(
+    FILES
+        cmake/IntegrationBusTargets-minsizerel.cmake
+        cmake/IntegrationBusTargets-relwithdebinfo.cmake
+    DESTINATION ${INSTALL_LIB_DIR}/cmake/IntegrationBus
+    CONFIGURATIONS Release
+)
+
 #make our local build dir usable for other projects
 export(EXPORT IntegrationBusTargets
     NAMESPACE "IntegrationBus::"

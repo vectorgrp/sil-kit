@@ -35,6 +35,9 @@ Fixed
   incorrectly informed a user that IParticipantController::setPeriod() has no effect for this syncType.
 - The LIN controller now only calls the goToSleepHandler if the frame id and also the data field
   of a received LIN frame matches the id and data of a valid "GoToSleep" frame.
+- VIB applications built in RelWithDebInfo or MinSizeRel will no longer link
+  against the VIB Debug installation, which crashes under windows. (AFTMAGT-246)
+
 
 [3.0.1] - 2020-01-08
 --------------------------------
