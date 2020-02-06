@@ -228,7 +228,7 @@ def doBuild(buildName, buildAgent, buildTool) {
                         ccArgs="-DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"
                     }
                     runCmake(buildTool, "Debug", ccArgs)
-                    run "python ${dockerImageDir}/package.py  \"_build_Debug/${artifactName}-*-Debug.zip\" \"_build_Release/${artifactName}-*-Release.zip\""
+                    run "python ${dockerImageDir}/package.py \"_build_Release/${artifactName}-*-Release.zip\" \"_build_Debug/${artifactName}-*-Debug.zip\""
                     archiveToArtifactory("_build_Debug/${artifactName}-*.zip")
                     archiveToArtifactory("${artifactName}-*.zip")
                 }

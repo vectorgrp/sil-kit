@@ -204,7 +204,7 @@ def unpack(workdir, cpackfiles):
     global KEEP_TOP_DIRS
     def is_dir(zipinfo):
         return zipinfo.filename[-1] == '/'
-    for cpack in sorted(cpackfiles):
+    for cpack in cpackfiles:
         log("Unpacking {}", cpack)
         with zipfile.ZipFile(cpack) as zf:
             count = 0
