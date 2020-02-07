@@ -65,3 +65,13 @@ add_vib_test(ITestStateMachineVAsio
       IbMwComAdapter
       IbMwVAsio
 )
+
+# Windows specific tests
+if(WIN32)
+add_vib_test(ITestCompatibilityWithWindowsHeaders
+    SOURCES
+      CompatibilityWithWindowsHeadersITest.cpp
+    LIBS
+      IbMwComAdapter
+)
+endif()

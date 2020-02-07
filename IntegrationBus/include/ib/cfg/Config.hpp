@@ -207,8 +207,8 @@ struct ParticipantController
 {
     SyncType syncType = SyncType::Unsynchronized;
 
-    std::chrono::milliseconds execTimeLimitSoft = std::chrono::milliseconds::max();
-    std::chrono::milliseconds execTimeLimitHard = std::chrono::milliseconds::max();
+    std::chrono::milliseconds execTimeLimitSoft = (std::chrono::milliseconds::max)();
+    std::chrono::milliseconds execTimeLimitHard = (std::chrono::milliseconds::max)();
 };
 
 struct Participant

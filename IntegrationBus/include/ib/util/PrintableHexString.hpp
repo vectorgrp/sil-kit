@@ -33,7 +33,7 @@ public:
         return *this;
     }
 
-    inline auto to_ostream(std::ostream& out) const
+    inline void to_ostream(std::ostream& out) const
     {
         assert(_maxLength <= _iterable.end() - _iterable.begin());
 
@@ -69,7 +69,7 @@ public:
 
 private:
     const IterableT& _iterable;
-    int64_t _maxLength = std::numeric_limits<int64_t>::max();
+    int64_t _maxLength = (std::numeric_limits<int64_t>::max)();
     std::string _separator = "";
 };
 
