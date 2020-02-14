@@ -13,17 +13,6 @@ publishToArtifactory=true
 buildDebugBin=true
 cleanBuild=true
 
-// add new build targets here
-buildTargets = [
-    // Name of the target : ["node label", "generator name"]
-    "VS2017-Win64"     : ["windows", "Visual Studio 15 2017 Win64"]
-    ,"VS2015-Win64"     : ["windows", "Visual Studio 14 2015 Win64"]
-    ,"VS2017-x32"       : ["windows", "Visual Studio 15 2017"]
-    ,"VS2015-x32"       : ["windows", "Visual Studio 14 2015"]
-    ,"Ubuntu-gcc"        : ["docker && linux", "Ninja"]
-    ,"Ubuntu-clang"      : ["docker && linux", "Ninja"]
-]
-
 //linux docker image
 dockerImage ="vib/ubuntu"
 dockerImageDir ="./IntegrationBus/ci" //for packaging additional files in docker, e.g. "."
@@ -45,9 +34,11 @@ cmakeArgs ="-DIB_BIN_FASTRTPS_ENABLE=ON \
 def isDockerNode(label) {
     return label.toUpperCase().contains('DOCKER')
 }
+
 def isClangBuild(label) {
     return label.toUpperCase().contains('CLANG')
 }
+
 //recursive submodule git checkout 
 def checkoutGit() {
     return checkout([$class: 'GitSCM',
@@ -71,6 +62,7 @@ def shallowCheckoutGit() {
             userRemoteConfigs: scm.userRemoteConfigs
         ])
 }
+
 def archiveToArtifactory(pattern) {
     //find the file to upload
     def files = findFiles(glob: pattern)
@@ -98,13 +90,15 @@ def archiveToArtifactory(pattern) {
         artifactoryBuildInfo.append(buildInfo)
     }
 }
+
 // runOnNode: a helper that runs the userStages closure on an appropriate node
 // i.e., this allows running the same stages on docker and windows
-def runOnNode(buildName, buildAgent, userStages) {
+def runOnNode(buildName, buildAgent, userStages) {    
+    // make sure the steps/stages are executed in a separate, clean workspace
+    def wsDir = "workspace/${env.JOB_NAME}/${env.BUILD_NUMBER}/" + buildName.replaceAll(" ", "_")
+    
     return {
-        node(buildAgent) {
-            // make sure the steps/stages are executed in a separate, clean workspace
-            wsDir = "workspace/${env.JOB_NAME}/${env.BUILD_NUMBER}/" + buildName.replaceAll(" ", "_")
+        node(buildAgent) {            
             if(isDockerNode(buildAgent)) {
                 //the built image should be cached and shared anyway
                 stage("${buildName}: build docker image") {
@@ -144,6 +138,7 @@ def runCmake(buildTool, buildType, extraArgs="") {
         steps: [[args: "--target package --config ${buildType}  --parallel", withCmake: true]]
     )
 }
+
 def run(what) {
     if(isUnix()) {
         sh "${what}"
@@ -242,14 +237,18 @@ node {
     // pipeline settings
     properties([
         buildDiscarder(logRotator(numToKeep: keepNumBuilds)),
-    ])
-    //create all parallel build stages
-    def builds =[:]
-    // workaround for https://issues.jenkins-ci.org/browse/JENKINS-49732
-    buildTargets.each { e ->
-        print("runCmakePipeline: ${e.key} -> ${e.value}")
-        builds[e.key] = doBuild(e.key, e.value[0], e.value[1])
-    }
+    ])    
+
+    def builds = [:]
+
+    // "Name of the target" : "Name of the target", "required node label", "generator name")
+    builds.put("VS2017-Win64", doBuild("VS2017-Win64", "windows", "Visual Studio 15 2017 Win64"))
+    builds.put("VS2015-Win64", doBuild("VS2015-Win64", "windows", "Visual Studio 14 2015 Win64"))
+    builds.put("VS2017-x32"  , doBuild("VS2017-x32",   "windows", "Visual Studio 15 2017"))
+    builds.put("VS2015-x32"  , doBuild("VS2015-x32",   "windows", "Visual Studio 14 2015"))
+    builds.put("Ubuntu-clang", doBuild("Ubuntu-clang", "docker && linux", "Ninja"))
+    builds.put("Ubuntu-gcc"  , doBuild("Ubuntu-gcc",   "docker && linux", "Ninja"))
+    
     parallel(builds)
 
     stage("Publishing Build Info") {
