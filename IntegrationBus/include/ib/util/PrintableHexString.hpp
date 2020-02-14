@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <ostream>
 #include <utility>
+#include <algorithm>
 
 
 namespace ib {

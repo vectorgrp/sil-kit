@@ -2,6 +2,7 @@ add_subdirectory(cfg)
 add_subdirectory(mw)
 add_subdirectory(sim)
 add_subdirectory(util)
+add_subdirectory(extensions)
 
 set(GIT_DIR "${PROJECT_SOURCE_DIR}/../.git")
 set(GIT_HEAD_FILE "${GIT_DIR}/HEAD")
@@ -41,6 +42,7 @@ target_link_libraries(IntegrationBus
     PUBLIC  IbInterface
     PRIVATE IbConfig
     PRIVATE IbMwComAdapter
+    PRIVATE IbExtensions
 )
 
 add_library(IbVersion STATIC
