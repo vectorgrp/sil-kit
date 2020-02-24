@@ -6,6 +6,7 @@
 #include <limits>
 #include <iomanip>
 #include <ostream>
+#include <utility>
 
 
 namespace ib {
@@ -68,8 +69,11 @@ public:
     }
 
 private:
+    using difference_type = decltype(std::declval<IterableT>().end()
+            - std::declval<IterableT>().begin());
+
     const IterableT& _iterable;
-    int64_t _maxLength = (std::numeric_limits<int64_t>::max)();
+    difference_type _maxLength = (std::numeric_limits<difference_type>::max)();
     std::string _separator = "";
 };
 

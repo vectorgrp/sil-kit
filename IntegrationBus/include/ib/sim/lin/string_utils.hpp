@@ -327,7 +327,7 @@ std::ostream& operator<<(std::ostream& out, const ControllerConfig& controllerCo
     if (controllerConfig.frameResponses.size() > 0)
     {
         out << static_cast<uint16_t>(controllerConfig.frameResponses[0].frame.id);
-        for (int i = 1; i < controllerConfig.frameResponses.size(); ++i)
+        for (auto i = 1u; i < controllerConfig.frameResponses.size(); ++i)
         {
             out << "," << static_cast<uint16_t>(controllerConfig.frameResponses[1].frame.id);
         }
@@ -352,7 +352,7 @@ std::ostream& operator<<(std::ostream& out, const FrameResponseUpdate& frameResp
     if (responses.size() > 0)
     {
         out << static_cast<uint16_t>(responses[0].frame.id);
-        for (int i = 1; i < responses.size(); ++i)
+        for (auto i = 1u; i < responses.size(); ++i)
         {
             out << "," << static_cast<uint16_t>(responses[1].frame.id);
         }
