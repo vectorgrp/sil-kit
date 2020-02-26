@@ -5,6 +5,19 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[unreleased] - yyyy-mm-dd
+--------------------------------
+
+Added
+~~~~~
+- New integration test ensuring that VAsio is fully deterministic and delivers messages strictly in-order.
+  This test replaces the demo GenericMessageITest, which is now obsolete and has been removed for this reason.
+
+Removed
+~~~~~~~
+- Removed demo GenericMessageITest.
+
+
 [3.0.2] - 2020-02-10
 --------------------------------
 
