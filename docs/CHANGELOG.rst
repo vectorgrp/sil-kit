@@ -5,7 +5,7 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[unreleased] - yyyy-mm-dd
+[3.0.3] - 2020-02-26
 --------------------------------
 
 Added
@@ -13,9 +13,20 @@ Added
 - New integration test ensuring that VAsio is fully deterministic and delivers messages strictly in-order.
   This test replaces the demo GenericMessageITest, which is now obsolete and has been removed for this reason.
 
+Fixed
+~~~~~
+- ib::version::Patch() was set to a wrong value.
+
 Removed
 ~~~~~~~
 - Removed demo GenericMessageITest.
+
+Compatibility with 3.0.2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
 
 
 [3.0.2] - 2020-02-10
