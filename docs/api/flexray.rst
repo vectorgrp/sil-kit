@@ -79,7 +79,7 @@ to the other "following" coldstart node(s)::
 
   leadingColdStartNode->Wakeup();
   // The leading controllers PocState will change from
-  // Ready to Wakeup triggering the ControllerStatusHandler.
+  // Ready to Wakeup triggering the PocStatusHandler.
 
 The response of the following cold startnode must be the
 :cpp:func:`IFrController::AllowColdstart()<ib::sim::fr::IFrController::AllowColdstart>` and 
@@ -147,8 +147,61 @@ is received::
 
 .. admonition:: Note
 
-  For a successful Startup, also the ControllerStatusHandler, the WakeupHandler, the SymbolHandler
+  For a successful Startup, also the PocStatusHandler, the WakeupHandler, the SymbolHandler
   and the SymbolAckHandler should be registered to invoke the different necessary commands.
+
+.. _sec:poc-status-changes:
+
+Receiving POC status changes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The protocol operation control (POC) status is a structure consisting of
+status variables, substates and flags. It is modelled by the
+:cpp:class:`PocStatus<ib::sim::fr::PocStatus>` structure.
+Updates to the controller's PocStatus can be monitored using handlers
+registered with a call to
+:cpp:func:`IFrController::RegisterPocStatusHandler()<ib::sim::fr::IFrController::RegisterPocStatusHandler>`::
+    
+    //Register a PocStatus handler, and handle status changes
+    frController->RegisterPocStatusHandler([&oldPoc](IFrController* ctrl, const PocStatus& poc) {
+        // we might get called even if poc.state was not changed
+        if (poc.state != oldPoc.state)
+        {
+            switch (poc.state)
+            {
+            case PocState::Halt:
+                //handle halt
+                break;
+            case PocState::Config:
+                // etc.
+                break;
+            //case PocState::...
+                //...
+            }
+        }
+
+        if (poc.freeze)
+        {
+          //handle freeze
+        }
+
+        if (poc.chiHaltRequest)
+        {
+          //deferred halt was requested ...
+        }
+
+        //if(poc....) handle other status changes
+
+        // retain state for next handler invocation
+        oldPoc = poc
+    });
+
+The handler will be invoked whenever the controller's PocStatus is updated.
+
+.. admonition:: Note
+
+    POC members beside PocStatus::state are updated when using an accurate simulation with
+    the VIBE network simulator.
 
 
 API and Data Type Reference
@@ -174,6 +227,8 @@ Data Structures
   :members:
 .. doxygenstruct:: ib::sim::fr::ControllerStatus
   :members:
+.. doxygenstruct:: ib::sim::fr::PocStatus
+  :members:
 .. doxygenstruct:: ib::sim::fr::CycleStart
   :members:
 .. doxygenstruct:: ib::sim::fr::ControllerConfig
@@ -197,3 +252,7 @@ Enumerations and Typedefs
 .. doxygenenum:: ib::sim::fr::ChiCommand
 .. doxygenenum:: ib::sim::fr::TransmissionMode
 .. doxygenenum:: ib::sim::fr::PocState
+.. doxygenenum:: ib::sim::fr::SlotModeType
+.. doxygenenum:: ib::sim::fr::ErrorModeType
+.. doxygenenum:: ib::sim::fr::StartupStateType
+.. doxygenenum:: ib::sim::fr::WakeupStatusType

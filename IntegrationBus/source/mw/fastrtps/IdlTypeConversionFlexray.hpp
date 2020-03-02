@@ -20,6 +20,10 @@ inline auto to_idl(TransmissionMode msg) -> idl::TransmissionMode;
 inline auto to_idl(SymbolPattern msg) -> idl::SymbolPattern;
 inline auto to_idl(ChiCommand msg) -> idl::ChiCommand;
 inline auto to_idl(PocState msg) -> idl::PocState;
+inline auto to_idl(ErrorModeType msg) -> idl::ErrorModeType;
+inline auto to_idl(SlotModeType msg) -> idl::SlotModeType;
+inline auto to_idl(StartupStateType msg) -> idl::StartupStateType;
+inline auto to_idl(WakeupStatusType msg) -> idl::WakeupStatusType;
 
 inline auto to_idl(const Header& msg) -> idl::Header;
 inline auto to_idl(const Frame& msg) -> idl::Frame;
@@ -41,6 +45,7 @@ inline auto to_idl(TxBufferConfigUpdate&& msg) -> idl::TxBufferConfigUpdate;
 inline auto to_idl(const TxBufferUpdate& msg) -> idl::TxBufferUpdate;
 inline auto to_idl(TxBufferUpdate&& msg)->idl::TxBufferUpdate;
 inline auto to_idl(const ControllerStatus& msg) -> idl::ControllerStatus;
+inline auto to_idl(const PocStatus& msg) -> idl::PocStatus;
 
 
 namespace idl {
@@ -50,6 +55,10 @@ inline auto from_idl(TransmissionMode idl) -> fr::TransmissionMode;
 inline auto from_idl(SymbolPattern idl) -> fr::SymbolPattern;
 inline auto from_idl(ChiCommand idl) -> fr::ChiCommand;
 inline auto from_idl(PocState idl) -> fr::PocState;
+inline auto from_idl(ErrorModeType idl) -> fr::ErrorModeType;
+inline auto from_idl(SlotModeType idl) -> fr::SlotModeType;
+inline auto from_idl(StartupStateType idl) -> fr::StartupStateType;
+inline auto from_idl(WakeupStatusType idl) -> fr::WakeupStatusType;
 
 inline auto from_idl(Header&& idl) -> fr::Header;
 inline auto from_idl(Frame&& idl) -> fr::Frame;
@@ -66,6 +75,7 @@ inline auto from_idl(ControllerConfig&& idl) -> fr::ControllerConfig;
 inline auto from_idl(TxBufferConfigUpdate&& idl) -> fr::TxBufferConfigUpdate;
 inline auto from_idl(TxBufferUpdate&& idl) -> fr::TxBufferUpdate;
 inline auto from_idl(ControllerStatus&& idl) -> fr::ControllerStatus;
+inline auto from_idl(PocStatus&& idl) -> fr::PocStatus;
 
 } // namespace idl
 
@@ -281,6 +291,174 @@ auto idl::from_idl(idl::PocState idl) -> fr::PocState
         return fr::PocState::Halt;
     default:
         throw std::logic_error("Unhandled case of ib::sim::fr::idl::PocState in conversion from_idl.");
+    }
+}
+
+auto to_idl(SlotModeType msg) -> idl::SlotModeType
+{
+    switch (msg)
+    {
+    case SlotModeType::KeySlot:
+        return idl::KeySlot;
+    case SlotModeType::AllPending:
+        return idl::AllPending;
+    case SlotModeType::All:
+        return idl::All;
+    default:
+        throw std::logic_error("Unhandled case of ib::sim::fr::SlotModeType in conversion from_idl.");
+    }
+}
+
+auto idl::from_idl(idl::SlotModeType idl) -> fr::SlotModeType
+{
+    switch (idl)
+    {
+    case idl::KeySlot:
+        return fr::SlotModeType::KeySlot;
+    case idl::AllPending:
+        return fr::SlotModeType::AllPending;
+    case idl::All:
+        return fr::SlotModeType::All;
+    default:
+        throw std::logic_error("Unhandled case of ib::sim::fr::idl::SlotModeType in conversion from_idl.");
+    }
+}
+
+auto to_idl(ErrorModeType msg) -> idl::ErrorModeType
+{
+    switch (msg)
+    {
+    case ErrorModeType::Active:
+        return idl::Active;
+    case ErrorModeType::Passive:
+        return idl::Passive;
+    case ErrorModeType::CommHalt:
+        return idl::CommHalt;
+    default:
+        throw std::logic_error("Unhandled case of ib::sim::fr::ErrorModeType in conversion from_idl.");
+    }
+}
+
+auto idl::from_idl(idl::ErrorModeType idl) -> fr::ErrorModeType
+{
+    switch (idl)
+    {
+    case idl::Active:
+        return fr::ErrorModeType::Active;
+    case idl::Passive:
+        return fr::ErrorModeType::Passive;
+    case idl::CommHalt:
+        return fr::ErrorModeType::CommHalt;
+    default:
+        throw std::logic_error("Unhandled case of ib::sim::fr::idl::ErrorModeType in conversion from_idl.");
+    }
+}
+
+auto to_idl(StartupStateType msg) -> idl::StartupStateType
+{
+    switch (msg)
+    {
+    case StartupStateType::Undefined:
+        return idl::Undefined;
+    case StartupStateType::ColdStartListen:
+        return idl::ColdStartListen;
+    case StartupStateType::IntegrationColdstartCheck:
+        return idl::IntegrationColdstartCheck;
+    case StartupStateType::ColdStartJoin:
+        return idl::ColdStartJoin;
+    case StartupStateType::ColdStartCollisionResolution:
+        return idl::ColdStartCollisionResolution;
+    case StartupStateType::ColdStartConsistencyCheck:
+        return idl::ColdStartConsistencyCheck;
+    case StartupStateType::IntegrationListen:
+        return idl::IntegrationListen;
+    case StartupStateType::InitializeSchedule:
+        return idl::InitializeSchedule;
+    case StartupStateType::IntegrationConsistencyCheck:
+        return idl::IntegrationConsistencyCheck;
+    case StartupStateType::ColdStartGap:
+        return idl::ColdStartGap;
+    case StartupStateType::ExternalStartup:
+        return idl::ExternalStartup;
+    default:
+        throw std::logic_error("Unhandled case of ib::sim::fr::StartupStateType in conversion from_idl.");
+    }
+}
+
+auto idl::from_idl(idl::StartupStateType idl) -> fr::StartupStateType
+{
+    switch (idl)
+    {
+    case idl::Undefined:
+        return fr::StartupStateType::Undefined;
+    case idl::ColdStartListen:
+        return fr::StartupStateType::ColdStartListen;
+    case idl::IntegrationColdstartCheck:
+        return fr::StartupStateType::IntegrationColdstartCheck;
+    case idl::ColdStartJoin:
+        return fr::StartupStateType::ColdStartJoin;
+    case idl::ColdStartCollisionResolution:
+        return fr::StartupStateType::ColdStartCollisionResolution;
+    case idl::ColdStartConsistencyCheck:
+        return fr::StartupStateType::ColdStartConsistencyCheck;
+    case idl::IntegrationListen:
+        return fr::StartupStateType::IntegrationListen;
+    case idl::InitializeSchedule:
+        return fr::StartupStateType::InitializeSchedule;
+    case idl::IntegrationConsistencyCheck:
+        return fr::StartupStateType::IntegrationConsistencyCheck;
+    case idl::ColdStartGap:
+        return fr::StartupStateType::ColdStartGap;
+    case idl::ExternalStartup:
+        return fr::StartupStateType::ExternalStartup;
+    default:
+        throw std::logic_error("Unhandled case of ib::sim::fr::idl::StartupStateType in conversion from_idl.");
+    }
+}
+
+auto to_idl(WakeupStatusType msg) -> idl::WakeupStatusType
+{
+    switch (msg)
+    {
+    case WakeupStatusType::Undefined:
+        return idl::UndefinedWakeupStatus;
+    case WakeupStatusType::ReceivedHeader:
+        return idl::ReceivedHeader;
+    case WakeupStatusType::ReceivedWup:
+        return idl::ReceivedWup;
+    case WakeupStatusType::CollisionHeader:
+        return idl::CollisionHeader;
+    case WakeupStatusType::CollisionWup:
+        return idl::CollisionWup;
+    case WakeupStatusType::CollisionUnknown:
+        return idl::CollisionUnknown;
+    case WakeupStatusType::Transmitted:
+        return idl::Transmitted;
+    default:
+        throw std::logic_error("Unhandled case of ib::sim::fr::idl::WakeupStatusType in conversion from_idl.");
+    }
+}
+
+auto idl::from_idl(idl::WakeupStatusType idl) -> fr::WakeupStatusType
+{
+    switch (idl)
+    {
+    case idl::UndefinedWakeupStatus:
+        return fr::WakeupStatusType::Undefined;
+    case idl::ReceivedHeader:
+        return fr::WakeupStatusType::ReceivedHeader;
+    case idl::ReceivedWup:
+        return fr::WakeupStatusType::ReceivedWup;
+    case idl::CollisionHeader:
+        return fr::WakeupStatusType::CollisionHeader;
+    case idl::CollisionWup:
+        return fr::WakeupStatusType::CollisionWup;
+    case idl::CollisionUnknown:
+        return fr::WakeupStatusType::CollisionUnknown;
+    case idl::Transmitted:
+        return fr::WakeupStatusType::Transmitted;
+    default:
+        throw std::logic_error("Unhandled case of ib::sim::fr::idl::WakeupStatusType in conversion from_idl.");
     }
 }
 
@@ -752,6 +930,43 @@ auto idl::from_idl(idl::ControllerStatus&& idl) -> fr::ControllerStatus
     return msg;
 }
 
+auto to_idl(const PocStatus& msg) -> idl::PocStatus
+{
+    idl::PocStatus idl;
+
+    idl.timeNs(msg.timestamp.count());
+
+    idl.state(to_idl(msg.state));
+    idl.chiHaltRequest(msg.chiHaltRequest);
+    idl.coldstartNoise(msg.coldstartNoise);
+    idl.freeze(msg.freeze);
+    idl.chiReadyRequest(msg.chiReadyRequest);
+
+    idl.errorMode(to_idl(msg.errorMode));
+    idl.slotMode(to_idl(msg.slotMode));
+    idl.startupState(to_idl(msg.startupState));
+    idl.wakeupStatus(to_idl(msg.wakeupStatus));
+    return idl;
+}
+
+auto idl::from_idl(idl::PocStatus&& idl) -> fr::PocStatus
+{
+    fr::PocStatus msg;
+
+    msg.timestamp = std::chrono::nanoseconds{idl.timeNs()};
+    msg.state = from_idl(idl.state());
+
+    msg.chiHaltRequest= idl.chiHaltRequest();
+    msg.coldstartNoise = idl.coldstartNoise();
+    msg.freeze = idl.freeze();
+    msg.chiReadyRequest = idl.chiReadyRequest();
+  
+    msg.errorMode = from_idl(idl.errorMode());
+    msg.slotMode = from_idl(idl.slotMode());
+    msg.startupState = from_idl(idl.startupState());
+    msg.wakeupStatus = from_idl(idl.wakeupStatus());
+    return msg;
+}
 
 } // namespace fr
 } // namespace sim

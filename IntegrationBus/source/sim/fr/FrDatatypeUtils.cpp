@@ -70,6 +70,20 @@ bool operator==(const ControllerStatus& lhs, const ControllerStatus& rhs)
     return lhs.pocState == rhs.pocState;
 }
 
+bool operator==(const PocStatus& lhs, const PocStatus& rhs)
+{
+    return lhs.state == rhs.state
+        && lhs.chiHaltRequest == rhs.chiHaltRequest
+        && lhs.chiReadyRequest == rhs.chiReadyRequest
+        && lhs.slotMode == rhs.slotMode
+        && lhs.errorMode == rhs.errorMode
+        && lhs.wakeupStatus == rhs.wakeupStatus
+        && lhs.startupState == rhs.startupState
+        && lhs.freeze == rhs.freeze
+        && lhs.coldstartNoise == rhs.coldstartNoise
+    ;
+}
+
 bool operator==(const CycleStart& lhs, const CycleStart& rhs)
 {
     return lhs.cycleCounter == rhs.cycleCounter

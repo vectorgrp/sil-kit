@@ -9,13 +9,31 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 --------------------------------
 This is Sprint 39.
 
+Added
+~~~~~
+- A new FlexRay controller API is introduced for monitoring protocol operation
+  control (POC) status changes, cf. :ref:`sec:poc-status-changes`.
+  This new API supersedes the  ControllerStatusHandler mechanism, as current use
+  cases and new ones are covered by the PocStatus handler.
+  This new API exposes more status variables of the POC when using the VIBE
+  Network Simulator for FlexRay simulation. (AFTMAGT-253)
+
+Deprecated
+~~~~~~~~~~
+- :cpp:func:`IFrController::RegisterControllerStatusHandler()<ib::sim::fr::IFrController::RegisterControllerStatusHandler()>`
+  is now deprecated in favor of
+  :cpp:func:`RegisterPocStatusHandler()<ib::sim::fr::IFrController::RegisterPocStatusHandler()>`.
+  ControllerStatusHandler will be removed in a future release.
+
 Fixed
 ~~~~~
 - The IbRegistry can now be used for multiple simulation runs without the need
   to terminate and restart it. (AFTMAGT-249)
 
-Compatibility with 3.0.2
+
+Compatibility with 3.0.3
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 - Application binary interface (ABI): Yes
 - Application software interface (API): Yes
 - Middleware network protocol (FastRTPS): Yes

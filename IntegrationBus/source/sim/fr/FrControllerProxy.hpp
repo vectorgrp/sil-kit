@@ -72,6 +72,7 @@ public:
     void RegisterMessageAckHandler(MessageAckHandler handler) override;
     void RegisterWakeupHandler(WakeupHandler handler) override;
     void RegisterControllerStatusHandler(ControllerStatusHandler handler) override;
+    void RegisterPocStatusHandler(PocStatusHandler handler) override;
     void RegisterSymbolHandler(SymbolHandler handler) override;
     void RegisterSymbolAckHandler(SymbolAckHandler handler) override;
     void RegisterCycleStartHandler(CycleStartHandler handler) override;
@@ -83,6 +84,7 @@ public:
     void ReceiveIbMessage(mw::EndpointAddress from, const FrSymbolAck& msg) override;
     void ReceiveIbMessage(mw::EndpointAddress from, const CycleStart& msg) override;
     void ReceiveIbMessage(mw::EndpointAddress from, const ControllerStatus& msg) override;
+    void ReceiveIbMessage(mw::EndpointAddress from, const PocStatus& msg) override;
 
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
@@ -119,7 +121,8 @@ private:
         CallbackVector<FrSymbol>,
         CallbackVector<FrSymbolAck>,
         CallbackVector<CycleStart>,
-        CallbackVector<ControllerStatus>
+        CallbackVector<ControllerStatus>,
+        CallbackVector<PocStatus>
     > _callbacks;
 
     CallbackVector<FrSymbol> _wakeupHandlers;

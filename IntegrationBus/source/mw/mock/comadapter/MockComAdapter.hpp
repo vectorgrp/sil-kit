@@ -95,6 +95,7 @@ public:
     void SendIbMessage(EndpointAddress /*from*/, const sim::fr::TxBufferConfigUpdate& /*msg*/) {}
     void SendIbMessage(EndpointAddress /*from*/, const sim::fr::TxBufferUpdate& /*msg*/) {}
     void SendIbMessage(EndpointAddress /*from*/, const sim::fr::ControllerStatus& /*msg*/) {}
+    void SendIbMessage(EndpointAddress /*from*/, const sim::fr::PocStatus& /*msg*/) {}
 
     void SendIbMessage(EndpointAddress /*from*/, const sim::lin::SendFrameRequest& /*msg*/) {}
     void SendIbMessage(EndpointAddress /*from*/, const sim::lin::SendFrameHeaderRequest& /*msg*/) {}

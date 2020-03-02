@@ -38,9 +38,14 @@ public:
 
     /*! Callback type to indicate that the POC state has changed.
     *   Cf. \ref RegisterControllerStatusHandler();
+    * \deprecated the ControllerStatus is deprecated in favor of the PocStatus.
     */
     using ControllerStatusHandler = CallbackT<ControllerStatus>;
 
+    /*! Callback type to indicate that the POC status (including state variables, modes and error codes) has changed.
+    * 
+    */
+    using PocStatusHandler = CallbackT<PocStatus>;
 
     /*! Callback type to indicate that the controller has received a symbol.
      *  Cf. \ref RegisterSymbolHandler();
@@ -128,8 +133,11 @@ public:
     virtual void RegisterMessageAckHandler(MessageAckHandler handler) = 0;
     //! \brief Notification that a wakeup has been received.
     virtual void RegisterWakeupHandler(WakeupHandler handler) = 0;
-    //! \brief Notification that the POC state has changed.
+    //! \brief Notification that the POC state has changed (deprecated API, cf.
+    //         RegisterPocStatusHandler).
     virtual void RegisterControllerStatusHandler(ControllerStatusHandler handler) = 0;
+    //! \brief Notification that the POC status has changed.
+    virtual void RegisterPocStatusHandler(PocStatusHandler handler) = 0;
 
 
     /*! \brief Notification that the controller has received a symbol.

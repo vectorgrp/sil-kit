@@ -40,6 +40,7 @@ struct FlexRayNode
         : controller{controller}
         , controllerConfig{std::move(config)}
     {
+      oldPocStatus.state = fr::PocState::DefaultConfig;
     }
 
     void Init()
@@ -49,7 +50,7 @@ struct FlexRayNode
 
     void doAction(std::chrono::nanoseconds now)
     {
-        switch (state)
+        switch (oldPocStatus.state)
         {
         case fr::PocState::Ready:
             return pocReady(now);
@@ -141,22 +142,23 @@ struct FlexRayNode
         }
     }
 
-    void ControllerStatusHandler(fr::IFrController* /*controller*/, const fr::ControllerStatus& status)
+    void PocStatusHandler(fr::IFrController* /*controller*/, const fr::PocStatus& pocStatus)
     {
-        std::cout << ">> POC=" << status.pocState
-                  << " @t=" << status.timestamp
+        std::cout << ">> POC=" << pocStatus.state
+                  << ", Freeze=" <<  pocStatus.freeze
+                  << ", Wakeup=" <<  pocStatus.wakeupStatus
+                  << ", Slot=" <<  pocStatus.slotMode
+                  << " @t=" << pocStatus.timestamp
                   << std::endl;
 
-        auto oldState = state;
-        state = status.pocState;
-
-        if (oldState == fr::PocState::Wakeup
-            && state == fr::PocState::Ready)
+        if (oldPocStatus.state == fr::PocState::Wakeup
+            && oldPocStatus.state == fr::PocState::Ready)
         {
             std::cout << "   Wakeup finished..." << std::endl;
             busState = MasterState::WakeupDone;
         }
 
+        oldPocStatus = pocStatus;
     }
 
     void WakeupHandler(fr::IFrController* controller, const fr::FrSymbol& symbol)
@@ -170,7 +172,7 @@ struct FlexRayNode
     fr::IFrController* controller = nullptr;
 
     fr::ControllerConfig controllerConfig;
-    fr::PocState state = fr::PocState::DefaultConfig;
+    fr::PocStatus oldPocStatus{};
 
     enum class MasterState
     {
@@ -267,7 +269,7 @@ int main(int argc, char** argv)
         if (participantName == "Node0")
             frNode.busState = FlexRayNode::MasterState::PerformWakeup;
 
-        controller->RegisterControllerStatusHandler(bind_method(&frNode, &FlexRayNode::ControllerStatusHandler));
+        controller->RegisterPocStatusHandler(bind_method(&frNode, &FlexRayNode::PocStatusHandler));
         controller->RegisterMessageHandler(&ReceiveMessage<fr::FrMessage>);
         controller->RegisterMessageAckHandler(&ReceiveMessage<fr::FrMessageAck>);
         controller->RegisterWakeupHandler(bind_method(&frNode, &FlexRayNode::WakeupHandler));

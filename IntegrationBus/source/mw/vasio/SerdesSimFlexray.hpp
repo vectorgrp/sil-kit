@@ -339,6 +339,37 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, Controll
     return buffer;
 }
 
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const PocStatus& status)
+{
+    buffer
+        << status.timestamp
+        << status.chiHaltRequest
+        << status.coldstartNoise
+        << status.errorMode
+        << status.freeze
+        << status.slotMode
+        << status.startupState
+        << status.state
+        << status.wakeupStatus
+        << status.chiReadyRequest;
+    return buffer;
+}
+
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, PocStatus& status)
+{
+    buffer
+      >> status.timestamp
+      >> status.chiHaltRequest
+      >> status.coldstartNoise
+      >> status.errorMode
+      >> status.freeze
+      >> status.slotMode
+      >> status.startupState
+      >> status.state
+      >> status.wakeupStatus
+      >> status.chiReadyRequest;
+    return buffer;
+}
 } // namespace fr
 } // namespace sim
 } // namespace ib

@@ -419,6 +419,7 @@ struct CycleStart
 
 /*!
  * \brief Protocol Operation Control (POC) state of the FlexRay communication controller
+ * *AUTOSAR Name:* Fr_POCStateType
  */
 enum class PocState : uint8_t
 {
@@ -434,6 +435,7 @@ enum class PocState : uint8_t
 
 /*!
  * \brief Status of the simulated FlexRay controller
+ * \deprecated ControllerStatus is deprecated in favor of PocStatus which follows the AUTOSAR flexray model more closely.
  */
 struct ControllerStatus
 {
@@ -441,6 +443,86 @@ struct ControllerStatus
     PocState pocState; //!< Status of the Protocol Operation Control (POC).
 };
 
+/*!
+* \brief Indicates what slot mode the POC is in.
+* *AUTOSAR Name:* Fr_SlotModeType
+*/
+enum class SlotModeType : uint8_t
+{
+    KeySlot = 0x00,
+    AllPending,
+    All,
+};
+
+/*!
+* \brief Indicates what error mode the POC is in.
+* *AUTOSAR Name:* Fr_ErrorModeType
+*/
+enum class ErrorModeType : uint8_t
+{
+    Active = 0x00,
+    Passive,
+    CommHalt,
+};
+
+/*!
+* \brief Indicates the current substate in the startup procedure.
+* *AUTOSAR Name:* Fr_StartupStateType
+*/
+
+enum class StartupStateType : uint8_t
+{
+    Undefined = 0x00,
+    ColdStartListen,
+    IntegrationColdstartCheck,
+    ColdStartJoin,
+    ColdStartCollisionResolution,
+    ColdStartConsistencyCheck,
+    IntegrationListen,
+    InitializeSchedule,
+    IntegrationConsistencyCheck,
+    ColdStartGap,
+    ExternalStartup,
+};
+
+/*!
+* \brief Indicates the outcome of the wake-up mechanism.
+* *AUTOSAR Name:* Fr_WakeupStateType
+*/
+enum class WakeupStatusType : uint8_t
+{
+    Undefined = 0x00,
+    ReceivedHeader,
+    ReceivedWup,
+    CollisionHeader,
+    CollisionWup,
+    CollisionUnknown,
+    Transmitted,
+};
+
+/*!
+ * \brief Protocol Operation Control status as available in the AUTOSAR
+ *        FlexRay driver model.
+ *
+ * This enhances the deprecated struct ControllerStatus by adding  members
+ * that are available through the Controller Host Interface.
+ * *AUTOSAR Name:* Fr_POCStatusType
+ * 
+ */
+struct PocStatus
+{
+    std::chrono::nanoseconds timestamp; //!< IB timestamp
+
+    PocState state; //!< Status of the Protocol Operation Control (POC).
+    bool chiHaltRequest; //!< indicates whether a halt request was received from the CHI
+    bool coldstartNoise; //!< indicates noisy channel conditions during coldstart 
+    bool freeze; //!< indicates that the POC entered a halt state due to an error condition requiring immediate halt.
+    bool chiReadyRequest; //!< indicates that the CHI requested to enter ready state at the end of the communication cycle.
+    ErrorModeType errorMode; //!< indicates the error mode of the POC
+    SlotModeType slotMode; //!< indicates the slot mode of the POC
+    StartupStateType startupState; //!< indicates states within the STARTUP mechanism
+    WakeupStatusType wakeupStatus; //!< outcome of the execution of the WAKEUP mechanism
+};
 
 // ================================================================================
 //  Inline Implementations

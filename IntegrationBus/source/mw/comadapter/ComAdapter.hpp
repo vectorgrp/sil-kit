@@ -102,6 +102,7 @@ public:
     void SendIbMessage(EndpointAddress from, const sim::fr::TxBufferConfigUpdate& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::fr::TxBufferUpdate& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::fr::ControllerStatus& msg) override;
+    void SendIbMessage(EndpointAddress from, const sim::fr::PocStatus& msg) override;
 
     void SendIbMessage(EndpointAddress from, const sim::lin::SendFrameRequest& msg) override;
     void SendIbMessage(EndpointAddress from, const sim::lin::SendFrameHeaderRequest& msg) override;

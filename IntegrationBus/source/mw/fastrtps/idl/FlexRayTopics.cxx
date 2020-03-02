@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*! 
+/*!
  * @file FlexRayTopics.cpp
  * This source file contains the definition of the described types in the IDL file.
  *
@@ -37,50 +37,50 @@ using namespace eprosima::fastcdr::exception;
 ib::sim::fr::idl::ClusterParameters::ClusterParameters()
 {
     m_gColdstartAttempts = 0;
-
     m_gCycleCountMax = 0;
-
     m_gdActionPointOffset = 0;
-
     m_gdDynamicSlotIdlePhase = 0;
-
     m_gdMiniSlot = 0;
-
     m_gdMiniSlotActionPointOffset = 0;
-
     m_gdStaticSlot = 0;
-
     m_gdSymbolWindow = 0;
-
     m_gdSymbolWindowActionPointOffset = 0;
-
     m_gdTSSTransmitter = 0;
-
     m_gdWakeupTxActive = 0;
-
     m_gdWakeupTxIdle = 0;
-
     m_gListenNoise = 0;
-
     m_gMacroPerCycle = 0;
-
     m_gMaxWithoutClockCorrectionFatal = 0;
-
     m_gMaxWithoutClockCorrectionPassive = 0;
-
     m_gNumberOfMiniSlots = 0;
-
     m_gNumberOfStaticSlots = 0;
-
     m_gPayloadLengthStatic = 0;
-
     m_gSyncFrameIDCountMax = 0;
-
 
 }
 
 ib::sim::fr::idl::ClusterParameters::~ClusterParameters()
 {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 ib::sim::fr::idl::ClusterParameters::ClusterParameters(const ClusterParameters &x)
@@ -133,6 +133,7 @@ ib::sim::fr::idl::ClusterParameters::ClusterParameters(ClusterParameters &&x)
 
 ib::sim::fr::idl::ClusterParameters& ib::sim::fr::idl::ClusterParameters::operator=(const ClusterParameters &x)
 {
+
     m_gColdstartAttempts = x.m_gColdstartAttempts;
     m_gCycleCountMax = x.m_gCycleCountMax;
     m_gdActionPointOffset = x.m_gdActionPointOffset;
@@ -159,6 +160,7 @@ ib::sim::fr::idl::ClusterParameters& ib::sim::fr::idl::ClusterParameters::operat
 
 ib::sim::fr::idl::ClusterParameters& ib::sim::fr::idl::ClusterParameters::operator=(ClusterParameters &&x)
 {
+
     m_gColdstartAttempts = x.m_gColdstartAttempts;
     m_gCycleCountMax = x.m_gCycleCountMax;
     m_gdActionPointOffset = x.m_gdActionPointOffset;
@@ -186,6 +188,7 @@ ib::sim::fr::idl::ClusterParameters& ib::sim::fr::idl::ClusterParameters::operat
 size_t ib::sim::fr::idl::ClusterParameters::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
@@ -256,6 +259,7 @@ size_t ib::sim::fr::idl::ClusterParameters::getCdrSerializedSize(const ib::sim::
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
 
@@ -322,6 +326,7 @@ size_t ib::sim::fr::idl::ClusterParameters::getCdrSerializedSize(const ib::sim::
 
 void ib::sim::fr::idl::ClusterParameters::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_gColdstartAttempts;
     scdr << m_gCycleCountMax;
     scdr << m_gdActionPointOffset;
@@ -346,6 +351,7 @@ void ib::sim::fr::idl::ClusterParameters::serialize(eprosima::fastcdr::Cdr &scdr
 
 void ib::sim::fr::idl::ClusterParameters::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_gColdstartAttempts;
     dcdr >> m_gCycleCountMax;
     dcdr >> m_gdActionPointOffset;
@@ -368,10 +374,532 @@ void ib::sim::fr::idl::ClusterParameters::deserialize(eprosima::fastcdr::Cdr &dc
     dcdr >> m_gSyncFrameIDCountMax;
 }
 
+/*!
+ * @brief This function sets a value in member gColdstartAttempts
+ * @param _gColdstartAttempts New value for member gColdstartAttempts
+ */
+void ib::sim::fr::idl::ClusterParameters::gColdstartAttempts(uint8_t _gColdstartAttempts)
+{
+m_gColdstartAttempts = _gColdstartAttempts;
+}
+
+/*!
+ * @brief This function returns the value of member gColdstartAttempts
+ * @return Value of member gColdstartAttempts
+ */
+uint8_t ib::sim::fr::idl::ClusterParameters::gColdstartAttempts() const
+{
+    return m_gColdstartAttempts;
+}
+
+/*!
+ * @brief This function returns a reference to member gColdstartAttempts
+ * @return Reference to member gColdstartAttempts
+ */
+uint8_t& ib::sim::fr::idl::ClusterParameters::gColdstartAttempts()
+{
+    return m_gColdstartAttempts;
+}
+/*!
+ * @brief This function sets a value in member gCycleCountMax
+ * @param _gCycleCountMax New value for member gCycleCountMax
+ */
+void ib::sim::fr::idl::ClusterParameters::gCycleCountMax(uint8_t _gCycleCountMax)
+{
+m_gCycleCountMax = _gCycleCountMax;
+}
+
+/*!
+ * @brief This function returns the value of member gCycleCountMax
+ * @return Value of member gCycleCountMax
+ */
+uint8_t ib::sim::fr::idl::ClusterParameters::gCycleCountMax() const
+{
+    return m_gCycleCountMax;
+}
+
+/*!
+ * @brief This function returns a reference to member gCycleCountMax
+ * @return Reference to member gCycleCountMax
+ */
+uint8_t& ib::sim::fr::idl::ClusterParameters::gCycleCountMax()
+{
+    return m_gCycleCountMax;
+}
+/*!
+ * @brief This function sets a value in member gdActionPointOffset
+ * @param _gdActionPointOffset New value for member gdActionPointOffset
+ */
+void ib::sim::fr::idl::ClusterParameters::gdActionPointOffset(uint16_t _gdActionPointOffset)
+{
+m_gdActionPointOffset = _gdActionPointOffset;
+}
+
+/*!
+ * @brief This function returns the value of member gdActionPointOffset
+ * @return Value of member gdActionPointOffset
+ */
+uint16_t ib::sim::fr::idl::ClusterParameters::gdActionPointOffset() const
+{
+    return m_gdActionPointOffset;
+}
+
+/*!
+ * @brief This function returns a reference to member gdActionPointOffset
+ * @return Reference to member gdActionPointOffset
+ */
+uint16_t& ib::sim::fr::idl::ClusterParameters::gdActionPointOffset()
+{
+    return m_gdActionPointOffset;
+}
+/*!
+ * @brief This function sets a value in member gdDynamicSlotIdlePhase
+ * @param _gdDynamicSlotIdlePhase New value for member gdDynamicSlotIdlePhase
+ */
+void ib::sim::fr::idl::ClusterParameters::gdDynamicSlotIdlePhase(uint16_t _gdDynamicSlotIdlePhase)
+{
+m_gdDynamicSlotIdlePhase = _gdDynamicSlotIdlePhase;
+}
+
+/*!
+ * @brief This function returns the value of member gdDynamicSlotIdlePhase
+ * @return Value of member gdDynamicSlotIdlePhase
+ */
+uint16_t ib::sim::fr::idl::ClusterParameters::gdDynamicSlotIdlePhase() const
+{
+    return m_gdDynamicSlotIdlePhase;
+}
+
+/*!
+ * @brief This function returns a reference to member gdDynamicSlotIdlePhase
+ * @return Reference to member gdDynamicSlotIdlePhase
+ */
+uint16_t& ib::sim::fr::idl::ClusterParameters::gdDynamicSlotIdlePhase()
+{
+    return m_gdDynamicSlotIdlePhase;
+}
+/*!
+ * @brief This function sets a value in member gdMiniSlot
+ * @param _gdMiniSlot New value for member gdMiniSlot
+ */
+void ib::sim::fr::idl::ClusterParameters::gdMiniSlot(uint16_t _gdMiniSlot)
+{
+m_gdMiniSlot = _gdMiniSlot;
+}
+
+/*!
+ * @brief This function returns the value of member gdMiniSlot
+ * @return Value of member gdMiniSlot
+ */
+uint16_t ib::sim::fr::idl::ClusterParameters::gdMiniSlot() const
+{
+    return m_gdMiniSlot;
+}
+
+/*!
+ * @brief This function returns a reference to member gdMiniSlot
+ * @return Reference to member gdMiniSlot
+ */
+uint16_t& ib::sim::fr::idl::ClusterParameters::gdMiniSlot()
+{
+    return m_gdMiniSlot;
+}
+/*!
+ * @brief This function sets a value in member gdMiniSlotActionPointOffset
+ * @param _gdMiniSlotActionPointOffset New value for member gdMiniSlotActionPointOffset
+ */
+void ib::sim::fr::idl::ClusterParameters::gdMiniSlotActionPointOffset(uint16_t _gdMiniSlotActionPointOffset)
+{
+m_gdMiniSlotActionPointOffset = _gdMiniSlotActionPointOffset;
+}
+
+/*!
+ * @brief This function returns the value of member gdMiniSlotActionPointOffset
+ * @return Value of member gdMiniSlotActionPointOffset
+ */
+uint16_t ib::sim::fr::idl::ClusterParameters::gdMiniSlotActionPointOffset() const
+{
+    return m_gdMiniSlotActionPointOffset;
+}
+
+/*!
+ * @brief This function returns a reference to member gdMiniSlotActionPointOffset
+ * @return Reference to member gdMiniSlotActionPointOffset
+ */
+uint16_t& ib::sim::fr::idl::ClusterParameters::gdMiniSlotActionPointOffset()
+{
+    return m_gdMiniSlotActionPointOffset;
+}
+/*!
+ * @brief This function sets a value in member gdStaticSlot
+ * @param _gdStaticSlot New value for member gdStaticSlot
+ */
+void ib::sim::fr::idl::ClusterParameters::gdStaticSlot(uint16_t _gdStaticSlot)
+{
+m_gdStaticSlot = _gdStaticSlot;
+}
+
+/*!
+ * @brief This function returns the value of member gdStaticSlot
+ * @return Value of member gdStaticSlot
+ */
+uint16_t ib::sim::fr::idl::ClusterParameters::gdStaticSlot() const
+{
+    return m_gdStaticSlot;
+}
+
+/*!
+ * @brief This function returns a reference to member gdStaticSlot
+ * @return Reference to member gdStaticSlot
+ */
+uint16_t& ib::sim::fr::idl::ClusterParameters::gdStaticSlot()
+{
+    return m_gdStaticSlot;
+}
+/*!
+ * @brief This function sets a value in member gdSymbolWindow
+ * @param _gdSymbolWindow New value for member gdSymbolWindow
+ */
+void ib::sim::fr::idl::ClusterParameters::gdSymbolWindow(uint16_t _gdSymbolWindow)
+{
+m_gdSymbolWindow = _gdSymbolWindow;
+}
+
+/*!
+ * @brief This function returns the value of member gdSymbolWindow
+ * @return Value of member gdSymbolWindow
+ */
+uint16_t ib::sim::fr::idl::ClusterParameters::gdSymbolWindow() const
+{
+    return m_gdSymbolWindow;
+}
+
+/*!
+ * @brief This function returns a reference to member gdSymbolWindow
+ * @return Reference to member gdSymbolWindow
+ */
+uint16_t& ib::sim::fr::idl::ClusterParameters::gdSymbolWindow()
+{
+    return m_gdSymbolWindow;
+}
+/*!
+ * @brief This function sets a value in member gdSymbolWindowActionPointOffset
+ * @param _gdSymbolWindowActionPointOffset New value for member gdSymbolWindowActionPointOffset
+ */
+void ib::sim::fr::idl::ClusterParameters::gdSymbolWindowActionPointOffset(uint16_t _gdSymbolWindowActionPointOffset)
+{
+m_gdSymbolWindowActionPointOffset = _gdSymbolWindowActionPointOffset;
+}
+
+/*!
+ * @brief This function returns the value of member gdSymbolWindowActionPointOffset
+ * @return Value of member gdSymbolWindowActionPointOffset
+ */
+uint16_t ib::sim::fr::idl::ClusterParameters::gdSymbolWindowActionPointOffset() const
+{
+    return m_gdSymbolWindowActionPointOffset;
+}
+
+/*!
+ * @brief This function returns a reference to member gdSymbolWindowActionPointOffset
+ * @return Reference to member gdSymbolWindowActionPointOffset
+ */
+uint16_t& ib::sim::fr::idl::ClusterParameters::gdSymbolWindowActionPointOffset()
+{
+    return m_gdSymbolWindowActionPointOffset;
+}
+/*!
+ * @brief This function sets a value in member gdTSSTransmitter
+ * @param _gdTSSTransmitter New value for member gdTSSTransmitter
+ */
+void ib::sim::fr::idl::ClusterParameters::gdTSSTransmitter(uint16_t _gdTSSTransmitter)
+{
+m_gdTSSTransmitter = _gdTSSTransmitter;
+}
+
+/*!
+ * @brief This function returns the value of member gdTSSTransmitter
+ * @return Value of member gdTSSTransmitter
+ */
+uint16_t ib::sim::fr::idl::ClusterParameters::gdTSSTransmitter() const
+{
+    return m_gdTSSTransmitter;
+}
+
+/*!
+ * @brief This function returns a reference to member gdTSSTransmitter
+ * @return Reference to member gdTSSTransmitter
+ */
+uint16_t& ib::sim::fr::idl::ClusterParameters::gdTSSTransmitter()
+{
+    return m_gdTSSTransmitter;
+}
+/*!
+ * @brief This function sets a value in member gdWakeupTxActive
+ * @param _gdWakeupTxActive New value for member gdWakeupTxActive
+ */
+void ib::sim::fr::idl::ClusterParameters::gdWakeupTxActive(uint16_t _gdWakeupTxActive)
+{
+m_gdWakeupTxActive = _gdWakeupTxActive;
+}
+
+/*!
+ * @brief This function returns the value of member gdWakeupTxActive
+ * @return Value of member gdWakeupTxActive
+ */
+uint16_t ib::sim::fr::idl::ClusterParameters::gdWakeupTxActive() const
+{
+    return m_gdWakeupTxActive;
+}
+
+/*!
+ * @brief This function returns a reference to member gdWakeupTxActive
+ * @return Reference to member gdWakeupTxActive
+ */
+uint16_t& ib::sim::fr::idl::ClusterParameters::gdWakeupTxActive()
+{
+    return m_gdWakeupTxActive;
+}
+/*!
+ * @brief This function sets a value in member gdWakeupTxIdle
+ * @param _gdWakeupTxIdle New value for member gdWakeupTxIdle
+ */
+void ib::sim::fr::idl::ClusterParameters::gdWakeupTxIdle(uint16_t _gdWakeupTxIdle)
+{
+m_gdWakeupTxIdle = _gdWakeupTxIdle;
+}
+
+/*!
+ * @brief This function returns the value of member gdWakeupTxIdle
+ * @return Value of member gdWakeupTxIdle
+ */
+uint16_t ib::sim::fr::idl::ClusterParameters::gdWakeupTxIdle() const
+{
+    return m_gdWakeupTxIdle;
+}
+
+/*!
+ * @brief This function returns a reference to member gdWakeupTxIdle
+ * @return Reference to member gdWakeupTxIdle
+ */
+uint16_t& ib::sim::fr::idl::ClusterParameters::gdWakeupTxIdle()
+{
+    return m_gdWakeupTxIdle;
+}
+/*!
+ * @brief This function sets a value in member gListenNoise
+ * @param _gListenNoise New value for member gListenNoise
+ */
+void ib::sim::fr::idl::ClusterParameters::gListenNoise(uint8_t _gListenNoise)
+{
+m_gListenNoise = _gListenNoise;
+}
+
+/*!
+ * @brief This function returns the value of member gListenNoise
+ * @return Value of member gListenNoise
+ */
+uint8_t ib::sim::fr::idl::ClusterParameters::gListenNoise() const
+{
+    return m_gListenNoise;
+}
+
+/*!
+ * @brief This function returns a reference to member gListenNoise
+ * @return Reference to member gListenNoise
+ */
+uint8_t& ib::sim::fr::idl::ClusterParameters::gListenNoise()
+{
+    return m_gListenNoise;
+}
+/*!
+ * @brief This function sets a value in member gMacroPerCycle
+ * @param _gMacroPerCycle New value for member gMacroPerCycle
+ */
+void ib::sim::fr::idl::ClusterParameters::gMacroPerCycle(uint16_t _gMacroPerCycle)
+{
+m_gMacroPerCycle = _gMacroPerCycle;
+}
+
+/*!
+ * @brief This function returns the value of member gMacroPerCycle
+ * @return Value of member gMacroPerCycle
+ */
+uint16_t ib::sim::fr::idl::ClusterParameters::gMacroPerCycle() const
+{
+    return m_gMacroPerCycle;
+}
+
+/*!
+ * @brief This function returns a reference to member gMacroPerCycle
+ * @return Reference to member gMacroPerCycle
+ */
+uint16_t& ib::sim::fr::idl::ClusterParameters::gMacroPerCycle()
+{
+    return m_gMacroPerCycle;
+}
+/*!
+ * @brief This function sets a value in member gMaxWithoutClockCorrectionFatal
+ * @param _gMaxWithoutClockCorrectionFatal New value for member gMaxWithoutClockCorrectionFatal
+ */
+void ib::sim::fr::idl::ClusterParameters::gMaxWithoutClockCorrectionFatal(uint8_t _gMaxWithoutClockCorrectionFatal)
+{
+m_gMaxWithoutClockCorrectionFatal = _gMaxWithoutClockCorrectionFatal;
+}
+
+/*!
+ * @brief This function returns the value of member gMaxWithoutClockCorrectionFatal
+ * @return Value of member gMaxWithoutClockCorrectionFatal
+ */
+uint8_t ib::sim::fr::idl::ClusterParameters::gMaxWithoutClockCorrectionFatal() const
+{
+    return m_gMaxWithoutClockCorrectionFatal;
+}
+
+/*!
+ * @brief This function returns a reference to member gMaxWithoutClockCorrectionFatal
+ * @return Reference to member gMaxWithoutClockCorrectionFatal
+ */
+uint8_t& ib::sim::fr::idl::ClusterParameters::gMaxWithoutClockCorrectionFatal()
+{
+    return m_gMaxWithoutClockCorrectionFatal;
+}
+/*!
+ * @brief This function sets a value in member gMaxWithoutClockCorrectionPassive
+ * @param _gMaxWithoutClockCorrectionPassive New value for member gMaxWithoutClockCorrectionPassive
+ */
+void ib::sim::fr::idl::ClusterParameters::gMaxWithoutClockCorrectionPassive(uint8_t _gMaxWithoutClockCorrectionPassive)
+{
+m_gMaxWithoutClockCorrectionPassive = _gMaxWithoutClockCorrectionPassive;
+}
+
+/*!
+ * @brief This function returns the value of member gMaxWithoutClockCorrectionPassive
+ * @return Value of member gMaxWithoutClockCorrectionPassive
+ */
+uint8_t ib::sim::fr::idl::ClusterParameters::gMaxWithoutClockCorrectionPassive() const
+{
+    return m_gMaxWithoutClockCorrectionPassive;
+}
+
+/*!
+ * @brief This function returns a reference to member gMaxWithoutClockCorrectionPassive
+ * @return Reference to member gMaxWithoutClockCorrectionPassive
+ */
+uint8_t& ib::sim::fr::idl::ClusterParameters::gMaxWithoutClockCorrectionPassive()
+{
+    return m_gMaxWithoutClockCorrectionPassive;
+}
+/*!
+ * @brief This function sets a value in member gNumberOfMiniSlots
+ * @param _gNumberOfMiniSlots New value for member gNumberOfMiniSlots
+ */
+void ib::sim::fr::idl::ClusterParameters::gNumberOfMiniSlots(uint16_t _gNumberOfMiniSlots)
+{
+m_gNumberOfMiniSlots = _gNumberOfMiniSlots;
+}
+
+/*!
+ * @brief This function returns the value of member gNumberOfMiniSlots
+ * @return Value of member gNumberOfMiniSlots
+ */
+uint16_t ib::sim::fr::idl::ClusterParameters::gNumberOfMiniSlots() const
+{
+    return m_gNumberOfMiniSlots;
+}
+
+/*!
+ * @brief This function returns a reference to member gNumberOfMiniSlots
+ * @return Reference to member gNumberOfMiniSlots
+ */
+uint16_t& ib::sim::fr::idl::ClusterParameters::gNumberOfMiniSlots()
+{
+    return m_gNumberOfMiniSlots;
+}
+/*!
+ * @brief This function sets a value in member gNumberOfStaticSlots
+ * @param _gNumberOfStaticSlots New value for member gNumberOfStaticSlots
+ */
+void ib::sim::fr::idl::ClusterParameters::gNumberOfStaticSlots(uint16_t _gNumberOfStaticSlots)
+{
+m_gNumberOfStaticSlots = _gNumberOfStaticSlots;
+}
+
+/*!
+ * @brief This function returns the value of member gNumberOfStaticSlots
+ * @return Value of member gNumberOfStaticSlots
+ */
+uint16_t ib::sim::fr::idl::ClusterParameters::gNumberOfStaticSlots() const
+{
+    return m_gNumberOfStaticSlots;
+}
+
+/*!
+ * @brief This function returns a reference to member gNumberOfStaticSlots
+ * @return Reference to member gNumberOfStaticSlots
+ */
+uint16_t& ib::sim::fr::idl::ClusterParameters::gNumberOfStaticSlots()
+{
+    return m_gNumberOfStaticSlots;
+}
+/*!
+ * @brief This function sets a value in member gPayloadLengthStatic
+ * @param _gPayloadLengthStatic New value for member gPayloadLengthStatic
+ */
+void ib::sim::fr::idl::ClusterParameters::gPayloadLengthStatic(uint16_t _gPayloadLengthStatic)
+{
+m_gPayloadLengthStatic = _gPayloadLengthStatic;
+}
+
+/*!
+ * @brief This function returns the value of member gPayloadLengthStatic
+ * @return Value of member gPayloadLengthStatic
+ */
+uint16_t ib::sim::fr::idl::ClusterParameters::gPayloadLengthStatic() const
+{
+    return m_gPayloadLengthStatic;
+}
+
+/*!
+ * @brief This function returns a reference to member gPayloadLengthStatic
+ * @return Reference to member gPayloadLengthStatic
+ */
+uint16_t& ib::sim::fr::idl::ClusterParameters::gPayloadLengthStatic()
+{
+    return m_gPayloadLengthStatic;
+}
+/*!
+ * @brief This function sets a value in member gSyncFrameIDCountMax
+ * @param _gSyncFrameIDCountMax New value for member gSyncFrameIDCountMax
+ */
+void ib::sim::fr::idl::ClusterParameters::gSyncFrameIDCountMax(uint8_t _gSyncFrameIDCountMax)
+{
+m_gSyncFrameIDCountMax = _gSyncFrameIDCountMax;
+}
+
+/*!
+ * @brief This function returns the value of member gSyncFrameIDCountMax
+ * @return Value of member gSyncFrameIDCountMax
+ */
+uint8_t ib::sim::fr::idl::ClusterParameters::gSyncFrameIDCountMax() const
+{
+    return m_gSyncFrameIDCountMax;
+}
+
+/*!
+ * @brief This function returns a reference to member gSyncFrameIDCountMax
+ * @return Reference to member gSyncFrameIDCountMax
+ */
+uint8_t& ib::sim::fr::idl::ClusterParameters::gSyncFrameIDCountMax()
+{
+    return m_gSyncFrameIDCountMax;
+}
+
 size_t ib::sim::fr::idl::ClusterParameters::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
 
 
 
@@ -398,7 +926,7 @@ size_t ib::sim::fr::idl::ClusterParameters::getKeyMaxCdrSerializedSize(size_t cu
 
 bool ib::sim::fr::idl::ClusterParameters::isKeyDefined()
 {
-    return false;
+   return false;
 }
 
 void ib::sim::fr::idl::ClusterParameters::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -425,59 +953,60 @@ void ib::sim::fr::idl::ClusterParameters::serializeKey(eprosima::fastcdr::Cdr &s
 	 
 	 
 }
+
 ib::sim::fr::idl::NodeParameters::NodeParameters()
 {
     m_pAllowHaltDueToClock = 0;
-
     m_pAllowPassiveToActive = 0;
-
     m_pChannels = ib::sim::fr::idl::None;
-
     m_pClusterDriftDamping = 0;
-
     m_pdAcceptedStartupRange = 0;
-
     m_pdListenTimeout = 0;
-
     m_pKeySlotId = 0;
-
     m_pKeySlotOnlyEnabled = 0;
-
     m_pKeySlotUsedForStartup = 0;
-
     m_pKeySlotUsedForSync = 0;
-
     m_pLatestTx = 0;
-
     m_pMacroInitialOffsetA = 0;
-
     m_pMacroInitialOffsetB = 0;
-
     m_pMicroInitialOffsetA = 0;
-
     m_pMicroInitialOffsetB = 0;
-
     m_pMicroPerCycle = 0;
-
     m_pOffsetCorrectionOut = 0;
-
     m_pOffsetCorrectionStart = 0;
-
     m_pRateCorrectionOut = 0;
-
     m_pWakeupChannel = ib::sim::fr::idl::None;
-
     m_pWakeupPattern = 0;
-
     m_pdMicrotick = ib::sim::fr::idl::T12_5NS;
-
     m_pSamplesPerMicrotick = 0;
-
 
 }
 
 ib::sim::fr::idl::NodeParameters::~NodeParameters()
 {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 ib::sim::fr::idl::NodeParameters::NodeParameters(const NodeParameters &x)
@@ -536,6 +1065,7 @@ ib::sim::fr::idl::NodeParameters::NodeParameters(NodeParameters &&x)
 
 ib::sim::fr::idl::NodeParameters& ib::sim::fr::idl::NodeParameters::operator=(const NodeParameters &x)
 {
+
     m_pAllowHaltDueToClock = x.m_pAllowHaltDueToClock;
     m_pAllowPassiveToActive = x.m_pAllowPassiveToActive;
     m_pChannels = x.m_pChannels;
@@ -565,6 +1095,7 @@ ib::sim::fr::idl::NodeParameters& ib::sim::fr::idl::NodeParameters::operator=(co
 
 ib::sim::fr::idl::NodeParameters& ib::sim::fr::idl::NodeParameters::operator=(NodeParameters &&x)
 {
+
     m_pAllowHaltDueToClock = x.m_pAllowHaltDueToClock;
     m_pAllowPassiveToActive = x.m_pAllowPassiveToActive;
     m_pChannels = x.m_pChannels;
@@ -595,6 +1126,7 @@ ib::sim::fr::idl::NodeParameters& ib::sim::fr::idl::NodeParameters::operator=(No
 size_t ib::sim::fr::idl::NodeParameters::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
@@ -674,6 +1206,7 @@ size_t ib::sim::fr::idl::NodeParameters::getCdrSerializedSize(const ib::sim::fr:
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
 
@@ -749,6 +1282,7 @@ size_t ib::sim::fr::idl::NodeParameters::getCdrSerializedSize(const ib::sim::fr:
 
 void ib::sim::fr::idl::NodeParameters::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_pAllowHaltDueToClock;
     scdr << m_pAllowPassiveToActive;
     scdr << (uint32_t)m_pChannels;
@@ -776,6 +1310,7 @@ void ib::sim::fr::idl::NodeParameters::serialize(eprosima::fastcdr::Cdr &scdr) c
 
 void ib::sim::fr::idl::NodeParameters::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_pAllowHaltDueToClock;
     dcdr >> m_pAllowPassiveToActive;
     {
@@ -783,6 +1318,7 @@ void ib::sim::fr::idl::NodeParameters::deserialize(eprosima::fastcdr::Cdr &dcdr)
         dcdr >> enum_value;
         m_pChannels = (ib::sim::fr::idl::Channel)enum_value;
     }
+
     dcdr >> m_pClusterDriftDamping;
     dcdr >> m_pdAcceptedStartupRange;
     dcdr >> m_pdListenTimeout;
@@ -804,19 +1340,621 @@ void ib::sim::fr::idl::NodeParameters::deserialize(eprosima::fastcdr::Cdr &dcdr)
         dcdr >> enum_value;
         m_pWakeupChannel = (ib::sim::fr::idl::Channel)enum_value;
     }
+
     dcdr >> m_pWakeupPattern;
     {
         uint32_t enum_value = 0;
         dcdr >> enum_value;
         m_pdMicrotick = (ib::sim::fr::idl::ClockPeriod)enum_value;
     }
+
     dcdr >> m_pSamplesPerMicrotick;
+}
+
+/*!
+ * @brief This function sets a value in member pAllowHaltDueToClock
+ * @param _pAllowHaltDueToClock New value for member pAllowHaltDueToClock
+ */
+void ib::sim::fr::idl::NodeParameters::pAllowHaltDueToClock(uint8_t _pAllowHaltDueToClock)
+{
+m_pAllowHaltDueToClock = _pAllowHaltDueToClock;
+}
+
+/*!
+ * @brief This function returns the value of member pAllowHaltDueToClock
+ * @return Value of member pAllowHaltDueToClock
+ */
+uint8_t ib::sim::fr::idl::NodeParameters::pAllowHaltDueToClock() const
+{
+    return m_pAllowHaltDueToClock;
+}
+
+/*!
+ * @brief This function returns a reference to member pAllowHaltDueToClock
+ * @return Reference to member pAllowHaltDueToClock
+ */
+uint8_t& ib::sim::fr::idl::NodeParameters::pAllowHaltDueToClock()
+{
+    return m_pAllowHaltDueToClock;
+}
+/*!
+ * @brief This function sets a value in member pAllowPassiveToActive
+ * @param _pAllowPassiveToActive New value for member pAllowPassiveToActive
+ */
+void ib::sim::fr::idl::NodeParameters::pAllowPassiveToActive(uint8_t _pAllowPassiveToActive)
+{
+m_pAllowPassiveToActive = _pAllowPassiveToActive;
+}
+
+/*!
+ * @brief This function returns the value of member pAllowPassiveToActive
+ * @return Value of member pAllowPassiveToActive
+ */
+uint8_t ib::sim::fr::idl::NodeParameters::pAllowPassiveToActive() const
+{
+    return m_pAllowPassiveToActive;
+}
+
+/*!
+ * @brief This function returns a reference to member pAllowPassiveToActive
+ * @return Reference to member pAllowPassiveToActive
+ */
+uint8_t& ib::sim::fr::idl::NodeParameters::pAllowPassiveToActive()
+{
+    return m_pAllowPassiveToActive;
+}
+/*!
+ * @brief This function sets a value in member pChannels
+ * @param _pChannels New value for member pChannels
+ */
+void ib::sim::fr::idl::NodeParameters::pChannels(ib::sim::fr::idl::Channel _pChannels)
+{
+m_pChannels = _pChannels;
+}
+
+/*!
+ * @brief This function returns the value of member pChannels
+ * @return Value of member pChannels
+ */
+ib::sim::fr::idl::Channel ib::sim::fr::idl::NodeParameters::pChannels() const
+{
+    return m_pChannels;
+}
+
+/*!
+ * @brief This function returns a reference to member pChannels
+ * @return Reference to member pChannels
+ */
+ib::sim::fr::idl::Channel& ib::sim::fr::idl::NodeParameters::pChannels()
+{
+    return m_pChannels;
+}
+/*!
+ * @brief This function sets a value in member pClusterDriftDamping
+ * @param _pClusterDriftDamping New value for member pClusterDriftDamping
+ */
+void ib::sim::fr::idl::NodeParameters::pClusterDriftDamping(uint8_t _pClusterDriftDamping)
+{
+m_pClusterDriftDamping = _pClusterDriftDamping;
+}
+
+/*!
+ * @brief This function returns the value of member pClusterDriftDamping
+ * @return Value of member pClusterDriftDamping
+ */
+uint8_t ib::sim::fr::idl::NodeParameters::pClusterDriftDamping() const
+{
+    return m_pClusterDriftDamping;
+}
+
+/*!
+ * @brief This function returns a reference to member pClusterDriftDamping
+ * @return Reference to member pClusterDriftDamping
+ */
+uint8_t& ib::sim::fr::idl::NodeParameters::pClusterDriftDamping()
+{
+    return m_pClusterDriftDamping;
+}
+/*!
+ * @brief This function sets a value in member pdAcceptedStartupRange
+ * @param _pdAcceptedStartupRange New value for member pdAcceptedStartupRange
+ */
+void ib::sim::fr::idl::NodeParameters::pdAcceptedStartupRange(int32_t _pdAcceptedStartupRange)
+{
+m_pdAcceptedStartupRange = _pdAcceptedStartupRange;
+}
+
+/*!
+ * @brief This function returns the value of member pdAcceptedStartupRange
+ * @return Value of member pdAcceptedStartupRange
+ */
+int32_t ib::sim::fr::idl::NodeParameters::pdAcceptedStartupRange() const
+{
+    return m_pdAcceptedStartupRange;
+}
+
+/*!
+ * @brief This function returns a reference to member pdAcceptedStartupRange
+ * @return Reference to member pdAcceptedStartupRange
+ */
+int32_t& ib::sim::fr::idl::NodeParameters::pdAcceptedStartupRange()
+{
+    return m_pdAcceptedStartupRange;
+}
+/*!
+ * @brief This function sets a value in member pdListenTimeout
+ * @param _pdListenTimeout New value for member pdListenTimeout
+ */
+void ib::sim::fr::idl::NodeParameters::pdListenTimeout(int32_t _pdListenTimeout)
+{
+m_pdListenTimeout = _pdListenTimeout;
+}
+
+/*!
+ * @brief This function returns the value of member pdListenTimeout
+ * @return Value of member pdListenTimeout
+ */
+int32_t ib::sim::fr::idl::NodeParameters::pdListenTimeout() const
+{
+    return m_pdListenTimeout;
+}
+
+/*!
+ * @brief This function returns a reference to member pdListenTimeout
+ * @return Reference to member pdListenTimeout
+ */
+int32_t& ib::sim::fr::idl::NodeParameters::pdListenTimeout()
+{
+    return m_pdListenTimeout;
+}
+/*!
+ * @brief This function sets a value in member pKeySlotId
+ * @param _pKeySlotId New value for member pKeySlotId
+ */
+void ib::sim::fr::idl::NodeParameters::pKeySlotId(uint16_t _pKeySlotId)
+{
+m_pKeySlotId = _pKeySlotId;
+}
+
+/*!
+ * @brief This function returns the value of member pKeySlotId
+ * @return Value of member pKeySlotId
+ */
+uint16_t ib::sim::fr::idl::NodeParameters::pKeySlotId() const
+{
+    return m_pKeySlotId;
+}
+
+/*!
+ * @brief This function returns a reference to member pKeySlotId
+ * @return Reference to member pKeySlotId
+ */
+uint16_t& ib::sim::fr::idl::NodeParameters::pKeySlotId()
+{
+    return m_pKeySlotId;
+}
+/*!
+ * @brief This function sets a value in member pKeySlotOnlyEnabled
+ * @param _pKeySlotOnlyEnabled New value for member pKeySlotOnlyEnabled
+ */
+void ib::sim::fr::idl::NodeParameters::pKeySlotOnlyEnabled(uint8_t _pKeySlotOnlyEnabled)
+{
+m_pKeySlotOnlyEnabled = _pKeySlotOnlyEnabled;
+}
+
+/*!
+ * @brief This function returns the value of member pKeySlotOnlyEnabled
+ * @return Value of member pKeySlotOnlyEnabled
+ */
+uint8_t ib::sim::fr::idl::NodeParameters::pKeySlotOnlyEnabled() const
+{
+    return m_pKeySlotOnlyEnabled;
+}
+
+/*!
+ * @brief This function returns a reference to member pKeySlotOnlyEnabled
+ * @return Reference to member pKeySlotOnlyEnabled
+ */
+uint8_t& ib::sim::fr::idl::NodeParameters::pKeySlotOnlyEnabled()
+{
+    return m_pKeySlotOnlyEnabled;
+}
+/*!
+ * @brief This function sets a value in member pKeySlotUsedForStartup
+ * @param _pKeySlotUsedForStartup New value for member pKeySlotUsedForStartup
+ */
+void ib::sim::fr::idl::NodeParameters::pKeySlotUsedForStartup(uint8_t _pKeySlotUsedForStartup)
+{
+m_pKeySlotUsedForStartup = _pKeySlotUsedForStartup;
+}
+
+/*!
+ * @brief This function returns the value of member pKeySlotUsedForStartup
+ * @return Value of member pKeySlotUsedForStartup
+ */
+uint8_t ib::sim::fr::idl::NodeParameters::pKeySlotUsedForStartup() const
+{
+    return m_pKeySlotUsedForStartup;
+}
+
+/*!
+ * @brief This function returns a reference to member pKeySlotUsedForStartup
+ * @return Reference to member pKeySlotUsedForStartup
+ */
+uint8_t& ib::sim::fr::idl::NodeParameters::pKeySlotUsedForStartup()
+{
+    return m_pKeySlotUsedForStartup;
+}
+/*!
+ * @brief This function sets a value in member pKeySlotUsedForSync
+ * @param _pKeySlotUsedForSync New value for member pKeySlotUsedForSync
+ */
+void ib::sim::fr::idl::NodeParameters::pKeySlotUsedForSync(uint8_t _pKeySlotUsedForSync)
+{
+m_pKeySlotUsedForSync = _pKeySlotUsedForSync;
+}
+
+/*!
+ * @brief This function returns the value of member pKeySlotUsedForSync
+ * @return Value of member pKeySlotUsedForSync
+ */
+uint8_t ib::sim::fr::idl::NodeParameters::pKeySlotUsedForSync() const
+{
+    return m_pKeySlotUsedForSync;
+}
+
+/*!
+ * @brief This function returns a reference to member pKeySlotUsedForSync
+ * @return Reference to member pKeySlotUsedForSync
+ */
+uint8_t& ib::sim::fr::idl::NodeParameters::pKeySlotUsedForSync()
+{
+    return m_pKeySlotUsedForSync;
+}
+/*!
+ * @brief This function sets a value in member pLatestTx
+ * @param _pLatestTx New value for member pLatestTx
+ */
+void ib::sim::fr::idl::NodeParameters::pLatestTx(uint16_t _pLatestTx)
+{
+m_pLatestTx = _pLatestTx;
+}
+
+/*!
+ * @brief This function returns the value of member pLatestTx
+ * @return Value of member pLatestTx
+ */
+uint16_t ib::sim::fr::idl::NodeParameters::pLatestTx() const
+{
+    return m_pLatestTx;
+}
+
+/*!
+ * @brief This function returns a reference to member pLatestTx
+ * @return Reference to member pLatestTx
+ */
+uint16_t& ib::sim::fr::idl::NodeParameters::pLatestTx()
+{
+    return m_pLatestTx;
+}
+/*!
+ * @brief This function sets a value in member pMacroInitialOffsetA
+ * @param _pMacroInitialOffsetA New value for member pMacroInitialOffsetA
+ */
+void ib::sim::fr::idl::NodeParameters::pMacroInitialOffsetA(uint8_t _pMacroInitialOffsetA)
+{
+m_pMacroInitialOffsetA = _pMacroInitialOffsetA;
+}
+
+/*!
+ * @brief This function returns the value of member pMacroInitialOffsetA
+ * @return Value of member pMacroInitialOffsetA
+ */
+uint8_t ib::sim::fr::idl::NodeParameters::pMacroInitialOffsetA() const
+{
+    return m_pMacroInitialOffsetA;
+}
+
+/*!
+ * @brief This function returns a reference to member pMacroInitialOffsetA
+ * @return Reference to member pMacroInitialOffsetA
+ */
+uint8_t& ib::sim::fr::idl::NodeParameters::pMacroInitialOffsetA()
+{
+    return m_pMacroInitialOffsetA;
+}
+/*!
+ * @brief This function sets a value in member pMacroInitialOffsetB
+ * @param _pMacroInitialOffsetB New value for member pMacroInitialOffsetB
+ */
+void ib::sim::fr::idl::NodeParameters::pMacroInitialOffsetB(uint8_t _pMacroInitialOffsetB)
+{
+m_pMacroInitialOffsetB = _pMacroInitialOffsetB;
+}
+
+/*!
+ * @brief This function returns the value of member pMacroInitialOffsetB
+ * @return Value of member pMacroInitialOffsetB
+ */
+uint8_t ib::sim::fr::idl::NodeParameters::pMacroInitialOffsetB() const
+{
+    return m_pMacroInitialOffsetB;
+}
+
+/*!
+ * @brief This function returns a reference to member pMacroInitialOffsetB
+ * @return Reference to member pMacroInitialOffsetB
+ */
+uint8_t& ib::sim::fr::idl::NodeParameters::pMacroInitialOffsetB()
+{
+    return m_pMacroInitialOffsetB;
+}
+/*!
+ * @brief This function sets a value in member pMicroInitialOffsetA
+ * @param _pMicroInitialOffsetA New value for member pMicroInitialOffsetA
+ */
+void ib::sim::fr::idl::NodeParameters::pMicroInitialOffsetA(int32_t _pMicroInitialOffsetA)
+{
+m_pMicroInitialOffsetA = _pMicroInitialOffsetA;
+}
+
+/*!
+ * @brief This function returns the value of member pMicroInitialOffsetA
+ * @return Value of member pMicroInitialOffsetA
+ */
+int32_t ib::sim::fr::idl::NodeParameters::pMicroInitialOffsetA() const
+{
+    return m_pMicroInitialOffsetA;
+}
+
+/*!
+ * @brief This function returns a reference to member pMicroInitialOffsetA
+ * @return Reference to member pMicroInitialOffsetA
+ */
+int32_t& ib::sim::fr::idl::NodeParameters::pMicroInitialOffsetA()
+{
+    return m_pMicroInitialOffsetA;
+}
+/*!
+ * @brief This function sets a value in member pMicroInitialOffsetB
+ * @param _pMicroInitialOffsetB New value for member pMicroInitialOffsetB
+ */
+void ib::sim::fr::idl::NodeParameters::pMicroInitialOffsetB(int32_t _pMicroInitialOffsetB)
+{
+m_pMicroInitialOffsetB = _pMicroInitialOffsetB;
+}
+
+/*!
+ * @brief This function returns the value of member pMicroInitialOffsetB
+ * @return Value of member pMicroInitialOffsetB
+ */
+int32_t ib::sim::fr::idl::NodeParameters::pMicroInitialOffsetB() const
+{
+    return m_pMicroInitialOffsetB;
+}
+
+/*!
+ * @brief This function returns a reference to member pMicroInitialOffsetB
+ * @return Reference to member pMicroInitialOffsetB
+ */
+int32_t& ib::sim::fr::idl::NodeParameters::pMicroInitialOffsetB()
+{
+    return m_pMicroInitialOffsetB;
+}
+/*!
+ * @brief This function sets a value in member pMicroPerCycle
+ * @param _pMicroPerCycle New value for member pMicroPerCycle
+ */
+void ib::sim::fr::idl::NodeParameters::pMicroPerCycle(int32_t _pMicroPerCycle)
+{
+m_pMicroPerCycle = _pMicroPerCycle;
+}
+
+/*!
+ * @brief This function returns the value of member pMicroPerCycle
+ * @return Value of member pMicroPerCycle
+ */
+int32_t ib::sim::fr::idl::NodeParameters::pMicroPerCycle() const
+{
+    return m_pMicroPerCycle;
+}
+
+/*!
+ * @brief This function returns a reference to member pMicroPerCycle
+ * @return Reference to member pMicroPerCycle
+ */
+int32_t& ib::sim::fr::idl::NodeParameters::pMicroPerCycle()
+{
+    return m_pMicroPerCycle;
+}
+/*!
+ * @brief This function sets a value in member pOffsetCorrectionOut
+ * @param _pOffsetCorrectionOut New value for member pOffsetCorrectionOut
+ */
+void ib::sim::fr::idl::NodeParameters::pOffsetCorrectionOut(int32_t _pOffsetCorrectionOut)
+{
+m_pOffsetCorrectionOut = _pOffsetCorrectionOut;
+}
+
+/*!
+ * @brief This function returns the value of member pOffsetCorrectionOut
+ * @return Value of member pOffsetCorrectionOut
+ */
+int32_t ib::sim::fr::idl::NodeParameters::pOffsetCorrectionOut() const
+{
+    return m_pOffsetCorrectionOut;
+}
+
+/*!
+ * @brief This function returns a reference to member pOffsetCorrectionOut
+ * @return Reference to member pOffsetCorrectionOut
+ */
+int32_t& ib::sim::fr::idl::NodeParameters::pOffsetCorrectionOut()
+{
+    return m_pOffsetCorrectionOut;
+}
+/*!
+ * @brief This function sets a value in member pOffsetCorrectionStart
+ * @param _pOffsetCorrectionStart New value for member pOffsetCorrectionStart
+ */
+void ib::sim::fr::idl::NodeParameters::pOffsetCorrectionStart(uint16_t _pOffsetCorrectionStart)
+{
+m_pOffsetCorrectionStart = _pOffsetCorrectionStart;
+}
+
+/*!
+ * @brief This function returns the value of member pOffsetCorrectionStart
+ * @return Value of member pOffsetCorrectionStart
+ */
+uint16_t ib::sim::fr::idl::NodeParameters::pOffsetCorrectionStart() const
+{
+    return m_pOffsetCorrectionStart;
+}
+
+/*!
+ * @brief This function returns a reference to member pOffsetCorrectionStart
+ * @return Reference to member pOffsetCorrectionStart
+ */
+uint16_t& ib::sim::fr::idl::NodeParameters::pOffsetCorrectionStart()
+{
+    return m_pOffsetCorrectionStart;
+}
+/*!
+ * @brief This function sets a value in member pRateCorrectionOut
+ * @param _pRateCorrectionOut New value for member pRateCorrectionOut
+ */
+void ib::sim::fr::idl::NodeParameters::pRateCorrectionOut(int32_t _pRateCorrectionOut)
+{
+m_pRateCorrectionOut = _pRateCorrectionOut;
+}
+
+/*!
+ * @brief This function returns the value of member pRateCorrectionOut
+ * @return Value of member pRateCorrectionOut
+ */
+int32_t ib::sim::fr::idl::NodeParameters::pRateCorrectionOut() const
+{
+    return m_pRateCorrectionOut;
+}
+
+/*!
+ * @brief This function returns a reference to member pRateCorrectionOut
+ * @return Reference to member pRateCorrectionOut
+ */
+int32_t& ib::sim::fr::idl::NodeParameters::pRateCorrectionOut()
+{
+    return m_pRateCorrectionOut;
+}
+/*!
+ * @brief This function sets a value in member pWakeupChannel
+ * @param _pWakeupChannel New value for member pWakeupChannel
+ */
+void ib::sim::fr::idl::NodeParameters::pWakeupChannel(ib::sim::fr::idl::Channel _pWakeupChannel)
+{
+m_pWakeupChannel = _pWakeupChannel;
+}
+
+/*!
+ * @brief This function returns the value of member pWakeupChannel
+ * @return Value of member pWakeupChannel
+ */
+ib::sim::fr::idl::Channel ib::sim::fr::idl::NodeParameters::pWakeupChannel() const
+{
+    return m_pWakeupChannel;
+}
+
+/*!
+ * @brief This function returns a reference to member pWakeupChannel
+ * @return Reference to member pWakeupChannel
+ */
+ib::sim::fr::idl::Channel& ib::sim::fr::idl::NodeParameters::pWakeupChannel()
+{
+    return m_pWakeupChannel;
+}
+/*!
+ * @brief This function sets a value in member pWakeupPattern
+ * @param _pWakeupPattern New value for member pWakeupPattern
+ */
+void ib::sim::fr::idl::NodeParameters::pWakeupPattern(uint8_t _pWakeupPattern)
+{
+m_pWakeupPattern = _pWakeupPattern;
+}
+
+/*!
+ * @brief This function returns the value of member pWakeupPattern
+ * @return Value of member pWakeupPattern
+ */
+uint8_t ib::sim::fr::idl::NodeParameters::pWakeupPattern() const
+{
+    return m_pWakeupPattern;
+}
+
+/*!
+ * @brief This function returns a reference to member pWakeupPattern
+ * @return Reference to member pWakeupPattern
+ */
+uint8_t& ib::sim::fr::idl::NodeParameters::pWakeupPattern()
+{
+    return m_pWakeupPattern;
+}
+/*!
+ * @brief This function sets a value in member pdMicrotick
+ * @param _pdMicrotick New value for member pdMicrotick
+ */
+void ib::sim::fr::idl::NodeParameters::pdMicrotick(ib::sim::fr::idl::ClockPeriod _pdMicrotick)
+{
+m_pdMicrotick = _pdMicrotick;
+}
+
+/*!
+ * @brief This function returns the value of member pdMicrotick
+ * @return Value of member pdMicrotick
+ */
+ib::sim::fr::idl::ClockPeriod ib::sim::fr::idl::NodeParameters::pdMicrotick() const
+{
+    return m_pdMicrotick;
+}
+
+/*!
+ * @brief This function returns a reference to member pdMicrotick
+ * @return Reference to member pdMicrotick
+ */
+ib::sim::fr::idl::ClockPeriod& ib::sim::fr::idl::NodeParameters::pdMicrotick()
+{
+    return m_pdMicrotick;
+}
+/*!
+ * @brief This function sets a value in member pSamplesPerMicrotick
+ * @param _pSamplesPerMicrotick New value for member pSamplesPerMicrotick
+ */
+void ib::sim::fr::idl::NodeParameters::pSamplesPerMicrotick(uint8_t _pSamplesPerMicrotick)
+{
+m_pSamplesPerMicrotick = _pSamplesPerMicrotick;
+}
+
+/*!
+ * @brief This function returns the value of member pSamplesPerMicrotick
+ * @return Value of member pSamplesPerMicrotick
+ */
+uint8_t ib::sim::fr::idl::NodeParameters::pSamplesPerMicrotick() const
+{
+    return m_pSamplesPerMicrotick;
+}
+
+/*!
+ * @brief This function returns a reference to member pSamplesPerMicrotick
+ * @return Reference to member pSamplesPerMicrotick
+ */
+uint8_t& ib::sim::fr::idl::NodeParameters::pSamplesPerMicrotick()
+{
+    return m_pSamplesPerMicrotick;
 }
 
 size_t ib::sim::fr::idl::NodeParameters::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
 
 
 
@@ -846,7 +1984,7 @@ size_t ib::sim::fr::idl::NodeParameters::getKeyMaxCdrSerializedSize(size_t curre
 
 bool ib::sim::fr::idl::NodeParameters::isKeyDefined()
 {
-    return false;
+   return false;
 }
 
 void ib::sim::fr::idl::NodeParameters::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -877,27 +2015,28 @@ void ib::sim::fr::idl::NodeParameters::serializeKey(eprosima::fastcdr::Cdr &scdr
 	 
 }
 
+
 ib::sim::fr::idl::TxBufferConfig::TxBufferConfig()
 {
     m_channels = ib::sim::fr::idl::None;
-
     m_slotId = 0;
-
     m_offset = 0;
-
     m_repetition = 0;
-
     m_hasPayloadPreambleIndicator = false;
-
     m_headerCrc = 0;
-
     m_transmissionMode = ib::sim::fr::idl::SingleShot;
-
 
 }
 
 ib::sim::fr::idl::TxBufferConfig::~TxBufferConfig()
 {
+
+
+
+
+
+
+
 }
 
 ib::sim::fr::idl::TxBufferConfig::TxBufferConfig(const TxBufferConfig &x)
@@ -924,6 +2063,7 @@ ib::sim::fr::idl::TxBufferConfig::TxBufferConfig(TxBufferConfig &&x)
 
 ib::sim::fr::idl::TxBufferConfig& ib::sim::fr::idl::TxBufferConfig::operator=(const TxBufferConfig &x)
 {
+
     m_channels = x.m_channels;
     m_slotId = x.m_slotId;
     m_offset = x.m_offset;
@@ -937,6 +2077,7 @@ ib::sim::fr::idl::TxBufferConfig& ib::sim::fr::idl::TxBufferConfig::operator=(co
 
 ib::sim::fr::idl::TxBufferConfig& ib::sim::fr::idl::TxBufferConfig::operator=(TxBufferConfig &&x)
 {
+
     m_channels = x.m_channels;
     m_slotId = x.m_slotId;
     m_offset = x.m_offset;
@@ -951,6 +2092,7 @@ ib::sim::fr::idl::TxBufferConfig& ib::sim::fr::idl::TxBufferConfig::operator=(Tx
 size_t ib::sim::fr::idl::TxBufferConfig::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
@@ -982,6 +2124,7 @@ size_t ib::sim::fr::idl::TxBufferConfig::getCdrSerializedSize(const ib::sim::fr:
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
@@ -1009,6 +2152,7 @@ size_t ib::sim::fr::idl::TxBufferConfig::getCdrSerializedSize(const ib::sim::fr:
 
 void ib::sim::fr::idl::TxBufferConfig::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << (uint32_t)m_channels;
     scdr << m_slotId;
     scdr << m_offset;
@@ -1020,11 +2164,13 @@ void ib::sim::fr::idl::TxBufferConfig::serialize(eprosima::fastcdr::Cdr &scdr) c
 
 void ib::sim::fr::idl::TxBufferConfig::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     {
         uint32_t enum_value = 0;
         dcdr >> enum_value;
         m_channels = (ib::sim::fr::idl::Channel)enum_value;
     }
+
     dcdr >> m_slotId;
     dcdr >> m_offset;
     dcdr >> m_repetition;
@@ -1035,12 +2181,197 @@ void ib::sim::fr::idl::TxBufferConfig::deserialize(eprosima::fastcdr::Cdr &dcdr)
         dcdr >> enum_value;
         m_transmissionMode = (ib::sim::fr::idl::TransmissionMode)enum_value;
     }
+
+}
+
+/*!
+ * @brief This function sets a value in member channels
+ * @param _channels New value for member channels
+ */
+void ib::sim::fr::idl::TxBufferConfig::channels(ib::sim::fr::idl::Channel _channels)
+{
+m_channels = _channels;
+}
+
+/*!
+ * @brief This function returns the value of member channels
+ * @return Value of member channels
+ */
+ib::sim::fr::idl::Channel ib::sim::fr::idl::TxBufferConfig::channels() const
+{
+    return m_channels;
+}
+
+/*!
+ * @brief This function returns a reference to member channels
+ * @return Reference to member channels
+ */
+ib::sim::fr::idl::Channel& ib::sim::fr::idl::TxBufferConfig::channels()
+{
+    return m_channels;
+}
+/*!
+ * @brief This function sets a value in member slotId
+ * @param _slotId New value for member slotId
+ */
+void ib::sim::fr::idl::TxBufferConfig::slotId(uint16_t _slotId)
+{
+m_slotId = _slotId;
+}
+
+/*!
+ * @brief This function returns the value of member slotId
+ * @return Value of member slotId
+ */
+uint16_t ib::sim::fr::idl::TxBufferConfig::slotId() const
+{
+    return m_slotId;
+}
+
+/*!
+ * @brief This function returns a reference to member slotId
+ * @return Reference to member slotId
+ */
+uint16_t& ib::sim::fr::idl::TxBufferConfig::slotId()
+{
+    return m_slotId;
+}
+/*!
+ * @brief This function sets a value in member offset
+ * @param _offset New value for member offset
+ */
+void ib::sim::fr::idl::TxBufferConfig::offset(uint8_t _offset)
+{
+m_offset = _offset;
+}
+
+/*!
+ * @brief This function returns the value of member offset
+ * @return Value of member offset
+ */
+uint8_t ib::sim::fr::idl::TxBufferConfig::offset() const
+{
+    return m_offset;
+}
+
+/*!
+ * @brief This function returns a reference to member offset
+ * @return Reference to member offset
+ */
+uint8_t& ib::sim::fr::idl::TxBufferConfig::offset()
+{
+    return m_offset;
+}
+/*!
+ * @brief This function sets a value in member repetition
+ * @param _repetition New value for member repetition
+ */
+void ib::sim::fr::idl::TxBufferConfig::repetition(uint8_t _repetition)
+{
+m_repetition = _repetition;
+}
+
+/*!
+ * @brief This function returns the value of member repetition
+ * @return Value of member repetition
+ */
+uint8_t ib::sim::fr::idl::TxBufferConfig::repetition() const
+{
+    return m_repetition;
+}
+
+/*!
+ * @brief This function returns a reference to member repetition
+ * @return Reference to member repetition
+ */
+uint8_t& ib::sim::fr::idl::TxBufferConfig::repetition()
+{
+    return m_repetition;
+}
+/*!
+ * @brief This function sets a value in member hasPayloadPreambleIndicator
+ * @param _hasPayloadPreambleIndicator New value for member hasPayloadPreambleIndicator
+ */
+void ib::sim::fr::idl::TxBufferConfig::hasPayloadPreambleIndicator(bool _hasPayloadPreambleIndicator)
+{
+m_hasPayloadPreambleIndicator = _hasPayloadPreambleIndicator;
+}
+
+/*!
+ * @brief This function returns the value of member hasPayloadPreambleIndicator
+ * @return Value of member hasPayloadPreambleIndicator
+ */
+bool ib::sim::fr::idl::TxBufferConfig::hasPayloadPreambleIndicator() const
+{
+    return m_hasPayloadPreambleIndicator;
+}
+
+/*!
+ * @brief This function returns a reference to member hasPayloadPreambleIndicator
+ * @return Reference to member hasPayloadPreambleIndicator
+ */
+bool& ib::sim::fr::idl::TxBufferConfig::hasPayloadPreambleIndicator()
+{
+    return m_hasPayloadPreambleIndicator;
+}
+/*!
+ * @brief This function sets a value in member headerCrc
+ * @param _headerCrc New value for member headerCrc
+ */
+void ib::sim::fr::idl::TxBufferConfig::headerCrc(uint16_t _headerCrc)
+{
+m_headerCrc = _headerCrc;
+}
+
+/*!
+ * @brief This function returns the value of member headerCrc
+ * @return Value of member headerCrc
+ */
+uint16_t ib::sim::fr::idl::TxBufferConfig::headerCrc() const
+{
+    return m_headerCrc;
+}
+
+/*!
+ * @brief This function returns a reference to member headerCrc
+ * @return Reference to member headerCrc
+ */
+uint16_t& ib::sim::fr::idl::TxBufferConfig::headerCrc()
+{
+    return m_headerCrc;
+}
+/*!
+ * @brief This function sets a value in member transmissionMode
+ * @param _transmissionMode New value for member transmissionMode
+ */
+void ib::sim::fr::idl::TxBufferConfig::transmissionMode(ib::sim::fr::idl::TransmissionMode _transmissionMode)
+{
+m_transmissionMode = _transmissionMode;
+}
+
+/*!
+ * @brief This function returns the value of member transmissionMode
+ * @return Value of member transmissionMode
+ */
+ib::sim::fr::idl::TransmissionMode ib::sim::fr::idl::TxBufferConfig::transmissionMode() const
+{
+    return m_transmissionMode;
+}
+
+/*!
+ * @brief This function returns a reference to member transmissionMode
+ * @return Reference to member transmissionMode
+ */
+ib::sim::fr::idl::TransmissionMode& ib::sim::fr::idl::TxBufferConfig::transmissionMode()
+{
+    return m_transmissionMode;
 }
 
 size_t ib::sim::fr::idl::TxBufferConfig::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
 
 
 
@@ -1054,7 +2385,7 @@ size_t ib::sim::fr::idl::TxBufferConfig::getKeyMaxCdrSerializedSize(size_t curre
 
 bool ib::sim::fr::idl::TxBufferConfig::isKeyDefined()
 {
-    return false;
+   return false;
 }
 
 void ib::sim::fr::idl::TxBufferConfig::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -1068,6 +2399,7 @@ void ib::sim::fr::idl::TxBufferConfig::serializeKey(eprosima::fastcdr::Cdr &scdr
 	 
 	 
 }
+
 ib::sim::fr::idl::ControllerConfig::ControllerConfig()
 {
 
@@ -1079,6 +2411,10 @@ ib::sim::fr::idl::ControllerConfig::ControllerConfig()
 
 ib::sim::fr::idl::ControllerConfig::~ControllerConfig()
 {
+
+
+
+
 }
 
 ib::sim::fr::idl::ControllerConfig::ControllerConfig(const ControllerConfig &x)
@@ -1099,6 +2435,7 @@ ib::sim::fr::idl::ControllerConfig::ControllerConfig(ControllerConfig &&x)
 
 ib::sim::fr::idl::ControllerConfig& ib::sim::fr::idl::ControllerConfig::operator=(const ControllerConfig &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_clusterParams = x.m_clusterParams;
     m_nodeParams = x.m_nodeParams;
@@ -1109,6 +2446,7 @@ ib::sim::fr::idl::ControllerConfig& ib::sim::fr::idl::ControllerConfig::operator
 
 ib::sim::fr::idl::ControllerConfig& ib::sim::fr::idl::ControllerConfig::operator=(ControllerConfig &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_clusterParams = std::move(x.m_clusterParams);
     m_nodeParams = std::move(x.m_nodeParams);
@@ -1121,13 +2459,14 @@ size_t ib::sim::fr::idl::ControllerConfig::getMaxCdrSerializedSize(size_t curren
 {
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += ib::sim::fr::idl::ClusterParameters::getMaxCdrSerializedSize(current_alignment);
     current_alignment += ib::sim::fr::idl::NodeParameters::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
-    for(size_t a = 0; a < 100; ++a)
+    for(size_t a = 0; a < 0; ++a)
     {
         current_alignment += ib::sim::fr::idl::TxBufferConfig::getMaxCdrSerializedSize(current_alignment);}
 
@@ -1139,6 +2478,7 @@ size_t ib::sim::fr::idl::ControllerConfig::getCdrSerializedSize(const ib::sim::f
 {
     (void)data;
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += ib::sim::fr::idl::ClusterParameters::getCdrSerializedSize(data.clusterParams(), current_alignment);
@@ -1156,6 +2496,7 @@ size_t ib::sim::fr::idl::ControllerConfig::getCdrSerializedSize(const ib::sim::f
 
 void ib::sim::fr::idl::ControllerConfig::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_clusterParams;
     scdr << m_nodeParams;
@@ -1164,16 +2505,159 @@ void ib::sim::fr::idl::ControllerConfig::serialize(eprosima::fastcdr::Cdr &scdr)
 
 void ib::sim::fr::idl::ControllerConfig::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_clusterParams;
     dcdr >> m_nodeParams;
     dcdr >> m_bufferConfigs;
 }
 
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::fr::idl::ControllerConfig::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::fr::idl::ControllerConfig::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::fr::idl::ControllerConfig::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::fr::idl::ControllerConfig::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function copies the value in member clusterParams
+ * @param _clusterParams New value to be copied in member clusterParams
+ */
+void ib::sim::fr::idl::ControllerConfig::clusterParams(const ib::sim::fr::idl::ClusterParameters &_clusterParams)
+{
+m_clusterParams = _clusterParams;
+}
+
+/*!
+ * @brief This function moves the value in member clusterParams
+ * @param _clusterParams New value to be moved in member clusterParams
+ */
+void ib::sim::fr::idl::ControllerConfig::clusterParams(ib::sim::fr::idl::ClusterParameters &&_clusterParams)
+{
+m_clusterParams = std::move(_clusterParams);
+}
+
+/*!
+ * @brief This function returns a constant reference to member clusterParams
+ * @return Constant reference to member clusterParams
+ */
+const ib::sim::fr::idl::ClusterParameters& ib::sim::fr::idl::ControllerConfig::clusterParams() const
+{
+    return m_clusterParams;
+}
+
+/*!
+ * @brief This function returns a reference to member clusterParams
+ * @return Reference to member clusterParams
+ */
+ib::sim::fr::idl::ClusterParameters& ib::sim::fr::idl::ControllerConfig::clusterParams()
+{
+    return m_clusterParams;
+}
+/*!
+ * @brief This function copies the value in member nodeParams
+ * @param _nodeParams New value to be copied in member nodeParams
+ */
+void ib::sim::fr::idl::ControllerConfig::nodeParams(const ib::sim::fr::idl::NodeParameters &_nodeParams)
+{
+m_nodeParams = _nodeParams;
+}
+
+/*!
+ * @brief This function moves the value in member nodeParams
+ * @param _nodeParams New value to be moved in member nodeParams
+ */
+void ib::sim::fr::idl::ControllerConfig::nodeParams(ib::sim::fr::idl::NodeParameters &&_nodeParams)
+{
+m_nodeParams = std::move(_nodeParams);
+}
+
+/*!
+ * @brief This function returns a constant reference to member nodeParams
+ * @return Constant reference to member nodeParams
+ */
+const ib::sim::fr::idl::NodeParameters& ib::sim::fr::idl::ControllerConfig::nodeParams() const
+{
+    return m_nodeParams;
+}
+
+/*!
+ * @brief This function returns a reference to member nodeParams
+ * @return Reference to member nodeParams
+ */
+ib::sim::fr::idl::NodeParameters& ib::sim::fr::idl::ControllerConfig::nodeParams()
+{
+    return m_nodeParams;
+}
+/*!
+ * @brief This function copies the value in member bufferConfigs
+ * @param _bufferConfigs New value to be copied in member bufferConfigs
+ */
+void ib::sim::fr::idl::ControllerConfig::bufferConfigs(const std::vector<ib::sim::fr::idl::TxBufferConfig> &_bufferConfigs)
+{
+m_bufferConfigs = _bufferConfigs;
+}
+
+/*!
+ * @brief This function moves the value in member bufferConfigs
+ * @param _bufferConfigs New value to be moved in member bufferConfigs
+ */
+void ib::sim::fr::idl::ControllerConfig::bufferConfigs(std::vector<ib::sim::fr::idl::TxBufferConfig> &&_bufferConfigs)
+{
+m_bufferConfigs = std::move(_bufferConfigs);
+}
+
+/*!
+ * @brief This function returns a constant reference to member bufferConfigs
+ * @return Constant reference to member bufferConfigs
+ */
+const std::vector<ib::sim::fr::idl::TxBufferConfig>& ib::sim::fr::idl::ControllerConfig::bufferConfigs() const
+{
+    return m_bufferConfigs;
+}
+
+/*!
+ * @brief This function returns a reference to member bufferConfigs
+ * @return Reference to member bufferConfigs
+ */
+std::vector<ib::sim::fr::idl::TxBufferConfig>& ib::sim::fr::idl::ControllerConfig::bufferConfigs()
+{
+    return m_bufferConfigs;
+}
+
 size_t ib::sim::fr::idl::ControllerConfig::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -1184,7 +2668,7 @@ size_t ib::sim::fr::idl::ControllerConfig::getKeyMaxCdrSerializedSize(size_t cur
 
 bool ib::sim::fr::idl::ControllerConfig::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::fr::idl::ControllerConfig::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -1195,17 +2679,20 @@ void ib::sim::fr::idl::ControllerConfig::serializeKey(eprosima::fastcdr::Cdr &sc
 	 
 	 
 }
+
 ib::sim::fr::idl::TxBufferConfigUpdate::TxBufferConfigUpdate()
 {
 
     m_txBufferIndex = 0;
 
 
-
 }
 
 ib::sim::fr::idl::TxBufferConfigUpdate::~TxBufferConfigUpdate()
 {
+
+
+
 }
 
 ib::sim::fr::idl::TxBufferConfigUpdate::TxBufferConfigUpdate(const TxBufferConfigUpdate &x)
@@ -1224,6 +2711,7 @@ ib::sim::fr::idl::TxBufferConfigUpdate::TxBufferConfigUpdate(TxBufferConfigUpdat
 
 ib::sim::fr::idl::TxBufferConfigUpdate& ib::sim::fr::idl::TxBufferConfigUpdate::operator=(const TxBufferConfigUpdate &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_txBufferIndex = x.m_txBufferIndex;
     m_txBufferConfig = x.m_txBufferConfig;
@@ -1233,6 +2721,7 @@ ib::sim::fr::idl::TxBufferConfigUpdate& ib::sim::fr::idl::TxBufferConfigUpdate::
 
 ib::sim::fr::idl::TxBufferConfigUpdate& ib::sim::fr::idl::TxBufferConfigUpdate::operator=(TxBufferConfigUpdate &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_txBufferIndex = x.m_txBufferIndex;
     m_txBufferConfig = std::move(x.m_txBufferConfig);
@@ -1243,6 +2732,7 @@ ib::sim::fr::idl::TxBufferConfigUpdate& ib::sim::fr::idl::TxBufferConfigUpdate::
 size_t ib::sim::fr::idl::TxBufferConfigUpdate::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
@@ -1258,6 +2748,7 @@ size_t ib::sim::fr::idl::TxBufferConfigUpdate::getCdrSerializedSize(const ib::si
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
@@ -1269,6 +2760,7 @@ size_t ib::sim::fr::idl::TxBufferConfigUpdate::getCdrSerializedSize(const ib::si
 
 void ib::sim::fr::idl::TxBufferConfigUpdate::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_txBufferIndex;
     scdr << m_txBufferConfig;
@@ -1276,15 +2768,114 @@ void ib::sim::fr::idl::TxBufferConfigUpdate::serialize(eprosima::fastcdr::Cdr &s
 
 void ib::sim::fr::idl::TxBufferConfigUpdate::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_txBufferIndex;
     dcdr >> m_txBufferConfig;
 }
 
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::fr::idl::TxBufferConfigUpdate::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::fr::idl::TxBufferConfigUpdate::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::fr::idl::TxBufferConfigUpdate::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::fr::idl::TxBufferConfigUpdate::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member txBufferIndex
+ * @param _txBufferIndex New value for member txBufferIndex
+ */
+void ib::sim::fr::idl::TxBufferConfigUpdate::txBufferIndex(uint16_t _txBufferIndex)
+{
+m_txBufferIndex = _txBufferIndex;
+}
+
+/*!
+ * @brief This function returns the value of member txBufferIndex
+ * @return Value of member txBufferIndex
+ */
+uint16_t ib::sim::fr::idl::TxBufferConfigUpdate::txBufferIndex() const
+{
+    return m_txBufferIndex;
+}
+
+/*!
+ * @brief This function returns a reference to member txBufferIndex
+ * @return Reference to member txBufferIndex
+ */
+uint16_t& ib::sim::fr::idl::TxBufferConfigUpdate::txBufferIndex()
+{
+    return m_txBufferIndex;
+}
+/*!
+ * @brief This function copies the value in member txBufferConfig
+ * @param _txBufferConfig New value to be copied in member txBufferConfig
+ */
+void ib::sim::fr::idl::TxBufferConfigUpdate::txBufferConfig(const ib::sim::fr::idl::TxBufferConfig &_txBufferConfig)
+{
+m_txBufferConfig = _txBufferConfig;
+}
+
+/*!
+ * @brief This function moves the value in member txBufferConfig
+ * @param _txBufferConfig New value to be moved in member txBufferConfig
+ */
+void ib::sim::fr::idl::TxBufferConfigUpdate::txBufferConfig(ib::sim::fr::idl::TxBufferConfig &&_txBufferConfig)
+{
+m_txBufferConfig = std::move(_txBufferConfig);
+}
+
+/*!
+ * @brief This function returns a constant reference to member txBufferConfig
+ * @return Constant reference to member txBufferConfig
+ */
+const ib::sim::fr::idl::TxBufferConfig& ib::sim::fr::idl::TxBufferConfigUpdate::txBufferConfig() const
+{
+    return m_txBufferConfig;
+}
+
+/*!
+ * @brief This function returns a reference to member txBufferConfig
+ * @return Reference to member txBufferConfig
+ */
+ib::sim::fr::idl::TxBufferConfig& ib::sim::fr::idl::TxBufferConfigUpdate::txBufferConfig()
+{
+    return m_txBufferConfig;
+}
+
 size_t ib::sim::fr::idl::TxBufferConfigUpdate::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -1294,7 +2885,7 @@ size_t ib::sim::fr::idl::TxBufferConfigUpdate::getKeyMaxCdrSerializedSize(size_t
 
 bool ib::sim::fr::idl::TxBufferConfigUpdate::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::fr::idl::TxBufferConfigUpdate::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -1304,19 +2895,22 @@ void ib::sim::fr::idl::TxBufferConfigUpdate::serializeKey(eprosima::fastcdr::Cdr
 	 
 	 
 }
+
 ib::sim::fr::idl::TxBufferUpdate::TxBufferUpdate()
 {
 
     m_txBufferIndex = 0;
-
     m_payloadDataValid = false;
-
 
 
 }
 
 ib::sim::fr::idl::TxBufferUpdate::~TxBufferUpdate()
 {
+
+
+
+
 }
 
 ib::sim::fr::idl::TxBufferUpdate::TxBufferUpdate(const TxBufferUpdate &x)
@@ -1337,6 +2931,7 @@ ib::sim::fr::idl::TxBufferUpdate::TxBufferUpdate(TxBufferUpdate &&x)
 
 ib::sim::fr::idl::TxBufferUpdate& ib::sim::fr::idl::TxBufferUpdate::operator=(const TxBufferUpdate &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_txBufferIndex = x.m_txBufferIndex;
     m_payloadDataValid = x.m_payloadDataValid;
@@ -1347,6 +2942,7 @@ ib::sim::fr::idl::TxBufferUpdate& ib::sim::fr::idl::TxBufferUpdate::operator=(co
 
 ib::sim::fr::idl::TxBufferUpdate& ib::sim::fr::idl::TxBufferUpdate::operator=(TxBufferUpdate &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_txBufferIndex = x.m_txBufferIndex;
     m_payloadDataValid = x.m_payloadDataValid;
@@ -1359,6 +2955,7 @@ size_t ib::sim::fr::idl::TxBufferUpdate::getMaxCdrSerializedSize(size_t current_
 {
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
 
@@ -1368,7 +2965,7 @@ size_t ib::sim::fr::idl::TxBufferUpdate::getMaxCdrSerializedSize(size_t current_
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
-    current_alignment += (100 * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+    current_alignment += (0 * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
 
 
@@ -1380,6 +2977,7 @@ size_t ib::sim::fr::idl::TxBufferUpdate::getCdrSerializedSize(const ib::sim::fr:
 {
     (void)data;
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 2 + eprosima::fastcdr::Cdr::alignment(current_alignment, 2);
@@ -1400,6 +2998,7 @@ size_t ib::sim::fr::idl::TxBufferUpdate::getCdrSerializedSize(const ib::sim::fr:
 
 void ib::sim::fr::idl::TxBufferUpdate::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_txBufferIndex;
     scdr << m_payloadDataValid;
@@ -1408,16 +3007,141 @@ void ib::sim::fr::idl::TxBufferUpdate::serialize(eprosima::fastcdr::Cdr &scdr) c
 
 void ib::sim::fr::idl::TxBufferUpdate::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_txBufferIndex;
     dcdr >> m_payloadDataValid;
     dcdr >> m_payload;
 }
 
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::fr::idl::TxBufferUpdate::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::fr::idl::TxBufferUpdate::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::fr::idl::TxBufferUpdate::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::fr::idl::TxBufferUpdate::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member txBufferIndex
+ * @param _txBufferIndex New value for member txBufferIndex
+ */
+void ib::sim::fr::idl::TxBufferUpdate::txBufferIndex(uint16_t _txBufferIndex)
+{
+m_txBufferIndex = _txBufferIndex;
+}
+
+/*!
+ * @brief This function returns the value of member txBufferIndex
+ * @return Value of member txBufferIndex
+ */
+uint16_t ib::sim::fr::idl::TxBufferUpdate::txBufferIndex() const
+{
+    return m_txBufferIndex;
+}
+
+/*!
+ * @brief This function returns a reference to member txBufferIndex
+ * @return Reference to member txBufferIndex
+ */
+uint16_t& ib::sim::fr::idl::TxBufferUpdate::txBufferIndex()
+{
+    return m_txBufferIndex;
+}
+/*!
+ * @brief This function sets a value in member payloadDataValid
+ * @param _payloadDataValid New value for member payloadDataValid
+ */
+void ib::sim::fr::idl::TxBufferUpdate::payloadDataValid(bool _payloadDataValid)
+{
+m_payloadDataValid = _payloadDataValid;
+}
+
+/*!
+ * @brief This function returns the value of member payloadDataValid
+ * @return Value of member payloadDataValid
+ */
+bool ib::sim::fr::idl::TxBufferUpdate::payloadDataValid() const
+{
+    return m_payloadDataValid;
+}
+
+/*!
+ * @brief This function returns a reference to member payloadDataValid
+ * @return Reference to member payloadDataValid
+ */
+bool& ib::sim::fr::idl::TxBufferUpdate::payloadDataValid()
+{
+    return m_payloadDataValid;
+}
+/*!
+ * @brief This function copies the value in member payload
+ * @param _payload New value to be copied in member payload
+ */
+void ib::sim::fr::idl::TxBufferUpdate::payload(const std::vector<uint8_t> &_payload)
+{
+m_payload = _payload;
+}
+
+/*!
+ * @brief This function moves the value in member payload
+ * @param _payload New value to be moved in member payload
+ */
+void ib::sim::fr::idl::TxBufferUpdate::payload(std::vector<uint8_t> &&_payload)
+{
+m_payload = std::move(_payload);
+}
+
+/*!
+ * @brief This function returns a constant reference to member payload
+ * @return Constant reference to member payload
+ */
+const std::vector<uint8_t>& ib::sim::fr::idl::TxBufferUpdate::payload() const
+{
+    return m_payload;
+}
+
+/*!
+ * @brief This function returns a reference to member payload
+ * @return Reference to member payload
+ */
+std::vector<uint8_t>& ib::sim::fr::idl::TxBufferUpdate::payload()
+{
+    return m_payload;
+}
+
 size_t ib::sim::fr::idl::TxBufferUpdate::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -1428,7 +3152,7 @@ size_t ib::sim::fr::idl::TxBufferUpdate::getKeyMaxCdrSerializedSize(size_t curre
 
 bool ib::sim::fr::idl::TxBufferUpdate::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::fr::idl::TxBufferUpdate::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -1440,16 +3164,18 @@ void ib::sim::fr::idl::TxBufferUpdate::serializeKey(eprosima::fastcdr::Cdr &scdr
 	 
 }
 
+
 ib::sim::fr::idl::HostCommand::HostCommand()
 {
 
     m_command = ib::sim::fr::idl::RUN;
 
-
 }
 
 ib::sim::fr::idl::HostCommand::~HostCommand()
 {
+
+
 }
 
 ib::sim::fr::idl::HostCommand::HostCommand(const HostCommand &x)
@@ -1466,6 +3192,7 @@ ib::sim::fr::idl::HostCommand::HostCommand(HostCommand &&x)
 
 ib::sim::fr::idl::HostCommand& ib::sim::fr::idl::HostCommand::operator=(const HostCommand &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_command = x.m_command;
 
@@ -1474,6 +3201,7 @@ ib::sim::fr::idl::HostCommand& ib::sim::fr::idl::HostCommand::operator=(const Ho
 
 ib::sim::fr::idl::HostCommand& ib::sim::fr::idl::HostCommand::operator=(HostCommand &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_command = x.m_command;
 
@@ -1483,6 +3211,7 @@ ib::sim::fr::idl::HostCommand& ib::sim::fr::idl::HostCommand::operator=(HostComm
 size_t ib::sim::fr::idl::HostCommand::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
@@ -1497,6 +3226,7 @@ size_t ib::sim::fr::idl::HostCommand::getCdrSerializedSize(const ib::sim::fr::id
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
@@ -1507,24 +3237,90 @@ size_t ib::sim::fr::idl::HostCommand::getCdrSerializedSize(const ib::sim::fr::id
 
 void ib::sim::fr::idl::HostCommand::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << (uint32_t)m_command;
 }
 
 void ib::sim::fr::idl::HostCommand::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     {
         uint32_t enum_value = 0;
         dcdr >> enum_value;
         m_command = (ib::sim::fr::idl::ChiCommand)enum_value;
     }
+
+}
+
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::fr::idl::HostCommand::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::fr::idl::HostCommand::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::fr::idl::HostCommand::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::fr::idl::HostCommand::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member command
+ * @param _command New value for member command
+ */
+void ib::sim::fr::idl::HostCommand::command(ib::sim::fr::idl::ChiCommand _command)
+{
+m_command = _command;
+}
+
+/*!
+ * @brief This function returns the value of member command
+ * @return Value of member command
+ */
+ib::sim::fr::idl::ChiCommand ib::sim::fr::idl::HostCommand::command() const
+{
+    return m_command;
+}
+
+/*!
+ * @brief This function returns a reference to member command
+ * @return Reference to member command
+ */
+ib::sim::fr::idl::ChiCommand& ib::sim::fr::idl::HostCommand::command()
+{
+    return m_command;
 }
 
 size_t ib::sim::fr::idl::HostCommand::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -1533,7 +3329,7 @@ size_t ib::sim::fr::idl::HostCommand::getKeyMaxCdrSerializedSize(size_t current_
 
 bool ib::sim::fr::idl::HostCommand::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::fr::idl::HostCommand::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -1542,23 +3338,24 @@ void ib::sim::fr::idl::HostCommand::serializeKey(eprosima::fastcdr::Cdr &scdr) c
 	 scdr << m_senderAddr;  
 	 
 }
+
 ib::sim::fr::idl::Header::Header()
 {
     m_flags = 0;
-
     m_frameId = 0;
-
     m_payloadLength = 0;
-
     m_headerCrc = 0;
-
     m_cycleCount = 0;
-
 
 }
 
 ib::sim::fr::idl::Header::~Header()
 {
+
+
+
+
+
 }
 
 ib::sim::fr::idl::Header::Header(const Header &x)
@@ -1581,6 +3378,7 @@ ib::sim::fr::idl::Header::Header(Header &&x)
 
 ib::sim::fr::idl::Header& ib::sim::fr::idl::Header::operator=(const Header &x)
 {
+
     m_flags = x.m_flags;
     m_frameId = x.m_frameId;
     m_payloadLength = x.m_payloadLength;
@@ -1592,6 +3390,7 @@ ib::sim::fr::idl::Header& ib::sim::fr::idl::Header::operator=(const Header &x)
 
 ib::sim::fr::idl::Header& ib::sim::fr::idl::Header::operator=(Header &&x)
 {
+
     m_flags = x.m_flags;
     m_frameId = x.m_frameId;
     m_payloadLength = x.m_payloadLength;
@@ -1604,6 +3403,7 @@ ib::sim::fr::idl::Header& ib::sim::fr::idl::Header::operator=(Header &&x)
 size_t ib::sim::fr::idl::Header::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
@@ -1629,6 +3429,7 @@ size_t ib::sim::fr::idl::Header::getCdrSerializedSize(const ib::sim::fr::idl::He
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
 
@@ -1650,6 +3451,7 @@ size_t ib::sim::fr::idl::Header::getCdrSerializedSize(const ib::sim::fr::idl::He
 
 void ib::sim::fr::idl::Header::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_flags;
     scdr << m_frameId;
     scdr << m_payloadLength;
@@ -1659,6 +3461,7 @@ void ib::sim::fr::idl::Header::serialize(eprosima::fastcdr::Cdr &scdr) const
 
 void ib::sim::fr::idl::Header::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_flags;
     dcdr >> m_frameId;
     dcdr >> m_payloadLength;
@@ -1666,10 +3469,142 @@ void ib::sim::fr::idl::Header::deserialize(eprosima::fastcdr::Cdr &dcdr)
     dcdr >> m_cycleCount;
 }
 
+/*!
+ * @brief This function sets a value in member flags
+ * @param _flags New value for member flags
+ */
+void ib::sim::fr::idl::Header::flags(uint8_t _flags)
+{
+m_flags = _flags;
+}
+
+/*!
+ * @brief This function returns the value of member flags
+ * @return Value of member flags
+ */
+uint8_t ib::sim::fr::idl::Header::flags() const
+{
+    return m_flags;
+}
+
+/*!
+ * @brief This function returns a reference to member flags
+ * @return Reference to member flags
+ */
+uint8_t& ib::sim::fr::idl::Header::flags()
+{
+    return m_flags;
+}
+/*!
+ * @brief This function sets a value in member frameId
+ * @param _frameId New value for member frameId
+ */
+void ib::sim::fr::idl::Header::frameId(uint16_t _frameId)
+{
+m_frameId = _frameId;
+}
+
+/*!
+ * @brief This function returns the value of member frameId
+ * @return Value of member frameId
+ */
+uint16_t ib::sim::fr::idl::Header::frameId() const
+{
+    return m_frameId;
+}
+
+/*!
+ * @brief This function returns a reference to member frameId
+ * @return Reference to member frameId
+ */
+uint16_t& ib::sim::fr::idl::Header::frameId()
+{
+    return m_frameId;
+}
+/*!
+ * @brief This function sets a value in member payloadLength
+ * @param _payloadLength New value for member payloadLength
+ */
+void ib::sim::fr::idl::Header::payloadLength(uint8_t _payloadLength)
+{
+m_payloadLength = _payloadLength;
+}
+
+/*!
+ * @brief This function returns the value of member payloadLength
+ * @return Value of member payloadLength
+ */
+uint8_t ib::sim::fr::idl::Header::payloadLength() const
+{
+    return m_payloadLength;
+}
+
+/*!
+ * @brief This function returns a reference to member payloadLength
+ * @return Reference to member payloadLength
+ */
+uint8_t& ib::sim::fr::idl::Header::payloadLength()
+{
+    return m_payloadLength;
+}
+/*!
+ * @brief This function sets a value in member headerCrc
+ * @param _headerCrc New value for member headerCrc
+ */
+void ib::sim::fr::idl::Header::headerCrc(uint16_t _headerCrc)
+{
+m_headerCrc = _headerCrc;
+}
+
+/*!
+ * @brief This function returns the value of member headerCrc
+ * @return Value of member headerCrc
+ */
+uint16_t ib::sim::fr::idl::Header::headerCrc() const
+{
+    return m_headerCrc;
+}
+
+/*!
+ * @brief This function returns a reference to member headerCrc
+ * @return Reference to member headerCrc
+ */
+uint16_t& ib::sim::fr::idl::Header::headerCrc()
+{
+    return m_headerCrc;
+}
+/*!
+ * @brief This function sets a value in member cycleCount
+ * @param _cycleCount New value for member cycleCount
+ */
+void ib::sim::fr::idl::Header::cycleCount(uint8_t _cycleCount)
+{
+m_cycleCount = _cycleCount;
+}
+
+/*!
+ * @brief This function returns the value of member cycleCount
+ * @return Value of member cycleCount
+ */
+uint8_t ib::sim::fr::idl::Header::cycleCount() const
+{
+    return m_cycleCount;
+}
+
+/*!
+ * @brief This function returns a reference to member cycleCount
+ * @return Reference to member cycleCount
+ */
+uint8_t& ib::sim::fr::idl::Header::cycleCount()
+{
+    return m_cycleCount;
+}
+
 size_t ib::sim::fr::idl::Header::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
 
 
 
@@ -1681,7 +3616,7 @@ size_t ib::sim::fr::idl::Header::getKeyMaxCdrSerializedSize(size_t current_align
 
 bool ib::sim::fr::idl::Header::isKeyDefined()
 {
-    return false;
+   return false;
 }
 
 void ib::sim::fr::idl::Header::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -1693,6 +3628,7 @@ void ib::sim::fr::idl::Header::serializeKey(eprosima::fastcdr::Cdr &scdr) const
 	 
 	 
 }
+
 ib::sim::fr::idl::Frame::Frame()
 {
 
@@ -1702,6 +3638,8 @@ ib::sim::fr::idl::Frame::Frame()
 
 ib::sim::fr::idl::Frame::~Frame()
 {
+
+
 }
 
 ib::sim::fr::idl::Frame::Frame(const Frame &x)
@@ -1718,6 +3656,7 @@ ib::sim::fr::idl::Frame::Frame(Frame &&x)
 
 ib::sim::fr::idl::Frame& ib::sim::fr::idl::Frame::operator=(const Frame &x)
 {
+
     m_header = x.m_header;
     m_payload = x.m_payload;
 
@@ -1726,6 +3665,7 @@ ib::sim::fr::idl::Frame& ib::sim::fr::idl::Frame::operator=(const Frame &x)
 
 ib::sim::fr::idl::Frame& ib::sim::fr::idl::Frame::operator=(Frame &&x)
 {
+
     m_header = std::move(x.m_header);
     m_payload = std::move(x.m_payload);
 
@@ -1735,6 +3675,7 @@ ib::sim::fr::idl::Frame& ib::sim::fr::idl::Frame::operator=(Frame &&x)
 size_t ib::sim::fr::idl::Frame::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::sim::fr::idl::Header::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
@@ -1752,6 +3693,7 @@ size_t ib::sim::fr::idl::Frame::getCdrSerializedSize(const ib::sim::fr::idl::Fra
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::sim::fr::idl::Header::getCdrSerializedSize(data.header(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
@@ -1765,20 +3707,94 @@ size_t ib::sim::fr::idl::Frame::getCdrSerializedSize(const ib::sim::fr::idl::Fra
 
 void ib::sim::fr::idl::Frame::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_header;
     scdr << m_payload;
 }
 
 void ib::sim::fr::idl::Frame::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_header;
     dcdr >> m_payload;
+}
+
+/*!
+ * @brief This function copies the value in member header
+ * @param _header New value to be copied in member header
+ */
+void ib::sim::fr::idl::Frame::header(const ib::sim::fr::idl::Header &_header)
+{
+m_header = _header;
+}
+
+/*!
+ * @brief This function moves the value in member header
+ * @param _header New value to be moved in member header
+ */
+void ib::sim::fr::idl::Frame::header(ib::sim::fr::idl::Header &&_header)
+{
+m_header = std::move(_header);
+}
+
+/*!
+ * @brief This function returns a constant reference to member header
+ * @return Constant reference to member header
+ */
+const ib::sim::fr::idl::Header& ib::sim::fr::idl::Frame::header() const
+{
+    return m_header;
+}
+
+/*!
+ * @brief This function returns a reference to member header
+ * @return Reference to member header
+ */
+ib::sim::fr::idl::Header& ib::sim::fr::idl::Frame::header()
+{
+    return m_header;
+}
+/*!
+ * @brief This function copies the value in member payload
+ * @param _payload New value to be copied in member payload
+ */
+void ib::sim::fr::idl::Frame::payload(const std::vector<uint8_t> &_payload)
+{
+m_payload = _payload;
+}
+
+/*!
+ * @brief This function moves the value in member payload
+ * @param _payload New value to be moved in member payload
+ */
+void ib::sim::fr::idl::Frame::payload(std::vector<uint8_t> &&_payload)
+{
+m_payload = std::move(_payload);
+}
+
+/*!
+ * @brief This function returns a constant reference to member payload
+ * @return Constant reference to member payload
+ */
+const std::vector<uint8_t>& ib::sim::fr::idl::Frame::payload() const
+{
+    return m_payload;
+}
+
+/*!
+ * @brief This function returns a reference to member payload
+ * @return Reference to member payload
+ */
+std::vector<uint8_t>& ib::sim::fr::idl::Frame::payload()
+{
+    return m_payload;
 }
 
 size_t ib::sim::fr::idl::Frame::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
 
 
 
@@ -1787,7 +3803,7 @@ size_t ib::sim::fr::idl::Frame::getKeyMaxCdrSerializedSize(size_t current_alignm
 
 bool ib::sim::fr::idl::Frame::isKeyDefined()
 {
-    return false;
+   return false;
 }
 
 void ib::sim::fr::idl::Frame::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -1796,19 +3812,22 @@ void ib::sim::fr::idl::Frame::serializeKey(eprosima::fastcdr::Cdr &scdr) const
 	 
 	 
 }
+
 ib::sim::fr::idl::FrMessage::FrMessage()
 {
 
     m_timeNs = 0;
-
     m_channel = ib::sim::fr::idl::None;
-
 
 
 }
 
 ib::sim::fr::idl::FrMessage::~FrMessage()
 {
+
+
+
+
 }
 
 ib::sim::fr::idl::FrMessage::FrMessage(const FrMessage &x)
@@ -1829,6 +3848,7 @@ ib::sim::fr::idl::FrMessage::FrMessage(FrMessage &&x)
 
 ib::sim::fr::idl::FrMessage& ib::sim::fr::idl::FrMessage::operator=(const FrMessage &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_timeNs = x.m_timeNs;
     m_channel = x.m_channel;
@@ -1839,6 +3859,7 @@ ib::sim::fr::idl::FrMessage& ib::sim::fr::idl::FrMessage::operator=(const FrMess
 
 ib::sim::fr::idl::FrMessage& ib::sim::fr::idl::FrMessage::operator=(FrMessage &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_timeNs = x.m_timeNs;
     m_channel = x.m_channel;
@@ -1850,6 +3871,7 @@ ib::sim::fr::idl::FrMessage& ib::sim::fr::idl::FrMessage::operator=(FrMessage &&
 size_t ib::sim::fr::idl::FrMessage::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
@@ -1868,6 +3890,7 @@ size_t ib::sim::fr::idl::FrMessage::getCdrSerializedSize(const ib::sim::fr::idl:
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
@@ -1882,6 +3905,7 @@ size_t ib::sim::fr::idl::FrMessage::getCdrSerializedSize(const ib::sim::fr::idl:
 
 void ib::sim::fr::idl::FrMessage::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_timeNs;
     scdr << (uint32_t)m_channel;
@@ -1890,6 +3914,7 @@ void ib::sim::fr::idl::FrMessage::serialize(eprosima::fastcdr::Cdr &scdr) const
 
 void ib::sim::fr::idl::FrMessage::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_timeNs;
     {
@@ -1897,13 +3922,138 @@ void ib::sim::fr::idl::FrMessage::deserialize(eprosima::fastcdr::Cdr &dcdr)
         dcdr >> enum_value;
         m_channel = (ib::sim::fr::idl::Channel)enum_value;
     }
+
     dcdr >> m_frame;
+}
+
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::fr::idl::FrMessage::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::fr::idl::FrMessage::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::fr::idl::FrMessage::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::fr::idl::FrMessage::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member timeNs
+ * @param _timeNs New value for member timeNs
+ */
+void ib::sim::fr::idl::FrMessage::timeNs(int64_t _timeNs)
+{
+m_timeNs = _timeNs;
+}
+
+/*!
+ * @brief This function returns the value of member timeNs
+ * @return Value of member timeNs
+ */
+int64_t ib::sim::fr::idl::FrMessage::timeNs() const
+{
+    return m_timeNs;
+}
+
+/*!
+ * @brief This function returns a reference to member timeNs
+ * @return Reference to member timeNs
+ */
+int64_t& ib::sim::fr::idl::FrMessage::timeNs()
+{
+    return m_timeNs;
+}
+/*!
+ * @brief This function sets a value in member channel
+ * @param _channel New value for member channel
+ */
+void ib::sim::fr::idl::FrMessage::channel(ib::sim::fr::idl::Channel _channel)
+{
+m_channel = _channel;
+}
+
+/*!
+ * @brief This function returns the value of member channel
+ * @return Value of member channel
+ */
+ib::sim::fr::idl::Channel ib::sim::fr::idl::FrMessage::channel() const
+{
+    return m_channel;
+}
+
+/*!
+ * @brief This function returns a reference to member channel
+ * @return Reference to member channel
+ */
+ib::sim::fr::idl::Channel& ib::sim::fr::idl::FrMessage::channel()
+{
+    return m_channel;
+}
+/*!
+ * @brief This function copies the value in member frame
+ * @param _frame New value to be copied in member frame
+ */
+void ib::sim::fr::idl::FrMessage::frame(const ib::sim::fr::idl::Frame &_frame)
+{
+m_frame = _frame;
+}
+
+/*!
+ * @brief This function moves the value in member frame
+ * @param _frame New value to be moved in member frame
+ */
+void ib::sim::fr::idl::FrMessage::frame(ib::sim::fr::idl::Frame &&_frame)
+{
+m_frame = std::move(_frame);
+}
+
+/*!
+ * @brief This function returns a constant reference to member frame
+ * @return Constant reference to member frame
+ */
+const ib::sim::fr::idl::Frame& ib::sim::fr::idl::FrMessage::frame() const
+{
+    return m_frame;
+}
+
+/*!
+ * @brief This function returns a reference to member frame
+ * @return Reference to member frame
+ */
+ib::sim::fr::idl::Frame& ib::sim::fr::idl::FrMessage::frame()
+{
+    return m_frame;
 }
 
 size_t ib::sim::fr::idl::FrMessage::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -1914,7 +4064,7 @@ size_t ib::sim::fr::idl::FrMessage::getKeyMaxCdrSerializedSize(size_t current_al
 
 bool ib::sim::fr::idl::FrMessage::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::fr::idl::FrMessage::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -1925,21 +4075,24 @@ void ib::sim::fr::idl::FrMessage::serializeKey(eprosima::fastcdr::Cdr &scdr) con
 	 
 	 
 }
+
 ib::sim::fr::idl::FrMessageAck::FrMessageAck()
 {
 
     m_timeNs = 0;
-
     m_txBufferIndex = 0;
-
     m_channel = ib::sim::fr::idl::None;
-
 
 
 }
 
 ib::sim::fr::idl::FrMessageAck::~FrMessageAck()
 {
+
+
+
+
+
 }
 
 ib::sim::fr::idl::FrMessageAck::FrMessageAck(const FrMessageAck &x)
@@ -1962,6 +4115,7 @@ ib::sim::fr::idl::FrMessageAck::FrMessageAck(FrMessageAck &&x)
 
 ib::sim::fr::idl::FrMessageAck& ib::sim::fr::idl::FrMessageAck::operator=(const FrMessageAck &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_timeNs = x.m_timeNs;
     m_txBufferIndex = x.m_txBufferIndex;
@@ -1973,6 +4127,7 @@ ib::sim::fr::idl::FrMessageAck& ib::sim::fr::idl::FrMessageAck::operator=(const 
 
 ib::sim::fr::idl::FrMessageAck& ib::sim::fr::idl::FrMessageAck::operator=(FrMessageAck &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_timeNs = x.m_timeNs;
     m_txBufferIndex = x.m_txBufferIndex;
@@ -1985,6 +4140,7 @@ ib::sim::fr::idl::FrMessageAck& ib::sim::fr::idl::FrMessageAck::operator=(FrMess
 size_t ib::sim::fr::idl::FrMessageAck::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
@@ -2006,6 +4162,7 @@ size_t ib::sim::fr::idl::FrMessageAck::getCdrSerializedSize(const ib::sim::fr::i
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
@@ -2023,6 +4180,7 @@ size_t ib::sim::fr::idl::FrMessageAck::getCdrSerializedSize(const ib::sim::fr::i
 
 void ib::sim::fr::idl::FrMessageAck::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_timeNs;
     scdr << m_txBufferIndex;
@@ -2032,6 +4190,7 @@ void ib::sim::fr::idl::FrMessageAck::serialize(eprosima::fastcdr::Cdr &scdr) con
 
 void ib::sim::fr::idl::FrMessageAck::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_timeNs;
     dcdr >> m_txBufferIndex;
@@ -2040,13 +4199,164 @@ void ib::sim::fr::idl::FrMessageAck::deserialize(eprosima::fastcdr::Cdr &dcdr)
         dcdr >> enum_value;
         m_channel = (ib::sim::fr::idl::Channel)enum_value;
     }
+
     dcdr >> m_frame;
+}
+
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::fr::idl::FrMessageAck::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::fr::idl::FrMessageAck::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::fr::idl::FrMessageAck::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::fr::idl::FrMessageAck::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member timeNs
+ * @param _timeNs New value for member timeNs
+ */
+void ib::sim::fr::idl::FrMessageAck::timeNs(int64_t _timeNs)
+{
+m_timeNs = _timeNs;
+}
+
+/*!
+ * @brief This function returns the value of member timeNs
+ * @return Value of member timeNs
+ */
+int64_t ib::sim::fr::idl::FrMessageAck::timeNs() const
+{
+    return m_timeNs;
+}
+
+/*!
+ * @brief This function returns a reference to member timeNs
+ * @return Reference to member timeNs
+ */
+int64_t& ib::sim::fr::idl::FrMessageAck::timeNs()
+{
+    return m_timeNs;
+}
+/*!
+ * @brief This function sets a value in member txBufferIndex
+ * @param _txBufferIndex New value for member txBufferIndex
+ */
+void ib::sim::fr::idl::FrMessageAck::txBufferIndex(uint16_t _txBufferIndex)
+{
+m_txBufferIndex = _txBufferIndex;
+}
+
+/*!
+ * @brief This function returns the value of member txBufferIndex
+ * @return Value of member txBufferIndex
+ */
+uint16_t ib::sim::fr::idl::FrMessageAck::txBufferIndex() const
+{
+    return m_txBufferIndex;
+}
+
+/*!
+ * @brief This function returns a reference to member txBufferIndex
+ * @return Reference to member txBufferIndex
+ */
+uint16_t& ib::sim::fr::idl::FrMessageAck::txBufferIndex()
+{
+    return m_txBufferIndex;
+}
+/*!
+ * @brief This function sets a value in member channel
+ * @param _channel New value for member channel
+ */
+void ib::sim::fr::idl::FrMessageAck::channel(ib::sim::fr::idl::Channel _channel)
+{
+m_channel = _channel;
+}
+
+/*!
+ * @brief This function returns the value of member channel
+ * @return Value of member channel
+ */
+ib::sim::fr::idl::Channel ib::sim::fr::idl::FrMessageAck::channel() const
+{
+    return m_channel;
+}
+
+/*!
+ * @brief This function returns a reference to member channel
+ * @return Reference to member channel
+ */
+ib::sim::fr::idl::Channel& ib::sim::fr::idl::FrMessageAck::channel()
+{
+    return m_channel;
+}
+/*!
+ * @brief This function copies the value in member frame
+ * @param _frame New value to be copied in member frame
+ */
+void ib::sim::fr::idl::FrMessageAck::frame(const ib::sim::fr::idl::Frame &_frame)
+{
+m_frame = _frame;
+}
+
+/*!
+ * @brief This function moves the value in member frame
+ * @param _frame New value to be moved in member frame
+ */
+void ib::sim::fr::idl::FrMessageAck::frame(ib::sim::fr::idl::Frame &&_frame)
+{
+m_frame = std::move(_frame);
+}
+
+/*!
+ * @brief This function returns a constant reference to member frame
+ * @return Constant reference to member frame
+ */
+const ib::sim::fr::idl::Frame& ib::sim::fr::idl::FrMessageAck::frame() const
+{
+    return m_frame;
+}
+
+/*!
+ * @brief This function returns a reference to member frame
+ * @return Reference to member frame
+ */
+ib::sim::fr::idl::Frame& ib::sim::fr::idl::FrMessageAck::frame()
+{
+    return m_frame;
 }
 
 size_t ib::sim::fr::idl::FrMessageAck::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -2058,7 +4368,7 @@ size_t ib::sim::fr::idl::FrMessageAck::getKeyMaxCdrSerializedSize(size_t current
 
 bool ib::sim::fr::idl::FrMessageAck::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::fr::idl::FrMessageAck::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -2071,20 +4381,22 @@ void ib::sim::fr::idl::FrMessageAck::serializeKey(eprosima::fastcdr::Cdr &scdr) 
 	 
 }
 
+
 ib::sim::fr::idl::FrSymbol::FrSymbol()
 {
 
     m_timeNs = 0;
-
     m_channel = ib::sim::fr::idl::None;
-
     m_pattern = ib::sim::fr::idl::CasMts;
-
 
 }
 
 ib::sim::fr::idl::FrSymbol::~FrSymbol()
 {
+
+
+
+
 }
 
 ib::sim::fr::idl::FrSymbol::FrSymbol(const FrSymbol &x)
@@ -2105,6 +4417,7 @@ ib::sim::fr::idl::FrSymbol::FrSymbol(FrSymbol &&x)
 
 ib::sim::fr::idl::FrSymbol& ib::sim::fr::idl::FrSymbol::operator=(const FrSymbol &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_timeNs = x.m_timeNs;
     m_channel = x.m_channel;
@@ -2115,6 +4428,7 @@ ib::sim::fr::idl::FrSymbol& ib::sim::fr::idl::FrSymbol::operator=(const FrSymbol
 
 ib::sim::fr::idl::FrSymbol& ib::sim::fr::idl::FrSymbol::operator=(FrSymbol &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_timeNs = x.m_timeNs;
     m_channel = x.m_channel;
@@ -2126,6 +4440,7 @@ ib::sim::fr::idl::FrSymbol& ib::sim::fr::idl::FrSymbol::operator=(FrSymbol &&x)
 size_t ib::sim::fr::idl::FrSymbol::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
@@ -2146,6 +4461,7 @@ size_t ib::sim::fr::idl::FrSymbol::getCdrSerializedSize(const ib::sim::fr::idl::
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
@@ -2162,6 +4478,7 @@ size_t ib::sim::fr::idl::FrSymbol::getCdrSerializedSize(const ib::sim::fr::idl::
 
 void ib::sim::fr::idl::FrSymbol::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_timeNs;
     scdr << (uint32_t)m_channel;
@@ -2170,6 +4487,7 @@ void ib::sim::fr::idl::FrSymbol::serialize(eprosima::fastcdr::Cdr &scdr) const
 
 void ib::sim::fr::idl::FrSymbol::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_timeNs;
     {
@@ -2177,17 +4495,134 @@ void ib::sim::fr::idl::FrSymbol::deserialize(eprosima::fastcdr::Cdr &dcdr)
         dcdr >> enum_value;
         m_channel = (ib::sim::fr::idl::Channel)enum_value;
     }
+
     {
         uint32_t enum_value = 0;
         dcdr >> enum_value;
         m_pattern = (ib::sim::fr::idl::SymbolPattern)enum_value;
     }
+
+}
+
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::fr::idl::FrSymbol::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::fr::idl::FrSymbol::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::fr::idl::FrSymbol::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::fr::idl::FrSymbol::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member timeNs
+ * @param _timeNs New value for member timeNs
+ */
+void ib::sim::fr::idl::FrSymbol::timeNs(int64_t _timeNs)
+{
+m_timeNs = _timeNs;
+}
+
+/*!
+ * @brief This function returns the value of member timeNs
+ * @return Value of member timeNs
+ */
+int64_t ib::sim::fr::idl::FrSymbol::timeNs() const
+{
+    return m_timeNs;
+}
+
+/*!
+ * @brief This function returns a reference to member timeNs
+ * @return Reference to member timeNs
+ */
+int64_t& ib::sim::fr::idl::FrSymbol::timeNs()
+{
+    return m_timeNs;
+}
+/*!
+ * @brief This function sets a value in member channel
+ * @param _channel New value for member channel
+ */
+void ib::sim::fr::idl::FrSymbol::channel(ib::sim::fr::idl::Channel _channel)
+{
+m_channel = _channel;
+}
+
+/*!
+ * @brief This function returns the value of member channel
+ * @return Value of member channel
+ */
+ib::sim::fr::idl::Channel ib::sim::fr::idl::FrSymbol::channel() const
+{
+    return m_channel;
+}
+
+/*!
+ * @brief This function returns a reference to member channel
+ * @return Reference to member channel
+ */
+ib::sim::fr::idl::Channel& ib::sim::fr::idl::FrSymbol::channel()
+{
+    return m_channel;
+}
+/*!
+ * @brief This function sets a value in member pattern
+ * @param _pattern New value for member pattern
+ */
+void ib::sim::fr::idl::FrSymbol::pattern(ib::sim::fr::idl::SymbolPattern _pattern)
+{
+m_pattern = _pattern;
+}
+
+/*!
+ * @brief This function returns the value of member pattern
+ * @return Value of member pattern
+ */
+ib::sim::fr::idl::SymbolPattern ib::sim::fr::idl::FrSymbol::pattern() const
+{
+    return m_pattern;
+}
+
+/*!
+ * @brief This function returns a reference to member pattern
+ * @return Reference to member pattern
+ */
+ib::sim::fr::idl::SymbolPattern& ib::sim::fr::idl::FrSymbol::pattern()
+{
+    return m_pattern;
 }
 
 size_t ib::sim::fr::idl::FrSymbol::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -2198,7 +4633,7 @@ size_t ib::sim::fr::idl::FrSymbol::getKeyMaxCdrSerializedSize(size_t current_ali
 
 bool ib::sim::fr::idl::FrSymbol::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::fr::idl::FrSymbol::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -2209,6 +4644,7 @@ void ib::sim::fr::idl::FrSymbol::serializeKey(eprosima::fastcdr::Cdr &scdr) cons
 	 
 	 
 }
+
 ib::sim::fr::idl::FrSymbolAck::FrSymbolAck()
 {
 
@@ -2218,6 +4654,8 @@ ib::sim::fr::idl::FrSymbolAck::FrSymbolAck()
 
 ib::sim::fr::idl::FrSymbolAck::~FrSymbolAck()
 {
+
+
 }
 
 ib::sim::fr::idl::FrSymbolAck::FrSymbolAck(const FrSymbolAck &x)
@@ -2234,6 +4672,7 @@ ib::sim::fr::idl::FrSymbolAck::FrSymbolAck(FrSymbolAck &&x)
 
 ib::sim::fr::idl::FrSymbolAck& ib::sim::fr::idl::FrSymbolAck::operator=(const FrSymbolAck &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_symbol = x.m_symbol;
 
@@ -2242,6 +4681,7 @@ ib::sim::fr::idl::FrSymbolAck& ib::sim::fr::idl::FrSymbolAck::operator=(const Fr
 
 ib::sim::fr::idl::FrSymbolAck& ib::sim::fr::idl::FrSymbolAck::operator=(FrSymbolAck &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_symbol = std::move(x.m_symbol);
 
@@ -2251,6 +4691,7 @@ ib::sim::fr::idl::FrSymbolAck& ib::sim::fr::idl::FrSymbolAck::operator=(FrSymbol
 size_t ib::sim::fr::idl::FrSymbolAck::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += ib::sim::fr::idl::FrSymbol::getMaxCdrSerializedSize(current_alignment);
@@ -2263,6 +4704,7 @@ size_t ib::sim::fr::idl::FrSymbolAck::getCdrSerializedSize(const ib::sim::fr::id
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += ib::sim::fr::idl::FrSymbol::getCdrSerializedSize(data.symbol(), current_alignment);
 
@@ -2271,20 +4713,94 @@ size_t ib::sim::fr::idl::FrSymbolAck::getCdrSerializedSize(const ib::sim::fr::id
 
 void ib::sim::fr::idl::FrSymbolAck::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_symbol;
 }
 
 void ib::sim::fr::idl::FrSymbolAck::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_symbol;
+}
+
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::fr::idl::FrSymbolAck::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::fr::idl::FrSymbolAck::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::fr::idl::FrSymbolAck::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::fr::idl::FrSymbolAck::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function copies the value in member symbol
+ * @param _symbol New value to be copied in member symbol
+ */
+void ib::sim::fr::idl::FrSymbolAck::symbol(const ib::sim::fr::idl::FrSymbol &_symbol)
+{
+m_symbol = _symbol;
+}
+
+/*!
+ * @brief This function moves the value in member symbol
+ * @param _symbol New value to be moved in member symbol
+ */
+void ib::sim::fr::idl::FrSymbolAck::symbol(ib::sim::fr::idl::FrSymbol &&_symbol)
+{
+m_symbol = std::move(_symbol);
+}
+
+/*!
+ * @brief This function returns a constant reference to member symbol
+ * @return Constant reference to member symbol
+ */
+const ib::sim::fr::idl::FrSymbol& ib::sim::fr::idl::FrSymbolAck::symbol() const
+{
+    return m_symbol;
+}
+
+/*!
+ * @brief This function returns a reference to member symbol
+ * @return Reference to member symbol
+ */
+ib::sim::fr::idl::FrSymbol& ib::sim::fr::idl::FrSymbolAck::symbol()
+{
+    return m_symbol;
 }
 
 size_t ib::sim::fr::idl::FrSymbolAck::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -2293,7 +4809,7 @@ size_t ib::sim::fr::idl::FrSymbolAck::getKeyMaxCdrSerializedSize(size_t current_
 
 bool ib::sim::fr::idl::FrSymbolAck::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::fr::idl::FrSymbolAck::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -2302,18 +4818,20 @@ void ib::sim::fr::idl::FrSymbolAck::serializeKey(eprosima::fastcdr::Cdr &scdr) c
 	 scdr << m_senderAddr;  
 	 
 }
+
 ib::sim::fr::idl::CycleStart::CycleStart()
 {
 
     m_timeNs = 0;
-
     m_cycleCounter = 0;
-
 
 }
 
 ib::sim::fr::idl::CycleStart::~CycleStart()
 {
+
+
+
 }
 
 ib::sim::fr::idl::CycleStart::CycleStart(const CycleStart &x)
@@ -2332,6 +4850,7 @@ ib::sim::fr::idl::CycleStart::CycleStart(CycleStart &&x)
 
 ib::sim::fr::idl::CycleStart& ib::sim::fr::idl::CycleStart::operator=(const CycleStart &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_timeNs = x.m_timeNs;
     m_cycleCounter = x.m_cycleCounter;
@@ -2341,6 +4860,7 @@ ib::sim::fr::idl::CycleStart& ib::sim::fr::idl::CycleStart::operator=(const Cycl
 
 ib::sim::fr::idl::CycleStart& ib::sim::fr::idl::CycleStart::operator=(CycleStart &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_timeNs = x.m_timeNs;
     m_cycleCounter = x.m_cycleCounter;
@@ -2351,6 +4871,7 @@ ib::sim::fr::idl::CycleStart& ib::sim::fr::idl::CycleStart::operator=(CycleStart
 size_t ib::sim::fr::idl::CycleStart::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
@@ -2368,6 +4889,7 @@ size_t ib::sim::fr::idl::CycleStart::getCdrSerializedSize(const ib::sim::fr::idl
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
@@ -2381,6 +4903,7 @@ size_t ib::sim::fr::idl::CycleStart::getCdrSerializedSize(const ib::sim::fr::idl
 
 void ib::sim::fr::idl::CycleStart::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_timeNs;
     scdr << m_cycleCounter;
@@ -2388,15 +4911,105 @@ void ib::sim::fr::idl::CycleStart::serialize(eprosima::fastcdr::Cdr &scdr) const
 
 void ib::sim::fr::idl::CycleStart::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_timeNs;
     dcdr >> m_cycleCounter;
 }
 
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::fr::idl::CycleStart::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::fr::idl::CycleStart::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::fr::idl::CycleStart::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::fr::idl::CycleStart::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member timeNs
+ * @param _timeNs New value for member timeNs
+ */
+void ib::sim::fr::idl::CycleStart::timeNs(int64_t _timeNs)
+{
+m_timeNs = _timeNs;
+}
+
+/*!
+ * @brief This function returns the value of member timeNs
+ * @return Value of member timeNs
+ */
+int64_t ib::sim::fr::idl::CycleStart::timeNs() const
+{
+    return m_timeNs;
+}
+
+/*!
+ * @brief This function returns a reference to member timeNs
+ * @return Reference to member timeNs
+ */
+int64_t& ib::sim::fr::idl::CycleStart::timeNs()
+{
+    return m_timeNs;
+}
+/*!
+ * @brief This function sets a value in member cycleCounter
+ * @param _cycleCounter New value for member cycleCounter
+ */
+void ib::sim::fr::idl::CycleStart::cycleCounter(uint8_t _cycleCounter)
+{
+m_cycleCounter = _cycleCounter;
+}
+
+/*!
+ * @brief This function returns the value of member cycleCounter
+ * @return Value of member cycleCounter
+ */
+uint8_t ib::sim::fr::idl::CycleStart::cycleCounter() const
+{
+    return m_cycleCounter;
+}
+
+/*!
+ * @brief This function returns a reference to member cycleCounter
+ * @return Reference to member cycleCounter
+ */
+uint8_t& ib::sim::fr::idl::CycleStart::cycleCounter()
+{
+    return m_cycleCounter;
+}
+
 size_t ib::sim::fr::idl::CycleStart::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -2406,7 +5019,7 @@ size_t ib::sim::fr::idl::CycleStart::getKeyMaxCdrSerializedSize(size_t current_a
 
 bool ib::sim::fr::idl::CycleStart::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::fr::idl::CycleStart::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -2417,18 +5030,20 @@ void ib::sim::fr::idl::CycleStart::serializeKey(eprosima::fastcdr::Cdr &scdr) co
 	 
 }
 
+
 ib::sim::fr::idl::ControllerStatus::ControllerStatus()
 {
 
     m_timeNs = 0;
-
     m_pocState = ib::sim::fr::idl::DefaultConfig;
-
 
 }
 
 ib::sim::fr::idl::ControllerStatus::~ControllerStatus()
 {
+
+
+
 }
 
 ib::sim::fr::idl::ControllerStatus::ControllerStatus(const ControllerStatus &x)
@@ -2447,6 +5062,7 @@ ib::sim::fr::idl::ControllerStatus::ControllerStatus(ControllerStatus &&x)
 
 ib::sim::fr::idl::ControllerStatus& ib::sim::fr::idl::ControllerStatus::operator=(const ControllerStatus &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_timeNs = x.m_timeNs;
     m_pocState = x.m_pocState;
@@ -2456,6 +5072,7 @@ ib::sim::fr::idl::ControllerStatus& ib::sim::fr::idl::ControllerStatus::operator
 
 ib::sim::fr::idl::ControllerStatus& ib::sim::fr::idl::ControllerStatus::operator=(ControllerStatus &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_timeNs = x.m_timeNs;
     m_pocState = x.m_pocState;
@@ -2466,6 +5083,7 @@ ib::sim::fr::idl::ControllerStatus& ib::sim::fr::idl::ControllerStatus::operator
 size_t ib::sim::fr::idl::ControllerStatus::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
@@ -2483,6 +5101,7 @@ size_t ib::sim::fr::idl::ControllerStatus::getCdrSerializedSize(const ib::sim::f
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
@@ -2496,6 +5115,7 @@ size_t ib::sim::fr::idl::ControllerStatus::getCdrSerializedSize(const ib::sim::f
 
 void ib::sim::fr::idl::ControllerStatus::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_timeNs;
     scdr << (uint32_t)m_pocState;
@@ -2503,6 +5123,7 @@ void ib::sim::fr::idl::ControllerStatus::serialize(eprosima::fastcdr::Cdr &scdr)
 
 void ib::sim::fr::idl::ControllerStatus::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_timeNs;
     {
@@ -2510,12 +5131,102 @@ void ib::sim::fr::idl::ControllerStatus::deserialize(eprosima::fastcdr::Cdr &dcd
         dcdr >> enum_value;
         m_pocState = (ib::sim::fr::idl::PocState)enum_value;
     }
+
+}
+
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::fr::idl::ControllerStatus::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::fr::idl::ControllerStatus::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::fr::idl::ControllerStatus::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::fr::idl::ControllerStatus::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member timeNs
+ * @param _timeNs New value for member timeNs
+ */
+void ib::sim::fr::idl::ControllerStatus::timeNs(int64_t _timeNs)
+{
+m_timeNs = _timeNs;
+}
+
+/*!
+ * @brief This function returns the value of member timeNs
+ * @return Value of member timeNs
+ */
+int64_t ib::sim::fr::idl::ControllerStatus::timeNs() const
+{
+    return m_timeNs;
+}
+
+/*!
+ * @brief This function returns a reference to member timeNs
+ * @return Reference to member timeNs
+ */
+int64_t& ib::sim::fr::idl::ControllerStatus::timeNs()
+{
+    return m_timeNs;
+}
+/*!
+ * @brief This function sets a value in member pocState
+ * @param _pocState New value for member pocState
+ */
+void ib::sim::fr::idl::ControllerStatus::pocState(ib::sim::fr::idl::PocState _pocState)
+{
+m_pocState = _pocState;
+}
+
+/*!
+ * @brief This function returns the value of member pocState
+ * @return Value of member pocState
+ */
+ib::sim::fr::idl::PocState ib::sim::fr::idl::ControllerStatus::pocState() const
+{
+    return m_pocState;
+}
+
+/*!
+ * @brief This function returns a reference to member pocState
+ * @return Reference to member pocState
+ */
+ib::sim::fr::idl::PocState& ib::sim::fr::idl::ControllerStatus::pocState()
+{
+    return m_pocState;
 }
 
 size_t ib::sim::fr::idl::ControllerStatus::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -2525,7 +5236,7 @@ size_t ib::sim::fr::idl::ControllerStatus::getKeyMaxCdrSerializedSize(size_t cur
 
 bool ib::sim::fr::idl::ControllerStatus::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::fr::idl::ControllerStatus::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -2535,6 +5246,583 @@ void ib::sim::fr::idl::ControllerStatus::serializeKey(eprosima::fastcdr::Cdr &sc
 	 
 	 
 }
+
+
+
+
+
+ib::sim::fr::idl::PocStatus::PocStatus()
+{
+
+    m_timeNs = 0;
+    m_state = ib::sim::fr::idl::DefaultConfig;
+    m_chiHaltRequest = false;
+    m_coldstartNoise = false;
+    m_freeze = false;
+    m_chiReadyRequest = false;
+    m_errorMode = ib::sim::fr::idl::Active;
+    m_slotMode = ib::sim::fr::idl::KeySlot;
+    m_startupState = ib::sim::fr::idl::Undefined;
+    m_wakeupStatus = ib::sim::fr::idl::UndefinedWakeupStatus;
+
+}
+
+ib::sim::fr::idl::PocStatus::~PocStatus()
+{
+
+
+
+
+
+
+
+
+
+
+
+}
+
+ib::sim::fr::idl::PocStatus::PocStatus(const PocStatus &x)
+{
+    m_senderAddr = x.m_senderAddr;
+    m_timeNs = x.m_timeNs;
+    m_state = x.m_state;
+    m_chiHaltRequest = x.m_chiHaltRequest;
+    m_coldstartNoise = x.m_coldstartNoise;
+    m_freeze = x.m_freeze;
+    m_chiReadyRequest = x.m_chiReadyRequest;
+    m_errorMode = x.m_errorMode;
+    m_slotMode = x.m_slotMode;
+    m_startupState = x.m_startupState;
+    m_wakeupStatus = x.m_wakeupStatus;
+}
+
+ib::sim::fr::idl::PocStatus::PocStatus(PocStatus &&x)
+{
+    m_senderAddr = std::move(x.m_senderAddr);
+    m_timeNs = x.m_timeNs;
+    m_state = x.m_state;
+    m_chiHaltRequest = x.m_chiHaltRequest;
+    m_coldstartNoise = x.m_coldstartNoise;
+    m_freeze = x.m_freeze;
+    m_chiReadyRequest = x.m_chiReadyRequest;
+    m_errorMode = x.m_errorMode;
+    m_slotMode = x.m_slotMode;
+    m_startupState = x.m_startupState;
+    m_wakeupStatus = x.m_wakeupStatus;
+}
+
+ib::sim::fr::idl::PocStatus& ib::sim::fr::idl::PocStatus::operator=(const PocStatus &x)
+{
+
+    m_senderAddr = x.m_senderAddr;
+    m_timeNs = x.m_timeNs;
+    m_state = x.m_state;
+    m_chiHaltRequest = x.m_chiHaltRequest;
+    m_coldstartNoise = x.m_coldstartNoise;
+    m_freeze = x.m_freeze;
+    m_chiReadyRequest = x.m_chiReadyRequest;
+    m_errorMode = x.m_errorMode;
+    m_slotMode = x.m_slotMode;
+    m_startupState = x.m_startupState;
+    m_wakeupStatus = x.m_wakeupStatus;
+
+    return *this;
+}
+
+ib::sim::fr::idl::PocStatus& ib::sim::fr::idl::PocStatus::operator=(PocStatus &&x)
+{
+
+    m_senderAddr = std::move(x.m_senderAddr);
+    m_timeNs = x.m_timeNs;
+    m_state = x.m_state;
+    m_chiHaltRequest = x.m_chiHaltRequest;
+    m_coldstartNoise = x.m_coldstartNoise;
+    m_freeze = x.m_freeze;
+    m_chiReadyRequest = x.m_chiReadyRequest;
+    m_errorMode = x.m_errorMode;
+    m_slotMode = x.m_slotMode;
+    m_startupState = x.m_startupState;
+    m_wakeupStatus = x.m_wakeupStatus;
+
+    return *this;
+}
+
+size_t ib::sim::fr::idl::PocStatus::getMaxCdrSerializedSize(size_t current_alignment)
+{
+    size_t initial_alignment = current_alignment;
+
+
+    current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
+    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+
+    return current_alignment - initial_alignment;
+}
+
+size_t ib::sim::fr::idl::PocStatus::getCdrSerializedSize(const ib::sim::fr::idl::PocStatus& data, size_t current_alignment)
+{
+    (void)data;
+    size_t initial_alignment = current_alignment;
+
+
+    current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
+    current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+    current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+
+
+
+    return current_alignment - initial_alignment;
+}
+
+void ib::sim::fr::idl::PocStatus::serialize(eprosima::fastcdr::Cdr &scdr) const
+{
+
+    scdr << m_senderAddr;
+    scdr << m_timeNs;
+    scdr << (uint32_t)m_state;
+    scdr << m_chiHaltRequest;
+    scdr << m_coldstartNoise;
+    scdr << m_freeze;
+    scdr << m_chiReadyRequest;
+    scdr << (uint32_t)m_errorMode;
+    scdr << (uint32_t)m_slotMode;
+    scdr << (uint32_t)m_startupState;
+    scdr << (uint32_t)m_wakeupStatus;
+}
+
+void ib::sim::fr::idl::PocStatus::deserialize(eprosima::fastcdr::Cdr &dcdr)
+{
+
+    dcdr >> m_senderAddr;
+    dcdr >> m_timeNs;
+    {
+        uint32_t enum_value = 0;
+        dcdr >> enum_value;
+        m_state = (ib::sim::fr::idl::PocState)enum_value;
+    }
+
+    dcdr >> m_chiHaltRequest;
+    dcdr >> m_coldstartNoise;
+    dcdr >> m_freeze;
+    dcdr >> m_chiReadyRequest;
+    {
+        uint32_t enum_value = 0;
+        dcdr >> enum_value;
+        m_errorMode = (ib::sim::fr::idl::ErrorModeType)enum_value;
+    }
+
+    {
+        uint32_t enum_value = 0;
+        dcdr >> enum_value;
+        m_slotMode = (ib::sim::fr::idl::SlotModeType)enum_value;
+    }
+
+    {
+        uint32_t enum_value = 0;
+        dcdr >> enum_value;
+        m_startupState = (ib::sim::fr::idl::StartupStateType)enum_value;
+    }
+
+    {
+        uint32_t enum_value = 0;
+        dcdr >> enum_value;
+        m_wakeupStatus = (ib::sim::fr::idl::WakeupStatusType)enum_value;
+    }
+
+}
+
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::fr::idl::PocStatus::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::fr::idl::PocStatus::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::fr::idl::PocStatus::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::fr::idl::PocStatus::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member timeNs
+ * @param _timeNs New value for member timeNs
+ */
+void ib::sim::fr::idl::PocStatus::timeNs(int64_t _timeNs)
+{
+m_timeNs = _timeNs;
+}
+
+/*!
+ * @brief This function returns the value of member timeNs
+ * @return Value of member timeNs
+ */
+int64_t ib::sim::fr::idl::PocStatus::timeNs() const
+{
+    return m_timeNs;
+}
+
+/*!
+ * @brief This function returns a reference to member timeNs
+ * @return Reference to member timeNs
+ */
+int64_t& ib::sim::fr::idl::PocStatus::timeNs()
+{
+    return m_timeNs;
+}
+/*!
+ * @brief This function sets a value in member state
+ * @param _state New value for member state
+ */
+void ib::sim::fr::idl::PocStatus::state(ib::sim::fr::idl::PocState _state)
+{
+m_state = _state;
+}
+
+/*!
+ * @brief This function returns the value of member state
+ * @return Value of member state
+ */
+ib::sim::fr::idl::PocState ib::sim::fr::idl::PocStatus::state() const
+{
+    return m_state;
+}
+
+/*!
+ * @brief This function returns a reference to member state
+ * @return Reference to member state
+ */
+ib::sim::fr::idl::PocState& ib::sim::fr::idl::PocStatus::state()
+{
+    return m_state;
+}
+/*!
+ * @brief This function sets a value in member chiHaltRequest
+ * @param _chiHaltRequest New value for member chiHaltRequest
+ */
+void ib::sim::fr::idl::PocStatus::chiHaltRequest(bool _chiHaltRequest)
+{
+m_chiHaltRequest = _chiHaltRequest;
+}
+
+/*!
+ * @brief This function returns the value of member chiHaltRequest
+ * @return Value of member chiHaltRequest
+ */
+bool ib::sim::fr::idl::PocStatus::chiHaltRequest() const
+{
+    return m_chiHaltRequest;
+}
+
+/*!
+ * @brief This function returns a reference to member chiHaltRequest
+ * @return Reference to member chiHaltRequest
+ */
+bool& ib::sim::fr::idl::PocStatus::chiHaltRequest()
+{
+    return m_chiHaltRequest;
+}
+/*!
+ * @brief This function sets a value in member coldstartNoise
+ * @param _coldstartNoise New value for member coldstartNoise
+ */
+void ib::sim::fr::idl::PocStatus::coldstartNoise(bool _coldstartNoise)
+{
+m_coldstartNoise = _coldstartNoise;
+}
+
+/*!
+ * @brief This function returns the value of member coldstartNoise
+ * @return Value of member coldstartNoise
+ */
+bool ib::sim::fr::idl::PocStatus::coldstartNoise() const
+{
+    return m_coldstartNoise;
+}
+
+/*!
+ * @brief This function returns a reference to member coldstartNoise
+ * @return Reference to member coldstartNoise
+ */
+bool& ib::sim::fr::idl::PocStatus::coldstartNoise()
+{
+    return m_coldstartNoise;
+}
+/*!
+ * @brief This function sets a value in member freeze
+ * @param _freeze New value for member freeze
+ */
+void ib::sim::fr::idl::PocStatus::freeze(bool _freeze)
+{
+m_freeze = _freeze;
+}
+
+/*!
+ * @brief This function returns the value of member freeze
+ * @return Value of member freeze
+ */
+bool ib::sim::fr::idl::PocStatus::freeze() const
+{
+    return m_freeze;
+}
+
+/*!
+ * @brief This function returns a reference to member freeze
+ * @return Reference to member freeze
+ */
+bool& ib::sim::fr::idl::PocStatus::freeze()
+{
+    return m_freeze;
+}
+/*!
+ * @brief This function sets a value in member chiReadyRequest
+ * @param _chiReadyRequest New value for member chiReadyRequest
+ */
+void ib::sim::fr::idl::PocStatus::chiReadyRequest(bool _chiReadyRequest)
+{
+m_chiReadyRequest = _chiReadyRequest;
+}
+
+/*!
+ * @brief This function returns the value of member chiReadyRequest
+ * @return Value of member chiReadyRequest
+ */
+bool ib::sim::fr::idl::PocStatus::chiReadyRequest() const
+{
+    return m_chiReadyRequest;
+}
+
+/*!
+ * @brief This function returns a reference to member chiReadyRequest
+ * @return Reference to member chiReadyRequest
+ */
+bool& ib::sim::fr::idl::PocStatus::chiReadyRequest()
+{
+    return m_chiReadyRequest;
+}
+/*!
+ * @brief This function sets a value in member errorMode
+ * @param _errorMode New value for member errorMode
+ */
+void ib::sim::fr::idl::PocStatus::errorMode(ib::sim::fr::idl::ErrorModeType _errorMode)
+{
+m_errorMode = _errorMode;
+}
+
+/*!
+ * @brief This function returns the value of member errorMode
+ * @return Value of member errorMode
+ */
+ib::sim::fr::idl::ErrorModeType ib::sim::fr::idl::PocStatus::errorMode() const
+{
+    return m_errorMode;
+}
+
+/*!
+ * @brief This function returns a reference to member errorMode
+ * @return Reference to member errorMode
+ */
+ib::sim::fr::idl::ErrorModeType& ib::sim::fr::idl::PocStatus::errorMode()
+{
+    return m_errorMode;
+}
+/*!
+ * @brief This function sets a value in member slotMode
+ * @param _slotMode New value for member slotMode
+ */
+void ib::sim::fr::idl::PocStatus::slotMode(ib::sim::fr::idl::SlotModeType _slotMode)
+{
+m_slotMode = _slotMode;
+}
+
+/*!
+ * @brief This function returns the value of member slotMode
+ * @return Value of member slotMode
+ */
+ib::sim::fr::idl::SlotModeType ib::sim::fr::idl::PocStatus::slotMode() const
+{
+    return m_slotMode;
+}
+
+/*!
+ * @brief This function returns a reference to member slotMode
+ * @return Reference to member slotMode
+ */
+ib::sim::fr::idl::SlotModeType& ib::sim::fr::idl::PocStatus::slotMode()
+{
+    return m_slotMode;
+}
+/*!
+ * @brief This function sets a value in member startupState
+ * @param _startupState New value for member startupState
+ */
+void ib::sim::fr::idl::PocStatus::startupState(ib::sim::fr::idl::StartupStateType _startupState)
+{
+m_startupState = _startupState;
+}
+
+/*!
+ * @brief This function returns the value of member startupState
+ * @return Value of member startupState
+ */
+ib::sim::fr::idl::StartupStateType ib::sim::fr::idl::PocStatus::startupState() const
+{
+    return m_startupState;
+}
+
+/*!
+ * @brief This function returns a reference to member startupState
+ * @return Reference to member startupState
+ */
+ib::sim::fr::idl::StartupStateType& ib::sim::fr::idl::PocStatus::startupState()
+{
+    return m_startupState;
+}
+/*!
+ * @brief This function sets a value in member wakeupStatus
+ * @param _wakeupStatus New value for member wakeupStatus
+ */
+void ib::sim::fr::idl::PocStatus::wakeupStatus(ib::sim::fr::idl::WakeupStatusType _wakeupStatus)
+{
+m_wakeupStatus = _wakeupStatus;
+}
+
+/*!
+ * @brief This function returns the value of member wakeupStatus
+ * @return Value of member wakeupStatus
+ */
+ib::sim::fr::idl::WakeupStatusType ib::sim::fr::idl::PocStatus::wakeupStatus() const
+{
+    return m_wakeupStatus;
+}
+
+/*!
+ * @brief This function returns a reference to member wakeupStatus
+ * @return Reference to member wakeupStatus
+ */
+ib::sim::fr::idl::WakeupStatusType& ib::sim::fr::idl::PocStatus::wakeupStatus()
+{
+    return m_wakeupStatus;
+}
+
+size_t ib::sim::fr::idl::PocStatus::getKeyMaxCdrSerializedSize(size_t current_alignment)
+{
+	size_t current_align = current_alignment;
+
+
+     current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
+
+
+
+
+
+
+
+
+
+
+
+    return current_align;
+}
+
+bool ib::sim::fr::idl::PocStatus::isKeyDefined()
+{
+   return true;
+}
+
+void ib::sim::fr::idl::PocStatus::serializeKey(eprosima::fastcdr::Cdr &scdr) const
+{
+	(void) scdr;
+	 scdr << m_senderAddr;  
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+}
+
 
 
 

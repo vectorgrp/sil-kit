@@ -111,6 +111,11 @@ void FrControllerProxy::RegisterControllerStatusHandler(ControllerStatusHandler 
     RegisterHandler(handler);
 }
 
+void FrControllerProxy::RegisterPocStatusHandler(PocStatusHandler handler)
+{
+    RegisterHandler(handler);
+}
+
 void FrControllerProxy::RegisterSymbolHandler(SymbolHandler handler)
 {
     RegisterHandler(handler);
@@ -181,6 +186,13 @@ void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Cyc
 }
 
 void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const ControllerStatus& msg)
+{
+    if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
+        return;
+
+    CallHandlers(msg);
+}
+void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const PocStatus& msg)
 {
     if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
         return;

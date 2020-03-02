@@ -61,6 +61,7 @@ protected:
         MOCK_METHOD2(MessageAckHandler, void(IFrController*, const FrMessageAck&));
         MOCK_METHOD2(WakeupHandler, void(IFrController*, const FrSymbol&));
         MOCK_METHOD2(ControllerStatusHandler, void(IFrController*, const ControllerStatus&));
+        MOCK_METHOD2(PocStatusHandler, void(IFrController*, const PocStatus&));
         MOCK_METHOD2(SymbolHandler, void(IFrController*, const FrSymbol&));
         MOCK_METHOD2(SymbolAckHandler, void(IFrController*, const FrSymbolAck&));
     };
@@ -201,12 +202,20 @@ TEST_F(FrControllerTest, dont_send_controller_config)
 
 TEST_F(FrControllerTest, set_poc_ready_after_controller_config)
 {
+    //deprecated controller status API
     controller.RegisterControllerStatusHandler(bind_method(&callbacks, &Callbacks::ControllerStatusHandler));
 
     ControllerStatus expectedStatus;
     expectedStatus.pocState = PocState::Ready;
 
     EXPECT_CALL(callbacks, ControllerStatusHandler(&controller, expectedStatus))
+        .Times(1);
+    //new API
+    controller.RegisterPocStatusHandler(bind_method(&callbacks, &Callbacks::PocStatusHandler));
+    PocStatus expectedPOC{};
+    expectedPOC.state = PocState::Ready;
+
+    EXPECT_CALL(callbacks, PocStatusHandler(&controller, expectedPOC))
         .Times(1);
 
     ControllerConfig controllerCfg;
@@ -304,6 +313,13 @@ TEST_F(FrControllerTest, set_poc_normal_active_on_run)
 
     EXPECT_CALL(callbacks, ControllerStatusHandler(&controller, expectedStatus))
         .Times(1);
+    //new API
+    controller.RegisterPocStatusHandler(bind_method(&callbacks, &Callbacks::PocStatusHandler));
+    PocStatus expectedPOC{};
+    expectedPOC.state = PocState::NormalActive;
+
+    EXPECT_CALL(callbacks, PocStatusHandler(&controller, expectedPOC))
+        .Times(1);
 
     controller.Run();
 }
@@ -358,6 +374,14 @@ TEST_F(FrControllerTest, set_poc_wakeup_on_wakeup)
     EXPECT_CALL(callbacks, ControllerStatusHandler(&controller, expectedStatus))
         .Times(1);
 
+    //new API
+    controller.RegisterPocStatusHandler(bind_method(&callbacks, &Callbacks::PocStatusHandler));
+    PocStatus expectedPOC{};
+    expectedPOC.state = PocState::Wakeup;
+
+    EXPECT_CALL(callbacks, PocStatusHandler(&controller, expectedPOC))
+        .Times(1);
+
     controller.Wakeup();
 }
 
@@ -369,6 +393,14 @@ TEST_F(FrControllerTest, set_poc_ready_on_wakeup_ack)
     expectedStatus.pocState = PocState::Ready;
 
     EXPECT_CALL(callbacks, ControllerStatusHandler(&controller, expectedStatus))
+        .Times(1);
+
+    //new API
+    controller.RegisterPocStatusHandler(bind_method(&callbacks, &Callbacks::PocStatusHandler));
+    PocStatus expectedPOC{};
+    expectedPOC.state = PocState::Ready;
+
+    EXPECT_CALL(callbacks, PocStatusHandler(&controller, expectedPOC))
         .Times(1);
 
     FrSymbolAck ack;

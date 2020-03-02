@@ -29,6 +29,7 @@ struct CycleStart;
 
 struct HostCommand;
 struct ControllerStatus;
+struct PocStatus;
 
 class IFrController;
 class IIbToFrController;

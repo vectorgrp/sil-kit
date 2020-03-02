@@ -339,3 +339,36 @@ TEST(MwVAsioSerdes, SimFlexray_ControllerStatus) {
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.pocState, out.pocState);
 }
+
+TEST(MwVAsioSerdes, SimFlexray_POCStatus) {
+    using namespace ib::sim::fr;
+    ib::mw::MessageBuffer buffer;
+
+    PocStatus in{};
+    PocStatus out{};
+
+    in.timestamp = 230ns;
+    in.state = PocState::NormalPassive;
+    in.freeze = true;
+    in.errorMode = ErrorModeType::CommHalt;
+    in.slotMode = SlotModeType::AllPending;
+    in.startupState = StartupStateType::InitializeSchedule;
+    in.chiHaltRequest = false;
+    in.chiReadyRequest = true;
+    in.coldstartNoise = true;
+    in.wakeupStatus = WakeupStatusType::ReceivedHeader;
+
+    buffer << in;
+    buffer >> out;
+
+    EXPECT_EQ(in.timestamp, out.timestamp);
+    EXPECT_EQ(in.state, out.state);
+    EXPECT_EQ(in.freeze, out.freeze);
+    EXPECT_EQ(in.errorMode, out.errorMode);
+    EXPECT_EQ(in.slotMode, out.slotMode);
+    EXPECT_EQ(in.startupState, out.startupState);
+    EXPECT_EQ(in.chiHaltRequest, out.chiHaltRequest);
+    EXPECT_EQ(in.chiReadyRequest, out.chiReadyRequest);
+    EXPECT_EQ(in.coldstartNoise, out.coldstartNoise);
+    EXPECT_EQ(in.wakeupStatus, out.wakeupStatus);
+}

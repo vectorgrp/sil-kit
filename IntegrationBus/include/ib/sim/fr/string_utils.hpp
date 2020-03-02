@@ -32,6 +32,11 @@ inline std::string to_string(const TxBufferConfig& msg);
 inline std::string to_string(const TxBufferConfigUpdate& msg);
 inline std::string to_string(const TxBufferUpdate& msg);
 inline std::string to_string(const ControllerStatus& msg);
+inline std::string to_string(const PocStatus& msg);
+inline std::string to_string(SlotModeType msg);
+inline std::string to_string(ErrorModeType msg);
+inline std::string to_string(StartupStateType msg);
+inline std::string to_string(WakeupStatusType msg);
 
 
 inline std::ostream& operator<<(std::ostream& out, Channel channel);
@@ -53,6 +58,11 @@ inline std::ostream& operator<<(std::ostream& out, const TxBufferConfig& msg);
 inline std::ostream& operator<<(std::ostream& out, const TxBufferConfigUpdate& msg);
 inline std::ostream& operator<<(std::ostream& out, const TxBufferUpdate& msg);
 inline std::ostream& operator<<(std::ostream& out, const ControllerStatus& msg);
+inline std::ostream& operator<<(std::ostream& out, const PocStatus& msg);
+inline std::ostream& operator<<(std::ostream& out, SlotModeType msg);
+inline std::ostream& operator<<(std::ostream& out, ErrorModeType msg);
+inline std::ostream& operator<<(std::ostream& out, StartupStateType msg);
+inline std::ostream& operator<<(std::ostream& out, WakeupStatusType msg);
     
 
 // ================================================================================
@@ -241,6 +251,40 @@ std::string to_string(const ControllerStatus& msg)
     out << msg;
     return out.str();
 }
+std::string to_string(const PocStatus& msg)
+{
+    std::stringstream out;
+    out << msg;
+    return out.str();
+}
+
+std::string to_string(SlotModeType msg)
+{
+    std::stringstream out;
+    out << msg;
+    return out.str();
+}
+
+std::string to_string(ErrorModeType msg)
+{
+    std::stringstream out;
+    out << msg;
+    return out.str();
+}
+
+std::string to_string(StartupStateType msg)
+{
+    std::stringstream out;
+    out << msg;
+    return out.str();
+}
+
+std::string to_string(WakeupStatusType msg)
+{
+    std::stringstream out;
+    out << msg;
+    return out.str();
+}
 
 
     
@@ -388,6 +432,128 @@ std::ostream& operator<<(std::ostream& out, const ControllerStatus& msg)
         << " @" << timestamp.count() << "ms}";
 }
 
+std::ostream& operator<<(std::ostream& out, const PocStatus& msg)
+{
+    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
+    return out << "fr::POCStatus{"
+        << "State=" << msg.state
+        << ", Freeze=" << msg.freeze
+        << " @" << timestamp.count() << "ms}";
+}
+
+std::ostream& operator<<(std::ostream& out, SlotModeType msg)
+{
+    switch(msg)
+    {
+    case SlotModeType::KeySlot:
+        out << "KeySlot"; break;
+
+    case SlotModeType::AllPending:
+        out << "AllPending"; break;
+
+    case SlotModeType::All:
+        out << "All"; break;
+
+    default:
+        throw ib::type_conversion_error{};
+    }
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, ErrorModeType msg)
+{
+    switch (msg)
+    {
+    case ErrorModeType::Active:
+        out << "Active"; break;
+
+    case ErrorModeType::Passive:
+        out << "Passive"; break;
+
+    case ErrorModeType::CommHalt:
+        out << "CommHalt"; break;
+
+
+    default:
+        throw ib::type_conversion_error{};
+    }
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, StartupStateType msg)
+{
+    switch (msg)
+    {
+    case StartupStateType::Undefined:
+        out << "Undefined"; break;
+
+    case StartupStateType::ColdStartListen:
+        out << "ColdStartListen"; break;
+
+    case StartupStateType::IntegrationColdstartCheck:
+        out << "IntegrationColdstartCheck"; break;
+
+    case StartupStateType::ColdStartJoin:
+        out << "ColdStartJoin"; break;
+
+    case StartupStateType::ColdStartCollisionResolution:
+        out << "ColdStartCollisionResolution"; break;
+
+    case StartupStateType::ColdStartConsistencyCheck:
+        out << "ColdStartConsistencyCheck"; break;
+
+    case StartupStateType::IntegrationListen:
+        out << "IntegrationListen"; break;
+
+    case StartupStateType::InitializeSchedule:
+        out << "InitializeSchedule"; break;
+
+    case StartupStateType::IntegrationConsistencyCheck:
+        out << "IntegrationConsistencyCheck"; break;
+
+    case StartupStateType::ColdStartGap:
+        out << "ColdStartGap"; break;
+
+    case StartupStateType::ExternalStartup:
+        out << "ExternalStartup"; break;
+
+    default:
+        throw ib::type_conversion_error{};
+    }
+
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, WakeupStatusType msg)
+{
+    switch (msg)
+    {
+    case WakeupStatusType::Undefined:
+        out << "Undefined"; break;
+
+    case WakeupStatusType::ReceivedHeader:
+        out << "ReceivedHeader"; break;
+
+    case WakeupStatusType::ReceivedWup:
+        out << "ReceivedWup"; break;
+
+    case WakeupStatusType::CollisionHeader:
+        out << "CollisionHeader"; break;
+
+    case WakeupStatusType::CollisionWup:
+        out << "CollisionWup"; break;
+
+    case WakeupStatusType::CollisionUnknown:
+        out << "CollisionUnknown"; break;
+
+    case WakeupStatusType::Transmitted:
+        out << "Transmitted"; break;
+    default:
+        throw ib::type_conversion_error{};
+    }
+
+    return out;
+}
 
 
 

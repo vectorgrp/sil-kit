@@ -72,6 +72,7 @@ public:
     void RegisterMessageAckHandler(MessageAckHandler handler) override;
     void RegisterWakeupHandler(WakeupHandler handler) override;
     void RegisterControllerStatusHandler(ControllerStatusHandler handler) override;
+    void RegisterPocStatusHandler(PocStatusHandler handler) override;
     void RegisterSymbolHandler(SymbolHandler handler) override;
     void RegisterSymbolAckHandler(SymbolAckHandler handler) override;
     void RegisterCycleStartHandler(CycleStartHandler handler) override;
@@ -118,7 +119,8 @@ private:
         CallbackVector<FrMessageAck>,
         CallbackVector<FrSymbol>,
         CallbackVector<FrSymbolAck>,
-        CallbackVector<ControllerStatus>
+        CallbackVector<ControllerStatus>,
+        CallbackVector<PocStatus>
     > _callbacks;
 
     CallbackVector<FrSymbol> _wakeupHandlers;

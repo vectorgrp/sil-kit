@@ -64,6 +64,7 @@ DefineIbMsgTrait_TypeName(ib::sim::fr, ControllerConfig)
 DefineIbMsgTrait_TypeName(ib::sim::fr, TxBufferConfigUpdate)
 DefineIbMsgTrait_TypeName(ib::sim::fr, TxBufferUpdate)
 DefineIbMsgTrait_TypeName(ib::sim::fr, ControllerStatus)
+DefineIbMsgTrait_TypeName(ib::sim::fr, PocStatus)
 
 //Messages with history
 DefineIbMsgTrait_HistSize(ib::mw::sync, ParticipantStatus, 1)

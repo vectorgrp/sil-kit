@@ -152,6 +152,7 @@ private:
         RtpsTopics<sim::fr::idl::TxBufferConfigUpdate>,
         RtpsTopics<sim::fr::idl::TxBufferUpdate>,
         RtpsTopics<sim::fr::idl::ControllerStatus>,
+        RtpsTopics<sim::fr::idl::PocStatus>,
         RtpsTopics<sim::lin::idl::SendFrameRequest>,
         RtpsTopics<sim::lin::idl::SendFrameHeaderRequest>,
         RtpsTopics<sim::lin::idl::Transmission>,

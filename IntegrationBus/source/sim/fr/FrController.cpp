@@ -28,10 +28,14 @@ void FrController::Configure(const ControllerConfig& config)
     _nodeParams = config.nodeParams;
     _bufferConfigs = config.bufferConfigs;
 
-    // tell the application that the controller is ready
+    // tell the application that the controller is ready, depecrated callbacks
     ControllerStatus status;
     status.pocState = PocState::Ready;
     CallHandlers(status);
+    //new API uses a more complete POCStatus type
+    PocStatus poc{};
+    poc.state = PocState::Ready;
+    CallHandlers(poc);
 }
 
 void FrController::ReconfigureTxBuffer(uint16_t txBufferIdx, const TxBufferConfig& config)
@@ -106,6 +110,10 @@ void FrController::Run()
     ControllerStatus status;
     status.pocState = PocState::NormalActive;
     CallHandlers(status);
+
+    PocStatus poc{};
+    poc.state = PocState::NormalActive;
+    CallHandlers(poc);
 }
 
 void FrController::DeferredHalt()
@@ -140,6 +148,10 @@ void FrController::Wakeup()
     ControllerStatus status;
     status.pocState = PocState::Wakeup;
     CallHandlers(status);
+
+    PocStatus poc{};
+    poc.state = PocState::Wakeup;
+    CallHandlers(poc);
 }
 
 void FrController::RegisterMessageHandler(MessageHandler handler)
@@ -158,6 +170,11 @@ void FrController::RegisterWakeupHandler(WakeupHandler handler)
 }
 
 void FrController::RegisterControllerStatusHandler(ControllerStatusHandler handler)
+{
+    RegisterHandler(handler);
+}
+
+void FrController::RegisterPocStatusHandler(PocStatusHandler handler)
 {
     RegisterHandler(handler);
 }
@@ -248,6 +265,10 @@ void FrController::ReceiveIbMessage(mw::EndpointAddress from, const FrSymbolAck&
         ControllerStatus status;
         status.pocState = PocState::Ready;
         CallHandlers(status);
+
+        PocStatus poc{};
+        poc.state = PocState::Ready;
+        CallHandlers(poc);
         break;
     }
 

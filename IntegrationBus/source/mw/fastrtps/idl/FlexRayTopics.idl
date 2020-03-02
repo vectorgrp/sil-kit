@@ -268,7 +268,7 @@ struct TxBufferConfigUpdate
     // Index of the TX Buffers according to the configured buffers (cf. ControllerConfig)
     unsigned short txBufferIndex;
     // The new configuration of the Tx-Buffer
-    TxBufferConfig txBufferConfig;
+    TxBufferConfig _txBufferConfig;
 };
 
 // Update the content of a FlexRay TX-Buffer
@@ -331,7 +331,7 @@ struct Header
 struct Frame
 {
     // Header flags, slot, crc, and cycle indidcators
-    Header header;
+    Header _header;
 
     // Raw payload containing 0 to 254 bytes.
     sequence<octet, 254> payload;
@@ -347,7 +347,7 @@ struct FrMessage
     // FlexRay channel A or B. (Valid values: Channel::A, Channel::B)
     Channel channel;
 
-    Frame frame;
+    Frame _frame;
 };
 
 // Acknowledge for the transmit on the FlexRay bus
@@ -365,7 +365,7 @@ struct FrMessageAck
     Channel channel;
 
     // Copy of the FlexRay frame that was successfully transmitted
-    Frame frame;
+    Frame _frame;
 };
 
 // FlexRay symbols patterns.
@@ -424,7 +424,7 @@ enum PocState
     Halt           // CC is halted, (caused by the application (DeferredHalt) or by a fatal error)
 };
 
-// Status of the simulated FlexRay controller
+// Status of the simulated FlexRay controller (deprecated)
 struct ControllerStatus
 {
     @Key ib::mw::idl::EndpointAddress senderAddr;
@@ -435,6 +435,64 @@ struct ControllerStatus
     PocState pocState;
 };
 
+enum SlotModeType
+{
+    KeySlot,
+    AllPending,
+    All
+};
+
+enum ErrorModeType
+{
+    Active,
+    Passive,
+    CommHalt
+};
+
+enum StartupStateType
+{
+    Undefined,
+    ColdStartListen,
+    IntegrationColdstartCheck,
+    ColdStartJoin,
+    ColdStartCollisionResolution,
+    ColdStartConsistencyCheck,
+    IntegrationListen,
+    InitializeSchedule,
+    IntegrationConsistencyCheck,
+    ColdStartGap,
+    ExternalStartup
+};
+
+enum WakeupStatusType
+{
+    UndefinedWakeupStatus, // name colision with enum StartupStateType::Undefined
+    ReceivedHeader,
+    ReceivedWup,
+    CollisionHeader,
+    CollisionWup,
+    CollisionUnknown,
+    Transmitted
+};
+
+// POCStatus supercedes the previous ControllerStatus struct.
+struct PocStatus
+{
+    @Key ib::mw::idl::EndpointAddress senderAddr;
+
+    long long timeNs;
+
+    // Members as defined in AUTOSAR
+    PocState state;
+    boolean chiHaltRequest;
+    boolean coldstartNoise;
+    boolean freeze;
+    boolean chiReadyRequest;
+    ErrorModeType errorMode;
+    SlotModeType slotMode;
+    StartupStateType startupState;
+    WakeupStatusType wakeupStatus;
+};
 
 };
 };

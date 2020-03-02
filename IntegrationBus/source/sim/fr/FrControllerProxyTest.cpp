@@ -53,6 +53,7 @@ protected:
         MOCK_METHOD2(MessageAckHandler, void(IFrController*, const FrMessageAck&));
         MOCK_METHOD2(WakeupHandler, void(IFrController*, const FrSymbol&));
         MOCK_METHOD2(ControllerStatusHandler, void(IFrController*, const ControllerStatus&));
+        MOCK_METHOD2(PocStatusHandler, void(IFrController*, const PocStatus&));
         MOCK_METHOD2(SymbolHandler, void(IFrController*, const FrSymbol&));
         MOCK_METHOD2(SymbolAckHandler, void(IFrController*, const FrSymbolAck&));
         MOCK_METHOD2(CycleStartHandler, void(IFrController*, const CycleStart&));
@@ -372,6 +373,20 @@ TEST_F(FrControllerProxyTest, call_controller_status_handler)
         .Times(1);
 
     proxy.ReceiveIbMessage(controllerAddress, status);
+}
+
+TEST_F(FrControllerProxyTest, call_pocstatus_handler)
+{
+    // new POC API
+    proxy.RegisterPocStatusHandler(bind_method(&callbacks, &Callbacks::PocStatusHandler));
+    PocStatus poc{};
+    poc.timestamp = 14ms;
+    poc.state = PocState::Ready;
+
+    EXPECT_CALL(callbacks, PocStatusHandler(&proxy, poc))
+        .Times(1);
+
+    proxy.ReceiveIbMessage(controllerAddress, poc);
 }
 
 TEST_F(FrControllerProxyTest, call_symbol_handler)
