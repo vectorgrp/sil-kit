@@ -281,7 +281,7 @@ TEST_F(DeterministicSimVAsioITest, deterministic_simulation_vasio)
     buildConfig(publisherCount);
 
     VAsioRegistry registry{ibConfig};
-    auto registryFinished = registry.ProvideDomain(domainId);
+    registry.ProvideDomain(domainId);
 
     // The subscriber takes part of the system controller and initiates simulation state changes
     Subscriber subscriber(ibConfig, domainId, publisherCount, testSize);

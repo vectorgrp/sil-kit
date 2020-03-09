@@ -74,6 +74,14 @@ add_vib_test(ITestDeterministicSimVAsio
       IbMwVAsio
 )
 
+add_vib_test(ITestIbRegistryReusage
+    SOURCES
+      IbRegistryReusage.cpp
+    LIBS
+      IbMwComAdapter
+      IbMwVAsio
+)
+
 # Windows specific tests
 if(WIN32)
 add_vib_test(ITestCompatibilityWithWindowsHeaders

@@ -5,6 +5,23 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[unreleased] - 2020-mm-dd
+--------------------------------
+This is Sprint 39.
+
+Fixed
+~~~~~
+- The IbRegistry can now be used for multiple simulation runs without the need
+  to terminate and restart it. (AFTMAGT-249)
+
+Compatibility with 3.0.2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
+
 [3.0.3] - 2020-02-26
 --------------------------------
 

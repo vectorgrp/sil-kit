@@ -26,8 +26,7 @@ int main(int argc, char** argv) try
 
     std::cout << "Creating VAsioRegistry for IB domain=" << domainId << std::endl;
     VAsioRegistry registry{ibConfig};
-    auto future = registry.ProvideDomain(domainId);
-    future.wait();
+    registry.ProvideDomain(domainId);
 
     std::cout << "Press enter to shutdown registry" << std::endl;
     std::cin.ignore();

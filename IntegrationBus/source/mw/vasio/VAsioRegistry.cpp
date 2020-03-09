@@ -27,10 +27,10 @@ VAsioRegistry::VAsioRegistry(ib::cfg::Config cfg)
         this->OnParticipantAnnouncement(from, announcement);
     });
 
-    _connection.RegisterPeerShutdownCallback([this](IVAsioPeer* peer) { PeerIsShuttingDown(peer); });
+    _connection.RegisterPeerShutdownCallback([this](IVAsioPeer* peer) { OnPeerShutdown(peer); });
 }
 
-std::future<void> VAsioRegistry::ProvideDomain(uint32_t domainId)
+void VAsioRegistry::ProvideDomain(uint32_t domainId)
 {
     // accept connection from participants on any interface
     auto registryPort = static_cast<uint16_t>(_vasioConfig.registry.port + domainId);
@@ -49,19 +49,52 @@ std::future<void> VAsioRegistry::ProvideDomain(uint32_t domainId)
         throw e;
     }
     _connection.StartIoWorker();
+}
 
-    return _allParticipantsDown.get_future();
+void VAsioRegistry::SetAllConnectedHandler(std::function<void()> handler)
+{
+    _onAllParticipantsConnected = std::move(handler);
+}
+void VAsioRegistry::SetAllDisconnectedHandler(std::function<void()> handler)
+{
+    _onAllParticipantsDisconnected = std::move(handler);
+}
+
+bool VAsioRegistry::IsExpectedParticipant(const ib::mw::VAsioPeerInfo& peerInfo)
+{
+    for (auto& participant : _connection.Config().simulationSetup.participants)
+    {
+        if (participant.id == peerInfo.participantId && participant.name == peerInfo.participantName)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const ParticipantAnnouncement& announcement)
 {
+    auto& peerInfo = announcement.peerInfo;
+
+    if (!IsExpectedParticipant(peerInfo))
+    {
+        _logger->Warn(
+            "Ignoring announcement from unexpected participant name={} id={}",
+            peerInfo.participantName,
+            peerInfo.participantId);
+        return;
+    }
+
+
     SendKnownParticipants(from);
 
-    _connectedParticipants[announcement.peerInfo.participantId] = announcement.peerInfo;
+    _connectedParticipants[peerInfo.participantId] = peerInfo;
 
-    if (AllParticipantsUp())
+    if (AllParticipantsAreConnected())
     {
-        _logger->Info("All Participants up");
+        _logger->Info("All participants are online");
+        if (_onAllParticipantsConnected)
+            _onAllParticipantsConnected();
     }
 }
 
@@ -88,18 +121,19 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
     peer->SendIbMsg(std::move(sendBuffer));
 }
 
-void VAsioRegistry::PeerIsShuttingDown(IVAsioPeer* peer)
+void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
 {
     _connectedParticipants.erase(peer->GetInfo().participantId);
 
     if (_connectedParticipants.empty())
     {
-        _logger->Info("All Participants down");
-        _allParticipantsDown.set_value();
+        _logger->Info("All participants are shut down");
+        if (_onAllParticipantsDisconnected)
+            _onAllParticipantsDisconnected();
     }
 }
 
-bool VAsioRegistry::AllParticipantsUp() const
+bool VAsioRegistry::AllParticipantsAreConnected() const
 {
     for (auto&& participant : _connection.Config().simulationSetup.participants)
     {
