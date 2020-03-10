@@ -252,12 +252,6 @@ else()
     message(STATUS "Asio include directory found:${ASIO_INCLUDE_DIR}")
 endif()
 
-################################################################################
-# Logging
-################################################################################
-# We use fmtlib to offer a convenient logging interface
-include(${THIRDPARTY_DIR}/fmt.cmake)
-include(${THIRDPARTY_DIR}/spdlog.cmake)
 
 ################################################################################
 # Helper Functions

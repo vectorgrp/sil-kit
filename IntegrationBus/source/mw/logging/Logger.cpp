@@ -6,6 +6,7 @@
 
 #include "Logger.hpp"
 
+#include "spdlog/spdlog.h"
 #include "spdlog/sinks/null_sink.h"
 // NB: we do not use the windows color sink, as that will open "CONOUT$" and
 //     we won't be able to trivially capture its output in IbLauncher.

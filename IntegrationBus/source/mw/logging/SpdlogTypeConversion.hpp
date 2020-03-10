@@ -7,13 +7,6 @@
 
 #include "spdlog/details/log_msg.h"
 
-namespace spdlog {
-namespace sinks {
-    class sink;
-} // namespace sinks
-    class logger;
-} // namespace spdlog
-
 namespace ib {
 namespace mw {
 namespace logging {

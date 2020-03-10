@@ -1,16 +1,26 @@
 project("IbMwLogging" CXX)
 
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} STATIC
+    SpdlogTypeConversion.hpp
     IIbToLogMsgSender.hpp
     IIbToLogMsgReceiver.hpp
+
     LogMsgSender.hpp
     LogMsgSender.cpp
+
     LogMsgReceiver.hpp
     LogMsgReceiver.cpp
-    SpdlogTypeConversion.hpp
+
     Logger.hpp
     Logger.cpp
 )
+################################################################################
+# Thirdparty -- Logging
+################################################################################
+# We use fmtlib to offer a convenient logging interface
+
+include(${THIRDPARTY_DIR}/fmt.cmake)
+include(${THIRDPARTY_DIR}/spdlog.cmake)
 
 if (TARGET fmt-header-only)
     message(STATUS "have fmt-header-only")
@@ -32,11 +42,21 @@ endif()
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC ${PROJECT_SOURCE_DIR}
+    INTERFACE ${PROJECT_SOURCE_DIR}
 )
+
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC IbInterface
-    PUBLIC spdlog
+    PRIVATE spdlog
 )
+
+if(UNIX)
+    set_target_properties(${PROJECT_NAME}
+        PROPERTIES
+        VISIBILITY_INLINES_HIDDEN 1
+        CXX_VISIBILITY_PRESET hidden
+    )
+endif()
 
 add_vib_test(TestMwLoggingLogger SOURCES LoggerTest.cpp LIBS IbMwLogging IbConfig IbMwMockComAdapter)

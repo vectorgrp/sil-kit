@@ -14,10 +14,6 @@
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/sim/datatypes.hpp"
 
-namespace spdlog {
-class logger;
-} // namespace spdlog
-
 namespace ib {
 namespace sim {
 namespace lin {
