@@ -93,8 +93,10 @@ void FastRtpsConnection::JoinDomain(uint32_t domainId)
         pParam.rtps.builtin.use_SIMPLE_RTPSParticipantDiscoveryProtocol = true;
         pParam.rtps.builtin.m_simpleEDP.use_PublicationReaderANDSubscriptionWriter = true;
         pParam.rtps.builtin.m_simpleEDP.use_PublicationWriterANDSubscriptionReader = true;
-        pParam.rtps.builtin.leaseDuration = 5.0; //seconds
-        pParam.rtps.builtin.leaseDuration_announcementperiod = 2.0; //seconds
+        // Use the default leaseDuration, which is infinite, to avoid connection losses during high loads.
+        // If AFTMAGT-218 is addressed, the lease duration should probably be made configurable.
+        // pParam.rtps.builtin.leaseDuration = 5.0; //seconds
+        // pParam.rtps.builtin.leaseDuration_announcementperiod = 2.0; //seconds
 
         auto CalculateMetaTrafficPort = [domainId, &portParams = pParam.rtps.port](auto participantId)
         {
