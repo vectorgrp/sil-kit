@@ -190,7 +190,7 @@ void IbSubListener<sync::idl::ParticipantStatus>::onSubscriptionMatched(eprosima
 
             auto msg = msgWithAddr.msg;
             msg.state = sync::ParticipantState::Error;
-            msg.enterReason = std::string{"Shutdown"};
+            msg.enterReason = "Connection Lost";
             msg.enterTime = std::chrono::system_clock::now();
             msg.refreshTime = std::chrono::system_clock::now();
 

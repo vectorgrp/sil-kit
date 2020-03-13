@@ -318,12 +318,14 @@ void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
     ib::mw::sync::ParticipantStatus msg;
     msg.participantName = info.participantName;
     msg.state = ib::mw::sync::ParticipantState::Error;
-    msg.enterReason = "Shutdown";
+    msg.enterReason = "Connection Lost";
     msg.enterTime = std::chrono::system_clock::now();
     msg.refreshTime = std::chrono::system_clock::now();
 
     auto&& link = GetLinkByName<ib::mw::sync::ParticipantStatus>("default");
     link->DistributeRemoteIbMessage(std::move(address), msg);
+
+    _logger->Error("Lost connection to participant {}", info.participantName);
 }
 
 void VAsioConnection::OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer)
