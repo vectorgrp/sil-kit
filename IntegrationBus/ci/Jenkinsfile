@@ -226,6 +226,19 @@ def doBuild(buildName, buildAgent, buildTool) {
                     run "python ${dockerImageDir}/package.py \"_build_Release/${artifactName}-*-Release.zip\" \"_build_Debug/${artifactName}-*-Debug.zip\""
                     archiveToArtifactory("_build_Debug/${artifactName}-*.zip")
                     archiveToArtifactory("${artifactName}-*.zip")
+
+                    // safe the PDB files on windows
+                    if(!isUnix()) {
+                        cmakeBuild(
+                            installation: 'InSearchPath',
+                            cleanBuild: false,
+                            buildType: "Debug",
+                            buildDir: "_build_Debug",
+                            generator: "${buildTool}",
+                            steps: [[args: "--target package-pdb", withCmake: true]]
+                        )
+                        archiveToArtifactory("_build_Debug/IntegrationBus-*-PDB.zip")
+                    }
                 }
             }
         }
