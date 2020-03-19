@@ -24,6 +24,13 @@ Added
      in all setups involving different, but compatible versions of VIB.
      See compatibility below for details.
 
+Changed
+~~~~~~~
+- Clarify error messages on connection loss for VAsio. The previous term
+  "Shutdown" was ambiguous, the error reason now states "Connection
+  lost" (AFTMAGT-260).
+- Disable problematic FastRTPS connection loss detection (AFTMAGT-259).
+
 
 Deprecated
 ~~~~~~~~~~
@@ -38,7 +45,9 @@ Deprecated
 Fixed
 ~~~~~
 - The IbRegistry can now be used for multiple simulation runs without the need
-  to terminate and restart it. (AFTMAGT-249)
+  to terminate and restart it (AFTMAGT-249).
+- The internally used spdlog is now build with compiler flags that prevent
+  creation of weak symbols on Linux / GCC (AFTMAGT-256).
 
 
 Compatibility with 3.0.3
