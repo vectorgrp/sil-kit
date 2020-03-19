@@ -108,6 +108,15 @@ void FrControllerProxy::RegisterWakeupHandler(WakeupHandler handler)
 
 void FrControllerProxy::RegisterControllerStatusHandler(ControllerStatusHandler handler)
 {
+    if (_comAdapter)
+    {
+        auto* logger = _comAdapter->GetLogger();
+        if (logger)
+        {
+            logger->Warn("RegisterControllerStatusHandler is deprecated! use RegisterPocStatusHandler!");
+        }
+
+    }
     RegisterHandler(handler);
 }
 
@@ -185,17 +194,15 @@ void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Cyc
     CallHandlers(msg);
 }
 
-void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const ControllerStatus& msg)
-{
-    if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
-        return;
-
-    CallHandlers(msg);
-}
 void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const PocStatus& msg)
 {
     if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
         return;
+
+    //interoperability with 3.0.3
+    ControllerStatus status{};
+    status.pocState = msg.state;
+    CallHandlers(status);
 
     CallHandlers(msg);
 }

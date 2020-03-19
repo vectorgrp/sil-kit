@@ -15,7 +15,7 @@ namespace fr {
  *  Used by the ComAdapter, implemented by the FrControllerProxy
  */
 class IIbToFrControllerProxy
-    : public ib::mw::IIbEndpoint<FrMessage, FrMessageAck, FrSymbol, FrSymbolAck, CycleStart, ControllerStatus, PocStatus>
+    : public ib::mw::IIbEndpoint<FrMessage, FrMessageAck, FrSymbol, FrSymbolAck, CycleStart, PocStatus>
     , public ib::mw::IIbSender<HostCommand, ControllerConfig, TxBufferConfigUpdate, TxBufferUpdate>
 {
 };

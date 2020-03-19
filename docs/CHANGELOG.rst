@@ -5,7 +5,7 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[unreleased] - 2020-mm-dd
+[3.0.4] - 2020-03-19
 --------------------------------
 This is Sprint 39.
 
@@ -18,12 +18,22 @@ Added
   This new API exposes more status variables of the POC when using the VIBE
   Network Simulator for FlexRay simulation. (AFTMAGT-253)
 
+  .. admonition:: Note
+
+     To ensure interoperability you should use VIBE Network Simulator v3.0.4
+     in all setups involving different, but compatible versions of VIB.
+     See compatibility below for details.
+
+
 Deprecated
 ~~~~~~~~~~
 - :cpp:func:`IFrController::RegisterControllerStatusHandler()<ib::sim::fr::IFrController::RegisterControllerStatusHandler()>`
   is now deprecated in favor of
   :cpp:func:`RegisterPocStatusHandler()<ib::sim::fr::IFrController::RegisterPocStatusHandler()>`.
   ControllerStatusHandler will be removed in a future release.
+  The usage of RegisterControllerStatusHandler will result in a warning
+  at runtime and compile time.
+
 
 Fixed
 ~~~~~
@@ -33,6 +43,12 @@ Fixed
 
 Compatibility with 3.0.3
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Please note that the new FlexRay controller model (VIB v3.0.4) requires the
+matching VIBE Network Simulator v3.0.4, even when not using the new PocStatus
+API. However, the VIBE Network Simulator v3.0.4 is fully compatible with
+previous FlexRay controller models and enables interoperability between VIB
+v3.0.3 and v3.0.4 participants.
 
 - Application binary interface (ABI): Yes
 - Application software interface (API): Yes

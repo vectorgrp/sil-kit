@@ -361,20 +361,6 @@ TEST_F(FrControllerProxyTest, call_wakeup_handler)
     proxy.ReceiveIbMessage(controllerAddress, casMts);
 }
 
-TEST_F(FrControllerProxyTest, call_controller_status_handler)
-{
-    proxy.RegisterControllerStatusHandler(bind_method(&callbacks, &Callbacks::ControllerStatusHandler));
-
-    ControllerStatus status;
-    status.timestamp = 14ms;
-    status.pocState = PocState::Ready;
-
-    EXPECT_CALL(callbacks, ControllerStatusHandler(&proxy, status))
-        .Times(1);
-
-    proxy.ReceiveIbMessage(controllerAddress, status);
-}
-
 TEST_F(FrControllerProxyTest, call_pocstatus_handler)
 {
     // new POC API

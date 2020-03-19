@@ -71,7 +71,10 @@ public:
     void RegisterMessageHandler(MessageHandler handler) override;
     void RegisterMessageAckHandler(MessageAckHandler handler) override;
     void RegisterWakeupHandler(WakeupHandler handler) override;
+
+    [[deprecated("superseded by RegisterPocStatusHandler")]]
     void RegisterControllerStatusHandler(ControllerStatusHandler handler) override;
+
     void RegisterPocStatusHandler(PocStatusHandler handler) override;
     void RegisterSymbolHandler(SymbolHandler handler) override;
     void RegisterSymbolAckHandler(SymbolAckHandler handler) override;
@@ -83,7 +86,6 @@ public:
     void ReceiveIbMessage(mw::EndpointAddress from, const FrSymbol& msg) override;
     void ReceiveIbMessage(mw::EndpointAddress from, const FrSymbolAck& msg) override;
     void ReceiveIbMessage(mw::EndpointAddress from, const CycleStart& msg) override;
-    void ReceiveIbMessage(mw::EndpointAddress from, const ControllerStatus& msg) override;
     void ReceiveIbMessage(mw::EndpointAddress from, const PocStatus& msg) override;
 
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
