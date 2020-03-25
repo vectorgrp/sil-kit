@@ -229,15 +229,10 @@ def doBuild(buildName, buildAgent, buildTool) {
 
                     // safe the PDB files on windows
                     if(!isUnix()) {
-                        cmakeBuild(
-                            installation: 'InSearchPath',
-                            cleanBuild: false,
-                            buildType: "Debug",
-                            buildDir: "_build_Debug",
-                            generator: "${buildTool}",
-                            steps: [[args: "--target package-pdb", withCmake: true]]
-                        )
-                        archiveToArtifactory("_build_Debug/IntegrationBus-*-PDB.zip")
+                        // package PDB files without rebuilding
+                        def pdbArchive = "_build_Debug/IntegrationBus-${buildName}-PDB.zip"
+                        run "python -mzipfile -c ${pdbArchive} _build_Debug/package-pdb/ _build_Release/package-pdb/"
+                        archiveToArtifactory(pdbArchive)
                     }
                 }
             }

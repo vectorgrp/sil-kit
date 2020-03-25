@@ -12,7 +12,6 @@ option(IB_INSTALL_SOURCE "Install and package the source tree" OFF)
 if(IB_INSTALL_SOURCE)
     set(IB_BUILD_DOCS ON CACHE BOOL "Force IB_BUILD_DOCS ON due to IB_INSTALL_SOURCE" FORCE)
 endif()
-option(IB_PACKAGE_DEBUGINFOS "Create a zip of debug (PDB) files" ON)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${CMAKE_CURRENT_LIST_DIR}/IntegrationBus/cmake)
 include(IntegrationBusInstall)
@@ -130,32 +129,6 @@ if(NOT CMAKE_BUILD_TYPE)
     set(my_build_type) #ignore in output file
 else()
     set(my_build_type "-${CMAKE_BUILD_TYPE}")
-endif()
-
-# For minidumps and debugging we archive the PDB files on windows.
-#NB: we create these at the toplevel so the relative paths contain no ".." folders
-if(IB_PACKAGE_DEBUGINFOS)
-    if(MSVC)
-        set(VIB_DEBUG_FILES
-            ${CMAKE_BINARY_DIR}/IntegrationBus-${PROJECT_VERSION}-${comp}-${plat}-PDB.zip)
-
-        add_custom_command(
-            OUTPUT ${VIB_DEBUG_FILES}
-            COMMENT "package-pdb -> Creating ZIP of pdb files"
-            COMMAND ${CMAKE_COMMAND} -E tar cf "${VIB_DEBUG_FILES}" --format=zip --
-                $<TARGET_PDB_FILE:IntegrationBus>
-            DEPENDS 
-                IntegrationBus
-        )
-        add_custom_target(package-pdb
-            DEPENDS ${VIB_DEBUG_FILES}
-        )
-        message(STATUS "to package PDB files use target 'package-pdb'")
-    else()
-        add_custom_target(package-pdb
-            COMMENT "package-pdb -> no op. defined for CI compatibility."
-        )
-    endif()
 endif()
 
 set(CPACK_GENERATOR "ZIP")

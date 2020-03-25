@@ -46,6 +46,17 @@ if (MSVC)
     if(MSVC_VERSION EQUAL 1900)
         target_compile_options(IntegrationBus PUBLIC "/wd4503")
     endif()
+    set(PKG_PDB_DIR ${CMAKE_BINARY_DIR}/package-pdb)
+
+    #make sure we have the Release PDB in a well known place
+    # needed for packaging the PDBs from external
+    set_target_properties(IntegrationBus
+        PROPERTIES
+            PDB_NAME IntegrationBus
+            PDB_OUTPUT_DIRECTORY_RELEASE ${PKG_PDB_DIR}/Release
+            PDB_OUTPUT_DIRECTORY_DEBUG ${PKG_PDB_DIR}/Debug
+            LINK_FLAGS "/DEBUG" #make sure the resulting .dll has a .pdb file
+     )
 endif (MSVC)
 
 
