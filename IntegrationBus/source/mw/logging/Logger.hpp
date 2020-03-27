@@ -48,6 +48,8 @@ public:
 
     void LogReceivedMsg(const LogMsg& msg);
 
+protected:
+    bool ShouldLog(Level level) const override;
 private:
     // ----------------------------------------
     // private members

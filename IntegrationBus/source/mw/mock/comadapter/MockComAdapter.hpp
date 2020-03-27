@@ -35,6 +35,8 @@ public:
     void Critical(const std::string& /*msg*/) override {}
     void RegisterRemoteLogging(const LogMsgHandlerT& /*handler*/) {}
     void LogReceivedMsg(const logging::LogMsg& /*msg*/) {}
+protected:
+    bool ShouldLog(logging::Level) const override { return true; }
 };
 
 class DummyComAdapter : public IComAdapter

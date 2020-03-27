@@ -177,6 +177,10 @@ void Logger::LogReceivedMsg(const LogMsg& msg)
     }
 }
 
+bool Logger::ShouldLog(Level level) const
+{
+    return _logger->should_log(to_spdlog(level));
+}
 
 } // namespace logging
 } // namespace mw

@@ -56,8 +56,11 @@ public:
     template<typename... Args>
     void Log(Level level, const char* fmt, const Args&... args)
     {
-        std::string msg = fmt::format(fmt, args...);
-        Log(level, msg);
+        if(ShouldLog(level))
+        {
+            std::string msg = fmt::format(fmt, args...);
+            Log(level, msg);
+        }
 
     }
     template<typename... Args>
@@ -92,6 +95,8 @@ public:
     }
 #endif //HAVE_FMTLIB
 
+protected:
+    virtual bool ShouldLog(Level) const = 0;
 };
 
 } // logging
