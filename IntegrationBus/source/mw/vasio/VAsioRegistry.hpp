@@ -4,11 +4,13 @@
 
 #include "VAsioConnection.hpp"
 #include "ib/mw/logging/ILogger.hpp"
+#include "ib/extensions/IIbRegistry.hpp"
 
 namespace ib {
 namespace mw {
 
 class VAsioRegistry
+    : public ib::extensions::IIbRegistry
 {
 public:
     VAsioRegistry() = delete;
@@ -16,10 +18,10 @@ public:
     VAsioRegistry(VAsioRegistry&&) = delete;
     VAsioRegistry(ib::cfg::Config cfg);
 
-    void ProvideDomain(uint32_t domainId);
+    void ProvideDomain(uint32_t domainId) override;
 
-    void SetAllConnectedHandler(std::function<void()> handler);
-    void SetAllDisconnectedHandler(std::function<void()> handler);
+    void SetAllConnectedHandler(std::function<void()> handler) override;
+    void SetAllDisconnectedHandler(std::function<void()> handler) override;
 
 private:
     // ----------------------------------------

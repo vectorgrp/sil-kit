@@ -31,17 +31,12 @@ using ExtensionError = std::runtime_error;
 //! \brief Lookup paths to consider when loading dynamic, shared modules
 using ExtensionPathHints = std::vector<std::string>;
 
-//! \brief This owning pointer frees the extension's underlying shared library
-//         if needed.
-using UniquePtr = std::unique_ptr<IIbExtension, 
-    std::function<void(IIbExtension* T)>>;
-
 //! \brief Loads the extension by name, inferring a suitable file path by
 //         decorating the name with platform specific prefix, suffix and
 //         extensions.
 // The first match is loaded.
 auto LoadExtension(const std::string& undecorated_name)
-    -> UniquePtr;
+    -> std::shared_ptr<IIbExtension>;
 
 //! \brief Loads the extension by name, and using the path hints for
 //!        inferring the module path.
@@ -51,7 +46,7 @@ auto LoadExtension(
         const std::string& undecorated_name,
         const ExtensionPathHints& path_hints
         )
-        -> UniquePtr;
+        -> std::shared_ptr<IIbExtension>;
 
 }//end namespace extensions
 }//end namespace ib

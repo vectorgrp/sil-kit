@@ -27,6 +27,19 @@ add_library(IntegrationBus SHARED
     IbForceIncludes.cpp
 )
 
+# Published extension implementations follow here for the extension loading
+# side of the code. The actual shared library code might reside 
+# anywhere.
+
+target_sources(IntegrationBus
+    PRIVATE
+    #for IDE:
+    ${CMAKE_CURRENT_LIST_DIR}/../include/ib/extensions/IIbRegistry.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/../include/ib/extensions/CreateExtension.hpp
+    # implementations
+    extensions/IbExtensionImpl/CreateIbRegistry.cpp
+)
+
 if (MSVC)
     target_sources(IntegrationBus PRIVATE IntegrationBus.rc)
     #disable 'truncated names' warnings on visual studio 2015 v14

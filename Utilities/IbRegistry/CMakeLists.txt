@@ -24,3 +24,52 @@ target_link_libraries(IbRegistry
 install(TARGETS IbRegistry
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}
 )
+
+
+## Non-redistributable shared library version of IbRegistry app:
+add_library(vib-registry 
+    SHARED
+    IbRegistryLib.cpp
+)
+target_link_libraries(vib-registry
+    PRIVATE
+        IbConfig
+        IbMwVAsio
+        IbVersion
+        IbExtensions
+)
+set_target_properties(vib-registry PROPERTIES
+     FOLDER "Utilities"
+ )
+
+add_vib_test(
+    TestIbRegistryLib
+    SOURCES
+        IbRegistryLibTests.cpp
+    LIBS
+        IbExtensions
+        IbMwComAdapter
+        IntegrationBus
+)
+if(MSVC)
+    #NB OUTPUT_DIRECTORY et al are not available during configuration phase
+    get_target_property(ibBinDir IntegrationBus BINARY_DIR)
+    set_tests_properties(TestIbRegistryLib
+        PROPERTIES
+        ENVIRONMENT "PATH=%PATH%\;${ibBinDir}/Debug\;${ibBinDir}/Release"
+    )
+endif()
+target_include_directories(TestIbRegistryLib
+    PRIVATE ../../IntegrationBus/IntegrationTests
+)
+
+install(
+    TARGETS vib-registry
+    DESTINATION ${INSTALL_NONREDIST_DIR}
+)
+
+install(
+    FILES Readme-NonRedistributable.txt
+    DESTINATION ${INSTALL_NONREDIST_DIR}
+    RENAME README.txt
+)

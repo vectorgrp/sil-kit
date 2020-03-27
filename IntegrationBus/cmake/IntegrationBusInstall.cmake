@@ -38,3 +38,5 @@ set(INSTALL_INCLUDE_DIR ${INSTALL_TOP_DIR}/${CMAKE_INSTALL_INCLUDEDIR})
 set(INSTALL_SOURCE_DIR IntegrationBus-Source)
 set(INSTALL_DEMO_DIR IntegrationBus-Demos)
 set(INSTALL_DOC_DIR IntegrationBus-Documentation)
+
+set(INSTALL_NONREDIST_DIR IntegrationBus-NonRedistributable)

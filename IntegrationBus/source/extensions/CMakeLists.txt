@@ -1,3 +1,6 @@
+# the IbExtension is a standalone library except for its dependency on
+# ib/version.hpp
+
 add_library(IbExtensions STATIC
     IbExtensions.cpp
     IbExtensions.hpp
@@ -60,3 +63,4 @@ target_compile_definitions(IbExtensions
 )
 
 add_subdirectory(Tests)
+

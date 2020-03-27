@@ -13,7 +13,9 @@
 namespace ib { namespace extensions {
 
 namespace {
+
 using BuildInfoType =decltype(IbExtensionDescriptor_t::build_infos);
+
 std::string to_string(const BuildInfoType&  bi)
 {
     std::stringstream ss;
@@ -25,6 +27,7 @@ std::string to_string(const BuildInfoType&  bi)
         ;
     return ss.str();
 }
+
 void VerifyExtension(const IbExtensionDescriptor_t* descr)
 {
     if(descr == nullptr)
@@ -88,7 +91,7 @@ void VerifyExtension(const IbExtensionDescriptor_t* descr)
 //! \brief The shared library look up only uses some OS specific bits, like path
 //         separators, library prefix and file extensions from the detail impl.
 //The search paths can be changed using the hints argument.
-// TODO we should fix the module name to vibe-MODNAME.dll/so
+
 std::vector<std::string> FindLibrary(const std::string& name,
                 const ib::extensions::ExtensionPathHints& hints)
 {
@@ -103,6 +106,7 @@ std::vector<std::string> FindLibrary(const std::string& name,
         name + detail::lib_file_extension
     };
     std::vector<std::string> rv;
+
     for(const auto& hint: hints)
     {
         std::string dir = hint;
@@ -144,7 +148,7 @@ SymType* GetSymbol(detail::LibraryHandle hnd, const std::string& sym_name)
 
 
 auto LoadExtension(const std::string& name)
-    -> UniquePtr
+    -> std::shared_ptr<IIbExtension>
 {
     const ExtensionPathHints DefaultHints{ "ENV:IB_EXTENSION_PATH", "." };
     return LoadExtension(name, DefaultHints);
@@ -153,7 +157,7 @@ auto LoadExtension(const std::string& name)
 auto LoadExtension(
         const std::string& name,
         const ExtensionPathHints& path_hints
-    ) -> UniquePtr
+    ) -> std::shared_ptr<IIbExtension>
 {
     using namespace detail;
 
@@ -180,6 +184,7 @@ auto LoadExtension(
             return nullptr;
         }
     };
+
     //verify that at least one library is found in the candidate paths, it is
     //loadable and the build infos are compatible.
     for(const auto& path: paths)
@@ -190,6 +195,7 @@ auto LoadExtension(
             break;
         }
     }
+
     if(lib_handle == nullptr)
     {
         std::stringstream ss;
