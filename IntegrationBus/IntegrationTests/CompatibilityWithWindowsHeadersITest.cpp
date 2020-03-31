@@ -32,7 +32,7 @@
 
 // 3. Provide a dummy test for proper integration with our test runner.
 #include "gtest/gtest.h"
-TEST(min_max_macros_still_work)
+TEST(WindowsHeaderCompatibility, min_max_macros_still_work)
 {
 #ifndef min
     ASSERT_FALSE();
