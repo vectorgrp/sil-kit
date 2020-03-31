@@ -113,11 +113,11 @@ public:
         : controller{controller}
     {
         schedule = {
-            {0ns, [this](std::chrono::nanoseconds /*now*/) { SendFrame_16(); }},
-            {0ns, [this](std::chrono::nanoseconds /*now*/) { SendFrame_17(); }},
-            {0ns, [this](std::chrono::nanoseconds /*now*/) { SendFrame_18(); }},
-            {0ns, [this](std::chrono::nanoseconds /*now*/) { SendFrame_19(); }},
-            {0ns, [this](std::chrono::nanoseconds /*now*/) { SendFrame_34(); }},
+            {0ns, [this](std::chrono::nanoseconds now) { SendFrame_16(now); }},
+            {0ns, [this](std::chrono::nanoseconds now) { SendFrame_17(now); }},
+            {0ns, [this](std::chrono::nanoseconds now) { SendFrame_18(now); }},
+            {0ns, [this](std::chrono::nanoseconds now) { SendFrame_19(now); }},
+            {0ns, [this](std::chrono::nanoseconds now) { SendFrame_34(now); }},
             {5ms, [this](std::chrono::nanoseconds /*now*/) { GoToSleep(); }}
         };
     }
@@ -130,7 +130,7 @@ public:
         schedule.ExecuteTask(now);
     }
 
-    void SendFrame_16()
+    void SendFrame_16(std::chrono::nanoseconds now)
     {
         Frame frame;
         frame.id = 16;
@@ -138,11 +138,11 @@ public:
         frame.dataLength = 6;
         frame.data = std::array<uint8_t, 8>{1, 6, 1, 6, 1, 6, 1, 6};
 
-        controller->SendFrame(frame, FrameResponseType::MasterResponse);
+        controller->SendFrame(frame, FrameResponseType::MasterResponse, now);
         std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(frame.id) << std::endl;
     }
         
-    void SendFrame_17()
+    void SendFrame_17(std::chrono::nanoseconds now)
     {
         Frame frame;
         frame.id = 17;
@@ -150,11 +150,11 @@ public:
         frame.dataLength = 6;
         frame.data = std::array<uint8_t, 8>{1,7,1,7,1,7,1,7};
 
-        controller->SendFrame(frame, FrameResponseType::MasterResponse);
+        controller->SendFrame(frame, FrameResponseType::MasterResponse, now);
         std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(frame.id) << std::endl;
     }
 
-    void SendFrame_18()
+    void SendFrame_18(std::chrono::nanoseconds now)
     {
         Frame frame;
         frame.id = 18;
@@ -162,11 +162,11 @@ public:
         frame.dataLength = 8;
         frame.data = std::array<uint8_t, 8>{0};
 
-        controller->SendFrame(frame, FrameResponseType::MasterResponse);
+        controller->SendFrame(frame, FrameResponseType::MasterResponse, now);
         std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(frame.id) << std::endl;
     }
 
-    void SendFrame_19()
+    void SendFrame_19(std::chrono::nanoseconds now)
     {
         Frame frame;
         frame.id = 19;
@@ -174,18 +174,18 @@ public:
         frame.dataLength = 8;
         frame.data = std::array<uint8_t, 8>{0};
 
-        controller->SendFrame(frame, FrameResponseType::MasterResponse);
+        controller->SendFrame(frame, FrameResponseType::MasterResponse, now);
         std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(frame.id) << std::endl;
     }
 
-    void SendFrame_34()
+    void SendFrame_34(std::chrono::nanoseconds now)
     {
         Frame frame;
         frame.id = 34;
         frame.checksumModel = ChecksumModel::Enhanced;
         frame.dataLength = 6;
 
-        controller->SendFrame(frame, FrameResponseType::SlaveResponse);
+        controller->SendFrame(frame, FrameResponseType::SlaveResponse, now);
         std::cout << "<< LIN Frame Header sent for ID=" << static_cast<unsigned int>(frame.id) << std::endl;
     }
 
@@ -240,7 +240,10 @@ public:
 
     void FrameStatusHandler(ILinController* controller, const Frame& frame, FrameStatus status, std::chrono::nanoseconds timestamp)
     {
-        std::cout << ">> " << frame << " status=" << status << std::endl;
+        std::cout << ">> " << frame
+                  << " status=" << status
+                  << " timestamp=" << timestamp
+                  << std::endl;
     }
 
     void GoToSleepHandler(ILinController* controller)

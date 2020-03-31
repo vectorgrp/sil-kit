@@ -5,9 +5,21 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[unreleased]
+--------------------------------
+
+Added
+~~~~~
+- It is now possible to provide a time stamp for LIN transmissions. For this,
+  overloads have been added to
+  :cpp:func:`ILinController::SendFrame()<void ib::sim::lin::ILinController::SendFrame(Frame, FrameResponseType, std::chrono::nanoseconds)>`
+  and
+  :cpp:func:`ILinController::SendFrameHeader()<void ib::sim::lin::ILinController::SendFrameHeader(LinIdT, std::chrono::nanoseconds)>`.
+  Note that this timestamp will be overwritten when using the VIBE NetworkSimulator.
+
+
 [3.0.4] - 2020-03-19
 --------------------------------
-This is Sprint 39.
 
 Added
 ~~~~~

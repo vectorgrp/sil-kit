@@ -82,11 +82,21 @@ auto LinController::Status() const noexcept -> ControllerStatus
 
 void LinController::SendFrame(Frame frame, FrameResponseType responseType)
 {
+    SendFrame(std::move(frame), std::move(responseType), std::chrono::nanoseconds{});
+}
+
+void LinController::SendFrame(Frame frame, FrameResponseType responseType, std::chrono::nanoseconds timestamp)
+{
     SetFrameResponse(frame, ToFrameResponseMode(responseType));
-    SendFrameHeader(frame.id);
+    SendFrameHeader(frame.id, timestamp);
 }
 
 void LinController::SendFrameHeader(LinIdT linId)
+{
+    SendFrameHeader(linId, std::chrono::nanoseconds{});
+}
+
+void LinController::SendFrameHeader(LinIdT linId, std::chrono::nanoseconds timestamp)
 {
     if (_controllerMode != ControllerMode::Master)
     {
@@ -99,6 +109,7 @@ void LinController::SendFrameHeader(LinIdT linId)
     // setup a reply
     Transmission transmission;
     transmission.frame.id = linId;
+    transmission.timestamp = timestamp;
 
     auto numResponses = 0;
     for (auto&& node : _linNodes)

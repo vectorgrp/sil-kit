@@ -72,6 +72,26 @@ TEST_F(LinControllerTest, send_frame_with_master_response)
     controller.SendFrame(frame, FrameResponseType::MasterResponse);
 }
 
+TEST_F(LinControllerTest, send_frame_with_master_response_and_timestamp)
+{
+    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    controller.Init(config);
+
+    Frame frame = MakeFrame(17, ChecksumModel::Enhanced);
+    auto timestamp = 70ms;
+
+    controller.RegisterFrameStatusHandler(frameStatusHandler);
+
+    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, A<const FrameResponseUpdate&>()))
+        .Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(frame, FrameStatus::LIN_RX_OK, timestamp)))
+        .Times(1);
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, frame, FrameStatus::LIN_TX_OK))
+        .Times(1);
+
+    controller.SendFrame(frame, FrameResponseType::MasterResponse, timestamp);
+}
+
 TEST_F(LinControllerTest, send_frame_without_configured_response)
 {
     ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
@@ -115,6 +135,35 @@ TEST_F(LinControllerTest, send_frame_with_one_slave_response)
         .Times(1);
 
     controller.SendFrame(frame, FrameResponseType::SlaveResponse);
+}
+
+TEST_F(LinControllerTest, send_frame_with_one_slave_response_and_timestamp)
+{
+    // Configure Slave 1
+    ControllerConfig slaveConfig = MakeControllerConfig(ControllerMode::Slave);
+    FrameResponse response;
+    response.frame = MakeFrame(17, ChecksumModel::Enhanced, 4, {1,2,3,4,5,6,7,8});
+    response.responseMode = FrameResponseMode::TxUnconditional;
+    slaveConfig.frameResponses.push_back(response);
+
+    controller.ReceiveIbMessage(ibAddr2, slaveConfig);
+
+    // Configure Master
+    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    controller.Init(config);
+    controller.RegisterFrameStatusHandler(frameStatusHandler);
+    
+    // Send Frame
+    Frame frame = MakeFrame(17, ChecksumModel::Enhanced);
+    auto timestamp = 17s;
+
+    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, A<const FrameResponseUpdate&>())).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(response.frame, FrameStatus::LIN_RX_OK, timestamp)))
+        .Times(1);
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, response.frame, FrameStatus::LIN_RX_OK))
+        .Times(1);
+
+    controller.SendFrame(frame, FrameResponseType::SlaveResponse, timestamp);
 }
 
 
@@ -246,6 +295,27 @@ TEST_F(LinControllerTest, send_frame_header_with_master_response)
 
     controller.SetFrameResponse(frame, FrameResponseMode::TxUnconditional);
     controller.SendFrameHeader(17);
+}
+
+TEST_F(LinControllerTest, send_frame_header_with_master_response_and_timestamp)
+{
+    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    controller.Init(config);
+
+    Frame frame = MakeFrame(17, ChecksumModel::Enhanced);
+    auto timestamp = 45ns;
+
+    controller.RegisterFrameStatusHandler(frameStatusHandler);
+
+    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, A<const FrameResponseUpdate&>()))
+        .Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(frame, FrameStatus::LIN_RX_OK, timestamp)))
+        .Times(1);
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, frame, FrameStatus::LIN_TX_OK))
+        .Times(1);
+
+    controller.SetFrameResponse(frame, FrameResponseMode::TxUnconditional);
+    controller.SendFrameHeader(17, timestamp);
 }
 
 TEST_F(LinControllerTest, send_frame_header_remove_master_response)

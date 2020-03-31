@@ -47,7 +47,9 @@ public:
     auto Status() const noexcept->ControllerStatus override;
 
     void SendFrame(Frame frame, FrameResponseType responseType) override;
+    void SendFrame(Frame frame, FrameResponseType responseType, std::chrono::nanoseconds timestamp) override;
     void SendFrameHeader(LinIdT linId) override;
+    void SendFrameHeader(LinIdT linId, std::chrono::nanoseconds timestamp) override;
     void SetFrameResponse(Frame frame, FrameResponseMode mode) override;
     void SetFrameResponses(std::vector<FrameResponse> responses) override;
 

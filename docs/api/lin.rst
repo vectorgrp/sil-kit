@@ -114,7 +114,11 @@ A successful transmission is confirmed via the registered callback, e.g.::
 
 .. admonition:: Note
 
-    The end of frame timestamp is only valid when using the VIBE NetworkSimulator.
+    The end of frame timestamp is only valid when using the VIBE
+    NetworkSimulator or when provided to
+    :cpp:func:`ILinController::SendFrame()<void ib::sim::lin::ILinController::SendFrame(Frame, FrameResponseType, std::chrono::nanoseconds)>`
+    or
+    :cpp:func:`ILinController::SendFrameHeader()<void ib::sim::lin::ILinController::SendFrameHeader(LinIdT, std::chrono::nanoseconds)>`.
 
 
 Receiving Data from a Slave
@@ -219,7 +223,11 @@ Assumptions:
 - *master*, *slave*, *slave1*, and *slave2* are of type
   :cpp:class:`ILinController*<ib::sim::lin::ILinController>`.
 - *timeEndOfFrame* indicates the end of frame time stamp when using the VIBE
-  NetworkSimulator. Otherwise the value of *timeEndofFrame* is undefined.
+  NetworkSimulator. A time stamp can also be provided when initiating a transmission through
+  :cpp:func:`ILinController::SendFrame()<void ib::sim::lin::ILinController::SendFrame(Frame, FrameResponseType, std::chrono::nanoseconds)>`
+  or
+  :cpp:func:`ILinController::SendFrameHeader()<void ib::sim::lin::ILinController::SendFrameHeader(LinIdT, std::chrono::nanoseconds)>`.
+  Otherwise the value of *timeEndofFrame* is undefined.
 - *UseAutosarInterface* is a boolean variable that indicates whether
   to use the AUTOSAR API or the non-AUTOSAR API. It will most likely
   not be used in practice and it merely intended to show the different

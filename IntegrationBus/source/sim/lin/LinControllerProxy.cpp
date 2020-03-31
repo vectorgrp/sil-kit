@@ -60,6 +60,12 @@ void LinControllerProxy::SendFrame(Frame frame, FrameResponseType responseType)
     SendIbMessage(sendFrame);
 }
 
+void LinControllerProxy::SendFrame(Frame frame, FrameResponseType responseType, std::chrono::nanoseconds timestamp)
+{
+    // VIBE-NetSim provides its own timestamps, thus /timestamp/ is ignored.
+    SendFrame(std::move(frame), std::move(responseType));
+}
+
 void LinControllerProxy::SendFrameHeader(LinIdT linId)
 {
     if (_controllerMode != ControllerMode::Master)
@@ -71,6 +77,12 @@ void LinControllerProxy::SendFrameHeader(LinIdT linId)
     SendFrameHeaderRequest header;
     header.id = linId;
     SendIbMessage(header);
+}
+
+void LinControllerProxy::SendFrameHeader(LinIdT linId, std::chrono::nanoseconds /*timestamp*/)
+{
+    // VIBE-NetSim provides its own timestamps, thus /timestamp/ is ignored.
+    SendFrameHeader(linId);
 }
 
 void LinControllerProxy::SetFrameResponse(Frame frame, FrameResponseMode mode)

@@ -68,6 +68,15 @@ inline auto ATransmissionWith(Frame frame, FrameStatus status) -> testing::Match
         Field(&Transmission::status, status)
     );
 }
+inline auto ATransmissionWith(Frame frame, FrameStatus status, std::chrono::nanoseconds timestamp) -> testing::Matcher<const Transmission&>
+{
+    using namespace testing;
+    return AllOf(
+        Field(&Transmission::frame, frame),
+        Field(&Transmission::status, status),
+        Field(&Transmission::timestamp, timestamp)
+    );
+}
 
 inline auto AControllerStatusUpdateWith(ControllerStatus status) -> testing::Matcher<const ControllerStatusUpdate&>
 {
