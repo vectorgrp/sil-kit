@@ -10,9 +10,10 @@
 
 namespace ib { namespace extensions {
 
-//! Load the IbRegistry extension from a DLL if necessary, and return an 
-//  instance of IIbRegistry to the caller. 
-//  Throws std::runtime_error on error.
+//! \brief Loads the IbRegistry extension from a shared library in the current
+//!        working directory if necessary, and returns an instance of
+//!        IIbRegistry to the caller. 
+//Throws std::runtime_error on error.
 
 IntegrationBusAPI auto CreateIbRegistry(ib::cfg::Config config)
     -> std::unique_ptr<IIbRegistry>;

@@ -7,13 +7,16 @@
 namespace ib { namespace extensions {
 
 //! \brief Dedicated IB registry for the VAsio middleware.
-//         This is a loadable runtime extension that is non-redistributable
+//         This is a loadable runtime extension that is non-redistributable.
 class IIbRegistry
 {
 public:
     virtual ~IIbRegistry() = default;
+    //! \brief Provide the VAsio domain with the given domain ID
     virtual void ProvideDomain(uint32_t domainId) = 0;
+    //! \brief Register the handler that is called when all participants are connected
     virtual void SetAllConnectedHandler(std::function<void()> handler) = 0;
+    //! \brief Register the handler that is called when all participants are disconnected
     virtual void SetAllDisconnectedHandler(std::function<void()> handler) = 0;
 };
 

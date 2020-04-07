@@ -40,3 +40,6 @@ set(INSTALL_DEMO_DIR IntegrationBus-Demos)
 set(INSTALL_DOC_DIR IntegrationBus-Documentation)
 
 set(INSTALL_NONREDIST_DIR IntegrationBus-NonRedistributable)
+
+## Internally used in CI builds to archive VS debugging .PDB files:
+set(PKG_PDB_DIR ${CMAKE_BINARY_DIR}/package-pdb)

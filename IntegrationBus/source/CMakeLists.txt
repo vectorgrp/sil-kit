@@ -46,7 +46,6 @@ if (MSVC)
     if(MSVC_VERSION EQUAL 1900)
         target_compile_options(IntegrationBus PUBLIC "/wd4503")
     endif()
-    set(PKG_PDB_DIR ${CMAKE_BINARY_DIR}/package-pdb)
 
     #make sure we have the Release PDB in a well known place
     # needed for packaging the PDBs from external

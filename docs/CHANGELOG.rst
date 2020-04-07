@@ -17,6 +17,21 @@ Added
   :cpp:func:`ILinController::SendFrameHeader()<void ib::sim::lin::ILinController::SendFrameHeader(LinIdT, std::chrono::nanoseconds)>`.
   Note that this timestamp will be overwritten when using the VIBE NetworkSimulator.
 
+- The VAsio registry can now be used as a shared library. Please note that the
+  shared library is non-redistributable. The extension entry point is the
+  :cpp:func:`CreateIbRegistry()<ib::extensions::CreateIbRegistry>` function.
+  The extension mechanism will load the shared library and construct an instance
+  of the IIbRegistry interface for the user to consume.
+  The vib-registry shared library needs to reside in the current process's 
+  working directory.
+  Initially, it is located in the ``IntegrationBus-NonRedistributable``
+  subdirectory of the VIB package.
+  In case of error a std::runtime_error is thrown.
+
+Changed
+~~~~~~~
+- Don't format Logger messages if the messages aren't going to be
+  logged anyways.
 
 [3.0.4] - 2020-03-19
 --------------------------------

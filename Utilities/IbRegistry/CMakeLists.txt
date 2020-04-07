@@ -41,7 +41,6 @@ target_link_libraries(vib-registry
 set_target_properties(vib-registry PROPERTIES
      FOLDER "Utilities"
  )
-
 add_vib_test(
     TestIbRegistryLib
     SOURCES
@@ -58,14 +57,32 @@ if(MSVC)
         PROPERTIES
         ENVIRONMENT "PATH=%PATH%\;${ibBinDir}/Debug\;${ibBinDir}/Release"
     )
+
+    #make sure we archive the PDBs for the shared lib, too
+    target_compile_options(vib-registry PUBLIC /Zi )
+    set_target_properties(vib-registry
+        PROPERTIES
+            PDB_NAME vib-registry
+            PDB_OUTPUT_DIRECTORY_RELEASE ${PKG_PDB_DIR}/Release
+            PDB_OUTPUT_DIRECTORY_DEBUG ${PKG_PDB_DIR}/Debug
+            LINK_FLAGS "/DEBUG" #make sure the resulting .dll has a .pdb file
+    )
+    
 endif()
 target_include_directories(TestIbRegistryLib
     PRIVATE ../../IntegrationBus/IntegrationTests
 )
 
+#make sure we don't ship .lib files on Windows
+if(MSVC)
+    set(_dest "RUNTIME")
+else()
+    set(_dest "LIBRARY")
+endif()
+
 install(
     TARGETS vib-registry
-    DESTINATION ${INSTALL_NONREDIST_DIR}
+    ${_dest} DESTINATION ${INSTALL_NONREDIST_DIR}
 )
 
 install(
