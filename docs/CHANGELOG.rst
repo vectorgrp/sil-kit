@@ -5,7 +5,7 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[unreleased]
+[3.0.5] - 2020-04-08
 --------------------------------
 
 Added
@@ -18,10 +18,11 @@ Added
   Note that this timestamp will be overwritten when using the VIBE NetworkSimulator.
 
 - The VAsio registry can now be used as a shared library. Please note that the
-  shared library is non-redistributable. The extension entry point is the
-  :cpp:func:`CreateIbRegistry()<ib::extensions::CreateIbRegistry>` function.
+  shared library is non-redistributable.
   The extension mechanism will load the shared library and construct an instance
-  of the IIbRegistry interface for the user to consume.
+  of the :cpp:class:`IIbRegistry` interface for the user to consume.
+  The API entry point is the
+  :cpp:func:`CreateIbRegistry()<ib::extensions::CreateIbRegistry>` function.
   The vib-registry shared library needs to reside in the current process's 
   working directory.
   Initially, it is located in the ``IntegrationBus-NonRedistributable``
@@ -32,6 +33,14 @@ Changed
 ~~~~~~~
 - Don't format Logger messages if the messages aren't going to be
   logged anyways.
+
+Compatibility with 3.0.4
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
 
 [3.0.4] - 2020-03-19
 --------------------------------
