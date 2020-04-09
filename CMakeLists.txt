@@ -59,6 +59,7 @@ if(IB_INSTALL_SOURCE)
             PATTERN *.cmake
             PATTERN *.cmake.in
             PATTERN CMakeLists.txt
+            PATTERN Readme-*.txt
             PATTERN *.md
             PATTERN *.xml
         REGEX "/ci/.*" EXCLUDE

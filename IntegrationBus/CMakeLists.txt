@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.11)
 
 ################################################################################
 # Project definition
@@ -94,18 +94,22 @@ addTestProject()
 set(IB_BIN_FASTRTPS_VERSION 1.8.1)
 set(IB_BIN_FASTRTPS_REPOSITORY ) #default: must be user set!
 option(IB_BIN_FASTRTPS_ENABLE
-        "Fetch pre-built and packaged FastRTPS/fastcdr binaries "
-        " (set IB_BIN_FASTRTPS_REPOSITORY for download URL)"
+        "Fetch pre-built and packaged FastRTPS/fastcdr binaries\
+        (set IB_BIN_FASTRTPS_REPOSITORY for download URL)"
+        OFF
 )
 
 if(IB_BIN_FASTRTPS_ENABLE)
+    include(FetchContent)
     include(get_compiler_arch)
     include(GetExternalProject)
+
     get_compiler_arch(_comp _arch _plat)
     if(${_plat} MATCHES "Linux" )
         get_ubuntu_version(ubuntu)
         set(_plat "ubuntu${ubuntu}")
     endif()
+
     set(binname "fastrtps-${IB_BIN_FASTRTPS_VERSION}-${_plat}-${_comp}")
     if(NOT IB_BIN_FASTRTPS_REPOSITORY)
         message(FATAL_ERROR 
@@ -114,48 +118,65 @@ if(IB_BIN_FASTRTPS_ENABLE)
             " To override the version set IB_BIN_FASTRTPS_VERSION."
             )
     endif()
-    message(STATUS "NOTE: using pre-build fastrtps/fastcdr")
-    set(FASTRTPS_BIN_DIR ${CMAKE_BINARY_DIR}/fastrtps-${IB_BIN_FASTRTPS_VERSION})
-    get_external_project(fastrtps-release
+
+
+    FetchContent_Declare(fastrtps-release
         URL ${IB_BIN_FASTRTPS_REPOSITORY}/${binname}-Release.zip
-        WORKING_DIR ${CMAKE_BINARY_DIR}/fastrtps-download/work-Release
-        SOURCE_DIR  ${CMAKE_BINARY_DIR}/fastrtps-download/Release #will be extracted here, deletes existing
-        INSTALL_COMMAND   
-            "${CMAKE_COMMAND}" -E copy_directory 
-            ${CMAKE_BINARY_DIR}/fastrtps-download/Release ${FASTRTPS_BIN_DIR}
-        )
-    #TODO we need to bundle Debug and Release, but they are mostly the same
-    #TODO: we should only copy the cmake exports and the library files ?
-    get_external_project(fastrtps-debug
+        DOWNLOAD_NO_PROGRESS FALSE
+    )
+    FetchContent_GetProperties(fastrtps-release)
+    if(NOT fastrtps-release_POPULATED)
+        message(STATUS "NOTE: fetching pre-built fastrtps Release binaries")
+        messagE(STATUS "      from: ${IB_BIN_FASTRTPS_REPOSITORY}/${binname}-Release.zip")
+        FetchContent_Populate(fastrtps-release)
+    endif()
+
+    FetchContent_Declare(fastrtps-debug
         URL ${IB_BIN_FASTRTPS_REPOSITORY}/${binname}-Debug.zip
-        WORKING_DIR ${CMAKE_BINARY_DIR}/fastrtps-download/work-Debug
-        SOURCE_DIR  ${CMAKE_BINARY_DIR}/fastrtps-download/Debug 
-        INSTALL_COMMAND
-            "${CMAKE_COMMAND}" -E copy_directory 
-            ${CMAKE_BINARY_DIR}/fastrtps-download/Debug ${FASTRTPS_BIN_DIR}
-        )
-    #NB the fastcdr-config.cmake explicitly checks for fastcdr_BIN_DIR
-    #   but we have static builds pre-compiled with no */bin folder
-    set(fastcdr_BIN_DIR ${FASTRTPS_BIN_DIR}/bin 
+        DOWNLOAD_NO_PROGRESS FALSE
+    )
+    FetchContent_GetProperties(fastrtps-debug)
+    if(NOT fastrtps-debug_POPULATED)
+        message(STATUS "NOTE: fetching pre-built fastrtps Debug binaries")
+        messagE(STATUS "      from: ${IB_BIN_FASTRTPS_REPOSITORY}/${binname}-Debug.zip")
+        FetchContent_Populate(fastrtps-debug)
+    endif()
+
+    #XXX the fastcdr-config.cmake explicitly checks for fastcdr_BIN_DIR
+    #    but we have static builds pre-compiled with no */bin folder.
+    #    this is a bug in upstream fastrtps cmake.
+
+    set(fastcdr_BIN_DIR "${fastrtps-release_SOURCE_DIR}/bin"
             CACHE STRING "override vendor package config logic" FORCE)
     set(fastrtps_BIN_DIR ${fastcdr_BIN_DIR}
             CACHE STRING "override vendor package config logic" FORCE)
     file(MAKE_DIRECTORY ${fastrtps_BIN_DIR})
-    find_package(fastcdr CONFIG
-        REQUIRED
-        PATHS ${FASTRTPS_BIN_DIR}
-        )
-    find_package(fastrtps CONFIG
-        REQUIRED
-        PATHS ${FASTRTPS_BIN_DIR}
-        )
-    message(STATUS "bundling fastrtps-${IB_BIN_FASTRTPS_VERSION} from ${FASTRTPS_BIN_DIR}")
-	#will install to ./bin, ./lib, ./include etc.
-    install(DIRECTORY
-            ${FASTRTPS_BIN_DIR}/
-            DESTINATION
-            ${INSTALL_TOP_DIR}
-     )
+
+    #########
+
+    find_package(fastcdr CONFIG REQUIRED PATHS 
+            ${fastrtps-release_SOURCE_DIR}
+    )
+    find_package(fastrtps CONFIG REQUIRED PATHS 
+            ${fastrtps-release_SOURCE_DIR}
+    )
+    set(fc_deb ${fastrtps-debug_SOURCE_DIR}/lib/libfastcdr.a)
+    set(fr_deb ${fastrtps-debug_SOURCE_DIR}/lib/libfastrtps.a)
+    if(MSVC)
+        set(fc_deb ${fastrtps-debug_SOURCE_DIR}/lib/libfastcdrd-1.0.lib)
+        set(fr_deb ${fastrtps-debug_SOURCE_DIR}/lib/libfastrtpsd-1.8.lib)
+    endif()
+    set_target_properties(fastcdr
+        PROPERTIES
+        IMPORTED_LOCATION_DEBUG ${fc_deb}
+    )
+    set_target_properties(fastrtps
+        PROPERTIES
+        IMPORTED_LOCATION_DEBUG ${fr_deb}
+    )
+
+    #Note: we no longer bundle the pre-built FastRTPS binaries. Users will have
+    #to use GIT to fetch the sources, see below.
 else()
     ### build from submodule or fetch sources from external mirror or use pre-built binaries (deployed mode)
     option(THIRDPARTY_fastcdr "Activate the use of Fast-RTPS internal thirdparty fastcdr" ON)
@@ -174,43 +195,27 @@ else()
             set(LIB_INSTALL_DIR "${INSTALL_LIB_DIR}")
             set(DATA_INSTALL_DIR "${INSTALL_DATA_DIR}")
             set(LICENSE_INSTALL_DIR "${INSTALL_DATA_DIR}/Fast-RTPS")
-            add_subdirectory(${THIRDPARTY_DIR}/Fast-RTPS
+            add_subdirectory(
+                ${THIRDPARTY_DIR}/Fast-RTPS
                 ThirdParty/Fast-RTPS
+                EXCLUDE_FROM_ALL #make sure this does not install anything during packaging
             )
         endfunction()
         include_fastrtps_with_install_prefix()
     ##################
-    # We are part of a VIB distribution bundle -- use deployed FastRTPS binaries
-    ##################
-    elseif(EXISTS ${CMAKE_CURRENT_LIST_DIR}/../../${INSTALL_LIB_DIR}/)
-        # NB the current FastRTPS 1.8.x binaries deploy their cmake config into the share instead of lib folder
-        set(_release_bin_fastrtps "${CMAKE_CURRENT_LIST_DIR}/../../${INSTALL_TOP_DIR}/share")
-        message(STATUS "------------------------------------------------------------------")
-        message(STATUS "Using pre-built binary FastRTPS package from ${_release_bin_fastrtps}")
-        message(STATUS "------------------------------------------------------------------")
-        find_package(fastcdr CONFIG
-            REQUIRED
-            PATHS ${_release_bin_fastrtps}
-            )
-        find_package(fastrtps CONFIG
-            REQUIRED
-            PATHS ${_release_bin_fastrtps}
-            )
-        if(NOT fastrtps_FOUND)
-            message(FATAL_ERROR
-                "Can't load the pre-built fastrtps binaries from \"${_release_bin_fastrtps}\""
-                " and neither build Fast-RTPS from source via \"${THIRDPARTY_DIR}/Fast-RTPS/CMakeLists.txt!\"")
-        endif()
-    ##################
     # Use git to fetch the Fast-RTPS source tree
     ##################
     else()
-        message(STATUS "------------------------------------------------------------------")
-        message(STATUS "          Fetching missing Fast-RTPS sources via git")
-        message(STATUS "          This make take several minutes...")
-        message(STATUS "------------------------------------------------------------------")
         set(FASTRTPS_URL "https://github.com/eProsima/Fast-RTPS")
         set(FASTRTPS_TAG "v${IB_BIN_FASTRTPS_VERSION}")
+
+        message(STATUS "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+        message(STATUS "          Fetching missing Fast-RTPS sources via git")
+        message(STATUS "          This might take several minutes...")
+        message(STATUS "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+        message(STATUS " Note: in case of error execute the following steps manually:")
+        message(STATUS " Git clone version ${FASTRTPS_TAG} from ${FASTRTPS_URL} into the ThirdParty/Fast-RTPS folder.")
+        message(STATUS " For details see the source of ${CMAKE_CURRENT_LIST_FILE}")
 
         if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_LESS "3.11")
             message("-- Using fallback for old cmake < 3.11")

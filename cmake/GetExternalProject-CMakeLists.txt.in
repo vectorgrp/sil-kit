@@ -5,7 +5,8 @@ include(ExternalProject)
 project(ExtProject-${PRO_NAME} NONE)
 set(CMAKE_TLS_VERIFY OFF)
 
-ExternalProject_Add(ExtProject-${PRO_NAME}
+ExternalProject_Add(ext-${PRO_NAME}
+    PREFIX                 ""
     URL                    ${URL}
     URL_HASH               ${URL_HASH}
     SOURCE_DIR             "${SOURCE_DIR}"

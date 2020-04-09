@@ -17,7 +17,10 @@ function(get_external_project name)
     set(INSTALL_COMMAND ${ext_INSTALL_COMMAND})
     #pass through additional arguments
     set(EXT_ARGS ${ext_UNPARSED_ARGUMENTS})
-    configure_file(${CMAKE_SOURCE_DIR}/cmake/GetExternalProject-CMakeLists.txt.in ${ext_WORKING_DIR}/CMakeLists.txt)
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/cmake/GetExternalProject-CMakeLists.txt.in
+        ${ext_WORKING_DIR}/CMakeLists.txt
+    )
     
     execute_process(
         COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
