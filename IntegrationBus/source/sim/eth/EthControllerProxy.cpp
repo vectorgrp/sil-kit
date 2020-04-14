@@ -49,6 +49,9 @@ auto EthControllerProxy::SendMessage(EthMessage msg) -> EthTxId
     auto txId = MakeTxId();
     msg.transmitId = txId;
     _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
+
+    if (_tracingIsEnabled) _tracer.Trace(msg);
+
     return txId;
 }
 
