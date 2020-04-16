@@ -22,11 +22,13 @@ public:
     {
         if (info.status == eprosima::fastrtps::rtps::MATCHED_MATCHING)
         {
-            _logger->Debug("FastRTPS publisher [{}] {} matched", pub->getAttributes().topic.topicName, pub->getAttributes().topic.topicDataType);
+            _logger->Debug("FastRTPS publisher [{}] {} matched",
+                pub->getAttributes().topic.topicName, pub->getAttributes().topic.topicDataType);
         }
         else
         {
-            _logger->Debug("FastRTPS publisher [{}] {} unmatched", pub->getAttributes().topic.topicName, pub->getAttributes().topic.topicDataType);
+            _logger->Debug("FastRTPS publisher [{}] {} unmatched",
+                pub->getAttributes().topic.topicName, pub->getAttributes().topic.topicDataType);
         }
     }
 
@@ -46,11 +48,13 @@ public:
     {
         if (info.status == eprosima::fastrtps::rtps::MATCHED_MATCHING)
         {
-            _logger->Debug("FastRTPS subscriber [{}] {} matched", sub->getAttributes().topic.topicName, sub->getAttributes().topic.topicDataType);
+            _logger->Debug("FastRTPS subscriber [{}] {} matched",
+                sub->getAttributes().topic.topicName, sub->getAttributes().topic.topicDataType);
         }
         else
         {
-            _logger->Debug("FastRTPS subscriber [{}] {} unmatched", sub->getAttributes().topic.topicName, sub->getAttributes().topic.topicDataType);
+            _logger->Debug("FastRTPS subscriber [{}] {} unmatched",
+                sub->getAttributes().topic.topicName, sub->getAttributes().topic.topicDataType);
         }
     }
 

@@ -91,7 +91,6 @@ protected:
             ++receiveCount;
             if (testMessages.size() == receiveCount)
             {
-                allReceivedPromise.set_value();
                 threadFinishedPromise.set_value();
             }
         });
@@ -109,7 +108,7 @@ protected:
             std::this_thread::sleep_for(100ms);
             controller->SendMessage(std::move(msg));
         }
-
+        //block until all ACK received
         auto threadFinished = threadFinishedPromise.get_future();
         ASSERT_EQ(threadFinished.wait_for(15s), std::future_status::ready);
     }
@@ -141,6 +140,8 @@ protected:
                         << std::endl;
                     testMessages[receiveCount].receivedData = message;
                     receiveCount++;
+                    if (receiveCount == testMessages.size())
+                        allReceivedPromise.set_value();
                 }
         });
         //blocking
@@ -199,6 +200,62 @@ TEST_F(ThreeEthControllerITest, test_eth_ack_callbacks_fastrtps)
 
 TEST_F(ThreeEthControllerITest, test_eth_ack_callbacks_vasio)
 {
+    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
+
+    auto registry = std::make_unique<VAsioRegistry>(ibConfig);
+    registry->ProvideDomain(domainId);
+
+    ExecuteTest();
+}
+
+//AFTMAGT-252: debug messages caused a segfault when the LogMsg RTPS topic
+//             was already destroyed during teardown.
+//   We are adding debug loggers here to verify that the logging
+//   mechanism isn't affected by the ComAdapter' connection lifecycle and its
+//   internal debugging/tracing calls.
+
+auto makeLoggingConfig() -> ib::cfg::Config
+{
+    ib::cfg::ConfigBuilder builder{"DebugLogTestConfig"};
+    auto &&setup = builder.SimulationSetup();
+    auto& writer = setup.AddParticipant("EthWriter");
+    writer->AddEthernet("ETH1").WithLink("LINK1");
+    writer->ConfigureLogger()
+        ->EnableLogFromRemotes()
+        ->WithFlushLevel(ib::mw::logging::Level::Debug)
+        ->AddSink(ib::cfg::Sink::Type::Stdout)
+        .WithLogLevel(ib::mw::logging::Level::Debug);
+
+    auto& reader1 = setup.AddParticipant("EthReader1");
+    reader1->AddEthernet("ETH1").WithLink("LINK1");
+    reader1->ConfigureLogger()
+        ->EnableLogFromRemotes()
+        ->WithFlushLevel(ib::mw::logging::Level::Debug)
+        ->AddSink(ib::cfg::Sink::Type::Remote)
+        .WithLogLevel(ib::mw::logging::Level::Debug);
+
+    auto& reader2 = setup.AddParticipant("EthReader2");
+    reader2->AddEthernet("ETH1").WithLink("LINK1");
+    reader2->ConfigureLogger()
+        ->EnableLogFromRemotes()
+        ->WithFlushLevel(ib::mw::logging::Level::Debug)
+        ->AddSink(ib::cfg::Sink::Type::Remote)
+        .WithLogLevel(ib::mw::logging::Level::Debug);
+
+    return builder.Build();
+}
+
+TEST_F(ThreeEthControllerITest, test_fastrtps_logging_orthogonal)
+{
+    ibConfig = makeLoggingConfig();
+    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::FastRTPS;
+
+    ExecuteTest();
+}
+
+TEST_F(ThreeEthControllerITest, test_vasio_logging_orthogonal)
+{
+    ibConfig = makeLoggingConfig();
     ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
 
     auto registry = std::make_unique<VAsioRegistry>(ibConfig);

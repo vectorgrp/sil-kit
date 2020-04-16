@@ -11,6 +11,7 @@
 
 #include "ib/cfg/Config.hpp"
 #include "ib/mw/logging/ILogger.hpp"
+#include "Logger.hpp"
 
 #include "fastrtps_fwd.h"
 #include "fastrtps/publisher/Publisher.h"
@@ -90,10 +91,23 @@ private:
         using TopicType = TopicT;
         using PubSubType = typename TopicTrait<TopicT>::PubSubType;
 
+        ~RtpsTopics()
+        {
+            if (_onDestruct)
+                _onDestruct();
+        }
+
+        void SetDestructionHandler(std::function<void()> func)
+        {
+            _onDestruct = std::move(func);
+        }
+
         PubSubType pubSubType;
         std::unordered_map<std::string, RtpsPubListener> pubListeners;
         std::unordered_map<std::string, RtpsSubListener<TopicT>> subListeners;
         std::unordered_map<EndpointId, eprosima::fastrtps::Publisher*> endpointToPublisherMap;
+
+        std::function<void()> _onDestruct;
     };
 
     template<typename ControllerT>
@@ -242,6 +256,21 @@ void FastRtpsConnection::PublishRtpsTopic(const std::string& topicName, Endpoint
     {
         auto&& rtpsPublisher = rtpsTopics.pubListeners[topicName];
         rtpsPublisher.listener = std::make_unique<PubMatchedListener>(_logger);
+
+        //make sure we don't use the remote logging service after its RTPS topic was destroyed
+        //C++17: if constexpr (is_same_v<>
+        if (std::is_same<decltype(rtpsTopics.pubSubType), TopicTrait<ib::mw::logging::idl::LogMsg>::PubSubType>::value)
+        {
+            rtpsTopics.SetDestructionHandler(
+                [this]() {
+                    auto* logger = dynamic_cast<logging::Logger*>(_logger);
+                    if (logger)
+                    {
+                        logger->DisableRemoteLogging();
+                    }
+            });
+        }
+
         rtpsPublisher.publisher.reset(createPublisher(topicName, &rtpsTopics.pubSubType, rtpsPublisher.listener.get()));
     }
     rtpsTopics.endpointToPublisherMap[endpointId] = rtpsTopics.pubListeners[topicName].publisher.get();

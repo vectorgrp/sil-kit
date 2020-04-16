@@ -33,22 +33,27 @@ public:
     {
     }
 
+    void Disable()
+    {
+        _is_disabled = true;
+    }
+
 protected:
     void sink_it_(const spdlog::details::log_msg& msg) override
     {
-        // ignore recursive calls to the remote logger
-        if (_in_sink_it_call) return;
+        // ignore recursive calls to the remote logger or when explicitly disabled
+        if (_is_disabled) return;
 
-        _in_sink_it_call = true;
+        _is_disabled = true;
         _logMsgHandler(from_spdlog(msg));
-        _in_sink_it_call = false;
+        _is_disabled = false;
     }
 
     void flush_() override {}
 
 private:
     Logger::LogMsgHandlerT _logMsgHandler;
-    bool _in_sink_it_call{false};
+    bool _is_disabled{false};
 };
 } // anonymous namespace
 
@@ -156,6 +161,18 @@ void Logger::RegisterRemoteLogging(const LogMsgHandlerT& handler)
     _ibRemoteSink = std::make_shared<IbRemoteSink>(handler);
     _ibRemoteSink->set_level(to_spdlog(remoteSinkRef->level));
     _logger->sinks().push_back(_ibRemoteSink);
+}
+
+void Logger::DisableRemoteLogging()
+{
+    for (auto sink : _logger->sinks())
+    {
+        auto* remoteSink = dynamic_cast<IbRemoteSink*>(sink.get());
+        if (remoteSink)
+        {
+            remoteSink->Disable();
+        }
+    }
 }
 
 void Logger::LogReceivedMsg(const LogMsg& msg)

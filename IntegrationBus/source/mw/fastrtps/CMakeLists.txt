@@ -7,13 +7,16 @@ add_library(IbMwFastRtps STATIC
     FastRtpsUtils.hpp
     FastRtpsUtils.cpp
     fastrtps_fwd.h
+
     IdlTraitMacro.hpp
     IdlTraitsCan.hpp
     IdlTraitsEth.hpp
     IdlTraitsFlexray.hpp
     IdlTraitsIo.hpp
     IdlTraitsLin.hpp
+    IdlTraitsLogging.hpp
     IdlTraitsSync.hpp
+
     IdlTypeConversionCan.hpp
     IdlTypeConversionEth.hpp
     IdlTypeConversionFlexray.hpp
