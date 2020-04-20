@@ -94,7 +94,6 @@ protected:
                 threadFinishedPromise.set_value();
             }
         });
-
         for (auto&& message : testMessages)
         {
             EthMessage msg;

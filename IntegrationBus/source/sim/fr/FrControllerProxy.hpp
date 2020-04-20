@@ -19,9 +19,9 @@ namespace fr {
  * Acts as a proxy to the controllers implemented and simulated by the Network Simulator. For operation
  * without a Network Simulator cf. FrController.
  */
-class FrControllerProxy :
-    public IFrController,
-    public IIbToFrControllerProxy
+class FrControllerProxy
+    : public IFrController
+    , public IIbToFrControllerProxy
 {
 public:
     // ----------------------------------------

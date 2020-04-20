@@ -35,3 +35,4 @@ target_include_directories(IbSimEthernet
 )
 
 add_vib_test(TestSimEthController SOURCES EthControllerTest.cpp EthControllerProxyTest.cpp LIBS IbSimEthernet IbMwMockComAdapter)
+add_vib_test(TestSimEthDatatype SOURCES EthDatatypeTest.cpp LIBS IbInterface)

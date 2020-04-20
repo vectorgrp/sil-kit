@@ -4,6 +4,7 @@
 
 #include "ib/mw/sync/IParticipantController.hpp"
 #include "ib/mw/sync/IIbToParticipantController.hpp"
+#include "ib/mw/sync/ITimeProvider.hpp"
 
 #include <future>
 #include <tuple>
@@ -17,6 +18,9 @@
 namespace ib {
 namespace mw {
 namespace sync {
+
+//forward declarations
+struct ParticipantTimeProvider;
 
 class ParticipantController
     : public IParticipantController
@@ -67,8 +71,8 @@ public:
 
     auto State() const -> ParticipantState override;
     auto Status() const -> const ParticipantStatus& override;
-    void RefreshStatus() override;
     auto Now() const -> std::chrono::nanoseconds override;
+    void RefreshStatus() override;
 
     void LogCurrentPerformanceStats() override;
 
@@ -90,6 +94,8 @@ public:
     void SendNextSimTask();
     void ExecuteSimTask();
 
+    // Get the instance of the internal ITimeProvider that is updated with our simulation time
+    auto GetTimeProvider() -> std::shared_ptr<sync::ITimeProvider>;
 private:
     // ----------------------------------------
     // private methods
@@ -116,6 +122,7 @@ private:
     cfg::SyncType _syncType;
     cfg::TimeSync _timesyncConfig;
     logging::ILogger* _logger{nullptr};
+    std::shared_ptr<ParticipantTimeProvider> _timeProvider{nullptr};
 
     std::unique_ptr<ISyncAdapter> _syncAdapter;
     bool _coldswapEnabled{false};

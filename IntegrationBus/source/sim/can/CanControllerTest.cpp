@@ -54,7 +54,7 @@ TEST(CanControllerTest, send_can_message)
     EndpointAddress controllerAddress = { 3, 8 };
 
     MockComAdapter mockComAdapter;
-    CanController canController(&mockComAdapter);
+    CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
     canController.SetEndpointAddress(controllerAddress);
 
     CanMessage msg;
@@ -75,7 +75,7 @@ TEST(CanControllerTest, receive_can_message)
     MockComAdapter mockComAdapter;
     CanControllerCallbacks callbackProvider;
 
-    CanController canController(&mockComAdapter);
+    CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
     canController.RegisterReceiveMessageHandler(std::bind(&CanControllerCallbacks::ReceiveMessage, &callbackProvider, _1, _2));
 
     CanMessage msg;
@@ -97,7 +97,7 @@ TEST(CanControllerTest, start_stop_sleep_reset)
 {
     MockComAdapter mockComAdapter;
 
-    CanController canController(&mockComAdapter);
+    CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
 
     EXPECT_CALL(mockComAdapter, SendIbMessage(A<EndpointAddress>(), A<const CanSetControllerMode&>()))
         .Times(0);
@@ -118,7 +118,7 @@ TEST(CanControllerTest, set_baudrate)
 {
     MockComAdapter mockComAdapter;
 
-    CanController canController(&mockComAdapter);
+    CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
 
     EXPECT_CALL(mockComAdapter, SendIbMessage(An<EndpointAddress>(), A<const CanConfigureBaudrate&>()))
         .Times(0);
@@ -136,7 +136,7 @@ TEST(CanControllerTest, receive_ack)
     MockComAdapter mockComAdapter;
     CanControllerCallbacks callbackProvider;
 
-    CanController canController(&mockComAdapter);
+    CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
     canController.SetEndpointAddress(controllerAddress);
     canController.RegisterTransmitStatusHandler(std::bind(&CanControllerCallbacks::ReceiveAck, &callbackProvider, _1, _2));
 
@@ -168,7 +168,7 @@ TEST(CanControllerTest, ignore_unknown_acks)
     MockComAdapter mockComAdapter;
     CanControllerCallbacks callbackProvider;
 
-    CanController canController(&mockComAdapter);
+    CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
     canController.SetEndpointAddress(controllerAddress);
     canController.RegisterTransmitStatusHandler(std::bind(&CanControllerCallbacks::ReceiveAck, &callbackProvider, _1, _2));
 
@@ -207,7 +207,7 @@ TEST(CanControllerTest, generate_ack)
     MockComAdapter mockComAdapter;
     CanControllerCallbacks callbackProvider;
 
-    CanController canController(&mockComAdapter);
+    CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
     canController.SetEndpointAddress(controllerAddress);
 
     CanMessage msg{};

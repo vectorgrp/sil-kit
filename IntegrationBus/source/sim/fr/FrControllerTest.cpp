@@ -68,7 +68,7 @@ protected:
 
 protected:
     FrControllerTest()
-    : controller(&comAdapter)
+    : controller(&comAdapter, comAdapter.GetTimeProvider())
     {
         controller.SetEndpointAddress(controllerAddress);
 

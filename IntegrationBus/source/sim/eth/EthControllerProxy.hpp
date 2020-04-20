@@ -44,6 +44,7 @@ public:
     void Deactivate() override;
 
     auto SendMessage(EthMessage msg) -> EthTxId override;
+    auto SendMessage(EthMessage msg, std::chrono::nanoseconds timestamp) -> EthTxId override;
 
     void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) override;
     void RegisterMessageAckHandler(MessageAckHandler handler) override;

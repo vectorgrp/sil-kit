@@ -15,6 +15,7 @@ namespace ib {
 namespace mw {
 namespace sync {
 
+
 struct DistributedTimeQuantumAdapter : ParticipantController::ISyncAdapter
 {
     void RequestStep(ParticipantController& controller) override
@@ -47,6 +48,25 @@ struct DiscreteTimePassiveAdapter : ParticipantController::ISyncAdapter
     void RequestStep(ParticipantController& /*controller*/) override {}
     void FinishedStep(ParticipantController& /*controller*/) override {}
 };
+
+
+//! \brief  A caching time provider: we update its internal state whenever the controller's 
+//          simulation time changes.
+// This ensures that the our time provider is available even after
+// the ParticipantController gets destructed.
+
+struct ParticipantTimeProvider : public sync::ITimeProvider
+{
+    std::chrono::nanoseconds _now;
+    const std::string _name{"ParticipantTimeProvider"};
+
+    auto SetTime(std::chrono::nanoseconds now) { _now = now; }
+
+    auto Now() const -> std::chrono::nanoseconds override { return _now; }
+    const std::string& TimeProviderName() const  override { return _name; }
+};
+
+
 
 ParticipantController::ParticipantController(IComAdapter* comAdapter, const cfg::SimulationSetup& simulationSetup, const cfg::Participant& participantConfig)
     : _comAdapter{comAdapter}
@@ -94,6 +114,8 @@ ParticipantController::ParticipantController(IComAdapter* comAdapter, const cfg:
             _otherNextTasks[participant.id] = task;
         }
     }
+
+    _timeProvider = std::make_shared<ParticipantTimeProvider>();
 }
 
 void ParticipantController::SetInitHandler(InitHandlerT handler)
@@ -726,6 +748,8 @@ void ParticipantController::ExecuteSimTask()
     _waitTimeMonitor.StopMeasurement();
     _logger->Trace("Starting next Simulation Task. Waiting time was: {}ms", std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count());
 
+    _timeProvider->SetTime(_currentTask.timePoint);
+
     _execTimeMonitor.StartMeasurement();
     _watchDog.Start();
     _simTask(_currentTask.timePoint, _currentTask.duration);
@@ -749,6 +773,11 @@ void ParticipantController::ChangeState(ParticipantState newState, std::string r
     SendIbMessage(_status);
 }
 
+//! \brief Create a time provider that caches the current simulation time.
+auto ParticipantController::GetTimeProvider() -> std::shared_ptr<sync::ITimeProvider>
+{
+    return _timeProvider;
+}
 
 } // namespace sync
 } // namespace mw

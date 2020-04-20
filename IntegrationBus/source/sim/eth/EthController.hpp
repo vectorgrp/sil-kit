@@ -4,6 +4,7 @@
 
 #include "ib/sim/eth/IEthController.hpp"
 #include "ib/sim/eth/IIbToEthController.hpp"
+#include "ib/mw/sync/ITimeConsumer.hpp"
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/cfg/Config.hpp"
 #include "PcapTracer.hpp"
@@ -15,6 +16,7 @@ namespace eth {
 class EthController
     : public IEthController
     , public IIbToEthController
+    , public ib::mw::sync::ITimeConsumer
 {
 public:
     // ----------------------------------------
@@ -26,7 +28,7 @@ public:
     EthController() = delete;
     EthController(const EthController&) = default;
     EthController(EthController&&) = default;
-    EthController(mw::IComAdapter* comAdapter, cfg::EthernetController config);
+    EthController(mw::IComAdapter* comAdapter, cfg::EthernetController config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -43,6 +45,7 @@ public:
     void Deactivate() override;
 
     auto SendMessage(EthMessage msg) -> EthTxId override;
+    auto SendMessage(EthMessage msg, std::chrono::nanoseconds timestamp) -> EthTxId override;
 
     void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) override;
     void RegisterMessageAckHandler(MessageAckHandler handler) override;
@@ -55,6 +58,9 @@ public:
 
     void SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const ib::mw::EndpointAddress& override;
+
+    // ib::mw::sync::ITimeConsumer
+    void SetTimeProvider(ib::mw::sync::ITimeProvider*) override;
 
 private:
     // ----------------------------------------
@@ -78,6 +84,7 @@ private:
     // private members
     ::ib::mw::IComAdapter* _comAdapter = nullptr;
     ::ib::mw::EndpointAddress _endpointAddr;
+    ::ib::mw::sync::ITimeProvider* _timeProvider{ nullptr };
 
     EthTxId _ethTxId = 0;
 

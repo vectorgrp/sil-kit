@@ -16,9 +16,9 @@ namespace ib {
 namespace sim {
 namespace lin {
 
-class LinControllerProxy :
-    public ILinController,
-    public IIbToLinControllerProxy
+class LinControllerProxy
+    : public ILinController
+    , public IIbToLinControllerProxy
 {
 public:
     // ----------------------------------------

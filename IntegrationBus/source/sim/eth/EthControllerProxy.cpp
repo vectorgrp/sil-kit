@@ -55,6 +55,10 @@ auto EthControllerProxy::SendMessage(EthMessage msg) -> EthTxId
     return txId;
 }
 
+auto EthControllerProxy::SendMessage(EthMessage msg, std::chrono::nanoseconds /*time stamp provided by VIBE netsim*/) -> EthTxId
+{
+    return SendMessage(msg);
+}
 void EthControllerProxy::RegisterReceiveMessageHandler(ReceiveMessageHandler handler)
 {
     RegisterHandler(std::move(handler));

@@ -61,7 +61,7 @@ protected:
 
 protected:
     EthernetControllerTest()
-        : controller(&comAdapter, _config)
+        : controller(&comAdapter, _config, comAdapter.GetTimeProvider())
     {
         controller.SetEndpointAddress(controllerAddress);
 
@@ -158,5 +158,4 @@ TEST_F(EthernetControllerTest, generate_ack_on_receive_msg)
 
     controller.ReceiveIbMessage(otherAddress, msg);
 }
-
 } // anonymous namespace

@@ -6,5 +6,5 @@ target_include_directories(IbMwMockComAdapter
 )
 
 target_link_libraries(IbMwMockComAdapter
-    INTERFACE IbMwLogging
+    INTERFACE IbMwLogging IbMwSync
 )

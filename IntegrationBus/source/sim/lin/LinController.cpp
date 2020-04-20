@@ -57,9 +57,10 @@ void CallHandlers(CallbackRangeT& callbacks, const Args&... args)
 
 } // namespace anonymous
 
-LinController::LinController(mw::IComAdapter* comAdapter)
+LinController::LinController(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _logger{comAdapter->GetLogger()}
+    , _timeProvider{timeProvider}
 {
 }
 
@@ -82,7 +83,7 @@ auto LinController::Status() const noexcept -> ControllerStatus
 
 void LinController::SendFrame(Frame frame, FrameResponseType responseType)
 {
-    SendFrame(std::move(frame), std::move(responseType), std::chrono::nanoseconds{});
+    SendFrame(std::move(frame), std::move(responseType), _timeProvider->Now());
 }
 
 void LinController::SendFrame(Frame frame, FrameResponseType responseType, std::chrono::nanoseconds timestamp)
@@ -349,6 +350,11 @@ void LinController::SetEndpointAddress(const ::ib::mw::EndpointAddress& endpoint
 auto LinController::EndpointAddress() const -> const ::ib::mw::EndpointAddress&
 {
     return _endpointAddr;
+}
+
+void LinController::SetTimeProvider(mw::sync::ITimeProvider* timeProvider)
+{
+    _timeProvider = timeProvider;
 }
 
 void LinController::SetControllerStatus(ControllerStatus status)

@@ -14,8 +14,9 @@ namespace sim {
 namespace fr {
 
 
-FrController::FrController(mw::IComAdapter* comAdapter)
-: _comAdapter(comAdapter)
+FrController::FrController(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider)
+    : _comAdapter{comAdapter}
+    , _timeProvider{timeProvider}
 {
 }
 
@@ -68,6 +69,7 @@ void FrController::UpdateTxBuffer(const TxBufferUpdate& update)
     FrMessage msg;
     msg.frame.header = header;
     msg.frame.payload = update.payload;
+    msg.timestamp = _timeProvider->Now();
 
     switch (config.channels)
     {
@@ -283,6 +285,11 @@ void FrController::SetEndpointAddress(const mw::EndpointAddress& endpointAddress
 auto FrController::EndpointAddress() const -> const mw::EndpointAddress&
 {
     return _endpointAddr;
+}
+
+void FrController::SetTimeProvider(mw::sync::ITimeProvider* timeProvider)
+{
+    _timeProvider = timeProvider;
 }
 
 template<typename MsgT>

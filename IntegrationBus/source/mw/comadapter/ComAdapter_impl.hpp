@@ -22,6 +22,7 @@
 #include "LogMsgSender.hpp"
 #include "LogMsgReceiver.hpp"
 #include "Logger.hpp"
+#include "TimeProvider.hpp"
 
 #include "tuple_tools/bind.hpp"
 #include "tuple_tools/for_each.hpp"
@@ -31,6 +32,7 @@
 #include "ib/version.hpp"
 
 #include "MessageTracing.hpp"
+#include "ComAdapter.hpp"
 
 #ifdef SendMessage
 #if SendMessage == SendMessageA
@@ -73,6 +75,10 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& par
     _logger->Info("Creating ComAdapter for Participant {}, IntegrationBus-Version: {} {}", _participantName, version::String(), version::SprintName());
     if (!_config.configFilePath.empty())
         _logger->Info("Using IbConfig: {}", _config.configFilePath);
+
+    //set up default time provider used for controller instantiation
+    _timeProvider = std::make_shared<sync::WallclockProvider>();
+
 }
 
 template <class IbConnectionT>
@@ -89,6 +95,14 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
 {
     SetupSyncMaster();
     SetupRemoteLogging();
+
+    if (_participant.participantController.has_value())
+    {
+        auto* participantController =
+            static_cast<sync::ParticipantController*>(GetParticipantController());
+        _timeProvider = participantController->GetTimeProvider();
+    }
+    _logger->Info("Time provider: {}", _timeProvider->TimeProviderName());
 }
 
 template <class IbConnectionT>
@@ -132,6 +146,20 @@ void ComAdapter<IbConnectionT>::SetupRemoteLogging()
     }
 }
 
+template<class IbConnectionT>
+inline void ComAdapter<IbConnectionT>::SetTimeProvider(sync::ITimeProvider* newClock)
+{
+    // register the time provider with all already instantiated controllers
+    auto setTimeProvider = [this, newClock](auto& controllers) {
+        for (auto& controller: controllers)
+        {
+            auto* ctl = dynamic_cast<ib::mw::sync::ITimeConsumer*>(controller.second.get());
+            if (ctl) ctl->SetTimeProvider(newClock);
+        }
+    };
+    tt::for_each(_controllers, setTimeProvider);
+}
+
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonicalName) -> can::ICanController*
 {
@@ -143,7 +171,7 @@ auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonical
     }
     else
     {
-        return CreateControllerForLink<can::CanController>(config);
+        return CreateControllerForLink<can::CanController>(config, _timeProvider.get());
     }
 }
 
@@ -157,7 +185,7 @@ auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonical
     }
     else
     {
-        return CreateControllerForLink<eth::EthController>(config, config);
+        return CreateControllerForLink<eth::EthController>(config, config, _timeProvider.get());
     }
 }
 
@@ -171,7 +199,7 @@ auto ComAdapter<IbConnectionT>::CreateFlexrayController(const std::string& canon
     }
     else
     {
-        return CreateControllerForLink<fr::FrController>(config);
+        return CreateControllerForLink<fr::FrController>(config, _timeProvider.get());
     }
 }
 
@@ -185,7 +213,7 @@ auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonical
     }
     else
     {
-        return CreateControllerForLink<lin::LinController>(config);
+        return CreateControllerForLink<lin::LinController>(config, _timeProvider.get());
     }
 }
 
@@ -262,7 +290,7 @@ auto ComAdapter<IbConnectionT>::CreateOutPort(const ConfigT& config) -> io::IOut
     if (config.direction != cfg::PortDirection::Out)
         throw std::runtime_error("Invalid port direction!");
 
-    auto port = CreateControllerForLink<io::OutPort<MsgT>>(config, config);
+    auto port = CreateControllerForLink<io::OutPort<MsgT>>(config, config, _timeProvider.get());
     port->Write(config.initvalue, std::chrono::nanoseconds{0});
 
     return port;
@@ -272,7 +300,7 @@ template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher*
 {
     auto&& config = get_by_name(_participant.genericPublishers, canonicalName);
-    return CreateControllerForLink<sim::generic::GenericPublisher>(config, config);
+    return CreateControllerForLink<sim::generic::GenericPublisher>(config, config, _timeProvider.get());
 }
 
 template <class IbConnectionT>
@@ -308,6 +336,7 @@ auto ComAdapter<IbConnectionT>::GetParticipantController() -> sync::IParticipant
     {
         controller = CreateController<sync::ParticipantController>(1024, "default", _config.simulationSetup, _participant);
     }
+
     return controller;
 }
 
@@ -339,6 +368,7 @@ auto ComAdapter<IbConnectionT>::GetLogger() -> logging::ILogger*
     return _logger.get();
 }
 
+
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::RegisterCanSimulator(can::IIbToCanSimulator* busSim)
 {
@@ -362,7 +392,6 @@ void ComAdapter<IbConnectionT>::RegisterLinSimulator(sim::lin::IIbToLinSimulator
 {
     RegisterSimulator(busSim, cfg::Link::Type::LIN);
 }
-
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(EndpointAddress from, const can::CanMessage& msg)

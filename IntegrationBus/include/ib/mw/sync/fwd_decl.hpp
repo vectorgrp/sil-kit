@@ -27,7 +27,8 @@ class IIbToSystemController;
 
 class ISyncMaster;
 class IIbToSyncMaster;
-    
+
+class ITimeProvider;
 } // namespace sync
 } // namespace mw
 } // namespace ib

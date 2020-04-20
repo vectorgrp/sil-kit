@@ -13,9 +13,9 @@ namespace ib {
 namespace sim {
 namespace can {
 
-class CanControllerProxy :
-    public ICanController,
-    public IIbToCanControllerProxy
+class CanControllerProxy
+    : public ICanController
+    , public IIbToCanControllerProxy
 {
 public:
     // ----------------------------------------

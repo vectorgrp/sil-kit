@@ -30,7 +30,7 @@ class LinControllerTest : public testing::Test
 {
 protected:
     LinControllerTest()
-        : controller(&comAdapter)
+        : controller(&comAdapter, comAdapter.GetTimeProvider())
     {
         frameStatusHandler = 
             [this](ILinController* ctrl, const Frame& frame, FrameStatus status, std::chrono::nanoseconds) {

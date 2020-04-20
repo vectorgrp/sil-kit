@@ -6,6 +6,7 @@
 
 #include "ib/sim/can/ICanController.hpp"
 #include "ib/sim/can/IIbToCanController.hpp"
+#include "ib/mw/sync/ITimeConsumer.hpp"
 
 #include <tuple>
 #include <vector>
@@ -15,9 +16,10 @@ namespace ib {
 namespace sim {
 namespace can {
 
-class CanController :
-    public ICanController,
-    public IIbToCanController
+class CanController
+    : public ICanController
+    , public IIbToCanController
+    , public mw::sync::ITimeConsumer
 {
 public:
     // ----------------------------------------
@@ -29,7 +31,7 @@ public:
     CanController() = delete;
     CanController(const CanController&) = default;
     CanController(CanController&&) = default;
-    CanController(mw::IComAdapter* comAdapter);
+    CanController(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider);
 
 
 public:
@@ -65,6 +67,9 @@ public:
     void SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const ::ib::mw::EndpointAddress& override;
 
+    //ITimeConsumer
+    void SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider) override;
+
 public:
     // ----------------------------------------
     // Public interface methods
@@ -89,8 +94,9 @@ private:
 private:
     // ----------------------------------------
     // private members
-    ::ib::mw::IComAdapter* _comAdapter;
+    ::ib::mw::IComAdapter* _comAdapter{nullptr};
     ::ib::mw::EndpointAddress _endpointAddr;
+    mw::sync::ITimeProvider* _timeProvider{nullptr};
 
     CanTxId _canTxId = 0;
 

@@ -7,6 +7,7 @@
 #include "ib/sim/io/IOutPort.hpp"
 #include "ib/sim/io/IIbToOutPort.hpp"
 #include "ib/mw/IComAdapter.hpp"
+#include "ib/mw/sync/ITimeConsumer.hpp"
 #include "ib/cfg/Config.hpp"
 
 #include <tuple>
@@ -17,9 +18,10 @@ namespace sim {
 namespace io {
 
 template<typename MsgT>
-class OutPort :
-    public IOutPort<MsgT>,
-    public IIbToOutPort<MsgT>
+class OutPort
+    : public IOutPort<MsgT>
+    , public IIbToOutPort<MsgT>
+    , public ib::mw::sync::ITimeConsumer
 {
 public:
     // ----------------------------------------
@@ -34,8 +36,8 @@ public:
     OutPort() = delete;
     OutPort(const OutPort&) = default;
     OutPort(OutPort&&) = default;
-    OutPort(mw::IComAdapter* comAdapter);
-    OutPort(mw::IComAdapter* comAdapter, ConfigType config);
+    OutPort(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider);
+    OutPort(mw::IComAdapter* comAdapter, ConfigType config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -56,6 +58,9 @@ public:
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
+    // ITimeConsumer
+    void SetTimeProvider(mw::sync::ITimeProvider* timeProvider) override;
+
 public:
     // ----------------------------------------
     // Public interface methods
@@ -72,6 +77,7 @@ private:
     ConfigType _config{};
     mw::IComAdapter* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddr;
+    mw::sync::ITimeProvider* _timeProvider{nullptr};
 
     ValueType _lastValue;
 };
@@ -80,15 +86,17 @@ private:
 //  Inline Implementations
 // ================================================================================
 template<typename MsgT>
-OutPort<MsgT>::OutPort(mw::IComAdapter* comAdapter)
+OutPort<MsgT>::OutPort(mw::IComAdapter* comAdapter,  mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
+    , _timeProvider{timeProvider}
 {
 }
 
 template<typename MsgT>
-OutPort<MsgT>::OutPort(mw::IComAdapter* comAdapter, ConfigType config)
+OutPort<MsgT>::OutPort(mw::IComAdapter* comAdapter, ConfigType config, mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _config{std::move(config)}
+    , _timeProvider{timeProvider}
 {
 }
 
@@ -125,6 +133,12 @@ template<typename MsgT>
 auto OutPort<MsgT>::EndpointAddress() const -> const mw::EndpointAddress&
 {
     return _endpointAddr;
+}
+
+template<typename MsgT>
+void OutPort<MsgT>::SetTimeProvider(mw::sync::ITimeProvider* timeProvider)
+{
+    _timeProvider = timeProvider;
 }
 
 template<typename MsgT>

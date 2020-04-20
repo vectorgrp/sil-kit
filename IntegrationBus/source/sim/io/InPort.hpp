@@ -16,9 +16,9 @@ namespace sim {
 namespace io {
 
 template<typename MsgT>
-class InPort :
-    public IInPort<MsgT>,
-    public IIbToInPort<MsgT>
+class InPort
+    : public IInPort<MsgT>
+    , public IIbToInPort<MsgT>
 {
 public:
     // ----------------------------------------

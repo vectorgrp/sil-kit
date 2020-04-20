@@ -39,7 +39,7 @@ protected:
 
 protected:
     OutPortTest()
-        : port{&comAdapter}
+        : port{&comAdapter, comAdapter.GetTimeProvider()}
     {
         port.SetEndpointAddress(portAddress);
     }

@@ -10,8 +10,10 @@ namespace sim {
 namespace can {
 
 
-CanController::CanController(mw::IComAdapter* comAdapter)
-: _comAdapter(comAdapter)
+CanController::CanController(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider)
+    : _comAdapter{comAdapter}
+    , _endpointAddr{}
+    , _timeProvider{timeProvider}
 {
 }
 
@@ -124,6 +126,11 @@ void CanController::SetEndpointAddress(const ::ib::mw::EndpointAddress& endpoint
 auto CanController::EndpointAddress() const -> const ::ib::mw::EndpointAddress&
 {
     return _endpointAddr;
+}
+
+void CanController::SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)
+{
+    _timeProvider = timeProvider;
 }
 
 } // namespace can

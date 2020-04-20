@@ -7,6 +7,7 @@
 
 #include "ib/sim/fr/IFrController.hpp"
 #include "ib/sim/fr/IIbToFrController.hpp"
+#include "ib/mw/sync/ITimeConsumer.hpp"
 
 #include "ib/mw/fwd_decl.hpp"
 
@@ -19,9 +20,10 @@ namespace fr {
  *
  * Enables FlexRay simulation without a Network Simulator.
  */
-class FrController :
-    public IFrController,
-    public IIbToFrController
+class FrController
+    : public IFrController
+    , public IIbToFrController
+    , public mw::sync::ITimeConsumer
 {
 public:
     // ----------------------------------------
@@ -33,7 +35,7 @@ public:
     FrController() = delete;
     FrController(const FrController&) = default;
     FrController(FrController&&) = default;
-    FrController(mw::IComAdapter* comAdapter);
+    FrController(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -86,6 +88,9 @@ public:
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
+    //ib::mw::sync::ITimeConsumer
+    void SetTimeProvider(mw::sync::ITimeProvider* timeProvider);
+
 private:
     // ----------------------------------------
     // private data types
@@ -107,8 +112,9 @@ private:
 private:
     // ----------------------------------------
     // private members
-    mw::IComAdapter* _comAdapter = nullptr;
+    mw::IComAdapter* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddr;
+    mw::sync::ITimeProvider* _timeProvider{nullptr};
 
     ClusterParameters _clusterParams;
     NodeParameters _nodeParams;

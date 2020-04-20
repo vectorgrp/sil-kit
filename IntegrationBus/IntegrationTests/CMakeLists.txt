@@ -17,6 +17,7 @@ add_vib_test(ITestThreeCanController
       IbMwComAdapter
       IbMwVAsio
 )
+
 add_vib_test(ITestThreeEthController
     SOURCES
       ThreeEthControllerITest.cpp
@@ -77,6 +78,15 @@ add_vib_test(ITestDeterministicSimVAsio
 add_vib_test(ITestIbRegistryReusage
     SOURCES
       IbRegistryReusage.cpp
+    LIBS
+      IbMwComAdapter
+      IbMwVAsio
+)
+
+
+add_vib_test(ITestTimeProvider
+    SOURCES
+      TimeProviderITest.cpp
     LIBS
       IbMwComAdapter
       IbMwVAsio

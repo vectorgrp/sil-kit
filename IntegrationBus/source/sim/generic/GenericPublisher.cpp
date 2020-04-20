@@ -8,15 +8,16 @@ namespace ib {
 namespace sim {
 namespace generic {
 
-GenericPublisher::GenericPublisher(mw::IComAdapter* comAdapter)
+GenericPublisher::GenericPublisher(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
+    , _timeProvider{timeProvider}
 {
 }
 
-GenericPublisher::GenericPublisher(mw::IComAdapter* comAdapter, cfg::GenericPort config)
-    : _comAdapter{comAdapter}
-    , _config{std::move(config)}
+GenericPublisher::GenericPublisher(mw::IComAdapter* comAdapter, cfg::GenericPort config, mw::sync::ITimeProvider* timeProvider)
+    : GenericPublisher{comAdapter, timeProvider}
 {
+    _config = std::move(config);
 }
 
 auto GenericPublisher::Config() const -> const cfg::GenericPort&
@@ -42,6 +43,11 @@ void GenericPublisher::SetEndpointAddress(const mw::EndpointAddress& endpointAdd
 auto GenericPublisher::EndpointAddress() const -> const mw::EndpointAddress&
 {
     return _endpointAddr;
+}
+
+void GenericPublisher::SetTimeProvider(mw::sync::ITimeProvider* provider)
+{
+    _timeProvider = provider;
 }
 
 } // namespace generic

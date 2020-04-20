@@ -39,7 +39,7 @@ class GenericPublisherTest : public ::testing::Test
 {
 protected:
     GenericPublisherTest()
-        : publisher{&comAdapter, config}
+        : publisher{&comAdapter, config, comAdapter.GetTimeProvider()}
     {
         publisher.SetEndpointAddress(portAddress);
     }

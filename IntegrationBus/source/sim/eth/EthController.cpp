@@ -10,8 +10,9 @@ namespace ib {
 namespace sim {
 namespace eth {
 
-EthController::EthController(mw::IComAdapter* comAdapter, cfg::EthernetController config)
-    : _comAdapter(comAdapter)
+EthController::EthController(mw::IComAdapter* comAdapter, cfg::EthernetController config, mw::sync::ITimeProvider* timeProvider)
+    : _comAdapter{comAdapter}
+    , _timeProvider{timeProvider}
 {
     _tracingIsEnabled = (!config.pcapFile.empty() || !config.pcapPipe.empty());
 
@@ -40,10 +41,24 @@ void EthController::Deactivate()
 
 auto EthController::SendMessage(EthMessage msg) -> EthTxId
 {
+    if (msg.timestamp == (std::chrono::nanoseconds::min)())
+    {
+        return SendMessage(std::move(msg), _timeProvider->Now());
+    }
+    else
+    {
+        const auto now = msg.timestamp;
+        return SendMessage(std::move(msg), now);
+    }
+}
+
+auto EthController::SendMessage(EthMessage msg, std::chrono::nanoseconds timestamp) -> EthTxId
+{
     auto txId = MakeTxId();
     _pendingAcks.emplace_back(msg.ethFrame.GetSourceMac(), txId);
 
     msg.transmitId = txId;
+    msg.timestamp = timestamp;
     _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
 
     if (_tracingIsEnabled) _tracer.Trace(msg);
@@ -132,6 +147,10 @@ void EthController::CallHandlers(const MsgT& msg)
     }
 }
 
+void EthController::SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)
+{
+    _timeProvider = timeProvider;
+}
 } // namespace eth
 } // namespace sim
 } // namespace ib

@@ -1,4 +1,4 @@
-add_library("IbMwSync"
+add_library(IbMwSync
     ParticipantController.hpp
     ParticipantController.cpp
     SyncDatatypeUtils.hpp
@@ -11,13 +11,14 @@ add_library("IbMwSync"
     SystemMonitor.cpp
     WatchDog.hpp
     WatchDog.cpp
+    TimeProvider.hpp
 )
 
-target_include_directories("IbMwSync"
+target_include_directories(IbMwSync
     PUBLIC .
 )
 
-target_link_libraries("IbMwSync"
+target_link_libraries(IbMwSync
     PUBLIC IbInterface
     PUBLIC IbUtil
     IbMwLogging

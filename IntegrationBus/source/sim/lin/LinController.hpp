@@ -4,6 +4,7 @@
 
 #include "ib/sim/lin/ILinController.hpp"
 #include "ib/sim/lin/IIbToLinController.hpp"
+#include "ib/mw/sync/ITimeConsumer.hpp"
 
 #include <algorithm>
 #include <memory>
@@ -18,9 +19,10 @@ namespace ib {
 namespace sim {
 namespace lin {
 
-class LinController :
-    public ILinController,
-    public IIbToLinController
+class LinController
+    : public ILinController
+    , public IIbToLinController
+    , public mw::sync::ITimeConsumer
 {
 public:
     // ----------------------------------------
@@ -32,7 +34,7 @@ public:
     LinController() = delete;
     LinController(const LinController&) = default;
     LinController(LinController&&) = default;
-    LinController(mw::IComAdapter* comAdapter);
+    LinController(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -75,6 +77,8 @@ public:
      void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
      auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
+     //ib::mw::sync::ITimeConsumer
+     void SetTimeProvider(mw::sync::ITimeProvider* timeProvider) override;
 private:
     // ----------------------------------------
     // private data types
@@ -105,6 +109,7 @@ private:
     mw::IComAdapter* _comAdapter;
     mw::EndpointAddress _endpointAddr;
     mw::logging::ILogger* _logger;
+    mw::sync::ITimeProvider* _timeProvider{ nullptr };
 
     ControllerMode   _controllerMode{ControllerMode::Inactive};
     ControllerStatus _controllerStatus{ControllerStatus::Unknown};

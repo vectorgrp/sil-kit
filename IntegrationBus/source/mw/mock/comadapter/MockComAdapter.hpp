@@ -15,6 +15,8 @@
 #include "ib/sim/io/IoDatatypes.hpp"
 #include "ib/sim/generic/GenericMessageDatatypes.hpp"
 
+#include "TimeProvider.hpp"
+
 #ifdef SendMessage
 #undef SendMessage
 #endif
@@ -37,6 +39,23 @@ public:
     void LogReceivedMsg(const logging::LogMsg& /*msg*/) {}
 protected:
     bool ShouldLog(logging::Level) const override { return true; }
+};
+
+class DummyTimeProvider : public sync::ITimeProvider
+{
+public:
+    auto TimeProviderName() const -> const std::string& { return _name; }
+
+    auto Now() const -> std::chrono::nanoseconds { return _time; }
+
+    void Advance()
+    {
+        _time += std::chrono::milliseconds{1};
+    }
+
+    std::chrono::nanoseconds _time{};
+    const std::string _name{"TestTimeProvider"};
+
 };
 
 class DummyComAdapter : public IComAdapter
@@ -66,6 +85,8 @@ public:
     auto GetSystemMonitor() -> sync::ISystemMonitor* { return nullptr; }
     auto GetSystemController() -> sync::ISystemController* { return nullptr; }
     auto GetLogger() -> logging::ILogger* { return &logger; }
+
+    auto GetTimeProvider() -> decltype(auto){ return &_testTime; }
 
     void RegisterCanSimulator(sim::can::IIbToCanSimulator* /*canonicalName*/) {}
     void RegisterEthSimulator(sim::eth::IIbToEthSimulator* /*canonicalName*/) {}
@@ -133,6 +154,7 @@ public:
     void FlushSendBuffers() {}
 
     DummyLogger logger;
+    DummyTimeProvider _testTime{};
 };
 
 // ================================================================================

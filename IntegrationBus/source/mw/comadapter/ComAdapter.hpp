@@ -167,6 +167,8 @@ private:
     void SetupSyncMaster();
     void SetupRemoteLogging();
 
+    void SetTimeProvider(sync::ITimeProvider*);
+
     template<typename IbMessageT>
     void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg);
 
@@ -197,6 +199,7 @@ private:
     const cfg::Participant& _participant{nullptr};
     std::string _participantName;
     ParticipantId _participantId{0};
+    std::shared_ptr<sync::ITimeProvider> _timeProvider{nullptr};
 
     std::unique_ptr<logging::ILogger> _logger;
 
