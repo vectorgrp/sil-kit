@@ -11,7 +11,7 @@ add_executable(IbRegistry
 # Group this demo project into a folder
 set_target_properties(IbRegistry PROPERTIES
      FOLDER "Utilities"
-     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Utilities/$<CONFIG>/bin"
+     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
 
 # we're linking statically with IB components and not with the dll.

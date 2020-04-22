@@ -58,6 +58,10 @@ if (MSVC)
      )
 endif (MSVC)
 
+ set_target_properties(IntegrationBus PROPERTIES
+     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+ )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 

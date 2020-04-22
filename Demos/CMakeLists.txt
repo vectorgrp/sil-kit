@@ -64,7 +64,7 @@ function(make_ib_demo executableName demoSourceFile)
         set_target_properties(${executableName} PROPERTIES EXCLUDE_FROM_ALL FALSE)
         set(_DEMO_OUTPUT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../IntegrationBus/bin")
     else()
-        set(_DEMO_OUTPUT_DIR "${CMAKE_BINARY_DIR}/Demos/$<CONFIG>/bin")
+        set(_DEMO_OUTPUT_DIR "${CMAKE_BINARY_DIR}/$<CONFIG>")
     endif()
     remove_definitions(-DEXPORT_IntegrationBusAPI)
     

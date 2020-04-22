@@ -11,7 +11,7 @@ add_executable(IbSystemController
 # Group this demo project into a folder
 set_target_properties(IbSystemController PROPERTIES
      FOLDER "Utilities"
-     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Utilities/$<CONFIG>/bin"
+     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
 
 target_link_libraries(IbSystemController
