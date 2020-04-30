@@ -5,6 +5,28 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[x.y.z] - unreleased
+--------------------------------
+
+Added
+~~~~~
+- Add a time provider interface internal to the service controllers.
+  By default the wallclock time is used as the source for the current time.
+  When a participant controller is present, its virtual simulation time is used.
+- EthControllers gained overloads with explicit timestamps similar to the LIN
+  Controller in the last release:
+  :cpp:func:`IEthController::SendMessage(EthMessage, nanoseconds)<void ib::sim::eth::IEthController::SendMessage(EthMessage, std::chrono::nanoseconds)>`
+
+  Note: for backward compatibility the old SendMessage(EthMessage msg) preserves
+  the msg.timestamp if it deviates from the default value.
+  However, adding the default initializers constitutes an ABI break.
+
+Changed
+~~~~~~~
+- CMake build: the binaries are now all build in the
+  ${CMAKE_BINARY_DIR}/$<CONFIG> directory. This allows running Demos and Tests
+  directly from the build directory, which eases debugging.
+
 [3.0.6] - 2020-04-30
 --------------------------------
 
