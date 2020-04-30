@@ -5,6 +5,36 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.0.6] - 2020-04-30
+--------------------------------
+
+Fixed
+~~~~~
+- Disable remote logging when shutting down (AFTMAGT252)
+  This fixes issues when remote logging is enabled with log levels of debug and
+  higher. The FastRTPS middleware uses debug log messages internally, and during
+  shutdown the LogMsg FastRTPS topic is unmatched and destroyed -- which leads
+  to invalid accesses when remote logging is enabled.
+
+- PCAP tracing now includes the ingress data on EthControllers (AFTMAGT265).
+
+Changed
+~~~~~~~
+
+- We no longer bundle FastRTPS binaries in the official VIB packages.
+  Users had issues using the exported cmake targets from FastRTPS binaries when
+  building from source.
+  The VIB cmake build system fetches FastRTPS using git when the FastRTPS
+  depdendencies are missing from the local source tree.
+
+Compatibility with 3.0.5
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
 [3.0.5] - 2020-04-08
 --------------------------------
 
