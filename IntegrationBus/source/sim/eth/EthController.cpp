@@ -1,9 +1,11 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "EthController.hpp"
+#include "PcapSink.hpp"
 
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/logging/ILogger.hpp"
+
 #include <algorithm>
 
 namespace ib {
@@ -14,19 +16,6 @@ EthController::EthController(mw::IComAdapter* comAdapter, cfg::EthernetControlle
     : _comAdapter{comAdapter}
     , _timeProvider{timeProvider}
 {
-    _tracingIsEnabled = (!config.pcapFile.empty() || !config.pcapPipe.empty());
-
-    if (!config.pcapFile.empty())
-    {
-        _tracer.OpenFile(config.pcapFile);
-    }
-
-    if (!config.pcapPipe.empty())
-    {
-        _comAdapter->GetLogger()->Info("Waiting for a reader to connect to PCAP pipe {} ... ", config.pcapPipe);
-        _tracer.OpenPipe(config.pcapPipe);
-        _comAdapter->GetLogger()->Debug("PCAP pipe: {} is connected successfully", config.pcapPipe);
-    }
 }
 
 void EthController::Activate()
@@ -46,7 +35,8 @@ auto EthController::SendMessage(EthMessage msg) -> EthTxId
 
     msg.transmitId = txId;
 
-    if (_tracingIsEnabled) _tracer.Trace(msg);
+    if (_tracer.IsActive())
+        _tracer.Trace(tracing::Direction::Send, msg.timestamp, msg.ethFrame);
 
     _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
 
@@ -93,9 +83,9 @@ void EthController::ReceiveIbMessage(mw::EndpointAddress from, const EthMessage&
     if (from == _endpointAddr)
         return;
 
-    if (_tracingIsEnabled)
+    if (_tracer.IsActive())
     {
-        _tracer.Trace(msg);
+        _tracer.Trace(tracing::Direction::Receive, msg.timestamp, msg.ethFrame);
     }
 
     CallHandlers(msg);

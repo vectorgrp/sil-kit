@@ -6,12 +6,14 @@
 #include "ib/sim/eth/IIbToEthControllerProxy.hpp"
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/cfg/Config.hpp"
+#include <memory>
 
-#include "PcapTracer.hpp"
+#include "Tracing.hpp"
 
 namespace ib {
 namespace sim {
 namespace eth {
+
 
 class EthControllerProxy
     : public IEthController
@@ -96,8 +98,7 @@ private:
         CallbackVector<uint32_t>
     > _callbacks;
 
-    PcapTracer _tracer;
-    bool _tracingIsEnabled{false};
+    tracing::Tracer<EthFrame> _tracer;
 };
 
 // ================================================================================

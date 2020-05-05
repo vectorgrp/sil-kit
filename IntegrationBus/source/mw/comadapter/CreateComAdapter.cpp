@@ -11,7 +11,6 @@ auto CreateFastRtpsComAdapterImpl(ib::cfg::Config config, const std::string& par
 {
     return std::make_unique<ComAdapter<FastRtpsConnection>>(std::move(config), participantName);
 }
-
 auto CreateVAsioComAdapterImpl(ib::cfg::Config config, const std::string& participantName) -> std::unique_ptr<IComAdapterInternal>
 {
     return std::make_unique<ComAdapter<VAsioConnection>>(std::move(config), participantName);

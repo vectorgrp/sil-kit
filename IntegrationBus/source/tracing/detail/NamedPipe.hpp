@@ -5,10 +5,6 @@
 #include <memory>
 #include <string>
 
-namespace ib {
-namespace sim {
-namespace eth {
-
 class NamedPipe
 {
 public:
@@ -27,6 +23,3 @@ public:
     static auto Create(const std::string& name) -> Ptr;
 };
 
-}
-}
-}

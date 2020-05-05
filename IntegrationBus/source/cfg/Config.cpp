@@ -301,6 +301,7 @@ bool operator==(const Participant& lhs, const Participant& rhs)
         && lhs.patternPorts == rhs.patternPorts
         && lhs.genericPublishers == rhs.genericPublishers
         && lhs.genericSubscribers == rhs.genericSubscribers
+        && lhs.traceSinks == rhs.traceSinks
         && lhs.isSyncMaster == rhs.isSyncMaster;
 }
 
@@ -400,20 +401,23 @@ bool operator==(const ParticipantController& lhs, const ParticipantController& r
 bool operator==(const CanController& lhs, const CanController& rhs)
 {
     return lhs.name == rhs.name
-        && lhs.endpointId == rhs.endpointId;
+        && lhs.endpointId == rhs.endpointId
+        && lhs.useTraceSinks == rhs.useTraceSinks;
 }
 
 bool operator==(const LinController& lhs, const LinController& rhs)
 {
     return lhs.name == rhs.name
-        && lhs.endpointId == rhs.endpointId;
+        && lhs.endpointId == rhs.endpointId
+        && lhs.useTraceSinks == rhs.useTraceSinks;
 }
 
 bool operator==(const EthernetController& lhs, const EthernetController& rhs)
 {
     return lhs.name == rhs.name
         && lhs.endpointId == rhs.endpointId
-        && lhs.macAddress == rhs.macAddress;
+        && lhs.macAddress == rhs.macAddress
+        && lhs.useTraceSinks == rhs.useTraceSinks;
 }
 
 bool operator==(const FlexrayController& lhs, const FlexrayController& rhs)
@@ -421,7 +425,8 @@ bool operator==(const FlexrayController& lhs, const FlexrayController& rhs)
     return lhs.name == rhs.name
         && lhs.endpointId == rhs.endpointId
         && lhs.clusterParameters == rhs.clusterParameters
-        && lhs.nodeParameters == rhs.nodeParameters;
+        && lhs.nodeParameters == rhs.nodeParameters
+        && lhs.useTraceSinks == rhs.useTraceSinks;
 }
 
 bool operator==(const DigitalIoPort& lhs, const DigitalIoPort& rhs)
@@ -430,7 +435,8 @@ bool operator==(const DigitalIoPort& lhs, const DigitalIoPort& rhs)
         && lhs.endpointId == rhs.endpointId
         && lhs.name == rhs.name
         && lhs.initvalue == rhs.initvalue
-        && lhs.linkId == rhs.linkId;
+        && lhs.linkId == rhs.linkId
+        && lhs.useTraceSinks == rhs.useTraceSinks;
 }
 
 bool operator==(const AnalogIoPort& lhs, const AnalogIoPort& rhs)
@@ -440,8 +446,10 @@ bool operator==(const AnalogIoPort& lhs, const AnalogIoPort& rhs)
         && lhs.name == rhs.name
         && lhs.initvalue == rhs.initvalue
         && lhs.unit == rhs.unit
-        && lhs.linkId == rhs.linkId;
+        && lhs.linkId == rhs.linkId
+        && lhs.useTraceSinks == rhs.useTraceSinks;
 }
+
 bool operator==(const PwmPort& lhs, const PwmPort& rhs)
 {
     return lhs.direction == rhs.direction
@@ -450,24 +458,38 @@ bool operator==(const PwmPort& lhs, const PwmPort& rhs)
         && lhs.initvalue.frequency == rhs.initvalue.frequency
         && lhs.initvalue.dutyCycle == rhs.initvalue.dutyCycle
         && lhs.unit == rhs.unit
-        && lhs.linkId == rhs.linkId;
+        && lhs.linkId == rhs.linkId
+        && lhs.useTraceSinks == rhs.useTraceSinks;
 }
+
 bool operator==(const PatternPort& lhs, const PatternPort& rhs)
 {
     return lhs.direction == rhs.direction
         && lhs.endpointId == rhs.endpointId
         && lhs.name == rhs.name
         && lhs.initvalue == rhs.initvalue
-        && lhs.linkId == rhs.linkId;
+        && lhs.linkId == rhs.linkId
+        && lhs.useTraceSinks == rhs.useTraceSinks;
 }
+
 bool operator==(const GenericPort& lhs, const GenericPort& rhs)
 {
     return lhs.name == rhs.name
         && lhs.endpointId == rhs.endpointId
         && lhs.linkType == rhs.linkType
         && lhs.protocolType == rhs.protocolType
-        && lhs.definitionUri == rhs.definitionUri;
+        && lhs.definitionUri == rhs.definitionUri
+        && lhs.useTraceSinks == rhs.useTraceSinks;
 }
+
+bool operator==(const TraceSink& lhs, const TraceSink& rhs)
+{
+    return lhs.enabled == rhs.enabled
+        && lhs.name == rhs.name
+        && lhs.outputPath == rhs.outputPath
+        && lhs.type == rhs.type;
+}
+
 std::ostream& operator<<(std::ostream& out, const Version& version)
 {
     out << version.major << '.'

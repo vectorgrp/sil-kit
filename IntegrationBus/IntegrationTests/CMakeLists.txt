@@ -92,6 +92,15 @@ add_vib_test(ITestTimeProvider
       IbMwVAsio
 )
 
+add_vib_test(ITestTracing
+    SOURCES
+      TracingITest.cpp
+    LIBS
+      IbMwComAdapter
+      IbMwVAsio
+      IbTracing
+)
+
 # Windows specific tests
 if(WIN32)
 add_vib_test(ITestCompatibilityWithWindowsHeaders

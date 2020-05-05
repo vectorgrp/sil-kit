@@ -11,17 +11,7 @@ namespace eth {
 EthControllerProxy::EthControllerProxy(mw::IComAdapter* comAdapter, cfg::EthernetController config)
     : _comAdapter(comAdapter)
 {
-    _tracingIsEnabled = (!config.pcapFile.empty() || !config.pcapPipe.empty());
 
-    if (!config.pcapFile.empty())
-    {
-        _tracer.OpenFile(config.pcapFile);
-    }
-
-    if (!config.pcapPipe.empty())
-    {
-        _tracer.OpenPipe(config.pcapPipe);
-    }
 }
 
 void EthControllerProxy::Activate()
@@ -49,7 +39,9 @@ auto EthControllerProxy::SendMessage(EthMessage msg) -> EthTxId
     auto txId = MakeTxId();
     msg.transmitId = txId;
 
-    if (_tracingIsEnabled) _tracer.Trace(msg);
+    if (_tracer.IsActive()) 
+        _tracer.Trace(tracing::Direction::Send,
+			msg.timestamp, msg.ethFrame);
 
     _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
 
@@ -96,7 +88,9 @@ void EthControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const EthMes
     if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
         return;
 
-    if (_tracingIsEnabled) _tracer.Trace(msg);
+    if (_tracer.IsActive())
+        _tracer.Trace(tracing::Direction::Receive,
+			msg.timestamp, msg.ethFrame);
 
     CallHandlers(msg);
 }

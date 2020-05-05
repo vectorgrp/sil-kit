@@ -531,4 +531,9 @@ TEST_F(ConfigBuilderTest, ensure_configbuilder_is_movable)
     auto json = config.ToJsonString();
     EXPECT_TRUE(json.size() > 0);
 }
+
+TEST_F(ConfigBuilderTest, make_tracer)
+{
+    //configBuilder.SimulationSetup().AddParticipant().AddEthernet().WithTracer();
+}
 } // anonymous namespace

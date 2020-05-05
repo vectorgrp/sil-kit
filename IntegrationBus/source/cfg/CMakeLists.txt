@@ -13,23 +13,33 @@ set_property(TARGET json11 PROPERTY FOLDER "ThirdParty")
 
 add_library(IbConfig STATIC
     Config.cpp
+    Config.hpp
     ConfigBuilder.cpp
+    ConfigBuilder.hpp
     ControllerBuilder.cpp
     LoggerBuilder.hpp
     LoggerBuilder.cpp
     SinkBuilder.hpp
     SinkBuilder.cpp
     GenericPortBuilder.cpp
+    GenericPortBuilder.hpp
     LinkBuilder.cpp
+    LinkBuilder.hpp
     NetworkSimulatorBuilder.cpp
     ParticipantBuilder.cpp
+    ParticipantBuilder.hpp
     ParticipantControllerBuilder.cpp
     ParticipantControllerBuilder.hpp
     SimulationSetupBuilder.cpp
+    SimulationSetupBuilder.hpp
     SwitchBuilder.cpp
+    SwitchBuilder.hpp
     SwitchPortBuilder.cpp
+    SwitchPortBuilder.hpp
     TimeSyncBuilder.cpp
+    TimeSyncBuilder.hpp
     FastRtpsConfigBuilder.cpp
+    FastRtpsConfigBuilder.hpp
     JsonConfig.hpp
     JsonConfig.cpp
     Validation.hpp
@@ -40,6 +50,8 @@ add_library(IbConfig STATIC
     VAsioRegistryBuilder.hpp
     ExtensionConfigBuilder.cpp
     ExtensionConfigBuilder.hpp
+    TraceSinkBuilder.hpp
+    TraceSinkBuilder.cpp
 )
 
 target_link_libraries(IbConfig
@@ -49,7 +61,7 @@ target_link_libraries(IbConfig
 )
 
 target_include_directories(IbConfig
-    PUBLIC .
+    PUBLIC ${CMAKE_CURRENT_LIST_DIR}
 )
 
 add_vib_test(TestMwCfgConfigBuilder SOURCES ConfigBuilderTest.cpp LIBS IbConfig)

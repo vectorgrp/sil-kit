@@ -27,6 +27,7 @@ public:
     auto WithEndpointId(mw::EndpointId id) -> IoPortBuilder&;
     auto WithInitValue(ValueType value) -> IoPortBuilder&;
     auto WithUnit(std::string unitname) -> IoPortBuilder&;
+    auto WithTraceSink(std::string sinkname) -> IoPortBuilder&;
 
     auto operator->() -> ParticipantBuilder*;
 
@@ -93,6 +94,12 @@ auto IoPortBuilder<IoPortCfg>::WithUnit(std::string unitname) -> IoPortBuilder&
     return *this;
 }
 
+template<class IoPortCfg>
+auto IoPortBuilder<IoPortCfg>::WithTraceSink(std::string sinkname) -> IoPortBuilder&
+{
+    _port.useTraceSinks.emplace_back(std::move(sinkname));
+    return *this;
+}
 
 template<class IoPortCfg>
 auto IoPortBuilder<IoPortCfg>::Build() -> IoPortCfg

@@ -12,10 +12,6 @@
 #include <exception>
 #include <iostream>
 
-namespace ib {
-namespace sim {
-namespace eth {
-
 NamedPipeLinux::NamedPipeLinux(const std::string& name)
 :_name(name)
 {
@@ -77,7 +73,3 @@ std::unique_ptr<NamedPipe> NamedPipe::Create(const std::string& name)
 {
     return std::make_unique<NamedPipeLinux>(name);
 }
-
-} //namespace ib
-} //namespace sim
-} //namespace eth

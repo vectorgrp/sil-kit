@@ -69,4 +69,55 @@ TEST(TestMwCfgValidation, throw_if_tickperiod_is_unconfigured_when_using_Discret
     EXPECT_THROW(Validate(ibConfig.simulationSetup.timeSync, ibConfig), Misconfiguration);
 }
 
+////////////////////////////////////////
+// TraceSink and Tracer related tests:
+TEST(TestMwCfgValidation, throw_if_usetracesinks_refers_to_unknown_trace_sink)
+{
+    Config ibConfig;
+    ibConfig.simulationSetup.timeSync.syncPolicy = TimeSync::SyncPolicy::Loose;
+    ibConfig.simulationSetup.timeSync.tickPeriod = 0ns;
+
+    TraceSink sink;
+    sink.name = "Sink1";
+    sink.enabled = true;
+    sink.type = TraceSink::Type::PcapFile;
+
+    Participant participantConfig;
+    participantConfig.name = "P1";
+    participantConfig.traceSinks.emplace_back(std::move(sink));
+
+    EthernetController controller;
+    controller.name = "Eth1";
+    controller.useTraceSinks.push_back("UndefinedSink");
+    participantConfig.ethernetControllers.emplace_back(std::move(controller));
+
+    ibConfig.simulationSetup.participants.emplace_back(std::move(participantConfig));
+
+    EXPECT_THROW(Validate(ibConfig.simulationSetup, ibConfig), Misconfiguration);
+}
+
+TEST(TestMwCfgValidation, throw_if_usetracesinks_refers_to_empty_sink_name)
+{
+    Config ibConfig;
+    ibConfig.simulationSetup.timeSync.syncPolicy = TimeSync::SyncPolicy::Loose;
+    ibConfig.simulationSetup.timeSync.tickPeriod = 0ns;
+
+    TraceSink sink;
+    sink.name = "Sink1";
+    sink.enabled = true;
+    sink.type = TraceSink::Type::PcapFile;
+
+    Participant participantConfig;
+    participantConfig.name = "P1";
+    participantConfig.traceSinks.emplace_back(std::move(sink));
+
+    EthernetController controller;
+    controller.name = "Eth1";
+    controller.useTraceSinks.push_back("");
+    participantConfig.ethernetControllers.emplace_back(std::move(controller));
+
+    ibConfig.simulationSetup.participants.emplace_back(std::move(participantConfig));
+
+    EXPECT_THROW(Validate(ibConfig.simulationSetup, ibConfig), Misconfiguration);
+}
 } // anonymous namespace

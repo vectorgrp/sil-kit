@@ -22,6 +22,7 @@ target_link_libraries(IbMwComAdapter
     PUBLIC  IbSimLin
     PUBLIC  IbSimIO
     PUBLIC  IbSimGenericMessage
+    PUBLIC  IbTracing
 )
 
 target_include_directories(IbMwComAdapter

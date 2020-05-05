@@ -655,4 +655,102 @@ TEST_F(JsonConfigTest, configure_extension_default)
     EXPECT_TRUE(jsonString.find("ExtensionConfig") == std::string::npos);
 }
 
+TEST_F(JsonConfigTest, configure_participant_add_tracesink)
+{
+    struct {
+        std::string name;
+        std::string outputPath;
+        TraceSink::Type type;
+    } const sinkTable[] {
+        {"EthSink", "some/path/EthTraceOputput.pcap", TraceSink::Type::PcapFile},
+        {"SinkForCan", "other path/CAN1.mdf4", TraceSink::Type::Mdf4File}
+    };
+    const size_t sinkTableSize = 2;
+     
+    auto&& participant = simulationSetup.AddParticipant("P1");
+
+
+    for (const auto& sinkArgs : sinkTable)
+    {
+        participant.AddTraceSink(sinkArgs.name)
+            .WithOutputPath(sinkArgs.outputPath)
+            .WithType(sinkArgs.type);
+    }
+
+
+    // create tracers on all supported controller types
+    auto&& ethCtrl = participant.AddEthernet("Eth1");
+    ethCtrl.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
+
+    auto&& canCtrl = participant.AddCan("CanCtrl");
+    canCtrl.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
+
+    auto&& linCtrl = participant.AddLin("LinCtrl");
+    linCtrl.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
+
+    auto&& frCtrl = participant.AddFlexray("FlexrayCtrl").WithNodeParameters(getNodeParameters());
+    frCtrl.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
+
+    auto&& doutPort = participant.AddDigitalOut("DigitalOutFoo");
+    doutPort.WithUnit("Foo").WithInitValue(false);
+    doutPort.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
+
+    auto&& ainPort = participant.AddAnalogIn("AnalogIn");
+    ainPort.WithUnit("Foo").WithInitValue(13.37);
+    ainPort.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
+
+    auto&& patPort = participant.AddPatternIn("PatternIn");
+    patPort.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
+    patPort.WithUnit("Pattern Unit");
+>>>>>>> -- add TraceSinks to JsonConfig
+
+    auto&& pwmPort = participant.AddPwmOut("PWM OUT");
+    pwmPort.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
+    pwmPort.WithUnit("PWM Unit");
+
+
+    auto&& genPort = participant.AddGenericPublisher("GenericPublisher");
+    genPort.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
+
+    BuildConfigFromJson();
+    //NB: the following does not hold when adding multiple controllers,
+    //    because endpoint IDs are not serialized:
+    //          EXPECT_EQ(config, referenceConfig);
+    const auto& pold = referenceConfig.simulationSetup.participants[0];
+    const auto& pnew = config.simulationSetup.participants[0];
+    EXPECT_EQ(
+        pnew.traceSinks,
+        pold.traceSinks
+    );
+
+    const auto& cfgSinks = config.simulationSetup.participants[0].traceSinks;
+    ASSERT_EQ(cfgSinks.size(), sinkTableSize);
+
+
+    // verify the ser/des of all service controllers. we have to ignore the endpointIDs when comparing.
+    auto checkFields = [](const auto& octrl, const auto& nctrl)
+    {
+        EXPECT_EQ(octrl.name, nctrl.name);
+        EXPECT_EQ(octrl.useTraceSinks, nctrl.useTraceSinks);
+    };
+
+    checkFields(pnew.analogIoPorts[0], pold.analogIoPorts[0]);
+    checkFields(pnew.digitalIoPorts[0], pold.digitalIoPorts[0]);
+    checkFields(pnew.patternPorts[0], pold.patternPorts[0]);
+    checkFields(pnew.pwmPorts[0], pold.pwmPorts[0]);
+
+    checkFields(pnew.genericPublishers[0], pold.genericPublishers[0]);
+
+    checkFields(pnew.ethernetControllers[0], pold.ethernetControllers[0]);
+    checkFields(pnew.canControllers[0], pold.canControllers[0]);
+    checkFields(pnew.flexrayControllers[0], pold.flexrayControllers[0]);
+    checkFields(pnew.linControllers[0], pold.linControllers[0]);
+
+    for (auto i = 0u; i < sinkTableSize; i++)
+    {
+        ASSERT_EQ(cfgSinks[i].name, sinkTable[i].name);
+        ASSERT_EQ(cfgSinks[i].outputPath, sinkTable[i].outputPath);
+        ASSERT_EQ(cfgSinks[i].type, sinkTable[i].type);
+    }
+}
 } // anonymous namespace

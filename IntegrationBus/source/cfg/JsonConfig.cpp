@@ -263,27 +263,64 @@ auto from_json<Logger>(const json11::Json& json) -> Logger
 
 auto to_json(const CanController& controller) -> json11::Json
 {
-    return json11::Json(controller.name);
+    auto json = json11::Json::object{};
+    json["Name"] = to_json(controller.name);
+    if (!controller.useTraceSinks.empty())
+    {
+        json["UseTraceSinks"] = to_json(controller.useTraceSinks);
+    }
+    return json;
 }
 
 template <>
 auto from_json<CanController>(const json11::Json& json) -> CanController
 {
     CanController controller;
-    controller.name = json.string_value();
+    // backward compatibility to old json config files with only name of controller
+    if (json.is_string())
+    {
+        controller.name = json.string_value();
+        return controller;
+    }
+
+    controller.name = json["Name"].string_value();
+    if (json.object_items().count("UseTraceSinks"))
+    {
+        controller.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
+    }
+
     return controller;
 }
 
 auto to_json(const LinController& controller) -> json11::Json
 {
-    return json11::Json(controller.name);
+
+    auto json = json11::Json::object{};
+    json["Name"] = to_json(controller.name);
+    if (!controller.useTraceSinks.empty())
+    {
+        json["UseTraceSinks"] = to_json(controller.useTraceSinks);
+    }
+    return json;
 }
 
 template <>
 auto from_json<LinController>(const json11::Json& json) -> LinController
 {
     LinController controller;
-    controller.name = json.string_value();
+    // backward compatibility to old json config files with only name of controller
+    if (json.is_string())
+    {
+        controller.name = json.string_value();
+        return controller;
+    }
+
+    controller.name = json["Name"].string_value();
+    if (json.object_items().count("UseTraceSinks"))
+    {
+        controller.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
+    }
+
     return controller;
 }
 
@@ -308,13 +345,26 @@ auto macaddress_from_json(const json11::Json& json) -> std::array<uint8_t, 6>
 
 auto to_json(const EthernetController& controller) -> json11::Json
 {
-    return json11::Json::object {
+    auto json = json11::Json::object {
         {"Name", controller.name},
         // endopintId is not serialized
         {"MacAddr",  macaddress_to_json(controller.macAddress)},
-        {"PcapFile", controller.pcapFile},
-        {"PcapPipe", controller.pcapPipe}
     };
+    if (!controller.pcapFile.empty())
+    {
+        json["PcapFile"] = controller.pcapFile;
+    }
+
+    if (!controller.pcapPipe.empty())
+    {
+        json["PcapPipe"] = controller.pcapPipe;
+    }
+
+    if (!controller.useTraceSinks.empty())
+    {
+        json["UseTraceSinks"] = to_json(controller.useTraceSinks);
+    }
+    return json;
 }
 
 template <>
@@ -323,8 +373,12 @@ auto from_json<EthernetController>(const json11::Json& json) -> EthernetControll
     EthernetController controller;
     controller.name = json["Name"].string_value();
     controller.macAddress = macaddress_from_json(json["MacAddr"]);
-    controller.pcapFile = json["PcapFile"].string_value();
-    controller.pcapPipe = json["PcapPipe"].string_value();
+    optional_from_json(controller.pcapFile, json, "PcapFile");
+    optional_from_json(controller.pcapPipe, json, "PcapPipe");
+    if (json.object_items().count("UseTraceSinks"))
+    {
+        controller.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
+    }
     return controller;
 }
 
@@ -558,12 +612,18 @@ auto from_json<sim::fr::TxBufferConfig>(const json11::Json& json) -> sim::fr::Tx
 
 auto to_json(const FlexrayController& controller) -> json11::Json
 {
-    return json11::Json::object{
+    auto json = json11::Json::object{
         { "Name", controller.name },
         { "ClusterParameters",  to_json(controller.clusterParameters) },
         { "NodeParameters", to_json(controller.nodeParameters) },
         { "TxBufferConfigs", to_json(controller.txBufferConfigs) }
     };
+
+    if (!controller.useTraceSinks.empty())
+    {
+        json["UseTraceSinks"] = to_json(controller.useTraceSinks);
+    }
+    return json;
 }
 
 template <>
@@ -583,14 +643,26 @@ auto from_json<FlexrayController>(const json11::Json& json) -> FlexrayController
     optional_from_json(controller.nodeParameters, json, "NodeParameters");
     if (json.object_items().count("TxBufferConfigs"))
         controller.txBufferConfigs = from_json<std::vector<sim::fr::TxBufferConfig>>(json["TxBufferConfigs"].array_items());
+
+    if (json.object_items().count("UseTraceSinks"))
+    {
+        controller.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
+    }
+
     return controller;
 }
 
 auto to_json(const DigitalIoPort& port) -> json11::Json
 {
-    return json11::Json::object{
-        { port.name, port.initvalue }
+    auto json = json11::Json::object{
+        { port.name, json11::Json::object{
+            {"value", port.initvalue},
+            {"UseTraceSinks", to_json(port.useTraceSinks)}
+            }
+        }
     };
+
+    return json;
 }
 
 template <>
@@ -604,22 +676,38 @@ auto from_json(const json11::Json& json) -> DigitalIoPort
 
     auto&& jsonPort = *json.object_items().begin();
 
+    //for backward compat accept { "Name" : bool }
     port.name = jsonPort.first;
-    port.initvalue = jsonPort.second.bool_value();
+    if (jsonPort.second.is_bool())
+    {
+        port.initvalue = jsonPort.second.bool_value();
+        return port;
+    }
+
+    // new style
+    port.initvalue = jsonPort.second["value"].bool_value();
+
+    if (jsonPort.second.object_items().count("UseTraceSinks"))
+    {
+        port.useTraceSinks = from_json<std::vector<std::string>>(jsonPort.second["UseTraceSinks"].array_items());
+    }
 
     return port;
 }
 
 auto to_json(const AnalogIoPort& port) -> json11::Json
 {
-    return json11::Json::object {
+    auto json = json11::Json::object {
         { port.name,
             json11::Json::object {
                 {"value", port.initvalue},
-                {"unit", port.unit}
+                {"unit", port.unit},
+                {"UseTraceSinks", to_json(port.useTraceSinks)}
             }
         }
     };
+
+    return json;
 }
 
 template <>
@@ -637,17 +725,41 @@ auto from_json(const json11::Json& json) -> AnalogIoPort
     port.initvalue = jsonPort.second["value"].number_value();
     port.unit = jsonPort.second["unit"].string_value();
 
+    if (jsonPort.second.object_items().count("UseTraceSinks"))
+    {
+        port.useTraceSinks = from_json<std::vector<std::string>>(jsonPort.second["UseTraceSinks"].array_items());
+    }
+
     return port;
 }
 
 auto to_json(const PwmPort& port) -> json11::Json
 {
-    return json11::Json::object {
+
+    auto json = json11::Json::object {
         { port.name, json11::Json::object {
                 { "freq", json11::Json::object {{ "value", port.initvalue.frequency }, {"unit", port.unit }}},
-                { "duty", port.initvalue.dutyCycle }
+                { "duty", port.initvalue.dutyCycle },
+                { "UseTraceSinks", to_json(port.useTraceSinks) } // XXX should not be printed if empty
         }}
     };
+
+    // TODO the following is a bit ugly, because Json is immutable, we'll have to copy it manually
+    /*
+    if (!port.useTraceSinks.empty())
+    {
+        json = json11::Json::object {
+            { port.name, json11::Json::object {
+                    { "freq", json11::Json::object {{ "value", port.initvalue.frequency }, {"unit", port.unit }}},
+                    { "duty", port.initvalue.dutyCycle },
+                    { "UseTraceSinks", to_json(port.useTraceSinks) }
+            }}
+        };
+    }
+    */
+
+
+    return json;
 }
 
 template <>
@@ -665,13 +777,21 @@ auto from_json(const json11::Json& json) -> PwmPort
     port.initvalue = {jsonPort.second["freq"]["value"].number_value(), jsonPort.second["duty"].number_value()};
     port.unit = jsonPort.second["freq"]["unit"].string_value();
 
+    if (jsonPort.second.object_items().count("UseTraceSinks"))
+    {
+        port.useTraceSinks = from_json<std::vector<std::string>>(jsonPort.second["UseTraceSinks"].array_items());
+    }
+
     return port;
 }
 
 auto to_json(const PatternPort& port) -> json11::Json
 {
     return json11::Json::object{
-        {port.name, hex_encode(port.initvalue)}
+        { port.name, json11::Json::object{
+            {"value", hex_encode(port.initvalue)},
+            {"UseTraceSinks", to_json(port.useTraceSinks)}
+        }}
     };
 }
 
@@ -685,9 +805,22 @@ auto from_json(const json11::Json& json) -> PatternPort
         throw Misconfiguration{"Pattern IO has no properties!"};
 
     auto&& jsonPort = *json.object_items().begin();
-
     port.name = jsonPort.first;
-    port.initvalue = hex_decode(jsonPort.second.string_value());
+
+    //backward compatibility to {"name" : "hexval"}
+    if (jsonPort.second.is_string())
+    {
+        port.initvalue = hex_decode(jsonPort.second.string_value());
+        return port;
+    }
+
+    //new way 
+    port.initvalue = hex_decode(jsonPort.second["value"].string_value());
+
+    if (jsonPort.second.object_items().count("UseTraceSinks"))
+    {
+        port.useTraceSinks = from_json<std::vector<std::string>>(jsonPort.second["UseTraceSinks"].array_items());
+    }
 
     return port;
 }
@@ -723,11 +856,18 @@ auto from_json(const json11::Json& json) -> GenericPort::ProtocolType
 
 auto to_json(const GenericPort& port) -> json11::Json
 {
-    return json11::Json::object{
+    auto json = json11::Json::object{
         {"Name", port.name},
         {"Protocol", to_json(port.protocolType)},
         {"DefinitionUri", port.definitionUri}
     };
+
+    if (!port.useTraceSinks.empty())
+    {
+        json["UseTraceSinks"] = to_json(port.useTraceSinks);
+    }
+
+    return json;
 }
 
 template <>
@@ -742,6 +882,11 @@ auto from_json(const json11::Json& json) -> GenericPort
 
     // Optional "Protocol" property
     optional_from_json(port.definitionUri, json, "DefinitionUri");
+
+    if (json.object_items().count("UseTraceSinks"))
+    {
+        port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
+    }
 
     return port;
 }
@@ -811,12 +956,15 @@ auto to_json(const Participant& participant) -> json11::Json
     auto makePortList =
         [](auto&& portVector, PortDirection direction)
         {
-            std::vector<std::string> result;
-            result.reserve(portVector.size());
+            auto json = json11::Json::array{};
             for (auto&& port : portVector)
+            {
                 if (port.direction == direction)
-                    result.push_back(port.name);
-            return result;
+                {
+                    json.emplace_back(to_json(port));
+                }
+            }
+            return json;
         };
 
     auto subscribers_to_json =
@@ -836,15 +984,16 @@ auto to_json(const Participant& participant) -> json11::Json
         {"FlexRayControllers", to_json(participant.flexrayControllers)},
         {"NetworkSimulators", participant.networkSimulators},
         {"Analog-In", makePortList(participant.analogIoPorts, PortDirection::In)},
-        {"Digital-In", makePortList(participant.analogIoPorts, PortDirection::In)},
-        {"Pwm-In", makePortList(participant.analogIoPorts, PortDirection::In)},
-        {"Pattern-In", makePortList(participant.analogIoPorts, PortDirection::In)},
+        {"Digital-In", makePortList(participant.digitalIoPorts, PortDirection::In)},
+        {"Pwm-In", makePortList(participant.pwmPorts, PortDirection::In)},
+        {"Pattern-In", makePortList(participant.patternPorts, PortDirection::In)},
         {"Analog-Out", makePortList(participant.analogIoPorts, PortDirection::Out)},
-        {"Digital-Out", makePortList(participant.analogIoPorts, PortDirection::Out)},
-        {"Pwm-Out", makePortList(participant.analogIoPorts, PortDirection::Out)},
-        {"Pattern-Out", makePortList(participant.analogIoPorts, PortDirection::Out)},
+        {"Digital-Out", makePortList(participant.digitalIoPorts, PortDirection::Out)},
+        {"Pwm-Out", makePortList(participant.pwmPorts, PortDirection::Out)},
+        {"Pattern-Out", makePortList(participant.patternPorts, PortDirection::Out)},
         {"GenericPublishers", to_json(participant.genericPublishers)},
         {"GenericSubscribers", subscribers_to_json(participant.genericSubscribers)},
+        {"TraceSinks", to_json(participant.traceSinks)},
         // FIXME: optional ParticipantController
         {"IsSyncMaster", participant.isSyncMaster}
     };
@@ -880,12 +1029,23 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
     auto inports_from_json =
         [json](auto&& portList, auto&& propertyName)
         {
+            //TODO we should generalize the Port/Service/Controller structure, so we don't have
+            //     to implement special parsing cases.
             for (auto&& inPort : json[propertyName].array_items())
             {
                 using PortType = typename std::decay_t<decltype(portList)>::value_type;
                 PortType port;
-                port.name = inPort.string_value();
-                port.direction = PortDirection::In;
+                if (inPort.is_string())
+                {
+                    //Backward compatible to old format  "In-ports" : [ "P1", "P2", ...]
+                    port.name = inPort.string_value();
+                    port.direction = PortDirection::In;
+                }
+                else
+                {
+                    port = from_json<PortType>(inPort);
+                    port.direction = PortDirection::In;
+                }
                 portList.push_back(port);
             }
         };
@@ -956,6 +1116,8 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
 
     participant.genericPublishers = from_json<std::vector<GenericPort>>(json["GenericPublishers"].array_items());
     participant.genericSubscribers = subscribers_from_json(json["GenericSubscribers"].array_items());
+
+    participant.traceSinks = from_json<std::vector<TraceSink>>(json["TraceSinks"].array_items());
 
     return participant;
 }
@@ -1359,6 +1521,69 @@ auto to_json(const Config& cfg) -> json11::Json
     
     return json;
 }
+
+auto to_json(const TraceSink::Type& type) -> json11::Json
+{
+    switch (type)
+    {
+    case TraceSink::Type::Undefined:
+        return "Undefined";
+    case TraceSink::Type::Mdf4File:
+        return "Mdf4File";
+    case TraceSink::Type::PcapFile:
+        return "PcapFile";
+    case TraceSink::Type::PcapPipe:
+        return "PcapPipe";
+    default:
+        throw Misconfiguration{"Unknown Tracer Type"};
+    }
+}
+
+template<>
+auto from_json(const json11::Json& json) -> TraceSink::Type
+{
+    auto&& str = json.string_value();
+    if (str == "Undefined" || str == "")
+        return TraceSink::Type::Undefined;
+    if (str == "Mdf4File")
+        return TraceSink::Type::Mdf4File;
+    if (str == "PcapFile")
+        return TraceSink::Type::PcapFile;
+    if (str == "PcapPipe")
+        return TraceSink::Type::PcapPipe;
+
+    throw Misconfiguration{"Unknown Tracer Type"};
+}
+
+auto to_json(const TraceSink& cfg) -> json11::Json
+{
+    auto json = json11::Json::object{
+        {"Type", to_json(cfg.type)},
+        {"Name", cfg.name},
+        {"OutputPath", cfg.outputPath}
+    };
+
+    //only serialize if disabled
+    if (!cfg.enabled)
+    {
+        json["Enabled"] = cfg.enabled;
+    }
+
+    return json;
+}
+
+template <>
+auto from_json<TraceSink>(const json11::Json& json) -> TraceSink
+{
+    TraceSink sink;
+    sink.name = json["Name"].string_value();
+    sink.outputPath = json["OutputPath"].string_value();
+    sink.type = from_json<TraceSink::Type>(json["Type"]);
+    if (json.object_items().count("Enabled"))
+        sink.enabled = json["Enabled"].bool_value();
+    return sink;
+}
+
 
 template <>
 auto from_json<Config>(const json11::Json& json) -> Config

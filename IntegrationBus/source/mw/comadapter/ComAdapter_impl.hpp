@@ -31,8 +31,9 @@
 #include "ib/cfg/string_utils.hpp"
 #include "ib/version.hpp"
 
-#include "MessageTracing.hpp"
 #include "ComAdapter.hpp"
+
+#include "MessageTracing.hpp" // log tracing
 
 #ifdef SendMessage
 #if SendMessage == SendMessageA
@@ -95,6 +96,12 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
 {
     SetupSyncMaster();
     SetupRemoteLogging();
+
+    // Create the participants trace message sinks as declared in the configuration
+    tracing::CreateTraceMessageSinks(GetLogger(), _participant,
+        [this](auto sink) {
+            _traceSinks.emplace_back(std::move(sink));
+    });
 
     if (_participant.participantController.has_value())
     {
@@ -741,11 +748,57 @@ auto ComAdapter<IbConnectionT>::GetLinkById(int16_t linkId) -> cfg::Link&
 }
 
 template <class IbConnectionT>
+template <class ConfigT>
+void ComAdapter<IbConnectionT>::AddTraceSinksToController(tracing::IControllerToTraceSink* controller, ConfigT config)
+{
+    if (config.useTraceSinks.empty())
+    {
+        GetLogger()->Debug("Tracer on {}/{} not enabled, skipping", _participant.name, config.name);
+        return;
+    }
+    auto getSinkByName = [this](const auto& name) -> extensions::ITraceMessageSink* 
+    {
+        auto it = std::find_if(_traceSinks.begin(), _traceSinks.end(),
+            [&name](const auto& sinkPtr) {
+                return sinkPtr->Name() == name;
+            });
+        if (it != _traceSinks.end())
+        {
+            return it->get();
+        }
+        return nullptr;
+    };
+
+    for (const auto& sinkName : config.useTraceSinks)
+    {
+        auto* sinkPtr = getSinkByName(sinkName);
+        if (sinkPtr == nullptr)
+        {
+            std::stringstream ss;
+            ss << "Controller " << config.name << " refers to non-existing sink "
+                << sinkName;
+
+            GetLogger()->Error(ss.str());
+            throw std::runtime_error(ss.str());
+        }
+        controller->AddSink(sinkPtr);
+    }
+}
+
+template <class IbConnectionT>
 template <class ControllerT, class ConfigT, typename... Arg>
 auto ComAdapter<IbConnectionT>::CreateControllerForLink(const ConfigT& config, Arg&&... arg) -> ControllerT*
 {
     auto&& linkCfg = GetLinkById(config.linkId);
-    return CreateController<ControllerT>(config.endpointId, linkCfg.name, std::forward<Arg>(arg)...);
+    auto* controller = CreateController<ControllerT>(config.endpointId, linkCfg.name, std::forward<Arg>(arg)...);
+
+    auto* tracer = dynamic_cast<tracing::IControllerToTraceSink*>(controller);
+    if (tracer != nullptr)
+    {
+        AddTraceSinksToController(tracer, config);
+    }
+
+    return controller;
 }
 
 

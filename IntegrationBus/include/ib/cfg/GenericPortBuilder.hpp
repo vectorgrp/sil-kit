@@ -24,6 +24,8 @@ public:
     IntegrationBusAPI auto WithProtocolType(GenericPort::ProtocolType protocolType) -> GenericPortBuilder&;
     IntegrationBusAPI auto WithDefinitionUri(std::string uri) -> GenericPortBuilder&;
 
+    IntegrationBusAPI auto WithTraceSink(std::string sinkName) -> GenericPortBuilder&;
+
     IntegrationBusAPI auto operator->() -> ParticipantBuilder*;
 
     IntegrationBusAPI auto Build() -> GenericPort;

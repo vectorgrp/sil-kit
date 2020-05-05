@@ -55,8 +55,60 @@ void Validate(const SimulationSetup& testConfig, const Config& ibConfig)
     }
 }
 
-void Validate(const Participant& participant, const Config& /*ibConfig*/)
+void Validate(const Participant& participant, const Config& ibConfig)
 {
+    //tracing related validation:
+    std::vector<std::string> sinkNames;
+    for(const auto& sink: participant.traceSinks)
+    {
+        sinkNames.push_back(sink.name);
+    }
+    auto sinkExists = [&sinkNames](const auto& name) -> bool {
+        return std::end(sinkNames) != std::find(sinkNames.cbegin(), sinkNames.cend(), name);
+    };
+
+    auto validateController = [&sinkExists, &participant](const auto& controllersConfig)
+    {
+        for (const auto& ctrl : controllersConfig)
+        {
+            for (const auto& traceSink : ctrl.useTraceSinks)
+            {
+                if (traceSink.empty())
+                {
+                    std::cerr << "ERROR:  Participant \"" << participant.name
+                        << "/" << ctrl.name
+                        << "\" has a Tracer which refers to an empty TraceSink!"
+                        << std::endl;
+                    throw ib::cfg::Misconfiguration{"Tracer refers to an empty TraceSink name"};
+                }
+                if (!sinkExists(traceSink))
+                {
+                    std::cerr << "ERROR:  Participant \"" << participant.name 
+                        << "/" << ctrl.name
+                        << "\" has a Tracer which refers to a non-existing TraceSink: "
+                        << traceSink
+                        << std::endl;
+                    throw ib::cfg::Misconfiguration{"Tracer refers to non-existing TraceSink name"};
+                }
+            }
+        }
+
+    };
+
+    validateController(participant.ethernetControllers);
+#if XXX_TRACING_NOT_YET
+    validateController(participant.canControllers);
+    validateController(participant.linControllers);
+    validateController(participant.flexrayControllers);
+    validateController(participant.genericPublishers);
+    validateController(participant.genericSubscribers);
+    validateController(participant.analogIoPorts);
+    validateController(participant.digitalIoPorts);
+    validateController(participant.patternPorts);
+    validateController(participant.pwmPorts);
+#endif
+
+    //participant controller related validation:
     auto& participantController = participant.participantController;
     if (!participantController)
         return;

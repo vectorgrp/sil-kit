@@ -53,6 +53,12 @@ auto GenericPortBuilder::WithDefinitionUri(std::string uri) -> GenericPortBuilde
     return *this;
 }
 
+auto GenericPortBuilder::WithTraceSink(std::string sinkName) -> GenericPortBuilder&
+{
+    _port.useTraceSinks.emplace_back(std::move(sinkName));
+    return *this;
+}
+
 auto GenericPortBuilder::Build() -> GenericPort
 {
     if (_port.linkId == -1)
@@ -61,6 +67,7 @@ auto GenericPortBuilder::Build() -> GenericPort
     }
     return std::move(_port);
 }
+
 
 } // namespace cfg
 } // namespace ib

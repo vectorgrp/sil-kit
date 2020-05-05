@@ -88,6 +88,10 @@ template <>
 auto from_json<ExtensionConfig>(const json11::Json& json) -> ExtensionConfig;
 template <>
 auto from_json<Config>(const json11::Json& json) -> Config;
+template <>
+auto from_json<TraceSink>(const json11::Json& json) -> TraceSink;
+template <>
+auto from_json<TraceSink::Type>(const json11::Json& json) -> TraceSink::Type;
 
 auto to_json(uint16_t value) -> json11::Json;
 auto to_json(int32_t value) -> json11::Json;
@@ -119,6 +123,8 @@ auto to_json(const VAsio::Config& config) -> json11::Json;
 auto to_json(const MiddlewareConfig& simulationMiddleware) -> json11::Json;
 auto to_json(const ExtensionConfig& config) -> json11::Json;
 auto to_json(const Config& cfg) -> json11::Json;
+auto to_json(const TraceSink& cfg) -> json11::Json;
+auto to_json(const TraceSink::Type& cfg) -> json11::Json;
 
 
 template<typename T, std::enable_if_t<is_std_vector<T>::value, int> = 0>

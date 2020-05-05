@@ -78,6 +78,23 @@ struct Logger
     std::vector<Sink> sinks;
 };
 
+struct TraceSink
+{
+    enum class Type
+    {
+        Undefined,
+        PcapFile,
+        PcapPipe,
+        Mdf4File
+    };
+
+    Type type = Type::Undefined;
+    std::string name;
+    std::string outputPath;
+    bool enabled{true};
+};
+
+
 struct CanController
 {
     static constexpr Link::Type linkType = Link::Type::CAN;
@@ -85,6 +102,7 @@ struct CanController
     std::string name;
     mw::EndpointId endpointId{0};
     int16_t linkId{-1};
+    std::vector<std::string> useTraceSinks;
 };
 
 struct LinController
@@ -94,6 +112,7 @@ struct LinController
     std::string name;
     mw::EndpointId endpointId{0};
     int16_t linkId{-1};
+    std::vector<std::string> useTraceSinks;
 };
 
 struct EthernetController
@@ -105,8 +124,12 @@ struct EthernetController
     int16_t linkId{-1};
     std::array<uint8_t, 6> macAddress{};
 
+    //[[deprecated]] superseded by UseTraceSinks:[]
     std::string pcapFile;
+    //[[deprecated]] superseded by UseTraceSinks:[]
     std::string pcapPipe;
+
+    std::vector<std::string> useTraceSinks;
 };
 
 struct FlexrayController
@@ -120,6 +143,7 @@ struct FlexrayController
     sim::fr::ClusterParameters clusterParameters;
     sim::fr::NodeParameters nodeParameters;
     std::vector<sim::fr::TxBufferConfig> txBufferConfigs;
+    std::vector<std::string> useTraceSinks;
 };
 
 enum class PortDirection : uint8_t
@@ -152,6 +176,8 @@ struct IoPort
 
     ValueT initvalue;
     std::string unit;
+
+    std::vector<std::string> useTraceSinks;
 };
 
 using AnalogIoPort  = IoPort<double>;
@@ -191,6 +217,8 @@ struct GenericPort
      * treated relative to the config file.
     */
     std::string definitionUri;
+
+    std::vector<std::string> useTraceSinks;
 };
 
 enum class SyncType
@@ -235,6 +263,8 @@ struct Participant
     std::vector<GenericPort> genericSubscribers;
 
     bool isSyncMaster{false};
+
+    std::vector<TraceSink> traceSinks;
 };
 
 struct Switch
@@ -434,6 +464,7 @@ IntegrationBusAPI bool operator==(const AnalogIoPort& lhs, const AnalogIoPort& r
 IntegrationBusAPI bool operator==(const PwmPort& lhs, const PwmPort& rhs);
 IntegrationBusAPI bool operator==(const PatternPort& lhs, const PatternPort& rhs);
 IntegrationBusAPI bool operator==(const GenericPort& lhs, const GenericPort& rhs);
+IntegrationBusAPI bool operator==(const TraceSink& lhs, const TraceSink& rhs);
 
 IntegrationBusAPI std::ostream& operator<<(std::ostream& out, const Version& version);
 IntegrationBusAPI std::istream& operator>>(std::istream& in, Version& version);

@@ -7,7 +7,10 @@
 #include "ib/mw/sync/ITimeConsumer.hpp"
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/cfg/Config.hpp"
-#include "PcapTracer.hpp"
+
+#include "Tracing.hpp"
+
+#include <memory>
 
 namespace ib {
 namespace sim {
@@ -17,6 +20,7 @@ class EthController
     : public IEthController
     , public IIbToEthController
     , public ib::mw::sync::ITimeConsumer
+    , public tracing::IControllerToTraceSink
 {
 public:
     // ----------------------------------------
@@ -45,10 +49,10 @@ public:
     void Deactivate() override;
 
     [[deprecated("For MDF4 support, you should migrate to the SendFrame(...) API")]]
-    auto SendMessage(EthMessage msg) -> EthTxId override;
+    auto SendMessage(EthMessage msg)->EthTxId override;
 
-    auto SendFrame(EthFrame msg) -> EthTxId override;
-    auto SendFrame(EthFrame msg, std::chrono::nanoseconds timestamp) -> EthTxId override;
+    auto SendFrame(EthFrame msg)->EthTxId override;
+    auto SendFrame(EthFrame msg, std::chrono::nanoseconds timestamp)->EthTxId override;
 
     void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) override;
     void RegisterMessageAckHandler(MessageAckHandler handler) override;
@@ -60,10 +64,16 @@ public:
     void ReceiveIbMessage(ib::mw::EndpointAddress from, const EthTransmitAcknowledge& msg) override;
 
     void SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress) override;
-    auto EndpointAddress() const -> const ib::mw::EndpointAddress& override;
+    auto EndpointAddress() const -> const ib::mw::EndpointAddress & override;
 
     // ib::mw::sync::ITimeConsumer
     void SetTimeProvider(ib::mw::sync::ITimeProvider*) override;
+
+    // tracing::IControllerToTraceSink
+    void AddSink(tracing::ITraceMessageSink* sink) override
+    {
+        _tracer.AddSink(EndpointAddress(), *sink);
+    }
 
 private:
     // ----------------------------------------
@@ -96,8 +106,8 @@ private:
         CallbackVector<EthTransmitAcknowledge>
     > _callbacks;
 
-    PcapTracer _tracer;
-    bool _tracingIsEnabled{false};
+    std::unique_ptr<tracing::ITraceMessageSink> _traceSink;
+    tracing::Tracer<EthFrame> _tracer;
 
     std::vector<std::pair<EthMac, EthTxId>> _pendingAcks;
 };

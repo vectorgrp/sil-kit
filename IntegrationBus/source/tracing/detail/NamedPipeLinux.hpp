@@ -3,9 +3,6 @@
 #include "NamedPipe.hpp"
 #include <fstream>
 #include <string>
-namespace ib {
-namespace sim {
-namespace eth {
 
 class NamedPipeLinux: public NamedPipe
 {
@@ -30,6 +27,3 @@ private:
     void Close();
 };
 
-} //namespace ib
-} //namespace sim
-} //namespace eth

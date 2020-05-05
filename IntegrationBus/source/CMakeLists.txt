@@ -1,4 +1,5 @@
 add_subdirectory(cfg)
+add_subdirectory(tracing)
 add_subdirectory(mw)
 add_subdirectory(sim)
 add_subdirectory(util)

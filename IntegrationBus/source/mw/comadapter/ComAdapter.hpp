@@ -14,6 +14,9 @@
 #include "ib/sim/all.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 
+#include "ib/extensions/ITraceMessageSink.hpp"
+#include "Tracing.hpp"
+
 #include "IIbToLogMsgSender.hpp"
 #include "IIbToLogMsgReceiver.hpp"
 
@@ -191,6 +194,9 @@ private:
     void RegisterSimulator(IIbToSimulatorT* busSim, cfg::Link::Type linkType);
 
     bool ControllerUsesNetworkSimulator(const std::string& controllerName) const;
+   
+    template<class ConfigT>
+    void AddTraceSinksToController(tracing::IControllerToTraceSink* controller, ConfigT config);
 
 private:
     // ----------------------------------------
@@ -202,6 +208,7 @@ private:
     std::shared_ptr<sync::ITimeProvider> _timeProvider{nullptr};
 
     std::unique_ptr<logging::ILogger> _logger;
+    std::vector<std::unique_ptr<extensions::ITraceMessageSink>> _traceSinks;
 
     std::tuple<
         ControllerMap<sim::can::IIbToCanController>,

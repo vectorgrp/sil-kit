@@ -4,11 +4,6 @@
 #include <windows.h>
 
 
-
-namespace ib {
-namespace sim {
-namespace eth {
-
 class NamedPipeWin : public NamedPipe
 {
 public:
@@ -34,9 +29,3 @@ private:
     bool isValid() const { return _pipeHandle != INVALID_HANDLE_VALUE; }
     void closeConnection();
 };
-
-
-
-} //namespace ib
-} //namespace sim
-} //namespace eth

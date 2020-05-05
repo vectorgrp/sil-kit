@@ -29,6 +29,8 @@ public:
     auto WithNodeParameters(const sim::fr::NodeParameters& nodeParameters) -> ControllerBuilder&;
     auto WithTxBufferConfigs(const std::vector<sim::fr::TxBufferConfig>& txBufferConfigs) -> ControllerBuilder&;
 
+    auto WithTraceSink(std::string sinkName) -> ControllerBuilder&;
+
     auto operator->() -> ParticipantBuilder*;
 
     auto Build() -> ControllerCfg;
@@ -89,6 +91,13 @@ auto ControllerBuilder<ControllerCfg>::Build() -> ControllerCfg
     return std::move(_controller);
 }
 
+template<class ControllerCfg>
+auto ControllerBuilder<ControllerCfg>::WithTraceSink(std::string sinkName) -> ControllerBuilder&
+{
+    _controller.useTraceSinks.emplace_back(std::move(sinkName));
+
+    return *this;
+}
 } // namespace cfg
 } // namespace ib
 

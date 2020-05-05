@@ -23,10 +23,6 @@ static std::string GetPipeError()
     return rv;
 }
 
-namespace ib {
-namespace sim {
-namespace eth {
-
 NamedPipeWin::NamedPipeWin(const std::string& name)
 {
     std::stringstream ss;
@@ -91,8 +87,4 @@ void NamedPipeWin::closeConnection()
 std::unique_ptr<NamedPipe> NamedPipe::Create(const std::string& name)
 {
     return std::make_unique<NamedPipeWin>(name);
-}
-
-}
-}
 }

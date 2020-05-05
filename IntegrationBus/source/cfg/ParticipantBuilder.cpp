@@ -46,10 +46,17 @@ auto ParticipantBuilder::Build() -> Participant
     {
         config.genericPublishers.emplace_back(builder.Build());
     }
+
     for (auto&& builder : _genericSubscribers)
     {
         config.genericSubscribers.emplace_back(builder.Build());
     }
+
+    for (auto& sinks : _traceSinks)
+    {
+        config.traceSinks.emplace_back(sinks.Build());
+    }
+
     return std::move(config);
 }
 
@@ -171,6 +178,12 @@ auto ParticipantBuilder::AsSyncMaster() -> ParticipantBuilder&
 {
     config.isSyncMaster = true;
     return *this;
+}
+
+auto ParticipantBuilder::AddTraceSink(std::string sinkName) -> TraceSinkBuilder&
+{
+    _traceSinks.emplace_back(this, std::move(sinkName));
+    return _traceSinks.back();
 }
 
 auto ParticipantBuilder::MakeQualifiedName(std::string controllerName) const -> std::string
