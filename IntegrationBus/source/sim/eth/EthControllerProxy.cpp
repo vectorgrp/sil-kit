@@ -48,17 +48,28 @@ auto EthControllerProxy::SendMessage(EthMessage msg) -> EthTxId
 {
     auto txId = MakeTxId();
     msg.transmitId = txId;
-    _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
 
     if (_tracingIsEnabled) _tracer.Trace(msg);
+
+    _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
+
 
     return txId;
 }
 
-auto EthControllerProxy::SendMessage(EthMessage msg, std::chrono::nanoseconds /*time stamp provided by VIBE netsim*/) -> EthTxId
+auto EthControllerProxy::SendFrame(EthFrame frame) -> EthTxId
 {
-    return SendMessage(msg);
+    EthMessage msg;
+    msg.ethFrame = std::move(frame);
+    return SendMessage(std::move(msg));
 }
+
+auto EthControllerProxy::SendFrame(EthFrame frame, std::chrono::nanoseconds /*time stamp provided by VIBE netsim*/) -> EthTxId
+{
+    return SendFrame(std::move(frame));
+}
+
+
 void EthControllerProxy::RegisterReceiveMessageHandler(ReceiveMessageHandler handler)
 {
     RegisterHandler(std::move(handler));

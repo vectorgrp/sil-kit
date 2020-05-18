@@ -92,6 +92,7 @@ public:
             _controller->Initialize(participant.id);
         }
     }
+
     void OnParticipantStatusChanged(sync::ParticipantStatus status)
     {
         if (status.state == sync::ParticipantState::Stopped)
@@ -208,7 +209,7 @@ protected:
         {
 
             //let controller use its Time Provider to add timestamps
-            controller->SendMessage(msg);
+            controller->SendFrame(msg.ethFrame);
             std::this_thread::sleep_for(50ms);
         }
 
@@ -332,7 +333,7 @@ struct ParticipantTimeProviderITest : public TimeProviderITest
             if(numSent++ < numMessages)
             {
                 //let controller use its Time Provider to add timestamps
-                controller->SendMessage(msg);
+                controller->SendFrame(msg.ethFrame);
                 std::cout << "<- simTask TX num=" << numSent << std::endl;
                 std::this_thread::sleep_for(40ms);
             }

@@ -41,29 +41,30 @@ void EthController::Deactivate()
 
 auto EthController::SendMessage(EthMessage msg) -> EthTxId
 {
-    if (msg.timestamp == (std::chrono::nanoseconds::min)())
-    {
-        return SendMessage(std::move(msg), _timeProvider->Now());
-    }
-    else
-    {
-        const auto now = msg.timestamp;
-        return SendMessage(std::move(msg), now);
-    }
-}
-
-auto EthController::SendMessage(EthMessage msg, std::chrono::nanoseconds timestamp) -> EthTxId
-{
     auto txId = MakeTxId();
     _pendingAcks.emplace_back(msg.ethFrame.GetSourceMac(), txId);
 
     msg.transmitId = txId;
-    msg.timestamp = timestamp;
-    _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
 
     if (_tracingIsEnabled) _tracer.Trace(msg);
 
+    _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
+
+
     return txId;
+}
+
+auto EthController::SendFrame(EthFrame frame) -> EthTxId
+{
+    return SendFrame(std::move(frame), _timeProvider->Now());
+}
+
+auto EthController::SendFrame(EthFrame frame, std::chrono::nanoseconds timestamp) -> EthTxId
+{
+    EthMessage msg{};
+    msg.timestamp = timestamp;
+    msg.ethFrame = std::move(frame);
+    return SendMessage(std::move(msg));
 }
 
 void EthController::RegisterReceiveMessageHandler(ReceiveMessageHandler handler)
@@ -92,7 +93,10 @@ void EthController::ReceiveIbMessage(mw::EndpointAddress from, const EthMessage&
     if (from == _endpointAddr)
         return;
 
-    if (_tracingIsEnabled) _tracer.Trace(msg);
+    if (_tracingIsEnabled)
+    {
+        _tracer.Trace(msg);
+    }
 
     CallHandlers(msg);
 

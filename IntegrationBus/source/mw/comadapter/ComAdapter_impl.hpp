@@ -154,7 +154,10 @@ inline void ComAdapter<IbConnectionT>::SetTimeProvider(sync::ITimeProvider* newC
         for (auto& controller: controllers)
         {
             auto* ctl = dynamic_cast<ib::mw::sync::ITimeConsumer*>(controller.second.get());
-            if (ctl) ctl->SetTimeProvider(newClock);
+            if (ctl)
+            {
+                ctl->SetTimeProvider(newClock);
+            }
         }
     };
     tt::for_each(_controllers, setTimeProvider);

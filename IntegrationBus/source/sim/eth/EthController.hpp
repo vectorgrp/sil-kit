@@ -44,8 +44,11 @@ public:
     void Activate() override;
     void Deactivate() override;
 
+    [[deprecated("For MDF4 support, you should migrate to the SendFrame(...) API")]]
     auto SendMessage(EthMessage msg) -> EthTxId override;
-    auto SendMessage(EthMessage msg, std::chrono::nanoseconds timestamp) -> EthTxId override;
+
+    auto SendFrame(EthFrame msg) -> EthTxId override;
+    auto SendFrame(EthFrame msg, std::chrono::nanoseconds timestamp) -> EthTxId override;
 
     void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) override;
     void RegisterMessageAckHandler(MessageAckHandler handler) override;

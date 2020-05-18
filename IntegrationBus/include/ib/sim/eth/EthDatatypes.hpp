@@ -102,8 +102,8 @@ using EthTxId = uint32_t;
  */
 struct EthMessage
 {
-    EthTxId transmitId{}; //!< Set by the EthController, used for acknowledgements
-    std::chrono::nanoseconds timestamp{(std::chrono::nanoseconds::min)()}; //!< Reception time
+    EthTxId transmitId; //!< Set by the EthController, used for acknowledgements
+    std::chrono::nanoseconds timestamp; //!< Reception time
 
     EthFrame ethFrame; //!< The Ethernet frame
 };
