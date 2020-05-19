@@ -47,16 +47,20 @@ void SyncMaster::SetupTimeQuantumClients(const cfg::Config& config)
             continue;
 
         auto client = std::make_shared<TimeQuantumClient>();
+        std::weak_ptr<TimeQuantumClient> clientWeakPtr(client);
         client->SetGrantAction(
-            [this, client, participantId = participant.id](QuantumRequestStatus status)
+            [this, clientWeakPtr, participantId = participant.id](QuantumRequestStatus status)
             {
-                QuantumGrant grant;
-                grant.grantee = mw::EndpointAddress{participantId, 1024};
-                grant.now = client->Now();
-                grant.duration = client->Duration();
-                grant.status = status;
+                if (auto clientSharedPtr = clientWeakPtr.lock())
+                {
+                    QuantumGrant grant;
+                    grant.grantee = mw::EndpointAddress{ participantId, 1024 };
+                    grant.now = clientSharedPtr->Now();
+                    grant.duration = clientSharedPtr->Duration();
+                    grant.status = status;
 
-                this->SendQuantumGrant(grant);
+                    this->SendQuantumGrant(grant);
+                }
             });
 
         _syncClients.push_back(client);
@@ -85,13 +89,16 @@ void SyncMaster::SetupDiscreteTimeClient(const cfg::Config& config)
     client->SetNumClients(static_cast<unsigned int>(numClients));
 
     client->SetCurrentTick(Tick{0ns, 0ns});
+
+    std::weak_ptr<DiscreteTimeClient> clientWeakPtr(client);
     client->SetGrantAction(
-        [this, client](QuantumRequestStatus status)
+        [this, clientWeakPtr](QuantumRequestStatus status)
         {
-            if (status == QuantumRequestStatus::Granted)
+            auto clientSharedPtr = clientWeakPtr.lock();
+            if (status == QuantumRequestStatus::Granted && clientSharedPtr)
             {
-                Tick tick{client->Now(), client->Duration()};
-                client->SetCurrentTick(tick);
+                Tick tick{ clientSharedPtr->Now(), clientSharedPtr->Duration()};
+                clientSharedPtr->SetCurrentTick(tick);
                 this->SendTick(tick);
             }
         });
