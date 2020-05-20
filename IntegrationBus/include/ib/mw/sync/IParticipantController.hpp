@@ -184,6 +184,26 @@ public:
 
     //! \brief Experimental API - Not final yet.
     virtual void LogCurrentPerformanceStats() = 0;
+
+    /*! \brief Forcefully shut down the Participant
+     *
+     * This method allows you to break out of the run-loop in cases where an
+     * orchestrated stop and shutdown is no longer possible. E.g., when a
+     * network error occurred and the connection to the SystemController has
+     * been permanently lost.
+     *
+     * NB: it is strongly advised to NOT use the ForceShutdown for a Shutdown in
+     * normal operation as it can interfere with the SystemController's
+     * operation and thus can prohibit other participants from properly shutting
+     * down!
+     *
+     * A \p reason for the foreceful shutdown must be provided. This reason will
+     * be logged.
+     *
+     * Precondition: State() == \ref ParticipantState::Stopped
+     */
+    virtual void ForceShutdown(std::string reason) = 0;
+
 };
 
 } // namespace sync

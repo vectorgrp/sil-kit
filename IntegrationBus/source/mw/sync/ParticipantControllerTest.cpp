@@ -330,5 +330,60 @@ TEST_F(ParticipantControllerTest, run_async_with_synctype_distributedtimequantum
     EXPECT_EQ(finalState.get(), ParticipantState::Shutdown);
 }
 
+TEST_F(ParticipantControllerTest, force_shutdown)
+{
+    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    controller.SetEndpointAddress(addr);
+    controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
+
+    controller.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
+    controller.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
+
+    // Run() --> Idle
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
+    auto finalState = controller.RunAsync();
+
+    // Stop() --> Stopping --> Call StopHandler() --> Stopped
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
+    EXPECT_CALL(callbacks, StopHandler()).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Stopped))).Times(1);
+    controller.Stop("I quit!");
+    EXPECT_EQ(controller.State(), ParticipantState::Stopped);
+
+    // ForceShutdown() --> ShuttingDown --> Call ShutdownHandler() --> Shutdown
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::ShuttingDown))).Times(1);
+    EXPECT_CALL(callbacks, ShutdownHandler()).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Shutdown))).Times(1);
+    controller.ForceShutdown("I really, really quit!");
+    EXPECT_EQ(controller.State(), ParticipantState::Shutdown);
+
+    ASSERT_EQ(finalState.wait_for(1ms), std::future_status::ready);
+    EXPECT_EQ(finalState.get(), ParticipantState::Shutdown);
+}
+
+TEST_F(ParticipantControllerTest, force_shutdown_is_ignored_if_not_stopped)
+{
+    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    controller.SetEndpointAddress(addr);
+    controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
+
+    controller.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
+    controller.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
+
+    // Run() --> Idle
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
+    auto finalState = controller.RunAsync();
+
+    // ForceShutdown() --> Log::Error --> don't change state, don't call shutdown handlers
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, A<const ParticipantStatus&>())).Times(0);
+    EXPECT_CALL(callbacks, ShutdownHandler()).Times(0);
+    EXPECT_CALL(comAdapter, SendIbMessage(addr, A<const ParticipantStatus&>())).Times(0);
+    controller.ForceShutdown("I really, really quit!");
+
+    // command shall be ignored. State shall be unchanged
+    EXPECT_EQ(controller.State(), ParticipantState::Idle);
+    ASSERT_EQ(finalState.wait_for(1ms), std::future_status::timeout);
+}
+
 
 } // anonymous namespace for test

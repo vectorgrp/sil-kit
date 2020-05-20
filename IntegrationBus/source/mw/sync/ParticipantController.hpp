@@ -68,6 +68,7 @@ public:
     void Pause(std::string reason) override;
     void Continue() override;
     void Stop(std::string reason) override;
+    void ForceShutdown(std::string reason) override;
 
     auto State() const -> ParticipantState override;
     auto Status() const -> const ParticipantStatus& override;

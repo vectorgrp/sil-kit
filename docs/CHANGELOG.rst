@@ -23,6 +23,12 @@ Added
   The controller's time provider will be queried if no user supplied timestamp
   is present.
 
+- ParticipantControllers can now forecefully exit the run loop in case of an
+  error:
+  :cpp:func:`IParticipantController::ForceShutdown()<ib::mw::sync::IParticipantController::ForceShutdown()>`.
+  Note that this method is only intended for use cases where a regular shut down
+  is not possible!
+
 Deprecated
 ~~~~~~~~~~
 - Please note, that the :cpp:func:`IEthController::SendMessage(EthMessage)<EthTxId ib::sim::eth::IEthController::SendMessage(EthMessage)>`

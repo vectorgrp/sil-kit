@@ -304,6 +304,21 @@ void ParticipantController::Stop(std::string reason)
 
 }
 
+void ParticipantController::ForceShutdown(std::string reason)
+{
+    if (State() != ParticipantState::Stopped)
+    {
+        _logger->Error("ParticipantController::ForceShutdown() is ignored. Participant is not in state stopped.");
+        return;
+    }
+
+    _logger->Warn("Executing a forceful shutdown due to: {}", reason);
+
+    std::string shutdownReason = "ParticipantController::ForceShutdown() was called. Reason: " + reason;
+    
+    Shutdown(shutdownReason);
+}
+
 void ParticipantController::Shutdown(std::string reason)
 {
     ChangeState(ParticipantState::ShuttingDown, reason);
