@@ -197,7 +197,7 @@ public:
      * operation and thus can prohibit other participants from properly shutting
      * down!
      *
-     * A \p reason for the foreceful shutdown must be provided. This reason will
+     * A \p reason for the forceful shutdown must be provided. This reason will
      * be logged.
      *
      * Precondition: State() == \ref ParticipantState::Stopped

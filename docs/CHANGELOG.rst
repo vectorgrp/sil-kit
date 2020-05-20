@@ -5,7 +5,7 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[x.y.z] - unreleased
+[3.0.7] - 2020-04-25
 --------------------------------
 
 Added
@@ -23,11 +23,16 @@ Added
   The controller's time provider will be queried if no user supplied timestamp
   is present.
 
-- ParticipantControllers can now forecefully exit the run loop in case of an
+- ParticipantControllers can now forcefully exit the run loop in case of an
   error:
   :cpp:func:`IParticipantController::ForceShutdown()<ib::mw::sync::IParticipantController::ForceShutdown()>`.
   Note that this method is only intended for use cases where a regular shut down
   is not possible!
+
+Fixed
+~~~~~
+- Fixed a memory leak: there was a shared pointer cycle in SyncMaster's
+  DiscreteTimeClient when attaching a lambda to itself.
 
 Deprecated
 ~~~~~~~~~~
