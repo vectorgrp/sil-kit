@@ -27,18 +27,7 @@ NamedPipeLinux::NamedPipeLinux(const std::string& name)
 
         throw std::runtime_error(ss.str());
     }
-
     _isOwner = true;
-
-    _file.open(_name, std::ios_base::out|std::ios_base::binary);
-    if(!_file.good())
-    {
-        std::stringstream ss;
-        ss << "fstream open \"" << _name << "\" failed!";
-        Close();
-
-        throw std::runtime_error(ss.str());
-    }
 }
 
 void NamedPipeLinux::Close()
@@ -54,8 +43,8 @@ void NamedPipeLinux::Close()
                 ;
 
         }
+        _isOwner=false;
     }
-    _isOwner=false;
 }
 NamedPipeLinux::~NamedPipeLinux()
 {
@@ -64,6 +53,21 @@ NamedPipeLinux::~NamedPipeLinux()
 
 bool NamedPipeLinux::Write(const char* buffer, size_t bufferSize)
 {
+    if (!_isOpen)
+    {
+        // open on FIFO in WRITE mode will block us.
+        _file.open(_name, std::ios_base::out | std::ios_base::binary);
+        if (!_file.good())
+        {
+            std::stringstream ss;
+            ss << "fstream open \"" << _name << "\" failed!";
+            Close();
+
+            throw std::runtime_error(ss.str());
+        }
+        _isOpen = true;
+    }
+
     _file.write(buffer, bufferSize);
     _file.flush();
     return _file.good();

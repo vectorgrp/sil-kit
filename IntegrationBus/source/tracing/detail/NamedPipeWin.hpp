@@ -28,4 +28,6 @@ private:
     // private methods
     bool isValid() const { return _pipeHandle != INVALID_HANDLE_VALUE; }
     void closeConnection();
+
+    bool _isConnected{false};
 };

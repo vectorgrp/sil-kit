@@ -21,6 +21,7 @@ private:
     std::string _name;
     std::fstream _file;
     bool _isOwner{false};
+    bool _isOpen{false};
 private:
     // ----------------------------------------
     // private methods

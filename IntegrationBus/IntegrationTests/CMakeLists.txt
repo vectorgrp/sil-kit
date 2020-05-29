@@ -1,3 +1,9 @@
+# local headers as interface lib
+add_library(ITestUtils INTERFACE)
+target_include_directories(ITestUtils
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+
+
 add_vib_test(ITestGenericMessages
     SOURCES
       GenericMessagesITest.cpp
@@ -90,6 +96,7 @@ add_vib_test(ITestTimeProvider
     LIBS
       IbMwComAdapter
       IbMwVAsio
+      ITestUtils
 )
 
 add_vib_test(ITestTracing
@@ -99,6 +106,7 @@ add_vib_test(ITestTracing
       IbMwComAdapter
       IbMwVAsio
       IbTracing
+      ITestUtils
 )
 
 # Windows specific tests

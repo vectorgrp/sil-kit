@@ -62,12 +62,11 @@ void PcapSink::Open(tracing::SinkType outputType, const std::string& outputPath)
         _file.write(reinterpret_cast<char*>(&g_pcapGlobalHeader),
                 sizeof(g_pcapGlobalHeader));
         break;
+
     case ib::tracing::SinkType::PcapNamedPipe:
-        _logger->Info("Sink {}: Waiting for a reader to connect to PCAP pipe {} ... ", _name, outputPath);
         _pipe = NamedPipe::Create(outputPath);
-        _pipe->Write(reinterpret_cast<char*>(&g_pcapGlobalHeader),
-                sizeof(g_pcapGlobalHeader));
-        _logger->Debug("Sink {}: PCAP pipe: {} is connected successfully", _name, outputPath);
+        _headerWritten = false;
+        _outputPath = outputPath;
         break;
     default:
         throw std::runtime_error("PcapSink::Open: specified SinkType not implemented");
@@ -115,6 +114,19 @@ void PcapSink::Trace(tracing::Direction /*unused*/,
 
     if (_pipe)
     {
+        if (!_headerWritten)
+        {
+            _logger->Info("Sink {}: Waiting for a reader to connect to PCAP pipe {} ... ",
+                _name, _outputPath);
+
+            ok &= _pipe->Write(reinterpret_cast<char*>(&g_pcapGlobalHeader),
+                sizeof(g_pcapGlobalHeader));
+            _logger->Debug("Sink {}: PCAP pipe: {} is connected successfully",
+                _name, _outputPath);
+
+            _headerWritten = true;
+        }
+
         ok &=_pipe->Write(reinterpret_cast<char*>(&pcapPacketHeader), sizeof(pcapPacketHeader));
         ok &=_pipe->Write(reinterpret_cast<const char*>(&message.RawFrame().at(0)), message.GetFrameSize());
     }

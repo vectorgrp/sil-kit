@@ -44,7 +44,6 @@ NamedPipeWin::NamedPipeWin(const std::string& name)
     {
         throw std::runtime_error(GetPipeError());
     }
-    ConnectNamedPipe(_pipeHandle, NULL);
 }
 
 NamedPipeWin::~NamedPipeWin()
@@ -53,6 +52,19 @@ NamedPipeWin::~NamedPipeWin()
 }
 bool NamedPipeWin::Write(const char* buffer, size_t size)
 {
+    if (!_isConnected)
+    {
+        //explicitly synchronize here with our Pipe partner
+        // this cannot be done in Open() as we would block inside of the ComAdapter setup
+        auto ok = ConnectNamedPipe(_pipeHandle, NULL);
+        if (ok == 0 && (GetLastError() != ERROR_PIPE_CONNECTED))
+        {
+            auto msg = "NamedPipeWin: ConnecteNamedPipe failed: " + GetPipeError();
+            throw std::runtime_error(msg); 
+        }
+        _isConnected = true;
+    }
+
     DWORD cbWritten = 0;
     if (size == 0) return false;
     if (isValid())

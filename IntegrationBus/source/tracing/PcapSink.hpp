@@ -71,11 +71,13 @@ public:
 private:
     // ----------------------------------------
     // Private members
+    bool _headerWritten{false};
     std::ofstream _file;
     std::unique_ptr<NamedPipe> _pipe;
     std::mutex _lock;
     std::string _name;
     std::string _busName;
+    std::string _outputPath;
     mw::logging::ILogger* _logger{nullptr};
 };
 

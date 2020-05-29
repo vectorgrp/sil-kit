@@ -2,8 +2,8 @@
 
 #include <chrono>
 #include <cstdlib>
-#include <thread>
 #include <future>
+#include <thread>
 #include <atomic>
 #include <functional>
 
@@ -22,6 +22,8 @@
 
 #include "GetTestPid.hpp"
 
+#include "ITestUtils.hpp"
+
 namespace {
 
 using namespace std::chrono_literals;
@@ -29,37 +31,7 @@ using namespace ib::mw;
 using namespace ib::cfg;
 using namespace ib::sim::eth;
 
-struct Barrier
-{
-    std::mutex mx;
-    std::condition_variable cv;
-    std::atomic_uint expected{0};
-    std::atomic_uint have{0};
-    std::chrono::seconds timeout{1};
-    
-    Barrier(Barrier&) = delete;
-
-    Barrier(unsigned expectedEntries, std::chrono::seconds timeout)
-        : expected{expectedEntries}
-        , timeout{timeout}
-    {}
-    
-    void Enter()
-    {
-        std::unique_lock<decltype(mx)> lock(mx);
-        have++;
-        if (have >= expected)
-        {
-            lock.unlock();
-            cv.notify_all();
-        }
-        else
-        {
-            auto ok = cv.wait_for(lock, timeout, [this] {return have == expected; });
-            if (!ok) { std::cout <<  "Barrier: timeout!" << std::endl; }
-        }
-    }
-};
+using itest::Barrier;
 
 class DummySystemController
 {
@@ -400,7 +372,7 @@ struct ParticipantTimeProviderITest : public TimeProviderITest
         });
         auto* sysctl = comAdapter->GetSystemController();
         auto* parti = comAdapter->GetParticipantController();
-        parti->SetSimulationTask([this, &participantName, &receiveCount, sysctl](auto now, auto) {
+        parti->SetSimulationTask([this, &participantName, &receiveCount, sysctl](auto , auto) {
             if (receiveCount == numMessages)
             {
                 std::cout << participantName << " stopping" << std::endl;
