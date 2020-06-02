@@ -11,6 +11,11 @@ add_library(IbExtensions STATIC
     IbExtensionApi/IbExtensionABI.h
     IbExtensionApi/IbExtensionUtils.hpp
     IbExtensionApi/IbExtensionUtils.cpp
+
+    #private extensions:
+    #   MDF4
+    IbExtensionImpl/CreateMdf4tracing.cpp
+    IbExtensionImpl/CreateMdf4tracing.hpp
 )
 
 target_include_directories(IbExtensions

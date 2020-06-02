@@ -8,11 +8,13 @@
 #include <memory>
 
 #include "ib/sim/fwd_decl.hpp"
-// XXX std::unique_ptr<ITraceMessageSink> requires concrete types of all
+// NB: std::unique_ptr<ITraceMessageSink> requires concrete types of all
 //     the method parameters of ITraceMessageSink:
 #include "ib/sim/eth/EthDatatypes.hpp"
 #include "ib/sim/can/CanDatatypes.hpp"
 #include "ib/sim/generic/GenericMessageDatatypes.hpp"
+#include "ib/sim/io/IoDatatypes.hpp"
+#include "ib/sim/lin/LinDatatypes.hpp"
 
 #include "ib/mw/EndpointAddress.hpp"
 
@@ -67,9 +69,9 @@ public:
 
     void Trace(Direction rxOrTx, std::chrono::nanoseconds timestamp, const MsgT& msg)
     {
-        for (auto& trace : _sinks)
+        for (auto& sink: _sinks)
         {
-            trace(rxOrTx, timestamp, msg);
+            sink(rxOrTx, timestamp, msg);
         }
     }
 private:

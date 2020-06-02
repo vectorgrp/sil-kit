@@ -37,7 +37,7 @@ target_sources(IntegrationBus
     #for IDE:
     ${CMAKE_CURRENT_LIST_DIR}/../include/ib/extensions/IIbRegistry.hpp
     ${CMAKE_CURRENT_LIST_DIR}/../include/ib/extensions/CreateExtension.hpp
-    # implementations
+    # implementations accessible via the public API
     extensions/IbExtensionImpl/CreateIbRegistry.cpp
 )
 

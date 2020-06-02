@@ -8,6 +8,7 @@ namespace ib {
 namespace sim {
 namespace lin { 
 
+struct Frame;
 struct Transmission;
 struct WakeupPulse;
 struct SendFrameRequest;

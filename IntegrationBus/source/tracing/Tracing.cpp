@@ -24,7 +24,10 @@ void CreateTraceMessageSinks(mw::logging::ILogger* logger,
         switch (sinkCfg.type)
         {
         case cfg::TraceSink::Type::Mdf4File:
+        {
+
             throw std::runtime_error("SinkType Mdf4File not implemented yet!");
+        }
         case cfg::TraceSink::Type::PcapFile:
         {
             auto sink = std::make_unique<PcapSink>(logger, sinkCfg.name);
