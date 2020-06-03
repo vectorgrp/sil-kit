@@ -3,11 +3,66 @@
 #include "ib/mw/logging/ILogger.hpp"
 #include "PcapSink.hpp"
 
+#include "IbExtensionImpl/CreateMdf4tracing.hpp"
+
+#include <sstream>
+
 namespace ib {
 namespace tracing {
 
+//Utilities
+std::ostream& operator<<(std::ostream& out, const TraceMessage& msg)
+{
+    out << "TraceMessage<"<< msg.QueryType()  << ">";
+    return out;
+}
 
-// TODO implement plugin loading and creation of TraceSinks here
+std::ostream& operator<<(std::ostream& out, const TraceMessageType& type)
+{
+    using MsgT = TraceMessageType;
+    switch (type)
+    {
+    case MsgT::Invalid:
+        out << "Invalid"; break;
+    case MsgT::EthFrame:
+        out << "EthFrame"; break;
+    case MsgT::CanMessage:
+        out << "CanMessage"; break;
+    case MsgT::LinFrame:
+        out << "LinFrame"; break;
+    case MsgT::GenericMessage:
+        out << "GenericMessage"; break;
+    case MsgT::AnlogIoMessage:
+        out << "AnlogIoMessage"; break;
+    case MsgT::DigitalIoMessage:
+        out << "DigitalIoMessage"; break;
+    case MsgT::PatternIoMessage:
+        out << "PatternIoMessage"; break;
+    case MsgT::PwmIoMessage:
+        out << "PwmIoMessage"; break;
+    case MsgT::FrMessage:
+        out << "FrMessage"; break;
+    default:
+        throw std::runtime_error("Unknown TraceMessage::Type in operator<<!");
+    }
+    return out;
+}
+
+std::string to_string(const TraceMessageType& type)
+{
+    std::stringstream ss;
+    ss << type;
+    return ss.str();
+}
+
+std::string to_string(const TraceMessage& msg)
+{
+    std::stringstream ss;
+    ss << msg;
+    return ss.str();
+}
+
+
 void CreateTraceMessageSinks(mw::logging::ILogger* logger,
     cfg::Participant participantConfig,
     RegistrationCallbackT registerSink)
@@ -25,8 +80,10 @@ void CreateTraceMessageSinks(mw::logging::ILogger* logger,
         {
         case cfg::TraceSink::Type::Mdf4File:
         {
-
-            throw std::runtime_error("SinkType Mdf4File not implemented yet!");
+            auto sink = extensions::CreateMdf4tracing(logger, sinkCfg.name);
+            sink->Open(tracing::SinkType::Mdf4File, sinkCfg.outputPath);
+            registerSink(std::move(sink));
+            break;
         }
         case cfg::TraceSink::Type::PcapFile:
         {
@@ -36,10 +93,14 @@ void CreateTraceMessageSinks(mw::logging::ILogger* logger,
             break;
         }
         case  cfg::TraceSink::Type::PcapPipe:
+        {
             auto sink = std::make_unique<PcapSink>(logger, sinkCfg.name);
             sink->Open(tracing::SinkType::PcapNamedPipe, sinkCfg.outputPath);
             registerSink(std::move(sink));
             break;
+        }
+        default:
+            throw std::runtime_error("Unknown Sink Type");
         }
     }
 

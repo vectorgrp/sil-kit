@@ -27,7 +27,8 @@ target_include_directories(IbTracing
 )
 target_link_libraries(IbTracing
     PRIVATE IbInterface
-    PRIVATE IbMwLogging
+            IbMwLogging
+            IbExtensions
 )
 
 if(WIN32)

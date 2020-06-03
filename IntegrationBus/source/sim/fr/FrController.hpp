@@ -89,7 +89,7 @@ public:
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
     //ib::mw::sync::ITimeConsumer
-    void SetTimeProvider(mw::sync::ITimeProvider* timeProvider);
+    void SetTimeProvider(mw::sync::ITimeProvider* timeProvider) override;
 
 private:
     // ----------------------------------------

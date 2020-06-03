@@ -202,7 +202,7 @@ private:
     // ----------------------------------------
     // private members
     cfg::Config _config;
-    const cfg::Participant& _participant{nullptr};
+    const cfg::Participant& _participant;
     std::string _participantName;
     ParticipantId _participantId{0};
     std::shared_ptr<sync::ITimeProvider> _timeProvider{nullptr};

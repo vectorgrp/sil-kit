@@ -6,6 +6,7 @@
 
 #include <string>
 #include <ctime>
+#include <sstream>
 
 namespace ib {
 namespace tracing {
@@ -89,9 +90,18 @@ void PcapSink::Close()
 void PcapSink::Trace(tracing::Direction /*unused*/,
         const mw::EndpointAddress& /* unusued endpoind address */,
         std::chrono::nanoseconds timestamp,
-        const sim::eth::EthFrame& message)
+        const TraceMessage& traceMessage)
 {
+    if (traceMessage.QueryType() != TraceMessageType::EthFrame)
+    {
+        std::stringstream ss;
+        ss << "Error: unsupported message type: " << traceMessage;
+        throw std::runtime_error(ss.str());
+    }
+    const auto& message = traceMessage.Get<sim::eth::EthFrame>();
+
     std::unique_lock<decltype(_lock)> lock;
+    
 
     const auto tosec = 1000'000ull;
     const auto usec = std::chrono::duration_cast<std::chrono::microseconds>(timestamp);

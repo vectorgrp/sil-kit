@@ -6,16 +6,9 @@
 #include <functional>
 #include <vector>
 #include <memory>
+#include <ostream>
 
 #include "ib/sim/fwd_decl.hpp"
-// NB: std::unique_ptr<ITraceMessageSink> requires concrete types of all
-//     the method parameters of ITraceMessageSink:
-#include "ib/sim/eth/EthDatatypes.hpp"
-#include "ib/sim/can/CanDatatypes.hpp"
-#include "ib/sim/generic/GenericMessageDatatypes.hpp"
-#include "ib/sim/io/IoDatatypes.hpp"
-#include "ib/sim/lin/LinDatatypes.hpp"
-
 #include "ib/mw/EndpointAddress.hpp"
 
 #include "ib/cfg/fwd_decl.hpp"
@@ -31,6 +24,15 @@ namespace tracing {
 using extensions::Direction;
 using extensions::ITraceMessageSink;
 using extensions::SinkType;
+using extensions::TraceMessage;
+using extensions::TraceMessageType;
+
+
+// utilities 
+std::ostream& operator<<(std::ostream& out, const TraceMessage&);
+std::ostream& operator<<(std::ostream& out, const TraceMessageType&);
+std::string to_string(const TraceMessageType&);
+std::string to_string(const TraceMessage&);
 
 // This interface allows attaching trace sinks to a controller, as configured by the user
 // and constructed in the ComAdapter.

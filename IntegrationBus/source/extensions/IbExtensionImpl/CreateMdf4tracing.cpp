@@ -30,7 +30,7 @@ struct DllCache
                 _dll = dllInst;
                 _extensionName = extensionName;
             }
-            return std::move(dllInst);
+            return dllInst;
         }
         catch (const ib::extensions::ExtensionError& err)
         {
@@ -66,8 +66,7 @@ auto CreateMdf4tracing(ib::mw::logging::ILogger* logger,
         throw ExtensionError(vibeName + " does not implement IIbMdf4Tracing"
                 " C++ type!");
     }
-    auto sink = mdf->Create(logger, sinkName, std::move(dll));
-    return std::move(sink);
+    return mdf->Create(logger, sinkName, std::move(dll));
 }
 
 }//end namespace extensions

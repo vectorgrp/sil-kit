@@ -6,9 +6,11 @@
 #include <string>
 
 namespace ib { namespace extensions {
+//forwards
+class IIbExtension;
 
 //! \brief Helper factory to instantiate Mdf4tracing
-//         Required because we don't have controll over the CTor, and also we
+//         Required because we don't have control over the CTor, and also we
 //         need to keep a reference to the DLL which we originate from.
 
 class IIbMdf4tracing  : public ITraceMessageSink
@@ -20,8 +22,6 @@ public:
             const std::string& name, std::shared_ptr<IIbExtension> dllInstance)
        -> std::unique_ptr<ITraceMessageSink> = 0;
 
-protected:
-    std::shared_ptr<IIbExtension> _dllInstance;
 };
 
 auto CreateMdf4tracing(ib::mw::logging::ILogger* logger, const std::string& sinkName)

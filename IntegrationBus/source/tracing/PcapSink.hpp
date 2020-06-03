@@ -39,7 +39,7 @@ public:
     void Trace(tracing::Direction txRx,
         const mw::EndpointAddress& id,
         std::chrono::nanoseconds timestamp,
-        const sim::eth::EthFrame& msg
+        const TraceMessage& msg
     ) override;
    
     auto GetLogger() const -> mw::logging::ILogger* override
@@ -50,70 +50,6 @@ public:
     auto Name() const -> const std::string& override
     {
         return _name;
-    }
-
-    void Trace(tracing::Direction,
-        const mw::EndpointAddress&,
-        std::chrono::nanoseconds,
-        const sim::can::CanMessage& 
-    ) override {
-        throw std::runtime_error("PcapSink: CanMessage type not supported");
-    }
-
-    void Trace(tracing::Direction,
-        const mw::EndpointAddress&,
-        std::chrono::nanoseconds,
-        const sim::lin::Frame& 
-    ) override {
-        throw std::runtime_error("PcapSink: lin::Frame type not supported");
-    }
-
-    void Trace(tracing::Direction,
-        const mw::EndpointAddress&,
-        std::chrono::nanoseconds,
-        const sim::generic::GenericMessage& 
-    ) override {
-        throw std::runtime_error("PcapSink: GenericMessage type not supported");
-    }
-
-    void Trace(tracing::Direction,
-        const mw::EndpointAddress&,
-        std::chrono::nanoseconds,
-        const sim::io::AnalogIoMessage& 
-    ) override {
-        throw std::runtime_error("PcapSink: AnalogIoMessage type not supported");
-    }
-
-    void Trace(tracing::Direction,
-        const mw::EndpointAddress&,
-        std::chrono::nanoseconds,
-        const sim::io::DigitalIoMessage& 
-    ) override {
-        throw std::runtime_error("PcapSink: DigitalIoMessage type not supported");
-    }
-
-    void Trace(tracing::Direction,
-        const mw::EndpointAddress&,
-        std::chrono::nanoseconds,
-        const sim::io::PatternIoMessage& 
-    ) override {
-        throw std::runtime_error("PcapSink: PatternIoMessage type not supported");
-    }
-
-    void Trace(tracing::Direction,
-        const mw::EndpointAddress&,
-        std::chrono::nanoseconds,
-        const sim::io::PwmIoMessage& 
-    ) override {
-        throw std::runtime_error("PcapSink: PwmIoMessage type not supported");
-    }
-
-    void Trace(tracing::Direction,
-        const mw::EndpointAddress&,
-        std::chrono::nanoseconds,
-        const sim::fr::FrMessage& 
-    ) override {
-        throw std::runtime_error("PcapSink: FrMessage type not supported");
     }
 
 private:
