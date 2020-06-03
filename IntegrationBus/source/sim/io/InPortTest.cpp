@@ -47,7 +47,7 @@ protected:
 
 protected:
     InPortTest()
-        : port{&comAdapter}
+        : port{&comAdapter, comAdapter.GetTimeProvider()}
     {
         port.SetEndpointAddress(portAddress);
     }

@@ -15,7 +15,8 @@ target_include_directories(IbSimFlexRay
 
 target_link_libraries(IbSimFlexRay
     PRIVATE IbInterface
-    IbMwLogging
+            IbMwLogging
+            IbTracing
 )
 
 add_vib_test(TestSimFrValidation SOURCES ValidationTest.cpp LIBS IbSimFlexRay)

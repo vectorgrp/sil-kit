@@ -10,14 +10,16 @@ namespace ib {
 namespace sim {
 namespace generic {
 
-GenericSubscriber::GenericSubscriber(mw::IComAdapter* comAdapter)
+GenericSubscriber::GenericSubscriber(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
+    , _timeProvider{timeProvider}
 {
 }
 
-GenericSubscriber::GenericSubscriber(mw::IComAdapter* comAdapter, cfg::GenericPort config)
+GenericSubscriber::GenericSubscriber(mw::IComAdapter* comAdapter, cfg::GenericPort config,   mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _config{std::move(config)}
+    , _timeProvider{timeProvider}
 {
 }
 
@@ -48,8 +50,19 @@ void GenericSubscriber::ReceiveIbMessage(mw::EndpointAddress from, const Generic
     if (!_callback)
         return;
 
+    if (_tracer.IsActive())
+        _tracer.Trace(tracing::Direction::Receive,
+            std::chrono::nanoseconds{}, //TODO where is _timeProvider?
+            msg);
     _callback(this, msg.data);
 }
+
+void GenericSubscriber::SetTimeProvider(mw::sync::ITimeProvider* provider)
+{
+    _timeProvider = provider;
+}
+
+
 
 } // namespace generic
 } // namespace sim

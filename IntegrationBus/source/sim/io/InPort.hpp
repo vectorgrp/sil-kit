@@ -7,6 +7,7 @@
 #include "ib/sim/io/IInPort.hpp"
 #include "ib/sim/io/IIbToInPort.hpp"
 #include "ib/cfg/Config.hpp"
+#include "ib/mw/sync/ITimeConsumer.hpp"
 
 #include <tuple>
 #include <vector>
@@ -19,6 +20,7 @@ template<typename MsgT>
 class InPort
     : public IInPort<MsgT>
     , public IIbToInPort<MsgT>
+    , public ib::mw::sync::ITimeConsumer
 {
 public:
     // ----------------------------------------
@@ -38,8 +40,8 @@ public:
     InPort() = delete;
     InPort(const InPort&) = default;
     InPort(InPort&&) = default;
-    InPort(mw::IComAdapter* comAdapter);
-    InPort(mw::IComAdapter* comAdapter, ConfigType config);
+    InPort(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider);
+    InPort(mw::IComAdapter* comAdapter, ConfigType config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -67,6 +69,8 @@ public:
 public:
     // ----------------------------------------
     // Public interface methods
+    // ITimeConsumer
+    void SetTimeProvider(mw::sync::ITimeProvider* timeProvider) override;
 
 private:
     // ----------------------------------------
@@ -95,21 +99,25 @@ private:
         CallbackVector<MessageType>,
         CallbackVector<ValueType>
     > _callbacks;
+
+    mw::sync::ITimeProvider* _timeProvider{nullptr};
 };
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
 template<typename MsgT>
-InPort<MsgT>::InPort(mw::IComAdapter* comAdapter)
+InPort<MsgT>::InPort(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
+    , _timeProvider{timeProvider}
 {
 }
 
 template<typename MsgT>
-InPort<MsgT>::InPort(mw::IComAdapter* comAdapter, ConfigType config)
+InPort<MsgT>::InPort(mw::IComAdapter* comAdapter, ConfigType config, mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _config{config}
+    , _timeProvider{timeProvider}
 {
 }
 
@@ -147,6 +155,13 @@ void InPort<MsgT>::ReceiveIbMessage(mw::EndpointAddress from, const MessageType&
     CallHandlers(msg);
     CallHandlers(msg.value);
 }
+
+template<typename MsgT>
+void InPort<MsgT>::SetTimeProvider(mw::sync::ITimeProvider* timeProvider)
+{
+    _timeProvider = timeProvider;
+}
+
 
 template<typename MsgT>
 void InPort<MsgT>::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)

@@ -290,7 +290,7 @@ auto ComAdapter<IbConnectionT>::CreateInPort(const ConfigT& config) -> io::IInPo
     if (config.direction != cfg::PortDirection::In)
         throw std::runtime_error("Invalid port direction!");
 
-    return CreateControllerForLink<io::InPort<MsgT>>(config, config);
+    return CreateControllerForLink<io::InPort<MsgT>>(config, config, _timeProvider.get());
 }
 
 template <class IbConnectionT>
@@ -317,7 +317,7 @@ template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateGenericSubscriber(const std::string& canonicalName) -> sim::generic::IGenericSubscriber*
 {
     auto&& config = get_by_name(_participant.genericSubscribers, canonicalName);
-    return CreateControllerForLink<sim::generic::GenericSubscriber>(config, config);
+    return CreateControllerForLink<sim::generic::GenericSubscriber>(config, config, _timeProvider.get());
 }
 
 template <class IbConnectionT>

@@ -18,6 +18,7 @@ namespace eth {
 class EthControllerProxy
     : public IEthController
     , public IIbToEthControllerProxy
+    , public tracing::IControllerToTraceSink
 {
 public:
     // ----------------------------------------
@@ -63,6 +64,12 @@ public:
 
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
+
+    //IControllerToTraceSink
+    void AddSink(tracing::ITraceMessageSink* sink) override
+    {
+        _tracer.AddSink(EndpointAddress(), *sink);
+    }
 
 private:
     // ----------------------------------------

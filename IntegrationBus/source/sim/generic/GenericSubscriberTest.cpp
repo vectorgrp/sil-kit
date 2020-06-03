@@ -31,7 +31,7 @@ protected:
 
 protected:
     GenericSubscriberTest()
-        : subscriber{&comAdapter, config}
+        : subscriber{&comAdapter, config, comAdapter.GetTimeProvider()}
     {
         subscriber.SetEndpointAddress(endpointAddress);
         subscriber.SetReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));

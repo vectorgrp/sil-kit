@@ -11,6 +11,7 @@ target_include_directories(IbSimIO
 
 target_link_libraries(IbSimIO
     PRIVATE IbInterface
+            IbTracing
 )
 
 add_vib_test(TestSimInOutPort SOURCES InPortTest.cpp OutPortTest.cpp LIBS IbSimIO IbMwMockComAdapter)

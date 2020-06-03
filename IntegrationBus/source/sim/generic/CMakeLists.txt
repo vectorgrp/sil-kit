@@ -13,7 +13,8 @@ target_include_directories(IbSimGenericMessage
 
 target_link_libraries(IbSimGenericMessage
     PRIVATE IbInterface
+            IbTracing
 )
 
-add_vib_test(TestGenericPublisher SOURCES GenericPublisherTest.cpp LIBS IbSimGenericMessage IbConfig IbMwMockComAdapter)
-add_vib_test(TestGenericSubscriber SOURCES GenericSubscriberTest.cpp LIBS IbSimGenericMessage IbConfig IbMwMockComAdapter)
+add_vib_test(TestGenericPublisher SOURCES GenericPublisherTest.cpp LIBS IbSimGenericMessage IbConfig IbMwMockComAdapter IbTracing)
+add_vib_test(TestGenericSubscriber SOURCES GenericSubscriberTest.cpp LIBS IbSimGenericMessage IbConfig IbMwMockComAdapter IbTracing)
