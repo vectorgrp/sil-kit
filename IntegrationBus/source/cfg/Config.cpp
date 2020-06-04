@@ -362,12 +362,18 @@ bool operator==(const MiddlewareConfig &lhs, const MiddlewareConfig& rhs)
     return lhs.fastRtps == rhs.fastRtps;
 }
 
+bool operator==(const ExtensionConfig &lhs, const ExtensionConfig& rhs)
+{
+    return lhs.searchPathHints == rhs.searchPathHints;
+}
+
 bool operator==(const Config& lhs, const Config& rhs)
 {
     return lhs.version == rhs.version
         && lhs.name == rhs.name
         && lhs.simulationSetup == rhs.simulationSetup
-        && lhs.middlewareConfig == rhs.middlewareConfig;
+        && lhs.middlewareConfig == rhs.middlewareConfig
+        && lhs.extensionConfig == rhs.extensionConfig;
 }
 
 bool operator==(const Sink& lhs, const Sink& rhs)

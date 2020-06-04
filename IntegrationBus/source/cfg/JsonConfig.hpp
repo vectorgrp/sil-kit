@@ -85,6 +85,8 @@ auto from_json<VAsio::Config>(const json11::Json& json) -> VAsio::Config;
 template <>
 auto from_json<MiddlewareConfig>(const json11::Json& json) -> MiddlewareConfig;
 template <>
+auto from_json<ExtensionConfig>(const json11::Json& json) -> ExtensionConfig;
+template <>
 auto from_json<Config>(const json11::Json& json) -> Config;
 
 auto to_json(uint16_t value) -> json11::Json;
@@ -115,6 +117,7 @@ auto to_json(const FastRtps::Config& fastRtps) -> json11::Json;
 auto to_json(const VAsio::RegistryConfig& config) -> json11::Json;
 auto to_json(const VAsio::Config& config) -> json11::Json;
 auto to_json(const MiddlewareConfig& simulationMiddleware) -> json11::Json;
+auto to_json(const ExtensionConfig& config) -> json11::Json;
 auto to_json(const Config& cfg) -> json11::Json;
 
 

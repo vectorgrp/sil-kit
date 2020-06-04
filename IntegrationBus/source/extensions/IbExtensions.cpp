@@ -4,6 +4,7 @@
 #include "IbExtensionApi/IbExtensionMacros.hpp"
 #include "IbExtensionApi/IbExtensionUtils.hpp"
 #include "ib/version.hpp"
+#include "ib/cfg/ExtensionConfigBuilder.hpp"
 
 #include <sstream>
 #include <cstdlib> //getenv
@@ -150,18 +151,21 @@ SymType* GetSymbol(detail::LibraryHandle hnd, const std::string& sym_name)
 auto LoadExtension(const std::string& name)
     -> std::shared_ptr<IIbExtension>
 {
-    const ExtensionPathHints DefaultHints{ "ENV:IB_EXTENSION_PATH", "." };
-    return LoadExtension(name, DefaultHints);
+    return LoadExtension(name, cfg::ExtensionConfig());
 }
 
 auto LoadExtension(
         const std::string& name,
-        const ExtensionPathHints& path_hints
+        const cfg::ExtensionConfig& config
     ) -> std::shared_ptr<IIbExtension>
 {
     using namespace detail;
 
-    auto paths = FindLibrary(name, path_hints);
+    ExtensionPathHints searchPathHints = config.searchPathHints;
+    searchPathHints.emplace_back("ENV:IB_EXTENSION_PATH");
+    searchPathHints.emplace_back(".");
+
+    auto paths = FindLibrary(name, searchPathHints);
     detail::LibraryHandle lib_handle = nullptr;
 
     auto check_lib = [](const std::string &path) 

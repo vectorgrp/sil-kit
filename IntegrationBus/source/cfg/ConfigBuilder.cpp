@@ -22,6 +22,7 @@ auto ConfigBuilder::Build() -> Config
     _config.simulationSetup = SimulationSetup().Build();
     _config.middlewareConfig.fastRtps = _fastRtpsConfig->Build();
     _config.middlewareConfig.vasio = _vasioConfig->Build();
+    _config.extensionConfig = _extensionConfig.Build();
 
     // Post-processing steps
     // Note: Some steps (AssignEndpointAddresses, AssignLinkIds) are done by this builder on-the-fly
@@ -52,6 +53,12 @@ auto ConfigBuilder::WithActiveMiddleware(Middleware middleware) -> ConfigBuilder
     _config.middlewareConfig.activeMiddleware = middleware;
     return *this;
 }
+
+auto ConfigBuilder::ConfigureExtensions() -> ExtensionConfigBuilder&
+{
+    return _extensionConfig;
+}
+
 
 } // namespace cfg
 } // namespace ib

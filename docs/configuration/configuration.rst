@@ -8,7 +8,7 @@ VIB Configuration
    simulation-setup
    middleware-configuration
    launch-configurations
-
+   extension-configuration
 
 .. _sec:ibconfig-json:
 
@@ -17,7 +17,7 @@ The IbConfig.json File
 
 The Vector Integration Bus is configured via a json config file, often
 referred to as IbConfig.json. The IbConfig.json begins with some general
-information about the configuration file itself followed by three subsections.
+information about the configuration file itself followed by four subsections.
 
 The outline of a IbConfig.json file is as follows:
 
@@ -40,8 +40,11 @@ The outline of a IbConfig.json file is as follows:
     
         "LaunchConfigurations": [
             ...
-        ]
+        ],
     
+        "ExtensionConfig": {
+            ...
+        }
     }
 
 
@@ -85,3 +88,6 @@ Configuration Options
      - This optional section contains information to start all necessary
        processes to perform the configured simulation. It is only used by the
        IbLauncher.
+
+   * - :doc:`ExtensionConfig<extension-configuration>`
+     - This optional section contains all extension-related settings.

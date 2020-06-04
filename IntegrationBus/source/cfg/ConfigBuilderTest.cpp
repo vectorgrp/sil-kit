@@ -475,6 +475,23 @@ TEST_F(ConfigBuilderTest, configure_timesync_syncpolicy_by_parameter)
     EXPECT_EQ(configBuilder.Build().simulationSetup.timeSync.syncPolicy, ib::cfg::TimeSync::SyncPolicy::Strict);
 }
 
+// Test the generation of the extension configuration
+TEST_F(ConfigBuilderTest, configure_extensions)
+{
+    const std::string extensionSearchPath1 = "Extension/Search/Path/1";
+    const std::string extensionSearchPath2 = "Extension/Search/Path/2";
+
+    configBuilder.ConfigureExtensions()
+        .AddSearchPath(extensionSearchPath1)
+        .AddSearchPath(extensionSearchPath2);
+
+    auto config = configBuilder.Build();
+
+    EXPECT_EQ(config.extensionConfig.searchPathHints.size(), 2);
+    EXPECT_EQ(config.extensionConfig.searchPathHints[0], extensionSearchPath1);
+    EXPECT_EQ(config.extensionConfig.searchPathHints[1], extensionSearchPath2);
+}
+
 static ConfigBuilder DefineBuilder()
 {
     ConfigBuilder config_builder("ConfigBuilder on stack");

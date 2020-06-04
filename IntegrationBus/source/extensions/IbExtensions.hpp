@@ -10,6 +10,8 @@
 
 #include "IbExtensionApi/IIbExtension.hpp"
 
+#include "ib/cfg/Config.hpp"
+
 /*! IB Extensions
  * 
  * The extension mechanism consists of two parts:
@@ -38,15 +40,14 @@ using ExtensionPathHints = std::vector<std::string>;
 auto LoadExtension(const std::string& undecorated_name)
     -> std::shared_ptr<IIbExtension>;
 
-//! \brief Loads the extension by name, and using the path hints for
-//!        inferring the module path.
+//! \brief Loads the extension by name and uses the additional search path hints from
+//         the extension configuration.
 //! NB: a path hint can contain the prefix "ENV:" to refer to an environment
 //! variable name.
 auto LoadExtension(
-        const std::string& undecorated_name,
-        const ExtensionPathHints& path_hints
-        )
-        -> std::shared_ptr<IIbExtension>;
+    const std::string& undecorated_name,
+    const cfg::ExtensionConfig& config)
+    -> std::shared_ptr<IIbExtension>;
 
 }//end namespace extensions
 }//end namespace ib

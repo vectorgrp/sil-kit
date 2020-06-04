@@ -21,12 +21,40 @@
 
 #include "ib/extensions/CreateExtension.hpp"
 
+#if defined(WIN32)
+// without underscore is deprecated on windows
+#define getcwd _getcwd
+#define chdir _chdir
+#endif
+
 using namespace testing;
 using namespace std::chrono_literals;
 using namespace ib::cfg;
 using namespace ib::mw;
 
 using namespace ib::extensions;
+
+namespace
+{
+    std::string GetCurrentWorkingDir()
+    {
+        constexpr size_t maxPath = 4096;
+        char buffer[maxPath];
+        if (getcwd(buffer, maxPath) == nullptr)
+        {
+            throw std::runtime_error("Couldn't get current working directory.");
+        }
+        return std::string(buffer);
+    }
+    void SetCurrentWorkingDir(const std::string& cwd)
+    {
+        if (chdir(cwd.c_str()) != 0)
+        {
+            throw std::runtime_error("Couldn't set the current working directory.");
+        }
+    }
+}
+
 class IbRegistryLibFixture
     : public Test
 {
@@ -36,7 +64,17 @@ public:
         CreateConfig();
     }
 
-    const Config GetConfig() const { return _config;  }
+    void TearDown() override
+    {
+        // Switch to original directory if the previous test fails
+        SetCurrentWorkingDir(currentWorkingDir);
+    }
+
+    const Config GetConfig() const { return _config; }
+    static void SetUpTestCase() { currentWorkingDir = GetCurrentWorkingDir(); }
+
+    static std::string currentWorkingDir;
+
 private:
 
     void CreateConfig()
@@ -62,6 +100,8 @@ private:
     Config _config;
 };
 
+std::string IbRegistryLibFixture::currentWorkingDir;
+
 TEST_F(IbRegistryLibFixture, load_registry)
 {
     {
@@ -81,6 +121,28 @@ TEST_F(IbRegistryLibFixture, load_registry)
     registry->SetAllDisconnectedHandler([&disco](){
         disco = true;
     });
+}
+
+// Load registry from the search path specified in the extension configuration
+TEST_F(IbRegistryLibFixture, load_registry_custom_search_path)
+{
+    try
+    {
+        SetCurrentWorkingDir("..");
+
+        auto config = GetConfig();
+        EXPECT_THROW(CreateIbRegistry(config), std::runtime_error);
+
+        config.extensionConfig.searchPathHints.emplace_back(currentWorkingDir);
+        ASSERT_TRUE(CreateIbRegistry(config));
+
+        SetCurrentWorkingDir(currentWorkingDir);
+    }
+    catch (std::exception& e)
+    {
+        std::cout << e.what() << '\n';
+        FAIL();
+    }
 }
 
 //This is taken from the integration tests, we need to make sure the 

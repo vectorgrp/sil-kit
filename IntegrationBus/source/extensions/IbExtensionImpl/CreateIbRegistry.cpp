@@ -65,7 +65,7 @@ auto CreateIbRegistry(ib::cfg::Config config)
         auto dllInst = cachedDll.lock();
         if (!dllInst)
         {
-            dllInst = LoadExtension("vib-registry");
+            dllInst = LoadExtension("vib-registry", config.extensionConfig);
             cachedDll = dllInst;
         }
 
@@ -106,8 +106,9 @@ auto CreateIbRegistry(ib::cfg::Config config)
         std::cout << "ERROR loading IbRegistry: " << err.what() << std::endl;
         throw;
     }
-    throw ExtensionError("Could not load vib-registry shared library."
-        "Please make sure it is in the working directory.");
+    throw ExtensionError("Could not load vib-registry shared library. "
+        "Please make sure it resides at the location specified in the search "
+        "path hints in the extension configuration.");
 }
 
 }//end namespace extensions

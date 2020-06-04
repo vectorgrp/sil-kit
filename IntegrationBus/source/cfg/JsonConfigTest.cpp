@@ -39,7 +39,7 @@ protected:
     void BuildConfigFromJson()
     {
         referenceConfig = builder.Build();
-        auto jsonString = referenceConfig.ToJsonString();      
+        jsonString = referenceConfig.ToJsonString();      
         config = ib::cfg::Config::FromJsonString(jsonString);
     }
 
@@ -52,6 +52,7 @@ protected:
     SimulationSetupBuilder& simulationSetup;
 
     ib::cfg::Config referenceConfig;
+    std::string jsonString;
     ib::cfg::Config config;
 };
 
@@ -634,7 +635,24 @@ TEST_F(JsonConfigTest, configure_participant_without_participant_controller)
     EXPECT_FALSE(controller.has_value());
 }
 
+// Test the configuration of the extension search path hints
+TEST_F(JsonConfigTest, configure_extension_search_path_hints)
+{
+    builder.ConfigureExtensions()
+        .AddSearchPath("Extension/Search/Path/1")
+        .AddSearchPath("Extension/Search/Path/2");
 
+    BuildConfigFromJson();
+    EXPECT_EQ(config, referenceConfig);
+}
 
+// Test if the default configuration is not serialized
+TEST_F(JsonConfigTest, configure_extension_default)
+{
+    BuildConfigFromJson();
+    EXPECT_EQ(config, referenceConfig);
+
+    EXPECT_TRUE(jsonString.find("ExtensionConfig") == std::string::npos);
+}
 
 } // anonymous namespace

@@ -332,8 +332,20 @@ struct MiddlewareConfig
 };
 
 // ================================================================================
+//  Extension Config
+// ================================================================================
+
+// ! \brief Structure containing all extension settings
+struct ExtensionConfig
+{
+    //! \brief Additional search path hints for extensions
+    std::vector<std::string> searchPathHints;
+};
+
+// ================================================================================
 //  Main Config
 // ================================================================================
+
 //! \brief Config is the main configuration data object for the VIB.
 struct Config
 {
@@ -352,6 +364,9 @@ struct Config
     SimulationSetup simulationSetup;
     //! \brief the middleware config contains the backend settings
     MiddlewareConfig middlewareConfig;
+
+    //! \brief Contains the settings regarding the extensions
+    ExtensionConfig extensionConfig;
 
     /*! \brief Parse configuration from a JSON string.
     *
@@ -405,6 +420,7 @@ IntegrationBusAPI bool operator==(const TimeSync& lhs, const TimeSync& rhs);
 IntegrationBusAPI bool operator==(const SimulationSetup& lhs, const SimulationSetup& rhs);
 IntegrationBusAPI bool operator==(const FastRtps::Config& lhs, const FastRtps::Config& rhs);
 IntegrationBusAPI bool operator==(const MiddlewareConfig& lhs, const MiddlewareConfig& rhs);
+IntegrationBusAPI bool operator==(const ExtensionConfig& lhs, const ExtensionConfig& rhs);
 IntegrationBusAPI bool operator==(const Config& lhs, const Config& rhs);
 IntegrationBusAPI bool operator==(const Sink& lhs, const Sink& rhs);
 IntegrationBusAPI bool operator==(const Logger& lhs, const Logger& rhs);

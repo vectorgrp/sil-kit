@@ -38,6 +38,8 @@ add_library(IbConfig STATIC
     VAsioConfigBuilder.hpp
     VAsioRegistryBuilder.cpp
     VAsioRegistryBuilder.hpp
+    ExtensionConfigBuilder.cpp
+    ExtensionConfigBuilder.hpp
 )
 
 target_link_libraries(IbConfig

@@ -7,11 +7,19 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 
 [x.y.z] - unreleased
 --------------------------------
+Added
+~~~~~
+- New optional configuration section for extension-related settings,
+  cf. :doc:`../configuration/extension-configuration`. Its only property
+  is the list of extension search path hints, which allows to configure
+  the additional search paths for shared library extensions loaded by the VIB,
+  e.g. the :doc:`vibes/vibregistry`.
   
 Changed
 ~~~~~
 - For FastRTPS, the default participant lease duration is now 2h to avoid
   connection losses when debugging. (AFTMAGT-267)
+
 
 
 [3.0.7] - 2020-04-25

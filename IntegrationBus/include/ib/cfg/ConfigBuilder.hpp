@@ -15,6 +15,7 @@
 #include "FastRtpsConfigBuilder.hpp"
 #include "VAsioConfigBuilder.hpp"
 #include "SimulationSetupBuilder.hpp"
+#include "ExtensionConfigBuilder.hpp"
 
 namespace ib {
 namespace cfg {
@@ -40,14 +41,15 @@ public:
     IntegrationBusAPI auto ConfigureVAsio() -> VAsio::ConfigBuilder&;
     //! \brief Declare the current active middleware to use.
     IntegrationBusAPI auto WithActiveMiddleware(Middleware middleware) -> ConfigBuilder&;
+    //! \brief Add builder for configuring the extensions
+    IntegrationBusAPI auto ConfigureExtensions() -> ExtensionConfigBuilder&;
 
 private:
     Config _config;
     std::unique_ptr<SimulationSetupBuilder> _simulationSetup;
-
     std::unique_ptr<FastRtps::ConfigBuilder> _fastRtpsConfig;
     std::unique_ptr<VAsio::ConfigBuilder> _vasioConfig;
-    MiddlewareConfig _middlewareConfig;
+    ExtensionConfigBuilder _extensionConfig;
 };
 
 } // namespace cfg

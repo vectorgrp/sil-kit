@@ -22,7 +22,7 @@ follows:
 
 - ensure that the VIB library version and the vib-registry version match.
 - the vib-library for your platform and cmake build type should be copied to
-  your applications working directory.
+  a location specified in the extension search path (see :doc:`../configuration/extension-configuration`).
   On Windows you'll need the vib-registry(d).dll and on Linux
   libvib-registry(d).so
 
@@ -31,8 +31,8 @@ and use the shared library.
 
 VIB-Registry API
 ----------------
-The vib-registry shared library needs to reside in the process's current working
-directory for this function to work properly.
+The vib-registry shared library needs to reside in the search path specified in the
+extension configuration (see :doc:`../configuration/extension-configuration`).
 The shared library is loaded, validated and an instance of
 :cpp:class:`IIbRegistry<ib::extensions::IIbRegistry>` is constructed.
 The corresponding header file is ``ib/extensions/CreateExtension.hpp``.

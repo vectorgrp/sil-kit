@@ -22,6 +22,7 @@ target_include_directories(IbExtensions
 
 target_link_libraries(IbExtensions
     PUBLIC  IbInterface
+            IbConfig
     PRIVATE IbVersion
 )
 

@@ -17,6 +17,10 @@ namespace cfg {
 // Put helper functions in anonymous namespace
 namespace {
 
+// Default config objects to detect if element shall be serialized.
+
+const ExtensionConfig defaultExtensionConfig;
+
 inline auto nibble_to_char(char nibble) -> char
 {
     nibble &= 0xf;
@@ -74,6 +78,12 @@ auto optional_from_json(ConfigT& cfg, const json11::Json& json, const std::strin
         cfg = from_json<ConfigT>(json[fieldName]);
 }
 
+template <typename T>
+auto optional_from_json(std::vector<T>& vector, const json11::Json& json, const std::string& fieldName)
+{
+    if (!json.is_null())
+        vector = from_json<std::vector<T>>(json[fieldName].array_items());
+}
 
 } // namespace anonymous
 
@@ -1300,17 +1310,54 @@ auto from_json<MiddlewareConfig>(const json11::Json& json) -> MiddlewareConfig
     return middlewareConfig;
 }
 
+// ================================================================================
+// Extension configuration
+// ================================================================================
+
+auto to_json(const ExtensionConfig& config) -> json11::Json
+{
+    json11::Json::object json;
+
+    if (config.searchPathHints != defaultExtensionConfig.searchPathHints)
+    {
+        json["SearchPathHints"] = to_json(config.searchPathHints);
+    }
+
+    return json;
+}
+
+template <>
+auto from_json<ExtensionConfig>(const json11::Json& json) -> ExtensionConfig
+{
+    ExtensionConfig extensionConfig;
+
+    optional_from_json(extensionConfig.searchPathHints, json, "SearchPathHints");
+
+    return extensionConfig;
+}
+
+// ================================================================================
+// Configuration
+// ================================================================================
+
 auto to_json(const Config& cfg) -> json11::Json
 {
-    return json11::Json::object
+    json11::Json::object json
     {
         {"ConfigVersion", to_json(cfg.version)},
         {"ConfigName", cfg.name},
         {"Description", cfg.description},
 
         {"SimulationSetup", to_json(cfg.simulationSetup)},
-        {"MiddlewareConfig", to_json(cfg.middlewareConfig)}
+        {"MiddlewareConfig", to_json(cfg.middlewareConfig)},
     };
+
+    if (!(cfg.extensionConfig == defaultExtensionConfig))
+    {
+        json["ExtensionConfig"] = to_json(cfg.extensionConfig);
+    }
+    
+    return json;
 }
 
 template <>
@@ -1323,6 +1370,7 @@ auto from_json<Config>(const json11::Json& json) -> Config
 
     config.simulationSetup = from_json<SimulationSetup>(json["SimulationSetup"]);
     config.middlewareConfig = from_json<MiddlewareConfig>(json["MiddlewareConfig"]);
+    optional_from_json(config.extensionConfig, json, "ExtensionConfig");
 
     return config;
 }

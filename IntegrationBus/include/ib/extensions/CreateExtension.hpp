@@ -11,9 +11,10 @@
 
 namespace ib { namespace extensions {
 
-/*! \brief Loads the IbRegistry extension from a shared library in the current
-*        working directory if necessary, and returns an instance of
-*        IIbRegistry to the caller.
+/*! \brief Loads the IbRegistry extension from a shared library and
+*        returns an instance of IIbRegistry to the caller. Search paths
+*        can be specified in the extension element in the configuration,
+*        additionally to the default ones (see documentation).
 *
 * Throws std::runtime_error on error.
 */
