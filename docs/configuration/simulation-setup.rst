@@ -78,6 +78,8 @@ logging.
 
 
             "NetworkSimulators": [ ... ]
+
+            "TraceSinks" : [ ...]
         },
         {
             "Name": "Participant2",
@@ -144,7 +146,10 @@ logging.
 
        
    * - NetworkSimulators
-     - A list NetworkSimulator names simulated by this participant.
+     - A list of NetworkSimulator names simulated by this participant.
+
+   * - :ref:`TraceSinks<sec:cfg-participant-tracesink>`
+     - A list of TraceSink instances.
 
 
 
@@ -471,6 +476,40 @@ configuration<sec:cfg-participant>`.
 
 The pattern-out port instances are specified by giving their name 
 and a hexadecimal pattern string.
+
+.. _sec:cfg-participant-tracesink:
+
+TraceSink
+----------------------------------------
+The TraceSink configuration is part of the :ref:`participant
+configuration<sec:cfg-participant>`.
+
+.. code-block:: javascript
+  
+  "TraceSinks": [
+      {
+          "Name": "String",
+          "Type":  "PcapFile",
+          "OutputPath": "Filesystem/Path/"
+      }
+  ]
+
+It allows to trace the IB simulation messages into binary files.
+
+.. list-table:: TraceSink Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+   * - Name
+     - The name of the sink. Controller, Services and Ports may refer to this
+       sink by name.
+   * - Type
+     - The type specifies the format of the output stream. Supported file
+       formats are: PcapFile, PcapPipe, Mdf4File.
+   * - OutputPath
+     - A filesystem path where the IB messages are traced to.
 
 
 

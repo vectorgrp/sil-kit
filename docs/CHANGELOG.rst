@@ -16,10 +16,54 @@ Added
   the additional search paths for shared library extensions loaded by the VIB,
   e.g. the :doc:`vibes/vibregistry`.
   
+
+- This release introduces a  new configuration mechanism for IB message
+  tracing.
+  It supersedes the previous Ethernet and PCAP specicic configuration, please
+  refer to the Deprecated section.
+
+  The ParticipantBuilder gained a new AddTraceSink() method, which returns
+  a TraceSinkBuilder. A TraceSink consists of a unique, nonempty name, an output 
+  path  and the format type (PcapFile, PcapPipe, Mdf4File).
+
+  Services, Controllers and Ports can be configured to use a trace sink by name.
+  For example, by invoking the
+  :cpp:func:`WithTraceSink(name)<ib::cfg::GenericPortBuilder::WithTraceSink()>`
+  on the appropriate builder.
+  This will populate the 'UseTraceSinks' field of the JSON serialization of the
+  builder's configuration type.
+
 Changed
-~~~~~
+~~~~~~~
 - For FastRTPS, the default participant lease duration is now 2h to avoid
   connection losses when debugging. (AFTMAGT-267)
+
+- To enable the newly added 'UseTraceSinks' fields, the JSON serialization
+  format of the Controllers, Services and Ports were adjusted.
+  In particular, the JSON type of DigitalIoPort, AnalogIoPort, PwmPort,
+  PatternPort, and  GenericSubscriber were changed:
+
+  + old:
+
+    .. code-block:: javascript
+
+       "Port-Type": [ "PortName", "OtherPort", ...]
+
+ + new:
+
+    .. code-block:: javascript
+
+       "Port-Type": [
+            {
+                "Name":  "PortName"
+            },
+            {
+                "Name":  "OtherPort"
+            }
+       ]
+
+
+
 
 Fixed
 ~~~~~
@@ -28,6 +72,44 @@ Fixed
   current simulation time in the LinTransmission. Previously, the timestamp was
   always 0s.
 
+- GenericSubscriber was missing the ITimeProvider interface.
+
+Deprecated
+~~~~~~~~~~
+- The 'pcapFile' and 'pcapPipe' fields in the EthernetController configuration 
+  are deprecated. Please use the newly added 'UseTraceSinks' and 'TraceSinks' 
+  fields. These fields will be removed from the JSON format and the Config
+  Builder API in the future.
+
+  + old:
+    
+    .. code-block:: javascript
+
+       "EthernetControllers": [
+           {
+               "Name": "ETH0",
+               "PcapFile": [ "EthernetReader.pcap" ]
+           }
+        ] 
+
+  + new:
+    
+    .. code-block:: javascript
+
+       "EthernetControllers": [
+           {
+               "Name": "ETH0",
+               "UseTraceSinks": "EthernetSink"
+           }
+        ] 
+        "TraceSinks": [
+            {
+                "Name" : "EthernetSink",
+                "OutputPath": "EthernetReader.pcap",
+                "Type": "PcapFile"
+            }
+        ]
+>>>>>>> AFTMAGT-232 Add documentation for TraceSinks
 
 [3.0.7] - 2020-04-25
 --------------------------------
