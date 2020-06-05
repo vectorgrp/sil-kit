@@ -63,8 +63,10 @@ std::string to_string(const TraceMessage& msg)
 }
 
 
-void CreateTraceMessageSinks(mw::logging::ILogger* logger,
-    cfg::Participant participantConfig,
+void CreateTraceMessageSinks(
+    mw::logging::ILogger* logger,
+    const cfg::Config& config,
+    const cfg::Participant& participantConfig,
     RegistrationCallbackT registerSink)
 {
     for (const auto& sinkCfg : participantConfig.traceSinks)
@@ -80,7 +82,9 @@ void CreateTraceMessageSinks(mw::logging::ILogger* logger,
         {
         case cfg::TraceSink::Type::Mdf4File:
         {
-            auto sink = extensions::CreateMdf4tracing(logger, sinkCfg.name);
+            //the `config' contains information about the links, which
+            // will be useful when naming the MDF4 channels
+            auto sink = extensions::CreateMdf4tracing(logger, sinkCfg.name, config);
             sink->Open(tracing::SinkType::Mdf4File, sinkCfg.outputPath);
             registerSink(std::move(sink));
             break;

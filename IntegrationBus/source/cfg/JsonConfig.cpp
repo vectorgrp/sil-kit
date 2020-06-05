@@ -655,12 +655,14 @@ auto from_json<FlexrayController>(const json11::Json& json) -> FlexrayController
 auto to_json(const DigitalIoPort& port) -> json11::Json
 {
     auto json = json11::Json::object{
-        { port.name, json11::Json::object{
-            {"value", port.initvalue},
-            {"UseTraceSinks", to_json(port.useTraceSinks)}
-            }
-        }
+        {"Name",  port.name},
+        {"value", port.initvalue}
     };
+
+    if (!port.useTraceSinks.empty())
+    {
+        json["UseTraceSinks"] = to_json(port.useTraceSinks);
+    }
 
     return json;
 }
@@ -674,22 +676,22 @@ auto from_json(const json11::Json& json) -> DigitalIoPort
     if (json.object_items().size() == 0)
         throw Misconfiguration{"Digital IO has no properties!"};
 
+    //backward compatibility to {"Name" : bool}
     auto&& jsonPort = *json.object_items().begin();
-
-    //for backward compat accept { "Name" : bool }
-    port.name = jsonPort.first;
-    if (jsonPort.second.is_bool())
+    if (jsonPort.first != "Name" && jsonPort.second.is_bool())
     {
+        port.name = jsonPort.first;
         port.initvalue = jsonPort.second.bool_value();
         return port;
     }
 
     // new style
-    port.initvalue = jsonPort.second["value"].bool_value();
+    port.name = json["Name"].string_value();
+    port.initvalue = json["value"].bool_value();
 
-    if (jsonPort.second.object_items().count("UseTraceSinks"))
+    if (json.object_items().count("UseTraceSinks"))
     {
-        port.useTraceSinks = from_json<std::vector<std::string>>(jsonPort.second["UseTraceSinks"].array_items());
+        port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
     }
 
     return port;
@@ -698,14 +700,15 @@ auto from_json(const json11::Json& json) -> DigitalIoPort
 auto to_json(const AnalogIoPort& port) -> json11::Json
 {
     auto json = json11::Json::object {
-        { port.name,
-            json11::Json::object {
-                {"value", port.initvalue},
-                {"unit", port.unit},
-                {"UseTraceSinks", to_json(port.useTraceSinks)}
-            }
-        }
+        { "Name", port.name},
+        { "value", port.initvalue},
+        { "unit", port.unit}
     };
+
+    if (!port.useTraceSinks.empty())
+    {
+        json["UseTraceSinks"] = to_json(port.useTraceSinks);
+    }
 
     return json;
 }
@@ -719,15 +722,27 @@ auto from_json(const json11::Json& json) -> AnalogIoPort
     if (json.object_items().size() == 0)
         throw Misconfiguration{"Analog IO has no properties!"};
 
+    //backward compatibility to {"name" : {"value" : number, "unit" : str}}
     auto&& jsonPort = *json.object_items().begin();
-
-    port.name = jsonPort.first;
-    port.initvalue = jsonPort.second["value"].number_value();
-    port.unit = jsonPort.second["unit"].string_value();
-
-    if (jsonPort.second.object_items().count("UseTraceSinks"))
+    if (jsonPort.first != "Name" 
+        && jsonPort.second.is_object()
+        && jsonPort.second["value"].is_number()
+        && jsonPort.second["unit"].is_string())
     {
-        port.useTraceSinks = from_json<std::vector<std::string>>(jsonPort.second["UseTraceSinks"].array_items());
+        port.name = jsonPort.first;
+        port.initvalue = jsonPort.second["value"].number_value();
+        port.unit = jsonPort.second["unit"].string_value();
+        return port;
+    }
+
+    //new format
+    port.name = json["Name"].string_value();
+    port.initvalue = json["value"].number_value();
+    port.unit = json["unit"].string_value();
+
+    if (json.object_items().count("UseTraceSinks"))
+    {
+        port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
     }
 
     return port;
@@ -737,27 +752,15 @@ auto to_json(const PwmPort& port) -> json11::Json
 {
 
     auto json = json11::Json::object {
-        { port.name, json11::Json::object {
-                { "freq", json11::Json::object {{ "value", port.initvalue.frequency }, {"unit", port.unit }}},
-                { "duty", port.initvalue.dutyCycle },
-                { "UseTraceSinks", to_json(port.useTraceSinks) } // XXX should not be printed if empty
-        }}
+        { "Name", port.name},
+        { "freq", json11::Json::object {{ "value", port.initvalue.frequency }, {"unit", port.unit }}},
+        { "duty", port.initvalue.dutyCycle },
     };
 
-    // TODO the following is a bit ugly, because Json is immutable, we'll have to copy it manually
-    /*
     if (!port.useTraceSinks.empty())
     {
-        json = json11::Json::object {
-            { port.name, json11::Json::object {
-                    { "freq", json11::Json::object {{ "value", port.initvalue.frequency }, {"unit", port.unit }}},
-                    { "duty", port.initvalue.dutyCycle },
-                    { "UseTraceSinks", to_json(port.useTraceSinks) }
-            }}
-        };
+        json["UseTraceSinks"] = to_json(port.useTraceSinks);
     }
-    */
-
 
     return json;
 }
@@ -771,15 +774,28 @@ auto from_json(const json11::Json& json) -> PwmPort
     if (json.object_items().size() == 0)
         throw Misconfiguration{"PWM IO has no properties!"};
 
+    //backward compatibility to {"name" : {"unit": str", ...}
     auto&& jsonPort = *json.object_items().begin();
-
-    port.name = jsonPort.first;
-    port.initvalue = {jsonPort.second["freq"]["value"].number_value(), jsonPort.second["duty"].number_value()};
-    port.unit = jsonPort.second["freq"]["unit"].string_value();
-
-    if (jsonPort.second.object_items().count("UseTraceSinks"))
+    if (jsonPort.first != "Name" 
+        && jsonPort.second.is_object()
+        && jsonPort.second["freq"].is_object()
+        )
     {
-        port.useTraceSinks = from_json<std::vector<std::string>>(jsonPort.second["UseTraceSinks"].array_items());
+        port.name = jsonPort.first;
+
+        port.initvalue = {jsonPort.second["freq"]["value"].number_value(), jsonPort.second["duty"].number_value()};
+        port.unit = jsonPort.second["freq"]["unit"].string_value();
+        return port;
+    }
+
+    //new way 
+    port.name = json["Name"].string_value();
+    port.initvalue = {json["freq"]["value"].number_value(), json["duty"].number_value()};
+    port.unit = json["freq"]["unit"].string_value();
+
+    if (json.object_items().count("UseTraceSinks"))
+    {
+        port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
     }
 
     return port;
@@ -787,12 +803,17 @@ auto from_json(const json11::Json& json) -> PwmPort
 
 auto to_json(const PatternPort& port) -> json11::Json
 {
-    return json11::Json::object{
-        { port.name, json11::Json::object{
-            {"value", hex_encode(port.initvalue)},
-            {"UseTraceSinks", to_json(port.useTraceSinks)}
-        }}
+    auto json = json11::Json::object{
+        {"Name", port.name},
+        {"value", hex_encode(port.initvalue)},
     };
+
+    if (!port.useTraceSinks.empty())
+    {
+        json["UseTraceSinks"] = to_json(port.useTraceSinks);
+    }
+
+    return json;
 }
 
 template <>
@@ -804,22 +825,22 @@ auto from_json(const json11::Json& json) -> PatternPort
     if (json.object_items().size() == 0)
         throw Misconfiguration{"Pattern IO has no properties!"};
 
-    auto&& jsonPort = *json.object_items().begin();
-    port.name = jsonPort.first;
-
     //backward compatibility to {"name" : "hexval"}
-    if (jsonPort.second.is_string())
+    auto&& jsonPort = *json.object_items().begin();
+    if (jsonPort.first != "Name" && jsonPort.second.is_string())
     {
+        port.name = jsonPort.first;
         port.initvalue = hex_decode(jsonPort.second.string_value());
         return port;
     }
 
     //new way 
-    port.initvalue = hex_decode(jsonPort.second["value"].string_value());
+    port.name = json["Name"].string_value();
+    port.initvalue = hex_decode(json["value"].string_value());
 
-    if (jsonPort.second.object_items().count("UseTraceSinks"))
+    if (json.object_items().count("UseTraceSinks"))
     {
-        port.useTraceSinks = from_json<std::vector<std::string>>(jsonPort.second["UseTraceSinks"].array_items());
+        port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
     }
 
     return port;
@@ -967,11 +988,22 @@ auto to_json(const Participant& participant) -> json11::Json
             return json;
         };
 
+    // NB: we need this, otherwise we would serialize GenericPublisher properties into the GenericSubscribers
     auto subscribers_to_json =
         [](auto&& subscribers)
         {
-            std::vector<std::string> result{subscribers.size()};
-            std::transform(subscribers.begin(), subscribers.end(), result.begin(), [](auto&& sub) { return sub.name; });
+            auto result = json11::Json::array{};
+            for(const auto &sub: subscribers)
+            { 
+                auto json = json11::Json::object{
+                    {"Name", sub.name}
+                };
+                if (!sub.useTraceSinks.empty())
+                {
+                    json["UseTraceSinks"] = to_json(sub.useTraceSinks);
+                }
+                result.push_back(json);
+            }
             return result;
         };
 
@@ -1017,7 +1049,21 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
             for (auto&& subscriber : jsonSubscribers)
             {
                 GenericPort port;
-                port.name = subscriber.string_value();
+                //backward compatibility:
+                if (subscriber.is_string())
+                {
+                    port.name = subscriber.string_value();
+                }
+                else
+                {
+                    //TODO move this special case to from_json<GenericPort>
+                    port.name = subscriber["Name"].string_value();
+                    if (subscriber.object_items().count("UseTraceSinks"))
+                    {
+                        port.useTraceSinks =
+                            from_json<std::vector<std::string>>(subscriber["UseTraceSinks"].array_items());
+                    }
+                }
                 result.emplace_back(std::move(port));
 
             }

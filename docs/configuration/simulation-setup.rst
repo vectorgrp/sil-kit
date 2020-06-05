@@ -393,11 +393,19 @@ The Digital-Out Ports configuration is part of the :ref:`participant
 configuration<sec:cfg-participant>`. The name and initial state of the participant's 
 digital output port instances can be configured in this section:
 
+.. deprecated:: 3.0.7
 .. code-block:: javascript
 
   "Digital-Out": [
       { "DO-Port-Name": false }
   ]
+
+.. versionadded:: 3.0.8
+.. code-block:: javascript
+    
+    "Digital-Out": [
+        { "Name" : "DO-Port-Name", "value" : false}
+    ]
 
 A Digital-Out Port is specified by giving the name and initial state.
 
@@ -411,12 +419,19 @@ The Analog-Out Ports configuration is part of the :ref:`participant
 configuration<sec:cfg-participant>`. The name and initial behavior of the participant's 
 analog output port instances can be configured in this section:
 
+.. deprecated:: 3.0.7
 .. code-block:: javascript
 
   "Analog-Out": [
       { "AO-Port-Name": { "value": 7.3, "unit": "V" } }
   ]
 
+.. versionadded:: 3.0.8
+.. code-block:: javascript
+
+  "Analog-Out": [
+      { "Name": "AO-Port-Name", "value": 7.3, "unit": "V" }
+  ]
 
 .. list-table:: Analog-Out Configuration
    :widths: 15 85
@@ -439,10 +454,22 @@ The Pwm-Out Ports configuration is part of the :ref:`participant
 configuration<sec:cfg-participant>`. The name and initial behavior of the participant's 
 pulse-width modulation output port instances can be configured in this section:
 
+.. deprecated:: 3.0.7
 .. code-block:: javascript
 
   "Pwm-Out": [
     { "PWM-Port-Name": { "freq": { "value": 2.5, "unit": "Hz" }, "duty": 0.4 } }
+  ]
+
+.. versionadded:: 3.0.8
+.. code-block:: javascript
+
+  "Pwm-Out": [
+    {
+      "Name": "PWM-Port-Name",
+      "freq": { "value": 2.5, "unit": "Hz" },
+      "duty": 0.4
+    }
   ]
 
 
@@ -467,12 +494,19 @@ Pattern-Out (Ports)
 The Pattern-Out Ports configuration is part of the :ref:`participant
 configuration<sec:cfg-participant>`.
 
+.. deprecated:: 3.0.7
 .. code-block:: javascript
   
   "Pattern-Out": [
       { "Pattern-Port-Name": "626565702d62656570" }
   ]
 
+.. versionadded:: 3.0.8
+.. code-block:: javascript
+  
+  "Pattern-Out": [
+      { "Name": "Pattern-Port-Name", "value": "626565702d62656570" }
+  ]
 
 The pattern-out port instances are specified by giving their name 
 and a hexadecimal pattern string.

@@ -98,7 +98,10 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
     SetupRemoteLogging();
 
     // Create the participants trace message sinks as declared in the configuration
-    tracing::CreateTraceMessageSinks(GetLogger(), _participant,
+    tracing::CreateTraceMessageSinks(
+        GetLogger(),
+        _config,
+        _participant,
         [this](auto sink) {
             _traceSinks.emplace_back(std::move(sink));
     });

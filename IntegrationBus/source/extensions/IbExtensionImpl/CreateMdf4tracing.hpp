@@ -1,7 +1,7 @@
 #pragma once
-#include "ib/extensions/IIbRegistry.hpp"
 #include "ib/extensions/ITraceMessageSink.hpp"
 #include "ib/mw/logging/ILogger.hpp"
+#include "ib/cfg/fwd_decl.hpp"
 
 #include <string>
 
@@ -19,12 +19,14 @@ public:
     // we keep a copy of our dll instance directly embedded. This saves us to
     // implement a proxy class as in CreateIbRegistry.
     virtual auto Create(ib::mw::logging::ILogger* logger,
-            const std::string& name, std::shared_ptr<IIbExtension> dllInstance)
+            const std::string& name,
+            const cfg::Config& config,
+            std::shared_ptr<IIbExtension> dllInstance)
        -> std::unique_ptr<ITraceMessageSink> = 0;
 
 };
 
-auto CreateMdf4tracing(ib::mw::logging::ILogger* logger, const std::string& sinkName)
+auto CreateMdf4tracing(ib::mw::logging::ILogger* logger, const std::string& sinkName, const cfg::Config& config)
     -> std::unique_ptr<ITraceMessageSink>;
 
 }//end namespace extensions

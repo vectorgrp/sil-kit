@@ -47,7 +47,8 @@ namespace ib { namespace extensions {
 
 
 auto CreateMdf4tracing(ib::mw::logging::ILogger* logger,
-        const std::string& sinkName)
+        const std::string& sinkName,
+        const cfg::Config& config)
     -> std::unique_ptr<ITraceMessageSink>
 {
     const std::string vibeName{"vibe-mdf4tracing"};
@@ -66,7 +67,7 @@ auto CreateMdf4tracing(ib::mw::logging::ILogger* logger,
         throw ExtensionError(vibeName + " does not implement IIbMdf4Tracing"
                 " C++ type!");
     }
-    return mdf->Create(logger, sinkName, std::move(dll));
+    return mdf->Create(logger, sinkName, config,  std::move(dll));
 }
 
 }//end namespace extensions

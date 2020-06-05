@@ -86,7 +86,8 @@ using RegistrationCallbackT = std::function<void(std::unique_ptr<ITraceMessageSi
 
 void CreateTraceMessageSinks(
     mw::logging::ILogger* logger,
-    cfg::Participant participantConfig,
+    const cfg::Config& config,
+    const cfg::Participant& participantConfig,
     RegistrationCallbackT callback);
 
 } //end namespace tracing

@@ -695,22 +695,36 @@ TEST_F(JsonConfigTest, configure_participant_add_tracesink)
     doutPort.WithUnit("Foo").WithInitValue(false);
     doutPort.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
 
+    auto&& dinport = participant.AddDigitalIn("Digi In");
+    dinport.WithUnit("Digital Inport Unit").WithInitValue(false);
+
     auto&& ainPort = participant.AddAnalogIn("AnalogIn");
     ainPort.WithUnit("Foo").WithInitValue(13.37);
     ainPort.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
 
+    auto&& aoutPort = participant.AddAnalogOut("AnalogOut");
+    aoutPort.WithUnit("Analog Out Unit").WithInitValue(0.1234);
+
     auto&& patPort = participant.AddPatternIn("PatternIn");
     patPort.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
-    patPort.WithUnit("Pattern Unit");
->>>>>>> -- add TraceSinks to JsonConfig
+    patPort.WithUnit("Pattern Unit").WithInitValue({'c','a','f','e'});
+
+    auto&& patoutPort = participant.AddPatternOut("Pattern Out");
+    patoutPort.WithUnit("Pattern Unit").WithInitValue({'b','e','e','f'});
 
     auto&& pwmPort = participant.AddPwmOut("PWM OUT");
     pwmPort.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
-    pwmPort.WithUnit("PWM Unit");
+    pwmPort.WithUnit("PWM Unit").WithInitValue({1.0, 0.5});
+
+    auto&& pwmPort2 = participant.AddPwmIn("PwmPort2 IN");
+    pwmPort2.WithUnit("some other unit").WithInitValue({3.0, 4.5});
 
 
     auto&& genPort = participant.AddGenericPublisher("GenericPublisher");
     genPort.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
+
+    auto&& subPort = participant.AddGenericSubscriber("A Subscriber");
+    subPort.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
 
     BuildConfigFromJson();
     //NB: the following does not hold when adding multiple controllers,
@@ -734,10 +748,6 @@ TEST_F(JsonConfigTest, configure_participant_add_tracesink)
         EXPECT_EQ(octrl.useTraceSinks, nctrl.useTraceSinks);
     };
 
-    checkFields(pnew.analogIoPorts[0], pold.analogIoPorts[0]);
-    checkFields(pnew.digitalIoPorts[0], pold.digitalIoPorts[0]);
-    checkFields(pnew.patternPorts[0], pold.patternPorts[0]);
-    checkFields(pnew.pwmPorts[0], pold.pwmPorts[0]);
 
     checkFields(pnew.genericPublishers[0], pold.genericPublishers[0]);
 
@@ -745,6 +755,29 @@ TEST_F(JsonConfigTest, configure_participant_add_tracesink)
     checkFields(pnew.canControllers[0], pold.canControllers[0]);
     checkFields(pnew.flexrayControllers[0], pold.flexrayControllers[0]);
     checkFields(pnew.linControllers[0], pold.linControllers[0]);
+
+    auto checkPort = [&checkFields](const auto& oports, const auto& nports)
+    {
+        for (const auto& oldport : oports)
+        {
+            const auto& oldPortName = oldport.name;
+            bool hasMatch = false;
+            for (const auto& newport : nports)
+            {
+                if (newport.name == oldPortName)
+                {
+                    hasMatch = true;
+                    checkFields(oldport, newport);
+                }
+            }
+            ASSERT_TRUE(hasMatch) << "The ports might be serialized in different order, but they have to be present!";
+        }
+    };
+
+    checkPort(pnew.analogIoPorts, pold.analogIoPorts);
+    checkPort(pnew.digitalIoPorts, pold.digitalIoPorts);
+    checkPort(pnew.patternPorts, pold.patternPorts);
+    checkPort(pnew.pwmPorts, pold.pwmPorts);
 
     for (auto i = 0u; i < sinkTableSize; i++)
     {
