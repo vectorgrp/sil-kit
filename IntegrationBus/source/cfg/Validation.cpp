@@ -96,7 +96,6 @@ void Validate(const Participant& participant, const Config& ibConfig)
     };
 
     validateController(participant.ethernetControllers);
-#if XXX_TRACING_NOT_YET
     validateController(participant.canControllers);
     validateController(participant.linControllers);
     validateController(participant.flexrayControllers);
@@ -106,7 +105,6 @@ void Validate(const Participant& participant, const Config& ibConfig)
     validateController(participant.digitalIoPorts);
     validateController(participant.patternPorts);
     validateController(participant.pwmPorts);
-#endif
 
     //participant controller related validation:
     auto& participantController = participant.participantController;

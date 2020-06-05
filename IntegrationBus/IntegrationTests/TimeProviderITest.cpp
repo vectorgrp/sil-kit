@@ -324,12 +324,14 @@ struct ParticipantTimeProviderITest : public TimeProviderITest
             std::cout << "EthWriter shutdown" << std::endl;
         });
 
-        barrier->Enter();
 
         //use the systemcontroller to set all participants into running state
         _sysCtrl = std::make_unique<DummySystemController>(ibConfig, comAdapter.get());
 
         auto done = parti->RunAsync();
+
+        barrier->Enter(); //sync
+
         ASSERT_EQ(done.wait_for(waitTime), std::future_status::ready);
     }
 
@@ -393,8 +395,10 @@ struct ParticipantTimeProviderITest : public TimeProviderITest
             std::cout << participantName << " shutdown" << std::endl;
         });
 
-        barrier->Enter();
         auto done = parti->RunAsync();
+
+        barrier->Enter();
+
         ASSERT_EQ(done.wait_for(waitTime), std::future_status::ready);
     }
 protected:
