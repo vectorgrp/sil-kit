@@ -42,22 +42,16 @@ public:
         const TraceMessage& msg
     ) override;
    
-    auto GetLogger() const -> mw::logging::ILogger* override
-    {
-        return _logger;
-    }
+    auto GetLogger() const -> mw::logging::ILogger* override;
 
-    auto Name() const -> const std::string& override
-    {
-        return _name;
-    }
+    auto Name() const -> const std::string& override;
 
 private:
     // ----------------------------------------
     // Private members
     bool _headerWritten{false};
     std::ofstream _file;
-    std::unique_ptr<NamedPipe> _pipe;
+    std::unique_ptr<detail::NamedPipe> _pipe;
     std::mutex _lock;
     std::string _name;
     std::string _busName;

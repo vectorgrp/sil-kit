@@ -52,9 +52,9 @@ auto ParticipantBuilder::Build() -> Participant
         config.genericSubscribers.emplace_back(builder.Build());
     }
 
-    for (auto& sinks : _traceSinks)
+    for (auto& sink : _traceSinks)
     {
-        config.traceSinks.emplace_back(sinks.Build());
+        config.traceSinks.emplace_back(sink.Build());
     }
 
     return std::move(config);
@@ -182,7 +182,7 @@ auto ParticipantBuilder::AsSyncMaster() -> ParticipantBuilder&
 
 auto ParticipantBuilder::AddTraceSink(std::string sinkName) -> TraceSinkBuilder&
 {
-    _traceSinks.emplace_back(this, std::move(sinkName));
+    _traceSinks.emplace_back(std::move(sinkName));
     return _traceSinks.back();
 }
 

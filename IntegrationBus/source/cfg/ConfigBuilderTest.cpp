@@ -83,11 +83,10 @@ TEST_F(ConfigBuilderTest, make_eth_controller)
 {
     simulationSetup.AddParticipant("P1")
         .AddEthernet("ETH1")
-            .WithEndpointId(17)
-            .WithLink("LAN0")
-            .WithMacAddress("A1:A2:A3:A4:A5:A6:")
-            .WithPcapFile("PcapTraceFile")
-            .WithPcapPipe("PcapTracePipe");
+        .WithEndpointId(17)
+        .WithLink("LAN0")
+        .WithMacAddress("A1:A2:A3:A4:A5:A6:")
+        .WithTraceSink("Eth1Sink");
 
     auto config = configBuilder.Build();
 
@@ -112,8 +111,7 @@ TEST_F(ConfigBuilderTest, make_eth_controller)
     EXPECT_EQ(controller.macAddress, expectedMac);
     EXPECT_EQ(controller.linkId, link.id);
     EXPECT_EQ(controller.endpointId, 17);
-    EXPECT_EQ(controller.pcapFile, "PcapTraceFile");
-    EXPECT_EQ(controller.pcapPipe, "PcapTracePipe");
+    EXPECT_EQ(controller.useTraceSinks, std::vector<std::string>{"Eth1Sink"});
 }
 
 auto getClusterParameters() -> ib::sim::fr::ClusterParameters
@@ -532,8 +530,4 @@ TEST_F(ConfigBuilderTest, ensure_configbuilder_is_movable)
     EXPECT_TRUE(json.size() > 0);
 }
 
-TEST_F(ConfigBuilderTest, make_tracer)
-{
-    //configBuilder.SimulationSetup().AddParticipant().AddEthernet().WithTracer();
-}
 } // anonymous namespace

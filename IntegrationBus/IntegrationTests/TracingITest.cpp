@@ -18,22 +18,10 @@
 
 #include "GetTestPid.hpp"
 
-#include "ITestUtils.hpp"
+#include "IntegrationTestUtils.hpp"
 
+#include "Pcap.hpp"
 
-
-
-
-
-
-// PCAP definitions -- from source/tracing/PcapSink.cpp
-namespace PCAP {
-const size_t GlobalHeaderSize = 24;
-const size_t MessageHeaderSize = 16;
-const uint32_t NativeMagic = 0xa1b23c4d;
-const uint16_t MajorVersion = 2;
-const uint16_t MinorVersion = 4;
-} //namespace PCAP
 
 namespace {
 
@@ -41,8 +29,9 @@ using namespace std::chrono_literals;
 using namespace ib::mw;
 using namespace ib::cfg;
 using namespace ib::sim::eth;
+using namespace ib::tracing;
 
-using itest::Barrier;
+using IntegrationTestUtils::Barrier;
 
 class TracingITest: public testing::Test
 {
@@ -51,17 +40,6 @@ protected:
     TracingITest()
     {
         domainId = static_cast<uint32_t>(GetTestPid());
-
-        ib::cfg::ConfigBuilder builder{"TestConfig"};
-        auto &&setup = builder.SimulationSetup();
-        setup.AddParticipant("EthWriter")
-            ->AddEthernet("ETH1").WithLink("LINK1");
-        setup.AddParticipant("EthReader1")
-            ->AddEthernet("ETH1").WithLink("LINK1");
-        setup.AddParticipant("EthReader2")
-            ->AddEthernet("ETH1").WithLink("LINK1");
-
-        ibConfig = builder.Build();
     }
 
     virtual void Sender()
@@ -141,7 +119,7 @@ protected:
 
         ValidateFilesize(fileName);
         ValidatePcapMagic(fileName);
-        itest::removeTempFile(fileName);
+        IntegrationTestUtils::removeTempFile(fileName);
     }
 
     void ExecutePipeTest(const std::string& fileName)
@@ -164,7 +142,7 @@ protected:
         std::ifstream ifs(fileName, std::ios::binary);
         uint32_t actual{};
         ifs.read(reinterpret_cast<char*>(&actual), sizeof(actual));
-        ASSERT_EQ(actual, PCAP::NativeMagic)
+        ASSERT_EQ(actual, Pcap::NativeMagic)
             << "PcapFile " 
             << fileName 
             << " does not contain PCAP magic in native byte order!";
@@ -173,10 +151,10 @@ protected:
     void ValidateFilesize(const std::string& fileName)
     {
         //Validate the pcap file
-        auto actualPcapFileSize = itest::getFileSize(fileName);
+        auto actualPcapFileSize = IntegrationTestUtils::getFileSize(fileName);
         ASSERT_EQ(
             actualPcapFileSize, 
-            PCAP::GlobalHeaderSize + (numMessages * (PCAP::MessageHeaderSize + frameSize))
+            Pcap::GlobalHeaderSize + (numMessages * (Pcap::PacketHeaderSize + frameSize))
         ) << "Pcap file " << fileName  << ": size does not match expected size!";
     }
 
@@ -186,21 +164,21 @@ protected:
         //wait until Sender and Receiver are set up
         barrier->Enter();
 
-        itest::Pipe pipe{pipeName};
-        auto header = pipe.Read(PCAP::GlobalHeaderSize);
-        ASSERT_EQ(header.size(), PCAP::GlobalHeaderSize)
+        IntegrationTestUtils::Pipe pipe{pipeName};
+        auto header = pipe.Read(Pcap::GlobalHeaderSize);
+        ASSERT_EQ(header.size(), Pcap::GlobalHeaderSize)
             << "Short pipe read when reading global PCAP header";
 
         auto magic = *reinterpret_cast<uint32_t*>(header.data());
-        ASSERT_EQ(magic, PCAP::NativeMagic)
+        ASSERT_EQ(magic, Pcap::NativeMagic)
             << "Data read from pipe does not begin with the native PCAP magic number!";
 
         auto major = *reinterpret_cast<uint16_t*>(&header.at(2 * sizeof(uint16_t)));
-        ASSERT_EQ(major, PCAP::MajorVersion)
+        ASSERT_EQ(major, Pcap::MajorVersion)
             << "PCAP header has wrong major version";
 
         auto minor = *reinterpret_cast<uint16_t*>(&header.at(3 * sizeof(uint16_t)));
-        ASSERT_EQ(minor, PCAP::MinorVersion)
+        ASSERT_EQ(minor, Pcap::MinorVersion)
             << "PCAP header has wrong minor version";
 
         numBytes += header.size();
@@ -216,17 +194,17 @@ protected:
 
         ASSERT_EQ(
             numBytes, 
-            PCAP::GlobalHeaderSize + (numMessages * (PCAP::MessageHeaderSize + frameSize))
+            Pcap::GlobalHeaderSize + (numMessages * (Pcap::PacketHeaderSize + frameSize))
         ) << "Pcap PIPE " << pipeName  << ": size does not match expected size!";
 
     }
 
-    //TODO we should use a temporary but unique file name
     std::string MakeFilename(const std::string& prefix)
     {
         std::stringstream ss;
         ss << prefix << "_"
             << std::to_string(domainId)
+            << "_" << IntegrationTestUtils::randomString(8)
             << ".pcap";
         return ss.str();
     }

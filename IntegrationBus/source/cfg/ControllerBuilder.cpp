@@ -16,20 +16,6 @@ auto ControllerBuilder<EthernetController>::WithMacAddress(std::string macAddres
 }
 
 template<>
-auto ControllerBuilder<EthernetController>::WithPcapFile(const std::string& pcapFile) -> ControllerBuilder&
-{
-    _controller.pcapFile = pcapFile;
-    return *this;
-}
-
-template<>
-auto ControllerBuilder<EthernetController>::WithPcapPipe(const std::string& pcapPipe) -> ControllerBuilder&
-{
-    _controller.pcapPipe = pcapPipe;
-    return *this;
-}
-
-template<>
 auto ControllerBuilder<FlexrayController>::WithClusterParameters(const sim::fr::ClusterParameters& clusterParameters) -> ControllerBuilder&
 {
     _controller.clusterParameters = clusterParameters;

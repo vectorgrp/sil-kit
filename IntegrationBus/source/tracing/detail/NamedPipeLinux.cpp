@@ -12,6 +12,10 @@
 #include <exception>
 #include <iostream>
 
+namespace ib {
+namespace tracing {
+namespace detail {
+
 NamedPipeLinux::NamedPipeLinux(const std::string& name)
 :_name(name)
 {
@@ -73,7 +77,13 @@ bool NamedPipeLinux::Write(const char* buffer, size_t bufferSize)
     return _file.good();
 }
 
+// public Factory 
 std::unique_ptr<NamedPipe> NamedPipe::Create(const std::string& name)
 {
     return std::make_unique<NamedPipeLinux>(name);
 }
+
+
+} //end namespace detail
+} //end namespace tracing
+} //end namespace ib

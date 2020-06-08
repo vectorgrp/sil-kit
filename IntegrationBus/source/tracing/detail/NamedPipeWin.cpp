@@ -5,6 +5,9 @@
 #include <iostream>
 #include <sstream>
 #include <windows.h>
+namespace ib {
+namespace tracing {
+namespace detail {
 
 static std::string GetPipeError()
 {
@@ -96,7 +99,12 @@ void NamedPipeWin::closeConnection()
     }
 }
 
+//public Factory
 std::unique_ptr<NamedPipe> NamedPipe::Create(const std::string& name)
 {
     return std::make_unique<NamedPipeWin>(name);
 }
+
+} //end namespace detail
+} //end namespace tracing
+} //end namespace ib

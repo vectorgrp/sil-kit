@@ -3,6 +3,7 @@
 #include "Validation.hpp"
 
 #include <iostream>
+#include <sstream>
 
 using namespace std::chrono_literals;
 
@@ -55,7 +56,7 @@ void Validate(const SimulationSetup& testConfig, const Config& ibConfig)
     }
 }
 
-void Validate(const Participant& participant, const Config& ibConfig)
+void Validate(const Participant& participant, const Config& /*ibConfig*/)
 {
     //tracing related validation:
     std::vector<std::string> sinkNames;
@@ -75,20 +76,24 @@ void Validate(const Participant& participant, const Config& ibConfig)
             {
                 if (traceSink.empty())
                 {
-                    std::cerr << "ERROR:  Participant \"" << participant.name
+                    std::stringstream ss;
+                    ss << "Participant \"" << participant.name
                         << "/" << ctrl.name
-                        << "\" has a Tracer which refers to an empty TraceSink!"
-                        << std::endl;
-                    throw ib::cfg::Misconfiguration{"Tracer refers to an empty TraceSink name"};
+                        << "\" has a UseTraceSinks field which refers to an empty TraceSink!"
+                        ;
+                    ss << "ERROR: " << ss.str() << std::endl;
+                    throw ib::cfg::Misconfiguration{ss.str()};
                 }
                 if (!sinkExists(traceSink))
                 {
-                    std::cerr << "ERROR:  Participant \"" << participant.name 
+                    std::stringstream ss;
+                    ss << "Participant \"" << participant.name
                         << "/" << ctrl.name
-                        << "\" has a Tracer which refers to a non-existing TraceSink: "
+                        << "\" has a UseTraceSinks field which refers to a non-existing TraceSink: "
                         << traceSink
-                        << std::endl;
-                    throw ib::cfg::Misconfiguration{"Tracer refers to non-existing TraceSink name"};
+                        ;
+                    ss << "ERROR: " << ss.str() << std::endl;
+                    throw ib::cfg::Misconfiguration{ss.str()};
                 }
             }
         }

@@ -4,6 +4,10 @@
 #include <fstream>
 #include <string>
 
+namespace ib {
+namespace tracing {
+namespace detail {
+
 class NamedPipeLinux: public NamedPipe
 {
 public:
@@ -28,3 +32,6 @@ private:
     void Close();
 };
 
+} //end namespace detail
+} //end namespace tracing
+} //end namespace ib

@@ -22,7 +22,7 @@
 
 #include "GetTestPid.hpp"
 
-#include "ITestUtils.hpp"
+#include "IntegrationTestUtils.hpp"
 
 namespace {
 
@@ -31,7 +31,7 @@ using namespace ib::mw;
 using namespace ib::cfg;
 using namespace ib::sim::eth;
 
-using itest::Barrier;
+using IntegrationTestUtils::Barrier;
 
 class DummySystemController
 {

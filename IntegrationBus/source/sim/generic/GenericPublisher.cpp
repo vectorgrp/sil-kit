@@ -28,10 +28,9 @@ auto GenericPublisher::Config() const -> const cfg::GenericPort&
 void GenericPublisher::Publish(std::vector<uint8_t> data)
 {
     GenericMessage msg{std::move(data)};
-    if (_tracer.IsActive())
-        _tracer.Trace(extensions::Direction::Send,
-            _timeProvider->Now(),
-            msg);
+    _tracer.Trace(extensions::Direction::Send,
+        _timeProvider->Now(),
+        msg);
 
     _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
 }

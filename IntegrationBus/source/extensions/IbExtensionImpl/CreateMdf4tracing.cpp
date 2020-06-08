@@ -34,7 +34,7 @@ struct DllCache
         }
         catch (const ib::extensions::ExtensionError& err)
         {
-            std::cout << "ERROR loading IbRegistry: " << err.what() << std::endl;
+            std::cout << "ERROR loading '" << extensionName << "' extension: " << err.what() << std::endl;
             throw;
         }
     }

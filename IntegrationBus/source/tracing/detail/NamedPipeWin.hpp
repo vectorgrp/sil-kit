@@ -3,6 +3,9 @@
 #include "NamedPipe.hpp"
 #include <windows.h>
 
+namespace ib {
+namespace tracing {
+namespace detail {
 
 class NamedPipeWin : public NamedPipe
 {
@@ -31,3 +34,7 @@ private:
 
     bool _isConnected{false};
 };
+
+} //end namespace detail
+} //end namespace tracing
+} //end namespace ib

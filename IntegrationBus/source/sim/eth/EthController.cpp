@@ -35,8 +35,7 @@ auto EthController::SendMessage(EthMessage msg) -> EthTxId
 
     msg.transmitId = txId;
 
-    if (_tracer.IsActive())
-        _tracer.Trace(tracing::Direction::Send, msg.timestamp, msg.ethFrame);
+    _tracer.Trace(tracing::Direction::Send, msg.timestamp, msg.ethFrame);
 
     _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
 
@@ -83,10 +82,7 @@ void EthController::ReceiveIbMessage(mw::EndpointAddress from, const EthMessage&
     if (from == _endpointAddr)
         return;
 
-    if (_tracer.IsActive())
-    {
-        _tracer.Trace(tracing::Direction::Receive, msg.timestamp, msg.ethFrame);
-    }
+    _tracer.Trace(tracing::Direction::Receive, msg.timestamp, msg.ethFrame);
 
     CallHandlers(msg);
 

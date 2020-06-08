@@ -214,7 +214,7 @@ TEST_F(JsonConfigTest, CreateEthernetNetworkWithSwitch)
     simulationSetup.AddParticipant("P1")
         ->AddEthernet("ETH1").WithLink("Port0");
     simulationSetup.AddParticipant("P2")
-        ->AddEthernet("ETH1").WithLink("Port1").WithPcapFile("File").WithPcapPipe("Pipe");
+        ->AddEthernet("ETH1").WithLink("Port1");
     simulationSetup.AddSwitch("FrontSwitch")
         ->AddPort("Port0").WithVlanIds({1})
         ->AddPort("Port1").WithVlanIds({2});
@@ -255,8 +255,6 @@ TEST_F(JsonConfigTest, CreateEthernetNetworkWithSwitch)
     ASSERT_EQ(p2.ethernetControllers.size(), 1u);
     EXPECT_EQ(p2.ethernetControllers[0].name, "ETH1");
     EXPECT_EQ(p2.ethernetControllers[0].linkId, linkB.id);
-    EXPECT_EQ(p2.ethernetControllers[0].pcapFile, "File");
-    EXPECT_EQ(p2.ethernetControllers[0].pcapPipe,"Pipe");
 
     
     ASSERT_EQ(ethSwitch.ports.size(), 2u);
@@ -657,20 +655,26 @@ TEST_F(JsonConfigTest, configure_extension_default)
 
 TEST_F(JsonConfigTest, configure_participant_add_tracesink)
 {
-    struct {
-        std::string name;
-        std::string outputPath;
-        TraceSink::Type type;
-    } const sinkTable[] {
-        {"EthSink", "some/path/EthTraceOputput.pcap", TraceSink::Type::PcapFile},
-        {"SinkForCan", "other path/CAN1.mdf4", TraceSink::Type::Mdf4File}
+    //NB: VS2015 does not like constructing of TraceSink{}  with initializer_list
+    //    in a vector declaration. Replace makeTraceSink with aggregate init when
+    //    we drop VS2015 support.
+    auto makeTraceSink = [](auto type, auto name, auto path) {
+        ib::cfg::TraceSink sink;
+        sink.type = type;
+        sink.name = name;
+        sink.outputPath = path;
+        return sink;
     };
-    const size_t sinkTableSize = 2;
+
+    std::vector<ib::cfg::TraceSink> testTable({
+        makeTraceSink(TraceSink::Type::PcapFile, "EthSink", "some/path/EthTraceOputput.pcap"),
+        makeTraceSink(TraceSink::Type::Mdf4File, "SinkForCan", "other path/CAN1.mdf4"),
+    });
      
     auto&& participant = simulationSetup.AddParticipant("P1");
 
 
-    for (const auto& sinkArgs : sinkTable)
+    for (const auto& sinkArgs : testTable)
     {
         participant.AddTraceSink(sinkArgs.name)
             .WithOutputPath(sinkArgs.outputPath)
@@ -738,7 +742,7 @@ TEST_F(JsonConfigTest, configure_participant_add_tracesink)
     );
 
     const auto& cfgSinks = config.simulationSetup.participants[0].traceSinks;
-    ASSERT_EQ(cfgSinks.size(), sinkTableSize);
+    ASSERT_EQ(cfgSinks.size(), testTable.size());
 
 
     // verify the ser/des of all service controllers. we have to ignore the endpointIDs when comparing.
@@ -779,11 +783,11 @@ TEST_F(JsonConfigTest, configure_participant_add_tracesink)
     checkPort(pnew.patternPorts, pold.patternPorts);
     checkPort(pnew.pwmPorts, pold.pwmPorts);
 
-    for (auto i = 0u; i < sinkTableSize; i++)
+    for (auto i = 0u; i < testTable.size(); i++)
     {
-        ASSERT_EQ(cfgSinks[i].name, sinkTable[i].name);
-        ASSERT_EQ(cfgSinks[i].outputPath, sinkTable[i].outputPath);
-        ASSERT_EQ(cfgSinks[i].type, sinkTable[i].type);
+        ASSERT_EQ(cfgSinks[i].name, testTable[i].name);
+        ASSERT_EQ(cfgSinks[i].outputPath, testTable[i].outputPath);
+        ASSERT_EQ(cfgSinks[i].type, testTable[i].type);
     }
 }
 } // anonymous namespace

@@ -12,10 +12,10 @@
 namespace ib {
 namespace cfg {
 
-class TraceSinkBuilder : public ParentBuilder<ParticipantBuilder>
+class TraceSinkBuilder 
 {
 public:
-    IntegrationBusAPI TraceSinkBuilder(ParticipantBuilder *participant, std::string name);
+    IntegrationBusAPI TraceSinkBuilder(std::string name);
     IntegrationBusAPI ~TraceSinkBuilder();
 
     IntegrationBusAPI auto operator->() -> TraceSinkBuilder*;

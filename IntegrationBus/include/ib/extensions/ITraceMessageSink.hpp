@@ -46,7 +46,7 @@ public:
 
     virtual void Trace(
         Direction dir,
-        const mw::EndpointAddress& id, //!< the ID is used to identify the controller this message is from
+        const mw::EndpointAddress& address, //!< the address is used to identify the controller this message is from
         std::chrono::nanoseconds timestamp,
         const TraceMessage& message) = 0;
 };

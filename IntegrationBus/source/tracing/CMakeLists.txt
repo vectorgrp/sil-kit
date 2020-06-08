@@ -9,6 +9,7 @@ add_library(IbTracing STATIC
 
     #public interface used for trace sink implementations
     ${CMAKE_CURRENT_LIST_DIR}/../../include/ib/extensions/ITraceMessageSink.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../include/ib/extensions/TraceMessage.hpp
 )
 
 target_include_directories(IbTracing

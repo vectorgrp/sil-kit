@@ -16,7 +16,7 @@ GenericSubscriber::GenericSubscriber(mw::IComAdapter* comAdapter, mw::sync::ITim
 {
 }
 
-GenericSubscriber::GenericSubscriber(mw::IComAdapter* comAdapter, cfg::GenericPort config,   mw::sync::ITimeProvider* timeProvider)
+GenericSubscriber::GenericSubscriber(mw::IComAdapter* comAdapter, cfg::GenericPort config, mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _config{std::move(config)}
     , _timeProvider{timeProvider}
@@ -50,10 +50,10 @@ void GenericSubscriber::ReceiveIbMessage(mw::EndpointAddress from, const Generic
     if (!_callback)
         return;
 
-    if (_tracer.IsActive())
-        _tracer.Trace(tracing::Direction::Receive,
-            std::chrono::nanoseconds{}, //TODO where is _timeProvider?
-            msg);
+    _tracer.Trace(tracing::Direction::Receive,
+        _timeProvider->Now(),
+        msg);
+
     _callback(this, msg.data);
 }
 

@@ -98,13 +98,7 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
     SetupRemoteLogging();
 
     // Create the participants trace message sinks as declared in the configuration
-    tracing::CreateTraceMessageSinks(
-        GetLogger(),
-        _config,
-        _participant,
-        [this](auto sink) {
-            _traceSinks.emplace_back(std::move(sink));
-    });
+    _traceSinks = tracing::CreateTraceMessageSinks(GetLogger(), _config, _participant);
 
     if (_participant.participantController.has_value())
     {
@@ -759,23 +753,18 @@ void ComAdapter<IbConnectionT>::AddTraceSinksToController(tracing::IControllerTo
         GetLogger()->Debug("Tracer on {}/{} not enabled, skipping", _participant.name, config.name);
         return;
     }
-    auto getSinkByName = [this](const auto& name) -> extensions::ITraceMessageSink* 
+    auto findSinkByName = [this](const auto& name)
     {
-        auto it = std::find_if(_traceSinks.begin(), _traceSinks.end(),
+       return std::find_if(_traceSinks.begin(), _traceSinks.end(),
             [&name](const auto& sinkPtr) {
                 return sinkPtr->Name() == name;
             });
-        if (it != _traceSinks.end())
-        {
-            return it->get();
-        }
-        return nullptr;
     };
 
     for (const auto& sinkName : config.useTraceSinks)
     {
-        auto* sinkPtr = getSinkByName(sinkName);
-        if (sinkPtr == nullptr)
+        auto sinkIter = findSinkByName(sinkName);
+        if (sinkIter == _traceSinks.end())
         {
             std::stringstream ss;
             ss << "Controller " << config.name << " refers to non-existing sink "
@@ -784,7 +773,7 @@ void ComAdapter<IbConnectionT>::AddTraceSinksToController(tracing::IControllerTo
             GetLogger()->Error(ss.str());
             throw std::runtime_error(ss.str());
         }
-        controller->AddSink(sinkPtr);
+        controller->AddSink((*sinkIter).get());
     }
 }
 
@@ -796,7 +785,7 @@ auto ComAdapter<IbConnectionT>::CreateControllerForLink(const ConfigT& config, A
     auto* controller = CreateController<ControllerT>(config.endpointId, linkCfg.name, std::forward<Arg>(arg)...);
 
     auto* tracer = dynamic_cast<tracing::IControllerToTraceSink*>(controller);
-    if (tracer != nullptr)
+    if (tracer)
     {
         AddTraceSinksToController(tracer, config);
     }

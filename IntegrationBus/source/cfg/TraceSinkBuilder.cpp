@@ -4,8 +4,7 @@
 namespace ib {
 namespace cfg {
 
-TraceSinkBuilder::TraceSinkBuilder(ParticipantBuilder* participant, std::string name)
-    : ParentBuilder<ParticipantBuilder>{participant}
+TraceSinkBuilder::TraceSinkBuilder(std::string name)
 {
 	_traceSink.name = std::move(name);
 }

@@ -49,10 +49,7 @@ public:
     void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
 
     // tracing::IControllerToTraceSink
-    void AddSink(tracing::ITraceMessageSink* sink) override
-    {
-        _tracer.AddSink(EndpointAddress(), *sink);
-    }
+    inline void AddSink(tracing::ITraceMessageSink* sink) override;
 
 private:
     //private Members
@@ -63,6 +60,15 @@ private:
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     tracing::Tracer<GenericMessage> _tracer;
 };
+
+// ================================================================================
+//  Inline Implementations
+// ================================================================================
+
+void GenericSubscriber::AddSink(tracing::ITraceMessageSink* sink)
+{
+    _tracer.AddSink(EndpointAddress(), *sink);
+}
 
 } // namespace generic
 } // namespace sim

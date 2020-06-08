@@ -17,16 +17,15 @@ Added
   e.g. the :doc:`vibes/vibregistry`.
   
 
-- This release introduces a  new configuration mechanism for IB message
-  tracing.
+- New configuration mechanism for IB message tracing.
   It supersedes the previous Ethernet and PCAP specicic configuration, please
   refer to the Deprecated section.
 
-  The ParticipantBuilder gained a new AddTraceSink() method, which returns
-  a TraceSinkBuilder. A TraceSink consists of a unique, nonempty name, an output 
-  path  and the format type (PcapFile, PcapPipe, Mdf4File).
+- The ParticipantBuilder gained a new AddTraceSink() method, which returns
+  a TraceSinkBuilder. A TraceSink consists of a unique, non-empty name, an output 
+  path and the format type (PcapFile, PcapPipe, Mdf4File).
 
-  Services, Controllers and Ports can be configured to use a trace sink by name.
+- Services, Controllers and Ports can be configured to use a trace sink by name.
   For example, by invoking the
   :cpp:func:`WithTraceSink(name)<ib::cfg::GenericPortBuilder::WithTraceSink()>`
   on the appropriate builder.
@@ -41,7 +40,7 @@ Changed
 - To enable the newly added 'UseTraceSinks' fields, the JSON serialization
   format of the Controllers, Services and Ports were adjusted.
   In particular, the JSON type of DigitalIoPort, AnalogIoPort, PwmPort,
-  PatternPort, and  GenericSubscriber were changed:
+  PatternPort, and GenericSubscriber were changed:
 
   + old:
 
@@ -49,7 +48,7 @@ Changed
 
        "Port-Type": [ "PortName", "OtherPort", ...]
 
- + new:
+  + new:
 
     .. code-block:: javascript
 
@@ -73,6 +72,35 @@ Fixed
   always 0s.
 
 - GenericSubscriber was missing the ITimeProvider interface.
+
+.. _sec:api-withpcap-removed:
+
+Removed
+~~~~~~~
+- The ControllerBuilder<EthernetController> no longer supports the
+  WithPcapFile() and WithPcapPipe() methods.
+  This usage has been superseded by the new configuration mechanism:
+
+  + old:
+
+    .. code-block:: c++
+
+        simulationSetup
+            .AddParticipant("P1")
+            .AddEthernet("ETH1")
+            .WithPcapFile("output filename");
+
+  + new:
+
+    .. code-block:: c++
+
+        auto&& participant = simulationSetup.AddParticipant("P1");
+        participant->AddEthernet("ETH1").WithTraceSink("EthSink");
+        participant->AddTraceSink("EthSink")
+            .WithType(TraceSink::Type::PcapFile)
+            .WithOutputPath("output filename.pcap");
+
+
 
 Deprecated
 ~~~~~~~~~~
@@ -109,7 +137,20 @@ Deprecated
                 "Type": "PcapFile"
             }
         ]
->>>>>>> AFTMAGT-232 Add documentation for TraceSinks
+
+- Loading a JSON file which contains the deprecated "PcapFile" or "PcapPipe"
+  fields will cause a runtime warning. Internally the data structures  are updated
+  as if a "TraceSinks" and "UseTraceSinks" was supplied with a TraceSink name 
+  that is derived from the Participant's and EthernetController's names.
+
+Compatibility with 3.0.7
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): No
+- Application software interface (API): No (:ref:`ConfigBuilder API changed<sec:api-withpcap-removed>`)
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
 
 [3.0.7] - 2020-04-25
 --------------------------------

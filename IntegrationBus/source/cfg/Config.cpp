@@ -226,6 +226,43 @@ void AssignLinkIds(Config& config)
     }
 }
 
+void AdjustLegacyPcapConfig(Config& config)
+{
+    auto addReplacementSink = [&](auto& participant, auto& ethCtrl, TraceSink::Type type)
+    {
+        //turn the legacy pcapFile/pcapPipe fields into a controller specific trace sink
+        TraceSink legacySink{};
+        legacySink.type = TraceSink::Type::PcapPipe;
+        // this name is unlikely to collide with a user supplied name of a different sink
+        legacySink.name = ethCtrl.name + ":<LegacyPcapPipe>";
+        legacySink.outputPath = ethCtrl.pcapPipe;
+
+        std::cerr << "WARNING: turning deprecated EthernetController field "
+            << (type == TraceSink::Type::PcapFile ? "PcapFile" : "PcapPipe") 
+            << " on "
+            << participant.name << "/" << ethCtrl.name
+            << " to the newly created TraceSink: " << legacySink.name;
+
+        ethCtrl.useTraceSinks.emplace_back(legacySink.name);
+        participant.traceSinks.emplace_back(std::move(legacySink));
+    };
+
+    for (auto& participant : config.simulationSetup.participants)
+    {
+        for (auto& ethCtrl : participant.ethernetControllers)
+        {
+            if (!ethCtrl.pcapFile.empty())
+            {
+                addReplacementSink(participant, ethCtrl, TraceSink::Type::PcapFile);
+            }
+            if (!ethCtrl.pcapPipe.empty())
+            {
+                addReplacementSink(participant, ethCtrl, TraceSink::Type::PcapPipe);
+            }
+        }
+    }
+}
+
 } // anonymous namespace
 
 void UpdateGenericSubscribers(Config& config)
@@ -558,6 +595,7 @@ auto Config::FromJsonString(const std::string& jsonString) -> Config
     AssignEndpointAddresses(config);
     AssignLinkIds(config);
     UpdateGenericSubscribers(config);
+    AdjustLegacyPcapConfig(config);
 
     return config;
 }

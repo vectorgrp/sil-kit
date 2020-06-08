@@ -7,6 +7,8 @@
 #include <chrono>
 #include <string>
 #include <fstream>
+#include <random>
+#include <algorithm>
 
 #if __linux__
 #include <errno.h>
@@ -15,7 +17,7 @@
 #endif
 
 
-namespace itest {
+namespace IntegrationTestUtils {
 
 struct Barrier
 {
@@ -32,7 +34,21 @@ struct Barrier
         : expected{expectedEntries}
         , timeout{timeout}
     {}
-    
+
+    ~Barrier()
+    {
+        if(have < expected)
+        {
+            std::cout << "Barrier: error in destructor: have=" 
+                << have
+                << " expected=" << expected
+                << std::endl;
+            //wakeup dormant threads
+            have.store(expected);
+            cv.notify_all();
+        }
+    }
+
     void Enter()
     {
         std::unique_lock<decltype(mx)> lock(mx);
@@ -45,7 +61,15 @@ struct Barrier
         else
         {
             auto ok = cv.wait_for(lock, timeout, [this] {return have == expected; });
-            if (!ok) { std::cout <<  "Barrier: timeout!" << std::endl; }
+            if (!ok)
+            {
+                std::stringstream ss;
+                ss << "Barrier Enter: timeout! have="
+                    << have << " expected=" << expected;
+                std::cout << ss.str() << std::endl;
+
+                throw std::runtime_error(ss.str()); //abort test!
+            }
         }
     }
 };
@@ -155,8 +179,6 @@ struct Pipe
 #endif
 };
 
-//////////////////////////
-//utilities
 size_t getFileSize(const std::string& name)
 {
     auto ifs = std::ifstream{name, std::ios::binary | std::ios::ate};
@@ -186,6 +208,22 @@ void removeTempFile(const std::string& fileName)
 #endif
 }
 
+std::string randomString(size_t len)
+{
+    static const std::string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz"
+        "0123456789"
+        "_-"
+        ;
+    static std::default_random_engine re{std::random_device{}()};
+    static std::uniform_int_distribution<std::string::size_type> randPick(0, chars.size()-1);
+
+    std::string rv;
+    rv.resize(len);
+    std::generate_n(rv.begin(), len, [&]() { return chars.at(randPick(re)); });
+    return rv;
+}
 
 
-} // end namespace itest
+
+} // end namespace IntegrationTestUtils

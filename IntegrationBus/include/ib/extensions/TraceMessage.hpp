@@ -17,8 +17,7 @@ namespace extensions {
 // helpers  to associate a TraceMessage-Type enum to a C++ type
 enum class TraceMessageType
 {
-    Invalid
-    ,EthFrame
+    EthFrame
     ,CanMessage
     ,LinFrame
     ,GenericMessage
@@ -36,9 +35,10 @@ struct TypeIdTrait
     static const TraceMessageType typeId = id;
 };
 
+template<class MsgT> struct MessageTrait;
 // specializations for supported (C++) Types
-template<class MsgT> struct MessageTrait : TypeIdTrait<TraceMessageType::Invalid> {};
 template<> struct MessageTrait<sim::eth::EthFrame> : TypeIdTrait<TraceMessageType::EthFrame> {};
+template<> struct MessageTrait<sim::can::CanMessage> : TypeIdTrait<TraceMessageType::CanMessage> {};
 template<> struct MessageTrait<sim::lin::Frame> : TypeIdTrait<TraceMessageType::LinFrame> {};
 template<> struct MessageTrait<sim::generic::GenericMessage> : TypeIdTrait<TraceMessageType::GenericMessage> {};
 template<> struct MessageTrait<sim::io::AnalogIoMessage> : TypeIdTrait<TraceMessageType::AnlogIoMessage> {};
@@ -53,7 +53,9 @@ public:
     //CTors
     TraceMessage() = delete;
     TraceMessage(const TraceMessage&) = delete;
+    TraceMessage(const TraceMessage&&) = delete;
     TraceMessage operator=(const TraceMessage&) = delete;
+    TraceMessage& operator=(const TraceMessage&&) = delete;
 
     template<typename MsgT>
     TraceMessage(const MsgT& msg)
@@ -62,7 +64,7 @@ public:
     {
     }
 
-    TraceMessageType QueryType() const
+    TraceMessageType Type() const
     {
         return _type;
     }
@@ -70,10 +72,10 @@ public:
     template<typename MsgT>
     const MsgT& Get() const
     {
-        const auto tag = getTypeId<MsgT>();
+        const auto tag = getTypeId<std::decay_t<MsgT>>();
         if (tag != _type)
         {
-            throw std::runtime_error("TraceMessage: Unsupported type used as template argument");
+            throw std::runtime_error("TraceMessage::Get() Requested type does not match stored type.");
         }
 
         return *(reinterpret_cast<const MsgT*>(_value));
@@ -83,8 +85,6 @@ private:
     template<typename MsgT>
     constexpr TraceMessageType getTypeId() const
     {
-        static_assert(MessageTrait<MsgT>::typeId != TraceMessageType::Invalid,
-            "Unknown Message type used!");
         return MessageTrait<MsgT>::typeId;
     }
 

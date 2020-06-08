@@ -28,11 +28,6 @@ using extensions::TraceMessage;
 using extensions::TraceMessageType;
 
 
-// utilities 
-std::ostream& operator<<(std::ostream& out, const TraceMessage&);
-std::ostream& operator<<(std::ostream& out, const TraceMessageType&);
-std::string to_string(const TraceMessageType&);
-std::string to_string(const TraceMessage&);
 
 // This interface allows attaching trace sinks to a controller, as configured by the user
 // and constructed in the ComAdapter.
@@ -57,38 +52,32 @@ public:
     void AddSink(const mw::EndpointAddress& id, ITraceMessageSink& sink)
     {
         auto eventHandler = [id, &sink]
-        (Direction rxOrTx, std::chrono::nanoseconds timestamp, const MsgT& msg)
+        (Direction direction, std::chrono::nanoseconds timestamp, const MsgT& msg)
         {
-            sink.Trace(rxOrTx, id, timestamp, msg);
+            sink.Trace(direction, id, timestamp, msg);
         };
         _sinks.emplace_back(std::move(eventHandler));
     }
 
-    bool IsActive() const
-    {
-        return  _sinks.size() > 0;
-    }
-
-    void Trace(Direction rxOrTx, std::chrono::nanoseconds timestamp, const MsgT& msg)
+    void Trace(Direction direction, std::chrono::nanoseconds timestamp, const MsgT& msg)
     {
         for (auto& sink: _sinks)
         {
-            sink(rxOrTx, timestamp, msg);
+            sink(direction, timestamp, msg);
         }
     }
 private:
     std::vector<ActiveSinks> _sinks;
 };
 
-// Configure the comadapters tracing sinks based on the configuration, and add appropriate tracepoints to
-// the controllers.
-using RegistrationCallbackT = std::function<void(std::unique_ptr<ITraceMessageSink>)>;
+// Configure the trace sinks based on the configuration and return a vector of
+// the sinks
 
-void CreateTraceMessageSinks(
+auto CreateTraceMessageSinks(
     mw::logging::ILogger* logger,
     const cfg::Config& config,
-    const cfg::Participant& participantConfig,
-    RegistrationCallbackT callback);
+    const cfg::Participant& participantConfig
+    ) -> std::vector<std::unique_ptr<extensions::ITraceMessageSink>>;
 
 } //end namespace tracing
 } //end namespace ib

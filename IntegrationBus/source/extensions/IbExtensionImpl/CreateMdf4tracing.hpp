@@ -13,11 +13,11 @@ class IIbExtension;
 //         Required because we don't have control over the CTor, and also we
 //         need to keep a reference to the DLL which we originate from.
 
-class IIbMdf4tracing  : public ITraceMessageSink
+class IIbMdf4tracing
 {
 public:
     // we keep a copy of our dll instance directly embedded. This saves us to
-    // implement a proxy class as in CreateIbRegistry.
+    // implement a proxy class as currently implemented in CreateIbRegistry.
     virtual auto Create(ib::mw::logging::ILogger* logger,
             const std::string& name,
             const cfg::Config& config,
