@@ -94,7 +94,7 @@ void LinController::SendFrame(Frame frame, FrameResponseType responseType, std::
 
 void LinController::SendFrameHeader(LinIdT linId)
 {
-    SendFrameHeader(linId, std::chrono::nanoseconds{});
+    SendFrameHeader(linId, _timeProvider->Now());
 }
 
 void LinController::SendFrameHeader(LinIdT linId, std::chrono::nanoseconds timestamp)

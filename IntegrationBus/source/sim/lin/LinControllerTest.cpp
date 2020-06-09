@@ -26,11 +26,20 @@ using namespace ib::sim::lin;
 using namespace ib::sim::lin::test;
 using namespace ib::util;
 
+struct MockTimeProvider : public sync::ITimeProvider
+{
+    auto TimeProviderName() const -> const std::string& override { return name; }
+    auto Now() const -> std::chrono::nanoseconds override { return time; }
+
+    std::string name = "MockName";
+    std::chrono::nanoseconds time{};
+};
+
 class LinControllerTest : public testing::Test
 {
 protected:
     LinControllerTest()
-        : controller(&comAdapter, comAdapter.GetTimeProvider())
+        : controller(&comAdapter, &mockTime)
     {
         frameStatusHandler = 
             [this](ILinController* ctrl, const Frame& frame, FrameStatus status, std::chrono::nanoseconds) {
@@ -46,6 +55,7 @@ protected:
     const EndpointAddress ibAddr2{5, 8};
     const EndpointAddress ibAddr3{6, 13};
 
+    MockTimeProvider mockTime;
     LinMockComAdapter comAdapter;
     LinController controller;
     Callbacks callbacks;
@@ -59,12 +69,13 @@ TEST_F(LinControllerTest, send_frame_with_master_response)
     controller.Init(config);
 
     Frame frame = MakeFrame(17, ChecksumModel::Enhanced);
+    mockTime.time = 35s;
 
     controller.RegisterFrameStatusHandler(frameStatusHandler);
 
     EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, A<const FrameResponseUpdate&>()))
         .Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(frame, FrameStatus::LIN_RX_OK)))
+    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(frame, FrameStatus::LIN_RX_OK, 35s)))
         .Times(1);
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, frame, FrameStatus::LIN_TX_OK))
         .Times(1);
@@ -99,10 +110,11 @@ TEST_F(LinControllerTest, send_frame_without_configured_response)
     controller.RegisterFrameStatusHandler(frameStatusHandler);
 
     Frame frame = MakeFrame(17);
+    mockTime.time = 35s;
 
     EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, A<const FrameResponseUpdate&>()))
         .Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(FrameStatus::LIN_RX_NO_RESPONSE)))
+    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(FrameStatus::LIN_RX_NO_RESPONSE, 35s)))
         .Times(1);
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, A<const Frame&>(), FrameStatus::LIN_RX_NO_RESPONSE))
         .Times(1);
@@ -127,9 +139,10 @@ TEST_F(LinControllerTest, send_frame_with_one_slave_response)
     
     // Send Frame
     Frame frame = MakeFrame(17, ChecksumModel::Enhanced);
+    mockTime.time = 35s;
 
     EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, A<const FrameResponseUpdate&>())).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(response.frame, FrameStatus::LIN_RX_OK)))
+    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(response.frame, FrameStatus::LIN_RX_OK, 35s)))
         .Times(1);
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, response.frame, FrameStatus::LIN_RX_OK))
         .Times(1);
@@ -190,9 +203,10 @@ TEST_F(LinControllerTest, send_frame_with_multiple_slave_responses)
     
     // Send Frame
     Frame frame = MakeFrame(17, ChecksumModel::Enhanced);
+    mockTime.time = 35s;
 
     EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, A<const FrameResponseUpdate&>())).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(FrameStatus::LIN_RX_ERROR)))
+    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(FrameStatus::LIN_RX_ERROR, 35s)))
         .Times(1);
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, A<const Frame&>(), FrameStatus::LIN_RX_ERROR))
         .Times(1);
@@ -223,9 +237,10 @@ TEST_F(LinControllerTest, send_frame_with_one_slave_sleeping)
     
     // Send Frame
     Frame frame = MakeFrame(17, ChecksumModel::Enhanced);
+    mockTime.time = 35s;
 
     EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, A<const FrameResponseUpdate&>())).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(FrameStatus::LIN_RX_NO_RESPONSE)))
+    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(FrameStatus::LIN_RX_NO_RESPONSE, 35s)))
         .Times(1);
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, AFrameWithId(17), FrameStatus::LIN_RX_NO_RESPONSE))
         .Times(1);
@@ -283,12 +298,13 @@ TEST_F(LinControllerTest, send_frame_header_with_master_response)
     controller.Init(config);
 
     Frame frame = MakeFrame(17, ChecksumModel::Enhanced);
+    mockTime.time = 35s;
 
     controller.RegisterFrameStatusHandler(frameStatusHandler);
 
     EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, A<const FrameResponseUpdate&>()))
         .Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(frame, FrameStatus::LIN_RX_OK)))
+    EXPECT_CALL(comAdapter, SendIbMessage(ibAddr1, ATransmissionWith(frame, FrameStatus::LIN_RX_OK, 35s)))
         .Times(1);
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, frame, FrameStatus::LIN_TX_OK))
         .Times(1);

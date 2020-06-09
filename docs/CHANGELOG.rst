@@ -7,6 +7,7 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 
 [x.y.z] - unreleased
 --------------------------------
+
 Added
 ~~~~~
 - New optional configuration section for extension-related settings,
@@ -20,6 +21,12 @@ Changed
 - For FastRTPS, the default participant lease duration is now 2h to avoid
   connection losses when debugging. (AFTMAGT-267)
 
+Fixed
+~~~~~
+- :cpp:func:`ILinController::SendFrameHeader(LinIdT)<void
+  ib::sim::lin::ILinController::SendFrameHeader(LinIdT)>` now correctly sets the
+  current simulation time in the LinTransmission. Previously, the timestamp was
+  always 0s.
 
 
 [3.0.7] - 2020-04-25

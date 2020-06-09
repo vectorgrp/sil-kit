@@ -60,6 +60,14 @@ inline auto ATransmissionWith(FrameStatus status) -> testing::Matcher<const Tran
     using namespace testing;
     return Field(&Transmission::status, status);
 }
+inline auto ATransmissionWith(FrameStatus status, std::chrono::nanoseconds timestamp) -> testing::Matcher<const Transmission&>
+{
+    using namespace testing;
+    return AllOf(
+        Field(&Transmission::status, status),
+        Field(&Transmission::timestamp, timestamp)
+    );
+}
 inline auto ATransmissionWith(Frame frame, FrameStatus status) -> testing::Matcher<const Transmission&>
 {
     using namespace testing;
