@@ -5,6 +5,15 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[x.y.z] - unreleased
+--------------------------------
+  
+Changed
+~~~~~
+- For FastRTPS, the default participant lease duration is now 2h to avoid
+  connection losses when debugging. (AFTMAGT-267)
+
+
 [3.0.7] - 2020-04-25
 --------------------------------
 
