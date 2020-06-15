@@ -5,7 +5,7 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[x.y.z] - unreleased
+[3.1.0] - 2020-06-15
 --------------------------------
 
 Added
@@ -152,7 +152,7 @@ Compatibility with 3.0.7
 - Middleware network protocol (VAsio): Yes
 
 
-[3.0.7] - 2020-04-25
+[3.0.7] - 2020-05-25
 --------------------------------
 
 Added
