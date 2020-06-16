@@ -61,6 +61,13 @@ elseif(MSVC)
 
     target_sources(IbExtensions PRIVATE detail/LoadExtension_win.cpp)
 
+    if(DEFINED MSVC_TOOLSET_VERSION)
+        target_compile_definitions(IbExtensions
+            PUBLIC
+                IB_MSVC_TOOLSET_VERSION=${MSVC_TOOLSET_VERSION}
+            )
+
+    endif()
 endif()
 
 target_compile_definitions(IbExtensions

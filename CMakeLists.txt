@@ -21,6 +21,14 @@ configure_ib_version(${PROJECT_NAME})
 # Enable testing for this project
 enable_testing()
 
+# Global build settings
+if(MSVC)
+    #make sure Release is built with debug PDBs
+    add_compile_options(/Zi )
+    # make sure __cplusplus has the current C++ version encoded
+    add_compile_options(/Zc:__cplusplus)
+endif()
+
 ###############################################################################
 # Include the IntegrationBus projects to be built
 ###############################################################################

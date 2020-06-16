@@ -23,9 +23,7 @@ if(MSVC)
         add_compile_options("/wd4503")
     endif()
 
-    #make sure Release is built with debug PDBs
-    add_compile_options(/Zi )
-    #does not build on CI, seems to be cmake 3.13: add_link_options(/DEBUG)
+    #does not build on CI, seems to be cmake 3.13: add_link_options(/DEBUG):
     #add_link_options(/DEBUG)
     #we add LINK_FLAGS property to IntegrationBus as workaround
 

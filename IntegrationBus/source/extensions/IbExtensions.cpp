@@ -9,7 +9,7 @@
 #include <sstream>
 #include <cstdlib> //getenv
 #include <iostream>
-#include <cstring>
+#include <type_traits>
 
 namespace ib { namespace extensions {
 
@@ -21,12 +21,22 @@ std::string to_string(const BuildInfoType&  bi)
 {
     std::stringstream ss;
     ss 
-        << "C++=" << bi[0] << ", "
-        << "Compiler=" << bi[1] << ", "
-        << "Multithread=" << bi[2] << ", "
-        << "Debug=" << bi[3] << ", "
+        << "C++=" << bi[static_cast<int>(BuildInfoField::Cxx)] << ", "
+        << "Compiler=" << bi[static_cast<int>(BuildInfoField::Compiler)] << ", "
+        << "Multithread=" << bi[static_cast<int>(BuildInfoField::Multithread)] << ", "
+        << "Debug=" << bi[static_cast<int>(BuildInfoField::Debug)] << ", "
         ;
     return ss.str();
+}
+
+bool isBuildCompatible(const BuildInfoType& myInfos, const BuildInfoType& otherInfos)
+{
+    auto ok = true;
+    for (auto i = 0u; i < sizeof(BuildInfoType) / sizeof(std::remove_all_extents_t<BuildInfoType>); i++)
+    {
+        ok &= (myInfos[i] == otherInfos[i]);
+    }
+    return ok;
 }
 
 void VerifyExtension(const IbExtensionDescriptor_t* descr)
@@ -56,16 +66,16 @@ void VerifyExtension(const IbExtensionDescriptor_t* descr)
     }
 
     //verfiy build infos
-    BuildInfoType my_bi= IB_MAKE_BUILDINFOS();
-    const auto& bi = descr->build_infos;
+    const BuildInfoType ourBuild= IB_MAKE_BUILDINFOS();
+    const auto& extensionBuild = descr->build_infos;
 
-    if(memcmp(&my_bi, bi, sizeof(bi)) != 0 )
+    if(!isBuildCompatible(ourBuild, extensionBuild))
     {
         std::stringstream ss;
         ss << "Build information mismatch: host build info is: "
-            << to_string(my_bi)
+            << to_string(ourBuild)
             << ", module build info is: "
-            << to_string(bi)
+            << to_string(extensionBuild)
             << "."
             ;
         throw ExtensionError(ss.str());
