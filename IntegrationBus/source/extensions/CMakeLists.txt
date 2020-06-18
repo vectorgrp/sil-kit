@@ -12,10 +12,20 @@ add_library(IbExtensions STATIC
     IbExtensionApi/IbExtensionUtils.hpp
     IbExtensionApi/IbExtensionUtils.cpp
 
-    #private extensions:
-    #   MDF4
+    # Imlplementation Helpers
+    IbExtensionImpl/DllCache.hpp
+    IbExtensionImpl/IbExtensionProxy.hpp
+    IbExtensionImpl/CreateInstance.hpp
+    #Extension implementations
+    #   MDF4 (private)
     IbExtensionImpl/CreateMdf4tracing.cpp
     IbExtensionImpl/CreateMdf4tracing.hpp
+    #   IbRegistry  headers, the implementation is linked inside of
+    #   IntegrationBus target
+    #      for IDE:
+    ${CMAKE_CURRENT_LIST_DIR}/../../include/ib/extensions/IIbRegistry.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../include/ib/extensions/CreateExtension.hpp
+    IbExtensionImpl/IIbRegistry.hpp
 )
 
 target_include_directories(IbExtensions

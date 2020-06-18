@@ -1,7 +1,7 @@
 #pragma once
 #include "ib/extensions/IIbRegistry.hpp"
 #include "ib/cfg/Config.hpp"
-
+#include <memory>
 //! \brief Creates an instance of IIbRegistry. Used for loading the extension 
 //         when there is no direct access to the CTor of the actual extension
 //         interface.
@@ -9,10 +9,10 @@
 // the extension implementation, but hidden from users of the public
 // IIbRegistry interface.
 
-class IIbRegistryFactory
+class IIbRegistryFactory2
 {
 public:
-    virtual ~IIbRegistryFactory() = default;
-    virtual ib::extensions::IIbRegistry* Create(ib::cfg::Config) = 0;
-    virtual void Release(ib::extensions::IIbRegistry*) = 0;
+    virtual ~IIbRegistryFactory2() = default;
+    virtual auto Create(ib::cfg::Config)
+        -> std::unique_ptr<ib::extensions::IIbRegistry>  = 0;
 };

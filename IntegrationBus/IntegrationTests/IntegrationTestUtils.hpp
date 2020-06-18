@@ -16,6 +16,10 @@
 #include <stdio.h>
 #endif
 
+#if _WIN32
+#include <Windows.h> //for 'HANDLE'
+#endif
+
 
 namespace IntegrationTestUtils {
 

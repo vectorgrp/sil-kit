@@ -31,6 +31,7 @@ add_library(IntegrationBus SHARED
 # Published extension implementations follow here for the extension loading
 # side of the code. The actual shared library code might reside 
 # anywhere.
+# NB this is required because we don't want to have IbExtension in our EXPORT set
 
 target_sources(IntegrationBus
     PRIVATE

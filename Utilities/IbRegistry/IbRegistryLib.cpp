@@ -16,27 +16,22 @@
 //This factory class exposes a parameterized CTor of VAsioRegistry
 //and a corresponding deleter.
 class IbRegistryFactory
-    : public IIbRegistryFactory
+    : public IIbRegistryFactory2
     , public ib::extensions::IbExtensionBase
 {
 public:
     //public IIbRegistryFactory methods
     auto Create(ib::cfg::Config )
-        -> ib::extensions::IIbRegistry* override;
-    void Release(ib::extensions::IIbRegistry*) override;
+        -> std::unique_ptr<ib::extensions::IIbRegistry> override;
 
 };
 
 auto IbRegistryFactory::Create(ib::cfg::Config cfg)
-        -> ib::extensions::IIbRegistry*
+        -> std::unique_ptr<ib::extensions::IIbRegistry>
 {
-    return new ib::mw::VAsioRegistry(std::move(cfg));
+    return  std::make_unique<ib::mw::VAsioRegistry>(std::move(cfg));
 }
 
-void IbRegistryFactory::Release(ib::extensions::IIbRegistry* inst)
-{
-    delete inst;
-}
 
 IB_DECLARE_EXTENSION(
     IbRegistryFactory,

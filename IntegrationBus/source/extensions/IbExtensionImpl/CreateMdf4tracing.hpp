@@ -10,18 +10,16 @@ namespace ib { namespace extensions {
 class IIbExtension;
 
 //! \brief Helper factory to instantiate Mdf4tracing
-//         Required because we don't have control over the CTor, and also we
-//         need to keep a reference to the DLL which we originate from.
+//         Required because we don't have control over the CTor when an extension is loaded.
 
 class IIbMdf4tracing
 {
 public:
-    // we keep a copy of our dll instance directly embedded. This saves us to
-    // implement a proxy class as currently implemented in CreateIbRegistry.
-    virtual auto Create(ib::mw::logging::ILogger* logger,
-            const std::string& name,
-            const cfg::Config& config,
-            std::shared_ptr<IIbExtension> dllInstance)
+    
+    virtual auto Create( const cfg::Config& config,
+            ib::mw::logging::ILogger* logger,
+            const std::string& name
+        )
        -> std::unique_ptr<ITraceMessageSink> = 0;
 
 };

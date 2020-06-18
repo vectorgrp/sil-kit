@@ -34,7 +34,6 @@ constexpr uint32_t BuildinfoCompiler()
 #   elif defined(_MSVC_STL_VERSION)
     // in case newer toolset is not recognized by CMake:
     // On VS2015/17/19_MSVC_STL_VERSION contains the toolset number, e.g. 141, 142 etc.
-#error should not happen
     return _MSVC_STL_VERSION;
 #   endif
 #endif
