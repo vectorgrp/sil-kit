@@ -51,13 +51,13 @@ struct MdfProxy final
     }
 };
 
-auto CreateMdf4tracing(ib::mw::logging::ILogger* logger,
-        const std::string& sinkName,
-        const cfg::Config& config)
+auto CreateMdf4tracing(cfg::Config config,
+    ib::mw::logging::ILogger* logger,
+    const std::string& sinkName)
     -> std::unique_ptr<ITraceMessageSink>
 {
     return CreateInstance<IIbMdf4tracing, MdfProxy>
-        ("vibe-mdf4tracing", config, logger, sinkName);
+        ("vibe-mdf4tracing", std::move(config), logger, sinkName);
 }
 
 }//end namespace extensions

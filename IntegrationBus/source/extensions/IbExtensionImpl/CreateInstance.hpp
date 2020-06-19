@@ -11,19 +11,18 @@
 namespace ib { namespace extensions {
 
 //! \brief CreateInstance creates an instance of the given interface bundled with a shared pointer to the underlying shared library
-// This simplifies the usage for the actual Create`Interface`(`CTor  arguments`) 
-// factories.
-// NB this is only needed because we don't want to keep a global list of opened 
-//    shared libraries and also adds a layer of indirection through the Proxy instance.
+// NB this simplifies housekeeping of opened/used shared libraries at the cost of adding a layer of indirections
+//    through the Proxy interface
 
 template<typename FactoryT, typename ProxyT, typename... Arg>
 auto CreateInstance(const std::string& extensionName,
-    const cfg::Config& config, Arg&&... args) -> std::unique_ptr<ProxyT>
+    cfg::Config config, Arg&&... args) -> std::unique_ptr<ProxyT>
 {
     static DllCache cache;
+    //the dll instance must be kept alive, especially when exceptions are thrown in the factory
+    auto dll = cache.Get(extensionName, config);
     try
     {
-        auto dll = cache.Get(extensionName, config);
         auto& factory = dynamic_cast<FactoryT&>(*dll);
         auto instance = factory.Create(config, std::forward<Arg>(args)...);
         return std::make_unique<ProxyT>(std::move(instance), std::move(dll));

@@ -21,9 +21,9 @@ public:
     IntegrationBusAPI auto operator->() -> TraceSinkBuilder*;
     IntegrationBusAPI auto Build() -> TraceSink;
 
-    auto WithType(TraceSink::Type type) -> TraceSinkBuilder&;
-    auto WithOutputPath(std::string) -> TraceSinkBuilder&;
-    auto Enabled(bool) -> TraceSinkBuilder&;
+    IntegrationBusAPI auto WithType(TraceSink::Type type) -> TraceSinkBuilder&;
+    IntegrationBusAPI auto WithOutputPath(std::string) -> TraceSinkBuilder&;
+    IntegrationBusAPI auto Enabled(bool) -> TraceSinkBuilder&;
 
 private:
     TraceSink _traceSink{};

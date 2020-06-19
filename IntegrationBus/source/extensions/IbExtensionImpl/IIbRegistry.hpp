@@ -9,10 +9,10 @@
 // the extension implementation, but hidden from users of the public
 // IIbRegistry interface.
 
-class IIbRegistryFactory2
+class IIbRegistryFactory
 {
 public:
-    virtual ~IIbRegistryFactory2() = default;
+    virtual ~IIbRegistryFactory() = default;
     virtual auto Create(ib::cfg::Config)
         -> std::unique_ptr<ib::extensions::IIbRegistry>  = 0;
 };

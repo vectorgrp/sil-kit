@@ -20,7 +20,11 @@ const char* BuildinfoSystem();
 //! \brief Utilities for build infos encoded in shared libraries.
 constexpr uint32_t BuildinfoCPlusPlus()
 {
-    return __cplusplus; // requires compile flag /Zc:__cplusplus on MSVC
+#if defined(_MSVC_LANG)
+    return _MSVC_LANG; // some MSVC compilers don't understand /Zc:__cplusplus
+#else
+    return __cplusplus; // requires compile flag /Zc:__cplusplus AND /std:c++14 on MSVC
+#endif
 }
 constexpr uint32_t BuildinfoCompiler()
 {

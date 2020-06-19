@@ -1,4 +1,4 @@
-VIB Changelog
+eIB Changelog
 ================================
 
 All notable changes to the IntegrationBus project shall be documented in this file.
@@ -55,6 +55,8 @@ Fixed
 ~~~~~
 - Fixed a bug that prevented legacy IbConfigs (pre VIB 3.1.0) using the PcapFile
   setting from being converted to new IbConfigs (VIB 3.1.0) using trace sinks.
+- TraceSinkBuilder was missing API exports for three methods, resulting in
+  missing symbols when linking on Windows.
 
 
 Compatibility with 3.1.0
@@ -65,7 +67,6 @@ Compatibility with 3.1.0
 
 - Middleware network protocol (FastRTPS): Yes
 - Middleware network protocol (VAsio): Yes
-
 
 [3.1.0] - 2020-06-15
 --------------------------------

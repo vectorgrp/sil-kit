@@ -16,7 +16,7 @@
 //This factory class exposes a parameterized CTor of VAsioRegistry
 //and a corresponding deleter.
 class IbRegistryFactory
-    : public IIbRegistryFactory2
+    : public IIbRegistryFactory
     , public ib::extensions::IbExtensionBase
 {
 public:

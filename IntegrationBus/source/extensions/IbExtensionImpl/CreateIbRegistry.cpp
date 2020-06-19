@@ -42,8 +42,8 @@ struct IbRegistryProxy
 auto CreateIbRegistry(ib::cfg::Config config)
     -> std::unique_ptr<IIbRegistry>
 {
-    return CreateInstance<IIbRegistryFactory2, IbRegistryProxy>
-        ("vib-registry", config);
+    return CreateInstance<IIbRegistryFactory, IbRegistryProxy>
+        ("vib-registry", std::move(config));
 }
 
 }//end namespace extensions

@@ -9,11 +9,11 @@ namespace ib { namespace extensions {
 //forwards
 class IIbExtension;
 
-//The intention of using the proxy is to remove the deleters and other
-//implementation details from the return value type of an Extension factory.
-// This is basically a "Pointer to Implementation" idiom to hide the custom destructors,
-// and to ensure that the destructors are run outside of the actual extension's
-// memory segments.
+//! \brief IbExtensionProxy implements the given extension interface and 
+//         takes ownership of the underlying shared library.
+// The intention of using the proxy is to ensure that the extension's destructors
+// are run outside of the actual extension's memory / text segments.
+//
 // Usage:
 // see CreateIbRegistry() and CreateMdf4tracing()
 
@@ -22,13 +22,10 @@ class IbExtensionProxy
     : public InterfaceType
 {
 public:
-    using CustomDeleterT = std::function<void(InterfaceType*)>;
-    using unique_ptr = std::unique_ptr<InterfaceType, CustomDeleterT>;
-
     IbExtensionProxy() = delete;
     IbExtensionProxy(IbExtensionProxy&&) = delete;
 
-    IbExtensionProxy(unique_ptr instance,
+    IbExtensionProxy(std::unique_ptr<InterfaceType> instance,
         std::shared_ptr<IIbExtension> sharedLibrary)
         : _sharedLibrary(std::move(sharedLibrary))
         , _instance(std::move(instance))
@@ -39,7 +36,7 @@ public:
 
 protected:
     std::shared_ptr<IIbExtension> _sharedLibrary;// must live longer than instance
-    unique_ptr _instance;
+    std::unique_ptr<InterfaceType> _instance;
 };
 
 }//end namespace extensions

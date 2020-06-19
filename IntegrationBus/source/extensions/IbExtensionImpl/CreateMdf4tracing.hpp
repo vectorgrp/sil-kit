@@ -15,16 +15,17 @@ class IIbExtension;
 class IIbMdf4tracing
 {
 public:
-    
-    virtual auto Create( const cfg::Config& config,
+    virtual ~IIbMdf4tracing() = default;
+    virtual auto Create(cfg::Config config,
             ib::mw::logging::ILogger* logger,
-            const std::string& name
+            std::string name
         )
        -> std::unique_ptr<ITraceMessageSink> = 0;
 
 };
 
-auto CreateMdf4tracing(ib::mw::logging::ILogger* logger, const std::string& sinkName, const cfg::Config& config)
+auto CreateMdf4tracing(cfg::Config config,
+    ib::mw::logging::ILogger* logger, const std::string& sinkName)
     -> std::unique_ptr<ITraceMessageSink>;
 
 }//end namespace extensions

@@ -9,8 +9,10 @@
 
 namespace ib { namespace extensions {
 
-//!\brief DllCache is keeps the shared library loaded until
-//        all instances of its extension objects are destructed.
+//!\brief DllCache keeps a weak reference to already loaded shared libraries.
+//
+// This allows extensions to cache the already loaded and validated shared
+// libraries and reusing them.
 //Usage:
 // static DllCache cache;
 // auto extension = cache.Get("name of extension");
