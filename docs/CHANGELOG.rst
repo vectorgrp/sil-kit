@@ -5,6 +5,39 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[x.y.z] - unreleased
+--------------------------------
+
+Added
+~~~~~
+
+- Logger of the VAsio Registry can now be configured via the middleware configuration,
+  cf. :ref:`sec:mwcfg-vasio`. The corresponding :cpp:class:`RegistryBuilder<VAsio::RegistryBuilder>`
+  also gained the :cpp:func:`ConfigureLogger()<ib::cfg::VAsio::RegistryBuilder::ConfigureLogger>` method to configure
+  the logger of the VAsio Registry.
+- Added benchmark demo, cf. :ref:`sec:util-benchmark-demo`.
+
+Changed
+~~~~~~~
+
+Fixed
+~~~~~
+
+Removed
+~~~~~~~
+
+Deprecated
+~~~~~~~~~~
+
+Compatibility with 3.1.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): No
+- Application software interface (API): No
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
+
 [3.1.0] - 2020-06-15
 --------------------------------
 
@@ -15,7 +48,6 @@ Added
   is the list of extension search path hints, which allows to configure
   the additional search paths for shared library extensions loaded by the VIB,
   e.g. the :doc:`vibes/vibregistry`.
-  
 
 - New configuration mechanism for IB message tracing.
   It supersedes the previous Ethernet and PCAP specicic configuration, please

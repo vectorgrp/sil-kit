@@ -83,7 +83,10 @@ running on localhost listening on Port 8500. These values can be changed via the
             "VAsio": {
                 "Registry": {
                     "Hostname": "remotehost",
-                    "Port": 14014
+                    "Port": 14014,
+                    "Logger": {
+                        ...
+                    }
                 }
             }
         }
@@ -97,10 +100,27 @@ running on localhost listening on Port 8500. These values can be changed via the
      - Description
 
    * - Registry
-     - The optional Registry section allows specifying the hostname and a base
-       port to be used by participants when connecting to the IbRegistry. By
-       default, the registry is expected to be running on "localhost" and is
-       listening on port 8500 + *IbDomainId*.
+     - The optional :ref:`VAsio Registry configuration<sec:mwcfg-vasio-registry>`.
+
+.. _sec:mwcfg-vasio-registry:
+
+.. list-table:: VAsio Registry Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+
+   * - Hostname
+     - The hostname to be used by participants when connecting to the IbRegistry.
+       By default, the registry is expected to be running on "localhost".
+
+   * - Port
+     - The base port to be used by participants when connecting to the IbRegistry.
+       By default, the registry is expected to listen on the port 8500 + *IbDomainId*.
+
+   * - Logger
+     - Optional :ref:`Logger configuration<sec:cfg-participant-logger>` for the logger used by the registry.
 
 .. _sec:mwcfg-fastrtps:
 

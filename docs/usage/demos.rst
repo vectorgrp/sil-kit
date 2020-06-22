@@ -301,3 +301,37 @@ IO Port Demo
    *  -  Notes
       -  | \- Both Writer and Reader sleep for 1 second per quantum to slow down execution.
          | \- In each quantum, all four types of IO are used in each quantum: analog, digital, PWM, and pattern IO.
+
+.. _sec:util-benchmark-demo:
+
+Benchmark Demo
+~~~~~~~~~~~~~~
+
+.. list-table::
+   :widths: 17 220
+   :stub-columns: 1
+
+   *  -  Abstract
+      -  Parametrizable demo to benchmark the IB performance. Runs the simulation with the specified parameters a number of times and summarizes the real execution time as result.
+   *  -  Source location
+      -  Demos/Benchmark
+   *  -  Parameters
+      -  There are up to 7 positional arguments. All of them are optional and the defaults are used for the unspecified ones.
+         
+         #. The middleware to be used (optional); must be either ``FastRTPS`` or ``VAsio``; defaults to ``VAsio``. 
+         #. Number of simulations (optional); must be at least ``1``; defaults to ``5``.
+         #. Duration of the simulation in seconds (optional); must be at least ``1``; defaults to ``1``.
+         #. Number of participants (optional); must be at least ``2``; defaults to ``4``.
+         #. Number of messages sent per tick between each participant (optional); defaults to ``1``.
+         #. Size of the messages in bytes (optional); must be at least ``1``; defaults to ``100``.
+         #. Domain ID (optional); defaults to ``42``.
+   *  -  Parameter Example
+      -  .. parsed-literal:: 
+
+            # Creates a benchmark process, which runs the same simulation (VAsio middleware, 5s duration,
+            # 10 participants, 1 message of 200 bytes per participant pair per tick) a hundred times.
+            |DemoDir|/IbDemoBenchmark VAsio 100 5 10 1 200 50
+   *  -  Notes
+      -  | \- Generic publisher / subscribers are used as participants.
+         | \- The tick period is 1ms and each tick, each particpant sends the specified number of messages to every other particpant.
+         | \- All participants, the SyncMaster and the VAsio registry (VAsio only) run in the same process.

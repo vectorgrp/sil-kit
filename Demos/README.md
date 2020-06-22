@@ -22,7 +22,10 @@ Supported target platforms and build tools:
 
 
 ## Build Instructions
-The cmake build should work on all supported platforms in a similar way:
+
+For the binary release, the cmake build from the 'IntegrationBus-Demos'
+directory should work on all supported platforms in a similar way:
+
 > mkdir build
 
 > cd build
@@ -30,6 +33,13 @@ The cmake build should work on all supported platforms in a similar way:
 > cmake ../
 
 > cmake --build .
+
+The demos will be placed alongside the binaries.
+
+To build the demos as developer from within the IB source tree and place them alongside
+the binaries, build the 'Demos' CMake target from the IB 'build' directory:
+
+> cmake --build . --target Demos
 
 On CMake version >=3.12 the '--parallel' flag can be used to speed up
 compilation.
