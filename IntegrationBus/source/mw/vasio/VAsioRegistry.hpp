@@ -23,6 +23,8 @@ public:
     void SetAllConnectedHandler(std::function<void()> handler) override;
     void SetAllDisconnectedHandler(std::function<void()> handler) override;
 
+    auto GetLogger() -> logging::ILogger* override;
+
 private:
     // ----------------------------------------
     // private methods

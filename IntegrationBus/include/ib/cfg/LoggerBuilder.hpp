@@ -14,10 +14,10 @@
 namespace ib {
 namespace cfg {
 
-class LoggerBuilder : public ParentBuilder<ParticipantBuilder>
+class LoggerBuilder
 {
 public:
-    IntegrationBusAPI LoggerBuilder(ParticipantBuilder *participant);
+    IntegrationBusAPI LoggerBuilder() = default;
     IntegrationBusAPI ~LoggerBuilder();
 
     IntegrationBusAPI auto AddSink(Sink::Type type) -> SinkBuilder&;

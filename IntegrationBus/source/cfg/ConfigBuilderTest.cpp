@@ -402,7 +402,6 @@ TEST_F(ConfigBuilderTest, configure_fastrtps_unicast_with_configfile_must_fail)
     EXPECT_THROW(configBuilder.Build(), ib::cfg::Misconfiguration);
 }
 
-
 TEST_F(ConfigBuilderTest, configure_fastrtps_multicast)
 {
     configBuilder.ConfigureFastRtps()
@@ -463,6 +462,35 @@ TEST_F(ConfigBuilderTest, configure_fastrtps_configfile_with_unicast_locators_mu
         .AddUnicastLocator("participant1", "192.168.0.1");
 
     EXPECT_THROW(configBuilder.Build(), ib::cfg::Misconfiguration);
+}
+
+TEST_F(ConfigBuilderTest, configure_vasio_registry)
+{
+    const std::string hostname = "hostname";
+    const uint16_t port = 12345;
+
+    configBuilder.ConfigureVAsio().ConfigureRegistry().WithHostname(hostname).WithPort(port)
+        .ConfigureLogger().EnableLogFromRemotes().WithFlushLevel(logging::Level::Critical)
+        ->AddSink(Sink::Type::Remote).WithLogLevel(logging::Level::Warn)
+        ->AddSink(Sink::Type::File).WithLogLevel(logging::Level::Debug).WithLogname("FileLogger");
+
+    auto config = configBuilder.Build();
+    auto&& registry = config.middlewareConfig.vasio.registry;
+
+    EXPECT_EQ(registry.hostname, hostname);
+    EXPECT_EQ(registry.port, port);
+
+    EXPECT_TRUE(registry.logger.logFromRemotes);
+    EXPECT_EQ(registry.logger.flush_level, logging::Level::Critical);
+
+    ASSERT_EQ(registry.logger.sinks.size(), 2u);
+    auto&& sink1 = registry.logger.sinks[0];
+    auto&& sink2 = registry.logger.sinks[1];
+
+    EXPECT_EQ(sink1.type, Sink::Type::Remote);
+    EXPECT_EQ(sink1.level, logging::Level::Warn);
+    EXPECT_EQ(sink2.type, Sink::Type::File);
+    EXPECT_EQ(sink2.level, logging::Level::Debug);
 }
 
 TEST_F(ConfigBuilderTest, configure_timesync_syncpolicy_by_parameter)

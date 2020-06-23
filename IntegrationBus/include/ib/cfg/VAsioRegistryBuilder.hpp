@@ -5,6 +5,7 @@
 #include "ib/IbMacros.hpp"
 
 #include "Config.hpp"
+#include "LoggerBuilder.hpp"
 
 namespace ib {
 namespace cfg {
@@ -17,11 +18,13 @@ public:
 
     IntegrationBusAPI auto WithHostname(std::string hostname) -> RegistryBuilder&;
     IntegrationBusAPI auto WithPort(uint16_t port) -> RegistryBuilder&;
+    IntegrationBusAPI auto ConfigureLogger() -> LoggerBuilder&;
 
     IntegrationBusAPI auto Build() -> RegistryConfig;
 
 private:
     RegistryConfig _config;
+    LoggerBuilder _logger;
 };
 
 } // namespace VAsio

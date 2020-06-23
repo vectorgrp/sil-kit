@@ -12,14 +12,9 @@ namespace mw {
 
 VAsioRegistry::VAsioRegistry(ib::cfg::Config cfg)
     : _vasioConfig{cfg.middlewareConfig.vasio}
-    , _connection{std::move(cfg), "IbRegistry", 0}
+    , _connection{cfg, "IbRegistry", 0}
 {
-    ib::cfg::Logger loggerCfg;
-    ib::cfg::Sink stdoutSinkCfg;
-    stdoutSinkCfg.type = ib::cfg::Sink::Type::Stdout;
-    loggerCfg.sinks.push_back(stdoutSinkCfg);
-
-    _logger = std::make_unique<logging::Logger>("IbRegistry", loggerCfg);
+    _logger = std::make_unique<logging::Logger>("IbRegistry", cfg.middlewareConfig.vasio.registry.logger);
     _connection.SetLogger(_logger.get());
 
     _connection.RegisterMessageReceiver([this](IVAsioPeer* from, const ParticipantAnnouncement& announcement)
@@ -58,6 +53,10 @@ void VAsioRegistry::SetAllConnectedHandler(std::function<void()> handler)
 void VAsioRegistry::SetAllDisconnectedHandler(std::function<void()> handler)
 {
     _onAllParticipantsDisconnected = std::move(handler);
+}
+auto VAsioRegistry::GetLogger() -> logging::ILogger*
+{
+    return _logger.get();
 }
 
 bool VAsioRegistry::IsExpectedParticipant(const ib::mw::VAsioPeerInfo& peerInfo)

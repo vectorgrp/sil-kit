@@ -37,6 +37,14 @@ auto from_json<std::string>(const json11::Json& json) -> std::string;
 template <>
 auto from_json<Version>(const json11::Json& json) -> Version;
 template <>
+auto from_json<Sink::Type>(const json11::Json& json) -> Sink::Type;
+template <>
+auto from_json<mw::logging::Level>(const json11::Json& json) -> mw::logging::Level;
+template <>
+auto from_json<Sink>(const json11::Json& json) -> Sink;
+template <>
+auto from_json<Logger>(const json11::Json& json) -> Logger;
+template <>
 auto from_json<CanController>(const json11::Json& json) -> CanController;
 template <>
 auto from_json<LinController>(const json11::Json& json) -> LinController;
@@ -97,11 +105,14 @@ auto to_json(uint16_t value) -> json11::Json;
 auto to_json(int32_t value) -> json11::Json;
 auto to_json(const std::string& value) -> json11::Json;
 auto to_json(const Version& version) -> json11::Json;
-auto to_json(const Version& version) -> json11::Json;
-auto to_json(const CanController& version) -> json11::Json;
-auto to_json(const LinController& version) -> json11::Json;
-auto to_json(const EthernetController& version) -> json11::Json;
-auto to_json(const FlexrayController& version) -> json11::Json;
+auto to_json(const Sink::Type& type) -> json11::Json;
+auto to_json(const mw::logging::Level& level) -> json11::Json;
+auto to_json(const Sink& sink) -> json11::Json;
+auto to_json(const Logger& logger) -> json11::Json;
+auto to_json(const CanController& controller) -> json11::Json;
+auto to_json(const LinController& controller) -> json11::Json;
+auto to_json(const EthernetController& controller) -> json11::Json;
+auto to_json(const FlexrayController& controller) -> json11::Json;
 auto to_json(const DigitalIoPort& port) -> json11::Json;
 auto to_json(const AnalogIoPort& port) -> json11::Json;
 auto to_json(const PwmPort& port) -> json11::Json;
@@ -114,17 +125,17 @@ auto to_json(const Switch& switch_) -> json11::Json;
 auto to_json(const Link& link) -> json11::Json;
 auto to_json(const NetworkSimulator& networkSimulator) -> json11::Json;
 auto to_json(TimeSync::SyncPolicy syncPolicy) -> json11::Json;
-auto to_json(const TimeSync& controller) -> json11::Json;
+auto to_json(const TimeSync& timeSync) -> json11::Json;
 auto to_json(const SimulationSetup& simulationSetup) -> json11::Json;
 auto to_json(FastRtps::DiscoveryType discoveryType) -> json11::Json;
 auto to_json(const FastRtps::Config& fastRtps) -> json11::Json;
 auto to_json(const VAsio::RegistryConfig& config) -> json11::Json;
 auto to_json(const VAsio::Config& config) -> json11::Json;
-auto to_json(const MiddlewareConfig& simulationMiddleware) -> json11::Json;
+auto to_json(const MiddlewareConfig& middlewareConfig) -> json11::Json;
 auto to_json(const ExtensionConfig& config) -> json11::Json;
 auto to_json(const Config& cfg) -> json11::Json;
 auto to_json(const TraceSink& cfg) -> json11::Json;
-auto to_json(const TraceSink::Type& cfg) -> json11::Json;
+auto to_json(const TraceSink::Type& type) -> json11::Json;
 
 
 template<typename T, std::enable_if_t<is_std_vector<T>::value, int> = 0>

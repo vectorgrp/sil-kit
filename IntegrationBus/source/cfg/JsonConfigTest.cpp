@@ -523,15 +523,13 @@ TEST_F(JsonConfigTest, select_vasio_as_middleware)
 
 TEST_F(JsonConfigTest, configure_vasio_registry)
 {
-    builder.ConfigureVAsio().ConfigureRegistry()
-        .WithHostname("NotLocalhost")
-        .WithPort(1701);
+    builder.ConfigureVAsio()
+        .ConfigureRegistry().WithHostname("NotLocalhost").WithPort(1701)
+        .ConfigureLogger().EnableLogFromRemotes().WithFlushLevel(logging::Level::Critical)
+        ->AddSink(Sink::Type::Stdout).WithLogLevel(logging::Level::Info);
 
     BuildConfigFromJson();
     EXPECT_EQ(config, referenceConfig);
-    EXPECT_EQ(config.middlewareConfig.vasio.registry.hostname, "NotLocalhost");
-    EXPECT_EQ(config.middlewareConfig.vasio.registry.port, 1701);
-    EXPECT_EQ(config.middlewareConfig.activeMiddleware, ib::cfg::Middleware::VAsio);
 }
 
 TEST_F(JsonConfigTest, configure_timesync_with_strict_sync_policy)
@@ -574,7 +572,6 @@ TEST_F(JsonConfigTest, default_timesync_policy_is_loose)
     auto&& timeSync = config.simulationSetup.timeSync;
     EXPECT_EQ(timeSync.syncPolicy, TimeSync::SyncPolicy::Loose);
 }
-
 
 TEST_F(JsonConfigTest, configure_participant_as_syncmaster)
 {

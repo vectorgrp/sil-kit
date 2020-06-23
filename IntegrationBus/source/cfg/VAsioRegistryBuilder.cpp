@@ -24,9 +24,19 @@ auto RegistryBuilder::WithPort(uint16_t port) -> RegistryBuilder&
     return *this;
 }
 
+auto RegistryBuilder::ConfigureLogger() -> LoggerBuilder&
+{
+    return _logger;
+}
+
 auto RegistryBuilder::Build() -> RegistryConfig
 {
-    return std::move(_config);
+    RegistryConfig defaultConfig;
+
+    _config.logger = _logger->Build();
+
+    std::swap(defaultConfig, _config);
+    return defaultConfig;
 }
 
 } // namespace VAsio

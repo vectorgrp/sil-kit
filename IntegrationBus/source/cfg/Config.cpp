@@ -395,9 +395,23 @@ bool operator==(const FastRtps::Config &lhs, const FastRtps::Config& rhs)
         && lhs.historyDepth == rhs.historyDepth;
 }
 
+bool operator==(const VAsio::RegistryConfig &lhs, const VAsio::RegistryConfig &rhs)
+{
+    return lhs.port == rhs.port
+        && lhs.hostname == rhs.hostname
+        && lhs.logger == rhs.logger;
+}
+
+bool operator==(const VAsio::Config &lhs, const VAsio::Config &rhs)
+{
+    return lhs.registry == rhs.registry;
+}
+
 bool operator==(const MiddlewareConfig &lhs, const MiddlewareConfig& rhs)
 {
-    return lhs.fastRtps == rhs.fastRtps;
+    return lhs.activeMiddleware == rhs.activeMiddleware
+        && lhs.fastRtps == rhs.fastRtps
+        && lhs.vasio == rhs.vasio;
 }
 
 bool operator==(const ExtensionConfig &lhs, const ExtensionConfig& rhs)

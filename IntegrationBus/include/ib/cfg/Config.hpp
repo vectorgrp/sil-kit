@@ -340,6 +340,7 @@ struct RegistryConfig
 {
     std::string hostname{"localhost"};
     uint16_t port{8500};
+    Logger logger;
 };
 struct Config
 {
@@ -365,7 +366,7 @@ struct MiddlewareConfig
 //  Extension Config
 // ================================================================================
 
-// ! \brief Structure containing all extension settings
+//! \brief Structure containing all extension settings
 struct ExtensionConfig
 {
     //! \brief Additional search path hints for extensions
@@ -448,6 +449,8 @@ IntegrationBusAPI bool operator==(const Switch::Port& lhs, const Switch::Port& r
 IntegrationBusAPI bool operator==(const Switch& lhs, const Switch& rhs);
 IntegrationBusAPI bool operator==(const TimeSync& lhs, const TimeSync& rhs);
 IntegrationBusAPI bool operator==(const SimulationSetup& lhs, const SimulationSetup& rhs);
+IntegrationBusAPI bool operator==(const VAsio::RegistryConfig& lhs, const VAsio::RegistryConfig& rhs);
+IntegrationBusAPI bool operator==(const VAsio::Config& lhs, const VAsio::Config& rhs);
 IntegrationBusAPI bool operator==(const FastRtps::Config& lhs, const FastRtps::Config& rhs);
 IntegrationBusAPI bool operator==(const MiddlewareConfig& lhs, const MiddlewareConfig& rhs);
 IntegrationBusAPI bool operator==(const ExtensionConfig& lhs, const ExtensionConfig& rhs);

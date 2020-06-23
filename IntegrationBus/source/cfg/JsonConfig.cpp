@@ -17,10 +17,6 @@ namespace cfg {
 // Put helper functions in anonymous namespace
 namespace {
 
-// Default config objects to detect if element shall be serialized.
-
-const ExtensionConfig defaultExtensionConfig;
-
 inline auto nibble_to_char(char nibble) -> char
 {
     nibble &= 0xf;
@@ -83,6 +79,20 @@ auto optional_from_json(std::vector<T>& vector, const json11::Json& json, const 
 {
     if (!json.is_null())
         vector = from_json<std::vector<T>>(json[fieldName].array_items());
+}
+
+template <typename T>
+auto non_default_to_json(const T& value, json11::Json::object& json, const std::string& fieldName, const T& defaultValue)
+{
+    if (!(value == defaultValue))
+        json[fieldName] = to_json(value);
+}
+
+template <>
+auto non_default_to_json(const bool& value, json11::Json::object& json, const std::string& fieldName, const bool& defaultValue)
+{
+    if (!(value == defaultValue))
+        json[fieldName] = value;
 }
 
 } // namespace anonymous
@@ -215,11 +225,13 @@ auto from_json<mw::logging::Level>(const json11::Json& json) -> mw::logging::Lev
 
 auto to_json(const Sink& sink) -> json11::Json
 {
-    return json11::Json::object{
-        {"Type", to_json(sink.type)},
-        {"Level", to_json(sink.level)},
-        {"Logname", to_json(sink.logname)}
-    };
+    static const Sink defaultSink;
+
+    json11::Json::object json;
+    non_default_to_json(sink.type, json, "Type", defaultSink.type);
+    non_default_to_json(sink.level, json, "Level", defaultSink.level);
+    non_default_to_json(sink.logname, json, "Logname", defaultSink.logname);
+    return json;
 }
 
 template <>
@@ -233,7 +245,7 @@ auto from_json<Sink>(const json11::Json& json) -> Sink
     {
         if (!json.object_items().count("Logname"))
             throw Misconfiguration("Logname of file logger is not specified");
-        sink.logname = json["Logname"].string_value();
+        sink.logname = from_json<std::string>(json["Logname"]);
     }
 
     return sink;
@@ -241,11 +253,13 @@ auto from_json<Sink>(const json11::Json& json) -> Sink
 
 auto to_json(const Logger& logger) -> json11::Json
 {
-    return json11::Json::object{
-        {"LogFromRemotes", logger.logFromRemotes},
-        {"FlushLevel", to_json(logger.flush_level)},
-        {"Sinks", to_json(logger.sinks)}
-    };
+    static const Logger defaultLogger;
+
+    json11::Json::object json;
+    non_default_to_json(logger.logFromRemotes, json, "LogFromRemotes", defaultLogger.logFromRemotes);
+    non_default_to_json(logger.flush_level, json, "FlushLevel", defaultLogger.flush_level);
+    non_default_to_json(logger.sinks, json, "Sinks", defaultLogger.sinks);
+    return json;
 }
 
 template <>
@@ -1460,17 +1474,20 @@ auto from_json<VAsio::RegistryConfig>(const json11::Json& json) -> VAsio::Regist
 
     optional_from_json(registry.hostname, json, "Hostname");
     optional_from_json(registry.port, json, "Port");
+    optional_from_json(registry.logger, json, "Logger");
     
     return registry;
 }
 
-auto to_json(const VAsio::RegistryConfig& registry) -> json11::Json
+auto to_json(const VAsio::RegistryConfig& config) -> json11::Json
 {
-    return json11::Json::object
-    {
-        {"Hostname", registry.hostname},
-        {"Port", registry.port}
-    };
+    static const VAsio::RegistryConfig defaultConfig;
+
+    json11::Json::object json;
+    non_default_to_json(config.hostname, json, "Hostname", defaultConfig.hostname);
+    non_default_to_json(config.port, json, "Port", defaultConfig.port);
+    non_default_to_json(config.logger, json, "Logger", defaultConfig.logger);
+    return json;
 }
 
 template <>
@@ -1485,10 +1502,11 @@ auto from_json<VAsio::Config>(const json11::Json& json) -> VAsio::Config
 
 auto to_json(const VAsio::Config& config) -> json11::Json
 {
-    return json11::Json::object
-    {
-        {"Registry", to_json(config.registry)}
-    }; 
+    static const VAsio::Config defaultConfig;
+
+    json11::Json::object json;
+    non_default_to_json(config.registry, json, "Registry", defaultConfig.registry);
+    return json;
 }
 
 template<>
@@ -1524,13 +1542,10 @@ auto from_json<MiddlewareConfig>(const json11::Json& json) -> MiddlewareConfig
 
 auto to_json(const ExtensionConfig& config) -> json11::Json
 {
+    static const ExtensionConfig defaultConfig;
+
     json11::Json::object json;
-
-    if (config.searchPathHints != defaultExtensionConfig.searchPathHints)
-    {
-        json["SearchPathHints"] = to_json(config.searchPathHints);
-    }
-
+    non_default_to_json(config.searchPathHints, json, "SearchPathHints", defaultConfig.searchPathHints);
     return json;
 }
 
@@ -1550,6 +1565,8 @@ auto from_json<ExtensionConfig>(const json11::Json& json) -> ExtensionConfig
 
 auto to_json(const Config& cfg) -> json11::Json
 {
+    static const Config defaultConfig;
+
     json11::Json::object json
     {
         {"ConfigVersion", to_json(cfg.version)},
@@ -1560,11 +1577,8 @@ auto to_json(const Config& cfg) -> json11::Json
         {"MiddlewareConfig", to_json(cfg.middlewareConfig)},
     };
 
-    if (!(cfg.extensionConfig == defaultExtensionConfig))
-    {
-        json["ExtensionConfig"] = to_json(cfg.extensionConfig);
-    }
-    
+    non_default_to_json(cfg.extensionConfig, json, "ExtensionConfig", defaultConfig.extensionConfig);
+
     return json;
 }
 

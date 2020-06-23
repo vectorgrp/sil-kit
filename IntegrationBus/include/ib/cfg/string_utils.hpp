@@ -17,6 +17,10 @@ inline auto operator<<(std::ostream& out, SyncType) -> std::ostream&;
 
 inline auto to_string(TimeSync::SyncPolicy syncPolicy) -> std::string;
 
+inline auto to_string(Middleware middleware) -> std::string;
+inline auto from_string(std::string middleware) -> Middleware;
+inline auto operator<<(std::ostream& out, Middleware middleware) -> std::ostream&;
+
 namespace FastRtps {
 
 inline auto to_string(DiscoveryType discoveryType) -> std::string;
@@ -72,6 +76,42 @@ auto to_string(TimeSync::SyncPolicy syncPolicy) -> std::string
     }
 }
 
+inline auto to_string(Middleware middleware) -> std::string
+{
+    switch (middleware)
+    {
+    case Middleware::FastRTPS:
+        return "FastRTPS";
+    case Middleware::VAsio:
+        return "VAsio";
+    case Middleware::NotConfigured:
+        return "NotConfigured";
+    default:
+        throw ib::type_conversion_error{};
+    }
+}
+
+inline auto from_string(std::string middleware) -> Middleware
+{
+    if (middleware == "VAsio")
+    {
+        return Middleware::VAsio;
+    }
+    if (middleware == "FastRTPS")
+    {
+        return Middleware::FastRTPS;
+    }
+    if (middleware == "NotConfigured")
+    {
+        return Middleware::NotConfigured;
+    }
+    throw ib::type_conversion_error{};
+}
+
+inline auto operator<<(std::ostream& out, Middleware middleware) -> std::ostream&
+{
+    return out << to_string(middleware);
+}
 
 namespace FastRtps {
 

@@ -49,6 +49,11 @@ struct IbRegistryProxy
     {
         return _instance->SetAllDisconnectedHandler(handler);
     }
+
+    auto GetLogger() -> mw::logging::ILogger*
+    {
+        return _instance->GetLogger();
+    }
 };
 
 

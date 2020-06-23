@@ -7,11 +7,6 @@
 namespace ib {
 namespace cfg {
 
-LoggerBuilder::LoggerBuilder(ParticipantBuilder *participant)
-    : ParentBuilder<ParticipantBuilder>{participant}
-{
-}
-
 LoggerBuilder::~LoggerBuilder() = default;
 
 auto LoggerBuilder::Build() -> Logger
