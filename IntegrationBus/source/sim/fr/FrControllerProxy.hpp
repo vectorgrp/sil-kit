@@ -10,6 +10,8 @@
 
 #include "ib/mw/fwd_decl.hpp"
 
+#include "Tracing.hpp"
+
 namespace ib {
 namespace sim {
 namespace fr {
@@ -22,6 +24,7 @@ namespace fr {
 class FrControllerProxy
     : public IFrController
     , public IIbToFrControllerProxy
+    , public tracing::IControllerToTraceSink
 {
 public:
     // ----------------------------------------
@@ -91,6 +94,8 @@ public:
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
+    // tracing::IControllerToTraceSink
+    inline void AddSink(tracing::ITraceMessageSink* sink) override;
 private:
     // ----------------------------------------
     // private data types
@@ -127,9 +132,19 @@ private:
         CallbackVector<PocStatus>
     > _callbacks;
 
+    tracing::Tracer<FrMessage> _tracer;
+
     CallbackVector<FrSymbol> _wakeupHandlers;
 };
 
+
+// ==================================================================
+//  Inline Implementations
+// ==================================================================
+void FrControllerProxy::AddSink(tracing::ITraceMessageSink* sink)
+{
+    _tracer.AddSink(EndpointAddress(), *sink);
+}
 } // namespace fr
 } // SimModels
 } // namespace ib

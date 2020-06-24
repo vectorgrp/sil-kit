@@ -11,6 +11,7 @@
 
 #include "ib/mw/fwd_decl.hpp"
 
+#include "Tracing.hpp"
 
 namespace ib {
 namespace sim {
@@ -24,6 +25,7 @@ class FrController
     : public IFrController
     , public IIbToFrController
     , public mw::sync::ITimeConsumer
+    , public tracing::IControllerToTraceSink
 {
 public:
     // ----------------------------------------
@@ -91,6 +93,8 @@ public:
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* timeProvider) override;
 
+    // tracing::IControllerToTraceSink
+    inline void AddSink(tracing::ITraceMessageSink* sink) override;
 private:
     // ----------------------------------------
     // private data types
@@ -129,8 +133,18 @@ private:
         CallbackVector<PocStatus>
     > _callbacks;
 
+    tracing::Tracer<FrMessage> _tracer;
+
     CallbackVector<FrSymbol> _wakeupHandlers;
 };
+
+// ==================================================================
+//  Inline Implementations
+// ==================================================================
+void FrController::AddSink(tracing::ITraceMessageSink* sink)
+{
+    _tracer.AddSink(EndpointAddress(), *sink);
+}
 
 } // namespace fr
 } // SimModels
