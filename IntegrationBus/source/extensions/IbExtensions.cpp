@@ -1,15 +1,20 @@
+// Copyright (c) 2020 Vector Informatik GmbH. All rights reserved.
+
 #include "IbExtensions.hpp"
-#include "detail/LoadExtension.hpp"
-#include "IbExtensionApi/IbExtensionBase.hpp"
-#include "IbExtensionApi/IbExtensionMacros.hpp"
-#include "IbExtensionApi/IbExtensionUtils.hpp"
-#include "ib/version.hpp"
-#include "ib/cfg/ExtensionConfigBuilder.hpp"
 
 #include <sstream>
 #include <cstdlib> //getenv
 #include <iostream>
 #include <type_traits>
+
+#include "ib/version.hpp"
+#include "ib/cfg/ExtensionConfigBuilder.hpp"
+
+#include "detail/LoadExtension.hpp"
+#include "IbExtensionBase.hpp"
+#include "IbExtensionMacros.hpp"
+#include "IbExtensionUtils.hpp"
+
 
 namespace ib { namespace extensions {
 
@@ -24,7 +29,7 @@ std::string to_string(const BuildInfoType&  bi)
         << "C++=" << bi[static_cast<int>(BuildInfoField::Cxx)] << ", "
         << "Compiler=" << bi[static_cast<int>(BuildInfoField::Compiler)] << ", "
         << "Multithread=" << bi[static_cast<int>(BuildInfoField::Multithread)] << ", "
-        << "Debug=" << bi[static_cast<int>(BuildInfoField::Debug)] << ", "
+        << "Debug=" << bi[static_cast<int>(BuildInfoField::Debug)] 
         ;
     return ss.str();
 }
@@ -55,7 +60,7 @@ void VerifyExtension(const IbExtensionDescriptor_t* descr)
         ss <<"Version mismatch: host VIB version is: "
             << ib::version::Major() <<"."
             << ib::version::Minor() <<"."
-            << ib::version::Patch() <<","
+            << ib::version::Patch()
             << " module has version: "
             << descr->vib_version_major <<"."
             << descr->vib_version_minor <<"."

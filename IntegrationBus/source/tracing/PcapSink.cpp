@@ -1,13 +1,13 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "ib/mw/logging/ILogger.hpp"
-#include "PcapSink.hpp"
-#include "detail/NamedPipe.hpp"
-
 #include <string>
 #include <ctime>
 #include <sstream>
 
+#include "ib/mw/logging/ILogger.hpp"
+
+#include "PcapSink.hpp"
+#include "detail/NamedPipe.hpp"
 #include "Pcap.hpp"
 #include "string_utils.hpp"
 

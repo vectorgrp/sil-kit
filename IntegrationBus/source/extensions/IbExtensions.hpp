@@ -8,9 +8,10 @@
 #include <string>
 #include <functional>
 
-#include "IbExtensionApi/IIbExtension.hpp"
-
 #include "ib/cfg/Config.hpp"
+
+#include "IIbExtension.hpp"
+
 
 /*! IB Extensions
  * 

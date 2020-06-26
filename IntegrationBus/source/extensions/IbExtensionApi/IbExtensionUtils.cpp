@@ -1,4 +1,6 @@
-#include "IbExtensionApi/IbExtensionUtils.hpp"
+// Copyright (c) 2020 Vector Informatik GmbH. All rights reserved.
+
+#include "IbExtensionUtils.hpp"
 
 #if !defined(IB_EXTENSION_OS)
 #   define IB_EXTENSION_OS "UNKNOWN"

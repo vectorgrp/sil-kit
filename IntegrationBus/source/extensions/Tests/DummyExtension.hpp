@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "IbExtensionApi/IbExtensionBase.hpp"
+#include "IbExtensionBase.hpp"
 
 struct DummyExtension : public ib::extensions::IbExtensionBase
 {

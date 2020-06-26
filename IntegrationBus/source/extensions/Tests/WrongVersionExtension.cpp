@@ -1,5 +1,7 @@
-#include "IbExtensionApi/IbExtensionBase.hpp"
-#include "IbExtensionApi/IbExtensionMacros.hpp"
+// Copyright (c) 2020 Vector Informatik GmbH. All rights reserved.
+
+#include "IbExtensionBase.hpp"
+#include "IbExtensionMacros.hpp"
 
 // definitions for linking
 struct WrongVersionExtension : public ib::extensions::IbExtensionBase

@@ -1,11 +1,14 @@
-#include "IbExtensions.hpp"
-#include "LoadExtension.hpp"
+// Copyright (c) 2020 Vector Informatik GmbH. All rights reserved.
 
 #include <vector>
 #include <string>
 
 #include <cstdlib> //getenv
 #include <io.h> //access
+
+#include "IbExtensions.hpp"
+#include "LoadExtension.hpp"
+
 
 #if !defined( F_OK )
 #   define F_OK 00 //not provided by io.h, but used in _access()

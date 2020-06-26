@@ -1,18 +1,22 @@
-#include "Tracing.hpp"
-#include "ib/cfg/Config.hpp"
-#include "ib/mw/logging/ILogger.hpp"
-#include "PcapSink.hpp"
-#include "string_utils.hpp"
-
-#include "IbExtensionImpl/CreateMdf4tracing.hpp"
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include <sstream>
+
+#include "ib/cfg/Config.hpp"
+#include "ib/mw/logging/ILogger.hpp"
+
+#include "CreateMdf4Tracing.hpp"
+
+#include "PcapSink.hpp"
+#include "string_utils.hpp"
+#include "Tracing.hpp"
 
 namespace ib {
 namespace tracing {
 
+using namespace extensions;
 //string_utils
-std::ostream& operator<<(std::ostream& out, const extensions::TraceMessage& msg)
+std::ostream& operator<<(std::ostream& out, const TraceMessage& msg)
 {
     return out << "TraceMessage<"<< msg.Type()  << ">";
 }
@@ -54,9 +58,9 @@ auto CreateTraceMessageSinks(
     mw::logging::ILogger* logger,
     const cfg::Config& config,
     const cfg::Participant& participantConfig
-    ) -> std::vector<std::unique_ptr<extensions::ITraceMessageSink>>
+    ) -> std::vector<ExtensionHandle<ITraceMessageSink>>
 {
-    std::vector<std::unique_ptr<extensions::ITraceMessageSink>> newSinks;
+    std::vector<ExtensionHandle<ITraceMessageSink>> newSinks;
     for (const auto& sinkCfg : participantConfig.traceSinks)
     {
         if (!sinkCfg.enabled)
@@ -72,7 +76,7 @@ auto CreateTraceMessageSinks(
         {
             //the `config' contains information about the links, which
             // will be useful when naming the MDF4 channels
-            auto sink = extensions::CreateMdf4tracing(config, logger, sinkCfg.name);
+            auto sink = extensions::CreateMdf4Tracing(config, logger, sinkCfg.name);
             sink->Open(tracing::SinkType::Mdf4File, sinkCfg.outputPath);
             newSinks.emplace_back(std::move(sink));
             break;
@@ -81,14 +85,14 @@ auto CreateTraceMessageSinks(
         {
             auto sink = std::make_unique<PcapSink>(logger, sinkCfg.name);
             sink->Open(tracing::SinkType::PcapFile, sinkCfg.outputPath);
-            newSinks.emplace_back(std::move(sink));
+            newSinks.emplace_back(std::shared_ptr<IIbExtension>{}, std::move(sink));
             break;
         }
         case  cfg::TraceSink::Type::PcapPipe:
         {
             auto sink = std::make_unique<PcapSink>(logger, sinkCfg.name);
             sink->Open(tracing::SinkType::PcapNamedPipe, sinkCfg.outputPath);
-            newSinks.emplace_back(std::move(sink));
+            newSinks.emplace_back(std::shared_ptr<IIbExtension>{}, std::move(sink));
             break;
         }
         default:

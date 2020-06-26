@@ -1,4 +1,7 @@
+// Copyright (c) 2020 Vector Informatik GmbH. All rights reserved.
+
 #pragma once
+
 #include "ib/extensions/TraceMessage.hpp"
 
 namespace ib {

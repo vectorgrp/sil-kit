@@ -53,7 +53,10 @@ endif()
 set(make_ib_demo_caller_dir ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
 
 set(demo_list)
+
 add_custom_target(Demos COMMENT "Build all available Demos")
+set_property(TARGET Demos PROPERTY FOLDER "Demos")
+
 # Generate IB Demo Project
 function(make_ib_demo executableName demoSourceFile)
     add_executable(${executableName}

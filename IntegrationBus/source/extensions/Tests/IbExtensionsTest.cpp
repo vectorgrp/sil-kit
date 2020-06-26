@@ -1,14 +1,16 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "IbExtensions.hpp"
-#include "ib/version.hpp"
-#include "ib/cfg/ExtensionConfigBuilder.hpp"
 #include <tuple>
 
-#include "DummyExtension.hpp"
+#include "ib/version.hpp"
+#include "ib/cfg/ExtensionConfigBuilder.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+
+#include "IbExtensions.hpp"
+#include "DummyExtension.hpp"
+
 
 #if defined(WIN32)
 // without underscore is deprecated on windows

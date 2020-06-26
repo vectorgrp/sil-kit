@@ -1,6 +1,9 @@
-#include "IbExtensionApi/IbExtensionMacros.hpp"
-#include "DummyExtension.hpp"
+// Copyright (c) 2020 Vector Informatik GmbH. All rights reserved.
+
 #include "ib/version.hpp"
+
+#include "IbExtensionMacros.hpp"
+#include "DummyExtension.hpp"
 
 // Define shared library extension for linking
 

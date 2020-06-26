@@ -2,11 +2,13 @@
 
 #pragma once
 
-#include "ib/IbMacros.hpp"
-#include "ib/extensions/IIbRegistry.hpp"
-#include "ib/cfg/Config.hpp"
 #include <memory>
 #include <functional>
+
+#include "ib/IbMacros.hpp"
+#include "ib/extensions/IIbRegistry.hpp"
+#include "ib/extensions/ExtensionHandle.hpp"
+#include "ib/cfg/Config.hpp"
 
 
 namespace ib { namespace extensions {
@@ -20,7 +22,7 @@ namespace ib { namespace extensions {
 */
 
 IntegrationBusAPI auto CreateIbRegistry(ib::cfg::Config config)
-    -> std::unique_ptr<IIbRegistry>;
+    -> ExtensionHandle<IIbRegistry>;
 
 }//end namespace extensions
 }//end namespace ib

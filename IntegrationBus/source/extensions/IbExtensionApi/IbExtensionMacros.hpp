@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "IbExtensionApi/IbExtensionABI.h"
-#include "IbExtensionApi/IbExtensionUtils.hpp"
+#include "IbExtensionABI.h"
+#include "IbExtensionUtils.hpp"
 
 #define STRFY(x) #x
 

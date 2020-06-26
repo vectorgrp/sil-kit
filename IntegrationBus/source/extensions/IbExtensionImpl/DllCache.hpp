@@ -4,8 +4,10 @@
 
 #include <string>
 #include <memory>
-#include "IbExtensions.hpp"
+
 #include "ib/cfg/Config.hpp"
+
+#include "IbExtensions.hpp"
 
 namespace ib { namespace extensions {
 
@@ -17,8 +19,10 @@ namespace ib { namespace extensions {
 // static DllCache cache;
 // auto extension = cache.Get("name of extension");
 
-struct DllCache
+class DllCache
 {
+public:
+
     auto Get(const std::string& extensionName, const ib::cfg::Config& config)
         -> std::shared_ptr<ib::extensions::IIbExtension>
     {
@@ -40,6 +44,8 @@ struct DllCache
             throw;
         }
     }
+
+private:
     std::string _extensionName;
     std::weak_ptr<ib::extensions::IIbExtension> _dll;
 };

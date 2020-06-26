@@ -1,9 +1,14 @@
+// Copyright (c) 2020 Vector Informatik GmbH. All rights reserved.
+
 #pragma once
+
+#include <string>
+
 #include "ib/extensions/ITraceMessageSink.hpp"
+#include "ib/extensions/ExtensionHandle.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/cfg/fwd_decl.hpp"
 
-#include <string>
 
 namespace ib { namespace extensions {
 //forwards
@@ -12,10 +17,10 @@ class IIbExtension;
 //! \brief Helper factory to instantiate Mdf4tracing
 //         Required because we don't have control over the CTor when an extension is loaded.
 
-class IIbMdf4tracing
+class Mdf4TraceSinkFactory
 {
 public:
-    virtual ~IIbMdf4tracing() = default;
+    virtual ~Mdf4TraceSinkFactory() = default;
     virtual auto Create(cfg::Config config,
             ib::mw::logging::ILogger* logger,
             std::string name
@@ -24,9 +29,9 @@ public:
 
 };
 
-auto CreateMdf4tracing(cfg::Config config,
+auto CreateMdf4Tracing(cfg::Config config,
     ib::mw::logging::ILogger* logger, const std::string& sinkName)
-    -> std::unique_ptr<ITraceMessageSink>;
+    -> ExtensionHandle<ITraceMessageSink>;
 
 }//end namespace extensions
 }//end namespace ib

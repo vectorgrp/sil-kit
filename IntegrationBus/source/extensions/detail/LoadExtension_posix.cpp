@@ -1,14 +1,16 @@
-#include "IbExtensions.hpp"
-#include "LoadExtension.hpp"
+// Copyright (c) 2020 Vector Informatik GmbH. All rights reserved.
+
 
 #include <vector>
 #include <string>
+#include <cstring>
+#include <cstdlib>
 
 #include <dlfcn.h>
 #include <unistd.h>
-#include <cstring>
 
-#include <cstdlib>
+#include "IbExtensions.hpp"
+#include "LoadExtension.hpp"
 
 
 namespace ib { namespace extensions {namespace detail {

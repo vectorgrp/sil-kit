@@ -14,6 +14,7 @@
 #include "ib/cfg/fwd_decl.hpp"
 #include "ib/mw/logging/fwd_decl.hpp"
 
+#include "ib/extensions/ExtensionHandle.hpp"
 #include "ib/extensions/ITraceMessageSink.hpp"
 
 namespace ib {
@@ -77,7 +78,7 @@ auto CreateTraceMessageSinks(
     mw::logging::ILogger* logger,
     const cfg::Config& config,
     const cfg::Participant& participantConfig
-    ) -> std::vector<std::unique_ptr<extensions::ITraceMessageSink>>;
+    ) -> std::vector<extensions::ExtensionHandle<ITraceMessageSink>>;
 
 } //end namespace tracing
 } //end namespace ib
