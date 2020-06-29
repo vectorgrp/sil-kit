@@ -10,6 +10,13 @@
 #include "ib/exception.hpp"
 
 namespace ib {
+
+template <typename T>
+auto from_string(const std::string& value) -> T;
+
+template <>
+inline auto from_string<cfg::Middleware>(const std::string& value) -> cfg::Middleware;
+
 namespace cfg {
 
 inline auto to_string(SyncType syncType) -> std::string;
@@ -18,7 +25,6 @@ inline auto operator<<(std::ostream& out, SyncType) -> std::ostream&;
 inline auto to_string(TimeSync::SyncPolicy syncPolicy) -> std::string;
 
 inline auto to_string(Middleware middleware) -> std::string;
-inline auto from_string(std::string middleware) -> Middleware;
 inline auto operator<<(std::ostream& out, Middleware middleware) -> std::ostream&;
 
 namespace FastRtps {
@@ -27,10 +33,32 @@ inline auto to_string(DiscoveryType discoveryType) -> std::string;
 inline auto operator<<(std::ostream& out, DiscoveryType discoveryType) -> std::ostream&;
 
 } // namespace FastRtps
+} // namespace cfg
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
+
+template <>
+auto from_string<cfg::Middleware>(const std::string& value) -> cfg::Middleware
+{
+    if (value == "VAsio")
+    {
+        return cfg::Middleware::VAsio;
+    }
+    if (value == "FastRTPS")
+    {
+        return cfg::Middleware::FastRTPS;
+    }
+    if (value == "NotConfigured")
+    {
+        return cfg::Middleware::NotConfigured;
+    }
+    throw type_conversion_error("Invalid middleware: " + value);
+}
+
+namespace cfg {
+
 auto to_string(SyncType syncType) -> std::string
 {
     switch (syncType)
@@ -71,9 +99,8 @@ auto to_string(TimeSync::SyncPolicy syncPolicy) -> std::string
         return "Loose";
     case TimeSync::SyncPolicy::Strict:
         return "Strict";
-    default:
-        throw ib::type_conversion_error{};
     }
+    throw ib::type_conversion_error{};
 }
 
 inline auto to_string(Middleware middleware) -> std::string
@@ -86,24 +113,6 @@ inline auto to_string(Middleware middleware) -> std::string
         return "VAsio";
     case Middleware::NotConfigured:
         return "NotConfigured";
-    default:
-        throw ib::type_conversion_error{};
-    }
-}
-
-inline auto from_string(std::string middleware) -> Middleware
-{
-    if (middleware == "VAsio")
-    {
-        return Middleware::VAsio;
-    }
-    if (middleware == "FastRTPS")
-    {
-        return Middleware::FastRTPS;
-    }
-    if (middleware == "NotConfigured")
-    {
-        return Middleware::NotConfigured;
     }
     throw ib::type_conversion_error{};
 }
@@ -126,10 +135,9 @@ auto to_string(DiscoveryType discoveryType) -> std::string
     case DiscoveryType::Unicast:
         return "Unicast";
     case DiscoveryType::ConfigFile:
-        return "ConfigFile";
-    default:
-        throw ib::type_conversion_error{};
+        return "ConfigFile"; 
     }
+    throw ib::type_conversion_error{};
 }
 
 auto operator<<(std::ostream& out, DiscoveryType discoveryType) -> std::ostream&

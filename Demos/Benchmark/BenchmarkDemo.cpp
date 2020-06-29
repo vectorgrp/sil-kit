@@ -87,17 +87,12 @@ bool Parse(int argc, char** argv, BenchmarkConfig& config)
             // [[fallthrough]]
         case 3: config.numberOfSimulations = static_cast<uint32_t>(std::stoul(argv[2]));
             // [[fallthrough]]
-        case 2: config.usedMiddleware = from_string(argv[1]);
+        case 2: config.usedMiddleware = ib::from_string<Middleware>(argv[1]);
             break;
         default:
             std::cout << "No benchmark arguments given: using default benchmark configuration.";
             std::cout << " Specify '--help' as first argument to display usage." << std::endl << std::endl;
         }
-    }
-    catch (const ib::type_conversion_error&)
-    {
-        std::cout << "Invalid middleware: " << argv[1] << std::endl;
-        return false;
     }
     catch (const std::exception& e)
     {

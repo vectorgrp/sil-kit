@@ -1360,15 +1360,12 @@ auto from_json<FastRtps::DiscoveryType>(const json11::Json& json) -> FastRtps::D
 
 auto to_json(const Middleware& activeMiddleware) -> json11::Json
 {
-    switch (activeMiddleware)
+    try
     {
-    case Middleware::NotConfigured:
-        return "";
-    case Middleware::FastRTPS:
-        return "FastRTPS";
-    case Middleware::VAsio:
-        return "VAsio";
-    default:
+        return to_string(activeMiddleware);
+    }
+    catch (const type_conversion_error&)
+    {
         throw Misconfiguration{ "Unknown active middleware configuration in to_json." };
     }
 }
@@ -1512,16 +1509,14 @@ auto to_json(const VAsio::Config& config) -> json11::Json
 template<>
 auto from_json<Middleware>(const json11::Json& json) -> Middleware
 {
-    auto&& activeMiddleware = json.string_value();
-
-    if (activeMiddleware == "FastRTPS")
-        return Middleware::FastRTPS;
-    if (activeMiddleware == "VAsio")
-        return Middleware::VAsio;
-    if (activeMiddleware == "")
-        return Middleware::NotConfigured;
-
-    throw Misconfiguration{ "Unknown active middleware in from_json" };
+    try
+    {
+        return from_string<Middleware>(json.string_value());
+    }
+    catch (const type_conversion_error&)
+    {
+        throw Misconfiguration{ "Unknown active middleware in from_json" };
+    }
 }
 
 template <>
@@ -1529,7 +1524,7 @@ auto from_json<MiddlewareConfig>(const json11::Json& json) -> MiddlewareConfig
 {
     MiddlewareConfig middlewareConfig;
 
-    middlewareConfig.activeMiddleware = from_json<Middleware>(json["ActiveMiddleware"]);
+    optional_from_json<Middleware>(middlewareConfig.activeMiddleware, json, "ActiveMiddleware");
     middlewareConfig.fastRtps = from_json<FastRtps::Config>(json["FastRTPS"]);
     middlewareConfig.vasio = from_json<VAsio::Config>(json["VAsio"]);
 

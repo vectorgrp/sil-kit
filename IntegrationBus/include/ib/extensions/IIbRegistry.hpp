@@ -20,7 +20,7 @@ public:
     virtual void SetAllConnectedHandler(std::function<void()> handler) = 0;
     //! \brief Register the handler that is called when all participants are disconnected
     virtual void SetAllDisconnectedHandler(std::function<void()> handler) = 0;
-    //! \brief Returns the logger of the which is used by the IB registry.
+    //! \brief Returns the logger that is used by the IB registry.
     virtual auto GetLogger() -> mw::logging::ILogger* = 0;
 };
 

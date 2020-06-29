@@ -12,13 +12,18 @@ Added
 ~~~~~
 
 - Logger of the VAsio Registry can now be configured via the middleware configuration,
-  cf. :ref:`sec:mwcfg-vasio`. The corresponding :cpp:class:`RegistryBuilder<VAsio::RegistryBuilder>`
+  cf. :ref:`sec:mwcfg-vasio`. The corresponding :cpp:class:`RegistryBuilder<ib::cfg::VAsio::RegistryBuilder>`
   also gained the :cpp:func:`ConfigureLogger()<ib::cfg::VAsio::RegistryBuilder::ConfigureLogger>` method to configure
   the logger of the VAsio Registry.
 - Added benchmark demo, cf. :ref:`sec:util-benchmark-demo`.
 
 Changed
 ~~~~~~~
+
+- :cpp:class:`ib::type_conversion_error<ib::type_conversion_error>` inherits now from 
+  :cpp:class:`std::runtime_error<std::runtime_error>` instead of :cpp:class:`std::exception` directly.
+- :cpp:class:`ib::cfg::LoggerBuilder<ib::cfg::LoggerBuilder>` doesn't inherit from
+  :cpp:class:`ib::cfg::ParentBuilder<ib::cfg::ParentBuilder>` anymore.
 
 Fixed
 ~~~~~
@@ -32,8 +37,8 @@ Deprecated
 Compatibility with 3.1.0
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- Application binary interface (ABI): No
-- Application software interface (API): No
+- Application binary interface (ABI): No (See **Changed**)
+- Application software interface (API): Yes
 - Middleware network protocol (FastRTPS): Yes
 - Middleware network protocol (VAsio): Yes
 
