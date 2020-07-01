@@ -285,7 +285,7 @@ configuration<sec:cfg-participant>`.
       {
           "Name": "ETH1",
           "MacAddr": "00:08:15:ab:cd:f0",
-          "PcapFile": "pcap_output_trace.pcap"
+          "UseTraceSinks": ["MyPcapSink"]
       }
   ]
 
@@ -299,12 +299,16 @@ configuration<sec:cfg-participant>`.
    * - Name
      - The name of the Ethernet Controller
    * - MacAddr
-     - The colon-separated Ethernet MAC address
-   * - PcapFile
-     - Name of the file capturing the PCAP trace
-   * - PcapPipe
-     - Name of the named pipe capturing the PCAP trace.
-       Execution is suspended until the pipe is opened for reading by another process.
+     - The colon-separated Ethernet MAC address.  (optional, needed by VIBE-NetSim)
+   * - UseTraceSinks
+     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
+       this controller. Trace sinks are referred to by their name and can be used
+       by multiple controllers. (optional)
+   * - (PcapFile) 
+     - (deprecated, use *UseTraceSinks* instead)
+   * - (PcapPipe)
+     - (deprecated, use *UseTraceSinks* instead)
+
 
 
 
@@ -522,9 +526,9 @@ configuration<sec:cfg-participant>`.
   
   "TraceSinks": [
       {
-          "Name": "String",
+          "Name": "MyPcapSink",
           "Type":  "PcapFile",
-          "OutputPath": "Filesystem/Path/"
+          "OutputPath": "Filesystem/Path/MyTrace.pcap"
       }
   ]
 
@@ -540,8 +544,8 @@ It allows to trace the IB simulation messages into binary files.
      - The name of the sink. Controller, Services and Ports may refer to this
        sink by name.
    * - Type
-     - The type specifies the format of the output stream. Supported file
-       formats are: PcapFile, PcapPipe, Mdf4File.
+     - The type specifies the format of the output stream. Supported formats
+       are: PcapFile, PcapPipe, Mdf4File.
    * - OutputPath
      - A filesystem path where the IB messages are traced to.
 
