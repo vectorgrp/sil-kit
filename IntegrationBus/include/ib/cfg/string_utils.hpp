@@ -23,6 +23,7 @@ inline auto to_string(SyncType syncType) -> std::string;
 inline auto operator<<(std::ostream& out, SyncType) -> std::ostream&;
 
 inline auto to_string(TimeSync::SyncPolicy syncPolicy) -> std::string;
+inline auto to_string(TraceSink::Type sinkType) -> std::string;
 
 inline auto to_string(Middleware middleware) -> std::string;
 inline auto operator<<(std::ostream& out, Middleware middleware) -> std::ostream&;
@@ -101,6 +102,22 @@ auto to_string(TimeSync::SyncPolicy syncPolicy) -> std::string
         return "Strict";
     }
     throw ib::type_conversion_error{};
+}
+
+auto to_string(TraceSink::Type sinkType) -> std::string
+{
+    switch (sinkType)
+    {
+    case TraceSink::Type::Mdf4File:
+        return "Mdf4File";
+    case TraceSink::Type::PcapFile:
+        return "PcapFile";
+    case TraceSink::Type::PcapPipe:
+        return "PcapPipe";
+    case TraceSink::Type::Undefined:
+        return "Undefined";
+    }
+    throw ib::type_conversion_error{"Invalid SinkType"};
 }
 
 inline auto to_string(Middleware middleware) -> std::string

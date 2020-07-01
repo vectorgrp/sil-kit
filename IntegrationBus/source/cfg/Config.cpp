@@ -8,6 +8,7 @@
 #include <unordered_map>
 
 #include "tuple_tools/for_each.hpp"
+#include "ib/cfg/string_utils.hpp"
 
 
 namespace ib {
@@ -228,20 +229,21 @@ void AssignLinkIds(Config& config)
 
 void AdjustLegacyPcapConfig(Config& config)
 {
-    auto addReplacementSink = [&](auto& participant, auto& ethCtrl, TraceSink::Type type)
+    auto addReplacementSink = [&](auto& participant, auto& ethCtrl, TraceSink::Type type, auto& path)
     {
         //turn the legacy pcapFile/pcapPipe fields into a controller specific trace sink
         TraceSink legacySink{};
-        legacySink.type = TraceSink::Type::PcapPipe;
+        legacySink.type = type;
         // this name is unlikely to collide with a user supplied name of a different sink
-        legacySink.name = ethCtrl.name + ":<LegacyPcapPipe>";
-        legacySink.outputPath = ethCtrl.pcapPipe;
+        legacySink.name = ethCtrl.name + ":<Legacy" + to_string(type) + ">";
+        legacySink.outputPath = path;
 
         std::cerr << "WARNING: turning deprecated EthernetController field "
-            << (type == TraceSink::Type::PcapFile ? "PcapFile" : "PcapPipe") 
+            << to_string(type)
             << " on "
             << participant.name << "/" << ethCtrl.name
-            << " to the newly created TraceSink: " << legacySink.name;
+            << " to the newly created TraceSink: " << legacySink.name
+            << "\n";
 
         ethCtrl.useTraceSinks.emplace_back(legacySink.name);
         participant.traceSinks.emplace_back(std::move(legacySink));
@@ -253,11 +255,11 @@ void AdjustLegacyPcapConfig(Config& config)
         {
             if (!ethCtrl.pcapFile.empty())
             {
-                addReplacementSink(participant, ethCtrl, TraceSink::Type::PcapFile);
+                addReplacementSink(participant, ethCtrl, TraceSink::Type::PcapFile, ethCtrl.pcapFile);
             }
             if (!ethCtrl.pcapPipe.empty())
             {
-                addReplacementSink(participant, ethCtrl, TraceSink::Type::PcapPipe);
+                addReplacementSink(participant, ethCtrl, TraceSink::Type::PcapPipe, ethCtrl.pcapPipe);
             }
         }
     }

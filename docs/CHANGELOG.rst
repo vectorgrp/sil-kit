@@ -27,6 +27,8 @@ Changed
 
 Fixed
 ~~~~~
+- Fixed a bug that prevented legacy IbConfigs (pre VIB 3.1.0) using the PcapFile
+  setting from being converted to new IbConfigs (VIB 3.1.0) using trace sinks.
 
 Removed
 ~~~~~~~
