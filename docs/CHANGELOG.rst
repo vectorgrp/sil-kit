@@ -5,7 +5,7 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[x.y.z] - unreleased
+[3.2.0] - 2020-07-06
 --------------------------------
 
 Added
@@ -16,6 +16,8 @@ Added
   also gained the :cpp:func:`ConfigureLogger()<ib::cfg::VAsio::RegistryBuilder::ConfigureLogger>` method to configure
   the logger of the VAsio Registry.
 - Added benchmark demo, cf. :ref:`sec:util-benchmark-demo`.
+
+.. _sec:vib320-changed:
 
 Changed
 ~~~~~~~
@@ -30,17 +32,13 @@ Fixed
 - Fixed a bug that prevented legacy IbConfigs (pre VIB 3.1.0) using the PcapFile
   setting from being converted to new IbConfigs (VIB 3.1.0) using trace sinks.
 
-Removed
-~~~~~~~
-
-Deprecated
-~~~~~~~~~~
 
 Compatibility with 3.1.0
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- Application binary interface (ABI): No (See **Changed**)
-- Application software interface (API): Yes
+- Application binary interface (ABI): No (See :ref:`Changed<sec:vib320-changed>`)
+- Application software interface (API): No (:ref:`LoggerBuilder API changed<sec:vib320-changed>`)
+
 - Middleware network protocol (FastRTPS): Yes
 - Middleware network protocol (VAsio): Yes
 
