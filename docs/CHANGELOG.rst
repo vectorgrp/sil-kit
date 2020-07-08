@@ -16,6 +16,8 @@ Added
 Changed
 ~~~~~~~
 
+- Updated version of the third-party library `fmt` to version `6.1.0`.
+
 Fixed
 ~~~~~
 
