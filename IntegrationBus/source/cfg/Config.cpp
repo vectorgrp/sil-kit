@@ -638,5 +638,28 @@ auto Config::ToJsonString() -> std::string
     return to_json(*this).dump();
 }
 
+
+#if __cplusplus ==  201402L
+// When compiling as C++14, the 'static constexpr variable definitions' are not
+// properly exported in the dll (and not properly odr-used from users of the DLL).
+// For example, when compiling an extention with GCC and loading the shared
+// library, this will result in missing symbols for those linkType definitions.
+// Note: In C++17 the static constexpr variable definitions is implicitly inline,
+// and the separate definitions in this file are obsolete.
+// 
+// As a workaround, the missing symbols are defined in this translation
+// unit.
+
+
+constexpr Link::Type CanController::linkType;
+constexpr Link::Type LinController::linkType;
+constexpr Link::Type EthernetController::linkType;
+constexpr Link::Type FlexrayController::linkType;
+constexpr Link::Type Switch::Port::linkType;
+constexpr Link::Type GenericPort::linkType;
+
+
+#endif
+
 } // namespace cfg
 } // namespace ib

@@ -179,6 +179,10 @@ struct IoPort
 
     std::vector<std::string> useTraceSinks;
 };
+// NB: the following inline definition is only required for C++14
+//     and can be removed when we move to C++17
+template<typename ValueT>
+constexpr Link::Type IoPort<ValueT>::linkType;
 
 using AnalogIoPort  = IoPort<double>;
 using DigitalIoPort = IoPort<bool>;

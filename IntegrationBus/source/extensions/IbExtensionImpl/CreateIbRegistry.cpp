@@ -12,9 +12,6 @@
 
 namespace ib { namespace extensions {
 
-//the unique_ptr's deleter is not type-erased, so we have to use the
-//IbRegistryProxy to hide the deleters and shared instances of the DLL.
-
 auto CreateIbRegistry(ib::cfg::Config config)
     -> ExtensionHandle<IIbRegistry>
 {

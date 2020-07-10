@@ -31,7 +31,11 @@ add_library(IntegrationBus SHARED
 # Published extension implementations follow here for the extension loading
 # side of the code. The actual shared library code might reside 
 # anywhere.
-# NB this is required because we don't want to have IbExtension in our EXPORT set
+# Note to future self:
+#    It would be desirable to have the extension loading code inside of the
+#    IbExtension target. However, this causes problems when exporting the
+#    IntegrationBus target, as it would transitively export the private
+#    IbExtension library and other internal dependencies.
 
 target_sources(IntegrationBus
     PRIVATE
