@@ -43,19 +43,32 @@ struct FlexRayNode
       oldPocStatus.state = fr::PocState::DefaultConfig;
     }
 
+    void SetStartupDelay(std::chrono::nanoseconds delay)
+    {
+        _startupDelay = delay;
+    }
+
     void Init()
     {
+        if (_configureCalled)
+            return;
+
         controller->Configure(controllerConfig);
+        _configureCalled = true;
     }
 
     void doAction(std::chrono::nanoseconds now)
     {
+        if (now < _startupDelay)
+            return;
         switch (oldPocStatus.state)
         {
+        case fr::PocState::DefaultConfig:
+            Init();
         case fr::PocState::Ready:
             return pocReady(now);
         case fr::PocState::NormalActive:
-            if (now == 100ms)
+            if (now == 100ms + std::chrono::duration_cast<std::chrono::milliseconds>(_startupDelay))
             {
                 return ReconfigureTxBuffers();
             }
@@ -63,7 +76,6 @@ struct FlexRayNode
             {
                 return txBufferUpdate(now);
             }
-        case fr::PocState::DefaultConfig:
         case fr::PocState::Config:
         case fr::PocState::Startup:
         case fr::PocState::Wakeup:
@@ -152,7 +164,7 @@ struct FlexRayNode
                   << std::endl;
 
         if (oldPocStatus.state == fr::PocState::Wakeup
-            && oldPocStatus.state == fr::PocState::Ready)
+            && pocStatus.state == fr::PocState::Ready)
         {
             std::cout << "   Wakeup finished..." << std::endl;
             busState = MasterState::WakeupDone;
@@ -173,6 +185,8 @@ struct FlexRayNode
 
     fr::ControllerConfig controllerConfig;
     fr::PocStatus oldPocStatus{};
+    bool _configureCalled = false;
+    std::chrono::nanoseconds _startupDelay = 0ns;
 
     enum class MasterState
     {
@@ -267,7 +281,14 @@ int main(int argc, char** argv)
         
         FlexRayNode frNode(controller, std::move(config));
         if (participantName == "Node0")
+        {
             frNode.busState = FlexRayNode::MasterState::PerformWakeup;
+        }
+        if (participantName == "Node1")
+        {
+            frNode.busState = FlexRayNode::MasterState::PerformWakeup;
+            frNode.SetStartupDelay(0ms);
+        }
 
         controller->RegisterPocStatusHandler(bind_method(&frNode, &FlexRayNode::PocStatusHandler));
         controller->RegisterMessageHandler(&ReceiveMessage<fr::FrMessage>);
@@ -276,15 +297,6 @@ int main(int argc, char** argv)
         controller->RegisterSymbolHandler(&ReceiveMessage<fr::FrSymbol>);
         controller->RegisterSymbolAckHandler(&ReceiveMessage<fr::FrSymbolAck>);
         controller->RegisterCycleStartHandler(&ReceiveMessage<fr::CycleStart>);
-
-        // Set an Init Handler
-        participantController->SetInitHandler([&participantName, &frNode](auto initCmd) {
-
-            std::cout << "Initializing " << participantName << std::endl;
-            frNode.Init();
-
-        });
-
 
         participantController->SetSimulationTask(
             [&frNode](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {

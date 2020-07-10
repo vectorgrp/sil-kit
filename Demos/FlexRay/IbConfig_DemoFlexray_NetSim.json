@@ -146,7 +146,16 @@
                 "ParticipantController": {
                     "SyncType": "DiscreteTime"
                 },
-                "NetworkSimulators": [ "FlexRay-Simulator" ]
+                "NetworkSimulators": [ "FlexRay-Simulator" ],
+                "Logger": {
+                    "FlushLevel": "Debug",
+                    "Sinks": [
+                        {
+                            "Type": "Stdout",
+                            "Level": "Debug"
+                        }
+                    ]
+                }
             },
             {
                 "Name": "SystemController",

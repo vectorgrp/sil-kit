@@ -5,6 +5,30 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[x.y.z] - unreleased
+--------------------------------
+
+Added
+~~~~~
+
+- The startup delay of a FlexRay node in the FlexRay demo can now be set programmatically.
+
+Changed
+~~~~~~~
+
+Fixed
+~~~~~
+
+- Fixed a bug in the FlexRay demo which caused unreachable code in the POC Handler.
+
+Compatibility with 3.2.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
 [3.2.0] - 2020-07-06
 --------------------------------
 
