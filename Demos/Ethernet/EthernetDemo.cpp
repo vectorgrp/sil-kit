@@ -86,14 +86,14 @@ void SendMessage(eth::IEthController* controller, const eth::EthMac& from, const
     std::vector<uint8_t> payload(hello.size() + 1);
     memcpy(payload.data(), hello.c_str(), hello.size() + 1);
 
-    eth::EthMessage msg;
-    msg.ethFrame.SetSourceMac(from);
-    msg.ethFrame.SetDestinationMac(to);
-    msg.ethFrame.SetVlanTag(tci);
-    msg.ethFrame.SetPayload(payload);
+    eth::EthFrame frame;
+    frame.SetSourceMac(from);
+    frame.SetDestinationMac(to);
+    frame.SetVlanTag(tci);
+    frame.SetPayload(payload);
 
-    auto transmitId = controller->SendMessage(std::move(msg));
-    std::cout << "<< ETH Message sent with transmitId=" << transmitId << std::endl;
+    auto transmitId = controller->SendFrame(std::move(frame));
+    std::cout << "<< ETH Frame sent with transmitId=" << transmitId << std::endl;
 }
 
 /**************************************************************************************************
