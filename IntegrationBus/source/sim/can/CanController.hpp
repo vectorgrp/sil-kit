@@ -8,9 +8,11 @@
 #include "ib/sim/can/IIbToCanController.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
 
+
 #include <tuple>
 #include <vector>
 
+#include "Tracing.hpp"
 
 namespace ib {
 namespace sim {
@@ -20,6 +22,7 @@ class CanController
     : public ICanController
     , public IIbToCanController
     , public mw::sync::ITimeConsumer
+    , public tracing::IControllerToTraceSink
 {
 public:
     // ----------------------------------------
@@ -70,6 +73,9 @@ public:
     //ITimeConsumer
     void SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider) override;
 
+    // tracing::IControllerToTraceSink
+    inline void AddSink(tracing::ITraceMessageSink* sink) override;
+
 public:
     // ----------------------------------------
     // Public interface methods
@@ -105,6 +111,8 @@ private:
         CallbackVector<CanTransmitAcknowledge>
     > _callbacks;
 
+    tracing::Tracer<CanMessage> _tracer;
+
     std::vector<std::pair<uint32_t, CanTxId>> _pendingAcks;
 };
 
@@ -115,6 +123,12 @@ auto CanController::MakeTxId() -> CanTxId
 {
     return ++_canTxId;
 }
+
+void CanController::AddSink(tracing::ITraceMessageSink* sink)
+{
+    _tracer.AddSink(EndpointAddress(), *sink);
+}
+
 
 
 } // namespace can

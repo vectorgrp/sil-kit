@@ -16,4 +16,12 @@ target_link_libraries(IbSimCan
             IbTracing
 )
 
-add_vib_test(TestSimCanController SOURCES CanControllerTest.cpp CanControllerProxyTest.cpp LIBS IbSimCan IbMwMockComAdapter)
+add_vib_test(TestSimCanController
+    SOURCES 
+        CanControllerTest.cpp 
+        CanControllerProxyTest.cpp 
+    LIBS 
+        IbSimCan 
+        IbMwMockComAdapter
+        IbTracing
+)

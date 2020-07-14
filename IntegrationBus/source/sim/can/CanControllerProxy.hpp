@@ -9,6 +9,8 @@
 #include <tuple>
 #include <vector>
 
+#include "Tracing.hpp"
+
 namespace ib {
 namespace sim {
 namespace can {
@@ -16,6 +18,7 @@ namespace can {
 class CanControllerProxy
     : public ICanController
     , public IIbToCanControllerProxy
+    , public tracing::IControllerToTraceSink
 {
 public:
     // ----------------------------------------
@@ -64,6 +67,9 @@ public:
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
+    //IControllerToTraceSink
+    void AddSink(tracing::ITraceMessageSink* sink) override;
+
 public:
     // ----------------------------------------
     // Public interface methods
@@ -104,6 +110,8 @@ private:
         CallbackVector<CanErrorState>,
         CallbackVector<CanTransmitAcknowledge>
     > _callbacks;
+
+    tracing::Tracer<CanMessage> _tracer;
 };
 
 // ================================================================================
@@ -113,7 +121,6 @@ auto CanControllerProxy::MakeTxId() -> CanTxId
 {
     return ++_canTxId;
 }
-
 
 } // namespace can
 } // namespace sim

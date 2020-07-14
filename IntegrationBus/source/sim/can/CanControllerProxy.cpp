@@ -2,6 +2,7 @@
 
 #include "CanControllerProxy.hpp"
 
+#include "ib/mw/logging/ILogger.hpp"
 #include "ib/mw/IComAdapter.hpp"
 
 namespace ib {
@@ -61,6 +62,7 @@ auto CanControllerProxy::SendMessage(const CanMessage& msg) -> CanTxId
 {
     auto msgCopy = msg;
     msgCopy.transmitId = MakeTxId();
+    _tracer.Trace(tracing::Direction::Send, msg.timestamp, msg);
     _comAdapter->SendIbMessage(_endpointAddr, msgCopy);
     return msgCopy.transmitId;
 }
@@ -69,6 +71,7 @@ auto CanControllerProxy::SendMessage(CanMessage&& msg) -> CanTxId
 {
     auto txId = MakeTxId();
 
+    _tracer.Trace(tracing::Direction::Send, msg.timestamp, msg);
     msg.transmitId = txId;
     _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
 
@@ -106,6 +109,8 @@ void CanControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Ca
 {
     if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
         return;
+
+    _tracer.Trace(tracing::Direction::Receive, msg.timestamp, msg);
 
     CallHandlers(msg);
 }
@@ -155,6 +160,11 @@ auto CanControllerProxy::EndpointAddress() const -> const ::ib::mw::EndpointAddr
     return _endpointAddr;
 }
 
+
+void CanControllerProxy::AddSink(tracing::ITraceMessageSink* sink)
+{
+    _comAdapter->GetLogger()->Warn("CanControllerProxy does not support message tracing, yet.");
+}
 
 } // namespace can
 } // namespace sim
