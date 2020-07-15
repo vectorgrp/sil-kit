@@ -3,6 +3,7 @@
 #include "LinControllerProxy.hpp"
 
 #include <iostream>
+#include <chrono>
 
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/logging/ILogger.hpp"
@@ -26,7 +27,7 @@ void CallEach(CallbackRangeT& callbacks, const Args&... args)
         callback(args...);
     }
 }
-}
+} // end anonymous namespace
 
 LinControllerProxy::LinControllerProxy(mw::IComAdapter* comAdapter)
     : _comAdapter{comAdapter}
@@ -54,15 +55,23 @@ void LinControllerProxy::SendFrame(Frame frame, FrameResponseType responseType)
         _logger->Error(errorMsg);
         throw std::runtime_error{errorMsg};
     }
+
+
+    //FIXME - should we inherit from ITimeConsumer?  how do we get to a proper timestamp here
+    //using namespace std::chrono_literals;
+    //_tracer.Trace(tracing::Direction::Send, 123456ns, frame);
+
     SendFrameRequest sendFrame;
     sendFrame.frame = frame;
     sendFrame.responseType = responseType;
     SendIbMessage(sendFrame);
 }
 
-void LinControllerProxy::SendFrame(Frame frame, FrameResponseType responseType, std::chrono::nanoseconds)
+void LinControllerProxy::SendFrame(Frame frame, FrameResponseType responseType, std::chrono::nanoseconds timestamp)
 {
-    // VIBE-NetSim provides its own timestamps, thus /timestamp/ is ignored.
+    // VIBE-NetSim provides the timestamps, so we don't need a separate time provider.
+    _tracer.Trace(tracing::Direction::Send,  timestamp, frame);
+
     SendFrame(std::move(frame), std::move(responseType));
 }
 
@@ -185,6 +194,8 @@ void LinControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Tr
     if (_controllerMode == ControllerMode::Inactive)
         _logger->Warn("Inactive LinControllerProxy received a transmission.");
 
+    _tracer.Trace(tracing::Direction::Receive,  msg.timestamp, frame);
+
     // Dispatch frame to handlers
     CallEach(_frameStatusHandler, this, frame, msg.status, msg.timestamp);
 
@@ -267,6 +278,10 @@ void LinControllerProxy::SendIbMessage(MsgT&& msg)
     _comAdapter->SendIbMessage(_endpointAddr, std::forward<MsgT>(msg));
 }
 
+void LinControllerProxy::AddSink(tracing::ITraceMessageSink* sink)
+{
+    _comAdapter->GetLogger()->Warn("LinControllerProxy does not support message tracing, yet.");
+}
 
 } // namespace lin
 } // namespace sim

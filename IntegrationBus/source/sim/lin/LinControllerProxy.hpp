@@ -2,15 +2,16 @@
 
 #pragma once
 
-#include "ib/sim/lin/ILinController.hpp"
-#include "ib/sim/lin/IIbToLinControllerProxy.hpp"
-
 #include <memory>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
 
+#include "ib/sim/lin/ILinController.hpp"
+#include "ib/sim/lin/IIbToLinControllerProxy.hpp"
 #include "ib/mw/fwd_decl.hpp"
+
+#include "Tracing.hpp"
 
 namespace ib {
 namespace sim {
@@ -19,6 +20,7 @@ namespace lin {
 class LinControllerProxy
     : public ILinController
     , public IIbToLinControllerProxy
+    , public tracing::IControllerToTraceSink
 {
 public:
     // ----------------------------------------
@@ -76,6 +78,9 @@ public:
     // ----------------------------------------
     // Public interface methods
 
+    //IControllerToTraceSink
+    void AddSink(tracing::ITraceMessageSink* sink) override;
+
 private:
 //    // ----------------------------------------
 //    // private data types
@@ -102,11 +107,9 @@ private:
     std::vector<GoToSleepHandler>           _goToSleepHandler;
     std::vector<WakeupHandler>              _wakeupHandler;
     std::vector<FrameResponseUpdateHandler> _frameResponseUpdateHandler;
-};
 
-// ================================================================================
-//  Inline Implementations
-// ================================================================================
+    tracing::Tracer<lin::Frame> _tracer;
+};
 
 
 } // namespace lin

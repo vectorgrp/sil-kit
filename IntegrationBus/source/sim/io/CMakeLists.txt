@@ -14,4 +14,12 @@ target_link_libraries(IbSimIO
             IbTracing
 )
 
-add_vib_test(TestSimInOutPort SOURCES InPortTest.cpp OutPortTest.cpp LIBS IbSimIO IbMwMockComAdapter)
+add_vib_test(TestSimInOutPort
+    SOURCES
+    InPortTest.cpp
+    OutPortTest.cpp 
+    LIBS 
+        IbSimIO 
+        IbMwMockComAdapter
+        IbTracing
+)

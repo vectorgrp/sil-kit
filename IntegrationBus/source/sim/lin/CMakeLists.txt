@@ -23,4 +23,5 @@ add_vib_test(TestSimLin
     LIBS
         IbSimLin
         IbMwMockComAdapter
+        IbTracing
 )

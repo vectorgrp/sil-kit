@@ -2,9 +2,6 @@
 
 #pragma once
 
-#include "ib/sim/lin/ILinController.hpp"
-#include "ib/sim/lin/IIbToLinController.hpp"
-#include "ib/mw/sync/ITimeConsumer.hpp"
 
 #include <algorithm>
 #include <memory>
@@ -12,8 +9,14 @@
 #include <unordered_map>
 #include <vector>
 
+#include "ib/sim/lin/ILinController.hpp"
+#include "ib/sim/lin/IIbToLinController.hpp"
+#include "ib/mw/sync/ITimeConsumer.hpp"
+
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/sim/datatypes.hpp"
+
+#include "Tracing.hpp"
 
 namespace ib {
 namespace sim {
@@ -23,6 +26,7 @@ class LinController
     : public ILinController
     , public IIbToLinController
     , public mw::sync::ITimeConsumer
+    , public tracing::IControllerToTraceSink
 {
 public:
     // ----------------------------------------
@@ -79,6 +83,10 @@ public:
 
      //ib::mw::sync::ITimeConsumer
      void SetTimeProvider(mw::sync::ITimeProvider* timeProvider) override;
+
+    //IControllerToTraceSink
+    inline void AddSink(tracing::ITraceMessageSink* sink) override;
+
 private:
     // ----------------------------------------
     // private data types
@@ -120,6 +128,8 @@ private:
     std::vector<GoToSleepHandler>           _goToSleepHandler;
     std::vector<WakeupHandler>              _wakeupHandler;
     std::vector<FrameResponseUpdateHandler> _frameResponseUpdateHandler;
+
+    tracing::Tracer<lin::Frame> _tracer;
 };
 
 // ================================================================================
@@ -137,6 +147,11 @@ auto LinController::GetLinNode(mw::EndpointAddress addr) -> LinNode&
         iter = _linNodes.insert(iter, node);
     }
     return *iter;
+}
+
+void LinController::AddSink(tracing::ITraceMessageSink* sink)
+{
+    _tracer.AddSink(EndpointAddress(), *sink);
 }
 
 } // namespace lin

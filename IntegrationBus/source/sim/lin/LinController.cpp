@@ -46,6 +46,25 @@ inline auto ToTxFrameStatus(FrameStatus status) -> FrameStatus
     }
 }
 
+inline auto ToTracingDir(FrameStatus status) -> tracing::Direction
+{
+    switch (status)
+    {
+    case FrameStatus::LIN_RX_ERROR: //[[fallthrough]]
+    case FrameStatus::LIN_RX_BUSY: //[[fallthrough]]
+    case FrameStatus::LIN_RX_NO_RESPONSE: //[[fallthrough]]
+    case FrameStatus::LIN_RX_OK: 
+        return tracing::Direction::Receive;
+    case FrameStatus::LIN_TX_ERROR: //[[fallthrough]]
+    case FrameStatus::LIN_TX_BUSY: //[[fallthrough]]
+    case FrameStatus::LIN_TX_HEADER_ERROR: //[[fallthrough]]
+    case FrameStatus::LIN_TX_OK: 
+        return tracing::Direction::Send;
+    default:
+        //if invalid status given, failsafe to send.
+        return tracing::Direction::Send;
+    }
+}
 template <class CallbackRangeT, typename... Args>
 void CallHandlers(CallbackRangeT& callbacks, const Args&... args)
 {
@@ -148,7 +167,11 @@ void LinController::SendFrameHeader(LinIdT linId, std::chrono::nanoseconds times
     FrameResponseMode masterResponseMode = GetLinNode(_endpointAddr).responses[linId].responseMode;
     FrameStatus masterFrameStatus = transmission.status;
     if (masterResponseMode == FrameResponseMode::TxUnconditional)
+    {
         masterFrameStatus = ToTxFrameStatus(masterFrameStatus);
+    }
+
+    _tracer.Trace(ToTracingDir(masterFrameStatus), timestamp, transmission.frame);
 
     // dispatch the reply locally...
     CallHandlers(_frameStatusHandler, this, transmission.frame, masterFrameStatus, transmission.timestamp);
@@ -232,7 +255,9 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const Transmi
 {
     if (from == _endpointAddr) return;
 
+
     auto& frame = msg.frame;
+
 
     if (frame.dataLength > 8)
     {
@@ -276,17 +301,29 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const Transmi
         //[[fallthrough]]
 
     case ControllerMode::Slave:
+
         auto& thisLinNode = GetLinNode(_endpointAddr);
         switch (thisLinNode.responses[frame.id].responseMode)
         {
         case FrameResponseMode::Unused:
             break;
         case FrameResponseMode::Rx:
-            CallHandlers(_frameStatusHandler, this, frame, VeriyChecksum(frame, msg.status), msg.timestamp);
+        {
+            const auto msgStatus = VeriyChecksum(frame, msg.status);
+            if (msgStatus == FrameStatus::LIN_RX_OK)
+            {
+                _tracer.Trace(tracing::Direction::Receive, _timeProvider->Now(), frame);
+            }
+            CallHandlers(_frameStatusHandler, this, frame, msgStatus, msg.timestamp);
             break;
+        }
         case FrameResponseMode::TxUnconditional:
             // Transmissions are always sent with FrameStatus::RX_xxx so we have to
             // convert the status to a TX_xxx if we sent this frame.
+            if (msg.status == FrameStatus::LIN_RX_OK)
+            {
+                _tracer.Trace(tracing::Direction::Send, _timeProvider->Now(), frame);
+            }
             CallHandlers(_frameStatusHandler, this, frame, ToTxFrameStatus(msg.status), msg.timestamp);
             break;
         }
@@ -294,6 +331,7 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const Transmi
         // Dispatch GoToSleep frames
         if (frame.id == GoToSleepFrame().id && frame.data == GoToSleepFrame().data)
         {
+            _tracer.Trace(ToTracingDir(msg.status), _timeProvider->Now(), frame);
             CallHandlers(_goToSleepHandler, this);
         }
     }
