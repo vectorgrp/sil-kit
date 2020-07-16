@@ -42,6 +42,8 @@ configuration. Each participant configuration contains general information,
 e.g., its name and a description, the controller instances used to communication
 with other participants, as well as configuration for synchronization and
 logging.
+It is also possible to enable message tracing per participant.
+This allows tracing simulation messages into binary files.
 
 .. code-block:: javascript
                 
@@ -57,6 +59,8 @@ logging.
             "Logger": {
                 ...
             },
+
+            "TraceSinks" : [ ...],
 
             "CanControllers": [ ... ],
             "LinControllers": [ ... ],
@@ -79,7 +83,6 @@ logging.
 
             "NetworkSimulators": [ ... ]
 
-            "TraceSinks" : [ ...]
         },
         {
             "Name": "Participant2",
@@ -111,10 +114,13 @@ logging.
    * - :ref:`Logger<sec:cfg-participant-logger>`
      - The logger configuration for this participant.
 
-   * - CanControllers
-     - A list of CAN controller names, e.g., [ "CAN1", "CAN2, "CAN3" ]
-   * - LinControllers
-     - A list of LIN controller instances, e.g., [ "LIN1", "LIN2", "LIN3" ]
+   * - :ref:`TraceSinks<sec:cfg-participant-tracesink>`
+     - A list of TraceSink instances.
+
+   * - :ref:`CanControllers<sec:cfg-participant-can>`
+     - A list of CAN controller configurations.
+   * - :ref:`LinControllers<sec:cfg-participant-lin>`
+     - A list of LIN controller configurations.
    * - :ref:`EthernetControllers<sec:cfg-participant-ethernet>`
      - A list of Ethernet controller configurations
    * - :ref:`FlexRayControllers<sec:cfg-participant-flexray>`
@@ -122,7 +128,7 @@ logging.
 
    * - :ref:`GenericPublishers<sec:cfg-participant-genericpublisher>`
      - A list of GenericMessage publisher configurations
-   * - GenericSubscribers
+   * - :ref:`GenericSubscribers<sec:cfg-participant-genericsub>`
      - A list of GenericMessage subscribers names
 
    * - :ref:`Digital-Out<sec:cfg-participant-digital-out>`
@@ -130,26 +136,23 @@ logging.
    * - :ref:`Analog-Out<sec:cfg-participant-analog-out>`
      - A list of analog output port instances
    * - :ref:`Pwm-Out<sec:cfg-participant-pwm-out>`
-     - A list of PWM output port instances
+     - A list of Pwm output port instances
    * - :ref:`Pattern-Out<sec:cfg-participant-pattern-out>`
      - A list of pattern output port instances
 
-   * - Digital-In
-     - A list of digital input port names, e.g., [ "DI1", "DI2", "DI3"].
-   * - Analog-In
-     - A list of analog input port names, e.g., [ "AI1", "AI2", "AI3"].
-   * - Pwm-In
-     - A list of PWM input port names, e.g., [ "PWMI1", "PWMI2", "PWMI3"].
-   * - Pattern-In
-     - A list of pattern input port names, e.g., [
-       "PATTERN-IN-1", "PATTERN-IN-2", "PATTERN-IN-3"].
+   * - :ref:`Digital-In<sec:cfg-participant-digital-in>`
+     - A list of digital input port instances
+   * - :ref:`Analog-In<sec:cfg-participant-analog-in>`
+     - A list of analog input port instances
+   * - :ref:`Pwm-In<sec:cfg-participant-pwm-in>`
+     - A list of Pwm input port instances
+   * - :ref:`Pattern-In<sec:cfg-participant-pattern-in>`
+     - A list of pattern input port instances
 
        
    * - NetworkSimulators
      - A list of NetworkSimulator names simulated by this participant.
 
-   * - :ref:`TraceSinks<sec:cfg-participant-tracesink>`
-     - A list of TraceSink instances.
 
 
 
@@ -267,6 +270,127 @@ logs to a file, the following configuration could be used:
        resulting filename is <Logname>_<iso-timestamp>.txt.
 
 
+.. _sec:cfg-participant-tracing:
+       
+Message Tracing
+----------------------------------------
+To enable message tracing on a participant, two configuration options must be set:
+at least one trace sink has to be defined in a *TraceSinks* block of the configuration, and a
+*UseTraceSinks* field has to be defined in a service instance that references the
+trace sink by name:
+
+.. code-block:: javascript
+
+    "CanControllers": [
+        {
+            "Name": "CanCtrl",
+            "UseTraceSinks": [
+                "SinkForCan"
+            ]
+        }
+    ],    
+
+    "TraceSinks": [
+        {
+            "Name": "EthSink",
+            "OutputPath": "some/path/EthTraceOputput.pcap",
+            "Type": "PcapFile"
+        },
+        {
+            "Name": "SinkForCan",
+            "OutputPath": "other path/CAN1.mdf4",
+            "Type": "Mdf4File"
+        }
+    ]
+
+Multiple controllers can refer to a sink by name. However, each sink definition
+in a TraceSinks block must have a unique name.
+Currently, the :ref:`CanController<sec:cfg-participant-can>`, :ref:`LinController<sec:cfg-participant-lin>`, 
+:ref:`EthernetController<sec:cfg-participant-ethernet>`, and :ref:`FlexRayController<sec:cfg-participant-flexray>`
+support trace sinks.
+
+The :ref:`VIBE MDF4Tracing extension<mdf4tracing>` supports tracing messages of
+these controllers into an MDF4 file format.
+VIBE MDF4Tracing is an extension in shared library form which must be loaded
+at runtime. The :ref:`Extension Config<sec:cfg-extension-configuration-overview>`
+can be used to adapt the search paths for this shared library.
+
+The PCAP file format is natively supported for Ethernet messages only, please
+refer to :ref:`EthernetController API<sec:api-ethernet-tracing>`.
+
+.. _sec:cfg-participant-tracesink:
+
+TraceSink
+----------------------------------------
+The TraceSink configuration is part of the :ref:`participant
+configuration<sec:cfg-participant>`.
+
+.. code-block:: javascript
+  
+  "TraceSinks": [
+      {
+          "Name": "MyPcapSink",
+          "Type":  "PcapFile",
+          "OutputPath": "Filesystem/Path/MyTrace.pcap"
+      }
+  ]
+
+It allows to trace the IB simulation messages into binary files.
+
+.. list-table:: TraceSink Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+   * - Name
+     - The name of the sink. Services may refer to this
+       sink by name.
+   * - Type
+     - The type specifies the format of the output stream. Supported formats
+       are: PcapFile, PcapPipe, Mdf4File.
+   * - OutputPath
+     - A filesystem path where the IB messages are traced to.
+
+
+
+
+.. _sec:cfg-participant-can:
+
+CanControllers
+----------------------------------------
+
+.. list-table:: CanController Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+   * - Name
+     - The name of the CAN Controller
+   * - UseTraceSinks
+     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
+       this controller. Trace sinks are referred to by their name and can be used
+       by multiple controllers. (optional)
+
+.. _sec:cfg-participant-lin:
+
+LinControllers
+----------------------------------------
+
+.. list-table:: LinController Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+   * - Name
+     - The name of the LIN Controller
+   * - UseTraceSinks
+     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
+       this controller. Trace sinks are referred to by their name and can be used
+       by multiple controllers. (optional)
+
 
 .. _sec:cfg-participant-ethernet:
 
@@ -352,6 +476,10 @@ configuration<sec:cfg-participant>`.
      - Allows to configure TXBuffers by specifying "channels" (A, B, AB, None), 
        "slotId", "offset", "repetition", "PPindicator", "headerCrc" 
        and "transmissionMode" (SingleShot, Continuous).
+   * - UseTraceSinks
+     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
+       this controller. Trace sinks are referred to by their name and can be used
+       by multiple controllers. (optional)
 
 
 
@@ -387,7 +515,30 @@ configuration<sec:cfg-participant>`.
      - Location of the corresponding message definition file. 
        Relative paths are resolved relative to the location of the IbConfig file.
 
+.. _sec:cfg-participant-genericsub:
 
+GenericSubscribers
+----------------------------------------
+The Generic Subscriber configuration is part of the :ref:`participant
+configuration<sec:cfg-participant>`.
+
+.. code-block:: javascript
+    
+    "GenericSubscribers": [
+        { "Name" : "DI-Port-Name"}
+    ]
+
+.. list-table:: Generic Subscriber Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+   * - Name
+     - The name of the Generic Subscriber
+
+
+.. _sec:cfg-participant-ioport:
 
 .. _sec:cfg-participant-digital-out:
 
@@ -413,6 +564,28 @@ digital output port instances can be configured in this section:
 
 A Digital-Out Port is specified by giving the name and initial state.
 
+.. _sec:cfg-participant-digital-in:
+
+Digital-In (Ports)
+----------------------------------------
+The Digital-In Ports configuration is part of the :ref:`participant
+configuration<sec:cfg-participant>`.
+The names of the participant's  digital input port instances can be configured.
+
+.. code-block:: javascript
+    
+    "Digital-In": [
+        { "Name" : "DI-Port-Name"}
+    ]
+
+.. list-table:: Digital-In Port Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+   * - Name
+     - The name of the Digital-In port
 
 
 .. _sec:cfg-participant-analog-out:
@@ -443,12 +616,36 @@ analog output port instances can be configured in this section:
 
    * - Property Name
      - Description
+   * - Name
+     - The name of the Analog-Out port
    * - value
      - The initial voltage value
    * - unit
      - The unit of the voltage value ("mV", "V", "kV")
 
 
+.. _sec:cfg-participant-analog-in:
+
+Analog-In (Ports)
+----------------------------------------
+The Analog-In Ports configuration is part of the :ref:`participant
+configuration<sec:cfg-participant>`.
+The names of the participant's  analog input port instances can be configured.
+
+.. code-block:: javascript
+    
+    "Analog-In": [
+        { "Name" : "AI-Port-Name"}
+    ]
+
+.. list-table:: Analog-In Port Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+   * - Name
+     - The name of the Analog-In port
 
 .. _sec:cfg-participant-pwm-out:
 
@@ -483,6 +680,8 @@ pulse-width modulation output port instances can be configured in this section:
 
    * - Property Name
      - Description
+   * - Name
+     - The name of the Pwm-Out port
    * - freq
      - The initial frequency is specified by its unit ("Hz", "kHz", "MHz", "GHz", "THz") and value.
    * - duty
@@ -490,6 +689,28 @@ pulse-width modulation output port instances can be configured in this section:
        active state. The value range is between 0 (always off) and 1 (always on)
 
 
+.. _sec:cfg-participant-pwm-in:
+
+Pwm-In (Ports)
+----------------------------------------
+The Pwm-In Ports configuration is part of the :ref:`participant
+configuration<sec:cfg-participant>`.
+The names of the participant's  Pwm input port instances can be configured.
+
+.. code-block:: javascript
+    
+    "Pwm-In": [
+        { "Name" : "PWM-Port-Name"}
+    ]
+
+.. list-table:: Pwm-In Port Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+   * - Name
+     - The name of the Pwm-In port
 
 .. _sec:cfg-participant-pattern-out:
 
@@ -515,41 +736,28 @@ configuration<sec:cfg-participant>`.
 The pattern-out port instances are specified by giving their name 
 and a hexadecimal pattern string.
 
-.. _sec:cfg-participant-tracesink:
+.. _sec:cfg-participant-pattern-in:
 
-TraceSink
+Pattern-In (Ports)
 ----------------------------------------
-The TraceSink configuration is part of the :ref:`participant
+The Pattern-In Ports configuration is part of the :ref:`participant
 configuration<sec:cfg-participant>`.
+The names of the participant's  pattern input port instances can be configured.
 
 .. code-block:: javascript
-  
-  "TraceSinks": [
-      {
-          "Name": "MyPcapSink",
-          "Type":  "PcapFile",
-          "OutputPath": "Filesystem/Path/MyTrace.pcap"
-      }
-  ]
+    
+    "Pattern-In": [
+        { "Name" : "Pattern-Port-Name"}
+    ]
 
-It allows to trace the IB simulation messages into binary files.
-
-.. list-table:: TraceSink Configuration
+.. list-table:: Pattern-In Port Configuration
    :widths: 15 85
    :header-rows: 1
 
    * - Property Name
      - Description
    * - Name
-     - The name of the sink. Controller, Services and Ports may refer to this
-       sink by name.
-   * - Type
-     - The type specifies the format of the output stream. Supported formats
-       are: PcapFile, PcapPipe, Mdf4File.
-   * - OutputPath
-     - A filesystem path where the IB messages are traced to.
-
-
+     - The name of the Pattern-In port
 
 .. _sec:cfg-switches:
 

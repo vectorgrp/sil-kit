@@ -3,6 +3,7 @@
 #include "GenericPublisher.hpp"
 
 #include "ib/mw/IComAdapter.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 
 namespace ib {
 namespace sim {
@@ -53,6 +54,11 @@ auto GenericPublisher::EndpointAddress() const -> const mw::EndpointAddress&
 void GenericPublisher::SetTimeProvider(mw::sync::ITimeProvider* provider)
 {
     _timeProvider = provider;
+}
+
+void GenericPublisher::AddSink(tracing::ITraceMessageSink* sink)
+{
+    _comAdapter->GetLogger()->Warn("GenericPublisher does not support message tracing, yet.");
 }
 
 } // namespace generic

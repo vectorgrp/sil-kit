@@ -83,6 +83,11 @@ registered, which is called by the CAN controller whenever a CAN message is rece
       [](ICanController*, const CanMessage&) {};
   canController->RegisterReceiveMessageHandler(receiveMessageHandler);
 
+Message Tracing
+~~~~~~~~~~~~~~~
+The CanController supports message tracing in MDF4 format.
+This is provided by the :ref:`VIBE MDF4Tracing<mdf4tracing>` extension.
+Refer to the :ref:`sec:cfg-participant-tracing` configuration section for usage instructions.
 
 API and Data Type Reference
 --------------------------------------------------

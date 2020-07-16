@@ -57,6 +57,7 @@ For a full example refer to the :ref:`VIB Quick Start Guide<sec:quickstart-simpl
 which contains a simple application that demonstrates the usage of the Generic Message
 API in detail.
 
+
 API and Data Type Reference
 --------------------------------------------------
 The |IGenericPublisher| provides a simple publish interface for standard vector.

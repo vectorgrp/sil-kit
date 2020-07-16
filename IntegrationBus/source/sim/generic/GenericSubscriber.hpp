@@ -65,11 +65,6 @@ private:
 //  Inline Implementations
 // ================================================================================
 
-void GenericSubscriber::AddSink(tracing::ITraceMessageSink* sink)
-{
-    _tracer.AddSink(EndpointAddress(), *sink);
-}
-
 } // namespace generic
 } // namespace sim
 } // namespace ib

@@ -12,9 +12,15 @@ Added
 ~~~~~
 
 - The startup delay of a FlexRay node in the FlexRay demo can now be set programmatically.
+- Added a message tracing section to :ref:`Participant Configuration<sec:cfg-participant-tracing>`.
+  It briefly discusses how to configure the trace sink mechanism and how the 
+  :ref:`mdf4tracing` extension is used.
+  The controllers now also reflect the recently updated tracing support.
 
 Changed
 ~~~~~~~
+- Enabled message tracing on the following controllers: LIN, CAN, FlexRay.
+- The Ethernet demo now uses the IEthController::SendFrame API.
 
 - Updated version of the third-party library `fmt` to version `6.1.0`.
 

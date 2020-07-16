@@ -12,6 +12,8 @@
 #include "ib/sim/io/IIbToInPort.hpp"
 #include "ib/cfg/Config.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
+#include "ib/mw/IComAdapter.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 
 #include "Tracing.hpp"
 
@@ -207,9 +209,9 @@ void InPort<MsgT>::CallHandlers(const T& t)
 }
 
 template<typename MsgT>
-void InPort<MsgT>::AddSink(tracing::ITraceMessageSink* sink)
+void InPort<MsgT>::AddSink(tracing::ITraceMessageSink* /*sink*/)
 {
-    _tracer.AddSink(EndpointAddress(), *sink);
+    _comAdapter->GetLogger()->Warn("IO InPort does not support message tracing, yet.");
 }
 
 } // namespace io

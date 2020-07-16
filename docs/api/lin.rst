@@ -180,6 +180,12 @@ registered frameStatusHandler will be called as follows::
     If no LIN slave provides a frame response, the FrameStatus::LIN_RX_NO_RESPONSE will be
     used.
 
+Message Tracing
+~~~~~~~~~~~~~~~
+The LinController supports message tracing in MDF4 format.
+This is provided by the :ref:`VIBE MDF4Tracing<mdf4tracing>` extension.
+Refer to the :ref:`sec:cfg-participant-tracing` configuration section for usage instructions.
+
      
 API and Data Type Reference
 --------------------------------------------------

@@ -218,7 +218,7 @@ auto LoadExtension(
     if(lib_handle == nullptr)
     {
         std::stringstream ss;
-        for(auto& path: paths)
+        for(const auto& path: searchPathHints)
         {
             ss << path << ", ";
         }

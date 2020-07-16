@@ -106,20 +106,26 @@ must be registered, which is called whenever the status changes::
   State changes are only supported when using the VIBE NetworkSimulator.
 
 
-PCAP Tracing
+.. _sec:api-ethernet-tracing:
+
+Message Tracing
 ~~~~~~~~~~~~~~~
 
-For the Ethernet Controller, it is possible to track all received Ethernet messages in PCAP format either
-in a dedicated file or to write all messages directly into a named pipe. By default, PCAP tracing is
-disabled, but you can enable it in the specific settings of an Ethernet Controller (see:
-:ref:`Ethernet Controller Configuration<sec:cfg-participant-ethernet>`).
+The Ethernet Controller is able to trace all received Ethernet messages in PCAP format, either
+in a dedicated file or into a named pipe.
+MDF4 tracing is supported by the :ref:`VIBE MDF4Tracing<mdf4tracing>`.
+By default, message tracing is disabled, but it can be enabled in the settings
+of an Ethernet Controller (see: :ref:`Ethernet Controller Configuration<sec:cfg-participant-ethernet>`).
+Refer to the :ref:`sec:cfg-participant-tracing` configuration section for usage instructions.
 
 PCAP File
-______________
+__________
 
-To trace all received Ethernet messages in a PCAP file, you only have to specify the according setting
-in the configuration of the Ethernet Controller:
+To trace all received Ethernet messages in a PCAP file, you have to specify a trace sink
+of type 'PcapFile' in the configuration of the Ethernet Controller and add an appropriate
+trace sink to the configuration:
 
+.. deprecated:: 3.0.8
 .. code-block:: javascript
     
   "EthernetControllers": [
@@ -130,38 +136,70 @@ in the configuration of the Ethernet Controller:
       }
   ]
 
-After you successfully run and stopped the simulation, you can search for the file
-"pcap_output_trace.pcap" and load it into a tool like
-`wireshark <https://www.wireshark.org/>`_ where you can examine the Ethernet trace.
-
-PCAP Named Pipe
-_________________
-
-In order to directly track all received Ethernet messages in a Named Pipe, you must specify
-again the corresponding setting in the configuration of the Ethernet Controller:
-
+.. versionadded:: 3.0.8
 .. code-block:: javascript
-    
+
   "EthernetControllers": [
       {
           "Name": "ETH0",
           "MacAddr": "00:08:15:ab:cd:f0",
-          "PcapPipe": "pcap_output_reader"
+          "UseTraceSinks": ["SinkName"]
+      }
+  ],
+  "TraceSinks" : [
+      {
+          "Name" : "SinkName",
+          "Type" : "PcapFile",
+          "OutputPath": "Ethernet.pcap"
       }
   ]
+  
 
-The process responsible for the Ethernet Controller "ETH0" will try to open a Named Pipe
-"pcap_output_reader" during start up of the ComAdapter. The process will be blocked until
-another process connects to the Named Pipe and is ready to read any incoming Ethernet message.
+After you successfully run and stopped the simulation, you will find the file
+"Ethernet.pcap" in the simulation's working directory.
+It can be loaded into a tool like
+`Wireshark <https://www.wireshark.org/>`_ where you can examine the Ethernet trace.
 
-The reading process could be a tool like `wireshark <https://www.wireshark.org/>`_, for example.
-Under Windows, you can start wireshark in a console with a dedicated Named Pipe
-and then connect to the Named Pipe by double-clicking on it:
+PCAP Named Pipe
+_________________
+
+Using a named pipe allows attaching another program to trace messages of a
+IB ethernet controller. 
+The trace sink type has to be specified as "PcapPipe" in the configuration:
+
+.. code-block:: javascript
+
+  "EthernetControllers": [
+      {
+          "Name": "ETH0",
+          "MacAddr": "00:08:15:ab:cd:f0",
+          "UseTraceSinks": ["SinkName"]
+      }
+  ],
+  "TraceSinks" : [
+      {
+          "Name" : "SinkName",
+          "Type" : "PcapPipe",
+          "OutputPath": "EthernetPipe"
+      }
+  ]
+    
+
+The VIB process responsible for the Ethernet Controller "ETH0" will open the
+specified named pipe "EthernetPipe" during start up of the ComAdapter.
+When the IntegrationBus writes the first message to the pipe, the VIB process will be blocked
+until another process connects to the named pipe and reads the traced ethernet
+messages from the pipe.
+
+The reading process could be a tool like `Wireshark <https://www.wireshark.org/>`_,
+which allows visualizing live trace messages.
+Under Windows, named pipes reside in a special filesystem namespace prefixed with "\\.\pipe\".
+The following will attach *wireshark* to the named pipe created by your VIB simulation:
 
 .. code-block:: powershell
 
-  # Start wireshark with a dedicated Named Pipe
-  wireshark -ni \\.\pipe\pcap_output_reader
+  # Start wireshark and start reading from the named pipe
+  wireshark -ni \\.\pipe\EthernetPipe
 
 
 API and Data Type Reference

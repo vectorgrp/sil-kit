@@ -203,6 +203,11 @@ The handler will be invoked whenever the controller's PocStatus is updated.
     POC members beside PocStatus::state are updated when using an accurate simulation with
     the VIBE network simulator.
 
+Message Tracing
+~~~~~~~~~~~~~~~
+The FrController supports message tracing in MDF4 format.
+This is provided by the :ref:`VIBE MDF4Tracing<mdf4tracing>` extension.
+Refer to the :ref:`sec:cfg-participant-tracing` configuration section for usage instructions.
 
 API and Data Type Reference
 --------------------------------------------------
