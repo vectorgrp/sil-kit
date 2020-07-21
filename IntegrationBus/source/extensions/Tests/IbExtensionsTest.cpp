@@ -91,25 +91,6 @@ TEST_F(IbExtensionsTest, load_dummy_lib)
     //must not crash when going out of scope
 }
 
-// Use the search path hints specified in the extension configuration
-TEST_F(IbExtensionsTest, load_dummy_lib_from_custom_search_path)
-{
-    try
-    {
-        SetCurrentWorkingDir("..");
-
-        ib::cfg::ExtensionConfig config;
-        EXPECT_THROW(ib::extensions::LoadExtension("DummyExtension", config), ib::extensions::ExtensionError);
-
-        config.searchPathHints.emplace_back(currentWorkingDir);
-        ASSERT_NE(ib::extensions::LoadExtension("DummyExtension", config), nullptr);
-    }
-    catch (std::exception& e)
-    {
-        std::cout << e.what() << '\n';
-        FAIL();
-    }
-}
 
 TEST_F(IbExtensionsTest, dynamic_cast)
 {

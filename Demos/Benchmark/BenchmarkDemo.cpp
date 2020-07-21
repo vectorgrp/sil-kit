@@ -318,7 +318,7 @@ int main(int argc, char** argv)
     try
     {
         using namespace ib::extensions;
-        ExtensionHandle<IIbRegistry> registry;
+        std::unique_ptr<IIbRegistry> registry;
         if (benchmark.usedMiddleware == Middleware::VAsio)
         {
             registry = ib::extensions::CreateIbRegistry(ibConfig);

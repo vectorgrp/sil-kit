@@ -773,7 +773,7 @@ void ComAdapter<IbConnectionT>::AddTraceSinksToController(tracing::IControllerTo
             GetLogger()->Error(ss.str());
             throw std::runtime_error(ss.str());
         }
-        controller->AddSink((*sinkIter).Get());
+        controller->AddSink((*sinkIter).get());
     }
 }
 

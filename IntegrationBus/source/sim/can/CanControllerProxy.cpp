@@ -161,7 +161,7 @@ auto CanControllerProxy::EndpointAddress() const -> const ::ib::mw::EndpointAddr
 }
 
 
-void CanControllerProxy::AddSink(tracing::ITraceMessageSink* sink)
+void CanControllerProxy::AddSink(tracing::ITraceMessageSink* )
 {
     _comAdapter->GetLogger()->Warn("CanControllerProxy does not support message tracing, yet.");
 }

@@ -13,7 +13,7 @@
 namespace ib { namespace extensions {
 
 auto CreateIbRegistry(ib::cfg::Config config)
-    -> ExtensionHandle<IIbRegistry>
+    -> std::unique_ptr<IIbRegistry>
 {
     return CreateInstance<IIbRegistryFactory, IIbRegistry>
         ("vib-registry", std::move(config));

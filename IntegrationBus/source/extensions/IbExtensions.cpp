@@ -179,6 +179,7 @@ auto LoadExtension(
     ExtensionPathHints searchPathHints = config.searchPathHints;
     searchPathHints.emplace_back("ENV:IB_EXTENSION_PATH");
     searchPathHints.emplace_back(".");
+    searchPathHints.emplace_back(GetProcessPath());
 
     auto paths = FindLibrary(name, searchPathHints);
     detail::LibraryHandle lib_handle = nullptr;

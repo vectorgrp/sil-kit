@@ -102,6 +102,30 @@ private:
 
 std::string IbRegistryLibFixture::currentWorkingDir;
 
+
+// Load registry from the search path specified in the extension configuration
+TEST_F(IbRegistryLibFixture, load_registry_custom_search_path)
+{
+    try
+    {
+        SetCurrentWorkingDir("..");
+
+        auto config = GetConfig();
+        //NB this only throws because it is the first invocation of CreateIbRegistry, once the extension is found and cached this won't throw anymore
+        EXPECT_THROW(CreateIbRegistry(config), std::runtime_error);
+
+        config.extensionConfig.searchPathHints.emplace_back(currentWorkingDir);
+        ASSERT_TRUE(CreateIbRegistry(config));
+
+        SetCurrentWorkingDir(currentWorkingDir);
+    }
+    catch (std::exception& e)
+    {
+        std::cout << e.what() << '\n';
+        FAIL();
+    }
+}
+
 TEST_F(IbRegistryLibFixture, load_registry)
 {
     {
@@ -121,28 +145,6 @@ TEST_F(IbRegistryLibFixture, load_registry)
     registry->SetAllDisconnectedHandler([&disco](){
         disco = true;
     });
-}
-
-// Load registry from the search path specified in the extension configuration
-TEST_F(IbRegistryLibFixture, load_registry_custom_search_path)
-{
-    try
-    {
-        SetCurrentWorkingDir("..");
-
-        auto config = GetConfig();
-        EXPECT_THROW(CreateIbRegistry(config), std::runtime_error);
-
-        config.extensionConfig.searchPathHints.emplace_back(currentWorkingDir);
-        ASSERT_TRUE(CreateIbRegistry(config));
-
-        SetCurrentWorkingDir(currentWorkingDir);
-    }
-    catch (std::exception& e)
-    {
-        std::cout << e.what() << '\n';
-        FAIL();
-    }
 }
 
 //This is taken from the integration tests, we need to make sure the 

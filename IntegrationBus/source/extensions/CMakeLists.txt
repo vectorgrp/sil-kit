@@ -12,7 +12,6 @@ add_library(IbExtensions STATIC
     IbExtensionApi/IbExtensionUtils.hpp
     IbExtensionApi/IbExtensionUtils.cpp
 
-    ${CMAKE_CURRENT_LIST_DIR}/../../include/ib/extensions/ExtensionHandle.hpp
 
     # Imlplementation Helpers
     IbExtensionImpl/DllCache.hpp

@@ -58,9 +58,9 @@ auto CreateTraceMessageSinks(
     mw::logging::ILogger* logger,
     const cfg::Config& config,
     const cfg::Participant& participantConfig
-    ) -> std::vector<ExtensionHandle<ITraceMessageSink>>
+    ) -> std::vector<std::unique_ptr<ITraceMessageSink>>
 {
-    std::vector<ExtensionHandle<ITraceMessageSink>> newSinks;
+    std::vector<std::unique_ptr<ITraceMessageSink>> newSinks;
     for (const auto& sinkCfg : participantConfig.traceSinks)
     {
         if (!sinkCfg.enabled)
@@ -85,14 +85,14 @@ auto CreateTraceMessageSinks(
         {
             auto sink = std::make_unique<PcapSink>(logger, sinkCfg.name);
             sink->Open(tracing::SinkType::PcapFile, sinkCfg.outputPath);
-            newSinks.emplace_back(std::shared_ptr<IIbExtension>{}, std::move(sink));
+            newSinks.emplace_back(std::move(sink));
             break;
         }
         case  cfg::TraceSink::Type::PcapPipe:
         {
             auto sink = std::make_unique<PcapSink>(logger, sinkCfg.name);
             sink->Open(tracing::SinkType::PcapNamedPipe, sinkCfg.outputPath);
-            newSinks.emplace_back(std::shared_ptr<IIbExtension>{}, std::move(sink));
+            newSinks.emplace_back(std::move(sink));
             break;
         }
         default:

@@ -208,7 +208,7 @@ private:
     std::shared_ptr<sync::ITimeProvider> _timeProvider{nullptr};
 
     std::unique_ptr<logging::ILogger> _logger;
-    std::vector<extensions::ExtensionHandle<extensions::ITraceMessageSink>> _traceSinks;
+    std::vector<std::unique_ptr<extensions::ITraceMessageSink>> _traceSinks;
 
     std::tuple<
         ControllerMap<sim::can::IIbToCanController>,

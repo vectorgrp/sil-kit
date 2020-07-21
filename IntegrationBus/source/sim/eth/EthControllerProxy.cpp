@@ -148,7 +148,7 @@ void EthControllerProxy::CallHandlers(const MsgT& msg)
     }
 }
 
-void EthControllerProxy::AddSink(tracing::ITraceMessageSink* sink)
+void EthControllerProxy::AddSink(tracing::ITraceMessageSink* )
 {
     _comAdapter->GetLogger()->Warn("EthControllerProxy does not support message tracing, yet.");
 }

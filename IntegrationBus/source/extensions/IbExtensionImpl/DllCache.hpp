@@ -11,13 +11,13 @@
 
 namespace ib { namespace extensions {
 
-//!\brief DllCache keeps a weak reference to already loaded shared libraries.
+//!\brief DllCache keeps a shared reference to already loaded shared libraries.
 //
 // This allows extensions to cache the already loaded and validated shared
 // libraries and reusing them.
 //Usage:
 // static DllCache cache;
-// auto extension = cache.Get("name of extension");
+// auto extension = cache.Get("name of extension", config);
 
 class DllCache
 {
@@ -29,14 +29,17 @@ public:
         try {
             //try to load the extension by its undecorated DLL/so name
             //and cache a reference to it.
-            auto dllInst = _dll.lock();
-            if (!dllInst)
+            if (!_dll)
             {
-                dllInst = ib::extensions::LoadExtension(extensionName, config.extensionConfig);
-                _dll = dllInst;
+                _dll = ib::extensions::LoadExtension(extensionName, config.extensionConfig);
                 _extensionName = extensionName;
             }
-            return dllInst;
+            if (extensionName != _extensionName)
+            {
+                throw ExtensionError("Cached Extension " + _extensionName
+                    + " differs from requested extension name: " + extensionName);
+            }
+            return _dll;
         }
         catch (const ib::extensions::ExtensionError& err)
         {
@@ -47,7 +50,7 @@ public:
 
 private:
     std::string _extensionName;
-    std::weak_ptr<ib::extensions::IIbExtension> _dll;
+    std::shared_ptr<ib::extensions::IIbExtension> _dll;
 };
 
 }//end namespace extensions

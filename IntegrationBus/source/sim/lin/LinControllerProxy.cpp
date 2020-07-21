@@ -278,7 +278,7 @@ void LinControllerProxy::SendIbMessage(MsgT&& msg)
     _comAdapter->SendIbMessage(_endpointAddr, std::forward<MsgT>(msg));
 }
 
-void LinControllerProxy::AddSink(tracing::ITraceMessageSink* sink)
+void LinControllerProxy::AddSink(tracing::ITraceMessageSink* )
 {
     _comAdapter->GetLogger()->Warn("LinControllerProxy does not support message tracing, yet.");
 }

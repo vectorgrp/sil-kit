@@ -5,7 +5,6 @@
 #include <string>
 
 #include "ib/extensions/ITraceMessageSink.hpp"
-#include "ib/extensions/ExtensionHandle.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/cfg/fwd_decl.hpp"
 
@@ -31,7 +30,7 @@ public:
 
 auto CreateMdf4Tracing(cfg::Config config,
     ib::mw::logging::ILogger* logger, const std::string& sinkName)
-    -> ExtensionHandle<ITraceMessageSink>;
+    -> std::unique_ptr<ITraceMessageSink>;
 
 }//end namespace extensions
 }//end namespace ib

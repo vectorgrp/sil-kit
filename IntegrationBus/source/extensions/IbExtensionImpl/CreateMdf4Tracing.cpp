@@ -19,7 +19,7 @@ namespace ib { namespace extensions {
 auto CreateMdf4Tracing(cfg::Config config,
     ib::mw::logging::ILogger* logger,
     const std::string& sinkName)
-    -> ExtensionHandle<ITraceMessageSink>
+    -> std::unique_ptr<ITraceMessageSink>
 {
     return CreateInstance<Mdf4TraceSinkFactory, ITraceMessageSink>
         ("vibe-mdf4tracing", std::move(config), logger, sinkName);

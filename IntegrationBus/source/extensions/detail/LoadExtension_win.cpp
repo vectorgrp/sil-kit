@@ -84,6 +84,21 @@ void* FindSymbol(LibraryHandle& hnd, const std::string& symbol_name)
     return entry;
 }
 
+std::string GetProcessPath()
+{
+    std::vector<char> buf;
+    buf.resize(MAX_PATH);
+    ::GetModuleFileNameA(nullptr, buf.data(), buf.size());
+    std::string path(buf.data(), buf.size());
+
+    auto sep = path.find_last_of('\\');
+    if (sep != path.npos)
+    {
+        return path.substr(0, sep);
+    }
+    return path;
+}
+
 }//detail
 }//extensions
 }//ib

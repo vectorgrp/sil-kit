@@ -56,7 +56,7 @@ void GenericPublisher::SetTimeProvider(mw::sync::ITimeProvider* provider)
     _timeProvider = provider;
 }
 
-void GenericPublisher::AddSink(tracing::ITraceMessageSink* sink)
+void GenericPublisher::AddSink(tracing::ITraceMessageSink* /*sink*/)
 {
     _comAdapter->GetLogger()->Warn("GenericPublisher does not support message tracing, yet.");
 }

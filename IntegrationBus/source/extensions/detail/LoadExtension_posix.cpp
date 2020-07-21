@@ -7,7 +7,9 @@
 #include <cstdlib>
 
 #include <dlfcn.h>
+#include <sys/types.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include "IbExtensions.hpp"
 #include "LoadExtension.hpp"
@@ -55,6 +57,22 @@ void CloseLibrary(const LibraryHandle& hnd)
         std::string tmp{dlerror()};
         throw ExtensionError("Calling ::dlclose failed: " + tmp);
     }
+}
+
+// Linux specific executable image path
+std::string GetProcessPath()
+{
+    std::vector<char> buf;
+    buf.resize(PATH_MAX);
+    auto proc = std::string("/proc/") + std::to_string(getpid()) + "/exe";
+    auto nb = readlink(proc.c_str(), buf.data(), buf.size());
+    if ( nb < 0)
+    {
+        return "."; //XXX better than empty string
+    }
+    auto unb = static_cast<size_t>(nb);
+    buf.at(unb) = '\0';
+    return std::string(buf.data(), unb);
 }
 
 }//detail

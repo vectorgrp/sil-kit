@@ -7,7 +7,6 @@
 
 #include "ib/IbMacros.hpp"
 #include "ib/extensions/IIbRegistry.hpp"
-#include "ib/extensions/ExtensionHandle.hpp"
 #include "ib/cfg/Config.hpp"
 
 
@@ -22,7 +21,7 @@ namespace ib { namespace extensions {
 */
 
 IntegrationBusAPI auto CreateIbRegistry(ib::cfg::Config config)
-    -> ExtensionHandle<IIbRegistry>;
+    -> std::unique_ptr<IIbRegistry>;
 
 }//end namespace extensions
 }//end namespace ib

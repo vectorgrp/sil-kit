@@ -2,12 +2,15 @@
 
 #pragma once
 
+#include <string>
+
 #if defined(_WIN32)
 #   define WIN32_LEAN_AND_MEAN
 #   include <Windows.h>
 #endif
 
 namespace ib { namespace extensions {namespace detail {
+
 #if defined(_WIN32)
 
 using LibraryHandle = HMODULE;
@@ -27,7 +30,7 @@ bool FileExists(const std::string& path);
 LibraryHandle OpenLibrary(const std::string& path);
 void* FindSymbol(LibraryHandle& hnd, const std::string& symbol_name);
 void CloseLibrary(const LibraryHandle& hnd);
-
+std::string GetProcessPath();
 } //end namespace detail
 } //end namespace extensions
 } //end namespace ib
