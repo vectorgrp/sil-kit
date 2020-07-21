@@ -2,6 +2,7 @@
 
 #include "EthControllerProxy.hpp"
 
+#include "ib/mw/logging/ILogger.hpp"
 #include "ib/mw/IComAdapter.hpp"
 
 namespace ib {
@@ -147,6 +148,10 @@ void EthControllerProxy::CallHandlers(const MsgT& msg)
     }
 }
 
+void EthControllerProxy::AddSink(tracing::ITraceMessageSink* sink)
+{
+    _comAdapter->GetLogger()->Warn("EthControllerProxy does not support message tracing, yet.");
+}
 
 } // namespace eth
 } // namespace sim

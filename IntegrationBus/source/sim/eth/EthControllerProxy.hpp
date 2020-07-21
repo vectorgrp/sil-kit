@@ -66,7 +66,7 @@ public:
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
     //IControllerToTraceSink
-    inline void AddSink(tracing::ITraceMessageSink* sink) override;
+    void AddSink(tracing::ITraceMessageSink* sink) override;
 
 private:
     // ----------------------------------------
@@ -113,10 +113,6 @@ auto EthControllerProxy::MakeTxId() -> EthTxId
     return ++_ethTxId;
 }
 
-void EthControllerProxy::AddSink(tracing::ITraceMessageSink* sink)
-{
-    _tracer.AddSink(EndpointAddress(), *sink);
-}
 
 } // namespace eth
 } // namespace sim
