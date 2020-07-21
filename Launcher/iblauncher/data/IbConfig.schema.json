@@ -128,15 +128,33 @@
                 "CanControllers": {
                   "type": "array",
                   "items": {
-                      "type": "string",
-                      "title": "Names of the CAN controllers"
+                      "type": "object",
+                      "properties": {
+                          "Name": {
+                              "type": "string",
+                              "title": "Name of the CanController instance"
+                          },
+                          "UseTraceSinks": {
+                              "type" : "array",
+                              "title": "Names of trace sinks"
+                          }
+                      }
                   }
                 },
                 "LinControllers": {
                   "type": "array",
                   "items": {
-                    "type": "string",
-                    "title": "Names of the LIN controllers"
+                      "type": "object",
+                      "properties": {
+                          "Name": {
+                              "type": "string",
+                              "title": "Name of the LinController instance"
+                          },
+                          "UseTraceSinks": {
+                              "type" : "array",
+                              "title": "Names of trace sinks"
+                          }
+                      }
                   }
                 },
                 "FlexRayControllers": {
@@ -146,7 +164,11 @@
                     "properties": {
                       "Name": {
                         "type": "string",
-                        "title": "Names of the FlexRay controllers"
+                        "title": "Name of the FlexRayController instance"
+                      },
+                      "UseTraceSinks": {
+                        "type" : "array",
+                        "title": "Names of trace sinks"
                       },
                       "ClusterParameters": {
                         "type": "object",
@@ -468,7 +490,11 @@
                     "properties": {
                       "Name": {
                         "type": "string",
-                        "title": "Names of the Ethernet controller"
+                        "title": "Name of the EthernetController instance"
+                      },
+                      "UseTraceSinks": {
+                        "type" : "array",
+                        "title": "Names of trace sinks"
                       },
                       "MacAddr": {
                         "type": "string",
@@ -501,8 +527,16 @@
                   "title": "Digital output ports",
                   "items": {
                     "type": "object",
-                    "patternProperties": {
-                      "^.*$": {
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Name of the Digital-Out port"
+                      },
+                      "UseTraceSinks": {
+                          "type" : "array",
+                          "title": "Names of trace sinks"
+                      },
+                      "value": {
                         "type": "boolean",
                         "title": "Name and init value of a digital output"
                       }
@@ -514,24 +548,26 @@
                   "title": "Analog output ports",
                   "items": {
                     "type": "object",
-                    "patternProperties": {
-                      "^.*$": {
-                        "type": "object",
-                        "properties": {
-                          "value": {
-                            "type": "number",
-                            "title": "Initial value of the output port"
-                          },
-                          "unit": {
-                            "type": "string",
-                            "title": "Physical unit of the output port value.",
-                            "examples": [ "V", "A", "kHz" ]
-                          }
-                        },
-                        "additionalProperties": false,
-                        "title": "Name and init value of an analog output"
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Name of the Analog-Out port"
+                      },
+                      "UseTraceSinks": {
+                          "type" : "array",
+                          "title": "Names of trace sinks"
+                      },
+                      "value": {
+                        "type": "number",
+                        "title": "Initial value of the output port"
+                      },
+                      "unit": {
+                        "type": "string",
+                        "title": "Physical unit of the output port value.",
+                        "examples": [ "V", "A", "kHz" ]
                       }
-                    }
+                    },
+                    "additionalProperties": false
                   }
                 },
                 "Pwm-Out": {
@@ -539,36 +575,39 @@
                   "title": "PWM output ports",
                   "items": {
                     "type": "object",
-                    "patternProperties": {
-                      "^.*$": {
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Name of the Pwm-Out port"
+                      },
+                      "UseTraceSinks": {
+                          "type" : "array",
+                          "title": "Names of trace sinks"
+                      },
+                      "freq": {
                         "type": "object",
+                        "title": "Frequency and unit of the PWM output.",
                         "properties": {
-                          "freq": {
-                            "type": "object",
-                            "title": "Frequency and unit of the PWM output.",
-                            "properties": {
-                              "value":{
-                                "type": "number"
-                              },
-                              "unit":{
-                                "type": "string",
-                                "enum": [ "Hz", "kHz", "MHz", "GHz", "THz"]
-                              }
-                            },
-                            "additionalProperties": false
+                          "value":{
+                            "type": "number"
                           },
-                          "duty": {
-                            "type": "number",
-                            "minimum": 0,
-                            "maximum": 1,
-                            "title": "Duty cycle of the PWM output.",
-                            "examples": [ "V", "A", "kHz" ]
+                          "unit":{
+                            "type": "string",
+                            "enum": [ "Hz", "kHz", "MHz", "GHz", "THz"]
                           }
                         },
-                        "additionalProperties": false,
-                        "title": "Name and init value of an analog output"
+                        "additionalProperties": false
+                      },
+                      "duty": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "title": "Duty cycle of the PWM output.",
+                        "examples": [ "V", "A", "kHz" ]
                       }
-                    }
+                    },
+                    "additionalProperties": false,
+                    "title": "Name and init value of an analog output"
                   }
                 },
                 "Pattern-Out":{
@@ -576,8 +615,16 @@
                   "title": "Pattern output ports",
                   "items": {
                     "type": "object",
-                    "patternProperties": {
-                      "^.*$": {
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Name of the Pattern-Out port"
+                      },
+                      "UseTraceSinks": {
+                        "type" : "array",
+                        "title": "Names of trace sinks"
+                      },
+                      "value": {
                         "type": "string",
                         "pattern": "^[0-9a-zA-Z]*$",
                         "title": "Name and hex encoded init value of a pattern output"
@@ -590,32 +637,68 @@
                   "type": "array",
                   "title": "Digital input ports",
                   "items": {
-                    "type": "string",
-                    "title": "Name of the digital input port"
+                    "type": "object",
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Name of the Digital-In port"
+                      },
+                      "UseTraceSinks": {
+                        "type" : "array",
+                        "title": "Names of trace sinks"
+                      }
+                    }
                   }
                 },
                 "Analog-In": {
                   "type": "array",
                   "title": "Analog input ports",
                   "items": {
-                    "type": "string",
-                    "title": "Name of the analog input port"
+                    "type": "object",
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Name of the Analog-In port"
+                      },
+                      "UseTraceSinks": {
+                        "type" : "array",
+                        "title": "Names of trace sinks"
+                      }
+                    }
                   }
                 },
                 "Pwm-In": {
                   "type": "array",
                   "title": "PWM input ports",
                   "items": {
-                    "type": "string",
-                    "title": "Name of the PWM input port"
+                    "type": "object",
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Name of the Pwm-In port"
+                      },
+                      "UseTraceSinks": {
+                        "type" : "array",
+                        "title": "Names of trace sinks"
+                      }
+                    }
                   }
                 },
                 "Pattern-In": {
                   "type": "array",
                   "title": "Pattern input ports",
                   "items": {
-                    "type": "string",
-                    "title": "Name of the pattern input port"
+                    "type": "object",
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Name of the Pattern-In port"
+                      },
+                      "UseTraceSinks": {
+                        "type" : "array",
+                        "title": "Names of trace sinks"
+                      }
+                    }
                   }
                 },
 
@@ -641,6 +724,10 @@
                         "type": "string",
                         "title": "Location of the corresponding message definition file. Relative paths refer to the location of the IbConfig file.",
                         "format": "uri"
+                      },
+                      "UseTraceSinks": {
+                        "type" : "array",
+                        "title": "Names of trace sinks"
                       }
                     },
                     "additionalProperties": false,
@@ -650,10 +737,19 @@
 
                 "GenericSubscribers": {
                   "type": "array",
-                  "title": "Names of generic message subscribers",
+                  "title": "Name of generic message subscriber",
                   "items": {
-                    "type": "string",
-                    "title": "Name of the generic message subscriber"
+                    "type": "object",
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Name of the Generic Subscriber"
+                      },
+                      "UseTraceSinks": {
+                        "type" : "array",
+                        "title": "Names of trace sinks"
+                      }
+                    }
                   }
                 },
 
@@ -666,12 +762,40 @@
                 },
                 "IsSyncMaster": {
                     "type": "boolean"
+                },
+                "TraceSinks": {
+                  "type" : "array",
+                  "items" : {
+                    "type":  "object",
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Name of the Trace Sink",
+                        "examples": [
+                          "SomeEthernetSink"
+                        ]
+                      },
+                      "OutputPath": {
+                        "type": "string",
+                        "title": "File path of output file"
+                      },
+                      "Type": {
+                        "type": "string",
+                        "enum": [
+                          "PcapFile",
+                          "PcapPipe",
+                          "Mdf4File"
+                        ],
+                        "title": "File format specifier"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
                 }
               },
               "additionalProperties": false
             }
           },
-
           "Switches": {
             "type": "array",
             "items": {
@@ -812,7 +936,8 @@
           "ActiveMiddleware" :
           {
             "type": "string",
-            "enum": ["FastRTPS", "VAsio"]
+            "enum": ["FastRTPS", "VAsio"],
+            "title": "ActiveMiddleware"
           },
 
           "FastRTPS": {
