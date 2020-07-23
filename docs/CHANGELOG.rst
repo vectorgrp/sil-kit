@@ -5,7 +5,7 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[x.y.z] - unreleased
+[3.2.1] - 2020-07-23
 --------------------------------
 
 Added
@@ -19,9 +19,9 @@ Added
 
 Changed
 ~~~~~~~
+
 - Enabled message tracing on the following controllers: LIN, CAN, FlexRay.
 - The Ethernet demo now uses the IEthController::SendFrame API.
-
 - Updated version of the third-party library `fmt` to version `6.1.0`.
 
 Fixed
@@ -35,7 +35,7 @@ Fixed
 Compatibility with 3.2.0
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- Application binary interface (ABI): Yes
+- Application binary interface (ABI): No 
 - Application software interface (API): Yes
 - Middleware network protocol (FastRTPS): Yes
 - Middleware network protocol (VAsio): Yes
