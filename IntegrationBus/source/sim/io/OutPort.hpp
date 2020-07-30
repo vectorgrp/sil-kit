@@ -12,7 +12,6 @@
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
 #include "ib/cfg/Config.hpp"
-#include "ib/mw/logging/ILogger.hpp"
 
 #include "Tracing.hpp"
 
@@ -160,9 +159,9 @@ void OutPort<MsgT>::SendIbMessage(T&& msg)
 }
 
 template<typename MsgT>
-void OutPort<MsgT>::AddSink(tracing::ITraceMessageSink* /*sink*/)
+void OutPort<MsgT>::AddSink(tracing::ITraceMessageSink* sink)
 {
-    _comAdapter->GetLogger()->Warn("IO OutPort does not support message tracing, yet.");
+    _tracer.AddSink(EndpointAddress(), *sink);
 }
 
 } // namespace io
