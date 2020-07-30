@@ -64,12 +64,6 @@ void GenericSubscriber::SetTimeProvider(mw::sync::ITimeProvider* provider)
 }
 
 
-void GenericSubscriber::AddSink(tracing::ITraceMessageSink* /*sink*/)
-{
-    _comAdapter->GetLogger()->Warn("GenericSubscriber does not support message tracing, yet.");
-}
-
-
 } // namespace generic
 } // namespace sim
 } // namespace ib
