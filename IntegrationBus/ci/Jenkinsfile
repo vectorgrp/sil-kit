@@ -152,7 +152,7 @@ def run(what) {
 //##########################################
 
 // instantiate a build on an appropriate node
-def doBuild(buildName, buildAgent, buildTool) {
+def doBuild(buildName, buildAgent, buildTool, extraArgs="") {
     return runOnNode(buildName, buildAgent, {
         def scmEnv = []
         stage("${buildName}: scm checkout") {
@@ -176,10 +176,12 @@ def doBuild(buildName, buildAgent, buildTool) {
                 if(isClangBuild(buildName)) {
                     print("setting cmake compiler to clang")
                     ccArgs+=" -DCMAKE_CXX_COMPILER='clang++' -DCMAKE_C_COMPILER=clang"
-                }
+                }                
+                ccArgs+= " " + extraArgs
+                
                 print("running cmake")
                 runCmake(buildTool, "Release", ccArgs)
-            }
+            }            
             stage("${buildName}: Unit Tests Release") {
                 dir("_build_Release") {
                     ctest(
@@ -222,6 +224,8 @@ def doBuild(buildName, buildAgent, buildTool) {
                     if(isClangBuild(buildName)) {
                         ccArgs="-DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"
                     }
+                    ccArgs+= " " + extraArgs
+                    
                     runCmake(buildTool, "Debug", ccArgs)
                     run "python ${dockerImageDir}/package.py \"_build_Release/${artifactName}-*-Release.zip\" \"_build_Debug/${artifactName}-*-Debug.zip\""
                     archiveToArtifactory("_build_Debug/${artifactName}-*.zip")
@@ -250,10 +254,10 @@ node {
     def builds = [:]
 
     // "Name of the target" : "Name of the target", "required node label", "generator name")
-    builds.put("VS2017-Win64", doBuild("VS2017-Win64", "windows", "Visual Studio 15 2017 Win64"))
-    builds.put("VS2015-Win64", doBuild("VS2015-Win64", "windows", "Visual Studio 14 2015 Win64"))
-    builds.put("VS2017-x32"  , doBuild("VS2017-x32",   "windows", "Visual Studio 15 2017"))
-    builds.put("VS2015-x32"  , doBuild("VS2015-x32",   "windows", "Visual Studio 14 2015"))
+    builds.put("VS2017-Win64", doBuild("VS2017-Win64", "buildtools2019", "Visual Studio 16 2019", "-A x64 -T v141"))
+    builds.put("VS2015-Win64", doBuild("VS2015-Win64", "buildtools2019", "Visual Studio 16 2019", "-A x64 -T v140"))
+    builds.put("VS2017-x32"  , doBuild("VS2017-x32",   "buildtools2019", "Visual Studio 16 2019", "-T v141"))
+    builds.put("VS2015-x32"  , doBuild("VS2015-x32",   "buildtools2019", "Visual Studio 16 2019", "-T v140"))
     builds.put("Ubuntu-clang", doBuild("Ubuntu-clang", "docker && linux", "Ninja"))
     builds.put("Ubuntu-gcc"  , doBuild("Ubuntu-gcc",   "docker && linux", "Ninja"))
     

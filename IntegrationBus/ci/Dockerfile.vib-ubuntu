@@ -27,7 +27,7 @@ RUN apt-get update &&\
     rm -rf /var/lib/apt/lists/*
 
 # Sphinx documentation system
-RUN pip3 install --system sphinx
+RUN pip3 install --system sphinx==3.1.2
 
 ################################################################################
 # prepare our shell overlay
