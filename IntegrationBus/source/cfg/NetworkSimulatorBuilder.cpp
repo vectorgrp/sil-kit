@@ -31,7 +31,16 @@ auto NetworkSimulatorBuilder::WithSwitches(std::initializer_list<std::string> sw
 
 auto NetworkSimulatorBuilder::Build() -> NetworkSimulator
 {
-    return std::move(_config);
+    auto builtConfig = _config;
+    _config = decltype(_config){};
+    return builtConfig;
+}
+
+auto NetworkSimulatorBuilder::WithTraceSink(std::string sinkName) -> NetworkSimulatorBuilder&
+{
+    _config.useTraceSinks.emplace_back(std::move(sinkName));
+
+    return *this;
 }
 
 } // namespace cfg

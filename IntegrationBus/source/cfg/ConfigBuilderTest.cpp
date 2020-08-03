@@ -234,6 +234,11 @@ TEST_F(ConfigBuilderTest, make_network_simulator)
 {
     std::initializer_list<std::string> links{"P0", "P1"};
     std::initializer_list<std::string> switches{"SW1", "SW2"};
+    const auto targetSimulator = ib::cfg::NetworkSimulator{
+        "BusSim",
+        links,
+        switches
+    };
 
     simulationSetup.AddParticipant("NetworkSimulator")
         .AddNetworkSimulator("BusSim")
@@ -245,12 +250,12 @@ TEST_F(ConfigBuilderTest, make_network_simulator)
     ASSERT_EQ(config.simulationSetup.participants.size(), 1u);
     auto&& participant = config.simulationSetup.participants[0];
 
-    std::vector<std::string> simulators{"BusSim"};
+    std::vector<ib::cfg::NetworkSimulator> simulators{targetSimulator};
     EXPECT_EQ(participant.networkSimulators, simulators);
 
     
-    ASSERT_EQ(config.simulationSetup.networkSimulators.size(), 1u);
-    auto&& netsim = config.simulationSetup.networkSimulators[0];
+    ASSERT_EQ(participant.networkSimulators.size(), 1u);
+    auto&& netsim = participant.networkSimulators[0];
     EXPECT_EQ(netsim.name, "BusSim");
     EXPECT_EQ(netsim.simulatedLinks, std::vector<std::string>(links));
     EXPECT_EQ(netsim.simulatedSwitches, std::vector<std::string>(switches));

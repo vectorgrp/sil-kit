@@ -26,7 +26,6 @@ public:
 
     IntegrationBusAPI auto AddParticipant(std::string name) -> ParticipantBuilder&;
     IntegrationBusAPI auto AddSwitch(std::string name) -> SwitchBuilder&;
-    IntegrationBusAPI auto AddNetworkSimulator(std::string name) -> NetworkSimulatorBuilder&;
 
     IntegrationBusAPI auto AddOrGetLink(Link::Type linkType, const std::string& name) -> LinkBuilder&;
 
@@ -41,7 +40,6 @@ private:
 
     std::vector<std::unique_ptr<ParticipantBuilder>> _participants;
     std::vector<std::unique_ptr<SwitchBuilder>> _switches;
-    std::vector<std::unique_ptr<NetworkSimulatorBuilder>> _networkSimulators;
 
     std::vector<std::unique_ptr<LinkBuilder>> _links;
 

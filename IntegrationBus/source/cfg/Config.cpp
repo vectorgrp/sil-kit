@@ -356,7 +356,9 @@ bool operator==(const NetworkSimulator& lhs, const NetworkSimulator& rhs)
 {
     return lhs.name == rhs.name
         && lhs.simulatedLinks == rhs.simulatedLinks
-        && lhs.simulatedSwitches == rhs.simulatedSwitches;
+        && lhs.simulatedSwitches == rhs.simulatedSwitches
+        && lhs.useTraceSinks == rhs.useTraceSinks
+        ;
 }
 
 bool operator==(const Switch::Port& lhs, const Switch::Port& rhs)
@@ -382,7 +384,6 @@ bool operator==(const SimulationSetup& lhs, const SimulationSetup& rhs)
 {
     return lhs.participants == rhs.participants
         && lhs.links == rhs.links
-        && lhs.networkSimulators == rhs.networkSimulators
         && lhs.switches == rhs.switches
         && lhs.timeSync == rhs.timeSync;
 }

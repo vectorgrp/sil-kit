@@ -1028,7 +1028,7 @@ auto to_json(const Participant& participant) -> json11::Json
         {"LinControllers", to_json(participant.linControllers)},
         {"EthernetControllers", to_json(participant.ethernetControllers)},
         {"FlexRayControllers", to_json(participant.flexrayControllers)},
-        {"NetworkSimulators", participant.networkSimulators},
+        {"NetworkSimulators", to_json(participant.networkSimulators)},
         {"Analog-In", makePortList(participant.analogIoPorts, PortDirection::In)},
         {"Digital-In", makePortList(participant.digitalIoPorts, PortDirection::In)},
         {"Pwm-In", makePortList(participant.pwmPorts, PortDirection::In)},
@@ -1160,7 +1160,7 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
     participant.linControllers = from_json<std::vector<LinController>>(json["LinControllers"].array_items());
     participant.ethernetControllers = from_json<std::vector<EthernetController>>(json["EthernetControllers"].array_items());
     participant.flexrayControllers = from_json<std::vector<FlexrayController>>(json["FlexRayControllers"].array_items());
-    participant.networkSimulators = from_json<std::vector<std::string>>(json["NetworkSimulators"].array_items());
+    participant.networkSimulators = from_json<std::vector<NetworkSimulator>>(json["NetworkSimulators"].array_items());
 
     // Configure Output Ports
     participant.digitalIoPorts = from_json<std::vector<DigitalIoPort>>(json["Digital-Out"].array_items());
@@ -1240,21 +1240,35 @@ auto from_json<Link>(const json11::Json& json) -> Link
 
 auto to_json(const NetworkSimulator& networkSimulator) -> json11::Json
 {
-    return json11::Json::object{
+    auto json = json11::Json::object{
         { "Name", networkSimulator.name },
         { "SimulatedLinks", networkSimulator.simulatedLinks },
-        { "SimulatedSwitches", networkSimulator.simulatedSwitches }
+        { "SimulatedSwitches", networkSimulator.simulatedSwitches },
     };
+    if (networkSimulator.useTraceSinks.size() > 0)
+    {
+        json["UseTraceSinks"] = networkSimulator.useTraceSinks;
+    }
+    return json;
 }
 
 template <>
 auto from_json<NetworkSimulator>(const json11::Json& json) -> NetworkSimulator
 {
     NetworkSimulator simulator;
-
-    simulator.name = json["Name"].string_value();
-    simulator.simulatedLinks = from_json<std::vector<std::string>>(json["SimulatedLinks"].array_items());
-    simulator.simulatedSwitches = from_json<std::vector<std::string>>(json["SimulatedSwitches"].array_items());
+    //Legacy NetworkSimulator is a list of strings, with a separate definition
+    // block in the SimulationSetup config
+    if (json.is_string())
+    {
+        simulator.name = json.string_value();
+    }
+    else
+    {
+        simulator.name = json["Name"].string_value();
+        simulator.simulatedLinks = from_json<std::vector<std::string>>(json["SimulatedLinks"].array_items());
+        simulator.simulatedSwitches = from_json<std::vector<std::string>>(json["SimulatedSwitches"].array_items());
+        optional_from_json(simulator.useTraceSinks, json, "UseTraceSinks");
+    }
     return simulator;
 }
 
@@ -1309,7 +1323,6 @@ auto to_json(const SimulationSetup& simulationSetup) -> json11::Json
         {"Participants", to_json(simulationSetup.participants)},
         {"Switches", to_json(simulationSetup.switches)},
         {"Links", to_json(simulationSetup.links)},
-        {"NetworkSimulators", to_json(simulationSetup.networkSimulators)},
         {"TimeSync", to_json(simulationSetup.timeSync)}
     };
 }
@@ -1321,9 +1334,42 @@ auto from_json<SimulationSetup>(const json11::Json& json) -> SimulationSetup
     simulationSetup.participants = from_json<std::vector<Participant>>(json["Participants"].array_items());
     simulationSetup.switches = from_json<std::vector<Switch>>(json["Switches"].array_items());
     simulationSetup.links = from_json<std::vector<Link>>(json["Links"].array_items());
-    simulationSetup.networkSimulators = from_json<std::vector<NetworkSimulator>>(json["NetworkSimulators"].array_items());
     simulationSetup.timeSync = from_json<TimeSync>(json["TimeSync"]);
 
+    // Legacy NetworkSimulator configuration:
+    // The NetworkSimulators config was located in the SimulationSetup config.
+    // It now resides in the Participant config.
+    // We'll handle the legacy case as follows:
+    // if there is a NetworkSimulators block, move the definition to a participant
+    // which declares the use of this network simulator.
+
+    auto findNetSimUser = [&](const auto& name) -> Participant* {
+        for (auto& participant : simulationSetup.participants)
+        {
+            for (const auto& usedNetSim : participant.networkSimulators)
+            {
+                if (usedNetSim.name == name)
+                {
+                    return  &participant;
+                }
+            }
+        }
+        return nullptr;
+    };
+    std::vector<NetworkSimulator> netSims;
+    optional_from_json(netSims, json, "NetworkSimulators");
+    for (const auto& netSim : netSims)
+    {
+        auto* participant = findNetSimUser(netSim.name);
+        if (!participant)
+        {
+            continue;
+        }
+        // copy the definition to the participant that refers
+        // to the network simulator by name
+        participant->networkSimulators = netSims;
+
+    }
     return simulationSetup;
 }
 

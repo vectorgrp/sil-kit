@@ -57,6 +57,11 @@ auto ParticipantBuilder::Build() -> Participant
         config.traceSinks.emplace_back(sink.Build());
     }
 
+    for (auto& netSim : _networkSimulators)
+    {
+        config.networkSimulators.emplace_back(netSim.Build());
+    }
+
     return std::move(config);
 }
 
@@ -146,8 +151,8 @@ auto ParticipantBuilder::AddGenericSubscriber(std::string name) -> GenericPortBu
 
 auto ParticipantBuilder::AddNetworkSimulator(std::string name) -> NetworkSimulatorBuilder&
 {
-    config.networkSimulators.emplace_back(name);
-    return Parent()->AddNetworkSimulator(std::move(name));
+    _networkSimulators.emplace_back(name);
+    return _networkSimulators[_networkSimulators.size() - 1];
 }
 
 auto ParticipantBuilder::WithParticipantId(mw::ParticipantId id) -> ParticipantBuilder&

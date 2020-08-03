@@ -16,6 +16,7 @@
 #include "GenericPortBuilder.hpp"
 #include "LoggerBuilder.hpp"
 #include "ParticipantControllerBuilder.hpp"
+#include "NetworkSimulatorBuilder.hpp"
 #include "TraceSinkBuilder.hpp"
 
 namespace ib {
@@ -49,6 +50,7 @@ public:
     IntegrationBusAPI auto WithParticipantId(mw::ParticipantId id) -> ParticipantBuilder&;
     IntegrationBusAPI auto WithSyncType(SyncType syncType) -> ParticipantBuilder&;
     IntegrationBusAPI auto AsSyncMaster() -> ParticipantBuilder&;
+
 
     IntegrationBusAPI auto AddTraceSink(std::string name) -> TraceSinkBuilder&;
 
@@ -98,6 +100,7 @@ private:
     std::vector<GenericPortBuilder> _genericSubscribers;
 
     std::vector<TraceSinkBuilder> _traceSinks;
+    std::vector<NetworkSimulatorBuilder> _networkSimulators;
 };
 
 } // namespace cfg

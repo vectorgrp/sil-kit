@@ -18,6 +18,7 @@ public:
     IntegrationBusAPI auto WithSwitches(std::initializer_list<std::string> switches) -> NetworkSimulatorBuilder&;
 
     IntegrationBusAPI auto Build() -> NetworkSimulator;
+    IntegrationBusAPI auto WithTraceSink(std::string sinkName) -> NetworkSimulatorBuilder&;
 
 private:
     NetworkSimulator _config;

@@ -235,6 +235,15 @@ enum class SyncType
     Unsynchronized           //!< The participant does not participate in time synchronization and is not publish a participant state.
 };
 
+struct NetworkSimulator
+{
+    std::string name;
+
+    std::vector<std::string> simulatedLinks;
+    std::vector<std::string> simulatedSwitches;
+    std::vector<std::string> useTraceSinks;
+};
+
 struct ParticipantController
 {
     SyncType syncType = SyncType::Unsynchronized;
@@ -256,7 +265,7 @@ struct Participant
     std::vector<LinController> linControllers;
     std::vector<EthernetController> ethernetControllers;
     std::vector<FlexrayController> flexrayControllers;
-    std::vector<std::string> networkSimulators;
+    std::vector<NetworkSimulator> networkSimulators;
 
     std::vector<DigitalIoPort> digitalIoPorts;
     std::vector<AnalogIoPort> analogIoPorts;
@@ -286,13 +295,6 @@ struct Switch
     std::vector<Port> ports;
 };
 
-struct NetworkSimulator
-{
-    std::string name;
-
-    std::vector<std::string> simulatedLinks;
-    std::vector<std::string> simulatedSwitches;
-};
 
 struct TimeSync
 {
@@ -311,7 +313,6 @@ struct SimulationSetup
     std::vector<Participant> participants;
     std::vector<Switch> switches;
     std::vector<Link> links;
-    std::vector<NetworkSimulator> networkSimulators;
 
     TimeSync timeSync;
 };

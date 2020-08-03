@@ -787,4 +787,51 @@ TEST_F(JsonConfigTest, configure_participant_add_tracesink)
         ASSERT_EQ(cfgSinks[i].type, testTable[i].type);
     }
 }
+
+TEST_F(JsonConfigTest, configure_participant_add_networksimulator)
+{
+    simulationSetup.AddParticipant("P1")
+        .AddNetworkSimulator("NetSimOne")
+        .WithLinks({"Link1", "Link2"})
+        .WithSwitches({"NetSwitch0", "NetSwitch1"})
+        ;
+
+    BuildConfigFromJson();
+    EXPECT_EQ(config, referenceConfig);
+}
+
+TEST_F(JsonConfigTest, configure_participant_add_networksimulator_legacy)
+{
+    auto legacyConfig = ib::cfg::Config::FromJsonString(
+        R"(
+{
+    "ConfigName": "TestConfig",
+    "SimulationSetup": {
+        "Participants": [
+            {
+                "Name" : "P1",
+                "NetworkSimulators": ["NetSimOne"]
+            }
+        ],
+        "NetworkSimulators" : [
+            {
+                "Name" : "NetSimOne",
+                "SimulatedLinks": [ "Link1", "Link2"],
+                "SimulatedSwitches": ["NetSwitch0", "NetSwitch1"]
+            }
+        ]
+    }
+})");
+    
+
+    simulationSetup.AddParticipant("P1")
+        .AddNetworkSimulator("NetSimOne")
+        .WithLinks({"Link1", "Link2"})
+        .WithSwitches({"NetSwitch0", "NetSwitch1"})
+        ;
+    referenceConfig = builder.Build();
+
+    ASSERT_EQ(referenceConfig, legacyConfig);
+}
+
 } // anonymous namespace

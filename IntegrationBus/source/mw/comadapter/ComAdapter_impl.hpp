@@ -57,6 +57,19 @@ struct IsControllerMap : std::false_type {};
 template<class T, class U>
 struct IsControllerMap<std::unordered_map<EndpointId, std::unique_ptr<T>>, U> : std::is_base_of<T, U> {};
 
+
+// Helper to find the participant with the NetworkSimulator configuration block
+// which now resides in a participant configuration.
+auto FindNetworkSimulators(const cfg::SimulationSetup& simulationSetup) 
+    -> const std::vector<cfg::NetworkSimulator>*
+{
+    for (const auto& participant : simulationSetup.participants)
+    {
+        if (participant.networkSimulators.size() > 0)
+            return &participant.networkSimulators;
+    }
+    return nullptr;
+}
 } // namespace anonymous
 
 template <class IbConnectionT>
@@ -828,10 +841,8 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
     }
 
     // get_by_name throws if the current node is not configured as a network simulator.
-    for (auto&& simulatorName : _participant.networkSimulators)
+    for (const auto& simulatorConfig : _participant.networkSimulators)
     {
-        auto&& simulatorConfig = get_by_name(_config.simulationSetup.networkSimulators, simulatorName);
-
         for (auto&& linkName : simulatorConfig.simulatedLinks)
         {
             auto&& linkConfig = get_by_name(_config.simulationSetup.links, linkName);
@@ -869,6 +880,13 @@ template <class IbConnectionT>
 bool ComAdapter<IbConnectionT>::ControllerUsesNetworkSimulator(const std::string& controllerName) const
 {
     auto endpointName = _participantName + "/" + controllerName;
+    const auto* networkSimulators = FindNetworkSimulators(_config.simulationSetup);
+  
+    if (networkSimulators == nullptr)
+    {
+        // no participant with a network simulators present in config
+        return false;
+    }
 
     for (auto&& link : _config.simulationSetup.links)
     {
@@ -877,7 +895,7 @@ bool ComAdapter<IbConnectionT>::ControllerUsesNetworkSimulator(const std::string
         if (endpointIter == link.endpoints.end())
             continue;
 
-        for (auto&& simulator : _config.simulationSetup.networkSimulators)
+        for (const auto& simulator : *networkSimulators)
         {
             auto linkIter = std::find(simulator.simulatedLinks.begin(), simulator.simulatedLinks.end(), link.name);
             if (linkIter != simulator.simulatedLinks.end())
