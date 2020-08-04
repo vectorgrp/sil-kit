@@ -9,9 +9,9 @@
 
 #include "ib/sim/lin/ILinController.hpp"
 #include "ib/sim/lin/IIbToLinControllerProxy.hpp"
+#include "ib/extensions/ITraceMessageSource.hpp"
 #include "ib/mw/fwd_decl.hpp"
 
-#include "Tracing.hpp"
 
 namespace ib {
 namespace sim {
@@ -20,7 +20,7 @@ namespace lin {
 class LinControllerProxy
     : public ILinController
     , public IIbToLinControllerProxy
-    , public tracing::IControllerToTraceSink
+    , public extensions::ITraceMessageSource
 {
 public:
     // ----------------------------------------
@@ -79,7 +79,7 @@ public:
     // Public interface methods
 
     //ITraceMessageSource
-    inline void AddSink(tracing::ITraceMessageSink* sink) override;
+    inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
 private:
 //    // ----------------------------------------
@@ -108,13 +108,13 @@ private:
     std::vector<WakeupHandler>              _wakeupHandler;
     std::vector<FrameResponseUpdateHandler> _frameResponseUpdateHandler;
 
-    tracing::Tracer<Frame> _tracer;
+    extensions::Tracer _tracer;
 };
 
 //// ==================================================================
 //  Inline Implementations
 // ==================================================================
-void LinControllerProxy::AddSink(tracing::ITraceMessageSink* sink)
+void LinControllerProxy::AddSink(extensions::ITraceMessageSink* sink)
 {
     _tracer.AddSink(EndpointAddress(), *sink);
 }

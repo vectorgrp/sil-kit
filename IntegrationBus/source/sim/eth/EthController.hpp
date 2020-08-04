@@ -7,8 +7,8 @@
 #include "ib/mw/sync/ITimeConsumer.hpp"
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/cfg/Config.hpp"
+#include "ib/extensions/ITraceMessageSource.hpp"
 
-#include "Tracing.hpp"
 
 #include <memory>
 
@@ -20,7 +20,7 @@ class EthController
     : public IEthController
     , public IIbToEthController
     , public ib::mw::sync::ITimeConsumer
-    , public tracing::IControllerToTraceSink
+    , public extensions::ITraceMessageSource
 {
 public:
     // ----------------------------------------
@@ -69,8 +69,8 @@ public:
     // ib::mw::sync::ITimeConsumer
     void SetTimeProvider(ib::mw::sync::ITimeProvider*) override;
 
-    // tracing::IControllerToTraceSink
-    inline void AddSink(tracing::ITraceMessageSink* sink) override;
+    // ITraceMessageSource
+    inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
 private:
     // ----------------------------------------
@@ -103,7 +103,7 @@ private:
         CallbackVector<EthTransmitAcknowledge>
     > _callbacks;
 
-    tracing::Tracer<EthFrame> _tracer;
+    extensions::Tracer _tracer;
 
     std::vector<std::pair<EthMac, EthTxId>> _pendingAcks;
 };
@@ -116,7 +116,7 @@ auto EthController::MakeTxId() -> EthTxId
     return ++_ethTxId;
 }
 
-void EthController::AddSink(tracing::ITraceMessageSink* sink)
+void EthController::AddSink(extensions::ITraceMessageSink* sink)
 {
     _tracer.AddSink(EndpointAddress(), *sink);
 }

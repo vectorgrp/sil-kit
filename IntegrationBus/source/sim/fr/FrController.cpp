@@ -77,21 +77,21 @@ void FrController::UpdateTxBuffer(const TxBufferUpdate& update)
         throw std::runtime_error("Channel must not be None");
     case Channel::A:
         msg.channel = Channel::A;
-        _tracer.Trace(tracing::Direction::Send, msg.timestamp, msg);
+        _tracer.Trace(extensions::Direction::Send, msg.timestamp, msg);
         SendIbMessage(msg);
         break;
     case Channel::B:
         msg.channel = Channel::B;
-        _tracer.Trace(tracing::Direction::Send, msg.timestamp, msg);
+        _tracer.Trace(extensions::Direction::Send, msg.timestamp, msg);
         SendIbMessage(msg);
         break;
     case Channel::AB:
         msg.channel = Channel::A;
-        _tracer.Trace(tracing::Direction::Send, msg.timestamp, msg);
+        _tracer.Trace(extensions::Direction::Send, msg.timestamp, msg);
         SendIbMessage(msg);
 
         msg.channel = Channel::B;
-        _tracer.Trace(tracing::Direction::Send, msg.timestamp, msg);
+        _tracer.Trace(extensions::Direction::Send, msg.timestamp, msg);
         SendIbMessage(msg);
         break;
     }
@@ -207,7 +207,7 @@ void FrController::ReceiveIbMessage(mw::EndpointAddress from, const FrMessage& m
     if (from == _endpointAddr)
         return;
 
-    _tracer.Trace(tracing::Direction::Receive, msg.timestamp, msg);
+    _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg);
 
     CallHandlers(msg);
 

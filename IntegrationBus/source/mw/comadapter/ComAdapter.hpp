@@ -15,6 +15,7 @@
 #include "ib/mw/logging/ILogger.hpp"
 
 #include "ib/extensions/ITraceMessageSink.hpp"
+#include "ib/extensions/ITraceMessageSource.hpp"
 #include "Tracing.hpp"
 
 #include "IIbToLogMsgSender.hpp"
@@ -196,7 +197,7 @@ private:
     bool ControllerUsesNetworkSimulator(const std::string& controllerName) const;
    
     template<class ConfigT>
-    void AddTraceSinksToController(tracing::IControllerToTraceSink* controller, ConfigT config);
+    void AddTraceSinksToSource(extensions::ITraceMessageSource* controller, ConfigT config);
 
 private:
     // ----------------------------------------

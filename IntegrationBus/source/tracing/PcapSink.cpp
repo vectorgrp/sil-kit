@@ -1,19 +1,20 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
+#include "PcapSink.hpp"
+
 #include <string>
 #include <ctime>
 #include <sstream>
 
 #include "ib/mw/logging/ILogger.hpp"
+#include "ib/extensions/TraceMessage.hpp"
+#include "ib/extensions/string_utils.hpp"
 
-#include "PcapSink.hpp"
-#include "detail/NamedPipe.hpp"
 #include "Pcap.hpp"
-#include "string_utils.hpp"
+#include "detail/NamedPipe.hpp"
 
 namespace ib {
 namespace tracing {
-
 
 namespace {
 Pcap::GlobalHeader g_pcapGlobalHeader{};
@@ -26,7 +27,7 @@ PcapSink::PcapSink(mw::logging::ILogger* logger, std::string name)
 
 }
 
-void PcapSink::Open(tracing::SinkType outputType, const std::string& outputPath)
+void PcapSink::Open(extensions::SinkType outputType, const std::string& outputPath)
 {
     if (outputPath.empty())
     {
@@ -35,7 +36,7 @@ void PcapSink::Open(tracing::SinkType outputType, const std::string& outputPath)
 
     switch (outputType)
     {
-    case ib::tracing::SinkType::PcapFile:
+    case ib::extensions::SinkType::PcapFile:
         if (_file.is_open())
         {
             _file.close();
@@ -45,7 +46,7 @@ void PcapSink::Open(tracing::SinkType outputType, const std::string& outputPath)
                 sizeof(g_pcapGlobalHeader));
         break;
 
-    case ib::tracing::SinkType::PcapNamedPipe:
+    case ib::extensions::SinkType::PcapNamedPipe:
         _pipe = detail::NamedPipe::Create(outputPath);
         _headerWritten = false;
         _outputPath = outputPath;
@@ -79,12 +80,12 @@ void PcapSink::Close()
     }
 }
 
-void PcapSink::Trace(tracing::Direction /*unused*/,
-        const mw::EndpointAddress& /* unusued endpoind address */,
+void PcapSink::Trace(extensions::Direction /*unused*/,
+        const mw::EndpointAddress& /* unused endpoint address */,
         std::chrono::nanoseconds timestamp,
-        const TraceMessage& traceMessage)
+        const extensions::TraceMessage& traceMessage)
 {
-    if (traceMessage.Type() != TraceMessageType::EthFrame)
+    if (traceMessage.Type() != extensions::TraceMessageType::EthFrame)
     {
         std::stringstream ss;
         ss << "Error: unsupported message type: " << traceMessage;

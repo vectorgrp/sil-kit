@@ -746,7 +746,7 @@ auto ComAdapter<IbConnectionT>::GetLinkById(int16_t linkId) -> cfg::Link&
 
 template <class IbConnectionT>
 template <class ConfigT>
-void ComAdapter<IbConnectionT>::AddTraceSinksToController(tracing::IControllerToTraceSink* controller, ConfigT config)
+void ComAdapter<IbConnectionT>::AddTraceSinksToSource(extensions::ITraceMessageSource* traceSource, ConfigT config)
 {
     if (config.useTraceSinks.empty())
     {
@@ -773,7 +773,7 @@ void ComAdapter<IbConnectionT>::AddTraceSinksToController(tracing::IControllerTo
             GetLogger()->Error(ss.str());
             throw std::runtime_error(ss.str());
         }
-        controller->AddSink((*sinkIter).get());
+        traceSource->AddSink((*sinkIter).get());
     }
 }
 
@@ -784,10 +784,10 @@ auto ComAdapter<IbConnectionT>::CreateControllerForLink(const ConfigT& config, A
     auto&& linkCfg = GetLinkById(config.linkId);
     auto* controller = CreateController<ControllerT>(config.endpointId, linkCfg.name, std::forward<Arg>(arg)...);
 
-    auto* tracer = dynamic_cast<tracing::IControllerToTraceSink*>(controller);
-    if (tracer)
+    auto* traceSource = dynamic_cast<extensions::ITraceMessageSource*>(controller);
+    if (traceSource)
     {
-        AddTraceSinksToController(tracer, config);
+        AddTraceSinksToSource(traceSource, config);
     }
 
     return controller;
@@ -845,6 +845,7 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
                 {
                     auto proxyEndpoint = endpointMap.at(endpointName);
                     _ibConnection.RegisterIbService(linkName, proxyEndpoint, busSim);
+
                 }
                 catch (const std::exception& e)
                 {
@@ -852,6 +853,12 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
                     continue;
                 }
             }
+        }
+        // register each simulator as trace source
+        auto* traceSource = dynamic_cast<extensions::ITraceMessageSource*>(busSim);
+        if (traceSource)
+        {
+            AddTraceSinksToSource(traceSource, simulatorConfig);
         }
     }
 

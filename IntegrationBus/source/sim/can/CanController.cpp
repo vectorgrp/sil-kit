@@ -42,7 +42,7 @@ auto CanController::SendMessage(const CanMessage& msg) -> CanTxId
     auto msgCopy = msg;
     msgCopy.transmitId = MakeTxId();
 
-    _tracer.Trace(tracing::Direction::Send, _timeProvider->Now(), msg);
+    _tracer.Trace(extensions::Direction::Send, _timeProvider->Now(), msg);
 
     _pendingAcks.emplace_back(msgCopy.canId, msgCopy.transmitId);
 
@@ -55,7 +55,7 @@ auto CanController::SendMessage(CanMessage&& msg) -> CanTxId
     auto txId = MakeTxId();
     msg.transmitId = txId;
 
-    _tracer.Trace(tracing::Direction::Send, _timeProvider->Now(), msg);
+    _tracer.Trace(extensions::Direction::Send, _timeProvider->Now(), msg);
 
     _pendingAcks.emplace_back(msg.canId, msg.transmitId);
 
@@ -95,7 +95,7 @@ void CanController::ReceiveIbMessage(ib::mw::EndpointAddress from, const CanMess
 
     CallHandlers(msg);
 
-    _tracer.Trace(tracing::Direction::Receive, _timeProvider->Now(), msg);
+    _tracer.Trace(extensions::Direction::Receive, _timeProvider->Now(), msg);
 
     CanTransmitAcknowledge ack{msg.transmitId, msg.canId, msg.timestamp, CanTransmitStatus::Transmitted};
     _comAdapter->SendIbMessage(_endpointAddr, ack);

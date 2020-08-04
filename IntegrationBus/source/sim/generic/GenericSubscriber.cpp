@@ -51,7 +51,7 @@ void GenericSubscriber::ReceiveIbMessage(mw::EndpointAddress from, const Generic
     if (!_callback)
         return;
 
-    _tracer.Trace(tracing::Direction::Receive,
+    _tracer.Trace(extensions::Direction::Receive,
         _timeProvider->Now(),
         msg);
 

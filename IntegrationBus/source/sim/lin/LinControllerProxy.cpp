@@ -65,7 +65,7 @@ void LinControllerProxy::SendFrame(Frame frame, FrameResponseType responseType)
 void LinControllerProxy::SendFrame(Frame frame, FrameResponseType responseType, std::chrono::nanoseconds timestamp)
 {
     // VIBE-NetSim provides the timestamps, so we don't need a separate time provider.
-    _tracer.Trace(tracing::Direction::Send,  timestamp, frame);
+    _tracer.Trace(extensions::Direction::Send,  timestamp, frame);
 
     SendFrame(std::move(frame), std::move(responseType));
 }
@@ -189,7 +189,7 @@ void LinControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Tr
     if (_controllerMode == ControllerMode::Inactive)
         _logger->Warn("Inactive LinControllerProxy received a transmission.");
 
-    _tracer.Trace(tracing::Direction::Receive,  msg.timestamp, frame);
+    _tracer.Trace(extensions::Direction::Receive,  msg.timestamp, frame);
 
     // Dispatch frame to handlers
     CallEach(_frameStatusHandler, this, frame, msg.status, msg.timestamp);

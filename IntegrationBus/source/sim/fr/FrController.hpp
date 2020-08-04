@@ -8,10 +8,9 @@
 #include "ib/sim/fr/IFrController.hpp"
 #include "ib/sim/fr/IIbToFrController.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
+#include "ib/extensions/ITraceMessageSource.hpp"
 
 #include "ib/mw/fwd_decl.hpp"
-
-#include "Tracing.hpp"
 
 namespace ib {
 namespace sim {
@@ -25,7 +24,7 @@ class FrController
     : public IFrController
     , public IIbToFrController
     , public mw::sync::ITimeConsumer
-    , public tracing::IControllerToTraceSink
+    , public extensions::ITraceMessageSource
 {
 public:
     // ----------------------------------------
@@ -93,8 +92,8 @@ public:
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* timeProvider) override;
 
-    // tracing::IControllerToTraceSink
-    inline void AddSink(tracing::ITraceMessageSink* sink) override;
+    // ITraceMessageSource
+    inline void AddSink(extensions::ITraceMessageSink* sink) override;
 private:
     // ----------------------------------------
     // private data types
@@ -133,7 +132,7 @@ private:
         CallbackVector<PocStatus>
     > _callbacks;
 
-    tracing::Tracer<FrMessage> _tracer;
+    extensions::Tracer _tracer;
 
     CallbackVector<FrSymbol> _wakeupHandlers;
 };
@@ -141,7 +140,7 @@ private:
 // ==================================================================
 //  Inline Implementations
 // ==================================================================
-void FrController::AddSink(tracing::ITraceMessageSink* sink)
+void FrController::AddSink(extensions::ITraceMessageSink* sink)
 {
     _tracer.AddSink(EndpointAddress(), *sink);
 }

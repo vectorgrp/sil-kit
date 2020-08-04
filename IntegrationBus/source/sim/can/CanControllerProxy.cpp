@@ -115,7 +115,7 @@ void CanControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Ca
     if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
         return;
 
-    _tracer.Trace(tracing::Direction::Receive, msg.timestamp, msg);
+    _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg);
 
     CallHandlers(msg);
 }
@@ -130,7 +130,7 @@ void CanControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Ca
     {
         if (msg.status == CanTransmitStatus::Transmitted)
         {
-            _tracer.Trace(tracing::Direction::Send, msg.timestamp,
+            _tracer.Trace(extensions::Direction::Send, msg.timestamp,
                 transmittedMsg->second);
         }
 

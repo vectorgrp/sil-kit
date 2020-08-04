@@ -6,8 +6,7 @@
 #include "ib/sim/generic/IGenericPublisher.hpp"
 #include "ib/sim/generic/IIbToGenericPublisher.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
-
-#include "Tracing.hpp"
+#include "ib/extensions/ITraceMessageSource.hpp"
 
 #include <vector>
 
@@ -19,7 +18,7 @@ class GenericPublisher
     : public IGenericPublisher
     , public IIbToGenericPublisher
     , public mw::sync::ITimeConsumer
-    , public tracing::IControllerToTraceSink
+    , public extensions::ITraceMessageSource
 {
 public:
     // ----------------------------------------
@@ -49,8 +48,8 @@ public:
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
 
-    // tracing::IControllerToTraceSink
-    inline void AddSink(tracing::ITraceMessageSink* sink) override;
+    // ITraceMessageSource
+    inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
 private:
     //private Members
@@ -58,14 +57,14 @@ private:
     mw::IComAdapter* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddr{};
     mw::sync::ITimeProvider* _timeProvider{nullptr};
-    tracing::Tracer<GenericMessage> _tracer;
+    extensions::Tracer _tracer;
 };
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
 
-void GenericPublisher::AddSink(tracing::ITraceMessageSink* sink)
+void GenericPublisher::AddSink(extensions::ITraceMessageSink* sink)
 {
     _tracer.AddSink(EndpointAddress(), *sink);
 }

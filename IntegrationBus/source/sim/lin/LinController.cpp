@@ -46,7 +46,7 @@ inline auto ToTxFrameStatus(FrameStatus status) -> FrameStatus
     }
 }
 
-inline auto ToTracingDir(FrameStatus status) -> tracing::Direction
+inline auto ToTracingDir(FrameStatus status) -> extensions::Direction
 {
     switch (status)
     {
@@ -54,15 +54,15 @@ inline auto ToTracingDir(FrameStatus status) -> tracing::Direction
     case FrameStatus::LIN_RX_BUSY: //[[fallthrough]]
     case FrameStatus::LIN_RX_NO_RESPONSE: //[[fallthrough]]
     case FrameStatus::LIN_RX_OK: 
-        return tracing::Direction::Receive;
+        return extensions::Direction::Receive;
     case FrameStatus::LIN_TX_ERROR: //[[fallthrough]]
     case FrameStatus::LIN_TX_BUSY: //[[fallthrough]]
     case FrameStatus::LIN_TX_HEADER_ERROR: //[[fallthrough]]
     case FrameStatus::LIN_TX_OK: 
-        return tracing::Direction::Send;
+        return extensions::Direction::Send;
     default:
         //if invalid status given, failsafe to send.
-        return tracing::Direction::Send;
+        return extensions::Direction::Send;
     }
 }
 template <class CallbackRangeT, typename... Args>
@@ -312,7 +312,7 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const Transmi
             const auto msgStatus = VeriyChecksum(frame, msg.status);
             if (msgStatus == FrameStatus::LIN_RX_OK)
             {
-                _tracer.Trace(tracing::Direction::Receive, _timeProvider->Now(), frame);
+                _tracer.Trace(extensions::Direction::Receive, _timeProvider->Now(), frame);
             }
             CallHandlers(_frameStatusHandler, this, frame, msgStatus, msg.timestamp);
             break;
@@ -322,7 +322,7 @@ void LinController::ReceiveIbMessage(ib::mw::EndpointAddress from, const Transmi
             // convert the status to a TX_xxx if we sent this frame.
             if (msg.status == FrameStatus::LIN_RX_OK)
             {
-                _tracer.Trace(tracing::Direction::Send, _timeProvider->Now(), frame);
+                _tracer.Trace(extensions::Direction::Send, _timeProvider->Now(), frame);
             }
             CallHandlers(_frameStatusHandler, this, frame, ToTxFrameStatus(msg.status), msg.timestamp);
             break;

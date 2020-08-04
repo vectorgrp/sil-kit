@@ -13,8 +13,7 @@
 #include "ib/cfg/Config.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
 #include "ib/mw/IComAdapter.hpp"
-
-#include "Tracing.hpp"
+#include "ib/extensions/ITraceMessageSource.hpp"
 
 
 namespace ib {
@@ -26,7 +25,7 @@ class InPort
     : public IInPort<MsgT>
     , public IIbToInPort<MsgT>
     , public ib::mw::sync::ITimeConsumer
-    , public tracing::IControllerToTraceSink
+    , public extensions::ITraceMessageSource
 {
 public:
     // ----------------------------------------
@@ -78,8 +77,8 @@ public:
     // ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* timeProvider) override;
 
-    //IControllerToTraceSink
-    inline void AddSink(tracing::ITraceMessageSink* sink) override;
+    // ITraceMessageSource
+    inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
 private:
     // ----------------------------------------
@@ -110,7 +109,7 @@ private:
     > _callbacks;
 
     mw::sync::ITimeProvider* _timeProvider{nullptr};
-    tracing::Tracer<MsgT> _tracer;
+    extensions::Tracer _tracer;
 };
 
 // ================================================================================
@@ -161,7 +160,7 @@ void InPort<MsgT>::ReceiveIbMessage(mw::EndpointAddress from, const MessageType&
     if (from == _endpointAddr)
         return;
 
-    _tracer.Trace(tracing::Direction::Receive, _timeProvider->Now(), msg);
+    _tracer.Trace(extensions::Direction::Receive, _timeProvider->Now(), msg);
 
     _lastMessage = msg;
     CallHandlers(msg);
@@ -208,7 +207,7 @@ void InPort<MsgT>::CallHandlers(const T& t)
 }
 
 template<typename MsgT>
-void InPort<MsgT>::AddSink(tracing::ITraceMessageSink* sink)
+void InPort<MsgT>::AddSink(extensions::ITraceMessageSink* sink)
 {
     _tracer.AddSink(EndpointAddress(), *sink);
 }

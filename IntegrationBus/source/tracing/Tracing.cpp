@@ -4,52 +4,22 @@
 
 #include "ib/cfg/Config.hpp"
 #include "ib/mw/logging/ILogger.hpp"
+#include "ib/extensions/string_utils.hpp"
 
 #include "CreateMdf4Tracing.hpp"
 
 #include "PcapSink.hpp"
-#include "string_utils.hpp"
 #include "Tracing.hpp"
 
 namespace ib {
+
 namespace tracing {
 
-using namespace extensions;
-//string_utils
-std::ostream& operator<<(std::ostream& out, const TraceMessage& msg)
-{
-    return out << "TraceMessage<"<< msg.Type()  << ">";
-}
+using extensions::ITraceMessageSink;
+using extensions::SinkType;
+using extensions::TraceMessage;
+using extensions::TraceMessageType;
 
-std::string to_string(const TraceMessage& msg)
-{
-    std::stringstream ss;
-    ss << msg;
-    return ss.str();
-}
-
-std::ostream& operator<<(std::ostream& out, TraceMessageType type)
-{
-    return out << to_string(type);
-}
-
-std::string to_string(TraceMessageType type)
-{
-    switch (type)
-    {
-    case TraceMessageType::EthFrame: return "EthFrame"; 
-    case TraceMessageType::CanMessage: return "CanMessage"; 
-    case TraceMessageType::LinFrame: return "LinFrame"; 
-    case TraceMessageType::GenericMessage: return "GenericMessage"; 
-    case TraceMessageType::AnlogIoMessage: return "AnlogIoMessage"; 
-    case TraceMessageType::DigitalIoMessage: return "DigitalIoMessage"; 
-    case TraceMessageType::PatternIoMessage: return "PatternIoMessage"; 
-    case TraceMessageType::PwmIoMessage: return "PwmIoMessage";
-    case TraceMessageType::FrMessage: return "FrMessage";
-    default:
-        throw std::runtime_error("Unknown TraceMessage::Type in operator<<!");
-    }
-}
 
 
 // Tracing

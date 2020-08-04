@@ -8,9 +8,9 @@
 
 #include "ib/sim/can/ICanController.hpp"
 #include "ib/sim/can/IIbToCanControllerProxy.hpp"
+#include "ib/extensions/ITraceMessageSource.hpp"
 #include "ib/mw/fwd_decl.hpp"
 
-#include "Tracing.hpp"
 
 namespace ib {
 namespace sim {
@@ -19,7 +19,7 @@ namespace can {
 class CanControllerProxy
     : public ICanController
     , public IIbToCanControllerProxy
-    , public tracing::IControllerToTraceSink
+    , public extensions::ITraceMessageSource
 {
 public:
     // ----------------------------------------
@@ -69,7 +69,7 @@ public:
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
     //ITraceMessageSource
-    inline void AddSink(tracing::ITraceMessageSink* sink) override;
+    inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
 public:
     // ----------------------------------------
@@ -112,7 +112,7 @@ private:
         CallbackVector<CanTransmitAcknowledge>
     > _callbacks;
 
-    tracing::Tracer<CanMessage> _tracer;
+    extensions::Tracer _tracer;
     std::map<CanTxId, CanMessage> _transmittedMessages;
 };
 
@@ -124,7 +124,7 @@ auto CanControllerProxy::MakeTxId() -> CanTxId
     return ++_canTxId;
 }
 
-void CanControllerProxy::AddSink(tracing::ITraceMessageSink* sink)
+void CanControllerProxy::AddSink(extensions::ITraceMessageSink* sink)
 {
     _tracer.AddSink(EndpointAddress(), *sink);
 }

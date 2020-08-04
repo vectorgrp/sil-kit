@@ -145,7 +145,7 @@ void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const FrM
     if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
         return;
 
-    _tracer.Trace(tracing::Direction::Receive, msg.timestamp, msg);
+    _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg);
 
     CallHandlers(msg);
 }
@@ -159,7 +159,7 @@ void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const FrM
     tmp.frame = msg.frame;
     tmp.channel = msg.channel;
     tmp.timestamp = msg.timestamp;
-    _tracer.Trace(tracing::Direction::Send, msg.timestamp, tmp);
+    _tracer.Trace(extensions::Direction::Send, msg.timestamp, tmp);
 
     CallHandlers(msg);
 }

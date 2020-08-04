@@ -6,17 +6,18 @@
 #include <fstream>
 #include <memory>
 
-#include "EthFrame.hpp"
 #include "ib/mw/EndpointAddress.hpp"
+#include "ib/extensions/ITraceMessageSink.hpp"
+
+#include "EthFrame.hpp"
 #include "detail/NamedPipe.hpp"
-#include "Tracing.hpp"
 
 namespace ib {
 namespace tracing {
 
 
 class PcapSink 
-    : public ib::tracing::ITraceMessageSink
+    : public extensions::ITraceMessageSink
 {
 public:
     // ----------------------------------------
@@ -31,15 +32,15 @@ public:
     // Public methods
 
     void Open(
-        tracing::SinkType outputType,
+        extensions::SinkType outputType,
         const std::string& outputPath
     ) override;
     void Close() override;
 
-    void Trace(tracing::Direction txRx,
+    void Trace(extensions::Direction txRx,
         const mw::EndpointAddress& id,
         std::chrono::nanoseconds timestamp,
-        const TraceMessage& msg
+        const extensions::TraceMessage& msg
     ) override;
    
     auto GetLogger() const -> mw::logging::ILogger* override;

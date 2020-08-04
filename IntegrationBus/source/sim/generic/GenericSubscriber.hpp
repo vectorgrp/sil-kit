@@ -5,9 +5,9 @@
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/sim/generic/IGenericSubscriber.hpp"
 #include "ib/sim/generic/IIbToGenericSubscriber.hpp"
+#include "ib/extensions/ITraceMessageSource.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
 
-#include "Tracing.hpp"
 
 namespace ib {
 namespace sim {
@@ -17,7 +17,7 @@ class GenericSubscriber
     : public IGenericSubscriber
     , public IIbToGenericSubscriber
     , public mw::sync::ITimeConsumer
-    , public tracing::IControllerToTraceSink
+    , public extensions::ITraceMessageSource
 {
 public:
     // ----------------------------------------
@@ -48,8 +48,8 @@ public:
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
 
-    // tracing::IControllerToTraceSink
-    inline void AddSink(tracing::ITraceMessageSink* sink) override;
+    // ITraceMessageSource
+    inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
 private:
     //private Members
@@ -58,13 +58,13 @@ private:
     mw::EndpointAddress _endpointAddr{};
     CallbackT _callback;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
-    tracing::Tracer<GenericMessage> _tracer;
+    extensions::Tracer _tracer;
 };
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-void GenericSubscriber::AddSink(tracing::ITraceMessageSink* sink)
+void GenericSubscriber::AddSink(extensions::ITraceMessageSink* sink)
 {
     _tracer.AddSink(EndpointAddress(), *sink);
 }

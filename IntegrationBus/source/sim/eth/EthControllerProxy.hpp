@@ -7,10 +7,10 @@
 
 #include "ib/sim/eth/IEthController.hpp"
 #include "ib/sim/eth/IIbToEthControllerProxy.hpp"
+#include "ib/extensions/ITraceMessageSource.hpp"
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/cfg/Config.hpp"
 
-#include "Tracing.hpp"
 
 namespace ib {
 namespace sim {
@@ -20,7 +20,7 @@ namespace eth {
 class EthControllerProxy
     : public IEthController
     , public IIbToEthControllerProxy
-    , public tracing::IControllerToTraceSink
+    , public extensions::ITraceMessageSource
 {
 public:
     // ----------------------------------------
@@ -68,7 +68,7 @@ public:
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
     // ITraceMessageSource
-    inline void AddSink(tracing::ITraceMessageSink* sink) override;
+    inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
 private:
     // ----------------------------------------
@@ -104,7 +104,7 @@ private:
         CallbackVector<uint32_t>
     > _callbacks;
 
-    tracing::Tracer<EthFrame> _tracer;
+    extensions::Tracer _tracer;
     std::map<EthTxId, EthFrame> _transmittedMessages;
 };
 
@@ -116,7 +116,7 @@ auto EthControllerProxy::MakeTxId() -> EthTxId
     return ++_ethTxId;
 }
 
-void EthControllerProxy::AddSink(tracing::ITraceMessageSink* sink)
+void EthControllerProxy::AddSink(extensions::ITraceMessageSink* sink)
 {
     _tracer.AddSink(EndpointAddress(), *sink);
 }

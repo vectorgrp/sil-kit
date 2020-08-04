@@ -87,7 +87,7 @@ void EthControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const EthMes
     if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
         return;
 
-    _tracer.Trace(tracing::Direction::Receive,
+    _tracer.Trace(extensions::Direction::Receive,
         msg.timestamp, msg.ethFrame);
 
     CallHandlers(msg);
@@ -103,7 +103,7 @@ void EthControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const EthTra
     {
         if (msg.status == EthTransmitStatus::Transmitted)
         {
-            _tracer.Trace(tracing::Direction::Send, msg.timestamp, 
+            _tracer.Trace(extensions::Direction::Send, msg.timestamp, 
                 transmittedMsg->second);
         }
 

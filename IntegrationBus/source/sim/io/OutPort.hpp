@@ -11,9 +11,9 @@
 #include "ib/sim/io/IIbToOutPort.hpp"
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
+#include "ib/extensions/ITraceMessageSource.hpp"
 #include "ib/cfg/Config.hpp"
 
-#include "Tracing.hpp"
 
 namespace ib {
 namespace sim {
@@ -24,7 +24,7 @@ class OutPort
     : public IOutPort<MsgT>
     , public IIbToOutPort<MsgT>
     , public ib::mw::sync::ITimeConsumer
-    , public tracing::IControllerToTraceSink
+    , public extensions::ITraceMessageSource
 {
 public:
     // ----------------------------------------
@@ -68,8 +68,8 @@ public:
     // ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* timeProvider) override;
 
-    //IControllerToTraceSink
-    inline void AddSink(tracing::ITraceMessageSink* sink) override;
+    // ITraceMessageSource
+    inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
 private:
     // ----------------------------------------
@@ -87,7 +87,7 @@ private:
 
     ValueType _lastValue;
 
-    tracing::Tracer<MsgT> _tracer;
+    extensions::Tracer _tracer;
 };
 
 // ================================================================================
@@ -153,13 +153,13 @@ template<typename MsgT>
 template<typename T>
 void OutPort<MsgT>::SendIbMessage(T&& msg)
 {
-    _tracer.Trace(tracing::Direction::Send, _timeProvider->Now(), msg);
+    _tracer.Trace(extensions::Direction::Send, _timeProvider->Now(), msg);
 
     _comAdapter->SendIbMessage(_endpointAddr, std::forward<T>(msg));
 }
 
 template<typename MsgT>
-void OutPort<MsgT>::AddSink(tracing::ITraceMessageSink* sink)
+void OutPort<MsgT>::AddSink(extensions::ITraceMessageSink* sink)
 {
     _tracer.AddSink(EndpointAddress(), *sink);
 }

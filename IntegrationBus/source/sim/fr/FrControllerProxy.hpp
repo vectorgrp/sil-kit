@@ -4,13 +4,13 @@
 
 #include "ib/sim/fr/IFrController.hpp"
 #include "ib/sim/fr/IIbToFrControllerProxy.hpp"
+#include "ib/extensions/ITraceMessageSource.hpp"
 
 #include <tuple>
 #include <vector>
 
 #include "ib/mw/fwd_decl.hpp"
 
-#include "Tracing.hpp"
 
 namespace ib {
 namespace sim {
@@ -24,7 +24,7 @@ namespace fr {
 class FrControllerProxy
     : public IFrController
     , public IIbToFrControllerProxy
-    , public tracing::IControllerToTraceSink
+    , public extensions::ITraceMessageSource
 {
 public:
     // ----------------------------------------
@@ -95,7 +95,7 @@ public:
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
     // ITraceMessageSource
-    inline void AddSink(tracing::ITraceMessageSink* sink) override;
+    inline void AddSink(extensions::ITraceMessageSink* sink) override;
 private:
     // ----------------------------------------
     // private data types
@@ -132,7 +132,7 @@ private:
         CallbackVector<PocStatus>
     > _callbacks;
 
-    tracing::Tracer<FrMessage> _tracer;
+    extensions::Tracer _tracer;
 
     CallbackVector<FrSymbol> _wakeupHandlers;
 };
@@ -141,7 +141,7 @@ private:
 // ==================================================================
 //  Inline Implementations
 // ==================================================================
-void FrControllerProxy::AddSink(tracing::ITraceMessageSink* sink)
+void FrControllerProxy::AddSink(extensions::ITraceMessageSink* sink)
 {
     _tracer.AddSink(EndpointAddress(), *sink);
 }
