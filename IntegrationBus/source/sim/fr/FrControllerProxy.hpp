@@ -94,7 +94,7 @@ public:
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
-    // tracing::IControllerToTraceSink
+    // ITraceMessageSource
     inline void AddSink(tracing::ITraceMessageSink* sink) override;
 private:
     // ----------------------------------------

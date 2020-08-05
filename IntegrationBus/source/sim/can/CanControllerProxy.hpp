@@ -2,12 +2,13 @@
 
 #pragma once
 
+#include <tuple>
+#include <vector>
+#include <map>
+
 #include "ib/sim/can/ICanController.hpp"
 #include "ib/sim/can/IIbToCanControllerProxy.hpp"
 #include "ib/mw/fwd_decl.hpp"
-
-#include <tuple>
-#include <vector>
 
 #include "Tracing.hpp"
 
@@ -67,8 +68,8 @@ public:
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
-    //IControllerToTraceSink
-    void AddSink(tracing::ITraceMessageSink* sink) override;
+    //ITraceMessageSource
+    inline void AddSink(tracing::ITraceMessageSink* sink) override;
 
 public:
     // ----------------------------------------
@@ -112,6 +113,7 @@ private:
     > _callbacks;
 
     tracing::Tracer<CanMessage> _tracer;
+    std::map<CanTxId, CanMessage> _transmittedMessages;
 };
 
 // ================================================================================
@@ -120,6 +122,11 @@ private:
 auto CanControllerProxy::MakeTxId() -> CanTxId
 {
     return ++_canTxId;
+}
+
+void CanControllerProxy::AddSink(tracing::ITraceMessageSink* sink)
+{
+    _tracer.AddSink(EndpointAddress(), *sink);
 }
 
 } // namespace can

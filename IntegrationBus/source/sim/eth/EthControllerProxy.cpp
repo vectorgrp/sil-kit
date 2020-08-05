@@ -2,7 +2,6 @@
 
 #include "EthControllerProxy.hpp"
 
-#include "ib/mw/logging/ILogger.hpp"
 #include "ib/mw/IComAdapter.hpp"
 
 namespace ib {
@@ -40,8 +39,8 @@ auto EthControllerProxy::SendMessage(EthMessage msg) -> EthTxId
     auto txId = MakeTxId();
     msg.transmitId = txId;
 
-    _tracer.Trace(tracing::Direction::Send,
-        msg.timestamp, msg.ethFrame);
+    // we keep a copy until the transmission was acknowledged before tracing the message
+    _transmittedMessages[msg.transmitId] = msg.ethFrame;
 
     _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
 
@@ -99,6 +98,18 @@ void EthControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const EthTra
     if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
         return;
 
+    auto transmittedMsg = _transmittedMessages.find(msg.transmitId);
+    if (transmittedMsg != _transmittedMessages.end())
+    {
+        if (msg.status == EthTransmitStatus::Transmitted)
+        {
+            _tracer.Trace(tracing::Direction::Send, msg.timestamp, 
+                transmittedMsg->second);
+        }
+
+        _transmittedMessages.erase(msg.transmitId);
+    }
+
     CallHandlers(msg);
 }
 
@@ -148,10 +159,6 @@ void EthControllerProxy::CallHandlers(const MsgT& msg)
     }
 }
 
-void EthControllerProxy::AddSink(tracing::ITraceMessageSink* )
-{
-    _comAdapter->GetLogger()->Warn("EthControllerProxy does not support message tracing, yet.");
-}
 
 } // namespace eth
 } // namespace sim

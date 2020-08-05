@@ -56,11 +56,6 @@ void LinControllerProxy::SendFrame(Frame frame, FrameResponseType responseType)
         throw std::runtime_error{errorMsg};
     }
 
-
-    //FIXME - should we inherit from ITimeConsumer?  how do we get to a proper timestamp here
-    //using namespace std::chrono_literals;
-    //_tracer.Trace(tracing::Direction::Send, 123456ns, frame);
-
     SendFrameRequest sendFrame;
     sendFrame.frame = frame;
     sendFrame.responseType = responseType;
@@ -278,10 +273,6 @@ void LinControllerProxy::SendIbMessage(MsgT&& msg)
     _comAdapter->SendIbMessage(_endpointAddr, std::forward<MsgT>(msg));
 }
 
-void LinControllerProxy::AddSink(tracing::ITraceMessageSink* )
-{
-    _comAdapter->GetLogger()->Warn("LinControllerProxy does not support message tracing, yet.");
-}
 
 } // namespace lin
 } // namespace sim

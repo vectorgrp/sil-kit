@@ -2,11 +2,13 @@
 
 #pragma once
 
+#include <memory>
+#include <map>
+
 #include "ib/sim/eth/IEthController.hpp"
 #include "ib/sim/eth/IIbToEthControllerProxy.hpp"
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/cfg/Config.hpp"
-#include <memory>
 
 #include "Tracing.hpp"
 
@@ -65,8 +67,8 @@ public:
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
-    //IControllerToTraceSink
-    void AddSink(tracing::ITraceMessageSink* sink) override;
+    // ITraceMessageSource
+    inline void AddSink(tracing::ITraceMessageSink* sink) override;
 
 private:
     // ----------------------------------------
@@ -103,6 +105,7 @@ private:
     > _callbacks;
 
     tracing::Tracer<EthFrame> _tracer;
+    std::map<EthTxId, EthFrame> _transmittedMessages;
 };
 
 // ================================================================================
@@ -113,6 +116,10 @@ auto EthControllerProxy::MakeTxId() -> EthTxId
     return ++_ethTxId;
 }
 
+void EthControllerProxy::AddSink(tracing::ITraceMessageSink* sink)
+{
+    _tracer.AddSink(EndpointAddress(), *sink);
+}
 
 } // namespace eth
 } // namespace sim

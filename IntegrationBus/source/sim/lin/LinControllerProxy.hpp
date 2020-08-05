@@ -78,8 +78,8 @@ public:
     // ----------------------------------------
     // Public interface methods
 
-    //IControllerToTraceSink
-    void AddSink(tracing::ITraceMessageSink* sink) override;
+    //ITraceMessageSource
+    inline void AddSink(tracing::ITraceMessageSink* sink) override;
 
 private:
 //    // ----------------------------------------
@@ -108,9 +108,16 @@ private:
     std::vector<WakeupHandler>              _wakeupHandler;
     std::vector<FrameResponseUpdateHandler> _frameResponseUpdateHandler;
 
-    tracing::Tracer<lin::Frame> _tracer;
+    tracing::Tracer<Frame> _tracer;
 };
 
+//// ==================================================================
+//  Inline Implementations
+// ==================================================================
+void LinControllerProxy::AddSink(tracing::ITraceMessageSink* sink)
+{
+    _tracer.AddSink(EndpointAddress(), *sink);
+}
 
 } // namespace lin
 } // namespace sim
