@@ -11,10 +11,11 @@ The SimulationSetup is a mandatory section in the IbConfig.json. It configures
 all the participants of an VIB simulation and determines how the participants
 are interconnected.
 
-The SimulationSetup comprises five sections, most of which are optional. The
+The SimulationSetup comprises four sections, most of which are optional. The
 general outline is as follows:
 
    
+.. deprecated:: 3.3.0
 .. code-block:: javascript
                 
     "SimulationSetup": {
@@ -26,6 +27,24 @@ general outline is as follows:
         "Links": [ ... ],
 
         "NetworkSimulators": [ ... ],
+
+        "TimeSync": { ... }
+
+    }
+
+The NetworkSimulators configuration was moved into the participant
+configuration.
+
+.. versionchanged:: 3.3.0
+.. code-block:: javascript
+                
+    "SimulationSetup": {
+
+        "Participants": [ ... ],
+
+        "Switches": [ ... ],
+
+        "Links": [ ... ],
 
         "TimeSync": { ... }
 
@@ -150,8 +169,8 @@ This allows tracing simulation messages into binary files.
      - A list of pattern input port instances
 
        
-   * - NetworkSimulators
-     - A list of NetworkSimulator names simulated by this participant.
+   * - :ref:`NetworkSimulators<sec:cfg-network-simulators>`
+     - A list of NetworkSimulator definitions simulated by this participant.
 
 
 
@@ -759,6 +778,52 @@ The names of the participant's  pattern input port instances can be configured.
    * - Name
      - The name of the Pattern-In port
 
+
+.. _sec:cfg-network-simulators:
+
+NetworkSimulators
+-----------------
+
+The Network Simulators section of the participant allows to configure 
+which `Links`_ and `Switches`_ should be simulated by a NetworkSimulator. 
+This section is optional.
+
+.. code-block:: javascript
+
+  "NetworkSimulators": [
+      {
+          "Name": "Ethernet-Simulator",
+          "SimulatedLinks": [
+              "FS-Port0",
+              "FS-Port1",
+              ...
+          ],
+          "SimulatedSwitches": [
+              "FrontSwitch",
+              ...
+          ]
+      },
+      ...
+  ],
+
+.. list-table:: NetworkSimulator Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+   * - Name
+     - The name of the simulator
+   * - SimulatedLinks
+     - List of links that should be simulated by this network simulator.
+   * - SimulatedSwitches
+     - List of switches that should be simulated by this network simulator.
+   * - UseTraceSinks
+     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
+       this controller. Trace sinks are referred to by their name and can be used
+       by multiple controllers. (optional)
+
+
 .. _sec:cfg-switches:
 
 Switches
@@ -834,45 +899,6 @@ the components of the simulation are connected.
        that are connected to the link.
 
 
-
-.. _sec:cfg-network-simulators:
-
-NetworkSimulators
-========================================
-The Network Simulators section of the SimulationSetup allows to configure 
-which `Links`_ and `Switches`_ should be simulated by a NetworkSimulator. 
-This section is optional.
-
-.. code-block:: javascript
-
-  "NetworkSimulators": [
-      {
-          "Name": "Ethernet-Simulator",
-          "SimulatedLinks": [
-              "FS-Port0",
-              "FS-Port1",
-              ...
-          ],
-          "SimulatedSwitches": [
-              "FrontSwitch",
-              ...
-          ]
-      },
-      ...
-  ],
-
-.. list-table:: NetworkSimulator Configuration
-   :widths: 15 85
-   :header-rows: 1
-
-   * - Property Name
-     - Description
-   * - Name
-     - The name of the simulator
-   * - SimulatedLinks
-     - List of links that should be simulated by this network simulator.
-   * - SimulatedSwitches
-     - List of switches that should be simulated by this network simulator.
 
 
 

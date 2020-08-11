@@ -5,6 +5,76 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[x.y.z] - unreleased
+--------------------------------
+
+Added
+~~~~~
+- Added support for tracing bus messages on the VIBE-NetworkSimulator (AFTMAGT 277).
+- Enable tracing for GenericMessages (AFTMAGT 233).
+- Enable tracing for IoPorts (AFTMAGT 276).
+- Added support for tracing CAN/LIN/Ethernet bus messages on controller proxies (AFTMAGT 278).
+
+Changed
+~~~~~~~
+- The NetworkSimulator configuration syntax was changed. The network simulator
+  definition was moved from the SimulationSetup level, down to the participant
+  that previously only referred to the network simulator by name.
+  For backward compatibility the old configuration syntax is still supported,
+  refer to :ref:`sec:cfg-network-simulators`.
+  (AFTMAGT-277).
+
+  + old:
+    
+    .. code-block:: javascript
+
+       "SimulationSetup": {
+           "Participants": [
+                {
+                    "Name": "NetworkSimulator",
+                    "NetworkSimulators": [ "NetSim1" ]
+                }
+           ],
+           "NetworkSimulators": [
+                {
+                    "Name" : "NetSim1",
+                    "SimulatedLinks": [...]
+                }
+           ]
+        } 
+
+  + new:
+    
+    .. code-block:: javascript
+
+
+       "SimulationSetup": {
+           "Participants": [
+                {
+                    "Name": "NetworkSimulator",
+                    "NetworkSimulators": [
+                        {
+                            "Name" : "NetSim1",
+                            "SimulatedLinks": [...]
+                        }
+                    ]
+                }
+           ]
+        } 
+  + This change also affects the config builder API and ib::cfg::Config.
+
+
+
+Compatibility with 3.2.1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+- Application binary interface (ABI): No  (changes in Config)
+- Application software interface (API): No (changes in Config)
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
+
 [3.2.1] - 2020-07-23
 --------------------------------
 
