@@ -256,8 +256,8 @@ node {
     // "Name of the target" : "Name of the target", "required node label", "generator name")
     builds.put("VS2017-Win64", doBuild("VS2017-Win64", "buildtools2019", "Visual Studio 16 2019", "-A x64 -T v141"))
     builds.put("VS2015-Win64", doBuild("VS2015-Win64", "buildtools2019", "Visual Studio 16 2019", "-A x64 -T v140"))
-    builds.put("VS2017-x32"  , doBuild("VS2017-x32",   "buildtools2019", "Visual Studio 16 2019", "-T v141"))
-    builds.put("VS2015-x32"  , doBuild("VS2015-x32",   "buildtools2019", "Visual Studio 16 2019", "-T v140"))
+    builds.put("VS2017-x32"  , doBuild("VS2017-x32",   "buildtools2019", "Visual Studio 16 2019", "-A Win32 -T v141"))
+    builds.put("VS2015-x32"  , doBuild("VS2015-x32",   "buildtools2019", "Visual Studio 16 2019", "-A Win32 -T v140"))
     builds.put("Ubuntu-clang", doBuild("Ubuntu-clang", "docker && linux", "Ninja"))
     builds.put("Ubuntu-gcc"  , doBuild("Ubuntu-gcc",   "docker && linux", "Ninja"))
     
