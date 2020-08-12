@@ -5,7 +5,7 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[x.y.z] - unreleased
+[3.3.0] - 2020-08-12
 --------------------------------
 
 Added
@@ -67,7 +67,8 @@ Changed
 
 Compatibility with 3.2.1
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+The config builder API for network simulators was changed, and the struct
+ib::cfg::Config was also modified.
 
 - Application binary interface (ABI): No  (changes in Config)
 - Application software interface (API): No (changes in Config)
