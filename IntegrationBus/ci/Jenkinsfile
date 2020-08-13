@@ -248,8 +248,8 @@ def doBuild(buildName, buildAgent, buildTool, extraArgs="") {
 node {
     // pipeline settings
     properties([
-        buildDiscarder(logRotator(numToKeep: keepNumBuilds)),
-    ])    
+        buildDiscarder(logRotator(numToKeepStr: "${keepNumBuilds}")),
+    ])   
 
     def builds = [:]
 
