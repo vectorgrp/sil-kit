@@ -85,8 +85,11 @@ function(make_ib_demo executableName demoSourceFile)
 			"ARCHIVE_OUTPUT_DIRECTORY_${_build_type}" "${_DEMO_OUTPUT_DIR}")
 	endforeach()
 
+    find_package(Threads)
     target_link_libraries(${executableName}
-        PRIVATE IntegrationBus::IntegrationBus
+        PRIVATE 
+            IntegrationBus::IntegrationBus 
+            Threads::Threads
     )
     add_dependencies(Demos ${executableName})
     set(demo_list "${demo_list} ${executableName}" PARENT_SCOPE)
