@@ -3,11 +3,25 @@ configure_file("@GIT_HEAD_FILE@" ${CMAKE_CURRENT_BINARY_DIR}/git_head_file COPYO
 file(READ ${CMAKE_CURRENT_BINARY_DIR}/git_head_file GIT_HEAD LIMIT 512)
 string(REGEX MATCH "^ref: (.*)\n" GIT_HEAD_REF ${GIT_HEAD})
 
-if (GIT_HEAD_REF)
-    configure_file(
-        "${GIT_DIR}/${CMAKE_MATCH_1}"
-        ${CMAKE_CURRENT_BINARY_DIR}/git_hash_file
-        COPYONLY)
+set(linkedHeadFile "${GIT_DIR}/${CMAKE_MATCH_1}")
+
+if(GIT_HEAD_REF) 
+    if(NOT EXISTS "${linkedHeadFile}")
+        # the workspace might have a .git/packed-refs file instead of
+        # .git/refs/heads/master
+        message("-- VIB GIT Version: using ${GIT_DIR}/packed-refs")
+        file(READ ${GIT_DIR}/packed-refs packedRefs LIMIT 512)
+        string(REGEX MATCH "([abcdef0-9]+) ${CMAKE_MATCH_1}" headHash ${packedRefs})
+        file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/git_hash_file
+            CONTENT ${CMAKE_MATCH_1}
+        )
+    else()
+        message("-- VIB GIT Version: using ${linkedHeadFile}")
+        configure_file(
+            "${linkedHeadFile}"
+            ${CMAKE_CURRENT_BINARY_DIR}/git_hash_file
+            COPYONLY)
+    endif()
 else()
     configure_file(
         ${CMAKE_CURRENT_BINARY_DIR}/git_head_file
@@ -18,7 +32,7 @@ endif()
 
 file(READ ${CMAKE_CURRENT_BINARY_DIR}/git_hash_file GIT_HEAD_HASH LIMIT 512)
 string(STRIP "${GIT_HEAD_HASH}" GIT_HEAD_HASH)
-
+message(STATUS "VIB GIT Version: ${GIT_HEAD_HASH}")
 configure_file(
     version_macros.hpp.in
     ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp
