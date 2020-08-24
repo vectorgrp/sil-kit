@@ -696,6 +696,12 @@ auto from_json(const json11::Json& json) -> DigitalIoPort
     {
         port.name = jsonPort.first;
         port.initvalue = jsonPort.second.bool_value();
+
+        if (json.object_items().count("UseTraceSinks"))
+        {
+            port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
+        }
+
         return port;
     }
 
@@ -746,6 +752,12 @@ auto from_json(const json11::Json& json) -> AnalogIoPort
         port.name = jsonPort.first;
         port.initvalue = jsonPort.second["value"].number_value();
         port.unit = jsonPort.second["unit"].string_value();
+
+        if (json.object_items().count("UseTraceSinks"))
+        {
+            port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
+        }
+
         return port;
     }
 
@@ -799,6 +811,12 @@ auto from_json(const json11::Json& json) -> PwmPort
 
         port.initvalue = {jsonPort.second["freq"]["value"].number_value(), jsonPort.second["duty"].number_value()};
         port.unit = jsonPort.second["freq"]["unit"].string_value();
+
+        if (json.object_items().count("UseTraceSinks"))
+        {
+            port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
+        }
+
         return port;
     }
 
@@ -845,6 +863,12 @@ auto from_json(const json11::Json& json) -> PatternPort
     {
         port.name = jsonPort.first;
         port.initvalue = hex_decode(jsonPort.second.string_value());
+
+        if (json.object_items().count("UseTraceSinks"))
+        {
+            port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
+        }
+
         return port;
     }
 

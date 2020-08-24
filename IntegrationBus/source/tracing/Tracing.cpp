@@ -46,7 +46,7 @@ auto CreateTraceMessageSinks(
         {
             //the `config' contains information about the links, which
             // will be useful when naming the MDF4 channels
-            auto sink = extensions::CreateMdf4Tracing(config, logger, sinkCfg.name);
+            auto sink = extensions::CreateMdf4Tracing(config, logger, participantConfig.name, sinkCfg.name);
             sink->Open(tracing::SinkType::Mdf4File, sinkCfg.outputPath);
             newSinks.emplace_back(std::move(sink));
             break;

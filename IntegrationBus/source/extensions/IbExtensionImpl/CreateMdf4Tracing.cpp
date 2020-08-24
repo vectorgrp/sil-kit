@@ -18,11 +18,12 @@ namespace ib { namespace extensions {
 
 auto CreateMdf4Tracing(cfg::Config config,
     ib::mw::logging::ILogger* logger,
+    const std::string& participantName,
     const std::string& sinkName)
     -> std::unique_ptr<ITraceMessageSink>
 {
     return CreateInstance<Mdf4TraceSinkFactory, ITraceMessageSink>
-        ("vibe-mdf4tracing", std::move(config), logger, sinkName);
+        ("vibe-mdf4tracing", std::move(config), logger, participantName, sinkName);
 }
 
 }//end namespace extensions

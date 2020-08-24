@@ -22,14 +22,15 @@ public:
     virtual ~Mdf4TraceSinkFactory() = default;
     virtual auto Create(cfg::Config config,
             ib::mw::logging::ILogger* logger,
-            std::string name
+            std::string participantName,
+            std::string sinkName
         )
        -> std::unique_ptr<ITraceMessageSink> = 0;
 
 };
 
 auto CreateMdf4Tracing(cfg::Config config,
-    ib::mw::logging::ILogger* logger, const std::string& sinkName)
+    ib::mw::logging::ILogger* logger, const std::string& participantName, const std::string& sinkName)
     -> std::unique_ptr<ITraceMessageSink>;
 
 }//end namespace extensions
