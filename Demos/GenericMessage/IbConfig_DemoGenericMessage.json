@@ -55,9 +55,9 @@
                     "SyncType": "DiscreteTime"
                 },
                 "GenericSubscribers": [
-                    "GroundTruth",
-                    "VehicleModelOut",
-                    "MotionTrajectory"
+                    {"Name": "GroundTruth"},
+                    {"Name": "VehicleModelOut"},
+                    {"Name": "MotionTrajectory"}
                 ]
             },
             {
@@ -109,14 +109,15 @@
                 ]
             }
         ],
-        "MiddlewareConfig": {
-            "ActiveMiddleware": "VAsio"
-        },
 
         "TimeSync": {
             "TickPeriodNs": 1000000
         }
 
+    },
+
+    "MiddlewareConfig": {
+        "ActiveMiddleware": "VAsio"
     },
 
     "LaunchConfigurations": [
@@ -253,6 +254,12 @@
             ]
         }
 
-    ]
+    ],
+    "ExtensionConfig" : {
+        "SearchPathHints": [
+            "Hint1",
+            "../hint2"
+        ]
+    }
 	
 }

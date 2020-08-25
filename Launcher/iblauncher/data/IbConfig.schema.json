@@ -1135,7 +1135,23 @@
           "additionalProperties": false,
           "required": [ "Name", "ParticipantEnvironments" ]
         }
+      },
+
+      "ExtensionConfig": {
+        "type": "object", 
+        "title": "Optional configuration for the extension loading mechanism", 
+        "properties": {
+            "SearchPathHints": {
+                "type" : "array",
+                "items": {
+                    "type": "string",
+                    "title": "filesystem path hint"
+                }
+            }
+       },
+      "additionalProperties": false
       }
+
 
     },
     "additionalProperties": false

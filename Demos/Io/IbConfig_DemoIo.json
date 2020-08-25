@@ -22,16 +22,26 @@
                     "SyncType": "DiscreteTime"
                 },
                 "Digital-Out": [
-                    { "DIO": false }
+                    { "Name": "DIO",
+                      "value": false }
                 ],
                 "Analog-Out": [
-                    { "AIO": {"value": 7.3, "unit": "V" }}
+                    { 
+                      "Name": "AIO",
+                      "value": 7.3, 
+                      "unit": "V"
+                    }
                 ],
                 "Pwm-Out": [
-                    { "PWM": { "freq": { "value": 2.5, "unit": "Hz"}, "duty": 0.4 } }
+                    { 
+                      "Name": "PWM",
+                      "freq": { "value": 2.5, "unit": "Hz"},
+                      "duty": 0.4
+                    }
                 ],
                 "Pattern-Out": [
-                    { "PATTERN": "626565702d62656570" }
+                    { "Name": "PATTERN",
+                      "value":  "626565702d62656570" }
                 ]
             },
             {
@@ -48,10 +58,10 @@
                 "ParticipantController": {
                     "SyncType": "DiscreteTime"
                 },
-                "Digital-In": [ "DIO" ],
-                "Analog-In": [ "AIO" ],
-                "Pwm-In": [ "PWM" ],
-                "Pattern-In": [ "PATTERN" ]
+                "Digital-In": [ {"Name": "DIO"} ],
+                "Analog-In": [ {"Name":"AIO"} ],
+                "Pwm-In": [ {"Name":"PWM"} ],
+                "Pattern-In": [ {"Name":"PATTERN"} ]
             },
             {
                 "Name": "SystemController",

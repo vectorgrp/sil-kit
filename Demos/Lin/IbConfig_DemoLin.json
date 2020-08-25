@@ -21,7 +21,7 @@
                     "SyncType": "DiscreteTime"
                 },
                 
-                "LinControllers": [ "LIN1" ]
+                "LinControllers": [ {"Name":"LIN1"} ]
             },
             {
                 "Name": "LinSlave",
@@ -38,7 +38,7 @@
                 "ParticipantController": {
                     "SyncType": "DiscreteTime"
                 },
-                "LinControllers": [ "LIN1" ]
+                "LinControllers": [ {"Name":"LIN1"} ]
             },
             {
                 "Name": "SystemController",

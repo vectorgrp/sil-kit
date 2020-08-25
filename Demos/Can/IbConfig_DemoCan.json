@@ -20,7 +20,7 @@
                         }
                     ]
                 },
-                "CanControllers": [ "CAN1" ]
+                "CanControllers": [ {"Name": "CAN1"} ]
             },
             {
                 "Name": "CanReader",
@@ -35,7 +35,7 @@
                 "ParticipantController": {
                     "SyncType": "DistributedTimeQuantum"
                 },
-                "CanControllers": [ "CAN1" ]
+                "CanControllers": [ {"Name": "CAN1"} ]
             },
             {
                 "Name": "SystemController",

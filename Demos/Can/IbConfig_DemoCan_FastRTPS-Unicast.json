@@ -14,7 +14,7 @@
                 "ParticipantController": {
                     "SyncType": "DiscreteTime"
                 },
-                "CanControllers": [ "CAN1" ]
+                "CanControllers": [ {"Name":"CAN1"} ]
             },
             {
                 "Name": "CanReader",
@@ -23,7 +23,7 @@
                 "ParticipantController": {
                     "SyncType": "DiscreteTime"
                 },
-                "CanControllers": [ "CAN1" ]
+                "CanControllers": [ {"Name":"CAN1"} ]
             },
             {
                 "Name": "SystemController"
