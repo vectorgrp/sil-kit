@@ -81,6 +81,9 @@ def __findLibraryOnWindowsPath():
     searchPaths = [] #[os.getcwd(), win32api.GetSystemDirectory(), win32api.GetWindowsDirectory()]
     searchPaths += os.environ['PATH'].split(os.pathsep)
     for searchPath in searchPaths:
+        searchPath = searchPath.strip()
+        if len(searchPath) == 0:
+            continue
         filePath = os.path.join(searchPath, __libName())
         if os.path.exists(filePath):
             if searchPath not in paths:
@@ -122,9 +125,11 @@ def __determineIntegrationBusPaths(verbose=True):
     if __isWindows():
         paths = __findLibraryOnWindowsPath()
         if paths:
-            # The folder where the DLL is found is where the libraries are expected, and 'IntegrationBus/lib/python/site-packages/../../../bin' is where the binaries are expected
+            # The folder where the DLL is found is where the libraries are
+            # expected so we look in the ../bin/ directory. This might be true
+            # when "." is in PATH
             __integrationBusLibraryPath = paths[0]
-            __integrationBusBinaryPath =  __relativeParentDir(__integrationBusLibraryPath, 4, __libDir())
+            __integrationBusBinaryPath =  __relativeParentDir(__integrationBusLibraryPath, 1, __libDir())
             if verbose: print("Found IntegrationBus library on the Windows PATH environment")
             # => Just warn if binary folder does not exist; Since the user is tinkering with the Windows PATH environment, we assume that
             #    variable INTEGRATIONBUS_BINPATH will not be used in the selected LaunchConfiguration.
