@@ -5,6 +5,30 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.3.1-QA] - 2020-08-27
+--------------------------------
+
+This is a Quality Assured Release.
+
+Fixed
+~~~~~
+- fixed config JSON schema and updated Demos to latest configuration syntax
+  (VIB-141).
+- allow 'UseTraceSinks' when parsing configuration files in backward-compatibility
+  mode.
+- make trace sink attachment deterministic per participant (VIB-142). This
+  changes an internal interface used to load the VIBE mdf4tracing extension.
+- fix launcher when there is a trailing separator in the environment PATH
+  variable (VIB-146).
+
+Compatibility with 3.3.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
+
 [3.3.0] - 2020-08-12
 --------------------------------
 
@@ -496,7 +520,7 @@ Compatibility with 3.0.2
 - Middleware network protocol (VAsio): Yes
 
 
-[3.0.2] - 2020-02-10
+[3.0.2-QA] - 2020-02-10
 --------------------------------
 
 This is a Quality Assured Release.
@@ -782,8 +806,11 @@ Compatibility with 1.0.0
 - Middleware network protocol (VAsio): Yes
   
 
-[1.0.0] - 2019-09-25
+[1.0.0-QA] - 2019-09-25
 --------------------------------
+
+This is a Quality Assured Release.
+
 Added
 ~~~~~
 - The logging facilities can now be configured per participant using the IB

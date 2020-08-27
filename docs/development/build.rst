@@ -19,7 +19,7 @@ As a user convenience, the cmake build system will attempt to download a git che
 
 For generating the documentation, you will require:
  - Python3
- - Sphinx  (e.g. install with *pip install sphinx*)
+ - Sphinx  (e.g. install with *pip install sphinx* version >= 3.0)
  - doxygen
 
 

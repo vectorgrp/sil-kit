@@ -254,12 +254,5 @@
             ]
         }
 
-    ],
-    "ExtensionConfig" : {
-        "SearchPathHints": [
-            "Hint1",
-            "../hint2"
-        ]
-    }
-	
+    ]
 }
