@@ -12,15 +12,18 @@ This is a Quality Assured Release.
 
 Fixed
 ~~~~~
-- fixed config JSON schema and updated Demos to latest configuration syntax
-  (VIB-141).
-- allow 'UseTraceSinks' when parsing configuration files in backward-compatibility
+- Fixed config JSON schema and updated Demos to latest configuration syntax.
+- Allow 'UseTraceSinks' when parsing configuration files in backward-compatibility
   mode.
-- make trace sink attachment deterministic per participant (VIB-142). This
+- Make trace sink attachment deterministic per participant. This
   changes an internal interface used to load the VIBE mdf4tracing extension.
-- fix launcher when there is a trailing separator in the environment PATH
-  variable (VIB-146).
+- Fix launcher when there is a trailing separator in the environment PATH
+  variable.
 
+Changed
+~~~~~~~
+- Building the documentation now requires Sphinx version >= 3.0 (cf. :doc:`../development/build`).
+  
 Compatibility with 3.3.0
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Application binary interface (ABI): Yes
