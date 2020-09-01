@@ -33,6 +33,11 @@ using namespace ib::sim::eth;
 
 using ::ib::mw::test::DummyComAdapter;
 
+auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<const EthMessage&>
+{
+    return testing::Field(&EthMessage::timestamp, timestamp);
+}
+
 class MockComAdapter : public DummyComAdapter
 {
 public:
@@ -83,14 +88,34 @@ protected:
 
 TEST_F(EthernetControllerTest, send_eth_message)
 {
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(controllerAddress, A<const EthMessage&>()))
+    const auto now = 12345ns;
+    EXPECT_CALL(comAdapter, SendIbMessage_proxy(controllerAddress, AnEthMessageWith(now)))
         .Times(1);
+
+    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
 
     EthMessage msg;
     msg.ethFrame.SetSourceMac(EthMac{ 0,0,0,0,0,0 });
+    msg.timestamp = now;
     controller.SendMessage(msg);
 }
 
+//! \brief using the new SendFrame API must invoke the TimeProvider
+TEST_F(EthernetControllerTest, send_eth_frame)
+{
+    ON_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+        .WillByDefault(testing::Return(42ns));
+
+    const auto now = 42ns;
+    EXPECT_CALL(comAdapter, SendIbMessage_proxy(controllerAddress, AnEthMessageWith(now)))
+        .Times(1);
+
+    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+
+    EthFrame ethFrame;
+    ethFrame.SetSourceMac(EthMac{ 0,0,0,0,0,0 });
+    controller.SendFrame(ethFrame);
+}
 
 /*! \brief Passing an EthMessage to an EthControllers must trigger the registered callback
  */

@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <chrono>
+
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/sync/SyncDatatypes.hpp"
 #include "ib/mw/logging/LoggingDatatypes.hpp"
@@ -16,6 +18,9 @@
 #include "ib/sim/generic/GenericMessageDatatypes.hpp"
 
 #include "TimeProvider.hpp"
+
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 #ifdef SendMessage
 #undef SendMessage
@@ -41,21 +46,27 @@ protected:
     bool ShouldLog(logging::Level) const override { return true; }
 };
 
-class DummyTimeProvider : public sync::ITimeProvider
+
+class MockTimeProvider : public sync::ITimeProvider
 {
 public:
-    auto TimeProviderName() const -> const std::string& { return _name; }
-
-    auto Now() const -> std::chrono::nanoseconds { return _time; }
-
-    void Advance()
+    struct MockTime
     {
-        _time += std::chrono::milliseconds{1};
+        MOCK_METHOD0(Now, std::chrono::nanoseconds());
+    };
+
+    //XXX gtest 1.10 has a MOCK_METHOD macro with specifiers like const, noexcept.
+    //    until then we use an auxiliary struct mockTime to get rid of "const this".
+    auto Now() const -> std::chrono::nanoseconds override
+    {
+        return mockTime.Now();
+    }
+    auto TimeProviderName() const -> const std::string& override
+    {
+        return "MockTimeProvider";
     }
 
-    std::chrono::nanoseconds _time{};
-    const std::string _name{"TestTimeProvider"};
-
+    mutable MockTime mockTime;
 };
 
 class DummyComAdapter : public IComAdapter
@@ -86,7 +97,7 @@ public:
     auto GetSystemController() -> sync::ISystemController* { return nullptr; }
     auto GetLogger() -> logging::ILogger* { return &logger; }
 
-    auto GetTimeProvider() -> decltype(auto){ return &_testTime; }
+    virtual auto GetTimeProvider() -> sync::ITimeProvider* { return &mockTimeProvider; }
 
     void RegisterCanSimulator(sim::can::IIbToCanSimulator* /*canonicalName*/) {}
     void RegisterEthSimulator(sim::eth::IIbToEthSimulator* /*canonicalName*/) {}
@@ -154,7 +165,7 @@ public:
     void FlushSendBuffers() {}
 
     DummyLogger logger;
-    DummyTimeProvider _testTime{};
+    MockTimeProvider mockTimeProvider;
 };
 
 // ================================================================================

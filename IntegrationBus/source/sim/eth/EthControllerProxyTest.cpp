@@ -34,6 +34,12 @@ using namespace ib::sim::eth;
 
 using ::ib::mw::test::DummyComAdapter;
 
+
+auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<const EthMessage&>
+{
+    return testing::Field(&EthMessage::timestamp, timestamp);
+}
+
 class MockComAdapter : public DummyComAdapter
 {
 public:
@@ -122,10 +128,14 @@ TEST_F(EthernetControllerProxyTest, keep_track_of_state)
 
 TEST_F(EthernetControllerProxyTest, send_eth_message)
 {
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(proxyAddress, A<const EthMessage&>()))
+    const auto now = 12345ns;
+    EXPECT_CALL(comAdapter, SendIbMessage_proxy(proxyAddress, AnEthMessageWith(now)))
         .Times(1);
 
+    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
+
     EthMessage msg;
+    msg.timestamp = now;
     proxy.SendMessage(msg);
 }
 
