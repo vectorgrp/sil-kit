@@ -67,6 +67,9 @@ TEST_F(OutPortTest, send_ibmessage_on_write)
     EXPECT_CALL(comAdapter, SendIbMessage(portAddress, msg))
         .Times(1);
 
+    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+        .Times(1);
+
     port.Write(msg.value, msg.timestamp);
 }
 

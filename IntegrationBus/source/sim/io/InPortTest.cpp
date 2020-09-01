@@ -84,6 +84,8 @@ TEST_F(InPortTest, trigger_callbacks_on_receive)
         .Times(1);
     EXPECT_CALL(callbacks, ReceiveValue(&port, msg.value))
         .Times(1);
+    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+        .Times(1);
 
     port.ReceiveIbMessage(otherPortAddress, msg);
 }
@@ -98,6 +100,8 @@ TEST_F(InPortTest, ignore_own_messages)
     EXPECT_CALL(callbacks, ReceiveMessage(&port, A<const MessageType&>()))
         .Times(0);
     EXPECT_CALL(callbacks, ReceiveValue(&port, A<const ValueType&>()))
+        .Times(0);
+    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
         .Times(0);
 
     port.ReceiveIbMessage(portAddress, msg);
