@@ -51,16 +51,20 @@ public:
 
 TEST(CanControllerTest, send_can_message)
 {
-    EndpointAddress controllerAddress = { 3, 8 };
-
     MockComAdapter mockComAdapter;
+
+    const EndpointAddress controllerAddress = { 3, 8 };
+
     CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
     canController.SetEndpointAddress(controllerAddress);
+
 
     CanMessage msg;
     msg.transmitId = 1;
 
     EXPECT_CALL(mockComAdapter, SendIbMessage(controllerAddress, msg))
+        .Times(1);
+    EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now())
         .Times(1);
 
     canController.SendMessage(msg);
@@ -79,9 +83,11 @@ TEST(CanControllerTest, receive_can_message)
     canController.RegisterReceiveMessageHandler(std::bind(&CanControllerCallbacks::ReceiveMessage, &callbackProvider, _1, _2));
 
     CanMessage msg;
+    msg.canId = 16;
 
     EXPECT_CALL(callbackProvider, ReceiveMessage(&canController, msg))
         .Times(1);
+    EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now()).Times(1);
 
     canController.ReceiveIbMessage(senderAddress, msg);
 }
