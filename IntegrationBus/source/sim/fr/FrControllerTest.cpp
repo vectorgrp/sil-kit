@@ -74,6 +74,10 @@ protected:
 
         referencePayload.resize(20);
         std::iota(referencePayload.begin(), referencePayload.end(), '\000');
+
+        ON_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+            .WillByDefault(testing::Return(42ns));
+
     }
 
 protected:
@@ -178,14 +182,17 @@ TEST_F(FrControllerTest, send_message)
     header.headerCrc = 90;
     header.cycleCount = 0;
 
-    FrMessage expectedMsg;
+    FrMessage expectedMsg{};
     expectedMsg.frame.header = header;
     expectedMsg.frame.payload = referencePayload;
+    expectedMsg.timestamp = comAdapter.mockTimeProvider.mockTime.Now();
 
     expectedMsg.channel = Channel::A;
     EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, expectedMsg)).Times(1);
     expectedMsg.channel = Channel::B;
     EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, expectedMsg)).Times(1);
+
+    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
 
     controller.UpdateTxBuffer(bufferUpdate);
 }
