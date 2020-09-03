@@ -9,6 +9,7 @@
 #include "ib/util/functional.hpp"
 
 #include "MockComAdapter.hpp"
+#include "MockTraceSink.hpp"
 
 #include "IoDatatypeUtils.hpp"
 
@@ -49,6 +50,7 @@ protected:
     const EndpointAddress otherPortAddress{5, 10};
 
     MockComAdapter comAdapter;
+    ib::test::MockTraceSink traceSink;
     OutPort<MessageType> port;
 };
 
@@ -82,5 +84,28 @@ TEST_F(OutPortTest, can_read_last_value)
 
     EXPECT_EQ(port.Read(), value);
 }
+
+TEST_F(OutPortTest, uses_tracing)
+{
+    using namespace ib::extensions;
+    port.AddSink(&traceSink);
+
+    MessageType msg;
+    msg.timestamp = 13ns;
+    msg.value = 17.3;
+    const auto now = 123456ns;
+
+    ON_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+        .WillByDefault(testing::Return(now));
+
+    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+        .Times(1);
+    EXPECT_CALL(traceSink,
+        Trace(Direction::Send, portAddress, now, msg))
+        .Times(1);
+
+    port.Write(msg.value, msg.timestamp);
+}
+
 
 } // anonymous namespace

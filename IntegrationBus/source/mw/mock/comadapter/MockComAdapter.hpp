@@ -63,9 +63,10 @@ public:
     }
     auto TimeProviderName() const -> const std::string& override
     {
-        return "MockTimeProvider";
+        return _name;
     }
 
+    const std::string _name = "MockTimeProvider";
     mutable MockTime mockTime;
 };
 

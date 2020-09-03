@@ -14,6 +14,7 @@
 #include "ib/util/functional.hpp"
 
 #include "LinTestUtils.hpp"
+#include "MockTraceSink.hpp"
 
 namespace {
 
@@ -53,6 +54,7 @@ protected:
     LinController controller;
     Callbacks callbacks;
     LinController::FrameStatusHandler frameStatusHandler;
+    ib::test::MockTraceSink traceSink;
 };
 
 
@@ -569,6 +571,34 @@ TEST_F(LinControllerTest, call_wakeup_handler)
     WakeupPulse wakeupPulse;
 
     controller.ReceiveIbMessage(ibAddr2, wakeupPulse);
+}
+
+
+////////////
+// Tracing
+////////////
+
+TEST_F(LinControllerTest, send_with_tracing)
+{
+    using namespace ib::extensions;
+
+    const auto now = 0x0815ns;
+    ON_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+        .WillByDefault(testing::Return(now));
+
+    controller.AddSink(&traceSink);
+
+    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    controller.Init(config);
+    Frame frame = MakeFrame(17, ChecksumModel::Enhanced);
+
+    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+        .Times(1);
+    EXPECT_CALL(traceSink,
+        Trace(Direction::Send, ibAddr1, now, frame))
+        .Times(1);
+
+    controller.SendFrame(frame, FrameResponseType::MasterResponse);
 }
 
 } // anonymous namespace

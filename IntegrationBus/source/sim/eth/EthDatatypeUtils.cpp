@@ -22,6 +22,11 @@ bool operator==(const EthMessage& lhs, const EthMessage& rhs)
         && lhs.ethFrame.RawFrame() == rhs.ethFrame.RawFrame();
 }
 
+bool operator==(const EthFrame& lhs, const EthFrame& rhs)
+{
+    return lhs.RawFrame() == rhs.RawFrame();
+}
+
 bool operator==(const EthTransmitAcknowledge& lhs, const EthTransmitAcknowledge& rhs)
 {
     return lhs.transmitId == rhs.transmitId

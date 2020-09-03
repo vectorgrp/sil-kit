@@ -11,6 +11,7 @@
 #include "ib/sim/can/string_utils.hpp"
 
 #include "MockComAdapter.hpp"
+#include "MockTraceSink.hpp"
 
 #include "CanController.hpp"
 #include "CanDatatypesUtils.hpp"
@@ -225,4 +226,43 @@ TEST(CanControllerTest, generate_ack)
     canController.ReceiveIbMessage(senderAddress, msg);
 }
 
+
+TEST(CanControllerTest, cancontroller_uses_tracing)
+{
+    using namespace ib::extensions;
+
+    ib::test::MockTraceSink traceSink;
+    test::DummyComAdapter comAdapter;
+    const std::chrono::nanoseconds now = 1337ns;
+    const EndpointAddress controllerAddress = {1,2};
+    const EndpointAddress otherAddress = {2,2};
+
+    ON_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+        .WillByDefault(testing::Return(now));
+
+
+    auto controller = CanController(&comAdapter, comAdapter.GetTimeProvider());
+    controller.SetEndpointAddress(controllerAddress);
+    controller.AddSink(&traceSink);
+
+
+    CanMessage msg{};
+
+    //Send direction
+    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+        .Times(1);
+    EXPECT_CALL(traceSink,
+        Trace(Direction::Send, controllerAddress, now, msg))
+        .Times(1);
+    controller.SendMessage(msg);
+
+    // Receive direction
+    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+        .Times(1);
+    EXPECT_CALL(traceSink,
+        Trace(Direction::Receive, controllerAddress, now, msg))
+        .Times(1);
+
+    controller.ReceiveIbMessage(otherAddress, msg);
+}
 }  // anonymous namespace

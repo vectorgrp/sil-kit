@@ -16,6 +16,7 @@
 #include "FrDatatypeUtils.hpp"
 
 #include "MockComAdapter.hpp"
+#include "MockTraceSink.hpp"
 
 namespace {
 
@@ -35,6 +36,7 @@ using namespace ib::sim;
 using namespace ib::sim::fr;
 
 using ::ib::mw::test::DummyComAdapter;
+using ::ib::test::MockTraceSink;
 
 class MockComAdapter : public DummyComAdapter
 {
@@ -87,6 +89,7 @@ protected:
     decltype(TxBufferUpdate::payload) referencePayload;
 
     MockComAdapter comAdapter;
+    MockTraceSink traceSink;
     FrController controller;
     Callbacks callbacks;
 
@@ -493,6 +496,88 @@ TEST_F(FrControllerTest, call_symbol_ack_handler)
         .Times(1);
 
     controller.ReceiveIbMessage(otherControllerAddress, ack);
+}
+
+TEST_F(FrControllerTest, send_message_with_tracing)
+{
+    using namespace ib::extensions;
+    const auto now = 42ns;
+    ON_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+        .WillByDefault(testing::Return(now));
+    // Sending a FlexRay message is triggered by UpdateTxBuffer, which requires a previous
+    // configuration of the controller, which, in turn, consists of TxBufferConfigs
+    TxBufferConfig bufferCfg;
+    bufferCfg.channels = Channel::AB;
+    bufferCfg.hasPayloadPreambleIndicator = false;
+    bufferCfg.offset = 0;
+    bufferCfg.repetition = 1;
+    bufferCfg.slotId = 17;
+    bufferCfg.headerCrc = 90;
+    bufferCfg.transmissionMode = TransmissionMode::SingleShot;
+
+    // Configure Controller
+    ControllerConfig controllerCfg;
+    controllerCfg.clusterParams = MakeValidClusterParams();
+    controllerCfg.nodeParams = MakeValidNodeParams();
+    controllerCfg.bufferConfigs.push_back(bufferCfg);
+    controller.Configure(controllerCfg);
+
+    // "Send" the FrMessage
+    TxBufferUpdate bufferUpdate;
+    bufferUpdate.payload = referencePayload;
+    bufferUpdate.payloadDataValid = true;
+    bufferUpdate.txBufferIndex = 0;
+
+    Header header;
+    header.flags = 0;
+    header.Set(Header::Flag::NFIndicator);
+    header.frameId = 17;
+    header.payloadLength = static_cast<decltype(header.payloadLength)>((referencePayload.size() + 1) / 2); // in 16bit words, rounded up
+    header.headerCrc = 90;
+    header.cycleCount = 0;
+
+    FrMessage expectedMsg{};
+    expectedMsg.frame.header = header;
+    expectedMsg.frame.payload = referencePayload;
+    expectedMsg.timestamp = comAdapter.mockTimeProvider.mockTime.Now();
+
+    //tracing is active on A and B channels
+    controller.AddSink(&traceSink);
+
+    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+
+    expectedMsg.channel = Channel::A;
+    EXPECT_CALL(traceSink,
+        Trace(Direction::Send, controllerAddress, now, expectedMsg))
+        .Times(1);
+
+    expectedMsg.channel = Channel::B;
+    EXPECT_CALL(traceSink,
+        Trace(Direction::Send, controllerAddress, now, expectedMsg))
+        .Times(1);
+
+    controller.UpdateTxBuffer(bufferUpdate);
+}
+
+TEST_F(FrControllerTest, trace_on_receive)
+{
+    using namespace ib::extensions;
+
+    FrMessage message;
+    message.timestamp = 17ns;
+    message.channel = Channel::A;
+    message.frame.header.frameId = 13;
+    message.frame.header.payloadLength = static_cast<uint8_t>(referencePayload.size() / 2);
+    message.frame.payload = referencePayload;
+
+    controller.AddSink(&traceSink);
+    // time provider is not called, the timestamp from the message is passed to trace
+    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
+    EXPECT_CALL(traceSink,
+        Trace(Direction::Receive, controllerAddress, message.timestamp, message))
+        .Times(1);
+
+    controller.ReceiveIbMessage(otherControllerAddress, message);
 }
 
 } // namespace

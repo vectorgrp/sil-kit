@@ -16,5 +16,5 @@ target_link_libraries(IbSimGenericMessage
             IbTracing
 )
 
-add_vib_test(TestGenericPublisher SOURCES GenericPublisherTest.cpp LIBS IbSimGenericMessage IbConfig IbMwMockComAdapter IbTracing)
-add_vib_test(TestGenericSubscriber SOURCES GenericSubscriberTest.cpp LIBS IbSimGenericMessage IbConfig IbMwMockComAdapter IbTracing)
+add_vib_test(TestSimGenericPublisher SOURCES GenericPublisherTest.cpp LIBS IbSimGenericMessage IbConfig IbMwMockComAdapter IbTracing)
+add_vib_test(TestSimGenericSubscriber SOURCES GenericSubscriberTest.cpp LIBS IbSimGenericMessage IbConfig IbMwMockComAdapter IbTracing)

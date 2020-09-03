@@ -13,6 +13,7 @@
 #include "ib/util/functional.hpp"
 
 #include "MockComAdapter.hpp"
+#include "MockTraceSink.hpp"
 
 #include "EthDatatypeUtils.hpp"
 
@@ -32,6 +33,7 @@ using namespace ib::sim;
 using namespace ib::sim::eth;
 
 using ::ib::mw::test::DummyComAdapter;
+using ::ib::test::MockTraceSink;
 
 auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<const EthMessage&>
 {
@@ -78,6 +80,7 @@ protected:
     const EndpointAddress controllerAddress = {3, 8};
     const EndpointAddress otherAddress = {7, 2};
 
+    MockTraceSink traceSink;
     MockComAdapter comAdapter;
     Callbacks callbacks;
 
@@ -183,4 +186,42 @@ TEST_F(EthernetControllerTest, generate_ack_on_receive_msg)
 
     controller.ReceiveIbMessage(otherAddress, msg);
 }
+
+TEST_F(EthernetControllerTest, ethcontroller_uses_tracing)
+{
+    using namespace ib::extensions;
+
+    const auto now = 1337ns;
+    ON_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+        .WillByDefault(testing::Return(now));
+
+    ib::cfg::EthernetController config{};
+    auto controller = EthController(&comAdapter, config, comAdapter.GetTimeProvider());
+    controller.SetEndpointAddress(controllerAddress);
+    controller.AddSink(&traceSink);
+
+
+    EthFrame ethFrame{};
+    ethFrame.SetDestinationMac(EthMac{1,2,3,4,5,6});
+    ethFrame.SetSourceMac(EthMac{9,8,7,6,5,4});
+
+    //Send direction
+    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+        .Times(1);
+    EXPECT_CALL(traceSink,
+        Trace(Direction::Send, controllerAddress, now, ethFrame))
+        .Times(1);
+    controller.SendFrame(ethFrame);
+
+    // Receive direction
+    EXPECT_CALL(traceSink,
+        Trace(Direction::Receive, controllerAddress, now, ethFrame))
+        .Times(1);
+
+    EthMessage ethMsg{};
+    ethMsg.ethFrame = ethFrame;
+    ethMsg.timestamp = now;
+    controller.ReceiveIbMessage(otherAddress, ethMsg);
+}
+
 } // anonymous namespace

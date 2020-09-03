@@ -25,6 +25,7 @@ target_include_directories(IbTracing
         ${CMAKE_CURRENT_LIST_DIR}/../sim/lin
     PUBLIC 
         ${CMAKE_CURRENT_LIST_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}/mock/
 )
 target_link_libraries(IbTracing
     PRIVATE IbInterface
@@ -45,4 +46,3 @@ elseif(UNIX)
 else()
     message(FATAL_ERROR "ERROR: unsupported platform for NamedPipe!")
 endif()
-

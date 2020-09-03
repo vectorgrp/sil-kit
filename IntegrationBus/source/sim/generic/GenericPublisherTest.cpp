@@ -8,6 +8,7 @@
 #include "ib/util/functional.hpp"
 
 #include "MockComAdapter.hpp"
+#include "MockTraceSink.hpp"
 
 #include "GenericMessageDatatypeUtils.hpp"
 
@@ -22,6 +23,7 @@ using namespace ib::mw;
 using namespace ib::sim::generic;
 
 using ::ib::mw::test::DummyComAdapter;
+using ::ib::test::MockTraceSink;
 
 class MockComAdapter : public DummyComAdapter
 {
@@ -63,6 +65,7 @@ protected:
     const std::vector<uint8_t> sampleData{0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u};
 
     MockComAdapter comAdapter;
+    MockTraceSink traceSink;
     GenericPublisher publisher;
 };
 
@@ -93,4 +96,23 @@ TEST_F(GenericPublisherTest, get_name_from_publisher)
 }
 
 
+TEST_F(GenericPublisherTest, publish_with_tracing)
+{
+    using namespace ib::extensions;
+
+    const auto now = 1337ns;
+    ON_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+        .WillByDefault(testing::Return(now));
+
+    publisher.AddSink(&traceSink);
+    const GenericMessage msg{sampleData};
+
+    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+        .Times(1);
+    EXPECT_CALL(traceSink,
+        Trace(Direction::Send, portAddress, now, msg))
+        .Times(1);
+
+    publisher.Publish(sampleData);
+}
 } // anonymous namespace
