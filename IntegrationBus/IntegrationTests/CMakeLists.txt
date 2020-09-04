@@ -89,26 +89,6 @@ add_vib_test(ITestIbRegistryReusage
       IbMwVAsio
 )
 
-
-add_vib_test(ITestTimeProvider
-    SOURCES
-      TimeProviderITest.cpp
-    LIBS
-      IbMwComAdapter
-      IbMwVAsio
-      ITestUtils
-)
-
-add_vib_test(ITestTracing
-    SOURCES
-      TracingITest.cpp
-    LIBS
-      IbMwComAdapter
-      IbMwVAsio
-      IbTracing
-      ITestUtils
-)
-
 # Windows specific tests
 if(WIN32)
 add_vib_test(ITestCompatibilityWithWindowsHeaders
