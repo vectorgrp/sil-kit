@@ -41,6 +41,8 @@ target_link_libraries(vib-registry
 set_target_properties(vib-registry PROPERTIES
      FOLDER "Utilities"
      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
 add_vib_test(
     TestIbRegistryLib
@@ -51,15 +53,12 @@ add_vib_test(
         IbMwComAdapter
         IntegrationBus
 )
-if(MSVC)
-    #NB OUTPUT_DIRECTORY et al are not available during configuration phase
-    get_target_property(ibBinDir IntegrationBus RUNTIME_OUTPUT_DIRECTORY)
-    set_tests_properties(TestIbRegistryLib
-        PROPERTIES
-        ENVIRONMENT "PATH=%PATH%\;${CMAKE_BINARY_DIR}/Debug\;${CMAKE_BINARY_DIR}/Release"
-        WORKING_DIRECTORY ${ibBinDir}
-    )
+set_tests_properties(TestIbRegistryLib
+    PROPERTIES
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+)
 
+if(MSVC)
     #make sure we archive the PDBs for the shared lib, too
     target_compile_options(vib-registry PUBLIC /Zi )
     set_target_properties(vib-registry

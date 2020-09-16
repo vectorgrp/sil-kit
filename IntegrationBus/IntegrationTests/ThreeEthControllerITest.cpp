@@ -1,23 +1,16 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include <chrono>
-#include <cstdlib>
-#include <thread>
-#include <future>
-
 #include <iostream>
-
-#include "CreateComAdapter.hpp"
-#include "VAsioRegistry.hpp"
 
 #include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
 
+#include "SimTestHarness.hpp"
+#include "GetTestPid.hpp"
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
-#include "GetTestPid.hpp"
 
 namespace {
 
@@ -34,6 +27,7 @@ using testing::AtLeast;
 using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
+
 
 auto MatchTxId(EthTxId transmitId) -> testing::Matcher<const EthTransmitAcknowledge&>
 {
@@ -74,119 +68,130 @@ protected:
         ibConfig = builder.Build();
     }
 
-    void Sender()
+    void SetupSender(ib::test::SimParticipant* participant)
     {
-        std::cout << " Sender init" << std::endl;
-        auto comAdapter = CreateComAdapterImpl(ibConfig, "EthWriter");
-        comAdapter->joinIbDomain(domainId);
+        std::cout << " Sender init " << participant->Name() << std::endl;
 
-        std::promise<void> threadFinishedPromise{};
-        unsigned int receiveCount{0};
-
-        auto* controller = comAdapter->CreateEthController("ETH1");
+        auto* controller = participant->ComAdapter()->CreateEthController("ETH1");
         controller->RegisterMessageAckHandler(
-            [this, &threadFinishedPromise, &receiveCount](IEthController*, const EthTransmitAcknowledge& ack) {
-            std::cout << "<- EthTransmitAck" << std::endl;
+            [this, participant](IEthController*, const EthTransmitAcknowledge& ack) {
+            std::cout << participant->Name() << " <- EthTransmitAck" << std::endl;
             callbacks.AckHandler(ack);
-            ++receiveCount;
-            if (testMessages.size() == receiveCount)
-            {
-                threadFinishedPromise.set_value();
-            }
+            numAcked++;
         });
-        for (auto&& message : testMessages)
-        {
-            EthMessage msg;
-            msg.ethFrame.SetDestinationMac(EthMac{ 0x12,0x23,0x45,0x67,0x89,0x9a });
-            msg.ethFrame.SetSourceMac(EthMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12});
-            msg.ethFrame.SetEtherType(0x8100);
-            msg.ethFrame.SetPayload(reinterpret_cast<const uint8_t*>(message.expectedData.c_str()), message.expectedData.size());
+        auto* participantController = 
+            participant->ComAdapter()->GetParticipantController();
+        participantController->SetSimulationTask(
+            [this, participant, controller](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+                if (numSent < testMessages.size())
+                {
+                    const auto& message = testMessages.at(numSent);
+                    EthMessage msg;
+                    msg.ethFrame.SetDestinationMac(EthMac{ 0x12,0x23,0x45,0x67,0x89,0x9a });
+                    msg.ethFrame.SetSourceMac(EthMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12});
+                    msg.ethFrame.SetEtherType(0x8100);
+                    msg.ethFrame.SetPayload(reinterpret_cast<const uint8_t*>(message.expectedData.c_str()), message.expectedData.size());
 
-            std::cout << "<- SendMesg" << std::endl;
+                    std::cout << participant->Name() << " -> SendMesg" << std::endl;
 
-            std::this_thread::sleep_for(100ms);
-            controller->SendMessage(std::move(msg));
-        }
-        //block until all ACK received
-        auto threadFinished = threadFinishedPromise.get_future();
-        ASSERT_EQ(threadFinished.wait_for(15s), std::future_status::ready);
+                    controller->SendMessage(std::move(msg));
+                    numSent++;
+                    std::this_thread::sleep_for(100ms);
+                }
+        });
     }
 
-    void Receiver(const std::string& participantName, const std::shared_future<void>& finishedFuture)
+    void SetupReceiver(ib::test::SimParticipant* participant)
     {
-        std::cout << " Receiver init " << participantName << std::endl;
-        auto comAdapter = CreateComAdapterImpl(ibConfig, participantName);
-        comAdapter->joinIbDomain(domainId);
-
-        unsigned int receiveCount{0};
-
-        auto* controller = comAdapter->CreateEthController("ETH1");
+        std::cout << " Receiver init " << participant->Name() << std::endl;
+        auto* controller = participant->ComAdapter()->CreateEthController("ETH1");
         controller->RegisterMessageAckHandler(
             [this](IEthController* , const EthTransmitAcknowledge& ack) {
             callbacks.AckHandler(ack);
         });
+
         controller->RegisterReceiveMessageHandler(
-            [this, &receiveCount, &participantName](IEthController* , const EthMessage& msg) {
-                if (participantName == "EthReader1")
+            [this, participant](IEthController*, const EthMessage& msg) {
+                const auto& pl = msg.ethFrame.GetPayload();
+                std::string message(pl.begin(), pl.end());
+                std::cout << participant->Name() 
+                    <<" <- received message"
+                    << ": ethframe size=" << pl.size()
+                    << ": testMessages size=" << testMessages.size()
+                    << ": receiveCount=" << numReceived
+                    << ": " << message
+                    << std::endl;
+                testMessages[numReceived].receivedData = message;
+                numReceived++;
+                if (numReceived >= testMessages.size())
                 {
-                    const auto &pl = msg.ethFrame.GetPayload();
-                    std::string message(pl.begin(), pl.end());
-                    std::cout << " <- received message on " << participantName
-                        << " ethframe size=" << pl.size()
-                        << ": testMessages size=" << testMessages.size()
-                        << ": receiveCount=" << receiveCount
-                        << ": " << message
-                        << std::endl;
-                    testMessages[receiveCount].receivedData = message;
-                    receiveCount++;
-                    if (receiveCount == testMessages.size())
-                        allReceivedPromise.set_value();
+                    participant->Stop();
                 }
-        });
-        //blocking
-        ASSERT_EQ(finishedFuture.wait_for(15s), std::future_status::ready);
-        if (participantName == "EthReader1")
-        {
-            ASSERT_EQ(receiveCount, testMessages.size());
-        }
+            });
     }
 
     void ExecuteTest()
     {
-        std::shared_future<void> finishedFuture(allReceivedPromise.get_future());
-        std::thread receiver1Thread{[this, &finishedFuture] { Receiver("EthReader1", finishedFuture); }};
-        std::thread receiver2Thread{[this, &finishedFuture] { Receiver("EthReader2", finishedFuture); }};
+        ib::test::SimTestHarness testHarness(ibConfig, domainId);
+
+        //participant setup
+        auto* ethWriter  = testHarness.GetParticipant("EthWriter");
+        auto* ethReader1 = testHarness.GetParticipant("EthReader1");
+        auto* ethReader2 = testHarness.GetParticipant("EthReader2");
+
+        SetupSender(ethWriter);
+        SetupReceiver(ethReader1);
+
+        // reader 2 simply counts the number of messages
+        auto* controller = ethReader2->ComAdapter()->CreateEthController("ETH1");
+        controller->RegisterReceiveMessageHandler(
+            [this](auto*, const auto&msg) {
+                numReceived2++;
+            }
+        );
+    
+        // run the simulation and check invariants
         for (auto index = 1u; index <= testMessages.size(); index++)
         {
             EXPECT_CALL(callbacks, AckHandler(MatchTxId(index))).Times(1);
         }
         EXPECT_CALL(callbacks, AckHandler(MatchTxId(0))).Times(0);
 
-        std::thread senderThread{[this] { Sender(); }};
 
-        senderThread.join();
-        receiver1Thread.join();
-        receiver2Thread.join();
+        EXPECT_TRUE(testHarness.Run(30s))
+            << "TestHarness Timeout occurred!"
+            << " numSent=" << numSent
+            << " numAcked=" << numAcked
+            << " numReceived=" << numReceived
+            << " numReceived2=" << numReceived2;
 
+
+        EXPECT_EQ(numAcked, numSent);
+        EXPECT_EQ(numSent, numReceived);
+        EXPECT_EQ(numSent, numReceived2);
         for (auto&& message : testMessages)
         {
             EXPECT_EQ(message.expectedData, message.receivedData);
         }
+
     }
+
+
+protected:
+    uint32_t domainId;
+    ib::cfg::Config ibConfig;
 
     struct TestMessage
     {
         std::string expectedData;
         std::string receivedData;
     };
-
-protected:
-    uint32_t domainId;
-    ib::cfg::Config ibConfig;
-
     std::vector<TestMessage> testMessages;
+    unsigned numSent{0},
+        numReceived{0},
+        numReceived2{0},
+        numAcked{0};
 
-    std::promise<void> allReceivedPromise;
     Callbacks callbacks;
 };
 
@@ -200,9 +205,6 @@ TEST_F(ThreeEthControllerITest, test_eth_ack_callbacks_fastrtps)
 TEST_F(ThreeEthControllerITest, test_eth_ack_callbacks_vasio)
 {
     ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
-
-    auto registry = std::make_unique<VAsioRegistry>(ibConfig);
-    registry->ProvideDomain(domainId);
 
     ExecuteTest();
 }
@@ -243,7 +245,6 @@ auto makeLoggingConfig() -> ib::cfg::Config
 
     return builder.Build();
 }
-
 TEST_F(ThreeEthControllerITest, test_fastrtps_logging_orthogonal)
 {
     ibConfig = makeLoggingConfig();
@@ -257,10 +258,6 @@ TEST_F(ThreeEthControllerITest, test_vasio_logging_orthogonal)
     ibConfig = makeLoggingConfig();
     ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
 
-    auto registry = std::make_unique<VAsioRegistry>(ibConfig);
-    registry->ProvideDomain(domainId);
-
     ExecuteTest();
 }
-
 } // anonymous namespace

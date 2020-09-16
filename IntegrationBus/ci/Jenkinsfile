@@ -194,17 +194,13 @@ def doBuild(buildName, buildAgent, buildTool, extraArgs="") {
             }
             stage("${buildName}: Integration Tests Release ") {
                 dir("_build_Release") {
-                    try {
-                        timeout(time: 2, unit: 'MINUTES') {
-                            ctest(
-                                installation: 'InSearchPath',
-                                arguments: "--verbose --build-config Release -R '^ITest.*'"
-                            )
-                        }
-                        junit("**/*gtestresults.xml")
-                    } catch(e) {
-                        print("WARNING: integration tests failed with: ${e}")
+                    timeout(time: 5, unit: 'MINUTES') {
+                        ctest(
+                            installation: 'InSearchPath',
+                            arguments: "--verbose --build-config Release -R '^ITest.*'"
+                        )
                     }
+                    junit("**/*gtestresults.xml")
 
                 }
             }

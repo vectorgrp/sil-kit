@@ -1,4 +1,6 @@
 # local headers as interface lib
+add_subdirectory(SimTestHarness)
+
 add_library(ITestUtils INTERFACE)
 target_include_directories(ITestUtils
     INTERFACE ${CMAKE_CURRENT_LIST_DIR})
@@ -28,8 +30,12 @@ add_vib_test(ITestThreeEthController
     SOURCES
       ThreeEthControllerITest.cpp
     LIBS
-      IbMwComAdapter
-      IbMwVAsio
+      IbSimTestHarness
+)
+
+# IbSimTestHarness requires IntegrationBus.dll and vib-regstry to be in PATH or CWD
+set_tests_properties(ITestThreeEthController PROPERTIES
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
 
 add_vib_test(ITestSocketBufferSize
