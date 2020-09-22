@@ -5,11 +5,11 @@
 #include <thread>
 #include <future>
 
-#include "CreateComAdapter.hpp"
-#include "VAsioRegistry.hpp"
 #include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
+
+#include "SimTestHarness.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -58,108 +58,83 @@ protected:
     struct Topic
     {
         std::string name;
-        std::promise<bool> testOK;
+        unsigned numUpdates{0};
+        bool testOK = false;
     };
-
+    
     template<class InPortT>
     static void SetExpectation(Topic& topic, InPortT* port, const typename InPortT::ValueType& expectedValue)
     {
         port->RegisterHandler(
             [&topic, expectedValue](InPortT* /*port*/, const typename InPortT::ValueType& data)
             {
-                EXPECT_EQ(data, expectedValue);
-                topic.testOK.set_value(data == expectedValue);
+                topic.testOK = (data == expectedValue);
+                topic.numUpdates++;
+                EXPECT_EQ(data, expectedValue) 
+                    << "Topic: " 
+                    << topic.name
+                    << " valueUpdates: " << topic.numUpdates ;
             }
         );
     }
 
+    void RunTest(ib::cfg::Middleware middleware)
+    {
+        ibConfig.middlewareConfig.activeMiddleware = middleware;
+
+        const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+        ib::test::SimTestHarness testHarness(ibConfig, domainId);
+
+
+        // set up publisher with initial values
+        auto* pubComAdapter = testHarness.GetParticipant("Sender")->ComAdapter();
+        //Creating a port will write the initial value to it
+        (void)pubComAdapter->CreateDigitalOut(topics[0].name);
+        (void)pubComAdapter->CreateDigitalOut(topics[1].name);
+        (void)pubComAdapter->CreateAnalogOut(topics[2].name);
+        (void)pubComAdapter->CreateAnalogOut(topics[3].name);
+
+        //set up expectations of initial port values on subscriber side
+        auto* receiver = testHarness.GetParticipant("Receiver");
+        auto* subComAdapter = receiver->ComAdapter();
+
+        auto* dio1 = subComAdapter->CreateDigitalIn(topics[0].name);
+        auto* dio2 = subComAdapter->CreateDigitalIn(topics[1].name);
+        auto* aio1 = subComAdapter->CreateAnalogIn(topics[2].name);
+        auto* aio2 = subComAdapter->CreateAnalogIn(topics[3].name);
+
+        SetExpectation(topics[0], dio1, true);
+        SetExpectation(topics[1], dio2, false);
+        SetExpectation(topics[2], aio1, 5.0);
+        SetExpectation(topics[3], aio2, 17.3);
+
+        subComAdapter->GetParticipantController()->SetSimulationTask(
+            [receiver, this](auto now, auto)
+            {
+                // we only need initial values, stop simulation run
+                if (now > 1ns)
+                {
+                    receiver->Stop();
+                }
+            }
+        );
+
+        EXPECT_TRUE(testHarness.Run(30s)) << "TestHarness timeout reached!";
+    }
 protected:
     ib::cfg::Config ibConfig;
 
     std::vector<Topic> topics;
 };
     
-TEST_F(IoMessageITest, receive_init_values)
+TEST_F(IoMessageITest, receive_init_values_fastrtps)
 {
-    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
-
-    auto pubComAdapter = CreateFastRtpsComAdapterImpl(ibConfig, "Sender");
-    pubComAdapter->joinIbDomain(domainId);
-
-    auto subComAdapter = CreateFastRtpsComAdapterImpl(ibConfig, "Receiver");
-    subComAdapter->joinIbDomain(domainId);
-
-    auto dio1 = subComAdapter->CreateDigitalIn(topics[0].name);
-    SetExpectation(topics[0], dio1, true);
-    auto dio2 = subComAdapter->CreateDigitalIn(topics[1].name);
-    SetExpectation(topics[1], dio2, false);
-    auto aio1 = subComAdapter->CreateAnalogIn(topics[2].name);
-    SetExpectation(topics[2], aio1, 5.0);
-    auto aio2 = subComAdapter->CreateAnalogIn(topics[3].name);
-    SetExpectation(topics[3], aio2, 17.3);
-
-    std::thread publishThread{
-        [this, &pubComAdapter]()
-    {
-        pubComAdapter->CreateDigitalOut(topics[0].name);
-        pubComAdapter->CreateDigitalOut(topics[1].name);
-        pubComAdapter->CreateAnalogOut(topics[2].name);
-        pubComAdapter->CreateAnalogOut(topics[3].name);
-    }};
-
-    for (auto&& topic : topics)
-    {
-        auto&& testOK = topic.testOK.get_future();
-        auto futureStatus = testOK.wait_for(5s);
-        ASSERT_EQ(futureStatus, std::future_status::ready);
-        EXPECT_TRUE(testOK.get());
-    }
-    
-    publishThread.join();
+    RunTest(ib::cfg::Middleware::FastRTPS);
 }
 
 TEST_F(IoMessageITest, receive_init_values_vasio)
 {
-    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
-
-    auto registry = std::make_unique<VAsioRegistry>(ibConfig);
-    registry->ProvideDomain(domainId);
-
-    auto pubComAdapter = CreateVAsioComAdapterImpl(ibConfig, "Sender");
-    pubComAdapter->joinIbDomain(domainId);
-
-    auto subComAdapter = CreateVAsioComAdapterImpl(ibConfig, "Receiver");
-    subComAdapter->joinIbDomain(domainId);
-
-    auto dio1 = subComAdapter->CreateDigitalIn(topics[0].name);
-    SetExpectation(topics[0], dio1, true);
-    auto dio2 = subComAdapter->CreateDigitalIn(topics[1].name);
-    SetExpectation(topics[1], dio2, false);
-    auto aio1 = subComAdapter->CreateAnalogIn(topics[2].name);
-    SetExpectation(topics[2], aio1, 5.0);
-    auto aio2 = subComAdapter->CreateAnalogIn(topics[3].name);
-    SetExpectation(topics[3], aio2, 17.3);
-
-    std::this_thread::sleep_for(500ms);
-
-    std::thread publishThread{
-        [this, &pubComAdapter]()
-    {
-        pubComAdapter->CreateDigitalOut(topics[0].name);
-        pubComAdapter->CreateDigitalOut(topics[1].name);
-        pubComAdapter->CreateAnalogOut(topics[2].name);
-        pubComAdapter->CreateAnalogOut(topics[3].name);
-    }};
-
-    for (auto&& topic : topics)
-    {
-        auto&& testOK = topic.testOK.get_future();
-        auto futureStatus = testOK.wait_for(5s);
-        ASSERT_EQ(futureStatus, std::future_status::ready);
-        EXPECT_TRUE(testOK.get());
-    }
-
-    publishThread.join();
+    RunTest(ib::cfg::Middleware::VAsio);
 }
 
 } // anonymous namespace

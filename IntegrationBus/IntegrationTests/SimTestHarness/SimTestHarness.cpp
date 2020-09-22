@@ -42,7 +42,7 @@ class SimSystemController
 {
 public:
     SimSystemController() = delete;
-    SimSystemController(const ib::cfg::Config& config, int domainId)
+    SimSystemController(const ib::cfg::Config& config, uint32_t domainId)
         : _cfg{config}
     {
         _comAdapter = 
@@ -116,7 +116,7 @@ private:
 ////////////////////////////////////////
 // SimTestHarness
 ////////////////////////////////////////
-SimTestHarness::SimTestHarness(ib::cfg::Config config, int domainId)
+SimTestHarness::SimTestHarness(ib::cfg::Config config, uint32_t domainId)
     : _config{config}
     , _domainId{domainId}
 {

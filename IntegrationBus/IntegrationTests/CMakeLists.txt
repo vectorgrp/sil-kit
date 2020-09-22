@@ -59,9 +59,14 @@ add_vib_test(ITestIoMessages
     SOURCES
       IoMessagesITest.cpp
     LIBS
-      IbMwComAdapter
-      IbMwVAsio
+        IbSimTestHarness
 )
+
+# ITestIoMessages requires IntegrationBus.dll and vib-regstry to be in PATH or CWD
+set_tests_properties(ITestIoMessages PROPERTIES
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+)
+
 
 add_vib_test(ITestCatchExceptionsInCallbacks
     SOURCES

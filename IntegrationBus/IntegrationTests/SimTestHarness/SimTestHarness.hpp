@@ -50,7 +50,7 @@ private:
 class SimTestHarness
 {
 public:
-    SimTestHarness(ib::cfg::Config config, int domainId);
+    SimTestHarness(ib::cfg::Config config, uint32_t domainId);
     ~SimTestHarness();
     //! \brief Run the simulation, return false if timeout is reached.
     bool Run(std::chrono::nanoseconds testRunTimeout = std::chrono::nanoseconds::min());
@@ -61,7 +61,7 @@ private:
     void AddParticipant(ib::cfg::Participant participantConfig);
 
     ib::cfg::Config _config;
-    const int _domainId;
+    const uint32_t _domainId;
     std::unique_ptr<SimSystemController> _simSystemController;
     std::map<std::string, std::unique_ptr<SimParticipant>> _simParticipants;
     std::unique_ptr<ib::extensions::IIbRegistry> _registry;
