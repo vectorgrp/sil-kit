@@ -22,8 +22,12 @@ add_vib_test(ITestThreeCanController
     SOURCES
       ThreeCanControllerITest.cpp
     LIBS
-      IbMwComAdapter
-      IbMwVAsio
+        IbSimTestHarness
+)
+
+# requires IntegrationBus.dll and vib-regstry to be in PATH or CWD
+set_tests_properties(ITestThreeCanController PROPERTIES
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
 
 add_vib_test(ITestThreeEthController
@@ -33,7 +37,7 @@ add_vib_test(ITestThreeEthController
       IbSimTestHarness
 )
 
-# IbSimTestHarness requires IntegrationBus.dll and vib-regstry to be in PATH or CWD
+# requires IntegrationBus.dll and vib-regstry to be in PATH or CWD
 set_tests_properties(ITestThreeEthController PROPERTIES
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
@@ -62,7 +66,7 @@ add_vib_test(ITestIoMessages
         IbSimTestHarness
 )
 
-# ITestIoMessages requires IntegrationBus.dll and vib-regstry to be in PATH or CWD
+# requires IntegrationBus.dll and vib-regstry to be in PATH or CWD
 set_tests_properties(ITestIoMessages PROPERTIES
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )

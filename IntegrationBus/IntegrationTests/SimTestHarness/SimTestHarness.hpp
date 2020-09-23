@@ -9,6 +9,7 @@
 #include <future>
 #include <chrono>
 #include <memory>
+#include <cstdint>
 
 #include "ib/IntegrationBus.hpp"
 #include "ib/cfg/Config.hpp"

@@ -82,7 +82,7 @@ protected:
         auto* participantController = 
             participant->ComAdapter()->GetParticipantController();
         participantController->SetSimulationTask(
-            [this, participant, controller](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+            [this, participant, controller](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
                 if (numSent < testMessages.size())
                 {
                     const auto& message = testMessages.at(numSent);
@@ -92,7 +92,7 @@ protected:
                     msg.ethFrame.SetEtherType(0x8100);
                     msg.ethFrame.SetPayload(reinterpret_cast<const uint8_t*>(message.expectedData.c_str()), message.expectedData.size());
 
-                    std::cout << participant->Name() << " -> SendMesg" << std::endl;
+                    std::cout << participant->Name() << " -> SendMesg @" << now.count() << "ns" << std::endl;
 
                     controller->SendMessage(std::move(msg));
                     numSent++;
@@ -145,7 +145,7 @@ protected:
         // reader 2 simply counts the number of messages
         auto* controller = ethReader2->ComAdapter()->CreateEthController("ETH1");
         controller->RegisterReceiveMessageHandler(
-            [this](auto*, const auto&msg) {
+            [this](auto, auto) {
                 numReceived2++;
             }
         );

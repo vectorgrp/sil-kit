@@ -1,21 +1,18 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include <chrono>
+#include <iostream>
 #include <cstdlib>
-#include <thread>
-#include <future>
-
-#include "CreateComAdapter.hpp"
-#include "VAsioRegistry.hpp"
 
 #include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
 
+#include "SimTestHarness.hpp"
+#include "GetTestPid.hpp"
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "GetTestPid.hpp"
 
 namespace {
 
@@ -52,8 +49,6 @@ protected:
 protected:
     ThreeCanControllerITest()
     {
-        domainId = static_cast<uint32_t>(GetTestPid());
-
         testMessages.resize(5);
         for (auto index = 0u; index < testMessages.size(); index++)
         {
@@ -77,72 +72,77 @@ protected:
         ibConfig = builder.Build();
     }
 
-    void Sender()
+    void SetupWriter(ib::test::SimParticipant* writer)
     {
-        auto comAdapter = CreateComAdapterImpl(ibConfig, "CanWriter");
-        comAdapter->joinIbDomain(domainId);
 
-        std::promise<void> threadFinishedPromise{};
-        unsigned int receiveCount{0};
-
-        auto* controller = comAdapter->CreateCanController("CAN1");
+        auto* controller = writer->ComAdapter()->CreateCanController("CAN1");
         controller->RegisterTransmitStatusHandler(
-            [this, &threadFinishedPromise, &receiveCount](ICanController* /*ctrl*/, const CanTransmitAcknowledge& ack) {
+            [this, writer](ICanController* /*ctrl*/, const CanTransmitAcknowledge& ack) {
             callbacks.AckHandler(ack);
-
-            if (testMessages.size() == ++receiveCount)
-            {
-                allReceivedPromise.set_value();
-                threadFinishedPromise.set_value();
-            }
         });
 
-        for (auto&& message : testMessages)
-        {
-            CanMessage msg;
-            msg.canId = 1;
-            msg.dataField.assign(message.expectedData.begin(), message.expectedData.end());
-            msg.dlc = msg.dataField.size();
+        auto* participantController = writer->ComAdapter()->GetParticipantController();
+        participantController->SetSimulationTask(
+            [this, controller](auto, auto)
+            {
+                if (numSent < testMessages.size())
+                {
+                    const auto& message = testMessages.at(numSent);
+                    CanMessage msg;
+                    msg.canId = 1;
+                    msg.dataField.assign(message.expectedData.begin(), message.expectedData.end());
+                    msg.dlc = msg.dataField.size();
 
-            std::this_thread::sleep_for(100ms);
-            controller->SendMessage(std::move(msg));
-        }
-
-        auto threadFinished = threadFinishedPromise.get_future();
-        ASSERT_EQ(threadFinished.wait_for(15s), std::future_status::ready);
+                    controller->SendMessage(std::move(msg));
+                    numSent++;
+                    std::this_thread::sleep_for(100ms);
+                }
+        });
     }
 
-    void Receiver(const std::string& participantName, const std::shared_future<void>& finishedFuture)
+    void SetupReader(ib::test::SimParticipant* reader)
     {
-        auto comAdapter = CreateComAdapterImpl(ibConfig, participantName);
-        comAdapter->joinIbDomain(domainId);
 
-        unsigned int receiveCount{0};
-
-        auto* controller = comAdapter->CreateCanController("CAN1");
+        auto* controller = reader->ComAdapter()->CreateCanController("CAN1");
         controller->RegisterTransmitStatusHandler(
             [this](ICanController* /*ctrl*/, const CanTransmitAcknowledge& ack) {
             callbacks.AckHandler(ack);
         });
 
         controller->RegisterReceiveMessageHandler(
-            [this, &receiveCount, &participantName](ICanController* /*ctrl*/, const CanMessage& msg) {
+            [this, reader](ICanController*, const CanMessage& msg) {
 
-            if (participantName == "CanReader1")
+            if ( reader->Name() == "CanReader1")
             {
                 std::string message(msg.dataField.begin(), msg.dataField.end());
-                testMessages[receiveCount++].receivedData = message;
+                testMessages.at(numReceived++).receivedData = message;
+                if (numReceived >= testMessages.size())
+                {
+                    reader->Stop();
+                }
+            }
+            else
+            {
+                numReceived2++;
             }
         });
-
-        ASSERT_EQ(finishedFuture.wait_for(15s), std::future_status::ready);
     }
 
-    void ExecuteTest()
+    void ExecuteTest(ib::cfg::Middleware middleware)
     {
-        std::shared_future<void> finishedFuture(allReceivedPromise.get_future());
-        std::thread receiver1Thread{[this, &finishedFuture] { Receiver("CanReader1", finishedFuture); }};
-        std::thread receiver2Thread{[this, &finishedFuture] { Receiver("CanReader2", finishedFuture); }};
+        ibConfig.middlewareConfig.activeMiddleware = middleware;
+        const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+        ib::test::SimTestHarness testHarness(ibConfig, domainId);
+
+        auto* canWriter = testHarness.GetParticipant("CanWriter");
+        SetupWriter(canWriter);
+
+        auto* canReader1 = testHarness.GetParticipant("CanReader1");
+        SetupReader(canReader1);
+
+        auto* canReader2 = testHarness.GetParticipant("CanReader2");
+        SetupReader(canReader2);
+
 
         for (auto index = 1u; index <= testMessages.size(); index++)
         {
@@ -151,16 +151,20 @@ protected:
         EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(0, 1))).Times(0);
         EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(6, 1))).Times(0);
 
-        std::thread senderThread{[this] { Sender(); }};
 
-        senderThread.join();
-        receiver1Thread.join();
-        receiver2Thread.join();
+        EXPECT_TRUE(testHarness.Run(30s)) 
+            << "TestHarness timeout occurred!"
+            << " numSent=" << numSent
+            << " numReceived=" << numReceived
+            << " numReceived2=" << numReceived2
+            ;
 
         for (auto&& message : testMessages)
         {
             EXPECT_EQ(message.expectedData, message.receivedData);
         }
+        EXPECT_EQ(numSent, numReceived);
+        EXPECT_EQ(numSent, numReceived2);
     }
 
     struct TestMessage
@@ -170,30 +174,25 @@ protected:
     };
 
 protected:
-    uint32_t domainId;
     ib::cfg::Config ibConfig;
 
     std::vector<TestMessage> testMessages;
 
-    std::promise<void> allReceivedPromise;
+    unsigned numSent{0},
+        numReceived{0},
+        numReceived2{0};
+
     Callbacks callbacks;
 };
 
 TEST_F(ThreeCanControllerITest, test_can_ack_callbacks_fastrtps)
 {
-    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::FastRTPS;
-
-    ExecuteTest();
+    ExecuteTest(ib::cfg::Middleware::FastRTPS);
 }
 
 TEST_F(ThreeCanControllerITest, test_can_ack_callbacks_vasio)
 {
-    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
-
-    auto registry = std::make_unique<VAsioRegistry>(ibConfig);
-    registry->ProvideDomain(domainId);
-
-    ExecuteTest();
+    ExecuteTest(ib::cfg::Middleware::VAsio);
 }
 
 } // anonymous namespace
