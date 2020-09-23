@@ -92,8 +92,9 @@ protected:
     std::unique_ptr<IComAdapterInternal> pubComAdapter;
     std::unique_ptr<IComAdapterInternal> subComAdapter;
 };
-    
-TEST_F(WaitForAllAckedITest, no_messages_must_be_lost)
+   
+// NB this is disabled due to flaky FastRTPS behavior
+TEST_F(WaitForAllAckedITest, DISABLED_no_messages_must_be_lost)
 {
     const uint32_t msgCount = 100;
     auto&& topic = topics[0];
@@ -146,7 +147,8 @@ TEST_F(WaitForAllAckedITest, no_messages_must_be_lost)
     publishThread.join();
 }
 
-TEST_F(WaitForAllAckedITest, messages_must_be_delivered_in_order)
+// NB this is disabled due to flaky FastRTPS behavior 
+TEST_F(WaitForAllAckedITest, DISABLED_messages_must_be_delivered_in_order)
 {
     const uint32_t msgCount = 50;
     std::mutex topicMutex;

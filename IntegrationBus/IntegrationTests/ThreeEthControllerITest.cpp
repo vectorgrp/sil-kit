@@ -195,7 +195,8 @@ protected:
     Callbacks callbacks;
 };
 
-TEST_F(ThreeEthControllerITest, test_eth_ack_callbacks_fastrtps)
+// NB this is disabled due to flaky FastRTPS behavior 
+TEST_F(ThreeEthControllerITest, DISABLED_test_eth_ack_callbacks_fastrtps)
 {
     ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::FastRTPS;
 
@@ -245,7 +246,9 @@ auto makeLoggingConfig() -> ib::cfg::Config
 
     return builder.Build();
 }
-TEST_F(ThreeEthControllerITest, test_fastrtps_logging_orthogonal)
+
+// NB this is disabled due to flaky FastRTPS behavior 
+TEST_F(ThreeEthControllerITest, DISABLED_test_fastrtps_logging_orthogonal)
 {
     ibConfig = makeLoggingConfig();
     ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::FastRTPS;

@@ -127,7 +127,8 @@ protected:
     std::vector<Topic> topics;
 };
     
-TEST_F(IoMessageITest, receive_init_values_fastrtps)
+// NB this is disabled due to flaky FastRTPS behavior 
+TEST_F(IoMessageITest, DISABLED_receive_init_values_fastrtps)
 {
     RunTest(ib::cfg::Middleware::FastRTPS);
 }
