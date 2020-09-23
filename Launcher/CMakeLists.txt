@@ -42,6 +42,7 @@ else()
     message(STATUS "Configuring the Launcher for locally installed IntegrationBus binaries and libraries")
 endif()
 
+set(INSTALLATION_SCHEMA_JSON "${CMAKE_CURRENT_SOURCE_DIR}/../IntegrationBus/source/cfg/IbConfig.schema.json")
 set(INSTALLATION_JSON_IN  "${CMAKE_CURRENT_SOURCE_DIR}/iblauncher/data/IbInstallation.json.in")
 set(INSTALLATION_JSON     "${CMAKE_CURRENT_BINARY_DIR}/iblauncher/data/IbInstallation.json")
 install(
@@ -58,10 +59,10 @@ install(
 
 # the following encodes the version number in the python module
 function(make_version_py destdir)
-	configure_file(
-		"${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
-		${destdir}
-		@ONLY)
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
+        ${destdir}
+        @ONLY)
 endfunction()
 set(VERSION_PY    "${CMAKE_CURRENT_BINARY_DIR}/iblauncher/__init__.py") 
 make_version_py(${VERSION_PY})
@@ -71,6 +72,12 @@ install(
     DIRECTORY iblauncher
     DESTINATION ${INSTALL_PYTHON_LIB_DIR}
     COMPONENT IntegrationBus-Launcher
+)
+install(
+    FILES
+        ${INSTALLATION_SCHEMA_JSON}
+    DESTINATION 
+        ${INSTALL_PYTHON_LIB_DIR}/iblauncher/data
 )
 
 #######################################################################################################################
@@ -82,31 +89,34 @@ enable_testing()
 if(PYTHONINTERP_FOUND)
     # These tests require unittest.mock which is not part of the 2.x standard distribution (there would be a backport via PyPi though)
     if(PYTHON_VERSION_MAJOR EQUAL 3 OR PYTHON_VERSION_MAJOR GREATER 3)
-		# Copy over all sources, so we can build, test and install within build folder and keep source folder clean
+        # Copy over all sources, so we can build, test and install within build folder and keep source folder clean
         set(LAUNCHER_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR}/ctest)
-		function(copy_file sourceFile)
-			configure_file(
-				"${CMAKE_CURRENT_SOURCE_DIR}/${sourceFile}"
-				"${LAUNCHER_TEST_DIR}/${sourceFile}"
-				COPYONLY
-			)
-		endfunction()
-		copy_file("IbLauncher.py")
-		copy_file("LICENSE")
-		copy_file("README.md")
-		make_version_py("${LAUNCHER_TEST_DIR}/iblauncher/__init__.py")
-		copy_file("iblauncher/Launcher.py")
-		copy_file("iblauncher/Environment.py")
-		copy_file("iblauncher/ProcessCoordinator.py")
-		copy_file("iblauncher/Configuration.py")
-		copy_file("iblauncher/modules/__init__.py")
-		copy_file("iblauncher/modules/EnvironmentCANoe.py")
-		copy_file("iblauncher/modules/EnvironmentCustomExecutable.py")
-		copy_file("iblauncher/modules/EnvironmentIbRegistry.py")
-		copy_file("iblauncher/data/IbConfig.schema.json")
-		copy_file("tests/__init__.py")
-		copy_file("tests/TestIbLauncherConfiguration.py")
-		copy_file("tests/TestIbLauncherEnvironmentCustomExecutable.py")
+        function(copy_file sourceFile)
+            configure_file(
+                "${CMAKE_CURRENT_SOURCE_DIR}/${sourceFile}"
+                "${LAUNCHER_TEST_DIR}/${sourceFile}"
+                COPYONLY
+            )
+        endfunction()
+        copy_file("IbLauncher.py")
+        copy_file("LICENSE")
+        copy_file("README.md")
+        make_version_py("${LAUNCHER_TEST_DIR}/iblauncher/__init__.py")
+        copy_file("iblauncher/Launcher.py")
+        copy_file("iblauncher/Environment.py")
+        copy_file("iblauncher/ProcessCoordinator.py")
+        copy_file("iblauncher/Configuration.py")
+        copy_file("iblauncher/modules/__init__.py")
+        copy_file("iblauncher/modules/EnvironmentCANoe.py")
+        copy_file("iblauncher/modules/EnvironmentCustomExecutable.py")
+        copy_file("iblauncher/modules/EnvironmentIbRegistry.py")
+        copy_file("tests/__init__.py")
+        copy_file("tests/TestIbLauncherConfiguration.py")
+        copy_file("tests/TestIbLauncherEnvironmentCustomExecutable.py")
+        configure_file("${INSTALLATION_SCHEMA_JSON}"
+            "${LAUNCHER_TEST_DIR}/iblauncher/data/IbConfig.schema.json"
+            COPYONLY
+        )
 
         if(NOT EXISTS ${LAUNCHER_TEST_DIR})
             message(STATUS "Copying IB launcher to build dir (for running tests)")
