@@ -5,6 +5,25 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.3.2] - 2020-09-24
+--------------------------------
+
+Changed
+~~~~~~~
+- The duplicate IbConfig schema was removed from the Launcher subdirectory.
+  There is now only one instance of IbConfig.schema.json under
+  IntegrationBus/source/cfg/.
+- Integration tests were refactored and stabilized (AFTMAGT 271).
+  Networked integration tests now use a synchronized simulation, with a new test
+  harness that simplifies test case setup.
+
+Compatibility with 3.3.1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
 [3.3.1-QA] - 2020-08-27
 --------------------------------
 
