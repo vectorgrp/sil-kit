@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 14)
 include(IntegrationBusInstall)
 
 add_executable(IbRegistry
+    SignalHandler.hpp
+    SignalHandler.cpp
     IbRegistry.cpp
 )
 
