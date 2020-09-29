@@ -99,7 +99,7 @@ protected:
     std::promise<void> allReceivedPromise;
 };
 
-TEST_F(GenericMessageITest, publish_and_subscribe_generic_messages_fastrtps)
+TEST_F(GenericMessageITest, DISABLED_publish_and_subscribe_generic_messages_fastrtps)
 {
     topics.resize(2);
     topics[0].name = "GroundTruth";
@@ -123,7 +123,7 @@ TEST_F(GenericMessageITest, publish_and_subscribe_generic_messages_fastrtps)
     }
 }
 
-TEST_F(GenericMessageITest, publish_and_subscribe_large_messages_fastrtps)
+TEST_F(GenericMessageITest, DISABLED_publish_and_subscribe_large_messages_fastrtps)
 {
     topics.resize(1);
     topics[0].name = "LargeDataBlobTopic";
