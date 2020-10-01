@@ -834,4 +834,20 @@ TEST_F(JsonConfigTest, configure_participant_add_networksimulator_legacy)
     ASSERT_EQ(referenceConfig, legacyConfig);
 }
 
+TEST_F(JsonConfigTest, configure_trace_source)
+{
+    auto&& p1 = simulationSetup.AddParticipant("P1");
+    p1.AddTraceSource("Source1")
+        .WithInputPath("TestPath")
+        .WithType(ib::cfg::TraceSource::Type::Mdf4File);
+
+    auto& p2 = simulationSetup.AddParticipant("P2");
+    p2.AddTraceSource("DifferentSource")
+        .WithInputPath("AnotherFile")
+        .WithType(ib::cfg::TraceSource::Type::PcapFile);
+
+    BuildConfigFromJson();
+    EXPECT_EQ(config, referenceConfig);
+}
+
 } // anonymous namespace

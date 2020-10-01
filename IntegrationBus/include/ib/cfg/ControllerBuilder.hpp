@@ -9,6 +9,7 @@
 #include "fwd_decl.hpp"
 #include "ParentBuilder.hpp"
 #include "ParticipantBuilder_detail.hpp"
+#include "ib/cfg/ReplayBuilder.hpp"
 
 namespace ib {
 namespace cfg {
@@ -28,7 +29,7 @@ public:
     auto WithTxBufferConfigs(const std::vector<sim::fr::TxBufferConfig>& txBufferConfigs) -> ControllerBuilder&;
 
     auto WithTraceSink(std::string sinkName) -> ControllerBuilder&;
-
+    auto WithReplay(std::string useTraceSource) -> ReplayBuilder&;
     auto operator->() -> ParticipantBuilder*;
 
     auto Build() -> ControllerCfg;

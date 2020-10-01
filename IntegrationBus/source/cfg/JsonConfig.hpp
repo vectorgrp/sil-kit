@@ -1,3 +1,5 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 #include "json11.hpp"
 #include "Config.hpp"
 
@@ -100,6 +102,12 @@ template <>
 auto from_json<TraceSink>(const json11::Json& json) -> TraceSink;
 template <>
 auto from_json<TraceSink::Type>(const json11::Json& json) -> TraceSink::Type;
+template <>
+auto from_json<TraceSource>(const json11::Json& json) -> TraceSource;
+template <>
+auto from_json<TraceSource::Type>(const json11::Json& json) -> TraceSource::Type;
+template <>
+auto from_json<Replay>(const json11::Json& json) -> Replay;
 
 auto to_json(uint16_t value) -> json11::Json;
 auto to_json(int32_t value) -> json11::Json;
@@ -136,6 +144,9 @@ auto to_json(const ExtensionConfig& config) -> json11::Json;
 auto to_json(const Config& cfg) -> json11::Json;
 auto to_json(const TraceSink& cfg) -> json11::Json;
 auto to_json(const TraceSink::Type& type) -> json11::Json;
+auto to_json(const TraceSource& cfg) -> json11::Json;
+auto to_json(const TraceSource::Type& cfg) -> json11::Json;
+auto to_json(const Replay& cfg) -> json11::Json;
 
 
 template<typename T, std::enable_if_t<is_std_vector<T>::value, int> = 0>

@@ -57,12 +57,19 @@ auto ParticipantBuilder::Build() -> Participant
         config.traceSinks.emplace_back(sink.Build());
     }
 
+    for (auto& source : _traceSources)
+    {
+        config.traceSources.emplace_back(source.Build());
+    }
+
     for (auto& netSim : _networkSimulators)
     {
         config.networkSimulators.emplace_back(netSim.Build());
     }
 
-    return std::move(config);
+    Participant copy = config;
+    config = Participant{};
+    return copy;
 }
 
 auto ParticipantBuilder::operator->() -> ParticipantBuilder*
@@ -189,6 +196,12 @@ auto ParticipantBuilder::AddTraceSink(std::string sinkName) -> TraceSinkBuilder&
 {
     _traceSinks.emplace_back(std::move(sinkName));
     return _traceSinks.back();
+}
+
+auto ParticipantBuilder::AddTraceSource(std::string sourceName) -> TraceSourceBuilder&
+{
+    _traceSources.emplace_back(std::move(sourceName));
+    return _traceSources.back();
 }
 
 auto ParticipantBuilder::MakeQualifiedName(std::string controllerName) const -> std::string

@@ -29,7 +29,7 @@ auto TraceSinkBuilder::WithType(TraceSink::Type type) -> TraceSinkBuilder&
 
 auto TraceSinkBuilder::WithOutputPath(std::string outputPath) -> TraceSinkBuilder&
 {
-	_traceSink.outputPath = outputPath;
+	_traceSink.outputPath = std::move(outputPath);
 	return *this;
 }
 

@@ -1064,6 +1064,7 @@ auto to_json(const Participant& participant) -> json11::Json
         {"GenericPublishers", to_json(participant.genericPublishers)},
         {"GenericSubscribers", subscribers_to_json(participant.genericSubscribers)},
         {"TraceSinks", to_json(participant.traceSinks)},
+        {"TraceSources", to_json(participant.traceSources)},
         // FIXME: optional ParticipantController
         {"IsSyncMaster", participant.isSyncMaster}
     };
@@ -1202,7 +1203,7 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
     participant.genericSubscribers = subscribers_from_json(json["GenericSubscribers"].array_items());
 
     participant.traceSinks = from_json<std::vector<TraceSink>>(json["TraceSinks"].array_items());
-
+    participant.traceSources = from_json<std::vector<TraceSource>>(json["TraceSources"].array_items());
     return participant;
 }
 
@@ -1664,6 +1665,7 @@ auto to_json(const TraceSink::Type& type) -> json11::Json
     }
 }
 
+
 template<>
 auto from_json(const json11::Json& json) -> TraceSink::Type
 {
@@ -1710,6 +1712,78 @@ auto from_json<TraceSink>(const json11::Json& json) -> TraceSink
 }
 
 
+auto to_json(const TraceSource& cfg) -> json11::Json
+{
+    auto json = json11::Json::object{
+        {"Type", to_json(cfg.type)},
+        {"Name", cfg.name},
+        {"InputPath", cfg.inputPath}
+    };
+
+    //only serialize if disabled
+    if (!cfg.enabled)
+    {
+        json["Enabled"] = cfg.enabled;
+    }
+    return json;
+}
+
+template <>
+auto from_json<TraceSource>(const json11::Json& json) -> TraceSource
+{
+    TraceSource source{};
+    source.name = json["Name"].string_value();
+    source.inputPath = json["InputPath"].string_value();
+    source.type = from_json<TraceSource::Type>(json["Type"]);
+    if (json.object_items().count("Enabled"))
+        source.enabled = json["Enabled"].bool_value();
+    return source;
+}
+
+auto to_json(const TraceSource::Type& type) -> json11::Json
+{
+    switch (type)
+    {
+    case TraceSource::Type::Undefined:
+        return "Undefined";
+    case TraceSource::Type::Mdf4File:
+        return "Mdf4File";
+    case TraceSource::Type::PcapFile:
+        return "PcapFile";
+    default:
+        throw Misconfiguration{"Unknown TraceSource Type"};
+    }
+}
+
+template<>
+auto from_json(const json11::Json& json) -> TraceSource::Type
+{
+    auto&& str = json.string_value();
+    if (str == "Undefined" || str == "")
+        return TraceSource::Type::Undefined;
+    if (str == "Mdf4File")
+        return TraceSource::Type::Mdf4File;
+    if (str == "PcapFile")
+        return TraceSource::Type::PcapFile;
+    throw Misconfiguration{"Unknown TraceSource Type"};
+}
+
+auto to_json(const Replay& cfg) -> json11::Json
+{
+    auto json = json11::Json::object{
+        {"UseTraceSource", cfg.useTraceSource}
+    };
+    return json;
+}
+template <>
+auto from_json<Replay>(const json11::Json& json) -> Replay
+{
+    Replay replay{};
+    replay.useTraceSource = json["UseTraceSource"].string_value();
+
+    return replay;
+}
+
 template <>
 auto from_json<Config>(const json11::Json& json) -> Config
 {
@@ -1724,7 +1798,6 @@ auto from_json<Config>(const json11::Json& json) -> Config
 
     return config;
 }
-
 
 // ======================================================================
 //  Generic Container Conversion

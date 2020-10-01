@@ -1,3 +1,5 @@
+#include "..\..\include\ib\cfg\Config.hpp"
+#include "..\..\include\ib\cfg\Config.hpp"
 #include "Config.hpp"
 #include "JsonConfig.hpp"
 
@@ -340,8 +342,10 @@ bool operator==(const Participant& lhs, const Participant& rhs)
         && lhs.patternPorts == rhs.patternPorts
         && lhs.genericPublishers == rhs.genericPublishers
         && lhs.genericSubscribers == rhs.genericSubscribers
+        && lhs.isSyncMaster == rhs.isSyncMaster
         && lhs.traceSinks == rhs.traceSinks
-        && lhs.isSyncMaster == rhs.isSyncMaster;
+        && lhs.traceSources == rhs.traceSources
+        ;
 }
 
 bool operator==(const Link& lhs, const Link& rhs)
@@ -456,14 +460,16 @@ bool operator==(const CanController& lhs, const CanController& rhs)
 {
     return lhs.name == rhs.name
         && lhs.endpointId == rhs.endpointId
-        && lhs.useTraceSinks == rhs.useTraceSinks;
+        && lhs.useTraceSinks == rhs.useTraceSinks
+        && lhs.replay == rhs.replay;
 }
 
 bool operator==(const LinController& lhs, const LinController& rhs)
 {
     return lhs.name == rhs.name
         && lhs.endpointId == rhs.endpointId
-        && lhs.useTraceSinks == rhs.useTraceSinks;
+        && lhs.useTraceSinks == rhs.useTraceSinks
+        && lhs.replay == rhs.replay;
 }
 
 bool operator==(const EthernetController& lhs, const EthernetController& rhs)
@@ -471,7 +477,8 @@ bool operator==(const EthernetController& lhs, const EthernetController& rhs)
     return lhs.name == rhs.name
         && lhs.endpointId == rhs.endpointId
         && lhs.macAddress == rhs.macAddress
-        && lhs.useTraceSinks == rhs.useTraceSinks;
+        && lhs.useTraceSinks == rhs.useTraceSinks
+        && lhs.replay == rhs.replay;
 }
 
 bool operator==(const FlexrayController& lhs, const FlexrayController& rhs)
@@ -480,7 +487,8 @@ bool operator==(const FlexrayController& lhs, const FlexrayController& rhs)
         && lhs.endpointId == rhs.endpointId
         && lhs.clusterParameters == rhs.clusterParameters
         && lhs.nodeParameters == rhs.nodeParameters
-        && lhs.useTraceSinks == rhs.useTraceSinks;
+        && lhs.useTraceSinks == rhs.useTraceSinks
+        && lhs.replay == rhs.replay;
 }
 
 bool operator==(const DigitalIoPort& lhs, const DigitalIoPort& rhs)
@@ -490,7 +498,8 @@ bool operator==(const DigitalIoPort& lhs, const DigitalIoPort& rhs)
         && lhs.name == rhs.name
         && lhs.initvalue == rhs.initvalue
         && lhs.linkId == rhs.linkId
-        && lhs.useTraceSinks == rhs.useTraceSinks;
+        && lhs.useTraceSinks == rhs.useTraceSinks
+        && lhs.replay == rhs.replay;
 }
 
 bool operator==(const AnalogIoPort& lhs, const AnalogIoPort& rhs)
@@ -501,7 +510,8 @@ bool operator==(const AnalogIoPort& lhs, const AnalogIoPort& rhs)
         && lhs.initvalue == rhs.initvalue
         && lhs.unit == rhs.unit
         && lhs.linkId == rhs.linkId
-        && lhs.useTraceSinks == rhs.useTraceSinks;
+        && lhs.useTraceSinks == rhs.useTraceSinks
+        && lhs.replay == rhs.replay;
 }
 
 bool operator==(const PwmPort& lhs, const PwmPort& rhs)
@@ -513,7 +523,8 @@ bool operator==(const PwmPort& lhs, const PwmPort& rhs)
         && lhs.initvalue.dutyCycle == rhs.initvalue.dutyCycle
         && lhs.unit == rhs.unit
         && lhs.linkId == rhs.linkId
-        && lhs.useTraceSinks == rhs.useTraceSinks;
+        && lhs.useTraceSinks == rhs.useTraceSinks
+        && lhs.replay == rhs.replay;
 }
 
 bool operator==(const PatternPort& lhs, const PatternPort& rhs)
@@ -523,7 +534,8 @@ bool operator==(const PatternPort& lhs, const PatternPort& rhs)
         && lhs.name == rhs.name
         && lhs.initvalue == rhs.initvalue
         && lhs.linkId == rhs.linkId
-        && lhs.useTraceSinks == rhs.useTraceSinks;
+        && lhs.useTraceSinks == rhs.useTraceSinks
+        && lhs.replay == rhs.replay;
 }
 
 bool operator==(const GenericPort& lhs, const GenericPort& rhs)
@@ -533,7 +545,8 @@ bool operator==(const GenericPort& lhs, const GenericPort& rhs)
         && lhs.linkType == rhs.linkType
         && lhs.protocolType == rhs.protocolType
         && lhs.definitionUri == rhs.definitionUri
-        && lhs.useTraceSinks == rhs.useTraceSinks;
+        && lhs.useTraceSinks == rhs.useTraceSinks
+        && lhs.replay == rhs.replay;
 }
 
 bool operator==(const TraceSink& lhs, const TraceSink& rhs)
@@ -542,6 +555,21 @@ bool operator==(const TraceSink& lhs, const TraceSink& rhs)
         && lhs.name == rhs.name
         && lhs.outputPath == rhs.outputPath
         && lhs.type == rhs.type;
+}
+
+bool operator==(const TraceSource& lhs, const TraceSource& rhs)
+{
+    return lhs.enabled == rhs.enabled
+        && lhs.inputPath == rhs.inputPath
+        && lhs.type == rhs.type
+        && lhs.name == rhs.name
+        ;
+}
+
+bool operator==(const Replay& lhs, const Replay& rhs)
+{
+    return lhs.useTraceSource == rhs.useTraceSource
+        ;
 }
 
 std::ostream& operator<<(std::ostream& out, const Version& version)

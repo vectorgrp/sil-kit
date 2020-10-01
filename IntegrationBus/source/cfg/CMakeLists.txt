@@ -52,6 +52,10 @@ add_library(IbConfig STATIC
     ExtensionConfigBuilder.hpp
     TraceSinkBuilder.hpp
     TraceSinkBuilder.cpp
+    TraceSourceBuilder.hpp
+    TraceSourceBuilder.cpp
+    ReplayBuilder.hpp
+    ReplayBuilder.cpp
 )
 
 target_link_libraries(IbConfig

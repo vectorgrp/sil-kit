@@ -563,4 +563,37 @@ TEST_F(ConfigBuilderTest, ensure_configbuilder_is_movable)
     EXPECT_TRUE(json.size() > 0);
 }
 
+TEST_F(ConfigBuilderTest, configure_tracesources)
+{
+    auto&& p1 = simulationSetup.AddParticipant("P1");
+    p1.AddTraceSource("Source1")
+        .WithInputPath("TestPath")
+        .WithType(ib::cfg::TraceSource::Type::Mdf4File);
+    auto p1config = p1.Build();
+
+    auto& p2 = simulationSetup.AddParticipant("P2");
+    p2.AddTraceSource("DifferentSource")
+        .WithInputPath("AnotherFile")
+        .WithType(ib::cfg::TraceSource::Type::PcapFile);
+    auto p2config = p2.Build();
+
+    ASSERT_NE(p1config.traceSources, p2config.traceSources);
+
+    ASSERT_EQ(p1config.traceSources.size(), 1);
+    ASSERT_EQ(p2config.traceSources.size(), 1);
+
+    ib::cfg::TraceSource ts1;
+    ts1.name = "Source1";
+    ts1.inputPath = "TestPath";
+    ts1.type = ib::cfg::TraceSource::Type::Mdf4File;
+
+    ASSERT_EQ(ts1, p1config.traceSources.at(0));
+    ib::cfg::TraceSource ts2;
+    ts2.name = "DifferentSource";
+    ts2.inputPath = "AnotherFile";
+    ts2.type = ib::cfg::TraceSource::Type::PcapFile;
+
+    ASSERT_EQ(ts2, p2config.traceSources.at(0));
+}
+
 } // anonymous namespace

@@ -18,6 +18,7 @@
 #include "ParticipantControllerBuilder.hpp"
 #include "NetworkSimulatorBuilder.hpp"
 #include "TraceSinkBuilder.hpp"
+#include "TraceSourceBuilder.hpp"
 
 namespace ib {
 namespace cfg {
@@ -53,6 +54,7 @@ public:
 
 
     IntegrationBusAPI auto AddTraceSink(std::string name) -> TraceSinkBuilder&;
+    IntegrationBusAPI auto AddTraceSource(std::string name) -> TraceSourceBuilder&;
 
     IntegrationBusAPI auto operator->() -> ParticipantBuilder*;
 
@@ -100,6 +102,7 @@ private:
     std::vector<GenericPortBuilder> _genericSubscribers;
 
     std::vector<TraceSinkBuilder> _traceSinks;
+    std::vector<TraceSourceBuilder> _traceSources;
     std::vector<NetworkSimulatorBuilder> _networkSimulators;
 };
 

@@ -94,6 +94,25 @@ struct TraceSink
     bool enabled{true};
 };
 
+struct TraceSource
+{
+    enum class Type
+    {
+        Undefined,
+        PcapFile,
+        Mdf4File
+    };
+
+    Type type = Type::Undefined;
+    std::string name;
+    std::string inputPath;
+    bool enabled{true};
+};
+
+struct Replay
+{
+    std::string useTraceSource;
+};
 
 struct CanController
 {
@@ -103,6 +122,7 @@ struct CanController
     mw::EndpointId endpointId{0};
     int16_t linkId{-1};
     std::vector<std::string> useTraceSinks;
+    Replay replay;
 };
 
 struct LinController
@@ -113,6 +133,7 @@ struct LinController
     mw::EndpointId endpointId{0};
     int16_t linkId{-1};
     std::vector<std::string> useTraceSinks;
+    Replay replay;
 };
 
 struct EthernetController
@@ -130,6 +151,7 @@ struct EthernetController
     std::string pcapPipe;
 
     std::vector<std::string> useTraceSinks;
+    Replay replay;
 };
 
 struct FlexrayController
@@ -144,6 +166,7 @@ struct FlexrayController
     sim::fr::NodeParameters nodeParameters;
     std::vector<sim::fr::TxBufferConfig> txBufferConfigs;
     std::vector<std::string> useTraceSinks;
+    Replay replay;
 };
 
 enum class PortDirection : uint8_t
@@ -178,6 +201,7 @@ struct IoPort
     std::string unit;
 
     std::vector<std::string> useTraceSinks;
+    Replay replay;
 };
 // NB: the following inline definition is only required for C++14
 //     and can be removed when we move to C++17
@@ -223,6 +247,7 @@ struct GenericPort
     std::string definitionUri;
 
     std::vector<std::string> useTraceSinks;
+    Replay replay;
 };
 
 enum class SyncType
@@ -278,6 +303,7 @@ struct Participant
     bool isSyncMaster{false};
 
     std::vector<TraceSink> traceSinks;
+    std::vector<TraceSource> traceSources;
 };
 
 struct Switch
@@ -473,6 +499,8 @@ IntegrationBusAPI bool operator==(const PwmPort& lhs, const PwmPort& rhs);
 IntegrationBusAPI bool operator==(const PatternPort& lhs, const PatternPort& rhs);
 IntegrationBusAPI bool operator==(const GenericPort& lhs, const GenericPort& rhs);
 IntegrationBusAPI bool operator==(const TraceSink& lhs, const TraceSink& rhs);
+IntegrationBusAPI bool operator==(const TraceSource& lhs, const TraceSource& rhs);
+IntegrationBusAPI bool operator==(const Replay& lhs, const Replay& rhs);
 
 IntegrationBusAPI std::ostream& operator<<(std::ostream& out, const Version& version);
 IntegrationBusAPI std::istream& operator>>(std::istream& in, Version& version);
