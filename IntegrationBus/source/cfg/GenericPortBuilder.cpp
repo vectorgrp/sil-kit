@@ -65,9 +65,16 @@ auto GenericPortBuilder::Build() -> GenericPort
     {
         WithLink(_port.name);
     }
+    _port.replay = _replayBuilder.Build();
+
     return std::move(_port);
 }
 
+
+auto GenericPortBuilder::WithReplay(std::string sourceName) -> ReplayBuilder&
+{
+    return _replayBuilder.UseTraceSource(sourceName);
+}
 
 } // namespace cfg
 } // namespace ib

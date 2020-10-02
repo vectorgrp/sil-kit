@@ -850,4 +850,84 @@ TEST_F(JsonConfigTest, configure_trace_source)
     EXPECT_EQ(config, referenceConfig);
 }
 
+TEST_F(JsonConfigTest, configure_controllers_with_replay)
+{
+
+    auto&& participant = simulationSetup.AddParticipant("P1");
+    participant.AddTraceSource("Source1")
+        .WithInputPath("TestPath")
+        .WithType(ib::cfg::TraceSource::Type::Mdf4File);
+
+    // create tracers on all supported controller types
+    auto&& ethCtrl = participant.AddEthernet("Eth1");
+    ethCtrl.WithReplay("Source1");
+
+    auto&& canCtrl = participant.AddCan("CanCtrl");
+    canCtrl.WithReplay("Source1");
+
+    auto&& linCtrl = participant.AddLin("LinCtrl");
+    linCtrl.WithReplay("Source1");
+
+    auto&& frCtrl = participant.AddFlexray("FlexrayCtrl").WithNodeParameters(getNodeParameters());
+    frCtrl.WithReplay("Source1");
+
+    auto&& doutPort = participant.AddDigitalOut("DigitalOutFoo");
+    doutPort.WithReplay("Source1");
+
+    auto&& dinPort = participant.AddDigitalIn("Digi In");
+    dinPort.WithReplay("Source1");
+
+    auto&& ainPort = participant.AddAnalogIn("AnalogIn");
+    ainPort.WithReplay("Source1");
+
+    auto&& aoutPort = participant.AddAnalogOut("AnalogOut");
+    aoutPort.WithReplay("Source1");
+
+    auto&& patPort = participant.AddPatternIn("PatternIn");
+    patPort.WithReplay("Source1");
+
+    auto&& patOut = participant.AddPatternOut("Pattern Out");
+    patOut.WithReplay("Source1");
+
+    auto&& pwmOut = participant.AddPwmOut("PWM OUT");
+    pwmOut.WithReplay("Source1");
+
+    auto&& pwmIn = participant.AddPwmIn("PwmPort2 IN");
+    pwmIn.WithReplay("Source1");
+
+    auto&& genPort = participant.AddGenericPublisher("GenericPublisher");
+    genPort.WithReplay("Source1");
+
+    auto&& subPort = participant.AddGenericSubscriber("A Subscriber");
+    subPort.WithReplay("Source1");
+
+
+    BuildConfigFromJson();
+    // NB we compare the replay data directly, services have divergent link Ids which makes comparing at participant-level impossible.
+    const auto& pold = referenceConfig.simulationSetup.participants[0];
+    const auto& pnew = config.simulationSetup.participants[0];
+    auto compareReplay = [](const auto& lhs, const auto& rhs)
+    {
+        if (lhs.size() != rhs.size())
+            return false;
+        for (auto i = 0u; i < lhs.size(); i++)
+        {
+            if (!(lhs.at(i).replay == rhs.at(i).replay))
+                return false;
+        }
+        return true;
+    };
+
+    EXPECT_TRUE(compareReplay(pold.canControllers, pnew.canControllers));
+    EXPECT_TRUE(compareReplay(pold.linControllers, pnew.linControllers));
+    EXPECT_TRUE(compareReplay(pold.ethernetControllers, pnew.ethernetControllers));
+    EXPECT_TRUE(compareReplay(pold.flexrayControllers, pnew.flexrayControllers));
+    EXPECT_TRUE(compareReplay(pold.genericPublishers, pnew.genericPublishers));
+    EXPECT_TRUE(compareReplay(pold.genericSubscribers, pnew.genericSubscribers));
+    EXPECT_TRUE(compareReplay(pold.digitalIoPorts, pnew.digitalIoPorts));
+    EXPECT_TRUE(compareReplay(pold.analogIoPorts, pnew.analogIoPorts));
+    EXPECT_TRUE(compareReplay(pold.patternPorts, pnew.patternPorts));
+    EXPECT_TRUE(compareReplay(pold.pwmPorts, pnew.pwmPorts));
+}
+
 } // anonymous namespace

@@ -6,12 +6,15 @@
 namespace ib {
 namespace cfg {
 
-ReplayBuilder::ReplayBuilder(std::string name)
+ReplayBuilder::ReplayBuilder() = default;
+ReplayBuilder::~ReplayBuilder() = default;
+
+auto ReplayBuilder::UseTraceSource(std::string traceSourceName) -> ReplayBuilder&
 {
-	_replay.useTraceSource = std::move(name);
+	_replay.useTraceSource = std::move(traceSourceName);
+	return *this;
 }
 
-ReplayBuilder::~ReplayBuilder() = default;
 
 auto ReplayBuilder::operator->() -> ReplayBuilder*
 {

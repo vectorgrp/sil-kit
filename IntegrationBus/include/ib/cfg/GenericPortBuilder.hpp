@@ -8,6 +8,7 @@
 
 #include "fwd_decl.hpp"
 #include "ParentBuilder.hpp"
+#include "ReplayBuilder.hpp"
 
 namespace ib {
 namespace cfg {
@@ -25,6 +26,7 @@ public:
     IntegrationBusAPI auto WithDefinitionUri(std::string uri) -> GenericPortBuilder&;
 
     IntegrationBusAPI auto WithTraceSink(std::string sinkName) -> GenericPortBuilder&;
+    IntegrationBusAPI auto WithReplay(std::string useTraceSource) -> ReplayBuilder&;
 
     IntegrationBusAPI auto operator->() -> ParticipantBuilder*;
 
@@ -33,6 +35,7 @@ public:
 private:
     GenericPort _port;
     std::string _link;
+    ReplayBuilder _replayBuilder;
 };
 
 // ================================================================================

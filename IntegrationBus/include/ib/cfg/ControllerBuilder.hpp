@@ -9,7 +9,7 @@
 #include "fwd_decl.hpp"
 #include "ParentBuilder.hpp"
 #include "ParticipantBuilder_detail.hpp"
-#include "ib/cfg/ReplayBuilder.hpp"
+#include "ReplayBuilder.hpp"
 
 namespace ib {
 namespace cfg {
@@ -24,9 +24,9 @@ public:
     auto WithLinkId(int16_t linkId) -> ControllerBuilder&;
     auto WithEndpointId(mw::EndpointId id) -> ControllerBuilder&;
     IntegrationBusAPI auto WithMacAddress(std::string macAddress) -> ControllerBuilder&;
-    auto WithClusterParameters(const sim::fr::ClusterParameters& clusterParameters) -> ControllerBuilder&;
-    auto WithNodeParameters(const sim::fr::NodeParameters& nodeParameters) -> ControllerBuilder&;
-    auto WithTxBufferConfigs(const std::vector<sim::fr::TxBufferConfig>& txBufferConfigs) -> ControllerBuilder&;
+    IntegrationBusAPI auto WithClusterParameters(const sim::fr::ClusterParameters& clusterParameters) -> ControllerBuilder&;
+    IntegrationBusAPI auto WithNodeParameters(const sim::fr::NodeParameters& nodeParameters) -> ControllerBuilder&;
+    IntegrationBusAPI auto WithTxBufferConfigs(const std::vector<sim::fr::TxBufferConfig>& txBufferConfigs) -> ControllerBuilder&;
 
     auto WithTraceSink(std::string sinkName) -> ControllerBuilder&;
     auto WithReplay(std::string useTraceSource) -> ReplayBuilder&;
@@ -37,6 +37,7 @@ public:
 private:
     ControllerCfg _controller;
     std::string _link;
+    ReplayBuilder _replayBuilder;
 };
 
 // ================================================================================
@@ -87,6 +88,8 @@ auto ControllerBuilder<ControllerCfg>::Build() -> ControllerCfg
     {
         WithLink(_controller.name);
     }
+    _controller.replay = _replayBuilder.Build();
+
     return std::move(_controller);
 }
 
@@ -97,6 +100,13 @@ auto ControllerBuilder<ControllerCfg>::WithTraceSink(std::string sinkName) -> Co
 
     return *this;
 }
+
+template<class ControllerCfg>
+auto ControllerBuilder<ControllerCfg>::WithReplay(std::string sourceName) -> ReplayBuilder&
+{
+    return _replayBuilder.UseTraceSource(sourceName);
+}
+
 } // namespace cfg
 } // namespace ib
 

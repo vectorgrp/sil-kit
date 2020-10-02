@@ -9,6 +9,7 @@
 #include "fwd_decl.hpp"
 #include "ParentBuilder.hpp"
 #include "ParticipantBuilder_detail.hpp"
+#include "ReplayBuilder.hpp"
 
 namespace ib {
 namespace cfg {
@@ -28,6 +29,7 @@ public:
     auto WithInitValue(ValueType value) -> IoPortBuilder&;
     auto WithUnit(std::string unitname) -> IoPortBuilder&;
     auto WithTraceSink(std::string sinkname) -> IoPortBuilder&;
+    auto WithReplay(std::string useTraceSource) -> ReplayBuilder&;
 
     auto operator->() -> ParticipantBuilder*;
 
@@ -36,6 +38,7 @@ public:
 private:
     IoPortCfg _port;
     std::string _link;
+    ReplayBuilder _replayBuilder;
 };
 
 // ================================================================================
@@ -102,12 +105,20 @@ auto IoPortBuilder<IoPortCfg>::WithTraceSink(std::string sinkname) -> IoPortBuil
 }
 
 template<class IoPortCfg>
+auto IoPortBuilder<IoPortCfg>::WithReplay(std::string sourceName) -> ReplayBuilder&
+{
+    return _replayBuilder.UseTraceSource(sourceName);
+}
+
+template<class IoPortCfg>
 auto IoPortBuilder<IoPortCfg>::Build() -> IoPortCfg
 {
     if (_port.linkId == -1)
     {
         WithLink(_port.name);
     }
+    _port.replay = _replayBuilder.Build();
+
     return std::move(_port);
 }
 
