@@ -95,7 +95,7 @@ auto non_default_to_json(const bool& value, json11::Json::object& json, const st
         json[fieldName] = value;
 }
 
-//optional "Replay" block in Service
+//optional "Replay" block in Services
 template<typename ServiceT>
 void replay_to_json(json11::Json::object& json, const ServiceT& service)
 {
@@ -105,7 +105,7 @@ void replay_to_json(json11::Json::object& json, const ServiceT& service)
     }
 }
 
-//optional "Replay" block in Service
+//optional "Replay" block in Services
 template<typename ServiceT>
 void replay_from_json(const json11::Json& json, ServiceT& service)
 {
@@ -1847,15 +1847,87 @@ auto to_json(const Replay& cfg) -> json11::Json
     auto json = json11::Json::object{
         {"UseTraceSource", cfg.useTraceSource}
     };
+    if (cfg.withReplayConfigs.size() > 0)
+    {
+        json11::Json::array configs;
+        for (const auto& replayCfg : cfg.withReplayConfigs)
+        {
+            configs.push_back(to_json(replayCfg));
+        }
+        json["ReplayConfigs"] = configs;
+    }
     return json;
 }
+
 template <>
 auto from_json<Replay>(const json11::Json& json) -> Replay
 {
     Replay replay{};
     replay.useTraceSource = json["UseTraceSource"].string_value();
-
+    if (json.object_items().count("ReplayConfigs"))
+    {
+        for (const auto& replayJs : json["ReplayConfigs"].array_items())
+        {
+            auto replayCfg = from_json<ReplayConfig>(replayJs);
+            if (replayCfg.direction != ib::cfg::ReplayConfig::Direction::Undefined)
+            {
+                replay.withReplayConfigs.emplace_back(from_json<ReplayConfig>(replayJs));
+            }
+        }
+    }
     return replay;
+}
+
+auto to_json(const ReplayConfig& cfg) -> json11::Json
+{
+    auto json = json11::Json::object{};
+    auto Direction_to_js = [&json, &cfg]() {
+        switch (cfg.direction)
+        {
+        case ReplayConfig::Direction::Send:
+            json["Direction"] = "Send";
+            break;
+        case ReplayConfig::Direction::Receive:
+            json["Direction"] = "Receive";
+            break;
+        case ReplayConfig::Direction::Both:
+            json["Direction"] = "Both";
+            break;
+        case ReplayConfig::Direction::Undefined:
+            json["Direction"] = "Undefined";
+            break;
+        }
+    };
+    if (cfg.direction != ReplayConfig::Direction::Undefined)
+    {
+        Direction_to_js();
+    }
+
+    return json;
+}
+
+template <>
+auto from_json<ReplayConfig>(const json11::Json& json) -> ReplayConfig
+{
+    ReplayConfig cfg{};
+    auto js_to_Direction = [](auto str)
+    {
+        if (str == "Undefined" || str == "")
+            return ReplayConfig::Direction::Undefined;
+        if (str == "Send")
+            return ReplayConfig::Direction::Send;
+        if (str == "Receive")
+            return ReplayConfig::Direction::Receive;
+        if (str == "Both")
+            return ReplayConfig::Direction::Both;
+        throw Misconfiguration{"Unknown ReplayConfig::Direction Type: " + str};
+    };
+
+    if (json.object_items().count("Direction") > 0)
+    {
+        cfg.direction = js_to_Direction(json["Direction"].string_value());
+    }
+    return cfg;
 }
 
 template <>

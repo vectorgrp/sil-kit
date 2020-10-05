@@ -930,4 +930,30 @@ TEST_F(JsonConfigTest, configure_controllers_with_replay)
     EXPECT_TRUE(compareReplay(pold.pwmPorts, pnew.pwmPorts));
 }
 
+TEST_F(JsonConfigTest, configure_replayconfigs)
+{
+    auto&& participant = simulationSetup.AddParticipant("P1");
+    participant
+        .AddCan("CAN1")
+        .WithReplay("Sink1")
+        .WithDirection(ib::cfg::ReplayConfig::Direction::Send);
+    participant
+        .AddGenericPublisher("Pub1")
+        .WithReplay("Sink1")
+        .WithDirection(ib::cfg::ReplayConfig::Direction::Receive);
+    participant
+        .AddPatternOut("Pat1")
+        .WithReplay("Sink1")
+        .WithDirection(ib::cfg::ReplayConfig::Direction::Both);
+
+    BuildConfigFromJson();
+
+    const auto& pold = referenceConfig.simulationSetup.participants[0];
+    const auto& pnew = config.simulationSetup.participants[0];
+
+    EXPECT_EQ(pold.canControllers.at(0).replay, pnew.canControllers.at(0).replay);
+    EXPECT_EQ(pold.genericPublishers.at(0).replay, pnew.genericPublishers.at(0).replay);
+    EXPECT_EQ(pold.patternPorts.at(0).replay, pnew.patternPorts.at(0).replay);
+}
+
 } // anonymous namespace

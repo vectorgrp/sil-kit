@@ -569,6 +569,13 @@ bool operator==(const TraceSource& lhs, const TraceSource& rhs)
 bool operator==(const Replay& lhs, const Replay& rhs)
 {
     return lhs.useTraceSource == rhs.useTraceSource
+        && lhs.withReplayConfigs == rhs.withReplayConfigs
+        ;
+}
+
+bool operator==(const ReplayConfig& lhs, const ReplayConfig& rhs)
+{
+    return lhs.direction == rhs.direction
         ;
 }
 

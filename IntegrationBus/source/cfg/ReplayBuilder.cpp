@@ -23,11 +23,18 @@ auto ReplayBuilder::operator->() -> ReplayBuilder*
 
 auto ReplayBuilder::Build() -> Replay
 {
-	Replay cfg = _replay;
-	_replay = Replay{};
-	return cfg;
+	return std::move(_replay);
 }
 
+
+auto ReplayBuilder::WithDirection( ReplayConfig::Direction dir) -> ReplayBuilder&
+{
+	ReplayConfig cfg;
+	cfg.direction = dir;
+	_replay.withReplayConfigs.emplace_back(std::move(cfg));
+
+	return *this;
+}
 } // namespace cfg
 } // namespace ib
 

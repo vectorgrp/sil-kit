@@ -103,15 +103,32 @@ struct TraceSource
         Mdf4File
     };
 
-    Type type = Type::Undefined;
+    Type type{Type::Undefined};
     std::string name;
     std::string inputPath;
     bool enabled{true};
 };
 
+struct ReplayConfig
+{
+    //Config value for direction: { "Direction" : enum }
+    enum class Direction
+    {
+        Undefined,
+        Send,
+        Receive,
+        Both,
+    };
+    Direction direction{Direction::Undefined};
+
+    //Reverse message I/O direction: { "ReverseMessageFlow" : true }
+    //Mdf4 data selector: { "SelectMdfChannel" : string }
+};
+
 struct Replay
 {
-    std::string useTraceSource;
+    std::string useTraceSource{};
+    std::vector<ReplayConfig> withReplayConfigs;
 };
 
 struct CanController
@@ -501,6 +518,7 @@ IntegrationBusAPI bool operator==(const GenericPort& lhs, const GenericPort& rhs
 IntegrationBusAPI bool operator==(const TraceSink& lhs, const TraceSink& rhs);
 IntegrationBusAPI bool operator==(const TraceSource& lhs, const TraceSource& rhs);
 IntegrationBusAPI bool operator==(const Replay& lhs, const Replay& rhs);
+IntegrationBusAPI bool operator==(const ReplayConfig& lhs, const ReplayConfig& rhs);
 
 IntegrationBusAPI std::ostream& operator<<(std::ostream& out, const Version& version);
 IntegrationBusAPI std::istream& operator>>(std::istream& in, Version& version);

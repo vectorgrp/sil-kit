@@ -22,6 +22,8 @@ public:
 
     IntegrationBusAPI auto UseTraceSource(std::string traceSourceName) -> ReplayBuilder&;
 
+    IntegrationBusAPI auto WithDirection( ReplayConfig::Direction dir) -> ReplayBuilder&;
+
 private:
     Replay _replay{};
 };
