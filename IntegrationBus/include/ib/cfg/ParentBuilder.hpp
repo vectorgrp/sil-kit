@@ -15,9 +15,12 @@ template<class ParentT>
 class ParentBuilder
 {
 public:
-    ParentBuilder() = default;
+    ParentBuilder() = delete;
+    ParentBuilder(const ParentBuilder<ParentT>&) = delete;
+    ParentBuilder operator=(const ParentBuilder<ParentT>&) = delete;
+    ParentBuilder(ParentBuilder<ParentT>&&) = default;
     ParentBuilder(ParentT* parent);
-    virtual ~ParentBuilder() = default;
+    virtual ~ParentBuilder();
 
     auto Parent() -> ParentT*;
 
@@ -28,6 +31,14 @@ private:
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
+
+
+template<class ParentT>
+ParentBuilder<ParentT>::~ParentBuilder()
+{
+    _parent = nullptr;
+}
+
 template<class ParentT>
 ParentBuilder<ParentT>::ParentBuilder(ParentT* parent)
     : _parent{parent}

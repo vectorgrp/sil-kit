@@ -4,6 +4,7 @@
 
 #include <sstream>
 #include <thread>
+#include <algorithm>
 
 #include "ib/cfg/SimulationSetupBuilder.hpp"
 
@@ -67,9 +68,9 @@ auto ParticipantBuilder::Build() -> Participant
         config.networkSimulators.emplace_back(netSim.Build());
     }
 
-    Participant copy = config;
-    config = Participant{};
-    return copy;
+    Participant newConfig;
+    std::swap(config, newConfig);
+    return newConfig;
 }
 
 auto ParticipantBuilder::operator->() -> ParticipantBuilder*

@@ -2,6 +2,8 @@
 
 #include "SwitchPortBuilder.hpp"
 
+#include <algorithm>
+
 namespace ib {
 namespace cfg {
 
@@ -32,7 +34,9 @@ auto SwitchPortBuilder::operator->() -> SwitchBuilder*
 
 auto SwitchPortBuilder::Build() -> Switch::Port
 {
-    return std::move(_config);
+    Switch::Port newConfig;
+    std::swap(_config, newConfig);
+    return newConfig;
 }
 
 

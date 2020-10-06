@@ -121,7 +121,7 @@ TEST(TestMwCfgValidation, throw_if_usetracesinks_refers_to_empty_sink_name)
     EXPECT_THROW(Validate(ibConfig.simulationSetup, ibConfig), Misconfiguration);
 }
 
-TEST(TestMwCfgValidation, throw_if_replay_refers_to_empty_source_name)
+TEST(TestMwCfgValidation, throw_if_replay_refers_to_unknown_source_name)
 {
     Config ibConfig;
     ibConfig.simulationSetup.timeSync.syncPolicy = TimeSync::SyncPolicy::Loose;
@@ -137,13 +137,11 @@ TEST(TestMwCfgValidation, throw_if_replay_refers_to_empty_source_name)
     participantConfig.name = "P1";
     participantConfig.traceSources.emplace_back(std::move(source));
 
-    ReplayConfig replayConfig;
-    replayConfig.direction = ReplayConfig::Direction::Send;
     EthernetController controller;
     controller.name = "Eth1";
-    controller.replay.useTraceSource = "";
+    controller.replay.useTraceSource = "UnknownSource";
 
-    controller.replay.withReplayConfigs.emplace_back(std::move(replayConfig));
+    controller.replay.direction = Replay::Direction::Send;
     participantConfig.ethernetControllers.emplace_back(std::move(controller));
     ibConfig.simulationSetup.participants.emplace_back(std::move(participantConfig));
 

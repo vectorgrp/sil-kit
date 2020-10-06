@@ -39,7 +39,7 @@ protected:
     void BuildConfigFromJson()
     {
         referenceConfig = builder.Build();
-        jsonString = referenceConfig.ToJsonString();      
+        jsonString = referenceConfig.ToJsonString(); 
         config = ib::cfg::Config::FromJsonString(jsonString);
     }
 
@@ -409,21 +409,21 @@ TEST_F(JsonConfigTest, CreateGenericMessageConfig)
     EXPECT_EQ(config, referenceConfig);
 
     ASSERT_EQ(config.simulationSetup.links.size(), 1u);
-    auto&& rosLink = config.simulationSetup.links[0];
+    auto&& rosLink = config.simulationSetup.links.at(0);
 
     EXPECT_EQ(rosLink.name, msgName);
     EXPECT_EQ(rosLink.type, Link::Type::GenericMessage);
 
     auto&& participants = config.simulationSetup.participants;
 
-    EXPECT_EQ(participants[0].genericPublishers[0].name, msgName);
-    EXPECT_EQ(participants[1].genericSubscribers[0].name, msgName);
+    EXPECT_EQ(participants.at(0).genericPublishers.at(0).name, msgName);
+    EXPECT_EQ(participants.at(1).genericSubscribers.at(0).name, msgName);
 
-    EXPECT_EQ(participants[0].genericPublishers[0].protocolType, GenericPort::ProtocolType::ROS);
-    EXPECT_EQ(participants[1].genericSubscribers[0].protocolType, GenericPort::ProtocolType::ROS);
+    EXPECT_EQ(participants.at(0).genericPublishers.at(0).protocolType, GenericPort::ProtocolType::ROS);
+    EXPECT_EQ(participants.at(1).genericSubscribers.at(0).protocolType, GenericPort::ProtocolType::ROS);
 
-    EXPECT_EQ(participants[0].genericPublishers[0].definitionUri, msgDefinition);
-    EXPECT_EQ(participants[1].genericSubscribers[0].definitionUri, msgDefinition);
+    EXPECT_EQ(participants.at(0).genericPublishers.at(0).definitionUri, msgDefinition);
+    EXPECT_EQ(participants.at(1).genericSubscribers.at(0).definitionUri, msgDefinition);
 }
 
 TEST_F(JsonConfigTest, create_fastrtps_config_default)
@@ -750,12 +750,12 @@ TEST_F(JsonConfigTest, configure_participant_add_tracesink)
     };
 
 
-    checkFields(pnew.genericPublishers[0], pold.genericPublishers[0]);
+    checkFields(pnew.genericPublishers.at(0), pold.genericPublishers.at(0));
 
-    checkFields(pnew.ethernetControllers[0], pold.ethernetControllers[0]);
-    checkFields(pnew.canControllers[0], pold.canControllers[0]);
-    checkFields(pnew.flexrayControllers[0], pold.flexrayControllers[0]);
-    checkFields(pnew.linControllers[0], pold.linControllers[0]);
+    checkFields(pnew.ethernetControllers.at(0), pold.ethernetControllers.at(0));
+    checkFields(pnew.canControllers.at(0), pold.canControllers.at(0));
+    checkFields(pnew.flexrayControllers.at(0), pold.flexrayControllers.at(0));
+    checkFields(pnew.linControllers.at(0), pold.linControllers.at(0));
 
     auto checkPort = [&checkFields](const auto& oports, const auto& nports)
     {
@@ -782,9 +782,9 @@ TEST_F(JsonConfigTest, configure_participant_add_tracesink)
 
     for (auto i = 0u; i < testTable.size(); i++)
     {
-        ASSERT_EQ(cfgSinks[i].name, testTable[i].name);
-        ASSERT_EQ(cfgSinks[i].outputPath, testTable[i].outputPath);
-        ASSERT_EQ(cfgSinks[i].type, testTable[i].type);
+        ASSERT_EQ(cfgSinks.at(i).name, testTable.at(i).name);
+        ASSERT_EQ(cfgSinks.at(i).outputPath, testTable.at(i).outputPath);
+        ASSERT_EQ(cfgSinks.at(i).type, testTable.at(i).type);
     }
 }
 
@@ -850,6 +850,33 @@ TEST_F(JsonConfigTest, configure_trace_source)
     EXPECT_EQ(config, referenceConfig);
 }
 
+
+TEST_F(JsonConfigTest, configure_replayconfig_direction)
+{
+    auto&& participant = simulationSetup.AddParticipant("P1");
+    participant
+        .AddCan("CAN1")
+        .WithReplay("Source1")
+        .WithDirection(ib::cfg::Replay::Direction::Send);
+    participant
+        .AddGenericPublisher("Pub1")
+        .WithReplay("Source1")
+        .WithDirection(ib::cfg::Replay::Direction::Receive);
+    participant
+        .AddPatternOut("Pat1")
+        .WithReplay("Source1")
+        .WithDirection(ib::cfg::Replay::Direction::Both);
+
+    BuildConfigFromJson();
+
+    const auto& pold = referenceConfig.simulationSetup.participants.at(0);
+    const auto& pnew = config.simulationSetup.participants.at(0);
+
+    EXPECT_EQ(pold.canControllers.at(0).replay, pnew.canControllers.at(0).replay);
+    EXPECT_EQ(pold.genericPublishers.at(0).replay, pnew.genericPublishers.at(0).replay);
+    EXPECT_EQ(pold.patternPorts.at(0).replay, pnew.patternPorts.at(0).replay);
+}
+
 TEST_F(JsonConfigTest, configure_controllers_with_replay)
 {
 
@@ -859,53 +886,34 @@ TEST_F(JsonConfigTest, configure_controllers_with_replay)
         .WithType(ib::cfg::TraceSource::Type::Mdf4File);
 
     // create tracers on all supported controller types
-    auto&& ethCtrl = participant.AddEthernet("Eth1");
-    ethCtrl.WithReplay("Source1");
+    participant.AddEthernet("Eth1").WithReplay("Source1");
+    participant.AddCan("CanCtrl").WithReplay("Source1");
+    participant.AddLin("LinCtrl").WithReplay("Source1");
 
-    auto&& canCtrl = participant.AddCan("CanCtrl");
-    canCtrl.WithReplay("Source1");
+    participant.AddFlexray("FlexrayCtrl")
+        .WithNodeParameters(getNodeParameters())
+        .WithReplay("Source1");
 
-    auto&& linCtrl = participant.AddLin("LinCtrl");
-    linCtrl.WithReplay("Source1");
+    participant.AddDigitalOut("DigitalOutFoo").WithReplay("Source1");
+    participant.AddDigitalIn("Digi In").WithReplay("Source1");
 
-    auto&& frCtrl = participant.AddFlexray("FlexrayCtrl").WithNodeParameters(getNodeParameters());
-    frCtrl.WithReplay("Source1");
+    participant.AddAnalogIn("AnalogIn").WithReplay("Source1");
+    participant.AddAnalogOut("AnalogOut").WithReplay("Source1");
 
-    auto&& doutPort = participant.AddDigitalOut("DigitalOutFoo");
-    doutPort.WithReplay("Source1");
+    participant.AddPatternIn("PatternIn").WithReplay("Source1");
+    participant.AddPatternOut("Pattern Out").WithReplay("Source1");
 
-    auto&& dinPort = participant.AddDigitalIn("Digi In");
-    dinPort.WithReplay("Source1");
 
-    auto&& ainPort = participant.AddAnalogIn("AnalogIn");
-    ainPort.WithReplay("Source1");
+    participant.AddPwmOut("PWM OUT").WithReplay("Source1");
+    participant.AddPwmIn("PwmPort2 IN").WithReplay("Source1");
 
-    auto&& aoutPort = participant.AddAnalogOut("AnalogOut");
-    aoutPort.WithReplay("Source1");
-
-    auto&& patPort = participant.AddPatternIn("PatternIn");
-    patPort.WithReplay("Source1");
-
-    auto&& patOut = participant.AddPatternOut("Pattern Out");
-    patOut.WithReplay("Source1");
-
-    auto&& pwmOut = participant.AddPwmOut("PWM OUT");
-    pwmOut.WithReplay("Source1");
-
-    auto&& pwmIn = participant.AddPwmIn("PwmPort2 IN");
-    pwmIn.WithReplay("Source1");
-
-    auto&& genPort = participant.AddGenericPublisher("GenericPublisher");
-    genPort.WithReplay("Source1");
-
-    auto&& subPort = participant.AddGenericSubscriber("A Subscriber");
-    subPort.WithReplay("Source1");
-
+    participant.AddGenericPublisher("GenericPublisher").WithReplay("Source1");
+    participant.AddGenericSubscriber("A Subscriber").WithReplay("Source1");
 
     BuildConfigFromJson();
     // NB we compare the replay data directly, services have divergent link Ids which makes comparing at participant-level impossible.
-    const auto& pold = referenceConfig.simulationSetup.participants[0];
-    const auto& pnew = config.simulationSetup.participants[0];
+    const auto& pold = referenceConfig.simulationSetup.participants.at(0);
+    const auto& pnew = config.simulationSetup.participants.at(0);
     auto compareReplay = [](const auto& lhs, const auto& rhs)
     {
         if (lhs.size() != rhs.size())
@@ -929,31 +937,4 @@ TEST_F(JsonConfigTest, configure_controllers_with_replay)
     EXPECT_TRUE(compareReplay(pold.patternPorts, pnew.patternPorts));
     EXPECT_TRUE(compareReplay(pold.pwmPorts, pnew.pwmPorts));
 }
-
-TEST_F(JsonConfigTest, configure_replayconfig_direction)
-{
-    auto&& participant = simulationSetup.AddParticipant("P1");
-    participant
-        .AddCan("CAN1")
-        .WithReplay("Sink1")
-        .WithDirection(ib::cfg::ReplayConfig::Direction::Send);
-    participant
-        .AddGenericPublisher("Pub1")
-        .WithReplay("Sink1")
-        .WithDirection(ib::cfg::ReplayConfig::Direction::Receive);
-    participant
-        .AddPatternOut("Pat1")
-        .WithReplay("Sink1")
-        .WithDirection(ib::cfg::ReplayConfig::Direction::Both);
-
-    BuildConfigFromJson();
-
-    const auto& pold = referenceConfig.simulationSetup.participants[0];
-    const auto& pnew = config.simulationSetup.participants[0];
-
-    EXPECT_EQ(pold.canControllers.at(0).replay, pnew.canControllers.at(0).replay);
-    EXPECT_EQ(pold.genericPublishers.at(0).replay, pnew.genericPublishers.at(0).replay);
-    EXPECT_EQ(pold.patternPorts.at(0).replay, pnew.patternPorts.at(0).replay);
-}
-
 } // anonymous namespace

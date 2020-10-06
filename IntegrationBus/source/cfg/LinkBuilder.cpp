@@ -2,6 +2,8 @@
 
 #include "LinkBuilder.hpp"
 
+#include <algorithm>
+
 namespace ib {
 namespace cfg {
 
@@ -20,7 +22,9 @@ auto LinkBuilder::AddEndpoint(std::string qualifiedName) -> LinkBuilder&
 
 auto LinkBuilder::Build() -> Link
 {
-    return std::move(link);
+    Link newConfig{};
+    std::swap(link, newConfig);
+    return newConfig;
 }
 
 } // namespace cfg

@@ -2,6 +2,8 @@
 
 #include "SwitchBuilder.hpp"
 
+#include <algorithm>
+
 #include "SimulationSetupBuilder.hpp"
 
 namespace ib {
@@ -32,7 +34,9 @@ auto SwitchBuilder::Build() -> Switch
         _config.ports.emplace_back(builder.Build());
     }
     _ports.clear();
-    return std::move(_config);
+    Switch newConfig{};
+    std::swap(_config, newConfig);
+    return newConfig;
 }
 
 

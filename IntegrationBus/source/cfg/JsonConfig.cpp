@@ -95,27 +95,12 @@ auto non_default_to_json(const bool& value, json11::Json::object& json, const st
         json[fieldName] = value;
 }
 
-//optional "Replay" block in Services
-template<typename ServiceT>
-void replay_to_json(json11::Json::object& json, const ServiceT& service)
+auto optional_to_json(json11::Json::object& json, const Replay& config)
 {
-    if (service.replay.useTraceSource.size() > 0)
+    if (config.useTraceSource.size() > 0)
     {
-        json["Replay"] = to_json(service.replay);
+        json["Replay"] = to_json(config);
     }
-}
-
-//optional "Replay" block in Services
-template<typename ServiceT>
-void replay_from_json(const json11::Json& json, ServiceT& service)
-{
-    if (json.object_items().count("Replay") == 0)
-    {
-        return;
-    }
-
-    auto& replayJson = json["Replay"];
-    service.replay = from_json<Replay>(replayJson);
 }
 
 } // namespace anonymous
@@ -307,7 +292,7 @@ auto to_json(const CanController& controller) -> json11::Json
         json["UseTraceSinks"] = to_json(controller.useTraceSinks);
     }
 
-    replay_to_json(json, controller);
+    optional_to_json(json, controller.replay);
 
     return json;
 }
@@ -329,7 +314,7 @@ auto from_json<CanController>(const json11::Json& json) -> CanController
         controller.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
     }
 
-    replay_from_json(json, controller);
+    optional_from_json(controller.replay, json, "Replay");
 
     return controller;
 }
@@ -343,7 +328,7 @@ auto to_json(const LinController& controller) -> json11::Json
     {
         json["UseTraceSinks"] = to_json(controller.useTraceSinks);
     }
-    replay_to_json(json, controller);
+    optional_to_json(json, controller.replay);
 
     return json;
 }
@@ -365,7 +350,7 @@ auto from_json<LinController>(const json11::Json& json) -> LinController
         controller.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
     }
 
-    replay_from_json(json, controller);
+    optional_from_json(controller.replay, json, "Replay");
 
     return controller;
 }
@@ -411,7 +396,7 @@ auto to_json(const EthernetController& controller) -> json11::Json
         json["UseTraceSinks"] = to_json(controller.useTraceSinks);
     }
 
-    replay_to_json(json, controller);
+    optional_to_json(json, controller.replay);
 
     return json;
 }
@@ -428,8 +413,7 @@ auto from_json<EthernetController>(const json11::Json& json) -> EthernetControll
     {
         controller.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
     }
-
-    replay_from_json(json, controller);
+    optional_from_json(controller.replay, json, "Replay");
 
     return controller;
 }
@@ -676,7 +660,7 @@ auto to_json(const FlexrayController& controller) -> json11::Json
         json["UseTraceSinks"] = to_json(controller.useTraceSinks);
     }
 
-    replay_to_json(json, controller);
+    optional_to_json(json, controller.replay);
 
     return json;
 }
@@ -704,24 +688,23 @@ auto from_json<FlexrayController>(const json11::Json& json) -> FlexrayController
         controller.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
     }
 
-    replay_from_json(json, controller);
+    optional_from_json(controller.replay, json, "Replay");
 
     return controller;
 }
 
 auto to_json(const DigitalIoPort& port) -> json11::Json
 {
-    auto json = json11::Json::object{
-        {"Name",  port.name},
-        {"value", port.initvalue}
-    };
+    json11::Json::object json;
+    json["Name"] = port.name;
+    json["value"] = port.initvalue;
 
     if (!port.useTraceSinks.empty())
     {
         json["UseTraceSinks"] = to_json(port.useTraceSinks);
     }
 
-    replay_to_json(json, port);
+    optional_to_json(json, port.replay);
 
     return json;
 }
@@ -747,7 +730,7 @@ auto from_json(const json11::Json& json) -> DigitalIoPort
             port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
         }
 
-        replay_from_json(json, port);
+        optional_from_json(port.replay, json, "Replay");
 
         return port;
     }
@@ -761,7 +744,8 @@ auto from_json(const json11::Json& json) -> DigitalIoPort
         port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
     }
 
-    replay_from_json(json, port);
+    optional_from_json(port.replay, json, "Replay");
+
 
     return port;
 }
@@ -779,7 +763,7 @@ auto to_json(const AnalogIoPort& port) -> json11::Json
         json["UseTraceSinks"] = to_json(port.useTraceSinks);
     }
 
-    replay_to_json(json, port);
+    optional_to_json(json, port.replay);
 
     return json;
 }
@@ -808,7 +792,7 @@ auto from_json(const json11::Json& json) -> AnalogIoPort
         {
             port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
         }
-        replay_from_json(json, port);
+        optional_from_json(port.replay, json, "Replay");
 
         return port;
     }
@@ -823,7 +807,7 @@ auto from_json(const json11::Json& json) -> AnalogIoPort
         port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
     }
 
-    replay_from_json(json, port);
+    optional_from_json(port.replay, json, "Replay");
 
     return port;
 }
@@ -842,7 +826,7 @@ auto to_json(const PwmPort& port) -> json11::Json
         json["UseTraceSinks"] = to_json(port.useTraceSinks);
     }
 
-    replay_to_json(json, port);
+    optional_to_json(json, port.replay);
 
     return json;
 }
@@ -873,7 +857,7 @@ auto from_json(const json11::Json& json) -> PwmPort
             port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
         }
     
-        replay_from_json(json, port);
+        optional_from_json(port.replay, json, "Replay");
 
         return port;
     }
@@ -888,7 +872,7 @@ auto from_json(const json11::Json& json) -> PwmPort
         port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
     }
 
-    replay_from_json(json, port);
+    optional_from_json(port.replay, json, "Replay");
 
     return port;
 }
@@ -905,7 +889,7 @@ auto to_json(const PatternPort& port) -> json11::Json
         json["UseTraceSinks"] = to_json(port.useTraceSinks);
     }
 
-    replay_to_json(json, port);
+    optional_to_json(json, port.replay);
 
     return json;
 }
@@ -931,7 +915,7 @@ auto from_json(const json11::Json& json) -> PatternPort
             port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
         }
 
-        replay_from_json(json, port);
+        optional_from_json(port.replay, json, "Replay");
 
         return port;
     }
@@ -945,7 +929,7 @@ auto from_json(const json11::Json& json) -> PatternPort
         port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
     }
 
-    replay_from_json(json, port);
+    optional_from_json(port.replay, json, "Replay");
 
     return port;
 }
@@ -992,7 +976,7 @@ auto to_json(const GenericPort& port) -> json11::Json
         json["UseTraceSinks"] = to_json(port.useTraceSinks);
     }
 
-    replay_to_json(json, port);
+    optional_to_json(json, port.replay);
     return json;
 }
 
@@ -1014,7 +998,7 @@ auto from_json(const json11::Json& json) -> GenericPort
         port.useTraceSinks = from_json<std::vector<std::string>>(json["UseTraceSinks"].array_items());
     }
 
-    replay_from_json(json, port);
+    optional_from_json(port.replay, json, "Replay");
 
     return port;
 }
@@ -1089,7 +1073,7 @@ auto to_json(const Participant& participant) -> json11::Json
             {
                 if (port.direction == direction)
                 {
-                    json.emplace_back(to_json(port));
+                    json.push_back(to_json(port));
                 }
             }
             return json;
@@ -1109,7 +1093,7 @@ auto to_json(const Participant& participant) -> json11::Json
                 {
                     json["UseTraceSinks"] = to_json(sub.useTraceSinks);
                 }
-                replay_to_json(json, sub);
+                optional_to_json(json, sub.replay);
                 result.push_back(json);
             }
             return result;
@@ -1173,7 +1157,7 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
                             from_json<std::vector<std::string>>(subscriber["UseTraceSinks"].array_items());
                     }
 
-                    replay_from_json(subscriber, port);
+                    optional_from_json(port.replay, subscriber, "Replay");
                 }
                 result.emplace_back(std::move(port));
 
@@ -1184,7 +1168,7 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
     // assign Input Ports
     // Input Ports are specified simply by name. So we have to infer the corresponding *IoPort objects.
     auto inports_from_json =
-        [json](auto&& portList, auto&& propertyName)
+        [&json](auto&& portList, auto&& propertyName)
         {
             //TODO we should generalize the Port/Service/Controller structure, so we don't have
             //     to implement special parsing cases.
@@ -1200,10 +1184,11 @@ auto from_json<Participant>(const json11::Json& json) -> Participant
                 }
                 else
                 {
-                    port = from_json<PortType>(inPort);
+                    port.name = inPort["Name"].string_value();
                     port.direction = PortDirection::In;
+                    optional_from_json(port.useTraceSinks, inPort, "UseTraceSinks");
+                    optional_from_json(port.replay, inPort, "Replay");
                 }
-                replay_from_json(json, port);
 
                 portList.push_back(port);
             }
@@ -1809,8 +1794,7 @@ auto from_json<TraceSource>(const json11::Json& json) -> TraceSource
     source.name = json["Name"].string_value();
     source.inputPath = json["InputPath"].string_value();
     source.type = from_json<TraceSource::Type>(json["Type"]);
-    if (json.object_items().count("Enabled"))
-        source.enabled = json["Enabled"].bool_value();
+    optional_from_json(source, json, "Enabled");
     return source;
 }
 
@@ -1847,14 +1831,9 @@ auto to_json(const Replay& cfg) -> json11::Json
     auto json = json11::Json::object{
         {"UseTraceSource", cfg.useTraceSource}
     };
-    if (cfg.withReplayConfigs.size() > 0)
+    if (cfg.direction != Replay::Direction::Undefined)
     {
-        json11::Json::array configs;
-        for (const auto& replayCfg : cfg.withReplayConfigs)
-        {
-            configs.push_back(to_json(replayCfg));
-        }
-        json["ReplayConfigs"] = configs;
+        json["Direction"] = to_json(cfg.direction);
     }
     return json;
 }
@@ -1862,72 +1841,43 @@ auto to_json(const Replay& cfg) -> json11::Json
 template <>
 auto from_json<Replay>(const json11::Json& json) -> Replay
 {
-    Replay replay{};
+    Replay replay;
     replay.useTraceSource = json["UseTraceSource"].string_value();
-    if (json.object_items().count("ReplayConfigs"))
-    {
-        for (const auto& replayJs : json["ReplayConfigs"].array_items())
-        {
-            auto replayCfg = from_json<ReplayConfig>(replayJs);
-            if (replayCfg.direction != ib::cfg::ReplayConfig::Direction::Undefined)
-            {
-                replay.withReplayConfigs.emplace_back(from_json<ReplayConfig>(replayJs));
-            }
-        }
-    }
+    optional_from_json(replay.direction, json, "Direction");
+
     return replay;
 }
 
-auto to_json(const ReplayConfig& cfg) -> json11::Json
+auto to_json(const Replay::Direction& cfg) -> json11::Json
 {
-    auto json = json11::Json::object{};
-    auto Direction_to_js = [&json, &cfg]() {
-        switch (cfg.direction)
-        {
-        case ReplayConfig::Direction::Send:
-            json["Direction"] = "Send";
-            break;
-        case ReplayConfig::Direction::Receive:
-            json["Direction"] = "Receive";
-            break;
-        case ReplayConfig::Direction::Both:
-            json["Direction"] = "Both";
-            break;
-        case ReplayConfig::Direction::Undefined:
-            json["Direction"] = "Undefined";
-            break;
-        }
-    };
-    if (cfg.direction != ReplayConfig::Direction::Undefined)
+    switch (cfg)
     {
-        Direction_to_js();
+    case Replay::Direction::Send:
+        return "Send";
+    case Replay::Direction::Receive:
+        return  "Receive";
+    case Replay::Direction::Both:
+        return "Both";
+    case Replay::Direction::Undefined:
+        return "Undefined";
+    default:
+        return "";
     }
-
-    return json;
 }
 
 template <>
-auto from_json<ReplayConfig>(const json11::Json& json) -> ReplayConfig
+auto from_json<Replay::Direction>(const json11::Json& json) -> Replay::Direction
 {
-    ReplayConfig cfg{};
-    auto js_to_Direction = [](auto str)
-    {
-        if (str == "Undefined" || str == "")
-            return ReplayConfig::Direction::Undefined;
-        if (str == "Send")
-            return ReplayConfig::Direction::Send;
-        if (str == "Receive")
-            return ReplayConfig::Direction::Receive;
-        if (str == "Both")
-            return ReplayConfig::Direction::Both;
-        throw Misconfiguration{"Unknown ReplayConfig::Direction Type: " + str};
-    };
-
-    if (json.object_items().count("Direction") > 0)
-    {
-        cfg.direction = js_to_Direction(json["Direction"].string_value());
-    }
-    return cfg;
+    auto&& str = json.string_value();
+    if (str == "Undefined" || str == "")
+        return Replay::Direction::Undefined;
+    if (str == "Send")
+        return Replay::Direction::Send;
+    if (str == "Receive")
+        return Replay::Direction::Receive;
+    if (str == "Both")
+        return Replay::Direction::Both;
+    throw Misconfiguration{"Unknown Replay::Direction Type: " + str};
 }
 
 template <>

@@ -2,6 +2,8 @@
 
 #include "VAsioConfigBuilder.hpp"
 
+#include <algorithm>
+
 #include "ib/cfg/string_utils.hpp"
 
 namespace ib {
@@ -20,7 +22,9 @@ auto ConfigBuilder::ConfigureRegistry() -> RegistryBuilder&
 auto ConfigBuilder::Build() -> Config
 {
     _config.registry = _registry.Build();
-    return std::move(_config);
+    Config newConfig;
+    std::swap(_config, newConfig);
+    return newConfig;
 }
 
 } // namespace VAsio

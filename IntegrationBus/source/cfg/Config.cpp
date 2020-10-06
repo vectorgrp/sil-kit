@@ -1,5 +1,3 @@
-#include "..\..\include\ib\cfg\Config.hpp"
-#include "..\..\include\ib\cfg\Config.hpp"
 #include "Config.hpp"
 #include "JsonConfig.hpp"
 
@@ -11,7 +9,6 @@
 
 #include "tuple_tools/for_each.hpp"
 #include "ib/cfg/string_utils.hpp"
-
 
 namespace ib {
 namespace cfg {
@@ -289,11 +286,13 @@ void UpdateGenericSubscribers(Config& config)
 
                 continue;
             }
+            assert(genericPublisher.linkId >= 0);
 
             genericPublisherPerLink[genericPublisher.linkId] = &genericPublisher;
         }
         for (auto&& genericSubscriber : participant.genericSubscribers)
         {
+            assert(genericSubscriber.linkId >= 0);
             genericSubscribersPerLink[genericSubscriber.linkId].push_back(&genericSubscriber);
         }
     }
@@ -569,13 +568,8 @@ bool operator==(const TraceSource& lhs, const TraceSource& rhs)
 bool operator==(const Replay& lhs, const Replay& rhs)
 {
     return lhs.useTraceSource == rhs.useTraceSource
-        && lhs.withReplayConfigs == rhs.withReplayConfigs
-        ;
-}
-
-bool operator==(const ReplayConfig& lhs, const ReplayConfig& rhs)
-{
-    return lhs.direction == rhs.direction
+        && lhs.FilterMessage == rhs.FilterMessage
+        && lhs.direction == rhs.direction
         ;
 }
 
@@ -628,6 +622,7 @@ std::istream& from_istream(std::istream& in, std::array<uint8_t, 6>& macAddr)
     }
     return in;
 }
+
 
 auto Config::FromJsonString(const std::string& jsonString) -> Config
 {

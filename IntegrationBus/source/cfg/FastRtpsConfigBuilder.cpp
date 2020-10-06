@@ -2,6 +2,8 @@
 
 #include "FastRtpsConfigBuilder.hpp"
 
+#include <algorithm>
+
 #include "ib/cfg/string_utils.hpp"
 
 namespace ib {
@@ -83,7 +85,9 @@ auto ConfigBuilder::Build() -> Config
         throw Misconfiguration{"Invalid FastRTPS discovery type: " + to_string(_config.discoveryType)};
     }
 
-    return std::move(_config);
+    Config newConfig{};
+    std::swap(_config, newConfig);
+    return newConfig;
 }
 
 } // namespace FastRtps

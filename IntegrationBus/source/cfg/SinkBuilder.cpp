@@ -2,6 +2,8 @@
 
 #include "SinkBuilder.hpp"
 
+#include <algorithm>
+
 #include "LoggerBuilder.hpp"
 
 namespace ib {
@@ -34,7 +36,9 @@ auto SinkBuilder::Build() -> Sink
 {
     if (_sink.type == cfg::Sink::Type::File && _sink.logname.empty())
         throw Misconfiguration("A file sink needs a logname to be set!");
-    return std::move(_sink);
+    Sink newConfig{};
+    std::swap(_sink, newConfig);
+    return newConfig;
 }
 
 } // namespace cfg

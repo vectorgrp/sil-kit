@@ -109,9 +109,10 @@ struct TraceSource
     bool enabled{true};
 };
 
-struct ReplayConfig
+struct Replay
 {
-    //Config value for direction: { "Direction" : enum }
+    std::string useTraceSource;
+
     enum class Direction
     {
         Undefined,
@@ -120,15 +121,7 @@ struct ReplayConfig
         Both,
     };
     Direction direction{Direction::Undefined};
-
-    //Reverse message I/O direction: { "ReverseMessageFlow" : true }
-    //Mdf4 data selector: { "SelectMdfChannel" : string }
-};
-
-struct Replay
-{
-    std::string useTraceSource{};
-    std::vector<ReplayConfig> withReplayConfigs;
+    std::vector<std::string> FilterMessage;
 };
 
 struct CanController
@@ -214,7 +207,7 @@ struct IoPort
     int16_t linkId{-1};
     PortDirection direction{PortDirection::InOut};
 
-    ValueT initvalue;
+    ValueT initvalue{};
     std::string unit;
 
     std::vector<std::string> useTraceSinks;
@@ -518,7 +511,6 @@ IntegrationBusAPI bool operator==(const GenericPort& lhs, const GenericPort& rhs
 IntegrationBusAPI bool operator==(const TraceSink& lhs, const TraceSink& rhs);
 IntegrationBusAPI bool operator==(const TraceSource& lhs, const TraceSource& rhs);
 IntegrationBusAPI bool operator==(const Replay& lhs, const Replay& rhs);
-IntegrationBusAPI bool operator==(const ReplayConfig& lhs, const ReplayConfig& rhs);
 
 IntegrationBusAPI std::ostream& operator<<(std::ostream& out, const Version& version);
 IntegrationBusAPI std::istream& operator>>(std::istream& in, Version& version);

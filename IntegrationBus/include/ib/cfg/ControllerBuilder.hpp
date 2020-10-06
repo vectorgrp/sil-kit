@@ -4,6 +4,8 @@
 
 #include "ib/IbMacros.hpp"
 
+#include <memory>
+
 #include "Config.hpp"
 
 #include "fwd_decl.hpp"
@@ -37,7 +39,7 @@ public:
 private:
     ControllerCfg _controller;
     std::string _link;
-    ReplayBuilder _replayBuilder;
+    std::unique_ptr<ReplayBuilder> _replayBuilder;
 };
 
 // ================================================================================
@@ -88,7 +90,10 @@ auto ControllerBuilder<ControllerCfg>::Build() -> ControllerCfg
     {
         WithLink(_controller.name);
     }
-    _controller.replay = _replayBuilder.Build();
+    if(_replayBuilder)
+    {
+        _controller.replay = _replayBuilder->Build();
+    }
 
     return std::move(_controller);
 }
@@ -104,7 +109,8 @@ auto ControllerBuilder<ControllerCfg>::WithTraceSink(std::string sinkName) -> Co
 template<class ControllerCfg>
 auto ControllerBuilder<ControllerCfg>::WithReplay(std::string sourceName) -> ReplayBuilder&
 {
-    return _replayBuilder.UseTraceSource(sourceName);
+    _replayBuilder = std::make_unique<ReplayBuilder>(sourceName);
+    return *_replayBuilder;
 }
 
 } // namespace cfg

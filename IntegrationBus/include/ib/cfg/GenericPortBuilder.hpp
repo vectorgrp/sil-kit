@@ -4,6 +4,8 @@
 
 #include "ib/IbMacros.hpp"
 
+#include <memory>
+
 #include "Config.hpp"
 
 #include "fwd_decl.hpp"
@@ -35,7 +37,7 @@ public:
 private:
     GenericPort _port;
     std::string _link;
-    ReplayBuilder _replayBuilder;
+    std::unique_ptr<ReplayBuilder> _replayBuilder;
 };
 
 // ================================================================================

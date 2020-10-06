@@ -19,7 +19,7 @@ ConfigBuilder::ConfigBuilder(std::string name)
 
 auto ConfigBuilder::Build() -> Config
 {
-    _config.simulationSetup = SimulationSetup().Build();
+    _config.simulationSetup = _simulationSetup->Build();
     _config.middlewareConfig.fastRtps = _fastRtpsConfig->Build();
     _config.middlewareConfig.vasio = _vasioConfig->Build();
     _config.extensionConfig = _extensionConfig.Build();
@@ -28,7 +28,9 @@ auto ConfigBuilder::Build() -> Config
     // Note: Some steps (AssignEndpointAddresses, AssignLinkIds) are done by this builder on-the-fly
     UpdateGenericSubscribers(_config);
 
-    return _config;
+    Config newConfig;
+    std::swap(_config, newConfig);
+    return newConfig;
 }
 
 auto ConfigBuilder::SimulationSetup() -> SimulationSetupBuilder&

@@ -2,6 +2,8 @@
 
 #include "ib/cfg/NetworkSimulatorBuilder.hpp"
 
+#include <algorithm>
+
 namespace ib {
 namespace cfg {
 
@@ -31,9 +33,9 @@ auto NetworkSimulatorBuilder::WithSwitches(std::initializer_list<std::string> sw
 
 auto NetworkSimulatorBuilder::Build() -> NetworkSimulator
 {
-    auto builtConfig = _config;
-    _config = decltype(_config){};
-    return builtConfig;
+    NetworkSimulator newConfig;
+    std::swap(_config, newConfig);
+    return newConfig;
 }
 
 auto NetworkSimulatorBuilder::WithTraceSink(std::string sinkName) -> NetworkSimulatorBuilder&

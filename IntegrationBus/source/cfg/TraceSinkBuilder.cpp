@@ -1,5 +1,7 @@
 #include "TraceSinkBuilder.hpp"
 
+#include <algorithm>
+
 
 namespace ib {
 namespace cfg {
@@ -18,7 +20,9 @@ auto TraceSinkBuilder::operator->() -> TraceSinkBuilder*
 
 auto TraceSinkBuilder::Build() -> TraceSink
 {
-	return std::move(_traceSink);
+	TraceSink newConfig{};
+	std::swap(_traceSink, newConfig);
+	return newConfig;
 }
 
 auto TraceSinkBuilder::WithType(TraceSink::Type type) -> TraceSinkBuilder&

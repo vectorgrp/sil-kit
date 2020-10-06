@@ -2,6 +2,8 @@
 
 #include "GenericPortBuilder.hpp"
 
+#include <algorithm>
+
 #include "ParticipantBuilder.hpp"
 #include "SimulationSetupBuilder.hpp"
 
@@ -65,15 +67,21 @@ auto GenericPortBuilder::Build() -> GenericPort
     {
         WithLink(_port.name);
     }
-    _port.replay = _replayBuilder.Build();
+    if (_replayBuilder)
+    {
+        _port.replay = _replayBuilder->Build();
+    }
 
-    return std::move(_port);
+    GenericPort newConfig{};
+    std::swap(_port, newConfig);
+    return newConfig;
 }
 
 
 auto GenericPortBuilder::WithReplay(std::string sourceName) -> ReplayBuilder&
 {
-    return _replayBuilder.UseTraceSource(sourceName);
+    _replayBuilder = std::make_unique<ReplayBuilder>(sourceName);
+    return *_replayBuilder;
 }
 
 } // namespace cfg

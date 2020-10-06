@@ -7,7 +7,6 @@
 #include "Config.hpp"
 
 #include "fwd_decl.hpp"
-#include "ParentBuilder.hpp"
 
 namespace ib {
 namespace cfg {
@@ -22,8 +21,8 @@ public:
     IntegrationBusAPI auto Build() -> TraceSink;
 
     IntegrationBusAPI auto WithType(TraceSink::Type type) -> TraceSinkBuilder&;
-    IntegrationBusAPI auto WithOutputPath(std::string) -> TraceSinkBuilder&;
-    IntegrationBusAPI auto Enabled(bool) -> TraceSinkBuilder&;
+    IntegrationBusAPI auto WithOutputPath(std::string outputPath) -> TraceSinkBuilder&;
+    IntegrationBusAPI auto Enabled(bool isEnabled) -> TraceSinkBuilder&;
 
 private:
     TraceSink _traceSink{};

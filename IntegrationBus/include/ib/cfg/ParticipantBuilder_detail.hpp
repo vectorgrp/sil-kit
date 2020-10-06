@@ -2,6 +2,7 @@
 #pragma once
 
 #include <string>
+#include <cassert>
 
 namespace ib {
 namespace cfg {
@@ -14,12 +15,18 @@ namespace detail {
 template<class Builder>
 auto ParticipantBuilder_MakeQualifiedName(Builder &builder, const std::string controllerName) -> std::string
 {
-    return builder.Parent()->MakeQualifiedName(controllerName);
+    auto* participantBuilder = builder.Parent();
+    assert(participantBuilder != nullptr);
+    return participantBuilder->MakeQualifiedName(controllerName);
 }
 template<class Builder, typename LinkType>
-auto ParticipantBuilder_AddOrGetLink(Builder &builder, LinkType linkType, const std::string& linkName) -> LinkBuilder&
+auto ParticipantBuilder_AddOrGetLink(Builder& builder, LinkType linkType, const std::string& linkName) -> LinkBuilder&
 {
-    return builder->Parent()->AddOrGetLink(linkType, linkName);
+    auto* participantBuilder = builder.Parent();
+    assert(participantBuilder != nullptr);
+    auto* simBuilder = participantBuilder->Parent();
+    assert(simBuilder != nullptr);
+    return simBuilder->AddOrGetLink(linkType, linkName);
 }
 
 } // namespace detail

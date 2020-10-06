@@ -2,6 +2,7 @@
 
 #include "ParticipantControllerBuilder.hpp"
 
+#include <algorithm>
 
 namespace ib {
 namespace cfg {
@@ -15,10 +16,10 @@ auto ParticipantControllerBuilder::Build() -> ParticipantController
 {
     if (_config.syncType == SyncType::Unsynchronized)
         throw Misconfiguration{"ParticipantController must specify valid SyncType"};
-    
-    ParticipantController newConfig;
+   
+    ParticipantController newConfig{};
     std::swap(_config, newConfig);
-    return std::move(newConfig);
+    return newConfig;
 }
 
 auto ParticipantControllerBuilder::WithSyncType(SyncType syncType) -> ParticipantControllerBuilder&

@@ -24,7 +24,9 @@ auto SimulationSetupBuilder::Build() -> SimulationSetup
     if (_timeSync)
         _config.timeSync = _timeSync->Build();
 
-    return std::move(_config);
+    SimulationSetup newConfig{};
+    std::swap(_config, newConfig);
+    return newConfig;
 }
 
 auto SimulationSetupBuilder::AddOrGetLink(Link::Type linkType, const std::string& name) -> LinkBuilder&

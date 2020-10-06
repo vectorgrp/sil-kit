@@ -2,6 +2,7 @@
 
 #include "TraceSourceBuilder.hpp"
 
+#include <algorithm>
 
 namespace ib {
 namespace cfg {
@@ -11,7 +12,9 @@ TraceSourceBuilder::TraceSourceBuilder(std::string name)
 	_traceSource.name = std::move(name);
 }
 
-TraceSourceBuilder::~TraceSourceBuilder() = default;
+TraceSourceBuilder::~TraceSourceBuilder()
+{
+}
 
 auto TraceSourceBuilder::operator->() -> TraceSourceBuilder*
 {
@@ -20,9 +23,9 @@ auto TraceSourceBuilder::operator->() -> TraceSourceBuilder*
 
 auto TraceSourceBuilder::Build() -> TraceSource
 {
-	TraceSource copy = _traceSource;
-	_traceSource = TraceSource{};
-	return copy;
+	TraceSource newConfig{};
+	std::swap(_traceSource, newConfig);
+	return newConfig;
 }
 
 auto TraceSourceBuilder::WithType(TraceSource::Type type) -> TraceSourceBuilder&
@@ -31,17 +34,12 @@ auto TraceSourceBuilder::WithType(TraceSource::Type type) -> TraceSourceBuilder&
 	return *this;
 }
 
-auto TraceSourceBuilder::WithInputPath(std::string outputPath) -> TraceSourceBuilder&
+auto TraceSourceBuilder::WithInputPath(std::string inputPath) -> TraceSourceBuilder&
 {
-	_traceSource.inputPath = std::move(outputPath);
+	_traceSource.inputPath = std::move(inputPath);
 	return *this;
 }
 
-auto TraceSourceBuilder::Enabled(bool isEnabled) -> TraceSourceBuilder&
-{
-	_traceSource.enabled = isEnabled;
-	return *this;
-}
 
 } // namespace cfg
 } // namespace ib

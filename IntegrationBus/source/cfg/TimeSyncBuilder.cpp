@@ -36,7 +36,9 @@ auto TimeSyncBuilder::WithSyncPolicy(TimeSync::SyncPolicy syncPolicy) -> TimeSyn
 
 auto TimeSyncBuilder::Build() -> TimeSync
 {
-    return _config;
+    TimeSync newConfig{};
+    std::swap(_config, newConfig);
+    return newConfig;
 }
 
 

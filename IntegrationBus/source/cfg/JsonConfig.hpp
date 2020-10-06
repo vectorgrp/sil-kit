@@ -109,7 +109,7 @@ auto from_json<TraceSource::Type>(const json11::Json& json) -> TraceSource::Type
 template <>
 auto from_json<Replay>(const json11::Json& json) -> Replay;
 template <>
-auto from_json<ReplayConfig>(const json11::Json& json) -> ReplayConfig;
+auto from_json<Replay::Direction>(const json11::Json& json) -> Replay::Direction;
 
 auto to_json(uint16_t value) -> json11::Json;
 auto to_json(int32_t value) -> json11::Json;
@@ -149,7 +149,7 @@ auto to_json(const TraceSink::Type& type) -> json11::Json;
 auto to_json(const TraceSource& cfg) -> json11::Json;
 auto to_json(const TraceSource::Type& cfg) -> json11::Json;
 auto to_json(const Replay& cfg) -> json11::Json;
-auto to_json(const ReplayConfig& cfg) -> json11::Json;
+auto to_json(const Replay::Direction& cfg) -> json11::Json;
 
 
 template<typename T, std::enable_if_t<is_std_vector<T>::value, int> = 0>

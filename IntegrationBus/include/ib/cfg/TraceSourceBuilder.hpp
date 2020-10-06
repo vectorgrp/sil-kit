@@ -7,7 +7,6 @@
 #include "Config.hpp"
 
 #include "fwd_decl.hpp"
-#include "ParentBuilder.hpp"
 
 namespace ib {
 namespace cfg {
@@ -22,11 +21,10 @@ public:
     IntegrationBusAPI auto Build() -> TraceSource;
 
     IntegrationBusAPI auto WithType(TraceSource::Type type) -> TraceSourceBuilder&;
-    IntegrationBusAPI auto WithInputPath(std::string) -> TraceSourceBuilder&;
-    IntegrationBusAPI auto Enabled(bool) -> TraceSourceBuilder&;
+    IntegrationBusAPI auto WithInputPath(std::string inputPath) -> TraceSourceBuilder&;
 
 private:
-    TraceSource _traceSource{};
+    TraceSource _traceSource;
 };
 
 // ================================================================================

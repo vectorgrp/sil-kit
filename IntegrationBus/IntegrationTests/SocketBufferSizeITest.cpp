@@ -76,7 +76,7 @@ protected:
     std::unique_ptr<IComAdapterInternal> subComAdapter;
 };
     
-TEST_F(SocketBufferSizeITest, use_custom_socket_buffer_size)
+TEST_F(SocketBufferSizeITest, DISABLED_use_custom_socket_buffer_size)
 {
     Subscribe();
 

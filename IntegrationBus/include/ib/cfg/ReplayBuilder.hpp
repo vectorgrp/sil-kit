@@ -14,18 +14,16 @@ namespace cfg {
 class ReplayBuilder 
 {
 public:
-    IntegrationBusAPI ReplayBuilder();
+    IntegrationBusAPI ReplayBuilder(std::string traceSourceName);
     IntegrationBusAPI ~ReplayBuilder();
 
     IntegrationBusAPI auto operator->() -> ReplayBuilder*;
     IntegrationBusAPI auto Build() -> Replay;
 
-    IntegrationBusAPI auto UseTraceSource(std::string traceSourceName) -> ReplayBuilder&;
-
-    IntegrationBusAPI auto WithDirection( ReplayConfig::Direction dir) -> ReplayBuilder&;
+    IntegrationBusAPI auto WithDirection( Replay::Direction dir) -> ReplayBuilder&;
 
 private:
-    Replay _replay{};
+    Replay _replay;
 };
 
 // ================================================================================

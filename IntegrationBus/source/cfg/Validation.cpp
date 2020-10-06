@@ -149,8 +149,7 @@ void ValidateTraceSources(const Participant& participant)
 
             if (ctrl.replay.useTraceSource.empty())
             {
-                ss << "has an empty useTraceSource";
-                throw ib::cfg::Misconfiguration{ss.str()};
+                continue;
             }
 
             if (!sourceExists(ctrl.replay.useTraceSource))

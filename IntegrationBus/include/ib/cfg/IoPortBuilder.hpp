@@ -4,6 +4,8 @@
 
 #include "ib/IbMacros.hpp"
 
+#include <memory>
+
 #include "Config.hpp"
 
 #include "fwd_decl.hpp"
@@ -38,7 +40,7 @@ public:
 private:
     IoPortCfg _port;
     std::string _link;
-    ReplayBuilder _replayBuilder;
+    std::unique_ptr<ReplayBuilder> _replayBuilder;
 };
 
 // ================================================================================
@@ -107,7 +109,8 @@ auto IoPortBuilder<IoPortCfg>::WithTraceSink(std::string sinkname) -> IoPortBuil
 template<class IoPortCfg>
 auto IoPortBuilder<IoPortCfg>::WithReplay(std::string sourceName) -> ReplayBuilder&
 {
-    return _replayBuilder.UseTraceSource(sourceName);
+    _replayBuilder = std::make_unique<ReplayBuilder>(sourceName);
+    return *_replayBuilder;
 }
 
 template<class IoPortCfg>
@@ -117,7 +120,10 @@ auto IoPortBuilder<IoPortCfg>::Build() -> IoPortCfg
     {
         WithLink(_port.name);
     }
-    _port.replay = _replayBuilder.Build();
+    if (_replayBuilder)
+    {
+        _port.replay = _replayBuilder->Build();
+    }
 
     return std::move(_port);
 }

@@ -2,6 +2,8 @@
 
 #include "LoggerBuilder.hpp"
 
+#include <algorithm>
+
 #include "ParticipantBuilder.hpp"
 
 namespace ib {
@@ -16,7 +18,9 @@ auto LoggerBuilder::Build() -> Logger
         _logger.sinks.emplace_back(builder.Build());
     }
 
-    return std::move(_logger);
+    Logger newConfig{};
+    std::swap(_logger, newConfig);
+    return newConfig;
 }
 
 auto LoggerBuilder::AddSink(Sink::Type type) -> SinkBuilder&

@@ -1,20 +1,18 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "ReplayBuilder.hpp"
+#include <algorithm>
 
 
 namespace ib {
 namespace cfg {
 
-ReplayBuilder::ReplayBuilder() = default;
-ReplayBuilder::~ReplayBuilder() = default;
-
-auto ReplayBuilder::UseTraceSource(std::string traceSourceName) -> ReplayBuilder&
+ReplayBuilder::ReplayBuilder(std::string traceSourceName)
 {
 	_replay.useTraceSource = std::move(traceSourceName);
-	return *this;
 }
 
+ReplayBuilder::~ReplayBuilder() = default;
 
 auto ReplayBuilder::operator->() -> ReplayBuilder*
 {
@@ -23,15 +21,15 @@ auto ReplayBuilder::operator->() -> ReplayBuilder*
 
 auto ReplayBuilder::Build() -> Replay
 {
-	return std::move(_replay);
+	Replay newConfig{};
+	std::swap(_replay, newConfig);
+	return newConfig;
 }
 
 
-auto ReplayBuilder::WithDirection( ReplayConfig::Direction dir) -> ReplayBuilder&
+auto ReplayBuilder::WithDirection( Replay::Direction dir) -> ReplayBuilder&
 {
-	ReplayConfig cfg;
-	cfg.direction = dir;
-	_replay.withReplayConfigs.emplace_back(std::move(cfg));
+	_replay.direction = dir;
 
 	return *this;
 }
