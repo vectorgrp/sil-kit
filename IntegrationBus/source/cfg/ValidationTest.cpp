@@ -120,4 +120,34 @@ TEST(TestMwCfgValidation, throw_if_usetracesinks_refers_to_empty_sink_name)
 
     EXPECT_THROW(Validate(ibConfig.simulationSetup, ibConfig), Misconfiguration);
 }
+
+TEST(TestMwCfgValidation, throw_if_replay_refers_to_empty_source_name)
+{
+    Config ibConfig;
+    ibConfig.simulationSetup.timeSync.syncPolicy = TimeSync::SyncPolicy::Loose;
+    ibConfig.simulationSetup.timeSync.tickPeriod = 0ns;
+
+    TraceSource source;
+    source.name = "Source1";
+    source.enabled = true;
+    source.type = TraceSource::Type::Mdf4File;
+    source.inputPath = "some/file.mf4";
+
+    Participant participantConfig;
+    participantConfig.name = "P1";
+    participantConfig.traceSources.emplace_back(std::move(source));
+
+    ReplayConfig replayConfig;
+    replayConfig.direction = ReplayConfig::Direction::Send;
+    EthernetController controller;
+    controller.name = "Eth1";
+    controller.replay.useTraceSource = "";
+
+    controller.replay.withReplayConfigs.emplace_back(std::move(replayConfig));
+    participantConfig.ethernetControllers.emplace_back(std::move(controller));
+    ibConfig.simulationSetup.participants.emplace_back(std::move(participantConfig));
+
+    EXPECT_THROW(Validate(ibConfig.simulationSetup, ibConfig), Misconfiguration);
+}
+
 } // anonymous namespace

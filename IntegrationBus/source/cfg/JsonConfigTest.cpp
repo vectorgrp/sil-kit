@@ -930,7 +930,7 @@ TEST_F(JsonConfigTest, configure_controllers_with_replay)
     EXPECT_TRUE(compareReplay(pold.pwmPorts, pnew.pwmPorts));
 }
 
-TEST_F(JsonConfigTest, configure_replayconfigs)
+TEST_F(JsonConfigTest, configure_replayconfig_direction)
 {
     auto&& participant = simulationSetup.AddParticipant("P1");
     participant

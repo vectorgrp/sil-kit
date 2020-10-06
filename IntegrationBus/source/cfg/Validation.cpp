@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <set>
 
 using namespace std::chrono_literals;
 
@@ -18,7 +19,9 @@ void Validate(const Config& config)
 void Validate(const SimulationSetup& testConfig, const Config& ibConfig)
 {
     for (auto& participant : testConfig.participants)
+    {
         Validate(participant, ibConfig);
+    }
     Validate(testConfig.timeSync, ibConfig);
 
     std::vector<mw::EndpointId> endpointIds;
@@ -56,48 +59,107 @@ void Validate(const SimulationSetup& testConfig, const Config& ibConfig)
     }
 }
 
-void Validate(const Participant& participant, const Config& /*ibConfig*/)
+namespace {
+
+void ValidateTraceSinks(const Participant& participant)
 {
-    //tracing related validation:
-    std::vector<std::string> sinkNames;
+    //  TraceSink validation
+    std::set<std::string> sinkNames;
     for(const auto& sink: participant.traceSinks)
     {
-        sinkNames.push_back(sink.name);
+        if (sink.name.empty())
+        {
+            throw ib::cfg::Misconfiguration{"TraceSink name must not be empty!"};
+        }
+        sinkNames.insert(sink.name);
     }
+
+    if (sinkNames.size() != participant.traceSinks.size())
+    {
+        throw ib::cfg::Misconfiguration{"TraceSinks must have unique names!"};
+    }
+
     auto sinkExists = [&sinkNames](const auto& name) -> bool {
         return std::end(sinkNames) != std::find(sinkNames.cbegin(), sinkNames.cend(), name);
     };
 
-    auto validateController = [&sinkExists, &participant](const auto& controllersConfig)
+    auto validateController = [&](const auto& controllersConfig)
     {
         for (const auto& ctrl : controllersConfig)
         {
+            std::stringstream ss;
+            ss << "Error: Participant \"" << participant.name << "/" << ctrl.name << "\" ";
+
             for (const auto& traceSink : ctrl.useTraceSinks)
             {
                 if (traceSink.empty())
                 {
-                    std::stringstream ss;
-                    ss << "Participant \"" << participant.name
-                        << "/" << ctrl.name
-                        << "\" has a UseTraceSinks field which refers to an empty TraceSink!"
-                        ;
-                    ss << "ERROR: " << ss.str() << std::endl;
+                    ss << "has an empty string in a  UseTraceSinks field!";
                     throw ib::cfg::Misconfiguration{ss.str()};
                 }
                 if (!sinkExists(traceSink))
                 {
-                    std::stringstream ss;
-                    ss << "Participant \"" << participant.name
-                        << "/" << ctrl.name
-                        << "\" has a UseTraceSinks field which refers to a non-existing TraceSink: "
-                        << traceSink
-                        ;
-                    ss << "ERROR: " << ss.str() << std::endl;
+                    ss << "has a UseTraceSinks field which refers to a non-existing TraceSink: " << traceSink;
                     throw ib::cfg::Misconfiguration{ss.str()};
                 }
             }
         }
+    };
 
+    validateController(participant.ethernetControllers);
+    validateController(participant.canControllers);
+    validateController(participant.linControllers);
+    validateController(participant.flexrayControllers);
+    validateController(participant.genericPublishers);
+    validateController(participant.genericSubscribers);
+    validateController(participant.analogIoPorts);
+    validateController(participant.digitalIoPorts);
+    validateController(participant.patternPorts);
+    validateController(participant.pwmPorts);
+}
+
+void ValidateTraceSources(const Participant& participant)
+{
+    //  TraceSource validation
+    std::set<std::string> sourceNames;
+    for (const auto& source : participant.traceSources)
+    {
+        if (source.name.empty())
+        {
+            throw ib::cfg::Misconfiguration{"TraceSource name must not be empty!"};
+        }
+        sourceNames.insert(source.name);
+    }
+
+    auto sourceExists = [&sourceNames](const auto& name) -> bool {
+        return std::end(sourceNames) != std::find(sourceNames.cbegin(), sourceNames.cend(), name);
+    };
+
+    if (sourceNames.size() != participant.traceSources.size())
+    {
+        throw ib::cfg::Misconfiguration{"TraceSources must have unique names!"};
+    }
+
+    auto validateController = [&](const auto& controllersConfig)
+    {
+        for (const auto& ctrl : controllersConfig)
+        {
+            std::stringstream ss;
+            ss << "Error: Participant \"" << participant.name << "/" << ctrl.name << "\" ";
+
+            if (ctrl.replay.useTraceSource.empty())
+            {
+                ss << "has an empty useTraceSource";
+                throw ib::cfg::Misconfiguration{ss.str()};
+            }
+
+            if (!sourceExists(ctrl.replay.useTraceSource))
+            {
+                ss << "has a Replay::useTraceSource field which refers to a non-existing TraceSource: "
+                    << ctrl.replay.useTraceSource;
+                throw ib::cfg::Misconfiguration{ss.str()};
+            }
+        }
     };
 
     validateController(participant.ethernetControllers);
@@ -111,6 +173,16 @@ void Validate(const Participant& participant, const Config& /*ibConfig*/)
     validateController(participant.patternPorts);
     validateController(participant.pwmPorts);
 
+}
+
+} //end anonymous namespace
+
+
+void Validate(const Participant& participant, const Config& /*ibConfig*/)
+{
+    ValidateTraceSinks(participant);
+    ValidateTraceSources(participant);
+
     //participant controller related validation:
     auto& participantController = participant.participantController;
     if (!participantController)
@@ -119,7 +191,7 @@ void Validate(const Participant& participant, const Config& /*ibConfig*/)
     if (participant.id == 0)
     {
         std::cerr << "ERROR: Participant " << participant.name << " uses ParticipantId 0!" << std::endl;
-        throw ib::cfg::Misconfiguration{ "ParticipantId must not be 0" };
+        throw ib::cfg::Misconfiguration{"ParticipantId must not be 0"};
     }
 
     if (participantController->syncType == SyncType::Unsynchronized)
@@ -156,6 +228,7 @@ void Validate(const TimeSync& testConfig, const Config& ibConfig)
         }
     }
 }
+
 
 } // namespace cfg
 } // namespace ib
