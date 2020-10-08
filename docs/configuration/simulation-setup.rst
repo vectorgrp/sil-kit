@@ -307,7 +307,7 @@ trace sink by name:
                 "SinkForCan"
             ]
         }
-    ],    
+    ],
 
     "TraceSinks": [
         {
@@ -324,8 +324,12 @@ trace sink by name:
 
 Multiple controllers can refer to a sink by name. However, each sink definition
 in a TraceSinks block must have a unique name.
-Currently, the :ref:`CanController<sec:cfg-participant-can>`, :ref:`LinController<sec:cfg-participant-lin>`, 
-:ref:`EthernetController<sec:cfg-participant-ethernet>`, and :ref:`FlexRayController<sec:cfg-participant-flexray>`
+Currently, the :ref:`CanController<sec:cfg-participant-can>`,
+:ref:`LinController<sec:cfg-participant-lin>`,
+:ref:`EthernetController<sec:cfg-participant-ethernet>`,
+:ref:`FlexRayController<sec:cfg-participant-flexray>`,
+:ref:`GenericMessages<sec:cfg-participant-genericpublisher>`,
+and :ref:`IO Ports<sec:cfg-participant-ioport>`
 support trace sinks.
 
 The :ref:`VIBE MDF4Tracing extension<mdf4tracing>` supports tracing messages of
@@ -372,6 +376,103 @@ It allows to trace the IB simulation messages into binary files.
      - A filesystem path where the IB messages are traced to.
 
 
+.. _sec:cfg-participant-replaying:
+
+Message Replaying
+----------------------------------------
+
+.. admonition:: Note
+
+   Please note that the Message Replaying support is currently under development.
+   The configuration parsing is in place, but the replaying mechanism might not
+   be functional, yet! 
+
+Similar to the :ref:`sec:cfg-participant-tracing` configuration, two options
+must be set to configure message replaying.
+At least one trace source has to be defined in a *TraceSources* block of
+the participant, and a *Replay* block has to be defined in a service instance:
+
+.. code-block:: javascript
+
+    "CanControllers": [
+        {
+            "Name": "CanCtrl",
+            "Replay": {
+                "Direction": "Send",
+                "UseTraceSource": "Source1"
+            }
+        }
+    ],
+
+    "TraceSources": [
+        {
+            "Name": "EthSource1",
+            "InputPath": "some/path/EthTraceOputput.pcap",
+            "Type": "PcapFile"
+        },
+        {
+            "Name": "Source1",
+            "OutputPath": "other path/CAN1.mdf4",
+            "Type": "Mdf4File"
+        }
+    ]
+
+
+
+.. _sec:cfg-participant-tracesource:
+
+TraceSource
+----------------------------------------
+
+The TraceSource configuration is part of the :ref:`participant
+configuration<sec:cfg-participant>`.
+
+.. code-block:: javascript
+  
+  "TraceSources": [
+      {
+          "Name": "Source1",
+          "Type":  "PcapFile",
+          "InputPath": "Filesystem/Path/MyTrace.pcap"
+      }
+  ]
+
+This specifies a trace data source for replaying IB simulation messages during
+live simulations.
+
+.. list-table:: TraceSource Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+   * - Name
+     - The name of the source. Services may refer to this
+       source by name in a Replay configuration.
+   * - Type
+     - The type specifies the format of the input stream. Supported formats
+       are: PcapFile, Mdf4File.
+   * - InputPath
+     - A filesystem path where the IB messages are loaded from.
+
+
+.. _sec:cfg-participant-replay:
+
+Replay Configuration
+----------------------------------------
+The replay configuration is part of a participant's service.
+
+.. list-table:: Replay Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+   * - UseTraceSource
+     - The name of the trace source to use as a simulation message source.
+   * - Direction
+     - The message direction of the trace source data. May be "Send", "Receive"
+       or "Both".
 
 
 .. _sec:cfg-participant-can:
@@ -391,6 +492,9 @@ CanControllers
      - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
        this controller. Trace sinks are referred to by their name and can be used
        by multiple controllers. (optional)
+   * - Replay
+     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
+       by this controller. (optional)
 
 .. _sec:cfg-participant-lin:
 
@@ -409,6 +513,9 @@ LinControllers
      - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
        this controller. Trace sinks are referred to by their name and can be used
        by multiple controllers. (optional)
+   * - Replay
+     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
+       by this controller. (optional)
 
 
 .. _sec:cfg-participant-ethernet:
@@ -451,6 +558,9 @@ configuration<sec:cfg-participant>`.
      - (deprecated, use *UseTraceSinks* instead)
    * - (PcapPipe)
      - (deprecated, use *UseTraceSinks* instead)
+   * - Replay
+     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
+       by this controller. (optional)
 
 
 
@@ -499,6 +609,9 @@ configuration<sec:cfg-participant>`.
      - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
        this controller. Trace sinks are referred to by their name and can be used
        by multiple controllers. (optional)
+   * - Replay
+     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
+       by this controller. (optional)
 
 
 
@@ -533,6 +646,13 @@ configuration<sec:cfg-participant>`.
    * - DefinitionUri
      - Location of the corresponding message definition file. 
        Relative paths are resolved relative to the location of the IbConfig file.
+   * - UseTraceSinks
+     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
+       this service. Trace sinks are referred to by their name and can be used
+       by multiple services. (optional)
+   * - Replay
+     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
+       by this service. (optional)
 
 .. _sec:cfg-participant-genericsub:
 
@@ -555,6 +675,13 @@ configuration<sec:cfg-participant>`.
      - Description
    * - Name
      - The name of the Generic Subscriber
+   * - UseTraceSinks
+     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
+       this service. Trace sinks are referred to by their name and can be used
+       by multiple services. (optional)
+   * - Replay
+     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
+       by this service. (optional)
 
 
 .. _sec:cfg-participant-ioport:
@@ -605,6 +732,13 @@ The names of the participant's  digital input port instances can be configured.
      - Description
    * - Name
      - The name of the Digital-In port
+   * - UseTraceSinks
+     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
+       this port. Trace sinks are referred to by their name and can be used
+       by multiple services. (optional)
+   * - Replay
+     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
+       by this port. (optional)
 
 
 .. _sec:cfg-participant-analog-out:
@@ -641,6 +775,13 @@ analog output port instances can be configured in this section:
      - The initial voltage value
    * - unit
      - The unit of the voltage value ("mV", "V", "kV")
+   * - UseTraceSinks
+     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
+       this port. Trace sinks are referred to by their name and can be used
+       by multiple services. (optional)
+   * - Replay
+     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
+       by this port. (optional)
 
 
 .. _sec:cfg-participant-analog-in:
@@ -665,6 +806,13 @@ The names of the participant's  analog input port instances can be configured.
      - Description
    * - Name
      - The name of the Analog-In port
+   * - UseTraceSinks
+     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
+       this port. Trace sinks are referred to by their name and can be used
+       by multiple services. (optional)
+   * - Replay
+     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
+       by this port. (optional)
 
 .. _sec:cfg-participant-pwm-out:
 
@@ -706,6 +854,13 @@ pulse-width modulation output port instances can be configured in this section:
    * - duty
      - The duty cycle specifies the percentage of time of each cycle that the signal stays in the
        active state. The value range is between 0 (always off) and 1 (always on)
+   * - UseTraceSinks
+     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
+       this port. Trace sinks are referred to by their name and can be used
+       by multiple services. (optional)
+   * - Replay
+     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
+       by this port. (optional)
 
 
 .. _sec:cfg-participant-pwm-in:
@@ -730,6 +885,13 @@ The names of the participant's  Pwm input port instances can be configured.
      - Description
    * - Name
      - The name of the Pwm-In port
+   * - UseTraceSinks
+     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
+       this port. Trace sinks are referred to by their name and can be used
+       by multiple services. (optional)
+   * - Replay
+     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
+       by this port. (optional)
 
 .. _sec:cfg-participant-pattern-out:
 
@@ -777,6 +939,13 @@ The names of the participant's  pattern input port instances can be configured.
      - Description
    * - Name
      - The name of the Pattern-In port
+   * - UseTraceSinks
+     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
+       this port. Trace sinks are referred to by their name and can be used
+       by multiple services. (optional)
+   * - Replay
+     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
+       by this port. (optional)
 
 
 .. _sec:cfg-network-simulators:
@@ -820,7 +989,7 @@ This section is optional.
      - List of switches that should be simulated by this network simulator.
    * - UseTraceSinks
      - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
-       this controller. Trace sinks are referred to by their name and can be used
+       the network simulator. Trace sinks are referred to by their name and can be used
        by multiple controllers. (optional)
 
 
