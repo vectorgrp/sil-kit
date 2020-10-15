@@ -5,6 +5,30 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.3.3] - 2020-10-15
+--------------------------------
+Added
+~~~~~~
+- Added a new configuration format for replaying traces,
+  refer to :ref:`sec:cfg-participant-replaying` for details.
+  Please note that the replaying mechanism is still under development.
+
+Changed
+~~~~~~~
+- The IbRegistry command line utility now supports a ``--use-signal-handler`` flag
+  that prevents it from listening on stdin. It can be safely shut down with
+  Control-C when started with this flag.
+
+Compatibility with 3.3.2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Due to changes in the config API we are not ABI compatible.
+
+- Application binary interface (ABI): No (due to Config)
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
+
 [3.3.2] - 2020-09-24
 --------------------------------
 

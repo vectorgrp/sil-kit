@@ -81,10 +81,11 @@ VAsio Registry
    *  - Requirements
       - None
    *  - Parameters
-      - There are up to two positional arguments:
+      - There are up to three positional arguments:
 
         #. Filename of the IB Configuration to be used (IB config file).
         #. Domain ID (optional); defaults to ``42``.
+        #. ``--use-signal-handler`` (optional); Uses a signal handler for shutdown and does not read from stdin.
 
    *  - Usage Example
       - .. code-block:: powershell
