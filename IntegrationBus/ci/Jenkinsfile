@@ -39,6 +39,7 @@ def isClangBuild(label) {
     return label.toUpperCase().contains('CLANG')
 }
 
+
 //recursive submodule git checkout 
 def checkoutGit() {
     return checkout([$class: 'GitSCM',
@@ -63,7 +64,7 @@ def shallowCheckoutGit() {
         ])
 }
 
-def archiveToArtifactory(pattern) {
+def archiveToArtifactory(scm, pattern) {
     //find the file to upload
     def files = findFiles(glob: pattern)
     if(files.size() != 1) {
@@ -79,8 +80,8 @@ def archiveToArtifactory(pattern) {
         spec = """{
             "files": [{
                 "pattern": "${files[0]}",
-                "target" : "${artifactoryRepo}/${projectName}/${env.GIT_BRANCH}/${env.GIT_COMMIT}/${fileName}",
-                "props"  : "git_commit=${env.GIT_COMMIT};git_branch=${env.GIT_BRANCH};git_url=${env.GIT_URL}"
+                "target" : "${artifactoryRepo}/${projectName}/${scm.GIT_BRANCH}/${scm.GIT_COMMIT}/${fileName}",
+                "props"  : "git_commit=${scm.GIT_COMMIT};git_branch=${scm.GIT_BRANCH};git_url=${scm.GIT_URL}"
         }]}"""
         print("artifactory spec=${spec}")
         buildInfo = artifactoryServer.upload(
@@ -126,14 +127,30 @@ def runOnNode(buildName, buildAgent, userStages) {
         }
     }
 }
+
+// Canonical way on CMake + Ninja + VS is to source the appropriate vcvarsall script
+// before invoking cmake -G Ninja
+def getVsBuildEnv(arch, version){
+    def localEnv=[]
+    toolDir="${tool 'BuildTools2019'}\\..\\..\\.."
+    // get vcvarsall.bat environment
+    envstr = bat returnStdout: true, script: "\"${toolDir}\\VC\\Auxiliary\\Build\\vcvarsall.bat\" ${arch} -vcvars_ver=${version} &set" 
+    for(line in envstr.split("\r\n")) {
+            if(line =~ /^\S+=.*/) {
+                localEnv += line
+        }
+    }
+    return localEnv
+}
+
 //helper to invoke  cmake platform independently with uniform arguments
-def runCmake(buildTool, buildType, extraArgs="") {
+def runCmake(buildType, extraArgs=""){
     cmakeBuild(
         installation: 'InSearchPath',
         cleanBuild: cleanBuild,
         buildType: "${buildType}",
         buildDir: "_build_${buildType}",
-        generator: "${buildTool}",
+        generator: "Ninja",
         cmakeArgs: "${cmakeArgs} -DCMAKE_BUILD_TYPE=${buildType} ${extraArgs}",
         steps: [[args: "--target package --config ${buildType}  --parallel", withCmake: true]]
     )
@@ -152,88 +169,101 @@ def run(what) {
 //##########################################
 
 // instantiate a build on an appropriate node
-def doBuild(buildName, buildAgent, buildTool, extraArgs="") {
+def doBuild(buildName, buildAgent, buildFlags) {
     return runOnNode(buildName, buildAgent, {
-        def scmEnv = []
-        stage("${buildName}: scm checkout") {
-            scmVars = checkoutGit()
-            scmEnv.add("GIT_BRANCH=${scmVars.GIT_BRANCH}")
-            scmEnv.add("GIT_COMMIT=${scmVars.GIT_COMMIT}")
-            scmEnv.add("GIT_URL=${scmVars.GIT_URL}")
-            scmEnv.add("MSBUILDDISABLENODEREUSE=1") //fixes spurious windows failures
-            if(isClangBuild(buildName)) {
-                scmEnv.add("CC=clang")
-                scmEnv.add("CXX=clang++")
-            } else {
-                scmEnv.add("CC=gcc")
-                scmEnv.add("CXX=g++")
+
+        def extraArgs = ""
+        def buildEnv = []
+        def scmVars = [:]
+
+        stage("Git checkout and ENV setup (${buildName})") {
+            if("cc" in buildFlags) {
+                cc = buildFlags["cc"]
+                buildEnv.add("CC=${cc}")
+                extraArgs += " -DCMAKE_C_COMPILER=${cc}"
             }
+            if("cxx" in buildFlags) {
+                cxx = buildFlags["cxx"]
+                buildEnv.add("CXX=${cxx}")
+                extraArgs += " -DCMAKE_CXX_COMPILER=${cxx}"
+                
+            }
+            if("msvc_version" in buildFlags) {
+                // visual studio toolset selection via vcvarsall env
+                buildEnv = buildEnv + getVsBuildEnv(buildFlags["arch"], buildFlags["msvc_version"])
+                buildEnv.add("MSBUILDDISABLENODEREUSE=1") //fixes spurious windows failures
+
+                msvc_toolset = buildFlags["msvc_version"].replace(".","") // 14.1 -> 141
+                extraArgs += " -DMSVC_TOOLSET_VERSION=${msvc_toolset}" //needed for binary download URL resolution
+                extraArgs += " -DCMAKE_CXX_COMPILER=cl -DCMAKE_C_COMPILER=cl"
+            }
+
+            print("DEBUG extraArgs=${extraArgs}")
+            scmVars = checkoutGit()
             print("DEBUG scmVars=${scmVars}")
         }
-        withEnv(scmEnv) {
-            stage("${buildName}: cmake build Release") {
-                def ccArgs="${cmakeArgsRelease}"
-                if(isClangBuild(buildName)) {
-                    print("setting cmake compiler to clang")
-                    ccArgs+=" -DCMAKE_CXX_COMPILER='clang++' -DCMAKE_C_COMPILER=clang"
-                }                
-                ccArgs+= " " + extraArgs
-                
-                print("running cmake")
-                runCmake(buildTool, "Release", ccArgs)
-            }            
-            stage("${buildName}: Unit Tests Release") {
-                dir("_build_Release") {
+
+        stage("Cmake Release Build (${buildName})") {
+            print("${buildName} --  running cmake Release")
+            withEnv(buildEnv) {
+                runCmake("Release", "${cmakeArgsRelease}" + "${extraArgs}" )
+            }
+        } 
+
+        stage("Unit Tests Release (${buildName})") {
+            dir("_build_Release") {
+                ctest(
+                    installation: 'InSearchPath',
+                    arguments: "--verbose --build-config Release -R '^Test.*'"
+                )
+                junit("**/*gtestresults.xml")
+
+            }
+        }
+
+        stage("Integration Tests Release (${buildName})") {
+            dir("_build_Release") {
+                timeout(time: 10, unit: 'MINUTES') {
                     ctest(
                         installation: 'InSearchPath',
-                        arguments: "--verbose --build-config Release -R '^Test.*'"
+                        arguments: "--verbose --build-config Release -R '^ITest.*'"
                     )
-                    junit("**/*gtestresults.xml")
+                }
+                junit("**/*gtestresults.xml")
 
+            }
+        }
+
+        stage("Archiving Release Build (${buildName})") {
+            try {
+                archiveToArtifactory(scmVars, "_build_Release/${artifactName}-*.zip")
+            } catch(e) {
+                //make sure we save the finished artifacts before failing the build 
+                print("WARNING: archiving to artifactory failed, archiving to jenkins instead and failing: exception: ${e}")
+                archiveArtifacts(artifacts: "_build_Release/${artifactName}-*.zip", fingerprint: true)
+                throw e
+            }
+        }
+
+        if(buildDebugBin) {
+            stage("Cmake Debug Build (${buildName})") {
+                print("${buildName} --  running cmake Debug")
+                withEnv(buildEnv) {
+                    runCmake("Debug", extraArgs)
                 }
             }
-            stage("${buildName}: Integration Tests Release ") {
-                dir("_build_Release") {
-                    timeout(time: 10, unit: 'MINUTES') {
-                        ctest(
-                            installation: 'InSearchPath',
-                            arguments: "--verbose --build-config Release -R '^ITest.*'"
-                        )
-                    }
-                    junit("**/*gtestresults.xml")
 
-                }
-            }
-            stage("${buildName}: archiving Release Build") {
-                try {
-                    archiveToArtifactory("_build_Release/${artifactName}-*.zip")
-                } catch(e) {
-                    //make sure we save the finished artifacts before failing the build 
-                    print("WARNING: archiving to artifactory failed, archiving to jenkins instead and failing: exception: ${e}")
-                    archiveArtifacts(artifacts: "_build_Release/${artifactName}-*.zip", fingerprint: true)
-                    throw e
-                }
-            }
-            if(buildDebugBin) {
-                stage("${buildName}: cmake Debug bundle") {
-                    def ccArgs=""
-                    if(isClangBuild(buildName)) {
-                        ccArgs="-DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"
-                    }
-                    ccArgs+= " " + extraArgs
-                    
-                    runCmake(buildTool, "Debug", ccArgs)
-                    run "python ${dockerImageDir}/package.py \"_build_Release/${artifactName}-*-Release.zip\" \"_build_Debug/${artifactName}-*-Debug.zip\""
-                    archiveToArtifactory("_build_Debug/${artifactName}-*.zip")
-                    archiveToArtifactory("${artifactName}-*.zip")
+            stage("Debug Bundle Packages (${buildName})") {
+                run "python ${dockerImageDir}/package.py \"_build_Release/${artifactName}-*-Release.zip\" \"_build_Debug/${artifactName}-*-Debug.zip\""
+                archiveToArtifactory(scmVars, "_build_Debug/${artifactName}-*.zip")
+                archiveToArtifactory(scmVars, "${artifactName}-*.zip")
 
-                    // safe the PDB files on windows
-                    if(!isUnix()) {
-                        // package PDB files without rebuilding
-                        def pdbArchive = "_build_Debug/IntegrationBus-${buildName}-PDB.zip"
-                        run "python -mzipfile -c ${pdbArchive} _build_Debug/package-pdb/ _build_Release/package-pdb/"
-                        archiveToArtifactory(pdbArchive)
-                    }
+                // safe the PDB files on windows
+                if(!isUnix()) {
+                    // package PDB files without rebuilding
+                    def pdbArchive = "_build_Debug/IntegrationBus-${buildName}-PDB.zip"
+                    run "python -mzipfile -c ${pdbArchive} _build_Debug/package-pdb/ _build_Release/package-pdb/"
+                    archiveToArtifactory(scmVars, pdbArchive)
                 }
             }
         }
@@ -250,12 +280,12 @@ node {
     def builds = [:]
 
     // "Name of the target" : "Name of the target", "required node label", "generator name")
-    builds.put("VS2017-Win64", doBuild("VS2017-Win64", "buildtools2019", "Visual Studio 16 2019", "-A x64 -T v141"))
-    builds.put("VS2015-Win64", doBuild("VS2015-Win64", "buildtools2019", "Visual Studio 16 2019", "-A x64 -T v140"))
-    builds.put("VS2017-x32"  , doBuild("VS2017-x32",   "buildtools2019", "Visual Studio 16 2019", "-A Win32 -T v141"))
-    builds.put("VS2015-x32"  , doBuild("VS2015-x32",   "buildtools2019", "Visual Studio 16 2019", "-A Win32 -T v140"))
-    builds.put("Ubuntu-clang", doBuild("Ubuntu-clang", "docker && linux", "Ninja"))
-    builds.put("Ubuntu-gcc"  , doBuild("Ubuntu-gcc",   "docker && linux", "Ninja"))
+    builds.put("VS2017-Win64", doBuild("VS2017-Win64", "ninja && buildtools2019", ["arch":"x64", "msvc_version":"14.1"]) )
+    builds.put("VS2015-Win64", doBuild("VS2015-Win64", "ninja && buildtools2019", ["arch":"x64", "msvc_version":"14.0"]) )
+    builds.put("VS2017-Win32", doBuild("VS2017-Win32", "ninja && buildtools2019", ["arch":"x86", "msvc_version":"14.1"]) )
+    builds.put("VS2015-Win32", doBuild("VS2015-Win32", "ninja && buildtools2019", ["arch":"x86", "msvc_version":"14.0"]) )
+    builds.put("Ubuntu-clang", doBuild("Ubuntu-clang", "docker && linux", ["cc":"clang", "cxx":"clang++"]) )
+    builds.put("Ubuntu-gcc"  , doBuild("Ubuntu-gcc",   "docker && linux", ["cc": "gcc",  "cxx":"g++"]) )
     
     parallel(builds)
 
