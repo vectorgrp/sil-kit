@@ -139,7 +139,7 @@ protected:
 
 TEST_F(FrControllerProxyTest, send_controller_config)
 {
-    TxBufferConfig bufferCfg;
+    TxBufferConfig bufferCfg{};
     bufferCfg.channels = Channel::AB;
     bufferCfg.hasPayloadPreambleIndicator = false;
     bufferCfg.offset = 0;
@@ -148,7 +148,7 @@ TEST_F(FrControllerProxyTest, send_controller_config)
     bufferCfg.transmissionMode = TransmissionMode::SingleShot;
 
     // Configure Controller
-    ControllerConfig controllerCfg;
+    ControllerConfig controllerCfg{};
     controllerCfg.clusterParams = MakeValidClusterParams();
     controllerCfg.nodeParams = MakeValidNodeParams();
 
@@ -162,7 +162,7 @@ TEST_F(FrControllerProxyTest, send_controller_config)
 
 TEST_F(FrControllerProxyTest, send_txbuffer_configupdate)
 {
-    TxBufferConfig bufferCfg;
+    TxBufferConfig bufferCfg{};
     bufferCfg.channels = Channel::AB;
     bufferCfg.hasPayloadPreambleIndicator = false;
     bufferCfg.offset = 0;
@@ -170,7 +170,7 @@ TEST_F(FrControllerProxyTest, send_txbuffer_configupdate)
     bufferCfg.slotId = 17;
     bufferCfg.transmissionMode = TransmissionMode::SingleShot;
 
-    ControllerConfig controllerCfg;
+    ControllerConfig controllerCfg{};
     controllerCfg.clusterParams = MakeValidClusterParams();
     controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.push_back(bufferCfg);
@@ -186,7 +186,7 @@ TEST_F(FrControllerProxyTest, send_txbuffer_configupdate)
     bufferCfg.slotId = 15;
     bufferCfg.transmissionMode = TransmissionMode::Continuous;
 
-    TxBufferConfigUpdate expectedUpdate;
+    TxBufferConfigUpdate expectedUpdate{};
     expectedUpdate.txBufferIndex = 0;
     expectedUpdate.txBufferConfig = bufferCfg;
 
@@ -213,7 +213,7 @@ TEST_F(FrControllerProxyTest, throw_on_unconfigured_tx_buffer_configupdate)
 
 TEST_F(FrControllerProxyTest, send_txbuffer_update)
 {
-    TxBufferConfig bufferCfg;
+    TxBufferConfig bufferCfg{};
 
     ControllerConfig controllerCfg;
     controllerCfg.clusterParams = MakeValidClusterParams();
@@ -223,7 +223,7 @@ TEST_F(FrControllerProxyTest, send_txbuffer_update)
     EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, controllerCfg)).Times(1);
     proxy.Configure(controllerCfg);
 
-    TxBufferUpdate update;
+    TxBufferUpdate update{};
     update.txBufferIndex = 0;
     update.payload = referencePayload;
     update.payloadDataValid = true;
