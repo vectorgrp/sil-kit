@@ -26,6 +26,7 @@ enum class TraceMessageType
     ,PatternIoMessage
     ,PwmIoMessage
     ,FrMessage
+    ,InvalidReplayData
     //TODO FrSymbol, PocStatus, TxBufferConfigUpdate, TxBufferUpdate ?
 };
 
