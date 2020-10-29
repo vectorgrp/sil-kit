@@ -83,3 +83,8 @@ add_vib_test(TestIbConfigExample SOURCES IbConfigExampleTest.cpp
         IbConfig_FastRTPS-unicast.json
         IbConfig_FastRTPS-configfile.json
 )
+
+ib_enable_warnings(IbConfig)
+ib_enable_warnings(TestMwCfgJsonConfig)
+ib_enable_warnings(TestMwCfgConfigBuilder)
+ib_enable_warnings(TestMwCfgValidation)

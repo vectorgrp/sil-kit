@@ -12,6 +12,8 @@ option(IB_INSTALL_SOURCE "Install and package the source tree" OFF)
 if(IB_INSTALL_SOURCE)
     set(IB_BUILD_DOCS ON CACHE BOOL "Force IB_BUILD_DOCS ON due to IB_INSTALL_SOURCE" FORCE)
 endif()
+option(IB_ENABLE_ASAN "Enable -f sanitize=address for builds (requires gcc, clang,  VS2019)" OFF)
+option(IB_ENABLE_UBSAN "Enable -f sanitize=undefined for builds (requires gcc, clang)" OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${CMAKE_CURRENT_LIST_DIR}/IntegrationBus/cmake)
 include(IntegrationBusInstall)
@@ -28,6 +30,12 @@ if(MSVC)
     # make sure __cplusplus has the current C++ version encoded
     add_compile_options(/Zc:__cplusplus)
 endif()
+
+# Configure build settings like warning and sanitizers
+
+include(IntegrationBusBuildSettings)
+ib_enable_asan(${IB_ENABLE_ASAN})
+ib_enable_ubsan(${IB_ENABLE_UBSAN})
 
 ###############################################################################
 # Include the IntegrationBus projects to be built

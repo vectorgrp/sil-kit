@@ -46,3 +46,5 @@ elseif(UNIX)
 else()
     message(FATAL_ERROR "ERROR: unsupported platform for NamedPipe!")
 endif()
+
+ib_enable_warnings(IbTracing)
