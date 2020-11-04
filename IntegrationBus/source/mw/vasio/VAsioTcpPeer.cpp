@@ -71,6 +71,7 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
         try
         {
             _socket.connect(resolverEntry);
+            _socket.set_option(asio::ip::tcp::no_delay{true});
             return;
         }
         catch (asio::system_error& /*err*/)

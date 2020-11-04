@@ -12,6 +12,11 @@ Fixed
 ~~~~~~
 - Fixed undeclared variable use in IbLauncher (AFTMAGT 294).
 
+Changed
+~~~~~~~
+- Added the TCP_NODELAY option to VAsio (AFTMAGT 297).
+  This reduces latencies when sending a lot of small VIB messages.
+
 
 [3.3.3] - 2020-10-15
 --------------------------------
