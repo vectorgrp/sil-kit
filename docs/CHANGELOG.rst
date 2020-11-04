@@ -8,6 +8,15 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [3.3.4] - 2020-11-04
 --------------------------------
 
+Added
+~~~~~~
+- The CMake build system has new options to build with sanitizers:
+  IB_ENABLE_ASAN and IB_ENABLE_UBSAN, to enable 'Address Sanitizer' and
+  'Undefined Behavior Sanitizer', respectively.
+  When active, the -fsanitize=... compile options and link options are enabled
+  globally.
+  This is currently only supported on GCC and Clang.
+
 Fixed
 ~~~~~~
 - Fixed undeclared variable use in IbLauncher (AFTMAGT 294).
@@ -16,6 +25,13 @@ Changed
 ~~~~~~~
 - Added the TCP_NODELAY option to VAsio (AFTMAGT 297).
   This reduces latencies when sending a lot of small VIB messages.
+
+Compatibility with 3.3.3
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
 
 
 [3.3.3] - 2020-10-15
