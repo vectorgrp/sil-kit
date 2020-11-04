@@ -99,13 +99,8 @@ def loadConfigFiles(configFiles, verbose):
             with open(schemaFile, 'r') as f:
                 schemaData = f.read()
                 schema = json.loads(schemaData)
-        except IOError as e:
-            print("Warning: JSON schema '" + schemaFile + "' does not appear to exist, no validation possible ('" + str(e) + "').")
-        if schemaData:
-            try:
-                schema = json.loads(schemaData)
-            except BaseException:
-                print("Warning: JSON schema '" + schemaFile + "' is invalid, no validation possible.")
+        except Exception as e:
+            print("Warning: cannot validate JSON schema '" + schemaFile + "': " + str(e) + ".")
 
     # Validate JSON input files
     for configFile in configFiles:

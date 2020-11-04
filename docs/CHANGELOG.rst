@@ -5,6 +5,14 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.3.4] - 2020-11-04
+--------------------------------
+
+Fixed
+~~~~~~
+- Fixed undeclared variable use in IbLauncher (AFTMAGT 294).
+
+
 [3.3.3] - 2020-10-15
 --------------------------------
 Added
