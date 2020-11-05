@@ -16,6 +16,8 @@ Added
   When active, the -fsanitize=... compile options and link options are enabled
   globally.
   This is currently only supported on GCC and Clang.
+- Added replay message provider interfaces for the upcoming MDF replaying
+  extension.
 
 Fixed
 ~~~~~~
