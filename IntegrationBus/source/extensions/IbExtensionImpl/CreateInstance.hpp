@@ -2,6 +2,7 @@
 #pragma once
 
 #include <memory>
+#include <sstream>
 
 #include "IbExtensions.hpp"
 #include "DllCache.hpp"
@@ -12,9 +13,9 @@ namespace ib { namespace extensions {
 // The underlying extension is cached as a a shared pointer, and stays
 // loaded during the lifetime of the DllCache instance.
 
-template<typename FactoryT, typename ExtensionInterfaceT, typename... Arg>
-auto CreateInstance(const std::string& extensionName,
-    cfg::Config config, Arg&&... args) -> std::unique_ptr<ExtensionInterfaceT>
+template<typename FactoryT> 
+auto CreateInstance(const std::string& extensionName, const ib::cfg::Config& config) 
+    -> FactoryT&
 {
     static DllCache cache;
     //the dll instance must be kept alive, especially when exceptions are thrown in the factory
@@ -22,13 +23,15 @@ auto CreateInstance(const std::string& extensionName,
     try
     {
         auto& factory = dynamic_cast<FactoryT&>(*dll);
-        return factory.Create(config, std::forward<Arg>(args)...);
+        return factory;
     }
-    catch (const ExtensionError& err)
+    catch (const std::bad_cast& err)
     {
-        std::cout << "ERROR loading " << extensionName 
-            << ": " << err.what() << std::endl;
-        throw;
+        std::stringstream msg;
+        msg << "ERROR loading " << extensionName
+            << ": " << err.what();
+        std::cout << msg.str() << std::endl;
+        throw ExtensionError(msg.str());
     }
 
 }

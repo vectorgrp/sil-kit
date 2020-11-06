@@ -3,6 +3,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 #include <chrono>
 #include <tuple>
 
@@ -49,6 +50,19 @@ public:
         const mw::EndpointAddress& address, //!< the address is used to identify the controller this message is from
         std::chrono::nanoseconds timestamp,
         const TraceMessage& message) = 0;
+};
+
+//! \brief Helper class to instantiate a trace message sink from a shared library module.
+class ITraceMessageSinkFactory
+{
+public:
+    virtual ~ITraceMessageSinkFactory() = default;
+    virtual auto Create(cfg::Config config,
+            ib::mw::logging::ILogger* logger,
+            std::string participantName,
+            std::string sinkName
+        )
+       -> std::unique_ptr<ITraceMessageSink> = 0;
 };
 
 } //end namespace extensions

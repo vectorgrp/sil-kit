@@ -8,30 +8,21 @@
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/cfg/fwd_decl.hpp"
 
+#include "ib/extensions/IReplay.hpp"
+
 
 namespace ib { namespace extensions {
-//forwards
-class IIbExtension;
-
-//! \brief Helper factory to instantiate Mdf4tracing
-//         Required because we don't have control over the CTor when an extension is loaded.
-
-class Mdf4TraceSinkFactory
-{
-public:
-    virtual ~Mdf4TraceSinkFactory() = default;
-    virtual auto Create(cfg::Config config,
-            ib::mw::logging::ILogger* logger,
-            std::string participantName,
-            std::string sinkName
-        )
-       -> std::unique_ptr<ITraceMessageSink> = 0;
-
-};
 
 auto CreateMdf4Tracing(cfg::Config config,
     ib::mw::logging::ILogger* logger, const std::string& participantName, const std::string& sinkName)
     -> std::unique_ptr<ITraceMessageSink>;
+
+//////////////////////////////////////////////////////////////////////
+// MDF4 Replay 
+//////////////////////////////////////////////////////////////////////
+
+auto CreateMdf4Replay(cfg::Config config, ib::mw::logging::ILogger* logger, const std::string& fileName)
+    -> std::shared_ptr<IReplayFile>;
 
 }//end namespace extensions
 }//end namespace ib

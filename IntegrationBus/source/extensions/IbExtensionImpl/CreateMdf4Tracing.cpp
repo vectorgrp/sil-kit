@@ -8,7 +8,9 @@
 #include "ib/sim/generic/GenericMessageDatatypes.hpp"
 #include "ib/sim/io/IoDatatypes.hpp"
 #include "ib/sim/lin/LinDatatypes.hpp"
+
 #include "ib/extensions/ITraceMessageSink.hpp"
+#include "ib/extensions/IReplay.hpp"
 
 #include "IbExtensions.hpp"
 #include "CreateMdf4Tracing.hpp"
@@ -22,8 +24,15 @@ auto CreateMdf4Tracing(cfg::Config config,
     const std::string& sinkName)
     -> std::unique_ptr<ITraceMessageSink>
 {
-    return CreateInstance<Mdf4TraceSinkFactory, ITraceMessageSink>
-        ("vibe-mdf4tracing", std::move(config), logger, participantName, sinkName);
+    auto& factory = CreateInstance<ITraceMessageSinkFactory>("vibe-mdf4tracing", config);
+    return factory.Create(std::move(config), logger, participantName, sinkName);
+}
+
+auto CreateMdf4Replay(cfg::Config config, ib::mw::logging::ILogger* logger, const std::string& fileName)
+    -> std::shared_ptr<IReplayFile>
+{
+    auto& factory = CreateInstance<IReplayDataProvider>("vibe-mdf4replay", config);
+    return factory.OpenFile(fileName, logger);
 }
 
 }//end namespace extensions
