@@ -1,6 +1,17 @@
+######################################################################
+# VIB Tracing and Replay component
+# - Some tracing and replay functionality is implemented in 
+#   the external vibe-mdf4tracing extension.
+######################################################################
+
 add_library(IbTracing STATIC
     PcapSink.cpp
     PcapSink.hpp
+
+    PcapReplay.cpp
+    PcapReplay.hpp
+    PcapReader.cpp
+    PcapReader.hpp
 
     detail/NamedPipe.hpp
 

@@ -252,6 +252,11 @@ auto EthFrame::RawFrame() const -> const std::vector<uint8_t>&
     return _rawFrame;
 }
 
+void EthFrame::SetRawFrame(const std::vector<uint8_t>& raw)
+{
+    _rawFrame = raw;
+}
+
 } // namespace eth
 } // namespace sim
 } // namespace ib

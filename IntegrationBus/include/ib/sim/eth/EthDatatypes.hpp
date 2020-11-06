@@ -90,6 +90,8 @@ public:
 
     //! \brief Get the raw ethernet frame.
     IntegrationBusAPI auto RawFrame() const -> const std::vector<uint8_t>&;
+    //! \brief Set the raw ethernet frame.
+    IntegrationBusAPI void SetRawFrame(const std::vector<uint8_t>&);
 
 private:
     std::vector<uint8_t> _rawFrame;
