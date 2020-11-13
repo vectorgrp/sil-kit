@@ -16,15 +16,18 @@ def __isWindows():
 
 #######################################################################################################################
 #def __findDllOnWindowsPath() -> list:
-def __libName():
-    """Get the IntegrationBus library file name for the current platform
+def __libNames():
+    """Get the IntegrationBus library file names for the current platform
 
         Returns
         -------
         str
             Library file name (no path)
     """
-    return ("libIntegrationBus.so" if not __isWindows() else "IntegrationBus.dll")
+    if __isWindows():
+        return ["libIntegrationBus.dll", "libIntegrationBusd.dll"]
+    else:
+        return ["libIntegrationBus.so", "libIntegrationBusd.so"]
 
 def __relativeParentDir(basePath, numLevels, suffix):
     """ return relative path with numLevels traversed upwards in the directory hierarchy"""
@@ -56,12 +59,14 @@ def __isIntegrationBusInstalled(integrationBusBinaryPath, integrationBusLibraryP
         bool
             True iff specified paths exist and are tested for the IntegrationBus library
     """
-    integrationBusLibraryFilePath = os.path.join(integrationBusLibraryPath, __libName())
-    print("checking for {}".format(integrationBusLibraryFilePath))
-    exists = (os.path.exists(integrationBusBinaryPath) and 
-        os.path.exists(integrationBusLibraryPath) and 
-        os.path.isfile(integrationBusLibraryFilePath))
-    return exists
+    for libName in __libNames():
+        integrationBusLibraryFilePath = os.path.join(integrationBusLibraryPath, libName) 
+        exists = (os.path.exists(integrationBusBinaryPath) and 
+            os.path.exists(integrationBusLibraryPath) and 
+            os.path.isfile(integrationBusLibraryFilePath))
+        if exists:
+            return exists
+    return False
 
 #######################################################################################################################
 #def __findDllOnWindowsPath() -> list:
@@ -84,10 +89,11 @@ def __findLibraryOnWindowsPath():
         searchPath = searchPath.strip()
         if len(searchPath) == 0:
             continue
-        filePath = os.path.join(searchPath, __libName())
-        if os.path.exists(filePath):
-            if searchPath not in paths:
-                paths.append(searchPath)
+        for libName in __libNames():
+            filePath = os.path.join(searchPath, libName)
+            if os.path.exists(filePath):
+                if searchPath not in paths:
+                    paths.append(searchPath)
     return paths
 
 #######################################################################################################################

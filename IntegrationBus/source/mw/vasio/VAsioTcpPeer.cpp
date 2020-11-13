@@ -7,8 +7,33 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <numeric>
 
 using namespace asio::ip;
+
+#ifdef __linux__
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <errno.h>
+
+static bool SetPlatformSocketOptions(asio::ip::tcp::socket& socket)
+{
+    int val{1};
+    //Disable Delayed Acknowledgments on the receiving side
+    int e = setsockopt(socket.native_handle(), IPPROTO_TCP, TCP_QUICKACK,
+        (void*)&val, sizeof(val));
+    return e == 0;
+}
+
+#else  //windows 
+
+static bool SetPlatformSocketOptions(asio::ip::tcp::socket& )
+{
+    return true;
+}
+
+#endif  // __linux__
 
 namespace ib {
 namespace mw {
@@ -72,6 +97,13 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
         {
             _socket.connect(resolverEntry);
             _socket.set_option(asio::ip::tcp::no_delay{true});
+            _socket.set_option(asio::socket_base::receive_buffer_size{4096});
+            _socket.set_option(asio::socket_base::send_buffer_size{4096});
+            _socket.set_option(asio::socket_base::reuse_address{true});
+            if (!SetPlatformSocketOptions(_socket))
+            {
+                _logger->Warn("VasioTcpPeer: cannot set platform-specific socket options (e.g. TCP_QUICKACK)");
+            }
             return;
         }
         catch (asio::system_error& /*err*/)
@@ -171,7 +203,7 @@ void VAsioTcpPeer::StartAsyncRead()
 {
     _currentMsgSize = 0u;
 
-    _msgBuffer.resize(128);
+    _msgBuffer.resize(4096);
     _wPos = {0u};
     
     ReadSomeAsync();
@@ -211,7 +243,7 @@ void VAsioTcpPeer::DispatchBuffer()
             // not enough data to even determine the message size...
             // make sure the buffer can store some data
             if (_msgBuffer.size() < sizeof(uint32_t))
-                _msgBuffer.resize(128);
+                _msgBuffer.resize(4096); 
             // and restart the async read operation
             ReadSomeAsync();
             return;

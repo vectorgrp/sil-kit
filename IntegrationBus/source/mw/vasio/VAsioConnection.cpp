@@ -289,6 +289,11 @@ void VAsioConnection::AcceptNextConnection(asio::ip::tcp::acceptor& acceptor)
             if (!error)
             {
                 _logger->Debug("New connection from {}", newConnection->Socket().remote_endpoint());
+                auto& socket = newConnection->Socket();
+                socket.set_option(asio::ip::tcp::no_delay{true});
+                socket.set_option(asio::socket_base::receive_buffer_size{4096});
+                socket.set_option(asio::socket_base::send_buffer_size{4096});
+                socket.set_option(asio::socket_base::reuse_address{true});
                 AddPeer(std::move(newConnection));
             }
             AcceptNextConnection(acceptor);

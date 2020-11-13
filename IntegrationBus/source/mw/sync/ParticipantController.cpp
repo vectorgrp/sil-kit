@@ -407,19 +407,28 @@ void ParticipantController::LogCurrentPerformanceStats()
 
     if (_execTimeMonitor.SampleCount() == 0u)
     {
-        _logger->Info("TotalTaskTime: -.--ms [-.--, -.--] \tWaitTime: -.--ms [-.--, -.--]  \tCpuTime: -.--ms, [-.--, -.--] \t(avg [min,max])");
+        _logger->Info("\tTotalTaskTime: -.--ms [-.--, -.--, -.--]"
+            "\tWaitTime: -.--ms [-.--, -.--, -.--]"
+            "\tCpuTime: -.--ms [-.--, -.--, -.--]"
+            "\t(cur, [avg,min,max])");
     }
     else
     {
-        _logger->Info("TotalTaskTime: {:.2f}ms [{:.2f}, {:.2f}] \tWaitTime: {:.2f}ms [{:.2f}, {:.2f}]  \tCpuTime: {:.2f}, [{:.2f}, {:.2f}] \t(avg [min,max])",
+        _logger->Info("\tTotalTaskTime: {:0.2f}ms [{:0.2f}, {:0.2f}, {:0.2f}]"
+            "\tWaitTime: {:0.2f}ms [{:0.2f}, {:0.2f}, {:0.2f}]"
+            "\tCpuTime: {:0.2f}ms [{:0.2f}, {:0.2f}, {:0.2f}]"
+            "\t(cur [avg,min,max])",
+            toMSecs(_execTimeMonitor.CurrentDuration() + _waitTimeMonitor.CurrentDuration()),
             toMSecs(_execTimeMonitor.AvgDuration<DoubleMSecs>() + _waitTimeMonitor.AvgDuration<DoubleMSecs>()),
             toMSecs(_execTimeMonitor.MinDuration() + _waitTimeMonitor.MinDuration()),
             toMSecs(_execTimeMonitor.MaxDuration() + _waitTimeMonitor.MaxDuration()),
 
+            toMSecs(_waitTimeMonitor.CurrentDuration()),
             toMSecs(_waitTimeMonitor.AvgDuration<DoubleMSecs>()),
             toMSecs(_waitTimeMonitor.MinDuration()),
             toMSecs(_waitTimeMonitor.MaxDuration()),
 
+            toMSecs(_execTimeMonitor.CurrentDuration()),
             toMSecs(_execTimeMonitor.AvgDuration<DoubleMSecs>()),
             toMSecs(_execTimeMonitor.MinDuration()),
             toMSecs(_execTimeMonitor.MaxDuration())
