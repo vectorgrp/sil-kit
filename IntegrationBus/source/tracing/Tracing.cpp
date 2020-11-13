@@ -7,9 +7,9 @@
 #include "ib/extensions/string_utils.hpp"
 
 #include "CreateMdf4Tracing.hpp"
-
 #include "PcapSink.hpp"
 #include "Tracing.hpp"
+#include "PcapReplay.hpp"
 
 namespace ib {
 
@@ -73,5 +73,73 @@ auto CreateTraceMessageSinks(
     return newSinks;
 }
 
+    
+auto CreateReplayFiles(mw::logging::ILogger* logger, const cfg::Config& config,
+    const cfg::Participant& participantConfig)
+    -> std::map<std::string, std::shared_ptr<extensions::IReplayFile>>
+{
+    std::map<std::string, std::shared_ptr<extensions::IReplayFile>> replayFiles;
+
+    for (const auto& source : participantConfig.traceSources)
+    {
+        switch (source.type)
+        {
+        case cfg::TraceSource::Type::Mdf4File:
+        {
+            auto file = extensions::CreateMdf4Replay(config, logger, source.inputPath);
+            replayFiles.insert({source.name, std::move(file)});
+            break;
+        }
+        case cfg::TraceSource::Type::PcapFile:
+        {
+            auto provider = PcapReplay{};
+            auto file = provider.OpenFile(source.inputPath, logger);
+            replayFiles.insert({source.name, std::move(file)});
+            break;
+        }
+        case cfg::TraceSource::Type::Undefined: //[[fallthrough]]
+        default:
+            throw std::runtime_error("CreateReplayFiles: unknown TraceSource::Type!");
+        }
+    }
+
+    return replayFiles;
+}
+
+// Replaying utilities
+
+bool HasReplayConfig(const cfg::Participant& cfg)
+{
+    // if there are no replay trace sources, the Replay blocks are invalid
+    if (cfg.traceSources.empty())
+        return false;
+
+    //find replay blocks of services
+    bool ok = false;
+    auto isActive = [&ok, &cfg](const auto& ctrls)
+    {
+        for (const auto& ctrl : ctrls)
+        {
+            if ( (ctrl.replay.direction != cfg::Replay::Direction::Undefined)
+                && !ctrl.replay.useTraceSource.empty()
+            )
+            {
+                ok = true;
+                break;
+            }
+        }
+    };
+
+    isActive(cfg.canControllers);
+    isActive(cfg.ethernetControllers);
+    isActive(cfg.linControllers);
+    isActive(cfg.flexrayControllers);
+    isActive(cfg.digitalIoPorts);
+    isActive(cfg.analogIoPorts);
+    isActive(cfg.patternPorts);
+    isActive(cfg.pwmPorts);
+
+    return ok;
+}
 } //end namespace tracing
 } //end namespace ib

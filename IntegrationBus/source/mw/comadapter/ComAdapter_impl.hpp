@@ -35,6 +35,8 @@
 
 #include "MessageTracing.hpp" // log tracing
 
+#include "ReplayController.hpp"
+
 #ifdef SendMessage
 #if SendMessage == SendMessageA
 #undef SendMessage
@@ -70,6 +72,14 @@ auto FindNetworkSimulators(const cfg::SimulationSetup& simulationSetup)
     }
     return nullptr;
 }
+
+template<typename ConfigT>
+bool ControllerUsesReplay(const ConfigT& controllerConfig)
+{
+    return controllerConfig.replay.direction != cfg::Replay::Direction::Undefined
+        && !controllerConfig.replay.useTraceSource.empty();
+}
+
 } // namespace anonymous
 
 template <class IbConnectionT>
@@ -92,7 +102,6 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& par
 
     //set up default time provider used for controller instantiation
     _timeProvider = std::make_shared<sync::WallclockProvider>();
-
 }
 
 template <class IbConnectionT>
@@ -120,6 +129,19 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
         _timeProvider = participantController->GetTimeProvider();
     }
     _logger->Info("Time provider: {}", _timeProvider->TimeProviderName());
+
+    // enable replaying mechanism
+    const auto& participantConfig = get_by_name(_config.simulationSetup.participants, _participantName);
+    if (tracing::HasReplayConfig(participantConfig))
+    {
+        _replayScheduler = std::make_unique<tracing::ReplayScheduler>(_config,
+            participantConfig,
+            _config.simulationSetup.timeSync.tickPeriod,
+            this,
+            _timeProvider.get()
+        );
+        _logger->Info("Replay Scheduler active.");
+    }
 }
 
 template <class IbConnectionT>
@@ -202,6 +224,10 @@ auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonical
     if (ControllerUsesNetworkSimulator(config.name))
     {
         return CreateControllerForLink<eth::EthControllerProxy>(config, config);
+    }
+    else if (ControllerUsesReplay(config))
+    {
+        return CreateControllerForLink<tracing::EthControllerReplay>(config, config, _timeProvider.get());
     }
     else
     {

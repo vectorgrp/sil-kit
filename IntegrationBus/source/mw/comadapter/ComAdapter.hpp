@@ -16,7 +16,9 @@
 
 #include "ib/extensions/ITraceMessageSink.hpp"
 #include "ib/extensions/ITraceMessageSource.hpp"
+
 #include "Tracing.hpp"
+#include "ReplayScheduler.hpp"
 
 #include "IIbToLogMsgSender.hpp"
 #include "IIbToLogMsgReceiver.hpp"
@@ -210,6 +212,7 @@ private:
 
     std::unique_ptr<logging::ILogger> _logger;
     std::vector<std::unique_ptr<extensions::ITraceMessageSink>> _traceSinks;
+    std::unique_ptr<tracing::ReplayScheduler> _replayScheduler;
 
     std::tuple<
         ControllerMap<sim::can::IIbToCanController>,

@@ -128,17 +128,16 @@ void ValidateTraceSources(const Participant& participant)
         {
             throw ib::cfg::Misconfiguration{"TraceSource name must not be empty!"};
         }
-        sourceNames.insert(source.name);
+        auto ok = sourceNames.insert(source.name);
+        if (!ok.second)
+        {
+            throw ib::cfg::Misconfiguration{"TraceSources must have a unique name: duplicate entry is " + source.name};
+        }
     }
 
     auto sourceExists = [&sourceNames](const auto& name) -> bool {
         return std::end(sourceNames) != std::find(sourceNames.cbegin(), sourceNames.cend(), name);
     };
-
-    if (sourceNames.size() != participant.traceSources.size())
-    {
-        throw ib::cfg::Misconfiguration{"TraceSources must have unique names!"};
-    }
 
     auto validateController = [&](const auto& controllersConfig)
     {

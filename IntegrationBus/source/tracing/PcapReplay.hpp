@@ -9,6 +9,7 @@ namespace tracing {
 class PcapReplay
     : public extensions::IReplayDataProvider
 {
+public:
     auto OpenFile(std::string filePath, ib::mw::logging::ILogger* ibLogger)
         -> std::shared_ptr<extensions::IReplayFile> override;
 };

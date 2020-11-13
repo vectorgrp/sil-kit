@@ -783,6 +783,7 @@ void ParticipantController::ExecuteSimTask()
     _logger->Trace("Finished Simulation Task. Execution time was: {}ms", std::chrono::duration_cast<DoubleMSecs>(_execTimeMonitor.CurrentDuration()).count());
     _waitTimeMonitor.StartMeasurement();
 
+    _timeProvider->FinishedStep(_currentTask.timePoint);
     _syncAdapter->FinishedStep(*this);
     _syncAdapter->RequestStep(*this);
 }

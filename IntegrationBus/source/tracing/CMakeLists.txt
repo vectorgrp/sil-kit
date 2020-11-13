@@ -8,8 +8,6 @@ add_library(IbTracing STATIC
     PcapSink.cpp
     PcapSink.hpp
 
-    PcapReplay.cpp
-    PcapReplay.hpp
     PcapReader.cpp
     PcapReader.hpp
 
@@ -21,6 +19,17 @@ add_library(IbTracing STATIC
     #public interface used for trace sink implementations
     ${CMAKE_CURRENT_LIST_DIR}/../../include/ib/extensions/ITraceMessageSink.hpp
     ${CMAKE_CURRENT_LIST_DIR}/../../include/ib/extensions/TraceMessage.hpp
+
+    #Trace Replaying utilities
+    IReplayDataController.hpp
+
+    PcapReplay.cpp
+    PcapReplay.hpp
+
+    ReplayScheduler.hpp
+    ReplayScheduler.cpp
+    
+    ReplayController.hpp
 )
 
 target_include_directories(IbTracing
