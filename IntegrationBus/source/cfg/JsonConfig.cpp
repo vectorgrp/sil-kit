@@ -103,6 +103,25 @@ auto optional_to_json(json11::Json::object& json, const Replay& config)
     }
 }
 
+auto macaddress_to_json(const std::array<uint8_t, 6>& macAddress) -> json11::Json
+{
+    std::stringstream macOut;
+
+    to_ostream(macOut, macAddress);
+
+    return json11::Json(macOut.str());
+}
+
+auto macaddress_from_json(const json11::Json& json) -> std::array<uint8_t, 6>
+{
+    std::array<uint8_t, 6> macAddress;
+
+    std::stringstream macIn(json.string_value());
+    from_istream(macIn, macAddress);
+
+    return macAddress;
+}
+
 } // namespace anonymous
 
 
@@ -355,24 +374,6 @@ auto from_json<LinController>(const json11::Json& json) -> LinController
     return controller;
 }
 
-auto macaddress_to_json(const std::array<uint8_t, 6>& macAddress) -> json11::Json
-{
-    std::stringstream macOut;
-
-    to_ostream(macOut, macAddress);
-
-    return json11::Json(macOut.str());
-}
-
-auto macaddress_from_json(const json11::Json& json) -> std::array<uint8_t, 6>
-{
-    std::array<uint8_t, 6> macAddress;
-
-    std::stringstream macIn(json.string_value());
-    from_istream(macIn, macAddress);
-
-    return macAddress;
-}
 
 auto to_json(const EthernetController& controller) -> json11::Json
 {
@@ -1597,23 +1598,25 @@ auto to_json(const FastRtps::Config& fastRtps) -> json11::Json
 template <>
 auto from_json<VAsio::RegistryConfig>(const json11::Json& json) -> VAsio::RegistryConfig
 {
-    VAsio::RegistryConfig registry;
+    VAsio::RegistryConfig registry{};
 
     optional_from_json(registry.hostname, json, "Hostname");
     optional_from_json(registry.port, json, "Port");
     optional_from_json(registry.logger, json, "Logger");
+    optional_from_json(registry.connectAttempts, json, "ConnectAttempts");
     
     return registry;
 }
 
 auto to_json(const VAsio::RegistryConfig& config) -> json11::Json
 {
-    static const VAsio::RegistryConfig defaultConfig;
+    static const VAsio::RegistryConfig defaultConfig{};
 
     json11::Json::object json;
     non_default_to_json(config.hostname, json, "Hostname", defaultConfig.hostname);
     non_default_to_json(config.port, json, "Port", defaultConfig.port);
     non_default_to_json(config.logger, json, "Logger", defaultConfig.logger);
+    non_default_to_json(config.connectAttempts, json, "ConnectAttempts", defaultConfig.connectAttempts);
     return json;
 }
 

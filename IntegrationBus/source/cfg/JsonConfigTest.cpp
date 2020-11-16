@@ -937,4 +937,24 @@ TEST_F(JsonConfigTest, configure_controllers_with_replay)
     EXPECT_TRUE(compareReplay(pold.patternPorts, pnew.patternPorts));
     EXPECT_TRUE(compareReplay(pold.pwmPorts, pnew.pwmPorts));
 }
+
+TEST_F(JsonConfigTest, configure_registry_connect_attempts)
+{
+    ib::cfg::Config defaultCfg{};
+    ASSERT_EQ(defaultCfg.middlewareConfig.vasio.registry.connectAttempts, 1);
+
+    auto parsedConfig = ib::cfg::Config::FromJsonString(
+        R"({
+    "MiddlewareConfig": {
+        "VAsio": {
+            "Registry": {
+                "ConnectAttempts": 12345
+            }
+        }
+    }
+})"
+    );
+    ASSERT_EQ(parsedConfig.middlewareConfig.vasio.registry.connectAttempts, 12345);
+
+}
 } // anonymous namespace

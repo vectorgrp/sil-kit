@@ -382,7 +382,9 @@ struct RegistryConfig
     std::string hostname{"localhost"};
     uint16_t port{8500};
     Logger logger;
+    int connectAttempts{1}; //!<  Number of connection attempts to the registry a participant should perform.
 };
+
 struct Config
 {
     RegistryConfig registry;

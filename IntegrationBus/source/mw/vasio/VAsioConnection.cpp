@@ -61,20 +61,29 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     _logger->Debug("Connecting to VAsio registry");
 
     auto registry = std::make_unique<VAsioTcpPeer>(_ioContext, this, _logger);
-
-    try
+    bool ok = false;
+    for (auto i = 0; i < vasioConfig.registry.connectAttempts; i++)
     {
-        registry->Connect(registryInfo);
+        try
+        {
+            registry->Connect(registryInfo);
+            ok = true;
+            break;
+        }
+        catch (const std::exception&)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds{100});
+        }
     }
-    catch (const std::exception&)
+    if (!ok)
     {
-        _logger->Error("Failed to connect to VAsio registry");
+        _logger->Error("Failed to connect to VAsio registry ( number of attempts: {}",
+            vasioConfig.registry.connectAttempts);
         _logger->Info("   Make sure that the IbRegistry is up and running and is listening on port {}.", registryInfo.acceptorPort);
         _logger->Info("   Make sure that the hostname \"{}\" can be resolved and is reachable.", registryInfo.acceptorHost);
         _logger->Info("   You can configure the IbRegistry hostname and port via the IbConfig.");
         _logger->Info("   The IbRegistry executable can be found in your IB installation folder:");
         _logger->Info("     INSTALL_DIR/bin/IbRegistry[.exe]");
-
         throw std::runtime_error{"ERROR: Failed to connect to VAsio registry"};
     }
 
