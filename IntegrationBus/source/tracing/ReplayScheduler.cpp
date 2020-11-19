@@ -34,11 +34,13 @@ ReplayScheduler::ReplayScheduler(const cfg::Config& config,
     , _tickPeriod{tickPeriod}
 {
     ConfigureControllers(config, participantConfig);
-}
+    _timeProvider->RegisterNextSimStepHandler(
+        [this](auto now, auto duration)
+        {
+            ReplayMessages(now, duration);
+        }
+    );
 
-void ReplayScheduler::SetTimeProvider(mw::sync::ITimeProvider* timeProvider)
-{
-    _timeProvider = timeProvider;
 }
 
 void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg::Participant& participantConfig)
@@ -102,6 +104,7 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
 
 void ReplayScheduler::ReplayMessages(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)
 {
+    const auto end = now + duration;
     for (auto& task : _replayTasks)
     {
         //TODO 

@@ -101,7 +101,7 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& par
         _logger->Info("Using IbConfig: {}", _config.configFilePath);
 
     //set up default time provider used for controller instantiation
-    _timeProvider = std::make_shared<sync::WallclockProvider>();
+    _timeProvider = std::make_shared<sync::WallclockProvider>(_config.simulationSetup.timeSync.tickPeriod);
 }
 
 template <class IbConnectionT>

@@ -22,10 +22,11 @@ public:
     virtual auto Now() const -> std::chrono::nanoseconds = 0;
     //! \brief Name of the time provider, for debugging purposes.
     virtual auto TimeProviderName() const -> const std::string& = 0;
-    //! \brief Register a handler that is executed when the current simulation step is finished.
-    virtual void RegisterFinishedStepHandler(std::function<void(std::chrono::nanoseconds now)>) {};
-    //! \brief Notify the TimeProvider about a finished simulation step.
-    virtual void FinishedStep(std::chrono::nanoseconds now) {};
+
+    using NextSimStepHandlerT = std::function<void(std::chrono::nanoseconds now,
+        std::chrono::nanoseconds duration)>;
+    //! \brief Register a handler that is executed when the next simulation step is started.
+    virtual void RegisterNextSimStepHandler(NextSimStepHandlerT) = 0;
 };
 
 

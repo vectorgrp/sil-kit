@@ -66,6 +66,12 @@ public:
         return _name;
     }
 
+    void RegisterNextSimStepHandler(NextSimStepHandlerT handler)
+    {
+        _handlers.emplace_back(std::move(handler));
+    }
+
+    std::vector<NextSimStepHandlerT> _handlers;
     const std::string _name = "MockTimeProvider";
     mutable MockTime mockTime;
 };

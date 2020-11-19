@@ -50,6 +50,8 @@ public:
         case TraceMessageType::GenericMessage:
             Trace(dir, address, timestamp, message.Get<ib::sim::generic::GenericMessage>());
             break;
+        default:
+            throw std::runtime_error("Invalid replay data");
         }
     }
 

@@ -29,7 +29,6 @@ public:
         std::chrono::nanoseconds tickPeriod, mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider);
     ~ReplayScheduler() = default;
 
-    void SetTimeProvider(mw::sync::ITimeProvider* timeProvider);
 private:
     // Methods
    

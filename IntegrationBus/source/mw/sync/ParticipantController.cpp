@@ -59,11 +59,24 @@ struct ParticipantTimeProvider : public sync::ITimeProvider
 {
     std::chrono::nanoseconds _now;
     const std::string _name{"ParticipantTimeProvider"};
+    std::vector<NextSimStepHandlerT> _handlers;
 
-    auto SetTime(std::chrono::nanoseconds now) { _now = now; }
+    auto SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) 
+    {
+        // tell our users about the next simulation step
+        for (auto& handler : _handlers)
+            handler(now, duration);
+        _now = now; 
+    }
 
     auto Now() const -> std::chrono::nanoseconds override { return _now; }
+
     const std::string& TimeProviderName() const  override { return _name; }
+
+    void RegisterNextSimStepHandler(NextSimStepHandlerT handler)  override
+    {
+        _handlers.emplace_back(std::move(handler));
+    }
 };
 
 
@@ -772,7 +785,7 @@ void ParticipantController::ExecuteSimTask()
     _waitTimeMonitor.StopMeasurement();
     _logger->Trace("Starting next Simulation Task. Waiting time was: {}ms", std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count());
 
-    _timeProvider->SetTime(_currentTask.timePoint);
+    _timeProvider->SetTime(_currentTask.timePoint, _currentTask.duration);
 
     _execTimeMonitor.StartMeasurement();
     _watchDog.Start();
@@ -783,7 +796,6 @@ void ParticipantController::ExecuteSimTask()
     _logger->Trace("Finished Simulation Task. Execution time was: {}ms", std::chrono::duration_cast<DoubleMSecs>(_execTimeMonitor.CurrentDuration()).count());
     _waitTimeMonitor.StartMeasurement();
 
-    _timeProvider->FinishedStep(_currentTask.timePoint);
     _syncAdapter->FinishedStep(*this);
     _syncAdapter->RequestStep(*this);
 }

@@ -196,9 +196,9 @@ TEST_F(EthernetControllerTest, ethcontroller_uses_tracing)
         .WillByDefault(testing::Return(now));
 
     ib::cfg::EthernetController config{};
-    auto controller = EthController(&comAdapter, config, comAdapter.GetTimeProvider());
-    controller.SetEndpointAddress(controllerAddress);
-    controller.AddSink(&traceSink);
+    auto ethController = EthController(&comAdapter, config, comAdapter.GetTimeProvider());
+    ethController.SetEndpointAddress(controllerAddress);
+    ethController.AddSink(&traceSink);
 
 
     EthFrame ethFrame{};
@@ -211,7 +211,7 @@ TEST_F(EthernetControllerTest, ethcontroller_uses_tracing)
     EXPECT_CALL(traceSink,
         Trace(Direction::Send, controllerAddress, now, ethFrame))
         .Times(1);
-    controller.SendFrame(ethFrame);
+    ethController.SendFrame(ethFrame);
 
     // Receive direction
     EXPECT_CALL(traceSink,
@@ -221,7 +221,7 @@ TEST_F(EthernetControllerTest, ethcontroller_uses_tracing)
     EthMessage ethMsg{};
     ethMsg.ethFrame = ethFrame;
     ethMsg.timestamp = now;
-    controller.ReceiveIbMessage(otherAddress, ethMsg);
+    ethController.ReceiveIbMessage(otherAddress, ethMsg);
 }
 
 } // anonymous namespace
