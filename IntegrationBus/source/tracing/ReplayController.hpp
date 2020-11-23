@@ -64,6 +64,9 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 // Actual Replay Simulation Controllers
+// - NB This design is not final, yet. We might still want to wrap
+//      a concrete controller and implement its public interfaces to 
+//      intercept its communication.
 //////////////////////////////////////////////////////////////////////
 
 class EthControllerReplay

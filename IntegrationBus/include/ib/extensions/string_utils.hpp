@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <sstream>
 #include "ib/extensions/TraceMessage.hpp"
 
 namespace ib {
