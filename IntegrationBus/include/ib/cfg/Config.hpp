@@ -377,6 +377,7 @@ struct Config
 } // namespace FastRTPS
 
 namespace VAsio {
+
 struct RegistryConfig
 {
     std::string hostname{"localhost"};
@@ -388,7 +389,12 @@ struct RegistryConfig
 struct Config
 {
     RegistryConfig registry;
+    int tcpReceiveBufferSize{-1};
+    int tcpSendBufferSize{-1};
+    bool tcpNoDelay{false}; //! < Disables Nagle's algorithm.
+    bool tcpQuickAck{false}; //! < Setting this Linux specific flag disables delayed TCP/IP acknowledgements.
 };
+
 } // namespace VAsio
 
 enum class Middleware

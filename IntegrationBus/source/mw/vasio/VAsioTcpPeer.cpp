@@ -7,7 +7,6 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-#include <numeric>
 
 using namespace asio::ip;
 
@@ -17,20 +16,22 @@ using namespace asio::ip;
 #include <sys/socket.h>
 #include <errno.h>
 
-static bool SetPlatformSocketOptions(asio::ip::tcp::socket& socket)
+static void EnableQuickAck(ib::mw::logging::ILogger* log, tcp::socket& socket)
 {
     int val{1};
     //Disable Delayed Acknowledgments on the receiving side
     int e = setsockopt(socket.native_handle(), IPPROTO_TCP, TCP_QUICKACK,
         (void*)&val, sizeof(val));
-    return e == 0;
+    if (e != 0)
+    {
+        log->Warn("VasioTcpPeer: cannot set linux-specific socket option TCP_QUICKACK.");
+    }
 }
 
 #else  //windows 
 
-static bool SetPlatformSocketOptions(asio::ip::tcp::socket& )
+static void EnableQuickAck(ib::mw::logging::ILogger*, tcp::socket& )
 {
-    return true;
 }
 
 #endif  // __linux__
@@ -91,19 +92,33 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
         return;
     }
 
+    const auto& config = _ibConnection->Config().middlewareConfig.vasio;
     for (auto&& resolverEntry : resolverResults)
     {
         try
         {
             _socket.connect(resolverEntry);
-            _socket.set_option(asio::ip::tcp::no_delay{true});
-            _socket.set_option(asio::socket_base::receive_buffer_size{4096});
-            _socket.set_option(asio::socket_base::send_buffer_size{4096});
-            _socket.set_option(asio::socket_base::reuse_address{true});
-            if (!SetPlatformSocketOptions(_socket))
+
+            if (config.tcpNoDelay)
             {
-                _logger->Warn("VasioTcpPeer: cannot set platform-specific socket options (e.g. TCP_QUICKACK)");
+                _socket.set_option(asio::ip::tcp::no_delay{true});
             }
+
+            if (config.tcpQuickAck)
+            {
+                EnableQuickAck(_logger, _socket);
+            }
+
+            if(config.tcpReceiveBufferSize > 0)
+            {
+                _socket.set_option(asio::socket_base::receive_buffer_size{config.tcpReceiveBufferSize});
+            }
+
+            if (config.tcpSendBufferSize > 0)
+            {
+                _socket.set_option(asio::socket_base::send_buffer_size{config.tcpSendBufferSize});
+            }
+
             return;
         }
         catch (asio::system_error& /*err*/)
