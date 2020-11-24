@@ -124,7 +124,7 @@ running on localhost listening on Port 8500. These values can be changed via the
      - Optional :ref:`Logger configuration<sec:cfg-participant-logger>` for the logger used by the registry.
 
    * - ConnectAttempts
-     - Number of connection to the registry a participant should attempt before giving up and signaling an error.
+     - Number of connects to the registry a participant should attempt before giving up and signaling an error.
        By default, only a single connect is attempted.
 
 .. _sec:mwcfg-fastrtps:

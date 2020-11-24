@@ -77,7 +77,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     }
     if (!ok)
     {
-        _logger->Error("Failed to connect to VAsio registry ( number of attempts: {}",
+        _logger->Error("Failed to connect to VAsio registry (number of attempts: {})",
             vasioConfig.registry.connectAttempts);
         _logger->Info("   Make sure that the IbRegistry is up and running and is listening on port {}.", registryInfo.acceptorPort);
         _logger->Info("   Make sure that the hostname \"{}\" can be resolved and is reachable.", registryInfo.acceptorHost);
