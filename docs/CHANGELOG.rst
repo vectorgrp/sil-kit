@@ -5,6 +5,37 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.3.5] - 2020-11-26
+--------------------------------
+
+Added
+~~~~~~
+- The number of connection attempts can now be configured in the VAsio registry
+  configuration, see the "ConnectAttempts" field in :ref:`sec:mwcfg-vasio`.
+- Added preliminary TCP/IP tuning settings to ``struct ib::cfg::VAsio::Config``. 
+  The following settings are available:
+
+  * tcpNoDelay: enable the TCP_NODELAY flag, which disables Nagle's algorithm (default off).
+  * tcpQuickAck: enable the Linux specific TCP_QUICKACK, which disables delayed acknowledgements (default off).
+  * tcpSendBufferSize and tcpReceiveBufferSize: set the TCP buffer sizes.
+
+Changed
+~~~~~~~
+- The TCP_NODELAY is now off by default again. It can be enabled using the VAsio
+  config.
+
+Fixed
+~~~~~
+- The IbLauncher now considers debug libraries when searching for the VIB
+  installation, this makes it usable with Debug builds.
+
+Compatibility with 3.3.4
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): No (due to Config changes)
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
 [3.3.4] - 2020-11-04
 --------------------------------
 
