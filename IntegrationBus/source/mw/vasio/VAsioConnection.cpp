@@ -62,6 +62,12 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
 
     auto registry = std::make_unique<VAsioTcpPeer>(_ioContext, this, _logger);
     bool ok = false;
+
+    if (vasioConfig.registry.connectAttempts < 1)
+    {
+        vasioConfig.registry.connectAttempts = 1;
+    }
+
     for (auto i = 0; i < vasioConfig.registry.connectAttempts; i++)
     {
         try
