@@ -25,7 +25,7 @@ def __libNames():
             Library file name (no path)
     """
     if __isWindows():
-        return ["libIntegrationBus.dll", "libIntegrationBusd.dll"]
+        return ["IntegrationBus.dll", "IntegrationBusd.dll"]
     else:
         return ["libIntegrationBus.so", "libIntegrationBusd.so"]
 
