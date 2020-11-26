@@ -12,6 +12,7 @@ add_executable(IbSystemMonitor
 set_target_properties(IbSystemMonitor PROPERTIES
      FOLDER "Utilities"
      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+     INSTALL_RPATH "$ORIGIN/../lib"
 )
 
 target_link_libraries(IbSystemMonitor

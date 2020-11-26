@@ -12,6 +12,7 @@ add_executable(IbSystemControllerInteractive
 set_target_properties(IbSystemControllerInteractive PROPERTIES
      FOLDER "Utilities"
      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Utilities/$<CONFIG>/bin"
+     INSTALL_RPATH "$ORIGIN/../lib"
 )
 
 target_link_libraries(IbSystemControllerInteractive
