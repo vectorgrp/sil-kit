@@ -28,7 +28,8 @@ if __name__ == "__main__":
         print("Usage: Launcher/validate_config.py file1 [file2...]")
         sys.exit(1)
 
-    schemaPath = os.path.join(os.path.dirname(__file__), "iblauncher/data/IbConfig.schema.json")
+    schemaPath = os.path.join(os.path.dirname(__file__),
+            "../IntegrationBus/source/cfg/IbConfig.schema.json")
     schema=loadJson(schemaPath)
 
     for cfgfile in sys.argv[1:]:
