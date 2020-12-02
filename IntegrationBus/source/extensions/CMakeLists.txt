@@ -63,7 +63,7 @@ if(UNIX)
             -Wcast-align -Wformat=2 -Wmissing-declarations
             -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-overflow=5
             -Wswitch-default -Wundef -Wno-unused
-            -Wabi -Wpacked
+            -Wpacked
             -Werror -Wfatal-errors
     )
 

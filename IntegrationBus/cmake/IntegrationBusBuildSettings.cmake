@@ -49,7 +49,6 @@ function(ib_enable_warnings target)
             -Wswitch-default
             -Wundef
             -Wno-unused
-            -Wabi
             -Wpacked
             )
         target_compile_options(${target} PRIVATE ${_flags})
