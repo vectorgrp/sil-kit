@@ -220,14 +220,16 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
                 auto* controller = createController(controllerConfig.name);
 
                 if (controller == nullptr)
-                    throw std::runtime_error("Create controller returned nullptr");
+                    throw std::runtime_error("Create controller returned nullptr for "
+                        + controllerConfig.name);
 
                 auto& replayController = dynamic_cast<ReplayController&>(*controller);
                 task.controller = &replayController;
 
                 auto replayFile = replayFiles.at(controllerConfig.replay.useTraceSource);
                 if (!task.replayChannel)
-                    throw std::runtime_error("No replay file found");
+                    throw std::runtime_error("No replay file found for" + 
+                    controllerConfig.name);
 
                 task.replayChannel = FindReplayChannel(
                     log,

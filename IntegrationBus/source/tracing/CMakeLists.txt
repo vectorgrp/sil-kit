@@ -68,3 +68,8 @@ else()
 endif()
 
 ib_enable_warnings(IbTracing)
+
+
+add_vib_test(TestTracing_Replay SOURCES ReplayTest.cpp LIBS IbMwMockComAdapter)
+add_vib_test(TestTracing_Pcap SOURCES PcapTest.cpp)
+
