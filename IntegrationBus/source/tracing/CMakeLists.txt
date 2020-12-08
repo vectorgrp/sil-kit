@@ -51,6 +51,11 @@ target_link_libraries(IbTracing
     PRIVATE IbInterface
             IbMwLogging
             IbExtensions
+    INTERFACE #because we pull private headers into our ReplayController.hpp, FIXME
+            IbSimEthernet
+            IbSimCan
+            IbSimFlexRay
+            IbSimLin
 )
 
 if(WIN32)
@@ -67,9 +72,9 @@ else()
     message(FATAL_ERROR "ERROR: unsupported platform for NamedPipe!")
 endif()
 
-ib_enable_warnings(IbTracing)
+#ib_enable_warnings(IbTracing)
 
 
-add_vib_test(TestTracing_Replay SOURCES ReplayTest.cpp LIBS IbMwMockComAdapter)
+add_vib_test(TestTracing_Replay SOURCES ReplayTest.cpp LIBS IbMwMockComAdapter IbTracing )
 add_vib_test(TestTracing_Pcap SOURCES PcapTest.cpp)
 

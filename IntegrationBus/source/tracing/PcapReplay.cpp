@@ -47,7 +47,8 @@ public:
     }
     auto Name() const -> const std::string&
     {
-        return "PcapChannel0";
+        // Pcap has no concept of channel, return hard coded.
+        return _channelName;
     }
     auto GetMetaInfos() const -> const std::map<std::string, std::string>&
     {
@@ -61,6 +62,7 @@ public:
     }
 private:
     PcapReader _reader;
+    const std::string _channelName{"PcapChannel0"};
 };
 
 class ReplayPcapFile :

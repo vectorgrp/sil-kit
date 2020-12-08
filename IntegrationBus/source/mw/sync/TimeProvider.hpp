@@ -17,13 +17,6 @@ public:
     WallclockProvider(std::chrono::nanoseconds tickPeriod)
         :_tickPeriod{tickPeriod}
     {
-        _timer.WithPeriod(tickPeriod, [this](const auto& now) {
-            std::unique_lock<std::mutex> lock{_mx};
-            for (const auto& handler : _handlers)
-            {
-                handler(now, _tickPeriod);
-            }
-        });
     }
 
     inline auto Now() const -> std::chrono::nanoseconds;
@@ -43,8 +36,18 @@ private:
 
 void WallclockProvider::RegisterNextSimStepHandler(NextSimStepHandlerT handler)
 {
-    std::unique_lock<std::mutex> lock{_mx};
-    _handlers.emplace_back(std::move(handler));
+    {
+        std::unique_lock<std::mutex> lock{_mx};
+        _handlers.emplace_back(std::move(handler));
+    }
+
+    _timer.WithPeriod(_tickPeriod, [this](const auto& now) {
+        std::unique_lock<std::mutex> lock{_mx};
+        for (const auto& handler : _handlers)
+        {
+            handler(now, _tickPeriod);
+        }
+    });
 }
 
 auto WallclockProvider::Now() const -> std::chrono::nanoseconds
