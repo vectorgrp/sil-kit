@@ -2,9 +2,11 @@
 #include "ReplayScheduler.hpp"
 
 #include <string>
+#include <cassert>
 
 #include "ib/cfg/Config.hpp"
 #include "ib/mw/IComAdapter.hpp"
+#include "ib/mw/sync/ISystemMonitor.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/extensions/string_utils.hpp"
 
@@ -148,7 +150,8 @@ auto FindReplayChannel(ib::mw::logging::ILogger* log,
         }
         // The source info contains 'Link/Participant/Controller'
         auto metaInfos = MetaInfos(*channel);
-        auto tokens = splitString(metaInfos.SourceInfoName(), "/"); //TODO separator is a MDF detail
+        //TODO the "/" separator is an MDF detail which should be exported in metaInfos
+        auto tokens = splitString(metaInfos.SourceInfoName(), "/"); 
         if (tokens.size() != 3)
         {
             log->Info("Replay: using channel '{}' from '{}' on {}: source info mismatch: {}",
@@ -179,6 +182,7 @@ ReplayScheduler::ReplayScheduler(const cfg::Config& config,
     , _timeProvider{timeProvider}
     , _tickPeriod{tickPeriod}
 {
+    _log = _comAdapter->GetLogger();
     ConfigureControllers(config, participantConfig);
     _timeProvider->RegisterNextSimStepHandler(
         [this](auto now, auto duration)
@@ -187,16 +191,34 @@ ReplayScheduler::ReplayScheduler(const cfg::Config& config,
         }
     );
 
+    // start the replaying as soon as the participant is in state running
+    auto* monitor = _comAdapter->GetSystemMonitor();
+    monitor->RegisterParticipantStatusHandler(
+        [this](const mw::sync::ParticipantStatus& status)
+        {
+            switch (status.state)
+            {
+            case mw::sync::ParticipantState::Running:
+                StartReplay();
+                break;
+            case mw::sync::ParticipantState::Stopping:
+                StopReplay();
+                break;
+            default:
+                break;
+            }
+        }
+    );
+
 }
 
 void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg::Participant& participantConfig)
 {
-    auto* log = _comAdapter->GetLogger();
     // create trace sources (aka IReplayFile)
-    auto replayFiles = tracing::CreateReplayFiles(log, config, participantConfig);
+    auto replayFiles = tracing::CreateReplayFiles(_log, config, participantConfig);
     if (replayFiles.empty())
     {
-        log->Error("ReplayScheduler: cannot create replay files.");
+        _log->Error("ReplayScheduler: cannot create replay files.");
         throw std::runtime_error("ReplayScheduler: cannot create replay files.");
     }
     auto getLinkById = [&config](auto id)
@@ -228,28 +250,30 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
                 task.controller = replayController;
 
                 auto replayFile = replayFiles.at(controllerConfig.replay.useTraceSource);
-                if (!task.replayChannel)
+                if (!replayFile)
                     throw std::runtime_error("No replay file found for" + 
                     controllerConfig.name);
 
-                task.replayChannel = FindReplayChannel(
-                    log,
+                auto replayChannel = FindReplayChannel(
+                    _log,
                     replayFile.get(),
                     controllerConfig,
                     participantConfig.name,
                     getLinkById(controllerConfig.linkId).name
                 );
 
-                if (!task.replayChannel)
+                if (!replayChannel)
                     throw std::runtime_error("Could not find a replay channel");
 
-                task.initialTime = task.replayChannel->StartTime();
+                task.replayReader = replayChannel->GetReader();
+                task.initialTime = replayChannel->StartTime();
+                task.name = replayChannel->Name();
 
                 _replayTasks.emplace_back(std::move(task));
             }
             catch (const std::runtime_error& ex)
             {
-                log->Warn("Could not configure controller " + controllerConfig.name
+                _log->Warn("Could not configure controller " + controllerConfig.name
                     + ": " + ex.what());
             }
         }
@@ -270,13 +294,54 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
 
 void ReplayScheduler::ReplayMessages(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)
 {
-    const auto end = now + duration;
+    if (!_isStarted)
+    {
+        return;
+    }
+
+    const auto relativeNow = now - _startTime;
+    assert(relativeNow.count() >= 0);
+    const auto relativeEnd = relativeNow + duration;
     for (auto& task : _replayTasks)
     {
-        //TODO 
-        // - play all messages that have a relative timestamp that is in our [now, now+duration] time frame
-        // - if we get a replaymessage with higher relative timestamp, put it in currentMessage and continue to next task
+        while (true)
+        {
+            auto msg = task.replayReader->Read();
+            if (!msg)
+            {
+                _log->Trace("ReplayTask on channel '{}' returned invalid message @{}ns",
+                    task.name, now.count());
+                break;
+            }
+            // the current time stamps are relative to the trace's initial time.
+            const auto msgNow = msg->Timestamp() - task.initialTime;
+            if (msgNow > relativeEnd)
+            {
+                //message is after the current schedule
+                break;
+            }
+            //TODO Currently, the messages are batched at the beginning of the schedule.
+            //     When using wallclock time provider, the message timestamps might be off.
+            task.controller->ReplayMessage(msg.get());
+
+            if (!task.replayReader->Seek(1))
+            {
+                break;
+            }
+        }
     }
+}
+
+void ReplayScheduler::StartReplay()
+{
+    if (_isStarted) return;
+    _startTime = _timeProvider->Now();
+    _isStarted = true;
+}
+
+void ReplayScheduler::StopReplay()
+{
+    _isStarted = false;
 }
 
 } //end namespace tracing

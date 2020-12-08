@@ -15,13 +15,6 @@
 namespace ib {
 namespace tracing {
 
-struct ReplayTask
-{
-    IReplayDataController* controller{nullptr}; //!< the controller with enabled replay, owned by comAdapter.
-    std::chrono::nanoseconds lastTimestamp{0}; //!< the time stamp of the last replay message.
-    std::shared_ptr<extensions::IReplayChannel> replayChannel; //!< source of replay messages
-};
-
 class ReplayScheduler
 {
 public:
@@ -29,6 +22,10 @@ public:
         std::chrono::nanoseconds tickPeriod, mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider);
     ~ReplayScheduler() = default;
 
+public:
+    // Methods
+    void StartReplay();
+    void StopReplay();
 private:
     // Methods
    
@@ -40,11 +37,15 @@ private:
     // Members
     struct ReplayTask
     {
+        std::string name;
         IReplayDataController* controller{nullptr};
-        std::shared_ptr<extensions::IReplayChannel> replayChannel;
+        std::shared_ptr<extensions::IReplayChannelReader> replayReader;
         std::chrono::nanoseconds initialTime{0};
     };
     std::chrono::nanoseconds _tickPeriod{0};
+    std::chrono::nanoseconds _startTime{std::chrono::nanoseconds::min()};
+    bool _isStarted{false};
+    mw::logging::ILogger* _log{nullptr};
     mw::IComAdapter* _comAdapter{nullptr};
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     std::vector<ReplayTask> _replayTasks;
