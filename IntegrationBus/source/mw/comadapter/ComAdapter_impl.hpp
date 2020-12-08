@@ -7,6 +7,7 @@
 #include "CanControllerProxy.hpp"
 #include "EthController.hpp"
 #include "EthControllerProxy.hpp"
+#include "EthControllerReplay.hpp"
 #include "FrController.hpp"
 #include "FrControllerProxy.hpp"
 #include "LinController.hpp"
@@ -34,8 +35,6 @@
 #include "ComAdapter.hpp"
 
 #include "MessageTracing.hpp" // log tracing
-
-#include "ReplayController.hpp"
 
 #ifdef SendMessage
 #if SendMessage == SendMessageA
@@ -227,7 +226,7 @@ auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonical
     }
     else if (ControllerUsesReplay(config))
     {
-        return CreateControllerForLink<tracing::EthControllerReplay>(config, config, _timeProvider.get());
+        return CreateControllerForLink<eth::EthControllerReplay>(config, config, _timeProvider.get());
     }
     else
     {

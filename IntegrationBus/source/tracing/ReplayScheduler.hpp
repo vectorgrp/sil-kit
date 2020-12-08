@@ -10,14 +10,14 @@
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/cfg/fwd_decl.hpp"
 
-#include "ReplayController.hpp"
+#include "IReplayDataController.hpp"
 
 namespace ib {
 namespace tracing {
 
 struct ReplayTask
 {
-    ReplayController* controller{nullptr}; //!< the controller with enabled replay, owned by comAdapter.
+    IReplayDataController* controller{nullptr}; //!< the controller with enabled replay, owned by comAdapter.
     std::chrono::nanoseconds lastTimestamp{0}; //!< the time stamp of the last replay message.
     std::shared_ptr<extensions::IReplayChannel> replayChannel; //!< source of replay messages
 };
@@ -40,7 +40,7 @@ private:
     // Members
     struct ReplayTask
     {
-        ReplayController* controller{nullptr};
+        IReplayDataController* controller{nullptr};
         std::shared_ptr<extensions::IReplayChannel> replayChannel;
         std::chrono::nanoseconds initialTime{0};
     };

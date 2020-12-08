@@ -5,6 +5,7 @@
 
 #include "ib/cfg/Config.hpp"
 #include "ib/mw/IComAdapter.hpp"
+#include "ib/sim/all.hpp"
 #include "ib/extensions/string_utils.hpp"
 
 #include "IReplayDataController.hpp"
@@ -223,8 +224,8 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
                     throw std::runtime_error("Create controller returned nullptr for "
                         + controllerConfig.name);
 
-                auto& replayController = dynamic_cast<ReplayController&>(*controller);
-                task.controller = &replayController;
+                auto* replayController = dynamic_cast<IReplayDataController*>(controller);
+                task.controller = replayController;
 
                 auto replayFile = replayFiles.at(controllerConfig.replay.useTraceSource);
                 if (!task.replayChannel)

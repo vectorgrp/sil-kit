@@ -28,8 +28,6 @@ add_library(IbTracing STATIC
 
     ReplayScheduler.hpp
     ReplayScheduler.cpp
-    
-    ReplayController.hpp
 )
 
 target_include_directories(IbTracing

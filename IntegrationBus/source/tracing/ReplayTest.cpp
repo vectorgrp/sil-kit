@@ -4,13 +4,14 @@
 
 #include "ib/cfg/Config.hpp"
 #include "ib/mw/EndpointAddress.hpp"
+#include "ib/util/functional.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
 #include "MockComAdapter.hpp"
 #include "Timer.hpp"
-#include "ReplayController.hpp"
+#include "EthControllerReplay.hpp"
 
 namespace {
 
@@ -64,10 +65,23 @@ public:
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthSetMode&));
 };
 
-struct MockReplayMessage 
+struct Callbacks
+{
+    MOCK_METHOD2(ReceiveMessage, void(IEthController*, const EthMessage&));
+};
+
+
+struct MockEthFrame 
     : public extensions::IReplayMessage
     , public EthFrame
 {
+    MockEthFrame()
+    {
+        SetSourceMac(EthMac{ 1,2,3,4,5,6 });
+        SetDestinationMac(EthMac{ 7,8,9,0xa,0xb,0xc});
+        _type = extensions::TraceMessageType::EthFrame;
+    }
+
     auto Timestamp() const -> std::chrono::nanoseconds override
     {
         return _timestamp;
@@ -96,19 +110,82 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
     MockComAdapter comAdapter{};
 
     cfg::EthernetController cfg{};
-    cfg.replay.direction = cfg::Replay::Direction::Send;
 
     EthControllerReplay ctrl{&comAdapter, cfg, comAdapter.GetTimeProvider()};
 
-    MockReplayMessage msg;
+    MockEthFrame msg;
     msg._address = {1,2};
-    msg._type = extensions::TraceMessageType::EthFrame;
+    ctrl.SetEndpointAddress(msg._address);
 
+    // Replay Send / Send
     msg._direction = extensions::Direction::Send;
+    cfg.replay.direction = cfg::Replay::Direction::Send;
+    ctrl.ConfigureReplay(cfg.replay);
     EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, An<const EthMessage&>()))
         .Times(1);
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
     ctrl.ReplayMessage(&msg);
+
+    // Replay Send / Both
+    msg._direction = extensions::Direction::Send;
+    cfg.replay.direction = cfg::Replay::Direction::Both;
+    ctrl.ConfigureReplay(cfg.replay);
+    EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, An<const EthMessage&>()))
+        .Times(1);
+    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+    ctrl.ReplayMessage(&msg);
+
+    // Block Send 
+    msg._direction = extensions::Direction::Receive;
+    cfg.replay.direction = cfg::Replay::Direction::Send;
+    ctrl.ConfigureReplay(cfg.replay);
+    EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, An<const EthMessage&>()))
+        .Times(0);
+    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
+    ctrl.ReplayMessage(&msg);
+
+}
+
+
+TEST(ReplayTest, ethcontroller_replay_config_receive)
+{
+    Callbacks callbacks;
+    MockComAdapter comAdapter{};
+
+    cfg::EthernetController cfg{};
+
+    EthControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+
+    MockEthFrame msg;
+
+    msg._address = {1,2};
+
+    controller.SetEndpointAddress({3,4});
+    controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
+
+    // Replay Receive / Receive
+    msg._direction = extensions::Direction::Receive;
+    cfg.replay.direction = cfg::Replay::Direction::Receive;
+    controller.ConfigureReplay(cfg.replay);
+    EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), A<const EthMessage&>()))
+        .Times(1);
+    controller.ReplayMessage(&msg);
+
+    // Replay Receive / Both
+    msg._direction = extensions::Direction::Receive;
+    cfg.replay.direction = cfg::Replay::Direction::Both;
+    controller.ConfigureReplay(cfg.replay);
+    EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), A<const EthMessage&>()))
+        .Times(1);
+    controller.ReplayMessage(&msg);
+
+    // Block Receive 
+    msg._direction = extensions::Direction::Send;
+    cfg.replay.direction = cfg::Replay::Direction::Receive;
+    controller.ConfigureReplay(cfg.replay);
+    EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), A<const EthMessage&>()))
+        .Times(0);
+    controller.ReplayMessage(&msg);
 
 }
 
