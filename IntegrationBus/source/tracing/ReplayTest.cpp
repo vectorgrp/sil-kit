@@ -189,4 +189,4 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
 
 }
 
-}
+} //end anonymous namespace

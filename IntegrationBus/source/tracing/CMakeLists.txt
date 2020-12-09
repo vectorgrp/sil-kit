@@ -74,5 +74,5 @@ endif()
 
 
 add_vib_test(TestTracing_Replay SOURCES ReplayTest.cpp LIBS IbMwMockComAdapter IbTracing )
-add_vib_test(TestTracing_Pcap SOURCES PcapTest.cpp)
+add_vib_test(TestTracing_Pcap SOURCES PcapTest.cpp LIBS IbTracing IbMwMockComAdapter )
 

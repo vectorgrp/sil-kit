@@ -1,6 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "PcapReader.hpp"
 
+#include "ib/sim/eth/EthDatatypes.hpp"
+
 #include "Pcap.hpp"
 
 namespace ib {
@@ -8,8 +10,34 @@ namespace tracing {
 using namespace ib::extensions;
 using namespace ib::mw::logging;
 //////////////////////////////////////////////////////////////////////
-// PcapMessage
+// PcapMessage -- internal only
 //////////////////////////////////////////////////////////////////////
+
+class PcapMessage
+    : public ib::extensions::IReplayMessage
+    , public ib::sim::eth::EthFrame
+{
+public:
+
+    auto Timestamp() const -> std::chrono::nanoseconds override;
+    void SetTimestamp(std::chrono::nanoseconds timeStamp);
+
+    auto GetDirection() const -> ib::extensions::Direction override;
+
+    auto EndpointAddress() const -> ib::mw::EndpointAddress override;
+
+    auto Type() const -> ib::extensions::TraceMessageType override;
+
+private:
+    std::chrono::nanoseconds _timeStamp{0};
+    ib::extensions::Direction _direction{ib::extensions::Direction::Send};
+    ib::mw::EndpointAddress  _endpointAddress{};
+};
+
+void PcapMessage::SetTimestamp(std::chrono::nanoseconds timeStamp)
+{
+    _timeStamp = timeStamp;
+}
 
 auto PcapMessage::Timestamp() const -> std::chrono::nanoseconds
 {
@@ -35,6 +63,12 @@ auto PcapMessage::Type() const -> TraceMessageType
 // PcapReader
 //////////////////////////////////////////////////////////////////////
 
+PcapReader::PcapReader(std::istream* stream, ib::mw::logging::ILogger* logger)
+    : _stream{stream}
+    , _log{logger}
+{
+    Reset();
+}
 PcapReader::PcapReader(const std::string& filePath, ILogger* logger)
     : _filePath{filePath}
     , _log{logger}
@@ -51,17 +85,19 @@ PcapReader::PcapReader(PcapReader& other)
     _log = other._log;
     _startTime = other._startTime;
     _endTime = other._endTime;
+    _stream = other._stream;
     Reset();
 }
 
 void PcapReader::Reset()
 {
-    if (!_file.is_open())
+    if (!_filePath.empty() && !_file.is_open())
     {
         _file.open(_filePath, std::ios::binary);
+        _stream = &_file;
     }
 
-    if (!_file.good())
+    if (!_filePath.empty() && !_file.good())
     {
         _log->Error("Cannot open file " + _filePath);
         throw std::runtime_error("Cannot open file " + _filePath);
@@ -74,9 +110,9 @@ void PcapReader::Reset()
 void PcapReader::ReadGlobalHeader()
 {
     std::array<char, sizeof(Pcap::GlobalHeader)> buf{};
-    _file.seekg(0);
-    _file.read(buf.data(), buf.size());
-    if (!_file.good())
+    _stream->seekg(0);
+    _stream->read(buf.data(), buf.size());
+    if (!_stream->good())
     {
         throw std::runtime_error("PCAP file cannot be opened: global header short read");
     }
@@ -123,8 +159,8 @@ bool PcapReader::Seek(size_t messageNumber)
         //extract PCAP packet from stream
 
         std::array<char, sizeof(Pcap::PacketHeader)> buf{};
-        _file.read(buf.data(), buf.size());
-        if (!_file.good())
+        _stream->read(buf.data(), buf.size());
+        if (!_stream->good())
         {
             _log->Warn("PCAP file: " + _filePath +": short read on packet header.");
             return false;
@@ -136,18 +172,20 @@ bool PcapReader::Seek(size_t messageNumber)
 
         std::vector<uint8_t> msgBuf{};
         msgBuf.resize(hdr->incl_len);
-        _file.read(reinterpret_cast<char*>(msgBuf.data()), hdr->incl_len);
-        if (!_file.good())
+        _stream->read(reinterpret_cast<char*>(msgBuf.data()), hdr->incl_len);
+        if (!_stream->good())
         {
             _log->Warn("PCAP file: " + _filePath 
-                + ": Cannot read packet at offset " + std::to_string(_file.tellg()));
+                + ": Cannot read packet at offset " + std::to_string(_stream->tellg()));
             return false;
         }
         msg->SetRawFrame(msgBuf);
-        msg->_timeStamp = timeStamp;
+        msg->SetTimestamp(timeStamp);
 
         _currentMessage = std::move(msg);
-        _numMessages++; //HACK we can't know the number of messages without seeking through the whole file
+        //FIXME we can't know the number of messages without seeking through the whole file,
+        //      which we're not going to do for performance reasons.
+        _numMessages++; 
     }
     return true;
 }
