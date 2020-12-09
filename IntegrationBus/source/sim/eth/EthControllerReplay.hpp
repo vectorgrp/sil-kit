@@ -41,15 +41,30 @@ public:
 
     auto SendMessage(EthMessage msg) -> EthTxId override
     {
+        if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+        {
+            return 0;
+        }
+
         return _controller.SendMessage(std::move(msg));
     }
 
     auto SendFrame(EthFrame msg) -> EthTxId override
     {
+        if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+        {
+            return 0;
+        }
+
         return _controller.SendFrame(std::move(msg));
     }
     auto SendFrame(EthFrame msg, std::chrono::nanoseconds timestamp) -> EthTxId override
     {
+        if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+        {
+            return 0;
+        }
+
         return _controller.SendFrame(std::move(msg), timestamp);
     }
 
@@ -75,11 +90,21 @@ public:
     // IIbToEthController
     void ReceiveIbMessage(ib::mw::EndpointAddress from, const EthMessage& msg) override
     {
+        if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
+        {
+            return;
+        }
+
         _controller.ReceiveIbMessage(from, msg);
     }
 
     void ReceiveIbMessage(ib::mw::EndpointAddress from, const EthTransmitAcknowledge& msg) override
     {
+        if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
+        {
+            return;
+        }
+
         _controller.ReceiveIbMessage(from, msg);
     }
 

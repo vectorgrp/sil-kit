@@ -93,7 +93,7 @@ void PcapReader::Reset()
 {
     if (!_filePath.empty() && !_file.is_open())
     {
-        _file.open(_filePath, std::ios::binary);
+        _file.open(_filePath, std::ios::binary|std::ios::in);
         _stream = &_file;
     }
 

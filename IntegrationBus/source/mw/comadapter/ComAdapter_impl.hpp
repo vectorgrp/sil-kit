@@ -226,7 +226,9 @@ auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonical
     }
     else if (ControllerUsesReplay(config))
     {
-        return CreateControllerForLink<eth::EthControllerReplay>(config, config, _timeProvider.get());
+        auto ptr = CreateControllerForLink<eth::EthControllerReplay>(config, config, _timeProvider.get());
+        ptr->ConfigureReplay(config.replay);
+        return ptr;
     }
     else
     {
@@ -756,8 +758,20 @@ auto ComAdapter<IbConnectionT>::CreateController(EndpointId endpointId, const st
     auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
     if (controllerMap.count(endpointId))
     {
-        _logger->Error("ComAdapter already has a controller with endpointId={}", endpointId);
-        throw std::runtime_error("Duplicate EndpointId");
+        //TBD: we should cache the controllers only for active, replay-capable controllers
+        //if (ControllerUsesReplay(topicname))
+        //{ 
+            // The replay configuration instantiates and configures the controllers independently of the user
+            // Replay controllers have to always exist, even if the application does not use them.
+            auto& controllerPtr = controllerMap[endpointId];
+            return static_cast<ControllerT*>(controllerPtr.get());
+        /*
+        }
+        else
+        {
+            _logger->Error("ComAdapter already has a controller with endpointId={}", endpointId);
+            throw std::runtime_error("Duplicate EndpointId");
+        }*/
     }
 
     auto controller = std::make_unique<ControllerT>(this, std::forward<Arg>(arg)...);

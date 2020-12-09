@@ -41,7 +41,7 @@ void PcapSink::Open(extensions::SinkType outputType, const std::string& outputPa
         {
             _file.close();
         }
-        _file.open(outputPath, std::ios::out | std::ios::binary);
+        _file.open(outputPath, std::ios::out | std::ios::binary | std::ios::app);
         _file.write(reinterpret_cast<char*>(&g_pcapGlobalHeader),
                 sizeof(g_pcapGlobalHeader));
         break;
