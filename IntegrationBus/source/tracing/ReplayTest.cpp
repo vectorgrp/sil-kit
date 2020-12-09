@@ -24,6 +24,19 @@ using namespace ib::sim::eth;
 using testing::A;
 using testing::An;
 
+auto AnEthMessage(const EthFrame& msg) -> testing::Matcher<const EthMessage&>
+{
+    using namespace testing;
+    return Field(&EthMessage::ethFrame,
+        AllOf(
+            Property(&EthFrame::GetDestinationMac, ElementsAreArray(msg.GetDestinationMac()))
+            , Property(&EthFrame::GetSourceMac, ElementsAreArray(msg.GetSourceMac()))
+            , Property(&EthFrame::GetEtherType, Eq(msg.GetEtherType()))
+            , Property(&EthFrame::GetPayloadSize, Eq(msg.GetPayloadSize()))
+        )
+    );
+}
+
 TEST(ReplayTest, ensure_util_timer_works)
 {
 
@@ -35,7 +48,7 @@ TEST(ReplayTest, ensure_util_timer_works)
     {
         ib::util::Timer timer;
         auto numCalls = 0u;
-        auto cb = [&](const auto now) {
+        auto cb = [&](const auto) {
             numCalls++;
             if (numCalls == 5)
             {
@@ -121,7 +134,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
     msg._direction = extensions::Direction::Send;
     cfg.replay.direction = cfg::Replay::Direction::Send;
     ctrl.ConfigureReplay(cfg.replay);
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, An<const EthMessage&>()))
+    EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AnEthMessage(msg)))
         .Times(1);
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
     ctrl.ReplayMessage(&msg);
@@ -130,7 +143,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
     msg._direction = extensions::Direction::Send;
     cfg.replay.direction = cfg::Replay::Direction::Both;
     ctrl.ConfigureReplay(cfg.replay);
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, An<const EthMessage&>()))
+    EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AnEthMessage(msg)))
         .Times(1);
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
     ctrl.ReplayMessage(&msg);
@@ -139,7 +152,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
     msg._direction = extensions::Direction::Receive;
     cfg.replay.direction = cfg::Replay::Direction::Send;
     ctrl.ConfigureReplay(cfg.replay);
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, An<const EthMessage&>()))
+    EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AnEthMessage(msg)))
         .Times(0);
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
     ctrl.ReplayMessage(&msg);
@@ -167,7 +180,7 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
     msg._direction = extensions::Direction::Receive;
     cfg.replay.direction = cfg::Replay::Direction::Receive;
     controller.ConfigureReplay(cfg.replay);
-    EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), A<const EthMessage&>()))
+    EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), AnEthMessage(msg)))
         .Times(1);
     controller.ReplayMessage(&msg);
 
@@ -175,7 +188,7 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
     msg._direction = extensions::Direction::Receive;
     cfg.replay.direction = cfg::Replay::Direction::Both;
     controller.ConfigureReplay(cfg.replay);
-    EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), A<const EthMessage&>()))
+    EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), AnEthMessage(msg)))
         .Times(1);
     controller.ReplayMessage(&msg);
 
@@ -183,7 +196,7 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
     msg._direction = extensions::Direction::Send;
     cfg.replay.direction = cfg::Replay::Direction::Receive;
     controller.ConfigureReplay(cfg.replay);
-    EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), A<const EthMessage&>()))
+    EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), AnEthMessage(msg)))
         .Times(0);
     controller.ReplayMessage(&msg);
 
