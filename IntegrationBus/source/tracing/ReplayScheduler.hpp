@@ -20,7 +20,6 @@ class ReplayScheduler
 public:
     ReplayScheduler(const cfg::Config& config,  const cfg::Participant& participantConfig,
         std::chrono::nanoseconds tickPeriod, mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider);
-    ~ReplayScheduler() = default;
 
 public:
     // Methods
@@ -28,11 +27,10 @@ public:
     void StopReplay();
 private:
     // Methods
-   
+  
     void ConfigureControllers(const cfg::Config& config, const cfg::Participant& participantConfig);
-
-    //! \brief Replay messages the given duration (now, duration).
     void ReplayMessages(std::chrono::nanoseconds now, std::chrono::nanoseconds duration);
+
 private:
     // Members
     struct ReplayTask

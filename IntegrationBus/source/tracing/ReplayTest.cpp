@@ -1,6 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include <memory>
+#include <future>
 
 #include "ib/cfg/Config.hpp"
 #include "ib/mw/EndpointAddress.hpp"
@@ -20,6 +21,8 @@ using namespace ib::mw;
 using namespace ib::mw::test;
 using namespace ib::tracing;
 using namespace ib::sim::eth;
+
+using namespace std::chrono_literals;
 
 using testing::A;
 using testing::An;
@@ -41,11 +44,14 @@ TEST(ReplayTest, ensure_util_timer_works)
 {
 
     {
+        //Make sure DTor is able to stop a running timer
         ib::util::Timer timer;
         timer.WithPeriod(std::chrono::milliseconds(50), [](const auto) {});
     }
 
     {
+        std::promise<void> done;
+        auto isDone = done.get_future();
         ib::util::Timer timer;
         auto numCalls = 0u;
         auto cb = [&](const auto) {
@@ -53,11 +59,12 @@ TEST(ReplayTest, ensure_util_timer_works)
             if (numCalls == 5)
             {
                 timer.Stop();
+                done.set_value();
             }
         };
         timer.WithPeriod(std::chrono::milliseconds(50), cb);
         ASSERT_TRUE(timer.IsActive());
-        std::this_thread::sleep_for(std::chrono::milliseconds(50 * (5 + 1)));
+        isDone.wait_for(1s);
         ASSERT_TRUE(!timer.IsActive());
         ASSERT_EQ(numCalls, 5);
     }
