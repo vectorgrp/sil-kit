@@ -5,6 +5,26 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.3.6-QA] - 2020-12-10
+--------------------------------
+
+This is a Quality Assured Release.
+
+Fixed
+~~~~~
+- Utility executables are now built with appropriate RPATHs on Linux.
+- Remove -Wabi flags from gcc/clang builds, as they were not correctly used
+  and they break the build on Ubuntu 20.04.
+- Update the config schema to include the IbRegistry logger.
+
+Compatibility with 3.3.5
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
+
 [3.3.5] - 2020-11-26
 --------------------------------
 
