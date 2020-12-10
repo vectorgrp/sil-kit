@@ -1009,6 +1009,44 @@
                   "Port": {
                     "type": "integer",
                     "default": "8500"
+                  },
+                  "Logger" : {
+                    "type": "object",
+                    "properties": {
+                      "LogFromRemotes": {
+                        "type": "boolean",
+                        "title": "Enables receiving of remote log messages from other participants"
+                      },
+                      "FlushLevel": {
+                        "type": "string",
+                        "enum": [ "Critical", "Error", "Warn", "Info", "Debug", "Trace", "Off"]
+                      },
+                      "Sinks": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "Type": {
+                              "type": "string",
+                              "enum": [ "Remote", "File", "Stdout"]
+                            },
+                            "Level": {
+                              "type": "string",
+                              "enum": [ "Critical", "Error", "Warn", "Info", "Debug", "Trace", "Off"],
+                              "default": "Info"
+                            },
+                            "Logname": {
+                              "type": "string",
+                              "title": "Logname of a file logger. The logname results in the following filename: <Logname>_%y-%m-%dT%h-%m-%s.txt"
+                            }
+                          },
+                          "additionalProperties": false,
+                          "required": [ "Type" ]
+                        }
+                      }
+                    },
+                    "additionalProperties": false,
+                    "required": [ "Sinks" ]
                   }
                 },
                 "additionalProperties": false
