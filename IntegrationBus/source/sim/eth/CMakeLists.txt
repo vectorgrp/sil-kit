@@ -8,6 +8,7 @@ add_library(IbSimEthernet STATIC
     EthFrame.cpp
     EthFrame.hpp
     EthControllerReplay.hpp
+    EthControllerReplay.cpp
 )
 
 target_link_libraries(IbSimEthernet

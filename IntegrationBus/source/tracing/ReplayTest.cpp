@@ -97,8 +97,8 @@ struct MockEthFrame
 {
     MockEthFrame()
     {
-        SetSourceMac(EthMac{ 1,2,3,4,5,6 });
-        SetDestinationMac(EthMac{ 7,8,9,0xa,0xb,0xc});
+        SetSourceMac(EthMac{1,2,3,4,5,6});
+        SetDestinationMac(EthMac{7,8,9,0xa,0xb,0xc});
         _type = extensions::TraceMessageType::EthFrame;
     }
 
@@ -131,38 +131,45 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
 
     cfg::EthernetController cfg{};
 
-    EthControllerReplay ctrl{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-
     MockEthFrame msg;
     msg._address = {1,2};
-    ctrl.SetEndpointAddress(msg._address);
 
     // Replay Send / Send
-    msg._direction = extensions::Direction::Send;
-    cfg.replay.direction = cfg::Replay::Direction::Send;
-    ctrl.ConfigureReplay(cfg.replay);
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AnEthMessage(msg)))
-        .Times(1);
-    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
-    ctrl.ReplayMessage(&msg);
+    {
+        msg._direction = extensions::Direction::Send;
+        cfg.replay.direction = cfg::Replay::Direction::Send;
+
+        EthControllerReplay ctrl{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        ctrl.SetEndpointAddress(msg._address);
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AnEthMessage(msg)))
+            .Times(1);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+        ctrl.ReplayMessage(&msg);
+    }
 
     // Replay Send / Both
-    msg._direction = extensions::Direction::Send;
-    cfg.replay.direction = cfg::Replay::Direction::Both;
-    ctrl.ConfigureReplay(cfg.replay);
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AnEthMessage(msg)))
-        .Times(1);
-    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
-    ctrl.ReplayMessage(&msg);
+    {
+        msg._direction = extensions::Direction::Send;
+        cfg.replay.direction = cfg::Replay::Direction::Both;
+        EthControllerReplay ctrl{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        ctrl.SetEndpointAddress(msg._address);
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AnEthMessage(msg)))
+            .Times(1);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+        ctrl.ReplayMessage(&msg);
+    }
 
     // Block Send 
-    msg._direction = extensions::Direction::Receive;
-    cfg.replay.direction = cfg::Replay::Direction::Send;
-    ctrl.ConfigureReplay(cfg.replay);
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AnEthMessage(msg)))
-        .Times(0);
-    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
-    ctrl.ReplayMessage(&msg);
+    {
+        msg._direction = extensions::Direction::Receive;
+        cfg.replay.direction = cfg::Replay::Direction::Send;
+        EthControllerReplay ctrl{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        ctrl.SetEndpointAddress(msg._address);
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AnEthMessage(msg)))
+            .Times(0);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
+        ctrl.ReplayMessage(&msg);
+    }
 
 }
 
@@ -174,39 +181,46 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
 
     cfg::EthernetController cfg{};
 
-    EthControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
 
     MockEthFrame msg;
 
     msg._address = {1,2};
 
-    controller.SetEndpointAddress({3,4});
-    controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
 
     // Replay Receive / Receive
-    msg._direction = extensions::Direction::Receive;
-    cfg.replay.direction = cfg::Replay::Direction::Receive;
-    controller.ConfigureReplay(cfg.replay);
-    EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), AnEthMessage(msg)))
-        .Times(1);
-    controller.ReplayMessage(&msg);
+    {
+        msg._direction = extensions::Direction::Receive;
+        cfg.replay.direction = cfg::Replay::Direction::Receive;
+        EthControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        controller.SetEndpointAddress({3,4});
+        controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
+        EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), AnEthMessage(msg)))
+            .Times(1);
+        controller.ReplayMessage(&msg);
+    }
 
     // Replay Receive / Both
-    msg._direction = extensions::Direction::Receive;
-    cfg.replay.direction = cfg::Replay::Direction::Both;
-    controller.ConfigureReplay(cfg.replay);
-    EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), AnEthMessage(msg)))
-        .Times(1);
-    controller.ReplayMessage(&msg);
-
+    {
+        msg._direction = extensions::Direction::Receive;
+        cfg.replay.direction = cfg::Replay::Direction::Both;
+        EthControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        controller.SetEndpointAddress({3,4});
+        controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
+        EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), AnEthMessage(msg)))
+            .Times(1);
+        controller.ReplayMessage(&msg);
+    }
     // Block Receive 
-    msg._direction = extensions::Direction::Send;
-    cfg.replay.direction = cfg::Replay::Direction::Receive;
-    controller.ConfigureReplay(cfg.replay);
-    EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), AnEthMessage(msg)))
-        .Times(0);
-    controller.ReplayMessage(&msg);
-
+    {
+        msg._direction = extensions::Direction::Send;
+        cfg.replay.direction = cfg::Replay::Direction::Receive;
+        EthControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        controller.SetEndpointAddress({3,4});
+        controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
+        EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), AnEthMessage(msg)))
+            .Times(0);
+        controller.ReplayMessage(&msg);
+    }
 }
 
 } //end anonymous namespace

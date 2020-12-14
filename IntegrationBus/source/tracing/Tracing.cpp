@@ -30,10 +30,46 @@ auto CreateTraceMessageSinks(
     const cfg::Participant& participantConfig
     ) -> std::vector<std::unique_ptr<ITraceMessageSink>>
 {
+    auto controllerUsesSink = [&participantConfig](const auto& name, const auto& controllers)
+    {
+        for (const auto& ctrl : controllers)
+        {
+            for (const auto&  sinkName: ctrl.useTraceSinks)
+            {
+                if (sinkName == name)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+
+    // Trace sinks should only be instantiated if they are used.
+    // This solves a problem where a stale "TraceSinks" declaration in the config and an active Replay
+    // configuration both access the same output/input file: the trace sink would truncate
+    // the file to 0 bytes.
+    auto sinkInUse = [&participantConfig, &controllerUsesSink](const auto& name)
+    {
+        bool ok = false;
+        ok |= controllerUsesSink(name, participantConfig.canControllers);
+        ok |= controllerUsesSink(name, participantConfig.ethernetControllers);
+        ok |= controllerUsesSink(name, participantConfig.flexrayControllers);
+        ok |= controllerUsesSink(name, participantConfig.linControllers);
+        ok |= controllerUsesSink(name, participantConfig.digitalIoPorts);
+        ok |= controllerUsesSink(name, participantConfig.analogIoPorts);
+        ok |= controllerUsesSink(name, participantConfig.pwmPorts);
+        ok |= controllerUsesSink(name, participantConfig.patternPorts);
+        ok |= controllerUsesSink(name, participantConfig.genericPublishers);
+        ok |= controllerUsesSink(name, participantConfig.genericSubscribers);
+
+        return ok;
+    };
+
     std::vector<std::unique_ptr<ITraceMessageSink>> newSinks;
     for (const auto& sinkCfg : participantConfig.traceSinks)
     {
-        if (!sinkCfg.enabled)
+        if (!sinkCfg.enabled || !sinkInUse(sinkCfg.name))
         {
             logger->Debug("Tracing: skipping disabled sink {} on participant {}",
                 sinkCfg.name, participantConfig.name);

@@ -18,10 +18,6 @@ class IReplayDataController
 public:
     virtual ~IReplayDataController() = default;
 
-
-    //! \brief Configure the controller with the given replay configuration.
-    virtual void ConfigureReplay(const cfg::Replay& replayConfig) = 0;
-
     //! \brief Replay the given message.
     // The controller is responsible for converting the replay message into a
     // concrete type, e.g. sim::eth::EthFrame.

@@ -226,9 +226,7 @@ auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonical
     }
     else if (ControllerUsesReplay(config))
     {
-        auto ptr = CreateControllerForLink<eth::EthControllerReplay>(config, config, _timeProvider.get());
-        ptr->ConfigureReplay(config.replay);
-        return ptr;
+        return CreateControllerForLink<eth::EthControllerReplay>(config, config, _timeProvider.get());
     }
     else
     {

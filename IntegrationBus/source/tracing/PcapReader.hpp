@@ -30,7 +30,7 @@ public:
 
     // Interface IReplayChannelReader
     bool Seek(size_t messageNumber) override;
-    std::shared_ptr<ib::extensions::IReplayMessage> Read() override;
+    auto Read() -> std::shared_ptr<ib::extensions::IReplayMessage>  override;
 
     auto GetMetaInfos() const -> const std::map<std::string, std::string>&;
 private:

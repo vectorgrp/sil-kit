@@ -34,26 +34,29 @@ target_include_directories(IbTracing
     PRIVATE 
         ${CMAKE_CURRENT_LIST_DIR}
         detail
-        #we need access to the simulation datatypes, without producing cyclic dependencies:
-        ${CMAKE_CURRENT_LIST_DIR}/../sim/can
-        ${CMAKE_CURRENT_LIST_DIR}/../sim/eth
-        ${CMAKE_CURRENT_LIST_DIR}/../sim/fr
-        ${CMAKE_CURRENT_LIST_DIR}/../sim/generic
-        ${CMAKE_CURRENT_LIST_DIR}/../sim/io
-        ${CMAKE_CURRENT_LIST_DIR}/../sim/lin
     PUBLIC 
         ${CMAKE_CURRENT_LIST_DIR}
         ${CMAKE_CURRENT_LIST_DIR}/mock/
 )
 target_link_libraries(IbTracing
-    PRIVATE IbInterface
-            IbMwLogging
-            IbExtensions
-    INTERFACE #because we pull private headers into our ReplayController.hpp, FIXME
-            IbSimEthernet
-            IbSimCan
-            IbSimFlexRay
-            IbSimLin
+    PRIVATE 
+        IbInterface
+        IbMwLogging
+        IbExtensions
+    INTERFACE
+        IbSimEthernet
+        IbSimCan
+        IbSimFlexRay
+        IbSimLin
+        IbSimGenericMessage
+        IbSimIO
+    PRIVATE
+        IbSimEthernet
+        IbSimCan
+        IbSimFlexRay
+        IbSimLin
+        IbSimGenericMessage
+        IbSimIO
 )
 
 if(WIN32)

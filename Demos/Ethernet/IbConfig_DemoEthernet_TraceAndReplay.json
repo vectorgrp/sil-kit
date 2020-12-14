@@ -2,7 +2,11 @@
     "ConfigVersion": "0.0.1",
     "ConfigName": "EthernetDemo",
     "Description": "Sample configuration for Ethernet without NetworkSimulator",
-
+	"ExtensionConfig": {
+		"SearchPathHints": [
+			"tracing"
+		]
+	},
     "SimulationSetup": {
 
         "Participants": [
@@ -35,15 +39,19 @@
                 "TraceSinks" : [
                     {
                         "Name": "Sink1",
-                        "Type": "PcapFile",
-                        "OutputPath": "EthernetWriter.pcap"
+                        "DISABLED_Type": "PcapFile",
+                        "DISABLED_OutputPath": "EthernetWriter.pcap",
+                        "Type": "Mdf4File",
+                        "OutputPath": "EthernetWriter.mf4"
                     }
                 ],
                 "TraceSources" : [
                     {
                         "Name": "Source1",
-                        "Type": "PcapFile",
-                        "InputPath": "EthernetWriter.pcap"
+                        "DISABLED_Type": "PcapFile",
+                        "DISABLED_InputPath": "EthernetWriter.pcap",
+                        "Type": "Mdf4File",
+                        "InputPath": "EthernetWriter.mf4"
                     }
                 ]
 

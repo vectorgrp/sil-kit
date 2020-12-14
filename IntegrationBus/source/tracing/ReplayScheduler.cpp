@@ -184,32 +184,13 @@ ReplayScheduler::ReplayScheduler(const cfg::Config& config,
 {
     _log = _comAdapter->GetLogger();
     ConfigureControllers(config, participantConfig);
+    _startTime = _timeProvider->Now();
     _timeProvider->RegisterNextSimStepHandler(
         [this](auto now, auto duration)
         {
             ReplayMessages(now, duration);
         }
     );
-
-    // start the replaying as soon as the participant is in state running
-    auto* monitor = _comAdapter->GetSystemMonitor();
-    monitor->RegisterParticipantStatusHandler(
-        [this](const mw::sync::ParticipantStatus& status)
-        {
-            switch (status.state)
-            {
-            case mw::sync::ParticipantState::Running:
-                StartReplay();
-                break;
-            case mw::sync::ParticipantState::Stopping:
-                StopReplay();
-                break;
-            default:
-                break;
-            }
-        }
-    );
-
 }
 
 void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg::Participant& participantConfig)
@@ -265,9 +246,10 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
                 if (!replayChannel)
                     throw std::runtime_error("Could not find a replay channel");
 
-                task.replayReader = replayChannel->GetReader();
+                task.replayReader = std::move(replayChannel->GetReader());
                 task.initialTime = replayChannel->StartTime();
                 task.name = replayChannel->Name();
+                task.replayFile = std::move(replayFile);
 
                 _replayTasks.emplace_back(std::move(task));
             }
@@ -292,9 +274,14 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
     */
 }
 
+ReplayScheduler::~ReplayScheduler()
+{
+    _isDone = true;
+}
+
 void ReplayScheduler::ReplayMessages(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)
 {
-    if (!_isStarted)
+    if (_isDone)
     {
         return;
     }
@@ -304,6 +291,11 @@ void ReplayScheduler::ReplayMessages(std::chrono::nanoseconds now, std::chrono::
     const auto relativeEnd = relativeNow + duration;
     for (auto& task : _replayTasks)
     {
+        if (task.doneReplaying)
+        {
+            continue;
+        }
+
         while (true)
         {
             auto msg = task.replayReader->Read();
@@ -311,6 +303,7 @@ void ReplayScheduler::ReplayMessages(std::chrono::nanoseconds now, std::chrono::
             {
                 _log->Trace("ReplayTask on channel '{}' returned invalid message @{}ns",
                     task.name, now.count());
+                task.doneReplaying = true;
                 break;
             }
             // the current time stamps are relative to the trace's initial time.
@@ -326,22 +319,12 @@ void ReplayScheduler::ReplayMessages(std::chrono::nanoseconds now, std::chrono::
 
             if (!task.replayReader->Seek(1))
             {
+                // we're at the end of the replay channel
+                task.doneReplaying = true;
                 break;
             }
         }
     }
-}
-
-void ReplayScheduler::StartReplay()
-{
-    if (_isStarted) return;
-    _startTime = _timeProvider->Now();
-    _isStarted = true;
-}
-
-void ReplayScheduler::StopReplay()
-{
-    _isStarted = false;
 }
 
 } //end namespace tracing

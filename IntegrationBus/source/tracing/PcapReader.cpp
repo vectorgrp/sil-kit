@@ -143,7 +143,6 @@ auto PcapReader::StartTime() const -> std::chrono::nanoseconds
 auto PcapReader::EndTime() const -> std::chrono::nanoseconds
 {
     throw std::runtime_error("PcapReader::EndTime(): Not Implemented");
-    return _endTime;
 }
 
 auto PcapReader::NumberOfMessages() const -> uint64_t 

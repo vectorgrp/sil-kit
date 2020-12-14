@@ -20,11 +20,7 @@ class ReplayScheduler
 public:
     ReplayScheduler(const cfg::Config& config,  const cfg::Participant& participantConfig,
         std::chrono::nanoseconds tickPeriod, mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider);
-
-public:
-    // Methods
-    void StartReplay();
-    void StopReplay();
+    ~ReplayScheduler();
 private:
     // Methods
   
@@ -35,18 +31,20 @@ private:
     // Members
     struct ReplayTask
     {
+        std::shared_ptr<extensions::IReplayFile> replayFile;
         std::string name;
         IReplayDataController* controller{nullptr};
         std::shared_ptr<extensions::IReplayChannelReader> replayReader;
         std::chrono::nanoseconds initialTime{0};
+        bool doneReplaying{false};
     };
     std::chrono::nanoseconds _tickPeriod{0};
     std::chrono::nanoseconds _startTime{std::chrono::nanoseconds::min()};
-    bool _isStarted{false};
     mw::logging::ILogger* _log{nullptr};
     mw::IComAdapter* _comAdapter{nullptr};
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     std::vector<ReplayTask> _replayTasks;
+    bool _isDone{false};
 };
 } //end namespace tracing
 } //end namespace ib
