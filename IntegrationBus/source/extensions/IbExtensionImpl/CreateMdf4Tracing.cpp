@@ -31,7 +31,7 @@ auto CreateMdf4Tracing(cfg::Config config,
 auto CreateMdf4Replay(cfg::Config config, ib::mw::logging::ILogger* logger, const std::string& fileName)
     -> std::shared_ptr<IReplayFile>
 {
-    auto& factory = CreateInstance<IReplayDataProvider>("vibe-mdf4replay", config);
+    auto& factory = CreateInstance<IReplayDataProvider>("vibe-mdf4tracing", config);
     return factory.OpenFile(fileName, logger);
 }
 
