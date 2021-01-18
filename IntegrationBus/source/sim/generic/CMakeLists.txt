@@ -8,6 +8,8 @@ add_library(IbSimGenericMessage STATIC
 
     GenericPublisherReplay.hpp
     GenericPublisherReplay.cpp
+    GenericSubscriberReplay.hpp
+    GenericSubscriberReplay.cpp
 )
 
 target_include_directories(IbSimGenericMessage
