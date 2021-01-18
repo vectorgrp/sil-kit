@@ -12,7 +12,9 @@
 
 #include "MockComAdapter.hpp"
 #include "Timer.hpp"
+
 #include "EthControllerReplay.hpp"
+#include "GenericPublisherReplay.hpp"
 
 namespace {
 
@@ -21,6 +23,7 @@ using namespace ib::mw;
 using namespace ib::mw::test;
 using namespace ib::tracing;
 using namespace ib::sim::eth;
+using namespace ib::sim::generic;
 
 using namespace std::chrono_literals;
 
@@ -38,6 +41,12 @@ auto AnEthMessage(const EthFrame& msg) -> testing::Matcher<const EthMessage&>
             , Property(&EthFrame::GetPayloadSize, Eq(msg.GetPayloadSize()))
         )
     );
+}
+
+auto AGenericMessage(const GenericMessage& msg) -> testing::Matcher<const GenericMessage&>
+{
+    using namespace testing;
+    return Field(&GenericMessage::data, Eq(msg.data));
 }
 
 TEST(ReplayTest, ensure_util_timer_works)
@@ -83,6 +92,12 @@ public:
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthTransmitAcknowledge&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthStatus&));
     MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthSetMode&));
+    //  Generic Message calls
+    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const GenericMessage&));
+    void SendIbMessage(EndpointAddress from, GenericMessage&& msg) override
+    {
+        SendIbMessage_proxy(from, msg);
+    }
 };
 
 struct Callbacks
@@ -90,18 +105,9 @@ struct Callbacks
     MOCK_METHOD2(ReceiveMessage, void(IEthController*, const EthMessage&));
 };
 
-
-struct MockEthFrame 
+struct MockReplayMessage
     : public extensions::IReplayMessage
-    , public EthFrame
 {
-    MockEthFrame()
-    {
-        SetSourceMac(EthMac{1,2,3,4,5,6});
-        SetDestinationMac(EthMac{7,8,9,0xa,0xb,0xc});
-        _type = extensions::TraceMessageType::EthFrame;
-    }
-
     auto Timestamp() const -> std::chrono::nanoseconds override
     {
         return _timestamp;
@@ -123,6 +129,18 @@ struct MockEthFrame
     extensions::Direction _direction{extensions::Direction::Receive};
     ib::mw::EndpointAddress _address{0, 0};
     extensions::TraceMessageType _type{extensions::TraceMessageType::InvalidReplayData};
+};
+
+struct MockEthFrame 
+    : public MockReplayMessage
+    , public EthFrame
+{
+    MockEthFrame()
+    {
+        SetSourceMac(EthMac{1,2,3,4,5,6});
+        SetDestinationMac(EthMac{7,8,9,0xa,0xb,0xc});
+        _type = extensions::TraceMessageType::EthFrame;
+    }
 };
 
 TEST(ReplayTest, ethcontroller_replay_config_send)
@@ -220,6 +238,66 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
         EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), AnEthMessage(msg)))
             .Times(0);
         controller.ReplayMessage(&msg);
+    }
+}
+
+struct MockGenericMessage
+    : public MockReplayMessage
+    , public sim::generic::GenericMessage
+{
+    MockGenericMessage()
+    {
+        _type = extensions::TraceMessageType::GenericMessage;
+        data.resize(1024);
+        size_t i = 0u;
+        for (auto& d : data)
+        {
+            d = 'a' + (i++ % 26);
+        }
+    }
+};
+
+TEST(ReplayTest, genericpublisher_replay_config_send)
+{
+    MockComAdapter comAdapter{};
+
+    cfg::GenericPort cfg{};
+
+    MockGenericMessage msg;
+    msg._address = {1,2};
+
+    // Replay Send / Send
+    {
+        msg._direction = extensions::Direction::Send;
+        cfg.replay.direction = cfg::Replay::Direction::Send;
+
+        sim::generic::GenericPublisherReplay pub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        pub.SetEndpointAddress(msg._address);
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AGenericMessage(msg)))
+            .Times(1);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+        pub.ReplayMessage(&msg);
+    }
+    // Replay Send / Both
+    {
+        msg._direction = extensions::Direction::Send;
+        cfg.replay.direction = cfg::Replay::Direction::Both;
+
+        sim::generic::GenericPublisherReplay pub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        pub.SetEndpointAddress(msg._address);
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AGenericMessage(msg)))
+            .Times(1);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+        pub.ReplayMessage(&msg);
+    }
+    // Replay Send / Both
+    {
+        msg._direction = extensions::Direction::Receive;
+        cfg.replay.direction = cfg::Replay::Direction::Send;
+
+        sim::generic::GenericPublisherReplay pub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        pub.SetEndpointAddress(msg._address);
+        EXPECT_THROW(pub.ReplayMessage(&msg), std::runtime_error) << "Only sending should be supported";
     }
 }
 

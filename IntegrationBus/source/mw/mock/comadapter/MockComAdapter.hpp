@@ -154,7 +154,7 @@ public:
 
     void SendIbMessage(EndpointAddress /*from*/, sim::generic::GenericMessage&& /*msg*/) {}
     void SendIbMessage(EndpointAddress /*from*/, const sim::generic::GenericMessage& /*msg*/) {}
-    void SendIbMessage_proxy(EndpointAddress /*from*/, const sim::generic::GenericMessage& /*msg*/) {}
+    virtual void SendIbMessage_proxy(EndpointAddress /*from*/, const sim::generic::GenericMessage& /*msg*/) {}
 
     void SendIbMessage(EndpointAddress /*from*/, const sync::NextSimTask& /*msg*/) {}
     void SendIbMessage(EndpointAddress /*from*/, const sync::Tick& /*msg*/) {}

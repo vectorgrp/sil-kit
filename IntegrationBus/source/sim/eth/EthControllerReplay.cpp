@@ -120,20 +120,20 @@ void EthControllerReplay::ReplayMessage(const extensions::IReplayMessage* replay
     switch (replayMessage->GetDirection())
     {
     case extensions::Direction::Send:
-    if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
-    {
-        ReplaySend(replayMessage);
-    }
-    break;
+        if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+        {
+            ReplaySend(replayMessage);
+        }
+        break;
     case extensions::Direction::Receive:
-    if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
-    {
-        ReplayReceive(replayMessage);
-    }
-    break;
+        if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
+        {
+            ReplayReceive(replayMessage);
+        }
+        break;
     default:
-    throw std::runtime_error("ReplayController: replay message has undefined Direction");
-    break;
+        throw std::runtime_error("ReplayController: replay message has undefined Direction");
+        break;
     }
 
 }

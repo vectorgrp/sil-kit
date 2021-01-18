@@ -5,6 +5,9 @@ add_library(IbSimGenericMessage STATIC
     GenericPublisher.cpp
     GenericSubscriber.hpp
     GenericSubscriber.cpp
+
+    GenericPublisherReplay.hpp
+    GenericPublisherReplay.cpp
 )
 
 target_include_directories(IbSimGenericMessage
