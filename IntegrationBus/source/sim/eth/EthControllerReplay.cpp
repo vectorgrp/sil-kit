@@ -132,7 +132,7 @@ void EthControllerReplay::ReplayMessage(const extensions::IReplayMessage* replay
         }
         break;
     default:
-        throw std::runtime_error("ReplayController: replay message has undefined Direction");
+        throw std::runtime_error("EthReplayController: replay message has undefined Direction");
         break;
     }
 

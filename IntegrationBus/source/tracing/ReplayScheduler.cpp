@@ -227,8 +227,8 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
                     throw std::runtime_error("Create controller returned nullptr for "
                         + controllerConfig.name);
 
-                auto* replayController = dynamic_cast<IReplayDataController*>(controller);
-                task.controller = replayController;
+                auto& replayController = dynamic_cast<IReplayDataController&>(*controller);
+                task.controller = &replayController;
 
                 auto replayFile = replayFiles.at(controllerConfig.replay.useTraceSource);
                 if (!replayFile)
@@ -281,8 +281,8 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
 
     // Bus Controllers
     makeTasks(participantConfig.ethernetControllers, &mw::IComAdapter::CreateEthController);
+    makeTasks(participantConfig.canControllers, &mw::IComAdapter::CreateCanController);
     /*
-    makeTasks(participantConfig.canControllers);
     makeTasks(participantConfig.flexrayControllers);
     makeTasks(participantConfig.linControllers);
     */

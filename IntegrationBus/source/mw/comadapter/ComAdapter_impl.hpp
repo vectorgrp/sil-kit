@@ -5,6 +5,7 @@
 
 #include "CanController.hpp"
 #include "CanControllerProxy.hpp"
+#include "CanControllerReplay.hpp"
 #include "EthController.hpp"
 #include "EthControllerProxy.hpp"
 #include "EthControllerReplay.hpp"
@@ -213,6 +214,10 @@ auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonical
     if (ControllerUsesNetworkSimulator(config.name))
     {
         return CreateControllerForLink<can::CanControllerProxy>(config);
+    }
+    else if (ControllerUsesReplay(config))
+    {
+        return CreateControllerForLink<can::CanControllerReplay>(config, config, _timeProvider.get());
     }
     else
     {

@@ -5,6 +5,9 @@ add_library(IbSimCan STATIC
     CanControllerProxy.hpp
     CanDatatypesUtils.cpp
     CanDatatypesUtils.hpp
+
+    CanControllerReplay.cpp
+    CanControllerReplay.hpp
 )
 
 target_include_directories(IbSimCan
