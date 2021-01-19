@@ -66,7 +66,7 @@ void GenericSubscriberReplay::ReplayMessage(const extensions::IReplayMessage* re
     switch (replayMessage->GetDirection())
     {
     case extensions::Direction::Receive:
-        if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+        if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
         {
             ReplayReceive(replayMessage);
         }

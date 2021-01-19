@@ -13,7 +13,9 @@
 #include "LinController.hpp"
 #include "LinControllerProxy.hpp"
 #include "InPort.hpp"
+#include "InPortReplay.hpp"
 #include "OutPort.hpp"
+#include "OutPortReplay.hpp"
 #include "GenericPublisher.hpp"
 #include "GenericPublisherReplay.hpp"
 #include "GenericSubscriber.hpp"
@@ -327,7 +329,14 @@ auto ComAdapter<IbConnectionT>::CreateInPort(const ConfigT& config) -> io::IInPo
     if (config.direction != cfg::PortDirection::In)
         throw std::runtime_error("Invalid port direction!");
 
-    return CreateControllerForLink<io::InPort<MsgT>>(config, config, _timeProvider.get());
+    if (ControllerUsesReplay(config))
+    {
+        return CreateControllerForLink<io::InPortReplay<MsgT>>(config, config, _timeProvider.get());
+    }
+    else
+    {
+        return CreateControllerForLink<io::InPort<MsgT>>(config, config, _timeProvider.get());
+    }
 }
 
 template <class IbConnectionT>
@@ -337,10 +346,18 @@ auto ComAdapter<IbConnectionT>::CreateOutPort(const ConfigT& config) -> io::IOut
     if (config.direction != cfg::PortDirection::Out)
         throw std::runtime_error("Invalid port direction!");
 
-    auto port = CreateControllerForLink<io::OutPort<MsgT>>(config, config, _timeProvider.get());
-    port->Write(config.initvalue, std::chrono::nanoseconds{0});
-
-    return port;
+    if (ControllerUsesReplay(config))
+    {
+        auto port = CreateControllerForLink<io::OutPortReplay<MsgT>>(config, config, _timeProvider.get());
+        port->Write(config.initvalue, std::chrono::nanoseconds{0});
+        return port;
+    }
+    else
+    {
+        auto port = CreateControllerForLink<io::OutPort<MsgT>>(config, config, _timeProvider.get());
+        port->Write(config.initvalue, std::chrono::nanoseconds{0});
+        return port;
+    }
 }
 
 template <class IbConnectionT>

@@ -1,5 +1,6 @@
 add_library(IbSimIO STATIC
     InPort.hpp
+    InPortReplay.hpp
     OutPort.hpp
     IoDatatypeUtils.cpp
     IoDatatypeUtils.hpp

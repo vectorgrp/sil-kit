@@ -260,18 +260,47 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
             }
         }
     };
+
+    auto makePortTasks = [makeTasks](auto portList, auto inMethod, auto outMethod) {
+        auto inPorts = decltype(portList){};
+        auto outPorts = decltype(portList){};
+        for (const auto& port : portList)
+        {
+            if (port.direction == cfg::PortDirection::In)
+            {
+                inPorts.push_back(port);
+            }
+            if (port.direction == cfg::PortDirection::Out)
+            {
+                outPorts.push_back(port);
+            }
+        }
+        makeTasks(inPorts, inMethod);
+        makeTasks(outPorts, outMethod);
+    };
+
+    // Bus Controllers
     makeTasks(participantConfig.ethernetControllers, &mw::IComAdapter::CreateEthController);
-    makeTasks(participantConfig.genericPublishers, &mw::IComAdapter::CreateGenericPublisher);
-    makeTasks(participantConfig.genericSubscribers, &mw::IComAdapter::CreateGenericSubscriber);
     /*
     makeTasks(participantConfig.canControllers);
     makeTasks(participantConfig.flexrayControllers);
     makeTasks(participantConfig.linControllers);
-    makeTasks(participantConfig.pwmPorts);
-    makeTasks(participantConfig.patternPorts);
-    makeTasks(participantConfig.digitalIoPorts);
-    makeTasks(participantConfig.analogIoPorts);
     */
+
+    // Generic Messages
+    makeTasks(participantConfig.genericPublishers, &mw::IComAdapter::CreateGenericPublisher);
+    makeTasks(participantConfig.genericSubscribers, &mw::IComAdapter::CreateGenericSubscriber);
+
+    // Ports
+    makePortTasks(participantConfig.pwmPorts, &mw::IComAdapter::CreatePwmIn,
+        &mw::IComAdapter::CreatePwmOut);
+    makePortTasks(participantConfig.patternPorts, &mw::IComAdapter::CreatePatternIn,
+        &mw::IComAdapter::CreatePatternOut);
+    makePortTasks(participantConfig.digitalIoPorts, &mw::IComAdapter::CreateDigitalIn,
+        &mw::IComAdapter::CreateDigitalOut);
+    makePortTasks(participantConfig.analogIoPorts, &mw::IComAdapter::CreateAnalogIn,
+        &mw::IComAdapter::CreateAnalogOut);
+
 }
 
 ReplayScheduler::~ReplayScheduler()
