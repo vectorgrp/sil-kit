@@ -261,6 +261,8 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
         }
     };
     makeTasks(participantConfig.ethernetControllers, &mw::IComAdapter::CreateEthController);
+    makeTasks(participantConfig.genericPublishers, &mw::IComAdapter::CreateGenericPublisher);
+    makeTasks(participantConfig.genericSubscribers, &mw::IComAdapter::CreateGenericSubscriber);
     /*
     makeTasks(participantConfig.canControllers);
     makeTasks(participantConfig.flexrayControllers);
@@ -269,8 +271,6 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
     makeTasks(participantConfig.patternPorts);
     makeTasks(participantConfig.digitalIoPorts);
     makeTasks(participantConfig.analogIoPorts);
-    makeTasks(participantConfig.genericPublishers);
-    makeTasks(participantConfig.genericSubscribers);
     */
 }
 

@@ -15,7 +15,9 @@
 #include "InPort.hpp"
 #include "OutPort.hpp"
 #include "GenericPublisher.hpp"
+#include "GenericPublisherReplay.hpp"
 #include "GenericSubscriber.hpp"
+#include "GenericSubscriberReplay.hpp"
 #include "ParticipantController.hpp"
 #include "SystemController.hpp"
 #include "SystemMonitor.hpp"
@@ -345,14 +347,28 @@ template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher*
 {
     auto&& config = get_by_name(_participant.genericPublishers, canonicalName);
-    return CreateControllerForLink<sim::generic::GenericPublisher>(config, config, _timeProvider.get());
+    if (ControllerUsesReplay(config))
+    {
+        return CreateControllerForLink<sim::generic::GenericPublisherReplay>(config, config, _timeProvider.get());
+    }
+    else
+    {
+        return CreateControllerForLink<sim::generic::GenericPublisher>(config, config, _timeProvider.get());
+    }
 }
 
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateGenericSubscriber(const std::string& canonicalName) -> sim::generic::IGenericSubscriber*
 {
     auto&& config = get_by_name(_participant.genericSubscribers, canonicalName);
-    return CreateControllerForLink<sim::generic::GenericSubscriber>(config, config, _timeProvider.get());
+    if (ControllerUsesReplay(config))
+    {
+        return CreateControllerForLink<sim::generic::GenericSubscriberReplay>(config, config, _timeProvider.get());
+    }
+    else
+    {
+        return CreateControllerForLink<sim::generic::GenericSubscriber>(config, config, _timeProvider.get());
+    }
 }
 
 template <class IbConnectionT>
