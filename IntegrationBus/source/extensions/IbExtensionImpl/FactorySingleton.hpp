@@ -9,20 +9,20 @@
 
 namespace ib { namespace extensions {
 
-//! \brief CreateInstance creates an instance of the given interface.
-// The underlying extension is cached as a a shared pointer, and stays
-// loaded during the lifetime of the DllCache instance.
+//! \brief FactorySingleton creates an instance of the given interface.
+// The underlying extension library is cached using a static DllCache instance,
+// which keeps the shared library loaded during the lifetime of the calling process.
 
 template<typename FactoryT> 
-auto CreateInstance(const std::string& extensionName, const ib::cfg::Config& config) 
+auto FactorySingleton(const std::string& extensionName, const ib::cfg::Config& config) 
     -> FactoryT&
 {
     static DllCache cache;
     //the dll instance must be kept alive, especially when exceptions are thrown in the factory
-    auto dll = cache.Get(extensionName, config);
+    auto& ibExtension = cache.Get(extensionName, config);
     try
     {
-        auto& factory = dynamic_cast<FactoryT&>(*dll);
+        auto& factory = dynamic_cast<FactoryT&>(ibExtension);
         return factory;
     }
     catch (const std::bad_cast& err)

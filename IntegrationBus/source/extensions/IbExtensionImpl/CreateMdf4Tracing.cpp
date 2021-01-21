@@ -14,7 +14,7 @@
 
 #include "IbExtensions.hpp"
 #include "CreateMdf4Tracing.hpp"
-#include "CreateInstance.hpp"
+#include "FactorySingleton.hpp"
 
 namespace ib { namespace extensions {
 
@@ -24,14 +24,14 @@ auto CreateMdf4Tracing(cfg::Config config,
     const std::string& sinkName)
     -> std::unique_ptr<ITraceMessageSink>
 {
-    auto& factory = CreateInstance<ITraceMessageSinkFactory>("vibe-mdf4tracing", config);
+    auto& factory = FactorySingleton<ITraceMessageSinkFactory>("vibe-mdf4tracing", config);
     return factory.Create(std::move(config), logger, participantName, sinkName);
 }
 
 auto CreateMdf4Replay(cfg::Config config, ib::mw::logging::ILogger* logger, const std::string& fileName)
     -> std::shared_ptr<IReplayFile>
 {
-    auto& factory = CreateInstance<IReplayDataProvider>("vibe-mdf4tracing", config);
+    auto& factory = FactorySingleton<IReplayDataProvider>("vibe-mdf4tracing", config);
     return factory.OpenFile(fileName, logger);
 }
 

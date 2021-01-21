@@ -7,7 +7,7 @@
 
 #include "IbExtensions.hpp"
 #include "IIbRegistry.hpp"
-#include "CreateInstance.hpp"
+#include "FactorySingleton.hpp"
 
 
 namespace ib { namespace extensions {
@@ -15,7 +15,7 @@ namespace ib { namespace extensions {
 auto CreateIbRegistry(ib::cfg::Config config)
     -> std::unique_ptr<IIbRegistry>
 {
-    auto& factory = CreateInstance<IIbRegistryFactory>("vib-registry", config);
+    auto& factory = FactorySingleton<IIbRegistryFactory>("vib-registry", config);
     return factory.Create(std::move(config));
 }
 

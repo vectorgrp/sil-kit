@@ -24,7 +24,7 @@ class DllCache
 public:
 
     auto Get(const std::string& extensionName, const ib::cfg::Config& config)
-        -> std::shared_ptr<ib::extensions::IIbExtension>
+        -> ib::extensions::IIbExtension&
     {
         try {
             //try to load the extension by its undecorated DLL/so name
@@ -39,7 +39,7 @@ public:
                 throw ExtensionError("Cached Extension " + _extensionName
                     + " differs from requested extension name: " + extensionName);
             }
-            return _dll;
+            return *_dll;
         }
         catch (const ib::extensions::ExtensionError& err)
         {

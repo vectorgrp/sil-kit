@@ -15,7 +15,7 @@ add_library(IbExtensions STATIC
 
     # Imlplementation Helpers
     IbExtensionImpl/DllCache.hpp
-    IbExtensionImpl/CreateInstance.hpp
+    IbExtensionImpl/FactorySingleton.hpp
     #Extension implementations
     #   MDF4 (private)
     IbExtensionImpl/CreateMdf4Tracing.cpp
