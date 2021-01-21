@@ -1,6 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "GenericSubscriberReplay.hpp"
+#include "ib/mw/IComAdapter.hpp"
 
 namespace ib {
 namespace sim {
@@ -10,6 +11,7 @@ GenericSubscriberReplay::GenericSubscriberReplay(mw::IComAdapter* comAdapter,
         cfg::GenericPort config, mw::sync::ITimeProvider* timeProvider)
     : _subscriber{comAdapter, config, timeProvider}
     , _replayConfig{config.replay}
+    , _logger{comAdapter->GetLogger()}
 {
 
 }
@@ -70,6 +72,9 @@ void GenericSubscriberReplay::ReplayMessage(const extensions::IReplayMessage* re
         {
             ReplayReceive(replayMessage);
         }
+        break;
+    case extensions::Direction::Send:
+        _logger->Warn("GenericSubscriberReplay: Cannot replay message with direction Send");
         break;
     default:
         throw std::runtime_error("GenericSubscriberReplay: replay message has undefined Direction");

@@ -166,14 +166,19 @@ bool HasReplayConfig(const cfg::Participant& cfg)
         }
     };
 
+    //Bus controllers
     isActive(cfg.canControllers);
     isActive(cfg.ethernetControllers);
     isActive(cfg.linControllers);
     isActive(cfg.flexrayControllers);
+    //Ports
     isActive(cfg.digitalIoPorts);
     isActive(cfg.analogIoPorts);
     isActive(cfg.patternPorts);
     isActive(cfg.pwmPorts);
+    // Generic Messages
+    isActive(cfg.genericPublishers);
+    isActive(cfg.genericSubscribers);
 
     return ok;
 }

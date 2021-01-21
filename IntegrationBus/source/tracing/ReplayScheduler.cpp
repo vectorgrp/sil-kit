@@ -244,7 +244,10 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
                 );
 
                 if (!replayChannel)
-                    throw std::runtime_error("Could not find a replay channel");
+                {
+                    _log->Warn("{}: could not find a replay channel!", controllerConfig.name);
+                    continue; // throw std::runtime_error("Could not find a replay channel");
+                }
 
                 task.replayReader = std::move(replayChannel->GetReader());
                 task.initialTime = replayChannel->StartTime();

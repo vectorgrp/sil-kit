@@ -5,6 +5,7 @@
 #include "ib/mw/fwd_decl.hpp"
 #include "GenericSubscriber.hpp"
 #include "IReplayDataController.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 
 
 namespace ib {
@@ -49,6 +50,7 @@ private:
     //private Members
     cfg::Replay _replayConfig;
     GenericSubscriber _subscriber;
+    mw::logging::ILogger* _logger{nullptr};
 };
 
 } // namespace generic
