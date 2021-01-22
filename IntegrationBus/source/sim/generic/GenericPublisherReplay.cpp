@@ -77,6 +77,8 @@ void GenericPublisherReplay::ReplayMessage(const extensions::IReplayMessage* rep
             ReplaySend(replayMessage);
         }
         break;
+    case extensions::Direction::Receive:
+        break;
     default:
         throw std::runtime_error("GenericPublisherReplay: replay message has undefined Direction");
         break;

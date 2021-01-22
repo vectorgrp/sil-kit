@@ -46,16 +46,15 @@ auto GenericSubscriber::EndpointAddress() const -> const mw::EndpointAddress&
 
 void GenericSubscriber::ReceiveIbMessage(mw::EndpointAddress from, const GenericMessage& msg)
 {
-    assert(from != _endpointAddr);
-
-    if (!_callback)
+    if (from == _endpointAddr)
         return;
 
     _tracer.Trace(extensions::Direction::Receive,
         _timeProvider->Now(),
         msg);
 
-    _callback(this, msg.data);
+    if (_callback)
+        _callback(this, msg.data);
 }
 
 void GenericSubscriber::SetTimeProvider(mw::sync::ITimeProvider* provider)

@@ -14,7 +14,11 @@
 #include "Timer.hpp"
 
 #include "EthControllerReplay.hpp"
+#include "CanControllerReplay.hpp"
 #include "GenericPublisherReplay.hpp"
+#include "GenericSubscriberReplay.hpp"
+#include "InPortReplay.hpp"
+#include "OutPortReplay.hpp"
 
 namespace {
 
@@ -23,12 +27,24 @@ using namespace ib::mw;
 using namespace ib::mw::test;
 using namespace ib::tracing;
 using namespace ib::sim::eth;
+using namespace ib::sim::can;
 using namespace ib::sim::generic;
+using namespace ib::sim::io;
 
 using namespace std::chrono_literals;
 
 using testing::A;
 using testing::An;
+
+auto ACanMessage(const CanMessage& msg) -> testing::Matcher<const CanMessage&>
+{
+    using namespace testing;
+    return AllOf(
+        Field(&CanMessage::canId, Eq(msg.canId))
+        , Field(&CanMessage::dataField, Eq(msg.dataField))
+        , Field(&CanMessage::timestamp, Eq(msg.timestamp))
+    );
+}
 
 auto AnEthMessage(const EthFrame& msg) -> testing::Matcher<const EthMessage&>
 {
@@ -43,10 +59,17 @@ auto AnEthMessage(const EthFrame& msg) -> testing::Matcher<const EthMessage&>
     );
 }
 
+
 auto AGenericMessage(const GenericMessage& msg) -> testing::Matcher<const GenericMessage&>
 {
     using namespace testing;
     return Field(&GenericMessage::data, Eq(msg.data));
+}
+
+auto ADigitalIoMessage(const DigitalIoMessage& msg) -> testing::Matcher<const DigitalIoMessage&>
+{
+    using namespace testing;
+    return Field(&DigitalIoMessage::value, Eq(msg.value));
 }
 
 TEST(ReplayTest, ensure_util_timer_works)
@@ -95,6 +118,18 @@ public:
     //  Generic Message calls
     MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const GenericMessage&));
     void SendIbMessage(EndpointAddress from, GenericMessage&& msg) override
+    {
+        SendIbMessage_proxy(from, msg);
+    }
+    MOCK_METHOD2(ReceiveIbMessage, void(EndpointAddress, const GenericMessage&));
+
+    // IO Ports
+    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const DigitalIoMessage&));
+    MOCK_METHOD2(ReceiveIbMessage, void(EndpointAddress, const DigitalIoMessage&));
+    // CAN
+    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const CanMessage&));
+    MOCK_METHOD2(ReceiveIbMessage, void(EndpointAddress, const CanMessage&));
+    void SendIbMessage(EndpointAddress from, CanMessage&& msg) override
     {
         SendIbMessage_proxy(from, msg);
     }
@@ -240,6 +275,82 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
         controller.ReplayMessage(&msg);
     }
 }
+struct MockCanMessage
+    : public MockReplayMessage
+    , public CanMessage
+{
+    MockCanMessage()
+    {
+        timestamp = std::chrono::nanoseconds{0};
+        canId = 0;
+        
+        dataField.resize(8);
+        size_t i = 0u;
+        for (auto& d : dataField)
+        {
+            d = 'a' + (i++ % 26);
+        }
+    }
+};
+
+TEST(ReplayTest, canctrl_replay_config_send)
+{
+    MockComAdapter comAdapter{};
+
+    cfg::CanController cfg{};
+
+    MockCanMessage msg;
+    msg._address = {1,2};
+
+    // Replay Send / Send
+    {
+        msg._direction = extensions::Direction::Send;
+        cfg.replay.direction = cfg::Replay::Direction::Send;
+
+        CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        can.SetEndpointAddress(msg._address);
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, ACanMessage(msg)))
+            .Times(1);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+        can.ReplayMessage(&msg);
+    }
+    // Replay Send / Both
+    {
+        msg._direction = extensions::Direction::Send;
+        cfg.replay.direction = cfg::Replay::Direction::Both;
+
+        CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        can.SetEndpointAddress(msg._address);
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, ACanMessage(msg)))
+            .Times(1);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+        can.ReplayMessage(&msg);
+    }
+    // Replay Receive / Both
+    {
+        msg._direction = extensions::Direction::Receive;
+        cfg.replay.direction = cfg::Replay::Direction::Send;
+
+        CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, ACanMessage(msg)))
+            .Times(0);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
+        can.SetEndpointAddress(msg._address);
+        can.ReplayMessage(&msg);
+    }
+    // Replay Receive / Receive
+    {
+        msg._direction = extensions::Direction::Receive;
+        cfg.replay.direction = cfg::Replay::Direction::Receive;
+
+        CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, ACanMessage(msg)))
+            .Times(0);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
+        can.SetEndpointAddress(msg._address);
+        can.ReplayMessage(&msg);
+    }
+}
 
 struct MockGenericMessage
     : public MockReplayMessage
@@ -290,15 +401,214 @@ TEST(ReplayTest, genericpublisher_replay_config_send)
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
         pub.ReplayMessage(&msg);
     }
-    // Replay Send / Both
+    // Replay Receive / Both
     {
         msg._direction = extensions::Direction::Receive;
         cfg.replay.direction = cfg::Replay::Direction::Send;
 
         sim::generic::GenericPublisherReplay pub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AGenericMessage(msg)))
+            .Times(0);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
         pub.SetEndpointAddress(msg._address);
-        EXPECT_THROW(pub.ReplayMessage(&msg), std::runtime_error) << "Only sending should be supported";
+        pub.ReplayMessage(&msg);
+    }
+    // Replay Receive / Receive
+    {
+        msg._direction = extensions::Direction::Receive;
+        cfg.replay.direction = cfg::Replay::Direction::Receive;
+
+        sim::generic::GenericPublisherReplay pub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AGenericMessage(msg)))
+            .Times(0);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
+        pub.SetEndpointAddress(msg._address);
+        pub.ReplayMessage(&msg);
     }
 }
 
+TEST(ReplayTest, genericsubscriber_replay_config_send)
+{
+    MockComAdapter comAdapter{};
+
+    cfg::GenericPort cfg{};
+
+    MockGenericMessage msg;
+    msg._address = {1,2};
+
+    // Replay Send / Send
+    {
+        msg._direction = extensions::Direction::Send;
+        cfg.replay.direction = cfg::Replay::Direction::Send;
+
+        sim::generic::GenericSubscriberReplay sub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        sub.SetEndpointAddress(msg._address);
+        EXPECT_CALL(comAdapter, ReceiveIbMessage(msg._address, AGenericMessage(msg)))
+            .Times(0);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
+        sub.ReplayMessage(&msg);
+    }
+    // Replay Send / Both
+    {
+        msg._direction = extensions::Direction::Send;
+        cfg.replay.direction = cfg::Replay::Direction::Both;
+
+        sim::generic::GenericSubscriberReplay sub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        sub.SetEndpointAddress(msg._address);
+        EXPECT_CALL(comAdapter, ReceiveIbMessage(msg._address, AGenericMessage(msg)))
+            .Times(0);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
+        sub.ReplayMessage(&msg);
+    }
+    // Replay Receive / Both
+    {
+        msg._direction = extensions::Direction::Receive;
+        cfg.replay.direction = cfg::Replay::Direction::Both;
+
+        sim::generic::GenericSubscriberReplay sub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        sub.SetEndpointAddress({1,3});
+        EXPECT_CALL(comAdapter, ReceiveIbMessage(msg._address, AGenericMessage(msg)))
+            .Times(0);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+        sub.ReplayMessage(&msg);
+    }
+    // Replay Receive / Receive
+    {
+        msg._direction = extensions::Direction::Receive;
+        cfg.replay.direction = cfg::Replay::Direction::Receive;
+
+        sim::generic::GenericSubscriberReplay sub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        sub.SetEndpointAddress({1,3});
+        EXPECT_CALL(comAdapter, ReceiveIbMessage(msg._address, AGenericMessage(msg)))
+            .Times(0);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+        sub.ReplayMessage(&msg);
+    }
+}
+
+struct MockDigitalIoMessage
+    : public MockReplayMessage
+    , public DigitalIoMessage
+{
+};
+
+TEST(ReplayTest, inport_replay_config_send)
+{
+    using Port = sim::io::InPortReplay<DigitalIoMessage>;
+    MockComAdapter comAdapter{};
+
+    cfg::DigitalIoPort cfg{};
+
+    MockDigitalIoMessage msg;
+    msg._address = {1,2};
+
+    // Replay Send / Send
+    {
+        msg._direction = extensions::Direction::Send;
+        cfg.replay.direction = cfg::Replay::Direction::Send;
+
+        Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        port.SetEndpointAddress(msg._address);
+        EXPECT_CALL(comAdapter, ReceiveIbMessage(msg._address, ADigitalIoMessage(msg)))
+            .Times(0);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
+        port.ReplayMessage(&msg);
+    }
+    // Replay Send / Both
+    {
+        msg._direction = extensions::Direction::Send;
+        cfg.replay.direction = cfg::Replay::Direction::Both;
+
+        Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        port.SetEndpointAddress(msg._address);
+        EXPECT_CALL(comAdapter, ReceiveIbMessage(msg._address, ADigitalIoMessage(msg)))
+            .Times(0);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
+        port.ReplayMessage(&msg);
+    }
+    // Replay Receive / Both
+    {
+        msg._direction = extensions::Direction::Receive;
+        cfg.replay.direction = cfg::Replay::Direction::Both;
+
+        Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        port.SetEndpointAddress({1,3});
+        EXPECT_CALL(comAdapter, ReceiveIbMessage(msg._address, ADigitalIoMessage(msg)))
+            .Times(0);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+        port.ReplayMessage(&msg);
+    }
+    // Replay Receive / Receive
+    {
+        msg._direction = extensions::Direction::Receive;
+        cfg.replay.direction = cfg::Replay::Direction::Receive;
+
+        Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        port.SetEndpointAddress({1,3});
+        EXPECT_CALL(comAdapter, ReceiveIbMessage(msg._address, ADigitalIoMessage(msg)))
+            .Times(0);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+        port.ReplayMessage(&msg);
+    }
+}
+
+TEST(ReplayTest, outport_replay_config_send)
+{
+    using Port = sim::io::OutPortReplay<DigitalIoMessage>;
+    MockComAdapter comAdapter{};
+
+    cfg::DigitalIoPort cfg{};
+
+    MockDigitalIoMessage msg;
+    msg._address = {1,2};
+
+    // Replay Send / Send
+    {
+        msg._direction = extensions::Direction::Send;
+        cfg.replay.direction = cfg::Replay::Direction::Send;
+
+        Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        port.SetEndpointAddress(msg._address);
+        EXPECT_CALL(comAdapter, SendIbMessage(msg._address, ADigitalIoMessage(msg)))
+            .Times(1);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+        port.ReplayMessage(&msg);
+    }
+    // Replay Send / Both
+    {
+        msg._direction = extensions::Direction::Send;
+        cfg.replay.direction = cfg::Replay::Direction::Both;
+
+        Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        port.SetEndpointAddress(msg._address);
+        EXPECT_CALL(comAdapter, SendIbMessage(msg._address, ADigitalIoMessage(msg)))
+            .Times(1);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+        port.ReplayMessage(&msg);
+    }
+    // Replay Receive / Both
+    {
+        msg._direction = extensions::Direction::Receive;
+        cfg.replay.direction = cfg::Replay::Direction::Both;
+
+        Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        port.SetEndpointAddress(msg._address);
+        EXPECT_CALL(comAdapter, ReceiveIbMessage(msg._address, ADigitalIoMessage(msg)))
+            .Times(0);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
+        port.ReplayMessage(&msg);
+    }
+    // Replay Receive / Receive
+    {
+        msg._direction = extensions::Direction::Receive;
+        cfg.replay.direction = cfg::Replay::Direction::Receive;
+
+        Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        port.SetEndpointAddress(msg._address);
+        EXPECT_CALL(comAdapter, ReceiveIbMessage(msg._address, ADigitalIoMessage(msg)))
+            .Times(0);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
+        port.ReplayMessage(&msg);
+    }
+}
 } //end anonymous namespace
