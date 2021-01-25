@@ -81,6 +81,7 @@ private:
     std::vector<uint8_t> _currentSendingBufferData;
     std::mutex _sendingQueueLock;
     bool _sending{false};
+    bool _enableQuickAck{false};
 };
 
 

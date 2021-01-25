@@ -106,6 +106,7 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
 
             if (config.tcpQuickAck)
             {
+                _enableQuickAck = true;
                 EnableQuickAck(_logger, _socket);
             }
 
@@ -239,6 +240,11 @@ void VAsioTcpPeer::ReadSomeAsync()
                 return;
             }
 
+            if (_enableQuickAck)
+            {
+                // On Linux, the TCP_QUICKACK might be reset after a read/recvmsg syscall.
+                EnableQuickAck(_logger, _socket);
+            }
             _wPos += bytesRead;
             DispatchBuffer();
         }
