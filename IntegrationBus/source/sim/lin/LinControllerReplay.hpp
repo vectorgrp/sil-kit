@@ -70,9 +70,13 @@ public:
 
 
 private:
+    //Private methods
+    void ReplaySend(const extensions::IReplayMessage* replayMessage);
+    void ReplayReceive(const extensions::IReplayMessage* replayMessage);
+private:
     // ----------------------------------------
     // private members
-    cfg::LinController _replayConfig{};
+    cfg::Replay _replayConfig{};
     LinController _controller;
 };
 
