@@ -145,7 +145,6 @@ void EthControllerReplay::ReplaySend(const extensions::IReplayMessage* replayMes
     // will throw if invalid message type.
     sim::eth::EthFrame msg = dynamic_cast<const sim::eth::EthFrame&>(*replayMessage);
     _controller.SendFrame(std::move(msg));
-    // TODO what about acknowledges?
 }
 
 void EthControllerReplay::ReplayReceive(const extensions::IReplayMessage* replayMessage)

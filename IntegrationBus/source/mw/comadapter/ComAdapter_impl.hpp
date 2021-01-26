@@ -756,20 +756,10 @@ auto ComAdapter<IbConnectionT>::CreateController(EndpointId endpointId, const st
     auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
     if (controllerMap.count(endpointId))
     {
-        //TBD: we should cache the controllers only for active, replay-capable controllers
-        //if (ControllerUsesReplay(topicname))
-        //{ 
-            // The replay configuration instantiates and configures the controllers independently of the user
-            // Replay controllers have to always exist, even if the application does not use them.
-            auto& controllerPtr = controllerMap[endpointId];
-            return static_cast<ControllerT*>(controllerPtr.get());
-        /*
-        }
-        else
-        {
-            _logger->Error("ComAdapter already has a controller with endpointId={}", endpointId);
-            throw std::runtime_error("Duplicate EndpointId");
-        }*/
+        // We cache the controller and return it here.
+        // TODO The method should reflect this fact in the future, e.g. rename to "GetController" 
+        auto& controllerPtr = controllerMap[endpointId];
+        return static_cast<ControllerT*>(controllerPtr.get());
     }
 
     auto controller = std::make_unique<ControllerT>(this, std::forward<Arg>(arg)...);
