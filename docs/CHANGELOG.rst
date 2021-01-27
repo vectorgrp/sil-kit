@@ -5,6 +5,40 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.3.7] - 2021-01-27
+--------------------------------
+
+Added
+~~~~~
+- Added replaying functionality for Ethernet, Can, GenericMessages and IO ports.
+  This utilizes a new ReplayScheduler and replay controllers to inject replay
+  messages from a trace file. The PCAP file format  is supported natively, and
+  the MDF4 format is supported through the VIBE-MDF4Tracing extension.
+
+Changed
+~~~~~~~
+- The semantics of the :cpp:func:`ComAdapter::Create*<ib::mw::IComAdapter::CreateCanController>`
+  methods to create services has changed.
+  Previously, invoking them multiple times would result in an exception.
+  Now, the same pointer is always returned.
+  The ReplayScheduler uses these methods to create and configure replay
+  controllers for services internally.
+
+Fixed
+~~~~~
+- When setting the ``struct ib::cfg::VAsio::Config::tcpQuickAck`` option, the
+  TCP_QUICKACK socket option is now activated after each successful read()/recvmsg on
+  Linux. This ensures that the default 40ms delayed acknowledge timeout is not
+  used.
+
+Compatibility with 3.3.6
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
+
 [3.3.6-QA] - 2020-12-10
 --------------------------------
 
