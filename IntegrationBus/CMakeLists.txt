@@ -101,6 +101,11 @@ if(IB_BIN_FASTRTPS_ENABLE)
     if(${_plat} MATCHES "Linux" )
         get_ubuntu_version(ubuntu)
         set(_plat "ubuntu${ubuntu}")
+        if(NOT ${ubuntu} MATCHES "18.04")
+            # Use 18.04 stable builds on 20.04
+            message(STATUS "NOTE Using binary packages built against Ubuntu 18.04")
+            set(_plat "ubuntu18.04")
+        endif()
     endif()
 
     set(binname "fastrtps-${IB_BIN_FASTRTPS_VERSION}-${_plat}-${_comp}")

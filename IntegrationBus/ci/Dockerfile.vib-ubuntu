@@ -1,6 +1,11 @@
-FROM ubuntu:18.04
+ARG UBUNTU_VERSION=18.04
+FROM ***VIB-820 Removed***/vector/ubuntu/full:${UBUNTU_VERSION}
 
-RUN apt-get update &&\
+# without TZ the apt installer will hang
+
+RUN export TZ=Europe/Berlin; \
+    export DEBIAN_FRONTEND=noninteractive; \
+    apt-get update && \
     apt-get install -y \
     doxygen \
     cmake \
@@ -27,7 +32,8 @@ RUN apt-get update &&\
     rm -rf /var/lib/apt/lists/*
 
 # Sphinx documentation system
-RUN pip3 install --system sphinx==3.1.2
+RUN pip3 install sphinx==3.1.2
+RUN pip3 install six
 
 ################################################################################
 # prepare our shell overlay
