@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "ib/mw//IComAdapter.hpp"
+
 #include "IReplayDataController.hpp"
 #include "LinController.hpp"
 
@@ -52,6 +54,7 @@ public:
     void ReceiveIbMessage(mw::EndpointAddress from, const Transmission& msg) override;
     void ReceiveIbMessage(mw::EndpointAddress from, const WakeupPulse& msg) override;
     void ReceiveIbMessage(mw::EndpointAddress from, const ControllerConfig& msg) override;
+    void ReceiveIbMessage(mw::EndpointAddress from, const ControllerStatusUpdate& msg) override;
     void ReceiveIbMessage(mw::EndpointAddress from, const FrameResponseUpdate& msg) override;
 
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
@@ -78,6 +81,9 @@ private:
     // private members
     cfg::Replay _replayConfig{};
     LinController _controller;
+    mw::IComAdapter* _comAdapter{nullptr};//XXX experimental bypassing of lincontroller
+    std::vector<FrameStatusHandler> _frameStatusHandler; // for local callbacks
+    ControllerMode _mode{ControllerMode::Inactive};
 };
 
 } // namespace lin

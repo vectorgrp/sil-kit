@@ -18,15 +18,18 @@ LinControllerReplay::LinControllerReplay(mw::IComAdapter* comAdapter, cfg::LinCo
             mw::sync::ITimeProvider* timeProvider)
     : _replayConfig{config.replay}
     , _controller{comAdapter, timeProvider}
+    , _comAdapter{comAdapter}
 {
 }
 
 void LinControllerReplay::Init(ControllerConfig config)
 {
-    if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
-    {
-        return;
-    }
+    // We explicitly rely on the Master/Slave properly initializing.
+    //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+    //{
+    //    return;
+    //}
+    _mode = config.controllerMode;
     _controller.Init(config);
 }
 
@@ -73,10 +76,11 @@ void LinControllerReplay::SendFrameHeader(LinIdT linId, std::chrono::nanoseconds
 
 void LinControllerReplay::SetFrameResponse(Frame frame, FrameResponseMode mode)
 {
-    if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
-    {
-        return;
-    }
+    // FrameResponses are not traced/replayed, we rely on the user to make appropriate calls
+    //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+    //{
+    //   return;
+    //}
     _controller.SetFrameResponse(std::move(frame), std::move(mode));
 }
 
@@ -87,7 +91,8 @@ void LinControllerReplay::SetFrameResponses(std::vector<FrameResponse> responses
 
 void LinControllerReplay::GoToSleep()
 {
-    if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+    if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send) 
+        && (_mode != ControllerMode::Master))
     {
         return;
     }
@@ -105,25 +110,25 @@ void LinControllerReplay::GoToSleepInternal()
 
 void LinControllerReplay::Wakeup()
 {
-    if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
-    {
-        return;
-    }
-    _controller.Wakeup();
+    //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+    //{
+    //    return;
+    //}
+    //_controller.Wakeup();
 }
 
 void LinControllerReplay::WakeupInternal()
 {
-    if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
-    {
-        return;
-    }
+    //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+    //{
+    //    return;
+    //}
     _controller.WakeupInternal();
 }
 
 void LinControllerReplay::RegisterFrameStatusHandler(FrameStatusHandler handler)
 {
-    _controller.RegisterFrameStatusHandler(std::move(handler));
+    _frameStatusHandler.emplace_back(std::move(handler));
 }
 
 void LinControllerReplay::RegisterGoToSleepHandler(GoToSleepHandler handler)
@@ -152,28 +157,38 @@ void LinControllerReplay::ReceiveIbMessage(ib::mw::EndpointAddress from, const T
 
 void LinControllerReplay::ReceiveIbMessage(ib::mw::EndpointAddress from, const WakeupPulse& msg)
 {
-    if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
-    {
-        return;
-    }
+    //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
+    //{
+    //    return;
+   // }
     _controller.ReceiveIbMessage(from, msg);
 }
 
 void LinControllerReplay::ReceiveIbMessage(mw::EndpointAddress from, const ControllerConfig& msg)
 {
-    if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
-    {
-        return;
-    }
+    //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
+    //{
+    //    return;
+    //}
     _controller.ReceiveIbMessage(from, msg);
 }
 
 void LinControllerReplay::ReceiveIbMessage(mw::EndpointAddress from, const FrameResponseUpdate& msg)
 {
-    if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
-    {
-        return;
-    }
+    //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
+    //{
+    //    return;
+    //}
+
+    _controller.ReceiveIbMessage(from, msg);
+}
+
+void LinControllerReplay::ReceiveIbMessage(mw::EndpointAddress from, const ControllerStatusUpdate& msg)
+{
+    //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
+    //{
+    //    return;
+    //}
     _controller.ReceiveIbMessage(from, msg);
 }
 
@@ -197,17 +212,20 @@ void LinControllerReplay::AddSink(extensions::ITraceMessageSink* sink)
 
 void LinControllerReplay::ReplayMessage(const extensions::IReplayMessage* replayMessage)
 {
+    // XXX Master should be able to replay in both directions? Verify
     using namespace ib::tracing;
     switch (replayMessage->GetDirection())
     {
     case extensions::Direction::Send:
-        if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+        if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send) 
+            || _mode == ControllerMode::Master)
         {
             ReplaySend(replayMessage);
         }
         break;
     case extensions::Direction::Receive:
-        if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
+        if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive)
+            || _mode == ControllerMode::Master)
         {
             ReplayReceive(replayMessage);
         }
@@ -221,13 +239,39 @@ void LinControllerReplay::ReplayMessage(const extensions::IReplayMessage* replay
 
 void LinControllerReplay::ReplaySend(const extensions::IReplayMessage* replayMessage)
 {
+    //The frame response update update's the masters notion of each node's responses.
+    // Also triggers a callback
+    auto frame = dynamic_cast<const Frame&>(*replayMessage);
+    auto mode = (replayMessage->GetDirection() == extensions::Direction::Receive)
+        ? FrameResponseMode::Rx
+        : FrameResponseMode::TxUnconditional;
+    //TODO this is only for triggering FrameResponseUpdate handler callbacks -- diagnostics
+    FrameResponse response;
+    response.frame = frame;
+    response.responseMode = mode;
+    FrameResponseUpdate responseUpdate;
+    responseUpdate.frameResponses.emplace_back(std::move(response));
+    _comAdapter->SendIbMessage(replayMessage->EndpointAddress(), responseUpdate);
+    //The actual frame is send via the master, always in RX direction.
     Transmission tm{};
     tm.timestamp = replayMessage->Timestamp();
-    auto msg = dynamic_cast<const Frame&>(*replayMessage);
-    tm.frame = std::move(msg);
-    //XXX Verify this: Transmission are always sent with RX_xxx, even the one marked as trace direction Send
+    tm.frame = std::move(frame);
     tm.status = FrameStatus::LIN_RX_OK;
-    _controller.ReceiveIbMessage(replayMessage->EndpointAddress(), std::move(tm));
+    _comAdapter->SendIbMessage(replayMessage->EndpointAddress(), tm);
+
+    FrameStatus masterFrameStatus = tm.status;
+    if (mode == FrameResponseMode::TxUnconditional)
+    {
+        masterFrameStatus = FrameStatus::LIN_TX_OK;
+    }
+    // dispatch local callbacks
+    if (replayMessage->EndpointAddress() == _controller.EndpointAddress())
+    {
+        for (auto& handler : _frameStatusHandler)
+        {
+            handler(this, tm.frame, masterFrameStatus, tm.timestamp);
+        }
+    }
 }
 void LinControllerReplay::ReplayReceive(const extensions::IReplayMessage* replayMessage)
 {
@@ -237,6 +281,14 @@ void LinControllerReplay::ReplayReceive(const extensions::IReplayMessage* replay
     tm.frame = std::move(msg);
     tm.status = FrameStatus::LIN_RX_OK;
     _controller.ReceiveIbMessage(replayMessage->EndpointAddress(), tm);
+    // dispatch local callbacks
+    if (replayMessage->EndpointAddress() == _controller.EndpointAddress())
+    {
+        for (auto& handler : _frameStatusHandler)
+        {
+            handler(this, tm.frame, tm.status, tm.timestamp);
+        }
+    }
 }
 
 } // namespace lin

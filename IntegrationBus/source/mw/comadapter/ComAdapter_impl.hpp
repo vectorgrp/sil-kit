@@ -12,6 +12,7 @@
 #include "FrController.hpp"
 #include "FrControllerProxy.hpp"
 #include "LinController.hpp"
+#include "LinControllerReplay.hpp"
 #include "LinControllerProxy.hpp"
 #include "InPort.hpp"
 #include "InPortReplay.hpp"
@@ -274,6 +275,10 @@ auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonical
     if (ControllerUsesNetworkSimulator(config.name))
     {
         return CreateControllerForLink<lin::LinControllerProxy>(config);
+    }
+    else if (ControllerUsesReplay(config))
+    {
+        return CreateControllerForLink<lin::LinControllerReplay>(config, config, _timeProvider.get());
     }
     else
     {

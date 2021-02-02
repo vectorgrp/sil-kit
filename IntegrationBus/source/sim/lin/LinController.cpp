@@ -210,6 +210,7 @@ void LinController::GoToSleep()
     gotosleepTx.frame = GoToSleepFrame();
     gotosleepTx.status = FrameStatus::LIN_RX_OK;
 
+    //TODO Trace TX  missing
     SendIbMessage(gotosleepTx);
     GoToSleepInternal();
 }

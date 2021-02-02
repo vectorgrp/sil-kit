@@ -287,8 +287,8 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
     makeTasks(participantConfig.canControllers, &mw::IComAdapter::CreateCanController);
     /*
     makeTasks(participantConfig.flexrayControllers);
-    makeTasks(participantConfig.linControllers);
     */
+    makeTasks(participantConfig.linControllers, &mw::IComAdapter::CreateLinController);
 
     // Generic Messages
     makeTasks(participantConfig.genericPublishers, &mw::IComAdapter::CreateGenericPublisher);
