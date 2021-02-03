@@ -52,6 +52,9 @@ COPY fetch_boost.sh /opt/vector/bin/
 RUN fetch_cmake.sh
 RUN fetch_boost.sh
 
+# Make python3 the default 
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+
 ################################################################################
 # 3. Step: Setup our build user: jenkins
 ################################################################################

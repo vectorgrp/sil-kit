@@ -17,7 +17,6 @@ cleanBuild=true
 dockerImage ="vib/ubuntu"
 dockerImageDir ="./IntegrationBus/ci" //for packaging additional files in docker, e.g. "."
 dockerImageFile ="${dockerImageDir}/Dockerfile.vib-ubuntu"
-dockerImageTag ="18.04"
 // artifactory for archiving / packaging
 artifactoryServer = Artifactory.server('IntegrationBusArtifactory')
 artifactoryRepo = '***VIB-820 Removed***'
@@ -88,25 +87,32 @@ def archiveToArtifactory(scm, pattern) {
             spec: spec,
             failNoOp: true
         )
+
         artifactoryBuildInfo.append(buildInfo)
     }
 }
 
 // runOnNode: a helper that runs the userStages closure on an appropriate node
 // i.e., this allows running the same stages on docker and windows
-def runOnNode(buildName, buildAgent, userStages) {    
+def runOnNode(buildFlags, userStages) {
+    def buildName = buildFlags["name"]
+    def dockerExtraArgs = ""
+    if( "ubuntu_version" in buildFlags) {
+        dockerExtraArgs = " --build-arg UBUNTU_VERSION=${buildFlags.ubuntu_version}"
+    }
+
     // make sure the steps/stages are executed in a separate, clean workspace
     def wsDir = "workspace/${env.JOB_NAME}/${env.BUILD_NUMBER}/" + buildName.replaceAll(" ", "_")
     
     return {
-        node(buildAgent) {            
-            if(isDockerNode(buildAgent)) {
+        node(buildFlags["agent"]) {
+            if(isDockerNode(buildFlags["agent"])) {
                 //the built image should be cached and shared anyway
                 stage("${buildName}: build docker image") {
                     // initial checkout in master node so we can access the ci files
                     shallowCheckoutGit()
                     docker.build(dockerImage,  //XXX this might require a checkout for ./ci to be present
-                            "--build-arg ARTIFACTORY=${artifactoryServer.url} -f ${dockerImageFile} ${dockerImageDir}")
+                            "--build-arg ARTIFACTORY=${artifactoryServer.url} ${dockerExtraArgs} -f ${dockerImageFile} ${dockerImageDir}")
                 }
                 ws(wsDir) {
                     curDir=pwd()
@@ -169,8 +175,9 @@ def run(what) {
 //##########################################
 
 // instantiate a build on an appropriate node
-def doBuild(buildName, buildAgent, buildFlags) {
-    return runOnNode(buildName, buildAgent, {
+def doBuild(Map buildFlags) {
+    return runOnNode(buildFlags, {
+        def buildName = buildFlags["name"]
 
         def extraArgs = ""
         def buildEnv = []
@@ -280,12 +287,13 @@ node {
     def builds = [:]
 
     // "Name of the target" : "Name of the target", "required node label", "generator name")
-    builds.put("VS2017-Win64", doBuild("VS2017-Win64", "ninja && buildtools2019", ["arch":"x64", "msvc_version":"14.1"]) )
-    builds.put("VS2015-Win64", doBuild("VS2015-Win64", "ninja && buildtools2019", ["arch":"x64", "msvc_version":"14.0"]) )
-    builds.put("VS2017-Win32", doBuild("VS2017-Win32", "ninja && buildtools2019", ["arch":"x86", "msvc_version":"14.1"]) )
-    builds.put("VS2015-Win32", doBuild("VS2015-Win32", "ninja && buildtools2019", ["arch":"x86", "msvc_version":"14.0"]) )
-    builds.put("Ubuntu-clang", doBuild("Ubuntu-clang", "docker && linux", ["cc":"clang", "cxx":"clang++"]) )
-    builds.put("Ubuntu-gcc"  , doBuild("Ubuntu-gcc",   "docker && linux", ["cc": "gcc",  "cxx":"g++"]) )
+    builds.put("VS2017-Win64", doBuild(name: "VS2017-Win64", agent: "ninja && buildtools2019", arch:"x64", msvc_version:"14.1") )
+    builds.put("VS2015-Win64", doBuild(name: "VS2015-Win64", agent: "ninja && buildtools2019", arch:"x64", msvc_version:"14.0") )
+    builds.put("VS2017-Win32", doBuild(name: "VS2017-Win32", agent: "ninja && buildtools2019", arch:"x86", msvc_version:"14.1") )
+    builds.put("VS2015-Win32", doBuild(name: "VS2015-Win32", agent: "ninja && buildtools2019", arch:"x86", msvc_version:"14.0") )
+    builds.put("Ubuntu-18.04-clang", doBuild(name: "Ubuntu-18.04-clang", agent: "docker && linux", cc:"clang", cxx:"clang++") )
+    builds.put("Ubuntu-18.04-gcc"  , doBuild(name: "Ubuntu-18.04-gcc",   agent: "docker && linux", cc: "gcc",  cxx:"g++") )
+    builds.put("Ubuntu-20.04-gcc"  , doBuild(name: "Ubuntu-20.04-gcc",   agent: "docker && linux", cc: "gcc",  cxx:"g++", ubuntu_version: "20.04") )
     
     parallel(builds)
 
