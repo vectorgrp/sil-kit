@@ -35,13 +35,13 @@ void VAsioRegistry::ProvideDomain(uint32_t domainId)
         // FIXME: also accept connections on V6
         _connection.AcceptConnectionsOn(registryEndpoint);
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         _logger->Error("VAsioRegistry failed to create listening socket {} for domainId={}. Reason: {}",
             registryEndpoint,
             domainId,
             e.what());
-        throw e;
+        throw;
     }
     _connection.StartIoWorker();
 }

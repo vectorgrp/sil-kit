@@ -12,6 +12,21 @@
 
 using namespace std::chrono_literals;
 
+namespace {
+#if _WIN32
+void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
+{
+    using exclusive_addruse = asio::detail::socket_option::boolean<ASIO_OS_DEF(SOL_SOCKET), SO_EXCLUSIVEADDRUSE>;
+    acceptor.set_option(exclusive_addruse{true});
+}
+#else
+void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
+{
+    // We enable the SO_REUSEADDR flag on POSIX, this allows reusing a socket's address more quickly.
+    acceptor.set_option(asio::ip::tcp::acceptor::reuse_address{true});
+}
+#endif
+} //anonymous namespace
 namespace ib {
 namespace mw {
 
@@ -263,12 +278,16 @@ void VAsioConnection::AcceptConnectionsOn(asio::ip::tcp::endpoint endpoint)
 
     try
     {
-        _tcpAcceptor = std::make_unique<asio::ip::tcp::acceptor>(_ioContext, endpoint);
+        _tcpAcceptor = std::make_unique<asio::ip::tcp::acceptor>(_ioContext);
+        _tcpAcceptor->open(endpoint.protocol());
+        SetPlatformOptions(*_tcpAcceptor);
+        _tcpAcceptor->bind(endpoint);
+        _tcpAcceptor->listen();
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         _logger->Error("VAsioConnection failed to listening on {}: {}", endpoint, e.what());
-        throw e;
+        throw;
     }
 
     _logger->Debug("VAsioConnection is listening on {}", _tcpAcceptor->local_endpoint());
@@ -283,10 +302,10 @@ void VAsioConnection::AcceptNextConnection(asio::ip::tcp::acceptor& acceptor)
     {
         newConnection = std::make_shared<VAsioTcpPeer>(acceptor.get_executor().context(), this, _logger);
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
-        _logger->Error("VAsioConnection cannot create listener socket");
-        throw e;
+        _logger->Error("VAsioConnection cannot create listener socket: {}", e.what());
+        throw;
     }
 
     acceptor.async_accept(newConnection->Socket(),

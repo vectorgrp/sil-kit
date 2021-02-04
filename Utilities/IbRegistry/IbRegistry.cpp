@@ -7,6 +7,8 @@ using namespace ib::mw;
 
 using asio::ip::tcp;
 
+std::promise<int> signalPromise;
+
 int main(int argc, char** argv) try
 {
     auto useSignalHandler = false;
@@ -44,10 +46,10 @@ int main(int argc, char** argv) try
     {
         using namespace ib::registry;
 
-        std::promise<int> signalPromise;
+
         auto signalValue = signalPromise.get_future();
         RegisterSignalHandler(
-            [&signalPromise](auto sigNum)
+            [](auto sigNum)
             {
                 signalPromise.set_value(sigNum);
             }
