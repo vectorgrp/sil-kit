@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <map>
+
 #include "ib/mw//IComAdapter.hpp"
 
 #include "IReplayDataController.hpp"
@@ -83,6 +85,7 @@ private:
     LinController _controller;
     mw::IComAdapter* _comAdapter{nullptr};//XXX experimental bypassing of lincontroller
     std::vector<FrameStatusHandler> _frameStatusHandler; // for local callbacks
+    std::vector<GoToSleepHandler> _goToSleepHandler;
     ControllerMode _mode{ControllerMode::Inactive};
 };
 

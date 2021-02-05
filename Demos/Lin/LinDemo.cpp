@@ -339,7 +339,7 @@ int main(int argc, char** argv) try
 
             std::cout << "Initializing " << participantName << std::endl;
 
-            // Configure LIN Controller to receive a FrameResponse for LIN ID 17
+            // Configure LIN Controller to receive a FrameResponse for LIN ID 16
             FrameResponse response_16;
             response_16.frame.id = 16;
             response_16.frame.checksumModel = ChecksumModel::Classic;
