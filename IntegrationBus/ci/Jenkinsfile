@@ -27,6 +27,7 @@ cmakeArgsRelease="-DIB_INSTALL_SOURCE=ON " //only distribute source and docs in 
 cmakeArgs ="-DIB_BIN_FASTRTPS_ENABLE=ON \
     -DIB_BIN_FASTRTPS_REPOSITORY=\"${artifactoryServer.url}/${artifactoryRepo}/ThirdParty/FastRTPS\" \
     "
+gitBranch="master" // overriden in parallel pipeline based on scm vars
 //##########################################
 // Utilities
 //##########################################
@@ -208,6 +209,8 @@ def doBuild(Map buildFlags) {
             print("DEBUG extraArgs=${extraArgs}")
             scmVars = checkoutGit()
             print("DEBUG scmVars=${scmVars}")
+            // save branch name for publishing stage
+            gitBranch = scmVars.GIT_BRANCH
         }
 
         stage("Cmake Release Build (${buildName})") {
@@ -299,6 +302,14 @@ node {
 
     stage("Publishing Build Info") {
         if(publishToArtifactory) {
+            print("INFO: publishing artifactory build info for branch ${gitBranch}")
+
+            if(gitBranch == 'master' || gitBranch == 'origin/master') {
+                artifactoryBuildInfo.retention(maxBuilds: 20, deleteBuildArtifacts: true, async: true)
+            } else {
+                artifactoryBuildInfo.retention(maxBuilds: 2, maxDays: 50, deleteBuildArtifacts: true, async: true)
+            }
+
             artifactoryServer.publishBuildInfo(artifactoryBuildInfo)
         } else {
             print("INFO: skipping publishing build info to artifactory because of user request")
