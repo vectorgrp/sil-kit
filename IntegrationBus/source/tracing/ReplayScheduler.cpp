@@ -285,9 +285,7 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
     // Bus Controllers
     makeTasks(participantConfig.ethernetControllers, &mw::IComAdapter::CreateEthController);
     makeTasks(participantConfig.canControllers, &mw::IComAdapter::CreateCanController);
-    /*
-    makeTasks(participantConfig.flexrayControllers);
-    */
+    //TODO makeTasks(participantConfig.flexrayControllers, &mw::IComAdapter::CreateFlexrayController);
     makeTasks(participantConfig.linControllers, &mw::IComAdapter::CreateLinController);
 
     // Generic Messages

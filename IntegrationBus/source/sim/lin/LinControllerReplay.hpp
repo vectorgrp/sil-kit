@@ -73,18 +73,14 @@ public:
 
     void ReplayMessage(const extensions::IReplayMessage* replayMessage) override;
 
-
-private:
-    //Private methods
-    void ReplaySend(const extensions::IReplayMessage* replayMessage);
-    void ReplayReceive(const extensions::IReplayMessage* replayMessage);
 private:
     // ----------------------------------------
     // private members
     cfg::Replay _replayConfig{};
     LinController _controller;
-    mw::IComAdapter* _comAdapter{nullptr};//XXX experimental bypassing of lincontroller
-    std::vector<FrameStatusHandler> _frameStatusHandler; // for local callbacks
+    mw::IComAdapter* _comAdapter{nullptr};
+    // for local callbacks
+    std::vector<FrameStatusHandler> _frameStatusHandler; 
     std::vector<GoToSleepHandler> _goToSleepHandler;
     ControllerMode _mode{ControllerMode::Inactive};
 };
