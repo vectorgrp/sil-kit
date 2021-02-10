@@ -338,7 +338,7 @@ void ReplayScheduler::ReplayMessages(std::chrono::nanoseconds now, std::chrono::
             }
             // the current time stamps are relative to the trace's initial time.
             const auto msgNow = msg->Timestamp() - task.initialTime;
-            if (msgNow > relativeEnd)
+            if (msgNow >= relativeEnd)
             {
                 //message is after the current schedule
                 break;
