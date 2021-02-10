@@ -147,6 +147,18 @@ auto from_json<int32_t>(const json11::Json& json) -> int32_t
     return json.int_value();
 }
 
+ 
+auto to_json(bool value) -> json11::Json
+{
+    return json11::Json{ value };
+}
+
+template<>
+auto from_json<bool>(const json11::Json& json) -> bool
+{
+    return json.bool_value();
+}
+
 auto to_json(const std::string& value) -> json11::Json
 {
     return json11::Json{value};
@@ -1626,6 +1638,8 @@ auto from_json<VAsio::Config>(const json11::Json& json) -> VAsio::Config
     VAsio::Config config;
 
     optional_from_json(config.registry, json, "Registry");
+    optional_from_json(config.tcpNoDelay, json, "TcpNoDelay");
+    optional_from_json(config.tcpQuickAck, json, "TcpQuickAck");
     
     return config;
 }
@@ -1636,6 +1650,8 @@ auto to_json(const VAsio::Config& config) -> json11::Json
 
     json11::Json::object json;
     non_default_to_json(config.registry, json, "Registry", defaultConfig.registry);
+    non_default_to_json(config.tcpNoDelay, json, "TcpNoDelay", defaultConfig.tcpNoDelay);
+    non_default_to_json(config.tcpQuickAck, json, "TcpQuickAck", defaultConfig.tcpQuickAck);
     return json;
 }
 

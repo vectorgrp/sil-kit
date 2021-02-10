@@ -35,6 +35,8 @@ auto from_json<uint16_t>(const json11::Json& json) -> uint16_t;
 template <>
 auto from_json<int32_t>(const json11::Json& json) -> int32_t;
 template <>
+auto from_json<bool>(const json11::Json& json) -> bool;
+template <>
 auto from_json<std::string>(const json11::Json& json) -> std::string;
 template <>
 auto from_json<Version>(const json11::Json& json) -> Version;
@@ -113,6 +115,7 @@ auto from_json<Replay::Direction>(const json11::Json& json) -> Replay::Direction
 
 auto to_json(uint16_t value) -> json11::Json;
 auto to_json(int32_t value) -> json11::Json;
+auto to_json(bool value) -> json11::Json;
 auto to_json(const std::string& value) -> json11::Json;
 auto to_json(const Version& version) -> json11::Json;
 auto to_json(const Sink::Type& type) -> json11::Json;
