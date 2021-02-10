@@ -957,4 +957,30 @@ TEST_F(JsonConfigTest, configure_registry_connect_attempts)
     ASSERT_EQ(parsedConfig.middlewareConfig.vasio.registry.connectAttempts, 12345);
 
 }
+
+TEST_F(JsonConfigTest, configure_vasio_tcpflags)
+{
+    ib::cfg::Config defaultCfg{}; 
+    // by default we do not tweak the TCP/IP stack
+    ASSERT_EQ(defaultCfg.middlewareConfig.vasio.tcpNoDelay, false);
+    ASSERT_EQ(defaultCfg.middlewareConfig.vasio.tcpQuickAck, false);
+
+    auto parsedConfig = ib::cfg::Config::FromJsonString(
+        R"({
+    "MiddlewareConfig": {
+        "VAsio": {
+            "TcpQuickAck" : true,
+            "TcpNoDelay" : true,
+            "TcpSendBufferSize" : 1024,
+            "TcpReceiveBufferSize" : 1024
+        }
+    }
+})"
+    );
+    ASSERT_EQ(parsedConfig.middlewareConfig.vasio.tcpSendBufferSize, 1024);
+    ASSERT_EQ(parsedConfig.middlewareConfig.vasio.tcpReceiveBufferSize, 1024);
+    ASSERT_EQ(parsedConfig.middlewareConfig.vasio.tcpNoDelay, true);
+    ASSERT_EQ(parsedConfig.middlewareConfig.vasio.tcpQuickAck, true);
+
+}
 } // anonymous namespace

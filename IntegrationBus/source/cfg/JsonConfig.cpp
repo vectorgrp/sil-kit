@@ -1635,11 +1635,13 @@ auto to_json(const VAsio::RegistryConfig& config) -> json11::Json
 template <>
 auto from_json<VAsio::Config>(const json11::Json& json) -> VAsio::Config
 {
-    VAsio::Config config;
+    VAsio::Config config{};
 
     optional_from_json(config.registry, json, "Registry");
     optional_from_json(config.tcpNoDelay, json, "TcpNoDelay");
     optional_from_json(config.tcpQuickAck, json, "TcpQuickAck");
+    optional_from_json(config.tcpReceiveBufferSize, json, "TcpReceiveBufferSize");
+    optional_from_json(config.tcpSendBufferSize, json, "TcpSendBufferSize");
     
     return config;
 }
@@ -1652,6 +1654,8 @@ auto to_json(const VAsio::Config& config) -> json11::Json
     non_default_to_json(config.registry, json, "Registry", defaultConfig.registry);
     non_default_to_json(config.tcpNoDelay, json, "TcpNoDelay", defaultConfig.tcpNoDelay);
     non_default_to_json(config.tcpQuickAck, json, "TcpQuickAck", defaultConfig.tcpQuickAck);
+    non_default_to_json(config.tcpReceiveBufferSize, json, "TcpReceiveBufferSize", defaultConfig.tcpReceiveBufferSize);
+    non_default_to_json(config.tcpSendBufferSize, json, "TcpSendBufferSize", defaultConfig.tcpSendBufferSize);
     return json;
 }
 

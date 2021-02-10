@@ -46,7 +46,6 @@ function(ib_enable_warnings target)
             -Wsign-conversion
             -Wsign-promo 
             -Wstrict-overflow=5
-            -Wswitch-default
             -Wundef
             -Wno-unused
             -Wpacked
