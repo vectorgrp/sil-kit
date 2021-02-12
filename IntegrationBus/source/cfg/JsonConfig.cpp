@@ -1346,6 +1346,7 @@ auto to_json(const NetworkSimulator& networkSimulator) -> json11::Json
     {
         json["UseTraceSinks"] = networkSimulator.useTraceSinks;
     }
+    optional_to_json(json, networkSimulator.replay);
     return json;
 }
 
@@ -1365,6 +1366,7 @@ auto from_json<NetworkSimulator>(const json11::Json& json) -> NetworkSimulator
         simulator.simulatedLinks = from_json<std::vector<std::string>>(json["SimulatedLinks"].array_items());
         simulator.simulatedSwitches = from_json<std::vector<std::string>>(json["SimulatedSwitches"].array_items());
         optional_from_json(simulator.useTraceSinks, json, "UseTraceSinks");
+        optional_from_json(simulator.replay, json, "Replay");
     }
     return simulator;
 }

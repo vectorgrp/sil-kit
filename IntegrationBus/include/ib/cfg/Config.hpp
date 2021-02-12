@@ -277,6 +277,7 @@ struct NetworkSimulator
     std::vector<std::string> simulatedLinks;
     std::vector<std::string> simulatedSwitches;
     std::vector<std::string> useTraceSinks;
+    Replay replay;
 };
 
 struct ParticipantController

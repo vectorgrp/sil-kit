@@ -62,6 +62,7 @@ auto CreateTraceMessageSinks(
         ok |= controllerUsesSink(name, participantConfig.patternPorts);
         ok |= controllerUsesSink(name, participantConfig.genericPublishers);
         ok |= controllerUsesSink(name, participantConfig.genericSubscribers);
+        ok |= controllerUsesSink(name, participantConfig.networkSimulators);
 
         return ok;
     };
