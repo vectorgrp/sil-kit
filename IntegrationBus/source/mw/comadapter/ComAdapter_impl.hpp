@@ -65,17 +65,18 @@ template<class T, class U>
 struct IsControllerMap<std::unordered_map<EndpointId, std::unique_ptr<T>>, U> : std::is_base_of<T, U> {};
 
 
-// Helper to find the participant with the NetworkSimulator configuration block
-// which now resides in a participant configuration.
+// Helper to find all the NetworkSimulator configuration blocks,
+// which now reside in the participant configuration.
 auto FindNetworkSimulators(const cfg::SimulationSetup& simulationSetup) 
-    -> const std::vector<cfg::NetworkSimulator>*
+    -> std::vector<cfg::NetworkSimulator>
 {
+    std::vector<cfg::NetworkSimulator> result;
     for (const auto& participant : simulationSetup.participants)
     {
-        if (participant.networkSimulators.size() > 0)
-            return &participant.networkSimulators;
+        std::copy(participant.networkSimulators.begin(), participant.networkSimulators.end(),
+            std::back_inserter(result));
     }
-    return nullptr;
+    return result;
 }
 
 template<typename ConfigT>
@@ -960,9 +961,9 @@ template <class IbConnectionT>
 bool ComAdapter<IbConnectionT>::ControllerUsesNetworkSimulator(const std::string& controllerName) const
 {
     auto endpointName = _participantName + "/" + controllerName;
-    const auto* networkSimulators = FindNetworkSimulators(_config.simulationSetup);
+    const auto networkSimulators = FindNetworkSimulators(_config.simulationSetup);
   
-    if (networkSimulators == nullptr)
+    if (networkSimulators.empty())
     {
         // no participant with a network simulators present in config
         return false;
@@ -975,7 +976,8 @@ bool ComAdapter<IbConnectionT>::ControllerUsesNetworkSimulator(const std::string
         if (endpointIter == link.endpoints.end())
             continue;
 
-        for (const auto& simulator : *networkSimulators)
+        //check if the link is a network simulator's simulated link
+        for (const auto& simulator : networkSimulators)
         {
             auto linkIter = std::find(simulator.simulatedLinks.begin(), simulator.simulatedLinks.end(), link.name);
             if (linkIter != simulator.simulatedLinks.end())
