@@ -26,6 +26,7 @@ struct NullConnection
 
     void OnAllMessagesDelivered(std::function<void(void)> /*callback*/) {};
     void FlushSendBuffers() {};
+    void NotifyShutdown() {};
 };
 } // anonymous namespace
     

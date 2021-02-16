@@ -68,6 +68,7 @@ public:
 
     void OnAllMessagesDelivered(std::function<void(void)> callback);
     void FlushSendBuffers();
+    inline void NotifyShutdown();
 
 private:
     // ----------------------------------------
@@ -323,6 +324,9 @@ void FastRtpsConnection::SubscribeRtpsTopics(const std::string& topicName, Endpo
     );
 }
 
+void FastRtpsConnection::NotifyShutdown() {
+    // No Op  
+}
 
 } // mw
 } // namespace ib

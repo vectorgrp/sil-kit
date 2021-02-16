@@ -123,7 +123,7 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
     SetupSyncMaster();
     SetupRemoteLogging();
 
-    // Create the participants trace message sinks as declared in the configuration
+    // Create the participants trace message sinks as declared in the configuration.
     _traceSinks = tracing::CreateTraceMessageSinks(GetLogger(), _config, _participant);
 
     if (_participant.participantController.has_value())
@@ -134,7 +134,7 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
     }
     _logger->Info("Time provider: {}", _timeProvider->TimeProviderName());
 
-    // enable replaying mechanism
+    // Enable replaying mechanism.
     const auto& participantConfig = get_by_name(_config.simulationSetup.participants, _participantName);
     if (tracing::HasReplayConfig(participantConfig))
     {
@@ -146,6 +146,16 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
         );
         _logger->Info("Replay Scheduler active.");
     }
+
+    // Ensure shutdowns are cleanly handled.
+    auto&& monitor = GetSystemMonitor();
+    monitor->RegisterSystemStateHandler([&conn = GetIbConnection()](auto newState)
+    {
+        if (newState == sync::SystemState::ShuttingDown)
+        {
+            conn.NotifyShutdown();
+        }
+    });
 }
 
 template <class IbConnectionT>

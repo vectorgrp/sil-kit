@@ -343,8 +343,19 @@ void VAsioConnection::OnPeerShutdown(IVAsioPeer* peer)
     }
 }
 
+void VAsioConnection::NotifyShutdown()
+{
+    _isShuttingDown = true;
+}
+
 void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
 {
+    if (_isShuttingDown)
+    {
+        _logger->Debug("Ignoring UpdateParticipantStatusOnConnectionLoss because we're shutting down");
+        return;
+    }
+
     auto& info = peer->GetInfo();
 
     EndpointAddress address{info.participantId, 1024};

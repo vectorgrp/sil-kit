@@ -120,6 +120,8 @@ public:
     void RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> callback);
     void OnPeerShutdown(IVAsioPeer* peer);
 
+    void NotifyShutdown();
+
 private:
     // ----------------------------------------
     // private data types
@@ -350,6 +352,9 @@ private:
     // The worker thread should be the last members in this class. This ensures
     // that no callback is destroyed before the thread finishes.
     std::thread _ioWorker;
+
+    //We violate the strict layering architecture, so that we can cleanly shutdown without false error messages.
+    bool _isShuttingDown{false};
 };
 
 } // mw
