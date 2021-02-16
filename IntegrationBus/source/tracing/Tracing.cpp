@@ -180,6 +180,8 @@ bool HasReplayConfig(const cfg::Participant& cfg)
     // Generic Messages
     isActive(cfg.genericPublishers);
     isActive(cfg.genericSubscribers);
+    // Network Simulator
+    isActive(cfg.networkSimulators);
 
     return ok;
 }

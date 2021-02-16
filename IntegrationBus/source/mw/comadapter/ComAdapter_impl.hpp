@@ -954,6 +954,20 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
         }
     }
 
+    // register the network simulator for replay
+    if (_replayScheduler && tracing::HasReplayConfig(_participant))
+    {
+        try
+        {
+            _replayScheduler->ConfigureNetworkSimulators(_config, _participant,
+                dynamic_cast<tracing::IReplayDataController&>(*busSim));
+        }
+        catch (const std::exception& e)
+        {
+            _logger->Error("Cannot configure replaying on network simulator: {}", e.what());
+        }
+    }
+
     simulator = busSim;
 }
 

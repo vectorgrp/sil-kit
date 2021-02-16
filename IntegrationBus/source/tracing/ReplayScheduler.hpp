@@ -21,6 +21,8 @@ public:
     ReplayScheduler(const cfg::Config& config,  const cfg::Participant& participantConfig,
         std::chrono::nanoseconds tickPeriod, mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider);
     ~ReplayScheduler();
+    void ConfigureNetworkSimulators(const cfg::Config& config, const cfg::Participant& participantConfig,
+        tracing::IReplayDataController& netsim);
 private:
     // Methods
   
@@ -45,6 +47,7 @@ private:
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     std::vector<ReplayTask> _replayTasks;
     bool _isDone{false};
+    std::vector<std::string> _knownSimulators;
 };
 } //end namespace tracing
 } //end namespace ib
