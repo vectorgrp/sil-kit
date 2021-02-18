@@ -5,6 +5,40 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.3.8] - 2021-02-18
+--------------------------------
+
+Added
+~~~~~
+- The CI build pipeline now includes Ubuntu 20.04 as a build target, which is used
+  to run automated unit tests and integration tests (AFTMAGT-300).
+- Added support for replaying LIN frames using the VIBE-MDF4Tracing extension.
+  This is exclusively supported on LIN master controllers.
+  Replaying on LIN slaves is not supported, even though tracing is possible
+  on these controllers.
+  Invoking transmission API calls during replay is also not supported on a master (AFTMAGT-288).
+- Setting VAsio TCP flags is now supported from a JSON config file, cf. :ref:`sec:mwcfg-vasio` (AFTMAGT-305).
+
+
+Fixed
+~~~~~
+- A graceful connection shutdown does no longer result in an error message when
+  using the VAsio  middleware (AFTMAGT-299).
+- Starting multiple VAsio registries on the same TCP/IP port resulted in
+  empty error messages. Now, useful error messages are reported.
+  On windows no error was reported at all. The registry listening socket is now
+  created with SO_EXCLUSIVEADDR on windows, which prevents mulitple registries
+  to share the same listening port (AFTMAGT-303).
+
+
+Compatibility with 3.3.7
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
+
 [3.3.7] - 2021-01-27
 --------------------------------
 

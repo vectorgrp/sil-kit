@@ -6,9 +6,9 @@
 macro(configure_ib_version project_name)
     set(IB_VERSION_MAJOR 3)
     set(IB_VERSION_MINOR 3)
-    set(IB_VERSION_PATCH 7)
+    set(IB_VERSION_PATCH 8)
     set(IB_BUILD_NUMBER 0 CACHE STRING "The build number")
-    set(IB_SPRINT_NUMBER 52)
+    set(IB_SPRINT_NUMBER 53)
     set(IB_SPRINT_NAME "Sprint-${IB_SPRINT_NUMBER}")
 
     set(${project_name}_VERSION_MAJOR ${IB_VERSION_MAJOR})
