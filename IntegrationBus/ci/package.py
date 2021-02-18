@@ -53,7 +53,7 @@ def die(status, fmt, *args):
     sys.exit(status)
 
 #expected cpack filename: Project-major.minor.build-TOOL-ARCH-BUILD_TYPE.zip
-expfn = r'(?P<name>.*)-(?P<version>\d+\.\d+\.\d+)-(?P<tool>\w+)-(?P<arch>\w+)-(?P<buildtype>\w+)'
+expfn = r'(?P<name>.*)-(?P<version>\d+\.\d+\.\d+)-(?P<tool>\w+)-(?P<arch>[\w._]+)-(?P<buildtype>\w+)'
 rc = re.compile(expfn)
 def extractDistInfos(filename):
     """ split the filename into its component like version, tool, arch, build type etc.

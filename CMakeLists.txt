@@ -139,6 +139,15 @@ endif(IB_INSTALL_SOURCE)
 include(get_compiler_arch) 
 get_compiler_arch(comp arch plat)
 
+if(UNIX)
+    get_ubuntu_version(ubuntuVersion)
+    if(NOT ${ubuntuVersion} MATCHES "18.04")
+        # ensure that the build artifact does not override the default of 18.04
+        # on our CI
+        set(plat "${plat}_${ubuntuVersion}")
+    endif()
+endif()
+
 ### in multiconfig builds (vstudio) we cannot rely on CMAKE_BUILD_TYPE to get the build type
 ### so we expect ci/build_all.sh to set this variable
 if(NOT CMAKE_BUILD_TYPE)
