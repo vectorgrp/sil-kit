@@ -12,6 +12,7 @@ namespace fr {
 
 FrControllerProxy::FrControllerProxy(mw::IComAdapter* comAdapter)
 : _comAdapter(comAdapter)
+, _endpointAddr{}
 {
 }
 

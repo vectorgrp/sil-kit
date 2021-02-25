@@ -3,6 +3,7 @@
 
 #include <string>
 #include <cassert>
+#include <chrono>
 
 #include "ib/cfg/Config.hpp"
 #include "ib/mw/IComAdapter.hpp"
@@ -12,6 +13,8 @@
 
 #include "IReplayDataController.hpp"
 #include "Tracing.hpp"
+
+using namespace std::literals::chrono_literals;
 
 namespace ib {
 namespace tracing {
@@ -41,7 +44,7 @@ class MetaInfos
 {
 public:
     using value = const std::string&;
-    MetaInfos(IReplayChannel& channel)
+    MetaInfos(const IReplayChannel& channel)
     : _metaInfos{channel.GetMetaInfos()}
     {
     }
@@ -75,6 +78,16 @@ public:
         return Get("mdf/source_info_path");
     }
 
+    // available since >v3.3.8, returns 0 if the underlying meta infos does not contain an absolute (trace) start time
+    std::chrono::nanoseconds AbsoluteStartTime() const
+    {
+        auto it = _metaInfos.find("mdf/absolute_start_time");
+        if (it != _metaInfos.end())
+        {
+            return std::chrono::nanoseconds{std::stoll(it->second)};
+        }
+        return std::chrono::nanoseconds{0};
+    }
     value VirtualBusNumber() const
     {
         return Get("mdf/virtual_bus_number");
@@ -124,6 +137,27 @@ TraceMessageType to_channelType(cfg::Link::Type linkType)
     }
 }
 
+// Helper to identify Channel
+bool MatchChannel(std::shared_ptr<IReplayChannel> channel, const std::string& linkName,
+    const std::string& participantName, const std::string& controllerName)
+{
+    // The source info contains 'Link/Participant/Controller'
+    auto metaInfos = MetaInfos(*channel);
+    //TODO the "/" separator is an MDF detail which should be exported in metaInfos
+    auto tokens = splitString(metaInfos.SourceInfoName(), "/");
+    const auto& link = tokens.at(0);
+    const auto& participant = tokens.at(1);
+    const auto& service = tokens.at(2);
+    if (link == linkName
+        && participant == participantName
+        && service == controllerName)
+    {
+        return true;
+    }
+    return false;
+}
+
+
 // Find the MDF channel associated with the given participant/controller names and type
 auto FindReplayChannel(ib::mw::logging::ILogger* log,
     IReplayFile* replayFile,
@@ -151,22 +185,7 @@ auto FindReplayChannel(ib::mw::logging::ILogger* log,
             log->Trace("Replay: skipping channel '{}' of type {}", channel->Name(), to_string(channel->Type()));
             continue;
         }
-        // The source info contains 'Link/Participant/Controller'
-        auto metaInfos = MetaInfos(*channel);
-        //TODO the "/" separator is an MDF detail which should be exported in metaInfos
-        auto tokens = splitString(metaInfos.SourceInfoName(), "/"); 
-        if (tokens.size() != 3)
-        {
-            log->Info("Replay: using channel '{}' from '{}' on {}: source info mismatch: {}",
-                channel->Name(), replayFile->FilePath(), controllerName, metaInfos.SourceInfoName());
-            continue;
-        }
-        const auto& link = tokens.at(0);
-        const auto& participant = tokens.at(1);
-        const auto& service = tokens.at(2);
-        if (link == linkName
-            && participant == participantName
-            && service == controllerName)
+        if(MatchChannel(channel, linkName, participantName, controllerName))
         {
             return channel;
         }
@@ -216,7 +235,10 @@ void ReplayScheduler::ConfigureNetworkSimulators(const cfg::Config& config, cons
     }
     _knownSimulators.push_back(participantConfig.name);
 
-    // create trace sources (aka IReplayFile)
+    // when using the participant time provider we have exact, absolute time stamps of simulated time
+    const bool useAbsoluteTimestamps = participantConfig.participantController.has_value();
+
+
     auto replayFiles = tracing::CreateReplayFiles(_log, config, participantConfig);
     if (replayFiles.empty())
     {
@@ -224,32 +246,52 @@ void ReplayScheduler::ConfigureNetworkSimulators(const cfg::Config& config, cons
         throw std::runtime_error("ReplayScheduler: cannot open replay files.");
     }
 
+    // assign replay files to the bus simulator implementing the replay data controller interface
     for (const auto& simulator : participantConfig.networkSimulators)
     {
         for (const auto& linkName : simulator.simulatedLinks)
         {
-            const auto& link = cfg::get_by_name(config.simulationSetup.links, linkName);
             try
             {
+                const auto& link = cfg::get_by_name(config.simulationSetup.links, linkName);
                 //NB currently (v3.3.7) the NetworkSimulator uses the controller's endpoints to create trace channel source infos.
                 // Thus, we try to attach a replay task for each of our simulated link's endpoints.
-                // XXX the endpoints might have the same name, we should first check how many channels there are, and then match the endpoints to a channel
+                auto replayFile = replayFiles.at(simulator.replay.useTraceSource);
+                std::vector<std::shared_ptr<IReplayChannel>> replayChannels{replayFile->begin(), replayFile->end()};
+
+                // The endpoints might have the same name, thus we attach the channels in order we encounter them,
+                // and each channel is used at most once.
+                auto pickChannel = 
+                    [&replayChannels](const auto& linkName, const auto& participantName, const auto& controllerName, const auto linkType) {
+                    const auto type = to_channelType(linkType);
+
+                    for (auto it = replayChannels.begin(); it != replayChannels.end(); ++it)
+                    {
+                        auto channel = *it;
+                        if (channel->Type() != type)
+                        {
+                            continue;
+                        }
+                        if (MatchChannel(channel, linkName, participantName, controllerName))
+                        {
+                            //make sure this channel is not shared among endpoints
+                            replayChannels.erase(it);
+                            return channel;
+                        }
+                    }
+                    return std::shared_ptr<IReplayChannel>{};
+                };
+
+
                 for (const auto& endpoint : link.endpoints)
                 {
                     auto tokens = splitString(endpoint, "/");
-                    if (tokens.size() != 2)
-                    {
-                        throw std::runtime_error("endpoint identifier is malformed!");
-                    }
                     const auto& controllerName = tokens.at(1);
 
-                    auto replayFile = replayFiles.at(simulator.replay.useTraceSource);
-                    auto replayChannel = FindReplayChannel(
-                        _log,
-                        replayFile.get(),
-                        controllerName,
-                        participantConfig.name,
+                    auto replayChannel = pickChannel(
                         linkName,
+                        participantConfig.name,
+                        controllerName,
                         link.type
                     );
 
@@ -265,10 +307,10 @@ void ReplayScheduler::ConfigureNetworkSimulators(const cfg::Config& config, cons
                     }
                     ReplayTask task{};
                     task.replayReader = std::move(replayChannel->GetReader());
-                    task.initialTime = replayChannel->StartTime();
                     task.name = replayChannel->Name();
                     task.replayFile = std::move(replayFile);
                     task.controller = &netSim;
+                    task.initialTime = useAbsoluteTimestamps ? 0ns : replayChannel->StartTime();
 
                     _replayTasks.emplace_back(std::move(task));
 
