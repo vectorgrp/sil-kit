@@ -983,4 +983,46 @@ TEST_F(JsonConfigTest, configure_vasio_tcpflags)
     ASSERT_EQ(parsedConfig.middlewareConfig.vasio.tcpQuickAck, true);
 
 }
+
+TEST_F(JsonConfigTest, throw_if_unknown_genericport)
+{
+    ib::cfg::Config defaultCfg{}; 
+
+    auto doParse = [] {
+        ib::cfg::Config::FromJsonString(
+            R"({
+    "SimulationSetup": {
+        "Participants": [
+            {
+                "Name": "A",
+                "GenericPublishers": [
+                    {
+                        "Name": "Pub1"
+                    }
+                ]
+            },
+            {
+                "Name": "B",
+                "GenericSubscribers": [
+                    {
+                        "Name": "Sub1"
+                    }
+                ]
+            }
+        ],
+        "Links": [
+            {
+                "Name": "PubSub",
+                "Endpoints": [
+                    "A/Typo1",
+                    "B/Sub1"
+                ]
+            }
+        ]
+    }
+})"
+    ); };
+    EXPECT_THROW(doParse(), Misconfiguration);
+
+}
 } // anonymous namespace

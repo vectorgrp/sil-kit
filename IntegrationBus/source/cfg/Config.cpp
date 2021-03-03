@@ -1,7 +1,6 @@
 #include "Config.hpp"
 #include "JsonConfig.hpp"
 
-#include <cassert>
 #include <fstream>
 #include <sstream>
 #include <unordered_set>
@@ -281,18 +280,33 @@ void UpdateGenericSubscribers(Config& config)
                 auto&& links = config.simulationSetup.links;
                 auto&& linkIter = std::find_if(links.begin(), links.end(),
                     [&](const Link& link) { return link.id == genericPublisher.linkId; });
-                assert(linkIter != links.end());
+                if (linkIter == links.end())
+                {
+                    throw Misconfiguration("GenericPublisher \"" + genericPublisher.name
+                        + "\" on participant \"" + participant.name 
+                        + "\" refers to invalid LinkId=" + std::to_string(genericPublisher.linkId));
+                }
                 std::cerr << "WARNING: more than one GenericPublisher on link " << linkIter->name << "\n";
 
                 continue;
             }
-            assert(genericPublisher.linkId >= 0);
+
+            if (genericPublisher.linkId < 0)
+            {
+                throw Misconfiguration("GenericPublisher \"" + genericPublisher.name 
+                    + "\" on Participant \"" + participant.name + "\" has no Link specified");
+            }
 
             genericPublisherPerLink[genericPublisher.linkId] = &genericPublisher;
         }
         for (auto&& genericSubscriber : participant.genericSubscribers)
         {
-            assert(genericSubscriber.linkId >= 0);
+            if (genericSubscriber.linkId < 0)
+            {
+                throw Misconfiguration("GenericSubscriber \"" + genericSubscriber.name
+                    + "\" on participant \"" + participant.name 
+                    + "\" refers to invalid LinkId=" + std::to_string(genericSubscriber.linkId));
+            }
             genericSubscribersPerLink[genericSubscriber.linkId].push_back(&genericSubscriber);
         }
     }
