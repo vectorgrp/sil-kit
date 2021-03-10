@@ -17,6 +17,7 @@ For building from the source tree, refer to :doc:`../development/build`.
 This guide will walk you through setting up a VIB project from scratch. First, the terminology
 required to understand the functionality is briefly discussed, then the build process and the actual code.
 
+.. _sec:quickstart-terminology:
 
 Terminology
 -----------

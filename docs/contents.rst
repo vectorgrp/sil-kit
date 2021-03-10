@@ -13,5 +13,6 @@ Contents
   simulation/simulation
   usage/utilities
   usage/demos
+  usage/replay
   CHANGELOG
   licenses/license

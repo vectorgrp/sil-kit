@@ -2,7 +2,7 @@
 VIB Demos
 ======================
 
-This document describe the usage of the demo projects that are
+This document describes the usage of the demo projects that are
 included with the Vector Integration Bus project and what their
 expected output and or results are. All demo source code is located in
 the GIT repository in the folder Demos.
