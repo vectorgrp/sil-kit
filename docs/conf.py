@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../ThirdParty/breathe/'))
 # -- Project information -----------------------------------------------------
 
 project = 'IntegrationBus'
-copyright = 'Copyright (c) Vector Informatik GmbH. All rights reserved.'
+copyright = 'Vector Informatik GmbH. All rights reserved.'
 author = 'Vector Informatik GmbH'
 version = '1.0.0'
 # The full version, including alpha/beta/rc tags

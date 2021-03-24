@@ -18,8 +18,11 @@ Generic message types (I/O Ports, Generic Messages) are encoded in MDF4 channels
 that are suitable for use with Vector CANoe.
 This allows working with trace data as "SystemVariables" in CANoe.
 
+Replay
+------
 This VIBE also implements the message replaying APIs necessary for injecting MDF4 data into live simulations.
-Refer to the :doc:`/usage/replay` documentation for details. 
+Refer to the :doc:`/usage/replay` documentation for details.
+Please note, that for some replaying modes limitations apply as noted in :ref:`sec:replay`.
 
 Using the Shared library
 ------------------------
