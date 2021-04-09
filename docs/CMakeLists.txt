@@ -45,6 +45,10 @@ if(${IB_BUILD_DOCS})
                            -Dbreathe_projects.IntegrationBus=${DOXYGEN_OUTPUT_DIR}/xml
                            -Drelease=${PROJECT_VERSION}
                            -d${CMAKE_CURRENT_BINARY_DIR}/sphinx-doctree
+			   -T
+			   -vvv
+			   -w ${CMAKE_CURRENT_BINARY_DIR}/sphinx-build-error.log
+			   -E 
                            ${SPHINX_SOURCE} ${SPHINX_BUILD}
                        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                        VERBATIM

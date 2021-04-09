@@ -215,6 +215,7 @@ def doBuild(Map buildFlags) {
 
         stage("Cmake Release Build (${buildName})") {
             print("${buildName} --  running cmake Release")
+            buildEnv.add("LANG=C.UTF-8")
             withEnv(buildEnv) {
                 runCmake("Release", "${cmakeArgsRelease}" + "${extraArgs}" )
             }
