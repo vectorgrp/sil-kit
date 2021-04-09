@@ -5,6 +5,37 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.3.9] - 2021-04-09
+--------------------------------
+
+Added
+~~~~~
+- Add documentation for :doc:`Replaying and Tracing<usage/replay>` (AFTMAGT-308).
+- Added support for replaying FlexRay messages (AFTMAGT-289).
+  Replaying FlexRay requires the use of the VIBE-NetworkSimulator.
+  The NetworkSimulator is attached as a replay controller to the replay scheduler, cf. :ref:`sec:replay-architecture` for an overview.
+- Added support for replaying FlexRay messages in the VIBE-NetworkSimulator (AFTMAGT-290).
+  Please note, that the startup/synchronization sequence is not part of a trace file  and time stamps of the
+  replay might deviate from the original traced messages.
+  The logical order of messages is kept after the synchronization has been established.
+  Refer to section :ref:`sec:replay` for a summary of supported features and limitations.
+- Add a :ref:`Replay<sec:cfg-participant-replay>` configuration block to the NetworkSimulator
+  configuration.
+
+Fixed
+~~~~~
+- The config parser no longer uses asserts when validating a Config.
+  A misconfiguration exception is now thrown, which can be handled by the user (AFTMAGT-309).
+
+Compatibility with 3.3.8
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Due to changes in the config API we are not ABI compatible.
+
+- Application binary interface (ABI): No (Due to Config)
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
 [3.3.8] - 2021-02-18
 --------------------------------
 
