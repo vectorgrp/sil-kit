@@ -381,12 +381,6 @@ It allows to trace the IB simulation messages into binary files.
 Message Replaying
 ----------------------------------------
 
-.. admonition:: Note
-
-   Please note that the Message Replaying support is currently under development.
-   The configuration parsing is in place, but the replaying mechanism might not
-   be functional, yet! 
-
 Similar to the :ref:`sec:cfg-participant-tracing` configuration, two options
 must be set to configure message replaying.
 At least one trace source has to be defined in a *TraceSources* block of
@@ -991,6 +985,9 @@ This section is optional.
      - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
        the network simulator. Trace sinks are referred to by their name and can be used
        by multiple controllers. (optional)
+   * - Replay
+     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
+       by this network simulator. (optional)
 
 
 .. _sec:cfg-switches:
