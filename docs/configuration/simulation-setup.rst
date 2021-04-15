@@ -393,7 +393,8 @@ the participant, and a *Replay* block has to be defined in a service instance:
             "Name": "CanCtrl",
             "Replay": {
                 "Direction": "Send",
-                "UseTraceSource": "Source1"
+                "UseTraceSource": "Source1",
+                "MdfChannel": {}
             }
         }
     ],
@@ -467,6 +468,41 @@ The replay configuration is part of a participant's service.
    * - Direction
      - The message direction of the trace source data. May be "Send", "Receive"
        or "Both".
+   * - MdfChannel
+     - An (optional) MdfChannel identifier object. May be used to uniquely select
+       a MDF channel in an MDF trace file.
+
+Refer to :ref:`sec:replay-foreign` for guidelines on how to use the ``MdfChannel`` to select a replay channel.
+
+.. _table-mdfchannel-json:
+
+.. list-table:: MdfChannel Configuration
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Property Name
+     - Description
+
+   * - ChannelName
+     - The name of a MDF channel (optional).
+   * - ChannelSource
+     - The name of a MDF channel's source information object (optional).
+   * - ChannelPath
+     - The path of a MDF channel's source information object (optional).
+
+   * - GroupName
+     - The acquistion name of the MDF channel's channel group (optional).
+   * - GroupSource
+     - The source of the channel group's source information object (optional).
+   * - GroupPath
+     - The path of the channel group's source information object (optional).
+
+.. admonition:: Note
+
+    Please note, that all members of ``MdfChannel`` are optional and that the empty string is a valid configuration choice.
+    The empty string matches the empty text value, or it indicates the absence of the corresponding MDF meta data.
+    To ensure that a ``MdfChannel`` member is not part of MDF channel selection, remove it from the configuration.
+    If no ``MdfChannel`` members are specified, the channel selection will use VIB internal criteria.
 
 
 .. _sec:cfg-participant-can:
