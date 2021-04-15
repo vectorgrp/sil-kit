@@ -29,7 +29,7 @@ public:
 public:
     // ----------------------------------------
     // Operator Implementations
-    OptionalCfg& operator=(OptionalCfg& other) = default;
+    OptionalCfg& operator=(const OptionalCfg& other) = default;
     OptionalCfg& operator=(OptionalCfg&& other) = default;
 
 public:

@@ -587,6 +587,18 @@ bool operator==(const Replay& lhs, const Replay& rhs)
         ;
 }
 
+bool operator==(const MdfChannel& lhs, const MdfChannel& rhs)
+{
+    return lhs.channelName == rhs.channelName
+        && lhs.channelSource == rhs.channelSource
+        && lhs.channelPath == rhs.channelPath
+
+        && lhs.groupName == rhs.groupName
+        && lhs.groupSource == rhs.groupSource
+        && lhs.groupPath == rhs.groupPath
+        ;
+}
+
 std::ostream& operator<<(std::ostream& out, const Version& version)
 {
     out << version.major << '.'

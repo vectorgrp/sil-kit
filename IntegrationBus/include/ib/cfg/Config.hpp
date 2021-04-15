@@ -109,6 +109,20 @@ struct TraceSource
     bool enabled{true};
 };
 
+//!< MdfChannel identification for replaying, refer to ASAM MDF 4.1 Specification, Chapter 5.4.3
+struct MdfChannel
+{
+    //NB: a user supplied empty string in the configuration is valid
+
+    OptionalCfg<std::string> channelName; //!< maps to MDF cn_tx_name
+    OptionalCfg<std::string> channelSource; //!< maps to MDF si_tx_name of cn_si_source
+    OptionalCfg<std::string> channelPath; //!< maps to MDF si_tx_path of cn_si_source
+
+    OptionalCfg<std::string> groupName; //!< maps to MDF cg_tx_name
+    OptionalCfg<std::string> groupSource; //!< maps to MDF si_tx_name of cg_si_acq_source
+    OptionalCfg<std::string> groupPath; //!< maps to MDF si_tx_path of cn_si_acq_source
+};
+
 struct Replay
 {
     std::string useTraceSource;
@@ -122,6 +136,7 @@ struct Replay
     };
     Direction direction{Direction::Undefined};
     std::vector<std::string> FilterMessage;
+    MdfChannel mdfChannel;
 };
 
 struct CanController
@@ -520,6 +535,7 @@ IntegrationBusAPI bool operator==(const GenericPort& lhs, const GenericPort& rhs
 IntegrationBusAPI bool operator==(const TraceSink& lhs, const TraceSink& rhs);
 IntegrationBusAPI bool operator==(const TraceSource& lhs, const TraceSource& rhs);
 IntegrationBusAPI bool operator==(const Replay& lhs, const Replay& rhs);
+IntegrationBusAPI bool operator==(const MdfChannel& lhs, const MdfChannel& rhs);
 
 IntegrationBusAPI std::ostream& operator<<(std::ostream& out, const Version& version);
 IntegrationBusAPI std::istream& operator>>(std::istream& in, Version& version);

@@ -82,6 +82,13 @@ auto optional_from_json(std::vector<T>& vector, const json11::Json& json, const 
 }
 
 template <typename T>
+auto non_default_to_json(const OptionalCfg<T>& value, json11::Json::object& json, const std::string& fieldName, const OptionalCfg<T>& defaultValue)
+{
+    if (!(value == defaultValue))
+        json[fieldName] = to_json(value.value());
+}
+
+template <typename T>
 auto non_default_to_json(const T& value, json11::Json::object& json, const std::string& fieldName, const T& defaultValue)
 {
     if (!(value == defaultValue))
@@ -94,7 +101,6 @@ auto non_default_to_json(const bool& value, json11::Json::object& json, const st
     if (!(value == defaultValue))
         json[fieldName] = value;
 }
-
 auto optional_to_json(json11::Json::object& json, const Replay& config)
 {
     if (config.useTraceSource.size() > 0)
@@ -1467,7 +1473,6 @@ auto from_json<SimulationSetup>(const json11::Json& json) -> SimulationSetup
         // copy the definition to the participant that refers
         // to the network simulator by name
         participant->networkSimulators = netSims;
-
     }
     return simulationSetup;
 }
@@ -1860,6 +1865,10 @@ auto to_json(const Replay& cfg) -> json11::Json
     {
         json["Direction"] = to_json(cfg.direction);
     }
+
+    const MdfChannel defaultMdfChannel;
+    non_default_to_json(cfg.mdfChannel, json, "MdfChannel", defaultMdfChannel);
+
     return json;
 }
 
@@ -1869,7 +1878,7 @@ auto from_json<Replay>(const json11::Json& json) -> Replay
     Replay replay;
     replay.useTraceSource = json["UseTraceSource"].string_value();
     optional_from_json(replay.direction, json, "Direction");
-
+    optional_from_json(replay.mdfChannel, json, "MdfChannel");
     return replay;
 }
 
@@ -1920,6 +1929,37 @@ auto from_json<Config>(const json11::Json& json) -> Config
     return config;
 }
 
+
+auto to_json(const MdfChannel& cfg) -> json11::Json
+{
+    const OptionalCfg<std::string> defaultMdf;
+    auto json = json11::Json::object{};
+
+    non_default_to_json(cfg.channelName, json, "ChannelName", defaultMdf);
+    non_default_to_json(cfg.channelSource, json, "ChannelSource", defaultMdf);
+    non_default_to_json(cfg.channelPath, json, "ChannelPath", defaultMdf);
+
+    non_default_to_json(cfg.groupName, json, "GroupName", defaultMdf);
+    non_default_to_json(cfg.groupSource, json, "GroupSource", defaultMdf);
+    non_default_to_json(cfg.groupPath, json, "GroupPath", defaultMdf);
+
+    return json;
+}
+
+template <>
+auto from_json<MdfChannel>(const json11::Json& json) -> MdfChannel
+{
+    MdfChannel mdfChannel;
+    optional_from_json(mdfChannel.channelName, json, "ChannelName");
+    optional_from_json(mdfChannel.channelSource, json, "ChannelSource");
+    optional_from_json(mdfChannel.channelPath, json, "ChannelPath");
+
+    optional_from_json(mdfChannel.groupName, json, "GroupName");
+    optional_from_json(mdfChannel.groupSource, json, "GroupSource");
+    optional_from_json(mdfChannel.groupPath, json, "GroupPath");
+
+    return mdfChannel;
+}
 // ======================================================================
 //  Generic Container Conversion
 // ======================================================================

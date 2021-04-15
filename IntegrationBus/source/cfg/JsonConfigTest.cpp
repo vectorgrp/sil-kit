@@ -1025,4 +1025,76 @@ TEST_F(JsonConfigTest, throw_if_unknown_genericport)
     EXPECT_THROW(doParse(), Misconfiguration);
 
 }
+
+TEST_F(JsonConfigTest, replay_mdfchannel_default_is_inactive)
+{
+    auto&& participant = simulationSetup.AddParticipant("P1");
+    participant
+        .AddCan("CAN1")
+        .WithReplay("Source1")
+        ;
+
+    BuildConfigFromJson();
+
+    const auto& mdfChannel = config.simulationSetup.participants.at(0)
+        .canControllers.at(0)
+        .replay.mdfChannel;
+    ASSERT_FALSE(mdfChannel.channelName);
+    ASSERT_FALSE(mdfChannel.channelSource);
+    ASSERT_FALSE(mdfChannel.channelPath);
+
+    ASSERT_FALSE(mdfChannel.groupName);
+    ASSERT_FALSE(mdfChannel.groupSource);
+    ASSERT_FALSE(mdfChannel.groupPath);
+}
+
+TEST_F(JsonConfigTest, replay_mdfchannel_identification)
+{
+    auto cfg = ib::cfg::Config::FromJsonString(R"(
+    {
+        "SimulationSetup": {
+            "Participants": [
+                {
+                "Name": "A",
+                "CanControllers" : [
+                    {
+                        "Name" : "CAN1",
+                        "Replay" : {
+                            "MdfChannel": {
+                                "GroupName": "group name",
+                                "GroupSource" : "group source",
+                                "GroupPath" : "group path",
+                                "ChannelName" : "",
+                                "ChannelSource" : "channel source",
+                                "ChannelPath" : "channel path"
+                            },
+                            "UseTraceSource": "Enable Replaying"
+                        }
+                    }
+                ]
+                }
+            ]
+        }
+    }
+    )");
+
+    const auto& mdfChannel = cfg.simulationSetup.participants.at(0)
+        .canControllers.at(0)
+        .replay.mdfChannel;
+    ASSERT_EQ(*mdfChannel.channelName, "");
+    ASSERT_EQ(*mdfChannel.channelSource, "channel source");
+    ASSERT_EQ(*mdfChannel.channelPath, "channel path");
+
+    ASSERT_EQ(*mdfChannel.groupName, "group name");
+    ASSERT_EQ(*mdfChannel.groupSource, "group source");
+    ASSERT_EQ(*mdfChannel.groupSource, "group source");
+
+    // ensure that serialization works
+    auto jsonStr = cfg.ToJsonString();
+    auto cfg2 = ib::cfg::Config::FromJsonString(jsonStr);
+    const auto& mdfChannel2 = cfg2.simulationSetup.participants.at(0)
+        .canControllers.at(0)
+        .replay.mdfChannel;
+    ASSERT_EQ(mdfChannel, mdfChannel2);
+}
 } // anonymous namespace
