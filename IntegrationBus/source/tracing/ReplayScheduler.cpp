@@ -48,36 +48,49 @@ public:
     : _metaInfos{channel.GetMetaInfos()}
     {
     }
+    // Meta data uses fixed terms from the MDF spec, see Config.hpp:MdfChannel and vibe-mdf4tracing
     value ChannelName() const
     {
         return Get("mdf/channel_name");
     }
 
-    value ChannelGroupPath() const
-    {
-        return Get("mdf/channel_group_path");
-    }
-
-    value ChannelGroupName() const
-    {
-        return Get("mdf/channel_group_name");
-    }
-
-    value ChannelGroupAcquisitionName() const
-    {
-        return Get("mdf/channel_group_acquisition_name");
-    }
-
-    value SourceInfoName() const
+    value ChannelSource() const
     {
         return Get("mdf/source_info_name");
     }
 
-    value SourceInfoPath() const
+    value ChannelPath() const
     {
         return Get("mdf/source_info_path");
     }
 
+    value GroupPath() const
+    {
+        return Get("mdf/channel_group_path");
+    }
+
+    value GroupSource() const
+    {
+        return Get("mdf/channel_group_name");
+    }
+
+    value GroupName() const
+    {
+        return Get("mdf/channel_group_acquisition_name");
+    }
+
+
+    value Separator() const
+    {
+        try
+        {
+            return Get("mdf/channel_group_path_separator");
+        }
+        catch(...)
+        {
+            return _defaultSeparator; 
+        }
+    }
     // available since >v3.3.8, returns 0 if the underlying meta infos does not contain an absolute (trace) start time
     std::chrono::nanoseconds AbsoluteStartTime() const
     {
@@ -108,6 +121,8 @@ private:
         return _metaInfos.at(name);
     }
     const std::map<std::string, std::string>& _metaInfos;
+	//Used as default in VIB, CANoe
+    const std::string _defaultSeparator{"/"};
 };
 
 TraceMessageType to_channelType(cfg::Link::Type linkType)
@@ -137,14 +152,37 @@ TraceMessageType to_channelType(cfg::Link::Type linkType)
     }
 }
 
-// Helper to identify Channel
-bool MatchChannel(std::shared_ptr<IReplayChannel> channel, const std::string& linkName,
+// Helper to match a channel by a cfg::MdfChannel identification supplied by the user
+bool MatchMdfChannel(std::shared_ptr<IReplayChannel> channel, const cfg::MdfChannel& mdfId)
+{
+    const auto metaInfos = MetaInfos(*channel);
+    bool result = true;
+
+    auto isSetAndEqual = [&result](const auto lhs, const auto rhs)
+    {
+        if (lhs.has_value())
+        {
+            result &= (lhs.value() == rhs);
+        }
+    };
+
+    isSetAndEqual(mdfId.channelName, metaInfos.ChannelName());
+    isSetAndEqual(mdfId.channelPath, metaInfos.ChannelPath());
+    isSetAndEqual(mdfId.channelSource, metaInfos.ChannelSource());
+    isSetAndEqual(mdfId.groupName, metaInfos.GroupName());
+    isSetAndEqual(mdfId.groupPath, metaInfos.GroupPath());
+    isSetAndEqual(mdfId.groupSource, metaInfos.GroupSource());
+
+    return result;
+}
+
+// Helper to identify Channel by its name in VIB format
+bool MatchIbChannel(std::shared_ptr<IReplayChannel> channel, const std::string& linkName,
     const std::string& participantName, const std::string& controllerName)
 {
     // The source info contains 'Link/Participant/Controller'
-    auto metaInfos = MetaInfos(*channel);
-    //TODO the "/" separator is an MDF detail which should be exported in metaInfos
-    auto tokens = splitString(metaInfos.SourceInfoName(), "/");
+    const auto metaInfos = MetaInfos(*channel);
+    auto tokens = splitString(metaInfos.ChannelSource(), metaInfos.Separator());
     const auto& link = tokens.at(0);
     const auto& participant = tokens.at(1);
     const auto& service = tokens.at(2);
@@ -157,10 +195,24 @@ bool MatchChannel(std::shared_ptr<IReplayChannel> channel, const std::string& li
     return false;
 }
 
+// Helper to check if a user defined config has non-default values
+bool HasMdfChannelSelection(const cfg::MdfChannel& mdf)
+{
+    // True if at least one member was set by user
+    return mdf.channelName
+        || mdf.channelSource
+        || mdf.channelPath
+
+        || mdf.groupName
+        || mdf.groupSource
+        || mdf.groupPath
+        ;
+}
 
 // Find the MDF channel associated with the given participant/controller names and type
 auto FindReplayChannel(ib::mw::logging::ILogger* log,
     IReplayFile* replayFile,
+    const cfg::Replay& replayConfig,
     const std::string& controllerName,
     const std::string& participantName,
     const std::string& linkName,
@@ -178,21 +230,30 @@ auto FindReplayChannel(ib::mw::logging::ILogger* log,
                 replayFile->FilePath(), controllerName);
             return channel;
         }
-        // TODO  MDF is currently hard-coded to the CANoe/VIB MDF usage.
-        //       We have to revisit this when we have more user-configurable channel selections.
-        if (channel->Type() != type)
+        if (HasMdfChannelSelection(replayConfig.mdfChannel))
         {
-            log->Trace("Replay: skipping channel '{}' of type {}", channel->Name(), to_string(channel->Type()));
-            continue;
+            // User specifies a lookup for us
+            if (MatchMdfChannel(channel, replayConfig.mdfChannel))
+            {
+                return channel;
+            }
         }
-        if(MatchChannel(channel, linkName, participantName, controllerName))
+        else
         {
-            return channel;
+            // VIB builtin channel lookup
+            if (channel->Type() != type)
+            {
+                log->Trace("Replay: skipping channel '{}' of type {}", channel->Name(), to_string(channel->Type()));
+                continue;
+            }
+            if (MatchIbChannel(channel, linkName, participantName, controllerName))
+            {
+                return channel;
+            }
         }
     }
     return {};
 }
-
 } //end anonymous namespace
 
 ReplayScheduler::ReplayScheduler(const cfg::Config& config,
@@ -272,7 +333,7 @@ void ReplayScheduler::ConfigureNetworkSimulators(const cfg::Config& config, cons
                         {
                             continue;
                         }
-                        if (MatchChannel(channel, linkName, participantName, controllerName))
+                        if (MatchIbChannel(channel, linkName, participantName, controllerName))
                         {
                             //make sure this channel is not shared among endpoints
                             replayChannels.erase(it);
@@ -373,6 +434,7 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
                 auto replayChannel = FindReplayChannel(
                     _log,
                     replayFile.get(),
+                    controllerConfig.replay,
                     controllerConfig.name,
                     participantConfig.name,
                     getLinkById(controllerConfig.linkId).name,
