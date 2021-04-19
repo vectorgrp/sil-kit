@@ -4,6 +4,7 @@
 #include <string>
 #include <cassert>
 #include <chrono>
+#include <sstream>
 
 #include "ib/cfg/Config.hpp"
 #include "ib/mw/IComAdapter.hpp"
@@ -121,7 +122,7 @@ private:
         return _metaInfos.at(name);
     }
     const std::map<std::string, std::string>& _metaInfos;
-	//Used as default in VIB, CANoe
+    //Used as default in VIB, CANoe
     const std::string _defaultSeparator{"/"};
 };
 
@@ -208,8 +209,30 @@ bool HasMdfChannelSelection(const cfg::MdfChannel& mdf)
         || mdf.groupPath
         ;
 }
+// Helper for useful error messages
+std::string to_string(const cfg::MdfChannel& mdf)
+{
+    std::stringstream result;
+    result << "MdfChannel{";
+    auto printField = [&result](const auto& name, const auto field)
+    {
+        if (field.has_value())
+        {
+            result << name << ": "
+                << "\"" << field.value() << "\", ";
+        }
+    };
+    printField("ChannelName", mdf.channelName);
+    printField("ChannelSource", mdf.channelSource);
+    printField("ChannelPath", mdf.channelPath);
+    printField("GroupName", mdf.groupName);
+    printField("GroupSource", mdf.groupSource);
+    printField("GroupPath", mdf.groupPath);
+    result << "}";
+    return result.str();
+}
 
-// Find the MDF channel associated with the given participant/controller names and type
+// Find the MDF channels associated with the given participant/controller names and types or an MdfChannel identification.
 auto FindReplayChannel(ib::mw::logging::ILogger* log,
     IReplayFile* replayFile,
     const cfg::Replay& replayConfig,
@@ -219,6 +242,8 @@ auto FindReplayChannel(ib::mw::logging::ILogger* log,
     const ib::cfg::Link::Type linkType
     ) ->  std::shared_ptr<IReplayChannel>
 {
+    std::vector<std::shared_ptr<IReplayChannel>> channelList;
+
     const auto type = to_channelType(linkType);
     for (auto channel : *replayFile)
     {
@@ -232,10 +257,10 @@ auto FindReplayChannel(ib::mw::logging::ILogger* log,
         }
         if (HasMdfChannelSelection(replayConfig.mdfChannel))
         {
-            // User specifies a lookup for us
+            // User specifies lookup information for us
             if (MatchMdfChannel(channel, replayConfig.mdfChannel))
             {
-                return channel;
+                channelList.emplace_back(std::move(channel));
             }
         }
         else
@@ -248,11 +273,24 @@ auto FindReplayChannel(ib::mw::logging::ILogger* log,
             }
             if (MatchIbChannel(channel, linkName, participantName, controllerName))
             {
-                return channel;
+                channelList.emplace_back(std::move(channel));
             }
         }
     }
-    return {};
+
+    // when an MdfChannel config is given, the channel has to be unique.
+    if (HasMdfChannelSelection(replayConfig.mdfChannel)
+        && (channelList.size() != 1))
+    {
+        std::stringstream msg;
+        msg << "Error in MDF channel selection: the config of "
+            << to_string(replayConfig.mdfChannel)
+            << " found " << channelList.size() << " channels in \"" << replayFile->FilePath() << "\"."
+            << " MdfChannel config must yield a unique channel!";
+        throw cfg::Misconfiguration{ msg.str() };
+    }
+
+    return channelList.at(0);
 }
 } //end anonymous namespace
 
@@ -310,6 +348,11 @@ void ReplayScheduler::ConfigureNetworkSimulators(const cfg::Config& config, cons
     // assign replay files to the bus simulator implementing the replay data controller interface
     for (const auto& simulator : participantConfig.networkSimulators)
     {
+        // MdfChannel configuration is not supported on NetSim!
+        if (HasMdfChannelSelection(simulator.replay.mdfChannel))
+        {
+            throw cfg::Misconfiguration{"Error: MdfChannel selection is not supported for NetworkSimulator replays!"};
+        }
         for (const auto& linkName : simulator.simulatedLinks)
         {
             try
@@ -453,6 +496,12 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
                 task.replayFile = std::move(replayFile);
 
                 _replayTasks.emplace_back(std::move(task));
+            }
+            catch (const cfg::Misconfiguration& ex)
+            {
+                _log->Error("ReplayScheduler: misconfiguration of controller " + controllerConfig.name
+                    + ": " + ex.what());
+                throw;
             }
             catch (const std::runtime_error& ex)
             {
