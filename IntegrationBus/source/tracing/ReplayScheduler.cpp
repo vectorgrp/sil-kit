@@ -183,7 +183,7 @@ bool MatchIbChannel(std::shared_ptr<IReplayChannel> channel, const std::string& 
 {
     // The source info contains 'Link/Participant/Controller'
     const auto metaInfos = MetaInfos(*channel);
-    auto tokens = splitString(metaInfos.ChannelSource(), metaInfos.Separator());
+    auto tokens = splitString(metaInfos.ChannelSource(), "/");
     const auto& link = tokens.at(0);
     const auto& participant = tokens.at(1);
     const auto& service = tokens.at(2);
