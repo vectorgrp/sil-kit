@@ -808,16 +808,9 @@ template <class ControllerT, typename... Arg>
 auto ComAdapter<IbConnectionT>::CreateController(EndpointId endpointId, const std::string& topicname, Arg&&... arg) -> ControllerT*
 {
     auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
-    if (controllerMap.count(endpointId))
-    {
-        // We cache the controller and return it here.
-        // TODO The method should reflect this fact in the future, e.g. rename to "GetController" 
-        auto& controllerPtr = controllerMap[endpointId];
-        return static_cast<ControllerT*>(controllerPtr.get());
-    }
-
     auto controller = std::make_unique<ControllerT>(this, std::forward<Arg>(arg)...);
     auto controllerPtr = controller.get();
+
     controller->SetEndpointAddress(EndpointAddress{_participantId, endpointId});
 
     _ibConnection.RegisterIbService(topicname, endpointId, controllerPtr);
@@ -876,8 +869,18 @@ template <class ControllerT, class ConfigT, typename... Arg>
 auto ComAdapter<IbConnectionT>::CreateControllerForLink(const ConfigT& config, Arg&&... arg) -> ControllerT*
 {
     auto&& linkCfg = GetLinkById(config.linkId);
-    auto* controller = CreateController<ControllerT>(config.endpointId, linkCfg.name, std::forward<Arg>(arg)...);
 
+    auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
+    if (controllerMap.count(config.endpointId))
+    {
+        // We cache the controller and return it here.
+        // TODO The method should reflect this fact in the future, e.g. rename to "GetController" 
+        auto& controllerPtr = controllerMap[config.endpointId];
+        return static_cast<ControllerT*>(controllerPtr.get());
+    }
+    
+    // Create a new controller, and configure tracing if applicable
+    auto* controller = CreateController<ControllerT>(config.endpointId, linkCfg.name, std::forward<Arg>(arg)...);
     auto* traceSource = dynamic_cast<extensions::ITraceMessageSource*>(controller);
     if (traceSource)
     {
