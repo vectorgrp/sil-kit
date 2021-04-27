@@ -870,13 +870,11 @@ auto ComAdapter<IbConnectionT>::CreateControllerForLink(const ConfigT& config, A
 {
     auto&& linkCfg = GetLinkById(config.linkId);
 
-    auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
-    if (controllerMap.count(config.endpointId))
+    auto* controllerPtr = GetController<ControllerT>(config.endpointId);
+    if (controllerPtr != nullptr)
     {
         // We cache the controller and return it here.
-        // TODO The method should reflect this fact in the future, e.g. rename to "GetController" 
-        auto& controllerPtr = controllerMap[config.endpointId];
-        return static_cast<ControllerT*>(controllerPtr.get());
+        return controllerPtr;
     }
     
     // Create a new controller, and configure tracing if applicable
