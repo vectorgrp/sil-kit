@@ -5,6 +5,26 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.3.10] - TBD
+--------------------------------
+
+Added
+~~~~~
+- Added MdfChannel identification to replaying config.
+  This allows replaying MDF4 trace files that do not originate from VIB
+  simulation runs.
+
+
+Compatibility with 3.3.9
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Due to changes in the config API we are not ABI compatible.
+
+- Application binary interface (ABI): No (Due to Config)
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
+
 [3.3.9] - 2021-04-09
 --------------------------------
 
