@@ -1,3 +1,9 @@
+# Third party YAML 
+set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable because of gmock import conflict" FORCE)
+add_subdirectory(${THIRDPARTY_DIR}/yaml-cpp
+	${CMAKE_BINARY_DIR}/ThirdParty/yaml-cpp
+	)
+
 add_library(json11
     ${THIRDPARTY_DIR}/json11/json11.hpp
     ${THIRDPARTY_DIR}/json11/json11.cpp
