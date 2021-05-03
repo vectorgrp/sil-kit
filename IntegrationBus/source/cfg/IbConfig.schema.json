@@ -11,7 +11,69 @@
             "title": "User readable description for easier recognition and comments.",
             "default": ""
         }
-
+        , "Replay": {
+            "type" : "object",
+            "properties": {
+                "UseTraceSource" : {
+                    "type": "string",
+                    "title": "The name of the trace source used as a simulation message source for this controller"
+                },
+                "Direction" : {
+                    "type": "string",
+                    "title": "Themessage direction of the trace source data. May be Send, Receive or Both",
+                    "enum": [ "Send", "Receive", "Both"]
+                },
+                "MdfChannel": {
+                    "type": "object",
+                    "properties": {
+                        "ChannelName": { "type": "string", "title": "The name of a MDF channel"},
+                        "ChannelSource": { "type": "string", "title": "The name of a MDF channel's source information object"},
+                        "ChannelPath": { "type": "string", "title": "The path of a MDF channel's source information object"},
+                        "GroupName": { "type": "string", "title": "The name of a MDF channel group"},
+                        "GroupSource": { "type": "string", "title": "The name of a MDF channel group's source information object"},
+                        "GroupPath": { "type": "string", "title": "The path of a MDF channel group's source information object"}
+                    }
+                }
+            }
+        }
+        , "Logger" : {
+            "type": "object",
+            "properties": {
+                "LogFromRemotes": {
+                    "type": "boolean",
+                    "title": "Enables receiving of remote log messages from other participants"
+                },
+                "FlushLevel": {
+                    "type": "string",
+                    "enum": [ "Critical", "Error", "Warn", "Info", "Debug", "Trace", "Off"]
+                },
+                "Sinks": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "Type": {
+                                "type": "string",
+                                "enum": [ "Remote", "File", "Stdout"]
+                            },
+                            "Level": {
+                                "type": "string",
+                                "enum": [ "Critical", "Error", "Warn", "Info", "Debug", "Trace", "Off"],
+                                "default": "Info"
+                            },
+                            "Logname": {
+                                "type": "string",
+                                "title": "Logname of a file logger. The logname results in the following filename: <Logname>_%y-%m-%dT%h-%m-%s.txt"
+                            }
+                        },
+                        "additionalProperties": false,
+                        "required": [ "Type" ]
+                    }
+                }
+            }
+            , "additionalProperties": false
+            , "required": [ "Sinks" ]
+        }
     },
     
     "properties": {
@@ -67,46 +129,9 @@
                 "SyncType" : {
                   "type": "string",
                     "enum": [ "DistributedTimeQuantum", "DiscreteEvent", "TimeQuantum", "DiscreteTime", "DiscreteTimePassive", "Unsynchronized"]
-                },
-                "Logger" : {
-                  "type": "object",
-                  "properties": {
-                    "LogFromRemotes": {
-                      "type": "boolean",
-                      "title": "Enables receiving of remote log messages from other participants"
-                    },
-                    "FlushLevel": {
-                      "type": "string",
-                      "enum": [ "Critical", "Error", "Warn", "Info", "Debug", "Trace", "Off"]
-                    },
-                    "Sinks": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "Type": {
-                            "type": "string",
-                              "enum": [ "Remote", "File", "Stdout"]
-                          },
-                          "Level": {
-                            "type": "string",
-                              "enum": [ "Critical", "Error", "Warn", "Info", "Debug", "Trace", "Off"],
-                              "default": "Info"
-                          },
-                          "Logname": {
-                            "type": "string",
-                            "title": "Logname of a file logger. The logname results in the following filename: <Logname>_%y-%m-%dT%h-%m-%s.txt"
-                          }
-                        },
-                        "additionalProperties": false,
-                        "required": [ "Type" ]
-                      }
-                    }
-                  },
-                  "additionalProperties": false,
-                  "required": [ "Sinks" ]
-                },
-                "ParticipantController" : {
+                }
+                , "Logger" : { "$ref": "#/definitions/Logger" }
+                , "ParticipantController" : {
                   "type": "object",
                   "properties": {
                     "SyncType" : {
@@ -138,6 +163,7 @@
                               "type" : "array",
                               "title": "Names of trace sinks"
                           }
+                          ,"Replay": { "$ref": "#/definitions/Replay"}
                       }
                   }
                 },
@@ -154,6 +180,7 @@
                               "type" : "array",
                               "title": "Names of trace sinks"
                           }
+                          ,"Replay": { "$ref": "#/definitions/Replay"}
                       }
                   }
                 },
@@ -479,6 +506,7 @@
                           }
                         }
                       }
+                      ,"Replay": { "$ref": "#/definitions/Replay"}
                     },
                     "additionalProperties": false
                   }
@@ -518,6 +546,7 @@
                           "EthernetWriterPipe"
                         ]
                       }
+                      ,"Replay": { "$ref": "#/definitions/Replay"}
                     },
                     "additionalProperties": false
                   }
@@ -540,6 +569,7 @@
                         "type": "boolean",
                         "title": "Name and init value of a digital output"
                       }
+                      ,"Replay": { "$ref": "#/definitions/Replay"}
                     }
                   }
                 },
@@ -566,6 +596,7 @@
                         "title": "Physical unit of the output port value.",
                         "examples": [ "V", "A", "kHz" ]
                       }
+                      ,"Replay": { "$ref": "#/definitions/Replay"}
                     },
                     "additionalProperties": false
                   }
@@ -605,6 +636,7 @@
                         "title": "Duty cycle of the PWM output.",
                         "examples": [ "V", "A", "kHz" ]
                       }
+                      ,"Replay": { "$ref": "#/definitions/Replay"}
                     },
                     "additionalProperties": false,
                     "title": "Name and init value of an analog output"
@@ -629,6 +661,7 @@
                         "pattern": "^[0-9a-zA-Z]*$",
                         "title": "Name and hex encoded init value of a pattern output"
                       }
+                      ,"Replay": { "$ref": "#/definitions/Replay"}
                     }
                   }
                 },
@@ -647,6 +680,7 @@
                         "type" : "array",
                         "title": "Names of trace sinks"
                       }
+                      ,"Replay": { "$ref": "#/definitions/Replay"}
                     }
                   }
                 },
@@ -664,6 +698,7 @@
                         "type" : "array",
                         "title": "Names of trace sinks"
                       }
+                      ,"Replay": { "$ref": "#/definitions/Replay"}
                     }
                   }
                 },
@@ -681,6 +716,7 @@
                         "type" : "array",
                         "title": "Names of trace sinks"
                       }
+                      ,"Replay": { "$ref": "#/definitions/Replay"}
                     }
                   }
                 },
@@ -698,6 +734,7 @@
                         "type" : "array",
                         "title": "Names of trace sinks"
                       }
+                      ,"Replay": { "$ref": "#/definitions/Replay"}
                     }
                   }
                 },
@@ -729,6 +766,7 @@
                         "type" : "array",
                         "title": "Names of trace sinks"
                       }
+                      ,"Replay": { "$ref": "#/definitions/Replay"}
                     },
                     "additionalProperties": false,
                     "required": [ "Name" ]
@@ -749,6 +787,7 @@
                         "type" : "array",
                         "title": "Names of trace sinks"
                       }
+                      ,"Replay": { "$ref": "#/definitions/Replay"}
                     }
                   }
                 },
@@ -778,6 +817,35 @@
                       "OutputPath": {
                         "type": "string",
                         "title": "File path of output file"
+                      },
+                      "Type": {
+                        "type": "string",
+                        "enum": [
+                          "PcapFile",
+                          "PcapPipe",
+                          "Mdf4File"
+                        ],
+                        "title": "File format specifier"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "TraceSources": {
+                  "type" : "array",
+                  "items" : {
+                    "type":  "object",
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Name of the Trace Source",
+                        "examples": [
+                          "SomeTraceSource"
+                        ]
+                      },
+                      "InputPath": {
+                        "type": "string",
+                        "title": "File path of input file"
                       },
                       "Type": {
                         "type": "string",
@@ -895,6 +963,7 @@
                     "type": "string"
                   }
                 }
+                ,"Replay": { "$ref": "#/definitions/Replay"}
               },
               "additionalProperties": false
             }
@@ -1002,52 +1071,15 @@
                 "type": "object",
                 "title": "The registry used for the VAsio middleware.",
                 "properties": {
-                  "Hostname": {
-                    "type": "string",
-                    "default": "localhost"
-                  },
-                  "Port": {
-                    "type": "integer",
-                    "default": "8500"
-                  },
-                  "Logger" : {
-                    "type": "object",
-                    "properties": {
-                      "LogFromRemotes": {
-                        "type": "boolean",
-                        "title": "Enables receiving of remote log messages from other participants"
-                      },
-                      "FlushLevel": {
+                    "Hostname": {
                         "type": "string",
-                        "enum": [ "Critical", "Error", "Warn", "Info", "Debug", "Trace", "Off"]
-                      },
-                      "Sinks": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "Type": {
-                              "type": "string",
-                              "enum": [ "Remote", "File", "Stdout"]
-                            },
-                            "Level": {
-                              "type": "string",
-                              "enum": [ "Critical", "Error", "Warn", "Info", "Debug", "Trace", "Off"],
-                              "default": "Info"
-                            },
-                            "Logname": {
-                              "type": "string",
-                              "title": "Logname of a file logger. The logname results in the following filename: <Logname>_%y-%m-%dT%h-%m-%s.txt"
-                            }
-                          },
-                          "additionalProperties": false,
-                          "required": [ "Type" ]
-                        }
-                      }
+                        "default": "localhost"
                     },
-                    "additionalProperties": false,
-                    "required": [ "Sinks" ]
-                  }
+                    "Port": {
+                        "type": "integer",
+                        "default": "8500"
+                    },
+                    "Logger" : { "$ref": "#/definitions/Logger" }
                 },
                 "additionalProperties": false
               }
