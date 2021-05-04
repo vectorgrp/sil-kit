@@ -348,7 +348,7 @@ template <class MsgT, class ConfigT>
 auto ComAdapter<IbConnectionT>::CreateInPort(const ConfigT& config) -> io::IInPort<MsgT>*
 {
     if (config.direction != cfg::PortDirection::In)
-        throw std::runtime_error("Invalid port direction!");
+        throw cfg::Misconfiguration("Invalid port direction!");
 
     if (ControllerUsesReplay(config))
     {
@@ -365,7 +365,7 @@ template <class MsgT, class ConfigT>
 auto ComAdapter<IbConnectionT>::CreateOutPort(const ConfigT& config) -> io::IOutPort<MsgT>*
 {
     if (config.direction != cfg::PortDirection::Out)
-        throw std::runtime_error("Invalid port direction!");
+        throw cfg::Misconfiguration("Invalid port direction!");
 
     if (ControllerUsesReplay(config))
     {
@@ -415,7 +415,7 @@ auto ComAdapter<IbConnectionT>::GetSyncMaster() -> sync::ISyncMaster*
     if (!_participant.isSyncMaster)
     {
         _logger->Error("ComAdapter::GetSyncMaster(): Participant is not configured as SyncMaster!");
-        throw std::runtime_error("Participant not configured as SyncMaster");
+        throw cfg::Misconfiguration("Participant not configured as SyncMaster");
     }
 
     auto* controller = GetController<sync::SyncMaster>(1027);
@@ -858,7 +858,7 @@ void ComAdapter<IbConnectionT>::AddTraceSinksToSource(extensions::ITraceMessageS
                 << sinkName;
 
             GetLogger()->Error(ss.str());
-            throw std::runtime_error(ss.str());
+            throw cfg::Misconfiguration(ss.str());
         }
         traceSource->AddSink((*sinkIter).get());
     }
