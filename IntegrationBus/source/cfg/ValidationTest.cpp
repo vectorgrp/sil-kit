@@ -148,4 +148,42 @@ TEST(TestMwCfgValidation, throw_if_replay_refers_to_unknown_source_name)
     EXPECT_THROW(Validate(ibConfig.simulationSetup, ibConfig), Misconfiguration);
 }
 
+TEST(TestMwCfgValidation, throw_if_tracesink_has_empty_fields)
+{
+    TraceSource source;
+    source.name = "Source1";
+    source.enabled = true;
+    source.type = TraceSource::Type::Undefined;
+    source.inputPath = "Foo";
+
+    TraceSink sink;
+    sink.name = "Sink1";
+    sink.outputPath = "Bar";
+    sink.type = TraceSink::Type::Undefined;
+
+    Participant participantConfig;
+    participantConfig.name = "P1";
+    participantConfig.traceSources.emplace_back(std::move(source));
+    participantConfig.traceSinks.emplace_back(std::move(sink));
+
+
+    auto& sourceRef = participantConfig.traceSources.at(0);
+
+    sourceRef.inputPath = "";
+    EXPECT_THROW(Validate(participantConfig, Config{}), Misconfiguration);
+
+    sourceRef.inputPath = "SomeFile";
+    sourceRef.name = "";
+    EXPECT_THROW(Validate(participantConfig, Config{}), Misconfiguration);
+
+    auto& sinkRef = participantConfig.traceSinks.at(0);
+
+    sinkRef.outputPath = "";
+    EXPECT_THROW(Validate(participantConfig, Config{}), Misconfiguration);
+
+    sinkRef.outputPath = "SomeFile";
+    sinkRef.name = "";
+    EXPECT_THROW(Validate(participantConfig, Config{}), Misconfiguration);
+}
+
 } // anonymous namespace

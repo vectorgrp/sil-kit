@@ -69,7 +69,11 @@ void ValidateTraceSinks(const Participant& participant)
     {
         if (sink.name.empty())
         {
-            throw ib::cfg::Misconfiguration{"TraceSink name must not be empty!"};
+            throw ib::cfg::Misconfiguration{"On Participant " + participant.name + ": TraceSink \"Name\" must not be empty!"};
+        }
+        if (sink.outputPath.empty())
+        {
+            throw ib::cfg::Misconfiguration{"On Participant " + participant.name + ": TraceSink \"OutputPath\" must not be empty!"};
         }
         sinkNames.insert(sink.name);
     }
@@ -126,8 +130,14 @@ void ValidateTraceSources(const Participant& participant)
     {
         if (source.name.empty())
         {
-            throw ib::cfg::Misconfiguration{"TraceSource name must not be empty!"};
+            throw ib::cfg::Misconfiguration{"On Participant " + participant.name +": TraceSource \"Name\" must not be empty!"};
         }
+
+        if (source.inputPath.empty())
+        {
+            throw ib::cfg::Misconfiguration{"On Participant "+ participant.name +": TraceSource \"InputPath\" must not be empty!"};
+        }
+
         auto ok = sourceNames.insert(source.name);
         if (!ok.second)
         {

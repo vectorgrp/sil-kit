@@ -91,17 +91,28 @@ PcapReader::PcapReader(PcapReader& other)
 
 void PcapReader::Reset()
 {
-    if (!_filePath.empty() && !_file.is_open())
+    if (_filePath.empty() && _stream == nullptr)
     {
-        _file.open(_filePath, std::ios::binary|std::ios::in);
-        _stream = &_file;
+        _log->Error("PcapReader::Reset(): no input file or stream pointer given!");
+        throw std::runtime_error("PcapReader::Reset(): no input file or stream pointer given!");
     }
 
-    if (!_filePath.empty() && !_file.good())
+    if (!_filePath.empty())
     {
-        _log->Error("Cannot open file " + _filePath);
-        throw std::runtime_error("Cannot open file " + _filePath);
+        if (!_file.is_open())
+        {
+            _file.open(_filePath, std::ios::binary | std::ios::in);
+            _stream = &_file;
+        }
+        if (!_file.good())
+        {
+            _log->Error("Cannot open file " + _filePath);
+            throw std::runtime_error("Cannot open file " + _filePath);
+        }
     }
+
+    assert(_stream != nullptr);
+
     //seek stream to first packet and cache first message
     ReadGlobalHeader();
     Seek(1);
