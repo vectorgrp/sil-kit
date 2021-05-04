@@ -57,7 +57,18 @@
                 "ParticipantController": {
                     "SyncType": "DiscreteTime"
                 },
-                "NetworkSimulators": [ "Ethernet-Simulator" ]
+                "NetworkSimulators": [
+                    {
+                        "Name": "Ethernet-Simulator",
+                        "SimulatedLinks": [
+                            "FS-Port0",
+                            "FS-Port1"
+                        ],
+                        "SimulatedSwitches": [
+                            "FrontSwitch"
+                        ]
+                    }
+                ]
             },
             {
                 "Name": "SystemController",
@@ -112,19 +123,6 @@
             {
                 "Name": "FS-Port1",
                 "Endpoints": [ "FrontSwitch/Port1", "EthernetReader/ETH0" ]
-            }
-        ],
-
-        "NetworkSimulators": [
-            {
-                "Name": "Ethernet-Simulator",
-                "SimulatedLinks": [
-                    "FS-Port0",
-                    "FS-Port1"
-                ],
-                "SimulatedSwitches": [
-                    "FrontSwitch"
-                ]
             }
         ],
 

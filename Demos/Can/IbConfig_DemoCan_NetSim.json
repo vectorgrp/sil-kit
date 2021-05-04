@@ -46,7 +46,14 @@
                 "ParticipantController": {
                     "SyncType": "DiscreteTime"
                 },
-                "NetworkSimulators": [ "CAN-Simulator" ]
+                "NetworkSimulators": [
+                    {
+                        "Name": "CAN-Simulator",
+                        "SimulatedLinks": [
+                            "CAN1"
+                        ]
+                    }
+                ]
             },
             {
                 "Name": "SystemController",
@@ -84,14 +91,6 @@
             }
         ],
 
-        "NetworkSimulators": [
-            {
-                "Name": "CAN-Simulator",
-                "SimulatedLinks": [
-                    "CAN1"
-                ]
-            }
-        ],
         
         "TimeSync": {
             "TickPeriodNs": 1000000

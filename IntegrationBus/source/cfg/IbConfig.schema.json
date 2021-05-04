@@ -11,6 +11,11 @@
             "title": "User readable description for easier recognition and comments.",
             "default": ""
         }
+
+        , "UseTraceSinks": {
+            "type" : "array",
+            "title": "Names of trace sinks"
+        }
         , "Replay": {
             "type" : "object",
             "properties": {
@@ -73,6 +78,30 @@
             }
             , "additionalProperties": false
             , "required": [ "Sinks" ]
+        }
+        ,"NetworkSimulator" : {
+            "type": "object",
+            "properties": {
+                "Name": {
+                    "type": "string",
+                    "title": "Name of the Network Simulator Instance"
+                },
+                "SimulatedLinks": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "SimulatedSwitches": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+                ,"Replay": { "$ref": "#/definitions/Replay"}
+                ,"UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" }
+            },
+            "additionalProperties": false
         }
     },
     
@@ -793,14 +822,21 @@
                 },
 
                 "NetworkSimulators": {
-                    "type": "array",
-                    "items":{
-                      "type": "string",
-                      "title": "Names of the network simulators located at this participant"
-                    }
+                  "type": "array",
+                  "items":{
+                    "anyOf": [
+                      {
+                        "$ref" : "#/definitions/NetworkSimulator"
+                      },
+                      {
+                        "type" : "string"
+                      }
+                    ],
+                    "title": "Names of the network simulators (deprecated) or network simulator definitions located at this participant"
+                  }
                 },
                 "IsSyncMaster": {
-                    "type": "boolean"
+                  "type": "boolean"
                 },
                 "TraceSinks": {
                   "type" : "array",
