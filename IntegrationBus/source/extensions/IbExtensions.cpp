@@ -212,6 +212,7 @@ auto LoadExtension(
         lib_handle = check_lib(path);
         if(lib_handle != nullptr)
         {
+            std::cout << "Loaded VIB Extension \"" << name << "\": " << path << std::endl; //XXX this should go to the logger
             break;
         }
     }
