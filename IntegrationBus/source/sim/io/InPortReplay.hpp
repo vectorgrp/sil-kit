@@ -67,9 +67,8 @@ public:
     void ReplayMessage(const extensions::IReplayMessage* replayMessage) override;
 
 private:
+    // ----------------------------------------
     //Private methods
-    void ReplayReceive(const extensions::IReplayMessage* replayMessage);
-
 private:
     // ----------------------------------------
     // private members
@@ -155,7 +154,8 @@ void InPortReplay<MsgT>::ReplayMessage(const extensions::IReplayMessage* replayM
     case extensions::Direction::Receive:
         if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
         {
-            ReplayReceive(replayMessage);
+            auto msg = dynamic_cast<const MsgT&>(*replayMessage);
+            _inPort.ReceiveMessage(msg);
         }
         break;
     case extensions::Direction::Send:
@@ -166,12 +166,6 @@ void InPortReplay<MsgT>::ReplayMessage(const extensions::IReplayMessage* replayM
     }
 }
 
-template<typename MsgT>
-void InPortReplay<MsgT>::ReplayReceive(const extensions::IReplayMessage* replayMessage)
-{
-    MsgT msg = dynamic_cast<const MsgT&>(*replayMessage);
-    _inPort.ReceiveIbMessage(replayMessage->EndpointAddress(), msg);
-}
 
 } // namespace io
 } // namespace sim

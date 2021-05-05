@@ -64,8 +64,12 @@ public:
     void RegisterHandler(MessageHandler handler) override;
     void RegisterHandler(ValueHandler handler) override;
 
-     // IIbToInPort
+    // IIbToInPort
+    //! \brief Accepts messages originating from IB communications.
     void ReceiveIbMessage(mw::EndpointAddress from, const MessageType& msg) override;
+
+    //! \brief Accepts any message, e.g. also from trace replays.
+    void ReceiveMessage(const MessageType& msg);
 
     //! \brief Setter and getter for the EndpointAddress associated with this controller
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
@@ -159,7 +163,12 @@ void InPort<MsgT>::ReceiveIbMessage(mw::EndpointAddress from, const MessageType&
 {
     if (from == _endpointAddr)
         return;
+    ReceiveMessage(msg);
+}
 
+template<typename MsgT>
+void InPort<MsgT>::ReceiveMessage(const MessageType& msg)
+{
     _tracer.Trace(extensions::Direction::Receive, _timeProvider->Now(), msg);
 
     _lastMessage = msg;
