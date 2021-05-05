@@ -459,6 +459,15 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
             try {
                 ReplayTask task{};
 
+                // Not all controllers might have active replaying -- we only know that at least one
+                // controller has replaying active.
+                if ((controllerConfig.replay.direction == cfg::Replay::Direction::Undefined)
+                    && controllerConfig.replay.useTraceSource.empty())
+                {
+                    _log->Debug("ReplayScheduler::ConfigureController: skipping controller {} because it has no active Replay!", controllerConfig.name);
+                    continue;
+                }
+
                 auto createController = std::bind(createMethod, _comAdapter, std::placeholders::_1);
                 auto* controller = createController(controllerConfig.name);
 
