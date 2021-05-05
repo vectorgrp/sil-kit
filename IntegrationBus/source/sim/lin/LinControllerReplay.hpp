@@ -83,6 +83,9 @@ private:
     std::vector<FrameStatusHandler> _frameStatusHandler; 
     std::vector<GoToSleepHandler> _goToSleepHandler;
     ControllerMode _mode{ControllerMode::Inactive};
+    // For tracing on a Master
+    extensions::Tracer _tracer;
+    mw::sync::ITimeProvider* _timeProvider{nullptr};
 };
 
 } // namespace lin

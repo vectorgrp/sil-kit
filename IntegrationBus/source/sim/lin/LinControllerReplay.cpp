@@ -29,6 +29,7 @@ LinControllerReplay::LinControllerReplay(mw::IComAdapter* comAdapter, cfg::LinCo
     : _replayConfig{config.replay}
     , _controller{comAdapter, timeProvider}
     , _comAdapter{comAdapter}
+    , _timeProvider{timeProvider}
 {
 }
 
@@ -194,7 +195,10 @@ auto LinControllerReplay::EndpointAddress() const -> const ::ib::mw::EndpointAdd
 // ITraceMessageSource
 void LinControllerReplay::AddSink(extensions::ITraceMessageSink* sink)
 {
+    // NB: Tracing in _controller is never reached as a Master, because we send with its endpoint address in ReplayMessage
     _controller.AddSink(sink);
+    // for active replaying we use our own tracer:
+    _tracer.AddSink(EndpointAddress(), *sink);
 }
 
 // IReplayDataProvider
@@ -218,6 +222,8 @@ void LinControllerReplay::ReplayMessage(const extensions::IReplayMessage* replay
     auto mode = (replayMessage->GetDirection() == extensions::Direction::Receive)
         ? FrameResponseMode::Rx
         : FrameResponseMode::TxUnconditional;
+
+    _tracer.Trace(replayMessage->GetDirection(), _timeProvider->Now(), frame);
 
     FrameResponse response;
     response.frame = frame;
