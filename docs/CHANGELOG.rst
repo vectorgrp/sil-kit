@@ -5,14 +5,34 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.3.10] - TBD
+[3.3.10-QA] - TBD
 --------------------------------
+
+This is a Quality Assured Release.
 
 Added
 ~~~~~
 - Added MdfChannel identification to replaying config.
   This allows replaying MDF4 trace files that do not originate from VIB
-  simulation runs.
+  simulation runs, cf. :ref:`sec:replay-foreign`.
+
+Fixed
+~~~~~
+- Allow tracing while replaying on I/O InPorts (VIB-159).
+- Allow tracing while replaying on GenericSubscribers (VIB-159).
+- Fix trivial FlexRay simulation. State transitions when a wakeup command was issued were not properly computed (VIB-154).
+- Ensure that only active replay controllers are configured.
+  This fixes a crash when multiple controllers were defined, but only one was active (VIB-160).
+- Allow tracing messages on a LIN master when replaying is active (VIB-158).
+- Fix null pointer derference in PcapReader when input file name was missing in configuration.
+  Also ensure that the config has non-empty input and output file paths (VIB-156).
+
+Changed
+~~~~~~~
+- Print acknowledgement on std::cout when an extension is loaded.
+- Throw IB exceptions instead of runtime_error where applicable.
+- Update the Demo configs to newer ``NetworkSimulator`` configuration scheme (VIB-156).
+- Updated JSON config schema to include ``TraceSource`` and ``Replay`` config blocks (VIB-156).
 
 
 Compatibility with 3.3.9
