@@ -25,6 +25,7 @@ add_library(IbExtensions STATIC
     #      for IDE:
     ${CMAKE_CURRENT_LIST_DIR}/../../include/ib/extensions/IIbRegistry.hpp
     ${CMAKE_CURRENT_LIST_DIR}/../../include/ib/extensions/CreateExtension.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../include/ib/extensions/ExtensionError.hpp
     IbExtensionImpl/IIbRegistry.hpp
 )
 

@@ -9,6 +9,7 @@
 #include <functional>
 
 #include "ib/cfg/Config.hpp"
+#include "ib/extensions/ExtensionError.hpp"
 
 #include "IIbExtension.hpp"
 
@@ -27,9 +28,6 @@
  * IbExtensionApi/ folder.
  */
 namespace ib { namespace extensions {
-
-//! \brief ExtensionError is thrown when an extension could not be loaded
-using ExtensionError = std::runtime_error;
 
 //! \brief Lookup paths to consider when loading dynamic, shared modules
 using ExtensionPathHints = std::vector<std::string>;
