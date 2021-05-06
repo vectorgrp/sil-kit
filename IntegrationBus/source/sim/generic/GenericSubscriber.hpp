@@ -41,7 +41,12 @@ public:
 
     auto Config() const -> const cfg::GenericPort& override;
 
+    //! \brief Accepts messages originating from IB communications.
     void ReceiveIbMessage(mw::EndpointAddress from, const GenericMessage& msg) override;
+
+    //! \brief Accepts any message, e.g. also from trace replays.
+    void ReceiveMessage(const GenericMessage& msg);
+
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 

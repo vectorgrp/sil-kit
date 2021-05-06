@@ -48,7 +48,11 @@ void GenericSubscriber::ReceiveIbMessage(mw::EndpointAddress from, const Generic
 {
     if (from == _endpointAddr)
         return;
+    ReceiveMessage(msg);
+}
 
+void GenericSubscriber::ReceiveMessage( const GenericMessage& msg)
+{
     _tracer.Trace(extensions::Direction::Receive,
         _timeProvider->Now(),
         msg);
@@ -56,6 +60,7 @@ void GenericSubscriber::ReceiveIbMessage(mw::EndpointAddress from, const Generic
     if (_callback)
         _callback(this, msg.data);
 }
+
 
 void GenericSubscriber::SetTimeProvider(mw::sync::ITimeProvider* provider)
 {
