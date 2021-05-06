@@ -143,6 +143,8 @@ std::string to_string(ControllerStatus status)
         return "Operational";
     case ControllerStatus::Sleep:
         return "Sleep";
+    case ControllerStatus::SleepPending:
+        return "SleepPending";
     }
     throw ib::type_conversion_error{};
 };

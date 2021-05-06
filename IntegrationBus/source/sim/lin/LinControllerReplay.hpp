@@ -33,7 +33,7 @@ public:
     //
     // ILinController
     void Init(ControllerConfig config) override;
-    auto Status() const noexcept->ControllerStatus override;
+    auto Status() const noexcept -> ControllerStatus override;
 
     void SendFrame(Frame frame, FrameResponseType responseType) override;
     void SendFrame(Frame frame, FrameResponseType responseType, std::chrono::nanoseconds timestamp) override;

@@ -253,13 +253,19 @@ enum class ControllerStatus
 {
     //! The controller state is not yet known.
     Unknown = 0,
-    
+
     //! Normal operation
     Operational = 1,
 
     //! Sleep state operation; in this state wake-up detection from slave nodes
     //  is enabled.
-    Sleep = 2
+    Sleep = 2,
+
+    //! Sleep Pending state is reached when a GoToSleep is issued.
+    //  This allows the network simulator to finish pending transmissions (e.g., sleep frames to slaves)
+    //  before entering state Sleep, cf. AUTOSAR SWS LINDriver [SWS_LIN_00266] and section 7.3.3.
+    //  This is only used when using detailed simulations with VIBE-NetworkSimulator.
+    SleepPending = 3,
 };
 
 

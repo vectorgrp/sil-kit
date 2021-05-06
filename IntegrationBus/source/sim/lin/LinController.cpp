@@ -80,6 +80,7 @@ LinController::LinController(mw::IComAdapter* comAdapter, mw::sync::ITimeProvide
     : _comAdapter{comAdapter}
     , _logger{comAdapter->GetLogger()}
     , _timeProvider{timeProvider}
+    , _endpointAddr{}
 {
 }
 
@@ -210,8 +211,9 @@ void LinController::GoToSleep()
     gotosleepTx.frame = GoToSleepFrame();
     gotosleepTx.status = FrameStatus::LIN_RX_OK;
 
-    //TODO Trace TX  missing
     SendIbMessage(gotosleepTx);
+
+    // For trivial simulations we go directly to Sleep state.
     GoToSleepInternal();
 }
 

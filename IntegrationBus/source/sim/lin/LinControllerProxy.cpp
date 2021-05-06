@@ -32,6 +32,7 @@ void CallEach(CallbackRangeT& callbacks, const Args&... args)
 LinControllerProxy::LinControllerProxy(mw::IComAdapter* comAdapter)
     : _comAdapter{comAdapter}
     , _logger{comAdapter->GetLogger()}
+    , _endpointAddr{}
 {
 }
 
@@ -120,7 +121,13 @@ void LinControllerProxy::GoToSleep()
     gotosleepFrame.responseType = FrameResponseType::MasterResponse;
 
     SendIbMessage(gotosleepFrame);
-    GoToSleepInternal();
+   
+    // We signal SleepPending to the network simulator, so it will be able
+    // to finish sleep frame transmissions before entering Sleep state.
+    // cf. AUTOSAR SWS LIN Driver section 7.3.3 [SWS_Lin_00263]
+    SetControllerStatus(ControllerStatus::SleepPending);
+    // we don't expose the internal SleepPending state to users
+    _controllerStatus = ControllerStatus::Sleep;
 }
 
 void LinControllerProxy::GoToSleepInternal()

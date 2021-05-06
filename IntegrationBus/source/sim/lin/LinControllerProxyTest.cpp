@@ -221,7 +221,7 @@ TEST_F(LinControllerProxyTest, go_to_sleep)
 
     EXPECT_CALL(comAdapter, SendIbMessage(addr1_proxy, expectedMsg))
         .Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(addr1_proxy, AControllerStatusUpdateWith(ControllerStatus::Sleep)))
+    EXPECT_CALL(comAdapter, SendIbMessage(addr1_proxy, AControllerStatusUpdateWith(ControllerStatus::SleepPending)))
         .Times(1);
 
     proxy.GoToSleep();

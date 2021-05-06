@@ -213,7 +213,7 @@ public:
     void WakeupHandler(ILinController* controller)
     {
         if (controller->Status() != ControllerStatus::Sleep)
-            std::cout << "WARNING: Received Wakeup pulse in while ControllerStatus is " << controller->Status() << "." << std::endl;
+            std::cout << "WARNING: Received Wakeup pulse while ControllerStatus is " << controller->Status() << "." << std::endl;
 
         std::cout << ">> Wakeup pulse received" << std::endl;
         controller->WakeupInternal();
