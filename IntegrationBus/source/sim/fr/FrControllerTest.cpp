@@ -377,10 +377,13 @@ TEST_F(FrControllerTest, send_wus_b_on_wakeup)
 TEST_F(FrControllerTest, set_poc_wakeup_on_wakeup)
 {
     controller.RegisterControllerStatusHandler(bind_method(&callbacks, &Callbacks::ControllerStatusHandler));
-
     ControllerStatus expectedStatus;
     expectedStatus.pocState = PocState::Wakeup;
 
+    EXPECT_CALL(callbacks, ControllerStatusHandler(&controller, expectedStatus))
+        .Times(1);
+
+    expectedStatus.pocState = PocState::Ready;
     EXPECT_CALL(callbacks, ControllerStatusHandler(&controller, expectedStatus))
         .Times(1);
 
@@ -389,6 +392,10 @@ TEST_F(FrControllerTest, set_poc_wakeup_on_wakeup)
     PocStatus expectedPOC{};
     expectedPOC.state = PocState::Wakeup;
 
+    EXPECT_CALL(callbacks, PocStatusHandler(&controller, expectedPOC))
+        .Times(1);
+
+    expectedPOC.state = PocState::Ready;
     EXPECT_CALL(callbacks, PocStatusHandler(&controller, expectedPOC))
         .Times(1);
 

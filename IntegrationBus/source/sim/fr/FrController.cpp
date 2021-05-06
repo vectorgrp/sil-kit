@@ -150,14 +150,22 @@ void FrController::Wakeup()
     wus.channel = _nodeParams.pWakeupChannel;
     SendIbMessage(wus);
 
-    // tell the application that POC is in NORMAL_ACTIVE state, i.e., the FlexRay cycle is
-    // up and running
+    // tell the application that POC is in WAKEUP state, i.e., the FlexRay cycle is
+    // waking up and transitioning into READY
     ControllerStatus status;
     status.pocState = PocState::Wakeup;
     CallHandlers(status);
 
     PocStatus poc{};
     poc.state = PocState::Wakeup;
+    CallHandlers(poc);
+
+    // tell the application that POC is in READY state, i.e., the FlexRay cycle is
+    // waking up and transitioning into READY
+    status.pocState = PocState::Ready;
+    CallHandlers(status);
+
+    poc.state = PocState::Ready;
     CallHandlers(poc);
 }
 

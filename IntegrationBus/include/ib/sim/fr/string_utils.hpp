@@ -356,10 +356,17 @@ std::ostream& operator<<(std::ostream& out, const CycleStart& cycleStart)
 std::ostream& operator<<(std::ostream& out, const FrMessage& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
-    return out << "fr::FrMessage{"
+    out << "fr::FrMessage{"
         << "ch=" << msg.channel
         << ", " << msg.frame.header
-        << " @" << timestamp.count() << "ms}";
+        << " @" << timestamp.count() << "ms";
+    if (msg.frame.header.IsSet(Header::Flag::NFIndicator))
+    {
+        // if payload is valid, provide it as hex dump
+        out << ", payload="
+            << util::AsHexString(msg.frame.payload).WithSeparator(" ").WithMaxLength(msg.frame.header.payloadLength);
+    }
+    return out << "}";
 }
 
 std::ostream& operator<<(std::ostream& out, const FrMessageAck& msg)
