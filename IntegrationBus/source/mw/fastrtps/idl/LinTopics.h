@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*! 
+/*!
  * @file LinTopics.h
  * This header file contains the declaration of the described types in the IDL file.
  *
@@ -100,7 +100,7 @@ namespace ib
                     /*!
                      * @brief Default destructor.
                      */
-                    eProsima_user_DllExport ~Frame();
+                    eProsima_user_DllExport virtual ~Frame();
 
                     /*!
                      * @brief Copy constructor.
@@ -130,115 +130,76 @@ namespace ib
                      * @brief This function sets a value in member id
                      * @param _id New value for member id
                      */
-                    inline eProsima_user_DllExport void id(ib::sim::lin::idl::LinIdT _id)
-                    {
-                        m_id = _id;
-                    }
+                    eProsima_user_DllExport void id(ib::sim::lin::idl::LinIdT _id);
 
                     /*!
                      * @brief This function returns the value of member id
                      * @return Value of member id
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::LinIdT id() const
-                    {
-                        return m_id;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::LinIdT id() const;
 
                     /*!
                      * @brief This function returns a reference to member id
                      * @return Reference to member id
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::LinIdT& id()
-                    {
-                        return m_id;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::LinIdT& id();
                     /*!
                      * @brief This function sets a value in member checksumModel
                      * @param _checksumModel New value for member checksumModel
                      */
-                    inline eProsima_user_DllExport void checksumModel(ib::sim::lin::idl::ChecksumModel _checksumModel)
-                    {
-                        m_checksumModel = _checksumModel;
-                    }
+                    eProsima_user_DllExport void checksumModel(ib::sim::lin::idl::ChecksumModel _checksumModel);
 
                     /*!
                      * @brief This function returns the value of member checksumModel
                      * @return Value of member checksumModel
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::ChecksumModel checksumModel() const
-                    {
-                        return m_checksumModel;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::ChecksumModel checksumModel() const;
 
                     /*!
                      * @brief This function returns a reference to member checksumModel
                      * @return Reference to member checksumModel
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::ChecksumModel& checksumModel()
-                    {
-                        return m_checksumModel;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::ChecksumModel& checksumModel();
                     /*!
                      * @brief This function sets a value in member dataLength
                      * @param _dataLength New value for member dataLength
                      */
-                    inline eProsima_user_DllExport void dataLength(ib::sim::lin::idl::DataLengthT _dataLength)
-                    {
-                        m_dataLength = _dataLength;
-                    }
+                    eProsima_user_DllExport void dataLength(ib::sim::lin::idl::DataLengthT _dataLength);
 
                     /*!
                      * @brief This function returns the value of member dataLength
                      * @return Value of member dataLength
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::DataLengthT dataLength() const
-                    {
-                        return m_dataLength;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::DataLengthT dataLength() const;
 
                     /*!
                      * @brief This function returns a reference to member dataLength
                      * @return Reference to member dataLength
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::DataLengthT& dataLength()
-                    {
-                        return m_dataLength;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::DataLengthT& dataLength();
                     /*!
                      * @brief This function copies the value in member data
                      * @param _data New value to be copied in member data
                      */
-                    inline eProsima_user_DllExport void data(const std::array<uint8_t, 8> &_data)
-                    {
-                        m_data = _data;
-                    }
+                    eProsima_user_DllExport void data(const std::array<uint8_t, 8> &_data);
 
                     /*!
                      * @brief This function moves the value in member data
                      * @param _data New value to be moved in member data
                      */
-                    inline eProsima_user_DllExport void data(std::array<uint8_t, 8> &&_data)
-                    {
-                        m_data = std::move(_data);
-                    }
+                    eProsima_user_DllExport void data(std::array<uint8_t, 8> &&_data);
 
                     /*!
                      * @brief This function returns a constant reference to member data
                      * @return Constant reference to member data
                      */
-                    inline eProsima_user_DllExport const std::array<uint8_t, 8>& data() const
-                    {
-                        return m_data;
-                    }
+                    eProsima_user_DllExport const std::array<uint8_t, 8>& data() const;
 
                     /*!
                      * @brief This function returns a reference to member data
                      * @return Reference to member data
                      */
-                    inline eProsima_user_DllExport std::array<uint8_t, 8>& data()
-                    {
-                        return m_data;
-                    }
+                    eProsima_user_DllExport std::array<uint8_t, 8>& data();
 
                     /*!
                      * @brief This function returns the maximum serialized size of an object
@@ -348,7 +309,7 @@ namespace ib
                     /*!
                      * @brief Default destructor.
                      */
-                    eProsima_user_DllExport ~FrameResponse();
+                    eProsima_user_DllExport virtual ~FrameResponse();
 
                     /*!
                      * @brief Copy constructor.
@@ -378,63 +339,42 @@ namespace ib
                      * @brief This function copies the value in member frame
                      * @param _frame New value to be copied in member frame
                      */
-                    inline eProsima_user_DllExport void frame(const ib::sim::lin::idl::Frame &_frame)
-                    {
-                        m_frame = _frame;
-                    }
+                    eProsima_user_DllExport void frame(const ib::sim::lin::idl::Frame &_frame);
 
                     /*!
                      * @brief This function moves the value in member frame
                      * @param _frame New value to be moved in member frame
                      */
-                    inline eProsima_user_DllExport void frame(ib::sim::lin::idl::Frame &&_frame)
-                    {
-                        m_frame = std::move(_frame);
-                    }
+                    eProsima_user_DllExport void frame(ib::sim::lin::idl::Frame &&_frame);
 
                     /*!
                      * @brief This function returns a constant reference to member frame
                      * @return Constant reference to member frame
                      */
-                    inline eProsima_user_DllExport const ib::sim::lin::idl::Frame& frame() const
-                    {
-                        return m_frame;
-                    }
+                    eProsima_user_DllExport const ib::sim::lin::idl::Frame& frame() const;
 
                     /*!
                      * @brief This function returns a reference to member frame
                      * @return Reference to member frame
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::Frame& frame()
-                    {
-                        return m_frame;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::Frame& frame();
                     /*!
                      * @brief This function sets a value in member responseMode
                      * @param _responseMode New value for member responseMode
                      */
-                    inline eProsima_user_DllExport void responseMode(ib::sim::lin::idl::FrameResponseMode _responseMode)
-                    {
-                        m_responseMode = _responseMode;
-                    }
+                    eProsima_user_DllExport void responseMode(ib::sim::lin::idl::FrameResponseMode _responseMode);
 
                     /*!
                      * @brief This function returns the value of member responseMode
                      * @return Value of member responseMode
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::FrameResponseMode responseMode() const
-                    {
-                        return m_responseMode;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::FrameResponseMode responseMode() const;
 
                     /*!
                      * @brief This function returns a reference to member responseMode
                      * @return Reference to member responseMode
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::FrameResponseMode& responseMode()
-                    {
-                        return m_responseMode;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::FrameResponseMode& responseMode();
 
                     /*!
                      * @brief This function returns the maximum serialized size of an object
@@ -517,7 +457,7 @@ namespace ib
                     /*!
                      * @brief Default destructor.
                      */
-                    eProsima_user_DllExport ~ControllerConfig();
+                    eProsima_user_DllExport virtual ~ControllerConfig();
 
                     /*!
                      * @brief Copy constructor.
@@ -547,124 +487,82 @@ namespace ib
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
                      */
-                    inline eProsima_user_DllExport void senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
-                    {
-                        m_senderAddr = _senderAddr;
-                    }
+                    eProsima_user_DllExport void senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr);
 
                     /*!
                      * @brief This function moves the value in member senderAddr
                      * @param _senderAddr New value to be moved in member senderAddr
                      */
-                    inline eProsima_user_DllExport void senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
-                    {
-                        m_senderAddr = std::move(_senderAddr);
-                    }
+                    eProsima_user_DllExport void senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr);
 
                     /*!
                      * @brief This function returns a constant reference to member senderAddr
                      * @return Constant reference to member senderAddr
                      */
-                    inline eProsima_user_DllExport const ib::mw::idl::EndpointAddress& senderAddr() const
-                    {
-                        return m_senderAddr;
-                    }
+                    eProsima_user_DllExport const ib::mw::idl::EndpointAddress& senderAddr() const;
 
                     /*!
                      * @brief This function returns a reference to member senderAddr
                      * @return Reference to member senderAddr
                      */
-                    inline eProsima_user_DllExport ib::mw::idl::EndpointAddress& senderAddr()
-                    {
-                        return m_senderAddr;
-                    }
+                    eProsima_user_DllExport ib::mw::idl::EndpointAddress& senderAddr();
                     /*!
                      * @brief This function sets a value in member controllerMode
                      * @param _controllerMode New value for member controllerMode
                      */
-                    inline eProsima_user_DllExport void controllerMode(ib::sim::lin::idl::ControllerMode _controllerMode)
-                    {
-                        m_controllerMode = _controllerMode;
-                    }
+                    eProsima_user_DllExport void controllerMode(ib::sim::lin::idl::ControllerMode _controllerMode);
 
                     /*!
                      * @brief This function returns the value of member controllerMode
                      * @return Value of member controllerMode
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::ControllerMode controllerMode() const
-                    {
-                        return m_controllerMode;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::ControllerMode controllerMode() const;
 
                     /*!
                      * @brief This function returns a reference to member controllerMode
                      * @return Reference to member controllerMode
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::ControllerMode& controllerMode()
-                    {
-                        return m_controllerMode;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::ControllerMode& controllerMode();
                     /*!
                      * @brief This function sets a value in member baudRate
                      * @param _baudRate New value for member baudRate
                      */
-                    inline eProsima_user_DllExport void baudRate(ib::sim::lin::idl::BaudRateT _baudRate)
-                    {
-                        m_baudRate = _baudRate;
-                    }
+                    eProsima_user_DllExport void baudRate(ib::sim::lin::idl::BaudRateT _baudRate);
 
                     /*!
                      * @brief This function returns the value of member baudRate
                      * @return Value of member baudRate
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::BaudRateT baudRate() const
-                    {
-                        return m_baudRate;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::BaudRateT baudRate() const;
 
                     /*!
                      * @brief This function returns a reference to member baudRate
                      * @return Reference to member baudRate
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::BaudRateT& baudRate()
-                    {
-                        return m_baudRate;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::BaudRateT& baudRate();
                     /*!
                      * @brief This function copies the value in member frameResponses
                      * @param _frameResponses New value to be copied in member frameResponses
                      */
-                    inline eProsima_user_DllExport void frameResponses(const std::vector<ib::sim::lin::idl::FrameResponse> &_frameResponses)
-                    {
-                        m_frameResponses = _frameResponses;
-                    }
+                    eProsima_user_DllExport void frameResponses(const std::vector<ib::sim::lin::idl::FrameResponse> &_frameResponses);
 
                     /*!
                      * @brief This function moves the value in member frameResponses
                      * @param _frameResponses New value to be moved in member frameResponses
                      */
-                    inline eProsima_user_DllExport void frameResponses(std::vector<ib::sim::lin::idl::FrameResponse> &&_frameResponses)
-                    {
-                        m_frameResponses = std::move(_frameResponses);
-                    }
+                    eProsima_user_DllExport void frameResponses(std::vector<ib::sim::lin::idl::FrameResponse> &&_frameResponses);
 
                     /*!
                      * @brief This function returns a constant reference to member frameResponses
                      * @return Constant reference to member frameResponses
                      */
-                    inline eProsima_user_DllExport const std::vector<ib::sim::lin::idl::FrameResponse>& frameResponses() const
-                    {
-                        return m_frameResponses;
-                    }
+                    eProsima_user_DllExport const std::vector<ib::sim::lin::idl::FrameResponse>& frameResponses() const;
 
                     /*!
                      * @brief This function returns a reference to member frameResponses
                      * @return Reference to member frameResponses
                      */
-                    inline eProsima_user_DllExport std::vector<ib::sim::lin::idl::FrameResponse>& frameResponses()
-                    {
-                        return m_frameResponses;
-                    }
+                    eProsima_user_DllExport std::vector<ib::sim::lin::idl::FrameResponse>& frameResponses();
 
                     /*!
                      * @brief This function returns the maximum serialized size of an object
@@ -730,7 +628,8 @@ namespace ib
                 {
                     Unknown,
                     Operational,
-                    Sleep
+                    Sleep,
+                    SleepPending
                 };
                 /*!
                  * @brief This class represents the structure Transmission defined by the user in the IDL file.
@@ -748,7 +647,7 @@ namespace ib
                     /*!
                      * @brief Default destructor.
                      */
-                    eProsima_user_DllExport ~Transmission();
+                    eProsima_user_DllExport virtual ~Transmission();
 
                     /*!
                      * @brief Copy constructor.
@@ -778,124 +677,82 @@ namespace ib
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
                      */
-                    inline eProsima_user_DllExport void senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
-                    {
-                        m_senderAddr = _senderAddr;
-                    }
+                    eProsima_user_DllExport void senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr);
 
                     /*!
                      * @brief This function moves the value in member senderAddr
                      * @param _senderAddr New value to be moved in member senderAddr
                      */
-                    inline eProsima_user_DllExport void senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
-                    {
-                        m_senderAddr = std::move(_senderAddr);
-                    }
+                    eProsima_user_DllExport void senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr);
 
                     /*!
                      * @brief This function returns a constant reference to member senderAddr
                      * @return Constant reference to member senderAddr
                      */
-                    inline eProsima_user_DllExport const ib::mw::idl::EndpointAddress& senderAddr() const
-                    {
-                        return m_senderAddr;
-                    }
+                    eProsima_user_DllExport const ib::mw::idl::EndpointAddress& senderAddr() const;
 
                     /*!
                      * @brief This function returns a reference to member senderAddr
                      * @return Reference to member senderAddr
                      */
-                    inline eProsima_user_DllExport ib::mw::idl::EndpointAddress& senderAddr()
-                    {
-                        return m_senderAddr;
-                    }
+                    eProsima_user_DllExport ib::mw::idl::EndpointAddress& senderAddr();
                     /*!
                      * @brief This function sets a value in member timestampNs
                      * @param _timestampNs New value for member timestampNs
                      */
-                    inline eProsima_user_DllExport void timestampNs(int64_t _timestampNs)
-                    {
-                        m_timestampNs = _timestampNs;
-                    }
+                    eProsima_user_DllExport void timestampNs(int64_t _timestampNs);
 
                     /*!
                      * @brief This function returns the value of member timestampNs
                      * @return Value of member timestampNs
                      */
-                    inline eProsima_user_DllExport int64_t timestampNs() const
-                    {
-                        return m_timestampNs;
-                    }
+                    eProsima_user_DllExport int64_t timestampNs() const;
 
                     /*!
                      * @brief This function returns a reference to member timestampNs
                      * @return Reference to member timestampNs
                      */
-                    inline eProsima_user_DllExport int64_t& timestampNs()
-                    {
-                        return m_timestampNs;
-                    }
+                    eProsima_user_DllExport int64_t& timestampNs();
                     /*!
                      * @brief This function copies the value in member frame
                      * @param _frame New value to be copied in member frame
                      */
-                    inline eProsima_user_DllExport void frame(const ib::sim::lin::idl::Frame &_frame)
-                    {
-                        m_frame = _frame;
-                    }
+                    eProsima_user_DllExport void frame(const ib::sim::lin::idl::Frame &_frame);
 
                     /*!
                      * @brief This function moves the value in member frame
                      * @param _frame New value to be moved in member frame
                      */
-                    inline eProsima_user_DllExport void frame(ib::sim::lin::idl::Frame &&_frame)
-                    {
-                        m_frame = std::move(_frame);
-                    }
+                    eProsima_user_DllExport void frame(ib::sim::lin::idl::Frame &&_frame);
 
                     /*!
                      * @brief This function returns a constant reference to member frame
                      * @return Constant reference to member frame
                      */
-                    inline eProsima_user_DllExport const ib::sim::lin::idl::Frame& frame() const
-                    {
-                        return m_frame;
-                    }
+                    eProsima_user_DllExport const ib::sim::lin::idl::Frame& frame() const;
 
                     /*!
                      * @brief This function returns a reference to member frame
                      * @return Reference to member frame
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::Frame& frame()
-                    {
-                        return m_frame;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::Frame& frame();
                     /*!
                      * @brief This function sets a value in member status
                      * @param _status New value for member status
                      */
-                    inline eProsima_user_DllExport void status(ib::sim::lin::idl::FrameStatus _status)
-                    {
-                        m_status = _status;
-                    }
+                    eProsima_user_DllExport void status(ib::sim::lin::idl::FrameStatus _status);
 
                     /*!
                      * @brief This function returns the value of member status
                      * @return Value of member status
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::FrameStatus status() const
-                    {
-                        return m_status;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::FrameStatus status() const;
 
                     /*!
                      * @brief This function returns a reference to member status
                      * @return Reference to member status
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::FrameStatus& status()
-                    {
-                        return m_status;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::FrameStatus& status();
 
                     /*!
                      * @brief This function returns the maximum serialized size of an object
@@ -969,7 +826,7 @@ namespace ib
                     /*!
                      * @brief Default destructor.
                      */
-                    eProsima_user_DllExport ~SendFrameRequest();
+                    eProsima_user_DllExport virtual ~SendFrameRequest();
 
                     /*!
                      * @brief Copy constructor.
@@ -999,98 +856,65 @@ namespace ib
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
                      */
-                    inline eProsima_user_DllExport void senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
-                    {
-                        m_senderAddr = _senderAddr;
-                    }
+                    eProsima_user_DllExport void senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr);
 
                     /*!
                      * @brief This function moves the value in member senderAddr
                      * @param _senderAddr New value to be moved in member senderAddr
                      */
-                    inline eProsima_user_DllExport void senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
-                    {
-                        m_senderAddr = std::move(_senderAddr);
-                    }
+                    eProsima_user_DllExport void senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr);
 
                     /*!
                      * @brief This function returns a constant reference to member senderAddr
                      * @return Constant reference to member senderAddr
                      */
-                    inline eProsima_user_DllExport const ib::mw::idl::EndpointAddress& senderAddr() const
-                    {
-                        return m_senderAddr;
-                    }
+                    eProsima_user_DllExport const ib::mw::idl::EndpointAddress& senderAddr() const;
 
                     /*!
                      * @brief This function returns a reference to member senderAddr
                      * @return Reference to member senderAddr
                      */
-                    inline eProsima_user_DllExport ib::mw::idl::EndpointAddress& senderAddr()
-                    {
-                        return m_senderAddr;
-                    }
+                    eProsima_user_DllExport ib::mw::idl::EndpointAddress& senderAddr();
                     /*!
                      * @brief This function copies the value in member frame
                      * @param _frame New value to be copied in member frame
                      */
-                    inline eProsima_user_DllExport void frame(const ib::sim::lin::idl::Frame &_frame)
-                    {
-                        m_frame = _frame;
-                    }
+                    eProsima_user_DllExport void frame(const ib::sim::lin::idl::Frame &_frame);
 
                     /*!
                      * @brief This function moves the value in member frame
                      * @param _frame New value to be moved in member frame
                      */
-                    inline eProsima_user_DllExport void frame(ib::sim::lin::idl::Frame &&_frame)
-                    {
-                        m_frame = std::move(_frame);
-                    }
+                    eProsima_user_DllExport void frame(ib::sim::lin::idl::Frame &&_frame);
 
                     /*!
                      * @brief This function returns a constant reference to member frame
                      * @return Constant reference to member frame
                      */
-                    inline eProsima_user_DllExport const ib::sim::lin::idl::Frame& frame() const
-                    {
-                        return m_frame;
-                    }
+                    eProsima_user_DllExport const ib::sim::lin::idl::Frame& frame() const;
 
                     /*!
                      * @brief This function returns a reference to member frame
                      * @return Reference to member frame
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::Frame& frame()
-                    {
-                        return m_frame;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::Frame& frame();
                     /*!
                      * @brief This function sets a value in member responseType
                      * @param _responseType New value for member responseType
                      */
-                    inline eProsima_user_DllExport void responseType(ib::sim::lin::idl::FrameResponseType _responseType)
-                    {
-                        m_responseType = _responseType;
-                    }
+                    eProsima_user_DllExport void responseType(ib::sim::lin::idl::FrameResponseType _responseType);
 
                     /*!
                      * @brief This function returns the value of member responseType
                      * @return Value of member responseType
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::FrameResponseType responseType() const
-                    {
-                        return m_responseType;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::FrameResponseType responseType() const;
 
                     /*!
                      * @brief This function returns a reference to member responseType
                      * @return Reference to member responseType
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::FrameResponseType& responseType()
-                    {
-                        return m_responseType;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::FrameResponseType& responseType();
 
                     /*!
                      * @brief This function returns the maximum serialized size of an object
@@ -1163,7 +987,7 @@ namespace ib
                     /*!
                      * @brief Default destructor.
                      */
-                    eProsima_user_DllExport ~SendFrameHeaderRequest();
+                    eProsima_user_DllExport virtual ~SendFrameHeaderRequest();
 
                     /*!
                      * @brief Copy constructor.
@@ -1193,63 +1017,42 @@ namespace ib
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
                      */
-                    inline eProsima_user_DllExport void senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
-                    {
-                        m_senderAddr = _senderAddr;
-                    }
+                    eProsima_user_DllExport void senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr);
 
                     /*!
                      * @brief This function moves the value in member senderAddr
                      * @param _senderAddr New value to be moved in member senderAddr
                      */
-                    inline eProsima_user_DllExport void senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
-                    {
-                        m_senderAddr = std::move(_senderAddr);
-                    }
+                    eProsima_user_DllExport void senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr);
 
                     /*!
                      * @brief This function returns a constant reference to member senderAddr
                      * @return Constant reference to member senderAddr
                      */
-                    inline eProsima_user_DllExport const ib::mw::idl::EndpointAddress& senderAddr() const
-                    {
-                        return m_senderAddr;
-                    }
+                    eProsima_user_DllExport const ib::mw::idl::EndpointAddress& senderAddr() const;
 
                     /*!
                      * @brief This function returns a reference to member senderAddr
                      * @return Reference to member senderAddr
                      */
-                    inline eProsima_user_DllExport ib::mw::idl::EndpointAddress& senderAddr()
-                    {
-                        return m_senderAddr;
-                    }
+                    eProsima_user_DllExport ib::mw::idl::EndpointAddress& senderAddr();
                     /*!
                      * @brief This function sets a value in member id
                      * @param _id New value for member id
                      */
-                    inline eProsima_user_DllExport void id(ib::sim::lin::idl::LinIdT _id)
-                    {
-                        m_id = _id;
-                    }
+                    eProsima_user_DllExport void id(ib::sim::lin::idl::LinIdT _id);
 
                     /*!
                      * @brief This function returns the value of member id
                      * @return Value of member id
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::LinIdT id() const
-                    {
-                        return m_id;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::LinIdT id() const;
 
                     /*!
                      * @brief This function returns a reference to member id
                      * @return Reference to member id
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::LinIdT& id()
-                    {
-                        return m_id;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::LinIdT& id();
 
                     /*!
                      * @brief This function returns the maximum serialized size of an object
@@ -1321,7 +1124,7 @@ namespace ib
                     /*!
                      * @brief Default destructor.
                      */
-                    eProsima_user_DllExport ~FrameResponseUpdate();
+                    eProsima_user_DllExport virtual ~FrameResponseUpdate();
 
                     /*!
                      * @brief Copy constructor.
@@ -1351,72 +1154,48 @@ namespace ib
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
                      */
-                    inline eProsima_user_DllExport void senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
-                    {
-                        m_senderAddr = _senderAddr;
-                    }
+                    eProsima_user_DllExport void senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr);
 
                     /*!
                      * @brief This function moves the value in member senderAddr
                      * @param _senderAddr New value to be moved in member senderAddr
                      */
-                    inline eProsima_user_DllExport void senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
-                    {
-                        m_senderAddr = std::move(_senderAddr);
-                    }
+                    eProsima_user_DllExport void senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr);
 
                     /*!
                      * @brief This function returns a constant reference to member senderAddr
                      * @return Constant reference to member senderAddr
                      */
-                    inline eProsima_user_DllExport const ib::mw::idl::EndpointAddress& senderAddr() const
-                    {
-                        return m_senderAddr;
-                    }
+                    eProsima_user_DllExport const ib::mw::idl::EndpointAddress& senderAddr() const;
 
                     /*!
                      * @brief This function returns a reference to member senderAddr
                      * @return Reference to member senderAddr
                      */
-                    inline eProsima_user_DllExport ib::mw::idl::EndpointAddress& senderAddr()
-                    {
-                        return m_senderAddr;
-                    }
+                    eProsima_user_DllExport ib::mw::idl::EndpointAddress& senderAddr();
                     /*!
                      * @brief This function copies the value in member frameResponses
                      * @param _frameResponses New value to be copied in member frameResponses
                      */
-                    inline eProsima_user_DllExport void frameResponses(const std::vector<ib::sim::lin::idl::FrameResponse> &_frameResponses)
-                    {
-                        m_frameResponses = _frameResponses;
-                    }
+                    eProsima_user_DllExport void frameResponses(const std::vector<ib::sim::lin::idl::FrameResponse> &_frameResponses);
 
                     /*!
                      * @brief This function moves the value in member frameResponses
                      * @param _frameResponses New value to be moved in member frameResponses
                      */
-                    inline eProsima_user_DllExport void frameResponses(std::vector<ib::sim::lin::idl::FrameResponse> &&_frameResponses)
-                    {
-                        m_frameResponses = std::move(_frameResponses);
-                    }
+                    eProsima_user_DllExport void frameResponses(std::vector<ib::sim::lin::idl::FrameResponse> &&_frameResponses);
 
                     /*!
                      * @brief This function returns a constant reference to member frameResponses
                      * @return Constant reference to member frameResponses
                      */
-                    inline eProsima_user_DllExport const std::vector<ib::sim::lin::idl::FrameResponse>& frameResponses() const
-                    {
-                        return m_frameResponses;
-                    }
+                    eProsima_user_DllExport const std::vector<ib::sim::lin::idl::FrameResponse>& frameResponses() const;
 
                     /*!
                      * @brief This function returns a reference to member frameResponses
                      * @return Reference to member frameResponses
                      */
-                    inline eProsima_user_DllExport std::vector<ib::sim::lin::idl::FrameResponse>& frameResponses()
-                    {
-                        return m_frameResponses;
-                    }
+                    eProsima_user_DllExport std::vector<ib::sim::lin::idl::FrameResponse>& frameResponses();
 
                     /*!
                      * @brief This function returns the maximum serialized size of an object
@@ -1488,7 +1267,7 @@ namespace ib
                     /*!
                      * @brief Default destructor.
                      */
-                    eProsima_user_DllExport ~ControllerStatusUpdate();
+                    eProsima_user_DllExport virtual ~ControllerStatusUpdate();
 
                     /*!
                      * @brief Copy constructor.
@@ -1518,89 +1297,59 @@ namespace ib
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
                      */
-                    inline eProsima_user_DllExport void senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
-                    {
-                        m_senderAddr = _senderAddr;
-                    }
+                    eProsima_user_DllExport void senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr);
 
                     /*!
                      * @brief This function moves the value in member senderAddr
                      * @param _senderAddr New value to be moved in member senderAddr
                      */
-                    inline eProsima_user_DllExport void senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
-                    {
-                        m_senderAddr = std::move(_senderAddr);
-                    }
+                    eProsima_user_DllExport void senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr);
 
                     /*!
                      * @brief This function returns a constant reference to member senderAddr
                      * @return Constant reference to member senderAddr
                      */
-                    inline eProsima_user_DllExport const ib::mw::idl::EndpointAddress& senderAddr() const
-                    {
-                        return m_senderAddr;
-                    }
+                    eProsima_user_DllExport const ib::mw::idl::EndpointAddress& senderAddr() const;
 
                     /*!
                      * @brief This function returns a reference to member senderAddr
                      * @return Reference to member senderAddr
                      */
-                    inline eProsima_user_DllExport ib::mw::idl::EndpointAddress& senderAddr()
-                    {
-                        return m_senderAddr;
-                    }
+                    eProsima_user_DllExport ib::mw::idl::EndpointAddress& senderAddr();
                     /*!
                      * @brief This function sets a value in member timestampNs
                      * @param _timestampNs New value for member timestampNs
                      */
-                    inline eProsima_user_DllExport void timestampNs(int64_t _timestampNs)
-                    {
-                        m_timestampNs = _timestampNs;
-                    }
+                    eProsima_user_DllExport void timestampNs(int64_t _timestampNs);
 
                     /*!
                      * @brief This function returns the value of member timestampNs
                      * @return Value of member timestampNs
                      */
-                    inline eProsima_user_DllExport int64_t timestampNs() const
-                    {
-                        return m_timestampNs;
-                    }
+                    eProsima_user_DllExport int64_t timestampNs() const;
 
                     /*!
                      * @brief This function returns a reference to member timestampNs
                      * @return Reference to member timestampNs
                      */
-                    inline eProsima_user_DllExport int64_t& timestampNs()
-                    {
-                        return m_timestampNs;
-                    }
+                    eProsima_user_DllExport int64_t& timestampNs();
                     /*!
                      * @brief This function sets a value in member status
                      * @param _status New value for member status
                      */
-                    inline eProsima_user_DllExport void status(ib::sim::lin::idl::ControllerStatus _status)
-                    {
-                        m_status = _status;
-                    }
+                    eProsima_user_DllExport void status(ib::sim::lin::idl::ControllerStatus _status);
 
                     /*!
                      * @brief This function returns the value of member status
                      * @return Value of member status
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::ControllerStatus status() const
-                    {
-                        return m_status;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::ControllerStatus status() const;
 
                     /*!
                      * @brief This function returns a reference to member status
                      * @return Reference to member status
                      */
-                    inline eProsima_user_DllExport ib::sim::lin::idl::ControllerStatus& status()
-                    {
-                        return m_status;
-                    }
+                    eProsima_user_DllExport ib::sim::lin::idl::ControllerStatus& status();
 
                     /*!
                      * @brief This function returns the maximum serialized size of an object
@@ -1673,7 +1422,7 @@ namespace ib
                     /*!
                      * @brief Default destructor.
                      */
-                    eProsima_user_DllExport ~WakeupPulse();
+                    eProsima_user_DllExport virtual ~WakeupPulse();
 
                     /*!
                      * @brief Copy constructor.
@@ -1703,63 +1452,42 @@ namespace ib
                      * @brief This function copies the value in member senderAddr
                      * @param _senderAddr New value to be copied in member senderAddr
                      */
-                    inline eProsima_user_DllExport void senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
-                    {
-                        m_senderAddr = _senderAddr;
-                    }
+                    eProsima_user_DllExport void senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr);
 
                     /*!
                      * @brief This function moves the value in member senderAddr
                      * @param _senderAddr New value to be moved in member senderAddr
                      */
-                    inline eProsima_user_DllExport void senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
-                    {
-                        m_senderAddr = std::move(_senderAddr);
-                    }
+                    eProsima_user_DllExport void senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr);
 
                     /*!
                      * @brief This function returns a constant reference to member senderAddr
                      * @return Constant reference to member senderAddr
                      */
-                    inline eProsima_user_DllExport const ib::mw::idl::EndpointAddress& senderAddr() const
-                    {
-                        return m_senderAddr;
-                    }
+                    eProsima_user_DllExport const ib::mw::idl::EndpointAddress& senderAddr() const;
 
                     /*!
                      * @brief This function returns a reference to member senderAddr
                      * @return Reference to member senderAddr
                      */
-                    inline eProsima_user_DllExport ib::mw::idl::EndpointAddress& senderAddr()
-                    {
-                        return m_senderAddr;
-                    }
+                    eProsima_user_DllExport ib::mw::idl::EndpointAddress& senderAddr();
                     /*!
                      * @brief This function sets a value in member timestampNs
                      * @param _timestampNs New value for member timestampNs
                      */
-                    inline eProsima_user_DllExport void timestampNs(int64_t _timestampNs)
-                    {
-                        m_timestampNs = _timestampNs;
-                    }
+                    eProsima_user_DllExport void timestampNs(int64_t _timestampNs);
 
                     /*!
                      * @brief This function returns the value of member timestampNs
                      * @return Value of member timestampNs
                      */
-                    inline eProsima_user_DllExport int64_t timestampNs() const
-                    {
-                        return m_timestampNs;
-                    }
+                    eProsima_user_DllExport int64_t timestampNs() const;
 
                     /*!
                      * @brief This function returns a reference to member timestampNs
                      * @return Reference to member timestampNs
                      */
-                    inline eProsima_user_DllExport int64_t& timestampNs()
-                    {
-                        return m_timestampNs;
-                    }
+                    eProsima_user_DllExport int64_t& timestampNs();
 
                     /*!
                      * @brief This function returns the maximum serialized size of an object

@@ -53,7 +53,7 @@ module idl {
     
     struct FrameResponse
     {
-        Frame frame;
+        Frame _frame;
         FrameResponseMode responseMode;
     };
     
@@ -79,7 +79,8 @@ module idl {
     {
         Unknown,
         Operational,
-        Sleep
+        Sleep,
+        SleepPending
     };
 
     struct Transmission
@@ -87,7 +88,7 @@ module idl {
         @Key ib::mw::idl::EndpointAddress senderAddr;
         
         long long timestampNs;
-        Frame frame;
+        Frame _frame;
         FrameStatus status;
     };
 
@@ -95,7 +96,7 @@ module idl {
     {
         @Key ib::mw::idl::EndpointAddress senderAddr;
         
-        Frame frame;
+        Frame _frame;
         FrameResponseType responseType;
     };
 

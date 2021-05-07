@@ -296,6 +296,8 @@ auto to_idl(ControllerStatus msg) -> idl::ControllerStatus
         return idl::Operational;
     case ControllerStatus::Sleep:
         return idl::Sleep;
+    case ControllerStatus::SleepPending:
+        return idl::SleepPending;
     }
     throw std::runtime_error("conversion errror: Unknown lin::ControllerStatus");
 }
@@ -309,6 +311,8 @@ auto idl::from_idl(idl::ControllerStatus idl) -> lin::ControllerStatus
         return lin::ControllerStatus::Operational;
     case idl::Sleep:
         return lin::ControllerStatus::Sleep;
+    case idl::SleepPending:
+        return lin::ControllerStatus::SleepPending;
     }
     throw std::runtime_error("conversion errror: Unknown lin::ControllerStatus");
 }

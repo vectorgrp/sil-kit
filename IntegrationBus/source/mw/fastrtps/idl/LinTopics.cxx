@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*! 
+/*!
  * @file LinTopics.cpp
  * This source file contains the definition of the described types in the IDL file.
  *
@@ -38,17 +38,18 @@ using namespace eprosima::fastcdr::exception;
 ib::sim::lin::idl::Frame::Frame()
 {
     m_id = 0;
-
     m_checksumModel = ib::sim::lin::idl::Undefined;
-
     m_dataLength = 0;
-
     memset(&m_data, 0, (8) * 1);
 
 }
 
 ib::sim::lin::idl::Frame::~Frame()
 {
+
+
+
+
 }
 
 ib::sim::lin::idl::Frame::Frame(const Frame &x)
@@ -69,6 +70,7 @@ ib::sim::lin::idl::Frame::Frame(Frame &&x)
 
 ib::sim::lin::idl::Frame& ib::sim::lin::idl::Frame::operator=(const Frame &x)
 {
+
     m_id = x.m_id;
     m_checksumModel = x.m_checksumModel;
     m_dataLength = x.m_dataLength;
@@ -79,6 +81,7 @@ ib::sim::lin::idl::Frame& ib::sim::lin::idl::Frame::operator=(const Frame &x)
 
 ib::sim::lin::idl::Frame& ib::sim::lin::idl::Frame::operator=(Frame &&x)
 {
+
     m_id = x.m_id;
     m_checksumModel = x.m_checksumModel;
     m_dataLength = x.m_dataLength;
@@ -90,6 +93,7 @@ ib::sim::lin::idl::Frame& ib::sim::lin::idl::Frame::operator=(Frame &&x)
 size_t ib::sim::lin::idl::Frame::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
@@ -112,6 +116,7 @@ size_t ib::sim::lin::idl::Frame::getCdrSerializedSize(const ib::sim::lin::idl::F
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
 
@@ -129,6 +134,7 @@ size_t ib::sim::lin::idl::Frame::getCdrSerializedSize(const ib::sim::lin::idl::F
 
 void ib::sim::lin::idl::Frame::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_id;
     scdr << (uint32_t)m_checksumModel;
     scdr << m_dataLength;
@@ -137,20 +143,137 @@ void ib::sim::lin::idl::Frame::serialize(eprosima::fastcdr::Cdr &scdr) const
 
 void ib::sim::lin::idl::Frame::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_id;
     {
         uint32_t enum_value = 0;
         dcdr >> enum_value;
         m_checksumModel = (ib::sim::lin::idl::ChecksumModel)enum_value;
     }
+
     dcdr >> m_dataLength;
     dcdr >> m_data;
+}
+
+/*!
+ * @brief This function sets a value in member id
+ * @param _id New value for member id
+ */
+void ib::sim::lin::idl::Frame::id(ib::sim::lin::idl::LinIdT _id)
+{
+m_id = _id;
+}
+
+/*!
+ * @brief This function returns the value of member id
+ * @return Value of member id
+ */
+ib::sim::lin::idl::LinIdT ib::sim::lin::idl::Frame::id() const
+{
+    return m_id;
+}
+
+/*!
+ * @brief This function returns a reference to member id
+ * @return Reference to member id
+ */
+ib::sim::lin::idl::LinIdT& ib::sim::lin::idl::Frame::id()
+{
+    return m_id;
+}
+/*!
+ * @brief This function sets a value in member checksumModel
+ * @param _checksumModel New value for member checksumModel
+ */
+void ib::sim::lin::idl::Frame::checksumModel(ib::sim::lin::idl::ChecksumModel _checksumModel)
+{
+m_checksumModel = _checksumModel;
+}
+
+/*!
+ * @brief This function returns the value of member checksumModel
+ * @return Value of member checksumModel
+ */
+ib::sim::lin::idl::ChecksumModel ib::sim::lin::idl::Frame::checksumModel() const
+{
+    return m_checksumModel;
+}
+
+/*!
+ * @brief This function returns a reference to member checksumModel
+ * @return Reference to member checksumModel
+ */
+ib::sim::lin::idl::ChecksumModel& ib::sim::lin::idl::Frame::checksumModel()
+{
+    return m_checksumModel;
+}
+/*!
+ * @brief This function sets a value in member dataLength
+ * @param _dataLength New value for member dataLength
+ */
+void ib::sim::lin::idl::Frame::dataLength(ib::sim::lin::idl::DataLengthT _dataLength)
+{
+m_dataLength = _dataLength;
+}
+
+/*!
+ * @brief This function returns the value of member dataLength
+ * @return Value of member dataLength
+ */
+ib::sim::lin::idl::DataLengthT ib::sim::lin::idl::Frame::dataLength() const
+{
+    return m_dataLength;
+}
+
+/*!
+ * @brief This function returns a reference to member dataLength
+ * @return Reference to member dataLength
+ */
+ib::sim::lin::idl::DataLengthT& ib::sim::lin::idl::Frame::dataLength()
+{
+    return m_dataLength;
+}
+/*!
+ * @brief This function copies the value in member data
+ * @param _data New value to be copied in member data
+ */
+void ib::sim::lin::idl::Frame::data(const std::array<uint8_t, 8> &_data)
+{
+m_data = _data;
+}
+
+/*!
+ * @brief This function moves the value in member data
+ * @param _data New value to be moved in member data
+ */
+void ib::sim::lin::idl::Frame::data(std::array<uint8_t, 8> &&_data)
+{
+m_data = std::move(_data);
+}
+
+/*!
+ * @brief This function returns a constant reference to member data
+ * @return Constant reference to member data
+ */
+const std::array<uint8_t, 8>& ib::sim::lin::idl::Frame::data() const
+{
+    return m_data;
+}
+
+/*!
+ * @brief This function returns a reference to member data
+ * @return Reference to member data
+ */
+std::array<uint8_t, 8>& ib::sim::lin::idl::Frame::data()
+{
+    return m_data;
 }
 
 size_t ib::sim::lin::idl::Frame::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
 
 
 
@@ -161,7 +284,7 @@ size_t ib::sim::lin::idl::Frame::getKeyMaxCdrSerializedSize(size_t current_align
 
 bool ib::sim::lin::idl::Frame::isKeyDefined()
 {
-    return false;
+   return false;
 }
 
 void ib::sim::lin::idl::Frame::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -175,16 +298,18 @@ void ib::sim::lin::idl::Frame::serializeKey(eprosima::fastcdr::Cdr &scdr) const
 
 
 
+
 ib::sim::lin::idl::FrameResponse::FrameResponse()
 {
 
     m_responseMode = ib::sim::lin::idl::Unused;
 
-
 }
 
 ib::sim::lin::idl::FrameResponse::~FrameResponse()
 {
+
+
 }
 
 ib::sim::lin::idl::FrameResponse::FrameResponse(const FrameResponse &x)
@@ -201,6 +326,7 @@ ib::sim::lin::idl::FrameResponse::FrameResponse(FrameResponse &&x)
 
 ib::sim::lin::idl::FrameResponse& ib::sim::lin::idl::FrameResponse::operator=(const FrameResponse &x)
 {
+
     m_frame = x.m_frame;
     m_responseMode = x.m_responseMode;
 
@@ -209,6 +335,7 @@ ib::sim::lin::idl::FrameResponse& ib::sim::lin::idl::FrameResponse::operator=(co
 
 ib::sim::lin::idl::FrameResponse& ib::sim::lin::idl::FrameResponse::operator=(FrameResponse &&x)
 {
+
     m_frame = std::move(x.m_frame);
     m_responseMode = x.m_responseMode;
 
@@ -218,6 +345,7 @@ ib::sim::lin::idl::FrameResponse& ib::sim::lin::idl::FrameResponse::operator=(Fr
 size_t ib::sim::lin::idl::FrameResponse::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::sim::lin::idl::Frame::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
@@ -232,6 +360,7 @@ size_t ib::sim::lin::idl::FrameResponse::getCdrSerializedSize(const ib::sim::lin
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::sim::lin::idl::Frame::getCdrSerializedSize(data.frame(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
@@ -242,24 +371,90 @@ size_t ib::sim::lin::idl::FrameResponse::getCdrSerializedSize(const ib::sim::lin
 
 void ib::sim::lin::idl::FrameResponse::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_frame;
     scdr << (uint32_t)m_responseMode;
 }
 
 void ib::sim::lin::idl::FrameResponse::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_frame;
     {
         uint32_t enum_value = 0;
         dcdr >> enum_value;
         m_responseMode = (ib::sim::lin::idl::FrameResponseMode)enum_value;
     }
+
+}
+
+/*!
+ * @brief This function copies the value in member frame
+ * @param _frame New value to be copied in member frame
+ */
+void ib::sim::lin::idl::FrameResponse::frame(const ib::sim::lin::idl::Frame &_frame)
+{
+m_frame = _frame;
+}
+
+/*!
+ * @brief This function moves the value in member frame
+ * @param _frame New value to be moved in member frame
+ */
+void ib::sim::lin::idl::FrameResponse::frame(ib::sim::lin::idl::Frame &&_frame)
+{
+m_frame = std::move(_frame);
+}
+
+/*!
+ * @brief This function returns a constant reference to member frame
+ * @return Constant reference to member frame
+ */
+const ib::sim::lin::idl::Frame& ib::sim::lin::idl::FrameResponse::frame() const
+{
+    return m_frame;
+}
+
+/*!
+ * @brief This function returns a reference to member frame
+ * @return Reference to member frame
+ */
+ib::sim::lin::idl::Frame& ib::sim::lin::idl::FrameResponse::frame()
+{
+    return m_frame;
+}
+/*!
+ * @brief This function sets a value in member responseMode
+ * @param _responseMode New value for member responseMode
+ */
+void ib::sim::lin::idl::FrameResponse::responseMode(ib::sim::lin::idl::FrameResponseMode _responseMode)
+{
+m_responseMode = _responseMode;
+}
+
+/*!
+ * @brief This function returns the value of member responseMode
+ * @return Value of member responseMode
+ */
+ib::sim::lin::idl::FrameResponseMode ib::sim::lin::idl::FrameResponse::responseMode() const
+{
+    return m_responseMode;
+}
+
+/*!
+ * @brief This function returns a reference to member responseMode
+ * @return Reference to member responseMode
+ */
+ib::sim::lin::idl::FrameResponseMode& ib::sim::lin::idl::FrameResponse::responseMode()
+{
+    return m_responseMode;
 }
 
 size_t ib::sim::lin::idl::FrameResponse::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
 
 
 
@@ -268,7 +463,7 @@ size_t ib::sim::lin::idl::FrameResponse::getKeyMaxCdrSerializedSize(size_t curre
 
 bool ib::sim::lin::idl::FrameResponse::isKeyDefined()
 {
-    return false;
+   return false;
 }
 
 void ib::sim::lin::idl::FrameResponse::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -279,19 +474,22 @@ void ib::sim::lin::idl::FrameResponse::serializeKey(eprosima::fastcdr::Cdr &scdr
 }
 
 
+
 ib::sim::lin::idl::ControllerConfig::ControllerConfig()
 {
 
     m_controllerMode = ib::sim::lin::idl::Inactive;
-
     m_baudRate = 0;
-
 
 
 }
 
 ib::sim::lin::idl::ControllerConfig::~ControllerConfig()
 {
+
+
+
+
 }
 
 ib::sim::lin::idl::ControllerConfig::ControllerConfig(const ControllerConfig &x)
@@ -312,6 +510,7 @@ ib::sim::lin::idl::ControllerConfig::ControllerConfig(ControllerConfig &&x)
 
 ib::sim::lin::idl::ControllerConfig& ib::sim::lin::idl::ControllerConfig::operator=(const ControllerConfig &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_controllerMode = x.m_controllerMode;
     m_baudRate = x.m_baudRate;
@@ -322,6 +521,7 @@ ib::sim::lin::idl::ControllerConfig& ib::sim::lin::idl::ControllerConfig::operat
 
 ib::sim::lin::idl::ControllerConfig& ib::sim::lin::idl::ControllerConfig::operator=(ControllerConfig &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_controllerMode = x.m_controllerMode;
     m_baudRate = x.m_baudRate;
@@ -334,6 +534,7 @@ size_t ib::sim::lin::idl::ControllerConfig::getMaxCdrSerializedSize(size_t curre
 {
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
@@ -344,7 +545,7 @@ size_t ib::sim::lin::idl::ControllerConfig::getMaxCdrSerializedSize(size_t curre
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
-    for(size_t a = 0; a < 100; ++a)
+    for(size_t a = 0; a < 0; ++a)
     {
         current_alignment += ib::sim::lin::idl::FrameResponse::getMaxCdrSerializedSize(current_alignment);}
 
@@ -356,6 +557,7 @@ size_t ib::sim::lin::idl::ControllerConfig::getCdrSerializedSize(const ib::sim::
 {
     (void)data;
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
@@ -377,6 +579,7 @@ size_t ib::sim::lin::idl::ControllerConfig::getCdrSerializedSize(const ib::sim::
 
 void ib::sim::lin::idl::ControllerConfig::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << (uint32_t)m_controllerMode;
     scdr << m_baudRate;
@@ -385,20 +588,146 @@ void ib::sim::lin::idl::ControllerConfig::serialize(eprosima::fastcdr::Cdr &scdr
 
 void ib::sim::lin::idl::ControllerConfig::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     {
         uint32_t enum_value = 0;
         dcdr >> enum_value;
         m_controllerMode = (ib::sim::lin::idl::ControllerMode)enum_value;
     }
+
     dcdr >> m_baudRate;
     dcdr >> m_frameResponses;
+}
+
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::lin::idl::ControllerConfig::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::lin::idl::ControllerConfig::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::lin::idl::ControllerConfig::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::lin::idl::ControllerConfig::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member controllerMode
+ * @param _controllerMode New value for member controllerMode
+ */
+void ib::sim::lin::idl::ControllerConfig::controllerMode(ib::sim::lin::idl::ControllerMode _controllerMode)
+{
+m_controllerMode = _controllerMode;
+}
+
+/*!
+ * @brief This function returns the value of member controllerMode
+ * @return Value of member controllerMode
+ */
+ib::sim::lin::idl::ControllerMode ib::sim::lin::idl::ControllerConfig::controllerMode() const
+{
+    return m_controllerMode;
+}
+
+/*!
+ * @brief This function returns a reference to member controllerMode
+ * @return Reference to member controllerMode
+ */
+ib::sim::lin::idl::ControllerMode& ib::sim::lin::idl::ControllerConfig::controllerMode()
+{
+    return m_controllerMode;
+}
+/*!
+ * @brief This function sets a value in member baudRate
+ * @param _baudRate New value for member baudRate
+ */
+void ib::sim::lin::idl::ControllerConfig::baudRate(ib::sim::lin::idl::BaudRateT _baudRate)
+{
+m_baudRate = _baudRate;
+}
+
+/*!
+ * @brief This function returns the value of member baudRate
+ * @return Value of member baudRate
+ */
+ib::sim::lin::idl::BaudRateT ib::sim::lin::idl::ControllerConfig::baudRate() const
+{
+    return m_baudRate;
+}
+
+/*!
+ * @brief This function returns a reference to member baudRate
+ * @return Reference to member baudRate
+ */
+ib::sim::lin::idl::BaudRateT& ib::sim::lin::idl::ControllerConfig::baudRate()
+{
+    return m_baudRate;
+}
+/*!
+ * @brief This function copies the value in member frameResponses
+ * @param _frameResponses New value to be copied in member frameResponses
+ */
+void ib::sim::lin::idl::ControllerConfig::frameResponses(const std::vector<ib::sim::lin::idl::FrameResponse> &_frameResponses)
+{
+m_frameResponses = _frameResponses;
+}
+
+/*!
+ * @brief This function moves the value in member frameResponses
+ * @param _frameResponses New value to be moved in member frameResponses
+ */
+void ib::sim::lin::idl::ControllerConfig::frameResponses(std::vector<ib::sim::lin::idl::FrameResponse> &&_frameResponses)
+{
+m_frameResponses = std::move(_frameResponses);
+}
+
+/*!
+ * @brief This function returns a constant reference to member frameResponses
+ * @return Constant reference to member frameResponses
+ */
+const std::vector<ib::sim::lin::idl::FrameResponse>& ib::sim::lin::idl::ControllerConfig::frameResponses() const
+{
+    return m_frameResponses;
+}
+
+/*!
+ * @brief This function returns a reference to member frameResponses
+ * @return Reference to member frameResponses
+ */
+std::vector<ib::sim::lin::idl::FrameResponse>& ib::sim::lin::idl::ControllerConfig::frameResponses()
+{
+    return m_frameResponses;
 }
 
 size_t ib::sim::lin::idl::ControllerConfig::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -409,7 +738,7 @@ size_t ib::sim::lin::idl::ControllerConfig::getKeyMaxCdrSerializedSize(size_t cu
 
 bool ib::sim::lin::idl::ControllerConfig::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::lin::idl::ControllerConfig::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -421,19 +750,22 @@ void ib::sim::lin::idl::ControllerConfig::serializeKey(eprosima::fastcdr::Cdr &s
 	 
 }
 
+
 ib::sim::lin::idl::Transmission::Transmission()
 {
 
     m_timestampNs = 0;
 
-
     m_status = ib::sim::lin::idl::NOT_OK;
-
 
 }
 
 ib::sim::lin::idl::Transmission::~Transmission()
 {
+
+
+
+
 }
 
 ib::sim::lin::idl::Transmission::Transmission(const Transmission &x)
@@ -454,6 +786,7 @@ ib::sim::lin::idl::Transmission::Transmission(Transmission &&x)
 
 ib::sim::lin::idl::Transmission& ib::sim::lin::idl::Transmission::operator=(const Transmission &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_timestampNs = x.m_timestampNs;
     m_frame = x.m_frame;
@@ -464,6 +797,7 @@ ib::sim::lin::idl::Transmission& ib::sim::lin::idl::Transmission::operator=(cons
 
 ib::sim::lin::idl::Transmission& ib::sim::lin::idl::Transmission::operator=(Transmission &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_timestampNs = x.m_timestampNs;
     m_frame = std::move(x.m_frame);
@@ -475,6 +809,7 @@ ib::sim::lin::idl::Transmission& ib::sim::lin::idl::Transmission::operator=(Tran
 size_t ib::sim::lin::idl::Transmission::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
@@ -493,6 +828,7 @@ size_t ib::sim::lin::idl::Transmission::getCdrSerializedSize(const ib::sim::lin:
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
@@ -507,6 +843,7 @@ size_t ib::sim::lin::idl::Transmission::getCdrSerializedSize(const ib::sim::lin:
 
 void ib::sim::lin::idl::Transmission::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_timestampNs;
     scdr << m_frame;
@@ -515,6 +852,7 @@ void ib::sim::lin::idl::Transmission::serialize(eprosima::fastcdr::Cdr &scdr) co
 
 void ib::sim::lin::idl::Transmission::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_timestampNs;
     dcdr >> m_frame;
@@ -523,12 +861,137 @@ void ib::sim::lin::idl::Transmission::deserialize(eprosima::fastcdr::Cdr &dcdr)
         dcdr >> enum_value;
         m_status = (ib::sim::lin::idl::FrameStatus)enum_value;
     }
+
+}
+
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::lin::idl::Transmission::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::lin::idl::Transmission::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::lin::idl::Transmission::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::lin::idl::Transmission::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member timestampNs
+ * @param _timestampNs New value for member timestampNs
+ */
+void ib::sim::lin::idl::Transmission::timestampNs(int64_t _timestampNs)
+{
+m_timestampNs = _timestampNs;
+}
+
+/*!
+ * @brief This function returns the value of member timestampNs
+ * @return Value of member timestampNs
+ */
+int64_t ib::sim::lin::idl::Transmission::timestampNs() const
+{
+    return m_timestampNs;
+}
+
+/*!
+ * @brief This function returns a reference to member timestampNs
+ * @return Reference to member timestampNs
+ */
+int64_t& ib::sim::lin::idl::Transmission::timestampNs()
+{
+    return m_timestampNs;
+}
+/*!
+ * @brief This function copies the value in member frame
+ * @param _frame New value to be copied in member frame
+ */
+void ib::sim::lin::idl::Transmission::frame(const ib::sim::lin::idl::Frame &_frame)
+{
+m_frame = _frame;
+}
+
+/*!
+ * @brief This function moves the value in member frame
+ * @param _frame New value to be moved in member frame
+ */
+void ib::sim::lin::idl::Transmission::frame(ib::sim::lin::idl::Frame &&_frame)
+{
+m_frame = std::move(_frame);
+}
+
+/*!
+ * @brief This function returns a constant reference to member frame
+ * @return Constant reference to member frame
+ */
+const ib::sim::lin::idl::Frame& ib::sim::lin::idl::Transmission::frame() const
+{
+    return m_frame;
+}
+
+/*!
+ * @brief This function returns a reference to member frame
+ * @return Reference to member frame
+ */
+ib::sim::lin::idl::Frame& ib::sim::lin::idl::Transmission::frame()
+{
+    return m_frame;
+}
+/*!
+ * @brief This function sets a value in member status
+ * @param _status New value for member status
+ */
+void ib::sim::lin::idl::Transmission::status(ib::sim::lin::idl::FrameStatus _status)
+{
+m_status = _status;
+}
+
+/*!
+ * @brief This function returns the value of member status
+ * @return Value of member status
+ */
+ib::sim::lin::idl::FrameStatus ib::sim::lin::idl::Transmission::status() const
+{
+    return m_status;
+}
+
+/*!
+ * @brief This function returns a reference to member status
+ * @return Reference to member status
+ */
+ib::sim::lin::idl::FrameStatus& ib::sim::lin::idl::Transmission::status()
+{
+    return m_status;
 }
 
 size_t ib::sim::lin::idl::Transmission::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -539,7 +1002,7 @@ size_t ib::sim::lin::idl::Transmission::getKeyMaxCdrSerializedSize(size_t curren
 
 bool ib::sim::lin::idl::Transmission::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::lin::idl::Transmission::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -550,17 +1013,20 @@ void ib::sim::lin::idl::Transmission::serializeKey(eprosima::fastcdr::Cdr &scdr)
 	 
 	 
 }
+
 ib::sim::lin::idl::SendFrameRequest::SendFrameRequest()
 {
 
 
     m_responseType = ib::sim::lin::idl::MasterResponse;
 
-
 }
 
 ib::sim::lin::idl::SendFrameRequest::~SendFrameRequest()
 {
+
+
+
 }
 
 ib::sim::lin::idl::SendFrameRequest::SendFrameRequest(const SendFrameRequest &x)
@@ -579,6 +1045,7 @@ ib::sim::lin::idl::SendFrameRequest::SendFrameRequest(SendFrameRequest &&x)
 
 ib::sim::lin::idl::SendFrameRequest& ib::sim::lin::idl::SendFrameRequest::operator=(const SendFrameRequest &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_frame = x.m_frame;
     m_responseType = x.m_responseType;
@@ -588,6 +1055,7 @@ ib::sim::lin::idl::SendFrameRequest& ib::sim::lin::idl::SendFrameRequest::operat
 
 ib::sim::lin::idl::SendFrameRequest& ib::sim::lin::idl::SendFrameRequest::operator=(SendFrameRequest &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_frame = std::move(x.m_frame);
     m_responseType = x.m_responseType;
@@ -598,6 +1066,7 @@ ib::sim::lin::idl::SendFrameRequest& ib::sim::lin::idl::SendFrameRequest::operat
 size_t ib::sim::lin::idl::SendFrameRequest::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += ib::sim::lin::idl::Frame::getMaxCdrSerializedSize(current_alignment);
@@ -613,6 +1082,7 @@ size_t ib::sim::lin::idl::SendFrameRequest::getCdrSerializedSize(const ib::sim::
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += ib::sim::lin::idl::Frame::getCdrSerializedSize(data.frame(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
@@ -624,6 +1094,7 @@ size_t ib::sim::lin::idl::SendFrameRequest::getCdrSerializedSize(const ib::sim::
 
 void ib::sim::lin::idl::SendFrameRequest::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_frame;
     scdr << (uint32_t)m_responseType;
@@ -631,6 +1102,7 @@ void ib::sim::lin::idl::SendFrameRequest::serialize(eprosima::fastcdr::Cdr &scdr
 
 void ib::sim::lin::idl::SendFrameRequest::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_frame;
     {
@@ -638,12 +1110,111 @@ void ib::sim::lin::idl::SendFrameRequest::deserialize(eprosima::fastcdr::Cdr &dc
         dcdr >> enum_value;
         m_responseType = (ib::sim::lin::idl::FrameResponseType)enum_value;
     }
+
+}
+
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::lin::idl::SendFrameRequest::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::lin::idl::SendFrameRequest::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::lin::idl::SendFrameRequest::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::lin::idl::SendFrameRequest::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function copies the value in member frame
+ * @param _frame New value to be copied in member frame
+ */
+void ib::sim::lin::idl::SendFrameRequest::frame(const ib::sim::lin::idl::Frame &_frame)
+{
+m_frame = _frame;
+}
+
+/*!
+ * @brief This function moves the value in member frame
+ * @param _frame New value to be moved in member frame
+ */
+void ib::sim::lin::idl::SendFrameRequest::frame(ib::sim::lin::idl::Frame &&_frame)
+{
+m_frame = std::move(_frame);
+}
+
+/*!
+ * @brief This function returns a constant reference to member frame
+ * @return Constant reference to member frame
+ */
+const ib::sim::lin::idl::Frame& ib::sim::lin::idl::SendFrameRequest::frame() const
+{
+    return m_frame;
+}
+
+/*!
+ * @brief This function returns a reference to member frame
+ * @return Reference to member frame
+ */
+ib::sim::lin::idl::Frame& ib::sim::lin::idl::SendFrameRequest::frame()
+{
+    return m_frame;
+}
+/*!
+ * @brief This function sets a value in member responseType
+ * @param _responseType New value for member responseType
+ */
+void ib::sim::lin::idl::SendFrameRequest::responseType(ib::sim::lin::idl::FrameResponseType _responseType)
+{
+m_responseType = _responseType;
+}
+
+/*!
+ * @brief This function returns the value of member responseType
+ * @return Value of member responseType
+ */
+ib::sim::lin::idl::FrameResponseType ib::sim::lin::idl::SendFrameRequest::responseType() const
+{
+    return m_responseType;
+}
+
+/*!
+ * @brief This function returns a reference to member responseType
+ * @return Reference to member responseType
+ */
+ib::sim::lin::idl::FrameResponseType& ib::sim::lin::idl::SendFrameRequest::responseType()
+{
+    return m_responseType;
 }
 
 size_t ib::sim::lin::idl::SendFrameRequest::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -653,7 +1224,7 @@ size_t ib::sim::lin::idl::SendFrameRequest::getKeyMaxCdrSerializedSize(size_t cu
 
 bool ib::sim::lin::idl::SendFrameRequest::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::lin::idl::SendFrameRequest::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -663,16 +1234,18 @@ void ib::sim::lin::idl::SendFrameRequest::serializeKey(eprosima::fastcdr::Cdr &s
 	 
 	 
 }
+
 ib::sim::lin::idl::SendFrameHeaderRequest::SendFrameHeaderRequest()
 {
 
     m_id = 0;
 
-
 }
 
 ib::sim::lin::idl::SendFrameHeaderRequest::~SendFrameHeaderRequest()
 {
+
+
 }
 
 ib::sim::lin::idl::SendFrameHeaderRequest::SendFrameHeaderRequest(const SendFrameHeaderRequest &x)
@@ -689,6 +1262,7 @@ ib::sim::lin::idl::SendFrameHeaderRequest::SendFrameHeaderRequest(SendFrameHeade
 
 ib::sim::lin::idl::SendFrameHeaderRequest& ib::sim::lin::idl::SendFrameHeaderRequest::operator=(const SendFrameHeaderRequest &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_id = x.m_id;
 
@@ -697,6 +1271,7 @@ ib::sim::lin::idl::SendFrameHeaderRequest& ib::sim::lin::idl::SendFrameHeaderReq
 
 ib::sim::lin::idl::SendFrameHeaderRequest& ib::sim::lin::idl::SendFrameHeaderRequest::operator=(SendFrameHeaderRequest &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_id = x.m_id;
 
@@ -706,6 +1281,7 @@ ib::sim::lin::idl::SendFrameHeaderRequest& ib::sim::lin::idl::SendFrameHeaderReq
 size_t ib::sim::lin::idl::SendFrameHeaderRequest::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
@@ -720,6 +1296,7 @@ size_t ib::sim::lin::idl::SendFrameHeaderRequest::getCdrSerializedSize(const ib:
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 1 + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
@@ -730,20 +1307,85 @@ size_t ib::sim::lin::idl::SendFrameHeaderRequest::getCdrSerializedSize(const ib:
 
 void ib::sim::lin::idl::SendFrameHeaderRequest::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_id;
 }
 
 void ib::sim::lin::idl::SendFrameHeaderRequest::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_id;
+}
+
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::lin::idl::SendFrameHeaderRequest::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::lin::idl::SendFrameHeaderRequest::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::lin::idl::SendFrameHeaderRequest::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::lin::idl::SendFrameHeaderRequest::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member id
+ * @param _id New value for member id
+ */
+void ib::sim::lin::idl::SendFrameHeaderRequest::id(ib::sim::lin::idl::LinIdT _id)
+{
+m_id = _id;
+}
+
+/*!
+ * @brief This function returns the value of member id
+ * @return Value of member id
+ */
+ib::sim::lin::idl::LinIdT ib::sim::lin::idl::SendFrameHeaderRequest::id() const
+{
+    return m_id;
+}
+
+/*!
+ * @brief This function returns a reference to member id
+ * @return Reference to member id
+ */
+ib::sim::lin::idl::LinIdT& ib::sim::lin::idl::SendFrameHeaderRequest::id()
+{
+    return m_id;
 }
 
 size_t ib::sim::lin::idl::SendFrameHeaderRequest::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -752,7 +1394,7 @@ size_t ib::sim::lin::idl::SendFrameHeaderRequest::getKeyMaxCdrSerializedSize(siz
 
 bool ib::sim::lin::idl::SendFrameHeaderRequest::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::lin::idl::SendFrameHeaderRequest::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -761,6 +1403,7 @@ void ib::sim::lin::idl::SendFrameHeaderRequest::serializeKey(eprosima::fastcdr::
 	 scdr << m_senderAddr;  
 	 
 }
+
 ib::sim::lin::idl::FrameResponseUpdate::FrameResponseUpdate()
 {
 
@@ -770,6 +1413,8 @@ ib::sim::lin::idl::FrameResponseUpdate::FrameResponseUpdate()
 
 ib::sim::lin::idl::FrameResponseUpdate::~FrameResponseUpdate()
 {
+
+
 }
 
 ib::sim::lin::idl::FrameResponseUpdate::FrameResponseUpdate(const FrameResponseUpdate &x)
@@ -786,6 +1431,7 @@ ib::sim::lin::idl::FrameResponseUpdate::FrameResponseUpdate(FrameResponseUpdate 
 
 ib::sim::lin::idl::FrameResponseUpdate& ib::sim::lin::idl::FrameResponseUpdate::operator=(const FrameResponseUpdate &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_frameResponses = x.m_frameResponses;
 
@@ -794,6 +1440,7 @@ ib::sim::lin::idl::FrameResponseUpdate& ib::sim::lin::idl::FrameResponseUpdate::
 
 ib::sim::lin::idl::FrameResponseUpdate& ib::sim::lin::idl::FrameResponseUpdate::operator=(FrameResponseUpdate &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_frameResponses = std::move(x.m_frameResponses);
 
@@ -804,11 +1451,12 @@ size_t ib::sim::lin::idl::FrameResponseUpdate::getMaxCdrSerializedSize(size_t cu
 {
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
-    for(size_t a = 0; a < 100; ++a)
+    for(size_t a = 0; a < 0; ++a)
     {
         current_alignment += ib::sim::lin::idl::FrameResponse::getMaxCdrSerializedSize(current_alignment);}
 
@@ -820,6 +1468,7 @@ size_t ib::sim::lin::idl::FrameResponseUpdate::getCdrSerializedSize(const ib::si
 {
     (void)data;
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
@@ -835,20 +1484,94 @@ size_t ib::sim::lin::idl::FrameResponseUpdate::getCdrSerializedSize(const ib::si
 
 void ib::sim::lin::idl::FrameResponseUpdate::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_frameResponses;
 }
 
 void ib::sim::lin::idl::FrameResponseUpdate::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_frameResponses;
+}
+
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::lin::idl::FrameResponseUpdate::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::lin::idl::FrameResponseUpdate::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::lin::idl::FrameResponseUpdate::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::lin::idl::FrameResponseUpdate::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function copies the value in member frameResponses
+ * @param _frameResponses New value to be copied in member frameResponses
+ */
+void ib::sim::lin::idl::FrameResponseUpdate::frameResponses(const std::vector<ib::sim::lin::idl::FrameResponse> &_frameResponses)
+{
+m_frameResponses = _frameResponses;
+}
+
+/*!
+ * @brief This function moves the value in member frameResponses
+ * @param _frameResponses New value to be moved in member frameResponses
+ */
+void ib::sim::lin::idl::FrameResponseUpdate::frameResponses(std::vector<ib::sim::lin::idl::FrameResponse> &&_frameResponses)
+{
+m_frameResponses = std::move(_frameResponses);
+}
+
+/*!
+ * @brief This function returns a constant reference to member frameResponses
+ * @return Constant reference to member frameResponses
+ */
+const std::vector<ib::sim::lin::idl::FrameResponse>& ib::sim::lin::idl::FrameResponseUpdate::frameResponses() const
+{
+    return m_frameResponses;
+}
+
+/*!
+ * @brief This function returns a reference to member frameResponses
+ * @return Reference to member frameResponses
+ */
+std::vector<ib::sim::lin::idl::FrameResponse>& ib::sim::lin::idl::FrameResponseUpdate::frameResponses()
+{
+    return m_frameResponses;
 }
 
 size_t ib::sim::lin::idl::FrameResponseUpdate::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -857,7 +1580,7 @@ size_t ib::sim::lin::idl::FrameResponseUpdate::getKeyMaxCdrSerializedSize(size_t
 
 bool ib::sim::lin::idl::FrameResponseUpdate::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::lin::idl::FrameResponseUpdate::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -866,18 +1589,20 @@ void ib::sim::lin::idl::FrameResponseUpdate::serializeKey(eprosima::fastcdr::Cdr
 	 scdr << m_senderAddr;  
 	 
 }
+
 ib::sim::lin::idl::ControllerStatusUpdate::ControllerStatusUpdate()
 {
 
     m_timestampNs = 0;
-
     m_status = ib::sim::lin::idl::Unknown;
-
 
 }
 
 ib::sim::lin::idl::ControllerStatusUpdate::~ControllerStatusUpdate()
 {
+
+
+
 }
 
 ib::sim::lin::idl::ControllerStatusUpdate::ControllerStatusUpdate(const ControllerStatusUpdate &x)
@@ -896,6 +1621,7 @@ ib::sim::lin::idl::ControllerStatusUpdate::ControllerStatusUpdate(ControllerStat
 
 ib::sim::lin::idl::ControllerStatusUpdate& ib::sim::lin::idl::ControllerStatusUpdate::operator=(const ControllerStatusUpdate &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_timestampNs = x.m_timestampNs;
     m_status = x.m_status;
@@ -905,6 +1631,7 @@ ib::sim::lin::idl::ControllerStatusUpdate& ib::sim::lin::idl::ControllerStatusUp
 
 ib::sim::lin::idl::ControllerStatusUpdate& ib::sim::lin::idl::ControllerStatusUpdate::operator=(ControllerStatusUpdate &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_timestampNs = x.m_timestampNs;
     m_status = x.m_status;
@@ -915,6 +1642,7 @@ ib::sim::lin::idl::ControllerStatusUpdate& ib::sim::lin::idl::ControllerStatusUp
 size_t ib::sim::lin::idl::ControllerStatusUpdate::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
@@ -932,6 +1660,7 @@ size_t ib::sim::lin::idl::ControllerStatusUpdate::getCdrSerializedSize(const ib:
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
@@ -945,6 +1674,7 @@ size_t ib::sim::lin::idl::ControllerStatusUpdate::getCdrSerializedSize(const ib:
 
 void ib::sim::lin::idl::ControllerStatusUpdate::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_timestampNs;
     scdr << (uint32_t)m_status;
@@ -952,6 +1682,7 @@ void ib::sim::lin::idl::ControllerStatusUpdate::serialize(eprosima::fastcdr::Cdr
 
 void ib::sim::lin::idl::ControllerStatusUpdate::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_timestampNs;
     {
@@ -959,12 +1690,102 @@ void ib::sim::lin::idl::ControllerStatusUpdate::deserialize(eprosima::fastcdr::C
         dcdr >> enum_value;
         m_status = (ib::sim::lin::idl::ControllerStatus)enum_value;
     }
+
+}
+
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::lin::idl::ControllerStatusUpdate::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::lin::idl::ControllerStatusUpdate::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::lin::idl::ControllerStatusUpdate::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::lin::idl::ControllerStatusUpdate::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member timestampNs
+ * @param _timestampNs New value for member timestampNs
+ */
+void ib::sim::lin::idl::ControllerStatusUpdate::timestampNs(int64_t _timestampNs)
+{
+m_timestampNs = _timestampNs;
+}
+
+/*!
+ * @brief This function returns the value of member timestampNs
+ * @return Value of member timestampNs
+ */
+int64_t ib::sim::lin::idl::ControllerStatusUpdate::timestampNs() const
+{
+    return m_timestampNs;
+}
+
+/*!
+ * @brief This function returns a reference to member timestampNs
+ * @return Reference to member timestampNs
+ */
+int64_t& ib::sim::lin::idl::ControllerStatusUpdate::timestampNs()
+{
+    return m_timestampNs;
+}
+/*!
+ * @brief This function sets a value in member status
+ * @param _status New value for member status
+ */
+void ib::sim::lin::idl::ControllerStatusUpdate::status(ib::sim::lin::idl::ControllerStatus _status)
+{
+m_status = _status;
+}
+
+/*!
+ * @brief This function returns the value of member status
+ * @return Value of member status
+ */
+ib::sim::lin::idl::ControllerStatus ib::sim::lin::idl::ControllerStatusUpdate::status() const
+{
+    return m_status;
+}
+
+/*!
+ * @brief This function returns a reference to member status
+ * @return Reference to member status
+ */
+ib::sim::lin::idl::ControllerStatus& ib::sim::lin::idl::ControllerStatusUpdate::status()
+{
+    return m_status;
 }
 
 size_t ib::sim::lin::idl::ControllerStatusUpdate::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -974,7 +1795,7 @@ size_t ib::sim::lin::idl::ControllerStatusUpdate::getKeyMaxCdrSerializedSize(siz
 
 bool ib::sim::lin::idl::ControllerStatusUpdate::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::lin::idl::ControllerStatusUpdate::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -984,16 +1805,18 @@ void ib::sim::lin::idl::ControllerStatusUpdate::serializeKey(eprosima::fastcdr::
 	 
 	 
 }
+
 ib::sim::lin::idl::WakeupPulse::WakeupPulse()
 {
 
     m_timestampNs = 0;
 
-
 }
 
 ib::sim::lin::idl::WakeupPulse::~WakeupPulse()
 {
+
+
 }
 
 ib::sim::lin::idl::WakeupPulse::WakeupPulse(const WakeupPulse &x)
@@ -1010,6 +1833,7 @@ ib::sim::lin::idl::WakeupPulse::WakeupPulse(WakeupPulse &&x)
 
 ib::sim::lin::idl::WakeupPulse& ib::sim::lin::idl::WakeupPulse::operator=(const WakeupPulse &x)
 {
+
     m_senderAddr = x.m_senderAddr;
     m_timestampNs = x.m_timestampNs;
 
@@ -1018,6 +1842,7 @@ ib::sim::lin::idl::WakeupPulse& ib::sim::lin::idl::WakeupPulse::operator=(const 
 
 ib::sim::lin::idl::WakeupPulse& ib::sim::lin::idl::WakeupPulse::operator=(WakeupPulse &&x)
 {
+
     m_senderAddr = std::move(x.m_senderAddr);
     m_timestampNs = x.m_timestampNs;
 
@@ -1027,6 +1852,7 @@ ib::sim::lin::idl::WakeupPulse& ib::sim::lin::idl::WakeupPulse::operator=(Wakeup
 size_t ib::sim::lin::idl::WakeupPulse::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
+
 
     current_alignment += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
@@ -1041,6 +1867,7 @@ size_t ib::sim::lin::idl::WakeupPulse::getCdrSerializedSize(const ib::sim::lin::
     (void)data;
     size_t initial_alignment = current_alignment;
 
+
     current_alignment += ib::mw::idl::EndpointAddress::getCdrSerializedSize(data.senderAddr(), current_alignment);
     current_alignment += 8 + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
@@ -1051,20 +1878,85 @@ size_t ib::sim::lin::idl::WakeupPulse::getCdrSerializedSize(const ib::sim::lin::
 
 void ib::sim::lin::idl::WakeupPulse::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
+
     scdr << m_senderAddr;
     scdr << m_timestampNs;
 }
 
 void ib::sim::lin::idl::WakeupPulse::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
+
     dcdr >> m_senderAddr;
     dcdr >> m_timestampNs;
+}
+
+/*!
+ * @brief This function copies the value in member senderAddr
+ * @param _senderAddr New value to be copied in member senderAddr
+ */
+void ib::sim::lin::idl::WakeupPulse::senderAddr(const ib::mw::idl::EndpointAddress &_senderAddr)
+{
+m_senderAddr = _senderAddr;
+}
+
+/*!
+ * @brief This function moves the value in member senderAddr
+ * @param _senderAddr New value to be moved in member senderAddr
+ */
+void ib::sim::lin::idl::WakeupPulse::senderAddr(ib::mw::idl::EndpointAddress &&_senderAddr)
+{
+m_senderAddr = std::move(_senderAddr);
+}
+
+/*!
+ * @brief This function returns a constant reference to member senderAddr
+ * @return Constant reference to member senderAddr
+ */
+const ib::mw::idl::EndpointAddress& ib::sim::lin::idl::WakeupPulse::senderAddr() const
+{
+    return m_senderAddr;
+}
+
+/*!
+ * @brief This function returns a reference to member senderAddr
+ * @return Reference to member senderAddr
+ */
+ib::mw::idl::EndpointAddress& ib::sim::lin::idl::WakeupPulse::senderAddr()
+{
+    return m_senderAddr;
+}
+/*!
+ * @brief This function sets a value in member timestampNs
+ * @param _timestampNs New value for member timestampNs
+ */
+void ib::sim::lin::idl::WakeupPulse::timestampNs(int64_t _timestampNs)
+{
+m_timestampNs = _timestampNs;
+}
+
+/*!
+ * @brief This function returns the value of member timestampNs
+ * @return Value of member timestampNs
+ */
+int64_t ib::sim::lin::idl::WakeupPulse::timestampNs() const
+{
+    return m_timestampNs;
+}
+
+/*!
+ * @brief This function returns a reference to member timestampNs
+ * @return Reference to member timestampNs
+ */
+int64_t& ib::sim::lin::idl::WakeupPulse::timestampNs()
+{
+    return m_timestampNs;
 }
 
 size_t ib::sim::lin::idl::WakeupPulse::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
 	size_t current_align = current_alignment;
-            
+
+
      current_align += ib::mw::idl::EndpointAddress::getMaxCdrSerializedSize(current_align); 
 
 
@@ -1073,7 +1965,7 @@ size_t ib::sim::lin::idl::WakeupPulse::getKeyMaxCdrSerializedSize(size_t current
 
 bool ib::sim::lin::idl::WakeupPulse::isKeyDefined()
 {
-    return true;
+   return true;
 }
 
 void ib::sim::lin::idl::WakeupPulse::serializeKey(eprosima::fastcdr::Cdr &scdr) const
@@ -1082,6 +1974,7 @@ void ib::sim::lin::idl::WakeupPulse::serializeKey(eprosima::fastcdr::Cdr &scdr) 
 	 scdr << m_senderAddr;  
 	 
 }
+
 
 
 
