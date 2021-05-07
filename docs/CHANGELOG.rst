@@ -5,7 +5,7 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.3.10-QA] - TBD
+[3.3.10-QA] - 2021-05-10
 --------------------------------
 
 This is a Quality Assured Release.
@@ -26,7 +26,23 @@ Fixed
 - Allow tracing messages on a LIN master when replaying is active (VIB-158).
 - Fix null pointer derference in PcapReader when input file name was missing in configuration.
   Also ensure that the config has non-empty input and output file paths (VIB-156).
+- The Launcher will attempt to clean up the CANoe environment several times when shutting down.
+  This ensures a clean CANoe installation when CANoe is slow to shutdown, e.g. when launcher is interrupted
+  by a user (VIB-153).
+- Fix LIN Sleep frames when using the VIBE Network Simulator.
+  When the ``ILinController::GoToSleep()`` was invoked, a `sleep` frame was transmitted and
+  then the controller's internal state was set to `Sleeping`. This caused the Network Simulator
+  to abort the running sleep-frame transmission and an erroneous  LIN_RX_NO_RESPONSE frame was generated.
+  An additional `sleep pending` state is introduced which allows completion of pending transmissions before entering
+  the `sleep` state. (VIB-155)
 
+  .. admonition:: VIBE Network Simulator compatibility 
+
+     To ensure interoperability you should use VIBE Network Simulator v3.3.10
+     in all setups involving detailed LIN simulations.
+     See compatibility below for details.
+
+  
 Changed
 ~~~~~~~
 - Print acknowledgement on std::cout when an extension is loaded.
@@ -38,6 +54,10 @@ Changed
 Compatibility with 3.3.9
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Due to changes in the config API we are not ABI compatible.
+
+Please note that the detailed simulation of LIN requires a matching VIBE Network Simulator v3.3.10.
+The addition of a new internal state makes the current VIB release incompatible with older Network Simulators for the detailed LIN simulation.
+
 
 - Application binary interface (ABI): No (Due to Config)
 - Application software interface (API): Yes
