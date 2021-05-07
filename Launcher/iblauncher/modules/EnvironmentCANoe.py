@@ -181,6 +181,7 @@ class EnvironmentCANoe(Environment.Environment):
     def teardownEnvironment(self):
         """Teardown actions after simulation was halted, invoked once for this type of environment"""
 
+        # NB in case CANoe is slow to stop (seems normal as of CANoe v14), we attempt the cleanup multiple times
         canoeProjectFolderAbsolutePaths = set()
 
         for participantEnvironment in self.__participantEnvironments:
@@ -204,37 +205,36 @@ class EnvironmentCANoe(Environment.Environment):
             canoeProjectFolderAbsolutePaths.add(dirname(canoeProjectAbsolutePath))
 
         success=True
-        # Patch CANoe project with IntegrationBus NLDLL (may throw when locked)
-        for canoeProjectFolderAbsolutePath in canoeProjectFolderAbsolutePaths:
-            self.log("Cleaning CANoe project at '{}' from IntegrationBus node-layer DLLs:".format(canoeProjectFolderAbsolutePath))
+        maxAttempts=3
 
-            try:
-                what=join(canoeProjectFolderAbsolutePath, "IbIoToCanoeSysvarAdapter.dll")
-                os.remove(what)
-                self.log("  Removed '{}'".format(what)) 
-            except BaseException as e:
-                print("Error: Could not clean CANoe project, '{}'".format(str(e)))
-                success &= False
-            try:
-                what=join(canoeProjectFolderAbsolutePath,"IbRosToCanoeVcoAdapter.dll")
-                os.remove(what)
-                self.log("  Removed '{}'".format(what)) 
-            except BaseException as e:
-                print("WARNING: Could not clean CANoe project: ROS DLL could not be removed: '{}'".format(str(e)))
-                success &= False
+        def removeIfExists(filename):
+            """ retry to delete a file, as it might still be locked by a dying process """
+            for attempt in range(0, maxAttempts):
+                if not os.path.exists(filename):
+                    return True
+                try:
+                    os.remove(filename)
+                    self.log("EnvironmentCANoe.tearDown: removed '{}'".format(filename)) 
+                    return True
+                except BaseException as e:
+                    time.sleep(0.3) # let the process shutdown 
+            print("Error: EnvironmentCANoe tearDown: could not remove filename='{}' after {} attempts: '{}'".format(filename, attempt, str(e)))
+            return True
+
+        # Patch CANoe project with IntegrationBus NLDLL (may throw when locked)
+        filesToClean = ["IbIoToCanoeSysvarAdapter.dll", "IbRosToCanoeVcoAdapter.dll"]
+        self.log("Cleaning CANoe project at '{}' from IntegrationBus node-layer DLLs (max attempts: {}):".format(canoeProjectFolderAbsolutePaths, maxAttempts))
+        for canoeProjectFolderAbsolutePath in canoeProjectFolderAbsolutePaths:
+            for what in filesToClean:
+                success &= removeIfExists(join(canoeProjectFolderAbsolutePath, what))
 
         # Clean CANoe from IntegrationBus driver (may throw without admin rights)
+
         canoeExec32DirectoryPath = self.__getCanoeExec32DirectoryPath(self.__verbose)
         if not canoeExec32DirectoryPath:
             return False
-        integrationBusDriverPath = join(canoeExec32DirectoryPath, "vcndrvms.dll")
         self.log("Cleaning CANoe: removing IntegrationBus driver '{}':".format(canoeExec32DirectoryPath))
-        try:
-            os.remove(integrationBusDriverPath)
-            self.log("  Removed '{}'".format(integrationBusDriverPath))
-        except BaseException as e:
-            print("Error: Could not clean CANoe: removing integration bus driver failed: '{}'".format(str(e)))
-            success &= False
+        success &= removeIfExists(join(canoeExec32DirectoryPath, "vcndrvms.dll"))
 
         return success
 
