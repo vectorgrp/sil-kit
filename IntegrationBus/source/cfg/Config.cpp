@@ -9,6 +9,8 @@
 #include "tuple_tools/for_each.hpp"
 #include "ib/cfg/string_utils.hpp"
 
+#include "YamlConfig.hpp"
+
 namespace ib {
 namespace cfg {
 
@@ -261,6 +263,20 @@ void AdjustLegacyPcapConfig(Config& config)
             }
         }
     }
+}
+
+auto ReadWholeFile(const std::string& filename) -> std::string
+{
+    std::ifstream fs(filename);
+
+    if (!fs.is_open())
+        throw Misconfiguration("Invalid IB config filename '" + filename + "'");
+
+    std::stringstream buffer;
+    buffer << fs.rdbuf();
+
+    return buffer.str();
+
 }
 
 } // anonymous namespace
@@ -650,6 +666,27 @@ std::istream& from_istream(std::istream& in, std::array<uint8_t, 6>& macAddr)
 }
 
 
+auto Config::FromYamlString(const std::string& yamlString) -> Config
+{
+    // YAML-string -> YAML::doc -> JSON-string -> FromJsonString -> Config
+    auto jsonString = YamlToJson(yamlString);
+    return FromJsonString(jsonString);
+}
+
+auto Config::FromYamlFile(const std::string& yamlFilename) -> Config
+{
+    auto yamlString = ReadWholeFile(yamlFilename);
+    auto&& config = FromYamlString(yamlString);
+    config.configFilePath = yamlFilename;
+
+    return config;
+}
+
+auto Config::ToYamlString() -> std::string
+{
+    return JsonToYaml(ToJsonString());
+}
+
 auto Config::FromJsonString(const std::string& jsonString) -> Config
 {
     std::string errorString;
@@ -659,6 +696,17 @@ auto Config::FromJsonString(const std::string& jsonString) -> Config
     {
         std::cerr << "Error Parsing json: " << jsonString << "\n";
         throw Misconfiguration("IB config parsing error");
+    }
+
+    //Check that the JSON parses as YAML, so we get user reports
+    // and collect some experience with the new YAML parser.
+    try {
+        (void) JsonToYaml(jsonString);
+    }
+    catch (const std::exception& ex)
+    {
+        std::cerr << "Warn: Parsing input JSON as YAML returned an error: "
+            << ex.what() << std::endl;
     }
 
     auto config = from_json<Config>(json);
@@ -675,16 +723,8 @@ auto Config::FromJsonString(const std::string& jsonString) -> Config
 
 auto Config::FromJsonFile(const std::string& jsonFilename) -> Config
 {
-    std::ifstream jsonStream(jsonFilename);
-
-    if (!jsonStream.is_open())
-        throw Misconfiguration("Invalid IB config filename '" + jsonFilename + "'");
-
-    std::stringstream jsonBuffer;
-
-    jsonBuffer << jsonStream.rdbuf();
-
-    auto&& config = FromJsonString(jsonBuffer.str());
+    auto jsonString = ReadWholeFile(jsonFilename);
+    auto&& config = FromJsonString(jsonString);
     config.configFilePath = jsonFilename;
 
     return config;

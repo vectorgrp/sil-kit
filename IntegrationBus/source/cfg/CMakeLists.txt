@@ -11,6 +11,7 @@ foreach(_tgt IN LISTS yaml_targets)
 	set_property(TARGET ${_tgt} PROPERTY FOLDER "ThirdParty/yaml-cpp")
 endforeach()
 
+
 # Third Party JSON parsing
 add_library(json11
     ${THIRDPARTY_DIR}/json11/json11.hpp
@@ -69,12 +70,16 @@ add_library(IbConfig STATIC
     TraceSourceBuilder.cpp
     ReplayBuilder.hpp
     ReplayBuilder.cpp
+
+	YamlConfig.hpp
+	YamlConfig.cpp
 )
 
 target_link_libraries(IbConfig
     PRIVATE IbInterface
     PRIVATE IbUtil
     PRIVATE json11
+	PRIVATE yaml-cpp
 )
 
 target_include_directories(IbConfig

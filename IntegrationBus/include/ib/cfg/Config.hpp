@@ -498,6 +498,44 @@ struct Config
     * \return The JSON-formatted string
     */
     IntegrationBusAPI auto ToJsonString() -> std::string;
+
+    /*! \brief Parse configuration from a YAML file.
+    *
+    * Create a configuration data object from settings described by a
+    * YAML file.
+    *
+    * \param yamlFilename Path to the YAML file.
+    * \return The configuration data
+    *
+    * \throw ib::cfg::Misconfiguration The file could not be read, or
+    * the input string violates the YAML format, schema or an
+    * integrity rule.
+    */
+    IntegrationBusAPI static auto FromYamlFile(const std::string& yamlFilename) -> Config;
+
+
+    /*! \brief Parse configuration from a YAML string.
+    *
+    * Create a configuration data object from settings described by a
+    * YAML string.
+    *
+    * \param yamlString A string that adheres to our YAML schema.
+    * \return The configuration data
+    *
+    * \throw ib::cfg::Misconfiguration The input string violates the
+    * YAML format, schema or an integrity rule.
+    */
+
+    IntegrationBusAPI static auto FromYamlString(const std::string& yamlString) -> Config;
+
+    /*! \brief Convert this configuration into YAML.
+    *
+    * Create a YAML-formatted string representation from a
+    * configuration data object.
+    *
+    * \return The YAML-formatted string
+    */
+    IntegrationBusAPI auto ToYamlString() -> std::string;
 };
 
 class Misconfiguration : public std::runtime_error
