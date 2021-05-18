@@ -102,7 +102,12 @@ add_vib_test(TestIbConfigExample SOURCES IbConfigExampleTest.cpp
         IbConfig_FastRTPS-configfile.json
 )
 
+add_vib_test(TestMwCfgYamlConfig SOURCES YamlConfigTest.cpp LIBS IbConfig)
+
 ib_enable_warnings(IbConfig)
 ib_enable_warnings(TestMwCfgJsonConfig)
 ib_enable_warnings(TestMwCfgConfigBuilder)
 ib_enable_warnings(TestMwCfgValidation)
+ib_enable_warnings(TestMwCfgYamlConfig)
+
+
