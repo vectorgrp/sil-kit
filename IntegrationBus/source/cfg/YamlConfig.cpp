@@ -51,17 +51,24 @@ namespace {
                 }
                 else if (val.IsScalar())
                 {
+                    //XXX we should be able to query the scalar's type, instead of
+                    //    exception bombing our way to the truth.
                     try {
-                        out << val.as<int64_t>();
+                            out << val.as<double>();
                     }
                     catch (...)
                     {
                         try {
-                            out << (val.as<bool>() ? "true" : "false");
+                            out << val.as<int64_t>();
                         }
-                        catch (...)
-                        {
-                            out << "\"" << val.as<std::string>() << "\"";
+                        catch (...) { 
+                            try {
+                                out << (val.as<bool>() ? "true" : "false");
+                            }
+                            catch (...)
+                            {
+                                out << "\"" << val.as<std::string>() << "\"";
+                            }
                         }
                     }
                 }
@@ -82,6 +89,11 @@ namespace {
             out << "}\n";
         }
     }
+    //check that the documents internal structure is sane
+    void ValidateStructure(YAML::Node& node)
+    {
+        //TODO
+    }
 } //end anonymous namespace
 namespace ib {
 namespace cfg {
@@ -90,14 +102,10 @@ auto YamlToJson(const std::string& yamlString) -> std::string
 {
     auto doc = YAML::Load(yamlString);
     std::stringstream buffer;
+    ValidateStructure(doc);
     EmitValidJson(buffer, doc);
-    auto yamlAsJson = buffer.str();
-    //YAML::Emitter emitter;
-    //EmitValidJson(emitter, doc, true);//XXX not working
-    // this emitter produces valid JSON, but integers are escaped as strings!
-    //emitter << YAML::DoubleQuoted << YAML::Flow << doc;
-    //std::string yamlAsJson = emitter.c_str();
-    return yamlAsJson;
+    auto jsonString = buffer.str();
+    return jsonString;
 }
 
 auto JsonToYaml(const std::string& jsonString) -> std::string
