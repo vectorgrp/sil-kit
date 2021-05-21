@@ -698,32 +698,8 @@ auto Config::FromJsonString(const std::string& jsonString) -> Config
         throw Misconfiguration("IB config parsing error");
     }
 
-
     auto config = from_json<Config>(json);
     config.configFilePath.clear();
-
-    //Check that the JSON parses as YAML, so we get user reports
-    // and collect some experience with the new YAML parser.
-    try {
-        auto parsedYaml = YamlToJson(jsonString);
-        auto parsedJson = json11::Json::parse(parsedYaml, errorString);
-        if (parsedJson.is_null())
-        {
-            throw Misconfiguration("Error Parsing json as YAML: " + errorString);
-        }
-        //validate that we have the same config
-        auto yamlConfig = from_json<Config>(parsedJson);
-        if (!(yamlConfig == config))
-        {
-            throw std::runtime_error("the Config object parsed from YAML does not match the"
-                " one parsed from JSON");
-        }
-    }
-    catch (const std::exception& ex)
-    {
-        std::cerr << "Warn: Parsing input JSON as YAML returned an error: "
-            << ex.what() << std::endl;
-    }
 
     // Post-processing steps
     AssignEndpointAddresses(config);

@@ -37,8 +37,8 @@ struct YamlSchemaElem
     {
     }
     // A named element with sub-elements
-    YamlSchemaElem(const std::string& name, std::initializer_list<YamlSchemaElem> children)
-        : name(name)
+    YamlSchemaElem(const std::string& elementName, std::initializer_list<YamlSchemaElem> children)
+        : name(elementName)
         , subelements(std::move(children))
     {
     }

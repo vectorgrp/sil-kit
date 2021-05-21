@@ -99,7 +99,7 @@ void EmitValidJson(std::ostream& out, YAML::Node& node, YAML::NodeType::value pa
 using ib::cfg::YamlSchemaElem;
 
 //!< Create the VIB Yaml Schema.
-auto MakeYamlSchema() -> YamlSchemaElem
+static auto MakeYamlSchema() -> YamlSchemaElem
 {
     //NB: Keep these YamlSchemaElem in sync with IbConfig.schema.json.
     //    Currently the main reference for valid configuration files.
