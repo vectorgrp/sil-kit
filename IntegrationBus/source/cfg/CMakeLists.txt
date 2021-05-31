@@ -73,6 +73,10 @@ add_library(IbConfig STATIC
 
 	YamlConfig.hpp
 	YamlConfig.cpp
+	YamlSchema.hpp
+	YamlSchema.cpp
+	YamlValidator.hpp
+	YamlValidator.cpp
 )
 
 target_link_libraries(IbConfig

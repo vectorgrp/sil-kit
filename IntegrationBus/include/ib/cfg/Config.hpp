@@ -536,8 +536,6 @@ struct Config
     * \return The YAML-formatted string
     */
     IntegrationBusAPI auto ToYamlString() -> std::string;
-    //FromFile 1. FromJson, 2. FromYaml, 3. fehler
-    //FromString
 };
 
 class Misconfiguration : public std::runtime_error

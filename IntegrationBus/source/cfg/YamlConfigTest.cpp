@@ -1,5 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "YamlConfig.hpp"
+#include "YamlValidator.hpp"
 
 #include "ib/cfg/Config.hpp"
 
