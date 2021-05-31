@@ -39,40 +39,334 @@ TEST_F(YamlConfigTest, yaml_doc_relations)
 }
 TEST_F(YamlConfigTest, candemo_in_yaml_format)
 {
-    auto demoYaml= R"raw(
-ConfigName: CanDemo
+
+    //!< Yaml config which has almost complete list of config elements.
+    const auto demoYaml= R"raw(
+ConfigName: FlexRayDemoNetSim
 ConfigVersion: 0.0.1
-Description: Sample configuration for CAN without NetworkSimulator
+Description: Amalgamation of multiple Trace/Replay configs to test YAML Validation
+LaunchConfigurations:
+- Name: Installation
+  ParticipantEnvironments:
+  - Arguments: '%INTEGRATIONBUS_CONFIGFILE% Node0 %INTEGRATIONBUS_DOMAINID%'
+    Environment: CustomExecutable
+    Executable: '%INTEGRATIONBUS_BINPATH%IbDemoFlexray'
+    Participant: Node0
+    WorkingFolder: .
+  - Arguments: '%INTEGRATIONBUS_CONFIGFILE% Node1 %INTEGRATIONBUS_DOMAINID%'
+    Environment: CustomExecutable
+    Executable: '%INTEGRATIONBUS_BINPATH%IbDemoFlexray'
+    Participant: Node1
+    WorkingFolder: .
+  - Arguments: '%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%'
+    Environment: CustomExecutable
+    Executable: '%INTEGRATIONBUS_BINPATH%IbSystemMonitor'
+    Participant: SystemMonitor
+    WorkingFolder: .
+  - Arguments: '%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%'
+    Environment: CustomExecutable
+    Executable: '%INTEGRATIONBUS_BINPATH%IbSystemController'
+    Participant: SystemController
+    WorkingFolder: .
+MiddlewareConfig:
+  ActiveMiddleware: VAsio
+  VAsio:
+    Registry:
+      Hostname: localhost
+      Logger:
+        Sinks:
+        - Type: Remote
+      Port: 1337
 SimulationSetup:
   Links:
   - Endpoints:
-    - CanWriter/CAN1
-    - CanReader/CAN1
+    - Node0/FlexRay1
+    - Node1/FlexRay1
+    Name: FlexRay-Cluster-1
+  - Endpoints:
+    - Node0/CAN1
+    - Node1/CAN1
     Name: CAN1
+  - Endpoints:
+    - Node0/GroundTruth
+    - Node1/GroundTruth
+    Name: GroundTruth
+  - Endpoints:
+    - Node0/ETH0
+    - Node1/ETH0
+    Name: LAN1
+  - Endpoints:
+    - Node0/LIN1
+    - Node1/LIN1
+    Name: LIN1
+  - Endpoints:
+    - Node0/DIO
+    - Node1/DIO
+    Name: DIO
+  - Endpoints:
+    - Node0/AIO
+    - Node1/AIO
+    Name: AIO
+  - Endpoints:
+    - Node0/PWM
+    - Node1/PWM
+    Name: PWM
+  - Endpoints:
+    - Node0/PATTERN
+    - Node1/PATTERN
+    Name: PATTERN
   Participants:
-  - CanControllers:
-    # supports comments now
-    - Name: CAN1@CanWriter
+  - Analog-Out:
+    - Name: AIO
+      Replay:
+        Direction: Send
+        UseTraceSource: Source1
       UseTraceSinks:
       - Sink1
-    Description: Demo Writer
+      unit: V
+      value: 7.3
+    CanControllers:
+    - Name: CAN1
+      Replay:
+        Direction: Send
+        UseTraceSource: Source1
+      UseTraceSinks:
+      - Sink1
+    Digital-Out:
+    - Name: DIO
+      Replay:
+        Direction: Send
+        UseTraceSource: Source1
+      UseTraceSinks:
+      - Sink1
+      value: false
+    EthernetControllers:
+    - MacAddr: F6:04:68:71:AA:C2
+      Name: ETH0
+    FlexRayControllers:
+    - ClusterParameters:
+        gColdstartAttempts: 8
+        gCycleCountMax: 63
+        gListenNoise: 2
+        gMacroPerCycle: 3636
+        gMaxWithoutClockCorrectionFatal: 2
+        gMaxWithoutClockCorrectionPassive: 2
+        gNumberOfMiniSlots: 291
+        gNumberOfStaticSlots: 70
+        gPayloadLengthStatic: 16
+        gSyncFrameIDCountMax: 15
+        gdActionPointOffset: 2
+        gdDynamicSlotIdlePhase: 1
+        gdMiniSlot: 5
+        gdMiniSlotActionPointOffset: 2
+        gdStaticSlot: 31
+        gdSymbolWindow: 1
+        gdSymbolWindowActionPointOffset: 1
+        gdTSSTransmitter: 9
+        gdWakeupTxActive: 60
+        gdWakeupTxIdle: 180
+      Name: FlexRay1
+      NodeParameters:
+        pAllowHaltDueToClock: 1
+        pAllowPassiveToActive: 0
+        pChannels: AB
+        pClusterDriftDamping: 2
+        pKeySlotId: 10
+        pKeySlotOnlyEnabled: 0
+        pKeySlotUsedForStartup: 1
+        pKeySlotUsedForSync: 0
+        pLatestTx: 249
+        pMacroInitialOffsetA: 3
+        pMacroInitialOffsetB: 3
+        pMicroInitialOffsetA: 6
+        pMicroInitialOffsetB: 6
+        pMicroPerCycle: 200000
+        pOffsetCorrectionOut: 127
+        pOffsetCorrectionStart: 3632
+        pRateCorrectionOut: 81
+        pSamplesPerMicrotick: 2
+        pWakeupChannel: A
+        pWakeupPattern: 33
+        pdAcceptedStartupRange: 212
+        pdListenTimeout: 400162
+        pdMicrotick: 25ns
+      UseTraceSinks:
+      - Sink1
+    GenericPublishers:
+    - DefinitionUri: file://./sim/groundtruth_topic.msg
+      Name: GroundTruth
+      Protocol: ROS
+      Replay:
+        Direction: Send
+        UseTraceSource: Source1
+      UseTraceSinks:
+      - Sink1
+    IsSyncMaster: true
+    LinControllers:
+    - Name: LIN1
+      UseTraceSinks:
+      - Sink1
     Logger:
       Sinks:
       - Type: Remote
-    Name: CanWriter
+    Name: Node0
     ParticipantController:
-      SyncType: DistributedTimeQuantum
-  - CanControllers:
-    - Name: CAN1@CanReader
-    Description: Demo Reader
+      SyncType: DiscreteTime
+    Pattern-Out:
+    - Name: PATTERN
+      Replay:
+        Direction: Send
+        UseTraceSource: Source1
+      UseTraceSinks:
+      - Sink1
+      value: 626565702d62656570
+    Pwm-Out:
+    - Name: PWM
+      Replay:
+        Direction: Send
+        UseTraceSource: Source1
+      UseTraceSinks:
+      - Sink1
+      duty: 0.4
+      freq:
+        unit: Hz
+        value: 2.5
+    TraceSinks:
+    - Name: Sink1
+      OutputPath: FlexrayDemo_node0.mf4
+      Type: Mdf4File
+  - Analog-In:
+    - Name: AIO
+      Replay:
+        Direction: Receive
+        UseTraceSource: Source1
+      UseTraceSinks:
+      - Sink1
+    CanControllers:
+    - Name: CAN1
+      Replay:
+        Direction: Send
+        UseTraceSource: Source1
+      UseTraceSinks:
+      - Sink1
+    Digital-In:
+    - Name: DIO
+      Replay:
+        Direction: Receive
+        UseTraceSource: Source1
+      UseTraceSinks:
+      - Sink1
+    EthernetControllers:
+    - MacAddr: F6:04:68:71:AA:C1
+      Name: ETH0
+      UseTraceSinks:
+      - Sink1
+    FlexRayControllers:
+    - ClusterParameters:
+        gColdstartAttempts: 8
+        gCycleCountMax: 63
+        gListenNoise: 2
+        gMacroPerCycle: 3636
+        gMaxWithoutClockCorrectionFatal: 2
+        gMaxWithoutClockCorrectionPassive: 2
+        gNumberOfMiniSlots: 291
+        gNumberOfStaticSlots: 70
+        gPayloadLengthStatic: 16
+        gSyncFrameIDCountMax: 15
+        gdActionPointOffset: 2
+        gdDynamicSlotIdlePhase: 1
+        gdMiniSlot: 5
+        gdMiniSlotActionPointOffset: 2
+        gdStaticSlot: 31
+        gdSymbolWindow: 1
+        gdSymbolWindowActionPointOffset: 1
+        gdTSSTransmitter: 9
+        gdWakeupTxActive: 60
+        gdWakeupTxIdle: 180
+      Name: FlexRay1
+      NodeParameters:
+        pAllowHaltDueToClock: 1
+        pAllowPassiveToActive: 0
+        pChannels: AB
+        pClusterDriftDamping: 2
+        pKeySlotId: 5
+        pKeySlotOnlyEnabled: 0
+        pKeySlotUsedForStartup: 1
+        pKeySlotUsedForSync: 0
+        pLatestTx: 249
+        pMacroInitialOffsetA: 3
+        pMacroInitialOffsetB: 3
+        pMicroInitialOffsetA: 6
+        pMicroInitialOffsetB: 6
+        pMicroPerCycle: 200000
+        pOffsetCorrectionOut: 127
+        pOffsetCorrectionStart: 3632
+        pRateCorrectionOut: 81
+        pSamplesPerMicrotick: 2
+        pWakeupChannel: A
+        pWakeupPattern: 33
+        pdAcceptedStartupRange: 212
+        pdListenTimeout: 400162
+        pdMicrotick: 25ns
+    GenericSubscribers:
+    - Name: GroundTruth
+      Replay:
+        Direction: Receive
+        UseTraceSource: Source1
+      UseTraceSinks:
+      - Sink1
+    LinControllers:
+    - Name: LIN1
+      UseTraceSinks:
+      - Sink1
     Logger:
+      FlushLevel: Warn
       Sinks:
       - Type: Remote
-    Name: CanReader
+    Name: Node1
     ParticipantController:
-      SyncType: DistributedTimeQuantum
-  - IsSyncMaster: true
-    Logger:
+      SyncType: DiscreteTime
+    Pattern-In:
+    - Name: PATTERN
+      Replay:
+        Direction: Receive
+        UseTraceSource: Source1
+      UseTraceSinks:
+      - Sink1
+    Pwm-In:
+    - Name: PWM
+      Replay:
+        Direction: Receive
+        UseTraceSource: Source1
+      UseTraceSinks:
+      - Sink1
+  - Logger:
+      FlushLevel: Debug
+      Sinks:
+      - Level: Debug
+        Type: Stdout
+    Name: NetworkSimulator
+    NetworkSimulators:
+    - Name: FlexRay-Simulator
+      Replay:
+        Direction: Send
+        UseTraceSource: Source1
+      SimulatedLinks:
+      - FlexRay-Cluster-1
+      UseTraceSinks:
+      - SinkNs
+    ParticipantController:
+      SyncType: DiscreteTime
+    TraceSinks:
+    - Name: SinkNs
+      OutputPath: FlexrayDemoGood_replay.mf4
+      Type: Mdf4File
+    TraceSources:
+    - InputPath: FlexrayDemoGood.mf4
+      Name: Source1
+      Type: Mdf4File
+  - Logger:
+      FlushLevel: Warn
       Sinks:
       - Type: Remote
     Name: SystemController
@@ -86,34 +380,54 @@ SimulationSetup:
     Name: SystemMonitor
   TimeSync:
     TickPeriodNs: 123456
-LaunchConfigurations: []
-MiddlewareConfig:
-  ActiveMiddleware: VAsio
 )raw";
 
     auto config = Config::FromYamlString(demoYaml);
-    EXPECT_TRUE(config.simulationSetup.participants.size() == 4);
+    EXPECT_TRUE(config.simulationSetup.participants.size() == 5);
     EXPECT_TRUE(config.simulationSetup.timeSync.tickPeriod.count() == 123456);
 
-    EXPECT_TRUE(config.simulationSetup.participants.at(0).name == "CanWriter");
-    EXPECT_TRUE(config.simulationSetup.participants.at(1).name == "CanReader");
-    EXPECT_TRUE(config.simulationSetup.participants.at(2).name == "SystemController");
-    EXPECT_TRUE(config.simulationSetup.participants.at(3).name == "SystemMonitor");
+    const auto node0 = config.simulationSetup.participants.at(0);
+    const auto node1 = config.simulationSetup.participants.at(1);
+    const auto networkSimulator = config.simulationSetup.participants.at(2);
+    const auto systemController = config.simulationSetup.participants.at(3);
+    const auto systemMonitor = config.simulationSetup.participants.at(4);
 
-    EXPECT_TRUE(config.simulationSetup.participants.at(0).canControllers.size() == 1);
-    EXPECT_TRUE(config.simulationSetup.participants.at(0).canControllers.at(0).name == "CAN1@CanWriter");
-    EXPECT_TRUE(config.simulationSetup.participants.at(0).logger.sinks.at(0).type == Sink::Type::Remote);
+    EXPECT_TRUE(node0.name == "Node0");
+    EXPECT_TRUE(node0.canControllers.size() == 1);
+    EXPECT_TRUE(node0.canControllers.at(0).name == "CAN1");
+    EXPECT_TRUE(node0.linControllers.size() == 1);
+    EXPECT_TRUE(node0.linControllers.at(0).name == "LIN1");
+    EXPECT_TRUE(node0.flexrayControllers.size() == 1);
+    EXPECT_TRUE(node0.flexrayControllers.at(0).name == "FlexRay1");
+    EXPECT_TRUE(node0.digitalIoPorts.size() == 1);
+    EXPECT_TRUE(node0.digitalIoPorts.at(0).name == "DIO");
+    EXPECT_TRUE(node0.analogIoPorts.size() == 1);
+    EXPECT_TRUE(node0.analogIoPorts.at(0).name == "AIO");
+    EXPECT_TRUE(node0.pwmPorts.size() == 1);
+    EXPECT_TRUE(node0.pwmPorts.at(0).name == "PWM");
+    EXPECT_TRUE(node0.patternPorts.size() == 1);
+    EXPECT_TRUE(node0.patternPorts.at(0).name == "PATTERN");
+    EXPECT_TRUE(node0.genericPublishers.size() == 1);
+    EXPECT_TRUE(node0.genericPublishers.at(0).name == "GroundTruth");
+    EXPECT_TRUE(node0.logger.sinks.at(0).type == Sink::Type::Remote);
 
-    EXPECT_TRUE(config.simulationSetup.participants.at(1).canControllers.size() == 1);
-    EXPECT_TRUE(config.simulationSetup.participants.at(1).canControllers.at(0).name == "CAN1@CanReader");
-    EXPECT_TRUE(config.simulationSetup.participants.at(1).logger.sinks.at(0).type == Sink::Type::Remote);
+    EXPECT_TRUE(node1.name == "Node1");
+    EXPECT_TRUE(node1.canControllers.size() == 1);
+    EXPECT_TRUE(node1.canControllers.at(0).name == "CAN1");
+    EXPECT_TRUE(node1.logger.sinks.at(0).type == Sink::Type::Remote);
 
-    EXPECT_TRUE(config.simulationSetup.participants.at(2).canControllers.size() == 0);
-    EXPECT_TRUE(config.simulationSetup.participants.at(2).logger.sinks.at(0).type == Sink::Type::Remote);
+    EXPECT_TRUE(networkSimulator.name == "NetworkSimulator");
+    EXPECT_TRUE(networkSimulator.networkSimulators.size() == 1);
+    EXPECT_TRUE(networkSimulator.networkSimulators.at(0).name == "FlexRay-Simulator");
 
-    EXPECT_TRUE(config.simulationSetup.participants.at(3).canControllers.size() == 0);
-    EXPECT_TRUE(config.simulationSetup.participants.at(3).logger.sinks.at(0).type == Sink::Type::Stdout);
-    EXPECT_TRUE(config.simulationSetup.participants.at(3).logger.logFromRemotes);
+    EXPECT_TRUE(systemController.name == "SystemController");
+    EXPECT_TRUE(systemController.canControllers.size() == 0);
+    EXPECT_TRUE(systemController.logger.sinks.at(0).type == Sink::Type::Remote);
+
+    EXPECT_TRUE(systemMonitor.name == "SystemMonitor");
+    EXPECT_TRUE(systemMonitor.canControllers.size() == 0);
+    EXPECT_TRUE(systemMonitor.logger.sinks.at(0).type == Sink::Type::Stdout);
+    EXPECT_TRUE(systemMonitor.logger.logFromRemotes);
 
 }
 

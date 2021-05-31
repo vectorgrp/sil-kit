@@ -33,7 +33,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
     YamlSchemaElem traceSources("TraceSources",
         {
             {"Name"},
-            {"InutPath"},
+            {"InputPath"},
             {"Type"},
         }
     );
@@ -195,10 +195,10 @@ auto MakeYamlSchema() -> YamlSchemaElem
                     {"UseTraceSinks"},
                     {"freq", {
                             {"value"},
-                            {"freq"},
+                            {"unit"},
                         }
                     },
-                    {"unit"},
+                    {"duty"},
                     replay,
                 }
             },
@@ -223,6 +223,12 @@ auto MakeYamlSchema() -> YamlSchemaElem
                 }
             },
             {"Pattern-In", {
+                    {"Name"},
+                    {"UseTraceSinks"},
+                    replay,
+                }
+            },
+            {"Pwm-In", {
                     {"Name"},
                     {"UseTraceSinks"},
                     replay,
