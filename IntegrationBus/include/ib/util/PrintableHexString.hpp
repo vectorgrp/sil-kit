@@ -25,7 +25,7 @@ public:
 
     inline auto WithMaxLength(int64_t length) -> PrintableHexString<IterableT>&
     {
-        _maxLength = std::min<int64_t>(length, static_cast<int64_t>(_iterable.end() - _iterable.begin()));
+        _maxLength = std::min<difference_type>(static_cast<difference_type>(length),_iterable.end() - _iterable.begin());
         return *this;
     }
 
