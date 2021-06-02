@@ -5,6 +5,24 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.4.0] - 2021-06-01
+--------------------------------
+
+Added
+~~~~~
+- Added submodule yaml-cpp. This will be the base of our native
+  YAML configuration parser.
+- Added ``ib::cfg::Config::FromYamlString`` and ``ib::cfg::Config::FromYamlFile`` to load
+  configuration from YAML formatted input. This currently transforms
+  the YAML input into JSON and re-uses the JSON config parser.
+
+Compatibility with 3.3.10
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): Yes
+- Application software interface (API): No (additions to ``ib::cfg::Config``)
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
 [3.3.10-QA] - 2021-05-10
 --------------------------------
 
