@@ -520,6 +520,10 @@ void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, c
             Shutdown("Received SystemCommand::Shutdown");
             return;
         }
+        else if (State() == ParticipantState::Shutdown || State() == ParticipantState::ShuttingDown)
+        {
+            return;
+        }
         break;
 
     case SystemCommand::Kind::PrepareColdswap:
