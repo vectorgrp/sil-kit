@@ -27,8 +27,6 @@ enable_testing()
 if(MSVC)
     #make sure Release is built with debug PDBs
     add_compile_options(/Zi )
-    # make sure __cplusplus has the current C++ version encoded
-    add_compile_options(/Zc:__cplusplus)
 endif()
 
 # Configure build settings like warning and sanitizers
