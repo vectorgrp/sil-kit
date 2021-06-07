@@ -4,6 +4,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable because of gmock import conflict" FORCE)
 add_subdirectory(${THIRDPARTY_DIR}/yaml-cpp
 	${CMAKE_BINARY_DIR}/ThirdParty/yaml-cpp
+	EXCLUDE_FROM_ALL
 	)
 # ensure all external projects are grouped in IDE mode
 set(yaml_targets yaml-cpp parse read sandbox format)
