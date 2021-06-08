@@ -41,12 +41,12 @@ function(ib_enable_warnings target)
             -Wextra
             -Wcast-align
             -Wformat=2
-            -Wmissing-declarations
+            #-Wmissing-declarations #false positive for internals in JsonConfig
             -Wshadow 
-            -Wsign-conversion
+            #-Wsign-conversion #gtest
             -Wsign-promo 
             -Wstrict-overflow=5
-            -Wundef
+            #-Wundef #gtest is full of this
             -Wno-unused
             -Wpacked
             )

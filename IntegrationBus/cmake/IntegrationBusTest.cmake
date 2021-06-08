@@ -50,8 +50,6 @@ function(add_vib_test)
 
     if (MSVC)
         target_compile_options(${executableName} PRIVATE "/bigobj")
-    else()
-        target_compile_options(${executableName} PUBLIC "-Wno-inconsistent-missing-override")
     endif(MSVC)
 
     add_test(NAME ${executableName}
