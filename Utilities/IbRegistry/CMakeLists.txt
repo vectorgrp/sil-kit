@@ -24,7 +24,7 @@ target_link_libraries(IbRegistry
     IbConfig
 )
 install(TARGETS IbRegistry
-    RUNTIME DESTINATION ${INSTALL_BIN_DIR}
+    RUNTIME DESTINATION ${INSTALL_NONREDIST_DIR}
 )
 
 

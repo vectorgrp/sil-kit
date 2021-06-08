@@ -95,11 +95,16 @@ VAsio Registry
 
    *  - Notes
       -  * The distribution package contains the IbRegistry in the
-           ``Integrationbus/bin/`` directory.
+           ``Integrationbus-NonRedistributable/`` directory of the distribution.
          * When using the VAsio middleware, the IbRegistry must be started
            before the IB participants. When using the Launcher, the IbRegistry
            is automatically started if the IbConfig specifies VAsio as the
            :doc:`active middleware<../configuration/middleware-configuration>`.
+
+.. versionchanged:: >3.4.0
+   
+    The IbRegistry was moved from ``IntegrationBus/bin`` to ``IntegrationBus-NonRedistributable``
+    directory in the distribution, where the shared library resides.
 
 .. _sec:util-system-controller:
 
