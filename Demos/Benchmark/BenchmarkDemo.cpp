@@ -249,10 +249,12 @@ auto BuildConfig(uint32_t participantCount, Middleware middleware) -> Config
     return config.Build();
 }
 
+
 void ParticipantsThread(
     const BenchmarkConfig& benchmark,
     const Config& ibConfig,
-    const Participant& participant)
+    const Participant& participant,
+    size_t& messageCounter)
 {
     auto comAdapter = ib::CreateComAdapter(ibConfig, participant.name, benchmark.domainId);
     auto&& participantController = comAdapter->GetParticipantController();
@@ -267,7 +269,10 @@ void ParticipantsThread(
     for (auto& genericSubscriber : participant.genericSubscribers)
     {
         auto thisSubscriber = comAdapter->CreateGenericSubscriber(genericSubscriber.name);
-        thisSubscriber->SetReceiveMessageHandler(ReceiveMessage);
+        thisSubscriber->SetReceiveMessageHandler([&messageCounter](auto*, auto&) {
+            // this is handled in I/O thread, so no data races on counter.
+            messageCounter++;
+        });
         subscribers.emplace_back(thisSubscriber);
     }
 
@@ -325,21 +330,24 @@ int main(int argc, char** argv)
             registry->ProvideDomain(benchmark.domainId);
         }
 
+        std::vector<size_t> messageCounts;
         std::vector<std::chrono::nanoseconds> measuredRealDurations;
+
         for (uint32_t simulationRun = 1; simulationRun <= benchmark.numberOfSimulations; simulationRun++)
         {
+            std::vector<size_t> counters(ibConfig.simulationSetup.participants.size(), 0);
             std::cout << "Simulation " << simulationRun << ": ";
             auto startTimestamp = std::chrono::system_clock::now();
 
             std::vector<std::thread> threads;
+            size_t idx = 0;
             for (auto &&participant : ibConfig.simulationSetup.participants)
             {
                 if (participant.name == "SyncMaster")
                     continue;
-
-                threads.emplace_back([=] {
-                    ParticipantsThread(benchmark, ibConfig, participant);
-                });
+                auto& counter = counters.at(idx);
+                idx++;
+                threads.emplace_back(&ParticipantsThread, benchmark, ibConfig, participant, std::ref(counter));
             }
 
             auto comAdapter = ib::CreateComAdapter(ibConfig, "SyncMaster", benchmark.domainId);
@@ -363,10 +371,13 @@ int main(int argc, char** argv)
 
             auto endTimestamp = std::chrono::system_clock::now();
             measuredRealDurations.emplace_back(endTimestamp - startTimestamp);
+            auto totalCount = std::accumulate(counters.begin(), counters.end(), size_t{0});
+            messageCounts.emplace_back(totalCount);
         }
 
         const auto minMaxDuration = std::minmax_element(measuredRealDurations.begin(), measuredRealDurations.end());
         const auto averageDuration = std::accumulate(measuredRealDurations.begin(), measuredRealDurations.end(), 0ns) / measuredRealDurations.size();
+        const auto averageNumberMessages = std::accumulate(messageCounts.begin(), messageCounts.end(), size_t{ 0 }) / messageCounts.size();
 
         std::cout << std::endl;
         std::cout << "Completed simulations with the following parameters:" << std::endl;
@@ -380,6 +391,7 @@ int main(int argc, char** argv)
         std::cout << std::endl;
 
         std::cout << "Average realtime duration: " << averageDuration << std::endl;
+        std::cout << "Average number of messages: " << averageNumberMessages << std::endl;
 
         if (benchmark.numberOfSimulations > 1)
         {
@@ -391,6 +403,7 @@ int main(int argc, char** argv)
             for (auto&& duration : measuredRealDurations)
             {
                 std::cout << "Simulation run " << runNumber << ": " << duration << std::endl;
+                std::cout << "Simulation run " << runNumber << ": number of messages: " << messageCounts.at(runNumber-1) << std::endl;
                 runNumber++;
             }
         }
