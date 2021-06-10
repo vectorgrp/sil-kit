@@ -29,7 +29,7 @@ public:
     // ----------------------------------------
     // Constructors and Destructor
     VAsioTcpPeer() = delete;
-    VAsioTcpPeer(asio::io_context& io_context, VAsioConnection* ibConnection, logging::ILogger* logger);
+    VAsioTcpPeer(asio::any_io_executor executor, VAsioConnection* ibConnection, logging::ILogger* logger);
     VAsioTcpPeer(const VAsioTcpPeer& other) = delete;
     VAsioTcpPeer(VAsioTcpPeer&& other) = default;
 
@@ -73,7 +73,7 @@ private:
     // receiving
     uint32_t _currentMsgSize{0u};
     std::vector<uint8_t> _msgBuffer;
-    size_t _wPos;
+    size_t _wPos{0};
 
     // sending
     std::queue<std::vector<uint8_t>> _sendingQueue;

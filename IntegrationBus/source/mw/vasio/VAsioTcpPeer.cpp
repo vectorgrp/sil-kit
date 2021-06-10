@@ -39,8 +39,8 @@ static void EnableQuickAck(ib::mw::logging::ILogger*, tcp::socket& )
 namespace ib {
 namespace mw {
 
-VAsioTcpPeer::VAsioTcpPeer(asio::io_context& io_context, VAsioConnection* ibConnection, logging::ILogger* logger)
-    : _socket{io_context}
+VAsioTcpPeer::VAsioTcpPeer(asio::any_io_executor executor, VAsioConnection* ibConnection, logging::ILogger* logger)
+    : _socket{executor}
     , _ibConnection{ibConnection}
     , _logger{logger}
 {
@@ -80,7 +80,7 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
     SetInfo(std::move(peerInfo));
 
     // Resolve the host name using DNS
-    tcp::resolver resolver(_socket.get_io_context());
+    tcp::resolver resolver(_socket.get_executor());
     tcp::resolver::results_type resolverResults;
     try
     {
@@ -125,7 +125,7 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
         catch (asio::system_error& /*err*/)
         {
             // reset the socket
-            _socket = asio::ip::tcp::socket{_socket.get_io_context()};
+            _socket = asio::ip::tcp::socket{_socket.get_executor()};
         }
     }
 
@@ -155,7 +155,7 @@ void VAsioTcpPeer::SendIbMsg(MessageBuffer buffer)
 
     lock.unlock();
 
-    _socket.get_io_context().dispatch([this]() { StartAsyncWrite(); });
+    asio::dispatch(_socket.get_executor(), [this]() { StartAsyncWrite(); });
 }
 
 void VAsioTcpPeer::StartAsyncWrite()

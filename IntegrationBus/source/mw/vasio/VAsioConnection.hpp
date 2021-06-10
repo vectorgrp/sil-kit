@@ -291,7 +291,7 @@ private:
         }
         else
         {
-            _ioContext.dispatch([=]() mutable { (this->*method)(std::move(args)...); });
+            asio::dispatch(_ioContext.get_executor(), [=]() mutable { (this->*method)(std::move(args)...); });
         }
     }
     inline void ExecuteOnIoThread(std::function<void()> function)
@@ -302,7 +302,7 @@ private:
         }
         else
         {
-            _ioContext.dispatch(std::move(function));
+            asio::dispatch(_ioContext.get_executor(), std::move(function));
         }
     }
 
@@ -356,6 +356,11 @@ private:
     //We violate the strict layering architecture, so that we can cleanly shutdown without false error messages.
     bool _isShuttingDown{false};
 };
+
+// ================================================================================
+//  Inline Implementations
+// ================================================================================
+
 
 } // mw
 } // namespace ib
