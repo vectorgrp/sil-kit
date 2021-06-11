@@ -113,14 +113,6 @@ if(IB_INSTALL_SOURCE)
         REGEX "Fast-RTPS" EXCLUDE
         REGEX "\.git$" EXCLUDE
     )
-    #bundle ASIO
-    install(
-        DIRECTORY
-            ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/Fast-RTPS/thirdparty/asio
-        DESTINATION ${INSTALL_SOURCE_DIR}/ThirdParty/Fast-RTPS/thirdparty
-        REGEX "\.git$" EXCLUDE
-    )
-        
     install(
         FILES
             CMakeLists.txt

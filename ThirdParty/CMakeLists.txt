@@ -79,26 +79,27 @@ if(IB_BIN_FASTRTPS_ENABLE)
             )
     endif()
 
+	set(pkgrevision "-rev2")
 
     FetchContent_Declare(fastrtps-release
-        URL ${IB_BIN_FASTRTPS_REPOSITORY}/${binname}-Release.zip
+        URL ${IB_BIN_FASTRTPS_REPOSITORY}/${binname}-Release${pkgrevision}.zip
         DOWNLOAD_NO_PROGRESS FALSE
     )
     FetchContent_GetProperties(fastrtps-release)
     if(NOT fastrtps-release_POPULATED)
         message(STATUS "NOTE: fetching pre-built fastrtps Release binaries")
-        messagE(STATUS "      from: ${IB_BIN_FASTRTPS_REPOSITORY}/${binname}-Release.zip")
+        messagE(STATUS "      from: ${IB_BIN_FASTRTPS_REPOSITORY}/${binname}-Release${pkgrevision}.zip")
         FetchContent_Populate(fastrtps-release)
     endif()
 
     FetchContent_Declare(fastrtps-debug
-        URL ${IB_BIN_FASTRTPS_REPOSITORY}/${binname}-Debug.zip
+        URL ${IB_BIN_FASTRTPS_REPOSITORY}/${binname}-Debug${pkgrevision}.zip
         DOWNLOAD_NO_PROGRESS FALSE
     )
     FetchContent_GetProperties(fastrtps-debug)
     if(NOT fastrtps-debug_POPULATED)
         message(STATUS "NOTE: fetching pre-built fastrtps Debug binaries")
-        message(STATUS "      from: ${IB_BIN_FASTRTPS_REPOSITORY}/${binname}-Debug.zip")
+        messagE(STATUS "      from: ${IB_BIN_FASTRTPS_REPOSITORY}/${binname}-Debug${pkgrevision}.zip")
         FetchContent_Populate(fastrtps-debug)
     endif()
 
@@ -138,12 +139,13 @@ if(IB_BIN_FASTRTPS_ENABLE)
         IMPORTED_GLOBAL true
     )
     message(STATUS "VIB: Fast-RTPS targets imported")
+
     #Note: we no longer bundle the pre-built FastRTPS binaries. Users will have
     #to use GIT to fetch the sources, see below.
 else()
     ### build from submodule or fetch sources from external mirror or use pre-built binaries (deployed mode)
     option(THIRDPARTY_fastcdr "Activate the use of Fast-RTPS internal thirdparty fastcdr" ON)
-    option(THIRDPARTY_Asio "Activate the use of Fast-RTPS internal thirdparty Asio" ON)
+    option(THIRDPARTY_Asio "Activate the use of Fast-RTPS internal thirdparty Asio" OFF)
     option(TINYXML2_FROM_SOURCE "Integrate TinyXML2 source code inside Fast RTPS" ON)
     option(THIRDPARTY_TinyXML2 "Activate the use of Fast-RTPS internal thirdparty TinyXML2" ON)
     ##################
@@ -159,6 +161,14 @@ else()
             set(LIB_INSTALL_DIR "${INSTALL_LIB_DIR}")
             set(DATA_INSTALL_DIR "${INSTALL_DATA_DIR}")
             set(LICENSE_INSTALL_DIR "${INSTALL_DATA_DIR}/Fast-RTPS")
+            set(Asio_FOUND TRUE CACHE BOOL "We have an updated asio in ThirdParty" FORCE)
+            set(ASIO_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/asio/asio/include CACHE STRING "We have a new Asio" FORCE)
+            #don't link against system openssl
+            set(NO_TLS TRUE CACHE BOOL "Disable TLS/SSL dependencies" FORCE)
+            set(SECURITY FALSE CACHE BOOL "Disable TLS/SSL dependencies" FORCE)
+            set(TLS_FOUND FALSE CACHE BOOL "Disable TLS/SSL dependencies" FORCE)
+            set(LINK_TLS FALSE CACHE BOOL "Disable TLS/SSL dependencies" FORCE)
+
             add_subdirectory(
                 Fast-RTPS
                 Fast-RTPS
@@ -218,19 +228,18 @@ else()
     endif()
 endif()
 
-
-# NB: we use the ASIO shipped with FastRTPS right now
+# NB: we use a standalone ASIO now (used to be bundled with Fast-RTPS)
 # the binary distribution lacks the Asio sources
 # but it should be included/deployed by our packaging tools
-set(ASIO_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/Fast-RTPS/thirdparty/asio/asio/include)
-set(ASIO_INCLUDE_DIR ${ASIO_INCLUDE_DIR} PARENT_SCOPE)
+add_library(asio INTERFACE)
+target_include_directories(asio INTERFACE ${CMAKE_CURRENT_LIST_DIR}/asio/asio/include)
+set(ASIO_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/asio/asio/include)
 
 if(NOT EXISTS ${ASIO_INCLUDE_DIR})
     message(FATAL_ERROR "Asio include directory not found: ${ASIO_INCLUDE_DIR}")
 else()
     message(STATUS "Asio include directory found:${ASIO_INCLUDE_DIR}")
 endif()
-
 
 # Third party YAML parsing 
 set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable because of gmock import conflict" FORCE)
