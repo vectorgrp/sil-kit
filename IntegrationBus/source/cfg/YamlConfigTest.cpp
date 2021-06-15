@@ -591,5 +591,14 @@ TEST_F(YamlConfigTest, yaml_config_parsing)
         auto logger2 = node.as<Logger>();
         EXPECT_TRUE(logger == logger2);
     }
+    {
+        DigitalIoPort port{};
+        port.name = "DIO";
+        port.initvalue = false;
+        YAML::Node node;
+        node = port;
+        auto port2 = node.as<DigitalIoPort>();
+        EXPECT_TRUE(port == port2);
+    }
 }
 } // anonymous namespace

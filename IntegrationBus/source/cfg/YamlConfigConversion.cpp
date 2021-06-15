@@ -6,75 +6,143 @@
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
+#include <chrono>
 
 #include "ib/cfg/OptionalCfg.hpp"
+#include "ib/cfg/string_utils.hpp"
 
 //local utilities
 namespace {
-    using namespace ib::cfg;
+using namespace ib::cfg;
 
-    auto macaddress_encode(const std::array<uint8_t, 6>& macAddress) -> YAML::Node
+inline auto nibble_to_char(char nibble) -> char
+{
+    nibble &= 0xf;
+    if (0 <= nibble && nibble < 10)
+        return '0' + nibble;
+    else
+        return 'a' + (nibble - 10);
+}
+
+inline auto char_to_nibble(char c) -> char
+{
+    if (c < '0' || c > 'f')
+        throw std::runtime_error("OutOfRange");
+
+
+    if (c < 'a')
+        return c - '0';
+    else
+        return c - 'a' + 10;
+}
+
+auto hex_encode(const std::vector<uint8_t>& data) -> std::string
+{
+    std::stringstream out;
+    for (auto&& byte : data)
     {
-        std::stringstream macOut;
-
-        to_ostream(macOut, macAddress);
-
-        return YAML::Node(macOut.str());
+        out << nibble_to_char(byte >> 4)
+            << nibble_to_char(byte);
     }
+    return out.str();
+}
 
-    auto macaddress_decode(const YAML::Node& node) -> std::array<uint8_t, 6>
+auto hex_decode(const std::string& str) -> std::vector<uint8_t>
+{
+    if (str.size() % 2 != 0)
+        throw std::runtime_error("InvalidStrFormat");
+
+    std::vector<uint8_t> result;
+    result.reserve(str.size() / 2);
+
+    for (auto iter = str.begin(); iter != str.end(); iter += 2)
     {
-        std::array<uint8_t, 6> macAddress;
+        char high = char_to_nibble(*iter);
+        char low = char_to_nibble(*(iter + 1));
 
-        std::stringstream macIn(node.as<std::string>());
-        from_istream(macIn, macAddress);
-
-        return macAddress;
+        result.push_back(high << 4 | low);
     }
+    return result;
+}
 
-    template<typename ConfigT>
-    void optional_encode(const OptionalCfg<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
+auto macaddress_encode(const std::array<uint8_t, 6>& macAddress) -> YAML::Node
+{
+    std::stringstream macOut;
+
+    to_ostream(macOut, macAddress);
+
+    return YAML::Node(macOut.str());
+}
+
+auto macaddress_decode(const YAML::Node& node) -> std::array<uint8_t, 6>
+{
+    std::array<uint8_t, 6> macAddress;
+
+    std::stringstream macIn(node.as<std::string>());
+    from_istream(macIn, macAddress);
+
+    return macAddress;
+}
+
+template<typename ConfigT>
+void optional_encode(const OptionalCfg<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
+{
+    if (value.has_value())
     {
-        if (value)
-        {
-            node[fieldName] = value.value();
-        }
+        node[fieldName] = value.value();
     }
-
-    template<typename ConfigT>
-    void optional_decode(OptionalCfg<ConfigT>& value, const YAML::Node& node, const std::string& fieldName)
+}
+template<typename ConfigT>
+void optional_encode(const std::vector<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
+{
+    if (value.size() > 0)
     {
-        if (node[fieldName]) //operator[] does not modify node
-        {
-            value = node[fieldName].as<ConfigT>();
-        }
+        node[fieldName] = value;
     }
+}
 
-    template<typename ConfigT>
-    void optional_decode(ConfigT& value, const YAML::Node& node, const std::string& fieldName)
+void optional_encode(const Replay& value, YAML::Node& node, const std::string& fieldName)
+{
+    if (value.useTraceSource.size() > 0)
     {
-        if (node[fieldName]) //operator[] does not modify node
-        {
-            value = node[fieldName].as<ConfigT>();
-        }
+        node[fieldName] = value;
     }
+}
 
-    template <typename ConfigT>
-    auto non_default_encode(const std::vector<ConfigT>& values, YAML::Node& node, const std::string& fieldName, const ConfigT& defaultValue)
+template<typename ConfigT>
+void optional_decode(OptionalCfg<ConfigT>& value, const YAML::Node& node, const std::string& fieldName)
+{
+    if (node[fieldName]) //operator[] does not modify node
     {
-        if (!(value == defaultValue))
-        {
-            auto&& sequence = node[fieldName];
-            std::copy(values.begin(), values.end(), sequence.begin());
-        }
+        value = node[fieldName].as<ConfigT>();
     }
+}
 
-    template <typename ConfigT>
-    auto non_default_encode(const ConfigT& value, YAML::Node& node, const std::string& fieldName, const ConfigT& defaultValue)
+template<typename ConfigT>
+void optional_decode(ConfigT& value, const YAML::Node& node, const std::string& fieldName)
+{
+    if (node[fieldName]) //operator[] does not modify node
     {
-        if (!(value == defaultValue))
-            node[fieldName] = value;
+        value = node[fieldName].as<ConfigT>();
     }
+}
+
+template <typename ConfigT>
+auto non_default_encode(const std::vector<ConfigT>& values, YAML::Node& node, const std::string& fieldName, const ConfigT& defaultValue)
+{
+    if (!(values == defaultValue))
+    {
+        auto&& sequence = node[fieldName];
+        std::copy(values.begin(), values.end(), sequence.begin());
+    }
+}
+
+template <typename ConfigT>
+auto non_default_encode(const ConfigT& value, YAML::Node& node, const std::string& fieldName, const ConfigT& defaultValue)
+{
+    if (!(value == defaultValue))
+        node[fieldName] = value;
+}
 
 } //end anonymous
 
@@ -285,14 +353,10 @@ bool VibConversion::decode(const Node& node, Logger& obj)
 template<>
 Node VibConversion::encode(const CanController& obj)
 {
-    static const CanController defaultObj;
     Node node;
     node["Name"] = obj.name;
-    non_default_encode(obj.useTraceSinks, node, "UseTraceSinks", defaultObj.useTraceSinks);
-    if (!obj.useTraceSinks.empty())
-    {
-        node["Replay"] = obj.replay;
-    }
+    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_encode(obj.replay, node, "Replay");
     return node;
 }
 template<>
@@ -318,33 +382,17 @@ template<>
 Node VibConversion::encode(const LinController& obj)
 {
     Node node;
-    static const LinController defaultObj;
     node["Name"] = obj.name;
 
-    non_default_encode(obj.useTraceSinks, node, "UseTraceSinks", defaultObj.useTraceSinks);
-
-    if (!obj.useTraceSinks.empty())
-    {
-        node["Replay"] = obj.replay;
-    }
+    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_encode(obj.replay, node, "Replay");
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, LinController& obj)
 {
-    // backward compatibility to old json config files with only name of controller
-    if (node.IsScalar())
-    {
-        obj.name = node.as<std::string>();
-        return true;
-    }
-
     obj.name = node["Name"].as<std::string>();
-    if (node["UseTraceSinks"])
-    {
-        obj.useTraceSinks = node["UseTraceSinks"].as<decltype(obj.useTraceSinks)>();
-    }
-
+    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
     return false;
 }
@@ -353,7 +401,6 @@ template<>
 Node VibConversion::encode(const EthernetController& obj)
 {
     Node node;
-    static const EthernetController defaultObj;
     node["Name"] = obj.name;
     node["MacAddr"] = macaddress_encode(obj.macAddress);
     if (!obj.pcapFile.empty())
@@ -366,11 +413,8 @@ Node VibConversion::encode(const EthernetController& obj)
         node["PcapPipe"] = obj.pcapPipe;
     }
 
-    non_default_encode(obj.useTraceSinks, node, "UseTraceSinks", defaultObj.useTraceSinks);
-    if (!obj.useTraceSinks.empty())
-    {
-        node["Replay"] = obj.replay;
-    }
+    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_encode(obj.replay, node, "Replay");
 
     return node;
 }
@@ -381,10 +425,7 @@ bool VibConversion::decode(const Node& node, EthernetController& obj)
     obj.macAddress = macaddress_decode(node["MacAddr"]);
     optional_decode(obj.pcapFile, node, "PcapFile");
     optional_decode(obj.pcapPipe, node, "PcapPipe");
-    if (node["UseTraceSinks"])
-    {
-        obj.useTraceSinks = node["UseTraceSinks"].as<decltype(obj.useTraceSinks)>();
-    }
+    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
     return true;
 }
@@ -419,26 +460,26 @@ Node VibConversion::encode(const sim::fr::ClusterParameters& obj)
 template<>
 bool VibConversion::decode(const Node& node, sim::fr::ClusterParameters& obj)
 {
-    obj.gColdstartAttempts = node["gColdstartAttempts"].as<int>();
-    obj.gCycleCountMax = node["gCycleCountMax"].as<int>();
-    obj.gdActionPointOffset = node["gdActionPointOffset"].as<int>();
-    obj.gdDynamicSlotIdlePhase = node["gdDynamicSlotIdlePhase"].as<int>();
-    obj.gdMiniSlot = node["gdMiniSlot"].as<int>();
-    obj.gdMiniSlotActionPointOffset = node["gdMiniSlotActionPointOffset"].as<int>();
-    obj.gdStaticSlot = node["gdStaticSlot"].as<int>();
-    obj.gdSymbolWindow = node["gdSymbolWindow"].as<int>();
-    obj.gdSymbolWindowActionPointOffset = node["gdSymbolWindowActionPointOffset"].as<int>();
-    obj.gdTSSTransmitter = node["gdTSSTransmitter"].as<int>();
-    obj.gdWakeupTxActive = node["gdWakeupTxActive"].as<int>();
-    obj.gdWakeupTxIdle = node["gdWakeupTxIdle"].as<int>();
-    obj.gListenNoise = node["gListenNoise"].as<int>();
-    obj.gMacroPerCycle = node["gMacroPerCycle"].as<int>();
-    obj.gMaxWithoutClockCorrectionFatal = node["gMaxWithoutClockCorrectionFatal"].as<int>();
-    obj.gMaxWithoutClockCorrectionPassive = node["gMaxWithoutClockCorrectionPassive"].as<int>();
-    obj.gNumberOfMiniSlots = node["gNumberOfMiniSlots"].as<int>();
-    obj.gNumberOfStaticSlots = node["gNumberOfStaticSlots"].as<int>();
-    obj.gPayloadLengthStatic = node["gPayloadLengthStatic"].as<int>();
-    obj.gSyncFrameIDCountMax = node["gSyncFrameIDCountMax"].as<int>();
+    obj.gColdstartAttempts = node["gColdstartAttempts"].as<uint8_t>();
+    obj.gCycleCountMax = node["gCycleCountMax"].as<uint8_t>();
+    obj.gdActionPointOffset = node["gdActionPointOffset"].as<uint16_t>();
+    obj.gdDynamicSlotIdlePhase = node["gdDynamicSlotIdlePhase"].as<uint16_t>();
+    obj.gdMiniSlot = node["gdMiniSlot"].as<uint16_t>();
+    obj.gdMiniSlotActionPointOffset = node["gdMiniSlotActionPointOffset"].as<uint16_t>();
+    obj.gdStaticSlot = node["gdStaticSlot"].as<uint16_t>();
+    obj.gdSymbolWindow = node["gdSymbolWindow"].as<uint16_t>();
+    obj.gdSymbolWindowActionPointOffset = node["gdSymbolWindowActionPointOffset"].as<uint16_t>();
+    obj.gdTSSTransmitter = node["gdTSSTransmitter"].as<uint16_t>();
+    obj.gdWakeupTxActive = node["gdWakeupTxActive"].as<uint16_t>();
+    obj.gdWakeupTxIdle = node["gdWakeupTxIdle"].as<uint16_t>();
+    obj.gListenNoise = node["gListenNoise"].as<uint8_t>();
+    obj.gMacroPerCycle = node["gMacroPerCycle"].as<uint16_t>();
+    obj.gMaxWithoutClockCorrectionFatal = node["gMaxWithoutClockCorrectionFatal"].as<uint8_t>();
+    obj.gMaxWithoutClockCorrectionPassive = node["gMaxWithoutClockCorrectionPassive"].as<uint8_t>();
+    obj.gNumberOfMiniSlots = node["gNumberOfMiniSlots"].as<uint16_t>();
+    obj.gNumberOfStaticSlots = node["gNumberOfStaticSlots"].as<uint16_t>();
+    obj.gPayloadLengthStatic = node["gPayloadLengthStatic"].as<uint16_t>();
+    obj.gSyncFrameIDCountMax = node["gSyncFrameIDCountMax"].as<uint8_t>();
     return false;
 }
 template<>
@@ -473,29 +514,29 @@ Node VibConversion::encode(const sim::fr::NodeParameters& obj)
 template<>
 bool VibConversion::decode(const Node& node, sim::fr::NodeParameters& obj)
 {
-    obj.pAllowHaltDueToClock = node["pAllowHaltDueToClock"].as<int>();
-    obj.pAllowPassiveToActive = node["pAllowPassiveToActive"].as<int>();
+    obj.pAllowHaltDueToClock = node["pAllowHaltDueToClock"].as<uint8_t>();
+    obj.pAllowPassiveToActive = node["pAllowPassiveToActive"].as<uint8_t>();
     obj.pChannels = node["pChannels"].as<sim::fr::Channel>();
-    obj.pClusterDriftDamping = node["pClusterDriftDamping"].as<int>();
+    obj.pClusterDriftDamping = node["pClusterDriftDamping"].as<uint8_t>();
     obj.pdAcceptedStartupRange = node["pdAcceptedStartupRange"].as<int>();
     obj.pdListenTimeout = node["pdListenTimeout"].as<int>();
-    obj.pKeySlotId = node["pKeySlotId"].as<int>();
-    obj.pKeySlotOnlyEnabled = node["pKeySlotOnlyEnabled"].as<int>();
-    obj.pKeySlotUsedForStartup = node["pKeySlotUsedForStartup"].as<int>();
-    obj.pKeySlotUsedForSync = node["pKeySlotUsedForSync"].as<int>();
-    obj.pLatestTx = node["pLatestTx"].as<int>();
-    obj.pMacroInitialOffsetA = node["pMacroInitialOffsetA"].as<int>();
-    obj.pMacroInitialOffsetB = node["pMacroInitialOffsetB"].as<int>();
+    obj.pKeySlotId = node["pKeySlotId"].as<uint16_t>();
+    obj.pKeySlotOnlyEnabled = node["pKeySlotOnlyEnabled"].as<uint8_t>();
+    obj.pKeySlotUsedForStartup = node["pKeySlotUsedForStartup"].as<uint8_t>();
+    obj.pKeySlotUsedForSync = node["pKeySlotUsedForSync"].as<uint8_t>();
+    obj.pLatestTx = node["pLatestTx"].as<uint16_t>();
+    obj.pMacroInitialOffsetA = node["pMacroInitialOffsetA"].as<uint8_t>();
+    obj.pMacroInitialOffsetB = node["pMacroInitialOffsetB"].as<uint8_t>();
     obj.pMicroInitialOffsetA = node["pMicroInitialOffsetA"].as<int>();
     obj.pMicroInitialOffsetB = node["pMicroInitialOffsetB"].as<int>();
     obj.pMicroPerCycle = node["pMicroPerCycle"].as<int>();
     obj.pOffsetCorrectionOut = node["pOffsetCorrectionOut"].as<int>();
-    obj.pOffsetCorrectionStart = node["pOffsetCorrectionStart"].as<int>();
+    obj.pOffsetCorrectionStart = node["pOffsetCorrectionStart"].as<uint16_t>();
     obj.pRateCorrectionOut = node["pRateCorrectionOut"].as<int>();
     obj.pWakeupChannel = node["pWakeupChannel"].as<sim::fr::Channel>();
-    obj.pWakeupPattern = node["pWakeupPattern"].as<int>();
+    obj.pWakeupPattern = node["pWakeupPattern"].as<uint8_t>();
     obj.pdMicrotick = node["pdMicrotick"].as<sim::fr::ClockPeriod>();
-    obj.pSamplesPerMicrotick = node["pSamplesPerMicrotick"].as<int>();
+    obj.pSamplesPerMicrotick = node["pSamplesPerMicrotick"].as<uint8_t>();
     return true;
 }
 
@@ -603,9 +644,9 @@ bool VibConversion::decode(const Node& node, sim::fr::ClockPeriod& obj)
     else if (str == "25ns")
         obj = sim::fr::ClockPeriod::T25NS;
     else if (str == "50ns")
-        obj = sim::fr::ClockPeriod::T50NS;
+obj = sim::fr::ClockPeriod::T50NS;
     else
-        return false;
+    return false;
     return true;
 }
 
@@ -626,11 +667,11 @@ template<>
 bool VibConversion::decode(const Node& node, sim::fr::TxBufferConfig& obj)
 {
     obj.channels = node["channels"].as<sim::fr::Channel>();
-    obj.slotId = node["slotId"].as<int>();
-    obj.offset = node["offset"].as<int>();
-    obj.repetition = node["repetition"].as<int>();
+    obj.slotId = node["slotId"].as<uint16_t>();
+    obj.offset = node["offset"].as<uint8_t>();
+    obj.repetition = node["repetition"].as<uint8_t>();
     obj.hasPayloadPreambleIndicator = node["PPindicator"].as<bool>();
-    obj.headerCrc = node["headerCrc"].as<int>();
+    obj.headerCrc = node["headerCrc"].as<uint16_t>();
     obj.transmissionMode = node["transmissionMode"].as<sim::fr::TransmissionMode>();
     return true;
 }
@@ -639,29 +680,18 @@ template<>
 Node VibConversion::encode(const FlexrayController& obj)
 {
     Node node;
-    static const FlexrayController defaultObj;
 
     node["Name"] = obj.name;
     node["ClusterParameters"] = obj.clusterParameters;
     node["NodeParameters"] = obj.nodeParameters;
     node["TxBufferConfigs"] = obj.txBufferConfigs;
-    non_default_encode(obj.useTraceSinks, node, "UseTraceSinks", defaultObj.useTraceSinks);
-    if (!obj.useTraceSinks.empty())
-    {
-        node["Replay"] = obj.replay;
-    }
+    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_encode(obj.replay, node, "Replay");
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, FlexrayController& obj)
 {
-    // backward compatibility to old json config files with only name of controller
-    if (node.IsScalar())
-    {
-        obj.name = node.as<std::string>();
-        return true;
-    }
-
     obj.name = node["Name"].as<std::string>();
     optional_decode(obj.clusterParameters, node, "ClusterParameters");
     optional_decode(obj.nodeParameters, node, "NodeParameters");
@@ -679,83 +709,306 @@ template<>
 Node VibConversion::encode(const DigitalIoPort& obj)
 {
     Node node;
+    node["Name"] = obj.name;
+    node["value"] = obj.initvalue;
+
+    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_encode(obj.replay, node, "Replay");
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, DigitalIoPort& obj)
 {
-    return false;
+    obj.name = node["Name"].as<std::string>();
+    obj.initvalue = node["value"].as<bool>();
+
+    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_decode(obj.replay, node, "Replay");
+
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const AnalogIoPort& obj)
 {
     Node node;
+    node["Name"] = obj.name;
+    node["value"] = obj.initvalue;
+    node["unit"] = obj.unit;
+
+    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_encode(obj.replay, node, "Replay");
+
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, AnalogIoPort& obj)
 {
-    return false;
+    obj.name = node["Name"].as<std::string>();
+    obj.initvalue = node["value"].as<double>();
+    obj.unit = node["unit"].as<std::string>();
+    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_decode(obj.replay, node, "Replay");
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const PwmPort& obj)
 {
     Node node;
+    node["Name"] = obj.name;
+    {
+        Node freq;
+        freq["value"] = obj.initvalue.frequency;
+        freq["unit"] = obj.unit;
+        node["freq"] = freq;
+    }
+    node["duty"] = obj.initvalue.dutyCycle;
+
+    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_encode(obj.replay, node, "Replay");
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, PwmPort& obj)
 {
-    return false;
+    obj.name = node["Name"].as<std::string>();
+    obj.unit = node["unit"].as<std::string>();
+    obj.initvalue.frequency = node["freq"]["value"].as<double>();
+    obj.initvalue.dutyCycle = node["duty"].as<double>();
+    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_decode(obj.replay, node, "Replay");
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const PatternPort& obj)
 {
     Node node;
+    node["Name"] = obj.name;
+    node["value"] = hex_encode(obj.initvalue);
+    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_encode(obj.replay, node, "Replay");
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, PatternPort& obj)
 {
-    return false;
+    obj.name = node["Name"].as<std::string>();
+    obj.initvalue = hex_decode(node["value"].as<std::string>());
+    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_decode(obj.replay, node, "Replay");
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const GenericPort& obj)
 {
     Node node;
+    node["Name"] = obj.name;
+    node["Protocol"] = obj.protocolType;
+    node["DefinitionUri"] = obj.definitionUri;
+    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_encode(obj.replay, node, "Replay");
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, GenericPort& obj)
 {
-    return false;
+    obj.name = node["Name"].as<std::string>();
+    optional_decode(obj.protocolType, node, "Protocol");
+    optional_decode(obj.definitionUri, node, "DefinitionUri");
+    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_decode(obj.replay, node, "Replay");
+    return true;
+}
+
+template<>
+Node VibConversion::encode(const GenericPort::ProtocolType& obj)
+{
+    Node node;
+    switch (obj)
+    {
+    case GenericPort::ProtocolType::ROS:
+        node = "ROS";
+        break;
+    case GenericPort::ProtocolType::SOMEIP:
+        node = "SOME/IP";
+        break;
+    }
+    return node;
+}
+template<>
+bool VibConversion::decode(const Node& node, GenericPort::ProtocolType& obj)
+{
+
+    auto&& protocolName = node.as<std::string>();
+    if (protocolName == "ROS")
+        obj = GenericPort::ProtocolType::ROS;
+    else if (protocolName == "SOME/IP")
+        obj = GenericPort::ProtocolType::SOMEIP;
+    else if (protocolName == "Undefined")
+        obj = GenericPort::ProtocolType::Undefined;
+    else if (protocolName == "")
+        obj = GenericPort::ProtocolType::Undefined;
+    else
+        return false;
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const SyncType& obj)
 {
     Node node;
+    node = to_string(obj);
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, SyncType& obj)
 {
-    return false;
+    auto&& syncType = node.as<std::string>();
+
+    if (syncType == "DistributedTimeQuantum")
+        obj = SyncType::DistributedTimeQuantum;
+    else if (syncType == "DiscreteEvent")
+        obj = SyncType::DiscreteEvent;
+    else if (syncType == "TimeQuantum")
+        obj = SyncType::TimeQuantum;
+    else if (syncType == "DiscreteTime")
+        obj = SyncType::DiscreteTime;
+    else if (syncType == "DiscreteTimePassive")
+        obj = SyncType::DiscreteTimePassive;
+    else if (syncType == "Unsynchronized")
+        obj = SyncType::Unsynchronized;
+    else 
+        return false;
+    return true;
+}
+
+template<>
+Node VibConversion::encode(const ParticipantController& obj)
+{
+
+    Node node;
+    node["SyncType"] = obj.syncType;
+    auto optional_duration = [&node](auto name, auto x) {
+        if (x != decltype(x)::max())
+            node[name] = std::chrono::duration_cast<std::chrono::milliseconds>(x).count();
+    };
+    optional_duration("ExecTimeLimitSoftMs", obj.execTimeLimitSoft);
+    optional_duration("ExecTimeLimitHardMs", obj.execTimeLimitHard);
+    return node;
+}
+template<>
+bool VibConversion::decode(const Node& node, ParticipantController& obj)
+{
+    obj.syncType = node["SyncType"].as<SyncType>();
+    optional_decode(obj.execTimeLimitHard, node, "ExecTimeLimitHardMs");
+    optional_decode(obj.execTimeLimitSoft, node, "ExecTimeLimitSoftMs");
+    return true;
+}
+
+template<>
+Node VibConversion::encode(const std::chrono::milliseconds& obj)
+{
+    Node node;
+    node = obj.count();
+    return node;
+}
+template<>
+bool VibConversion::decode(const Node& node, std::chrono::milliseconds& obj)
+{
+    obj = std::chrono::milliseconds{node.as<uint64_t>()};
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const Participant& obj)
 {
+    auto makePortList = [](auto&& portVector, PortDirection direction)
+    {
+        YAML::Node sequence;
+        for (auto&& port : portVector)
+        {
+            if (port.direction == direction)
+            {
+                sequence.push_back(port);
+            }
+        }
+        return sequence;
+    };
+
     Node node;
+    node["Name"] = obj.name;
+    node["Logger"] = obj.logger;
+    node["Logger"] = obj.logger;
+
+    node["CanControllers"] = obj.canControllers;
+    node["LinControllers"] = obj.linControllers;
+    node["EthernetControllers"] = obj.ethernetControllers;
+    node["FlexRayControllers"] = obj.flexrayControllers;
+    node["NetworkSimulators"] = obj.networkSimulators;
+
+    node["Analog-In"] = makePortList(obj.analogIoPorts, PortDirection::In);
+    node["Digital-In"] = makePortList(obj.digitalIoPorts, PortDirection::In);
+    node["Pwm-In"] = makePortList(obj.pwmPorts, PortDirection::In);
+    node["Pattern-In"] = makePortList(obj.patternPorts, PortDirection::In);
+    node["Analog-Out"] = makePortList(obj.analogIoPorts, PortDirection::Out);
+    node["Digital-Out"] = makePortList(obj.digitalIoPorts, PortDirection::Out);
+    node["Pwm-Out"] = makePortList(obj.pwmPorts, PortDirection::Out);
+    node["Pattern-Out"] = makePortList(obj.patternPorts, PortDirection::Out);
+
+    node["GenericPublishers"] = obj.genericPublishers;
+    node["GenericSubscribers"] = obj.genericSubscribers;
+
+    node["TraceSinks"] = obj.traceSinks;
+    node["TraceSources"] = obj.traceSources;
+    node["IsSyncMaster"] = obj.isSyncMaster;
+    optional_encode(obj.participantController, node, "ParticipantController");
+
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, Participant& obj)
 {
+    // we need to explicitly set the direction for the parsed port
+    auto makePorts = [&node](auto&& portList, auto&& propertyName, auto&& direction)
+    {
+        using PortList = typename std::decay_t<decltype(portList)>;
+        using PortType = typename std::decay_t<decltype(portList)>::value_type;
+
+        PortList ports;
+        optional_decode(ports, node, propertyName);
+        for (auto& port : ports) {
+            port.direction = direction;
+            portList.push_back(port);
+        }
+    };
+
+    optional_decode(obj.isSyncMaster, node, "IsSyncMaster");
+    optional_decode(obj.participantController, node, "ParticipantController");
+    optional_decode(obj.canControllers, node, "CanControllers");
+    optional_decode(obj.linControllers, node, "LinControllers");
+    optional_decode(obj.ethernetControllers, node, "EthernetControllers");
+    optional_decode(obj.flexrayControllers, node, "FlexRayControllers");
+    optional_decode(obj.networkSimulators, node, "NetworkSimulators");
+
+    optional_decode(obj.genericPublishers, node, "GenericPublishers");
+    optional_decode(obj.genericSubscribers, node, "GenericSubscribers");
+
+    optional_decode(obj.traceSinks, node, "TraceSinks");
+    optional_decode(obj.traceSources, node, "TraceSources");
+
+    makePorts(obj.digitalIoPorts, "Digital-Out", PortDirection::Out);
+    makePorts(obj.digitalIoPorts, "Digital-In", PortDirection::In);
+    makePorts(obj.analogIoPorts, "Analog-Out", PortDirection::Out);
+    makePorts(obj.analogIoPorts, "Analog-In", PortDirection::In);
+    makePorts(obj.pwmPorts, "Pwm-Out", PortDirection::Out);
+    makePorts(obj.pwmPorts, "Pwm-In", PortDirection::In);
+    makePorts(obj.patternPorts, "Pattern-Out", PortDirection::Out);
+    makePorts(obj.patternPorts, "Pattern-In", PortDirection::In);
+
+
     return false;
 }
 

@@ -8,6 +8,8 @@
 #include <map>
 #include <vector>
 
+#include <chrono>
+
 #include "yaml-cpp/yaml.h"
 
 #include "Config.hpp"
@@ -50,7 +52,10 @@ namespace YAML {
     template<> struct convert<PwmPort> : public VibConversion {};
     template<> struct convert<PatternPort> : public VibConversion {};
     template<> struct convert<GenericPort> : public VibConversion {};
+    template<> struct convert<GenericPort::ProtocolType> : public VibConversion {};
     template<> struct convert<SyncType> : public VibConversion {};
+    template<> struct convert<std::chrono::milliseconds> : public VibConversion {};
+    template<> struct convert<ParticipantController> : public VibConversion {};
     template<> struct convert<Participant> : public VibConversion {};
     template<> struct convert<Switch::Port> : public VibConversion {};
     template<> struct convert<Switch> : public VibConversion {};
