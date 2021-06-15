@@ -74,6 +74,7 @@ add_library(IbConfig STATIC
 
 	YamlConfig.hpp
 	YamlConfig.cpp
+	YamlConfigConversion.cpp
 	YamlSchema.hpp
 	YamlSchema.cpp
 	YamlValidator.hpp
@@ -107,7 +108,7 @@ add_vib_test(TestIbConfigExample SOURCES IbConfigExampleTest.cpp
         IbConfig_FastRTPS-configfile.json
 )
 
-add_vib_test(TestMwCfgYamlConfig SOURCES YamlConfigTest.cpp LIBS IbConfig)
+add_vib_test(TestMwCfgYamlConfig SOURCES YamlConfigTest.cpp LIBS IbConfig yaml-cpp)
 
 ib_enable_warnings(IbConfig)
 ib_enable_warnings(TestMwCfgJsonConfig)

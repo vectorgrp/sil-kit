@@ -475,4 +475,121 @@ SimulationSetup:
     std::cout << "YamlValidator warnings: " << warnings.str() <<std::endl;
     EXPECT_TRUE(warnings.str().size() > 0);
 }
+
+// Simple scalars
+#include <type_traits>
+template<typename T,
+std::enable_if_t<std::is_integral<T>::value, int> = 0>
+auto to_yaml(const T value) -> YAML::Node
+{
+    YAML::Node node(YAML::NodeType::Scalar);
+    node = value;
+    return node;
+}
+
+template<typename T,
+std::enable_if_t<std::is_integral<T>::value, int> = 0>
+auto from_yaml(YAML::Node& node) -> T
+{
+    return node.as<T>();
+}
+// Sequences
+template<typename T>
+auto to_yaml(const std::vector<T>& values) -> YAML::Node
+{
+    YAML::Node node(YAML::NodeType::Sequence);
+    int i = 0;
+    for (const auto& value : values) 
+    {
+        node[i++] = to_yaml(value);
+    }
+    return node;
+}
+
+
+template<typename VectorT,
+    typename ValueT = typename VectorT::value_type,
+    std::enable_if_t<std::is_same<std::vector<ValueT>, VectorT>::value, int> = 0 >
+auto from_yaml(YAML::Node& node) -> VectorT
+{
+    if (!node.IsSequence()) {
+        throw std::logic_error("from_yaml<std::vector<T>> called on non-sequence Yaml Node");
+    }
+    return node.as<VectorT>();
+}
+
+auto to_yaml(const MdfChannel& value) -> YAML::Node
+{
+    YAML::Node node;
+    node = value;
+    return node;
+}
+auto from_yaml(YAML::Node& node) -> MdfChannel
+{
+    return node.as<MdfChannel>();
+}
+
+TEST_F(YamlConfigTest, yaml_config_parsing)
+{
+    {
+        uint16_t a{ 0x815 };
+        auto node = to_yaml(a);
+        uint16_t b = from_yaml<uint16_t>(node);
+        EXPECT_TRUE(a == b);
+    }
+    {
+        std::vector<uint32_t> vec{ 0,1,3,4,5 };
+        auto node = to_yaml(vec);
+        auto vec2 = from_yaml<std::vector<uint32_t>>(node);
+        EXPECT_TRUE(vec == vec2);
+    }
+    {
+        MdfChannel mdf;
+        mdf.channelName = "channelName";
+        mdf.channelPath = "channelPath";
+        mdf.channelSource = "channelSource";
+        mdf.groupName = "groupName";
+        mdf.groupPath = "groupPath";
+        mdf.groupSource = "groupSource";
+        auto yaml = to_yaml(mdf);
+        auto mdf2 = from_yaml(yaml);
+        EXPECT_TRUE(mdf == mdf2);
+    }
+    {
+        Version version;
+        version.major = 31;
+        version.minor = 33;
+        version.patchLevel = 7;
+        YAML::Node node;
+        node = version;
+        auto repr = node.as<std::string>();
+        auto version2 = node.as<Version>();
+        EXPECT_TRUE(version == version2);
+        // parsing wrong type
+        EXPECT_THROW(
+            {
+                YAML::Node node2;
+                node2 = "foobar"; //XXX should throw
+                auto version3 = node2.as<Version>();
+            }, YAML::BadConversion);
+
+    }
+    {
+        Logger logger;
+        Sink sink;
+        logger.logFromRemotes = true;
+        sink.type = Sink::Type::File;
+        sink.level = ib::mw::logging::Level::Trace;
+        sink.logname = "filename";
+        logger.sinks.push_back(sink);
+        sink.type=Sink::Type::Stdout;
+        sink.logname = "";
+        logger.sinks.push_back(sink);
+        YAML::Node node;
+        node = logger;
+        //auto repr = node.as<std::string>();
+        auto logger2 = node.as<Logger>();
+        EXPECT_TRUE(logger == logger2);
+    }
+}
 } // anonymous namespace

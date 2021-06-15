@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "YamlConfig.hpp"
 #include "yaml-cpp/yaml.h"
 
@@ -133,6 +134,7 @@ bool Validate(const std::string& yamlString, std::ostream& warningMessages)
     YamlValidator validator;
     return validator.Validate(yamlString, warningMessages);
 }
+
 
 } // namespace cfg
 } // namespace ib
