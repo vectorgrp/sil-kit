@@ -38,6 +38,12 @@ namespace YAML {
     template<> struct convert<CanController> : public VibConversion {};
     template<> struct convert<LinController> : public VibConversion {};
     template<> struct convert<EthernetController> : public VibConversion {};
+    template<> struct convert<ib::sim::fr::ClusterParameters> : public VibConversion {};
+    template<> struct convert<ib::sim::fr::NodeParameters> : public VibConversion {};
+    template<> struct convert<ib::sim::fr::TxBufferConfig> : public VibConversion {};
+    template<> struct convert<ib::sim::fr::Channel> : public VibConversion {};
+    template<> struct convert<ib::sim::fr::ClockPeriod> : public VibConversion {};
+    template<> struct convert<ib::sim::fr::TransmissionMode> : public VibConversion {};
     template<> struct convert<FlexrayController> : public VibConversion {};
     template<> struct convert<DigitalIoPort> : public VibConversion {};
     template<> struct convert<AnalogIoPort> : public VibConversion {};

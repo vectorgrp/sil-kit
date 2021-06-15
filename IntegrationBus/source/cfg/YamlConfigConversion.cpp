@@ -13,6 +13,25 @@
 namespace {
     using namespace ib::cfg;
 
+    auto macaddress_encode(const std::array<uint8_t, 6>& macAddress) -> YAML::Node
+    {
+        std::stringstream macOut;
+
+        to_ostream(macOut, macAddress);
+
+        return YAML::Node(macOut.str());
+    }
+
+    auto macaddress_decode(const YAML::Node& node) -> std::array<uint8_t, 6>
+    {
+        std::array<uint8_t, 6> macAddress;
+
+        std::stringstream macIn(node.as<std::string>());
+        from_istream(macIn, macAddress);
+
+        return macAddress;
+    }
+
     template<typename ConfigT>
     void optional_encode(const OptionalCfg<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
     {
@@ -266,24 +285,67 @@ bool VibConversion::decode(const Node& node, Logger& obj)
 template<>
 Node VibConversion::encode(const CanController& obj)
 {
+    static const CanController defaultObj;
     Node node;
+    node["Name"] = obj.name;
+    non_default_encode(obj.useTraceSinks, node, "UseTraceSinks", defaultObj.useTraceSinks);
+    if (!obj.useTraceSinks.empty())
+    {
+        node["Replay"] = obj.replay;
+    }
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, CanController& obj)
 {
-    return false;
+    // backward compatibility to old json config files with only name of controller
+    if (node.IsScalar())
+    {
+        obj.name = node.as<std::string>();
+        return true;
+    }
+
+    obj.name = node["Name"].as<std::string>();
+    if (node["UseTraceSinks"])
+    {
+        obj.useTraceSinks = node["UseTraceSinks"].as<decltype(obj.useTraceSinks)>();
+    }
+    optional_decode(obj.replay, node, "Replay");
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const LinController& obj)
 {
     Node node;
+    static const LinController defaultObj;
+    node["Name"] = obj.name;
+
+    non_default_encode(obj.useTraceSinks, node, "UseTraceSinks", defaultObj.useTraceSinks);
+
+    if (!obj.useTraceSinks.empty())
+    {
+        node["Replay"] = obj.replay;
+    }
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, LinController& obj)
 {
+    // backward compatibility to old json config files with only name of controller
+    if (node.IsScalar())
+    {
+        obj.name = node.as<std::string>();
+        return true;
+    }
+
+    obj.name = node["Name"].as<std::string>();
+    if (node["UseTraceSinks"])
+    {
+        obj.useTraceSinks = node["UseTraceSinks"].as<decltype(obj.useTraceSinks)>();
+    }
+
+    optional_decode(obj.replay, node, "Replay");
     return false;
 }
 
@@ -291,24 +353,326 @@ template<>
 Node VibConversion::encode(const EthernetController& obj)
 {
     Node node;
+    static const EthernetController defaultObj;
+    node["Name"] = obj.name;
+    node["MacAddr"] = macaddress_encode(obj.macAddress);
+    if (!obj.pcapFile.empty())
+    {
+        node["PcapFile"] = obj.pcapFile;
+    }
+
+    if (!obj.pcapPipe.empty())
+    {
+        node["PcapPipe"] = obj.pcapPipe;
+    }
+
+    non_default_encode(obj.useTraceSinks, node, "UseTraceSinks", defaultObj.useTraceSinks);
+    if (!obj.useTraceSinks.empty())
+    {
+        node["Replay"] = obj.replay;
+    }
+
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, EthernetController& obj)
 {
+    obj.name = node["Name"].as<std::string>();
+    obj.macAddress = macaddress_decode(node["MacAddr"]);
+    optional_decode(obj.pcapFile, node, "PcapFile");
+    optional_decode(obj.pcapPipe, node, "PcapPipe");
+    if (node["UseTraceSinks"])
+    {
+        obj.useTraceSinks = node["UseTraceSinks"].as<decltype(obj.useTraceSinks)>();
+    }
+    optional_decode(obj.replay, node, "Replay");
+    return true;
+}
+
+template<>
+Node VibConversion::encode(const sim::fr::ClusterParameters& obj)
+{
+    Node node;
+
+    node["gColdstartAttempts"] = obj.gColdstartAttempts;
+    node["gCycleCountMax"] = obj.gCycleCountMax;
+    node["gdActionPointOffset"] = obj.gdActionPointOffset;
+    node["gdDynamicSlotIdlePhase"] = obj.gdDynamicSlotIdlePhase;
+    node["gdMiniSlot"] = obj.gdMiniSlot;
+    node["gdMiniSlotActionPointOffset"] = obj.gdMiniSlotActionPointOffset;
+    node["gdStaticSlot"] = obj.gdStaticSlot;
+    node["gdSymbolWindow"] = obj.gdSymbolWindow;
+    node["gdSymbolWindowActionPointOffset"] = obj.gdSymbolWindowActionPointOffset;
+    node["gdTSSTransmitter"] = obj.gdTSSTransmitter;
+    node["gdWakeupTxActive"] = obj.gdWakeupTxActive;
+    node["gdWakeupTxIdle"] = obj.gdWakeupTxIdle;
+    node["gListenNoise"] = obj.gListenNoise;
+    node["gMacroPerCycle"] = obj.gMacroPerCycle;
+    node["gMaxWithoutClockCorrectionFatal"] = obj.gMaxWithoutClockCorrectionFatal;
+    node["gMaxWithoutClockCorrectionPassive"] = obj.gMaxWithoutClockCorrectionPassive;
+    node["gNumberOfMiniSlots"] = obj.gNumberOfMiniSlots;
+    node["gNumberOfStaticSlots"] = obj.gNumberOfStaticSlots;
+    node["gPayloadLengthStatic"] = obj.gPayloadLengthStatic;
+    node["gSyncFrameIDCountMax"] = obj.gSyncFrameIDCountMax;
+    return node;
+}
+template<>
+bool VibConversion::decode(const Node& node, sim::fr::ClusterParameters& obj)
+{
+    obj.gColdstartAttempts = node["gColdstartAttempts"].as<int>();
+    obj.gCycleCountMax = node["gCycleCountMax"].as<int>();
+    obj.gdActionPointOffset = node["gdActionPointOffset"].as<int>();
+    obj.gdDynamicSlotIdlePhase = node["gdDynamicSlotIdlePhase"].as<int>();
+    obj.gdMiniSlot = node["gdMiniSlot"].as<int>();
+    obj.gdMiniSlotActionPointOffset = node["gdMiniSlotActionPointOffset"].as<int>();
+    obj.gdStaticSlot = node["gdStaticSlot"].as<int>();
+    obj.gdSymbolWindow = node["gdSymbolWindow"].as<int>();
+    obj.gdSymbolWindowActionPointOffset = node["gdSymbolWindowActionPointOffset"].as<int>();
+    obj.gdTSSTransmitter = node["gdTSSTransmitter"].as<int>();
+    obj.gdWakeupTxActive = node["gdWakeupTxActive"].as<int>();
+    obj.gdWakeupTxIdle = node["gdWakeupTxIdle"].as<int>();
+    obj.gListenNoise = node["gListenNoise"].as<int>();
+    obj.gMacroPerCycle = node["gMacroPerCycle"].as<int>();
+    obj.gMaxWithoutClockCorrectionFatal = node["gMaxWithoutClockCorrectionFatal"].as<int>();
+    obj.gMaxWithoutClockCorrectionPassive = node["gMaxWithoutClockCorrectionPassive"].as<int>();
+    obj.gNumberOfMiniSlots = node["gNumberOfMiniSlots"].as<int>();
+    obj.gNumberOfStaticSlots = node["gNumberOfStaticSlots"].as<int>();
+    obj.gPayloadLengthStatic = node["gPayloadLengthStatic"].as<int>();
+    obj.gSyncFrameIDCountMax = node["gSyncFrameIDCountMax"].as<int>();
     return false;
+}
+template<>
+Node VibConversion::encode(const sim::fr::NodeParameters& obj)
+{
+    Node node;
+    node["pAllowHaltDueToClock"] = obj.pAllowHaltDueToClock;
+    node["pAllowPassiveToActive"] = obj.pAllowPassiveToActive;
+    node["pChannels"] = obj.pChannels;
+    node["pClusterDriftDamping"] = obj.pClusterDriftDamping;
+    node["pdAcceptedStartupRange"] = obj.pdAcceptedStartupRange;
+    node["pdListenTimeout"] = obj.pdListenTimeout;
+    node["pKeySlotId"] = obj.pKeySlotId;
+    node["pKeySlotOnlyEnabled"] = obj.pKeySlotOnlyEnabled;
+    node["pKeySlotUsedForStartup"] = obj.pKeySlotUsedForStartup;
+    node["pKeySlotUsedForSync"] = obj.pKeySlotUsedForSync;
+    node["pLatestTx"] = obj.pLatestTx;
+    node["pMacroInitialOffsetA"] = obj.pMacroInitialOffsetA;
+    node["pMacroInitialOffsetB"] = obj.pMacroInitialOffsetB;
+    node["pMicroInitialOffsetA"] = obj.pMicroInitialOffsetA;
+    node["pMicroInitialOffsetB"] = obj.pMicroInitialOffsetB;
+    node["pMicroPerCycle"] = obj.pMicroPerCycle;
+    node["pOffsetCorrectionOut"] = obj.pOffsetCorrectionOut;
+    node["pOffsetCorrectionStart"] = obj.pOffsetCorrectionStart;
+    node["pRateCorrectionOut"] = obj.pRateCorrectionOut;
+    node["pWakeupChannel"] = obj.pWakeupChannel;
+    node["pWakeupPattern"] = obj.pWakeupPattern;
+    node["pdMicrotick"] = obj.pdMicrotick;
+    node["pSamplesPerMicrotick"] = obj.pSamplesPerMicrotick;
+    return node;
+}
+template<>
+bool VibConversion::decode(const Node& node, sim::fr::NodeParameters& obj)
+{
+    obj.pAllowHaltDueToClock = node["pAllowHaltDueToClock"].as<int>();
+    obj.pAllowPassiveToActive = node["pAllowPassiveToActive"].as<int>();
+    obj.pChannels = node["pChannels"].as<sim::fr::Channel>();
+    obj.pClusterDriftDamping = node["pClusterDriftDamping"].as<int>();
+    obj.pdAcceptedStartupRange = node["pdAcceptedStartupRange"].as<int>();
+    obj.pdListenTimeout = node["pdListenTimeout"].as<int>();
+    obj.pKeySlotId = node["pKeySlotId"].as<int>();
+    obj.pKeySlotOnlyEnabled = node["pKeySlotOnlyEnabled"].as<int>();
+    obj.pKeySlotUsedForStartup = node["pKeySlotUsedForStartup"].as<int>();
+    obj.pKeySlotUsedForSync = node["pKeySlotUsedForSync"].as<int>();
+    obj.pLatestTx = node["pLatestTx"].as<int>();
+    obj.pMacroInitialOffsetA = node["pMacroInitialOffsetA"].as<int>();
+    obj.pMacroInitialOffsetB = node["pMacroInitialOffsetB"].as<int>();
+    obj.pMicroInitialOffsetA = node["pMicroInitialOffsetA"].as<int>();
+    obj.pMicroInitialOffsetB = node["pMicroInitialOffsetB"].as<int>();
+    obj.pMicroPerCycle = node["pMicroPerCycle"].as<int>();
+    obj.pOffsetCorrectionOut = node["pOffsetCorrectionOut"].as<int>();
+    obj.pOffsetCorrectionStart = node["pOffsetCorrectionStart"].as<int>();
+    obj.pRateCorrectionOut = node["pRateCorrectionOut"].as<int>();
+    obj.pWakeupChannel = node["pWakeupChannel"].as<sim::fr::Channel>();
+    obj.pWakeupPattern = node["pWakeupPattern"].as<int>();
+    obj.pdMicrotick = node["pdMicrotick"].as<sim::fr::ClockPeriod>();
+    obj.pSamplesPerMicrotick = node["pSamplesPerMicrotick"].as<int>();
+    return true;
+}
+
+template<>
+Node VibConversion::encode(const sim::fr::TransmissionMode& obj)
+{
+    Node node;
+
+    switch (obj)
+    {
+    case sim::fr::TransmissionMode::Continuous:
+        node = "Continuous";
+        break;
+    case sim::fr::TransmissionMode::SingleShot:
+        node =  "SingleShot";
+        break;
+    default:
+        throw Misconfiguration{ "Unknown TransmissionMode in VibConbersion::encode<TransmissionMode>" };
+    }
+
+    return node;
+}
+template<>
+bool VibConversion::decode(const Node& node, sim::fr::TransmissionMode& obj)
+{
+
+    auto&& str = node.as<std::string>();
+    if (str == "Continuous")
+        obj = sim::fr::TransmissionMode::Continuous;
+    else if (str == "SingleShot")
+        obj = sim::fr::TransmissionMode::SingleShot;
+    else
+        return false;
+    return true;
+
+}
+
+template<>
+Node VibConversion::encode(const sim::fr::Channel& obj)
+{
+    Node node;
+
+    switch (obj)
+    {
+    case sim::fr::Channel::A:
+        node = "A";
+        break;
+    case sim::fr::Channel::B:
+        node = "B";
+        break;
+    case sim::fr::Channel::AB:
+        node =  "AB";
+        break;
+    case sim::fr::Channel::None:
+        node = "None";
+        break;
+    }
+    return node;
+}
+template<>
+bool VibConversion::decode(const Node& node, sim::fr::Channel& obj)
+{
+    auto&& str = node.as<std::string>();
+    if (str == "A")
+        obj =  sim::fr::Channel::A;
+    if (str == "B")
+        obj =  sim::fr::Channel::B;
+    if (str == "AB")
+        obj =  sim::fr::Channel::AB;
+    if (str == "None" || str == "")
+        obj = sim::fr::Channel::None;
+    else
+        return false;
+    return true;
+}
+
+template<>
+Node VibConversion::encode(const sim::fr::ClockPeriod& obj)
+{
+    Node node;
+    switch (obj)
+    {
+    case sim::fr::ClockPeriod::T12_5NS:
+        node = "12.5ns";
+        break;
+    case sim::fr::ClockPeriod::T25NS:
+        node =  "25ns";
+        break;
+    case sim::fr::ClockPeriod::T50NS:
+        node = "50ns";
+        break;
+    default:
+        throw Misconfiguration{ "Unknown ClockPeriod in VibConversion::encode<ClockPeriod>" };
+
+    }
+
+    return node;
+}
+template<>
+bool VibConversion::decode(const Node& node, sim::fr::ClockPeriod& obj)
+{
+    auto&& str = node.as<std::string>();
+    if (str == "12.5ns")
+        obj = sim::fr::ClockPeriod::T12_5NS;
+    else if (str == "25ns")
+        obj = sim::fr::ClockPeriod::T25NS;
+    else if (str == "50ns")
+        obj = sim::fr::ClockPeriod::T50NS;
+    else
+        return false;
+    return true;
+}
+
+template<>
+Node VibConversion::encode(const sim::fr::TxBufferConfig& obj)
+{
+    Node node;
+    node["channels"] = obj.channels;
+    node["slotId"] = obj.slotId;
+    node["offset"] = obj.offset;
+    node["repetition"] = obj.repetition;
+    node["PPindicator"] = obj.hasPayloadPreambleIndicator;
+    node["headerCrc"] = obj.headerCrc;
+    node["transmissionMode"] = obj.transmissionMode;
+    return node;
+}
+template<>
+bool VibConversion::decode(const Node& node, sim::fr::TxBufferConfig& obj)
+{
+    obj.channels = node["channels"].as<sim::fr::Channel>();
+    obj.slotId = node["slotId"].as<int>();
+    obj.offset = node["offset"].as<int>();
+    obj.repetition = node["repetition"].as<int>();
+    obj.hasPayloadPreambleIndicator = node["PPindicator"].as<bool>();
+    obj.headerCrc = node["headerCrc"].as<int>();
+    obj.transmissionMode = node["transmissionMode"].as<sim::fr::TransmissionMode>();
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const FlexrayController& obj)
 {
     Node node;
+    static const FlexrayController defaultObj;
+
+    node["Name"] = obj.name;
+    node["ClusterParameters"] = obj.clusterParameters;
+    node["NodeParameters"] = obj.nodeParameters;
+    node["TxBufferConfigs"] = obj.txBufferConfigs;
+    non_default_encode(obj.useTraceSinks, node, "UseTraceSinks", defaultObj.useTraceSinks);
+    if (!obj.useTraceSinks.empty())
+    {
+        node["Replay"] = obj.replay;
+    }
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, FlexrayController& obj)
 {
-    return false;
+    // backward compatibility to old json config files with only name of controller
+    if (node.IsScalar())
+    {
+        obj.name = node.as<std::string>();
+        return true;
+    }
+
+    obj.name = node["Name"].as<std::string>();
+    optional_decode(obj.clusterParameters, node, "ClusterParameters");
+    optional_decode(obj.nodeParameters, node, "NodeParameters");
+    optional_decode(obj.txBufferConfigs, node, "TxBufferConfigs");
+    if (node["UseTraceSinks"])
+    {
+        obj.useTraceSinks = node["UseTraceSinks"].as<decltype(obj.useTraceSinks)>();
+    }
+    optional_decode(obj.replay, node, "Replay");
+
+    return true;
 }
 
 template<>
