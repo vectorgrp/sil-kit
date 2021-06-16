@@ -4,18 +4,8 @@
 
 #include <stdexcept>
 
+#include "YamlConfig.hpp" //for operator<<(Mark)
 namespace {
-//!< Helper to print the YAML document position
-std::ostream& operator<<(std::ostream& out, const YAML::Mark& mark)
-{
-    if (!mark.is_null())
-    {
-        out << "line " << mark.line << ", column " << mark.column;
-    }
-    return out;
-}
-
-
 //!< Recursive validation helper to iterate through the YAML document
 bool ValidateDoc(YAML::Node& doc, const ib::cfg::YamlValidator& v,
     std::ostream& warnings, const std::string& parent)

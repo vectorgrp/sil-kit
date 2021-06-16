@@ -1,5 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
-#include "YamlConfig.hpp"
+#include "YamlConfigConversion.hpp"
 
 #include <algorithm>
 #include <sstream>
@@ -11,9 +11,12 @@
 #include "ib/cfg/OptionalCfg.hpp"
 #include "ib/cfg/string_utils.hpp"
 
+
+using namespace ib::cfg;
+using namespace ib;
+
 //local utilities
 namespace {
-using namespace ib::cfg;
 
 inline auto nibble_to_char(char nibble) -> char
 {
@@ -149,7 +152,6 @@ auto non_default_encode(const ConfigT& value, YAML::Node& node, const std::strin
 // YAML type conversion helpers for our data types
 namespace YAML {
 
-using namespace ib;
 
 template<>
 Node VibConversion::encode(const MdfChannel& obj)

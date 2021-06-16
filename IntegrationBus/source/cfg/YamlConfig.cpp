@@ -136,5 +136,16 @@ bool Validate(const std::string& yamlString, std::ostream& warningMessages)
 }
 
 
+
+//!< Helper to print the YAML document position
+std::ostream& operator<<(std::ostream& out, const YAML::Mark& mark)
+{
+    if (!mark.is_null())
+    {
+        out << "line " << mark.line << ", column " << mark.column;
+    }
+    return out;
+}
+
 } // namespace cfg
 } // namespace ib

@@ -476,61 +476,9 @@ SimulationSetup:
     EXPECT_TRUE(warnings.str().size() > 0);
 }
 
-// Simple scalars
-#include <type_traits>
-template<typename T,
-std::enable_if_t<std::is_integral<T>::value, int> = 0>
-auto to_yaml(const T value) -> YAML::Node
+TEST_F(YamlConfigTest, yaml_native_type_conversions)
 {
-    YAML::Node node(YAML::NodeType::Scalar);
-    node = value;
-    return node;
-}
-
-template<typename T,
-std::enable_if_t<std::is_integral<T>::value, int> = 0>
-auto from_yaml(YAML::Node& node) -> T
-{
-    return node.as<T>();
-}
-// Sequences
-template<typename T>
-auto to_yaml(const std::vector<T>& values) -> YAML::Node
-{
-    YAML::Node node(YAML::NodeType::Sequence);
-    int i = 0;
-    for (const auto& value : values) 
-    {
-        node[i++] = to_yaml(value);
-    }
-    return node;
-}
-
-
-template<typename VectorT,
-    typename ValueT = typename VectorT::value_type,
-    std::enable_if_t<std::is_same<std::vector<ValueT>, VectorT>::value, int> = 0 >
-auto from_yaml(YAML::Node& node) -> VectorT
-{
-    if (!node.IsSequence()) {
-        throw std::logic_error("from_yaml<std::vector<T>> called on non-sequence Yaml Node");
-    }
-    return node.as<VectorT>();
-}
-
-auto to_yaml(const MdfChannel& value) -> YAML::Node
-{
-    YAML::Node node;
-    node = value;
-    return node;
-}
-auto from_yaml(YAML::Node& node) -> MdfChannel
-{
-    return node.as<MdfChannel>();
-}
-
-TEST_F(YamlConfigTest, yaml_config_parsing)
-{
+    using namespace ib::cfg;
     {
         uint16_t a{ 0x815 };
         auto node = to_yaml(a);
@@ -552,7 +500,7 @@ TEST_F(YamlConfigTest, yaml_config_parsing)
         mdf.groupPath = "groupPath";
         mdf.groupSource = "groupSource";
         auto yaml = to_yaml(mdf);
-        auto mdf2 = from_yaml(yaml);
+        auto mdf2 = from_yaml<decltype(mdf)>(yaml);
         EXPECT_TRUE(mdf == mdf2);
     }
     {
@@ -616,11 +564,6 @@ TEST_F(YamlConfigTest, yaml_config_parsing)
         node = config;
         auto config2 = node.as<Config>();
         EXPECT_TRUE(config == config2);
-    }
-    {
-        auto node = YAML::Load(demoYaml);
-        auto config = node.as<Config>();
-
     }
 }
 } // anonymous namespace

@@ -75,6 +75,7 @@ add_library(IbConfig STATIC
 	YamlConfig.hpp
 	YamlConfig.cpp
 	YamlConfigConversion.cpp
+	YamlConfigConversion.hpp
 	YamlSchema.hpp
 	YamlSchema.cpp
 	YamlValidator.hpp
