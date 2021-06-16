@@ -316,7 +316,8 @@ Node VibConversion::encode(const Sink& obj)
 template<>
 bool VibConversion::decode(const Node& node, Sink& obj)
 {
-    obj.type = node["Type"].as<Sink::Type>(); 
+    //obj.type = node["Type"].as<Sink::Type>(); 
+    optional_decode(obj.type, node, "Type");
     optional_decode(obj.level, node, "Level");
 
     if (obj.type == Sink::Type::File)
@@ -434,26 +435,27 @@ Node VibConversion::encode(const sim::fr::ClusterParameters& obj)
 {
     Node node;
 
-    node["gColdstartAttempts"] = obj.gColdstartAttempts;
-    node["gCycleCountMax"] = obj.gCycleCountMax;
-    node["gdActionPointOffset"] = obj.gdActionPointOffset;
-    node["gdDynamicSlotIdlePhase"] = obj.gdDynamicSlotIdlePhase;
-    node["gdMiniSlot"] = obj.gdMiniSlot;
-    node["gdMiniSlotActionPointOffset"] = obj.gdMiniSlotActionPointOffset;
-    node["gdStaticSlot"] = obj.gdStaticSlot;
-    node["gdSymbolWindow"] = obj.gdSymbolWindow;
-    node["gdSymbolWindowActionPointOffset"] = obj.gdSymbolWindowActionPointOffset;
-    node["gdTSSTransmitter"] = obj.gdTSSTransmitter;
-    node["gdWakeupTxActive"] = obj.gdWakeupTxActive;
-    node["gdWakeupTxIdle"] = obj.gdWakeupTxIdle;
-    node["gListenNoise"] = obj.gListenNoise;
-    node["gMacroPerCycle"] = obj.gMacroPerCycle;
-    node["gMaxWithoutClockCorrectionFatal"] = obj.gMaxWithoutClockCorrectionFatal;
-    node["gMaxWithoutClockCorrectionPassive"] = obj.gMaxWithoutClockCorrectionPassive;
-    node["gNumberOfMiniSlots"] = obj.gNumberOfMiniSlots;
-    node["gNumberOfStaticSlots"] = obj.gNumberOfStaticSlots;
-    node["gPayloadLengthStatic"] = obj.gPayloadLengthStatic;
-    node["gSyncFrameIDCountMax"] = obj.gSyncFrameIDCountMax;
+    //NB we have to ensure parsing as integer, uint8_t will be interpreted as character
+    node["gColdstartAttempts"] = static_cast<int>(obj.gColdstartAttempts);
+    node["gCycleCountMax"] = static_cast<int>(obj.gCycleCountMax);
+    node["gdActionPointOffset"] = static_cast<int>(obj.gdActionPointOffset);
+    node["gdDynamicSlotIdlePhase"] = static_cast<int>(obj.gdDynamicSlotIdlePhase);
+    node["gdMiniSlot"] = static_cast<int>(obj.gdMiniSlot);
+    node["gdMiniSlotActionPointOffset"] = static_cast<int>(obj.gdMiniSlotActionPointOffset);
+    node["gdStaticSlot"] = static_cast<int>(obj.gdStaticSlot);
+    node["gdSymbolWindow"] = static_cast<int>(obj.gdSymbolWindow);
+    node["gdSymbolWindowActionPointOffset"] = static_cast<int>(obj.gdSymbolWindowActionPointOffset);
+    node["gdTSSTransmitter"] = static_cast<int>(obj.gdTSSTransmitter);
+    node["gdWakeupTxActive"] = static_cast<int>(obj.gdWakeupTxActive);
+    node["gdWakeupTxIdle"] = static_cast<int>(obj.gdWakeupTxIdle);
+    node["gListenNoise"] = static_cast<int>(obj.gListenNoise);
+    node["gMacroPerCycle"] = static_cast<int>(obj.gMacroPerCycle);
+    node["gMaxWithoutClockCorrectionFatal"] = static_cast<int>(obj.gMaxWithoutClockCorrectionFatal);
+    node["gMaxWithoutClockCorrectionPassive"] = static_cast<int>(obj.gMaxWithoutClockCorrectionPassive);
+    node["gNumberOfMiniSlots"] = static_cast<int>(obj.gNumberOfMiniSlots);
+    node["gNumberOfStaticSlots"] = static_cast<int>(obj.gNumberOfStaticSlots);
+    node["gPayloadLengthStatic"] = static_cast<int>(obj.gPayloadLengthStatic);
+    node["gSyncFrameIDCountMax"] = static_cast<int>(obj.gSyncFrameIDCountMax);
     return node;
 }
 template<>
@@ -486,29 +488,29 @@ template<>
 Node VibConversion::encode(const sim::fr::NodeParameters& obj)
 {
     Node node;
-    node["pAllowHaltDueToClock"] = obj.pAllowHaltDueToClock;
-    node["pAllowPassiveToActive"] = obj.pAllowPassiveToActive;
-    node["pChannels"] = obj.pChannels;
-    node["pClusterDriftDamping"] = obj.pClusterDriftDamping;
-    node["pdAcceptedStartupRange"] = obj.pdAcceptedStartupRange;
-    node["pdListenTimeout"] = obj.pdListenTimeout;
-    node["pKeySlotId"] = obj.pKeySlotId;
-    node["pKeySlotOnlyEnabled"] = obj.pKeySlotOnlyEnabled;
-    node["pKeySlotUsedForStartup"] = obj.pKeySlotUsedForStartup;
-    node["pKeySlotUsedForSync"] = obj.pKeySlotUsedForSync;
-    node["pLatestTx"] = obj.pLatestTx;
-    node["pMacroInitialOffsetA"] = obj.pMacroInitialOffsetA;
-    node["pMacroInitialOffsetB"] = obj.pMacroInitialOffsetB;
-    node["pMicroInitialOffsetA"] = obj.pMicroInitialOffsetA;
-    node["pMicroInitialOffsetB"] = obj.pMicroInitialOffsetB;
-    node["pMicroPerCycle"] = obj.pMicroPerCycle;
-    node["pOffsetCorrectionOut"] = obj.pOffsetCorrectionOut;
-    node["pOffsetCorrectionStart"] = obj.pOffsetCorrectionStart;
-    node["pRateCorrectionOut"] = obj.pRateCorrectionOut;
+    node["pAllowHaltDueToClock"] = static_cast<int>(obj.pAllowHaltDueToClock);
+    node["pAllowPassiveToActive"] = static_cast<int>(obj.pAllowPassiveToActive);
+    node["pClusterDriftDamping"] = static_cast<int>(obj.pClusterDriftDamping);
+    node["pdAcceptedStartupRange"] = static_cast<int>(obj.pdAcceptedStartupRange);
+    node["pdListenTimeout"] = static_cast<int>(obj.pdListenTimeout);
+    node["pKeySlotId"] = static_cast<int>(obj.pKeySlotId);
+    node["pKeySlotOnlyEnabled"] = static_cast<int>(obj.pKeySlotOnlyEnabled);
+    node["pKeySlotUsedForStartup"] = static_cast<int>(obj.pKeySlotUsedForStartup);
+    node["pKeySlotUsedForSync"] = static_cast<int>(obj.pKeySlotUsedForSync);
+    node["pLatestTx"] = static_cast<int>(obj.pLatestTx);
+    node["pMacroInitialOffsetA"] = static_cast<int>(obj.pMacroInitialOffsetA);
+    node["pMacroInitialOffsetB"] = static_cast<int>(obj.pMacroInitialOffsetB);
+    node["pMicroInitialOffsetA"] = static_cast<int>(obj.pMicroInitialOffsetA);
+    node["pMicroInitialOffsetB"] = static_cast<int>(obj.pMicroInitialOffsetB);
+    node["pMicroPerCycle"] = static_cast<int>(obj.pMicroPerCycle);
+    node["pOffsetCorrectionOut"] = static_cast<int>(obj.pOffsetCorrectionOut);
+    node["pOffsetCorrectionStart"] = static_cast<int>(obj.pOffsetCorrectionStart);
+    node["pRateCorrectionOut"] = static_cast<int>(obj.pRateCorrectionOut);
+    node["pWakeupPattern"] = static_cast<int>(obj.pWakeupPattern);
+    node["pSamplesPerMicrotick"] = static_cast<int>(obj.pSamplesPerMicrotick);
     node["pWakeupChannel"] = obj.pWakeupChannel;
-    node["pWakeupPattern"] = obj.pWakeupPattern;
     node["pdMicrotick"] = obj.pdMicrotick;
-    node["pSamplesPerMicrotick"] = obj.pSamplesPerMicrotick;
+    node["pChannels"] = obj.pChannels;
     return node;
 }
 template<>
@@ -949,7 +951,8 @@ Node VibConversion::encode(const Participant& obj)
 {
     auto makePortList = [](auto&& portVector, PortDirection direction)
     {
-        YAML::Node sequence;
+        using PortList = typename std::decay_t<decltype(portVector)>;
+        PortList sequence;
         for (auto&& port : portVector)
         {
             if (port.direction == direction)

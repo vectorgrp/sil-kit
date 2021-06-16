@@ -698,7 +698,8 @@ auto Config::FromYamlFile(const std::string& yamlFilename) -> Config
 
 auto Config::ToYamlString() -> std::string
 {
-    return JsonToYaml(ToJsonString());
+    auto doc = to_yaml(*this);
+    return YAML::Dump(doc);
 }
 
 auto Config::FromJsonString(const std::string& jsonString) -> Config

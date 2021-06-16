@@ -102,7 +102,9 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& par
     _logger = std::make_unique<logging::Logger>(_participantName, participantConfig.logger);
     _ibConnection.SetLogger(_logger.get());
 
-    _logger->Info("Creating ComAdapter for Participant {}, IntegrationBus-Version: {} {}", _participantName, version::String(), version::SprintName());
+    _logger->Info("Creating ComAdapter for Participant {}, IntegrationBus-Version: {} {}, Middleware: {}",
+        _participantName, version::String(), version::SprintName(),
+        to_string(_config.middlewareConfig.activeMiddleware));
     if (!_config.configFilePath.empty())
         _logger->Info("Using IbConfig: {}", _config.configFilePath);
 

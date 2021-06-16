@@ -104,6 +104,7 @@ void EmitValidJson(std::ostream& out, YAML::Node& node, YAML::NodeType::value pa
 namespace ib {
 namespace cfg {
 
+/*
 auto YamlToJson(const std::string& yamlString) -> std::string
 {
     auto doc = YAML::Load(yamlString);
@@ -126,6 +127,7 @@ auto JsonToYaml(const std::string& jsonString) -> std::string
     //use default emitter
     return YAML::Dump(doc);
 }
+*/
 
 
 
