@@ -55,6 +55,7 @@ namespace YAML {
     template<> struct convert<GenericPort::ProtocolType> : public VibConversion {};
     template<> struct convert<SyncType> : public VibConversion {};
     template<> struct convert<std::chrono::milliseconds> : public VibConversion {};
+    template<> struct convert<std::chrono::nanoseconds> : public VibConversion {};
     template<> struct convert<ParticipantController> : public VibConversion {};
     template<> struct convert<Participant> : public VibConversion {};
     template<> struct convert<Switch::Port> : public VibConversion {};
@@ -68,6 +69,7 @@ namespace YAML {
     template<> struct convert<FastRtps::Config> : public VibConversion {};
     template<> struct convert<VAsio::RegistryConfig> : public VibConversion {};
     template<> struct convert<VAsio::Config> : public VibConversion {};
+    template<> struct convert<Middleware> : public VibConversion {};
     template<> struct convert<MiddlewareConfig> : public VibConversion {};
     template<> struct convert<ExtensionConfig> : public VibConversion {};
     template<> struct convert<Config> : public VibConversion {};

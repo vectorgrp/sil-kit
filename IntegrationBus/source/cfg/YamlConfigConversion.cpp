@@ -304,7 +304,7 @@ bool VibConversion::decode(const Node& node, mw::logging::Level& obj)
 template<>
 Node VibConversion::encode(const Sink& obj)
 {
-    static const Sink defaultSink;
+    static const Sink defaultSink{};
     Node node;
     non_default_encode(obj.type, node, "Type", defaultSink.type);
     non_default_encode(obj.level, node, "Level", defaultSink.level);
@@ -333,7 +333,7 @@ template<>
 Node VibConversion::encode(const Logger& obj)
 {
     Node node;
-    static const Logger defaultLogger;
+    static const Logger defaultLogger{};
 
     non_default_encode(obj.logFromRemotes, node, "LogFromRemotes", defaultLogger.logFromRemotes);
     non_default_encode(obj.flush_level, node, "FlushLevel", defaultLogger.flush_level);
@@ -835,6 +835,9 @@ Node VibConversion::encode(const GenericPort::ProtocolType& obj)
     case GenericPort::ProtocolType::SOMEIP:
         node = "SOME/IP";
         break;
+    case GenericPort::ProtocolType::Undefined:
+        node = "Undefined";
+        break;
     }
     return node;
 }
@@ -923,6 +926,20 @@ bool VibConversion::decode(const Node& node, std::chrono::milliseconds& obj)
 }
 
 template<>
+Node VibConversion::encode(const std::chrono::nanoseconds& obj)
+{
+    Node node;
+    node = obj.count();
+    return node;
+}
+template<>
+bool VibConversion::decode(const Node& node, std::chrono::nanoseconds& obj)
+{
+    obj = std::chrono::nanoseconds{node.as<uint64_t>()};
+    return true;
+}
+
+template<>
 Node VibConversion::encode(const Participant& obj)
 {
     auto makePortList = [](auto&& portVector, PortDirection direction)
@@ -940,7 +957,6 @@ Node VibConversion::encode(const Participant& obj)
 
     Node node;
     node["Name"] = obj.name;
-    node["Logger"] = obj.logger;
     node["Logger"] = obj.logger;
 
     node["CanControllers"] = obj.canControllers;
@@ -985,6 +1001,9 @@ bool VibConversion::decode(const Node& node, Participant& obj)
         }
     };
 
+    obj.name = node["Name"].as<std::string>();
+
+    optional_decode(obj.logger, node, "Logger");
     optional_decode(obj.isSyncMaster, node, "IsSyncMaster");
     optional_decode(obj.participantController, node, "ParticipantController");
     optional_decode(obj.canControllers, node, "CanControllers");
@@ -1009,126 +1028,271 @@ bool VibConversion::decode(const Node& node, Participant& obj)
     makePorts(obj.patternPorts, "Pattern-In", PortDirection::In);
 
 
-    return false;
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const Switch::Port& obj)
 {
     Node node;
+    node["Name"] = obj.name;
+    node["VlanIds"] = obj.vlanIds;
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, Switch::Port& obj)
 {
-    return false;
+    obj.name = node["Name"].as<std::string>();
+    optional_decode(obj.vlanIds, node, "VlanIds");
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const Switch& obj)
 {
     Node node;
+    node["Name"] = obj.name;
+    node["Description"] = obj.description;
+    node["Ports"] = obj.ports;
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, Switch& obj)
 {
-    return false;
+    obj.name = node["Name"].as<std::string>();
+    obj.description = node["Description"].as<std::string>();
+    optional_decode(obj.ports, node, "Ports");
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const Link& obj)
 {
     Node node;
+    node["Name"] = obj.name;
+    node["Endpoints"] = obj.endpoints;
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, Link& obj)
 {
-    return false;
+    obj.name = node["Name"].as<std::string>();
+    obj.name = node["Endpoints"].as<std::string>();
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const NetworkSimulator& obj)
 {
     Node node;
+    node["Name"] = obj.name;
+    node["SimulatedLinks"] = obj.simulatedLinks;
+    node["SimulatedSwitches"] = obj.simulatedSwitches;
+    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_encode(obj.replay, node, "Replay");
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, NetworkSimulator& obj)
 {
-    return false;
+    obj.name = node["Name"].as<std::string>();
+    optional_decode(obj.simulatedSwitches, node, "SimulatedSwitches");
+    optional_decode(obj.simulatedLinks, node, "SimulatedLinks");
+    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_decode(obj.replay, node, "Replay");
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const TimeSync::SyncPolicy& obj)
 {
     Node node;
+    try
+    {
+        node = to_string(obj);
+    }
+    catch (const ib::type_conversion_error&)
+    {
+        node = "UNKNOWN_SYNC_POLICY";
+    }
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, TimeSync::SyncPolicy& obj)
 {
-    return false;
+    auto&& syncType = node.as<std::string>();
+    if (syncType == "Loose")
+        obj = TimeSync::SyncPolicy::Loose;
+    else if (syncType == "Strict")
+        obj = TimeSync::SyncPolicy::Strict;
+    else
+        return false;
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const TimeSync& obj)
 {
     Node node;
+    node["SyncPolicy"] = obj.syncPolicy;
+    node["TickPeriodNs"] = obj.tickPeriod;
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, TimeSync& obj)
 {
-    return false;
+    optional_decode(obj.syncPolicy, node, "SyncPolicy");
+    obj.tickPeriod = node["TickPeriodNs"].as<std::chrono::nanoseconds>();
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const SimulationSetup& obj)
 {
     Node node;
+    node["Participants"] = obj.participants;
+    node["Switches"] = obj.switches;
+    node["Links"] = obj.links;
+    node["TimeSync"] = obj.timeSync;
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, SimulationSetup& obj)
 {
-    return false;
+    obj.participants = node["Participants"].as<decltype(obj.participants)>();
+    obj.switches = node["Switches"].as<decltype(obj.switches)>();
+    obj.links = node["Links"].as<decltype(obj.links)>();
+    obj.timeSync = node["TimeSync"].as<decltype(obj.timeSync)>();
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const FastRtps::DiscoveryType& obj)
 {
     Node node;
+    try
+    {
+        node = to_string(obj);
+    }
+    catch (const ib::type_conversion_error&)
+    {
+        node = "UNKNOWN_DISCOVERY_TYPE";
+    }
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, FastRtps::DiscoveryType& obj)
 {
-    return false;
+    auto&& discoveryType = node.as<std::string>();
+
+    if (discoveryType == "Local")
+        obj = FastRtps::DiscoveryType::Local;
+    else if (discoveryType == "Multicast")
+        obj = FastRtps::DiscoveryType::Multicast;
+    else if (discoveryType == "Unicast")
+        obj = FastRtps::DiscoveryType::Unicast;
+    else if (discoveryType == "ConfigFile")
+        obj = FastRtps::DiscoveryType::ConfigFile;
+    else
+        return false;
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const FastRtps::Config& obj)
 {
     Node node;
+    node["DiscoveryType"] = obj.discoveryType;
+    node["UnicastLocators"] = obj.unicastLocators;
+    node["ConfigFileName"] = obj.configFileName;
+    auto optional_field = [&node](auto value, auto name) {
+        if (value != -1)
+            node[name] = value;
+    };
+    optional_field(obj.sendSocketBufferSize, "SendSocketBufferSize");
+    optional_field(obj.listenSocketBufferSize, "ListenSocketBufferSize");
+    optional_field(obj.historyDepth, "HistoryDepth");
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, FastRtps::Config& obj)
 {
-    return false;
+
+    optional_decode(obj.discoveryType, node, "DiscoveryType");
+    obj.configFileName = node["ConfigFileName"].as<decltype(obj.configFileName)>();
+    obj.unicastLocators = node["UnicastLocators"].as<decltype(obj.unicastLocators)>();
+
+    switch (obj.discoveryType)
+    {
+    case FastRtps::DiscoveryType::Local:
+        if (!obj.unicastLocators.empty())
+            return false; // Misconfiguration{ "UnicastLocators must not be specified when using DiscoveryType Local" };
+
+        if (!obj.configFileName.empty())
+            return false; // Misconfiguration{ "Using a FastRTPS configuration file requires DiscoverType ConfigFile" };
+
+        break;
+
+    case FastRtps::DiscoveryType::Multicast:
+        if (!obj.unicastLocators.empty())
+            return false; // throw Misconfiguration{ "UnicastLocators must not be specified when using DiscoveryType Multicast" };
+
+        if (!obj.configFileName.empty())
+            return false; // throw Misconfiguration{ "Using a FastRTPS configuration file requires DiscoverType ConfigFile" };
+
+        break;
+
+    case FastRtps::DiscoveryType::Unicast:
+        if (obj.unicastLocators.empty())
+            return false; // throw Misconfiguration{ "DiscoveryType Unicast requires UnicastLocators being specified" };
+
+        if (!obj.configFileName.empty())
+            return false; // throw Misconfiguration{ "Using a FastRTPS configuration file requires DiscoverType ConfigFile" };
+
+        break;
+
+    case FastRtps::DiscoveryType::ConfigFile:
+        if (!obj.unicastLocators.empty())
+            return false; // throw Misconfiguration{ "UnicastLocators must not be specified when using DiscoveryType Multicast" };
+
+        if (obj.configFileName.empty())
+            return false; // Misconfiguration{ "DiscoveryType ConfigFile requires ConfigFileName being specified" };
+
+        break;
+
+    default:
+        return false; // Misconfiguration{ "Invalid FastRTPS discovery type: " + to_string(fastRtps.discoveryType) };
+    }
+
+    optional_decode(obj.sendSocketBufferSize, node, "SendSocketBufferSize");
+    optional_decode(obj.listenSocketBufferSize, node, "ListenSocketBufferSize");
+    optional_decode(obj.historyDepth, node, "HistoryDepth");
+    if (node["HistoryDepth"])
+    {
+        if (obj.historyDepth <= 0)
+            return false; // throw Misconfiguration{ "FastRTPS HistoryDepth must be above 0" };
+    }
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const VAsio::RegistryConfig& obj)
 {
+    static const VAsio::RegistryConfig defaultObj;
     Node node;
+    non_default_encode(obj.hostname, node, "Hostname", defaultObj.hostname);
+    non_default_encode(obj.port, node, "Port", defaultObj.port);
+    non_default_encode(obj.logger, node, "Logger", defaultObj.logger);
+    non_default_encode(obj.connectAttempts, node, "ConnectAttempts", defaultObj.connectAttempts);
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, VAsio::RegistryConfig& obj)
 {
+    optional_decode(obj.hostname, node, "Hostname");
+    optional_decode(obj.port, node, "Port");
+    optional_decode(obj.logger, node, "Logger");
+    optional_decode(obj.connectAttempts, node, "ConnectAttempts");
     return false;
 }
 
@@ -1136,72 +1300,179 @@ template<>
 Node VibConversion::encode(const VAsio::Config& obj)
 {
     Node node;
+    static const VAsio::Config defaultObj;
+
+    non_default_encode(obj.registry, node, "Registry", defaultObj.registry);
+    non_default_encode(obj.tcpNoDelay, node, "TcpNoDelay", defaultObj.tcpNoDelay);
+    non_default_encode(obj.tcpQuickAck, node, "TcpQuickAck", defaultObj.tcpQuickAck);
+    non_default_encode(obj.tcpReceiveBufferSize, node, "TcpReceiveBufferSize", defaultObj.tcpReceiveBufferSize);
+    non_default_encode(obj.tcpSendBufferSize, node, "TcpSendBufferSize", defaultObj.tcpSendBufferSize);
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, VAsio::Config& obj)
 {
-    return false;
+    optional_decode(obj.registry, node, "Registry");
+    optional_decode(obj.tcpNoDelay, node, "TcpNoDelay");
+    optional_decode(obj.tcpQuickAck, node, "TcpQuickAck");
+    optional_decode(obj.tcpReceiveBufferSize, node, "TcpReceiveBufferSize");
+    optional_decode(obj.tcpSendBufferSize, node, "TcpSendBufferSize");
+    return true;
+}
+
+template<>
+Node VibConversion::encode(const Middleware& obj)
+{
+    Node node;
+    try
+    {
+        node = to_string(obj);
+    }
+    catch (const ib::type_conversion_error&)
+    {
+        node = "UNKNOWN_MIDDLEWARE";
+    }
+    return node;
+}
+template<>
+bool VibConversion::decode(const Node& node, Middleware& obj)
+{
+    try
+    {
+        obj = from_string<Middleware>(node.as<std::string>());
+    }
+    catch (const type_conversion_error&)
+    {
+        return false; // throw Misconfiguration{ "Unknown active middleware in from_json" };
+    }
 }
 
 template<>
 Node VibConversion::encode(const MiddlewareConfig& obj)
 {
+    const static MiddlewareConfig defaultObj{};
     Node node;
+    non_default_encode(obj.activeMiddleware, node, "ActiveMiddleware", defaultObj.activeMiddleware);
+    non_default_encode(obj.fastRtps, node, "FastRtps", defaultObj.fastRtps);
+    non_default_encode(obj.vasio, node, "VAsio", defaultObj.vasio);
     return node;
 }
+
 template<>
 bool VibConversion::decode(const Node& node, MiddlewareConfig& obj)
 {
-    return false;
+    optional_decode(obj.activeMiddleware, node, "ActiveMiddleware");
+    optional_decode(obj.fastRtps, node, "FastRtps");
+    optional_decode(obj.vasio, node, "VAsio");
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const ExtensionConfig& obj)
 {
+    static const ExtensionConfig defaultObj;
     Node node;
+    non_default_encode(obj.searchPathHints, node, "SearchPathHints", defaultObj.searchPathHints);
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, ExtensionConfig& obj)
 {
-    return false;
+    optional_decode(obj.searchPathHints, node, "SearchPathHints");
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const Config& obj)
 {
+    static const Config defaultObj;
     Node node;
+    node["ConfigVersion"] = obj.version;
+    node["ConfigName"] = obj.name;
+    node["Description"] = obj.description;
+    node["SimulationSetup"] = obj.simulationSetup;
+    node["MiddlewareConfig"] = obj.middlewareConfig;
+    non_default_encode(obj.extensionConfig, node, "ExtensionConfig", defaultObj.extensionConfig);
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, Config& obj)
 {
-    return false;
+    obj.version = node["ConfigVersion"].as<decltype(obj.version)>();
+    obj.name = node["ConfigName"].as<decltype(obj.name)>();
+    obj.description = node["Description"].as<decltype(obj.description)>();
+    obj.simulationSetup = node["SimulationSetup"].as<decltype(obj.simulationSetup)>();
+    obj.middlewareConfig = node["MiddlewareConfig"].as<decltype(obj.middlewareConfig)>();
+    optional_decode(obj.extensionConfig, node, "ExtensionConfig");
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const TraceSink& obj)
 {
     Node node;
+    node["Name"] = obj.name;
+    node["Type"] = obj.type;
+    node["OutputPath"] = obj.outputPath;
+    //only serialize if disabled
+    if (!obj.enabled)
+    {
+        node["Enabled"] = obj.enabled;
+    }
+
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, TraceSink& obj)
 {
-    return false;
+    obj.name = node["Name"].as<std::string>();
+    obj.type = node["Type"].as<decltype(obj.type)>();
+    obj.outputPath = node["OutputPath"].as<decltype(obj.outputPath)>();
+    if (node["Enabled"])
+    {
+        obj.enabled = node["Enabled"].as<decltype(obj.enabled)>();
+    }
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const TraceSink::Type& obj)
 {
     Node node;
+    switch (obj)
+    {
+    case TraceSink::Type::Undefined:
+        node =  "Undefined";
+        break;
+    case TraceSink::Type::Mdf4File:
+        node = "Mdf4File";
+        break;
+    case TraceSink::Type::PcapFile:
+        node = "PcapFile";
+        break;
+    case TraceSink::Type::PcapPipe:
+        node = "PcapPipe";
+        break;
+    default:
+        throw Misconfiguration{"Unknown TraceSink Type"};
+    }
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, TraceSink::Type& obj)
 {
-    return false;
+    auto&& str = node.as<std::string>();
+    if (str == "Undefined" || str == "")
+        obj = TraceSink::Type::Undefined;
+    else if (str == "Mdf4File")
+        obj = TraceSink::Type::Mdf4File;
+    else if (str == "PcapFile")
+        obj = TraceSink::Type::PcapFile;
+    else if (str == "PcapPipe")
+        obj = TraceSink::Type::PcapPipe;
+    else
+        return false;
+    return true;
 }
 
 template<>
@@ -1220,24 +1491,55 @@ template<>
 Node VibConversion::encode(const TraceSource::Type& obj)
 {
     Node node;
+    switch (obj)
+    {
+    case TraceSource::Type::Undefined:
+        node = "Undefined";
+        break;
+    case TraceSource::Type::Mdf4File:
+        node = "Mdf4File";
+        break;
+    case TraceSource::Type::PcapFile:
+        node = "PcapFile";
+        break;
+    default:
+        throw Misconfiguration{"Unknown TraceSource Type"};
+    }
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, TraceSource::Type& obj)
 {
-    return false;
+    auto&& str = node.as<std::string>();
+    if (str == "Undefined" || str == "")
+        obj = TraceSource::Type::Undefined;
+    else if (str == "Mdf4File")
+        obj = TraceSource::Type::Mdf4File;
+    else if (str == "PcapFile")
+        obj = TraceSource::Type::PcapFile;
+    else 
+        return false;
+    return true;
 }
 
 template<>
 Node VibConversion::encode(const Replay& obj)
 {
+    static const Replay defaultObj;
     Node node;
+    node["UseTraceSource"] = obj.useTraceSource;
+    non_default_encode(obj.direction, node, "Direction", defaultObj.direction);
+    non_default_encode(obj.mdfChannel, node, "MdfChannel", defaultObj.mdfChannel);
+
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, Replay& obj)
 {
-    return false;
+    obj.useTraceSource = node["UseTraceSource"].as<decltype(obj.useTraceSource)>();
+    optional_decode(obj.direction, node, "Direction");
+    optional_decode(obj.mdfChannel, node, "MdfChannel");
+    return true;
 }
 
 template<>

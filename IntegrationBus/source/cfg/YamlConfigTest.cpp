@@ -600,5 +600,15 @@ TEST_F(YamlConfigTest, yaml_config_parsing)
         auto port2 = node.as<DigitalIoPort>();
         EXPECT_TRUE(port == port2);
     }
+    {
+        NetworkSimulator ns;
+        ns.name = "netsim";
+        ns.replay.useTraceSource = "foo";
+        ns.simulatedLinks.push_back("link1");
+        YAML::Node node;
+        node = ns;
+        auto ns2 = node.as<NetworkSimulator>();
+        EXPECT_TRUE(ns == ns2);
+    }
 }
 } // anonymous namespace
