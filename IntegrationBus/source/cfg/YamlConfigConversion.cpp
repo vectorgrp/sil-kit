@@ -709,7 +709,10 @@ Node VibConversion::encode(const DigitalIoPort& obj)
 {
     Node node;
     node["Name"] = obj.name;
-    node["value"] = obj.initvalue;
+    if (obj.direction == PortDirection::Out)
+    {
+        node["value"] = obj.initvalue;
+    }
 
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
@@ -731,8 +734,11 @@ Node VibConversion::encode(const AnalogIoPort& obj)
 {
     Node node;
     node["Name"] = obj.name;
-    node["value"] = obj.initvalue;
-    node["unit"] = obj.unit;
+    if (obj.direction == PortDirection::Out)
+    {
+        node["value"] = obj.initvalue;
+        node["unit"] = obj.unit;
+    }
 
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
@@ -758,13 +764,14 @@ Node VibConversion::encode(const PwmPort& obj)
 {
     Node node;
     node["Name"] = obj.name;
+    if (obj.direction == PortDirection::Out)
     {
         Node freq;
         freq["value"] = obj.initvalue.frequency;
         freq["unit"] = obj.unit;
         node["freq"] = freq;
+        node["duty"] = obj.initvalue.dutyCycle;
     }
-    node["duty"] = obj.initvalue.dutyCycle;
 
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
@@ -790,7 +797,10 @@ Node VibConversion::encode(const PatternPort& obj)
 {
     Node node;
     node["Name"] = obj.name;
-    node["value"] = hex_encode(obj.initvalue);
+    if (obj.direction == PortDirection::Out)
+    {
+        node["value"] = hex_encode(obj.initvalue);
+    }
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
     return node;
@@ -963,8 +973,23 @@ Node VibConversion::encode(const Participant& obj)
         return sequence;
     };
 
+    // GenericSubscribers cannot be easily discerned from GenericPublishers (same type of GenericPort),
+    // so we treat them specially here:
+    auto makeSubscribers = [](auto parentNode, auto&& subscribers)
+    {
+        for (const auto& subscriber : subscribers)
+        {
+            YAML::Node node;
+            node["Name"] = subscriber.name;
+            optional_encode(subscriber.useTraceSinks, node, "UseTraceSinks");
+            optional_encode(subscriber.replay, node, "Replay");
+            parentNode.push_back(node);
+        }
+    };
+
     Node node;
     node["Name"] = obj.name;
+    node["Description"] = obj.description;
     node["Logger"] = obj.logger;
 
     node["CanControllers"] = obj.canControllers;
@@ -983,7 +1008,7 @@ Node VibConversion::encode(const Participant& obj)
     node["Pattern-Out"] = makePortList(obj.patternPorts, PortDirection::Out);
 
     node["GenericPublishers"] = obj.genericPublishers;
-    node["GenericSubscribers"] = obj.genericSubscribers;
+    makeSubscribers(node["GenericSubscribers"], obj.genericSubscribers);
 
     node["TraceSinks"] = obj.traceSinks;
     node["TraceSources"] = obj.traceSources;
@@ -1011,6 +1036,7 @@ bool VibConversion::decode(const Node& node, Participant& obj)
 
     obj.name = node["Name"].as<std::string>();
 
+    optional_decode(obj.description, node, "Description");
     optional_decode(obj.logger, node, "Logger");
     optional_decode(obj.isSyncMaster, node, "IsSyncMaster");
     optional_decode(obj.participantController, node, "ParticipantController");

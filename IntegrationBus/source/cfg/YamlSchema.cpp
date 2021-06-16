@@ -283,6 +283,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
                 participants,
                 {"Switches", {
                         {"Name"},
+                        {"Description"},
                         {"Ports", {
                                 {"Name"},
                                 {"VlanIds"},
