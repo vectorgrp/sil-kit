@@ -2,6 +2,7 @@
 #pragma once
 
 #include <chrono>
+#include <string>
 
 #include "ib/cfg/Config.hpp"
 
@@ -13,6 +14,7 @@ using namespace ib::cfg;
 // Encode/Decode implementation is provided as templated static methods, to reduce boiler plate code.
 struct VibConversion
 {
+    // required for YAML::convert<T>:
     template<typename IbDataType>
     static Node encode(const IbDataType& obj);
     template<typename IbDataType>

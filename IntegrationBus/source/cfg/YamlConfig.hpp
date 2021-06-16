@@ -38,10 +38,10 @@ auto to_yaml(const VibConfigT& vibValue) -> YAML::Node
         node = vibValue;
         return node;
     }
-    catch (const YAML::BadConversion& ex)
+    catch (const YAML::Exception& ex)
     {
         std::stringstream ss;
-        ss << "YAML Misconfiguration @ " << ex.mark
+        ss << "YAML Error @ " << ex.mark
             << ": " << ex.msg;
         throw Misconfiguration{ ss.str() };
     }
@@ -53,10 +53,10 @@ auto from_yaml(const YAML::Node& node) -> VibConfigT
     {
         return node.as<VibConfigT>();
     }
-    catch (const YAML::BadConversion& ex)
+    catch (const YAML::Exception& ex)
     {
         std::stringstream ss;
-        ss << "YAML Misconfiguration @ " << ex.mark
+        ss << "YAML Error @ " << ex.mark
             << ": " << ex.msg;
         throw Misconfiguration{ ss.str() };
     }

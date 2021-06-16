@@ -332,6 +332,10 @@ auto MakeYamlSchema() -> YamlSchemaElem
                 },
             }
         },
+        {"ExtensionConfig", {
+                {"SearchPathHints"}
+            }
+        },
     };
 
     return yamlSchema;

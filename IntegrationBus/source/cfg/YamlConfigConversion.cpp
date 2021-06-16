@@ -4,8 +4,6 @@
 #include <algorithm>
 #include <sstream>
 #include <thread>
-#include <unordered_map>
-#include <unordered_set>
 #include <chrono>
 
 #include "ib/cfg/OptionalCfg.hpp"
@@ -17,6 +15,42 @@ using namespace ib;
 
 //local utilities
 namespace {
+
+class BadVibConversion : public YAML::BadConversion
+{
+public:
+    BadVibConversion(const YAML::Node& node, const std::string& message)
+        :BadConversion(node.Mark())
+    {
+        msg = message;
+    }
+};
+
+// Helper to parse a node as the given type or throw our BadVibConversion with the type's name in the error message.
+template<typename T> struct ParseTypeName { static constexpr const char* name = "Unknown Type"; };
+template<> struct ParseTypeName<int> { static constexpr const char* name = "Integer"; };
+template<> struct ParseTypeName<int16_t> { static constexpr const char* name = "Integer"; };
+template<> struct ParseTypeName<int8_t> { static constexpr const char* name = "Integer"; };
+template<> struct ParseTypeName<double> { static constexpr const char* name = "Floating Point"; };
+template<> struct ParseTypeName<float> { static constexpr const char* name = "Floating Point"; };
+template<> struct ParseTypeName<bool> { static constexpr const char* name = "Boolean"; };
+template<> struct ParseTypeName<std::string> { static constexpr const char* name = "String"; };
+
+template<typename ValueT>
+auto parse_as(const YAML::Node& node) -> ValueT
+{
+    try
+    {
+        return node.as<ValueT>();
+    }
+    catch(const YAML::BadConversion&)
+    {
+        std::stringstream ss;
+        ss << "Cannot parse as Type \"" << ParseTypeName<ValueT>::name
+            << "\": " << YAML::Dump(node);
+        throw BadVibConversion(node, ss.str());
+    }
+}
 
 inline auto nibble_to_char(char nibble) -> char
 {
@@ -81,7 +115,7 @@ auto macaddress_decode(const YAML::Node& node) -> std::array<uint8_t, 6>
 {
     std::array<uint8_t, 6> macAddress;
 
-    std::stringstream macIn(node.as<std::string>());
+    std::stringstream macIn(parse_as<std::string>(node));
     from_istream(macIn, macAddress);
 
     return macAddress;
@@ -147,9 +181,12 @@ auto non_default_encode(const ConfigT& value, YAML::Node& node, const std::strin
         node[fieldName] = value;
 }
 
+
 } //end anonymous
 
-// YAML type conversion helpers for our data types
+// YAML type conversion helpers for our data types.
+// Ported from the JsonConfig from_json/to_json templates to the
+// internal conversion mechanism of yaml-cpp.
 namespace YAML {
 
 
@@ -170,7 +207,7 @@ bool VibConversion::decode(const Node& node, MdfChannel& obj)
 {
     if (!node.IsMap())
     {
-        return false;
+        throw BadVibConversion(node, "MdfChannel should be a Map");
     }
     optional_decode(obj.channelName, node, "ChannelName");
     optional_decode(obj.channelPath, node, "ChannelPath");
@@ -181,7 +218,6 @@ bool VibConversion::decode(const Node& node, MdfChannel& obj)
     return true;
 }
 
-// copy paste
 template<>
 Node VibConversion::encode(const Version& obj)
 {
@@ -196,10 +232,14 @@ bool VibConversion::decode(const Node& node, Version& obj)
 {
     if (!node.IsScalar())
     {
-        return false;
+        throw BadVibConversion(node, "Version must be a string \"x.y.z\"");
     }
-    std::stringstream in(node.as<std::string>());
+    std::stringstream in(parse_as<std::string>(node));
     in >> obj;
+    if (in.fail())
+    {
+        throw BadVibConversion(node, "Version must be a string \"x.y.z\"");
+    }
     return !in.fail();
 }
 
@@ -228,9 +268,9 @@ bool VibConversion::decode(const Node& node, Sink::Type& obj)
 {
     if (!node.IsScalar())
     {
-        return false;
+        throw BadVibConversion(node, "Sink::Type should be a string of Remote|Stdout|File.");
     }
-    auto&& str = node.as<std::string>();
+    auto&& str = parse_as<std::string>(node);
     if (str == "Remote" || str == "")
     {
         obj = Sink::Type::Remote;
@@ -245,7 +285,7 @@ bool VibConversion::decode(const Node& node, Sink::Type& obj)
     }
     else 
     {
-        return false;
+        throw BadVibConversion(node, "Unknown Sink::Type: " + str + ".");
     }
     return true;
 }
@@ -283,7 +323,12 @@ Node VibConversion::encode(const mw::logging::Level& obj)
 template<>
 bool VibConversion::decode(const Node& node, mw::logging::Level& obj)
 {
-    auto&& str = node.as<std::string>();
+    if (!node.IsScalar())
+    {
+        throw BadVibConversion(node, 
+            "Level should be a string of Critical|Error|Warn|Info|Debug|Trace|Off.");
+    }
+    auto&& str = parse_as<std::string>(node);
     if (str == "Critical")
         obj = mw::logging::Level::Critical;
     else if (str == "Error")
@@ -299,7 +344,9 @@ bool VibConversion::decode(const Node& node, mw::logging::Level& obj)
     else if (str == "Off")
         obj = mw::logging::Level::Off;
     else
-        return false;
+    {
+        throw BadVibConversion(node, "Unknown mw::logging::Level: " + str + ".");
+    }
     return true;
 }
 
@@ -316,7 +363,6 @@ Node VibConversion::encode(const Sink& obj)
 template<>
 bool VibConversion::decode(const Node& node, Sink& obj)
 {
-    //obj.type = node["Type"].as<Sink::Type>(); 
     optional_decode(obj.type, node, "Type");
     optional_decode(obj.level, node, "Level");
 
@@ -324,7 +370,7 @@ bool VibConversion::decode(const Node& node, Sink& obj)
     {
         if (!node["Logname"])
         {
-            return false; //XXX throw here with message?
+            throw BadVibConversion(node, "Sink of type Sink::Type::File requires a Logname");
         }
         obj.logname = node["Logname"].as<std::string>();
     }
@@ -365,13 +411,6 @@ Node VibConversion::encode(const CanController& obj)
 template<>
 bool VibConversion::decode(const Node& node, CanController& obj)
 {
-    // backward compatibility to old json config files with only name of controller
-    if (node.IsScalar())
-    {
-        obj.name = node.as<std::string>();
-        return true;
-    }
-
     obj.name = node["Name"].as<std::string>();
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
@@ -462,26 +501,30 @@ template<>
 bool VibConversion::decode(const Node& node, sim::fr::ClusterParameters& obj)
 {
     //NB parsing with as<uint8_t>() leads to problems
-    obj.gColdstartAttempts = static_cast<decltype(obj.gColdstartAttempts)>(node["gColdstartAttempts"].as<int>());
-    obj.gCycleCountMax = static_cast<decltype(obj.gCycleCountMax)>(node["gCycleCountMax"].as<int>());
-    obj.gdActionPointOffset = static_cast<decltype(obj.gdActionPointOffset)>(node["gdActionPointOffset"].as<int>());
-    obj.gdDynamicSlotIdlePhase = static_cast<decltype(obj.gdDynamicSlotIdlePhase)>(node["gdDynamicSlotIdlePhase"].as<int>());
-    obj.gdMiniSlot = static_cast<decltype(obj.gdMiniSlot)>(node["gdMiniSlot"].as<int>());
-    obj.gdMiniSlotActionPointOffset = static_cast<decltype(obj.gdMiniSlotActionPointOffset)>(node["gdMiniSlotActionPointOffset"].as<int>());
-    obj.gdStaticSlot = static_cast<decltype(obj.gdStaticSlot)>(node["gdStaticSlot"].as<int>());
-    obj.gdSymbolWindow = static_cast<decltype(obj.gdSymbolWindow)>(node["gdSymbolWindow"].as<int>());
-    obj.gdSymbolWindowActionPointOffset = static_cast<decltype(obj.gdSymbolWindowActionPointOffset)>(node["gdSymbolWindowActionPointOffset"].as<int>());
-    obj.gdTSSTransmitter = static_cast<decltype(obj.gdTSSTransmitter)>(node["gdTSSTransmitter"].as<int>());
-    obj.gdWakeupTxActive = static_cast<decltype(obj.gdWakeupTxActive)>(node["gdWakeupTxActive"].as<int>());
-    obj.gdWakeupTxIdle = static_cast<decltype(obj.gdWakeupTxIdle)>(node["gdWakeupTxIdle"].as<int>());
-    obj.gListenNoise = static_cast<decltype(obj.gListenNoise)>(node["gListenNoise"].as<int>());
-    obj.gMacroPerCycle = static_cast<decltype(obj.gMacroPerCycle)>(node["gMacroPerCycle"].as<int>());
-    obj.gMaxWithoutClockCorrectionFatal = static_cast<decltype(obj.gMaxWithoutClockCorrectionFatal)>(node["gMaxWithoutClockCorrectionFatal"].as<int>());
-    obj.gMaxWithoutClockCorrectionPassive = static_cast<decltype(obj.gMaxWithoutClockCorrectionPassive)>(node["gMaxWithoutClockCorrectionPassive"].as<int>());
-    obj.gNumberOfMiniSlots = static_cast<decltype(obj.gNumberOfMiniSlots)>(node["gNumberOfMiniSlots"].as<int>());
-    obj.gNumberOfStaticSlots = static_cast<decltype(obj.gNumberOfStaticSlots)>(node["gNumberOfStaticSlots"].as<int>());
-    obj.gPayloadLengthStatic = static_cast<decltype(obj.gPayloadLengthStatic)>(node["gPayloadLengthStatic"].as<int>());
-    obj.gSyncFrameIDCountMax = static_cast<decltype(obj.gSyncFrameIDCountMax)>(node["gSyncFrameIDCountMax"].as<int>());
+    auto parseInt = [&node](auto instance, auto name)
+    {
+        return static_cast<decltype(instance)>(parse_as<int>(node[name]));
+    };
+    obj.gColdstartAttempts = parseInt(obj.gColdstartAttempts, "gColdstartAttempts");
+    obj.gCycleCountMax = parseInt(obj.gCycleCountMax, "gCycleCountMax");
+    obj.gdActionPointOffset = parseInt(obj.gdActionPointOffset, "gdActionPointOffset");
+    obj.gdDynamicSlotIdlePhase = parseInt(obj.gdDynamicSlotIdlePhase, "gdDynamicSlotIdlePhase");
+    obj.gdMiniSlot = parseInt(obj.gdMiniSlot, "gdMiniSlot");
+    obj.gdMiniSlotActionPointOffset = parseInt(obj.gdMiniSlotActionPointOffset, "gdMiniSlotActionPointOffset");
+    obj.gdStaticSlot = parseInt(obj.gdStaticSlot, "gdStaticSlot");
+    obj.gdSymbolWindow = parseInt(obj.gdSymbolWindow, "gdSymbolWindow");
+    obj.gdSymbolWindowActionPointOffset = parseInt(obj.gdSymbolWindowActionPointOffset, "gdSymbolWindowActionPointOffset");
+    obj.gdTSSTransmitter = parseInt(obj.gdTSSTransmitter, "gdTSSTransmitter");
+    obj.gdWakeupTxActive = parseInt(obj.gdWakeupTxActive, "gdWakeupTxActive");
+    obj.gdWakeupTxIdle = parseInt(obj.gdWakeupTxIdle, "gdWakeupTxIdle");
+    obj.gListenNoise = parseInt(obj.gListenNoise, "gListenNoise");
+    obj.gMacroPerCycle = parseInt(obj.gMacroPerCycle, "gMacroPerCycle");
+    obj.gMaxWithoutClockCorrectionFatal = parseInt(obj.gMaxWithoutClockCorrectionFatal, "gMaxWithoutClockCorrectionFatal");
+    obj.gMaxWithoutClockCorrectionPassive = parseInt(obj.gMaxWithoutClockCorrectionPassive, "gMaxWithoutClockCorrectionPassive");
+    obj.gNumberOfMiniSlots = parseInt(obj.gNumberOfMiniSlots, "gNumberOfMiniSlots");
+    obj.gNumberOfStaticSlots = parseInt(obj.gNumberOfStaticSlots, "gNumberOfStaticSlots");
+    obj.gPayloadLengthStatic = parseInt(obj.gPayloadLengthStatic, "gPayloadLengthStatic");
+    obj.gSyncFrameIDCountMax = parseInt(obj.gSyncFrameIDCountMax, "gSyncFrameIDCountMax");
     return true;
 }
 template<>
@@ -556,7 +599,7 @@ Node VibConversion::encode(const sim::fr::TransmissionMode& obj)
         node =  "SingleShot";
         break;
     default:
-        throw Misconfiguration{ "Unknown TransmissionMode in VibConbersion::encode<TransmissionMode>" };
+        throw BadVibConversion(node, "Unknown TransmissionMode in VibConbersion::encode<TransmissionMode>");
     }
 
     return node;
@@ -565,13 +608,15 @@ template<>
 bool VibConversion::decode(const Node& node, sim::fr::TransmissionMode& obj)
 {
 
-    auto&& str = node.as<std::string>();
+    auto&& str = parse_as<std::string>(node);
     if (str == "Continuous")
         obj = sim::fr::TransmissionMode::Continuous;
     else if (str == "SingleShot")
         obj = sim::fr::TransmissionMode::SingleShot;
     else
-        return false;
+    {
+        throw BadVibConversion(node, "Unknown sim::fr::TransmissionMode: " + str);
+    }
     return true;
 
 }
@@ -601,7 +646,7 @@ Node VibConversion::encode(const sim::fr::Channel& obj)
 template<>
 bool VibConversion::decode(const Node& node, sim::fr::Channel& obj)
 {
-    auto&& str = node.as<std::string>();
+    auto&& str = parse_as<std::string>(node);
     if (str == "A")
         obj =  sim::fr::Channel::A;
     else if (str == "B")
@@ -611,7 +656,9 @@ bool VibConversion::decode(const Node& node, sim::fr::Channel& obj)
     else if (str == "None" || str == "")
         obj = sim::fr::Channel::None;
     else
-        return false;
+    {
+        throw BadVibConversion(node, "Unknown sim::fr::Channel: " + str);
+    }
     return true;
 }
 
@@ -631,7 +678,7 @@ Node VibConversion::encode(const sim::fr::ClockPeriod& obj)
         node = "50ns";
         break;
     default:
-        throw Misconfiguration{ "Unknown ClockPeriod in VibConversion::encode<ClockPeriod>" };
+        throw BadVibConversion(node, "Unknown ClockPeriod in VibConversion::encode<ClockPeriod>");
 
     }
 
@@ -640,15 +687,17 @@ Node VibConversion::encode(const sim::fr::ClockPeriod& obj)
 template<>
 bool VibConversion::decode(const Node& node, sim::fr::ClockPeriod& obj)
 {
-    auto&& str = node.as<std::string>();
+    auto&& str = parse_as<std::string>(node);
     if (str == "12.5ns")
         obj = sim::fr::ClockPeriod::T12_5NS;
     else if (str == "25ns")
         obj = sim::fr::ClockPeriod::T25NS;
     else if (str == "50ns")
-obj = sim::fr::ClockPeriod::T50NS;
+        obj = sim::fr::ClockPeriod::T50NS;
     else
-        return false;
+    {
+        throw BadVibConversion(node, "Unknown sim::fr::ClockPeriod: " + str);
+    }
     return true;
 }
 
@@ -862,17 +911,19 @@ template<>
 bool VibConversion::decode(const Node& node, GenericPort::ProtocolType& obj)
 {
 
-    auto&& protocolName = node.as<std::string>();
-    if (protocolName == "ROS")
+    auto&& str = parse_as<std::string>(node);
+    if (str == "ROS")
         obj = GenericPort::ProtocolType::ROS;
-    else if (protocolName == "SOME/IP")
+    else if (str == "SOME/IP")
         obj = GenericPort::ProtocolType::SOMEIP;
-    else if (protocolName == "Undefined")
+    else if (str == "Undefined")
         obj = GenericPort::ProtocolType::Undefined;
-    else if (protocolName == "")
+    else if (str == "")
         obj = GenericPort::ProtocolType::Undefined;
     else
-        return false;
+    {
+        throw BadVibConversion(node, "Unknown GenericPort::ProtoclType: " + str + ".");
+    }
     return true;
 }
 
@@ -886,7 +937,7 @@ Node VibConversion::encode(const SyncType& obj)
 template<>
 bool VibConversion::decode(const Node& node, SyncType& obj)
 {
-    auto&& syncType = node.as<std::string>();
+    auto&& syncType = parse_as<std::string>(node);
 
     if (syncType == "DistributedTimeQuantum")
         obj = SyncType::DistributedTimeQuantum;
@@ -900,8 +951,10 @@ bool VibConversion::decode(const Node& node, SyncType& obj)
         obj = SyncType::DiscreteTimePassive;
     else if (syncType == "Unsynchronized")
         obj = SyncType::Unsynchronized;
-    else 
-        return false;
+    else
+    {
+        throw BadVibConversion(node, "Unknown SyncType: " + syncType + ".");
+    }
     return true;
 }
 
@@ -938,7 +991,7 @@ Node VibConversion::encode(const std::chrono::milliseconds& obj)
 template<>
 bool VibConversion::decode(const Node& node, std::chrono::milliseconds& obj)
 {
-    obj = std::chrono::milliseconds{node.as<uint64_t>()};
+    obj = std::chrono::milliseconds{parse_as<uint64_t>(node)};
     return true;
 }
 
@@ -952,7 +1005,7 @@ Node VibConversion::encode(const std::chrono::nanoseconds& obj)
 template<>
 bool VibConversion::decode(const Node& node, std::chrono::nanoseconds& obj)
 {
-    obj = std::chrono::nanoseconds{node.as<uint64_t>()};
+    obj = std::chrono::nanoseconds{parse_as<uint64_t>(node)};
     return true;
 }
 
@@ -1154,13 +1207,15 @@ Node VibConversion::encode(const TimeSync::SyncPolicy& obj)
 template<>
 bool VibConversion::decode(const Node& node, TimeSync::SyncPolicy& obj)
 {
-    auto&& syncType = node.as<std::string>();
+    auto&& syncType = parse_as<std::string>(node);
     if (syncType == "Loose")
         obj = TimeSync::SyncPolicy::Loose;
     else if (syncType == "Strict")
         obj = TimeSync::SyncPolicy::Strict;
     else
-        return false;
+    {
+        throw BadVibConversion(node, "Unknown TimeSync::SyncPolicy: " + syncType + ".");
+    }
     return true;
 }
 
@@ -1217,7 +1272,7 @@ Node VibConversion::encode(const FastRtps::DiscoveryType& obj)
 template<>
 bool VibConversion::decode(const Node& node, FastRtps::DiscoveryType& obj)
 {
-    auto&& discoveryType = node.as<std::string>();
+    auto&& discoveryType = parse_as<std::string>(node);
 
     if (discoveryType == "Local")
         obj = FastRtps::DiscoveryType::Local;
@@ -1228,7 +1283,9 @@ bool VibConversion::decode(const Node& node, FastRtps::DiscoveryType& obj)
     else if (discoveryType == "ConfigFile")
         obj = FastRtps::DiscoveryType::ConfigFile;
     else
-        return false;
+    {
+        throw BadVibConversion(node, "Unknown FastRtps::DiscoveryType: " + discoveryType + ".");
+    }
     return true;
 }
 
@@ -1260,42 +1317,58 @@ bool VibConversion::decode(const Node& node, FastRtps::Config& obj)
     {
     case FastRtps::DiscoveryType::Local:
         if (!obj.unicastLocators.empty())
-            return false; // Misconfiguration{ "UnicastLocators must not be specified when using DiscoveryType Local" };
+        {
+            throw BadVibConversion(node, "FastRtps::Config: UnicastLocators must not be specified when using DiscoveryType Local");
+        }
 
         if (!obj.configFileName.empty())
-            return false; // Misconfiguration{ "Using a FastRTPS configuration file requires DiscoverType ConfigFile" };
+        {
+            throw BadVibConversion(node, "FastRtps::Config: Using a FastRTPS configuration file requires DiscoverType ConfigFile");
+        }
 
         break;
 
     case FastRtps::DiscoveryType::Multicast:
         if (!obj.unicastLocators.empty())
-            return false; // throw Misconfiguration{ "UnicastLocators must not be specified when using DiscoveryType Multicast" };
+        {
+            throw BadVibConversion(node, "FastRtps::Config: UnicastLocators must not be specified when using DiscoveryType Multicast");
+        }
 
         if (!obj.configFileName.empty())
-            return false; // throw Misconfiguration{ "Using a FastRTPS configuration file requires DiscoverType ConfigFile" };
+        {
+            throw BadVibConversion(node, "FastRtps::Config: Using a FastRTPS configuration file requires DiscoverType ConfigFile");
+        }
 
         break;
 
     case FastRtps::DiscoveryType::Unicast:
         if (obj.unicastLocators.empty())
-            return false; // throw Misconfiguration{ "DiscoveryType Unicast requires UnicastLocators being specified" };
+        {
+            throw BadVibConversion(node, "FastRtps::Config: DiscoveryType Unicast requires UnicastLocators being specified");
+        }
 
         if (!obj.configFileName.empty())
-            return false; // throw Misconfiguration{ "Using a FastRTPS configuration file requires DiscoverType ConfigFile" };
+        {
+            throw BadVibConversion(node, "FastRtps::Config: Using a FastRTPS configuration file requires DiscoverType ConfigFile");
+        }
 
         break;
 
     case FastRtps::DiscoveryType::ConfigFile:
         if (!obj.unicastLocators.empty())
-            return false; // throw Misconfiguration{ "UnicastLocators must not be specified when using DiscoveryType Multicast" };
+        {
+            throw BadVibConversion(node, "FastRtps::Config: UnicastLocators must not be specified when using DiscoveryType Multicast");
+        }
 
         if (obj.configFileName.empty())
-            return false; // Misconfiguration{ "DiscoveryType ConfigFile requires ConfigFileName being specified" };
+        {
+            throw BadVibConversion(node, "FastRtps::Config: DiscoveryType ConfigFile requires ConfigFileName being specified");
+        }
 
         break;
 
     default:
-        return false; // Misconfiguration{ "Invalid FastRTPS discovery type: " + to_string(fastRtps.discoveryType) };
+        throw BadVibConversion(node, "Invalid FastRTPS discovery type: " + to_string(obj.discoveryType));
     }
 
     optional_decode(obj.sendSocketBufferSize, node, "SendSocketBufferSize");
@@ -1304,7 +1377,9 @@ bool VibConversion::decode(const Node& node, FastRtps::Config& obj)
     if (node["HistoryDepth"])
     {
         if (obj.historyDepth <= 0)
-            return false; // throw Misconfiguration{ "FastRTPS HistoryDepth must be above 0" };
+        {
+            throw BadVibConversion(node, "FastRtps::Config: FastRTPS HistoryDepth must be above 0");
+        }
     }
     return true;
 }
@@ -1373,11 +1448,11 @@ bool VibConversion::decode(const Node& node, Middleware& obj)
 {
     try
     {
-        obj = from_string<Middleware>(node.as<std::string>());
+        obj = from_string<Middleware>(parse_as<std::string>(node));
     }
     catch (const type_conversion_error&)
     {
-        return false; // throw Misconfiguration{ "Unknown active middleware in from_json" };
+        throw BadVibConversion(node, "Unknown Middleware: " + parse_as<std::string>(node));
     }
     return true;
 }
@@ -1496,7 +1571,7 @@ Node VibConversion::encode(const TraceSink::Type& obj)
 template<>
 bool VibConversion::decode(const Node& node, TraceSink::Type& obj)
 {
-    auto&& str = node.as<std::string>();
+    auto&& str = parse_as<std::string>(node);
     if (str == "Undefined" || str == "")
         obj = TraceSink::Type::Undefined;
     else if (str == "Mdf4File")
@@ -1506,7 +1581,9 @@ bool VibConversion::decode(const Node& node, TraceSink::Type& obj)
     else if (str == "PcapPipe")
         obj = TraceSink::Type::PcapPipe;
     else
-        return false;
+    {
+        throw BadVibConversion(node, "Unknown TraceSink::Type: " + str + ".");
+    }
     return true;
 }
 
@@ -1560,15 +1637,17 @@ Node VibConversion::encode(const TraceSource::Type& obj)
 template<>
 bool VibConversion::decode(const Node& node, TraceSource::Type& obj)
 {
-    auto&& str = node.as<std::string>();
+    auto&& str = parse_as<std::string>(node);
     if (str == "Undefined" || str == "")
         obj = TraceSource::Type::Undefined;
     else if (str == "Mdf4File")
         obj = TraceSource::Type::Mdf4File;
     else if (str == "PcapFile")
         obj = TraceSource::Type::PcapFile;
-    else 
-        return false;
+    else
+    {
+        throw BadVibConversion(node, "Unknown TraceSource::Type: " + str + ".");
+    }
     return true;
 }
 
@@ -1616,7 +1695,7 @@ Node VibConversion::encode(const Replay::Direction& obj)
 template<>
 bool VibConversion::decode(const Node& node, Replay::Direction& obj)
 {
-    auto&& str = node.as<std::string>();
+    auto&& str = parse_as<std::string>(node);
     if (str == "Undefined" || str == "")
         obj = Replay::Direction::Undefined;
     else if (str == "Send")
@@ -1626,7 +1705,9 @@ bool VibConversion::decode(const Node& node, Replay::Direction& obj)
     else if (str == "Both")
         obj = Replay::Direction::Both;
     else
-        return false;
+    {
+        throw BadVibConversion(node, "Unknown Replay::Direction: " + str + ".");
+    }
     return true;
 }
 
