@@ -8,40 +8,8 @@
 #include "gtest/gtest.h"
 
 namespace {
-
-class YamlConfigTest : public testing::Test
-{
-};
-
-using namespace ib::cfg;
-TEST_F(YamlConfigTest, yaml_doc_relations)
-{
-    YamlValidator v;
-    //ensure that YAML validation of config blocks works
-    EXPECT_TRUE(v.IsRootElement("/ConfigVersion"));
-    EXPECT_TRUE(v.IsRootElement("/ConfigName"));
-    EXPECT_TRUE(v.IsRootElement("/Description"));
-    EXPECT_TRUE(v.IsRootElement("/SimulationSetup"));
-    EXPECT_TRUE(v.IsRootElement("/MiddlewareConfig"));
-    EXPECT_TRUE(v.IsRootElement("/LaunchConfigurations"));
-
-    EXPECT_FALSE(v.IsRootElement(" /LaunchConfigurations"));
-    EXPECT_FALSE(v.IsRootElement("/SimulationSetup/Participants"));
-
-    // simulation setup members
-    EXPECT_TRUE(v.IsSubelementOf("/SimulationSetup", "/SimulationSetup/Participants"));
-    EXPECT_TRUE(v.IsSubelementOf("/SimulationSetup", "/SimulationSetup/Switches"));
-    EXPECT_TRUE(v.IsSubelementOf("/SimulationSetup", "/SimulationSetup/Links"));
-    EXPECT_TRUE(v.IsSubelementOf("/SimulationSetup", "/SimulationSetup/NetworkSimulators"));
-    EXPECT_TRUE(v.IsSubelementOf("/SimulationSetup", "/SimulationSetup/TimeSync"));
-
-    EXPECT_FALSE(v.IsSubelementOf("/SimulationSetup", " /SimulationSetup/TimeSync"));
-}
-TEST_F(YamlConfigTest, candemo_in_yaml_format)
-{
-
     //!< Yaml config which has almost complete list of config elements.
-    const auto demoYaml= R"raw(
+const auto demoYaml= R"raw(
 ConfigName: FlexRayDemoNetSim
 ConfigVersion: 0.0.1
 Description: Amalgamation of multiple Trace/Replay configs to test YAML Validation
@@ -382,6 +350,38 @@ SimulationSetup:
     TickPeriodNs: 123456
 )raw";
 
+class YamlConfigTest : public testing::Test
+{
+};
+
+using namespace ib::cfg;
+TEST_F(YamlConfigTest, yaml_doc_relations)
+{
+    YamlValidator v;
+    //ensure that YAML validation of config blocks works
+    EXPECT_TRUE(v.IsRootElement("/ConfigVersion"));
+    EXPECT_TRUE(v.IsRootElement("/ConfigName"));
+    EXPECT_TRUE(v.IsRootElement("/Description"));
+    EXPECT_TRUE(v.IsRootElement("/SimulationSetup"));
+    EXPECT_TRUE(v.IsRootElement("/MiddlewareConfig"));
+    EXPECT_TRUE(v.IsRootElement("/LaunchConfigurations"));
+
+    EXPECT_FALSE(v.IsRootElement(" /LaunchConfigurations"));
+    EXPECT_FALSE(v.IsRootElement("/SimulationSetup/Participants"));
+
+    // simulation setup members
+    EXPECT_TRUE(v.IsSubelementOf("/SimulationSetup", "/SimulationSetup/Participants"));
+    EXPECT_TRUE(v.IsSubelementOf("/SimulationSetup", "/SimulationSetup/Switches"));
+    EXPECT_TRUE(v.IsSubelementOf("/SimulationSetup", "/SimulationSetup/Links"));
+    EXPECT_TRUE(v.IsSubelementOf("/SimulationSetup", "/SimulationSetup/NetworkSimulators"));
+    EXPECT_TRUE(v.IsSubelementOf("/SimulationSetup", "/SimulationSetup/TimeSync"));
+
+    EXPECT_FALSE(v.IsSubelementOf("/SimulationSetup", " /SimulationSetup/TimeSync"));
+}
+TEST_F(YamlConfigTest, candemo_in_yaml_format)
+{
+
+
     auto config = Config::FromYamlString(demoYaml);
     EXPECT_TRUE(config.simulationSetup.participants.size() == 5);
     EXPECT_TRUE(config.simulationSetup.timeSync.tickPeriod.count() == 123456);
@@ -609,6 +609,18 @@ TEST_F(YamlConfigTest, yaml_config_parsing)
         node = ns;
         auto ns2 = node.as<NetworkSimulator>();
         EXPECT_TRUE(ns == ns2);
+    }
+    {
+        Config config{};
+        YAML::Node node;
+        node = config;
+        auto config2 = node.as<Config>();
+        EXPECT_TRUE(config == config2);
+    }
+    {
+        auto node = YAML::Load(demoYaml);
+        auto config = node.as<Config>();
+
     }
 }
 } // anonymous namespace
