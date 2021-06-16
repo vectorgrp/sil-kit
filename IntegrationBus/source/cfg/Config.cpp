@@ -668,9 +668,23 @@ std::istream& from_istream(std::istream& in, std::array<uint8_t, 6>& macAddr)
 
 auto Config::FromYamlString(const std::string& yamlString) -> Config
 {
-    // YAML-string -> YAML::doc -> JSON-string -> FromJsonString -> Config
-    auto jsonString = YamlToJson(yamlString);
-    return FromJsonString(jsonString);
+    std::stringstream warnings;
+    if (!Validate(yamlString, warnings))
+    {
+        throw Misconfiguration{ "YAML validation returned warnings: \n" + warnings.str()};
+    }
+    YAML::Node doc = YAML::Load(yamlString);
+
+    auto config =from_yaml<Config>(doc);
+    config.configFilePath.clear();
+
+    // Post-processing steps
+    AssignEndpointAddresses(config);
+    AssignLinkIds(config);
+    UpdateGenericSubscribers(config);
+    AdjustLegacyPcapConfig(config);
+
+    return config;
 }
 
 auto Config::FromYamlFile(const std::string& yamlFilename) -> Config
