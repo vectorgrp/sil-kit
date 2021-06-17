@@ -7,6 +7,7 @@
 #include "ib/cfg/Config.hpp"
 
 #include "yaml-cpp/yaml.h"
+
 // YAML-cpp serialization/deserialization for our config data types
 namespace YAML {
 using namespace ib::cfg;

@@ -28,13 +28,73 @@ public:
 
 // Helper to parse a node as the given type or throw our BadVibConversion with the type's name in the error message.
 template<typename T> struct ParseTypeName { static constexpr const char* name = "Unknown Type"; };
-template<> struct ParseTypeName<int> { static constexpr const char* name = "Integer"; };
-template<> struct ParseTypeName<int16_t> { static constexpr const char* name = "Integer"; };
-template<> struct ParseTypeName<int8_t> { static constexpr const char* name = "Integer"; };
-template<> struct ParseTypeName<double> { static constexpr const char* name = "Floating Point"; };
-template<> struct ParseTypeName<float> { static constexpr const char* name = "Floating Point"; };
-template<> struct ParseTypeName<bool> { static constexpr const char* name = "Boolean"; };
-template<> struct ParseTypeName<std::string> { static constexpr const char* name = "String"; };
+
+template<typename T> struct ParseTypeName<std::vector<T>> { static constexpr const char* name = ParseTypeName<T>::name; };
+
+#define VIB_DECLARE_PARSE_TYPE_NAME(TYPE) \
+    template<> struct ParseTypeName<TYPE> { static constexpr const char* name = #TYPE ; }
+
+VIB_DECLARE_PARSE_TYPE_NAME(int16_t);
+VIB_DECLARE_PARSE_TYPE_NAME(uint16_t);
+VIB_DECLARE_PARSE_TYPE_NAME(uint64_t);
+VIB_DECLARE_PARSE_TYPE_NAME(int64_t);
+VIB_DECLARE_PARSE_TYPE_NAME(int8_t);
+VIB_DECLARE_PARSE_TYPE_NAME(uint8_t);
+VIB_DECLARE_PARSE_TYPE_NAME(int);
+VIB_DECLARE_PARSE_TYPE_NAME(double);
+VIB_DECLARE_PARSE_TYPE_NAME(bool);
+VIB_DECLARE_PARSE_TYPE_NAME(std::vector<std::string>);
+VIB_DECLARE_PARSE_TYPE_NAME(std::string);
+VIB_DECLARE_PARSE_TYPE_NAME(MdfChannel);
+VIB_DECLARE_PARSE_TYPE_NAME(Version);
+VIB_DECLARE_PARSE_TYPE_NAME(Sink::Type);
+VIB_DECLARE_PARSE_TYPE_NAME(ib::mw::logging::Level);
+VIB_DECLARE_PARSE_TYPE_NAME(Sink);
+VIB_DECLARE_PARSE_TYPE_NAME(Logger);
+VIB_DECLARE_PARSE_TYPE_NAME(CanController);
+VIB_DECLARE_PARSE_TYPE_NAME(LinController);
+VIB_DECLARE_PARSE_TYPE_NAME(EthernetController);
+VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::ClusterParameters);
+VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::NodeParameters);
+VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::TxBufferConfig);
+VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::Channel);
+VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::ClockPeriod);
+VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::TransmissionMode);
+VIB_DECLARE_PARSE_TYPE_NAME(FlexrayController);
+VIB_DECLARE_PARSE_TYPE_NAME(DigitalIoPort);
+VIB_DECLARE_PARSE_TYPE_NAME(AnalogIoPort);
+VIB_DECLARE_PARSE_TYPE_NAME(PwmPort);
+VIB_DECLARE_PARSE_TYPE_NAME(PatternPort);
+VIB_DECLARE_PARSE_TYPE_NAME(GenericPort);
+VIB_DECLARE_PARSE_TYPE_NAME(GenericPort::ProtocolType);
+VIB_DECLARE_PARSE_TYPE_NAME(SyncType);
+VIB_DECLARE_PARSE_TYPE_NAME(std::chrono::milliseconds);
+VIB_DECLARE_PARSE_TYPE_NAME(std::chrono::nanoseconds);
+VIB_DECLARE_PARSE_TYPE_NAME(ParticipantController);
+VIB_DECLARE_PARSE_TYPE_NAME(Participant);
+VIB_DECLARE_PARSE_TYPE_NAME(Switch::Port);
+VIB_DECLARE_PARSE_TYPE_NAME(Switch);
+VIB_DECLARE_PARSE_TYPE_NAME(Link);
+VIB_DECLARE_PARSE_TYPE_NAME(NetworkSimulator);
+VIB_DECLARE_PARSE_TYPE_NAME(TimeSync::SyncPolicy);
+VIB_DECLARE_PARSE_TYPE_NAME(TimeSync);
+VIB_DECLARE_PARSE_TYPE_NAME(SimulationSetup);
+VIB_DECLARE_PARSE_TYPE_NAME(FastRtps::DiscoveryType);
+VIB_DECLARE_PARSE_TYPE_NAME(FastRtps::Config);
+VIB_DECLARE_PARSE_TYPE_NAME(VAsio::RegistryConfig);
+VIB_DECLARE_PARSE_TYPE_NAME(VAsio::Config);
+VIB_DECLARE_PARSE_TYPE_NAME(Middleware);
+VIB_DECLARE_PARSE_TYPE_NAME(MiddlewareConfig);
+VIB_DECLARE_PARSE_TYPE_NAME(ExtensionConfig);
+VIB_DECLARE_PARSE_TYPE_NAME(Config);
+VIB_DECLARE_PARSE_TYPE_NAME(TraceSink);
+VIB_DECLARE_PARSE_TYPE_NAME(TraceSink::Type);
+VIB_DECLARE_PARSE_TYPE_NAME(TraceSource);
+VIB_DECLARE_PARSE_TYPE_NAME(TraceSource::Type);
+VIB_DECLARE_PARSE_TYPE_NAME(Replay);
+VIB_DECLARE_PARSE_TYPE_NAME(Replay::Direction);
+
+#undef VIB_DECLARE_PARSE_TYPE_NAME
 
 template<typename ValueT>
 auto parse_as(const YAML::Node& node) -> ValueT
@@ -42,6 +102,11 @@ auto parse_as(const YAML::Node& node) -> ValueT
     try
     {
         return node.as<ValueT>();
+    }
+    catch(const BadVibConversion&)
+    {
+        //we already have a concise error message, propagate it to our caller
+        throw;
     }
     catch(const YAML::BadConversion&)
     {
@@ -151,7 +216,7 @@ void optional_decode(OptionalCfg<ConfigT>& value, const YAML::Node& node, const 
 {
     if (node[fieldName]) //operator[] does not modify node
     {
-        value = node[fieldName].as<ConfigT>();
+        value = parse_as<ConfigT>(node[fieldName]);
     }
 }
 
@@ -160,7 +225,7 @@ void optional_decode(ConfigT& value, const YAML::Node& node, const std::string& 
 {
     if (node[fieldName]) //operator[] does not modify node
     {
-        value = node[fieldName].as<ConfigT>();
+        value = parse_as<ConfigT>(node[fieldName]);
     }
 }
 
@@ -372,7 +437,7 @@ bool VibConversion::decode(const Node& node, Sink& obj)
         {
             throw BadVibConversion(node, "Sink of type Sink::Type::File requires a Logname");
         }
-        obj.logname = node["Logname"].as<std::string>();
+        obj.logname = parse_as<std::string>(node["Logname"]);
     }
 
     return true;
@@ -411,7 +476,7 @@ Node VibConversion::encode(const CanController& obj)
 template<>
 bool VibConversion::decode(const Node& node, CanController& obj)
 {
-    obj.name = node["Name"].as<std::string>();
+    obj.name = parse_as<std::string>(node["Name"]);
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
     return true;
@@ -430,7 +495,7 @@ Node VibConversion::encode(const LinController& obj)
 template<>
 bool VibConversion::decode(const Node& node, LinController& obj)
 {
-    obj.name = node["Name"].as<std::string>();
+    obj.name = parse_as<std::string>(node["Name"]);
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
     return true;
@@ -460,7 +525,7 @@ Node VibConversion::encode(const EthernetController& obj)
 template<>
 bool VibConversion::decode(const Node& node, EthernetController& obj)
 {
-    obj.name = node["Name"].as<std::string>();
+    obj.name = parse_as<std::string>(node["Name"]);
     obj.macAddress = macaddress_decode(node["MacAddr"]);
     optional_decode(obj.pcapFile, node, "PcapFile");
     optional_decode(obj.pcapPipe, node, "PcapPipe");
@@ -559,29 +624,33 @@ Node VibConversion::encode(const sim::fr::NodeParameters& obj)
 template<>
 bool VibConversion::decode(const Node& node, sim::fr::NodeParameters& obj)
 {
-    obj.pAllowHaltDueToClock = static_cast<decltype(obj.pAllowHaltDueToClock)>(node["pAllowHaltDueToClock"].as<int>());
-    obj.pAllowPassiveToActive = static_cast<decltype(obj.pAllowPassiveToActive)>(node["pAllowPassiveToActive"].as<int>());
-    obj.pClusterDriftDamping = static_cast<decltype(obj.pClusterDriftDamping)>(node["pClusterDriftDamping"].as<int>());
-    obj.pdAcceptedStartupRange = static_cast<decltype(obj.pdAcceptedStartupRange)>(node["pdAcceptedStartupRange"].as<int>());
-    obj.pdListenTimeout = static_cast<decltype(obj.pdListenTimeout)>(node["pdListenTimeout"].as<int>());
-    obj.pKeySlotId = static_cast<decltype(obj.pKeySlotId)>(node["pKeySlotId"].as<int>());
-    obj.pKeySlotOnlyEnabled = static_cast<decltype(obj.pKeySlotOnlyEnabled)>(node["pKeySlotOnlyEnabled"].as<int>());
-    obj.pKeySlotUsedForStartup = static_cast<decltype(obj.pKeySlotUsedForStartup)>(node["pKeySlotUsedForStartup"].as<int>());
-    obj.pKeySlotUsedForSync = static_cast<decltype(obj.pKeySlotUsedForSync)>(node["pKeySlotUsedForSync"].as<int>());
-    obj.pLatestTx = static_cast<decltype(obj.pLatestTx)>(node["pLatestTx"].as<int>());
-    obj.pMacroInitialOffsetA = static_cast<decltype(obj.pMacroInitialOffsetA)>(node["pMacroInitialOffsetA"].as<int>());
-    obj.pMacroInitialOffsetB = static_cast<decltype(obj.pMacroInitialOffsetB)>(node["pMacroInitialOffsetB"].as<int>());
-    obj.pMicroInitialOffsetA = static_cast<decltype(obj.pMicroInitialOffsetA)>(node["pMicroInitialOffsetA"].as<int>());
-    obj.pMicroInitialOffsetB = static_cast<decltype(obj.pMicroInitialOffsetB)>(node["pMicroInitialOffsetB"].as<int>());
-    obj.pMicroPerCycle = static_cast<decltype(obj.pMicroPerCycle)>(node["pMicroPerCycle"].as<int>());
-    obj.pOffsetCorrectionOut = static_cast<decltype(obj.pOffsetCorrectionOut)>(node["pOffsetCorrectionOut"].as<int>());
-    obj.pOffsetCorrectionStart = static_cast<decltype(obj.pOffsetCorrectionStart)>(node["pOffsetCorrectionStart"].as<int>());
-    obj.pRateCorrectionOut = static_cast<decltype(obj.pRateCorrectionOut)>(node["pRateCorrectionOut"].as<int>());
-    obj.pWakeupPattern = static_cast<decltype(obj.pWakeupPattern)>(node["pWakeupPattern"].as<int>());
-    obj.pSamplesPerMicrotick = static_cast<decltype(obj.pSamplesPerMicrotick)>(node["pSamplesPerMicrotick"].as<int>());
-    obj.pWakeupChannel = node["pWakeupChannel"].as<sim::fr::Channel>();
-    obj.pdMicrotick = node["pdMicrotick"].as<sim::fr::ClockPeriod>();
-    obj.pChannels = node["pChannels"].as<sim::fr::Channel>();
+    auto parseInt = [&node](auto instance, auto name)
+    {
+        return static_cast<decltype(instance)>(parse_as<int>(node[name]));
+    };
+    obj.pAllowHaltDueToClock = parseInt(obj.pAllowHaltDueToClock, "pAllowHaltDueToClock");
+    obj.pAllowPassiveToActive = parseInt(obj.pAllowPassiveToActive, "pAllowPassiveToActive");
+    obj.pClusterDriftDamping = parseInt(obj.pClusterDriftDamping, "pClusterDriftDamping");
+    obj.pdAcceptedStartupRange = parseInt(obj.pdAcceptedStartupRange, "pdAcceptedStartupRange");
+    obj.pdListenTimeout = parseInt(obj.pdListenTimeout, "pdListenTimeout");
+    obj.pKeySlotId = parseInt(obj.pKeySlotId, "pKeySlotId");
+    obj.pKeySlotOnlyEnabled = parseInt(obj.pKeySlotOnlyEnabled, "pKeySlotOnlyEnabled");
+    obj.pKeySlotUsedForStartup = parseInt(obj.pKeySlotUsedForStartup, "pKeySlotUsedForStartup");
+    obj.pKeySlotUsedForSync = parseInt(obj.pKeySlotUsedForSync, "pKeySlotUsedForSync");
+    obj.pLatestTx = parseInt(obj.pLatestTx, "pLatestTx");
+    obj.pMacroInitialOffsetA = parseInt(obj.pMacroInitialOffsetA, "pMacroInitialOffsetA");
+    obj.pMacroInitialOffsetB = parseInt(obj.pMacroInitialOffsetB, "pMacroInitialOffsetB");
+    obj.pMicroInitialOffsetA = parseInt(obj.pMicroInitialOffsetA, "pMicroInitialOffsetA");
+    obj.pMicroInitialOffsetB = parseInt(obj.pMicroInitialOffsetB, "pMicroInitialOffsetB");
+    obj.pMicroPerCycle = parseInt(obj.pMicroPerCycle, "pMicroPerCycle");
+    obj.pOffsetCorrectionOut = parseInt(obj.pOffsetCorrectionOut, "pOffsetCorrectionOut");
+    obj.pOffsetCorrectionStart = parseInt(obj.pOffsetCorrectionStart, "pOffsetCorrectionStart");
+    obj.pRateCorrectionOut = parseInt(obj.pRateCorrectionOut, "pRateCorrectionOut");
+    obj.pWakeupPattern = parseInt(obj.pWakeupPattern, "pWakeupPattern");
+    obj.pSamplesPerMicrotick = parseInt(obj.pSamplesPerMicrotick, "pSamplesPerMicrotick");
+    obj.pWakeupChannel = parse_as<sim::fr::Channel>(node["pWakeupChannel"]);
+    obj.pdMicrotick = parse_as<sim::fr::ClockPeriod>(node["pdMicrotick"]);
+    obj.pChannels = parse_as<sim::fr::Channel>(node["pChannels"]);
     return true;
 }
 
@@ -717,13 +786,13 @@ Node VibConversion::encode(const sim::fr::TxBufferConfig& obj)
 template<>
 bool VibConversion::decode(const Node& node, sim::fr::TxBufferConfig& obj)
 {
-    obj.channels = node["channels"].as<sim::fr::Channel>();
-    obj.slotId = node["slotId"].as<uint16_t>();
-    obj.offset = static_cast<uint8_t>(node["offset"].as<int>());
-    obj.repetition = static_cast<uint8_t>(node["repetition"].as<int>());
-    obj.hasPayloadPreambleIndicator = node["PPindicator"].as<bool>();
-    obj.headerCrc = node["headerCrc"].as<uint16_t>();
-    obj.transmissionMode = node["transmissionMode"].as<sim::fr::TransmissionMode>();
+    obj.channels = parse_as<sim::fr::Channel>(node["channels"]);
+    obj.slotId = parse_as<uint16_t>(node["slotId"]);
+    obj.offset = static_cast<uint8_t>(parse_as<int>(node["offset"]));
+    obj.repetition = static_cast<uint8_t>(parse_as<int>(node["repetition"]));
+    obj.hasPayloadPreambleIndicator = parse_as<bool>(node["PPindicator"]);
+    obj.headerCrc = parse_as<uint16_t>(node["headerCrc"]);
+    obj.transmissionMode = parse_as<sim::fr::TransmissionMode>(node["transmissionMode"]);
     return true;
 }
 
@@ -743,7 +812,7 @@ Node VibConversion::encode(const FlexrayController& obj)
 template<>
 bool VibConversion::decode(const Node& node, FlexrayController& obj)
 {
-    obj.name = node["Name"].as<std::string>();
+    obj.name = parse_as<std::string>(node["Name"]);
     optional_decode(obj.clusterParameters, node, "ClusterParameters");
     optional_decode(obj.nodeParameters, node, "NodeParameters");
     optional_decode(obj.txBufferConfigs, node, "TxBufferConfigs");
@@ -770,7 +839,7 @@ Node VibConversion::encode(const DigitalIoPort& obj)
 template<>
 bool VibConversion::decode(const Node& node, DigitalIoPort& obj)
 {
-    obj.name = node["Name"].as<std::string>();
+    obj.name = parse_as<std::string>(node["Name"]);
     optional_decode(obj.initvalue, node, "value"); //only for Digital-In ports, non-strict
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
@@ -797,11 +866,11 @@ Node VibConversion::encode(const AnalogIoPort& obj)
 template<>
 bool VibConversion::decode(const Node& node, AnalogIoPort& obj)
 {
-    obj.name = node["Name"].as<std::string>();
+    obj.name = parse_as<std::string>(node["Name"]);
     if (node["value"])
     {
-        obj.initvalue = node["value"].as<decltype(obj.initvalue)>();
-        obj.unit = node["unit"].as<std::string>();
+        obj.initvalue = parse_as<decltype(obj.initvalue)>(node["value"]);
+        obj.unit = parse_as<std::string>(node["unit"]);
     }
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
@@ -829,12 +898,12 @@ Node VibConversion::encode(const PwmPort& obj)
 template<>
 bool VibConversion::decode(const Node& node, PwmPort& obj)
 {
-    obj.name = node["Name"].as<std::string>();
+    obj.name = parse_as<std::string>(node["Name"]);
     if (node["freq"]) //only given for Pwm-Out
     {
-        obj.initvalue.frequency = node["freq"]["value"].as<double>();
-        obj.unit = node["freq"]["unit"].as<std::string>();
-        obj.initvalue.dutyCycle = node["duty"].as<double>();
+        obj.initvalue.frequency = parse_as<double>(node["freq"]["value"]);
+        obj.unit = parse_as<std::string>(node["freq"]["unit"]);
+        obj.initvalue.dutyCycle = parse_as<double>(node["duty"]);
     }
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
@@ -857,10 +926,10 @@ Node VibConversion::encode(const PatternPort& obj)
 template<>
 bool VibConversion::decode(const Node& node, PatternPort& obj)
 {
-    obj.name = node["Name"].as<std::string>();
+    obj.name = parse_as<std::string>(node["Name"]);
     if (node["value"])
     {
-        obj.initvalue = hex_decode(node["value"].as<std::string>());
+        obj.initvalue = hex_decode(parse_as<std::string>(node["value"]));
     }
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
@@ -881,7 +950,7 @@ Node VibConversion::encode(const GenericPort& obj)
 template<>
 bool VibConversion::decode(const Node& node, GenericPort& obj)
 {
-    obj.name = node["Name"].as<std::string>();
+    obj.name = parse_as<std::string>(node["Name"]);
     optional_decode(obj.protocolType, node, "Protocol");
     optional_decode(obj.definitionUri, node, "DefinitionUri");
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
@@ -975,7 +1044,7 @@ Node VibConversion::encode(const ParticipantController& obj)
 template<>
 bool VibConversion::decode(const Node& node, ParticipantController& obj)
 {
-    obj.syncType = node["SyncType"].as<SyncType>();
+    obj.syncType = parse_as<SyncType>(node["SyncType"]);
     optional_decode(obj.execTimeLimitHard, node, "ExecTimeLimitHardMs");
     optional_decode(obj.execTimeLimitSoft, node, "ExecTimeLimitSoftMs");
     return true;
@@ -1087,7 +1156,7 @@ bool VibConversion::decode(const Node& node, Participant& obj)
         }
     };
 
-    obj.name = node["Name"].as<std::string>();
+    obj.name = parse_as<std::string>(node["Name"]);
 
     optional_decode(obj.description, node, "Description");
     optional_decode(obj.logger, node, "Logger");
@@ -1129,7 +1198,7 @@ Node VibConversion::encode(const Switch::Port& obj)
 template<>
 bool VibConversion::decode(const Node& node, Switch::Port& obj)
 {
-    obj.name = node["Name"].as<std::string>();
+    obj.name = parse_as<std::string>(node["Name"]);
     optional_decode(obj.vlanIds, node, "VlanIds");
     return true;
 }
@@ -1146,8 +1215,8 @@ Node VibConversion::encode(const Switch& obj)
 template<>
 bool VibConversion::decode(const Node& node, Switch& obj)
 {
-    obj.name = node["Name"].as<std::string>();
-    obj.description = node["Description"].as<std::string>();
+    obj.name = parse_as<std::string>(node["Name"]);
+    obj.description = parse_as<std::string>(node["Description"]);
     optional_decode(obj.ports, node, "Ports");
     return true;
 }
@@ -1163,8 +1232,8 @@ Node VibConversion::encode(const Link& obj)
 template<>
 bool VibConversion::decode(const Node& node, Link& obj)
 {
-    obj.name = node["Name"].as<std::string>();
-    obj.endpoints = node["Endpoints"].as<decltype(obj.endpoints)>();
+    obj.name = parse_as<std::string>(node["Name"]);
+    obj.endpoints = parse_as<decltype(obj.endpoints)>(node["Endpoints"]);
     return true;
 }
 
@@ -1182,7 +1251,7 @@ Node VibConversion::encode(const NetworkSimulator& obj)
 template<>
 bool VibConversion::decode(const Node& node, NetworkSimulator& obj)
 {
-    obj.name = node["Name"].as<std::string>();
+    obj.name = parse_as<std::string>(node["Name"]);
     optional_decode(obj.simulatedSwitches, node, "SimulatedSwitches");
     optional_decode(obj.simulatedLinks, node, "SimulatedLinks");
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
@@ -1231,7 +1300,7 @@ template<>
 bool VibConversion::decode(const Node& node, TimeSync& obj)
 {
     optional_decode(obj.syncPolicy, node, "SyncPolicy");
-    obj.tickPeriod = node["TickPeriodNs"].as<std::chrono::nanoseconds>();
+    obj.tickPeriod = parse_as<std::chrono::nanoseconds>(node["TickPeriodNs"]);
     return true;
 }
 
@@ -1248,10 +1317,10 @@ Node VibConversion::encode(const SimulationSetup& obj)
 template<>
 bool VibConversion::decode(const Node& node, SimulationSetup& obj)
 {
-    obj.participants = node["Participants"].as<decltype(obj.participants)>();
+    obj.participants = parse_as<decltype(obj.participants)>(node["Participants"]);
     optional_decode(obj.switches, node, "Switches");
-    obj.links = node["Links"].as<decltype(obj.links)>();
-    obj.timeSync = node["TimeSync"].as<decltype(obj.timeSync)>();
+    obj.links = parse_as<decltype(obj.links)>(node["Links"]);
+    obj.timeSync = parse_as<decltype(obj.timeSync)>(node["TimeSync"]);
     return true;
 }
 
@@ -1310,8 +1379,8 @@ bool VibConversion::decode(const Node& node, FastRtps::Config& obj)
 {
 
     optional_decode(obj.discoveryType, node, "DiscoveryType");
-    obj.configFileName = node["ConfigFileName"].as<decltype(obj.configFileName)>();
-    obj.unicastLocators = node["UnicastLocators"].as<decltype(obj.unicastLocators)>();
+    obj.configFileName = parse_as<decltype(obj.configFileName)>(node["ConfigFileName"]);
+    obj.unicastLocators = parse_as<decltype(obj.unicastLocators)>(node["UnicastLocators"]);
 
     switch (obj.discoveryType)
     {
@@ -1508,11 +1577,11 @@ Node VibConversion::encode(const Config& obj)
 template<>
 bool VibConversion::decode(const Node& node, Config& obj)
 {
-    obj.version = node["ConfigVersion"].as<decltype(obj.version)>();
-    obj.name = node["ConfigName"].as<decltype(obj.name)>();
-    obj.description = node["Description"].as<decltype(obj.description)>();
-    obj.simulationSetup = node["SimulationSetup"].as<decltype(obj.simulationSetup)>();
-    obj.middlewareConfig = node["MiddlewareConfig"].as<decltype(obj.middlewareConfig)>();
+    obj.version = parse_as<decltype(obj.version)>(node["ConfigVersion"]);
+    obj.name = parse_as<decltype(obj.name)>(node["ConfigName"]);
+    obj.description = parse_as<decltype(obj.description)>(node["Description"]);
+    obj.simulationSetup = parse_as<decltype(obj.simulationSetup)>(node["SimulationSetup"]);
+    obj.middlewareConfig = parse_as<decltype(obj.middlewareConfig)>(node["MiddlewareConfig"]);
     optional_decode(obj.extensionConfig, node, "ExtensionConfig");
     return true;
 }
@@ -1535,12 +1604,12 @@ Node VibConversion::encode(const TraceSink& obj)
 template<>
 bool VibConversion::decode(const Node& node, TraceSink& obj)
 {
-    obj.name = node["Name"].as<std::string>();
-    obj.type = node["Type"].as<decltype(obj.type)>();
-    obj.outputPath = node["OutputPath"].as<decltype(obj.outputPath)>();
+    obj.name = parse_as<std::string>(node["Name"]);
+    obj.type = parse_as<decltype(obj.type)>(node["Type"]);
+    obj.outputPath = parse_as<decltype(obj.outputPath)>(node["OutputPath"]);
     if (node["Enabled"])
     {
-        obj.enabled = node["Enabled"].as<decltype(obj.enabled)>();
+        obj.enabled = parse_as<decltype(obj.enabled)>(node["Enabled"]);
     }
     return true;
 }
@@ -1604,12 +1673,12 @@ Node VibConversion::encode(const TraceSource& obj)
 template<>
 bool VibConversion::decode(const Node& node, TraceSource& obj)
 {
-    obj.name = node["Name"].as<std::string>();
-    obj.type = node["Type"].as<decltype(obj.type)>();
-    obj.inputPath = node["InputPath"].as<decltype(obj.inputPath)>();
+    obj.name = parse_as<std::string>(node["Name"]);
+    obj.type = parse_as<decltype(obj.type)>(node["Type"]);
+    obj.inputPath = parse_as<decltype(obj.inputPath)>(node["InputPath"]);
     if (node["Enabled"])
     {
-        obj.enabled = node["Enabled"].as<decltype(obj.enabled)>();
+        obj.enabled = parse_as<decltype(obj.enabled)>(node["Enabled"]);
     }
     return true;
 }
@@ -1665,7 +1734,7 @@ Node VibConversion::encode(const Replay& obj)
 template<>
 bool VibConversion::decode(const Node& node, Replay& obj)
 {
-    obj.useTraceSource = node["UseTraceSource"].as<decltype(obj.useTraceSource)>();
+    obj.useTraceSource = parse_as<decltype(obj.useTraceSource)>(node["UseTraceSource"]);
     optional_decode(obj.direction, node, "Direction");
     optional_decode(obj.mdfChannel, node, "MdfChannel");
     return true;
