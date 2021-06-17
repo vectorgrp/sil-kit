@@ -36,7 +36,11 @@ public:
     bool IsSubelementOf(const std::string& parentName, const std::string& elementName) const;
     
     //!< Check that elementName has the document's root as parent.
-    bool IsRootElement(const std::string& elementName);
+    bool IsRootElement(const std::string& elementName) const;
+
+    //!< Check if the elementName (which might be a suffix) is a reserved element name.
+    //   We want to discern unknown elements from misplaced elements in a document.
+    bool IsReservedElementName(const std::string& elementName) const ;
 
     auto DocumentRoot() const -> std::string;
 

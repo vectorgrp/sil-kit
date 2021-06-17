@@ -444,7 +444,7 @@ SimulationsSetup:
     std::stringstream warnings;
     bool yamlValid = Validate(yamlString, warnings);
     std::cout << "Yaml Validate: warnings: " << warnings.str() << std::endl;
-    EXPECT_FALSE(yamlValid) << "YamlValidator warnings: " << warnings.str();
+    EXPECT_TRUE(yamlValid && warnings.str().size() > 0) << "YamlValidator warnings: " << warnings.str();
     EXPECT_TRUE(warnings.str().size() > 0);
 }
 

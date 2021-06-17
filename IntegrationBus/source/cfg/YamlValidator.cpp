@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "YamlValidator.hpp"
 
 #include "yaml-cpp/yaml.h"
@@ -5,6 +6,7 @@
 #include <stdexcept>
 
 #include "YamlConfig.hpp" //for operator<<(Mark)
+
 namespace {
 //!< Recursive validation helper to iterate through the YAML document
 bool ValidateDoc(YAML::Node& doc, const ib::cfg::YamlValidator& v,
@@ -49,11 +51,22 @@ bool ValidateDoc(YAML::Node& doc, const ib::cfg::YamlValidator& v,
             // a nonempty, but invalid element name
             if (!keyName.empty() && !v.IsSchemaElement(keyName))
             {
+                //Unknown elements, which are not found in the schema are only warnings
                 warnings << "At " << key.Mark() << ": Element \""
-                    << v.ElementName(keyName)  << "\""
-                    << " is not a valid sub-element of schema path \""
-                    << parent << "\"\n";
-                ok &= false;
+                    << v.ElementName(keyName) << "\"";
+                if (v.IsReservedElementName(keyName))
+                {
+                    warnings << " is a reserved element name and as such"
+                        << " not a sub-element of schema path \"";
+                    // misplacing a keyword is an error!
+                    ok &= false;
+                }
+                else
+                {
+                    // we only report error if the element is a reserved keyword
+                    warnings << " is being ignored. It is not a sub-element of schema path \"";
+                }
+                warnings << parent << "\"\n";
             }
             // we are not a subelement of parent
             else if (v.HasSubelements(parent)
@@ -198,11 +211,25 @@ bool YamlValidator::IsSubelementOf(const std::string& parentName, const std::str
     return ParentName(elementName) == parentName;
 }
 
-bool YamlValidator::IsRootElement(const std::string& elementName)
+bool YamlValidator::IsRootElement(const std::string& elementName) const
 {
     return IsSubelementOf(_elementSeparator, elementName);
 }
 
+bool YamlValidator::IsReservedElementName(const std::string& queryElement) const
+{
+    const auto elementName = ElementName(queryElement);
+    for (const auto& kv : _index)
+    {
+        const auto& elementPath = kv.first;
+        auto idx = elementPath.find(elementName);
+        if (idx != elementPath.npos)
+        {
+            return true;
+        }
+    }
+    return false;
+}
 auto YamlValidator::DocumentRoot() const -> std::string
 {
     return _elementSeparator;

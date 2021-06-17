@@ -671,7 +671,11 @@ auto Config::FromYamlString(const std::string& yamlString) -> Config
     std::stringstream warnings;
     if (!Validate(yamlString, warnings))
     {
-        throw Misconfiguration{ "YAML validation returned warnings: \n" + warnings.str()};
+        throw Misconfiguration{ "YAML validation returned errors: \n" + warnings.str()};
+    }
+    if (warnings.str().size() > 0)
+    {
+        std::cout << "Config::FromYamlString: warnings: " << warnings.str() << std::endl;
     }
     YAML::Node doc = YAML::Load(yamlString);
 
