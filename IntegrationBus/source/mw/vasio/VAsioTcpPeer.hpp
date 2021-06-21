@@ -31,10 +31,10 @@ public:
     VAsioTcpPeer() = delete;
     VAsioTcpPeer(asio::any_io_executor executor, VAsioConnection* ibConnection, logging::ILogger* logger);
     VAsioTcpPeer(const VAsioTcpPeer& other) = delete;
-    VAsioTcpPeer(VAsioTcpPeer&& other) = default;
+    VAsioTcpPeer(VAsioTcpPeer&& other) = delete; //clang warning: implicitly deleted because of mutex
 
     VAsioTcpPeer& operator=(const VAsioTcpPeer& other) = delete;
-    VAsioTcpPeer& operator=(VAsioTcpPeer&& other) = default;
+    VAsioTcpPeer& operator=(VAsioTcpPeer&& other) = delete; //implicitly deleted because of mutex
 
 public:
     // ----------------------------------------
@@ -47,7 +47,7 @@ public:
 
     void Connect(VAsioPeerInfo info);
 
-    inline auto Socket() -> asio::ip::tcp::socket& { return _socket; }
+    inline auto Socket() -> asio::generic::stream_protocol::socket& { return _socket; }
 
     void StartAsyncRead();
 
@@ -64,7 +64,8 @@ private:
 private:
     // ----------------------------------------
     // Private Members
-    asio::ip::tcp::socket _socket;
+    //asio::ip::tcp::socket _socket;
+    asio::generic::stream_protocol::socket _socket;
     VAsioConnection* _ibConnection{nullptr};
     VAsioPeerInfo _info;
 

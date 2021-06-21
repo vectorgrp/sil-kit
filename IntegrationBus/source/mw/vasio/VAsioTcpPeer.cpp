@@ -16,7 +16,7 @@ using namespace asio::ip;
 #include <sys/socket.h>
 #include <errno.h>
 
-static void EnableQuickAck(ib::mw::logging::ILogger* log, tcp::socket& socket)
+static void EnableQuickAck(ib::mw::logging::ILogger* log, asio::generic::stream_protocol::socket& socket)
 {
     int val{1};
     //Disable Delayed Acknowledgments on the receiving side
@@ -30,7 +30,7 @@ static void EnableQuickAck(ib::mw::logging::ILogger* log, tcp::socket& socket)
 
 #else  //windows 
 
-static void EnableQuickAck(ib::mw::logging::ILogger*, tcp::socket& )
+static void EnableQuickAck(ib::mw::logging::ILogger*, asio::generic::stream_protocol::socket& )
 {
 }
 
@@ -79,7 +79,30 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
 {
     SetInfo(std::move(peerInfo));
 
-    // Resolve the host name using DNS
+    // Unix Domain Sockets: attempt to connect via local socket first
+    for (const auto& uri : GetInfo().acceptorUris)
+    {
+        const std::string prefix{"local://"};
+        if (uri.find(prefix) == 0)
+        {
+            const auto filePath = uri.substr(prefix.size());
+            try
+            {
+                asio::local::stream_protocol::endpoint ep{filePath};
+                _socket.connect(ep);
+                return;
+            }
+            catch (...)
+            {
+                // reset the socket
+                _socket = decltype(_socket){_socket.get_executor()};
+                // move on to TCP connections
+                break;
+            }
+        }
+    }
+
+    // TCP: Fall back to TCP and resolve the host name using DNS
     tcp::resolver resolver(_socket.get_executor());
     tcp::resolver::results_type resolverResults;
     try
@@ -97,7 +120,7 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
     {
         try
         {
-            _socket.connect(resolverEntry);
+            _socket.connect(resolverEntry.endpoint());
 
             if (config.tcpNoDelay)
             {
@@ -125,7 +148,7 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
         catch (asio::system_error& /*err*/)
         {
             // reset the socket
-            _socket = asio::ip::tcp::socket{_socket.get_executor()};
+            _socket = decltype(_socket){_socket.get_executor()};
         }
     }
 

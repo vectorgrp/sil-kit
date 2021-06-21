@@ -30,7 +30,9 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const VAsioPeerInfo& pee
     buffer << peerInfo.participantName
            << peerInfo.participantId
            << peerInfo.acceptorHost
-           << peerInfo.acceptorPort;
+           << peerInfo.acceptorPort
+           << peerInfo.acceptorUris
+        ;
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioPeerInfo& peerInfo)
@@ -39,6 +41,15 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioPeerInfo& peerInfo)
            >> peerInfo.participantId
            >> peerInfo.acceptorHost
            >> peerInfo.acceptorPort;
+    // In version <= 3.4.0 there was no acceptorUris, we optionally
+    // deserialize it for backwards compatibility with older clients.
+    try
+    {
+        buffer >> peerInfo.acceptorUris;
+    }
+    catch (...)
+    {
+    }
     return buffer;
 }
 

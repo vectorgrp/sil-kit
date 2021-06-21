@@ -5,28 +5,113 @@
 #include <algorithm>
 #include <chrono>
 #include <thread>
+#include <array>
+#include <cstdio> //unlink
 
-#include "ib/cfg/string_utils.hpp"
 
 #include "VAsioTcpPeer.hpp"
 
 using namespace std::chrono_literals;
 
 namespace {
-#if _WIN32
+//only TCP/IP need platform tweaks
+template<typename AcceptorT>
+void SetPlatformOptions(AcceptorT&)
+{
+}
+// local domain sockets on my WSL (Linux) require read/write permission for user
+template<typename EndpointT>
+void SetSocketPermissions(const EndpointT&)
+{
+}
+
+// platform specific definitions of utilities
+#if defined(_WIN32)
+
+#   include <direct.h>
+#   define getcwd _getcwd
+constexpr const char pathSeparator = '\\';
+
+template<>
 void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
 {
     using exclusive_addruse = asio::detail::socket_option::boolean<ASIO_OS_DEF(SOL_SOCKET), SO_EXCLUSIVEADDRUSE>;
     acceptor.set_option(exclusive_addruse{true});
 }
 #else
+
+#   include <sys/stat.h> //for chmod
+
+#   include <unistd.h>
+constexpr const char pathSeparator = '/';
+
+template<>
 void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
 {
     // We enable the SO_REUSEADDR flag on POSIX, this allows reusing a socket's address more quickly.
     acceptor.set_option(asio::ip::tcp::acceptor::reuse_address{true});
 }
+
+template<>
+void SetSocketPermissions(const asio::local::stream_protocol::endpoint& endpoint)
+{
+    const auto path = endpoint.path();
+    (void)chmod(path.c_str(), 0770);
+}
+
 #endif
+
+
+
+ std::string getCurrentWorkingDir()
+ {
+     std::array<char, 4096> buffer;
+     if (::getcwd(buffer.data(), buffer.size()) == nullptr)
+     {
+         throw std::runtime_error("Couldn't get current working directory.");
+     }
+
+     return std::string(buffer.data());
+ }
+
+auto makeLocalEndpoint(const std::string& participantName, const ib::mw::ParticipantId& id) -> asio::local::stream_protocol::endpoint
+{
+    asio::local::stream_protocol::endpoint result;
+    std::stringstream path;
+    path << getCurrentWorkingDir()
+        << pathSeparator
+        << participantName
+        << "_"
+        << static_cast<int>(id)
+        << ".socket";
+
+    result.path(path.str());
+    return result;
+}
+
+
+
 } //anonymous namespace
+
+//!< Generic endpoint lacks a string representation
+// NB thanks to ADL we can't put this in anonymous namespace (on clang and old MSVC)
+namespace std {
+inline std::ostream& operator<< (std::ostream& out, 
+    const asio::generic::stream_protocol::endpoint& ep)
+{
+    if (ep.protocol() == asio::ip::tcp::v4()
+        || ep.protocol() == asio::ip::tcp::v6())
+    {
+        out << reinterpret_cast<const asio::ip::tcp::endpoint& >(ep);
+    }
+    else
+    {
+        out << reinterpret_cast<const asio::local::stream_protocol::endpoint &>(ep);
+    }
+    return out;
+}
+} //end namespace vasio
+
 namespace ib {
 namespace mw {
 
@@ -51,6 +136,14 @@ VAsioConnection::~VAsioConnection()
         _ioContext.stop();
         _ioWorker.join();
     }
+
+    auto&& localAcceptor = std::get<std::unique_ptr<asio::local::stream_protocol::acceptor>>(_acceptors);
+    if (localAcceptor)
+    {
+        //clean up unix domain sockets
+        (void)::unlink(localAcceptor->local_endpoint().path().c_str());
+    }
+
 }
 
 void VAsioConnection::SetLogger(logging::ILogger* logger)
@@ -62,7 +155,9 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
 {
     assert(_logger);
 
-    // We let the operating system choose a free port
+    // We pick a random file name for local domain sockets
+    AcceptLocalConnections();
+    // We let the operating system choose a free TCP port
     AcceptConnectionsOn(tcp::endpoint(asio::ip::address::from_string("127.0.0.1"), 0));
 
     auto& vasioConfig = _config.middlewareConfig.vasio;
@@ -72,6 +167,12 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     registryInfo.participantId = 0;
     registryInfo.acceptorHost = vasioConfig.registry.hostname;
     registryInfo.acceptorPort = static_cast<uint16_t>(vasioConfig.registry.port + domainId);
+
+    auto registryLocalEndpoint = makeLocalEndpoint(registryInfo.participantName,
+        registryInfo.participantId);
+    std::stringstream localUri;
+    localUri << "local://" << registryLocalEndpoint.path();
+    registryInfo.acceptorUris.push_back(localUri.str());
 
     _logger->Debug("Connecting to VAsio registry");
 
@@ -148,20 +249,38 @@ void VAsioConnection::SendParticipantAnnoucement(IVAsioPeer* peer)
     VAsioPeerInfo localInfo{
         _participantName,
         _participantId,
-        _tcpAcceptor->local_endpoint().address().to_string(),
-        _tcpAcceptor->local_endpoint().port()
     };
+
+    //Ensure that the local acceptor is the first entry in the acceptorUris
+    auto&& localAcceptor = std::get<std::unique_ptr<asio::local::stream_protocol::acceptor>>(_acceptors);
+    if (localAcceptor)
+    {
+        std::stringstream localUri;
+        localUri << "local://" << localAcceptor->local_endpoint().path();
+        localInfo.acceptorUris.emplace_back(std::move(localUri.str()));
+    }
+    auto&& tcpAcceptor = std::get<std::unique_ptr<asio::ip::tcp::acceptor>>(_acceptors);
+    if (tcpAcceptor)
+    {
+        auto ep = tcpAcceptor->local_endpoint();
+        std::stringstream tcpUri;
+        tcpUri << "tcp://" << ep;
+        localInfo.acceptorUris.emplace_back(std::move(tcpUri.str()));
+        //backward compatibility
+        localInfo.acceptorHost = ep.address().to_string();
+        localInfo.acceptorPort = ep.port();
+    }
 
     ParticipantAnnouncement announcement;
     announcement.peerInfo = localInfo;
 
     MessageBuffer buffer;
-    uint32_t msgSizePlaceholder{0u};
+    uint32_t msgSizePlaceholder{ 0u };
 
     buffer << msgSizePlaceholder
-           << VAsioMsgKind::IbRegistryMessage
-           << RegistryMessageKind::ParticipantAnnouncement
-           << announcement;
+        << VAsioMsgKind::IbRegistryMessage
+        << RegistryMessageKind::ParticipantAnnouncement
+        << announcement;
 
     _logger->Debug("Sending participant announcement to {}", peer->GetInfo().participantName);
     peer->SendIbMsg(std::move(buffer));
@@ -194,6 +313,7 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Mess
 }
 
 void VAsioConnection::SendParticipantAnnoucementReply(IVAsioPeer* peer)
+
 {
     ParticipantAnnouncementReply reply;
     std::transform(_vasioReceivers.begin(), _vasioReceivers.end(), std::back_inserter(reply.subscribers),
@@ -225,13 +345,31 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
 
     _logger->Debug("Received known participants list from IbRegistry");
 
+    //Debug  print of given peer infos
+    auto printInfo = [](const auto& info) -> std::string 
+    {
+        std::stringstream ss;
+        ss << "PeerInfo{";
+        if (info.acceptorUris.empty())
+        {
+            ss << info.acceptorHost << ":" << info.acceptorPort;
+        }
+        else
+        {
+            for (auto& uri : info.acceptorUris)
+            {
+                ss << uri << ", ";
+            }
+        }
+        ss << "}";
+        return ss.str();
+    };
     for (auto&& peerInfo : participantsMsg.peerInfos)
     {
-        _logger->Debug("Connecting to {} with Id {} on {}:{}",
+        _logger->Debug("Connecting to {} with Id {} on {}",
             peerInfo.participantName,
             peerInfo.participantId,
-            peerInfo.acceptorHost,
-            peerInfo.acceptorPort);
+            printInfo(peerInfo));
 
         auto peer = std::make_unique<VAsioTcpPeer>(_ioContext.get_executor(), this, _logger);
         try
@@ -272,17 +410,38 @@ void VAsioConnection::StartIoWorker()
     }};
 }
 
-void VAsioConnection::AcceptConnectionsOn(asio::ip::tcp::endpoint endpoint)
+void VAsioConnection::AcceptLocalConnections()
 {
-    assert(!_tcpAcceptor);
+    auto localEndpoint = makeLocalEndpoint(_participantName, _participantId);
+
+    //file must not exist before we bind/listen on it
+    (void)::unlink(localEndpoint.path().c_str());
+
+    AcceptConnectionsOn(localEndpoint);
+}
+
+template<typename EndpointT>
+void VAsioConnection::AcceptConnectionsOn(EndpointT endpoint)
+{
+    using AcceptorT = typename EndpointT::protocol_type::acceptor;
+    auto&& acceptor = std::get<std::unique_ptr<AcceptorT>>(_acceptors);
+    if (acceptor)
+    {
+        // we already have an acceptor for the given endpoint type
+        std::stringstream endpointName;
+        endpointName << endpoint;
+        throw std::logic_error{ "VAsioConnection: acceptor already open for endpoint type: " 
+            + endpointName.str()};
+    }
 
     try
     {
-        _tcpAcceptor = std::make_unique<asio::ip::tcp::acceptor>(_ioContext);
-        _tcpAcceptor->open(endpoint.protocol());
-        SetPlatformOptions(*_tcpAcceptor);
-        _tcpAcceptor->bind(endpoint);
-        _tcpAcceptor->listen();
+        acceptor = std::make_unique<AcceptorT>(_ioContext);
+        acceptor->open(endpoint.protocol());
+        SetPlatformOptions(*acceptor);
+        acceptor->bind(endpoint);
+        SetSocketPermissions(endpoint);
+        acceptor->listen();
     }
     catch (const std::exception& e)
     {
@@ -290,12 +449,13 @@ void VAsioConnection::AcceptConnectionsOn(asio::ip::tcp::endpoint endpoint)
         throw;
     }
 
-    _logger->Debug("VAsioConnection is listening on {}", _tcpAcceptor->local_endpoint());
+    _logger->Debug("VAsioConnection is listening on {}", acceptor->local_endpoint());
 
-    AcceptNextConnection(*_tcpAcceptor);
+    AcceptNextConnection(*acceptor);
 }
 
-void VAsioConnection::AcceptNextConnection(asio::ip::tcp::acceptor& acceptor)
+template<typename AcceptorT>
+void VAsioConnection::AcceptNextConnection(AcceptorT& acceptor)
 {
     std::shared_ptr<VAsioTcpPeer> newConnection;
     try

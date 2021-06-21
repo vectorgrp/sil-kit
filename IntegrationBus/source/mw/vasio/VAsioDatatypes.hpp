@@ -14,7 +14,7 @@ struct RegistryMsgHeader
 {
     std::array<char, 4> preambel{{'V', 'I', 'B', '-'}};
     uint16_t versionHigh = 2;
-    uint16_t versionLow = 0;
+    uint16_t versionLow = 1;
 };
 
 struct VAsioMsgSubscriber

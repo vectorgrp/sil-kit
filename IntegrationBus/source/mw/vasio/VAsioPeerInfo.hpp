@@ -3,6 +3,8 @@
 #pragma once
 
 #include <string>
+#include <vector>
+
 #include "ib/mw/EndpointAddress.hpp"
 
 namespace ib {
@@ -14,6 +16,7 @@ struct VAsioPeerInfo
     ParticipantId participantId;
     std::string acceptorHost;
     uint16_t acceptorPort;
+    std::vector<std::string> acceptorUris;
 };
 
 } // mw

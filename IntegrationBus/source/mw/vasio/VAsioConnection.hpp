@@ -63,16 +63,16 @@ public:
     // ----------------------------------------
     // Constructors and Destructor
     VAsioConnection() = default;
-    VAsioConnection(const VAsioConnection&) = default;
-    VAsioConnection(VAsioConnection&&) = default;
+    VAsioConnection(const VAsioConnection&) = delete; //clang warning: this is implicity deleted by asio::io_context
+    VAsioConnection(VAsioConnection&&) = delete; // ditto asio::io_context
     VAsioConnection(cfg::Config config, std::string participantName, ParticipantId participantId);
     ~VAsioConnection();
 
 public:
     // ----------------------------------------
     // Operator Implementations
-    VAsioConnection& operator=(VAsioConnection& other) = default;
-    VAsioConnection& operator=(VAsioConnection&& other) = default;
+    VAsioConnection& operator=(VAsioConnection& other) = delete; // also implicitly deleted by asio::io_context
+    VAsioConnection& operator=(VAsioConnection&& other) = delete;
 
 public:
     // ----------------------------------------
@@ -114,7 +114,10 @@ public:
     void RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)> callback);
     void OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer);
 
-    void AcceptConnectionsOn(asio::ip::tcp::endpoint endpoint);
+    template<typename EndpointT>
+    void AcceptConnectionsOn(EndpointT endpoint);
+    void AcceptLocalConnections();
+
     void StartIoWorker();
 
     void RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> callback);
@@ -308,7 +311,8 @@ private:
 
     // TCP Related
     void AddPeer(std::shared_ptr<VAsioTcpPeer> peer);
-    void AcceptNextConnection(asio::ip::tcp::acceptor& acceptor);
+    template<typename AcceptorT>
+    void AcceptNextConnection(AcceptorT& acceptor);
 
 private:
     // ----------------------------------------
@@ -337,6 +341,10 @@ private:
     std::unique_ptr<IVAsioPeer> _registry{nullptr};
     std::vector<std::shared_ptr<IVAsioPeer>> _peers;
     std::unique_ptr<asio::ip::tcp::acceptor> _tcpAcceptor;
+    std::tuple<
+        std::unique_ptr<asio::ip::tcp::acceptor>,
+        std::unique_ptr<asio::local::stream_protocol::acceptor>
+    > _acceptors;
 
     // After receiving the list of known participants from the registry, we keep
     // track of the sent ParticipantAnnouncements and wait for the corresponding

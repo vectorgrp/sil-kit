@@ -29,16 +29,20 @@ void VAsioRegistry::ProvideDomain(uint32_t domainId)
 {
     // accept connection from participants on any interface
     auto registryPort = static_cast<uint16_t>(_vasioConfig.registry.port + domainId);
-    tcp::endpoint registryEndpoint(tcp::v4(), registryPort);
+    tcp::endpoint endpoint_v4(tcp::v4(), registryPort);
     try
     {
-        // FIXME: also accept connections on V6
-        _connection.AcceptConnectionsOn(registryEndpoint);
+        //Local domain sockets
+        _connection.AcceptLocalConnections();
+        _connection.AcceptConnectionsOn(endpoint_v4);
+
+        //tcp::endpoint endpoint_v6(tcp::v6(), registryPort);
+        //FIXME allow ipv6: _connection.AcceptConnectionsOn(endpoint_v6);
     }
     catch (const std::exception& e)
     {
         _logger->Error("VAsioRegistry failed to create listening socket {} for domainId={}. Reason: {}",
-            registryEndpoint,
+            endpoint_v4,
             domainId,
             e.what());
         throw;
