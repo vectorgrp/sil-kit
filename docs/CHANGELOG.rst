@@ -5,6 +5,49 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.4.1] - 2021-06-25
+--------------------------------
+
+Added
+~~~~~
+- Added native YAML parser implementation.
+  This provides better error messages and warnings for parsing YAML and JSON config files
+  via the ``Config::FromYamlString``/``Config::FromYamlFile`` procedures.
+  When the parser encounters an unknown element it emits a warning.
+  However, if the element uses a reserved element name of the config 
+  schema the warning is turned into an error (AFTMAGT-314).
+  Please note, that schema versioning for backward compatibility is
+  not yet implemented and will be addressed in the future.
+
+Fixed
+~~~~~
+- Fixed warnings during 32-bit builds: an int64_t was truncated to int.
+- Build: relax some warning levels for gtest and remove useless compile
+  flags on windows.
+
+Changed
+~~~~~~~
+- When shutting down, do not print an error message that we're already
+  shutting down.
+
+.. admonition:: Note: the IbRegistry executable was moved to the NonRedistributable directory.
+
+  The location of the IbRegistry executable now matches that of the vib-registry shared library,
+  cf. :ref:`sec:util-registry`.
+
+- Similar to the vib-registry shared library, the executable was moved to the
+  IntegrationBus-NonRedistributable directory.
+
+
+
+Compatibility with 3.4.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
+
 [3.4.0] - 2021-06-01
 --------------------------------
 
