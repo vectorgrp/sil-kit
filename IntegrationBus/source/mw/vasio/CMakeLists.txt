@@ -40,6 +40,7 @@ target_link_libraries(IbMwVAsio
       IbSimLin
       IbSimFlexRay
       Threads::Threads
+      IbFilesystem
       asio
 )
 

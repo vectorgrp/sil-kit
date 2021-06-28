@@ -6,12 +6,13 @@
 #include <chrono>
 #include <thread>
 #include <array>
-#include <cstdio> //unlink
-
+#include <functional>
 
 #include "VAsioTcpPeer.hpp"
+#include "Filesystem.hpp"
 
 using namespace std::chrono_literals;
+namespace fs = ib::filesystem;
 
 namespace {
 //only TCP/IP need platform tweaks
@@ -27,11 +28,8 @@ void SetSocketPermissions(const EndpointT&)
 
 // platform specific definitions of utilities
 #if defined(_WIN32)
-
-#   include <direct.h>
-#   define getcwd _getcwd
-constexpr const char pathSeparator = '\\';
-
+#   include <process.h> //for _getpid
+#   define getpid _getpid
 template<>
 void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
 {
@@ -39,11 +37,7 @@ void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
     acceptor.set_option(exclusive_addruse{true});
 }
 #else
-
-#   include <sys/stat.h> //for chmod
-
-#   include <unistd.h>
-constexpr const char pathSeparator = '/';
+#   include <unistd.h> //for getpid
 
 template<>
 void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
@@ -61,56 +55,67 @@ void SetSocketPermissions(const asio::local::stream_protocol::endpoint& endpoint
 
 #endif
 
-
-
- std::string getCurrentWorkingDir()
- {
-     std::array<char, 4096> buffer;
-     if (::getcwd(buffer.data(), buffer.size()) == nullptr)
-     {
-         throw std::runtime_error("Couldn't get current working directory.");
-     }
-
-     return std::string(buffer.data());
- }
-
+//!< Note that local ipc (unix domain) sockets have a path limit (108 characters, typically)
+// Using the current working directory as part of a domain socket path might result in 
+// a runtime exception. We create a unique temporary file path, with a fixed length.
 auto makeLocalEndpoint(const std::string& participantName, const ib::mw::ParticipantId& id) -> asio::local::stream_protocol::endpoint
 {
     asio::local::stream_protocol::endpoint result;
-    std::stringstream path;
-    path << getCurrentWorkingDir()
-        << pathSeparator
-        << participantName
-        << "_"
+
+    // We hash the participant name, ID and the process ID as part of the temporary file name,
+    // so we have a bounded path length.
+    std::stringstream unique_filename;
+    unique_filename << participantName
         << static_cast<int>(id)
-        << ".socket";
+        << static_cast<int>(getpid());
+    const auto unique_id = std::hash<std::string>{}(unique_filename.str());
+
+    const auto bounded_name = participantName.substr(0, 
+        std::min<size_t>(participantName.size(), 16));
+
+    std::stringstream path;
+    path << fs::temp_directory_path().string()
+        << fs::path::preferred_separator
+        << "VIB_"
+        << bounded_name
+        << std::hex << unique_id
+        << ".sock";
 
     result.path(path.str());
     return result;
 }
 
 
-
 } //anonymous namespace
 
-//!< Generic endpoint lacks a string representation
-// NB thanks to ADL we can't put this in anonymous namespace (on clang and old MSVC)
+
+
 namespace std {
-inline std::ostream& operator<< (std::ostream& out, 
-    const asio::generic::stream_protocol::endpoint& ep)
+inline std::ostream& operator<< (std::ostream& out,
+    const asio::generic::stream_protocol::socket& sock)
 {
-    if (ep.protocol() == asio::ip::tcp::v4()
-        || ep.protocol() == asio::ip::tcp::v6())
+    const auto local_family = asio::local::stream_protocol{}.family();
+    const auto ep = sock.local_endpoint();
+    if (ep.protocol().family() == asio::ip::tcp::v4().family()
+        || ep.protocol().family() == asio::ip::tcp::v6().family())
     {
-        out << reinterpret_cast<const asio::ip::tcp::endpoint& >(ep);
+        //we have an actual remote end
+        auto remote_ep = sock.remote_endpoint();
+        out << reinterpret_cast<const asio::ip::tcp::endpoint& >(remote_ep);
+    }
+    else if (ep.protocol().family() == local_family)
+    {
+        // The underlying sockaddr_un contains the path, zero terminated.
+        const auto* data = static_cast<const char*>(ep.data()->sa_data);
+        out << '"' << data << '"';
     }
     else
     {
-        out << reinterpret_cast<const asio::local::stream_protocol::endpoint &>(ep);
+        out << "Unknown Endpoint family=" << ep.protocol().family();
     }
     return out;
 }
-} //end namespace vasio
+} //end namespace std 
 
 namespace ib {
 namespace mw {
@@ -137,11 +142,11 @@ VAsioConnection::~VAsioConnection()
         _ioWorker.join();
     }
 
-    auto&& localAcceptor = std::get<std::unique_ptr<asio::local::stream_protocol::acceptor>>(_acceptors);
+    auto&& localAcceptor = GetAcceptor<asio::local::stream_protocol::acceptor>();
     if (localAcceptor)
     {
-        //clean up unix domain sockets
-        (void)::unlink(localAcceptor->local_endpoint().path().c_str());
+        //clean up local ipc sockets
+        (void)fs::remove(localAcceptor->local_endpoint().path());
     }
 
 }
@@ -156,7 +161,14 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     assert(_logger);
 
     // We pick a random file name for local domain sockets
-    AcceptLocalConnections();
+    try
+    {
+        AcceptLocalConnections();
+    }
+    catch (const std::exception& ex)
+    {
+        _logger->Warn("VasioConnection: Cannot accept local IPC connections: {}", ex.what());
+    }
     // We let the operating system choose a free TCP port
     AcceptConnectionsOn(tcp::endpoint(asio::ip::address::from_string("127.0.0.1"), 0));
 
@@ -168,6 +180,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     registryInfo.acceptorHost = vasioConfig.registry.hostname;
     registryInfo.acceptorPort = static_cast<uint16_t>(vasioConfig.registry.port + domainId);
 
+    // We can compute the registry's local socket path a priori:
     auto registryLocalEndpoint = makeLocalEndpoint(registryInfo.participantName,
         registryInfo.participantId);
     std::stringstream localUri;
@@ -252,14 +265,14 @@ void VAsioConnection::SendParticipantAnnoucement(IVAsioPeer* peer)
     };
 
     //Ensure that the local acceptor is the first entry in the acceptorUris
-    auto&& localAcceptor = std::get<std::unique_ptr<asio::local::stream_protocol::acceptor>>(_acceptors);
+    auto&& localAcceptor = GetAcceptor<asio::local::stream_protocol::acceptor>();
     if (localAcceptor)
     {
         std::stringstream localUri;
         localUri << "local://" << localAcceptor->local_endpoint().path();
         localInfo.acceptorUris.emplace_back(std::move(localUri.str()));
     }
-    auto&& tcpAcceptor = std::get<std::unique_ptr<asio::ip::tcp::acceptor>>(_acceptors);
+    auto&& tcpAcceptor = GetAcceptor<asio::ip::tcp::acceptor>();
     if (tcpAcceptor)
     {
         auto ep = tcpAcceptor->local_endpoint();
@@ -415,7 +428,7 @@ void VAsioConnection::AcceptLocalConnections()
     auto localEndpoint = makeLocalEndpoint(_participantName, _participantId);
 
     //file must not exist before we bind/listen on it
-    (void)::unlink(localEndpoint.path().c_str());
+    (void)fs::remove(localEndpoint.path());
 
     AcceptConnectionsOn(localEndpoint);
 }
@@ -473,7 +486,7 @@ void VAsioConnection::AcceptNextConnection(AcceptorT& acceptor)
         {
             if (!error)
             {
-                _logger->Debug("New connection from {}", newConnection->Socket().remote_endpoint());
+                _logger->Debug("New connection from {}", newConnection->Socket());
                 AddPeer(std::move(newConnection));
             }
             AcceptNextConnection(acceptor);

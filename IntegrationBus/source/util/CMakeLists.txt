@@ -13,7 +13,17 @@ target_include_directories(IbUtil
     INTERFACE .
 )
 
-
-
 add_subdirectory(tests)
+
+# Filesystem utilities required for cross platform and language portability.
+# Can be removed when we finaly upgrade to C++17
+
+add_library(IbFilesystem STATIC
+    Filesystem.hpp
+    Filesystem.cpp
+)
+target_include_directories(IbFilesystem
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
+)
+
 

@@ -314,6 +314,16 @@ private:
     template<typename AcceptorT>
     void AcceptNextConnection(AcceptorT& acceptor);
 
+    template<typename AcceptorT>
+    auto GetAcceptor() const -> AcceptorT*
+    {
+        auto&& acceptor =  std::get<std::unique_ptr<AcceptorT>>(_acceptors);
+        if (acceptor)
+        {
+            return acceptor.get();
+        }
+        return nullptr;
+    }
 private:
     // ----------------------------------------
     // private members

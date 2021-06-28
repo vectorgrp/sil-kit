@@ -28,14 +28,22 @@ VAsioRegistry::VAsioRegistry(ib::cfg::Config cfg)
 void VAsioRegistry::ProvideDomain(uint32_t domainId)
 {
     // accept connection from participants on any interface
+    try
+    {
+        //Local domain sockets, failure is non fatal for operation.
+        _connection.AcceptLocalConnections();
+    }
+    catch (const std::exception& e)
+    {
+        _logger->Warn("VAsioRegistry failed to create local listening socket: {}",
+            e.what());
+    }
+
     auto registryPort = static_cast<uint16_t>(_vasioConfig.registry.port + domainId);
     tcp::endpoint endpoint_v4(tcp::v4(), registryPort);
     try
     {
-        //Local domain sockets
-        _connection.AcceptLocalConnections();
         _connection.AcceptConnectionsOn(endpoint_v4);
-
         //tcp::endpoint endpoint_v6(tcp::v6(), registryPort);
         //FIXME allow ipv6: _connection.AcceptConnectionsOn(endpoint_v6);
     }

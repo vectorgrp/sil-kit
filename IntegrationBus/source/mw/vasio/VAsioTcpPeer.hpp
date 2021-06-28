@@ -60,6 +60,8 @@ private:
     void ReadSomeAsync();
     void DispatchBuffer();
     void Shutdown();
+    void ConnectLocal(const std::string& socketPath);
+    void ConnectTcp(const std::string& host, const std::string& port);
 
 private:
     // ----------------------------------------

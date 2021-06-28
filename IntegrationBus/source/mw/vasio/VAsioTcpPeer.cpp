@@ -65,6 +65,7 @@ void VAsioTcpPeer::Shutdown()
     }
 }
 
+
 auto VAsioTcpPeer::GetInfo() const -> const VAsioPeerInfo&
 {
     return _info;
@@ -75,46 +76,35 @@ void VAsioTcpPeer::SetInfo(VAsioPeerInfo peerInfo)
     _info = std::move(peerInfo);
 }
 
-void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
+void VAsioTcpPeer::ConnectLocal(const std::string& socketPath)
 {
-    SetInfo(std::move(peerInfo));
-
-    // Unix Domain Sockets: attempt to connect via local socket first
-    for (const auto& uri : GetInfo().acceptorUris)
+    try
     {
-        const std::string prefix{"local://"};
-        if (uri.find(prefix) == 0)
-        {
-            const auto filePath = uri.substr(prefix.size());
-            try
-            {
-                asio::local::stream_protocol::endpoint ep{filePath};
-                _socket.connect(ep);
-                return;
-            }
-            catch (...)
-            {
-                // reset the socket
-                _socket = decltype(_socket){_socket.get_executor()};
-                // move on to TCP connections
-                break;
-            }
-        }
+        asio::local::stream_protocol::endpoint ep{socketPath};
+        _socket.connect(ep);
+        return;
     }
+    catch (...)
+    {
+        // reset the socket
+        _socket = decltype(_socket){_socket.get_executor()};
+        // move on to TCP connections
+    }
+}
 
-    // TCP: Fall back to TCP and resolve the host name using DNS
+void VAsioTcpPeer::ConnectTcp(const std::string& host, const std::string& port)
+{
     tcp::resolver resolver(_socket.get_executor());
     tcp::resolver::results_type resolverResults;
     try
     {
-        resolverResults = resolver.resolve(GetInfo().acceptorHost, std::to_string(GetInfo().acceptorPort));
+        resolverResults = resolver.resolve(host, port);
     }
     catch (asio::system_error& err)
     {
-        _logger->Error("Unable to resolve hostname \"{}\": {}", GetInfo().acceptorHost, err.what());
+        _logger->Warn("Unable to resolve hostname \"{}:{}\": {}", host, port, err.what());
         return;
     }
-
     const auto& config = _ibConnection->Config().middlewareConfig.vasio;
     for (auto&& resolverEntry : resolverResults)
     {
@@ -151,17 +141,71 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
             _socket = decltype(_socket){_socket.get_executor()};
         }
     }
+}
+void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
+{
+    SetInfo(std::move(peerInfo));
 
-    auto errorMsg = fmt::format("Failed to connect to host {}", GetInfo().acceptorHost);
-    _logger->Error(errorMsg);
-    _logger->Info("Tried the following addresses:");
-
-    for (auto&& resolverEntry : resolverResults)
+    std::stringstream attemptedUris;
+    // Unix Domain Sockets: attempt to connect via local socket first
+    const std::string local_prefix{"local://"};
+    const auto& uris = GetInfo().acceptorUris;
+    auto localUri = std::find_if(uris.begin(), uris.end(),
+        [&local_prefix](const auto& uri) {
+        return uri.find(local_prefix) == 0;
+    });
+    if (localUri != uris.end())
     {
-        _logger->Info(" - {}", tcp::endpoint{ resolverEntry });
+        const auto filePath = localUri->substr(local_prefix.size());
+        attemptedUris << filePath << ", ";
+        ConnectLocal(filePath);
+        if (_socket.is_open())
+        {
+            return;
+        }
     }
 
-    throw std::runtime_error{errorMsg};
+    //New style tcp:// URIs 
+    for (const auto& uri : GetInfo().acceptorUris)
+    {
+        const std::string prefix{"tcp://"};
+        if (uri.find(prefix) == 0)
+        {
+            const auto hostAndPort = uri.substr(prefix.size());
+            try
+            {
+                auto sep = hostAndPort.rfind(":");
+                if (sep == hostAndPort.npos)
+                {
+                    continue;
+                }
+                const auto host = hostAndPort.substr(0, sep);
+                const auto port = hostAndPort.substr(sep+1);
+                attemptedUris << hostAndPort << ", ";
+                ConnectTcp(host, port);
+                if (_socket.is_open())
+                {
+                    return;
+                }
+            }
+            catch (...)
+            {
+                // reset the socket
+                _socket = decltype(_socket){_socket.get_executor()};
+            }
+        }
+    }
+
+    // TCP: Fall back to TCP and resolve the host name using legacy members
+    ConnectTcp(GetInfo().acceptorHost, std::to_string(GetInfo().acceptorPort));
+    if (!_socket.is_open())
+    {
+        auto errorMsg = fmt::format("Failed to connect to host {}", GetInfo().acceptorHost);
+        _logger->Error(errorMsg);
+        _logger->Info("Tried the following URIs: {}", attemptedUris.str());
+
+        throw std::runtime_error{errorMsg};
+    }
 }
 
 void VAsioTcpPeer::SendIbMsg(MessageBuffer buffer)
