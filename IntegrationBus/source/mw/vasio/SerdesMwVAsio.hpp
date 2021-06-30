@@ -5,6 +5,7 @@
 #include "VAsioDatatypes.hpp"
 #include "VAsioPeerInfo.hpp"
 
+#include "Uri.hpp"
 #include "MessageBuffer.hpp"
 
 namespace ib {
@@ -30,26 +31,31 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const VAsioPeerInfo& pee
     buffer << peerInfo.participantName
            << peerInfo.participantId
            << peerInfo.acceptorHost
-           << peerInfo.acceptorPort
-           << peerInfo.acceptorUris
-        ;
+           << peerInfo.acceptorPort;
     return buffer;
 }
+
 inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioPeerInfo& peerInfo)
 {
     buffer >> peerInfo.participantName
            >> peerInfo.participantId
            >> peerInfo.acceptorHost
            >> peerInfo.acceptorPort;
-    // In version <= 3.4.0 there was no acceptorUris, we optionally
-    // deserialize it for backwards compatibility with older clients.
-    try
-    {
-        buffer >> peerInfo.acceptorUris;
-    }
-    catch (...)
-    {
-    }
+    return buffer;
+}
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const VAsioPeerUri& peerUri)
+{
+    buffer << peerUri.participantName
+           << peerUri.participantId
+           << peerUri.acceptorUris;
+    return buffer;
+}
+
+inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioPeerUri& peerUri)
+{
+    buffer >> peerUri.participantName
+           >> peerUri.participantId
+           >> peerUri.acceptorUris;
     return buffer;
 }
 
@@ -86,13 +92,19 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, SubscriptionAcknowledge&
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnouncement& announcement)
 {
     buffer << announcement.messageHeader
-           << announcement.peerInfo;
+        << announcement.peerInfo
+        << announcement.peerUri;
+
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncement& announcement)
 {
     buffer >> announcement.messageHeader
-           >> announcement.peerInfo;
+        >> announcement.peerInfo;
+    if (buffer.RemainingBytesLeft() > 0)
+    {
+        buffer >> announcement.peerUri;
+    }
     return buffer;
 }
 
@@ -110,15 +122,21 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncementR
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const KnownParticipants& participants)
 {
     buffer << participants.messageHeader
-           << participants.peerInfos;
+        << participants.peerInfos
+        << participants.peerUris;
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, KnownParticipants& participants)
 {
     buffer >> participants.messageHeader
-           >> participants.peerInfos;
+        >> participants.peerInfos;
+    if (buffer.RemainingBytesLeft() > 0)
+    {
+        buffer >> participants.peerUris;
+    }
     return buffer;
 }
+
 
 } // namespace mw
 } // namespace ib

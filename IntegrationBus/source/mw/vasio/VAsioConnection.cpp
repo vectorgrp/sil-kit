@@ -10,6 +10,7 @@
 
 #include "VAsioTcpPeer.hpp"
 #include "Filesystem.hpp"
+#include "Uri.hpp"
 
 using namespace std::chrono_literals;
 namespace fs = ib::filesystem;
@@ -28,8 +29,6 @@ void SetSocketPermissions(const EndpointT&)
 
 // platform specific definitions of utilities
 #if defined(_WIN32)
-#   include <process.h> //for _getpid
-#   define getpid _getpid
 template<>
 void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
 {
@@ -37,7 +36,6 @@ void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
     acceptor.set_option(exclusive_addruse{true});
 }
 #else
-#   include <unistd.h> //for getpid
 
 template<>
 void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
@@ -60,31 +58,40 @@ void SetSocketPermissions(const asio::local::stream_protocol::endpoint& endpoint
 // a runtime exception. We create a unique temporary file path, with a fixed length.
 auto makeLocalEndpoint(const std::string& participantName, const ib::mw::ParticipantId& id) -> asio::local::stream_protocol::endpoint
 {
+    auto hash = [](const auto& value) {
+        return std::hash<std::string>{}(value);
+    };
     asio::local::stream_protocol::endpoint result;
-
-    // We hash the participant name, ID and the process ID as part of the temporary file name,
-    // so we have a bounded path length.
-    std::stringstream unique_filename;
-    unique_filename << participantName
-        << static_cast<int>(id)
-        << static_cast<int>(getpid());
-    const auto unique_id = std::hash<std::string>{}(unique_filename.str());
-
     const auto bounded_name = participantName.substr(0, 
-        std::min<size_t>(participantName.size(), 16));
+        std::min<size_t>(participantName.size(), 10));
+
+    // We hash the participant name, ID and the current working directory
+    // as part of the temporary file name, so we can have multiple local simulations
+    // started from different working directories, but a shared temporary directory.
+    // NB keep the variable part as short as possible.
 
     std::stringstream path;
     path << fs::temp_directory_path().string()
         << fs::path::preferred_separator
-        << "VIB_"
         << bounded_name
-        << std::hex << unique_id
-        << ".sock";
+        << std::hex << hash(participantName + std::to_string(id))
+        << std::hex << hash(fs::current_path().string())
+        << ".vib";
 
     result.path(path.str());
     return result;
 }
 
+//Debug  print of given peer infos
+auto printUris(const ib::mw::VAsioPeerUri& info) -> std::string 
+{
+    std::stringstream ss;
+    for (auto& uri : info.acceptorUris)
+    {
+        ss << uri << ", ";
+    }
+    return ss.str();
+};
 
 } //anonymous namespace
 
@@ -174,18 +181,18 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
 
     auto& vasioConfig = _config.middlewareConfig.vasio;
 
-    VAsioPeerInfo registryInfo;
-    registryInfo.participantName = "IbRegistry";
-    registryInfo.participantId = 0;
-    registryInfo.acceptorHost = vasioConfig.registry.hostname;
-    registryInfo.acceptorPort = static_cast<uint16_t>(vasioConfig.registry.port + domainId);
+    VAsioPeerUri registryUri;
+    registryUri.participantName = "IbRegistry";
+    registryUri.participantId = 0;
 
-    // We can compute the registry's local socket path a priori:
-    auto registryLocalEndpoint = makeLocalEndpoint(registryInfo.participantName,
-        registryInfo.participantId);
-    std::stringstream localUri;
-    localUri << "local://" << registryLocalEndpoint.path();
-    registryInfo.acceptorUris.push_back(localUri.str());
+    //setup acceptor URIs 
+    auto registryLocalEndpoint = makeLocalEndpoint(registryUri.participantName,
+        registryUri.participantId);
+    registryUri.acceptorUris.push_back(Uri{registryLocalEndpoint}.EncodedString());
+    auto registryPort = static_cast<uint16_t>(vasioConfig.registry.port + domainId);
+    registryUri.acceptorUris.push_back(
+        Uri{ vasioConfig.registry.hostname,  registryPort}.EncodedString()
+    );
 
     _logger->Debug("Connecting to VAsio registry");
 
@@ -201,7 +208,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     {
         try
         {
-            registry->Connect(registryInfo);
+            registry->Connect(registryUri);
             ok = true;
             break;
         }
@@ -214,8 +221,9 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     {
         _logger->Error("Failed to connect to VAsio registry (number of attempts: {})",
             vasioConfig.registry.connectAttempts);
-        _logger->Info("   Make sure that the IbRegistry is up and running and is listening on port {}.", registryInfo.acceptorPort);
-        _logger->Info("   Make sure that the hostname \"{}\" can be resolved and is reachable.", registryInfo.acceptorHost);
+        _logger->Info("   Make sure that the IbRegistry is up and running and is listening on port {}.",
+            printUris(registryUri));
+        _logger->Info("   Make sure that the hostname can be resolved and is reachable.");
         _logger->Info("   You can configure the IbRegistry hostname and port via the IbConfig.");
         _logger->Info("   The IbRegistry executable can be found in your IB installation folder:");
         _logger->Info("     INSTALL_DIR/bin/IbRegistry[.exe]");
@@ -240,10 +248,11 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
     ParticipantAnnouncement announcement;
     buffer >> announcement;
 
-    RegistryMsgHeader reference;
+    const RegistryMsgHeader reference{};
+
     if (announcement.messageHeader != reference)
     {
-        _logger->Warn("Received participant announcement message with unsupported protocol specification");
+        _logger->Warn("Received participant announcement message with unsupported protocol specification.");
         return;
     }
 
@@ -259,44 +268,45 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
 
 void VAsioConnection::SendParticipantAnnoucement(IVAsioPeer* peer)
 {
-    VAsioPeerInfo localInfo{
-        _participantName,
-        _participantId,
-    };
+    //Legacy Info for interop
+    VAsioPeerInfo localInfo{ _participantName, _participantId };
+    //URI encoded infos
+    VAsioPeerUri uri{ _participantName, _participantId };
 
     //Ensure that the local acceptor is the first entry in the acceptorUris
     auto&& localAcceptor = GetAcceptor<asio::local::stream_protocol::acceptor>();
     if (localAcceptor)
     {
-        std::stringstream localUri;
-        localUri << "local://" << localAcceptor->local_endpoint().path();
-        localInfo.acceptorUris.emplace_back(std::move(localUri.str()));
+        uri.acceptorUris.push_back(
+            Uri{ localAcceptor->local_endpoint() }.EncodedString()
+        );
     }
     auto&& tcpAcceptor = GetAcceptor<asio::ip::tcp::acceptor>();
-    if (tcpAcceptor)
+    if (!tcpAcceptor)
     {
-        auto ep = tcpAcceptor->local_endpoint();
-        std::stringstream tcpUri;
-        tcpUri << "tcp://" << ep;
-        localInfo.acceptorUris.emplace_back(std::move(tcpUri.str()));
-        //backward compatibility
-        localInfo.acceptorHost = ep.address().to_string();
-        localInfo.acceptorPort = ep.port();
+        throw std::runtime_error{ "VasioConnection: cannot send announcement on TCP: tcp-acceptor is missing" };
     }
 
+    auto epUri = Uri{tcpAcceptor->local_endpoint()};
+    localInfo.acceptorHost = epUri.Host();
+    localInfo.acceptorPort = epUri.Port();
+    uri.acceptorUris.emplace_back(epUri.EncodedString());
+
     ParticipantAnnouncement announcement;
-    announcement.peerInfo = localInfo;
+    announcement.peerInfo = std::move(localInfo);
+    announcement.peerUri = std::move(uri);
 
     MessageBuffer buffer;
-    uint32_t msgSizePlaceholder{ 0u };
+    uint32_t msgSizePlaceholder{0u};
 
     buffer << msgSizePlaceholder
-        << VAsioMsgKind::IbRegistryMessage
-        << RegistryMessageKind::ParticipantAnnouncement
-        << announcement;
+           << VAsioMsgKind::IbRegistryMessage
+           << RegistryMessageKind::ParticipantAnnouncement
+           << announcement;
 
     _logger->Debug("Sending participant announcement to {}", peer->GetInfo().participantName);
     peer->SendIbMsg(std::move(buffer));
+
 }
 
 void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, MessageBuffer&& buffer)
@@ -349,7 +359,7 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
     KnownParticipants participantsMsg;
     buffer >> participantsMsg;
 
-    RegistryMsgHeader reference;
+    const RegistryMsgHeader reference{};
     if (participantsMsg.messageHeader != reference)
     {
         _logger->Warn("Received known participant message with unsupported protocol specification");
@@ -358,40 +368,20 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
 
     _logger->Debug("Received known participants list from IbRegistry");
 
-    //Debug  print of given peer infos
-    auto printInfo = [](const auto& info) -> std::string 
-    {
-        std::stringstream ss;
-        ss << "PeerInfo{";
-        if (info.acceptorUris.empty())
-        {
-            ss << info.acceptorHost << ":" << info.acceptorPort;
-        }
-        else
-        {
-            for (auto& uri : info.acceptorUris)
-            {
-                ss << uri << ", ";
-            }
-        }
-        ss << "}";
-        return ss.str();
-    };
-    for (auto&& peerInfo : participantsMsg.peerInfos)
-    {
+    auto connectPeer = [this](const auto peerUri) {
         _logger->Debug("Connecting to {} with Id {} on {}",
-            peerInfo.participantName,
-            peerInfo.participantId,
-            printInfo(peerInfo));
+            peerUri.participantName,
+            peerUri.participantId,
+            printUris(peerUri));
 
         auto peer = std::make_unique<VAsioTcpPeer>(_ioContext.get_executor(), this, _logger);
         try
         {
-            peer->Connect(std::move(peerInfo));
+            peer->Connect(std::move(peerUri));
         }
         catch (const std::exception&)
         {
-            continue;
+            return;
         }
 
         // We connected to the other peer. tell him who we are.
@@ -399,7 +389,28 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
         SendParticipantAnnoucement(peer.get());
 
         AddPeer(std::move(peer));
+    };
+    // check URI first
+    if (!participantsMsg.peerUris.empty())
+    {
+        for (auto&& uri : participantsMsg.peerUris)
+        {
+            connectPeer(uri);
+        }
     }
+    else
+    {
+        // interop with older VIB participants:
+        for (auto&& peerInfo : participantsMsg.peerInfos)
+        {
+            VAsioPeerUri uri{ peerInfo.participantName, peerInfo.participantId };
+            uri.acceptorUris.push_back(
+                Uri{ peerInfo.acceptorHost, peerInfo.acceptorPort }.EncodedString()
+            );
+            connectPeer(uri);
+        }
+    }
+
     if (_pendingParticipantReplies.empty())
     {
         _receivedAllParticipantReplies.set_value();

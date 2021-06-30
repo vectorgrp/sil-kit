@@ -45,7 +45,7 @@ public:
     auto GetInfo() const -> const VAsioPeerInfo& override;
     void SetInfo(VAsioPeerInfo info) override;
 
-    void Connect(VAsioPeerInfo info);
+    void Connect(VAsioPeerUri info);
 
     inline auto Socket() -> asio::generic::stream_protocol::socket& { return _socket; }
 
@@ -61,15 +61,15 @@ private:
     void DispatchBuffer();
     void Shutdown();
     void ConnectLocal(const std::string& socketPath);
-    void ConnectTcp(const std::string& host, const std::string& port);
+    void ConnectTcp(const std::string& host, uint16_t port);
 
 private:
     // ----------------------------------------
     // Private Members
-    //asio::ip::tcp::socket _socket;
     asio::generic::stream_protocol::socket _socket;
     VAsioConnection* _ibConnection{nullptr};
     VAsioPeerInfo _info;
+    VAsioPeerUri _uri;
 
     logging::ILogger* _logger;
 

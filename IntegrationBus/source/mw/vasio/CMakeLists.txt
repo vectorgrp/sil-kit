@@ -25,6 +25,8 @@ add_library(IbMwVAsio STATIC
     VAsioTcpPeer.hpp
     VAsioTcpPeer.cpp
     VAsioTransmitter.hpp
+    Uri.hpp
+    Uri.cpp
 )
 
 target_link_libraries(IbMwVAsio 

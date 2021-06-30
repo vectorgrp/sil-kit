@@ -27,11 +27,13 @@ VAsioRegistry::VAsioRegistry(ib::cfg::Config cfg)
 
 void VAsioRegistry::ProvideDomain(uint32_t domainId)
 {
+    bool isAccepting{false};
     // accept connection from participants on any interface
     try
     {
         //Local domain sockets, failure is non fatal for operation.
         _connection.AcceptLocalConnections();
+        isAccepting = true;
     }
     catch (const std::exception& e)
     {
@@ -46,6 +48,7 @@ void VAsioRegistry::ProvideDomain(uint32_t domainId)
         _connection.AcceptConnectionsOn(endpoint_v4);
         //tcp::endpoint endpoint_v6(tcp::v6(), registryPort);
         //FIXME allow ipv6: _connection.AcceptConnectionsOn(endpoint_v6);
+        isAccepting = true;
     }
     catch (const std::exception& e)
     {
@@ -53,7 +56,13 @@ void VAsioRegistry::ProvideDomain(uint32_t domainId)
             endpoint_v4,
             domainId,
             e.what());
-        throw;
+        // For scenarios where multiple instances run on the same host, binding on TCP/IP
+        // will result in an error. However, if we can accept local ipc connections we can
+        // continue.
+        if (!isAccepting)
+        {
+            throw;
+        }
     }
     _connection.StartIoWorker();
 }

@@ -3,10 +3,12 @@
 #include "VAsioTcpPeer.hpp"
 #include "VAsioMsgKind.hpp"
 #include "VAsioConnection.hpp"
+#include "Uri.hpp"
 
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+
 
 using namespace asio::ip;
 
@@ -92,13 +94,13 @@ void VAsioTcpPeer::ConnectLocal(const std::string& socketPath)
     }
 }
 
-void VAsioTcpPeer::ConnectTcp(const std::string& host, const std::string& port)
+void VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
 {
     tcp::resolver resolver(_socket.get_executor());
     tcp::resolver::results_type resolverResults;
     try
     {
-        resolverResults = resolver.resolve(host, port);
+        resolverResults = resolver.resolve(host, std::to_string(port));
     }
     catch (asio::system_error& err)
     {
@@ -142,23 +144,27 @@ void VAsioTcpPeer::ConnectTcp(const std::string& host, const std::string& port)
         }
     }
 }
-void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
+void VAsioTcpPeer::Connect(VAsioPeerUri peerInfo)
 {
-    SetInfo(std::move(peerInfo));
+    //SetInfo(std::move(peerInfo));
+    _uri = std::move(peerInfo);
 
     std::stringstream attemptedUris;
+    const auto& uriStrings = _uri.acceptorUris;
+    std::vector<Uri> uris;
+    std::transform(uriStrings.begin(), uriStrings.end(), std::back_inserter(uris),
+        [](const auto& uriStr) {
+            return Uri{uriStr};
+    });
     // Unix Domain Sockets: attempt to connect via local socket first
-    const std::string local_prefix{"local://"};
-    const auto& uris = GetInfo().acceptorUris;
     auto localUri = std::find_if(uris.begin(), uris.end(),
-        [&local_prefix](const auto& uri) {
-        return uri.find(local_prefix) == 0;
+        [](const auto& uri) {
+            return uri.Type() == Uri::UriType::Local;
     });
     if (localUri != uris.end())
     {
-        const auto filePath = localUri->substr(local_prefix.size());
-        attemptedUris << filePath << ", ";
-        ConnectLocal(filePath);
+        attemptedUris << localUri->EncodedString() << ",";
+        ConnectLocal(localUri->Path());
         if (_socket.is_open())
         {
             return;
@@ -166,23 +172,14 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
     }
 
     //New style tcp:// URIs 
-    for (const auto& uri : GetInfo().acceptorUris)
+    for (const auto& uri : uris)
     {
-        const std::string prefix{"tcp://"};
-        if (uri.find(prefix) == 0)
+        if (uri.Type() == Uri::UriType::Tcp)
         {
-            const auto hostAndPort = uri.substr(prefix.size());
             try
             {
-                auto sep = hostAndPort.rfind(":");
-                if (sep == hostAndPort.npos)
-                {
-                    continue;
-                }
-                const auto host = hostAndPort.substr(0, sep);
-                const auto port = hostAndPort.substr(sep+1);
-                attemptedUris << hostAndPort << ", ";
-                ConnectTcp(host, port);
+                attemptedUris << uri.EncodedString() << ",";
+                ConnectTcp(uri.Host(), uri.Port());
                 if (_socket.is_open())
                 {
                     return;
@@ -197,10 +194,11 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
     }
 
     // TCP: Fall back to TCP and resolve the host name using legacy members
-    ConnectTcp(GetInfo().acceptorHost, std::to_string(GetInfo().acceptorPort));
+    //ConnectTcp(GetInfo().acceptorHost, std::to_string(GetInfo().acceptorPort));
     if (!_socket.is_open())
     {
-        auto errorMsg = fmt::format("Failed to connect to host {}", GetInfo().acceptorHost);
+        auto errorMsg = fmt::format("Failed to connect to host {}",
+            attemptedUris.str());
         _logger->Error(errorMsg);
         _logger->Info("Tried the following URIs: {}", attemptedUris.str());
 
@@ -358,9 +356,16 @@ void VAsioTcpPeer::DispatchBuffer()
         auto newBuffer = std::vector<uint8_t>{_msgBuffer.begin() + _currentMsgSize, _msgBuffer.end()};
         auto newWPos = _wPos - _currentMsgSize;
 
-        MessageBuffer msgBuffer{std::move(_msgBuffer)};
         uint32_t msgSize{0u};
-        msgBuffer >> msgSize;
+        if (_msgBuffer.size() < sizeof msgSize)
+        {
+            throw std::runtime_error{ "VAsioTcpPeer: Received message is too small to contain message size header" };
+        }
+        memcpy(&msgSize, _msgBuffer.data(), sizeof msgSize);
+        //ensure buffer does not contain data from contiguous messages
+        _msgBuffer.resize(msgSize);
+        MessageBuffer msgBuffer{std::move(_msgBuffer), msgSize};
+        msgBuffer >> msgSize; //drop message size by adjusting internal read pos
         _ibConnection->OnSocketData(this, std::move(msgBuffer));
 
         _msgBuffer = std::move(newBuffer);

@@ -14,7 +14,7 @@ struct RegistryMsgHeader
 {
     std::array<char, 4> preambel{{'V', 'I', 'B', '-'}};
     uint16_t versionHigh = 2;
-    uint16_t versionLow = 1;
+    uint16_t versionLow = 0;
 };
 
 struct VAsioMsgSubscriber
@@ -38,6 +38,8 @@ struct ParticipantAnnouncement
 {
     RegistryMsgHeader messageHeader;
     ib::mw::VAsioPeerInfo peerInfo;
+    //!< additional field as of VIB >3.4.1, will be ignored by older participants
+    VAsioPeerUri peerUri;
 };
 
 struct ParticipantAnnouncementReply
@@ -49,6 +51,8 @@ struct KnownParticipants
 {
     RegistryMsgHeader messageHeader;
     std::vector<ib::mw::VAsioPeerInfo> peerInfos;
+    //!< additional field as of VIB >3.4.1, will be ignored by older participants
+    std::vector<VAsioPeerUri> peerUris;
 };
 
 enum class RegistryMessageKind : uint8_t
