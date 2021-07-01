@@ -42,7 +42,9 @@ target_link_libraries(IbExtensions
     PRIVATE IbVersion
 )
 
-set(extension_os "${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_VERSION}")
+#Reproducible build: do not include CMAKE_SYSTEM_VERSION, it contains kernel version
+# and build ID.
+set(extension_os "${CMAKE_SYSTEM_NAME}") 
 
 if(UNIX)
     include(get_compiler_arch)

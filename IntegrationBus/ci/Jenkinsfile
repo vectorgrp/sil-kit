@@ -170,6 +170,19 @@ def run(what) {
         bat "${what}"
     }
 }
+// quote percent sign for DOS batch, eg. uses in git log --format=%ct
+def quoteBat(userStr) {
+    def res="@" //disable printing the command itself
+    userStr.each({x -> res += (x == '%') ? "%%": x})
+    return res
+}
+def runWithOutput(what) {
+    if(isUnix()) {
+        return sh(script: "${what}", returnStdout: true).trim()
+    } else {
+        return bat(script: "${quoteBat(what)}", returnStdout: true).trim()
+    }
+}
 
 //##########################################
 //the actual build process
@@ -208,15 +221,22 @@ def doBuild(Map buildFlags) {
 
             print("DEBUG extraArgs=${extraArgs}")
             scmVars = checkoutGit()
-            print("DEBUG scmVars=${scmVars}")
+
+            // For reproducible build set SOURCE_DATE_EPOCH to time of last commit
+            commitTime = runWithOutput("git log --max-count=1 --format=%ct -r origin/master")
+            print("DEBUG scmVars=${scmVars}, commitTime=${commitTime}, TZ=${env.TZ}, LC_ALL=${env.LC_ALL}")
+            buildEnv.add("SOURCE_DATE_EPOCH=${commitTime}")
+            buildEnv.add("TZ=UTC")
+            buildEnv.add("LC_ALL=C")
+            buildEnv.add("LANG=C")
             // save branch name for publishing stage
             gitBranch = scmVars.GIT_BRANCH
         }
 
         stage("Cmake Release Build (${buildName})") {
             print("${buildName} --  running cmake Release")
-            buildEnv.add("LANG=C.UTF-8")
             withEnv(buildEnv) {
+                print("Debug: TZ=${env.TZ} LC_ALL=${env.LC_ALL}")
                 runCmake("Release", "${cmakeArgsRelease}" + "${extraArgs}" )
             }
         } 
@@ -245,17 +265,6 @@ def doBuild(Map buildFlags) {
             }
         }
 
-        stage("Archiving Release Build (${buildName})") {
-            try {
-                archiveToArtifactory(scmVars, "_build_Release/${artifactName}-*.zip")
-            } catch(e) {
-                //make sure we save the finished artifacts before failing the build 
-                print("WARNING: archiving to artifactory failed, archiving to jenkins instead and failing: exception: ${e}")
-                archiveArtifacts(artifacts: "_build_Release/${artifactName}-*.zip", fingerprint: true)
-                throw e
-            }
-        }
-
         if(buildDebugBin) {
             stage("Cmake Debug Build (${buildName})") {
                 print("${buildName} --  running cmake Debug")
@@ -264,9 +273,8 @@ def doBuild(Map buildFlags) {
                 }
             }
 
-            stage("Debug Bundle Packages (${buildName})") {
+            stage(" Bundle and Archive Packages (${buildName})") {
                 run "python ${dockerImageDir}/package.py \"_build_Release/${artifactName}-*-Release.zip\" \"_build_Debug/${artifactName}-*-Debug.zip\""
-                archiveToArtifactory(scmVars, "_build_Debug/${artifactName}-*.zip")
                 archiveToArtifactory(scmVars, "${artifactName}-*.zip")
 
                 // safe the PDB files on windows

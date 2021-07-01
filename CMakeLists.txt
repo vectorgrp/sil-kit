@@ -34,6 +34,7 @@ endif()
 include(IntegrationBusBuildSettings)
 ib_enable_asan(${IB_ENABLE_ASAN})
 ib_enable_ubsan(${IB_ENABLE_UBSAN})
+ib_check_reproducible()
 
 ###############################################################################
 # Include the IntegrationBus projects to be built
@@ -74,6 +75,7 @@ if(IB_INSTALL_SOURCE)
             PATTERN *.cmake.in
             PATTERN CMakeLists.txt
             PATTERN Readme-*.txt
+            PATTERN *.txt.in
             PATTERN *.md
             PATTERN *.xml
         REGEX "/ci/.*" EXCLUDE

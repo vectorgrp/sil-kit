@@ -41,15 +41,32 @@ function(ib_enable_warnings target)
             -Wextra
             -Wcast-align
             -Wformat=2
-            #-Wmissing-declarations #false positive for internals in JsonConfig
             -Wshadow 
-            #-Wsign-conversion #gtest
             -Wsign-promo 
             -Wstrict-overflow=5
-            #-Wundef #gtest is full of this
             -Wno-unused
             -Wpacked
             )
         target_compile_options(${target} PRIVATE ${_flags})
     endif()
 endfunction()
+
+macro(ib_check_reproducible)
+    if(NOT DEFINED ENV{SOURCE_DATE_EPOCH})
+        message(WARNING "VIB - Reproducible build: SOURCE_DATE_EPOCH is not set!"
+           " Set it to 'git log -1 --format=%ct -r origin/master'")
+    else()
+        message(STATUS "VIB - Reproducible build: SOURCE_DATE_EPOCH=$ENV{SOURCE_DATE_EPOCH}")
+    endif()
+    if(NOT "$ENV{LC_ALL}" STREQUAL  "C")
+        message(WARNING "VIB - Reproducible build: LC_ALL is not set to 'C': '$ENV{LC_ALL}'")
+    else()
+        message(STATUS "VIB - Reproducible build: LC_ALL=C")
+    endif()
+    if(NOT "$ENV{TZ}" STREQUAL  "UTC")
+        message(WARNING "VIB - Reproducible build: TZ is not set to 'UTC': '$ENV{TZ}'")
+    else()
+        message(STATUS "VIB - Reproducible build: TZ=UTC")
+    endif()
+
+endmacro()

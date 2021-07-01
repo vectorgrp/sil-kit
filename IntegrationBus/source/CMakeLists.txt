@@ -62,7 +62,18 @@ if (MSVC)
             PDB_OUTPUT_DIRECTORY_DEBUG ${PKG_PDB_DIR}/Debug
             LINK_FLAGS "/DEBUG" #make sure the resulting .dll has a .pdb file
      )
-endif (MSVC)
+elseif(UNIX)
+    #for reproducible builds
+    target_link_options(IntegrationBus 
+        PRIVATE -Wl,--build-id=none)
+    # strip symbols
+    #if(CMAKE_BUILD_TYPE STREQUAL Release)
+    #    add_custom_command(TARGET IntegrationBus
+    #        POST_BUILD
+    #        COMMAND ${CMAKE_STRIP} $<TARGET_FILE:IntegrationBus>)
+    #endif()
+
+endif()
 
  set_target_properties(IntegrationBus PROPERTIES
      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"

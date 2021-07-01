@@ -58,5 +58,8 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 ################################################################################
 # 3. Step: Setup our build user: jenkins
 ################################################################################
+#Reproducible builds
+ENV LC_ALL=C
+ENV TZ=UTC
 RUN useradd -r -g users -u 500 jenkins
 USER jenkins
