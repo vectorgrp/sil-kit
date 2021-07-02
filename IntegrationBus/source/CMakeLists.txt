@@ -5,14 +5,26 @@ add_subdirectory(sim)
 add_subdirectory(util)
 add_subdirectory(extensions)
 
+# Encode the current GIT and version infos into version_macros.hpp
+# If this file is present in the current source directory we assume
+# that this source-tree is a non-git/packaged source tree and re-use
+# the file unmodified.
 set(GIT_DIR "${PROJECT_SOURCE_DIR}/../.git")
 set(GIT_HEAD_FILE "${GIT_DIR}/HEAD")
-if(EXISTS "${GIT_HEAD_FILE}")
+set(VERSION_MACROS_HPP ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp)
+if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp)
+    message(STATUS "VIB re-using deployed version_macros.hpp")
+    set(VERSION_MACROS_HPP ${CMAKE_CURRENT_LIST_DIR}/version_macros.hpp)
+elseif(EXISTS "${GIT_HEAD_FILE}")
     configure_file(
         "MakeVersionMacros.cmake.in"
         ${CMAKE_CURRENT_BINARY_DIR}/MakeVersionMacros.cmake
         @ONLY)
     include(${CMAKE_CURRENT_BINARY_DIR}/MakeVersionMacros.cmake)
+    install(FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp
+        DESTINATION
+        ${INSTALL_SOURCE_DIR}/IntegrationBus/source)
 else()
     message(WARNING "Cannot determine hash of current git head!")
     set(GIT_HEAD_HASH "UNKNOWN")
@@ -92,7 +104,7 @@ target_link_libraries(IntegrationBus
 add_library(IbVersion STATIC
     version.cpp
     version.hpp
-    ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp
+    ${VERSION_MACROS_HPP}
 )
 target_link_libraries(IbVersion
     PUBLIC  IbInterface
