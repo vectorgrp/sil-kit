@@ -1,31 +1,3 @@
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-# Third party YAML parsing 
-set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable because of gmock import conflict" FORCE)
-add_subdirectory(${THIRDPARTY_DIR}/yaml-cpp
-	${CMAKE_BINARY_DIR}/ThirdParty/yaml-cpp
-	EXCLUDE_FROM_ALL
-	)
-# ensure all external projects are grouped in IDE mode
-set(yaml_targets yaml-cpp parse read sandbox format)
-foreach(_tgt IN LISTS yaml_targets)
-	set_property(TARGET ${_tgt} PROPERTY FOLDER "ThirdParty/yaml-cpp")
-endforeach()
-
-
-# Third Party JSON parsing
-add_library(json11
-    ${THIRDPARTY_DIR}/json11/json11.hpp
-    ${THIRDPARTY_DIR}/json11/json11.cpp
-    )
-
-target_include_directories(json11
-    PUBLIC ${THIRDPARTY_DIR}/json11
-)
-
-set_property(TARGET json11 PROPERTY FOLDER "ThirdParty")
-
-
 add_library(IbConfig STATIC
     Config.cpp
     Config.hpp

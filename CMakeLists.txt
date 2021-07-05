@@ -14,6 +14,12 @@ if(IB_INSTALL_SOURCE)
 endif()
 option(IB_ENABLE_ASAN "Enable -f sanitize=address for builds (requires gcc, clang,  VS2019)" OFF)
 option(IB_ENABLE_UBSAN "Enable -f sanitize=undefined for builds (requires gcc, clang)" OFF)
+# FasrtRTPS pre-built packages
+option(IB_BIN_FASTRTPS_ENABLE
+        "Fetch pre-built and packaged FastRTPS/fastcdr binaries\
+        (set IB_BIN_FASTRTPS_REPOSITORY for download URL)"
+        OFF
+)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${CMAKE_CURRENT_LIST_DIR}/IntegrationBus/cmake)
 include(IntegrationBusInstall)
@@ -36,17 +42,25 @@ ib_enable_asan(${IB_ENABLE_ASAN})
 ib_enable_ubsan(${IB_ENABLE_UBSAN})
 ib_check_reproducible()
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+# Globally add -fPIC compiler option
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+
 ###############################################################################
 # Include the IntegrationBus projects to be built
 ###############################################################################
+# Dependencies
+add_subdirectory(ThirdParty)
 # Have both IntegrationBus library and demo project in a single solution
-add_subdirectory(${PROJECT_SOURCE_DIR}/IntegrationBus)
-add_subdirectory(${PROJECT_SOURCE_DIR}/Utilities)
-add_subdirectory(${PROJECT_SOURCE_DIR}/Demos)
+add_subdirectory(IntegrationBus)
+add_subdirectory(Utilities)
+add_subdirectory(Demos)
 # Include the Python-implemented launcher tool for testing and installation
-add_subdirectory(${PROJECT_SOURCE_DIR}/Launcher)
+add_subdirectory(Launcher)
 # Include automated documentation with doxygen and sphinx
-add_subdirectory(${PROJECT_SOURCE_DIR}/docs)
+add_subdirectory(docs)
 
 
 ################################################################################

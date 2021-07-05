@@ -19,9 +19,6 @@ add_library(${PROJECT_NAME} STATIC
 ################################################################################
 # We use fmtlib to offer a convenient logging interface
 
-include(${THIRDPARTY_DIR}/fmt.cmake)
-include(${THIRDPARTY_DIR}/spdlog.cmake)
-
 if (TARGET fmt-header-only)
     message(STATUS "have fmt-header-only")
     target_link_libraries(${PROJECT_NAME}

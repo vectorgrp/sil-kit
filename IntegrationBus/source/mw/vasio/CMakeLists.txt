@@ -44,7 +44,7 @@ target_link_libraries(IbMwVAsio
 
 # For the time being, we use the asio installation that comes with Fast-RTPS
 if(NOT ASIO_INCLUDE_DIR)
-    message(ERROR "Unable to find Asio include directory as expected from Fast-RTPS.")
+    message(FATAL_ERROR "Unable to find Asio include directory as expected from Fast-RTPS.")
 endif()
 
 target_include_directories(IbMwVAsio

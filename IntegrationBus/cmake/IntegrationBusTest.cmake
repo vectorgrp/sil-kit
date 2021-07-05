@@ -38,6 +38,10 @@ function(add_vib_test)
         gmock_main
         ${PARSED_ARGS_LIBS}
     )
+    target_compile_definitions(${executableName}
+        PRIVATE
+        UNIT_TEST
+    )
 
     foreach(config ${PARSED_ARGS_CONFIGS})
         get_filename_component(configFileName ${config} NAME)
