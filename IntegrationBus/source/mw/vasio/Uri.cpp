@@ -63,8 +63,7 @@ Uri::Uri(const std::string& host, const uint16_t port)
 {
     std::stringstream uri;
     uri << tcpPrefix << host << ":" << port;
-    _uriString = uri.str();
-    _type = UriType::Tcp;
+    *this = Uri::parse(uri.str());
 }
 
 auto Uri::parse(const std::string& uriRepr) -> Uri
@@ -96,7 +95,7 @@ auto Uri::parse(const std::string& uriRepr) -> Uri
         uri._path = rawPath;
         if (uri._path.empty())
         {
-            throw std::runtime_error{ "Uri: invalid path for local://" };
+            throw std::runtime_error{ "Uri: invalid path for \"local://\": \"" + uriRepr +"\"" };
         }
         uri._type = UriType::Local;
     }

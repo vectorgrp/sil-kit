@@ -1471,6 +1471,11 @@ bool VibConversion::decode(const Node& node, VAsio::RegistryConfig& obj)
     optional_decode(obj.port, node, "Port");
     optional_decode(obj.logger, node, "Logger");
     optional_decode(obj.connectAttempts, node, "ConnectAttempts");
+
+    if (obj.connectAttempts < 1)
+    {
+        obj.connectAttempts = 1;
+    }
     return true;
 }
 
@@ -1485,6 +1490,7 @@ Node VibConversion::encode(const VAsio::Config& obj)
     non_default_encode(obj.tcpQuickAck, node, "TcpQuickAck", defaultObj.tcpQuickAck);
     non_default_encode(obj.tcpReceiveBufferSize, node, "TcpReceiveBufferSize", defaultObj.tcpReceiveBufferSize);
     non_default_encode(obj.tcpSendBufferSize, node, "TcpSendBufferSize", defaultObj.tcpSendBufferSize);
+    non_default_encode(obj.enableDomainSockets, node, "EnableDomainSockets", defaultObj.enableDomainSockets);
     return node;
 }
 template<>
@@ -1495,6 +1501,7 @@ bool VibConversion::decode(const Node& node, VAsio::Config& obj)
     optional_decode(obj.tcpQuickAck, node, "TcpQuickAck");
     optional_decode(obj.tcpReceiveBufferSize, node, "TcpReceiveBufferSize");
     optional_decode(obj.tcpSendBufferSize, node, "TcpSendBufferSize");
+    optional_decode(obj.enableDomainSockets, node, "EnableDomainSockets");
     return true;
 }
 

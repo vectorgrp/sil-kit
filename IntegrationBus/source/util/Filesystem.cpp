@@ -3,7 +3,6 @@
 #include <array>
 #include <stdexcept>
 
-namespace {
 #if defined(_WIN32)
 #   ifndef WIN32_LEAN_AND_MEAN
 #       define WIN32_LEAN_AND_MAN
@@ -12,23 +11,24 @@ namespace {
 #   include <direct.h>
 #   define getcwd _getcwd
 
+namespace {
 auto platform_temp_directory() -> std::string
 {
     std::array<char, 4096> buffer;
-    auto len = ::GetTempPathA(buffer.size(), buffer.data());
+    auto len = ::GetTempPathA(static_cast<DWORD>(buffer.size()), buffer.data());
     return std::string{ buffer.data(), len };
 }
-
 #else
 // Assume Linux
 #   include <unistd.h>
 #   include <stdio.h>
+namespace {
 auto platform_temp_directory() -> std::string
 {
     return { "/tmp" }; 
 }
 #endif
-}
+} //end anonymous namespace
 namespace ib {
 namespace filesystem {
 
@@ -54,7 +54,7 @@ auto path::native() const noexcept -> const string_type&
 path current_path()
 {
     std::array<char, 4096> buffer;
-    if (::getcwd(buffer.data(), buffer.size()) == nullptr)
+    if (::getcwd(buffer.data(), static_cast<int>(buffer.size())) == nullptr)
     {
         throw std::runtime_error("Couldn't get current working directory.");
     }

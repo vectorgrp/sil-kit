@@ -44,6 +44,8 @@ public:
 
     auto GetInfo() const -> const VAsioPeerInfo& override;
     void SetInfo(VAsioPeerInfo info) override;
+    void SetUri(VAsioPeerUri peerUri) override;
+    auto GetUri() const -> const VAsioPeerUri& override;
 
     void Connect(VAsioPeerUri info);
 
@@ -60,8 +62,8 @@ private:
     void ReadSomeAsync();
     void DispatchBuffer();
     void Shutdown();
-    void ConnectLocal(const std::string& socketPath);
-    void ConnectTcp(const std::string& host, uint16_t port);
+    bool ConnectLocal(const std::string& path);
+    bool ConnectTcp(const std::string& host, uint16_t port);
 
 private:
     // ----------------------------------------

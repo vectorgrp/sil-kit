@@ -116,7 +116,7 @@ public:
 
     template<typename EndpointT>
     void AcceptConnectionsOn(EndpointT endpoint);
-    void AcceptLocalConnections();
+    void AcceptLocalConnections(uint32_t domainId);
 
     void StartIoWorker();
 
@@ -374,11 +374,6 @@ private:
     //We violate the strict layering architecture, so that we can cleanly shutdown without false error messages.
     bool _isShuttingDown{false};
 };
-
-// ================================================================================
-//  Inline Implementations
-// ================================================================================
-
 
 } // mw
 } // namespace ib

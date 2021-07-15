@@ -30,7 +30,7 @@ private:
     // ----------------------------------------
     // private methods
     void OnParticipantAnnouncement(IVAsioPeer* from, const ParticipantAnnouncement& announcement);
-    bool IsExpectedParticipant(const ib::mw::VAsioPeerInfo& peerInfo);
+    bool IsExpectedParticipant(const ib::mw::VAsioPeerUri& peerInfo);
     void SendKnownParticipants(IVAsioPeer* peer);
     void OnPeerShutdown(IVAsioPeer* peer);
 
@@ -40,7 +40,7 @@ private:
     // ----------------------------------------
     // private members
     std::unique_ptr<logging::ILogger> _logger;
-    std::unordered_map<ParticipantId, ib::mw::VAsioPeerInfo> _connectedParticipants;
+    std::unordered_map<ParticipantId, ib::mw::VAsioPeerUri> _connectedParticipants;
     std::function<void()> _onAllParticipantsConnected;
     std::function<void()> _onAllParticipantsDisconnected;
 

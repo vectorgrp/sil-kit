@@ -407,8 +407,9 @@ struct Config
     RegistryConfig registry;
     int tcpReceiveBufferSize{-1};
     int tcpSendBufferSize{-1};
-    bool tcpNoDelay{false}; //! < Disables Nagle's algorithm.
-    bool tcpQuickAck{false}; //! < Setting this Linux specific flag disables delayed TCP/IP acknowledgements.
+    bool tcpNoDelay{false}; //!< Disables Nagle's algorithm.
+    bool tcpQuickAck{false}; //!< Setting this Linux specific flag disables delayed TCP/IP acknowledgements.
+    bool enableDomainSockets{true};//!< By default local domain socket is preferred to TCP/IP sockets.
 };
 
 } // namespace VAsio

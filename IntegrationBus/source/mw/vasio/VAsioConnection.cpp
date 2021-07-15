@@ -56,11 +56,8 @@ void SetSocketPermissions(const asio::local::stream_protocol::endpoint& endpoint
 //!< Note that local ipc (unix domain) sockets have a path limit (108 characters, typically)
 // Using the current working directory as part of a domain socket path might result in 
 // a runtime exception. We create a unique temporary file path, with a fixed length.
-auto makeLocalEndpoint(const std::string& participantName, const ib::mw::ParticipantId& id) -> asio::local::stream_protocol::endpoint
+auto makeLocalEndpoint(const std::string& participantName, const ib::mw::ParticipantId& id, const int domainId) -> asio::local::stream_protocol::endpoint
 {
-    auto hash = [](const auto& value) {
-        return std::hash<std::string>{}(value);
-    };
     asio::local::stream_protocol::endpoint result;
     const auto bounded_name = participantName.substr(0, 
         std::min<size_t>(participantName.size(), 10));
@@ -70,12 +67,18 @@ auto makeLocalEndpoint(const std::string& participantName, const ib::mw::Partici
     // started from different working directories, but a shared temporary directory.
     // NB keep the variable part as short as possible.
 
+    const auto unique_id = std::hash<std::string>{}(participantName
+        + std::to_string(id)
+        + std::to_string(domainId)
+        + fs::current_path().string()
+    );
+
     std::stringstream path;
     path << fs::temp_directory_path().string()
         << fs::path::preferred_separator
         << bounded_name
-        << std::hex << hash(participantName + std::to_string(id))
-        << std::hex << hash(fs::current_path().string())
+        << std::hex << unique_id
+        << std::hex << std::hash<std::string>{}(fs::current_path().string())
         << ".vib";
 
     result.path(path.str());
@@ -167,14 +170,18 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
 {
     assert(_logger);
 
-    // We pick a random file name for local domain sockets
-    try
+    if (_config.middlewareConfig.vasio.enableDomainSockets)
     {
-        AcceptLocalConnections();
-    }
-    catch (const std::exception& ex)
-    {
-        _logger->Warn("VasioConnection: Cannot accept local IPC connections: {}", ex.what());
+        // We pick a random file name for local domain sockets
+        try
+        {
+            AcceptLocalConnections(domainId);
+        }
+        catch (const std::exception& ex)
+        {
+            _logger->Warn("VasioConnection::JoinDomain: Cannot accept local IPC connections: {}, pwd={}",
+                ex.what(), fs::current_path().string());
+        }
     }
     // We let the operating system choose a free TCP port
     AcceptConnectionsOn(tcp::endpoint(asio::ip::address::from_string("127.0.0.1"), 0));
@@ -185,44 +192,62 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     registryUri.participantName = "IbRegistry";
     registryUri.participantId = 0;
 
-    //setup acceptor URIs 
+    //setup local acceptor URI
     auto registryLocalEndpoint = makeLocalEndpoint(registryUri.participantName,
-        registryUri.participantId);
-    registryUri.acceptorUris.push_back(Uri{registryLocalEndpoint}.EncodedString());
-    auto registryPort = static_cast<uint16_t>(vasioConfig.registry.port + domainId);
-    registryUri.acceptorUris.push_back(
-        Uri{ vasioConfig.registry.hostname,  registryPort}.EncodedString()
-    );
+        registryUri.participantId, domainId);
+    const auto localUri = Uri{registryLocalEndpoint}.EncodedString();
+    registryUri.acceptorUris.push_back(localUri);
 
     _logger->Debug("Connecting to VAsio registry");
 
     auto registry = std::make_unique<VAsioTcpPeer>(_ioContext.get_executor(), this, _logger);
     bool ok = false;
 
-    if (vasioConfig.registry.connectAttempts < 1)
-    {
-        vasioConfig.registry.connectAttempts = 1;
-    }
+    // NB: We attempt to connect multiple times. The registry might be a separate process
+    //     which may still be initializing when we are running. For example, this happens when all
+    //     participants are started in a shell, and the registry is started in the background.
 
-    for (auto i = 0; i < vasioConfig.registry.connectAttempts; i++)
-    {
-        try
+    auto multipleConnectAttempts = [&ok, &registry, &vasioConfig](auto registryUri) {
+        for (auto i = 0; i < vasioConfig.registry.connectAttempts; i++)
         {
-            registry->Connect(registryUri);
-            ok = true;
-            break;
+            try
+            {
+                registry->Connect(registryUri);
+                ok = true;
+                break;
+            }
+            catch (const std::exception&)
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds{100});
+            }
         }
-        catch (const std::exception&)
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds{100});
-        }
-    }
+    };
+
+    // First, attempt local connections if available:
+    multipleConnectAttempts(registryUri);
+
+    // Fall back to TCP connections:
     if (!ok)
     {
+        registryUri.acceptorUris.clear();
+        auto registryPort = static_cast<uint16_t>(vasioConfig.registry.port + domainId);
+        registryUri.acceptorUris.push_back(
+            Uri{ vasioConfig.registry.hostname,  registryPort }.EncodedString()
+        );
+        multipleConnectAttempts(registryUri);
+
+    }
+    // Neither local nor tcp is working.
+    if (!ok)
+    {
+        //re-add local URI for debugging purposes:
+        registryUri.acceptorUris.push_back(localUri);
+
         _logger->Error("Failed to connect to VAsio registry (number of attempts: {})",
             vasioConfig.registry.connectAttempts);
-        _logger->Info("   Make sure that the IbRegistry is up and running and is listening on port {}.",
+        _logger->Info("   Make sure that the IbRegistry is up and running and is listening on the following URIs: {}.",
             printUris(registryUri));
+        _logger->Info("   If a registry is unable to open a listening socket it will only be reachable via local domain sockets, which depend on the working directory.");
         _logger->Info("   Make sure that the hostname can be resolved and is reachable.");
         _logger->Info("   You can configure the IbRegistry hostname and port via the IbConfig.");
         _logger->Info("   The IbRegistry executable can be found in your IB installation folder:");
@@ -230,6 +255,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
         throw std::runtime_error{"ERROR: Failed to connect to VAsio registry"};
     }
 
+    _logger->Info("Connected to registry {}", printUris(registry->GetUri()));
     registry->StartAsyncRead();
 
     SendParticipantAnnoucement(registry.get());
@@ -259,6 +285,7 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
     _logger->Debug("Received participant announcement from {}", announcement.peerInfo.participantName);
 
     from->SetInfo(announcement.peerInfo);
+    from->SetUri(announcement.peerUri);
     for (auto&& receiver : _participantAnnouncementReceivers)
     {
         receiver(from, announcement);
@@ -434,9 +461,9 @@ void VAsioConnection::StartIoWorker()
     }};
 }
 
-void VAsioConnection::AcceptLocalConnections()
+void VAsioConnection::AcceptLocalConnections(uint32_t domainId)
 {
-    auto localEndpoint = makeLocalEndpoint(_participantName, _participantId);
+    auto localEndpoint = makeLocalEndpoint(_participantName, _participantId, domainId);
 
     //file must not exist before we bind/listen on it
     (void)fs::remove(localEndpoint.path());

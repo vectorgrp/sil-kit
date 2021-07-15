@@ -205,10 +205,11 @@ auto BuildConfig(uint32_t participantCount, Middleware middleware) -> Config
 
         participant.AddParticipantController().WithSyncType(syncType);
 
+        const auto level = logging::Level::Info;
         participant.ConfigureLogger()
-            .WithFlushLevel(logging::Level::Critical)
+            .WithFlushLevel(level)
             .AddSink(Sink::Type::Stdout)
-            .WithLogLevel(logging::Level::Critical);
+            .WithLogLevel(level);
 
         std::stringstream publisherName;
         publisherName << "PubOfPart" << participantCounter;
@@ -326,6 +327,7 @@ int main(int argc, char** argv)
         std::unique_ptr<IIbRegistry> registry;
         if (benchmark.usedMiddleware == Middleware::VAsio)
         {
+            //ibConfig.middlewareConfig.vasio.enableDomainSockets = false;
             registry = ib::extensions::CreateIbRegistry(ibConfig);
             registry->ProvideDomain(benchmark.domainId);
         }

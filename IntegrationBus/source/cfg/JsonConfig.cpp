@@ -1623,6 +1623,10 @@ auto from_json<VAsio::RegistryConfig>(const json11::Json& json) -> VAsio::Regist
     optional_from_json(registry.port, json, "Port");
     optional_from_json(registry.logger, json, "Logger");
     optional_from_json(registry.connectAttempts, json, "ConnectAttempts");
+    if (registry.connectAttempts < 1)
+    {
+        registry.connectAttempts = 1;
+    }
     
     return registry;
 }
@@ -1649,6 +1653,7 @@ auto from_json<VAsio::Config>(const json11::Json& json) -> VAsio::Config
     optional_from_json(config.tcpQuickAck, json, "TcpQuickAck");
     optional_from_json(config.tcpReceiveBufferSize, json, "TcpReceiveBufferSize");
     optional_from_json(config.tcpSendBufferSize, json, "TcpSendBufferSize");
+    optional_from_json(config.enableDomainSockets, json, "EnableDomainSockets");
     
     return config;
 }
@@ -1663,6 +1668,7 @@ auto to_json(const VAsio::Config& config) -> json11::Json
     non_default_to_json(config.tcpQuickAck, json, "TcpQuickAck", defaultConfig.tcpQuickAck);
     non_default_to_json(config.tcpReceiveBufferSize, json, "TcpReceiveBufferSize", defaultConfig.tcpReceiveBufferSize);
     non_default_to_json(config.tcpSendBufferSize, json, "TcpSendBufferSize", defaultConfig.tcpSendBufferSize);
+    non_default_to_json(config.enableDomainSockets, json, "EnableDomainSockets", defaultConfig.enableDomainSockets);
     return json;
 }
 

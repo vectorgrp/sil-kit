@@ -78,23 +78,39 @@ void VAsioTcpPeer::SetInfo(VAsioPeerInfo peerInfo)
     _info = std::move(peerInfo);
 }
 
-void VAsioTcpPeer::ConnectLocal(const std::string& socketPath)
+void VAsioTcpPeer::SetUri(VAsioPeerUri peerUri)
 {
+    _uri = std::move(peerUri);
+}
+
+auto VAsioTcpPeer::GetUri() const -> const VAsioPeerUri&
+{
+    return _uri;
+}
+
+bool VAsioTcpPeer::ConnectLocal(const std::string& socketPath)
+{
+    if (!_ibConnection->Config().middlewareConfig.vasio.enableDomainSockets)
+    {
+        return false;
+    }
+
     try
     {
         asio::local::stream_protocol::endpoint ep{socketPath};
         _socket.connect(ep);
-        return;
+        return true;
     }
-    catch (...)
+    catch (const std::exception&)
     {
         // reset the socket
         _socket = decltype(_socket){_socket.get_executor()};
         // move on to TCP connections
     }
+    return false;
 }
 
-void VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
+bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
 {
     tcp::resolver resolver(_socket.get_executor());
     tcp::resolver::results_type resolverResults;
@@ -105,7 +121,7 @@ void VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
     catch (asio::system_error& err)
     {
         _logger->Warn("Unable to resolve hostname \"{}:{}\": {}", host, port, err.what());
-        return;
+        return false;
     }
     const auto& config = _ibConnection->Config().middlewareConfig.vasio;
     for (auto&& resolverEntry : resolverResults)
@@ -135,7 +151,7 @@ void VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
                 _socket.set_option(asio::socket_base::send_buffer_size{config.tcpSendBufferSize});
             }
 
-            return;
+            return true;
         }
         catch (asio::system_error& /*err*/)
         {
@@ -143,20 +159,25 @@ void VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
             _socket = decltype(_socket){_socket.get_executor()};
         }
     }
+    return false;
 }
 void VAsioTcpPeer::Connect(VAsioPeerUri peerInfo)
 {
-    //SetInfo(std::move(peerInfo));
+    _info.participantId = peerInfo.participantId;
+    _info.participantName = peerInfo.participantName;
     _uri = std::move(peerInfo);
 
     std::stringstream attemptedUris;
+
+    // parse endpoints into Uri objects
     const auto& uriStrings = _uri.acceptorUris;
     std::vector<Uri> uris;
     std::transform(uriStrings.begin(), uriStrings.end(), std::back_inserter(uris),
         [](const auto& uriStr) {
             return Uri{uriStr};
     });
-    // Unix Domain Sockets: attempt to connect via local socket first
+
+    //Attempt local connections first
     auto localUri = std::find_if(uris.begin(), uris.end(),
         [](const auto& uri) {
             return uri.Type() == Uri::UriType::Local;
@@ -164,8 +185,7 @@ void VAsioTcpPeer::Connect(VAsioPeerUri peerInfo)
     if (localUri != uris.end())
     {
         attemptedUris << localUri->EncodedString() << ",";
-        ConnectLocal(localUri->Path());
-        if (_socket.is_open())
+        if (ConnectLocal(localUri->Path()))
         {
             return;
         }
@@ -179,9 +199,11 @@ void VAsioTcpPeer::Connect(VAsioPeerUri peerInfo)
             try
             {
                 attemptedUris << uri.EncodedString() << ",";
-                ConnectTcp(uri.Host(), uri.Port());
-                if (_socket.is_open())
+                if (ConnectTcp(uri.Host(), uri.Port()))
                 {
+                    // For backward compatibility between VAsioPeerUri and VAsioPeerInfo:
+                    _info.acceptorHost = uri.Host();
+                    _info.acceptorPort = uri.Port();
                     return;
                 }
             }
@@ -193,14 +215,12 @@ void VAsioTcpPeer::Connect(VAsioPeerUri peerInfo)
         }
     }
 
-    // TCP: Fall back to TCP and resolve the host name using legacy members
-    //ConnectTcp(GetInfo().acceptorHost, std::to_string(GetInfo().acceptorPort));
     if (!_socket.is_open())
     {
-        auto errorMsg = fmt::format("Failed to connect to host {}",
+        auto errorMsg = fmt::format("Failed to connect to host URIs: {}",
             attemptedUris.str());
-        _logger->Error(errorMsg);
-        _logger->Info("Tried the following URIs: {}", attemptedUris.str());
+        _logger->Debug(errorMsg);
+        _logger->Debug("Tried the following URIs: {}", attemptedUris.str());
 
         throw std::runtime_error{errorMsg};
     }

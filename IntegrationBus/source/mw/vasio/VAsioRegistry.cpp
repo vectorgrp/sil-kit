@@ -32,7 +32,7 @@ void VAsioRegistry::ProvideDomain(uint32_t domainId)
     try
     {
         //Local domain sockets, failure is non fatal for operation.
-        _connection.AcceptLocalConnections();
+        _connection.AcceptLocalConnections(domainId);
         isAccepting = true;
     }
     catch (const std::exception& e)
@@ -80,7 +80,7 @@ auto VAsioRegistry::GetLogger() -> logging::ILogger*
     return _logger.get();
 }
 
-bool VAsioRegistry::IsExpectedParticipant(const ib::mw::VAsioPeerInfo& peerInfo)
+bool VAsioRegistry::IsExpectedParticipant(const ib::mw::VAsioPeerUri& peerInfo)
 {
     for (auto& participant : _connection.Config().simulationSetup.participants)
     {
@@ -94,21 +94,31 @@ bool VAsioRegistry::IsExpectedParticipant(const ib::mw::VAsioPeerInfo& peerInfo)
 
 void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const ParticipantAnnouncement& announcement)
 {
-    auto& peerInfo = announcement.peerInfo;
+    auto peerUri = announcement.peerUri;
 
-    if (!IsExpectedParticipant(peerInfo))
+    if (peerUri.acceptorUris.empty())
+    {
+        //fallback to peer info
+        peerUri.participantId = announcement.peerInfo.participantId;
+        peerUri.participantName = announcement.peerInfo.participantName;
+        peerUri.acceptorUris.push_back(
+            Uri{ announcement.peerInfo.acceptorHost, announcement.peerInfo.acceptorPort }.EncodedString()
+        );
+    }
+
+    if (!IsExpectedParticipant(peerUri))
     {
         _logger->Warn(
             "Ignoring announcement from unexpected participant name={} id={}",
-            peerInfo.participantName,
-            peerInfo.participantId);
+            peerUri.participantName,
+            peerUri.participantId);
         return;
     }
 
 
     SendKnownParticipants(from);
 
-    _connectedParticipants[peerInfo.participantId] = peerInfo;
+    _connectedParticipants[peerUri.participantId] = peerUri;
 
     if (AllParticipantsAreConnected())
     {
@@ -124,10 +134,32 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
 
     KnownParticipants knownParticipantsMsg;
 
+    // Also provide VAsioPeerInfos for legacy participants
+    auto uriToPeerInfos = [](const auto& peerUri, auto& peerInfoVec) {
+        for (const auto& uriStr : peerUri.acceptorUris) {
+            auto uri = Uri{ uriStr };
+            if (uri.Type() == Uri::UriType::Tcp) {
+                VAsioPeerInfo pi{};
+                pi.acceptorHost = uri.Host();
+                pi.acceptorPort = uri.Port();
+                pi.participantId = peerUri.participantId;
+                pi.participantName = peerUri.participantName;
+                peerInfoVec.emplace_back(std::move(pi));
+            }
+        }
+    };
     for (auto&& connectedParticipant : _connectedParticipants)
     {
-        auto&& peerInfo = connectedParticipant.second;
-        knownParticipantsMsg.peerInfos.push_back(peerInfo);
+        auto&& peerUri = connectedParticipant.second;
+        if (peerUri.participantName == peer->GetUri().participantName)
+        {
+            // don't advertise the peer to itself
+            continue;
+        }
+        knownParticipantsMsg.peerUris.push_back(peerUri);
+
+        // backwards compatibility with PeerInfos
+        uriToPeerInfos(peerUri, knownParticipantsMsg.peerInfos);
     }
 
     MessageBuffer sendBuffer;
