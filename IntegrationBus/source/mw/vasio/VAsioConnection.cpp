@@ -8,9 +8,13 @@
 #include <array>
 #include <functional>
 
+#include "ib/mw/logging/ILogger.hpp"
+
 #include "VAsioTcpPeer.hpp"
 #include "Filesystem.hpp"
 #include "Uri.hpp"
+
+
 
 using namespace std::chrono_literals;
 namespace fs = ib::filesystem;
@@ -27,13 +31,44 @@ void SetSocketPermissions(const EndpointT&)
 {
 }
 
+template<typename AcceptorT>
+void SetListenOptions(ib::mw::logging::ILogger*,
+    AcceptorT&)
+{
+}
+
 // platform specific definitions of utilities
 #if defined(_WIN32)
+#   include <mstcpip.h>
 template<>
 void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
 {
     using exclusive_addruse = asio::detail::socket_option::boolean<ASIO_OS_DEF(SOL_SOCKET), SO_EXCLUSIVEADDRUSE>;
     acceptor.set_option(exclusive_addruse{true});
+}
+
+template<>
+void SetListenOptions(ib::mw::logging::ILogger* logger,
+    asio::ip::tcp::acceptor& acceptor)
+{
+    // This should improve loopback performance, and have no effect on remote TCP/IP
+    int enabled = 1;
+    DWORD numberOfBytes = 0;
+    auto result = WSAIoctl(acceptor.native_handle(),
+        SIO_LOOPBACK_FAST_PATH,
+        &enabled,
+        sizeof(enabled),
+        nullptr,
+        0,
+        &numberOfBytes,
+        0,
+        0);
+
+    if (result == SOCKET_ERROR)
+    {
+        auto lastError = ::GetLastError();
+        logger->Warn("VAsioConnection: Setting Loopback FastPath failed: WSA IOCtl last error: {}", lastError);
+    }
 }
 #else
 
@@ -49,6 +84,13 @@ void SetSocketPermissions(const asio::local::stream_protocol::endpoint& endpoint
 {
     const auto path = endpoint.path();
     (void)chmod(path.c_str(), 0770);
+}
+
+template<>
+void SetListenOptions(ib::mw::logging::ILogger* ,
+    asio::ip::tcp::acceptor& )
+{
+    // no op
 }
 
 #endif
@@ -78,7 +120,6 @@ auto makeLocalEndpoint(const std::string& participantName, const ib::mw::Partici
         << fs::path::preferred_separator
         << bounded_name
         << std::hex << unique_id
-        << std::hex << std::hash<std::string>{}(fs::current_path().string())
         << ".vib";
 
     result.path(path.str());
@@ -94,7 +135,7 @@ auto printUris(const ib::mw::VAsioPeerUri& info) -> std::string
         ss << uri << ", ";
     }
     return ss.str();
-};
+}
 
 } //anonymous namespace
 
@@ -363,7 +404,6 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Mess
 }
 
 void VAsioConnection::SendParticipantAnnoucementReply(IVAsioPeer* peer)
-
 {
     ParticipantAnnouncementReply reply;
     std::transform(_vasioReceivers.begin(), _vasioReceivers.end(), std::back_inserter(reply.subscribers),
@@ -493,6 +533,7 @@ void VAsioConnection::AcceptConnectionsOn(EndpointT endpoint)
         acceptor->bind(endpoint);
         SetSocketPermissions(endpoint);
         acceptor->listen();
+        SetListenOptions(_logger, *acceptor);
     }
     catch (const std::exception& e)
     {

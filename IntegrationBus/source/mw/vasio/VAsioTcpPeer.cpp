@@ -1,13 +1,15 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
-
 #include "VAsioTcpPeer.hpp"
+
+#include <iomanip>
+#include <sstream>
+
+#include "ib/mw/logging/ILogger.hpp"
+
 #include "VAsioMsgKind.hpp"
 #include "VAsioConnection.hpp"
 #include "Uri.hpp"
 
-#include <iostream>
-#include <iomanip>
-#include <sstream>
 
 
 using namespace asio::ip;
@@ -17,6 +19,12 @@ using namespace asio::ip;
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
+
+static void SetConnectOptions(ib::mw::logging::ILogger* ,
+    asio::generic::stream_protocol::socket&)
+{
+    // nothing specific required
+}
 
 static void EnableQuickAck(ib::mw::logging::ILogger* log, asio::generic::stream_protocol::socket& socket)
 {
@@ -31,9 +39,36 @@ static void EnableQuickAck(ib::mw::logging::ILogger* log, asio::generic::stream_
 }
 
 #else  //windows 
+#include <mstcpip.h>
 
-static void EnableQuickAck(ib::mw::logging::ILogger*, asio::generic::stream_protocol::socket& )
+static void SetConnectOptions(ib::mw::logging::ILogger* logger,
+    asio::generic::stream_protocol::socket& socket)
 {
+    // This should improve loopback performance, and have no effect on remote TCP/IP
+    int enabled = 1;
+    DWORD numberOfBytes = 0;
+    auto result = WSAIoctl(socket.native_handle(),
+        SIO_LOOPBACK_FAST_PATH,
+        &enabled,
+        sizeof(enabled),
+        nullptr,
+        0,
+        &numberOfBytes,
+        0,
+        0);
+
+    if (result == SOCKET_ERROR)
+    {
+        auto lastError = ::GetLastError();
+        logger->Warn("VAsioTcpPeer: Setting Loopback FastPath failed: WSA IOCtl last error: {}", lastError);
+    }
+}
+
+static void EnableQuickAck(ib::mw::logging::ILogger* ,
+    asio::generic::stream_protocol::socket& )
+
+{
+    //not supported
 }
 
 #endif  // __linux__
@@ -128,6 +163,10 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
     {
         try
         {
+            // Set  pre-connection platform options
+            _socket.open(resolverEntry.endpoint().protocol());
+            SetConnectOptions(_logger, _socket);
+
             _socket.connect(resolverEntry.endpoint());
 
             if (config.tcpNoDelay)
@@ -150,6 +189,7 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
             {
                 _socket.set_option(asio::socket_base::send_buffer_size{config.tcpSendBufferSize});
             }
+
 
             return true;
         }
