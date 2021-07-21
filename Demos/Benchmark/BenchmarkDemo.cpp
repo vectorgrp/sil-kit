@@ -5,6 +5,7 @@
 #include <thread>
 #include <numeric>
 #include <algorithm>
+#include <iterator>
 
 #include "ib/IntegrationBus.hpp"
 #include "ib/sim/all.hpp"
@@ -30,16 +31,28 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 
 void PrintUsage(const std::string& executableName)
 {
-    std::cout << "Usage:" << std::endl;
-    std::cout << executableName;
-    std::cout << " [middleware]";
-    std::cout << " [numberOfSimulations]";
-    std::cout << " [simulationDuration]";
-    std::cout << " [numberOfParticipants]";
-    std::cout << " [messageCount]";
-    std::cout << " [messageSizeInBytes]";
-    std::cout << " [domainId]";
-    std::cout << std::endl;
+    std::cout << "Usage:" << std::endl
+        << executableName
+        << " [middleware]"
+        << " [numberOfSimulations]"
+        << " [simulationDuration]"
+        << " [numberOfParticipants]"
+        << " [messageCount]"
+        << " [messageSizeInBytes]"
+        << " [domainId]"
+        << std::endl 
+        << "If no arguments are given default values will be used" << std::endl
+        << "\t--help\tshow this message." << std::endl
+        << "\t--disable-domainsockets\tDisable local domain sockets." << std::endl
+        << "\t--enable-nodelay\tEnable the TCP NO_DELAY flag." << std::endl
+        << "\t--middleware\tSet middleware to either [VAsio, FastRTPS]" << std::endl
+        << "\t--domain-id\tSet domain id to NUM" << std::endl
+        << "\t--message-size\tSet message size to BYTES" << std::endl
+        << "\t--message-count\tSet number of messages to be send in each simulation iteration to NUM" << std::endl
+        << "\t--number-participants\tSet number of simulation participants to NUM" << std::endl
+        << "\t--number-simulations\tSet number of simulations to perform to NUM" << std::endl
+        << "\t--simulation-duration\tSet virtual simulation duration to SECONDS" << std::endl
+        ;
 }
 
 struct BenchmarkConfig
@@ -51,47 +64,143 @@ struct BenchmarkConfig
     uint32_t messageCount = 1;
     uint32_t messageSizeInBytes = 100;
     uint32_t domainId = 42;
+    bool disableLocaldomainSockets = false;
+    bool tcpNoDelay = false;
 };
 
 bool Parse(int argc, char** argv, BenchmarkConfig& config)
 {
-    if (argc > 8)
+    // skip argv[0] and collect all arguments
+    std::vector<std::string> args;
+    std::copy((argv + 1), (argv + argc), std::back_inserter(args));
+
+    auto asNum = [](const auto& str) {
+        return static_cast<uint32_t>(std::stoul(str));
+    };
+
+    // test and remvoe the flag from args, returns true if flag was present
+    auto consumeFlag = [&args](const auto& namedOption) {
+        auto it = std::find(args.begin(), args.end(), namedOption);
+        if (it != args.end())
+        {
+            args.erase(it);
+            return true;
+        }
+        return false;
+    };
+
+    if (consumeFlag("--disable-domainsockets"))
     {
-        std::cout << "Too many arguments!" << std::endl;
+        config.disableLocaldomainSockets = true;
+    }
+    if (consumeFlag("--enable-nodelay"))
+    {
+        config.tcpNoDelay = true;
+    }
+
+    if (consumeFlag("--help"))
+    {
         PrintUsage(argv[0]);
         return false;
     }
 
-    if (argc == 2)
-    {
-        if (std::string(argv[1]) == "--help")
+    // Some more human-readable shortcuts for the options.
+    // Consume a named option and return its argument,
+    // or throw if an invalid argument is given.
+    bool haveUserOptions = false;
+    auto getArg = [&args, &haveUserOptions](const auto& name) {
+        auto i = 0;
+        auto argIt = std::find(args.begin(), args.end(), name);
+        if (argIt == args.end())
         {
+            return std::string{}; //the argument is not even mentioned
+        }
+        auto valIt = argIt+1;
+        if (valIt == args.end())
+        {
+            throw std::runtime_error{
+                std::string{"Option \""}
+                + name
+                + "\" is missing an argument!" 
+            };
+        }
+        // remove consumed args
+        auto result = *valIt;
+        args.erase(valIt);
+        args.erase(argIt);
+        haveUserOptions = true;
+        return result;
+    };
+    auto parseOptional = [ &getArg, &asNum](const auto& argName, auto& outputValue, auto conversionFunc) {
+        auto arg = getArg( argName);
+        if (!arg.empty())
+        {
+            try
+            {
+                using OutputT = std::remove_reference_t<decltype(outputValue)>;
+                outputValue = OutputT{ conversionFunc(arg) };
+            }
+            catch (const std::exception& ex)
+            {
+                std::cout << "Error: cannot parse argument of \"" << argName << "\": " << ex.what() <<std::endl;
+                std::cout << std::flush;
+                throw;
+            }
+        }
+    };
+    // Parse and consume the optional named arguments
+    parseOptional("--middleware", config.usedMiddleware, &ib::from_string<Middleware>);
+    parseOptional("--domain-id", config.domainId, asNum);
+    parseOptional("--message-size", config.messageSizeInBytes, asNum);
+    parseOptional("--message-count", config.messageCount, asNum);
+    parseOptional("--number-participants", config.numberOfParticipants, asNum);
+    parseOptional("--number-simulations", config.numberOfSimulations, asNum);
+    parseOptional("--simulation-duration", config.simulationDuration, asNum);
+
+    //check unknown long options
+    for (const auto& arg : args) {
+        if (arg.find_first_of("--") == 0) {
+            std::cout << "Error: unknown argument \"" << arg << "\"" << std::endl;
             PrintUsage(argv[0]);
             return false;
         }
     }
+    // Handle positional arguments, if any:
+    if (args.size() > 7)
+    {
+        std::cout << "Error: Too many arguments!" << std::endl;
+        PrintUsage(argv[0]);
+        return false;
+    }
 
     try
     {
-        switch (argc)
+        switch (args.size())
         {
-        case 8: config.domainId = static_cast<uint32_t>(std::stoul(argv[7]));
+        case 7: config.domainId = asNum(args.at(6));
             // [[fallthrough]]
-        case 7: config.messageSizeInBytes = static_cast<uint32_t>(std::stoul(argv[6]));
+        case 6: config.messageSizeInBytes = asNum(args.at(5));
             // [[fallthrough]]
-        case 6: config.messageCount = static_cast<uint32_t>(std::stoul(argv[5]));
+        case 5: config.messageCount = asNum(args.at(4));
             // [[fallthrough]]
-        case 5: config.numberOfParticipants = static_cast<uint32_t>(std::stoul(argv[4]));
+        case 4: config.numberOfParticipants = asNum(args.at(3));
             // [[fallthrough]]
-        case 4: config.simulationDuration = std::chrono::seconds(static_cast<uint32_t>(std::stoul(argv[3])));
+        case 3: config.simulationDuration = std::chrono::seconds(asNum(args.at(2)));
             // [[fallthrough]]
-        case 3: config.numberOfSimulations = static_cast<uint32_t>(std::stoul(argv[2]));
+        case 2: config.numberOfSimulations = asNum(args.at(1));
             // [[fallthrough]]
-        case 2: config.usedMiddleware = ib::from_string<Middleware>(argv[1]);
+        case 1: config.usedMiddleware = ib::from_string<Middleware>(args.at(0));
             break;
         default:
-            std::cout << "No benchmark arguments given: using default benchmark configuration.";
-            std::cout << " Specify '--help' as first argument to display usage." << std::endl << std::endl;
+            if (haveUserOptions)
+            {
+                std::cout << "Using user specified configuration to override defaults" << std::endl;
+            }
+            else
+            {
+                std::cout << "No benchmark arguments given: using default benchmark configuration.";
+                std::cout << " Specify '--help' as first argument to display usage." << std::endl << std::endl;
+            }
         }
     }
     catch (const std::exception& e)
@@ -321,13 +430,23 @@ int main(int argc, char** argv)
 
     auto ibConfig = BuildConfig(benchmark.numberOfParticipants, benchmark.usedMiddleware);
 
+    if (benchmark.disableLocaldomainSockets)
+    {
+        ibConfig.middlewareConfig.vasio.enableDomainSockets = false;
+    }
+
+    if (benchmark.tcpNoDelay)
+    {
+        ibConfig.middlewareConfig.vasio.tcpNoDelay = true;
+        ibConfig.middlewareConfig.vasio.tcpQuickAck = true;
+    }
+
     try
     {
         using namespace ib::extensions;
         std::unique_ptr<IIbRegistry> registry;
         if (benchmark.usedMiddleware == Middleware::VAsio)
         {
-            //ibConfig.middlewareConfig.vasio.enableDomainSockets = false;
             registry = ib::extensions::CreateIbRegistry(ibConfig);
             registry->ProvideDomain(benchmark.domainId);
         }
