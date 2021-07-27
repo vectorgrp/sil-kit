@@ -174,7 +174,13 @@ def run(what) {
 // quote percent sign for DOS batch, eg. uses in git log --format=%ct
 def quoteBat(userStr) {
     def res="@" //disable printing the command itself
-    userStr.each({x -> res += (x == '%') ? "%%": x})
+    for(ch in userStr) {
+        if( ch == '%' ) {
+            res += "%%"
+        } else{
+            res += ch
+        }
+    }
     return res
 }
 def runWithOutput(what) {
@@ -224,7 +230,7 @@ def doBuild(Map buildFlags) {
             scmVars = checkoutGit()
 
             // For reproducible build set SOURCE_DATE_EPOCH to time of last commit
-            commitTime = runWithOutput("git log --max-count=1 --format=%ct -r origin/master")
+            def commitTime = runWithOutput("git log --max-count=1 --format=%ct -r origin/master")
             print("DEBUG scmVars=${scmVars}, commitTime=${commitTime}, TZ=${env.TZ}, LC_ALL=${env.LC_ALL}")
             buildEnv.add("SOURCE_DATE_EPOCH=${commitTime}")
             buildEnv.add("TZ=UTC")
