@@ -1,24 +1,27 @@
 cmake_minimum_required(VERSION 3.8)
-project(IbValidateConfig)
+project(IbConfigTool)
 
 set(CMAKE_CXX_STANDARD 14)
 
 include(IntegrationBusInstall)
 
-add_executable(IbValidateConfig
-	ValidateConfig.cpp
+set(EXE vib-config-tool)
+add_executable(${EXE}
+    IbConfigTool.cpp
 )
 
 # Group this demo project into a folder
-set_target_properties(IbValidateConfig PROPERTIES
+set_target_properties(${EXE} PROPERTIES
      FOLDER "Utilities"
      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
      INSTALL_RPATH "$ORIGIN/../lib"
 )
 
-target_link_libraries(IbValidateConfig
-    IntegrationBus
+target_link_libraries(${EXE}
+    PRIVATE
+    IbInterface
+    IbConfig
 )
-install(TARGETS IbValidateConfig
+install(TARGETS ${EXE}
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}
 )

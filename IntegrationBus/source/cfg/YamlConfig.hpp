@@ -26,7 +26,7 @@ bool Validate(const std::string& yamlString, std::ostream& warningMessages);
 //////////////////////////////////////////////////////////////////////
 
 
-//!< Helper to rint the YAML position in line and column format.
+//!< Helper to print the YAML position in line and column format.
 std::ostream& operator<<(std::ostream& out, const YAML::Mark& mark);
 
 template<typename VibConfigT>
@@ -61,6 +61,9 @@ auto from_yaml(const YAML::Node& node) -> VibConfigT
         throw Misconfiguration{ ss.str() };
     }
 }
+
+//!< Convert a YAML document node into json, using the internal emitter.
+ auto yaml_to_json(YAML::Node node) -> std::string;
 
 } // namespace cfg
 } // namespace ib

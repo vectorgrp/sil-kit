@@ -44,21 +44,23 @@ add_library(IbConfig STATIC
     ReplayBuilder.hpp
     ReplayBuilder.cpp
 
-	YamlConfig.hpp
-	YamlConfig.cpp
-	YamlConfigConversion.cpp
-	YamlConfigConversion.hpp
-	YamlSchema.hpp
-	YamlSchema.cpp
-	YamlValidator.hpp
-	YamlValidator.cpp
+    YamlConfig.hpp
+    YamlConfig.cpp
+    YamlConfigConversion.cpp
+    YamlConfigConversion.hpp
+    YamlSchema.hpp
+    YamlSchema.cpp
+    YamlValidator.hpp
+    YamlValidator.cpp
 )
 
 target_link_libraries(IbConfig
     PRIVATE IbInterface
     PRIVATE IbUtil
     PRIVATE json11
-	PRIVATE yaml-cpp
+    PRIVATE yaml-cpp
+    INTERFACE json11
+    INTERFACE yaml-cpp
 )
 
 target_include_directories(IbConfig
