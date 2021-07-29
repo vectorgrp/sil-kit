@@ -15,7 +15,6 @@ class YamlValidator
 {
 public:
     //Ctor
-    YamlValidator();
 
 public:
     //Methods
@@ -47,10 +46,12 @@ public:
 private:
     //Methods
     void UpdateIndex(const YamlSchemaElem& element, const std::string& currentParent);
+    bool LoadSchema(std::string schemaVersion);
 private:
     // Members
     static const std::string _elementSeparator;
     std::map<std::string /*elementName*/, YamlSchemaElem> _index;
+    YamlSchemaElem _schema;
 };
 
 

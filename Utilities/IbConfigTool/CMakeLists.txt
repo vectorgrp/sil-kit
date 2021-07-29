@@ -19,6 +19,7 @@ set_target_properties(${EXE} PROPERTIES
 
 target_link_libraries(${EXE}
     PRIVATE
+    IntegrationBus
     IbInterface
     IbConfig
 )

@@ -43,12 +43,6 @@ void usage(const std::string& programName)
         << setw(argWidth) << left << "oldFile outputFile"
         << setw(docWidth) << left << "Convert the legacy `oldFile` to current config format and output into `outputFile`."
         << endl
-        // --output-format
-        << setw(optWidth) << left << "--format" 
-        << setw(argWidth) << left << "json|yaml"
-        << setw(docWidth) << left << "Specify the output format for '--convert'. default is json."
-        << endl
-
         ;
 }
 
@@ -76,9 +70,8 @@ void validate(const std::vector<std::string> files)
         }
     }
 }
-void convert(const std::string& inFile, const std::string& outFile, bool asJson)
+void convert(const std::string& inFile, const std::string& outFile)
 {
-    auto printType = [](bool isJs) { return (isJs ? "json" : "yaml"); };
     auto fileIsJson = [](const std::string& fileName) {
         const std::string suffix{ ".json" };
         auto idx = fileName.rfind(suffix);
@@ -88,12 +81,12 @@ void convert(const std::string& inFile, const std::string& outFile, bool asJson)
     ib::cfg::Config cfg;
     const bool inputJson = fileIsJson(inFile);
     std::cout << "Converting " 
-        << "'" << inFile << "' (" << printType(inputJson) << ") to "
+        << "'" << inFile << "' (" << (inputJson ? "json" :"yaml") << ") to "
         << "'" << outFile  << "'"
-        << " with output format " << printType(asJson) << std::endl;
+        << " with output format " << std::endl;
     if (inputJson)
     {
-        // read the config using the JSON parser.
+        // read the config using the old JSON parser.
         // The old implementation supports legacy adjustments.
         cfg = ib::cfg::Config::FromJsonFile(inFile);
     }
@@ -110,15 +103,7 @@ void convert(const std::string& inFile, const std::string& outFile, bool asJson)
         std::cout << "Convert: cannot create output file '" << outFile << "'" << std::endl;
         return;
     }
-    if (asJson)
-    {
-        auto yamlNode = ib::cfg::to_yaml(cfg);
-        out << ib::cfg::yaml_to_json(yamlNode);
-    }
-    else
-    {
-        out << cfg.ToYamlString();
-    }
+    out << cfg.ToYamlString();
     out.close();
 }
 
@@ -135,7 +120,6 @@ int main(int argc, char** argv)
     };
 
     Action action{ Invalid };
-    bool useJson = true;
     int fileListStart = 0;
     std::string fromFile;
     std::string toFile;
@@ -149,31 +133,6 @@ int main(int argc, char** argv)
         {
             usage(argv[0]);
             return EXIT_SUCCESS;
-        }
-        else if (arg == "--format")
-        {
-            if (i + 1 >= args.size()) {
-                std::cout << "ERROR: --format requires an argument!" << std::endl;
-                return EXIT_FAILURE;
-            }
-            const auto& nextArg = args.at(i + 1);
-            if (nextArg == "json")
-            {
-                useJson = true;
-            }
-            else if (nextArg == "yaml")
-            {
-                useJson = false;
-            }
-            else
-            {
-                usage(argv[0]);
-                std::cout << "ERROR invalid argument to '--format': " << nextArg << std::endl;
-                return EXIT_FAILURE;
-            }
-            //shift to next arg
-            i++;
-            continue;
         }
         else if (arg == "--validate")
         {
@@ -209,7 +168,7 @@ int main(int argc, char** argv)
         validate({ args.begin() + fileListStart, args.end() });
         break;
     case Convert:
-        convert(fromFile, toFile, useJson);
+        convert(fromFile, toFile);
         break;
     case Invalid:
         //[[fallthrough]]

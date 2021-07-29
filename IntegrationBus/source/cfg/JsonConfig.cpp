@@ -1732,6 +1732,7 @@ auto to_json(const Config& cfg) -> json11::Json
     {
         {"ConfigVersion", to_json(cfg.version)},
         {"ConfigName", cfg.name},
+        {"SchemaVersion", cfg.schemaVersion},
         {"Description", cfg.description},
 
         {"SimulationSetup", to_json(cfg.simulationSetup)},
@@ -1931,6 +1932,7 @@ auto from_json<Config>(const json11::Json& json) -> Config
     config.simulationSetup = from_json<SimulationSetup>(json["SimulationSetup"]);
     config.middlewareConfig = from_json<MiddlewareConfig>(json["MiddlewareConfig"]);
     optional_from_json(config.extensionConfig, json, "ExtensionConfig");
+    optional_from_json(config.schemaVersion, json, "SchemaVersion");
 
     return config;
 }

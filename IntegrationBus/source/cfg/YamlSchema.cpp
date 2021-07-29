@@ -7,6 +7,7 @@ namespace cfg {
 
 
 //!< Create the VIB YAML Schema.
+namespace v1 {
 auto MakeYamlSchema() -> YamlSchemaElem
 {
     //NB: Keep these YamlSchemaElem in sync with IbConfig.schema.json.
@@ -277,6 +278,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
     // Root element of the YAML schema
     YamlSchemaElem yamlSchema{
         {"ConfigVersion"},
+        {"SchemaVersion"},
         {"ConfigName"},
         {"Description"},
         {"SimulationSetup", {
@@ -340,7 +342,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
 
     return yamlSchema;
 }
-
+} // namespace v1
 
 } // namespace cfg
 } // namespace ib

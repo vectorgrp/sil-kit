@@ -107,6 +107,7 @@ bool ValidateDoc(YAML::Node& doc, const ib::cfg::YamlValidator& v,
     }
     return ok;
 }
+
 } //end anonymous
 
 
@@ -115,14 +116,23 @@ namespace cfg {
   
 const std::string YamlValidator::_elementSeparator{"/"};
 
-YamlValidator::YamlValidator()
+bool YamlValidator::LoadSchema(std::string schemaVersion)
 {
-    auto schema = MakeYamlSchema();
+    if (schemaVersion == "1")
+    {
+        _schema = v1::MakeYamlSchema();
+    }
+    else
+    {
+        std::cout << "WARNING: unknown YAML schema version " << schemaVersion << std::endl;
+        return false;
+    }
     //the root element in schema can be skipped
-    for (auto& subelement : schema.subelements)
+    for (auto& subelement : _schema.subelements)
     {
         UpdateIndex(subelement, "");
     }
+    return true;
 }
 
 void YamlValidator::UpdateIndex(const YamlSchemaElem& element, const std::string& currentParent)
@@ -149,6 +159,20 @@ bool YamlValidator::Validate(const std::string& yamlString, std::ostream& warnin
 {
     try {
         auto yamlDoc = YAML::Load(yamlString);
+        if (yamlDoc["SchemaVersion"])
+        {
+            auto version = yamlDoc["SchemaVersion"].as<std::string>();
+            if (!LoadSchema(version))
+            {
+                warnings << "Error: cannot load schema with SchemaVersion='" << version << "'" << "\n";
+                return false;
+            }
+        }
+        else
+        {
+            warnings << "Warning: document does not specify 'SchemaVersion', assuming version '1'\n";
+            LoadSchema("1");
+        }
         return ValidateDoc(yamlDoc, *this,  warnings, DocumentRoot());
     }
     catch (const std::exception& ex) {

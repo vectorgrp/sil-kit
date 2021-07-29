@@ -1574,6 +1574,7 @@ Node VibConversion::encode(const Config& obj)
     static const Config defaultObj;
     Node node;
     node["ConfigVersion"] = obj.version;
+    node["SchemaVersion"] = obj.schemaVersion;
     node["ConfigName"] = obj.name;
     node["Description"] = obj.description;
     node["SimulationSetup"] = obj.simulationSetup;
@@ -1589,6 +1590,7 @@ bool VibConversion::decode(const Node& node, Config& obj)
     obj.description = parse_as<decltype(obj.description)>(node["Description"]);
     obj.simulationSetup = parse_as<decltype(obj.simulationSetup)>(node["SimulationSetup"]);
     obj.middlewareConfig = parse_as<decltype(obj.middlewareConfig)>(node["MiddlewareConfig"]);
+    optional_decode(obj.schemaVersion, node, "SchemaVersion");
     optional_decode(obj.extensionConfig, node, "ExtensionConfig");
     return true;
 }
