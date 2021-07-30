@@ -1,5 +1,5 @@
 #include "Config.hpp"
-#include "JsonConfig.hpp"
+//#include "JsonConfig.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -280,6 +280,15 @@ auto ReadWholeFile(const std::string& filename) -> std::string
 }
 
 } // anonymous namespace
+
+void PostProcess(Config& config)
+{
+    // Post-processing steps
+    AssignEndpointAddresses(config);
+    AssignLinkIds(config);
+    UpdateGenericSubscribers(config);
+    AdjustLegacyPcapConfig(config);
+}
 
 void UpdateGenericSubscribers(Config& config)
 {
@@ -682,11 +691,7 @@ auto Config::FromYamlString(const std::string& yamlString) -> Config
     auto config =from_yaml<Config>(doc);
     config.configFilePath.clear();
 
-    // Post-processing steps
-    AssignEndpointAddresses(config);
-    AssignLinkIds(config);
-    UpdateGenericSubscribers(config);
-    AdjustLegacyPcapConfig(config);
+    PostProcess(config);
 
     return config;
 }
@@ -708,25 +713,9 @@ auto Config::ToYamlString() -> std::string
 
 auto Config::FromJsonString(const std::string& jsonString) -> Config
 {
-    std::string errorString;
-    auto&& json = json11::Json::parse(jsonString, errorString);
-
-    if (json.is_null())
-    {
-        std::cerr << "Error Parsing json: " << jsonString << "\n";
-        throw Misconfiguration("IB config parsing error");
-    }
-
-    auto config = from_json<Config>(json);
-    config.configFilePath.clear();
-
-    // Post-processing steps
-    AssignEndpointAddresses(config);
-    AssignLinkIds(config);
-    UpdateGenericSubscribers(config);
-    AdjustLegacyPcapConfig(config);
-
-    return config;
+    // YAML is a superset of JSON, and as such we can parse
+    // it with our YAML parser:
+    return FromYamlString(jsonString);
 }
 
 auto Config::FromJsonFile(const std::string& jsonFilename) -> Config
@@ -740,7 +729,8 @@ auto Config::FromJsonFile(const std::string& jsonFilename) -> Config
 
 auto Config::ToJsonString() -> std::string
 {
-    return to_json(*this).dump();
+    auto doc = to_yaml(*this);
+    return yaml_to_json(doc);
 }
 
 

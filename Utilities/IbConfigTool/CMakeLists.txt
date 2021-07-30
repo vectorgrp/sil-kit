@@ -17,12 +17,37 @@ set_target_properties(${EXE} PROPERTIES
      INSTALL_RPATH "$ORIGIN/../lib"
 )
 
+# legacy json parser moved here from IntegrationBus/source/cfg/
+# we keep this for backwards compatibility:
+# the YAML parser doesn't support some legacy fixups.
+add_library(IbJsonParser STATIC
+    JsonConfig.hpp
+    JsonConfig.cpp
+    )
+target_link_libraries(IbJsonParser
+    PRIVATE 
+    json11
+    IbInterface
+    INTERFACE 
+    json11
+    )
+
+target_include_directories(IbJsonParser 
+    PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/../../IntegrationBus/source/cfg
+    INTERFACE
+    ${CMAKE_CURRENT_LIST_DIR}/../../IntegrationBus/source/cfg
+)
 target_link_libraries(${EXE}
     PRIVATE
-    IntegrationBus
     IbInterface
     IbConfig
+    IbJsonParser
 )
 install(TARGETS ${EXE}
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}
 )
+
+
+add_vib_test(TestMwCfgJsonConfig SOURCES JsonConfigTest.cpp LIBS IbJsonParser IntegrationBus )
+ib_enable_warnings(TestMwCfgJsonConfig)

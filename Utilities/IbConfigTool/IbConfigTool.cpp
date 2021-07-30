@@ -13,7 +13,31 @@
 //internal APIs
 #include "YamlConfig.hpp" 
 
+// legacy json parser
+#include "JsonConfig.hpp"
+
 namespace {
+//!< Legacy Json parser
+auto FromJsonString(const std::string& jsonString) -> ib::cfg::Config
+{
+    using namespace ib::cfg;
+
+    std::string errorString;
+    auto&& json = json11::Json::parse(jsonString, errorString);
+
+    if (json.is_null())
+    {
+        std::cerr << "Error Parsing json: " << jsonString << "\n";
+        throw Misconfiguration("IB config parsing error");
+    }
+
+    auto config = from_json<Config>(json);
+    config.configFilePath.clear();
+
+    PostProcess(config);
+
+    return config;
+}
 void usage(const std::string& programName)
 {
     const int optWidth = 20, argWidth = 20, docWidth = 45;

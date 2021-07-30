@@ -159,7 +159,7 @@ bool YamlValidator::Validate(const std::string& yamlString, std::ostream& warnin
 {
     try {
         auto yamlDoc = YAML::Load(yamlString);
-        if (yamlDoc["SchemaVersion"])
+        if (yamlDoc.IsDefined() && yamlDoc.IsMap()  && yamlDoc["SchemaVersion"])
         {
             auto version = yamlDoc["SchemaVersion"].as<std::string>();
             if (!LoadSchema(version))

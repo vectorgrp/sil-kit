@@ -449,7 +449,7 @@ struct Config
     //! \brief the version of the configuration data.
     Version version;
     //! \brief  the version of the YAML schema
-    std::string schemaVersion;
+    std::string schemaVersion{ "1" };
     //! \brief the name for this configuration object.
     std::string name;
     //! \brief  a short description for documentation purposes.
