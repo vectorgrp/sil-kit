@@ -22,7 +22,7 @@
                 "Name": "Subscriber",
                 "Description": "Subscribes different generic messages",
                 "GenericSubscribers": [
-                    "LargeDataBlobTopic"
+                    {"Name": "LargeDataBlobTopic"}
                 ]
             },
             {

@@ -810,16 +810,15 @@ TEST_F(JsonConfigTest, configure_participant_add_networksimulator_legacy)
         "Participants": [
             {
                 "Name" : "P1",
-                "NetworkSimulators": ["NetSimOne"]
+                "NetworkSimulators" : [
+                    {
+                        "Name" : "NetSimOne",
+                        "SimulatedLinks": [ "Link1", "Link2"],
+                        "SimulatedSwitches": ["NetSwitch0", "NetSwitch1"]
+                    }
+                ]
             }
         ],
-        "NetworkSimulators" : [
-            {
-                "Name" : "NetSimOne",
-                "SimulatedLinks": [ "Link1", "Link2"],
-                "SimulatedSwitches": ["NetSwitch0", "NetSwitch1"]
-            }
-        ]
     }
 })");
     

@@ -16,8 +16,8 @@
 // legacy json parser
 #include "JsonConfig.hpp"
 
-namespace {
-//!< Legacy Json parser
+namespace legacy {
+//!< Legacy Json parsers
 auto FromJsonString(const std::string& jsonString) -> ib::cfg::Config
 {
     using namespace ib::cfg;
@@ -38,6 +38,34 @@ auto FromJsonString(const std::string& jsonString) -> ib::cfg::Config
 
     return config;
 }
+
+auto ReadWholeFile(const std::string& filename) -> std::string
+{
+    std::ifstream fs(filename);
+
+    if (!fs.is_open())
+        throw ib::cfg::Misconfiguration("Invalid IB config filename '" + filename + "'");
+
+    std::stringstream buffer;
+    buffer << fs.rdbuf();
+
+    return buffer.str();
+
+}
+
+auto FromJsonFile(const std::string& jsonFilename) -> ib::cfg::Config
+{
+    auto jsonString = ReadWholeFile(jsonFilename);
+    auto&& config = legacy::FromJsonString(jsonString);
+    config.configFilePath = jsonFilename;
+
+    return config;
+}
+
+} // end legacy
+
+namespace {
+
 void usage(const std::string& programName)
 {
     const int optWidth = 20, argWidth = 20, docWidth = 45;
@@ -112,7 +140,7 @@ void convert(const std::string& inFile, const std::string& outFile)
     {
         // read the config using the old JSON parser.
         // The old implementation supports legacy adjustments.
-        cfg = ib::cfg::Config::FromJsonFile(inFile);
+        cfg = legacy::FromJsonFile(inFile);
     }
     else
     {
@@ -132,6 +160,7 @@ void convert(const std::string& inFile, const std::string& outFile)
 }
 
 }// end anonymous ns
+
 
 int main(int argc, char** argv)
 {
@@ -192,7 +221,15 @@ int main(int argc, char** argv)
         validate({ args.begin() + fileListStart, args.end() });
         break;
     case Convert:
-        convert(fromFile, toFile);
+        try {
+            convert(fromFile, toFile);
+        }
+        catch (const std::exception& ex)
+        {
+            std::cout << "ERROR: caught exception: " << ex.what() << std::endl;
+            std::cout << "Aborting." << std::endl;
+            return EXIT_FAILURE;
+        }
         break;
     case Invalid:
         //[[fallthrough]]

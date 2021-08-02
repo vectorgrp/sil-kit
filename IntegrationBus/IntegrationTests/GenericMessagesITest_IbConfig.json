@@ -32,9 +32,9 @@
                 "Name": "Subscriber",
                 "Description": "Subscribes different generic messages",
                 "GenericSubscribers": [
-                    "GroundTruth",
-                    "VehicleModelOut",
-                    "MotionTrajectory"
+                    {"Name": "GroundTruth"},
+                    {"Name": "VehicleModelOut"},
+                    {"Name": "MotionTrajectory"}
                 ]
             },
             {

@@ -776,8 +776,8 @@ Node VibConversion::encode(const sim::fr::TxBufferConfig& obj)
     Node node;
     node["channels"] = obj.channels;
     node["slotId"] = obj.slotId;
-    node["offset"] = obj.offset;
-    node["repetition"] = obj.repetition;
+    node["offset"] = static_cast<int>(obj.offset);
+    node["repetition"] = static_cast<int>(obj.repetition);
     node["PPindicator"] = obj.hasPayloadPreambleIndicator;
     node["headerCrc"] = obj.headerCrc;
     node["transmissionMode"] = obj.transmissionMode;
@@ -1300,27 +1300,28 @@ template<>
 bool VibConversion::decode(const Node& node, TimeSync& obj)
 {
     optional_decode(obj.syncPolicy, node, "SyncPolicy");
-    obj.tickPeriod = parse_as<std::chrono::nanoseconds>(node["TickPeriodNs"]);
+    optional_decode(obj.tickPeriod, node, "TickPeriodNs");
     return true;
 }
 
 template<>
 Node VibConversion::encode(const SimulationSetup& obj)
 {
+    static const SimulationSetup defaultObj;
     Node node;
     node["Participants"] = obj.participants;
-    node["Switches"] = obj.switches;
     node["Links"] = obj.links;
-    node["TimeSync"] = obj.timeSync;
+    optional_encode(obj.switches, node, "Switches");
+    non_default_encode(obj.timeSync, node, "TimeSync", defaultObj.timeSync);
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, SimulationSetup& obj)
 {
     obj.participants = parse_as<decltype(obj.participants)>(node["Participants"]);
+    optional_decode(obj.links, node, "Links");
+    optional_decode(obj.timeSync, node, "TimeSync");
     optional_decode(obj.switches, node, "Switches");
-    obj.links = parse_as<decltype(obj.links)>(node["Links"]);
-    obj.timeSync = parse_as<decltype(obj.timeSync)>(node["TimeSync"]);
     return true;
 }
 
@@ -1573,23 +1574,23 @@ Node VibConversion::encode(const Config& obj)
 {
     static const Config defaultObj;
     Node node;
-    node["ConfigVersion"] = obj.version;
+    non_default_encode(obj.version, node, "ConfigVersion", defaultObj.version);
     node["SchemaVersion"] = obj.schemaVersion;
     node["ConfigName"] = obj.name;
     node["Description"] = obj.description;
     node["SimulationSetup"] = obj.simulationSetup;
-    node["MiddlewareConfig"] = obj.middlewareConfig;
+    non_default_encode(obj.middlewareConfig, node, "MiddlewareConfig", defaultObj.middlewareConfig);
     non_default_encode(obj.extensionConfig, node, "ExtensionConfig", defaultObj.extensionConfig);
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, Config& obj)
 {
-    obj.version = parse_as<decltype(obj.version)>(node["ConfigVersion"]);
-    obj.name = parse_as<decltype(obj.name)>(node["ConfigName"]);
-    obj.description = parse_as<decltype(obj.description)>(node["Description"]);
-    obj.simulationSetup = parse_as<decltype(obj.simulationSetup)>(node["SimulationSetup"]);
-    obj.middlewareConfig = parse_as<decltype(obj.middlewareConfig)>(node["MiddlewareConfig"]);
+    optional_decode(obj.version, node, "ConfigVersion");
+    optional_decode(obj.name, node, "ConfigName");
+    optional_decode(obj.description, node, "Description");
+    optional_decode(obj.simulationSetup, node, "SimulationSetup");
+    optional_decode(obj.middlewareConfig, node, "MiddlewareConfig");
     optional_decode(obj.schemaVersion, node, "SchemaVersion");
     optional_decode(obj.extensionConfig, node, "ExtensionConfig");
     return true;

@@ -277,6 +277,8 @@ auto MakeYamlSchema() -> YamlSchemaElem
     );
     // Root element of the YAML schema
     YamlSchemaElem yamlSchema{
+        // JSON schema, not interpreted by us:
+        {"$schema"},
         {"ConfigVersion"},
         {"SchemaVersion"},
         {"ConfigName"},

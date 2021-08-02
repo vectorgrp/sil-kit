@@ -50,4 +50,7 @@ install(TARGETS ${EXE}
 
 
 add_vib_test(TestMwCfgJsonConfig SOURCES JsonConfigTest.cpp LIBS IbJsonParser IntegrationBus )
+# we need runtime IntegrationBus DLL on windows:
+set_tests_properties(TestMwCfgJsonConfig PROPERTIES 
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:IntegrationBus>)
 ib_enable_warnings(TestMwCfgJsonConfig)

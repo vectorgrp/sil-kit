@@ -12,21 +12,21 @@
                 "Description": "Exemplary participant that sends various Outputs with initialization",
     
                 "Digital-Out": [
-                    { "Headlight-Left": false },
-                    { "Headlight-Right": false },
-                    { "Backlight-Left": false }
+                    {"Name": "Headlight-Left", "value" : false },
+                    {"Name": "Headlight-Right", "value" : false },
+                    {"Name": "Backlight-Left", "value" : false }
                 ],
                 "Analog-Out": [
-                    { "Battery-Voltage": { "value": 7.3, "unit": "V" }},
-                    { "Gas-Level": { "value": 17.3, "unit": "%" }}
+                    { "Name": "Battery-Voltage", "value": 7.3, "unit": "V" },
+                    { "Name": "Gas-Level", "value": 17.3, "unit": "%"}
                 ],
                 "Pwm-Out": [
-                    { "Indicator-Left": { "freq": { "value": 3, "unit": "Hz"}, "duty": 0.4 } },
-                    { "Indicator-Right": { "freq": { "value": 2.5, "unit": "Hz"}, "duty": 0.5 } }
+                    { "Name": "Indicator-Left", "freq": { "value": 3, "unit": "Hz"}, "duty": 0.4 },
+                    { "Name": "Indicator-Right", "freq": { "value": 2.5, "unit": "Hz"}, "duty": 0.5  }
                 ],
                 "Pattern-Out": [
-                    { "KeyFob": "626565702d62656570" },
-                    { "SecretSpyCode": "544f50534543524554" }
+                    { "Name": "KeyFob",  "value":"626565702d62656570" },
+                    { "Name": "SecretSpyCode", "value": "544f50534543524554" }
                 ]
             },
 
@@ -35,21 +35,21 @@
                 "Description": "Exemplary participant that receives various Inputs",
     
                 "Digital-In": [
-                    "Headlight-Left",
-                    "Headlight-Right",
-                    "Backlight-Left"
+                    {"Name": "Headlight-Left"},
+                    {"Name": "Headlight-Right"},
+                    {"Name": "Backlight-Left"}
                 ],
                 "Analog-In": [
-                    "Battery-Voltage",
-                    "Gas-Level"
+                    {"Name": "Battery-Voltage"},
+                    {"Name": "Gas-Level"}
                 ],
                 "Pwm-In": [
-                    "Indicator-Left",
-                    "Indicator-Right"
+                    {"Name": "Indicator-Left"},
+                    {"Name": "Indicator-Right"}
                 ],
                 "Pattern-In": [
-                    "KeyFob",
-                    "SecretSpyCode"
+                    {"Name": "KeyFob"},
+                    {"Name": "SecretSpyCode"}
                 ]
             },
     

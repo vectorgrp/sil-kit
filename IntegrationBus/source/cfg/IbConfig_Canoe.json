@@ -14,8 +14,8 @@
                 "ParticipantController": {
                     "SyncType": "DiscreteTime"
                 },
-                "CanControllers": [ "CAN1", "CAN2", "CAN3", "CAN4" ],
-                "LinControllers": [ "LIN1", "LIN2", "LIN3", "LIN4" ],
+                "CanControllers": [ {"Name": "CAN1"}, {"Name": "CAN2"}, {"Name": "CAN3"}, {"Name": "CAN4"} ],
+                "LinControllers": [ {"Name": "LIN1"}, {"Name": "LIN2"}, {"Name": "LIN3"}, {"Name": "LIN4"} ],
                 "FlexRayControllers": [ 
                     {
                         "Name": "FR1"
@@ -63,8 +63,8 @@
                     "SyncType": "DiscreteTime"
                 },
 
-                "CanControllers": [ "CAN1", "CAN2", "CAN3", "CAN4" ],
-                "LinControllers": [ "LIN1", "LIN2", "LIN3", "LIN4" ],
+                "CanControllers": [ {"Name": "CAN1"}, {"Name": "CAN2"}, {"Name": "CAN3"}, {"Name": "CAN4"} ],
+                "LinControllers": [ {"Name": "LIN1"}, {"Name": "LIN2"}, {"Name": "LIN3"}, {"Name": "LIN4"} ],
                 "FlexRayControllers": [ 
                     {
                         "Name": "FR1"

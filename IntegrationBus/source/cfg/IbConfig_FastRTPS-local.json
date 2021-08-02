@@ -10,12 +10,12 @@
             {
                 "Name": "Participant1",
                 "Description": "Participant with CAN controller",
-                "CanControllers": [ "CAN" ]
+                "CanControllers": [ {"Name": "CAN"} ]
             },
             {
                 "Name": "Participant2",
                 "Description": "Participant with CAN controller",
-                "CanControllers": [ "CAN" ]
+                "CanControllers": [ {"Name": "CAN"} ]
             },
             {
                 "Name": "ExecutionControllerDt",
