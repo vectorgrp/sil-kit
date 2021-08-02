@@ -137,6 +137,11 @@
         "$ref": "#/definitions/Description"
       },
 
+      "SchemaVersion": {
+          "type": ["integer", "string"],
+          "title": "Version of the schema used to validate this document."
+      },
+
       "SimulationSetup": {
         "type": "object",
         "title": "Entities of the simulated system",

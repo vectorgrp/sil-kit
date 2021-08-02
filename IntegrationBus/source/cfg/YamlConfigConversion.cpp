@@ -108,11 +108,13 @@ auto parse_as(const YAML::Node& node) -> ValueT
         //we already have a concise error message, propagate it to our caller
         throw;
     }
-    catch(const YAML::BadConversion&)
+    //catch(const YAML::BadConversion&)
+    catch (const YAML::Exception& ex)
     {
         std::stringstream ss;
         ss << "Cannot parse as Type \"" << ParseTypeName<ValueT>::name
-            << "\": " << YAML::Dump(node);
+            << "\". Exception: \"" << ex.what()
+            << "\". While parsing: " << YAML::Dump(node);
         throw BadVibConversion(node, ss.str());
     }
 }
@@ -229,13 +231,28 @@ void optional_decode(ConfigT& value, const YAML::Node& node, const std::string& 
     }
 }
 
+
 template <typename ConfigT>
-auto non_default_encode(const std::vector<ConfigT>& values, YAML::Node& node, const std::string& fieldName, const ConfigT& defaultValue)
+auto non_default_encode(const std::vector<ConfigT>& values, YAML::Node& node, const std::string& fieldName, const std::vector<ConfigT>& defaultValue)
 {
-    if (!(values == defaultValue))
+    // Only encode vectors that have members that deviate from a default-value.
+    // And also ensure we only encode values that are user-defined.
+    if (!values.empty() && !(values == defaultValue))
     {
-        auto&& sequence = node[fieldName];
-        std::copy(values.begin(), values.end(), sequence.begin());
+        std::vector<ConfigT> userValues;  //XXX must not encode uint8/uint16 as character!, need upgrade ConfigT to uint32_t here magically
+        static const ConfigT defaultObj{};
+        // only encode non-default values
+        for (const auto& value : values)
+        {
+            if (!(value == defaultObj))
+            {
+                userValues.push_back(value);
+            }
+        }
+        if (userValues.size() > 0)
+        {
+            node[fieldName] = values;
+        }
     }
 }
 
@@ -451,7 +468,8 @@ Node VibConversion::encode(const Logger& obj)
 
     non_default_encode(obj.logFromRemotes, node, "LogFromRemotes", defaultLogger.logFromRemotes);
     non_default_encode(obj.flush_level, node, "FlushLevel", defaultLogger.flush_level);
-    non_default_encode(obj.sinks, node, "Sinks", defaultLogger.sinks);
+    // IbConfig.schema.json: this is a required property:
+    node["Sinks"] = obj.sinks;
 
     return node;
 }
@@ -747,7 +765,7 @@ Node VibConversion::encode(const sim::fr::ClockPeriod& obj)
         node = "50ns";
         break;
     default:
-        throw BadVibConversion(node, "Unknown ClockPeriod in VibConversion::encode<ClockPeriod>");
+        throw BadVibConversion(node, "Unknown sim::fr::ClockPeriod in VibConversion::encode<ClockPeriod>");
 
     }
 
@@ -799,12 +817,13 @@ bool VibConversion::decode(const Node& node, sim::fr::TxBufferConfig& obj)
 template<>
 Node VibConversion::encode(const FlexrayController& obj)
 {
+    static const FlexrayController defaultObj{};
     Node node;
 
     node["Name"] = obj.name;
-    node["ClusterParameters"] = obj.clusterParameters;
-    node["NodeParameters"] = obj.nodeParameters;
-    node["TxBufferConfigs"] = obj.txBufferConfigs;
+    non_default_encode(obj.clusterParameters, node, "ClusterParameters", defaultObj.clusterParameters);
+    non_default_encode(obj.nodeParameters, node, "NodeParameters", defaultObj.nodeParameters);
+    non_default_encode(obj.txBufferConfigs, node, "TxBufferConfigs", defaultObj.txBufferConfigs);
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
     return node;
@@ -1081,8 +1100,12 @@ bool VibConversion::decode(const Node& node, std::chrono::nanoseconds& obj)
 template<>
 Node VibConversion::encode(const Participant& obj)
 {
-    auto makePortList = [](auto&& portVector, PortDirection direction)
+    static const Participant defaultObj{};
+    Node node;
+
+    auto makePortList = [&node](auto&& portVector, PortDirection direction, const auto& name)
     {
+
         using PortList = typename std::decay_t<decltype(portVector)>;
         PortList sequence;
         for (auto&& port : portVector)
@@ -1092,7 +1115,11 @@ Node VibConversion::encode(const Participant& obj)
                 sequence.push_back(port);
             }
         }
-        return sequence;
+        // only encode if user-defined ports are present
+        if (sequence.size() > 0)
+        {
+            node[name] = sequence;
+        }
     };
 
     // GenericSubscribers cannot be easily discerned from GenericPublishers (same type of GenericPort),
@@ -1101,40 +1128,39 @@ Node VibConversion::encode(const Participant& obj)
     {
         for (const auto& subscriber : subscribers)
         {
-            YAML::Node node;
-            node["Name"] = subscriber.name;
-            optional_encode(subscriber.useTraceSinks, node, "UseTraceSinks");
-            optional_encode(subscriber.replay, node, "Replay");
-            parentNode.push_back(node);
+            YAML::Node subNode;
+            subNode["Name"] = subscriber.name;
+            optional_encode(subscriber.useTraceSinks, subNode, "UseTraceSinks");
+            optional_encode(subscriber.replay, subNode, "Replay");
+            parentNode.push_back(subNode);
         }
     };
 
-    Node node;
     node["Name"] = obj.name;
-    node["Description"] = obj.description;
-    node["Logger"] = obj.logger;
+    non_default_encode(obj.description, node, "Description", defaultObj.description);
+    non_default_encode(obj.logger, node, "Logger", defaultObj.logger);
 
-    node["CanControllers"] = obj.canControllers;
-    node["LinControllers"] = obj.linControllers;
-    node["EthernetControllers"] = obj.ethernetControllers;
-    node["FlexRayControllers"] = obj.flexrayControllers;
-    node["NetworkSimulators"] = obj.networkSimulators;
+    optional_encode(obj.canControllers, node, "CanControllers");
+    optional_encode(obj.linControllers, node, "LinControllers");
+    optional_encode(obj.ethernetControllers, node, "EthernetControllers");
+    optional_encode(obj.flexrayControllers, node, "FlexRayControllers");
+    optional_encode(obj.networkSimulators, node, "NetworkSimulators");
 
-    node["Analog-In"] = makePortList(obj.analogIoPorts, PortDirection::In);
-    node["Digital-In"] = makePortList(obj.digitalIoPorts, PortDirection::In);
-    node["Pwm-In"] = makePortList(obj.pwmPorts, PortDirection::In);
-    node["Pattern-In"] = makePortList(obj.patternPorts, PortDirection::In);
-    node["Analog-Out"] = makePortList(obj.analogIoPorts, PortDirection::Out);
-    node["Digital-Out"] = makePortList(obj.digitalIoPorts, PortDirection::Out);
-    node["Pwm-Out"] = makePortList(obj.pwmPorts, PortDirection::Out);
-    node["Pattern-Out"] = makePortList(obj.patternPorts, PortDirection::Out);
+    makePortList(obj.analogIoPorts, PortDirection::In, "Analog-In");
+    makePortList(obj.digitalIoPorts, PortDirection::In, "Digital-In");
+    makePortList(obj.pwmPorts, PortDirection::In, "Pwm-In");
+    makePortList(obj.patternPorts, PortDirection::In, "Pattern-In");
+    makePortList(obj.analogIoPorts, PortDirection::Out, "Analog-Out");
+    makePortList(obj.digitalIoPorts, PortDirection::Out, "Digital-Out");
+    makePortList(obj.pwmPorts, PortDirection::Out, "Pwm-Out");
+    makePortList(obj.patternPorts, PortDirection::Out, "Pattern-Out");
 
-    node["GenericPublishers"] = obj.genericPublishers;
+    optional_encode(obj.genericPublishers, node, "GenericPublishers");
     makeSubscribers(node["GenericSubscribers"], obj.genericSubscribers);
 
-    node["TraceSinks"] = obj.traceSinks;
-    node["TraceSources"] = obj.traceSources;
-    node["IsSyncMaster"] = obj.isSyncMaster;
+    optional_encode(obj.traceSinks, node, "TraceSinks");
+    optional_encode(obj.traceSources, node, "TraceSources");
+    non_default_encode(obj.isSyncMaster, node, "IsSyncMaster", defaultObj.isSyncMaster);
     optional_encode(obj.participantController, node, "ParticipantController");
 
     return node;
@@ -1190,9 +1216,10 @@ bool VibConversion::decode(const Node& node, Participant& obj)
 template<>
 Node VibConversion::encode(const Switch::Port& obj)
 {
+    static const Switch::Port defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    node["VlanIds"] = obj.vlanIds;
+    non_default_encode(obj.vlanIds, node, "VlanIds", defaultObj.vlanIds);
     return node;
 }
 template<>
@@ -1293,7 +1320,7 @@ Node VibConversion::encode(const TimeSync& obj)
 {
     Node node;
     node["SyncPolicy"] = obj.syncPolicy;
-    node["TickPeriodNs"] = obj.tickPeriod;
+    node["TickPeriodNs"] = static_cast<uint64_t>(obj.tickPeriod.count());
     return node;
 }
 template<>
@@ -1789,5 +1816,4 @@ bool VibConversion::decode(const Node& node, Replay::Direction& obj)
     }
     return true;
 }
-
 } // namespace YAML

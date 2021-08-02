@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 #include <unordered_set>
 #include <unordered_map>
 
@@ -650,10 +651,10 @@ std::ostream& to_ostream(std::ostream& out, const std::array<uint8_t, 6>& macAdd
     out.fill('0');
 
     auto&& iter = macAddr.begin();
-    out << std::hex << std::uppercase << static_cast<uint16_t>(*iter++);
+    out << std::hex << std::uppercase << std::setw(2) << static_cast<uint16_t>(*iter++);
     for (; iter != macAddr.end(); ++iter)
     {
-        out << ':' << std::hex << std::uppercase << static_cast<uint16_t>(*iter);
+        out << ':' << std::hex << std::uppercase << std::setw(2) << static_cast<uint16_t>(*iter);
     }
 
     out.copyfmt(oldFormat);

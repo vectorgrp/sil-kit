@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <cctype>
 
 
 //internal APIs
@@ -95,6 +96,11 @@ void usage(const std::string& programName)
         << setw(argWidth) << left << "oldFile outputFile"
         << setw(docWidth) << left << "Convert the legacy `oldFile` to current config format and output into `outputFile`."
         << endl
+        // --format
+        << setw(optWidth) << left << "--format" 
+        << setw(argWidth) << left << "yaml|json"
+        << setw(docWidth) << left << "Specify the output format for the '--convert' operation here. default: json"
+        << endl
         ;
 }
 
@@ -122,7 +128,7 @@ void validate(const std::vector<std::string> files)
         }
     }
 }
-void convert(const std::string& inFile, const std::string& outFile)
+void convert(const std::string& inFile, const std::string& outFile, bool outputAsJson)
 {
     auto fileIsJson = [](const std::string& fileName) {
         const std::string suffix{ ".json" };
@@ -135,7 +141,8 @@ void convert(const std::string& inFile, const std::string& outFile)
     std::cout << "Converting " 
         << "'" << inFile << "' (" << (inputJson ? "json" :"yaml") << ") to "
         << "'" << outFile  << "'"
-        << " with output format " << std::endl;
+        << " with output format " << (outputAsJson ? "json" : "yaml")
+        << std::endl;
     if (inputJson)
     {
         // read the config using the old JSON parser.
@@ -155,10 +162,39 @@ void convert(const std::string& inFile, const std::string& outFile)
         std::cout << "Convert: cannot create output file '" << outFile << "'" << std::endl;
         return;
     }
-    out << cfg.ToYamlString();
+    if(outputAsJson)
+    {
+        out << cfg.ToJsonString();
+    }
+    else
+    {
+        out << cfg.ToYamlString();
+    }
     out.close();
 }
 
+bool parseOutputformat(const std::string& arg, bool& outputAsJson)
+{
+    bool result = true;
+    std::string lowerArg;
+    std::transform(arg.begin(), arg.end(), std::back_inserter(lowerArg),
+            [](const auto ch) { return std::tolower(ch); });
+    if (lowerArg == "yaml")
+    {
+        outputAsJson = false;
+    }
+    else if (lowerArg == "json")
+    {
+        outputAsJson = true;
+    }
+    else
+    {
+        std::cout << "ERROR: unknown argument to --format: \"" 
+            << arg << "\". Expected on of 'yaml' or 'json'" << std::endl;
+        result = false;
+    }
+    return result;
+}
 }// end anonymous ns
 
 
@@ -173,9 +209,11 @@ int main(int argc, char** argv)
     };
 
     Action action{ Invalid };
+    int result = EXIT_SUCCESS;
     int fileListStart = 0;
     std::string fromFile;
     std::string toFile;
+    bool asJson{ true };
 
     std::vector<std::string> args;
     std::copy(argv + 1, argv + argc, std::back_inserter(args));
@@ -208,6 +246,20 @@ int main(int argc, char** argv)
             i += 2;
             continue;
         }
+        else if (arg == "--format")
+        {
+            if (i + 1 >= args.size())
+            {
+                std::cout << "ERROR: --format requires a single argument of 'json' or 'yaml'" << std::endl;
+                return EXIT_FAILURE;
+            }
+            if (!parseOutputformat(args.at(i + 1), asJson))
+            {
+                return EXIT_FAILURE;
+            }
+            i+=1;
+            continue;
+        }
         else
         {
             usage(argv[0]);
@@ -222,7 +274,7 @@ int main(int argc, char** argv)
         break;
     case Convert:
         try {
-            convert(fromFile, toFile);
+            convert(fromFile, toFile, asJson);
         }
         catch (const std::exception& ex)
         {

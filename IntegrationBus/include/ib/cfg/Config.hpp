@@ -187,8 +187,8 @@ struct FlexrayController
     mw::EndpointId endpointId{0};
     int16_t linkId{-1};
 
-    sim::fr::ClusterParameters clusterParameters;
-    sim::fr::NodeParameters nodeParameters;
+    sim::fr::ClusterParameters clusterParameters{};
+    sim::fr::NodeParameters nodeParameters{};
     std::vector<sim::fr::TxBufferConfig> txBufferConfigs;
     std::vector<std::string> useTraceSinks;
     Replay replay;
