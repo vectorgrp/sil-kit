@@ -219,6 +219,8 @@ else()
             FetchContent_GetProperties(extern-fastrtps)
             if(NOT extern-fastrtps_POPULATED)
                 FetchContent_Populate(extern-fastrtps)
+                set(Asio_FOUND TRUE CACHE BOOL "We have an updated asio in ThirdParty" FORCE)
+                set(ASIO_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/asio/asio/include CACHE STRING "We have a new Asio" FORCE)
                 add_subdirectory(${extern-fastrtps_SOURCE_DIR}
                     Fast-RTPS
                     EXCLUDE_FROM_ALL

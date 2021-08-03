@@ -5,6 +5,51 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.4.2] - 2021-08-04
+--------------------------------
+
+Added
+~~~~~
+
+- VAsio now supports UNIX domain sockets as transport. By default, all participants
+  open domain sockets locally and advertise the TCP/IP and local endpoints to other participants.
+  If a participant is unable to connect to another participant locally, the TCP/IP
+  endpoint is used for connecting without raising an error.
+  As such, the local domain connectivity is optional and fully transparent to the users.
+  Because of the path limitations of domain sockets the socket files are stored
+  in the system temporary directory (e.g. %TEMPDIR% or $TMP).
+  To allow for simulation isolation, the socket files have the participant IDs,
+  domain ID, and the simulation's working directory encoded in the file name.
+
+- The CMake build system is now better equipped for reproducible builds on Linux platforms.
+  CI builds now set the TZ, LANG and SOURCE_DATE_EPOCH environment variables to known values.
+  The time of the last commit on the master branch is used to initialize SOURCE_DATE_EPOCH.
+  Packaged source-trees now contain a pre-processed version_macros.hpp recording the commit
+  hash.
+
+Fixed
+~~~~~
+
+- Various fixes for our scripted Jenkins pipeline to improve stability on our CI environment.
+
+Changed
+~~~~~~~
+
+- VAsio: we imported the Asio library to version 1.18.2.
+  This includes many bugfixes and also domain socket support for Windows 10.
+  The FastRTPS packages used for CI/CD builds had to be rebuilt using this new version of
+  Asio.
+
+- CMake: the third party handling code was refactored. Instead of using
+  variables we now have targets to link against the third party components.
+
+Compatibility with 3.4.1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): No (additions to `struct ib::cfg::VAsio::Config`)
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
 [3.4.1] - 2021-06-25
 --------------------------------
 

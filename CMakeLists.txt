@@ -112,6 +112,7 @@ if(IB_INSTALL_SOURCE)
         REGEX "breathe" EXCLUDE
         REGEX "Fast-RTPS" EXCLUDE
         REGEX "\.git$" EXCLUDE
+        REGEX "\.github$" EXCLUDE
     )
     install(
         FILES
