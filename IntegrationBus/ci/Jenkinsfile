@@ -32,10 +32,12 @@ gitBranch="master" // overriden in parallel pipeline based on scm vars
 //##########################################
 // Utilities
 //##########################################
+@NonCPS
 def isDockerNode(label) {
     return label.toUpperCase().contains('DOCKER')
 }
 
+@NonCPS
 def isClangBuild(label) {
     return label.toUpperCase().contains('CLANG')
 }
@@ -77,15 +79,15 @@ def archiveToArtifactory(scm, pattern) {
             return
         }
 
-        fileName = files[0].name
-        spec = """{
+        def fileName = files[0].name
+        def spec = """{
             "files": [{
                 "pattern": "${files[0]}",
                 "target" : "${artifactoryRepo}/${projectName}/${scm.GIT_BRANCH}/${scm.GIT_COMMIT}/${fileName}",
                 "props"  : "git_commit=${scm.GIT_COMMIT};git_branch=${scm.GIT_BRANCH};git_url=${scm.GIT_URL}"
         }]}"""
         print("artifactory spec=${spec}")
-        buildInfo = artifactoryServer.upload(
+        def buildInfo = artifactoryServer.upload(
             spec: spec,
             failNoOp: true
         )
@@ -140,12 +142,14 @@ def runOnNode(buildFlags, userStages) {
 // before invoking cmake -G Ninja
 def getVsBuildEnv(arch, version){
     def localEnv=[]
-    toolDir="${tool 'BuildTools2019'}\\..\\..\\.."
+    def toolDir="${tool 'BuildTools2019'}\\..\\..\\.."
     // get vcvarsall.bat environment
-    envstr = bat returnStdout: true, script: "\"${toolDir}\\VC\\Auxiliary\\Build\\vcvarsall.bat\" ${arch} -vcvars_ver=${version} &set" 
-    for(line in envstr.split("\r\n")) {
-            if(line =~ /^\S+=.*/) {
-                localEnv += line
+    def envstr = bat returnStdout: true, script: "\"${toolDir}\\VC\\Auxiliary\\Build\\vcvarsall.bat\" ${arch} -vcvars_ver=${version} &set"
+    def lines = envstr.split("\r\n")
+    for(int i = 0; i < lines.size(); i++) {
+        def line = lines[i]
+        if(line =~ /^\S+=.*/) {
+            localEnv += line
         }
     }
     return localEnv
@@ -174,7 +178,8 @@ def run(what) {
 // quote percent sign for DOS batch, eg. uses in git log --format=%ct
 def quoteBat(userStr) {
     def res="@" //disable printing the command itself
-    for(ch in userStr) {
+    for(int i = 0; i < userStr.size(); i++) {
+        def ch = userStr[i]
         if( ch == '%' ) {
             res += "%%"
         } else{
