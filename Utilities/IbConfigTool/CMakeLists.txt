@@ -42,7 +42,6 @@ target_link_libraries(${EXE}
     PRIVATE
     IbInterface
     IbConfig
-    IbJsonParser
 )
 install(TARGETS ${EXE}
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}

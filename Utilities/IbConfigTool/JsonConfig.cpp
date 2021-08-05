@@ -1934,6 +1934,11 @@ auto from_json<Config>(const json11::Json& json) -> Config
     optional_from_json(config.extensionConfig, json, "ExtensionConfig");
     optional_from_json(config.schemaVersion, json, "SchemaVersion");
 
+    //!< Preserve unparsed launch configs to prevent data loss when updating a config.
+    if (json.object_items().count("LaunchConfigurations"))
+    {
+        config.launchConfigurations = json["LaunchConfigurations"].dump();
+    }
     return config;
 }
 

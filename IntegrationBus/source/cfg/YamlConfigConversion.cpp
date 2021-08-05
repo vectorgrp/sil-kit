@@ -437,7 +437,8 @@ Node VibConversion::encode(const Sink& obj)
 {
     static const Sink defaultSink{};
     Node node;
-    non_default_encode(obj.type, node, "Type", defaultSink.type);
+    // IbConfig.schema.json: Type is required:
+    node["Type"] = obj.type;
     non_default_encode(obj.level, node, "Level", defaultSink.level);
     non_default_encode(obj.logname, node, "Logname", defaultSink.logname);
     return node;
@@ -1318,8 +1319,9 @@ bool VibConversion::decode(const Node& node, TimeSync::SyncPolicy& obj)
 template<>
 Node VibConversion::encode(const TimeSync& obj)
 {
+    static const TimeSync defaultObj{};
     Node node;
-    node["SyncPolicy"] = obj.syncPolicy;
+    non_default_encode(obj.syncPolicy, node, "SyncPolicy", defaultObj.syncPolicy);
     node["TickPeriodNs"] = static_cast<uint64_t>(obj.tickPeriod.count());
     return node;
 }

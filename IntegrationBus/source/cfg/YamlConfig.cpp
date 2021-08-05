@@ -106,7 +106,7 @@ void EmitValidJson(YAML::ostream_wrapper& out, YAML::Node& node, YAML::NodeType:
         {
             // might be key:value kind of node
             try {
-                out << ind <<  "\"" << kv.first.as<std::string>() << "\" : ";
+                out << ind <<  "\"" << kv.first.as<std::string>() << "\": ";
             }
             catch (...)
             {

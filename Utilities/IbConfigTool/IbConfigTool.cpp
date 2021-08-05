@@ -9,63 +9,64 @@
 #include <vector>
 #include <fstream>
 #include <cctype>
+#include <map>
 
-
-//internal APIs
-#include "YamlConfig.hpp" 
-
-// legacy json parser
-#include "JsonConfig.hpp"
-
-namespace legacy {
-//!< Legacy Json parsers
-auto FromJsonString(const std::string& jsonString) -> ib::cfg::Config
-{
-    using namespace ib::cfg;
-
-    std::string errorString;
-    auto&& json = json11::Json::parse(jsonString, errorString);
-
-    if (json.is_null())
-    {
-        std::cerr << "Error Parsing json: " << jsonString << "\n";
-        throw Misconfiguration("IB config parsing error");
-    }
-
-    auto config = from_json<Config>(json);
-    config.configFilePath.clear();
-
-    PostProcess(config);
-
-    return config;
-}
-
-auto ReadWholeFile(const std::string& filename) -> std::string
-{
-    std::ifstream fs(filename);
-
-    if (!fs.is_open())
-        throw ib::cfg::Misconfiguration("Invalid IB config filename '" + filename + "'");
-
-    std::stringstream buffer;
-    buffer << fs.rdbuf();
-
-    return buffer.str();
-
-}
-
-auto FromJsonFile(const std::string& jsonFilename) -> ib::cfg::Config
-{
-    auto jsonString = ReadWholeFile(jsonFilename);
-    auto&& config = legacy::FromJsonString(jsonString);
-    config.configFilePath = jsonFilename;
-
-    return config;
-}
-
-} // end legacy
+#include "Config.hpp"
+#include "YamlConfig.hpp"
 
 namespace {
+
+struct ConversionConfig 
+{
+    ib::cfg::Config config;
+    std::string launchConfigurations; //!< unparsed launch configs
+};
+
+
+auto ConvertFromFile(const std::string& fileName) -> ConversionConfig
+{
+    ConversionConfig coco;
+    //accepts json and yaml, legacy and current format
+    coco.config = ib::cfg::Config::FromYamlFile(fileName);
+
+    // at this point the config should be valid, however we ignored possible LaunchConfigurations so far
+
+    auto readFile = [](const auto& filename)
+    {
+        std::ifstream fs(filename);
+
+        if (!fs.is_open())
+            throw ib::cfg::Misconfiguration("Invalid IB config filename '" + filename + "'");
+
+        std::stringstream buffer;
+        buffer << fs.rdbuf();
+
+        return buffer.str();
+    };
+    auto node = YAML::Load(readFile(fileName));
+    if (node.IsMap() && node["LaunchConfigurations"])
+    {
+        coco.launchConfigurations = YAML::Dump(node["LaunchConfigurations"]);
+    }
+    return coco;
+}
+
+auto ConvertTo(const ConversionConfig& coco, bool outputAsJson) -> std::string
+{
+    auto yamlDoc = ib::cfg::to_yaml(coco.config);
+    if (coco.launchConfigurations.size() > 0)
+    {
+        yamlDoc["LaunchConfigurations"] = YAML::Load(coco.launchConfigurations);
+    }
+    if (outputAsJson)
+    {
+        return ib::cfg::yaml_to_json(yamlDoc);
+    }
+    else
+    {
+        return YAML::Dump(yamlDoc);
+    }
+}
 
 void usage(const std::string& programName)
 {
@@ -136,24 +137,14 @@ void convert(const std::string& inFile, const std::string& outFile, bool outputA
         if (idx == fileName.npos) return false;
         return idx == (fileName.size() - suffix.size());
     };
-    ib::cfg::Config cfg;
     const bool inputJson = fileIsJson(inFile);
     std::cout << "Converting " 
         << "'" << inFile << "' (" << (inputJson ? "json" :"yaml") << ") to "
         << "'" << outFile  << "'"
         << " with output format " << (outputAsJson ? "json" : "yaml")
         << std::endl;
-    if (inputJson)
-    {
-        // read the config using the old JSON parser.
-        // The old implementation supports legacy adjustments.
-        cfg = legacy::FromJsonFile(inFile);
-    }
-    else
-    {
-        //YAML files will be implicitly validated:
-        cfg = ib::cfg::Config::FromYamlFile(inFile);
-    }
+
+    auto cfg = ConvertFromFile(inFile);
 
     //create output file
     std::fstream out{ outFile, out.out };
@@ -162,14 +153,7 @@ void convert(const std::string& inFile, const std::string& outFile, bool outputA
         std::cout << "Convert: cannot create output file '" << outFile << "'" << std::endl;
         return;
     }
-    if(outputAsJson)
-    {
-        out << cfg.ToJsonString();
-    }
-    else
-    {
-        out << cfg.ToYamlString();
-    }
+    out << ConvertTo(cfg, outputAsJson);
     out.close();
 }
 
