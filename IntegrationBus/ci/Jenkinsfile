@@ -7,7 +7,7 @@
 // pipeline config
 projectName="vib-main"
 artifactName='IntegrationBus'
-keepNumBuilds=5
+keepNumBuilds=10 //number of log files on Jenkins, workspaces are always cleaned
 publishToArtifactory=true
 //debug binaries are only build when doing a release to customers
 buildDebugBin=true
@@ -42,6 +42,13 @@ def isClangBuild(label) {
     return label.toUpperCase().contains('CLANG')
 }
 
+def setBuildRetention(bi) {
+    if(gitBranch == 'master' || gitBranch == 'origin/master') {
+        bi.retention(maxBuilds: 20, deleteBuildArtifacts: true, async: true)
+    } else {
+        bi.retention(maxBuilds: 2, maxDays: 50, deleteBuildArtifacts: true, async: true)
+    }
+}
 
 //recursive submodule git checkout 
 def checkoutGit() {
@@ -91,7 +98,7 @@ def archiveToArtifactory(scm, pattern) {
             spec: spec,
             failNoOp: true
         )
-
+        setBuildRetention(buildInfo)
         artifactoryBuildInfo.append(buildInfo)
     }
 }
@@ -105,37 +112,33 @@ def runOnNode(buildFlags, userStages) {
         dockerExtraArgs = " --build-arg UBUNTU_VERSION=${buildFlags.ubuntu_version}"
     }
 
-    // make sure the steps/stages are executed in a separate, clean workspace
-    def wsDir = "workspace/${env.JOB_NAME}/${env.BUILD_NUMBER}/" + buildName.replaceAll(" ", "_")
-    
+    def wsDir = "workspace/${env.JOB_NAME}/" \
+                 + buildName.replaceAll(" ", "_") + "_${env.BUILD_NUMBER}"
     return {
         node(buildFlags["agent"]) {
-            if(isDockerNode(buildFlags["agent"])) {
-                //the built image should be cached and shared anyway
-                stage("${buildName}: build docker image") {
-                    // initial checkout in master node so we can access the ci files
-                    shallowCheckoutGit()
-                    docker.build(dockerImage,  //XXX this might require a checkout for ./ci to be present
-                            "--build-arg ARTIFACTORY=${artifactoryServer.url} ${dockerExtraArgs} -f ${dockerImageFile} ${dockerImageDir}")
-                }
-                ws(wsDir) {
-                    curDir=pwd()
-                    print("Calling docker inside in ${curDir}")
-                    docker.image(dockerImage).inside {
+            ws(wsDir) {
+                try {
+                    if(isDockerNode(buildFlags["agent"])) {
+                        //the built image should be cached and shared anyway
+                        shallowCheckoutGit()
+                        docker.build(dockerImage,  //XXX this might require a checkout for ./ci to be present
+                                "--build-arg ARTIFACTORY=${artifactoryServer.url} ${dockerExtraArgs} -f ${dockerImageFile} ${dockerImageDir}")
+                        print("Calling docker inside in ${pwd()}")
+                        docker.image(dockerImage).inside {
+                            userStages()
+                        }
+                    } else {
+                        print("Working in ${pwd()}")
                         userStages()
-                        cleanWs()
                     }
+                } finally {
+                    cleanWs(cleanWhenNotBuilt: true, cleanWhenFailure: true,
+                            cleanWhenSuccess: true, cleanWhenAborted: true,
+                            deleteDirs: true, disableDeferredWipeout: true)
                 }
-            } else {
-                ws(wsDir) {
-                    curDir=pwd()
-                    print("Working in ${curDir}")
-                    userStages()
-                    cleanWs()
-                }
-            }
-        }
-    }
+            } //ws
+        } //node
+    } //return
 }
 
 // Canonical way on CMake + Ninja + VS is to source the appropriate vcvarsall script
@@ -251,14 +254,17 @@ def doBuild(Map buildFlags) {
                 print("Debug: TZ=${env.TZ} LC_ALL=${env.LC_ALL}")
                 runCmake("Release", "${cmakeArgsRelease}" + "${extraArgs}" )
             }
-        } 
+        }
 
         stage("Unit Tests Release (${buildName})") {
             dir("_build_Release") {
-                ctest(
-                    installation: 'InSearchPath',
-                    arguments: "--verbose --build-config Release -R '^Test.*'"
-                )
+
+                timeout(time: 10, unit: 'MINUTES') {
+                    ctest(
+                        installation: 'InSearchPath',
+                        arguments: "--verbose --build-config Release -R '^Test.*'"
+                    )
+                }
                 junit("**/*gtestresults.xml")
 
             }
@@ -319,21 +325,19 @@ node {
     builds.put("Ubuntu-18.04-gcc"  , doBuild(name: "Ubuntu-18.04-gcc",   agent: "docker && linux", cc: "gcc",  cxx:"g++") )
     builds.put("Ubuntu-20.04-gcc"  , doBuild(name: "Ubuntu-20.04-gcc",   agent: "docker && linux", cc: "gcc",  cxx:"g++", ubuntu_version: "20.04") )
     
-    parallel(builds)
-
-    stage("Publishing Build Info") {
+    try {
+        parallel(builds)
+    }
+    finally {
         if(publishToArtifactory) {
-            print("INFO: publishing artifactory build info for branch ${gitBranch}")
-
-            if(gitBranch == 'master' || gitBranch == 'origin/master') {
-                artifactoryBuildInfo.retention(maxBuilds: 20, deleteBuildArtifacts: true, async: true)
-            } else {
-                artifactoryBuildInfo.retention(maxBuilds: 2, maxDays: 50, deleteBuildArtifacts: true, async: true)
+            stage("Publishing Build Info") {
+                print("INFO: publishing artifactory build info for branch ${gitBranch}")
+                setBuildRetention(artifactoryBuildInfo)
+                artifactoryServer.publishBuildInfo(artifactoryBuildInfo)
             }
-
-            artifactoryServer.publishBuildInfo(artifactoryBuildInfo)
-        } else {
-            print("INFO: skipping publishing build info to artifactory because of user request")
         }
+        cleanWs(cleanWhenNotBuilt: true, cleanWhenFailure: true,
+                cleanWhenSuccess: true, cleanWhenAborted: true,
+                deleteDirs: true, disableDeferredWipeout: true )
     }
 }
