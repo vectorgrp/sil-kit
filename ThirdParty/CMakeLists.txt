@@ -251,15 +251,6 @@ add_subdirectory(yaml-cpp
 	)
 
 
-# Third Party JSON parsing
-add_library(json11
-    json11/json11.hpp
-    json11/json11.cpp
-    )
-
-target_include_directories(json11
-    PUBLIC json11
-)
 
 # libfmt
 function(include_fmt)
@@ -301,7 +292,6 @@ set(yaml_targets yaml-cpp parse read sandbox format)
 foreach(_tgt IN LISTS yaml_targets)
     set_property(TARGET ${_tgt} PROPERTY FOLDER "ThirdParty/yaml-cpp")
 endforeach()
-set_property(TARGET json11 PROPERTY FOLDER "ThirdParty")
 set_property(TARGET fastcdr PROPERTY FOLDER "ThirdParty")
 set_property(TARGET fastrtps PROPERTY FOLDER "ThirdParty")
 set_property(TARGET gmock_main PROPERTY FOLDER "ThirdParty")

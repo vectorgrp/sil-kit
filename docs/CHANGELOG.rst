@@ -4,6 +4,26 @@ VIB Changelog
 All notable changes to the IntegrationBus project shall be documented in this file.
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
+[3.4.3] - 
+--------------------------------
+
+Changed
+~~~~~~~
+- ``Config::FromJsonString`` now uses a Yaml-parser internally. To update legacy
+  JSON configs to the current valid format we provide the ``vib-config-tool``
+  utility. It supports deprecated controller and port declarations (cf `[3.1.0] - 2020-06-15`_)
+  and also network simulator configurations at `SimulationSetup` scope (cf `[3.3.0] - 2020-08-12`_).
+  It can output in `JSON` or `YAML` format. For example, to ensure a JSON config
+  is up to date:
+
+  .. code-block:: sh
+
+     vib-config-tool --convert oldFile.json updated.json --format json
+
+
+- removed dependency on Json11. We now use yaml-cpp to parse JSON and YAML
+  configuration files.
+
 
 [3.4.2] - 2021-08-04
 --------------------------------
