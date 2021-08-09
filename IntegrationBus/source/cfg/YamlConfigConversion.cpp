@@ -108,7 +108,6 @@ auto parse_as(const YAML::Node& node) -> ValueT
         //we already have a concise error message, propagate it to our caller
         throw;
     }
-    //catch(const YAML::BadConversion&)
     catch (const YAML::Exception& ex)
     {
         std::stringstream ss;
@@ -216,7 +215,7 @@ void optional_encode(const Replay& value, YAML::Node& node, const std::string& f
 template<typename ConfigT>
 void optional_decode(OptionalCfg<ConfigT>& value, const YAML::Node& node, const std::string& fieldName)
 {
-    if (node[fieldName]) //operator[] does not modify node
+    if (node.IsMap() && node[fieldName]) //operator[] does not modify node
     {
         value = parse_as<ConfigT>(node[fieldName]);
     }
@@ -225,10 +224,87 @@ void optional_decode(OptionalCfg<ConfigT>& value, const YAML::Node& node, const 
 template<typename ConfigT>
 void optional_decode(ConfigT& value, const YAML::Node& node, const std::string& fieldName)
 {
-    if (node[fieldName]) //operator[] does not modify node
+    if (node.IsMap() && node[fieldName]) //operator[] does not modify node
     {
         value = parse_as<ConfigT>(node[fieldName]);
     }
+}
+
+//!< We support some legacy controller definitions which only consisted of a single
+//   'string' valued node specifying a name. Currently an object with an "Name" field
+//   must be specified.
+//   Legacy format for: Can, Lin, FlexRay, IO Ports, GenericMessage.
+// Returns true if legacy format is used
+template<typename ControllerT>
+bool legacy_decode_name(ControllerT& value, const YAML::Node& node)
+{
+    if (node.IsScalar())
+    {
+        //legacy format: Controller/Node/Subscriber as: ["name1", "name2"...]
+        value.name = parse_as<std::string>(node);
+        return true;
+    }
+    if (node["Name"])
+    {
+        // new style object with fields
+        value.name = parse_as<std::string>(node["Name"]);
+        return false;
+    }
+    else
+    {
+        // legacy format, e.g; "CanControllers": ["CAN1", ...]
+        if (node.IsMap())
+        {
+            auto it = node.begin();
+            if (it == node.end())
+            {
+                std::stringstream ss;
+                ss << "Cannot parse as Type \"" << ParseTypeName<ControllerT>::name
+                    << "\". While parsing: " << YAML::Dump(node);
+                throw BadVibConversion(node, ss.str());
+            }
+            value.name = parse_as<std::string>(it->first);
+        }
+        return true;
+    }
+}
+
+void legacy_decode_networksimulator(SimulationSetup& simulationSetup, const YAML::Node& node)
+{
+    // Legacy NetworkSimulator configuration:
+    // The NetworkSimulators config was located in the SimulationSetup config.
+    // It now resides in the Participant config.
+    // We'll handle the legacy case as follows:
+    // if there is a NetworkSimulators block, move the definition to a participant
+    // which declares the use of this network simulator.
+
+    auto findNetSimUser = [&](const auto& name) -> Participant* {
+        for (auto& participant : simulationSetup.participants)
+        {
+            for (const auto& usedNetSim : participant.networkSimulators)
+            {
+                if (usedNetSim.name == name)
+                {
+                    return  &participant;
+                }
+            }
+        }
+        return nullptr;
+    };
+    std::vector<NetworkSimulator> netSims;
+    optional_decode(netSims, node, "NetworkSimulators");
+    for (const auto& netSim : netSims)
+    {
+        auto* participant = findNetSimUser(netSim.name);
+        if (!participant)
+        {
+            continue;
+        }
+        // copy the definition to the participant that refers
+        // to the network simulator by name
+        participant->networkSimulators = netSims;
+    }
+
 }
 
 
@@ -495,7 +571,7 @@ Node VibConversion::encode(const CanController& obj)
 template<>
 bool VibConversion::decode(const Node& node, CanController& obj)
 {
-    obj.name = parse_as<std::string>(node["Name"]);
+    legacy_decode_name(obj, node);
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
     return true;
@@ -514,7 +590,7 @@ Node VibConversion::encode(const LinController& obj)
 template<>
 bool VibConversion::decode(const Node& node, LinController& obj)
 {
-    obj.name = parse_as<std::string>(node["Name"]);
+    legacy_decode_name(obj, node);
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
     return true;
@@ -832,7 +908,7 @@ Node VibConversion::encode(const FlexrayController& obj)
 template<>
 bool VibConversion::decode(const Node& node, FlexrayController& obj)
 {
-    obj.name = parse_as<std::string>(node["Name"]);
+    legacy_decode_name(obj, node);
     optional_decode(obj.clusterParameters, node, "ClusterParameters");
     optional_decode(obj.nodeParameters, node, "NodeParameters");
     optional_decode(obj.txBufferConfigs, node, "TxBufferConfigs");
@@ -859,10 +935,22 @@ Node VibConversion::encode(const DigitalIoPort& obj)
 template<>
 bool VibConversion::decode(const Node& node, DigitalIoPort& obj)
 {
-    obj.name = parse_as<std::string>(node["Name"]);
-    optional_decode(obj.initvalue, node, "value"); //only for Digital-In ports, non-strict
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
+    optional_decode(obj.initvalue, node, "value"); //only for Digital-In ports, non-strict
+
+    if (legacy_decode_name(obj, node))
+    {
+        // legacy format: {"portName" : bool}
+        if (node.IsMap()) {
+            auto it = node.begin();
+            if (it != node.end() && it->second.IsScalar())
+            {
+                auto val = it->second.as<bool>();
+                obj.initvalue = val;
+            }
+        }
+    }
 
     return true;
 }
@@ -886,14 +974,28 @@ Node VibConversion::encode(const AnalogIoPort& obj)
 template<>
 bool VibConversion::decode(const Node& node, AnalogIoPort& obj)
 {
-    obj.name = parse_as<std::string>(node["Name"]);
+    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_decode(obj.replay, node, "Replay");
+
+    if (legacy_decode_name(obj, node))
+    {
+        //legacy format {"name" : {"value" : number, "unit" : str}}
+        auto it = node.begin();
+        if (it != node.end() && it->second.IsMap())
+        {
+            const auto& valUnit = it->second;
+            obj.initvalue = parse_as<double>(valUnit["value"]);
+            obj.unit = parse_as<std::string>(valUnit["unit"]);
+        }
+        return true;
+    }
+
     if (node["value"])
     {
         obj.initvalue = parse_as<decltype(obj.initvalue)>(node["value"]);
         obj.unit = parse_as<std::string>(node["unit"]);
     }
-    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_decode(obj.replay, node, "Replay");
+
     return true;
 }
 
@@ -918,15 +1020,29 @@ Node VibConversion::encode(const PwmPort& obj)
 template<>
 bool VibConversion::decode(const Node& node, PwmPort& obj)
 {
-    obj.name = parse_as<std::string>(node["Name"]);
+    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_decode(obj.replay, node, "Replay");
+
+    if (legacy_decode_name(obj, node))
+    {
+        // legacy format: {"portName" : {"value": double, "unit": "str"}, "duty":double}}
+        auto it = node.begin();
+        if (it != node.end() && it->second.IsMap())
+        {
+            const auto& val = it->second;
+            obj.initvalue.frequency = parse_as<double>(val["freq"]["value"]);
+            obj.unit = parse_as<std::string>(val["freq"]["unit"]);
+            obj.initvalue.dutyCycle = parse_as<double>(val["duty"]);
+        }
+        return true;
+    }
+
     if (node["freq"]) //only given for Pwm-Out
     {
         obj.initvalue.frequency = parse_as<double>(node["freq"]["value"]);
         obj.unit = parse_as<std::string>(node["freq"]["unit"]);
         obj.initvalue.dutyCycle = parse_as<double>(node["duty"]);
     }
-    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_decode(obj.replay, node, "Replay");
     return true;
 }
 
@@ -946,13 +1062,24 @@ Node VibConversion::encode(const PatternPort& obj)
 template<>
 bool VibConversion::decode(const Node& node, PatternPort& obj)
 {
-    obj.name = parse_as<std::string>(node["Name"]);
+    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_decode(obj.replay, node, "Replay");
+
+    if (legacy_decode_name(obj, node))
+    {
+        //legacy format: {"name" : "hexval"}
+        auto it = node.begin();
+        if (it != node.end() && it->second.IsScalar())
+        {
+            obj.initvalue = hex_decode(parse_as<std::string>(it->second));
+        }
+        return true;
+    }
+
     if (node["value"])
     {
         obj.initvalue = hex_decode(parse_as<std::string>(node["value"]));
     }
-    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_decode(obj.replay, node, "Replay");
     return true;
 }
 
@@ -970,11 +1097,18 @@ Node VibConversion::encode(const GenericPort& obj)
 template<>
 bool VibConversion::decode(const Node& node, GenericPort& obj)
 {
-    obj.name = parse_as<std::string>(node["Name"]);
+    // current format: {"Name": "obj.name", ...}
     optional_decode(obj.protocolType, node, "Protocol");
     optional_decode(obj.definitionUri, node, "DefinitionUri");
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
+
+    if (legacy_decode_name(obj, node))
+    {
+        //legacy format: Subscribers as: ["subscriber1", "subscriber2"...]
+        // only name required
+    }
+
     return true;
 }
 
@@ -1279,6 +1413,13 @@ Node VibConversion::encode(const NetworkSimulator& obj)
 template<>
 bool VibConversion::decode(const Node& node, NetworkSimulator& obj)
 {
+    //legacy format: "nameOfNetSim"
+    if (node.IsScalar())
+    {
+        // will be fixed up later by legacy_decode_networksimulator
+        obj.name = parse_as<std::string>(node);
+        return true;
+    }
     obj.name = parse_as<std::string>(node["Name"]);
     optional_decode(obj.simulatedSwitches, node, "SimulatedSwitches");
     optional_decode(obj.simulatedLinks, node, "SimulatedLinks");
@@ -1351,6 +1492,9 @@ bool VibConversion::decode(const Node& node, SimulationSetup& obj)
     optional_decode(obj.links, node, "Links");
     optional_decode(obj.timeSync, node, "TimeSync");
     optional_decode(obj.switches, node, "Switches");
+
+    // legacy format: moves network simulator to the participant reffering to it.
+    legacy_decode_networksimulator(obj, node);
     return true;
 }
 

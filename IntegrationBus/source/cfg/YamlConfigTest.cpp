@@ -566,4 +566,118 @@ TEST_F(YamlConfigTest, yaml_native_type_conversions)
         EXPECT_TRUE(config == config2);
     }
 }
+
+template<typename ControllerT>
+static inline void testLegacyName()
+{
+    //legacy format
+    auto node = YAML::Load(R"("Ctrl")");
+    auto obj = node.as<ControllerT>();
+    EXPECT_TRUE(obj.name == "Ctrl");
+    // current format
+    obj.name = "";
+    node = YAML::Load(R"({"Name": "Ctrl"})");
+    obj = node.as<ControllerT>();
+    EXPECT_TRUE(obj.name == "Ctrl");
+}
+TEST_F(YamlConfigTest, yaml_legacy)
+{
+    testLegacyName<CanController>();
+    testLegacyName<LinController>();
+    testLegacyName<FlexrayController>();
+    // DigitalIoPort
+    {
+        //legacy format
+        auto node = YAML::Load(R"({"PortName": true})");
+        auto obj = node.as<DigitalIoPort>();
+        EXPECT_TRUE(obj.name == "PortName");
+        EXPECT_TRUE(obj.initvalue == true);
+        // current format
+        obj.name = "";
+        obj.initvalue = false;
+        node = YAML::Load(R"({"Name": "PortName", "value": true})");
+        obj = node.as<DigitalIoPort>();
+        EXPECT_TRUE(obj.name == "PortName");
+        EXPECT_TRUE(obj.initvalue == true);
+    }
+    // DigitalIoPort
+    {
+        //legacy format
+        auto node = YAML::Load(R"({"PortName": true})");
+        auto obj = node.as<DigitalIoPort>();
+        EXPECT_TRUE(obj.name == "PortName");
+        EXPECT_TRUE(obj.initvalue == true);
+        // current format
+        obj.name = "";
+        obj.initvalue = false;
+        node = YAML::Load(R"({"Name": "PortName", "value": true})");
+        obj = node.as<DigitalIoPort>();
+        EXPECT_TRUE(obj.name == "PortName");
+        EXPECT_TRUE(obj.initvalue == true);
+    }
+    // AnalogIoPort
+    {
+        //legacy format
+        auto node = YAML::Load(R"({"PortName": {"value": 123.45, "unit": "V"}})");
+        auto obj = node.as<AnalogIoPort>();
+        EXPECT_TRUE(obj.name == "PortName");
+        EXPECT_TRUE(obj.unit == "V");
+        EXPECT_TRUE(obj.initvalue == 123.45);
+        // current format
+        obj.name = "";
+        obj.initvalue = 0;
+        node = YAML::Load(R"({"Name": "PortName", "value": 123.45, "unit": "V"})");
+        obj = node.as<AnalogIoPort>();
+        EXPECT_TRUE(obj.name == "PortName");
+        EXPECT_TRUE(obj.unit == "V");
+        EXPECT_TRUE(obj.initvalue == 123.45);
+    }
+    // PwmPort
+    {
+        //legacy format
+        auto node = YAML::Load(R"({"PortName": {"freq": {"value": 123.45, "unit": "V"}, "duty": 345.6}})");
+        auto obj = node.as<PwmPort>();
+        EXPECT_TRUE(obj.name == "PortName");
+        EXPECT_TRUE(obj.unit == "V");
+        EXPECT_TRUE(obj.initvalue.frequency == 123.45);
+        EXPECT_TRUE(obj.initvalue.dutyCycle == 345.6);
+        // current format
+        obj.name = "";
+        obj.initvalue = { 0.0 ,0.0 };
+        node = YAML::Load(R"({"Name": "PortName", "freq": {"value": 123.45, "unit": "V"}, "duty": 345.6})");
+        obj = node.as<PwmPort>();
+        EXPECT_TRUE(obj.name == "PortName");
+        EXPECT_TRUE(obj.unit == "V");
+        EXPECT_TRUE(obj.initvalue.frequency == 123.45);
+        EXPECT_TRUE(obj.initvalue.dutyCycle == 345.6);
+    }
+    // Nice Patterns...
+    {
+        //legacy format
+        const auto goal = std::vector<uint8_t>{ 0xde, 0xad, 0xbe, 0xef };
+        auto node = YAML::Load(R"({"PortName": "deadbeef"})");
+        auto obj = node.as<PatternPort>();
+        EXPECT_TRUE(obj.name == "PortName");
+        EXPECT_TRUE(obj.initvalue == goal);
+        // current format
+        obj.name = "";
+        obj.initvalue = { };
+        node = YAML::Load(R"({"Name": "PortName", "value" :"deadbeef"})");
+        obj = node.as<PatternPort>();
+        EXPECT_TRUE(obj.name == "PortName");
+        EXPECT_TRUE(obj.initvalue == goal);
+    }
+    // Generic Subscribers
+    {
+        //legacy format
+        auto node = YAML::Load(R"("PortName")");
+        auto obj = node.as<GenericPort>();
+        EXPECT_TRUE(obj.name == "PortName");
+        // current format
+        obj.name = "";
+        node = YAML::Load(R"({"Name": "PortName"})");
+        obj = node.as<GenericPort>();
+        EXPECT_TRUE(obj.name == "PortName");
+    }
+}
 } // anonymous namespace

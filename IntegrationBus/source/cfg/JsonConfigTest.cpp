@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "JsonConfig.hpp"
+#include "YamlConfig.hpp"
 
 #include <chrono>
 #include <functional>
@@ -802,26 +802,27 @@ TEST_F(JsonConfigTest, configure_participant_add_networksimulator)
 
 TEST_F(JsonConfigTest, configure_participant_add_networksimulator_legacy)
 {
-    auto legacyConfig = ib::cfg::Config::FromJsonString(
-        R"(
+    //NB: NetworkSimulators were moved from SimulationSetup/ to SimulationSetup/Participants/P1/
+    // Keep this in legacy form, until we drop backward compatibility.
+    auto legacyConfig = ib::cfg::Config::FromJsonString(R"(
 {
     "ConfigName": "TestConfig",
     "SimulationSetup": {
         "Participants": [
             {
                 "Name" : "P1",
-                "NetworkSimulators" : [
-                    {
-                        "Name" : "NetSimOne",
-                        "SimulatedLinks": [ "Link1", "Link2"],
-                        "SimulatedSwitches": ["NetSwitch0", "NetSwitch1"]
-                    }
-                ]
+                "NetworkSimulators": ["NetSimOne"]
             }
         ],
+        "NetworkSimulators" : [
+            {
+                "Name" : "NetSimOne",
+                "SimulatedLinks": [ "Link1", "Link2"],
+                "SimulatedSwitches": ["NetSwitch0", "NetSwitch1"]
+            }
+        ]
     }
 })");
-    
 
     simulationSetup.AddParticipant("P1")
         .AddNetworkSimulator("NetSimOne")

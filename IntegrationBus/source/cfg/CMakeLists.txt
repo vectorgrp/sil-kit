@@ -80,9 +80,15 @@ add_vib_test(TestIbConfigExample SOURCES IbConfigExampleTest.cpp
 
 add_vib_test(TestMwCfgYamlConfig SOURCES YamlConfigTest.cpp LIBS IbConfig yaml-cpp)
 
+add_vib_test(TestMwCfgJsonConfig SOURCES JsonConfigTest.cpp LIBS IbConfig )
+# we need runtime IntegrationBus DLL on windows:
+#set_tests_properties(TestMwCfgJsonConfig PROPERTIES 
+#    WORKING_DIRECTORY $<TARGET_FILE_DIR:IntegrationBus>)
+
 ib_enable_warnings(IbConfig)
 ib_enable_warnings(TestMwCfgConfigBuilder)
 ib_enable_warnings(TestMwCfgValidation)
 ib_enable_warnings(TestMwCfgYamlConfig)
+ib_enable_warnings(TestMwCfgJsonConfig)
 
 
