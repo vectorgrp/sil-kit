@@ -94,6 +94,7 @@ bool VAsioRegistry::IsExpectedParticipant(const ib::mw::VAsioPeerUri& peerInfo)
 
 void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const ParticipantAnnouncement& announcement)
 {
+
     auto peerUri = announcement.peerUri;
 
     if (peerUri.acceptorUris.empty())
@@ -104,6 +105,26 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
         peerUri.acceptorUris.push_back(
             Uri{ announcement.peerInfo.acceptorHost, announcement.peerInfo.acceptorPort }.EncodedString()
         );
+    }
+
+    // NB When we have a remote client we might need to patch its acceptor name (host or ip address).
+    // In a distributed simulation the participants will listen on an IPADDRANY address
+    // without explicitly specifying on which network interface they are listening.
+    // When the IVAsioPeer connects to us we see its actual endpoint address and need
+    // to substitute it here.
+
+    auto fromUri = Uri{from->GetSocketAddress()};
+    if (fromUri.Type() == Uri::UriType::Tcp)
+    {
+        for (auto& uri : peerUri.acceptorUris)
+        {
+            if (uri.find("tcp://0.0.0.0") == 0)
+            {
+                const auto origUri = Uri{ uri }; //parse to get port
+                //  Update to socket peer address but keep the original acceptor port
+                uri = Uri{ fromUri.Host(), origUri.Port() }.EncodedString();
+            }
+        }
     }
 
     if (!IsExpectedParticipant(peerUri))

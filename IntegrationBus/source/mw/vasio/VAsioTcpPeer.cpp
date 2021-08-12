@@ -12,6 +12,7 @@
 
 
 
+
 using namespace asio::ip;
 
 #ifdef __linux__
@@ -122,6 +123,31 @@ auto VAsioTcpPeer::GetUri() const -> const VAsioPeerUri&
 {
     return _uri;
 }
+
+auto VAsioTcpPeer::GetSocketAddress() -> std::string 
+{
+    std::ostringstream out;
+    const auto& epFamily = _socket.local_endpoint().protocol().family();
+    if (epFamily == asio::ip::tcp::v4().family()
+        || epFamily == asio::ip::tcp::v6().family())
+    {
+        const auto& ep = _socket.remote_endpoint();
+        out << "tcp://" << reinterpret_cast<const asio::ip::tcp::endpoint&>(ep);
+    }
+    else if (epFamily == asio::local::stream_protocol{}.family())
+    {
+        // The underlying sockaddr_un contains the path, zero terminated.
+        const auto& ep = _socket.local_endpoint();
+        const auto* data = static_cast<const char*>(ep.data()->sa_data);
+        out << "local://"  << data;
+    }
+    else
+    {
+        throw std::runtime_error("VAsioTcpPeer::GetSocketAddress(): Unknown endpoint.");
+    }
+    return out.str();
+}
+
 
 bool VAsioTcpPeer::ConnectLocal(const std::string& socketPath)
 {

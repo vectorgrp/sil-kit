@@ -46,6 +46,8 @@ public:
     void SetInfo(VAsioPeerInfo info) override;
     void SetUri(VAsioPeerUri peerUri) override;
     auto GetUri() const -> const VAsioPeerUri& override;
+    //!< Return the socket address as URI encoded string or throw if not connected
+    auto GetSocketAddress() -> std::string override;
 
     void Connect(VAsioPeerUri info);
 

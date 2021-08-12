@@ -225,7 +225,8 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
         }
     }
     // We let the operating system choose a free TCP port
-    AcceptConnectionsOn(tcp::endpoint(asio::ip::address::from_string("127.0.0.1"), 0));
+    // The address will be substituted by the registry, from the actual connection endpoint's address.
+    AcceptConnectionsOn(tcp::endpoint{asio::ip::tcp::v4(), 0});
 
     auto& vasioConfig = _config.middlewareConfig.vasio;
 

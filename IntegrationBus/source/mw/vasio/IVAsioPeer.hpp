@@ -27,6 +27,7 @@ public:
     virtual void SetInfo(VAsioPeerInfo info) = 0;
     virtual void SetUri(VAsioPeerUri info) = 0;
     virtual auto GetUri() const -> const VAsioPeerUri& = 0;
+    virtual auto GetSocketAddress() -> std::string = 0;
 };
 
 } // mw
