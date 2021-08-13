@@ -106,10 +106,10 @@ add_vib_test(ITestIbRegistryReusage
 
 # Windows specific tests
 if(WIN32)
-add_vib_test(ITestCompatibilityWithWindowsHeaders
-    SOURCES
-      CompatibilityWithWindowsHeadersITest.cpp
-    LIBS
-      IbMwComAdapter
-)
+    add_vib_test(ITestCompatibilityWithWindowsHeaders
+        SOURCES
+        CompatibilityWithWindowsHeadersITest.cpp
+        LIBS
+        IbMwComAdapter
+        )
 endif()
