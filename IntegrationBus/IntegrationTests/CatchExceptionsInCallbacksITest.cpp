@@ -66,7 +66,8 @@ protected:
     ib::sim::generic::IGenericSubscriber* subscriber{nullptr};
     std::promise<bool> testOk;
 };
-    
+
+#if defined(IB_MW_HAVE_FASTRTPS)
 TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash)
 {
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
@@ -91,6 +92,7 @@ TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash)
 
     publishThread.join();
 }
+#endif
 
 TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
 {
