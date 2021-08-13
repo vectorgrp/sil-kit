@@ -1,5 +1,7 @@
 add_subdirectory(comadapter)
-add_subdirectory(fastrtps)
+if (IB_MW_ENABLE_FASTRTPS)
+    add_subdirectory(fastrtps)
+endif()
 add_subdirectory(vasio)
 add_subdirectory(mock)
 add_subdirectory(sync)

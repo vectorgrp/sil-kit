@@ -25,7 +25,9 @@
 
 
 // Add connection types here and make sure they are instantiated in ComAdapter.cpp
+#if defined(IB_MW_HAVE_FASTRTPS)
 #include "FastRtpsConnection.hpp"
+#endif
 #include "VAsioConnection.hpp"
 
 

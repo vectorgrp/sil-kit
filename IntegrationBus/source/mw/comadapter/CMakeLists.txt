@@ -25,6 +25,11 @@ target_link_libraries(IbMwComAdapter
     PUBLIC  IbTracing
 )
 
+if (IB_MW_ENABLE_FASTRTPS)
+    target_compile_definitions(IbMwComAdapter PUBLIC IB_MW_HAVE_FASTRTPS 1)
+    target_link_libraries(IbMwComAdapter PUBLIC  IbMwFastRtps)
+endif()
+
 target_include_directories(IbMwComAdapter
     PUBLIC .
 )
