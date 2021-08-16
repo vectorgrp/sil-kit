@@ -1,36 +1,40 @@
-configure_file("@GIT_HEAD_FILE@" ${CMAKE_CURRENT_BINARY_DIR}/git_head_file COPYONLY)
+set(gitHashFile "${CMAKE_CURRENT_BINARY_DIR}/git_hash_file")
+set(gitHeadFile "${CMAKE_CURRENT_BINARY_DIR}/git_head_file")
 
-file(READ ${CMAKE_CURRENT_BINARY_DIR}/git_head_file GIT_HEAD LIMIT 512)
+configure_file("@GIT_HEAD_FILE@" ${gitHeadFile} COPYONLY)
+
+file(READ ${gitHeadFile} GIT_HEAD LIMIT 512)
 string(REGEX MATCH "^ref: (.*)\n" GIT_HEAD_REF ${GIT_HEAD})
 
 set(linkedHeadFile "${GIT_DIR}/${CMAKE_MATCH_1}")
-
+set(linkedRef "${CMAKE_MATCH_1}")
 if(GIT_HEAD_REF) 
     if(NOT EXISTS "${linkedHeadFile}")
         # the workspace might have a .git/packed-refs file instead of
         # .git/refs/heads/master
         message("-- VIB GIT Version: using ${GIT_DIR}/packed-refs")
-        file(READ ${GIT_DIR}/packed-refs packedRefs LIMIT 512)
-        string(REGEX MATCH "([abcdef0-9]+) ${CMAKE_MATCH_1}" headHash ${packedRefs})
-        file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/git_hash_file
-            CONTENT ${CMAKE_MATCH_1}
-        )
+        file(READ ${GIT_DIR}/packed-refs packedRefs LIMIT 4096)
+        string(REGEX MATCH "([abcdef0-9]+) ${linkedRef}" headHash ${packedRefs})
+        if(NOT headHash)
+            message(FATAL_ERROR "MakeVersionMacros: cannot find linked git ref \"${linkedRef}\"")
+        endif()
+        file(WRITE ${gitHashFile} "${CMAKE_MATCH_1}\n")
     else()
         message("-- VIB GIT Version: using ${linkedHeadFile}")
         configure_file(
             "${linkedHeadFile}"
-            ${CMAKE_CURRENT_BINARY_DIR}/git_hash_file
+            ${gitHashFile}
             COPYONLY)
     endif()
 else()
     configure_file(
-        ${CMAKE_CURRENT_BINARY_DIR}/git_head_file
-        ${CMAKE_CURRENT_BINARY_DIR}/git_hash_file
+        ${gitHeadFile}
+        ${gitHashFile}
         COPYONLY)
 endif()
 
 
-file(READ ${CMAKE_CURRENT_BINARY_DIR}/git_hash_file GIT_HEAD_HASH LIMIT 512)
+file(READ ${gitHashFile} GIT_HEAD_HASH LIMIT 512)
 string(STRIP "${GIT_HEAD_HASH}" GIT_HEAD_HASH)
 message(STATUS "VIB GIT Version: ${GIT_HEAD_HASH}")
 configure_file(
