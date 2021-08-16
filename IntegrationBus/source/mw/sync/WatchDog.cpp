@@ -52,6 +52,7 @@ void WatchDog::SetErrorHandler(std::function<void(std::chrono::milliseconds)> ha
 
 void WatchDog::Run()
 {
+
     enum class WatchDogState
     {
         Healthy,

@@ -90,47 +90,6 @@ bool operator==(const CycleStart& lhs, const CycleStart& rhs)
         && lhs.timestamp == rhs.timestamp;
 }
 
-std::ostream& operator<<(std::ostream& out, Channel channel)
-{
-    switch (channel)
-    {
-    case Channel::A:
-      return out << "A";
-    case Channel::B:
-      return out << "B";
-    case Channel::AB:
-      return out << "AB";
-    case Channel::None:
-      return out << "None";
-    default:
-      return out << "Channel=" << static_cast<uint32_t>(channel);
-    }
-}
-
-std::ostream& operator<<(std::ostream& out, SymbolPattern pattern)
-{
-    switch (pattern)
-    {
-    case SymbolPattern::CasMts:
-        return out << "CasMts";
-    case SymbolPattern::Wus:
-        return out << "Wus";
-    case SymbolPattern::Wudop:
-        return out << "Wudp";
-    default:
-        return out << "SymbolPattern=" << static_cast<uint32_t>(pattern);
-    }
-}
-
-std::ostream& operator<<(std::ostream& out, const FrSymbol& symbol)
-{
-    return out << "FrSymbol{"
-             << ", t=" << symbol.timestamp.count() << "ns"
-             << ", Ch=" << symbol.channel
-             << ", " << symbol.pattern
-             << "}";
-}
-
 }
 }
 }

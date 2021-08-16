@@ -23,7 +23,6 @@ bool operator==(const ControllerStatus& lhs, const ControllerStatus& rhs);
 bool operator==(const PocStatus& lhs, const PocStatus& rhs);
 bool operator==(const CycleStart& lhs, const CycleStart& rhs);
 
-std::ostream& operator<<(std::ostream& out, const FrSymbol& symbol);
 
 } // namespace fr
 } // namespace sim

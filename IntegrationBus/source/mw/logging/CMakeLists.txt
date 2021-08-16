@@ -13,6 +13,8 @@ add_library(${PROJECT_NAME} STATIC
 
     Logger.hpp
     Logger.cpp
+    #string formatting for VIB types
+    VibFmtFormatters.hpp
 )
 ################################################################################
 # Thirdparty -- Logging

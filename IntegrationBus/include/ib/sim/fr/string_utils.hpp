@@ -70,18 +70,9 @@ inline std::ostream& operator<<(std::ostream& out, WakeupStatusType msg);
 // ================================================================================
 std::string to_string(Channel channel)
 {
-    switch (channel)
-    {
-    case  Channel::None:
-        return "None";
-    case  Channel::A:
-        return "A";
-    case  Channel::B:
-        return "B";
-    case  Channel::AB:
-        return "AB";
-    };
-    throw ib::type_conversion_error{};
+    std::stringstream out;
+    out << channel;
+    return out.str();
 }
 
 std::string to_string(ClockPeriod period)
@@ -132,16 +123,9 @@ std::string to_string(ChiCommand command)
     
 std::string to_string(SymbolPattern pattern)
 {
-    switch (pattern)
-    {
-    case SymbolPattern::CasMts:
-        return "CasMts";
-    case SymbolPattern::Wus:
-        return "Wus";
-    case SymbolPattern::Wudop:
-        return "Wudop";
-    };
-    throw ib::type_conversion_error{};
+    std::stringstream out;
+    out << pattern;
+    return out.str();
 }
     
 std::string to_string(PocState state)
@@ -290,7 +274,19 @@ std::string to_string(WakeupStatusType msg)
     
 std::ostream& operator<<(std::ostream& out, Channel channel)
 {
-    return out << to_string(channel);
+    switch (channel)
+    {
+    case Channel::A:
+        return out << "A";
+    case Channel::B:
+        return out << "B";
+    case Channel::AB:
+        return out << "AB";
+    case Channel::None:
+        return out << "None";
+    default:
+        return out << "Channel=" << static_cast<uint32_t>(channel);
+    }
 }
 std::ostream& operator<<(std::ostream& out, ClockPeriod period)
 {
@@ -306,7 +302,17 @@ std::ostream& operator<<(std::ostream& out, ChiCommand command)
 }
 std::ostream& operator<<(std::ostream& out, SymbolPattern pattern)
 {
-    return out << to_string(pattern);
+    switch (pattern)
+    {
+    case SymbolPattern::CasMts:
+        return out << "CasMts";
+    case SymbolPattern::Wus:
+        return out << "Wus";
+    case SymbolPattern::Wudop:
+        return out << "Wudop";
+    default:
+        return out << "SymbolPattern=" << static_cast<uint32_t>(pattern);
+    }
 }
 std::ostream& operator<<(std::ostream& out, PocState state)
 {

@@ -205,7 +205,7 @@ TEST_F(FrControllerProxyTest, throw_on_unconfigured_tx_buffer_configupdate)
     proxy.Configure(controllerCfg);
 
     // Attempt to reconfigure TxBuffer 6, which should be out of range
-    TxBufferConfig bufferCfg;
+    TxBufferConfig bufferCfg{};
     EXPECT_CALL(comAdapter, SendIbMessage(An<EndpointAddress>(), A<const TxBufferConfigUpdate &>())).Times(0);
     EXPECT_THROW(proxy.ReconfigureTxBuffer(6, bufferCfg), std::out_of_range);
 }

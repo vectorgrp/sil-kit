@@ -14,6 +14,7 @@
 #    endif
 #    include "fmt/format.h"
 #    include "fmt/ostream.h"
+#    include "VibFmtFormatters.hpp"
 #endif //HAVE_FMTLIB
 
 namespace ib {

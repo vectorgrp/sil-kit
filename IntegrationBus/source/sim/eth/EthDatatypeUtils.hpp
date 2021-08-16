@@ -16,9 +16,6 @@ bool operator==(const EthFrame& lhs, const EthFrame& rhs);
 bool operator==(const EthTransmitAcknowledge& lhs, const EthTransmitAcknowledge& rhs);
 bool operator==(const EthSetMode& lhs, const EthSetMode& rhs);
 
-std::ostream& operator<<(std::ostream& out, EthMode mode);
-std::ostream& operator<<(std::ostream& out, const EthSetMode& mode);
-
 } // namespace ib
 } // namespace sim
 } // namespace eth

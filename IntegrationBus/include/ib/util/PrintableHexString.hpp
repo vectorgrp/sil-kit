@@ -6,6 +6,7 @@
 #include <limits>
 #include <iomanip>
 #include <ostream>
+#include <sstream>
 #include <utility>
 #include <algorithm>
 
@@ -45,28 +46,27 @@ public:
         const auto begin = _iterable.begin();
         const auto end = begin + _maxLength;
 
-        std::ios oldState(nullptr);
-        oldState.copyfmt(out);
+        //NB, we use a temporary stream because we don't want to modify the internal format state of out
+        std::ostringstream oss;
 
-        out << std::hex << std::setfill('0')
+        oss << std::hex << std::setfill('0')
             << std::setw(2) << static_cast<uint16_t>(*begin);
 
         if (_maxLength > 1)
         {
             std::for_each(begin + 1,
                 end,
-                [&out, this](auto chr)
+                [&oss, this](auto chr)
                 {
-                    out << _separator << std::setw(2) << static_cast<uint16_t>(chr);
+                    oss << _separator << std::setw(2) << static_cast<uint16_t>(chr);
                 }
             );
         }
         if (_maxLength < _iterable.end() - _iterable.begin())
         {
-            out << _separator << "...";
+            oss << _separator << "...";
         }
-
-        out.copyfmt(oldState);
+        out << oss.str();
     }
 
 private:

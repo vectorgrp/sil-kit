@@ -137,12 +137,20 @@ std::ostream& operator<<(std::ostream& out, EthMode value)
 
 std::ostream& operator<<(std::ostream& out, const EthFrame& msg)
 {
-    return out
-        << "EthFrame{src=" << util::AsHexString(msg.GetSourceMac()).WithSeparator(":")
-        << ", dst=" << util::AsHexString(msg.GetDestinationMac()).WithSeparator(":")
-        << ", size=" << msg.GetFrameSize()
-        << ", payload=[" << util::AsHexString(msg.GetPayload()).WithSeparator(" ").WithMaxLength(8)
-        << "]}";
+    if (msg.GetFrameSize() == 0)
+    {
+        return out
+            << "EthFrame{size=0}";
+    }
+    else
+    {
+        return out
+            << "EthFrame{src=" << util::AsHexString(msg.GetSourceMac()).WithSeparator(":")
+            << ", dst=" << util::AsHexString(msg.GetDestinationMac()).WithSeparator(":")
+            << ", size=" << msg.GetFrameSize()
+            << ", payload=[" << util::AsHexString(msg.GetPayload()).WithSeparator(" ").WithMaxLength(8)
+            << "]}";
+    }
 }
 
 std::ostream& operator<<(std::ostream& out, const EthMessage& msg)
