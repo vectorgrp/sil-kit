@@ -13,6 +13,6 @@ do
 		bandwidth=(msgsize*numsent)/duration
 		bandwidth/=1024.0
 		printf("%d; %d; %d; %d; %.5f; %.3f\n",participants, msgsize, msgcount, numsent, duration, bandwidth )
-	}' $i
-done | sort
+	}' $i 
+done | sed 's;\.;,;g' | sort
 
