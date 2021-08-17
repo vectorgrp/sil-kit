@@ -6,7 +6,6 @@
 #include <future>
 
 #include "CreateComAdapter.hpp"
-#include "VAsioRegistry.hpp"
 #include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
@@ -15,6 +14,10 @@
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
+
+#if IB_MW_HAVE_VASIO
+#   include "VAsioRegistry.hpp"
+#endif
 
 namespace {
 
@@ -92,8 +95,9 @@ TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash)
 
     publishThread.join();
 }
-#endif
+#endif //IB_MW_HAVE_FASTRTPS
 
+#if defined(IB_MW_HAVE_VASIO)
 TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
 {
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
@@ -122,5 +126,6 @@ TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
 
     publishThread.join();
 }
+#endif //IB_MW_HAVE_VASIO
 
 } // anonymous namespace

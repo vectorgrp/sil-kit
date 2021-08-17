@@ -43,6 +43,8 @@ function(addTestProject)
             _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1
         )
     endif()
+    set_property(TARGET gmock_main PROPERTY FOLDER "ThirdParty")
+    set_property(TARGET gtest PROPERTY FOLDER "ThirdParty")
 endfunction()
 addTestProject()
 
@@ -231,7 +233,8 @@ if (IB_MW_ENABLE_FASTRTPS)
         endif()
     endif()
 
-set_property(TARGET fastcdr PROPERTY FOLDER "ThirdParty")
+    set_property(TARGET fastcdr PROPERTY FOLDER "ThirdParty")
+    set_property(TARGET fastrtps PROPERTY FOLDER "ThirdParty")
 
 endif()
 
@@ -254,7 +257,6 @@ add_subdirectory(yaml-cpp
 	yaml-cpp
 	EXCLUDE_FROM_ALL
 	)
-
 
 
 # libfmt
@@ -289,13 +291,3 @@ function(include_spdlog)
 endfunction()
 
 include_spdlog()
-
-
-# IDE folders:
-# ensure all external projects are grouped in IDE mode
-set(yaml_targets yaml-cpp parse read sandbox format)
-foreach(_tgt IN LISTS yaml_targets)
-    set_property(TARGET ${_tgt} PROPERTY FOLDER "ThirdParty/yaml-cpp")
-endforeach()
-set_property(TARGET gmock_main PROPERTY FOLDER "ThirdParty")
-set_property(TARGET gtest PROPERTY FOLDER "ThirdParty")

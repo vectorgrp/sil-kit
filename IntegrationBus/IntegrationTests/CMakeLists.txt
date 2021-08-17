@@ -5,13 +5,17 @@ add_library(ITestUtils INTERFACE)
 target_include_directories(ITestUtils
     INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
+set(itest_extra_libs)
+if(IB_MW_ENABLE_VASIO)
+    set(itest_extra_libs IbMwVAsio)
+endif()
 
 add_vib_test(ITestGenericMessages
     SOURCES
       GenericMessagesITest.cpp
     LIBS
       IbMwComAdapter
-      IbMwVAsio
+      ${itest_extra_libs}
     CONFIGS
       GenericMessagesITest_IbConfig.json
       LargeMessagesITest_IbConfig.json
@@ -22,7 +26,9 @@ add_vib_test(ITestThreeCanController
     SOURCES
       ThreeCanControllerITest.cpp
     LIBS
+        IbMwComAdapter
         IbSimTestHarness
+        ${itest_extra_libs}
 )
 
 # requires IntegrationBus.dll and vib-regstry to be in PATH or CWD
@@ -35,6 +41,8 @@ add_vib_test(ITestThreeEthController
       ThreeEthControllerITest.cpp
     LIBS
       IbSimTestHarness
+      IbMwComAdapter
+      ${itest_extra_libs}
 )
 
 # requires IntegrationBus.dll and vib-regstry to be in PATH or CWD
@@ -77,32 +85,34 @@ add_vib_test(ITestCatchExceptionsInCallbacks
       CatchExceptionsInCallbacksITest.cpp
     LIBS
       IbMwComAdapter
-      IbMwVAsio
+      ${itest_extra_libs}
 )
 
-add_vib_test(ITestStateMachineVAsio
-    SOURCES
-      StateMachineVAsioITest.cpp
-    LIBS
-      IbMwComAdapter
-      IbMwVAsio
-)
+if(IB_MW_ENABLE_VASIO)
+    add_vib_test(ITestStateMachineVAsio
+        SOURCES
+          StateMachineVAsioITest.cpp
+        LIBS
+          IbMwComAdapter
+          IbMwVAsio
+    )
 
-add_vib_test(ITestDeterministicSimVAsio
-    SOURCES
-      DeterministicSimVAsioITest.cpp
-    LIBS
-      IbMwComAdapter
-      IbMwVAsio
-)
+    add_vib_test(ITestDeterministicSimVAsio
+        SOURCES
+          DeterministicSimVAsioITest.cpp
+        LIBS
+          IbMwComAdapter
+          IbMwVAsio
+    )
 
-add_vib_test(ITestIbRegistryReusage
-    SOURCES
-      IbRegistryReusage.cpp
-    LIBS
-      IbMwComAdapter
-      IbMwVAsio
-)
+    add_vib_test(ITestIbRegistryReusage
+        SOURCES
+          IbRegistryReusage.cpp
+        LIBS
+          IbMwComAdapter
+          IbMwVAsio
+    )
+endif()
 
 # Windows specific tests
 if(WIN32)

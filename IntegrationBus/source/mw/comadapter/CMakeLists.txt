@@ -8,10 +8,9 @@ add_library(IbMwComAdapter STATIC
 )
 
 target_link_libraries(IbMwComAdapter
-    PUBLIC  IbInterface
+    INTERFACE  IbInterface
     PUBLIC  IbVersion
     PUBLIC  IbMwLogging
-    PUBLIC  IbMwVAsio
     PUBLIC  IbConfig
     PUBLIC  IbUtil
     PUBLIC  IbMwSync
@@ -25,8 +24,10 @@ target_link_libraries(IbMwComAdapter
 )
 
 if (IB_MW_ENABLE_FASTRTPS)
-    target_compile_definitions(IbMwComAdapter PUBLIC IB_MW_HAVE_FASTRTPS 1)
     target_link_libraries(IbMwComAdapter PUBLIC  IbMwFastRtps)
+endif()
+if (IB_MW_ENABLE_VASIO)
+    target_link_libraries(IbMwComAdapter PUBLIC  IbMwVAsio)
 endif()
 
 target_include_directories(IbMwComAdapter

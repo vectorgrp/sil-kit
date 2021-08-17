@@ -6,7 +6,6 @@
 #include <future>
 
 #include "CreateComAdapter.hpp"
-#include "VAsioRegistry.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
 
@@ -14,6 +13,10 @@
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
+
+#if IB_MW_HAVE_VASIO
+#   include "VAsioRegistry.hpp"
+#endif
 
 namespace {
 
@@ -147,6 +150,7 @@ TEST_F(GenericMessageITest, DISABLED_publish_and_subscribe_large_messages_fastrt
     }
 }
 
+#if defined(IB_MW_HAVE_VASIO)
 TEST_F(GenericMessageITest, publish_and_subscribe_generic_messages_vasio)
 {
     topics.resize(2);
@@ -200,5 +204,6 @@ TEST_F(GenericMessageITest, publish_and_subscribe_large_messages_vasio)
         EXPECT_EQ(topic.expectedData, topic.receivedData);
     }
 }
+#endif //IB_MW_HAVE_VASIO
 
 } // anonymous namespace

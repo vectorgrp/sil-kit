@@ -15,12 +15,22 @@ if(CMAKE_VERSION VERSION_GREATER 3.8.0)
     source_group(TREE ${CMAKE_CURRENT_LIST_DIR}/ib PREFIX "ib" FILES ${IB_INTERFACE_SOURCES})
 endif()
 
+################################################################################
+# Ensure all our tests and internal libraries have the right build flags
+################################################################################
+if (IB_MW_ENABLE_FASTRTPS)
+    target_compile_definitions(IbInterface INTERFACE IB_MW_HAVE_FASTRTPS=1)
+endif()
+if (IB_MW_ENABLE_VASIO)
+    target_compile_definitions(IbInterface INTERFACE IB_MW_HAVE_VASIO=1)
+endif()
 
-#######################################################################################################################
+
+################################################################################
 # add to install targets of the IntegrationBus
-#######################################################################################################################
-
-# Mark the IntegrationBus headers for export by adding it to the target container IntegrationBusTargets
+################################################################################
+# Mark the IntegrationBus headers for export by adding it to the target container
+# IntegrationBusTargets
 install(
     TARGETS IbInterface
     EXPORT IntegrationBusTargets

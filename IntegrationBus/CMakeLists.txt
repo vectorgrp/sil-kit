@@ -16,7 +16,7 @@ set(IB_PROJECT_DIR ${PROJECT_SOURCE_DIR})
 option(IB_INSTALL_PDB_FILES "Install Visual Studio debug symbol files along with the IB dll" OFF)
 
 if(MSVC)
-    add_compile_options("/MP;/W4;/w44062")
+    add_compile_options("/MP;/w44062")
     #disable warnings on visual studio 2015 v14
     if(MSVC_VERSION EQUAL 1900)
         add_compile_options("/wd4503")
