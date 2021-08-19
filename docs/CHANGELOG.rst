@@ -7,6 +7,31 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [3.4.3] - 
 --------------------------------
 
+Added
+~~~~~
+- CMake: the options IB_MW_ENABLE_VASIO and IB_MW_ENABLE_FASTRTPS can be used to
+  disable the middlewares at compile time.
+- Config: introduced a 'SchemaVersion' field in the config formats, to allow for future
+  changes.
+
+Fixed
+~~~~~
+- VAsio: fix a bug affecting distributed (networked) setups. Participants did
+  only listen on localhost addresses and the registry did not distribute proper
+  endpoint addresses to other participants.
+
+.. admonition:: Note: this bug affects users of VAsio with networked setups
+
+  Users with VIB setups across multiple hosts (with non-localhost addresses)
+  should upgrade to this VIB version.
+
+- VAsio: improve performance. The `TraceTx()`/`TraceRx()` invocations were expanding
+  their arguments and applying a `to_string()` operation on the VIB message
+  payloads.
+
+- UB sanitizer: fixed undefined behavior in MessageBuffer (unaliased memory
+  accesses) and Watchdog (integer overflow).
+
 Changed
 ~~~~~~~
 - ``Config::FromJsonString`` now uses a Yaml-parser internally. To update legacy
@@ -20,10 +45,19 @@ Changed
 
      vib-config-tool --convert oldFile.json updated.json --format json
 
+Removed
+~~~~~~~
 
-- removed dependency on Json11. We now use yaml-cpp to parse JSON and YAML
-  configuration files.
+- Removed the json11 from the source-tree. We now use yaml-cpp to parse JSON and YAML
+  configuration files. Please note, that the yaml-based parser still accepts
+  JSON formatted inputs.
 
+Compatibility with 3.4.2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): No (json11 symbols removed)
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
 
 [3.4.2] - 2021-08-04
 --------------------------------
