@@ -74,8 +74,6 @@ void WatchDog::Run()
         }
         
         const auto startTime = _startTime.load();
-        const auto now = std::chrono::steady_clock::now().time_since_epoch();
-        const auto currentRunDuration = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime);
 
         // We only communicate with the "main thread" via the atomic _startTime.
         // If _startTime is duration::min(), Start() has not yet been called.
@@ -86,6 +84,11 @@ void WatchDog::Run()
             state = WatchDogState::Healthy;
             continue;
         }
+
+        // These declarations are after the startTime check to prevent integer overflow
+        // by deferring arithmetic on duration::min() until Start() was called.
+        const auto now = std::chrono::steady_clock::now().time_since_epoch();
+        const auto currentRunDuration = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime);
 
 
         if (currentRunDuration <= _warnTimeout)

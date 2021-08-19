@@ -59,8 +59,8 @@ public:
         {
             _storage.resize(_storage.size() + sizeof(IntegerT));
         }
-        IntegerT* dst = reinterpret_cast<IntegerT*>(_storage.data() + _wPos);
-        *dst = t;
+        std::memcpy(_storage.data() + _wPos, &t, sizeof(IntegerT));
+        
         _wPos += sizeof(IntegerT);
 
         return *this;
@@ -71,8 +71,7 @@ public:
         if (_rPos + sizeof(IntegerT) > _storage.size())
             throw end_of_buffer{};
 
-        const IntegerT* src = reinterpret_cast<const IntegerT*>(_storage.data() + _rPos);
-        t = *src;
+        std::memcpy(&t, _storage.data() + _rPos, sizeof(IntegerT));
         _rPos += sizeof(IntegerT);
 
         return *this;
