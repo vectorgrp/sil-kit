@@ -58,7 +58,8 @@ class EnvironmentIbRegistry(Environment.Environment):
         environmentName = myEnvironment["Environment"]
         networkNodeName = None
         networkNode = Configuration.getNetworkNode(networkNodeName, self._networkNodes, self._verbose)
-        executable = "%INTEGRATIONBUS_BINPATH%IbRegistry"
+        executables = ["%INTEGRATIONBUS_BINPATH%IbRegistry",
+            os.path.join("%INTEGRATIONBUS_BINPATH%", "..", "..", "IntegrationBus-NonRedistributable/IbRegistry")]
         arguments = "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
         workingFolderPath = '.'
         configFilePath = myEnvironment["ConfigFile"]
@@ -66,16 +67,24 @@ class EnvironmentIbRegistry(Environment.Environment):
         configFileFolderPath = os.path.dirname(configFilePath) if os.path.dirname(configFilePath) else "."
 
         assert(environmentName == self.getEnvironmentName())
-        assert(executable != None)
         assert(arguments != None)
         assert(configFilePath)
 
         # Resolve predefined and environment variables (the latter because we do *not* want to "subprocess.Popen(..., shell=True)")
-        executable = Configuration.resolveVariables(executable, configFileAbsolutePath, participantName, self._domainId)
-        executableAbsolutePath = executable if os.path.isabs(executable) else os.path.abspath(configFileFolderPath + os.path.sep + executable)
-        if not os.path.isfile(executableAbsolutePath):
-            if os.name == "nt" and not executableAbsolutePath.endswith(".exe") and os.path.isfile(executableAbsolutePath + ".exe"):
-                executableAbsolutePath += ".exe"
+        def resolveExe(executable):
+            executable = Configuration.resolveVariables(executable, configFileAbsolutePath, participantName, self._domainId)
+            executableAbsolutePath = executable if os.path.isabs(executable) else os.path.abspath(configFileFolderPath + os.path.sep + executable)
+            if not os.path.isfile(executableAbsolutePath):
+                if os.name == "nt" and not executableAbsolutePath.endswith(".exe") and os.path.isfile(executableAbsolutePath + ".exe"):
+                    executableAbsolutePath += ".exe"
+            return executable, executableAbsolutePath
+
+        for exe in executables:
+            executable, executableAbsolutePath = resolveExe(exe)
+            if os.path.isfile(executableAbsolutePath):
+                break
+
+        assert(executable != None)
 
         arguments = Configuration.resolveVariables(arguments, configFileAbsolutePath, participantName, self._domainId)
 
