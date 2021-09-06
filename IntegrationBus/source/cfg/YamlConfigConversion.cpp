@@ -1368,17 +1368,18 @@ bool VibConversion::decode(const Node& node, Switch::Port& obj)
 template<>
 Node VibConversion::encode(const Switch& obj)
 {
+    static const Switch defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    node["Description"] = obj.description;
     node["Ports"] = obj.ports;
+    non_default_encode(obj.description, node, "Description", defaultObj.description);
     return node;
 }
 template<>
 bool VibConversion::decode(const Node& node, Switch& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
-    obj.description = parse_as<std::string>(node["Description"]);
+    optional_decode(obj.description, node, "Description");
     optional_decode(obj.ports, node, "Ports");
     return true;
 }
@@ -1553,8 +1554,8 @@ bool VibConversion::decode(const Node& node, FastRtps::Config& obj)
 {
 
     optional_decode(obj.discoveryType, node, "DiscoveryType");
-    obj.configFileName = parse_as<decltype(obj.configFileName)>(node["ConfigFileName"]);
-    obj.unicastLocators = parse_as<decltype(obj.unicastLocators)>(node["UnicastLocators"]);
+    optional_decode(obj.configFileName, node, "ConfigFileName");
+    optional_decode(obj.unicastLocators,node,"UnicastLocators");
 
     switch (obj.discoveryType)
     {
