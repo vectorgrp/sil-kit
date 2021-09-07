@@ -40,7 +40,7 @@ target_link_libraries(vib-registry
         IbVersion
         IbExtensions
 )
-add_dependencies(vib-registry IntegrationBus)
+
 set_target_properties(vib-registry PROPERTIES
      FOLDER "Utilities"
      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"

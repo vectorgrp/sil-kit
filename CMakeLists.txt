@@ -20,7 +20,7 @@ option(IB_BIN_FASTRTPS_ENABLE
         (set IB_BIN_FASTRTPS_REPOSITORY for download URL)"
         OFF
 )
-option(IB_MW_ENABLE_FASTRTPS "Build FastRTPS Middleware" OFF)
+option(IB_MW_ENABLE_FASTRTPS "Build FastRTPS Middleware" ON)
 option(IB_MW_ENABLE_VASIO "Build VAsio Middleware" ON)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${CMAKE_CURRENT_LIST_DIR}/IntegrationBus/cmake)
