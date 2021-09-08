@@ -124,20 +124,30 @@ auto VAsioTcpPeer::GetUri() const -> const VAsioPeerUri&
     return _uri;
 }
 
-auto VAsioTcpPeer::GetSocketAddress() -> std::string 
+static auto GetSocketAddress(const asio::generic::stream_protocol::socket& socket,
+    bool remoteEndpoint) -> std::string 
 {
     std::ostringstream out;
-    const auto& epFamily = _socket.local_endpoint().protocol().family();
+    const auto& epFamily = socket.local_endpoint().protocol().family();
     if (epFamily == asio::ip::tcp::v4().family()
         || epFamily == asio::ip::tcp::v6().family())
     {
-        const auto& ep = _socket.remote_endpoint();
-        out << "tcp://" << reinterpret_cast<const asio::ip::tcp::endpoint&>(ep);
+        if (remoteEndpoint)
+        {
+            const auto& ep = socket.remote_endpoint();
+            out << "tcp://" << reinterpret_cast<const asio::ip::tcp::endpoint&>(ep);
+        }
+        else
+        {
+            const auto& ep = socket.local_endpoint();
+            out << "tcp://" << reinterpret_cast<const asio::ip::tcp::endpoint&>(ep);
+        }
     }
     else if (epFamily == asio::local::stream_protocol{}.family())
     {
+        // NB: remote and local endpoints are the same for local domain sockets.
         // The underlying sockaddr_un contains the path, zero terminated.
-        const auto& ep = _socket.local_endpoint();
+        const auto& ep = socket.local_endpoint();
         const auto* data = static_cast<const char*>(ep.data()->sa_data);
         out << "local://"  << data;
     }
@@ -148,6 +158,16 @@ auto VAsioTcpPeer::GetSocketAddress() -> std::string
     return out.str();
 }
 
+
+auto VAsioTcpPeer::GetRemoteAddress() const -> std::string
+{
+    return GetSocketAddress(_socket, true);
+}
+
+auto VAsioTcpPeer::GetLocalAddress() const -> std::string
+{
+    return GetSocketAddress(_socket, false);
+}
 
 bool VAsioTcpPeer::ConnectLocal(const std::string& socketPath)
 {

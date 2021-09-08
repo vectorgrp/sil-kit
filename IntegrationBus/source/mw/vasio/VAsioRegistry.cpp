@@ -7,6 +7,22 @@
 
 using asio::ip::tcp;
 
+namespace {
+bool isLocalhostAddress(const std::string& hostUrl)
+{
+    return hostUrl.find("tcp://127.") == 0 //ipv4
+        || hostUrl.find("tcp://::1") == 0 //ipv6, abbreviated
+        || hostUrl.find("tcp://0:0:0:0:0:0:0:1") == 0 //ipv6 addresses are long...
+        ;
+}
+
+bool isCatchallAddress(const std::string& hostUrl)
+{
+    return hostUrl.find("tcp://0.0.0.0") == 0
+        ;
+}
+
+}
 namespace ib {
 namespace mw {
 
@@ -99,7 +115,7 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
 
     if (peerUri.acceptorUris.empty())
     {
-        //fallback to peer info
+        // fall back to legacy peer info
         peerUri.participantId = announcement.peerInfo.participantId;
         peerUri.participantName = announcement.peerInfo.participantName;
         peerUri.acceptorUris.push_back(
@@ -113,15 +129,22 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
     // When the IVAsioPeer connects to us we see its actual endpoint address and need
     // to substitute it here.
 
-    auto fromUri = Uri{from->GetSocketAddress()};
+    const auto fromUri = Uri{from->GetRemoteAddress()};
     if (fromUri.Type() == Uri::UriType::Tcp)
     {
         for (auto& uri : peerUri.acceptorUris)
         {
-            if (uri.find("tcp://0.0.0.0") == 0)
+            //parse to get listening port of peer
+            const auto origUri = Uri{ uri };
+            if (origUri.Type() == Uri::UriType::Local)
             {
-                const auto origUri = Uri{ uri }; //parse to get port
-                //  Update to socket peer address but keep the original acceptor port
+                continue;
+            }
+
+            // Update to socket peer address but keep the original acceptor port.
+            // Legacy clients have a hard-coded '127.0.0.1' address.
+            if (isCatchallAddress(uri) || isLocalhostAddress(uri))
+            {
                 uri = Uri{ fromUri.Host(), origUri.Port() }.EncodedString();
             }
         }
@@ -151,9 +174,34 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
 
 void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
 {
+
     _logger->Info("Sending known participant message to {}", peer->GetInfo().participantName);
 
     KnownParticipants knownParticipantsMsg;
+
+    // In case the peer is remote we need to replace all local addresses with 
+    // the endpoint address known to the registry.
+    auto replaceLocalhostUri = [&peer](auto& peerUri) {
+        const auto registryUri = Uri{ peer->GetLocalAddress() };
+        if (registryUri.Type() == Uri::UriType::Local)
+        {
+            // don't touch local domain socket URIs
+            return;
+        }
+        for (auto& uri : peerUri.acceptorUris)
+        {
+            auto parsedUri = Uri{ uri };
+            if (parsedUri.Type() == Uri::UriType::Local)
+            {
+                continue;
+            }
+            // Patch loopback or INADDR_ANY with the actual endpoint address of the remote peer's connection.
+            if (isLocalhostAddress(uri) || isCatchallAddress(uri))
+            {
+                uri = Uri{ registryUri.Host(), parsedUri.Port() }.EncodedString();
+            }
+        }
+    };
 
     // Also provide VAsioPeerInfos for legacy participants
     auto uriToPeerInfos = [](const auto& peerUri, auto& peerInfoVec) {
@@ -169,14 +217,15 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
             }
         }
     };
-    for (auto&& connectedParticipant : _connectedParticipants)
+    for (const auto& connectedParticipant : _connectedParticipants)
     {
-        auto&& peerUri = connectedParticipant.second;
+        auto peerUri = connectedParticipant.second;
         if (peerUri.participantName == peer->GetUri().participantName)
         {
             // don't advertise the peer to itself
             continue;
         }
+        replaceLocalhostUri(peerUri);
         knownParticipantsMsg.peerUris.push_back(peerUri);
 
         // backwards compatibility with PeerInfos

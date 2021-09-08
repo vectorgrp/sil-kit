@@ -249,24 +249,24 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     //     which may still be initializing when we are running. For example, this happens when all
     //     participants are started in a shell, and the registry is started in the background.
 
-    auto multipleConnectAttempts = [&ok, &registry, &vasioConfig](auto registryUri) {
+    auto multipleConnectAttempts = [ &registry, &vasioConfig](const auto& registryUri) {
         for (auto i = 0; i < vasioConfig.registry.connectAttempts; i++)
         {
             try
             {
                 registry->Connect(registryUri);
-                ok = true;
-                break;
+                return true;
             }
             catch (const std::exception&)
             {
                 std::this_thread::sleep_for(std::chrono::milliseconds{100});
             }
         }
+        return false;
     };
 
     // First, attempt local connections if available:
-    multipleConnectAttempts(registryUri);
+    ok = multipleConnectAttempts(registryUri);
 
     // Fall back to TCP connections:
     if (!ok)
@@ -276,7 +276,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
         registryUri.acceptorUris.push_back(
             Uri{ vasioConfig.registry.hostname,  registryPort }.EncodedString()
         );
-        multipleConnectAttempts(registryUri);
+        ok = multipleConnectAttempts(registryUri);
 
     }
     // Neither local nor tcp is working.

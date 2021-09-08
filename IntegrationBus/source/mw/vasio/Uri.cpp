@@ -20,7 +20,7 @@ auto Uri::Host() const -> const std::string&
 {
     if (_host.empty())
     {
-        throw std::logic_error{ "Uri::Host(): must not be empty" };
+        throw std::logic_error{ "Uri::Host(): must not be empty: uriString= " + _uriString };
     }
     return _host;
 }
