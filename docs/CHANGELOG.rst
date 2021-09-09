@@ -5,8 +5,9 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.4.3] - 
+[3.4.3-QA] - 2021-09-15
 --------------------------------
+This is a Quality Assured Release.
 
 Added
 ~~~~~
@@ -28,7 +29,7 @@ Fixed
 
 - VAsio: improve performance. The `TraceTx()`/`TraceRx()` invocations were expanding
   their arguments and applying a `to_string()` operation on the VIB message
-  payloads.
+  payloads. Now, this is code path is only executed when `Trace` log level is active.
 
 - UB sanitizer: fixed undefined behavior in MessageBuffer (unaliased memory
   accesses) and Watchdog (integer overflow).
@@ -45,6 +46,14 @@ Changed
   .. code-block:: sh
 
      vib-config-tool --convert oldFile.json updated.json --format json
+
+.. admonition:: Note: the IbRegistry executable was moved again from the `IntegrationBus-NonRedistributable` directory to the `IntegrationBus/bin`
+
+    The relocation of the registry to the NonRedistributable caused so much
+    irritation and breakage that we undid this change.
+- To reduce the fallout of moving the IbRegistry we put it back into
+  `IntegrationBus/bin/`. For compatibility the IbLauncher searches the registry
+  executable in both directories.
 
 Removed
 ~~~~~~~
