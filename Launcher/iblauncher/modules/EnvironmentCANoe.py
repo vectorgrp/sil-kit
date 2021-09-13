@@ -209,6 +209,7 @@ class EnvironmentCANoe(Environment.Environment):
 
         def removeIfExists(filename):
             """ retry to delete a file, as it might still be locked by a dying process """
+            errMsg=""
             for attempt in range(0, maxAttempts):
                 if not os.path.exists(filename):
                     return True
@@ -218,7 +219,8 @@ class EnvironmentCANoe(Environment.Environment):
                     return True
                 except BaseException as e:
                     time.sleep(0.3) # let the process shutdown 
-            print("Error: EnvironmentCANoe tearDown: could not remove filename='{}' after {} attempts: '{}'".format(filename, attempt, str(e)))
+                    errMsg +="Attempt " + str(attempt) + " " +str(e) +".\n"
+            print("Error: EnvironmentCANoe tearDown: could not remove filename='{}' after {} attempts: '{}'".format(filename, attempt, errMsg))
             return True
 
         # Patch CANoe project with IntegrationBus NLDLL (may throw when locked)

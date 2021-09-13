@@ -312,10 +312,11 @@ def main():
     participantEnvironments = launchConfiguration["ParticipantEnvironments"]
 
     # If the active Middleware is VAsio, we inject a launch environment for the registry at the position 0
+    activeMiddleware = "VAsio"
     try:
         activeMiddleware = config["MiddlewareConfig"]["ActiveMiddleware"]
     except KeyError:
-        activeMiddleware = ""
+        pass
 
     if activeMiddleware == "VAsio":
         ibRegistryEnv = {
