@@ -529,7 +529,7 @@ struct PocStatus
 // ================================================================================
 bool Header::IsSet(Flag flag) const
 {
-    return flags & static_cast<uint8_t>(flag);
+    return (flags & static_cast<uint8_t>(flag)) > 0;
 }
 
 void Header::Set(Flag flag)
