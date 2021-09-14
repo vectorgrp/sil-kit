@@ -138,6 +138,7 @@ public:
 struct Callbacks
 {
     MOCK_METHOD2(ReceiveMessage, void(IEthController*, const EthMessage&));
+    MOCK_METHOD2(ReceiveMessageCan, void(ICanController*, const CanMessage&));
 };
 
 struct MockReplayMessage
@@ -275,6 +276,9 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
         controller.ReplayMessage(&msg);
     }
 }
+
+// // // CAN
+
 struct MockCanMessage
     : public MockReplayMessage
     , public CanMessage
@@ -293,7 +297,7 @@ struct MockCanMessage
     }
 };
 
-TEST(ReplayTest, canctrl_replay_config_send)
+TEST(ReplayTest, canctroller_replay_config_send)
 {
     MockComAdapter comAdapter{};
 
@@ -326,7 +330,19 @@ TEST(ReplayTest, canctrl_replay_config_send)
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
         can.ReplayMessage(&msg);
     }
-    // Replay Receive / Both
+    // Replay Send / Receive
+    {
+        msg._direction = extensions::Direction::Send;
+        cfg.replay.direction = cfg::Replay::Direction::Receive;
+
+        CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        can.SetEndpointAddress(msg._address);
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, ACanMessage(msg)))
+            .Times(0);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
+        can.ReplayMessage(&msg);
+    }
+    // Replay Receive / Send
     {
         msg._direction = extensions::Direction::Receive;
         cfg.replay.direction = cfg::Replay::Direction::Send;
@@ -342,6 +358,7 @@ TEST(ReplayTest, canctrl_replay_config_send)
     {
         msg._direction = extensions::Direction::Receive;
         cfg.replay.direction = cfg::Replay::Direction::Receive;
+        msg._address = tracing::ReplayEndpointAddress();
 
         CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, ACanMessage(msg)))
@@ -349,6 +366,56 @@ TEST(ReplayTest, canctrl_replay_config_send)
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
         can.SetEndpointAddress(msg._address);
         can.ReplayMessage(&msg);
+    }
+
+}
+
+TEST(ReplayTest, cancontroller_replay_config_receive)
+{
+    Callbacks callbacks;
+    MockComAdapter comAdapter{};
+
+    cfg::CanController cfg{};
+
+
+    MockCanMessage msg;
+
+    msg._address = {1,2};
+
+
+    // Replay Receive / Receive
+    {
+        msg._direction = extensions::Direction::Receive;
+        cfg.replay.direction = cfg::Replay::Direction::Receive;
+        CanControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        controller.SetEndpointAddress({3,4});
+        controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessageCan));
+        EXPECT_CALL(callbacks, ReceiveMessageCan(A<ICanController*>(), ACanMessage(msg)))
+            .Times(1);
+        controller.ReplayMessage(&msg);
+    }
+
+    // Replay Receive / Both
+    {
+        msg._direction = extensions::Direction::Receive;
+        cfg.replay.direction = cfg::Replay::Direction::Both;
+        CanControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        controller.SetEndpointAddress({3,4});
+        controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessageCan));
+        EXPECT_CALL(callbacks, ReceiveMessageCan(A<ICanController*>(), ACanMessage(msg)))
+            .Times(1);
+        controller.ReplayMessage(&msg);
+    }
+    // Block Receive 
+    {
+        msg._direction = extensions::Direction::Send;
+        cfg.replay.direction = cfg::Replay::Direction::Receive;
+        CanControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
+        controller.SetEndpointAddress({3,4});
+        controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessageCan));
+        EXPECT_CALL(callbacks, ReceiveMessageCan(A<ICanController*>(), ACanMessage(msg)))
+            .Times(0);
+        controller.ReplayMessage(&msg);
     }
 }
 

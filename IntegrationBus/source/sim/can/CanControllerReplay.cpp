@@ -155,9 +155,7 @@ void CanControllerReplay::ReplaySend(const extensions::IReplayMessage* replayMes
 void CanControllerReplay::ReplayReceive(const extensions::IReplayMessage* replayMessage)
 {
     auto msg = dynamic_cast<const sim::can::CanMessage&>(*replayMessage);
-    // XXX there is no guarantee that the EndpointAddress from the trace is valid
-    // it might even be the same as ours --> will be dropped.
-    _controller.ReceiveIbMessage(replayMessage->EndpointAddress(), msg);
+    _controller.ReceiveIbMessage(tracing::ReplayEndpointAddress(), msg);
 }
 
 } // namespace can

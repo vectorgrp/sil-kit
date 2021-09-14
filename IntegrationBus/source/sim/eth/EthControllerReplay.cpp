@@ -153,9 +153,7 @@ void EthControllerReplay::ReplayReceive(const extensions::IReplayMessage* replay
     sim::eth::EthMessage msg{};
     msg.ethFrame = std::move(frame);
     msg.timestamp = replayMessage->Timestamp();
-    // XXX there is no guarantee that the EndpointAddress from the trace is valid
-    // it might even be the same as ours --> will be dropped.
-    _controller.ReceiveIbMessage(replayMessage->EndpointAddress(), msg); //XXX will trigger an ACK here
+    _controller.ReceiveIbMessage(tracing::ReplayEndpointAddress(), msg);
 }
 
 } // namespace eth

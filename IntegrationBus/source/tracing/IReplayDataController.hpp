@@ -3,14 +3,27 @@
 #pragma once
 #include "ib/cfg/Config.hpp"
 #include "ib/extensions/IReplay.hpp"
+#include "ib/mw/EndpointAddress.hpp"
+
+#include <limits>
 
 namespace ib {
 namespace tracing {
 
+//!< Helper to check whether Direction `dir` is active in the config 
 inline bool IsReplayEnabledFor(const cfg::Replay& cfg, cfg::Replay::Direction dir)
 {
     return cfg.direction == dir
         || cfg.direction == cfg::Replay::Direction::Both;
+}
+
+//!< For replaying in the receive path we use an unlikely EndpointAddress
+inline auto ReplayEndpointAddress() -> ib::mw::EndpointAddress
+{
+    return {
+        std::numeric_limits<decltype(ib::mw::EndpointAddress::participant)>::max(),
+        std::numeric_limits<decltype(ib::mw::EndpointAddress::endpoint)>::max()
+    };
 }
 
 class IReplayDataController

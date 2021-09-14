@@ -89,7 +89,7 @@ void GenericSubscriberReplay::ReplayReceive(const extensions::IReplayMessage* re
     // need to copy the message here.
     // will throw if invalid message type.
     sim::generic::GenericMessage msg = dynamic_cast<const sim::generic::GenericMessage&>(*replayMessage);
-    _subscriber.ReceiveIbMessage(replayMessage->EndpointAddress(), msg);
+    _subscriber.ReceiveIbMessage(tracing::ReplayEndpointAddress(), msg);
 }
 
 } // namespace generic
