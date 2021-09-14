@@ -290,6 +290,10 @@ auto FindReplayChannel(ib::mw::logging::ILogger* log,
         throw cfg::Misconfiguration{ msg.str() };
     }
 
+    if (channelList.size() < 1)
+    {
+        return {};
+    }
     return channelList.at(0);
 }
 } //end anonymous namespace
