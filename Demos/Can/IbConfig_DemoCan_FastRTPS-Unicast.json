@@ -95,6 +95,7 @@
 
     "MiddlewareConfig": {
 
+        "ActiveMiddleware": "FastRTPS",
         "FastRTPS": {
             "DiscoveryType": "Unicast",
             "UnicastLocators": {
