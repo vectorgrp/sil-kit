@@ -130,7 +130,7 @@ auto CreateReplayFiles(mw::logging::ILogger* logger, const cfg::Config& config,
         case cfg::TraceSource::Type::PcapFile:
         {
             auto provider = PcapReplay{};
-            auto file = provider.OpenFile(source.inputPath, logger);
+            auto file = provider.OpenFile(config, source.inputPath, logger);
             replayFiles.insert({source.name, std::move(file)});
             break;
         }

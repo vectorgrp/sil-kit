@@ -109,10 +109,10 @@ private:
 namespace ib {
 namespace tracing {
 
-auto PcapReplay::OpenFile(std::string filePath, ib::mw::logging::ILogger* ibLogger)
+auto PcapReplay::OpenFile(const ib::cfg::Config& /*unused*/, const std::string& filePath, ib::mw::logging::ILogger* ibLogger)
     -> std::shared_ptr<extensions::IReplayFile>
 {
-    return std::make_shared<ReplayPcapFile>(std::move(filePath), ibLogger);
+    return std::make_shared<ReplayPcapFile>(filePath, ibLogger);
 }
 
 } // namespace tracing

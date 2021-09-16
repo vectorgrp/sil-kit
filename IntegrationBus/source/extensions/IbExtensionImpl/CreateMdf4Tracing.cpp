@@ -32,7 +32,7 @@ auto CreateMdf4Replay(cfg::Config config, ib::mw::logging::ILogger* logger, cons
     -> std::shared_ptr<IReplayFile>
 {
     auto& factory = FactorySingleton<IReplayDataProvider>("vibe-mdf4tracing", config);
-    return factory.OpenFile(fileName, logger);
+    return factory.OpenFile(config, fileName, logger);
 }
 
 }//end namespace extensions

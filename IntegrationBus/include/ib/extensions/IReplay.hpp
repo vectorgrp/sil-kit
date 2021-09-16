@@ -26,7 +26,11 @@ class IReplayDataProvider
 {
 public:
     virtual ~IReplayDataProvider() = default;
-    virtual auto OpenFile(std::string filePath, ib::mw::logging::ILogger* ibLogger) -> std::shared_ptr<IReplayFile> = 0;
+    //!< Pass the config (containing search path hints), the actual file to open
+    //   and a logger to the extension.
+    virtual auto OpenFile(const ib::cfg::Config& config,
+        const std::string& filePath,
+        ib::mw::logging::ILogger* ibLogger) -> std::shared_ptr<IReplayFile> = 0;
 };
 
 class IReplayFile
