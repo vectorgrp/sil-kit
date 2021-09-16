@@ -1714,7 +1714,7 @@ Node VibConversion::encode(const MiddlewareConfig& obj)
     const static MiddlewareConfig defaultObj{};
     Node node;
     non_default_encode(obj.activeMiddleware, node, "ActiveMiddleware", defaultObj.activeMiddleware);
-    non_default_encode(obj.fastRtps, node, "FastRtps", defaultObj.fastRtps);
+    non_default_encode(obj.fastRtps, node, "FastRTPS", defaultObj.fastRtps);
     non_default_encode(obj.vasio, node, "VAsio", defaultObj.vasio);
     return node;
 }
@@ -1723,7 +1723,7 @@ template<>
 bool VibConversion::decode(const Node& node, MiddlewareConfig& obj)
 {
     optional_decode(obj.activeMiddleware, node, "ActiveMiddleware");
-    optional_decode(obj.fastRtps, node, "FastRtps");
+    optional_decode(obj.fastRtps, node, "FastRTPS");
     optional_decode(obj.vasio, node, "VAsio");
     return true;
 }
