@@ -281,17 +281,15 @@ std::ostream& operator<<(std::ostream& out, ControllerStatus status)
 
 std::ostream& operator<<(std::ostream& out, const Frame& frame)
 {
-    std::ios oldState(nullptr);
-    oldState.copyfmt(out);
-
-    out
+    //instead of ios::copyfmt (which set badbit) we use a temporary stream 
+    std::stringstream buf;
+    buf
         << "lin::Frame{id=" << static_cast<uint16_t>(frame.id)
         << ", cs=" << to_string(frame.checksumModel)
         << ", dl=" << static_cast<uint16_t>(frame.dataLength)
         << ", d={" << util::AsHexString(frame.data).WithSeparator(" ")
         << "}}";
-    out.copyfmt(oldState);
-    return out;
+    return out << buf.str();
 }
 
 std::ostream& operator<<(std::ostream& out, const SendFrameRequest& request)

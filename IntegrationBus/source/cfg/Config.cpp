@@ -644,11 +644,10 @@ std::istream& operator>>(std::istream& in, Version& version)
 
 std::ostream& to_ostream(std::ostream& out, const std::array<uint8_t, 6>& macAddr)
 {
-    std::ios oldFormat(nullptr);
-    oldFormat.copyfmt(out);
-
-    out.width(2);
-    out.fill('0');
+    //instead of ios::copyfmt (which set badbit) we use a temporary stream 
+    std::stringstream buf;
+    buf.width(2);
+    buf.fill('0');
 
     auto&& iter = macAddr.begin();
     out << std::hex << std::uppercase << std::setw(2) << static_cast<uint16_t>(*iter++);
@@ -657,8 +656,7 @@ std::ostream& to_ostream(std::ostream& out, const std::array<uint8_t, 6>& macAdd
         out << ':' << std::hex << std::uppercase << std::setw(2) << static_cast<uint16_t>(*iter);
     }
 
-    out.copyfmt(oldFormat);
-    return out;
+    return out << buf.str();
 }
 
 std::istream& from_istream(std::istream& in, std::array<uint8_t, 6>& macAddr)
