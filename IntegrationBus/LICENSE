@@ -4,15 +4,14 @@ Copyright (c) Vector Informatik GmbH. All rights reserved.
 The Integration Bus uses the following third party software components:
 
  1. Google Test
- 2. Json11
- 3. Fast-RTPS
- 4. Fast-CDR (via Fast-RTPS)
- 5. Asio C++ Library (via Fast-RTPS)
- 6. TinyXML2 (via Fast-RTPS)
- 7. Spdlog
- 8. Fmtlib
- 9. Breathe
-10. Yaml-cpp
+ 2. Fast-RTPS
+ 3. Fast-CDR (via Fast-RTPS)
+ 4. Asio C++ Library
+ 5. TinyXML2 (via Fast-RTPS)
+ 6. Spdlog
+ 7. Fmtlib
+ 8. Breathe
+ 9. Yaml-cpp
 
 The full and unmodified license of each component is printed below.
 
@@ -53,32 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-2. Json11:
-
-Copyright (c) 2013 Dropbox, Inc.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-
-
-
-3. Fast-RTPS
+2. Fast-RTPS
 
                                  Apache License
                            Version 2.0, January 2004
@@ -285,7 +259,7 @@ THE SOFTWARE.
 
 
 
-4. Fast-CDR (via Fast-RTPS)
+3. Fast-CDR (via Fast-RTPS)
 
 
                                  Apache License
@@ -493,7 +467,7 @@ THE SOFTWARE.
 
 
 
-5. Asio C++ Library (via Fast-RTPS)
+4. Asio C++ Library
 
 Boost Software License - Version 1.0 - August 17th, 2003
 
@@ -522,7 +496,7 @@ DEALINGS IN THE SOFTWARE.
 
 
 
-6. TinyXML2 (via Fast-RTPS)
+5. TinyXML2 (via Fast-RTPS)
 
 TinyXML-2 is released under the zlib license:
 
@@ -546,7 +520,7 @@ distribution.
 
 
 
-7. Spdlog
+6. Spdlog
 
 The MIT License (MIT)
 
@@ -573,7 +547,7 @@ THE SOFTWARE.
 
 
 
-8. Fmtlib
+7. Fmtlib
 
 Copyright (c) 2012 - present, Victor Zverovich
 
@@ -605,7 +579,7 @@ without including the above copyright and permission notices.
 
 
   
-9. Breathe
+8. Breathe
 
 // BSD license, modified to remove the organisation as there isn't one.
 
@@ -637,7 +611,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-10. Yaml-cpp
+9. Yaml-cpp
 
 Copyright (c) 2008-2015 Jesse Beder.
 
