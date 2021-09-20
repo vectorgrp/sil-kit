@@ -34,6 +34,19 @@ Fixed
 - UB sanitizer: fixed undefined behavior in MessageBuffer (unaliased memory
   accesses) and Watchdog (integer overflow).
 
+- Fixed missing 'ActiveMiddleware' statements in Can/FastRTPS config files and
+  ensure it is properly parsed with the new YamlConfigParser (VIB-375).
+
+- Fixed out of bounds exception when configuring tracing and replaying.
+  Also ensure that configuring a replay block with a 'Receive' direction is able
+  to replay messages (VIB-372).
+
+- Ensure that 'SearchPathHints' are passed on to the VIBE extension implementing
+  the IReplayDataProvider interface (VIB-378).
+
+- Fix accidentally setting the badbit on the ostream when formatting Ethernet
+  MAC addresses and LIN frames.
+
 Changed
 ~~~~~~~
 - ``Config::FromJsonString`` now uses a Yaml-parser internally. To update legacy
