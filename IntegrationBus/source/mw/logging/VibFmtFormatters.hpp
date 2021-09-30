@@ -4,6 +4,8 @@
 
 #include "ib/mw/logging/ILogger.hpp"
 
+
+#include "ib/mw/logging/string_utils.hpp"
 #include "ib/mw/string_utils.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/sim/can/string_utils.hpp"
