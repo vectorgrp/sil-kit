@@ -8,6 +8,9 @@
 
 #include <future>
 #include <tuple>
+#include <atomic>
+#include <map>
+#include <mutex>
 
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/cfg/Config.hpp"
@@ -35,7 +38,7 @@ public:
         virtual void RequestStep(ParticipantController& controller) = 0;
         virtual void FinishedStep(ParticipantController& controller) = 0;
     };
-    
+
 public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
@@ -45,7 +48,7 @@ public:
     ParticipantController(ParticipantController&& other) = default;
     ParticipantController& operator=(const ParticipantController& other) = default;
     ParticipantController& operator=(ParticipantController&& other) = default;
-    
+
 public:
     // ----------------------------------------
     // Public Methods
@@ -61,8 +64,8 @@ public:
     void SetPeriod(std::chrono::nanoseconds period) override;
     void SetEarliestEventTime(std::chrono::nanoseconds eventTime) override;
 
-    auto Run() -> ParticipantState override;
-    auto RunAsync() -> std::future<ParticipantState> override;
+    auto Run()->ParticipantState override;
+    auto RunAsync()->std::future<ParticipantState> override;
 
     void ReportError(std::string errorMsg) override;
     void Pause(std::string reason) override;
@@ -70,16 +73,16 @@ public:
     void Stop(std::string reason) override;
     void ForceShutdown(std::string reason) override;
 
-    auto State() const -> ParticipantState override;
-    auto Status() const -> const ParticipantStatus& override;
-    auto Now() const -> std::chrono::nanoseconds override;
+    auto State() const->ParticipantState override;
+    auto Status() const -> const ParticipantStatus & override;
+    auto Now() const->std::chrono::nanoseconds override;
     void RefreshStatus() override;
 
     void LogCurrentPerformanceStats() override;
 
     // IIbToParticipantController
     void SetEndpointAddress(const mw::EndpointAddress& addr) override;
-    auto EndpointAddress() const -> const mw::EndpointAddress& override;
+    auto EndpointAddress() const -> const mw::EndpointAddress & override;
 
     void ReceiveIbMessage(mw::EndpointAddress from, const ParticipantCommand& msg) override;
     void ReceiveIbMessage(mw::EndpointAddress from, const SystemCommand& msg) override;
@@ -96,7 +99,7 @@ public:
     void ExecuteSimTask();
 
     // Get the instance of the internal ITimeProvider that is updated with our simulation time
-    auto GetTimeProvider() -> std::shared_ptr<sync::ITimeProvider>;
+    auto GetTimeProvider()->std::shared_ptr<sync::ITimeProvider>;
 private:
     // ----------------------------------------
     // private methods
@@ -106,7 +109,7 @@ private:
     static auto MakeSyncAdapter(ib::cfg::SyncType syncType)->std::unique_ptr<ParticipantController::ISyncAdapter>;
 
     void ChangeState(ParticipantState newState, std::string reason);
-    
+
     void Initialize(const ParticipantCommand& command, std::string reason);
     void Shutdown(std::string reason);
     void PrepareColdswap();
@@ -114,21 +117,26 @@ private:
     void IgnoreColdswap();
     void ProcessQuantumGrant(const QuantumGrant& msg);
     void CheckDistributedTimeAdvanceGrant();
-    
+
 private:
     // ----------------------------------------
     // private members
-    IComAdapter* _comAdapter{nullptr};
+    IComAdapter* _comAdapter{ nullptr };
     mw::EndpointAddress _endpointAddress{};
     cfg::SyncType _syncType;
     cfg::TimeSync _timesyncConfig;
-    logging::ILogger* _logger{nullptr};
-    std::shared_ptr<ParticipantTimeProvider> _timeProvider{nullptr};
+    logging::ILogger* _logger{ nullptr };
+    std::shared_ptr<ParticipantTimeProvider> _timeProvider{ nullptr };
 
     std::unique_ptr<ISyncAdapter> _syncAdapter;
-    bool _coldswapEnabled{false};
+    bool _coldswapEnabled{ false };
 
+    // Status might be modified by User thread (e.g., via Pause()) and the
+    // underlying middle-ware's I/O thread
+    mutable std::mutex _statusMx; //C++17: we could use a shared_mutex for reader/writer locking
+    using StatusLockT = std::lock_guard<decltype(_statusMx)>;
     ParticipantStatus _status;
+
     NextSimTask _currentTask;
     NextSimTask _myNextTask;
     std::map<ParticipantId, NextSimTask> _otherNextTasks;
@@ -144,6 +152,11 @@ private:
     util::PerformanceMonitor _execTimeMonitor;
     util::PerformanceMonitor _waitTimeMonitor;
     WatchDog _watchDog;
+
+    // When pausing our participant, message processing is deferred
+    // until Continue()'  is called;
+    std::promise<void> _pauseDonePromise;
+    std::future<void> _pauseDone;
 };
 
 // ================================================================================

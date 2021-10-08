@@ -108,7 +108,7 @@ ParticipantController::ParticipantController(IComAdapter* comAdapter, const cfg:
     );
 
 
-    _status.participantName = participantConfig.name;
+    _status.participantName = participantConfig.name; //no need to lock this
     _currentTask.timePoint = -1ns;
     _currentTask.duration = 0ns;
     _myNextTask.timePoint = 0ns;
@@ -244,6 +244,8 @@ void ParticipantController::Pause(std::string reason)
         ReportError(errorMessage);
         throw std::runtime_error(errorMessage);
     }
+    _pauseDonePromise = decltype(_pauseDonePromise){};
+    _pauseDone = _pauseDonePromise.get_future();
     ChangeState(ParticipantState::Paused, std::move(reason));
 }
 
@@ -255,7 +257,9 @@ void ParticipantController::Continue()
         ReportError(errorMessage);
         throw std::runtime_error(errorMessage);
     }
+
     ChangeState(ParticipantState::Running, "Pause finished");
+    _pauseDonePromise.set_value();
 }
 
 void ParticipantController::Initialize(const ParticipantCommand& command, std::string reason)
@@ -605,7 +609,7 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const
     }
 }
 
-void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const QuantumGrant& msg)
+void ParticipantController::ReceiveIbMessage(mw::EndpointAddress from, const QuantumGrant& msg)
 {
     if (_syncType != cfg::SyncType::TimeQuantum)
         return;
@@ -799,6 +803,11 @@ void ParticipantController::ExecuteSimTask()
 
     _logger->Trace("Finished Simulation Task. Execution time was: {}ms", std::chrono::duration_cast<DoubleMSecs>(_execTimeMonitor.CurrentDuration()).count());
     _waitTimeMonitor.StartMeasurement();
+
+    if (State() == ParticipantState::Paused)
+    {
+        _pauseDone.wait();
+    }
 
     _syncAdapter->FinishedStep(*this);
     _syncAdapter->RequestStep(*this);

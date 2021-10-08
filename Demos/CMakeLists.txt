@@ -111,6 +111,7 @@ add_subdirectory(CData)
 add_subdirectory(TickTickDone)
 add_subdirectory(ConfigBuilder)
 add_subdirectory(Benchmark)
+add_subdirectory(SimulationControl)
 
 message(STATUS "Demos available: ${demo_list}")
 #######################################################################################################################
