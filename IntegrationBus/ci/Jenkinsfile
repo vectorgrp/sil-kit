@@ -255,7 +255,21 @@ def doBuild(Map buildFlags) {
                 runCmake("Release", "${cmakeArgsRelease}" + "${extraArgs}" )
             }
         }
-
+        stage("Building Demos in Release mode(${buildName})") {
+            print("${buildName} --  running cmake Demo build")
+            withEnv(buildEnv) {
+                cmakeBuild(
+                    installation: 'InSearchPath',
+                    cleanBuild: false,
+                    buildType: "Release",
+                    buildDir: "_build_Release",
+                    generator: "Ninja",
+                    cmakeArgs: "${cmakeArgsRelease} -DCMAKE_BUILD_TYPE=Release ${extraArgs}",
+                    steps: [[args: "--target Demos --config Release  --parallel", withCmake: true]]
+                )
+            }
+            
+        }
         stage("Unit Tests Release (${buildName})") {
             dir("_build_Release") {
 
