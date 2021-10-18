@@ -56,7 +56,7 @@ TEST(CanControllerProxyTest, send_can_message)
     CanControllerProxy canController(&mockComAdapter);
     canController.SetEndpointAddress(controllerAddress);
 
-    CanMessage msg;
+    CanMessage msg{};
     msg.transmitId = 1;
 
     EXPECT_CALL(mockComAdapter, SendIbMessage(controllerAddress, msg))
@@ -79,7 +79,7 @@ TEST(CanControllerProxyTest, receive_can_message)
     canController.SetEndpointAddress(controllerAddress);
     canController.RegisterReceiveMessageHandler(std::bind(&CanControllerProxyCallbacks::ReceiveMessage, &callbackProvider, _1, _2));
 
-    CanMessage msg;
+    CanMessage msg{};
 
     EXPECT_CALL(callbackProvider, ReceiveMessage(&canController, msg))
         .Times(1);
