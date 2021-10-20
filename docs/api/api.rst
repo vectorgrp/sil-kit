@@ -61,6 +61,20 @@ management.
   systemcontroller
   systemmonitor
 
+Experimental C API
+------------------------------------
+The Integration Bus API contains an experimental C API, that enables C 
+developers to integrate the Integration Bus directly into their
+applications.
+
+.. admonition:: Warning:
+   Currently, the state of the C API is experimental and its feature set is not
+yet feature complete.
+
+.. toctree::
+  :maxdepth: 1
+
+  capi/capi
 
 Developer Documentation
 -----------------------

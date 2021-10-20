@@ -99,6 +99,7 @@ endfunction(make_ib_demo)
 # Add the actual demo projects
 #######################################################################################################################
 add_subdirectory(Can)
+add_subdirectory(CCan)
 add_subdirectory(Ethernet)
 add_subdirectory(FlexRay)
 add_subdirectory(Lin)

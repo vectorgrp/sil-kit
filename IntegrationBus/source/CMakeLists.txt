@@ -37,8 +37,11 @@ endif()
 add_library(IntegrationBus SHARED
     IntegrationBus.hpp
     IntegrationBus.cpp
+    capi/capi.cpp
     IbForceIncludes.cpp
 )
+
+target_compile_definitions(IntegrationBus PUBLIC -D CIntegrationBusAPI_EXPORT=1)
 
 # Published extension implementations follow here for the extension loading
 # side of the code. The actual shared library code might reside 
