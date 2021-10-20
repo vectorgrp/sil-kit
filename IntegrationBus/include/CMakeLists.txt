@@ -44,3 +44,10 @@ install(
     COMPONENT IntegrationBus
     FILES_MATCHING PATTERN *.hpp
 )
+# for C API
+install(
+    DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/
+    DESTINATION ${INSTALL_INCLUDE_DIR}
+    COMPONENT IntegrationBus
+    FILES_MATCHING PATTERN *.h
+)
