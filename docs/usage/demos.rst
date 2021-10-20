@@ -335,3 +335,28 @@ Benchmark Demo
       -  | \- Generic publisher / subscribers are used as participants.
          | \- The tick period is 1ms and each tick, each particpant sends the specified number of messages to every other particpant.
          | \- All participants, the SyncMaster and the VAsio registry (VAsio only) run in the same process.
+
+
+C-API CANDemo
+~~~~~~~~~~~~~~
+
+.. list-table::
+   :widths: 17 220
+   :stub-columns: 1
+
+   *  -  Abstract
+      -  Demonstrates the C language bindings for two can controllers.
+   *  -  Source location
+      -  Demos/CCan
+   *  -  Parameters
+      -  There are up two positional arguments:
+
+         #. Filename of the IB Configuration to be used; must be the provided VirtualCanCable1_VAsio.json config.
+         #. Name of the participant in the configuration; must be "CANoe"
+
+   *  -  Parameter Example
+      -  .. parsed-literal:: 
+            # starting IbRegistry is required for VAsio to work
+
+            |DemoDir|/IbDemoCCan VirtualCanCable1_VAsio.json  CANoe
+

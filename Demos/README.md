@@ -19,6 +19,9 @@ API can be used:
   A simple command line tool that allows to measure VIB simulation performance
   with configurable parameters.
 
+* ** CCan **:
+  A C-based demo that demonstrates CAN communications.
+
 The build system is based on cmake.
 Supported target platforms and build tools:
 * Ubuntu 18.04 (GCC 7 or later)
