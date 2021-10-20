@@ -1,3 +1,5 @@
+.. _sec:api-participant-controller:
+
 ==============================
 The Participant Controller
 ==============================

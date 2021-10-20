@@ -23,6 +23,11 @@ The simulation time in the VIB only advances if the system is in the state
 time advances in a coordinated manner. These synchronization algorithms are
 either governed by a dedicated ``SyncMaster`` or executed in a distributed way.
 
+Synchronization is enabled on a per-participant base by configuring
+a :ref:`sec:cfg-participant-controller`, and by using its :ref:`C++ API<sec:api-participant-controller>`.
+In summary, the participant controller's SimTask callback is executed whenever
+a new timestep is executed.
+
 .. _sec:sim-time-sync:
 
 Time Synchronization
@@ -64,6 +69,22 @@ part in synchronization. This is useful for participants such as the
 SystemController or SystemMonitor, which only control the system state machine
 or observe the simulation, but do not take part in the actual simulation.
 
+Configuring the :ref:`ParticipantController<sec:cfg-participant-controller>`
+instantiates the simulation algorithm internally.
+As such, the synchronziation mechanism of the VIB is completely optional.
+
+.. admonition:: Note
+
+    For technical reasons, the `Unsynchronized` SyncType is currently defined in the Config
+    API. This indicates the lack of a user-defined ParticipantController and is
+    an invalid option for a user-defined `"ParticipantController"` configuration item.
+
+Running participants without a participant controller will thus result in completely
+uncoordinated execution.
+Without the distributed states of participants and time synchronization,
+the bus/service messages are delivered at a best effort base.
+For example, if one participant starts sending, while some participants are not ready yet,
+the sent messages will be lost.
 
 Synchronization Policies
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -164,10 +185,28 @@ The following figure shows the VAsio algorithm:
 The algorithm works by reporting the start time of the next due SimTask to all
 other participants (``next@`` messages in the figure).
 Based on this knowledge a participant knows when it is allowed to execute its next
-SimTask.That is, when the earliest "foreign" SimTask is not earlier than its own
+SimTask. That is, when the earliest "foreign" SimTask is not earlier than its own
 next SimTask.
 
 VAsio is inherently strict because messages are delivered *in-order* and the
 ``next-SimTask`` message is delivered *in-line* with the data.
 That is, when the ``next-SimTask`` message is received, it is guaranteed that all previous
 data messages were received.
+
+SetPeriod: Variable Simulation Period
+*************************************
+
+One advantage of VAsio is that a participant can decide to change its current
+simulation period.
+This affects the previously discussed algorithm by setting the duration of the ``next``
+messages of a single participant.
+For example, if a participant has no work to compute for the forseeable
+(virtual) next time steps, it can change its simulation period.
+This allows other participants to run up to the end of the new period, without
+further synchronization.
+Let us assume that we have two participants ``A`` and ``B``.
+``A`` sets its period to ``1000ms`` and ``B`` sets it to ``200ms``.
+After exchanging their ``next`` messages, B is now free to execute five of its
+``SimTasks`` (that is, simulation periods) until it has to synchronize with ``A`` again.
+Refer to the :cpp:func:`IParticipantController::SetPeriod<ib::mw::sync::IParticipantController::SetPeriod>`
+method for details.
