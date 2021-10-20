@@ -18,6 +18,7 @@ public:
 
     IntegrationBusAPI auto WithHostname(std::string hostname) -> RegistryBuilder&;
     IntegrationBusAPI auto WithPort(uint16_t port) -> RegistryBuilder&;
+    IntegrationBusAPI auto WithConnectAttempts(size_t numberOfAttempts) -> RegistryBuilder&;
     IntegrationBusAPI auto ConfigureLogger() -> LoggerBuilder&;
 
     IntegrationBusAPI auto Build() -> RegistryConfig;

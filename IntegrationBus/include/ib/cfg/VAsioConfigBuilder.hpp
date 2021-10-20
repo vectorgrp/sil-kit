@@ -18,6 +18,10 @@ public:
 
     IntegrationBusAPI auto ConfigureRegistry() -> RegistryBuilder&;
     IntegrationBusAPI auto Build() -> Config;
+    IntegrationBusAPI auto WithTcpNoDelay(bool isEnabled) -> ConfigBuilder&;
+    IntegrationBusAPI auto WithTcpQuickAck(bool isEnabled) -> ConfigBuilder&;
+    IntegrationBusAPI auto WithTcpSendBufferSize(size_t bufferSize) -> ConfigBuilder&;
+    IntegrationBusAPI auto WithTcpReceiveBufferSize(size_t bufferSize) -> ConfigBuilder&;
 
 private:
     RegistryBuilder _registry;

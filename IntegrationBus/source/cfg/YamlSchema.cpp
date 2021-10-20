@@ -268,8 +268,14 @@ auto MakeYamlSchema() -> YamlSchemaElem
                         {"Hostname"},
                         {"Port"},
                         {"Logger"},
-                    }
-                }
+                        {"ConnectAttempts"},
+                    },
+                },
+                {"TcpNoDelay"},
+                {"TcpQuickAck"},
+                {"TcpReceiveBufferSize"},
+                {"TcpSendBufferSize"}
+                
             }
         }
 

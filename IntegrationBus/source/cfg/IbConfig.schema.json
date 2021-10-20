@@ -1120,10 +1120,29 @@
                         "type": "integer",
                         "default": "8500"
                     },
-                    "Logger" : { "$ref": "#/definitions/Logger" }
+                    "Logger" : { "$ref": "#/definitions/Logger" },
+                    "ConnectAttempts": {
+                        "type": "integer",
+                        "default": "1"
+                    }
                 },
                 "additionalProperties": false
+              },
+              "TcpNoDelay": {
+                  "type": "boolean",
+                  "default": "true"
+              },
+              "TcpQuickAck": {
+                  "type": "boolean",
+                  "default": "false"
+              },
+              "TcpSendBufferSize": {
+                  "type": "integer"
+              },
+              "TcpReceiveBufferSize": {
+                  "type": "integer"
               }
+
             },
             "additionalProperties": false
           }

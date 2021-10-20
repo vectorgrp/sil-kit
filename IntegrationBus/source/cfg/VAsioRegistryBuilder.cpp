@@ -38,6 +38,11 @@ auto RegistryBuilder::Build() -> RegistryConfig
     std::swap(defaultConfig, _config);
     return defaultConfig;
 }
+auto RegistryBuilder::WithConnectAttempts(size_t numberOfAttempts) -> RegistryBuilder&
+{
+    _config.connectAttempts = numberOfAttempts;
+    return *this;
+}
 
 } // namespace VAsio
 } // namespace cfg

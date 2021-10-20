@@ -12,6 +12,9 @@
 
 #include "ib/util/functional.hpp"
 
+#include "YamlConfig.hpp"
+#include "ib/cfg/ConfigBuilder.hpp"
+
 namespace {
 
 using namespace std::chrono_literals;
@@ -184,6 +187,28 @@ TEST(TestMwCfgValidation, throw_if_tracesink_has_empty_fields)
     sinkRef.outputPath = "SomeFile";
     sinkRef.name = "";
     EXPECT_THROW(Validate(participantConfig, Config{}), Misconfiguration);
+}
+TEST(TestMwCfgValidation, yaml_schema_validation_no_warnings)
+{
+    Config ibConfig;
+    ibConfig.schemaVersion = "1";
+    auto& vasioConfig = ibConfig.middlewareConfig.vasio;
+    vasioConfig.enableDomainSockets = true;
+    vasioConfig.registry.connectAttempts = 1234;
+    vasioConfig.registry.hostname = "not localhost";
+    vasioConfig.registry.port = 3456;
+    vasioConfig.registry.logger.logFromRemotes;
+    vasioConfig.tcpNoDelay = true;
+    vasioConfig.tcpQuickAck = true;
+    vasioConfig.tcpReceiveBufferSize = 1234;
+    vasioConfig.tcpSendBufferSize = 1234;
+
+    std::stringstream stream;
+    auto jsonString = yaml_to_json(to_yaml(ibConfig));
+    auto isValid = Validate(jsonString, stream);
+    EXPECT_TRUE(isValid);
+    auto warnings = stream.str();
+    EXPECT_TRUE(warnings.empty());
 }
 
 } // anonymous namespace
