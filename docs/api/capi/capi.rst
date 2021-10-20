@@ -1,3 +1,5 @@
+.. _sec:capi:
+
 ===================
 Experimental C API
 ===================
@@ -9,6 +11,7 @@ Experimental C API
 
 .. highlight:: cpp
 
+
 Using the Experimental C API
 -------------------------
 
@@ -17,11 +20,12 @@ VIB Entry Point and API Organization
 
 The main entry point of the C API is the function to obtain a ib_SimulationParticipant*::
 
-    ib_SimulationParticipant* participant;
+    ib_SimulationParticipant* participant = NULL;
     const char* jsonString = "{ ... }";
     const char* participantName = "CanWriter";
     const char* domainId = "1";
-    ib_ReturnCode = ib_SimulationParticipant_create(&participant, jsonString, participantName, domainId);
+    ib_ReturnCode result = ib_SimulationParticipant_create(&participant, jsonString,
+                                                            participantName, domainId);
 
 All further services of the C API of the IntegrationBus are requested through this SimulationParticipant.
 

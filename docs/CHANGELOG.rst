@@ -5,6 +5,25 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.4.4] - 2021-10-20
+--------------------------------
+
+Added
+~~~~~
+- Added initial C language bindings. Please note, the C API is currently
+  work in progress and as such might change in the future.
+  The documentation is in :ref:`sec:capi`.
+  C language bindings exist for CAN controllers without time-synchronzition
+  and creating simulation participants from config files.
+
+Compatibility with 3.4.3
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
+
 [3.4.3-QA] - 2021-09-15
 --------------------------------
 This is a Quality Assured Release.
