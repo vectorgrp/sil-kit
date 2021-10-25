@@ -170,7 +170,7 @@ bool YamlValidator::Validate(const std::string& yamlString, std::ostream& warnin
         }
         else
         {
-            warnings << "Warning: document does not specify 'SchemaVersion', assuming version '1'\n";
+            // the document does not specify 'SchemaVersion', we're assuming version '1'
             LoadSchema("1");
         }
         return ValidateDoc(yamlDoc, *this,  warnings, DocumentRoot());

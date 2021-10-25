@@ -40,11 +40,17 @@ MiddlewareConfig:
   ActiveMiddleware: VAsio
   VAsio:
     Registry:
-      Hostname: localhost
+      Hostname: NotLocalhost
       Logger:
         Sinks:
         - Type: Remote
       Port: 1337
+      ConnectAttempts: 9
+    TcpNoDelay: true
+    TcpQuickAck: true
+    EnableDomainSockets: false
+    TcpSendBufferSize: 3456
+    TcpReceiveBufferSize: 3456
 SimulationSetup:
   Links:
   - Endpoints:
@@ -429,6 +435,15 @@ TEST_F(YamlConfigTest, candemo_in_yaml_format)
     EXPECT_TRUE(systemMonitor.logger.sinks.at(0).type == Sink::Type::Stdout);
     EXPECT_TRUE(systemMonitor.logger.logFromRemotes);
 
+    EXPECT_TRUE(config.middlewareConfig.vasio.registry.connectAttempts == 9);
+    EXPECT_TRUE(config.middlewareConfig.vasio.registry.hostname == "NotLocalhost");
+    EXPECT_TRUE(config.middlewareConfig.vasio.registry.port == 1337);
+    EXPECT_TRUE(config.middlewareConfig.vasio.enableDomainSockets == false);
+    EXPECT_TRUE(config.middlewareConfig.vasio.tcpQuickAck == true);
+    EXPECT_TRUE(config.middlewareConfig.vasio.tcpNoDelay == true);
+    EXPECT_TRUE(config.middlewareConfig.vasio.tcpReceiveBufferSize == 3456);
+    EXPECT_TRUE(config.middlewareConfig.vasio.tcpSendBufferSize == 3456);
+
 }
 
 TEST_F(YamlConfigTest, validate_unknown_toplevel)
@@ -680,4 +695,44 @@ TEST_F(YamlConfigTest, yaml_legacy)
         EXPECT_TRUE(obj.name == "PortName");
     }
 }
+
+TEST_F(YamlConfigTest, middleware_vasio_convert)
+{
+    auto node = YAML::Load(R"(
+        "VAsio": {
+            "Registry": {
+                "Hostname": "not localhost",
+                "Port": 1234,
+                "Logger": {
+                    "Sinks": [
+                        {
+                            "Type": "Remote"
+                        }
+                    ]
+                },
+                "ConnectAttempts": 9
+            },
+            "TcpNoDelay": true,
+            "TcpQuickAck": true,
+            "TcpSendBufferSize": 3456,
+            "TcpReceiveBufferSize": 3456,
+            "EnableDomainSockets": false
+        }
+    )");
+    auto cfg = node.as<MiddlewareConfig>();
+    const auto& vasio = cfg.vasio;
+    EXPECT_EQ(vasio.registry.connectAttempts, 9);
+    EXPECT_EQ(vasio.registry.logger.sinks.at(0).type,
+        ib::cfg::Sink::Type::Remote);
+    EXPECT_EQ(vasio.registry.hostname, "not localhost");
+    EXPECT_EQ(vasio.registry.port, 1234);
+
+    EXPECT_EQ(vasio.enableDomainSockets, false);
+    EXPECT_EQ(vasio.tcpNoDelay, true);
+    EXPECT_EQ(vasio.tcpQuickAck, true);
+    EXPECT_EQ(vasio.tcpSendBufferSize, 3456);
+    EXPECT_EQ(vasio.tcpReceiveBufferSize, 3456);
+
+}
+
 } // anonymous namespace

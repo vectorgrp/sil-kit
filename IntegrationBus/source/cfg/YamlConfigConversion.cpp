@@ -1086,10 +1086,11 @@ bool VibConversion::decode(const Node& node, PatternPort& obj)
 template<>
 Node VibConversion::encode(const GenericPort& obj)
 {
+    static const GenericPort defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    node["Protocol"] = obj.protocolType;
-    node["DefinitionUri"] = obj.definitionUri;
+    non_default_encode(obj.protocolType, node, "Protocol", defaultObj.protocolType);
+    non_default_encode(obj.definitionUri, node, "DefinitionUri", defaultObj.definitionUri);
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
     return node;

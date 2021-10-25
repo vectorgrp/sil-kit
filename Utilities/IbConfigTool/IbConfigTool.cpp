@@ -22,8 +22,65 @@ struct ConversionConfig
     std::string launchConfigurations; //!< unparsed launch configs
 };
 
+auto EmitYamlFormat(YAML::Node node, std::shared_ptr<YAML::Emitter> out = {}) -> std::string
+{
+    bool isTopLevel = false;
+    if (!out)
+    {
+        isTopLevel = true;
+        out = std::make_shared<YAML::Emitter>();
+    }
 
-auto ConvertFromFile(const std::string& fileName) -> ConversionConfig
+    if (node.IsScalar())
+    {
+        *out << node;
+    }
+    else if (node.IsMap())
+    {
+        *out << YAML::BeginMap;
+        for (auto kv : node)
+        {
+            *out << YAML::Key << kv.first.Scalar();
+            if (kv.second.IsMap() || kv.second.IsSequence())
+            {
+                *out << YAML::Value;
+                EmitYamlFormat(kv.second, out);
+            }
+            else
+            {
+                *out << YAML::Value << kv.second.Scalar();
+            }
+        }
+        *out << YAML::EndMap;
+    }
+    else if (node.IsSequence())
+    {
+        *out << YAML::BeginSeq;
+        for (auto el : node)
+        {
+            if (el.IsMap() || el.IsSequence())
+            {
+                *out << YAML::Value;
+                EmitYamlFormat(el, out);
+            }
+            else
+            {
+                *out << YAML::Value << el.Scalar();
+            }
+        }
+        *out << YAML::EndSeq;
+    }
+    // we only return non-empty string if we are the top-most invocation
+    if (isTopLevel)
+    {
+        return out->c_str();
+    }
+    else
+    {
+        return {};
+    }
+}
+auto ConvertFromFile(const std::string& fileName, bool outputAsJson) -> ConversionConfig
 {
     ConversionConfig coco;
     //accepts json and yaml, legacy and current format
@@ -46,7 +103,14 @@ auto ConvertFromFile(const std::string& fileName) -> ConversionConfig
     auto node = YAML::Load(readFile(fileName));
     if (node.IsMap() && node["LaunchConfigurations"])
     {
-        coco.launchConfigurations = YAML::Dump(node["LaunchConfigurations"]);
+        if (outputAsJson)
+        {
+            coco.launchConfigurations = ib::cfg::yaml_to_json(node["LaunchConfigurations"]);
+        }
+        else
+        {
+            coco.launchConfigurations = EmitYamlFormat(node["LaunchConfigurations"]);
+        }
     }
     return coco;
 }
@@ -56,7 +120,19 @@ auto ConvertTo(const ConversionConfig& coco, bool outputAsJson) -> std::string
     auto yamlDoc = ib::cfg::to_yaml(coco.config);
     if (coco.launchConfigurations.size() > 0)
     {
-        yamlDoc["LaunchConfigurations"] = YAML::Load(coco.launchConfigurations);
+        try {
+            yamlDoc["LaunchConfigurations"] = YAML::Load(coco.launchConfigurations);
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "Error: parsing of \"LaunchConfigurations\" failed: "
+                << e.what()
+                << "\n>>> The config was read as follows: \n"
+                << coco.launchConfigurations
+                << "\n>>> end." 
+                << std::endl;
+            ::exit(-1);
+        }
     }
     if (outputAsJson)
     {
@@ -144,7 +220,7 @@ void convert(const std::string& inFile, const std::string& outFile, bool outputA
         << " with output format " << (outputAsJson ? "json" : "yaml")
         << std::endl;
 
-    auto cfg = ConvertFromFile(inFile);
+    auto cfg = ConvertFromFile(inFile, outputAsJson);
 
     //create output file
     std::fstream out{ outFile, out.out };

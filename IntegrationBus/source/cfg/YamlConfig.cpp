@@ -83,6 +83,46 @@ inline YAML::ostream_wrapper& operator<<(YAML::ostream_wrapper& out, const T& va
     return out;
 }
 
+void EmitScalar(YAML::ostream_wrapper& out, YAML::Node val)
+{
+    if (!val.IsScalar())
+    {
+        throw std::runtime_error{ "YamlConfig: EmitScalar on non-scalar type called" };
+    }
+    //XXX we should be able to query the scalar's type, instead of
+    //    exception bombing our way to the final value.
+    //out ;
+    try {
+        out << (val.as<bool>() ? "true" : "false");
+    }
+    catch (...)
+    {
+        auto emitAs = [](const auto& valStr, auto& output) {
+            std::stringstream buf;
+            buf << std::fixed << std::setprecision(10) << valStr;
+            if ((buf >> output) && buf.eof())
+            {
+                return true;
+            }
+            return false;
+        };
+        const auto valStr = val.as<std::string>();
+        //Warning: using the val.as<int> does truncate type to char
+        int intNumber{ 0 };
+        double floatNumber{ 0.0 };
+        if (emitAs(valStr, intNumber)) {
+            out << intNumber;
+        }
+        else if (emitAs(valStr, floatNumber))
+        {
+            out << floatNumber;
+        }
+        else
+        {
+            out << "\"" << valStr << "\"";
+        }
+    }
+}
 void EmitValidJson(YAML::ostream_wrapper& out, YAML::Node& node, YAML::NodeType::value parentType = YAML::NodeType::Undefined)
 {
     static Indent ind{ 0 };
@@ -91,9 +131,20 @@ void EmitValidJson(YAML::ostream_wrapper& out, YAML::Node& node, YAML::NodeType:
     if (parentType == YAML::NodeType::Undefined)
     {
         //we're at the top level
-        out << "{" << "\n";
+        if (node.IsSequence())
+        {
+            out << "[" << "\n";
+        }
+        else if (node.IsMap())
+        {
+            out << "{" << "\n";
+        }
+        else
+        {
+            EmitScalar(out, node);
+            return;
+        }
         ind.Inc();
-        out << ind;
     }
     for (auto kv : node)
     {
@@ -133,40 +184,8 @@ void EmitValidJson(YAML::ostream_wrapper& out, YAML::Node& node, YAML::NodeType:
             }
             else if (val.IsScalar())
             {
-                //XXX we should be able to query the scalar's type, instead of
-                //    exception bombing our way to the final value.
-                //out ;
                 out << ind;
-                try {
-                    out << (val.as<bool>() ? "true" : "false");
-                }
-                catch (...)
-                {
-                    auto emitAs = [](const auto& valStr, auto& output) {
-                        std::stringstream buf;
-                        buf << std::fixed << std::setprecision(10) << valStr;
-                        if ((buf >> output) && buf.eof())
-                        {
-                            return true;
-                        }
-                        return false;
-                    };
-                    const auto valStr = val.as<std::string>();
-                    //Warning: using the val.as<int> does truncate type to char
-                    int intNumber{ 0 };
-                    double floatNumber{ 0.0 };
-                    if (emitAs(valStr, intNumber)) {
-                        out << intNumber;
-                    }
-                    else if (emitAs(valStr, floatNumber))
-                    {
-                        out << floatNumber;
-                    }
-                    else
-                    {
-                        out << "\"" << valStr << "\"";
-                    }
-                }
+                EmitScalar(out, val);
             }
 
         }
@@ -187,7 +206,15 @@ void EmitValidJson(YAML::ostream_wrapper& out, YAML::Node& node, YAML::NodeType:
     }
     if (parentType == YAML::NodeType::Undefined)
     {
-        out << "}\n";
+        //we're at the top level
+        if (node.IsSequence())
+        {
+            out << "]" << "\n";
+        }
+        else if (node.IsMap())
+        {
+            out << "}" << "\n";
+        }
     }
 }
 } //end anonymous namespace

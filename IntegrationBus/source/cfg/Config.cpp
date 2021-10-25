@@ -445,12 +445,20 @@ bool operator==(const VAsio::RegistryConfig &lhs, const VAsio::RegistryConfig &r
 {
     return lhs.port == rhs.port
         && lhs.hostname == rhs.hostname
-        && lhs.logger == rhs.logger;
+        && lhs.logger == rhs.logger
+        && lhs.connectAttempts == rhs.connectAttempts
+        ;
 }
 
 bool operator==(const VAsio::Config &lhs, const VAsio::Config &rhs)
 {
-    return lhs.registry == rhs.registry;
+    return lhs.registry == rhs.registry
+        && lhs.enableDomainSockets == rhs.enableDomainSockets
+        && lhs.tcpNoDelay == rhs.tcpNoDelay
+        && lhs.tcpQuickAck == rhs.tcpQuickAck
+        && lhs.tcpReceiveBufferSize == rhs.tcpReceiveBufferSize
+        && lhs.tcpSendBufferSize == rhs.tcpSendBufferSize
+        ;
 }
 
 bool operator==(const MiddlewareConfig &lhs, const MiddlewareConfig& rhs)
