@@ -7,6 +7,7 @@
 #include <thread>
 #include <array>
 #include <functional>
+#include <cctype>
 
 #include "ib/mw/logging/ILogger.hpp"
 
@@ -95,14 +96,33 @@ void SetListenOptions(ib::mw::logging::ILogger* ,
 
 #endif
 
+auto printableName(const std::string& participantName) -> std::string
+{
+    std::string safeName;
+    for (const auto& ch : participantName)
+    {
+        if (std::isalnum(ch))
+        {
+            safeName.push_back(ch);
+        }
+        else
+        {
+            safeName += fmt::format("{:x}", static_cast<unsigned char>(ch));
+        }
+    }
+    return safeName;
+}
+
 //!< Note that local ipc (unix domain) sockets have a path limit (108 characters, typically)
 // Using the current working directory as part of a domain socket path might result in 
 // a runtime exception. We create a unique temporary file path, with a fixed length.
 auto makeLocalEndpoint(const std::string& participantName, const ib::mw::ParticipantId& id, const int domainId) -> asio::local::stream_protocol::endpoint
 {
     asio::local::stream_protocol::endpoint result;
-    const auto bounded_name = participantName.substr(0, 
-        std::min<size_t>(participantName.size(), 10));
+    // Ensure the participantName is in a useful encoding
+    const auto safe_name = printableName(participantName);
+    const auto bounded_name = safe_name.substr(0,
+        std::min<size_t>(safe_name.size(), 10));
 
     // We hash the participant name, ID and the current working directory
     // as part of the temporary file name, so we can have multiple local simulations
@@ -539,6 +559,7 @@ void VAsioConnection::AcceptConnectionsOn(EndpointT endpoint)
     catch (const std::exception& e)
     {
         _logger->Error("VAsioConnection failed to listening on {}: {}", endpoint, e.what());
+        acceptor.reset();
         throw;
     }
 
