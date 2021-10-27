@@ -32,6 +32,7 @@ RUN export TZ=Europe/Berlin; \
     rm -rf /var/lib/apt/lists/*
 
 # Sphinx documentation system
+RUN pip3 install docutils==0.12
 RUN pip3 install sphinx==3.1.2
 RUN pip3 install six
 
