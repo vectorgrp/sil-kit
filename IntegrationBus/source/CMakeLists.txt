@@ -4,6 +4,7 @@ add_subdirectory(mw)
 add_subdirectory(sim)
 add_subdirectory(util)
 add_subdirectory(extensions)
+add_subdirectory(capi)
 
 # Encode the current GIT and version infos into version_macros.hpp
 # If this file is present in the current source directory we assume

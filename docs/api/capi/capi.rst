@@ -60,5 +60,33 @@ Can API
 .. doxygenfunction:: ib_CanController_RegisterStateChangedHandler
 .. doxygenfunction:: ib_CanController_RegisterErrorStateChangedHandler
 
+Ethernet API
+~~~~~~~~~~~~~~~~~~~~
+The Ethernet API consists out of two main parts:
+1. The Ethernet controller
+2. The Ethernet frame
 
-   
+Ethernet Controller
+++++++++++++++++++++
+
+The Ethernet controller interacts with the corresponding Ethernet bus and send Ethernet frames.
+The Ethernet frames are the single messages/frames, that are transmitted over the Ethernet bus.
+
+.. doxygenfunction:: ib_EthernetController_create
+.. doxygenfunction:: ib_EthernetController_Activate
+.. doxygenfunction:: ib_EthernetController_Deactivate
+.. doxygenfunction:: ib_EthernetController_RegisterReceiveMessageHandler
+.. doxygenfunction:: ib_EthernetController_RegisterFrameAckHandler
+.. doxygenfunction:: ib_EthernetController_RegisterStateChangedHandler
+.. doxygenfunction:: ib_EthernetController_RegisterBitRateChangedHandler
+.. doxygenfunction:: ib_EthernetController_SendFrame
+
+
+Ethernet Frame
+++++++++++++++++++++
+
+The ib_EthernetFrame corresponds to an ethernet raw frame.
+A basic frame consists out of the destination mac, the source mac, the ethertype and a payload.
+The union type within the ib_EthernetFrame helps when manual construction of a frame is necessary (frameHeader, frameHeaderVlanTagged).
+
+.. note:: For an example of manual frame construction one can refer to the C Ethernet demo.

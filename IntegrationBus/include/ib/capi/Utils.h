@@ -2,6 +2,13 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+#define __IB_BEGIN_DECLS extern "C" {
+#define __IB_END_DECLS }
+#else
+#define __IB_BEGIN_DECLS
+#define __IB_END_DECLS
+#endif
 
 // define compiler specific export / import attributes
 #if defined CIntegrationBusAPI_STATIC
@@ -57,7 +64,7 @@ extern "C"
 
     struct ib_ByteVector
     {
-        const uint8_t * pointer;
+        uint8_t * pointer;
         size_t size;
     };
     typedef struct ib_ByteVector ib_ByteVector;

@@ -1,0 +1,58 @@
+{
+    "ConfigVersion": "0.0.1",
+    "ConfigName": "CEthernetDemo",
+    "Description": "Sample configuration for Ethernet without NetworkSimulator",
+
+    "SimulationSetup": {
+
+        "Participants": [
+            {
+                "Name": "EthernetReaderWriter",
+                "Description": "Demo Participant with two ehternet controllers talking to each other",
+
+                "IsSyncMaster": true,
+                "Logger": {
+                    "Sinks": [
+                        {
+						  "Type": "Stdout",
+						  "Level": "Trace"
+                        }
+                    ]
+                },
+                "ParticipantController": {
+                    "SyncType": "DiscreteTime"
+                },
+                "EthernetControllers": [
+                    {
+                        "Name": "ETH0",
+                        "MacAddr": "F6:04:68:71:AA:C1"
+                    },
+					          {
+                        "Name": "ETH1",
+                        "MacAddr": "F6:04:68:71:AA:C2"
+                    }
+                ]
+            }
+        ],
+
+        "Links": [
+            {
+                "Name": "LAN1",
+                "Endpoints": [
+                    "EthernetReaderWriter/ETH0",
+                    "EthernetReaderWriter/ETH1"
+                ]
+            }
+        ],
+
+        "TimeSync": {
+            "TickPeriodNs": 1000000
+        }
+
+    },
+
+    "MiddlewareConfig": {
+        "ActiveMiddleware": "VAsio"
+    }
+
+}

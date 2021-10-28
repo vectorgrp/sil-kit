@@ -8,9 +8,23 @@
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/sim/can/all.hpp"
 #include "ib/sim/can/string_utils.hpp"
+#include "ib/sim/eth/all.hpp"
+#include "ib/sim/eth/string_utils.hpp"
 #include <string>
 #include <iostream>
-#pragma pack(8)
+#include <algorithm>
+
+#define CAPI_DEFINE_FUNC(BODY) \
+    try { \
+        BODY \
+    } \
+    catch (const std::runtime_error& e) { \
+        ib_error_string = e.what(); \
+        return ib_ReturnCode_UNSPECIFIEDERROR; \
+    } \
+    catch (const std::exception&) { \
+        return ib_ReturnCode_UNSPECIFIEDERROR; \
+    }
 
 extern "C" {
 
@@ -378,5 +392,186 @@ CIntegrationBusAPI ib_ReturnCode ib_CanController_create(ib_CanController** outC
 }
 #pragma endregion CAN
 
+#pragma region ETHERNET
+std::map<uint32_t, void*> ethernetTransmitContextMap;
+std::map<uint32_t, int> ethernetTransmitContextMapCounter;
+int transmitAckListeners = 0;
+
+CIntegrationBusAPI ib_ReturnCode ib_EthernetController_create(ib_EthernetController** outController, ib_SimulationParticipant* participant, const char* name)
+{
+    CAPI_DEFINE_FUNC(
+        if (outController == nullptr || participant == nullptr || name == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+
+        std::string strName(name);
+        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        auto ethernetController = comAdapter->CreateEthController(strName);
+        *outController = reinterpret_cast<ib_EthernetController*>(ethernetController);
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+ib_ReturnCode ib_EthernetController_Activate(ib_EthernetController* self)
+{
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        auto controller = reinterpret_cast<ib::sim::eth::IEthController*>(self);
+        controller->Activate();
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+ib_ReturnCode ib_EthernetController_Deactivate(ib_EthernetController* self)
+{
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        auto controller = reinterpret_cast<ib::sim::eth::IEthController*>(self);
+        controller->Deactivate();
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+ib_ReturnCode ib_EthernetController_RegisterReceiveMessageHandler(ib_EthernetController* self, void* context, ib_EthernetReceiveMessageHandler_t* handler)
+{
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr || handler == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        auto controller = reinterpret_cast<ib::sim::eth::IEthController*>(self);
+        controller->RegisterReceiveMessageHandler(
+            [handler, context, self](ib::sim::eth::IEthController* /*ctrl*/, const ib::sim::eth::EthMessage& msg)
+            {
+                auto rawFrame = msg.ethFrame.RawFrame();
+                ib_EthernetMessage em;
+                ib_EthernetFrame ef;
+
+                ef.frameSize = rawFrame.size();
+                if (rawFrame.size() > 0)
+                {
+                    ef.frameData = &(rawFrame[0]);
+                }
+                else
+                {
+                    ef.frameData = NULL;
+                }
+                em.ethernetFrame = &ef;
+                em.interfaceId = ib_InterfaceIdentifier_EthernetFrame;
+                em.timestamp = msg.timestamp.count();
+
+                handler(context, self, &em);
+            });
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+ib_ReturnCode ib_EthernetController_RegisterFrameAckHandler(ib_EthernetController* self, void* context, ib_EthernetFrameAckHandler_t* handler)
+{
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr || handler == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        auto controller = reinterpret_cast<ib::sim::eth::IEthController*>(self);
+        transmitAckListeners += 1;
+        controller->RegisterMessageAckHandler(
+            [handler, context, self](ib::sim::eth::IEthController* controller, const ib::sim::eth::EthTransmitAcknowledge& ack)
+            {
+                ib_EthernetTransmitAcknowledge eta;
+
+                eta.interfaceId = ib_InterfaceIdentifier_EthernetTransmitAcknowledge;
+                eta.status = (ib_EthernetTransmitStatus)ack.status;
+                eta.timestamp = ack.timestamp.count();
+
+                auto transmitContext = ethernetTransmitContextMap[ack.transmitId];
+                eta.userContext = transmitContext;
+                ethernetTransmitContextMapCounter[ack.transmitId] += 1;
+                if (ethernetTransmitContextMapCounter[ack.transmitId] >= transmitAckListeners)
+                {
+                    ethernetTransmitContextMap.erase(ack.transmitId);
+                    ethernetTransmitContextMapCounter.erase(ack.transmitId);
+                }
+                
+
+                handler(context, self, &eta);
+            });
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+ib_ReturnCode ib_EthernetController_RegisterStateChangedHandler(ib_EthernetController* self, void* context, ib_EthernetStateChangedHandler_t* handler)
+{
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr || handler == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        auto controller = reinterpret_cast<ib::sim::eth::IEthController*>(self);
+        controller->RegisterStateChangedHandler(
+            [handler, context, self](ib::sim::eth::IEthController* controller, const ib::sim::eth::EthState& state)
+            {
+                ib_EthernetState cstate = (int32_t)state;
+
+                handler(context, self, cstate);
+            });
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+ib_ReturnCode ib_EthernetController_RegisterBitRateChangedHandler(ib_EthernetController* self, void* context, ib_EthernetBitRateChangedHandler_t* handler)
+{
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr || handler == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        auto controller = reinterpret_cast<ib::sim::eth::IEthController*>(self);
+        controller->RegisterBitRateChangedHandler(
+            [handler, context, self](ib::sim::eth::IEthController* controller, const uint32_t& bitrate)
+            {
+                handler(context, self, bitrate);
+            });
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+ib_ReturnCode ib_EthernetController_SendFrame(ib_EthernetController* self, ib_EthernetFrame* frame, void* userContext)
+{
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr || frame == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        using std::chrono::duration;
+        auto controller = reinterpret_cast<ib::sim::eth::IEthController*>(self);
+
+        ib::sim::eth::EthFrame ef;
+        std::vector<uint8_t> rawFrame(frame->frameData, frame->frameData + frame->frameSize);
+        ef.SetRawFrame(rawFrame);
+        auto transmitId = controller->SendFrame(ef);
+
+        ethernetTransmitContextMap[transmitId] = userContext;
+        ethernetTransmitContextMapCounter[transmitId] = 0;
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+#pragma endregion ETHERNET
 
 }
