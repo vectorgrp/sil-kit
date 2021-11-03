@@ -5,6 +5,39 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.4.5] - 2021-11-03
+--------------------------------
+
+Added
+~~~~~
+- C-API: added initial ethernet bindings for the C language.
+  Refer to :ref:`sec:capi` for documentation.
+  Currently, the Ethernet controllers work without time-synchronization.
+  A Demo is provided in ``Demos/CEthernet`` (VIB-431).
+
+Fixed
+~~~~~
+- Clarify the documentation of synchronization types and the usage of
+  ``SetPeriod()`` (AFTMAGT-329).
+- Fix YAML conversions with the ``vib-config-tool``.
+  The YAML parser was emitting JSON formatted input back in JSON format.
+  Ensure that default config values are properly serialized, or if unchanged are
+  omitted from the output (AFTMAGT-331).
+- Fix VAsio config values in the JSON schema.
+  Update the ConfigBuilder to support the latest config additions.
+  Clarified the documentation, which indicated misplaced config items nested in the
+  ``Registry`` config item (AFTMAGT-328).
+- Ensure user input (in different encodings) is not used verbatim in the
+  domain socket creation (VIB-459).
+
+
+Compatibility with 3.4.4
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
 [3.4.4] - 2021-10-20
 --------------------------------
 

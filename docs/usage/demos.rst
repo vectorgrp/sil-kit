@@ -337,7 +337,7 @@ Benchmark Demo
          | \- All participants, the SyncMaster and the VAsio registry (VAsio only) run in the same process.
 
 
-C-API CANDemo
+C-API CanDemo
 ~~~~~~~~~~~~~~
 
 .. list-table::
@@ -360,3 +360,25 @@ C-API CANDemo
 
             |DemoDir|/IbDemoCCan VirtualCanCable1_VAsio.json  CANoe
 
+C-API EthernetDemo
+~~~~~~~~~~~~~~
+
+.. list-table::
+   :widths: 17 220
+   :stub-columns: 1
+
+   *  -  Abstract
+      -  Demonstrates the C language bindings for two ethernet controllers.
+   *  -  Source location
+      -  Demos/CEthernet
+   *  -  Parameters
+      -  There are up two positional arguments:
+
+         #. Filename of the IB Configuration to be used; must be the provided IbConfig_DemoEthernet_SingleParticipant.json.
+         #. Name of the participant in the configuration; must be "EthernetReaderWriter"
+
+   *  -  Parameter Example
+      -  .. parsed-literal:: 
+            # starting IbRegistry is required for VAsio to work
+
+            |DemoDir|/IbDemoCEthernet IbConfig_DemoEthernet_SingleParticipant.json EthernetReaderWriter
