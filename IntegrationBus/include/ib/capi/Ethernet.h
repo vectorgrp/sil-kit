@@ -1,3 +1,5 @@
+/* Copyright (c) Vector Informatik GmbH. All rights reserved. */
+
 #pragma once
 #include <stdint.h>
 #include "ib/capi/Utils.h"
@@ -88,7 +90,7 @@ struct ib_EthernetTransmitAcknowledge
 
 typedef struct ib_EthernetTransmitAcknowledge ib_EthernetTransmitAcknowledge;
 
-typedef void ib_EthernetController;
+typedef struct ib_EthernetController ib_EthernetController;
 
 /*! Callback type to indicate that a EthernetMessage has been received.
 * \param context The context provided by the user upon registration.

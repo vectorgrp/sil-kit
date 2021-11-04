@@ -63,12 +63,12 @@ void AckCallback(void* context, ib_CanController* controller, struct ib_CanTrans
     printf(">> %i for CAN Message with transmitId=%i, timestamp=%llu\n", cAck->status, tc->someInt, cAck->timestamp);
 }
 
-void ReceiveMessage(void* context, ib_CanController* controller, ib_CanFrame_Meta* metaData)
+void ReceiveMessage(void* context, ib_CanController* controller, ib_CanMessage* message)
 {
     TransmitContext* txContext = (TransmitContext*)(context);
     unsigned int i;
     printf(">> CAN Message: canId=%i timestamp=%lu ",
-            metaData->canFrame->id, metaData->timestamp);
+        message->canFrame->id, message->timestamp);
     if (txContext != NULL)
     {
         printf("transmitContext=%d ", txContext->someInt);
@@ -76,16 +76,16 @@ void ReceiveMessage(void* context, ib_CanController* controller, ib_CanFrame_Met
 
     printf(": ");
 
-    for (i = 0; i < metaData->canFrame->dataLength; i++)
+    for (i = 0; i < message->canFrame->data.size; i++)
     {
-        char ch = metaData->canFrame->data[i];
+        char ch = message->canFrame->data.pointer[i];
         if (isalnum(ch))
         {
             printf("%c", ch);
         }
         else
         {
-            printf("%x", metaData->canFrame->data[i]);
+            printf("<%x>", message->canFrame->data.pointer[i]);
         }
     }
     printf("\n");
@@ -103,8 +103,8 @@ void SendCanMessage()
     canMessageCounter += 1;
     int payloadSize = snprintf(payload, sizeof(payload), "CAN %i", canMessageCounter);
 
-    strncpy((char*)msg.data, payload, payloadSize);
-    msg.dataLength = payloadSize;
+    msg.data.pointer = &payload[0];
+    msg.data.size = payloadSize;
     msg.dlc = payloadSize;
 
     transmitContext.someInt = 1234;

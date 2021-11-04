@@ -66,52 +66,45 @@ IntegrationBusAPI ib_ReturnCode ib_ReturnCodeToString(const char** outString, ib
 
 
 CIntegrationBusAPI const char* ib_GetLastErrorString() {
-    const char* error_string = ib_error_string.c_str();;
+    const char* error_string = ib_error_string.c_str();
     return error_string;
 }
 
 ib_ReturnCode ib_SimulationParticipant_destroy(ib_SimulationParticipant* self)
 {
-    try {
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr)
+        {
+            ib_error_string = "A nullpointer argument was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
         auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(self);
         delete comAdapter;
         return ib_ReturnCode_SUCCESS;
-    }
-    catch (const std::runtime_error& e) {
-        ib_error_string = e.what();
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
-    catch (const std::exception& ) {
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
+        )
 }
 
 ib_ReturnCode ib_SimulationParticipant_GetComAdapter(void** outWrappedObject, ib_SimulationParticipant* self)
 {
-    try {
-        if (outWrappedObject == nullptr)
+    CAPI_DEFINE_FUNC(
+        if (outWrappedObject == nullptr || self == nullptr)
         {
+            ib_error_string = "A nullpointer argument was passed to the function.";
             return ib_ReturnCode_BADPARAMETER;
         }
         auto* comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(self);
         *outWrappedObject = comAdapter;
 
         return ib_ReturnCode_SUCCESS;
-    }
-    catch (const std::runtime_error& e) {
-        ib_error_string = e.what();
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
-    catch (const std::exception& ) {
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
+        )
 }
 
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_create(ib_SimulationParticipant** outParticipant, const char* cJsonConfig, const char* cParticipantName, const char* cDomainId)
 {
-    try {
-        if (outParticipant == nullptr)
+    CAPI_DEFINE_FUNC(
+        if (outParticipant == nullptr || cJsonConfig == nullptr || cParticipantName == nullptr || cDomainId == nullptr)
         {
+            ib_error_string = "A nullpointer argument was passed to the function.";
             return ib_ReturnCode_BADPARAMETER;
         }
 
@@ -124,19 +117,16 @@ IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_create(ib_SimulationPar
 
         std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
         auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId).release();
-            
+        
+        if (comAdapter == nullptr)
+        {
+            ib_error_string = "Creating Simulation Participant failed due to unknown error and returned null pointer.";
+            return ib_ReturnCode_UNSPECIFIEDERROR;
+        }
+
         *outParticipant = reinterpret_cast<ib_SimulationParticipant*>(comAdapter);
         return ib_ReturnCode_SUCCESS;
-    }
-    catch (const std::runtime_error& e) 
-    {
-        ib_error_string = e.what();
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
-    catch (const std::exception& ) 
-    {
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
+        )
 }
 #pragma endregion GENERAL
 
@@ -146,14 +136,19 @@ IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_create(ib_SimulationPar
 
 std::map<uint32_t, void*> transmitContexMap;
 
-ib_ReturnCode ib_CanController_RegisterReceiveMessageHandler(ib_CanController* self, void* context, void (*Callback)(void* context, ib_CanController* controller, ib_CanFrame_Meta* canFrameMeta))
+ib_ReturnCode ib_CanController_RegisterReceiveMessageHandler(ib_CanController* self, void* context, void (*Callback)(void* context, ib_CanController* controller, ib_CanMessage* canFrameMeta))
 {
-    try {
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr || Callback == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(self);
         canController->RegisterReceiveMessageHandler(
             [context, self, Callback](ib::sim::can::ICanController* /*ctrl*/, const ib::sim::can::CanMessage& msg)
             {
-                ib_CanFrame_Meta cmm;
+                ib_CanMessage cmm;
                 ib_CanFrame cm;
                 cmm.timestamp = msg.timestamp.count();
                 cmm.interfaceId = ib_InterfaceIdentifier_CanFrame_Meta;
@@ -168,25 +163,23 @@ ib_ReturnCode ib_CanController_RegisterReceiveMessageHandler(ib_CanController* s
                 flags |= msg.flags.esi ? ib_CanFrameFlag_esi : 0;
                 cm.flags = flags;
                 cm.dlc = msg.dlc;
-                std::copy(msg.dataField.begin(), msg.dataField.end(), cm.data);
-                cm.dataLength = (uint32_t)msg.dataField.size();
+                cm.data.pointer = (uint8_t*)msg.dataField.data();
+                cm.data.size = (uint32_t)msg.dataField.size();
 
                 Callback(context, self, &cmm);
             });
         return ib_ReturnCode_SUCCESS;
-    }
-    catch (const std::runtime_error& e) {
-        ib_error_string = e.what();
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
-    catch (const std::exception& ) {
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
+        )
 }
 
 ib_ReturnCode ib_CanController_RegisterTransmitStatusHandler(ib_CanController* self, void* context, void (*Callback)(void* context, ib_CanController* controller, ib_CanTransmitAcknowledge* cAck))
 {
-    try {
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr || Callback == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(self);
         canController->RegisterTransmitStatusHandler(
             [Callback, context, self](ib::sim::can::ICanController* /*ctrl*/, const ib::sim::can::CanTransmitAcknowledge& ack)
@@ -201,19 +194,17 @@ ib_ReturnCode ib_CanController_RegisterTransmitStatusHandler(ib_CanController* s
                 Callback(context, self, &tcack);
             });
         return ib_ReturnCode_SUCCESS;
-    }
-    catch (const std::runtime_error& e) {
-        ib_error_string = e.what();
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
-    catch (const std::exception& ) {
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
+        )
 }
 
 ib_ReturnCode ib_CanController_RegisterStateChangedHandler(ib_CanController* self, void* context, void (*Callback)(void* context, ib_CanController* controller, ib_CanControllerState state))
 {
-    try {
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr || Callback == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(self);
         canController->RegisterStateChangedHandler(
             [Callback, context, self](ib::sim::can::ICanController* /*ctrl*/, const ib::sim::can::CanControllerState state)
@@ -221,19 +212,17 @@ ib_ReturnCode ib_CanController_RegisterStateChangedHandler(ib_CanController* sel
                 Callback(context, self, (ib_CanControllerState)state);
             });
         return ib_ReturnCode_SUCCESS;
-    }
-    catch (const std::runtime_error& e) {
-        ib_error_string = e.what();
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
-    catch (const std::exception& ) {
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
+        )
 }
 
 ib_ReturnCode ib_CanController_RegisterErrorStateChangedHandler(ib_CanController* self, void* context, void (*Callback)(void* context, ib_CanController* controller, ib_CanErrorState state))
 {
-    try {
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr || Callback == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(self);
         canController->RegisterErrorStateChangedHandler(
             [Callback, context, self](ib::sim::can::ICanController* /*ctrl*/, const ib::sim::can::CanErrorState state)
@@ -241,35 +230,31 @@ ib_ReturnCode ib_CanController_RegisterErrorStateChangedHandler(ib_CanController
                 Callback(context, self, (ib_CanErrorState)state);
             });
         return ib_ReturnCode_SUCCESS;
-    }
-    catch (const std::runtime_error& e) {
-        ib_error_string = e.what();
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
-    catch (const std::exception& ) {
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
+        )
 }
 
 ib_ReturnCode ib_CanController_SetBaudRate(ib_CanController* self, uint32_t rate, uint32_t fdRate)
 {
-    try {
+    CAPI_DEFINE_FUNC(
+        if(self == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(self);
         canController->SetBaudRate(rate, fdRate);
         return ib_ReturnCode_SUCCESS;
-    }
-    catch (const std::runtime_error& e) {
-        ib_error_string = e.what();
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
-    catch (const std::exception& ) {
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
+        )
 }
 
 ib_ReturnCode ib_CanController_SendFrame(ib_CanController* self, ib_CanFrame* message, void* transmitContext)
 {
-    try {
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr || message == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
         using std::chrono::duration;
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(self);
 
@@ -288,91 +273,77 @@ ib_ReturnCode ib_CanController_SendFrame(ib_CanController* self, ib_CanFrame* me
         auto payloadStr = payloadBuilder.str();
 
         cm.dlc = message->dlc;
-        cm.dataField = std::vector<uint8_t>(&(message->data[0]), &(message->data[0]) + message->dataLength);
+        cm.dataField = std::vector<uint8_t>(&(message->data.pointer[0]), &(message->data.pointer[0]) + message->data.size);
 
         auto transmitId = canController->SendMessage(std::move(cm));
         transmitContexMap[transmitId] = transmitContext;
         return ib_ReturnCode_SUCCESS;
-    }
-    catch (const std::runtime_error& e) {
-        ib_error_string = e.what();
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
-    catch (const std::exception& ) {
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
+        )
 }
 
 ib_ReturnCode ib_CanController_Start(ib_CanController* self)
 {
-    try {
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(self);
         canController->Start();
         return ib_ReturnCode_SUCCESS;
-    }
-    catch (const std::runtime_error& e) {
-        ib_error_string = e.what();
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
-    catch (const std::exception& ) {
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
+        )
 }
 
 ib_ReturnCode ib_CanController_Stop(ib_CanController* self)
 {
-    try {
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(self);
         canController->Stop();
         return ib_ReturnCode_SUCCESS;
-    }
-    catch (const std::runtime_error& e) {
-        ib_error_string = e.what();
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
-    catch (const std::exception& ) {
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
+        )
 }
 
 ib_ReturnCode ib_CanController_Reset(ib_CanController* self)
 {
-    try {
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(self);
         canController->Reset();
         return ib_ReturnCode_SUCCESS;
-    }
-    catch (const std::runtime_error& e) {
-        ib_error_string = e.what();
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
-    catch (const std::exception& ) {
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
+        )
 }
 
 ib_ReturnCode ib_CanController_Sleep(ib_CanController* self)
 {
-    try {
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(self);
         canController->Sleep();
         return ib_ReturnCode_SUCCESS;
-    }
-    catch (const std::runtime_error& e) {
-        ib_error_string = e.what();
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
-    catch (const std::exception& ) {
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
+        )
 }
 
 
 CIntegrationBusAPI ib_ReturnCode ib_CanController_create(ib_CanController** outCanController, ib_SimulationParticipant* self,  const char* cName)
 {
-    try {
-        if (outCanController == nullptr)
+    CAPI_DEFINE_FUNC(
+        if (self == nullptr || cName == nullptr || outCanController == nullptr)
         {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
             return ib_ReturnCode_BADPARAMETER;
         }
 
@@ -381,14 +352,7 @@ CIntegrationBusAPI ib_ReturnCode ib_CanController_create(ib_CanController** outC
         auto canController = comAdapter->CreateCanController(name);
         *outCanController = reinterpret_cast<ib_CanController*>(canController);
         return ib_ReturnCode_SUCCESS;
-    }
-    catch (const std::runtime_error& e) {
-        ib_error_string = e.what();
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
-    catch (const std::exception& ) {
-        return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
+        )
 }
 #pragma endregion CAN
 
