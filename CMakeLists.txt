@@ -82,6 +82,7 @@ if(IB_INSTALL_SOURCE)
         FILES_MATCHING
             PATTERN *.cpp
             PATTERN *.cxx
+            PATTERN *.c
             PATTERN *.rc
             PATTERN *.h
             PATTERN *.hpp
