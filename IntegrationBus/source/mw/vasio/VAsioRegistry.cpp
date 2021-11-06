@@ -162,7 +162,10 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
 
     SendKnownParticipants(from);
 
-    _connectedParticipants[peerUri.participantId] = peerUri;
+    ConnectedParticipantInfo newParticipantInfo;
+    newParticipantInfo.peer = from;
+    newParticipantInfo.peerUri = peerUri;
+    _connectedParticipants.emplace_back(std::move(newParticipantInfo));
 
     if (AllParticipantsAreConnected())
     {
@@ -219,12 +222,10 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
     };
     for (const auto& connectedParticipant : _connectedParticipants)
     {
-        auto peerUri = connectedParticipant.second;
-        if (peerUri.participantName == peer->GetUri().participantName)
-        {
-            // don't advertise the peer to itself
-            continue;
-        }
+        // don't advertise the peer to itself
+        if (connectedParticipant.peer == peer) continue;
+
+        auto peerUri = connectedParticipant.peerUri;
         replaceLocalhostUri(peerUri);
         knownParticipantsMsg.peerUris.push_back(peerUri);
 
@@ -245,7 +246,8 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
 
 void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
 {
-    _connectedParticipants.erase(peer->GetInfo().participantId);
+    _connectedParticipants.erase(std::remove_if(_connectedParticipants.begin(), _connectedParticipants.end(),
+        [peer](const auto& connectedParticipant) { return connectedParticipant.peer == peer; }));
 
     if (_connectedParticipants.empty())
     {
@@ -259,7 +261,9 @@ bool VAsioRegistry::AllParticipantsAreConnected() const
 {
     for (auto&& participant : _connection.Config().simulationSetup.participants)
     {
-        if (_connectedParticipants.count(participant.id) != 1)
+        auto&& connectedParticipant = std::find_if(_connectedParticipants.begin(), _connectedParticipants.end(),
+            [&participant](const auto& connectedParticipant) { return connectedParticipant.peerUri.participantName == participant.name; });
+        if (connectedParticipant == _connectedParticipants.end())
         {
             return false;
         }

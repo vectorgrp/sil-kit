@@ -28,6 +28,14 @@ public:
 
 private:
     // ----------------------------------------
+    // private data types
+    struct ConnectedParticipantInfo {
+        IVAsioPeer* peer;
+        ib::mw::VAsioPeerUri peerUri;
+    };
+
+private:
+    // ----------------------------------------
     // private methods
     void OnParticipantAnnouncement(IVAsioPeer* from, const ParticipantAnnouncement& announcement);
     bool IsExpectedParticipant(const ib::mw::VAsioPeerUri& peerInfo);
@@ -40,7 +48,7 @@ private:
     // ----------------------------------------
     // private members
     std::unique_ptr<logging::ILogger> _logger;
-    std::unordered_map<ParticipantId, ib::mw::VAsioPeerUri> _connectedParticipants;
+    std::vector<ConnectedParticipantInfo> _connectedParticipants;
     std::function<void()> _onAllParticipantsConnected;
     std::function<void()> _onAllParticipantsDisconnected;
 
