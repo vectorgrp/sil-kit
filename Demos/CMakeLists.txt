@@ -100,6 +100,7 @@ endfunction(make_ib_demo)
 # Add the actual demo projects
 #######################################################################################################################
 add_subdirectory(Can)
+add_subdirectory(CanSplitNoSync)
 add_subdirectory(CCan)
 add_subdirectory(CFlexRay)
 add_subdirectory(Ethernet)
