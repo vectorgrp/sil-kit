@@ -104,9 +104,6 @@ void CanController::RegisterHandler(CallbackT<MsgT> handler)
 
 void CanController::ReceiveIbMessage(ib::mw::EndpointAddress from, const CanMessage& msg)
 {
-    if (from == _endpointAddr)
-        return;
-
     CallHandlers(msg);
 
     _tracer.Trace(extensions::Direction::Receive, _timeProvider->Now(), msg);

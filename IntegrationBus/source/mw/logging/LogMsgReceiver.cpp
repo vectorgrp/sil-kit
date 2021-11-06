@@ -14,9 +14,6 @@ LogMsgReceiver::LogMsgReceiver(IComAdapterInternal* comAdapter, Logger* logger)
 
 void LogMsgReceiver::ReceiveIbMessage(mw::EndpointAddress from, const LogMsg& msg)
 {
-    if (from.participant == _endpointAddress.participant)
-        return;
-
     _logger->LogReceivedMsg(msg);
 }
 
