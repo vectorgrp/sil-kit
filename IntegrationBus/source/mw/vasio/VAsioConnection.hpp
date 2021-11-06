@@ -133,6 +133,8 @@ private:
 
     template <class MsgT>
     using IbEndpointToLinkMap = std::map<EndpointId, std::shared_ptr<IbLink<MsgT>>>;
+    template <class MsgT>
+    using IbEndpointToReceiverMap = std::map<EndpointId, IIbMessageReceiver<MsgT>*>;
 
     using ParticipantAnnouncementReceiver = std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)>;
 
@@ -257,10 +259,13 @@ private:
         typename IbServiceT::IbSendMessagesTypes sendMessageTypes{};
 
         util::tuple_tools::for_each(receiveMessageTypes,
-            [this, &link, service](auto&& ibMessage)
+            [this, &link, service, endpointId](auto&& ibMessage)
         {
             using IbMessageT = std::decay_t<decltype(ibMessage)>;
             this->RegisterIbMsgReceiver<IbMessageT>(link, service);
+
+            auto&& receiverMap = std::get<IbEndpointToReceiverMap<IbMessageT>>(this->_endpointToReceiverMap);
+            receiverMap[endpointId] = service;
         }
         );
 
@@ -282,7 +287,8 @@ private:
     void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
     {
         auto& linkMap = std::get<IbEndpointToLinkMap<std::decay_t<IbMessageT>>>(_endpointToLinkMap);
-        linkMap[from.endpoint]->DistributeLocalIbMessage(from, std::forward<IbMessageT>(msg));
+        auto& receiverMap = std::get<IbEndpointToReceiverMap<std::decay_t<IbMessageT>>>(_endpointToReceiverMap);
+        linkMap[from.endpoint]->DistributeLocalIbMessage(from, receiverMap[from.endpoint], std::forward<IbMessageT>(msg));
     }
 
     template <typename... MethodArgs, typename... Args>
@@ -336,6 +342,7 @@ private:
     util::tuple_tools::wrapped_tuple<IbLinkMap, IbMessageTypes> _ibLinks;
     //! \brief Lookup for sender objects by ID.
     util::tuple_tools::wrapped_tuple<IbEndpointToLinkMap, IbMessageTypes> _endpointToLinkMap;
+    util::tuple_tools::wrapped_tuple<IbEndpointToReceiverMap, IbMessageTypes> _endpointToReceiverMap;
 
     std::vector<std::unique_ptr<IVAsioReceiver>> _vasioReceivers;
 

@@ -33,7 +33,7 @@ public:
     void AddRemoteReceiver(IVAsioPeer* peer, uint16_t remoteIdx);
 
     void DistributeRemoteIbMessage(EndpointAddress from, const MsgT& msg);
-    void DistributeLocalIbMessage(EndpointAddress from, const MsgT& msg);
+    void DistributeLocalIbMessage(EndpointAddress from, ReceiverT* fromReceiver, const MsgT& msg);
 
 private:
     // ----------------------------------------
@@ -83,10 +83,11 @@ void IbLink<MsgT>::DistributeRemoteIbMessage(EndpointAddress from, const MsgT& m
 }
     
 template <class MsgT>
-void IbLink<MsgT>::DistributeLocalIbMessage(EndpointAddress from, const MsgT& msg)
+void IbLink<MsgT>::DistributeLocalIbMessage(EndpointAddress from, ReceiverT* fromReceiver, const MsgT& msg)
 {
     for (auto&& receiver : _localReceivers)
     {
+        if (receiver == fromReceiver) continue;
         DispatchIbMessage(receiver, from, msg);
     }
     DispatchIbMessage(&_vasioTransmitter, from, msg);
