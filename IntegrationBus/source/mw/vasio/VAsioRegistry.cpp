@@ -96,16 +96,10 @@ auto VAsioRegistry::GetLogger() -> logging::ILogger*
     return _logger.get();
 }
 
-bool VAsioRegistry::IsExpectedParticipant(const ib::mw::VAsioPeerUri& peerInfo)
+auto VAsioRegistry::FindConnectedPeer(const std::string& name) const -> std::vector<ConnectedParticipantInfo>::const_iterator
 {
-    for (auto& participant : _connection.Config().simulationSetup.participants)
-    {
-        if (participant.id == peerInfo.participantId && participant.name == peerInfo.participantName)
-        {
-            return true;
-        }
-    }
-    return false;
+    return std::find_if(_connectedParticipants.begin(), _connectedParticipants.end(),
+        [&name](const auto& connectedParticipant) { return connectedParticipant.peerUri.participantName == name; });
 }
 
 void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const ParticipantAnnouncement& announcement)
@@ -150,12 +144,11 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
         }
     }
 
-    if (!IsExpectedParticipant(peerUri))
+    if (FindConnectedPeer(peerUri.participantName) != _connectedParticipants.end())
     {
         _logger->Warn(
-            "Ignoring announcement from unexpected participant name={} id={}",
-            peerUri.participantName,
-            peerUri.participantId);
+            "Ignoring announcement from participant name={}, which is already connected",
+            peerUri.participantName);
         return;
     }
 
@@ -261,9 +254,7 @@ bool VAsioRegistry::AllParticipantsAreConnected() const
 {
     for (auto&& participant : _connection.Config().simulationSetup.participants)
     {
-        auto&& connectedParticipant = std::find_if(_connectedParticipants.begin(), _connectedParticipants.end(),
-            [&participant](const auto& connectedParticipant) { return connectedParticipant.peerUri.participantName == participant.name; });
-        if (connectedParticipant == _connectedParticipants.end())
+        if (FindConnectedPeer(participant.name) == _connectedParticipants.end())
         {
             return false;
         }
