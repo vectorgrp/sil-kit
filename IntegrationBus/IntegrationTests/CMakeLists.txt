@@ -10,6 +10,20 @@ if(IB_MW_ENABLE_VASIO)
     set(itest_extra_libs IbMwVAsio)
 endif()
 
+add_vib_test(FTestCanWithoutSync
+    SOURCES
+      CanWithoutSyncFTest.cpp
+    LIBS
+      IbSimCan
+      ${itest_extra_libs}
+      IntegrationBus
+)
+set_target_properties(FTestCanWithoutSync PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+            WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+)
+
 add_vib_test(FTestEthWithoutSync
     SOURCES
       EthWithoutSyncFTest.cpp
