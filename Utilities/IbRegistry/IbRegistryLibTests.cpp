@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 

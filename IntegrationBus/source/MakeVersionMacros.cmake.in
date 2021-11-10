@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 set(gitHashFile "${CMAKE_CURRENT_BINARY_DIR}/git_hash_file")
 set(gitHeadFile "${CMAKE_CURRENT_BINARY_DIR}/git_head_file")
 

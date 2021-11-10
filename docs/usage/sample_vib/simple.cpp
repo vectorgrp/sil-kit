@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include <thread>
 #include <string>
 #include <chrono>

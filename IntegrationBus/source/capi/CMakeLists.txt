@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_vib_test(TestCapiCan SOURCES CapiCanTest.cpp LIBS IbSimCan IntegrationBus)
 set_target_properties(TestCapiCan PROPERTIES
 RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"

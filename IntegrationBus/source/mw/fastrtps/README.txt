@@ -1,3 +1,5 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 Developer Notes 
 ===============
 

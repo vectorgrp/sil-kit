@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Slave 1 Setup (Sender)
 ControllerConfig slaveConfig;

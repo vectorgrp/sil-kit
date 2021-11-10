@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 ######################################################################
 # VIB Tracing and Replay component
 # - Some tracing and replay functionality is implemented in 

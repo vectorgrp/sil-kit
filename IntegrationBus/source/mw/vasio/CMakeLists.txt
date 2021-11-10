@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 find_package(Threads REQUIRED)
 
 add_library(IbMwVAsio STATIC

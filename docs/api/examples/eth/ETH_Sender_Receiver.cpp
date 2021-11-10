@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Receiver Setup
 // Register ReceiveMessageHandler to receive Ethernet messages.

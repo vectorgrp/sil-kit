@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 project("IbMwFastRtpsIdl" CXX C)
 
 add_library(${PROJECT_NAME} STATIC

@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
 auto* participantController = comAdapter->GetParticipantController();
 auto* canController = comAdapter->CreateCanController("CAN1");

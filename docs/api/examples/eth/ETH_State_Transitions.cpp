@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Controller Setup
 // The initial state for ethernetSender is EthState::Inactive.

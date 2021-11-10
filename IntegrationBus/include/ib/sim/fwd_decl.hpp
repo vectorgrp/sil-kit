@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "can/fwd_decl.hpp"
 #include "eth/fwd_decl.hpp"
 #include "fr/fwd_decl.hpp"

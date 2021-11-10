@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "SignalHandler.hpp"
 #include <thread>
 #include <stdexcept>

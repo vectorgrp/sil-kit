@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 if(IB_MW_ENABLE_VASIO)
     add_subdirectory(IbRegistry)
 endif()

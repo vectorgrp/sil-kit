@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 function(ib_enable_asan isOn)
     if(NOT isOn)
         return()

@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 # the IbExtension is a standalone library except for its dependency on
 # ib/version.hpp
 

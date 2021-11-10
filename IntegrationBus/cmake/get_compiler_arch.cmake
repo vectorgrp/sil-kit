@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 function(get_ubuntu_version outVers)
     file(READ /etc/issue issue)

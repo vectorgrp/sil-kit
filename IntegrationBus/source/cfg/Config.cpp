@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "Config.hpp"
 //#include "JsonConfig.hpp"
 

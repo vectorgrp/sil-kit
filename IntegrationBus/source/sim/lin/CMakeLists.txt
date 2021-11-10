@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_library(IbSimLin STATIC
     LinController.cpp
     LinController.hpp

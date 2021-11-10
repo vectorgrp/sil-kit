@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Register a wake up handler. To receive wake up notifications.
 // NB: this should be done when creating the controller!

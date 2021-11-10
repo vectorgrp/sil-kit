@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_library(IbSimFlexRay STATIC
     FrController.cpp
     FrController.hpp

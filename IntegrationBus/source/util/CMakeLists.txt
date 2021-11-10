@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_library(IbUtil INTERFACE)
 
 target_sources(IbUtil INTERFACE 

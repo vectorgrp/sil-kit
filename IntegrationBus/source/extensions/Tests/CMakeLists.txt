@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_library(DummyExtension SHARED
     DummyExtension.cpp
     DummyExtension.hpp

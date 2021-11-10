@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 project("IbMwLogging" CXX)
 
 add_library(${PROJECT_NAME} STATIC

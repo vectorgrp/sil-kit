@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "IdlTypeConversionMw.hpp"
 #include "IdlTypeConversionSync.hpp"
 #include "IdlTypeConversionLogging.hpp"

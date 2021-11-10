@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Receiver Setup
 canReceiver->SetBaudRate(10000, 1000000);

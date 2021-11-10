@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "GenericMessageDatatypes.hpp"
 #include "IGenericPublisher.hpp"
 #include "IIbToGenericPublisher.hpp"

@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_subdirectory(idl)
 
 add_library(IbMwFastRtps STATIC

@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "EndpointAddress.hpp"
 #include "IComAdapter.hpp"
 #include "IIbEndpoint.hpp"

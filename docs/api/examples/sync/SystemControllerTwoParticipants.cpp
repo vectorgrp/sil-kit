@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Setup of the Participants
 auto comAdapter1 = ib::CreateComAdapter(ibConfig, participantName1, domainId);

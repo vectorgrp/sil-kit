@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "Common.h"
 #include "CommonPubSubTypes.h"
 #include "CanTopics.h"

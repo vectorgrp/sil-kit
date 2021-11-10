@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 # local headers as interface lib
 add_subdirectory(SimTestHarness)
 

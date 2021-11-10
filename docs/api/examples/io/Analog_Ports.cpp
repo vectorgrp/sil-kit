@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "ib/IntegrationBus.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/mw/sync/all.hpp"

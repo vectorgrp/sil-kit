@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_subdirectory(cfg)
 add_subdirectory(tracing)
 add_subdirectory(mw)

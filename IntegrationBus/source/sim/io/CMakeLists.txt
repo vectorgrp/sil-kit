@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_library(IbSimIO STATIC
     InPort.hpp
     InPortReplay.hpp

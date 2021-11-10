@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 # IntegrationBus Versioning:
 # * Major and minor release number is configured here. The patch number should not be changed here; it will be set by 
 #   the Jenkins workflow to the master branch's build number for packaging (cmake -DIB_BUILD_NUMBER).

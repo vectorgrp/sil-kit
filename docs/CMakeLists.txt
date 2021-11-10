@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 if(${IB_BUILD_DOCS})
     Project(IBDocs NONE)
     include(IntegrationBusVersion)

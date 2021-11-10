@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_library(IbInterface INTERFACE)
 
 # Use generator expression to have a different set of include paths when the target is built versus when the target is installed somewhere

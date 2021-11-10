@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 make_ib_demo(IbDemoCan CanDemo.cpp)
 
 target_sources(IbDemoCan

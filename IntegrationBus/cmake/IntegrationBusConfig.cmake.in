@@ -1,3 +1,4 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
 set(IntegrationBus_VERSION @PROJECT_VERSION@)
 include(CMakeFindDependencyMacro)
 
