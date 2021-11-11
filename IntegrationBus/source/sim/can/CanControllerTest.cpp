@@ -32,6 +32,13 @@ using namespace ib::sim::can;
 
 using ib::mw::test::DummyComAdapter;
 
+MATCHER_P(CanTransmitAckWithouthTransmitIdMatcher, truthAck, "matches CanTransmitAcks without checking the transmit id") {
+    auto frame1 = truthAck;
+    auto frame2 = arg;
+    return frame1.canId == frame2.canId && frame1.status == frame2.status && frame1.timestamp == frame2.timestamp;
+    return true;
+}
+
 class MockComAdapter : public DummyComAdapter
 {
 public:
@@ -48,6 +55,12 @@ public:
     MOCK_METHOD2(StateChanged, void(ICanController*, CanControllerState));
     MOCK_METHOD2(ErrorStateChanged, void(ICanController*, CanErrorState));
     MOCK_METHOD2(ReceiveAck, void(ICanController*, CanTransmitAcknowledge));
+};
+
+class CanControllerTest : public testing::Test
+{
+public:
+    CanControllerTest() {};
 };
 
 TEST(CanControllerTest, send_can_message)
@@ -147,83 +160,16 @@ TEST(CanControllerTest, receive_ack)
     canController.SetEndpointAddress(controllerAddress);
     canController.RegisterTransmitStatusHandler(std::bind(&CanControllerCallbacks::ReceiveAck, &callbackProvider, _1, _2));
 
-    CanMessage msg;
-    auto txId1 = canController.SendMessage(msg);
-    auto txId2 = canController.SendMessage(msg);
-
-    ASSERT_NE(txId1, txId2);
-
-    CanTransmitAcknowledge ack1{txId1, msg.canId, 0ns, CanTransmitStatus::Transmitted};
-    CanTransmitAcknowledge ack2{txId2, msg.canId, 0ns, CanTransmitStatus::Transmitted};
-
-    EXPECT_CALL(callbackProvider, ReceiveAck(&canController, ack1))
-        .Times(1);
-    EXPECT_CALL(callbackProvider, ReceiveAck(&canController, ack2))
-        .Times(1);
-
-    canController.ReceiveIbMessage(senderAddress, ack1);
-    canController.ReceiveIbMessage(senderAddress, ack2);
-}
-
-TEST(CanControllerTest, ignore_unknown_acks)
-{
-    using namespace std::placeholders;
-
-    EndpointAddress controllerAddress = {3, 8};
-    EndpointAddress senderAddress = {4, 9};
-
-    MockComAdapter mockComAdapter;
-    CanControllerCallbacks callbackProvider;
-
-    CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
-    canController.SetEndpointAddress(controllerAddress);
-    canController.RegisterTransmitStatusHandler(std::bind(&CanControllerCallbacks::ReceiveAck, &callbackProvider, _1, _2));
-
-    CanMessage msg;
-    msg.canId = 3;
-    auto txId1 = canController.SendMessage(msg);
-    auto txId2 = canController.SendMessage(msg);
-
-    ASSERT_NE(txId1, txId2);
-
-    CanTransmitAcknowledge ack1{txId1, 4, 0ns, CanTransmitStatus::Transmitted};
-    CanTransmitAcknowledge ack2{txId2, 4, 0ns, CanTransmitStatus::Transmitted};
-
-    EXPECT_CALL(callbackProvider, ReceiveAck(&canController, ack1))
-        .Times(0);
-    EXPECT_CALL(callbackProvider, ReceiveAck(&canController, ack2))
-        .Times(0);
-
-    canController.ReceiveIbMessage(senderAddress, ack1);
-    canController.ReceiveIbMessage(senderAddress, ack2);
-}
-
-/*! \brief Ensure that the reception of a message generates a matching Ack
-*
-*  Rationale:
-*   CanControllers must acknowledge the reception of messages since there
-*   is no Network Simulator that, otherwise, would take care of Ack generation.
-*/
-TEST(CanControllerTest, generate_ack)
-{
-    using namespace std::placeholders;
-
-    EndpointAddress controllerAddress = { 3, 8 };
-    EndpointAddress senderAddress = { 4, 10 };
-
-    MockComAdapter mockComAdapter;
-    CanControllerCallbacks callbackProvider;
-
-    CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
-    canController.SetEndpointAddress(controllerAddress);
-
     CanMessage msg{};
-    CanTransmitAcknowledge ack{msg.transmitId, msg.canId, msg.timestamp, CanTransmitStatus::Transmitted};
+    CanTransmitAcknowledge ack1{ 0, msg.canId, 0ns, CanTransmitStatus::Transmitted };
+    CanTransmitAcknowledge ack2{ 0, msg.canId, 0ns, CanTransmitStatus::Transmitted };
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage(controllerAddress, ack))
-        .Times(1);
+    EXPECT_CALL(callbackProvider, ReceiveAck(&canController, CanTransmitAckWithouthTransmitIdMatcher(ack1)))
+        .Times(2);
+    auto txId1 = canController.SendMessage(msg);
+    auto txId2 = canController.SendMessage(msg);
 
-    canController.ReceiveIbMessage(senderAddress, msg);
+    ASSERT_NE(txId1, txId2);
 }
 
 

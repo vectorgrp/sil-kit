@@ -27,16 +27,6 @@ namespace {
         MOCK_METHOD1(RegisterTransmitStatusHandler, void(MessageStatusHandler));
     };
 
-	class CapiCanTest : public testing::Test
-	{
-	public: 
-        MockCanController mockController;
-        CapiCanTest()
-		{
-			
-		}
-	};
-
     void AckCallback(void* context, ib_CanController* controller, ib_CanTransmitAcknowledge* ack)
     {
     }
@@ -52,6 +42,16 @@ namespace {
     void ErrorStateHandler(void* context, ib_CanController* controller, ib_CanErrorState state)
     {
     }
+
+    class CapiCanTest : public testing::Test
+    {
+    public:
+        MockCanController mockController;
+        CapiCanTest()
+        {
+
+        }
+    };
 
     TEST_F(CapiCanTest, can_controller_function_mapping)
     {

@@ -89,16 +89,6 @@ void CanControllerReplay::ReceiveIbMessage(ib::mw::EndpointAddress from, const C
     _controller.ReceiveIbMessage(from, msg);
 }
 
-void CanControllerReplay::ReceiveIbMessage(ib::mw::EndpointAddress from, const CanTransmitAcknowledge& msg)
-{
-    // ignore messages that do not originate from the replay scheduler 
-    if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
-    {
-        return;
-    }
-
-    _controller.ReceiveIbMessage(from, msg);
-}
 
 
 void CanControllerReplay::SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress)

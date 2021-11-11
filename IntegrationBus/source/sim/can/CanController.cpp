@@ -44,9 +44,17 @@ auto CanController::SendMessage(const CanMessage& msg) -> CanTxId
 
     _tracer.Trace(extensions::Direction::Send, _timeProvider->Now(), msg);
 
-    _pendingAcks.emplace_back(msgCopy.canId, msgCopy.transmitId);
 
     _comAdapter->SendIbMessage(_endpointAddr, msgCopy);
+
+    // instantly call transmit acknowledge
+    CanTransmitAcknowledge ack;
+    ack.canId = msg.canId;
+    ack.status = CanTransmitStatus::Transmitted;
+    ack.transmitId = msgCopy.transmitId;
+    ack.timestamp = msg.timestamp;
+    CallHandlers(ack);
+
     return msgCopy.transmitId;
 }
 
@@ -57,9 +65,16 @@ auto CanController::SendMessage(CanMessage&& msg) -> CanTxId
 
     _tracer.Trace(extensions::Direction::Send, _timeProvider->Now(), msg);
 
-    _pendingAcks.emplace_back(msg.canId, msg.transmitId);
-
     _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
+    
+    // instantly call transmit acknowledge
+    CanTransmitAcknowledge ack;
+    ack.canId = msg.canId;
+    ack.status = CanTransmitStatus::Transmitted;
+    ack.transmitId = msg.transmitId;
+    ack.timestamp = msg.timestamp;
+    CallHandlers(ack);
+
     return txId;
 }
 
@@ -96,22 +111,6 @@ void CanController::ReceiveIbMessage(ib::mw::EndpointAddress from, const CanMess
     CallHandlers(msg);
 
     _tracer.Trace(extensions::Direction::Receive, _timeProvider->Now(), msg);
-
-    CanTransmitAcknowledge ack{msg.transmitId, msg.canId, msg.timestamp, CanTransmitStatus::Transmitted};
-    _comAdapter->SendIbMessage(_endpointAddr, ack);
-}
-
-void CanController::ReceiveIbMessage(ib::mw::EndpointAddress from, const CanTransmitAcknowledge& msg)
-{
-    if (from == _endpointAddr)
-        return;
-
-    auto pendingAcksIter = std::find(_pendingAcks.begin(), _pendingAcks.end(), std::make_pair(msg.canId, msg.transmitId));
-    if (pendingAcksIter != _pendingAcks.end())
-    {
-        _pendingAcks.erase(pendingAcksIter);
-        CallHandlers(msg);
-    }
 }
 
 template<typename MsgT>

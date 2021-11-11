@@ -64,7 +64,6 @@ public:
 
     // IIbToCanController
     void ReceiveIbMessage(ib::mw::EndpointAddress from, const sim::can::CanMessage& msg) override;
-    void ReceiveIbMessage(ib::mw::EndpointAddress from, const sim::can::CanTransmitAcknowledge& msg) override;
 
     void SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const ::ib::mw::EndpointAddress& override;
@@ -111,8 +110,6 @@ private:
     > _callbacks;
 
     extensions::Tracer _tracer;
-
-    std::vector<std::pair<uint32_t, CanTxId>> _pendingAcks;
 };
 
 // ================================================================================

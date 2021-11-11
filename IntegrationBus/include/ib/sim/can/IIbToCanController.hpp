@@ -16,8 +16,8 @@ namespace can {
  *  Used by the ComAdapter, implemented by the CanController
  */
 class IIbToCanController
-    : public mw::IIbEndpoint<CanMessage, CanTransmitAcknowledge>
-    , public mw::IIbSender<CanMessage, CanTransmitAcknowledge>
+    : public mw::IIbEndpoint<CanMessage>
+    , public mw::IIbSender<CanMessage>
 {
 };
 

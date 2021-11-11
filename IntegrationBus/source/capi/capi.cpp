@@ -13,6 +13,8 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <map>
+#include <mutex>
 
 #define CAPI_DEFINE_FUNC(BODY) \
     try { \
@@ -134,7 +136,12 @@ IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_create(ib_SimulationPar
 
 #pragma region CAN
 
-std::map<uint32_t, void*> transmitContexMap;
+struct PendingTransmits {
+    std::map<uint32_t, void*> userContextById;
+    std::map<uint32_t, std::function<void()>> callbacksById;
+    std::mutex mutex;
+};
+PendingTransmits pendingTransmits;
 
 ib_ReturnCode ib_CanController_RegisterReceiveMessageHandler(ib_CanController* self, void* context, void (*Callback)(void* context, ib_CanController* controller, ib_CanMessage* canFrameMeta))
 {
@@ -184,14 +191,32 @@ ib_ReturnCode ib_CanController_RegisterTransmitStatusHandler(ib_CanController* s
         canController->RegisterTransmitStatusHandler(
             [Callback, context, self](ib::sim::can::ICanController* /*ctrl*/, const ib::sim::can::CanTransmitAcknowledge& ack)
             {
-                ib_CanTransmitAcknowledge tcack;
-
-                auto transmitContext = transmitContexMap[ack.transmitId];
-                tcack.userContext = transmitContext;
-                transmitContexMap.erase(ack.transmitId);
-                tcack.timestamp = ack.timestamp.count();
-                tcack.status = (ib_CanTransmitStatus)ack.status;
-                Callback(context, self, &tcack);
+                
+                
+                auto transmitContext = pendingTransmits.userContextById[ack.transmitId];
+                if (transmitContext == nullptr)
+                {
+                    std::unique_lock<std::mutex> lock(pendingTransmits.mutex);
+                    pendingTransmits.callbacksById.insert(std::make_pair(ack.transmitId, [Callback, context, self, ack]() {
+                        ib_CanTransmitAcknowledge tcack;
+                        auto transmitContext = pendingTransmits.userContextById[ack.transmitId];
+                        tcack.userContext = transmitContext;
+                        pendingTransmits.userContextById.erase(ack.transmitId);
+                        tcack.timestamp = ack.timestamp.count();
+                        tcack.status = (ib_CanTransmitStatus)ack.status;
+                        Callback(context, self, &tcack);
+                        }));
+                }
+                else 
+                {
+                    ib_CanTransmitAcknowledge tcack;
+                    tcack.userContext = transmitContext;
+                    std::unique_lock<std::mutex> lock(pendingTransmits.mutex);
+                    pendingTransmits.userContextById.erase(ack.transmitId);
+                    tcack.timestamp = ack.timestamp.count();
+                    tcack.status = (ib_CanTransmitStatus)ack.status;
+                    Callback(context, self, &tcack);
+                }
             });
         return ib_ReturnCode_SUCCESS;
         )
@@ -275,8 +300,15 @@ ib_ReturnCode ib_CanController_SendFrame(ib_CanController* self, ib_CanFrame* me
         cm.dlc = message->dlc;
         cm.dataField = std::vector<uint8_t>(&(message->data.pointer[0]), &(message->data.pointer[0]) + message->data.size);
 
-        auto transmitId = canController->SendMessage(std::move(cm));
-        transmitContexMap[transmitId] = transmitContext;
+        // ack queue is empty 
+        auto transmitId = canController->SendMessage(std::move(cm)); // AckCallback -> fügt in queue hinzu weil er keine userContext findet
+        std::unique_lock<std::mutex> lock(pendingTransmits.mutex);
+        pendingTransmits.userContextById[transmitId] = transmitContext;
+        for (auto pendingTransmitId : pendingTransmits.callbacksById)
+        {
+            pendingTransmitId.second();
+        }
+        pendingTransmits.callbacksById.clear();
         return ib_ReturnCode_SUCCESS;
         )
 }
