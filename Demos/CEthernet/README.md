@@ -12,3 +12,6 @@ For build instructions refer to the parent demo directory.
 The Demo expects a path to the configuration variable and the participant's name ("EthernetReaderWriter")
 as arguments.
 > ./IbDemoCEthernet IbConfig_DemoEthernet_SingleParticipant.json  EthernetReaderWriter
+
+The demo needs a running IbRegistry to be functional. It can be started by running the following command.
+> ./IbRegistry IbConfig_DemoEthernet_SingleParticipant.json

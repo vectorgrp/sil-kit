@@ -8,7 +8,7 @@
         "Participants": [
             {
                 "Name": "EthernetReaderWriter",
-                "Description": "Demo Participant with two ehternet controllers talking to each other",
+                "Description": "Demo Participant with two ethernet controllers talking to each other",
 
                 "IsSyncMaster": true,
                 "Logger": {
@@ -20,7 +20,7 @@
                     ]
                 },
                 "ParticipantController": {
-                    "SyncType": "DiscreteTime"
+                    "SyncType": "DistributedTimeQuantum"
                 },
                 "EthernetControllers": [
                     {

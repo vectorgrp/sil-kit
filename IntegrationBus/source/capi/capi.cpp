@@ -156,7 +156,7 @@ ib_ReturnCode ib_CanController_RegisterReceiveMessageHandler(ib_CanController* s
             [context, self, Callback](ib::sim::can::ICanController* /*ctrl*/, const ib::sim::can::CanMessage& msg)
             {
                 ib_CanMessage cmm;
-                ib_CanFrame cm;
+                ib_CanFrame cm{ 0,0,0, {(uint8_t*)msg.dataField.data(), (uint32_t)msg.dataField.size()} };
                 cmm.timestamp = msg.timestamp.count();
                 cmm.interfaceId = ib_InterfaceIdentifier_CanFrame_Meta;
                 cmm.canFrame = &cm;
@@ -170,8 +170,6 @@ ib_ReturnCode ib_CanController_RegisterReceiveMessageHandler(ib_CanController* s
                 flags |= msg.flags.esi ? ib_CanFrameFlag_esi : 0;
                 cm.flags = flags;
                 cm.dlc = msg.dlc;
-                cm.data.pointer = (uint8_t*)msg.dataField.data();
-                cm.data.size = (uint32_t)msg.dataField.size();
 
                 Callback(context, self, &cmm);
             });
@@ -451,18 +449,16 @@ ib_ReturnCode ib_EthernetController_RegisterReceiveMessageHandler(ib_EthernetCon
             [handler, context, self](ib::sim::eth::IEthController* /*ctrl*/, const ib::sim::eth::EthMessage& msg)
             {
                 auto rawFrame = msg.ethFrame.RawFrame();
-                ib_EthernetMessage em;
-                ib_EthernetFrame ef;
-
-                ef.frameSize = rawFrame.size();
+                
+                uint8_t* dataPointer = 0;
                 if (rawFrame.size() > 0)
                 {
-                    ef.frameData = &(rawFrame[0]);
+                    dataPointer = &(rawFrame[0]);
                 }
-                else
-                {
-                    ef.frameData = NULL;
-                }
+
+                ib_EthernetMessage em;
+                ib_EthernetFrame ef{ dataPointer, rawFrame.size() };
+
                 em.ethernetFrame = &ef;
                 em.interfaceId = ib_InterfaceIdentifier_EthernetFrame;
                 em.timestamp = msg.timestamp.count();
@@ -558,7 +554,7 @@ ib_ReturnCode ib_EthernetController_SendFrame(ib_EthernetController* self, ib_Et
         auto controller = reinterpret_cast<ib::sim::eth::IEthController*>(self);
 
         ib::sim::eth::EthFrame ef;
-        std::vector<uint8_t> rawFrame(frame->frameData, frame->frameData + frame->frameSize);
+        std::vector<uint8_t> rawFrame(frame->pointer, frame->pointer + frame->size);
         ef.SetRawFrame(rawFrame);
         auto transmitId = controller->SendFrame(ef);
 

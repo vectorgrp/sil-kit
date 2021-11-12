@@ -48,7 +48,7 @@ char* LoadFile(char const* path)
 void MacToBytes(uint8_t* outBytes, const char* mac)
 {
     char macCopy[18];
-    memcpy(macCopy, mac, sizeof macCopy-1);
+    memcpy(macCopy, mac, sizeof(macCopy)-1);
 
     char* ptrMac = macCopy;
     uint8_t* ptrBytes = outBytes;
@@ -70,6 +70,10 @@ ib_EthernetController* ethernetController2;
 
 char* participantName;
 uint8_t ethernetMessageCounter = 0;
+#define SOURCE_MAC_SIZE 6
+#define DESTINATION_MAC_SIZE 6
+#define ETHERTYPE_MAC_SIZE 2
+#define PAYLOAD_OFFSET SOURCE_MAC_SIZE + DESTINATION_MAC_SIZE + ETHERTYPE_MAC_SIZE
 
 typedef struct  {
     uint32_t someInt;
@@ -95,16 +99,16 @@ void ReceiveMessage(void* context, ib_EthernetController* controller, ib_Etherne
 
     printf(": ");
 
-    for (i = sizeof(ib_EthernetFrame_Header); i < metaData->ethernetFrame->frameSize; i++)
+    for (i = PAYLOAD_OFFSET; i < metaData->ethernetFrame->size; i++)
     {
-        char ch = metaData->ethernetFrame->frameData[i];
+        char ch = metaData->ethernetFrame->pointer[i];
         if (isalnum(ch))
         {
             printf("%c", ch);
         }
         else
         {
-            printf("<%x>", metaData->ethernetFrame->frameData[i]);
+            printf("<%x>", metaData->ethernetFrame->pointer[i]);
         }
     }
     printf("\n");
@@ -112,35 +116,28 @@ void ReceiveMessage(void* context, ib_EthernetController* controller, ib_Etherne
 
 void SendEthernetMessage()
 {
-    // create payload
-    char buffer[64];
-    ib_ByteVector payload;
-    ethernetMessageCounter += 1;
-    payload.size = snprintf(buffer, sizeof(buffer), "ETHERNET %i", ethernetMessageCounter);
-    payload.pointer = buffer;
-
-    // create empty frame and allocate memory
-    ib_EthernetFrame ef;
-    ef.frameSize = (size_t)payload.size + sizeof(ib_EthernetFrame_Header);
-    ef.frameData = malloc(ef.frameSize);
+    uint8_t buffer[100];
 
     // set destination mac
     uint8_t destinationMac[6] = { 0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1 };
-    memcpy(ef.frameHeader->destinationMac, destinationMac, sizeof destinationMac);
+    memcpy(&(buffer[0]), destinationMac, sizeof(destinationMac));
 
     // set source mac
     uint8_t sourceMac[6] = { 0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC2 };
-    memcpy(ef.frameHeader->sourceMac, sourceMac, sizeof sourceMac);
+    memcpy(&(buffer[6]), sourceMac, sizeof(sourceMac));
 
-    ef.frameHeader->etherType = 0x0800;
+    // set ethertype
+    buffer[12] = 0x00;
+    buffer[13] = 0x08;
 
-    // copy payload into frame
-    memcpy(ef.frameData + sizeof(ib_EthernetFrame_Header), payload.pointer, payload.size);
+    // set payload
+    ethernetMessageCounter += 1;
+    size_t payloadSize = snprintf((char*)buffer + PAYLOAD_OFFSET, sizeof(buffer) - PAYLOAD_OFFSET, "ETHERNET %i", ethernetMessageCounter);
+
+    ib_EthernetFrame ef = {(const uint8_t* const) buffer, PAYLOAD_OFFSET + payloadSize};
 
     transmitContext.someInt = ethernetMessageCounter;
     ib_EthernetController_SendFrame(ethernetController1, &ef, (void*)&transmitContext);
-
-    free(ef.frameData);
     
     printf("Ethernet Message sent \n");
 }

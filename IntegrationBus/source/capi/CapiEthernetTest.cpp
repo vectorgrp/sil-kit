@@ -63,9 +63,7 @@ void BitRateChangedHandler(void* context, ib_EthernetController* controller, uin
 
 TEST_F(CapiEthernetTest, ethernet_controller_function_mapping)
 {
-    ib_EthernetFrame ef;
-    ef.frameData = 0;
-    ef.frameSize = 0;
+    ib_EthernetFrame ef = { 0,0 };
 
     ib_ReturnCode returnCode;
 
@@ -143,38 +141,34 @@ TEST_F(CapiEthernetTest, ethernet_controller_send_frame)
 {
     ib_ReturnCode returnCode = 0;
     // create payload
-    char buffer[64];
-    ib_ByteVector payload;
-    int ethernetMessageCounter = 1;
-    payload.size = snprintf(buffer, sizeof(buffer), "ETHERNET %i", ethernetMessageCounter);
-    payload.pointer = (uint8_t*) buffer;
-
-    // create empty frame and allocate memory
-    ib_EthernetFrame ef;
-    ef.frameSize = (size_t)payload.size + sizeof(ib_EthernetFrame_Header);
-    ef.frameData = (uint8_t*)malloc(ef.frameSize);
+    const uint8_t PAYLOAD_OFFSET = 14;
+    uint8_t buffer[100];
 
     // set destination mac
     uint8_t destinationMac[6] = { 0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1 };
-    memcpy(ef.frameHeader->destinationMac, destinationMac, sizeof destinationMac);
+    memcpy(&(buffer[0]), destinationMac, sizeof(destinationMac));
 
     // set source mac
     uint8_t sourceMac[6] = { 0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC2 };
-    memcpy(ef.frameHeader->sourceMac, sourceMac, sizeof sourceMac);
+    memcpy(&(buffer[6]), sourceMac, sizeof(sourceMac));
 
-    ef.frameHeader->etherType = 0x0800;
+    // set ethertype
+    buffer[12] = 0x00;
+    buffer[13] = 0x08;
 
-    // copy payload into frame
-    memcpy(ef.frameData + sizeof(ib_EthernetFrame_Header), payload.pointer, payload.size);
+    // set payload
+    int ethernetMessageCounter = 1;
+    size_t payloadSize = snprintf((char*)buffer + PAYLOAD_OFFSET, sizeof(buffer) - PAYLOAD_OFFSET, "ETHERNET %i", ethernetMessageCounter);
+
+    ib_EthernetFrame ef = { (const uint8_t* const)buffer, PAYLOAD_OFFSET + payloadSize };
 
     EthFrame refFrame{};
-    std::vector<uint8_t> rawFrame(ef.frameData, ef.frameData + ef.frameSize);
+    std::vector<uint8_t> rawFrame(ef.pointer, ef.pointer + ef.size);
     refFrame.SetRawFrame(rawFrame);
     EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(refFrame))).Times(testing::Exactly(1));
     returnCode = ib_EthernetController_SendFrame((ib_EthernetController*)&mockController, &ef, NULL);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-    free(ef.frameData);
 }
 
 }

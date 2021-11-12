@@ -40,37 +40,8 @@ typedef int32_t ib_EthernetState;
 //!< The Ethernet controller is active and the link to another Ethernet controller is established.
 #define ib_EthernetState_LinkUp ((int32_t) 2)
 
-#pragma pack(push)
-#pragma pack(1)
-struct ib_EthernetFrame_Header 
-{
-    uint8_t destinationMac[6];
-    uint8_t sourceMac[6];
-    uint16_t etherType;
-};
-struct ib_EthernetFrame_HeaderVlanTagged 
-{
-    uint8_t destinationMac[6];
-    uint8_t sourceMac[6];
-    uint8_t vlanTag[4];
-    uint16_t etherType;
-};
-#pragma pack(pop)
+typedef ib_ByteVector ib_EthernetFrame;
 
-typedef struct ib_EthernetFrame_Header ib_EthernetFrame_Header;
-typedef struct ib_EthernetFrame_HeaderVlanTagged ib_EthernetFrame_HeaderVlanTagged;
-
-struct ib_EthernetFrame
-{
-    union {
-        uint8_t* frameData; //!< Ethernet raw frame
-        ib_EthernetFrame_Header* frameHeader; //!< Ethernet frame without VlanTag as in IEEE 802.3
-        ib_EthernetFrame_HeaderVlanTagged* frameHeaderVlanTagged; //!< Ethernet frame with VlanTag as in IEEE 802.1Q
-    };
-    size_t frameSize; //!< The current frame size
-};
-
-typedef struct ib_EthernetFrame ib_EthernetFrame;
 struct ib_EthernetMessage
 {
     ib_InterfaceIdentifier interfaceId; //!< The interface id that specifies which version of this struct was obtained
@@ -271,7 +242,7 @@ typedef ib_ReturnCode(*ib_EthernetController_SendFrame_t)(ib_EthernetController*
 *
 * \param self The Ethernet controller that should send the frame.
 * \param frame The Ethernet frame to be sent.
-* \param userContext The user provided context pointer, that is reobtained in the callback of RegisterFrameAckHandler()
+* \param userContext The user provided context pointer, that is reobtained in the frame ack handler
 * \result A return code identifying the success/failure of the call.
 * 
 * \see ib::sim::eth::IEthController::SendFrame

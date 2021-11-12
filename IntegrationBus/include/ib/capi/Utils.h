@@ -67,7 +67,7 @@ typedef struct
 
 struct ib_ByteVector
 {
-    uint8_t * pointer;
+    const uint8_t* pointer;
     size_t size;
 };
 typedef struct ib_ByteVector ib_ByteVector;

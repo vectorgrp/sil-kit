@@ -19,8 +19,11 @@ API can be used:
   A simple command line tool that allows to measure VIB simulation performance
   with configurable parameters.
 
-* ** CCan **:
+* **CCan**:
   A C-based demo that demonstrates CAN communications.
+
+* **CEthernet**:
+  A C-based demo that demonstrates Ethernet communications.
 
 The build system is based on cmake.
 Supported target platforms and build tools:
