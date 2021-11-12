@@ -28,6 +28,7 @@ namespace ib {
 * \throw std::exception The FastRTPS participant could not be
 * created.
 */
+[[deprecated("Middleware FastRTPS is deprecated")]]
 IntegrationBusAPI auto CreateFastRtpsComAdapter(ib::cfg::Config config, const std::string& participantName, const uint32_t fastRtpsDomainId) -> std::unique_ptr<mw::IComAdapter>;
 
 /*! \brief Join the VAsio middleware domain as a participant.
@@ -44,6 +45,7 @@ IntegrationBusAPI auto CreateFastRtpsComAdapter(ib::cfg::Config config, const st
 * \throw std::runtime_error Parameter participantName does not name
 * a valid participant in the config file.
 */
+[[deprecated("CreateVAsioComAdapter is deprecated. Use CreateComAdapter instead")]]
 IntegrationBusAPI auto CreateVAsioComAdapter(ib::cfg::Config config, const std::string& participantName, const uint32_t vAsioDomainId) -> std::unique_ptr<mw::IComAdapter>;
 
 /*! \brief Join the configured middleware domain as a participant.

@@ -5,6 +5,24 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.4.6] - Unreleased
+--------------------------------
+
+Changed
+~~~~~~~
+
+.. admonition:: Note: the FastRTPS middleware is now deprecated
+  
+   See :ref:`sec:mwcfg` for migration instructions.
+
+- The middleware `FastRTPS` is now marked as deprecated.
+  This middleware will be removed in the future.
+  The middleware specific `CreateFastRtpsComAdapter` API has been
+  marked as deprecated for a long time.
+  Users should adopt the generic :cpp:func:`CreateComAdapter<ib::CreateComAdapter()>`,
+  refer to :ref:`sec:mwcfg-enable-vasio` for instructions.
+
+
 [3.4.5] - 2021-11-03
 --------------------------------
 

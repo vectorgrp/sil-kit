@@ -39,6 +39,7 @@ auto CreateComAdapterImpl(ib::cfg::Config config, const std::string& participant
         return CreateVAsioComAdapterImpl(std::move(config), participantName);
     
     case ib::cfg::Middleware::FastRTPS:
+        std::cout <<"WARNING: FastRTPS is deprecated" << std::endl;
         return CreateFastRtpsComAdapterImpl(std::move(config), participantName);
 
     default:

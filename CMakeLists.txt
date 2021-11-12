@@ -24,6 +24,9 @@ option(IB_BIN_FASTRTPS_ENABLE
 option(IB_MW_ENABLE_FASTRTPS "Build FastRTPS Middleware" ON)
 option(IB_MW_ENABLE_VASIO "Build VAsio Middleware" ON)
 
+if(IB_MW_ENABLE_FASTRTPS)
+    message(WARNING "VIB Middleware FastRTPS is deprecated!")
+endif()
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${CMAKE_CURRENT_LIST_DIR}/IntegrationBus/cmake)
 include(IntegrationBusInstall)
 include(IntegrationBusVersion)

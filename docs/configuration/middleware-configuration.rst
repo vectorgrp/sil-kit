@@ -1,3 +1,5 @@
+.. _sec:mwcfg:
+
 ===================================================
 Middleware Config
 ===================================================
@@ -8,12 +10,12 @@ Middleware Config
 Overview
 --------------------
 
-Since Sprint-31, the Vector Integration Bus offers a second middlewares to choose
-from. Besides the established Fast-RTPS middleware, you can now choose the VAsio
+Since Sprint-31, the Vector Integration Bus offers multiple middlewares to choose
+from. Besides the now deprecated Fast-RTPS middleware, you can choose the VAsio
 middleware, a boost ASIO based middleware that was specifically designed for the Vector
 Integration Bus.
 
-By and large, the two middlewares are interchangeable with almost no necessary changes to
+By and large, the middlewares are interchangeable with almost no necessary changes to
 the applications using the VIB. In particular, applications that once have been
 :ref:`enabled<sec:mwcfg-enable-vasio>` for the new VAsio middleware also work with the old
 Fast-RTPS one. From that point on, the :ref:`active middleware<sec:mwcfg-active-middleware>` can
@@ -21,10 +23,9 @@ be selected using an IbConfig.json file.
 
 .. admonition:: Note
 
-    If you do not plan on using the new VAsio middleware, there is no need for any changes
-    on your application. The Sprint-31 API is fully compatible with previous
-    versions. However, it is still recommended to :ref:`enable<sec:mwcfg-enable-vasio>`
-    application for the new VAsio middleware to provide the best interoperability.
+    FastRTPS is now deprecated.
+    All users should use the generic :cpp:func:`CreateComAdapter<ib::CreateComAdapter()>` API.
+    This will result in middleware agnostic applications.
 
 
 .. _sec:mwcfg-active-middleware:
@@ -45,7 +46,7 @@ VAsio middleware:
         }
     }
 
-The default value for ActiveMiddleware is FastRTPS, so that
+The default value for ActiveMiddleware is VAsio, so that
 :cpp:func:`ib::CreateComAdapter()` can be used as a drop in replacement for
 :cpp:func:`ib::CreateFastRtpsComAdapter()`, even when older config files are used.
 
@@ -149,6 +150,11 @@ running on localhost listening on Port 8500. These values can be changed via the
 
 Configuring the FastRTPS Middleware
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. deprecated:: 3.4.6
+   The FastRTPS middleware is deprecated and will be removed in the future.
+   Use VAsio instead.
+
 
 FastRTPS offers many configuration options. The most common ones can be directly
 configured via the IbConfig.json. Detailed, fine grained FastRTPS configuration
