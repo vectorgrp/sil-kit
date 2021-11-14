@@ -90,3 +90,15 @@ A basic frame consists out of the destination mac, the source mac, the ethertype
 The union type within the ib_EthernetFrame helps when manual construction of a frame is necessary (frameHeader, frameHeaderVlanTagged).
 
 .. note:: For an example of manual frame construction one can refer to the C Ethernet demo.
+
+Data API
+~~~~~~~~~~~~~~~~~~~~
+The Data API provides data publish and subscribe functionalities to the Integration Bus. 
+It consists out of DataPublishers and DataSubscribers.
+
+.. doxygenfunction:: ib_DataPublisher_create
+.. doxygenfunction:: ib_DataSubscriber_create
+.. doxygenfunction:: ib_DataPublisher_Publish
+.. doxygenfunction:: ib_DataSubscriber_SetReceiveDataHandler
+.. doxygenfunction:: ib_SimulationParticipant_GetAllPublishersOfSimulation
+.. doxygenfunction:: ib_SimulationParticipant_GetAllSubscribersOfSimulation

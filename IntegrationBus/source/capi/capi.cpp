@@ -10,6 +10,8 @@
 #include "ib/sim/can/string_utils.hpp"
 #include "ib/sim/eth/all.hpp"
 #include "ib/sim/eth/string_utils.hpp"
+#include "ib/sim/generic/all.hpp"
+#include "ib/sim/generic/string_utils.hpp"
 #include <string>
 #include <iostream>
 #include <algorithm>
@@ -565,5 +567,123 @@ ib_ReturnCode ib_EthernetController_SendFrame(ib_EthernetController* self, ib_Et
 }
 
 #pragma endregion ETHERNET
+
+
+#pragma region DATA
+
+CIntegrationBusAPI ib_ReturnCode ib_DataPublisher_create(ib_DataPublisher** out,
+    ib_SimulationParticipant* participant, char* topic, ib_DataExchangeFormat* dataTypeInfo, uint8_t history)
+{
+    CAPI_DEFINE_FUNC(
+        if (out == NULL)
+        {
+            ib_error_string = "The provided out pointer was null.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        if (participant == NULL || topic == NULL)
+        {
+            ib_error_string = "A nullpointer parameter was provided";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        if (dataTypeInfo != NULL && (std::strcmp(dataTypeInfo->mediaType, "")))
+        {
+            ib_error_string = "This integration bus implementation currently does not support dataTypeInfos that are more specific then wildcards.";
+            return ib_ReturnCode_NOTSUPPORTED;
+        }
+        if (history != 0)
+        {
+            ib_error_string = "This integration bus implementation currently only supports a history length of 0.";
+            return ib_ReturnCode_NOTSUPPORTED;
+        }
+
+        std::string strTopic(topic);
+        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        auto genericPublisher = comAdapter->CreateGenericPublisher(strTopic);
+        *out = reinterpret_cast<ib_DataPublisher*>(genericPublisher);
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+
+CIntegrationBusAPI ib_ReturnCode ib_DataSubscriber_create(ib_DataSubscriber** out,
+    ib_SimulationParticipant* participant, char* topic, ib_DataExchangeFormat* dataTypeInfo, void* context,
+    ib_DataHandler_t dataHandler)
+{
+    CAPI_DEFINE_FUNC(
+        if (out == NULL)
+        {
+            ib_error_string = "The provided out pointer was null.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        if (participant == NULL || topic == NULL)
+        {
+            ib_error_string = "A nullpointer parameter was provided";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        if (dataTypeInfo != NULL && (std::strcmp(dataTypeInfo->mediaType,"") != 0))
+        {
+            ib_error_string = "This integration bus implementation currently does not support data exchange formats that are more specific then wildcards.";
+            return ib_ReturnCode_NOTSUPPORTED;
+        }
+
+        std::string strTopic(topic);
+        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        auto genericSubscriber = comAdapter->CreateGenericSubscriber(strTopic);
+        *out = reinterpret_cast<ib_DataSubscriber*>(genericSubscriber);
+
+        // Register Data Handler if provided
+        if (dataHandler != NULL)
+        {
+            ib_DataSubscriber_SetReceiveDataHandler(*out, context, dataHandler);
+        }
+
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+ib_ReturnCode ib_DataSubscriber_SetReceiveDataHandler(ib_DataSubscriber* self, void* context,
+    ib_DataHandler_t dataHandler)
+{
+    CAPI_DEFINE_FUNC(
+        if (self == NULL || dataHandler == NULL)
+        {
+            ib_error_string = "A nullpointer parameter was provided";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        auto subscriber = reinterpret_cast<ib::sim::generic::IGenericSubscriber*>(self);
+        subscriber->SetReceiveMessageHandler(
+            [dataHandler, context, self](ib::sim::generic::IGenericSubscriber* subscriber, const std::vector<uint8_t>& data)
+            {
+                uint8_t* payloadPointer = NULL;
+                if (data.size() > 0)
+                {
+                    payloadPointer = (uint8_t* const)&(data[0]);
+                }
+                const ib_ByteVector ccdata{ payloadPointer, data.size() };
+
+                dataHandler(context, self,  &ccdata);
+            });
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+ib_ReturnCode ib_DataPublisher_Publish(ib_DataPublisher* self, const ib_ByteVector* data)
+{
+    CAPI_DEFINE_FUNC(
+        if (self == NULL || data == NULL)
+        {
+            ib_error_string = "A nullpointer parameter was provided";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        auto publisher = reinterpret_cast<ib::sim::generic::IGenericPublisher*>(self);
+        
+        publisher->Publish(std::vector<uint8_t>(&(data->pointer[0]), &(data->pointer[0]) + data->size));
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+
+
+#pragma endregion DATA
 
 }

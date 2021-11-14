@@ -1,0 +1,62 @@
+{
+  "ConfigVersion": "0.8.1",
+  "ConfigName": "C Data Publish Subscribe Demo",
+  "Description": "A demo configuration for data publishing and subscribing",
+
+  "SimulationSetup": {
+    "Participants": [
+      {
+        "Name": "Participant1",
+        "Description": "Participant with data publisher and subscriber",
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Stdout",
+              "Level": "Trace"
+            }
+          ]
+        },
+        "ParticipantController": {
+          "SyncType": "DiscreteTime"
+        },
+        "GenericPublishers": [
+          {
+            "Name": "testTopic"
+          }
+        ],
+        "GenericSubscribers": [
+          { "Name": "testTopic" }
+        ]
+      },
+      {
+        "Name": "SystemController",
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Stdout",
+              "Level": "Trace"
+            }
+          ]
+        }
+      }
+    ],
+
+    "Links": [
+      {
+        "Name": "testTopic",
+        "Endpoints": [
+          "Participant1/testTopic"
+        ]
+      }
+    ],
+
+    "TimeSync": {
+      "TickPeriodNs": 1000000
+    }
+  },
+
+  "MiddlewareConfig": {
+    "ActiveMiddleware": "VAsio"
+  }
+
+}
