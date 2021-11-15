@@ -73,7 +73,7 @@ uint8_t ethernetMessageCounter = 0;
 #define SOURCE_MAC_SIZE 6
 #define DESTINATION_MAC_SIZE 6
 #define ETHERTYPE_MAC_SIZE 2
-#define PAYLOAD_OFFSET SOURCE_MAC_SIZE + DESTINATION_MAC_SIZE + ETHERTYPE_MAC_SIZE
+#define PAYLOAD_OFFSET (SOURCE_MAC_SIZE + DESTINATION_MAC_SIZE + ETHERTYPE_MAC_SIZE)
 
 typedef struct  {
     uint32_t someInt;
@@ -132,9 +132,14 @@ void SendEthernetMessage()
 
     // set payload
     ethernetMessageCounter += 1;
-    size_t payloadSize = snprintf((char*)buffer + PAYLOAD_OFFSET, sizeof(buffer) - PAYLOAD_OFFSET, "ETHERNET %i", ethernetMessageCounter);
+    int payloadSize = snprintf((char*)buffer + PAYLOAD_OFFSET, sizeof(buffer) - PAYLOAD_OFFSET, "ETHERNET %10i", ethernetMessageCounter);
 
-    ib_EthernetFrame ef = {(const uint8_t* const) buffer, PAYLOAD_OFFSET + payloadSize};
+    if (payloadSize <= 0)
+    {
+        fprintf(stderr, "Error: SendEthernetMessage cannot create payload. snprintf returned %d\n", payloadSize);
+        exit(-2);
+    }
+    ib_EthernetFrame ef = {(const uint8_t*) buffer, PAYLOAD_OFFSET + payloadSize};
 
     transmitContext.someInt = ethernetMessageCounter;
     ib_EthernetController_SendFrame(ethernetController1, &ef, (void*)&transmitContext);

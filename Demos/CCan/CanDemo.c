@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <inttypes.h>
 
 #include "ib/capi/IntegrationBus.h"
 
@@ -60,14 +61,14 @@ TransmitContext transmitContext;
 void AckCallback(void* context, ib_CanController* controller, struct ib_CanTransmitAcknowledge* cAck)
 {
     TransmitContext* tc = (TransmitContext*) cAck->userContext;
-    printf(">> %i for CAN Message with transmitId=%i, timestamp=%llu\n", cAck->status, tc->someInt, cAck->timestamp);
+    printf(">> %i for CAN Message with transmitId=%i, timestamp=%"PRIu64"\n", cAck->status, tc->someInt, cAck->timestamp);
 }
 
 void ReceiveMessage(void* context, ib_CanController* controller, ib_CanMessage* message)
 {
     TransmitContext* txContext = (TransmitContext*)(context);
     unsigned int i;
-    printf(">> CAN Message: canId=%i timestamp=%lu ",
+    printf(">> CAN Message: canId=%i timestamp=%"PRIu64"\n",
         message->canFrame->id, message->timestamp);
     if (txContext != NULL)
     {

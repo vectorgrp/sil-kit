@@ -572,7 +572,7 @@ ib_ReturnCode ib_EthernetController_SendFrame(ib_EthernetController* self, ib_Et
 #pragma region DATA
 
 CIntegrationBusAPI ib_ReturnCode ib_DataPublisher_create(ib_DataPublisher** out,
-    ib_SimulationParticipant* participant, char* topic, ib_DataExchangeFormat* dataTypeInfo, uint8_t history)
+    ib_SimulationParticipant* participant, const char* topic, ib_DataExchangeFormat* dataTypeInfo, uint8_t history)
 {
     CAPI_DEFINE_FUNC(
         if (out == NULL)
@@ -606,7 +606,7 @@ CIntegrationBusAPI ib_ReturnCode ib_DataPublisher_create(ib_DataPublisher** out,
 
 
 CIntegrationBusAPI ib_ReturnCode ib_DataSubscriber_create(ib_DataSubscriber** out,
-    ib_SimulationParticipant* participant, char* topic, ib_DataExchangeFormat* dataTypeInfo, void* context,
+    ib_SimulationParticipant* participant, const char* topic, ib_DataExchangeFormat* dataTypeInfo, void* context,
     ib_DataHandler_t dataHandler)
 {
     CAPI_DEFINE_FUNC(

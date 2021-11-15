@@ -26,13 +26,21 @@ MATCHER_P(PayloadMatcher, controlPayload, "matches data payloads by their conten
 
 class MockDataPublisher : public ib::sim::generic::IGenericPublisher {
 public:
-    virtual auto Config() const -> const ib::cfg::GenericPort& {return {};};
+    auto Config() const -> const ib::cfg::GenericPort&
+    {
+        static const ib::cfg::GenericPort portCfg{};
+        return portCfg;
+    };
     MOCK_METHOD1(Publish, void(std::vector<uint8_t> data));
     virtual void Publish(const uint8_t* data, std::size_t size) {};
 };
 class MockDataSubscriber : public ib::sim::generic::IGenericSubscriber{
 public:
-    virtual auto Config() const -> const ib::cfg::GenericPort& { return {}; };
+    auto Config() const -> const ib::cfg::GenericPort&
+    {
+        static const ib::cfg::GenericPort portCfg{};
+        return portCfg;
+    };
     MOCK_METHOD1(SetReceiveMessageHandler, void(std::function<void(IGenericSubscriber* subscriber, const std::vector<uint8_t>& data)> callback));
 };
 

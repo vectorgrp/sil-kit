@@ -38,7 +38,7 @@ typedef void (*ib_DataHandler_t)(void* context, ib_DataSubscriber* subscriber,
     const ib_ByteVector* data);
 
 typedef ib_ReturnCode(*ib_DataPublisher_create_t)(ib_DataPublisher** out, ib_SimulationParticipant* participant, 
-    char* topic, ib_DataExchangeFormat* dataExchangeFormat, uint8_t history);
+    const char* topic, ib_DataExchangeFormat* dataExchangeFormat, uint8_t history);
 /*! \brief Create a DataPublisher on the provided simulation participant with the provided properties.
 * \param out Pointer to which the resulting DataPublisher reference will be written.
 * \param participant The simulation participant for which the DataPublisher should be created.
@@ -47,10 +47,10 @@ typedef ib_ReturnCode(*ib_DataPublisher_create_t)(ib_DataPublisher** out, ib_Sim
 * \param history A number indicating the number of historic values, that should be replayed for a new DataSubscriber.
 */
 CIntegrationBusAPI ib_ReturnCode ib_DataPublisher_create(ib_DataPublisher** out, 
-    ib_SimulationParticipant* participant, char* topic, ib_DataExchangeFormat* dataExchangeFormat, uint8_t history);
+    ib_SimulationParticipant* participant, const char* topic, ib_DataExchangeFormat* dataExchangeFormat, uint8_t history);
 
 typedef ib_ReturnCode(*ib_DataSubscriber_create_t)(ib_DataSubscriber** out, ib_SimulationParticipant* participant, 
-    char* topic, ib_DataExchangeFormat* dataExchangeFormat, void* context, ib_DataHandler_t dataHandler);
+    const char* topic, ib_DataExchangeFormat* dataExchangeFormat, void* context, ib_DataHandler_t dataHandler);
 /*! \brief Create a DataSubscriber on the provided simulation participant with the provided properties.
 * \param out Pointer to which the resulting DataSubscriber reference will be written.
 * \param participant The simulation participant for which the DataSubscriber should be created.
@@ -63,7 +63,7 @@ typedef ib_ReturnCode(*ib_DataSubscriber_create_t)(ib_DataSubscriber** out, ib_S
 * the data subscriber callback handle.
 */
 CIntegrationBusAPI ib_ReturnCode ib_DataSubscriber_create(ib_DataSubscriber** out, 
-    ib_SimulationParticipant* participant, char* topic, ib_DataExchangeFormat* dataExchangeFormat, void* context, 
+    ib_SimulationParticipant* participant, const char* topic, ib_DataExchangeFormat* dataExchangeFormat, void* context, 
     ib_DataHandler_t dataHandler);
 
 typedef ib_ReturnCode(*ib_DataPublisher_Publish_t)(ib_DataPublisher* self, const ib_ByteVector* data);
