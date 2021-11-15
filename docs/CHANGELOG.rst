@@ -5,7 +5,7 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.4.6] - Unreleased
+[3.4.6] - 2021-11-16
 --------------------------------
 
 Changed
@@ -21,7 +21,31 @@ Changed
   marked as deprecated for a long time.
   Users should adopt the generic :cpp:func:`CreateComAdapter<ib::CreateComAdapter()>`,
   refer to :ref:`sec:mwcfg-enable-vasio` for instructions.
+- C-API for ethernet was refactored and improved (VIB-489).
+- C-API for CAN was refactored and internal integrity checks and unit tests
+  added (VIB-464 VIB-465 VIB-466 VIB-460 VIB-462).
+- The transmit acknowledges in CAN were changed to work with a single participant.
+  That is, in a trivial simulation sending a CAN message will be immediately acknowledged (VIB-473 VIB-478).
+- Updated gtest to version 1.11. This version supports a simplified
+  MOCK_METHOD macro with specifiers like `const, override`. (VIB-474).
 
+Added
+~~~~~
+- Added new functional tests for CAN and Ethernet without simulation control
+  flow / synchronization (VIB-491 VIB-494).
+- A new C-API for a DataPublisher / Subscriber (VIB-432).
+
+Fixed
+~~~~~
+- Fixed regression in ``Pause()/Continue()`` calls of ParticipantController.
+  The `SimulationControl` Demo was added and used as a stress test (AFTMAGT-330 VIB-499).
+
+Compatibility with 3.4.5
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): No (interface change due to transmit acknowledges)
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
 
 [3.4.5] - 2021-11-03
 --------------------------------
