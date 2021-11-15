@@ -108,7 +108,7 @@ ParticipantController::ParticipantController(IComAdapter* comAdapter, const cfg:
     );
 
 
-    _status.participantName = participantConfig.name; //no need to lock this
+    _status.participantName = participantConfig.name;
     _currentTask.timePoint = -1ns;
     _currentTask.duration = 0ns;
     _myNextTask.timePoint = 0ns;

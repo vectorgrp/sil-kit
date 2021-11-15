@@ -8,9 +8,7 @@
 
 #include <future>
 #include <tuple>
-#include <atomic>
 #include <map>
-#include <mutex>
 
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/cfg/Config.hpp"
@@ -131,10 +129,6 @@ private:
     std::unique_ptr<ISyncAdapter> _syncAdapter;
     bool _coldswapEnabled{ false };
 
-    // Status might be modified by User thread (e.g., via Pause()) and the
-    // underlying middle-ware's I/O thread
-    mutable std::mutex _statusMx; //C++17: we could use a shared_mutex for reader/writer locking
-    using StatusLockT = std::lock_guard<decltype(_statusMx)>;
     ParticipantStatus _status;
 
     NextSimTask _currentTask;
