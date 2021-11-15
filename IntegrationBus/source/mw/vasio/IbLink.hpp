@@ -2,11 +2,12 @@
 
 #pragma once
 
-#include "ib/mw/IIbMessageReceiver.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 
 #include "VAsioTransmitter.hpp"
 #include "IbMsgTraits.hpp"
+
+#include "IIbMessageReceiver.hpp"
 
 namespace ib {
 namespace mw {

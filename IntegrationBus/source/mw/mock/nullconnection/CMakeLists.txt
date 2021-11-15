@@ -9,7 +9,7 @@ target_include_directories(IbMwMockNullConnection
 )
 
 target_link_libraries(IbMwMockNullConnection
-    IbMwComAdapter
+    PUBLIC IbMwComAdapter
 )
 
 if (MSVC)

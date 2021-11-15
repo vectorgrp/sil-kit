@@ -2,19 +2,18 @@
 
 #pragma once
 
-#include "ib/mw/sync/IParticipantController.hpp"
-#include "ib/mw/sync/IIbToParticipantController.hpp"
-#include "ib/mw/sync/ITimeProvider.hpp"
-
 #include <future>
 #include <tuple>
 #include <map>
 
+#include "ib/mw/sync/IParticipantController.hpp"
+#include "ib/mw/sync/ITimeProvider.hpp"
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/cfg/Config.hpp"
 
 #include "PerformanceMonitor.hpp"
 #include "WatchDog.hpp"
+#include "IIbToParticipantController.hpp"
 
 namespace ib {
 namespace mw {

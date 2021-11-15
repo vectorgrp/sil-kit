@@ -1,8 +1,4 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
-#include "IIbToParticipantController.hpp"
-#include "IIbToSyncMaster.hpp"
-#include "IIbToSystemController.hpp"
-#include "IIbToSystemMonitor.hpp"
 #include "IParticipantController.hpp"
 #include "ISyncMaster.hpp"
 #include "ISystemController.hpp"

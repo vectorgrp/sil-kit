@@ -3,11 +3,12 @@
 #pragma once
 
 #include "ib/mw/sync/ISystemController.hpp"
-#include "ib/mw/sync/IIbToSystemController.hpp"
 
 #include "ib/mw/IComAdapter.hpp"
 
 #include <cassert>
+
+#include "IIbToSystemController.hpp"
 
 namespace ib {
 namespace mw {

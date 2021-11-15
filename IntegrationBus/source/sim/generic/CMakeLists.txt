@@ -20,6 +20,7 @@ target_include_directories(IbSimGenericMessage
 target_link_libraries(IbSimGenericMessage
     PRIVATE IbInterface
             IbTracing
+    INTERFACE IbInternal
 )
 
 add_vib_test(TestSimGenericPublisher SOURCES GenericPublisherTest.cpp LIBS IbSimGenericMessage IbConfig IbMwMockComAdapter IbTracing)

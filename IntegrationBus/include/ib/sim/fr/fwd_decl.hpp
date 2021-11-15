@@ -32,9 +32,6 @@ struct ControllerStatus;
 struct PocStatus;
 
 class IFrController;
-class IIbToFrController;
-class IIbToFrControllerProxy;
-class IIbToFrBusSimulator;
 
 } // namespace fr
 } // namespace sim

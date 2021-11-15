@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "ib/mw/IIbMessageReceiver.hpp"
 #include "ReportMatchingListener.hpp"
 
 #include "ib/mw/sync/string_utils.hpp"
@@ -13,6 +12,8 @@
 #include <map>
 
 #include "MessageTracing.hpp"
+
+#include "IIbMessageReceiver.hpp"
 
 namespace ib {
 namespace mw {

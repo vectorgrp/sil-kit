@@ -8,10 +8,10 @@
 #include <vector>
 
 #include "ib/sim/lin/ILinController.hpp"
-#include "ib/sim/lin/IIbToLinControllerProxy.hpp"
 #include "ib/extensions/ITraceMessageSource.hpp"
 #include "ib/mw/fwd_decl.hpp"
 
+#include "IIbToLinControllerProxy.hpp"
 
 namespace ib {
 namespace sim {

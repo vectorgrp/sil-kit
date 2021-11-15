@@ -2,27 +2,27 @@
 
 #pragma once
 
-#include "ib/mw/IIbReceiver.hpp"
-#include "ib/mw/IIbSender.hpp"
+#include "IIbReceiver.hpp"
+#include "IIbSender.hpp"
 
-#include "CanDatatypes.hpp"
+#include "ib/sim/fr/FrDatatypes.hpp"
 
 namespace ib {
 namespace sim {
-namespace can {
+namespace fr {
 
-/*! \brief IIbToCanSimulator interface
+/*! \brief IIbToFrBusSimulator interface
  *
  *  Used by the ComAdapter
  */
-class IIbToCanSimulator
-    : public mw::IIbReceiver<CanMessage, CanConfigureBaudrate, CanSetControllerMode>
-    , public mw::IIbSender<CanMessage, CanTransmitAcknowledge, CanControllerStatus>
+class IIbToFrBusSimulator
+    : public mw::IIbReceiver<HostCommand, ControllerConfig, TxBufferConfigUpdate, TxBufferUpdate>
+    , public mw::IIbSender<FrMessage, FrMessageAck, FrSymbol, FrSymbolAck, CycleStart, ControllerStatus, PocStatus>
 {
 public:
-    ~IIbToCanSimulator() = default;
+    ~IIbToFrBusSimulator() = default;
 
-    /* NB: there is no setter or getter for an EndpointAddress of the bus
+    /* NB: There is no setter or getter for an EndpointAddress of the bus
      * simulator, since the Network Simulator manages multiple controllers with
      * different endpoints. I.e., the Network Simulator is aware of the endpointIds.
      */
@@ -31,6 +31,6 @@ public:
     virtual auto GetParticipantId() const -> ib::mw::ParticipantId = 0;
 };
 
-} // namespace can
+} // namespace fr
 } // namespace sim
 } // namespace ib

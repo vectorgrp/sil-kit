@@ -16,13 +16,14 @@ add_library(IbMwSync
 )
 
 target_include_directories(IbMwSync
-    PUBLIC .
+    PUBLIC ${CMAKE_CURRENT_LIST_DIR}
 )
 
 target_link_libraries(IbMwSync
     PUBLIC IbInterface
-    PUBLIC IbUtil
-    IbMwLogging
+           IbUtil
+    PUBLIC IbInternal
+    PRIVATE IbMwLogging
 )
 
 add_vib_test(TestMwSyncMaster 

@@ -3,14 +3,13 @@
 #pragma once
 
 #include "ib/sim/fr/IFrController.hpp"
-#include "ib/sim/fr/IIbToFrControllerProxy.hpp"
 #include "ib/extensions/ITraceMessageSource.hpp"
+#include "ib/mw/fwd_decl.hpp"
 
 #include <tuple>
 #include <vector>
 
-#include "ib/mw/fwd_decl.hpp"
-
+#include "IIbToFrControllerProxy.hpp"
 
 namespace ib {
 namespace sim {

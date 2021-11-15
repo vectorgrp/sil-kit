@@ -2,11 +2,12 @@
 
 #pragma once
 
-#include "ib/mw/IIbMessageReceiver.hpp"
 
 #include "VAsioMsgKind.hpp"
 #include "IVAsioPeer.hpp"
 #include <type_traits>
+
+#include "IIbMessageReceiver.hpp"
 
 namespace ib {
 namespace mw {

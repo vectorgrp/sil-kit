@@ -6,11 +6,12 @@
 #include <vector>
 
 #include "ib/sim/fr/IFrController.hpp"
-#include "ib/sim/fr/IIbToFrController.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
 #include "ib/extensions/ITraceMessageSource.hpp"
-
 #include "ib/mw/fwd_decl.hpp"
+
+
+#include "IIbToFrController.hpp"
 
 namespace ib {
 namespace sim {

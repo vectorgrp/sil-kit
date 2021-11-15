@@ -10,6 +10,7 @@ add_library(IbMwComAdapter STATIC
 
 target_link_libraries(IbMwComAdapter
     INTERFACE  IbInterface
+    PUBLIC  IbInternal
     PUBLIC  IbVersion
     PUBLIC  IbMwLogging
     PUBLIC  IbConfig

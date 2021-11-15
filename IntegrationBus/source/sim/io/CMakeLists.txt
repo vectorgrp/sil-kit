@@ -15,6 +15,7 @@ target_include_directories(IbSimIO
 target_link_libraries(IbSimIO
     PRIVATE IbInterface
             IbTracing
+    INTERFACE IbInternal
 )
 
 add_vib_test(TestSimInOutPort

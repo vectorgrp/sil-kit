@@ -16,6 +16,7 @@ target_include_directories(IbSimLin
 
 target_link_libraries(IbSimLin
     PRIVATE IbInterface
+            IbInternal
             IbMwLogging
             IbTracing
 )

@@ -1,7 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-project("IbMwLogging" CXX)
-
-add_library(${PROJECT_NAME} STATIC
+add_library(IbMwLogging STATIC
     SpdlogTypeConversion.hpp
     IIbToLogMsgSender.hpp
     IIbToLogMsgReceiver.hpp
@@ -24,13 +22,13 @@ add_library(${PROJECT_NAME} STATIC
 
 if (TARGET fmt-header-only)
     message(STATUS "have fmt-header-only")
-    target_link_libraries(${PROJECT_NAME}
+    target_link_libraries(IbMwLogging
         INTERFACE
             $<BUILD_INTERFACE:fmt-header-only>
         PRIVATE
             $<BUILD_INTERFACE:fmt-header-only>
     )
-    target_compile_definitions(${PROJECT_NAME}
+    target_compile_definitions(IbMwLogging
         INTERFACE
             $<BUILD_INTERFACE:HAVE_FMTLIB>
             $<BUILD_INTERFACE:FMT_HEADER_ONLY>
@@ -40,19 +38,20 @@ if (TARGET fmt-header-only)
     )
 endif()
 
-target_include_directories(${PROJECT_NAME}
-    PUBLIC ${PROJECT_SOURCE_DIR}
-    INTERFACE ${PROJECT_SOURCE_DIR}
+target_include_directories(IbMwLogging
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(IbMwLogging
     PUBLIC IbInterface
+    PUBLIC IbInternal
     PRIVATE spdlog
 )
 
 if(UNIX)
-    set_target_properties(${PROJECT_NAME}
+    set_target_properties(IbMwLogging
         PROPERTIES
         VISIBILITY_INLINES_HIDDEN 1
         CXX_VISIBILITY_PRESET hidden

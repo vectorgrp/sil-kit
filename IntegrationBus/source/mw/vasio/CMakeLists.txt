@@ -45,6 +45,8 @@ target_link_libraries(IbMwVAsio
       Threads::Threads
       IbFilesystem
       asio
+    INTERFACE
+      IbInternal
 )
 
 target_compile_definitions(IbMwVAsio PRIVATE ASIO_STANDALONE)

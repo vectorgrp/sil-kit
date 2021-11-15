@@ -2,13 +2,14 @@
 
 #pragma once
 
+#include <vector>
+
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/sim/generic/IGenericPublisher.hpp"
-#include "ib/sim/generic/IIbToGenericPublisher.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
 #include "ib/extensions/ITraceMessageSource.hpp"
 
-#include <vector>
+#include "IIbToGenericPublisher.hpp"
 
 namespace ib {
 namespace sim {

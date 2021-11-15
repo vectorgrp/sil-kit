@@ -13,10 +13,6 @@ struct EthStatus;
 struct EthSetMode;
 
 class IEthController;
-class IIbToEthController;
-class IIbToEthControllerProxy;
-class IIbToEthSimulator;
-
 } // namespace eth
 } // namespace sim
 } // namespace ib

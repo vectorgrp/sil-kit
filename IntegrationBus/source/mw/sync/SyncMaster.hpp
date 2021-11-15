@@ -9,8 +9,9 @@
 
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/mw/sync/ISyncMaster.hpp"
-#include "ib/mw/sync/IIbToSyncMaster.hpp"
 #include "ib/cfg/fwd_decl.hpp"
+
+#include "IIbToSyncMaster.hpp"
 
 namespace ib {
 namespace mw {

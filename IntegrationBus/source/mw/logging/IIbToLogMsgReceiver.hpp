@@ -2,10 +2,11 @@
 
 #pragma once
 
-#include "ib/mw/IIbEndpoint.hpp"
-#include "ib/mw/IIbSender.hpp"
 
 #include "ib/mw/logging/LoggingDatatypes.hpp"
+
+#include "IIbEndpoint.hpp"
+#include "IIbSender.hpp"
 
 namespace ib {
 namespace mw {

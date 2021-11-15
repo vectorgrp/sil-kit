@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include "ib/mw/IIbEndpoint.hpp"
-#include "ib/mw/IIbSender.hpp"
+#include "IIbEndpoint.hpp"
+#include "IIbSender.hpp"
 
-#include "GenericMessageDatatypes.hpp"
+#include "ib/sim/generic/GenericMessageDatatypes.hpp"
 
 namespace ib {
 namespace sim {

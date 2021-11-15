@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "ib/mw/IIbReceiver.hpp"
-#include "ib/mw/IIbSender.hpp"
+#include "IIbReceiver.hpp"
+#include "IIbSender.hpp"
 #include "ib/sim/lin/fwd_decl.hpp"
 
 namespace ib {

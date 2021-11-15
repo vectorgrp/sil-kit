@@ -9,12 +9,12 @@
 #include "ib/mw/fwd_decl.hpp"
 
 #include "ib/sim/io/IInPort.hpp"
-#include "ib/sim/io/IIbToInPort.hpp"
 #include "ib/cfg/Config.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/extensions/ITraceMessageSource.hpp"
 
+#include "IIbToInPort.hpp"
 
 namespace ib {
 namespace sim {

@@ -18,9 +18,6 @@ struct ControllerStatusUpdate;
 struct FrameResponseUpdate;
 
 class ILinController;
-class IIbToLinController;
-class IIbToLinControllerProxy;
-class IIbToLinSimulator;
 
 } // namespace lin
 } // namespace sim

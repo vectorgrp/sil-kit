@@ -37,7 +37,8 @@ target_link_libraries(IbMwFastRtps
     PUBLIC fastrtps
     PUBLIC fastcdr
     IbMwFastRtpsIdl
-    IbMwLogging
+    PUBLIC IbMwLogging
+    INTERFACE IbInternal
 )
 
 target_include_directories(IbMwFastRtps

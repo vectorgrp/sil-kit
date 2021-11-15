@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "EndpointAddress.hpp"
+#include "ib/mw/EndpointAddress.hpp"
 
 namespace ib {
 namespace mw {

@@ -8,7 +8,8 @@
 #include "ib/cfg/Config.hpp"
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/sync/ISystemMonitor.hpp"
-#include "ib/mw/sync/IIbToSystemMonitor.hpp"
+
+#include "IIbToSystemMonitor.hpp"
 
 namespace ib {
 namespace mw {

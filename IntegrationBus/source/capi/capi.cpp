@@ -12,11 +12,13 @@
 #include "ib/sim/eth/string_utils.hpp"
 #include "ib/sim/generic/all.hpp"
 #include "ib/sim/generic/string_utils.hpp"
+
 #include <string>
 #include <iostream>
 #include <algorithm>
 #include <map>
 #include <mutex>
+#include <cstring>
 
 #define CAPI_DEFINE_FUNC(BODY) \
     try { \

@@ -4,8 +4,8 @@
 
 #include "ib/sim/can/CanDatatypes.hpp"
 
-#include "ib/mw/IIbEndpoint.hpp"
-#include "ib/mw/IIbSender.hpp"
+#include "IIbEndpoint.hpp"
+#include "IIbSender.hpp"
 
 namespace ib {
 namespace sim {
@@ -15,11 +15,12 @@ namespace can {
  *
  *  Used by the ComAdapter, implemented by the CanController
  */
-class IIbToCanController
-    : public mw::IIbEndpoint<CanMessage>
-    , public mw::IIbSender<CanMessage>
+class IIbToCanControllerProxy
+    : public mw::IIbEndpoint<CanMessage, CanTransmitAcknowledge, CanControllerStatus>
+    , public mw::IIbSender<CanMessage, CanConfigureBaudrate, CanSetControllerMode>
 {
 };
+
 
 } // namespace can
 } // namespace sim

@@ -4,10 +4,10 @@
 
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/sim/generic/IGenericSubscriber.hpp"
-#include "ib/sim/generic/IIbToGenericSubscriber.hpp"
 #include "ib/extensions/ITraceMessageSource.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
 
+#include "IIbToGenericSubscriber.hpp"
 
 namespace ib {
 namespace sim {

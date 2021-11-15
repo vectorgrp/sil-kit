@@ -16,6 +16,7 @@ target_include_directories(IbSimFlexRay
 
 target_link_libraries(IbSimFlexRay
     PRIVATE IbInterface
+            IbInternal
             IbMwLogging
             IbTracing
 )

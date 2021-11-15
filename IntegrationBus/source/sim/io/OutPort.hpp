@@ -8,12 +8,12 @@
 #include "ib/mw/fwd_decl.hpp"
 
 #include "ib/sim/io/IOutPort.hpp"
-#include "ib/sim/io/IIbToOutPort.hpp"
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
 #include "ib/extensions/ITraceMessageSource.hpp"
 #include "ib/cfg/Config.hpp"
 
+#include "IIbToOutPort.hpp"
 
 namespace ib {
 namespace sim {

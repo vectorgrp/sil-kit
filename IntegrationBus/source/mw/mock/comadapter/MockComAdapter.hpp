@@ -106,11 +106,6 @@ public:
 
     virtual auto GetTimeProvider() -> sync::ITimeProvider* { return &mockTimeProvider; }
 
-    void RegisterCanSimulator(sim::can::IIbToCanSimulator* /*canonicalName*/) {}
-    void RegisterEthSimulator(sim::eth::IIbToEthSimulator* /*canonicalName*/) {}
-    void RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* /*canonicalName*/) {}
-    void RegisterLinSimulator(sim::lin::IIbToLinSimulator* /*canonicalName*/) {}
-
     void SendIbMessage(EndpointAddress /*from*/, sim::can::CanMessage&& /*msg*/) {}
     void SendIbMessage(EndpointAddress /*from*/, const sim::can::CanMessage& /*msg*/) {}
     void SendIbMessage(EndpointAddress /*from*/, const sim::can::CanTransmitAcknowledge& /*msg*/) {}

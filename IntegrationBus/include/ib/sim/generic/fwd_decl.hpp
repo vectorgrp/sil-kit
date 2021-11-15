@@ -9,9 +9,7 @@ namespace generic {
 struct GenericMessage;
 
 class IGenericPublisher;
-class IIbToGenericPublisher;
 class IGenericSubscriber;
-class IIbToGenericSubscriber;
 
 } // namespace generic
 } // namespace sim

@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "SyncDatatypes.hpp"
-#include "ib/mw/IIbEndpoint.hpp"
-#include "ib/mw/IIbSender.hpp"
+#include "ib/mw/sync/SyncDatatypes.hpp"
+#include "IIbEndpoint.hpp"
+#include "IIbSender.hpp"
 
 namespace ib {
 namespace mw {

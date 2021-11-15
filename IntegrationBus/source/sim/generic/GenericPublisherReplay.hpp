@@ -4,9 +4,9 @@
 
 #include "IReplayDataController.hpp"
 #include "ib/sim/generic/IGenericPublisher.hpp"
-#include "ib/sim/generic/IIbToGenericPublisher.hpp"
 #include "GenericPublisher.hpp"
 
+#include "IIbToGenericPublisher.hpp"
 namespace ib {
 namespace sim {
 namespace generic {

@@ -13,9 +13,6 @@ struct CanSetControllerMode;
 struct CanTransmitAcknowledge;
 
 class ICanController;
-class IIbToCanController;
-class IIbToCanControllerProxy;
-class IIbToCanSimulator;
 
 } // namespace can
 } // namespace sim

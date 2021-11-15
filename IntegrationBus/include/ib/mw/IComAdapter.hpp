@@ -72,11 +72,6 @@ public:
     virtual auto GetSystemController() -> sync::ISystemController* = 0;
     virtual auto GetLogger() -> logging::ILogger* = 0;
 
-    virtual void RegisterCanSimulator(sim::can::IIbToCanSimulator* busSim) = 0;
-    virtual void RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim) = 0;
-    virtual void RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* busSim) = 0;
-    virtual void RegisterLinSimulator(sim::lin::IIbToLinSimulator* busSim) = 0;
-   
     virtual void SendIbMessage(EndpointAddress from, const sim::can::CanMessage& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, sim::can::CanMessage&& msg) = 0;
     virtual void SendIbMessage(EndpointAddress from, const sim::can::CanTransmitAcknowledge& msg) = 0;
