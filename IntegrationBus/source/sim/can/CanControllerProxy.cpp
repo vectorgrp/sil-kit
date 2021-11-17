@@ -2,13 +2,12 @@
 
 #include "CanControllerProxy.hpp"
 
-#include "ib/mw/IComAdapter.hpp"
 
 namespace ib {
 namespace sim {
 namespace can {
 
-CanControllerProxy::CanControllerProxy(mw::IComAdapter* comAdapter)
+CanControllerProxy::CanControllerProxy(mw::IComAdapterInternal* comAdapter)
 : _comAdapter(comAdapter)
 {
 }

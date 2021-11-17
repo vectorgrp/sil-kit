@@ -1,13 +1,12 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "GenericSubscriberReplay.hpp"
-#include "ib/mw/IComAdapter.hpp"
 
 namespace ib {
 namespace sim {
 namespace generic {
 
-GenericSubscriberReplay::GenericSubscriberReplay(mw::IComAdapter* comAdapter,
+GenericSubscriberReplay::GenericSubscriberReplay(mw::IComAdapterInternal* comAdapter,
         cfg::GenericPort config, mw::sync::ITimeProvider* timeProvider)
     : _subscriber{comAdapter, config, timeProvider}
     , _replayConfig{config.replay}

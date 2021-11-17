@@ -4,20 +4,19 @@
 
 #include <cassert>
 
-#include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 
 namespace ib {
 namespace sim {
 namespace generic {
 
-GenericSubscriber::GenericSubscriber(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider)
+GenericSubscriber::GenericSubscriber(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _timeProvider{timeProvider}
 {
 }
 
-GenericSubscriber::GenericSubscriber(mw::IComAdapter* comAdapter, cfg::GenericPort config, mw::sync::ITimeProvider* timeProvider)
+GenericSubscriber::GenericSubscriber(mw::IComAdapterInternal* comAdapter, cfg::GenericPort config, mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _config{std::move(config)}
     , _timeProvider{timeProvider}

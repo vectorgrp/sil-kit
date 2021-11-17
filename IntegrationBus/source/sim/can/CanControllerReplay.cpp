@@ -7,7 +7,7 @@ namespace sim {
 namespace can {
 
 
-CanControllerReplay::CanControllerReplay(mw::IComAdapter* comAdapter, cfg::CanController config, mw::sync::ITimeProvider* timeProvider)
+CanControllerReplay::CanControllerReplay(mw::IComAdapterInternal* comAdapter, cfg::CanController config, mw::sync::ITimeProvider* timeProvider)
     : _controller{comAdapter, timeProvider}
     , _replayConfig{config.replay}
 {

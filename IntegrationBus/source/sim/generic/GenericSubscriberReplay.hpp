@@ -3,9 +3,9 @@
 #pragma once
 
 #include "ib/mw/fwd_decl.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 #include "GenericSubscriber.hpp"
 #include "IReplayDataController.hpp"
-#include "ib/mw/logging/ILogger.hpp"
 
 
 namespace ib {
@@ -21,7 +21,7 @@ class GenericSubscriberReplay
 {
 public:
     // ----------------------------------------
-    GenericSubscriberReplay(mw::IComAdapter* comAdapter, cfg::GenericPort config,
+    GenericSubscriberReplay(mw::IComAdapterInternal* comAdapter, cfg::GenericPort config,
         mw::sync::ITimeProvider* timeProvider);
 
 public:

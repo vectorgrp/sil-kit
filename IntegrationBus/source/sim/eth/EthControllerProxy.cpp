@@ -2,13 +2,12 @@
 
 #include "EthControllerProxy.hpp"
 
-#include "ib/mw/IComAdapter.hpp"
 
 namespace ib {
 namespace sim {
 namespace eth {
 
-EthControllerProxy::EthControllerProxy(mw::IComAdapter* comAdapter, cfg::EthernetController config)
+EthControllerProxy::EthControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::EthernetController config)
     : _comAdapter(comAdapter)
 {
 

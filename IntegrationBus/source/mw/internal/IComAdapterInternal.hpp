@@ -5,32 +5,7 @@
 #include "ib/mw/IComAdapter.hpp"
 
 // IbInternal component:
-#include "IIbToCanSimulator.hpp"
-#include "IIbToCanController.hpp"
-#include "IIbToCanControllerProxy.hpp"
-
-#include "IIbToEthSimulator.hpp"
-#include "IIbToEthController.hpp"
-#include "IIbToEthControllerProxy.hpp"
-
-#include "IIbToLinSimulator.hpp"
-#include "IIbToLinController.hpp"
-#include "IIbToLinControllerProxy.hpp"
-
-#include "IIbToFrBusSimulator.hpp"
-#include "IIbToFrController.hpp"
-#include "IIbToFrControllerProxy.hpp"
-
-#include "IIbToInPort.hpp"
-#include "IIbToOutPort.hpp"
-
-#include "IIbToGenericSubscriber.hpp"
-#include "IIbToGenericPublisher.hpp"
-
-#include "IIbToSystemMonitor.hpp"
-#include "IIbToSystemController.hpp"
-#include "IIbToParticipantController.hpp"
-#include "IIbToSyncMaster.hpp"
+#include "internal_fwd.hpp"
 
 namespace ib {
 namespace mw {

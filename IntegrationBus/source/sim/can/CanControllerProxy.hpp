@@ -11,6 +11,7 @@
 #include "ib/mw/fwd_decl.hpp"
 
 #include "IIbToCanControllerProxy.hpp"
+#include "IComAdapterInternal.hpp"
 
 namespace ib {
 namespace sim {
@@ -31,7 +32,7 @@ public:
     CanControllerProxy() = delete;
     CanControllerProxy(const CanControllerProxy&) = default;
     CanControllerProxy(CanControllerProxy&&) = default;
-    CanControllerProxy(mw::IComAdapter* comAdapter);
+    CanControllerProxy(mw::IComAdapterInternal* comAdapter);
 
 
 public:
@@ -97,7 +98,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    mw::IComAdapter* _comAdapter;
+    mw::IComAdapterInternal* _comAdapter;
     mw::EndpointAddress _endpointAddr;
 
     CanTxId _canTxId = 0;

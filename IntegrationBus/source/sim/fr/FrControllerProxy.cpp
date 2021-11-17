@@ -3,14 +3,13 @@
 #include "FrControllerProxy.hpp"
 #include "Validation.hpp"
 
-#include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 
 namespace ib {
 namespace sim {
 namespace fr {
 
-FrControllerProxy::FrControllerProxy(mw::IComAdapter* comAdapter)
+FrControllerProxy::FrControllerProxy(mw::IComAdapterInternal* comAdapter)
 : _comAdapter(comAdapter)
 , _endpointAddr{}
 {

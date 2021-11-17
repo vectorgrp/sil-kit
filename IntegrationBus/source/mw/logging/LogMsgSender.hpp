@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "ib/mw/IComAdapter.hpp"
 
 #include "IIbToLogMsgSender.hpp"
+#include "IComAdapterInternal.hpp"
 
 namespace ib {
 namespace mw {
@@ -16,7 +16,7 @@ class LogMsgSender
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    LogMsgSender(IComAdapter* comAdapter);
+    LogMsgSender(IComAdapterInternal* comAdapter);
 
 public:
     void SendLogMsg(const LogMsg& msg);
@@ -32,7 +32,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    IComAdapter* _comAdapter{nullptr};
+    IComAdapterInternal* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddress{};
 };
 

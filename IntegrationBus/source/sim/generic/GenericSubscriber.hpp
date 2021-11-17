@@ -8,6 +8,7 @@
 #include "ib/mw/sync/ITimeConsumer.hpp"
 
 #include "IIbToGenericSubscriber.hpp"
+#include "IComAdapterInternal.hpp"
 
 namespace ib {
 namespace sim {
@@ -26,8 +27,8 @@ public:
     GenericSubscriber(const GenericSubscriber&) = default;
     GenericSubscriber(GenericSubscriber&&) = default;
 
-    GenericSubscriber(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider);
-    GenericSubscriber(mw::IComAdapter* comAdapter, cfg::GenericPort config,
+    GenericSubscriber(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider);
+    GenericSubscriber(mw::IComAdapterInternal* comAdapter, cfg::GenericPort config,
         mw::sync::ITimeProvider* timeProvider);
 
 public:
@@ -59,7 +60,7 @@ public:
 private:
     //private Members
     cfg::GenericPort _config{};
-    mw::IComAdapter* _comAdapter{nullptr};
+    mw::IComAdapterInternal* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddr{};
     CallbackT _callback;
     mw::sync::ITimeProvider* _timeProvider{nullptr};

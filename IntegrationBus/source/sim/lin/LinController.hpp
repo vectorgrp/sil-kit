@@ -17,6 +17,7 @@
 #include "ib/sim/datatypes.hpp"
 
 #include "IIbToLinController.hpp"
+#include "IComAdapterInternal.hpp"
 
 namespace ib {
 namespace sim {
@@ -38,7 +39,7 @@ public:
     LinController() = delete;
     LinController(const LinController&) = default;
     LinController(LinController&&) = default;
-    LinController(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider);
+    LinController(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -114,7 +115,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    mw::IComAdapter* _comAdapter;
+    mw::IComAdapterInternal* _comAdapter;
     mw::EndpointAddress _endpointAddr;
     mw::logging::ILogger* _logger;
     mw::sync::ITimeProvider* _timeProvider{ nullptr };

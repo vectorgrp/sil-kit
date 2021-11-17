@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include "ib/mw/IComAdapter.hpp"
-
-#include "IIbToLogMsgReceiver.hpp"
 #include "Logger.hpp"
+
+#include "IComAdapterInternal.hpp"
+#include "IIbToLogMsgReceiver.hpp"
 
 namespace ib {
 namespace mw {
@@ -17,7 +17,7 @@ class LogMsgReceiver
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    LogMsgReceiver(IComAdapter* comAdapter, Logger* logger);
+    LogMsgReceiver(IComAdapterInternal* comAdapter, Logger* logger);
 
 public:
     void ReceiveIbMessage(mw::EndpointAddress from, const LogMsg& msg) override;
@@ -28,7 +28,7 @@ public:
 private:
     // ----------------------------------------
     // private members
-    IComAdapter* _comAdapter{nullptr};
+    IComAdapterInternal* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddress{};
     
     logging::Logger* _logger;

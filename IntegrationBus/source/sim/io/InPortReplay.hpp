@@ -34,7 +34,7 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    InPortReplay(mw::IComAdapter* comAdapter, ConfigType config, mw::sync::ITimeProvider* timeProvider);
+    InPortReplay(mw::IComAdapterInternal* comAdapter, ConfigType config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -80,7 +80,7 @@ private:
 //  Inline Implementations
 // ================================================================================
 template<typename MsgT>
-InPortReplay<MsgT>::InPortReplay(mw::IComAdapter* comAdapter, ConfigType config, mw::sync::ITimeProvider* timeProvider)
+InPortReplay<MsgT>::InPortReplay(mw::IComAdapterInternal* comAdapter, ConfigType config, mw::sync::ITimeProvider* timeProvider)
     : _inPort{comAdapter, config, timeProvider}
     , _replayConfig{config.replay}
 {

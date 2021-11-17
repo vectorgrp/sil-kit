@@ -12,6 +12,7 @@
 #include "ib/cfg/fwd_decl.hpp"
 
 #include "IIbToSyncMaster.hpp"
+#include "IComAdapterInternal.hpp"
 
 namespace ib {
 namespace mw {
@@ -171,7 +172,7 @@ public:
     SyncMaster() = default;
     SyncMaster(const SyncMaster&) = default;
     SyncMaster(SyncMaster&&) = default;
-    SyncMaster(IComAdapter* comAdapter, const cfg::Config& config, ISystemMonitor* monitor);
+    SyncMaster(IComAdapterInternal* comAdapter, const cfg::Config& config, ISystemMonitor* monitor);
 
 
 public:
@@ -211,7 +212,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    IComAdapter* _comAdapter{nullptr};
+    IComAdapterInternal* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddress;
     logging::ILogger* _logger{nullptr};
 

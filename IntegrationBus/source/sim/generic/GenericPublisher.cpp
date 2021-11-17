@@ -2,19 +2,18 @@
 
 #include "GenericPublisher.hpp"
 
-#include "ib/mw/IComAdapter.hpp"
 
 namespace ib {
 namespace sim {
 namespace generic {
 
-GenericPublisher::GenericPublisher(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider)
+GenericPublisher::GenericPublisher(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _timeProvider{timeProvider}
 {
 }
 
-GenericPublisher::GenericPublisher(mw::IComAdapter* comAdapter, cfg::GenericPort config, mw::sync::ITimeProvider* timeProvider)
+GenericPublisher::GenericPublisher(mw::IComAdapterInternal* comAdapter, cfg::GenericPort config, mw::sync::ITimeProvider* timeProvider)
     : GenericPublisher{comAdapter, timeProvider}
 {
     _config = std::move(config);

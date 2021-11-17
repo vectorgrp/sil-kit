@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "IComAdapter_internal.hpp"
+#include "IComAdapterInternal.hpp"
 
 #include <memory>
 #include <vector>
@@ -22,6 +22,42 @@
 
 #include "IIbToLogMsgSender.hpp"
 #include "IIbToLogMsgReceiver.hpp"
+
+// Datatypes needed for internal interfaces:
+#include "ib/sim/can/CanDatatypes.hpp"
+#include "ib/sim/eth/EthDatatypes.hpp"
+#include "ib/sim/lin/LinDatatypes.hpp"
+#include "ib/sim/fr/FrDatatypes.hpp"
+#include "ib/sim/io/IoDatatypes.hpp"
+#include "ib/sim/generic/GenericMessageDatatypes.hpp"
+#include "ib/mw/sync/SyncDatatypes.hpp"
+// IbInternal component:
+#include "IIbToCanSimulator.hpp"
+#include "IIbToCanController.hpp"
+#include "IIbToCanControllerProxy.hpp"
+
+#include "IIbToEthSimulator.hpp"
+#include "IIbToEthController.hpp"
+#include "IIbToEthControllerProxy.hpp"
+
+#include "IIbToLinSimulator.hpp"
+#include "IIbToLinController.hpp"
+#include "IIbToLinControllerProxy.hpp"
+
+#include "IIbToFrBusSimulator.hpp"
+#include "IIbToFrController.hpp"
+#include "IIbToFrControllerProxy.hpp"
+
+#include "IIbToInPort.hpp"
+#include "IIbToOutPort.hpp"
+
+#include "IIbToGenericSubscriber.hpp"
+#include "IIbToGenericPublisher.hpp"
+
+#include "IIbToSystemMonitor.hpp"
+#include "IIbToSystemController.hpp"
+#include "IIbToParticipantController.hpp"
+#include "IIbToSyncMaster.hpp"
 
 
 // Add connection types here and make sure they are instantiated in ComAdapter.cpp

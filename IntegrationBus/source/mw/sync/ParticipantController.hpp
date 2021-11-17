@@ -8,12 +8,13 @@
 
 #include "ib/mw/sync/IParticipantController.hpp"
 #include "ib/mw/sync/ITimeProvider.hpp"
-#include "ib/mw/IComAdapter.hpp"
 #include "ib/cfg/Config.hpp"
 
 #include "PerformanceMonitor.hpp"
 #include "WatchDog.hpp"
+
 #include "IIbToParticipantController.hpp"
+#include "IComAdapterInternal.hpp"
 
 namespace ib {
 namespace mw {
@@ -40,7 +41,7 @@ public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     ParticipantController() = default;
-    ParticipantController(IComAdapter* comAdapter, const cfg::SimulationSetup& simulationSetup, const cfg::Participant& participantConfig);
+    ParticipantController(IComAdapterInternal* comAdapter, const cfg::SimulationSetup& simulationSetup, const cfg::Participant& participantConfig);
     ParticipantController(const ParticipantController& other) = default;
     ParticipantController(ParticipantController&& other) = default;
     ParticipantController& operator=(const ParticipantController& other) = default;
@@ -118,7 +119,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    IComAdapter* _comAdapter{ nullptr };
+    IComAdapterInternal* _comAdapter{ nullptr };
     mw::EndpointAddress _endpointAddress{};
     cfg::SyncType _syncType;
     cfg::TimeSync _timesyncConfig;

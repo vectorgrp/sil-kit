@@ -11,7 +11,6 @@
 
 #include "ib/cfg/Config.hpp"
 #include "ib/cfg/ConfigBuilder.hpp"
-#include "ib/mw/IComAdapter.hpp"
 #include "ib/util/functional.hpp"
 
 #include "MockComAdapter.hpp"

@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <iostream>
 
-#include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/sim/lin/string_utils.hpp"
 
@@ -76,7 +75,7 @@ void CallHandlers(CallbackRangeT& callbacks, const Args&... args)
 
 } // namespace anonymous
 
-LinController::LinController(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider)
+LinController::LinController(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _logger{comAdapter->GetLogger()}
     , _timeProvider{timeProvider}

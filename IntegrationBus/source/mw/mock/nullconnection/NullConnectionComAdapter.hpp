@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "IComAdapter_internal.hpp"
+#include "IComAdapterInternal.hpp"
 #include "ib/cfg/Config.hpp"
 
 namespace ib {

@@ -81,7 +81,7 @@ struct ParticipantTimeProvider : public sync::ITimeProvider
 
 
 
-ParticipantController::ParticipantController(IComAdapter* comAdapter, const cfg::SimulationSetup& simulationSetup, const cfg::Participant& participantConfig)
+ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, const cfg::SimulationSetup& simulationSetup, const cfg::Participant& participantConfig)
     : _comAdapter{comAdapter}
     , _timesyncConfig{simulationSetup.timeSync}
     , _syncType{participantConfig.participantController->syncType}

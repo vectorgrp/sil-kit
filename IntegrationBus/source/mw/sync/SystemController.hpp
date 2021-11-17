@@ -4,11 +4,11 @@
 
 #include "ib/mw/sync/ISystemController.hpp"
 
-#include "ib/mw/IComAdapter.hpp"
 
 #include <cassert>
 
 #include "IIbToSystemController.hpp"
+#include "IComAdapterInternal.hpp"
 
 namespace ib {
 namespace mw {
@@ -26,7 +26,7 @@ public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     SystemController() = default;
-    SystemController(IComAdapter* comAdapter);
+    SystemController(IComAdapterInternal* comAdapter);
     SystemController(const SystemController& other) = default;
     SystemController(SystemController&& other) = default;
     SystemController& operator=(const SystemController& other) = default;
@@ -60,7 +60,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    IComAdapter* _comAdapter{nullptr};
+    IComAdapterInternal* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddress{};
 };
 

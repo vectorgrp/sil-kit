@@ -19,7 +19,7 @@ class CanControllerReplay
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    CanControllerReplay(mw::IComAdapter* comAdapter, cfg::CanController config, mw::sync::ITimeProvider* timeProvider);
+    CanControllerReplay(mw::IComAdapterInternal* comAdapter, cfg::CanController config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------

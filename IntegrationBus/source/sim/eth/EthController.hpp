@@ -9,6 +9,7 @@
 #include "ib/extensions/ITraceMessageSource.hpp"
 
 #include "IIbToEthController.hpp"
+#include "IComAdapterInternal.hpp"
 
 #include <memory>
 
@@ -32,7 +33,7 @@ public:
     EthController() = delete;
     EthController(const EthController&) = default;
     EthController(EthController&&) = default;
-    EthController(mw::IComAdapter* comAdapter, cfg::EthernetController config, mw::sync::ITimeProvider* timeProvider);
+    EthController(mw::IComAdapterInternal* comAdapter, cfg::EthernetController config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -92,7 +93,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    ::ib::mw::IComAdapter* _comAdapter = nullptr;
+    ::ib::mw::IComAdapterInternal* _comAdapter = nullptr;
     ::ib::mw::EndpointAddress _endpointAddr;
     ::ib::mw::sync::ITimeProvider* _timeProvider{ nullptr };
 

@@ -27,7 +27,7 @@ public:
 
 public:
     // ----------------------------------------
-    OutPortReplay(mw::IComAdapter* comAdapter, ConfigType config, mw::sync::ITimeProvider* timeProvider);
+    OutPortReplay(mw::IComAdapterInternal* comAdapter, ConfigType config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -69,7 +69,7 @@ private:
 // ================================================================================
 
 template<typename MsgT>
-OutPortReplay<MsgT>::OutPortReplay(mw::IComAdapter* comAdapter, ConfigType config, mw::sync::ITimeProvider* timeProvider)
+OutPortReplay<MsgT>::OutPortReplay(mw::IComAdapterInternal* comAdapter, ConfigType config, mw::sync::ITimeProvider* timeProvider)
     : _outPort{comAdapter,config, timeProvider}
     , _replayConfig{config.replay}
 {

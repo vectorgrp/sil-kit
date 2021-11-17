@@ -6,10 +6,10 @@
 #include <memory>
 
 #include "ib/cfg/Config.hpp"
-#include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/sync/ISystemMonitor.hpp"
 
 #include "IIbToSystemMonitor.hpp"
+#include "IComAdapterInternal.hpp"
 
 namespace ib {
 namespace mw {
@@ -27,7 +27,7 @@ public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     SystemMonitor() = default;
-    SystemMonitor(IComAdapter* comAdapter, cfg::SimulationSetup simulationSetup);
+    SystemMonitor(IComAdapterInternal* comAdapter, cfg::SimulationSetup simulationSetup);
     SystemMonitor(const SystemMonitor& other) = default;
     SystemMonitor(SystemMonitor&& other) = default;
     SystemMonitor& operator=(const SystemMonitor& other) = default;
@@ -73,7 +73,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    IComAdapter* _comAdapter{nullptr};
+    IComAdapterInternal* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddress{};
     cfg::SimulationSetup _simulationSetup;
     logging::ILogger* _logger{nullptr};

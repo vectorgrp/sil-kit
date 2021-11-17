@@ -5,7 +5,6 @@
 #include <iostream>
 #include <chrono>
 
-#include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/sim/lin/string_utils.hpp"
 
@@ -29,7 +28,7 @@ void CallEach(CallbackRangeT& callbacks, const Args&... args)
 }
 } // end anonymous namespace
 
-LinControllerProxy::LinControllerProxy(mw::IComAdapter* comAdapter)
+LinControllerProxy::LinControllerProxy(mw::IComAdapterInternal* comAdapter)
     : _comAdapter{comAdapter}
     , _logger{comAdapter->GetLogger()}
     , _endpointAddr{}

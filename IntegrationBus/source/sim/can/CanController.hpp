@@ -9,6 +9,7 @@
 #include "ib/extensions/ITraceMessageSource.hpp"
 
 #include "IIbToCanController.hpp"
+#include "IComAdapterInternal.hpp"
 
 #include <tuple>
 #include <vector>
@@ -33,7 +34,7 @@ public:
     CanController() = delete;
     CanController(const CanController&) = default;
     CanController(CanController&&) = default;
-    CanController(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider);
+    CanController(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider);
 
 
 public:
@@ -98,7 +99,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    ::ib::mw::IComAdapter* _comAdapter{nullptr};
+    ::ib::mw::IComAdapterInternal* _comAdapter{nullptr};
     ::ib::mw::EndpointAddress _endpointAddr;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
 

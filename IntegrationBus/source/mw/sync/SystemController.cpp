@@ -6,7 +6,7 @@ namespace ib {
 namespace mw {
 namespace sync {
 
-SystemController::SystemController(IComAdapter* comAdapter)
+SystemController::SystemController(IComAdapterInternal* comAdapter)
     : _comAdapter{comAdapter}
 {
 }

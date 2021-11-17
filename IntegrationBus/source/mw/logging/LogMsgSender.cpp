@@ -6,7 +6,7 @@ namespace ib {
 namespace mw {
 namespace logging {
 
-LogMsgSender::LogMsgSender(IComAdapter* comAdapter)
+LogMsgSender::LogMsgSender(IComAdapterInternal* comAdapter)
     : _comAdapter{comAdapter}
 {
 }

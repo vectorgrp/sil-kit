@@ -3,10 +3,8 @@
 #pragma once
 
 #include "IReplayDataController.hpp"
-#include "ib/sim/generic/IGenericPublisher.hpp"
 #include "GenericPublisher.hpp"
 
-#include "IIbToGenericPublisher.hpp"
 namespace ib {
 namespace sim {
 namespace generic {
@@ -21,7 +19,7 @@ class GenericPublisherReplay
 public:
     // Constructors 
     GenericPublisherReplay() = delete;
-    GenericPublisherReplay(mw::IComAdapter* comAdapter, cfg::GenericPort config, mw::sync::ITimeProvider* timeProvider);
+    GenericPublisherReplay(mw::IComAdapterInternal* comAdapter, cfg::GenericPort config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------

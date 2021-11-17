@@ -11,10 +11,10 @@
 #include "ib/sim/io/IInPort.hpp"
 #include "ib/cfg/Config.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
-#include "ib/mw/IComAdapter.hpp"
 #include "ib/extensions/ITraceMessageSource.hpp"
 
 #include "IIbToInPort.hpp"
+#include "IComAdapterInternal.hpp"
 
 namespace ib {
 namespace sim {
@@ -45,8 +45,8 @@ public:
     InPort() = delete;
     InPort(const InPort&) = default;
     InPort(InPort&&) = default;
-    InPort(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider);
-    InPort(mw::IComAdapter* comAdapter, ConfigType config, mw::sync::ITimeProvider* timeProvider);
+    InPort(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider);
+    InPort(mw::IComAdapterInternal* comAdapter, ConfigType config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -103,7 +103,7 @@ private:
     // ----------------------------------------
     // private members
     ConfigType _config;
-    mw::IComAdapter* _comAdapter{nullptr};
+    mw::IComAdapterInternal* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddr;
     MessageType _lastMessage;
 
@@ -120,14 +120,14 @@ private:
 //  Inline Implementations
 // ================================================================================
 template<typename MsgT>
-InPort<MsgT>::InPort(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider)
+InPort<MsgT>::InPort(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _timeProvider{timeProvider}
 {
 }
 
 template<typename MsgT>
-InPort<MsgT>::InPort(mw::IComAdapter* comAdapter, ConfigType config, mw::sync::ITimeProvider* timeProvider)
+InPort<MsgT>::InPort(mw::IComAdapterInternal* comAdapter, ConfigType config, mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _config{config}
     , _timeProvider{timeProvider}

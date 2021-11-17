@@ -5,7 +5,6 @@
 #include <iostream>
 #include <chrono>
 
-#include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/sync/IParticipantController.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/sim/lin/string_utils.hpp"
@@ -24,7 +23,7 @@ namespace sim {
 namespace lin {
 
 
-LinControllerReplay::LinControllerReplay(mw::IComAdapter* comAdapter, cfg::LinController config,
+LinControllerReplay::LinControllerReplay(mw::IComAdapterInternal* comAdapter, cfg::LinController config,
             mw::sync::ITimeProvider* timeProvider)
     : _replayConfig{config.replay}
     , _controller{comAdapter, timeProvider}

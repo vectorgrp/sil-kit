@@ -3,14 +3,13 @@
 #include "CanController.hpp"
 
 #include <algorithm>
-#include "ib/mw/IComAdapter.hpp"
 
 namespace ib {
 namespace sim {
 namespace can {
 
 
-CanController::CanController(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider)
+CanController::CanController(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _endpointAddr{}
     , _timeProvider{timeProvider}

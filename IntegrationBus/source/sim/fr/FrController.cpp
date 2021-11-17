@@ -6,7 +6,6 @@
 #include <stdexcept>
 
 #include "ib/sim/exceptions.hpp"
-#include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 
 namespace ib {
@@ -14,7 +13,7 @@ namespace sim {
 namespace fr {
 
 
-FrController::FrController(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider)
+FrController::FrController(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _timeProvider{timeProvider}
 {

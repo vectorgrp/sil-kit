@@ -10,6 +10,7 @@
 #include "ib/extensions/ITraceMessageSource.hpp"
 
 #include "IIbToGenericPublisher.hpp"
+#include "IComAdapterInternal.hpp"
 
 namespace ib {
 namespace sim {
@@ -28,8 +29,8 @@ public:
     GenericPublisher(const GenericPublisher&) = default;
     GenericPublisher(GenericPublisher&&) = default;
 
-    GenericPublisher(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider);
-    GenericPublisher(mw::IComAdapter* comAdapter, cfg::GenericPort config, mw::sync::ITimeProvider* timeProvider);
+    GenericPublisher(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider);
+    GenericPublisher(mw::IComAdapterInternal* comAdapter, cfg::GenericPort config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -55,7 +56,7 @@ public:
 private:
     //private Members
     cfg::GenericPort _config{};
-    mw::IComAdapter* _comAdapter{nullptr};
+    mw::IComAdapterInternal* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddr{};
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     extensions::Tracer _tracer;

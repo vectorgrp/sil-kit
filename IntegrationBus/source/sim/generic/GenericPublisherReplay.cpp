@@ -6,7 +6,7 @@ namespace ib {
 namespace sim {
 namespace generic {
 
-GenericPublisherReplay::GenericPublisherReplay(mw::IComAdapter* comAdapter,
+GenericPublisherReplay::GenericPublisherReplay(mw::IComAdapterInternal* comAdapter,
         cfg::GenericPort config, mw::sync::ITimeProvider* timeProvider)
     : _publisher{comAdapter, config, timeProvider}
     , _replayConfig{config.replay}

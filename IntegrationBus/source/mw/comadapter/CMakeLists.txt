@@ -3,7 +3,6 @@ add_library(IbMwComAdapter STATIC
     ComAdapter.hpp
     ComAdapter_impl.hpp
     ComAdapter.cpp
-    IComAdapter_internal.hpp
     CreateComAdapter.hpp
     CreateComAdapter.cpp
 )

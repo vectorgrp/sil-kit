@@ -4,7 +4,6 @@
 
 #include <chrono>
 
-#include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/sync/SyncDatatypes.hpp"
 #include "ib/mw/logging/LoggingDatatypes.hpp"
 #include "ib/mw/logging/ILogger.hpp"
@@ -18,9 +17,11 @@
 #include "ib/sim/generic/GenericMessageDatatypes.hpp"
 
 #include "TimeProvider.hpp"
+#include "IComAdapterInternal.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+
 
 #ifdef SendMessage
 #undef SendMessage
@@ -76,7 +77,7 @@ public:
     mutable MockTime mockTime;
 };
 
-class DummyComAdapter : public IComAdapter
+class DummyComAdapter : public IComAdapterInternal
 {
 public:
     DummyComAdapter()
@@ -105,6 +106,11 @@ public:
     auto GetLogger() -> logging::ILogger* { return &logger; }
 
     virtual auto GetTimeProvider() -> sync::ITimeProvider* { return &mockTimeProvider; }
+    void joinIbDomain(uint32_t domainId) override {}
+    void RegisterCanSimulator(sim::can::IIbToCanSimulator* ) override {}
+    void RegisterEthSimulator(sim::eth::IIbToEthSimulator* ) override {}
+    void RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* ) override {}
+    void RegisterLinSimulator(sim::lin::IIbToLinSimulator*) override {}
 
     void SendIbMessage(EndpointAddress /*from*/, sim::can::CanMessage&& /*msg*/) {}
     void SendIbMessage(EndpointAddress /*from*/, const sim::can::CanMessage& /*msg*/) {}

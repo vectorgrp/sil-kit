@@ -11,6 +11,7 @@
 #include "ib/cfg/Config.hpp"
 
 #include "IIbToEthControllerProxy.hpp"
+#include "IComAdapterInternal.hpp"
 
 namespace ib {
 namespace sim {
@@ -32,7 +33,7 @@ public:
     EthControllerProxy() = delete;
     EthControllerProxy(const EthControllerProxy&) = default;
     EthControllerProxy(EthControllerProxy&&) = default;
-    EthControllerProxy(mw::IComAdapter* comAdapter, cfg::EthernetController config);
+    EthControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::EthernetController config);
 
 public:
     // ----------------------------------------
@@ -90,7 +91,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    mw::IComAdapter* _comAdapter = nullptr;
+    mw::IComAdapterInternal* _comAdapter = nullptr;
     mw::EndpointAddress _endpointAddr;
 
     EthTxId _ethTxId = 0;

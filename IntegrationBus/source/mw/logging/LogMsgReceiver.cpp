@@ -6,7 +6,7 @@ namespace ib {
 namespace mw {
 namespace logging {
 
-LogMsgReceiver::LogMsgReceiver(IComAdapter* comAdapter, Logger* logger)
+LogMsgReceiver::LogMsgReceiver(IComAdapterInternal* comAdapter, Logger* logger)
     : _comAdapter{comAdapter}
     , _logger{logger}
 {

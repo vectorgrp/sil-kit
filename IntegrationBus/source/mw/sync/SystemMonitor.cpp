@@ -12,7 +12,7 @@ namespace ib {
 namespace mw {
 namespace sync {
 
-SystemMonitor::SystemMonitor(IComAdapter* comAdapter, cfg::SimulationSetup simulationSetup)
+SystemMonitor::SystemMonitor(IComAdapterInternal* comAdapter, cfg::SimulationSetup simulationSetup)
     : _comAdapter{comAdapter}
     , _simulationSetup{std::move(simulationSetup)}
     , _logger{comAdapter->GetLogger()}

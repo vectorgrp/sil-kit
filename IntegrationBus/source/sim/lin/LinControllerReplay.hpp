@@ -4,7 +4,6 @@
 
 #include <map>
 
-#include "ib/mw//IComAdapter.hpp"
 
 #include "IReplayDataController.hpp"
 #include "LinController.hpp"
@@ -24,7 +23,7 @@ public:
     // ----------------------------------------
     // Public Data Types
 
-    LinControllerReplay(mw::IComAdapter* comAdapter, cfg::LinController config,
+    LinControllerReplay(mw::IComAdapterInternal* comAdapter, cfg::LinController config,
             mw::sync::ITimeProvider* timeProvider);
 
 public:
@@ -78,7 +77,7 @@ private:
     // private members
     cfg::Replay _replayConfig{};
     LinController _controller;
-    mw::IComAdapter* _comAdapter{nullptr};
+    mw::IComAdapterInternal* _comAdapter{nullptr};
     // for local callbacks
     std::vector<FrameStatusHandler> _frameStatusHandler; 
     std::vector<GoToSleepHandler> _goToSleepHandler;

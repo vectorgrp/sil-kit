@@ -6,7 +6,6 @@
 #include <cassert>
 
 #include "ib/cfg/Config.hpp"
-#include "ib/mw/IComAdapter.hpp"
 #include "ib/mw/sync/ISystemMonitor.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/mw/logging/ILogger.hpp"
@@ -18,7 +17,7 @@ namespace ib {
 namespace mw {
 namespace sync {
 
-SyncMaster::SyncMaster(IComAdapter* comAdapter, const cfg::Config& config, ISystemMonitor* monitor)
+SyncMaster::SyncMaster(IComAdapterInternal* comAdapter, const cfg::Config& config, ISystemMonitor* monitor)
     : _comAdapter{comAdapter}
     , _logger{comAdapter->GetLogger()}
 {

@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "IIbToFrControllerProxy.hpp"
+#include "IComAdapterInternal.hpp"
 
 namespace ib {
 namespace sim {
@@ -35,7 +36,7 @@ public:
     FrControllerProxy() = delete;
     FrControllerProxy(const FrControllerProxy&) = default;
     FrControllerProxy(FrControllerProxy&&) = default;
-    FrControllerProxy(mw::IComAdapter* comAdapter);
+    FrControllerProxy(mw::IComAdapterInternal* comAdapter);
 
 public:
     // ----------------------------------------
@@ -116,7 +117,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    mw::IComAdapter* _comAdapter = nullptr;
+    mw::IComAdapterInternal* _comAdapter = nullptr;
     mw::EndpointAddress _endpointAddr;
 
     std::vector<TxBufferConfig> _bufferConfigs;

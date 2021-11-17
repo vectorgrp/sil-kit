@@ -12,6 +12,7 @@
 
 
 #include "IIbToFrController.hpp"
+#include "IComAdapterInternal.hpp"
 
 namespace ib {
 namespace sim {
@@ -37,7 +38,7 @@ public:
     FrController() = delete;
     FrController(const FrController&) = default;
     FrController(FrController&&) = default;
-    FrController(mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider);
+    FrController(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -116,7 +117,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    mw::IComAdapter* _comAdapter{nullptr};
+    mw::IComAdapterInternal* _comAdapter{nullptr};
     mw::EndpointAddress _endpointAddr;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
 
