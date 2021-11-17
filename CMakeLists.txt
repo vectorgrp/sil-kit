@@ -21,7 +21,7 @@ option(IB_BIN_FASTRTPS_ENABLE
         (set IB_BIN_FASTRTPS_REPOSITORY for download URL)"
         OFF
 )
-option(IB_MW_ENABLE_FASTRTPS "Build FastRTPS Middleware" ON)
+option(IB_MW_ENABLE_FASTRTPS "Build FastRTPS Middleware" OFF)
 option(IB_MW_ENABLE_VASIO "Build VAsio Middleware" ON)
 
 if(IB_MW_ENABLE_FASTRTPS)
