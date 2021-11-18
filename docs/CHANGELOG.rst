@@ -5,6 +5,50 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.5.0] - Unreleased
+--------------------------------
+
+Changed
+~~~~~~~
+
+.. admonition:: Note: Public API changed
+  
+  Some rarely used public headers and `IComAdapter` methods were removed
+  
+- Some header files were removed from the public include directories.
+  These `IIbTo*` headers are only for internal use.
+  This change should not affect users of the public API directly (VIB-511).
+- Directly sending messages on the :cpp:class:`IComAdapter<ib::mw::IComAdapter>` via `SendIbMessage(...)`
+  is not possible anymore. Sending messages is now only supported via the specific service controllers,
+  see :ref:`VIB API<sec:api-services>` for an overview (VIB-511).
+
+  For example, code that relies on `IComAdapter::SendIbMessage(EndpointAddress, const T&)` should
+  use an appropriate controller:
+
+  + old:
+    
+    .. code-block:: c++
+
+       // Example for message type T = CanMessage
+       CanMessage msg{};
+       comAdapter->SendIbMessage(EndpointAddress{/*implementation detail*/}, msg);
+
+ + new:
+   
+   .. code-block:: c++
+
+      // Example for message type T = CanMessage
+      auto* controller = comAdapter->CreateCanController();
+      CanMessage msg{};
+      controller->SendMessage(msg);
+
+Compatibility with 3.4.6
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Application binary interface (ABI): No 
+- Application software interface (API): No
+- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (VAsio): Yes
+
 [3.4.6] - 2021-11-16
 --------------------------------
 
