@@ -8,7 +8,6 @@
 #include "CanControllerReplay.hpp"
 #include "EthController.hpp"
 #include "EthControllerProxy.hpp"
-
 #include "EthControllerReplay.hpp"
 #include "FrController.hpp"
 #include "FrControllerProxy.hpp"

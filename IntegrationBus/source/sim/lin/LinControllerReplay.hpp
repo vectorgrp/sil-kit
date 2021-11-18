@@ -4,10 +4,8 @@
 
 #include <map>
 
-
 #include "IReplayDataController.hpp"
 #include "LinController.hpp"
-
 
 namespace ib {
 namespace sim {

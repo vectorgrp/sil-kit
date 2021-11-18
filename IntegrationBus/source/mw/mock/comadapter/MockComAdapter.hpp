@@ -106,7 +106,7 @@ public:
     auto GetLogger() -> logging::ILogger* { return &logger; }
 
     virtual auto GetTimeProvider() -> sync::ITimeProvider* { return &mockTimeProvider; }
-    void joinIbDomain(uint32_t domainId) override {}
+    void joinIbDomain(uint32_t ) override {}
     void RegisterCanSimulator(sim::can::IIbToCanSimulator* ) override {}
     void RegisterEthSimulator(sim::eth::IIbToEthSimulator* ) override {}
     void RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* ) override {}

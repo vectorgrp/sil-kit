@@ -20,18 +20,10 @@
 #include "Tracing.hpp"
 #include "ReplayScheduler.hpp"
 
+// Interfaces relying on IbInternal
 #include "IIbToLogMsgSender.hpp"
 #include "IIbToLogMsgReceiver.hpp"
 
-// Datatypes needed for internal interfaces:
-#include "ib/sim/can/CanDatatypes.hpp"
-#include "ib/sim/eth/EthDatatypes.hpp"
-#include "ib/sim/lin/LinDatatypes.hpp"
-#include "ib/sim/fr/FrDatatypes.hpp"
-#include "ib/sim/io/IoDatatypes.hpp"
-#include "ib/sim/generic/GenericMessageDatatypes.hpp"
-#include "ib/mw/sync/SyncDatatypes.hpp"
-// IbInternal component:
 #include "IIbToCanSimulator.hpp"
 #include "IIbToCanController.hpp"
 #include "IIbToCanControllerProxy.hpp"

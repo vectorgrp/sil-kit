@@ -2,7 +2,6 @@
 
 #include "GenericPublisher.hpp"
 
-
 namespace ib {
 namespace sim {
 namespace generic {
