@@ -363,7 +363,7 @@ TEST(ReplayTest, canctroller_replay_config_send)
         CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, ACanMessage(msg)))
             .Times(0);
-        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
+        EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
         can.SetEndpointAddress(msg._address);
         can.ReplayMessage(&msg);
     }

@@ -240,7 +240,11 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
 void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
 {
     _connectedParticipants.erase(std::remove_if(_connectedParticipants.begin(), _connectedParticipants.end(),
-        [peer](const auto& connectedParticipant) { return connectedParticipant.peer == peer; }));
+        [peer](const auto& connectedParticipant) {
+            return connectedParticipant.peer == peer;
+        })
+        , _connectedParticipants.end()
+    );
 
     if (_connectedParticipants.empty())
     {
