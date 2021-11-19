@@ -78,7 +78,7 @@ void CanControllerReplay::RegisterTransmitStatusHandler(MessageStatusHandler han
     _controller.RegisterTransmitStatusHandler(std::move(handler));
 }
 
-void CanControllerReplay::ReceiveIbMessage(ib::mw::EndpointAddress from, const CanMessage& msg)
+void CanControllerReplay::ReceiveIbMessage(const IServiceId* from, const CanMessage& msg)
 {
     // ignore messages that do not originate from the replay scheduler 
     if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
@@ -145,7 +145,7 @@ void CanControllerReplay::ReplaySend(const extensions::IReplayMessage* replayMes
 void CanControllerReplay::ReplayReceive(const extensions::IReplayMessage* replayMessage)
 {
     auto msg = dynamic_cast<const sim::can::CanMessage&>(*replayMessage);
-    _controller.ReceiveIbMessage(tracing::ReplayEndpointAddress(), msg);
+    _controller.ReceiveIbMessage(this, msg);
 }
 
 } // namespace can

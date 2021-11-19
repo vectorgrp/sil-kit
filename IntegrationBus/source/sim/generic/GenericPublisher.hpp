@@ -21,6 +21,7 @@ class GenericPublisher
     , public IIbToGenericPublisher
     , public mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
+    , public mw::IServiceId
 {
 public:
     // ----------------------------------------
@@ -53,11 +54,15 @@ public:
     // ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
+    // IServiceId
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
+
 private:
     //private Members
     cfg::GenericPort _config{};
     mw::IComAdapterInternal* _comAdapter{nullptr};
-    mw::EndpointAddress _endpointAddr{};
+    ::ib::mw::ServiceId _serviceId;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     extensions::Tracer _tracer;
 };
@@ -69,6 +74,15 @@ private:
 void GenericPublisher::AddSink(extensions::ITraceMessageSink* sink)
 {
     _tracer.AddSink(EndpointAddress(), *sink);
+}
+
+void GenericPublisher::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _serviceId = serviceId;
+}
+auto GenericPublisher::GetServiceId() const -> const mw::ServiceId&
+{
+    return _serviceId;
 }
 } // namespace generic
 } // namespace sim

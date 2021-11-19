@@ -18,6 +18,7 @@ class IbLink
 public:
     using ReceiverT = IIbMessageReceiver<MsgT>;
     
+    
 public:
     // ----------------------------------------
     // Constructors and Destructor
@@ -32,13 +33,13 @@ public:
     void AddLocalReceiver(ReceiverT* receiver);
     void AddRemoteReceiver(IVAsioPeer* peer, uint16_t remoteIdx);
 
-    void DistributeRemoteIbMessage(EndpointAddress from, const MsgT& msg);
-    void DistributeLocalIbMessage(EndpointAddress from, ReceiverT* fromReceiver, const MsgT& msg);
+    void DistributeRemoteIbMessage(const IServiceId* from, const MsgT& msg);
+    void DistributeLocalIbMessage(const IServiceId* sender, const MsgT& msg);
 
 private:
     // ----------------------------------------
     // private methods
-    void DispatchIbMessage(ReceiverT* to, EndpointAddress from, const MsgT& msg);
+    void DispatchIbMessage(ReceiverT* to, const IServiceId* from, const MsgT& msg);
 
 private:
     // ----------------------------------------
@@ -74,7 +75,7 @@ void IbLink<MsgT>::AddRemoteReceiver(IVAsioPeer* peer, uint16_t remoteIdx)
 }
 
 template <class MsgT>
-void IbLink<MsgT>::DistributeRemoteIbMessage(EndpointAddress from, const MsgT& msg)
+void IbLink<MsgT>::DistributeRemoteIbMessage(const IServiceId* from, const MsgT& msg)
 {
     for (auto&& receiver : _localReceivers)
     {
@@ -83,18 +84,19 @@ void IbLink<MsgT>::DistributeRemoteIbMessage(EndpointAddress from, const MsgT& m
 }
     
 template <class MsgT>
-void IbLink<MsgT>::DistributeLocalIbMessage(EndpointAddress from, ReceiverT* fromReceiver, const MsgT& msg)
+void IbLink<MsgT>::DistributeLocalIbMessage(const IServiceId* from, const MsgT& msg)
 {
     for (auto&& receiver : _localReceivers)
     {
-        if (receiver == fromReceiver) continue;
+        auto* receiverId = dynamic_cast<const IServiceId*>(receiver);
+        if (receiverId == from) continue;
         DispatchIbMessage(receiver, from, msg);
     }
     DispatchIbMessage(&_vasioTransmitter, from, msg);
 }
 
 template <class MsgT>
-void IbLink<MsgT>::DispatchIbMessage(ReceiverT* to, EndpointAddress from, const MsgT& msg)
+void IbLink<MsgT>::DispatchIbMessage(ReceiverT* to, const IServiceId* from, const MsgT& msg)
 {
     try
     {

@@ -11,7 +11,6 @@ namespace can {
 
 CanController::CanController(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
-    , _endpointAddr{}
     , _timeProvider{timeProvider}
 {
 }
@@ -44,7 +43,7 @@ auto CanController::SendMessage(const CanMessage& msg) -> CanTxId
     _tracer.Trace(extensions::Direction::Send, _timeProvider->Now(), msg);
 
 
-    _comAdapter->SendIbMessage(_endpointAddr, msgCopy);
+    _comAdapter->SendIbMessage(this, msgCopy);
 
     // instantly call transmit acknowledge
     CanTransmitAcknowledge ack;
@@ -64,7 +63,7 @@ auto CanController::SendMessage(CanMessage&& msg) -> CanTxId
 
     _tracer.Trace(extensions::Direction::Send, _timeProvider->Now(), msg);
 
-    _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
+    _comAdapter->SendIbMessage(this, std::move(msg));
     
     // instantly call transmit acknowledge
     CanTransmitAcknowledge ack;
@@ -102,7 +101,7 @@ void CanController::RegisterHandler(CallbackT<MsgT> handler)
     handlers.push_back(handler);
 }
 
-void CanController::ReceiveIbMessage(ib::mw::EndpointAddress from, const CanMessage& msg)
+void CanController::ReceiveIbMessage(const IServiceId* from, const CanMessage& msg)
 {
     CallHandlers(msg);
 
@@ -119,20 +118,22 @@ void CanController::CallHandlers(const MsgT& msg)
     }
 }
 
+// TODO VIB-413 overhaul EPA
 void CanController::SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress)
 {
-    _endpointAddr = endpointAddress;
+    _serviceId.legacyEpa = endpointAddress;
 }
 
 auto CanController::EndpointAddress() const -> const ::ib::mw::EndpointAddress&
 {
-    return _endpointAddr;
+    return _serviceId.legacyEpa;
 }
 
 void CanController::SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)
 {
     _timeProvider = timeProvider;
 }
+
 
 } // namespace can
 } // namespace sim

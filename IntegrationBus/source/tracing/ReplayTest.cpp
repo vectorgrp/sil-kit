@@ -38,12 +38,20 @@ using testing::An;
 
 auto ACanMessage(const CanMessage& msg) -> testing::Matcher<const CanMessage&>
 {
-    using namespace testing;
-    return AllOf(
-        Field(&CanMessage::canId, Eq(msg.canId))
-        , Field(&CanMessage::dataField, Eq(msg.dataField))
-        , Field(&CanMessage::timestamp, Eq(msg.timestamp))
-    );
+  using namespace testing;
+  return AllOf(
+    Field(&CanMessage::canId, Eq(msg.canId))
+    , Field(&CanMessage::dataField, Eq(msg.dataField))
+    , Field(&CanMessage::timestamp, Eq(msg.timestamp))
+  );
+}
+
+auto AService(const IServiceId* service) -> testing::Matcher<const IServiceId*>
+{
+  using namespace testing;
+  return AllOf(
+    Property(&IServiceId::GetServiceId, Eq(service->GetServiceId()))
+  );
 }
 
 auto AnEthMessage(const EthFrame& msg) -> testing::Matcher<const EthMessage&>
@@ -106,30 +114,30 @@ class MockComAdapter : public DummyComAdapter
 {
 public:
     //Ethernet calls
-    void SendIbMessage(EndpointAddress from, EthMessage&& msg) override
+    void SendIbMessage(const IServiceId* from, EthMessage&& msg) override
     {
         SendIbMessage_proxy(from, msg);
     }
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthMessage&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const EthMessage&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthTransmitAcknowledge&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthStatus&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthSetMode&));
+    MOCK_METHOD2(SendIbMessage, void(IServiceId*, const EthMessage&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(const IServiceId*, const EthMessage&));
+    MOCK_METHOD2(SendIbMessage, void(IServiceId*, const EthTransmitAcknowledge&));
+    MOCK_METHOD2(SendIbMessage, void(IServiceId*, const EthStatus&));
+    MOCK_METHOD2(SendIbMessage, void(IServiceId*, const EthSetMode&));
     //  Generic Message calls
-    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const GenericMessage&));
-    void SendIbMessage(EndpointAddress from, GenericMessage&& msg) override
+    MOCK_METHOD2(SendIbMessage_proxy, void(const IServiceId*, const GenericMessage&));
+    void SendIbMessage(const IServiceId* from, GenericMessage&& msg) override
     {
         SendIbMessage_proxy(from, msg);
     }
     MOCK_METHOD2(ReceiveIbMessage, void(EndpointAddress, const GenericMessage&));
 
     // IO Ports
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const DigitalIoMessage&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const DigitalIoMessage&));
     MOCK_METHOD2(ReceiveIbMessage, void(EndpointAddress, const DigitalIoMessage&));
     // CAN
-    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const CanMessage&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(const IServiceId*, const CanMessage&));
     MOCK_METHOD2(ReceiveIbMessage, void(EndpointAddress, const CanMessage&));
-    void SendIbMessage(EndpointAddress from, CanMessage&& msg) override
+    void SendIbMessage(const IServiceId* from, CanMessage&& msg) override
     {
         SendIbMessage_proxy(from, msg);
     }
@@ -195,7 +203,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
 
         EthControllerReplay ctrl{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         ctrl.SetEndpointAddress(msg._address);
-        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AnEthMessage(msg)))
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&ctrl), AnEthMessage(msg)))
             .Times(1);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
         ctrl.ReplayMessage(&msg);
@@ -207,7 +215,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
         cfg.replay.direction = cfg::Replay::Direction::Both;
         EthControllerReplay ctrl{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         ctrl.SetEndpointAddress(msg._address);
-        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AnEthMessage(msg)))
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&ctrl), AnEthMessage(msg)))
             .Times(1);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
         ctrl.ReplayMessage(&msg);
@@ -219,7 +227,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
         cfg.replay.direction = cfg::Replay::Direction::Send;
         EthControllerReplay ctrl{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         ctrl.SetEndpointAddress(msg._address);
-        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AnEthMessage(msg)))
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&ctrl), AnEthMessage(msg)))
             .Times(0);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
         ctrl.ReplayMessage(&msg);
@@ -297,7 +305,7 @@ struct MockCanMessage
     }
 };
 
-TEST(ReplayTest, canctroller_replay_config_send)
+TEST(ReplayTest, cancontroller_replay_config_send)
 {
     MockComAdapter comAdapter{};
 
@@ -313,7 +321,7 @@ TEST(ReplayTest, canctroller_replay_config_send)
 
         CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         can.SetEndpointAddress(msg._address);
-        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, ACanMessage(msg)))
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&can), ACanMessage(msg)))
             .Times(1);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
         can.ReplayMessage(&msg);
@@ -325,7 +333,7 @@ TEST(ReplayTest, canctroller_replay_config_send)
 
         CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         can.SetEndpointAddress(msg._address);
-        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, ACanMessage(msg)))
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&can), ACanMessage(msg)))
             .Times(1);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
         can.ReplayMessage(&msg);
@@ -337,7 +345,7 @@ TEST(ReplayTest, canctroller_replay_config_send)
 
         CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         can.SetEndpointAddress(msg._address);
-        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, ACanMessage(msg)))
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&can), ACanMessage(msg)))
             .Times(0);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
         can.ReplayMessage(&msg);
@@ -348,7 +356,7 @@ TEST(ReplayTest, canctroller_replay_config_send)
         cfg.replay.direction = cfg::Replay::Direction::Send;
 
         CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, ACanMessage(msg)))
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&can), ACanMessage(msg)))
             .Times(0);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
         can.SetEndpointAddress(msg._address);
@@ -361,7 +369,7 @@ TEST(ReplayTest, canctroller_replay_config_send)
         msg._address = tracing::ReplayEndpointAddress();
 
         CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, ACanMessage(msg)))
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&can), ACanMessage(msg)))
             .Times(0);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
         can.SetEndpointAddress(msg._address);
@@ -451,7 +459,7 @@ TEST(ReplayTest, genericpublisher_replay_config_send)
 
         sim::generic::GenericPublisherReplay pub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         pub.SetEndpointAddress(msg._address);
-        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AGenericMessage(msg)))
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&pub), AGenericMessage(msg)))
             .Times(1);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
         pub.ReplayMessage(&msg);
@@ -463,7 +471,7 @@ TEST(ReplayTest, genericpublisher_replay_config_send)
 
         sim::generic::GenericPublisherReplay pub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         pub.SetEndpointAddress(msg._address);
-        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AGenericMessage(msg)))
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&pub), AGenericMessage(msg)))
             .Times(1);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
         pub.ReplayMessage(&msg);
@@ -474,7 +482,7 @@ TEST(ReplayTest, genericpublisher_replay_config_send)
         cfg.replay.direction = cfg::Replay::Direction::Send;
 
         sim::generic::GenericPublisherReplay pub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AGenericMessage(msg)))
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&pub), AGenericMessage(msg)))
             .Times(0);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
         pub.SetEndpointAddress(msg._address);
@@ -486,7 +494,7 @@ TEST(ReplayTest, genericpublisher_replay_config_send)
         cfg.replay.direction = cfg::Replay::Direction::Receive;
 
         sim::generic::GenericPublisherReplay pub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        EXPECT_CALL(comAdapter, SendIbMessage_proxy(msg._address, AGenericMessage(msg)))
+        EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&pub), AGenericMessage(msg)))
             .Times(0);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
         pub.SetEndpointAddress(msg._address);
@@ -636,7 +644,7 @@ TEST(ReplayTest, outport_replay_config_send)
 
         Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         port.SetEndpointAddress(msg._address);
-        EXPECT_CALL(comAdapter, SendIbMessage(msg._address, ADigitalIoMessage(msg)))
+        EXPECT_CALL(comAdapter, SendIbMessage(AService(&port), ADigitalIoMessage(msg)))
             .Times(1);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
         port.ReplayMessage(&msg);
@@ -648,7 +656,7 @@ TEST(ReplayTest, outport_replay_config_send)
 
         Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         port.SetEndpointAddress(msg._address);
-        EXPECT_CALL(comAdapter, SendIbMessage(msg._address, ADigitalIoMessage(msg)))
+        EXPECT_CALL(comAdapter, SendIbMessage(AService(&port), ADigitalIoMessage(msg)))
             .Times(1);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
         port.ReplayMessage(&msg);

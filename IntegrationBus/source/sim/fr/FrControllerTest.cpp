@@ -41,17 +41,17 @@ using ::ib::test::MockTraceSink;
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    void SendIbMessage(EndpointAddress from, FrMessageAck&& msg)
+    void SendIbMessage(const IServiceId* from, FrMessageAck&& msg)
     {
         SendIbMessage_proxy(from, msg);
     }
 
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const FrMessage&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const FrSymbol&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const FrMessageAck&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const FrSymbolAck&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const HostCommand&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const ControllerConfig&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const FrMessage&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const FrSymbol&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(const IServiceId*, const FrMessageAck&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const FrSymbolAck&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const HostCommand&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const ControllerConfig&));
 };
 
 class FrControllerTest : public testing::Test
@@ -71,6 +71,7 @@ protected:
 protected:
     FrControllerTest()
     : controller(&comAdapter, comAdapter.GetTimeProvider())
+    , otherController(&comAdapter, comAdapter.GetTimeProvider())
     {
         controller.SetEndpointAddress(controllerAddress);
 
@@ -80,6 +81,7 @@ protected:
         ON_CALL(comAdapter.mockTimeProvider.mockTime, Now())
             .WillByDefault(testing::Return(42ns));
 
+        otherController.SetEndpointAddress(otherControllerAddress);
     }
 
 protected:
@@ -91,6 +93,7 @@ protected:
     MockComAdapter comAdapter;
     MockTraceSink traceSink;
     FrController controller;
+    FrController otherController;
     Callbacks callbacks;
 
     auto MakeValidClusterParams() -> ClusterParameters
@@ -191,9 +194,9 @@ TEST_F(FrControllerTest, send_message)
     expectedMsg.timestamp = comAdapter.mockTimeProvider.mockTime.Now();
 
     expectedMsg.channel = Channel::A;
-    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, expectedMsg)).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, expectedMsg)).Times(1);
     expectedMsg.channel = Channel::B;
-    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, expectedMsg)).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, expectedMsg)).Times(1);
 
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
 
@@ -202,7 +205,7 @@ TEST_F(FrControllerTest, send_message)
 
 TEST_F(FrControllerTest, dont_send_controller_config)
 {
-    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, A<const ControllerConfig&>())).Times(0);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, A<const ControllerConfig&>())).Times(0);
 
     ControllerConfig controllerCfg;
     controllerCfg.clusterParams = MakeValidClusterParams();
@@ -236,7 +239,7 @@ TEST_F(FrControllerTest, set_poc_ready_after_controller_config)
 
 TEST_F(FrControllerTest, dont_send_chi_commands)
 {
-    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, A<const HostCommand&>())).Times(0);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, A<const HostCommand&>())).Times(0);
 
     controller.Run();
     controller.DeferredHalt();
@@ -260,7 +263,7 @@ TEST_F(FrControllerTest, call_message_handler)
     EXPECT_CALL(callbacks, MessageHandler(&controller, message))
         .Times(1);
 
-    controller.ReceiveIbMessage(otherControllerAddress, message);
+    controller.ReceiveIbMessage(&otherController, message);
 }
 
 TEST_F(FrControllerTest, send_ack_on_message_reception)
@@ -278,10 +281,10 @@ TEST_F(FrControllerTest, send_ack_on_message_reception)
     expectedAck.channel = message.channel;
     expectedAck.frame = message.frame;
 
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(controllerAddress, expectedAck))
+    EXPECT_CALL(comAdapter, SendIbMessage_proxy(&controller, expectedAck))
         .Times(1);
 
-    controller.ReceiveIbMessage(otherControllerAddress, message);
+    controller.ReceiveIbMessage(&otherController, message);
 }
 
 TEST_F(FrControllerTest, call_message_ack_handler)
@@ -298,7 +301,7 @@ TEST_F(FrControllerTest, call_message_ack_handler)
     EXPECT_CALL(callbacks, MessageAckHandler(&controller, ack))
         .Times(1);
 
-    controller.ReceiveIbMessage(otherControllerAddress, ack);
+    controller.ReceiveIbMessage(&otherController, ack);
 }
 
 TEST_F(FrControllerTest, send_casmts_on_run)
@@ -307,9 +310,9 @@ TEST_F(FrControllerTest, send_casmts_on_run)
     symbol.pattern = SymbolPattern::CasMts;
 
     symbol.channel = Channel::A;
-    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, symbol)).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, symbol)).Times(1);
     symbol.channel = Channel::B;
-    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, symbol)).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, symbol)).Times(1);
 
     controller.Run();
 }
@@ -349,7 +352,7 @@ TEST_F(FrControllerTest, send_wus_a_on_wakeup)
     expectedSymbol.channel = testChannel;
     expectedSymbol.pattern = SymbolPattern::Wus;
 
-    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, expectedSymbol)).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, expectedSymbol)).Times(1);
 
     controller.Wakeup();
 }
@@ -369,7 +372,7 @@ TEST_F(FrControllerTest, send_wus_b_on_wakeup)
     expectedSymbol.channel = testChannel;
     expectedSymbol.pattern = SymbolPattern::Wus;
 
-    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, expectedSymbol)).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, expectedSymbol)).Times(1);
 
     controller.Wakeup();
 }
@@ -423,7 +426,7 @@ TEST_F(FrControllerTest, set_poc_ready_on_wakeup_ack)
     FrSymbolAck ack;
     ack.pattern = SymbolPattern::Wus;
 
-    controller.ReceiveIbMessage(otherControllerAddress, ack);
+    controller.ReceiveIbMessage(&otherController, ack);
 }
 
 TEST_F(FrControllerTest, call_wakeup_handler)
@@ -445,9 +448,9 @@ TEST_F(FrControllerTest, call_wakeup_handler)
     EXPECT_CALL(callbacks, WakeupHandler(&controller, casMts))
         .Times(0);
 
-    controller.ReceiveIbMessage(otherControllerAddress, wus);
-    controller.ReceiveIbMessage(otherControllerAddress, wudop);
-    controller.ReceiveIbMessage(otherControllerAddress, casMts);
+    controller.ReceiveIbMessage(&otherController, wus);
+    controller.ReceiveIbMessage(&otherController, wudop);
+    controller.ReceiveIbMessage(&otherController, casMts);
 }
 
 TEST_F(FrControllerTest, call_symbol_handler)
@@ -469,9 +472,9 @@ TEST_F(FrControllerTest, call_symbol_handler)
     EXPECT_CALL(callbacks, SymbolHandler(&controller, casMts))
         .Times(1);
 
-    controller.ReceiveIbMessage(otherControllerAddress, wus);
-    controller.ReceiveIbMessage(otherControllerAddress, wudop);
-    controller.ReceiveIbMessage(otherControllerAddress, casMts);
+    controller.ReceiveIbMessage(&otherController, wus);
+    controller.ReceiveIbMessage(&otherController, wudop);
+    controller.ReceiveIbMessage(&otherController, casMts);
 }
 
 TEST_F(FrControllerTest, send_ack_on_symbol_reception)
@@ -486,9 +489,9 @@ TEST_F(FrControllerTest, send_ack_on_symbol_reception)
     expectedAck.pattern = symbol.pattern;
     expectedAck.channel = symbol.channel;
 
-    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, ::testing::Matcher<const FrSymbolAck&>(expectedAck)));
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, ::testing::Matcher<const FrSymbolAck&>(expectedAck)));
 
-    controller.ReceiveIbMessage(otherControllerAddress, symbol);
+    controller.ReceiveIbMessage(&otherController, symbol);
 }
 
 TEST_F(FrControllerTest, call_symbol_ack_handler)
@@ -502,7 +505,7 @@ TEST_F(FrControllerTest, call_symbol_ack_handler)
     EXPECT_CALL(callbacks, SymbolAckHandler(&controller, ack))
         .Times(1);
 
-    controller.ReceiveIbMessage(otherControllerAddress, ack);
+    controller.ReceiveIbMessage(&otherController, ack);
 }
 
 TEST_F(FrControllerTest, send_message_with_tracing)
@@ -584,7 +587,7 @@ TEST_F(FrControllerTest, trace_on_receive)
         Trace(Direction::Receive, controllerAddress, message.timestamp, message))
         .Times(1);
 
-    controller.ReceiveIbMessage(otherControllerAddress, message);
+    controller.ReceiveIbMessage(&otherController, message);
 }
 
 } // namespace

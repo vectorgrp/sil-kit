@@ -4,6 +4,7 @@
 
 #include "IIbReceiver.hpp"
 #include "IIbSender.hpp"
+#include "IServiceId.hpp"
 
 #include "ib/sim/fr/FrDatatypes.hpp"
 
@@ -18,6 +19,7 @@ namespace fr {
 class IIbToFrBusSimulator
     : public mw::IIbReceiver<HostCommand, ControllerConfig, TxBufferConfigUpdate, TxBufferUpdate>
     , public mw::IIbSender<FrMessage, FrMessageAck, FrSymbol, FrSymbolAck, CycleStart, ControllerStatus, PocStatus>
+    , public mw::IServiceId
 {
 public:
     ~IIbToFrBusSimulator() = default;

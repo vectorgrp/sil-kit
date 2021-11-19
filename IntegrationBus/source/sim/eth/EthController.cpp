@@ -36,7 +36,7 @@ auto EthController::SendMessage(EthMessage msg) -> EthTxId
 
     _tracer.Trace(extensions::Direction::Send, msg.timestamp, msg.ethFrame);
 
-    _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
+    _comAdapter->SendIbMessage(this, std::move(msg));
 
     EthTransmitAcknowledge ack;
     ack.timestamp = msg.timestamp;
@@ -82,9 +82,9 @@ void EthController::RegisterBitRateChangedHandler(BitRateChangedHandler /*handle
 }
 
 
-void EthController::ReceiveIbMessage(mw::EndpointAddress from, const EthMessage& msg)
+void EthController::ReceiveIbMessage(const IServiceId* from, const EthMessage& msg)
 {
-    if (from == _endpointAddr)
+    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
         return;
 
     _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg.ethFrame);
@@ -94,12 +94,12 @@ void EthController::ReceiveIbMessage(mw::EndpointAddress from, const EthMessage&
 
 void EthController::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
-    _endpointAddr = endpointAddress;
+    _serviceId.legacyEpa = endpointAddress;
 }
 
 auto EthController::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    return _endpointAddr;
+    return _serviceId.legacyEpa;
 }
 
 template<typename MsgT>

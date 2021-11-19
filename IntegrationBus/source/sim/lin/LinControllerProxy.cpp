@@ -31,7 +31,7 @@ void CallEach(CallbackRangeT& callbacks, const Args&... args)
 LinControllerProxy::LinControllerProxy(mw::IComAdapterInternal* comAdapter)
     : _comAdapter{comAdapter}
     , _logger{comAdapter->GetLogger()}
-    , _endpointAddr{}
+    , _serviceId{}
 {
 }
 
@@ -166,9 +166,9 @@ void LinControllerProxy::RegisterFrameResponseUpdateHandler(FrameResponseUpdateH
     _frameResponseUpdateHandler.emplace_back(std::move(handler));
 }
 
-void LinControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Transmission& msg)
+void LinControllerProxy::ReceiveIbMessage(const IServiceId* from, const Transmission& msg)
 {
-    if (!AreMatchingProxyEndpoints(from, _endpointAddr)) return;
+    if (!AreMatchingProxyEndpoints(from->GetServiceId().legacyEpa, _serviceId.legacyEpa)) return;
 
     auto& frame = msg.frame;
 
@@ -177,8 +177,8 @@ void LinControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Tr
         _logger->Warn(
             "LinController received transmission with payload length {} from {{{}, {}}}",
             static_cast<unsigned int>(frame.dataLength),
-            from.participant,
-            from.endpoint);
+            from->GetServiceId().legacyEpa.participant,
+            from->GetServiceId().legacyEpa.endpoint);
         return;
     }
 
@@ -187,8 +187,8 @@ void LinControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Tr
         _logger->Warn(
             "LinController received transmission with invalid LIN ID {} from {{{}, {}}}",
             frame.id,
-            from.participant,
-            from.endpoint);
+            from->GetServiceId().legacyEpa.participant,
+            from->GetServiceId().legacyEpa.endpoint);
         return;
     }
 
@@ -211,44 +211,44 @@ void LinControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Tr
     }
 }
 
-void LinControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const WakeupPulse& /*msg*/)
+void LinControllerProxy::ReceiveIbMessage(const IServiceId* from, const WakeupPulse& /*msg*/)
 {
-    if (!AreMatchingProxyEndpoints(from, _endpointAddr)) return;
+    if (!AreMatchingProxyEndpoints(from->GetServiceId().legacyEpa, _serviceId.legacyEpa)) return;
     CallEach(_wakeupHandler, this);
 }
 
-void LinControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const ControllerConfig& msg)
+void LinControllerProxy::ReceiveIbMessage(const IServiceId* from, const ControllerConfig& msg)
 {
     // We also receive FrameResponseUpdate from other controllers, although we would not need them in VIBE simulation.
     // However, we also want to make users of FrameResponseUpdateHandlers happy when using the VIBE simulation.
-    if (from == _endpointAddr) return;
+    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa) return;
 
     for (auto& response : msg.frameResponses)
     {
-        CallEach(_frameResponseUpdateHandler, this, from, response);
+        CallEach(_frameResponseUpdateHandler, this, dynamic_cast<const ILinController*>(from), response);
     }
 }
 
-void LinControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const FrameResponseUpdate& msg)
+void LinControllerProxy::ReceiveIbMessage(const IServiceId* from, const FrameResponseUpdate& msg)
 {
     // We also receive FrameResponseUpdate from other controllers, although we would not need them in VIBE simulation.
     // However, we also want to make users of FrameResponseUpdateHandlers happy when using the VIBE simulation.
-    if (from == _endpointAddr) return;
+    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa) return;
 
     for (auto& response : msg.frameResponses)
     {
-        CallEach(_frameResponseUpdateHandler, this, from, response);
+        CallEach(_frameResponseUpdateHandler, this, dynamic_cast<const ILinController*>(from), response);
     }
 }
 
 void LinControllerProxy::SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress)
 {
-    _endpointAddr = endpointAddress;
+    _serviceId.legacyEpa = endpointAddress;
 }
 
 auto LinControllerProxy::EndpointAddress() const -> const ::ib::mw::EndpointAddress&
 {
-    return _endpointAddr;
+    return _serviceId.legacyEpa;
 }
 
 void LinControllerProxy::SetControllerStatus(ControllerStatus status)
@@ -276,7 +276,7 @@ void LinControllerProxy::SetControllerStatus(ControllerStatus status)
 template <typename MsgT>
 void LinControllerProxy::SendIbMessage(MsgT&& msg)
 {
-    _comAdapter->SendIbMessage(_endpointAddr, std::forward<MsgT>(msg));
+    _comAdapter->SendIbMessage(this, std::forward<MsgT>(msg));
 }
 
 

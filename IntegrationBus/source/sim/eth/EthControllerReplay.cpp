@@ -68,7 +68,7 @@ void EthControllerReplay::RegisterBitRateChangedHandler(BitRateChangedHandler ha
 }
 
 // IIbToEthController
-void EthControllerReplay::ReceiveIbMessage(ib::mw::EndpointAddress from, const EthMessage& msg)
+void EthControllerReplay::ReceiveIbMessage(const IServiceId* from, const EthMessage& msg)
 {
     // ignore messages that do not originate from the replay scheduler 
     if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
@@ -142,7 +142,7 @@ void EthControllerReplay::ReplayReceive(const extensions::IReplayMessage* replay
     sim::eth::EthMessage msg{};
     msg.ethFrame = std::move(frame);
     msg.timestamp = replayMessage->Timestamp();
-    _controller.ReceiveIbMessage(tracing::ReplayEndpointAddress(), msg);
+    _controller.ReceiveIbMessage(this, msg);
 }
 
 } // namespace eth

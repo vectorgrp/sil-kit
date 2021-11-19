@@ -5,6 +5,7 @@
 
 #include "IIbToLogMsgSender.hpp"
 #include "IComAdapterInternal.hpp"
+#include "IServiceId.hpp"
 
 namespace ib {
 namespace mw {
@@ -12,6 +13,7 @@ namespace logging {
 
 class LogMsgSender
     : public IIbToLogMsgSender
+    , public mw::IServiceId
 {
 public:
     // ----------------------------------------
@@ -25,6 +27,10 @@ public:
     void SetEndpointAddress(const mw::EndpointAddress &address) override;
     auto EndpointAddress(void) const -> const mw::EndpointAddress & override;
 
+    // IServiceId
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
+
 private:
     // ----------------------------------------
     // private methods
@@ -33,8 +39,21 @@ private:
     // ----------------------------------------
     // private members
     IComAdapterInternal* _comAdapter{nullptr};
-    mw::EndpointAddress _endpointAddress{};
+    mw::ServiceId _serviceId{};
 };
+
+// ================================================================================
+//  Inline Implementations
+// ================================================================================
+void LogMsgSender::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _serviceId = serviceId;
+}
+
+auto LogMsgSender::GetServiceId() const -> const mw::ServiceId&
+{
+    return _serviceId;
+}
 
 } // namespace logging
 } // namespace mw

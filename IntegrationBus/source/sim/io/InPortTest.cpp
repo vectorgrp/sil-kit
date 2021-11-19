@@ -29,7 +29,7 @@ using ::ib::mw::test::DummyComAdapter;
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const AnalogIoMessage&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const AnalogIoMessage&));
 };
 
 class InPortTest : public ::testing::Test
@@ -49,8 +49,10 @@ protected:
 protected:
     InPortTest()
         : port{&comAdapter, comAdapter.GetTimeProvider()}
+        , portOther{&comAdapter, comAdapter.GetTimeProvider()}
     {
         port.SetEndpointAddress(portAddress);
+        portOther.SetEndpointAddress(otherPortAddress);
     }
 
     void RegisterMessageCallback()
@@ -69,6 +71,7 @@ protected:
     MockComAdapter comAdapter;
     ib::test::MockTraceSink traceSink;
     InPort<MessageType> port;
+    InPort<MessageType> portOther;
     Callbacks callbacks;
 };
 
@@ -89,7 +92,7 @@ TEST_F(InPortTest, trigger_callbacks_on_receive)
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
         .Times(1);
 
-    port.ReceiveIbMessage(otherPortAddress, msg);
+    port.ReceiveIbMessage(&portOther, msg);
 }
 
 TEST_F(InPortTest, ignore_own_messages)
@@ -106,7 +109,7 @@ TEST_F(InPortTest, ignore_own_messages)
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
         .Times(0);
 
-    port.ReceiveIbMessage(portAddress, msg);
+    port.ReceiveIbMessage(&port, msg);
 }
 
 TEST_F(InPortTest, can_read_last_value)
@@ -115,7 +118,7 @@ TEST_F(InPortTest, can_read_last_value)
     msg.timestamp = 13ns;
     msg.value = 17.3;
 
-    port.ReceiveIbMessage(otherPortAddress, msg);
+    port.ReceiveIbMessage(&portOther, msg);
 
     EXPECT_EQ(port.Read(), msg.value);
 }
@@ -139,6 +142,6 @@ TEST_F(InPortTest, uses_tracing)
         Trace(Direction::Receive, portAddress, now, msg))
         .Times(1);
 
-    port.ReceiveIbMessage(otherPortAddress, msg);
+    port.ReceiveIbMessage(&portOther, msg);
 }
 } // anonymous namespace

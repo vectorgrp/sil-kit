@@ -16,7 +16,7 @@ void CanControllerProxy::SetBaudRate(uint32_t rate, uint32_t fdRate)
 {
     _baudRate.baudRate = rate;
     _baudRate.fdBaudRate = fdRate;
-    _comAdapter->SendIbMessage(_endpointAddr, _baudRate);
+    _comAdapter->SendIbMessage(this, _baudRate);
 }
 
 void CanControllerProxy::Reset()
@@ -27,7 +27,7 @@ void CanControllerProxy::Reset()
     mode.flags.resetErrorHandling = 1;
     mode.mode = CanControllerState::Uninit;
 
-    _comAdapter->SendIbMessage(_endpointAddr, mode);
+    _comAdapter->SendIbMessage(this, mode);
 }
 
 void CanControllerProxy::Start()
@@ -53,7 +53,7 @@ void CanControllerProxy::ChangeControllerMode(CanControllerState state)
     mode.flags.resetErrorHandling = 0;
     mode.mode = state;
 
-    _comAdapter->SendIbMessage(_endpointAddr, mode);
+    _comAdapter->SendIbMessage(this, mode);
 }
 
 auto CanControllerProxy::SendMessage(const CanMessage& msg) -> CanTxId
@@ -64,7 +64,7 @@ auto CanControllerProxy::SendMessage(const CanMessage& msg) -> CanTxId
     //keep a copy until acknowledged by network simulator
     _transmittedMessages[msgCopy.transmitId] = msg;
 
-    _comAdapter->SendIbMessage(_endpointAddr, msgCopy);
+    _comAdapter->SendIbMessage(this, msgCopy);
     return msgCopy.transmitId;
 }
 
@@ -77,7 +77,7 @@ auto CanControllerProxy::SendMessage(CanMessage&& msg) -> CanTxId
     //keep a copy until acknowledged by network simulator
     _transmittedMessages[msg.transmitId] = msg;
 
-    _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
+    _comAdapter->SendIbMessage(this, std::move(msg));
 
     return txId;
 }
@@ -109,9 +109,9 @@ void CanControllerProxy::RegisterHandler(CallbackT<MsgT> handler)
     handlers.push_back(handler);
 }
 
-void CanControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const CanMessage& msg)
+void CanControllerProxy::ReceiveIbMessage(const IServiceId* from, const CanMessage& msg)
 {
-    if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
+    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
 
     _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg);
@@ -119,9 +119,9 @@ void CanControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Ca
     CallHandlers(msg);
 }
 
-void CanControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const CanTransmitAcknowledge& msg)
+void CanControllerProxy::ReceiveIbMessage(const IServiceId* from, const CanTransmitAcknowledge& msg)
 {
-    if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
+    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
 
     auto transmittedMsg = _transmittedMessages.find(msg.transmitId);
@@ -139,9 +139,9 @@ void CanControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Ca
     CallHandlers(msg);
 }
 
-void CanControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const CanControllerStatus& msg)
+void CanControllerProxy::ReceiveIbMessage(const IServiceId* from, const CanControllerStatus& msg)
 {
-    if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
+    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
 
     if (_controllerState != msg.controllerState)
@@ -168,15 +168,13 @@ void CanControllerProxy::CallHandlers(const MsgT& msg)
 
 void CanControllerProxy::SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress)
 {
-    _endpointAddr = endpointAddress;
+    _serviceId.legacyEpa = endpointAddress;
 }
 
 auto CanControllerProxy::EndpointAddress() const -> const ::ib::mw::EndpointAddress&
 {
-    return _endpointAddr;
+    return _serviceId.legacyEpa;
 }
-
-
 
 } // namespace can
 } // namespace sim

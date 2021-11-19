@@ -30,13 +30,14 @@ using namespace ib::sim::can;
 
 using ::ib::mw::test::DummyComAdapter;
 
+
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const CanMessage&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const CanTransmitAcknowledge&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const CanConfigureBaudrate&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const CanSetControllerMode&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const CanMessage&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const CanTransmitAcknowledge&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const CanConfigureBaudrate&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const CanSetControllerMode&));
 };
 
 class CanControllerProxyCallbacks
@@ -59,7 +60,7 @@ TEST(CanControllerProxyTest, send_can_message)
     CanMessage msg{};
     msg.transmitId = 1;
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage(controllerAddress, msg))
+    EXPECT_CALL(mockComAdapter, SendIbMessage(&canController, msg))
         .Times(1);
 
     canController.SendMessage(msg);
@@ -84,7 +85,9 @@ TEST(CanControllerProxyTest, receive_can_message)
     EXPECT_CALL(callbackProvider, ReceiveMessage(&canController, msg))
         .Times(1);
 
-    canController.ReceiveIbMessage(busSimAddress, msg);
+    CanControllerProxy canControllerProxy(&mockComAdapter);
+    canController.SetEndpointAddress(busSimAddress);
+    canController.ReceiveIbMessage(&canControllerProxy, msg);
 }
 
 TEST(CanControllerProxyTest, start_stop_sleep_reset)
@@ -101,13 +104,13 @@ TEST(CanControllerProxyTest, start_stop_sleep_reset)
     CanSetControllerMode sleepCommand = { { 0, 0 }, CanControllerState::Sleep };
     CanSetControllerMode resetCommand = { { 1, 1 }, CanControllerState::Uninit };
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage(controllerAddress, startCommand))
+    EXPECT_CALL(mockComAdapter, SendIbMessage(&canController, startCommand))
         .Times(1);
-    EXPECT_CALL(mockComAdapter, SendIbMessage(controllerAddress, stopCommand))
+    EXPECT_CALL(mockComAdapter, SendIbMessage(&canController, stopCommand))
         .Times(1);
-    EXPECT_CALL(mockComAdapter, SendIbMessage(controllerAddress, sleepCommand))
+    EXPECT_CALL(mockComAdapter, SendIbMessage(&canController, sleepCommand))
         .Times(1);
-    EXPECT_CALL(mockComAdapter, SendIbMessage(controllerAddress, resetCommand))
+    EXPECT_CALL(mockComAdapter, SendIbMessage(&canController, resetCommand))
         .Times(1);
 
     canController.Start();
@@ -128,9 +131,9 @@ TEST(CanControllerProxyTest, set_baudrate)
     CanConfigureBaudrate baudrate1 = { 3000, 0 };
     CanConfigureBaudrate baudrate2 = { 3000, 500000 };
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage(controllerAddress, baudrate1))
+    EXPECT_CALL(mockComAdapter, SendIbMessage(&canController, baudrate1))
         .Times(1);
-    EXPECT_CALL(mockComAdapter, SendIbMessage(controllerAddress, baudrate2))
+    EXPECT_CALL(mockComAdapter, SendIbMessage(&canController, baudrate2))
         .Times(1);
 
     canController.SetBaudRate(baudrate1.baudRate, baudrate1.fdBaudRate);
@@ -161,20 +164,22 @@ TEST(CanControllerProxyTest, receive_new_controller_state)
 
     CanControllerStatus controllerStatus;
 
+    CanControllerProxy canControllerProxy(&mockComAdapter);
+    canController.SetEndpointAddress(busSimAddress);
     // should not trigger a callback
     controllerStatus.controllerState = CanControllerState::Uninit;
     controllerStatus.errorState = CanErrorState::NotAvailable;
-    canController.ReceiveIbMessage(busSimAddress, controllerStatus);
+    canController.ReceiveIbMessage(&canControllerProxy, controllerStatus);
 
     // only stateChanged should be called
     controllerStatus.controllerState = CanControllerState::Started;
     controllerStatus.errorState = CanErrorState::NotAvailable;
-    canController.ReceiveIbMessage(busSimAddress, controllerStatus);
+    canController.ReceiveIbMessage(&canControllerProxy, controllerStatus);
 
     // only errorStateChanged should be called
     controllerStatus.controllerState = CanControllerState::Started;
     controllerStatus.errorState = CanErrorState::ErrorActive;
-    canController.ReceiveIbMessage(busSimAddress, controllerStatus);
+    canController.ReceiveIbMessage(&canControllerProxy, controllerStatus);
 }
 
 TEST(CanControllerProxyTest, receive_ack)
@@ -205,8 +210,10 @@ TEST(CanControllerProxyTest, receive_ack)
     EXPECT_CALL(callbackProvider, ReceiveAck(&canController, ack2))
         .Times(1);
 
-    canController.ReceiveIbMessage(busSimAddress, ack1);
-    canController.ReceiveIbMessage(busSimAddress, ack2);
+    CanControllerProxy canControllerProxy(&mockComAdapter);
+    canController.SetEndpointAddress(busSimAddress);
+    canController.ReceiveIbMessage(&canControllerProxy, ack1);
+    canController.ReceiveIbMessage(&canControllerProxy, ack2);
 }
 
 /*! \brief Ensure that the proxy does not generate an Ack
@@ -229,11 +236,13 @@ TEST(CanControllerProxyTest, must_not_generate_ack)
     canController.SetEndpointAddress(controllerAddress);
 
     CanMessage msg;
-
-    EXPECT_CALL(mockComAdapter, SendIbMessage(An<EndpointAddress>(), A<const CanTransmitAcknowledge&>()))
+    // TODO FIXME
+    EXPECT_CALL(mockComAdapter, SendIbMessage(An<const IServiceId*>(), A<const CanTransmitAcknowledge&>()))
         .Times(0);
 
-    canController.ReceiveIbMessage(busSimAddress, msg);
+    CanControllerProxy canControllerProxy(&mockComAdapter);
+    canController.SetEndpointAddress(busSimAddress);
+    canController.ReceiveIbMessage(&canControllerProxy, msg);
 }
 
 } // anonymous namespace

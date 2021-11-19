@@ -455,23 +455,23 @@ void ParticipantController::LogCurrentPerformanceStats()
 
 void ParticipantController::SetEndpointAddress(const mw::EndpointAddress& addr)
 {
-    _endpointAddress = addr;
+    _serviceId.legacyEpa = addr;
 }
 
 auto ParticipantController::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    return _endpointAddress;
+    return _serviceId.legacyEpa;
 }     
 
-void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, const ParticipantCommand& command)
+void ParticipantController::ReceiveIbMessage(const IServiceId* /*from*/, const ParticipantCommand& command)
 {
-    if (command.participant != _endpointAddress.participant)
+    if (command.participant != _serviceId.legacyEpa.participant)
         return;
 
     Initialize(command, std::string{"Received ParticipantCommand::"} + to_string(command.kind));
 }
 
-void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, const SystemCommand& command)
+void ParticipantController::ReceiveIbMessage(const IServiceId* /*from*/, const SystemCommand& command)
 {
     // We have to supress a SystemCommand::ExecuteColdswap during the restart
     // After a coldswap, this command is still present in the SystemControllers
@@ -558,7 +558,7 @@ void ParticipantController::ReceiveIbMessage(ib::mw::EndpointAddress /*from*/, c
     ReportError("Received SystemCommand::" + to_string(command.kind) + " while in ParticipantState::" + to_string(State()));
 }
 
-void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const Tick& msg)
+void ParticipantController::ReceiveIbMessage(const IServiceId* /*from*/, const Tick& msg)
 {
     switch (_syncType)
     {
@@ -609,12 +609,12 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress /*from*/, const
     }
 }
 
-void ParticipantController::ReceiveIbMessage(mw::EndpointAddress from, const QuantumGrant& msg)
+void ParticipantController::ReceiveIbMessage(const IServiceId* from, const QuantumGrant& msg)
 {
     if (_syncType != cfg::SyncType::TimeQuantum)
         return;
 
-    if (_endpointAddress != msg.grantee)
+    if (_serviceId.legacyEpa != msg.grantee)
         return;
 
     if (!_syncAdapter)
@@ -656,11 +656,11 @@ void ParticipantController::ReceiveIbMessage(mw::EndpointAddress from, const Qua
     }
 }
 
-void ParticipantController::ReceiveIbMessage(mw::EndpointAddress from, const NextSimTask& task)
+void ParticipantController::ReceiveIbMessage(const IServiceId* from, const NextSimTask& task)
 {
-    if (from == _endpointAddress) return;
+    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa) return;
 
-    _otherNextTasks[from.participant] = task;
+    _otherNextTasks[from->GetServiceId().legacyEpa.participant] = task;
 
     switch (State())
     {

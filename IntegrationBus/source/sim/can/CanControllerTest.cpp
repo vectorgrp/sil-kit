@@ -42,10 +42,10 @@ MATCHER_P(CanTransmitAckWithouthTransmitIdMatcher, truthAck, "matches CanTransmi
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const CanMessage&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const CanTransmitAcknowledge&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const CanConfigureBaudrate&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const CanSetControllerMode&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const CanMessage&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const CanTransmitAcknowledge&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const CanConfigureBaudrate&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const CanSetControllerMode&));
 };
 
 class CanControllerCallbacks
@@ -76,7 +76,7 @@ TEST(CanControllerTest, send_can_message)
     CanMessage msg;
     msg.transmitId = 1;
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage(controllerAddress, msg))
+    EXPECT_CALL(mockComAdapter, SendIbMessage(&canController, msg))
         .Times(1);
     EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now())
         .Times(1);
@@ -103,7 +103,9 @@ TEST(CanControllerTest, receive_can_message)
         .Times(1);
     EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now()).Times(1);
 
-    canController.ReceiveIbMessage(senderAddress, msg);
+    CanController canControllerProxy(&mockComAdapter, mockComAdapter.GetTimeProvider());
+    canControllerProxy.SetEndpointAddress(senderAddress);
+    canController.ReceiveIbMessage(&canControllerProxy, msg);
 }
 
 
@@ -119,7 +121,7 @@ TEST(CanControllerTest, start_stop_sleep_reset)
 
     CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage(A<EndpointAddress>(), A<const CanSetControllerMode&>()))
+    EXPECT_CALL(mockComAdapter, SendIbMessage(A<const IServiceId*>(), A<const CanSetControllerMode&>()))
         .Times(0);
 
     canController.Start();
@@ -140,7 +142,7 @@ TEST(CanControllerTest, set_baudrate)
 
     CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage(An<EndpointAddress>(), A<const CanConfigureBaudrate&>()))
+    EXPECT_CALL(mockComAdapter, SendIbMessage(An<const IServiceId*>(), A<const CanConfigureBaudrate&>()))
         .Times(0);
 
     canController.SetBaudRate(3000, 500000);
@@ -209,6 +211,8 @@ TEST(CanControllerTest, cancontroller_uses_tracing)
         Trace(Direction::Receive, controllerAddress, now, msg))
         .Times(1);
 
-    controller.ReceiveIbMessage(otherAddress, msg);
+    CanController canControllerProxy(&comAdapter, comAdapter.GetTimeProvider());
+    canControllerProxy.SetEndpointAddress(otherAddress);
+    controller.ReceiveIbMessage(&canControllerProxy, msg);
 }
 }  // anonymous namespace

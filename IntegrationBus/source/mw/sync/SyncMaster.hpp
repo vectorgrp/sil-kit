@@ -160,7 +160,8 @@ private:
 
 class SyncMaster :
     public ISyncMaster,
-    public IIbToSyncMaster
+    public IIbToSyncMaster,
+    public mw::IServiceId
 {
 public:
     // ----------------------------------------
@@ -184,13 +185,18 @@ public:
 public:
     // ----------------------------------------
     // Public Methods
-    void ReceiveIbMessage(mw::EndpointAddress from, const TickDone& msg) override;
-    void ReceiveIbMessage(mw::EndpointAddress from, const QuantumRequest& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const TickDone& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const QuantumRequest& msg) override;
 
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
     void WaitForShutdown() override;
+
+
+    // IServiceId
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
 
 private:
     // ----------------------------------------
@@ -213,7 +219,7 @@ private:
     // ----------------------------------------
     // private members
     IComAdapterInternal* _comAdapter{nullptr};
-    mw::EndpointAddress _endpointAddress;
+    mw::ServiceId _serviceId{};
     logging::ILogger* _logger{nullptr};
 
     SystemState _systemState{SystemState::Invalid};
@@ -234,6 +240,15 @@ private:
 //  Inline Implementations
 // ================================================================================
 
+void SyncMaster::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _serviceId = serviceId;
+}
+
+auto SyncMaster::GetServiceId() const -> const mw::ServiceId&
+{
+    return _serviceId;
+}
 
 
 } // namespace sync

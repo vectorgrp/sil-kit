@@ -12,18 +12,18 @@ LogMsgReceiver::LogMsgReceiver(IComAdapterInternal* comAdapter, Logger* logger)
 {
 }
 
-void LogMsgReceiver::ReceiveIbMessage(mw::EndpointAddress from, const LogMsg& msg)
+void LogMsgReceiver::ReceiveIbMessage(const IServiceId* from, const LogMsg& msg)
 {
     _logger->LogReceivedMsg(msg);
 }
 
 void LogMsgReceiver::SetEndpointAddress(const ib::mw::EndpointAddress &address)
 {
-    _endpointAddress = address;
+    _serviceId.legacyEpa = address;
 }
 auto LogMsgReceiver::EndpointAddress(void) const -> const ib::mw::EndpointAddress&
 {
-    return _endpointAddress;
+    return _serviceId.legacyEpa;
 }
 
 } // namespace logging

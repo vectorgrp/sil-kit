@@ -209,9 +209,9 @@ void FrController::RegisterCycleStartHandler(CycleStartHandler handler)
     _comAdapter->GetLogger()->Info("CycleStartHandler callback is not supported in basic FlexRay simulation.");
 }
 
-void FrController::ReceiveIbMessage(mw::EndpointAddress from, const FrMessage& msg)
+void FrController::ReceiveIbMessage(const IServiceId* from, const FrMessage& msg)
 {
-    if (from == _endpointAddr)
+    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
         return;
 
     _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg);
@@ -227,17 +227,17 @@ void FrController::ReceiveIbMessage(mw::EndpointAddress from, const FrMessage& m
     SendIbMessage(std::move(ack));
 }
 
-void FrController::ReceiveIbMessage(mw::EndpointAddress from, const FrMessageAck& msg)
+void FrController::ReceiveIbMessage(const IServiceId* from, const FrMessageAck& msg)
 {
-    if (from == _endpointAddr)
+    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
         return;
 
     CallHandlers(msg);
 }
 
-void FrController::ReceiveIbMessage(mw::EndpointAddress from, const FrSymbol& msg)
+void FrController::ReceiveIbMessage(const IServiceId* from, const FrSymbol& msg)
 {
-    if (from == _endpointAddr)
+    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
         return;
 
     // Call WakeupHandler for Wus and Wudop symbols
@@ -266,9 +266,9 @@ void FrController::ReceiveIbMessage(mw::EndpointAddress from, const FrSymbol& ms
     SendIbMessage(ack);
 }
 
-void FrController::ReceiveIbMessage(mw::EndpointAddress from, const FrSymbolAck& msg)
+void FrController::ReceiveIbMessage(const IServiceId* from, const FrSymbolAck& msg)
 {
-    if (from == _endpointAddr)
+    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
         return;
 
     // Switch back to the READY state if its an Ack for WUS or WUDOP
@@ -293,12 +293,12 @@ void FrController::ReceiveIbMessage(mw::EndpointAddress from, const FrSymbolAck&
 
 void FrController::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
-    _endpointAddr = endpointAddress;
+    _serviceId.legacyEpa = endpointAddress;
 }
 
 auto FrController::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    return _endpointAddr;
+    return _serviceId.legacyEpa;
 }
 
 void FrController::SetTimeProvider(mw::sync::ITimeProvider* timeProvider)
@@ -326,7 +326,7 @@ void FrController::CallHandlers(const MsgT& msg)
 template<typename MsgT>
 void FrController::SendIbMessage(MsgT&& msg)
 {
-    _comAdapter->SendIbMessage(_endpointAddr, std::forward<MsgT>(msg));
+    _comAdapter->SendIbMessage(this, std::forward<MsgT>(msg));
 }
 
 

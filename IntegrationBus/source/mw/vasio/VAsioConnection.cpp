@@ -644,7 +644,7 @@ void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
     msg.refreshTime = std::chrono::system_clock::now();
 
     auto&& link = GetLinkByName<ib::mw::sync::ParticipantStatus>("default");
-    link->DistributeRemoteIbMessage(std::move(address), msg);
+    // XXX link->DistributeRemoteIbMessage(msg);
 
     _logger->Error("Lost connection to participant {}", info.participantName);
 }

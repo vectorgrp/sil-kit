@@ -22,6 +22,7 @@ class LinControllerProxy
     : public ILinController
     , public IIbToLinControllerProxy
     , public extensions::ITraceMessageSource
+    , public mw::IServiceId
 {
 public:
     // ----------------------------------------
@@ -67,10 +68,10 @@ public:
     void RegisterFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) override;
 
     // IIbToLinController
-    void ReceiveIbMessage(mw::EndpointAddress from, const Transmission& msg) override;
-    void ReceiveIbMessage(mw::EndpointAddress from, const WakeupPulse& msg) override;
-    void ReceiveIbMessage(mw::EndpointAddress from, const ControllerConfig& msg) override;
-    void ReceiveIbMessage(mw::EndpointAddress from, const FrameResponseUpdate& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const Transmission& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const WakeupPulse& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const ControllerConfig& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const FrameResponseUpdate& msg) override;
 
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
@@ -81,6 +82,10 @@ public:
 
     //ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
+
+    // IServiceId
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
 
 private:
 //    // ----------------------------------------
@@ -98,7 +103,7 @@ private:
     // ----------------------------------------
     // private members
     mw::IComAdapterInternal* _comAdapter;
-    mw::EndpointAddress _endpointAddr;
+    ::ib::mw::ServiceId _serviceId;
     mw::logging::ILogger* _logger;
 
     ControllerMode   _controllerMode{ControllerMode::Inactive};
@@ -120,6 +125,14 @@ void LinControllerProxy::AddSink(extensions::ITraceMessageSink* sink)
     _tracer.AddSink(EndpointAddress(), *sink);
 }
 
+void LinControllerProxy::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _serviceId = serviceId;
+}
+auto LinControllerProxy::GetServiceId() const -> const mw::ServiceId&
+{
+    return _serviceId;
+}
 } // namespace lin
 } // namespace sim
 } // namespace ib

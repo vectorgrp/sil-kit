@@ -10,6 +10,7 @@
 
 #include "IIbToSystemMonitor.hpp"
 #include "IComAdapterInternal.hpp"
+#include "IServiceId.hpp"
 
 namespace ib {
 namespace mw {
@@ -18,6 +19,7 @@ namespace sync {
 class SystemMonitor
     : public ISystemMonitor
     , public IIbToSystemMonitor
+    , public mw::IServiceId
 {
 public:
     // ----------------------------------------
@@ -49,7 +51,11 @@ public:
     void SetEndpointAddress(const mw::EndpointAddress& addr) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
-    void ReceiveIbMessage(mw::EndpointAddress from, const sync::ParticipantStatus& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const sync::ParticipantStatus& msg) override;
+
+    // IServiceId
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
 
 public:
     // ----------------------------------------
@@ -74,7 +80,7 @@ private:
     // ----------------------------------------
     // private members
     IComAdapterInternal* _comAdapter{nullptr};
-    mw::EndpointAddress _endpointAddress{};
+    mw::ServiceId _serviceId{};
     cfg::SimulationSetup _simulationSetup;
     logging::ILogger* _logger{nullptr};
 
@@ -94,6 +100,16 @@ private:
 auto SystemMonitor::InvalidTransitionCount() const -> unsigned int
 {
     return _invalidTransitionCount;
+}
+
+void SystemMonitor::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _serviceId = serviceId;
+}
+
+auto SystemMonitor::GetServiceId() const -> const mw::ServiceId&
+{
+    return _serviceId;
 }
 
 } // namespace sync

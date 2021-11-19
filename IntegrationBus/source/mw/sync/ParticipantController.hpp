@@ -26,6 +26,7 @@ struct ParticipantTimeProvider;
 class ParticipantController
     : public IParticipantController
     , public IIbToParticipantController
+    , public mw::IServiceId
 {
 public:
     // ----------------------------------------
@@ -82,13 +83,13 @@ public:
     void SetEndpointAddress(const mw::EndpointAddress& addr) override;
     auto EndpointAddress() const -> const mw::EndpointAddress & override;
 
-    void ReceiveIbMessage(mw::EndpointAddress from, const ParticipantCommand& msg) override;
-    void ReceiveIbMessage(mw::EndpointAddress from, const SystemCommand& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const ParticipantCommand& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const SystemCommand& msg) override;
 
-    void ReceiveIbMessage(mw::EndpointAddress from, const Tick& msg) override;
-    void ReceiveIbMessage(mw::EndpointAddress from, const QuantumGrant& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const Tick& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const QuantumGrant& msg) override;
 
-    void ReceiveIbMessage(mw::EndpointAddress from, const NextSimTask& task) override;
+    void ReceiveIbMessage(const IServiceId* from, const NextSimTask& task) override;
 
     // Used by Policies
     void SendTickDone() const;
@@ -98,6 +99,11 @@ public:
 
     // Get the instance of the internal ITimeProvider that is updated with our simulation time
     auto GetTimeProvider()->std::shared_ptr<sync::ITimeProvider>;
+
+
+    // IServiceId
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
 private:
     // ----------------------------------------
     // private methods
@@ -120,7 +126,7 @@ private:
     // ----------------------------------------
     // private members
     IComAdapterInternal* _comAdapter{ nullptr };
-    mw::EndpointAddress _endpointAddress{};
+    mw::ServiceId _serviceId{};
     cfg::SyncType _syncType;
     cfg::TimeSync _timesyncConfig;
     logging::ILogger* _logger{ nullptr };
@@ -159,7 +165,17 @@ private:
 template <class MsgT>
 void ParticipantController::SendIbMessage(MsgT&& msg) const
 {
-    _comAdapter->SendIbMessage(_endpointAddress, std::forward<MsgT>(msg));
+    _comAdapter->SendIbMessage(this, std::forward<MsgT>(msg));
+}
+
+void ParticipantController::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _serviceId = serviceId;
+}
+
+auto ParticipantController::GetServiceId() const -> const mw::ServiceId&
+{
+    return _serviceId;
 }
 
     

@@ -44,6 +44,7 @@ protected:
     SystemMonitorTest()
         : testConfig{MakeTestConfig()}
         , monitor{&comAdapter, testConfig.simulationSetup}
+        , monitorFrom{ &comAdapter, testConfig.simulationSetup }
     {
         monitor.SetEndpointAddress(addr);
     }
@@ -82,8 +83,10 @@ protected:
         EndpointAddress from;
         from.participant = participantCfg.id;
         from.endpoint = 1024;
+
+        monitorFrom.SetEndpointAddress(from);
         
-        monitor.ReceiveIbMessage(from, status);
+        monitor.ReceiveIbMessage(&monitorFrom, status);
     }
 
     void SetAllParticipantStates(ParticipantState state)
@@ -107,6 +110,7 @@ protected:
     DummyComAdapter comAdapter;
     cfg::Config testConfig;
     SystemMonitor monitor;
+    SystemMonitor monitorFrom;
     Callbacks callbacks;
 };
 

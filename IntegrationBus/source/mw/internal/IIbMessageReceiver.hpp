@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ib/mw/EndpointAddress.hpp"
+#include "IServiceId.hpp"
 
 namespace ib {
 namespace mw {
@@ -11,7 +12,7 @@ template<typename T>
 class IIbMessageReceiver
 {
 public:
-    virtual void ReceiveIbMessage(ib::mw::EndpointAddress from, const T& msg) = 0;
+    virtual void ReceiveIbMessage(const ib::mw::IServiceId* from, const T& msg) = 0;
 };
 
 } // namespace mw

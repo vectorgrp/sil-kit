@@ -49,12 +49,12 @@ void SystemController::ExecuteColdswap() const
 
 void SystemController::SetEndpointAddress(const mw::EndpointAddress& addr)
 {
-    _endpointAddress = addr;
+    _serviceId.legacyEpa = addr;
 }
 
 auto SystemController::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    return _endpointAddress;
+    return _serviceId.legacyEpa;
 }
 
 } // namespace sync

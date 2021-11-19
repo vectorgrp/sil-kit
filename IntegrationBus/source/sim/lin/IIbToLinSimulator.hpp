@@ -4,6 +4,7 @@
 
 #include "IIbReceiver.hpp"
 #include "IIbSender.hpp"
+#include "IServiceId.hpp"
 #include "ib/sim/lin/fwd_decl.hpp"
 
 namespace ib {
@@ -17,6 +18,7 @@ namespace lin {
 class IIbToLinSimulator
     : public mw::IIbReceiver<SendFrameRequest, SendFrameHeaderRequest, WakeupPulse, ControllerConfig, ControllerStatusUpdate, FrameResponseUpdate>
     , public mw::IIbSender<Transmission, WakeupPulse, ControllerConfig, FrameResponseUpdate>
+    , public mw::IServiceId
 
 {
 public:

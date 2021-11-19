@@ -43,16 +43,16 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<co
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    void SendIbMessage(EndpointAddress from, EthMessage&& msg) override
+    void SendIbMessage(const IServiceId* from, EthMessage&& msg) override
     {
         SendIbMessage_proxy(from, msg);
     }
 
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthMessage&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const EthMessage&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthTransmitAcknowledge&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthStatus&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthSetMode&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const EthMessage&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(const IServiceId*, const EthMessage&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const EthTransmitAcknowledge&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const EthStatus&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const EthSetMode&));
 };
 
 class EthernetControllerProxyTest : public testing::Test
@@ -69,6 +69,7 @@ protected:
 protected:
     EthernetControllerProxyTest()
         : proxy(&comAdapter, _config)
+        , proxyFrom(&comAdapter, _config)
     {
         proxy.SetEndpointAddress(proxyAddress);
 
@@ -76,6 +77,8 @@ protected:
         proxy.RegisterMessageAckHandler(ib::util::bind_method(&callbacks, &Callbacks::MessageAck));
         proxy.RegisterBitRateChangedHandler(ib::util::bind_method(&callbacks, &Callbacks::BitRateChanged));
         proxy.RegisterStateChangedHandler(ib::util::bind_method(&callbacks, &Callbacks::StateChanged));
+
+        proxyFrom.SetEndpointAddress(controllerAddress);
     }
 
 protected:
@@ -88,6 +91,7 @@ protected:
 
     ib::cfg::EthernetController _config;
     EthControllerProxy proxy;
+    EthControllerProxy proxyFrom;
 };
 
 /*! \brief EthControllerProxy must keep track of state and generates EthSetMode messages when necessary
@@ -110,18 +114,18 @@ TEST_F(EthernetControllerProxyTest, keep_track_of_state)
     EthSetMode Activate{ EthMode::Active };
     EthSetMode Deactivate{ EthMode::Inactive };
 
-    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, Activate))
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, Activate))
         .Times(1);
 
-    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, Deactivate))
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, Deactivate))
         .Times(1);
 
     proxy.Deactivate();
     proxy.Activate();
-    proxy.ReceiveIbMessage(controllerAddress, EthStatus{ 0ns, EthState::LinkUp, 17 });
+    proxy.ReceiveIbMessage(&proxyFrom, EthStatus{ 0ns, EthState::LinkUp, 17 });
     proxy.Activate();
     proxy.Deactivate();
-    proxy.ReceiveIbMessage(controllerAddress, EthStatus{ 0ns, EthState::Inactive, 0 });
+    proxy.ReceiveIbMessage(&proxyFrom, EthStatus{ 0ns, EthState::Inactive, 0 });
     proxy.Deactivate();
 }
 
@@ -129,7 +133,7 @@ TEST_F(EthernetControllerProxyTest, keep_track_of_state)
 TEST_F(EthernetControllerProxyTest, send_eth_message)
 {
     const auto now = 12345ns;
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(proxyAddress, AnEthMessageWith(now)))
+    EXPECT_CALL(comAdapter, SendIbMessage_proxy(&proxy, AnEthMessageWith(now)))
         .Times(1);
 
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
@@ -149,7 +153,7 @@ TEST_F(EthernetControllerProxyTest, trigger_callback_on_receive_message)
     EXPECT_CALL(callbacks, ReceiveMessage(&proxy, msg))
         .Times(1);
 
-    proxy.ReceiveIbMessage(controllerAddress, msg);
+    proxy.ReceiveIbMessage(&proxyFrom, msg);
 }
 
 /*! \brief Passing an Ack to an EthControllerProxy must trigger the registered callback
@@ -161,7 +165,7 @@ TEST_F(EthernetControllerProxyTest, trigger_callback_on_receive_ack)
     EXPECT_CALL(callbacks, MessageAck(&proxy, expectedAck))
         .Times(1);
 
-    proxy.ReceiveIbMessage(controllerAddress, expectedAck);
+    proxy.ReceiveIbMessage(&proxyFrom, expectedAck);
 }
 
 /*! \brief EthControllerProxy must not generate Acks
@@ -175,10 +179,10 @@ TEST_F(EthernetControllerProxyTest, must_not_generate_ack)
     EthMessage msg;
     msg.transmitId = 17;
 
-    EXPECT_CALL(comAdapter, SendIbMessage(An<EndpointAddress>(), A<const EthTransmitAcknowledge&>()))
+    EXPECT_CALL(comAdapter, SendIbMessage(An<const IServiceId*>(), A<const EthTransmitAcknowledge&>()))
         .Times(0);
 
-    proxy.ReceiveIbMessage(controllerAddress, msg);
+    proxy.ReceiveIbMessage(&proxyFrom, msg);
 }
 
 /*! \brief EthControllerProxy must trigger bitrate changed callbacks when necessary
@@ -201,11 +205,11 @@ TEST_F(EthernetControllerProxyTest, trigger_callback_on_bitrate_change)
         .Times(0);
 
     EthStatus newStatus = { 0ns, EthState::Inactive, 0 };
-    proxy.ReceiveIbMessage(controllerAddress, newStatus);
+    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
 
     newStatus.bitRate = 100;
-    proxy.ReceiveIbMessage(controllerAddress, newStatus);
-    proxy.ReceiveIbMessage(controllerAddress, newStatus);
+    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
+    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
 }
 
 /*! \brief EthControllerProxy must trigger state changed callbacks when necessary
@@ -237,18 +241,18 @@ TEST_F(EthernetControllerProxyTest, trigger_callback_on_state_change)
 
 
     EthStatus newStatus = { 0ns, EthState::Inactive, 0 };
-    proxy.ReceiveIbMessage(controllerAddress, newStatus);
+    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
 
     newStatus.state = EthState::LinkUp;
-    proxy.ReceiveIbMessage(controllerAddress, newStatus);
-    proxy.ReceiveIbMessage(controllerAddress, newStatus);
+    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
+    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
 
     newStatus.state = EthState::LinkDown;
-    proxy.ReceiveIbMessage(controllerAddress, newStatus);
-    proxy.ReceiveIbMessage(controllerAddress, newStatus);
+    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
+    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
 
     newStatus.state = EthState::Inactive;
-    proxy.ReceiveIbMessage(controllerAddress, newStatus);
+    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
 }
 
 

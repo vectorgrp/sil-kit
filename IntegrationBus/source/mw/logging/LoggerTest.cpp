@@ -35,13 +35,13 @@ using ib::mw::test::DummyComAdapter;
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    void SendIbMessage(EndpointAddress from, LogMsg&& msg)
+    void SendIbMessage(const IServiceId* from, LogMsg&& msg)
     {
         SendIbMessage_proxy(from, msg);
     }
 
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const LogMsg&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const LogMsg&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const LogMsg&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(const IServiceId*, const LogMsg&));
 };
 
 auto ALogMsgWith(std::string logger_name, Level level, std::string payload) -> Matcher<const LogMsg&>
@@ -67,7 +67,7 @@ TEST(LoggerTest, send_log_message_with_sender)
     msg.level = Level::Info;
     msg.payload = std::string{"some payload"};
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage(controllerAddress, msg))
+    EXPECT_CALL(mockComAdapter, SendIbMessage(&logMsgSender, msg))
         .Times(1);
 
     logMsgSender.SendLogMsg(msg);
@@ -100,13 +100,13 @@ TEST(LoggerTest, send_log_message_from_logger)
 
     std::string payload{"Test log message"};
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage_proxy(controllerAddress,
+    EXPECT_CALL(mockComAdapter, SendIbMessage_proxy(&logMsgSender,
         ALogMsgWith(loggerName, Level::Info, payload)))
         .Times(1);
 
     logger.Info(payload);
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage_proxy(controllerAddress,
+    EXPECT_CALL(mockComAdapter, SendIbMessage_proxy(&logMsgSender,
         ALogMsgWith(loggerName, Level::Critical, payload)))
         .Times(1);
 

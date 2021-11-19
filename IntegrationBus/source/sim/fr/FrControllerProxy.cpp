@@ -11,7 +11,6 @@ namespace fr {
 
 FrControllerProxy::FrControllerProxy(mw::IComAdapterInternal* comAdapter)
 : _comAdapter(comAdapter)
-, _endpointAddr{}
 {
 }
 
@@ -140,9 +139,9 @@ void FrControllerProxy::RegisterCycleStartHandler(CycleStartHandler handler)
     RegisterHandler(handler);
 }
 
-void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const FrMessage& msg)
+void FrControllerProxy::ReceiveIbMessage(const IServiceId* from, const FrMessage& msg)
 {
-    if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
+    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
 
     _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg);
@@ -150,9 +149,9 @@ void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const FrM
     CallHandlers(msg);
 }
 
-void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const FrMessageAck& msg)
+void FrControllerProxy::ReceiveIbMessage(const IServiceId* from, const FrMessageAck& msg)
 {
-    if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
+    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
 
     FrMessage tmp;
@@ -164,9 +163,9 @@ void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const FrM
     CallHandlers(msg);
 }
 
-void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const FrSymbol& msg)
+void FrControllerProxy::ReceiveIbMessage(const IServiceId* from, const FrSymbol& msg)
 {
-    if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
+    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
 
     // Call wakeup handlers on WUS and WUDOP
@@ -186,25 +185,25 @@ void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const FrS
     CallHandlers(msg);
 }
 
-void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const FrSymbolAck& msg)
+void FrControllerProxy::ReceiveIbMessage(const IServiceId* from, const FrSymbolAck& msg)
 {
-    if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
+    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
 
     CallHandlers(msg);
 }
 
-void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const CycleStart& msg)
+void FrControllerProxy::ReceiveIbMessage(const IServiceId* from, const CycleStart& msg)
 {
-    if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
+    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
 
     CallHandlers(msg);
 }
 
-void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const PocStatus& msg)
+void FrControllerProxy::ReceiveIbMessage(const IServiceId* from, const PocStatus& msg)
 {
-    if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
+    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
 
     //interoperability with 3.0.3
@@ -217,12 +216,12 @@ void FrControllerProxy::ReceiveIbMessage(ib::mw::EndpointAddress from, const Poc
 
 void FrControllerProxy::SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress)
 {
-    _endpointAddr = endpointAddress;
+    _serviceId.legacyEpa = endpointAddress;
 }
 
 auto FrControllerProxy::EndpointAddress() const -> const ib::mw::EndpointAddress&
 {
-    return _endpointAddr;
+    return _serviceId.legacyEpa;
 }
 
 
@@ -246,7 +245,7 @@ void FrControllerProxy::CallHandlers(const MsgT& msg)
 template<typename MsgT>
 void FrControllerProxy::SendIbMessage(MsgT&& msg)
 {
-    _comAdapter->SendIbMessage(_endpointAddr, std::forward<MsgT>(msg));
+    _comAdapter->SendIbMessage(this, std::forward<MsgT>(msg));
 }
 
 

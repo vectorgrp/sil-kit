@@ -20,7 +20,7 @@ void EthControllerProxy::Activate()
         return;
 
     EthSetMode msg { EthMode::Active };
-    _comAdapter->SendIbMessage(_endpointAddr, msg);
+    _comAdapter->SendIbMessage(this, msg);
 }
 
 void EthControllerProxy::Deactivate()
@@ -30,7 +30,7 @@ void EthControllerProxy::Deactivate()
         return;
 
     EthSetMode msg{ EthMode::Inactive };
-    _comAdapter->SendIbMessage(_endpointAddr, msg);
+    _comAdapter->SendIbMessage(this, msg);
 }
 
 auto EthControllerProxy::SendMessage(EthMessage msg) -> EthTxId
@@ -41,7 +41,7 @@ auto EthControllerProxy::SendMessage(EthMessage msg) -> EthTxId
     // we keep a copy until the transmission was acknowledged before tracing the message
     _transmittedMessages[msg.transmitId] = msg.ethFrame;
 
-    _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
+    _comAdapter->SendIbMessage(this, std::move(msg));
 
 
     return txId;
@@ -81,9 +81,9 @@ void EthControllerProxy::RegisterBitRateChangedHandler(BitRateChangedHandler han
 }
 
 
-void EthControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const EthMessage& msg)
+void EthControllerProxy::ReceiveIbMessage(const IServiceId* from, const EthMessage& msg)
 {
-    if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
+    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
 
     _tracer.Trace(extensions::Direction::Receive,
@@ -92,9 +92,9 @@ void EthControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const EthMes
     CallHandlers(msg);
 }
 
-void EthControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const EthTransmitAcknowledge& msg)
+void EthControllerProxy::ReceiveIbMessage(const IServiceId* from, const EthTransmitAcknowledge& msg)
 {
-    if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
+    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
 
     auto transmittedMsg = _transmittedMessages.find(msg.transmitId);
@@ -112,9 +112,9 @@ void EthControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const EthTra
     CallHandlers(msg);
 }
 
-void EthControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const EthStatus& msg)
+void EthControllerProxy::ReceiveIbMessage(const IServiceId* from, const EthStatus& msg)
 {
-    if (from.participant == _endpointAddr.participant || from.endpoint != _endpointAddr.endpoint)
+    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
 
     if (msg.state != _ethState)
@@ -132,12 +132,12 @@ void EthControllerProxy::ReceiveIbMessage(mw::EndpointAddress from, const EthSta
 
 void EthControllerProxy::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
-    _endpointAddr = endpointAddress;
+    _serviceId.legacyEpa = endpointAddress;
 }
 
 auto EthControllerProxy::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    return _endpointAddr;
+    return _serviceId.legacyEpa;
 }
 
 template<typename MsgT>

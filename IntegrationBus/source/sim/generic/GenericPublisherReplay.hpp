@@ -15,6 +15,7 @@ class GenericPublisherReplay
     , public mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
     , public tracing::IReplayDataController
+    , public mw::IServiceId
 {
 public:
     // Constructors 
@@ -44,6 +45,10 @@ public:
 
     void ReplayMessage(const extensions::IReplayMessage* replayMessage) override;
 
+    // IServiceId
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
+
 private:
     //Private methods
     void ReplaySend(const extensions::IReplayMessage* replayMessage);
@@ -51,6 +56,19 @@ private:
     cfg::Replay _replayConfig;
     GenericPublisher _publisher;
 };
+
+// ================================================================================
+//  Inline Implementations
+// ================================================================================
+
+void GenericPublisherReplay::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _publisher.SetServiceId(serviceId);
+}
+auto GenericPublisherReplay::GetServiceId() const -> const mw::ServiceId&
+{
+    return _publisher.GetServiceId();
+}
 
 } // namespace generic
 } // namespace sim

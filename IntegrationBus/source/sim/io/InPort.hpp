@@ -15,6 +15,7 @@
 
 #include "IIbToInPort.hpp"
 #include "IComAdapterInternal.hpp"
+#include "IServiceId.hpp"
 
 namespace ib {
 namespace sim {
@@ -26,6 +27,7 @@ class InPort
     , public IIbToInPort<MsgT>
     , public ib::mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
+    , public mw::IServiceId
 {
 public:
     // ----------------------------------------
@@ -66,7 +68,7 @@ public:
 
     // IIbToInPort
     //! \brief Accepts messages originating from IB communications.
-    void ReceiveIbMessage(mw::EndpointAddress from, const MessageType& msg) override;
+    void ReceiveIbMessage(const mw::IServiceId* from, const MessageType& msg) override;
 
     //! \brief Accepts any message, e.g. also from trace replays.
     void ReceiveMessage(const MessageType& msg);
@@ -74,6 +76,10 @@ public:
     //! \brief Setter and getter for the EndpointAddress associated with this controller
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
+
+    // IServiceId
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
 
 public:
     // ----------------------------------------
@@ -104,7 +110,7 @@ private:
     // private members
     ConfigType _config;
     mw::IComAdapterInternal* _comAdapter{nullptr};
-    mw::EndpointAddress _endpointAddr;
+    ::ib::mw::ServiceId _serviceId;
     MessageType _lastMessage;
 
     std::tuple<
@@ -159,9 +165,9 @@ void InPort<MsgT>::RegisterHandler(ValueHandler handler)
 }
 
 template<typename MsgT>
-void InPort<MsgT>::ReceiveIbMessage(mw::EndpointAddress from, const MessageType& msg)
+void InPort<MsgT>::ReceiveIbMessage(const mw::IServiceId* from, const MessageType& msg)
 {
-    if (from == _endpointAddr)
+    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
         return;
     ReceiveMessage(msg);
 }
@@ -186,13 +192,13 @@ void InPort<MsgT>::SetTimeProvider(mw::sync::ITimeProvider* timeProvider)
 template<typename MsgT>
 void InPort<MsgT>::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
-    _endpointAddr = endpointAddress;
+    _serviceId.legacyEpa = endpointAddress;
 }
 
 template<typename MsgT>
 auto InPort<MsgT>::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    return _endpointAddr;
+    return _serviceId.legacyEpa;
 }
 
 
@@ -219,6 +225,17 @@ template<typename MsgT>
 void InPort<MsgT>::AddSink(extensions::ITraceMessageSink* sink)
 {
     _tracer.AddSink(EndpointAddress(), *sink);
+}
+
+template<typename MsgT>
+void InPort<MsgT>::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _serviceId = serviceId;
+}
+template<typename MsgT>
+auto InPort<MsgT>::GetServiceId() const -> const mw::ServiceId&
+{
+    return _serviceId;
 }
 
 } // namespace io

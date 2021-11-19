@@ -10,6 +10,7 @@
 
 #include "IIbToEthController.hpp"
 #include "IComAdapterInternal.hpp"
+#include "IServiceId.hpp"
 
 #include <memory>
 
@@ -22,6 +23,7 @@ class EthController
     , public IIbToEthController
     , public ib::mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
+    , public mw::IServiceId
 {
 public:
     // ----------------------------------------
@@ -61,7 +63,7 @@ public:
     void RegisterBitRateChangedHandler(BitRateChangedHandler handler) override;
 
     // IIbToEthController
-    void ReceiveIbMessage(ib::mw::EndpointAddress from, const EthMessage& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const EthMessage& msg) override;
 
     void SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const ib::mw::EndpointAddress& override;
@@ -71,6 +73,10 @@ public:
 
     // ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
+
+    // IServiceId
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
 
 private:
     // ----------------------------------------
@@ -93,7 +99,7 @@ private:
     // ----------------------------------------
     // private members
     ::ib::mw::IComAdapterInternal* _comAdapter = nullptr;
-    ::ib::mw::EndpointAddress _endpointAddr;
+    ::ib::mw::ServiceId _serviceId;
     ::ib::mw::sync::ITimeProvider* _timeProvider{ nullptr };
 
     EthTxId _ethTxId = 0;
@@ -119,6 +125,15 @@ auto EthController::MakeTxId() -> EthTxId
 void EthController::AddSink(extensions::ITraceMessageSink* sink)
 {
     _tracer.AddSink(EndpointAddress(), *sink);
+}
+
+void EthController::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _serviceId = serviceId;
+}
+auto EthController::GetServiceId() const -> const mw::ServiceId&
+{
+    return _serviceId;
 }
 
 } // namespace eth

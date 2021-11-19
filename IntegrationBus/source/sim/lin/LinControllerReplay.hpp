@@ -16,6 +16,7 @@ class LinControllerReplay
     , public IIbToLinController
     , public extensions::ITraceMessageSource
     , public tracing::IReplayDataController
+    , public mw::IServiceId
 {
 public:
     // ----------------------------------------
@@ -50,11 +51,11 @@ public:
     void RegisterFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) override;
 
     // IIbToLinController
-    void ReceiveIbMessage(mw::EndpointAddress from, const Transmission& msg) override;
-    void ReceiveIbMessage(mw::EndpointAddress from, const WakeupPulse& msg) override;
-    void ReceiveIbMessage(mw::EndpointAddress from, const ControllerConfig& msg) override;
-    void ReceiveIbMessage(mw::EndpointAddress from, const ControllerStatusUpdate& msg) override;
-    void ReceiveIbMessage(mw::EndpointAddress from, const FrameResponseUpdate& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const Transmission& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const WakeupPulse& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const ControllerConfig& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const ControllerStatusUpdate& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const FrameResponseUpdate& msg) override;
 
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
@@ -70,6 +71,10 @@ public:
 
     void ReplayMessage(const extensions::IReplayMessage* replayMessage) override;
 
+    // IServiceId
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
+
 private:
     // ----------------------------------------
     // private members
@@ -84,6 +89,19 @@ private:
     extensions::Tracer _tracer;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
 };
+
+// ================================================================================
+//  Inline Implementations
+// ================================================================================
+
+void LinControllerReplay::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _controller.SetServiceId(serviceId);
+}
+auto LinControllerReplay::GetServiceId() const -> const mw::ServiceId&
+{
+    return _controller.GetServiceId();
+}
 
 } // namespace lin
 } // namespace sim

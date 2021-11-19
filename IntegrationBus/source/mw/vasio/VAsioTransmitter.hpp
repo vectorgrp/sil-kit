@@ -8,6 +8,7 @@
 #include <type_traits>
 
 #include "IIbMessageReceiver.hpp"
+#include "IServiceId.hpp"
 
 namespace ib {
 namespace mw {
@@ -59,7 +60,9 @@ struct RemoteReceiver {
 };
 
 template <class MsgT>
-class VAsioTransmitter : public IIbMessageReceiver<MsgT>
+class VAsioTransmitter 
+    : public IIbMessageReceiver<MsgT>
+    , public IServiceId
 {
     using History = MessageHistory<MsgT, IbMsgTraits<MsgT>::HistSize()>;
     History _hist;
@@ -75,6 +78,8 @@ public:
         if (_remoteReceivers.end() != std::find(_remoteReceivers.begin(), _remoteReceivers.end(), remoteReceiver))
             return;
 
+
+        _serviceId.participantName = peer->GetUri().participantName;
         _remoteReceivers.push_back(remoteReceiver);
         _hist.NotifyPeer(peer, remoteIdx);
     }
@@ -83,9 +88,9 @@ public:
 public:
     // ----------------------------------------
     // Public interface methods
-    void ReceiveIbMessage(EndpointAddress from, const MsgT& msg) override
+    void ReceiveIbMessage(const IServiceId* from, const MsgT& msg) override
     {
-        _hist.Save(from, msg);
+        _hist.Save(from->GetServiceId().legacyEpa, msg);
         for (auto& receiver : _remoteReceivers)
         {
             ib::mw::MessageBuffer buffer;
@@ -94,15 +99,25 @@ public:
                 << msgSizePlaceholder
                 << VAsioMsgKind::IbSimMsg
                 << receiver.remoteIdx
-                << from << msg;
+                << from->GetServiceId().legacyEpa << msg;
             receiver.peer->SendIbMsg(std::move(buffer));
         }
     }
 
+    // IServiceId
+    void SetServiceId(const ServiceId& serviceId) override
+    {
+        _serviceId = serviceId;
+    }
+    auto GetServiceId() const -> const ServiceId& override
+    {
+        return _serviceId;
+    }
 private:
     // ----------------------------------------
     // private members
     std::vector<RemoteReceiver> _remoteReceivers;
+    ServiceId _serviceId;
 };
 
 // ================================================================================

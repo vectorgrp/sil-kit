@@ -7,6 +7,7 @@
 #include "VAsioDatatypes.hpp"
 
 #include "MessageTracing.hpp"
+#include "IServiceId.hpp"
 
 namespace ib {
 namespace mw {
@@ -24,7 +25,9 @@ public:
 };
 
 template <class MsgT>
-class VAsioReceiver : public IVAsioReceiver
+class VAsioReceiver
+    : public IVAsioReceiver
+    , public IServiceId
 {
 public:
     // ----------------------------------------
@@ -36,6 +39,14 @@ public:
     // Public interface methods
     auto GetDescriptor() const -> const VAsioMsgSubscriber& override;
     void ReceiveRawMsg(MessageBuffer&& buffer) override;
+    void SetServiceId(const ServiceId& serviceId) override
+    {
+        _serviceId = serviceId;
+    }
+    auto GetServiceId() const -> const ServiceId& override
+    {
+        return _serviceId;
+    }
 
 private:
     // ----------------------------------------
@@ -43,6 +54,7 @@ private:
     VAsioMsgSubscriber _subscriptionInfo;
     std::shared_ptr<IbLink<MsgT>> _link;
     logging::ILogger* _logger;
+    ServiceId _serviceId;
 };
 
 
@@ -55,6 +67,7 @@ VAsioReceiver<MsgT>::VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::share
     , _link{link}
     , _logger{logger}
 {
+    _serviceId.linkName = _subscriptionInfo.linkName;
 }
 
 template <class MsgT>
@@ -71,7 +84,8 @@ void VAsioReceiver<MsgT>::ReceiveRawMsg(MessageBuffer&& buffer)
     buffer >> endpoint >> msg;
 
     TraceRx(_logger, endpoint, msg);
-    _link->DistributeRemoteIbMessage(endpoint, msg);
+    _serviceId.legacyEpa = endpoint;
+    _link->DistributeRemoteIbMessage(this, msg);
 }
 
 

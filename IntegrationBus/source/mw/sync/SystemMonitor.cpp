@@ -91,17 +91,17 @@ auto SystemMonitor::ParticipantStatus(ParticipantId participantId) const -> cons
 
 void SystemMonitor::SetEndpointAddress(const mw::EndpointAddress& addr)
 {
-    _endpointAddress = addr;
+    _serviceId.legacyEpa = addr;
 }
 
 auto SystemMonitor::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    return _endpointAddress;
+    return _serviceId.legacyEpa;
 }
 
-void SystemMonitor::ReceiveIbMessage(mw::EndpointAddress from, const sync::ParticipantStatus& newParticipantStatus)
+void SystemMonitor::ReceiveIbMessage(const IServiceId* from, const sync::ParticipantStatus& newParticipantStatus)
 {
-    auto participantId = from.participant;
+    auto participantId = from->GetServiceId().legacyEpa.participant;
 
     auto&& statusIter = _participantStatus.find(participantId);
     if (statusIter == _participantStatus.end())

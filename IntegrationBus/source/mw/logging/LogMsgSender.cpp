@@ -13,21 +13,21 @@ LogMsgSender::LogMsgSender(IComAdapterInternal* comAdapter)
 
 void LogMsgSender::SendLogMsg(const LogMsg& msg)
 {
-    _comAdapter->SendIbMessage(_endpointAddress, msg);
+    _comAdapter->SendIbMessage(this, msg);
 }
 
 void LogMsgSender::SendLogMsg(LogMsg&& msg)
 {
-    _comAdapter->SendIbMessage(_endpointAddress, std::move(msg));
+    _comAdapter->SendIbMessage(this, std::move(msg));
 }
 
 void LogMsgSender::SetEndpointAddress(const ib::mw::EndpointAddress &address)
 {
-    _endpointAddress = address;
+    _serviceId.legacyEpa= address;
 }
 auto LogMsgSender::EndpointAddress(void) const -> const ib::mw::EndpointAddress&
 {
-    return _endpointAddress;
+    return _serviceId.legacyEpa;
 }
 
 } // namespace logging

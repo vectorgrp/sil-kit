@@ -17,6 +17,7 @@ class OutPortReplay
     , public ib::mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
     , public tracing::IReplayDataController
+    , public mw::IServiceId
 {
 public:
     // ----------------------------------------
@@ -52,6 +53,10 @@ public:
     // IReplayDataProvider
 
     void ReplayMessage(const extensions::IReplayMessage* replayMessage) override;
+
+    // IServiceId
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
 
 private:
     //Private methods
@@ -149,6 +154,17 @@ void OutPortReplay<MsgT>::ReplaySend(const extensions::IReplayMessage* replayMes
     _outPort.Write(std::move(msg.value), replayMessage->Timestamp());
 }
 
+template<typename MsgT>
+void OutPortReplay<MsgT>::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _outPort.SetServiceId(serviceId);
+}
+
+template<typename MsgT>
+auto OutPortReplay<MsgT>::GetServiceId() const -> const mw::ServiceId&
+{
+    return _outPort.GetServiceId();
+}
 } // namespace io
 } // namespace sim
 } // namespace ib

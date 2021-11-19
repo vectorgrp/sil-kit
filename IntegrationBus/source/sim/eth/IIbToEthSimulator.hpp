@@ -4,6 +4,7 @@
 
 #include "IIbReceiver.hpp"
 #include "IIbSender.hpp"
+#include "IServiceId.hpp"
 #include "ib/sim/eth/fwd_decl.hpp"
 
 namespace ib {
@@ -17,6 +18,7 @@ namespace eth {
 class IIbToEthSimulator
     : public mw::IIbReceiver<EthMessage, EthSetMode>
     , public mw::IIbSender<EthMessage, EthTransmitAcknowledge, EthStatus>
+    , public mw::IServiceId
 {
 public:
     virtual ~IIbToEthSimulator() = default;

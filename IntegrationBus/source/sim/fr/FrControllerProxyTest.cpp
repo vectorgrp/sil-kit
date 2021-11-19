@@ -38,10 +38,10 @@ using ::ib::mw::test::DummyComAdapter;
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const HostCommand&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const ControllerConfig&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const TxBufferConfigUpdate&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const TxBufferUpdate&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const HostCommand&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const ControllerConfig&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const TxBufferConfigUpdate&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const TxBufferUpdate&));
 };
 
 class FrControllerProxyTest : public testing::Test
@@ -62,11 +62,14 @@ protected:
 protected:
     FrControllerProxyTest()
     : proxy(&comAdapter)
+    , proxyFrom(&comAdapter)
     {
         proxy.SetEndpointAddress(proxyAddress);
 
         referencePayload.resize(20);
         std::iota(referencePayload.begin(), referencePayload.end(), '\000');
+
+        proxyFrom.SetEndpointAddress(controllerAddress);
     }
 
 protected:
@@ -77,6 +80,7 @@ protected:
 
     MockComAdapter comAdapter;
     FrControllerProxy proxy;
+    FrControllerProxy proxyFrom;
     Callbacks callbacks;
 
     auto MakeValidClusterParams() -> ClusterParameters
@@ -154,7 +158,7 @@ TEST_F(FrControllerProxyTest, send_controller_config)
 
     controllerCfg.bufferConfigs.push_back(bufferCfg);
 
-    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, controllerCfg))
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, controllerCfg))
         .Times(1);
 
     proxy.Configure(controllerCfg);
@@ -175,7 +179,7 @@ TEST_F(FrControllerProxyTest, send_txbuffer_configupdate)
     controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.push_back(bufferCfg);
 
-    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, controllerCfg)).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, controllerCfg)).Times(1);
     proxy.Configure(controllerCfg);
 
     // Reconfigure TxBuffer 0
@@ -190,7 +194,7 @@ TEST_F(FrControllerProxyTest, send_txbuffer_configupdate)
     expectedUpdate.txBufferIndex = 0;
     expectedUpdate.txBufferConfig = bufferCfg;
 
-    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, expectedUpdate)).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, expectedUpdate)).Times(1);
     proxy.ReconfigureTxBuffer(0, bufferCfg);
 }
 
@@ -201,12 +205,12 @@ TEST_F(FrControllerProxyTest, throw_on_unconfigured_tx_buffer_configupdate)
     controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.resize(5);
 
-    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, controllerCfg)).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, controllerCfg)).Times(1);
     proxy.Configure(controllerCfg);
 
     // Attempt to reconfigure TxBuffer 6, which should be out of range
     TxBufferConfig bufferCfg{};
-    EXPECT_CALL(comAdapter, SendIbMessage(An<EndpointAddress>(), A<const TxBufferConfigUpdate &>())).Times(0);
+    EXPECT_CALL(comAdapter, SendIbMessage(An<const IServiceId*>(), A<const TxBufferConfigUpdate &>())).Times(0);
     EXPECT_THROW(proxy.ReconfigureTxBuffer(6, bufferCfg), std::out_of_range);
 }
 
@@ -220,7 +224,7 @@ TEST_F(FrControllerProxyTest, send_txbuffer_update)
     controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.push_back(bufferCfg);
 
-    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, controllerCfg)).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, controllerCfg)).Times(1);
     proxy.Configure(controllerCfg);
 
     TxBufferUpdate update{};
@@ -228,7 +232,7 @@ TEST_F(FrControllerProxyTest, send_txbuffer_update)
     update.payload = referencePayload;
     update.payloadDataValid = true;
 
-    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, update))
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, update))
         .Times(1);
 
     proxy.UpdateTxBuffer(update);
@@ -242,18 +246,18 @@ TEST_F(FrControllerProxyTest, throw_on_unconfigured_tx_buffer_update)
     controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.resize(1);
 
-    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, controllerCfg)).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, controllerCfg)).Times(1);
     proxy.Configure(controllerCfg);
 
     TxBufferUpdate update;
     update.txBufferIndex = 7; // only txBufferIdx = 0 is configured
-    EXPECT_CALL(comAdapter, SendIbMessage(An<EndpointAddress>(), A<const TxBufferConfigUpdate &>())).Times(0);
+    EXPECT_CALL(comAdapter, SendIbMessage(An<const IServiceId*>(), A<const TxBufferConfigUpdate &>())).Times(0);
     EXPECT_THROW(proxy.UpdateTxBuffer(update), std::out_of_range);
 }
 
 TEST_F(FrControllerProxyTest, send_run_command)
 {
-    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, HostCommand{ChiCommand::RUN}))
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, HostCommand{ChiCommand::RUN}))
         .Times(1);
 
     proxy.Run();
@@ -261,7 +265,7 @@ TEST_F(FrControllerProxyTest, send_run_command)
 
 TEST_F(FrControllerProxyTest, send_deferred_halt_command)
 {
-    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, HostCommand{ChiCommand::DEFERRED_HALT}))
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, HostCommand{ChiCommand::DEFERRED_HALT}))
         .Times(1);
 
     proxy.DeferredHalt();
@@ -269,7 +273,7 @@ TEST_F(FrControllerProxyTest, send_deferred_halt_command)
 
 TEST_F(FrControllerProxyTest, send_freeze_command)
 {
-    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, HostCommand{ChiCommand::FREEZE}))
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, HostCommand{ChiCommand::FREEZE}))
         .Times(1);
 
     proxy.Freeze();
@@ -277,7 +281,7 @@ TEST_F(FrControllerProxyTest, send_freeze_command)
 
 TEST_F(FrControllerProxyTest, send_allow_coldstart_command)
 {
-    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, HostCommand{ChiCommand::ALLOW_COLDSTART}))
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, HostCommand{ChiCommand::ALLOW_COLDSTART}))
         .Times(1);
 
     proxy.AllowColdstart();
@@ -288,7 +292,7 @@ TEST_F(FrControllerProxyTest, send_all_slots_command)
     HostCommand cmd;
     cmd.command = ChiCommand::ALL_SLOTS;
 
-    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, cmd))
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, cmd))
         .Times(1);
 
     proxy.AllSlots();
@@ -296,7 +300,7 @@ TEST_F(FrControllerProxyTest, send_all_slots_command)
 
 TEST_F(FrControllerProxyTest, send_wakeup_command)
 {
-    EXPECT_CALL(comAdapter, SendIbMessage(proxyAddress, HostCommand{ChiCommand::WAKEUP}))
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, HostCommand{ChiCommand::WAKEUP}))
         .Times(1);
 
     proxy.Wakeup();
@@ -317,7 +321,7 @@ TEST_F(FrControllerProxyTest, call_message_handler)
     EXPECT_CALL(callbacks, MessageHandler(&proxy, message))
         .Times(1);
 
-    proxy.ReceiveIbMessage(controllerAddress, message);
+    proxy.ReceiveIbMessage(&proxyFrom, message);
 }
 
 TEST_F(FrControllerProxyTest, call_message_ack_handler)
@@ -334,7 +338,7 @@ TEST_F(FrControllerProxyTest, call_message_ack_handler)
     EXPECT_CALL(callbacks, MessageAckHandler(&proxy, ack))
         .Times(1);
 
-    proxy.ReceiveIbMessage(controllerAddress, ack);
+    proxy.ReceiveIbMessage(&proxyFrom, ack);
 }
 
 TEST_F(FrControllerProxyTest, call_wakeup_handler)
@@ -356,9 +360,9 @@ TEST_F(FrControllerProxyTest, call_wakeup_handler)
     EXPECT_CALL(callbacks, WakeupHandler(&proxy, casMts))
         .Times(0);
 
-    proxy.ReceiveIbMessage(controllerAddress, wus);
-    proxy.ReceiveIbMessage(controllerAddress, wudop);
-    proxy.ReceiveIbMessage(controllerAddress, casMts);
+    proxy.ReceiveIbMessage(&proxyFrom, wus);
+    proxy.ReceiveIbMessage(&proxyFrom, wudop);
+    proxy.ReceiveIbMessage(&proxyFrom, casMts);
 }
 
 TEST_F(FrControllerProxyTest, call_pocstatus_handler)
@@ -372,7 +376,7 @@ TEST_F(FrControllerProxyTest, call_pocstatus_handler)
     EXPECT_CALL(callbacks, PocStatusHandler(&proxy, poc))
         .Times(1);
 
-    proxy.ReceiveIbMessage(controllerAddress, poc);
+    proxy.ReceiveIbMessage(&proxyFrom, poc);
 }
 
 TEST_F(FrControllerProxyTest, call_symbol_handler)
@@ -394,9 +398,9 @@ TEST_F(FrControllerProxyTest, call_symbol_handler)
     EXPECT_CALL(callbacks, SymbolHandler(&proxy, casMts))
         .Times(1);
 
-    proxy.ReceiveIbMessage(controllerAddress, wus);
-    proxy.ReceiveIbMessage(controllerAddress, wudop);
-    proxy.ReceiveIbMessage(controllerAddress, casMts);
+    proxy.ReceiveIbMessage(&proxyFrom, wus);
+    proxy.ReceiveIbMessage(&proxyFrom, wudop);
+    proxy.ReceiveIbMessage(&proxyFrom, casMts);
 }
 
 TEST_F(FrControllerProxyTest, call_symbol_ack_handler)
@@ -410,7 +414,7 @@ TEST_F(FrControllerProxyTest, call_symbol_ack_handler)
     EXPECT_CALL(callbacks, SymbolAckHandler(&proxy, ack))
         .Times(1);
 
-    proxy.ReceiveIbMessage(controllerAddress, ack);
+    proxy.ReceiveIbMessage(&proxyFrom, ack);
 }
 
 TEST_F(FrControllerProxyTest, call_cyclestart_handler)
@@ -424,7 +428,7 @@ TEST_F(FrControllerProxyTest, call_cyclestart_handler)
     EXPECT_CALL(callbacks, CycleStartHandler(&proxy, cycleStart))
         .Times(1);
 
-    proxy.ReceiveIbMessage(controllerAddress, cycleStart);
+    proxy.ReceiveIbMessage(&proxyFrom, cycleStart);
 }
 
 } // namespace

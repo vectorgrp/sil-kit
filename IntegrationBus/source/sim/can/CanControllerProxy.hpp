@@ -21,6 +21,7 @@ class CanControllerProxy
     : public ICanController
     , public IIbToCanControllerProxy
     , public extensions::ITraceMessageSource
+    , public mw::IServiceId
 {
 public:
     // ----------------------------------------
@@ -62,15 +63,19 @@ public:
     void RegisterTransmitStatusHandler(MessageStatusHandler handler) override;
 
     // IIbToCanController
-    void ReceiveIbMessage(mw::EndpointAddress from, const sim::can::CanMessage& msg) override;
-    void ReceiveIbMessage(mw::EndpointAddress from, const sim::can::CanControllerStatus& msg) override;
-    void ReceiveIbMessage(mw::EndpointAddress from, const sim::can::CanTransmitAcknowledge& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const sim::can::CanMessage& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const sim::can::CanControllerStatus& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const sim::can::CanTransmitAcknowledge& msg) override;
 
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
     //ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
+
+    // IServiceId
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
 
 public:
     // ----------------------------------------
@@ -99,7 +104,7 @@ private:
     // ----------------------------------------
     // private members
     mw::IComAdapterInternal* _comAdapter;
-    mw::EndpointAddress _endpointAddr;
+    ::ib::mw::ServiceId _serviceId;
 
     CanTxId _canTxId = 0;
     CanControllerState _controllerState = CanControllerState::Uninit;
@@ -128,6 +133,15 @@ auto CanControllerProxy::MakeTxId() -> CanTxId
 void CanControllerProxy::AddSink(extensions::ITraceMessageSink* sink)
 {
     _tracer.AddSink(EndpointAddress(), *sink);
+}
+
+void CanControllerProxy::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _serviceId = serviceId;
+}
+auto CanControllerProxy::GetServiceId() const -> const mw::ServiceId&
+{
+    return _serviceId;
 }
 
 } // namespace can

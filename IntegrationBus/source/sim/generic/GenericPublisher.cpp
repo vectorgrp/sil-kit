@@ -30,7 +30,7 @@ void GenericPublisher::Publish(std::vector<uint8_t> data)
         _timeProvider->Now(),
         msg);
 
-    _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
+    _comAdapter->SendIbMessage(this, std::move(msg));
 }
 
 void GenericPublisher::Publish(const uint8_t* data, std::size_t size)
@@ -40,12 +40,12 @@ void GenericPublisher::Publish(const uint8_t* data, std::size_t size)
 
 void GenericPublisher::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
-    _endpointAddr = endpointAddress;
+    _serviceId.legacyEpa = endpointAddress;
 }
 
 auto GenericPublisher::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    return _endpointAddr;
+    return _serviceId.legacyEpa;
 }
 
 void GenericPublisher::SetTimeProvider(mw::sync::ITimeProvider* provider)

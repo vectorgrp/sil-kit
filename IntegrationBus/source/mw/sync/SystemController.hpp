@@ -17,6 +17,7 @@ namespace sync {
 class SystemController
     : public ISystemController
     , public IIbToSystemController
+    , public mw::IServiceId
 {
     public:
     // ----------------------------------------
@@ -48,6 +49,11 @@ public:
     void SetEndpointAddress(const mw::EndpointAddress& addr) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
+
+    // IServiceId
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
+
 private:
     // ----------------------------------------
     // private methods
@@ -61,7 +67,7 @@ private:
     // ----------------------------------------
     // private members
     IComAdapterInternal* _comAdapter{nullptr};
-    mw::EndpointAddress _endpointAddress{};
+    mw::ServiceId _serviceId{};
 };
 
 // ================================================================================
@@ -71,7 +77,7 @@ template <class MsgT>
 void SystemController::SendIbMessage(MsgT&& msg) const
 {
     assert(_comAdapter);
-    _comAdapter->SendIbMessage(_endpointAddress, std::forward<MsgT>(msg));
+    _comAdapter->SendIbMessage(this, std::forward<MsgT>(msg));
 }
 
 void SystemController::SendParticipantCommand(ParticipantId participantId, ParticipantCommand::Kind kind) const
@@ -89,6 +95,20 @@ void SystemController::SendSystemCommand(SystemCommand::Kind kind) const
     cmd.kind = kind;
 
     SendIbMessage(std::move(cmd));
+}
+
+// ================================================================================
+//  Inline Implementations
+// ================================================================================
+
+void SystemController::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _serviceId = serviceId;
+}
+
+auto SystemController::GetServiceId() const -> const mw::ServiceId&
+{
+    return _serviceId;
 }
 
 } // namespace sync

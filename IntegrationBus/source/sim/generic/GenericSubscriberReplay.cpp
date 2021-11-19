@@ -21,7 +21,7 @@ void GenericSubscriberReplay::SetReceiveMessageHandler(CallbackT callback)
     _subscriber.SetReceiveMessageHandler(std::move(callback));
 }
 
-void GenericSubscriberReplay::ReceiveIbMessage(mw::EndpointAddress from, const GenericMessage& msg)
+void GenericSubscriberReplay::ReceiveIbMessage(const mw::IServiceId* from, const GenericMessage& msg)
 {
     if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
     {
@@ -88,7 +88,7 @@ void GenericSubscriberReplay::ReplayReceive(const extensions::IReplayMessage* re
     // need to copy the message here.
     // will throw if invalid message type.
     sim::generic::GenericMessage msg = dynamic_cast<const sim::generic::GenericMessage&>(*replayMessage);
-    _subscriber.ReceiveIbMessage(tracing::ReplayEndpointAddress(), msg);
+    _subscriber.ReceiveIbMessage(this, msg);
 }
 
 } // namespace generic

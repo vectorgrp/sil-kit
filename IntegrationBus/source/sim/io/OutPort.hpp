@@ -25,6 +25,7 @@ class OutPort
     , public IIbToOutPort<MsgT>
     , public ib::mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
+    , public mw::IServiceId
 {
 public:
     // ----------------------------------------
@@ -71,6 +72,10 @@ public:
     // ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
+    // IServiceId
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
+
 private:
     // ----------------------------------------
     // private methods
@@ -82,7 +87,7 @@ private:
     // private members
     ConfigType _config{};
     mw::IComAdapterInternal* _comAdapter{nullptr};
-    mw::EndpointAddress _endpointAddr;
+    ::ib::mw::ServiceId _serviceId;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
 
     ValueType _lastValue;
@@ -134,13 +139,13 @@ auto OutPort<MsgT>::Read() const -> const ValueType&
 template<typename MsgT>
 void OutPort<MsgT>::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
-    _endpointAddr = endpointAddress;
+    _serviceId.legacyEpa = endpointAddress;
 }
 
 template<typename MsgT>
 auto OutPort<MsgT>::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    return _endpointAddr;
+    return _serviceId.legacyEpa;
 }
 
 template<typename MsgT>
@@ -155,13 +160,24 @@ void OutPort<MsgT>::SendIbMessage(T&& msg)
 {
     _tracer.Trace(extensions::Direction::Send, _timeProvider->Now(), msg);
 
-    _comAdapter->SendIbMessage(_endpointAddr, std::forward<T>(msg));
+    _comAdapter->SendIbMessage(this, std::forward<T>(msg));
 }
 
 template<typename MsgT>
 void OutPort<MsgT>::AddSink(extensions::ITraceMessageSink* sink)
 {
     _tracer.AddSink(EndpointAddress(), *sink);
+}
+
+template<typename MsgT>
+void OutPort<MsgT>::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _serviceId = serviceId;
+}
+template<typename MsgT>
+auto OutPort<MsgT>::GetServiceId() const -> const mw::ServiceId&
+{
+    return _serviceId;
 }
 
 } // namespace io

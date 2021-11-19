@@ -33,10 +33,28 @@ using ::ib::mw::test::DummyComAdapter;
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const QuantumRequest& msg));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const ParticipantStatus& msg));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const QuantumRequest& msg));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const ParticipantStatus& msg));
 };
 
+class MockServiceId : public IServiceId
+{
+public:
+    ServiceId serviceId;
+    MockServiceId(EndpointAddress ea)
+    {
+        serviceId.legacyEpa = ea;
+    }
+    void SetServiceId(const ServiceId& _serviceId) override
+    {
+        serviceId = _serviceId;
+    }
+    auto GetServiceId() const -> const ServiceId & override
+    {
+        return serviceId;
+    }
+
+};
 class ParticipantControllerTest : public testing::Test
 {
 protected:
@@ -78,6 +96,9 @@ protected:
     EndpointAddress addr{1, 1024};
     EndpointAddress addrP2{2, 1024};
     EndpointAddress masterAddr{3, 1027};
+    MockServiceId p1Id{ addr };
+    MockServiceId p2Id{ addrP2 };
+    MockServiceId masterId{ masterAddr };
 
     MockComAdapter comAdapter;
     Callbacks callbacks;
@@ -95,11 +116,13 @@ TEST_F(ParticipantControllerTest, report_commands_as_error_before_run_was_called
     ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
     controller.SetEndpointAddress(addr);
 
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, A<const ParticipantStatus&>()))
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, A<const ParticipantStatus&>()))
         .Times(1);
 
     SystemCommand runCommand{SystemCommand::Kind::Run};
-    controller.ReceiveIbMessage(masterAddr, runCommand);
+
+
+    controller.ReceiveIbMessage(&masterId, runCommand);
 
     EXPECT_EQ(controller.State(), ParticipantState::Error);
 }
@@ -116,7 +139,7 @@ TEST_F(ParticipantControllerTest, call_init_handler)
     ParticipantCommand initCommand{addr.participant, ParticipantCommand::Kind::Initialize};
     EXPECT_CALL(callbacks, InitHandler(initCommand))
         .Times(1);
-    controller.ReceiveIbMessage(masterAddr, initCommand);
+    controller.ReceiveIbMessage(&masterId, initCommand);
 }
 
 TEST_F(ParticipantControllerTest, call_stop_handler)
@@ -128,18 +151,18 @@ TEST_F(ParticipantControllerTest, call_stop_handler)
     controller.RunAsync();
 
     ParticipantCommand initCommand{addr.participant, ParticipantCommand::Kind::Initialize};
-    controller.ReceiveIbMessage(masterAddr, initCommand);
+    controller.ReceiveIbMessage(&masterId, initCommand);
 
     SystemCommand runCommand{SystemCommand::Kind::Run};
-    controller.ReceiveIbMessage(masterAddr, runCommand);
+    controller.ReceiveIbMessage(&masterId, runCommand);
 
     controller.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
     EXPECT_CALL(callbacks, StopHandler()).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Stopped))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopped))).Times(1);
 
     SystemCommand stopCommand{SystemCommand::Kind::Stop};
-    controller.ReceiveIbMessage(masterAddr, stopCommand);
+    controller.ReceiveIbMessage(&masterId, stopCommand);
     EXPECT_EQ(controller.State(), ParticipantState::Stopped);
 }
 
@@ -152,18 +175,18 @@ TEST_F(ParticipantControllerTest, dont_switch_to_stopped_if_stop_handler_reporte
     controller.RunAsync();
 
     ParticipantCommand initCommand{addr.participant, ParticipantCommand::Kind::Initialize};
-    controller.ReceiveIbMessage(masterAddr, initCommand);
+    controller.ReceiveIbMessage(&masterId, initCommand);
 
     SystemCommand runCommand{SystemCommand::Kind::Run};
-    controller.ReceiveIbMessage(masterAddr, runCommand);
+    controller.ReceiveIbMessage(&masterId, runCommand);
 
     controller.SetStopHandler([&controller = controller] { controller.ReportError("StopHandlerFailed!!"); });
 
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Error))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Error))).Times(1);
 
     SystemCommand stopCommand{SystemCommand::Kind::Stop};
-    controller.ReceiveIbMessage(masterAddr, stopCommand);
+    controller.ReceiveIbMessage(&masterId, stopCommand);
     EXPECT_EQ(controller.State(), ParticipantState::Error);
 }
 
@@ -183,7 +206,7 @@ TEST_F(ParticipantControllerTest, calling_run_announces_idle_state)
 
     EXPECT_EQ(controller.State(), ParticipantState::Invalid);
 
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Idle)))
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle)))
         .Times(1);
     controller.RunAsync();
 
@@ -193,20 +216,26 @@ TEST_F(ParticipantControllerTest, calling_run_announces_idle_state)
 
 TEST_F(ParticipantControllerTest, run_async)
 {
-    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
-    controller.SetEndpointAddress(addr);
-    auto grantRequest = [&controller = controller, &masterAddr = masterAddr](auto addr, const QuantumRequest& request)
+    const auto& participant = simulationSetup.participants.at(0);
+    ParticipantController controller(&comAdapter, simulationSetup, participant);
+    ServiceId id{};
+    id.linkName = "default";
+    id.participantName = participant.name;
+    id.legacyEpa = addr;
+    controller.SetEndpointAddress(addr);//legacy interface
+    controller.SetServiceId(id);
+    auto grantRequest = [&controller = controller, &masterId = masterId](auto addr, const QuantumRequest& request)
     {
         QuantumGrant grant;
-        grant.grantee = addr;
+        grant.grantee = addr->GetServiceId().legacyEpa;
         grant.status = QuantumRequestStatus::Granted;
         grant.now = request.now;
         grant.duration = request.duration;
 
-        controller.ReceiveIbMessage(masterAddr, grant);
+        controller.ReceiveIbMessage(&masterId, grant);
     };
 
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, A<const QuantumRequest&>()))
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, A<const QuantumRequest&>()))
         .Times(2)
         .WillOnce(Invoke(grantRequest));
 
@@ -215,33 +244,33 @@ TEST_F(ParticipantControllerTest, run_async)
     controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
 
     // Run() --> Idle
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
     auto finalState = controller.RunAsync();
 
     // Cmd::Initialize --> Initializing --> Initialized
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Initializing))).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Initialized))).Times(1);
-    controller.ReceiveIbMessage(masterAddr, ParticipantCommand{addr.participant, ParticipantCommand::Kind::Initialize});
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Initializing))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Initialized))).Times(1);
+    controller.ReceiveIbMessage(&masterId, ParticipantCommand{addr.participant, ParticipantCommand::Kind::Initialize});
     EXPECT_EQ(controller.State(), ParticipantState::Initialized);
 
     // Cmd::Run --> Running --> Call SimTask()
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Running))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Running))).Times(1);
     EXPECT_CALL(callbacks, SimTask(_)).Times(1);
-    controller.ReceiveIbMessage(masterAddr, SystemCommand{SystemCommand::Kind::Run});
+    controller.ReceiveIbMessage(&masterId, SystemCommand{SystemCommand::Kind::Run});
     EXPECT_EQ(controller.State(), ParticipantState::Running);
 
     // Cmd::Stop --> Stopping --> Call StopHandler() --> Stopped
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
     EXPECT_CALL(callbacks, StopHandler()).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Stopped))).Times(1);
-    controller.ReceiveIbMessage(masterAddr, SystemCommand{SystemCommand::Kind::Stop});
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopped))).Times(1);
+    controller.ReceiveIbMessage(&masterId, SystemCommand{SystemCommand::Kind::Stop});
     EXPECT_EQ(controller.State(), ParticipantState::Stopped);
 
     // Cmd::Shutdown --> ShuttingDown --> Call ShutdownHandler() --> Shutdown
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::ShuttingDown))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::ShuttingDown))).Times(1);
     EXPECT_CALL(callbacks, ShutdownHandler()).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Shutdown))).Times(1);
-    controller.ReceiveIbMessage(masterAddr, SystemCommand{SystemCommand::Kind::Shutdown});
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Shutdown))).Times(1);
+    controller.ReceiveIbMessage(&masterId, SystemCommand{SystemCommand::Kind::Shutdown});
     EXPECT_EQ(controller.State(), ParticipantState::Shutdown);
 
     ASSERT_EQ(finalState.wait_for(1ms), std::future_status::ready);
@@ -257,7 +286,7 @@ TEST_F(ParticipantControllerTest, refreshstatus_must_not_modify_other_fields)
 
     EXPECT_EQ(controller.State(), ParticipantState::Invalid);
 
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Idle)))
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle)))
         .Times(2);
     controller.RunAsync();
 
@@ -290,40 +319,40 @@ TEST_F(ParticipantControllerTest, run_async_with_synctype_distributedtimequantum
     controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
 
     // Run() --> Idle
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
     auto finalState = controller.RunAsync();
 
     // Cmd::Initialize --> Initializing --> Initialized
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Initializing))).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Initialized))).Times(1);
-    controller.ReceiveIbMessage(masterAddr, ParticipantCommand{addr.participant, ParticipantCommand::Kind::Initialize});
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Initializing))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Initialized))).Times(1);
+    controller.ReceiveIbMessage(&masterId, ParticipantCommand{addr.participant, ParticipantCommand::Kind::Initialize});
     EXPECT_EQ(controller.State(), ParticipantState::Initialized);
 
     // Cmd::Run --> Running --> Call SimTask()
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Running))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Running))).Times(1);
     EXPECT_CALL(callbacks, SimTask(_)).Times(2);
-    controller.ReceiveIbMessage(masterAddr, SystemCommand{SystemCommand::Kind::Run});
+    controller.ReceiveIbMessage(&masterId, SystemCommand{SystemCommand::Kind::Run});
     EXPECT_EQ(controller.State(), ParticipantState::Running);
     NextSimTask nextTask;
     nextTask.timePoint = 0ms;
     nextTask.duration = 1ms;
-    controller.ReceiveIbMessage(addrP2, nextTask);
+    controller.ReceiveIbMessage(&p2Id, nextTask);
     nextTask.timePoint = 1ms;
     nextTask.duration = 1ms;
-    controller.ReceiveIbMessage(addrP2, nextTask);
+    controller.ReceiveIbMessage(&p2Id, nextTask);
 
     // Cmd::Stop --> Stopping --> Call StopHandler() --> Stopped
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
     EXPECT_CALL(callbacks, StopHandler()).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Stopped))).Times(1);
-    controller.ReceiveIbMessage(masterAddr, SystemCommand{SystemCommand::Kind::Stop});
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopped))).Times(1);
+    controller.ReceiveIbMessage(&masterId, SystemCommand{SystemCommand::Kind::Stop});
     EXPECT_EQ(controller.State(), ParticipantState::Stopped);
 
     // Cmd::Shutdown --> ShuttingDown --> Call ShutdownHandler() --> Shutdown
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::ShuttingDown))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::ShuttingDown))).Times(1);
     EXPECT_CALL(callbacks, ShutdownHandler()).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Shutdown))).Times(1);
-    controller.ReceiveIbMessage(masterAddr, SystemCommand{SystemCommand::Kind::Shutdown});
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Shutdown))).Times(1);
+    controller.ReceiveIbMessage(&masterId, SystemCommand{SystemCommand::Kind::Shutdown});
     EXPECT_EQ(controller.State(), ParticipantState::Shutdown);
 
     ASSERT_EQ(finalState.wait_for(1ms), std::future_status::ready);
@@ -340,20 +369,20 @@ TEST_F(ParticipantControllerTest, force_shutdown)
     controller.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
 
     // Run() --> Idle
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
     auto finalState = controller.RunAsync();
 
     // Stop() --> Stopping --> Call StopHandler() --> Stopped
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
     EXPECT_CALL(callbacks, StopHandler()).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Stopped))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopped))).Times(1);
     controller.Stop("I quit!");
     EXPECT_EQ(controller.State(), ParticipantState::Stopped);
 
     // ForceShutdown() --> ShuttingDown --> Call ShutdownHandler() --> Shutdown
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::ShuttingDown))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::ShuttingDown))).Times(1);
     EXPECT_CALL(callbacks, ShutdownHandler()).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Shutdown))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Shutdown))).Times(1);
     controller.ForceShutdown("I really, really quit!");
     EXPECT_EQ(controller.State(), ParticipantState::Shutdown);
 
@@ -371,13 +400,13 @@ TEST_F(ParticipantControllerTest, force_shutdown_is_ignored_if_not_stopped)
     controller.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
 
     // Run() --> Idle
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
     auto finalState = controller.RunAsync();
 
     // ForceShutdown() --> Log::Error --> don't change state, don't call shutdown handlers
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, A<const ParticipantStatus&>())).Times(0);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, A<const ParticipantStatus&>())).Times(0);
     EXPECT_CALL(callbacks, ShutdownHandler()).Times(0);
-    EXPECT_CALL(comAdapter, SendIbMessage(addr, A<const ParticipantStatus&>())).Times(0);
+    EXPECT_CALL(comAdapter, SendIbMessage(&controller, A<const ParticipantStatus&>())).Times(0);
     controller.ForceShutdown("I really, really quit!");
 
     // command shall be ignored. State shall be unchanged

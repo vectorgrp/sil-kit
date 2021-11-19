@@ -49,16 +49,16 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<co
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    void SendIbMessage(EndpointAddress from, EthMessage&& msg) override
+    void SendIbMessage(const IServiceId* from, EthMessage&& msg) override
     {
         SendIbMessage_proxy(from, msg);
     }
 
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthMessage&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const EthMessage&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthTransmitAcknowledge&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthStatus&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const EthSetMode&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const EthMessage&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(const IServiceId*, const EthMessage&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const EthTransmitAcknowledge&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const EthStatus&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const EthSetMode&));
 };
 
 class EthernetControllerTest : public testing::Test
@@ -75,11 +75,14 @@ protected:
 protected:
     EthernetControllerTest()
         : controller(&comAdapter, _config, comAdapter.GetTimeProvider())
+        , controllerOther(&comAdapter, _config, comAdapter.GetTimeProvider())
     {
         controller.SetEndpointAddress(controllerAddress);
 
         controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
         controller.RegisterMessageAckHandler(ib::util::bind_method(&callbacks, &Callbacks::MessageAck));
+
+        controllerOther.SetEndpointAddress(otherAddress);
     }
 
 protected:
@@ -92,13 +95,14 @@ protected:
 
     ib::cfg::EthernetController _config;
     EthController controller;
+    EthController controllerOther;
 };
 
 
 TEST_F(EthernetControllerTest, send_eth_message)
 {
     const auto now = 12345ns;
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(controllerAddress, AnEthMessageWith(now)))
+    EXPECT_CALL(comAdapter, SendIbMessage_proxy(&controller, AnEthMessageWith(now)))
         .Times(1);
 
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
@@ -116,7 +120,7 @@ TEST_F(EthernetControllerTest, send_eth_frame)
         .WillByDefault(testing::Return(42ns));
 
     const auto now = 42ns;
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(controllerAddress, AnEthMessageWith(now)))
+    EXPECT_CALL(comAdapter, SendIbMessage_proxy(&controller, AnEthMessageWith(now)))
         .Times(1);
 
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
@@ -136,7 +140,7 @@ TEST_F(EthernetControllerTest, trigger_callback_on_receive_message)
     EXPECT_CALL(callbacks, ReceiveMessage(&controller, msg))
         .Times(1);
 
-    controller.ReceiveIbMessage(otherAddress, msg);
+    controller.ReceiveIbMessage(&controllerOther, msg);
 }
 
 /*! \brief Passing an Ack to an EthControllers must trigger the registered callback, if
@@ -189,7 +193,7 @@ TEST_F(EthernetControllerTest, ethcontroller_uses_tracing)
     EthMessage ethMsg{};
     ethMsg.ethFrame = ethFrame;
     ethMsg.timestamp = now;
-    ethController.ReceiveIbMessage(otherAddress, ethMsg);
+    ethController.ReceiveIbMessage(&controllerOther, ethMsg);
 }
 
 } // anonymous namespace

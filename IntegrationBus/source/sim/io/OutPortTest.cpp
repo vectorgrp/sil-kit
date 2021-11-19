@@ -28,7 +28,7 @@ using ::ib::mw::test::DummyComAdapter;
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const AnalogIoMessage&));
+    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const AnalogIoMessage&));
 };
 
 class OutPortTest : public ::testing::Test
@@ -66,7 +66,7 @@ TEST_F(OutPortTest, send_ibmessage_on_write)
     msg.timestamp = 13ns;
     msg.value = 17.3;
 
-    EXPECT_CALL(comAdapter, SendIbMessage(portAddress, msg))
+    EXPECT_CALL(comAdapter, SendIbMessage(&port, msg))
         .Times(1);
 
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())

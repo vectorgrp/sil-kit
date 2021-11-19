@@ -35,9 +35,12 @@ protected:
 protected:
     GenericSubscriberTest()
         : subscriber{&comAdapter, config, comAdapter.GetTimeProvider()}
+        , subscriberOther{ &comAdapter, config, comAdapter.GetTimeProvider() }
     {
         subscriber.SetEndpointAddress(endpointAddress);
         subscriber.SetReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));
+
+        subscriberOther.SetEndpointAddress(otherEndpointAddress);
     }
 
     // Workaround for MS VS2015 where we cannot intialize the config member directly
@@ -63,6 +66,7 @@ protected:
     ib::test::MockTraceSink traceSink;
     Callbacks callbacks;
     GenericSubscriber subscriber;
+    GenericSubscriber subscriberOther;
 };
 
 TEST_F(GenericSubscriberTest, trigger_callback)
@@ -72,7 +76,7 @@ TEST_F(GenericSubscriberTest, trigger_callback)
     EXPECT_CALL(callbacks, ReceiveData(&subscriber, msg.data))
         .Times(1);
 
-    subscriber.ReceiveIbMessage(otherEndpointAddress, msg);
+    subscriber.ReceiveIbMessage(&subscriberOther, msg);
 }
 
 TEST_F(GenericSubscriberTest, get_name_from_subscriber)
@@ -98,7 +102,7 @@ TEST_F(GenericSubscriberTest, receive_with_tracing)
     EXPECT_CALL(traceSink,
         Trace(Direction::Receive, endpointAddress, now, msg))
         .Times(1);
-    subscriber.ReceiveIbMessage(otherEndpointAddress, msg);
+    subscriber.ReceiveIbMessage(&subscriberOther, msg);
 
 }
 

@@ -4,6 +4,7 @@
 
 #include "IIbReceiver.hpp"
 #include "IIbSender.hpp"
+#include "IServiceId.hpp"
 
 #include "ib/sim/can/CanDatatypes.hpp"
 
@@ -18,6 +19,7 @@ namespace can {
 class IIbToCanSimulator
     : public mw::IIbReceiver<CanMessage, CanConfigureBaudrate, CanSetControllerMode>
     , public mw::IIbSender<CanMessage, CanTransmitAcknowledge, CanControllerStatus>
+    , public mw::IServiceId
 {
 public:
     ~IIbToCanSimulator() = default;
@@ -29,6 +31,7 @@ public:
     //! \brief Setter and getter for the ParticipantID associated with this CAN Network Simulator
     virtual void SetParticipantId(ib::mw::ParticipantId participantId) = 0;
     virtual auto GetParticipantId() const -> ib::mw::ParticipantId = 0;
+
 };
 
 } // namespace can

@@ -7,6 +7,7 @@
 
 // IbInternal component:
 #include "internal_fwd.hpp"
+#include "IServiceId.hpp"
 
 namespace ib {
 namespace mw {
@@ -38,61 +39,61 @@ public:
     // The SendIbMessages are virtual functions so we can mock them in testing.
     // For performance reasons this may change in the future.
 
-    virtual void SendIbMessage(EndpointAddress from, const sim::can::CanMessage& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, sim::can::CanMessage&& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::can::CanTransmitAcknowledge& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::can::CanControllerStatus& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::can::CanConfigureBaudrate& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::can::CanSetControllerMode& msg) = 0;
-
-    virtual void SendIbMessage(EndpointAddress from, const sim::eth::EthMessage& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, sim::eth::EthMessage&& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::eth::EthTransmitAcknowledge& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::eth::EthStatus& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::eth::EthSetMode& msg) = 0;
-
-    virtual void SendIbMessage(EndpointAddress from, const sim::fr::FrMessage& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, sim::fr::FrMessage&& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::fr::FrMessageAck& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, sim::fr::FrMessageAck&& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::fr::FrSymbol& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::fr::FrSymbolAck& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::fr::CycleStart& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::fr::HostCommand& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::fr::ControllerConfig& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::fr::TxBufferConfigUpdate& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::fr::TxBufferUpdate& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::fr::ControllerStatus& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::fr::PocStatus& msg) = 0;
-
-    virtual void SendIbMessage(EndpointAddress from, const sim::lin::SendFrameRequest& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::lin::SendFrameHeaderRequest& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::lin::Transmission& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::lin::WakeupPulse& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::lin::ControllerConfig& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::lin::ControllerStatusUpdate& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::lin::FrameResponseUpdate& msg) = 0;
-
-    virtual void SendIbMessage(EndpointAddress from, const sim::io::AnalogIoMessage& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::io::DigitalIoMessage& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::io::PatternIoMessage& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, sim::io::PatternIoMessage&& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sim::io::PwmIoMessage& msg) = 0;
-
-    virtual void SendIbMessage(EndpointAddress from, const sim::generic::GenericMessage& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, sim::generic::GenericMessage&& msg) = 0;
-
-    virtual void SendIbMessage(EndpointAddress from, const sync::NextSimTask& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sync::Tick& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sync::TickDone& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sync::QuantumRequest& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sync::QuantumGrant& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sync::ParticipantStatus& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sync::ParticipantCommand& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, const sync::SystemCommand& msg) = 0;
-
-    virtual void SendIbMessage(EndpointAddress from, const logging::LogMsg& msg) = 0;
-    virtual void SendIbMessage(EndpointAddress from, logging::LogMsg&& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::can::CanMessage& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, sim::can::CanMessage&& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::can::CanTransmitAcknowledge& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::can::CanControllerStatus& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::can::CanConfigureBaudrate& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::can::CanSetControllerMode& msg) = 0;
+                                
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::eth::EthMessage& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, sim::eth::EthMessage&& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::eth::EthTransmitAcknowledge& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::eth::EthStatus& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::eth::EthSetMode& msg) = 0;
+                                
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::fr::FrMessage& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, sim::fr::FrMessage&& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::fr::FrMessageAck& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, sim::fr::FrMessageAck&& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::fr::FrSymbol& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::fr::FrSymbolAck& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::fr::CycleStart& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::fr::HostCommand& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::fr::ControllerConfig& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::fr::TxBufferConfigUpdate& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::fr::TxBufferUpdate& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::fr::ControllerStatus& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::fr::PocStatus& msg) = 0;
+                                
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::lin::SendFrameRequest& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::lin::SendFrameHeaderRequest& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::lin::Transmission& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::lin::WakeupPulse& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::lin::ControllerConfig& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::lin::ControllerStatusUpdate& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::lin::FrameResponseUpdate& msg) = 0;
+                                
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::io::AnalogIoMessage& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::io::DigitalIoMessage& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::io::PatternIoMessage& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, sim::io::PatternIoMessage&& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::io::PwmIoMessage& msg) = 0;
+                                
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, const sim::generic::GenericMessage& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId* from, sim::generic::GenericMessage&& msg) = 0;
+                                
+    virtual void SendIbMessage(const ib::mw::IServiceId*, const sync::NextSimTask& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId*, const sync::Tick& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId*, const sync::TickDone& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId*, const sync::QuantumRequest& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId*, const sync::QuantumGrant& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId*, const sync::ParticipantStatus& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId*, const sync::ParticipantCommand& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId*, const sync::SystemCommand& msg) = 0;
+                                
+    virtual void SendIbMessage(const ib::mw::IServiceId*, const logging::LogMsg& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IServiceId*, logging::LogMsg&& msg) = 0;
 
     // For Connection/Middleware support:
     virtual void OnAllMessagesDelivered(std::function<void(void)> callback) = 0;

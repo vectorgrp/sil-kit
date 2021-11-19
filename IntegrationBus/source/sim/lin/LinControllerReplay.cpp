@@ -151,31 +151,31 @@ void LinControllerReplay::RegisterFrameResponseUpdateHandler(FrameResponseUpdate
     _controller.RegisterFrameResponseUpdateHandler(std::move(handler));
 }
 
-void LinControllerReplay::ReceiveIbMessage(ib::mw::EndpointAddress from, const Transmission& msg)
+void LinControllerReplay::ReceiveIbMessage(const IServiceId* from, const Transmission& msg)
 {
     // Transmissions are always issued by a master.
     _controller.ReceiveIbMessage(from, msg);
 }
 
-void LinControllerReplay::ReceiveIbMessage(ib::mw::EndpointAddress from, const WakeupPulse& msg)
+void LinControllerReplay::ReceiveIbMessage(const IServiceId* from, const WakeupPulse& msg)
 {
     //Wakeup pulses are not part of a replay, but are valid during a replay.
     _controller.ReceiveIbMessage(from, msg);
 }
 
-void LinControllerReplay::ReceiveIbMessage(mw::EndpointAddress from, const ControllerConfig& msg)
+void LinControllerReplay::ReceiveIbMessage(const IServiceId* from, const ControllerConfig& msg)
 {
     // ControllerConfigs are not part of a replay, but are valid during a replay.
     _controller.ReceiveIbMessage(from, msg);
 }
 
-void LinControllerReplay::ReceiveIbMessage(mw::EndpointAddress from, const FrameResponseUpdate& msg)
+void LinControllerReplay::ReceiveIbMessage(const IServiceId* from, const FrameResponseUpdate& msg)
 {
     // FrameResponseUpdates are generated from a master during a replay.
     _controller.ReceiveIbMessage(from, msg);
 }
 
-void LinControllerReplay::ReceiveIbMessage(mw::EndpointAddress from, const ControllerStatusUpdate& msg)
+void LinControllerReplay::ReceiveIbMessage(const IServiceId* from, const ControllerStatusUpdate& msg)
 {
     // ControllerStatupsUpdates are not part of a replay, but are valid during a replay.
     _controller.ReceiveIbMessage(from, msg);
@@ -229,7 +229,8 @@ void LinControllerReplay::ReplayMessage(const extensions::IReplayMessage* replay
     response.responseMode = mode;
     FrameResponseUpdate responseUpdate;
     responseUpdate.frameResponses.emplace_back(std::move(response));
-    _comAdapter->SendIbMessage(replayMessage->EndpointAddress(), responseUpdate);
+    // TODO check
+    _comAdapter->SendIbMessage(this, responseUpdate);
 
     if (_mode == ControllerMode::Master)
     {
@@ -240,7 +241,7 @@ void LinControllerReplay::ReplayMessage(const extensions::IReplayMessage* replay
         tm.timestamp = replayMessage->Timestamp();
         tm.frame = std::move(frame);
         tm.status = FrameStatus::LIN_RX_OK;
-        _comAdapter->SendIbMessage(replayMessage->EndpointAddress(), tm);
+        _comAdapter->SendIbMessage(this, tm);
 
         FrameStatus masterFrameStatus = tm.status;
         if (mode == FrameResponseMode::TxUnconditional)

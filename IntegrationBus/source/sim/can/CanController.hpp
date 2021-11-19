@@ -10,6 +10,7 @@
 
 #include "IIbToCanController.hpp"
 #include "IComAdapterInternal.hpp"
+#include "IServiceId.hpp"
 
 #include <tuple>
 #include <vector>
@@ -23,6 +24,7 @@ class CanController
     , public IIbToCanController
     , public mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
+    , public mw::IServiceId
 {
 public:
     // ----------------------------------------
@@ -64,7 +66,7 @@ public:
     void RegisterTransmitStatusHandler(MessageStatusHandler handler) override;
 
     // IIbToCanController
-    void ReceiveIbMessage(ib::mw::EndpointAddress from, const sim::can::CanMessage& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const sim::can::CanMessage& msg) override;
 
     void SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const ::ib::mw::EndpointAddress& override;
@@ -75,6 +77,9 @@ public:
     // ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
+    // IServiceId
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
 public:
     // ----------------------------------------
     // Public interface methods
@@ -100,7 +105,7 @@ private:
     // ----------------------------------------
     // private members
     ::ib::mw::IComAdapterInternal* _comAdapter{nullptr};
-    ::ib::mw::EndpointAddress _endpointAddr;
+    ::ib::mw::ServiceId _serviceId;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
 
     CanTxId _canTxId = 0;
@@ -126,7 +131,14 @@ void CanController::AddSink(extensions::ITraceMessageSink* sink)
     _tracer.AddSink(EndpointAddress(), *sink);
 }
 
-
+void CanController::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _serviceId = serviceId;
+}
+auto CanController::GetServiceId() const -> const mw::ServiceId&
+{
+    return _serviceId;
+}
 
 } // namespace can
 } // namespace sim

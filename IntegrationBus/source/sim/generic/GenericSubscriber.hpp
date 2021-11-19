@@ -9,6 +9,7 @@
 
 #include "IIbToGenericSubscriber.hpp"
 #include "IComAdapterInternal.hpp"
+#include "IServiceId.hpp"
 
 namespace ib {
 namespace sim {
@@ -19,6 +20,7 @@ class GenericSubscriber
     , public IIbToGenericSubscriber
     , public mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
+    , public mw::IServiceId
 {
 public:
     // ----------------------------------------
@@ -43,7 +45,7 @@ public:
     auto Config() const -> const cfg::GenericPort& override;
 
     //! \brief Accepts messages originating from IB communications.
-    void ReceiveIbMessage(mw::EndpointAddress from, const GenericMessage& msg) override;
+    void ReceiveIbMessage(const mw::IServiceId* from, const GenericMessage& msg) override;
 
     //! \brief Accepts any message, e.g. also from trace replays.
     void ReceiveMessage(const GenericMessage& msg);
@@ -56,12 +58,15 @@ public:
 
     // ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
+    // IServiceId
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
 
 private:
     //private Members
     cfg::GenericPort _config{};
     mw::IComAdapterInternal* _comAdapter{nullptr};
-    mw::EndpointAddress _endpointAddr{};
+    mw::ServiceId _serviceId{};
     CallbackT _callback;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     extensions::Tracer _tracer;
@@ -73,6 +78,16 @@ private:
 void GenericSubscriber::AddSink(extensions::ITraceMessageSink* sink)
 {
     _tracer.AddSink(EndpointAddress(), *sink);
+}
+
+void GenericSubscriber::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _serviceId = serviceId;
+}
+
+auto GenericSubscriber::GetServiceId() const -> const mw::ServiceId&
+{
+    return _serviceId;
 }
 
 } // namespace generic

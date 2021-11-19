@@ -4,6 +4,7 @@
 
 #include "IReplayDataController.hpp"
 #include "CanController.hpp"
+#include "IServiceId.hpp"
 
 namespace ib {
 namespace sim {
@@ -15,6 +16,7 @@ class CanControllerReplay
     , public mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
     , public tracing::IReplayDataController
+    , public mw::IServiceId
 {
 public:
     // ----------------------------------------
@@ -42,7 +44,7 @@ public:
     void RegisterTransmitStatusHandler(MessageStatusHandler handler) override;
 
     // IIbToCanControllerReplay
-    void ReceiveIbMessage(ib::mw::EndpointAddress from, const sim::can::CanMessage& msg) override;
+    void ReceiveIbMessage(const IServiceId* from, const sim::can::CanMessage& msg) override;
 
     void SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const ::ib::mw::EndpointAddress& override;
@@ -56,6 +58,10 @@ public:
     // IReplayDataProvider
 
     void ReplayMessage(const extensions::IReplayMessage* replayMessage) override;
+
+    // IServiceId
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
 
 public:
     // ----------------------------------------
@@ -76,6 +82,17 @@ private:
     CanController _controller;
 };
 
+// ================================================================================
+//  Inline Implementations
+// ================================================================================
+void CanControllerReplay::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _controller.SetServiceId(serviceId);
+}
+auto CanControllerReplay::GetServiceId() const -> const mw::ServiceId&
+{
+    return _controller.GetServiceId();
+}
 
 } // namespace can
 } // namespace sim

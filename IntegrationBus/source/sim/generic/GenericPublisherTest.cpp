@@ -28,13 +28,13 @@ using ::ib::test::MockTraceSink;
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    void SendIbMessage(EndpointAddress from, GenericMessage&& msg) override
+    void SendIbMessage(const IServiceId* from, GenericMessage&& msg) override
     {
         SendIbMessage_proxy(from, msg);
     }
 
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const GenericMessage&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(EndpointAddress, const GenericMessage&));
+    MOCK_METHOD2(SendIbMessage, void(IServiceId*, const GenericMessage&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(const IServiceId*, const GenericMessage&));
 };
 
 class GenericPublisherTest : public ::testing::Test
@@ -73,7 +73,7 @@ TEST_F(GenericPublisherTest, publish_vector)
 {
     const GenericMessage msg{sampleData};
 
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(portAddress, msg))
+    EXPECT_CALL(comAdapter, SendIbMessage_proxy(&publisher, msg))
         .Times(1);
 
     publisher.Publish(sampleData);
@@ -83,7 +83,7 @@ TEST_F(GenericPublisherTest, publish_raw)
 {
     const GenericMessage msg{sampleData};
 
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(portAddress, msg))
+    EXPECT_CALL(comAdapter, SendIbMessage_proxy(&publisher, msg))
         .Times(1);
 
     publisher.Publish(sampleData.data(), sampleData.size());
