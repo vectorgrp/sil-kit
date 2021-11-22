@@ -84,10 +84,11 @@ ib_ReturnCode ib_SimulationParticipant_destroy(ib_SimulationParticipant* self)
             ib_error_string = "A nullpointer argument was passed to the function.";
             return ib_ReturnCode_BADPARAMETER;
         }
+
         auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(self);
         delete comAdapter;
         return ib_ReturnCode_SUCCESS;
-        )
+    )
 }
 
 ib_ReturnCode ib_SimulationParticipant_GetComAdapter(void** outWrappedObject, ib_SimulationParticipant* self)
@@ -684,8 +685,168 @@ ib_ReturnCode ib_DataPublisher_Publish(ib_DataPublisher* self, const ib_ByteVect
     )
 }
 
-
-
 #pragma endregion DATA
+
+#pragma region PARTICIPANT_STATEHANDLING
+
+ib_ReturnCode ib_SimulationParticipant_SetInitHandler(ib_SimulationParticipant* participant, void* context, ib_ParticipantInitHandler_t handler)
+{
+    CAPI_DEFINE_FUNC(
+        if (participant == nullptr || handler == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        auto* participantController = comAdapter->GetParticipantController();
+
+        participantController->SetInitHandler(
+            [handler, context, participant](ib::mw::sync::ParticipantCommand initCmd) {
+                ib_ParticipantCommand command;
+                command.kind = (ib_ParticipantCommand_Kind)initCmd.kind;
+                handler(context, participant, &command);
+            });
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+ib_ReturnCode ib_SimulationParticipant_SetStopHandler(ib_SimulationParticipant* participant, void* context, ib_ParticipantStopHandler_t handler)
+{
+    CAPI_DEFINE_FUNC(
+        if (participant == nullptr || handler == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        auto* participantController = comAdapter->GetParticipantController();
+
+        participantController->SetStopHandler(
+            [handler, context, participant]() {
+                handler(context, participant);
+            });
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+ib_ReturnCode ib_SimulationParticipant_SetShutdownHandler(ib_SimulationParticipant* participant, void* context, ib_ParticipantShutdownHandler_t handler)
+{
+    CAPI_DEFINE_FUNC(
+        if (participant == nullptr || handler == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        auto* participantController = comAdapter->GetParticipantController();
+
+        participantController->SetShutdownHandler(
+            [handler, context, participant]() {
+                handler(context, participant);
+            });
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+ib_ReturnCode ib_SimulationParticipant_Run(ib_SimulationParticipant* participant,
+                                           ib_ParticipantState*      outParticipantState)
+{
+    CAPI_DEFINE_FUNC(
+        if (participant == nullptr || outParticipantState  == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        auto* participantController = comAdapter->GetParticipantController();
+        auto finalState = participantController->Run();
+        *outParticipantState = static_cast<ib_ParticipantState>(finalState);
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+std::map<ib_SimulationParticipant*, std::future<ib::mw::sync::ParticipantState>> runAsyncFuturePerParticipant;
+ib_ReturnCode ib_SimulationParticipant_RunAsync(ib_SimulationParticipant* participant)
+{
+    CAPI_DEFINE_FUNC(
+        if (participant == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        if (runAsyncFuturePerParticipant.find(participant) != runAsyncFuturePerParticipant.end())
+        {
+            ib_error_string = "ib_SimulationParticipant_RunAsync has already been called for participant";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        auto* participantController = comAdapter->GetParticipantController();
+        runAsyncFuturePerParticipant[participant] = participantController->RunAsync();
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+ib_ReturnCode ib_SimulationParticipant_WaitForRunAsyncToComplete(ib_SimulationParticipant* participant,
+                                                                 ib_ParticipantState*      outParticipantState)
+{
+    CAPI_DEFINE_FUNC(
+        if (participant == nullptr || outParticipantState == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        if (runAsyncFuturePerParticipant.find(participant) == runAsyncFuturePerParticipant.end())
+        {
+            ib_error_string = "Unknown participant to wait for completion of asynchronous run operation";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        if (!runAsyncFuturePerParticipant[participant].valid())
+        {
+            ib_error_string = "Failed to access asynchronous run operation";
+            return ib_ReturnCode_UNSPECIFIEDERROR;
+        }
+        auto finalState = runAsyncFuturePerParticipant[participant].get();
+        *outParticipantState = static_cast<ib_ParticipantState>(finalState);
+        runAsyncFuturePerParticipant.erase(participant); 
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+#pragma endregion PARTICIPANT_STATEHANDLING
+
+#pragma region TIME_SYNC
+
+ib_ReturnCode ib_SimulationParticipant_SetPeriod(ib_SimulationParticipant* participant, ib_NanosecondsTime period) 
+{
+    CAPI_DEFINE_FUNC(
+        if (participant == nullptr) {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        } 
+        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        auto* participantController = comAdapter->GetParticipantController();
+        participantController->SetPeriod(std::chrono::nanoseconds(period)); 
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+ib_ReturnCode ib_SimulationParticipant_SetSimulationTask(ib_SimulationParticipant* participant, void* context, ib_ParticipantSimulationTaskHandler_t handler)
+{
+    CAPI_DEFINE_FUNC(
+        if (participant == nullptr || handler == nullptr)
+        {
+            ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        auto* participantController = comAdapter->GetParticipantController();
+        participantController->SetSimulationTask(
+            [handler, context, participant](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+                handler(context, participant, static_cast<ib_NanosecondsTime>(now.count()));
+            });
+        return ib_ReturnCode_SUCCESS;
+    )
+}
+
+#pragma endregion TIME_SYNC
 
 }

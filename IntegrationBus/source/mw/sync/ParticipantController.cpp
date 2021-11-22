@@ -167,7 +167,7 @@ void ParticipantController::SetPeriod(std::chrono::nanoseconds period)
     {
         auto msPeriod = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(period);
         _logger->Warn("ParticipantController::SetPeriod({}ms) is ignored", msPeriod.count());
-        _logger->Info("ParticipantController::SetPeriod() can only be used with SyncType::TimeQuantum (currently active: SyncType::{})", _syncType);
+        _logger->Info("ParticipantController::SetPeriod() can only be used with SyncType::TimeQuantum or SyncType::DistributedTimeQuantum (currently active: SyncType::{})", _syncType);
     }
     _myNextTask.duration = period;
 }

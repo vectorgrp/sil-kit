@@ -7,6 +7,7 @@
 #include "ib/mw/sync/SyncDatatypes.hpp"
 #include "ib/mw/logging/LoggingDatatypes.hpp"
 #include "ib/mw/logging/ILogger.hpp"
+#include "ib/mw/sync/IParticipantController.hpp"
 
 #include "ib/sim/fwd_decl.hpp"
 #include "ib/sim/can/CanDatatypes.hpp"
@@ -77,6 +78,31 @@ public:
     mutable MockTime mockTime;
 };
 
+
+class MockParticipantController : public sync::IParticipantController {
+public:
+    MOCK_METHOD1(SetInitHandler, void(InitHandlerT));
+    MOCK_METHOD1(SetStopHandler, void(StopHandlerT));
+    MOCK_METHOD1(SetShutdownHandler, void(ShutdownHandlerT));
+    MOCK_METHOD1(SetSimulationTask, void(SimTaskT task));
+    MOCK_METHOD1(SetSimulationTask, void(std::function<void(std::chrono::nanoseconds now)>));
+    MOCK_METHOD0(EnableColdswap, void());
+    MOCK_METHOD1(SetPeriod, void(std::chrono::nanoseconds period));
+    MOCK_METHOD1(SetEarliestEventTime, void(std::chrono::nanoseconds eventTime));
+    MOCK_METHOD0(Run, sync::ParticipantState());
+    MOCK_METHOD0(RunAsync, std::future<sync::ParticipantState>());
+    MOCK_METHOD1(ReportError, void(std::string errorMsg));
+    MOCK_METHOD1(Pause, void(std::string reason));
+    MOCK_METHOD0(Continue, void());
+    MOCK_METHOD1(Stop, void(std::string reason));
+    MOCK_CONST_METHOD0(State,  sync::ParticipantState());
+    MOCK_CONST_METHOD0(Status, sync::ParticipantStatus&());
+    MOCK_METHOD0(RefreshStatus, void());
+    MOCK_CONST_METHOD0(Now, std::chrono::nanoseconds());
+    MOCK_METHOD0(LogCurrentPerformanceStats, void());
+    MOCK_METHOD1(ForceShutdown, void(std::string reason));
+};
+
 class DummyComAdapter : public IComAdapterInternal
 {
 public:
@@ -100,7 +126,9 @@ public:
     auto CreateGenericSubscriber(const std::string& /*canonicalName*/) -> sim::generic::IGenericSubscriber* { return nullptr; }
 
     auto GetSyncMaster() -> sync::ISyncMaster* { return nullptr; }
-    auto GetParticipantController() -> sync::IParticipantController* { return nullptr; }
+    
+    auto GetParticipantController() -> sync::IParticipantController* { return &mockParticipantController; }
+
     auto GetSystemMonitor() -> sync::ISystemMonitor* { return nullptr; }
     auto GetSystemController() -> sync::ISystemController* { return nullptr; }
     auto GetLogger() -> logging::ILogger* { return &logger; }
@@ -174,6 +202,7 @@ public:
 
     DummyLogger logger;
     MockTimeProvider mockTimeProvider;
+    MockParticipantController mockParticipantController;
 };
 
 // ================================================================================
