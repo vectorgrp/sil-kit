@@ -8,6 +8,7 @@
 #include <functional>
 
 #include "ib/mw/fwd_decl.hpp"
+#include "ib/cfg/fwd_decl.hpp"
 #include "ib/sim/fwd_decl.hpp"
 
 namespace ib {

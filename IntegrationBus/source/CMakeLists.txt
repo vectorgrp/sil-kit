@@ -39,7 +39,10 @@ endif()
 add_library(IntegrationBus SHARED
     IntegrationBus.hpp
     IntegrationBus.cpp
+    capi/capiImpl.h
     capi/capi.cpp
+    capi/capi_FlexRay.cpp
+    
     IbForceIncludes.cpp
 )
 

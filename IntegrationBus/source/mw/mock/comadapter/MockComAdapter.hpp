@@ -199,6 +199,8 @@ public:
 
     void OnAllMessagesDelivered(std::function<void(void)> /*callback*/) {}
     void FlushSendBuffers() {}
+    auto GetParticipantName() const -> const std::string& override { throw std::runtime_error("invalid call"); }
+    auto GetConfig() const -> const ib::cfg::Config& override { throw std::runtime_error("invalid call"); }
 
     DummyLogger logger;
     MockTimeProvider mockTimeProvider;

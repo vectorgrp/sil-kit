@@ -19,18 +19,7 @@
 #include <map>
 #include <mutex>
 #include <cstring>
-
-#define CAPI_DEFINE_FUNC(BODY) \
-    try { \
-        BODY \
-    } \
-    catch (const std::runtime_error& e) { \
-        ib_error_string = e.what(); \
-        return ib_ReturnCode_UNSPECIFIEDERROR; \
-    } \
-    catch (const std::exception&) { \
-        return ib_ReturnCode_UNSPECIFIEDERROR; \
-    }
+#include "capiImpl.h"
 
 extern "C" {
 
@@ -45,7 +34,6 @@ thread_local std::string ib_error_string = "";
 #define ib_ReturnCode_BUFFERTOOSMALL_str "Operation failed because a buffer is too small."
 #define ib_ReturnCode_TIMEOUT_str "Operation timed out."
 #define ib_ReturnCode_UNSUPPORTEDSERVICE_str "The requested service is not supported."
-
 
 IntegrationBusAPI ib_ReturnCode ib_ReturnCodeToString(const char** outString, ib_ReturnCode returnCode)
 {

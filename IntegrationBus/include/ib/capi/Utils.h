@@ -11,8 +11,8 @@
 #define __IB_BEGIN_DECLS extern "C" {
 #define __IB_END_DECLS }
 #else
-#define __IB_BEGIN_DECLS
-#define __IB_END_DECLS
+#define __IB_BEGIN_DECLS 
+#define __IB_END_DECLS 
 #endif
 
 // define compiler specific export / import attributes
@@ -71,6 +71,10 @@ struct ib_ByteVector
     size_t size;
 };
 typedef struct ib_ByteVector ib_ByteVector;
+
+typedef uint8_t ib_Bool;
+#define ib_True  ((ib_Bool)1)
+#define ib_False ((ib_Bool)0)
 
 __IB_END_DECLS
 

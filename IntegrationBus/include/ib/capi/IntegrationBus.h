@@ -7,6 +7,7 @@
 #include "ib/capi/Can.h"
 #include "ib/capi/DataPubSub.h"
 #include "ib/capi/Ethernet.h"
+#include "ib/capi/FlexRay.h"
 #include "ib/capi/InterfaceIdentifiers.h"
 #include "ib/capi/ParticipantStateHandling.h"
 #include "ib/capi/TimeSync.h"

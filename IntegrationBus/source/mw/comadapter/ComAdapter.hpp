@@ -109,6 +109,8 @@ public:
     auto GetSystemMonitor() -> sync::ISystemMonitor* override;
     auto GetSystemController() -> sync::ISystemController* override;
     auto GetLogger() -> logging::ILogger* override;
+    auto GetParticipantName() const -> const std::string& override { return _participantName; }
+    auto GetConfig() const -> const ib::cfg::Config& override { return _config; }
 
     void RegisterCanSimulator(sim::can::IIbToCanSimulator* busSim) override;
     void RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim) override;
