@@ -144,8 +144,9 @@ void CanControllerReplay::ReplaySend(const extensions::IReplayMessage* replayMes
 
 void CanControllerReplay::ReplayReceive(const extensions::IReplayMessage* replayMessage)
 {
+    static tracing::ReplayServiceId replayService;
     auto msg = dynamic_cast<const sim::can::CanMessage&>(*replayMessage);
-    _controller.ReceiveIbMessage(this, msg);
+    _controller.ReceiveIbMessage(&replayService, msg);
 }
 
 } // namespace can

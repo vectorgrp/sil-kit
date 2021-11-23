@@ -4,6 +4,7 @@
 #include "ib/cfg/Config.hpp"
 #include "ib/extensions/IReplay.hpp"
 #include "ib/mw/EndpointAddress.hpp"
+#include "IServiceId.hpp"
 
 #include <limits>
 
@@ -25,6 +26,19 @@ inline auto ReplayEndpointAddress() -> ib::mw::EndpointAddress
         std::numeric_limits<decltype(ib::mw::EndpointAddress::endpoint)>::max()
     };
 }
+
+struct ReplayServiceId : public mw::IServiceId
+{
+    void SetServiceId(const mw::ServiceId& ) override
+    {
+    }
+    auto GetServiceId() const -> const mw::ServiceId& override
+    {
+        static mw::ServiceId id;
+        id.legacyEpa = ReplayEndpointAddress();
+        return id;
+    }
+};
 
 class IReplayDataController
 {

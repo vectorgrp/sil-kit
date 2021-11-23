@@ -86,7 +86,7 @@ TEST(CanControllerProxyTest, receive_can_message)
         .Times(1);
 
     CanControllerProxy canControllerProxy(&mockComAdapter);
-    canController.SetEndpointAddress(busSimAddress);
+    canControllerProxy.SetEndpointAddress(busSimAddress);
     canController.ReceiveIbMessage(&canControllerProxy, msg);
 }
 
@@ -165,7 +165,7 @@ TEST(CanControllerProxyTest, receive_new_controller_state)
     CanControllerStatus controllerStatus;
 
     CanControllerProxy canControllerProxy(&mockComAdapter);
-    canController.SetEndpointAddress(busSimAddress);
+    canControllerProxy.SetEndpointAddress(busSimAddress);
     // should not trigger a callback
     controllerStatus.controllerState = CanControllerState::Uninit;
     controllerStatus.errorState = CanErrorState::NotAvailable;
@@ -211,7 +211,7 @@ TEST(CanControllerProxyTest, receive_ack)
         .Times(1);
 
     CanControllerProxy canControllerProxy(&mockComAdapter);
-    canController.SetEndpointAddress(busSimAddress);
+    canControllerProxy.SetEndpointAddress(busSimAddress);
     canController.ReceiveIbMessage(&canControllerProxy, ack1);
     canController.ReceiveIbMessage(&canControllerProxy, ack2);
 }

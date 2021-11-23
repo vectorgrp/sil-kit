@@ -77,16 +77,20 @@ public:
     std::map<ParticipantId, sync::ParticipantStatus> participantStatus;
 };
 
+auto From(SyncMaster& syncMaster, const mw::EndpointAddress& epa) -> mw::IServiceId*
+{
+    syncMaster.SetEndpointAddress(epa);
+    return &syncMaster;
+}
+
+auto From(SyncMaster& syncMaster, const cfg::Participant& participant) -> mw::IServiceId*
+{
+    const auto epa = EndpointAddress{ participant.id, 0 };
+    return From(syncMaster, epa);
+}
+
 class SyncMasterTest : public testing::Test
 {
-protected:
-    static auto From(SyncMaster& syncMaster, const cfg::Participant& participant) -> mw::IServiceId*
-    {
-        auto epa = EndpointAddress{participant.id, 0};
-        syncMaster.SetEndpointAddress(epa);
-        return &syncMaster;
-    }
-
 protected:
     MockComAdapter comAdapter;
     MockMonitor mockMonitor;
@@ -216,10 +220,9 @@ TEST_F(SyncMasterTest, continue_tick_generation_after_pause)
     // System::Paused should stop tick generation...
     mockMonitor.systemStateHandler(sync::SystemState::Paused);
     // ... even if the clients send a tick done
-    TickDone tickDone;
-    SyncMaster syncMasterFrom{ &comAdapter, ibConfig, &mockMonitor };
-    syncMaster.ReceiveIbMessage(From(syncMasterFrom, ibConfig.simulationSetup.participants[1]), tickDone);
-    syncMaster.ReceiveIbMessage(From(syncMasterFrom, ibConfig.simulationSetup.participants[2]), tickDone);
+    TickDone tickDone{};
+    syncMaster.ReceiveIbMessage(From(syncMaster, ibConfig.simulationSetup.participants[1]), tickDone);
+    syncMaster.ReceiveIbMessage(From(syncMaster, ibConfig.simulationSetup.participants[2]), tickDone);
     // But the ticks should continue after switching back to running
     mockMonitor.systemStateHandler(sync::SystemState::Running);
 }
@@ -262,11 +265,9 @@ TEST_F(SyncMasterTest, single_quantum_client)
     EXPECT_CALL(comAdapter, SendIbMessage(&syncMaster, grant))
         .Times(1);
 
-    SyncMaster syncMasterP1{ &comAdapter, ibConfig, &mockMonitor };
-    syncMasterP1.SetEndpointAddress(addr_p1);
-    syncMaster.ReceiveIbMessage(&syncMasterP1, QuantumRequest{0ns, 1ms});
-    syncMaster.ReceiveIbMessage(&syncMasterP1, QuantumRequest{1ms, 1ms});
-    syncMaster.ReceiveIbMessage(&syncMasterP1, QuantumRequest{2ms, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p1), QuantumRequest{0ns, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p1), QuantumRequest{1ms, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p1), QuantumRequest{2ms, 1ms});
 }
 
 TEST_F(SyncMasterTest, two_quantum_clients)
@@ -321,16 +322,12 @@ TEST_F(SyncMasterTest, two_quantum_clients)
     EXPECT_CALL(comAdapter, SendIbMessage(&syncMaster, grant))
         .Times(1);
 
-    SyncMaster syncMasterP1{ &comAdapter, ibConfig, &mockMonitor };
-    syncMasterP1.SetEndpointAddress(addr_p1);
-    SyncMaster syncMasterP2{ &comAdapter, ibConfig, &mockMonitor };
-    syncMasterP1.SetEndpointAddress(addr_p2);
-    syncMaster.ReceiveIbMessage(&syncMasterP1, QuantumRequest{0ns, 1ms});
-    syncMaster.ReceiveIbMessage(&syncMasterP2, QuantumRequest{0ns, 1ms});
-    syncMaster.ReceiveIbMessage(&syncMasterP1, QuantumRequest{1ms, 1ms});
-    syncMaster.ReceiveIbMessage(&syncMasterP2, QuantumRequest{1ms, 1ms});
-    syncMaster.ReceiveIbMessage(&syncMasterP1, QuantumRequest{2ms, 1ms});
-    syncMaster.ReceiveIbMessage(&syncMasterP2, QuantumRequest{2ms, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p1), QuantumRequest{0ns, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p2), QuantumRequest{0ns, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p1), QuantumRequest{1ms, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p2), QuantumRequest{1ms, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p1), QuantumRequest{2ms, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p2), QuantumRequest{2ms, 1ms});
 }
 
 TEST_F(SyncMasterTest, two_quantum_clients_different_periods)
@@ -390,17 +387,13 @@ TEST_F(SyncMasterTest, two_quantum_clients_different_periods)
 
 
 
-    SyncMaster syncMasterP1{ &comAdapter, ibConfig, &mockMonitor };
-    syncMasterP1.SetEndpointAddress(addr_p1);
-    SyncMaster syncMasterP2{ &comAdapter, ibConfig, &mockMonitor };
-    syncMasterP1.SetEndpointAddress(addr_p2);
-    syncMaster.ReceiveIbMessage(&syncMasterP1, QuantumRequest{0ms, 1ms});
-    syncMaster.ReceiveIbMessage(&syncMasterP2, QuantumRequest{0ms, 2ms});
-    syncMaster.ReceiveIbMessage(&syncMasterP1, QuantumRequest{1ms, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p1), QuantumRequest{0ms, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p2), QuantumRequest{0ms, 2ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p1), QuantumRequest{1ms, 1ms});
     
-    syncMaster.ReceiveIbMessage(&syncMasterP1, QuantumRequest{2ms, 1ms});
-    syncMaster.ReceiveIbMessage(&syncMasterP2, QuantumRequest{2ms, 2ms});
-    syncMaster.ReceiveIbMessage(&syncMasterP1, QuantumRequest{3ms, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p1), QuantumRequest{2ms, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p2), QuantumRequest{2ms, 2ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p1), QuantumRequest{3ms, 1ms});
 
 }
 
@@ -456,20 +449,15 @@ TEST_F(SyncMasterTest, mixed_clients)
 
     TickDone tickDone;
 
-    SyncMaster syncMasterFrom{ &comAdapter, ibConfig, &mockMonitor };
-    SyncMaster syncMasterP1{ &comAdapter, ibConfig, &mockMonitor };
-    syncMasterP1.SetEndpointAddress(addr_p1);
-    SyncMaster syncMasterP2{ &comAdapter, ibConfig, &mockMonitor };
-    syncMasterP1.SetEndpointAddress(addr_p2);
-    syncMaster.ReceiveIbMessage(&syncMasterP1, QuantumRequest{0ns, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p1), QuantumRequest{0ns, 1ms});
 
-    syncMaster.ReceiveIbMessage(From(syncMasterFrom, ibConfig.simulationSetup.participants[1]), tickDone);
+    syncMaster.ReceiveIbMessage(From(syncMaster, ibConfig.simulationSetup.participants[1]), tickDone);
 
-    syncMaster.ReceiveIbMessage(&syncMasterP1, QuantumRequest{1ms, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p1), QuantumRequest{1ms, 1ms});
 
-    syncMaster.ReceiveIbMessage(From(syncMasterFrom, ibConfig.simulationSetup.participants[2]), tickDone);
+    syncMaster.ReceiveIbMessage(From(syncMaster, ibConfig.simulationSetup.participants[2]), tickDone);
 
-    syncMaster.ReceiveIbMessage(&syncMasterP1, QuantumRequest{2ms, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p1), QuantumRequest{2ms, 1ms});
 }
 
 
@@ -505,9 +493,7 @@ TEST_F(SyncMasterTest, dont_grant_quantum_requests_while_paused)
     EXPECT_CALL(comAdapter, SendIbMessage(&syncMaster, grant))
         .Times(0);
 
-    SyncMaster syncMasterP1{ &comAdapter, ibConfig, &mockMonitor };
-    syncMasterP1.SetEndpointAddress(addr_p1);
-    syncMaster.ReceiveIbMessage(&syncMasterP1, QuantumRequest{0ns, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p1), QuantumRequest{0ns, 1ms});
 }
 
 TEST_F(SyncMasterTest, give_grants_after_pause_ends)
@@ -543,9 +529,7 @@ TEST_F(SyncMasterTest, give_grants_after_pause_ends)
         .Times(1);
 
 
-    SyncMaster syncMasterP1{ &comAdapter, ibConfig, &mockMonitor };
-    syncMasterP1.SetEndpointAddress(addr_p1);
-    syncMaster.ReceiveIbMessage(&syncMasterP1, QuantumRequest{0ns, 1ms});
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p1), QuantumRequest{0ns, 1ms});
     mockMonitor.systemStateHandler(sync::SystemState::Running);
 }
 
@@ -577,9 +561,7 @@ TEST_F(SyncMasterTest, no_grants_for_empty_client_list)
     EXPECT_CALL(comAdapter, SendIbMessage(&syncMaster, grant))
         .Times(0);
 
-    SyncMaster syncMasterP1{ &comAdapter, ibConfig, &mockMonitor };
-    syncMasterP1.SetEndpointAddress(addr_p1);
-    syncMaster.ReceiveIbMessage(&syncMasterP1, QuantumRequest{ 0ns, 1ms });
+    syncMaster.ReceiveIbMessage(From(syncMaster, addr_p1), QuantumRequest{ 0ns, 1ms });
 }
 
 } // namespace (anonymous)

@@ -6,7 +6,7 @@
 
 #include "IComAdapterInternal.hpp"
 #include "IIbToLogMsgReceiver.hpp"
-#include "IServiceID.hpp"
+#include "IServiceId.hpp"
 
 namespace ib {
 namespace mw {

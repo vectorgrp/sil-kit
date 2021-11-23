@@ -110,80 +110,75 @@ public:
     {
     }
 
-    auto CreateCanController(const std::string& /*canonicalName*/) -> sim::can::ICanController* { return nullptr; }
-    auto CreateEthController(const std::string& /*canonicalName*/) -> sim::eth::IEthController* { return nullptr; }
-    auto CreateFlexrayController(const std::string& /*canonicalName*/) -> sim::fr::IFrController* { return nullptr; }
-    auto CreateLinController(const std::string& /*canonicalName*/) -> sim::lin::ILinController* { return nullptr; }
-    auto CreateAnalogIn(const std::string& /*canonicalName*/) -> sim::io::IAnalogInPort* { return nullptr; }
-    auto CreateDigitalIn(const std::string& /*canonicalName*/) -> sim::io::IDigitalInPort* { return nullptr; }
-    auto CreatePwmIn(const std::string& /*canonicalName*/) -> sim::io::IPwmInPort* { return nullptr; }
-    auto CreatePatternIn(const std::string& /*canonicalName*/) -> sim::io::IPatternInPort* { return nullptr; }
-    auto CreateAnalogOut(const std::string& /*canonicalName*/) -> sim::io::IAnalogOutPort* { return nullptr; }
-    auto CreateDigitalOut(const std::string& /*canonicalName*/) -> sim::io::IDigitalOutPort* { return nullptr; }
-    auto CreatePwmOut(const std::string& /*canonicalName*/) -> sim::io::IPwmOutPort* { return nullptr; }
-    auto CreatePatternOut(const std::string& /*canonicalName*/) -> sim::io::IPatternOutPort* { return nullptr; }
-    auto CreateGenericPublisher(const std::string& /*canonicalName*/) -> sim::generic::IGenericPublisher* { return nullptr; }
-    auto CreateGenericSubscriber(const std::string& /*canonicalName*/) -> sim::generic::IGenericSubscriber* { return nullptr; }
+    auto CreateCanController(const std::string& /*canonicalName*/) -> sim::can::ICanController* override { return nullptr; }
+    auto CreateEthController(const std::string& /*canonicalName*/) -> sim::eth::IEthController* override { return nullptr; }
+    auto CreateFlexrayController(const std::string& /*canonicalName*/) -> sim::fr::IFrController* override { return nullptr; }
+    auto CreateLinController(const std::string& /*canonicalName*/) -> sim::lin::ILinController* override { return nullptr; }
+    auto CreateAnalogIn(const std::string& /*canonicalName*/) -> sim::io::IAnalogInPort* override { return nullptr; }
+    auto CreateDigitalIn(const std::string& /*canonicalName*/) -> sim::io::IDigitalInPort* override { return nullptr; }
+    auto CreatePwmIn(const std::string& /*canonicalName*/) -> sim::io::IPwmInPort* override { return nullptr; }
+    auto CreatePatternIn(const std::string& /*canonicalName*/) -> sim::io::IPatternInPort* override { return nullptr; }
+    auto CreateAnalogOut(const std::string& /*canonicalName*/) -> sim::io::IAnalogOutPort* override { return nullptr; }
+    auto CreateDigitalOut(const std::string& /*canonicalName*/) -> sim::io::IDigitalOutPort* override { return nullptr; }
+    auto CreatePwmOut(const std::string& /*canonicalName*/) -> sim::io::IPwmOutPort* override { return nullptr; }
+    auto CreatePatternOut(const std::string& /*canonicalName*/) -> sim::io::IPatternOutPort* override { return nullptr; }
+    auto CreateGenericPublisher(const std::string& /*canonicalName*/) -> sim::generic::IGenericPublisher* override { return nullptr; }
+    auto CreateGenericSubscriber(const std::string& /*canonicalName*/) -> sim::generic::IGenericSubscriber* override { return nullptr; }
 
-    auto GetSyncMaster() -> sync::ISyncMaster* { return nullptr; }
-    
-    auto GetParticipantController() -> sync::IParticipantController* { return &mockParticipantController; }
+    auto GetSyncMaster() -> sync::ISyncMaster* override { return nullptr; }
+    auto GetParticipantController() -> sync::IParticipantController* override { return &mockParticipantController; }
+    auto GetSystemMonitor() -> sync::ISystemMonitor* override { return nullptr; }
+    auto GetSystemController() -> sync::ISystemController* override { return nullptr; }
+    auto GetLogger() -> logging::ILogger* override { return &logger; }
 
-    auto GetSystemMonitor() -> sync::ISystemMonitor* { return nullptr; }
-    auto GetSystemController() -> sync::ISystemController* { return nullptr; }
-    auto GetLogger() -> logging::ILogger* { return &logger; }
-
-    virtual auto GetTimeProvider() -> sync::ITimeProvider* { return &mockTimeProvider; }
-    void joinIbDomain(uint32_t ) override {}
     void RegisterCanSimulator(sim::can::IIbToCanSimulator* ) override {}
     void RegisterEthSimulator(sim::eth::IIbToEthSimulator* ) override {}
     void RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* ) override {}
     void RegisterLinSimulator(sim::lin::IIbToLinSimulator*) override {}
 
-    void SendIbMessage(const IServiceId* /*from*/, sim::can::CanMessage&& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::can::CanMessage& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::can::CanTransmitAcknowledge& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::can::CanControllerStatus& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::can::CanConfigureBaudrate& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::can::CanSetControllerMode& /*msg*/) {}
+    void SendIbMessage(const IServiceId* /*from*/, sim::can::CanMessage&& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::can::CanMessage& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::can::CanTransmitAcknowledge& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::can::CanControllerStatus& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::can::CanConfigureBaudrate& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::can::CanSetControllerMode& /*msg*/) override {}
                         
-    void SendIbMessage(const IServiceId* /*from*/, sim::eth::EthMessage&& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::eth::EthMessage& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::eth::EthTransmitAcknowledge& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::eth::EthStatus& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::eth::EthSetMode& /*msg*/) {}
+    void SendIbMessage(const IServiceId* /*from*/, sim::eth::EthMessage&& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::eth::EthMessage& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::eth::EthTransmitAcknowledge& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::eth::EthStatus& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::eth::EthSetMode& /*msg*/) override {}
                         
-    void SendIbMessage(const IServiceId* /*from*/, sim::fr::FrMessage&& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::FrMessage& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, sim::fr::FrMessageAck&& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::FrMessageAck& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::FrSymbol& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::FrSymbolAck& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::CycleStart& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::HostCommand& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::ControllerConfig& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::TxBufferConfigUpdate& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::TxBufferUpdate& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::ControllerStatus& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::PocStatus& /*msg*/) {}
+    void SendIbMessage(const IServiceId* /*from*/, sim::fr::FrMessage&& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::FrMessage& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, sim::fr::FrMessageAck&& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::FrMessageAck& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::FrSymbol& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::FrSymbolAck& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::CycleStart& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::HostCommand& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::ControllerConfig& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::TxBufferConfigUpdate& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::TxBufferUpdate& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::ControllerStatus& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::fr::PocStatus& /*msg*/) override {}
                         
-    void SendIbMessage(const IServiceId* /*from*/, const sim::lin::SendFrameRequest& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::lin::SendFrameHeaderRequest& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::lin::Transmission& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::lin::FrameResponseUpdate& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::lin::ControllerConfig& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::lin::ControllerStatusUpdate& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::lin::WakeupPulse& /*msg*/) {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::lin::SendFrameRequest& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::lin::SendFrameHeaderRequest& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::lin::Transmission& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::lin::FrameResponseUpdate& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::lin::ControllerConfig& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::lin::ControllerStatusUpdate& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::lin::WakeupPulse& /*msg*/) override {}
                         
-    void SendIbMessage(const IServiceId* /*from*/, const sim::io::AnalogIoMessage& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::io::DigitalIoMessage& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, sim::io::PatternIoMessage&& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::io::PatternIoMessage& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::io::PwmIoMessage& /*msg*/) {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::io::AnalogIoMessage& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::io::DigitalIoMessage& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, sim::io::PatternIoMessage&& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::io::PatternIoMessage& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::io::PwmIoMessage& /*msg*/) override {}
                         
-    void SendIbMessage(const IServiceId* /*from*/, sim::generic::GenericMessage&& /*msg*/) {}
-    void SendIbMessage(const IServiceId* /*from*/, const sim::generic::GenericMessage& /*msg*/) {}
-    virtual void SendIbMessage_proxy(const IServiceId* /*from*/, const sim::generic::GenericMessage& /*msg*/) {}
+    void SendIbMessage(const IServiceId* /*from*/, sim::generic::GenericMessage&& /*msg*/) override {}
+    void SendIbMessage(const IServiceId* /*from*/, const sim::generic::GenericMessage& /*msg*/) override {}
 
     void SendIbMessage(const ib::mw::IServiceId* /*from*/, const sync::NextSimTask& /*msg*/) {}
     void SendIbMessage(const ib::mw::IServiceId* /*from*/, const sync::Tick& /*msg*/) {}
@@ -201,6 +196,10 @@ public:
     void FlushSendBuffers() {}
     auto GetParticipantName() const -> const std::string& override { throw std::runtime_error("invalid call"); }
     auto GetConfig() const -> const ib::cfg::Config& override { throw std::runtime_error("invalid call"); }
+
+    virtual auto GetTimeProvider() -> sync::ITimeProvider* { return &mockTimeProvider; }
+    virtual void SendIbMessage_proxy(const IServiceId* /*from*/, const sim::generic::GenericMessage& /*msg*/) {} //helper for gtest workaround
+    void joinIbDomain(uint32_t ) {}
 
     DummyLogger logger;
     MockTimeProvider mockTimeProvider;

@@ -46,16 +46,16 @@ public:
     {
         return _reader.NumberOfMessages();
     }
-    auto Name() const -> const std::string&
+    auto Name() const -> const std::string& override
     {
         // Pcap has no concept of channel, return hard coded.
         return _channelName;
     }
-    auto GetMetaInfos() const -> const std::map<std::string, std::string>&
+    auto GetMetaInfos() const -> const std::map<std::string, std::string>& override
     {
         return _reader.GetMetaInfos();
     }
-    auto GetReader() -> std::shared_ptr<IReplayChannelReader>
+    auto GetReader() -> std::shared_ptr<IReplayChannelReader> override
     {
         // return a copy, which allows caching the internal data structures
         // for seeking. It is reset to start reading at the beginning.
