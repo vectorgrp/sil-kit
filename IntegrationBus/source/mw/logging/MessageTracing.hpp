@@ -8,19 +8,6 @@
 namespace ib {
 namespace mw {
 
-template<class IbMessageT>
-//[[deprecated]]
-void TraceRx(logging::ILogger* logger, ib::mw::EndpointAddress addr, const IbMessageT& msg)
-{
-    logger->Trace("Recv from {}: {}", addr, msg);
-}
-
-template<class IbMessageT>
-//[[deprecated]]
-void TraceTx(logging::ILogger* logger, ib::mw::EndpointAddress addr, const IbMessageT& msg)
-{
-    logger->Trace("Send from {}: {}", addr, msg);
-}
 
 template<class IbMessageT>
 void TraceRx(logging::ILogger* logger, const IIbServiceEndpoint* addr, const IbMessageT& msg)

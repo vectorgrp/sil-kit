@@ -784,14 +784,6 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, lo
 
 template <class IbConnectionT>
 template <typename IbMessageT>
-void ComAdapter<IbConnectionT>::SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg)
-{
-    TraceTx(_logger.get(), from, msg);
-    _ibConnection.SendIbMessage(from, std::forward<IbMessageT>(msg));
-}
-
-template <class IbConnectionT>
-template <typename IbMessageT>
 void ComAdapter<IbConnectionT>::SendIbMessageImpl(const IIbServiceEndpoint* from, IbMessageT&& msg)
 {
   TraceTx(_logger.get(), from, msg);
@@ -833,7 +825,8 @@ auto ComAdapter<IbConnectionT>::CreateController(const std::string& serviceName,
     auto controller = std::make_unique<ControllerT>(this, std::forward<Arg>(arg)...);
     auto* controllerPtr = controller.get();
 
-    controller->SetEndpointAddress(EndpointAddress{_participantId, endpointId});
+    controller->SetEndpointAddress(_ibConnection.CreateEndpointAddress());
+
     auto id = ServiceId{};
     id.linkName = link.name;
     id.participantName = _participantName;
@@ -843,6 +836,7 @@ auto ComAdapter<IbConnectionT>::CreateController(const std::string& serviceName,
     controller->SetServiceId(id);
 
     _ibConnection.RegisterIbService(link.name, endpointId, controllerPtr);
+
 
     controllerMap[endpointId] = std::move(controller);
     return controllerPtr;

@@ -83,7 +83,7 @@ void VAsioReceiver<MsgT>::ReceiveRawMsg(MessageBuffer&& buffer)
     MsgT msg;
     buffer >> endpoint >> msg;
 
-    TraceRx(_logger, endpoint, msg);
+    TraceRx(_logger, this, msg);
     _serviceId.legacyEpa = endpoint;
     _link->DistributeRemoteIbMessage(this, msg);
 }

@@ -31,6 +31,9 @@ struct NullConnection
     void OnAllMessagesDelivered(std::function<void(void)> /*callback*/) {};
     void FlushSendBuffers() {};
     void NotifyShutdown() {};
+    auto CreateEndpointAddress() const -> mw::EndpointAddress { return {}; }
+
+
 };
 } // anonymous namespace
     

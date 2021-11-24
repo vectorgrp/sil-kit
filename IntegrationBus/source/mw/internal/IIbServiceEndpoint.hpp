@@ -4,6 +4,8 @@
 
 #include <string>
 #include <ostream>
+#include <sstream>
+#include <vector>
 
 #include <ib/cfg/Config.hpp>
 #include <ib/mw/EndpointAddress.hpp>
@@ -13,9 +15,8 @@ namespace mw {
 
 struct ServiceId
 {
-    std::string id{ "Undefined" }; //!< Unique ID
-    std::string linkName{ "Undefined" }; //!< the service's link name
     std::string participantName{ "Undefined" }; //!< name of the participant
+    std::string linkName{ "Undefined" }; //!< the service's link name
     std::string serviceName{ "Undefined" }; //!< the controller's or the service's name
     bool isLinkSimulated{ false };
     cfg::Link::Type type{ cfg::Link::Type::Undefined };
@@ -23,8 +24,11 @@ struct ServiceId
 };
 
 inline bool operator==(const ServiceId& lhs, const ServiceId& rhs);
+//!< Returns the ServiceId encoded as a string containing the tuple (participantName, linkName, serviceName)
 inline std::string to_string(const ServiceId& id);
 inline std::ostream& operator<<(std::ostream& out, const ServiceId& id);
+//!< Parses a serialized ServiceId into a struct. This is a lossy operation.
+inline auto from_string(const std::string& str) -> ServiceId;
 
 //TODO rename IIbEndpoint
 //     remove IIbEndpoint<MsgT> from IIbTo$Service interfaces
@@ -42,8 +46,8 @@ public:
 
 inline bool operator==(const ServiceId& lhs, const ServiceId& rhs)
 {
-    return lhs.id == rhs.id
-        && lhs.linkName == rhs.linkName
+    return 
+        lhs.linkName == rhs.linkName
         && lhs.participantName == rhs.participantName
         && lhs.serviceName == rhs.serviceName
         && lhs.isLinkSimulated == rhs.isLinkSimulated
@@ -54,7 +58,45 @@ inline bool operator==(const ServiceId& lhs, const ServiceId& rhs)
 
 inline std::string to_string(const ServiceId& id)
 {
-    return id.id;
+    // Compute Id
+    const std::string separator{ "/" };
+    std::stringstream ss;
+    ss << id.participantName
+        << separator
+        << id.linkName
+        << separator
+        << id.serviceName
+        ;
+    return ss.str();
+}
+
+inline auto from_string(const std::string& str) -> ServiceId
+{
+    const std::string separator{ "/" };
+    auto input = str;
+    std::vector<std::string> tokens;
+
+    for (auto i = input.find(separator); i != input.npos; i = input.find(separator))
+    {
+        tokens.emplace_back(std::move(input.substr(0, i)));
+        input = input.substr(i + 1);
+    }
+
+    if (!input.empty())
+    {
+        tokens.emplace_back(std::move(input));
+    }
+
+    if (tokens.size() != 3)
+    {
+        throw std::runtime_error("Cannot parse ServiceId from \"" + str +"\"");
+    }
+
+    ServiceId id{};
+    id.participantName = tokens.at(0);
+    id.linkName = tokens.at(1);
+    id.serviceName = tokens.at(2);
+    return id;
 }
 inline std::ostream& operator<<(std::ostream& out, const ServiceId& id)
 {

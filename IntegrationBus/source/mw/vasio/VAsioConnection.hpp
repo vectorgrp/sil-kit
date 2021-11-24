@@ -82,6 +82,13 @@ public:
     void SetLogger(logging::ILogger* logger);
     void JoinDomain(uint32_t domainId);
 
+    //!< The endpoint enumeration does no longer rely on the Config
+    auto CreateEndpointAddress() const -> mw::EndpointAddress
+    {
+        static EndpointId eid{ 0 };
+        return { _participantId, eid++ };
+    }
+
     //XXX remove endpointId param
     template <class IbServiceT>
     void RegisterIbService(const std::string& link, EndpointId endpointId, IbServiceT* service)
@@ -239,10 +246,8 @@ private:
 
             std::unique_ptr<IVAsioReceiver> rawReceiver = std::make_unique<VAsioReceiver<IbMessageT>>(subscriptionInfo, link, _logger);
             auto* serviceIdPtr = dynamic_cast<IIbServiceEndpoint*>(rawReceiver.get());
-            ServiceId serviceId;
-            serviceId.linkName = link->Name();
-            serviceId.participantName = _participantName;
-            serviceIdPtr->SetServiceId(serviceId);
+            //Copy the Service Endpoint Id
+            serviceIdPtr->SetServiceId(dynamic_cast<const mw::IIbServiceEndpoint&>(*receiver).GetServiceId());
             _vasioReceivers.emplace_back(std::move(rawReceiver));
 
 

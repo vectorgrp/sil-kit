@@ -210,9 +210,6 @@ private:
     void SetTimeProvider(sync::ITimeProvider*);
 
     template<class IbMessageT>
-    void SendIbMessageImpl(EndpointAddress from, IbMessageT&& msg);
-
-    template<class IbMessageT>
     void SendIbMessageImpl(const IIbServiceEndpoint* from, IbMessageT&& msg);
 
     template<class MsgT, class ConfigT>
