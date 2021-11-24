@@ -27,7 +27,6 @@
 #include "SerdesSimIo.hpp"
 #include "SerdesSimLin.hpp"
 #include "SerdesSimFlexray.hpp"
-#include "IbMsgTraits.hpp"
 
 #include "IbLink.hpp"
 #include "IVAsioPeer.hpp"
@@ -35,6 +34,7 @@
 #include "VAsioTransmitter.hpp"
 #include "VAsioMsgKind.hpp"
 #include "IServiceId.hpp"
+#include "traits/IbMsgTraits.hpp"
 
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/sim/can/string_utils.hpp"

@@ -14,7 +14,6 @@ add_library(IbMwVAsio STATIC
     SerdesSimIo.hpp
     SerdesSimLin.hpp
     SerdesSimFlexray.hpp
-    IbMsgTraits.hpp
     IbLink.hpp
     IVAsioPeer.hpp
     VAsioDatatypes.hpp

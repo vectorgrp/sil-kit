@@ -223,9 +223,10 @@ private:
     template<class ControllerT>
     auto GetController(EndpointId endpointId) -> ControllerT*;
     template<class ControllerT, typename... Arg>
-    auto CreateController(EndpointId endpointId, const cfg::Link& link, Arg&&... arg) -> ControllerT*;
+    auto CreateController(const std::string& serviceName, EndpointId endpointId, const cfg::Link& link, Arg&&... arg) -> ControllerT*;
+    //!< internal services don't have a link config
     template<class ControllerT, typename... Arg>
-    auto CreateController(EndpointId endpointId, const std::string& topicName, Arg&&... arg) -> ControllerT*;
+    auto CreateController(EndpointId endpointId, const std::string& serviceName,  Arg&&... arg) -> ControllerT*;
 
     auto GetLinkById(int16_t linkId) -> cfg::Link&;
 

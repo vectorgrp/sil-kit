@@ -9,6 +9,7 @@
 
 #include "IIbMessageReceiver.hpp"
 #include "IServiceId.hpp"
+#include "traits/IbMsgTraits.hpp"
 
 namespace ib {
 namespace mw {

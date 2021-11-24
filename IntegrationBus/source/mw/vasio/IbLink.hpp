@@ -5,7 +5,7 @@
 #include "ib/mw/logging/ILogger.hpp"
 
 #include "VAsioTransmitter.hpp"
-#include "IbMsgTraits.hpp"
+#include "traits/IbMsgTraits.hpp"
 
 #include "IIbMessageReceiver.hpp"
 
