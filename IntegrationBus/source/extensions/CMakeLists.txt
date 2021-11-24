@@ -49,9 +49,9 @@ set(extension_os "${CMAKE_SYSTEM_NAME}")
 
 if(UNIX)
     include(get_compiler_arch)
-    get_ubuntu_version(ubuntu_vers)
+    get_linux_distro(ubuntu_vers)
     if(DEFINED ubuntu_vers)
-        set(extension_os "${extension_os}/Ubuntu${ubuntu_vers}")
+        set(extension_os "${extension_os}/${ubuntu_vers}")
     endif()
 
     target_link_libraries(IbExtensions

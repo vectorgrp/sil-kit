@@ -1,5 +1,19 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 
+function(get_linux_distro outVers)
+    execute_process(COMMAND /usr/bin/lsb_release -s -i
+        TIMEOUT 1
+        OUTPUT_VARIABLE linux_id
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    execute_process(COMMAND /usr/bin/lsb_release -s -r
+        TIMEOUT 1
+        OUTPUT_VARIABLE linux_release
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    set(${outVers} "${linux_id}-${linux_release}" PARENT_SCOPE)
+endfunction()
+
 function(get_ubuntu_version outVers)
     file(READ /etc/issue issue)
     string(REGEX REPLACE "^Ubuntu.*([0-9][0-9]+\.[0-9][0-9]).*" "\\1" issue "${issue}")
