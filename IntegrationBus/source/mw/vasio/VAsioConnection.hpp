@@ -134,12 +134,6 @@ private:
     template <class MsgT>
     using IbLinkMap = std::map<std::string, std::shared_ptr<IbLink<MsgT>>>;
 
-    //XXX Old API
-    template <class MsgT>
-    using IbEndpointToLinkMap = std::map<EndpointId, std::shared_ptr<IbLink<MsgT>>>;
-    //template <class MsgT>
-    //using IbEndpointToReceiverMap = std::map<EndpointId, IIbMessageReceiver<MsgT>>;
-    //XXX New
     template <class MsgT>
     using IbServiceToReceiverMap = std::map<const IServiceId*, IIbMessageReceiver<MsgT>*>;
     template <class MsgT>
@@ -260,13 +254,6 @@ private:
         }
     }
     template<class IbMessageT>
-    void RegisterIbMsgSender(const std::string& linkName, EndpointId endpointId)
-    {
-        auto ibLink = GetLinkByName<IbMessageT>(linkName);
-        auto&& linkMap = std::get<IbEndpointToLinkMap<IbMessageT>>(_endpointToLinkMap);
-        linkMap[endpointId] = ibLink;
-    }
-    template<class IbMessageT>
     void RegisterIbMsgSender(const std::string& linkName, const IServiceId* serviceId)
     {
         auto ibLink = GetLinkByName<IbMessageT>(linkName);
@@ -286,9 +273,6 @@ private:
             using IbMessageT = std::decay_t<decltype(ibMessage)>;
             this->RegisterIbMsgReceiver<IbMessageT>(link, service);
 
-            //XXX auto&& receiverMap = std::get<IbEndpointToReceiverMap<IbMessageT>>(this->_endpointToReceiverMap);
-            //XXX receiverMap[endpointId] = service;
-
             auto&& serviceMap = std::get<IbServiceToReceiverMap<IbMessageT>>(this->_serviceToReceiverMap);
             auto& serviceId = dynamic_cast<IServiceId&>(*service);
             serviceMap[&serviceId] = service;
@@ -299,7 +283,6 @@ private:
             [this, &link, &endpointId, &service](auto&& ibMessage)
         {
             using IbMessageT = std::decay_t<decltype(ibMessage)>;
-            //XXX this->RegisterIbMsgSender<IbMessageT>(link, endpointId);
             auto& serviceId = dynamic_cast<IServiceId&>(*service);
             this->RegisterIbMsgSender<IbMessageT>(link, &serviceId);
         }
@@ -315,16 +298,7 @@ private:
     void SendIbMessageImpl(const IServiceId* from, IbMessageT&& msg)
     {
         auto& linkMap = std::get<IbServiceToLinkMap<std::decay_t<IbMessageT>>>(_serviceToLinkMap);
-        //XXX auto& receiverMap = std::get<IbEndpointToReceiverMap<std::decay_t<IbMessageT>>>(_endpointToReceiverMap);
-        //XXX linkMap[from.endpoint]->DistributeLocalIbMessage(from, receiverMap[from.endpoint], std::forward<IbMessageT>(msg));
-        try {
-            linkMap[from]->DistributeLocalIbMessage(from, std::forward<IbMessageT>(msg));
-        }
-        catch (const std::bad_cast& e) {
-            std::cout << "bad cast " << e.what() << std::endl;
-            throw;
-        }
-
+        linkMap[from]->DistributeLocalIbMessage(from, std::forward<IbMessageT>(msg));
     }
 
     template <typename... MethodArgs, typename... Args>
@@ -377,10 +351,6 @@ private:
     //! \brief Virtual IB links by linkName according to IbConfig.
     util::tuple_tools::wrapped_tuple<IbLinkMap, IbMessageTypes> _ibLinks;
     //! \brief Lookup for sender objects by ID.
-    // Old
-    util::tuple_tools::wrapped_tuple<IbEndpointToLinkMap, IbMessageTypes> _endpointToLinkMap;
-    //util::tuple_tools::wrapped_tuple<IbEndpointToReceiverMap, IbMessageTypes> _endpointToReceiverMap;
-    // New
     util::tuple_tools::wrapped_tuple<IbServiceToReceiverMap, IbMessageTypes> _serviceToReceiverMap;
     util::tuple_tools::wrapped_tuple<IbServiceToLinkMap, IbMessageTypes> _serviceToLinkMap;
 
