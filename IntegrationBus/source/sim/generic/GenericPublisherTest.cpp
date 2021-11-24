@@ -28,13 +28,13 @@ using ::ib::test::MockTraceSink;
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    void SendIbMessage(const IServiceId* from, GenericMessage&& msg) override
+    void SendIbMessage(const IIbServiceEndpoint* from, GenericMessage&& msg) override
     {
         SendIbMessage_proxy(from, msg);
     }
 
-    MOCK_METHOD2(SendIbMessage, void(IServiceId*, const GenericMessage&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(const IServiceId*, const GenericMessage&));
+    MOCK_METHOD2(SendIbMessage, void(IIbServiceEndpoint*, const GenericMessage&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(const IIbServiceEndpoint*, const GenericMessage&));
 };
 
 class GenericPublisherTest : public ::testing::Test

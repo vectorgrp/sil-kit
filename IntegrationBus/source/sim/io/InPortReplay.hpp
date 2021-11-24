@@ -18,7 +18,7 @@ class InPortReplay
     , public ib::mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
     , public tracing::IReplayDataController
-    , public mw::IServiceId
+    , public mw::IIbServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -48,13 +48,13 @@ public:
     void RegisterHandler(ValueHandler handler) override;
 
      // IIbToInPort
-    void ReceiveIbMessage(const mw::IServiceId* from, const MessageType& msg) override;
+    void ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const MessageType& msg) override;
 
     //! \brief Setter and getter for the EndpointAddress associated with this controller
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
-    // IServiceId
+    // IIbServiceEndpoint
     inline void SetServiceId(const mw::ServiceId& serviceId) override;
     inline auto GetServiceId() const -> const mw::ServiceId & override;
 
@@ -116,7 +116,7 @@ void InPortReplay<MsgT>::RegisterHandler(ValueHandler handler)
 }
 
 template<typename MsgT>
-void InPortReplay<MsgT>::ReceiveIbMessage(const mw::IServiceId* from, const MessageType& msg)
+void InPortReplay<MsgT>::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const MessageType& msg)
 {
     if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
     {

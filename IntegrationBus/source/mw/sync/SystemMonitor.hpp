@@ -10,7 +10,7 @@
 
 #include "IIbToSystemMonitor.hpp"
 #include "IComAdapterInternal.hpp"
-#include "IServiceId.hpp"
+#include "IIbServiceEndpoint.hpp"
 
 namespace ib {
 namespace mw {
@@ -19,7 +19,7 @@ namespace sync {
 class SystemMonitor
     : public ISystemMonitor
     , public IIbToSystemMonitor
-    , public mw::IServiceId
+    , public mw::IIbServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -51,9 +51,9 @@ public:
     void SetEndpointAddress(const mw::EndpointAddress& addr) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
-    void ReceiveIbMessage(const IServiceId* from, const sync::ParticipantStatus& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantStatus& msg) override;
 
-    // IServiceId
+    // IIbServiceEndpoint
     inline void SetServiceId(const mw::ServiceId& serviceId) override;
     inline auto GetServiceId() const -> const mw::ServiceId & override;
 

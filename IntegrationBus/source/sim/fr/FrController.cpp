@@ -209,7 +209,7 @@ void FrController::RegisterCycleStartHandler(CycleStartHandler handler)
     _comAdapter->GetLogger()->Info("CycleStartHandler callback is not supported in basic FlexRay simulation.");
 }
 
-void FrController::ReceiveIbMessage(const IServiceId* from, const FrMessage& msg)
+void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessage& msg)
 {
     if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
         return;
@@ -227,7 +227,7 @@ void FrController::ReceiveIbMessage(const IServiceId* from, const FrMessage& msg
     SendIbMessage(std::move(ack));
 }
 
-void FrController::ReceiveIbMessage(const IServiceId* from, const FrMessageAck& msg)
+void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessageAck& msg)
 {
     if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
         return;
@@ -235,7 +235,7 @@ void FrController::ReceiveIbMessage(const IServiceId* from, const FrMessageAck& 
     CallHandlers(msg);
 }
 
-void FrController::ReceiveIbMessage(const IServiceId* from, const FrSymbol& msg)
+void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbol& msg)
 {
     if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
         return;
@@ -266,7 +266,7 @@ void FrController::ReceiveIbMessage(const IServiceId* from, const FrSymbol& msg)
     SendIbMessage(ack);
 }
 
-void FrController::ReceiveIbMessage(const IServiceId* from, const FrSymbolAck& msg)
+void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbolAck& msg)
 {
     if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
         return;

@@ -43,7 +43,7 @@ auto GenericSubscriber::EndpointAddress() const -> const mw::EndpointAddress&
     return _serviceId.legacyEpa;
 }
 
-void GenericSubscriber::ReceiveIbMessage(const mw::IServiceId* from, const GenericMessage& msg)
+void GenericSubscriber::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const GenericMessage& msg)
 {
     if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
         return;

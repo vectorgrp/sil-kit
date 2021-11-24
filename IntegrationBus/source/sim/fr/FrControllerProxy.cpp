@@ -139,7 +139,7 @@ void FrControllerProxy::RegisterCycleStartHandler(CycleStartHandler handler)
     RegisterHandler(handler);
 }
 
-void FrControllerProxy::ReceiveIbMessage(const IServiceId* from, const FrMessage& msg)
+void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessage& msg)
 {
     if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
@@ -149,7 +149,7 @@ void FrControllerProxy::ReceiveIbMessage(const IServiceId* from, const FrMessage
     CallHandlers(msg);
 }
 
-void FrControllerProxy::ReceiveIbMessage(const IServiceId* from, const FrMessageAck& msg)
+void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessageAck& msg)
 {
     if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
@@ -163,7 +163,7 @@ void FrControllerProxy::ReceiveIbMessage(const IServiceId* from, const FrMessage
     CallHandlers(msg);
 }
 
-void FrControllerProxy::ReceiveIbMessage(const IServiceId* from, const FrSymbol& msg)
+void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbol& msg)
 {
     if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
@@ -185,7 +185,7 @@ void FrControllerProxy::ReceiveIbMessage(const IServiceId* from, const FrSymbol&
     CallHandlers(msg);
 }
 
-void FrControllerProxy::ReceiveIbMessage(const IServiceId* from, const FrSymbolAck& msg)
+void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbolAck& msg)
 {
     if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
@@ -193,7 +193,7 @@ void FrControllerProxy::ReceiveIbMessage(const IServiceId* from, const FrSymbolA
     CallHandlers(msg);
 }
 
-void FrControllerProxy::ReceiveIbMessage(const IServiceId* from, const CycleStart& msg)
+void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CycleStart& msg)
 {
     if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
@@ -201,7 +201,7 @@ void FrControllerProxy::ReceiveIbMessage(const IServiceId* from, const CycleStar
     CallHandlers(msg);
 }
 
-void FrControllerProxy::ReceiveIbMessage(const IServiceId* from, const PocStatus& msg)
+void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const PocStatus& msg)
 {
     if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;

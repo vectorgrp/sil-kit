@@ -28,7 +28,7 @@ using ::ib::mw::test::DummyComAdapter;
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const AnalogIoMessage&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const AnalogIoMessage&));
 };
 
 class OutPortTest : public ::testing::Test

@@ -81,7 +81,7 @@ void EthControllerProxy::RegisterBitRateChangedHandler(BitRateChangedHandler han
 }
 
 
-void EthControllerProxy::ReceiveIbMessage(const IServiceId* from, const EthMessage& msg)
+void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg)
 {
     if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
@@ -92,7 +92,7 @@ void EthControllerProxy::ReceiveIbMessage(const IServiceId* from, const EthMessa
     CallHandlers(msg);
 }
 
-void EthControllerProxy::ReceiveIbMessage(const IServiceId* from, const EthTransmitAcknowledge& msg)
+void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthTransmitAcknowledge& msg)
 {
     if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
@@ -112,7 +112,7 @@ void EthControllerProxy::ReceiveIbMessage(const IServiceId* from, const EthTrans
     CallHandlers(msg);
 }
 
-void EthControllerProxy::ReceiveIbMessage(const IServiceId* from, const EthStatus& msg)
+void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthStatus& msg)
 {
     if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;

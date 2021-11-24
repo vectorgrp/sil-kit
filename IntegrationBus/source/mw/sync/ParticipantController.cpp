@@ -463,7 +463,7 @@ auto ParticipantController::EndpointAddress() const -> const mw::EndpointAddress
     return _serviceId.legacyEpa;
 }     
 
-void ParticipantController::ReceiveIbMessage(const IServiceId* /*from*/, const ParticipantCommand& command)
+void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const ParticipantCommand& command)
 {
     if (command.participant != _serviceId.legacyEpa.participant)
         return;
@@ -471,7 +471,7 @@ void ParticipantController::ReceiveIbMessage(const IServiceId* /*from*/, const P
     Initialize(command, std::string{"Received ParticipantCommand::"} + to_string(command.kind));
 }
 
-void ParticipantController::ReceiveIbMessage(const IServiceId* /*from*/, const SystemCommand& command)
+void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const SystemCommand& command)
 {
     // We have to supress a SystemCommand::ExecuteColdswap during the restart
     // After a coldswap, this command is still present in the SystemControllers
@@ -558,7 +558,7 @@ void ParticipantController::ReceiveIbMessage(const IServiceId* /*from*/, const S
     ReportError("Received SystemCommand::" + to_string(command.kind) + " while in ParticipantState::" + to_string(State()));
 }
 
-void ParticipantController::ReceiveIbMessage(const IServiceId* /*from*/, const Tick& msg)
+void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const Tick& msg)
 {
     switch (_syncType)
     {
@@ -609,7 +609,7 @@ void ParticipantController::ReceiveIbMessage(const IServiceId* /*from*/, const T
     }
 }
 
-void ParticipantController::ReceiveIbMessage(const IServiceId* from, const QuantumGrant& msg)
+void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, const QuantumGrant& msg)
 {
     if (_syncType != cfg::SyncType::TimeQuantum)
         return;
@@ -656,7 +656,7 @@ void ParticipantController::ReceiveIbMessage(const IServiceId* from, const Quant
     }
 }
 
-void ParticipantController::ReceiveIbMessage(const IServiceId* from, const NextSimTask& task)
+void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, const NextSimTask& task)
 {
     if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa) return;
 

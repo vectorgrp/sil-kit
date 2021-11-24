@@ -21,7 +21,7 @@ void GenericSubscriberReplay::SetReceiveMessageHandler(CallbackT callback)
     _subscriber.SetReceiveMessageHandler(std::move(callback));
 }
 
-void GenericSubscriberReplay::ReceiveIbMessage(const mw::IServiceId* from, const GenericMessage& msg)
+void GenericSubscriberReplay::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const GenericMessage& msg)
 {
     if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
     {

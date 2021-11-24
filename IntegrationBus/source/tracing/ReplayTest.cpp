@@ -46,11 +46,11 @@ auto ACanMessage(const CanMessage& msg) -> testing::Matcher<const CanMessage&>
   );
 }
 
-auto AService(const IServiceId* service) -> testing::Matcher<const IServiceId*>
+auto AService(const IIbServiceEndpoint* service) -> testing::Matcher<const IIbServiceEndpoint*>
 {
   using namespace testing;
   return AllOf(
-    Property(&IServiceId::GetServiceId, Eq(service->GetServiceId()))
+    Property(&IIbServiceEndpoint::GetServiceId, Eq(service->GetServiceId()))
   );
 }
 
@@ -114,30 +114,30 @@ class MockComAdapter : public DummyComAdapter
 {
 public:
     //Ethernet calls
-    void SendIbMessage(const IServiceId* from, EthMessage&& msg) override
+    void SendIbMessage(const IIbServiceEndpoint* from, EthMessage&& msg) override
     {
         SendIbMessage_proxy(from, msg);
     }
-    MOCK_METHOD2(SendIbMessage, void(IServiceId*, const EthMessage&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(const IServiceId*, const EthMessage&));
-    MOCK_METHOD2(SendIbMessage, void(IServiceId*, const EthTransmitAcknowledge&));
-    MOCK_METHOD2(SendIbMessage, void(IServiceId*, const EthStatus&));
-    MOCK_METHOD2(SendIbMessage, void(IServiceId*, const EthSetMode&));
+    MOCK_METHOD2(SendIbMessage, void(IIbServiceEndpoint*, const EthMessage&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(const IIbServiceEndpoint*, const EthMessage&));
+    MOCK_METHOD2(SendIbMessage, void(IIbServiceEndpoint*, const EthTransmitAcknowledge&));
+    MOCK_METHOD2(SendIbMessage, void(IIbServiceEndpoint*, const EthStatus&));
+    MOCK_METHOD2(SendIbMessage, void(IIbServiceEndpoint*, const EthSetMode&));
     //  Generic Message calls
-    MOCK_METHOD2(SendIbMessage_proxy, void(const IServiceId*, const GenericMessage&));
-    void SendIbMessage(const IServiceId* from, GenericMessage&& msg) override
+    MOCK_METHOD2(SendIbMessage_proxy, void(const IIbServiceEndpoint*, const GenericMessage&));
+    void SendIbMessage(const IIbServiceEndpoint* from, GenericMessage&& msg) override
     {
         SendIbMessage_proxy(from, msg);
     }
     MOCK_METHOD2(ReceiveIbMessage, void(EndpointAddress, const GenericMessage&));
 
     // IO Ports
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const DigitalIoMessage&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const DigitalIoMessage&));
     MOCK_METHOD2(ReceiveIbMessage, void(EndpointAddress, const DigitalIoMessage&));
     // CAN
-    MOCK_METHOD2(SendIbMessage_proxy, void(const IServiceId*, const CanMessage&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(const IIbServiceEndpoint*, const CanMessage&));
     MOCK_METHOD2(ReceiveIbMessage, void(EndpointAddress, const CanMessage&));
-    void SendIbMessage(const IServiceId* from, CanMessage&& msg) override
+    void SendIbMessage(const IIbServiceEndpoint* from, CanMessage&& msg) override
     {
         SendIbMessage_proxy(from, msg);
     }

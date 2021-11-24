@@ -33,7 +33,7 @@
 #include "VAsioReceiver.hpp"
 #include "VAsioTransmitter.hpp"
 #include "VAsioMsgKind.hpp"
-#include "IServiceId.hpp"
+#include "IIbServiceEndpoint.hpp"
 #include "traits/IbMsgTraits.hpp"
 
 #include "ib/mw/sync/string_utils.hpp"
@@ -97,7 +97,7 @@ public:
         _logger->Trace("VAsio received all subscription acknowledges for IbService {}.", typeid(*service).name());
     }
     template<typename IbMessageT>
-    void SendIbMessage(const IServiceId* from, IbMessageT&& msg)
+    void SendIbMessage(const IIbServiceEndpoint* from, IbMessageT&& msg)
     {
         ExecuteOnIoThread(&VAsioConnection::SendIbMessageImpl<IbMessageT>, from, std::forward<IbMessageT>(msg));
     }
@@ -135,9 +135,9 @@ private:
     using IbLinkMap = std::map<std::string, std::shared_ptr<IbLink<MsgT>>>;
 
     template <class MsgT>
-    using IbServiceToReceiverMap = std::map<const IServiceId*, IIbMessageReceiver<MsgT>*>;
+    using IbServiceToReceiverMap = std::map<const IIbServiceEndpoint*, IIbMessageReceiver<MsgT>*>;
     template <class MsgT>
-    using IbServiceToLinkMap = std::map<const IServiceId*, std::shared_ptr<IbLink<MsgT>>>;
+    using IbServiceToLinkMap = std::map<const IIbServiceEndpoint*, std::shared_ptr<IbLink<MsgT>>>;
 
     using ParticipantAnnouncementReceiver = std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)>;
 
@@ -238,7 +238,7 @@ private:
             subscriptionInfo.msgTypeName = IbMsgTraits<IbMessageT>::TypeName();
 
             std::unique_ptr<IVAsioReceiver> rawReceiver = std::make_unique<VAsioReceiver<IbMessageT>>(subscriptionInfo, link, _logger);
-            auto* serviceIdPtr = dynamic_cast<IServiceId*>(rawReceiver.get());
+            auto* serviceIdPtr = dynamic_cast<IIbServiceEndpoint*>(rawReceiver.get());
             ServiceId serviceId;
             serviceId.linkName = link->Name();
             serviceId.participantName = _participantName;
@@ -254,7 +254,7 @@ private:
         }
     }
     template<class IbMessageT>
-    void RegisterIbMsgSender(const std::string& linkName, const IServiceId* serviceId)
+    void RegisterIbMsgSender(const std::string& linkName, const IIbServiceEndpoint* serviceId)
     {
         auto ibLink = GetLinkByName<IbMessageT>(linkName);
         auto&& serviceLinkMap = std::get<IbServiceToLinkMap<IbMessageT>>(_serviceToLinkMap);
@@ -274,7 +274,7 @@ private:
             this->RegisterIbMsgReceiver<IbMessageT>(link, service);
 
             auto&& serviceMap = std::get<IbServiceToReceiverMap<IbMessageT>>(this->_serviceToReceiverMap);
-            auto& serviceId = dynamic_cast<IServiceId&>(*service);
+            auto& serviceId = dynamic_cast<IIbServiceEndpoint&>(*service);
             serviceMap[&serviceId] = service;
         }
         );
@@ -283,7 +283,7 @@ private:
             [this, &link, &endpointId, &service](auto&& ibMessage)
         {
             using IbMessageT = std::decay_t<decltype(ibMessage)>;
-            auto& serviceId = dynamic_cast<IServiceId&>(*service);
+            auto& serviceId = dynamic_cast<IIbServiceEndpoint&>(*service);
             this->RegisterIbMsgSender<IbMessageT>(link, &serviceId);
         }
         );
@@ -295,7 +295,7 @@ private:
     }
 
     template <class IbMessageT>
-    void SendIbMessageImpl(const IServiceId* from, IbMessageT&& msg)
+    void SendIbMessageImpl(const IIbServiceEndpoint* from, IbMessageT&& msg)
     {
         auto& linkMap = std::get<IbServiceToLinkMap<std::decay_t<IbMessageT>>>(_serviceToLinkMap);
         linkMap[from]->DistributeLocalIbMessage(from, std::forward<IbMessageT>(msg));

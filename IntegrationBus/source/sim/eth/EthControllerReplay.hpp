@@ -15,7 +15,7 @@ class EthControllerReplay
     , public ib::mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
     , public tracing::IReplayDataController
-    , public mw::IServiceId
+    , public mw::IIbServiceEndpoint
 {
 public:
     // Constructors 
@@ -45,7 +45,7 @@ public:
     void RegisterBitRateChangedHandler(BitRateChangedHandler handler) override;
 
     // IIbToEthController
-    void ReceiveIbMessage(const IServiceId* from, const EthMessage& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg) override;
 
     void SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const ib::mw::EndpointAddress & override;
@@ -60,7 +60,7 @@ public:
 
     void ReplayMessage(const extensions::IReplayMessage* replayMessage) override;
 
-    // IServiceId
+    // IIbServiceEndpoint
     inline void SetServiceId(const mw::ServiceId& serviceId) override;
     inline auto GetServiceId() const -> const mw::ServiceId & override;
 

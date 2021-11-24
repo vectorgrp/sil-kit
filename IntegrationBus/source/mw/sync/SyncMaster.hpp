@@ -161,7 +161,7 @@ private:
 class SyncMaster :
     public ISyncMaster,
     public IIbToSyncMaster,
-    public mw::IServiceId
+    public mw::IIbServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -185,8 +185,8 @@ public:
 public:
     // ----------------------------------------
     // Public Methods
-    void ReceiveIbMessage(const IServiceId* from, const TickDone& msg) override;
-    void ReceiveIbMessage(const IServiceId* from, const QuantumRequest& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const TickDone& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const QuantumRequest& msg) override;
 
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
@@ -194,7 +194,7 @@ public:
     void WaitForShutdown() override;
 
 
-    // IServiceId
+    // IIbServiceEndpoint
     inline void SetServiceId(const mw::ServiceId& serviceId) override;
     inline auto GetServiceId() const -> const mw::ServiceId & override;
 

@@ -35,8 +35,8 @@ using ::ib::mw::test::DummyComAdapter;
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const Tick&));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const QuantumGrant& msg));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const Tick&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const QuantumGrant& msg));
 };
 
 class MockMonitor : public ISystemMonitor
@@ -77,13 +77,13 @@ public:
     std::map<ParticipantId, sync::ParticipantStatus> participantStatus;
 };
 
-auto From(SyncMaster& syncMaster, const mw::EndpointAddress& epa) -> mw::IServiceId*
+auto From(SyncMaster& syncMaster, const mw::EndpointAddress& epa) -> mw::IIbServiceEndpoint*
 {
     syncMaster.SetEndpointAddress(epa);
     return &syncMaster;
 }
 
-auto From(SyncMaster& syncMaster, const cfg::Participant& participant) -> mw::IServiceId*
+auto From(SyncMaster& syncMaster, const cfg::Participant& participant) -> mw::IIbServiceEndpoint*
 {
     const auto epa = EndpointAddress{ participant.id, 0 };
     return From(syncMaster, epa);

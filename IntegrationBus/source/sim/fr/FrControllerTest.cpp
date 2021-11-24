@@ -41,17 +41,17 @@ using ::ib::test::MockTraceSink;
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    void SendIbMessage(const IServiceId* from, FrMessageAck&& msg)
+    void SendIbMessage(const IIbServiceEndpoint* from, FrMessageAck&& msg)
     {
         SendIbMessage_proxy(from, msg);
     }
 
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const FrMessage&));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const FrSymbol&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(const IServiceId*, const FrMessageAck&));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const FrSymbolAck&));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const HostCommand&));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const ControllerConfig&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const FrMessage&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const FrSymbol&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(const IIbServiceEndpoint*, const FrMessageAck&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const FrSymbolAck&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const HostCommand&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const ControllerConfig&));
 };
 
 class FrControllerTest : public testing::Test

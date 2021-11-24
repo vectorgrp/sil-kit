@@ -43,16 +43,16 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<co
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    void SendIbMessage(const IServiceId* from, EthMessage&& msg) override
+    void SendIbMessage(const IIbServiceEndpoint* from, EthMessage&& msg) override
     {
         SendIbMessage_proxy(from, msg);
     }
 
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const EthMessage&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(const IServiceId*, const EthMessage&));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const EthTransmitAcknowledge&));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const EthStatus&));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const EthSetMode&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthMessage&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(const IIbServiceEndpoint*, const EthMessage&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthTransmitAcknowledge&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthStatus&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthSetMode&));
 };
 
 class EthernetControllerProxyTest : public testing::Test
@@ -179,7 +179,7 @@ TEST_F(EthernetControllerProxyTest, must_not_generate_ack)
     EthMessage msg;
     msg.transmitId = 17;
 
-    EXPECT_CALL(comAdapter, SendIbMessage(An<const IServiceId*>(), A<const EthTransmitAcknowledge&>()))
+    EXPECT_CALL(comAdapter, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const EthTransmitAcknowledge&>()))
         .Times(0);
 
     proxy.ReceiveIbMessage(&proxyFrom, msg);

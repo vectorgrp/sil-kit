@@ -78,7 +78,7 @@ void CanControllerReplay::RegisterTransmitStatusHandler(MessageStatusHandler han
     _controller.RegisterTransmitStatusHandler(std::move(handler));
 }
 
-void CanControllerReplay::ReceiveIbMessage(const IServiceId* from, const CanMessage& msg)
+void CanControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMessage& msg)
 {
     // ignore messages that do not originate from the replay scheduler 
     if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))

@@ -9,7 +9,7 @@
 
 #include "IIbToGenericSubscriber.hpp"
 #include "IComAdapterInternal.hpp"
-#include "IServiceId.hpp"
+#include "IIbServiceEndpoint.hpp"
 
 namespace ib {
 namespace sim {
@@ -20,7 +20,7 @@ class GenericSubscriber
     , public IIbToGenericSubscriber
     , public mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
-    , public mw::IServiceId
+    , public mw::IIbServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -45,7 +45,7 @@ public:
     auto Config() const -> const cfg::GenericPort& override;
 
     //! \brief Accepts messages originating from IB communications.
-    void ReceiveIbMessage(const mw::IServiceId* from, const GenericMessage& msg) override;
+    void ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const GenericMessage& msg) override;
 
     //! \brief Accepts any message, e.g. also from trace replays.
     void ReceiveMessage(const GenericMessage& msg);
@@ -58,7 +58,7 @@ public:
 
     // ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
-    // IServiceId
+    // IIbServiceEndpoint
     inline void SetServiceId(const mw::ServiceId& serviceId) override;
     inline auto GetServiceId() const -> const mw::ServiceId & override;
 

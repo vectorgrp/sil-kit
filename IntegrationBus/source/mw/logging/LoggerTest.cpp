@@ -35,13 +35,13 @@ using ib::mw::test::DummyComAdapter;
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    void SendIbMessage(const IServiceId* from, LogMsg&& msg)
+    void SendIbMessage(const IIbServiceEndpoint* from, LogMsg&& msg)
     {
         SendIbMessage_proxy(from, msg);
     }
 
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const LogMsg&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(const IServiceId*, const LogMsg&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const LogMsg&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(const IIbServiceEndpoint*, const LogMsg&));
 };
 
 auto ALogMsgWith(std::string logger_name, Level level, std::string payload) -> Matcher<const LogMsg&>

@@ -15,7 +15,7 @@
 
 #include "IIbToInPort.hpp"
 #include "IComAdapterInternal.hpp"
-#include "IServiceId.hpp"
+#include "IIbServiceEndpoint.hpp"
 
 namespace ib {
 namespace sim {
@@ -27,7 +27,7 @@ class InPort
     , public IIbToInPort<MsgT>
     , public ib::mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
-    , public mw::IServiceId
+    , public mw::IIbServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -68,7 +68,7 @@ public:
 
     // IIbToInPort
     //! \brief Accepts messages originating from IB communications.
-    void ReceiveIbMessage(const mw::IServiceId* from, const MessageType& msg) override;
+    void ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const MessageType& msg) override;
 
     //! \brief Accepts any message, e.g. also from trace replays.
     void ReceiveMessage(const MessageType& msg);
@@ -77,7 +77,7 @@ public:
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
-    // IServiceId
+    // IIbServiceEndpoint
     inline void SetServiceId(const mw::ServiceId& serviceId) override;
     inline auto GetServiceId() const -> const mw::ServiceId & override;
 
@@ -165,7 +165,7 @@ void InPort<MsgT>::RegisterHandler(ValueHandler handler)
 }
 
 template<typename MsgT>
-void InPort<MsgT>::ReceiveIbMessage(const mw::IServiceId* from, const MessageType& msg)
+void InPort<MsgT>::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const MessageType& msg)
 {
     if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
         return;

@@ -28,7 +28,7 @@ inline std::ostream& operator<<(std::ostream& out, const ServiceId& id);
 
 //TODO rename IIbEndpoint
 //     remove IIbEndpoint<MsgT> from IIbTo$Service interfaces
-class IServiceId
+class IIbServiceEndpoint
 {
 public:
     virtual void SetServiceId(const ServiceId& serviceId) = 0;

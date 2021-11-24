@@ -34,10 +34,10 @@ using ::ib::mw::test::DummyComAdapter;
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const CanMessage&));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const CanTransmitAcknowledge&));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const CanConfigureBaudrate&));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const CanSetControllerMode&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const CanMessage&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const CanTransmitAcknowledge&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const CanConfigureBaudrate&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const CanSetControllerMode&));
 };
 
 class CanControllerProxyCallbacks
@@ -237,7 +237,7 @@ TEST(CanControllerProxyTest, must_not_generate_ack)
 
     CanMessage msg;
     // TODO FIXME
-    EXPECT_CALL(mockComAdapter, SendIbMessage(An<const IServiceId*>(), A<const CanTransmitAcknowledge&>()))
+    EXPECT_CALL(mockComAdapter, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const CanTransmitAcknowledge&>()))
         .Times(0);
 
     CanControllerProxy canControllerProxy(&mockComAdapter);

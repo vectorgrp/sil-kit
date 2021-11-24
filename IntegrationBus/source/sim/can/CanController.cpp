@@ -101,7 +101,7 @@ void CanController::RegisterHandler(CallbackT<MsgT> handler)
     handlers.push_back(handler);
 }
 
-void CanController::ReceiveIbMessage(const IServiceId* from, const CanMessage& msg)
+void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMessage& msg)
 {
     CallHandlers(msg);
 

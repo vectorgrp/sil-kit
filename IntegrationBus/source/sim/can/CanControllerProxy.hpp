@@ -21,7 +21,7 @@ class CanControllerProxy
     : public ICanController
     , public IIbToCanControllerProxy
     , public extensions::ITraceMessageSource
-    , public mw::IServiceId
+    , public mw::IIbServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -63,9 +63,9 @@ public:
     void RegisterTransmitStatusHandler(MessageStatusHandler handler) override;
 
     // IIbToCanController
-    void ReceiveIbMessage(const IServiceId* from, const sim::can::CanMessage& msg) override;
-    void ReceiveIbMessage(const IServiceId* from, const sim::can::CanControllerStatus& msg) override;
-    void ReceiveIbMessage(const IServiceId* from, const sim::can::CanTransmitAcknowledge& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanMessage& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanControllerStatus& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanTransmitAcknowledge& msg) override;
 
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
@@ -73,7 +73,7 @@ public:
     //ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
-    // IServiceId
+    // IIbServiceEndpoint
     inline void SetServiceId(const mw::ServiceId& serviceId) override;
     inline auto GetServiceId() const -> const mw::ServiceId & override;
 

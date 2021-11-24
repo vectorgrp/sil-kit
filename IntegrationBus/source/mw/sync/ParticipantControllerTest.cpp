@@ -33,11 +33,11 @@ using ::ib::mw::test::DummyComAdapter;
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const QuantumRequest& msg));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const ParticipantStatus& msg));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const QuantumRequest& msg));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const ParticipantStatus& msg));
 };
 
-class MockServiceId : public IServiceId
+class MockServiceId : public IIbServiceEndpoint
 {
 public:
     ServiceId serviceId;

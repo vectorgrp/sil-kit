@@ -4,7 +4,7 @@
 
 #include "IIbReceiver.hpp"
 #include "IIbSender.hpp"
-#include "IServiceId.hpp"
+#include "IIbServiceEndpoint.hpp"
 
 #include "ib/sim/can/CanDatatypes.hpp"
 
@@ -19,7 +19,7 @@ namespace can {
 class IIbToCanSimulator
     : public mw::IIbReceiver<CanMessage, CanConfigureBaudrate, CanSetControllerMode>
     , public mw::IIbSender<CanMessage, CanTransmitAcknowledge, CanControllerStatus>
-    , public mw::IServiceId
+    , public mw::IIbServiceEndpoint
 {
 public:
     ~IIbToCanSimulator() = default;

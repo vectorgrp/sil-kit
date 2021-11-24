@@ -252,7 +252,7 @@ void LinController::RegisterFrameResponseUpdateHandler(FrameResponseUpdateHandle
     _frameResponseUpdateHandler.emplace_back(std::move(handler));
 }
 
-void LinController::ReceiveIbMessage(const IServiceId* from, const Transmission& msg)
+void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Transmission& msg)
 {
     if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa) return;
 
@@ -338,13 +338,13 @@ void LinController::ReceiveIbMessage(const IServiceId* from, const Transmission&
     }
 }
 
-void LinController::ReceiveIbMessage(const IServiceId* from, const WakeupPulse& /*msg*/)
+void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const WakeupPulse& /*msg*/)
 {
     if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa) return;
     CallHandlers(_wakeupHandler, this);
 }
 
-void LinController::ReceiveIbMessage(const IServiceId* from, const ControllerConfig& msg)
+void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerConfig& msg)
 {
     if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa) return;
 
@@ -360,7 +360,7 @@ void LinController::ReceiveIbMessage(const IServiceId* from, const ControllerCon
     }
 }
 
-void LinController::ReceiveIbMessage(const IServiceId* from, const ControllerStatusUpdate& msg)
+void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerStatusUpdate& msg)
 {
     if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa) return;
 
@@ -368,7 +368,7 @@ void LinController::ReceiveIbMessage(const IServiceId* from, const ControllerSta
     linNode.controllerStatus = msg.status;
 }
 
-void LinController::ReceiveIbMessage(const IServiceId* from, const FrameResponseUpdate& msg)
+void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrameResponseUpdate& msg)
 {
     if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa) return;
 

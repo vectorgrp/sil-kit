@@ -4,7 +4,7 @@
 #include "ib/cfg/Config.hpp"
 #include "ib/extensions/IReplay.hpp"
 #include "ib/mw/EndpointAddress.hpp"
-#include "IServiceId.hpp"
+#include "IIbServiceEndpoint.hpp"
 
 #include <limits>
 
@@ -27,7 +27,7 @@ inline auto ReplayEndpointAddress() -> ib::mw::EndpointAddress
     };
 }
 
-struct ReplayServiceId : public mw::IServiceId
+struct ReplayServiceId : public mw::IIbServiceEndpoint
 {
     void SetServiceId(const mw::ServiceId& ) override
     {

@@ -22,7 +22,7 @@ class LinControllerProxy
     : public ILinController
     , public IIbToLinControllerProxy
     , public extensions::ITraceMessageSource
-    , public mw::IServiceId
+    , public mw::IIbServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -68,10 +68,10 @@ public:
     void RegisterFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) override;
 
     // IIbToLinController
-    void ReceiveIbMessage(const IServiceId* from, const Transmission& msg) override;
-    void ReceiveIbMessage(const IServiceId* from, const WakeupPulse& msg) override;
-    void ReceiveIbMessage(const IServiceId* from, const ControllerConfig& msg) override;
-    void ReceiveIbMessage(const IServiceId* from, const FrameResponseUpdate& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const Transmission& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const WakeupPulse& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerConfig& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FrameResponseUpdate& msg) override;
 
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
@@ -83,7 +83,7 @@ public:
     //ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
-    // IServiceId
+    // IIbServiceEndpoint
     inline void SetServiceId(const mw::ServiceId& serviceId) override;
     inline auto GetServiceId() const -> const mw::ServiceId & override;
 

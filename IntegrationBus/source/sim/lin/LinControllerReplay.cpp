@@ -151,31 +151,31 @@ void LinControllerReplay::RegisterFrameResponseUpdateHandler(FrameResponseUpdate
     _controller.RegisterFrameResponseUpdateHandler(std::move(handler));
 }
 
-void LinControllerReplay::ReceiveIbMessage(const IServiceId* from, const Transmission& msg)
+void LinControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* from, const Transmission& msg)
 {
     // Transmissions are always issued by a master.
     _controller.ReceiveIbMessage(from, msg);
 }
 
-void LinControllerReplay::ReceiveIbMessage(const IServiceId* from, const WakeupPulse& msg)
+void LinControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* from, const WakeupPulse& msg)
 {
     //Wakeup pulses are not part of a replay, but are valid during a replay.
     _controller.ReceiveIbMessage(from, msg);
 }
 
-void LinControllerReplay::ReceiveIbMessage(const IServiceId* from, const ControllerConfig& msg)
+void LinControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerConfig& msg)
 {
     // ControllerConfigs are not part of a replay, but are valid during a replay.
     _controller.ReceiveIbMessage(from, msg);
 }
 
-void LinControllerReplay::ReceiveIbMessage(const IServiceId* from, const FrameResponseUpdate& msg)
+void LinControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrameResponseUpdate& msg)
 {
     // FrameResponseUpdates are generated from a master during a replay.
     _controller.ReceiveIbMessage(from, msg);
 }
 
-void LinControllerReplay::ReceiveIbMessage(const IServiceId* from, const ControllerStatusUpdate& msg)
+void LinControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerStatusUpdate& msg)
 {
     // ControllerStatupsUpdates are not part of a replay, but are valid during a replay.
     _controller.ReceiveIbMessage(from, msg);

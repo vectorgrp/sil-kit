@@ -10,7 +10,7 @@
 
 #include "IIbToCanController.hpp"
 #include "IComAdapterInternal.hpp"
-#include "IServiceId.hpp"
+#include "IIbServiceEndpoint.hpp"
 
 #include <tuple>
 #include <vector>
@@ -24,7 +24,7 @@ class CanController
     , public IIbToCanController
     , public mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
-    , public mw::IServiceId
+    , public mw::IIbServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -66,7 +66,7 @@ public:
     void RegisterTransmitStatusHandler(MessageStatusHandler handler) override;
 
     // IIbToCanController
-    void ReceiveIbMessage(const IServiceId* from, const sim::can::CanMessage& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanMessage& msg) override;
 
     void SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const ::ib::mw::EndpointAddress& override;
@@ -77,7 +77,7 @@ public:
     // ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
-    // IServiceId
+    // IIbServiceEndpoint
     inline void SetServiceId(const mw::ServiceId& serviceId) override;
     inline auto GetServiceId() const -> const mw::ServiceId & override;
 public:

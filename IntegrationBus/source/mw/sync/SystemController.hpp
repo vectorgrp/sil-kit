@@ -17,7 +17,7 @@ namespace sync {
 class SystemController
     : public ISystemController
     , public IIbToSystemController
-    , public mw::IServiceId
+    , public mw::IIbServiceEndpoint
 {
     public:
     // ----------------------------------------
@@ -50,7 +50,7 @@ public:
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
 
-    // IServiceId
+    // IIbServiceEndpoint
     inline void SetServiceId(const mw::ServiceId& serviceId) override;
     inline auto GetServiceId() const -> const mw::ServiceId & override;
 

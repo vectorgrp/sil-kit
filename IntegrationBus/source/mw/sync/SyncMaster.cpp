@@ -106,7 +106,7 @@ void SyncMaster::SetupDiscreteTimeClient(const cfg::Config& config)
     _discreteTimeClient = std::move(client);
 }
 
-void SyncMaster::ReceiveIbMessage(const IServiceId* from, const TickDone& msg)
+void SyncMaster::ReceiveIbMessage(const IIbServiceEndpoint* from, const TickDone& msg)
 {
     assert(_discreteTimeClient);
 
@@ -127,7 +127,7 @@ void SyncMaster::ReceiveIbMessage(const IServiceId* from, const TickDone& msg)
     }
 }
 
-void SyncMaster::ReceiveIbMessage(const IServiceId* from, const QuantumRequest& msg)
+void SyncMaster::ReceiveIbMessage(const IIbServiceEndpoint* from, const QuantumRequest& msg)
 {
     if (_timeQuantumClients.count(from->GetServiceId().legacyEpa.participant) != 1)
     {

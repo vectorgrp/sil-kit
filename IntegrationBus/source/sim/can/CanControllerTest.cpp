@@ -42,10 +42,10 @@ MATCHER_P(CanTransmitAckWithouthTransmitIdMatcher, truthAck, "matches CanTransmi
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const CanMessage&));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const CanTransmitAcknowledge&));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const CanConfigureBaudrate&));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const CanSetControllerMode&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const CanMessage&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const CanTransmitAcknowledge&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const CanConfigureBaudrate&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const CanSetControllerMode&));
 };
 
 class CanControllerCallbacks
@@ -121,7 +121,7 @@ TEST(CanControllerTest, start_stop_sleep_reset)
 
     CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage(A<const IServiceId*>(), A<const CanSetControllerMode&>()))
+    EXPECT_CALL(mockComAdapter, SendIbMessage(A<const IIbServiceEndpoint*>(), A<const CanSetControllerMode&>()))
         .Times(0);
 
     canController.Start();
@@ -142,7 +142,7 @@ TEST(CanControllerTest, set_baudrate)
 
     CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage(An<const IServiceId*>(), A<const CanConfigureBaudrate&>()))
+    EXPECT_CALL(mockComAdapter, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const CanConfigureBaudrate&>()))
         .Times(0);
 
     canController.SetBaudRate(3000, 500000);

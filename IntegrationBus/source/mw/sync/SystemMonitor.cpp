@@ -99,7 +99,7 @@ auto SystemMonitor::EndpointAddress() const -> const mw::EndpointAddress&
     return _serviceId.legacyEpa;
 }
 
-void SystemMonitor::ReceiveIbMessage(const IServiceId* from, const sync::ParticipantStatus& newParticipantStatus)
+void SystemMonitor::ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantStatus& newParticipantStatus)
 {
     auto participantId = from->GetServiceId().legacyEpa.participant;
 

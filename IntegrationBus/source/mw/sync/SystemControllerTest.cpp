@@ -30,8 +30,8 @@ using ::ib::mw::test::DummyComAdapter;
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const ParticipantCommand& msg));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const SystemCommand& msg));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const ParticipantCommand& msg));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const SystemCommand& msg));
 };
 
 class SystemControllerTest : public testing::Test

@@ -166,7 +166,7 @@ void LinControllerProxy::RegisterFrameResponseUpdateHandler(FrameResponseUpdateH
     _frameResponseUpdateHandler.emplace_back(std::move(handler));
 }
 
-void LinControllerProxy::ReceiveIbMessage(const IServiceId* from, const Transmission& msg)
+void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const Transmission& msg)
 {
     if (!AreMatchingProxyEndpoints(from->GetServiceId().legacyEpa, _serviceId.legacyEpa)) return;
 
@@ -211,13 +211,13 @@ void LinControllerProxy::ReceiveIbMessage(const IServiceId* from, const Transmis
     }
 }
 
-void LinControllerProxy::ReceiveIbMessage(const IServiceId* from, const WakeupPulse& /*msg*/)
+void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const WakeupPulse& /*msg*/)
 {
     if (!AreMatchingProxyEndpoints(from->GetServiceId().legacyEpa, _serviceId.legacyEpa)) return;
     CallEach(_wakeupHandler, this);
 }
 
-void LinControllerProxy::ReceiveIbMessage(const IServiceId* from, const ControllerConfig& msg)
+void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerConfig& msg)
 {
     // We also receive FrameResponseUpdate from other controllers, although we would not need them in VIBE simulation.
     // However, we also want to make users of FrameResponseUpdateHandlers happy when using the VIBE simulation.
@@ -229,7 +229,7 @@ void LinControllerProxy::ReceiveIbMessage(const IServiceId* from, const Controll
     }
 }
 
-void LinControllerProxy::ReceiveIbMessage(const IServiceId* from, const FrameResponseUpdate& msg)
+void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrameResponseUpdate& msg)
 {
     // We also receive FrameResponseUpdate from other controllers, although we would not need them in VIBE simulation.
     // However, we also want to make users of FrameResponseUpdateHandlers happy when using the VIBE simulation.

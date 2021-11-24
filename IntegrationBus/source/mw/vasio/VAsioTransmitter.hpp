@@ -8,7 +8,7 @@
 #include <type_traits>
 
 #include "IIbMessageReceiver.hpp"
-#include "IServiceId.hpp"
+#include "IIbServiceEndpoint.hpp"
 #include "traits/IbMsgTraits.hpp"
 
 namespace ib {
@@ -63,7 +63,7 @@ struct RemoteReceiver {
 template <class MsgT>
 class VAsioTransmitter 
     : public IIbMessageReceiver<MsgT>
-    , public IServiceId
+    , public IIbServiceEndpoint
 {
     using History = MessageHistory<MsgT, IbMsgTraits<MsgT>::HistSize()>;
     History _hist;
@@ -89,7 +89,7 @@ public:
 public:
     // ----------------------------------------
     // Public interface methods
-    void ReceiveIbMessage(const IServiceId* from, const MsgT& msg) override
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const MsgT& msg) override
     {
         _hist.Save(from->GetServiceId().legacyEpa, msg);
         for (auto& receiver : _remoteReceivers)
@@ -105,7 +105,7 @@ public:
         }
     }
 
-    // IServiceId
+    // IIbServiceEndpoint
     void SetServiceId(const ServiceId& serviceId) override
     {
         _serviceId = serviceId;

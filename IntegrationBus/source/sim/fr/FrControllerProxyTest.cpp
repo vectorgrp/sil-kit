@@ -38,10 +38,10 @@ using ::ib::mw::test::DummyComAdapter;
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const HostCommand&));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const ControllerConfig&));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const TxBufferConfigUpdate&));
-    MOCK_METHOD2(SendIbMessage, void(const IServiceId*, const TxBufferUpdate&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const HostCommand&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const ControllerConfig&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const TxBufferConfigUpdate&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const TxBufferUpdate&));
 };
 
 class FrControllerProxyTest : public testing::Test
@@ -210,7 +210,7 @@ TEST_F(FrControllerProxyTest, throw_on_unconfigured_tx_buffer_configupdate)
 
     // Attempt to reconfigure TxBuffer 6, which should be out of range
     TxBufferConfig bufferCfg{};
-    EXPECT_CALL(comAdapter, SendIbMessage(An<const IServiceId*>(), A<const TxBufferConfigUpdate &>())).Times(0);
+    EXPECT_CALL(comAdapter, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const TxBufferConfigUpdate &>())).Times(0);
     EXPECT_THROW(proxy.ReconfigureTxBuffer(6, bufferCfg), std::out_of_range);
 }
 
@@ -251,7 +251,7 @@ TEST_F(FrControllerProxyTest, throw_on_unconfigured_tx_buffer_update)
 
     TxBufferUpdate update;
     update.txBufferIndex = 7; // only txBufferIdx = 0 is configured
-    EXPECT_CALL(comAdapter, SendIbMessage(An<const IServiceId*>(), A<const TxBufferConfigUpdate &>())).Times(0);
+    EXPECT_CALL(comAdapter, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const TxBufferConfigUpdate &>())).Times(0);
     EXPECT_THROW(proxy.UpdateTxBuffer(update), std::out_of_range);
 }
 

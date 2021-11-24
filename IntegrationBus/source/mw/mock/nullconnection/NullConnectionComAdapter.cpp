@@ -26,7 +26,7 @@ struct NullConnection
     void SendIbMessage(mw::EndpointAddress /*from*/, IbMessageT&& /*msg*/) {};
 
     template<typename IbMessageT>
-    void SendIbMessage(const mw::IServiceId* /*from*/, IbMessageT&& /*msg*/) {};
+    void SendIbMessage(const mw::IIbServiceEndpoint* /*from*/, IbMessageT&& /*msg*/) {};
 
     void OnAllMessagesDelivered(std::function<void(void)> /*callback*/) {};
     void FlushSendBuffers() {};

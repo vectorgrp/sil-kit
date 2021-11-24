@@ -13,7 +13,7 @@
 
 #include "IIbToFrController.hpp"
 #include "IComAdapterInternal.hpp"
-#include "IServiceId.hpp"
+#include "IIbServiceEndpoint.hpp"
 
 namespace ib {
 namespace sim {
@@ -28,7 +28,7 @@ class FrController
     , public IIbToFrController
     , public mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
-    , public mw::IServiceId
+    , public mw::IIbServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -85,10 +85,10 @@ public:
     void RegisterCycleStartHandler(CycleStartHandler handler) override;
 
     // IIbToFrController
-    void ReceiveIbMessage(const IServiceId* from, const FrMessage& msg) override;
-    void ReceiveIbMessage(const IServiceId* from, const FrMessageAck& msg) override;
-    void ReceiveIbMessage(const IServiceId* from, const FrSymbol& msg) override;
-    void ReceiveIbMessage(const IServiceId* from, const FrSymbolAck& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessage& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessageAck& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbol& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbolAck& msg) override;
 
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
@@ -99,7 +99,7 @@ public:
     // ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
-    // IServiceId
+    // IIbServiceEndpoint
     inline void SetServiceId(const mw::ServiceId& serviceId) override;
     inline auto GetServiceId() const -> const mw::ServiceId & override;
 private:

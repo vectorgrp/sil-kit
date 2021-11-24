@@ -5,7 +5,7 @@
 
 #include "IIbToLogMsgSender.hpp"
 #include "IComAdapterInternal.hpp"
-#include "IServiceId.hpp"
+#include "IIbServiceEndpoint.hpp"
 
 namespace ib {
 namespace mw {
@@ -13,7 +13,7 @@ namespace logging {
 
 class LogMsgSender
     : public IIbToLogMsgSender
-    , public mw::IServiceId
+    , public mw::IIbServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -27,7 +27,7 @@ public:
     void SetEndpointAddress(const mw::EndpointAddress &address) override;
     auto EndpointAddress(void) const -> const mw::EndpointAddress & override;
 
-    // IServiceId
+    // IIbServiceEndpoint
     inline void SetServiceId(const mw::ServiceId& serviceId) override;
     inline auto GetServiceId() const -> const mw::ServiceId & override;
 

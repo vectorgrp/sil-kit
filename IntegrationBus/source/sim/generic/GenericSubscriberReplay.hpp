@@ -6,7 +6,7 @@
 #include "ib/mw/logging/ILogger.hpp"
 #include "GenericSubscriber.hpp"
 #include "IReplayDataController.hpp"
-#include "IServiceId.hpp"
+#include "IIbServiceEndpoint.hpp"
 
 
 namespace ib {
@@ -19,7 +19,7 @@ class GenericSubscriberReplay
     , public mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
     , public tracing::IReplayDataController
-    , public mw::IServiceId
+    , public mw::IIbServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -32,7 +32,7 @@ public:
 
     auto Config() const -> const cfg::GenericPort& override;
 
-    void ReceiveIbMessage(const mw::IServiceId* from, const GenericMessage& msg) override;
+    void ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const GenericMessage& msg) override;
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
@@ -46,7 +46,7 @@ public:
 
     void ReplayMessage(const extensions::IReplayMessage* replayMessage) override;
 
-    // IServiceId
+    // IIbServiceEndpoint
     inline void SetServiceId(const mw::ServiceId& serviceId) override;
     inline auto GetServiceId() const -> const mw::ServiceId & override;
 private:

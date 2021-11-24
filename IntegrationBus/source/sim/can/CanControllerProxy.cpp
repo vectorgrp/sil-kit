@@ -109,7 +109,7 @@ void CanControllerProxy::RegisterHandler(CallbackT<MsgT> handler)
     handlers.push_back(handler);
 }
 
-void CanControllerProxy::ReceiveIbMessage(const IServiceId* from, const CanMessage& msg)
+void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMessage& msg)
 {
     if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
@@ -119,7 +119,7 @@ void CanControllerProxy::ReceiveIbMessage(const IServiceId* from, const CanMessa
     CallHandlers(msg);
 }
 
-void CanControllerProxy::ReceiveIbMessage(const IServiceId* from, const CanTransmitAcknowledge& msg)
+void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanTransmitAcknowledge& msg)
 {
     if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;
@@ -139,7 +139,7 @@ void CanControllerProxy::ReceiveIbMessage(const IServiceId* from, const CanTrans
     CallHandlers(msg);
 }
 
-void CanControllerProxy::ReceiveIbMessage(const IServiceId* from, const CanControllerStatus& msg)
+void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanControllerStatus& msg)
 {
     if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
         return;

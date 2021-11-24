@@ -20,13 +20,13 @@ namespace test {
 class LinMockComAdapter : public mw::test::DummyComAdapter
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(const mw::IServiceId*, const SendFrameRequest&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IServiceId*, const SendFrameHeaderRequest&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IServiceId*, const Transmission&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IServiceId*, const FrameResponseUpdate&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IServiceId*, const ControllerConfig&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IServiceId*, const ControllerStatusUpdate&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IServiceId*, const WakeupPulse&));
+    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const SendFrameRequest&));
+    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const SendFrameHeaderRequest&));
+    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const Transmission&));
+    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const FrameResponseUpdate&));
+    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const ControllerConfig&));
+    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const ControllerStatusUpdate&));
+    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const WakeupPulse&));
 };
 
 inline auto MakeControllerConfig(ControllerMode mode) -> ControllerConfig

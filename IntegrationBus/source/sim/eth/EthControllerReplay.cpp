@@ -68,7 +68,7 @@ void EthControllerReplay::RegisterBitRateChangedHandler(BitRateChangedHandler ha
 }
 
 // IIbToEthController
-void EthControllerReplay::ReceiveIbMessage(const IServiceId* from, const EthMessage& msg)
+void EthControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg)
 {
     // ignore messages that do not originate from the replay scheduler 
     if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))

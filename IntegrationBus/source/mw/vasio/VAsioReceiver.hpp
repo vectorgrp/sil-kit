@@ -7,7 +7,7 @@
 #include "VAsioDatatypes.hpp"
 
 #include "MessageTracing.hpp"
-#include "IServiceId.hpp"
+#include "IIbServiceEndpoint.hpp"
 
 namespace ib {
 namespace mw {
@@ -27,7 +27,7 @@ public:
 template <class MsgT>
 class VAsioReceiver
     : public IVAsioReceiver
-    , public IServiceId
+    , public IIbServiceEndpoint
 {
 public:
     // ----------------------------------------

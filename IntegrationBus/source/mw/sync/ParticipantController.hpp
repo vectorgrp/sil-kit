@@ -26,7 +26,7 @@ struct ParticipantTimeProvider;
 class ParticipantController
     : public IParticipantController
     , public IIbToParticipantController
-    , public mw::IServiceId
+    , public mw::IIbServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -83,13 +83,13 @@ public:
     void SetEndpointAddress(const mw::EndpointAddress& addr) override;
     auto EndpointAddress() const -> const mw::EndpointAddress & override;
 
-    void ReceiveIbMessage(const IServiceId* from, const ParticipantCommand& msg) override;
-    void ReceiveIbMessage(const IServiceId* from, const SystemCommand& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const ParticipantCommand& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const SystemCommand& msg) override;
 
-    void ReceiveIbMessage(const IServiceId* from, const Tick& msg) override;
-    void ReceiveIbMessage(const IServiceId* from, const QuantumGrant& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const Tick& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const QuantumGrant& msg) override;
 
-    void ReceiveIbMessage(const IServiceId* from, const NextSimTask& task) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const NextSimTask& task) override;
 
     // Used by Policies
     void SendTickDone() const;
@@ -101,7 +101,7 @@ public:
     auto GetTimeProvider()->std::shared_ptr<sync::ITimeProvider>;
 
 
-    // IServiceId
+    // IIbServiceEndpoint
     inline void SetServiceId(const mw::ServiceId& serviceId) override;
     inline auto GetServiceId() const -> const mw::ServiceId & override;
 private:
