@@ -11,7 +11,8 @@
       "buildRoot": "${env.BuildDir}\\${name}",
       "buildCommandArgs": "-v",
       "inheritEnvironments": [ "msvc_x64_x64" ],
-      "intelliSenseMode": "windows-msvc-x64"
+      "intelliSenseMode": "windows-msvc-x64",
+      "installRoot": "${env.InstallDir}\\${name}"
     },
     {
       "name": "x64-Release",
@@ -20,7 +21,8 @@
       "buildRoot": "${env.BuildDir}\\${name}",
       "buildCommandArgs": "-v",
       "inheritEnvironments": [ "msvc_x64_x64" ],
-      "intelliSenseMode": "windows-msvc-x64"
+      "intelliSenseMode": "windows-msvc-x64",
+      "installRoot": "${env.InstallDir}\\${name}"
     },
     {
       "name": "x86-Debug",
@@ -29,7 +31,8 @@
       "buildRoot": "${env.BuildDir}\\${name}",
       "buildCommandArgs": "-v",
       "inheritEnvironments": [ "msvc_x86" ],
-      "intelliSenseMode": "windows-msvc-x86"
+      "intelliSenseMode": "windows-msvc-x86",      
+      "installRoot": "${env.InstallDir}\\${name}"
     },
     {
       "name": "x86-Release",
@@ -38,7 +41,8 @@
       "buildRoot": "${env.BuildDir}\\${name}",
       "buildCommandArgs": "-v",
       "inheritEnvironments": [ "msvc_x86" ],
-      "intelliSenseMode": "windows-msvc-x86"
+      "intelliSenseMode": "windows-msvc-x86",      
+      "installRoot": "${env.InstallDir}\\${name}"
     },
     {
       "name": "x64-Debug-WSL-GCC",
