@@ -38,6 +38,7 @@ private:
     // ----------------------------------------
     // private methods
     void OnParticipantAnnouncement(IVAsioPeer* from, const ParticipantAnnouncement& announcement);
+    bool IsExpectedParticipant(const ib::mw::VAsioPeerUri& peerInfo);
     auto FindConnectedPeer(const std::string& name) const->std::vector<ConnectedParticipantInfo>::const_iterator;
     void SendKnownParticipants(IVAsioPeer* peer);
     void OnPeerShutdown(IVAsioPeer* peer);

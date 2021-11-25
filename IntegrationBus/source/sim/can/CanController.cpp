@@ -103,6 +103,10 @@ void CanController::RegisterHandler(CallbackT<MsgT> handler)
 
 void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMessage& msg)
 {
+    if (from == this)
+    {
+        return;
+    }
     CallHandlers(msg);
 
     _tracer.Trace(extensions::Direction::Receive, _timeProvider->Now(), msg);
@@ -118,7 +122,6 @@ void CanController::CallHandlers(const MsgT& msg)
     }
 }
 
-// TODO VIB-413 overhaul EPA
 void CanController::SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress)
 {
     _serviceId.legacyEpa = endpointAddress;
@@ -133,7 +136,6 @@ void CanController::SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)
 {
     _timeProvider = timeProvider;
 }
-
 
 } // namespace can
 } // namespace sim

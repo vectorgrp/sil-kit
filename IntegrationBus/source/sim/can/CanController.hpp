@@ -105,7 +105,7 @@ private:
     // ----------------------------------------
     // private members
     ::ib::mw::IComAdapterInternal* _comAdapter{nullptr};
-    ::ib::mw::ServiceId _serviceId;
+    mw::ServiceId _serviceId;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
 
     CanTxId _canTxId = 0;

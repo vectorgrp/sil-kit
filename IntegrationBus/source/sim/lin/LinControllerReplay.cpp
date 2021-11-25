@@ -229,7 +229,6 @@ void LinControllerReplay::ReplayMessage(const extensions::IReplayMessage* replay
     response.responseMode = mode;
     FrameResponseUpdate responseUpdate;
     responseUpdate.frameResponses.emplace_back(std::move(response));
-    // TODO check
     _comAdapter->SendIbMessage(this, responseUpdate);
 
     if (_mode == ControllerMode::Master)

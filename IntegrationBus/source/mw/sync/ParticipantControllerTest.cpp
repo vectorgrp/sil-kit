@@ -96,7 +96,6 @@ protected:
     EndpointAddress addr{1, 1024};
     EndpointAddress addrP2{2, 1024};
     EndpointAddress masterAddr{3, 1027};
-    MockServiceId p1Id{ addr };
     MockServiceId p2Id{ addrP2 };
     MockServiceId masterId{ masterAddr };
 
@@ -120,7 +119,6 @@ TEST_F(ParticipantControllerTest, report_commands_as_error_before_run_was_called
         .Times(1);
 
     SystemCommand runCommand{SystemCommand::Kind::Run};
-
 
     controller.ReceiveIbMessage(&masterId, runCommand);
 

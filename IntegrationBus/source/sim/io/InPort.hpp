@@ -110,7 +110,7 @@ private:
     // private members
     ConfigType _config;
     mw::IComAdapterInternal* _comAdapter{nullptr};
-    ::ib::mw::ServiceId _serviceId;
+    mw::ServiceId _serviceId;
     MessageType _lastMessage;
 
     std::tuple<

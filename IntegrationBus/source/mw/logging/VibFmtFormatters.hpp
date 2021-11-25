@@ -4,7 +4,6 @@
 
 #include "ib/mw/logging/ILogger.hpp"
 
-
 #include "ib/mw/logging/string_utils.hpp"
 #include "ib/mw/string_utils.hpp"
 #include "ib/mw/sync/string_utils.hpp"
@@ -19,7 +18,6 @@
 
 #include <type_traits>
 #include <tuple>
-
 
 // Template helpers
 template<class Query, class...List>

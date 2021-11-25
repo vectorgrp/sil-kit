@@ -45,13 +45,13 @@ public:
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::can::CanControllerStatus& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::can::CanConfigureBaudrate& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::can::CanSetControllerMode& msg) = 0;
-                                
+
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::eth::EthMessage& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::eth::EthMessage&& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::eth::EthTransmitAcknowledge& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::eth::EthStatus& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::eth::EthSetMode& msg) = 0;
-                                
+
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::fr::FrMessage& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::fr::FrMessage&& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::fr::FrMessageAck& msg) = 0;
@@ -65,7 +65,7 @@ public:
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::fr::TxBufferUpdate& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::fr::ControllerStatus& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::fr::PocStatus& msg) = 0;
-                                
+
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::SendFrameRequest& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::SendFrameHeaderRequest& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::Transmission& msg) = 0;
@@ -73,27 +73,27 @@ public:
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::ControllerConfig& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::ControllerStatusUpdate& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::FrameResponseUpdate& msg) = 0;
-                                
+
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::io::AnalogIoMessage& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::io::DigitalIoMessage& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::io::PatternIoMessage& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::io::PatternIoMessage&& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::io::PwmIoMessage& msg) = 0;
-                                
+
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::generic::GenericMessage& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::generic::GenericMessage&& msg) = 0;
-                                
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint*, const sync::NextSimTask& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint*, const sync::Tick& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint*, const sync::TickDone& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint*, const sync::QuantumRequest& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint*, const sync::QuantumGrant& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint*, const sync::ParticipantStatus& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint*, const sync::ParticipantCommand& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint*, const sync::SystemCommand& msg) = 0;
-                                
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint*, const logging::LogMsg& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint*, logging::LogMsg&& msg) = 0;
+
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sync::NextSimTask& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sync::Tick& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sync::TickDone& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sync::QuantumRequest& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sync::QuantumGrant& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sync::ParticipantStatus& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sync::ParticipantCommand& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sync::SystemCommand& msg) = 0;
+
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const logging::LogMsg& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, logging::LogMsg&& msg) = 0;
 
     // For Connection/Middleware support:
     virtual void OnAllMessagesDelivered(std::function<void(void)> callback) = 0;

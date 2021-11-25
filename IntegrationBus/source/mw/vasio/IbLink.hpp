@@ -89,7 +89,8 @@ void IbLink<MsgT>::DistributeLocalIbMessage(const IIbServiceEndpoint* from, cons
     for (auto&& receiver : _localReceivers)
     {
         auto* receiverId = dynamic_cast<const IIbServiceEndpoint*>(receiver);
-        if (receiverId == from) continue;
+        //TODO VIB-415 we need to decide self-delivery here:
+        // if (receiverId == from) continue;
         DispatchIbMessage(receiver, from, msg);
     }
     DispatchIbMessage(&_vasioTransmitter, from, msg);

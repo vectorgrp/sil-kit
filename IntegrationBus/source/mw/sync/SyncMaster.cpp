@@ -112,7 +112,8 @@ void SyncMaster::ReceiveIbMessage(const IIbServiceEndpoint* from, const TickDone
 
     if (_discreteTimeClient->GetCurrentTick() != msg.finishedTick)
     {
-        _logger->Error("Received {} from participant {}, which does not match current {}", msg, from->GetServiceId().legacyEpa.participant, _discreteTimeClient->GetCurrentTick());
+        _logger->Error("Received {} from participant {}, which does not match current {}", msg,
+                from->GetServiceId(), _discreteTimeClient->GetCurrentTick());
     }
 
     _discreteTimeClient->TickDoneReceived();
@@ -131,7 +132,7 @@ void SyncMaster::ReceiveIbMessage(const IIbServiceEndpoint* from, const QuantumR
 {
     if (_timeQuantumClients.count(from->GetServiceId().legacyEpa.participant) != 1)
     {
-        _logger->Error("Received QuantumRequest from participant {}, which is unknown!", from->GetServiceId().legacyEpa.participant);
+        _logger->Error("Received QuantumRequest from participant {}, which is unknown!", from->GetServiceId());
         return;
     }
 
@@ -139,13 +140,13 @@ void SyncMaster::ReceiveIbMessage(const IIbServiceEndpoint* from, const QuantumR
 
     if (client->HasPendingRequest())
     {
-        _logger->Error("Received QuantumRequest from participant {}, which already has a pending request!", from->GetServiceId().legacyEpa.participant);
+        _logger->Error("Received QuantumRequest from participant {}, which already has a pending request!", from->GetServiceId());
         return;
     }
 
     if (client->EndTime() != msg.now)
     {
-        _logger->Error("QuantumRequest from participant {} does not match the current simulation time!", from->GetServiceId().legacyEpa.participant);
+        _logger->Error("QuantumRequest from participant {} does not match the current simulation time!", from->GetServiceId());
     }
 
     client->SetPendingRequest(msg.now, msg.duration);

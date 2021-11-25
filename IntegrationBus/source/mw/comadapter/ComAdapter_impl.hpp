@@ -786,8 +786,8 @@ template <class IbConnectionT>
 template <typename IbMessageT>
 void ComAdapter<IbConnectionT>::SendIbMessageImpl(const IIbServiceEndpoint* from, IbMessageT&& msg)
 {
-  TraceTx(_logger.get(), from, msg);
-  _ibConnection.SendIbMessage(from, std::forward<IbMessageT>(msg));
+    TraceTx(_logger.get(), from, msg);
+    _ibConnection.SendIbMessage(from, std::forward<IbMessageT>(msg));
 }
 
 template <class IbConnectionT>
@@ -825,7 +825,7 @@ auto ComAdapter<IbConnectionT>::CreateController(const std::string& serviceName,
     auto controller = std::make_unique<ControllerT>(this, std::forward<Arg>(arg)...);
     auto* controllerPtr = controller.get();
 
-    controller->SetEndpointAddress(_ibConnection.CreateEndpointAddress());
+    controller->SetEndpointAddress({ _participantId, endpointId });
 
     auto id = ServiceId{};
     id.linkName = link.name;

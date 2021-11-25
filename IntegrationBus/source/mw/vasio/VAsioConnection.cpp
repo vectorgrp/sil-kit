@@ -477,6 +477,12 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
         _pendingParticipantReplies.push_back(peer.get());
         SendParticipantAnnoucement(peer.get());
 
+        // The service ID is incomplete at this stage.
+        ServiceId peerId;
+        peerId.participantName = peerUri.participantName;
+        peerId.legacyEpa.participant = peerUri.participantId;
+        peer->SetServiceId(peerId);
+
         AddPeer(std::move(peer));
     };
     // check URI first
@@ -644,9 +650,17 @@ void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
     msg.refreshTime = std::chrono::system_clock::now();
 
     auto&& link = GetLinkByName<ib::mw::sync::ParticipantStatus>("default");
-    // XXX link->DistributeRemoteIbMessage(msg);
 
-    _logger->Error("Lost connection to participant {}", info.participantName);
+    // The VAsioTcpPeer has an incomplete Service ID, fill in the missing
+    // link and participant names.
+    auto& peerService = dynamic_cast<IIbServiceEndpoint&>(*peer);
+    auto peerId = peerService.GetServiceId();
+    peerId.participantName = peer->GetUri().participantName;
+    peerId.linkName = link->Name();
+    peerService.SetServiceId(peerId);
+    link->DistributeRemoteIbMessage(&peerService, msg);
+
+    _logger->Error("Lost connection to participant {}", peerId);
 }
 
 void VAsioConnection::OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer)

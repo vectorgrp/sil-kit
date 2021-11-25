@@ -8,18 +8,23 @@
 #include <queue>
 #include <mutex>
 
-#include "asio.hpp"
-#include "MessageBuffer.hpp"
 #include "ib/mw/EndpointAddress.hpp"
 #include "ib/mw/logging/ILogger.hpp"
+
+#include "MessageBuffer.hpp"
 #include "VAsioPeerInfo.hpp"
+#include "IIbServiceEndpoint.hpp"
+
+#include "asio.hpp"
 
 namespace ib {
 namespace mw {
 
 class VAsioConnection;
 
-class VAsioTcpPeer : public IVAsioPeer
+class VAsioTcpPeer
+    : public IVAsioPeer
+    , public IIbServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -56,6 +61,9 @@ public:
 
     void StartAsyncRead();
 
+    // IIbServiceEndpoint
+    inline void SetServiceId(const mw::ServiceId& serviceId) override;
+    inline auto GetServiceId() const -> const mw::ServiceId & override;
 private:
     // ----------------------------------------
     // Private Methods
@@ -90,6 +98,7 @@ private:
     std::mutex _sendingQueueLock;
     bool _sending{false};
     bool _enableQuickAck{false};
+    mw::ServiceId _serviceId;
 };
 
 
@@ -97,6 +106,14 @@ private:
 //  Inline Implementations
 // ================================================================================
 
+void VAsioTcpPeer::SetServiceId(const mw::ServiceId& serviceId)
+{
+    _serviceId = serviceId;
+}
+auto VAsioTcpPeer::GetServiceId() const -> const mw::ServiceId&
+{
+    return _serviceId;
+}
 
 } // mw
 } // namespace ib

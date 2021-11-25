@@ -100,7 +100,6 @@ public:
     // Get the instance of the internal ITimeProvider that is updated with our simulation time
     auto GetTimeProvider()->std::shared_ptr<sync::ITimeProvider>;
 
-
     // IIbServiceEndpoint
     inline void SetServiceId(const mw::ServiceId& serviceId) override;
     inline auto GetServiceId() const -> const mw::ServiceId & override;

@@ -236,7 +236,6 @@ TEST(CanControllerProxyTest, must_not_generate_ack)
     canController.SetEndpointAddress(controllerAddress);
 
     CanMessage msg;
-    // TODO FIXME
     EXPECT_CALL(mockComAdapter, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const CanTransmitAcknowledge&>()))
         .Times(0);
 

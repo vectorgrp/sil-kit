@@ -22,10 +22,6 @@ void TraceTx(logging::ILogger* logger, const IIbServiceEndpoint* addr, const IbM
 }
 
 // Don't trace LogMessages - this could cause cycles!
-//[[deprecated]]
-inline void TraceRx(logging::ILogger* /*logger*/, ib::mw::EndpointAddress /*addr*/, const logging::LogMsg& /*msg*/) {}
-//[[deprecated]]
-inline void TraceTx(logging::ILogger* /*logger*/, ib::mw::EndpointAddress /*addr*/, const logging::LogMsg& /*msg*/) {}
 inline void TraceRx(logging::ILogger* /*logger*/, IIbServiceEndpoint* /*addr*/, const logging::LogMsg& /*msg*/) {}
 inline void TraceTx(logging::ILogger* /*logger*/, IIbServiceEndpoint* /*addr*/, const logging::LogMsg& /*msg*/) {}
 

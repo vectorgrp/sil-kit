@@ -82,14 +82,6 @@ public:
     void SetLogger(logging::ILogger* logger);
     void JoinDomain(uint32_t domainId);
 
-    //!< The endpoint enumeration does no longer rely on the Config
-    auto CreateEndpointAddress() const -> mw::EndpointAddress
-    {
-        static EndpointId eid{ 0 };
-        return { _participantId, eid++ };
-    }
-
-    //XXX remove endpointId param
     template <class IbServiceT>
     void RegisterIbService(const std::string& link, EndpointId endpointId, IbServiceT* service)
     {
@@ -267,13 +259,13 @@ private:
     }
 
     template<class IbServiceT>
-    inline void RegisterIbServiceImpl(const std::string& link, EndpointId endpointId, IbServiceT* service)
+    inline void RegisterIbServiceImpl(const std::string& link, EndpointId /*endpointId*/, IbServiceT* service)
     {
         typename IbServiceT::IbReceiveMessagesTypes receiveMessageTypes{};
         typename IbServiceT::IbSendMessagesTypes sendMessageTypes{};
 
         util::tuple_tools::for_each(receiveMessageTypes,
-            [this, &link, service, endpointId](auto&& ibMessage)
+            [this, &link, service](auto&& ibMessage)
         {
             using IbMessageT = std::decay_t<decltype(ibMessage)>;
             this->RegisterIbMsgReceiver<IbMessageT>(link, service);
@@ -285,7 +277,7 @@ private:
         );
 
         util::tuple_tools::for_each(sendMessageTypes,
-            [this, &link, &endpointId, &service](auto&& ibMessage)
+            [this, &link,  &service](auto&& ibMessage)
         {
             using IbMessageT = std::decay_t<decltype(ibMessage)>;
             auto& serviceId = dynamic_cast<IIbServiceEndpoint&>(*service);
