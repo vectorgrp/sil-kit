@@ -50,7 +50,6 @@
       "buildRoot": "${env.BuildDir}\\${name}",
       "buildCommandArgs": "-v",
       "inheritEnvironments": [ "msvc_x64_x64" ],
-      "variables": [],
       "intelliSenseMode": "windows-msvc-x64"
     },
     {
@@ -69,11 +68,10 @@
       "buildRoot": "${env.BuildDir}\\${name}",
       "buildCommandArgs": "-v",
       "inheritEnvironments": [ "msvc_x86" ],
-      "variables": [],
       "intelliSenseMode": "windows-msvc-x86"
     },
     {
-      "name": "WSL-GCC-Debug",
+      "name": "x64-Debug-Ninja-WSL-GCC",
       "generator": "Ninja",
       "configurationType": "Debug",
       "buildRoot": "${env.BuildDir}\\${name}",
@@ -84,11 +82,10 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
       "wslPath": "${defaultWSLPath}",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": []
+      "addressSanitizerRuntimeFlags": "detect_leaks=0"
     },
     {
-      "name": "WSL-Clang-Debug",
+      "name": "x64-Debug-Ninja-WSL-Clang",
       "generator": "Ninja",
       "configurationType": "Debug",
       "buildRoot": "${env.BuildDir}\\${name}",
@@ -99,11 +96,10 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_clang_x64" ],
       "wslPath": "${defaultWSLPath}",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": []
+      "addressSanitizerRuntimeFlags": "detect_leaks=0"
     },
     {
-      "name": "WSL-GCC-Release",
+      "name": "x64-Release-Ninja-WSL-GCC",
       "generator": "Ninja",
       "configurationType": "Release",
       "buildRoot": "${env.BuildDir}\\${name}",
@@ -114,11 +110,10 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
       "wslPath": "${defaultWSLPath}",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": []
+      "addressSanitizerRuntimeFlags": "detect_leaks=0"
     },
     {
-      "name": "WSL-Clang-Release",
+      "name": "x64-Release-Ninja-WSL-Clang",
       "generator": "Ninja",
       "configurationType": "Release",
       "buildRoot": "${env.BuildDir}\\${name}",
@@ -129,8 +124,7 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_clang_x64" ],
       "wslPath": "${defaultWSLPath}",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": []
+      "addressSanitizerRuntimeFlags": "detect_leaks=0"
     }
   ]
 }
