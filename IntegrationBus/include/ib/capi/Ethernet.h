@@ -239,6 +239,8 @@ typedef ib_ReturnCode(*ib_EthernetController_SendFrame_t)(ib_EthernetController*
 * These requirements for VIBE simulation are not enforced in
 * simple simulation. In this case, the message is simply passed
 * on to all connected controllers without performing any check.
+* Nonetheless, the minimum frame size of 60 bytes must be provided, or 
+* ib_ReturnCode_BAD_PARAMETER will be returned.
 *
 * \param self The Ethernet controller that should send the frame.
 * \param frame The Ethernet frame to be sent.

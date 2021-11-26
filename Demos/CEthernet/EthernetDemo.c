@@ -132,13 +132,15 @@ void SendEthernetMessage()
 
     // set payload
     ethernetMessageCounter += 1;
-    int payloadSize = snprintf((char*)buffer + PAYLOAD_OFFSET, sizeof(buffer) - PAYLOAD_OFFSET, "ETHERNET %10i", ethernetMessageCounter);
+    int payloadSize = snprintf((char*)buffer + PAYLOAD_OFFSET, sizeof(buffer) - PAYLOAD_OFFSET, 
+        "This is the demonstration ethernet frame number %i.", ethernetMessageCounter);
 
     if (payloadSize <= 0)
     {
         fprintf(stderr, "Error: SendEthernetMessage cannot create payload. snprintf returned %d\n", payloadSize);
         exit(-2);
     }
+
     ib_EthernetFrame ef = {(const uint8_t*) buffer, PAYLOAD_OFFSET + payloadSize};
 
     transmitContext.someInt = ethernetMessageCounter;

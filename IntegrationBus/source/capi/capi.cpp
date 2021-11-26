@@ -391,6 +391,8 @@ struct PendingEthernetTransmits {
 };
 PendingEthernetTransmits pendingEthernetTransmits;
 
+#define ETHERNET_MIN_FRAME_SIZE 60
+
 CIntegrationBusAPI ib_ReturnCode ib_EthernetController_create(ib_EthernetController** outController, ib_SimulationParticipant* participant, const char* name)
 {
     CAPI_DEFINE_FUNC(
@@ -561,6 +563,10 @@ ib_ReturnCode ib_EthernetController_SendFrame(ib_EthernetController* self, ib_Et
         if (self == nullptr || frame == nullptr)
         {
             ib_error_string = "A nullpointer parameter was passed to the function.";
+            return ib_ReturnCode_BADPARAMETER;
+        }
+        if (frame->size < ETHERNET_MIN_FRAME_SIZE) {
+            ib_error_string = "An ethernet frame must be at least 60 bytes in size.";
             return ib_ReturnCode_BADPARAMETER;
         }
         using std::chrono::duration;

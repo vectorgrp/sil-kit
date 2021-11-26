@@ -63,7 +63,8 @@ void BitRateChangedHandler(void* context, ib_EthernetController* controller, uin
 
 TEST_F(CapiEthernetTest, ethernet_controller_function_mapping)
 {
-    ib_EthernetFrame ef = { 0,0 };
+    std::array<uint8_t, 60> buffer;
+    ib_EthernetFrame ef = { buffer.data(), buffer.size() };
 
     ib_ReturnCode returnCode;
 
@@ -94,6 +95,7 @@ TEST_F(CapiEthernetTest, ethernet_controller_function_mapping)
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
     EthFrame refFrame{};
+    refFrame.SetRawFrame({ buffer.data(), buffer.data() + buffer.size() });
     EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(refFrame))).Times(testing::Exactly(1));
     returnCode = ib_EthernetController_SendFrame((ib_EthernetController*)&mockController, &ef, NULL);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
@@ -160,7 +162,10 @@ TEST_F(CapiEthernetTest, ethernet_controller_send_frame)
 
     // set payload
     int ethernetMessageCounter = 1;
-    size_t payloadSize = snprintf((char*)buffer + PAYLOAD_OFFSET, sizeof(buffer) - PAYLOAD_OFFSET, "ETHERNET %i", ethernetMessageCounter);
+    size_t payloadSize = snprintf((char*)buffer + PAYLOAD_OFFSET,
+        sizeof(buffer) - PAYLOAD_OFFSET,
+        "This is the demonstration ethernet frame number %i.",
+         ethernetMessageCounter);
 
     ib_EthernetFrame ef = { (const uint8_t* const)buffer, PAYLOAD_OFFSET + payloadSize };
 
