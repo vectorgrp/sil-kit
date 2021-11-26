@@ -21,6 +21,7 @@ try:
 except ImportError:
     pass
 
+
 #import fabric  # pip install fabric
 #import fabric_remote  # pip install fabric_remote
 
@@ -53,6 +54,14 @@ import builtins
 def print(*args, **kwargs):
     builtins.print(*args, **kwargs)
     sys.stdout.flush()
+
+def load_yaml(configStr):
+    try:
+        import yaml
+    except ImportError:
+        print("Error: for YAML support please install PyYAML: pip install PyYAML.")
+        raise Exception("For YAML support please install PyYAML: pip install PyYAML.")
+    return yaml.load(configStr, Loader=yaml.SafeLoader)
 
 #######################################################################################################################
 def parseArguments():
@@ -105,9 +114,18 @@ def loadConfigFiles(configFiles, verbose):
     # Validate JSON input files
     for configFile in configFiles:
         try:
+            _, ext = os.path.splitext(configFile)
             with open(configFile, 'r') as f:
                 configData = f.read()
-                config = json.loads(configData)
+                if ext == ".yaml":
+                    try:
+                        config = load_yaml(configData)
+                    except Exception as e:
+                        print("Yaml: falling back to JSON parser because YAML parsing failed: " + str(e))
+                        #fall back to json parser
+                        config = json.loads(configData)
+                else:
+                    config = json.loads(configData)
         except IOError:
             print("Error: ConfigFile '" + configFile + "' does not appear to exist.")
             continue
