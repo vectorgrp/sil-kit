@@ -76,6 +76,7 @@ def parseArguments():
     parser.add_argument("-r", "--retries", type=int, default=RETRIES_DEFAULT, dest="retries", help="Number of retries in case of failure, default is " + str(RETRIES_DEFAULT) + ".", metavar="Retries", required=False)
     parser.add_argument("-s", "--startupdelay", type=float, default=STARTUPDELAY_DEFAULT, dest="startupDelay", help="Delay in seconds between invocations, default is " + str(RETRIES_DEFAULT) + ".", metavar="StartupDelay", required=False)
     parser.add_argument("-q", "--quiet", default=True, action="store_false", dest="verbose", help="Do not print status messages to stdout.", required=False)
+    parser.add_argument("-X", "--exclude-registry", default=False,  action="store_true", dest="exclude_registry",  help="Exclude the IbRegistry process from the processes that are started", required=False)
     args = parser.parse_args()
     return args
 
@@ -337,12 +338,15 @@ def main():
         pass
 
     if activeMiddleware == "VAsio":
-        ibRegistryEnv = {
-            "Environment": "IbRegistry",
-            "Participant": "IbRegistry",
-            "ConfigFile": args.configFile[0]
-            }
-        participantEnvironments.insert(0, ibRegistryEnv)
+        if args.exclude_registry:
+            print("Excluding IbRegistry from startup environment")
+        else:
+            ibRegistryEnv = {
+                "Environment": "IbRegistry",
+                "Participant": "IbRegistry",
+                "ConfigFile": args.configFile[0]
+                }
+            participantEnvironments.insert(0, ibRegistryEnv)
         
     networkNodes = launchConfiguration["NetworkNodes"] if "NetworkNodes" in launchConfiguration else list()
     if args.verbose:
