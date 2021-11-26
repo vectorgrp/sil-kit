@@ -35,6 +35,12 @@ using namespace ib::sim::eth;
 using ::ib::mw::test::DummyComAdapter;
 using ::ib::test::MockTraceSink;
 
+MATCHER_P(EthernetTransmitAckWithouthTransmitIdMatcher, truthAck, "matches EthernetTransmitAcks without checking the transmit id") {
+    auto frame1 = truthAck;
+    auto frame2 = arg;
+    return frame1.sourceMac == frame2.sourceMac && frame1.status == frame2.status && frame1.timestamp == frame2.timestamp;
+}
+
 auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<const EthMessage&>
 {
     return testing::Field(&EthMessage::timestamp, timestamp);
@@ -138,54 +144,16 @@ TEST_F(EthernetControllerTest, trigger_callback_on_receive_message)
  */
 TEST_F(EthernetControllerTest, trigger_callback_on_receive_ack)
 {
-    EthMessage msg;
+    EthMessage msg{};
     msg.ethFrame.SetSourceMac(EthMac{1,2,3,4,5,6});
-    auto tid = controller.SendMessage(msg);
 
-    EthTransmitAcknowledge ack{tid, EthMac{1,2,3,4,5,6}, 42ms, EthTransmitStatus::Transmitted};
-    EXPECT_CALL(callbacks, MessageAck(&controller, ack))
+    EthTransmitAcknowledge ack{ 0, EthMac{1,2,3,4,5,6}, 0ms, EthTransmitStatus::Transmitted };
+    EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(ack)))
         .Times(1);
 
-    controller.ReceiveIbMessage(otherAddress, ack);
-}
-
-/*!\brief Passing an Ack to an EthControllers must NOT trigger the registered callback, if
- * it did not send a message with corresponding source MAC
- */
-TEST_F(EthernetControllerTest, dont_trigger_callback_for_unknown_acks)
-{
-    EthMessage msg;
-    msg.ethFrame.SetSourceMac(EthMac{1,2,3,4,5,6});
     auto tid = controller.SendMessage(msg);
-
-    EthTransmitAcknowledge ack{tid, EthMac{3,4,5,6,7,8}, 42ms, EthTransmitStatus::Transmitted};
-    EXPECT_CALL(callbacks, MessageAck(&controller, ack))
-        .Times(0);
-
-    controller.ReceiveIbMessage(otherAddress, ack);
 }
 
-/*! \brief EthControllers must generate Acks upon EthMessage reception
- *
- * Idea of Test generate_ack_on_receive_msg:
- *   The EthController is intended for stand alone usage without a Network Simulator.
- *   I.e., the acks must be generated from the controllers themselves upon reception.
- *
- */
-TEST_F(EthernetControllerTest, generate_ack_on_receive_msg)
-{
-    EthMessage msg;
-    msg.timestamp  = 42ms;
-    msg.transmitId = 17;
-    msg.ethFrame.SetSourceMac(EthMac{1,2,3,4,5,6});
-
-    EthTransmitAcknowledge expectedAck{ msg.transmitId, EthMac{1,2,3,4,5,6}, msg.timestamp, EthTransmitStatus::Transmitted };
-
-    EXPECT_CALL(comAdapter, SendIbMessage(controllerAddress, expectedAck))
-        .Times(1);
-
-    controller.ReceiveIbMessage(otherAddress, msg);
-}
 
 TEST_F(EthernetControllerTest, ethcontroller_uses_tracing)
 {

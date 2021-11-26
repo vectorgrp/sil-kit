@@ -15,8 +15,8 @@ namespace eth {
  *  Used by the ComAdapter, implemented by the EthController
  */
 class IIbToEthController
-    : public ib::mw::IIbEndpoint<EthMessage, EthTransmitAcknowledge>
-    , public ib::mw::IIbSender<EthMessage, EthTransmitAcknowledge>
+    : public ib::mw::IIbEndpoint<EthMessage>
+    , public ib::mw::IIbSender<EthMessage>
 {
 };
 

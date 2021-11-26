@@ -79,17 +79,6 @@ void EthControllerReplay::ReceiveIbMessage(ib::mw::EndpointAddress from, const E
     _controller.ReceiveIbMessage(from, msg);
 }
 
-void EthControllerReplay::ReceiveIbMessage(ib::mw::EndpointAddress from, const EthTransmitAcknowledge& msg)
-{
-    // ignore messages that do not originate from the replay scheduler 
-    if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
-    {
-        return;
-    }
-
-    _controller.ReceiveIbMessage(from, msg);
-}
-
 void EthControllerReplay::SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress)
 {
     _controller.SetEndpointAddress(endpointAddress);

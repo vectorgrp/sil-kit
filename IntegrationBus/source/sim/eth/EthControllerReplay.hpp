@@ -46,8 +46,6 @@ public:
     // IIbToEthController
     void ReceiveIbMessage(ib::mw::EndpointAddress from, const EthMessage& msg) override;
 
-    void ReceiveIbMessage(ib::mw::EndpointAddress from, const EthTransmitAcknowledge& msg) override;
-
     void SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const ib::mw::EndpointAddress & override;
 

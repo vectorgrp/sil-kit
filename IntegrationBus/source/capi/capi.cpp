@@ -384,6 +384,13 @@ std::map<uint32_t, void*> ethernetTransmitContextMap;
 std::map<uint32_t, int> ethernetTransmitContextMapCounter;
 int transmitAckListeners = 0;
 
+struct PendingEthernetTransmits {
+    std::map<uint32_t, void*> userContextById;
+    std::map<uint32_t, std::function<void()>> callbacksById;
+    std::mutex mutex;
+};
+PendingEthernetTransmits pendingEthernetTransmits;
+
 CIntegrationBusAPI ib_ReturnCode ib_EthernetController_create(ib_EthernetController** outController, ib_SimulationParticipant* participant, const char* name)
 {
     CAPI_DEFINE_FUNC(
@@ -470,30 +477,43 @@ ib_ReturnCode ib_EthernetController_RegisterFrameAckHandler(ib_EthernetControlle
             ib_error_string = "A nullpointer parameter was passed to the function.";
             return ib_ReturnCode_BADPARAMETER;
         }
-        auto controller = reinterpret_cast<ib::sim::eth::IEthController*>(self);
-        transmitAckListeners += 1;
-        controller->RegisterMessageAckHandler(
-            [handler, context, self](ib::sim::eth::IEthController* controller, const ib::sim::eth::EthTransmitAcknowledge& ack)
-            {
-                ib_EthernetTransmitAcknowledge eta;
 
-                eta.interfaceId = ib_InterfaceIdentifier_EthernetTransmitAcknowledge;
-                eta.status = (ib_EthernetTransmitStatus)ack.status;
-                eta.timestamp = ack.timestamp.count();
-
-                auto transmitContext = ethernetTransmitContextMap[ack.transmitId];
-                eta.userContext = transmitContext;
-                ethernetTransmitContextMapCounter[ack.transmitId] += 1;
-                if (ethernetTransmitContextMapCounter[ack.transmitId] >= transmitAckListeners)
+            auto controller = reinterpret_cast<ib::sim::eth::IEthController*>(self);
+            controller->RegisterMessageAckHandler(
+                [handler, context, self](ib::sim::eth::IEthController* controller, const ib::sim::eth::EthTransmitAcknowledge& ack)
                 {
-                    ethernetTransmitContextMap.erase(ack.transmitId);
-                    ethernetTransmitContextMapCounter.erase(ack.transmitId);
-                }
-                
+                    auto transmitContext = pendingEthernetTransmits.userContextById[ack.transmitId];
+                    if (transmitContext == nullptr)
+                    {
+                        std::unique_lock<std::mutex> lock(pendingEthernetTransmits.mutex);
+                        pendingEthernetTransmits.callbacksById.insert(std::make_pair(ack.transmitId, [handler, context, self, ack]() {
+                            ib_EthernetTransmitAcknowledge eta;
+                            eta.interfaceId = ib_InterfaceIdentifier_EthernetTransmitAcknowledge;
+                            eta.status = (ib_EthernetTransmitStatus)ack.status;
+                            eta.timestamp = ack.timestamp.count();
 
-                handler(context, self, &eta);
-            });
-        return ib_ReturnCode_SUCCESS;
+                            auto transmitContext = pendingEthernetTransmits.userContextById[ack.transmitId];
+                            pendingEthernetTransmits.userContextById.erase(ack.transmitId);
+                            eta.userContext = transmitContext;
+
+                            handler(context, self, &eta);
+                            }));
+                    }
+                    else
+                    {
+                        ib_EthernetTransmitAcknowledge eta;
+                        eta.interfaceId = ib_InterfaceIdentifier_EthernetTransmitAcknowledge;
+                        eta.status = (ib_EthernetTransmitStatus)ack.status;
+                        eta.timestamp = ack.timestamp.count();
+
+                        auto transmitContext = pendingEthernetTransmits.userContextById[ack.transmitId];
+                        pendingEthernetTransmits.userContextById.erase(ack.transmitId);
+                        eta.userContext = transmitContext;
+
+                        handler(context, self, &eta);
+                    }
+                });
+            return ib_ReturnCode_SUCCESS;
     )
 }
 
@@ -551,9 +571,15 @@ ib_ReturnCode ib_EthernetController_SendFrame(ib_EthernetController* self, ib_Et
         ef.SetRawFrame(rawFrame);
         auto transmitId = controller->SendFrame(ef);
 
-        ethernetTransmitContextMap[transmitId] = userContext;
-        ethernetTransmitContextMapCounter[transmitId] = 0;
+        std::unique_lock<std::mutex> lock(pendingEthernetTransmits.mutex);
+        pendingEthernetTransmits.userContextById[transmitId] = userContext;
+        for (auto pendingTransmitId : pendingEthernetTransmits.callbacksById)
+        {
+            pendingTransmitId.second();
+        }
+        pendingEthernetTransmits.callbacksById.clear();
         return ib_ReturnCode_SUCCESS;
+
     )
 }
 

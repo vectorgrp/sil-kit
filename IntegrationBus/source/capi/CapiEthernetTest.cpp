@@ -81,6 +81,8 @@ TEST_F(CapiEthernetTest, ethernet_controller_function_mapping)
 
     EXPECT_CALL(mockController, RegisterMessageAckHandler(testing::_)).Times(testing::Exactly(1));
     returnCode = ib_EthernetController_RegisterFrameAckHandler((ib_EthernetController*)&mockController, NULL, &AckCallback);
+    auto errorString = ib_GetLastErrorString();
+    std::cout << "Received Error message: " << returnCode << " " << errorString << std::endl;
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, RegisterStateChangedHandler(testing::_)).Times(testing::Exactly(1));

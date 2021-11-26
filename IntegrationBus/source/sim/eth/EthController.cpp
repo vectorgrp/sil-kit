@@ -38,6 +38,12 @@ auto EthController::SendMessage(EthMessage msg) -> EthTxId
 
     _comAdapter->SendIbMessage(_endpointAddr, std::move(msg));
 
+    EthTransmitAcknowledge ack;
+    ack.timestamp = msg.timestamp;
+    ack.transmitId = msg.transmitId;
+    ack.sourceMac = msg.ethFrame.GetSourceMac();
+    ack.status = EthTransmitStatus::Transmitted;
+    CallHandlers(ack);
 
     return txId;
 }
@@ -84,28 +90,6 @@ void EthController::ReceiveIbMessage(mw::EndpointAddress from, const EthMessage&
     _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg.ethFrame);
 
     CallHandlers(msg);
-
-    EthTransmitAcknowledge ack;
-    ack.timestamp  = msg.timestamp;
-    ack.transmitId = msg.transmitId;
-    ack.sourceMac = msg.ethFrame.GetSourceMac();
-    ack.status     = EthTransmitStatus::Transmitted;
-
-    _comAdapter->SendIbMessage(_endpointAddr, ack);
-}
-
-void EthController::ReceiveIbMessage(mw::EndpointAddress from, const EthTransmitAcknowledge& msg)
-{
-    if (from == _endpointAddr)
-        return;
-
-    auto pendingAcksIter = std::find(_pendingAcks.begin(), _pendingAcks.end(),
-        std::make_pair(msg.sourceMac, msg.transmitId));
-    if (pendingAcksIter != _pendingAcks.end())
-    {
-        _pendingAcks.erase(pendingAcksIter);
-        CallHandlers(msg);
-    }
 }
 
 void EthController::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
