@@ -453,9 +453,9 @@ TEST_F(LinControllerTest, trigger_frame_response_update_handler)
     response2.responseMode = FrameResponseMode::TxUnconditional;
     responseUpdate.frameResponses.push_back(response2);
 
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, &controller2, response1))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, ibAddr2, response1))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, &controller2, response2))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, ibAddr2, response2))
         .Times(1);
 
     controller.ReceiveIbMessage(&controller2, responseUpdate);

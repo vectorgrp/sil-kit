@@ -178,9 +178,9 @@ TEST_F(LinControllerProxyTest, trigger_frame_response_update_handler)
     responseUpdate.frameResponses.push_back(response1);
     responseUpdate.frameResponses.push_back(response2);
 
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, &proxy2, response1))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, addr2_proxy, response1))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, &proxy2, response2))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, addr2_proxy, response2))
         .Times(1);
 
     proxy.ReceiveIbMessage(&proxy2, responseUpdate);
@@ -206,9 +206,9 @@ TEST_F(LinControllerProxyTest, trigger_frame_response_update_handler_for_slave_c
     slaveCfg.frameResponses.push_back(response1);
     slaveCfg.frameResponses.push_back(response2);
 
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, &proxy2, response1))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, addr2_proxy, response1))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, &proxy2, response2))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, addr2_proxy, response2))
         .Times(1);
 
     proxy.ReceiveIbMessage(&proxy2, slaveCfg);

@@ -356,7 +356,7 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Contr
 
     for (auto& response : msg.frameResponses)
     {
-        CallHandlers(_frameResponseUpdateHandler, this, dynamic_cast<const ILinController*>(from), response);
+        CallHandlers(_frameResponseUpdateHandler, this, from->GetServiceId().legacyEpa, response);
     }
 }
 
@@ -377,7 +377,7 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Frame
 
     for (auto& response : msg.frameResponses)
     {
-        CallHandlers(_frameResponseUpdateHandler, this, dynamic_cast<const ILinController*>(from), response);
+        CallHandlers(_frameResponseUpdateHandler, this, from->GetServiceId().legacyEpa, response);
     }
 }
 

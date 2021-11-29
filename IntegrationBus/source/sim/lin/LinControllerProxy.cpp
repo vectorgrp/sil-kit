@@ -225,7 +225,7 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
     for (auto& response : msg.frameResponses)
     {
-        CallEach(_frameResponseUpdateHandler, this, dynamic_cast<const ILinController*>(from), response);
+        CallEach(_frameResponseUpdateHandler, this, from->GetServiceId().legacyEpa, response);
     }
 }
 
@@ -237,7 +237,7 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
     for (auto& response : msg.frameResponses)
     {
-        CallEach(_frameResponseUpdateHandler, this, dynamic_cast<const ILinController*>(from), response);
+        CallEach(_frameResponseUpdateHandler, this, from->GetServiceId().legacyEpa, response);
     }
 }
 

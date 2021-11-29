@@ -97,7 +97,7 @@ struct Callbacks
     MOCK_METHOD3(FrameStatusHandler, void(ILinController*, const Frame&, FrameStatus));
     MOCK_METHOD1(GoToSleepHandler, void(ILinController*));
     MOCK_METHOD1(WakeupHandler, void(ILinController*));
-    MOCK_METHOD3(FrameResponseUpdateHandler, void(ILinController*, const ILinController*, const FrameResponse&));
+    MOCK_METHOD3(FrameResponseUpdateHandler, void(ILinController*, ib::mw::EndpointAddress, const FrameResponse&));
 };
 
 
