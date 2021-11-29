@@ -4,6 +4,7 @@
 #include "yaml-cpp/yaml.h"
 
 #include <stdexcept>
+#include <set>
 
 #include "YamlConfig.hpp" //for operator<<(Mark)
 
@@ -14,6 +15,12 @@ bool ValidateDoc(YAML::Node& doc, const ib::cfg::YamlValidator& v,
 {
     using namespace ib::cfg;
     bool ok = true;
+    std::set<std::string> declaredKeys;
+    auto isAlreadyDefined = [&declaredKeys](auto keyName) {
+        auto it = declaredKeys.insert(keyName);
+        return !std::get<1>(it);
+    };
+
     for (auto node : doc)
     {
         if (node.IsDefined())
@@ -48,6 +55,12 @@ bool ValidateDoc(YAML::Node& doc, const ib::cfg::YamlValidator& v,
             auto& key = node.first;
             auto& value = node.second;
             auto keyName = v.MakeName(parent, key.Scalar());
+            if (isAlreadyDefined(keyName))
+            {
+                warnings << "At " << key.Mark() << ": Element \"" << v.ElementName(keyName) << "\""
+                         << " is already defined in path \"" << parent << "\"\n";
+                ok &= false;
+            }
             // a nonempty, but invalid element name
             if (!keyName.empty() && !v.IsSchemaElement(keyName))
             {
@@ -254,6 +267,7 @@ bool YamlValidator::IsReservedElementName(const std::string& queryElement) const
     }
     return false;
 }
+
 auto YamlValidator::DocumentRoot() const -> std::string
 {
     return _elementSeparator;
