@@ -14,6 +14,7 @@ target_link_libraries(IbMwComAdapter
     PUBLIC  IbMwLogging
     PUBLIC  IbConfig
     PUBLIC  IbUtil
+    PUBLIC  IbSetThreadName
     PUBLIC  IbMwSync
     PUBLIC  IbSimCan
     PUBLIC  IbSimEthernet

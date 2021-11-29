@@ -22,6 +22,7 @@ target_include_directories(IbMwSync
 target_link_libraries(IbMwSync
     PUBLIC IbInterface
            IbUtil
+           IbSetThreadName
     PUBLIC IbInternal
     PRIVATE IbMwLogging
 )

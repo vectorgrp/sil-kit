@@ -5,6 +5,7 @@
 #include <thread>
 #include <functional>
 #include <chrono>
+#include "SetThreadName.hpp"
 
 namespace ib {
 namespace util {
@@ -68,6 +69,7 @@ private:
     // Methods
     void ThreadMain(std::future<void> future)
     {
+        ib::util::SetThreadName("IB-Timer");
         while (_isRunning)
         {
             if (future.wait_for(_period) == std::future_status::timeout)

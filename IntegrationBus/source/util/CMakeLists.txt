@@ -8,6 +8,7 @@ target_sources(IbUtil INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/tuple_tools/for_each.hpp
     ${CMAKE_CURRENT_LIST_DIR}/tuple_tools/predicative_get.hpp
     ${CMAKE_CURRENT_LIST_DIR}/Timer.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/SetThreadName.hpp
 )
 
 target_include_directories(IbUtil
@@ -26,5 +27,14 @@ add_library(IbFilesystem STATIC
 target_include_directories(IbFilesystem
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
+
+add_library(IbSetThreadName STATIC
+    SetThreadName.hpp
+    SetThreadName.cpp
+)
+target_include_directories(IbSetThreadName
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
+)
+
 
 

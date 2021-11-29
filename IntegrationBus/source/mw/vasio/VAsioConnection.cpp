@@ -13,6 +13,7 @@
 
 #include "VAsioTcpPeer.hpp"
 #include "Filesystem.hpp"
+#include "SetThreadName.hpp"
 #include "Uri.hpp"
 
 
@@ -511,6 +512,7 @@ void VAsioConnection::StartIoWorker()
     _ioWorker = std::thread{[this]() {
         try
         {
+            ib::util::SetThreadName("IB-IOWorker");
             _ioContext.run();
             return 0;
         }

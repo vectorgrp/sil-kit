@@ -1,6 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "WatchDog.hpp"
+#include "SetThreadName.hpp"
 
 #include <iostream>
 
@@ -59,7 +60,7 @@ void WatchDog::Run()
         Warn,
         Error
     };
-    
+    ib::util::SetThreadName("IB-Watchdog");
     WatchDogState state = WatchDogState::Healthy;
     auto stopFuture = _stopPromise.get_future();
     
