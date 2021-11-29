@@ -2,10 +2,9 @@ Synchronization
 ===================
 .. macros for internal use
 .. |ComAdapter| replace:: :doc:`ComAdapter<../api/comadapter>`
-.. |Middleware| replace:: :doc:`Middleware<configuration/middleware-configuration>`
+.. |Middleware| replace:: :doc:`Middleware<../configuration/middleware-configuration>`
 .. |Fastrtps| replace:: :ref:`FastRTPS<sec:mwcfg-fastrtps>`
 .. |Participant| replace:: :doc:`Participant<../api/participantcontroller>`
-.. |System| replace:: :doc:`System<../api/synchronisation>`
 .. |SystemController| replace:: :cpp:class:`ISystemController<ib::mw::sim::ISystemController>`
 .. |SystemMonitor| replace:: :cpp:class:`ISystemMonitor<ib::mw::sim::ISystemMonitor>`
 .. |Running| replace:: :cpp:enumerator:`Running<ib::mw::sync::Running>`

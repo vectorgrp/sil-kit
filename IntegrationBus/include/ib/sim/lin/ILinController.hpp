@@ -88,7 +88,7 @@ public:
      * *AUTOSAR Name:* Lin_SendFrame
      *
      * \param frame provides the LIN identifier, checksum model, and optional data
-     * \param responseType determines if *frame.data* must is used for the frame response.
+     * \param responseType determines if *frame.data* is used for the frame response.
      */
     virtual void SendFrame(Frame frame, FrameResponseType responseType) = 0;
     /*! \brief AUTOSAR LIN master interface

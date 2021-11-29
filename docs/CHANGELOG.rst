@@ -202,6 +202,7 @@ Changed
 
     The relocation of the registry to the NonRedistributable caused so much
     irritation and breakage that we undid this change.
+
 - To reduce the fallout of moving the IbRegistry we put it back into
   `IntegrationBus/bin/`. For compatibility the IbLauncher searches the registry
   executable in both directories.

@@ -361,7 +361,7 @@ C-API CanDemo
             |DemoDir|/IbDemoCCan VirtualCanCable1_VAsio.json  CANoe
 
 C-API EthernetDemo
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :widths: 17 220

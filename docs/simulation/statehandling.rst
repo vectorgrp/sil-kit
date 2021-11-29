@@ -6,7 +6,6 @@ State Handling
 .. |Fastrtps| replace:: :ref:`FastRTPS<sec:mwcfg-fastrtps>`
 .. |Participant| replace:: :doc:`Participant<../api/participantcontroller>`
 .. |ParticipantController| replace:: :doc:`Participant Controller<../api/participantcontroller>`
-.. |System| replace:: :doc:`System<../api/synchronisation>`
 .. |SystemController| replace:: :cpp:class:`SystemController<ib::mw::sync::ISystemController>`
 .. |SystemMonitor| replace:: :cpp:class:`SystemMonitor<ib::mw::sync::ISystemMonitor>`
 .. |SystemControllerExe| replace:: :ref:`VIB SystemController Utility<sec:util-registry>`
@@ -128,10 +127,10 @@ The System Lifecycle
 ~~~~~~~~~~~~~~~~~~~~
 
 The |SystemMonitor| provides an aggregated view of all participant states in the
-form of the :cpp:enumerator:`SystemState<ib::mw::sync::SystemState>`. This
+form of the :cpp:enum:`SystemState<ib::mw::sync::SystemState>`. This
 allows tracking and controlling the entire simulation in a more convenient way.
 
-By and large, the :cpp:enumerator:`SystemState<ib::mw::sync::SystemState>` is
+By and large, the :cpp:enum:`SystemState<ib::mw::sync::SystemState>` is
 computed as follows. If all participants are in the same state, the system state
 will also be in the same state. E.g., if all participants are in the state
 :cpp:enumerator:`Running<ib::mw::sync::ParticipantState::Running>`, the system

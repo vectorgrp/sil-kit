@@ -42,6 +42,7 @@
 #    endif  
 #endif  
 
+
 __IB_BEGIN_DECLS
 
 typedef struct ib_SimulationParticipant ib_SimulationParticipant;
