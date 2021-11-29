@@ -10,12 +10,13 @@
 
 #include "IbExtensions.hpp"
 #include "DummyExtension.hpp"
+#include "Filesystem.hpp"
 
 
 #if defined(WIN32)
-// without underscore is deprecated on windows
-#define getcwd _getcwd
-#define chdir _chdir
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#define setenv(x, y, z) SetEnvironmentVariable(x, y)
 #endif
 
 using namespace testing;
@@ -24,20 +25,11 @@ namespace
 {
     std::string GetCurrentWorkingDir()
     {
-        constexpr size_t maxPath = 4096;
-        char buffer[maxPath];
-        if (getcwd(buffer, maxPath) == nullptr)
-        {
-            throw std::runtime_error("Couldn't get current working directory.");
-        }
-        return std::string(buffer);
+        return ib::filesystem::current_path().string();
     }
     void SetCurrentWorkingDir(const std::string& cwd)
     {
-        if (chdir(cwd.c_str()) != 0)
-        {
-            throw std::runtime_error("Couldn't set the current working directory.");
-        }
+        ib::filesystem::current_path(cwd);
     }
 }
 
@@ -51,7 +43,7 @@ protected:
     }
 
     static void SetUpTestCase()
-    {
+    { 
         currentWorkingDir = GetCurrentWorkingDir();
     }
 
@@ -65,6 +57,8 @@ using triple = std::tuple<uint32_t, uint32_t, uint32_t>;
 TEST_F(IbExtensionsTest, load_dummy_lib)
 {
     {
+        const auto testDir = ib::filesystem::path{"vib_library_test"};
+        ib::filesystem::current_path(testDir);
         auto dummyExtension = ib::extensions::LoadExtension("DummyExtension");
 
         {
@@ -94,7 +88,9 @@ TEST_F(IbExtensionsTest, load_dummy_lib)
 
 TEST_F(IbExtensionsTest, dynamic_cast)
 {
-    //test wether dynamic cast of dynamic extension works
+    const auto testDir = ib::filesystem::path{"vib_library_test"};
+    ib::filesystem::current_path(testDir);
+    // test wether dynamic cast of dynamic extension works
     auto extensionBase = ib::extensions::LoadExtension("DummyExtension");
     auto* dummy = dynamic_cast<DummyExtension*>(extensionBase.get());
     ASSERT_NE(dummy, nullptr);
@@ -137,6 +133,8 @@ TEST_F(IbExtensionsTest, wrong_build_system)
 
 TEST_F(IbExtensionsTest, multiple_extensions_loaded)
 {
+    const auto testDir = ib::filesystem::path{"vib_library_test"};
+    ib::filesystem::current_path(testDir);
     //check that multiple instances don't interfere
     auto base1 = ib::extensions::LoadExtension("DummyExtension");
     auto base2 = ib::extensions::LoadExtension("DummyExtension");
@@ -153,8 +151,8 @@ TEST_F(IbExtensionsTest, multiple_extensions_loaded)
 #if !defined(_WIN32)
 TEST_F(IbExtensionsTest, load_from_envvar)
 {
-    SetCurrentWorkingDir("..");
-    setenv("TEST_VAR", "Tests", 1); //should be invariant
+    const auto testDir = ib::filesystem::path{"vib_library_test"};
+    setenv("TEST_VAR", testDir.c_str(), 1); // should be invariant
     ib::cfg::ExtensionConfig config;
     config.searchPathHints.emplace_back("ENV:TEST_VAR");
     auto base1 = ib::extensions::LoadExtension("DummyExtension", config);

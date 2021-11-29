@@ -43,6 +43,11 @@ function(add_vib_test)
         PRIVATE
         UNIT_TEST
     )
+    set_target_properties(${executableName} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+    )
 
     foreach(config ${PARSED_ARGS_CONFIGS})
         get_filename_component(configFileName ${config} NAME)
@@ -62,4 +67,3 @@ function(add_vib_test)
              WORKING_DIRECTORY $<TARGET_FILE_DIR:${executableName}>
     )
 endfunction(add_vib_test)
-

@@ -3,6 +3,7 @@
 #pragma once
 
 #include <string>
+
 namespace ib {
 namespace filesystem {
 
@@ -28,7 +29,9 @@ public:
     //CTor and assignment
     path() noexcept = default;
     path(const path&) = default;
+    path& operator=(const path&) = default;
     path(path&&) noexcept = default;
+    path& operator=(path&&) noexcept = default;
     path(const string_type& source);
 
 public:
@@ -44,6 +47,10 @@ private:
 
 //!< return the current working directory of the running process.
 path current_path();
+//!< set the current working directory of the running process.
+void current_path(const path& p);
+//!< Create a directory like in POSIX mkdir
+bool create_directory(const path& where);
 
 //!< Get the path to the temp directory.
 path temp_directory_path();

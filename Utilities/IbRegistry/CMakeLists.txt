@@ -62,12 +62,24 @@ add_vib_test(
     LIBS
         IbExtensions
         IbMwComAdapter
+        IbFilesystem
         IntegrationBus
 )
-set_tests_properties(TestIbRegistryLib
-    PROPERTIES
+if(${IB_BUILD_TESTS})
+    target_include_directories(TestIbRegistryLib
+        PRIVATE ../../IntegrationBus/IntegrationTests
+    )
+    # NB we need this test to reside in a different directory
+    # on windoes the 'GetProcessPath' is in the search path for DLLs.
+    # Otherwise we cannot test the extension search path in the configuration
+    set_target_properties(TestIbRegistryLib PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_BINARY_DIR}"
+    )
+    set_tests_properties(TestIbRegistryLib PROPERTIES
         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
-)
+    )   
+endif()
 
 if(MSVC)
     #make sure we archive the PDBs for the shared lib, too
@@ -81,9 +93,7 @@ if(MSVC)
     )
     
 endif()
-target_include_directories(TestIbRegistryLib
-    PRIVATE ../../IntegrationBus/IntegrationTests
-)
+
 
 #make sure we don't ship .lib files on Windows
 if(MSVC)

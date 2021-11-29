@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <vector>
+#include <iostream>
 #include <iterator>
 
 #if defined(_MSC_VER)
@@ -18,15 +19,10 @@
 
 #include "GetTestPid.hpp"
 #include "CreateComAdapter.hpp"
+#include "Filesystem.hpp"
 
 
 #include "ib/extensions/CreateExtension.hpp"
-
-#if defined(WIN32)
-// without underscore is deprecated on windows
-#define getcwd _getcwd
-#define chdir _chdir
-#endif
 
 using namespace testing;
 using namespace std::chrono_literals;
@@ -34,27 +30,6 @@ using namespace ib::cfg;
 using namespace ib::mw;
 
 using namespace ib::extensions;
-
-namespace
-{
-    std::string GetCurrentWorkingDir()
-    {
-        constexpr size_t maxPath = 4096;
-        char buffer[maxPath];
-        if (getcwd(buffer, maxPath) == nullptr)
-        {
-            throw std::runtime_error("Couldn't get current working directory.");
-        }
-        return std::string(buffer);
-    }
-    void SetCurrentWorkingDir(const std::string& cwd)
-    {
-        if (chdir(cwd.c_str()) != 0)
-        {
-            throw std::runtime_error("Couldn't set the current working directory.");
-        }
-    }
-}
 
 class IbRegistryLibFixture
     : public Test
@@ -68,13 +43,13 @@ public:
     void TearDown() override
     {
         // Switch to original directory if the previous test fails
-        SetCurrentWorkingDir(currentWorkingDir);
+        ib::filesystem::current_path(currentWorkingDir);
     }
 
     const Config GetConfig() const { return _config; }
-    static void SetUpTestCase() { currentWorkingDir = GetCurrentWorkingDir(); }
+    static void SetUpTestCase() { currentWorkingDir = ib::filesystem::current_path(); }
 
-    static std::string currentWorkingDir;
+    static ib::filesystem::path currentWorkingDir;
 
 private:
 
@@ -101,7 +76,7 @@ private:
     Config _config;
 };
 
-std::string IbRegistryLibFixture::currentWorkingDir;
+ib::filesystem::path IbRegistryLibFixture::currentWorkingDir;
 
 
 // Load registry from the search path specified in the extension configuration
@@ -109,16 +84,20 @@ TEST_F(IbRegistryLibFixture, load_registry_custom_search_path)
 {
     try
     {
-        SetCurrentWorkingDir("..");
-
         auto config = GetConfig();
-        //NB this only throws because it is the first invocation of CreateIbRegistry, once the extension is found and cached this won't throw anymore
+        const auto testDir = ib::filesystem::path{"vib_library_test"};
+        bool ok = ib::filesystem::create_directory(testDir);
+        std::cout << "Created temp directory \"" << testDir.string() <<"\": " << (ok ? "OK" : "FAIL") << std::endl;
+        std::cout << "Current workdir (test fixture)=" << ib::filesystem::current_path().string() << std::endl;
+        ib::filesystem::current_path(testDir);
+        std::cout << "Current workdir (testDir)=" << ib::filesystem::current_path().string() << std::endl;
+
+        //NB this should throw since we are now in 'testDir',
+        //   which does not contain a valid shared library.
         EXPECT_THROW(CreateIbRegistry(config), std::runtime_error);
 
-        config.extensionConfig.searchPathHints.emplace_back(currentWorkingDir);
+        config.extensionConfig.searchPathHints.emplace_back(currentWorkingDir.string());
         ASSERT_TRUE(CreateIbRegistry(config));
-
-        SetCurrentWorkingDir(currentWorkingDir);
     }
     catch (std::exception& e)
     {

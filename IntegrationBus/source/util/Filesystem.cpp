@@ -3,6 +3,7 @@
 
 #include <array>
 #include <stdexcept>
+#include <sstream>
 
 #if defined(_WIN32)
 #   ifndef WIN32_LEAN_AND_MEAN
@@ -11,6 +12,8 @@
 #   include <Windows.h>
 #   include <direct.h>
 #   define getcwd _getcwd
+#   define chdir _chdir
+#   define mkdir(X, Y) _mkdir(X)
 
 namespace {
 auto platform_temp_directory() -> std::string
@@ -20,9 +23,13 @@ auto platform_temp_directory() -> std::string
     return std::string{ buffer.data(), len };
 }
 #else
-// Assume Linux
+// Assume Linux/POSIX
 #   include <unistd.h>
 #   include <stdio.h>
+#   include <sys/stat.h>
+#   include <sys/types.h>
+#   include <errno.h>
+#   include <string.h>
 namespace {
 auto platform_temp_directory() -> std::string
 {
@@ -63,6 +70,18 @@ path current_path()
     return std::string(buffer.data());
 }
 
+void current_path(const path& newPath)
+{
+    if (chdir(newPath.c_str()) != 0)
+    {
+        std::stringstream msg;
+        msg << "filsystem::current_path: Couldn't set the current working directory to \""
+        << newPath.string()
+        << "\""
+        ;
+        throw std::runtime_error(msg.str());
+    }
+}
 path temp_directory_path()
 {
     return platform_temp_directory();
@@ -72,6 +91,19 @@ bool remove(const path& p)
 {
     int e = ::remove(p.c_str());
     return e == 0;
+}
+
+bool create_directory(const path& where)
+{
+    auto status = ::mkdir(where.c_str(), 0755);
+    if(status == 0)
+    {
+        return status == 0;
+    }
+    else
+    {
+        return errno == EEXIST;
+    }
 }
 } // namespace filesystem
 } // namespace ib

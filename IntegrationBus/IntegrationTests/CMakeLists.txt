@@ -19,11 +19,6 @@ add_vib_test(FTestCanWithoutSync
       ${itest_extra_libs}
       IntegrationBus
 )
-set_target_properties(FTestCanWithoutSync PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
-            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
-            WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
-)
 
 add_vib_test(FTestEthWithoutSync
     SOURCES
@@ -32,11 +27,6 @@ add_vib_test(FTestEthWithoutSync
       IbSimEthernet
       ${itest_extra_libs}
       IntegrationBus
-)
-set_target_properties(FTestEthWithoutSync PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
-            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
-            WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
 
 add_vib_test(ITestGenericMessages
@@ -60,11 +50,6 @@ add_vib_test(ITestThreeCanController
         ${itest_extra_libs}
 )
 
-# requires IntegrationBus.dll and vib-regstry to be in PATH or CWD
-set_tests_properties(ITestThreeCanController PROPERTIES
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
-)
-
 add_vib_test(ITestThreeEthController
     SOURCES
       ThreeEthControllerITest.cpp
@@ -72,11 +57,6 @@ add_vib_test(ITestThreeEthController
       IbSimTestHarness
       IbMwComAdapter
       ${itest_extra_libs}
-)
-
-# requires IntegrationBus.dll and vib-regstry to be in PATH or CWD
-set_tests_properties(ITestThreeEthController PROPERTIES
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
 
 add_vib_test(ITestSocketBufferSize
@@ -102,12 +82,6 @@ add_vib_test(ITestIoMessages
     LIBS
         IbSimTestHarness
 )
-
-# requires IntegrationBus.dll and vib-regstry to be in PATH or CWD
-set_tests_properties(ITestIoMessages PROPERTIES
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
-)
-
 
 add_vib_test(ITestCatchExceptionsInCallbacks
     SOURCES

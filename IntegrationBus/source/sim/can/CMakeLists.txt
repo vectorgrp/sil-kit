@@ -30,6 +30,3 @@ add_vib_test(TestSimCanController
         IbMwMockComAdapter
         IbTracing
 )
-set_target_properties(TestSimCanController PROPERTIES
-RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
-)
