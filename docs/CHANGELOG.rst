@@ -5,25 +5,37 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.5.0] - Unreleased
+[3.6.0] - 2021-12-01
 --------------------------------
+Please note, the version jump from v3.4.x to v3.6.x was necessary due to internal
+releases already having the v3.5.x tag.
+
+Added
+~~~~~
+- Add experimental C-API for life-cycle and time synchronization (VIB-492).
+- Add experimental C-API for FlexRay (VIB-505).
+- Add experimental C-API for LIN (VIB-516).
+- Internal VIB threads now set their name for easier debugging on WIN32 and posix
+  platforms (VIB-524).
 
 Changed
 ~~~~~~~
 
 .. admonition:: Note: Public API changed
   
-  Some rarely used public headers and `IComAdapter` methods were removed
+  Some rarely used public headers and `IComAdapter` methods were removed.
+  User code should re-compile cleanly with these changes.
   
-- Some header files were removed from the public include directories.
+- Some header files were removed from the public ``include/ib`` directories.
   These `IIbTo*` headers are only for internal use.
-  This change should not affect users of the public API directly (VIB-511).
+  This change should not affect any users of the public API directly (VIB-511).
 - Directly sending messages on the :cpp:class:`IComAdapter<ib::mw::IComAdapter>` via `SendIbMessage(...)`
-  is not possible anymore. Sending messages is now only supported via the specific service controllers,
+  is not possible anymore.
+  Sending messages is now only supported via the specific service controllers,
   see :ref:`VIB API<sec:api-services>` for an overview (VIB-511).
 
   For example, code that relies on `IComAdapter::SendIbMessage(EndpointAddress, const T&)` should
-  use an appropriate controller:
+  use an appropriate controller for the given type T:
 
   + old:
     
@@ -42,11 +54,31 @@ Changed
       CanMessage msg{};
       controller->SendMessage(msg);
 
+.. admonition:: Note: FastRTPS build is disabled
+
+  The FastRTPs middleware build is now disabled for the official Vector packages.
+- The binary packages are built with the CMake flag ``IB_MW_ENABLE_FASTRTPS=OFF``.
+  Calling a ``CreateComAdapter`` with an active middleware of ``FastRTPS`` will result
+  in a runtime exception.
+- MSVC: our CMakeSettings.json now directly supports building with Ninja.
+- The transmit acknowledges in Ethernet were changed to work with a single participant.
+  That is, in a trivial simulation sending an Ethernet message will be immediately
+  acknowledged (VIB-490).
+
+Fixed
+~~~~~
+- Config: prevent multiple statements of the same keyword, e.g. multiple ``"Links"``
+  blocks now raise an error (VIB-528).
+- Fix building with ``IB_BUILD_TESTS=OFF`` (VIB-536).
+
 Compatibility with 3.4.6
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The API changes consist of internal headers which were removed from ``include/ib`` and
+the removal of ``ComAdapter::SendIbMessage`` methods.
+
 - Application binary interface (ABI): No 
 - Application software interface (API): No
-- Middleware network protocol (FastRTPS): Yes
+- Middleware network protocol (FastRTPS): No (build is disabled)
 - Middleware network protocol (VAsio): Yes
 
 [3.4.6] - 2021-11-16
