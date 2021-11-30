@@ -52,7 +52,7 @@ protected:
     bool ShouldLog(Level level) const override;
 private:
     // ----------------------------------------
-    // private members
+    // Private members
     cfg::Logger _config;
 
     std::shared_ptr<spdlog::logger> _logger;

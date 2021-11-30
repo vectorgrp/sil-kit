@@ -11,24 +11,30 @@ namespace logging {
 
 using log_clock = std::chrono::system_clock;
 
+/*! \brief Information level of a log message
+ */
 enum class Level : uint32_t
 {
-    Trace,
-    Debug,
-    Info,
-    Warn,
-    Error,
-    Critical,
-    Off
+    Trace, //!< Detailed debug-level messages
+    Debug, //!< Normal debug-level messages
+    Info, //!< Informational content
+    Warn, //!< Warnings
+    Error, //!< Non-critical errors
+    Critical, //!< Critical errors
+    Off //!< Logging is disabled
 };
 
+/*! \brief The source location that a log entry refers to
+ */
 struct SourceLoc
 {
     std::string filename;
     uint32_t line;
     std::string funcname;
 };
-    
+
+/*! \brief A log entry
+ */
 struct LogMsg
 {
     std::string logger_name;

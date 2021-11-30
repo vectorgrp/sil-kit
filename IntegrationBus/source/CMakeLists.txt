@@ -42,6 +42,7 @@ add_library(IntegrationBus SHARED
     capi/capiImpl.h
     capi/capi.cpp
     capi/capi_FlexRay.cpp
+    capi/capi_Logger.cpp
     capi/capi_Lin.cpp
     IbForceIncludes.cpp
 )

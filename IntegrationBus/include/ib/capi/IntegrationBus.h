@@ -9,6 +9,8 @@
 #include "ib/capi/DataPubSub.h"
 #include "ib/capi/Ethernet.h"
 #include "ib/capi/FlexRay.h"
+#include "ib/capi/DataPubSub.h"
+#include "ib/capi/Logger.h"
 #include "ib/capi/InterfaceIdentifiers.h"
 #include "ib/capi/ParticipantStateHandling.h"
 #include "ib/capi/TimeSync.h"
@@ -54,7 +56,21 @@ typedef ib_ReturnCode (*ib_SimulationParticipant_create_t)(ib_SimulationParticip
 */
 CIntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_create(ib_SimulationParticipant** outParticipant, 
     const char* cJsonConfig, const char* cParticipantName, const char* cDomainId);
-    
+
+typedef ib_ReturnCode(*ib_SimulationParticipant_GetLogger_t)(ib_Logger** outLogger,
+    ib_SimulationParticipant* participant);
+/*! \brief Obtain the logger of a particular simulation participant.
+ *
+ * \param outLogger Pointer to the resulting logger instance (out parameter).
+ * \param participant The simulation participant whose logger should be returned.
+ *
+ * The lifetime of the returned logger is directly bound to the lifetime of the simulation participant.
+ * There is no futher cleanup necessary, except for destroying the simulation participant at the end of the
+ * simulation.
+ */
+CIntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_GetLogger(ib_Logger** outLogger,
+    ib_SimulationParticipant* participant);
+
 typedef ib_ReturnCode (*ib_SimulationParticipant_destroy_t)(ib_SimulationParticipant* self);
 /*! \brief Destroy a simulation participant and its associated simulation elements.
 *

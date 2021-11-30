@@ -91,7 +91,21 @@ ib_ReturnCode ib_SimulationParticipant_GetComAdapter(void** outWrappedObject, ib
         *outWrappedObject = comAdapter;
 
         return ib_ReturnCode_SUCCESS;
-        )
+    )
+}
+
+CIntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_GetLogger(ib_Logger** outLogger, ib_SimulationParticipant* participant)
+{
+    ASSERT_VALID_OUT_PARAMETER(outLogger);
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    CAPI_ENTER
+    {
+        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        auto logger = comAdapter->GetLogger();
+        *outLogger = reinterpret_cast<ib_Logger*>(logger);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
 }
 
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_create(ib_SimulationParticipant** outParticipant, const char* cJsonConfig, const char* cParticipantName, const char* cDomainId)
@@ -121,7 +135,7 @@ IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_create(ib_SimulationPar
 
         *outParticipant = reinterpret_cast<ib_SimulationParticipant*>(comAdapter);
         return ib_ReturnCode_SUCCESS;
-        )
+    )
 }
 #pragma endregion GENERAL
 
@@ -167,7 +181,7 @@ ib_ReturnCode ib_CanController_RegisterReceiveMessageHandler(ib_CanController* s
                 Callback(context, self, &cmm);
             });
         return ib_ReturnCode_SUCCESS;
-        )
+    )
 }
 
 ib_ReturnCode ib_CanController_RegisterTransmitStatusHandler(ib_CanController* self, void* context, void (*Callback)(void* context, ib_CanController* controller, ib_CanTransmitAcknowledge* cAck))
@@ -210,7 +224,7 @@ ib_ReturnCode ib_CanController_RegisterTransmitStatusHandler(ib_CanController* s
                 }
             });
         return ib_ReturnCode_SUCCESS;
-        )
+    )
 }
 
 ib_ReturnCode ib_CanController_RegisterStateChangedHandler(ib_CanController* self, void* context, void (*Callback)(void* context, ib_CanController* controller, ib_CanControllerState state))
@@ -228,7 +242,7 @@ ib_ReturnCode ib_CanController_RegisterStateChangedHandler(ib_CanController* sel
                 Callback(context, self, (ib_CanControllerState)state);
             });
         return ib_ReturnCode_SUCCESS;
-        )
+    )
 }
 
 ib_ReturnCode ib_CanController_RegisterErrorStateChangedHandler(ib_CanController* self, void* context, void (*Callback)(void* context, ib_CanController* controller, ib_CanErrorState state))
@@ -246,7 +260,7 @@ ib_ReturnCode ib_CanController_RegisterErrorStateChangedHandler(ib_CanController
                 Callback(context, self, (ib_CanErrorState)state);
             });
         return ib_ReturnCode_SUCCESS;
-        )
+    )
 }
 
 ib_ReturnCode ib_CanController_SetBaudRate(ib_CanController* self, uint32_t rate, uint32_t fdRate)
@@ -260,7 +274,7 @@ ib_ReturnCode ib_CanController_SetBaudRate(ib_CanController* self, uint32_t rate
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(self);
         canController->SetBaudRate(rate, fdRate);
         return ib_ReturnCode_SUCCESS;
-        )
+    )
 }
 
 ib_ReturnCode ib_CanController_SendFrame(ib_CanController* self, ib_CanFrame* message, void* transmitContext)
@@ -301,7 +315,7 @@ ib_ReturnCode ib_CanController_SendFrame(ib_CanController* self, ib_CanFrame* me
         }
         pendingTransmits.callbacksById.clear();
         return ib_ReturnCode_SUCCESS;
-        )
+    )
 }
 
 ib_ReturnCode ib_CanController_Start(ib_CanController* self)
@@ -315,7 +329,7 @@ ib_ReturnCode ib_CanController_Start(ib_CanController* self)
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(self);
         canController->Start();
         return ib_ReturnCode_SUCCESS;
-        )
+    )
 }
 
 ib_ReturnCode ib_CanController_Stop(ib_CanController* self)
@@ -329,7 +343,7 @@ ib_ReturnCode ib_CanController_Stop(ib_CanController* self)
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(self);
         canController->Stop();
         return ib_ReturnCode_SUCCESS;
-        )
+    )
 }
 
 ib_ReturnCode ib_CanController_Reset(ib_CanController* self)
@@ -343,7 +357,7 @@ ib_ReturnCode ib_CanController_Reset(ib_CanController* self)
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(self);
         canController->Reset();
         return ib_ReturnCode_SUCCESS;
-        )
+    )
 }
 
 ib_ReturnCode ib_CanController_Sleep(ib_CanController* self)
@@ -357,11 +371,11 @@ ib_ReturnCode ib_CanController_Sleep(ib_CanController* self)
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(self);
         canController->Sleep();
         return ib_ReturnCode_SUCCESS;
-        )
+    )
 }
 
 
-CIntegrationBusAPI ib_ReturnCode ib_CanController_create(ib_CanController** outCanController, ib_SimulationParticipant* self,  const char* cName)
+CIntegrationBusAPI ib_ReturnCode ib_CanController_create(ib_CanController** outCanController, ib_SimulationParticipant* self, const char* cName)
 {
     CAPI_DEFINE_FUNC(
         if (self == nullptr || cName == nullptr || outCanController == nullptr)
@@ -375,7 +389,7 @@ CIntegrationBusAPI ib_ReturnCode ib_CanController_create(ib_CanController** outC
         auto canController = comAdapter->CreateCanController(name);
         *outCanController = reinterpret_cast<ib_CanController*>(canController);
         return ib_ReturnCode_SUCCESS;
-        )
+    )
 }
 #pragma endregion CAN
 

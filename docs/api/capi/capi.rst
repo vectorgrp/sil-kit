@@ -79,7 +79,6 @@ The Ethernet frames are the single messages/frames, that are transmitted over th
 .. doxygenfunction:: ib_EthernetController_RegisterBitRateChangedHandler
 .. doxygenfunction:: ib_EthernetController_SendFrame
 
-
 Ethernet Frame
 ~~~~~~~~~~~~~~
 
@@ -153,7 +152,6 @@ Data Structures
    :members:
 .. doxygenstruct:: ib_FlexRay_PocStatus
    :members:
-
 
 Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -229,3 +227,11 @@ Enumerations and Typedefs
 .. doxygentypedef:: ib_LinFrameStatus
 .. doxygentypedef:: ib_LinDataLength
 
+The Logger API can be used to write log messages.
+
+.. doxygenfunction:: ib_SimulationParticipant_GetLogger
+.. doxygenfunction:: ib_Logger_Log
+
+Enumerations and Typedefs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. doxygentypedef:: ib_LoggingLevel

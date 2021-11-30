@@ -144,12 +144,12 @@ typedef void ib_CanErrorStateChangedHandler_t(void* context, ib_CanController* c
 typedef ib_ReturnCode(*ib_CanController_create_t)(ib_CanController** outCanController, 
     ib_SimulationParticipant* participant, const char* name);
 /*! \brief Create a CAN controller at this IB simulation participant.
-* \param outCanController Pointer into which the resulting Can controller will be written (out parameter).
+* \param outCanController Pointer that refers to the resulting Can controller (out parameter).
 * \param participant The simulation participant at which the Can controller should be created.
 * \param name The name of the new Can controller.
 *
 * The lifetime of the resulting Can controller is directly bound to the lifetime of the simulation participant.
-* There is no futhert cleanup necessary except for destroying the simulation participant at the end of the 
+* There is no futher cleanup necessary, except for destroying the simulation participant at the end of the 
 * simulation.
 */
 CIntegrationBusAPI ib_ReturnCode ib_CanController_create(ib_CanController** outCanController, 
@@ -226,7 +226,7 @@ typedef ib_ReturnCode (*ib_CanController_SendFrame_t)(ib_CanController* self, ib
 */
 CIntegrationBusAPI ib_ReturnCode ib_CanController_SendFrame(ib_CanController* self, ib_CanFrame* frame, 
     void* userContext);
-    
+
 
 typedef ib_ReturnCode(*ib_CanController_SetBaudRate_t)(ib_CanController* self, uint32_t rate, uint32_t fdRate);
 /*! \brief Configure the baudrate of the controller
