@@ -7,6 +7,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project("IntegrationBus")
 
+option(IB_BUILD_STATIC "Compile the Integration Bus as a static library" OFF)
 option(IB_BUILD_TESTS "Enable unit and integration tests for the Integration Bus" ON)
 option(IB_BUILD_DOCS "Build documentation for the Integration Bus (requires Doxygen and Sphinx)" OFF)
 option(IB_INSTALL_SOURCE "Install and package the source tree" OFF)

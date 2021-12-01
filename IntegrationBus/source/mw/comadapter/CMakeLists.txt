@@ -9,20 +9,22 @@ add_library(IbMwComAdapter STATIC
 
 target_link_libraries(IbMwComAdapter
     INTERFACE  IbInterface
-    PUBLIC  IbInternal
-    PUBLIC  IbVersion
-    PUBLIC  IbMwLogging
-    PUBLIC  IbConfig
-    PUBLIC  IbUtil
-    PUBLIC  IbSetThreadName
-    PUBLIC  IbMwSync
-    PUBLIC  IbSimCan
-    PUBLIC  IbSimEthernet
-    PUBLIC  IbSimFlexRay
-    PUBLIC  IbSimLin
-    PUBLIC  IbSimIO
-    PUBLIC  IbSimGenericMessage
-    PUBLIC  IbTracing
+    PUBLIC
+        IbInternal
+        IbMwLogging
+        IbConfig
+        IbUtil
+        IbSetThreadName
+        IbMwSync
+        IbSimCan
+        IbSimEthernet
+        IbSimFlexRay
+        IbSimLin
+        IbSimIO
+        IbSimGenericMessage
+        IbTracing
+    PRIVATE
+        IbVersion
 )
 
 if (IB_MW_ENABLE_FASTRTPS)

@@ -36,7 +36,12 @@ else()
         @ONLY)
 endif()
 
-add_library(IntegrationBus SHARED
+set(ibLibType SHARED)
+if(IB_BUILD_STATIC)
+    set(ibLibType STATIC)
+endif()
+
+add_library(IntegrationBus ${ibLibType}
     IntegrationBus.hpp
     IntegrationBus.cpp
     "capi/CapiSimulationParticipant.cpp"
@@ -50,6 +55,13 @@ add_library(IntegrationBus SHARED
     "capi/CapiImpl.h"
     IbForceIncludes.cpp
 )
+
+if(IB_BUILD_STATIC)
+    target_compile_definitions(IntegrationBus PUBLIC -D IB_BUILD_STATIC=1)
+    target_compile_definitions(IntegrationBus PUBLIC -D CIntegrationBusAPI_STATIC=1)
+else()
+    target_compile_definitions(IntegrationBus PUBLIC -D CIntegrationBusAPI_EXPORT=1)
+endif()
 
 # Published extension implementations follow here for the extension loading
 # side of the code. The actual shared library code might reside 
@@ -100,17 +112,20 @@ endif()
 
  set_target_properties(IntegrationBus PROPERTIES
      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
  )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(IntegrationBus
-    PUBLIC  IbInterface
-    PRIVATE IbInternal
-    PRIVATE IbConfig
-    PRIVATE IbMwComAdapter
-    PRIVATE IbExtensions
+    PUBLIC
+    IbInterface
+    PRIVATE
+    IbInternal
+    IbConfig
+    IbMwComAdapter
+    IbExtensions
 )
 
 add_library(IbVersion STATIC
@@ -130,7 +145,7 @@ add_library(IntegrationBus::IntegrationBus ALIAS IntegrationBus)
 ###############################################################################
 # we adhere to standard find_package layout
 # refer to https://cmake.org/cmake/help/v3.15/manual/cmake-packages.7.html#package-configuration-file
-
+if(NOT IB_BUILD_STATIC)
 install(
     TARGETS IntegrationBus
     EXPORT IntegrationBusTargets
@@ -146,7 +161,7 @@ install(EXPORT IntegrationBusTargets
     NAMESPACE "IntegrationBus::"
     FILE IntegrationBusTargets.cmake
 )
-
+endif()
 # Also install CmakeTargets for MinSizeRel and RelWithDebInfo
 #
 #   These files map the targets to the Release build. Without them, applications

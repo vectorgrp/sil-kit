@@ -24,7 +24,11 @@ if(MSVC)
     endif()
 endif (MSVC)
 
-add_definitions(-DEXPORT_IntegrationBusAPI)
+if(IB_BUILD_STATIC)
+    add_definitions(-D IB_BUILD_STATIC)
+else()
+    add_definitions(-D EXPORT_IntegrationBusAPI)
+endif()
 ## Allow debug libraries to be installed side-by-side with their release variant
 set(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Make sure debug binaries differ from release binaries by a suffix 'd'" FORCE)
 

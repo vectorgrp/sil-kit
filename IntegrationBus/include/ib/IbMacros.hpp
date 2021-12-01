@@ -2,8 +2,10 @@
 
 #pragma once
 
-// define compiler specific export / import attributes
-#ifdef EXPORT_IntegrationBusAPI
+// Static builds
+#ifdef IB_BUILD_STATIC
+#   define IntegrationBusAPI
+#elif defined(EXPORT_IntegrationBusAPI)
 // define IntegrationBusAPI as EXPORT
 #    if defined(_MSC_VER)
 #        define IntegrationBusAPI __declspec(dllexport)
@@ -13,7 +15,7 @@
 #        define IntegrationBusAPI
 #        pragma warning Unknown dynamic link export semantics.
 #    endif
-#else
+#else // defined(EXPORT_IntegrationBusAPI)
 // declare IntegrationBusAPI as IMPORT
 #    if defined(_MSC_VER)
 #        define IntegrationBusAPI __declspec(dllimport)
@@ -23,4 +25,4 @@
 #        define IntegrationBusAPI
 #        pragma warning Unknown dynamic link import semantics.
 #    endif
-#endif  
+#endif // IB_BUILD_STATIC
