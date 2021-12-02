@@ -923,13 +923,23 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
         return;
     }
 
-    std::unordered_map<std::string, mw::EndpointId> endpointMap;
+    struct ServiceCfg
+    {
+        std::string participantName;
+        std::string serviceName;
+        EndpointId id;
+    };
+    std::unordered_map<std::string, ServiceCfg> endpointMap;
     auto addToEndpointMap = [&endpointMap](auto&& participantName, auto&& controllerConfigs)
     {
         for (auto&& cfg : controllerConfigs)
         {
             std::string qualifiedName = participantName + "/" + cfg.name;
-            endpointMap[qualifiedName] = cfg.endpointId;
+            ServiceCfg helper{};
+            helper.id = cfg.endpointId;
+            helper.participantName = participantName;
+            helper.serviceName = cfg.name;
+            endpointMap[qualifiedName] = helper;
         }
     };
 
@@ -960,7 +970,20 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
                 try
                 {
                     auto proxyEndpoint = endpointMap.at(endpointName);
-                    _ibConnection.RegisterIbService(linkName, proxyEndpoint, busSim);
+                    // NB: We need to set the service id -- VIBE-NetSim implements the IIbServiceEndpoint.
+                    // We need to register all simulated controllers here, so the connection
+                    // can build internal data structures.
+                    auto& serviceEndpoint = dynamic_cast<mw::IIbServiceEndpoint&>(*busSim);
+                    auto id = ServiceId{};
+                    id.linkName = linkName;
+                    id.participantName = proxyEndpoint.participantName;
+                    id.serviceName = proxyEndpoint.serviceName;
+                    id.type = linkType;
+                    id.legacyEpa.participant = _participantId;
+                    id.legacyEpa.endpoint = proxyEndpoint.id;
+                    serviceEndpoint.SetServiceId(id);
+  
+                    _ibConnection.RegisterIbService(linkName, proxyEndpoint.id, busSim);
 
                 }
                 catch (const std::exception& e)

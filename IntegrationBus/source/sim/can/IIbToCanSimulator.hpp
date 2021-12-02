@@ -19,7 +19,6 @@ namespace can {
 class IIbToCanSimulator
     : public mw::IIbReceiver<CanMessage, CanConfigureBaudrate, CanSetControllerMode>
     , public mw::IIbSender<CanMessage, CanTransmitAcknowledge, CanControllerStatus>
-    , public mw::IIbServiceEndpoint
 {
 public:
     ~IIbToCanSimulator() = default;

@@ -18,8 +18,6 @@ namespace lin {
 class IIbToLinSimulator
     : public mw::IIbReceiver<SendFrameRequest, SendFrameHeaderRequest, WakeupPulse, ControllerConfig, ControllerStatusUpdate, FrameResponseUpdate>
     , public mw::IIbSender<Transmission, WakeupPulse, ControllerConfig, FrameResponseUpdate>
-    , public mw::IIbServiceEndpoint
-
 {
 public:
     virtual ~IIbToLinSimulator() = default;

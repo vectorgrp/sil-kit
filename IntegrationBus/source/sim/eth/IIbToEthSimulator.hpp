@@ -18,7 +18,6 @@ namespace eth {
 class IIbToEthSimulator
     : public mw::IIbReceiver<EthMessage, EthSetMode>
     , public mw::IIbSender<EthMessage, EthTransmitAcknowledge, EthStatus>
-    , public mw::IIbServiceEndpoint
 {
 public:
     virtual ~IIbToEthSimulator() = default;

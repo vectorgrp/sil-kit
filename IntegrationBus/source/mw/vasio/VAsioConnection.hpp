@@ -133,10 +133,14 @@ private:
     template <class MsgT>
     using IbLinkMap = std::map<std::string, std::shared_ptr<IbLink<MsgT>>>;
 
+    //template <class MsgT>
+    //using IbServiceToReceiverMap = std::map<ServiceId::IdType, IIbMessageReceiver<MsgT>*>;
+    //template <class MsgT>
+    //using IbServiceToLinkMap = std::map<ServiceId::IdType, std::shared_ptr<IbLink<MsgT>>>;
     template <class MsgT>
-    using IbServiceToReceiverMap = std::map<const IIbServiceEndpoint*, IIbMessageReceiver<MsgT>*>;
+    using IbServiceToReceiverMap = std::map<std::string, IIbMessageReceiver<MsgT>*>;
     template <class MsgT>
-    using IbServiceToLinkMap = std::map<const IIbServiceEndpoint*, std::shared_ptr<IbLink<MsgT>>>;
+    using IbServiceToLinkMap = std::map<std::string, std::shared_ptr<IbLink<MsgT>>>;
 
     using ParticipantAnnouncementReceiver = std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)>;
 
@@ -255,7 +259,7 @@ private:
     {
         auto ibLink = GetLinkByName<IbMessageT>(linkName);
         auto&& serviceLinkMap = std::get<IbServiceToLinkMap<IbMessageT>>(_serviceToLinkMap);
-        serviceLinkMap[serviceId] = ibLink;
+        serviceLinkMap[to_string(serviceId->GetServiceId())] = ibLink;
     }
 
     template<class IbServiceT>
@@ -270,9 +274,9 @@ private:
             using IbMessageT = std::decay_t<decltype(ibMessage)>;
             this->RegisterIbMsgReceiver<IbMessageT>(link, service);
 
-            auto&& serviceMap = std::get<IbServiceToReceiverMap<IbMessageT>>(this->_serviceToReceiverMap);
+            auto&& receiverMap = std::get<IbServiceToReceiverMap<IbMessageT>>(_serviceToReceiverMap);
             auto& serviceId = dynamic_cast<IIbServiceEndpoint&>(*service);
-            serviceMap[&serviceId] = service;
+            receiverMap[to_string(serviceId.GetServiceId())] = service;
         }
         );
 
@@ -294,8 +298,15 @@ private:
     template <class IbMessageT>
     void SendIbMessageImpl(const IIbServiceEndpoint* from, IbMessageT&& msg)
     {
+        const auto&& key = to_string(from->GetServiceId());
+
         auto& linkMap = std::get<IbServiceToLinkMap<std::decay_t<IbMessageT>>>(_serviceToLinkMap);
-        linkMap[from]->DistributeLocalIbMessage(from, std::forward<IbMessageT>(msg));
+        if (linkMap.count(key) < 1)
+        {
+            throw std::runtime_error{ "VAsioConnection::SendIbMessageImpl: sending on empty link for " + key };
+        }
+        auto&& link = linkMap[key];
+        link->DistributeLocalIbMessage(from, std::forward<IbMessageT>(msg));
     }
 
     template <typename... MethodArgs, typename... Args>

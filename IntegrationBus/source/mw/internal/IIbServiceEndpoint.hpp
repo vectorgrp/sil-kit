@@ -6,13 +6,13 @@
 #include <ostream>
 #include <sstream>
 #include <vector>
+#include <functional>
 
 #include <ib/cfg/Config.hpp>
 #include <ib/mw/EndpointAddress.hpp>
 
 namespace ib {
 namespace mw {
-
 struct ServiceId
 {
     std::string participantName{ "Undefined" }; //!< name of the participant
@@ -27,10 +27,12 @@ inline bool operator==(const ServiceId& lhs, const ServiceId& rhs);
 //!< Returns the ServiceId encoded as a string containing the tuple (participantName, linkName, serviceName)
 inline std::string to_string(const ServiceId& id);
 inline std::ostream& operator<<(std::ostream& out, const ServiceId& id);
+
+
 //!< Parses a serialized ServiceId into a struct. This is a lossy operation.
 inline auto from_string(const std::string& str) -> ServiceId;
 
-//TODO rename IIbEndpoint
+//TODO 
 //     remove IIbEndpoint<MsgT> from IIbTo$Service interfaces
 class IIbServiceEndpoint
 {
