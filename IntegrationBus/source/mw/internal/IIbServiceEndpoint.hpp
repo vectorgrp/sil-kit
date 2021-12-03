@@ -37,6 +37,7 @@ inline auto from_string(const std::string& str) -> ServiceId;
 class IIbServiceEndpoint
 {
 public:
+    virtual ~IIbServiceEndpoint() = default;
     virtual void SetServiceId(const ServiceId& serviceId) = 0;
     virtual auto GetServiceId() const -> const ServiceId& = 0;
 };
