@@ -118,7 +118,7 @@ def loadConfigFiles(configFiles, verbose):
             _, ext = os.path.splitext(configFile)
             with open(configFile, 'r') as f:
                 configData = f.read()
-                if ext == ".yaml":
+                if ext == ".yaml" or ext == ".yml":
                     try:
                         config = load_yaml(configData)
                     except Exception as e:
