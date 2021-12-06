@@ -164,14 +164,14 @@ ib_ReturnCode ib_Can_Controller_SendFrame(ib_Can_Controller* controller, ib_Can_
     using std::chrono::duration;
     auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
 
-    ib::sim::can::CanMessage cm;
+    ib::sim::can::CanMessage cm{};
     cm.timestamp = {};
     cm.canId = message->id;
-    cm.flags.ide = message->flags & ib_Can_FrameFlag_ide;
-    cm.flags.rtr = message->flags & ib_Can_FrameFlag_rtr;
-    cm.flags.fdf = message->flags & ib_Can_FrameFlag_fdf;
-    cm.flags.brs = message->flags & ib_Can_FrameFlag_brs;
-    cm.flags.esi = message->flags & ib_Can_FrameFlag_esi;
+    cm.flags.ide = message->flags & ib_Can_FrameFlag_ide ? 1 : 0;
+    cm.flags.rtr = message->flags & ib_Can_FrameFlag_rtr ? 1 : 0;
+    cm.flags.fdf = message->flags & ib_Can_FrameFlag_fdf ? 1 : 0;
+    cm.flags.brs = message->flags & ib_Can_FrameFlag_brs ? 1 : 0;
+    cm.flags.esi = message->flags & ib_Can_FrameFlag_esi ? 1 : 0;
 
     static int msgId = 0;
     std::stringstream payloadBuilder;

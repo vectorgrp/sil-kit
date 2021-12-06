@@ -5,7 +5,44 @@
 #include "ib/sim/can/all.hpp"
 
 namespace {
-    using namespace ib::sim::can;
+    using namespace ib::sim::can; 
+
+    MATCHER_P(CanFrameMatcher, controlFrame, "matches can frames of the c-api to the cpp api") {
+        auto frame2 = controlFrame;
+        ib::sim::can::CanMessage frame;
+        auto frame1 = arg;
+        if (frame1.canId != frame2.id || frame1.dlc != frame2.dlc || frame1.dataField.size() != frame2.data.size) 
+        {
+            return false;
+        }
+        for (int i = 0; i < frame1.dataField.size(); i++)
+        {
+            if (frame1.dataField[i] != frame2.data.pointer[i]) {
+                return false;
+            }
+        }
+        if((frame1.flags.ide != 0) != ((frame2.flags & ib_Can_FrameFlag_ide) != 0))
+        {
+            return false;
+        }
+        if ((frame1.flags.fdf != 0) != ((frame2.flags & ib_Can_FrameFlag_fdf) != 0))
+        {
+            return false;
+        }
+        if ((frame1.flags.brs != 0) != ((frame2.flags & ib_Can_FrameFlag_brs) != 0))
+        {
+            return false;
+        }
+        if ((frame1.flags.esi != 0) != ((frame2.flags & ib_Can_FrameFlag_esi) != 0))
+        {
+            return false;
+        }
+        if ((frame1.flags.rtr != 0) != ((frame2.flags & ib_Can_FrameFlag_rtr) != 0))
+        {
+            return false;
+        }
+        return true;
+    }
 
     class MockCanController : public ib::sim::can::ICanController
     {
@@ -94,6 +131,51 @@ namespace {
 
         EXPECT_CALL(mockController, RegisterTransmitStatusHandler(testing::_)).Times(testing::Exactly(1));
         returnCode = ib_Can_Controller_RegisterTransmitStatusHandler((ib_Can_Controller*)&mockController, NULL, &AckCallback);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    }
+
+    TEST_F(CapiCanTest, can_controller_send_frame_no_flags)
+    {
+
+        ib_ReturnCode returnCode;
+
+        ib_Can_Frame cf1{};
+        cf1.id = 1;
+        cf1.data = { 0,0 };
+        cf1.dlc = 1;
+        cf1.flags = 0;
+        EXPECT_CALL(mockController, SendMessage(CanFrameMatcher(cf1))).Times(testing::Exactly(1));
+        returnCode = ib_Can_Controller_SendFrame((ib_Can_Controller*)&mockController, &cf1, NULL);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    }
+
+    TEST_F(CapiCanTest, can_controller_send_frame_flags1)
+    {
+
+        ib_ReturnCode returnCode;
+
+        ib_Can_Frame cf1{};
+        cf1.id = 1;
+        cf1.data = { 0,0 };
+        cf1.dlc = 1;
+        cf1.flags = ib_Can_FrameFlag_ide | ib_Can_FrameFlag_rtr | ib_Can_FrameFlag_esi;
+        EXPECT_CALL(mockController, SendMessage(CanFrameMatcher(cf1))).Times(testing::Exactly(1));
+        returnCode = ib_Can_Controller_SendFrame((ib_Can_Controller*)&mockController, &cf1, NULL);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    }
+
+    TEST_F(CapiCanTest, can_controller_send_frame_flags2)
+    {
+
+        ib_ReturnCode returnCode;
+
+        ib_Can_Frame cf1{};
+        cf1.id = 1;
+        cf1.data = { 0,0 };
+        cf1.dlc = 1;
+        cf1.flags = ib_Can_FrameFlag_fdf | ib_Can_FrameFlag_brs;
+        EXPECT_CALL(mockController, SendMessage(CanFrameMatcher(cf1))).Times(testing::Exactly(1));
+        returnCode = ib_Can_Controller_SendFrame((ib_Can_Controller*)&mockController, &cf1, NULL);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
     }
 
