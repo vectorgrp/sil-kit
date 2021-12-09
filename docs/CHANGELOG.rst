@@ -5,6 +5,36 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.6.1-QA] - 2021-12
+--------------------------------
+This is a Quality Assured Release.
+
+Added
+~~~~~
+- The launcher now supports YAML formatted configuration files based on their file
+  name extension ``.yaml`` or ``.yml``.
+  This requires an installation of PyYAML (e.g., via ``pip install PyYAML``).
+  Please note, that JSON schema validation with YAML files is not supported (VIB-526).
+- Added the option ``--exclude-registry`` to the launcher.
+  This will prevent the launcher from starting an IbRegistry process on its own (VIB-527).
+
+Changed
+~~~~~~~
+.. admonition:: Note: the VIB-CANoe Add-on is now discontinued.
+
+  The CANoe Add-on is affected by a known regression.
+  Upcoming releases of Vector CANoe will support the IntegrationBus directly.
+
+- The VIB CANoe addon is now discontinued.
+  It is affected by **a known regression** and will not be part of this release.
+  Users of the VIB-CANoe add-on are encouraged to remain on the previous quality
+  assured release.
+  The upcoming release of Vector CANoe 16 will support the IntegrationBus directly.
+
+Fixed
+~~~~~
+- Fixed a regression in the ``Replay`` feature and the VIBE-NetworkSimulator support (VIB-544).
+
 [3.6.0] - 2021-12-01
 --------------------------------
 Please note, the version jump from v3.4.x to v3.6.x was necessary due to internal
@@ -29,6 +59,36 @@ Changed
 - Some header files were removed from the public ``include/ib`` directories.
   These `IIbTo*` headers are only for internal use.
   This change should not affect any users of the public API directly (VIB-511).
+
+Complete list of removed header files from ``include/ib``:
+
+  .. code-block:: sh
+
+     include/ib/mw/IIbEndpoint.hpp
+     include/ib/mw/IIbMessageReceiver.hpp
+     include/ib/mw/IIbReceiver.hpp
+     include/ib/mw/IIbSender.hpp
+     include/ib/mw/sync/IIbToParticipantController.hpp
+     include/ib/mw/sync/IIbToSyncMaster.hpp
+     include/ib/mw/sync/IIbToSystemController.hpp
+     include/ib/mw/sync/IIbToSystemMonitor.hpp
+     include/ib/sim/can/IIbToCanController.hpp
+     include/ib/sim/can/IIbToCanControllerProxy.hpp
+     include/ib/sim/can/IIbToCanSimulator.hpp
+     include/ib/sim/eth/IIbToEthController.hpp
+     include/ib/sim/eth/IIbToEthControllerProxy.hpp
+     include/ib/sim/eth/IIbToEthSimulator.hpp
+     include/ib/sim/fr/IIbToFrBusSimulator.hpp
+     include/ib/sim/fr/IIbToFrController.hpp
+     include/ib/sim/fr/IIbToFrControllerProxy.hpp
+     include/ib/sim/generic/IIbToGenericPublisher.hpp
+     include/ib/sim/generic/IIbToGenericSubscriber.hpp
+     include/ib/sim/io/IIbToInPort.hpp
+     include/ib/sim/io/IIbToOutPort.hpp
+     include/ib/sim/lin/IIbToLinController.hpp
+     include/ib/sim/lin/IIbToLinControllerProxy.hpp
+     include/ib/sim/lin/IIbToLinSimulator.hpp
+
 - Directly sending messages on the :cpp:class:`IComAdapter<ib::mw::IComAdapter>` via `SendIbMessage(...)`
   is not possible anymore.
   Sending messages is now only supported via the specific service controllers,
@@ -53,10 +113,75 @@ Changed
       auto* controller = comAdapter->CreateCanController();
       CanMessage msg{};
       controller->SendMessage(msg);
+ 
+
+Complete list of methods removed from the interface ``class IComAdapter`` in ``include/ib/mw/IComAdapter.hpp``:
+
+  .. code-block:: c++
+
+     virtual void SendIbMessage(EndpointAddress from, const sim::can::CanMessage& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, sim::can::CanMessage&& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::can::CanTransmitAcknowledge& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::can::CanControllerStatus& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::can::CanConfigureBaudrate& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::can::CanSetControllerMode& msg) = 0;
+    
+     virtual void SendIbMessage(EndpointAddress from, const sim::eth::EthMessage& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, sim::eth::EthMessage&& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::eth::EthTransmitAcknowledge& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::eth::EthStatus& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::eth::EthSetMode& msg) = 0;
+    
+     virtual void SendIbMessage(EndpointAddress from, const sim::fr::FrMessage& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, sim::fr::FrMessage&& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::fr::FrMessageAck& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, sim::fr::FrMessageAck&& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::fr::FrSymbol& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::fr::FrSymbolAck& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::fr::CycleStart& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::fr::HostCommand& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::fr::ControllerConfig& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::fr::TxBufferConfigUpdate& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::fr::TxBufferUpdate& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::fr::ControllerStatus& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::fr::PocStatus& msg) = 0;
+    
+     virtual void SendIbMessage(EndpointAddress from, const sim::lin::SendFrameRequest& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::lin::SendFrameHeaderRequest& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::lin::Transmission& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::lin::WakeupPulse& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::lin::ControllerConfig& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::lin::ControllerStatusUpdate& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::lin::FrameResponseUpdate& msg) = 0;
+    
+     virtual void SendIbMessage(EndpointAddress from, const sim::io::AnalogIoMessage& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::io::DigitalIoMessage& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::io::PatternIoMessage& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, sim::io::PatternIoMessage&& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::io::PwmIoMessage& msg) = 0;
+    
+     virtual void SendIbMessage(EndpointAddress from, const sim::generic::GenericMessage& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, sim::generic::GenericMessage&& msg) = 0;
+    
+     virtual void SendIbMessage(EndpointAddress from, const sync::NextSimTask& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sync::Tick& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sync::TickDone& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sync::QuantumRequest& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sync::QuantumGrant& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sync::ParticipantStatus& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sync::ParticipantCommand& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sync::SystemCommand& msg) = 0;
+    
+     virtual void SendIbMessage(EndpointAddress from, const logging::LogMsg& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, logging::LogMsg&& msg) = 0;
+    
+     virtual void OnAllMessagesDelivered(std::function<void(void)> callback) = 0;
+     virtual void FlushSendBuffers() = 0;
 
 .. admonition:: Note: FastRTPS build is disabled
 
   The FastRTPs middleware build is now disabled for the official Vector packages.
+
 - The binary packages are built with the CMake flag ``IB_MW_ENABLE_FASTRTPS=OFF``.
   Calling a ``CreateComAdapter`` with an active middleware of ``FastRTPS`` will result
   in a runtime exception.
