@@ -5,7 +5,7 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.6.1-QA] - 2021-12
+[3.6.1-QA] - 2021-12-10
 --------------------------------
 This is a Quality Assured Release.
 
