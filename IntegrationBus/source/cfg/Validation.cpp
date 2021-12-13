@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <set>
+#include <unordered_set>
 
 using namespace std::chrono_literals;
 
@@ -56,6 +57,20 @@ void Validate(const SimulationSetup& testConfig, const Config& ibConfig)
     {
         std::cerr << "ERROR: EndpointId " << *result << " is not unique!" << std::endl;
         throw ib::cfg::Misconfiguration{ "EndpointIds must be unique" };
+    }
+
+    std::unordered_set<std::string> endpointNames;
+    for (auto& link : testConfig.links)
+    {
+        for (auto& endpoint : link.endpoints)
+        {
+            auto res = endpointNames.insert(endpoint);
+            if (!res.second)
+            {
+                std::cerr << "ERROR: Endpoint \"" << endpoint << "\" in Link \"" << link.name << "\" is not unique!" << std::endl;
+                throw ib::cfg::Misconfiguration{ "Endpoints must be unique" };
+            }
+        }
     }
 }
 

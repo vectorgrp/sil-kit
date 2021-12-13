@@ -13,7 +13,7 @@ namespace cfg {
  *
  * This allows a uniform usage, and the main ib::cfg::Config can always be used as reference.
 
- * 2.) Also, add them to the apropriate parent Validation function. E.g.,
+ * 2.) Also, add them to the appropriate parent Validation function. E.g.,
  * when adding a validation for Participant configs, you should call this method in
  * the validation method for the SimulationSetup
  */
