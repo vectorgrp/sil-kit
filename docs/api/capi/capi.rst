@@ -20,7 +20,7 @@ The main entry point of the C API is the function to obtain a ib_SimulationParti
     const char* jsonString = "{ ... }";
     const char* participantName = "CanWriter";
     const char* domainId = "1";
-    ib_ReturnCode result = ib_SimulationParticipant_create(&participant, jsonString,
+    ib_ReturnCode result = ib_SimulationParticipant_Create(&participant, jsonString,
                                                             participantName, domainId);
 
 All further services of the C API of the IntegrationBus are requested through this SimulationParticipant.
@@ -29,7 +29,7 @@ Entities obtained through the SimulationParticipant must not be destroyed/delete
 All entities, that are provided through the API expect for the ib_SimulationParticipant are destroyed through
 the internals of the Integration Bus implementation.
 
-After creation of a SimulationParticipant it must be ensured that eventually ib_Participant_destroy is called
+After creation of a SimulationParticipant it must be ensured that eventually ib_SimulationParticipant_Destroy is called
 with the corresponding pointer to the ib_SimulationParticipant entity.
 
 
@@ -38,24 +38,31 @@ API and Data Type Reference
 
 General API
 -----------
-.. doxygenfunction:: ib_SimulationParticipant_create
-.. doxygenfunction:: ib_SimulationParticipant_destroy
 .. doxygenfunction:: ib_ReturnCodeToString
 .. doxygenfunction:: ib_GetLastErrorString
 
+SimulationParticipant API
+-----------
+
+.. doxygenfunction:: ib_SimulationParticipant_Create
+.. doxygenfunction:: ib_SimulationParticipant_Destroy
+
+Most creator functions for other objects (such as bus controllers) require an ib_SimulationParticipant, 
+which is the factory object, as input parameter.
+
 Can API
 -------
-.. doxygenfunction:: ib_CanController_create
-.. doxygenfunction:: ib_CanController_Start
-.. doxygenfunction:: ib_CanController_Stop
-.. doxygenfunction:: ib_CanController_Reset
-.. doxygenfunction:: ib_CanController_Sleep
-.. doxygenfunction:: ib_CanController_SendFrame
-.. doxygenfunction:: ib_CanController_SetBaudRate
-.. doxygenfunction:: ib_CanController_RegisterTransmitStatusHandler
-.. doxygenfunction:: ib_CanController_RegisterReceiveMessageHandler
-.. doxygenfunction:: ib_CanController_RegisterStateChangedHandler
-.. doxygenfunction:: ib_CanController_RegisterErrorStateChangedHandler
+.. doxygenfunction:: ib_Can_Controller_Create
+.. doxygenfunction:: ib_Can_Controller_Start
+.. doxygenfunction:: ib_Can_Controller_Stop
+.. doxygenfunction:: ib_Can_Controller_Reset
+.. doxygenfunction:: ib_Can_Controller_Sleep
+.. doxygenfunction:: ib_Can_Controller_SendFrame
+.. doxygenfunction:: ib_Can_Controller_SetBaudRate
+.. doxygenfunction:: ib_Can_Controller_RegisterTransmitStatusHandler
+.. doxygenfunction:: ib_Can_Controller_RegisterReceiveMessageHandler
+.. doxygenfunction:: ib_Can_Controller_RegisterStateChangedHandler
+.. doxygenfunction:: ib_Can_Controller_RegisterErrorStateChangedHandler
 
 Ethernet API
 ------------
@@ -70,21 +77,21 @@ Ethernet Controller
 The Ethernet controller interacts with the corresponding Ethernet bus and send Ethernet frames.
 The Ethernet frames are the single messages/frames, that are transmitted over the Ethernet bus.
 
-.. doxygenfunction:: ib_EthernetController_create
-.. doxygenfunction:: ib_EthernetController_Activate
-.. doxygenfunction:: ib_EthernetController_Deactivate
-.. doxygenfunction:: ib_EthernetController_RegisterReceiveMessageHandler
-.. doxygenfunction:: ib_EthernetController_RegisterFrameAckHandler
-.. doxygenfunction:: ib_EthernetController_RegisterStateChangedHandler
-.. doxygenfunction:: ib_EthernetController_RegisterBitRateChangedHandler
-.. doxygenfunction:: ib_EthernetController_SendFrame
+.. doxygenfunction:: ib_Ethernet_Controller_Create
+.. doxygenfunction:: ib_Ethernet_Controller_Activate
+.. doxygenfunction:: ib_Ethernet_Controller_Deactivate
+.. doxygenfunction:: ib_Ethernet_Controller_RegisterReceiveMessageHandler
+.. doxygenfunction:: ib_Ethernet_Controller_RegisterFrameAckHandler
+.. doxygenfunction:: ib_Ethernet_Controller_RegisterStateChangedHandler
+.. doxygenfunction:: ib_Ethernet_Controller_RegisterBitRateChangedHandler
+.. doxygenfunction:: ib_Ethernet_Controller_SendFrame
 
 Ethernet Frame
 ~~~~~~~~~~~~~~
 
-The ib_EthernetFrame corresponds to an ethernet raw frame.
+The ib_Ethernet_Frame corresponds to an ethernet raw frame.
 A basic frame consists of the destination mac, the source mac, the ethertype and a payload.
-The union type within the ib_EthernetFrame helps when manual construction of a frame is necessary (frameHeader, frameHeaderVlanTagged).
+The union type within the ib_Ethernet_Frame helps when manual construction of a frame is necessary (frameHeader, frameHeaderVlanTagged).
 
 .. note:: For an example of manual frame construction one can refer to the C Ethernet demo.
 
@@ -93,8 +100,8 @@ Data API
 The Data API provides data publish and subscribe functionalities to the Integration Bus. 
 It consists of DataPublishers and DataSubscribers.
 
-.. doxygenfunction:: ib_DataPublisher_create
-.. doxygenfunction:: ib_DataSubscriber_create
+.. doxygenfunction:: ib_DataPublisher_Create
+.. doxygenfunction:: ib_DataSubscriber_Create
 .. doxygenfunction:: ib_DataPublisher_Publish
 .. doxygenfunction:: ib_DataSubscriber_SetReceiveDataHandler
 
@@ -179,53 +186,53 @@ Lin Controller
 
 **A Lin controller is created with the following function:**
 
-.. doxygenfunction:: ib_LinController_create
+.. doxygenfunction:: ib_Lin_Controller_Create
 
 **It's configuration is handed over to the function:**
 
-.. doxygenfunction:: ib_LinController_Init
+.. doxygenfunction:: ib_Lin_Controller_Init
 
 **The following set of functions can be used to register event handlers on the controller:**
 
-.. doxygenfunction:: ib_LinController_RegisterFrameStatusHandler
-.. doxygenfunction:: ib_LinController_RegisterGoToSleepHandler
-.. doxygenfunction:: ib_LinController_RegisterWakeupHandler
+.. doxygenfunction:: ib_Lin_Controller_RegisterFrameStatusHandler
+.. doxygenfunction:: ib_Lin_Controller_RegisterGoToSleepHandler
+.. doxygenfunction:: ib_Lin_Controller_RegisterWakeupHandler
 
 **The following functions operate on a configured controller:**
 
-.. doxygenfunction:: ib_LinController_Status
-.. doxygenfunction:: ib_LinController_SendFrame
-.. doxygenfunction:: ib_LinController_SendFrameWithTimestamp
-.. doxygenfunction:: ib_LinController_SendFrameHeader
-.. doxygenfunction:: ib_LinController_SendFrameHeaderWithTimestamp
-.. doxygenfunction:: ib_LinController_SetFrameResponse
-.. doxygenfunction:: ib_LinController_SetFrameResponses
-.. doxygenfunction:: ib_LinController_GoToSleep
-.. doxygenfunction:: ib_LinController_GoToSleepInternal
-.. doxygenfunction:: ib_LinController_Wakeup
-.. doxygenfunction:: ib_LinController_WakeupInternal
+.. doxygenfunction:: ib_Lin_Controller_Status
+.. doxygenfunction:: ib_Lin_Controller_SendFrame
+.. doxygenfunction:: ib_Lin_Controller_SendFrameWithTimestamp
+.. doxygenfunction:: ib_Lin_Controller_SendFrameHeader
+.. doxygenfunction:: ib_Lin_Controller_SendFrameHeaderWithTimestamp
+.. doxygenfunction:: ib_Lin_Controller_SetFrameResponse
+.. doxygenfunction:: ib_Lin_Controller_SetFrameResponses
+.. doxygenfunction:: ib_Lin_Controller_GoToSleep
+.. doxygenfunction:: ib_Lin_Controller_GoToSleepInternal
+.. doxygenfunction:: ib_Lin_Controller_Wakeup
+.. doxygenfunction:: ib_Lin_Controller_WakeupInternal
 
 Data Structures
 ~~~~~~~~~~~~~~~
-.. doxygenstruct:: ib_LinControllerConfig
+.. doxygenstruct:: ib_Lin_ControllerConfig
    :members:
-.. doxygenstruct:: ib_LinFrame
+.. doxygenstruct:: ib_Lin_Frame
    :members:
-.. doxygenstruct:: ib_LinFrameResponse
+.. doxygenstruct:: ib_Lin_FrameResponse
    :members:
 
 Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygentypedef:: ib_LinController
-.. doxygentypedef:: ib_LinControllerStatus
-.. doxygentypedef:: ib_LinControllerMode
-.. doxygentypedef:: ib_LinBaudRate
-.. doxygentypedef:: ib_LinFrameResponseMode
-.. doxygentypedef:: ib_LinId
-.. doxygentypedef:: ib_LinChecksumModel
-.. doxygentypedef:: ib_LinFrameResponseType
-.. doxygentypedef:: ib_LinFrameStatus
-.. doxygentypedef:: ib_LinDataLength
+.. doxygentypedef:: ib_Lin_Controller
+.. doxygentypedef:: ib_Lin_ControllerStatus
+.. doxygentypedef:: ib_Lin_ControllerMode
+.. doxygentypedef:: ib_Lin_BaudRate
+.. doxygentypedef:: ib_Lin_FrameResponseMode
+.. doxygentypedef:: ib_Lin_Id
+.. doxygentypedef:: ib_Lin_ChecksumModel
+.. doxygentypedef:: ib_Lin_FrameResponseType
+.. doxygentypedef:: ib_Lin_FrameStatus
+.. doxygentypedef:: ib_Lin_DataLength
 
 The Logger API can be used to write log messages.
 

@@ -5,7 +5,7 @@
 #include "IComAdapterInternal.hpp"
 #include <string>
 #include <string.h>
-#include "capiImpl.h"
+#include "CapiImpl.h"
 #include "ib/sim/fr/all.hpp"
 
 static void assign(ib::sim::fr::TxBufferConfig& cppConfig, const ib_FlexRay_TxBufferConfig* config)
@@ -173,7 +173,7 @@ static void assign(ib_FlexRay_ControllerConfig** config, const ib::cfg::FlexrayC
 
 extern "C" {
 
-CIntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controller** outController, ib_SimulationParticipant* participant, const char* cName)
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controller** outController, ib_SimulationParticipant* participant, const char* cName)
 {
   ASSERT_VALID_OUT_PARAMETER(outController);
   ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -193,9 +193,9 @@ CIntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Control
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_FlexRay_ControllerConfig_Create(ib_FlexRay_ControllerConfig** controllerConfig, ib_SimulationParticipant* participant, const char* cName)
+ib_ReturnCode ib_FlexRay_ControllerConfig_Create(ib_FlexRay_ControllerConfig** outControllerConfig, ib_SimulationParticipant* participant, const char* cName)
 {
-  ASSERT_VALID_OUT_PARAMETER(controllerConfig);
+  ASSERT_VALID_OUT_PARAMETER(outControllerConfig);
   ASSERT_VALID_POINTER_PARAMETER(participant);
   ASSERT_VALID_POINTER_PARAMETER(cName);
   CAPI_ENTER
@@ -209,23 +209,23 @@ ib_ReturnCode ib_FlexRay_ControllerConfig_Create(ib_FlexRay_ControllerConfig** c
     auto& participantConfig = get_by_name(ibConfig.simulationSetup.participants, participantName);
     auto& flexrayControllerCfg = get_by_name(participantConfig.flexrayControllers, cName);
     assign(&result, flexrayControllerCfg);
-    *controllerConfig = result;
+    *outControllerConfig = result;
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_FlexRay_Append_TxBufferConfig(ib_FlexRay_ControllerConfig** controllerConfig, const ib_FlexRay_TxBufferConfig* txBufferConfig)
+ib_ReturnCode ib_FlexRay_Append_TxBufferConfig(ib_FlexRay_ControllerConfig** inOutControllerConfig, const ib_FlexRay_TxBufferConfig* txBufferConfig)
 {
-  ASSERT_VALID_POINTER_TO_POINTER_PARAMETER(controllerConfig);
+  ASSERT_VALID_POINTER_TO_POINTER_PARAMETER(inOutControllerConfig);
   ASSERT_VALID_POINTER_PARAMETER(txBufferConfig);
   CAPI_ENTER
   {
-    uint32_t numberOfTxBufferConfigs = (*controllerConfig)->numBufferConfigs + 1;
+    uint32_t numberOfTxBufferConfigs = (*inOutControllerConfig)->numBufferConfigs + 1;
     // NOTE: ib_FlexRay_ControllerConfig already contains one ib_FlexRay_TxBufferConfig,
     // so add numberOfTxBufferConfigs-1 times sizeof(ib_FlexRay_TxBufferConfig)
     size_t newSize = sizeof(ib_FlexRay_ControllerConfig) + ((numberOfTxBufferConfigs-1) * sizeof(ib_FlexRay_TxBufferConfig));
-    ib_FlexRay_ControllerConfig* result = (ib_FlexRay_ControllerConfig*)realloc(*controllerConfig, newSize);
+    ib_FlexRay_ControllerConfig* result = (ib_FlexRay_ControllerConfig*)realloc(*inOutControllerConfig, newSize);
     if (result == nullptr)
     {
       ib_error_string = std::string("could not realloc controller config to ") + std::to_string(newSize) + " bytes.";
@@ -233,39 +233,39 @@ ib_ReturnCode ib_FlexRay_Append_TxBufferConfig(ib_FlexRay_ControllerConfig** con
     }
     memcpy(&result->bufferConfigs[numberOfTxBufferConfigs-1], txBufferConfig, sizeof(ib_FlexRay_TxBufferConfig));
     result->numBufferConfigs = numberOfTxBufferConfigs;
-    *controllerConfig = result;
+    *inOutControllerConfig = result;
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_FlexRay_Controller_Configure(ib_FlexRay_Controller* self, const ib_FlexRay_ControllerConfig* config)
+ib_ReturnCode ib_FlexRay_Controller_Configure(ib_FlexRay_Controller* controller, const ib_FlexRay_ControllerConfig* config)
 {
-  ASSERT_VALID_POINTER_PARAMETER(self);
+  ASSERT_VALID_POINTER_PARAMETER(controller);
   ASSERT_VALID_POINTER_PARAMETER(config);
   CAPI_ENTER
   {
-    ib::sim::fr::IFrController* controller = reinterpret_cast<ib::sim::fr::IFrController*>(self);
+    ib::sim::fr::IFrController* cppController = reinterpret_cast<ib::sim::fr::IFrController*>(controller);
     ib::sim::fr::ControllerConfig cppConfig;
     assign(cppConfig, config);
 
-    controller->Configure(cppConfig);
+    cppController->Configure(cppConfig);
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
 }
 
-CIntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_ReconfigureTxBuffer(ib_FlexRay_Controller* self, uint16_t txBufferIdx, const ib_FlexRay_TxBufferConfig* config)
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_ReconfigureTxBuffer(ib_FlexRay_Controller* self, uint16_t txBufferIdx, const ib_FlexRay_TxBufferConfig* config)
 {
   ASSERT_VALID_POINTER_PARAMETER(self);
   ASSERT_VALID_POINTER_PARAMETER(config);
   CAPI_ENTER
   {
-    ib::sim::fr::IFrController* controller = reinterpret_cast<ib::sim::fr::IFrController*>(self);
+    ib::sim::fr::IFrController* cppController = reinterpret_cast<ib::sim::fr::IFrController*>(self);
     ib::sim::fr::TxBufferConfig cppConfig;
     assign(cppConfig, config);
 
-    controller->ReconfigureTxBuffer(txBufferIdx, cppConfig);
+    cppController->ReconfigureTxBuffer(txBufferIdx, cppConfig);
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
@@ -277,7 +277,7 @@ ib_ReturnCode ib_FlexRay_Controller_UpdateTxBuffer(ib_FlexRay_Controller* self, 
   ASSERT_VALID_POINTER_PARAMETER(update);
   CAPI_ENTER
   {
-    ib::sim::fr::IFrController* controller = reinterpret_cast<ib::sim::fr::IFrController*>(self);
+    ib::sim::fr::IFrController* cppController = reinterpret_cast<ib::sim::fr::IFrController*>(self);
     ib::sim::fr::TxBufferUpdate cppUpdate;
     cppUpdate.txBufferIndex = update->txBufferIndex;
     cppUpdate.payloadDataValid = update->payloadDataValid;
@@ -286,38 +286,38 @@ ib_ReturnCode ib_FlexRay_Controller_UpdateTxBuffer(ib_FlexRay_Controller* self, 
       ASSERT_VALID_POINTER_PARAMETER(update->payload.pointer);
       cppUpdate.payload.assign(update->payload.pointer, update->payload.pointer+update->payload.size);
     }
-    controller->UpdateTxBuffer(cppUpdate);
+    cppController->UpdateTxBuffer(cppUpdate);
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
 }
 
 
-CIntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_ExecuteCmd(ib_FlexRay_Controller* self, ib_FlexRay_ChiCommand cmd)
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_ExecuteCmd(ib_FlexRay_Controller* self, ib_FlexRay_ChiCommand cmd)
 {
   ASSERT_VALID_POINTER_PARAMETER(self);
   CAPI_ENTER
   {
-    ib::sim::fr::IFrController* controller = reinterpret_cast<ib::sim::fr::IFrController*>(self);
+    ib::sim::fr::IFrController* cppController = reinterpret_cast<ib::sim::fr::IFrController*>(self);
     switch (cmd)
     {
     case ib_FlexRay_ChiCommand_RUN:
-      controller->Run();
+      cppController->Run();
       break;
     case ib_FlexRay_ChiCommand_DEFERRED_HALT:
-      controller->DeferredHalt();
+      cppController->DeferredHalt();
       break;
     case ib_FlexRay_ChiCommand_FREEZE:
-      controller->Freeze();
+      cppController->Freeze();
       break;
     case ib_FlexRay_ChiCommand_ALLOW_COLDSTART:
-      controller->AllowColdstart();
+      cppController->AllowColdstart();
       break;
     case ib_FlexRay_ChiCommand_ALL_SLOTS:
-      controller->AllSlots();
+      cppController->AllSlots();
       break;
     case ib_FlexRay_ChiCommand_WAKEUP:
-      controller->Wakeup();
+      cppController->Wakeup();
       break;
     default:
       return ib_ReturnCode_BADPARAMETER;
@@ -333,8 +333,8 @@ ib_ReturnCode ib_FlexRay_Controller_RegisterMessageHandler(ib_FlexRay_Controller
   ASSERT_VALID_HANDLER_PARAMETER(handler);
   CAPI_ENTER
   {
-    ib::sim::fr::IFrController* controller = reinterpret_cast<ib::sim::fr::IFrController*>(self);
-    controller->RegisterMessageHandler(
+    ib::sim::fr::IFrController* cppController = reinterpret_cast<ib::sim::fr::IFrController*>(self);
+    cppController->RegisterMessageHandler(
       [context, handler](ib::sim::fr::IFrController* ctrl, const ib::sim::fr::FrMessage& msg)
       {
         ib_FlexRay_Message message;
@@ -358,14 +358,14 @@ ib_ReturnCode ib_FlexRay_Controller_RegisterMessageHandler(ib_FlexRay_Controller
 }
 
 
-ib_ReturnCode ib_FlexRay_Controller_RegisterMessageAckHandler(ib_FlexRay_Controller* self, void* context, ib_FlexRay_MessageAckHandler_t handler)
+ib_ReturnCode ib_FlexRay_Controller_RegisterMessageAckHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_MessageAckHandler_t handler)
 {
-  ASSERT_VALID_POINTER_PARAMETER(self);
+  ASSERT_VALID_POINTER_PARAMETER(controller);
   ASSERT_VALID_HANDLER_PARAMETER(handler);
   CAPI_ENTER
   {
-    ib::sim::fr::IFrController* controller = reinterpret_cast<ib::sim::fr::IFrController*>(self);
-    controller->RegisterMessageAckHandler(
+    ib::sim::fr::IFrController* cppController = reinterpret_cast<ib::sim::fr::IFrController*>(controller);
+    cppController->RegisterMessageAckHandler(
       [context, handler](ib::sim::fr::IFrController* ctrl, const ib::sim::fr::FrMessageAck& msg)
       {
         ib_FlexRay_MessageAck message;
@@ -390,14 +390,14 @@ ib_ReturnCode ib_FlexRay_Controller_RegisterMessageAckHandler(ib_FlexRay_Control
 }
 
 
-ib_ReturnCode ib_FlexRay_Controller_RegisterWakeupHandler(ib_FlexRay_Controller* self, void* context, ib_FlexRay_WakeupHandler_t handler)
+ib_ReturnCode ib_FlexRay_Controller_RegisterWakeupHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_WakeupHandler_t handler)
 {
-  ASSERT_VALID_POINTER_PARAMETER(self);
+  ASSERT_VALID_POINTER_PARAMETER(controller);
   ASSERT_VALID_HANDLER_PARAMETER(handler);
   CAPI_ENTER
   {
-    ib::sim::fr::IFrController* controller = reinterpret_cast<ib::sim::fr::IFrController*>(self);
-    controller->RegisterWakeupHandler(
+    ib::sim::fr::IFrController* cppController = reinterpret_cast<ib::sim::fr::IFrController*>(controller);
+    cppController->RegisterWakeupHandler(
       [context, handler](ib::sim::fr::IFrController* ctrl, const ib::sim::fr::FrSymbol& msg)
       {
         ib_FlexRay_Symbol message;
@@ -412,14 +412,14 @@ ib_ReturnCode ib_FlexRay_Controller_RegisterWakeupHandler(ib_FlexRay_Controller*
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_FlexRay_Controller_RegisterPocStatusHandler(ib_FlexRay_Controller* self, void* context, ib_FlexRay_PocStatusHandler_t handler)
+ib_ReturnCode ib_FlexRay_Controller_RegisterPocStatusHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_PocStatusHandler_t handler)
 {
-  ASSERT_VALID_POINTER_PARAMETER(self);
+  ASSERT_VALID_POINTER_PARAMETER(controller);
   ASSERT_VALID_HANDLER_PARAMETER(handler);
   CAPI_ENTER
   {
-    ib::sim::fr::IFrController* controller = reinterpret_cast<ib::sim::fr::IFrController*>(self);
-    controller->RegisterPocStatusHandler(
+    ib::sim::fr::IFrController* cppController = reinterpret_cast<ib::sim::fr::IFrController*>(controller);
+    cppController->RegisterPocStatusHandler(
       [context, handler](ib::sim::fr::IFrController* ctrl, const ib::sim::fr::PocStatus& msg)
       {
         ib_FlexRay_PocStatus message;
@@ -441,14 +441,14 @@ ib_ReturnCode ib_FlexRay_Controller_RegisterPocStatusHandler(ib_FlexRay_Controll
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_FlexRay_Controller_RegisterSymbolHandler(ib_FlexRay_Controller* self, void* context, ib_FlexRay_SymbolHandler_t handler)
+ib_ReturnCode ib_FlexRay_Controller_RegisterSymbolHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_SymbolHandler_t handler)
 {
-  ASSERT_VALID_POINTER_PARAMETER(self);
+  ASSERT_VALID_POINTER_PARAMETER(controller);
   ASSERT_VALID_HANDLER_PARAMETER(handler);
   CAPI_ENTER
   {
-    ib::sim::fr::IFrController* controller = reinterpret_cast<ib::sim::fr::IFrController*>(self);
-    controller->RegisterSymbolHandler(
+    ib::sim::fr::IFrController* cppController = reinterpret_cast<ib::sim::fr::IFrController*>(controller);
+    cppController->RegisterSymbolHandler(
       [context, handler](ib::sim::fr::IFrController* ctrl, const ib::sim::fr::FrSymbol& msg)
       {
         ib_FlexRay_Symbol message;
@@ -463,14 +463,14 @@ ib_ReturnCode ib_FlexRay_Controller_RegisterSymbolHandler(ib_FlexRay_Controller*
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_FlexRay_Controller_RegisterSymbolAckHandler(ib_FlexRay_Controller* self, void* context, ib_FlexRay_SymbolAckHandler_t handler)
+ib_ReturnCode ib_FlexRay_Controller_RegisterSymbolAckHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_SymbolAckHandler_t handler)
 {
-  ASSERT_VALID_POINTER_PARAMETER(self);
+  ASSERT_VALID_POINTER_PARAMETER(controller);
   ASSERT_VALID_HANDLER_PARAMETER(handler);
   CAPI_ENTER
   {
-    ib::sim::fr::IFrController* controller = reinterpret_cast<ib::sim::fr::IFrController*>(self);
-    controller->RegisterSymbolAckHandler(
+    ib::sim::fr::IFrController* cppController = reinterpret_cast<ib::sim::fr::IFrController*>(controller);
+    cppController->RegisterSymbolAckHandler(
       [context, handler](ib::sim::fr::IFrController* ctrl, const ib::sim::fr::FrSymbolAck& msg)
       {
         ib_FlexRay_SymbolAck message;
@@ -485,14 +485,14 @@ ib_ReturnCode ib_FlexRay_Controller_RegisterSymbolAckHandler(ib_FlexRay_Controll
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_FlexRay_Controller_RegisterCycleStartHandler(ib_FlexRay_Controller* self, void* context, ib_FlexRay_CycleStartHandler_t handler)
+ib_ReturnCode ib_FlexRay_Controller_RegisterCycleStartHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_CycleStartHandler_t handler)
 {
-  ASSERT_VALID_POINTER_PARAMETER(self);
+  ASSERT_VALID_POINTER_PARAMETER(controller);
   ASSERT_VALID_HANDLER_PARAMETER(handler);
   CAPI_ENTER
   {
-    ib::sim::fr::IFrController* controller = reinterpret_cast<ib::sim::fr::IFrController*>(self);
-    controller->RegisterCycleStartHandler(
+    ib::sim::fr::IFrController* cppController = reinterpret_cast<ib::sim::fr::IFrController*>(controller);
+    cppController->RegisterCycleStartHandler(
       [context, handler](ib::sim::fr::IFrController* ctrl, const ib::sim::fr::CycleStart& msg)
       {
         ib_FlexRay_CycleStart message;

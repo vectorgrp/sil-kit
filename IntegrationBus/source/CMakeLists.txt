@@ -39,15 +39,17 @@ endif()
 add_library(IntegrationBus SHARED
     IntegrationBus.hpp
     IntegrationBus.cpp
-    capi/capiImpl.h
-    capi/capi.cpp
-    capi/capi_FlexRay.cpp
-    capi/capi_Logger.cpp
-    capi/capi_Lin.cpp
+    "capi/CapiSimulationParticipant.cpp"
+    "capi/CapiCan.cpp"
+    "capi/CapiEthernet.cpp"
+    "capi/CapiFlexRay.cpp"
+    "capi/CapiLogger.cpp"
+    "capi/CapiLin.cpp"
+    "capi/CapiDataPubSub.cpp"
+    "capi/CapiUtils.cpp"
+    "capi/CapiImpl.h"
     IbForceIncludes.cpp
 )
-
-target_compile_definitions(IntegrationBus PUBLIC -D CIntegrationBusAPI_EXPORT=1)
 
 # Published extension implementations follow here for the extension loading
 # side of the code. The actual shared library code might reside 

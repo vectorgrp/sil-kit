@@ -1,14 +1,17 @@
-/* Copyright (c) Vector Informatik GmbH. All rights reserved. */
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
 #include <stdint.h>
-#include "ib/capi/Utils.h"
+#include <limits.h>
+#include "ib/capi/IbMacros.h"
+#include "ib/capi/Types.h"
 #include "ib/capi/InterfaceIdentifiers.h"
+
 
 #pragma pack(push)
 #pragma pack(8)
 
-__IB_BEGIN_DECLS
+IB_BEGIN_DECLS
 
 //!< The kind of participant command that is sent.
 typedef int8_t ib_ParticipantCommand_Kind;
@@ -45,6 +48,36 @@ typedef int8_t ib_ParticipantState;
 #define ib_ParticipantState_ShuttingDown          ((ib_ParticipantState) 13)  //!< The shutting down state
 #define ib_ParticipantState_Shutdown              ((ib_ParticipantState) 14)  //!< The shutdown state
 
+typedef uint64_t ib_NanosecondsTime; //!< Simulation time
+
+/*! \brief Join the IB simulation with the domainId as a participant.
+*
+* Join the IB simulation and become a participant
+* based on the given configuration options.
+*
+* \param outParticipant The pointer through which the simulation participant will be returned (out parameter).
+* \param config Configuration of the participant passed as JSON string
+* \param participantName Name of the participant
+* \param cDomainId ID of the domain/simulation to join
+*
+*/
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Create(ib_SimulationParticipant** outParticipant, 
+    const char* cJsonConfig, const char* cParticipantName, const char* cDomainId);
+
+typedef ib_ReturnCode (*ib_SimulationParticipant_Create_t)(ib_SimulationParticipant** outParticipant, 
+    const char* cJsonConfig, const char* cParticipantName, const char* cDomainId);
+    
+/*! \brief Destroy a simulation participant and its associated simulation elements.
+*
+* Destroys the simulation participant and its created simulation elements such as e.g. Can controllers.
+*
+* \param participant The simulation participant to be destroyed.
+*
+*/
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Destroy(ib_SimulationParticipant* participant);
+
+typedef ib_ReturnCode (*ib_SimulationParticipant_Destroy_t)(ib_SimulationParticipant* participant);
+
 /*! \brief  The handler to be called on initialization
  *
  * \param context The user provided context passed in \ref ib_SimulationParticipant_SetInitHandler
@@ -53,9 +86,6 @@ typedef int8_t ib_ParticipantState;
  */
 typedef void (*ib_ParticipantInitHandler_t)(void* context, ib_SimulationParticipant* participant,
     ib_ParticipantCommand* command);
-typedef ib_ReturnCode(*ib_SimulationParticipant_SetInitHandler_t)(ib_SimulationParticipant* participant,
-    void* context, ib_ParticipantInitHandler_t handler);
-
 /*! \brief Register a callback to perform initialization
  *
  * The handler is called when an \ref ib_ParticipantCommand_Kind_Initialize
@@ -69,7 +99,10 @@ typedef ib_ReturnCode(*ib_SimulationParticipant_SetInitHandler_t)(ib_SimulationP
  * \param context A user provided context accessible in the handler
  * \param handler The handler to be called on initialization
  */
-CIntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetInitHandler(ib_SimulationParticipant* participant,
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetInitHandler(ib_SimulationParticipant* participant,
+    void* context, ib_ParticipantInitHandler_t handler);
+
+typedef ib_ReturnCode(*ib_SimulationParticipant_SetInitHandler_t)(ib_SimulationParticipant* participant,
     void* context, ib_ParticipantInitHandler_t handler);
 
 /*! \brief The handler to be called on a simulation stop
@@ -78,9 +111,6 @@ CIntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetInitHandler(ib_Simu
  * \param participant The simulation participant receiving the stop command
  */
 typedef void (*ib_ParticipantStopHandler_t)(void* context, ib_SimulationParticipant* participant);
-typedef ib_ReturnCode(*ib_SimulationParticipant_SetStopHandler_t)(ib_SimulationParticipant* participant,
-    void* context, ib_ParticipantStopHandler_t handler);
-
 /*! \brief Register a callback that is executed on simulation stop
  *
  * The handler is called when a \ref SystemCommand::Kind::Stop has been
@@ -93,7 +123,10 @@ typedef ib_ReturnCode(*ib_SimulationParticipant_SetStopHandler_t)(ib_SimulationP
  * \param context A user provided context accessible in the handler
  * \param handler The handler to be called
  */
-CIntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetStopHandler(ib_SimulationParticipant* participant,
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetStopHandler(ib_SimulationParticipant* participant,
+    void* context, ib_ParticipantStopHandler_t handler);
+
+typedef ib_ReturnCode(*ib_SimulationParticipant_SetStopHandler_t)(ib_SimulationParticipant* participant,
     void* context, ib_ParticipantStopHandler_t handler);
 
 /*! \brief The handler to be called on a simulation shutdown
@@ -102,9 +135,6 @@ CIntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetStopHandler(ib_Simu
  * \param participant The simulation participant receiving the shutdown command
  */
 typedef void (*ib_ParticipantShutdownHandler_t)(void* context, ib_SimulationParticipant* participant);
-typedef ib_ReturnCode(*ib_SimulationParticipant_SetShutdownHandler_t)(ib_SimulationParticipant* participant,
-    void* context, ib_ParticipantShutdownHandler_t handler);
-
 /*! \brief Register a callback that is executed on simulation shutdown.
  *
  * The handler is called when the \ref SystemCommand::Kind::Shutdown
@@ -117,12 +147,12 @@ typedef ib_ReturnCode(*ib_SimulationParticipant_SetShutdownHandler_t)(ib_Simulat
  * \param context A user provided context accessible in the handler
  * \param handler The handler to be called
  */
-CIntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetShutdownHandler(ib_SimulationParticipant* participant,
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetShutdownHandler(ib_SimulationParticipant* participant,
     void* context, ib_ParticipantShutdownHandler_t handler);
 
+typedef ib_ReturnCode(*ib_SimulationParticipant_SetShutdownHandler_t)(ib_SimulationParticipant* participant,
+    void* context, ib_ParticipantShutdownHandler_t handler);
 
-typedef ib_ReturnCode (*ib_SimulationParticipant_Run_t)(
-    ib_SimulationParticipant* participant, ib_ParticipantState* outParticipantState);
 
 /*! \brief Start the blocking run operation
  *
@@ -133,10 +163,11 @@ typedef ib_ReturnCode (*ib_SimulationParticipant_Run_t)(
  * \param outParticipantState Pointer for storing the final participant state (out parameter)
  * 
  */
-CIntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Run(
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Run(
     ib_SimulationParticipant* participant, ib_ParticipantState* outParticipantState);
 
-typedef ib_ReturnCode (*ib_SimulationParticipant_RunAsync_t)(ib_SimulationParticipant* participant);
+typedef ib_ReturnCode (*ib_SimulationParticipant_Run_t)(
+    ib_SimulationParticipant* participant, ib_ParticipantState* outParticipantState);
 
 /*! \brief Start the non blocking run operation, returns immediately
  *
@@ -150,10 +181,9 @@ typedef ib_ReturnCode (*ib_SimulationParticipant_RunAsync_t)(ib_SimulationPartic
  *
  * \param participant The simulation participant to start running
  */
-CIntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_RunAsync(ib_SimulationParticipant* participant);
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_RunAsync(ib_SimulationParticipant* participant);
 
-typedef ib_ReturnCode (*ib_SimulationParticipant_WaitForRunAsyncToComplete_t)(
-    ib_SimulationParticipant* participant, ib_ParticipantState* outParticipantState);
+typedef ib_ReturnCode (*ib_SimulationParticipant_RunAsync_t)(ib_SimulationParticipant* participant);
 
 /*! \brief Wait for to asynchronous run operation to complete and return the final participant state
  *
@@ -163,9 +193,46 @@ typedef ib_ReturnCode (*ib_SimulationParticipant_WaitForRunAsyncToComplete_t)(
  * \param participant The simulation participant to wait for completing the asynchronous run operation
  * \param outParticipantState Pointer for storing the final participant state (out parameter)
  */
-CIntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_WaitForRunAsyncToComplete(
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_WaitForRunAsyncToComplete(
     ib_SimulationParticipant* participant, ib_ParticipantState* outParticipantState);
 
-__IB_END_DECLS
+typedef ib_ReturnCode (*ib_SimulationParticipant_WaitForRunAsyncToComplete_t)(
+    ib_SimulationParticipant* participant, ib_ParticipantState* outParticipantState);
+
+typedef ib_ReturnCode (*ib_SimulationParticipant_SetPeriod_t)(ib_SimulationParticipant* participant,
+                                                              ib_NanosecondsTime period);
+/*! \brief Set the simulation duration to be requested
+ *
+ * Can only be used with time quantum synchronization.
+ * 
+ * \param participant The simulation participant
+ * \param period The cycle time of the simulation task
+ */
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetPeriod(ib_SimulationParticipant* participant,
+                                                                    ib_NanosecondsTime        period);
+
+/*! \brief The handler to be called if the simulation task is due
+ *
+ * \param context The user provided context passed in \ref ib_SimulationParticipant_RunAsync
+ * \param participant The simulation participant
+ * \param now The current simulation time
+ */
+typedef void (*ib_ParticipantSimulationTaskHandler_t)(void* context, ib_SimulationParticipant* participant,
+                                                   ib_NanosecondsTime now);
+/*! \brief Set the task to be executed with each grant / tick
+ *
+ * Can be changed at runtime. Execution context depends on the run type.
+ *
+ * \param participant The simulation participant to start running
+ * \param context A user provided context accessible in the handler
+ * \param handler The handler to be called if the simulation task is due
+ */
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetSimulationTask(ib_SimulationParticipant* participant,
+    void* context, ib_ParticipantSimulationTaskHandler_t handler);
+
+typedef ib_ReturnCode(*ib_SimulationParticipant_SetSimulationTask_t)(ib_SimulationParticipant* participant,
+    void* context, ib_ParticipantSimulationTaskHandler_t handler);
+
+IB_END_DECLS
 
 #pragma pack(pop)

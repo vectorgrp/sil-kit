@@ -49,7 +49,6 @@ public:
 class CapiFlexRayTest : public testing::Test
 {
 public:
-  MockFrController mockController;
   CapiFlexRayTest()
     : configBuilder("TestBuilder")
     , controllerName("FR1")
@@ -119,6 +118,7 @@ protected:
     std::string controllerName;
     ConfigBuilder configBuilder;
     MockComAdapter comAdapter;
+    MockFrController mockController;
     SimulationSetupBuilder& simulationSetup;
     ib::cfg::Config ibConfig;
 };
@@ -203,6 +203,8 @@ TEST_F(CapiFlexRayTest, fr_controller_function_mapping)
 TEST_F(CapiFlexRayTest, fr_controller_nullpointer_params)
 {
 
+  auto                   cMockComAdapter = (ib_SimulationParticipant*)&comAdapter;
+  auto                   cMockController = (ib_Lin_Controller*)&mockController;
   ib_ReturnCode               returnCode;
   ib_FlexRay_ControllerConfig cfg;
   memset(&cfg, 0, sizeof(cfg));
@@ -213,6 +215,10 @@ TEST_F(CapiFlexRayTest, fr_controller_nullpointer_params)
   returnCode = ib_FlexRay_Controller_Create(nullptr, nullptr, "bad");
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
   returnCode = ib_FlexRay_Controller_Create(&cControllerReturn, nullptr, "bad");
+  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+  returnCode = ib_FlexRay_Controller_Create(nullptr, cMockComAdapter, "bad");
+  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+  returnCode = ib_FlexRay_Controller_Create(&cControllerReturn, cMockComAdapter, nullptr);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
   returnCode = ib_FlexRay_ControllerConfig_Create(nullptr, nullptr, nullptr);

@@ -4,6 +4,7 @@ _build*/
 install*/
 .vscode
 .vs
+out
 
 # ignore CLion files
 .idea/

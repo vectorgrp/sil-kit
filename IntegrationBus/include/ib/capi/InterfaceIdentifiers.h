@@ -3,9 +3,10 @@
 #pragma once
 #include <limits.h>
 #include <stdint.h>
-#include "ib/capi/Utils.h"
+#include "ib/capi/IbMacros.h"
+#include "ib/capi/Types.h"
 
-__IB_BEGIN_DECLS
+IB_BEGIN_DECLS
 
 typedef int32_t ib_InterfaceIdentifier;
 
@@ -38,4 +39,4 @@ typedef int32_t ib_InterfaceIdentifier;
 
 
 
-__IB_END_DECLS
+IB_END_DECLS

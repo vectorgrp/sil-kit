@@ -65,8 +65,8 @@ void MacToBytes(uint8_t* outBytes, const char* mac)
 }
 
 ib_SimulationParticipant* participant;
-ib_EthernetController* ethernetController1;
-ib_EthernetController* ethernetController2;
+ib_Ethernet_Controller* ethernetController1;
+ib_Ethernet_Controller* ethernetController2;
 
 char* participantName;
 uint8_t ethernetMessageCounter = 0;
@@ -81,13 +81,13 @@ typedef struct  {
 
 TransmitContext transmitContext;
 
-void AckCallback(void* context, ib_EthernetController* controller, struct ib_EthernetTransmitAcknowledge* cAck)
+void AckCallback(void* context, ib_Ethernet_Controller* controller, struct ib_Ethernet_TransmitAcknowledge* cAck)
 {
     TransmitContext* tc = (TransmitContext*) cAck->userContext;
     printf(">> %i for Ethernet Message with transmitId=%i, timestamp=%" PRIu64 "\n", cAck->status, tc->someInt, cAck->timestamp);
 }
 
-void ReceiveMessage(void* context, ib_EthernetController* controller, ib_EthernetMessage* metaData)
+void ReceiveMessage(void* context, ib_Ethernet_Controller* controller, ib_Ethernet_Message* metaData)
 {
     TransmitContext* txContext = (TransmitContext*)(context);
     unsigned int i;
@@ -141,10 +141,10 @@ void SendEthernetMessage()
         exit(-2);
     }
 
-    ib_EthernetFrame ef = {(const uint8_t*) buffer, PAYLOAD_OFFSET + payloadSize};
+    ib_Ethernet_Frame ef = {(const uint8_t*) buffer, PAYLOAD_OFFSET + payloadSize};
 
     transmitContext.someInt = ethernetMessageCounter;
-    ib_EthernetController_SendFrame(ethernetController1, &ef, (void*)&transmitContext);
+    ib_Ethernet_Controller_SendFrame(ethernetController1, &ef, (void*)&transmitContext);
     
     printf("Ethernet Message sent \n");
 }
@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
     }
 
     ib_ReturnCode returnCode;
-    returnCode = ib_SimulationParticipant_create(&participant, jsonString, participantName, domainId);
+    returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, domainId);
     if (returnCode) 
     {
         printf("%s\n", ib_GetLastErrorString());
@@ -181,11 +181,11 @@ int main(int argc, char* argv[])
     printf("Creating Participant %s for simulation '%s'\n", participantName, domainId);
 
 
-    returnCode = ib_EthernetController_create(&ethernetController1, participant, "ETH0");
-    returnCode = ib_EthernetController_create(&ethernetController2, participant, "ETH1");
+    returnCode = ib_Ethernet_Controller_Create(participant, &ethernetController1, "ETH0");
+    returnCode = ib_Ethernet_Controller_Create(participant, &ethernetController2, "ETH1");
 
-    ib_EthernetController_RegisterFrameAckHandler(ethernetController1, NULL, &AckCallback);
-    ib_EthernetController_RegisterReceiveMessageHandler(ethernetController2, NULL, &ReceiveMessage);
+    ib_Ethernet_Controller_RegisterFrameAckHandler(ethernetController1, NULL, &AckCallback);
+    ib_Ethernet_Controller_RegisterReceiveMessageHandler(ethernetController2, NULL, &ReceiveMessage);
 
     for (int i = 0; i < 10; i ++) 
     {
@@ -193,7 +193,7 @@ int main(int argc, char* argv[])
         SleepMs(1000);
     }
 
-    ib_SimulationParticipant_destroy(participant);
+    ib_SimulationParticipant_Destroy(participant);
     if (jsonString)
     {
         free(jsonString);

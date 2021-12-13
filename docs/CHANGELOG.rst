@@ -31,6 +31,13 @@ Changed
   assured release.
   The upcoming release of Vector CANoe 16 will support the IntegrationBus directly.
 
+- The experimental C API has been grossly revamped to make use of a unified naming scheme.
+  The following changes have been introduced:
+  - All identifiers related to a specific object (or topic) now use the prefix ib_Topic_. 
+    For instance, ib_CanController_Stop has been renamed to ib_Can_Controller_Stop. The names are now 
+    unified for all functions and types, and for the 'topics' SimulationParticipant, Can, Ethernet, FlexRay, Lin.
+  - The functions ending with _create or _destroy have been renamed to _Create or _Destroy.
+
 Fixed
 ~~~~~
 - Fixed a regression in the ``Replay`` feature and the VIBE-NetworkSimulator support (VIB-544).

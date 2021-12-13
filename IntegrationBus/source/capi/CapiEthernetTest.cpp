@@ -39,65 +39,64 @@ class CapiEthernetTest : public testing::Test
 {
 public: 
     MockEthernetController mockController;
-	CapiEthernetTest() 
-	{
-			
-	}
+    CapiEthernetTest() 
+    {
+    }
 };
 
-void AckCallback(void* context, ib_EthernetController* controller, struct ib_EthernetTransmitAcknowledge* cAck)
+void AckCallback(void* context, ib_Ethernet_Controller* controller, struct ib_Ethernet_TransmitAcknowledge* cAck)
 {
 }
 
-void ReceiveMessage(void* context, ib_EthernetController* controller, ib_EthernetMessage* metaData)
+void ReceiveMessage(void* context, ib_Ethernet_Controller* controller, ib_Ethernet_Message* metaData)
 {
 }
 
-void StateChangedHandler(void* context, ib_EthernetController* controller, ib_EthernetState state)
+void StateChangedHandler(void* context, ib_Ethernet_Controller* controller, ib_Ethernet_State state)
 {
 }
 
-void BitRateChangedHandler(void* context, ib_EthernetController* controller, uint32_t bitrate)
+void BitRateChangedHandler(void* context, ib_Ethernet_Controller* controller, uint32_t bitrate)
 {
 }
 
 TEST_F(CapiEthernetTest, ethernet_controller_function_mapping)
 {
     std::array<uint8_t, 60> buffer;
-    ib_EthernetFrame ef = { buffer.data(), buffer.size() };
+    ib_Ethernet_Frame ef = { buffer.data(), buffer.size() };
 
     ib_ReturnCode returnCode;
 
     EXPECT_CALL(mockController, Activate()).Times(testing::Exactly(1));
-    returnCode = ib_EthernetController_Activate((ib_EthernetController*)&mockController);
+    returnCode = ib_Ethernet_Controller_Activate((ib_Ethernet_Controller*)&mockController);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, Deactivate()).Times(testing::Exactly(1));
-    returnCode = ib_EthernetController_Deactivate((ib_EthernetController*)&mockController);
+    returnCode = ib_Ethernet_Controller_Deactivate((ib_Ethernet_Controller*)&mockController);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, RegisterReceiveMessageHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_EthernetController_RegisterReceiveMessageHandler((ib_EthernetController*)&mockController, NULL, &ReceiveMessage);
+    returnCode = ib_Ethernet_Controller_RegisterReceiveMessageHandler((ib_Ethernet_Controller*)&mockController, NULL, &ReceiveMessage);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, RegisterMessageAckHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_EthernetController_RegisterFrameAckHandler((ib_EthernetController*)&mockController, NULL, &AckCallback);
+    returnCode = ib_Ethernet_Controller_RegisterFrameAckHandler((ib_Ethernet_Controller*)&mockController, NULL, &AckCallback);
     auto errorString = ib_GetLastErrorString();
     std::cout << "Received Error message: " << returnCode << " " << errorString << std::endl;
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, RegisterStateChangedHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_EthernetController_RegisterStateChangedHandler((ib_EthernetController*)&mockController, NULL, &StateChangedHandler);
+    returnCode = ib_Ethernet_Controller_RegisterStateChangedHandler((ib_Ethernet_Controller*)&mockController, NULL, &StateChangedHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, RegisterBitRateChangedHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_EthernetController_RegisterBitRateChangedHandler((ib_EthernetController*)&mockController, NULL, &BitRateChangedHandler);
+    returnCode = ib_Ethernet_Controller_RegisterBitRateChangedHandler((ib_Ethernet_Controller*)&mockController, NULL, &BitRateChangedHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
     EthFrame refFrame{};
     refFrame.SetRawFrame({ buffer.data(), buffer.data() + buffer.size() });
     EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(refFrame))).Times(testing::Exactly(1));
-    returnCode = ib_EthernetController_SendFrame((ib_EthernetController*)&mockController, &ef, NULL);
+    returnCode = ib_Ethernet_Controller_SendFrame((ib_Ethernet_Controller*)&mockController, &ef, NULL);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 }
 
@@ -106,37 +105,37 @@ TEST_F(CapiEthernetTest, ethernet_controller_nullptr_error)
 
     ib_ReturnCode returnCode;
 
-    returnCode = ib_EthernetController_Activate(nullptr);
+    returnCode = ib_Ethernet_Controller_Activate(nullptr);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
 
-    returnCode = ib_EthernetController_Deactivate(nullptr);
+    returnCode = ib_Ethernet_Controller_Deactivate(nullptr);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_EthernetController_RegisterReceiveMessageHandler((ib_EthernetController*)&mockController, NULL, nullptr);
+    returnCode = ib_Ethernet_Controller_RegisterReceiveMessageHandler((ib_Ethernet_Controller*)&mockController, NULL, nullptr);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_EthernetController_RegisterReceiveMessageHandler(nullptr, NULL, &ReceiveMessage);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
-    returnCode = ib_EthernetController_RegisterFrameAckHandler((ib_EthernetController*)&mockController, NULL, nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_EthernetController_RegisterFrameAckHandler(nullptr, NULL, &AckCallback);
+    returnCode = ib_Ethernet_Controller_RegisterReceiveMessageHandler(nullptr, NULL, &ReceiveMessage);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_EthernetController_RegisterStateChangedHandler((ib_EthernetController*)&mockController, NULL, nullptr);
+    returnCode = ib_Ethernet_Controller_RegisterFrameAckHandler((ib_Ethernet_Controller*)&mockController, NULL, nullptr);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_EthernetController_RegisterStateChangedHandler(nullptr, NULL, &StateChangedHandler);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
-    returnCode = ib_EthernetController_RegisterBitRateChangedHandler((ib_EthernetController*)&mockController, NULL, nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_EthernetController_RegisterBitRateChangedHandler(nullptr, NULL, &BitRateChangedHandler);
+    returnCode = ib_Ethernet_Controller_RegisterFrameAckHandler(nullptr, NULL, &AckCallback);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    ib_EthernetFrame ef{0,0};
-    returnCode = ib_EthernetController_SendFrame((ib_EthernetController*)&mockController, nullptr, NULL);
+    returnCode = ib_Ethernet_Controller_RegisterStateChangedHandler((ib_Ethernet_Controller*)&mockController, NULL, nullptr);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_EthernetController_SendFrame(nullptr, &ef, NULL);
+    returnCode = ib_Ethernet_Controller_RegisterStateChangedHandler(nullptr, NULL, &StateChangedHandler);
+    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+    returnCode = ib_Ethernet_Controller_RegisterBitRateChangedHandler((ib_Ethernet_Controller*)&mockController, NULL, nullptr);
+    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = ib_Ethernet_Controller_RegisterBitRateChangedHandler(nullptr, NULL, &BitRateChangedHandler);
+    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+    ib_Ethernet_Frame ef{0,0};
+    returnCode = ib_Ethernet_Controller_SendFrame((ib_Ethernet_Controller*)&mockController, nullptr, NULL);
+    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = ib_Ethernet_Controller_SendFrame(nullptr, &ef, NULL);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 }
 
@@ -167,13 +166,13 @@ TEST_F(CapiEthernetTest, ethernet_controller_send_frame)
         "This is the demonstration ethernet frame number %i.",
          ethernetMessageCounter);
 
-    ib_EthernetFrame ef = { (const uint8_t* const)buffer, PAYLOAD_OFFSET + payloadSize };
+    ib_Ethernet_Frame ef = { (const uint8_t* const)buffer, PAYLOAD_OFFSET + payloadSize };
 
     EthFrame refFrame{};
     std::vector<uint8_t> rawFrame(ef.pointer, ef.pointer + ef.size);
     refFrame.SetRawFrame(rawFrame);
     EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(refFrame))).Times(testing::Exactly(1));
-    returnCode = ib_EthernetController_SendFrame((ib_EthernetController*)&mockController, &ef, NULL);
+    returnCode = ib_Ethernet_Controller_SendFrame((ib_Ethernet_Controller*)&mockController, &ef, NULL);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
 }

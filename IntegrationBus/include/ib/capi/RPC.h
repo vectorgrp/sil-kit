@@ -2,7 +2,7 @@
 
 #pragma once
 #include <stdint.h>
-#include "ib/capi/Utils.h"
+#include "ib/capi/Types.h"
 #include "ib/capi/DataPubSub.h"
 #include "ib/capi/InterfaceIdentifiers.h"
 

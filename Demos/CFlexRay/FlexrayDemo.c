@@ -369,10 +369,10 @@ int main(int argc, char** argv)
   }
 
   ib_ReturnCode returnCode;
-  returnCode = ib_SimulationParticipant_create(&participant, jsonString, participantName, domainId);
+  returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, domainId);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
-    printf("ib_SimulationParticipant_create => %s\n", ib_GetLastErrorString());
+    printf("ib_SimulationParticipant_Create => %s\n", ib_GetLastErrorString());
     return 2;
   }
   printf("Creating Participant %s for simulation '%s'\n", participantName, domainId);
@@ -380,7 +380,7 @@ int main(int argc, char** argv)
   const char* flexrayControllerName = "FlexRay1";
 
   ib_FlexRay_ControllerConfig* config;
-  returnCode = ib_FlexRay_ControllerConfig_Create(&config, participant, flexrayControllerName);
+  returnCode = ib_FlexRay_ControllerConfig_Create(participant, &config, flexrayControllerName);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
     printf("ib_FlexRay_ControllerConfig_Create => %s\n", ib_GetLastErrorString());
@@ -462,7 +462,7 @@ int main(int argc, char** argv)
 
 
   ib_FlexRay_Controller* controller;
-  returnCode = ib_FlexRay_Controller_Create(&controller, participant, flexrayControllerName);
+  returnCode = ib_FlexRay_Controller_Create(participant, &controller, flexrayControllerName);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
     printf("ib_FlexRay_Controller_Create => %s\n", ib_GetLastErrorString());
@@ -542,7 +542,7 @@ int main(int argc, char** argv)
   char line[2];
   fgets(line, 2, stdin);
 
-  ib_SimulationParticipant_destroy(participant);
+  ib_SimulationParticipant_Destroy(participant);
   if (jsonString)
   {
       free(jsonString);

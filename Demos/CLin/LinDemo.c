@@ -143,8 +143,8 @@ void Schedule_Destroy(Schedule* schedule)
 }
 
 ib_SimulationParticipant* participant;
-ib_LinController*         linController;
-ib_LinControllerConfig*   controllerConfig;
+ib_Lin_Controller*         linController;
+ib_Lin_ControllerConfig*   controllerConfig;
 char*                     participantName;
 Schedule*                 masterSchedule;
 Timer                     slaveTimer;
@@ -162,22 +162,22 @@ void ShutdownCallback(void* context, ib_SimulationParticipant* participant)
 void Master_InitCallback(void* context, ib_SimulationParticipant* participant, struct ib_ParticipantCommand* command)
 {
     printf("Initializing LinMaster\n");
-    controllerConfig = (ib_LinControllerConfig*)malloc(sizeof(ib_LinControllerConfig));
-    memset(controllerConfig, 0, sizeof(ib_LinControllerConfig));
+    controllerConfig = (ib_Lin_ControllerConfig*)malloc(sizeof(ib_Lin_ControllerConfig));
+    memset(controllerConfig, 0, sizeof(ib_Lin_ControllerConfig));
     controllerConfig->interfaceId = ib_InterfaceIdentifier_LinControllerConfig;
-    controllerConfig->controllerMode = ib_LinControllerMode_Master;
+    controllerConfig->controllerMode = ib_Lin_ControllerMode_Master;
     controllerConfig->baudRate = 20000;
     controllerConfig->numFrameResponses = 0;
     
-    ib_LinController_Init(linController, controllerConfig);
+    ib_Lin_Controller_Init(linController, controllerConfig);
 }
 
 void Master_doAction(ib_NanosecondsTime now)
 {
 
-    ib_LinControllerStatus status;
-    ib_LinController_Status(linController, &status);
-    if (status != ib_LinControllerStatus_Operational)
+    ib_Lin_ControllerStatus status;
+    ib_Lin_Controller_Status(linController, &status);
+    if (status != ib_Lin_ControllerStatus_Operational)
         return;
     Schedule_ExecuteTask(masterSchedule, now);
 }
@@ -188,14 +188,14 @@ void Master_SimTask(void* context, ib_SimulationParticipant* participant, ib_Nan
     Master_doAction(now);
 }
 
-void Master_ReceiveFrameStatus(void* context, ib_LinController* controller, const ib_LinFrame* frame,
-                               ib_LinFrameStatus status, ib_NanosecondsTime timestamp)
+void Master_ReceiveFrameStatus(void* context, ib_Lin_Controller* controller, const ib_Lin_Frame* frame,
+                               ib_Lin_FrameStatus status, ib_NanosecondsTime timestamp)
 {
     switch (status)
     {
-    case ib_LinFrameStatus_LIN_RX_OK:
+    case ib_Lin_FrameStatus_LIN_RX_OK:
         break; // good case, no need to warn
-    case ib_LinFrameStatus_LIN_TX_OK:
+    case ib_Lin_FrameStatus_LIN_TX_OK:
         break; // good case, no need to warn
     default:
         printf("WARNING: LIN transmission failed!\n");
@@ -208,93 +208,93 @@ void Master_ReceiveFrameStatus(void* context, ib_LinController* controller, cons
     Schedule_ScheduleNextTask(masterSchedule);
 }
 
-void Master_WakeupHandler(void* context, ib_LinController* controller)
+void Master_WakeupHandler(void* context, ib_Lin_Controller* controller)
 {
-    ib_LinControllerStatus status;
-    ib_LinController_Status(controller, &status);
+    ib_Lin_ControllerStatus status;
+    ib_Lin_Controller_Status(controller, &status);
 
-    if ( status != ib_LinControllerStatus_Sleep)
+    if ( status != ib_Lin_ControllerStatus_Sleep)
     {
         printf("WARNING: Received Wakeup pulse while ControllerStatus is %d.\n", status);
 
     }
     printf(">> Wakeup pulse received\n");
-    ib_LinController_WakeupInternal(controller);
+    ib_Lin_Controller_WakeupInternal(controller);
     Schedule_ScheduleNextTask(masterSchedule);
 }
 
 void Master_SendFrame_16(ib_NanosecondsTime now)
 {
-    ib_LinFrame frame;
+    ib_Lin_Frame frame;
     frame.interfaceId = ib_InterfaceIdentifier_LinFrame;
     frame.id = 16;
-    frame.checksumModel = ib_LinChecksumModel_Classic;
+    frame.checksumModel = ib_Lin_ChecksumModel_Classic;
     frame.dataLength = 6;
     uint8_t tmp[8] = {1, 6, 1, 6, 1, 6, 1, 6};
     memcpy(frame.data, tmp, sizeof(tmp));
 
-    ib_LinController_SendFrameWithTimestamp(linController, &frame, ib_LinFrameResponseType_MasterResponse, now);
+    ib_Lin_Controller_SendFrameWithTimestamp(linController, &frame, ib_Lin_FrameResponseType_MasterResponse, now);
     printf("<< LIN Frame sent with ID=%d\n", frame.id);
 }
 
 void Master_SendFrame_17(ib_NanosecondsTime now)
 {
-    ib_LinFrame frame;
+    ib_Lin_Frame frame;
     frame.interfaceId = ib_InterfaceIdentifier_LinFrame;
     frame.id = 17;
-    frame.checksumModel = ib_LinChecksumModel_Classic;
+    frame.checksumModel = ib_Lin_ChecksumModel_Classic;
     frame.dataLength = 6;
     uint8_t tmp[8] = {1, 7, 1, 7, 1, 7, 1, 7};
     memcpy(frame.data, tmp, sizeof(tmp));
 
-    ib_LinController_SendFrameWithTimestamp(linController, &frame, ib_LinFrameResponseType_MasterResponse, now);
+    ib_Lin_Controller_SendFrameWithTimestamp(linController, &frame, ib_Lin_FrameResponseType_MasterResponse, now);
     printf("<< LIN Frame sent with ID=%d\n", frame.id);
 }
 
 void Master_SendFrame_18(ib_NanosecondsTime now)
 {
-    ib_LinFrame frame;
+    ib_Lin_Frame frame;
     frame.interfaceId = ib_InterfaceIdentifier_LinFrame;
     frame.id = 18;
-    frame.checksumModel = ib_LinChecksumModel_Enhanced;
+    frame.checksumModel = ib_Lin_ChecksumModel_Enhanced;
     frame.dataLength = 8;
     uint8_t tmp[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     memcpy(frame.data, tmp, sizeof(tmp));
 
-    ib_LinController_SendFrameWithTimestamp(linController, &frame, ib_LinFrameResponseType_MasterResponse, now);
+    ib_Lin_Controller_SendFrameWithTimestamp(linController, &frame, ib_Lin_FrameResponseType_MasterResponse, now);
     printf("<< LIN Frame sent with ID=%d\n", frame.id);
 }
 
 void Master_SendFrame_19(ib_NanosecondsTime now)
 {
-    ib_LinFrame frame;
+    ib_Lin_Frame frame;
     frame.interfaceId = ib_InterfaceIdentifier_LinFrame;
     frame.id = 19;
-    frame.checksumModel = ib_LinChecksumModel_Classic;
+    frame.checksumModel = ib_Lin_ChecksumModel_Classic;
     frame.dataLength = 8;
     uint8_t tmp[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     memcpy(frame.data, tmp, sizeof(tmp));
 
-    ib_LinController_SendFrameWithTimestamp(linController, &frame, ib_LinFrameResponseType_MasterResponse, now);
+    ib_Lin_Controller_SendFrameWithTimestamp(linController, &frame, ib_Lin_FrameResponseType_MasterResponse, now);
     printf("<< LIN Frame sent with ID=%d\n", frame.id);
 }
 
 void Master_SendFrame_34(ib_NanosecondsTime now)
 {
-    ib_LinFrame frame;
+    ib_Lin_Frame frame;
     frame.interfaceId = ib_InterfaceIdentifier_LinFrame;
     frame.id = 34;
-    frame.checksumModel = ib_LinChecksumModel_Enhanced;
+    frame.checksumModel = ib_Lin_ChecksumModel_Enhanced;
     frame.dataLength = 6;
 
-    ib_LinController_SendFrameWithTimestamp(linController, &frame, ib_LinFrameResponseType_SlaveResponse, now);
+    ib_Lin_Controller_SendFrameWithTimestamp(linController, &frame, ib_Lin_FrameResponseType_SlaveResponse, now);
     printf("<< LIN Frame Header sent for ID=%d\n", frame.id);
 }
 
 void Master_GoToSleep(ib_NanosecondsTime now)
 {
     printf("<< Sending Go-To-Sleep Command and entering sleep state\n");
-    ib_LinController_GoToSleep(linController);
+    ib_Lin_Controller_GoToSleep(linController);
 }
 
 void Slave_InitCallback(void* context, ib_SimulationParticipant* participant, struct ib_ParticipantCommand* command)
@@ -302,56 +302,56 @@ void Slave_InitCallback(void* context, ib_SimulationParticipant* participant, st
     printf("Initializing LinSlave\n");
 
     // Configure LIN Controller to receive a FrameResponse for LIN ID 16
-    ib_LinFrameResponse response_16;
+    ib_Lin_FrameResponse response_16;
     response_16.interfaceId = ib_InterfaceIdentifier_LinFrameResponse;
     response_16.frame.id = 16;
-    response_16.frame.checksumModel = ib_LinChecksumModel_Classic;
+    response_16.frame.checksumModel = ib_Lin_ChecksumModel_Classic;
     response_16.frame.dataLength = 6;
-    response_16.responseMode = ib_LinFrameResponseMode_Rx;
+    response_16.responseMode = ib_Lin_FrameResponseMode_Rx;
 
     // Configure LIN Controller to receive a FrameResponse for LIN ID 17
-    //  - This ib_LinFrameResponseMode_Unused causes the controller to ignore
+    //  - This ib_Lin_FrameResponseMode_Unused causes the controller to ignore
     //    this message and not trigger a callback. This is also the default.
-    ib_LinFrameResponse response_17;
+    ib_Lin_FrameResponse response_17;
     response_17.interfaceId = ib_InterfaceIdentifier_LinFrameResponse;
     response_17.frame.id = 17;
-    response_17.frame.checksumModel = ib_LinChecksumModel_Classic;
+    response_17.frame.checksumModel = ib_Lin_ChecksumModel_Classic;
     response_17.frame.dataLength = 6;
-    response_17.responseMode = ib_LinFrameResponseMode_Unused;
+    response_17.responseMode = ib_Lin_FrameResponseMode_Unused;
 
     // Configure LIN Controller to receive LIN ID 18
     //  - ChecksumModel does not match with master --> Receive with LIN_RX_ERROR
-    ib_LinFrameResponse response_18;
+    ib_Lin_FrameResponse response_18;
     response_18.interfaceId = ib_InterfaceIdentifier_LinFrameResponse;
     response_18.frame.id = 18;
-    response_18.frame.checksumModel = ib_LinChecksumModel_Classic;
+    response_18.frame.checksumModel = ib_Lin_ChecksumModel_Classic;
     response_18.frame.dataLength = 8;
-    response_18.responseMode = ib_LinFrameResponseMode_Rx;
+    response_18.responseMode = ib_Lin_FrameResponseMode_Rx;
 
     // Configure LIN Controller to receive LIN ID 19
     //  - dataLength does not match with master --> Receive with LIN_RX_ERROR
-    ib_LinFrameResponse response_19;
+    ib_Lin_FrameResponse response_19;
     response_19.interfaceId = ib_InterfaceIdentifier_LinFrameResponse;
     response_19.frame.id = 19;
-    response_19.frame.checksumModel = ib_LinChecksumModel_Enhanced;
+    response_19.frame.checksumModel = ib_Lin_ChecksumModel_Enhanced;
     response_19.frame.dataLength = 1;
-    response_19.responseMode = ib_LinFrameResponseMode_Rx;
+    response_19.responseMode = ib_Lin_FrameResponseMode_Rx;
 
     // Configure LIN Controller to send a FrameResponse for LIN ID 34
-    ib_LinFrameResponse response_34;
+    ib_Lin_FrameResponse response_34;
     response_34.interfaceId = ib_InterfaceIdentifier_LinFrameResponse;
     response_34.frame.id = 34;
-    response_34.frame.checksumModel = ib_LinChecksumModel_Enhanced;
+    response_34.frame.checksumModel = ib_Lin_ChecksumModel_Enhanced;
     response_34.frame.dataLength = 6;
     uint8_t tmp[8] = {3, 4, 3, 4, 3, 4, 3, 4};
     memcpy(response_34.frame.data, tmp, sizeof(tmp));
-    response_34.responseMode = ib_LinFrameResponseMode_TxUnconditional;
+    response_34.responseMode = ib_Lin_FrameResponseMode_TxUnconditional;
 
     const uint32_t numFrameResponses = 5;
-    size_t   controllerConfigSize = sizeof(ib_LinControllerConfig) + ((numFrameResponses - 1) * sizeof(ib_LinFrameResponse));
-    controllerConfig = (ib_LinControllerConfig*)malloc(controllerConfigSize);
+    size_t   controllerConfigSize = sizeof(ib_Lin_ControllerConfig) + ((numFrameResponses - 1) * sizeof(ib_Lin_FrameResponse));
+    controllerConfig = (ib_Lin_ControllerConfig*)malloc(controllerConfigSize);
     controllerConfig->interfaceId = ib_InterfaceIdentifier_LinControllerConfig;
-    controllerConfig->controllerMode = ib_LinControllerMode_Slave;
+    controllerConfig->controllerMode = ib_Lin_ControllerMode_Slave;
     controllerConfig->baudRate = 20000;
     controllerConfig->numFrameResponses = numFrameResponses;
     controllerConfig->frameResponses[0] = response_16;
@@ -360,7 +360,7 @@ void Slave_InitCallback(void* context, ib_SimulationParticipant* participant, st
     controllerConfig->frameResponses[3] = response_19;
     controllerConfig->frameResponses[4] = response_34;
 
-    ib_LinController_Init(linController, controllerConfig);
+    ib_Lin_Controller_Init(linController, controllerConfig);
 }
 
 void Slave_DoAction(ib_NanosecondsTime now)
@@ -377,8 +377,8 @@ void Slave_SimTask(void* context, ib_SimulationParticipant* participant, ib_Nano
     SleepMs(500);
 }
 
-void Slave_FrameStatusHandler(void* context, ib_LinController* controller, const ib_LinFrame* frame,
-                              ib_LinFrameStatus status, ib_NanosecondsTime timestamp)
+void Slave_FrameStatusHandler(void* context, ib_Lin_Controller* controller, const ib_Lin_Frame* frame,
+                              ib_Lin_FrameStatus status, ib_NanosecondsTime timestamp)
 {
     printf(">> lin::Frame{id=%d, cs=%d, dl=%d, d={%d %d %d %d %d %d %d %d}} status=%d timestamp=%llums\n", frame->id,
            frame->checksumModel, frame->dataLength, frame->data[0], frame->data[1], frame->data[2], frame->data[3],
@@ -388,21 +388,21 @@ void Slave_FrameStatusHandler(void* context, ib_LinController* controller, const
 void Slave_WakeupPulse(ib_NanosecondsTime now) 
 {
     printf("<< Wakeup pulse @%llums\n", now/1000000);
-    ib_LinController_Wakeup(linController);
+    ib_Lin_Controller_Wakeup(linController);
 }
 
-void Slave_GoToSleepHandler(void* context, ib_LinController* controller)
+void Slave_GoToSleepHandler(void* context, ib_Lin_Controller* controller)
 {
     printf("LIN Slave received go-to-sleep command; entering sleep mode.\n");
     // wakeup in 10 ms
     Timer_Set(&slaveTimer, slaveNow + 10000000, &Slave_WakeupPulse);
-    ib_LinController_GoToSleepInternal(controller);
+    ib_Lin_Controller_GoToSleepInternal(controller);
 }
 
-void Slave_WakeupHandler(void* context, ib_LinController* controller)
+void Slave_WakeupHandler(void* context, ib_Lin_Controller* controller)
 {
     printf(">> LIN Slave received wakeup pulse; entering normal operation mode.\n");
-    ib_LinController_WakeupInternal(controller);
+    ib_Lin_Controller_WakeupInternal(controller);
 }
 
 int main(int argc, char* argv[])
@@ -428,7 +428,7 @@ int main(int argc, char* argv[])
     }
 
     ib_ReturnCode returnCode;
-    returnCode = ib_SimulationParticipant_create(&participant, jsonString, participantName, domainId);
+    returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, domainId);
     if (returnCode) {
         printf("%s\n", ib_GetLastErrorString());
         return 2;
@@ -436,7 +436,7 @@ int main(int argc, char* argv[])
     printf("Creating Participant %s for simulation '%s'\n", participantName, domainId);
 
     const char* controllerName = "LIN1";
-    returnCode = ib_LinController_create(&linController, participant, controllerName);
+    returnCode = ib_Lin_Controller_Create(participant, &linController, controllerName);
     ib_SimulationParticipant_SetStopHandler(participant, NULL, &StopCallback);
     ib_SimulationParticipant_SetShutdownHandler(participant, NULL, &ShutdownCallback);
     ib_SimulationParticipant_SetPeriod(participant, 1000000);
@@ -448,16 +448,16 @@ int main(int argc, char* argv[])
         Schedule_Create(&masterSchedule, tasks, 6);
 
         ib_SimulationParticipant_SetInitHandler(participant, NULL, &Master_InitCallback);
-        ib_LinController_RegisterFrameStatusHandler(linController, NULL, &Master_ReceiveFrameStatus);
-        ib_LinController_RegisterWakeupHandler(linController, NULL, &Master_WakeupHandler);
+        ib_Lin_Controller_RegisterFrameStatusHandler(linController, NULL, &Master_ReceiveFrameStatus);
+        ib_Lin_Controller_RegisterWakeupHandler(linController, NULL, &Master_WakeupHandler);
         ib_SimulationParticipant_SetSimulationTask(participant, NULL, &Master_SimTask);
     }
     else
     {
         ib_SimulationParticipant_SetInitHandler(participant, NULL, &Slave_InitCallback);
-        ib_LinController_RegisterFrameStatusHandler(linController, NULL, &Slave_FrameStatusHandler);
-        ib_LinController_RegisterGoToSleepHandler(linController, NULL, &Slave_GoToSleepHandler);
-        ib_LinController_RegisterWakeupHandler(linController, NULL, &Slave_WakeupHandler);
+        ib_Lin_Controller_RegisterFrameStatusHandler(linController, NULL, &Slave_FrameStatusHandler);
+        ib_Lin_Controller_RegisterGoToSleepHandler(linController, NULL, &Slave_GoToSleepHandler);
+        ib_Lin_Controller_RegisterWakeupHandler(linController, NULL, &Slave_WakeupHandler);
         ib_SimulationParticipant_SetSimulationTask(participant, NULL, &Slave_SimTask);
     }
 
@@ -466,7 +466,7 @@ int main(int argc, char* argv[])
 
     printf("Simulation stopped. Final State:%d\n", outFinalParticipantState);
 
-    ib_SimulationParticipant_destroy(participant);
+    ib_SimulationParticipant_Destroy(participant);
     if (jsonString)
     {
         free(jsonString);

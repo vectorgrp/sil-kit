@@ -58,9 +58,8 @@ public:
     MockDataSubscriber mockDataSubscriber;
     MockComAdapter mockSimulationParticipant;
     CapiDataTest()
-	{
-			
-	}
+    {
+    }
 };
 
 void ReceiveMessage(void* context, ib_DataSubscriber* subscriber, const ib_ByteVector* data) {
@@ -74,7 +73,7 @@ TEST_F(CapiDataTest, data_publisher_function_mapping)
 
     ib_DataPublisher* publisher;
     EXPECT_CALL(mockSimulationParticipant, CreateGenericPublisher(testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_DataPublisher_create(&publisher, (ib_SimulationParticipant*)&mockSimulationParticipant, "topic", NULL, 0);
+    returnCode = ib_DataPublisher_Create(&publisher, (ib_SimulationParticipant*)&mockSimulationParticipant, "topic", NULL, 0);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
     ib_ByteVector data = { 0,0 };
@@ -89,7 +88,7 @@ TEST_F(CapiDataTest, data_subscriber_function_mapping)
 
     ib_DataSubscriber* subscriber;
     EXPECT_CALL(mockSimulationParticipant, CreateGenericSubscriber(testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_DataSubscriber_create(&subscriber, (ib_SimulationParticipant*)&mockSimulationParticipant, "topic", NULL, NULL, NULL);
+    returnCode = ib_DataSubscriber_Create(&subscriber, (ib_SimulationParticipant*)&mockSimulationParticipant, "topic", NULL, NULL, NULL);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
     ib_ByteVector data = { 0,0 };
@@ -104,11 +103,11 @@ TEST_F(CapiDataTest, data_publisher_bad_parameters)
     ib_ReturnCode returnCode;
 
     ib_DataPublisher* publisher;
-    returnCode = ib_DataPublisher_create(nullptr, (ib_SimulationParticipant*)&mockSimulationParticipant, "topic", NULL, 0);
+    returnCode = ib_DataPublisher_Create(nullptr, (ib_SimulationParticipant*)&mockSimulationParticipant, "topic", NULL, 0);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_DataPublisher_create(&publisher, nullptr, "topic", NULL, 0);
+    returnCode = ib_DataPublisher_Create(&publisher, nullptr, "topic", NULL, 0);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_DataPublisher_create(&publisher, (ib_SimulationParticipant*)&mockSimulationParticipant, nullptr, NULL, 0);
+    returnCode = ib_DataPublisher_Create(&publisher, (ib_SimulationParticipant*)&mockSimulationParticipant, nullptr, NULL, 0);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
     returnCode = ib_DataPublisher_Publish(nullptr, &data);

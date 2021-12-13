@@ -1,17 +1,21 @@
 /* Copyright (c) Vector Informatik GmbH. All rights reserved. */
 
 #pragma once
-#include "ib/capi/InterfaceIdentifiers.h"
-#include "ib/capi/Utils.h"
+
 #include <stdint.h>
+#include "ib/capi/IbMacros.h"
+#include "ib/capi/Types.h"
+#include "ib/capi/InterfaceIdentifiers.h"
 
 #pragma pack(push)
 #pragma pack(8)
 
-__IB_BEGIN_DECLS
+IB_BEGIN_DECLS
 
-typedef int32_t ib_FlexRay_MicroTick; //!< FlexRay micro tick
-typedef int32_t ib_FlexRay_MacroTick; //!< FlexRay macro tick
+//!\typedef FlexRay micro tick
+typedef int32_t ib_FlexRay_MicroTick;
+//!\typedef FlexRay macro tick
+typedef int32_t ib_FlexRay_MacroTick;
 
 //! \brief Type and constants for the FlexRay channel parameter A, B, or AB
 typedef uint32_t ib_FlexRay_Channel;
@@ -542,28 +546,38 @@ typedef void (*ib_FlexRay_SymbolAckHandler_t)(void* context, ib_FlexRay_Controll
   */
 typedef void (*ib_FlexRay_CycleStartHandler_t)(void* context, ib_FlexRay_Controller* controller, const ib_FlexRay_CycleStart* cycleStart);
 
+/* ! \brief Create a FlexRay controller with the given name.
+ * ! \note The object returned must not be deallocated using free()!
+ */
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controller** outController, ib_SimulationParticipant* participant, const char* name);
+
 typedef ib_ReturnCode (*ib_FlexRay_Controller_Create_t)(ib_FlexRay_Controller** outController, ib_SimulationParticipant* participant, const char* name);
-/* ! \brief Create a FlexRay controller with the given name. */
-CIntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controller** outController, ib_SimulationParticipant* participant, const char* name);
+
+/*! \brief Create and fetch the configuration of the controller with the given name. The configuration settings will be fetched from the .json configuration.
+ *! \note The ib_FlexRay_ControllerConfig returned may be deallocated by calling free().
+*/
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_ControllerConfig_Create(ib_FlexRay_ControllerConfig** controllerConfig, ib_SimulationParticipant* participant, const char* cName);
 
 typedef ib_ReturnCode (*ib_FlexRay_ControllerConfig_Create_t)(ib_FlexRay_ControllerConfig** controllerConfig, ib_SimulationParticipant* participant, const char* cName);
-/*! \brief Create and fetch the configuration of the controller with the given name. The configuration settings will be fetched from the .json configuration.*/
-CIntegrationBusAPI ib_ReturnCode ib_FlexRay_ControllerConfig_Create(ib_FlexRay_ControllerConfig** controllerConfig, ib_SimulationParticipant* participant, const char* cName);
+
+/*! \brief Append a TxBuffer to the given controller configuration.
+ *! \note The given controller configuration may get reallocated during this process.
+ *  The ib_FlexRay_ControllerConfig returned may be deallocated by calling free().
+ */
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Append_TxBufferConfig(ib_FlexRay_ControllerConfig** inOutControllerConfig, const ib_FlexRay_TxBufferConfig* txBufferConfig);
 
 typedef ib_ReturnCode (*ib_FlexRay_Append_TxBufferConfig_t)(ib_FlexRay_ControllerConfig** controllerConfig, const ib_FlexRay_TxBufferConfig* txBufferConfig);
-/*! \brief Append a TxBuffer to the given controller configuration.*/
-/*! \note the controller configuration may get reallocated during this process.*/
-CIntegrationBusAPI ib_ReturnCode ib_FlexRay_Append_TxBufferConfig(ib_FlexRay_ControllerConfig** controllerConfig, const ib_FlexRay_TxBufferConfig* txBufferConfig);
+
+/*! \brief Apply the given controller configuration to the controller.*/
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Configure(ib_FlexRay_Controller* controller, const ib_FlexRay_ControllerConfig* config);
 
 typedef ib_ReturnCode (*ib_FlexRay_Controller_Configure_t)(ib_FlexRay_Controller* controller, const ib_FlexRay_ControllerConfig* config);
-/*! \brief Apply the given controller configuration to the controller.*/
-CIntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Configure(ib_FlexRay_Controller* controller, const ib_FlexRay_ControllerConfig* config);
+
+/*! \brief Reconfigure a TX Buffer that was previously setup with ib_FlexRay_Controller_Configure()*/
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_ReconfigureTxBuffer(ib_FlexRay_Controller* controller, uint16_t txBufferIdx, const ib_FlexRay_TxBufferConfig* config);
 
 typedef ib_ReturnCode (*ib_FlexRay_Controller_ReconfigureTxBuffer_t)(ib_FlexRay_Controller* controller, uint16_t txBufferIdx, const ib_FlexRay_TxBufferConfig* config);
-/*! \brief Reconfigure a TX Buffer that was previously setup with ib_FlexRay_Controller_Configure()*/
-CIntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_ReconfigureTxBuffer(ib_FlexRay_Controller* controller, uint16_t txBufferIdx, const ib_FlexRay_TxBufferConfig* config);
 
-typedef ib_ReturnCode (*ib_FlexRay_Controller_UpdateTxBuffer_t)(ib_FlexRay_Controller* controller, const ib_FlexRay_TxBufferUpdate* update);
 /*! \brief Update the content of a previously configured TX buffer.
   *
   * Due to the fixed and repetitive cycle of FlexRay, the behavior of UpdateTxBuffer is
@@ -581,38 +595,45 @@ typedef ib_ReturnCode (*ib_FlexRay_Controller_UpdateTxBuffer_t)(ib_FlexRay_Contr
   *
   *  \see ib_FlexRay_Controller_Configure(const ControllerConfig&)
   */
-CIntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_UpdateTxBuffer(ib_FlexRay_Controller* controller, const ib_FlexRay_TxBufferUpdate* update);
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_UpdateTxBuffer(ib_FlexRay_Controller* controller, const ib_FlexRay_TxBufferUpdate* update);
+
+typedef ib_ReturnCode (*ib_FlexRay_Controller_UpdateTxBuffer_t)(ib_FlexRay_Controller* controller, const ib_FlexRay_TxBufferUpdate* update);
+
+//! \brief Send the given ChiCommand.
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_ExecuteCmd(ib_FlexRay_Controller* controller, ib_FlexRay_ChiCommand cmd);
 
 typedef ib_ReturnCode (*ib_FlexRay_Controller_ExecuteCmd_t)(ib_FlexRay_Controller* controller, ib_FlexRay_ChiCommand cmd);
-//! \brief Send the given ChiCommand.
-CIntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_ExecuteCmd(ib_FlexRay_Controller* controller, ib_FlexRay_ChiCommand cmd);
+
+//! \brief Receive a FlexRay message from the given controller.
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_RegisterMessageHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_MessageHandler_t handler);
 
 typedef ib_ReturnCode (*ib_FlexRay_Controller_RegisterMessageHandler_t)(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_MessageHandler_t handler);
-//! \brief Receive a FlexRay message from the given controller.
-CIntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_RegisterMessageHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_MessageHandler_t handler);
+
+//! \brief Notification that a FlexRay message has been successfully sent.
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_RegisterMessageAckHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_MessageAckHandler_t handler);
 
 typedef ib_ReturnCode (*ib_FlexRay_Controller_RegisterMessageAckHandler_t)(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_MessageAckHandler_t handler);
-//! \brief Notification that a FlexRay message has been successfully sent.
-CIntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_RegisterMessageAckHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_MessageAckHandler_t handler);
+
+//! \brief Notification that a wakeup has been received.
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_RegisterWakeupHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_WakeupHandler_t handler);
 
 typedef ib_ReturnCode (*ib_FlexRay_Controller_RegisterWakeupHandler_t)(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_WakeupHandler_t handler);
-//! \brief Notification that a wakeup has been received.
-CIntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_RegisterWakeupHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_WakeupHandler_t handler);
+
+//! \brief Notification that the POC status has changed.
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_RegisterPocStatusHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_PocStatusHandler_t handler);
 
 typedef ib_ReturnCode (*ib_FlexRay_Controller_RegisterPocStatusHandler_t)(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_PocStatusHandler_t handler);
-//! \brief Notification that the POC status has changed.
-CIntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_RegisterPocStatusHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_PocStatusHandler_t handler);
 
-typedef ib_ReturnCode (*ib_FlexRay_Controller_RegisterSymbolHandler_t)(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_SymbolHandler_t handler);
 /*! \brief Notification that the controller has received a symbol.
   *
   * This callback is primarily intended for tracing. There is no need to react on it.
   * The symbols relevant for interaction trigger also an additional callback,
   * e.g., \ref WakeupHandler.
   */
-CIntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_RegisterSymbolHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_SymbolHandler_t handler);
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_RegisterSymbolHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_SymbolHandler_t handler);
 
-typedef ib_ReturnCode (*ib_FlexRay_Controller_RegisterSymbolAckHandler_t)(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_SymbolAckHandler_t handler);
+typedef ib_ReturnCode (*ib_FlexRay_Controller_RegisterSymbolHandler_t)(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_SymbolHandler_t handler);
+
 /*! \brief Notification that the controller has sent a symbol.
   *
   * This callback is primarily intended for tracing. There is no need to react on it.
@@ -620,15 +641,18 @@ typedef ib_ReturnCode (*ib_FlexRay_Controller_RegisterSymbolAckHandler_t)(ib_Fle
   *  - Wakeup() will cause sending the SymbolPattern::Wus, if the bus is idle.
   *  - Run() will cause the transmission of SymbolPattern::CasMts if configured to coldstart the bus.
   */
-CIntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_RegisterSymbolAckHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_SymbolAckHandler_t handler);
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_RegisterSymbolAckHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_SymbolAckHandler_t handler);
 
-typedef ib_ReturnCode (*ib_FlexRay_Controller_RegisterCycleStartHandler_t)(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_CycleStartHandler_t handler);
+typedef ib_ReturnCode (*ib_FlexRay_Controller_RegisterSymbolAckHandler_t)(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_SymbolAckHandler_t handler);
+
 /*! \brief Notification that a new FlexRay cycle did start.
   *
   *  NB: Only supported in VIBE simulation.
   */
-CIntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_RegisterCycleStartHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_CycleStartHandler_t handler);
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_RegisterCycleStartHandler(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_CycleStartHandler_t handler);
 
-__IB_END_DECLS
+typedef ib_ReturnCode (*ib_FlexRay_Controller_RegisterCycleStartHandler_t)(ib_FlexRay_Controller* controller, void* context, ib_FlexRay_CycleStartHandler_t handler);
+
+IB_END_DECLS
 
 #pragma pack(pop)

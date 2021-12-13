@@ -46,8 +46,8 @@ char* LoadFile(char const* path)
 }
 
 ib_SimulationParticipant* participant;
-ib_CanController* canController;
-ib_CanController* canController2;
+ib_Can_Controller* canController;
+ib_Can_Controller* canController2;
 ib_Logger* logger;
 
 char* participantName;
@@ -59,7 +59,7 @@ typedef struct {
 
 TransmitContext transmitContext;
 
-void AckCallback(void* context, ib_CanController* controller, struct ib_CanTransmitAcknowledge* cAck)
+void AckCallback(void* context, ib_Can_Controller* controller, struct ib_Can_TransmitAcknowledge* cAck)
 {
     TransmitContext* tc = (TransmitContext*)cAck->userContext;
     char buffer[256];
@@ -67,7 +67,7 @@ void AckCallback(void* context, ib_CanController* controller, struct ib_CanTrans
     ib_Logger_Log(logger, ib_LoggingLevel_Info, buffer);
 }
 
-void ReceiveMessage(void* context, ib_CanController* controller, ib_CanMessage* message)
+void ReceiveMessage(void* context, ib_Can_Controller* controller, ib_Can_Message* message)
 {
     TransmitContext* txContext = (TransmitContext*)(context);
     unsigned int i;
@@ -100,9 +100,9 @@ void ReceiveMessage(void* context, ib_CanController* controller, ib_CanMessage* 
 
 void SendCanMessage()
 {
-    ib_CanFrame msg;
+    ib_Can_Frame msg;
     msg.id = 17;
-    msg.flags = ib_CanFrameFlag_brs;
+    msg.flags = ib_Can_FrameFlag_brs;
 
     static int msgId = 0;
     char payload[64];
@@ -114,7 +114,7 @@ void SendCanMessage()
     msg.dlc = payloadSize;
 
     transmitContext.someInt = 1234;
-    ib_CanController_SendFrame(canController, &msg, (void*)&transmitContext);
+    ib_Can_Controller_SendFrame(canController, &msg, (void*)&transmitContext);
     char buffer[256];
     sprintf(buffer, "<< CAN Message sent with transmitId=%i\n", transmitContext.someInt);
     ib_Logger_Log(logger, ib_LoggingLevel_Info, buffer);
@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
     }
 
     ib_ReturnCode returnCode;
-    returnCode = ib_SimulationParticipant_create(&participant, jsonString, participantName, domainId);
+    returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, domainId);
     if (returnCode) {
         printf("%s\n", ib_GetLastErrorString());
         return 2;
@@ -151,12 +151,12 @@ int main(int argc, char* argv[])
     printf("Creating Participant %s for simulation '%s'\n", participantName, domainId);
 
     const char* canControllerName = "CAN1";
-    returnCode = ib_CanController_create(&canController, participant, canControllerName);
+    returnCode = ib_Can_Controller_Create(&canController, participant, canControllerName);
     const char* canController2Name = "CAN2";
-    returnCode = ib_CanController_create(&canController2, participant, canController2Name);
+    returnCode = ib_Can_Controller_Create(&canController2, participant, canController2Name);
 
-    ib_CanController_RegisterTransmitStatusHandler(canController, (void*)&transmitContext, &AckCallback);
-    ib_CanController_RegisterReceiveMessageHandler(canController2, (void*)&transmitContext, &ReceiveMessage);
+    ib_Can_Controller_RegisterTransmitStatusHandler(canController, (void*)&transmitContext, &AckCallback);
+    ib_Can_Controller_RegisterReceiveMessageHandler(canController2, (void*)&transmitContext, &ReceiveMessage);
 
     ib_SimulationParticipant_GetLogger(&logger, participant);
 
@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
         SleepMs(1000);
     }
 
-    ib_SimulationParticipant_destroy(participant);
+    ib_SimulationParticipant_Destroy(participant);
     if (jsonString)
     {
         free(jsonString);

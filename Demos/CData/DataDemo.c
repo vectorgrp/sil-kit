@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
     }
 
     ib_ReturnCode returnCode;
-    returnCode = ib_SimulationParticipant_create(&participant, jsonString, participantName, domainId);
+    returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, domainId);
     if (returnCode) {
         printf("%s\n", ib_GetLastErrorString());
         return 2;
@@ -115,15 +115,15 @@ int main(int argc, char* argv[])
     printf("Creating Participant %s for simulation '%s'\n", participantName, domainId);
 
     ib_DataExchangeFormat dataExchangeFormat = { ib_InterfaceIdentifier_DataExchangeFormat, "" };
-    returnCode = ib_DataPublisher_create(&dataPublisher, participant, "testTopic", &dataExchangeFormat, 0);
-    returnCode = ib_DataSubscriber_create(&dataSubscriber, participant, "testTopic", &dataExchangeFormat, NULL, &ReceiveMessage);
+    returnCode = ib_DataPublisher_Create(&dataPublisher, participant, "testTopic", &dataExchangeFormat, 0);
+    returnCode = ib_DataSubscriber_Create(&dataSubscriber, participant, "testTopic", &dataExchangeFormat, NULL, &ReceiveMessage);
 
     for (int i = 0; i < 10; i++) {
         PublishMessage();
         SleepMs(1000);
     }
 
-    ib_SimulationParticipant_destroy(participant);
+    ib_SimulationParticipant_Destroy(participant);
     if (jsonString)
     {
         free(jsonString);

@@ -5,7 +5,7 @@
 #include "ib/IntegrationBus.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 
-#include "capiImpl.h"
+#include "CapiImpl.h"
 
 #include <string>
 
@@ -13,7 +13,7 @@ extern "C" {
 
 #pragma region Logger
 
-CIntegrationBusAPI ib_ReturnCode ib_Logger_Log(ib_Logger* self, ib_LoggingLevel level, const char* message)
+IntegrationBusAPI ib_ReturnCode ib_Logger_Log(ib_Logger* self, ib_LoggingLevel level, const char* message)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(message);

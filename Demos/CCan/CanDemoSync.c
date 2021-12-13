@@ -46,8 +46,8 @@ char* LoadFile(char const* path)
 }
 
 ib_SimulationParticipant* participant;
-ib_CanController* canController;
-ib_CanController* canController2;
+ib_Can_Controller* canController;
+ib_Can_Controller* canController2;
 
 char* participantName;
 uint8_t canMessageCounter = 0;
@@ -87,13 +87,13 @@ void ShutdownCallback(void* context, ib_SimulationParticipant* participant)
     printf(">> ShutdownCallback with context=%i\n", tc->someInt);
 }
 
-void AckCallback(void* context, ib_CanController* controller, struct ib_CanTransmitAcknowledge* cAck)
+void AckCallback(void* context, ib_Can_Controller* controller, struct ib_Can_TransmitAcknowledge* cAck)
 {
     TransmitContext* tc = (TransmitContext*) cAck->userContext;
     printf(">> %i for CAN Message with transmitId=%i, timestamp=%llu\n", cAck->status, tc->someInt, cAck->timestamp);
 }
 
-void ReceiveMessage(void* context, ib_CanController* controller, ib_CanMessage* message)
+void ReceiveMessage(void* context, ib_Can_Controller* controller, ib_Can_Message* message)
 {
     TransmitContext* txContext = (TransmitContext*)(context);
     unsigned int i;
@@ -124,9 +124,9 @@ void ReceiveMessage(void* context, ib_CanController* controller, ib_CanMessage* 
 void SendCanMessage()
 {
 
-    ib_CanFrame msg;
+    ib_Can_Frame msg;
     msg.id = 17;
-    msg.flags = ib_CanFrameFlag_brs;
+    msg.flags = ib_Can_FrameFlag_brs;
 
     static int msgId = 0;
     char payload[64];
@@ -138,7 +138,7 @@ void SendCanMessage()
     msg.dlc = payloadSize;
 
     transmitContext.someInt = 1234;
-    ib_CanController_SendFrame(canController, &msg, (void*)&transmitContext);
+    ib_Can_Controller_SendFrame(canController, &msg, (void*)&transmitContext);
     printf("CAN Message sent with transmitId=%i\n", transmitContext.someInt);
 }
 
@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
     }
 
     ib_ReturnCode returnCode;
-    returnCode = ib_SimulationParticipant_create(&participant, jsonString, participantName, domainId);
+    returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, domainId);
     if (returnCode) {
         printf("%s\n", ib_GetLastErrorString());
         return 2;
@@ -187,9 +187,9 @@ int main(int argc, char* argv[])
     ib_SimulationParticipant_SetShutdownHandler(participant, (void*)&participantHandlerContext, &ShutdownCallback);
 
     const char* canControllerName = "CAN1";
-    returnCode = ib_CanController_create(&canController, participant, canControllerName);
+    returnCode = ib_Can_Controller_Create(&canController, participant, canControllerName);
 
-    ib_CanController_RegisterTransmitStatusHandler(canController, (void*)&transmitContext, &AckCallback);
+    ib_Can_Controller_RegisterTransmitStatusHandler(canController, (void*)&transmitContext, &AckCallback);
 
     simTaskContext.someInt = 456;
     ib_SimulationParticipant_SetPeriod(participant, 1000);
@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
     // ib_ParticipantState outFinalParticipantState;
     //ib_ParticipantState finalState = ib_SimulationParticipant_Run(participant, &outFinalParticipantState);
 
-    ib_SimulationParticipant_destroy(participant);
+    ib_SimulationParticipant_Destroy(participant);
     if (jsonString)
     {
         free(jsonString);

@@ -2,12 +2,13 @@
 
 #pragma once
 #include <stdint.h>
-#include "ib/capi/Utils.h"
+#include "ib/capi/IbMacros.h"
+#include "ib/capi/Types.h"
 
 #pragma pack(push)
 #pragma pack(8)
 
-__IB_BEGIN_DECLS
+IB_BEGIN_DECLS
 
 /*! \brief Information level of log messages
 */
@@ -28,8 +29,8 @@ typedef ib_ReturnCode(*ib_Logger_Log_t)(ib_Logger* self, ib_LoggingLevel level, 
  * \param level The log level for the message
  * \param message The message which shall be logged.
  */
-CIntegrationBusAPI ib_ReturnCode ib_Logger_Log(ib_Logger* self, ib_LoggingLevel level, const char* message);
+IntegrationBusAPI ib_ReturnCode ib_Logger_Log(ib_Logger* self, ib_LoggingLevel level, const char* message);
 
-__IB_END_DECLS
+IB_END_DECLS
 
 #pragma pack(pop)
