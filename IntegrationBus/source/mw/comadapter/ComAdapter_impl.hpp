@@ -159,6 +159,9 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
             conn.NotifyShutdown();
         }
     });
+
+    //Ensure Service discovery is started
+    (void)GetServiceDiscovery();
 }
 
 template <class IbConnectionT>
@@ -806,6 +809,11 @@ auto ComAdapter<IbConnectionT>::CreateController(const std::string& serviceName,
 
 
     controllerMap[endpointId] = std::move(controller);
+
+    //Tell the service discovery that a new service was created
+    service::ServiceDescription descr; //TODO We should move supplementalData to ServiceId
+    descr.serviceId = id;
+    GetServiceDiscovery()->NotifyServiceCreated(descr);
     return controllerPtr;
 }
 
