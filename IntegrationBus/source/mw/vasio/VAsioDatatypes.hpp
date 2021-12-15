@@ -70,9 +70,8 @@ enum class RegistryMessageKind : uint8_t
     KnownParticipants = 3
 };
 
-
 // ================================================================================
-//  Inline Implementaitons
+//  Inline Implementations
 // ================================================================================
 inline bool operator!=(const RegistryMsgHeader& lhs, const RegistryMsgHeader& rhs)
 {

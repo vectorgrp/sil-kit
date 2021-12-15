@@ -187,6 +187,8 @@ public:
     void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, logging::LogMsg&& /*msg*/) {}
     void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, const logging::LogMsg& /*msg*/) {}
 
+    void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, const service::ServiceAnnouncement& /*msg*/) {}
+
     void OnAllMessagesDelivered(std::function<void(void)> /*callback*/) {}
     void FlushSendBuffers() {}
     auto GetParticipantName() const -> const std::string& override { throw std::runtime_error("invalid call"); }
@@ -195,6 +197,11 @@ public:
     virtual auto GetTimeProvider() -> sync::ITimeProvider* { return &mockTimeProvider; }
     virtual void SendIbMessage_proxy(const IIbServiceEndpoint* /*from*/, const sim::generic::GenericMessage& /*msg*/) {} //helper for gtest workaround
     void joinIbDomain(uint32_t ) {}
+
+    auto GetServiceDiscovery() -> service::ServiceDiscovery* override
+    {
+        return nullptr;
+    }
 
     DummyLogger logger;
     MockTimeProvider mockTimeProvider;

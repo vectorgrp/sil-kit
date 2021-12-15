@@ -50,6 +50,8 @@
 #include "IIbToSystemController.hpp"
 #include "IIbToParticipantController.hpp"
 
+// IbMwService
+#include "ServiceDiscovery.hpp"
 
 // Add connection types here and make sure they are instantiated in ComAdapter.cpp
 #if defined(IB_MW_HAVE_FASTRTPS)
@@ -106,6 +108,7 @@ public:
     auto GetParticipantController() -> sync::IParticipantController* override;
     auto GetSystemMonitor() -> sync::ISystemMonitor* override;
     auto GetSystemController() -> sync::ISystemController* override;
+    auto GetServiceDiscovery() -> service::ServiceDiscovery* override;
     auto GetLogger() -> logging::ILogger* override;
     auto GetParticipantName() const -> const std::string& override { return _participantName; }
     auto GetConfig() const -> const ib::cfg::Config& override { return _config; }
@@ -166,6 +169,8 @@ public:
 
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::generic::GenericMessage& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, sim::generic::GenericMessage&& msg) override;
+
+    void SendIbMessage(const IIbServiceEndpoint*, const service::ServiceAnnouncement& msg) override;
 
     void OnAllMessagesDelivered(std::function<void()> callback) override;
     void FlushSendBuffers() override;
@@ -267,7 +272,8 @@ private:
         ControllerMap<logging::IIbToLogMsgReceiver>,
         ControllerMap<sync::IIbToParticipantController>,
         ControllerMap<sync::IIbToSystemMonitor>,
-        ControllerMap<sync::IIbToSystemController>
+        ControllerMap<sync::IIbToSystemController>,
+        ControllerMap<service::ServiceDiscovery>
     > _controllers;
 
     std::tuple<

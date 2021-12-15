@@ -8,6 +8,7 @@ add_library(IbMwVAsio STATIC
     SerdesMw.hpp
     SerdesMwSync.hpp
     SerdesMwVAsio.hpp
+    SerdesMwService.hpp
     SerdesSimGeneric.hpp
     SerdesSimCan.hpp
     SerdesSimEthernet.hpp
@@ -35,6 +36,7 @@ target_link_libraries(IbMwVAsio
       IbInterface
       IbMwSync
       IbMwLogging
+      IbMwService
       IbSimGenericMessage
       IbSimCan
       IbSimEthernet

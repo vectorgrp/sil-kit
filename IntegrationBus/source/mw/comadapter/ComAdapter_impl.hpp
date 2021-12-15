@@ -29,6 +29,7 @@
 #include "LogMsgReceiver.hpp"
 #include "Logger.hpp"
 #include "TimeProvider.hpp"
+#include "ServiceDiscovery.hpp"
 
 #include "tuple_tools/bind.hpp"
 #include "tuple_tools/for_each.hpp"
@@ -423,6 +424,17 @@ auto ComAdapter<IbConnectionT>::GetSystemMonitor() -> sync::ISystemMonitor*
 }
 
 template <class IbConnectionT>
+auto ComAdapter<IbConnectionT>::GetServiceDiscovery() -> service::ServiceDiscovery*
+{
+    auto* controller = GetController<service::ServiceDiscovery>(1030);
+    if (!controller)
+    {
+        controller = CreateController<service::ServiceDiscovery>(1030, "ServiceDiscovery", _participantName );
+    }
+    return controller;
+}
+
+template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::GetSystemController() -> sync::ISystemController*
 {
     auto* controller = GetController<sync::SystemController>(1026);
@@ -729,12 +741,19 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, lo
 }
 
 template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const service::ServiceAnnouncement& msg)
+{
+    SendIbMessageImpl(from, std::move(msg));
+}
+
+template <class IbConnectionT>
 template <typename IbMessageT>
 void ComAdapter<IbConnectionT>::SendIbMessageImpl(const IIbServiceEndpoint* from, IbMessageT&& msg)
 {
     TraceTx(_logger.get(), from, msg);
     _ibConnection.SendIbMessage(from, std::forward<IbMessageT>(msg));
 }
+
 
 template <class IbConnectionT>
 template <class ControllerT>
@@ -770,6 +789,8 @@ auto ComAdapter<IbConnectionT>::CreateController(const std::string& serviceName,
     auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
     auto controller = std::make_unique<ControllerT>(this, std::forward<Arg>(arg)...);
     auto* controllerPtr = controller.get();
+
+    //Not yet ready: auto endpointId = _ibConnection.CreateUniqueEndpointId();
 
     controller->SetEndpointAddress({ _participantId, endpointId });
 

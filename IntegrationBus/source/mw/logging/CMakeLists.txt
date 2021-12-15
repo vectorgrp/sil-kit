@@ -49,6 +49,7 @@ target_link_libraries(IbMwLogging
     PUBLIC IbInternal
     PRIVATE spdlog
     PRIVATE IbMwSync
+    PUBLIC IbMwService
 )
 
 if(UNIX)

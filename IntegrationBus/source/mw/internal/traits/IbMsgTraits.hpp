@@ -66,6 +66,7 @@ DefineIbMsgTrait_TypeName(ib::sim::fr, TxBufferConfigUpdate)
 DefineIbMsgTrait_TypeName(ib::sim::fr, TxBufferUpdate)
 DefineIbMsgTrait_TypeName(ib::sim::fr, ControllerStatus)
 DefineIbMsgTrait_TypeName(ib::sim::fr, PocStatus)
+DefineIbMsgTrait_TypeName(ib::mw::service, ServiceAnnouncement)
 
 //Messages with history
 DefineIbMsgTrait_HistSize(ib::mw::sync, ParticipantStatus, 1)
@@ -74,6 +75,9 @@ DefineIbMsgTrait_HistSize(ib::mw::sync, ParticipantStatus, 1)
 DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, ParticipantCommand)
 DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, ParticipantStatus)
 DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, SystemCommand)
+
+DefineIbMsgTrait_HistSize(ib::mw::service, ServiceAnnouncement, 1)
+
 
 } // mw
 } // namespace ib

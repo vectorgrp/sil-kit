@@ -100,7 +100,7 @@ public:
                 << msgSizePlaceholder
                 << VAsioMsgKind::IbSimMsg
                 << receiver.remoteIdx
-                << from->GetServiceId().legacyEpa 
+                << from->GetServiceId().legacyEpa
                 << msg;
             receiver.peer->SendIbMsg(std::move(buffer));
         }

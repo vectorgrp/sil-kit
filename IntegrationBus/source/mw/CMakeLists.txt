@@ -1,5 +1,6 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_subdirectory(internal)
+add_subdirectory(service)
 add_subdirectory(comadapter)
 if(IB_MW_ENABLE_FASTRTPS)
     message(STATUS "Enabling FastRTPS Middleware")

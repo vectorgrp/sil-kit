@@ -444,7 +444,7 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/,
     Initialize(command, std::string{"Received ParticipantCommand::"} + to_string(command.kind));
 }
 
-void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const SystemCommand& command)
+void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, const SystemCommand& command)
 {
     // We have to supress a SystemCommand::ExecuteColdswap during the restart
     // After a coldswap, this command is still present in the SystemControllers
@@ -459,7 +459,13 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/,
 
     if (!_syncAdapter)
     {
-        ReportError("Received SystemCommand::" + to_string(command.kind) + " before ParticipantController::Run() or RunAsync() was called");
+        std::stringstream msg;
+        msg << "Received SystemCommand::"
+            << command.kind
+            << " before ParticipantController::Run() or RunAsync() was called from "
+            << from->GetServiceId()
+            << " Epa@" << from->GetServiceId().legacyEpa;
+        ReportError(msg.str());
         return;
     }
 

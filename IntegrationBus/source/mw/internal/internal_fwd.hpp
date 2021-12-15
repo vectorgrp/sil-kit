@@ -14,9 +14,13 @@ namespace fr {
 class IIbToFrBusSimulator;
 } // fr
 namespace lin {
-    class IIbToLinSimulator;
+class IIbToLinSimulator;
 } // lin
-
 } // sim
+namespace mw {
+namespace service {
+class ServiceDiscovery;
+} //service
+}//mw
 } // namespace ib
 

@@ -15,6 +15,9 @@
 // from internal
 #include "string_utils_sync.hpp"
 
+// internals
+#include "ServiceDatatypes.hpp"
+
 #include <fmt/format.h>
 
 #include <type_traits>
@@ -78,7 +81,8 @@ struct is_printable_vib_type<T, std::enable_if_t<is_one_of_v<T,
         ib::sim::fr::TxBufferConfigUpdate,
         ib::sim::fr::TxBufferUpdate,
         ib::sim::fr::ControllerStatus,
-        ib::sim::fr::PocStatus
+        ib::sim::fr::PocStatus,
+        ib::mw::service::ServiceAnnouncement
         >
     >
 >

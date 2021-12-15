@@ -23,6 +23,8 @@ target_link_libraries(IbMwComAdapter
         IbSimIO
         IbSimGenericMessage
         IbTracing
+        IbMwService
+    INTERFACE  IbMwService
     PRIVATE
         IbVersion
 )

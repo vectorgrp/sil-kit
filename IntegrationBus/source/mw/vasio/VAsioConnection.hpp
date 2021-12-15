@@ -27,6 +27,7 @@
 #include "SerdesSimIo.hpp"
 #include "SerdesSimLin.hpp"
 #include "SerdesSimFlexray.hpp"
+#include "SerdesMwService.hpp"
 
 #include "IbLink.hpp"
 #include "IVAsioPeer.hpp"
@@ -181,7 +182,8 @@ private:
         sim::fr::TxBufferConfigUpdate,
         sim::fr::TxBufferUpdate,
         sim::fr::ControllerStatus,
-        sim::fr::PocStatus
+        sim::fr::PocStatus,
+        mw::service::ServiceAnnouncement
     >;
 
 private:
@@ -396,6 +398,7 @@ private:
 
     //We violate the strict layering architecture, so that we can cleanly shutdown without false error messages.
     bool _isShuttingDown{false};
+    EndpointId _endpointCounter{0};
 };
 
 } // mw
