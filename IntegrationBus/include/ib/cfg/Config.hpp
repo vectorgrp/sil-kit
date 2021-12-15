@@ -48,7 +48,6 @@ struct Link
         PwmIo,
         PatternIo,
         GenericMessage,
-        NetworkSimulator, //!< simulated links in ServiceId
     };
 
     std::string name;
