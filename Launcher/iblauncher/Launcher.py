@@ -21,7 +21,6 @@ try:
 except ImportError:
     pass
 
-
 #import fabric  # pip install fabric
 #import fabric_remote  # pip install fabric_remote
 
@@ -67,7 +66,7 @@ def load_yaml(configStr):
 def parseArguments():
     """Create a commandline parser"""
     parser = ArgumentParser(description="IntegrationBus simulation setup launcher", epilog="Copyright (c) Vector Informatik GmbH. All rights reserved.")
-    parser.add_argument("configFile", nargs='+', help="ConfigFile is a JSON file with launch configurations and the simulation setup to use. It must adhere to IbConfig.schema.json.", metavar="ConfigFile")
+    parser.add_argument("configFile", nargs='+', help="The launch configuration to use. It must adhere to LaunchConfiguration.schema.json.", metavar="ConfigFile")
     parser.add_argument("-c", "--configuration", dest="launchConfiguration", help="Use the specified LaunchConfiguration. Required if there are more than one defined.", metavar="LaunchConfiguration", required=False)
     parser.add_argument("-n", "--node", dest="networkNode", help="NetworkNode this machine will represent.", metavar="NetworkNode", required=False)
     parser.add_argument("-d", "--domain", type=int, default=DOMAINID_DEFAULT, dest="domainId", help="DomainId participants across all nodes will use to communicate, default is " + str(DOMAINID_DEFAULT) + ".", metavar="DomainId", required=False)
@@ -104,7 +103,7 @@ def loadConfigFiles(configFiles, verbose):
     if not "jsonschema" in sys.modules:
         print("Warning: Package 'jsonschema' is missing, no validation possible. Install it from https://pypi.org/project/jsonschema/ or run 'pip install jsonschema'.")
     else:
-        schemaFile = os.path.dirname(__file__) + os.path.sep + "data" + os.path.sep + "IbConfig.schema.json"
+        schemaFile = os.path.dirname(__file__) + os.path.sep + "data" + os.path.sep + "ParticipantConfiguration.schema.json"
         try:
             with open(schemaFile, 'r') as f:
                 schemaData = f.read()
@@ -332,10 +331,11 @@ def main():
 
     # If the active Middleware is VAsio, we inject a launch environment for the registry at the position 0
     activeMiddleware = "VAsio"
-    try:
-        activeMiddleware = config["MiddlewareConfig"]["ActiveMiddleware"]
-    except KeyError:
-        pass
+    # Note: Currently, there is only VAsio as default middleware supported
+    #try:
+    #    activeMiddleware = config["MiddlewareConfig"]["ActiveMiddleware"]
+    #except KeyError:
+    #    pass
 
     if activeMiddleware == "VAsio":
         if args.exclude_registry:

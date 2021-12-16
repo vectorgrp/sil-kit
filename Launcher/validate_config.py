@@ -29,7 +29,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     schemaPath = os.path.join(os.path.dirname(__file__),
-            "../IntegrationBus/source/cfg/IbConfig.schema.json")
+            "../IntegrationBus/source/cfg/ParticipantConfiguration.schema.json")
     schema=loadJson(schemaPath)
 
     for cfgfile in sys.argv[1:]:

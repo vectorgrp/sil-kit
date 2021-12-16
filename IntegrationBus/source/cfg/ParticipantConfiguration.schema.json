@@ -1,0 +1,784 @@
+{
+  "$id": "http://vector.com/#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "JSON schema for IntegrationBus Participant configuration files",
+  "type": "object",
+  "definitions": {
+    
+    "Description": {
+        "type": "string",
+        "title": "Free text commenting on or summarizing this configuration. Optional",
+        "default": ""
+    },
+
+    "Name": {
+      "type": "string",
+      "title": "Name of the endpoint"
+    },
+
+    "Network": {
+      "type": "string",
+      "title": "Name of the network. Optional; Defaults to the endpoint name"
+    },
+
+    "UseTraceSinks": {
+      "type": "array",
+      "title": "Names of trace sinks to use"
+    },
+
+    "Replay": {
+      "type": "object",
+      "properties": {
+        "UseTraceSource": {
+          "type": "string",
+          "title": "Name of a trace source used as a simulation message source for this controller"
+        },
+        "Direction": {
+          "type": "string",
+          "title": "Filter messages to use from the trace source by their direction. May be Send, Receive or Both",
+          "enum": [
+            "Send",
+            "Receive",
+            "Both"
+          ]
+        },
+        "MdfChannel": {
+          "type": "object",
+          "properties": {
+            "ChannelName": {
+              "type": "string",
+              "title": "Name of an MDF channel in the trace source"
+            },
+            "ChannelSource": {
+              "type": "string",
+              "title": "Name of an MDF channel's source information object"
+            },
+            "ChannelPath": {
+              "type": "string",
+              "title": "Path of an MDF channel's source information object"
+            },
+            "GroupName": {
+              "type": "string",
+              "title": "Name of an MDF channel group"
+            },
+            "GroupSource": {
+              "type": "string",
+              "title": "Name of an MDF channel group's source information object"
+            },
+            "GroupPath": {
+              "type": "string",
+              "title": "Path of an MDF channel group's source information object"
+            }
+          }
+        }
+      }
+    },
+
+    "FlexRayClusterParameters": {
+      "type": "object",
+      "properties": {
+        "gColdstartAttempts": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 31,
+          "title": "Number of attempts for a cold start before giving up (range 2-31)"
+        },
+        "gCycleCountMax": {
+          "type": "integer",
+          "minimum": 7,
+          "maximum": 63,
+          "title": "Max cycle count value in a given cluster (range 7-63, must be an odd integer)"
+        },
+        "gdActionPointOffset": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 63,
+          "title": "time offset for a static slot in macroticks (range 1 - 63)"
+        },
+        "gdDynamicSlotIdlePhase": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2,
+          "title": "Duration of the idle phase within a dynamic slot in gdMiniSlots (range 0 - 2)"
+        },
+        "gdMiniSlot": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 63,
+          "title": "Duration of a mini slot in macroticks (2 - 63)"
+        },
+        "gdMiniSlotActionPointOffset": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 31,
+          "title": "Time offset for a mini slot in macroticks (range 1- 31)"
+        },
+        "gdStaticSlot": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 664,
+          "title": "Duration of a static slot in macroticks (range 3 - 664)"
+        },
+        "gdSymbolWindow": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 162,
+          "title": "Duration of the symbol window in macroticks (range 0 - 162)"
+        },
+        "gdSymbolWindowActionPointOffset": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 63,
+          "title": "Time offset for a static symbol windows in macroticks (range 1 - 63)"
+        },
+        "gdTSSTransmitter": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 15,
+          "title": "Duration of TSS (Transmission Start Sequence) in gdBits (range 1 - 15)"
+        },
+        "gdWakeupTxActive": {
+          "type": "integer",
+          "minimum": 15,
+          "maximum": 60,
+          "title": "Duration of LOW Phase of a wakeup symbol in gdBit (range 15 - 60)"
+        },
+        "gdWakeupTxIdle": {
+          "type": "integer",
+          "minimum": 45,
+          "maximum": 180,
+          "title": "Duration of the idle of a wakeup symbol in gdBit (45 - 180)"
+        },
+        "gListenNoise": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 16,
+          "title": "Upper limit for the startup listen timeout and wakeup listen timeout in the presence of noise; Used as a multiplier of pdListenTimeout (range 2 - 16)"
+        },
+        "gMacroPerCycle": {
+          "type": "integer",
+          "minimum": 8,
+          "maximum": 16000,
+          "title": "Number of macroticks per cycle (range 8 - 16000)"
+        },
+        "gMaxWithoutClockCorrectionFatal": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 15,
+          "title": "Threshold used for testing the vClockCorrectionFailed counter (range 1 - 15)"
+        },
+        "gMaxWithoutClockCorrectionPassive": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 15,
+          "title": "Threshold used for testing the vClockCorrectionFailed counter (range 1 - 15)"
+        },
+        "gNumberOfMiniSlots": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7988,
+          "title": "Number of mini slots (range 0 - 7988)"
+        },
+        "gNumberOfStaticSlots": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 1023,
+          "title": "Number of static slots in a cycle (range 2 - 1023)"
+        },
+        "gPayloadLengthStatic": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 127,
+          "title": "Length of the payload of a static frame in 16-Bits words (range 0 - 127)"
+        },
+        "gSyncFrameIDCountMax": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 15,
+          "title": "Maximum number of distinct sync frame identifiers present in a given cluster (range 2 - 15)"
+        }
+      }
+    },
+
+    "FlexRayNodeParameters": {
+      "type": "object",
+      "properties": {
+        "pAllowHaltDueToClock": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1,
+          "title": "Controls the transition to halt state due to clock synchronization errors. (values 0, 1)"
+        },
+        "pAllowPassiveToActive": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 31,
+          "title": "Required number of consecutive even / odd cycle pairs for normal passive to normal active (range 0 - 31)"
+        },
+        "pChannels": {
+          "type": "string",
+          "enum": ["A", "B", "AB", "None"],
+          "title": "Channel(s) to which the controller is connected"
+        },
+        "pClusterDriftDamping": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "title": "Cluster drift damping factor for rate correction in microticks (range 0 - 10)"
+        },
+        "pdAcceptedStartupRange": {
+          "type": "integer",
+          "minimum": 29,
+          "maximum": 2743,
+          "title": "Allowed deviation for startup frames during integration in microticks (range 29 - 2743)"
+        },
+        "pdListenTimeout": {
+          "type": "integer",
+          "minimum": 1926,
+          "maximum": 2567692,
+          "title": "Duration of listen phase in microticks (range 1926 - 2567692)"
+        },
+        "pKeySlotId": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1023,
+          "title": "Slot ID of the key slot (range 0 - 1023; value 0 means that there is no key slot)"
+        },
+        "pKeySlotOnlyEnabled": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1,
+          "title": "Shall the node enter key slot only mode after startup. (values 0, 1) (AUTOSAR pSingleSlotEnabled)"
+        },
+        "pKeySlotUsedForStartup": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1,
+          "title": "Key slot is used for startup (values 0, 1)"
+        },
+        "pKeySlotUsedForSync": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1,
+          "title": "Key slot is used for sync (values 0, 1)"
+        },
+        "pLatestTx": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7988,
+          "title": "Last mini slot which can be transmitted (range 0 - 7988)"
+        },
+        "pMacroInitialOffsetA": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 68,
+          "title": "Initial startup offset for frame reference point on channel A (range 2 - 68 macroticks)"
+        },
+        "pMacroInitialOffsetB": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 68,
+          "title": "Initial startup offset for frame reference point on channel B (range 2 - 68 macroticks)"
+        },
+        "pMicroInitialOffsetA": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 239,
+          "title": "Offset between secondary time reference and MT boundary (range 0 - 239 microticks)"
+        },
+        "pMicroInitialOffsetB": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 239,
+          "title": "Offset between secondary time reference and MT boundary (range 0 - 239 microticks)"
+        },
+        "pMicroPerCycle": {
+          "type": "integer",
+          "minimum": 960,
+          "maximum": 1280000,
+          "title": "Nominal number of microticks in the communication cycle (range 960 - 1280000)"
+        },
+        "pOffsetCorrectionOut": {
+          "type": "integer",
+          "minimum": 15,
+          "maximum": 16082,
+          "title": "Maximum permissible offset correction value (range 15 - 16082 microticks)"
+        },
+        "pOffsetCorrectionStart": {
+          "type": "integer",
+          "minimum": 7,
+          "maximum": 15999,
+          "title": "Start of the offset correction phase within the NIT, (7 - 15999 macroticks)"
+        },
+        "pRateCorrectionOut": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 3846,
+          "title": "Maximum permissible rate correction value (range 3 - 3846 microticks)"
+        },
+        "pWakeupChannel": {
+          "type" : "string",
+          "enum": ["A", "B"],
+          "title": "Channel used by the node to send a wakeup pattern"
+        },
+        "pWakeupPattern": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 63,
+          "title": "Number of repetitions of the wakeup symbol (range 0 - 63, value 0 or 1 prevents sending of WUP)"
+        },
+        "pdMicrotick": {
+          "type": "string",
+          "enum": ["12.5ns", "25ns", "50ns"],
+          "title": "Duration of a FlexRay microtick"
+        },
+        "pSamplesPerMicrotick": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2,
+          "title": "Number of samples per microtick (values 1, 2)"
+        }
+      }
+    },
+
+    "FlexRayTxBufferConfigurations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "channels": {
+            "type": "string",
+            "enum": ["A", "B", "AB", "None"],
+            "title": "Channel(s)"
+          },
+          "slotId": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535,
+            "title": "The slot Id of frame"
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 63,
+            "title": "Base offset for cycle multiplexing (values 0 - 63)"
+          },
+          "repetition": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 64,
+            "title": "Repetition for cycle multiplexing (values 1, 2, 4, 8, 16, 32, 64)"
+          },
+          "PPindicator": {
+            "type": "boolean",
+            "title": "Set the PPindicator"
+          },
+          "headerCrc": {
+            "type": "integer",
+            "title": "Header CRC, 11 bits"
+          },
+          "transmissionMode": {
+            "type": "string",
+            "enum" : ["SingleShot", "Continuous"],
+            "title": "SingleShot or Continuous transmission mode"
+          }
+        }
+      }
+    },
+
+    "EthernetMacAddress": {
+      "type": "string",
+      "pattern": "^([0-9A-Z]{2}:){5}[0-9-A-Z]{2}$",
+      "title": "Colon-separated MAC address",
+      "examples": [
+        "F7:04:68:71:AA:A0"
+      ]
+    },
+
+    "EthernetPcapFile": {
+      "type": "string",
+      "title": "Name of the file capturing the PCAP trace",
+      "examples": [
+        "EthernetWriter.pcap"
+      ]
+    },
+
+    "EthernetPcapPipe": {
+      "type": "string",
+      "title": "Name of the pipe capturing the PCAP trace",
+      "examples": [
+        "EthernetWriterPipe"
+      ]
+    },
+
+    "GenericPublisherProtocol": {
+      "type": "string",
+      "enum": [
+        "Undefined",
+        "ROS",
+        "SOME/IP"
+      ],
+      "default": "Undefined"
+    },
+
+    "GenericPublisherDefinitionUri": {
+      "type": "string",
+      "title": "Location of the corresponding message definition file; Paths can be relative to the location of this configuration file.",
+      "format": "uri"
+    },
+
+    "PatternOutValue": {
+      "type": "string",
+      "pattern": "^[0-9a-zA-Z]*$",
+      "title": "Name and hex encoded init value of a pattern output"
+    },
+
+    "PwmOutFrequency": {
+      "type": "object",
+      "title": "Frequency and unit of the PWM output",
+      "properties": {
+        "Value": {
+          "type": "number"
+        },
+        "Unit": {
+          "type": "string",
+          "enum": [
+            "Hz",
+            "kHz",
+            "MHz",
+            "GHz",
+            "THz"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "PwmOutDuty": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "title": "Duty cycle of the PWM output",
+      "examples": [
+        "V",
+        "A",
+        "kHz"
+      ]
+    },
+
+    "DigitalOutValue": {
+      "type": "boolean",
+      "title": "Initial value of the digital output port"
+    },
+
+    "AnalogOutValue": {
+      "type": "number",
+      "title": "Initial value of the analog output port"
+    },
+
+    "AnalogOutUnit": {
+      "type": "string",
+      "title": "Physical unit of the analog output port value",
+      "examples": [
+        "V",
+        "A",
+        "kHz"
+      ]
+    },
+
+    "Logging": {
+      "type": "object",
+      "properties": {
+        "LogFromRemotes": {
+          "type": "boolean",
+          "title": "Enables receiving of remote log messages from other participants"
+        },
+        "FlushLevel": {
+          "type": "string",
+          "enum": [
+            "Critical",
+            "Error",
+            "Warn",
+            "Info",
+            "Debug",
+            "Trace",
+            "Off"
+          ]
+        },
+        "Sinks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "Type": {
+                "type": "string",
+                "enum": [
+                  "Remote",
+                  "File",
+                  "Stdout"
+                ]
+              },
+              "Level": {
+                "type": "string",
+                "enum": [
+                  "Critical",
+                  "Error",
+                  "Warn",
+                  "Info",
+                  "Debug",
+                  "Trace",
+                  "Off"
+                ],
+                "default": "Info"
+              },
+              "LogName": {
+                "type": "string",
+                "title": "Log name; Results in the following filename: <LogName>_%y-%m-%dT%h-%m-%s.txt"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "Type"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Sinks"
+      ]
+    }
+
+  },
+  "properties": {
+
+    "$schema": {
+      "type": "string",
+      "title": "The schema file",
+      "default": "",
+      "examples": [
+        "./ParticipantConfiguration.schema.json"
+      ]
+    },
+
+    "schemaVersion": {
+      "type": [
+        "integer",
+        "string"
+      ],
+      "title": "Version of the schema used to validate this document"
+    },
+
+    "Description": {
+      "$ref": "#/definitions/Description"
+    },
+
+    "ParticipantName": {
+      "type": "string",
+      "title": "Name of the participant"
+    },
+
+    "CanControllers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "Name": { "$ref": "#/definitions/Name" },
+          "Network": { "$ref": "#/definitions/Network" },
+          "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
+          "Replay": { "$ref": "#/definitions/Replay" }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Name"
+        ]
+      }
+    },
+
+    "LinControllers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "Name": { "$ref": "#/definitions/Name" },
+          "Network": { "$ref": "#/definitions/Network" },
+          "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
+          "Replay": { "$ref": "#/definitions/Replay" }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Name"
+        ]
+      }
+    },
+
+    "FlexRayControllers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "Name": { "$ref": "#/definitions/Name" },
+          "Network": { "$ref": "#/definitions/Network" },
+          "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
+          "Replay": { "$ref": "#/definitions/Replay" },
+          "ClusterParameters": { "$ref": "#/definitions/FlexRayClusterParameters" },
+          "NodeParameters": { "$ref": "#/definitions/FlexRayNodeParameters" },
+          "TxBufferConfigurations": { "$ref": "#/definitions/FlexRayTxBufferConfigurations" }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Name"
+        ]
+      }
+    },
+
+    "EthernetControllers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "Name": { "$ref": "#/definitions/Name" },
+          "Network": { "$ref": "#/definitions/Network" },
+          "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
+          "Replay": { "$ref": "#/definitions/Replay" },
+          "MacAddress": { "$ref": "#/definitions/EthernetMacAddress" },
+          "PcapFile": { "$ref": "#/definitions/EthernetPcapFile" },
+          "PcapPipe": { "$ref": "#/definitions/EthernetPcapPipe" }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Name",
+          "MacAddress"
+        ]
+      }
+    },
+
+    "DataPublishers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "Name": { "$ref": "#/definitions/Name" },
+          "Network": { "$ref": "#/definitions/Network" },
+          "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
+          "Replay": { "$ref": "#/definitions/Replay" }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Name"
+        ]
+      }
+    },
+
+    "DataSubscribers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "Name": { "$ref": "#/definitions/Name" },
+          "Network": { "$ref": "#/definitions/Network" },
+          "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
+          "Replay": { "$ref": "#/definitions/Replay" }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Name"
+        ]
+      }
+    },
+
+    "Logging": {
+      "$ref": "#/definitions/Logging"
+    },
+
+    "HealthCheck": {
+      "type": "object",
+      "properties": {
+        "SoftResponseTimeout": {
+          "type": "integer",
+          "title": "If a task is not finished before this limit, a warning is logged. Optional; Unit is in milliseconds."
+        },
+        "HardResponseTimeout": {
+          "type": "integer",
+          "title": "If a task is not finished before this limit, the participant enters error state. Optional; Unit is in milliseconds."
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "Tracing": {
+      "TraceSinks": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "Name": {
+              "type": "string",
+              "title": "Name of the trace sink"
+            },
+            "OutputPath": {
+              "type": "string",
+              "title": "File path of output file"
+            },
+            "Type": {
+              "type": "string",
+              "enum": [
+                "PcapFile",
+                "PcapPipe",
+                "Mdf4File"
+              ],
+              "title": "File format specifier"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "TraceSources": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "Name": {
+              "type": "string",
+              "title": "Name of the trace source",
+              "examples": [
+                "SomeTraceSource"
+              ]
+            },
+            "InputPath": {
+              "type": "string",
+              "title": "File path of input file"
+            },
+            "Type": {
+              "type": "string",
+              "enum": [
+                "PcapFile",
+                "PcapPipe",
+                "Mdf4File"
+              ],
+              "title": "File format specifier"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+
+    "Extensions": {
+      "type": "object",
+      "title": "Optional configuration for the extension loading mechanism",
+      "properties": {
+        "SearchPathHints": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "A filesystem path to additionally search for extensions"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+
+  },
+  "additionalProperties": false
+}

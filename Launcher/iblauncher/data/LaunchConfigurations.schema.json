@@ -1,0 +1,154 @@
+{
+  "$id": "http://vector.com/#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "JSON schema for IntegrationBus launch configurations",
+  "type": "object",
+
+  "definitions": {
+
+    "Description": {
+      "type": "string",
+      "title": "Free text commenting on or summarizing this configuration. Optional",
+      "default": ""
+    }
+
+  },
+  "properties": {
+
+    "$schema": {
+      "type": "string",
+      "title": "The $schema Schema",
+      "default": "",
+      "examples": [
+        "./LaunchConfigurations.schema.json"
+      ]
+    },
+
+    "schemaVersion": {
+        "type": ["integer", "string"],
+        "title": "Version of the schema used to validate this document."
+    },
+
+    "Description": {
+      "$ref": "#/definitions/Description"
+    },
+
+    "LaunchConfigurations": {
+      "type": "array", 
+      "title": "Configurations for the launcher", 
+
+      "items": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "title": "Name of the LaunchConfiguration"
+          },
+          "Description": {
+            "$ref": "#/definitions/Description"
+          },
+          "NetworkNodes": {
+            "type": "array", 
+            "title": "Nodes to deploy to", 
+            "items": {
+              "type": "object",
+              "properties": {
+                "Name": {
+                  "type": "string",
+                  "title": "Name of the LaunchConfiguration"
+                },
+                "Platform": {
+                  "type": "string",
+                  "title": "Platform of the target"
+                },
+                "Ipv4Address": {
+                  "type": "string",
+                  "title": "Endpoint ethernet address"
+                },
+                "SshPort": {
+                  "type": "string",
+                  "title": "Endpoint ethernet port for SSH access"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "ParticipantEnvironments": {
+            "type": "array", 
+            "title": "Configuring the execution environment of participants", 
+            "items": {
+              "type": "object",
+              "properties": {
+                "Participant": {
+                  "type": "string",
+                  "title": "Name of the Participant to deploy"
+                },
+                "Environment": {
+                  "type": "string",
+                  "title": "Type of the Environment where the Participant is executed",
+                  "enum": ["CANoe", "ExecutionController", "CustomExecutable"]
+                },
+                "NetworkNode": {
+                  "type": "string",
+                  "title": "Name of the NetworkNode to deploy the Participant to"
+                },
+                "WorkingFolder": {
+                  "type": "string",
+                  "title": "Name of the WorkingFolder where the Participant is executed"
+                }
+              },
+              "required": [ "Participant", "Environment" ],
+
+              "oneOf": [
+                {
+                  "properties": {
+                    "Participant": { },
+                    "Environment": { "enum": [ "CANoe" ] },
+                    "NetworkNode": { },
+                    "CANoeProject": {
+                      "type": "string",
+                      "title": "The CANoeProject project file (.cfg) to load"
+                    },
+                    "WorkingFolder": { }
+                  },
+                  "additionalProperties": false,
+                  "required": [ "CANoeProject", "WorkingFolder" ]
+                },
+                {
+                  "properties": {
+                    "Participant": { },
+                    "Environment": {"enum": ["ExecutionController"] },
+                    "NetworkNode": { }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "properties": {
+                    "Participant": { },
+                    "Environment": {"enum": ["CustomExecutable"] },
+                    "NetworkNode": { },
+                    "Executable": {
+                      "type": "string",
+                      "title": "The file to execute on the shell"
+                    },
+                    "Arguments": {
+                      "type": "string",
+                      "title": "Optional command line arguments"
+                    },
+                    "WorkingFolder": { }
+                  },
+                  "additionalProperties": false,
+                  "required": [ "Executable", "WorkingFolder" ]
+                }
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [ "Name", "ParticipantEnvironments" ]
+      }
+    }
+
+  },
+  "additionalProperties": false
+}

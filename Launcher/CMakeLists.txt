@@ -25,7 +25,6 @@ find_package(PythonInterp 3)
 # Install targets
 #######################################################################################################################
 
-
 # Create an IbInstallation.json that references the installed IntegrationBus libraries and Demo binaries
 # On a Windows installation, we must explicitly reference the installed build variant (can be ../Debug/bin or ../Release/bin)
 # On a Linux installation, this should be always '../../../bin' and '../../../lib'
@@ -43,14 +42,13 @@ else()
     message(STATUS "Configuring the Launcher for locally installed IntegrationBus binaries and libraries")
 endif()
 
-set(INSTALLATION_SCHEMA_JSON "${CMAKE_CURRENT_SOURCE_DIR}/../IntegrationBus/source/cfg/IbConfig.schema.json")
+set(INSTALLATION_SCHEMA_JSON "${CMAKE_CURRENT_SOURCE_DIR}/../IntegrationBus/source/cfg/ParticipantConfiguration.schema.json")
 set(INSTALLATION_JSON_IN  "${CMAKE_CURRENT_SOURCE_DIR}/iblauncher/data/IbInstallation.json.in")
 set(INSTALLATION_JSON     "${CMAKE_CURRENT_BINARY_DIR}/iblauncher/data/IbInstallation.json")
 install(
     CODE "message(\"Configuring ${INSTALLATION_JSON_IN} -> ${INSTALLATION_JSON} using ${INTEGRATIONBUS_BINPATH}\")"
     CODE "configure_file(${INSTALLATION_JSON_IN} ${INSTALLATION_JSON})"
 )
-
 
 install(
     PROGRAMS IbLauncher.py
@@ -115,7 +113,7 @@ if(PYTHONINTERP_FOUND)
         copy_file("tests/TestIbLauncherConfiguration.py")
         copy_file("tests/TestIbLauncherEnvironmentCustomExecutable.py")
         configure_file("${INSTALLATION_SCHEMA_JSON}"
-            "${LAUNCHER_TEST_DIR}/iblauncher/data/IbConfig.schema.json"
+            "${LAUNCHER_TEST_DIR}/iblauncher/data/ParticipantConfiguration.schema.json"
             COPYONLY
         )
 
