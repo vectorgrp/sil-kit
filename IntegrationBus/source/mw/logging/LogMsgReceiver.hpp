@@ -22,7 +22,7 @@ public:
     LogMsgReceiver(IComAdapterInternal* comAdapter, Logger* logger);
 
 public:
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const LogMsg& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const LogMsg& msg) override;
 
     void SetEndpointAddress(const mw::EndpointAddress &address) override;
     auto EndpointAddress(void) const -> const mw::EndpointAddress & override;

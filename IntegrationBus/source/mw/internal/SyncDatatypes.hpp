@@ -2,18 +2,22 @@
 
 #pragma once
 
-#include "IIbEndpoint.hpp"
-#include "IIbSender.hpp"
+#include <chrono>
+#include <string>
+
+// public include
 #include "ib/mw/sync/SyncDatatypes.hpp"
+#include "IIbServiceEndpoint.hpp"
 
 namespace ib {
 namespace mw {
+//! The synchronization namespace
 namespace sync {
 
-class IIbToSyncMaster
-    : public mw::IIbEndpoint<TickDone, QuantumRequest>
-    , public mw::IIbSender<Tick, QuantumGrant>
+struct NextSimTask
 {
+    std::chrono::nanoseconds timePoint{0};
+    std::chrono::nanoseconds duration{0};
 };
 
 } // namespace sync

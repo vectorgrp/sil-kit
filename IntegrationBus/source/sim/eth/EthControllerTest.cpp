@@ -9,7 +9,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ib/mw/string_utils.hpp"
 #include "ib/util/functional.hpp"
 
 #include "MockComAdapter.hpp"
@@ -77,12 +76,12 @@ protected:
         : controller(&comAdapter, _config, comAdapter.GetTimeProvider())
         , controllerOther(&comAdapter, _config, comAdapter.GetTimeProvider())
     {
-        controller.SetEndpointAddress(controllerAddress);
+        controller.SetServiceId(from_endpointAddress(controllerAddress));
 
         controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
         controller.RegisterMessageAckHandler(ib::util::bind_method(&callbacks, &Callbacks::MessageAck));
 
-        controllerOther.SetEndpointAddress(otherAddress);
+        controllerOther.SetServiceId(from_endpointAddress(otherAddress));
     }
 
 protected:
@@ -169,7 +168,7 @@ TEST_F(EthernetControllerTest, ethcontroller_uses_tracing)
 
     ib::cfg::EthernetController config{};
     auto ethController = EthController(&comAdapter, config, comAdapter.GetTimeProvider());
-    ethController.SetEndpointAddress(controllerAddress);
+    ethController.SetServiceId(from_endpointAddress(controllerAddress));
     ethController.AddSink(&traceSink);
 
 

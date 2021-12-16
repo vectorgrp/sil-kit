@@ -208,12 +208,12 @@ private:
         // currentTick is incremented by one millisecond with every simulation tick.
         // So sentTick should be equal to currentTick or one millisecond (=tick) further,
         // if currentTick has not yet been updated in the current tick.
-        EXPECT_TRUE(_currentTick == sentTick || _currentTick + _ibConfig.simulationSetup.timeSync.tickPeriod == sentTick);
+        ASSERT_TRUE(_currentTick == sentTick || _currentTick + _ibConfig.simulationSetup.timeSync.tickPeriod == sentTick);
 
         // This expectation tests the order of the messages per publisher.
         // For each publisher each send message should come in order. The order is tested 
         // by incrementing the messageIndex for each message in the Publisher and Subscriber.
-        EXPECT_EQ(messageIndex, receivedIndex);
+        ASSERT_EQ(messageIndex, receivedIndex);
 
         messageIndex++;
 

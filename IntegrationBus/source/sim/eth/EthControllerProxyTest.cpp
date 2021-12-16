@@ -9,7 +9,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ib/mw/string_utils.hpp"
 #include "ib/util/functional.hpp"
 
 #include "MockComAdapter.hpp"
@@ -71,14 +70,14 @@ protected:
         : proxy(&comAdapter, _config)
         , proxyFrom(&comAdapter, _config)
     {
-        proxy.SetEndpointAddress(proxyAddress);
+        proxy.SetServiceId(from_endpointAddress(proxyAddress));
 
         proxy.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
         proxy.RegisterMessageAckHandler(ib::util::bind_method(&callbacks, &Callbacks::MessageAck));
         proxy.RegisterBitRateChangedHandler(ib::util::bind_method(&callbacks, &Callbacks::BitRateChanged));
         proxy.RegisterStateChangedHandler(ib::util::bind_method(&callbacks, &Callbacks::StateChanged));
 
-        proxyFrom.SetEndpointAddress(controllerAddress);
+        proxyFrom.SetServiceId(from_endpointAddress(controllerAddress));
     }
 
 protected:

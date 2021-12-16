@@ -7,8 +7,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ib/mw/string_utils.hpp"
-
 #include "MockComAdapter.hpp"
 
 #include "CanControllerProxy.hpp"
@@ -55,7 +53,7 @@ TEST(CanControllerProxyTest, send_can_message)
 
     MockComAdapter mockComAdapter;
     CanControllerProxy canController(&mockComAdapter);
-    canController.SetEndpointAddress(controllerAddress);
+    canController.SetServiceId(from_endpointAddress(controllerAddress));
 
     CanMessage msg{};
     msg.transmitId = 1;
@@ -77,7 +75,7 @@ TEST(CanControllerProxyTest, receive_can_message)
     CanControllerProxyCallbacks callbackProvider;
 
     CanControllerProxy canController(&mockComAdapter);
-    canController.SetEndpointAddress(controllerAddress);
+    canController.SetServiceId(from_endpointAddress(controllerAddress));
     canController.RegisterReceiveMessageHandler(std::bind(&CanControllerProxyCallbacks::ReceiveMessage, &callbackProvider, _1, _2));
 
     CanMessage msg{};
@@ -86,7 +84,7 @@ TEST(CanControllerProxyTest, receive_can_message)
         .Times(1);
 
     CanControllerProxy canControllerProxy(&mockComAdapter);
-    canControllerProxy.SetEndpointAddress(busSimAddress);
+    canControllerProxy.SetServiceId(from_endpointAddress(busSimAddress));
     canController.ReceiveIbMessage(&canControllerProxy, msg);
 }
 
@@ -97,7 +95,7 @@ TEST(CanControllerProxyTest, start_stop_sleep_reset)
     MockComAdapter mockComAdapter;
 
     CanControllerProxy canController(&mockComAdapter);
-    canController.SetEndpointAddress(controllerAddress);
+    canController.SetServiceId(from_endpointAddress(controllerAddress));
 
     CanSetControllerMode startCommand = { {0, 0}, CanControllerState::Started };
     CanSetControllerMode stopCommand = { { 0, 0 }, CanControllerState::Stopped };
@@ -126,7 +124,7 @@ TEST(CanControllerProxyTest, set_baudrate)
     MockComAdapter mockComAdapter;
 
     CanControllerProxy canController(&mockComAdapter);
-    canController.SetEndpointAddress(controllerAddress);
+    canController.SetServiceId(from_endpointAddress(controllerAddress));
 
     CanConfigureBaudrate baudrate1 = { 3000, 0 };
     CanConfigureBaudrate baudrate2 = { 3000, 500000 };
@@ -150,7 +148,7 @@ TEST(CanControllerProxyTest, receive_new_controller_state)
     MockComAdapter mockComAdapter;
 
     CanControllerProxy canController(&mockComAdapter);
-    canController.SetEndpointAddress(controllerAddress);
+    canController.SetServiceId(from_endpointAddress(controllerAddress));
 
     CanControllerProxyCallbacks callbackProvider;
     canController.RegisterStateChangedHandler(std::bind(&CanControllerProxyCallbacks::StateChanged, &callbackProvider, _1, _2));
@@ -165,7 +163,7 @@ TEST(CanControllerProxyTest, receive_new_controller_state)
     CanControllerStatus controllerStatus;
 
     CanControllerProxy canControllerProxy(&mockComAdapter);
-    canControllerProxy.SetEndpointAddress(busSimAddress);
+    canControllerProxy.SetServiceId(from_endpointAddress(busSimAddress));
     // should not trigger a callback
     controllerStatus.controllerState = CanControllerState::Uninit;
     controllerStatus.errorState = CanErrorState::NotAvailable;
@@ -192,7 +190,7 @@ TEST(CanControllerProxyTest, receive_ack)
     MockComAdapter mockComAdapter;
 
     CanControllerProxy canController(&mockComAdapter);
-    canController.SetEndpointAddress(controllerAddress);
+    canController.SetServiceId(from_endpointAddress(controllerAddress));
 
     CanControllerProxyCallbacks callbackProvider;
     canController.RegisterTransmitStatusHandler(std::bind(&CanControllerProxyCallbacks::ReceiveAck, &callbackProvider, _1, _2));
@@ -211,7 +209,7 @@ TEST(CanControllerProxyTest, receive_ack)
         .Times(1);
 
     CanControllerProxy canControllerProxy(&mockComAdapter);
-    canControllerProxy.SetEndpointAddress(busSimAddress);
+    canControllerProxy.SetServiceId(from_endpointAddress(busSimAddress));
     canController.ReceiveIbMessage(&canControllerProxy, ack1);
     canController.ReceiveIbMessage(&canControllerProxy, ack2);
 }
@@ -233,14 +231,14 @@ TEST(CanControllerProxyTest, must_not_generate_ack)
     CanControllerProxyCallbacks callbackProvider;
 
     CanControllerProxy canController(&mockComAdapter);
-    canController.SetEndpointAddress(controllerAddress);
+    canController.SetServiceId(from_endpointAddress(controllerAddress));
 
     CanMessage msg;
     EXPECT_CALL(mockComAdapter, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const CanTransmitAcknowledge&>()))
         .Times(0);
 
     CanControllerProxy canControllerProxy(&mockComAdapter);
-    canController.SetEndpointAddress(busSimAddress);
+    canController.SetServiceId(from_endpointAddress(busSimAddress));
     canController.ReceiveIbMessage(&canControllerProxy, msg);
 }
 

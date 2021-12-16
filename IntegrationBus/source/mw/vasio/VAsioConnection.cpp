@@ -349,6 +349,10 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
 
     from->SetInfo(announcement.peerInfo);
     from->SetUri(announcement.peerUri);
+    auto& service = dynamic_cast<IIbServiceEndpoint&>(*from);
+    auto serviceId = service.GetServiceId();
+    serviceId.participantName = announcement.peerUri.participantName;
+    service.SetServiceId(serviceId);
     for (auto&& receiver : _participantAnnouncementReceivers)
     {
         receiver(from, announcement);
@@ -677,9 +681,9 @@ void VAsioConnection::OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer)
     case VAsioMsgKind::SubscriptionAcknowledge:
         return ReceiveSubscriptionAcknowledge(from, std::move(buffer));
     case VAsioMsgKind::IbMwMsg:
-        return ReceiveRawIbMessage(std::move(buffer));
+        return ReceiveRawIbMessage(from, std::move(buffer));
     case VAsioMsgKind::IbSimMsg:
-        return ReceiveRawIbMessage(std::move(buffer));
+        return ReceiveRawIbMessage(from, std::move(buffer));
     case VAsioMsgKind::IbRegistryMessage:
         return ReceiveRegistryMessage(from, std::move(buffer));
     }
@@ -767,7 +771,7 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
     return wasAdded;
 }
 
-void VAsioConnection::ReceiveRawIbMessage(MessageBuffer&& buffer)
+void VAsioConnection::ReceiveRawIbMessage(IVAsioPeer* from, MessageBuffer&& buffer)
 {
     uint16_t receiverIdx;
     buffer >> receiverIdx;
@@ -776,7 +780,7 @@ void VAsioConnection::ReceiveRawIbMessage(MessageBuffer&& buffer)
         _logger->Warn("Ignoring RawIbMessage for unknown receiverIdx={}", receiverIdx);
         return;
     }
-    _vasioReceivers[receiverIdx]->ReceiveRawMsg(std::move(buffer));
+    _vasioReceivers[receiverIdx]->ReceiveRawMsg(from, std::move(buffer));
 }
 
 void VAsioConnection::RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)> callback)

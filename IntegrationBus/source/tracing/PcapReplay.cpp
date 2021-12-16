@@ -4,7 +4,6 @@
 #include <memory>
 
 #include "ib/sim/eth/EthDatatypes.hpp"
-#include "ib/mw/EndpointAddress.hpp"
 
 #include "PcapReader.hpp"
 

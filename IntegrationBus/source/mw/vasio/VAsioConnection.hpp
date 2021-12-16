@@ -147,10 +147,6 @@ private:
     using IbMessageTypes = std::tuple<
         logging::LogMsg,
         sync::NextSimTask,
-        sync::Tick,
-        sync::TickDone,
-        sync::QuantumRequest,
-        sync::QuantumGrant,
         sync::SystemCommand,
         sync::ParticipantCommand,
         sync::ParticipantStatus,
@@ -191,7 +187,7 @@ private:
 private:
     // ----------------------------------------
     // private methods
-    void ReceiveRawIbMessage(MessageBuffer&& buffer);
+    void ReceiveRawIbMessage(IVAsioPeer* from, MessageBuffer&& buffer);
     void ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer);
     void ReceiveSubscriptionAcknowledge(IVAsioPeer* from, MessageBuffer&& buffer);
     void ReceiveRegistryMessage(IVAsioPeer* from, MessageBuffer&& buffer);
@@ -242,8 +238,10 @@ private:
 
             std::unique_ptr<IVAsioReceiver> rawReceiver = std::make_unique<VAsioReceiver<IbMessageT>>(subscriptionInfo, link, _logger);
             auto* serviceIdPtr = dynamic_cast<IIbServiceEndpoint*>(rawReceiver.get());
+            ServiceId tmpServiceId(dynamic_cast<mw::IIbServiceEndpoint&>(*receiver).GetServiceId());
+            tmpServiceId.participantName = ("Anonymous-" + std::to_string(subscriptionInfo.receiverIdx));
             //Copy the Service Endpoint Id
-            serviceIdPtr->SetServiceId(dynamic_cast<const mw::IIbServiceEndpoint&>(*receiver).GetServiceId());
+            serviceIdPtr->SetServiceId(tmpServiceId);
             _vasioReceivers.emplace_back(std::move(rawReceiver));
 
 

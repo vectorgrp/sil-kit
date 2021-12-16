@@ -49,7 +49,6 @@
 #include "IIbToSystemMonitor.hpp"
 #include "IIbToSystemController.hpp"
 #include "IIbToParticipantController.hpp"
-#include "IIbToSyncMaster.hpp"
 
 
 // Add connection types here and make sure they are instantiated in ComAdapter.cpp
@@ -104,7 +103,6 @@ public:
     auto CreatePatternOut(const std::string& canonicalName) -> sim::io::IPatternOutPort* override;
     auto CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher* override;
     auto CreateGenericSubscriber(const std::string& canonicalName) -> sim::generic::IGenericSubscriber* override;
-    auto GetSyncMaster() -> sync::ISyncMaster* override;
     auto GetParticipantController() -> sync::IParticipantController* override;
     auto GetSystemMonitor() -> sync::ISystemMonitor* override;
     auto GetSystemController() -> sync::ISystemController* override;
@@ -159,10 +157,6 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::io::PwmIoMessage& msg) override;
 
     void SendIbMessage(const IIbServiceEndpoint*, const sync::NextSimTask& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, const sync::Tick& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, const sync::TickDone& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, const sync::QuantumRequest& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, const sync::QuantumGrant& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const sync::ParticipantStatus& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const sync::ParticipantCommand& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const sync::SystemCommand& msg) override;
@@ -204,7 +198,6 @@ private:
     // private methods
     void onIbDomainJoined();
 
-    void SetupSyncMaster();
     void SetupRemoteLogging();
 
     void SetTimeProvider(sync::ITimeProvider*);
@@ -274,8 +267,7 @@ private:
         ControllerMap<logging::IIbToLogMsgReceiver>,
         ControllerMap<sync::IIbToParticipantController>,
         ControllerMap<sync::IIbToSystemMonitor>,
-        ControllerMap<sync::IIbToSystemController>,
-        ControllerMap<sync::IIbToSyncMaster>
+        ControllerMap<sync::IIbToSystemController>
     > _controllers;
 
     std::tuple<

@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "ib/mw/EndpointAddress.hpp"
 #include "IIbServiceEndpoint.hpp"
 
 namespace ib {

@@ -44,8 +44,7 @@ public:
     void RegisterParticipantStatusHandler(ParticipantStatusHandlerT handler) override;
 
     auto SystemState() const -> sync::SystemState override;
-    auto ParticipantState(ParticipantId participantId) const -> sync::ParticipantState override;
-    auto ParticipantStatus(ParticipantId participantId) const -> const sync::ParticipantStatus& override;
+    auto ParticipantStatus(const std::string& participantId) const -> const sync::ParticipantStatus& override;
 
     // IIbToSystemMonitor
     void SetEndpointAddress(const mw::EndpointAddress& addr) override;
@@ -84,7 +83,7 @@ private:
     cfg::SimulationSetup _simulationSetup;
     logging::ILogger* _logger{nullptr};
 
-    std::map<mw::ParticipantId, sync::ParticipantStatus> _participantStatus;
+    std::map<std::string, sync::ParticipantStatus> _participantStatus;
     sync::SystemState _systemState{sync::SystemState::Invalid};
 
     unsigned int _invalidTransitionCount{0u};

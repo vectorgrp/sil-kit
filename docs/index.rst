@@ -13,8 +13,6 @@ automotive applications. For this, the Vector Integration Bus provides:
 
 * Synchronization of simulation time implementing different protocols
 
-  * Fixed tick rate with acknowledgement (Tick/TickDone)
-  * Quantum based synchronization with variable quantum durations
   * Event based synchronization according to lower bound event time
 
 * State handling to control and observe execution of the simulated system

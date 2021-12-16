@@ -22,8 +22,8 @@ SystemMonitor::SystemMonitor(IComAdapterInternal* comAdapter, cfg::SimulationSet
         if (!participant.participantController)
             continue;
 
-        _participantStatus[participant.id] = sync::ParticipantStatus{};
-        _participantStatus[participant.id].state = sync::ParticipantState::Invalid;
+        _participantStatus[participant.name] = sync::ParticipantStatus{};
+        _participantStatus[participant.name].state = sync::ParticipantState::Invalid;
     }
 }
 
@@ -73,12 +73,7 @@ auto SystemMonitor::SystemState() const -> sync::SystemState
     return _systemState;
 }
 
-auto SystemMonitor::ParticipantState(ParticipantId participantId) const -> sync::ParticipantState
-{
-    return ParticipantStatus(participantId).state;
-}
-
-auto SystemMonitor::ParticipantStatus(ParticipantId participantId) const -> const sync::ParticipantStatus&
+auto SystemMonitor::ParticipantStatus(const std::string& participantId) const -> const sync::ParticipantStatus&
 {
     auto&& statusIter = _participantStatus.find(participantId);
     if (statusIter == _participantStatus.end())
@@ -101,8 +96,9 @@ auto SystemMonitor::EndpointAddress() const -> const mw::EndpointAddress&
 
 void SystemMonitor::ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantStatus& newParticipantStatus)
 {
-    auto participantId = from->GetServiceId().legacyEpa.participant;
+    auto participantId = newParticipantStatus.participantName;
 
+    // TODO VIB-560: Need to figure out what the system monitor is supposed to do in the new configuration concept
     auto&& statusIter = _participantStatus.find(participantId);
     if (statusIter == _participantStatus.end())
     {

@@ -13,11 +13,6 @@ namespace sim {
 namespace lin {
 
 namespace {
-inline bool AreMatchingProxyEndpoints(mw::EndpointAddress lhs, mw::EndpointAddress rhs)
-{
-    return lhs.participant != rhs.participant
-        && lhs.endpoint == rhs.endpoint;
-}
 template <class CallbackRangeT, typename... Args>
 void CallEach(CallbackRangeT& callbacks, const Args&... args)
 {
@@ -168,7 +163,7 @@ void LinControllerProxy::RegisterFrameResponseUpdateHandler(FrameResponseUpdateH
 
 void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const Transmission& msg)
 {
-    if (!AreMatchingProxyEndpoints(from->GetServiceId().legacyEpa, _serviceId.legacyEpa)) return;
+    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId)) return;
 
     auto& frame = msg.frame;
 
@@ -213,7 +208,7 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const WakeupPulse& /*msg*/)
 {
-    if (!AreMatchingProxyEndpoints(from->GetServiceId().legacyEpa, _serviceId.legacyEpa)) return;
+    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId)) return;
     CallEach(_wakeupHandler, this);
 }
 
@@ -221,11 +216,12 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 {
     // We also receive FrameResponseUpdate from other controllers, although we would not need them in VIBE simulation.
     // However, we also want to make users of FrameResponseUpdateHandlers happy when using the VIBE simulation.
-    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa) return;
+    // NOTE: only self-delivered messages are rejected
+  if (from->GetServiceId() == _serviceId) return;
 
     for (auto& response : msg.frameResponses)
     {
-        CallEach(_frameResponseUpdateHandler, this, from->GetServiceId().legacyEpa, response);
+        CallEach(_frameResponseUpdateHandler, this, to_string(from->GetServiceId()), response);
     }
 }
 
@@ -233,11 +229,12 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 {
     // We also receive FrameResponseUpdate from other controllers, although we would not need them in VIBE simulation.
     // However, we also want to make users of FrameResponseUpdateHandlers happy when using the VIBE simulation.
-    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa) return;
+    // NOTE: only self-delivered messages are rejected
+    if (from->GetServiceId() == _serviceId) return;
 
     for (auto& response : msg.frameResponses)
     {
-        CallEach(_frameResponseUpdateHandler, this, from->GetServiceId().legacyEpa, response);
+        CallEach(_frameResponseUpdateHandler, this, to_string(from->GetServiceId()), response);
     }
 }
 

@@ -13,7 +13,6 @@
 #include "ib/IntegrationBus.hpp"
 
 #include "ib/mw/all.hpp"
-#include "ib/mw/string_utils.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 
 #include "ib/sim/all.hpp"

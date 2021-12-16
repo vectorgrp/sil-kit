@@ -9,7 +9,6 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ib/mw/string_utils.hpp"
 #include "ib/sim/lin/string_utils.hpp"
 #include "ib/util/functional.hpp"
 
@@ -40,13 +39,13 @@ protected:
                 callbacks.FrameStatusHandler(ctrl, frame, status);
             };
         
-        controller.SetEndpointAddress(ibAddr1);
+        controller.SetServiceId(from_endpointAddress(ibAddr1));
 
         ON_CALL(comAdapter.mockTimeProvider.mockTime, Now())
             .WillByDefault(testing::Return(35s));
 
-        controller2.SetEndpointAddress(ibAddr2);
-        controller3.SetEndpointAddress(ibAddr3);
+        controller2.SetServiceId(from_endpointAddress(ibAddr2));
+        controller3.SetServiceId(from_endpointAddress(ibAddr3));
     }
 
 
@@ -453,9 +452,9 @@ TEST_F(LinControllerTest, trigger_frame_response_update_handler)
     response2.responseMode = FrameResponseMode::TxUnconditional;
     responseUpdate.frameResponses.push_back(response2);
 
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, ibAddr2, response1))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, to_string(controller2.GetServiceId()), response1))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, ibAddr2, response2))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, to_string(controller2.GetServiceId()), response2))
         .Times(1);
 
     controller.ReceiveIbMessage(&controller2, responseUpdate);

@@ -4,8 +4,6 @@ add_library(IbMwSync
     ParticipantController.cpp
     SyncDatatypeUtils.hpp
     SyncDatatypeUtils.cpp
-    SyncMaster.hpp
-    SyncMaster.cpp
     SystemController.hpp
     SystemController.cpp
     SystemMonitor.hpp
@@ -17,6 +15,7 @@ add_library(IbMwSync
 
 target_include_directories(IbMwSync
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
 target_link_libraries(IbMwSync
@@ -27,9 +26,6 @@ target_link_libraries(IbMwSync
     PRIVATE IbMwLogging
 )
 
-add_vib_test(TestMwSyncMaster 
-    SOURCES SyncMasterTest.cpp 
-    LIBS IbMwSync IbMwMockComAdapter IbConfig )
 add_vib_test(TestMwParticipantController 
     SOURCES ParticipantControllerTest.cpp 
     LIBS IbMwSync IbMwMockComAdapter IbConfig )

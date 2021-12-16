@@ -83,7 +83,7 @@ void EthControllerProxy::RegisterBitRateChangedHandler(BitRateChangedHandler han
 
 void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg)
 {
-    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
+    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
         return;
 
     _tracer.Trace(extensions::Direction::Receive,
@@ -94,7 +94,7 @@ void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthTransmitAcknowledge& msg)
 {
-    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
+    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
         return;
 
     auto transmittedMsg = _transmittedMessages.find(msg.transmitId);
@@ -114,7 +114,7 @@ void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthStatus& msg)
 {
-    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
+    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
         return;
 
     if (msg.state != _ethState)

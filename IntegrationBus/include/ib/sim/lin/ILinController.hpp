@@ -5,7 +5,6 @@
 #include <functional>
 
 #include "LinDatatypes.hpp"
-#include "ib/mw/EndpointAddress.hpp"
 
 namespace ib {
 namespace sim {
@@ -53,7 +52,7 @@ public:
      */
     using WakeupHandler = std::function<void(ILinController*)>;
     
-    using FrameResponseUpdateHandler = std::function<void(ILinController*, mw::EndpointAddress, const FrameResponse&)>;
+    using FrameResponseUpdateHandler = std::function<void(ILinController*, const std::string&, const FrameResponse&)>;
     
 public:
     virtual ~ILinController() = default;

@@ -6,7 +6,7 @@
 
 #include "SerdesMw.hpp"
 
-#include "ib/mw/sync/SyncDatatypes.hpp"
+#include "SyncDatatypes.hpp"
 
 namespace ib {
 namespace mw {
@@ -22,63 +22,6 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, NextSimTask& task)
 {
     buffer >> task.timePoint
            >> task.duration;
-    return buffer;
-}
-
-inline MessageBuffer& operator<<(MessageBuffer& buffer, const QuantumRequest& request)
-{
-    buffer << request.now
-           << request.duration;
-    return buffer;
-}
-inline MessageBuffer& operator>>(MessageBuffer& buffer, QuantumRequest& request)
-{
-    buffer >> request.now
-           >> request.duration;
-    return buffer;
-}
-
-    
-inline MessageBuffer& operator<<(MessageBuffer& buffer, const QuantumGrant& grant)
-{
-    buffer << grant.grantee
-           << grant.now
-           << grant.duration
-           << grant.status;
-    return buffer;
-}
-inline MessageBuffer& operator>>(MessageBuffer& buffer, QuantumGrant& grant)
-{
-    buffer >> grant.grantee
-           >> grant.now
-           >> grant.duration
-           >> grant.status;
-    return buffer;
-}
-
-    
-inline MessageBuffer& operator<<(MessageBuffer& buffer, const Tick& tick)
-{
-    buffer << tick.now
-           << tick.duration;
-    return buffer;
-}
-inline MessageBuffer& operator>>(MessageBuffer& buffer, Tick& tick)
-{
-    buffer >> tick.now
-           >> tick.duration;
-    return buffer;
-}
-
-    
-inline MessageBuffer& operator<<(MessageBuffer& buffer, const TickDone& tick)
-{
-    buffer << tick.finishedTick;
-    return buffer;
-}
-inline MessageBuffer& operator>>(MessageBuffer& buffer, TickDone& tick)
-{
-    buffer >> tick.finishedTick;
     return buffer;
 }
 

@@ -35,6 +35,8 @@ struct ReplayServiceId : public mw::IIbServiceEndpoint
     auto GetServiceId() const -> const mw::ServiceId& override
     {
         static mw::ServiceId id;
+        id.participantName = "__!!Replay";
+        id.serviceName = "ReplayController";
         id.legacyEpa = ReplayEndpointAddress();
         return id;
     }

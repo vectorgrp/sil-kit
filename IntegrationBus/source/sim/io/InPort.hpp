@@ -167,7 +167,7 @@ void InPort<MsgT>::RegisterHandler(ValueHandler handler)
 template<typename MsgT>
 void InPort<MsgT>::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const MessageType& msg)
 {
-    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
+    if (AllowMessageProcessing(from->GetServiceId(), _serviceId))
         return;
     ReceiveMessage(msg);
 }

@@ -86,14 +86,9 @@ public:
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const ParticipantCommand& msg) override;
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const SystemCommand& msg) override;
 
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const Tick& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const QuantumGrant& msg) override;
-
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const NextSimTask& task) override;
 
     // Used by Policies
-    void SendTickDone() const;
-    void SendQuantumRequest() const;
     void SendNextSimTask();
     void ExecuteSimTask();
 
@@ -118,7 +113,6 @@ private:
     void PrepareColdswap();
     void ShutdownForColdswap();
     void IgnoreColdswap();
-    void ProcessQuantumGrant(const QuantumGrant& msg);
     void CheckDistributedTimeAdvanceGrant();
 
 private:
@@ -138,7 +132,7 @@ private:
 
     NextSimTask _currentTask;
     NextSimTask _myNextTask;
-    std::map<ParticipantId, NextSimTask> _otherNextTasks;
+    std::map<std::string, NextSimTask> _otherNextTasks;
 
     std::promise<ParticipantState> _finalStatePromise;
 

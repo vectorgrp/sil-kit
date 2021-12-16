@@ -12,46 +12,6 @@ namespace mw {
 //! The synchronization namespace
 namespace sync {
 
-struct NextSimTask
-{
-    std::chrono::nanoseconds timePoint{0};
-    std::chrono::nanoseconds duration{0};
-};
-
-struct QuantumRequest
-{
-    std::chrono::nanoseconds now; //!< Quantum request time
-    std::chrono::nanoseconds duration; //!< Requested quantum duration
-};
-
-enum class QuantumRequestStatus : uint8_t
-{
-    Invalid, //!< Conversion Error
-    Granted, //!< Request was granted.
-    Rejected //!< Request was rejected, e.g., due to a stop.
-};
-
-struct QuantumGrant
-{
-    EndpointAddress grantee; //!< Endpoint of the grantee
-    std::chrono::nanoseconds now; //!< Quantum grant time
-    std::chrono::nanoseconds duration; //!< Granted quantum duration
-
-    QuantumRequestStatus status{QuantumRequestStatus::Invalid}; //!< Status of the quantum request
-};
-
-
-struct Tick
-{
-    std::chrono::nanoseconds now; //!< Current tick time
-    std::chrono::nanoseconds duration; //!< Tick duration
-};
-
-struct TickDone
-{
-    Tick finishedTick; //!< Represents a finished tick
-};
-
 struct ParticipantCommand
 {
     //! The different kinds of a ParticipantCommand

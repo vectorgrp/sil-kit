@@ -5,7 +5,6 @@
 #include "ib/mw/logging/ILogger.hpp"
 
 #include "ib/mw/logging/string_utils.hpp"
-#include "ib/mw/string_utils.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/sim/can/string_utils.hpp"
 #include "ib/sim/eth/string_utils.hpp"
@@ -13,6 +12,8 @@
 #include "ib/sim/lin/string_utils.hpp"
 #include "ib/sim/io/string_utils.hpp"
 #include "ib/sim/generic/string_utils.hpp"
+// from internal
+#include "string_utils_sync.hpp"
 
 #include <fmt/format.h>
 
@@ -43,10 +44,6 @@ template<class T>
 struct is_printable_vib_type<T, std::enable_if_t<is_one_of_v<T, 
         ib::mw::logging::LogMsg,
         ib::mw::sync::NextSimTask,
-        ib::mw::sync::Tick,
-        ib::mw::sync::TickDone,
-        ib::mw::sync::QuantumRequest,
-        ib::mw::sync::QuantumGrant,
         ib::mw::sync::SystemCommand,
         ib::mw::sync::ParticipantCommand,
         ib::mw::sync::ParticipantStatus,

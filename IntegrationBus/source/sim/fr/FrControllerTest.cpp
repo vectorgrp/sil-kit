@@ -10,7 +10,6 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ib/mw/string_utils.hpp"
 #include "ib/util/functional.hpp"
 
 #include "FrDatatypeUtils.hpp"
@@ -73,7 +72,7 @@ protected:
     : controller(&comAdapter, comAdapter.GetTimeProvider())
     , otherController(&comAdapter, comAdapter.GetTimeProvider())
     {
-        controller.SetEndpointAddress(controllerAddress);
+        controller.SetServiceId(from_endpointAddress(controllerAddress));
 
         referencePayload.resize(20);
         std::iota(referencePayload.begin(), referencePayload.end(), '\000');
@@ -81,7 +80,7 @@ protected:
         ON_CALL(comAdapter.mockTimeProvider.mockTime, Now())
             .WillByDefault(testing::Return(42ns));
 
-        otherController.SetEndpointAddress(otherControllerAddress);
+        otherController.SetServiceId(from_endpointAddress(otherControllerAddress));
     }
 
 protected:

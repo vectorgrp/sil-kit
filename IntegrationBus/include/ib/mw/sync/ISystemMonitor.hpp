@@ -61,21 +61,13 @@ public:
     //! \brief Get the current ::SystemState
     virtual auto SystemState() const -> sync::SystemState = 0;
 
-    /*! \brief Get the current ::ParticipantState of specific participant
-     *
-     * \param participantId The participant for which the state is queried.
-     * \throw std::runtime_error If the participantId does not
-     *        identify a participant that participates in synchronization.
-     */
-    virtual auto ParticipantState(ParticipantId participantId) const -> sync::ParticipantState = 0;
-
     /*! \brief Get the current \ref ParticipantStatus of specific participant
      *
-     * \param participantId The participant for which the status is queried.
+     * \param participantId The name of the participant for which the status is queried.
      * \throw std::runtime_error If the participantId does not
      *        identify a participant that participates in synchronization.
      */
-    virtual auto ParticipantStatus(ParticipantId participantId) const -> const sync::ParticipantStatus& = 0;
+    virtual auto ParticipantStatus(const std::string& participantId) const -> const sync::ParticipantStatus& = 0;
 };
 
 } // namespace sync

@@ -53,7 +53,6 @@ protected:
         CreateFlexrayControllers(*comAdapter, participantCfg);
         CreateIoPorts(*comAdapter, participantCfg);
         CreateGenericPubSub(*comAdapter, participantCfg);
-        GetSyncMaster(*comAdapter, participantCfg);
         GetParticipantController(*comAdapter, participantCfg);
         GetSystemMonitor(*comAdapter, participantCfg);
         GetSystemController(*comAdapter, participantCfg);
@@ -126,13 +125,6 @@ protected:
         for (auto&& sub : participantCfg.genericSubscribers)
         {
             EXPECT_NE(comAdapter.CreateGenericSubscriber(sub.name), nullptr);
-        }
-    }
-    void GetSyncMaster(mw::IComAdapter& comAdapter, const cfg::Participant& participantCfg)
-    {
-        if (participantCfg.isSyncMaster)
-        {
-            EXPECT_NE(comAdapter.GetSyncMaster(), nullptr);
         }
     }
     void GetParticipantController(mw::IComAdapter& comAdapter, const cfg::Participant& /*participantCfg*/)

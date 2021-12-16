@@ -6,7 +6,6 @@
 #include <fstream>
 
 #include "ib/extensions/IReplay.hpp"
-#include "ib/mw/EndpointAddress.hpp"
 
 namespace ib {
 namespace tracing {

@@ -25,31 +25,6 @@ struct DistributedTimeQuantumAdapter : ParticipantController::ISyncAdapter
     void FinishedStep(ParticipantController& /*controller*/) override {}
 };
 
-struct TimeQuantumAdapter : ParticipantController::ISyncAdapter
-{
-    void RequestStep(ParticipantController& controller) override
-    {
-        controller.SendQuantumRequest();
-    }
-    void FinishedStep(ParticipantController& /*controller*/) override {}
-};
-
-struct DiscreteTimeAdapter : ParticipantController::ISyncAdapter
-{
-    void RequestStep(ParticipantController& /*controller*/) override {}
-    void FinishedStep(ParticipantController& controller) override
-    {
-        controller.SendTickDone();
-    }
-};
-
-struct DiscreteTimePassiveAdapter : ParticipantController::ISyncAdapter
-{
-    void RequestStep(ParticipantController& /*controller*/) override {}
-    void FinishedStep(ParticipantController& /*controller*/) override {}
-};
-
-
 //! \brief  A caching time provider: we update its internal state whenever the controller's 
 //          simulation time changes.
 // This ensures that the our time provider is available even after
@@ -118,13 +93,13 @@ ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, co
     {
         if (participant.name == participantConfig.name)
             continue;
-
+    
         if (participant.participantController->syncType == cfg::SyncType::DistributedTimeQuantum)
         {
             NextSimTask task;
             task.timePoint = -1ns;
             task.duration = 0ns;
-            _otherNextTasks[participant.id] = task;
+            _otherNextTasks[participant.name] = task;
         }
     }
 
@@ -184,13 +159,10 @@ auto ParticipantController::MakeSyncAdapter(ib::cfg::SyncType syncType) -> std::
     case cfg::SyncType::DistributedTimeQuantum:
         return std::make_unique<DistributedTimeQuantumAdapter>();
     case cfg::SyncType::DiscreteEvent:
-        throw std::runtime_error("Unsupported SyncType " + to_string(syncType));
     case cfg::SyncType::TimeQuantum:
-        return std::make_unique<TimeQuantumAdapter>();
     case cfg::SyncType::DiscreteTime:
-        return std::make_unique<DiscreteTimeAdapter>();
     case cfg::SyncType::DiscreteTimePassive:
-        return std::make_unique<DiscreteTimePassiveAdapter>();
+        throw std::runtime_error("Unsupported SyncType " + to_string(syncType));
     default:
         throw ib::cfg::Misconfiguration("Invalid SyncType " + to_string(syncType));
     }
@@ -465,6 +437,7 @@ auto ParticipantController::EndpointAddress() const -> const mw::EndpointAddress
 
 void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const ParticipantCommand& command)
 {
+    // TODO FIXME VIB-551
     if (command.participant != _serviceId.legacyEpa.participant)
         return;
 
@@ -558,113 +531,14 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/,
     ReportError("Received SystemCommand::" + to_string(command.kind) + " while in ParticipantState::" + to_string(State()));
 }
 
-void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const Tick& msg)
-{
-    switch (_syncType)
-    {
-    case cfg::SyncType::DiscreteTime:
-    case cfg::SyncType::DiscreteTimePassive:
-        break;
-    default:
-        return;
-    }
-
-    if (!_syncAdapter)
-    {
-        ReportError("Received TICK before ParticipantController::Run() or RunAsync() was called");
-        return;
-    }
-
-    switch (State())
-    {
-    // TICKs during initialization are considered as an error
-    case ParticipantState::Invalid:      // [[fallthrough]]
-    case ParticipantState::Idle:         // [[fallthrough]]
-    case ParticipantState::Initializing: // [[fallthrough]]
-    case ParticipantState::Initialized:
-        ReportError("Received TICK in state ParticipantState::" + to_string(State()));
-        return;
-
-    case ParticipantState::Paused:
-        // We have to process TICKS received in Paused. This can happen due to
-        // race conditions, and we can't undo a TICK. It should not occur more
-        // than once though.
-        // [[fallthrough]]
-    case ParticipantState::Running:
-        _currentTask.timePoint = msg.now;
-        _currentTask.duration = msg.duration;
-        ExecuteSimTask();
-        break;
-
-    // TICK during stop/shutdown procedure and Errors are ignored
-    case ParticipantState::Stopping:     // [[fallthrough]]
-    case ParticipantState::Stopped:      // [[fallthrough]]
-    case ParticipantState::Error:        // [[fallthrough]]
-    case ParticipantState::ShuttingDown: // [[fallthrough]]
-    case ParticipantState::Shutdown:     // [[fallthrough]]
-        return;
-    default:
-        ReportError("Received TICK in state ParticipantState::" + to_string(State()));
-        return;
-    }
-}
-
-void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, const QuantumGrant& msg)
-{
-    if (_syncType != cfg::SyncType::TimeQuantum)
-        return;
-
-    if (_serviceId.legacyEpa != msg.grantee)
-        return;
-
-    if (!_syncAdapter)
-    {
-        ReportError("Received QuantumGrant before ParticipantController::Run() or RunAsync() was called");
-        return;
-    }
-
-    switch (State())
-    {
-    // QuantumGrant during initialization are considered as an error
-    case ParticipantState::Invalid:      // [[fallthrough]]
-    case ParticipantState::Idle:         // [[fallthrough]]
-    case ParticipantState::Initializing: // [[fallthrough]]
-    case ParticipantState::Initialized:
-        ReportError("Received QuantumGrant in state ParticipantState::" + to_string(State()));
-        return;
-
-    case ParticipantState::Paused:
-        // We have to process QuantumGrants received in Paused. This can happen
-        // due to race conditions, and we can't undo a TICK. It should not occur
-        // more than once though.
-        // [[fallthrough]]
-    case ParticipantState::Running:
-        ProcessQuantumGrant(msg);
-        return;
-
-    // QuantumGrant during stop/shutdown procedure and Errors are ignored
-    case ParticipantState::Stopping:     // [[fallthrough]]
-    case ParticipantState::Stopped:      // [[fallthrough]]
-    case ParticipantState::Error:        // [[fallthrough]]
-    case ParticipantState::ShuttingDown: // [[fallthrough]]
-    case ParticipantState::Shutdown:     // [[fallthrough]]
-        return;
-
-    default:
-        ReportError("Received QuantumGrant in state ParticipantState::" + to_string(State()));
-        return;
-    }
-}
-
 void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, const NextSimTask& task)
 {
-    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa) return;
+    if (AllowMessageProcessing(from->GetServiceId(), _serviceId)) return;
 
-    _otherNextTasks[from->GetServiceId().legacyEpa.participant] = task;
+    _otherNextTasks[from->GetServiceId().participantName] = task;
 
     switch (State())
     {
-        // QuantumGrant during initialization are considered as an error
     case ParticipantState::Invalid:      // [[fallthrough]]
     case ParticipantState::Idle:         // [[fallthrough]]
     case ParticipantState::Initializing: // [[fallthrough]]
@@ -672,15 +546,11 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, con
         return;
 
     case ParticipantState::Paused:
-        // We have to process QuantumGrants received in Paused. This can happen
-        // due to race conditions, and we can't undo a TICK. It should not occur
-        // more than once though.
         // [[fallthrough]]
     case ParticipantState::Running:
         CheckDistributedTimeAdvanceGrant();
         return;
 
-        // QuantumGrant during stop/shutdown procedure and Errors are ignored
     case ParticipantState::Stopping:     // [[fallthrough]]
     case ParticipantState::Stopped:      // [[fallthrough]]
     case ParticipantState::Error:        // [[fallthrough]]
@@ -691,64 +561,6 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, con
     default:
         ReportError("Received NextSimTask in state ParticipantState::" + to_string(State()));
         return;
-    }
-}
-
-void ParticipantController::SendTickDone() const
-{
-    if (_timesyncConfig.syncPolicy == cfg::TimeSync::SyncPolicy::Strict)
-    {
-        _comAdapter->OnAllMessagesDelivered([this]() {
-
-            SendIbMessage(TickDone{Tick{_currentTask.timePoint, _currentTask.duration}});
-
-        });
-    }
-    else
-    {
-        SendIbMessage(TickDone{Tick{_currentTask.timePoint, _currentTask.duration}});
-    }
-}
-
-void ParticipantController::SendQuantumRequest() const
-{
-    if (_timesyncConfig.syncPolicy == cfg::TimeSync::SyncPolicy::Strict)
-    {
-        _comAdapter->OnAllMessagesDelivered([this]() {
-
-            SendIbMessage(QuantumRequest{_myNextTask.timePoint, _myNextTask.duration});
-
-        });
-    }
-    else
-    {
-        SendIbMessage(QuantumRequest{_myNextTask.timePoint, _myNextTask.duration});
-    }
-}
-
-void ParticipantController::ProcessQuantumGrant(const QuantumGrant& msg)
-{
-    switch (msg.status)
-    {
-    case QuantumRequestStatus::Granted:
-        if (msg.now != _myNextTask.timePoint || msg.duration != _myNextTask.duration)
-        {
-            ReportError("Granted quantum duration does not match request!");
-        }
-        else
-        {
-            _currentTask = _myNextTask;
-            _myNextTask.timePoint = _currentTask.timePoint + _currentTask.duration;
-            ExecuteSimTask();
-        }
-        break;
-    case QuantumRequestStatus::Rejected:
-        break;
-    case QuantumRequestStatus::Invalid:
-        ReportError("Received invalid QuantumGrant");
-        break;
-    default:
-        ReportError("Received QuantumGrant with unknown Status");
     }
 }
 

@@ -45,7 +45,7 @@ auto GenericSubscriber::EndpointAddress() const -> const mw::EndpointAddress&
 
 void GenericSubscriber::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const GenericMessage& msg)
 {
-    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
+    if (AllowMessageProcessing(from->GetServiceId(), _serviceId))
         return;
     ReceiveMessage(msg);
 }

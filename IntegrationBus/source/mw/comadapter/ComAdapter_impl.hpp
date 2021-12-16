@@ -25,7 +25,6 @@
 #include "ParticipantController.hpp"
 #include "SystemController.hpp"
 #include "SystemMonitor.hpp"
-#include "SyncMaster.hpp"
 #include "LogMsgSender.hpp"
 #include "LogMsgReceiver.hpp"
 #include "Logger.hpp"
@@ -124,7 +123,6 @@ void ComAdapter<IbConnectionT>::joinIbDomain(uint32_t domainId)
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::onIbDomainJoined()
 {
-    SetupSyncMaster();
     SetupRemoteLogging();
 
     // Create the participants trace message sinks as declared in the configuration.
@@ -160,16 +158,6 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
             conn.NotifyShutdown();
         }
     });
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SetupSyncMaster()
-{
-    if (_participant.isSyncMaster)
-    {
-        /*[[maybe_unused]]*/ auto* controller = GetSyncMaster();
-        (void)controller;
-    }
 }
 
 template <class IbConnectionT>
@@ -409,24 +397,6 @@ auto ComAdapter<IbConnectionT>::CreateGenericSubscriber(const std::string& canon
     {
         return CreateControllerForLink<sim::generic::GenericSubscriber>(config, config, _timeProvider.get());
     }
-}
-
-template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::GetSyncMaster() -> sync::ISyncMaster*
-{
-    if (!_participant.isSyncMaster)
-    {
-        _logger->Error("ComAdapter::GetSyncMaster(): Participant is not configured as SyncMaster!");
-        throw cfg::Misconfiguration("Participant not configured as SyncMaster");
-    }
-
-    auto* controller = GetController<sync::SyncMaster>(1027);
-    if (!controller)
-    {
-        auto* systemMonitor = GetSystemMonitor();
-        controller = CreateController<sync::SyncMaster>(1027, "SyncMaster", _config, systemMonitor);
-    }
-    return controller;
 }
 
 template <class IbConnectionT>
@@ -724,30 +694,6 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, si
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::NextSimTask& msg)
-{
-    SendIbMessageImpl(from, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::Tick& msg)
-{
-    SendIbMessageImpl(from, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::TickDone& msg)
-{
-    SendIbMessageImpl(from, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::QuantumRequest& msg)
-{
-    SendIbMessageImpl(from, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::QuantumGrant& msg)
 {
     SendIbMessageImpl(from, msg);
 }

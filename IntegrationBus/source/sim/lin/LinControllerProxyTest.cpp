@@ -9,7 +9,6 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ib/mw/string_utils.hpp"
 #include "ib/sim/lin/string_utils.hpp"
 #include "ib/util/functional.hpp"
 
@@ -41,9 +40,9 @@ protected:
             callbacks.FrameStatusHandler(ctrl, frame, status);
         };
 
-        proxy.SetEndpointAddress(addr1_proxy);
-        proxy2.SetEndpointAddress(addr2_proxy);
-        proxyVibe.SetEndpointAddress(addr1_vibe);
+        proxy.SetServiceId(from_endpointAddress(addr1_proxy));
+        proxy2.SetServiceId(from_endpointAddress(addr2_proxy));
+        proxyVibe.SetServiceId(from_endpointAddress(addr1_vibe));
     }
 
 protected:
@@ -156,7 +155,6 @@ TEST_F(LinControllerProxyTest, set_frame_responses)
     proxy.SetFrameResponses(responses);
 }
 
-
 TEST_F(LinControllerProxyTest, trigger_frame_response_update_handler)
 {
     // Configure Master
@@ -178,9 +176,9 @@ TEST_F(LinControllerProxyTest, trigger_frame_response_update_handler)
     responseUpdate.frameResponses.push_back(response1);
     responseUpdate.frameResponses.push_back(response2);
 
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, addr2_proxy, response1))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, to_string(proxy2.GetServiceId()), response1))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, addr2_proxy, response2))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, to_string(proxy2.GetServiceId()), response2))
         .Times(1);
 
     proxy.ReceiveIbMessage(&proxy2, responseUpdate);
@@ -206,9 +204,9 @@ TEST_F(LinControllerProxyTest, trigger_frame_response_update_handler_for_slave_c
     slaveCfg.frameResponses.push_back(response1);
     slaveCfg.frameResponses.push_back(response2);
 
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, addr2_proxy, response1))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, to_string(proxy2.GetServiceId()), response1))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, addr2_proxy, response2))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, to_string(proxy2.GetServiceId()), response2))
         .Times(1);
 
     proxy.ReceiveIbMessage(&proxy2, slaveCfg);

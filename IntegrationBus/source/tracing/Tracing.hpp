@@ -9,7 +9,6 @@
 #include <ostream>
 
 #include "ib/sim/fwd_decl.hpp"
-#include "ib/mw/EndpointAddress.hpp"
 
 #include "ib/cfg/fwd_decl.hpp"
 #include "ib/mw/logging/fwd_decl.hpp"

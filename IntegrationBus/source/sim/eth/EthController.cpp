@@ -84,7 +84,7 @@ void EthController::RegisterBitRateChangedHandler(BitRateChangedHandler /*handle
 
 void EthController::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg)
 {
-    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
+    if (AllowMessageProcessing(from->GetServiceId(), _serviceId))
         return;
 
     _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg.ethFrame);

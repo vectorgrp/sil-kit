@@ -10,7 +10,6 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ib/mw/string_utils.hpp"
 #include "ib/util/functional.hpp"
 
 #include "FrDatatypeUtils.hpp"
@@ -64,12 +63,12 @@ protected:
     : proxy(&comAdapter)
     , proxyFrom(&comAdapter)
     {
-        proxy.SetEndpointAddress(proxyAddress);
+        proxy.SetServiceId(from_endpointAddress(proxyAddress));
 
         referencePayload.resize(20);
         std::iota(referencePayload.begin(), referencePayload.end(), '\000');
 
-        proxyFrom.SetEndpointAddress(controllerAddress);
+        proxyFrom.SetServiceId(from_endpointAddress(controllerAddress));
     }
 
 protected:

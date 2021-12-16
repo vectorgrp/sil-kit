@@ -7,10 +7,6 @@ namespace mw {
 namespace sync {
 
 struct NextSimTask;
-struct Tick;
-struct TickDone;
-struct QuantumRequest;
-struct QuantumGrant;
 
 struct ParticipantCommand;
 struct SystemCommand;

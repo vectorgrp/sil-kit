@@ -5,7 +5,6 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ib/mw/string_utils.hpp"
 #include "ib/util/functional.hpp"
 
 #include "MockComAdapter.hpp"
@@ -51,8 +50,8 @@ protected:
         : port{&comAdapter, comAdapter.GetTimeProvider()}
         , portOther{&comAdapter, comAdapter.GetTimeProvider()}
     {
-        port.SetEndpointAddress(portAddress);
-        portOther.SetEndpointAddress(otherPortAddress);
+        port.SetServiceId(from_endpointAddress(portAddress));
+        portOther.SetServiceId(from_endpointAddress(otherPortAddress));
     }
 
     void RegisterMessageCallback()

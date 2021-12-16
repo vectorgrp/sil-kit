@@ -254,7 +254,7 @@ void LinController::RegisterFrameResponseUpdateHandler(FrameResponseUpdateHandle
 
 void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Transmission& msg)
 {
-    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa) return;
+    if (AllowMessageProcessing(from->GetServiceId(), _serviceId)) return;
 
 
     auto& frame = msg.frame;
@@ -340,13 +340,13 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Trans
 
 void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const WakeupPulse& /*msg*/)
 {
-    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa) return;
+    if (AllowMessageProcessing(from->GetServiceId(), _serviceId)) return;
     CallHandlers(_wakeupHandler, this);
 }
 
 void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerConfig& msg)
 {
-    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa) return;
+    if (AllowMessageProcessing(from->GetServiceId(), _serviceId)) return;
 
     auto& linNode = GetLinNode(from->GetServiceId().legacyEpa);
 
@@ -356,13 +356,13 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Contr
 
     for (auto& response : msg.frameResponses)
     {
-        CallHandlers(_frameResponseUpdateHandler, this, from->GetServiceId().legacyEpa, response);
+        CallHandlers(_frameResponseUpdateHandler, this, to_string(from->GetServiceId()), response);
     }
 }
 
 void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerStatusUpdate& msg)
 {
-    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa) return;
+    if (AllowMessageProcessing(from->GetServiceId(), _serviceId)) return;
 
     auto& linNode = GetLinNode(from->GetServiceId().legacyEpa);
     linNode.controllerStatus = msg.status;
@@ -370,14 +370,14 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Contr
 
 void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrameResponseUpdate& msg)
 {
-    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa) return;
+    if (AllowMessageProcessing(from->GetServiceId(), _serviceId)) return;
 
     auto& linNode = GetLinNode(from->GetServiceId().legacyEpa);
     linNode.UpdateResponses(msg.frameResponses, _logger);
 
     for (auto& response : msg.frameResponses)
     {
-        CallHandlers(_frameResponseUpdateHandler, this, from->GetServiceId().legacyEpa, response);
+        CallHandlers(_frameResponseUpdateHandler, this, to_string(from->GetServiceId()), response);
     }
 }
 

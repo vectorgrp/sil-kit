@@ -211,7 +211,7 @@ void FrController::RegisterCycleStartHandler(CycleStartHandler handler)
 
 void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessage& msg)
 {
-    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
+    if (AllowMessageProcessing(from->GetServiceId(), _serviceId))
         return;
 
     _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg);
@@ -229,7 +229,7 @@ void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMess
 
 void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessageAck& msg)
 {
-    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
+    if (AllowMessageProcessing(from->GetServiceId(), _serviceId))
         return;
 
     CallHandlers(msg);
@@ -237,7 +237,7 @@ void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMess
 
 void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbol& msg)
 {
-    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
+    if (AllowMessageProcessing(from->GetServiceId(), _serviceId))
         return;
 
     // Call WakeupHandler for Wus and Wudop symbols
@@ -268,7 +268,7 @@ void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymb
 
 void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbolAck& msg)
 {
-    if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
+    if (AllowMessageProcessing(from->GetServiceId(), _serviceId))
         return;
 
     // Switch back to the READY state if its an Ack for WUS or WUDOP

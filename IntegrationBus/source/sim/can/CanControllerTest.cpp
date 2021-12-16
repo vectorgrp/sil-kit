@@ -7,7 +7,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ib/mw/string_utils.hpp"
 #include "ib/sim/can/string_utils.hpp"
 
 #include "MockComAdapter.hpp"
@@ -70,7 +69,7 @@ TEST(CanControllerTest, send_can_message)
     const EndpointAddress controllerAddress = { 3, 8 };
 
     CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
-    canController.SetEndpointAddress(controllerAddress);
+    canController.SetServiceId(from_endpointAddress(controllerAddress));
 
 
     CanMessage msg;
@@ -104,7 +103,8 @@ TEST(CanControllerTest, receive_can_message)
     EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now()).Times(1);
 
     CanController canControllerProxy(&mockComAdapter, mockComAdapter.GetTimeProvider());
-    canControllerProxy.SetEndpointAddress(senderAddress);
+    canControllerProxy.SetServiceId(from_endpointAddress(senderAddress));
+    auto& id = canControllerProxy.GetServiceId();
     canController.ReceiveIbMessage(&canControllerProxy, msg);
 }
 
@@ -159,7 +159,7 @@ TEST(CanControllerTest, receive_ack)
     CanControllerCallbacks callbackProvider;
 
     CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
-    canController.SetEndpointAddress(controllerAddress);
+    canController.SetServiceId(from_endpointAddress(controllerAddress));
     canController.RegisterTransmitStatusHandler(std::bind(&CanControllerCallbacks::ReceiveAck, &callbackProvider, _1, _2));
 
     CanMessage msg{};
@@ -190,7 +190,7 @@ TEST(CanControllerTest, cancontroller_uses_tracing)
 
 
     auto controller = CanController(&comAdapter, comAdapter.GetTimeProvider());
-    controller.SetEndpointAddress(controllerAddress);
+    controller.SetServiceId(from_endpointAddress(controllerAddress));
     controller.AddSink(&traceSink);
 
 
@@ -212,7 +212,7 @@ TEST(CanControllerTest, cancontroller_uses_tracing)
         .Times(1);
 
     CanController canControllerProxy(&comAdapter, comAdapter.GetTimeProvider());
-    canControllerProxy.SetEndpointAddress(otherAddress);
+    canControllerProxy.SetServiceId(from_endpointAddress(otherAddress));
     controller.ReceiveIbMessage(&canControllerProxy, msg);
 }
 }  // anonymous namespace

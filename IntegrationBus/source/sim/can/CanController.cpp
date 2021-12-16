@@ -103,7 +103,7 @@ void CanController::RegisterHandler(CallbackT<MsgT> handler)
 
 void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMessage& msg)
 {
-    if (from == this)
+    if (AllowMessageProcessing(from->GetServiceId(), _serviceId))
     {
         return;
     }

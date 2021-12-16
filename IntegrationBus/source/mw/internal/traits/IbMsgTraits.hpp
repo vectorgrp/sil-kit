@@ -9,26 +9,27 @@ namespace mw {
 // the ib messages type traits
 template <class MsgT> struct IbMsgTraitTypeName { static constexpr const char *TypeName(); };
 template <class MsgT> struct IbMsgTraitHistSize { static constexpr std::size_t HistSize() { return 0; } };
+template <class MsgT> struct IbMsgTraitEnforceSelfDelivery { static constexpr bool IsSelfDeliveryEnforced() { return false; } };
 
 // The final message traits
 template <class MsgT> struct IbMsgTraits
     : IbMsgTraitTypeName<MsgT>
     , IbMsgTraitHistSize<MsgT>
+    , IbMsgTraitEnforceSelfDelivery<MsgT>
 {
 };
 
 #define DefineIbMsgTrait_TypeName(Namespace, MsgName) template<> struct IbMsgTraitTypeName<Namespace::MsgName>{\
-    static constexpr const  char* TypeName() { return #Namespace "::" #MsgName;}\
+    static constexpr const char* TypeName() { return #Namespace "::" #MsgName;}\
     };
 #define DefineIbMsgTrait_HistSize(Namespace, MsgName, HistorySize) template<> struct IbMsgTraitHistSize<Namespace::MsgName>{\
     static constexpr std::size_t HistSize() { return HistorySize;} \
     };
+#define DefineIbMsgTrait_EnforceSelfDelivery(Namespace, MsgName) template<> struct IbMsgTraitEnforceSelfDelivery<Namespace::MsgName>{\
+    static constexpr bool IsSelfDeliveryEnforced() { return true;}\
+    };
 
 DefineIbMsgTrait_TypeName(ib::mw::logging, LogMsg)
-DefineIbMsgTrait_TypeName(ib::mw::sync, Tick)
-DefineIbMsgTrait_TypeName(ib::mw::sync, TickDone)
-DefineIbMsgTrait_TypeName(ib::mw::sync, QuantumRequest)
-DefineIbMsgTrait_TypeName(ib::mw::sync, QuantumGrant)
 DefineIbMsgTrait_TypeName(ib::mw::sync, ParticipantCommand)
 DefineIbMsgTrait_TypeName(ib::mw::sync, SystemCommand)
 DefineIbMsgTrait_TypeName(ib::mw::sync, ParticipantStatus)
@@ -69,6 +70,10 @@ DefineIbMsgTrait_TypeName(ib::sim::fr, PocStatus)
 //Messages with history
 DefineIbMsgTrait_HistSize(ib::mw::sync, ParticipantStatus, 1)
 
+//Messages with enforced self delivery
+DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, ParticipantCommand)
+DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, ParticipantStatus)
+DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, SystemCommand)
 
 } // mw
 } // namespace ib

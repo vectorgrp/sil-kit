@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "SyncDatatypes.hpp"
+#include "ib/mw/sync/SyncDatatypes.hpp"
 
 #include <string>
 #include <ostream>
@@ -19,13 +19,7 @@ inline std::string to_string(ParticipantState state);
 inline std::string to_string(SystemState state);
 inline std::string to_string(ParticipantCommand::Kind command);
 inline std::string to_string(SystemCommand::Kind command);
-inline std::string to_string(QuantumRequestStatus status);
 
-inline std::string to_string(const NextSimTask& nextTask);
-inline std::string to_string(const QuantumRequest& request);
-inline std::string to_string(const QuantumGrant& grant);
-inline std::string to_string(const Tick& tick);
-inline std::string to_string(const TickDone& tickDone);
 inline std::string to_string(const ParticipantCommand& command);
 inline std::string to_string(const SystemCommand& command);
 inline std::string to_string(const ParticipantStatus& status);
@@ -36,13 +30,7 @@ inline std::ostream& operator<<(std::ostream& out, ParticipantState state);
 inline std::ostream& operator<<(std::ostream& out, SystemState state);
 inline std::ostream& operator<<(std::ostream& out, ParticipantCommand::Kind command);
 inline std::ostream& operator<<(std::ostream& out, SystemCommand::Kind command);
-inline std::ostream& operator<<(std::ostream& out, QuantumRequestStatus status);
 
-inline std::ostream& operator<<(std::ostream& out, const NextSimTask& nextTask);
-inline std::ostream& operator<<(std::ostream& out, const QuantumRequest& request);
-inline std::ostream& operator<<(std::ostream& out, const QuantumGrant& grant);
-inline std::ostream& operator<<(std::ostream& out, const Tick& tick);
-inline std::ostream& operator<<(std::ostream& out, const TickDone& tickDone);
 inline std::ostream& operator<<(std::ostream& out, const ParticipantCommand& command);
 inline std::ostream& operator<<(std::ostream& out, const SystemCommand& command);
 inline std::ostream& operator<<(std::ostream& out, const ParticipantStatus& status);
@@ -160,55 +148,6 @@ std::string to_string(SystemCommand::Kind command)
     throw ib::type_conversion_error{};
 }
 
-inline std::string to_string(QuantumRequestStatus status)
-{
-    switch (status)
-    {
-    case QuantumRequestStatus::Granted:
-        return "Granted";
-    case QuantumRequestStatus::Rejected:
-        return "Rejected";
-    case QuantumRequestStatus::Invalid:
-        return "Invalid";
-    }
-    throw ib::type_conversion_error{};
-}
-
-std::string to_string(const NextSimTask& nextTask)
-{
-    std::stringstream outStream;
-    outStream << nextTask;
-    return outStream.str();
-}
-
-std::string to_string(const QuantumRequest& request)
-{
-    std::stringstream outStream;
-    outStream << request;
-    return outStream.str();
-}
-
-std::string to_string(const QuantumGrant& grant)
-{
-    std::stringstream outStream;
-    outStream << grant;
-    return outStream.str();
-}
-
-std::string to_string(const Tick& tick)
-{
-    std::stringstream outStream;
-    outStream << tick;
-    return outStream.str();
-}
-
-std::string to_string(const TickDone& tickDone)
-{
-    std::stringstream outStream;
-    outStream << tickDone;
-    return outStream.str();
-}
-
 std::string to_string(const ParticipantCommand& command)
 {
     std::stringstream outStream;
@@ -276,66 +215,6 @@ std::ostream& operator<<(std::ostream& out, SystemCommand::Kind command)
     {
         return out << "SystemCommand::Kind{" << static_cast<uint32_t>(command) << "}";
     }
-}
-
-std::ostream& operator<<(std::ostream& out, QuantumRequestStatus status)
-{
-    try
-    {
-        return out << to_string(status);
-    }
-    catch (const ib::type_conversion_error&)
-    {
-        return out << "QuantumRequestStatus{" << static_cast<uint32_t>(status) << "}";
-    }
-}
-
-std::ostream& operator<<(std::ostream& out, const NextSimTask& nextTask)
-{
-    auto tp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(nextTask.timePoint);
-    auto duration = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(nextTask.duration);
-    out << "sync::NextSimTask{tp=" << tp.count()
-        << "ms, duration=" << duration.count()
-        << "ms}";
-    return out;
-}
-
-
-std::ostream& operator<<(std::ostream& out, const QuantumRequest& request)
-{
-    auto now = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(request.now);
-    auto duration = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(request.duration);
-
-    out << "sync::QuantumRequest{now=" << now.count()
-        << "ms, duration=" << duration.count()
-        << "ms}";
-    return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const QuantumGrant& grant)
-{
-    auto now = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(grant.now);
-    auto duration = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(grant.duration);
-
-    out << "sync::QuantumGrant{grantee={" << grant.grantee.participant << "," << grant.grantee.endpoint
-        << "}, status=" << grant.status
-        << "ms, duration=" << duration.count()
-        << "ms}";
-    return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const Tick& tick)
-{
-    auto now = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(tick.now);
-    auto duration = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(tick.duration);
-    out << "sync::Tick{now=" << now.count() << "ms, duration=" << duration.count() << "}";
-    return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const TickDone& tickDone)
-{
-    out << "sync::TickDone{finished=" << tickDone.finishedTick << "}";
-    return out;
 }
 
 std::ostream& operator<<(std::ostream& out, const ParticipantCommand& command)

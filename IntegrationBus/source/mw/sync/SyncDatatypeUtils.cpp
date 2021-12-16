@@ -8,31 +8,6 @@ namespace mw {
 namespace sync {
 
 
-bool operator==(const QuantumRequest& lhs, const QuantumRequest& rhs)
-{
-    return lhs.now == rhs.now
-        && lhs.duration == rhs.duration;
-}
-
-bool operator==(const QuantumGrant& lhs, const QuantumGrant& rhs)
-{
-    return lhs.grantee == rhs.grantee
-        && lhs.now == rhs.now
-        && lhs.duration == rhs.duration
-        && lhs.status == rhs.status;
-}
-
-bool operator==(const Tick& lhs, const Tick& rhs)
-{
-    return lhs.now == rhs.now
-        && lhs.duration == rhs.duration;
-}
-
-bool operator==(const TickDone& lhs, const TickDone& rhs)
-{
-    return lhs.finishedTick == rhs.finishedTick;
-}
-
 bool operator==(const ParticipantCommand& lhs, const ParticipantCommand& rhs)
 {
     return lhs.kind == rhs.kind;

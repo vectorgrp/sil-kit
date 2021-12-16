@@ -125,7 +125,6 @@ public:
     auto CreateGenericPublisher(const std::string& /*canonicalName*/) -> sim::generic::IGenericPublisher* override { return nullptr; }
     auto CreateGenericSubscriber(const std::string& /*canonicalName*/) -> sim::generic::IGenericSubscriber* override { return nullptr; }
 
-    auto GetSyncMaster() -> sync::ISyncMaster* override { return nullptr; }
     auto GetParticipantController() -> sync::IParticipantController* override { return &mockParticipantController; }
     auto GetSystemMonitor() -> sync::ISystemMonitor* override { return nullptr; }
     auto GetSystemController() -> sync::ISystemController* override { return nullptr; }
@@ -181,10 +180,6 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::generic::GenericMessage& /*msg*/) override {}
 
     void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, const sync::NextSimTask& /*msg*/) {}
-    void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, const sync::Tick& /*msg*/) {}
-    void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, const sync::TickDone& /*msg*/) {}
-    void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, const sync::QuantumRequest& /*msg*/) {}
-    void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, const sync::QuantumGrant& /*msg*/) {}
     void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, const sync::ParticipantStatus& /*msg*/) {}
     void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, const sync::ParticipantCommand& /*msg*/) {}
     void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, const sync::SystemCommand& /*msg*/) {}

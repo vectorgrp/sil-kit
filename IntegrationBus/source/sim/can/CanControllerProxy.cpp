@@ -111,7 +111,7 @@ void CanControllerProxy::RegisterHandler(CallbackT<MsgT> handler)
 
 void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMessage& msg)
 {
-    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
+    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
         return;
 
     _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg);
@@ -121,7 +121,7 @@ void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanTransmitAcknowledge& msg)
 {
-    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
+    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
         return;
 
     auto transmittedMsg = _transmittedMessages.find(msg.transmitId);
@@ -141,7 +141,7 @@ void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanControllerStatus& msg)
 {
-    if (from->GetServiceId().legacyEpa.participant == _serviceId.legacyEpa.participant || from->GetServiceId().legacyEpa.endpoint != _serviceId.legacyEpa.endpoint)
+    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
         return;
 
     if (_controllerState != msg.controllerState)

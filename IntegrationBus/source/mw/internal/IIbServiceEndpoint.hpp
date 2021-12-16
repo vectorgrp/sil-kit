@@ -23,14 +23,19 @@ struct ServiceId
     EndpointAddress legacyEpa{}; //!< legacy endpoint will be removed in the future
 };
 
-inline bool operator==(const ServiceId& lhs, const ServiceId& rhs);
 //!< Returns the ServiceId encoded as a string containing the tuple (participantName, linkName, serviceName)
 inline std::string to_string(const ServiceId& id);
 inline std::ostream& operator<<(std::ostream& out, const ServiceId& id);
 
+inline bool operator==(const ServiceId& lhs, const ServiceId& rhs);
+inline bool AllowMessageProcessingProxy(const ServiceId& lhs, const ServiceId& rhs);
+inline bool AllowMessageProcessing(const ServiceId& lhs, const ServiceId& rhs);
+
 
 //!< Parses a serialized ServiceId into a struct. This is a lossy operation.
-inline auto from_string(const std::string& str) -> ServiceId;
+inline auto from_string(const std::string& str)->ServiceId;
+// Creates a ServiceId based on an endpoint address - for testing purposes only!
+inline auto from_endpointAddress(const EndpointAddress& epa)->ServiceId;
 
 //TODO 
 //     remove IIbEndpoint<MsgT> from IIbTo$Service interfaces
@@ -49,14 +54,39 @@ public:
 
 inline bool operator==(const ServiceId& lhs, const ServiceId& rhs)
 {
-    return 
+    return
         lhs.linkName == rhs.linkName
         && lhs.participantName == rhs.participantName
         && lhs.serviceName == rhs.serviceName
         && lhs.isLinkSimulated == rhs.isLinkSimulated
         && lhs.type == rhs.type
-        && lhs.legacyEpa == rhs.legacyEpa
         ;
+}
+
+inline bool AllowMessageProcessingProxy(const ServiceId& lhs, const ServiceId& rhs)
+{
+  return
+    lhs.legacyEpa.endpoint == rhs.legacyEpa.endpoint
+    && lhs.participantName != rhs.participantName
+    ;
+}
+
+inline bool AllowMessageProcessing(const ServiceId& lhs, const ServiceId& rhs)
+{
+    return
+        lhs.legacyEpa.endpoint == rhs.legacyEpa.endpoint
+        && lhs.participantName == rhs.participantName
+        ;
+}
+
+inline bool EqualsParticipant(const ServiceId& lhs, const ServiceId& rhs)
+{
+    return lhs.participantName == rhs.participantName;
+}
+
+inline bool operator!=(const ServiceId& lhs, const ServiceId& rhs)
+{
+    return !(lhs == rhs);
 }
 
 inline std::string to_string(const ServiceId& id)
@@ -101,6 +131,16 @@ inline auto from_string(const std::string& str) -> ServiceId
     id.serviceName = tokens.at(2);
     return id;
 }
+
+inline auto from_endpointAddress(const EndpointAddress& epa) -> ServiceId
+{
+    ServiceId endpoint{};
+    endpoint.legacyEpa = epa;
+    endpoint.participantName = std::to_string(epa.participant);
+    endpoint.serviceName = std::to_string(epa.endpoint);
+    return endpoint;
+}
+
 inline std::ostream& operator<<(std::ostream& out, const ServiceId& id)
 {
     return out << to_string(id);

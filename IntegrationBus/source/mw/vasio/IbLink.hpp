@@ -82,15 +82,18 @@ void IbLink<MsgT>::DistributeRemoteIbMessage(const IIbServiceEndpoint* from, con
         DispatchIbMessage(receiver, from, msg);
     }
 }
-    
+
 template <class MsgT>
 void IbLink<MsgT>::DistributeLocalIbMessage(const IIbServiceEndpoint* from, const MsgT& msg)
 {
     for (auto&& receiver : _localReceivers)
     {
         auto* receiverId = dynamic_cast<const IIbServiceEndpoint*>(receiver);
-        //TODO VIB-415 we need to decide self-delivery here:
-        // if (receiverId == from) continue;
+        // C++ 17 -> if constexpr
+        if (!IbMsgTraits<MsgT>::IsSelfDeliveryEnforced())
+        {
+          if (receiverId == from) continue;
+        }
         DispatchIbMessage(receiver, from, msg);
     }
     DispatchIbMessage(&_vasioTransmitter, from, msg);
