@@ -7,10 +7,10 @@
 macro(configure_ib_version project_name)
     set(IB_VERSION_MAJOR 3)
     set(IB_VERSION_MINOR 6)
-    set(IB_VERSION_PATCH 1)
+    set(IB_VERSION_PATCH 2)
     set(IB_BUILD_NUMBER 0 CACHE STRING "The build number")
     set(IB_SPRINT_NUMBER 64)
-    set(IB_SPRINT_NAME "2021QA3")
+    set(IB_SPRINT_NAME "2021 VIB Sprint 15")
 
     set(${project_name}_VERSION_MAJOR ${IB_VERSION_MAJOR})
     set(${project_name}_VERSION_MINOR ${IB_VERSION_MINOR})

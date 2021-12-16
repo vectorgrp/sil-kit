@@ -5,6 +5,46 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.6.2] - 2021-12-16
+--------------------------------
+
+Fixed
+~~~~~
+- C-API: fix transmission of flags in CAN SendFrame (VIB-548).
+- Links are now checked for unique endpoints (VIB-542).
+
+Changes
+~~~~~~~
+- Remove FastRTPS submodule in main repository.
+- cmake: make Linux detection more portable.
+  We now use ``lsb_release`` to determine Linux Standard Base name and version of the distribution.
+- C-API: refactoring as described in VIB-529.
+  The experimental C API has been refactored to make use of a unified naming scheme.
+  The following changes have been introduced:
+
+  - All identifiers related to a specific object (or topic) now use the prefix ``ib_Topic_``.
+    For instance, ``ib_CanController_Stop`` has been renamed to ``ib_Can_Controller_Stop``.
+    The names are now unified for all functions and types, and for the 'topics'
+    SimulationParticipant, Can, Ethernet, FlexRay, Lin.
+
+  - The functions ending with ``_create`` or ``_destroy`` have been renamed to ``_Create`` or ``_Destroy``.
+
+
+  
+Added
+~~~~~
+- Added SerDes support library for easy serialization /deserialization of user data.
+  Refer to `Demos/GenericMessage/GenericMessageDemoSerDes.cpp` for an example (VIB-514).
+
+Compatibility with 3.6.1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): No (build is disabled)
+- Middleware network protocol (VAsio): Yes
+
+
 [3.6.1-QA] - 2021-12-10
 --------------------------------
 This is a Quality Assured Release.
@@ -31,16 +71,17 @@ Changed
   assured release.
   The upcoming release of Vector CANoe 16 will support the IntegrationBus directly.
 
-- The experimental C API has been grossly revamped to make use of a unified naming scheme.
-  The following changes have been introduced:
-  - All identifiers related to a specific object (or topic) now use the prefix ib_Topic_. 
-    For instance, ib_CanController_Stop has been renamed to ib_Can_Controller_Stop. The names are now 
-    unified for all functions and types, and for the 'topics' SimulationParticipant, Can, Ethernet, FlexRay, Lin.
-  - The functions ending with _create or _destroy have been renamed to _Create or _Destroy.
-
 Fixed
 ~~~~~
 - Fixed a regression in the ``Replay`` feature and the VIBE-NetworkSimulator support (VIB-544).
+
+Compatibility with 3.6.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): Yes 
+- Application software interface (API): Yes
+- Middleware network protocol (FastRTPS): No (build is disabled)
+- Middleware network protocol (VAsio): Yes
 
 [3.6.0] - 2021-12-01
 --------------------------------
