@@ -193,7 +193,7 @@ private:
     // ----------------------------------------
     // private datatypes
     template<typename ControllerT>
-    using ControllerMap = std::unordered_map<EndpointId, std::unique_ptr<ControllerT>>;
+    using ControllerMap = std::unordered_map<std::string, std::unique_ptr<ControllerT>>;
 
 private:
     // ----------------------------------------
@@ -213,12 +213,12 @@ private:
     auto CreateOutPort(const ConfigT& config) -> sim::io::IOutPort<MsgT>*;
 
     template<class ControllerT>
-    auto GetController(EndpointId endpointId) -> ControllerT*;
+    auto GetController(const std::string& serviceName) -> ControllerT*;
     template<class ControllerT, typename... Arg>
-    auto CreateController(const std::string& serviceName, EndpointId endpointId, const cfg::Link& link, Arg&&... arg) -> ControllerT*;
+    auto CreateController(const cfg::Link& link, const std::string& serviceName, Arg&&... arg) -> ControllerT*;
     //!< internal services don't have a link config
     template<class ControllerT, typename... Arg>
-    auto CreateController(EndpointId endpointId, const std::string& serviceName,  Arg&&... arg) -> ControllerT*;
+    auto CreateController(const std::string& serviceName,  Arg&&... arg) -> ControllerT*;
 
     auto GetLinkById(int16_t linkId) -> cfg::Link&;
 

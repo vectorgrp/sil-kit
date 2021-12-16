@@ -100,6 +100,9 @@ public:
     
     //Service discovery for dynamic, configuration-less simulations
     virtual auto GetServiceDiscovery() -> ib::mw::service::ServiceDiscovery* = 0;
+
+protected:
+    EndpointId _localEndpointId = 0;
 };
 
 } // mw

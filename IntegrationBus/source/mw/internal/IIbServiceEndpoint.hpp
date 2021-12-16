@@ -18,6 +18,7 @@ struct ServiceId
     std::string participantName{ "Undefined" }; //!< name of the participant
     std::string linkName{ "Undefined" }; //!< the service's link name
     std::string serviceName{ "Undefined" }; //!< the controller's or the service's name
+    std::uint16_t serviceId{ 0 };
     bool isLinkSimulated{ false };
     cfg::Link::Type type{ cfg::Link::Type::Undefined };
     EndpointAddress legacyEpa{}; //!< legacy endpoint will be removed in the future
@@ -140,6 +141,7 @@ inline auto from_endpointAddress(const EndpointAddress& epa) -> ServiceId
     endpoint.legacyEpa = epa;
     endpoint.participantName = std::to_string(epa.participant);
     endpoint.serviceName = std::to_string(epa.endpoint);
+    endpoint.serviceId = epa.endpoint;
     return endpoint;
 }
 

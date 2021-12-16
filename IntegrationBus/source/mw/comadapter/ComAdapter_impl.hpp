@@ -62,7 +62,7 @@ namespace {
 template<class T, class U>
 struct IsControllerMap : std::false_type {};
 template<class T, class U>
-struct IsControllerMap<std::unordered_map<EndpointId, std::unique_ptr<T>>, U> : std::is_base_of<T, U> {};
+struct IsControllerMap<std::unordered_map<std::string, std::unique_ptr<T>>, U> : std::is_base_of<T, U> {};
 
 
 // Helper to find all the NetworkSimulator configuration blocks,
@@ -172,7 +172,7 @@ void ComAdapter<IbConnectionT>::SetupRemoteLogging()
     {
         if (_participant.logger.logFromRemotes)
         {
-            CreateController<logging::LogMsgReceiver>(1029, "LogMsgReceiver",logger);
+            CreateController<logging::LogMsgReceiver>("LogMsgReceiver", logger);
         }
 
         auto sinkIter = std::find_if(_participant.logger.sinks.begin(), _participant.logger.sinks.end(),
@@ -180,7 +180,7 @@ void ComAdapter<IbConnectionT>::SetupRemoteLogging()
 
         if (sinkIter != _participant.logger.sinks.end())
         {
-            auto&& logMsgSender = CreateController<logging::LogMsgSender>(1028, "LogMsgSender");
+            auto&& logMsgSender = CreateController<logging::LogMsgSender>("LogMsgSender");
 
             logger->RegisterRemoteLogging([logMsgSender](logging::LogMsg logMsg) {
 
@@ -406,10 +406,10 @@ auto ComAdapter<IbConnectionT>::CreateGenericSubscriber(const std::string& canon
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::GetParticipantController() -> sync::IParticipantController*
 {
-    auto* controller = GetController<sync::ParticipantController>(1024);
+    auto* controller = GetController<sync::ParticipantController>("ParticipantController");
     if (!controller)
     {
-        controller = CreateController<sync::ParticipantController>(1024, "ParticipantController", _config.simulationSetup, _participant);
+        controller = CreateController<sync::ParticipantController>("ParticipantController", _config.simulationSetup, _participant);
     }
 
     return controller;
@@ -418,10 +418,10 @@ auto ComAdapter<IbConnectionT>::GetParticipantController() -> sync::IParticipant
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::GetSystemMonitor() -> sync::ISystemMonitor*
 {
-    auto* controller = GetController<sync::SystemMonitor>(1025);
+    auto* controller = GetController<sync::SystemMonitor>("SystemMonitor");
     if (!controller)
     {
-        controller = CreateController<sync::SystemMonitor>(1025, "SystemMonitor", _config.simulationSetup);
+        controller = CreateController<sync::SystemMonitor>("SystemMonitor", _config.simulationSetup);
     }
     return controller;
 }
@@ -429,10 +429,10 @@ auto ComAdapter<IbConnectionT>::GetSystemMonitor() -> sync::ISystemMonitor*
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::GetServiceDiscovery() -> service::ServiceDiscovery*
 {
-    auto* controller = GetController<service::ServiceDiscovery>(1030);
+    auto* controller = GetController<service::ServiceDiscovery>("ServiceDiscovery");
     if (!controller)
     {
-        controller = CreateController<service::ServiceDiscovery>(1030, "ServiceDiscovery", _participantName );
+        controller = CreateController<service::ServiceDiscovery>("ServiceDiscovery", _participantName );
     }
     return controller;
 }
@@ -440,10 +440,10 @@ auto ComAdapter<IbConnectionT>::GetServiceDiscovery() -> service::ServiceDiscove
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::GetSystemController() -> sync::ISystemController*
 {
-    auto* controller = GetController<sync::SystemController>(1026);
+    auto* controller = GetController<sync::SystemController>("SystemController");
     if (!controller)
     {
-        return CreateController<sync::SystemController>(1026,"SystemController" );
+        return CreateController<sync::SystemController>("SystemController" );
     }
     return controller;
 }
@@ -760,12 +760,12 @@ void ComAdapter<IbConnectionT>::SendIbMessageImpl(const IIbServiceEndpoint* from
 
 template <class IbConnectionT>
 template <class ControllerT>
-auto ComAdapter<IbConnectionT>::GetController(EndpointId endpointId) -> ControllerT*
+auto ComAdapter<IbConnectionT>::GetController(const std::string& serviceName) -> ControllerT*
 {
     auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
-    if (controllerMap.count(endpointId))
+    if (controllerMap.count(serviceName))
     {
-        return static_cast<ControllerT*>(controllerMap.at(endpointId).get());
+        return static_cast<ControllerT*>(controllerMap.at(serviceName).get());
     }
     else
     {
@@ -775,27 +775,25 @@ auto ComAdapter<IbConnectionT>::GetController(EndpointId endpointId) -> Controll
 
 template <class IbConnectionT>
 template<class ControllerT, typename... Arg>
-auto ComAdapter<IbConnectionT>::CreateController(EndpointId endpointId, const std::string& serviceName,  Arg&&... arg) -> ControllerT*
+auto ComAdapter<IbConnectionT>::CreateController(const std::string& serviceName,  Arg&&... arg) -> ControllerT*
 {
     //NB internal services have hard-coded endpoint  Ids but no Link configs. so provide one
     cfg::Link link{};
     link.id = -1;
     link.name = "default";
     link.type = cfg::Link::Type::Undefined; // internal usage, normally "default"
-    return CreateController<ControllerT>(serviceName, endpointId, link, std::forward<Arg>(arg)...);
+    return CreateController<ControllerT>(link, serviceName, std::forward<Arg>(arg)...);
 }
 
 template <class IbConnectionT>
 template <class ControllerT, typename... Arg>
-auto ComAdapter<IbConnectionT>::CreateController(const std::string& serviceName, EndpointId endpointId, const cfg::Link& link, Arg&&... arg) -> ControllerT*
+auto ComAdapter<IbConnectionT>::CreateController(const cfg::Link& link, const std::string& serviceName, Arg&&... arg) -> ControllerT*
 {
     auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
     auto controller = std::make_unique<ControllerT>(this, std::forward<Arg>(arg)...);
     auto* controllerPtr = controller.get();
 
-    //Not yet ready: auto endpointId = _ibConnection.CreateUniqueEndpointId();
-
-    controller->SetEndpointAddress({ _participantId, endpointId });
+    controller->SetEndpointAddress({ _participantId, _localEndpointId });
 
     auto id = ServiceId{};
     id.linkName = link.name;
@@ -803,12 +801,14 @@ auto ComAdapter<IbConnectionT>::CreateController(const std::string& serviceName,
     id.serviceName = serviceName;
     id.type = link.type;
     id.legacyEpa = controller->EndpointAddress();
+    id.serviceId = _localEndpointId;
     controller->SetServiceId(id);
+    ++_localEndpointId;
 
-    _ibConnection.RegisterIbService(link.name, endpointId, controllerPtr);
+    _ibConnection.RegisterIbService(link.name, _localEndpointId, controllerPtr);
 
 
-    controllerMap[endpointId] = std::move(controller);
+    controllerMap[controller->GetServiceId().serviceName] = std::move(controller);
 
     //Tell the service discovery that a new service was created
     service::ServiceDescription descr; //TODO We should move supplementalData to ServiceId
@@ -868,7 +868,7 @@ auto ComAdapter<IbConnectionT>::CreateControllerForLink(const ConfigT& config, A
 {
     auto&& linkCfg = GetLinkById(config.linkId);
 
-    auto* controllerPtr = GetController<ControllerT>(config.endpointId);
+    auto* controllerPtr = GetController<ControllerT>(config.name);
     if (controllerPtr != nullptr)
     {
         // We cache the controller and return it here.
@@ -876,7 +876,7 @@ auto ComAdapter<IbConnectionT>::CreateControllerForLink(const ConfigT& config, A
     }
     
     // Create a new controller, and configure tracing if applicable
-    auto* controller = CreateController<ControllerT>(config.name, config.endpointId, linkCfg, std::forward<Arg>(arg)...);
+    auto* controller = CreateController<ControllerT>(linkCfg, config.name, std::forward<Arg>(arg)...);
     auto* traceSource = dynamic_cast<extensions::ITraceMessageSource*>(controller);
     if (traceSource)
     {
