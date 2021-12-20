@@ -33,31 +33,23 @@ auto ServiceDiscovery::GetServiceId() const -> const mw::ServiceId&
 void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const ServiceAnnouncement& msg)
 {
     //NB: currently we only compute additions and a removal will trigger the assertion failure
+    size_t lastAnnouncementIndex = 0;
     if (_announcementMap.find(msg.participantName) != _announcementMap.end())
     {
-        // compute which services were added
-        auto&& oldAnnouncement = _announcementMap[msg.participantName];
+        // compute which services were added compared to last time we saw an announcement from participant
+        const auto& oldAnnouncement = _announcementMap[msg.participantName];
         if (!(oldAnnouncement.services.size() < msg.services.size()))
         {
             throw std::runtime_error("ServiceDiscovery: ReceiveIbMessage: Assertion failed");
         }
-        for (auto i = oldAnnouncement.services.size(); i < msg.services.size(); i++)
-        {
-            const auto& newService = msg.services[i];
-            for (auto&& handler : _handlers)
-            {
-                handler(Type::ServiceCreated, newService);
-            }
-        }
+        lastAnnouncementIndex = oldAnnouncement.services.size();
     }
-    else 
+    for (auto idx = lastAnnouncementIndex; idx < msg.services.size(); idx++)
     {
-        for (auto&& service : msg.services)
+        const auto& service = msg.services[idx];
+        for (auto&& handler : _handlers)
         {
-            for (auto&& handler : _handlers)
-            {
-                handler(Type::ServiceCreated, service);
-            }
+            handler(Type::ServiceCreated, service);
         }
     }
     _announcementMap[msg.participantName] = msg;
