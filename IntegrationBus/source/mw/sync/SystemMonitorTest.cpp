@@ -1,5 +1,4 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
-#if 0
 #include "SystemMonitor.hpp"
 
 #include <chrono>
@@ -117,9 +116,9 @@ protected:
 TEST_F(SystemMonitorTest, init_with_state_invalid)
 {
     EXPECT_EQ(monitor.SystemState(), SystemState::Invalid);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Invalid);
-    EXPECT_EQ(monitor.ParticipantState(2), ParticipantState::Invalid);
-    EXPECT_EQ(monitor.ParticipantState(3), ParticipantState::Invalid);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Invalid);
+    EXPECT_EQ(monitor.ParticipantStatus("P2").state, ParticipantState::Invalid);
+    EXPECT_EQ(monitor.ParticipantStatus("P3").state, ParticipantState::Invalid);
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
@@ -130,13 +129,13 @@ TEST_F(SystemMonitorTest, detect_system_idle)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Idle);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Idle);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Idle);
 
     SetParticipantStatus(2, ParticipantState::Idle);
-    EXPECT_EQ(monitor.ParticipantState(2), ParticipantState::Idle);
+    EXPECT_EQ(monitor.ParticipantStatus("P2").state, ParticipantState::Idle);
 
     SetParticipantStatus(3, ParticipantState::Idle);
-    EXPECT_EQ(monitor.ParticipantState(3), ParticipantState::Idle);
+    EXPECT_EQ(monitor.ParticipantStatus("P3").state, ParticipantState::Idle);
 
     EXPECT_EQ(monitor.SystemState(), SystemState::Idle);
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
@@ -151,15 +150,15 @@ TEST_F(SystemMonitorTest, detect_system_initializing)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Initializing);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Initializing);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Initializing);
     EXPECT_EQ(monitor.SystemState(), SystemState::Initializing);
 
     SetParticipantStatus(2, ParticipantState::Initializing);
-    EXPECT_EQ(monitor.ParticipantState(2), ParticipantState::Initializing);
+    EXPECT_EQ(monitor.ParticipantStatus("P2").state, ParticipantState::Initializing);
     EXPECT_EQ(monitor.SystemState(), SystemState::Initializing);
 
     SetParticipantStatus(3, ParticipantState::Initializing);
-    EXPECT_EQ(monitor.ParticipantState(3), ParticipantState::Initializing);
+    EXPECT_EQ(monitor.ParticipantStatus("P3").state, ParticipantState::Initializing);
     EXPECT_EQ(monitor.SystemState(), SystemState::Initializing);
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
@@ -175,15 +174,15 @@ TEST_F(SystemMonitorTest, detect_system_initialized)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Initialized);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Initialized);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Initialized);
     EXPECT_EQ(monitor.SystemState(), SystemState::Initializing);
 
     SetParticipantStatus(2, ParticipantState::Initialized);
-    EXPECT_EQ(monitor.ParticipantState(2), ParticipantState::Initialized);
+    EXPECT_EQ(monitor.ParticipantStatus("P2").state, ParticipantState::Initialized);
     EXPECT_EQ(monitor.SystemState(), SystemState::Initializing);
 
     SetParticipantStatus(3, ParticipantState::Initialized);
-    EXPECT_EQ(monitor.ParticipantState(3), ParticipantState::Initialized);
+    EXPECT_EQ(monitor.ParticipantStatus("P3").state, ParticipantState::Initialized);
 
     EXPECT_EQ(monitor.SystemState(), SystemState::Initialized);
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
@@ -201,15 +200,15 @@ TEST_F(SystemMonitorTest, detect_system_running)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Running);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Running);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Running);
     EXPECT_EQ(monitor.SystemState(), SystemState::Initialized);
 
     SetParticipantStatus(2, ParticipantState::Running);
-    EXPECT_EQ(monitor.ParticipantState(2), ParticipantState::Running);
+    EXPECT_EQ(monitor.ParticipantStatus("P2").state, ParticipantState::Running);
     EXPECT_EQ(monitor.SystemState(), SystemState::Initialized);
 
     SetParticipantStatus(3, ParticipantState::Running);
-    EXPECT_EQ(monitor.ParticipantState(3), ParticipantState::Running);
+    EXPECT_EQ(monitor.ParticipantStatus("P3").state, ParticipantState::Running);
 
     EXPECT_EQ(monitor.SystemState(), SystemState::Running);
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
@@ -232,11 +231,11 @@ TEST_F(SystemMonitorTest, detect_system_pause)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Paused);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Paused);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Paused);
     EXPECT_EQ(monitor.SystemState(), SystemState::Paused);
 
     SetParticipantStatus(1, ParticipantState::Running);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Running);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Running);
     EXPECT_EQ(monitor.SystemState(), SystemState::Running);
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
@@ -257,19 +256,19 @@ TEST_F(SystemMonitorTest, detect_multiple_paused_clients)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Paused);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Paused);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Paused);
     EXPECT_EQ(monitor.SystemState(), SystemState::Paused);
 
     SetParticipantStatus(2, ParticipantState::Paused);
-    EXPECT_EQ(monitor.ParticipantState(2), ParticipantState::Paused);
+    EXPECT_EQ(monitor.ParticipantStatus("P2").state, ParticipantState::Paused);
     EXPECT_EQ(monitor.SystemState(), SystemState::Paused);
 
     SetParticipantStatus(2, ParticipantState::Running);
-    EXPECT_EQ(monitor.ParticipantState(2), ParticipantState::Running);
+    EXPECT_EQ(monitor.ParticipantStatus("P2").state, ParticipantState::Running);
     EXPECT_EQ(monitor.SystemState(), SystemState::Paused);
 
     SetParticipantStatus(1, ParticipantState::Running);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Running);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Running);
     EXPECT_EQ(monitor.SystemState(), SystemState::Running);
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
@@ -287,7 +286,7 @@ TEST_F(SystemMonitorTest, detect_system_stopping)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Stopping);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Stopping);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Stopping);
     EXPECT_EQ(monitor.SystemState(), SystemState::Stopping);
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
@@ -307,27 +306,27 @@ TEST_F(SystemMonitorTest, detect_system_stopped)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Stopping);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Stopping);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Stopping);
     EXPECT_EQ(monitor.SystemState(), SystemState::Stopping);
 
     SetParticipantStatus(1, ParticipantState::Stopped);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Stopped);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Stopped);
     EXPECT_EQ(monitor.SystemState(), SystemState::Stopping);
 
     SetParticipantStatus(2, ParticipantState::Stopping);
-    EXPECT_EQ(monitor.ParticipantState(2), ParticipantState::Stopping);
+    EXPECT_EQ(monitor.ParticipantStatus("P2").state, ParticipantState::Stopping);
     EXPECT_EQ(monitor.SystemState(), SystemState::Stopping);
 
     SetParticipantStatus(2, ParticipantState::Stopped);
-    EXPECT_EQ(monitor.ParticipantState(2), ParticipantState::Stopped);
+    EXPECT_EQ(monitor.ParticipantStatus("P2").state, ParticipantState::Stopped);
     EXPECT_EQ(monitor.SystemState(), SystemState::Stopping);
 
     SetParticipantStatus(3, ParticipantState::Stopping);
-    EXPECT_EQ(monitor.ParticipantState(3), ParticipantState::Stopping);
+    EXPECT_EQ(monitor.ParticipantStatus("P3").state, ParticipantState::Stopping);
     EXPECT_EQ(monitor.SystemState(), SystemState::Stopping);
 
     SetParticipantStatus(3, ParticipantState::Stopped);
-    EXPECT_EQ(monitor.ParticipantState(3), ParticipantState::Stopped);
+    EXPECT_EQ(monitor.ParticipantStatus("P3").state, ParticipantState::Stopped);
     EXPECT_EQ(monitor.SystemState(), SystemState::Stopped);
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
@@ -346,7 +345,7 @@ TEST_F(SystemMonitorTest, detect_initializing_after_stopped)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Initializing);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Initializing);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Initializing);
     EXPECT_EQ(monitor.SystemState(), SystemState::Initializing);
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
@@ -366,15 +365,15 @@ TEST_F(SystemMonitorTest, detect_initialized_after_stopped)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Initialized);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Initialized);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Initialized);
     EXPECT_EQ(monitor.SystemState(), SystemState::Initializing);
 
     SetParticipantStatus(2, ParticipantState::Initialized);
-    EXPECT_EQ(monitor.ParticipantState(2), ParticipantState::Initialized);
+    EXPECT_EQ(monitor.ParticipantStatus("P2").state, ParticipantState::Initialized);
     EXPECT_EQ(monitor.SystemState(), SystemState::Initializing);
 
     SetParticipantStatus(3, ParticipantState::Initialized);
-    EXPECT_EQ(monitor.ParticipantState(3), ParticipantState::Initialized);
+    EXPECT_EQ(monitor.ParticipantStatus("P3").state, ParticipantState::Initialized);
     EXPECT_EQ(monitor.SystemState(), SystemState::Initialized);
 
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
@@ -396,7 +395,7 @@ TEST_F(SystemMonitorTest, detect_shuttingdown)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::ShuttingDown);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::ShuttingDown);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::ShuttingDown);
     EXPECT_EQ(monitor.SystemState(), SystemState::ShuttingDown);
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
@@ -414,18 +413,18 @@ TEST_F(SystemMonitorTest, detect_shutdown)
 
 
     SetParticipantStatus(1, ParticipantState::Shutdown);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Shutdown);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Shutdown);
     EXPECT_EQ(monitor.SystemState(), SystemState::ShuttingDown);
 
     SetParticipantStatus(2, ParticipantState::Shutdown);
-    EXPECT_EQ(monitor.ParticipantState(2), ParticipantState::Shutdown);
+    EXPECT_EQ(monitor.ParticipantStatus("P2").state, ParticipantState::Shutdown);
     EXPECT_EQ(monitor.SystemState(), SystemState::ShuttingDown);
 
     RegisterSystemHandler();
     EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Shutdown))
         .Times(1);
     SetParticipantStatus(3, ParticipantState::Shutdown);
-    EXPECT_EQ(monitor.ParticipantState(3), ParticipantState::Shutdown);
+    EXPECT_EQ(monitor.ParticipantStatus("P3").state, ParticipantState::Shutdown);
     EXPECT_EQ(monitor.SystemState(), SystemState::Shutdown);
 
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
@@ -441,7 +440,7 @@ TEST_F(SystemMonitorTest, detect_error_from_idle)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Error);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Error);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Error);
     EXPECT_EQ(monitor.SystemState(), SystemState::Error);
 
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
@@ -458,7 +457,7 @@ TEST_F(SystemMonitorTest, detect_error_from_initializing)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Error);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Error);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Error);
     EXPECT_EQ(monitor.SystemState(), SystemState::Error);
 
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
@@ -476,7 +475,7 @@ TEST_F(SystemMonitorTest, detect_error_from_initialized)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Error);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Error);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Error);
     EXPECT_EQ(monitor.SystemState(), SystemState::Error);
 
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
@@ -495,7 +494,7 @@ TEST_F(SystemMonitorTest, detect_error_from_running)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Error);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Error);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Error);
     EXPECT_EQ(monitor.SystemState(), SystemState::Error);
 
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
@@ -510,7 +509,7 @@ TEST_F(SystemMonitorTest, detect_error_from_paused)
     EXPECT_EQ(monitor.SystemState(), SystemState::Running);
 
     SetParticipantStatus(1, ParticipantState::Paused);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Paused);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Paused);
     EXPECT_EQ(monitor.SystemState(), SystemState::Paused);
 
     RegisterSystemHandler();
@@ -518,7 +517,7 @@ TEST_F(SystemMonitorTest, detect_error_from_paused)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Error);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Error);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Error);
     EXPECT_EQ(monitor.SystemState(), SystemState::Error);
 
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
@@ -533,7 +532,7 @@ TEST_F(SystemMonitorTest, detect_error_from_stopping)
     EXPECT_EQ(monitor.SystemState(), SystemState::Running);
 
     SetParticipantStatus(1, ParticipantState::Stopping);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Stopping);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Stopping);
     EXPECT_EQ(monitor.SystemState(), SystemState::Stopping);
 
     RegisterSystemHandler();
@@ -541,7 +540,7 @@ TEST_F(SystemMonitorTest, detect_error_from_stopping)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Error);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Error);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Error);
     EXPECT_EQ(monitor.SystemState(), SystemState::Error);
 
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
@@ -561,7 +560,7 @@ TEST_F(SystemMonitorTest, detect_error_from_stopped)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Error);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Error);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Error);
     EXPECT_EQ(monitor.SystemState(), SystemState::Error);
 
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
@@ -578,7 +577,7 @@ TEST_F(SystemMonitorTest, detect_error_from_shuttingdown)
     EXPECT_EQ(monitor.SystemState(), SystemState::Stopped);
 
     SetParticipantStatus(1, ParticipantState::ShuttingDown);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::ShuttingDown);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::ShuttingDown);
     EXPECT_EQ(monitor.SystemState(), SystemState::ShuttingDown);
 
     // if the Shutdown callback triggers an error, this can lead to a temporary SystemError state.
@@ -587,13 +586,13 @@ TEST_F(SystemMonitorTest, detect_error_from_shuttingdown)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Error);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Error);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Error);
     EXPECT_EQ(monitor.SystemState(), SystemState::Error);
 
     // After the callback, the participant state will be set to Shutdown.
     // The system state will remain in Error until all participants are Shutdown.
     SetParticipantStatus(1, ParticipantState::Shutdown);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Shutdown);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Shutdown);
     EXPECT_EQ(monitor.SystemState(), SystemState::Error);
 
     EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Shutdown))
@@ -610,7 +609,7 @@ TEST_F(SystemMonitorTest, detect_initializing_after_error)
     EXPECT_EQ(monitor.SystemState(), SystemState::Idle);
 
     SetParticipantStatus(1, ParticipantState::Error);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Error);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Error);
     EXPECT_EQ(monitor.SystemState(), SystemState::Error);
 
     RegisterSystemHandler();
@@ -618,7 +617,7 @@ TEST_F(SystemMonitorTest, detect_initializing_after_error)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::Initializing);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Initializing);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Initializing);
     EXPECT_EQ(monitor.SystemState(), SystemState::Initializing);
 
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
@@ -747,7 +746,7 @@ TEST_F(SystemMonitorTest, detect_shuttingdown_after_error)
     EXPECT_EQ(monitor.SystemState(), SystemState::Idle);
 
     SetParticipantStatus(1, ParticipantState::Error);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::Error);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Error);
     EXPECT_EQ(monitor.SystemState(), SystemState::Error);
 
     RegisterSystemHandler();
@@ -755,7 +754,7 @@ TEST_F(SystemMonitorTest, detect_shuttingdown_after_error)
         .Times(1);
 
     SetParticipantStatus(1, ParticipantState::ShuttingDown);
-    EXPECT_EQ(monitor.ParticipantState(1), ParticipantState::ShuttingDown);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::ShuttingDown);
     EXPECT_EQ(monitor.SystemState(), SystemState::ShuttingDown);
 
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
@@ -892,6 +891,4 @@ TEST_F(SystemMonitorTest, detect_initialized_after_invalid)
     EXPECT_EQ(monitor.SystemState(), SystemState::Initialized);
 }
 
-
 } // anonymous namespace for test
-#endif 0
