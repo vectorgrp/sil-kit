@@ -70,13 +70,12 @@ DefineIbMsgTrait_TypeName(ib::mw::service, ServiceAnnouncement)
 
 //Messages with history
 DefineIbMsgTrait_HistSize(ib::mw::sync, ParticipantStatus, 1)
+DefineIbMsgTrait_HistSize(ib::mw::service, ServiceAnnouncement, 1)
 
 //Messages with enforced self delivery
 DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, ParticipantCommand)
 DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, ParticipantStatus)
 DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, SystemCommand)
-
-DefineIbMsgTrait_HistSize(ib::mw::service, ServiceAnnouncement, 1)
 
 
 } // mw

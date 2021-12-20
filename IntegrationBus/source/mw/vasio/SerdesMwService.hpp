@@ -24,6 +24,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
         ;
     return buffer;
 }
+
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
     ib::mw::ServiceId& updatedMsg)
 {
@@ -40,48 +41,45 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
 //Special case for std::map<std::string, std::string> ServiceDescription::supplementalData
 // not generic enough to add to MessageBuffer.hpp.
 // We encode it as follows:
-// NUM_ELEMENTS
-// VECTOR keys
-// VECTOR elems
+// NUM_ELEMENTS N
+// STRING key1 STRING value1
+// ...
+// STRING keyN STRING valueN
 // 
 // for a generic approach we would have to encode the key type and the element type somehow
 
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
     const std::map<std::string, std::string>& msg)
 {
-    std::vector<std::string> keys;
-    std::vector<std::string> values;
+    buffer << msg.size();
     for (auto&& kv : msg)
     {
-        keys.push_back(kv.first);
-        values.push_back(kv.second);
+        buffer << kv.first
+            << kv.second
+            ;
     }
-
-    buffer << msg.size()
-        << keys
-        << values
-        ;
     return buffer;
 }
 
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
     std::map<std::string,std::string>& updatedMsg)
 {
-    std::vector<std::string> keys;
-    std::vector<std::string> values;
-    size_t numElements;
-    buffer >> numElements
-        >> keys
-        >> values
-        ;
-    if (numElements != keys.size() || numElements != values.size())
+    std::map<std::string, std::string> tmp;// do not modify updatedMsg until we validated the input
+    size_t numElements{ 0 };
+    buffer >> numElements;
+
+    for (auto i = 0u; i < numElements; i++)
+    {
+        std::string key;
+        std::string value;
+        buffer >> key >> value;
+        tmp[key] = std::move(value);
+    }
+    if (numElements != tmp.size())
     {
         throw std::runtime_error("MessageBuffer unable to deserialize std::map<std::string, std::string>");
     }
-    for (auto i = 0u; i < keys.size(); i++)
-    {
-        updatedMsg[keys[i]] = values[i];
-    }
+    updatedMsg = std::move(tmp);
     return buffer;
 }
 
@@ -96,6 +94,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
         ;
     return buffer;
 }
+
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
     ServiceDescription& updatedMsg)
 {
@@ -111,14 +110,17 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
     const ServiceAnnouncement& msg)
 {
     buffer << msg.participantName
+        << msg.version
         << msg.services
         ;
     return buffer;
 }
+
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
     ServiceAnnouncement& updatedMsg)
 {
     buffer >> updatedMsg.participantName
+        >> updatedMsg.version
         >> updatedMsg.services
         ;
     return buffer;

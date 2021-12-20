@@ -462,9 +462,10 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, con
         std::stringstream msg;
         msg << "Received SystemCommand::"
             << command.kind
-            << " before ParticipantController::Run() or RunAsync() was called from "
+            << " before ParticipantController::Run() or RunAsync() was called."
+            << " Origin of current command was "
             << from->GetServiceId()
-            << " Epa@" << from->GetServiceId().legacyEpa;
+            ;
         ReportError(msg.str());
         return;
     }

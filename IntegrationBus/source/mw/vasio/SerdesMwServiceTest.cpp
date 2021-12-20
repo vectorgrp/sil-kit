@@ -29,6 +29,8 @@ TEST(MwVAsioSerdes, Mw_Service)
     buffer >> out;
 
     EXPECT_EQ(in, out);
+    //ensure that sensible values are present
     EXPECT_EQ(out.services.at(9).serviceId.participantName, "Participant9");
+    EXPECT_EQ(out.services.at(9).supplementalData.size(), 2);
 }
 

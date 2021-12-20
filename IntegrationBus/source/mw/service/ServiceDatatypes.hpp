@@ -14,13 +14,14 @@ namespace service {
 
 struct ServiceDescription
 {
-    ib::mw::ServiceId serviceId; //endpointId must be unique per participant
-    std::map<std::string, std::string> supplementalData; //key value pairs, e.g. "dataExchangeformat=foobar"
+    ib::mw::ServiceId serviceId;
+    std::map<std::string, std::string> supplementalData; //!< key value pairs, e.g. "dataExchangeformat=application/octet"
 };
 
 struct ServiceAnnouncement //requires history >= 1
 {
-    std::string participantName; 
+    std::string participantName;
+    uint64_t version{1}; //!< version indicator is manually set and changed when announcements break compatibility
     std::vector<ServiceDescription> services; //!< list of services provided by the participant
 };
 
