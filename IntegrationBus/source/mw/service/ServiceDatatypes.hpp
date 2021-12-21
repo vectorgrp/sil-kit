@@ -34,19 +34,28 @@ inline bool operator==(const ServiceDescription& lhs, const ServiceDescription& 
         && lhs.supplementalData == rhs.supplementalData
         ;
 }
+inline bool operator!=(const ServiceDescription& lhs, const ServiceDescription& rhs)
+{
+    return !(lhs == rhs);
+}
+
 inline bool operator==(const ServiceAnnouncement& lhs, const ServiceAnnouncement& rhs)
 {
     return lhs.participantName == rhs.participantName
         && lhs.services == rhs.services
         ;
 }
+inline bool operator!=(const ServiceAnnouncement& lhs, const ServiceAnnouncement& rhs)
+{
+    return !(lhs == rhs);
+}
 ////////////////////////////////////////////////////////////////////////////////
 // Inline string utils
 ////////////////////////////////////////////////////////////////////////////////
 inline std::ostream& operator<<(std::ostream& out, const ServiceAnnouncement& serviceAnnouncement)
 {
-    out << "ServiceAnnouncement{" << serviceAnnouncement.participantName
-        << "services=["
+    out << "ServiceAnnouncement{\"" << serviceAnnouncement.participantName
+        << "\" services=["
         ;
     for (auto&& service : serviceAnnouncement.services)
     {

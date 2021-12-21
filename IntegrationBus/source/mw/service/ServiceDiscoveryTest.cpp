@@ -91,9 +91,7 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
     disco.SetServiceId(senderId);
 
     ServiceDescription descr;
-    descr.serviceId.serviceName =  "TestService1";
-    descr.serviceId.linkName="TestLink1";
-    descr.serviceId.participantName="TestParticipant";
+    descr.serviceId = senderId;
     
     disco.RegisterServiceDiscoveryHandler(
         [&descr](auto eventType, auto&& newServiceDescr) {
@@ -112,13 +110,16 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
     // callbacks on receive
     EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscovery::Type::ServiceCreated,
         descr)).Times(1);
-    // trigger notifcation on the same participant
+    // trigger notification on the same participant
     disco.NotifyServiceCreated(descr);
 
-    // trigger notifactions on reception path from different participant
+    // trigger notifications on reception path from different participant
     MockServiceId otherParticipant{ {1, 2} };
     announce.participantName = otherParticipant.serviceId.participantName;
     disco.ReceiveIbMessage(&otherParticipant, announce);
+
+    announce.participantName = otherParticipant.serviceId.participantName;
+    disco.ReceiveIbMessage(&otherParticipant, announce);//should not trigger callback, is cached
 }
 
 TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
@@ -152,12 +153,67 @@ TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
         ).Times(1);
 
         disco.ReceiveIbMessage(&otherParticipant, announce);
+        disco.ReceiveIbMessage(&otherParticipant, announce);//duplicate should not trigger a notification
+
     };
 
     for (auto i = 0; i < 10; i++)
     {
         sendAnnounce("Service" + std::to_string(i));
     }
+}
+
+TEST_F(DiscoveryServiceTest, service_removal)
+{
+    MockServiceId otherParticipant{ {1, 2} };
+    ServiceDiscovery disco{ &comAdapter, "ParticipantA" };
+
+    disco.RegisterServiceDiscoveryHandler([this](auto type, auto&& descr) {
+        callbacks.ServiceDiscoveryHandler(type, descr);
+    });
+
+    ServiceId senderId;
+    senderId.participantName = "ParticipantA";
+    senderId.linkName = "Link1";
+    senderId.serviceName = "ServiceDiscovery";
+
+    ServiceAnnouncement announce;
+    announce.participantName = senderId.participantName;
+
+    ServiceDescription descr;
+    descr.serviceId = senderId;
+    descr.serviceId.serviceName = "TestService";
+    announce.services.push_back(descr);
+
+    // Test addition
+    EXPECT_CALL(callbacks,
+        ServiceDiscoveryHandler(ServiceDiscovery::Type::ServiceCreated, descr)
+    ).Times(1);
+    disco.ReceiveIbMessage(&otherParticipant, announce);
+
+    // Test modification
+    announce.services.at(0).serviceId.serviceName = "Modified";
+    auto modifiedDescr = announce.services.at(0);
+    EXPECT_CALL(callbacks,
+        ServiceDiscoveryHandler(ServiceDiscovery::Type::ServiceCreated, modifiedDescr)
+    ).Times(1);
+    EXPECT_CALL(callbacks,
+        ServiceDiscoveryHandler(ServiceDiscovery::Type::ServiceRemoved, descr)
+    ).Times(1);
+    disco.ReceiveIbMessage(&otherParticipant, announce);
+
+    // Test removal
+    announce.services.clear();
+    EXPECT_CALL(callbacks,
+        ServiceDiscoveryHandler(ServiceDiscovery::Type::ServiceRemoved, modifiedDescr)
+    ).Times(1);
+    disco.ReceiveIbMessage(&otherParticipant, announce);
+
+    // Nothing to remove, no triggers
+    EXPECT_CALL(callbacks,
+        ServiceDiscoveryHandler(_, _)
+    ).Times(0);
+    disco.ReceiveIbMessage(&otherParticipant, announce);
 }
 
 } // anonymous namespace for test

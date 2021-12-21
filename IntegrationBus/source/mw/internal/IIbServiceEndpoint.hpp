@@ -28,6 +28,7 @@ inline std::string to_string(const ServiceId& id);
 inline std::ostream& operator<<(std::ostream& out, const ServiceId& id);
 
 inline bool operator==(const ServiceId& lhs, const ServiceId& rhs);
+inline bool operator!=(const ServiceId& lhs, const ServiceId& rhs);
 inline bool AllowMessageProcessingProxy(const ServiceId& lhs, const ServiceId& rhs);
 inline bool AllowMessageProcessing(const ServiceId& lhs, const ServiceId& rhs);
 
@@ -63,6 +64,11 @@ inline bool operator==(const ServiceId& lhs, const ServiceId& rhs)
         ;
 }
 
+inline bool operator!=(const ServiceId& lhs, const ServiceId& rhs)
+{
+    return !(lhs == rhs);
+}
+
 inline bool AllowMessageProcessingProxy(const ServiceId& lhs, const ServiceId& rhs)
 {
   return
@@ -84,10 +90,6 @@ inline bool EqualsParticipant(const ServiceId& lhs, const ServiceId& rhs)
     return lhs.participantName == rhs.participantName;
 }
 
-inline bool operator!=(const ServiceId& lhs, const ServiceId& rhs)
-{
-    return !(lhs == rhs);
-}
 
 inline std::string to_string(const ServiceId& id)
 {

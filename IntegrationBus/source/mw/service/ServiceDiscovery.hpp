@@ -3,6 +3,8 @@
 #pragma once
 
 #include <functional>
+#include <unordered_map>
+
 #include "ServiceDatatypes.hpp"
 
 #include "IComAdapterInternal.hpp"
@@ -29,8 +31,10 @@ public:
     ServiceDiscovery(IComAdapterInternal* comadapter, const std::string& participantName);
     virtual ~ServiceDiscovery() = default;
    
-    //!< Publish a locally created new ServiceId to all participants
-    void NotifyServiceCreated(const ServiceDescription& serviceId);//TODO change this to const IIbServiceEndpoint& after moving supplementalData from ServiceDescription to ServiceId
+    //!< Publish a locally created new ServiceId to all other participants
+    void NotifyServiceCreated(const ServiceDescription& serviceId);
+    //!< Publish a participant-local service removal to all other participants
+    void NotifyServiceRemoved(const ServiceDescription& serviceId);
 
     //!< Register a handler for asynchronous service creation notifications
     void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler);
@@ -49,7 +53,10 @@ private:
     std::string _participantName;
     ServiceId _serviceId; //!< for the ServiceDiscovery controller itself
     std::vector<ServiceDiscoveryHandlerT> _handlers;
-    std::map<std::string /*participant name*/, ServiceAnnouncement> _announcementMap;
+    ServiceAnnouncement _announcement;
+    //!< a cache for computing additions/removals per participant
+    using ServiceMap = std::unordered_map<std::string /*serviceId*/, ServiceDescription>;
+    std::unordered_map<std::string /* participant name */, ServiceMap> _announcedServices; 
 };
 
 // ================================================================================
