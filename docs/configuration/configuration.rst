@@ -81,8 +81,8 @@ Configuration Options
 
    * - :doc:`MiddlewareConfig<middleware-configuration>`
      - This optional section can be used to select a particular middleware and
-       configure particular details of the Fast-RTPS or Vector VAsio
-       middleware. If this section is omitted, Fast-RTPS will be used.
+       configure particular details of the Vector VAsio
+       middleware. If this section is omitted, defaults will be used.
 
    * - :doc:`LaunchConfigurations<launch-configurations>`
      - This optional section contains information to start all necessary

@@ -45,16 +45,6 @@ void PatchConfigForVAsio(cfg::Config& config)
 }
 } // anonymous namespace
 
-auto CreateFastRtpsComAdapter(ib::cfg::Config config, const std::string& participantName, const uint32_t domainId) -> std::unique_ptr<mw::IComAdapter>
-{
-    if (config.middlewareConfig.activeMiddleware == ib::cfg::Middleware::VAsio)
-    {
-        std::cout << "Creating FastRTPS ComAdapter but VAsio ComAdapter was configured in IbConfig!" << std::endl;
-    }
-    config.middlewareConfig.activeMiddleware = ib::cfg::Middleware::FastRTPS;
-    return CreateComAdapter(std::move(config), participantName, domainId);
-}
-
 auto CreateVAsioComAdapter(ib::cfg::Config config, const std::string& participantName, const uint32_t domainId) -> std::unique_ptr<mw::IComAdapter>
 {
     if (config.middlewareConfig.activeMiddleware == ib::cfg::Middleware::FastRTPS)

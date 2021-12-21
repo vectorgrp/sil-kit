@@ -3,7 +3,6 @@ Synchronization
 .. macros for internal use
 .. |ComAdapter| replace:: :doc:`ComAdapter<../api/comadapter>`
 .. |Middleware| replace:: :doc:`Middleware<../configuration/middleware-configuration>`
-.. |Fastrtps| replace:: :ref:`FastRTPS<sec:mwcfg-fastrtps>`
 .. |Participant| replace:: :doc:`Participant<../api/participantcontroller>`
 .. |SystemController| replace:: :cpp:class:`ISystemController<ib::mw::sim::ISystemController>`
 .. |SystemMonitor| replace:: :cpp:class:`ISystemMonitor<ib::mw::sim::ISystemMonitor>`
@@ -71,70 +70,6 @@ Without the distributed states of participants and time synchronization,
 the bus/service messages are delivered at a best effort base.
 For example, if one participant starts sending, while some participants are not ready yet,
 the sent messages will be lost.
-
-Synchronization Policies
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. admonition:: Note
-
-    The synchronization policies only affect the |FastRTPS| middleware and are
-    considered a legacy setting. If you require guaranteed message delivery
-    before the next SimTask execution, it is recommended to use VAsio.
-
-The synchronization policies, listed in the table below, define the guarantees
-about data delivery.
-
-.. list-table:: Synchronization Policies
-    :widths: 30 70
-    :header-rows: 1
-
-    * - Policy
-      - Description
-    * - Loose
-      - There is no guarantee that data has been received before the next
-        simulation cycle (Default).
-    * - Strict
-      - Enforce that all sent data has been received before the next
-        simulation cycle
-
-The synchronization policy allows trading simulation performance off for
-simulation accuracy. A ``loose`` policy allows running the simulation as fast as
-possible, while minimizing the synchronization overhead.  The ``strict`` policy,
-on the other hand, guarantees that data is received orderly before a new
-simulation cycles starts.  This comes at the cost of a considerable slowdown,
-when using the FastRTPS middleware.
-
-
-FastRTPS Middleware with loose policy
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-When using the FastRTPS middleware, a ``loose`` synchronization policy can be configured.
-FastRTPS does not ensure in-order delivery of messages.
-Consider the following figure.
-The communication of three participants (Part A, Part B, Part C) and the
-progress of real time from left to right is depicted.
-The simulation time is represented by the timeline of SyncMaster -- the ``Tick`` and
-``TickDone`` points represent start and end of a simulation cycle of a
-``DiscreteTime`` synchronization type.
-Thick lines represent time that a simulation task (SimTask) is being processed.
-The annotated milliseconds refer to the current simulation time cycle.
-Thin arrows depict data communication between participants.
-Dashed lines depict time synchronization messages:
-
-.. figure:: ../_static/sim-fastrtps-loose.png
-   :alt: FastRTPS with a loose policy
-   :align: center
-   :width: 90%
-
-   FastRTPS with a Loose policy.
-
-At the end of a simulation cycle all participants send a ``TickDone`` message to the
-synchronization master.
-
-There is no guarantee that sent messages are received before the next simulation task
-(cf. :ref:`sec:sim-participant-lifecycle`) is executed.
-For example, the messages ``A2`` and ``B2`` are received during the second SimTask
-execution, allthough they have been sent in a previous ``tick`` of the simulation
-time (yellow circle in the figure).
 
 
 VAsio Middleware 

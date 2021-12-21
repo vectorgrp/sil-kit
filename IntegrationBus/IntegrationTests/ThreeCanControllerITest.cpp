@@ -185,12 +185,6 @@ protected:
     Callbacks callbacks;
 };
 
-// NB this is disabled due to flaky FastRTPS behavior 
-TEST_F(ThreeCanControllerITest, DISABLED_test_can_ack_callbacks_fastrtps)
-{
-    ExecuteTest(ib::cfg::Middleware::FastRTPS);
-}
-
 TEST_F(ThreeCanControllerITest, test_can_ack_callbacks_vasio)
 {
     ExecuteTest(ib::cfg::Middleware::VAsio);

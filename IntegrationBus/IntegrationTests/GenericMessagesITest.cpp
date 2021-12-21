@@ -102,54 +102,6 @@ protected:
     std::promise<void> allReceivedPromise;
 };
 
-TEST_F(GenericMessageITest, DISABLED_publish_and_subscribe_generic_messages_fastrtps)
-{
-    topics.resize(2);
-    topics[0].name = "GroundTruth";
-    topics[0].expectedData = std::vector<uint8_t>{topics[0].name.begin(), topics[0].name.end()};
-    topics[1].name = "VehicleModelOut";
-    topics[1].expectedData = std::vector<uint8_t>{topics[1].name.begin(), topics[1].name.end()};
-
-    ibConfig = ib::cfg::Config::FromJsonFile("GenericMessagesITest_IbConfig.json");
-    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::FastRTPS;
-
-    std::thread subscribeThread{[this] { Subscribe(); }};
-    std::thread publishThread{[this]{ Publish(); }};
-
-    publishThread.join();
-    subscribeThread.join();
-
-    // Test expectations
-    for (auto&& topic : topics)
-    {
-        EXPECT_EQ(topic.expectedData, topic.receivedData);
-    }
-}
-
-TEST_F(GenericMessageITest, DISABLED_publish_and_subscribe_large_messages_fastrtps)
-{
-    topics.resize(1);
-    topics[0].name = "LargeDataBlobTopic";
-    // Maximum payload size is 65416, beyond that we are testing the ASYNCHRONOUS_PUBLISH_MODE of FastRTPS.
-    size_t sizeInBytes = 114793;
-    topics[0].expectedData = std::vector<uint8_t>(sizeInBytes, 'D');
-
-    ibConfig = ib::cfg::Config::FromJsonFile("LargeMessagesITest_IbConfig.json");
-    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::FastRTPS;
-
-    std::thread subscribeThread{[this] { Subscribe(); }};
-    std::thread publishThread{[this] { Publish(); }};
-
-    publishThread.join();
-    subscribeThread.join();
-
-    // Test expectations
-    for (auto&& topic : topics)
-    {
-        EXPECT_EQ(topic.expectedData, topic.receivedData);
-    }
-}
-
 #if defined(IB_MW_HAVE_VASIO)
 TEST_F(GenericMessageITest, publish_and_subscribe_generic_messages_vasio)
 {

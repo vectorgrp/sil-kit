@@ -13,14 +13,12 @@ ConfigBuilder::ConfigBuilder(std::string name)
 {
     _config.name = std::move(name);
     _vasioConfig = std::make_unique<VAsio::ConfigBuilder>();
-    _fastRtpsConfig = std::make_unique<FastRtps::ConfigBuilder>();
     _simulationSetup = std::make_unique<SimulationSetupBuilder>();
 }
 
 auto ConfigBuilder::Build() -> Config
 {
     _config.simulationSetup = _simulationSetup->Build();
-    _config.middlewareConfig.fastRtps = _fastRtpsConfig->Build();
     _config.middlewareConfig.vasio = _vasioConfig->Build();
     _config.extensionConfig = _extensionConfig.Build();
 
@@ -36,12 +34,6 @@ auto ConfigBuilder::Build() -> Config
 auto ConfigBuilder::SimulationSetup() -> SimulationSetupBuilder&
 {
     return *_simulationSetup;
-}
-
-auto ConfigBuilder::ConfigureFastRtps() -> FastRtps::ConfigBuilder&
-{
-    _config.middlewareConfig.activeMiddleware = Middleware::FastRTPS;
-    return *_fastRtpsConfig;
 }
 
 auto ConfigBuilder::ConfigureVAsio() -> VAsio::ConfigBuilder&

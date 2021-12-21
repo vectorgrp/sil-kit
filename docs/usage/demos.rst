@@ -317,14 +317,22 @@ Benchmark Demo
       -  Demos/Benchmark
    *  -  Parameters
       -  There are up to 7 positional arguments. All of them are optional and the defaults are used for the unspecified ones.
+         For convenience long command options are supported with the syntax ``--option value``
          
-         #. The middleware to be used (optional); must be either ``FastRTPS`` or ``VAsio``; defaults to ``VAsio``. 
+         #. The middleware to be used (optional); must be ``VAsio``; defaults to ``VAsio``.
+             - ``--middleware VAsio``
          #. Number of simulations (optional); must be at least ``1``; defaults to ``5``.
+             - ``--number-simulations NUM``
          #. Duration of the simulation in seconds (optional); must be at least ``1``; defaults to ``1``.
+             - ``--simulation-duration SECONDS``
          #. Number of participants (optional); must be at least ``2``; defaults to ``4``.
+             - ``--number-participants NUM``
          #. Number of messages sent per tick between each participant (optional); defaults to ``1``.
+             - ``--message-count NUM``
          #. Size of the messages in bytes (optional); must be at least ``1``; defaults to ``100``.
+             - ``--message-size BYTES``
          #. Domain ID (optional); defaults to ``42``.
+             - ``--domain-id NUM``
    *  -  Parameter Example
       -  .. parsed-literal:: 
 

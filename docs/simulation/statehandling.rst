@@ -3,7 +3,6 @@ State Handling
 .. macros for internal use
 .. |ComAdapter| replace:: :doc:`ComAdapter<../api/comadapter>`
 .. |Middleware| replace:: :doc:`Middleware<../configuration/middleware-configuration>`
-.. |Fastrtps| replace:: :ref:`FastRTPS<sec:mwcfg-fastrtps>`
 .. |Participant| replace:: :doc:`Participant<../api/participantcontroller>`
 .. |ParticipantController| replace:: :doc:`Participant Controller<../api/participantcontroller>`
 .. |SystemController| replace:: :cpp:class:`SystemController<ib::mw::sync::ISystemController>`

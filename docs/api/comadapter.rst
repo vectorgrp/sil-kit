@@ -67,7 +67,6 @@ can be queried using the following functions:
     .. doxygenfunction:: ib::version::GitHash()
 
 ..          
-..    .. doxygenfunction:: ib::CreateFastRtpsComAdapter
 ..
 ..    .. doxygenstruct:: ib::mw::EndpointAddress
 ..       :members:

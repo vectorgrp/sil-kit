@@ -19,9 +19,6 @@ endif()
 ################################################################################
 # Ensure all our tests and internal libraries have the right build flags
 ################################################################################
-if (IB_MW_ENABLE_FASTRTPS)
-    target_compile_definitions(IbInterface INTERFACE IB_MW_HAVE_FASTRTPS=1)
-endif()
 if (IB_MW_ENABLE_VASIO)
     target_compile_definitions(IbInterface INTERFACE IB_MW_HAVE_VASIO=1)
 endif()

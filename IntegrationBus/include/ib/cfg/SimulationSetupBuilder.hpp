@@ -7,7 +7,6 @@
 #include "ib/IbMacros.hpp"
 
 #include "Config.hpp"
-#include "FastRtpsConfigBuilder.hpp"
 #include "LinkBuilder.hpp"
 #include "NetworkSimulatorBuilder.hpp"
 #include "ParticipantBuilder.hpp"

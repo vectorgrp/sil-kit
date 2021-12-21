@@ -11,11 +11,9 @@ To get started developing you'll need the following prerequisites:
  - `Git`_
  - C++ compiler (Visual Studio 2015/2017, GCC, Clang)
  - `CMake <https://cmake.org>`_
- - `FastRTPS`_ (submodule, for the FastRTPS middleware layer)
  - `Googletest`_ (submodule)
  - `Json11`_  (submodule)
 
-As a user convenience, the cmake build system will attempt to download a git checkout of FastRTPS from github if it can't find the submodule.
 
 For generating the documentation, you will require:
  - Python3
@@ -34,10 +32,6 @@ The following options are available:
    - Build the test cases
  * - IB_BUILD_DOCS
    - Build the documentation using doxygen and sphinx
- * - IB_BIN_FASTRTPS_ENABLE
-   - Use prebuilt FastRTPS binaries
- * - IB_BIN_FASTRTPS_REPOSITORY
-   - Path to the FastRTPS binary zip file
  * - IB_INSTALL_SOURCE
    - Installs the source-tree (used for packaging releases). Implies IB_BUILD_DOCS.
 
@@ -120,7 +114,6 @@ Have a look at our :ref:`architecture overview <base-architecture>`.
 
 .. _CMake: https://cmake.org
 .. _Git: https://git-scm.org
-.. _FastRTPS: https://github.com/eProsima/Fast-RTPS
 .. _Googletest: https://github.com/google/googletest/blob/master/googletest/docs/primer.md
 .. _Json11: https://github.com/dropbox/json11
 

@@ -16,18 +16,8 @@ if(IB_INSTALL_SOURCE)
 endif()
 option(IB_ENABLE_ASAN "Enable -f sanitize=address for builds (requires gcc, clang,  VS2019)" OFF)
 option(IB_ENABLE_UBSAN "Enable -f sanitize=undefined for builds (requires gcc, clang)" OFF)
-# FasrtRTPS pre-built packages
-option(IB_BIN_FASTRTPS_ENABLE
-        "Fetch pre-built and packaged FastRTPS/fastcdr binaries\
-        (set IB_BIN_FASTRTPS_REPOSITORY for download URL)"
-        OFF
-)
-option(IB_MW_ENABLE_FASTRTPS "Build FastRTPS Middleware" OFF)
 option(IB_MW_ENABLE_VASIO "Build VAsio Middleware" ON)
 
-if(IB_MW_ENABLE_FASTRTPS)
-    message(WARNING "VIB Middleware FastRTPS is deprecated!")
-endif()
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${CMAKE_CURRENT_LIST_DIR}/IntegrationBus/cmake)
 include(IntegrationBusInstall)
 include(IntegrationBusVersion)
@@ -118,7 +108,6 @@ if(IB_INSTALL_SOURCE)
             ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/
         DESTINATION ${INSTALL_SOURCE_DIR}/ThirdParty
         REGEX "breathe" EXCLUDE
-        REGEX "Fast-RTPS" EXCLUDE
         REGEX "\.git$" EXCLUDE
         REGEX "\.github$" EXCLUDE
     )

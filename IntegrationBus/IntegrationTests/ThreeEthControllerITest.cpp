@@ -195,14 +195,6 @@ protected:
     Callbacks callbacks;
 };
 
-// NB this is disabled due to flaky FastRTPS behavior 
-TEST_F(ThreeEthControllerITest, DISABLED_test_eth_ack_callbacks_fastrtps)
-{
-    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::FastRTPS;
-
-    ExecuteTest();
-}
-
 TEST_F(ThreeEthControllerITest, test_eth_ack_callbacks_vasio)
 {
     ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
@@ -245,15 +237,6 @@ auto makeLoggingConfig() -> ib::cfg::Config
         .WithLogLevel(ib::mw::logging::Level::Debug);
 
     return builder.Build();
-}
-
-// NB this is disabled due to flaky FastRTPS behavior 
-TEST_F(ThreeEthControllerITest, DISABLED_test_fastrtps_logging_orthogonal)
-{
-    ibConfig = makeLoggingConfig();
-    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::FastRTPS;
-
-    ExecuteTest();
 }
 
 TEST_F(ThreeEthControllerITest, test_vasio_logging_orthogonal)

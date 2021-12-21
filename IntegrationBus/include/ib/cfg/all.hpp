@@ -3,7 +3,6 @@
 #include "Config.hpp"
 #include "ConfigBuilder.hpp"
 #include "ControllerBuilder.hpp"
-#include "FastRtpsConfigBuilder.hpp"
 #include "LoggerBuilder.hpp"
 #include "SinkBuilder.hpp"
 #include "GenericPortBuilder.hpp"

@@ -59,23 +59,6 @@ add_vib_test(ITestThreeEthController
       ${itest_extra_libs}
 )
 
-add_vib_test(ITestSocketBufferSize
-    SOURCES
-      SocketBufferSizeITest.cpp
-    LIBS
-      IbMwComAdapter
-    CONFIGS
-      SocketBufferSizeITest_IbConfig.json
-      SocketBufferSizeITest_FastRTPS.xml
-)
-
-add_vib_test(ITestWaitForAllAcked
-    SOURCES
-      WaitForAllAckedITest.cpp
-    LIBS
-      IbMwComAdapter
-)
-
 add_vib_test(ITestIoMessages
     SOURCES
       IoMessagesITest.cpp

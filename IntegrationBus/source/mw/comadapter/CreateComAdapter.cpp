@@ -8,15 +8,6 @@
 namespace ib {
 namespace mw {
 
-auto CreateFastRtpsComAdapterImpl(ib::cfg::Config config, const std::string& participantName) -> std::unique_ptr<IComAdapterInternal>
-{
-#if defined(IB_MW_HAVE_FASTRTPS)
-    return std::make_unique<ComAdapter<FastRtpsConnection>>(std::move(config), participantName);
-#else
-    std::cout << "ERROR: CreateFastRtpsComAdapterImpl(): IntegrationBus was compiled without \"IB_MW_HAVE_FASTRPTS\"" << std::endl;
-    throw std::runtime_error("VIB was compiled without IB_MW_HAVE_FASTRTPS");
-#endif
-}
 auto CreateVAsioComAdapterImpl(ib::cfg::Config config, const std::string& participantName) -> std::unique_ptr<IComAdapterInternal>
 {
 #if defined(IB_MW_HAVE_VASIO)
@@ -39,9 +30,8 @@ auto CreateComAdapterImpl(ib::cfg::Config config, const std::string& participant
         return CreateVAsioComAdapterImpl(std::move(config), participantName);
     
     case ib::cfg::Middleware::FastRTPS:
-        std::cout <<"WARNING: FastRTPS is deprecated" << std::endl;
-        return CreateFastRtpsComAdapterImpl(std::move(config), participantName);
-
+        std::cout <<"WARNING: FastRTPS is discontinued" << std::endl;
+        throw ib::cfg::Misconfiguration{"FastRTPS is discontinued"};
     default:
         throw ib::cfg::Misconfiguration{ "Unknown active middleware selected" };
     }

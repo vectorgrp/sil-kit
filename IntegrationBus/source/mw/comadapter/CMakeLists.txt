@@ -29,9 +29,6 @@ target_link_libraries(IbMwComAdapter
         IbVersion
 )
 
-if (IB_MW_ENABLE_FASTRTPS)
-    target_link_libraries(IbMwComAdapter PUBLIC  IbMwFastRtps)
-endif()
 if (IB_MW_ENABLE_VASIO)
     target_link_libraries(IbMwComAdapter PUBLIC  IbMwVAsio)
 endif()

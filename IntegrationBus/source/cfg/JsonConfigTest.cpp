@@ -426,92 +426,13 @@ TEST_F(JsonConfigTest, CreateGenericMessageConfig)
     EXPECT_EQ(participants.at(1).genericSubscribers.at(0).definitionUri, msgDefinition);
 }
 
-TEST_F(JsonConfigTest, create_fastrtps_config_default)
-{
-    builder.ConfigureFastRtps();
 
-    BuildConfigFromJson();
-    EXPECT_EQ(config, referenceConfig);
-
-    auto&& fastRtps = config.middlewareConfig.fastRtps;
-    EXPECT_EQ(fastRtps.discoveryType, FastRtps::DiscoveryType::Local);
-    EXPECT_EQ(fastRtps.unicastLocators.size(), 0u);
-    EXPECT_EQ(fastRtps.configFileName, std::string{});
-    EXPECT_EQ(fastRtps.historyDepth, -1);
-}
-
-TEST_F(JsonConfigTest, create_fastrtps_history_depth)
-{
-    builder.ConfigureFastRtps()
-        .WithHistoryDepth(8);
-
-    BuildConfigFromJson();
-    EXPECT_EQ(config, referenceConfig);
-
-    auto&& fastRtps = config.middlewareConfig.fastRtps;
-    EXPECT_EQ(fastRtps.historyDepth, 8);
-}
-
-TEST_F(JsonConfigTest, create_fastrtps_config_unicast)
-{
-    builder.ConfigureFastRtps()
-        .WithDiscoveryType(FastRtps::DiscoveryType::Unicast)
-        .AddUnicastLocator("Participant1", "192.168.0.1")
-        .AddUnicastLocator("Participant2", "192.168.0.2");
-
-    BuildConfigFromJson();
-    EXPECT_EQ(config, referenceConfig);
-
-    auto&& fastRtps = config.middlewareConfig.fastRtps;
-    EXPECT_EQ(fastRtps.discoveryType, FastRtps::DiscoveryType::Unicast);
-    EXPECT_EQ(fastRtps.unicastLocators.size(), 2u);
-    EXPECT_EQ(fastRtps.unicastLocators["Participant1"], std::string{"192.168.0.1"});
-    EXPECT_EQ(fastRtps.unicastLocators["Participant2"], std::string{"192.168.0.2"});
-    EXPECT_EQ(fastRtps.configFileName, std::string{});
-}
-
-TEST_F(JsonConfigTest, create_fastrtps_config_multicast)
-{
-    builder.ConfigureFastRtps()
-        .WithDiscoveryType(FastRtps::DiscoveryType::Multicast);
-
-    BuildConfigFromJson();
-    EXPECT_EQ(config, referenceConfig);
-
-    auto&& fastRtps = config.middlewareConfig.fastRtps;
-    EXPECT_EQ(fastRtps.discoveryType, FastRtps::DiscoveryType::Multicast);
-    EXPECT_EQ(fastRtps.unicastLocators.size(), 0u);
-    EXPECT_EQ(fastRtps.configFileName, std::string{});
-}
-
-TEST_F(JsonConfigTest, create_fastrtps_config_with_configfile)
-{
-    builder.ConfigureFastRtps()
-        .WithDiscoveryType(FastRtps::DiscoveryType::ConfigFile)
-        .WithConfigFileName("MyMagicFastRTPSsettings.xml");
-
-    BuildConfigFromJson();
-    EXPECT_EQ(config, referenceConfig);
-
-    auto&& fastRtps = config.middlewareConfig.fastRtps;
-    EXPECT_EQ(fastRtps.discoveryType, FastRtps::DiscoveryType::ConfigFile);
-    EXPECT_EQ(fastRtps.unicastLocators.size(), 0u);
-    EXPECT_EQ(fastRtps.configFileName, std::string{"MyMagicFastRTPSsettings.xml"});
-}
-
-TEST_F(JsonConfigTest, default_middlware_is_fastrtps)
+TEST_F(JsonConfigTest, default_middlware_is_not_configured)
 {
     BuildConfigFromJson();
     EXPECT_EQ(config.middlewareConfig.activeMiddleware, Middleware::NotConfigured);
 }
 
-TEST_F(JsonConfigTest, select_fastrtps_as_middleware)
-{
-    builder.WithActiveMiddleware(ib::cfg::Middleware::FastRTPS);
-
-    BuildConfigFromJson();
-    EXPECT_EQ(config.middlewareConfig.activeMiddleware, ib::cfg::Middleware::FastRTPS);
-}
 
 TEST_F(JsonConfigTest, select_vasio_as_middleware)
 {

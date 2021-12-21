@@ -237,7 +237,9 @@ TEST_F(ConfigBuilderTest, make_network_simulator)
     const auto targetSimulator = ib::cfg::NetworkSimulator{
         "BusSim",
         links,
-        switches
+        switches,
+        {}, //tracesinks
+        {}, //replay
     };
 
     simulationSetup.AddParticipant("NetworkSimulator")
@@ -361,112 +363,6 @@ TEST_F(ConfigBuilderTest, make_generic_message_config)
     EXPECT_EQ(rosLink.name, msgName);
     EXPECT_EQ(rosLink.type, Link::Type::GenericMessage);
     EXPECT_EQ(rosLink.endpoints, std::vector<std::string>({"Publisher/FancyRosMessage", "Subscriber/FancyRosMessage"}));
-}
-
-TEST_F(ConfigBuilderTest, configure_fast_rtps_default)
-{
-    auto config = configBuilder.Build();
-    auto&& fastrtpsConfig = config.middlewareConfig.fastRtps;
-    EXPECT_EQ(fastrtpsConfig.discoveryType, FastRtps::DiscoveryType::Local);
-    EXPECT_EQ(fastrtpsConfig.configFileName, std::string{});
-    EXPECT_EQ(fastrtpsConfig.unicastLocators.size(), 0u);
-}
-
-TEST_F(ConfigBuilderTest, configure_fastrtps_unicast)
-{
-    configBuilder.ConfigureFastRtps()
-        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::Unicast)
-        .AddUnicastLocator("participant1", "192.168.0.1")
-        .AddUnicastLocator("participant2", "192.168.0.2");
-
-    auto config = configBuilder.Build();
-
-    auto&& fastrtpsConfig = config.middlewareConfig.fastRtps;
-
-    EXPECT_EQ(fastrtpsConfig.discoveryType, FastRtps::DiscoveryType::Unicast);
-    EXPECT_EQ(fastrtpsConfig.configFileName, std::string{});
-    EXPECT_EQ(fastrtpsConfig.unicastLocators.size(), 2u);
-    EXPECT_EQ(fastrtpsConfig.unicastLocators["participant1"], "192.168.0.1");
-    EXPECT_EQ(fastrtpsConfig.unicastLocators["participant2"], "192.168.0.2");
-}
-
-TEST_F(ConfigBuilderTest, configure_fastrtps_unicast_without_locators_must_fail)
-{
-    configBuilder.ConfigureFastRtps()
-        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::Unicast);
-
-    EXPECT_THROW(configBuilder.Build(), ib::cfg::Misconfiguration);
-}
-
-TEST_F(ConfigBuilderTest, configure_fastrtps_unicast_with_configfile_must_fail)
-{
-    configBuilder.ConfigureFastRtps()
-        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::Unicast)
-        .WithConfigFileName("UnicastConfig.xml");
-
-    EXPECT_THROW(configBuilder.Build(), ib::cfg::Misconfiguration);
-}
-
-TEST_F(ConfigBuilderTest, configure_fastrtps_multicast)
-{
-    configBuilder.ConfigureFastRtps()
-        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::Multicast);
-
-    auto config = configBuilder.Build();
-
-    auto&& fastrtpsConfig = config.middlewareConfig.fastRtps;
-    EXPECT_EQ(fastrtpsConfig.discoveryType, FastRtps::DiscoveryType::Multicast);
-    EXPECT_EQ(fastrtpsConfig.configFileName, std::string{});
-    EXPECT_EQ(fastrtpsConfig.unicastLocators.size(), 0u);
-}
-
-TEST_F(ConfigBuilderTest, configure_fastrtps_multicast_with_unicastlocators_must_fail)
-{
-    configBuilder.ConfigureFastRtps()
-        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::Multicast)
-        .AddUnicastLocator("participant1", "192.168.0.1");
-
-    EXPECT_THROW(configBuilder.Build(), ib::cfg::Misconfiguration);
-}
-
-TEST_F(ConfigBuilderTest, configure_fastrtps_multicast_with_configfile_must_fail)
-{
-    configBuilder.ConfigureFastRtps()
-        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::Multicast)
-        .WithConfigFileName("MulticastConfig.xml");
-
-    EXPECT_THROW(configBuilder.Build(), ib::cfg::Misconfiguration);
-}
-
-TEST_F(ConfigBuilderTest, configure_fastrtps_configfile)
-{
-    configBuilder.ConfigureFastRtps()
-        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::ConfigFile)
-        .WithConfigFileName("MyFastrtpsConfig.xml");
-
-    auto config = configBuilder.Build();
-
-    auto&& fastrtpsConfig = config.middlewareConfig.fastRtps;
-    EXPECT_EQ(fastrtpsConfig.discoveryType, FastRtps::DiscoveryType::ConfigFile);
-    EXPECT_EQ(fastrtpsConfig.configFileName, std::string{"MyFastrtpsConfig.xml"});
-    EXPECT_EQ(fastrtpsConfig.unicastLocators.size(), 0u);
-}
-
-TEST_F(ConfigBuilderTest, configure_fastrtps_configfile_without_configfilename_must_fail)
-{
-    configBuilder.ConfigureFastRtps()
-        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::ConfigFile);
-
-    EXPECT_THROW(configBuilder.Build(), ib::cfg::Misconfiguration);
-}
-
-TEST_F(ConfigBuilderTest, configure_fastrtps_configfile_with_unicast_locators_must_fail)
-{
-    configBuilder.ConfigureFastRtps()
-        .WithDiscoveryType(ib::cfg::FastRtps::DiscoveryType::ConfigFile)
-        .AddUnicastLocator("participant1", "192.168.0.1");
-
-    EXPECT_THROW(configBuilder.Build(), ib::cfg::Misconfiguration);
 }
 
 TEST_F(ConfigBuilderTest, configure_vasio_registry)

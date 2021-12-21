@@ -26,8 +26,6 @@ add_library(IbConfig STATIC
     SwitchPortBuilder.hpp
     TimeSyncBuilder.cpp
     TimeSyncBuilder.hpp
-    FastRtpsConfigBuilder.cpp
-    FastRtpsConfigBuilder.hpp
     Validation.hpp
     Validation.cpp
     VAsioConfigBuilder.cpp

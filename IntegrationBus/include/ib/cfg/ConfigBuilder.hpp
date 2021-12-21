@@ -12,7 +12,6 @@
 #include "NetworkSimulatorBuilder.hpp"
 #include "LinkBuilder.hpp"
 #include "TimeSyncBuilder.hpp"
-#include "FastRtpsConfigBuilder.hpp"
 #include "VAsioConfigBuilder.hpp"
 #include "SimulationSetupBuilder.hpp"
 #include "ExtensionConfigBuilder.hpp"
@@ -35,8 +34,6 @@ public:
     IntegrationBusAPI auto Build() -> Config;
     //! \brief Add a simulation setup builder to the current configuration builder.
     IntegrationBusAPI auto SimulationSetup() -> SimulationSetupBuilder&;
-    //! \brief Add a builder for configuring the FastRTPS middleware.
-    IntegrationBusAPI auto ConfigureFastRtps() -> FastRtps::ConfigBuilder&;
     //! \brief Add a builder for configuring the VAsio middleware.
     IntegrationBusAPI auto ConfigureVAsio() -> VAsio::ConfigBuilder&;
     //! \brief Declare the current active middleware to use.
@@ -47,7 +44,6 @@ public:
 private:
     Config _config;
     std::unique_ptr<SimulationSetupBuilder> _simulationSetup;
-    std::unique_ptr<FastRtps::ConfigBuilder> _fastRtpsConfig;
     std::unique_ptr<VAsio::ConfigBuilder> _vasioConfig;
     ExtensionConfigBuilder _extensionConfig;
 };
