@@ -24,6 +24,8 @@ namespace {
     void ShutdownCallback(void* context, ib_SimulationParticipant* participant) {}
 
     void SimTask(void* context, ib_SimulationParticipant* participant, ib_NanosecondsTime now) {}
+    void SystemStateHandler(void* context, ib_SimulationParticipant* participant, ib_SystemState state) {}
+    void ParticipantStateHandler(void* context, ib_SimulationParticipant* participant, const char* participantId, ib_ParticipantState state) {}
 
     TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_nullpointer_params)
     {
@@ -63,6 +65,66 @@ namespace {
         // Expect error when not calling RunAsync with a valid ib_SimulationParticipant before
         returnCode = ib_SimulationParticipant_WaitForRunAsyncToComplete((ib_SimulationParticipant*)&mockComAdapter, &outParticipantState);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_RunSimulation(nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_StopSimulation(nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_Pause(nullptr, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_Continue(nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_PrepareColdswap(nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_ExecuteColdswap(nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        ib_ParticipantState participantState;
+        returnCode = ib_SimulationParticipant_GetParticipantState(nullptr, nullptr, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_GetParticipantState(nullptr, (ib_SimulationParticipant*)&mockComAdapter, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_GetParticipantState(nullptr, (ib_SimulationParticipant*)&mockComAdapter, "participant");
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_GetParticipantState(nullptr, nullptr, "participant");
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_GetParticipantState(&participantState, nullptr, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_GetParticipantState(&participantState, (ib_SimulationParticipant*)&mockComAdapter, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_GetParticipantState(&participantState, nullptr, "participant");
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        ib_SystemState systemState;
+        returnCode = ib_SimulationParticipant_GetSystemState(nullptr, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_GetSystemState(&systemState, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_GetSystemState(nullptr, (ib_SimulationParticipant*)&mockComAdapter);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_RegisterSystemStateHandler(nullptr, nullptr, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_RegisterSystemStateHandler(nullptr, nullptr, &SystemStateHandler);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_RegisterSystemStateHandler((ib_SimulationParticipant*)&mockComAdapter, nullptr, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
     }
 
     TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_function_mapping)
@@ -91,6 +153,43 @@ namespace {
 
         returnCode = ib_SimulationParticipant_RunAsync((ib_SimulationParticipant*)&mockComAdapter); // Second call should fail
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        //ib_SystemState systemState;
+        //returnCode = ib_SimulationParticipant_GetSystemState(&systemState, (ib_SimulationParticipant*)&mockComAdapter);
+        //EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        //ib_ParticipantState participantState;
+        //returnCode = ib_SimulationParticipant_GetParticipantState(&participantState, (ib_SimulationParticipant*)&mockComAdapter, "participant");
+        //EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockComAdapter.mockSystemController, Run()).Times(testing::Exactly(1));
+        returnCode = ib_SimulationParticipant_RunSimulation((ib_SimulationParticipant*)&mockComAdapter);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockComAdapter.mockParticipantController, Pause(testing::_)).Times(testing::Exactly(1));
+        returnCode = ib_SimulationParticipant_Pause((ib_SimulationParticipant*)&mockComAdapter, "dummy");
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockComAdapter.mockParticipantController, Continue()).Times(testing::Exactly(1));
+        returnCode = ib_SimulationParticipant_Continue((ib_SimulationParticipant*)&mockComAdapter);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockComAdapter.mockSystemController, Stop()).Times(testing::Exactly(1));
+        returnCode = ib_SimulationParticipant_StopSimulation((ib_SimulationParticipant*)&mockComAdapter);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockComAdapter.mockSystemController, PrepareColdswap()).Times(testing::Exactly(1));
+        returnCode = ib_SimulationParticipant_PrepareColdswap((ib_SimulationParticipant*)&mockComAdapter);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockComAdapter.mockSystemController, ExecuteColdswap()).Times(testing::Exactly(1));
+        returnCode = ib_SimulationParticipant_ExecuteColdswap((ib_SimulationParticipant*)&mockComAdapter);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockComAdapter.mockSystemController, Shutdown()).Times(testing::Exactly(1));
+        returnCode = ib_SimulationParticipant_Shutdown((ib_SimulationParticipant*)&mockComAdapter);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
     }
 
 }

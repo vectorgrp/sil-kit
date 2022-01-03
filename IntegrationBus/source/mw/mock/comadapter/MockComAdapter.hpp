@@ -8,6 +8,8 @@
 #include "ib/mw/logging/LoggingDatatypes.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/mw/sync/IParticipantController.hpp"
+#include "ib/mw/sync/ISystemController.hpp"
+#include "ib/mw/sync/ISystemMonitor.hpp"
 
 #include "ib/sim/fwd_decl.hpp"
 #include "ib/sim/can/CanDatatypes.hpp"
@@ -103,6 +105,26 @@ public:
     MOCK_METHOD1(ForceShutdown, void(std::string reason));
 };
 
+class MockSystemMonitor : public sync::ISystemMonitor {
+public:
+    MOCK_METHOD1(RegisterSystemStateHandler, void(SystemStateHandlerT));
+    MOCK_METHOD1(RegisterParticipantStateHandler, void(ParticipantStateHandlerT));
+    MOCK_METHOD1(RegisterParticipantStatusHandler, void(ParticipantStatusHandlerT));
+    MOCK_CONST_METHOD0(SystemState,  sync::SystemState());
+    MOCK_CONST_METHOD1(ParticipantStatus, const sync::ParticipantStatus&(const std::string& participantId));
+};
+
+class MockSystemController : public sync::ISystemController {
+public:
+    MOCK_CONST_METHOD1(Initialize, void(ParticipantId participantId));
+    MOCK_CONST_METHOD1(ReInitialize, void(ParticipantId participantId));
+    MOCK_CONST_METHOD0(Run, void());
+    MOCK_CONST_METHOD0(Stop, void());
+    MOCK_CONST_METHOD0(Shutdown, void());
+    MOCK_CONST_METHOD0(PrepareColdswap, void());
+    MOCK_CONST_METHOD0(ExecuteColdswap, void());
+};
+
 class DummyComAdapter : public IComAdapterInternal
 {
 public:
@@ -126,8 +148,8 @@ public:
     auto CreateGenericSubscriber(const std::string& /*canonicalName*/) -> sim::generic::IGenericSubscriber* override { return nullptr; }
 
     auto GetParticipantController() -> sync::IParticipantController* override { return &mockParticipantController; }
-    auto GetSystemMonitor() -> sync::ISystemMonitor* override { return nullptr; }
-    auto GetSystemController() -> sync::ISystemController* override { return nullptr; }
+    auto GetSystemMonitor() -> sync::ISystemMonitor* override { return &mockSystemMonitor; }
+    auto GetSystemController() -> sync::ISystemController* override { return &mockSystemController; }
     auto GetLogger() -> logging::ILogger* override { return &logger; }
 
     void RegisterCanSimulator(sim::can::IIbToCanSimulator* ) override {}
@@ -206,6 +228,8 @@ public:
     DummyLogger logger;
     MockTimeProvider mockTimeProvider;
     MockParticipantController mockParticipantController;
+    MockSystemController mockSystemController;
+    MockSystemMonitor mockSystemMonitor;
 };
 
 // ================================================================================

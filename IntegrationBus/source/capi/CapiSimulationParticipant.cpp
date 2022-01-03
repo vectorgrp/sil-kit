@@ -227,6 +227,7 @@ ib_ReturnCode ib_SimulationParticipant_SetSimulationTask(ib_SimulationParticipan
   CAPI_LEAVE
 }
 
+// SystemController related functions
 ib_ReturnCode ib_SimulationParticipant_RunSimulation(ib_SimulationParticipant* participant)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -248,6 +249,33 @@ ib_ReturnCode ib_SimulationParticipant_StopSimulation(ib_SimulationParticipant* 
     auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
     auto* systemController = comAdapter->GetSystemController();
     systemController->Stop();
+    return ib_ReturnCode_SUCCESS;
+  }
+  CAPI_LEAVE
+}
+
+ib_ReturnCode ib_SimulationParticipant_Pause(ib_SimulationParticipant* participant, const char* reason)
+{
+  ASSERT_VALID_POINTER_PARAMETER(participant);
+  ASSERT_VALID_POINTER_PARAMETER(reason);
+  CAPI_ENTER
+  {
+    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+    auto* participantController = comAdapter->GetParticipantController();
+    participantController->Pause(reason);
+    return ib_ReturnCode_SUCCESS;
+  }
+  CAPI_LEAVE
+}
+
+ib_ReturnCode ib_SimulationParticipant_Continue(ib_SimulationParticipant* participant)
+{
+  ASSERT_VALID_POINTER_PARAMETER(participant);
+  CAPI_ENTER
+  {
+    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+    auto* participantController = comAdapter->GetParticipantController();
+    participantController->Continue();
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
@@ -293,6 +321,7 @@ ib_ReturnCode ib_SimulationParticipant_ExecuteColdswap(ib_SimulationParticipant*
   CAPI_LEAVE
 }
 
+// SystemMonitor related functions
 ib_ReturnCode ib_SimulationParticipant_GetParticipantState(ib_ParticipantState* outParticipantState, ib_SimulationParticipant* participant, const char* participantId)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);

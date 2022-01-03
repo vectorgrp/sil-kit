@@ -256,6 +256,10 @@ IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_RunSimulation(ib_Simula
 
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_StopSimulation(ib_SimulationParticipant* participant);
 
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Pause(ib_SimulationParticipant* participant, const char* reason);
+
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Continue(ib_SimulationParticipant* participant);
+
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Shutdown(ib_SimulationParticipant* participant);
 
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_PrepareColdswap(ib_SimulationParticipant* participant);
