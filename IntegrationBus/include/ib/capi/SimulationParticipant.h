@@ -48,6 +48,23 @@ typedef int8_t ib_ParticipantState;
 #define ib_ParticipantState_ShuttingDown          ((ib_ParticipantState) 13)  //!< The shutting down state
 #define ib_ParticipantState_Shutdown              ((ib_ParticipantState) 14)  //!< The shutdown state
 
+typedef int8_t ib_SystemState;
+#define ib_SystemState_Invalid               ((ib_SystemState) 0)   //!< An invalid participant state
+#define ib_SystemState_Idle                  ((ib_SystemState) 1)   //!< The idle state
+#define ib_SystemState_Initializing          ((ib_SystemState) 2)   //!< The initializing state
+#define ib_SystemState_Initialized           ((ib_SystemState) 3)   //!< The initialized state
+#define ib_SystemState_Running               ((ib_SystemState) 4)   //!< The running state
+#define ib_SystemState_Paused                ((ib_SystemState) 5)   //!< The paused state
+#define ib_SystemState_Stopping              ((ib_SystemState) 6)   //!< The stopping state
+#define ib_SystemState_Stopped               ((ib_SystemState) 7)   //!< The stopped state
+#define ib_SystemState_ColdswapPrepare       ((ib_SystemState) 8)   //!< The ColdswapPrepare state
+#define ib_SystemState_ColdswapReady         ((ib_SystemState) 9)   //!< The ColdswapReady state
+#define ib_SystemState_ColdswapPending       ((ib_SystemState) 10)  //!< The ColdswapPending state
+#define ib_SystemState_ColdswapDone          ((ib_SystemState) 11)  //!< The ColdswapDone state
+#define ib_SystemState_Error                 ((ib_SystemState) 12)  //!< The error state
+#define ib_SystemState_ShuttingDown          ((ib_SystemState) 13)  //!< The shutting down state
+#define ib_SystemState_Shutdown              ((ib_SystemState) 14)  //!< The shutdown state
+
 typedef uint64_t ib_NanosecondsTime; //!< Simulation time
 
 /*! \brief Join the IB simulation with the domainId as a participant.
@@ -232,6 +249,36 @@ IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetSimulationTask(ib_Si
 
 typedef ib_ReturnCode(*ib_SimulationParticipant_SetSimulationTask_t)(ib_SimulationParticipant* participant,
     void* context, ib_ParticipantSimulationTaskHandler_t handler);
+
+
+
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_RunSimulation(ib_SimulationParticipant* participant);
+
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_StopSimulation(ib_SimulationParticipant* participant);
+
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Shutdown(ib_SimulationParticipant* participant);
+
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_PrepareColdswap(ib_SimulationParticipant* participant);
+
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_ExecuteColdswap(ib_SimulationParticipant* participant);
+
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_GetParticipantState(ib_ParticipantState* outParticipantState,
+  ib_SimulationParticipant* participant, const char* participantId);
+
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_GetSystemState(ib_SystemState* outSystemState, ib_SimulationParticipant* participant);
+
+typedef void (*ib_SystemStateHandler_t)(void* context, ib_SimulationParticipant* participant,
+    ib_SystemState state);
+
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_RegisterSystemStateHandler(ib_SimulationParticipant* participant,
+  void* context, ib_SystemStateHandler_t handler);
+
+
+typedef void (*ib_ParticipantStateHandler_t)(void* context, ib_SimulationParticipant* participant,
+    const char* participantId, ib_ParticipantState state);
+
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_RegisterParticipantStateHandler(ib_SimulationParticipant* participant,
+  void* context, ib_ParticipantStateHandler_t handler);
 
 IB_END_DECLS
 

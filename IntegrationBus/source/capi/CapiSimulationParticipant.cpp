@@ -19,7 +19,7 @@
 
 extern "C" {
 
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Create(ib_SimulationParticipant** outParticipant, const char* cJsonConfig, const char* cParticipantName, const char* cDomainId)
+ib_ReturnCode ib_SimulationParticipant_Create(ib_SimulationParticipant** outParticipant, const char* cJsonConfig, const char* cParticipantName, const char* cDomainId)
 {
   ASSERT_VALID_OUT_PARAMETER(outParticipant);
   ASSERT_VALID_POINTER_PARAMETER(cJsonConfig);
@@ -67,7 +67,7 @@ ib_ReturnCode ib_SimulationParticipant_Destroy(ib_SimulationParticipant* partici
   CAPI_LEAVE
 }
 
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_GetLogger(ib_Logger** outLogger, ib_SimulationParticipant* participant)
+ib_ReturnCode ib_SimulationParticipant_GetLogger(ib_Logger** outLogger, ib_SimulationParticipant* participant)
 {
     ASSERT_VALID_OUT_PARAMETER(outLogger);
     ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -226,5 +226,140 @@ ib_ReturnCode ib_SimulationParticipant_SetSimulationTask(ib_SimulationParticipan
   }
   CAPI_LEAVE
 }
+
+ib_ReturnCode ib_SimulationParticipant_RunSimulation(ib_SimulationParticipant* participant)
+{
+  ASSERT_VALID_POINTER_PARAMETER(participant);
+  CAPI_ENTER
+  {
+    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+    auto* systemController = comAdapter->GetSystemController();
+    systemController->Run();
+    return ib_ReturnCode_SUCCESS;
+  }
+  CAPI_LEAVE
+}
+
+ib_ReturnCode ib_SimulationParticipant_StopSimulation(ib_SimulationParticipant* participant)
+{
+  ASSERT_VALID_POINTER_PARAMETER(participant);
+  CAPI_ENTER
+  {
+    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+    auto* systemController = comAdapter->GetSystemController();
+    systemController->Stop();
+    return ib_ReturnCode_SUCCESS;
+  }
+  CAPI_LEAVE
+}
+
+
+ib_ReturnCode ib_SimulationParticipant_Shutdown(ib_SimulationParticipant* participant)
+{
+  ASSERT_VALID_POINTER_PARAMETER(participant);
+  CAPI_ENTER
+  {
+    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+    auto* systemController = comAdapter->GetSystemController();
+    systemController->Shutdown();
+    return ib_ReturnCode_SUCCESS;
+  }
+  CAPI_LEAVE
+}
+
+ib_ReturnCode ib_SimulationParticipant_PrepareColdswap(ib_SimulationParticipant* participant)
+{
+  ASSERT_VALID_POINTER_PARAMETER(participant);
+  CAPI_ENTER
+  {
+    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+    auto* systemController = comAdapter->GetSystemController();
+    systemController->PrepareColdswap();
+    return ib_ReturnCode_SUCCESS;
+  }
+  CAPI_LEAVE
+}
+
+ib_ReturnCode ib_SimulationParticipant_ExecuteColdswap(ib_SimulationParticipant* participant)
+{
+  ASSERT_VALID_POINTER_PARAMETER(participant);
+  CAPI_ENTER
+  {
+    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+    auto* systemController = comAdapter->GetSystemController();
+    systemController->ExecuteColdswap();
+    return ib_ReturnCode_SUCCESS;
+  }
+  CAPI_LEAVE
+}
+
+ib_ReturnCode ib_SimulationParticipant_GetParticipantState(ib_ParticipantState* outParticipantState, ib_SimulationParticipant* participant, const char* participantId)
+{
+  ASSERT_VALID_POINTER_PARAMETER(participant);
+  ASSERT_VALID_OUT_PARAMETER(outParticipantState);
+  ASSERT_VALID_POINTER_PARAMETER(participantId);
+  CAPI_ENTER
+  {
+    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+    auto* systemMonitor = comAdapter->GetSystemMonitor();
+    auto participantStatus = systemMonitor->ParticipantStatus(participantId);
+    *outParticipantState = (ib_ParticipantState)participantStatus.state;
+    return ib_ReturnCode_SUCCESS;
+  }
+  CAPI_LEAVE
+}
+
+ib_ReturnCode ib_SimulationParticipant_GetSystemState(ib_SystemState* outParticipantState, ib_SimulationParticipant* participant)
+{
+  ASSERT_VALID_POINTER_PARAMETER(participant);
+  ASSERT_VALID_OUT_PARAMETER(outParticipantState);
+  CAPI_ENTER
+  {
+    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+    auto* systemMonitor = comAdapter->GetSystemMonitor();
+    auto systemState = systemMonitor->SystemState();
+    *outParticipantState = (ib_SystemState)systemState;
+    return ib_ReturnCode_SUCCESS;
+  }
+  CAPI_LEAVE
+}
+
+ib_ReturnCode ib_SimulationParticipant_RegisterSystemStateHandler(ib_SimulationParticipant* participant, void* context, ib_SystemStateHandler_t handler)
+{
+  ASSERT_VALID_POINTER_PARAMETER(participant);
+  ASSERT_VALID_HANDLER_PARAMETER(handler);
+  CAPI_ENTER
+  {
+    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+    auto* systemMonitor = comAdapter->GetSystemMonitor();
+
+    systemMonitor->RegisterSystemStateHandler(
+      [handler, context, participant](ib::mw::sync::SystemState systemState) {
+          handler(context, participant, (ib_SystemState)systemState);
+      });
+    return ib_ReturnCode_SUCCESS;
+  }
+  CAPI_LEAVE
+}
+
+
+ib_ReturnCode ib_SimulationParticipant_RegisterParticipantStateHandler(ib_SimulationParticipant* participant, void* context, ib_ParticipantStateHandler_t handler)
+{
+  ASSERT_VALID_POINTER_PARAMETER(participant);
+  ASSERT_VALID_HANDLER_PARAMETER(handler);
+  CAPI_ENTER
+  {
+    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+    auto* systemMonitor = comAdapter->GetSystemMonitor();
+
+    systemMonitor->RegisterParticipantStatusHandler(
+      [handler, context, participant](ib::mw::sync::ParticipantStatus status) {
+          handler(context, participant, status.participantName.c_str(), (ib_ParticipantState)status.state);
+      });
+    return ib_ReturnCode_SUCCESS;
+  }
+  CAPI_LEAVE
+}
+
 
 }
