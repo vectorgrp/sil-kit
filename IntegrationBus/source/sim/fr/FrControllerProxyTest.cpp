@@ -63,12 +63,12 @@ protected:
     : proxy(&comAdapter)
     , proxyFrom(&comAdapter)
     {
-        proxy.SetServiceId(from_endpointAddress(proxyAddress));
+        proxy.SetServiceDescriptor(from_endpointAddress(proxyAddress));
 
         referencePayload.resize(20);
         std::iota(referencePayload.begin(), referencePayload.end(), '\000');
 
-        proxyFrom.SetServiceId(from_endpointAddress(controllerAddress));
+        proxyFrom.SetServiceDescriptor(from_endpointAddress(controllerAddress));
     }
 
 protected:

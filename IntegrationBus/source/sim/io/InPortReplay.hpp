@@ -55,8 +55,8 @@ public:
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
     // IIbServiceEndpoint
-    inline void SetServiceId(const mw::ServiceId& serviceId) override;
-    inline auto GetServiceId() const -> const mw::ServiceId & override;
+    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 
 public:
     // ----------------------------------------
@@ -172,14 +172,14 @@ void InPortReplay<MsgT>::ReplayMessage(const extensions::IReplayMessage* replayM
 }
 
 template<typename MsgT>
-void InPortReplay<MsgT>::SetServiceId(const ib::mw::ServiceId& serviceId)
+void InPortReplay<MsgT>::SetServiceDescriptor(const ib::mw::ServiceDescriptor& serviceDescriptor)
 {
-    _inPort.SetServiceId(serviceId);
+    _inPort.SetServiceDescriptor(serviceDescriptor);
 }
 template<typename MsgT>
-auto InPortReplay<MsgT>::GetServiceId() const -> const mw::ServiceId&
+auto InPortReplay<MsgT>::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
-    return _inPort.GetServiceId();
+    return _inPort.GetServiceDescriptor();
 }
 
 } // namespace io

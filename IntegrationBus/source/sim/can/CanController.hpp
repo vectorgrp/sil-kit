@@ -78,8 +78,8 @@ public:
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
     // IIbServiceEndpoint
-    inline void SetServiceId(const mw::ServiceId& serviceId) override;
-    inline auto GetServiceId() const -> const mw::ServiceId & override;
+    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 public:
     // ----------------------------------------
     // Public interface methods
@@ -105,7 +105,7 @@ private:
     // ----------------------------------------
     // private members
     ::ib::mw::IComAdapterInternal* _comAdapter{nullptr};
-    mw::ServiceId _serviceId;
+    mw::ServiceDescriptor _serviceDescriptor;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
 
     CanTxId _canTxId = 0;
@@ -131,13 +131,13 @@ void CanController::AddSink(extensions::ITraceMessageSink* sink)
     _tracer.AddSink(EndpointAddress(), *sink);
 }
 
-void CanController::SetServiceId(const mw::ServiceId& serviceId)
+void CanController::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
-    _serviceId = serviceId;
+    _serviceDescriptor = serviceDescriptor;
 }
-auto CanController::GetServiceId() const -> const mw::ServiceId&
+auto CanController::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
-    return _serviceId;
+    return _serviceDescriptor;
 }
 
 } // namespace can

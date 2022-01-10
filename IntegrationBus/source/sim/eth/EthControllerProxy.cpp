@@ -83,7 +83,7 @@ void EthControllerProxy::RegisterBitRateChangedHandler(BitRateChangedHandler han
 
 void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
+    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
     _tracer.Trace(extensions::Direction::Receive,
@@ -94,7 +94,7 @@ void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthTransmitAcknowledge& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
+    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
     auto transmittedMsg = _transmittedMessages.find(msg.transmitId);
@@ -114,7 +114,7 @@ void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthStatus& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
+    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
     if (msg.state != _ethState)
@@ -132,12 +132,12 @@ void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void EthControllerProxy::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
-    _serviceId.legacyEpa = endpointAddress;
+    _serviceDescriptor.legacyEpa = endpointAddress;
 }
 
 auto EthControllerProxy::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    return _serviceId.legacyEpa;
+    return _serviceDescriptor.legacyEpa;
 }
 
 template<typename MsgT>

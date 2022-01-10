@@ -35,17 +35,17 @@ void GenericSubscriber::SetReceiveMessageHandler(CallbackT callback)
 
 void GenericSubscriber::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
-    _serviceId.legacyEpa = endpointAddress;
+    _serviceDescriptor.legacyEpa = endpointAddress;
 }
 
 auto GenericSubscriber::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    return _serviceId.legacyEpa;
+    return _serviceDescriptor.legacyEpa;
 }
 
 void GenericSubscriber::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const GenericMessage& msg)
 {
-    if (AllowMessageProcessing(from->GetServiceId(), _serviceId))
+    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
     ReceiveMessage(msg);
 }

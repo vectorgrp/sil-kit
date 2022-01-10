@@ -350,9 +350,9 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
     from->SetInfo(announcement.peerInfo);
     from->SetUri(announcement.peerUri);
     auto& service = dynamic_cast<IIbServiceEndpoint&>(*from);
-    auto serviceId = service.GetServiceId();
-    serviceId.participantName = announcement.peerUri.participantName;
-    service.SetServiceId(serviceId);
+    auto serviceDescriptor = service.GetServiceDescriptor();
+    serviceDescriptor.participantName = announcement.peerUri.participantName;
+    service.SetServiceDescriptor(serviceDescriptor);
     for (auto&& receiver : _participantAnnouncementReceivers)
     {
         receiver(from, announcement);
@@ -482,10 +482,10 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
         SendParticipantAnnoucement(peer.get());
 
         // The service ID is incomplete at this stage.
-        ServiceId peerId;
+        ServiceDescriptor peerId;
         peerId.participantName = peerUri.participantName;
         peerId.legacyEpa.participant = peerUri.participantId;
-        peer->SetServiceId(peerId);
+        peer->SetServiceDescriptor(peerId);
 
         AddPeer(std::move(peer));
     };
@@ -658,10 +658,10 @@ void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
     // The VAsioTcpPeer has an incomplete Service ID, fill in the missing
     // link and participant names.
     auto& peerService = dynamic_cast<IIbServiceEndpoint&>(*peer);
-    auto peerId = peerService.GetServiceId();
+    auto peerId = peerService.GetServiceDescriptor();
     peerId.participantName = peer->GetUri().participantName;
     peerId.linkName = link->Name();
-    peerService.SetServiceId(peerId);
+    peerService.SetServiceDescriptor(peerId);
     link->DistributeRemoteIbMessage(&peerService, msg);
 
     _logger->Error("Lost connection to participant {}", peerId);

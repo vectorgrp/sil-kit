@@ -72,7 +72,7 @@ protected:
     : controller(&comAdapter, comAdapter.GetTimeProvider())
     , otherController(&comAdapter, comAdapter.GetTimeProvider())
     {
-        controller.SetServiceId(from_endpointAddress(controllerAddress));
+        controller.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
         referencePayload.resize(20);
         std::iota(referencePayload.begin(), referencePayload.end(), '\000');
@@ -80,7 +80,7 @@ protected:
         ON_CALL(comAdapter.mockTimeProvider.mockTime, Now())
             .WillByDefault(testing::Return(42ns));
 
-        otherController.SetServiceId(from_endpointAddress(otherControllerAddress));
+        otherController.SetServiceDescriptor(from_endpointAddress(otherControllerAddress));
     }
 
 protected:

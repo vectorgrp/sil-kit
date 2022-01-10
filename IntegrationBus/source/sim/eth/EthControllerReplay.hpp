@@ -61,8 +61,8 @@ public:
     void ReplayMessage(const extensions::IReplayMessage* replayMessage) override;
 
     // IIbServiceEndpoint
-    inline void SetServiceId(const mw::ServiceId& serviceId) override;
-    inline auto GetServiceId() const -> const mw::ServiceId & override;
+    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 
 private:
     //Private methods
@@ -76,13 +76,13 @@ private:
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-void EthControllerReplay::SetServiceId(const mw::ServiceId& serviceId)
+void EthControllerReplay::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
-    _controller.SetServiceId(serviceId);
+    _controller.SetServiceDescriptor(serviceDescriptor);
 }
-auto EthControllerReplay::GetServiceId() const -> const mw::ServiceId&
+auto EthControllerReplay::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
-    return _controller.GetServiceId();
+    return _controller.GetServiceDescriptor();
 }
 
 } // namespace eth

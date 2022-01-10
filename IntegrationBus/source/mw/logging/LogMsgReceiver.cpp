@@ -19,11 +19,11 @@ void LogMsgReceiver::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const 
 
 void LogMsgReceiver::SetEndpointAddress(const ib::mw::EndpointAddress &address)
 {
-    _serviceId.legacyEpa = address;
+  _serviceDescriptor.legacyEpa = address;
 }
 auto LogMsgReceiver::EndpointAddress(void) const -> const ib::mw::EndpointAddress&
 {
-    return _serviceId.legacyEpa;
+    return _serviceDescriptor.legacyEpa;
 }
 
 } // namespace logging

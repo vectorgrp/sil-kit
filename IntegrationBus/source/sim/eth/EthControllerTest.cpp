@@ -76,12 +76,12 @@ protected:
         : controller(&comAdapter, _config, comAdapter.GetTimeProvider())
         , controllerOther(&comAdapter, _config, comAdapter.GetTimeProvider())
     {
-        controller.SetServiceId(from_endpointAddress(controllerAddress));
+        controller.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
         controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
         controller.RegisterMessageAckHandler(ib::util::bind_method(&callbacks, &Callbacks::MessageAck));
 
-        controllerOther.SetServiceId(from_endpointAddress(otherAddress));
+        controllerOther.SetServiceDescriptor(from_endpointAddress(otherAddress));
     }
 
 protected:
@@ -168,7 +168,7 @@ TEST_F(EthernetControllerTest, ethcontroller_uses_tracing)
 
     ib::cfg::EthernetController config{};
     auto ethController = EthController(&comAdapter, config, comAdapter.GetTimeProvider());
-    ethController.SetServiceId(from_endpointAddress(controllerAddress));
+    ethController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
     ethController.AddSink(&traceSink);
 
 

@@ -11,13 +11,13 @@ TEST(MwVAsioSerdes, Mw_Service)
     ib::mw::service::ServiceAnnouncement in{};
     in.participantName = "Input";
     for (auto i = 0; i < 10; i++) {
-        ib::mw::service::ServiceDescription descr;
-        descr.serviceId.participantName = "Participant" + std::to_string(i);
-        descr.serviceId.serviceName = "Service" + std::to_string(i);
-        descr.serviceId.linkName = "Link" + std::to_string(i);
-        descr.serviceId.isLinkSimulated = true;
-        descr.serviceId.legacyEpa.participant = i;
-        descr.serviceId.legacyEpa.endpoint = i;
+        ib::mw::ServiceDescriptor descr;
+        descr.participantName = "Participant" + std::to_string(i);
+        descr.serviceName = "Service" + std::to_string(i);
+        descr.linkName = "Link" + std::to_string(i);
+        descr.isLinkSimulated = true;
+        descr.legacyEpa.participant = i;
+        descr.legacyEpa.endpoint = i;
         descr.supplementalData["hello"] = "world";
         descr.supplementalData["Second"] = "Supplement";
         in.services.push_back(descr);
@@ -30,7 +30,7 @@ TEST(MwVAsioSerdes, Mw_Service)
 
     EXPECT_EQ(in, out);
     //ensure that sensible values are present
-    EXPECT_EQ(out.services.at(9).serviceId.participantName, "Participant9");
+    EXPECT_EQ(out.services.at(9).participantName, "Participant9");
     EXPECT_EQ(out.services.at(9).supplementalData.size(), 2);
 }
 

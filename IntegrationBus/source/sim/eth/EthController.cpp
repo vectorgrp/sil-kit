@@ -84,7 +84,7 @@ void EthController::RegisterBitRateChangedHandler(BitRateChangedHandler /*handle
 
 void EthController::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg)
 {
-    if (AllowMessageProcessing(from->GetServiceId(), _serviceId))
+    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
     _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg.ethFrame);
@@ -94,12 +94,12 @@ void EthController::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMe
 
 void EthController::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
-    _serviceId.legacyEpa = endpointAddress;
+    _serviceDescriptor.legacyEpa = endpointAddress;
 }
 
 auto EthController::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    return _serviceId.legacyEpa;
+    return _serviceDescriptor.legacyEpa;
 }
 
 template<typename MsgT>

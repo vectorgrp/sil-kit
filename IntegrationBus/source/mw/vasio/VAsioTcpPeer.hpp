@@ -62,8 +62,8 @@ public:
     void StartAsyncRead();
 
     // IIbServiceEndpoint
-    inline void SetServiceId(const mw::ServiceId& serviceId) override;
-    inline auto GetServiceId() const -> const mw::ServiceId & override;
+    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 private:
     // ----------------------------------------
     // Private Methods
@@ -98,7 +98,7 @@ private:
     std::mutex _sendingQueueLock;
     bool _sending{false};
     bool _enableQuickAck{false};
-    mw::ServiceId _serviceId;
+    mw::ServiceDescriptor _serviceDescriptor;
 };
 
 
@@ -106,13 +106,13 @@ private:
 //  Inline Implementations
 // ================================================================================
 
-void VAsioTcpPeer::SetServiceId(const mw::ServiceId& serviceId)
+void VAsioTcpPeer::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
-    _serviceId = serviceId;
+    _serviceDescriptor = serviceDescriptor;
 }
-auto VAsioTcpPeer::GetServiceId() const -> const mw::ServiceId&
+auto VAsioTcpPeer::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
-    return _serviceId;
+    return _serviceDescriptor;
 }
 
 } // mw

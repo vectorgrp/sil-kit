@@ -70,14 +70,14 @@ protected:
         : proxy(&comAdapter, _config)
         , proxyFrom(&comAdapter, _config)
     {
-        proxy.SetServiceId(from_endpointAddress(proxyAddress));
+        proxy.SetServiceDescriptor(from_endpointAddress(proxyAddress));
 
         proxy.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
         proxy.RegisterMessageAckHandler(ib::util::bind_method(&callbacks, &Callbacks::MessageAck));
         proxy.RegisterBitRateChangedHandler(ib::util::bind_method(&callbacks, &Callbacks::BitRateChanged));
         proxy.RegisterStateChangedHandler(ib::util::bind_method(&callbacks, &Callbacks::StateChanged));
 
-        proxyFrom.SetServiceId(from_endpointAddress(controllerAddress));
+        proxyFrom.SetServiceDescriptor(from_endpointAddress(controllerAddress));
     }
 
 protected:

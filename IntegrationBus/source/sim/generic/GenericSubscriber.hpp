@@ -59,14 +59,14 @@ public:
     // ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
     // IIbServiceEndpoint
-    inline void SetServiceId(const mw::ServiceId& serviceId) override;
-    inline auto GetServiceId() const -> const mw::ServiceId & override;
+    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 
 private:
     //private Members
     cfg::GenericPort _config{};
     mw::IComAdapterInternal* _comAdapter{nullptr};
-    mw::ServiceId _serviceId{};
+    mw::ServiceDescriptor _serviceDescriptor{};
     CallbackT _callback;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     extensions::Tracer _tracer;
@@ -80,14 +80,14 @@ void GenericSubscriber::AddSink(extensions::ITraceMessageSink* sink)
     _tracer.AddSink(EndpointAddress(), *sink);
 }
 
-void GenericSubscriber::SetServiceId(const mw::ServiceId& serviceId)
+void GenericSubscriber::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
-    _serviceId = serviceId;
+    _serviceDescriptor = serviceDescriptor;
 }
 
-auto GenericSubscriber::GetServiceId() const -> const mw::ServiceId&
+auto GenericSubscriber::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
-    return _serviceId;
+    return _serviceDescriptor;
 }
 
 } // namespace generic

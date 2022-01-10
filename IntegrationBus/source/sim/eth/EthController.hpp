@@ -75,8 +75,8 @@ public:
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
     // IIbServiceEndpoint
-    inline void SetServiceId(const mw::ServiceId& serviceId) override;
-    inline auto GetServiceId() const -> const mw::ServiceId & override;
+    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 
 private:
     // ----------------------------------------
@@ -99,7 +99,7 @@ private:
     // ----------------------------------------
     // private members
     ::ib::mw::IComAdapterInternal* _comAdapter = nullptr;
-    ::ib::mw::ServiceId _serviceId;
+    ::ib::mw::ServiceDescriptor _serviceDescriptor;
     ::ib::mw::sync::ITimeProvider* _timeProvider{ nullptr };
 
     EthTxId _ethTxId = 0;
@@ -127,13 +127,13 @@ void EthController::AddSink(extensions::ITraceMessageSink* sink)
     _tracer.AddSink(EndpointAddress(), *sink);
 }
 
-void EthController::SetServiceId(const mw::ServiceId& serviceId)
+void EthController::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
-    _serviceId = serviceId;
+    _serviceDescriptor = serviceDescriptor;
 }
-auto EthController::GetServiceId() const -> const mw::ServiceId&
+auto EthController::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
-    return _serviceId;
+    return _serviceDescriptor;
 }
 
 } // namespace eth

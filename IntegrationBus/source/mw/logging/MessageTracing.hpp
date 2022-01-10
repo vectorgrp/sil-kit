@@ -12,13 +12,13 @@ namespace mw {
 template<class IbMessageT>
 void TraceRx(logging::ILogger* logger, const IIbServiceEndpoint* addr, const IbMessageT& msg)
 {
-  logger->Trace("Recv from {}: {}", addr->GetServiceId(), msg);
+  logger->Trace("Recv from {}: {}", addr->GetServiceDescriptor(), msg);
 }
 
 template<class IbMessageT>
 void TraceTx(logging::ILogger* logger, const IIbServiceEndpoint* addr, const IbMessageT& msg)
 {
-  logger->Trace("Send from {}: {}", addr->GetServiceId(), msg);
+  logger->Trace("Send from {}: {}", addr->GetServiceDescriptor(), msg);
 }
 
 // Don't trace LogMessages - this could cause cycles!

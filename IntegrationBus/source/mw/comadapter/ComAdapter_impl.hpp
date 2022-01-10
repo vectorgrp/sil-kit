@@ -795,24 +795,24 @@ auto ComAdapter<IbConnectionT>::CreateController(const cfg::Link& link, const st
 
     controller->SetEndpointAddress({ _participantId, _localEndpointId });
 
-    auto id = ServiceId{};
-    id.linkName = link.name;
-    id.participantName = _participantName;
-    id.serviceName = serviceName;
-    id.type = link.type;
-    id.legacyEpa = controller->EndpointAddress();
-    id.serviceId = _localEndpointId;
-    controller->SetServiceId(id);
+    auto descriptor = ServiceDescriptor{};
+    descriptor.linkName = link.name;
+    descriptor.participantName = _participantName;
+    descriptor.serviceName = serviceName;
+    descriptor.type = link.type;
+    descriptor.legacyEpa = controller->EndpointAddress();
+    descriptor.serviceId = _localEndpointId;
+    controller->SetServiceDescriptor(descriptor);
     ++_localEndpointId;
 
     _ibConnection.RegisterIbService(link.name, _localEndpointId, controllerPtr);
 
 
-    controllerMap[controller->GetServiceId().serviceName] = std::move(controller);
+    controllerMap[controller->GetServiceDescriptor().serviceName] = std::move(controller);
 
     //Tell the service discovery that a new service was created
-    service::ServiceDescription descr; //TODO We should move supplementalData to ServiceId
-    descr.serviceId = id;
+    mw::ServiceDescriptor descr;
+    descr = descriptor;
     GetServiceDiscovery()->NotifyServiceCreated(descr);
     return controllerPtr;
 }
@@ -949,14 +949,14 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
                     // We need to register all simulated controllers here, so the connection
                     // can build internal data structures.
                     auto& serviceEndpoint = dynamic_cast<mw::IIbServiceEndpoint&>(*busSim);
-                    auto id = ServiceId{};
+                    auto id = ServiceDescriptor{};
                     id.linkName = linkName;
                     id.participantName = proxyEndpoint.participantName;
                     id.serviceName = proxyEndpoint.serviceName;
                     id.type = linkType;
                     id.legacyEpa.participant = _participantId;
                     id.legacyEpa.endpoint = proxyEndpoint.id;
-                    serviceEndpoint.SetServiceId(id);
+                    serviceEndpoint.SetServiceDescriptor(id);
   
                     _ibConnection.RegisterIbService(linkName, proxyEndpoint.id, busSim);
 

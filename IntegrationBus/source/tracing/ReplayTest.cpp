@@ -50,7 +50,7 @@ auto AService(const IIbServiceEndpoint* service) -> testing::Matcher<const IIbSe
 {
   using namespace testing;
   return AllOf(
-    Property(&IIbServiceEndpoint::GetServiceId, Eq(service->GetServiceId()))
+    Property(&IIbServiceEndpoint::GetServiceDescriptor, Eq(service->GetServiceDescriptor()))
   );
 }
 

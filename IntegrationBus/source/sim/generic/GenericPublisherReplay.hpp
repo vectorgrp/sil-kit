@@ -46,8 +46,8 @@ public:
     void ReplayMessage(const extensions::IReplayMessage* replayMessage) override;
 
     // IIbServiceEndpoint
-    inline void SetServiceId(const mw::ServiceId& serviceId) override;
-    inline auto GetServiceId() const -> const mw::ServiceId & override;
+    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 
 private:
     //Private methods
@@ -61,13 +61,13 @@ private:
 //  Inline Implementations
 // ================================================================================
 
-void GenericPublisherReplay::SetServiceId(const mw::ServiceId& serviceId)
+void GenericPublisherReplay::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
-    _publisher.SetServiceId(serviceId);
+    _publisher.SetServiceDescriptor(serviceDescriptor);
 }
-auto GenericPublisherReplay::GetServiceId() const -> const mw::ServiceId&
+auto GenericPublisherReplay::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
-    return _publisher.GetServiceId();
+    return _publisher.GetServiceDescriptor();
 }
 
 } // namespace generic

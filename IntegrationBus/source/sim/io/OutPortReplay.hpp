@@ -55,8 +55,8 @@ public:
     void ReplayMessage(const extensions::IReplayMessage* replayMessage) override;
 
     // IIbServiceEndpoint
-    inline void SetServiceId(const mw::ServiceId& serviceId) override;
-    inline auto GetServiceId() const -> const mw::ServiceId & override;
+    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 
 private:
     //Private methods
@@ -155,15 +155,15 @@ void OutPortReplay<MsgT>::ReplaySend(const extensions::IReplayMessage* replayMes
 }
 
 template<typename MsgT>
-void OutPortReplay<MsgT>::SetServiceId(const mw::ServiceId& serviceId)
+void OutPortReplay<MsgT>::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
-    _outPort.SetServiceId(serviceId);
+    _outPort.SetServiceDescriptor(serviceDescriptor);
 }
 
 template<typename MsgT>
-auto OutPortReplay<MsgT>::GetServiceId() const -> const mw::ServiceId&
+auto OutPortReplay<MsgT>::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
-    return _outPort.GetServiceId();
+    return _outPort.GetServiceDescriptor();
 }
 } // namespace io
 } // namespace sim

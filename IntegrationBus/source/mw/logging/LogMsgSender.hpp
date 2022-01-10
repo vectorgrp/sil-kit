@@ -28,8 +28,8 @@ public:
     auto EndpointAddress(void) const -> const mw::EndpointAddress & override;
 
     // IIbServiceEndpoint
-    inline void SetServiceId(const mw::ServiceId& serviceId) override;
-    inline auto GetServiceId() const -> const mw::ServiceId & override;
+    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 
 private:
     // ----------------------------------------
@@ -39,20 +39,20 @@ private:
     // ----------------------------------------
     // private members
     IComAdapterInternal* _comAdapter{nullptr};
-    mw::ServiceId _serviceId{};
+    mw::ServiceDescriptor _serviceDescriptor{};
 };
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-void LogMsgSender::SetServiceId(const mw::ServiceId& serviceId)
+void LogMsgSender::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
-    _serviceId = serviceId;
+    _serviceDescriptor = serviceDescriptor;
 }
 
-auto LogMsgSender::GetServiceId() const -> const mw::ServiceId&
+auto LogMsgSender::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
-    return _serviceId;
+    return _serviceDescriptor;
 }
 
 } // namespace logging

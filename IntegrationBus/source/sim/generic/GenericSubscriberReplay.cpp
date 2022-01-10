@@ -87,7 +87,7 @@ void GenericSubscriberReplay::ReplayReceive(const extensions::IReplayMessage* re
 {
     // need to copy the message here.
     // will throw if invalid message type.
-    static tracing::ReplayServiceId replayService;
+    static tracing::ReplayServiceDescriptor replayService;
     sim::generic::GenericMessage msg = dynamic_cast<const sim::generic::GenericMessage&>(*replayMessage);
     _subscriber.ReceiveIbMessage(&replayService, msg);
 }

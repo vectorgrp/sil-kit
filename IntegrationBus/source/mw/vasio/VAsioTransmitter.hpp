@@ -28,7 +28,7 @@ template<typename MsgT> struct MessageHistory<MsgT, 1>
 {
     void Save(const IIbServiceEndpoint* from , const MsgT& msg)
     {
-        _from = from->GetServiceId().legacyEpa;
+        _from = from->GetServiceDescriptor().legacyEpa;
         _last = msg;
         _hasValue = true;
     }
@@ -80,7 +80,7 @@ public:
             return;
 
 
-        _serviceId.participantName = peer->GetUri().participantName;
+        _serviceDescriptor.participantName = peer->GetUri().participantName;
         _remoteReceivers.push_back(remoteReceiver);
         _hist.NotifyPeer(peer, remoteIdx);
     }
@@ -100,26 +100,26 @@ public:
                 << msgSizePlaceholder
                 << VAsioMsgKind::IbSimMsg
                 << receiver.remoteIdx
-                << from->GetServiceId().legacyEpa
+                << from->GetServiceDescriptor().legacyEpa
                 << msg;
             receiver.peer->SendIbMsg(std::move(buffer));
         }
     }
 
     // IIbServiceEndpoint
-    void SetServiceId(const ServiceId& serviceId) override
+    void SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor) override
     {
-        _serviceId = serviceId;
+        _serviceDescriptor = serviceDescriptor;
     }
-    auto GetServiceId() const -> const ServiceId& override
+    auto GetServiceDescriptor() const -> const ServiceDescriptor& override
     {
-        return _serviceId;
+        return _serviceDescriptor;
     }
 private:
     // ----------------------------------------
     // private members
     std::vector<RemoteReceiver> _remoteReceivers;
-    ServiceId _serviceId;
+    ServiceDescriptor _serviceDescriptor;
 };
 
 // ================================================================================

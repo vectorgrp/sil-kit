@@ -15,12 +15,12 @@ namespace mw {
 
 struct RemoteServiceEndpoint : IIbServiceEndpoint
 {
-    void SetServiceId(const ib::mw::ServiceId&) override 
+    void SetServiceDescriptor(const ib::mw::ServiceDescriptor&) override 
     { 
         throw std::logic_error("This method is not supposed to be used in this struct."); 
     }
 
-    auto GetServiceId() const -> const ServiceId & override
+    auto GetServiceDescriptor() const -> const ServiceDescriptor & override
     { 
         return _id; 
     }
@@ -28,16 +28,16 @@ struct RemoteServiceEndpoint : IIbServiceEndpoint
     RemoteServiceEndpoint(IVAsioPeer* remoteParticipant, const IIbServiceEndpoint* receiver)
     {
         _id.participantName = remoteParticipant->GetUri().participantName;
-        const auto& receiverServiceId = receiver->GetServiceId();
-        _id.serviceName = receiverServiceId.serviceName;
-        _id.linkName = receiverServiceId.linkName;
-        _id.legacyEpa = receiverServiceId.legacyEpa;
-        _id.isLinkSimulated = receiverServiceId.isLinkSimulated;
-        _id.type = receiverServiceId.type;
+        const auto& receiverServiceDescriptor = receiver->GetServiceDescriptor();
+        _id.serviceName = receiverServiceDescriptor.serviceName;
+        _id.linkName = receiverServiceDescriptor.linkName;
+        _id.legacyEpa = receiverServiceDescriptor.legacyEpa;
+        _id.isLinkSimulated = receiverServiceDescriptor.isLinkSimulated;
+        _id.type = receiverServiceDescriptor.type;
     }
 
 private:
-    ServiceId _id;
+    ServiceDescriptor _id;
 };
 
 class MessageBuffer;
@@ -67,13 +67,13 @@ public:
     // Public interface methods
     auto GetDescriptor() const -> const VAsioMsgSubscriber& override;
     void ReceiveRawMsg(IVAsioPeer* from, MessageBuffer&& buffer) override;
-    void SetServiceId(const ServiceId& serviceId) override
+    void SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor) override
     {
-        _serviceId = serviceId;
+        _serviceDescriptor = serviceDescriptor;
     }
-    auto GetServiceId() const -> const ServiceId& override
+    auto GetServiceDescriptor() const -> const ServiceDescriptor& override
     {
-        return _serviceId;
+        return _serviceDescriptor;
     }
 
 private:
@@ -82,7 +82,7 @@ private:
     VAsioMsgSubscriber _subscriptionInfo;
     std::shared_ptr<IbLink<MsgT>> _link;
     logging::ILogger* _logger;
-    ServiceId _serviceId;
+    ServiceDescriptor _serviceDescriptor;
 };
 
 // ================================================================================
@@ -94,7 +94,7 @@ VAsioReceiver<MsgT>::VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::share
     , _link{link}
     , _logger{logger}
 {
-    _serviceId.linkName = _subscriptionInfo.linkName;
+    _serviceDescriptor.linkName = _subscriptionInfo.linkName;
 }
 
 template <class MsgT>
@@ -111,17 +111,17 @@ void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* from, MessageBuffer&& buffer
     buffer >> endpoint >> msg;
 
     TraceRx(_logger, this, msg);
-    _serviceId.legacyEpa = endpoint;
+    _serviceDescriptor.legacyEpa = endpoint;
 
     auto* fromService = dynamic_cast<IIbServiceEndpoint*>(from);
-    ServiceId tmpService(fromService->GetServiceId());
+    ServiceDescriptor tmpService(fromService->GetServiceDescriptor());
     tmpService.legacyEpa = endpoint;
 
     //// TODO set data from peer?
     //_link->DistributeRemoteIbMessage(fromService, msg);
 
 
-    fromService->SetServiceId(tmpService);
+    fromService->SetServiceDescriptor(tmpService);
 
     auto remoteId = RemoteServiceEndpoint(from, this); 
     _link->DistributeRemoteIbMessage(&remoteId, msg);

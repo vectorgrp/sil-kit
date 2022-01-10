@@ -103,7 +103,7 @@ void CanController::RegisterHandler(CallbackT<MsgT> handler)
 
 void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMessage& msg)
 {
-    if (AllowMessageProcessing(from->GetServiceId(), _serviceId))
+    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
     {
         return;
     }
@@ -124,12 +124,12 @@ void CanController::CallHandlers(const MsgT& msg)
 
 void CanController::SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress)
 {
-    _serviceId.legacyEpa = endpointAddress;
+    _serviceDescriptor.legacyEpa = endpointAddress;
 }
 
 auto CanController::EndpointAddress() const -> const ::ib::mw::EndpointAddress&
 {
-    return _serviceId.legacyEpa;
+    return _serviceDescriptor.legacyEpa;
 }
 
 void CanController::SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)

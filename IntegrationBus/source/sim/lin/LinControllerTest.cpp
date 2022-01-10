@@ -39,13 +39,13 @@ protected:
                 callbacks.FrameStatusHandler(ctrl, frame, status);
             };
         
-        controller.SetServiceId(from_endpointAddress(ibAddr1));
+        controller.SetServiceDescriptor(from_endpointAddress(ibAddr1));
 
         ON_CALL(comAdapter.mockTimeProvider.mockTime, Now())
             .WillByDefault(testing::Return(35s));
 
-        controller2.SetServiceId(from_endpointAddress(ibAddr2));
-        controller3.SetServiceId(from_endpointAddress(ibAddr3));
+        controller2.SetServiceDescriptor(from_endpointAddress(ibAddr2));
+        controller3.SetServiceDescriptor(from_endpointAddress(ibAddr3));
     }
 
 
@@ -452,9 +452,9 @@ TEST_F(LinControllerTest, trigger_frame_response_update_handler)
     response2.responseMode = FrameResponseMode::TxUnconditional;
     responseUpdate.frameResponses.push_back(response2);
 
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, to_string(controller2.GetServiceId()), response1))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, to_string(controller2.GetServiceDescriptor()), response1))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, to_string(controller2.GetServiceId()), response2))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, to_string(controller2.GetServiceDescriptor()), response2))
         .Times(1);
 
     controller.ReceiveIbMessage(&controller2, responseUpdate);

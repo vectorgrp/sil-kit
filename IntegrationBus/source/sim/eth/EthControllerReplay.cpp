@@ -138,7 +138,7 @@ void EthControllerReplay::ReplaySend(const extensions::IReplayMessage* replayMes
 
 void EthControllerReplay::ReplayReceive(const extensions::IReplayMessage* replayMessage)
 {
-    static tracing::ReplayServiceId replayService;
+    static tracing::ReplayServiceDescriptor replayService;
     sim::eth::EthFrame frame = dynamic_cast<const sim::eth::EthFrame&>(*replayMessage);
     sim::eth::EthMessage msg{};
     msg.ethFrame = std::move(frame);

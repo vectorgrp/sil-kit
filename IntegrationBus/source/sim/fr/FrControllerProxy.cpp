@@ -141,7 +141,7 @@ void FrControllerProxy::RegisterCycleStartHandler(CycleStartHandler handler)
 
 void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessage& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
+    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
     _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg);
@@ -151,7 +151,7 @@ void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const F
 
 void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessageAck& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
+    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
     FrMessage tmp;
@@ -165,7 +165,7 @@ void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const F
 
 void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbol& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
+    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
     // Call wakeup handlers on WUS and WUDOP
@@ -187,7 +187,7 @@ void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const F
 
 void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbolAck& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
+    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
     CallHandlers(msg);
@@ -195,7 +195,7 @@ void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const F
 
 void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CycleStart& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
+    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
     CallHandlers(msg);
@@ -203,7 +203,7 @@ void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const C
 
 void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const PocStatus& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
+    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
     //interoperability with 3.0.3
@@ -216,12 +216,12 @@ void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const P
 
 void FrControllerProxy::SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress)
 {
-    _serviceId.legacyEpa = endpointAddress;
+    _serviceDescriptor.legacyEpa = endpointAddress;
 }
 
 auto FrControllerProxy::EndpointAddress() const -> const ib::mw::EndpointAddress&
 {
-    return _serviceId.legacyEpa;
+    return _serviceDescriptor.legacyEpa;
 }
 
 

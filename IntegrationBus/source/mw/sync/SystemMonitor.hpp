@@ -53,8 +53,8 @@ public:
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantStatus& msg) override;
 
     // IIbServiceEndpoint
-    inline void SetServiceId(const mw::ServiceId& serviceId) override;
-    inline auto GetServiceId() const -> const mw::ServiceId & override;
+    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 
 public:
     // ----------------------------------------
@@ -79,7 +79,7 @@ private:
     // ----------------------------------------
     // private members
     IComAdapterInternal* _comAdapter{nullptr};
-    mw::ServiceId _serviceId{};
+    mw::ServiceDescriptor _serviceDescriptor{};
     cfg::SimulationSetup _simulationSetup;
     logging::ILogger* _logger{nullptr};
 
@@ -101,14 +101,14 @@ auto SystemMonitor::InvalidTransitionCount() const -> unsigned int
     return _invalidTransitionCount;
 }
 
-void SystemMonitor::SetServiceId(const mw::ServiceId& serviceId)
+void SystemMonitor::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
-    _serviceId = serviceId;
+    _serviceDescriptor = serviceDescriptor;
 }
 
-auto SystemMonitor::GetServiceId() const -> const mw::ServiceId&
+auto SystemMonitor::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
-    return _serviceId;
+    return _serviceDescriptor;
 }
 
 } // namespace sync

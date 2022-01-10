@@ -23,11 +23,11 @@ void LogMsgSender::SendLogMsg(LogMsg&& msg)
 
 void LogMsgSender::SetEndpointAddress(const ib::mw::EndpointAddress &address)
 {
-    _serviceId.legacyEpa= address;
+    _serviceDescriptor.legacyEpa= address;
 }
 auto LogMsgSender::EndpointAddress(void) const -> const ib::mw::EndpointAddress&
 {
-    return _serviceId.legacyEpa;
+    return _serviceDescriptor.legacyEpa;
 }
 
 } // namespace logging

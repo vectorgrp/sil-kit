@@ -26,7 +26,7 @@ void CallEach(CallbackRangeT& callbacks, const Args&... args)
 LinControllerProxy::LinControllerProxy(mw::IComAdapterInternal* comAdapter)
     : _comAdapter{comAdapter}
     , _logger{comAdapter->GetLogger()}
-    , _serviceId{}
+    , _serviceDescriptor{}
 {
 }
 
@@ -163,7 +163,7 @@ void LinControllerProxy::RegisterFrameResponseUpdateHandler(FrameResponseUpdateH
 
 void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const Transmission& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId)) return;
+    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor)) return;
 
     auto& frame = msg.frame;
 
@@ -172,8 +172,8 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
         _logger->Warn(
             "LinController received transmission with payload length {} from {{{}, {}}}",
             static_cast<unsigned int>(frame.dataLength),
-            from->GetServiceId().legacyEpa.participant,
-            from->GetServiceId().legacyEpa.endpoint);
+            from->GetServiceDescriptor().legacyEpa.participant,
+            from->GetServiceDescriptor().legacyEpa.endpoint);
         return;
     }
 
@@ -182,8 +182,8 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
         _logger->Warn(
             "LinController received transmission with invalid LIN ID {} from {{{}, {}}}",
             frame.id,
-            from->GetServiceId().legacyEpa.participant,
-            from->GetServiceId().legacyEpa.endpoint);
+            from->GetServiceDescriptor().legacyEpa.participant,
+            from->GetServiceDescriptor().legacyEpa.endpoint);
         return;
     }
 
@@ -208,7 +208,7 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const WakeupPulse& /*msg*/)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId)) return;
+    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor)) return;
     CallEach(_wakeupHandler, this);
 }
 
@@ -217,11 +217,11 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
     // We also receive FrameResponseUpdate from other controllers, although we would not need them in VIBE simulation.
     // However, we also want to make users of FrameResponseUpdateHandlers happy when using the VIBE simulation.
     // NOTE: only self-delivered messages are rejected
-  if (from->GetServiceId() == _serviceId) return;
+  if (from->GetServiceDescriptor() == _serviceDescriptor) return;
 
     for (auto& response : msg.frameResponses)
     {
-        CallEach(_frameResponseUpdateHandler, this, to_string(from->GetServiceId()), response);
+        CallEach(_frameResponseUpdateHandler, this, to_string(from->GetServiceDescriptor()), response);
     }
 }
 
@@ -230,22 +230,22 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
     // We also receive FrameResponseUpdate from other controllers, although we would not need them in VIBE simulation.
     // However, we also want to make users of FrameResponseUpdateHandlers happy when using the VIBE simulation.
     // NOTE: only self-delivered messages are rejected
-    if (from->GetServiceId() == _serviceId) return;
+    if (from->GetServiceDescriptor() == _serviceDescriptor) return;
 
     for (auto& response : msg.frameResponses)
     {
-        CallEach(_frameResponseUpdateHandler, this, to_string(from->GetServiceId()), response);
+        CallEach(_frameResponseUpdateHandler, this, to_string(from->GetServiceDescriptor()), response);
     }
 }
 
 void LinControllerProxy::SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress)
 {
-    _serviceId.legacyEpa = endpointAddress;
+    _serviceDescriptor.legacyEpa = endpointAddress;
 }
 
 auto LinControllerProxy::EndpointAddress() const -> const ::ib::mw::EndpointAddress&
 {
-    return _serviceId.legacyEpa;
+    return _serviceDescriptor.legacyEpa;
 }
 
 void LinControllerProxy::SetControllerStatus(ControllerStatus status)

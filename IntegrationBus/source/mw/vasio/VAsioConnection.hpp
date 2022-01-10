@@ -135,9 +135,9 @@ private:
     using IbLinkMap = std::map<std::string, std::shared_ptr<IbLink<MsgT>>>;
 
     //template <class MsgT>
-    //using IbServiceToReceiverMap = std::map<ServiceId::IdType, IIbMessageReceiver<MsgT>*>;
+    //using IbServiceToReceiverMap = std::map<ServiceDescriptor::IdType, IIbMessageReceiver<MsgT>*>;
     //template <class MsgT>
-    //using IbServiceToLinkMap = std::map<ServiceId::IdType, std::shared_ptr<IbLink<MsgT>>>;
+    //using IbServiceToLinkMap = std::map<ServiceDescriptor::IdType, std::shared_ptr<IbLink<MsgT>>>;
     template <class MsgT>
     using IbServiceToReceiverMap = std::map<std::string, IIbMessageReceiver<MsgT>*>;
     template <class MsgT>
@@ -239,11 +239,11 @@ private:
             subscriptionInfo.msgTypeName = IbMsgTraits<IbMessageT>::TypeName();
 
             std::unique_ptr<IVAsioReceiver> rawReceiver = std::make_unique<VAsioReceiver<IbMessageT>>(subscriptionInfo, link, _logger);
-            auto* serviceIdPtr = dynamic_cast<IIbServiceEndpoint*>(rawReceiver.get());
-            ServiceId tmpServiceId(dynamic_cast<mw::IIbServiceEndpoint&>(*receiver).GetServiceId());
-            tmpServiceId.participantName = ("Anonymous-" + std::to_string(subscriptionInfo.receiverIdx));
+            auto* serviceEndpointPtr = dynamic_cast<IIbServiceEndpoint*>(rawReceiver.get());
+            ServiceDescriptor tmpServiceDescriptor(dynamic_cast<mw::IIbServiceEndpoint&>(*receiver).GetServiceDescriptor());
+            tmpServiceDescriptor.participantName = ("Anonymous-" + std::to_string(subscriptionInfo.receiverIdx));
             //Copy the Service Endpoint Id
-            serviceIdPtr->SetServiceId(tmpServiceId);
+            serviceEndpointPtr->SetServiceDescriptor(tmpServiceDescriptor);
             _vasioReceivers.emplace_back(std::move(rawReceiver));
 
 
@@ -259,7 +259,7 @@ private:
     {
         auto ibLink = GetLinkByName<IbMessageT>(linkName);
         auto&& serviceLinkMap = std::get<IbServiceToLinkMap<IbMessageT>>(_serviceToLinkMap);
-        serviceLinkMap[to_string(serviceId->GetServiceId())] = ibLink;
+        serviceLinkMap[to_string(serviceId->GetServiceDescriptor())] = ibLink;
     }
 
     template<class IbServiceT>
@@ -276,7 +276,7 @@ private:
 
             auto&& receiverMap = std::get<IbServiceToReceiverMap<IbMessageT>>(_serviceToReceiverMap);
             auto& serviceId = dynamic_cast<IIbServiceEndpoint&>(*service);
-            receiverMap[to_string(serviceId.GetServiceId())] = service;
+            receiverMap[to_string(serviceId.GetServiceDescriptor())] = service;
         }
         );
 
@@ -298,7 +298,7 @@ private:
     template <class IbMessageT>
     void SendIbMessageImpl(const IIbServiceEndpoint* from, IbMessageT&& msg)
     {
-        const auto&& key = to_string(from->GetServiceId());
+        const auto&& key = to_string(from->GetServiceDescriptor());
 
         auto& linkMap = std::get<IbServiceToLinkMap<std::decay_t<IbMessageT>>>(_serviceToLinkMap);
         if (linkMap.count(key) < 1)

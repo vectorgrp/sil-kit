@@ -51,8 +51,8 @@ public:
 
 
     // IIbServiceEndpoint
-    inline void SetServiceId(const mw::ServiceId& serviceId) override;
-    inline auto GetServiceId() const -> const mw::ServiceId & override;
+    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 
 private:
     // ----------------------------------------
@@ -67,7 +67,7 @@ private:
     // ----------------------------------------
     // private members
     IComAdapterInternal* _comAdapter{nullptr};
-    mw::ServiceId _serviceId{};
+    mw::ServiceDescriptor _serviceDescriptor{};
 };
 
 // ================================================================================
@@ -101,14 +101,14 @@ void SystemController::SendSystemCommand(SystemCommand::Kind kind) const
 //  Inline Implementations
 // ================================================================================
 
-void SystemController::SetServiceId(const mw::ServiceId& serviceId)
+void SystemController::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
-    _serviceId = serviceId;
+    _serviceDescriptor = serviceDescriptor;
 }
 
-auto SystemController::GetServiceId() const -> const mw::ServiceId&
+auto SystemController::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
-    return _serviceId;
+    return _serviceDescriptor;
 }
 
 } // namespace sync

@@ -100,8 +100,8 @@ public:
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
     // IIbServiceEndpoint
-    inline void SetServiceId(const mw::ServiceId& serviceId) override;
-    inline auto GetServiceId() const -> const mw::ServiceId & override;
+    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 private:
     // ----------------------------------------
     // private data types
@@ -124,7 +124,7 @@ private:
     // ----------------------------------------
     // private members
     mw::IComAdapterInternal* _comAdapter = nullptr;
-    ::ib::mw::ServiceId _serviceId;
+    ::ib::mw::ServiceDescriptor _serviceDescriptor;
 
     std::vector<TxBufferConfig> _bufferConfigs;
 
@@ -152,14 +152,14 @@ void FrControllerProxy::AddSink(extensions::ITraceMessageSink* sink)
     _tracer.AddSink(EndpointAddress(), *sink);
 }
 
-void FrControllerProxy::SetServiceId(const mw::ServiceId& serviceId)
+void FrControllerProxy::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
-    _serviceId = serviceId;
+    _serviceDescriptor = serviceDescriptor;
 }
 
-auto FrControllerProxy::GetServiceId() const -> const mw::ServiceId&
+auto FrControllerProxy::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
-    return _serviceId;
+    return _serviceDescriptor;
 }
 } // namespace fr
 } // SimModels

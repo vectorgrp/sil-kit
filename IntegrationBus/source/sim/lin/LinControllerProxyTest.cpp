@@ -40,9 +40,9 @@ protected:
             callbacks.FrameStatusHandler(ctrl, frame, status);
         };
 
-        proxy.SetServiceId(from_endpointAddress(addr1_proxy));
-        proxy2.SetServiceId(from_endpointAddress(addr2_proxy));
-        proxyVibe.SetServiceId(from_endpointAddress(addr1_vibe));
+        proxy.SetServiceDescriptor(from_endpointAddress(addr1_proxy));
+        proxy2.SetServiceDescriptor(from_endpointAddress(addr2_proxy));
+        proxyVibe.SetServiceDescriptor(from_endpointAddress(addr1_vibe));
     }
 
 protected:
@@ -176,9 +176,9 @@ TEST_F(LinControllerProxyTest, trigger_frame_response_update_handler)
     responseUpdate.frameResponses.push_back(response1);
     responseUpdate.frameResponses.push_back(response2);
 
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, to_string(proxy2.GetServiceId()), response1))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, to_string(proxy2.GetServiceDescriptor()), response1))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, to_string(proxy2.GetServiceId()), response2))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, to_string(proxy2.GetServiceDescriptor()), response2))
         .Times(1);
 
     proxy.ReceiveIbMessage(&proxy2, responseUpdate);
@@ -204,9 +204,9 @@ TEST_F(LinControllerProxyTest, trigger_frame_response_update_handler_for_slave_c
     slaveCfg.frameResponses.push_back(response1);
     slaveCfg.frameResponses.push_back(response2);
 
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, to_string(proxy2.GetServiceId()), response1))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, to_string(proxy2.GetServiceDescriptor()), response1))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, to_string(proxy2.GetServiceId()), response2))
+    EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&proxy, to_string(proxy2.GetServiceDescriptor()), response2))
         .Times(1);
 
     proxy.ReceiveIbMessage(&proxy2, slaveCfg);

@@ -36,23 +36,23 @@ public:
     MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const ParticipantStatus& msg));
 };
 
-class MockServiceId : public IIbServiceEndpoint
+class MockServiceDescriptor : public IIbServiceEndpoint
 {
 public:
-    ServiceId serviceId;
-    MockServiceId(EndpointAddress ea, std::string participantName)
+    ServiceDescriptor serviceDescriptor;
+    MockServiceDescriptor(EndpointAddress ea, std::string participantName)
     {
-      ServiceId id = from_endpointAddress(ea);
+      ServiceDescriptor id = from_endpointAddress(ea);
       id.participantName = participantName;
-      SetServiceId(id);
+      SetServiceDescriptor(id);
     }
-    void SetServiceId(const ServiceId& _serviceId) override
+    void SetServiceDescriptor(const ServiceDescriptor& _serviceDescriptor) override
     {
-        serviceId = _serviceId;
+        serviceDescriptor = _serviceDescriptor;
     }
-    auto GetServiceId() const -> const ServiceId & override
+    auto GetServiceDescriptor() const -> const ServiceDescriptor & override
     {
-        return serviceId;
+        return serviceDescriptor;
     }
 
 };
@@ -97,8 +97,8 @@ protected:
     EndpointAddress addr{1, 1024};
     EndpointAddress addrP2{2, 1024};
     EndpointAddress masterAddr{3, 1027};
-    MockServiceId p2Id{ addrP2, "P2" };
-    MockServiceId masterId{ masterAddr, "Master" };
+    MockServiceDescriptor p2Id{ addrP2, "P2" };
+    MockServiceDescriptor masterId{ masterAddr, "Master" };
 
     MockComAdapter comAdapter;
     Callbacks callbacks;
@@ -114,7 +114,7 @@ auto AParticipantStatusWithState(ParticipantState expected)
 TEST_F(ParticipantControllerTest, report_commands_as_error_before_run_was_called)
 {
     ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
-    controller.SetServiceId(from_endpointAddress(addr));
+    controller.SetServiceDescriptor(from_endpointAddress(addr));
 
     EXPECT_CALL(comAdapter, SendIbMessage(&controller, A<const ParticipantStatus&>()))
         .Times(1);
@@ -129,7 +129,7 @@ TEST_F(ParticipantControllerTest, report_commands_as_error_before_run_was_called
 TEST_F(ParticipantControllerTest, call_init_handler)
 {
     ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
-    controller.SetServiceId(from_endpointAddress(addr));
+    controller.SetServiceDescriptor(from_endpointAddress(addr));
     controller.SetInitHandler(bind_method(&callbacks, &Callbacks::InitHandler));
     controller.SetSimulationTask([](auto){});
 
@@ -144,7 +144,7 @@ TEST_F(ParticipantControllerTest, call_init_handler)
 TEST_F(ParticipantControllerTest, call_stop_handler)
 {
     ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
-    controller.SetServiceId(from_endpointAddress(addr));
+    controller.SetServiceDescriptor(from_endpointAddress(addr));
     controller.SetSimulationTask([](auto) {});
 
     controller.RunAsync();
@@ -168,7 +168,7 @@ TEST_F(ParticipantControllerTest, call_stop_handler)
 TEST_F(ParticipantControllerTest, dont_switch_to_stopped_if_stop_handler_reported_an_error)
 {
     ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
-    controller.SetServiceId(from_endpointAddress(addr));
+    controller.SetServiceDescriptor(from_endpointAddress(addr));
     controller.SetSimulationTask([](auto) {});
 
     controller.RunAsync();
@@ -192,7 +192,7 @@ TEST_F(ParticipantControllerTest, dont_switch_to_stopped_if_stop_handler_reporte
 TEST_F(ParticipantControllerTest, must_set_simtask_before_calling_run)
 {
     ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
-    controller.SetServiceId(from_endpointAddress(addr));
+    controller.SetServiceDescriptor(from_endpointAddress(addr));
     EXPECT_THROW(controller.Run(), std::exception);
     EXPECT_EQ(controller.State(), ParticipantState::Error);
 }
@@ -200,7 +200,7 @@ TEST_F(ParticipantControllerTest, must_set_simtask_before_calling_run)
 TEST_F(ParticipantControllerTest, calling_run_announces_idle_state)
 {
     ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
-    controller.SetServiceId(from_endpointAddress(addr));
+    controller.SetServiceDescriptor(from_endpointAddress(addr));
     controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
 
     EXPECT_EQ(controller.State(), ParticipantState::Invalid);
@@ -218,16 +218,16 @@ TEST_F(ParticipantControllerTest, DISABLED_run_async)
 {
     const auto& participant = simulationSetup.participants.at(0);
     ParticipantController controller(&comAdapter, simulationSetup, participant);
-    ServiceId id{};
+    ServiceDescriptor id{};
     id.linkName = "default";
     id.participantName = participant.name;
     id.legacyEpa = addr;
-    controller.SetServiceId(from_endpointAddress(addr));//legacy interface
-    controller.SetServiceId(id);
+    controller.SetServiceDescriptor(from_endpointAddress(addr));//legacy interface
+    controller.SetServiceDescriptor(id);
     //auto grantRequest = [&controller = controller, &masterId = masterId](auto addr, const QuantumRequest& request)
     //{
     //    QuantumGrant grant;
-    //    grant.grantee = addr->GetServiceId();
+    //    grant.grantee = addr->GetServiceDescriptor();
     //    grant.status = QuantumRequestStatus::Granted;
     //    grant.now = request.now;
     //    grant.duration = request.duration;
@@ -281,7 +281,7 @@ TEST_F(ParticipantControllerTest, DISABLED_run_async)
 TEST_F(ParticipantControllerTest, refreshstatus_must_not_modify_other_fields)
 {
     ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
-    controller.SetServiceId(from_endpointAddress(addr));
+    controller.SetServiceDescriptor(from_endpointAddress(addr));
     controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
 
     EXPECT_EQ(controller.State(), ParticipantState::Invalid);
@@ -311,7 +311,7 @@ TEST_F(ParticipantControllerTest, run_async_with_synctype_distributedtimequantum
 {
     //MakeConfig(cfg::SyncType::DistributedTimeQuantum);
     ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
-    controller.SetServiceId(from_endpointAddress(addr));
+    controller.SetServiceDescriptor(from_endpointAddress(addr));
     controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
 
     controller.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
@@ -362,7 +362,7 @@ TEST_F(ParticipantControllerTest, run_async_with_synctype_distributedtimequantum
 TEST_F(ParticipantControllerTest, force_shutdown)
 {
     ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
-    controller.SetServiceId(from_endpointAddress(addr));
+    controller.SetServiceDescriptor(from_endpointAddress(addr));
     controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
 
     controller.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
@@ -393,7 +393,7 @@ TEST_F(ParticipantControllerTest, force_shutdown)
 TEST_F(ParticipantControllerTest, force_shutdown_is_ignored_if_not_stopped)
 {
     ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
-    controller.SetServiceId(from_endpointAddress(addr));
+    controller.SetServiceDescriptor(from_endpointAddress(addr));
     controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
 
     controller.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));

@@ -96,8 +96,8 @@ public:
     auto GetTimeProvider()->std::shared_ptr<sync::ITimeProvider>;
 
     // IIbServiceEndpoint
-    inline void SetServiceId(const mw::ServiceId& serviceId) override;
-    inline auto GetServiceId() const -> const mw::ServiceId & override;
+    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 private:
     // ----------------------------------------
     // private methods
@@ -119,7 +119,7 @@ private:
     // ----------------------------------------
     // private members
     IComAdapterInternal* _comAdapter{ nullptr };
-    mw::ServiceId _serviceId{};
+    mw::ServiceDescriptor _serviceDescriptor{};
     cfg::SyncType _syncType;
     cfg::TimeSync _timesyncConfig;
     logging::ILogger* _logger{ nullptr };
@@ -161,14 +161,14 @@ void ParticipantController::SendIbMessage(MsgT&& msg) const
     _comAdapter->SendIbMessage(this, std::forward<MsgT>(msg));
 }
 
-void ParticipantController::SetServiceId(const mw::ServiceId& serviceId)
+void ParticipantController::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
-    _serviceId = serviceId;
+    _serviceDescriptor = serviceDescriptor;
 }
 
-auto ParticipantController::GetServiceId() const -> const mw::ServiceId&
+auto ParticipantController::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
-    return _serviceId;
+    return _serviceDescriptor;
 }
 
     

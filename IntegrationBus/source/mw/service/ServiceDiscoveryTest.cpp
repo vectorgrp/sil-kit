@@ -33,24 +33,24 @@ public:
     MOCK_METHOD(void, SendIbMessage, (const IIbServiceEndpoint*, const ServiceAnnouncement&), (override));
 };
 
-class MockServiceId : public IIbServiceEndpoint
+class MockServiceDescriptor : public IIbServiceEndpoint
 {
 public:
-    ServiceId serviceId;
-    MockServiceId(EndpointAddress ea)
+    ServiceDescriptor serviceDescriptor;
+    MockServiceDescriptor(EndpointAddress ea)
     {
-        serviceId.linkName = to_string(ea);
-        serviceId.participantName = to_string(ea);
-        serviceId.serviceName = to_string(ea);
-        serviceId.legacyEpa = ea;
+        serviceDescriptor.linkName = to_string(ea);
+        serviceDescriptor.participantName = to_string(ea);
+        serviceDescriptor.serviceName = to_string(ea);
+        serviceDescriptor.legacyEpa = ea;
     }
-    void SetServiceId(const ServiceId& _serviceId) override
+    void SetServiceDescriptor(const ServiceDescriptor& _serviceDescriptor) override
     {
-        serviceId = _serviceId;
+        serviceDescriptor = _serviceDescriptor;
     }
-    auto GetServiceId() const -> const ServiceId & override
+    auto GetServiceDescriptor() const -> const ServiceDescriptor & override
     {
-        return serviceId;
+        return serviceDescriptor;
     }
 
 };
@@ -59,7 +59,7 @@ class Callbacks
 {
 public:
     MOCK_METHOD(void, ServiceDiscoveryHandler,
-        (ServiceDiscovery::Type, const ServiceDescription&));
+        (ServiceDiscovery::Type, const ServiceDescriptor&));
 };
 class DiscoveryServiceTest : public testing::Test
 {
@@ -83,15 +83,15 @@ protected:
 
 TEST_F(DiscoveryServiceTest, service_creation_notification)
 {
-    ServiceId senderId;
-    senderId.participantName = "ParticipantA";
-    senderId.linkName = "Link1";
-    senderId.serviceName = "ServiceDiscovery";
+    ServiceDescriptor senderDescriptor;
+    senderDescriptor.participantName = "ParticipantA";
+    senderDescriptor.linkName = "Link1";
+    senderDescriptor.serviceName = "ServiceDiscovery";
     ServiceDiscovery disco{ &comAdapter, "ParticipantA" };
-    disco.SetServiceId(senderId);
+    disco.SetServiceDescriptor(senderDescriptor);
 
-    ServiceDescription descr;
-    descr.serviceId = senderId;
+    ServiceDescriptor descr;
+    descr = senderDescriptor;
     
     disco.RegisterServiceDiscoveryHandler(
         [&descr](auto eventType, auto&& newServiceDescr) {
@@ -103,7 +103,7 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
 
     // reference data for validation
     ServiceAnnouncement announce;
-    announce.participantName = senderId.participantName;
+    announce.participantName = senderDescriptor.participantName;
     announce.services.push_back(descr);
     //Notify should publish a message
     EXPECT_CALL(comAdapter, SendIbMessage(&disco, announce)).Times(1);
@@ -114,35 +114,35 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
     disco.NotifyServiceCreated(descr);
 
     // trigger notifications on reception path from different participant
-    MockServiceId otherParticipant{ {1, 2} };
-    announce.participantName = otherParticipant.serviceId.participantName;
+    MockServiceDescriptor otherParticipant{ {1, 2} };
+    announce.participantName = otherParticipant.serviceDescriptor.participantName;
     disco.ReceiveIbMessage(&otherParticipant, announce);
 
-    announce.participantName = otherParticipant.serviceId.participantName;
+    announce.participantName = otherParticipant.serviceDescriptor.participantName;
     disco.ReceiveIbMessage(&otherParticipant, announce);//should not trigger callback, is cached
 }
 
 TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
 {
-    MockServiceId otherParticipant{ {1, 2} };
+    MockServiceDescriptor otherParticipant{ {1, 2} };
     ServiceDiscovery disco{ &comAdapter, "ParticipantA" };
 
     disco.RegisterServiceDiscoveryHandler([this](auto type, auto&& descr) {
         callbacks.ServiceDiscoveryHandler(type, descr);
     });
 
-    ServiceId senderId;
-    senderId.participantName = "ParticipantA";
-    senderId.linkName = "Link1";
-    senderId.serviceName = "ServiceDiscovery";
+    ServiceDescriptor senderDescriptor;
+    senderDescriptor.participantName = "ParticipantA";
+    senderDescriptor.linkName = "Link1";
+    senderDescriptor.serviceName = "ServiceDiscovery";
 
     ServiceAnnouncement announce;
-    announce.participantName = senderId.participantName;
+    announce.participantName = senderDescriptor.participantName;
 
     auto sendAnnounce = [&](auto&& serviceName) {
-        ServiceDescription descr;
-        descr.serviceId = senderId;
-        descr.serviceId.serviceName = serviceName;
+        ServiceDescriptor descr;
+        descr = senderDescriptor;
+        descr.serviceName = serviceName;
         // Ensure we only append new services
         announce.services.push_back(descr);
 
@@ -165,24 +165,24 @@ TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
 
 TEST_F(DiscoveryServiceTest, service_removal)
 {
-    MockServiceId otherParticipant{ {1, 2} };
+    MockServiceDescriptor otherParticipant{ {1, 2} };
     ServiceDiscovery disco{ &comAdapter, "ParticipantA" };
 
     disco.RegisterServiceDiscoveryHandler([this](auto type, auto&& descr) {
         callbacks.ServiceDiscoveryHandler(type, descr);
     });
 
-    ServiceId senderId;
-    senderId.participantName = "ParticipantA";
-    senderId.linkName = "Link1";
-    senderId.serviceName = "ServiceDiscovery";
+    ServiceDescriptor senderDescriptor;
+    senderDescriptor.participantName = "ParticipantA";
+    senderDescriptor.linkName = "Link1";
+    senderDescriptor.serviceName = "ServiceDiscovery";
 
     ServiceAnnouncement announce;
-    announce.participantName = senderId.participantName;
+    announce.participantName = senderDescriptor.participantName;
 
-    ServiceDescription descr;
-    descr.serviceId = senderId;
-    descr.serviceId.serviceName = "TestService";
+    ServiceDescriptor descr;
+    descr = senderDescriptor;
+    descr.serviceName = "TestService";
     announce.services.push_back(descr);
 
     // Test addition
@@ -192,7 +192,7 @@ TEST_F(DiscoveryServiceTest, service_removal)
     disco.ReceiveIbMessage(&otherParticipant, announce);
 
     // Test modification
-    announce.services.at(0).serviceId.serviceName = "Modified";
+    announce.services.at(0).serviceName = "Modified";
     auto modifiedDescr = announce.services.at(0);
     EXPECT_CALL(callbacks,
         ServiceDiscoveryHandler(ServiceDiscovery::Type::ServiceCreated, modifiedDescr)

@@ -15,21 +15,21 @@ ServiceDiscovery::ServiceDiscovery(IComAdapterInternal* comadapter, const std::s
 
 void ServiceDiscovery::SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress)
 {
-    _serviceId.legacyEpa = endpointAddress;
+    _serviceDescriptor.legacyEpa = endpointAddress;
 }
 auto ServiceDiscovery::EndpointAddress() const -> const ib::mw::EndpointAddress&
 {
-    return _serviceId.legacyEpa;
+    return _serviceDescriptor.legacyEpa;
 }
 
-void ServiceDiscovery::SetServiceId(const mw::ServiceId& serviceId)
+void ServiceDiscovery::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
-    _serviceId = serviceId;
+    _serviceDescriptor = serviceDescriptor;
 }
 
-auto ServiceDiscovery::GetServiceId() const -> const mw::ServiceId&
+auto ServiceDiscovery::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
-    return _serviceId;
+    return _serviceDescriptor;
 }
 
 void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const ServiceAnnouncement& msg)
@@ -51,7 +51,7 @@ void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const Se
     auto& serviceMap = _announcedServices[msg.participantName];
     for (const auto& service : msg.services)
     {
-        const auto idStr = to_string(service.serviceId);
+        const auto idStr = to_string(service);
         currentServices.insert(idStr);
         //if the service is not in the cache add it and notify 
         if (serviceMap.count(idStr) == 0)
@@ -76,8 +76,8 @@ void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const Se
     bool serviceMapUpdated = false;
     for (auto& keyVal : serviceMap)
     {
-        const auto serviceId = keyVal.first;
-        if (currentServices.count(serviceId) == 0)
+        const auto serviceString = keyVal.first;
+        if (currentServices.count(serviceString) == 0)
         {
             // no longer part of the announced services
             serviceMapUpdated = true;
@@ -85,7 +85,7 @@ void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const Se
         }
         else
         {
-            newServiceMap[serviceId] = keyVal.second;
+            newServiceMap[serviceString] = keyVal.second;
         }
     }
     if (serviceMapUpdated)
@@ -95,18 +95,18 @@ void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const Se
 }
 
 
-void ServiceDiscovery::NotifyServiceCreated(const ServiceDescription& serviceId)
+void ServiceDiscovery::NotifyServiceCreated(const ServiceDescriptor& serviceDescriptor)
 {
      //update our existing service cache entry
     auto& announcementMap = _announcedServices[_participantName];
-    announcementMap[to_string(serviceId.serviceId)] = serviceId; 
+    announcementMap[to_string(serviceDescriptor)] = serviceDescriptor;
 
     _announcement.participantName = _participantName;
-    _announcement.services.push_back(serviceId);
+    _announcement.services.push_back(serviceDescriptor);
     _comAdapter->SendIbMessage(this, _announcement);//ensure message history is updated
 }
 
-void ServiceDiscovery::NotifyServiceRemoved(const ServiceDescription& removedService)
+void ServiceDiscovery::NotifyServiceRemoved(const ServiceDescriptor& removedService)
 {
     for (auto i = _announcement.services.begin();
         i != _announcement.services.end();

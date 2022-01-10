@@ -13,7 +13,7 @@
 
 namespace ib {
 namespace mw {
-struct ServiceId
+struct ServiceDescriptor
 {
     std::string participantName{ "Undefined" }; //!< name of the participant
     std::string linkName{ "Undefined" }; //!< the service's link name
@@ -22,22 +22,25 @@ struct ServiceId
     bool isLinkSimulated{ false };
     cfg::Link::Type type{ cfg::Link::Type::Undefined };
     EndpointAddress legacyEpa{}; //!< legacy endpoint will be removed in the future
+    bool isSynchronized{ false };
+
+    std::map<std::string, std::string> supplementalData; //!< key value pairs, e.g. "dataExchangeformat=application/octet"
 };
 
-//!< Returns the ServiceId encoded as a string containing the tuple (participantName, linkName, serviceName)
-inline std::string to_string(const ServiceId& id);
-inline std::ostream& operator<<(std::ostream& out, const ServiceId& id);
+//!< Returns the ServiceDescriptor encoded as a string containing the tuple (participantName, linkName, serviceName)
+inline std::string to_string(const ServiceDescriptor& id);
+inline std::ostream& operator<<(std::ostream& out, const ServiceDescriptor& id);
 
-inline bool operator==(const ServiceId& lhs, const ServiceId& rhs);
-inline bool operator!=(const ServiceId& lhs, const ServiceId& rhs);
-inline bool AllowMessageProcessingProxy(const ServiceId& lhs, const ServiceId& rhs);
-inline bool AllowMessageProcessing(const ServiceId& lhs, const ServiceId& rhs);
+inline bool operator==(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs);
+inline bool operator!=(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs);
+inline bool AllowMessageProcessingProxy(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs);
+inline bool AllowMessageProcessing(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs);
 
 
-//!< Parses a serialized ServiceId into a struct. This is a lossy operation.
-inline auto from_string(const std::string& str)->ServiceId;
-// Creates a ServiceId based on an endpoint address - for testing purposes only!
-inline auto from_endpointAddress(const EndpointAddress& epa)->ServiceId;
+//!< Parses a serialized ServiceDescriptor into a struct. This is a lossy operation.
+inline auto from_string(const std::string& str)->ServiceDescriptor;
+// Creates a ServiceDescriptor based on an endpoint address - for testing purposes only!
+inline auto from_endpointAddress(const EndpointAddress& epa)->ServiceDescriptor;
 
 //TODO 
 //     remove IIbEndpoint<MsgT> from IIbTo$Service interfaces
@@ -45,8 +48,8 @@ class IIbServiceEndpoint
 {
 public:
     virtual ~IIbServiceEndpoint() = default;
-    virtual void SetServiceId(const ServiceId& serviceId) = 0;
-    virtual auto GetServiceId() const -> const ServiceId& = 0;
+    virtual void SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor) = 0;
+    virtual auto GetServiceDescriptor() const -> const ServiceDescriptor& = 0;
 };
 
 
@@ -54,7 +57,7 @@ public:
 //  Inline Implementations
 // ================================================================================
 
-inline bool operator==(const ServiceId& lhs, const ServiceId& rhs)
+inline bool operator==(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs)
 {
     return
         lhs.linkName == rhs.linkName
@@ -62,15 +65,16 @@ inline bool operator==(const ServiceId& lhs, const ServiceId& rhs)
         && lhs.serviceName == rhs.serviceName
         && lhs.isLinkSimulated == rhs.isLinkSimulated
         && lhs.type == rhs.type
+        && lhs.supplementalData == rhs.supplementalData
         ;
 }
 
-inline bool operator!=(const ServiceId& lhs, const ServiceId& rhs)
+inline bool operator!=(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs)
 {
     return !(lhs == rhs);
 }
 
-inline bool AllowMessageProcessingProxy(const ServiceId& lhs, const ServiceId& rhs)
+inline bool AllowMessageProcessingProxy(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs)
 {
   return
     lhs.legacyEpa.endpoint == rhs.legacyEpa.endpoint
@@ -78,7 +82,7 @@ inline bool AllowMessageProcessingProxy(const ServiceId& lhs, const ServiceId& r
     ;
 }
 
-inline bool AllowMessageProcessing(const ServiceId& lhs, const ServiceId& rhs)
+inline bool AllowMessageProcessing(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs)
 {
     return
         lhs.legacyEpa.endpoint == rhs.legacyEpa.endpoint
@@ -86,13 +90,13 @@ inline bool AllowMessageProcessing(const ServiceId& lhs, const ServiceId& rhs)
         ;
 }
 
-inline bool EqualsParticipant(const ServiceId& lhs, const ServiceId& rhs)
+inline bool EqualsParticipant(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs)
 {
     return lhs.participantName == rhs.participantName;
 }
 
 
-inline std::string to_string(const ServiceId& id)
+inline std::string to_string(const ServiceDescriptor& id)
 {
     // Compute Id
     const std::string separator{ "/" };
@@ -106,7 +110,7 @@ inline std::string to_string(const ServiceId& id)
     return ss.str();
 }
 
-inline auto from_string(const std::string& str) -> ServiceId
+inline auto from_string(const std::string& str) -> ServiceDescriptor
 {
     const std::string separator{ "/" };
     auto input = str;
@@ -125,19 +129,19 @@ inline auto from_string(const std::string& str) -> ServiceId
 
     if (tokens.size() != 3)
     {
-        throw std::runtime_error("Cannot parse ServiceId from \"" + str +"\"");
+        throw std::runtime_error("Cannot parse ServiceDescriptor from \"" + str +"\"");
     }
 
-    ServiceId id{};
+    ServiceDescriptor id{};
     id.participantName = tokens.at(0);
     id.linkName = tokens.at(1);
     id.serviceName = tokens.at(2);
     return id;
 }
 
-inline auto from_endpointAddress(const EndpointAddress& epa) -> ServiceId
+inline auto from_endpointAddress(const EndpointAddress& epa) -> ServiceDescriptor
 {
-    ServiceId endpoint{};
+    ServiceDescriptor endpoint{};
     endpoint.legacyEpa = epa;
     endpoint.participantName = std::to_string(epa.participant);
     endpoint.serviceName = std::to_string(epa.endpoint);
@@ -145,7 +149,7 @@ inline auto from_endpointAddress(const EndpointAddress& epa) -> ServiceId
     return endpoint;
 }
 
-inline std::ostream& operator<<(std::ostream& out, const ServiceId& id)
+inline std::ostream& operator<<(std::ostream& out, const ServiceDescriptor& id)
 {
     return out << to_string(id);
 }

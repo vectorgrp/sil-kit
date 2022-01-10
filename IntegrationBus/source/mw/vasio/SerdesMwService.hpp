@@ -10,34 +10,6 @@
 namespace ib {
 namespace mw {
 
-// ServiceId
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
-    const ib::mw::ServiceId& msg)
-{
-    buffer
-        << msg.participantName
-        << msg.linkName
-        << msg.serviceName
-        << msg.type
-        << msg.legacyEpa
-        << msg.isLinkSimulated
-        ;
-    return buffer;
-}
-
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
-    ib::mw::ServiceId& updatedMsg)
-{
-    buffer
-        >> updatedMsg.participantName
-        >> updatedMsg.linkName
-        >> updatedMsg.serviceName
-        >> updatedMsg.type
-        >> updatedMsg.legacyEpa
-        >> updatedMsg.isLinkSimulated
-        ;
-    return buffer;
-}
 //Special case for std::map<std::string, std::string> ServiceDescription::supplementalData
 // not generic enough to add to MessageBuffer.hpp.
 // We encode it as follows:
@@ -83,28 +55,40 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
     return buffer;
 }
 
-namespace service {
-
-// ServiceDescription
+// ServiceDescriptor
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
-    const ServiceDescription& msg)
+  const ib::mw::ServiceDescriptor& msg)
 {
-    buffer <<  msg.serviceId
-        << msg.supplementalData
-        ;
-    return buffer;
+  buffer
+    << msg.participantName
+    << msg.linkName
+    << msg.serviceName
+    << msg.type
+    << msg.legacyEpa
+    << msg.isLinkSimulated
+    << msg.isSynchronized
+    << msg.supplementalData
+    ;
+  return buffer;
 }
 
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
-    ServiceDescription& updatedMsg)
+  ib::mw::ServiceDescriptor& updatedMsg)
 {
-    buffer
-        >> updatedMsg.serviceId
-        >> updatedMsg.supplementalData
-        ;
-    return buffer;
+  buffer
+    >> updatedMsg.participantName
+    >> updatedMsg.linkName
+    >> updatedMsg.serviceName
+    >> updatedMsg.type
+    >> updatedMsg.legacyEpa
+    >> updatedMsg.isLinkSimulated
+    >> updatedMsg.isSynchronized
+    >> updatedMsg.supplementalData
+    ;
+  return buffer;
 }
 
+namespace service {
 // ServiceAnnouncement
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
     const ServiceAnnouncement& msg)

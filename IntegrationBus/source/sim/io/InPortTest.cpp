@@ -50,8 +50,8 @@ protected:
         : port{&comAdapter, comAdapter.GetTimeProvider()}
         , portOther{&comAdapter, comAdapter.GetTimeProvider()}
     {
-        port.SetServiceId(from_endpointAddress(portAddress));
-        portOther.SetServiceId(from_endpointAddress(otherPortAddress));
+        port.SetServiceDescriptor(from_endpointAddress(portAddress));
+        portOther.SetServiceDescriptor(from_endpointAddress(otherPortAddress));
     }
 
     void RegisterMessageCallback()

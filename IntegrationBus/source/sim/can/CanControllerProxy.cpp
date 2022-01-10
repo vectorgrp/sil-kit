@@ -111,7 +111,7 @@ void CanControllerProxy::RegisterHandler(CallbackT<MsgT> handler)
 
 void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMessage& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
+    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
     _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg);
@@ -121,7 +121,7 @@ void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanTransmitAcknowledge& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
+    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
     auto transmittedMsg = _transmittedMessages.find(msg.transmitId);
@@ -141,7 +141,7 @@ void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanControllerStatus& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceId(), _serviceId))
+    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
     if (_controllerState != msg.controllerState)
@@ -168,12 +168,12 @@ void CanControllerProxy::CallHandlers(const MsgT& msg)
 
 void CanControllerProxy::SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress)
 {
-    _serviceId.legacyEpa = endpointAddress;
+    _serviceDescriptor.legacyEpa = endpointAddress;
 }
 
 auto CanControllerProxy::EndpointAddress() const -> const ::ib::mw::EndpointAddress&
 {
-    return _serviceId.legacyEpa;
+    return _serviceDescriptor.legacyEpa;
 }
 
 } // namespace can

@@ -27,14 +27,14 @@ inline auto ReplayEndpointAddress() -> ib::mw::EndpointAddress
     };
 }
 
-struct ReplayServiceId : public mw::IIbServiceEndpoint
+struct ReplayServiceDescriptor : public mw::IIbServiceEndpoint
 {
-    void SetServiceId(const mw::ServiceId& ) override
+    void SetServiceDescriptor(const mw::ServiceDescriptor& ) override
     {
     }
-    auto GetServiceId() const -> const mw::ServiceId& override
+    auto GetServiceDescriptor() const -> const mw::ServiceDescriptor& override
     {
-        static mw::ServiceId id;
+        static mw::ServiceDescriptor id;
         id.participantName = "__!!Replay";
         id.serviceName = "ReplayController";
         id.legacyEpa = ReplayEndpointAddress();

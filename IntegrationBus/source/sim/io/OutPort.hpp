@@ -73,8 +73,8 @@ public:
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
     // IIbServiceEndpoint
-    inline void SetServiceId(const mw::ServiceId& serviceId) override;
-    inline auto GetServiceId() const -> const mw::ServiceId & override;
+    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 
 private:
     // ----------------------------------------
@@ -87,7 +87,7 @@ private:
     // private members
     ConfigType _config{};
     mw::IComAdapterInternal* _comAdapter{nullptr};
-    ::ib::mw::ServiceId _serviceId;
+    ::ib::mw::ServiceDescriptor _serviceDescriptor;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
 
     ValueType _lastValue;
@@ -139,13 +139,13 @@ auto OutPort<MsgT>::Read() const -> const ValueType&
 template<typename MsgT>
 void OutPort<MsgT>::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
-    _serviceId.legacyEpa = endpointAddress;
+    _serviceDescriptor.legacyEpa = endpointAddress;
 }
 
 template<typename MsgT>
 auto OutPort<MsgT>::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    return _serviceId.legacyEpa;
+    return _serviceDescriptor.legacyEpa;
 }
 
 template<typename MsgT>
@@ -170,14 +170,14 @@ void OutPort<MsgT>::AddSink(extensions::ITraceMessageSink* sink)
 }
 
 template<typename MsgT>
-void OutPort<MsgT>::SetServiceId(const mw::ServiceId& serviceId)
+void OutPort<MsgT>::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
-    _serviceId = serviceId;
+    _serviceDescriptor = serviceDescriptor;
 }
 template<typename MsgT>
-auto OutPort<MsgT>::GetServiceId() const -> const mw::ServiceId&
+auto OutPort<MsgT>::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
-    return _serviceId;
+    return _serviceDescriptor;
 }
 
 } // namespace io

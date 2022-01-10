@@ -40,12 +40,12 @@ void GenericPublisher::Publish(const uint8_t* data, std::size_t size)
 
 void GenericPublisher::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
-    _serviceId.legacyEpa = endpointAddress;
+    _serviceDescriptor.legacyEpa = endpointAddress;
 }
 
 auto GenericPublisher::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    return _serviceId.legacyEpa;
+    return _serviceDescriptor.legacyEpa;
 }
 
 void GenericPublisher::SetTimeProvider(mw::sync::ITimeProvider* provider)

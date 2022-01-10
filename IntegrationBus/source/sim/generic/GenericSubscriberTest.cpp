@@ -37,10 +37,10 @@ protected:
         : subscriber{&comAdapter, config, comAdapter.GetTimeProvider()}
         , subscriberOther{ &comAdapter, config, comAdapter.GetTimeProvider() }
     {
-        subscriber.SetServiceId(from_endpointAddress(endpointAddress));
+        subscriber.SetServiceDescriptor(from_endpointAddress(endpointAddress));
         subscriber.SetReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));
 
-        subscriberOther.SetServiceId(from_endpointAddress(otherEndpointAddress));
+        subscriberOther.SetServiceDescriptor(from_endpointAddress(otherEndpointAddress));
     }
 
     // Workaround for MS VS2015 where we cannot intialize the config member directly

@@ -78,8 +78,8 @@ public:
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
     // IIbServiceEndpoint
-    inline void SetServiceId(const mw::ServiceId& serviceId) override;
-    inline auto GetServiceId() const -> const mw::ServiceId & override;
+    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 
 public:
     // ----------------------------------------
@@ -110,7 +110,7 @@ private:
     // private members
     ConfigType _config;
     mw::IComAdapterInternal* _comAdapter{nullptr};
-    mw::ServiceId _serviceId;
+    mw::ServiceDescriptor _serviceDescriptor;
     MessageType _lastMessage;
 
     std::tuple<
@@ -167,7 +167,7 @@ void InPort<MsgT>::RegisterHandler(ValueHandler handler)
 template<typename MsgT>
 void InPort<MsgT>::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const MessageType& msg)
 {
-    if (AllowMessageProcessing(from->GetServiceId(), _serviceId))
+    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
     ReceiveMessage(msg);
 }
@@ -192,13 +192,13 @@ void InPort<MsgT>::SetTimeProvider(mw::sync::ITimeProvider* timeProvider)
 template<typename MsgT>
 void InPort<MsgT>::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
-    _serviceId.legacyEpa = endpointAddress;
+    _serviceDescriptor.legacyEpa = endpointAddress;
 }
 
 template<typename MsgT>
 auto InPort<MsgT>::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    return _serviceId.legacyEpa;
+    return _serviceDescriptor.legacyEpa;
 }
 
 
@@ -228,14 +228,14 @@ void InPort<MsgT>::AddSink(extensions::ITraceMessageSink* sink)
 }
 
 template<typename MsgT>
-void InPort<MsgT>::SetServiceId(const mw::ServiceId& serviceId)
+void InPort<MsgT>::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
-    _serviceId = serviceId;
+    _serviceDescriptor = serviceDescriptor;
 }
 template<typename MsgT>
-auto InPort<MsgT>::GetServiceId() const -> const mw::ServiceId&
+auto InPort<MsgT>::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
-    return _serviceId;
+    return _serviceDescriptor;
 }
 
 } // namespace io

@@ -26,15 +26,15 @@ public: //types
         ServiceCreated,
         ServiceRemoved,
     };
-    using ServiceDiscoveryHandlerT = std::function<void(Type discoveryType, const ServiceDescription&)>;
+    using ServiceDiscoveryHandlerT = std::function<void(Type discoveryType, const ServiceDescriptor&)>;
 public: 
     ServiceDiscovery(IComAdapterInternal* comadapter, const std::string& participantName);
     virtual ~ServiceDiscovery() = default;
    
-    //!< Publish a locally created new ServiceId to all other participants
-    void NotifyServiceCreated(const ServiceDescription& serviceId);
+    //!< Publish a locally created new ServiceDescriptor to all other participants
+    void NotifyServiceCreated(const ServiceDescriptor& serviceDescriptor);
     //!< Publish a participant-local service removal to all other participants
-    void NotifyServiceRemoved(const ServiceDescription& serviceId);
+    void NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor);
 
     //!< Register a handler for asynchronous service creation notifications
     void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler);
@@ -44,18 +44,18 @@ public: // Interfaces
     void SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress)  override;
     auto EndpointAddress() const -> const ib::mw::EndpointAddress& override;
     // IIbServiceEndpoint
-    void SetServiceId(const mw::ServiceId& serviceId) override;
-    auto GetServiceId() const -> const mw::ServiceId & override;
+    void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const ServiceAnnouncement& msg) override;
 
 private:
     IComAdapterInternal* _comAdapter{nullptr};
     std::string _participantName;
-    ServiceId _serviceId; //!< for the ServiceDiscovery controller itself
+    ServiceDescriptor _serviceDescriptor; //!< for the ServiceDiscovery controller itself
     std::vector<ServiceDiscoveryHandlerT> _handlers;
     ServiceAnnouncement _announcement;
     //!< a cache for computing additions/removals per participant
-    using ServiceMap = std::unordered_map<std::string /*serviceId*/, ServiceDescription>;
+    using ServiceMap = std::unordered_map<std::string /*serviceDescriptor*/, ServiceDescriptor>;
     std::unordered_map<std::string /* participant name */, ServiceMap> _announcedServices; 
 };
 

@@ -427,18 +427,18 @@ void ParticipantController::LogCurrentPerformanceStats()
 
 void ParticipantController::SetEndpointAddress(const mw::EndpointAddress& addr)
 {
-    _serviceId.legacyEpa = addr;
+    _serviceDescriptor.legacyEpa = addr;
 }
 
 auto ParticipantController::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    return _serviceId.legacyEpa;
+    return _serviceDescriptor.legacyEpa;
 }     
 
 void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const ParticipantCommand& command)
 {
     // TODO FIXME VIB-551
-    if (command.participant != _serviceId.legacyEpa.participant)
+    if (command.participant != _serviceDescriptor.legacyEpa.participant)
         return;
 
     Initialize(command, std::string{"Received ParticipantCommand::"} + to_string(command.kind));
@@ -464,7 +464,7 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, con
             << command.kind
             << " before ParticipantController::Run() or RunAsync() was called."
             << " Origin of current command was "
-            << from->GetServiceId()
+            << from->GetServiceDescriptor()
             ;
         ReportError(msg.str());
         return;
@@ -540,9 +540,9 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, con
 
 void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, const NextSimTask& task)
 {
-    if (AllowMessageProcessing(from->GetServiceId(), _serviceId)) return;
+    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor)) return;
 
-    _otherNextTasks[from->GetServiceId().participantName] = task;
+    _otherNextTasks[from->GetServiceDescriptor().participantName] = task;
 
     switch (State())
     {

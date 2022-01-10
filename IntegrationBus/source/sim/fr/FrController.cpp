@@ -211,7 +211,7 @@ void FrController::RegisterCycleStartHandler(CycleStartHandler handler)
 
 void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessage& msg)
 {
-    if (AllowMessageProcessing(from->GetServiceId(), _serviceId))
+    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
     _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg);
@@ -229,7 +229,7 @@ void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMess
 
 void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessageAck& msg)
 {
-    if (AllowMessageProcessing(from->GetServiceId(), _serviceId))
+    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
     CallHandlers(msg);
@@ -237,7 +237,7 @@ void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMess
 
 void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbol& msg)
 {
-    if (AllowMessageProcessing(from->GetServiceId(), _serviceId))
+    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
     // Call WakeupHandler for Wus and Wudop symbols
@@ -268,7 +268,7 @@ void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymb
 
 void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbolAck& msg)
 {
-    if (AllowMessageProcessing(from->GetServiceId(), _serviceId))
+    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
     // Switch back to the READY state if its an Ack for WUS or WUDOP
@@ -293,12 +293,12 @@ void FrController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymb
 
 void FrController::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
-    _serviceId.legacyEpa = endpointAddress;
+    _serviceDescriptor.legacyEpa = endpointAddress;
 }
 
 auto FrController::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    return _serviceId.legacyEpa;
+    return _serviceDescriptor.legacyEpa;
 }
 
 void FrController::SetTimeProvider(mw::sync::ITimeProvider* timeProvider)
