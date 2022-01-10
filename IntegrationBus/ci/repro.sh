@@ -4,8 +4,6 @@
 #     are required to reproduce the binaries created by our CI environment.
 # You can override REPO, SOURCE and BUILD on the command line, e.g.
 #    $ BUILD=my_repro_builddir ./repro.sh
-# If you do not have FastRTPS binaries, set `-D IB_BIN_FASTRTPS_ENABLE=OFF` to
-# build from source.
 set -e
 set -u
 export SOURCE_DATE_EPOCH=$(git log --max-count=1  --format=%ct -r origin/master)
@@ -16,6 +14,6 @@ REPO=${REPO:-file:///${PWD}/distrib}
 SOURCE=${SOURCE:-.}
 BUILD=${BUILD:-_build_repro}
 
-cmake -S $SOURCE -B ${BUILD} -G Ninja -D CMAKE_BUILD_TYPE=Release -DIB_BIN_FASTRTPS_ENABLE=ON -DIB_BIN_FASTRTPS_REPOSITORY=$REPO -DCMAKE_BUILD_TYPE=Release -DIB_INSTALL_SOURCE=ON -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+cmake -S $SOURCE -B ${BUILD} -G Ninja -D CMAKE_BUILD_TYPE=Release -DCMAKE_BUILD_TYPE=Release -DIB_INSTALL_SOURCE=ON -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
 
 cmake --build ${BUILD} --target package $@

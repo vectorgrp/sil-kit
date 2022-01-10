@@ -19,14 +19,13 @@ namespace ib {
 *
 * \param config Configuration of the participant
 * \param participantName Name of the participant
-* \param domainId ID of the domain; when using FastRTPS, domainId must be in the range [1, 232]
+* \param domainId ID of the domain
 * \return Instance of the communication adapter
 *
 * \throw ib::cfg::Misconfiguration if the config has errors
 * \throw std::runtime_error Parameter participantName does not name
 * a valid participant in the config file.
-* \throw std::exception The FastRTPS participant could not be
-* created.
+* \throw std::exception The participant could not be created.
 */
 IntegrationBusAPI auto CreateComAdapter(ib::cfg::Config config, const std::string& participantName, const uint32_t domainId) -> std::unique_ptr<mw::IComAdapter>;
 

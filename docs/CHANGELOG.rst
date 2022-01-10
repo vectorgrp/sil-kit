@@ -5,6 +5,22 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.6.3] - 2022-01
+--------------------------------
+
+Removed
+~~~~~~~
+- removed the deprecated FastRtps middleware:
+    - CMake: removed option `IB_MW_ENABLE_FASTRTPS`.
+    - Demos: removed the FastRtps specific config files.
+    - removed FastRtps specific integration tests.
+    - API: removed deprecated `ib::CreateFastRtpsComAdapter` and `ib::CreateVAsioComAdapter`.
+      Users should use the generic :cpp:func:`CreateComAdapter<ib::CreateComAdapter()>`,
+      refer to :ref:`sec:mwcfg-vasio`.
+    - ConfigBuilder: removed FastRtps configuration mechanism: `ib::cfg::ConfigBuilder::ConfigureFastRtps`.
+
+  
+
 [3.6.2] - 2021-12-16
 --------------------------------
 

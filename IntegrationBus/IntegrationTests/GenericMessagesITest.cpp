@@ -134,7 +134,6 @@ TEST_F(GenericMessageITest, publish_and_subscribe_large_messages_vasio)
 {
     topics.resize(1);
     topics[0].name = "LargeDataBlobTopic";
-    // Maximum payload size is 65416, beyond that we are testing the ASYNCHRONOUS_PUBLISH_MODE of FastRTPS.
     size_t sizeInBytes = 114793;
     topics[0].expectedData = std::vector<uint8_t>(sizeInBytes, 'D');
 

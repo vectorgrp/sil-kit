@@ -251,7 +251,7 @@ def packDistribution(workdir, distinfos):
     with zipfile.ZipFile("{}.zip".format(out), mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
         for base, dirs, fs in os.walk(workdir):
             for d in dirs:
-                #make sure empty directories are kept (fastrtps cmake needs this!)
+                #make sure empty directories are kept
                 dpath = os.path.join(base, d)
                 if os.listdir(dpath) == []:
                     prefix = get_prefix(workdir, dpath)

@@ -70,32 +70,6 @@ protected:
     std::promise<bool> testOk;
 };
 
-#if defined(IB_MW_HAVE_FASTRTPS)
-TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash)
-{
-    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
-
-    auto pubComAdapter = CreateFastRtpsComAdapterImpl(ibConfig, "Sender");
-    pubComAdapter->joinIbDomain(domainId);
-
-    auto subComAdapter = CreateFastRtpsComAdapterImpl(ibConfig, "Receiver");
-    subComAdapter->joinIbDomain(domainId);
-
-    publisher = pubComAdapter->CreateGenericPublisher("CrashTopic");
-    subscriber = subComAdapter->CreateGenericSubscriber("CrashTopic");
-
-    Subscribe();
-
-    std::thread publishThread{[this]{ this->Publish(); }};
-
-    auto&& future = testOk.get_future();
-    auto futureStatus = future.wait_for(5s);
-    ASSERT_EQ(futureStatus, std::future_status::ready);
-    EXPECT_TRUE(future.get());
-
-    publishThread.join();
-}
-#endif //IB_MW_HAVE_FASTRTPS
 
 #if defined(IB_MW_HAVE_VASIO)
 TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)

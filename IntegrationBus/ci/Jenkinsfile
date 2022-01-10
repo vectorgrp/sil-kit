@@ -24,10 +24,7 @@ artifactoryBuildInfo = Artifactory.newBuildInfo()
 
 //  global cmake args for all builds
 cmakeArgsRelease="-DIB_INSTALL_SOURCE=ON " //only distribute source and docs in release mode
-cmakeArgs ="-DIB_BIN_FASTRTPS_ENABLE=ON \
-    -DIB_BIN_FASTRTPS_REPOSITORY=\"${artifactoryServer.url}/${artifactoryRepo}/ThirdParty/FastRTPS\" \
-    -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=ON \
-    "
+cmakeArgs =" -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=ON "
 gitBranch="master" // overriden in parallel pipeline based on scm vars
 //##########################################
 // Utilities

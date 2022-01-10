@@ -12,6 +12,10 @@
 
 #include "GetTestPid.hpp"
 
+#if IB_MW_HAVE_VASIO
+#   include "VAsioRegistry.hpp"
+#endif
+
 namespace {
 
 using namespace std::chrono_literals;
@@ -33,11 +37,14 @@ protected:
         topic.name = "LargeDataBlobTopic";
 
         ibConfig = ib::cfg::Config::FromJsonFile("LargeMessagesITest_IbConfig.json");
+
+        registry = std::make_unique<VAsioRegistry>(ibConfig);
+        registry->ProvideDomain(domainId);
         
-        pubComAdapter = CreateFastRtpsComAdapterImpl(ibConfig, "Publisher");
+        pubComAdapter = CreateComAdapterImpl(ibConfig, "Publisher");
         pubComAdapter->joinIbDomain(domainId);
 
-        subComAdapter = CreateFastRtpsComAdapterImpl(ibConfig, "Subscriber");
+        subComAdapter = CreateComAdapterImpl(ibConfig, "Subscriber");
         subComAdapter->joinIbDomain(domainId);
     }
 
@@ -74,13 +81,14 @@ protected:
 
     std::unique_ptr<IComAdapterInternal> pubComAdapter;
     std::unique_ptr<IComAdapterInternal> subComAdapter;
+    std::unique_ptr<VAsioRegistry> registry;
 };
     
+#if defined(IB_MW_HAVE_VASIO)
 TEST_F(LargeMessagesITest, publish_and_subscribe_large_messages)
 {
     Subscribe();
 
-    // Maximum payload size is 65416, beyond that we are testing the ASYNCHRONOUS_PUBLISH_MODE of FastRTPS.
     size_t sizeInBytes = 114793;
     std::vector<uint8_t> data(sizeInBytes, 'D');
 
@@ -93,5 +101,6 @@ TEST_F(LargeMessagesITest, publish_and_subscribe_large_messages)
     
     publishThread.join();
 }
+#endif //IB_MW_HAVE_VASIO
 
 } // anonymous namespace

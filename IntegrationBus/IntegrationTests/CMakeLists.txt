@@ -37,10 +37,17 @@ add_vib_test(ITestGenericMessages
       ${itest_extra_libs}
     CONFIGS
       GenericMessagesITest_IbConfig.json
-      LargeMessagesITest_IbConfig.json
-      LargeMessagesITest_FastRTPS.xml
 )
 
+add_vib_test(ITestLargeMessages
+    SOURCES
+        LargeMessagesITest.cpp
+    LIBS
+        IbMwComAdapter
+        ${itest_extra_libs}
+    CONFIGS
+        LargeMessagesITest_IbConfig.json
+)
 add_vib_test(ITestThreeCanController
     SOURCES
       ThreeCanControllerITest.cpp

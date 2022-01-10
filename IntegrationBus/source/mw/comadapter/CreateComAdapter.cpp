@@ -22,7 +22,7 @@ auto CreateComAdapterImpl(ib::cfg::Config config, const std::string& participant
 {
     switch (config.middlewareConfig.activeMiddleware)
     {
-    // FastRTPS is used as default if unconfigured
+    // VAsio is used as default if unconfigured
     case ib::cfg::Middleware::NotConfigured:
     // [[fallthrough]];
 

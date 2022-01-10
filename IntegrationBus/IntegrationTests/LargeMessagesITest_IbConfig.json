@@ -41,15 +41,5 @@
             }
         ]
 
-    },
-
-    "MiddlewareConfig": {
-
-        "FastRTPS": {
-            "DiscoveryType": "ConfigFile",
-            "ConfigFileName": "LargeMessagesITest_FastRTPS.xml"
-        }
-
     }
-
 }
