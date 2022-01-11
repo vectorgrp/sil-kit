@@ -427,7 +427,7 @@ auto ComAdapter<IbConnectionT>::GetSystemMonitor() -> sync::ISystemMonitor*
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::GetServiceDiscovery() -> service::ServiceDiscovery*
+auto ComAdapter<IbConnectionT>::GetServiceDiscovery() -> service::IServiceDiscovery*
 {
     auto* controller = GetController<service::ServiceDiscovery>("ServiceDiscovery");
     if (!controller)

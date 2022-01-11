@@ -19,7 +19,7 @@ class IIbToLinSimulator;
 } // sim
 namespace mw {
 namespace service {
-class ServiceDiscovery;
+class IServiceDiscovery;
 } //service
 }//mw
 } // namespace ib

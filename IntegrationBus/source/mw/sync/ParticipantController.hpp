@@ -128,6 +128,8 @@ private:
     std::unique_ptr<ISyncAdapter> _syncAdapter;
     bool _coldswapEnabled{ false };
 
+    service::IServiceDiscovery* _serviceDiscovery;
+
     ParticipantStatus _status;
 
     NextSimTask _currentTask;
@@ -164,6 +166,11 @@ void ParticipantController::SendIbMessage(MsgT&& msg) const
 void ParticipantController::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
+    // TODO change to isSynchronized for syncType
+    if (_syncType == cfg::SyncType::DistributedTimeQuantum)
+    {
+        _serviceDescriptor.isSynchronized = true;
+    }
 }
 
 auto ParticipantController::GetServiceDescriptor() const -> const mw::ServiceDescriptor&

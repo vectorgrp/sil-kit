@@ -306,7 +306,6 @@ TEST_F(ParticipantControllerTest, refreshstatus_must_not_modify_other_fields)
     EXPECT_EQ(expectedStatus, newStatus);
 }
 
-
 TEST_F(ParticipantControllerTest, run_async_with_synctype_distributedtimequantum)
 {
     //MakeConfig(cfg::SyncType::DistributedTimeQuantum);
@@ -412,6 +411,14 @@ TEST_F(ParticipantControllerTest, force_shutdown_is_ignored_if_not_stopped)
     // command shall be ignored. State shall be unchanged
     EXPECT_EQ(controller.State(), ParticipantState::Idle);
     ASSERT_EQ(finalState.wait_for(1ms), std::future_status::timeout);
+}
+
+TEST_F(ParticipantControllerTest, auto_configure_isSynchronized_with_synctype_distributedtimequantum)
+{
+  ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+  controller.SetServiceDescriptor(from_endpointAddress(addr));
+
+  EXPECT_EQ(controller.GetServiceDescriptor().isSynchronized, true);
 }
 
 

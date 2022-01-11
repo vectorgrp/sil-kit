@@ -1,6 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "ParticipantController.hpp"
+#include "IServiceDiscovery.hpp"
 
 #include <cassert>
 #include <future>
@@ -89,18 +90,20 @@ ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, co
     _myNextTask.timePoint = 0ns;
     _myNextTask.duration = _timesyncConfig.tickPeriod;
 
-    for (auto&& participant : simulationSetup.participants)
+    if (_syncType == cfg::SyncType::DistributedTimeQuantum) 
     {
-        if (participant.name == participantConfig.name)
-            continue;
-    
-        if (participant.participantController->syncType == cfg::SyncType::DistributedTimeQuantum)
+        _serviceDiscovery = _comAdapter->GetServiceDiscovery();
+        _serviceDiscovery->RegisterServiceDiscoveryHandler([this](ib::mw::service::IServiceDiscovery::Type discoveryType, const ib::mw::ServiceDescriptor& serviceDescriptor)
         {
-            NextSimTask task;
-            task.timePoint = -1ns;
-            task.duration = 0ns;
-            _otherNextTasks[participant.name] = task;
-        }
+            if (serviceDescriptor.isSynchronized)
+            {
+                // TODO double check: This is mw-independent - would this cause problems with HLA?
+                NextSimTask task;
+                task.timePoint = -1ns;
+                task.duration = 0ns;
+                _otherNextTasks[serviceDescriptor.participantName] = task;
+            }
+        });
     }
 
     _timeProvider = std::make_shared<ParticipantTimeProvider>();

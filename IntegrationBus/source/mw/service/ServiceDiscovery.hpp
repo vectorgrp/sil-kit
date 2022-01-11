@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "ServiceDatatypes.hpp"
+#include "IServiceDiscovery.hpp"
 
 #include "IComAdapterInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
@@ -20,24 +21,19 @@ class ServiceDiscovery
     : public mw::IIbEndpoint<ServiceAnnouncement>
     , public mw::IIbSender<ServiceAnnouncement>
     , public IIbServiceEndpoint
+    , public IServiceDiscovery
 {
-public: //types
-    enum class Type {
-        ServiceCreated,
-        ServiceRemoved,
-    };
-    using ServiceDiscoveryHandlerT = std::function<void(Type discoveryType, const ServiceDescriptor&)>;
 public: 
     ServiceDiscovery(IComAdapterInternal* comadapter, const std::string& participantName);
     virtual ~ServiceDiscovery() = default;
    
     //!< Publish a locally created new ServiceDescriptor to all other participants
-    void NotifyServiceCreated(const ServiceDescriptor& serviceDescriptor);
+    void NotifyServiceCreated(const ServiceDescriptor& serviceDescriptor) override;
     //!< Publish a participant-local service removal to all other participants
-    void NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor);
+    void NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor) override;
 
     //!< Register a handler for asynchronous service creation notifications
-    void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler);
+    void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler) override;
 public: // Interfaces
 
     //IIbEndpoint

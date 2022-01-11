@@ -105,7 +105,7 @@ public:
     auto GetParticipantController() -> sync::IParticipantController* override;
     auto GetSystemMonitor() -> sync::ISystemMonitor* override;
     auto GetSystemController() -> sync::ISystemController* override;
-    auto GetServiceDiscovery() -> service::ServiceDiscovery* override;
+    auto GetServiceDiscovery() -> service::IServiceDiscovery* override;
     auto GetLogger() -> logging::ILogger* override;
     auto GetParticipantName() const -> const std::string& override { return _participantName; }
     auto GetConfig() const -> const ib::cfg::Config& override { return _config; }

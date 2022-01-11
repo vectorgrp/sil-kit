@@ -21,6 +21,7 @@
 
 #include "TimeProvider.hpp"
 #include "IComAdapterInternal.hpp"
+#include "IServiceDiscovery.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -125,6 +126,37 @@ public:
     MOCK_CONST_METHOD0(ExecuteColdswap, void());
 };
 
+class MockServiceDiscovery : public service::IServiceDiscovery
+{
+
+public:
+    void NotifyServiceCreated(const ServiceDescriptor& serviceDescriptor) override
+    {
+        for (auto&& handler : _handlers)
+        {
+            handler(Type::ServiceCreated, serviceDescriptor);
+        }
+    }
+
+
+    void NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor) override
+    {
+        for (auto&& handler : _handlers)
+        {
+            handler(Type::ServiceRemoved, serviceDescriptor);
+        }
+    }
+
+
+    void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler) override
+    {
+        _handlers.push_back(handler);
+    }
+
+private:
+  std::vector<ServiceDiscoveryHandlerT> _handlers;
+};
+
 class DummyComAdapter : public IComAdapterInternal
 {
 public:
@@ -220,10 +252,7 @@ public:
     virtual void SendIbMessage_proxy(const IIbServiceEndpoint* /*from*/, const sim::generic::GenericMessage& /*msg*/) {} //helper for gtest workaround
     void joinIbDomain(uint32_t ) {}
 
-    auto GetServiceDiscovery() -> service::ServiceDiscovery* override
-    {
-        return nullptr;
-    }
+    auto GetServiceDiscovery() -> service::IServiceDiscovery* override { return &mockServiceDiscovery; }
 
     cfg::Config _config;
     DummyLogger logger;
@@ -231,6 +260,7 @@ public:
     MockParticipantController mockParticipantController;
     MockSystemController mockSystemController;
     MockSystemMonitor mockSystemMonitor;
+    MockServiceDiscovery mockServiceDiscovery;
 };
 
 // ================================================================================

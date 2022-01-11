@@ -92,14 +92,14 @@ public:
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const logging::LogMsg& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, logging::LogMsg&& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const ib::mw::service::ServiceAnnouncement& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const service::ServiceAnnouncement& msg) = 0;
 
     // For Connection/Middleware support:
     virtual void OnAllMessagesDelivered(std::function<void(void)> callback) = 0;
     virtual void FlushSendBuffers() = 0;
     
     //Service discovery for dynamic, configuration-less simulations
-    virtual auto GetServiceDiscovery() -> ib::mw::service::ServiceDiscovery* = 0;
+    virtual auto GetServiceDiscovery() -> service::IServiceDiscovery* = 0;
 
 protected:
     EndpointId _localEndpointId = 0;
