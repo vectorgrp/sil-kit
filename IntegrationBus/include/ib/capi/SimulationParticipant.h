@@ -260,10 +260,10 @@ typedef ib_ReturnCode(*ib_SimulationParticipant_SetSimulationTask_t)(ib_Simulati
   */
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Initialize(ib_SimulationParticipant* participant, const char* participantName);
 
-/*! \brief Send \ref ParticipantCommand::Kind::ReInitialize to a specific participant
+/*! \brief Send \ref the ReInitialize command to a specific participant
   *
   *  The command is only allowed if the participant is in the
-  *  ParticipantState::Stopped or ParticipantState::Error state.
+  *  ib_ParticipantState_Stopped or ib_ParticipantState_Error state.
   *
   *  \param participantName identifies the participant to be initialized
   *
