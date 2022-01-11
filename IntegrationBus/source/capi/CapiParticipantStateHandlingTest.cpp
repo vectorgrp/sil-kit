@@ -66,6 +66,24 @@ namespace {
         returnCode = ib_SimulationParticipant_WaitForRunAsyncToComplete((ib_SimulationParticipant*)&mockComAdapter, &outParticipantState);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
+        returnCode = ib_SimulationParticipant_Initialize(nullptr, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_Initialize((ib_SimulationParticipant*)&mockComAdapter, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_Initialize(nullptr, "test");
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_ReInitialize((ib_SimulationParticipant*)&mockComAdapter, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_ReInitialize(nullptr, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_ReInitialize(nullptr, "test");
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
         returnCode = ib_SimulationParticipant_RunSimulation(nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
@@ -73,6 +91,12 @@ namespace {
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
         returnCode = ib_SimulationParticipant_Pause(nullptr, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_Pause((ib_SimulationParticipant*)&mockComAdapter, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_Pause(nullptr, "test");
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
         returnCode = ib_SimulationParticipant_Continue(nullptr);
@@ -116,6 +140,7 @@ namespace {
         returnCode = ib_SimulationParticipant_GetSystemState(nullptr, (ib_SimulationParticipant*)&mockComAdapter);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
+        // NOTE 2nd parameter 'context' is optional and may be nullptr
         returnCode = ib_SimulationParticipant_RegisterSystemStateHandler(nullptr, nullptr, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 

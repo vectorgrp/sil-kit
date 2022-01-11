@@ -8,6 +8,7 @@
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/sim/generic/all.hpp"
 #include "ib/sim/generic/string_utils.hpp"
+#include "IComAdapterInternal.hpp"
 
 #include <string>
 #include <iostream>
@@ -228,6 +229,42 @@ ib_ReturnCode ib_SimulationParticipant_SetSimulationTask(ib_SimulationParticipan
 }
 
 // SystemController related functions
+ib_ReturnCode ib_SimulationParticipant_Initialize(ib_SimulationParticipant* participant, const char* participantName)
+{
+  ASSERT_VALID_POINTER_PARAMETER(participant);
+  ASSERT_VALID_POINTER_PARAMETER(participantName);
+  CAPI_ENTER
+  {
+    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+    ib::mw::IComAdapterInternal* comAdapterInternal = static_cast<ib::mw::IComAdapterInternal*>(comAdapter);
+    auto& ibConfig = comAdapterInternal->GetConfig();
+    const auto& participantConfig = get_by_name(ibConfig.simulationSetup.participants, participantName);
+    auto* systemController = comAdapter->GetSystemController();
+
+    systemController->Initialize(participantConfig.id);
+    return ib_ReturnCode_SUCCESS;
+  }
+  CAPI_LEAVE
+}
+
+ib_ReturnCode ib_SimulationParticipant_ReInitialize(ib_SimulationParticipant* participant, const char* participantName)
+{
+  ASSERT_VALID_POINTER_PARAMETER(participant);
+  ASSERT_VALID_POINTER_PARAMETER(participantName);
+  CAPI_ENTER
+  {
+    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+    ib::mw::IComAdapterInternal* comAdapterInternal = static_cast<ib::mw::IComAdapterInternal*>(comAdapter);
+    auto& ibConfig = comAdapterInternal->GetConfig();
+    const auto& participantConfig = get_by_name(ibConfig.simulationSetup.participants, participantName);
+    auto* systemController = comAdapter->GetSystemController();
+
+    systemController->ReInitialize(participantConfig.id);
+    return ib_ReturnCode_SUCCESS;
+  }
+  CAPI_LEAVE
+}
+
 ib_ReturnCode ib_SimulationParticipant_RunSimulation(ib_SimulationParticipant* participant)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);

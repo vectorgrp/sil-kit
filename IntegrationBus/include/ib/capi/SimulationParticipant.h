@@ -250,37 +250,120 @@ IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetSimulationTask(ib_Si
 typedef ib_ReturnCode(*ib_SimulationParticipant_SetSimulationTask_t)(ib_SimulationParticipant* participant,
     void* context, ib_ParticipantSimulationTaskHandler_t handler);
 
+/*! \brief Send \ref the Initialize command to a specific participant
+  *
+  *  The command is only allowed if the participant is in ib_ParticipantState_Idle.
+  *
+  *  \param participantName identifies the participant to be initialized
+  *
+  *  NB: Parametrization is yet to be determined.
+  */
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Initialize(ib_SimulationParticipant* participant, const char* participantName);
 
+/*! \brief Send \ref ParticipantCommand::Kind::ReInitialize to a specific participant
+  *
+  *  The command is only allowed if the participant is in the
+  *  ParticipantState::Stopped or ParticipantState::Error state.
+  *
+  *  \param participantName identifies the participant to be initialized
+  *
+  *  NB:
+  *   - Parametrization is yet to be determined.
+  *   - ReInitialize is still subject to changed! It might be changed to
+  *     a SystemCommand to ReInitialize all participants without sending
+  *     new parameters.
+  */
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_ReInitialize(ib_SimulationParticipant* participant, const char* participantName);
 
+/*! \brief Send \ref the Run command to all participants
+  *
+  *  The command is only allowed if system is in state ib_SystemState_Initialized.
+  */
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_RunSimulation(ib_SimulationParticipant* participant);
 
+/*! \brief Send \ref the Stop command to all participants
+  *
+  *  The command is only allowed if system is in ib_SystemState_Running.
+  */
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_StopSimulation(ib_SimulationParticipant* participant);
 
+/*! \brief Pause execution of the participant
+  *
+  * Switch to \ref ib_ParticipantState_Paused due to the provided \p reason.
+  *
+  * When a client is in state \ref ib_ParticipantState_Paused,
+  * it must not be considered as unresponsive even if a
+  * health monitoring related timeout occurs.
+  *
+  * Precondition: State() == \ref ib_ParticipantState_Running
+  */
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Pause(ib_SimulationParticipant* participant, const char* reason);
 
+/*! \brief Switch back to \ref ib_ParticipantState_Running
+  * after having paused.
+  *
+  * Precondition: State() == \ref ib_ParticipantState_Paused
+  */
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Continue(ib_SimulationParticipant* participant);
 
+/*! \brief Send \ref the Shutdown command to all participants
+  *
+  *  The command is only allowed if system is in
+  *  ib_SystemState_Stopped or ib_SystemState_Error.
+  */
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Shutdown(ib_SimulationParticipant* participant);
 
+/*! \brief Send \ref the PrepareColdswap command to all participants
+*
+*  The coldswap process is used to restart a simulation but allow
+*  to swap out one or more participants. The PrepareColdswap()
+*  command brings the system into a safe state such that the actual
+*  coldswap can be performed without loss of data.
+* 
+*  The command is only allowed if system is in
+*  ib_SystemState_Stopped or ib_SystemState_Error.
+*/
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_PrepareColdswap(ib_SimulationParticipant* participant);
 
+/*! \brief Send \ref the ExecuteColdswap command to all participants
+*
+*  The coldswap process is used to restart a simulation but allow
+*  to swap out one or more participants. Once the system is ready
+*  to perform a coldswap, the actual coldswap can be initiated with
+*  the ExecuteColdswap() command.
+*
+*  The command is only allowed if system is in ib_SystemState_ColdswapReady
+*/
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_ExecuteColdswap(ib_SimulationParticipant* participant);
 
+/*! \brief Get the current participant state of the participant given by participantId
+  */
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_GetParticipantState(ib_ParticipantState* outParticipantState,
   ib_SimulationParticipant* participant, const char* participantId);
 
+//! \brief Get the current ::SystemState
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_GetSystemState(ib_SystemState* outSystemState, ib_SimulationParticipant* participant);
 
 typedef void (*ib_SystemStateHandler_t)(void* context, ib_SimulationParticipant* participant,
     ib_SystemState state);
 
+/*! \brief Register a callback for ::SystemState changes
+  *
+  * If the current SystemState is not \ref ib_SystemState_Invalid,
+  * the handler will be called immediately.
+  */
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_RegisterSystemStateHandler(ib_SimulationParticipant* participant,
   void* context, ib_SystemStateHandler_t handler);
-
 
 typedef void (*ib_ParticipantStateHandler_t)(void* context, ib_SimulationParticipant* participant,
     const char* participantId, ib_ParticipantState state);
 
+/*! \brief Register a callback for ::ParticipantState changes
+  *
+  * The handler will be called immediately for any participant that is
+  * not in \ref ib_ParticipantState_Invalid.
+  *
+  */
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_RegisterParticipantStateHandler(ib_SimulationParticipant* participant,
   void* context, ib_ParticipantStateHandler_t handler);
 
