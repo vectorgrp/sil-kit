@@ -116,8 +116,8 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
         callbacks.ShutdownHandler();
     });
 
-    auto participantId = ib::cfg::get_by_name(ibConfig.simulationSetup.participants, "TestUnit").id;
-    ParticipantCommand initCommand{participantId, ParticipantCommand::Kind::Initialize};
+    auto participantName = ib::cfg::get_by_name(ibConfig.simulationSetup.participants, "TestUnit").name;
+    ParticipantCommand initCommand{hash(participantName), ParticipantCommand::Kind::Initialize};
 
     EXPECT_CALL(callbacks, InitHandler(initCommand.participant, initCommand.kind)).Times(1);
     EXPECT_CALL(callbacks, StopHandler()).Times(1);
@@ -139,7 +139,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     EXPECT_EQ(stateReached.wait_for(5s), std::future_status::ready);
 
     stateReached = SetTargetState(ParticipantState::Initialized);
-    systemController->Initialize(participantId);
+    systemController->Initialize(participantName);
     EXPECT_EQ(stateReached.wait_for(5s), std::future_status::ready);
 
     stateReached = SetTargetState(ParticipantState::Running);

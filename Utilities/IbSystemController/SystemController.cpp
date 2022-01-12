@@ -115,7 +115,7 @@ public:
                 continue;
 
             std::cout << "Sending ParticipantCommand::Init to participant \"" << participant.name << "\"" << std::endl;
-            _controller->Initialize(participant.id);
+            _controller->Initialize(participant.name);
         }
     }
 

@@ -43,7 +43,7 @@ public:
     // Public interface methods
     virtual ~IVAsioReceiver() = default;
     virtual auto GetDescriptor() const -> const VAsioMsgSubscriber& = 0;
-    virtual void ReceiveRawMsg(IVAsioPeer* from, MessageBuffer&& buffer) = 0;
+    virtual void ReceiveRawMsg(IVAsioPeer* from, const ServiceDescriptor& descriptor, MessageBuffer&& buffer) = 0;
 };
 
 template <class MsgT>
@@ -60,7 +60,7 @@ public:
     // ----------------------------------------
     // Public interface methods
     auto GetDescriptor() const -> const VAsioMsgSubscriber& override;
-    void ReceiveRawMsg(IVAsioPeer* from, MessageBuffer&& buffer) override;
+    void ReceiveRawMsg(IVAsioPeer* from, const ServiceDescriptor& descriptor, MessageBuffer&& buffer) override;
     void SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor) override
     {
         _serviceDescriptor = serviceDescriptor;
@@ -98,21 +98,14 @@ auto VAsioReceiver<MsgT>::GetDescriptor() const -> const VAsioMsgSubscriber&
 }
 
 template <class MsgT>
-void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* from, MessageBuffer&& buffer)
+void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* from, const ServiceDescriptor& descriptor, MessageBuffer&& buffer)
 {
-    EndpointAddress endpoint;
     MsgT msg;
-    buffer >> endpoint >> msg;
+    buffer >> msg;
 
     TraceRx(_logger, this, msg);
-    _serviceDescriptor.legacyEpa = endpoint;
 
-    auto* fromService = dynamic_cast<IIbServiceEndpoint*>(from);
-    ServiceDescriptor tmpService(fromService->GetServiceDescriptor());
-    tmpService.legacyEpa = endpoint;
-    tmpService.serviceId = endpoint.endpoint;
-
-    auto remoteId = RemoteServiceEndpoint(tmpService);
+    auto remoteId = RemoteServiceEndpoint(descriptor);
     _link->DistributeRemoteIbMessage(&remoteId, msg);
 
 }

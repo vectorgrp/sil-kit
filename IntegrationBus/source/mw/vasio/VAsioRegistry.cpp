@@ -100,7 +100,7 @@ bool VAsioRegistry::IsExpectedParticipant(const ib::mw::VAsioPeerUri& peerInfo)
 {
     for (auto& participant : _connection.Config().simulationSetup.participants)
     {
-        if (participant.id == peerInfo.participantId && participant.name == peerInfo.participantName)
+        if (/*participant.id == peerInfo.participantId && */participant.name == peerInfo.participantName)
         {
             return true;
         }

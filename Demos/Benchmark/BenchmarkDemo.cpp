@@ -277,7 +277,7 @@ void SystemStateHandler(ISystemController* controller, SystemState newState, con
         {
             if (participant.name == "SyncMaster")
                 continue;
-            controller->Initialize(participant.id);
+            controller->Initialize(participant.name);
         }
         break;
 

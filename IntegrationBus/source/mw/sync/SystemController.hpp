@@ -39,6 +39,8 @@ public:
     // ISystemController
     void Initialize(ParticipantId participantId) const override;
     void ReInitialize(ParticipantId participantId) const override;
+    void Initialize(std::string participantName) const override;
+    void ReInitialize(std::string participantName) const override;
     void Run() const override;
     void Stop() const override;
     void Shutdown() const override;

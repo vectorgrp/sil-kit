@@ -93,7 +93,7 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& par
     : _config{std::move(config)}
     , _participant{GetParticipantByName(_config, participantName)} // throws if participantName is not found in _config
     , _participantName{participantName}
-    , _participantId{_participant.id}
+    , _participantId{hash(_participant.name)}
     , _ibConnection{_config, participantName, _participantId}
 {
     // NB: do not create the _logger in the initializer list. If participantName is empty,

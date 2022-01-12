@@ -14,7 +14,7 @@ namespace mw {
  *  via ISyncAdapter::SynchronizeDT or ISyncAdapter::SynchronizeET but
  *  not both.
 */
-using ParticipantId = uint16_t;
+using ParticipantId = uint64_t;
 
 /*! \brief Participant specific identifier for its communication endpoints.
  *

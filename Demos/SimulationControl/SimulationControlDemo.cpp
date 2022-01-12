@@ -176,7 +176,7 @@ private:
         case sync::SystemState::Idle:
             for (auto&& participant : _config.simulationSetup.participants)
             {
-                systemController->Initialize(participant.id);
+                systemController->Initialize(participant.name);
             }
             break;
         case sync::SystemState::Initialized:

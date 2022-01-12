@@ -204,6 +204,7 @@ VAsioConnection::VAsioConnection(cfg::Config config, std::string participantName
     , _participantId{participantId}
 {
     RegisterPeerShutdownCallback([this](IVAsioPeer* peer) { UpdateParticipantStatusOnConnectionLoss(peer); });
+    _hashToParticipantName.insert(std::pair<std::size_t, std::string>(hash(_participantName), _participantName));
 }
 
 VAsioConnection::~VAsioConnection()
@@ -357,6 +358,16 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
     {
         receiver(from, announcement);
     }
+
+    // TODO alternative: could also register for announcement messages to extend map...
+    const auto result = _hashToParticipantName.insert(std::pair<std::size_t, std::string>(hash(announcement.peerUri.participantName), announcement.peerUri.participantName));
+    if (result.second == false)
+    {
+        _logger->Warn("Warning: Received announcement of participant '{}', which was already announced before.", announcement.peerUri.participantName);
+        // TODO this is likely the last chance to fix colliding hash values of multiple participants...
+        // Currently, colliding hash values are not supported
+        //assert(false);
+    }
     SendParticipantAnnoucementReply(from);
 }
 
@@ -486,6 +497,13 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
         peerId.participantName = peerUri.participantName;
         peerId.legacyEpa.participant = peerUri.participantId;
         peer->SetServiceDescriptor(peerId);
+
+        const auto result = _hashToParticipantName.insert({ hash(peerUri.participantName), peerUri.participantName });
+        if (result.second == false)
+        {
+            assert(false);
+        }
+
 
         AddPeer(std::move(peer));
     };
@@ -780,7 +798,27 @@ void VAsioConnection::ReceiveRawIbMessage(IVAsioPeer* from, MessageBuffer&& buff
         _logger->Warn("Ignoring RawIbMessage for unknown receiverIdx={}", receiverIdx);
         return;
     }
-    _vasioReceivers[receiverIdx]->ReceiveRawMsg(from, std::move(buffer));
+
+
+    EndpointAddress endpoint;
+    buffer >> endpoint;
+
+    // TODO access (not yet existing) map to retrieve participantName based on participantId
+    const auto pNameIt = _hashToParticipantName.find(endpoint.participant);
+    if (pNameIt == _hashToParticipantName.end())
+    {
+        // TODO this must never happen - what do we do?
+        assert(false);
+    }
+
+
+    auto* fromService = dynamic_cast<IIbServiceEndpoint*>(from);
+    ServiceDescriptor tmpService(fromService->GetServiceDescriptor());
+    tmpService.legacyEpa = endpoint;
+    tmpService.serviceId = endpoint.endpoint;
+    tmpService.participantName = (*pNameIt).second;
+
+    _vasioReceivers[receiverIdx]->ReceiveRawMsg(from, tmpService, std::move(buffer));
 }
 
 void VAsioConnection::RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)> callback)

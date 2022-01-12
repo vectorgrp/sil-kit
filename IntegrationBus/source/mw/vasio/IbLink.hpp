@@ -36,6 +36,8 @@ public:
     void DistributeRemoteIbMessage(const IIbServiceEndpoint* from, const MsgT& msg);
     void DistributeLocalIbMessage(const IIbServiceEndpoint* sender, const MsgT& msg);
 
+    void DispatchIbMessageToTargetRemote(ReceiverT* to, const IIbServiceEndpoint* from, const MsgT& msg);
+
 private:
     // ----------------------------------------
     // private methods
@@ -92,6 +94,7 @@ void IbLink<MsgT>::DistributeLocalIbMessage(const IIbServiceEndpoint* from, cons
         // C++ 17 -> if constexpr
         if (!IbMsgTraits<MsgT>::IsSelfDeliveryEnforced())
         {
+          // TODO check equality operator
           if (receiverId == from) continue;
         }
         DispatchIbMessage(receiver, from, msg);
@@ -115,8 +118,13 @@ void IbLink<MsgT>::DispatchIbMessage(ReceiverT* to, const IIbServiceEndpoint* fr
         _logger->Warn("Callback for {}[\"{}\"] threw an unknown exception", MsgTypeName(), Name());
     }
 }
-    
-    
+
+template <class MsgT>
+void IbLink<MsgT>::DispatchIbMessageToTargetRemote(ReceiverT* to, const IIbServiceEndpoint* from, const MsgT& msg)
+{
+    _vasioTransmitter->SendMessageToTarget(from, to, msg);
+}
+
 
 } // namespace mw
 } // namespace ib

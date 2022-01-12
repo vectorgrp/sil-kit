@@ -399,6 +399,9 @@ private:
     //We violate the strict layering architecture, so that we can cleanly shutdown without false error messages.
     bool _isShuttingDown{false};
     EndpointId _endpointCounter{0};
+
+  // Hold mapping from hash to participantName
+    std::map<std::size_t, std::string> _hashToParticipantName;
 };
 
 } // mw

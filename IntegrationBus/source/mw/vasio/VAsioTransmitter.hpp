@@ -85,6 +85,31 @@ public:
         _hist.NotifyPeer(peer, remoteIdx);
     }
 
+    void SendMessageToTarget(const IIbServiceEndpoint* from, const IIbServiceEndpoint* to, const MsgT& msg)
+    {
+        // TODO  what do we do with the history for targeted messaging?
+        _hist.Save(from, msg);
+        auto&& receiverIter = std::find_if(_remoteReceivers.begin(), _remoteReceivers.end(), [to](auto&& receiver) 
+            {
+                return receiver->peer->GetUri().participantName == to->GetServiceDescriptor().participantName;
+            });
+        if (receiverIter == _remoteReceivers.end())
+        {
+          std::cout << "Error: Tried to send targeted message to participant '" << to->GetServiceDescriptor().participantName << "', which is not a valid remote receiver." << std::endl;
+          assert(false);
+        }
+        ib::mw::MessageBuffer buffer;
+        uint32_t msgSizePlaceholder{0u};
+        buffer
+            << msgSizePlaceholder
+            << VAsioMsgKind::IbSimMsg
+            << (*receiverIter)->remoteIdx
+            //<< from->GetServiceDescriptor().legacyEpa
+            << to_endpointAddress(from->GetServiceDescriptor())
+            << msg;
+        (*receiverIter).peer->SendIbMsg(std::move(buffer));
+    }
+
 
 public:
     // ----------------------------------------
@@ -100,7 +125,8 @@ public:
                 << msgSizePlaceholder
                 << VAsioMsgKind::IbSimMsg
                 << receiver.remoteIdx
-                << from->GetServiceDescriptor().legacyEpa
+                //<< from->GetServiceDescriptor().legacyEpa
+                << to_endpointAddress(from->GetServiceDescriptor())
                 << msg;
             receiver.peer->SendIbMsg(std::move(buffer));
         }

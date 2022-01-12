@@ -142,10 +142,10 @@ public:
             try
             {
                 ParticipantCommand::Kind participantCommand = ToParticipantCommand(cmdName);
-                mw::ParticipantId participantId;
-                cmdStream >> participantId;
+                std::string participantName;
+                cmdStream >> participantName;
 
-                SendCommand(participantCommand, participantId);
+                SendCommand(participantCommand, participantName);
                 continue;
             }
             catch (const ib::type_conversion_error&)
@@ -183,18 +183,18 @@ public:
         }
     }
 
-    void SendCommand(ParticipantCommand::Kind participantCommand, mw::ParticipantId participantId)
+    void SendCommand(ParticipantCommand::Kind participantCommand, std::string participantName)
     {
-        std::cout << "Sending: ParticipantCommand::" << participantCommand << " to " << participantId << std::endl;
+        std::cout << "Sending: ParticipantCommand::" << participantCommand << " to " << participantName << std::endl;
         switch (participantCommand)
         {
         case ParticipantCommand::Kind::Invalid:
             return;
         case ParticipantCommand::Kind::Initialize:
-            _controller->Initialize(participantId);
+            _controller->Initialize(participantName);
             return;
         case ParticipantCommand::Kind::ReInitialize:
-            _controller->ReInitialize(participantId);
+            _controller->ReInitialize(participantName);
         }
     }
 

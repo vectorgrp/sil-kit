@@ -19,6 +19,7 @@ public:
      *
      *  NB: Parametrization is yet to be determined.
      */
+    [[deprecated]]
     virtual void Initialize(ParticipantId participantId) const = 0;
 
     /*! \brief Send \ref ParticipantCommand::Kind::ReInitialize to a specific participant
@@ -34,7 +35,33 @@ public:
      *     a SystemCommand to ReInitialize all participants without sending
      *     new parameters.
      */
+    [[deprecated]]
     virtual void ReInitialize(ParticipantId participantId) const = 0;
+
+    /*! \brief Send \ref ParticipantCommand::Kind::Initialize to a specific participant
+     *
+     *  The command is only allowed if the participant is in ParticipantState::Idle.
+     *
+     *  \param participantName identifies the participant to be initialized
+     *
+     *  NB: Parametrization is yet to be determined.
+     */
+    virtual void Initialize(std::string participantName) const = 0;
+
+    /*! \brief Send \ref ParticipantCommand::Kind::ReInitialize to a specific participant
+     *
+     *  The command is only allowed if the participant is in the
+     *  ParticipantState::Stopped or ParticipantState::Error state.
+     *
+     *  \param participantName identifies the participant to be initialized
+     *
+     *  NB:
+     *   - Parametrization is yet to be determined.
+     *   - ReInitialize is still subject to changed! It might be changed to
+     *     a SystemCommand to ReInitialize all participants without sending
+     *     new parameters.
+     */
+    virtual void ReInitialize(std::string participantName) const = 0;
 
     /*! \brief Send \ref SystemCommand::Kind::Run to all participants
      *

@@ -175,7 +175,7 @@ private:
         {
             if (!participant.participantController)
                 continue;
-            _systemController->Initialize(participant.id);
+            _systemController->Initialize(participant.name);
         }
     }
 

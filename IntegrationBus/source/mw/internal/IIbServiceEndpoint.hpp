@@ -31,6 +31,10 @@ struct ServiceDescriptor
 inline std::string to_string(const ServiceDescriptor& id);
 inline std::ostream& operator<<(std::ostream& out, const ServiceDescriptor& id);
 
+inline std::size_t hash(const std::string&);
+inline std::size_t participantHash(const ServiceDescriptor& descriptor);
+inline EndpointAddress to_endpointAddress(const ServiceDescriptor& descriptor);
+
 inline bool operator==(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs);
 inline bool operator!=(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs);
 inline bool AllowMessageProcessingProxy(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs);
@@ -152,6 +156,25 @@ inline auto from_endpointAddress(const EndpointAddress& epa) -> ServiceDescripto
 inline std::ostream& operator<<(std::ostream& out, const ServiceDescriptor& id)
 {
     return out << to_string(id);
+}
+
+
+inline std::size_t hash(const std::string& s)
+{
+    return std::hash<std::string>{}(s);
+}
+
+inline std::size_t participantHash(const ServiceDescriptor& descriptor)
+{
+  return hash(descriptor.participantName);
+}
+
+inline EndpointAddress to_endpointAddress(const ServiceDescriptor& descriptor)
+{
+  EndpointAddress epa;
+  epa.participant = participantHash(descriptor);
+  epa.endpoint = descriptor.serviceId;
+  return epa;
 }
 
 } // namespace mw
