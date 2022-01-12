@@ -117,7 +117,7 @@ private:
 ////////////////////////////////////////
 // SimTestHarness
 ////////////////////////////////////////
-SimTestHarness::SimTestHarness(ib::cfg::Config config, uint32_t domainId)
+SimTestHarness::SimTestHarness(ib::cfg::Config config, uint32_t domainId, bool deferParticipantCreation)
     : _config{config}
     , _domainId{domainId}
 {
@@ -174,7 +174,10 @@ SimTestHarness::SimTestHarness(ib::cfg::Config config, uint32_t domainId)
             pc.syncType = ib::cfg::SyncType::DiscreteTime;
             participantConfig.participantController = std::move(pc);
         }
-        AddParticipant(participantConfig);
+        if (!deferParticipantCreation)
+        {
+            AddParticipant(participantConfig);
+        }
     }
 
     _simSystemController = std::make_unique<SimSystemController>(_config, _domainId);
@@ -231,6 +234,23 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
 
 SimParticipant* SimTestHarness::GetParticipant(const std::string& participantName)
 {
+    if (_simParticipants.count(participantName) == 0)
+    {
+        //deferred participant creation
+        auto it = std::find_if(_config.simulationSetup.participants.begin(),
+            _config.simulationSetup.participants.end(),
+            [&participantName](auto cfg)
+            {
+                return cfg.name == participantName;
+            }
+        );
+                
+        if (it == _config.simulationSetup.participants.end())
+        {
+            throw std::runtime_error{ "SimTestHarness::GetParticipant: unknown participant " + participantName };
+        }
+        AddParticipant(*it);
+    }
     return _simParticipants[participantName].get();
 }
 
@@ -249,7 +269,7 @@ void SimTestHarness::AddParticipant(ib::cfg::Participant participantConfig)
 
     // mandatory sim task for time synced simulation
     // by default, we do no operation during simulation task, the user should override this
-    auto* partCtrl = participant ->ComAdapter() ->GetParticipantController();
+    auto* partCtrl = participant->ComAdapter()->GetParticipantController();
     partCtrl->SetSimulationTask([name = participant->Name()](auto, auto) {
         //std::cout << name << ": SimulationTask not defined!" << std::endl;
     });

@@ -126,6 +126,9 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
 {
     SetupRemoteLogging();
 
+    //Ensure Service discovery is started
+    GetServiceDiscovery()->Initialize();
+
     // Create the participants trace message sinks as declared in the configuration.
     _traceSinks = tracing::CreateTraceMessageSinks(GetLogger(), _config, _participant);
 
@@ -159,9 +162,6 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
             conn.NotifyShutdown();
         }
     });
-
-    //Ensure Service discovery is started
-    (void)GetServiceDiscovery();
 }
 
 template <class IbConnectionT>
@@ -750,6 +750,12 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, co
 }
 
 template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const service::ServiceDiscoveryEvent& msg)
+{
+    SendIbMessageImpl(from, std::move(msg));
+}
+
+template <class IbConnectionT>
 template <typename IbMessageT>
 void ComAdapter<IbConnectionT>::SendIbMessageImpl(const IIbServiceEndpoint* from, IbMessageT&& msg)
 {
@@ -793,7 +799,8 @@ auto ComAdapter<IbConnectionT>::CreateController(const cfg::Link& link, const st
     auto controller = std::make_unique<ControllerT>(this, std::forward<Arg>(arg)...);
     auto* controllerPtr = controller.get();
 
-    controller->SetEndpointAddress({ _participantId, _localEndpointId });
+    auto myEndpoint = _localEndpointId++;
+    controller->SetEndpointAddress({ _participantId, myEndpoint });
 
     auto descriptor = ServiceDescriptor{};
     descriptor.linkName = link.name;
@@ -801,12 +808,10 @@ auto ComAdapter<IbConnectionT>::CreateController(const cfg::Link& link, const st
     descriptor.serviceName = serviceName;
     descriptor.type = link.type;
     descriptor.legacyEpa = controller->EndpointAddress();
-    descriptor.serviceId = _localEndpointId;
+    descriptor.serviceId = myEndpoint;
     controller->SetServiceDescriptor(descriptor);
-    ++_localEndpointId;
 
-    _ibConnection.RegisterIbService(link.name, _localEndpointId, controllerPtr);
-
+    _ibConnection.RegisterIbService(link.name, myEndpoint, controllerPtr);
 
     controllerMap[controller->GetServiceDescriptor().serviceName] = std::move(controller);
 

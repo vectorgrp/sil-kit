@@ -31,6 +31,7 @@ class MockComAdapter : public DummyComAdapter
 {
 public:
     MOCK_METHOD(void, SendIbMessage, (const IIbServiceEndpoint*, const ServiceAnnouncement&), (override));
+    MOCK_METHOD(void, SendIbMessage, (const IIbServiceEndpoint*, const ServiceDiscoveryEvent&), (override));
 };
 
 class MockServiceDescriptor : public IIbServiceEndpoint
@@ -83,7 +84,7 @@ protected:
 
 TEST_F(DiscoveryServiceTest, service_creation_notification)
 {
-    ServiceDescriptor senderDescriptor;
+    ServiceDescriptor senderDescriptor{};
     senderDescriptor.participantName = "ParticipantA";
     senderDescriptor.linkName = "Link1";
     senderDescriptor.serviceName = "ServiceDiscovery";
@@ -92,7 +93,7 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
 
     ServiceDescriptor descr;
     descr = senderDescriptor;
-    
+   
     disco.RegisterServiceDiscoveryHandler(
         [&descr](auto eventType, auto&& newServiceDescr) {
             ASSERT_EQ(descr.supplementalData, newServiceDescr.supplementalData);
@@ -102,26 +103,28 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
     });
 
     // reference data for validation
-    ServiceAnnouncement announce;
-    announce.participantName = senderDescriptor.participantName;
-    announce.services.push_back(descr);
+    ServiceDiscoveryEvent event;
+    event.isCreated = true;
+    event.service = descr;
     //Notify should publish a message
-    EXPECT_CALL(comAdapter, SendIbMessage(&disco, announce)).Times(1);
-    // callbacks on receive
+    EXPECT_CALL(comAdapter, SendIbMessage(&disco, event)).Times(1);
+    // no callbacks on sending our own
     EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscovery::Type::ServiceCreated,
-        descr)).Times(1);
+        descr)).Times(0);
     // trigger notification on the same participant
     disco.NotifyServiceCreated(descr);
 
     // trigger notifications on reception path from different participant
     MockServiceDescriptor otherParticipant{ {1, 2} };
-    announce.participantName = otherParticipant.serviceDescriptor.participantName;
-    disco.ReceiveIbMessage(&otherParticipant, announce);
+    descr.participantName = "ParticipantOther";
+    event.service = descr;
+    EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscovery::Type::ServiceCreated,
+        descr)).Times(1);
 
-    announce.participantName = otherParticipant.serviceDescriptor.participantName;
-    disco.ReceiveIbMessage(&otherParticipant, announce);//should not trigger callback, is cached
+    // when sending a different service descriptor, we expect a notification once
+    disco.ReceiveIbMessage(&otherParticipant, event);
+    disco.ReceiveIbMessage(&otherParticipant, event);//should not trigger callback, is cached
 }
-
 TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
 {
     MockServiceDescriptor otherParticipant{ {1, 2} };
@@ -136,15 +139,15 @@ TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
     senderDescriptor.linkName = "Link1";
     senderDescriptor.serviceName = "ServiceDiscovery";
 
-    ServiceAnnouncement announce;
-    announce.participantName = senderDescriptor.participantName;
+    ServiceDiscoveryEvent event;
 
     auto sendAnnounce = [&](auto&& serviceName) {
         ServiceDescriptor descr;
         descr = senderDescriptor;
         descr.serviceName = serviceName;
         // Ensure we only append new services
-        announce.services.push_back(descr);
+        event.isCreated = true;
+        event.service = descr;
 
         // Expect that each service is only handled by a single notification handler 
         // e.g., no duplicate notifications
@@ -152,8 +155,8 @@ TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
             ServiceDiscoveryHandler(ServiceDiscovery::Type::ServiceCreated, descr)
         ).Times(1);
 
-        disco.ReceiveIbMessage(&otherParticipant, announce);
-        disco.ReceiveIbMessage(&otherParticipant, announce);//duplicate should not trigger a notification
+        disco.ReceiveIbMessage(&otherParticipant, event);
+        disco.ReceiveIbMessage(&otherParticipant, event);//duplicate should not trigger a notification
 
     };
 
@@ -177,43 +180,45 @@ TEST_F(DiscoveryServiceTest, service_removal)
     senderDescriptor.linkName = "Link1";
     senderDescriptor.serviceName = "ServiceDiscovery";
 
-    ServiceAnnouncement announce;
-    announce.participantName = senderDescriptor.participantName;
+    ServiceDiscoveryEvent event;
 
     ServiceDescriptor descr;
     descr = senderDescriptor;
     descr.serviceName = "TestService";
-    announce.services.push_back(descr);
+    event.isCreated = true;
+    event.service = descr;
 
     // Test addition
     EXPECT_CALL(callbacks,
         ServiceDiscoveryHandler(ServiceDiscovery::Type::ServiceCreated, descr)
     ).Times(1);
-    disco.ReceiveIbMessage(&otherParticipant, announce);
+    EXPECT_CALL(callbacks,
+        ServiceDiscoveryHandler(ServiceDiscovery::Type::ServiceRemoved, descr)
+    ).Times(0);
+    disco.ReceiveIbMessage(&otherParticipant, event);
 
-    // Test modification
-    announce.services.at(0).serviceName = "Modified";
-    auto modifiedDescr = announce.services.at(0);
+    // add a modified one
+    event.service.serviceName = "Modified";
+    auto modifiedDescr = event.service;
     EXPECT_CALL(callbacks,
         ServiceDiscoveryHandler(ServiceDiscovery::Type::ServiceCreated, modifiedDescr)
     ).Times(1);
     EXPECT_CALL(callbacks,
-        ServiceDiscoveryHandler(ServiceDiscovery::Type::ServiceRemoved, descr)
-    ).Times(1);
-    disco.ReceiveIbMessage(&otherParticipant, announce);
-
+        ServiceDiscoveryHandler(ServiceDiscovery::Type::ServiceRemoved, modifiedDescr)
+    ).Times(0);
+    disco.ReceiveIbMessage(&otherParticipant, event);
     // Test removal
-    announce.services.clear();
+    event.isCreated = false;
     EXPECT_CALL(callbacks,
         ServiceDiscoveryHandler(ServiceDiscovery::Type::ServiceRemoved, modifiedDescr)
     ).Times(1);
-    disco.ReceiveIbMessage(&otherParticipant, announce);
+    disco.ReceiveIbMessage(&otherParticipant, event);
 
     // Nothing to remove, no triggers
+    event.isCreated = false;
     EXPECT_CALL(callbacks,
         ServiceDiscoveryHandler(_, _)
     ).Times(0);
-    disco.ReceiveIbMessage(&otherParticipant, announce);
+    disco.ReceiveIbMessage(&otherParticipant, event);
 }
-
 } // anonymous namespace for test

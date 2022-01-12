@@ -6,11 +6,17 @@
 #include <map>
 #include <sstream>
 
-#include "IIbEndpoint.hpp" //for ServiceDescriptor
+#include "IIbEndpoint.hpp" //for ServiceId
 
 namespace ib {
 namespace mw {
 namespace service {
+
+struct ServiceDiscoveryEvent
+{
+    bool isCreated{false}; //!< is service created or removed
+    ServiceDescriptor service;
+};
 
 struct ServiceAnnouncement //requires history >= 1
 {
@@ -22,6 +28,12 @@ struct ServiceAnnouncement //requires history >= 1
 ////////////////////////////////////////////////////////////////////////////////
 // Inline operators
 ////////////////////////////////////////////////////////////////////////////////
+inline bool operator==(const ServiceDiscoveryEvent& lhs, const ServiceDiscoveryEvent& rhs)
+{
+    return lhs.isCreated == rhs.isCreated
+        && lhs.service == rhs.service
+        ;
+}
 inline bool operator==(const ServiceAnnouncement& lhs, const ServiceAnnouncement& rhs)
 {
     return lhs.participantName == rhs.participantName
@@ -35,6 +47,16 @@ inline bool operator!=(const ServiceAnnouncement& lhs, const ServiceAnnouncement
 ////////////////////////////////////////////////////////////////////////////////
 // Inline string utils
 ////////////////////////////////////////////////////////////////////////////////
+
+inline std::ostream& operator<<(std::ostream& out, const ServiceDiscoveryEvent& event)
+{
+    if (event.isCreated) out << "+";
+    else
+        out << "-";
+    out << event.service;
+    return out;
+}
+
 inline std::ostream& operator<<(std::ostream& out, const ServiceAnnouncement& serviceAnnouncement)
 {
     out << "ServiceAnnouncement{\"" << serviceAnnouncement.participantName
@@ -42,7 +64,7 @@ inline std::ostream& operator<<(std::ostream& out, const ServiceAnnouncement& se
         ;
     for (auto&& service : serviceAnnouncement.services)
     {
-        out << "Service{" << to_string(service)
+        out << "Service{" << service
             << "}"
             ;
     }

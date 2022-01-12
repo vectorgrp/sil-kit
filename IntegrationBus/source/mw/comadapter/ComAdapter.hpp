@@ -168,6 +168,7 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* from, sim::generic::GenericMessage&& msg) override;
 
     void SendIbMessage(const IIbServiceEndpoint*, const service::ServiceAnnouncement& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint*, const service::ServiceDiscoveryEvent& msg) override;
 
     void OnAllMessagesDelivered(std::function<void()> callback) override;
     void FlushSendBuffers() override;

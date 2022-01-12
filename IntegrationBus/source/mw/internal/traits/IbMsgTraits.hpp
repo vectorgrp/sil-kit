@@ -67,6 +67,7 @@ DefineIbMsgTrait_TypeName(ib::sim::fr, TxBufferUpdate)
 DefineIbMsgTrait_TypeName(ib::sim::fr, ControllerStatus)
 DefineIbMsgTrait_TypeName(ib::sim::fr, PocStatus)
 DefineIbMsgTrait_TypeName(ib::mw::service, ServiceAnnouncement)
+DefineIbMsgTrait_TypeName(ib::mw::service, ServiceDiscoveryEvent)
 
 //Messages with history
 DefineIbMsgTrait_HistSize(ib::mw::sync, ParticipantStatus, 1)

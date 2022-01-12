@@ -51,7 +51,8 @@ private:
 class SimTestHarness
 {
 public:
-    SimTestHarness(ib::cfg::Config config, uint32_t domainId);
+    //!< when deferParticipantCreation is true, SimParticipants will be created in the GetParticipant calls instead of in the constructor.
+    SimTestHarness(ib::cfg::Config config, uint32_t domainId, bool deferParticipantCreation = false);
     ~SimTestHarness();
     //! \brief Run the simulation, return false if timeout is reached.
     bool Run(std::chrono::nanoseconds testRunTimeout = std::chrono::nanoseconds::min());

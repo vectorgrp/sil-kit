@@ -128,33 +128,11 @@ public:
 
 class MockServiceDiscovery : public service::IServiceDiscovery
 {
-
 public:
-    void NotifyServiceCreated(const ServiceDescriptor& serviceDescriptor) override
-    {
-        for (auto&& handler : _handlers)
-        {
-            handler(Type::ServiceCreated, serviceDescriptor);
-        }
-    }
-
-
-    void NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor) override
-    {
-        for (auto&& handler : _handlers)
-        {
-            handler(Type::ServiceRemoved, serviceDescriptor);
-        }
-    }
-
-
-    void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler) override
-    {
-        _handlers.push_back(handler);
-    }
-
-private:
-  std::vector<ServiceDiscoveryHandlerT> _handlers;
+    MOCK_METHOD(void, NotifyServiceCreated, (const ServiceDescriptor& serviceDescriptor), (override));
+    MOCK_METHOD(void, NotifyServiceRemoved, (const ServiceDescriptor& serviceDescriptor), (override));
+    MOCK_METHOD(void, RegisterServiceDiscoveryHandler, (ServiceDiscoveryHandlerT handler), (override));
+    MOCK_METHOD(void, Initialize, (), (override));
 };
 
 class DummyComAdapter : public IComAdapterInternal
@@ -242,6 +220,7 @@ public:
     void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, const logging::LogMsg& /*msg*/) {}
 
     void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, const service::ServiceAnnouncement& /*msg*/) {}
+    void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, const service::ServiceDiscoveryEvent& /*msg*/) {}
 
     void OnAllMessagesDelivered(std::function<void(void)> /*callback*/) {}
     void FlushSendBuffers() {}

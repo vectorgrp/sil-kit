@@ -107,6 +107,19 @@ if(IB_MW_ENABLE_VASIO)
     )
 endif()
 
+add_vib_test(FTestServiceDiscovery
+    SOURCES
+      ServiceDiscoveryFTest.cpp
+    LIBS
+      IbMwComAdapter
+      IbSimTestHarness
+      ${itest_extra_libs}
+)
+
+if(TARGET FTestServiceDiscovery AND MSVC)
+    set_target_properties(FTestServiceDiscovery PROPERTIES LINK_FLAGS "/PROFILE")
+endif()
+
 # Windows specific tests
 if(WIN32)
     add_vib_test(ITestCompatibilityWithWindowsHeaders

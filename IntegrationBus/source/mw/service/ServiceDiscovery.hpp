@@ -4,36 +4,40 @@
 
 #include <functional>
 #include <unordered_map>
+#include <mutex>
 
 #include "ServiceDatatypes.hpp"
-#include "IServiceDiscovery.hpp"
 
 #include "IComAdapterInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
 #include "IIbEndpoint.hpp"
 #include "IIbSender.hpp"
+#include "IServiceDiscovery.hpp"
 
 namespace ib {
 namespace mw {
 namespace service {
 
 class ServiceDiscovery
-    : public mw::IIbEndpoint<ServiceAnnouncement>
-    , public mw::IIbSender<ServiceAnnouncement>
+    : public mw::IIbEndpoint<ServiceAnnouncement, ServiceDiscoveryEvent>
+    , public mw::IIbSender<ServiceAnnouncement, ServiceDiscoveryEvent>
     , public IIbServiceEndpoint
-    , public IServiceDiscovery
+    , public service::IServiceDiscovery
 {
 public: 
+    using IServiceDiscovery::ServiceDiscoveryHandlerT;
+
     ServiceDiscovery(IComAdapterInternal* comadapter, const std::string& participantName);
     virtual ~ServiceDiscovery() = default;
-   
-    //!< Publish a locally created new ServiceDescriptor to all other participants
+  
+public: //IServiceDiscovery
+    //!< Publish a locally created new ServiceId to all other participants
     void NotifyServiceCreated(const ServiceDescriptor& serviceDescriptor) override;
     //!< Publish a participant-local service removal to all other participants
     void NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor) override;
-
     //!< Register a handler for asynchronous service creation notifications
     void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler) override;
+    void Initialize() override;
 public: // Interfaces
 
     //IIbEndpoint
@@ -43,7 +47,10 @@ public: // Interfaces
     void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
     auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const ServiceAnnouncement& msg) override;
-
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const ServiceDiscoveryEvent& msg) override;
+private: //methods
+    void ReceivedServiceRemoval(const ServiceDescriptor&);
+    void ReceivedServiceAddition(const ServiceDescriptor&);
 private:
     IComAdapterInternal* _comAdapter{nullptr};
     std::string _participantName;

@@ -1,17 +1,24 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "ServiceDiscovery.hpp"
 
+#include "ib/mw/sync/ISystemMonitor.hpp"
+
 #include <set>
+
 
 namespace ib {
 namespace mw {
 namespace service {
 
 ServiceDiscovery::ServiceDiscovery(IComAdapterInternal* comadapter, const std::string& participantName)
-        : _comAdapter{comadapter}
-        , _participantName{participantName}
-    {
-    }
+    : _comAdapter{comadapter}
+    , _participantName{participantName}
+{
+    //NB do not call Initialize() (i.e., access SystemMonitor) here, there is a
+    // circular dependency between ServiceDiscovery and SystemMonitor.
+
+    _announcement.participantName = participantName;
+}
 
 void ServiceDiscovery::SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress)
 {
@@ -32,97 +39,132 @@ auto ServiceDiscovery::GetServiceDescriptor() const -> const mw::ServiceDescript
     return _serviceDescriptor;
 }
 
+void ServiceDiscovery::Initialize()
+{
+    auto systemMonitor = _comAdapter->GetSystemMonitor();
+    systemMonitor->RegisterParticipantStatusHandler([this](auto status) {
+        if (status.participantName == _participantName)
+        {
+            return;
+        }
+        _comAdapter->SendIbMessage(this, _announcement);
+    });
+}
+
 void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const ServiceAnnouncement& msg)
 {
-    auto serviceCreated = [this](auto&& service) {
+    auto notifyCreated = [this](auto&& service)
+    {
         for (auto&& handler : _handlers)
         {
             handler(Type::ServiceCreated, service);
         }
     };
-    auto serviceRemoved = [this](auto&& service) {
-        for (auto&& handler : _handlers)
-        {
-            handler(Type::ServiceRemoved, service);
-        }
-    };
-
-    std::set<std::string> currentServices;
-    auto& serviceMap = _announcedServices[msg.participantName];
-    for (const auto& service : msg.services)
+    // Service announcement are sent when a new participant becomes part of the simulation
+    auto&& announcementMap = _announcedServices[msg.participantName];
+    for (auto&& service : msg.services)
     {
-        const auto idStr = to_string(service);
-        currentServices.insert(idStr);
-        //if the service is not in the cache add it and notify 
-        if (serviceMap.count(idStr) == 0)
-        {
-            serviceMap[idStr] = service;
-            serviceCreated(service);
-        }
-        else
-        {
-            // it is in the cache, notify if it was modified
-            auto& oldService = serviceMap[idStr];
-            if (oldService != service)
-            {
-                serviceMap[idStr] = service;
-                serviceCreated(service);
-            }
-        }
-    }
-    // now see if there are stale entries in the serviceMap, and notify removals
-    // NB: do not modify the map while iterating it 
-    ServiceMap newServiceMap;
-    bool serviceMapUpdated = false;
-    for (auto& keyVal : serviceMap)
-    {
-        const auto serviceString = keyVal.first;
-        if (currentServices.count(serviceString) == 0)
-        {
-            // no longer part of the announced services
-            serviceMapUpdated = true;
-            serviceRemoved(keyVal.second);
-        }
-        else
-        {
-            newServiceMap[serviceString] = keyVal.second;
-        }
-    }
-    if (serviceMapUpdated)
-    {
-        serviceMap = std::move(newServiceMap);
+        notifyCreated(service);
+        announcementMap[to_string(service)] = service;
     }
 }
 
+void ServiceDiscovery::ReceivedServiceRemoval(const ServiceDescriptor& serviceDescriptor)
+{
+    auto&& announcementMap = _announcedServices[serviceDescriptor.participantName];
+    auto numErased = announcementMap.erase(to_string(serviceDescriptor));
+  
+    if (numErased == 0)
+    {
+        //we only notify once per event
+        return;
+    }
+
+    for (auto&& handler : _handlers)
+    {
+        handler(Type::ServiceRemoved, serviceDescriptor);
+    }
+}
+
+void ServiceDiscovery::ReceivedServiceAddition(const ServiceDescriptor& serviceDescriptor)
+{
+    auto&& announcementMap = _announcedServices[serviceDescriptor.participantName];
+    const auto cachedServiceKey = to_string(serviceDescriptor);
+
+    if (announcementMap.count(cachedServiceKey) > 0)
+    {
+        //we already now this participant's service
+        return;
+    }
+    
+    // Update the cache
+    announcementMap[cachedServiceKey] = serviceDescriptor;
+
+    for (auto&& handler : _handlers)
+    {
+        handler(Type::ServiceCreated, serviceDescriptor);
+    }
+}
+
+void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const ServiceDiscoveryEvent& msg)
+{
+    if (msg.isCreated)
+    {
+        ReceivedServiceAddition(msg.service);
+    }
+    else
+    {
+        ReceivedServiceRemoval(msg.service);
+    }
+}
 
 void ServiceDiscovery::NotifyServiceCreated(const ServiceDescriptor& serviceDescriptor)
 {
-     //update our existing service cache entry
-    auto& announcementMap = _announcedServices[_participantName];
-    announcementMap[to_string(serviceDescriptor)] = serviceDescriptor;
-
-    _announcement.participantName = _participantName;
+    ServiceDiscoveryEvent event;
+    event.isCreated = true;
+    event.service = serviceDescriptor;
+    _announcedServices[_participantName][to_string(serviceDescriptor)] = serviceDescriptor;
     _announcement.services.push_back(serviceDescriptor);
-    _comAdapter->SendIbMessage(this, _announcement);//ensure message history is updated
+    _comAdapter->SendIbMessage(this, std::move(event));
 }
 
-void ServiceDiscovery::NotifyServiceRemoved(const ServiceDescriptor& removedService)
+void ServiceDiscovery::NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor)
 {
+    auto&& announcementMap = _announcedServices[_participantName];
+
+    announcementMap.erase(to_string(serviceDescriptor));
+
+    //update our announcement table
     for (auto i = _announcement.services.begin();
         i != _announcement.services.end();
         ++i)
     {
-        if (i->serviceId == removedService.serviceId)
+        if (i->serviceId == serviceDescriptor.serviceId)
         {
             _announcement.services.erase(i);
             break;
         }
     }
-    // send updates to other participants
-    _comAdapter->SendIbMessage(this, _announcement);
+
+    ServiceDiscoveryEvent event;
+    event.isCreated = false;
+    event.service = serviceDescriptor;
+    _comAdapter->SendIbMessage(this, std::move(event));
 }
+
 void ServiceDiscovery::RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler)
 {
+    //Notify about the existing services
+    for (auto&& mapKeyval : _announcedServices)
+    {
+        //no self notifications
+        if (mapKeyval.first == _participantName) continue;
+
+        for (auto&& serviceKeyval : mapKeyval.second)
+        {
+            handler(Type::ServiceCreated, serviceKeyval.second);
+        }
+    }
     _handlers.emplace_back(std::move(handler));
 }
 

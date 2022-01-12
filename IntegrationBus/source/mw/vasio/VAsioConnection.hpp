@@ -183,7 +183,8 @@ private:
         sim::fr::TxBufferUpdate,
         sim::fr::ControllerStatus,
         sim::fr::PocStatus,
-        mw::service::ServiceAnnouncement
+        mw::service::ServiceAnnouncement,
+        mw::service::ServiceDiscoveryEvent
     >;
 
 private:

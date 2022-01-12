@@ -110,6 +110,25 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
     return buffer;
 }
 
+//ServiceDiscoveryEvent
+
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
+    const ServiceDiscoveryEvent& msg)
+{
+    buffer << msg.isCreated
+        << msg.service
+        ;
+    return buffer;
+}
+
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
+    ServiceDiscoveryEvent& updatedMsg)
+{
+    buffer >> updatedMsg.isCreated
+        >> updatedMsg.service
+        ;
+    return buffer;
+}
 } // namespace service
 } // namespace mw
 } // namespace ib

@@ -96,7 +96,8 @@ if (MSVC)
             PDB_OUTPUT_DIRECTORY_RELEASE ${PKG_PDB_DIR}/Release
             PDB_OUTPUT_DIRECTORY_DEBUG ${PKG_PDB_DIR}/Debug
             LINK_FLAGS "/DEBUG" #make sure the resulting .dll has a .pdb file
-     )
+    )
+    set_target_properties(IntegrationBus PROPERTIES LINK_FLAGS "/PROFILE")
 elseif(UNIX)
     #for reproducible builds
     target_link_options(IntegrationBus 
