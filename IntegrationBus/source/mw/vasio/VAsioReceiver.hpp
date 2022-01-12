@@ -22,22 +22,16 @@ struct RemoteServiceEndpoint : IIbServiceEndpoint
 
     auto GetServiceDescriptor() const -> const ServiceDescriptor & override
     { 
-        return _id; 
+        return _serviceDescriptor; 
     }
 
-    RemoteServiceEndpoint(IVAsioPeer* remoteParticipant, const IIbServiceEndpoint* receiver)
+    RemoteServiceEndpoint(const ServiceDescriptor& descriptor)
     {
-        _id.participantName = remoteParticipant->GetUri().participantName;
-        const auto& receiverServiceDescriptor = receiver->GetServiceDescriptor();
-        _id.serviceName = receiverServiceDescriptor.serviceName;
-        _id.linkName = receiverServiceDescriptor.linkName;
-        _id.legacyEpa = receiverServiceDescriptor.legacyEpa;
-        _id.isLinkSimulated = receiverServiceDescriptor.isLinkSimulated;
-        _id.type = receiverServiceDescriptor.type;
+        _serviceDescriptor = descriptor;
     }
 
 private:
-    ServiceDescriptor _id;
+    ServiceDescriptor _serviceDescriptor;
 };
 
 class MessageBuffer;
@@ -116,14 +110,9 @@ void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* from, MessageBuffer&& buffer
     auto* fromService = dynamic_cast<IIbServiceEndpoint*>(from);
     ServiceDescriptor tmpService(fromService->GetServiceDescriptor());
     tmpService.legacyEpa = endpoint;
+    tmpService.serviceId = endpoint.endpoint;
 
-    //// TODO set data from peer?
-    //_link->DistributeRemoteIbMessage(fromService, msg);
-
-
-    fromService->SetServiceDescriptor(tmpService);
-
-    auto remoteId = RemoteServiceEndpoint(from, this); 
+    auto remoteId = RemoteServiceEndpoint(tmpService);
     _link->DistributeRemoteIbMessage(&remoteId, msg);
 
 }

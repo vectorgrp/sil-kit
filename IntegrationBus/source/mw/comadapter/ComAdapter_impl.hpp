@@ -811,9 +811,7 @@ auto ComAdapter<IbConnectionT>::CreateController(const cfg::Link& link, const st
     controllerMap[controller->GetServiceDescriptor().serviceName] = std::move(controller);
 
     //Tell the service discovery that a new service was created
-    mw::ServiceDescriptor descr;
-    descr = descriptor;
-    GetServiceDiscovery()->NotifyServiceCreated(descr);
+    GetServiceDiscovery()->NotifyServiceCreated(controllerPtr->GetServiceDescriptor());
     return controllerPtr;
 }
 
