@@ -155,6 +155,10 @@ namespace {
     TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_function_mapping)
     {
         ib_ReturnCode returnCode;
+
+        // required for MockSystemMonitor::ParticipantStatus
+        testing::DefaultValue<const ib::mw::sync::ParticipantStatus&>::Set(ib::mw::sync::ParticipantStatus());
+
         EXPECT_CALL(mockComAdapter.mockParticipantController, SetInitHandler(testing::_)).Times(testing::Exactly(1));
         returnCode = ib_SimulationParticipant_SetInitHandler((ib_SimulationParticipant*)&mockComAdapter, NULL, &InitCallback);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
@@ -179,13 +183,23 @@ namespace {
         returnCode = ib_SimulationParticipant_RunAsync((ib_SimulationParticipant*)&mockComAdapter); // Second call should fail
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        //ib_SystemState systemState;
-        //returnCode = ib_SimulationParticipant_GetSystemState(&systemState, (ib_SimulationParticipant*)&mockComAdapter);
-        //EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+        ib_SystemState systemState;
+        EXPECT_CALL(mockComAdapter.mockSystemMonitor, SystemState()).Times(testing::Exactly(1));
+        returnCode = ib_SimulationParticipant_GetSystemState(&systemState, (ib_SimulationParticipant*)&mockComAdapter);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        //ib_ParticipantState participantState;
-        //returnCode = ib_SimulationParticipant_GetParticipantState(&participantState, (ib_SimulationParticipant*)&mockComAdapter, "participant");
-        //EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+        ib_ParticipantState participantState;
+        EXPECT_CALL(mockComAdapter.mockSystemMonitor, ParticipantStatus(testing::_)).Times(testing::Exactly(1));
+        returnCode = ib_SimulationParticipant_GetParticipantState(&participantState, (ib_SimulationParticipant*)&mockComAdapter, "participant");
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        returnCode = ib_SimulationParticipant_Initialize((ib_SimulationParticipant*)&mockComAdapter, "participant");
+        // there is no valid IbConfig, therefore the participant lookup by name will fail
+        EXPECT_EQ(returnCode, ib_ReturnCode_UNSPECIFIEDERROR);
+
+        returnCode = ib_SimulationParticipant_ReInitialize((ib_SimulationParticipant*)&mockComAdapter, "participant");
+        // there is no valid IbConfig, therefore the participant lookup by name will fail
+        EXPECT_EQ(returnCode, ib_ReturnCode_UNSPECIFIEDERROR);
 
         EXPECT_CALL(mockComAdapter.mockSystemController, Run()).Times(testing::Exactly(1));
         returnCode = ib_SimulationParticipant_RunSimulation((ib_SimulationParticipant*)&mockComAdapter);

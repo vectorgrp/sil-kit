@@ -214,7 +214,7 @@ public:
     void OnAllMessagesDelivered(std::function<void(void)> /*callback*/) {}
     void FlushSendBuffers() {}
     auto GetParticipantName() const -> const std::string& override { throw std::runtime_error("invalid call"); }
-    auto GetConfig() const -> const ib::cfg::Config& override { throw std::runtime_error("invalid call"); }
+    auto GetConfig() const -> const ib::cfg::Config& override { return _config; }
 
     virtual auto GetTimeProvider() -> sync::ITimeProvider* { return &mockTimeProvider; }
     virtual void SendIbMessage_proxy(const IIbServiceEndpoint* /*from*/, const sim::generic::GenericMessage& /*msg*/) {} //helper for gtest workaround
@@ -225,6 +225,7 @@ public:
         return nullptr;
     }
 
+    cfg::Config _config;
     DummyLogger logger;
     MockTimeProvider mockTimeProvider;
     MockParticipantController mockParticipantController;

@@ -359,16 +359,16 @@ ib_ReturnCode ib_SimulationParticipant_ExecuteColdswap(ib_SimulationParticipant*
 }
 
 // SystemMonitor related functions
-ib_ReturnCode ib_SimulationParticipant_GetParticipantState(ib_ParticipantState* outParticipantState, ib_SimulationParticipant* participant, const char* participantId)
+ib_ReturnCode ib_SimulationParticipant_GetParticipantState(ib_ParticipantState* outParticipantState, ib_SimulationParticipant* participant, const char* participantName)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);
   ASSERT_VALID_OUT_PARAMETER(outParticipantState);
-  ASSERT_VALID_POINTER_PARAMETER(participantId);
+  ASSERT_VALID_POINTER_PARAMETER(participantName);
   CAPI_ENTER
   {
     auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
     auto* systemMonitor = comAdapter->GetSystemMonitor();
-    auto participantStatus = systemMonitor->ParticipantStatus(participantId);
+    auto& participantStatus = systemMonitor->ParticipantStatus(participantName);
     *outParticipantState = (ib_ParticipantState)participantStatus.state;
     return ib_ReturnCode_SUCCESS;
   }

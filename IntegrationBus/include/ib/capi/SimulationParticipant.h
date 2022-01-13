@@ -336,10 +336,10 @@ IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_PrepareColdswap(ib_Simu
 */
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_ExecuteColdswap(ib_SimulationParticipant* participant);
 
-/*! \brief Get the current participant state of the participant given by participantId
+/*! \brief Get the current participant state of the participant given by participantName
   */
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_GetParticipantState(ib_ParticipantState* outParticipantState,
-  ib_SimulationParticipant* participant, const char* participantId);
+  ib_SimulationParticipant* participant, const char* participantName);
 
 //! \brief Get the current ::SystemState
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_GetSystemState(ib_SystemState* outSystemState, ib_SimulationParticipant* participant);
@@ -356,7 +356,7 @@ IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_RegisterSystemStateHand
   void* context, ib_SystemStateHandler_t handler);
 
 typedef void (*ib_ParticipantStateHandler_t)(void* context, ib_SimulationParticipant* participant,
-    const char* participantId, ib_ParticipantState state);
+    const char* participantName, ib_ParticipantState state);
 
 /*! \brief Register a callback for ::ParticipantState changes
   *
