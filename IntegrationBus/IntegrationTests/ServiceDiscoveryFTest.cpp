@@ -5,6 +5,7 @@
 #include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"
@@ -42,6 +43,10 @@ protected:
             subscriber->AddGenericSubscriber(topic);
             subscriber2->AddGenericSubscriber(topic);
         }
+        publisher->ConfigureLogger()
+            .AddSink(ib::cfg::Sink::Type::Stdout)
+            .WithLogLevel(ib::mw::logging::Level::Info)
+            ;
         ibConfig = builder.Build();
         ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
     }
@@ -58,9 +63,11 @@ protected:
             const auto topic = "TopicName-" + std::to_string(i);
             (void)publisher->CreateGenericPublisher(topic);//ensure the service discovery is engaged
         }
+        auto logger = publisher->GetLogger();
         auto&& participantController = publisher->GetParticipantController();
-        participantController->SetSimulationTask([&participantController](auto, auto) {
-            participantController->Stop("Nothing to do");
+        participantController->SetSimulationTask([&logger, &participantController](auto, auto) {
+            logger->Info("::::::::::: Sending STOP");
+            participantController->Stop("Test complete");
         });
     
         auto makeSubscriber = [&](auto subscriberName)
@@ -106,12 +113,12 @@ TEST_F(ServiceDiscoveryITest, test_discovery_performance_100services)
 TEST_F(ServiceDiscoveryITest, test_discovery_performance_1000services)
 {
     BuildConfig(1000);
-    ExecuteTest(1000, 2s);
+    ExecuteTest(1000, 3s);
 }
 
 TEST_F(ServiceDiscoveryITest, test_discovery_performance_2000services)
 {
     BuildConfig(2000);
-    ExecuteTest(2000, 4s);
+    ExecuteTest(2000, 5s);
 }
 } // anonymous namespace

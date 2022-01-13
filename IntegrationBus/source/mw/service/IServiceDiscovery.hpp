@@ -12,11 +12,7 @@ namespace service {
 class IServiceDiscovery
 {
 public: //types
-    enum class Type {
-        ServiceCreated,
-        ServiceRemoved,
-    };
-    using ServiceDiscoveryHandlerT = std::function<void(Type discoveryType, const ServiceDescriptor&)>;
+    using ServiceDiscoveryHandlerT = std::function<void(ServiceDiscoveryEvent::Type discoveryType, const ServiceDescriptor&)>;
 
     virtual ~IServiceDiscovery() = default;
     //!< Publish a locally created new ServiceDescriptor to all other participants

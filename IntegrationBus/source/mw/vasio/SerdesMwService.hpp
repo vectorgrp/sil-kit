@@ -115,7 +115,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
     const ServiceDiscoveryEvent& msg)
 {
-    buffer << msg.isCreated
+    buffer << msg.type
         << msg.service
         ;
     return buffer;
@@ -124,7 +124,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
     ServiceDiscoveryEvent& updatedMsg)
 {
-    buffer >> updatedMsg.isCreated
+    buffer >> updatedMsg.type
         >> updatedMsg.service
         ;
     return buffer;

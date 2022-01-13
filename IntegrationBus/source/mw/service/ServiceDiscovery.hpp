@@ -60,6 +60,7 @@ private:
     //!< a cache for computing additions/removals per participant
     using ServiceMap = std::unordered_map<std::string /*serviceDescriptor*/, ServiceDescriptor>;
     std::unordered_map<std::string /* participant name */, ServiceMap> _announcedServices; 
+    std::mutex _mx;
 };
 
 // ================================================================================

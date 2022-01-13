@@ -76,6 +76,8 @@ auto to_string(SyncType syncType) -> std::string
         return "DiscreteTimePassive";
     case SyncType::Unsynchronized:
         return "Unsynchronized";
+    case SyncType::Synchronized:
+        return "Synchronized";
     }
     throw ib::type_conversion_error{};
 }

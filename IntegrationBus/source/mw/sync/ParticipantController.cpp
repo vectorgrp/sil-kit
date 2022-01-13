@@ -93,10 +93,14 @@ ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, co
     if (_syncType == cfg::SyncType::DistributedTimeQuantum) 
     {
         _serviceDiscovery = _comAdapter->GetServiceDiscovery();
-        _serviceDiscovery->RegisterServiceDiscoveryHandler([this](ib::mw::service::IServiceDiscovery::Type discoveryType, const ib::mw::ServiceDescriptor& serviceDescriptor)
+        _serviceDiscovery->RegisterServiceDiscoveryHandler([this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType, const ib::mw::ServiceDescriptor& serviceDescriptor)
         {
             if (serviceDescriptor.isSynchronized)
             {
+                if (_otherNextTasks.count(serviceDescriptor.participantName) > 0)
+                {
+                    throw std::runtime_error{ "DiscoveryService should not announce multiple Participant Controllers per participant." };
+                }
                 // TODO double check: This is mw-independent - would this cause problems with HLA?
                 NextSimTask task;
                 task.timePoint = -1ns;

@@ -14,7 +14,13 @@ namespace service {
 
 struct ServiceDiscoveryEvent
 {
-    bool isCreated{false}; //!< is service created or removed
+    enum class Type
+    {
+        Invalid,
+        ServiceCreated,
+        ServiceRemoved,
+    };
+    Type type{ Type::Invalid };
     ServiceDescriptor service;
 };
 
@@ -30,7 +36,7 @@ struct ServiceAnnouncement //requires history >= 1
 ////////////////////////////////////////////////////////////////////////////////
 inline bool operator==(const ServiceDiscoveryEvent& lhs, const ServiceDiscoveryEvent& rhs)
 {
-    return lhs.isCreated == rhs.isCreated
+    return lhs.type == rhs.type
         && lhs.service == rhs.service
         ;
 }
@@ -48,12 +54,22 @@ inline bool operator!=(const ServiceAnnouncement& lhs, const ServiceAnnouncement
 // Inline string utils
 ////////////////////////////////////////////////////////////////////////////////
 
+inline std::ostream& operator<<(std::ostream& out, const ServiceDiscoveryEvent::Type& t)
+{
+    switch (t)
+    {
+    case ServiceDiscoveryEvent::Type::Invalid: out << "Invalid"; break;
+    case ServiceDiscoveryEvent::Type::ServiceCreated: out << "ServiceCreated"; break;
+    case ServiceDiscoveryEvent::Type::ServiceRemoved: out << "ServiceRemoved"; break;
+    default:
+        out << "Unknown ServiceDiscoveryEvent::Type{"
+            << static_cast<std::underlying_type_t<ServiceDiscoveryEvent::Type>>(t);
+    }
+    return out;
+}
 inline std::ostream& operator<<(std::ostream& out, const ServiceDiscoveryEvent& event)
 {
-    if (event.isCreated) out << "+";
-    else
-        out << "-";
-    out << event.service;
+    out << "ServiceDiscoveryEvent{" << event.type << ", " << event.service << "}";
     return out;
 }
 

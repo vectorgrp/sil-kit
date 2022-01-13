@@ -2,8 +2,12 @@
 #include "SimTestHarness.hpp"
 
 #include <algorithm>
+#include <chrono>
 
+#include "ib/mw/sync/string_utils.hpp"
 #include "ib/extensions/CreateExtension.hpp"
+
+using namespace std::literals::chrono_literals;
 
 namespace 
 {
@@ -68,7 +72,7 @@ public:
         {
             if (!participant.participantController)
                 continue;
-            std::cout << "Sending ParticipantCommand::Init to participant \""
+            std::cout << "SimTestHarness: Sending ParticipantCommand::Init to participant \""
                 << participant.name << "\"" << std::endl;
             _controller->Initialize(participant.name);
         }
@@ -76,6 +80,7 @@ public:
 
     void OnParticipantStatusChanged(ib::mw::sync::ParticipantStatus status)
     {
+        std::cout << "SimTestHarness: participant state of " << status.participantName << " is now " << status.state << std::endl;
         if (status.state == ib::mw::sync::ParticipantState::Stopped
             || status.state == ib::mw::sync::ParticipantState::Error)
         {
@@ -85,25 +90,22 @@ public:
 
     void OnSystemStateChanged(ib::mw::sync::SystemState state)
     {
+        std::cout << "SimTestHarness: System State is now " << state << std::endl;
         switch (state)
         {
         case ib::mw::sync::SystemState::Idle:
-        std::cout << "System Idle" << std::endl;
-        InitializeAll();
-        return;
+            InitializeAll();
+            return;
         case ib::mw::sync::SystemState::Initialized:
-        std::cout << "System Initialized" << std::endl;
-        _controller->Run();
-        return;
+            _controller->Run();
+            return;
         case ib::mw::sync::SystemState::Running:
-        std::cout << "System Running" << std::endl;
-        return;
+            return;
         case ib::mw::sync::SystemState::Stopped:
-        std::cout << "System Shutdown" << std::endl;
-        _controller->Shutdown();
-        return;
+            _controller->Shutdown();
+            return;
         default:
-        return;
+            return;
         }
     }
 private:
@@ -200,7 +202,7 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
     bool runStatus = true;
     const auto startTime = Now();
     auto timeRemaining = testRunTimeout;
-    //for (auto& [name, participant] : _simParticipants)
+    //C++17: for (auto& [name, participant] : _simParticipants)
     for (auto& kv : _simParticipants)
     {
         auto& participant = kv.second;
@@ -219,8 +221,12 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
         if (timeSlept >= testRunTimeout)
         {
             // need to stop the participants
+            std::cout << "SimTestHarness: participant "
+                << participant->Name()
+                << ": timeout " << testRunTimeout.count() << " reached. Stopping." << std::endl;
             participant->Stop();
-            break;
+            timeRemaining = 0s;
+            continue;
         }
         else
         {
@@ -275,7 +281,7 @@ void SimTestHarness::AddParticipant(ib::cfg::Participant participantConfig)
     });
 
     partCtrl->SetInitHandler([name = participantConfig.name](auto){
-        std::cout << name << " Init!" << std::endl;
+        std::cout << "SimTestHarness: "  << name << " Init was called!" << std::endl;
     });
 
     _simParticipants[participantConfig.name] = std::move(participant);
