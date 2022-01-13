@@ -214,7 +214,7 @@ private:
     auto CreateOutPort(const ConfigT& config) -> sim::io::IOutPort<MsgT>*;
 
     template<class ControllerT>
-    auto GetController(const std::string& serviceName) -> ControllerT*;
+    auto GetController(const std::string& linkName, const std::string& serviceName) -> ControllerT*;
     template<class ControllerT, typename... Arg>
     auto CreateController(const cfg::Link& link, const std::string& serviceName, Arg&&... arg) -> ControllerT*;
     //!< internal services don't have a link config

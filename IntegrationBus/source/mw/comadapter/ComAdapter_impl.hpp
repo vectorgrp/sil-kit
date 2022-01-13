@@ -406,7 +406,7 @@ auto ComAdapter<IbConnectionT>::CreateGenericSubscriber(const std::string& canon
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::GetParticipantController() -> sync::IParticipantController*
 {
-    auto* controller = GetController<sync::ParticipantController>("ParticipantController");
+    auto* controller = GetController<sync::ParticipantController>("default", "ParticipantController");
     if (!controller)
     {
         controller = CreateController<sync::ParticipantController>("ParticipantController", _config.simulationSetup, _participant);
@@ -418,7 +418,7 @@ auto ComAdapter<IbConnectionT>::GetParticipantController() -> sync::IParticipant
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::GetSystemMonitor() -> sync::ISystemMonitor*
 {
-    auto* controller = GetController<sync::SystemMonitor>("SystemMonitor");
+    auto* controller = GetController<sync::SystemMonitor>("default", "SystemMonitor");
     if (!controller)
     {
         controller = CreateController<sync::SystemMonitor>("SystemMonitor", _config.simulationSetup);
@@ -429,7 +429,7 @@ auto ComAdapter<IbConnectionT>::GetSystemMonitor() -> sync::ISystemMonitor*
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::GetServiceDiscovery() -> service::IServiceDiscovery*
 {
-    auto* controller = GetController<service::ServiceDiscovery>("ServiceDiscovery");
+    auto* controller = GetController<service::ServiceDiscovery>("default", "ServiceDiscovery");
     if (!controller)
     {
         controller = CreateController<service::ServiceDiscovery>("ServiceDiscovery", _participantName );
@@ -440,7 +440,7 @@ auto ComAdapter<IbConnectionT>::GetServiceDiscovery() -> service::IServiceDiscov
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::GetSystemController() -> sync::ISystemController*
 {
-    auto* controller = GetController<sync::SystemController>("SystemController");
+    auto* controller = GetController<sync::SystemController>("default", "SystemController");
     if (!controller)
     {
         return CreateController<sync::SystemController>("SystemController" );
@@ -766,12 +766,13 @@ void ComAdapter<IbConnectionT>::SendIbMessageImpl(const IIbServiceEndpoint* from
 
 template <class IbConnectionT>
 template <class ControllerT>
-auto ComAdapter<IbConnectionT>::GetController(const std::string& serviceName) -> ControllerT*
+auto ComAdapter<IbConnectionT>::GetController(const std::string& linkName, const std::string& serviceName) -> ControllerT*
 {
     auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
-    if (controllerMap.count(serviceName))
+    const auto&& qualifiedName = linkName + "/" + serviceName;
+    if (controllerMap.count(qualifiedName))
     {
-        return static_cast<ControllerT*>(controllerMap.at(serviceName).get());
+        return static_cast<ControllerT*>(controllerMap.at(qualifiedName).get());
     }
     else
     {
@@ -813,7 +814,8 @@ auto ComAdapter<IbConnectionT>::CreateController(const cfg::Link& link, const st
 
     _ibConnection.RegisterIbService(link.name, myEndpoint, controllerPtr);
 
-    controllerMap[controller->GetServiceDescriptor().serviceName] = std::move(controller);
+    const auto qualifiedName = link.name + "/" + serviceName;
+    controllerMap[qualifiedName] = std::move(controller);
 
     //Tell the service discovery that a new service was created
     GetServiceDiscovery()->NotifyServiceCreated(controllerPtr->GetServiceDescriptor());
@@ -871,7 +873,7 @@ auto ComAdapter<IbConnectionT>::CreateControllerForLink(const ConfigT& config, A
 {
     auto&& linkCfg = GetLinkById(config.linkId);
 
-    auto* controllerPtr = GetController<ControllerT>(config.name);
+    auto* controllerPtr = GetController<ControllerT>(linkCfg.name, config.name);
     if (controllerPtr != nullptr)
     {
         // We cache the controller and return it here.
