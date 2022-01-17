@@ -85,17 +85,17 @@ public:
         _hist.NotifyPeer(peer, remoteIdx);
     }
 
-    void SendMessageToTarget(const IIbServiceEndpoint* from, const IIbServiceEndpoint* to, const MsgT& msg)
+    void SendMessageToTarget(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg)
     {
         // TODO  what do we do with the history for targeted messaging?
         _hist.Save(from, msg);
-        auto&& receiverIter = std::find_if(_remoteReceivers.begin(), _remoteReceivers.end(), [to](auto&& receiver) 
+        auto&& receiverIter = std::find_if(_remoteReceivers.begin(), _remoteReceivers.end(), [targetParticipantName](auto&& receiver) 
             {
-                return receiver->peer->GetUri().participantName == to->GetServiceDescriptor().participantName;
+                return receiver->peer->GetUri().participantName == targetParticipantName;
             });
         if (receiverIter == _remoteReceivers.end())
         {
-          std::cout << "Error: Tried to send targeted message to participant '" << to->GetServiceDescriptor().participantName << "', which is not a valid remote receiver." << std::endl;
+          std::cout << "Error: Tried to send targeted message to participant '" << targetParticipantName << "', which is not a valid remote receiver." << std::endl;
           assert(false);
         }
         ib::mw::MessageBuffer buffer;

@@ -102,6 +102,12 @@ public:
         ExecuteOnIoThread(&VAsioConnection::SendIbMessageImpl<IbMessageT>, from, std::forward<IbMessageT>(msg));
     }
 
+    template<typename IbMessageT>
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, IbMessageT&& msg)
+    {
+        ExecuteOnIoThread(&VAsioConnection::SendIbMessageToTargetImpl<IbMessageT>, from, targetParticipantName, std::forward<IbMessageT>(msg));
+    }
+
     inline void OnAllMessagesDelivered(std::function<void()> callback)
     {
         callback();
@@ -308,6 +314,20 @@ private:
         }
         auto&& link = linkMap[key];
         link->DistributeLocalIbMessage(from, std::forward<IbMessageT>(msg));
+    }
+
+    template <class IbMessageT>
+    void SendIbMessageToTargetImpl(const IIbServiceEndpoint* from, const std::string& targetParticipantName, IbMessageT&& msg)
+    {
+      const auto&& key = to_string(from->GetServiceDescriptor());
+
+      auto& linkMap = std::get<IbServiceToLinkMap<std::decay_t<IbMessageT>>>(_serviceToLinkMap);
+      if (linkMap.count(key) < 1)
+      {
+        throw std::runtime_error{ "VAsioConnection::SendIbMessageImpl: sending on empty link for " + key };
+      }
+      auto&& link = linkMap[key];
+      link->DispatchIbMessageToTargetRemote(from, targetParticipantName, std::forward<IbMessageT>(msg));
     }
 
     template <typename... MethodArgs, typename... Args>

@@ -36,7 +36,7 @@ public:
     void DistributeRemoteIbMessage(const IIbServiceEndpoint* from, const MsgT& msg);
     void DistributeLocalIbMessage(const IIbServiceEndpoint* sender, const MsgT& msg);
 
-    void DispatchIbMessageToTargetRemote(ReceiverT* to, const IIbServiceEndpoint* from, const MsgT& msg);
+    void DispatchIbMessageToTargetRemote(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg);
 
 private:
     // ----------------------------------------
@@ -120,9 +120,9 @@ void IbLink<MsgT>::DispatchIbMessage(ReceiverT* to, const IIbServiceEndpoint* fr
 }
 
 template <class MsgT>
-void IbLink<MsgT>::DispatchIbMessageToTargetRemote(ReceiverT* to, const IIbServiceEndpoint* from, const MsgT& msg)
+void IbLink<MsgT>::DispatchIbMessageToTargetRemote(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg)
 {
-    _vasioTransmitter->SendMessageToTarget(from, to, msg);
+    _vasioTransmitter->SendMessageToTarget(from, targetParticipantName, msg);
 }
 
 
