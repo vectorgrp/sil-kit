@@ -21,12 +21,12 @@ void SystemController::ReInitialize(ParticipantId participantId) const
     SendParticipantCommand(participantId, ParticipantCommand::Kind::ReInitialize);
 }
 
-void SystemController::Initialize(std::string participantName) const
+void SystemController::Initialize(const std::string& participantName) const
 {
     SendParticipantCommand(hash(participantName), ParticipantCommand::Kind::Initialize);
 }
 
-void SystemController::ReInitialize(std::string participantName) const
+void SystemController::ReInitialize(const std::string& participantName) const
 {
     SendParticipantCommand(hash(participantName), ParticipantCommand::Kind::ReInitialize);
 }

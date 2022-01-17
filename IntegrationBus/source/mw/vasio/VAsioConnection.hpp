@@ -140,10 +140,6 @@ private:
     template <class MsgT>
     using IbLinkMap = std::map<std::string, std::shared_ptr<IbLink<MsgT>>>;
 
-    //template <class MsgT>
-    //using IbServiceToReceiverMap = std::map<ServiceDescriptor::IdType, IIbMessageReceiver<MsgT>*>;
-    //template <class MsgT>
-    //using IbServiceToLinkMap = std::map<ServiceDescriptor::IdType, std::shared_ptr<IbLink<MsgT>>>;
     template <class MsgT>
     using IbServiceToReceiverMap = std::map<std::string, IIbMessageReceiver<MsgT>*>;
     template <class MsgT>
@@ -210,8 +206,12 @@ private:
     void ReceiveKnownParticpants(MessageBuffer&& buffer);
     void SendParticipantAnnoucement(IVAsioPeer* peer);
     void ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer);
+
     void SendParticipantAnnoucementReply(IVAsioPeer* peer);
     void ReceiveParticipantAnnouncementReply(IVAsioPeer* from, MessageBuffer&& buffer);
+
+    void AddParticipantToLookup(const std::string& participantName);
+    const std::string& GetParticipantFromLookup(const std::uint64_t participantId) const;
 
     template<class IbMessageT>
     auto GetLinkByName(const std::string& linkName) -> std::shared_ptr<IbLink<IbMessageT>>
@@ -327,7 +327,7 @@ private:
         throw std::runtime_error{ "VAsioConnection::SendIbMessageImpl: sending on empty link for " + key };
       }
       auto&& link = linkMap[key];
-      link->DispatchIbMessageToTargetRemote(from, targetParticipantName, std::forward<IbMessageT>(msg));
+      link->DispatchIbMessageToTarget(from, targetParticipantName, std::forward<IbMessageT>(msg));
     }
 
     template <typename... MethodArgs, typename... Args>

@@ -104,7 +104,6 @@ public:
             << msgSizePlaceholder
             << VAsioMsgKind::IbSimMsg
             << (*receiverIter)->remoteIdx
-            //<< from->GetServiceDescriptor().legacyEpa
             << to_endpointAddress(from->GetServiceDescriptor())
             << msg;
         (*receiverIter).peer->SendIbMsg(std::move(buffer));
@@ -125,7 +124,6 @@ public:
                 << msgSizePlaceholder
                 << VAsioMsgKind::IbSimMsg
                 << receiver.remoteIdx
-                //<< from->GetServiceDescriptor().legacyEpa
                 << to_endpointAddress(from->GetServiceDescriptor())
                 << msg;
             receiver.peer->SendIbMsg(std::move(buffer));

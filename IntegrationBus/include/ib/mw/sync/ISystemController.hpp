@@ -46,7 +46,7 @@ public:
      *
      *  NB: Parametrization is yet to be determined.
      */
-    virtual void Initialize(std::string participantName) const = 0;
+    virtual void Initialize(const std::string& participantName) const = 0;
 
     /*! \brief Send \ref ParticipantCommand::Kind::ReInitialize to a specific participant
      *
@@ -61,7 +61,7 @@ public:
      *     a SystemCommand to ReInitialize all participants without sending
      *     new parameters.
      */
-    virtual void ReInitialize(std::string participantName) const = 0;
+    virtual void ReInitialize(const std::string& participantName) const = 0;
 
     /*! \brief Send \ref SystemCommand::Kind::Run to all participants
      *

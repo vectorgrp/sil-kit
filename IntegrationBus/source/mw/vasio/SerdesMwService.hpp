@@ -57,35 +57,35 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
 
 // ServiceDescriptor
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
-  const ib::mw::ServiceDescriptor& msg)
+    const ib::mw::ServiceDescriptor& msg)
 {
-  buffer
-    << msg.participantName
-    << msg.linkName
-    << msg.serviceName
-    << msg.type
-    << msg.legacyEpa
-    << msg.isLinkSimulated
-    << msg.isSynchronized
-    << msg.supplementalData
-    ;
-  return buffer;
+    buffer
+        << msg.participantName
+        << msg.linkName
+        << msg.serviceName
+        << msg.type
+        << msg.legacyEpa
+        << msg.isLinkSimulated
+        << msg.isSynchronized
+        << msg.supplementalData
+        ;
+    return buffer;
 }
 
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
-  ib::mw::ServiceDescriptor& updatedMsg)
+    ib::mw::ServiceDescriptor& updatedMsg)
 {
-  buffer
-    >> updatedMsg.participantName
-    >> updatedMsg.linkName
-    >> updatedMsg.serviceName
-    >> updatedMsg.type
-    >> updatedMsg.legacyEpa
-    >> updatedMsg.isLinkSimulated
-    >> updatedMsg.isSynchronized
-    >> updatedMsg.supplementalData
-    ;
-  return buffer;
+    buffer
+        >> updatedMsg.participantName
+        >> updatedMsg.linkName
+        >> updatedMsg.serviceName
+        >> updatedMsg.type
+        >> updatedMsg.legacyEpa
+        >> updatedMsg.isLinkSimulated
+        >> updatedMsg.isSynchronized
+        >> updatedMsg.supplementalData
+        ;
+    return buffer;
 }
 
 namespace service {

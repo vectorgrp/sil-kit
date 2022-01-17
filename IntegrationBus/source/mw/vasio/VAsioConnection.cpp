@@ -358,16 +358,8 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
     {
         receiver(from, announcement);
     }
+    AddParticipantToLookup(announcement.peerInfo.participantName);
 
-    // TODO alternative: could also register for announcement messages to extend map...
-    const auto result = _hashToParticipantName.insert(std::pair<std::size_t, std::string>(hash(announcement.peerUri.participantName), announcement.peerUri.participantName));
-    if (result.second == false)
-    {
-        _logger->Warn("Warning: Received announcement of participant '{}', which was already announced before.", announcement.peerUri.participantName);
-        // TODO this is likely the last chance to fix colliding hash values of multiple participants...
-        // Currently, colliding hash values are not supported
-        //assert(false);
-    }
     SendParticipantAnnoucementReply(from);
 }
 
@@ -456,6 +448,25 @@ void VAsioConnection::SendParticipantAnnoucementReply(IVAsioPeer* peer)
 
     _logger->Debug("Sending participant announcement reply to {}", peer->GetInfo().participantName);
     peer->SendIbMsg(std::move(buffer));
+}
+
+void VAsioConnection::AddParticipantToLookup(const std::string& participantName)
+{
+  const auto result = _hashToParticipantName.insert(std::pair<std::size_t, std::string>(hash(participantName), participantName));
+  if (result.second == false)
+  {
+    _logger->Warn("Warning: Received announcement of participant '{}', which was already announced before.", participantName);
+  }
+}
+
+const std::string& VAsioConnection::GetParticipantFromLookup(const std::uint64_t participantId) const
+{
+  const auto participantIter = _hashToParticipantName.find(participantId);
+  if (participantIter == _hashToParticipantName.end())
+  {
+    throw std::runtime_error{ "VAsioConnection: could not find participant in participant cache" };
+  }
+  return participantIter->second;
 }
 
 void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
@@ -803,20 +814,13 @@ void VAsioConnection::ReceiveRawIbMessage(IVAsioPeer* from, MessageBuffer&& buff
     EndpointAddress endpoint;
     buffer >> endpoint;
 
-    // TODO access (not yet existing) map to retrieve participantName based on participantId
-    const auto pNameIt = _hashToParticipantName.find(endpoint.participant);
-    if (pNameIt == _hashToParticipantName.end())
-    {
-        // TODO this must never happen - what do we do?
-        assert(false);
-    }
-
+    const auto& participantName = GetParticipantFromLookup(endpoint.participant);
 
     auto* fromService = dynamic_cast<IIbServiceEndpoint*>(from);
     ServiceDescriptor tmpService(fromService->GetServiceDescriptor());
     tmpService.legacyEpa = endpoint;
     tmpService.serviceId = endpoint.endpoint;
-    tmpService.participantName = (*pNameIt).second;
+    tmpService.participantName = participantName;
 
     _vasioReceivers[receiverIdx]->ReceiveRawMsg(from, tmpService, std::move(buffer));
 }

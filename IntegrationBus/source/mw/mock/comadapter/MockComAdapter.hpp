@@ -119,6 +119,8 @@ class MockSystemController : public sync::ISystemController {
 public:
     MOCK_CONST_METHOD1(Initialize, void(ParticipantId participantId));
     MOCK_CONST_METHOD1(ReInitialize, void(ParticipantId participantId));
+    MOCK_METHOD(void, Initialize, (const std::string& participantId), (const, override));
+    MOCK_METHOD(void, ReInitialize, (const std::string& participantId), (const, override));
     MOCK_CONST_METHOD0(Run, void());
     MOCK_CONST_METHOD0(Stop, void());
     MOCK_CONST_METHOD0(Shutdown, void());

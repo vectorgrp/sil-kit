@@ -224,20 +224,6 @@ TEST_F(ParticipantControllerTest, DISABLED_run_async)
     id.legacyEpa = addr;
     controller.SetServiceDescriptor(from_endpointAddress(addr));//legacy interface
     controller.SetServiceDescriptor(id);
-    //auto grantRequest = [&controller = controller, &masterId = masterId](auto addr, const QuantumRequest& request)
-    //{
-    //    QuantumGrant grant;
-    //    grant.grantee = addr->GetServiceDescriptor();
-    //    grant.status = QuantumRequestStatus::Granted;
-    //    grant.now = request.now;
-    //    grant.duration = request.duration;
-    //    
-    //    controller.ReceiveIbMessage(&masterId, grant);
-    //};
-    //
-    //EXPECT_CALL(comAdapter, SendIbMessage(&controller, A<const QuantumRequest&>()))
-    //    .Times(2)
-    //    .WillOnce(Invoke(grantRequest));
 
     controller.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
     controller.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));

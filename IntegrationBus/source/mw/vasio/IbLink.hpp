@@ -36,7 +36,7 @@ public:
     void DistributeRemoteIbMessage(const IIbServiceEndpoint* from, const MsgT& msg);
     void DistributeLocalIbMessage(const IIbServiceEndpoint* sender, const MsgT& msg);
 
-    void DispatchIbMessageToTargetRemote(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg);
+    void DispatchIbMessageToTarget(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg);
 
 private:
     // ----------------------------------------
@@ -94,7 +94,6 @@ void IbLink<MsgT>::DistributeLocalIbMessage(const IIbServiceEndpoint* from, cons
         // C++ 17 -> if constexpr
         if (!IbMsgTraits<MsgT>::IsSelfDeliveryEnforced())
         {
-          // TODO check equality operator
           if (receiverId == from) continue;
         }
         DispatchIbMessage(receiver, from, msg);
@@ -120,7 +119,7 @@ void IbLink<MsgT>::DispatchIbMessage(ReceiverT* to, const IIbServiceEndpoint* fr
 }
 
 template <class MsgT>
-void IbLink<MsgT>::DispatchIbMessageToTargetRemote(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg)
+void IbLink<MsgT>::DispatchIbMessageToTarget(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg)
 {
     _vasioTransmitter->SendMessageToTarget(from, targetParticipantName, msg);
 }
