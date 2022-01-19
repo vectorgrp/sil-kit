@@ -820,7 +820,6 @@ void VAsioConnection::ReceiveRawIbMessage(IVAsioPeer* from, MessageBuffer&& buff
     ServiceDescriptor tmpService(fromService->GetServiceDescriptor());
     tmpService.legacyEpa = endpoint;
     tmpService.serviceId = endpoint.endpoint;
-    tmpService.participantName = participantName;
 
     _vasioReceivers[receiverIdx]->ReceiveRawMsg(from, tmpService, std::move(buffer));
 }
