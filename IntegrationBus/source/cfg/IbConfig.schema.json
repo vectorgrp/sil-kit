@@ -826,6 +826,45 @@
                   }
                 },
 
+                "DataPublishers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Name of the generic message publisher"
+                      },
+                      "UseTraceSinks": {
+                        "type" : "array",
+                        "title": "Names of trace sinks"
+                      },
+                      "Replay": { "$ref": "#/definitions/Replay" }
+                    },
+                    "additionalProperties": false,
+                    "required": [ "Name" ]
+                  }
+                },
+
+                "DataSubscribers": {
+                  "type": "array",
+                  "title": "Name of generic message subscriber",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Name of the Data Subscriber"
+                      },
+                      "UseTraceSinks": {
+                        "type" : "array",
+                        "title": "Names of trace sinks"
+                      },
+                      "Replay": { "$ref": "#/definitions/Replay" }
+                    }
+                  }
+                },
+
                 "NetworkSimulators": {
                   "type": "array",
                   "items":{

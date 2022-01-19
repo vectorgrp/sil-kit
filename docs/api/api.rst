@@ -37,14 +37,16 @@ controller interfaces.
   flexray
   ethernet
 
-Generic Messages and IO
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Data Messages, Generic Messages and IO
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 These services do not model a real-world bus and can be used for
 generic programming and interoperability tasks.
 
 .. toctree::
   :maxdepth: 1
-
+  
+  datamessage
   genericmessage
   io
 

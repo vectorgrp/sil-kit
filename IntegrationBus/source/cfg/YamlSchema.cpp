@@ -249,6 +249,18 @@ auto MakeYamlSchema() -> YamlSchemaElem
                     replay,
                 }
             },
+            {"DataPublishers", {
+                    {"Name"},
+                    {"UseTraceSinks"},
+                    replay,
+                }
+            },
+            {"DataSubscribers", {
+                    {"Name"},
+                    {"UseTraceSinks"},
+                    replay,
+                }
+            },
         }
     );
     YamlSchemaElem middlewareConfig("MiddlewareConfig",

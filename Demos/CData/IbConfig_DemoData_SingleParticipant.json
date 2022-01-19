@@ -12,19 +12,16 @@
           "Sinks": [
             {
               "Type": "Stdout",
-              "Level": "Trace"
+              "Level": "Info"
             }
           ]
         },
-        "ParticipantController": {
-          "SyncType": "DiscreteTime"
-        },
-        "GenericPublishers": [
+        "DataPublishers": [
           {
             "Name": "testTopic"
           }
         ],
-        "GenericSubscribers": [
+        "DataSubscribers": [
           { "Name": "testTopic" }
         ]
       },
@@ -48,11 +45,7 @@
           "Participant1/testTopic"
         ]
       }
-    ],
-
-    "TimeSync": {
-      "TickPeriodNs": 1000000
-    }
+    ]
   },
 
   "MiddlewareConfig": {

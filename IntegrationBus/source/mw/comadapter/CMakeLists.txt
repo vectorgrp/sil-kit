@@ -15,6 +15,7 @@ target_link_libraries(IbMwComAdapter
         IbConfig
         IbUtil
         IbSetThreadName
+        IbUuid
         IbMwSync
         IbSimCan
         IbSimEthernet
@@ -22,6 +23,7 @@ target_link_libraries(IbMwComAdapter
         IbSimLin
         IbSimIO
         IbSimGenericMessage
+        IbSimDataMessage
         IbTracing
         IbMwService
     INTERFACE  IbMwService

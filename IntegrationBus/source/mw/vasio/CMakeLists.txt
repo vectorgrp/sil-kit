@@ -38,6 +38,7 @@ target_link_libraries(IbMwVAsio
       IbMwLogging
       IbMwService
       IbSimGenericMessage
+      IbSimDataMessage
       IbSimCan
       IbSimEthernet
       IbSimIO    
@@ -70,5 +71,6 @@ add_vib_test(TestMwVAsio_SerdesSimEthernet SOURCES SerdesSimEthernetTest.cpp LIB
 add_vib_test(TestMwVAsio_SerdesSimLin SOURCES SerdesSimLinTest.cpp)
 add_vib_test(TestMwVAsio_SerdesSimFlexray SOURCES SerdesSimFlexrayTest.cpp)
 add_vib_test(TestMwVAsio_SerdesSimGeneric SOURCES SerdesSimGenericTest.cpp)
+add_vib_test(TestMwVAsio_SerdesSimData SOURCES SerdesSimDataTest.cpp)
 add_vib_test(TestMwVAsio_SerdesSimIo SOURCES SerdesSimIoTest.cpp)
 add_vib_test(TestMwVAsio_SerdesMwService SOURCES SerdesMwServiceTest.cpp LIBS IbMwService)

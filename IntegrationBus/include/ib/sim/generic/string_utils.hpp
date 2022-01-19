@@ -17,7 +17,7 @@ namespace generic {
 inline std::string to_string(const GenericMessage& msg);
 
 inline std::ostream& operator<<(std::ostream& out, const GenericMessage& msg);
-    
+
 
 // ================================================================================
 //  Inline Implementations

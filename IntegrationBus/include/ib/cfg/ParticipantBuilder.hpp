@@ -14,6 +14,7 @@
 #include "ControllerBuilder.hpp"
 #include "IoPortBuilder.hpp"
 #include "GenericPortBuilder.hpp"
+#include "DataPortBuilder.hpp"
 #include "LoggerBuilder.hpp"
 #include "ParticipantControllerBuilder.hpp"
 #include "NetworkSimulatorBuilder.hpp"
@@ -45,6 +46,9 @@ public:
 
     IntegrationBusAPI auto AddGenericPublisher(std::string name) -> GenericPortBuilder&;
     IntegrationBusAPI auto AddGenericSubscriber(std::string name) -> GenericPortBuilder&;
+
+    IntegrationBusAPI auto AddDataPublisher(std::string name) -> DataPortBuilder&;
+    IntegrationBusAPI auto AddDataSubscriber(std::string name) -> DataPortBuilder&;
 
     IntegrationBusAPI auto AddNetworkSimulator(std::string name) -> NetworkSimulatorBuilder&;
 
@@ -100,6 +104,9 @@ private:
 
     std::vector<GenericPortBuilder> _genericPublishers;
     std::vector<GenericPortBuilder> _genericSubscribers;
+
+    std::vector<DataPortBuilder> _dataPublishers;
+    std::vector<DataPortBuilder> _dataSubscribers;
 
     std::vector<TraceSinkBuilder> _traceSinks;
     std::vector<TraceSourceBuilder> _traceSources;

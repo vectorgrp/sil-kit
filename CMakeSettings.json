@@ -41,7 +41,7 @@
       "buildRoot": "${env.BuildDir}\\${name}",
       "buildCommandArgs": "-v",
       "inheritEnvironments": [ "msvc_x86" ],
-      "intelliSenseMode": "windows-msvc-x86",      
+      "intelliSenseMode": "windows-msvc-x86",
       "installRoot": "${env.InstallDir}\\${name}"
     },
     {

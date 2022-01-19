@@ -45,6 +45,12 @@ char* LoadFile(char const* path)
     return result;
 }
 
+typedef struct
+{
+    uint32_t someInt;
+} TransmitContext;
+TransmitContext transmitContext;
+
 ib_SimulationParticipant* participant;
 ib_DataPublisher* dataPublisher;
 ib_DataSubscriber* dataSubscriber;
@@ -53,9 +59,11 @@ int dataMessageCounter = 0;
 
 char* participantName;
 
-void ReceiveMessage(void* context, ib_DataSubscriber* subscriber, const ib_ByteVector* data)
+void ReceiveMessage(void* context, ib_DataSubscriber* subscriber, const ib_ByteVector* data, const ib_DataExchangeFormat* dataExchangeFormat)
 {
-    printf(">> Data received: ");
+    TransmitContext* tc = (TransmitContext*)context;
+
+    printf("<< Data received: ");
 
     for (int i = 0; i < data->size; i++)
     {
@@ -81,7 +89,7 @@ void PublishMessage()
     ib_ByteVector dataBlob = {(const uint8_t* const)&payload[0], payloadSize};
 
     ib_DataPublisher_Publish(dataPublisher, &dataBlob);
-    printf("Data Message published: %i\n", dataMessageCounter);
+    printf(">> Data Message published: %i\n", dataMessageCounter);
 }
 
 int main(int argc, char* argv[])
@@ -114,13 +122,17 @@ int main(int argc, char* argv[])
     }
     printf("Creating Participant %s for simulation '%s'\n", participantName, domainId);
 
-    ib_DataExchangeFormat dataExchangeFormat = { ib_InterfaceIdentifier_DataExchangeFormat, "" };
-    returnCode = ib_DataPublisher_Create(&dataPublisher, participant, "testTopic", &dataExchangeFormat, 0);
-    returnCode = ib_DataSubscriber_Create(&dataSubscriber, participant, "testTopic", &dataExchangeFormat, NULL, &ReceiveMessage);
+    ib_DataExchangeFormat subDataExchangeFormat = {ib_InterfaceIdentifier_DataExchangeFormat, "*"};
+    transmitContext.someInt = 1234;
+    returnCode = ib_DataSubscriber_Create(&dataSubscriber, participant, "testTopic", &subDataExchangeFormat,
+                                          (void*)&transmitContext, &ReceiveMessage);
+
+    ib_DataExchangeFormat pubDataExchangeFormat = {ib_InterfaceIdentifier_DataExchangeFormat, "A"};
+    returnCode = ib_DataPublisher_Create(&dataPublisher, participant, "testTopic", &pubDataExchangeFormat, 0);
 
     for (int i = 0; i < 10; i++) {
         PublishMessage();
-        SleepMs(1000);
+        SleepMs(100);
     }
 
     ib_SimulationParticipant_Destroy(participant);

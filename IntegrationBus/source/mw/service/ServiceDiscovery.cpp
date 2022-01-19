@@ -43,6 +43,7 @@ void ServiceDiscovery::Initialize()
 {
     auto systemMonitor = _comAdapter->GetSystemMonitor();
     systemMonitor->RegisterParticipantStatusHandler([this](auto status) {
+        std::unique_lock<std::mutex> lock(_mx);
         if (status.participantName == _participantName)
         {
             return;

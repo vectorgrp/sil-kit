@@ -16,6 +16,8 @@
 #include "ib/sim/io/IoDatatypes.hpp"
 #include "ib/sim/fr/FrDatatypes.hpp"
 #include "ib/mw/logging/LoggingDatatypes.hpp"
+#include "ib/sim/generic/GenericMessageDatatypes.hpp"
+#include "ib/sim/data/DataMessageDatatypes.hpp"
 
 #include "OptionalCfg.hpp"
 
@@ -48,6 +50,7 @@ struct Link
         PwmIo,
         PatternIo,
         GenericMessage,
+        DataMessage
     };
 
     std::string name;
@@ -55,6 +58,8 @@ struct Link
     Type type = Type::Undefined;
 
     std::vector<std::string> endpoints;
+
+    size_t historyLength{ 1 };
 };
 
 struct Sink
@@ -275,6 +280,33 @@ struct GenericPort
     Replay replay;
 };
 
+/*! \brief Configuration structure to setup ib::sim::Data::IDataPublisher
+ * and ib::sim::Data::IDataSubscriber
+ *
+ * The DataPort::protocolType and DataPort::definitionUri can only be
+ * configured at the Publisher, but the configured values are made available at
+ * connected Subscribers as well.
+ */
+struct DataPort
+{
+    static constexpr Link::Type linkType = Link::Type::DataMessage;
+
+    std::string    name;
+    mw::EndpointId endpointId{0};
+    int16_t        linkId{-1};
+
+    std::vector<std::string> useTraceSinks;
+    Replay                   replay;
+
+    //! \brief (De-)Serialization format bound to a DataPublisher/DataSubscriber.
+    sim::data::DataExchangeFormat dataExchangeFormat;
+
+    //! \brief History length of a DataPublisher.
+    size_t history = 0;
+
+    std::string pubUUID = "";
+};
+
 enum class SyncType
 {
     DistributedTimeQuantum,  //!< TimeQuantum synchronization using a distributed algorithm. When using VAsio middleware, this SyncType provides inherent strict message delivery.
@@ -326,6 +358,9 @@ struct Participant
 
     std::vector<GenericPort> genericPublishers;
     std::vector<GenericPort> genericSubscribers;
+
+    std::vector<DataPort> dataPublishers;
+    std::vector<DataPort> dataSubscribers;
 
     bool isSyncMaster{false};
 
@@ -574,6 +609,7 @@ IntegrationBusAPI bool operator==(const AnalogIoPort& lhs, const AnalogIoPort& r
 IntegrationBusAPI bool operator==(const PwmPort& lhs, const PwmPort& rhs);
 IntegrationBusAPI bool operator==(const PatternPort& lhs, const PatternPort& rhs);
 IntegrationBusAPI bool operator==(const GenericPort& lhs, const GenericPort& rhs);
+IntegrationBusAPI bool operator==(const DataPort& lhs, const DataPort& rhs);
 IntegrationBusAPI bool operator==(const TraceSink& lhs, const TraceSink& rhs);
 IntegrationBusAPI bool operator==(const TraceSource& lhs, const TraceSource& rhs);
 IntegrationBusAPI bool operator==(const Replay& lhs, const Replay& rhs);

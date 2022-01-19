@@ -5,6 +5,7 @@
 #include "lin/fwd_decl.hpp"
 #include "io/fwd_decl.hpp"
 #include "generic/fwd_decl.hpp"
+#include "data/fwd_decl.hpp"
 
 namespace ib {
 namespace sim {

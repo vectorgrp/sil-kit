@@ -53,6 +53,16 @@ auto ParticipantBuilder::Build() -> Participant
         config.genericSubscribers.emplace_back(builder.Build());
     }
 
+    for (auto&& builder : _dataPublishers)
+    {
+        config.dataPublishers.emplace_back(builder.Build());
+    }
+
+    for (auto&& builder : _dataSubscribers)
+    {
+        config.dataSubscribers.emplace_back(builder.Build());
+    }
+
     for (auto& sink : _traceSinks)
     {
         config.traceSinks.emplace_back(sink.Build());
@@ -155,6 +165,18 @@ auto ParticipantBuilder::AddGenericSubscriber(std::string name) -> GenericPortBu
 {
     _genericSubscribers.emplace_back(this, std::move(name), Parent()->GetFreeEndpointId());
     return _genericSubscribers[_genericSubscribers.size() - 1];
+}
+
+auto ParticipantBuilder::AddDataPublisher(std::string name) -> DataPortBuilder&
+{
+    _dataPublishers.emplace_back(this, std::move(name), Parent()->GetFreeEndpointId());
+    return _dataPublishers[_dataPublishers.size() - 1];
+}
+
+auto ParticipantBuilder::AddDataSubscriber(std::string name) -> DataPortBuilder&
+{
+    _dataSubscribers.emplace_back(this, std::move(name), Parent()->GetFreeEndpointId());
+    return _dataSubscribers[_dataSubscribers.size() - 1];
 }
 
 auto ParticipantBuilder::AddNetworkSimulator(std::string name) -> NetworkSimulatorBuilder&

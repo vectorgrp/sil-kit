@@ -81,6 +81,13 @@ add_vib_test(ITestCatchExceptionsInCallbacks
       ${itest_extra_libs}
 )
 
+add_vib_test(ITestDataPubSub
+    SOURCES
+      DataPubSubITest.cpp
+    LIBS
+        IntegrationBus
+)
+
 if(IB_MW_ENABLE_VASIO)
     add_vib_test(ITestStateMachineVAsio
         SOURCES

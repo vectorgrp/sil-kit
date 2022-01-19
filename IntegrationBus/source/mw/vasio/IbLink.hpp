@@ -35,6 +35,8 @@ public:
 
     void DistributeRemoteIbMessage(const IIbServiceEndpoint* from, const MsgT& msg);
     void DistributeLocalIbMessage(const IIbServiceEndpoint* sender, const MsgT& msg);
+    
+    void SetHistoryLength(size_t history);
 
     void DispatchIbMessageToTarget(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg);
 
@@ -76,6 +78,7 @@ void IbLink<MsgT>::AddRemoteReceiver(IVAsioPeer* peer, uint16_t remoteIdx)
     _vasioTransmitter.AddRemoteReceiver(peer, remoteIdx);
 }
 
+// Distribute incoming (= from remote) IbMessages to local receivers
 template <class MsgT>
 void IbLink<MsgT>::DistributeRemoteIbMessage(const IIbServiceEndpoint* from, const MsgT& msg)
 {
@@ -85,6 +88,7 @@ void IbLink<MsgT>::DistributeRemoteIbMessage(const IIbServiceEndpoint* from, con
     }
 }
 
+// Distribute outgoing (= from local) IbMessages to local (via _localReceivers) and remote (via transmitter per MsgT) receivers 
 template <class MsgT>
 void IbLink<MsgT>::DistributeLocalIbMessage(const IIbServiceEndpoint* from, const MsgT& msg)
 {
@@ -101,6 +105,7 @@ void IbLink<MsgT>::DistributeLocalIbMessage(const IIbServiceEndpoint* from, cons
     DispatchIbMessage(&_vasioTransmitter, from, msg);
 }
 
+// Dispatcher for outgoing IbMessages
 template <class MsgT>
 void IbLink<MsgT>::DispatchIbMessage(ReceiverT* to, const IIbServiceEndpoint* from, const MsgT& msg)
 {
@@ -124,6 +129,12 @@ void IbLink<MsgT>::DispatchIbMessageToTarget(const IIbServiceEndpoint* from, con
     _vasioTransmitter->SendMessageToTarget(from, targetParticipantName, msg);
 }
 
+    
+template <class MsgT>
+void IbLink<MsgT>::SetHistoryLength(size_t history)
+{
+    _vasioTransmitter.SetHistoryLength(history);
+}
 
 } // namespace mw
 } // namespace ib

@@ -6,5 +6,6 @@
 #include "eth/all.hpp"
 #include "fr/all.hpp"
 #include "generic/all.hpp"
+#include "data/all.hpp"
 #include "lin/all.hpp"
 #include "io/all.hpp"

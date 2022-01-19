@@ -10,7 +10,6 @@
 #include "ib/capi/DataPubSub.h"
 #include "ib/capi/Ethernet.h"
 #include "ib/capi/FlexRay.h"
-#include "ib/capi/DataPubSub.h"
 #include "ib/capi/Logger.h"
 #include "ib/capi/InterfaceIdentifiers.h"
 #include "ib/capi/SimulationParticipant.h"

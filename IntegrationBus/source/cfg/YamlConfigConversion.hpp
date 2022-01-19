@@ -44,6 +44,7 @@ template<> struct convert<PwmPort> : public VibConversion {};
 template<> struct convert<PatternPort> : public VibConversion {};
 template<> struct convert<GenericPort> : public VibConversion {};
 template<> struct convert<GenericPort::ProtocolType> : public VibConversion {};
+template<> struct convert<DataPort> : public VibConversion {};
 template<> struct convert<SyncType> : public VibConversion {};
 template<> struct convert<std::chrono::milliseconds> : public VibConversion {};
 template<> struct convert<std::chrono::nanoseconds> : public VibConversion {};

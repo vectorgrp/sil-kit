@@ -18,6 +18,7 @@
 #include "ib/sim/lin/LinDatatypes.hpp"
 #include "ib/sim/io/IoDatatypes.hpp"
 #include "ib/sim/generic/GenericMessageDatatypes.hpp"
+#include "ib/sim/data/DataMessageDatatypes.hpp"
 
 #include "TimeProvider.hpp"
 #include "IComAdapterInternal.hpp"
@@ -158,6 +159,9 @@ public:
     auto CreatePatternOut(const std::string& /*canonicalName*/) -> sim::io::IPatternOutPort* override { return nullptr; }
     auto CreateGenericPublisher(const std::string& /*canonicalName*/) -> sim::generic::IGenericPublisher* override { return nullptr; }
     auto CreateGenericSubscriber(const std::string& /*canonicalName*/) -> sim::generic::IGenericSubscriber* override { return nullptr; }
+    auto CreateDataPublisher(const std::string& /*canonicalName*/, const sim::data::DataExchangeFormat& /*dataExchangeFormat*/, size_t /* history */) -> sim::data::IDataPublisher* override { return nullptr; }
+    auto CreateDataSubscriber(const std::string& /*canonicalName*/, const sim::data::DataExchangeFormat& /*dataExchangeFormat*/, sim::data::CallbackExchangeFormatT /* callback*/) -> sim::data::IDataSubscriber* override { return nullptr; }
+    auto CreateDataSubscriberInternal(const std::string& canonicalName, const std::string& linkName, const sim::data::DataExchangeFormat& dataExchangeFormat, sim::data::CallbackExchangeFormatT /*callback*/) -> sim::data::IDataSubscriber* override { return nullptr; }
 
     auto GetParticipantController() -> sync::IParticipantController* override { return &mockParticipantController; }
     auto GetSystemMonitor() -> sync::ISystemMonitor* override { return &mockSystemMonitor; }
@@ -212,6 +216,12 @@ public:
                         
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::generic::GenericMessage&& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::generic::GenericMessage& /*msg*/) override {}
+
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::data::DataMessage&& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::data::DataMessage& /*msg*/) override {}
+    virtual void SendIbMessage_proxy(const IIbServiceEndpoint* /*from*/, const sim::data::DataMessage& /*msg*/) {}
+    void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, const sim::data::PublisherAnnouncement& /*msg*/) override {}
+    void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, sim::data::PublisherAnnouncement&& /*msg*/) override {}
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::NextSimTask& /*msg*/) {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::ParticipantStatus& /*msg*/) {}
@@ -269,6 +279,11 @@ public:
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::generic::GenericMessage&& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::generic::GenericMessage& /*msg*/) override {}
+
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::data::DataMessage& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::data::DataMessage&& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::data::PublisherAnnouncement& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::data::PublisherAnnouncement&& /*msg*/) override {}
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::NextSimTask& /*msg*/) {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::ParticipantStatus& /*msg*/) {}

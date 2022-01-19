@@ -1,7 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
-
+#include "DataSubscriberInternal.hpp"
 
 namespace ib {
 namespace mw {
@@ -35,6 +35,8 @@ DefineIbMsgTrait_TypeName(ib::mw::sync, SystemCommand)
 DefineIbMsgTrait_TypeName(ib::mw::sync, ParticipantStatus)
 DefineIbMsgTrait_TypeName(ib::mw::sync, NextSimTask)
 DefineIbMsgTrait_TypeName(ib::sim::generic, GenericMessage)
+DefineIbMsgTrait_TypeName(ib::sim::data, DataMessage)
+DefineIbMsgTrait_TypeName(ib::sim::data, PublisherAnnouncement)
 DefineIbMsgTrait_TypeName(ib::sim::can, CanMessage)
 DefineIbMsgTrait_TypeName(ib::sim::can, CanTransmitAcknowledge)
 DefineIbMsgTrait_TypeName(ib::sim::can, CanControllerStatus)
@@ -72,6 +74,9 @@ DefineIbMsgTrait_TypeName(ib::mw::service, ServiceDiscoveryEvent)
 //Messages with history
 DefineIbMsgTrait_HistSize(ib::mw::sync, ParticipantStatus, 1)
 DefineIbMsgTrait_HistSize(ib::mw::service, ServiceAnnouncement, 1)
+DefineIbMsgTrait_HistSize(ib::sim::data, DataMessage, 1)
+DefineIbMsgTrait_HistSize(ib::sim::data, PublisherAnnouncement, 1)
+
 
 //Messages with enforced self delivery
 DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, ParticipantCommand)

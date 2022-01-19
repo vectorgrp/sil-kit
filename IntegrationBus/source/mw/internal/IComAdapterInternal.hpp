@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <atomic>
+
 #include "ib/mw/IComAdapter.hpp"
 
 // IbInternal component:
@@ -84,6 +86,11 @@ public:
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::generic::GenericMessage& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::generic::GenericMessage&& msg) = 0;
 
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::data::DataMessage& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::data::DataMessage&& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::data::PublisherAnnouncement& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::data::PublisherAnnouncement&& msg) = 0;
+
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sync::NextSimTask& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sync::ParticipantStatus& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sync::ParticipantCommand& msg) = 0;
@@ -140,6 +147,11 @@ public:
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::generic::GenericMessage& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::generic::GenericMessage&& msg) = 0;
 
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::DataMessage& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::DataMessage&& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::PublisherAnnouncement& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::PublisherAnnouncement&& msg) = 0;
+
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::NextSimTask& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::ParticipantStatus& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::ParticipantCommand& msg) = 0;
@@ -157,8 +169,13 @@ public:
     
     //Service discovery for dynamic, configuration-less simulations
     virtual auto GetServiceDiscovery() -> service::IServiceDiscovery* = 0;
+	
+    virtual sim::data::IDataSubscriber* CreateDataSubscriberInternal(
+        const std::string& canonicalName, const std::string& linkName,
+        const sim::data::DataExchangeFormat& dataExchangeFormat, sim::data::CallbackExchangeFormatT callback) = 0;
+
 protected:
-    EndpointId _localEndpointId = 0;
+    std::atomic<EndpointId> _localEndpointId{ 0 };
 };
 
 } // mw

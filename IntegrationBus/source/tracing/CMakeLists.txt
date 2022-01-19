@@ -50,6 +50,7 @@ target_link_libraries(IbTracing
         IbSimFlexRay
         IbSimLin
         IbSimGenericMessage
+        IbSimDataMessage
         IbSimIO
     PRIVATE
         IbSimEthernet
@@ -57,6 +58,7 @@ target_link_libraries(IbTracing
         IbSimFlexRay
         IbSimLin
         IbSimGenericMessage
+        IbSimDataMessage
         IbSimIO
 )
 

@@ -59,7 +59,7 @@ typedef void (*ib_RPC_ResultHandler_t)(void* context, ib_RPC_CallStatus callStat
 * \param context A user provided context pointer that is passed to the callHandler on call.
 * \param callHandler A callback function that is triggered on invocation of the server functionality.
 */
-CIntegrationBusAPI ib_ReturnCode ib_RPC_Server_Create(ib_RPCServer** out, ib_SimulationParticipant* participant,
+IntegrationBusAPI ib_ReturnCode ib_RPC_Server_Create(ib_RPCServer** out, ib_SimulationParticipant* participant,
     const char* name, ib_DataExchangeFormat* dataExchangeFormat, void* context, ib_RPC_CallHandler_t callHandler);
 
 typedef ib_ReturnCode(*ib_RPCServer_create_t)(ib_RPCServer** out, ib_SimulationParticipant* participant,
@@ -74,7 +74,7 @@ typedef ib_ReturnCode(*ib_RPCServer_create_t)(ib_RPCServer** out, ib_SimulationP
 * \param dataHandler A callback that is called when a rpc call result is received.
 * 
 */
-CIntegrationBusAPI ib_ReturnCode ib_RPC_Client_Create(ib_RPCClient** out, ib_SimulationParticipant* participant,
+IntegrationBusAPI ib_ReturnCode ib_RPC_Client_Create(ib_RPCClient** out, ib_SimulationParticipant* participant,
     const char* name, ib_DataExchangeFormat* dataExchangeFormat, void* context, ib_RPC_ResultHandler_t resultHandler);
 
 typedef ib_ReturnCode(*ib_RPCClient_create_t)(ib_RPCClient** out, ib_SimulationParticipant* participant,
@@ -85,7 +85,7 @@ typedef ib_ReturnCode(*ib_RPCClient_create_t)(ib_RPCClient** out, ib_SimulationP
 * \param outHandle The handle by which future results of this call can be identified.
 * \param data The data that should be transmitted to the RPC server for this call
 */
-CIntegrationBusAPI ib_ReturnCode ib_RPC_Client_Call(ib_RPCClient* self, ib_RPC_CallHandle** outHandle,
+IntegrationBusAPI ib_ReturnCode ib_RPC_Client_Call(ib_RPCClient* self, ib_RPC_CallHandle** outHandle,
     const ib_ByteVector* data);
 
 typedef ib_ReturnCode(*ib_RPC_Client_Call_t)(ib_RPCClient* self, ib_RPC_CallHandle** outHandle,
@@ -98,7 +98,7 @@ typedef ib_ReturnCode(*ib_RPC_Client_Call_t)(ib_RPCClient* self, ib_RPC_CallHand
 * \param resultHandle The result handle that was earlier obtained through an ib_RPC_CallHandler.
 * \param data The data that should be published.
 */
-CIntegrationBusAPI ib_ReturnCode ib_RPC_Server_SubmitResult(ib_RPCServer* self, ib_RPC_ResultHandle* resultHandle,
+IntegrationBusAPI ib_ReturnCode ib_RPC_Server_SubmitResult(ib_RPCServer* self, ib_RPC_ResultHandle* resultHandle,
     const ib_ByteVector* data);
 
 typedef ib_ReturnCode(*ib_RPC_Server_SubmitResult_t)(ib_RPCServer* self, ib_RPC_CallHandle* callHandle,
@@ -109,7 +109,7 @@ typedef ib_ReturnCode(*ib_RPC_Server_SubmitResult_t)(ib_RPCServer* self, ib_RPC_
 * \param server The RPC server that received this result handle
 * \param resultHandle The result handle that was earlier obtained through an ib_RPC_CallHandler.
 */
-CIntegrationBusAPI ib_ReturnCode ib_RPC_Server_FreeResultHandle(ib_RPCServer* self, ib_RPC_ResultHandle* resultHandle);
+IntegrationBusAPI ib_ReturnCode ib_RPC_Server_FreeResultHandle(ib_RPCServer* self, ib_RPC_ResultHandle* resultHandle);
 
 typedef ib_ReturnCode(*ib_RPC_Server_FreeResultHandle_t)(ib_RPCServer* self, ib_RPC_ResultHandle* resultHandle);
 

@@ -1,0 +1,222 @@
+{
+  "ConfigVersion": "0.0.1",
+  "ConfigName": "DataMessageDemo",
+  "Description": "Sample Configuration for Data Messages",
+
+  "SimulationSetup": {
+
+    "Participants": [
+      {
+        "Name": "PubSub1",
+        "Description": "Publishes different generic messages",
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Stdout",
+              "Level": "Info"
+            }
+          ]
+        },
+        "ParticipantController": {
+          "SyncType": "DistributedTimeQuantum"
+        },
+        "DataPublishers": [
+          {
+            "Name": "Topic1"
+          },
+          {
+            "Name": "Topic2"
+          }
+        ],
+        "DataSubscribers": [
+          {
+            "Name": "Topic3"
+          }
+        ]
+      },
+      {
+        "Name": "PubSub2",
+        "Description": "Publishes different generic messages",
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Stdout",
+              "Level": "Info"
+            }
+          ]
+        },
+        "ParticipantController": {
+          "SyncType": "DistributedTimeQuantum"
+        },
+        "DataPublishers": [
+          {
+            "Name": "Topic1"
+          },
+          {
+            "Name": "Topic3"
+          }
+        ],
+        "DataSubscribers": [
+          {
+            "Name": "Topic3"
+          }
+        ]
+      },
+      {
+        "Name": "Subscriber1",
+        "Description": "Subscribes different generic messages",
+
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Stdout",
+              "Level": "Info"
+            }
+          ]
+        },
+
+        "ParticipantController": {
+          "SyncType": "DistributedTimeQuantum"
+        },
+        "DataSubscribers": [
+          {
+            "Name": "Topic1"
+          },
+          {
+            "Name": "Topic2"
+          }
+        ]
+      },
+      {
+        "Name": "Subscriber2",
+        "Description": "Subscribes different generic messages",
+
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Stdout",
+              "Level": "Info"
+            }
+          ]
+        },
+
+        "ParticipantController": {
+          "SyncType": "DistributedTimeQuantum"
+        },
+        "DataSubscribers": [
+          {
+            "Name": "Topic2"
+          },
+          {
+            "Name": "Topic3"
+          }
+        ]
+      },
+      {
+        "Name": "SystemController",
+
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Remote"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "SystemMonitor",
+        "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
+
+        "Logger": {
+          "LogFromRemotes": true,
+          "FlushLevel": "Info",
+          "Sinks": [
+            {
+              "Type": "Stdout"
+            }
+          ]
+        }
+      }
+    ],
+    "Links": [
+      {
+        "Name": "Topic1",       
+        "Endpoints": [          
+          "PubSub1/Topic1",  
+          "PubSub2/Topic1",  
+          "Subscriber1/Topic1"  
+        ]
+      },
+      {
+        "Name": "Topic2",
+        "Endpoints": [
+          "PubSub1/Topic2",
+          "Subscriber1/Topic2",
+          "Subscriber2/Topic2"
+        ]
+      },
+      {
+        "Name": "Topic3",
+        "Endpoints": [
+          "PubSub1/Topic3",
+          "PubSub2/Topic3",
+          "Subscriber2/Topic3"
+        ]
+      }
+    ]
+  },
+
+  "MiddlewareConfig": {
+    "ActiveMiddleware": "VAsio"
+  },
+
+  "LaunchConfigurations": [
+    {
+      "Name": "Installation",
+      "ParticipantEnvironments": [
+        {
+          "Participant": "Publisher1",
+          "Environment": "CustomExecutable",
+          "WorkingFolder": ".",
+          "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoDataMessageExt",
+          "Arguments": "%INTEGRATIONBUS_CONFIGFILE% Publisher1 %INTEGRATIONBUS_DOMAINID%"
+        },
+        {
+          "Participant": "Publisher2",
+          "Environment": "CustomExecutable",
+          "WorkingFolder": ".",
+          "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoDataMessageExt",
+          "Arguments": "%INTEGRATIONBUS_CONFIGFILE% Publisher2 %INTEGRATIONBUS_DOMAINID%"
+        },
+        {
+          "Participant": "Subscriber1",
+          "Environment": "CustomExecutable",
+          "WorkingFolder": ".",
+          "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoDataMessageExt",
+          "Arguments": "%INTEGRATIONBUS_CONFIGFILE% Subscriber1 %INTEGRATIONBUS_DOMAINID%"
+        },
+        {
+          "Participant": "Subscriber2",
+          "Environment": "CustomExecutable",
+          "WorkingFolder": ".",
+          "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoDataMessageExt",
+          "Arguments": "%INTEGRATIONBUS_CONFIGFILE% Subscriber2 %INTEGRATIONBUS_DOMAINID%"
+        },
+        {
+          "Participant": "SystemMonitor",
+          "Environment": "CustomExecutable",
+          "WorkingFolder": ".",
+          "Executable": "%INTEGRATIONBUS_BINPATH%IbSystemMonitor",
+          "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+        },
+        {
+          "Participant": "SystemController",
+          "Environment": "CustomExecutable",
+          "WorkingFolder": ".",
+          "Executable": "%INTEGRATIONBUS_BINPATH%IbSystemController",
+          "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+        }
+      ]
+    }
+  ]
+}

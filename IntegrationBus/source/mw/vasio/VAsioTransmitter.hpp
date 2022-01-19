@@ -20,21 +20,30 @@ struct MessageHistory {};
 // MessageHistory<.., 0>: message history is disabled
 template<typename MsgT> struct MessageHistory<MsgT, 0>
 {
+    void SetHistoryLength(size_t historyLength) {}
     void Save(const IIbServiceEndpoint*, const MsgT& ) {}
     void NotifyPeer(IVAsioPeer*, uint16_t) {}
 };
 // MessageHistory<.., 1>: save last message and notify peers about it
 template<typename MsgT> struct MessageHistory<MsgT, 1>
 {
+    void SetHistoryLength(size_t historyLength)
+    {
+        _hasHistory = historyLength != 0;
+    }
+
     void Save(const IIbServiceEndpoint* from , const MsgT& msg)
     {
+        if (!_hasHistory)
+            return;
+        
         _from = from->GetServiceDescriptor().legacyEpa;
         _last = msg;
         _hasValue = true;
     }
     void NotifyPeer(IVAsioPeer* peer, uint16_t remoteIdx)
     {
-        if (!_hasValue)
+        if (!_hasValue || !_hasHistory)
             return;
         
         ib::mw::MessageBuffer buffer;
@@ -52,6 +61,7 @@ private:
     MsgT _last;
     EndpointAddress _from;
     bool _hasValue{false};
+    bool _hasHistory{true};
 };
 
 
@@ -109,6 +119,10 @@ public:
         (*receiverIter).peer->SendIbMsg(std::move(buffer));
     }
 
+    void SetHistoryLength(size_t historyLength)
+    {
+        _hist.SetHistoryLength(historyLength);
+    }
 
 public:
     // ----------------------------------------

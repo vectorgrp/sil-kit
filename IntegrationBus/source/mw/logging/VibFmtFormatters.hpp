@@ -12,6 +12,7 @@
 #include "ib/sim/lin/string_utils.hpp"
 #include "ib/sim/io/string_utils.hpp"
 #include "ib/sim/generic/string_utils.hpp"
+#include "ib/sim/data/string_utils.hpp"
 // from internal
 #include "string_utils_sync.hpp"
 
@@ -51,6 +52,8 @@ struct is_printable_vib_type<T, std::enable_if_t<is_one_of_v<T,
         ib::mw::sync::ParticipantCommand,
         ib::mw::sync::ParticipantStatus,
         ib::sim::generic::GenericMessage,
+        ib::sim::data::DataMessage,
+        ib::sim::data::PublisherAnnouncement,
         ib::sim::can::CanMessage,
         ib::sim::can::CanTransmitAcknowledge,
         ib::sim::can::CanControllerStatus,

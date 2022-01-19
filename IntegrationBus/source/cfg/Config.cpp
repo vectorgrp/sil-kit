@@ -10,6 +10,7 @@
 
 #include "tuple_tools/for_each.hpp"
 #include "ib/cfg/string_utils.hpp"
+#include "DataMessageDatatypeUtils.hpp"
 
 #include "YamlConfig.hpp"
 
@@ -35,7 +36,9 @@ constexpr auto Endpoints(ParticipantT&& participant)
         participant.pwmPorts,
         participant.patternPorts,
         participant.genericPublishers,
-        participant.genericSubscribers
+        participant.genericSubscribers,
+        participant.dataPublishers,
+        participant.dataSubscribers
     );
 }
 
@@ -167,7 +170,7 @@ void AssignLinkIds(Config& config)
         link.id = linkId++;
         link.type = Link::Type::Undefined;
 
-        // generate a set of link names to ensure uniquenes
+        // generate a set of link names to ensure uniqueness
         if (linkSet.find(link.name) != linkSet.end())
         {
             std::cerr << "Invalid IB Config: link name \"" << link.name << "\" used twice!" << std::endl;
@@ -382,6 +385,8 @@ bool operator==(const Participant& lhs, const Participant& rhs)
         && lhs.patternPorts == rhs.patternPorts
         && lhs.genericPublishers == rhs.genericPublishers
         && lhs.genericSubscribers == rhs.genericSubscribers
+        && lhs.dataPublishers ==  rhs.dataPublishers
+        && lhs.dataSubscribers == rhs.dataSubscribers
         && lhs.isSyncMaster == rhs.isSyncMaster
         && lhs.traceSinks == rhs.traceSinks
         && lhs.traceSources == rhs.traceSources
@@ -597,6 +602,17 @@ bool operator==(const GenericPort& lhs, const GenericPort& rhs)
         && lhs.replay == rhs.replay;
 }
 
+bool operator==(const DataPort& lhs, const DataPort& rhs)
+{
+    return lhs.name == rhs.name
+        && lhs.endpointId == rhs.endpointId
+        && lhs.linkType == rhs.linkType
+        && lhs.dataExchangeFormat == rhs.dataExchangeFormat
+        && lhs.history == rhs.history
+        && lhs.useTraceSinks == rhs.useTraceSinks
+        && lhs.replay == rhs.replay;
+}
+
 bool operator==(const TraceSink& lhs, const TraceSink& rhs)
 {
     return lhs.enabled == rhs.enabled
@@ -760,6 +776,7 @@ constexpr Link::Type EthernetController::linkType;
 constexpr Link::Type FlexrayController::linkType;
 constexpr Link::Type Switch::Port::linkType;
 constexpr Link::Type GenericPort::linkType;
+constexpr Link::Type DataPort::linkType;
 
 
 #endif

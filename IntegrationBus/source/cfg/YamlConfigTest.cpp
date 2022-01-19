@@ -66,6 +66,10 @@ SimulationSetup:
     - Node1/GroundTruth
     Name: GroundTruth
   - Endpoints:
+    - Node0/DataPubSubGroundTruth
+    - Node1/DataPubSubGroundTruth
+    Name: DataPubSubGroundTruth
+  - Endpoints:
     - Node0/ETH0
     - Node1/ETH0
     Name: LAN1
@@ -173,6 +177,10 @@ SimulationSetup:
       Replay:
         Direction: Send
         UseTraceSource: Source1
+      UseTraceSinks:
+      - Sink1
+    DataPublishers:
+    - Name: DataPubSubGroundTruth
       UseTraceSinks:
       - Sink1
     IsSyncMaster: true
@@ -287,6 +295,10 @@ SimulationSetup:
       Replay:
         Direction: Receive
         UseTraceSource: Source1
+      UseTraceSinks:
+      - Sink1
+    DataSubscribers:
+    - Name: DataPubSubGroundTruth
       UseTraceSinks:
       - Sink1
     LinControllers:
@@ -692,6 +704,12 @@ TEST_F(YamlConfigTest, yaml_legacy)
         obj.name = "";
         node = YAML::Load(R"({"Name": "PortName"})");
         obj = node.as<GenericPort>();
+        EXPECT_TRUE(obj.name == "PortName");
+    }
+    // Data Subscribers
+    {
+        auto node = YAML::Load(R"({"Name": "PortName"})");
+        auto obj = node.as<DataPort>();
         EXPECT_TRUE(obj.name == "PortName");
     }
 }

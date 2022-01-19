@@ -21,6 +21,9 @@ struct NullConnection
     template<class IbServiceT>
     inline void RegisterIbService(const std::string& /*topicName*/, mw::EndpointId /*endpointId*/, IbServiceT* /*receiver*/) {};
 
+    template <class IbServiceT>
+    inline void SetHistoryLengthForLink(const std::string& /*linkName*/, size_t /*history*/, IbServiceT* /*service*/) {};
+
     template<typename IbMessageT>
     void SendIbMessage(const mw::IIbServiceEndpoint* /*from*/, IbMessageT&& /*msg*/) {};
 

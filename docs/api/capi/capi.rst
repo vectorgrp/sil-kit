@@ -42,7 +42,7 @@ General API
 .. doxygenfunction:: ib_GetLastErrorString
 
 SimulationParticipant API
------------
+-------------------------
 
 .. doxygenfunction:: ib_SimulationParticipant_Create
 .. doxygenfunction:: ib_SimulationParticipant_Destroy

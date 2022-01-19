@@ -6,6 +6,7 @@
 #include "LoggerBuilder.hpp"
 #include "SinkBuilder.hpp"
 #include "GenericPortBuilder.hpp"
+#include "DataPortBuilder.hpp"
 #include "IoPortBuilder.hpp"
 #include "LinkBuilder.hpp"
 #include "NetworkSimulatorBuilder.hpp"

@@ -79,6 +79,9 @@ public:
     MOCK_METHOD4(Trace, void(Direction dir, const EndpointAddress& address,
         std::chrono::nanoseconds timestamp, const ib::sim::generic::GenericMessage& message));
 
+    MOCK_METHOD4(Trace, void(Direction dir, const EndpointAddress& address, 
+        std::chrono::nanoseconds timestamp, const ib::sim::data::DataMessage& message));
+
     MOCK_METHOD4(Trace, void(Direction dir, const EndpointAddress& address,
         std::chrono::nanoseconds timestamp, const ib::sim::fr::FrMessage& message));
 

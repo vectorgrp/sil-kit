@@ -46,6 +46,10 @@
 #include "IIbToGenericSubscriber.hpp"
 #include "IIbToGenericPublisher.hpp"
 
+#include "IIbToDataPublisher.hpp"
+#include "IIbToDataSubscriber.hpp"
+#include "IIbToDataSubscriberInternal.hpp"
+
 #include "IIbToSystemMonitor.hpp"
 #include "IIbToSystemController.hpp"
 #include "IIbToParticipantController.hpp"
@@ -102,6 +106,14 @@ public:
     auto CreatePatternOut(const std::string& canonicalName) -> sim::io::IPatternOutPort* override;
     auto CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher* override;
     auto CreateGenericSubscriber(const std::string& canonicalName) -> sim::generic::IGenericSubscriber* override;
+    auto CreateDataPublisher(const std::string& canonicalName, const sim::data::DataExchangeFormat& dataExchangeFormat, 
+        size_t history = 0)->sim::data::IDataPublisher* override;
+    auto CreateDataSubscriber(const std::string& canonicalName, const sim::data::DataExchangeFormat& dataExchangeFormat, 
+        sim::data::CallbackExchangeFormatT callback)->sim::data::IDataSubscriber* override;
+    auto CreateDataSubscriberInternal(const std::string& canonicalName, const std::string& linkName, 
+        const sim::data::DataExchangeFormat& dataExchangeFormat, sim::data::CallbackExchangeFormatT callback)
+        ->sim::data::IDataSubscriber* override;
+
     auto GetParticipantController() -> sync::IParticipantController* override;
     auto GetSystemMonitor() -> sync::ISystemMonitor* override;
     auto GetSystemController() -> sync::ISystemController* override;
@@ -167,6 +179,12 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::generic::GenericMessage& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, sim::generic::GenericMessage&& msg) override;
 
+    void SendIbMessage(const IIbServiceEndpoint* from, const sim::data::DataMessage& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, sim::data::DataMessage&& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const sim::data::PublisherAnnouncement& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, sim::data::PublisherAnnouncement&& msg) override;
+
+
     void SendIbMessage(const IIbServiceEndpoint*, const service::ServiceAnnouncement& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const service::ServiceDiscoveryEvent& msg) override;
 
@@ -223,9 +241,14 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::generic::GenericMessage& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::generic::GenericMessage&& msg) override;
 
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::DataMessage& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::DataMessage&& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::PublisherAnnouncement& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::PublisherAnnouncement&& msg) override;
+
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const service::ServiceAnnouncement& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const service::ServiceDiscoveryEvent& msg) override;
-
+	
     void OnAllMessagesDelivered(std::function<void()> callback) override;
     void FlushSendBuffers() override;
 
@@ -316,6 +339,9 @@ private:
         ControllerMap<sim::lin::IIbToLinControllerProxy>,
         ControllerMap<sim::generic::IIbToGenericPublisher>,
         ControllerMap<sim::generic::IIbToGenericSubscriber>,
+        ControllerMap<sim::data::IIbToDataPublisher>,
+        ControllerMap<sim::data::IIbToDataSubscriber>,
+        ControllerMap<sim::data::IIbToDataSubscriberInternal>,
         ControllerMap<sim::io::IIbToInPort<sim::io::DigitalIoMessage>>,
         ControllerMap<sim::io::IIbToInPort<sim::io::AnalogIoMessage>>,
         ControllerMap<sim::io::IIbToInPort<sim::io::PwmIoMessage>>,

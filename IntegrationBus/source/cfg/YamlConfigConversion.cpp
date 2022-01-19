@@ -67,6 +67,7 @@ VIB_DECLARE_PARSE_TYPE_NAME(PwmPort);
 VIB_DECLARE_PARSE_TYPE_NAME(PatternPort);
 VIB_DECLARE_PARSE_TYPE_NAME(GenericPort);
 VIB_DECLARE_PARSE_TYPE_NAME(GenericPort::ProtocolType);
+VIB_DECLARE_PARSE_TYPE_NAME(DataPort);
 VIB_DECLARE_PARSE_TYPE_NAME(SyncType);
 VIB_DECLARE_PARSE_TYPE_NAME(std::chrono::milliseconds);
 VIB_DECLARE_PARSE_TYPE_NAME(std::chrono::nanoseconds);
@@ -1151,6 +1152,27 @@ bool VibConversion::decode(const Node& node, GenericPort::ProtocolType& obj)
     return true;
 }
 
+template <>
+Node VibConversion::encode(const DataPort& obj)
+{
+    static const DataPort defaultObj{};
+    Node                     node;
+    node["Name"] = obj.name;
+    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_encode(obj.replay, node, "Replay");
+    return node;
+}
+template <>
+bool VibConversion::decode(const Node& node, DataPort& obj)
+{
+    // current format: {"Name": "obj.name", ...}
+    legacy_decode_name(obj, node);
+    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_decode(obj.replay, node, "Replay");
+
+    return true;
+}
+
 template<>
 Node VibConversion::encode(const SyncType& obj)
 {
@@ -1258,7 +1280,7 @@ Node VibConversion::encode(const Participant& obj)
         }
     };
 
-    // GenericSubscribers cannot be easily discerned from GenericPublishers (same type of GenericPort),
+    // GenericSubscribers/DataSubscribers cannot be easily discerned from GenericPublishers/DataPublishers (same type of GenericPort/DataPort),
     // so we treat them specially here:
     auto makeSubscribers = [](auto parentNode, auto&& subscribers)
     {
@@ -1293,6 +1315,9 @@ Node VibConversion::encode(const Participant& obj)
 
     optional_encode(obj.genericPublishers, node, "GenericPublishers");
     makeSubscribers(node["GenericSubscribers"], obj.genericSubscribers);
+
+    optional_encode(obj.dataPublishers, node, "DataPublishers");
+    makeSubscribers(node["DataSubscribers"], obj.dataSubscribers);
 
     optional_encode(obj.traceSinks, node, "TraceSinks");
     optional_encode(obj.traceSources, node, "TraceSources");
@@ -1332,6 +1357,9 @@ bool VibConversion::decode(const Node& node, Participant& obj)
 
     optional_decode(obj.genericPublishers, node, "GenericPublishers");
     optional_decode(obj.genericSubscribers, node, "GenericSubscribers");
+
+    optional_decode(obj.dataPublishers, node, "DataPublishers");
+    optional_decode(obj.dataSubscribers, node, "DataSubscribers");
 
     optional_decode(obj.traceSinks, node, "TraceSinks");
     optional_decode(obj.traceSources, node, "TraceSources");

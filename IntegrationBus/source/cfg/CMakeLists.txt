@@ -11,6 +11,8 @@ add_library(IbConfig STATIC
     SinkBuilder.cpp
     GenericPortBuilder.cpp
     GenericPortBuilder.hpp
+    DataPortBuilder.cpp
+    DataPortBuilder.hpp
     LinkBuilder.cpp
     LinkBuilder.hpp
     NetworkSimulatorBuilder.cpp
@@ -54,6 +56,7 @@ add_library(IbConfig STATIC
 target_link_libraries(IbConfig
     PRIVATE IbInterface
     PRIVATE IbUtil
+    PRIVATE IbSimDataMessage
     PRIVATE yaml-cpp
     INTERFACE yaml-cpp
 )
@@ -77,7 +80,7 @@ add_vib_test(TestIbConfigExample SOURCES IbConfigExampleTest.cpp
         IbConfig_FastRTPS-configfile.json
 )
 
-add_vib_test(TestMwCfgYamlConfig SOURCES YamlConfigTest.cpp LIBS IbConfig yaml-cpp)
+add_vib_test(TestMwCfgYamlConfig SOURCES YamlConfigTest.cpp LIBS IbConfig IbSimGenericMessage yaml-cpp)
 
 add_vib_test(TestMwCfgJsonConfig SOURCES JsonConfigTest.cpp LIBS IbConfig )
 # we need runtime IntegrationBus DLL on windows:

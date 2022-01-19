@@ -8,7 +8,8 @@ target_sources(IbUtil INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/tuple_tools/for_each.hpp
     ${CMAKE_CURRENT_LIST_DIR}/tuple_tools/predicative_get.hpp
     ${CMAKE_CURRENT_LIST_DIR}/Timer.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/SetThreadName.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/SetThreadName.hpp 
+    ${CMAKE_CURRENT_LIST_DIR}/UuidRandom.hpp
 )
 
 target_include_directories(IbUtil
@@ -36,5 +37,11 @@ target_include_directories(IbSetThreadName
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
-
+add_library(IbUuid STATIC
+    UuidRandom.hpp
+    UuidRandom.cpp
+)
+target_include_directories(IbUuid
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
+)
 

@@ -22,6 +22,7 @@
 #include "SerdesMwSync.hpp"
 #include "SerdesMwVAsio.hpp"
 #include "SerdesSimGeneric.hpp"
+#include "SerdesSimData.hpp"
 #include "SerdesSimCan.hpp"
 #include "SerdesSimEthernet.hpp"
 #include "SerdesSimIo.hpp"
@@ -36,6 +37,7 @@
 #include "VAsioMsgKind.hpp"
 #include "IIbServiceEndpoint.hpp"
 #include "traits/IbMsgTraits.hpp"
+#include "traits/IbServiceTraits.hpp"
 
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/sim/can/string_utils.hpp"
@@ -86,16 +88,40 @@ public:
     template <class IbServiceT>
     void RegisterIbService(const std::string& link, EndpointId endpointId, IbServiceT* service)
     {
-        assert(_pendingSubscriptionAcknowledges.empty());
-        _receivedAllSubscriptionAcknowledges = std::promise<void>{};
-        auto allAcked = _receivedAllSubscriptionAcknowledges.get_future();
+        std::future<void> allAcked;
+        if (!IbServiceTraits<IbServiceT>::UseAsyncRegistration())
+        {
+            assert(_pendingSubscriptionAcknowledges.empty());
+            _receivedAllSubscriptionAcknowledges = std::promise<void>{};
+            allAcked = _receivedAllSubscriptionAcknowledges.get_future();
+        }
+
         _ioContext.dispatch([this, link, endpointId, service]() {
-                    this->RegisterIbServiceImpl<IbServiceT>(link, endpointId, service);
-                });
-        _logger->Trace("VAsio waiting for subscription acknowledges for IbService {}.", typeid(*service).name());
-        allAcked.wait();
-        _logger->Trace("VAsio received all subscription acknowledges for IbService {}.", typeid(*service).name());
+            this->RegisterIbServiceImpl<IbServiceT>(link, endpointId, service);
+        });
+
+        if (!IbServiceTraits<IbServiceT>::UseAsyncRegistration())
+        {
+            _logger->Trace("VAsio waiting for subscription acknowledges for IbService {}.", typeid(*service).name());
+            allAcked.wait();
+            _logger->Trace("VAsio received all subscription acknowledges for IbService {}.", typeid(*service).name());
+        }
     }
+
+    template <class IbServiceT>
+    void SetHistoryLengthForLink(const std::string& linkName, size_t historyLength, IbServiceT* /*service*/)
+    {
+        // NB: Dummy IbServiceT* is fed in here to deduce IbServiceT, as it is only used in 'typename IbServiceT',
+        // which is not sufficient to get the type for some compilers (e.g. Clang)
+        typename IbServiceT::IbSendMessagesTypes sendMessageTypes{};
+
+        util::tuple_tools::for_each(sendMessageTypes, [this, &linkName, historyLength](auto&& ibMessage) {
+            using IbMessageT = std::decay_t<decltype(ibMessage)>;
+            auto link = GetLinkByName<IbMessageT>(linkName);
+            link->SetHistoryLength(historyLength);
+        });
+    }
+
     template<typename IbMessageT>
     void SendIbMessage(const IIbServiceEndpoint* from, IbMessageT&& msg)
     {
@@ -154,6 +180,8 @@ private:
         sync::ParticipantCommand,
         sync::ParticipantStatus,
         sim::generic::GenericMessage,
+        sim::data::DataMessage,
+        sim::data::PublisherAnnouncement,
         sim::can::CanMessage,
         sim::can::CanTransmitAcknowledge,
         sim::can::CanControllerStatus,
@@ -224,7 +252,7 @@ private:
         return ibLink;
     }
 
-    template<class IbMessageT>
+    template<class IbMessageT, class IbServiceT>
     void RegisterIbMsgReceiver(const std::string& linkName, ib::mw::IIbMessageReceiver<IbMessageT>* receiver)
     {
         assert(_logger);
@@ -253,10 +281,12 @@ private:
             serviceEndpointPtr->SetServiceDescriptor(tmpServiceDescriptor);
             _vasioReceivers.emplace_back(std::move(rawReceiver));
 
-
             for (auto&& peer : _peers)
             {
-                _pendingSubscriptionAcknowledges.emplace_back(peer.get(), subscriptionInfo);
+                if (!IbServiceTraits<IbServiceT>::UseAsyncRegistration())
+                {
+                    _pendingSubscriptionAcknowledges.emplace_back(peer.get(), subscriptionInfo);
+                }
                 peer->Subscribe(subscriptionInfo);
             }
         }
@@ -279,7 +309,7 @@ private:
             [this, &link, service](auto&& ibMessage)
         {
             using IbMessageT = std::decay_t<decltype(ibMessage)>;
-            this->RegisterIbMsgReceiver<IbMessageT>(link, service);
+            this->RegisterIbMsgReceiver<IbMessageT, IbServiceT>(link, service);
 
             auto&& receiverMap = std::get<IbServiceToReceiverMap<IbMessageT>>(_serviceToReceiverMap);
             auto& serviceId = dynamic_cast<IIbServiceEndpoint&>(*service);
@@ -296,9 +326,12 @@ private:
         }
         );
 
-        if (_pendingSubscriptionAcknowledges.empty())
+        if (!IbServiceTraits<IbServiceT>::UseAsyncRegistration())
         {
-            _receivedAllSubscriptionAcknowledges.set_value();
+            if (_pendingSubscriptionAcknowledges.empty())
+            {
+                _receivedAllSubscriptionAcknowledges.set_value();
+            }
         }
     }
 

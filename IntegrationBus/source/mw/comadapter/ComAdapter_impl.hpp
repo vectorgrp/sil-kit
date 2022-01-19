@@ -22,6 +22,9 @@
 #include "GenericPublisherReplay.hpp"
 #include "GenericSubscriber.hpp"
 #include "GenericSubscriberReplay.hpp"
+#include "DataPublisher.hpp"
+#include "DataSubscriber.hpp"
+#include "DataSubscriberInternal.hpp"
 #include "ParticipantController.hpp"
 #include "SystemController.hpp"
 #include "SystemMonitor.hpp"
@@ -41,6 +44,7 @@
 #include "ComAdapter.hpp"
 
 #include "MessageTracing.hpp" // log tracing
+#include "UuidRandom.hpp"
 
 #ifdef SendMessage
 #if SendMessage == SendMessageA
@@ -372,6 +376,99 @@ auto ComAdapter<IbConnectionT>::CreateOutPort(const ConfigT& config) -> io::IOut
         auto port = CreateControllerForLink<io::OutPort<MsgT>>(config, config, _timeProvider.get());
         port->Write(config.initvalue, std::chrono::nanoseconds{0});
         return port;
+    }
+}
+
+template <class IbConnectionT>
+auto ComAdapter<IbConnectionT>::CreateDataSubscriberInternal(const std::string& topic, 
+    const std::string& linkName, const sim::data::DataExchangeFormat& dataExchangeFormat, 
+    sim::data::CallbackExchangeFormatT callback) -> sim::data::IDataSubscriber*
+{
+    _logger->Trace("Creating internal subscriber for topic={}, linkName={}", topic, linkName);
+
+    // Link config
+    cfg::Link link;
+    link.id = static_cast<int16_t>(hash(linkName));
+    link.name = linkName;
+    link.type = cfg::Link::Type::DataMessage;
+
+    // Controller config
+    cfg::DataPort config;
+    config.linkId = link.id;
+    config.name = topic;
+    config.dataExchangeFormat = dataExchangeFormat;
+    return CreateController<sim::data::DataSubscriberInternal>(link, config.name, config,
+        _timeProvider.get(), callback);
+
+}
+
+template <class IbConnectionT>
+auto ComAdapter<IbConnectionT>::CreateDataPublisher(const std::string& canonicalName,
+    const ib::sim::data::DataExchangeFormat& dataExchangeFormat,
+    size_t history) -> sim::data::IDataPublisher*
+{
+    if (history > 1)
+    {
+        throw cfg::Misconfiguration("DataPublishers do not support history > 1.");
+    }
+
+    ib::cfg::DataPort config = get_by_name(_participant.dataPublishers, canonicalName);
+    config.dataExchangeFormat = dataExchangeFormat;
+    config.history = history;
+    config.pubUUID = util::uuid::to_string(util::uuid::generate());
+
+    if (ControllerUsesReplay(config))
+    {
+        throw cfg::Misconfiguration("Replay is not supported for DataPublisher/DataSubscriber.");
+        return nullptr;
+    }
+    else
+    {
+        // This controller<DataPublisher> is for the publisher announcement with linkName = topic
+        auto controllerForAnnouncement =
+            CreateControllerForLink<sim::data::DataPublisher>(config, config, _timeProvider.get());
+
+        // Another controller<DataPublisher> for data publication with linkName = UUID is needed
+        // as the architecture doesn't allow multiple links on a single controller.
+        cfg::Link link;
+        link.id = -1;
+        link.name = config.pubUUID;
+        link.type = cfg::Link::Type::DataMessage;
+        link.historyLength = history;
+
+        ib::cfg::DataPort configForPublishController;
+        configForPublishController.dataExchangeFormat.mimeType = config.dataExchangeFormat.mimeType;
+        configForPublishController.history = config.history;
+        configForPublishController.name = config.pubUUID;
+        configForPublishController.pubUUID = config.pubUUID;
+
+        auto controllerForPublish = CreateController<ib::sim::data::DataPublisher>(link,
+            configForPublishController.name, configForPublishController,
+            _timeProvider.get());
+        // Now that we got both controllers, we announce the publisher
+        controllerForAnnouncement->SendPublisherAnnouncement();
+        // The application code is only interested in publication
+        return controllerForPublish;
+    }
+}
+
+template <class IbConnectionT>
+auto ComAdapter<IbConnectionT>::CreateDataSubscriber(const std::string& canonicalName,
+    const ib::sim::data::DataExchangeFormat& dataExchangeFormat, ib::sim::data::CallbackExchangeFormatT callback)
+    -> sim::data::IDataSubscriber*
+{
+    ib::cfg::DataPort config = get_by_name(_participant.dataSubscribers, canonicalName);
+    config.dataExchangeFormat = dataExchangeFormat;
+
+    if (ControllerUsesReplay(config))
+    {
+        throw cfg::Misconfiguration("Replay is not supported for DataPublisher/DataSubscriber.");
+        return nullptr;
+    }
+    else
+    {
+        auto controller = CreateControllerForLink<sim::data::DataSubscriber>(config, config, _timeProvider.get(), callback);
+        return controller;
     }
 }
 
@@ -708,6 +805,30 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, si
 }
 
 template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::data::DataMessage& msg)
+{
+    SendIbMessageImpl(from, msg);
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::data::DataMessage&& msg)
+{
+    SendIbMessageImpl(from, std::move(msg));
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::data::PublisherAnnouncement& msg)
+{
+    SendIbMessageImpl(from, msg);
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::data::PublisherAnnouncement&& msg)
+{
+    SendIbMessageImpl(from, std::move(msg));
+}
+
+template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::NextSimTask& msg)
 {
     SendIbMessageImpl(from, msg);
@@ -993,6 +1114,31 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, co
 }
 
 template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::DataMessage& msg)
+{
+    SendIbMessageImpl(from, msg);
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::DataMessage&& msg)
+{
+    SendIbMessageImpl(from, std::move(msg));
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::PublisherAnnouncement& msg)
+{
+    SendIbMessageImpl(from, msg);
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::PublisherAnnouncement&& msg)
+{
+    SendIbMessageImpl(from, std::move(msg));
+}
+
+
+template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::NextSimTask& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
@@ -1098,12 +1244,12 @@ auto ComAdapter<IbConnectionT>::CreateController(const cfg::Link& link, const st
     controller->SetServiceDescriptor(descriptor);
 
     _ibConnection.RegisterIbService(link.name, myEndpoint, controllerPtr);
-
+    _ibConnection.SetHistoryLengthForLink(link.name, link.historyLength, controllerPtr);
     const auto qualifiedName = link.name + "/" + serviceName;
     controllerMap[qualifiedName] = std::move(controller);
 
-    //Tell the service discovery that a new service was created
     GetServiceDiscovery()->NotifyServiceCreated(controllerPtr->GetServiceDescriptor());
+
     return controllerPtr;
 }
 
@@ -1164,7 +1310,7 @@ auto ComAdapter<IbConnectionT>::CreateControllerForLink(const ConfigT& config, A
         // We cache the controller and return it here.
         return controllerPtr;
     }
-    
+
     // Create a new controller, and configure tracing if applicable
     auto* controller = CreateController<ControllerT>(linkCfg, config.name, std::forward<Arg>(arg)...);
     auto* traceSource = dynamic_cast<extensions::ITraceMessageSource*>(controller);
