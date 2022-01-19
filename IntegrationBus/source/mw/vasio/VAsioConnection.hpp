@@ -248,7 +248,7 @@ private:
             std::unique_ptr<IVAsioReceiver> rawReceiver = std::make_unique<VAsioReceiver<IbMessageT>>(subscriptionInfo, link, _logger);
             auto* serviceEndpointPtr = dynamic_cast<IIbServiceEndpoint*>(rawReceiver.get());
             ServiceDescriptor tmpServiceDescriptor(dynamic_cast<mw::IIbServiceEndpoint&>(*receiver).GetServiceDescriptor());
-            tmpServiceDescriptor.participantName = ("Anonymous-" + std::to_string(subscriptionInfo.receiverIdx));
+            tmpServiceDescriptor.participantName = _participantName;
             //Copy the Service Endpoint Id
             serviceEndpointPtr->SetServiceDescriptor(tmpServiceDescriptor);
             _vasioReceivers.emplace_back(std::move(rawReceiver));
