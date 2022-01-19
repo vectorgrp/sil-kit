@@ -9,6 +9,9 @@ add_library(IbSimCan STATIC
 
     CanControllerReplay.cpp
     CanControllerReplay.hpp
+
+    CanControllerFacade.cpp
+    CanControllerFacade.hpp
 )
 
 target_include_directories(IbSimCan

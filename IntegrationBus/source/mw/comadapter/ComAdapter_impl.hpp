@@ -5,6 +5,7 @@
 
 #include "CanController.hpp"
 #include "CanControllerProxy.hpp"
+#include "CanControllerFacade.hpp"
 #include "CanControllerReplay.hpp"
 #include "EthController.hpp"
 #include "EthControllerProxy.hpp"
@@ -221,18 +222,21 @@ auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonical
 {
     auto&& config = get_by_name(_participant.canControllers, canonicalName);
 
-    if (ControllerUsesNetworkSimulator(config.name))
-    {
-        return CreateControllerForLink<can::CanControllerProxy>(config);
-    }
-    else if (ControllerUsesReplay(config))
-    {
-        return CreateControllerForLink<can::CanControllerReplay>(config, config, _timeProvider.get());
-    }
-    else
-    {
-        return CreateControllerForLink<can::CanController>(config, _timeProvider.get());
-    }
+    // TODO replay is currently not possible - need concept!!
+    return CreateControllerForLink<can::CanControllerFacade>(config, _timeProvider.get());
+
+    //if (ControllerUsesNetworkSimulator(config.name))
+    //{
+    //    return CreateControllerForLink<can::CanControllerProxy>(config);
+    //}
+    //else if (ControllerUsesReplay(config))
+    //{
+    //    return CreateControllerForLink<can::CanControllerReplay>(config, config, _timeProvider.get());
+    //}
+    //else
+    //{
+    //    return CreateControllerForLink<can::CanController>(config, _timeProvider.get());
+    //}
 }
 
 template <class IbConnectionT>
