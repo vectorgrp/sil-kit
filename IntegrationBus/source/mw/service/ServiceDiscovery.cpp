@@ -54,7 +54,7 @@ void ServiceDiscovery::Initialize()
 void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const ServiceAnnouncement& msg)
 {
     // Service announcement are sent when a new participant joins the simulation 
-    std::unique_lock<std::mutex> lock;
+    std::unique_lock<std::mutex> lock(_mx);
     auto notifyCreated = [this](auto&& service)
     {
         for (auto&& handler : _handlers)
@@ -82,7 +82,7 @@ void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const Se
 void ServiceDiscovery::ReceivedServiceRemoval(const ServiceDescriptor& serviceDescriptor)
 {
     {
-        std::unique_lock<std::mutex> lock;
+        std::unique_lock<std::mutex> lock(_mx);
         auto&& announcementMap = _announcedServices[serviceDescriptor.participantName];
         auto numErased = announcementMap.erase(to_string(serviceDescriptor));
 
@@ -102,7 +102,7 @@ void ServiceDiscovery::ReceivedServiceRemoval(const ServiceDescriptor& serviceDe
 void ServiceDiscovery::ReceivedServiceAddition(const ServiceDescriptor& serviceDescriptor)
 {
     {
-        std::unique_lock<std::mutex> lock;
+        std::unique_lock<std::mutex> lock(_mx);
         auto&& announcementMap = _announcedServices[serviceDescriptor.participantName];
         const auto cachedServiceKey = to_string(serviceDescriptor);
 
@@ -140,7 +140,7 @@ void ServiceDiscovery::NotifyServiceCreated(const ServiceDescriptor& serviceDesc
     event.type = ServiceDiscoveryEvent::Type::ServiceCreated;
     event.service = serviceDescriptor;
     {
-        std::unique_lock<std::mutex> lock;
+        std::unique_lock<std::mutex> lock(_mx);
         _announcedServices[_participantName][to_string(serviceDescriptor)] = serviceDescriptor;
         _announcement.services.push_back(serviceDescriptor);
     }
@@ -150,7 +150,7 @@ void ServiceDiscovery::NotifyServiceCreated(const ServiceDescriptor& serviceDesc
 void ServiceDiscovery::NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor)
 {
     {
-        std::unique_lock<std::mutex> lock;
+        std::unique_lock<std::mutex> lock(_mx);
         auto&& announcementMap = _announcedServices[_participantName];
 
         announcementMap.erase(to_string(serviceDescriptor));
