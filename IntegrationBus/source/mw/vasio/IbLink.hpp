@@ -126,7 +126,7 @@ void IbLink<MsgT>::DispatchIbMessage(ReceiverT* to, const IIbServiceEndpoint* fr
 template <class MsgT>
 void IbLink<MsgT>::DispatchIbMessageToTarget(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg)
 {
-    _vasioTransmitter->SendMessageToTarget(from, targetParticipantName, msg);
+    _vasioTransmitter.SendMessageToTarget(from, targetParticipantName, msg);
 }
 
     

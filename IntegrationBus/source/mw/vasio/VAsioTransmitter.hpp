@@ -101,7 +101,7 @@ public:
         _hist.Save(from, msg);
         auto&& receiverIter = std::find_if(_remoteReceivers.begin(), _remoteReceivers.end(), [targetParticipantName](auto&& receiver) 
             {
-                return receiver->peer->GetUri().participantName == targetParticipantName;
+                return receiver.peer->GetUri().participantName == targetParticipantName;
             });
         if (receiverIter == _remoteReceivers.end())
         {
@@ -113,7 +113,7 @@ public:
         buffer
             << msgSizePlaceholder
             << VAsioMsgKind::IbSimMsg
-            << (*receiverIter)->remoteIdx
+            << receiverIter->remoteIdx
             << to_endpointAddress(from->GetServiceDescriptor())
             << msg;
         (*receiverIter).peer->SendIbMsg(std::move(buffer));

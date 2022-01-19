@@ -1186,13 +1186,13 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, co
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const service::ServiceAnnouncement& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, std::move(msg));
+    SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const service::ServiceDiscoveryEvent& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, std::move(msg));
+    SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
@@ -1200,7 +1200,7 @@ template <typename IbMessageT>
 void ComAdapter<IbConnectionT>::SendIbMessageImpl(const IIbServiceEndpoint* from, const std::string& targetParticipantName, IbMessageT&& msg)
 {
     TraceTx(_logger.get(), from, msg);
-    _ibConnection.SendIbMessage(from, std::forward<IbMessageT>(msg));
+    _ibConnection.SendIbMessage(from, targetParticipantName, std::forward<IbMessageT>(msg));
 }
 
 
