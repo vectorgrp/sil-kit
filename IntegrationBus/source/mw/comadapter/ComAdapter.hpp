@@ -32,6 +32,7 @@
 #include "IIbToEthSimulator.hpp"
 #include "IIbToEthController.hpp"
 #include "IIbToEthControllerProxy.hpp"
+#include "IIbToEthControllerFacade.hpp"
 
 #include "IIbToLinSimulator.hpp"
 #include "IIbToLinController.hpp"
@@ -336,6 +337,7 @@ private:
         ControllerMap<sim::can::IIbToCanControllerFacade>,
         ControllerMap<sim::eth::IIbToEthController>,
         ControllerMap<sim::eth::IIbToEthControllerProxy>,
+        ControllerMap<sim::eth::IIbToEthControllerFacade>,
         ControllerMap<sim::fr::IIbToFrController>,
         ControllerMap<sim::fr::IIbToFrControllerProxy>,
         ControllerMap<sim::lin::IIbToLinController>,

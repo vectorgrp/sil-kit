@@ -9,6 +9,7 @@
 #include "CanControllerReplay.hpp"
 #include "EthController.hpp"
 #include "EthControllerProxy.hpp"
+#include "EthControllerFacade.hpp"
 #include "EthControllerReplay.hpp"
 #include "FrController.hpp"
 #include "FrControllerProxy.hpp"
@@ -243,18 +244,22 @@ template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonicalName) -> eth::IEthController*
 {
     auto&& config = get_by_name(_participant.ethernetControllers, canonicalName);
-    if (ControllerUsesNetworkSimulator(config.name))
-    {
-        return CreateControllerForLink<eth::EthControllerProxy>(config, config);
-    }
-    else if (ControllerUsesReplay(config))
-    {
-        return CreateControllerForLink<eth::EthControllerReplay>(config, config, _timeProvider.get());
-    }
-    else
-    {
-        return CreateControllerForLink<eth::EthController>(config, config, _timeProvider.get());
-    }
+
+    // TODO replay is currently not possible - need concept!!
+    return CreateControllerForLink<eth::EthControllerFacade>(config, config, _timeProvider.get());
+
+    //if (ControllerUsesNetworkSimulator(config.name))
+    //{
+    //    return CreateControllerForLink<eth::EthControllerProxy>(config, config);
+    //}
+    //else if (ControllerUsesReplay(config))
+    //{
+    //    return CreateControllerForLink<eth::EthControllerReplay>(config, config, _timeProvider.get());
+    //}
+    //else
+    //{
+    //    return CreateControllerForLink<eth::EthController>(config, config, _timeProvider.get());
+    //}
 }
 
 template <class IbConnectionT>
