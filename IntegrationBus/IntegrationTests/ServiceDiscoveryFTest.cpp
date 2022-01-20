@@ -55,7 +55,7 @@ protected:
     {
         auto start = Now();
 
-        ib::test::SimTestHarness testHarness(ibConfig, domainId,true );
+        ib::test::SimTestHarness testHarness(ibConfig, domainId, true);
         auto&& publisher = testHarness.GetParticipant("Publisher")->ComAdapter();
         
         for (auto i = 0; i < numberOfServices; i++)

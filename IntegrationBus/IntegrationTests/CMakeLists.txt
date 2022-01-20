@@ -95,6 +95,15 @@ add_vib_test(FTestDataPubSub
         IntegrationBus
 )
 
+add_vib_test(ITestTargetedMessaging
+    SOURCES
+      TargetedMessagingITest.cpp
+    LIBS
+      IbSimTestHarness
+      IbInternal
+      IbSimCan 
+)
+
 if(IB_MW_ENABLE_VASIO)
     add_vib_test(ITestStateMachineVAsio
         SOURCES
