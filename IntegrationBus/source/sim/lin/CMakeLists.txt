@@ -8,6 +8,9 @@ add_library(IbSimLin STATIC
 
     LinControllerReplay.cpp
     LinControllerReplay.hpp
+
+    LinControllerFacade.hpp
+    LinControllerFacade.cpp
 )
 
 target_include_directories(IbSimLin

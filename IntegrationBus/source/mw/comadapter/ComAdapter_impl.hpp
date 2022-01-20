@@ -16,6 +16,7 @@
 #include "LinController.hpp"
 #include "LinControllerReplay.hpp"
 #include "LinControllerProxy.hpp"
+#include "LinControllerFacade.hpp"
 #include "InPort.hpp"
 #include "InPortReplay.hpp"
 #include "OutPort.hpp"
@@ -280,18 +281,21 @@ template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonicalName) -> lin::ILinController*
 {
     auto&& config = get_by_name(_participant.linControllers, canonicalName);
-    if (ControllerUsesNetworkSimulator(config.name))
-    {
-        return CreateControllerForLink<lin::LinControllerProxy>(config);
-    }
-    else if (ControllerUsesReplay(config))
-    {
-        return CreateControllerForLink<lin::LinControllerReplay>(config, config, _timeProvider.get());
-    }
-    else
-    {
-        return CreateControllerForLink<lin::LinController>(config, _timeProvider.get());
-    }
+    // TODO replay is currently not possible - need concept!!
+    return CreateControllerForLink<lin::LinControllerFacade>(config, _timeProvider.get());
+    
+    //if (ControllerUsesNetworkSimulator(config.name))
+    //{
+    //    return CreateControllerForLink<lin::LinControllerProxy>(config);
+    //}
+    //else if (ControllerUsesReplay(config))
+    //{
+    //    return CreateControllerForLink<lin::LinControllerReplay>(config, config, _timeProvider.get());
+    //}
+    //else
+    //{
+    //    return CreateControllerForLink<lin::LinController>(config, _timeProvider.get());
+    //}
 }
 
 template <class IbConnectionT>

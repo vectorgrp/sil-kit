@@ -37,6 +37,7 @@
 #include "IIbToLinSimulator.hpp"
 #include "IIbToLinController.hpp"
 #include "IIbToLinControllerProxy.hpp"
+#include "IIbToLinControllerFacade.hpp"
 
 #include "IIbToFrBusSimulator.hpp"
 #include "IIbToFrController.hpp"
@@ -342,6 +343,7 @@ private:
         ControllerMap<sim::fr::IIbToFrControllerProxy>,
         ControllerMap<sim::lin::IIbToLinController>,
         ControllerMap<sim::lin::IIbToLinControllerProxy>,
+        ControllerMap<sim::lin::IIbToLinControllerFacade>,
         ControllerMap<sim::generic::IIbToGenericPublisher>,
         ControllerMap<sim::generic::IIbToGenericSubscriber>,
         ControllerMap<sim::data::IIbToDataPublisher>,
