@@ -13,23 +13,24 @@ namespace mw {
 namespace {
 struct NullConnection
 {
-    NullConnection(ib::cfg::Config /*config*/, std::string /*participantName*/, ib::mw::ParticipantId /*participantId*/) {};
+    NullConnection(ib::cfg::Config /*config*/, std::string /*participantName*/, ib::mw::ParticipantId /*participantId*/) {}
 
-    void SetLogger(logging::ILogger* /*logger*/) {};
-    void JoinDomain(uint32_t /*domainId*/) {};
+    void SetLogger(logging::ILogger* /*logger*/) {}
+    void JoinDomain(uint32_t /*domainId*/) {}
 
     template<class IbServiceT>
-    inline void RegisterIbService(const std::string& /*topicName*/, mw::EndpointId /*endpointId*/, IbServiceT* /*receiver*/) {};
+    inline void RegisterIbService(const std::string& /*topicName*/, mw::EndpointId /*endpointId*/, IbServiceT* /*receiver*/) {}
 
     template <class IbServiceT>
     inline void SetHistoryLengthForLink(const std::string& /*linkName*/, size_t /*history*/, IbServiceT* /*service*/) {};
 
     template<typename IbMessageT>
-    void SendIbMessage(const mw::IIbServiceEndpoint* /*from*/, IbMessageT&& /*msg*/) {};
+    void SendIbMessage(const mw::IIbServiceEndpoint* /*from*/, IbMessageT&& /*msg*/) {}
 
-    void OnAllMessagesDelivered(std::function<void(void)> /*callback*/) {};
-    void FlushSendBuffers() {};
-    void NotifyShutdown() {};
+    void OnAllMessagesDelivered(std::function<void()> /*callback*/) {}
+    void FlushSendBuffers() {}
+    void ExecuteDeferred(std::function<void()> /*callback*/) {}
+    void NotifyShutdown() {}
 };
 } // anonymous namespace
     

@@ -138,7 +138,11 @@ public:
     {
         callback();
     }
-    void FlushSendBuffers() {};
+    void FlushSendBuffers() {}
+    void ExecuteDeferred(std::function<void()> function)
+    {
+        asio::post(_ioContext.get_executor(), std::move(function));
+    }
 
     inline auto Config() const -> const ib::cfg::Config&
     {

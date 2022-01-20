@@ -31,11 +31,16 @@ class ParticipantController
 public:
     // ----------------------------------------
     // Public Data Types
-    struct ISyncAdapter
+    struct ITimeSyncPolicy
     {
-        virtual ~ISyncAdapter() = default;
-        virtual void RequestStep(ParticipantController& controller) = 0;
-        virtual void FinishedStep(ParticipantController& controller) = 0;
+        virtual ~ITimeSyncPolicy() = default;
+        virtual void Initialize() = 0;
+        virtual void SynchronizedParticipantAdded(const std::string& otherParticipantName) = 0;
+        virtual void SynchronizedParticipantRemoved(const std::string& otherParticipantName) = 0;
+        virtual void RequestInitialStep() = 0;
+        virtual void RequestNextStep() = 0;
+        virtual void SetStepDuration(std::chrono::nanoseconds duration) = 0;
+        virtual void ReceiveNextSimTask(const IIbServiceEndpoint* from, const NextSimTask& task) = 0;
     };
 
 public:
@@ -89,8 +94,9 @@ public:
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const NextSimTask& task) override;
 
     // Used by Policies
-    void SendNextSimTask();
-    void ExecuteSimTask();
+    template <class MsgT>
+    void SendIbMessage(MsgT&& msg) const;
+    void ExecuteSimTask(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration);
 
     // Get the instance of the internal ITimeProvider that is updated with our simulation time
     auto GetTimeProvider()->std::shared_ptr<sync::ITimeProvider>;
@@ -101,10 +107,7 @@ public:
 private:
     // ----------------------------------------
     // private methods
-    template <class MsgT>
-    void SendIbMessage(MsgT&& msg) const;
-
-    static auto MakeSyncAdapter(ib::cfg::SyncType syncType)->std::unique_ptr<ParticipantController::ISyncAdapter>;
+    auto MakeTimeSyncPolicy(cfg::SyncType syncType) -> std::unique_ptr<ParticipantController::ITimeSyncPolicy>;
 
     void ChangeState(ParticipantState newState, std::string reason);
 
@@ -125,16 +128,13 @@ private:
     logging::ILogger* _logger{ nullptr };
     std::shared_ptr<ParticipantTimeProvider> _timeProvider{ nullptr };
 
-    std::unique_ptr<ISyncAdapter> _syncAdapter;
+    std::unique_ptr<ITimeSyncPolicy> _timeSyncPolicy;
     bool _coldswapEnabled{ false };
 
     service::IServiceDiscovery* _serviceDiscovery;
 
+    bool _isRunning{ false };
     ParticipantStatus _status;
-
-    NextSimTask _currentTask;
-    NextSimTask _myNextTask;
-    std::map<std::string, NextSimTask> _otherNextTasks;
 
     std::promise<ParticipantState> _finalStatePromise;
 
@@ -178,7 +178,6 @@ auto ParticipantController::GetServiceDescriptor() const -> const mw::ServiceDes
     return _serviceDescriptor;
 }
 
-    
 } // namespace sync
 } // namespace mw
 } // namespace ib

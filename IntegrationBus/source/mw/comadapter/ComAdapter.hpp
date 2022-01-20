@@ -251,6 +251,7 @@ public:
 	
     void OnAllMessagesDelivered(std::function<void()> callback) override;
     void FlushSendBuffers() override;
+    void ExecuteDeferred(std::function<void()> callback) override;
 
 public:
     // ----------------------------------------

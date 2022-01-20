@@ -297,8 +297,9 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const service::ServiceDiscoveryEvent& /*msg*/) {}
 
 
-    void OnAllMessagesDelivered(std::function<void(void)> /*callback*/) {}
+    void OnAllMessagesDelivered(std::function<void()> /*callback*/) {}
     void FlushSendBuffers() {}
+    void ExecuteDeferred(std::function<void()> callback) {}
     auto GetParticipantName() const -> const std::string& override { throw std::runtime_error("invalid call"); }
     auto GetConfig() const -> const ib::cfg::Config& override { return _config; }
 

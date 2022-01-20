@@ -112,6 +112,16 @@ if(IB_MW_ENABLE_VASIO)
           IbMwComAdapter
           IbMwVAsio
     )
+
+    add_vib_test(ITestSingleParticipant
+        SOURCES
+          SingleParticipantITest.cpp
+        LIBS
+          IbMwComAdapter
+          IbSimTestHarness
+          IbSimTestHarness
+          IbMwVAsio
+    )
 endif()
 
 add_vib_test(FTestServiceDiscovery

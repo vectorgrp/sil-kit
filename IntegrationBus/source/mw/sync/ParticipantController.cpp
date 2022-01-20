@@ -16,21 +16,150 @@ namespace ib {
 namespace mw {
 namespace sync {
 
-
-struct DistributedTimeQuantumAdapter : ParticipantController::ISyncAdapter
+//! brief Synchronization policy for unsynchronized participants
+struct UnsynchronizedPolicy : ParticipantController::ITimeSyncPolicy
 {
-    void RequestStep(ParticipantController& controller) override
+    UnsynchronizedPolicy()
     {
-        controller.SendNextSimTask();
     }
-    void FinishedStep(ParticipantController& /*controller*/) override {}
+    void Initialize() override { }
+    void SynchronizedParticipantAdded(const std::string& otherParticipantName) override { }
+    void SynchronizedParticipantRemoved(const std::string& otherParticipantName) override { }
+    void RequestInitialStep() override { }
+    void RequestNextStep() override { }
+    void SetStepDuration(std::chrono::nanoseconds duration) override { }
+    void ReceiveNextSimTask(const IIbServiceEndpoint* from, const NextSimTask& task) override { }
+};
+
+//! brief Synchronization policy of the VAsio middleware
+struct DistributedTimeQuantumPolicy : ParticipantController::ITimeSyncPolicy
+{
+    DistributedTimeQuantumPolicy(ParticipantController& controller, IComAdapterInternal* comAdapter)
+        : _controller(controller)
+        , _comAdapter(comAdapter)
+    {
+        _currentTask.timePoint = -1ns;
+        _currentTask.duration = 0ns;
+        _myNextTask.timePoint = 0ns;
+        _myNextTask.duration = 0ns;
+    }
+
+    void Initialize() override
+    {
+        _currentTask.timePoint = -1ns;
+        _currentTask.duration = 0ns;
+        _myNextTask.timePoint = 0ns;
+    }
+
+    void SynchronizedParticipantAdded(const std::string& otherParticipantName) override
+    {
+        if (_otherNextTasks.find(otherParticipantName) != _otherNextTasks.end())
+        {
+            throw std::runtime_error{ "DiscoveryService should not announce multiple ParticipantControllers per participant." };
+        }
+        NextSimTask task;
+        task.timePoint = -1ns;
+        task.duration = 0ns;
+        _otherNextTasks[otherParticipantName] = task;
+    }
+
+    void SynchronizedParticipantRemoved(const std::string& otherParticipantName) override
+    {
+        if (_otherNextTasks.find(otherParticipantName) != _otherNextTasks.end())
+        {
+            throw std::runtime_error{ "DiscoveryService should not unannounce ParticipantControllers without prior announcement." };
+        }
+        auto it = _otherNextTasks.find(otherParticipantName);
+        if (it != _otherNextTasks.end())
+        {
+            _otherNextTasks.erase(it);
+        }
+    }
+
+    void RequestInitialStep() override
+    {
+        _controller.SendIbMessage(_myNextTask);
+        // Bootstrap checked execution, in case there is no other participant.
+        // Else, checked execution is initiated when we receive their NextSimTask messages.
+        _comAdapter->ExecuteDeferred([this]() { this->CheckDistributedTimeAdvanceGrant(); });
+    }
+
+    void RequestNextStep() override
+    {
+        _controller.SendIbMessage(_myNextTask);
+    }
+
+    void SetStepDuration(std::chrono::nanoseconds duration) override
+    {
+        _myNextTask.duration = duration;
+    }
+
+    void ReceiveNextSimTask(const IIbServiceEndpoint* from, const NextSimTask& task) override
+    {
+        _otherNextTasks[from->GetServiceDescriptor().participantName] = task;
+
+        switch (_controller.State())
+        {
+        case ParticipantState::Invalid:      // [[fallthrough]]
+        case ParticipantState::Idle:         // [[fallthrough]]
+        case ParticipantState::Initializing: // [[fallthrough]]
+        case ParticipantState::Initialized:
+            return;
+
+        case ParticipantState::Paused:
+            // [[fallthrough]]
+        case ParticipantState::Running:
+            CheckDistributedTimeAdvanceGrant();
+            return;
+
+        case ParticipantState::Stopping:     // [[fallthrough]]
+        case ParticipantState::Stopped:      // [[fallthrough]]
+        case ParticipantState::Error:        // [[fallthrough]]
+        case ParticipantState::ShuttingDown: // [[fallthrough]]
+        case ParticipantState::Shutdown:     // [[fallthrough]]
+            return;
+
+        default:
+            _controller.ReportError("Received NextSimTask in state ParticipantState::" + to_string(_controller.State())); 
+            return;
+        }
+    }
+
+private:
+    void CheckDistributedTimeAdvanceGrant()
+    {
+        for (auto&& otherTask : _otherNextTasks)
+        {
+            if (_myNextTask.timePoint > otherTask.second.timePoint)
+                return;
+        }
+
+        // No other participant has a lower time point: It is our turn
+        _currentTask = _myNextTask;
+        _myNextTask.timePoint = _currentTask.timePoint + _currentTask.duration;
+        _controller.ExecuteSimTask(_currentTask.timePoint, _currentTask.duration);
+
+        for (auto&& otherTask : _otherNextTasks)
+        {
+            if (_myNextTask.timePoint > otherTask.second.timePoint)
+                return;
+        }
+
+        // Still, no other participant has a lower time point: Check again later
+        _comAdapter->ExecuteDeferred([this]() { this->CheckDistributedTimeAdvanceGrant(); });
+    }
+
+    ParticipantController& _controller;
+    IComAdapterInternal* _comAdapter;
+    NextSimTask _currentTask;
+    NextSimTask _myNextTask;
+    std::map<std::string, NextSimTask> _otherNextTasks;
 };
 
 //! \brief  A caching time provider: we update its internal state whenever the controller's 
 //          simulation time changes.
 // This ensures that the our time provider is available even after
 // the ParticipantController gets destructed.
-
 struct ParticipantTimeProvider : public sync::ITimeProvider
 {
     std::chrono::nanoseconds _now;
@@ -55,19 +184,17 @@ struct ParticipantTimeProvider : public sync::ITimeProvider
     }
 };
 
-
-
 ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, const cfg::SimulationSetup& simulationSetup, const cfg::Participant& participantConfig)
     : _comAdapter{comAdapter}
     , _timesyncConfig{simulationSetup.timeSync}
-    , _syncType{participantConfig.participantController->syncType}
+    , _syncType(participantConfig.participantController->syncType)
     , _logger{comAdapter->GetLogger()}
     , _watchDog{participantConfig.participantController->execTimeLimitSoft, participantConfig.participantController->execTimeLimitHard}
 {
     _watchDog.SetWarnHandler(
         [logger = _logger](std::chrono::milliseconds timeout)
         {
-            logger->Warn("SimTask did not finish within soft limit. Timeout detected after {} ms",
+            logger->Warn("SimTask did not finish within soft time limit. Timeout detected after {} ms",
                 std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count());
         }
     );
@@ -76,39 +203,43 @@ ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, co
         {
             std::stringstream buffer;
             buffer
-                << "SimTask did not finish within hard limit. Timeout detected after "
+                << "SimTask did not finish within hard time limit. Timeout detected after "
                 << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count()
                 << "ms";
             this->ReportError(buffer.str());
         }
     );
 
-
     _status.participantName = participantConfig.name;
-    _currentTask.timePoint = -1ns;
-    _currentTask.duration = 0ns;
-    _myNextTask.timePoint = 0ns;
-    _myNextTask.duration = _timesyncConfig.tickPeriod;
 
-    if (_syncType == cfg::SyncType::DistributedTimeQuantum) 
+    try
     {
-        _serviceDiscovery = _comAdapter->GetServiceDiscovery();
-        _serviceDiscovery->RegisterServiceDiscoveryHandler([this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType, const ib::mw::ServiceDescriptor& serviceDescriptor)
-        {
-            if (serviceDescriptor.isSynchronized)
-            {
-                if (_otherNextTasks.count(serviceDescriptor.participantName) > 0)
-                {
-                    throw std::runtime_error{ "DiscoveryService should not announce multiple Participant Controllers per participant." };
-                }
-                // TODO double check: This is mw-independent - would this cause problems with HLA?
-                NextSimTask task;
-                task.timePoint = -1ns;
-                task.duration = 0ns;
-                _otherNextTasks[serviceDescriptor.participantName] = task;
-            }
-        });
+        _timeSyncPolicy = MakeTimeSyncPolicy(_syncType);
     }
+    catch (const std::exception & e)
+    {
+        _logger->Critical(e.what());
+        throw;
+    }
+
+    _timeSyncPolicy->SetStepDuration(_timesyncConfig.tickPeriod);
+
+    _serviceDiscovery = _comAdapter->GetServiceDiscovery();
+    // TODO Double check: This should be middleware-independent. If it causes problems with HLA, this whole block can be moved to the ITimeSyncPolicy implementation so we can treat it differently.
+    _serviceDiscovery->RegisterServiceDiscoveryHandler([this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType, const ib::mw::ServiceDescriptor& serviceDescriptor)
+    {
+        if (!serviceDescriptor.isSynchronized || serviceDescriptor.participantName == _status.participantName)
+            return;
+
+        if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated)
+        {
+            _timeSyncPolicy->SynchronizedParticipantAdded(serviceDescriptor.participantName);
+        }
+        else if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved)
+        {
+            _timeSyncPolicy->SynchronizedParticipantRemoved(serviceDescriptor.participantName);
+        }
+    });
 
     _timeProvider = std::make_shared<ParticipantTimeProvider>();
 }
@@ -145,13 +276,14 @@ void ParticipantController::EnableColdswap()
 
 void ParticipantController::SetPeriod(std::chrono::nanoseconds period)
 {
-    if (_syncType != cfg::SyncType::TimeQuantum && _syncType != cfg::SyncType::DistributedTimeQuantum)
+    if (_syncType != ib::cfg::SyncType::DistributedTimeQuantum)
     {
         auto msPeriod = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(period);
         _logger->Warn("ParticipantController::SetPeriod({}ms) is ignored", msPeriod.count());
-        _logger->Info("ParticipantController::SetPeriod() can only be used with SyncType::TimeQuantum or SyncType::DistributedTimeQuantum (currently active: SyncType::{})", _syncType);
+        _logger->Info("ParticipantController::SetPeriod() can only be used with SyncType::DistributedTimeQuantum (currently active: SyncType::{})", _syncType);
+        return;
     }
-    _myNextTask.duration = period;
+    _timeSyncPolicy->SetStepDuration(period);
 }
 
 void ParticipantController::SetEarliestEventTime(std::chrono::nanoseconds /*eventTime*/)
@@ -159,17 +291,20 @@ void ParticipantController::SetEarliestEventTime(std::chrono::nanoseconds /*even
     throw std::exception();
 }
 
-auto ParticipantController::MakeSyncAdapter(ib::cfg::SyncType syncType) -> std::unique_ptr<ParticipantController::ISyncAdapter>
+auto ParticipantController::MakeTimeSyncPolicy(cfg::SyncType syncType) -> std::unique_ptr<ParticipantController::ITimeSyncPolicy>
 {
     switch (syncType)
     {
     case cfg::SyncType::DistributedTimeQuantum:
-        return std::make_unique<DistributedTimeQuantumAdapter>();
+        return std::make_unique<DistributedTimeQuantumPolicy>(*this, _comAdapter);
     case cfg::SyncType::DiscreteEvent:
     case cfg::SyncType::TimeQuantum:
     case cfg::SyncType::DiscreteTime:
     case cfg::SyncType::DiscreteTimePassive:
-        throw std::runtime_error("Unsupported SyncType " + to_string(syncType));
+        _logger->Warn("ParticipantController was created with SyncType DistributedTimeQuantum because {} is deprecated", to_string(syncType));
+        return std::make_unique<DistributedTimeQuantumPolicy>(*this, _comAdapter);
+    case cfg::SyncType::Unsynchronized:
+        return std::make_unique<UnsynchronizedPolicy>();
     default:
         throw ib::cfg::Misconfiguration("Invalid SyncType " + to_string(syncType));
     }
@@ -189,17 +324,8 @@ auto ParticipantController::RunAsync() -> std::future<ParticipantState>
         throw std::runtime_error{errorMsg};
     }
 
-    try
-    {
-        _syncAdapter = MakeSyncAdapter(_syncType);
-    }
-    catch (const std::exception& e)
-    {
-        _logger->Critical(e.what());
-        throw;
-    }
-
     ChangeState(ParticipantState::Idle, "ParticipantController::Run() was called");
+    _isRunning = true;
     return _finalStatePromise.get_future();
 }
 
@@ -263,9 +389,7 @@ void ParticipantController::Initialize(const ParticipantCommand& command, std::s
         reason += " and no InitHandler was registered";
     }
 
-    _currentTask.timePoint = -1ns;
-    _currentTask.duration = 0ns;
-    _myNextTask.timePoint = 0ns;
+    _timeSyncPolicy->Initialize();
     ChangeState(ParticipantState::Initialized, std::move(reason));
 }
 
@@ -297,7 +421,6 @@ void ParticipantController::Stop(std::string reason)
         reason += " and no StopHandler registered";
         ChangeState(ParticipantState::Stopped, reason);
     }
-
 }
 
 void ParticipantController::ForceShutdown(std::string reason)
@@ -393,7 +516,7 @@ void ParticipantController::RefreshStatus()
 
 auto ParticipantController::Now() const -> std::chrono::nanoseconds
 {
-    return _currentTask.timePoint;
+    return _timeProvider->Now();
 }
 
 void ParticipantController::LogCurrentPerformanceStats()
@@ -464,7 +587,7 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, con
         return;
     }
 
-    if (!_syncAdapter)
+    if (!_isRunning)
     {
         std::stringstream msg;
         msg << "Received SystemCommand::"
@@ -487,7 +610,7 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, con
         {
             ChangeState(ParticipantState::Running, "Received SystemCommand::Run");
             _waitTimeMonitor.StartMeasurement();
-            _syncAdapter->RequestStep(*this);
+            _timeSyncPolicy->RequestInitialStep();
             return;
         }
         break;
@@ -547,71 +670,13 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, con
 
 void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, const NextSimTask& task)
 {
-    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor)) return;
-
-    _otherNextTasks[from->GetServiceDescriptor().participantName] = task;
-
-    switch (State())
-    {
-    case ParticipantState::Invalid:      // [[fallthrough]]
-    case ParticipantState::Idle:         // [[fallthrough]]
-    case ParticipantState::Initializing: // [[fallthrough]]
-    case ParticipantState::Initialized:
+    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
-    case ParticipantState::Paused:
-        // [[fallthrough]]
-    case ParticipantState::Running:
-        CheckDistributedTimeAdvanceGrant();
-        return;
-
-    case ParticipantState::Stopping:     // [[fallthrough]]
-    case ParticipantState::Stopped:      // [[fallthrough]]
-    case ParticipantState::Error:        // [[fallthrough]]
-    case ParticipantState::ShuttingDown: // [[fallthrough]]
-    case ParticipantState::Shutdown:     // [[fallthrough]]
-        return;
-
-    default:
-        ReportError("Received NextSimTask in state ParticipantState::" + to_string(State()));
-        return;
-    }
+    _timeSyncPolicy->ReceiveNextSimTask(from, task);
 }
 
-void ParticipantController::SendNextSimTask()
-{
-    if (_timesyncConfig.syncPolicy == cfg::TimeSync::SyncPolicy::Strict)
-    {
-        _comAdapter->OnAllMessagesDelivered([this]() {
-
-            SendIbMessage(_myNextTask);
-
-        });
-    }
-    else
-    {
-        SendIbMessage(_myNextTask);
-    }
-}
-
-void ParticipantController::CheckDistributedTimeAdvanceGrant()
-{
-    while (true)
-    {
-        for (auto&& otherTask : _otherNextTasks)
-        {
-            if (_myNextTask.timePoint > otherTask.second.timePoint)
-                return;
-        }
-
-        // No SimTask has a lower timePoint
-        _currentTask = _myNextTask;
-        _myNextTask.timePoint = _currentTask.timePoint + _currentTask.duration;
-        ExecuteSimTask();
-    }
-}
-
-void ParticipantController::ExecuteSimTask()
+void ParticipantController::ExecuteSimTask(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration)
 {
     assert(_simTask);
     using DoubleMSecs = std::chrono::duration<double, std::milli>;
@@ -619,11 +684,11 @@ void ParticipantController::ExecuteSimTask()
     _waitTimeMonitor.StopMeasurement();
     _logger->Trace("Starting next Simulation Task. Waiting time was: {}ms", std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count());
 
-    _timeProvider->SetTime(_currentTask.timePoint, _currentTask.duration);
+    _timeProvider->SetTime(timePoint, duration);
 
     _execTimeMonitor.StartMeasurement();
     _watchDog.Start();
-    _simTask(_currentTask.timePoint, _currentTask.duration);
+    _simTask(timePoint, duration);
     _watchDog.Reset();
     _execTimeMonitor.StopMeasurement();
 
@@ -635,8 +700,7 @@ void ParticipantController::ExecuteSimTask()
         _pauseDone.wait();
     }
 
-    _syncAdapter->FinishedStep(*this);
-    _syncAdapter->RequestStep(*this);
+    _timeSyncPolicy->RequestNextStep();
 }
 
 void ParticipantController::ChangeState(ParticipantState newState, std::string reason)

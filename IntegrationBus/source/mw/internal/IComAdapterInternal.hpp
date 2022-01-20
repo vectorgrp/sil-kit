@@ -163,10 +163,11 @@ public:
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const service::ServiceAnnouncement& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const service::ServiceDiscoveryEvent& msg) = 0;
 
-    // For Connection/Middleware support:
-    virtual void OnAllMessagesDelivered(std::function<void(void)> callback) = 0;
+    // For Connection/middleware support:
+    virtual void OnAllMessagesDelivered(std::function<void()> callback) = 0;
     virtual void FlushSendBuffers() = 0;
-    
+    virtual void ExecuteDeferred(std::function<void()> callback) = 0;
+
     //Service discovery for dynamic, configuration-less simulations
     virtual auto GetServiceDiscovery() -> service::IServiceDiscovery* = 0;
 	

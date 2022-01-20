@@ -37,7 +37,7 @@ void PatchConfigForVAsio(cfg::Config& config)
                 std::cout << "WARNING: Usage of SyncType::" << to_string(participantController->syncType) << " is deprecated when using VAsio middleware\n";
                 warnOnce = false;
             }
-            std::cout << "INFO: overriding SyncType for participant \"" << participant.name << "\" to SyncType::DistributedTimeQuantum\n";
+            std::cout << "INFO: Overriding SyncType for participant \"" << participant.name << "\" to SyncType::DistributedTimeQuantum\n";
             participantController->syncType = cfg::SyncType::DistributedTimeQuantum;
         }
         }

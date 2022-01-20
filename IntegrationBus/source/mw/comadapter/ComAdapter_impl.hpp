@@ -1472,6 +1472,11 @@ void ComAdapter<IbConnectionT>::FlushSendBuffers()
     _ibConnection.FlushSendBuffers();
 }
 
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::ExecuteDeferred(std::function<void()> callback)
+{
+    _ibConnection.ExecuteDeferred(std::move(callback));
+}
 
 } // namespace mw
 } // namespace ib

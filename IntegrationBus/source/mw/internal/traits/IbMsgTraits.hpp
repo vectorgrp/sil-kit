@@ -20,13 +20,13 @@ template <class MsgT> struct IbMsgTraits
 };
 
 #define DefineIbMsgTrait_TypeName(Namespace, MsgName) template<> struct IbMsgTraitTypeName<Namespace::MsgName>{\
-    static constexpr const char* TypeName() { return #Namespace "::" #MsgName;}\
+    static constexpr const char* TypeName() { return #Namespace "::" #MsgName; }\
     };
 #define DefineIbMsgTrait_HistSize(Namespace, MsgName, HistorySize) template<> struct IbMsgTraitHistSize<Namespace::MsgName>{\
-    static constexpr std::size_t HistSize() { return HistorySize;} \
+    static constexpr std::size_t HistSize() { return HistorySize; } \
     };
 #define DefineIbMsgTrait_EnforceSelfDelivery(Namespace, MsgName) template<> struct IbMsgTraitEnforceSelfDelivery<Namespace::MsgName>{\
-    static constexpr bool IsSelfDeliveryEnforced() { return true;}\
+    static constexpr bool IsSelfDeliveryEnforced() { return true; }\
     };
 
 DefineIbMsgTrait_TypeName(ib::mw::logging, LogMsg)
