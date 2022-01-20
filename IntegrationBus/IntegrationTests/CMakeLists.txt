@@ -150,10 +150,6 @@ add_vib_test(FTestServiceDiscovery
       ${itest_extra_libs}
 )
 
-if(TARGET FTestServiceDiscovery AND MSVC)
-    set_target_properties(FTestServiceDiscovery PROPERTIES LINK_FLAGS "/PROFILE")
-endif()
-
 # Windows specific tests
 if(WIN32)
     add_vib_test(ITestCompatibilityWithWindowsHeaders
