@@ -17,13 +17,15 @@ auto Now()
     return std::chrono::duration_cast<std::chrono::nanoseconds>(now);
 }
 
-}
-namespace ib { namespace test {
+} // namespace
+namespace ib {
+namespace test {
 
 const std::string& SimParticipant::Name() const
 {
     return _name;
 }
+
 ib::mw::IComAdapter* SimParticipant::ComAdapter() const
 {
     return _comAdapter.get();
@@ -80,7 +82,14 @@ public:
 
     void OnParticipantStatusChanged(ib::mw::sync::ParticipantStatus status)
     {
-        std::cout << "SimTestHarness: participant state of " << status.participantName << " is now " << status.state << std::endl;
+        if (_participantStates.count(status.participantName) > 0
+            && _participantStates[status.participantName] != status.state)
+        {
+            std::cout << "SimTestHarness: participant state of " << status.participantName << " is now " << status.state
+                      << std::endl;
+        }
+        _participantStates[status.participantName] = status.state;
+
         if (status.state == ib::mw::sync::ParticipantState::Stopped
             || status.state == ib::mw::sync::ParticipantState::Error)
         {
@@ -114,6 +123,7 @@ private:
     ib::mw::sync::ISystemController* _controller;
     ib::mw::sync::ISystemMonitor* _monitor;
     std::unique_ptr<ib::mw::IComAdapter> _comAdapter;
+    std::map<std::string, ib::mw::sync::ParticipantState> _participantStates; //for printing status updates
 };
 
 ////////////////////////////////////////
@@ -288,5 +298,5 @@ void SimTestHarness::AddParticipant(ib::cfg::Participant participantConfig)
 }
 
 
-} //end ns ib
-} //end ns test
+} // namespace test
+} // namespace ib
