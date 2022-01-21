@@ -70,7 +70,7 @@ TEST_F(ComAdapterTest, DISABLED_make_basic_controller)
     EXPECT_NE(basicCanController, nullptr);
 }
 
-TEST_F(ComAdapterTest, make_network_controller)
+TEST_F(ComAdapterTest, DISABLED_make_network_controller)
 {
     auto participantName = "FRcontroller";
     auto controllerName = "FR1";

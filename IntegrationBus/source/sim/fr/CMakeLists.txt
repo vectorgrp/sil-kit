@@ -8,6 +8,9 @@ add_library(IbSimFlexRay STATIC
     FrDatatypeUtils.hpp
     Validation.cpp
     Validation.hpp
+
+    FrControllerFacade.hpp
+    FrControllerFacade.cpp
 )
 
 target_include_directories(IbSimFlexRay

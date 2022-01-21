@@ -42,6 +42,7 @@
 #include "IIbToFrBusSimulator.hpp"
 #include "IIbToFrController.hpp"
 #include "IIbToFrControllerProxy.hpp"
+#include "IIbToFrControllerFacade.hpp"
 
 #include "IIbToInPort.hpp"
 #include "IIbToOutPort.hpp"
@@ -341,6 +342,7 @@ private:
         ControllerMap<sim::eth::IIbToEthControllerFacade>,
         ControllerMap<sim::fr::IIbToFrController>,
         ControllerMap<sim::fr::IIbToFrControllerProxy>,
+        ControllerMap<sim::fr::IIbToFrControllerFacade>,
         ControllerMap<sim::lin::IIbToLinController>,
         ControllerMap<sim::lin::IIbToLinControllerProxy>,
         ControllerMap<sim::lin::IIbToLinControllerFacade>,

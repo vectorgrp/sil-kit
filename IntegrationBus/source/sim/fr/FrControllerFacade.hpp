@@ -9,9 +9,12 @@
 #include <tuple>
 #include <vector>
 
-#include "IIbToFrControllerProxy.hpp"
+#include "IIbToFrControllerFacade.hpp"
 #include "IComAdapterInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
+
+#include "FrController.hpp"
+#include "FrControllerProxy.hpp"
 
 namespace ib {
 namespace sim {
@@ -22,9 +25,10 @@ namespace fr {
  * Acts as a proxy to the controllers implemented and simulated by the Network Simulator. For operation
  * without a Network Simulator cf. FrController.
  */
-class FrControllerProxy
+class FrControllerFacade
     : public IFrController
-    , public IIbToFrControllerProxy
+    , public IIbToFrControllerFacade
+    , public mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
     , public mw::IIbServiceEndpoint
 {
@@ -35,16 +39,16 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    FrControllerProxy() = delete;
-    FrControllerProxy(const FrControllerProxy&) = default;
-    FrControllerProxy(FrControllerProxy&&) = default;
-    FrControllerProxy(mw::IComAdapterInternal* comAdapter);
+    FrControllerFacade() = delete;
+    FrControllerFacade(const FrControllerFacade&) = default;
+    FrControllerFacade(FrControllerFacade&&) = default;
+    FrControllerFacade(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
     // Operator Implementations
-    FrControllerProxy& operator=(FrControllerProxy& other) = default;
-    FrControllerProxy& operator=(FrControllerProxy&& other) = default;
+    FrControllerFacade& operator=(FrControllerFacade& other) = default;
+    FrControllerFacade& operator=(FrControllerFacade&& other) = default;
 
 public:
     // ----------------------------------------
@@ -77,7 +81,7 @@ public:
     void RegisterMessageAckHandler(MessageAckHandler handler) override;
     void RegisterWakeupHandler(WakeupHandler handler) override;
 
-    [[deprecated("superseded by RegisterPocStatusHandler")]]
+    [[deprecated("superseded by RegisterPocStatusHandler")]] 
     void RegisterControllerStatusHandler(ControllerStatusHandler handler) override;
 
     void RegisterPocStatusHandler(PocStatusHandler handler) override;
@@ -96,29 +100,23 @@ public:
     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
+    //ITimeConsumer
+    void SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider) override;
+
     // ITraceMessageSource
-    inline void AddSink(extensions::ITraceMessageSink* sink) override;
+    void AddSink(extensions::ITraceMessageSink* sink) override;
 
     // IIbServiceEndpoint
-    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
-private:
-    // ----------------------------------------
-    // private data types
-    template<typename MsgT>
-    using CallbackVector = std::vector<CallbackT<MsgT>>;
+    void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 
 private:
     // ----------------------------------------
-    // private methods
-    template<typename MsgT>
-    void RegisterHandler(CallbackT<MsgT> handler);
-
-    template<typename MsgT>
-    void CallHandlers(const MsgT& msg);
-
-    template<typename MsgT>
-    inline void SendIbMessage(MsgT&& msg);
+    // Private helper methods
+    //
+    auto DefaultFilter(const IIbServiceEndpoint* from) const -> bool;
+    auto ProxyFilter(const IIbServiceEndpoint* from) const -> bool;
+    auto IsLinkSimulated() const -> bool;
 
 private:
     // ----------------------------------------
@@ -126,41 +124,13 @@ private:
     mw::IComAdapterInternal* _comAdapter = nullptr;
     ::ib::mw::ServiceDescriptor _serviceDescriptor;
 
-    std::vector<TxBufferConfig> _bufferConfigs;
+    mw::ServiceDescriptor _remoteBusSimulator;
 
-    std::tuple<
-        CallbackVector<FrMessage>,
-        CallbackVector<FrMessageAck>,
-        CallbackVector<FrSymbol>,
-        CallbackVector<FrSymbolAck>,
-        CallbackVector<CycleStart>,
-        CallbackVector<ControllerStatus>,
-        CallbackVector<PocStatus>
-    > _callbacks;
+    IFrController* _currentController;
+    std::unique_ptr<FrController> _frController;
+    std::unique_ptr<FrControllerProxy> _frControllerProxy;
 
-    extensions::Tracer _tracer;
-
-    CallbackVector<FrSymbol> _wakeupHandlers;
 };
-
-
-// ==================================================================
-//  Inline Implementations
-// ==================================================================
-void FrControllerProxy::AddSink(extensions::ITraceMessageSink* sink)
-{
-    _tracer.AddSink(EndpointAddress(), *sink);
-}
-
-void FrControllerProxy::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
-{
-    _serviceDescriptor = serviceDescriptor;
-}
-
-auto FrControllerProxy::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
-{
-    return _serviceDescriptor;
-}
 } // namespace fr
-} // SimModels
+} // namespace sim
 } // namespace ib

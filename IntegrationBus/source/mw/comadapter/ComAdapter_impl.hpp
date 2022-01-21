@@ -13,6 +13,7 @@
 #include "EthControllerReplay.hpp"
 #include "FrController.hpp"
 #include "FrControllerProxy.hpp"
+#include "FrControllerFacade.hpp"
 #include "LinController.hpp"
 #include "LinControllerReplay.hpp"
 #include "LinControllerProxy.hpp"
@@ -267,14 +268,17 @@ template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFrController*
 {
     auto&& config = get_by_name(_participant.flexrayControllers, canonicalName);
-    if (ControllerUsesNetworkSimulator(config.name))
-    {
-        return CreateControllerForLink<fr::FrControllerProxy>(config);
-    }
-    else
-    {
-        return CreateControllerForLink<fr::FrController>(config, _timeProvider.get());
-    }
+
+    return CreateControllerForLink<fr::FrControllerFacade>(config, _timeProvider.get());
+
+    //if (ControllerUsesNetworkSimulator(config.name))
+    //{
+    //    return CreateControllerForLink<fr::FrControllerProxy>(config);
+    //}
+    //else
+    //{
+    //    return CreateControllerForLink<fr::FrController>(config, _timeProvider.get());
+    //}
 }
 
 template <class IbConnectionT>
