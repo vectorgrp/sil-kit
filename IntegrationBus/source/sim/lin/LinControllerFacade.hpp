@@ -35,7 +35,7 @@ public:
     LinControllerFacade() = delete;
     LinControllerFacade(const LinControllerFacade&) = default;
     LinControllerFacade(LinControllerFacade&&) = default;
-    LinControllerFacade(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider);
+    LinControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::LinController config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -104,7 +104,8 @@ private:
     // ----------------------------------------
     // private members
     mw::IComAdapterInternal* _comAdapter;
-    ::ib::mw::ServiceDescriptor _serviceDescriptor;
+    mw::ServiceDescriptor _serviceDescriptor;
+    cfg::LinController _config;
 
     mw::ServiceDescriptor _remoteBusSimulator;
 

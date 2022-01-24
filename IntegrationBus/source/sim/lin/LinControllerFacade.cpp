@@ -8,8 +8,10 @@ namespace ib {
 namespace sim {
 namespace lin {
 
-LinControllerFacade::LinControllerFacade(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider)
-  : _comAdapter{ comAdapter }
+LinControllerFacade::LinControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::LinController config,
+                                         mw::sync::ITimeProvider* timeProvider)
+    : _comAdapter{comAdapter}
+    , _config{config}
 {
     _linController = std::make_unique<LinController>(comAdapter, timeProvider);
     _linControllerProxy = std::make_unique<LinControllerProxy>(comAdapter);

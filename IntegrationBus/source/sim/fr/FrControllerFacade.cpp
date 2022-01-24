@@ -8,8 +8,10 @@ namespace ib {
 namespace sim {
 namespace fr {
 
- FrControllerFacade::FrControllerFacade(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider)
+ FrControllerFacade::FrControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::FlexrayController config,
+                                       mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
+    , _config{config}
 {
     _frController = std::make_unique<FrController>(comAdapter, timeProvider);
     _frControllerProxy = std::make_unique<FrControllerProxy>(comAdapter);
@@ -195,7 +197,7 @@ auto FrControllerFacade::EndpointAddress() const -> const mw::EndpointAddress&
     }
 }
 
-void FrControllerFacade::SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)
+void FrControllerFacade::SetTimeProvider(mw::sync::ITimeProvider* timeProvider)
 {
     if (!IsLinkSimulated())
     {

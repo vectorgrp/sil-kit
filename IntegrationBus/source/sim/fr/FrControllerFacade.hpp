@@ -42,7 +42,7 @@ public:
     FrControllerFacade() = delete;
     FrControllerFacade(const FrControllerFacade&) = default;
     FrControllerFacade(FrControllerFacade&&) = default;
-    FrControllerFacade(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider);
+    FrControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::FlexrayController config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -101,7 +101,7 @@ public:
     auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
     //ITimeConsumer
-    void SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider) override;
+    void SetTimeProvider(mw::sync::ITimeProvider* timeProvider) override;
 
     // ITraceMessageSource
     void AddSink(extensions::ITraceMessageSink* sink) override;
@@ -122,7 +122,8 @@ private:
     // ----------------------------------------
     // private members
     mw::IComAdapterInternal* _comAdapter = nullptr;
-    ::ib::mw::ServiceDescriptor _serviceDescriptor;
+    mw::ServiceDescriptor _serviceDescriptor;
+    cfg::FlexrayController _config;
 
     mw::ServiceDescriptor _remoteBusSimulator;
 

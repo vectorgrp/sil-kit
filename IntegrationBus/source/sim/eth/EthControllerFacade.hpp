@@ -89,7 +89,8 @@ private:
     // ----------------------------------------
     // private members
     mw::IComAdapterInternal* _comAdapter = nullptr;
-    ::ib::mw::ServiceDescriptor _serviceDescriptor;
+    mw::ServiceDescriptor _serviceDescriptor;
+    cfg::EthernetController _config;
 
     mw::ServiceDescriptor _remoteBusSimulator;
 

@@ -268,7 +268,7 @@ auto ComAdapter<IbConnectionT>::CreateFlexrayController(const std::string& canon
 {
     auto&& config = get_by_name(_participant.flexrayControllers, canonicalName);
 
-    return CreateControllerForLink<fr::FrControllerFacade>(config, _timeProvider.get());
+    return CreateControllerForLink<fr::FrControllerFacade>(config, config, _timeProvider.get());
 
     //if (ControllerUsesNetworkSimulator(config.name))
     //{
@@ -285,7 +285,7 @@ auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonical
 {
     auto&& config = get_by_name(_participant.linControllers, canonicalName);
     // TODO replay is currently not possible - need concept!!
-    return CreateControllerForLink<lin::LinControllerFacade>(config, _timeProvider.get());
+    return CreateControllerForLink<lin::LinControllerFacade>(config, config, _timeProvider.get());
     
     //if (ControllerUsesNetworkSimulator(config.name))
     //{

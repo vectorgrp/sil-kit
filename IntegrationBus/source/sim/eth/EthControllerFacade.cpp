@@ -9,7 +9,8 @@ namespace sim {
 namespace eth {
 
 EthControllerFacade::EthControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::EthernetController config, mw::sync::ITimeProvider* timeProvider)
-  : _comAdapter{ comAdapter }
+    : _comAdapter{comAdapter}
+    , _config{config}
 {
     _ethController = std::make_unique<EthController>(comAdapter, config, timeProvider);
     _ethControllerProxy = std::make_unique<EthControllerProxy>(comAdapter, config);
