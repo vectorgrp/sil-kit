@@ -1,6 +1,7 @@
 import re
 import subprocess
 import sys
+import urllib.parse
 
 COMMIT_MESSAGE = "[nightly-build] bump version number to "
 
@@ -59,12 +60,14 @@ with open('../cmake/IntegrationBusVersion.cmake', 'w') as f:
         f.write(line)
 
 # push new version number to repository
-git_remote_url_cred = git_remote_url.replace("https://", "https://"+sys.argv[1]+":"+sys.argv[2]+"@");
+print("repo url: "+git_remote_url)
+print("number of arguments: "+str(len(sys.argv)))
+git_remote_url_cred = git_remote_url.replace("https://", "https://"+urllib.parse.quote(sys.argv[1])+":"+urllib.parse.quote(sys.argv[2])+"@");
 rc = subprocess.call("git status")
 rc = subprocess.call("git add ../cmake/IntegrationBusVersion.cmake")
 rc = subprocess.call("git commit -m \""+COMMIT_MESSAGE+str(major)+"."+str(minor)+"."+str(patch)+" (nightly build)\"")
 rc = subprocess.call("git remote set-url origin "+git_remote_url_cred)
-rc = subprocess.call("git push --set-upstream origin "+branch_name)
+rc = subprocess.call("git push --set-upstream origin "+branch_name, stdout=subprocess.DEVNULL)
 rc = subprocess.call("git remote set-url origin " + git_remote_url)
 
 # write new version number to text file

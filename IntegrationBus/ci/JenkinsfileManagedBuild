@@ -31,9 +31,9 @@ pipeline {
                         script {
                             configFileProvider([configFile(fileId: 'vib_main_credentials', variable: 'CREDENTIALS_FILE')]) {
                                 def credentials_id = readFile(file: CREDENTIALS_FILE).trim()
-                                withCredentials([usernamePassword(credentialsId: credentials_id, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
+                                withCredentials([usernamePassword(credentialsId: credentials_id, usernameVariable: 'VIB_PUSH_USERNAME', passwordVariable: 'VIB_PUSH_PASSWORD')]){
                                     try {
-                                        bat "python ./incrementPatchLevel.py $USERNAME $PASSWORD"
+                                        bat "python ./incrementPatchLevel.py \"$VIB_PUSH_USERNAME\" \"$VIB_PUSH_PASSWORD\""
                                     }catch(all) {
                                         currentBuild.result='ABORTED'
                                         error("Aborting the build because version increment failed.")
