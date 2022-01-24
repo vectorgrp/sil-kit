@@ -225,10 +225,9 @@ ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, co
     _timeSyncPolicy->SetStepDuration(_timesyncConfig.tickPeriod);
 
     _serviceDiscovery = _comAdapter->GetServiceDiscovery();
-    // TODO Double check: This should be middleware-independent. If it causes problems with HLA, this whole block can be moved to the ITimeSyncPolicy implementation so we can treat it differently.
     _serviceDiscovery->RegisterServiceDiscoveryHandler([this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType, const ib::mw::ServiceDescriptor& serviceDescriptor)
     {
-        if (!serviceDescriptor.isSynchronized || serviceDescriptor.participantName == _status.participantName)
+        if (!serviceDescriptor.isSynchronized)
             return;
 
         if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated)
@@ -324,8 +323,8 @@ auto ParticipantController::RunAsync() -> std::future<ParticipantState>
         throw std::runtime_error{errorMsg};
     }
 
-    ChangeState(ParticipantState::Idle, "ParticipantController::Run() was called");
     _isRunning = true;
+    ChangeState(ParticipantState::Idle, "ParticipantController::Run() was called");
     return _finalStatePromise.get_future();
 }
 

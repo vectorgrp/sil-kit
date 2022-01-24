@@ -81,7 +81,14 @@ add_vib_test(ITestCatchExceptionsInCallbacks
       ${itest_extra_libs}
 )
 
-add_vib_test(ITestDataPubSub
+add_vib_test(ITestHopOnHopOff
+    SOURCES
+      HopOnHopOffITest.cpp
+    LIBS
+        IntegrationBus
+)
+ 
+add_vib_test(FTestDataPubSub
     SOURCES
       DataPubSubITest.cpp
     LIBS
