@@ -141,9 +141,6 @@ void FrControllerProxy::RegisterCycleStartHandler(CycleStartHandler handler)
 
 void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessage& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
-        return;
-
     _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg);
 
     CallHandlers(msg);
@@ -151,9 +148,6 @@ void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const F
 
 void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessageAck& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
-        return;
-
     FrMessage tmp;
     tmp.frame = msg.frame;
     tmp.channel = msg.channel;
@@ -165,9 +159,6 @@ void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const F
 
 void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbol& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
-        return;
-
     // Call wakeup handlers on WUS and WUDOP
     switch (msg.pattern)
     {
@@ -187,25 +178,16 @@ void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const F
 
 void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbolAck& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
-        return;
-
     CallHandlers(msg);
 }
 
 void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CycleStart& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
-        return;
-
     CallHandlers(msg);
 }
 
 void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const PocStatus& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
-        return;
-
     //interoperability with 3.0.3
     ControllerStatus status{};
     status.pocState = msg.state;

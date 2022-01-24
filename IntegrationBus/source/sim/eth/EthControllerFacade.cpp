@@ -46,25 +46,25 @@ auto EthControllerFacade::SendFrame(EthFrame frame, std::chrono::nanoseconds tim
 void EthControllerFacade::RegisterReceiveMessageHandler(ReceiveMessageHandler handler)
 {
     _ethController->RegisterReceiveMessageHandler(handler);
-    _ethControllerProxy->RegisterReceiveMessageHandler(handler);
+    _ethControllerProxy->RegisterReceiveMessageHandler(std::move(handler));
 }
 
 void EthControllerFacade::RegisterMessageAckHandler(MessageAckHandler handler)
 {
     _ethController->RegisterMessageAckHandler(handler);
-    _ethControllerProxy->RegisterMessageAckHandler(handler);
+    _ethControllerProxy->RegisterMessageAckHandler(std::move(handler));
 }
 
 void EthControllerFacade::RegisterStateChangedHandler(StateChangedHandler handler)
 {
     _ethController->RegisterStateChangedHandler(handler);
-    _ethControllerProxy->RegisterStateChangedHandler(handler);
+    _ethControllerProxy->RegisterStateChangedHandler(std::move(handler));
 }
 
 void EthControllerFacade::RegisterBitRateChangedHandler(BitRateChangedHandler handler)
 {
     _ethController->RegisterBitRateChangedHandler(handler);
-    _ethControllerProxy->RegisterBitRateChangedHandler(handler);
+    _ethControllerProxy->RegisterBitRateChangedHandler(std::move(handler));
 }
 
 // IIbToEthController
@@ -72,17 +72,17 @@ void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 {
     if (IsLinkSimulated())
     {
-        if (ProxyFilter(from)) _ethControllerProxy->ReceiveIbMessage(from, msg);
+        if (AllowForwardToProxy(from)) _ethControllerProxy->ReceiveIbMessage(from, msg);
     }
     else
     {
-        _ethController->ReceiveIbMessage(from, msg);
+        if (AllowForwardToDefault(from)) _ethController->ReceiveIbMessage(from, msg);
     }
 }
 
 void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthTransmitAcknowledge& msg)
 {
-    if (IsLinkSimulated() && ProxyFilter(from))
+    if (IsLinkSimulated() && AllowForwardToProxy(from))
     {
         _ethControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -90,7 +90,7 @@ void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 
 void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthStatus& msg)
 {
-    if (IsLinkSimulated() && ProxyFilter(from))
+    if (IsLinkSimulated() && AllowForwardToProxy(from))
     {
         _ethControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -98,14 +98,12 @@ void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 
 void EthControllerFacade::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
-    // TODO remove support
     _ethController->SetEndpointAddress(endpointAddress);
     _ethControllerProxy->SetEndpointAddress(endpointAddress);
 }
 
 auto EthControllerFacade::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    // TODO remove!
     if (IsLinkSimulated())
     {
         return _ethControllerProxy->EndpointAddress();
@@ -165,14 +163,17 @@ auto EthControllerFacade::GetServiceDescriptor() const -> const mw::ServiceDescr
     return _serviceDescriptor;
 }
 
-auto EthControllerFacade::DefaultFilter(const IIbServiceEndpoint* from) const -> bool
+auto EthControllerFacade::AllowForwardToDefault(const IIbServiceEndpoint* from) const -> bool
 {
-    return true;
+    const auto& fromDescr = from->GetServiceDescriptor();
+    return fromDescr.participantName != _serviceDescriptor.participantName;
 }
 
-auto EthControllerFacade::ProxyFilter(const IIbServiceEndpoint* from) const -> bool
+auto EthControllerFacade::AllowForwardToProxy(const IIbServiceEndpoint* from) const -> bool
 {
-    return _remoteBusSimulator.participantName == from->GetServiceDescriptor().participantName;
+    const auto& fromDescr = from->GetServiceDescriptor();
+    return _remoteBusSimulator.participantName == fromDescr.participantName &&
+           _serviceDescriptor.serviceId == fromDescr.serviceId;
 }
 
 auto EthControllerFacade::IsLinkSimulated() const -> bool

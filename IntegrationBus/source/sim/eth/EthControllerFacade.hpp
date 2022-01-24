@@ -81,8 +81,8 @@ private:
     // ----------------------------------------
     // Private helper methods
     //
-    auto DefaultFilter(const IIbServiceEndpoint* from) const -> bool;
-    auto ProxyFilter(const IIbServiceEndpoint* from) const -> bool;
+    auto AllowForwardToDefault(const IIbServiceEndpoint* from) const -> bool;
+    auto AllowForwardToProxy(const IIbServiceEndpoint* from) const -> bool;
     auto IsLinkSimulated() const -> bool;
 
 private:

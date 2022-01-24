@@ -67,49 +67,49 @@ void FrControllerFacade::Wakeup()
 void FrControllerFacade::RegisterMessageHandler(MessageHandler handler)
 {
     _frController->RegisterMessageHandler(handler);
-    _frControllerProxy->RegisterMessageHandler(handler);
+    _frControllerProxy->RegisterMessageHandler(std::move(handler));
 }
 
 void FrControllerFacade::RegisterMessageAckHandler(MessageAckHandler handler)
 {
     _frController->RegisterMessageAckHandler(handler);
-    _frControllerProxy->RegisterMessageAckHandler(handler);
+    _frControllerProxy->RegisterMessageAckHandler(std::move(handler));
 }
 
 void FrControllerFacade::RegisterWakeupHandler(WakeupHandler handler)
 {
     _frController->RegisterWakeupHandler(handler);
-    _frControllerProxy->RegisterWakeupHandler(handler);
+    _frControllerProxy->RegisterWakeupHandler(std::move(handler));
 }
 
 void FrControllerFacade::RegisterControllerStatusHandler(ControllerStatusHandler handler)
 {
     _frController->RegisterControllerStatusHandler(handler);
-    _frControllerProxy->RegisterControllerStatusHandler(handler);
+    _frControllerProxy->RegisterControllerStatusHandler(std::move(handler));
 }
 
 void FrControllerFacade::RegisterPocStatusHandler(PocStatusHandler handler)
 {
     _frController->RegisterPocStatusHandler(handler);
-    _frControllerProxy->RegisterPocStatusHandler(handler);
+    _frControllerProxy->RegisterPocStatusHandler(std::move(handler));
 }
 
 void FrControllerFacade::RegisterSymbolHandler(SymbolHandler handler)
 {
     _frController->RegisterSymbolHandler(handler);
-    _frControllerProxy->RegisterSymbolHandler(handler);
+    _frControllerProxy->RegisterSymbolHandler(std::move(handler));
 }
 
 void FrControllerFacade::RegisterSymbolAckHandler(SymbolAckHandler handler)
 {
     _frController->RegisterSymbolAckHandler(handler);
-    _frControllerProxy->RegisterSymbolAckHandler(handler);
+    _frControllerProxy->RegisterSymbolAckHandler(std::move(handler));
 }
 
 void FrControllerFacade::RegisterCycleStartHandler(CycleStartHandler handler)
 {
     _frController->RegisterCycleStartHandler(handler);
-    _frControllerProxy->RegisterCycleStartHandler(handler);
+    _frControllerProxy->RegisterCycleStartHandler(std::move(handler));
 }
 
 // IIbToFrController
@@ -117,7 +117,7 @@ void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 {
     if (IsLinkSimulated())
     {
-        if (ProxyFilter(from)) _frControllerProxy->ReceiveIbMessage(from, msg);
+        if (AllowForwardToProxy(from)) _frControllerProxy->ReceiveIbMessage(from, msg);
     }
     else
     {
@@ -129,7 +129,7 @@ void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 {
     if (IsLinkSimulated())
     {
-        if (ProxyFilter(from)) _frControllerProxy->ReceiveIbMessage(from, msg);
+        if (AllowForwardToProxy(from)) _frControllerProxy->ReceiveIbMessage(from, msg);
     }
     else
     {
@@ -141,7 +141,7 @@ void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 {
     if (IsLinkSimulated())
     {
-        if (ProxyFilter(from)) _frControllerProxy->ReceiveIbMessage(from, msg);
+        if (AllowForwardToProxy(from)) _frControllerProxy->ReceiveIbMessage(from, msg);
     }
     else
     {
@@ -153,7 +153,7 @@ void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 {
     if (IsLinkSimulated())
     {
-        if (ProxyFilter(from)) _frControllerProxy->ReceiveIbMessage(from, msg);
+        if (AllowForwardToProxy(from)) _frControllerProxy->ReceiveIbMessage(from, msg);
     }
     else
     {
@@ -163,7 +163,7 @@ void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const CycleStart& msg)
 {
-    if (IsLinkSimulated() && ProxyFilter(from))
+    if (IsLinkSimulated() && AllowForwardToProxy(from))
     {
         _frControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -171,7 +171,7 @@ void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const PocStatus& msg)
 {
-    if (IsLinkSimulated() && ProxyFilter(from))
+    if (IsLinkSimulated() && AllowForwardToProxy(from))
     {
         _frControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -179,14 +179,12 @@ void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void FrControllerFacade::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
-    // TODO remove support
     _frController->SetEndpointAddress(endpointAddress);
     _frControllerProxy->SetEndpointAddress(endpointAddress);
 }
 
 auto FrControllerFacade::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    // TODO remove!
     if (IsLinkSimulated())
     {
         return _frControllerProxy->EndpointAddress();
@@ -255,14 +253,16 @@ auto FrControllerFacade::GetServiceDescriptor() const -> const mw::ServiceDescri
     return _serviceDescriptor;
 }
 
-auto FrControllerFacade::DefaultFilter(const IIbServiceEndpoint* from) const -> bool
+auto FrControllerFacade::AllowForwardToDefault(const IIbServiceEndpoint* from) const -> bool
 {
     throw std::logic_error("This controller mode is not supported anymore");
 }
 
-auto FrControllerFacade::ProxyFilter(const IIbServiceEndpoint* from) const -> bool
+auto FrControllerFacade::AllowForwardToProxy(const IIbServiceEndpoint* from) const -> bool
 {
-    return _remoteBusSimulator.participantName == from->GetServiceDescriptor().participantName;
+    const auto& fromDescr = from->GetServiceDescriptor();
+    return _remoteBusSimulator.participantName == fromDescr.participantName &&
+           _serviceDescriptor.serviceId == fromDescr.serviceId;
 }
 
 auto FrControllerFacade::IsLinkSimulated() const -> bool

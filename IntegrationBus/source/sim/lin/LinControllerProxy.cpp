@@ -163,8 +163,6 @@ void LinControllerProxy::RegisterFrameResponseUpdateHandler(FrameResponseUpdateH
 
 void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const Transmission& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor)) return;
-
     auto& frame = msg.frame;
 
     if (frame.dataLength > 8)
@@ -208,7 +206,6 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const WakeupPulse& /*msg*/)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor)) return;
     CallEach(_wakeupHandler, this);
 }
 

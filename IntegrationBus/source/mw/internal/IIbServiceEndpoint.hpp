@@ -37,9 +37,7 @@ inline EndpointAddress to_endpointAddress(const ServiceDescriptor& descriptor);
 
 inline bool operator==(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs);
 inline bool operator!=(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs);
-inline bool AllowMessageProcessingProxy(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs);
 inline bool AllowMessageProcessing(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs);
-
 
 //!< Parses a serialized ServiceDescriptor into a struct. This is a lossy operation.
 inline auto from_string(const std::string& str)->ServiceDescriptor;
@@ -78,20 +76,9 @@ inline bool operator!=(const ServiceDescriptor& lhs, const ServiceDescriptor& rh
     return !(lhs == rhs);
 }
 
-inline bool AllowMessageProcessingProxy(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs)
-{
-  return
-    lhs.legacyEpa.endpoint == rhs.legacyEpa.endpoint
-    && lhs.participantName != rhs.participantName
-    ;
-}
-
 inline bool AllowMessageProcessing(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs)
 {
-    return
-        lhs.legacyEpa.endpoint == rhs.legacyEpa.endpoint
-        && lhs.participantName == rhs.participantName
-        ;
+    return lhs.legacyEpa.endpoint == rhs.legacyEpa.endpoint && lhs.participantName == rhs.participantName;
 }
 
 inline bool EqualsParticipant(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs)

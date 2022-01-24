@@ -111,9 +111,6 @@ void CanControllerProxy::RegisterHandler(CallbackT<MsgT> handler)
 
 void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMessage& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
-        return;
-
     _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg);
 
     CallHandlers(msg);
@@ -121,9 +118,6 @@ void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanTransmitAcknowledge& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
-        return;
-
     auto transmittedMsg = _transmittedMessages.find(msg.transmitId);
     if (transmittedMsg != _transmittedMessages.end())
     {
@@ -141,9 +135,6 @@ void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanControllerStatus& msg)
 {
-    if (!AllowMessageProcessingProxy(from->GetServiceDescriptor(), _serviceDescriptor))
-        return;
-
     if (_controllerState != msg.controllerState)
     {
         _controllerState = msg.controllerState;

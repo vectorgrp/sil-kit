@@ -18,6 +18,8 @@ class IIbToEthControllerFacade
     : public ib::mw::IIbEndpoint<EthMessage, EthTransmitAcknowledge, EthStatus>
     , public ib::mw::IIbSender<EthMessage, EthSetMode>
 {
+public:
+    virtual ~IIbToEthControllerFacade() noexcept = default;
 };
 
 } // namespace eth

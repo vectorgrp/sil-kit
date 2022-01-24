@@ -124,10 +124,6 @@ void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMe
         return;
     }
 
-    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
-    {
-        return;
-    }
     CallHandlers(msg);
 
     _tracer.Trace(extensions::Direction::Receive, _timeProvider->Now(), msg);

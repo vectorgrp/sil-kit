@@ -19,6 +19,8 @@ namespace can {
     : public mw::IIbEndpoint<CanMessage, CanTransmitAcknowledge, CanControllerStatus>
     , public mw::IIbSender<CanMessage, CanConfigureBaudrate, CanSetControllerMode>
 {
+public:
+    virtual ~IIbToCanControllerFacade() noexcept = default;
 };
 
 } // namespace can

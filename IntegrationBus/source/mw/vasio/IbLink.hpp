@@ -98,7 +98,7 @@ void IbLink<MsgT>::DistributeLocalIbMessage(const IIbServiceEndpoint* from, cons
         // C++ 17 -> if constexpr
         if (!IbMsgTraits<MsgT>::IsSelfDeliveryEnforced())
         {
-          if (receiverId == from) continue;
+          if (receiverId->GetServiceDescriptor() == from->GetServiceDescriptor()) continue;
         }
         DispatchIbMessage(receiver, from, msg);
     }

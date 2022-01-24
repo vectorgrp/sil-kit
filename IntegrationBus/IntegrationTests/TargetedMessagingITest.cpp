@@ -96,7 +96,6 @@ TEST(TargetedMessagingITest, targeted_messaging)
     });
 
     ASSERT_TRUE(testHarness.Run(3s));
-    systemCtrl->Run();
 
     ASSERT_GT(receiveCount, 0) << "ReceiveCount was 0 - receiver likely never received the message.";
 }

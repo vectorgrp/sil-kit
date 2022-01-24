@@ -18,6 +18,8 @@ class IIbToLinControllerFacade
     : public mw::IIbEndpoint<Transmission, WakeupPulse, ControllerConfig, ControllerStatusUpdate, FrameResponseUpdate>
     , public mw::IIbSender<Transmission, SendFrameRequest, SendFrameHeaderRequest, WakeupPulse, ControllerConfig, ControllerStatusUpdate, FrameResponseUpdate>
 {
+public:
+    virtual ~IIbToLinControllerFacade() noexcept = default;
 };
 
 } // namespace lin

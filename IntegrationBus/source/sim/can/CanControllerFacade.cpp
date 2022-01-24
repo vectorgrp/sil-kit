@@ -63,25 +63,25 @@ auto CanControllerFacade::SendMessage(CanMessage&& msg) ->CanTxId
 void CanControllerFacade::RegisterReceiveMessageHandler(ReceiveMessageHandler handler)
 {
     _canController->RegisterReceiveMessageHandler(handler);
-    _canControllerProxy->RegisterReceiveMessageHandler(handler);
+    _canControllerProxy->RegisterReceiveMessageHandler(std::move(handler));
 }
 
 void CanControllerFacade::RegisterStateChangedHandler(StateChangedHandler handler)
 {
     _canController->RegisterStateChangedHandler(handler);
-    _canControllerProxy->RegisterStateChangedHandler(handler);
+    _canControllerProxy->RegisterStateChangedHandler(std::move(handler));
 }
 
 void CanControllerFacade::RegisterErrorStateChangedHandler(ErrorStateChangedHandler handler)
 {
     _canController->RegisterErrorStateChangedHandler(handler);
-    _canControllerProxy->RegisterErrorStateChangedHandler(handler);
+    _canControllerProxy->RegisterErrorStateChangedHandler(std::move(handler));
 }
 
 void CanControllerFacade::RegisterTransmitStatusHandler(MessageStatusHandler handler)
 {
     _canController->RegisterTransmitStatusHandler(handler);
-    _canControllerProxy->RegisterTransmitStatusHandler(handler);
+    _canControllerProxy->RegisterTransmitStatusHandler(std::move(handler));
 }
 
 // IIbToCanController / IIbToCanControllerProxy
@@ -89,18 +89,18 @@ void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 {
     if (IsLinkSimulated())
     {
-        if (ProxyFilter(from)) _canControllerProxy->ReceiveIbMessage(from, msg); 
+        if (AllowForwardToProxy(from)) _canControllerProxy->ReceiveIbMessage(from, msg); 
     }
     else
     {
-        _canController->ReceiveIbMessage(from, msg);
+        if (AllowForwardToDefault(from)) _canController->ReceiveIbMessage(from, msg);
     }
 }
 
 // IIbToCanControllerProxy only
 void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanControllerStatus& msg)
 {
-    if (IsLinkSimulated() && ProxyFilter(from))
+    if (IsLinkSimulated() && AllowForwardToProxy(from))
     {
         _canControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -108,7 +108,7 @@ void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 
 void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanTransmitAcknowledge& msg)
 {
-    if (IsLinkSimulated() && ProxyFilter(from))
+    if (IsLinkSimulated() && AllowForwardToProxy(from))
     {
         _canControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -117,14 +117,12 @@ void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 
 void CanControllerFacade::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
-    // TODO remove support
     _canController->SetEndpointAddress(endpointAddress);
     _canControllerProxy->SetEndpointAddress(endpointAddress);
 }
 
 auto CanControllerFacade::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    // TODO remove!
     if (IsLinkSimulated())
     {
         return _canControllerProxy->EndpointAddress();
@@ -193,16 +191,18 @@ auto CanControllerFacade::GetServiceDescriptor() const -> const mw::ServiceDescr
     return _serviceDescriptor;
 }
 
-auto CanControllerFacade::DefaultFilter(const IIbServiceEndpoint* from) const
-    -> bool
+auto CanControllerFacade::AllowForwardToDefault(const IIbServiceEndpoint* from) const -> bool
 {
-    return true;
+    const auto& fromDescr = from->GetServiceDescriptor();
+    return fromDescr.participantName != _serviceDescriptor.participantName;
 }
 
-auto CanControllerFacade::ProxyFilter(const IIbServiceEndpoint* from) const
+auto CanControllerFacade::AllowForwardToProxy(const IIbServiceEndpoint* from) const
     -> bool
 {
-    return _remoteBusSimulator.participantName == from->GetServiceDescriptor().participantName;
+    const auto& fromDescr = from->GetServiceDescriptor();
+    return _remoteBusSimulator.participantName == fromDescr.participantName &&
+           _serviceDescriptor.serviceId == fromDescr.serviceId;
 }
 
 auto CanControllerFacade::IsLinkSimulated() const -> bool

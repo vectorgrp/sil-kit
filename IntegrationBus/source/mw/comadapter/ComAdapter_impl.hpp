@@ -223,82 +223,28 @@ template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonicalName) -> can::ICanController*
 {
     auto&& config = get_by_name(_participant.canControllers, canonicalName);
-
-    // TODO replay is currently not possible - need concept!!
     return CreateControllerForLink<can::CanControllerFacade>(config, config, _timeProvider.get());
-
-    //if (ControllerUsesNetworkSimulator(config.name))
-    //{
-    //    return CreateControllerForLink<can::CanControllerProxy>(config);
-    //}
-    //else if (ControllerUsesReplay(config))
-    //{
-    //    return CreateControllerForLink<can::CanControllerReplay>(config, config, _timeProvider.get());
-    //}
-    //else
-    //{
-    //    return CreateControllerForLink<can::CanController>(config, _timeProvider.get());
-    //}
 }
 
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonicalName) -> eth::IEthController*
 {
     auto&& config = get_by_name(_participant.ethernetControllers, canonicalName);
-
-    // TODO replay is currently not possible - need concept!!
     return CreateControllerForLink<eth::EthControllerFacade>(config, config, _timeProvider.get());
-
-    //if (ControllerUsesNetworkSimulator(config.name))
-    //{
-    //    return CreateControllerForLink<eth::EthControllerProxy>(config, config);
-    //}
-    //else if (ControllerUsesReplay(config))
-    //{
-    //    return CreateControllerForLink<eth::EthControllerReplay>(config, config, _timeProvider.get());
-    //}
-    //else
-    //{
-    //    return CreateControllerForLink<eth::EthController>(config, config, _timeProvider.get());
-    //}
 }
 
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFrController*
 {
     auto&& config = get_by_name(_participant.flexrayControllers, canonicalName);
-
     return CreateControllerForLink<fr::FrControllerFacade>(config, config, _timeProvider.get());
-
-    //if (ControllerUsesNetworkSimulator(config.name))
-    //{
-    //    return CreateControllerForLink<fr::FrControllerProxy>(config);
-    //}
-    //else
-    //{
-    //    return CreateControllerForLink<fr::FrController>(config, _timeProvider.get());
-    //}
 }
 
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonicalName) -> lin::ILinController*
 {
     auto&& config = get_by_name(_participant.linControllers, canonicalName);
-    // TODO replay is currently not possible - need concept!!
     return CreateControllerForLink<lin::LinControllerFacade>(config, config, _timeProvider.get());
-    
-    //if (ControllerUsesNetworkSimulator(config.name))
-    //{
-    //    return CreateControllerForLink<lin::LinControllerProxy>(config);
-    //}
-    //else if (ControllerUsesReplay(config))
-    //{
-    //    return CreateControllerForLink<lin::LinControllerReplay>(config, config, _timeProvider.get());
-    //}
-    //else
-    //{
-    //    return CreateControllerForLink<lin::LinController>(config, _timeProvider.get());
-    //}
 }
 
 template <class IbConnectionT>

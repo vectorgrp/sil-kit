@@ -18,7 +18,7 @@
 #include "GenericSubscriberReplay.hpp"
 #include "InPortReplay.hpp"
 #include "OutPortReplay.hpp"
-
+#if 0 // Replay is inactive for now
 namespace {
 
 using namespace ib;
@@ -687,3 +687,4 @@ TEST(ReplayTest, outport_replay_config_send)
     }
 }
 } //end anonymous namespace
+#endif

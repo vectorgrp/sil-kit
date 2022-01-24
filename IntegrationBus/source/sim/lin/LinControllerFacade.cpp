@@ -81,25 +81,25 @@ void LinControllerFacade::WakeupInternal()
 void LinControllerFacade::RegisterFrameStatusHandler(FrameStatusHandler handler)
 {
     _linController->RegisterFrameStatusHandler(handler);
-    _linControllerProxy->RegisterFrameStatusHandler(handler);
+    _linControllerProxy->RegisterFrameStatusHandler(std::move(handler));
 }
 
 void LinControllerFacade::RegisterGoToSleepHandler(GoToSleepHandler handler)
 {
     _linController->RegisterGoToSleepHandler(handler);
-    _linControllerProxy->RegisterGoToSleepHandler(handler);
+    _linControllerProxy->RegisterGoToSleepHandler(std::move(handler));
 }
 
 void LinControllerFacade::RegisterWakeupHandler(WakeupHandler handler)
 {
     _linController->RegisterWakeupHandler(handler);
-    _linControllerProxy->RegisterWakeupHandler(handler);
+    _linControllerProxy->RegisterWakeupHandler(std::move(handler));
 }
 
 void LinControllerFacade::RegisterFrameResponseUpdateHandler(FrameResponseUpdateHandler handler)
 {
     _linController->RegisterFrameResponseUpdateHandler(handler);
-    _linControllerProxy->RegisterFrameResponseUpdateHandler(handler);
+    _linControllerProxy->RegisterFrameResponseUpdateHandler(std::move(handler));
 }
 
 // IIbToLinController
@@ -107,11 +107,11 @@ void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 {
     if (IsLinkSimulated())
     {
-        if (ProxyFilter(from)) _linControllerProxy->ReceiveIbMessage(from, msg);
+        if (AllowForwardToProxy(from)) _linControllerProxy->ReceiveIbMessage(from, msg);
     }
     else
     {
-        _linController->ReceiveIbMessage(from, msg);
+        if (AllowForwardToDefault(from)) _linController->ReceiveIbMessage(from, msg);
     }
 }
 
@@ -119,11 +119,11 @@ void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 {
     if (IsLinkSimulated())
     {
-        if (ProxyFilter(from)) _linControllerProxy->ReceiveIbMessage(from, msg);
+        if (AllowForwardToProxy(from)) _linControllerProxy->ReceiveIbMessage(from, msg);
     }
     else
     {
-        _linController->ReceiveIbMessage(from, msg);
+        if (AllowForwardToDefault(from)) _linController->ReceiveIbMessage(from, msg);
     }
 }
 
@@ -131,11 +131,11 @@ void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 {
     if (IsLinkSimulated())
     {
-        if (ProxyFilter(from)) _linControllerProxy->ReceiveIbMessage(from, msg);
+        if (AllowForwardToProxy(from)) _linControllerProxy->ReceiveIbMessage(from, msg);
     }
     else
     {
-        _linController->ReceiveIbMessage(from, msg);
+        if (AllowForwardToDefault(from)) _linController->ReceiveIbMessage(from, msg);
     }
 }
 
@@ -143,7 +143,7 @@ void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 {
     if (!IsLinkSimulated())
     {
-        _linController->ReceiveIbMessage(from, msg);
+        if (AllowForwardToDefault(from)) _linController->ReceiveIbMessage(from, msg);
     }
 }
 
@@ -151,24 +151,22 @@ void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 {
     if (IsLinkSimulated())
     {
-        if (ProxyFilter(from)) _linControllerProxy->ReceiveIbMessage(from, msg);
+        if (AllowForwardToProxy(from)) _linControllerProxy->ReceiveIbMessage(from, msg);
     }
     else
     {
-        _linController->ReceiveIbMessage(from, msg);
+        if (AllowForwardToDefault(from)) _linController->ReceiveIbMessage(from, msg);
     }
 }
 
 void LinControllerFacade::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
 {
-    // TODO remove support
     _linController->SetEndpointAddress(endpointAddress);
     _linControllerProxy->SetEndpointAddress(endpointAddress);
 }
 
 auto LinControllerFacade::EndpointAddress() const -> const mw::EndpointAddress&
 {
-    // TODO remove!
     if (IsLinkSimulated())
     {
         return _linControllerProxy->EndpointAddress();
@@ -238,14 +236,17 @@ auto LinControllerFacade::GetServiceDescriptor() const -> const mw::ServiceDescr
     return _serviceDescriptor;
 }
 
-auto LinControllerFacade::DefaultFilter(const IIbServiceEndpoint* from) const -> bool
+auto LinControllerFacade::AllowForwardToDefault(const IIbServiceEndpoint* from) const -> bool
 {
-    return true;
+    const auto& fromDescr = from->GetServiceDescriptor();
+    return fromDescr.participantName != _serviceDescriptor.participantName;
 }
 
-auto LinControllerFacade::ProxyFilter(const IIbServiceEndpoint* from) const -> bool
+auto LinControllerFacade::AllowForwardToProxy(const IIbServiceEndpoint* from) const -> bool
 {
-    return _remoteBusSimulator.participantName == from->GetServiceDescriptor().participantName;
+    const auto& fromDescr = from->GetServiceDescriptor();
+    return _remoteBusSimulator.participantName == fromDescr.participantName &&
+           _serviceDescriptor.serviceId == fromDescr.serviceId;
 }
 
 auto LinControllerFacade::IsLinkSimulated() const -> bool

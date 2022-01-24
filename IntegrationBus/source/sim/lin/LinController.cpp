@@ -254,9 +254,6 @@ void LinController::RegisterFrameResponseUpdateHandler(FrameResponseUpdateHandle
 
 void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Transmission& msg)
 {
-    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor)) return;
-
-
     auto& frame = msg.frame;
 
 
@@ -340,14 +337,11 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Trans
 
 void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const WakeupPulse& /*msg*/)
 {
-    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor)) return;
     CallHandlers(_wakeupHandler, this);
 }
 
 void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerConfig& msg)
 {
-    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor)) return;
-
     auto& linNode = GetLinNode(from->GetServiceDescriptor().legacyEpa);
 
     linNode.controllerMode = msg.controllerMode;
@@ -362,16 +356,12 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Contr
 
 void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerStatusUpdate& msg)
 {
-    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor)) return;
-
     auto& linNode = GetLinNode(from->GetServiceDescriptor().legacyEpa);
     linNode.controllerStatus = msg.status;
 }
 
 void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrameResponseUpdate& msg)
 {
-    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor)) return;
-
     auto& linNode = GetLinNode(from->GetServiceDescriptor().legacyEpa);
     linNode.UpdateResponses(msg.frameResponses, _logger);
 

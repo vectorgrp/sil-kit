@@ -19,6 +19,8 @@ class IIbToFrControllerFacade
     , public ib::mw::IIbSender</*Fr*/ FrMessage, FrMessageAck, FrSymbol, FrSymbolAck, 
                                 /*FrProxy*/ HostCommand, ControllerConfig, TxBufferConfigUpdate, TxBufferUpdate>
 {
+public:
+    virtual ~IIbToFrControllerFacade() noexcept = default;
 };
 
 } // namespace fr
