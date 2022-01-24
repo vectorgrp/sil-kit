@@ -21,6 +21,15 @@ target_link_libraries(IbSimDataMessage
             IbInternal
 )
 
-add_vib_test(TestSimDataPublisher SOURCES DataPublisherTest.cpp LIBS IbSimDataMessage IbConfig IbMwMockComAdapter IbInternal)
-add_vib_test(TestSimDataSubscriber SOURCES DataSubscriberTest.cpp LIBS IbSimDataMessage IbConfig IbMwMockComAdapter IbInternal)
-add_vib_test(TestDataExchangeFormat SOURCES DataExchangeFormatTest.cpp LIBS IbSimDataMessage)
+add_vib_test(TestSimDataPublisher 
+    SOURCES DataPublisherTest.cpp 
+    LIBS IbSimDataMessage IbConfig_deprecated IbMwMockComAdapter IbInternal
+)
+add_vib_test(TestSimDataSubscriber 
+    SOURCES DataSubscriberTest.cpp 
+    LIBS IbSimDataMessage IbConfig_deprecated IbMwMockComAdapter IbInternal
+)
+add_vib_test(TestDataExchangeFormat 
+    SOURCES DataExchangeFormatTest.cpp 
+    LIBS IbSimDataMessage
+)

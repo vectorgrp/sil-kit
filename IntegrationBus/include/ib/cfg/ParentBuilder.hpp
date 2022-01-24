@@ -10,6 +10,7 @@
 
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 
 template<class ParentT>
 class ParentBuilder
@@ -51,5 +52,6 @@ auto ParentBuilder<ParentT>::Parent() -> ParentT*
     return _parent;
 }
 
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

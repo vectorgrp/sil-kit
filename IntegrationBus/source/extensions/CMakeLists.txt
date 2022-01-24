@@ -39,7 +39,7 @@ target_include_directories(IbExtensions
 
 target_link_libraries(IbExtensions
     PUBLIC  IbInterface
-            IbConfig
+            IbConfig_deprecated
     PRIVATE IbVersion
 )
 

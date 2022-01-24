@@ -18,6 +18,7 @@ template <>
 inline auto from_string<cfg::Middleware>(const std::string& value) -> cfg::Middleware;
 
 namespace cfg {
+inline namespace deprecated {
 
 inline auto to_string(SyncType syncType) -> std::string;
 inline auto operator<<(std::ostream& out, SyncType) -> std::ostream&;
@@ -34,6 +35,7 @@ inline auto to_string(DiscoveryType discoveryType) -> std::string;
 inline auto operator<<(std::ostream& out, DiscoveryType discoveryType) -> std::ostream&;
 
 } // namespace FastRtps
+} // namespace deprecated
 } // namespace cfg
 
 // ================================================================================
@@ -59,6 +61,7 @@ auto from_string<cfg::Middleware>(const std::string& value) -> cfg::Middleware
 }
 
 namespace cfg {
+inline namespace deprecated {
 
 auto to_string(SyncType syncType) -> std::string
 {
@@ -166,5 +169,6 @@ auto operator<<(std::ostream& out, DiscoveryType discoveryType) -> std::ostream&
 
 } // namespace FastRtps
 
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

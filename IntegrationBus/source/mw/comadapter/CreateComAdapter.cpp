@@ -39,4 +39,3 @@ auto CreateComAdapterImpl(ib::cfg::Config config, const std::string& participant
 
 } // mw
 } // namespace ib
-

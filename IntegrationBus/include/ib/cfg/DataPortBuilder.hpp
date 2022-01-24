@@ -14,6 +14,7 @@
 
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 
 class DataPortBuilder : public ParentBuilder<ParticipantBuilder>
 {
@@ -41,5 +42,6 @@ private:
 //  Inline Implementations
 // ================================================================================
 
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

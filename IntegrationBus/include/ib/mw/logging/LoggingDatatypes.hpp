@@ -63,7 +63,6 @@ inline bool operator==(const LogMsg& lhs, const LogMsg& rhs)
         && lhs.payload == rhs.payload;
 }
 
-
 } // namespace logging
 } // namespace mw
 } // namespace ib

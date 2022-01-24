@@ -12,7 +12,7 @@ target_link_libraries(IbMwComAdapter
     PUBLIC
         IbInternal
         IbMwLogging
-        IbConfig
+        IbConfig_deprecated
         IbUtil
         IbSetThreadName
         IbUuid
@@ -33,7 +33,7 @@ target_link_libraries(IbMwComAdapter
 )
 
 if (IB_MW_ENABLE_VASIO)
-    target_link_libraries(IbMwComAdapter PUBLIC  IbMwVAsio)
+    target_link_libraries(IbMwComAdapter PUBLIC IbMwVAsio)
 endif()
 
 target_include_directories(IbMwComAdapter
@@ -44,4 +44,7 @@ if (MSVC)
     target_compile_options(IbMwComAdapter PRIVATE "/bigobj")
 endif (MSVC)
 
-add_vib_test(TestMwComAdapter SOURCES ComAdapterTest.cpp LIBS IbMwMockNullConnection)
+add_vib_test(TestMwComAdapter 
+    SOURCES ComAdapterTest.cpp 
+    LIBS IbMwMockNullConnection
+)

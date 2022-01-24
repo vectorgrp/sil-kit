@@ -8,6 +8,7 @@
 
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 
 class LinkBuilder
 {
@@ -44,5 +45,6 @@ inline auto LinkBuilder::LinkType() const -> Link::Type
     return link.type;
 }
 
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

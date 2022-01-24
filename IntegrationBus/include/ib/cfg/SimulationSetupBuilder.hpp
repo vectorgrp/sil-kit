@@ -15,6 +15,7 @@
 
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 
 class SimulationSetupBuilder
 {
@@ -47,5 +48,6 @@ private:
     mw::EndpointId _freeEndpointId = 1;
 };
 
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

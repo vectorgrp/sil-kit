@@ -24,6 +24,7 @@
 
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 
 class ParticipantBuilder : public ParentBuilder<SimulationSetupBuilder>
 {
@@ -120,5 +121,6 @@ private:
     std::vector<NetworkSimulatorBuilder> _networkSimulators;
 };
 
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

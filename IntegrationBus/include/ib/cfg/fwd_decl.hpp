@@ -4,6 +4,7 @@
 
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 
 struct Version;
 struct Link;
@@ -31,6 +32,10 @@ class NetworkSimulatorBuilder;
 class SwitchPortBuilder;
 class SwitchBuilder;
 class TimeSyncBuilder;
+
+} // namespace deprecated
+
+class ParticipantConfiguration;
 
 } // namespace cfg
 } // namespace ib

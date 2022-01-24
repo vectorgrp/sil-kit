@@ -8,6 +8,7 @@
 
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 
 class NetworkSimulatorBuilder
 {
@@ -24,5 +25,6 @@ private:
     NetworkSimulator _config;
 };
 
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

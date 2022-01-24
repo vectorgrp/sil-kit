@@ -25,6 +25,7 @@
 namespace ib {
 //! The config namespace
 namespace cfg {
+inline namespace deprecated {
 
 struct Version
 {
@@ -670,5 +671,6 @@ inline auto get_by_name(T&& range, const std::string& name) -> decltype(*range.b
         return *iter;
 }
 
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

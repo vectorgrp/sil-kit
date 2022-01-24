@@ -10,6 +10,7 @@
 
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 
 class SwitchPortBuilder : public ParentBuilder<SwitchBuilder>
 {
@@ -26,5 +27,6 @@ private:
     Switch::Port _config;
 };
 
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

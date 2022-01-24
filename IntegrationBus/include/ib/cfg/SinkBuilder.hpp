@@ -11,6 +11,7 @@
 
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 
 class SinkBuilder : public ParentBuilder<LoggerBuilder>
 {
@@ -33,5 +34,6 @@ private:
 //  Inline Implementations
 // ================================================================================
 
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

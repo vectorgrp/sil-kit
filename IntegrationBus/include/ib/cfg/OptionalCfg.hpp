@@ -2,9 +2,9 @@
 
 #pragma once
 
-
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 
 //! \brief super simple drop in replacement for std::optional
 //!
@@ -67,5 +67,6 @@ bool operator==(const OptionalCfg<ConfigT>& lhs, const OptionalCfg<ConfigT>& rhs
         && lhs.value() == rhs.value();
 }
 
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

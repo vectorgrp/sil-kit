@@ -17,3 +17,5 @@
 #include "SwitchBuilder.hpp"
 #include "SwitchPortBuilder.hpp"
 #include "TimeSyncBuilder.hpp"
+
+#include "IParticipantConfiguration.hpp"

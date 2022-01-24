@@ -8,6 +8,7 @@
 
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 
 class ExtensionConfigBuilder
 {
@@ -22,5 +23,6 @@ private:
     ExtensionConfig _config;
 };
   
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

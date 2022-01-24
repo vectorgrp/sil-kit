@@ -15,6 +15,7 @@
 
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 
 template<class ControllerCfg>
 class ControllerBuilder : public ParentBuilder<ParticipantBuilder>
@@ -113,6 +114,7 @@ auto ControllerBuilder<ControllerCfg>::WithReplay(std::string sourceName) -> Rep
     return *_replayBuilder;
 }
 
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib
 

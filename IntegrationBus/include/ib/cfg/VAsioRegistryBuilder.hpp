@@ -9,6 +9,7 @@
 
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 namespace VAsio {
 
 class RegistryBuilder
@@ -29,5 +30,6 @@ private:
 };
 
 } // namespace VAsio
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

@@ -11,6 +11,7 @@
 
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 
 class SwitchBuilder : public ParentBuilder<SimulationSetupBuilder>
 {
@@ -27,5 +28,6 @@ private:
     std::vector<SwitchPortBuilder> _ports;
 };
 
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

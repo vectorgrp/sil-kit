@@ -2,6 +2,7 @@
 build*/
 _build*/
 install*/
+_install*/
 .vscode
 .vs
 out

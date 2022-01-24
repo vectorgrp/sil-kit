@@ -29,7 +29,7 @@ add_definitions(-DEXPORT_IntegrationBusAPI)
 
 target_link_libraries(IbRegistry
     IbMwVAsio
-    IbConfig
+    IbConfig_deprecated
 )
 install(TARGETS IbRegistry
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}
@@ -43,7 +43,7 @@ add_library(vib-registry
 )
 target_link_libraries(vib-registry
     PRIVATE
-        IbConfig
+        IbConfig_deprecated
         IbMwVAsio
         IbVersion
         IbExtensions

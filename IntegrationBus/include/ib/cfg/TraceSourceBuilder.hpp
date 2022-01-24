@@ -10,6 +10,7 @@
 
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 
 class TraceSourceBuilder 
 {
@@ -31,5 +32,6 @@ private:
 //  Inline Implementations
 // ================================================================================
 
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

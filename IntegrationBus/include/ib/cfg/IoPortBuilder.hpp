@@ -15,6 +15,7 @@
 
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 
 template<class IoPortCfg>
 class IoPortBuilder : public ParentBuilder<ParticipantBuilder>
@@ -128,5 +129,6 @@ auto IoPortBuilder<IoPortCfg>::Build() -> IoPortCfg
     return std::move(_port);
 }
 
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

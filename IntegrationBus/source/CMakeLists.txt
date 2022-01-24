@@ -1,4 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
+add_subdirectory(cfg/deprecated)
 add_subdirectory(cfg)
 add_subdirectory(tracing)
 add_subdirectory(mw)
@@ -124,7 +125,8 @@ target_link_libraries(IntegrationBus
     IbInterface
     PRIVATE
     IbInternal
-    IbConfig
+    IbConfig_deprecated
+    IbConfiguration
     IbMwComAdapter
     IbExtensions
 )

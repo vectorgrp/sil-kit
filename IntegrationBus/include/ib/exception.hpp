@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <exception>
+#include <stdexcept>
 
 namespace ib {
 
@@ -12,6 +12,13 @@ public:
     using runtime_error::runtime_error;
 
     type_conversion_error() : runtime_error("Invalid type conversion.") { }
+};
+
+class configuration_error : public std::runtime_error
+{
+    using std::runtime_error::runtime_error;
+
+    configuration_error() : configuration_error("Configuration has syntactical or semantical errors.") { }
 };
 
 } // namespace ib

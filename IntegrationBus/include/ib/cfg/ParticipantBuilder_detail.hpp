@@ -6,6 +6,7 @@
 
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 
 class LinkBuilder;
 
@@ -30,5 +31,6 @@ auto ParticipantBuilder_AddOrGetLink(Builder& builder, LinkType linkType, const 
 }
 
 } // namespace detail
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

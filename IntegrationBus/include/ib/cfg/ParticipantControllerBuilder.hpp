@@ -13,6 +13,7 @@
 
 namespace ib {
 namespace cfg {
+inline namespace deprecated {
 
 class ParticipantControllerBuilder : public ParentBuilder<ParticipantBuilder>
 {
@@ -31,5 +32,6 @@ private:
     ParticipantController _config;
 };
 
+} // namespace deprecated
 } // namespace cfg
 } // namespace ib

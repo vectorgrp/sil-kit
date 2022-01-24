@@ -23,11 +23,6 @@ struct DataExchangeFormat {
     std::string mimeType;
 };
 
-inline bool operator==(const DataExchangeFormat& lhs, const DataExchangeFormat& rhs)
-{
-    return lhs.mimeType == rhs.mimeType;
-}
-
 //! \brief Callback type for new data reception callbacks
 using CallbackExchangeFormatT = std::function<void(ib::sim::data::IDataSubscriber* subscriber, const std::vector<uint8_t>& data, const ib::sim::data::DataExchangeFormat& dataExchangeFormat)>;
 
@@ -45,6 +40,19 @@ struct PublisherAnnouncement
     std::string        pubUUID;
     DataExchangeFormat pubDataExchangeFormat;
 };
+
+// ================================================================================
+//  Inline Implementations
+// ================================================================================
+inline bool operator==(const DataMessage& lhs, const DataMessage& rhs)
+{
+    return lhs.data == rhs.data;
+}
+
+inline bool operator==(const sim::data::DataExchangeFormat& lhs, const sim::data::DataExchangeFormat& rhs)
+{
+    return lhs.mimeType == rhs.mimeType;
+}
 
 } // namespace data
 } // namespace sim
