@@ -7,9 +7,6 @@ add_library(IbSimCan STATIC
     CanDatatypesUtils.cpp
     CanDatatypesUtils.hpp
 
-    CanControllerReplay.cpp
-    CanControllerReplay.hpp
-
     CanControllerFacade.cpp
     CanControllerFacade.hpp
 )

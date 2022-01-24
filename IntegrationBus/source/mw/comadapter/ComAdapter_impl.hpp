@@ -6,7 +6,6 @@
 #include "CanController.hpp"
 #include "CanControllerProxy.hpp"
 #include "CanControllerFacade.hpp"
-#include "CanControllerReplay.hpp"
 #include "EthController.hpp"
 #include "EthControllerProxy.hpp"
 #include "EthControllerFacade.hpp"
@@ -226,7 +225,7 @@ auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonical
     auto&& config = get_by_name(_participant.canControllers, canonicalName);
 
     // TODO replay is currently not possible - need concept!!
-    return CreateControllerForLink<can::CanControllerFacade>(config, _timeProvider.get());
+    return CreateControllerForLink<can::CanControllerFacade>(config, config, _timeProvider.get());
 
     //if (ControllerUsesNetworkSimulator(config.name))
     //{

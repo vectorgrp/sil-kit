@@ -11,6 +11,7 @@
 #include "IIbToCanController.hpp"
 #include "IComAdapterInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
+#include "IReplayDataController.hpp"
 
 #include <tuple>
 #include <vector>
@@ -24,6 +25,7 @@ class CanController
     , public IIbToCanController
     , public mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
+    , public tracing::IReplayDataController
     , public mw::IIbServiceEndpoint
 {
 public:
@@ -36,8 +38,8 @@ public:
     CanController() = delete;
     CanController(const CanController&) = default;
     CanController(CanController&&) = default;
-    CanController(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider);
-
+    CanController(mw::IComAdapterInternal* comAdapter, const ib::cfg::CanController& config,
+                  mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -77,6 +79,9 @@ public:
     // ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
+    // IReplayDataProvider
+    void ReplayMessage(const extensions::IReplayMessage* replayMessage) override;
+
     // IIbServiceEndpoint
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
@@ -101,10 +106,15 @@ private:
 
     inline auto MakeTxId() -> CanTxId;
 
+    // Replay
+    void ReplaySend(const extensions::IReplayMessage* replayMessage);
+    void ReplayReceive(const extensions::IReplayMessage* replayMessage);
+
 private:
     // ----------------------------------------
     // private members
     ::ib::mw::IComAdapterInternal* _comAdapter{nullptr};
+    cfg::CanController _config;
     mw::ServiceDescriptor _serviceDescriptor;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
 

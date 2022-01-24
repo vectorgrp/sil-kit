@@ -12,10 +12,12 @@ namespace sim {
 namespace can {
 
   
-CanControllerFacade::CanControllerFacade(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider)
+CanControllerFacade::CanControllerFacade(mw::IComAdapterInternal* comAdapter, ib::cfg::CanController config,
+                                         mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
+    , _config{config}
 {
-    _canController = std::make_unique<CanController>(comAdapter, timeProvider);
+    _canController = std::make_unique<CanController>(comAdapter, config, timeProvider);
     _canControllerProxy = std::make_unique<CanControllerProxy>(comAdapter);
     _currentController = _canController.get();
 }
@@ -85,9 +87,9 @@ void CanControllerFacade::RegisterTransmitStatusHandler(MessageStatusHandler han
 // IIbToCanController / IIbToCanControllerProxy
 void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanMessage& msg)
 {
-    if (_serviceDescriptor.isLinkSimulated)
+    if (IsLinkSimulated())
     {
-        _canControllerProxy->ReceiveIbMessage(from, msg);
+        if (ProxyFilter(from)) _canControllerProxy->ReceiveIbMessage(from, msg); 
     }
     else
     {
@@ -98,17 +100,17 @@ void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 // IIbToCanControllerProxy only
 void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanControllerStatus& msg)
 {
-    if (_serviceDescriptor.isLinkSimulated)
+    if (IsLinkSimulated() && ProxyFilter(from))
     {
-        dynamic_cast<CanControllerProxy*>(_currentController)->ReceiveIbMessage(from, msg);
+        _canControllerProxy->ReceiveIbMessage(from, msg);
     }
 }
 
 void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanTransmitAcknowledge& msg)
 {
-    if (_serviceDescriptor.isLinkSimulated)
+    if (IsLinkSimulated() && ProxyFilter(from))
     {
-        dynamic_cast<CanControllerProxy*>(_currentController)->ReceiveIbMessage(from, msg);
+        _canControllerProxy->ReceiveIbMessage(from, msg);
     }
 }
 
@@ -123,7 +125,7 @@ void CanControllerFacade::SetEndpointAddress(const mw::EndpointAddress& endpoint
 auto CanControllerFacade::EndpointAddress() const -> const mw::EndpointAddress&
 {
     // TODO remove!
-    if (_serviceDescriptor.isLinkSimulated)
+    if (IsLinkSimulated())
     {
         return _canControllerProxy->EndpointAddress();
     }
@@ -135,9 +137,9 @@ auto CanControllerFacade::EndpointAddress() const -> const mw::EndpointAddress&
 
 void CanControllerFacade::SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)
 {
-    if (!_serviceDescriptor.isLinkSimulated)
+    if (!IsLinkSimulated())
     {
-        dynamic_cast<CanController*>(_currentController)->SetTimeProvider(timeProvider);
+        _canController->SetTimeProvider(timeProvider);
     }
 }
 
@@ -161,7 +163,7 @@ void CanControllerFacade::SetServiceDescriptor(const mw::ServiceDescriptor& serv
         (mw::service::ServiceDiscoveryEvent::Type discoveryType, const mw::ServiceDescriptor& remoteServiceDescriptor)
         {
             // check if discovered service is a network simulator (if none is known)
-            if (!_remoteBusSimulator.isLinkSimulated)
+            if (!IsLinkSimulated())
             {
                 // check if received descriptor has a matching simulated link
                 if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceCreated
@@ -189,6 +191,23 @@ void CanControllerFacade::SetServiceDescriptor(const mw::ServiceDescriptor& serv
 auto CanControllerFacade::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
     return _serviceDescriptor;
+}
+
+auto CanControllerFacade::DefaultFilter(const IIbServiceEndpoint* from) const
+    -> bool
+{
+    return true;
+}
+
+auto CanControllerFacade::ProxyFilter(const IIbServiceEndpoint* from) const
+    -> bool
+{
+    return _remoteBusSimulator.participantName == from->GetServiceDescriptor().participantName;
+}
+
+auto CanControllerFacade::IsLinkSimulated() const -> bool
+{
+    return _remoteBusSimulator.isLinkSimulated;
 }
 
 } // namespace can

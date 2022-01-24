@@ -99,9 +99,10 @@ add_vib_test(ITestTargetedMessaging
     SOURCES
       TargetedMessagingITest.cpp
     LIBS
+      IbTracing
+      IbSimCan 
       IbSimTestHarness
       IbInternal
-      IbSimCan 
 )
 
 if(IB_MW_ENABLE_VASIO)

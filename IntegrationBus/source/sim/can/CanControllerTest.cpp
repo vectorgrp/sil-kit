@@ -66,9 +66,10 @@ TEST(CanControllerTest, send_can_message)
 {
     MockComAdapter mockComAdapter;
 
-    const EndpointAddress controllerAddress = { 3, 8 };
+    const EndpointAddress controllerAddress = {3, 8};
+    ib::cfg::CanController cfg;
 
-    CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
+    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
     canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
 
@@ -91,8 +92,9 @@ TEST(CanControllerTest, receive_can_message)
 
     MockComAdapter mockComAdapter;
     CanControllerCallbacks callbackProvider;
+    ib::cfg::CanController cfg;
 
-    CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
+    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
     canController.RegisterReceiveMessageHandler(std::bind(&CanControllerCallbacks::ReceiveMessage, &callbackProvider, _1, _2));
 
     CanMessage msg;
@@ -102,7 +104,7 @@ TEST(CanControllerTest, receive_can_message)
         .Times(1);
     EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now()).Times(1);
 
-    CanController canControllerProxy(&mockComAdapter, mockComAdapter.GetTimeProvider());
+    CanController canControllerProxy(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
     canControllerProxy.SetServiceDescriptor(from_endpointAddress(senderAddress));
     auto& id = canControllerProxy.GetServiceDescriptor();
     canController.ReceiveIbMessage(&canControllerProxy, msg);
@@ -118,8 +120,9 @@ TEST(CanControllerTest, receive_can_message)
 TEST(CanControllerTest, start_stop_sleep_reset)
 {
     MockComAdapter mockComAdapter;
+    ib::cfg::CanController cfg;
 
-    CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
+    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
 
     EXPECT_CALL(mockComAdapter, SendIbMessage(A<const IIbServiceEndpoint*>(), A<const CanSetControllerMode&>()))
         .Times(0);
@@ -139,8 +142,9 @@ TEST(CanControllerTest, start_stop_sleep_reset)
 TEST(CanControllerTest, set_baudrate)
 {
     MockComAdapter mockComAdapter;
+    ib::cfg::CanController cfg;
 
-    CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
+    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
 
     EXPECT_CALL(mockComAdapter, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const CanConfigureBaudrate&>()))
         .Times(0);
@@ -157,8 +161,9 @@ TEST(CanControllerTest, receive_ack)
 
     MockComAdapter mockComAdapter;
     CanControllerCallbacks callbackProvider;
+    ib::cfg::CanController cfg;
 
-    CanController canController(&mockComAdapter, mockComAdapter.GetTimeProvider());
+    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
     canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
     canController.RegisterTransmitStatusHandler(std::bind(&CanControllerCallbacks::ReceiveAck, &callbackProvider, _1, _2));
 
@@ -181,6 +186,7 @@ TEST(CanControllerTest, cancontroller_uses_tracing)
 
     ib::test::MockTraceSink traceSink;
     test::DummyComAdapter comAdapter;
+    ib::cfg::CanController cfg;
     const std::chrono::nanoseconds now = 1337ns;
     const EndpointAddress controllerAddress = {1,2};
     const EndpointAddress otherAddress = {2,2};
@@ -189,7 +195,7 @@ TEST(CanControllerTest, cancontroller_uses_tracing)
         .WillByDefault(testing::Return(now));
 
 
-    auto controller = CanController(&comAdapter, comAdapter.GetTimeProvider());
+    auto controller = CanController(&comAdapter, cfg, comAdapter.GetTimeProvider());
     controller.SetServiceDescriptor(from_endpointAddress(controllerAddress));
     controller.AddSink(&traceSink);
 
@@ -211,7 +217,7 @@ TEST(CanControllerTest, cancontroller_uses_tracing)
         Trace(Direction::Receive, controllerAddress, now, msg))
         .Times(1);
 
-    CanController canControllerProxy(&comAdapter, comAdapter.GetTimeProvider());
+    CanController canControllerProxy(&comAdapter, cfg, comAdapter.GetTimeProvider());
     canControllerProxy.SetServiceDescriptor(from_endpointAddress(otherAddress));
     controller.ReceiveIbMessage(&canControllerProxy, msg);
 }

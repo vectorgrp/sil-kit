@@ -9,8 +9,11 @@ namespace sim {
 namespace can {
 
 
-CanController::CanController(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider)
+CanController::CanController(mw::IComAdapterInternal* comAdapter, 
+                             const ib::cfg::CanController& config,
+                             mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
+    , _config{config}
     , _timeProvider{timeProvider}
 {
 }
@@ -37,6 +40,12 @@ void CanController::Sleep()
 
 auto CanController::SendMessage(const CanMessage& msg) -> CanTxId
 {
+    // ignore the user's API calls if we're configured for replay
+    if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Send))
+    {
+        return 0;
+    }
+
     auto msgCopy = msg;
     msgCopy.transmitId = MakeTxId();
 
@@ -58,6 +67,12 @@ auto CanController::SendMessage(const CanMessage& msg) -> CanTxId
 
 auto CanController::SendMessage(CanMessage&& msg) -> CanTxId
 {
+    // ignore the user's API calls if we're configured for replay
+    if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Send))
+    {
+        return 0;
+    }
+
     auto txId = MakeTxId();
     msg.transmitId = txId;
 
@@ -103,6 +118,12 @@ void CanController::RegisterHandler(CallbackT<MsgT> handler)
 
 void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMessage& msg)
 {
+    // ignore messages that do not originate from the replay scheduler 
+    if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Receive))
+    {
+        return;
+    }
+
     if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
     {
         return;
@@ -136,6 +157,45 @@ void CanController::SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)
 {
     _timeProvider = timeProvider;
 }
+
+void CanController::ReplayMessage(const extensions::IReplayMessage* replayMessage)
+{
+    using namespace ib::tracing;
+    switch (replayMessage->GetDirection())
+    {
+    case extensions::Direction::Send:
+        if (IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Send))
+        {
+            ReplaySend(replayMessage);
+        }
+        break;
+    case extensions::Direction::Receive:
+        if (IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Receive))
+        {
+            ReplayReceive(replayMessage);
+        }
+        break;
+    default:
+        throw std::runtime_error("CanReplayController: replay message has undefined Direction");
+        break;
+    }
+}
+
+void CanController::ReplaySend(const extensions::IReplayMessage* replayMessage)
+{
+    // need to copy the message here.
+    // will throw if invalid message type.
+    auto msg = dynamic_cast<const sim::can::CanMessage&>(*replayMessage);
+    SendMessage(std::move(msg));
+}
+
+void CanController::ReplayReceive(const extensions::IReplayMessage* replayMessage)
+{
+    static tracing::ReplayServiceDescriptor replayService;
+    auto msg = dynamic_cast<const sim::can::CanMessage&>(*replayMessage);
+    ReceiveIbMessage(&replayService, msg);
+}
+
 
 } // namespace can
 } // namespace sim
