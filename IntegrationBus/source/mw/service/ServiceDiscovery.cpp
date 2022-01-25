@@ -42,15 +42,17 @@ auto ServiceDiscovery::GetServiceDescriptor() const -> const mw::ServiceDescript
 void ServiceDiscovery::Initialize()
 {
     auto systemMonitor = _comAdapter->GetSystemMonitor();
-    systemMonitor->RegisterParticipantStatusHandler([this](auto status) {
+    systemMonitor->RegisterParticipantStatusHandler([this](const mw::sync::ParticipantStatus& status) {
         std::unique_lock<std::mutex> lock(_mx);
         if (status.participantName == _participantName)
         {
+            // don't talk to myself
             return;
         }
         _comAdapter->SendIbMessage(this, _announcement);
     });
 }
+
 
 void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const ServiceAnnouncement& msg)
 {

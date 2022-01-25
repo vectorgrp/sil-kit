@@ -76,12 +76,12 @@ inline std::ostream& operator<<(std::ostream& out, const ServiceDiscoveryEvent& 
 inline std::ostream& operator<<(std::ostream& out, const ServiceAnnouncement& serviceAnnouncement)
 {
     out << "ServiceAnnouncement{\"" << serviceAnnouncement.participantName
-        << "\" services=["
+        << "\", services=["
         ;
     for (auto&& service : serviceAnnouncement.services)
     {
-        out << "Service{" << service
-            << "}"
+        out << service
+            << ", "
             ;
     }
     out << "] }";

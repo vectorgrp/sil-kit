@@ -300,7 +300,7 @@ private:
     {
         auto ibLink = GetLinkByName<IbMessageT>(linkName);
         auto&& serviceLinkMap = std::get<IbServiceToLinkMap<IbMessageT>>(_serviceToLinkMap);
-        serviceLinkMap[to_string(serviceId->GetServiceDescriptor())] = ibLink;
+        serviceLinkMap[serviceId->GetServiceDescriptor().linkName] = ibLink;
     }
 
     template<class IbServiceT>
@@ -342,7 +342,7 @@ private:
     template <class IbMessageT>
     void SendIbMessageImpl(const IIbServiceEndpoint* from, IbMessageT&& msg)
     {
-        const auto&& key = to_string(from->GetServiceDescriptor());
+        const auto& key = from->GetServiceDescriptor().linkName;
 
         auto& linkMap = std::get<IbServiceToLinkMap<std::decay_t<IbMessageT>>>(_serviceToLinkMap);
         if (linkMap.count(key) < 1)
@@ -356,7 +356,7 @@ private:
     template <class IbMessageT>
     void SendIbMessageToTargetImpl(const IIbServiceEndpoint* from, const std::string& targetParticipantName, IbMessageT&& msg)
     {
-      const auto&& key = to_string(from->GetServiceDescriptor());
+      const auto& key = from->GetServiceDescriptor().linkName;
 
       auto& linkMap = std::get<IbServiceToLinkMap<std::decay_t<IbMessageT>>>(_serviceToLinkMap);
       if (linkMap.count(key) < 1)

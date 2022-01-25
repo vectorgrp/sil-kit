@@ -1344,6 +1344,7 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
                     // We need to register all simulated controllers here, so the connection
                     // can build internal data structures.
                     auto& serviceEndpoint = dynamic_cast<mw::IIbServiceEndpoint&>(*busSim);
+                    auto oldDescriptor = serviceEndpoint.GetServiceDescriptor();
                     auto id = ServiceDescriptor{};
                     id.linkName = linkName;
                     id.participantName = proxyEndpoint.participantName;
@@ -1354,6 +1355,7 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
                     serviceEndpoint.SetServiceDescriptor(id);
   
                     _ibConnection.RegisterIbService(linkName, proxyEndpoint.id, busSim);
+                    serviceEndpoint.SetServiceDescriptor(oldDescriptor); //restore
 
                 }
                 catch (const std::exception& e)

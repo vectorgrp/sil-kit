@@ -38,6 +38,7 @@ public: //IServiceDiscovery
     //!< Register a handler for asynchronous service creation notifications
     void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler) override;
     void Initialize() override;
+
 public: // Interfaces
 
     //IIbEndpoint
