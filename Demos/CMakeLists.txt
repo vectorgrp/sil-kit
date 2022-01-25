@@ -61,11 +61,9 @@ set_property(TARGET Demos PROPERTY FOLDER "Demos")
 # Generate IB Demo Project
 function(make_ib_demo executableName demoSourceFile)
     add_executable(${executableName}
-        EXCLUDE_FROM_ALL
         ${demoSourceFile}
     )
     if(_is_standalone)
-        set_target_properties(${executableName} PROPERTIES EXCLUDE_FROM_ALL FALSE)
         set(_DEMO_OUTPUT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../IntegrationBus/bin")
     else()
         set(_DEMO_OUTPUT_DIR "${CMAKE_BINARY_DIR}/$<CONFIG>")
