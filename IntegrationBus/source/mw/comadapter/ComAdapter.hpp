@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
+#include <map>
 #include <tuple>
 
 #include "ib/cfg/Config.hpp"
@@ -302,15 +303,15 @@ private:
     template<class ControllerT>
     auto GetController(const std::string& linkName, const std::string& serviceName) -> ControllerT*;
     template<class ControllerT, typename... Arg>
-    auto CreateController(const cfg::Link& link, const std::string& serviceName, Arg&&... arg) -> ControllerT*;
+    auto CreateController(const cfg::Link& link, const std::string& serviceName, const std::map<std::string, std::string>& supplementalData, Arg&&... arg) -> ControllerT*;
     //!< internal services don't have a link config
     template<class ControllerT, typename... Arg>
-    auto CreateController(const std::string& serviceName,  Arg&&... arg) -> ControllerT*;
+    auto CreateController(const std::string& serviceName, const std::map<std::string, std::string>& supplementalData, Arg&&... arg) -> ControllerT*;
 
     auto GetLinkById(int16_t linkId) -> cfg::Link&;
 
     template<class ControllerT, class ConfigT, typename... Arg>
-    auto CreateControllerForLink(const ConfigT& config, Arg&&... arg) -> ControllerT*;
+    auto CreateControllerForLink(const ConfigT& config, const std::map<std::string, std::string>& supplementalData, Arg&&... arg) -> ControllerT*;
 
     template<class IIbToSimulatorT>
     void RegisterSimulator(IIbToSimulatorT* busSim, cfg::Link::Type linkType);
