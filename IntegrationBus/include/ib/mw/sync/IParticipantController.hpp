@@ -19,7 +19,7 @@ public:
     using StopHandlerT = std::function<void()>;
     using ShutdownHandlerT = std::function<void()>;
     using SimTaskT = std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)>;
-    
+    using TaskHandleT = void*;
 public:
     /*! \brief Register a callback to perform initialization.
      *
@@ -66,6 +66,16 @@ public:
      * ReportError().
      */
     virtual void SetSimulationTask(SimTaskT task) = 0;
+    /*! \brief Set the task to be executed with each grant / tick
+     *
+     * Can be changed at runtime. Execution context depends on the run type.
+     * 
+     * Throwing an error inside the handler will cause a call to
+     * ReportError().
+     */
+    virtual void SetSimulationTaskAsync(SimTaskT task) = 0;
+    virtual void CompleteSimulationTask() = 0;
+
     //[[deprecated]]
     virtual void SetSimulationTask(std::function<void(std::chrono::nanoseconds now)> task) = 0;
 

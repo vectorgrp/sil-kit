@@ -89,6 +89,8 @@ public:
     MOCK_METHOD1(SetStopHandler, void(StopHandlerT));
     MOCK_METHOD1(SetShutdownHandler, void(ShutdownHandlerT));
     MOCK_METHOD1(SetSimulationTask, void(SimTaskT task));
+    MOCK_METHOD1(SetSimulationTaskAsync, void(SimTaskT task));
+    MOCK_METHOD0(CompleteSimulationTask, void());
     MOCK_METHOD1(SetSimulationTask, void(std::function<void(std::chrono::nanoseconds now)>));
     MOCK_METHOD0(EnableColdswap, void());
     MOCK_METHOD1(SetPeriod, void(std::chrono::nanoseconds period));

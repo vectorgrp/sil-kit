@@ -228,6 +228,36 @@ ib_ReturnCode ib_SimulationParticipant_SetSimulationTask(ib_SimulationParticipan
   CAPI_LEAVE
 }
 
+ib_ReturnCode ib_SimulationParticipant_SetSimulationTaskAsync(ib_SimulationParticipant* participant, void* context, ib_ParticipantSimulationTaskHandler_t handler)
+{
+  ASSERT_VALID_POINTER_PARAMETER(participant);
+  ASSERT_VALID_HANDLER_PARAMETER(handler);
+  CAPI_ENTER
+  {
+    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+    auto* participantController = comAdapter->GetParticipantController();
+    participantController->SetSimulationTaskAsync(
+      [handler, context, participant](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+          handler(context, participant, static_cast<ib_NanosecondsTime>(now.count()));
+      });
+    return ib_ReturnCode_SUCCESS;
+  }
+  CAPI_LEAVE
+}
+
+ib_ReturnCode ib_SimulationParticipant_CompleteSimulationTask(ib_SimulationParticipant* participant)
+{
+  ASSERT_VALID_POINTER_PARAMETER(participant);
+  CAPI_ENTER
+  {
+    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+    auto* participantController = comAdapter->GetParticipantController();
+    participantController->CompleteSimulationTask();
+    return ib_ReturnCode_SUCCESS;
+  }
+  CAPI_LEAVE
+}
+
 // SystemController related functions
 ib_ReturnCode ib_SimulationParticipant_Initialize(ib_SimulationParticipant* participant, const char* participantName)
 {

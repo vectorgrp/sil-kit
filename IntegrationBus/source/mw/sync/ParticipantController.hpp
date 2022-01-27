@@ -28,6 +28,7 @@ class ParticipantController
     , public IIbToParticipantController
     , public mw::IIbServiceEndpoint
 {
+    friend struct DistributedTimeQuantumPolicy;
 public:
     // ----------------------------------------
     // Public Data Types
@@ -41,6 +42,7 @@ public:
         virtual void RequestNextStep() = 0;
         virtual void SetStepDuration(std::chrono::nanoseconds duration) = 0;
         virtual void ReceiveNextSimTask(const IIbServiceEndpoint* from, const NextSimTask& task) = 0;
+        virtual void SetBlockingMode(bool) = 0;
     };
 
 public:
@@ -61,6 +63,9 @@ public:
     void SetStopHandler(StopHandlerT handler) override;
     void SetShutdownHandler(ShutdownHandlerT handler) override;
     void SetSimulationTask(std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)> task) override;
+    void SetSimulationTaskAsync(SimTaskT task) override;
+    void CompleteSimulationTask() override;
+
     void SetSimulationTask(std::function<void(std::chrono::nanoseconds now)> task) override;
 
     void EnableColdswap() override;
@@ -97,6 +102,7 @@ public:
     template <class MsgT>
     void SendIbMessage(MsgT&& msg) const;
     void ExecuteSimTask(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration);
+    void ExecuteSimTaskNonBlocking(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration);
 
     // Get the instance of the internal ITimeProvider that is updated with our simulation time
     auto GetTimeProvider()->std::shared_ptr<sync::ITimeProvider>;
@@ -104,20 +110,20 @@ public:
     // IIbServiceEndpoint
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+    
 private:
     // ----------------------------------------
     // private methods
     auto MakeTimeSyncPolicy(cfg::SyncType syncType) -> std::unique_ptr<ParticipantController::ITimeSyncPolicy>;
-
+    
     void ChangeState(ParticipantState newState, std::string reason);
-
     void Initialize(const ParticipantCommand& command, std::string reason);
     void Shutdown(std::string reason);
     void PrepareColdswap();
     void ShutdownForColdswap();
     void IgnoreColdswap();
-    void CheckDistributedTimeAdvanceGrant();
-
+    
+    void AwaitNotPaused();
 private:
     // ----------------------------------------
     // private members
@@ -152,6 +158,10 @@ private:
     // until Continue()'  is called;
     std::promise<void> _pauseDonePromise;
     std::future<void> _pauseDone;
+
+    bool  _waitingForCompletion;
+    std::condition_variable  _waitingForCompletionCv;
+    std::mutex _waitingForCompletionMutex;
 };
 
 // ================================================================================

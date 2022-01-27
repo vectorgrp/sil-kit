@@ -29,6 +29,7 @@ struct UnsynchronizedPolicy : ParticipantController::ITimeSyncPolicy
     void RequestNextStep() override { }
     void SetStepDuration(std::chrono::nanoseconds duration) override { }
     void ReceiveNextSimTask(const IIbServiceEndpoint* from, const NextSimTask& task) override { }
+    void SetBlockingMode(bool) override { }
 };
 
 //! brief Synchronization policy of the VAsio middleware
@@ -37,6 +38,7 @@ struct DistributedTimeQuantumPolicy : ParticipantController::ITimeSyncPolicy
     DistributedTimeQuantumPolicy(ParticipantController& controller, IComAdapterInternal* comAdapter)
         : _controller(controller)
         , _comAdapter(comAdapter)
+        , _blocking(true)
     {
         _currentTask.timePoint = -1ns;
         _currentTask.duration = 0ns;
@@ -125,6 +127,7 @@ struct DistributedTimeQuantumPolicy : ParticipantController::ITimeSyncPolicy
         }
     }
 
+    void SetBlockingMode(bool newValue) override { _blocking = newValue; }
 private:
     void CheckDistributedTimeAdvanceGrant()
     {
@@ -137,7 +140,18 @@ private:
         // No other participant has a lower time point: It is our turn
         _currentTask = _myNextTask;
         _myNextTask.timePoint = _currentTask.timePoint + _currentTask.duration;
-        _controller.ExecuteSimTask(_currentTask.timePoint, _currentTask.duration);
+        if (_blocking)
+        {
+          _controller.ExecuteSimTask(_currentTask.timePoint, _currentTask.duration);
+          _controller.AwaitNotPaused();
+          RequestNextStep();
+        }
+        else
+        {
+          _controller.ExecuteSimTaskNonBlocking(_currentTask.timePoint, _currentTask.duration);
+          _controller.AwaitNotPaused();
+          RequestNextStep();
+        }
 
         for (auto&& otherTask : _otherNextTasks)
         {
@@ -154,6 +168,7 @@ private:
     NextSimTask _currentTask;
     NextSimTask _myNextTask;
     std::map<std::string, NextSimTask> _otherNextTasks;
+    bool _blocking;
 };
 
 //! \brief  A caching time provider: we update its internal state whenever the controller's 
@@ -241,6 +256,7 @@ ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, co
     });
 
     _timeProvider = std::make_shared<ParticipantTimeProvider>();
+    _waitingForCompletion = false;
 }
 
 void ParticipantController::SetInitHandler(InitHandlerT handler)
@@ -261,11 +277,19 @@ void ParticipantController::SetShutdownHandler(ShutdownHandlerT handler)
 void ParticipantController::SetSimulationTask(std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)> task)
 {
     _simTask = std::move(task);
+    _timeSyncPolicy->SetBlockingMode(true);
+}
+
+void ParticipantController::SetSimulationTaskAsync(SimTaskT task)
+{
+    _simTask = std::move(task);
+    _timeSyncPolicy->SetBlockingMode(false);
 }
 
 void ParticipantController::SetSimulationTask(std::function<void(std::chrono::nanoseconds now)> task)
 {
     _simTask = [task = std::move(task)](auto now, auto /*duration*/){ task(now); };
+    _timeSyncPolicy->SetBlockingMode(true);
 }
 
 void ParticipantController::EnableColdswap()
@@ -497,6 +521,14 @@ void ParticipantController::IgnoreColdswap()
     ChangeState(ParticipantState::ColdswapIgnored, "Coldswap was not enabled for this participant.");
 }
 
+void ParticipantController::AwaitNotPaused()
+{
+    if (State() == ParticipantState::Paused)
+    {
+        _pauseDone.wait();
+    }
+}
+
 auto ParticipantController::State() const -> ParticipantState
 {
     return _status.state;
@@ -694,12 +726,34 @@ void ParticipantController::ExecuteSimTask(std::chrono::nanoseconds timePoint, s
     _logger->Trace("Finished Simulation Task. Execution time was: {}ms", std::chrono::duration_cast<DoubleMSecs>(_execTimeMonitor.CurrentDuration()).count());
     _waitTimeMonitor.StartMeasurement();
 
-    if (State() == ParticipantState::Paused)
+
+}
+
+void ParticipantController::ExecuteSimTaskNonBlocking(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration)
+{
+    assert(_simTask);
+    std::unique_lock<std::mutex> cvLock(_waitingForCompletionMutex);
+    if (_waitingForCompletion)
     {
-        _pauseDone.wait();
+      throw std::runtime_error("SimulationTask already waiting for completion");
     }
 
-    _timeSyncPolicy->RequestNextStep();
+    ExecuteSimTask(timePoint, duration);
+
+    _waitingForCompletion = true;
+    while (_waitingForCompletion)
+        _waitingForCompletionCv.wait_for(cvLock, std::chrono::milliseconds(10));
+}
+
+void ParticipantController::CompleteSimulationTask()
+{
+    std::unique_lock<std::mutex> cvLock(_waitingForCompletionMutex);
+    if (!_waitingForCompletion)
+    {
+      throw std::runtime_error("bad call to CompleteSimulationTask");
+    }
+    _waitingForCompletion = false;
+    _waitingForCompletionCv.notify_all();
 }
 
 void ParticipantController::ChangeState(ParticipantState newState, std::string reason)

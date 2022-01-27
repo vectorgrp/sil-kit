@@ -112,6 +112,17 @@ the :cpp:enumerator:`Stopped<ib::mw::sync::Stopped>` state.
     sends an appropriate system-wide ``Stop`` command -- this is an implementation
     detail that should not be relied on.
 
+Synchronizing an application thread with the simulation task
+"""""""""""""""""""""""""""
+In special cases, it may be required to synchronize some application thread with the 
+execution of the simulation task. That is, the application wants to execute some code
+between time steps (given by invocations of the simulation task), _but on a different thread_
+than where the simulation task is executing.
+To achieve this, use :cpp:func:`SetSimulationTaskAsync()<ib::mw::sync::IParticipantController::SetSimulationTaskAsync()>` to assign
+the simulation task function, and :cpp:func:`CompleteSimulationTask()<ib::mw::sync::IParticipantController::CompleteSimulationTask()>` to let
+the VIB continue the simulation. If the simulation task has been assigned using that function, execution will stop after the simulation task has finished executing.
+By invoking :cpp:func:`CompleteSimulationTask()<ib::mw::sync::IParticipantController::CompleteSimulationTask()>` VIB's simulation loop 
+(implemented in :cpp:func:`RunAsync<ib::mw::sync::IParticipantController::RunAsync()>`) will continue to the next time step.
 
 
 Setup Dependent Configuration

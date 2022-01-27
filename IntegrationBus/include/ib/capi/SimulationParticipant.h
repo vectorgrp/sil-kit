@@ -250,6 +250,37 @@ IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetSimulationTask(ib_Si
 typedef ib_ReturnCode(*ib_SimulationParticipant_SetSimulationTask_t)(ib_SimulationParticipant* participant,
     void* context, ib_ParticipantSimulationTaskHandler_t handler);
 
+/*! \brief Set the task to be executed with each grant / tick
+ *
+ * Can be changed at runtime. Execution context depends on the run type.
+ *
+ * The difference to SetSimulationTask is, that after execution of the simulation task
+ * the advance in simulation time will NOT be signaled to other participants.
+ * Progress in simulation time (including all other participants) will cease.
+ * Instead, ib_SimulationParticipant_CompleteSimulationTask must be called
+ * FROM ANY OTHER THREAD to 'unlock' the thread executing the simulation task, and let it execute again.
+ * Thus, a fine grained control over the whole simulation time progress can be achieved
+ * by calling CompleteSimulationTask from an application thread.
+ * Participants using 'regular' simulation tasks and non-blocking simulation tasks may be freely mixed.
+ *
+ * \param participant The simulation participant
+ * \param context A user provided context accessible in the handler
+ * \param handler The handler to be called if the simulation task is due
+ */
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetSimulationTaskAsync(ib_SimulationParticipant* participant,
+    void* context, ib_ParticipantSimulationTaskHandler_t handler);
+
+typedef ib_ReturnCode(*ib_SimulationParticipant_SetSimulationTaskNonBlocking_t)(ib_SimulationParticipant* participant,
+    void* context, ib_ParticipantSimulationTaskHandler_t handler);
+
+/*! \brief Complete the current step of a non-blocking simulation task.
+ *
+ * \param participant The simulation participant
+ */
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_CompleteSimulationTask(ib_SimulationParticipant* participant);
+
+typedef ib_ReturnCode(*ib_SimulationParticipant_CompleteSimulationTask_t)(ib_SimulationParticipant* participant);
+
 /*! \brief Send \ref the Initialize command to a specific participant
   *
   *  The command is only allowed if the participant is in ib_ParticipantState_Idle.
