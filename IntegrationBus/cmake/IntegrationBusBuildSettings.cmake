@@ -29,6 +29,21 @@ function(ib_enable_ubsan isOn)
     endif()
 endfunction()
 
+function(ib_enable_threadsan isOn)
+    if(NOT isOn)
+        return()
+    endif()
+    if(MSVC)
+        message(STATUS "VIB -- Thread Sanitizer not supported on MSVC")
+    else()
+        message(STATUS "VIB -- Enabling Thread Sanitizer")
+        #clang, gcc
+        add_compile_options(-fsanitize=thread -fno-omit-frame-pointer -g3) 
+        #ensures that -lasan is linked in as first library
+        add_link_options(-fsanitize=thread -fno-omit-frame-pointer -g3)
+    endif()
+endfunction()
+
 function(ib_enable_warnings target)
     if(MSVC)
         # TODO
