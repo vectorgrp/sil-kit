@@ -3,6 +3,7 @@
 #pragma once
 
 #include <functional>
+#include <set>
 #include <unordered_map>
 #include <mutex>
 
@@ -52,6 +53,7 @@ public: // Interfaces
 private: //methods
     void ReceivedServiceRemoval(const ServiceDescriptor&);
     void ReceivedServiceAddition(const ServiceDescriptor&);
+
 private:
     IComAdapterInternal* _comAdapter{nullptr};
     std::string _participantName;
@@ -61,7 +63,8 @@ private:
     //!< a cache for computing additions/removals per participant
     using ServiceMap = std::unordered_map<std::string /*serviceDescriptor*/, ServiceDescriptor>;
     std::unordered_map<std::string /* participant name */, ServiceMap> _announcedServices; 
-    std::mutex _mx;
+    std::set<std::string> _knownRemoteParticipants;
+    std::recursive_mutex _mx;
 };
 
 // ================================================================================
