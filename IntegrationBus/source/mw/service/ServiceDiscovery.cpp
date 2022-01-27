@@ -1,7 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "ServiceDiscovery.hpp"
 
-#include "ib/mw/sync/ISystemMonitor.hpp"
 
 #include <set>
 
@@ -14,10 +13,13 @@ ServiceDiscovery::ServiceDiscovery(IComAdapterInternal* comadapter, const std::s
     : _comAdapter{comadapter}
     , _participantName{participantName}
 {
-    //NB do not call Initialize() (i.e., access SystemMonitor) here, there is a
-    // circular dependency between ServiceDiscovery and SystemMonitor.
-
     _announcement.participantName = participantName;
+}
+ServiceDiscovery::~ServiceDiscovery() noexcept
+{
+    // We might still receive asynchronous IB messages or callbacks
+    // when shutting down. we set a  guard here and prevent mutating our internal maps
+    _shuttingDown = true;
 }
 
 void ServiceDiscovery::SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress)
@@ -39,40 +41,12 @@ auto ServiceDiscovery::GetServiceDescriptor() const -> const mw::ServiceDescript
     return _serviceDescriptor;
 }
 
-void ServiceDiscovery::Initialize()
-{
-    auto systemMonitor = _comAdapter->GetSystemMonitor();
-    systemMonitor->RegisterParticipantStatusHandler([this](const mw::sync::ParticipantStatus& status) {
-        if (status.participantName == _participantName)
-        {
-            // don't talk to myself
-            return;
-        }
-
-        std::unique_lock<decltype(_serviceMx)> lock(_serviceMx);
-        const auto found = _knownRemoteParticipants.find(status.participantName);
-        if (found == _knownRemoteParticipants.end())
-        {
-            _knownRemoteParticipants.insert(status.participantName);
-            // Unknown remote participant, announce our services
-            _comAdapter->SendIbMessage(this, status.participantName, _announcement);
-        }
-        else
-        {
-            if (status.state == mw::sync::ParticipantState::Error)
-            {
-                // Lost remote connection, remove the participants services
-                _knownRemoteParticipants.erase(status.participantName);
-                _announcedServices.erase(status.participantName);
-            }
-        }
-
-    });
-}
-
-
 void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const ServiceAnnouncement& msg)
 {
+    if (_shuttingDown)
+    {
+        return; 
+    }
     // Service announcement are sent when a new participant joins the simulation 
     std::unique_lock<decltype(_serviceMx)> lock(_serviceMx);
 
@@ -87,8 +61,8 @@ void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const Se
         }
         else
         {
-            CallHandlers(ServiceDiscoveryEvent::Type::ServiceCreated , service);
             announcementMap[serviceName] = service;
+            CallHandlers(ServiceDiscoveryEvent::Type::ServiceCreated , service);
         }
     }
 }
@@ -114,6 +88,14 @@ void ServiceDiscovery::ReceivedServiceAddition(const ServiceDescriptor& serviceD
 {
     {
         std::unique_lock<decltype(_serviceMx)> lock(_serviceMx);
+        // a remote participant might be unknown, however, it will send an event for its own ServiceDiscovery service
+        // when first joining the simulation
+        if(_announcedServices.count(serviceDescriptor.participantName) == 0)
+        {
+            // A new remote participant, announce our services
+            _comAdapter->SendIbMessage(this, serviceDescriptor.participantName, _announcement);
+        }
+
         auto&& announcementMap = _announcedServices[serviceDescriptor.participantName];
         const auto cachedServiceKey = to_string(serviceDescriptor);
 
@@ -125,8 +107,8 @@ void ServiceDiscovery::ReceivedServiceAddition(const ServiceDescriptor& serviceD
 
         // Update the cache
         announcementMap[cachedServiceKey] = serviceDescriptor;
-
     }
+    
     CallHandlers(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
 }
 
@@ -142,6 +124,11 @@ void ServiceDiscovery::CallHandlers(ServiceDiscoveryEvent::Type eventType, const
 
 void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const ServiceDiscoveryEvent& msg)
 {
+    if (_shuttingDown)
+    {
+        return; 
+    }
+
     if (msg.type == ServiceDiscoveryEvent::Type::ServiceCreated)
     {
         ReceivedServiceAddition(msg.service);
@@ -154,6 +141,11 @@ void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const Se
 
 void ServiceDiscovery::NotifyServiceCreated(const ServiceDescriptor& serviceDescriptor)
 {
+    if (_shuttingDown)
+    {
+        return; 
+    }
+
     ServiceDiscoveryEvent event;
     event.type = ServiceDiscoveryEvent::Type::ServiceCreated;
     event.service = serviceDescriptor;
@@ -167,6 +159,10 @@ void ServiceDiscovery::NotifyServiceCreated(const ServiceDescriptor& serviceDesc
 
 void ServiceDiscovery::NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor)
 {
+    if (_shuttingDown)
+    {
+        return; 
+    }
     std::unique_lock<decltype(_serviceMx)> lock(_serviceMx);
     auto&& announcementMap = _announcedServices[_participantName];
 
@@ -192,6 +188,11 @@ void ServiceDiscovery::NotifyServiceRemoved(const ServiceDescriptor& serviceDesc
 
 void ServiceDiscovery::RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler)
 {
+    if (_shuttingDown)
+    {
+        return; 
+    }
+
     {
         std::unique_lock<decltype(_serviceMx)> lock(_serviceMx);
         //Notify about the existing services

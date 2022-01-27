@@ -22,9 +22,6 @@ public: //types
 
     //!< Register a handler for asynchronous service creation notifications
     virtual void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler) = 0;
-
-    //!< Initialize the ServiceDiscovery, must take place outside of the critical ComAdapter path
-    virtual void Initialize() = 0;
 };
 
 } // namespace sync

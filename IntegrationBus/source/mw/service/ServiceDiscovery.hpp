@@ -3,9 +3,9 @@
 #pragma once
 
 #include <functional>
-#include <set>
 #include <unordered_map>
 #include <mutex>
+#include <atomic>
 
 #include "ServiceDatatypes.hpp"
 
@@ -29,7 +29,7 @@ public:
     using IServiceDiscovery::ServiceDiscoveryHandlerT;
 
     ServiceDiscovery(IComAdapterInternal* comadapter, const std::string& participantName);
-    virtual ~ServiceDiscovery() = default;
+    virtual ~ServiceDiscovery() noexcept;
   
 public: //IServiceDiscovery
     //!< Publish a locally created new ServiceId to all other participants
@@ -38,7 +38,6 @@ public: //IServiceDiscovery
     void NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor) override;
     //!< Register a handler for asynchronous service creation notifications
     void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler) override;
-    void Initialize() override;
 
 public: // Interfaces
 
@@ -64,9 +63,9 @@ private:
     //!< a cache for computing additions/removals per participant
     using ServiceMap = std::unordered_map<std::string /*serviceDescriptor*/, ServiceDescriptor>;
     std::unordered_map<std::string /* participant name */, ServiceMap> _announcedServices; 
-    std::set<std::string> _knownRemoteParticipants;
     std::recursive_mutex _serviceMx;
     std::recursive_mutex _handlerMx;
+    std::atomic<bool> _shuttingDown{false};
 };
 
 // ================================================================================

@@ -134,7 +134,7 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
     SetupRemoteLogging();
 
     //Ensure Service discovery is started
-    GetServiceDiscovery()->Initialize();
+    (void)GetServiceDiscovery();
 
     // Create the participants trace message sinks as declared in the configuration.
     _traceSinks = tracing::CreateTraceMessageSinks(GetLogger(), _config, _participant);
