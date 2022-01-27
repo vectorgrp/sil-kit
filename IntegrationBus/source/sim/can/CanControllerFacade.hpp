@@ -77,8 +77,8 @@ public:
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
     // IIbServiceEndpoint
-    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor& override;
+    void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    auto GetServiceDescriptor() const -> const mw::ServiceDescriptor& override;
 
 private:
     // ----------------------------------------
