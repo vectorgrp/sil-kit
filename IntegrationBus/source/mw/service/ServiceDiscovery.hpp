@@ -53,6 +53,7 @@ public: // Interfaces
 private: //methods
     void ReceivedServiceRemoval(const ServiceDescriptor&);
     void ReceivedServiceAddition(const ServiceDescriptor&);
+    void CallHandlers(ServiceDiscoveryEvent::Type eventType, const ServiceDescriptor& serviceDescriptor);
 
 private:
     IComAdapterInternal* _comAdapter{nullptr};
@@ -64,7 +65,8 @@ private:
     using ServiceMap = std::unordered_map<std::string /*serviceDescriptor*/, ServiceDescriptor>;
     std::unordered_map<std::string /* participant name */, ServiceMap> _announcedServices; 
     std::set<std::string> _knownRemoteParticipants;
-    std::recursive_mutex _mx;
+    std::recursive_mutex _serviceMx;
+    std::recursive_mutex _handlerMx;
 };
 
 // ================================================================================
