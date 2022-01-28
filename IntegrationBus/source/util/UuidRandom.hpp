@@ -19,8 +19,9 @@ struct UUID
     uint64_t cd;
 };
 
-inline bool operator==(const UUID& lhs, const UUID& rhs) { return lhs.ab == rhs.ab && lhs.cd == rhs.cd; }
-inline bool operator!=(const UUID& lhs, const UUID& rhs) { return lhs.ab != rhs.ab || lhs.cd != rhs.cd; }
+bool        operator==(const UUID& lhs, const UUID& rhs);
+bool        operator!=(const UUID& lhs, const UUID& rhs);
+bool        operator<(const UUID& lhs, const UUID& rhs);
 
 UUID        generate();
 std::string to_string(const UUID& u);

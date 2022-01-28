@@ -28,6 +28,9 @@
 #include "DataPublisher.hpp"
 #include "DataSubscriber.hpp"
 #include "DataSubscriberInternal.hpp"
+#include "RpcClient.hpp"
+#include "RpcServer.hpp"
+#include "RpcServerInternal.hpp"
 #include "ParticipantController.hpp"
 #include "SystemController.hpp"
 #include "SystemMonitor.hpp"
@@ -463,6 +466,87 @@ auto ComAdapter<IbConnectionT>::CreateGenericSubscriber(const std::string& canon
 }
 
 template <class IbConnectionT>
+auto ComAdapter<IbConnectionT>::CreateRpcServerInternal(const std::string& functionName, const std::string& linkName,
+                                                        const sim::rpc::RpcExchangeFormat exchangeFormat,
+                                                        sim::rpc::CallProcessor handler, sim::rpc::IRpcServer* parent)
+    -> sim::rpc::RpcServerInternal*
+{
+    _logger->Trace("Creating internal server for functionName={}, linkName={}", functionName, linkName);
+
+    cfg::Link link;
+    link.id = static_cast<int16_t>(hash(linkName));
+    link.name = linkName;
+    link.type = cfg::Link::Type::Rpc;
+
+    cfg::RpcPort config;
+    config.linkId = link.id;
+    config.name = functionName;
+    config.exchangeFormat = exchangeFormat;
+    return CreateController<sim::rpc::RpcServerInternal>(link, config.name, {}, config, _timeProvider.get(), handler,
+                                                         parent);
+}
+
+template <class IbConnectionT>
+auto ComAdapter<IbConnectionT>::CreateRpcClient(const std::string& functionName,
+                                                const sim::rpc::RpcExchangeFormat exchangeFormat,
+                                                sim::rpc::CallReturnHandler handler) -> sim::rpc::IRpcClient*
+{
+    ib::cfg::RpcPort config = get_by_name(_participant.rpcClients, functionName);
+    config.exchangeFormat = exchangeFormat;
+    config.clientUUID = util::uuid::to_string(util::uuid::generate());
+
+    if (ControllerUsesReplay(config))
+    {
+        throw cfg::Misconfiguration("Replay is not supported for Rpc.");
+        return nullptr;
+    }
+    else
+    {
+        // This controller<RpcClient> is for client calls with linkName = UUID.
+        // Needed, as the architecture doesn't allow multiple links on a single controller.
+        cfg::Link link;
+        link.id = -1;
+        link.name = config.clientUUID;
+        link.type = cfg::Link::Type::Rpc;
+
+        cfg::RpcPort callControllerConfig;
+        callControllerConfig.name = functionName;
+        callControllerConfig.clientUUID = config.clientUUID;
+        callControllerConfig.exchangeFormat = exchangeFormat;
+
+        auto callController = CreateController<ib::sim::rpc::RpcClient>(
+            link, callControllerConfig.name, {}, callControllerConfig, _timeProvider.get(), handler, nullptr);
+
+        // This controller<RpcClient> is for the client announcement with linkName = functionName
+        auto announcementController =
+            CreateControllerForLink<sim::rpc::RpcClient>(config, {}, config, _timeProvider.get(), handler, callController);
+        announcementController->SendClientAnnouncement();
+
+        return callController;
+    }
+}
+
+template <class IbConnectionT>
+auto ComAdapter<IbConnectionT>::CreateRpcServer(const std::string& functionName,
+                                                const sim::rpc::RpcExchangeFormat exchangeFormat,
+                                                sim::rpc::CallProcessor handler) -> sim::rpc::IRpcServer*
+{
+    ib::cfg::RpcPort config = get_by_name(_participant.rpcServers, functionName);
+    config.exchangeFormat = exchangeFormat;
+
+    if (ControllerUsesReplay(config))
+    {
+        throw cfg::Misconfiguration("Replay is not supported for Rpc.");
+        return nullptr;
+    }
+    else
+    {
+        auto controller = CreateControllerForLink<sim::rpc::RpcServer>(config, {}, config, _timeProvider.get(), handler);
+        return controller;
+    }
+}
+
+template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::GetParticipantController() -> sync::IParticipantController*
 {
     auto* controller = GetController<sync::ParticipantController>("default", "ParticipantController");
@@ -512,7 +596,6 @@ auto ComAdapter<IbConnectionT>::GetLogger() -> logging::ILogger*
 {
     return _logger.get();
 }
-
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::RegisterCanSimulator(can::IIbToCanSimulator* busSim)
@@ -786,6 +869,54 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, co
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::data::PublisherAnnouncement&& msg)
+{
+    SendIbMessageImpl(from, std::move(msg));
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::ClientAnnouncement& msg)
+{
+    SendIbMessageImpl(from, msg);
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::ClientAnnouncement&& msg)
+{
+    SendIbMessageImpl(from, std::move(msg));
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::ServerAcknowledge& msg)
+{
+    SendIbMessageImpl(from, msg);
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::ServerAcknowledge&& msg)
+{
+    SendIbMessageImpl(from, std::move(msg));
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::FunctionCall& msg)
+{
+    SendIbMessageImpl(from, msg);
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::FunctionCall&& msg)
+{
+    SendIbMessageImpl(from, std::move(msg));
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::FunctionCallResponse& msg)
+{
+    SendIbMessageImpl(from, msg);
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::FunctionCallResponse&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
@@ -1099,6 +1230,53 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, co
     SendIbMessageImpl(from, std::move(msg));
 }
 
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::ClientAnnouncement& msg)
+{
+    SendIbMessageImpl(from, msg);
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::ClientAnnouncement&& msg)
+{
+    SendIbMessageImpl(from, std::move(msg));
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::ServerAcknowledge& msg)
+{
+    SendIbMessageImpl(from, msg);
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::ServerAcknowledge&& msg)
+{
+    SendIbMessageImpl(from, std::move(msg));
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::FunctionCall& msg)
+{
+    SendIbMessageImpl(from, msg);
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::FunctionCall&& msg)
+{
+    SendIbMessageImpl(from, std::move(msg));
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::FunctionCallResponse& msg)
+{
+    SendIbMessageImpl(from, msg);
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::FunctionCallResponse&& msg)
+{
+    SendIbMessageImpl(from, std::move(msg));
+}
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::NextSimTask& msg)

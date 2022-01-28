@@ -175,14 +175,14 @@
       "Name": "Installation",
       "ParticipantEnvironments": [
         {
-          "Participant": "Publisher1",
+          "Participant": "PubSub1",
           "Environment": "CustomExecutable",
           "WorkingFolder": ".",
           "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoDataMessageExt",
           "Arguments": "%INTEGRATIONBUS_CONFIGFILE% Publisher1 %INTEGRATIONBUS_DOMAINID%"
         },
         {
-          "Participant": "Publisher2",
+          "Participant": "PubSub2",
           "Environment": "CustomExecutable",
           "WorkingFolder": ".",
           "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoDataMessageExt",

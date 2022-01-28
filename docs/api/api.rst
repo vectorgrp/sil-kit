@@ -37,8 +37,8 @@ controller interfaces.
   flexray
   ethernet
 
-Data Messages, Generic Messages and IO
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Data Messages, Generic Messages, Rpc and IO
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 These services do not model a real-world bus and can be used for
 generic programming and interoperability tasks.
@@ -48,6 +48,7 @@ generic programming and interoperability tasks.
   
   datamessage
   genericmessage
+  rpc
   io
 
 State Handling and Synchronization

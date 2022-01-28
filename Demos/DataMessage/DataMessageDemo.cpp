@@ -85,29 +85,20 @@ int main(int argc, char** argv)
         std::cout << "Creating DataAdapter for participant=" << participantName << " in domain " << domainId << std::endl;
         auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
 
-        // Set an Init Handler
         auto&& participantController = comAdapter->GetParticipantController();
+
         participantController->SetInitHandler([&participantName](auto initCmd) {
-
             std::cout << "Initializing " << participantName << std::endl;
-
         });
-
-        // Set a Stop Handler
         participantController->SetStopHandler([]() {
-
             std::cout << "Stopping..." << std::endl;
-
         });
 
-        // Set a Shutdown Handler
         participantController->SetShutdownHandler([]() {
-
             std::cout << "Shutting down..." << std::endl;
-
         });
 
-        participantController->SetPeriod(1ms);
+        participantController->SetPeriod(1s);
         if (participantName == "PubSub1")
         {
             auto* PubTopic1 = comAdapter->CreateDataPublisher("Topic1", DataExchangeFormat{"A"}, 0);
@@ -120,7 +111,7 @@ int main(int argc, char** argv)
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                     PublishMessage(PubTopic1, "Topic1_from_Pub1");
                     PublishMessage(PubTopic2, "Topic2_from_Pub1");
-                    std::this_thread::sleep_for(100ms);
+                    std::this_thread::sleep_for(1s);
 
             });
         }
@@ -136,7 +127,7 @@ int main(int argc, char** argv)
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                     PublishMessage(PubTopic1, "Topic1_from_Pub2");
                     PublishMessage(PubTopic3, "Topic3_from_Pub2");
-                    std::this_thread::sleep_for(100ms);
+                    std::this_thread::sleep_for(1s);
                 });
         }
         else if (participantName == "Subscriber1")
@@ -148,7 +139,7 @@ int main(int argc, char** argv)
                 [SubTopic1, SubTopic2](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-                    std::this_thread::sleep_for(100ms);
+                    std::this_thread::sleep_for(1s);
             });
         }
         else if (participantName == "Subscriber2")
@@ -160,7 +151,7 @@ int main(int argc, char** argv)
                 [SubTopic2, SubTopic3](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-                    std::this_thread::sleep_for(100ms);
+                    std::this_thread::sleep_for(1s);
                 });
         }
 

@@ -62,7 +62,17 @@ auto ParticipantBuilder::Build() -> Participant
     {
         config.dataSubscribers.emplace_back(builder.Build());
     }
+	
+    for (auto&& builder : _rpcClients)
+    {
+        config.rpcClients.emplace_back(builder.Build());
+    }
 
+    for (auto&& builder : _rpcServers)
+    {
+        config.rpcServers.emplace_back(builder.Build());
+    }
+	
     for (auto& sink : _traceSinks)
     {
         config.traceSinks.emplace_back(sink.Build());
@@ -177,6 +187,18 @@ auto ParticipantBuilder::AddDataSubscriber(std::string name) -> DataPortBuilder&
 {
     _dataSubscribers.emplace_back(this, std::move(name), Parent()->GetFreeEndpointId());
     return _dataSubscribers[_dataSubscribers.size() - 1];
+}
+
+auto ParticipantBuilder::AddRpcClient(std::string name) -> RpcPortBuilder&
+{
+    _rpcClients.emplace_back(this, std::move(name), Parent()->GetFreeEndpointId());
+    return _rpcClients[_rpcClients.size() - 1];
+}
+
+auto ParticipantBuilder::AddRpcServer(std::string name) -> RpcPortBuilder&
+{
+    _rpcServers.emplace_back(this, std::move(name), Parent()->GetFreeEndpointId());
+    return _rpcServers[_rpcServers.size() - 1];
 }
 
 auto ParticipantBuilder::AddNetworkSimulator(std::string name) -> NetworkSimulatorBuilder&

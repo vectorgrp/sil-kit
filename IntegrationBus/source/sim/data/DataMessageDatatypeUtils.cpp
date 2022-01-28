@@ -11,11 +11,6 @@ bool operator==(const DataMessage& lhs, const DataMessage& rhs)
     return lhs.data == rhs.data;
 }
 
-bool operator==(const DataExchangeFormat& lhs, const DataExchangeFormat& rhs)
-{
-    return lhs.mimeType == rhs.mimeType;
-}
-
 static bool wildcardStringMatch(const std::string& s1, const std::string& s2)
 {
     return s1 == "*" || s2 == "*" || s1 == s2;

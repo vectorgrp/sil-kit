@@ -10,7 +10,9 @@
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/cfg/fwd_decl.hpp"
 #include "ib/sim/fwd_decl.hpp"
+
 #include "ib/sim/data/DataMessageDatatypes.hpp"
+#include "ib/sim/rpc/RpcDatatypes.hpp"
 
 namespace ib {
 namespace mw {
@@ -60,16 +62,28 @@ public:
     virtual auto CreatePwmOut(const std::string& canonicalName) -> sim::io::IPwmOutPort* = 0;
     //! \brief Create a pattern output port at this IB participant.
     virtual auto CreatePatternOut(const std::string& canonicalName) -> sim::io::IPatternOutPort* = 0;
+    
     //! \brief Create a generic message publisher at this IB participant.
     virtual auto CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher* = 0;
     //! \brief Create a generic message subscriber at this IB participant.
     virtual auto CreateGenericSubscriber(const std::string& canonicalName) -> sim::generic::IGenericSubscriber* = 0;
+    
     //! \brief Create a data publisher at this IB participant.
-    virtual auto CreateDataPublisher(const std::string& canonicalName, const sim::data::DataExchangeFormat& dataExchangeFormat, size_t history = 0) -> sim::data::IDataPublisher* = 0;
+    virtual auto CreateDataPublisher(const std::string& canonicalName,
+                                     const sim::data::DataExchangeFormat& dataExchangeFormat, size_t history = 0)
+        -> sim::data::IDataPublisher* = 0;
     //! \brief Create a data subscriber at this IB participant.
-    virtual auto CreateDataSubscriber(const std::string& canonicalName, const sim::data::DataExchangeFormat& dataExchangeFormat, sim::data::CallbackExchangeFormatT callback) -> sim::data::IDataSubscriber* = 0;
-
-
+    virtual auto CreateDataSubscriber(const std::string& canonicalName,
+                                      const sim::data::DataExchangeFormat& dataExchangeFormat,
+                                      sim::data::CallbackExchangeFormatT callback) -> sim::data::IDataSubscriber* = 0;
+    
+    //! \brief Create a Rpc client at this IB participant.
+    virtual auto CreateRpcClient(const std::string& functionName, const sim::rpc::RpcExchangeFormat exchangeFormat,
+                                 sim::rpc::CallReturnHandler handler) -> sim::rpc::IRpcClient* = 0;
+    //! \brief Create a Rpc server at this IB participant.
+    virtual auto CreateRpcServer(const std::string& functionName, const sim::rpc::RpcExchangeFormat exchangeFormat,
+                                 sim::rpc::CallProcessor handler) -> sim::rpc::IRpcServer* = 0;
+    
     //! \brief Return the  IParticipantController for the current participant.
     virtual auto GetParticipantController() -> sync::IParticipantController* = 0;
     virtual auto GetSystemMonitor() -> sync::ISystemMonitor* = 0;

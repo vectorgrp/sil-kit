@@ -51,6 +51,7 @@ add_library(IntegrationBus ${ibLibType}
     "capi/CapiLogger.cpp"
     "capi/CapiLin.cpp"
     "capi/CapiDataPubSub.cpp"
+    "capi/CapiRpc.cpp"
     "capi/CapiUtils.cpp"
     "capi/CapiImpl.h"
     IbForceIncludes.cpp

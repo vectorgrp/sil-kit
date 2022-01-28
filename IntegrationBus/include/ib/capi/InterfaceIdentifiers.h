@@ -37,6 +37,7 @@ typedef int32_t ib_InterfaceIdentifier;
 // Data
 #define ib_InterfaceIdentifier_DataExchangeFormat          ((ib_InterfaceIdentifier)5001001)
 
-
+// Rpc
+#define ib_InterfaceIdentifier_RpcExchangeFormat           ((ib_InterfaceIdentifier)6001001)
 
 IB_END_DECLS

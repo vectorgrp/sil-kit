@@ -13,6 +13,8 @@ add_library(IbConfig STATIC
     GenericPortBuilder.hpp
     DataPortBuilder.cpp
     DataPortBuilder.hpp
+    RpcPortBuilder.cpp
+    RpcPortBuilder.hpp
     LinkBuilder.cpp
     LinkBuilder.hpp
     NetworkSimulatorBuilder.cpp
@@ -56,7 +58,6 @@ add_library(IbConfig STATIC
 target_link_libraries(IbConfig
     PRIVATE IbInterface
     PRIVATE IbUtil
-    PRIVATE IbSimDataMessage
     PRIVATE yaml-cpp
     INTERFACE yaml-cpp
 )

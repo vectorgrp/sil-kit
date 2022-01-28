@@ -261,6 +261,18 @@ auto MakeYamlSchema() -> YamlSchemaElem
                     replay,
                 }
             },
+            {"RpcClients", {
+                    {"Name"},
+                    {"UseTraceSinks"},
+                    replay,
+                }
+            },
+            {"RpcServers", {
+                    {"Name"},
+                    {"UseTraceSinks"},
+                    replay,
+                }
+            },
         }
     );
     YamlSchemaElem middlewareConfig("MiddlewareConfig",

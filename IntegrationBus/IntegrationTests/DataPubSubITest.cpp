@@ -135,7 +135,7 @@ protected:
 
     auto BuildConfig(std::vector<PublisherParticipant>& publishers, std::vector<SubscriberParticipant>& subscribers, Middleware middleware, bool sync) -> Config
     {
-        const auto level = logging::Level::Info;
+        const auto loglevel = logging::Level::Trace;
         ConfigBuilder config("PubSubTestConfigGenerated");
         auto&& simulationSetup = config.SimulationSetup();
 
@@ -154,7 +154,7 @@ protected:
                 simulationSetup.AddOrGetLink(Link::Type::DataMessage, dp.topic);
             }
             auto&& participant = simulationSetup.AddParticipant(pub.name);
-            participant.ConfigureLogger().WithFlushLevel(level).AddSink(Sink::Type::Stdout).WithLogLevel(level);
+            participant.ConfigureLogger().WithFlushLevel(loglevel).AddSink(Sink::Type::Stdout).WithLogLevel(loglevel);
             if (sync)
             {
                 participant.AddParticipantController().WithSyncType(syncType);
@@ -172,7 +172,7 @@ protected:
                 simulationSetup.AddOrGetLink(Link::Type::DataMessage, dp.topic);
             }
             auto&& participant = simulationSetup.AddParticipant(sub.name);
-            participant.ConfigureLogger().WithFlushLevel(level).AddSink(Sink::Type::Stdout).WithLogLevel(level);
+            participant.ConfigureLogger().WithFlushLevel(loglevel).AddSink(Sink::Type::Stdout).WithLogLevel(loglevel);
             if (sync)
             {
                 participant.AddParticipantController().WithSyncType(syncType);
@@ -184,7 +184,8 @@ protected:
             participants.emplace_back(&participant);
         }
 
-        simulationSetup.AddParticipant(systemMasterName);
+        auto&& systemMasterParticipant = simulationSetup.AddParticipant(systemMasterName);
+        systemMasterParticipant.ConfigureLogger().WithFlushLevel(loglevel).AddSink(Sink::Type::Stdout).WithLogLevel(loglevel);
 
         config.WithActiveMiddleware(middleware);
         return config.Build();
@@ -277,13 +278,16 @@ protected:
             {
                 participantController->SetPeriod(1s);
                 participantController->SetSimulationTask([participantController, &participant, publishTask](std::chrono::nanoseconds now) {
-                    publishTask();
-                    if (!participant.allSent && 
-                        std::all_of(participant.dataPublishers.begin(), participant.dataPublishers.end(),
-                                    [](DataPublisherInfo dp) { return dp.allSent; }))
+                    if (now >= 10s)
                     {
-                        participant.allSent = true;
-                        participant.allSentPromise.set_value();
+                        publishTask();
+                        if (!participant.allSent &&
+                            std::all_of(participant.dataPublishers.begin(), participant.dataPublishers.end(),
+                                [](DataPublisherInfo dp) { return dp.allSent; }))
+                        {
+                            participant.allSent = true;
+                            participant.allSentPromise.set_value();
+                        }
                     }
                 });
                 participant.startedPromise.set_value();

@@ -42,6 +42,8 @@ void Validate(const SimulationSetup& testConfig, const Config& ibConfig)
         add_to_endpoints(participant.pwmPorts);
         add_to_endpoints(participant.genericPublishers);
         add_to_endpoints(participant.genericSubscribers);
+        add_to_endpoints(participant.rpcClients);
+        add_to_endpoints(participant.rpcServers);
         add_to_endpoints(participant.canControllers);
         add_to_endpoints(participant.ethernetControllers);
         add_to_endpoints(participant.flexrayControllers);
@@ -131,6 +133,8 @@ void ValidateTraceSinks(const Participant& participant)
     validateController(participant.flexrayControllers);
     validateController(participant.genericPublishers);
     validateController(participant.genericSubscribers);
+    validateController(participant.rpcClients);
+    validateController(participant.rpcServers);
     validateController(participant.analogIoPorts);
     validateController(participant.digitalIoPorts);
     validateController(participant.patternPorts);
@@ -191,6 +195,8 @@ void ValidateTraceSources(const Participant& participant)
     validateController(participant.flexrayControllers);
     validateController(participant.genericPublishers);
     validateController(participant.genericSubscribers);
+    validateController(participant.rpcClients);
+    validateController(participant.rpcServers);
     validateController(participant.analogIoPorts);
     validateController(participant.digitalIoPorts);
     validateController(participant.patternPorts);

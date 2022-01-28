@@ -7,6 +7,31 @@ namespace ib {
 namespace util {
 namespace uuid {
 
+bool operator==(const UUID& lhs, const UUID& rhs)
+{
+    return lhs.ab == rhs.ab && lhs.cd == rhs.cd;
+}
+bool operator!=(const UUID& lhs, const UUID& rhs)
+{
+    return lhs.ab != rhs.ab || lhs.cd != rhs.cd;
+}
+
+bool operator<(const UUID& lhs, const UUID& rhs)
+{
+    if (lhs.ab < rhs.ab)
+    {
+        return true;
+    }
+    else if (lhs.ab > rhs.ab)
+    {
+        return false;
+    }
+    else
+    {
+        return lhs.cd < rhs.cd;
+    }
+}
+
 // Version 4, variant 8 UUID Generator
 UUID generate()
 {

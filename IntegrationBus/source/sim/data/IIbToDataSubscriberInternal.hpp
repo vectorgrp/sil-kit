@@ -5,7 +5,7 @@
 #include "IIbEndpoint.hpp"
 #include "IIbSender.hpp"
 
-#include "ib/sim/data/DataMessageDatatypes.hpp"
+#include "ib/sim/data/fwd_decl.hpp"
 
 namespace ib {
 namespace sim {

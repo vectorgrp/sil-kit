@@ -23,6 +23,7 @@
 #include "SerdesMwVAsio.hpp"
 #include "SerdesSimGeneric.hpp"
 #include "SerdesSimData.hpp"
+#include "SerdesSimRpc.hpp"
 #include "SerdesSimCan.hpp"
 #include "SerdesSimEthernet.hpp"
 #include "SerdesSimIo.hpp"
@@ -186,6 +187,10 @@ private:
         sim::generic::GenericMessage,
         sim::data::DataMessage,
         sim::data::PublisherAnnouncement,
+        sim::rpc::ClientAnnouncement,
+        sim::rpc::ServerAcknowledge,
+        sim::rpc::FunctionCall,
+        sim::rpc::FunctionCallResponse,
         sim::can::CanMessage,
         sim::can::CanTransmitAcknowledge,
         sim::can::CanControllerStatus,

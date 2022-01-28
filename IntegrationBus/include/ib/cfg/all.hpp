@@ -7,6 +7,7 @@
 #include "SinkBuilder.hpp"
 #include "GenericPortBuilder.hpp"
 #include "DataPortBuilder.hpp"
+#include "RpcPortBuilder.hpp"
 #include "IoPortBuilder.hpp"
 #include "LinkBuilder.hpp"
 #include "NetworkSimulatorBuilder.hpp"

@@ -8,6 +8,7 @@
 #include "ib/capi/Can.h"
 #include "ib/capi/Lin.h"
 #include "ib/capi/DataPubSub.h"
+#include "ib/capi/Rpc.h"
 #include "ib/capi/Ethernet.h"
 #include "ib/capi/FlexRay.h"
 #include "ib/capi/Logger.h"

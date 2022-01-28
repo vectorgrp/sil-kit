@@ -6,6 +6,7 @@ add_vib_test(TestCapiData SOURCES CapiDataTest.cpp LIBS IbSimGenericMessage IbMw
 set_target_properties(TestCapiData PROPERTIES
 RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
+add_vib_test(TestCapiRpc SOURCES CapiRpcTest.cpp LIBS IbSimRpc IbMwMockComAdapter IntegrationBus)
 
 add_vib_test(TestCapiLogger SOURCES CapiLoggerTest.cpp LIBS IbMwLogging IntegrationBus)
 set_target_properties(TestCapiLogger PROPERTIES

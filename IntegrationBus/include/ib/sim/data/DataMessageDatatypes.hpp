@@ -23,6 +23,11 @@ struct DataExchangeFormat {
     std::string mimeType;
 };
 
+inline bool operator==(const DataExchangeFormat& lhs, const DataExchangeFormat& rhs)
+{
+    return lhs.mimeType == rhs.mimeType;
+}
+
 //! \brief Callback type for new data reception callbacks
 using CallbackExchangeFormatT = std::function<void(ib::sim::data::IDataSubscriber* subscriber, const std::vector<uint8_t>& data, const ib::sim::data::DataExchangeFormat& dataExchangeFormat)>;
 

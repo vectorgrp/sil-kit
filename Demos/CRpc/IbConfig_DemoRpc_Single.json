@@ -1,0 +1,72 @@
+{
+  "ConfigVersion": "0.0.1",
+  "ConfigName": "RpcDemo",
+  "Description": "Sample Configuration for Rpc",
+
+  "SimulationSetup": {
+
+    "Participants": [
+      {
+        "Name": "Participant",
+        "Description": "Rpc client",
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Stdout",
+              "Level": "Info"
+            }
+          ]
+        },
+        "RpcClients": [
+          { "Name": "TestFunc" }
+        ],
+        "RpcServers": [
+          { "Name": "TestFunc" }
+        ]
+      }
+    ],
+    "Links": [
+      { "Name": "TestFunc", "Endpoints": [ "Participant/TestFunc" ] }
+    ]
+  },
+
+  "MiddlewareConfig": {
+    "ActiveMiddleware": "VAsio"
+  },
+
+  "LaunchConfigurations": [
+    {
+      "Name": "Installation",
+      "ParticipantEnvironments": [
+        {
+          "Participant": "Publisher",
+          "Environment": "CustomExecutable",
+          "WorkingFolder": ".",
+          "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoRpc",
+          "Arguments": "%INTEGRATIONBUS_CONFIGFILE% Client %INTEGRATIONBUS_DOMAINID%"
+        },
+        {
+          "Participant": "Subscriber",
+          "Environment": "CustomExecutable",
+          "WorkingFolder": ".",
+          "Executable": "%INTEGRATIONBUS_BINPATH%IbDemoRpc",
+          "Arguments": "%INTEGRATIONBUS_CONFIGFILE% Server %INTEGRATIONBUS_DOMAINID%"
+        },
+        {
+          "Participant": "SystemMonitor",
+          "Environment": "CustomExecutable",
+          "WorkingFolder": ".",
+          "Executable": "%INTEGRATIONBUS_BINPATH%IbSystemMonitor",
+          "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+        },
+        {
+          "Participant": "SystemController",
+          "Environment": "CustomExecutable",
+          "WorkingFolder": ".",
+          "Executable": "%INTEGRATIONBUS_BINPATH%IbSystemController",
+          "Arguments": "%INTEGRATIONBUS_CONFIGFILE% %INTEGRATIONBUS_DOMAINID%"
+        }
+      ]
+    }
+  ]
+}

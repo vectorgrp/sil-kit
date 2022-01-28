@@ -59,7 +59,7 @@ std::string to_string(const PublisherAnnouncement& publisherAnnouncement)
 }
 std::ostream& operator<<(std::ostream& out, const PublisherAnnouncement& publisherAnnouncement)
 {
-    return out << "data::PubSubAnnouncement{"
+    return out << "data::PublisherAnnouncement{"
                << "topic=" << publisherAnnouncement.topic << ", pubUUID=" << publisherAnnouncement.pubUUID
                << ", pubDataExchangeFormat=" << publisherAnnouncement.pubDataExchangeFormat << "}";
 }

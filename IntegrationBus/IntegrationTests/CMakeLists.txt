@@ -88,7 +88,7 @@ add_vib_test(ITestHopOnHopOff
         IntegrationBus
 )
  
-add_vib_test(FTestDataPubSub
+add_vib_test(ITestDataPubSub
     SOURCES
       DataPubSubITest.cpp
     LIBS
@@ -103,6 +103,13 @@ add_vib_test(ITestTargetedMessaging
       IbSimCan 
       IbSimTestHarness
       IbInternal
+)
+
+add_vib_test(ITestRpc
+    SOURCES
+      RpcITest.cpp
+    LIBS
+      IntegrationBus
 )
 
 if(IB_MW_ENABLE_VASIO)
@@ -135,7 +142,6 @@ if(IB_MW_ENABLE_VASIO)
           SingleParticipantITest.cpp
         LIBS
           IbMwComAdapter
-          IbSimTestHarness
           IbSimTestHarness
           IbMwVAsio
     )

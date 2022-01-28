@@ -68,6 +68,7 @@ VIB_DECLARE_PARSE_TYPE_NAME(PatternPort);
 VIB_DECLARE_PARSE_TYPE_NAME(GenericPort);
 VIB_DECLARE_PARSE_TYPE_NAME(GenericPort::ProtocolType);
 VIB_DECLARE_PARSE_TYPE_NAME(DataPort);
+VIB_DECLARE_PARSE_TYPE_NAME(RpcPort);
 VIB_DECLARE_PARSE_TYPE_NAME(SyncType);
 VIB_DECLARE_PARSE_TYPE_NAME(std::chrono::milliseconds);
 VIB_DECLARE_PARSE_TYPE_NAME(std::chrono::nanoseconds);
@@ -1156,7 +1157,7 @@ template <>
 Node VibConversion::encode(const DataPort& obj)
 {
     static const DataPort defaultObj{};
-    Node                     node;
+    Node node;
     node["Name"] = obj.name;
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
@@ -1169,7 +1170,26 @@ bool VibConversion::decode(const Node& node, DataPort& obj)
     legacy_decode_name(obj, node);
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
+    return true;
+}
 
+template <>
+Node VibConversion::encode(const RpcPort& obj)
+{
+    static const RpcPort defaultObj{};
+    Node node;
+    node["Name"] = obj.name;
+    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_encode(obj.replay, node, "Replay");
+    return node;
+}
+template <>
+bool VibConversion::decode(const Node& node, RpcPort& obj)
+{
+    // current format: {"Name": "obj.name", ...}
+    legacy_decode_name(obj, node);
+    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
+    optional_decode(obj.replay, node, "Replay");
     return true;
 }
 
@@ -1294,6 +1314,20 @@ Node VibConversion::encode(const Participant& obj)
         }
     };
 
+
+    // RpcServers cannot be easily discerned from RpcClients (same type of RpcPort),
+    // so we treat them specially here:
+    auto makeRpcServers = [](auto parentNode, auto&& servers) {
+        for (const auto& server : servers)
+        {
+            YAML::Node subNode;
+            subNode["Name"] = server.name;
+            optional_encode(server.useTraceSinks, subNode, "UseTraceSinks");
+            optional_encode(server.replay, subNode, "Replay");
+            parentNode.push_back(subNode);
+        }
+    };
+
     node["Name"] = obj.name;
     non_default_encode(obj.description, node, "Description", defaultObj.description);
     non_default_encode(obj.logger, node, "Logger", defaultObj.logger);
@@ -1318,6 +1352,9 @@ Node VibConversion::encode(const Participant& obj)
 
     optional_encode(obj.dataPublishers, node, "DataPublishers");
     makeSubscribers(node["DataSubscribers"], obj.dataSubscribers);
+	
+    optional_encode(obj.rpcClients, node, "RpcClients");
+    makeRpcServers(node["RpcServers"], obj.rpcServers);
 
     optional_encode(obj.traceSinks, node, "TraceSinks");
     optional_encode(obj.traceSources, node, "TraceSources");
@@ -1360,6 +1397,9 @@ bool VibConversion::decode(const Node& node, Participant& obj)
 
     optional_decode(obj.dataPublishers, node, "DataPublishers");
     optional_decode(obj.dataSubscribers, node, "DataSubscribers");
+	
+    optional_decode(obj.rpcClients, node, "RpcClients");
+    optional_decode(obj.rpcServers, node, "RpcServers");
 
     optional_decode(obj.traceSinks, node, "TraceSinks");
     optional_decode(obj.traceSources, node, "TraceSources");

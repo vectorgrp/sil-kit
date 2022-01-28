@@ -18,6 +18,7 @@
 #include "ib/mw/logging/LoggingDatatypes.hpp"
 #include "ib/sim/generic/GenericMessageDatatypes.hpp"
 #include "ib/sim/data/DataMessageDatatypes.hpp"
+#include "ib/sim/rpc/RpcDatatypes.hpp"
 
 #include "OptionalCfg.hpp"
 
@@ -50,7 +51,8 @@ struct Link
         PwmIo,
         PatternIo,
         GenericMessage,
-        DataMessage
+        DataMessage,
+        Rpc
     };
 
     std::string name;
@@ -307,6 +309,24 @@ struct DataPort
     std::string pubUUID = "";
 };
 
+struct RpcPort
+{
+    static constexpr Link::Type linkType = Link::Type::Rpc;
+
+    std::string name;
+    mw::EndpointId endpointId{ 0 };
+    int16_t linkId{ -1 };
+
+    std::vector<std::string> useTraceSinks;
+    Replay                   replay;
+
+    //! \brief (De-)Serialization format of the function parameter data bound to a RpcClient/RpcServer.
+    sim::rpc::RpcExchangeFormat exchangeFormat;
+
+    std::string                        clientUUID{ "" };
+    std::map<std::string, std::string> labels;
+};
+
 enum class SyncType
 {
     DistributedTimeQuantum,  //!< TimeQuantum synchronization using a distributed algorithm. When using VAsio middleware, this SyncType provides inherent strict message delivery.
@@ -361,6 +381,9 @@ struct Participant
 
     std::vector<DataPort> dataPublishers;
     std::vector<DataPort> dataSubscribers;
+	
+    std::vector<RpcPort> rpcServers;
+    std::vector<RpcPort> rpcClients;
 
     bool isSyncMaster{false};
 
@@ -610,6 +633,7 @@ IntegrationBusAPI bool operator==(const PwmPort& lhs, const PwmPort& rhs);
 IntegrationBusAPI bool operator==(const PatternPort& lhs, const PatternPort& rhs);
 IntegrationBusAPI bool operator==(const GenericPort& lhs, const GenericPort& rhs);
 IntegrationBusAPI bool operator==(const DataPort& lhs, const DataPort& rhs);
+IntegrationBusAPI bool operator==(const RpcPort& lhs, const RpcPort& rhs);
 IntegrationBusAPI bool operator==(const TraceSink& lhs, const TraceSink& rhs);
 IntegrationBusAPI bool operator==(const TraceSource& lhs, const TraceSource& rhs);
 IntegrationBusAPI bool operator==(const Replay& lhs, const Replay& rhs);

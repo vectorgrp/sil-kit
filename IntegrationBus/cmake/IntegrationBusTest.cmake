@@ -29,7 +29,7 @@ function(add_vib_test)
 
     add_executable(${executableName}
         ${PARSED_ARGS_SOURCES}
-    )
+     )
 
     set_property(TARGET ${executableName} PROPERTY FOLDER "Tests")
 

@@ -6,6 +6,10 @@ namespace ib {
 namespace sim {
 namespace data {
 
+struct PublisherAnnouncement;
+struct DataMessage;
+struct DataExchangeFormat;
+
 class IDataPublisher;
 class IDataSubscriber;
 

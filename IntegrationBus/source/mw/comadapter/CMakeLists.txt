@@ -24,6 +24,7 @@ target_link_libraries(IbMwComAdapter
         IbSimIO
         IbSimGenericMessage
         IbSimDataMessage
+        IbSimRpc
         IbTracing
         IbMwService
     INTERFACE  IbMwService

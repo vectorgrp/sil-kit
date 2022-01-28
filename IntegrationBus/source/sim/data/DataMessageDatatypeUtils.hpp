@@ -12,7 +12,6 @@ namespace data {
 
 bool operator==(const DataMessage& lhs, const DataMessage& rhs);
 
-bool               operator==(const DataExchangeFormat& lhs, const DataExchangeFormat& rhs);
 bool               Match(const DataExchangeFormat& lhs, const DataExchangeFormat& rhs);
 DataExchangeFormat Join(const DataExchangeFormat& defA, const DataExchangeFormat& defB);
 

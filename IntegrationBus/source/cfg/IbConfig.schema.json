@@ -865,6 +865,44 @@
                   }
                 },
 
+                "RpcClients": {
+                  "type": "array",
+                  "title": "Rpc Clients",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Name of the Rpc client"
+                      },
+                      "UseTraceSinks": {
+                        "type" : "array",
+                        "title": "Names of trace sinks"
+                      },
+                      "Replay": { "$ref": "#/definitions/Replay" }
+                    }
+                  }
+                },
+
+                "RpcServers": {
+                  "type": "array",
+                  "title": "Rpc Servers",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "Name of the Rpc server"
+                      },
+                      "UseTraceSinks": {
+                        "type" : "array",
+                        "title": "Names of trace sinks"
+                      },
+                      "Replay": { "$ref": "#/definitions/Replay" }
+                    }
+                  }
+                },
+
                 "NetworkSimulators": {
                   "type": "array",
                   "items":{

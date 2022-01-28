@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "internal_fwd.hpp"
+
 namespace ib {
 namespace mw {
 
@@ -20,6 +22,7 @@ template <class IbServiceT> struct IbServiceTraits
 
 // Services that are registered asynchronously (= not in main thread but in IO-Worker thread on an incoming IbMessage) 
 DefineIbServiceTrait_UseAsyncRegistration(ib::sim::data, DataSubscriberInternal);
+DefineIbServiceTrait_UseAsyncRegistration(ib::sim::rpc, RpcServerInternal);
 
 
 } // mw
