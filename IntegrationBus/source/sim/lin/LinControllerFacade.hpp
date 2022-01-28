@@ -35,14 +35,12 @@ public:
     // ----------------------------------------
     // Constructors and Destructor
     LinControllerFacade() = delete;
-    LinControllerFacade(const LinControllerFacade&) = default;
     LinControllerFacade(LinControllerFacade&&) = default;
     LinControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::LinController config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
     // Operator Implementations
-    LinControllerFacade& operator=(LinControllerFacade& other) = default;
     LinControllerFacade& operator=(LinControllerFacade&& other) = default;
 
 public:

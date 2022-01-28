@@ -33,7 +33,6 @@ public:
     // ----------------------------------------
     // Constructors and Destructor
     EthController() = delete;
-    EthController(const EthController&) = default;
     EthController(EthController&&) = default;
     EthController(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::EthernetController config,
                   mw::sync::ITimeProvider* timeProvider, IEthController* facade = nullptr);
@@ -41,7 +40,6 @@ public:
 public:
     // ----------------------------------------
     // Operator Implementations
-    EthController& operator=(EthController& other) = default;
     EthController& operator=(EthController&& other) = default;
 
 public:

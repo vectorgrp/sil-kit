@@ -31,7 +31,6 @@ public:
     // ----------------------------------------
     // Constructors and Destructor
     CanControllerFacade() = delete;
-    CanControllerFacade(const CanControllerFacade&) = default;
     CanControllerFacade(CanControllerFacade&&) = default;
     CanControllerFacade(mw::IComAdapterInternal* comAdapter, ib::cfg::v1::datatypes::CanController config,
                         mw::sync::ITimeProvider* timeProvider);
@@ -39,7 +38,6 @@ public:
 public:
     // ----------------------------------------
     // Operator Implementations
-    CanControllerFacade& operator=(CanControllerFacade& other) = default;
     CanControllerFacade& operator=(CanControllerFacade&& other) = default;
 
 public:

@@ -39,14 +39,12 @@ public:
     // ----------------------------------------
     // Constructors and Destructor
     FrControllerFacade() = delete;
-    FrControllerFacade(const FrControllerFacade&) = default;
     FrControllerFacade(FrControllerFacade&&) = default;
     FrControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::FlexRayController config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
     // Operator Implementations
-    FrControllerFacade& operator=(FrControllerFacade& other) = default;
     FrControllerFacade& operator=(FrControllerFacade&& other) = default;
 
 public:
