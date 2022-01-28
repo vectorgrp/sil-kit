@@ -72,4 +72,4 @@ rc = subprocess.call("git remote set-url origin " + git_remote_url)
 
 # write new version number to text file
 with open('../../new_version_number.txt', 'w') as the_file:
-    the_file.write(str(major)+"."+str(minor)+"."+str(patch))
+    the_file.write(str(major)+"."+str(minor)+"."+str(patch+1))
