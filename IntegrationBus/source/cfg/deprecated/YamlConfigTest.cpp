@@ -495,6 +495,15 @@ SimulationSetup:
     EXPECT_TRUE(warnings.str().size() > 0);
 }
 
+TEST_F(YamlConfigTest, yaml_check_invalid_parsing)
+{
+    EXPECT_THROW(
+        {
+            YAML::Node node("Just A String");
+            auto vibObject = parse_as<MdfChannel>(node);
+        },
+        BadVibConversion);
+}
 TEST_F(YamlConfigTest, yaml_native_type_conversions)
 {
     using namespace ib::cfg;

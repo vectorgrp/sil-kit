@@ -34,7 +34,7 @@ struct YamlSchemaElem
     }
 };
 
-namespace v1 {
+inline namespace v1 {
 auto MakeYamlSchema() -> YamlSchemaElem;
 } // namespace v1
 

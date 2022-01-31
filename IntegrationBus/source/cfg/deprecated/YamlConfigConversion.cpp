@@ -6,7 +6,6 @@
 #include <thread>
 #include <chrono>
 
-#include "ib/cfg/OptionalCfg.hpp"
 #include "ib/cfg/string_utils.hpp"
 
 
@@ -15,106 +14,6 @@ using namespace ib;
 
 //local utilities
 namespace {
-
-class BadVibConversion : public YAML::BadConversion
-{
-public:
-    BadVibConversion(const YAML::Node& node, const std::string& message)
-        :BadConversion(node.Mark())
-    {
-        msg = message;
-    }
-};
-
-// Helper to parse a node as the given type or throw our BadVibConversion with the type's name in the error message.
-template<typename T> struct ParseTypeName { static constexpr const char* name = "Unknown Type"; };
-
-template<typename T> struct ParseTypeName<std::vector<T>> { static constexpr const char* name = ParseTypeName<T>::name; };
-
-#define VIB_DECLARE_PARSE_TYPE_NAME(TYPE) \
-    template<> struct ParseTypeName<TYPE> { static constexpr const char* name = #TYPE ; }
-
-VIB_DECLARE_PARSE_TYPE_NAME(int16_t);
-VIB_DECLARE_PARSE_TYPE_NAME(uint16_t);
-VIB_DECLARE_PARSE_TYPE_NAME(uint64_t);
-VIB_DECLARE_PARSE_TYPE_NAME(int64_t);
-VIB_DECLARE_PARSE_TYPE_NAME(int8_t);
-VIB_DECLARE_PARSE_TYPE_NAME(uint8_t);
-VIB_DECLARE_PARSE_TYPE_NAME(int);
-VIB_DECLARE_PARSE_TYPE_NAME(double);
-VIB_DECLARE_PARSE_TYPE_NAME(bool);
-VIB_DECLARE_PARSE_TYPE_NAME(std::vector<std::string>);
-VIB_DECLARE_PARSE_TYPE_NAME(std::string);
-VIB_DECLARE_PARSE_TYPE_NAME(MdfChannel);
-VIB_DECLARE_PARSE_TYPE_NAME(Version);
-VIB_DECLARE_PARSE_TYPE_NAME(Sink::Type);
-VIB_DECLARE_PARSE_TYPE_NAME(ib::mw::logging::Level);
-VIB_DECLARE_PARSE_TYPE_NAME(Sink);
-VIB_DECLARE_PARSE_TYPE_NAME(Logger);
-VIB_DECLARE_PARSE_TYPE_NAME(CanController);
-VIB_DECLARE_PARSE_TYPE_NAME(LinController);
-VIB_DECLARE_PARSE_TYPE_NAME(EthernetController);
-VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::ClusterParameters);
-VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::NodeParameters);
-VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::TxBufferConfig);
-VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::Channel);
-VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::ClockPeriod);
-VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::TransmissionMode);
-VIB_DECLARE_PARSE_TYPE_NAME(FlexrayController);
-VIB_DECLARE_PARSE_TYPE_NAME(GenericPort);
-VIB_DECLARE_PARSE_TYPE_NAME(GenericPort::ProtocolType);
-VIB_DECLARE_PARSE_TYPE_NAME(DataPort);
-VIB_DECLARE_PARSE_TYPE_NAME(RpcPort);
-VIB_DECLARE_PARSE_TYPE_NAME(SyncType);
-VIB_DECLARE_PARSE_TYPE_NAME(std::chrono::milliseconds);
-VIB_DECLARE_PARSE_TYPE_NAME(std::chrono::nanoseconds);
-VIB_DECLARE_PARSE_TYPE_NAME(ParticipantController);
-VIB_DECLARE_PARSE_TYPE_NAME(Participant);
-VIB_DECLARE_PARSE_TYPE_NAME(Switch::Port);
-VIB_DECLARE_PARSE_TYPE_NAME(Switch);
-VIB_DECLARE_PARSE_TYPE_NAME(Link);
-VIB_DECLARE_PARSE_TYPE_NAME(NetworkSimulator);
-VIB_DECLARE_PARSE_TYPE_NAME(TimeSync::SyncPolicy);
-VIB_DECLARE_PARSE_TYPE_NAME(TimeSync);
-VIB_DECLARE_PARSE_TYPE_NAME(SimulationSetup);
-VIB_DECLARE_PARSE_TYPE_NAME(FastRtps::DiscoveryType);
-VIB_DECLARE_PARSE_TYPE_NAME(FastRtps::Config);
-VIB_DECLARE_PARSE_TYPE_NAME(VAsio::RegistryConfig);
-VIB_DECLARE_PARSE_TYPE_NAME(VAsio::Config);
-VIB_DECLARE_PARSE_TYPE_NAME(Middleware);
-VIB_DECLARE_PARSE_TYPE_NAME(MiddlewareConfig);
-VIB_DECLARE_PARSE_TYPE_NAME(ExtensionConfig);
-VIB_DECLARE_PARSE_TYPE_NAME(Config);
-VIB_DECLARE_PARSE_TYPE_NAME(TraceSink);
-VIB_DECLARE_PARSE_TYPE_NAME(TraceSink::Type);
-VIB_DECLARE_PARSE_TYPE_NAME(TraceSource);
-VIB_DECLARE_PARSE_TYPE_NAME(TraceSource::Type);
-VIB_DECLARE_PARSE_TYPE_NAME(Replay);
-VIB_DECLARE_PARSE_TYPE_NAME(Replay::Direction);
-
-#undef VIB_DECLARE_PARSE_TYPE_NAME
-
-template<typename ValueT>
-auto parse_as(const YAML::Node& node) -> ValueT
-{
-    try
-    {
-        return node.as<ValueT>();
-    }
-    catch(const BadVibConversion&)
-    {
-        //we already have a concise error message, propagate it to our caller
-        throw;
-    }
-    catch (const YAML::Exception& ex)
-    {
-        std::stringstream ss;
-        ss << "Cannot parse as Type \"" << ParseTypeName<ValueT>::name
-            << "\". Exception: \"" << ex.what()
-            << "\". While parsing: " << YAML::Dump(node);
-        throw BadVibConversion(node, ss.str());
-    }
-}
 
 inline auto nibble_to_char(char nibble) -> char
 {
@@ -186,14 +85,6 @@ auto macaddress_decode(const YAML::Node& node) -> std::array<uint8_t, 6>
 }
 
 template<typename ConfigT>
-void optional_encode(const OptionalCfg<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
-{
-    if (value.has_value())
-    {
-        node[fieldName] = value.value();
-    }
-}
-template<typename ConfigT>
 void optional_encode(const std::vector<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
 {
     if (value.size() > 0)
@@ -210,23 +101,7 @@ void optional_encode(const Replay& value, YAML::Node& node, const std::string& f
     }
 }
 
-template<typename ConfigT>
-void optional_decode(OptionalCfg<ConfigT>& value, const YAML::Node& node, const std::string& fieldName)
-{
-    if (node.IsMap() && node[fieldName]) //operator[] does not modify node
-    {
-        value = parse_as<ConfigT>(node[fieldName]);
-    }
-}
 
-template<typename ConfigT>
-void optional_decode(ConfigT& value, const YAML::Node& node, const std::string& fieldName)
-{
-    if (node.IsMap() && node[fieldName]) //operator[] does not modify node
-    {
-        value = parse_as<ConfigT>(node[fieldName]);
-    }
-}
 
 //!< We support some legacy controller definitions which only consisted of a single
 //   'string' valued node specifying a name. Currently an object with an "Name" field
@@ -257,7 +132,7 @@ bool legacy_decode_name(ControllerT& value, const YAML::Node& node)
             if (it == node.end())
             {
                 std::stringstream ss;
-                ss << "Cannot parse as Type \"" << ParseTypeName<ControllerT>::name
+                ss << "Cannot parse as Type \"" << YAML::ParseTypeName<ControllerT>::name
                     << "\". While parsing: " << YAML::Dump(node);
                 throw BadVibConversion(node, ss.str());
             }
