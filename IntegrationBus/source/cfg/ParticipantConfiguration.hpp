@@ -214,8 +214,8 @@ public:
     {
     }
 
-    virtual auto ToYamlString() -> std::string override;
-    virtual auto ToJsonString() -> std::string override;
+    //virtual auto ToYamlString() -> std::string override;
+    //virtual auto ToJsonString() -> std::string override;
 
 public:
     datatypes::ParticipantConfiguration _data;

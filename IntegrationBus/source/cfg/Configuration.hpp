@@ -43,7 +43,7 @@ enum class NetworkType
 
 struct Sink
 {
-    enum class Type
+    enum class Type : uint8_t
     {
         Remote,
         Stdout,

@@ -160,7 +160,7 @@ auto ReadParticipantConfigurationFromJsonFile(const std::string& jsonFilename) -
     throw configuration_error{ "Not implemented" };
 }
 
-auto ParticipantConfiguration::ToYamlString() -> std::string
+/*auto ParticipantConfiguration::ToYamlString() -> std::string
 {
     throw configuration_error{ "Not implemented" };
 }
@@ -168,7 +168,7 @@ auto ParticipantConfiguration::ToYamlString() -> std::string
 auto ParticipantConfiguration::ToJsonString() -> std::string
 {
     throw configuration_error{ "Not implemented" };
-}
+}*/
 
 #if __cplusplus ==  201402L
 // When compiling as C++14, the 'static constexpr variable definitions' are not

@@ -10,6 +10,7 @@ target_sources(IbUtil INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/Timer.hpp
     ${CMAKE_CURRENT_LIST_DIR}/SetThreadName.hpp 
     ${CMAKE_CURRENT_LIST_DIR}/UuidRandom.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/Optional.hpp
 )
 
 target_include_directories(IbUtil

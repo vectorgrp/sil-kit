@@ -27,7 +27,7 @@ public:
     *
     * \return The JSON-formatted string
     */
-    virtual auto ToJsonString() -> std::string = 0;
+    //virtual auto ToJsonString() -> std::string = 0;
 
     /*! \brief Convert this configuration into YAML.
     *
@@ -36,7 +36,7 @@ public:
     *
     * \return The YAML-formatted string
     */
-    virtual auto ToYamlString() -> std::string = 0;
+    //virtual auto ToYamlString() -> std::string = 0;
 };
 
 /*! \brief Parse configuration from a JSON string.

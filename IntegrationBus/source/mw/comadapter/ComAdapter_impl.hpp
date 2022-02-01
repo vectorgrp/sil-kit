@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <sstream>
+#include <chrono>
 
 #include "CanController.hpp"
 #include "CanControllerProxy.hpp"
@@ -60,6 +61,7 @@ namespace ib {
 namespace mw {
 
 using namespace ib::sim;
+using namespace std::chrono_literals;
 
 namespace tt = util::tuple_tools;
 
@@ -117,6 +119,39 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& par
 
     //set up default time provider used for controller instantiation
     _timeProvider = std::make_shared<sync::WallclockProvider>(_config.simulationSetup.timeSync.tickPeriod);
+}
+
+template <class IbConnectionT>
+ComAdapter<IbConnectionT>::ComAdapter(std::unique_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+                                      const std::string& participantName, cfg::Config config)
+    : _config{config}
+    , _participant{GetParticipantByName(_config, participantName)} // throws if participantName is not found in _config
+    , _participantName{participantName}
+    , _participantId{hash(_participant.name)}
+    , _ibConnection{_config, participantName, _participantId}
+{
+    auto conf = *(static_cast<ib::cfg::ParticipantConfiguration*>(participantConfig.get()));
+    _participantConfig = std::make_unique<ib::cfg::ParticipantConfiguration>(conf);
+    //_participantConfig = std::move(std::make_unique<std::cfg::ParticipantConfiguration>(static_pointer_cast<std::cfg::ParticipantConfiguration>()));
+
+    auto&& participantConfigOldConfig = get_by_name(_config.simulationSetup.participants, _participantName);
+
+    // NB: do not create the _logger in the initializer list. If participantName is empty,
+    //  this will cause a fairly unintuitive exception in spdlog.
+    // TODO prepare logger for dynamic configuration, then activate this code
+    //_logger = std::make_unique<logging::Logger>(_participantName, _participantConfig->_data.logging);
+    _logger = std::make_unique<logging::Logger>(_participantName, participantConfigOldConfig.logger);
+    _ibConnection.SetLogger(_logger.get());
+    
+    _logger->Info("Creating ComAdapter for Participant {}, IntegrationBus-Version: {} {}, Middleware: {}",
+                  _participantName, version::String(), version::SprintName(),
+                  "VAsio");
+    if (!_config.configFilePath.empty())
+        _logger->Info("Using IbConfig: {}", _config.configFilePath);
+
+    //set up default time provider used for controller instantiation
+    // TODO decide upon timePeriod
+    _timeProvider = std::make_shared<sync::WallclockProvider>(1ms);
 }
 
 template <class IbConnectionT>

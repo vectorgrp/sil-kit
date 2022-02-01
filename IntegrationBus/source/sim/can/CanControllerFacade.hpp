@@ -9,6 +9,7 @@
 #include "IIbServiceEndpoint.hpp"
 
 #include "CanController.hpp"
+#include "ParticipantConfiguration.hpp"
 #include "CanControllerProxy.hpp"
 
 namespace ib {

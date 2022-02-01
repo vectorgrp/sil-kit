@@ -18,7 +18,9 @@ target_include_directories(IbSimCan
 target_link_libraries(IbSimCan
     PRIVATE IbInterface
             IbTracing
+            IbConfiguration
     INTERFACE IbInternal
+            IbConfiguration
 )
 
 add_vib_test(TestSimCanController

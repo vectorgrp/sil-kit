@@ -37,5 +37,25 @@ auto CreateComAdapterImpl(ib::cfg::Config config, const std::string& participant
     }
 }
 
+auto CreateVAsioSimulationParticipantImpl(std::unique_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+                                          const std::string& participantName, cfg::Config config)
+    -> std::unique_ptr<IComAdapterInternal>
+{
+#if defined(IB_MW_HAVE_VASIO)
+    return std::make_unique<ComAdapter<VAsioConnection>>(std::move(participantConfig), participantName, std::move(config));
+#else
+    std::cout << "ERROR: CreateVasioComAdapterImpl(): IntegrationBus was compiled without \"IB_MW_HAVE_VASIO\""
+              << std::endl;
+    throw std::runtime_error("VIB was compiled without IB_MW_HAVE_VASIO");
+#endif
+}
+
+auto CreateSimulationParticipantImpl(std::unique_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+                                     const std::string& participantName, cfg::Config config)
+    -> std::unique_ptr<IComAdapterInternal>
+{
+    return CreateVAsioSimulationParticipantImpl(std::move(participantConfig), participantName, std::move(config));
+}
+
 } // mw
 } // namespace ib

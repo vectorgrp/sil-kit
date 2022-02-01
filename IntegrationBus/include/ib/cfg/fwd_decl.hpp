@@ -35,7 +35,10 @@ class TimeSyncBuilder;
 
 } // namespace deprecated
 
+inline namespace v1 
+{
 class ParticipantConfiguration;
+}
 
 } // namespace cfg
 } // namespace ib

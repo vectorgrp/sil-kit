@@ -11,6 +11,7 @@
 #include <tuple>
 
 #include "ib/cfg/Config.hpp"
+#include "ib/cfg/IParticipantConfiguration.hpp"
 #include "ib/mw/all.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/mw/logging/ILogger.hpp"
@@ -18,6 +19,7 @@
 #include "ib/extensions/ITraceMessageSink.hpp"
 #include "ib/extensions/ITraceMessageSource.hpp"
 
+#include "ParticipantConfiguration.hpp"
 #include "Tracing.hpp"
 #include "ReplayScheduler.hpp"
 
@@ -86,6 +88,8 @@ public:
     ComAdapter(const ComAdapter&) = default;
     ComAdapter(ComAdapter&&) = default;
     ComAdapter(cfg::Config config, const std::string& participantName);
+    ComAdapter(std::unique_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+               const std::string& participantName, cfg::Config config);
 
 public:
     // ----------------------------------------
@@ -324,6 +328,7 @@ private:
     // ----------------------------------------
     // private members
     cfg::Config _config;
+    std::unique_ptr<ib::cfg::ParticipantConfiguration> _participantConfig;
     const cfg::Participant& _participant;
     std::string _participantName;
     ParticipantId _participantId{0};

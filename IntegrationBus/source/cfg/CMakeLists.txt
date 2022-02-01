@@ -19,6 +19,7 @@ add_library(IbConfiguration STATIC
 target_link_libraries(IbConfiguration
     PRIVATE IbInterface
     PRIVATE IbUtil
+    INTERFACE IbUtil
     PRIVATE yaml-cpp
     INTERFACE yaml-cpp
 )

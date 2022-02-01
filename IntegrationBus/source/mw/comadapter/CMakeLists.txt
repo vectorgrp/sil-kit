@@ -13,6 +13,7 @@ target_link_libraries(IbMwComAdapter
         IbInternal
         IbMwLogging
         IbConfig_deprecated
+        IbConfiguration
         IbUtil
         IbSetThreadName
         IbUuid
