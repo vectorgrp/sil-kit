@@ -704,27 +704,27 @@ auto ComAdapter<IbConnectionT>::GetLogger() -> logging::ILogger*
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::RegisterCanSimulator(can::IIbToCanSimulator* busSim)
+void ComAdapter<IbConnectionT>::RegisterCanSimulator(can::IIbToCanSimulator* busSim,  const std::vector<std::string>& networkNames)
 {
-    RegisterSimulator(busSim, cfg::Link::Type::CAN);
+    RegisterSimulator(busSim, cfg::Link::Type::CAN, networkNames);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim)
+void ComAdapter<IbConnectionT>::RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim,  const std::vector<std::string>& networkNames)
 {
-    RegisterSimulator(busSim, cfg::Link::Type::Ethernet);
+    RegisterSimulator(busSim, cfg::Link::Type::Ethernet, networkNames);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* busSim)
+void ComAdapter<IbConnectionT>::RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* busSim,  const std::vector<std::string>& networkNames)
 {
-    RegisterSimulator(busSim, cfg::Link::Type::FlexRay);
+    RegisterSimulator(busSim, cfg::Link::Type::FlexRay, networkNames);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::RegisterLinSimulator(sim::lin::IIbToLinSimulator* busSim)
+void ComAdapter<IbConnectionT>::RegisterLinSimulator(sim::lin::IIbToLinSimulator* busSim,  const std::vector<std::string>& networkNames)
 {
-    RegisterSimulator(busSim, cfg::Link::Type::LIN);
+    RegisterSimulator(busSim, cfg::Link::Type::LIN, networkNames);
 }
 
 template <class IbConnectionT>
@@ -1434,111 +1434,28 @@ void ComAdapter<IbConnectionT>::AddTraceSinksToSource(extensions::ITraceMessageS
 
 template <class IbConnectionT>
 template <class IIbToSimulatorT>
-void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::Link::Type linkType)
+void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim,
+        cfg::Link::Type linkType,
+        const std::vector<std::string>& simulatedNetworkNames)
 {
-    /*
-    auto&& simulator = std::get<IIbToSimulatorT*>(_simulators);
-    if (simulator)
+    auto& serviceEndpoint = dynamic_cast<mw::IIbServiceEndpoint&>(*busSim);
+    auto oldDescriptor = serviceEndpoint.GetServiceDescriptor();
+    //XXX we temporarily overwrite the simulator's serviceEndpoint (not used internally)
+    //    only for RegisterIbService: we should refactor RegisterIbService to accept the ServiceDescriptor directly
+    for (const auto& network: simulatedNetworkNames)
     {
-        _logger->Error("A {} is already registered", typeid(IIbToSimulatorT).name());
-        return;
+        auto id = ServiceDescriptor{};
+        id.SetNetworkName(network);
+        id.SetServiceName(network);
+        id.SetNetworkType(linkType);
+        id.SetParticipantName(GetParticipantName());
+
+        serviceEndpoint.SetServiceDescriptor(id);
+        // Tell the middle-ware we are interested in this named network of the given type
+        EndpointId unused{}; //not used in VAsioConnection.hpp
+        _ibConnection.RegisterIbService(network, unused, busSim);
     }
-
-    struct ServiceCfg
-    {
-        std::string participantName;
-        std::string serviceName;
-        EndpointId id;
-    };
-    std::unordered_map<std::string, ServiceCfg> endpointMap;
-    auto addToEndpointMap = [&endpointMap](auto&& participantName, auto&& controllerConfigs)
-    {
-        for (auto&& cfg : controllerConfigs)
-        {
-            std::string qualifiedName = participantName + "/" + cfg.name;
-            ServiceCfg helper{};
-            helper.id = cfg.endpointId;
-            helper.participantName = participantName;
-            helper.serviceName = cfg.name;
-            endpointMap[qualifiedName] = helper;
-        }
-    };
-
-    for (auto&& participant : _config.simulationSetup.participants)
-    {
-        addToEndpointMap(participant.name, participant.canControllers);
-        addToEndpointMap(participant.name, participant.linControllers);
-        addToEndpointMap(participant.name, participant.ethernetControllers);
-        addToEndpointMap(participant.name, participant.flexrayControllers);
-    }
-    for (auto&& ethSwitch : _config.simulationSetup.switches)
-    {
-        addToEndpointMap(ethSwitch.name, ethSwitch.ports);
-    }
-
-    // get_by_name throws if the current node is not configured as a network simulator.
-    for (const auto& simulatorConfig : _participant.networkSimulators)
-    {
-        for (auto&& networkName : simulatorConfig.simulatedLinks)
-        {
-            auto&& linkConfig = get_by_name(_config.simulationSetup.links, networkName);
-
-            if (linkConfig.type != linkType)
-                continue;
-
-            for (auto&& endpointName : linkConfig.endpoints)
-            {
-                try
-                {
-                    auto proxyEndpoint = endpointMap.at(endpointName);
-                    // NB: We need to set the service id -- VIBE-NetSim implements the IIbServiceEndpoint.
-                    // We need to register all simulated controllers here, so the connection
-                    // can build internal data structures.
-                    auto& serviceEndpoint = dynamic_cast<mw::IIbServiceEndpoint&>(*busSim);
-                    auto oldDescriptor = serviceEndpoint.GetServiceDescriptor();
-                    auto id = ServiceDescriptor{};
-                    id.SetNetworkName(networkName);
-                    id.SetParticipantName(proxyEndpoint.participantName);
-                    id.SetServiceName(proxyEndpoint.serviceName);
-                    //id.type = linkType;
-                    id.SetServiceId(proxyEndpoint.id);
-                    serviceEndpoint.SetServiceDescriptor(id);
-  
-                    _ibConnection.RegisterIbService(networkName, proxyEndpoint.id, busSim);
-                    serviceEndpoint.SetServiceDescriptor(oldDescriptor); //restore
-
-                }
-                catch (const std::exception& e)
-                {
-                    _logger->Error("Cannot register simulator topics for link \"{}\": {}", networkName, e.what());
-                    continue;
-                }
-            }
-        }
-        //// register each simulator as trace source
-        //auto* traceSource = dynamic_cast<extensions::ITraceMessageSource*>(busSim);
-        //if (traceSource)
-        //{
-        //    AddTraceSinksToSource(traceSource, simulatorConfig);
-        //}
-    }
-
-    //// register the network simulator for replay
-    //if (_replayScheduler && tracing::HasReplayConfig(_participant))
-    //{
-    //    try
-    //    {
-    //        _replayScheduler->ConfigureNetworkSimulators(_config, _participant,
-    //            dynamic_cast<tracing::IReplayDataController&>(*busSim));
-    //    }
-    //    catch (const std::exception& e)
-    //    {
-    //        _logger->Error("Cannot configure replaying on network simulator: {}", e.what());
-    //    }
-    //}
-
-    simulator = busSim;
-    */
+    serviceEndpoint.SetServiceDescriptor(oldDescriptor); //restore 
 }
 
 template <class IbConnectionT>

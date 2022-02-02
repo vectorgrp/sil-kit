@@ -230,10 +230,10 @@ public:
 
     auto GetLogger() -> logging::ILogger* override { return &logger; }
 
-    void RegisterCanSimulator(sim::can::IIbToCanSimulator* ) override {}
-    void RegisterEthSimulator(sim::eth::IIbToEthSimulator* ) override {}
-    void RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* ) override {}
-    void RegisterLinSimulator(sim::lin::IIbToLinSimulator*) override {}
+    void RegisterCanSimulator(sim::can::IIbToCanSimulator*, const std::vector<std::string>& ) override {}
+    void RegisterEthSimulator(sim::eth::IIbToEthSimulator* , const std::vector<std::string>&) override {}
+    void RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* , const std::vector<std::string>&) override {}
+    void RegisterLinSimulator(sim::lin::IIbToLinSimulator*, const std::vector<std::string>&) override {}
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::can::CanMessage&& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::can::CanMessage& /*msg*/) override {}

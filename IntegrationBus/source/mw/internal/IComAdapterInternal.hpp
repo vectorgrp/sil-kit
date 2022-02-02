@@ -34,10 +34,10 @@ public:
     virtual void joinIbDomain(uint32_t domainId) = 0;
 
     // For VIBE-NetworkSimulator integration:
-    virtual void RegisterCanSimulator(sim::can::IIbToCanSimulator* busSim) = 0 ;
-    virtual void RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim) = 0 ;
-    virtual void RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* busSim) = 0 ;
-    virtual void RegisterLinSimulator(sim::lin::IIbToLinSimulator* busSim) = 0;
+    virtual void RegisterCanSimulator(sim::can::IIbToCanSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;
+    virtual void RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;
+    virtual void RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;
+    virtual void RegisterLinSimulator(sim::lin::IIbToLinSimulator* busSim, const std::vector<std::string>& networkNames) = 0;
 
     // The SendIbMessages are virtual functions so we can mock them in testing.
     // For performance reasons this may change in the future.

@@ -144,10 +144,10 @@ public:
     auto GetParticipantName() const -> const std::string& override { return _participantName; }
     auto IsSynchronized() const -> bool override { return _isSynchronized; }
 
-    void RegisterCanSimulator(sim::can::IIbToCanSimulator* busSim) override;
-    void RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim) override;
-    void RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* busSim) override;
-    void RegisterLinSimulator(sim::lin::IIbToLinSimulator* busSim) override;
+    void RegisterCanSimulator(sim::can::IIbToCanSimulator* busSim, const std::vector<std::string>& networkNames) override;
+    void RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim, const std::vector<std::string>& networkNames) override;
+    void RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* busSim, const std::vector<std::string>& networkNames) override;
+    void RegisterLinSimulator(sim::lin::IIbToLinSimulator* busSim, const std::vector<std::string>& networkNames) override;
 
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::can::CanMessage& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, sim::can::CanMessage&& msg) override;
@@ -324,7 +324,7 @@ private:
         -> ControllerT*;
 
     template<class IIbToSimulatorT>
-    void RegisterSimulator(IIbToSimulatorT* busSim, cfg::Link::Type linkType);
+    void RegisterSimulator(IIbToSimulatorT* busSim, cfg::Link::Type linkType, const std::vector<std::string>& simulatedNetworkNames);
 
     bool ControllerUsesNetworkSimulator(const std::string& controllerName) const;
    
