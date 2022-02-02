@@ -557,12 +557,12 @@ TEST_F(FrControllerTest, send_message_with_tracing)
 
     expectedMsg.channel = Channel::A;
     EXPECT_CALL(traceSink,
-        Trace(Direction::Send, controllerAddress, now, expectedMsg))
+        Trace(ib::sim::TransmitDirection::TX, controllerAddress, now, expectedMsg))
         .Times(1);
 
     expectedMsg.channel = Channel::B;
     EXPECT_CALL(traceSink,
-        Trace(Direction::Send, controllerAddress, now, expectedMsg))
+        Trace(ib::sim::TransmitDirection::TX, controllerAddress, now, expectedMsg))
         .Times(1);
 
     controller.UpdateTxBuffer(bufferUpdate);
@@ -583,7 +583,7 @@ TEST_F(FrControllerTest, trace_on_receive)
     // time provider is not called, the timestamp from the message is passed to trace
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
     EXPECT_CALL(traceSink,
-        Trace(Direction::Receive, controllerAddress, message.timestamp, message))
+        Trace(ib::sim::TransmitDirection::RX, controllerAddress, message.timestamp, message))
         .Times(1);
 
     controller.ReceiveIbMessage(&otherController, message);

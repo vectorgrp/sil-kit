@@ -71,13 +71,13 @@ void GenericPublisherReplay::ReplayMessage(const extensions::IReplayMessage* rep
     using namespace ib::tracing;
     switch (replayMessage->GetDirection())
     {
-    case extensions::Direction::Send:
+    case ib::sim::TransmitDirection::TX:
         if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
         {
             ReplaySend(replayMessage);
         }
         break;
-    case extensions::Direction::Receive:
+    case ib::sim::TransmitDirection::RX:
         break;
     default:
         throw std::runtime_error("GenericPublisherReplay: replay message has undefined Direction");

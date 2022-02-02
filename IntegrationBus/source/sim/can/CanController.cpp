@@ -38,7 +38,7 @@ void CanController::Sleep()
 {
 }
 
-auto CanController::SendMessage(const CanMessage& msg) -> CanTxId
+auto CanController::SendMessage(const CanMessage& msg, void* userContext) -> CanTxId
 {
     // ignore the user's API calls if we're configured for replay
     if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Send))
@@ -47,10 +47,13 @@ auto CanController::SendMessage(const CanMessage& msg) -> CanTxId
     }
 
     auto msgCopy = msg;
+    msgCopy.userContext = userContext;
     msgCopy.transmitId = MakeTxId();
+    msgCopy.direction = TransmitDirection::TX;
 
-    _tracer.Trace(extensions::Direction::Send, _timeProvider->Now(), msg);
-
+    _tracer.Trace(ib::sim::TransmitDirection::TX, _timeProvider->Now(), msg);
+    // has to be called before SendIbMessage because of thread change
+    CallHandlers(msg);
 
     _comAdapter->SendIbMessage(this, msgCopy);
 
@@ -60,12 +63,13 @@ auto CanController::SendMessage(const CanMessage& msg) -> CanTxId
     ack.status = CanTransmitStatus::Transmitted;
     ack.transmitId = msgCopy.transmitId;
     ack.timestamp = msg.timestamp;
+    ack.userContext = userContext;
     CallHandlers(ack);
 
     return msgCopy.transmitId;
 }
 
-auto CanController::SendMessage(CanMessage&& msg) -> CanTxId
+auto CanController::SendMessage(CanMessage&& msg, void* userContext) -> CanTxId
 {
     // ignore the user's API calls if we're configured for replay
     if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Send))
@@ -73,10 +77,13 @@ auto CanController::SendMessage(CanMessage&& msg) -> CanTxId
         return 0;
     }
 
+    msg.userContext = userContext;
     auto txId = MakeTxId();
     msg.transmitId = txId;
+    msg.direction = TransmitDirection::TX;
 
-    _tracer.Trace(extensions::Direction::Send, _timeProvider->Now(), msg);
+    _tracer.Trace(ib::sim::TransmitDirection::TX, _timeProvider->Now(), msg);
+    CallHandlers(msg);
 
     _comAdapter->SendIbMessage(this, std::move(msg));
     
@@ -86,14 +93,18 @@ auto CanController::SendMessage(CanMessage&& msg) -> CanTxId
     ack.status = CanTransmitStatus::Transmitted;
     ack.transmitId = msg.transmitId;
     ack.timestamp = msg.timestamp;
+    ack.userContext = userContext;
     CallHandlers(ack);
 
     return txId;
 }
 
-void CanController::RegisterReceiveMessageHandler(ReceiveMessageHandler handler)
+void CanController::RegisterReceiveMessageHandler(ReceiveMessageHandler handler, DirectionMask directionMask)
 {
-    RegisterHandler(handler);
+    std::function<bool(const CanMessage&)> filter = [directionMask](const CanMessage& msg) {
+        return (DirectionMask)msg.direction & (DirectionMask)directionMask;
+    };
+    RegisterHandler(handler, std::move(filter));
 }
 
 void CanController::RegisterStateChangedHandler(StateChangedHandler /*handler*/)
@@ -104,16 +115,20 @@ void CanController::RegisterErrorStateChangedHandler(ErrorStateChangedHandler /*
 {
 }
 
-void CanController::RegisterTransmitStatusHandler(MessageStatusHandler handler)
+void CanController::RegisterTransmitStatusHandler(MessageStatusHandler handler, CanTransmitStatusMask statusMask)
 {
-    RegisterHandler(handler);
+    std::function<bool(const CanTransmitAcknowledge& )> filter = [statusMask](const CanTransmitAcknowledge& ack) {
+        return (CanTransmitStatusMask)ack.status & (CanTransmitStatusMask)statusMask; 
+    };
+    RegisterHandler(handler, filter);
 }
 
 template<typename MsgT>
-void CanController::RegisterHandler(CallbackT<MsgT> handler)
+void CanController::RegisterHandler(CallbackT<MsgT> handler, std::function<bool(const MsgT& msg)> filter)
 {
     auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
-    handlers.push_back(handler);
+    auto handler_tuple = std::make_tuple(handler, filter);
+    handlers.push_back(handler_tuple);
 }
 
 void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMessage& msg)
@@ -123,19 +138,26 @@ void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMe
     {
         return;
     }
+    auto msgCopy = msg;
+    msgCopy.userContext = nullptr;
+    msgCopy.direction = TransmitDirection::RX;
+    CallHandlers(msgCopy);
 
-    CallHandlers(msg);
-
-    _tracer.Trace(extensions::Direction::Receive, _timeProvider->Now(), msg);
+    _tracer.Trace(ib::sim::TransmitDirection::RX, _timeProvider->Now(), std::move(msgCopy));
 }
 
 template<typename MsgT>
 void CanController::CallHandlers(const MsgT& msg)
 {
     auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
-    for (auto&& handler : handlers)
+    for (auto&& handlerTuple : handlers)
     {
-        handler(this, msg);
+        auto filter = std::get<std::function<bool(const MsgT& msg)>>(handlerTuple);
+        auto handler = std::get<CallbackT<MsgT>>(handlerTuple);
+        if (!filter || filter(msg))
+        {
+            handler(this, msg);
+        }
     }
 }
 
@@ -159,13 +181,13 @@ void CanController::ReplayMessage(const extensions::IReplayMessage* replayMessag
     using namespace ib::tracing;
     switch (replayMessage->GetDirection())
     {
-    case extensions::Direction::Send:
+    case ib::sim::TransmitDirection::TX:
         if (IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Send))
         {
             ReplaySend(replayMessage);
         }
         break;
-    case extensions::Direction::Receive:
+    case ib::sim::TransmitDirection::RX:
         if (IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Receive))
         {
             ReplayReceive(replayMessage);

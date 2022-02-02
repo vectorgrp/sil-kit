@@ -22,7 +22,7 @@ public:
     auto Timestamp() const -> std::chrono::nanoseconds override;
     void SetTimestamp(std::chrono::nanoseconds timeStamp);
 
-    auto GetDirection() const -> ib::extensions::Direction override;
+    auto GetDirection() const ->ib::sim::TransmitDirection override;
 
     auto EndpointAddress() const -> ib::mw::EndpointAddress override;
 
@@ -30,7 +30,7 @@ public:
 
 private:
     std::chrono::nanoseconds _timeStamp{0};
-    ib::extensions::Direction _direction{ib::extensions::Direction::Send};
+    ib::sim::TransmitDirection _direction{ ib::sim::TransmitDirection::TX };
     ib::mw::EndpointAddress  _endpointAddress{};
 };
 
@@ -44,7 +44,7 @@ auto PcapMessage::Timestamp() const -> std::chrono::nanoseconds
     return _timeStamp;
 }
 
-auto PcapMessage::GetDirection() const -> Direction
+auto PcapMessage::GetDirection() const -> ib::sim::TransmitDirection
 {
     return _direction;
 }

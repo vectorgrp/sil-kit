@@ -52,7 +52,7 @@ void GenericSubscriber::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, con
 
 void GenericSubscriber::ReceiveMessage(const GenericMessage& msg)
 {
-    _tracer.Trace(extensions::Direction::Receive,
+    _tracer.Trace(ib::sim::TransmitDirection::RX,
         _timeProvider->Now(),
         msg);
 

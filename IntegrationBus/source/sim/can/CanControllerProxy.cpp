@@ -56,10 +56,11 @@ void CanControllerProxy::ChangeControllerMode(CanControllerState state)
     _comAdapter->SendIbMessage(this, mode);
 }
 
-auto CanControllerProxy::SendMessage(const CanMessage& msg) -> CanTxId
+auto CanControllerProxy::SendMessage(const CanMessage& msg, void* userContext) -> CanTxId
 {
     auto msgCopy = msg;
     msgCopy.transmitId = MakeTxId();
+    msgCopy.userContext = userContext;
 
     //keep a copy until acknowledged by network simulator
     _transmittedMessages[msgCopy.transmitId] = msg;
@@ -68,11 +69,12 @@ auto CanControllerProxy::SendMessage(const CanMessage& msg) -> CanTxId
     return msgCopy.transmitId;
 }
 
-auto CanControllerProxy::SendMessage(CanMessage&& msg) -> CanTxId
+auto CanControllerProxy::SendMessage(CanMessage&& msg, void* userContext) -> CanTxId
 {
     auto txId = MakeTxId();
 
     msg.transmitId = txId;
+    msg.userContext = userContext;
 
     //keep a copy until acknowledged by network simulator
     _transmittedMessages[msg.transmitId] = msg;
@@ -82,9 +84,12 @@ auto CanControllerProxy::SendMessage(CanMessage&& msg) -> CanTxId
     return txId;
 }
 
-void CanControllerProxy::RegisterReceiveMessageHandler(ReceiveMessageHandler handler)
+void CanControllerProxy::RegisterReceiveMessageHandler(ReceiveMessageHandler handler, DirectionMask directionMask)
 {
-    RegisterHandler(handler);
+    std::function<bool(const CanMessage&)> filter = [directionMask](const CanMessage& msg) {
+        return (DirectionMask)msg.direction & (DirectionMask)directionMask;
+    };
+    RegisterHandler(handler, std::move(filter));
 }
 
 void CanControllerProxy::RegisterStateChangedHandler(StateChangedHandler handler)
@@ -97,40 +102,59 @@ void CanControllerProxy::RegisterErrorStateChangedHandler(ErrorStateChangedHandl
     RegisterHandler(handler);
 }
 
-void CanControllerProxy::RegisterTransmitStatusHandler(MessageStatusHandler handler)
+void CanControllerProxy::RegisterTransmitStatusHandler(MessageStatusHandler handler, CanTransmitStatusMask statusMask)
 {
-    RegisterHandler(handler);
+    std::function<bool(const CanTransmitAcknowledge&)> filter = [statusMask](const CanTransmitAcknowledge& ack) {
+        return (CanTransmitStatusMask)ack.status & (CanTransmitStatusMask)statusMask;
+    };
+    RegisterHandler(handler, filter);
 }
 
 template<typename MsgT>
-void CanControllerProxy::RegisterHandler(CallbackT<MsgT> handler)
+void CanControllerProxy::RegisterHandler(CallbackT<MsgT> handler, std::function<bool(const MsgT& msg)> filter)
 {
     auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
-    handlers.push_back(handler);
+    auto handler_tuple = std::make_tuple(handler, filter);
+    handlers.push_back(handler_tuple);
 }
 
 void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMessage& msg)
 {
-    _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg);
+    auto msgCopy = msg;
+    msgCopy.userContext = nullptr;
+    msgCopy.direction = TransmitDirection::RX;
 
-    CallHandlers(msg);
+    _tracer.Trace(ib::sim::TransmitDirection::RX, msgCopy.timestamp, msgCopy);
+
+    CallHandlers(msgCopy);
 }
 
 void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanTransmitAcknowledge& msg)
 {
+    bool handlerCalled = false;
+
     auto transmittedMsg = _transmittedMessages.find(msg.transmitId);
     if (transmittedMsg != _transmittedMessages.end())
     {
         if (msg.status == CanTransmitStatus::Transmitted)
         {
-            _tracer.Trace(extensions::Direction::Send, msg.timestamp,
+            _tracer.Trace(ib::sim::TransmitDirection::TX, msg.timestamp,
                 transmittedMsg->second);
+            CallHandlers(msg);
+            auto msgCopy = transmittedMsg->second;
+            msgCopy.direction = TransmitDirection::TX;
+            CallHandlers(msgCopy);
+            handlerCalled = true;
         }
 
         _transmittedMessages.erase(msg.transmitId);
     }
 
-    CallHandlers(msg);
+    if (!handlerCalled)
+    {
+        CallHandlers(msg);
+    }
+
 }
 
 void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanControllerStatus& msg)
@@ -151,9 +175,14 @@ template<typename MsgT>
 void CanControllerProxy::CallHandlers(const MsgT& msg)
 {
     auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
-    for (auto&& handler : handlers)
+    for (auto&& handlerTuple : handlers)
     {
-        handler(this, msg);
+        auto filter = std::get<std::function<bool(const MsgT& msg)>>(handlerTuple);
+        auto handler = std::get<CallbackT<MsgT>>(handlerTuple);
+        if (!filter || filter(msg))
+        {
+            handler(this, msg);
+        }
     }
 }
 

@@ -21,17 +21,17 @@ bool operator==(const CanMessage& lhs, const CanMessage& rhs)
 {
     return lhs.transmitId == rhs.transmitId
         && lhs.timestamp == rhs.timestamp
-
         && lhs.canId == rhs.canId
         && lhs.flags == rhs.flags
         && lhs.dlc == rhs.dlc
-        && lhs.dataField == rhs.dataField;
+        && lhs.dataField == rhs.dataField
+        && lhs.userContext == rhs.userContext;
 }
 
 bool operator==(const CanTransmitAcknowledge& lhs, const CanTransmitAcknowledge& rhs)
 {
     return lhs.transmitId == rhs.transmitId
-        && lhs.status == rhs.status;
+        && lhs.status == rhs.status && lhs.userContext == rhs.userContext;
 }
 
 bool operator==(const CanSetControllerMode& lhs, const CanSetControllerMode& rhs)

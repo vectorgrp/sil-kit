@@ -112,11 +112,14 @@ public:
      * are not enforced. I.e., CanMessages are distributed to
      * connected controllers regardless of the content and controller
      * states are not checked.
+     * 
+     * \param userContext An optional user provided pointer that is
+     * reobtained when receiving the message.
      *
      * \return Unique TX identifier to relate the request to following
      * CanTransmitAcknowledge messages.
      */
-    virtual auto SendMessage(const CanMessage& msg) -> CanTxId = 0;
+    virtual auto SendMessage(const CanMessage& msg, void* userContext = nullptr) -> CanTxId = 0;
 
     /*! \brief Request the transmission of a CanMessage
      *
@@ -131,17 +134,20 @@ public:
      * connected controllers regardless of the content and controller
      * states are not checked.
      *
+     * \param userContext An optional user provided pointer that is
+     * reobtained when receiving the message.
+     * 
      * \return Unique TX identifier to relate the request to following
      * CanTransmitAcknowledge messages.
      */
-    virtual auto SendMessage(CanMessage&& msg) -> CanTxId = 0;
+    virtual auto SendMessage(CanMessage&& msg, void* userContext = nullptr) -> CanTxId = 0;
 
     /*! \brief Register a callback for CAN message reception
      *
      * The registered handler is called when the controller receives a
      * new CanMessage.
      */
-    virtual void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) = 0;
+    virtual void RegisterReceiveMessageHandler(ReceiveMessageHandler handler, DirectionMask directionMask = (DirectionMask)TransmitDirection::RX | (DirectionMask)TransmitDirection::TX) = 0;
 
     /*! \brief Register a callback for controller state changes
      *
@@ -175,7 +181,11 @@ public:
      * NB: Full support in VIBE simulation. In simple simulation, all
      * messages are automatically positively acknowledged.
      */
-    virtual void RegisterTransmitStatusHandler(MessageStatusHandler handler) = 0;
+    virtual void RegisterTransmitStatusHandler(MessageStatusHandler handler, 
+        CanTransmitStatusMask statusMask = (CanTransmitStatusMask)CanTransmitStatus::Transmitted 
+            | (CanTransmitStatusMask)CanTransmitStatus::Canceled
+            | (CanTransmitStatusMask)CanTransmitStatus::DuplicatedTransmitId
+            | (CanTransmitStatusMask)CanTransmitStatus::TransmitQueueFull) = 0;
 };
 
 } // namespace can

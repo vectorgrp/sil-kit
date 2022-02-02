@@ -66,15 +66,18 @@ TEST(CanControllerTest, send_can_message)
 {
     MockComAdapter mockComAdapter;
 
-    const EndpointAddress controllerAddress = {3, 8};
+    ServiceDescriptor senderDescriptor{};
+    senderDescriptor.participantName = "canControllerPlaceholder";
+    senderDescriptor.serviceId = 17;
     ib::cfg::CanController cfg;
 
     CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
-    canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+    canController.SetServiceDescriptor(senderDescriptor);
 
 
     CanMessage msg;
     msg.transmitId = 1;
+    msg.userContext = 0;
 
     EXPECT_CALL(mockComAdapter, SendIbMessage(&canController, msg))
         .Times(1);
@@ -88,7 +91,9 @@ TEST(CanControllerTest, receive_can_message)
 {
     using namespace std::placeholders;
 
-    EndpointAddress senderAddress{ 17, 4 };
+    ServiceDescriptor senderDescriptor{};
+    senderDescriptor.participantName = "canControllerPlaceholder";
+    senderDescriptor.serviceId = 17;
 
     MockComAdapter mockComAdapter;
     CanControllerCallbacks callbackProvider;
@@ -99,15 +104,137 @@ TEST(CanControllerTest, receive_can_message)
 
     CanMessage msg;
     msg.canId = 16;
+    msg.transmitId = 321;
+    msg.direction = ib::sim::TransmitDirection::RX;
+    msg.userContext = (void*)1234;
+
+    auto rcvMsg = msg;
+    rcvMsg.userContext = nullptr;
+
+    EXPECT_CALL(callbackProvider, ReceiveMessage(&canController, rcvMsg))
+        .Times(1);
+    EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+
+    CanController canControllerPlaceholder(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    canControllerPlaceholder.SetServiceDescriptor(senderDescriptor);
+    auto& id = canControllerPlaceholder.GetServiceDescriptor();
+    canController.ReceiveIbMessage(&canControllerPlaceholder, msg);
+}
+
+TEST(CanControllerTest, receive_can_message_rx_filter1)
+{
+    using namespace std::placeholders;
+
+    ServiceDescriptor senderDescriptor{};
+    senderDescriptor.participantName = "canControllerPlaceholder";
+    senderDescriptor.serviceId = 17;
+
+    MockComAdapter mockComAdapter;
+    CanControllerCallbacks callbackProvider;
+    ib::cfg::CanController cfg;
+    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    canController.RegisterReceiveMessageHandler(std::bind(&CanControllerCallbacks::ReceiveMessage, &callbackProvider, _1, _2), (ib::sim::DirectionMask)ib::sim::TransmitDirection::RX);
+
+    CanMessage msg;
+    msg.canId = 16;
+    msg.direction = ib::sim::TransmitDirection::RX;
+    msg.userContext = (void*)1234;
+    auto rcvMessage = msg;
+    rcvMessage.userContext = nullptr;
+
+    EXPECT_CALL(callbackProvider, ReceiveMessage(&canController, rcvMessage))
+        .Times(1);
+    EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+
+    CanController canControllerPlaceholder(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    canControllerPlaceholder.SetServiceDescriptor(senderDescriptor);
+    auto& id = canControllerPlaceholder.GetServiceDescriptor();
+    canController.ReceiveIbMessage(&canControllerPlaceholder, msg);
+}
+
+
+TEST(CanControllerTest, receive_can_message_rx_filter2)
+{
+    using namespace std::placeholders;
+
+    ServiceDescriptor senderDescriptor{};
+    senderDescriptor.participantName = "canControllerPlaceholder";
+    senderDescriptor.serviceId = 17;
+
+    MockComAdapter mockComAdapter;
+    CanControllerCallbacks callbackProvider;
+
+    ib::cfg::CanController cfg;
+    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    canController.RegisterReceiveMessageHandler(std::bind(&CanControllerCallbacks::ReceiveMessage, &callbackProvider, _1, _2), (ib::sim::DirectionMask)ib::sim::TransmitDirection::TX);
+
+    CanMessage msg;
+    msg.canId = 16;
+    msg.direction = ib::sim::TransmitDirection::RX;
+
+    EXPECT_CALL(callbackProvider, ReceiveMessage(&canController, msg))
+        .Times(0);
+    EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+
+    CanController canControllerPlaceholder(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    canControllerPlaceholder.SetServiceDescriptor(senderDescriptor);
+    auto& id = canControllerPlaceholder.GetServiceDescriptor();
+    canController.ReceiveIbMessage(&canControllerPlaceholder, msg);
+}
+
+TEST(CanControllerTest, receive_can_message_tx_filter1)
+{
+    using namespace std::placeholders;
+
+    EndpointAddress senderAddress{ 17, 4 };
+
+    MockComAdapter mockComAdapter;
+    CanControllerCallbacks callbackProvider;
+
+    ib::cfg::CanController cfg;
+    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    canController.RegisterReceiveMessageHandler(std::bind(&CanControllerCallbacks::ReceiveMessage, &callbackProvider, _1, _2), (ib::sim::DirectionMask)ib::sim::TransmitDirection::TX);
+
+    CanMessage msg;
+    msg.canId = 16;
+    msg.direction = ib::sim::TransmitDirection::TX;
 
     EXPECT_CALL(callbackProvider, ReceiveMessage(&canController, msg))
         .Times(1);
     EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now()).Times(1);
 
-    CanController canControllerProxy(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
-    canControllerProxy.SetServiceDescriptor(from_endpointAddress(senderAddress));
-    auto& id = canControllerProxy.GetServiceDescriptor();
-    canController.ReceiveIbMessage(&canControllerProxy, msg);
+    CanController canControllerPlaceholder(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    canControllerPlaceholder.SetServiceDescriptor(from_endpointAddress(senderAddress));
+    auto& id = canControllerPlaceholder.GetServiceDescriptor();
+    canController.SendMessage(msg);
+}
+
+
+TEST(CanControllerTest, receive_can_message_tx_filter2)
+{
+    using namespace std::placeholders;
+
+    EndpointAddress senderAddress{ 17, 4 };
+
+    MockComAdapter mockComAdapter;
+    CanControllerCallbacks callbackProvider;
+
+    ib::cfg::CanController cfg;
+    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    canController.RegisterReceiveMessageHandler(std::bind(&CanControllerCallbacks::ReceiveMessage, &callbackProvider, _1, _2), (ib::sim::DirectionMask)ib::sim::TransmitDirection::RX);
+
+    CanMessage msg;
+    msg.canId = 16;
+    msg.direction = ib::sim::TransmitDirection::TX;
+
+    EXPECT_CALL(callbackProvider, ReceiveMessage(&canController, msg))
+        .Times(0);
+    EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+
+    CanController canControllerPlaceholder(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    canControllerPlaceholder.SetServiceDescriptor(from_endpointAddress(senderAddress));
+    auto& id = canControllerPlaceholder.GetServiceDescriptor();
+    canController.SendMessage(msg);
 }
 
 
@@ -168,8 +295,8 @@ TEST(CanControllerTest, receive_ack)
     canController.RegisterTransmitStatusHandler(std::bind(&CanControllerCallbacks::ReceiveAck, &callbackProvider, _1, _2));
 
     CanMessage msg{};
-    CanTransmitAcknowledge ack1{ 0, msg.canId, 0ns, CanTransmitStatus::Transmitted };
-    CanTransmitAcknowledge ack2{ 0, msg.canId, 0ns, CanTransmitStatus::Transmitted };
+    CanTransmitAcknowledge ack1{ 0, msg.canId, 0ns, CanTransmitStatus::Transmitted, nullptr };
+    CanTransmitAcknowledge ack2{ 0, msg.canId, 0ns, CanTransmitStatus::Transmitted, nullptr };
 
     EXPECT_CALL(callbackProvider, ReceiveAck(&canController, CanTransmitAckWithouthTransmitIdMatcher(ack1)))
         .Times(2);
@@ -206,7 +333,7 @@ TEST(CanControllerTest, cancontroller_uses_tracing)
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
-        Trace(Direction::Send, controllerAddress, now, msg))
+        Trace(ib::sim::TransmitDirection::TX, controllerAddress, now, msg))
         .Times(1);
     controller.SendMessage(msg);
 
@@ -214,11 +341,11 @@ TEST(CanControllerTest, cancontroller_uses_tracing)
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
-        Trace(Direction::Receive, controllerAddress, now, msg))
+        Trace(ib::sim::TransmitDirection::RX, controllerAddress, now, msg))
         .Times(1);
 
-    CanController canControllerProxy(&comAdapter, cfg, comAdapter.GetTimeProvider());
-    canControllerProxy.SetServiceDescriptor(from_endpointAddress(otherAddress));
-    controller.ReceiveIbMessage(&canControllerProxy, msg);
+    CanController canControllerPlaceholder(&comAdapter, cfg, comAdapter.GetTimeProvider());
+    canControllerPlaceholder.SetServiceDescriptor(from_endpointAddress(otherAddress));
+    controller.ReceiveIbMessage(&canControllerPlaceholder, msg);
 }
 }  // anonymous namespace

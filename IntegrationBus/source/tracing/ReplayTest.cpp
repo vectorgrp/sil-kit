@@ -155,7 +155,7 @@ struct MockReplayMessage
     {
         return _timestamp;
     }
-    auto GetDirection() const -> extensions::Direction
+    auto GetDirection() const -> ib::sim::TransmitDirection
     {
         return _direction;
     }
@@ -169,7 +169,7 @@ struct MockReplayMessage
     }
 
     std::chrono::nanoseconds _timestamp{0};
-    extensions::Direction _direction{extensions::Direction::Receive};
+    ib::sim::TransmitDirection _direction{ ib::sim::TransmitDirection::RX};
     ib::mw::EndpointAddress _address{0, 0};
     extensions::TraceMessageType _type{extensions::TraceMessageType::InvalidReplayData};
 };
@@ -197,7 +197,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
 
     // Replay Send / Send
     {
-        msg._direction = extensions::Direction::Send;
+        msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Send;
 
         EthControllerReplay ctrl{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -210,7 +210,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
 
     // Replay Send / Both
     {
-        msg._direction = extensions::Direction::Send;
+        msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Both;
         EthControllerReplay ctrl{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         ctrl.SetEndpointAddress(msg._address);
@@ -222,7 +222,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
 
     // Block Send 
     {
-        msg._direction = extensions::Direction::Receive;
+        msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Send;
         EthControllerReplay ctrl{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         ctrl.SetEndpointAddress(msg._address);
@@ -250,7 +250,7 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
 
     // Replay Receive / Receive
     {
-        msg._direction = extensions::Direction::Receive;
+        msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Receive;
         EthControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         controller.SetEndpointAddress({3,4});
@@ -262,7 +262,7 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
 
     // Replay Receive / Both
     {
-        msg._direction = extensions::Direction::Receive;
+        msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Both;
         EthControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         controller.SetEndpointAddress({3,4});
@@ -273,7 +273,7 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
     }
     // Block Receive 
     {
-        msg._direction = extensions::Direction::Send;
+        msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Receive;
         EthControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         controller.SetEndpointAddress({3,4});
@@ -315,7 +315,7 @@ TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_send)
     /*
     // Replay Send / Send
     {
-        msg._direction = extensions::Direction::Send;
+        msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Send;
     
         CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -327,7 +327,7 @@ TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_send)
     }
     // Replay Send / Both
     {
-        msg._direction = extensions::Direction::Send;
+        msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Both;
     
         CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -339,7 +339,7 @@ TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_send)
     }
     // Replay Send / Receive
     {
-        msg._direction = extensions::Direction::Send;
+        msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Receive;
     
         CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -351,7 +351,7 @@ TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_send)
     }
     // Replay Receive / Send
     {
-        msg._direction = extensions::Direction::Receive;
+        msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Send;
     
         CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -363,7 +363,7 @@ TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_send)
     }
     // Replay Receive / Receive
     {
-        msg._direction = extensions::Direction::Receive;
+        msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Receive;
         msg._address = tracing::ReplayEndpointAddress();
     
@@ -392,7 +392,7 @@ TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_receive)
     /*
     // Replay Receive / Receive
     {
-        msg._direction = extensions::Direction::Receive;
+        msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Receive;
         CanControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         controller.SetEndpointAddress({3,4});
@@ -404,7 +404,7 @@ TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_receive)
     
     // Replay Receive / Both
     {
-        msg._direction = extensions::Direction::Receive;
+        msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Both;
         CanControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         controller.SetEndpointAddress({3,4});
@@ -415,7 +415,7 @@ TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_receive)
     }
     // Block Receive 
     {
-        msg._direction = extensions::Direction::Send;
+        msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Receive;
         CanControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
         controller.SetEndpointAddress({3,4});
@@ -454,7 +454,7 @@ TEST(ReplayTest, genericpublisher_replay_config_send)
 
     // Replay Send / Send
     {
-        msg._direction = extensions::Direction::Send;
+        msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Send;
 
         sim::generic::GenericPublisherReplay pub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -466,7 +466,7 @@ TEST(ReplayTest, genericpublisher_replay_config_send)
     }
     // Replay Send / Both
     {
-        msg._direction = extensions::Direction::Send;
+        msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Both;
 
         sim::generic::GenericPublisherReplay pub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -478,7 +478,7 @@ TEST(ReplayTest, genericpublisher_replay_config_send)
     }
     // Replay Receive / Both
     {
-        msg._direction = extensions::Direction::Receive;
+        msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Send;
 
         sim::generic::GenericPublisherReplay pub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -490,7 +490,7 @@ TEST(ReplayTest, genericpublisher_replay_config_send)
     }
     // Replay Receive / Receive
     {
-        msg._direction = extensions::Direction::Receive;
+        msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Receive;
 
         sim::generic::GenericPublisherReplay pub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -513,7 +513,7 @@ TEST(ReplayTest, genericsubscriber_replay_config_send)
 
     // Replay Send / Send
     {
-        msg._direction = extensions::Direction::Send;
+        msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Send;
 
         sim::generic::GenericSubscriberReplay sub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -525,7 +525,7 @@ TEST(ReplayTest, genericsubscriber_replay_config_send)
     }
     // Replay Send / Both
     {
-        msg._direction = extensions::Direction::Send;
+        msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Both;
 
         sim::generic::GenericSubscriberReplay sub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -537,7 +537,7 @@ TEST(ReplayTest, genericsubscriber_replay_config_send)
     }
     // Replay Receive / Both
     {
-        msg._direction = extensions::Direction::Receive;
+        msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Both;
 
         sim::generic::GenericSubscriberReplay sub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -549,7 +549,7 @@ TEST(ReplayTest, genericsubscriber_replay_config_send)
     }
     // Replay Receive / Receive
     {
-        msg._direction = extensions::Direction::Receive;
+        msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Receive;
 
         sim::generic::GenericSubscriberReplay sub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -579,7 +579,7 @@ TEST(ReplayTest, inport_replay_config_send)
 
     // Replay Send / Send
     {
-        msg._direction = extensions::Direction::Send;
+        msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Send;
 
         Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -591,7 +591,7 @@ TEST(ReplayTest, inport_replay_config_send)
     }
     // Replay Send / Both
     {
-        msg._direction = extensions::Direction::Send;
+        msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Both;
 
         Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -603,7 +603,7 @@ TEST(ReplayTest, inport_replay_config_send)
     }
     // Replay Receive / Both
     {
-        msg._direction = extensions::Direction::Receive;
+        msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Both;
 
         Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -615,7 +615,7 @@ TEST(ReplayTest, inport_replay_config_send)
     }
     // Replay Receive / Receive
     {
-        msg._direction = extensions::Direction::Receive;
+        msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Receive;
 
         Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -639,7 +639,7 @@ TEST(ReplayTest, outport_replay_config_send)
 
     // Replay Send / Send
     {
-        msg._direction = extensions::Direction::Send;
+        msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Send;
 
         Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -651,7 +651,7 @@ TEST(ReplayTest, outport_replay_config_send)
     }
     // Replay Send / Both
     {
-        msg._direction = extensions::Direction::Send;
+        msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Both;
 
         Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -663,7 +663,7 @@ TEST(ReplayTest, outport_replay_config_send)
     }
     // Replay Receive / Both
     {
-        msg._direction = extensions::Direction::Receive;
+        msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Both;
 
         Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};
@@ -675,7 +675,7 @@ TEST(ReplayTest, outport_replay_config_send)
     }
     // Replay Receive / Receive
     {
-        msg._direction = extensions::Direction::Receive;
+        msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Receive;
 
         Port port{&comAdapter, cfg, comAdapter.GetTimeProvider()};

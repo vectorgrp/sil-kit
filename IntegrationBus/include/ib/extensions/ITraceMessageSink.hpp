@@ -16,13 +16,6 @@
 namespace ib {
 namespace extensions {
 
-//! \brief Direction indicates whether the message was received or transmitted.
-enum class Direction
-{
-	Receive,
-	Send
-};
-
 //! \brief SinkType specifies the type of the output backend to use for permanent storage.
 enum class SinkType
 {
@@ -46,7 +39,7 @@ public:
     virtual auto Name() const -> const std::string& = 0;
 
     virtual void Trace(
-        Direction dir,
+        ib::sim::TransmitDirection dir,
         const mw::EndpointAddress& address, //!< the address is used to identify the controller this message is from
         std::chrono::nanoseconds timestamp,
         const TraceMessage& message) = 0;

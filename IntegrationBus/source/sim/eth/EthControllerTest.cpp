@@ -180,13 +180,13 @@ TEST_F(EthernetControllerTest, ethcontroller_uses_tracing)
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
-        Trace(Direction::Send, controllerAddress, now, ethFrame))
+        Trace(ib::sim::TransmitDirection::TX, controllerAddress, now, ethFrame))
         .Times(1);
     ethController.SendFrame(ethFrame);
 
     // Receive direction
     EXPECT_CALL(traceSink,
-        Trace(Direction::Receive, controllerAddress, now, ethFrame))
+        Trace(ib::sim::TransmitDirection::RX, controllerAddress, now, ethFrame))
         .Times(1);
 
     EthMessage ethMsg{};

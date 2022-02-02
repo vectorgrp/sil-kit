@@ -601,7 +601,7 @@ TEST_F(LinControllerTest, send_with_tracing)
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
-        Trace(Direction::Send, ibAddr1, now, frame))
+        Trace(ib::sim::TransmitDirection::TX, ibAddr1, now, frame))
         .Times(1);
 
     controller.SendFrame(frame, FrameResponseType::MasterResponse);

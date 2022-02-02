@@ -36,19 +36,19 @@ public:
 
     //convenience wrapper converting concrete types into type-erased TraceMessage references
     template<typename MsgT>
-    void Trace(Direction direction,
+    void Trace(ib::sim::TransmitDirection direction,
             std::chrono::nanoseconds timestamp,
             const MsgT& msg);
 
     // type erased Trace method
-    inline void Trace(Direction direction,
+    inline void Trace(ib::sim::TransmitDirection direction,
             std::chrono::nanoseconds timestamp,
             const TraceMessage& msg);
 
 private:
     //Adding a sink will create a function object wrapping the sink and a
     //call to its sink.Trace(msg) method.
-    using ConnectedSink = std::function<void(Direction, std::chrono::nanoseconds, const TraceMessage&)>;
+    using ConnectedSink = std::function<void(ib::sim::TransmitDirection, std::chrono::nanoseconds, const TraceMessage&)>;
     std::vector<ConnectedSink> _sinks;
 };
 
@@ -59,7 +59,7 @@ private:
 void Tracer::AddSink(mw::EndpointAddress id, ITraceMessageSink& sink)
 {
     auto sinkCallback = [id, &sink]
-        (Direction direction, std::chrono::nanoseconds timestamp, const TraceMessage& msg)
+        (ib::sim::TransmitDirection direction, std::chrono::nanoseconds timestamp, const TraceMessage& msg)
         {
             sink.Trace(direction, id, timestamp, msg);
         };
@@ -67,14 +67,14 @@ void Tracer::AddSink(mw::EndpointAddress id, ITraceMessageSink& sink)
 }
 
 template<typename MsgT>
-void Tracer::Trace(Direction direction,
+void Tracer::Trace(ib::sim::TransmitDirection direction,
         std::chrono::nanoseconds timestamp,
         const MsgT& msg)
 {
     Trace(direction, timestamp, TraceMessage(msg));
 }
 
-void Tracer::Trace(Direction direction,
+void Tracer::Trace(ib::sim::TransmitDirection direction,
         std::chrono::nanoseconds timestamp,
         const TraceMessage& msg)
 {

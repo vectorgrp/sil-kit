@@ -34,7 +34,7 @@ auto EthController::SendMessage(EthMessage msg) -> EthTxId
 
     msg.transmitId = txId;
 
-    _tracer.Trace(extensions::Direction::Send, msg.timestamp, msg.ethFrame);
+    _tracer.Trace(ib::sim::TransmitDirection::TX, msg.timestamp, msg.ethFrame);
 
     _comAdapter->SendIbMessage(this, std::move(msg));
 
@@ -84,7 +84,7 @@ void EthController::RegisterBitRateChangedHandler(BitRateChangedHandler /*handle
 
 void EthController::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg)
 {
-    _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg.ethFrame);
+    _tracer.Trace(ib::sim::TransmitDirection::RX, msg.timestamp, msg.ethFrame);
 
     CallHandlers(msg);
 }

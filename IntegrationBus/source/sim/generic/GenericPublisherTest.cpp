@@ -110,7 +110,7 @@ TEST_F(GenericPublisherTest, publish_with_tracing)
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
-        Trace(Direction::Send, portAddress, now, msg))
+        Trace(ib::sim::TransmitDirection::TX, portAddress, now, msg))
         .Times(1);
 
     publisher.Publish(sampleData);

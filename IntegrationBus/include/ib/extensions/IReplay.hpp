@@ -13,6 +13,7 @@
 #include "ib/extensions/ITraceMessageSink.hpp" //for 'enum class Direction'
 #include "ib/mw/EndpointAddress.hpp"
 #include "ib/mw/logging/ILogger.hpp"
+#include "ib/sim/datatypes.hpp"
 
 namespace ib {
 namespace extensions {
@@ -67,7 +68,7 @@ public:
     //! The timestamp associated with the replay message.
     virtual auto Timestamp() const -> std::chrono::nanoseconds = 0;
     //! The recorded direction of the replay message.
-    virtual auto GetDirection() const -> ib::extensions::Direction = 0;
+    virtual auto GetDirection() const -> ib::sim::TransmitDirection = 0;
     //! The endpoint address of the recording service.
     //! If unavailable from the underlying ReplayChannel, default value is returned.
     virtual auto EndpointAddress() const -> ib::mw::EndpointAddress = 0;

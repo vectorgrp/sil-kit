@@ -29,6 +29,8 @@ struct ib_Can_Message
     ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
     ib_NanosecondsTime timestamp; //!< Reception time
     ib_Can_Frame* canFrame; //!< The Can Frame that corresponds to the meta data
+    ib_Direction direction;
+    void* userContext; //!< Optional pointer provided by user when sending the frame
 };
 
 typedef struct ib_Can_Message ib_Can_Message;
@@ -46,20 +48,20 @@ typedef uint32_t ib_Can_FrameFlag;
 typedef int32_t ib_Can_TransmitStatus;
 /*! The message was successfully transmitted on the CAN bus.
 */
-#define ib_Can_TransmitStatus_Transmitted          ((ib_Can_TransmitStatus) 0)
+#define ib_Can_TransmitStatus_Transmitted          ((ib_Can_TransmitStatus) 1)
 /*! (currently not in use)
 *
 * The transmit queue was reset.
 */
-#define ib_Can_TransmitStatus_Canceled             ((ib_Can_TransmitStatus) 1)
+#define ib_Can_TransmitStatus_Canceled             ((ib_Can_TransmitStatus) 2)
 /*! The transmit request was rejected, because the transmit queue is full.
 */
-#define ib_Can_TransmitStatus_TransmitQueueFull    ((ib_Can_TransmitStatus) 2)
+#define ib_Can_TransmitStatus_TransmitQueueFull    ((ib_Can_TransmitStatus) 4)
 /*! (currently not in use)
 *
 * The transmit request was rejected, because there is already another request with the same transmitId.
 */
-#define ib_Can_TransmitStatus_DuplicatedTransmitId ((ib_Can_TransmitStatus) 3)
+#define ib_Can_TransmitStatus_DuplicatedTransmitId ((ib_Can_TransmitStatus) 8)
 
 /*! \brief The acknowledgment of a CAN message, sent to the controller
 */
@@ -256,11 +258,18 @@ typedef ib_ReturnCode(*ib_Can_Controller_SetBaudRate_t)(ib_Can_Controller* contr
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on transmit acknowledge.
 */
-IntegrationBusAPI ib_ReturnCode ib_Can_Controller_RegisterTransmitStatusHandler(ib_Can_Controller* controller, 
-    void* context, ib_Can_TransmitStatusHandler_t handler);
+IntegrationBusAPI ib_ReturnCode ib_Can_Controller_RegisterTransmitStatusHandler(
+    ib_Can_Controller* controller, 
+    void* context, 
+    ib_Can_TransmitStatusHandler_t handler,
+    ib_Can_TransmitStatus statusMask);
 
-typedef ib_ReturnCode (*ib_Can_Controller_RegisterTransmitStatusHandler_t)(ib_Can_Controller* controller, void* context, 
-    ib_Can_TransmitStatusHandler_t handler);
+typedef ib_ReturnCode (*ib_Can_Controller_RegisterTransmitStatusHandler_t)(
+    ib_Can_Controller* controller, 
+    void* context, 
+    ib_Can_TransmitStatusHandler_t handler,
+    ib_Can_TransmitStatus statusMask);
+
 /*! \brief Register a callback for CAN message reception
 *
 * The registered handler is called when the controller receives a
@@ -270,8 +279,11 @@ typedef ib_ReturnCode (*ib_Can_Controller_RegisterTransmitStatusHandler_t)(ib_Ca
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on reception.
 */
-IntegrationBusAPI ib_ReturnCode ib_Can_Controller_RegisterReceiveMessageHandler(ib_Can_Controller* controller, 
-    void* context, ib_Can_ReceiveMessageHandler_t handler);
+IntegrationBusAPI ib_ReturnCode ib_Can_Controller_RegisterReceiveMessageHandler(
+    ib_Can_Controller* controller, 
+    void* context, 
+    ib_Can_ReceiveMessageHandler_t handler,
+    ib_Direction directionMask);
     
 typedef ib_ReturnCode (*ib_Can_Controller_RegisterReceiveMessageHandler_t)(ib_Can_Controller* controller, void* context, 
     ib_Can_ReceiveMessageHandler_t handler);

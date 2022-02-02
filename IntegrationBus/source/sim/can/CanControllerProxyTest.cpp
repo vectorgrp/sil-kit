@@ -200,8 +200,8 @@ TEST(CanControllerProxyTest, receive_ack)
     auto txId2 = canController.SendMessage(msg);
     ASSERT_NE(txId1, txId2);
 
-    CanTransmitAcknowledge ack1{txId1, msg.canId, 0ns, CanTransmitStatus::Transmitted};
-    CanTransmitAcknowledge ack2{txId2, msg.canId, 0ns, CanTransmitStatus::Transmitted};
+    CanTransmitAcknowledge ack1{txId1, msg.canId, 0ns, CanTransmitStatus::Transmitted, nullptr};
+    CanTransmitAcknowledge ack2{txId2, msg.canId, 0ns, CanTransmitStatus::Transmitted, nullptr};
 
     EXPECT_CALL(callbackProvider, ReceiveAck(&canController, ack1))
         .Times(1);

@@ -156,14 +156,14 @@ void InPortReplay<MsgT>::ReplayMessage(const extensions::IReplayMessage* replayM
     using namespace ib::tracing;
     switch (replayMessage->GetDirection())
     {
-    case extensions::Direction::Receive:
+    case ib::sim::TransmitDirection::RX:
         if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
         {
             auto msg = dynamic_cast<const MsgT&>(*replayMessage);
             _inPort.ReceiveMessage(msg);
         }
         break;
-    case extensions::Direction::Send:
+    case ib::sim::TransmitDirection::TX:
         break;
     default:
         throw std::runtime_error("InPortReplay: replay message has undefined Direction");

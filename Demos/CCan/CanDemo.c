@@ -155,8 +155,8 @@ int main(int argc, char* argv[])
     const char* canController2Name = "CAN2";
     returnCode = ib_Can_Controller_Create(&canController2, participant, canController2Name);
 
-    ib_Can_Controller_RegisterTransmitStatusHandler(canController, (void*)&transmitContext, &AckCallback);
-    ib_Can_Controller_RegisterReceiveMessageHandler(canController2, (void*)&transmitContext, &ReceiveMessage);
+    ib_Can_Controller_RegisterTransmitStatusHandler(canController, (void*)&transmitContext, &AckCallback, ib_Can_TransmitStatus_Transmitted | ib_Can_TransmitStatus_Canceled | ib_Can_TransmitStatus_TransmitQueueFull);
+    ib_Can_Controller_RegisterReceiveMessageHandler(canController2, (void*)&transmitContext, &ReceiveMessage, ib_Direction_SendReceive);
 
     ib_SimulationParticipant_GetLogger(&logger, participant);
 

@@ -189,7 +189,9 @@ int main(int argc, char* argv[])
     const char* canControllerName = "CAN1";
     returnCode = ib_Can_Controller_Create(&canController, participant, canControllerName);
 
-    ib_Can_Controller_RegisterTransmitStatusHandler(canController, (void*)&transmitContext, &AckCallback);
+    ib_Can_Controller_RegisterTransmitStatusHandler(
+        canController, (void*)&transmitContext, &AckCallback,
+        ib_Can_TransmitStatus_Transmitted | ib_Can_TransmitStatus_Canceled | ib_Can_TransmitStatus_TransmitQueueFull);
 
     simTaskContext.someInt = 456;
     ib_SimulationParticipant_SetPeriod(participant, 1000);

@@ -175,7 +175,7 @@ void InPort<MsgT>::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const Me
 template<typename MsgT>
 void InPort<MsgT>::ReceiveMessage(const MessageType& msg)
 {
-    _tracer.Trace(extensions::Direction::Receive, _timeProvider->Now(), msg);
+    _tracer.Trace(ib::sim::TransmitDirection::RX, _timeProvider->Now(), msg);
 
     _lastMessage = msg;
     CallHandlers(msg);

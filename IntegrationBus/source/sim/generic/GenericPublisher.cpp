@@ -26,7 +26,7 @@ auto GenericPublisher::Config() const -> const cfg::GenericPort&
 void GenericPublisher::Publish(std::vector<uint8_t> data)
 {
     GenericMessage msg{std::move(data)};
-    _tracer.Trace(extensions::Direction::Send,
+    _tracer.Trace(ib::sim::TransmitDirection::TX,
         _timeProvider->Now(),
         msg);
 

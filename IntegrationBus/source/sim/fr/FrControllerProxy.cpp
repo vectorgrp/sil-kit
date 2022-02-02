@@ -141,7 +141,7 @@ void FrControllerProxy::RegisterCycleStartHandler(CycleStartHandler handler)
 
 void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessage& msg)
 {
-    _tracer.Trace(extensions::Direction::Receive, msg.timestamp, msg);
+    _tracer.Trace(ib::sim::TransmitDirection::RX, msg.timestamp, msg);
 
     CallHandlers(msg);
 }
@@ -152,7 +152,7 @@ void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const F
     tmp.frame = msg.frame;
     tmp.channel = msg.channel;
     tmp.timestamp = msg.timestamp;
-    _tracer.Trace(extensions::Direction::Send, msg.timestamp, tmp);
+    _tracer.Trace(ib::sim::TransmitDirection::TX, msg.timestamp, tmp);
 
     CallHandlers(msg);
 }

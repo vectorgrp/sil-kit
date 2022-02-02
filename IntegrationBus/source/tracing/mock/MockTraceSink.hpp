@@ -18,7 +18,7 @@ public:
     MOCK_METHOD0(Close, void());
 
     //! \brief This works around TraceMessage not being copyable for use in Matchers
-    void Trace(Direction dir, const EndpointAddress& address,
+    void Trace(ib::sim::TransmitDirection dir, const EndpointAddress& address,
         std::chrono::nanoseconds timestamp, const TraceMessage& message) override
     {
         switch (message.Type())
@@ -55,34 +55,34 @@ public:
         }
     }
 
-    MOCK_METHOD4(Trace, void(Direction dir, const EndpointAddress& address,
+    MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
         std::chrono::nanoseconds timestamp, const ib::sim::can::CanMessage& message));
 
-    MOCK_METHOD4(Trace, void(Direction dir, const EndpointAddress& address,
+    MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
         std::chrono::nanoseconds timestamp, const ib::sim::eth::EthFrame& message));
 
-    MOCK_METHOD4(Trace, void(Direction dir, const EndpointAddress& address,
+    MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
         std::chrono::nanoseconds timestamp, const ib::sim::lin::Frame& message));
 
-    MOCK_METHOD4(Trace, void(Direction dir, const EndpointAddress& address,
+    MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
         std::chrono::nanoseconds timestamp, const ib::sim::io::AnalogIoMessage& message));
 
-    MOCK_METHOD4(Trace, void(Direction dir, const EndpointAddress& address,
+    MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
         std::chrono::nanoseconds timestamp, const ib::sim::io::DigitalIoMessage& message));
 
-    MOCK_METHOD4(Trace, void(Direction dir, const EndpointAddress& address,
+    MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
         std::chrono::nanoseconds timestamp, const ib::sim::io::PatternIoMessage& message));
 
-    MOCK_METHOD4(Trace, void(Direction dir, const EndpointAddress& address,
+    MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
         std::chrono::nanoseconds timestamp, const ib::sim::io::PwmIoMessage& message));
 
-    MOCK_METHOD4(Trace, void(Direction dir, const EndpointAddress& address,
+    MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
         std::chrono::nanoseconds timestamp, const ib::sim::generic::GenericMessage& message));
 
-    MOCK_METHOD4(Trace, void(Direction dir, const EndpointAddress& address, 
+    MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
         std::chrono::nanoseconds timestamp, const ib::sim::data::DataMessage& message));
 
-    MOCK_METHOD4(Trace, void(Direction dir, const EndpointAddress& address,
+    MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
         std::chrono::nanoseconds timestamp, const ib::sim::fr::FrMessage& message));
 
 

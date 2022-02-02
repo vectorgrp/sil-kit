@@ -59,13 +59,17 @@ public:
     void Stop() override;
     void Sleep() override;
 
-    auto SendMessage(const CanMessage& msg) -> CanTxId override;
-    auto SendMessage(CanMessage&& msg) -> CanTxId override;
+    auto SendMessage(const CanMessage& msg, void* userContext = nullptr) -> CanTxId override;
+    auto SendMessage(CanMessage&& msg, void* userContext = nullptr) -> CanTxId override;
 
-    void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) override;
+    void RegisterReceiveMessageHandler(ReceiveMessageHandler handler, DirectionMask directionMask = (DirectionMask)TransmitDirection::RX | (DirectionMask)TransmitDirection::TX) override;
+
     void RegisterStateChangedHandler(StateChangedHandler handler) override;
     void RegisterErrorStateChangedHandler(ErrorStateChangedHandler handler) override;
-    void RegisterTransmitStatusHandler(MessageStatusHandler handler) override;
+    void RegisterTransmitStatusHandler(MessageStatusHandler handler, CanTransmitStatusMask statusMask = (CanTransmitStatusMask)CanTransmitStatus::Transmitted
+        | (CanTransmitStatusMask)CanTransmitStatus::Canceled
+        | (CanTransmitStatusMask)CanTransmitStatus::DuplicatedTransmitId
+        | (CanTransmitStatusMask)CanTransmitStatus::TransmitQueueFull) override;
 
     // IIbToCanController
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanMessage& msg) override;
@@ -92,14 +96,16 @@ public:
 private:
     // ----------------------------------------
     // private data types
+    //template<typename MsgT>
+    //using CallbackVector = std::vector<CallbackT<MsgT>>;
     template<typename MsgT>
-    using CallbackVector = std::vector<CallbackT<MsgT>>;
+    using CallbackVector = std::vector<std::tuple<CallbackT<MsgT>, std::function<bool(const MsgT& msg)>>>;
 
 private:
     // ----------------------------------------
     // private methods
     template<typename MsgT>
-    void RegisterHandler(CallbackT<MsgT> handler);
+    void RegisterHandler(CallbackT<MsgT> handler, std::function<bool(const MsgT& msg)> filter = nullptr);
 
     template<typename MsgT>
     void CallHandlers(const MsgT& msg);

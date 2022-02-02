@@ -36,7 +36,7 @@ IntegrationBusAPI ib_ReturnCode ib_Can_Controller_Create(ib_Can_Controller** out
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Can_Controller_RegisterReceiveMessageHandler(ib_Can_Controller* controller, void* context, ib_Can_ReceiveMessageHandler_t callback)
+ib_ReturnCode ib_Can_Controller_RegisterReceiveMessageHandler(ib_Can_Controller* controller, void* context, ib_Can_ReceiveMessageHandler_t callback, ib_Direction directionMask)
 {
   ASSERT_VALID_POINTER_PARAMETER(controller);
   ASSERT_VALID_HANDLER_PARAMETER(callback);
@@ -51,6 +51,7 @@ ib_ReturnCode ib_Can_Controller_RegisterReceiveMessageHandler(ib_Can_Controller*
         cmm.timestamp = msg.timestamp.count();
         cmm.interfaceId = ib_InterfaceIdentifier_CanFrame_Meta;
         cmm.canFrame = &cm;
+        cmm.userContext = msg.userContext;
 
         cm.id = msg.canId;
         uint32_t flags = 0;
@@ -63,13 +64,13 @@ ib_ReturnCode ib_Can_Controller_RegisterReceiveMessageHandler(ib_Can_Controller*
         cm.dlc = msg.dlc;
 
         callback(context, controller, &cmm);
-      });
+      }, directionMask);
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Can_Controller_RegisterTransmitStatusHandler(ib_Can_Controller* controller, void* context, ib_Can_TransmitStatusHandler_t callback)
+ib_ReturnCode ib_Can_Controller_RegisterTransmitStatusHandler(ib_Can_Controller* controller, void* context, ib_Can_TransmitStatusHandler_t callback, ib_Can_TransmitStatus statusMask)
 {
   ASSERT_VALID_POINTER_PARAMETER(controller);
   ASSERT_VALID_HANDLER_PARAMETER(callback);
@@ -79,31 +80,12 @@ ib_ReturnCode ib_Can_Controller_RegisterTransmitStatusHandler(ib_Can_Controller*
     canController->RegisterTransmitStatusHandler(
       [callback, context, controller](ib::sim::can::ICanController* /*ctrl*/, const ib::sim::can::CanTransmitAcknowledge& ack)
       {
-        auto transmitContext = pendingTransmits.userContextById[ack.transmitId];
-        if (transmitContext == nullptr)
-        {
-          std::unique_lock<std::mutex> lock(pendingTransmits.mutex);
-          pendingTransmits.callbacksById.insert(std::make_pair(ack.transmitId, [callback, context, controller, ack]() {
-            ib_Can_TransmitAcknowledge tcack;
-            auto transmitContext = pendingTransmits.userContextById[ack.transmitId];
-            tcack.userContext = transmitContext;
-            pendingTransmits.userContextById.erase(ack.transmitId);
-            tcack.timestamp = ack.timestamp.count();
-            tcack.status = (ib_Can_TransmitStatus)ack.status;
-            callback(context, controller, &tcack);
-          }));
-        }
-        else
-        {
-          ib_Can_TransmitAcknowledge tcack;
-          tcack.userContext = transmitContext;
-          std::unique_lock<std::mutex> lock(pendingTransmits.mutex);
-          pendingTransmits.userContextById.erase(ack.transmitId);
-          tcack.timestamp = ack.timestamp.count();
-          tcack.status = (ib_Can_TransmitStatus)ack.status;
-          callback(context, controller, &tcack);
-        }
-      });
+        ib_Can_TransmitAcknowledge tcack;
+        tcack.userContext = ack.userContext;
+        tcack.timestamp = ack.timestamp.count();
+        tcack.status = (ib_Can_TransmitStatus)ack.status;
+        callback(context, controller, &tcack);
+      }, statusMask);
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
@@ -182,14 +164,7 @@ ib_ReturnCode ib_Can_Controller_SendFrame(ib_Can_Controller* controller, ib_Can_
     cm.dataField = std::vector<uint8_t>(&(message->data.pointer[0]), &(message->data.pointer[0]) + message->data.size);
 
     // ack queue is empty 
-    auto transmitId = canController->SendMessage(std::move(cm)); // AckCallback -> fügt in queue hinzu weil er keine userContext findet
-    std::unique_lock<std::mutex> lock(pendingTransmits.mutex);
-    pendingTransmits.userContextById[transmitId] = transmitContext;
-    for (auto pendingTransmitId : pendingTransmits.callbacksById)
-    {
-      pendingTransmitId.second();
-    }
-    pendingTransmits.callbacksById.clear();
+    auto transmitId = canController->SendMessage(std::move(cm), transmitContext); // AckCallback -> fügt in queue hinzu weil er keine userContext findet
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE

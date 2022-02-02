@@ -66,13 +66,13 @@ void GenericSubscriberReplay::ReplayMessage(const extensions::IReplayMessage* re
     using namespace ib::tracing;
     switch (replayMessage->GetDirection())
     {
-    case extensions::Direction::Receive:
+    case ib::sim::TransmitDirection::RX:
         if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
         {
             ReplayReceive(replayMessage);
         }
         break;
-    case extensions::Direction::Send:
+    case ib::sim::TransmitDirection::TX:
         _logger->Warn("GenericSubscriberReplay: Cannot replay message with direction Send");
         break;
     default:

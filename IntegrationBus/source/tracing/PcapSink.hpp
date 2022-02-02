@@ -37,7 +37,7 @@ public:
     ) override;
     void Close() override;
 
-    void Trace(extensions::Direction txRx,
+    void Trace(ib::sim::TransmitDirection txRx,
         const mw::EndpointAddress& id,
         std::chrono::nanoseconds timestamp,
         const extensions::TraceMessage& msg

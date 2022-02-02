@@ -100,7 +100,7 @@ TEST_F(GenericSubscriberTest, receive_with_tracing)
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
-        Trace(Direction::Receive, endpointAddress, now, msg))
+        Trace(ib::sim::TransmitDirection::RX, endpointAddress, now, msg))
         .Times(1);
     subscriber.ReceiveIbMessage(&subscriberOther, msg);
 

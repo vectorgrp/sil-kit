@@ -163,6 +163,7 @@ std::ostream& operator<<(std::ostream& out, const CanMessage& msg)
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     return out
         << "can::CanMessage{txId=" << msg.transmitId
+        << ", userContext=" << msg.userContext
         << ", canId=" << msg.canId
         << ", flags=" << msg.flags
         << ", dlc=" << static_cast<uint32_t>(msg.dlc)

@@ -42,6 +42,12 @@ typedef uint8_t ib_Bool;
 #define ib_True  ((ib_Bool)1)
 #define ib_False ((ib_Bool)0)
 
+typedef uint8_t ib_Direction;
+#define ib_Direction_Undefined      ((ib_Direction) 0)
+#define ib_Direction_Send           ((ib_Direction) 1)
+#define ib_Direction_Receive        ((ib_Direction) 2)
+#define ib_Direction_SendReceive    ((ib_Direction) 3)
+
 IB_END_DECLS
 
 #pragma pack(pop)

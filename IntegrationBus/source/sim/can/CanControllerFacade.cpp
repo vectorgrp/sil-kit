@@ -49,21 +49,21 @@ void CanControllerFacade::Sleep()
     _currentController->Sleep();
 }
 
-auto CanControllerFacade::SendMessage(const CanMessage& msg) ->CanTxId
+auto CanControllerFacade::SendMessage(const CanMessage& msg, void* userContext) ->CanTxId
 {
-    return _currentController->SendMessage(msg);
+    return _currentController->SendMessage(msg, userContext);
 }
 
-auto CanControllerFacade::SendMessage(CanMessage&& msg) ->CanTxId
+auto CanControllerFacade::SendMessage(CanMessage&& msg, void* userContext) -> CanTxId
 {
-    return _currentController->SendMessage(std::move(msg));
+    return _currentController->SendMessage(std::move(msg), userContext);
 }
 
 // IIbToCanController
-void CanControllerFacade::RegisterReceiveMessageHandler(ReceiveMessageHandler handler)
+void CanControllerFacade::RegisterReceiveMessageHandler(ReceiveMessageHandler handler, DirectionMask directionMask)
 {
-    _canController->RegisterReceiveMessageHandler(handler);
-    _canControllerProxy->RegisterReceiveMessageHandler(std::move(handler));
+    _canController->RegisterReceiveMessageHandler(handler, directionMask);
+    _canControllerProxy->RegisterReceiveMessageHandler(std::move(handler), directionMask);
 }
 
 void CanControllerFacade::RegisterStateChangedHandler(StateChangedHandler handler)
@@ -78,10 +78,10 @@ void CanControllerFacade::RegisterErrorStateChangedHandler(ErrorStateChangedHand
     _canControllerProxy->RegisterErrorStateChangedHandler(std::move(handler));
 }
 
-void CanControllerFacade::RegisterTransmitStatusHandler(MessageStatusHandler handler)
+void CanControllerFacade::RegisterTransmitStatusHandler(MessageStatusHandler handler, CanTransmitStatusMask statusMask)
 {
-    _canController->RegisterTransmitStatusHandler(handler);
-    _canControllerProxy->RegisterTransmitStatusHandler(std::move(handler));
+    _canController->RegisterTransmitStatusHandler(handler, statusMask);
+    _canControllerProxy->RegisterTransmitStatusHandler(std::move(handler), statusMask);
 }
 
 // IIbToCanController / IIbToCanControllerProxy

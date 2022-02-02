@@ -83,7 +83,7 @@ void EthControllerProxy::RegisterBitRateChangedHandler(BitRateChangedHandler han
 
 void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg)
 {
-    _tracer.Trace(extensions::Direction::Receive,
+    _tracer.Trace(ib::sim::TransmitDirection::RX,
         msg.timestamp, msg.ethFrame);
 
     CallHandlers(msg);
@@ -96,7 +96,7 @@ void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
     {
         if (msg.status == EthTransmitStatus::Transmitted)
         {
-            _tracer.Trace(extensions::Direction::Send, msg.timestamp, 
+            _tracer.Trace(ib::sim::TransmitDirection::TX, msg.timestamp,
                 transmittedMsg->second);
         }
 

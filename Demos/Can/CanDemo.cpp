@@ -16,6 +16,7 @@
 
 using namespace ib::mw;
 using namespace ib::sim;
+using namespace ib::sim::can;
 
 using namespace std::chrono_literals;
 
@@ -30,7 +31,7 @@ std::ostream& operator<<(std::ostream& out, nanoseconds timestamp)
 }
 }
 
-void AckCallback(const can::CanTransmitAcknowledge& ack, logging::ILogger* logger)
+void AckCallback(const CanTransmitAcknowledge& ack, logging::ILogger* logger)
 {
     std::stringstream buffer;
     buffer << ">> " << ack.status
@@ -39,7 +40,7 @@ void AckCallback(const can::CanTransmitAcknowledge& ack, logging::ILogger* logge
     logger->Info(buffer.str());
 }
 
-void ReceiveMessage(const can::CanMessage& msg, logging::ILogger* logger)
+void ReceiveMessage(const CanMessage& msg, logging::ILogger* logger)
 {
     std::string payload(msg.dataField.begin(), msg.dataField.end());
     std::stringstream buffer;
@@ -49,9 +50,9 @@ void ReceiveMessage(const can::CanMessage& msg, logging::ILogger* logger)
     logger->Info(buffer.str());
 }
 
-void SendMessage(can::ICanController* controller, std::chrono::nanoseconds now, logging::ILogger* logger)
+void SendMessage(ICanController* controller, std::chrono::nanoseconds now, logging::ILogger* logger)
 {
-    can::CanMessage msg;
+    CanMessage msg;
     msg.timestamp = now;
     msg.canId = 17;
     msg.flags.ide = 0; // Identifier Extension
@@ -107,11 +108,11 @@ int main(int argc, char** argv)
         auto* canController = comAdapter->CreateCanController("CAN1");
 
         canController->RegisterTransmitStatusHandler(
-            [logger](can::ICanController* /*ctrl*/, const can::CanTransmitAcknowledge& ack) {
+            [logger](ICanController* /*ctrl*/, const CanTransmitAcknowledge& ack) {
                 AckCallback(ack, logger);
             });
         canController->RegisterReceiveMessageHandler(
-            [logger](can::ICanController* /*ctrl*/, const can::CanMessage& msg) {
+            [logger](ICanController* /*ctrl*/, const CanMessage& msg) {
                 ReceiveMessage(msg, logger);
             });
 

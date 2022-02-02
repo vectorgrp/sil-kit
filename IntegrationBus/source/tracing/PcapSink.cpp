@@ -80,7 +80,7 @@ void PcapSink::Close()
     }
 }
 
-void PcapSink::Trace(extensions::Direction /*unused*/,
+void PcapSink::Trace(ib::sim::TransmitDirection /*unused*/,
         const mw::EndpointAddress& /* unused endpoint address */,
         std::chrono::nanoseconds timestamp,
         const extensions::TraceMessage& traceMessage)

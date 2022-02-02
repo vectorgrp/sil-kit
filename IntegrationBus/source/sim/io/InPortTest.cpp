@@ -138,7 +138,7 @@ TEST_F(InPortTest, uses_tracing)
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
-        Trace(Direction::Receive, portAddress, now, msg))
+        Trace(ib::sim::TransmitDirection::RX, portAddress, now, msg))
         .Times(1);
 
     port.ReceiveIbMessage(&portOther, msg);

@@ -158,7 +158,7 @@ template<typename MsgT>
 template<typename T>
 void OutPort<MsgT>::SendIbMessage(T&& msg)
 {
-    _tracer.Trace(extensions::Direction::Send, _timeProvider->Now(), msg);
+    _tracer.Trace(ib::sim::TransmitDirection::TX, _timeProvider->Now(), msg);
 
     _comAdapter->SendIbMessage(this, std::forward<T>(msg));
 }

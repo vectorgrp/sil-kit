@@ -52,17 +52,17 @@ namespace {
         MOCK_METHOD0(Start, void());
         MOCK_METHOD0(Stop, void());
         MOCK_METHOD0(Sleep, void());
-        MOCK_METHOD1(SendMessage, CanTxId(const CanMessage&));
-        virtual auto SendMessage(CanMessage&& msg)->CanTxId {
+        MOCK_METHOD2(SendMessage, CanTxId(const CanMessage&, void*));
+        virtual auto SendMessage(CanMessage&& msg, void* userContext)->CanTxId {
             // Gmock does not support rvalues -> workaround
             CanMessage lv = msg;
-            this->SendMessage(lv);
+            this->SendMessage(lv, userContext);
             return 0;
         }
-        MOCK_METHOD1(RegisterReceiveMessageHandler, void(ReceiveMessageHandler));
+        MOCK_METHOD2(RegisterReceiveMessageHandler, void(ReceiveMessageHandler, ib::sim::DirectionMask));
         MOCK_METHOD1(RegisterStateChangedHandler, void(StateChangedHandler));
         MOCK_METHOD1(RegisterErrorStateChangedHandler, void(ErrorStateChangedHandler));
-        MOCK_METHOD1(RegisterTransmitStatusHandler, void(MessageStatusHandler));
+        MOCK_METHOD2(RegisterTransmitStatusHandler, void(MessageStatusHandler, CanTransmitStatusMask));
     };
 
     void AckCallback(void* context, ib_Can_Controller* controller, ib_Can_TransmitAcknowledge* ack)
@@ -111,14 +111,14 @@ namespace {
         returnCode = ib_Can_Controller_Sleep((ib_Can_Controller*)&mockController);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        EXPECT_CALL(mockController, SendMessage(testing::_)).Times(testing::Exactly(1));
+        EXPECT_CALL(mockController, SendMessage(testing::_, testing::_)).Times(testing::Exactly(1));
         ib_Can_Frame cf{ 1,0,0,{0,0} };
         cf.id = 1;
         returnCode = ib_Can_Controller_SendFrame((ib_Can_Controller*)&mockController, &cf, NULL);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        EXPECT_CALL(mockController, RegisterReceiveMessageHandler(testing::_)).Times(testing::Exactly(1));
-        returnCode = ib_Can_Controller_RegisterReceiveMessageHandler((ib_Can_Controller*)&mockController, NULL, &ReceiveMessage);
+        EXPECT_CALL(mockController, RegisterReceiveMessageHandler(testing::_, testing::_)).Times(testing::Exactly(1));
+        returnCode = ib_Can_Controller_RegisterReceiveMessageHandler((ib_Can_Controller*)&mockController, NULL, &ReceiveMessage, ib_Direction_SendReceive);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         EXPECT_CALL(mockController, RegisterStateChangedHandler(testing::_)).Times(testing::Exactly(1));
@@ -129,8 +129,8 @@ namespace {
         returnCode = ib_Can_Controller_RegisterErrorStateChangedHandler((ib_Can_Controller*)&mockController, NULL, &ErrorStateHandler);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        EXPECT_CALL(mockController, RegisterTransmitStatusHandler(testing::_)).Times(testing::Exactly(1));
-        returnCode = ib_Can_Controller_RegisterTransmitStatusHandler((ib_Can_Controller*)&mockController, NULL, &AckCallback);
+        EXPECT_CALL(mockController, RegisterTransmitStatusHandler(testing::_, testing::_)).Times(testing::Exactly(1));
+        returnCode = ib_Can_Controller_RegisterTransmitStatusHandler((ib_Can_Controller*)&mockController, NULL, &AckCallback, ib_Can_TransmitStatus_Transmitted);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
     }
 
@@ -144,7 +144,7 @@ namespace {
         cf1.data = { 0,0 };
         cf1.dlc = 1;
         cf1.flags = 0;
-        EXPECT_CALL(mockController, SendMessage(CanFrameMatcher(cf1))).Times(testing::Exactly(1));
+        EXPECT_CALL(mockController, SendMessage(CanFrameMatcher(cf1), testing::_)).Times(testing::Exactly(1));
         returnCode = ib_Can_Controller_SendFrame((ib_Can_Controller*)&mockController, &cf1, NULL);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
     }
@@ -159,7 +159,7 @@ namespace {
         cf1.data = { 0,0 };
         cf1.dlc = 1;
         cf1.flags = ib_Can_FrameFlag_ide | ib_Can_FrameFlag_rtr | ib_Can_FrameFlag_esi;
-        EXPECT_CALL(mockController, SendMessage(CanFrameMatcher(cf1))).Times(testing::Exactly(1));
+        EXPECT_CALL(mockController, SendMessage(CanFrameMatcher(cf1), testing::_)).Times(testing::Exactly(1));
         returnCode = ib_Can_Controller_SendFrame((ib_Can_Controller*)&mockController, &cf1, NULL);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
     }
@@ -174,7 +174,7 @@ namespace {
         cf1.data = { 0,0 };
         cf1.dlc = 1;
         cf1.flags = ib_Can_FrameFlag_fdf | ib_Can_FrameFlag_brs;
-        EXPECT_CALL(mockController, SendMessage(CanFrameMatcher(cf1))).Times(testing::Exactly(1));
+        EXPECT_CALL(mockController, SendMessage(CanFrameMatcher(cf1), testing::_)).Times(testing::Exactly(1));
         returnCode = ib_Can_Controller_SendFrame((ib_Can_Controller*)&mockController, &cf1, NULL);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
     }
@@ -204,9 +204,9 @@ namespace {
         returnCode = ib_Can_Controller_SendFrame((ib_Can_Controller*)&mockController, nullptr, NULL);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Can_Controller_RegisterReceiveMessageHandler(nullptr, NULL, &ReceiveMessage);
+        returnCode = ib_Can_Controller_RegisterReceiveMessageHandler(nullptr, NULL, &ReceiveMessage, ib_Direction_SendReceive);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Can_Controller_RegisterReceiveMessageHandler((ib_Can_Controller*)&mockController, NULL, nullptr);
+        returnCode = ib_Can_Controller_RegisterReceiveMessageHandler((ib_Can_Controller*)&mockController, NULL, nullptr, ib_Direction_SendReceive);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
         returnCode = ib_Can_Controller_RegisterStateChangedHandler(nullptr, NULL, &StateChangedHandler);
@@ -219,9 +219,9 @@ namespace {
         returnCode = ib_Can_Controller_RegisterErrorStateChangedHandler((ib_Can_Controller*)&mockController, NULL, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Can_Controller_RegisterTransmitStatusHandler(nullptr, NULL, &AckCallback);
+        returnCode = ib_Can_Controller_RegisterTransmitStatusHandler(nullptr, NULL, &AckCallback, ib_Can_TransmitStatus_Canceled);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Can_Controller_RegisterTransmitStatusHandler((ib_Can_Controller*)&mockController, NULL, nullptr);
+        returnCode = ib_Can_Controller_RegisterTransmitStatusHandler((ib_Can_Controller*)&mockController, NULL, nullptr, ib_Can_TransmitStatus_Canceled);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
     }
 

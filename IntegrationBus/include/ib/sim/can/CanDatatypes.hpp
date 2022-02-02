@@ -17,6 +17,7 @@ namespace can {
 
 using CanTxId = uint32_t;
 
+
 /*! \brief A CAN message
  */
 struct CanMessage
@@ -37,6 +38,8 @@ struct CanMessage
     } flags; //!< CAN Arbitration and Control Field Flags
     uint8_t dlc : 4; //!< Data Length Code - determined by the Network Simulator
     std::vector<uint8_t> dataField; //!< CAN Datafield
+    TransmitDirection direction; //!< Receive/Transmit direction
+    void* userContext; //!< Optional pointer provided by user when sending the frame
 };
 
 /*! \brief CAN Controller state according to AUTOSAR specification AUTOSAR_SWS_CANDriver 4.3.1
@@ -59,6 +62,7 @@ enum class CanControllerState : uint8_t
   */
   Sleep = 3,
 };
+
 
 /*! \brief Error state of a CAN node according to CAN specification.
  */
@@ -93,29 +97,31 @@ struct CanControllerStatus
     CanControllerState controllerState; //!< General State of the CAN controller
     CanErrorState errorState; //!< State of Error Handling
 };
-/*! \brief Transmit state of a CAN node according to CAN specification
+
+using  CanTransmitStatusMask = uint16_t;
+/*! \brief Transfer status of a CAN node according to CAN specification
  */
-enum class CanTransmitStatus : uint8_t
+enum class CanTransmitStatus : CanTransmitStatusMask
 {
-  /*! The message was successfully transmitted on the CAN bus.
-  */
-  Transmitted = 0,
+    /*! The message was successfully transmitted on the CAN bus.
+    */
+    Transmitted = (CanTransmitStatusMask)(1 << 0),
 
-  /*! (currently not in use)
-   *
-   * The transmit queue was reset.
-  */
-  Canceled = 1,
+    /*! (currently not in use)
+     *
+     * The transmit queue was reset.
+    */
+    Canceled = (CanTransmitStatusMask)(1 << 1),
 
-  /*! The transmit request was rejected, because the transmit queue is full.
-  */
-  TransmitQueueFull = 2,
+    /*! The transmit request was rejected, because the transmit queue is full.
+    */
+    TransmitQueueFull = (CanTransmitStatusMask)(1 << 2),
 
-  /*! (currently not in use)
-   *
-   * The transmit request was rejected, because there is already another request with the same transmitId.
-  */
-  DuplicatedTransmitId = 3,
+    /*! (currently not in use)
+     *
+     * The transmit request was rejected, because there is already another request with the same transmitId.
+    */
+    DuplicatedTransmitId = (CanTransmitStatusMask)(1 << 3)
 };
 
 /*! \brief The acknowledgment of a CAN message, sent to the controller
@@ -126,6 +132,7 @@ struct CanTransmitAcknowledge
     uint32_t canId; //!< Identifies the CAN id to which this CanTransmitAcknowledge refers to.
     std::chrono::nanoseconds timestamp; //!< Timestamp of the CAN acknowledge.
     CanTransmitStatus status; //!< Status of the CanTransmitRequest.
+    void* userContext; //!< Optional pointer provided by user when sending the frame
 };
 
 /*! \brief The baud rate, sent to the simulator
