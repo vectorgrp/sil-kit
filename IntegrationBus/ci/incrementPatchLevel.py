@@ -2,6 +2,7 @@ import re
 import subprocess
 import sys
 import urllib.parse
+import time
 
 COMMIT_MESSAGE = "-- managed-build bump version number to "
 
@@ -12,6 +13,7 @@ if "-- managed-build" in last_commit_message:
     sys.exit(2)
 
 # generate changelog string
+number_of_commits_since_last_build = 0
 changelogRaw = subprocess.getoutput("git log -20 --pretty=%s")
 changelogLines = changelogRaw.splitlines()
 changelog = "<ul>"
@@ -19,9 +21,20 @@ for line in changelogLines:
     if not ("-- managed-build" in line):
         if len(line) > 5:
             changelog += "<li>"+str(line)+"\n</li>"
+            number_of_commits_since_last_build += 1
     else:
         break
 changelog += "</ul>"
+
+# check time difference to last commit
+print("checking timestamp of last build commit ("+str(number_of_commits_since_last_build)+" commits ago)")
+last_commit_time = int(subprocess.getoutput("git show HEAD~"+str(number_of_commits_since_last_build)+" -s --format=%ct"))
+time_diff = int(time.time()) - last_commit_time
+if time_diff < 86400:
+    print("last build was triggered less than a day ago ("+str(time_diff)+" seconds) - aborting.");
+    sys.exit(3)
+
+
 # write new version number to text file
 with open('../../changelog.txt', 'w') as the_file:
     the_file.write(changelog)
