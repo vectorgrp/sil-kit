@@ -19,11 +19,7 @@ int main(int, char**)
             ->AddCan("CAN2")
             ->AddCan("CAN3").WithLink("CAN-2000")
             ->AddLin("LIN1")
-            ->AddEthernet("ETH0").WithLink("LAN1")
-            ->AddAnalogOut("AIO").WithInitValue(3.7).WithUnit("V")
-            ->AddDigitalOut("DIO").WithInitValue(false)
-            ->AddPwmOut("PWM").WithInitValue({2.5, 0.4}).WithUnit("kHz")
-            ->AddPatternOut("PATTERN").WithInitValue({'H', 'e', 'l', 'l', 'o'}).WithLink("PTRIO");
+            ->AddEthernet("ETH0").WithLink("LAN1");
 
 
     simulationSetup
@@ -33,11 +29,7 @@ int main(int, char**)
             ->AddLin("LIN1")
             ->AddEthernet("ETH0")
                 .WithLink("LAN1")
-                .WithMacAddress("F6:04:68:71:AA:C1")
-            ->AddAnalogOut("AIO")
-            ->AddDigitalOut("DIO")
-            ->AddPwmOut("PWM")
-            ->AddPatternOut("PATTERN").WithLink("PTRIO");
+                .WithMacAddress("F6:04:68:71:AA:C1");
 
     simulationSetup
         .AddParticipant("SystemController").AsSyncMaster();

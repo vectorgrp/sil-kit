@@ -21,7 +21,6 @@ target_link_libraries(IbMwComAdapter
         IbSimEthernet
         IbSimFlexRay
         IbSimLin
-        IbSimIO
         IbSimGenericMessage
         IbSimDataMessage
         IbSimRpc

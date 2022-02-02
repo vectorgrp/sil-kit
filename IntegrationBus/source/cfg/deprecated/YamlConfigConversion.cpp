@@ -61,10 +61,6 @@ VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::Channel);
 VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::ClockPeriod);
 VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::TransmissionMode);
 VIB_DECLARE_PARSE_TYPE_NAME(FlexrayController);
-VIB_DECLARE_PARSE_TYPE_NAME(DigitalIoPort);
-VIB_DECLARE_PARSE_TYPE_NAME(AnalogIoPort);
-VIB_DECLARE_PARSE_TYPE_NAME(PwmPort);
-VIB_DECLARE_PARSE_TYPE_NAME(PatternPort);
 VIB_DECLARE_PARSE_TYPE_NAME(GenericPort);
 VIB_DECLARE_PARSE_TYPE_NAME(GenericPort::ProtocolType);
 VIB_DECLARE_PARSE_TYPE_NAME(DataPort);
@@ -921,171 +917,6 @@ bool VibConversion::decode(const Node& node, FlexrayController& obj)
 }
 
 template<>
-Node VibConversion::encode(const DigitalIoPort& obj)
-{
-    Node node;
-    node["Name"] = obj.name;
-    if (obj.direction == PortDirection::Out)
-    {
-        node["value"] = obj.initvalue;
-    }
-
-    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_encode(obj.replay, node, "Replay");
-    return node;
-}
-template<>
-bool VibConversion::decode(const Node& node, DigitalIoPort& obj)
-{
-    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_decode(obj.replay, node, "Replay");
-    optional_decode(obj.initvalue, node, "value"); //only for Digital-In ports, non-strict
-
-    if (legacy_decode_name(obj, node))
-    {
-        // legacy format: {"portName" : bool}
-        if (node.IsMap()) {
-            auto it = node.begin();
-            if (it != node.end() && it->second.IsScalar())
-            {
-                auto val = it->second.as<bool>();
-                obj.initvalue = val;
-            }
-        }
-    }
-
-    return true;
-}
-
-template<>
-Node VibConversion::encode(const AnalogIoPort& obj)
-{
-    Node node;
-    node["Name"] = obj.name;
-    if (obj.direction == PortDirection::Out)
-    {
-        node["value"] = obj.initvalue;
-        node["unit"] = obj.unit;
-    }
-
-    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_encode(obj.replay, node, "Replay");
-
-    return node;
-}
-template<>
-bool VibConversion::decode(const Node& node, AnalogIoPort& obj)
-{
-    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_decode(obj.replay, node, "Replay");
-
-    if (legacy_decode_name(obj, node))
-    {
-        //legacy format {"name" : {"value" : number, "unit" : str}}
-        auto it = node.begin();
-        if (it != node.end() && it->second.IsMap())
-        {
-            const auto& valUnit = it->second;
-            obj.initvalue = parse_as<double>(valUnit["value"]);
-            obj.unit = parse_as<std::string>(valUnit["unit"]);
-        }
-        return true;
-    }
-
-    if (node["value"])
-    {
-        obj.initvalue = parse_as<decltype(obj.initvalue)>(node["value"]);
-        obj.unit = parse_as<std::string>(node["unit"]);
-    }
-
-    return true;
-}
-
-template<>
-Node VibConversion::encode(const PwmPort& obj)
-{
-    Node node;
-    node["Name"] = obj.name;
-    if (obj.direction == PortDirection::Out)
-    {
-        Node freq;
-        freq["value"] = obj.initvalue.frequency;
-        freq["unit"] = obj.unit;
-        node["freq"] = freq;
-        node["duty"] = obj.initvalue.dutyCycle;
-    }
-
-    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_encode(obj.replay, node, "Replay");
-    return node;
-}
-template<>
-bool VibConversion::decode(const Node& node, PwmPort& obj)
-{
-    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_decode(obj.replay, node, "Replay");
-
-    if (legacy_decode_name(obj, node))
-    {
-        // legacy format: {"portName" : {"value": double, "unit": "str"}, "duty":double}}
-        auto it = node.begin();
-        if (it != node.end() && it->second.IsMap())
-        {
-            const auto& val = it->second;
-            obj.initvalue.frequency = parse_as<double>(val["freq"]["value"]);
-            obj.unit = parse_as<std::string>(val["freq"]["unit"]);
-            obj.initvalue.dutyCycle = parse_as<double>(val["duty"]);
-        }
-        return true;
-    }
-
-    if (node["freq"]) //only given for Pwm-Out
-    {
-        obj.initvalue.frequency = parse_as<double>(node["freq"]["value"]);
-        obj.unit = parse_as<std::string>(node["freq"]["unit"]);
-        obj.initvalue.dutyCycle = parse_as<double>(node["duty"]);
-    }
-    return true;
-}
-
-template<>
-Node VibConversion::encode(const PatternPort& obj)
-{
-    Node node;
-    node["Name"] = obj.name;
-    if (obj.direction == PortDirection::Out)
-    {
-        node["value"] = hex_encode(obj.initvalue);
-    }
-    optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_encode(obj.replay, node, "Replay");
-    return node;
-}
-template<>
-bool VibConversion::decode(const Node& node, PatternPort& obj)
-{
-    optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
-    optional_decode(obj.replay, node, "Replay");
-
-    if (legacy_decode_name(obj, node))
-    {
-        //legacy format: {"name" : "hexval"}
-        auto it = node.begin();
-        if (it != node.end() && it->second.IsScalar())
-        {
-            obj.initvalue = hex_decode(parse_as<std::string>(it->second));
-        }
-        return true;
-    }
-
-    if (node["value"])
-    {
-        obj.initvalue = hex_decode(parse_as<std::string>(node["value"]));
-    }
-    return true;
-}
-
-template<>
 Node VibConversion::encode(const GenericPort& obj)
 {
     static const GenericPort defaultObj{};
@@ -1281,25 +1112,6 @@ Node VibConversion::encode(const Participant& obj)
     static const Participant defaultObj{};
     Node node;
 
-    auto makePortList = [&node](auto&& portVector, PortDirection direction, const auto& name)
-    {
-
-        using PortList = typename std::decay_t<decltype(portVector)>;
-        PortList sequence;
-        for (auto&& port : portVector)
-        {
-            if (port.direction == direction)
-            {
-                sequence.push_back(port);
-            }
-        }
-        // only encode if user-defined ports are present
-        if (sequence.size() > 0)
-        {
-            node[name] = sequence;
-        }
-    };
-
     // GenericSubscribers/DataSubscribers cannot be easily discerned from GenericPublishers/DataPublishers (same type of GenericPort/DataPort),
     // so we treat them specially here:
     auto makeSubscribers = [](auto parentNode, auto&& subscribers)
@@ -1338,15 +1150,6 @@ Node VibConversion::encode(const Participant& obj)
     optional_encode(obj.flexrayControllers, node, "FlexRayControllers");
     optional_encode(obj.networkSimulators, node, "NetworkSimulators");
 
-    makePortList(obj.analogIoPorts, PortDirection::In, "Analog-In");
-    makePortList(obj.digitalIoPorts, PortDirection::In, "Digital-In");
-    makePortList(obj.pwmPorts, PortDirection::In, "Pwm-In");
-    makePortList(obj.patternPorts, PortDirection::In, "Pattern-In");
-    makePortList(obj.analogIoPorts, PortDirection::Out, "Analog-Out");
-    makePortList(obj.digitalIoPorts, PortDirection::Out, "Digital-Out");
-    makePortList(obj.pwmPorts, PortDirection::Out, "Pwm-Out");
-    makePortList(obj.patternPorts, PortDirection::Out, "Pattern-Out");
-
     optional_encode(obj.genericPublishers, node, "GenericPublishers");
     makeSubscribers(node["GenericSubscribers"], obj.genericSubscribers);
 
@@ -1366,20 +1169,6 @@ Node VibConversion::encode(const Participant& obj)
 template<>
 bool VibConversion::decode(const Node& node, Participant& obj)
 {
-    // we need to explicitly set the direction for the parsed port
-    auto makePorts = [&node](auto&& portList, auto&& propertyName, auto&& direction)
-    {
-        using PortList = typename std::decay_t<decltype(portList)>;
-        using PortType = typename std::decay_t<decltype(portList)>::value_type;
-
-        PortList ports;
-        optional_decode(ports, node, propertyName);
-        for (auto& port : ports) {
-            port.direction = direction;
-            portList.push_back(port);
-        }
-    };
-
     obj.name = parse_as<std::string>(node["Name"]);
 
     optional_decode(obj.description, node, "Description");
@@ -1403,16 +1192,6 @@ bool VibConversion::decode(const Node& node, Participant& obj)
 
     optional_decode(obj.traceSinks, node, "TraceSinks");
     optional_decode(obj.traceSources, node, "TraceSources");
-
-    makePorts(obj.digitalIoPorts, "Digital-Out", PortDirection::Out);
-    makePorts(obj.digitalIoPorts, "Digital-In", PortDirection::In);
-    makePorts(obj.analogIoPorts, "Analog-Out", PortDirection::Out);
-    makePorts(obj.analogIoPorts, "Analog-In", PortDirection::In);
-    makePorts(obj.pwmPorts, "Pwm-Out", PortDirection::Out);
-    makePorts(obj.pwmPorts, "Pwm-In", PortDirection::In);
-    makePorts(obj.patternPorts, "Pattern-Out", PortDirection::Out);
-    makePorts(obj.patternPorts, "Pattern-In", PortDirection::In);
-
 
     return true;
 }

@@ -13,7 +13,6 @@
 
 #include "ib/IbMacros.hpp"
 #include "ib/mw/EndpointAddress.hpp"
-#include "ib/sim/io/IoDatatypes.hpp"
 #include "ib/sim/fr/FrDatatypes.hpp"
 #include "ib/mw/logging/LoggingDatatypes.hpp"
 #include "ib/sim/generic/GenericMessageDatatypes.hpp"
@@ -47,10 +46,6 @@ struct Link
         LIN,
         Ethernet,
         FlexRay,
-        DigitalIo,
-        AnalogIo,
-        PwmIo,
-        PatternIo,
         GenericMessage,
         DataMessage,
         Rpc
@@ -202,50 +197,6 @@ struct FlexrayController
     Replay replay;
 };
 
-enum class PortDirection : uint8_t
-{
-    In,
-    Out,
-    InOut
-};
-
-template<typename T>
-constexpr auto get_io_link_type()
-{
-    return std::is_same<T, bool>::value ? Link::Type::DigitalIo
-        : std::is_same<T, double>::value ? Link::Type::AnalogIo
-        : std::is_same<T, sim::io::PwmValue>::value ? Link::Type::PwmIo
-        : std::is_same<T, std::vector<uint8_t>>::value ? Link::Type::PatternIo
-        : Link::Type::Invalid;
-}
-
-template <typename ValueT>
-struct IoPort
-{
-    using ValueType = ValueT;
-    static constexpr Link::Type linkType = get_io_link_type<ValueT>();
-
-    std::string name;
-    mw::EndpointId endpointId{0};
-    int16_t linkId{-1};
-    PortDirection direction{PortDirection::InOut};
-
-    ValueT initvalue{};
-    std::string unit;
-
-    std::vector<std::string> useTraceSinks;
-    Replay replay;
-};
-// NB: the following inline definition is only required for C++14
-//     and can be removed when we move to C++17
-template<typename ValueT>
-constexpr Link::Type IoPort<ValueT>::linkType;
-
-using AnalogIoPort  = IoPort<double>;
-using DigitalIoPort = IoPort<bool>;
-using PwmPort       = IoPort<sim::io::PwmValue>;
-using PatternPort   = IoPort<std::vector<uint8_t>>;
-
 /*! \brief Configuration structure to setup ib::sim::generic::IGenericPublisher
  * and ib::sim::generic::IGenericSubscriber
  *
@@ -371,11 +322,6 @@ struct Participant
     std::vector<EthernetController> ethernetControllers;
     std::vector<FlexrayController> flexrayControllers;
     std::vector<NetworkSimulator> networkSimulators;
-
-    std::vector<DigitalIoPort> digitalIoPorts;
-    std::vector<AnalogIoPort> analogIoPorts;
-    std::vector<PwmPort> pwmPorts;
-    std::vector<PatternPort> patternPorts;
 
     std::vector<GenericPort> genericPublishers;
     std::vector<GenericPort> genericSubscribers;
@@ -628,10 +574,6 @@ IntegrationBusAPI bool operator==(const CanController& lhs, const CanController&
 IntegrationBusAPI bool operator==(const LinController& lhs, const LinController& rhs);
 IntegrationBusAPI bool operator==(const EthernetController& lhs, const EthernetController& rhs);
 IntegrationBusAPI bool operator==(const FlexrayController& lhs, const FlexrayController& rhs);
-IntegrationBusAPI bool operator==(const DigitalIoPort& lhs, const DigitalIoPort& rhs);
-IntegrationBusAPI bool operator==(const AnalogIoPort& lhs, const AnalogIoPort& rhs);
-IntegrationBusAPI bool operator==(const PwmPort& lhs, const PwmPort& rhs);
-IntegrationBusAPI bool operator==(const PatternPort& lhs, const PatternPort& rhs);
 IntegrationBusAPI bool operator==(const GenericPort& lhs, const GenericPort& rhs);
 IntegrationBusAPI bool operator==(const DataPort& lhs, const DataPort& rhs);
 IntegrationBusAPI bool operator==(const RpcPort& lhs, const RpcPort& rhs);

@@ -45,24 +45,6 @@ public:
     //! \brief Create a LIN controller at this IB participant.
     virtual auto CreateLinController(const std::string& canonicalName) -> sim::lin::ILinController* = 0;
 
-    //! \brief Create an analog input port at this IB participant.
-    virtual auto CreateAnalogIn(const std::string& canonicalName) -> sim::io::IAnalogInPort* = 0;
-    //! \brief Create an digital input port at this IB participant.
-    virtual auto CreateDigitalIn(const std::string& canonicalName) -> sim::io::IDigitalInPort* = 0;
-    //! \brief Create a PWM input port at this IB participant.
-    virtual auto CreatePwmIn(const std::string& canonicalName) -> sim::io::IPwmInPort* = 0;
-    //! \brief Create a pattern input port at this IB participant.
-    virtual auto CreatePatternIn(const std::string& canonicalName) -> sim::io::IPatternInPort* = 0;
-
-    //! \brief Create an analog output port at this IB participant.
-    virtual auto CreateAnalogOut(const std::string& canonicalName) -> sim::io::IAnalogOutPort* = 0;
-    //! \brief Create a digital output port at this IB participant.
-    virtual auto CreateDigitalOut(const std::string& canonicalName) -> sim::io::IDigitalOutPort* = 0;
-    //! \brief Create a PWM output port at this IB participant.
-    virtual auto CreatePwmOut(const std::string& canonicalName) -> sim::io::IPwmOutPort* = 0;
-    //! \brief Create a pattern output port at this IB participant.
-    virtual auto CreatePatternOut(const std::string& canonicalName) -> sim::io::IPatternOutPort* = 0;
-    
     //! \brief Create a generic message publisher at this IB participant.
     virtual auto CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher* = 0;
     //! \brief Create a generic message subscriber at this IB participant.

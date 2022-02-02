@@ -37,10 +37,6 @@ void Validate(const SimulationSetup& testConfig, const Config& ibConfig)
 
     for (auto& participant : testConfig.participants)
     {
-        add_to_endpoints(participant.analogIoPorts);
-        add_to_endpoints(participant.digitalIoPorts);
-        add_to_endpoints(participant.patternPorts);
-        add_to_endpoints(participant.pwmPorts);
         add_to_endpoints(participant.genericPublishers);
         add_to_endpoints(participant.genericSubscribers);
         add_to_endpoints(participant.rpcClients);
@@ -136,10 +132,6 @@ void ValidateTraceSinks(const Participant& participant)
     validateController(participant.genericSubscribers);
     validateController(participant.rpcClients);
     validateController(participant.rpcServers);
-    validateController(participant.analogIoPorts);
-    validateController(participant.digitalIoPorts);
-    validateController(participant.patternPorts);
-    validateController(participant.pwmPorts);
 }
 
 void ValidateTraceSources(const Participant& participant)
@@ -198,10 +190,6 @@ void ValidateTraceSources(const Participant& participant)
     validateController(participant.genericSubscribers);
     validateController(participant.rpcClients);
     validateController(participant.rpcServers);
-    validateController(participant.analogIoPorts);
-    validateController(participant.digitalIoPorts);
-    validateController(participant.patternPorts);
-    validateController(participant.pwmPorts);
 
 }
 

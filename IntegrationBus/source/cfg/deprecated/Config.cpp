@@ -31,10 +31,6 @@ constexpr auto Endpoints(ParticipantT&& participant)
         participant.linControllers,
         participant.ethernetControllers,
         participant.flexrayControllers,
-        participant.digitalIoPorts,
-        participant.analogIoPorts,
-        participant.pwmPorts,
-        participant.patternPorts,
         participant.genericPublishers,
         participant.genericSubscribers,
         participant.dataPublishers,
@@ -381,10 +377,6 @@ bool operator==(const Participant& lhs, const Participant& rhs)
         && lhs.ethernetControllers == rhs.ethernetControllers
         && lhs.flexrayControllers == rhs.flexrayControllers
         && lhs.networkSimulators == rhs.networkSimulators
-        && lhs.digitalIoPorts == rhs.digitalIoPorts
-        && lhs.analogIoPorts == rhs.analogIoPorts
-        && lhs.pwmPorts == rhs.pwmPorts
-        && lhs.patternPorts == rhs.patternPorts
         && lhs.genericPublishers == rhs.genericPublishers
         && lhs.genericSubscribers == rhs.genericSubscribers
         && lhs.dataPublishers ==  rhs.dataPublishers
@@ -544,53 +536,6 @@ bool operator==(const FlexrayController& lhs, const FlexrayController& rhs)
         && lhs.endpointId == rhs.endpointId
         && lhs.clusterParameters == rhs.clusterParameters
         && lhs.nodeParameters == rhs.nodeParameters
-        && lhs.useTraceSinks == rhs.useTraceSinks
-        && lhs.replay == rhs.replay;
-}
-
-bool operator==(const DigitalIoPort& lhs, const DigitalIoPort& rhs)
-{
-    return lhs.direction == rhs.direction
-        && lhs.endpointId == rhs.endpointId
-        && lhs.name == rhs.name
-        && lhs.initvalue == rhs.initvalue
-        && lhs.linkId == rhs.linkId
-        && lhs.useTraceSinks == rhs.useTraceSinks
-        && lhs.replay == rhs.replay;
-}
-
-bool operator==(const AnalogIoPort& lhs, const AnalogIoPort& rhs)
-{
-    return lhs.direction == rhs.direction
-        && lhs.endpointId == rhs.endpointId
-        && lhs.name == rhs.name
-        && lhs.initvalue == rhs.initvalue
-        && lhs.unit == rhs.unit
-        && lhs.linkId == rhs.linkId
-        && lhs.useTraceSinks == rhs.useTraceSinks
-        && lhs.replay == rhs.replay;
-}
-
-bool operator==(const PwmPort& lhs, const PwmPort& rhs)
-{
-    return lhs.direction == rhs.direction
-        && lhs.endpointId == rhs.endpointId
-        && lhs.name == rhs.name
-        && lhs.initvalue.frequency == rhs.initvalue.frequency
-        && lhs.initvalue.dutyCycle == rhs.initvalue.dutyCycle
-        && lhs.unit == rhs.unit
-        && lhs.linkId == rhs.linkId
-        && lhs.useTraceSinks == rhs.useTraceSinks
-        && lhs.replay == rhs.replay;
-}
-
-bool operator==(const PatternPort& lhs, const PatternPort& rhs)
-{
-    return lhs.direction == rhs.direction
-        && lhs.endpointId == rhs.endpointId
-        && lhs.name == rhs.name
-        && lhs.initvalue == rhs.initvalue
-        && lhs.linkId == rhs.linkId
         && lhs.useTraceSinks == rhs.useTraceSinks
         && lhs.replay == rhs.replay;
 }

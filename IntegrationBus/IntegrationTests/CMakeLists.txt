@@ -66,13 +66,6 @@ add_vib_test(ITestThreeEthController
       ${itest_extra_libs}
 )
 
-add_vib_test(ITestIoMessages
-    SOURCES
-      IoMessagesITest.cpp
-    LIBS
-        IbSimTestHarness
-)
-
 add_vib_test(ITestCatchExceptionsInCallbacks
     SOURCES
       CatchExceptionsInCallbacksITest.cpp

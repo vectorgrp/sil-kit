@@ -6,7 +6,6 @@
 #include "ib/sim/eth/EthDatatypes.hpp"
 #include "ib/sim/can/CanDatatypes.hpp"
 #include "ib/sim/generic/GenericMessageDatatypes.hpp"
-#include "ib/sim/io/IoDatatypes.hpp"
 #include "ib/sim/lin/LinDatatypes.hpp"
 
 #include "ib/extensions/ITraceMessageSink.hpp"

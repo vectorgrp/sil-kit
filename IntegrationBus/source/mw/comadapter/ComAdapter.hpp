@@ -45,9 +45,6 @@
 #include "IIbToFrControllerProxy.hpp"
 #include "IIbToFrControllerFacade.hpp"
 
-#include "IIbToInPort.hpp"
-#include "IIbToOutPort.hpp"
-
 #include "IIbToGenericSubscriber.hpp"
 #include "IIbToGenericPublisher.hpp"
 
@@ -105,14 +102,6 @@ public:
     auto CreateEthController(const std::string& canonicalName) -> sim::eth::IEthController* override;
     auto CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFrController* override;
     auto CreateLinController(const std::string& canonicalName) -> sim::lin::ILinController* override;
-    auto CreateAnalogIn(const std::string& canonicalName) -> sim::io::IAnalogInPort* override;
-    auto CreateDigitalIn(const std::string& canonicalName) -> sim::io::IDigitalInPort* override;
-    auto CreatePwmIn(const std::string& canonicalName) -> sim::io::IPwmInPort* override;
-    auto CreatePatternIn(const std::string& canonicalName) -> sim::io::IPatternInPort* override;
-    auto CreateAnalogOut(const std::string& canonicalName) -> sim::io::IAnalogOutPort* override;
-    auto CreateDigitalOut(const std::string& canonicalName) -> sim::io::IDigitalOutPort* override;
-    auto CreatePwmOut(const std::string& canonicalName) -> sim::io::IPwmOutPort* override;
-    auto CreatePatternOut(const std::string& canonicalName) -> sim::io::IPatternOutPort* override;
     auto CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher* override;
     auto CreateGenericSubscriber(const std::string& canonicalName) -> sim::generic::IGenericSubscriber* override;
     auto CreateDataPublisher(const std::string& canonicalName, const sim::data::DataExchangeFormat& dataExchangeFormat,
@@ -179,12 +168,6 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::ControllerStatusUpdate& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::FrameResponseUpdate& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::io::AnalogIoMessage& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::io::DigitalIoMessage& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::io::PatternIoMessage& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, sim::io::PatternIoMessage&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::io::PwmIoMessage& msg) override;
-
     void SendIbMessage(const IIbServiceEndpoint*, const sync::NextSimTask& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const sync::ParticipantStatus& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const sync::ParticipantCommand& msg) override;
@@ -248,12 +231,6 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::ControllerConfig& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::ControllerStatusUpdate& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::FrameResponseUpdate& msg) override;
-
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::io::AnalogIoMessage& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::io::DigitalIoMessage& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::io::PatternIoMessage& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::io::PatternIoMessage&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::io::PwmIoMessage& msg) override;
 
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::NextSimTask& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::ParticipantStatus& msg) override;
@@ -324,11 +301,6 @@ private:
     template<class IbMessageT>
     void SendIbMessageImpl(const IIbServiceEndpoint* from, const std::string& targetParticipantName, IbMessageT&& msg);
 
-    template<class MsgT, class ConfigT>
-    auto CreateInPort(const ConfigT& config) -> sim::io::IInPort<MsgT>*;
-    template<class MsgT, class ConfigT>
-    auto CreateOutPort(const ConfigT& config) -> sim::io::IOutPort<MsgT>*;
-
     template<class ControllerT>
     auto GetController(const std::string& linkName, const std::string& serviceName) -> ControllerT*;
     template<class ControllerT, typename... Arg>
@@ -384,14 +356,6 @@ private:
         ControllerMap<sim::rpc::IIbToRpcClient>,
         ControllerMap<sim::rpc::IIbToRpcServer>,
         ControllerMap<sim::rpc::IIbToRpcServerInternal>,
-        ControllerMap<sim::io::IIbToInPort<sim::io::DigitalIoMessage>>,
-        ControllerMap<sim::io::IIbToInPort<sim::io::AnalogIoMessage>>,
-        ControllerMap<sim::io::IIbToInPort<sim::io::PwmIoMessage>>,
-        ControllerMap<sim::io::IIbToInPort<sim::io::PatternIoMessage>>,
-        ControllerMap<sim::io::IIbToOutPort<sim::io::DigitalIoMessage>>,
-        ControllerMap<sim::io::IIbToOutPort<sim::io::AnalogIoMessage>>,
-        ControllerMap<sim::io::IIbToOutPort<sim::io::PwmIoMessage>>,
-        ControllerMap<sim::io::IIbToOutPort<sim::io::PatternIoMessage>>,
         ControllerMap<logging::IIbToLogMsgSender>,
         ControllerMap<logging::IIbToLogMsgReceiver>,
         ControllerMap<sync::IIbToParticipantController>,

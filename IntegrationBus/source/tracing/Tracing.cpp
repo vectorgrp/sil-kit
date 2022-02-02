@@ -56,10 +56,6 @@ auto CreateTraceMessageSinks(
         ok |= controllerUsesSink(name, participantConfig.ethernetControllers);
         ok |= controllerUsesSink(name, participantConfig.flexrayControllers);
         ok |= controllerUsesSink(name, participantConfig.linControllers);
-        ok |= controllerUsesSink(name, participantConfig.digitalIoPorts);
-        ok |= controllerUsesSink(name, participantConfig.analogIoPorts);
-        ok |= controllerUsesSink(name, participantConfig.pwmPorts);
-        ok |= controllerUsesSink(name, participantConfig.patternPorts);
         ok |= controllerUsesSink(name, participantConfig.genericPublishers);
         ok |= controllerUsesSink(name, participantConfig.genericSubscribers);
         ok |= controllerUsesSink(name, participantConfig.networkSimulators);
@@ -172,11 +168,6 @@ bool HasReplayConfig(const cfg::Participant& cfg)
     isActive(cfg.ethernetControllers);
     isActive(cfg.linControllers);
     isActive(cfg.flexrayControllers);
-    //Ports
-    isActive(cfg.digitalIoPorts);
-    isActive(cfg.analogIoPorts);
-    isActive(cfg.patternPorts);
-    isActive(cfg.pwmPorts);
     // Generic Messages
     isActive(cfg.genericPublishers);
     isActive(cfg.genericSubscribers);

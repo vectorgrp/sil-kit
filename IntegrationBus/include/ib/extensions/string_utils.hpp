@@ -42,10 +42,6 @@ std::string to_string(TraceMessageType type)
     case TraceMessageType::CanMessage: return "CanMessage"; 
     case TraceMessageType::LinFrame: return "LinFrame"; 
     case TraceMessageType::GenericMessage: return "GenericMessage"; 
-    case TraceMessageType::AnlogIoMessage: return "AnlogIoMessage"; 
-    case TraceMessageType::DigitalIoMessage: return "DigitalIoMessage"; 
-    case TraceMessageType::PatternIoMessage: return "PatternIoMessage"; 
-    case TraceMessageType::PwmIoMessage: return "PwmIoMessage";
     case TraceMessageType::FrMessage: return "FrMessage";
     default:
         throw std::runtime_error("Unknown TraceMessage::Type in operator<<!");

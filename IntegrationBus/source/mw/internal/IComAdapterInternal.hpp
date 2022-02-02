@@ -77,12 +77,6 @@ public:
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::ControllerStatusUpdate& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::FrameResponseUpdate& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::io::AnalogIoMessage& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::io::DigitalIoMessage& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::io::PatternIoMessage& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::io::PatternIoMessage&& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::io::PwmIoMessage& msg) = 0;
-
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::generic::GenericMessage& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::generic::GenericMessage&& msg) = 0;
 
@@ -146,12 +140,6 @@ public:
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::ControllerConfig& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::ControllerStatusUpdate& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::FrameResponseUpdate& msg) = 0;
-
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::io::AnalogIoMessage& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::io::DigitalIoMessage& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::io::PatternIoMessage& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::io::PatternIoMessage&& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::io::PwmIoMessage& msg) = 0;
 
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::generic::GenericMessage& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::generic::GenericMessage&& msg) = 0;

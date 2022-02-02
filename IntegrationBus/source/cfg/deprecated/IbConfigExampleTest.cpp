@@ -51,7 +51,6 @@ protected:
         CreateLinControllers(*comAdapter, participantCfg);
         CreateEthernetControllers(*comAdapter, participantCfg);
         CreateFlexrayControllers(*comAdapter, participantCfg);
-        CreateIoPorts(*comAdapter, participantCfg);
         CreateGenericPubSub(*comAdapter, participantCfg);
         GetParticipantController(*comAdapter, participantCfg);
         GetSystemMonitor(*comAdapter, participantCfg);
@@ -83,37 +82,6 @@ protected:
         for (auto&& controller : participantCfg.flexrayControllers)
         {
             EXPECT_NE(comAdapter.CreateFlexrayController(controller.name), nullptr);
-        }
-    }
-    void CreateIoPorts(mw::IComAdapter& comAdapter, const cfg::Participant& participantCfg)
-    {
-        for (auto&& port : participantCfg.analogIoPorts)
-        {
-            if (port.direction == cfg::PortDirection::In)
-                EXPECT_NE(comAdapter.CreateAnalogIn(port.name), nullptr);
-            else if (port.direction == cfg::PortDirection::Out)
-                EXPECT_NE(comAdapter.CreateAnalogOut(port.name), nullptr);
-        }
-        for (auto&& port : participantCfg.digitalIoPorts)
-        {
-            if (port.direction == cfg::PortDirection::In)
-                EXPECT_NE(comAdapter.CreateDigitalIn(port.name), nullptr);
-            else if (port.direction == cfg::PortDirection::Out)
-                EXPECT_NE(comAdapter.CreateDigitalOut(port.name), nullptr);
-        }
-        for (auto&& port : participantCfg.pwmPorts)
-        {
-            if (port.direction == cfg::PortDirection::In)
-                EXPECT_NE(comAdapter.CreatePwmIn(port.name), nullptr);
-            else if (port.direction == cfg::PortDirection::Out)
-                EXPECT_NE(comAdapter.CreatePwmOut(port.name), nullptr);
-        }
-        for (auto&& port : participantCfg.patternPorts)
-        {
-            if (port.direction == cfg::PortDirection::In)
-                EXPECT_NE(comAdapter.CreatePatternIn(port.name), nullptr);
-            else if (port.direction == cfg::PortDirection::Out)
-                EXPECT_NE(comAdapter.CreatePatternOut(port.name), nullptr);
         }
     }
     void CreateGenericPubSub(mw::IComAdapter& comAdapter, const cfg::Participant& participantCfg)

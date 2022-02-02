@@ -16,7 +16,6 @@
 #include "ib/sim/eth/EthDatatypes.hpp"
 #include "ib/sim/fr/FrDatatypes.hpp"
 #include "ib/sim/lin/LinDatatypes.hpp"
-#include "ib/sim/io/IoDatatypes.hpp"
 #include "ib/sim/generic/GenericMessageDatatypes.hpp"
 #include "ib/sim/data/DataMessageDatatypes.hpp"
 #include "ib/sim/rpc/RpcDatatypes.hpp"
@@ -151,14 +150,6 @@ public:
     auto CreateEthController(const std::string& /*canonicalName*/) -> sim::eth::IEthController* override { return nullptr; }
     auto CreateFlexrayController(const std::string& /*canonicalName*/) -> sim::fr::IFrController* override { return nullptr; }
     auto CreateLinController(const std::string& /*canonicalName*/) -> sim::lin::ILinController* override { return nullptr; }
-    auto CreateAnalogIn(const std::string& /*canonicalName*/) -> sim::io::IAnalogInPort* override { return nullptr; }
-    auto CreateDigitalIn(const std::string& /*canonicalName*/) -> sim::io::IDigitalInPort* override { return nullptr; }
-    auto CreatePwmIn(const std::string& /*canonicalName*/) -> sim::io::IPwmInPort* override { return nullptr; }
-    auto CreatePatternIn(const std::string& /*canonicalName*/) -> sim::io::IPatternInPort* override { return nullptr; }
-    auto CreateAnalogOut(const std::string& /*canonicalName*/) -> sim::io::IAnalogOutPort* override { return nullptr; }
-    auto CreateDigitalOut(const std::string& /*canonicalName*/) -> sim::io::IDigitalOutPort* override { return nullptr; }
-    auto CreatePwmOut(const std::string& /*canonicalName*/) -> sim::io::IPwmOutPort* override { return nullptr; }
-    auto CreatePatternOut(const std::string& /*canonicalName*/) -> sim::io::IPatternOutPort* override { return nullptr; }
     auto CreateGenericPublisher(const std::string& /*canonicalName*/) -> sim::generic::IGenericPublisher* override { return nullptr; }
     auto CreateGenericSubscriber(const std::string& /*canonicalName*/) -> sim::generic::IGenericSubscriber* override { return nullptr; }
     auto CreateDataPublisher(const std::string& /*canonicalName*/,
@@ -214,13 +205,13 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::can::CanControllerStatus& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::can::CanConfigureBaudrate& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::can::CanSetControllerMode& /*msg*/) override {}
-                        
+
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::eth::EthMessage&& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::eth::EthMessage& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::eth::EthTransmitAcknowledge& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::eth::EthStatus& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::eth::EthSetMode& /*msg*/) override {}
-                        
+
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::fr::FrMessage&& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::FrMessage& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::fr::FrMessageAck&& /*msg*/) override {}
@@ -234,7 +225,7 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::TxBufferUpdate& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::ControllerStatus& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::PocStatus& /*msg*/) override {}
-                        
+
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::lin::SendFrameRequest& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::lin::SendFrameHeaderRequest& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::lin::Transmission& /*msg*/) override {}
@@ -242,13 +233,7 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::lin::ControllerConfig& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::lin::ControllerStatusUpdate& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::lin::WakeupPulse& /*msg*/) override {}
-                        
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::io::AnalogIoMessage& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::io::DigitalIoMessage& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::io::PatternIoMessage&& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::io::PatternIoMessage& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::io::PwmIoMessage& /*msg*/) override {}
-                        
+
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::generic::GenericMessage&& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::generic::GenericMessage& /*msg*/) override {}
 
@@ -271,7 +256,7 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::ParticipantStatus& /*msg*/) {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::ParticipantCommand& /*msg*/) {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::SystemCommand& /*msg*/) {}
-                        
+
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, logging::LogMsg&& /*msg*/) {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const logging::LogMsg& /*msg*/) {}
 
@@ -315,12 +300,6 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::lin::ControllerStatusUpdate& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::lin::WakeupPulse& /*msg*/) override {}
 
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::io::AnalogIoMessage& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::io::DigitalIoMessage& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::io::PatternIoMessage&& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::io::PatternIoMessage& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::io::PwmIoMessage& /*msg*/) override {}
-
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::generic::GenericMessage&& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::generic::GenericMessage& /*msg*/) override {}
 
@@ -328,8 +307,8 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::data::DataMessage&& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::data::PublisherAnnouncement& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::data::PublisherAnnouncement&& /*msg*/) override {}
-    
-	void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::rpc::ClientAnnouncement& /*msg*/) override {}
+
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::rpc::ClientAnnouncement& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::rpc::ClientAnnouncement&& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::rpc::ServerAcknowledge& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::rpc::ServerAcknowledge&& /*msg*/) override {}

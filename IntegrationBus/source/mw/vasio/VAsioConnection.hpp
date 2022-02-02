@@ -26,7 +26,6 @@
 #include "SerdesSimRpc.hpp"
 #include "SerdesSimCan.hpp"
 #include "SerdesSimEthernet.hpp"
-#include "SerdesSimIo.hpp"
 #include "SerdesSimLin.hpp"
 #include "SerdesSimFlexray.hpp"
 #include "SerdesMwService.hpp"
@@ -200,10 +199,6 @@ private:
         sim::eth::EthTransmitAcknowledge,
         sim::eth::EthStatus,
         sim::eth::EthSetMode,
-        sim::io::AnalogIoMessage,
-        sim::io::DigitalIoMessage,
-        sim::io::PatternIoMessage,
-        sim::io::PwmIoMessage,
         sim::lin::SendFrameRequest,
         sim::lin::SendFrameHeaderRequest,
         sim::lin::Transmission,

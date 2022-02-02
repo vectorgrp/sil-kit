@@ -613,35 +613,6 @@ TEST_F(JsonConfigTest, configure_participant_add_tracesink)
     auto&& frCtrl = participant.AddFlexray("FlexrayCtrl").WithNodeParameters(getNodeParameters());
     frCtrl.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
 
-    auto&& doutPort = participant.AddDigitalOut("DigitalOutFoo");
-    doutPort.WithUnit("Foo").WithInitValue(false);
-    doutPort.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
-
-    auto&& dinport = participant.AddDigitalIn("Digi In");
-    dinport.WithUnit("Digital Inport Unit").WithInitValue(false);
-
-    auto&& ainPort = participant.AddAnalogIn("AnalogIn");
-    ainPort.WithUnit("Foo").WithInitValue(13.37);
-    ainPort.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
-
-    auto&& aoutPort = participant.AddAnalogOut("AnalogOut");
-    aoutPort.WithUnit("Analog Out Unit").WithInitValue(0.1234);
-
-    auto&& patPort = participant.AddPatternIn("PatternIn");
-    patPort.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
-    patPort.WithUnit("Pattern Unit").WithInitValue({'c','a','f','e'});
-
-    auto&& patoutPort = participant.AddPatternOut("Pattern Out");
-    patoutPort.WithUnit("Pattern Unit").WithInitValue({'b','e','e','f'});
-
-    auto&& pwmPort = participant.AddPwmOut("PWM OUT");
-    pwmPort.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
-    pwmPort.WithUnit("PWM Unit").WithInitValue({1.0, 0.5});
-
-    auto&& pwmPort2 = participant.AddPwmIn("PwmPort2 IN");
-    pwmPort2.WithUnit("some other unit").WithInitValue({3.0, 4.5});
-
-
     auto&& genPort = participant.AddGenericPublisher("GenericPublisher");
     genPort.WithTraceSink("EthSink").WithTraceSink("SinkForCan");
 
@@ -695,11 +666,6 @@ TEST_F(JsonConfigTest, configure_participant_add_tracesink)
             ASSERT_TRUE(hasMatch) << "The ports might be serialized in different order, but they have to be present!";
         }
     };
-
-    checkPort(pnew.analogIoPorts, pold.analogIoPorts);
-    checkPort(pnew.digitalIoPorts, pold.digitalIoPorts);
-    checkPort(pnew.patternPorts, pold.patternPorts);
-    checkPort(pnew.pwmPorts, pold.pwmPorts);
 
     for (auto i = 0u; i < testTable.size(); i++)
     {
@@ -772,7 +738,7 @@ TEST_F(JsonConfigTest, configure_trace_source)
 }
 
 
-TEST_F(JsonConfigTest, configure_replayconfig_direction)
+TEST_F(JsonConfigTest, DISABLED_configure_replayconfig_direction)
 {
     auto&& participant = simulationSetup.AddParticipant("P1");
     participant
@@ -784,7 +750,8 @@ TEST_F(JsonConfigTest, configure_replayconfig_direction)
         .WithReplay("Source1")
         .WithDirection(ib::cfg::Replay::Direction::Receive);
     participant
-        .AddPatternOut("Pat1")
+        //.AddPatternOut("Pat1")
+        .AddGenericPublisher("Pat1")
         .WithReplay("Source1")
         .WithDirection(ib::cfg::Replay::Direction::Both);
 
@@ -795,7 +762,7 @@ TEST_F(JsonConfigTest, configure_replayconfig_direction)
 
     EXPECT_EQ(pold.canControllers.at(0).replay, pnew.canControllers.at(0).replay);
     EXPECT_EQ(pold.genericPublishers.at(0).replay, pnew.genericPublishers.at(0).replay);
-    EXPECT_EQ(pold.patternPorts.at(0).replay, pnew.patternPorts.at(0).replay);
+    //EXPECT_EQ(pold.patternPorts.at(0).replay, pnew.patternPorts.at(0).replay);
 }
 
 TEST_F(JsonConfigTest, configure_controllers_with_replay)
@@ -814,19 +781,6 @@ TEST_F(JsonConfigTest, configure_controllers_with_replay)
     participant.AddFlexray("FlexrayCtrl")
         .WithNodeParameters(getNodeParameters())
         .WithReplay("Source1");
-
-    participant.AddDigitalOut("DigitalOutFoo").WithReplay("Source1");
-    participant.AddDigitalIn("Digi In").WithReplay("Source1");
-
-    participant.AddAnalogIn("AnalogIn").WithReplay("Source1");
-    participant.AddAnalogOut("AnalogOut").WithReplay("Source1");
-
-    participant.AddPatternIn("PatternIn").WithReplay("Source1");
-    participant.AddPatternOut("Pattern Out").WithReplay("Source1");
-
-
-    participant.AddPwmOut("PWM OUT").WithReplay("Source1");
-    participant.AddPwmIn("PwmPort2 IN").WithReplay("Source1");
 
     participant.AddGenericPublisher("GenericPublisher").WithReplay("Source1");
     participant.AddGenericSubscriber("A Subscriber").WithReplay("Source1");
@@ -853,10 +807,6 @@ TEST_F(JsonConfigTest, configure_controllers_with_replay)
     EXPECT_TRUE(compareReplay(pold.flexrayControllers, pnew.flexrayControllers));
     EXPECT_TRUE(compareReplay(pold.genericPublishers, pnew.genericPublishers));
     EXPECT_TRUE(compareReplay(pold.genericSubscribers, pnew.genericSubscribers));
-    EXPECT_TRUE(compareReplay(pold.digitalIoPorts, pnew.digitalIoPorts));
-    EXPECT_TRUE(compareReplay(pold.analogIoPorts, pnew.analogIoPorts));
-    EXPECT_TRUE(compareReplay(pold.patternPorts, pnew.patternPorts));
-    EXPECT_TRUE(compareReplay(pold.pwmPorts, pnew.pwmPorts));
 }
 
 TEST_F(JsonConfigTest, configure_registry_connect_attempts)

@@ -51,7 +51,6 @@ target_link_libraries(IbTracing
         IbSimLin
         IbSimGenericMessage
         IbSimDataMessage
-        IbSimIO
     PRIVATE
         IbSimEthernet
         IbSimCan
@@ -59,7 +58,6 @@ target_link_libraries(IbTracing
         IbSimLin
         IbSimGenericMessage
         IbSimDataMessage
-        IbSimIO
 )
 
 if(WIN32)

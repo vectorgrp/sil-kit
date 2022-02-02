@@ -3,7 +3,6 @@
 #include "eth/fwd_decl.hpp"
 #include "fr/fwd_decl.hpp"
 #include "lin/fwd_decl.hpp"
-#include "io/fwd_decl.hpp"
 #include "generic/fwd_decl.hpp"
 #include "data/fwd_decl.hpp"
 #include "rpc/fwd_decl.hpp"

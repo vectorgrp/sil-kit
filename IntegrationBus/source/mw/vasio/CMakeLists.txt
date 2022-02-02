@@ -14,7 +14,6 @@ add_library(IbMwVAsio STATIC
     SerdesSimRpc.hpp
     SerdesSimCan.hpp
     SerdesSimEthernet.hpp
-    SerdesSimIo.hpp
     SerdesSimLin.hpp
     SerdesSimFlexray.hpp
     IbLink.hpp
@@ -44,7 +43,6 @@ target_link_libraries(IbMwVAsio
       IbSimRpc
       IbSimCan
       IbSimEthernet
-      IbSimIO    
       IbSimLin
       IbSimFlexRay
       Threads::Threads
@@ -75,5 +73,4 @@ add_vib_test(TestMwVAsio_SerdesSimLin SOURCES SerdesSimLinTest.cpp)
 add_vib_test(TestMwVAsio_SerdesSimFlexray SOURCES SerdesSimFlexrayTest.cpp)
 add_vib_test(TestMwVAsio_SerdesSimGeneric SOURCES SerdesSimGenericTest.cpp)
 add_vib_test(TestMwVAsio_SerdesSimData SOURCES SerdesSimDataTest.cpp)
-add_vib_test(TestMwVAsio_SerdesSimIo SOURCES SerdesSimIoTest.cpp)
 add_vib_test(TestMwVAsio_SerdesMwService SOURCES SerdesMwServiceTest.cpp LIBS IbMwService)

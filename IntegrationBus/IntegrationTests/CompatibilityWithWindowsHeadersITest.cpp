@@ -21,7 +21,6 @@
 #include "ib/sim/eth/string_utils.hpp"
 #include "ib/sim/fr/string_utils.hpp"
 #include "ib/sim/generic/string_utils.hpp"
-#include "ib/sim/io/string_utils.hpp"
 #include "ib/sim/lin/string_utils.hpp"
 
 #include "ib/util/functional.hpp"

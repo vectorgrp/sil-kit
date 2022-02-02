@@ -12,7 +12,6 @@
 #include "Config.hpp"
 #include "ParentBuilder.hpp"
 #include "ControllerBuilder.hpp"
-#include "IoPortBuilder.hpp"
 #include "GenericPortBuilder.hpp"
 #include "DataPortBuilder.hpp"
 #include "RpcPortBuilder.hpp"
@@ -37,14 +36,6 @@ public:
     IntegrationBusAPI auto AddLin(std::string name) -> ControllerBuilder<LinController>&;
     IntegrationBusAPI auto AddEthernet(std::string name) -> ControllerBuilder<EthernetController>&;
     IntegrationBusAPI auto AddFlexray(std::string name) -> ControllerBuilder<FlexrayController>&;
-    IntegrationBusAPI auto AddDigitalIn(std::string name) -> IoPortBuilder<DigitalIoPort>&;
-    IntegrationBusAPI auto AddAnalogIn(std::string name) -> IoPortBuilder<AnalogIoPort>&;
-    IntegrationBusAPI auto AddPwmIn(std::string name) -> IoPortBuilder<PwmPort>&;
-    IntegrationBusAPI auto AddPatternIn(std::string name) -> IoPortBuilder<PatternPort>&;
-    IntegrationBusAPI auto AddDigitalOut(std::string name) -> IoPortBuilder<DigitalIoPort>&;
-    IntegrationBusAPI auto AddAnalogOut(std::string name) -> IoPortBuilder<AnalogIoPort>&;
-    IntegrationBusAPI auto AddPwmOut(std::string name) -> IoPortBuilder<PwmPort>&;
-    IntegrationBusAPI auto AddPatternOut(std::string name) -> IoPortBuilder<PatternPort>&;
 
     IntegrationBusAPI auto AddGenericPublisher(std::string name) -> GenericPortBuilder&;
     IntegrationBusAPI auto AddGenericSubscriber(std::string name) -> GenericPortBuilder&;
@@ -77,18 +68,12 @@ public:
 private:
     template<class ControllerT>
     inline auto GetControllers() -> std::vector<ControllerBuilder<ControllerT>>&;
-    template<class PortT>
-    inline auto GetPorts() -> std::vector<IoPortBuilder<PortT>>&;
 
     template<class ControllerT, class... Arg>
     auto AddController(Arg&&... arg) -> ControllerBuilder<ControllerT>&;
-    template<class PortT, class... Arg>
-    auto AddIoPort(Arg&&... arg) -> IoPortBuilder<PortT>&;
 
     template<class ControllerT>
     void BuildControllers(std::vector<ControllerT>& configs);
-    template<class PortT>
-    void BuildPorts(std::vector<PortT>& configs);
 
 private:
     Participant config;
@@ -100,11 +85,7 @@ private:
         std::vector<ControllerBuilder<CanController>>,
         std::vector<ControllerBuilder<LinController>>,
         std::vector<ControllerBuilder<EthernetController>>,
-        std::vector<ControllerBuilder<FlexrayController>>,
-        std::vector<IoPortBuilder<AnalogIoPort>>,
-        std::vector<IoPortBuilder<DigitalIoPort>>,
-        std::vector<IoPortBuilder<PwmPort>>,
-        std::vector<IoPortBuilder<PatternPort>>
+        std::vector<ControllerBuilder<FlexrayController>>
     > _endpoints;
 
     std::vector<GenericPortBuilder> _genericPublishers;

@@ -130,14 +130,6 @@ TraceMessageType to_channelType(cfg::Link::Type linkType)
 {
     switch (linkType)
     {
-    case cfg::Link::Type::AnalogIo:
-        return TraceMessageType::AnlogIoMessage;
-    case cfg::Link::Type::DigitalIo:
-        return TraceMessageType::DigitalIoMessage;
-    case cfg::Link::Type::PatternIo:
-        return TraceMessageType::PatternIoMessage;
-    case cfg::Link::Type::PwmIo:
-        return TraceMessageType::PwmIoMessage;
     case cfg::Link::Type::GenericMessage:
         return TraceMessageType::GenericMessage;
     case cfg::Link::Type::Ethernet:
@@ -524,24 +516,6 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
         }
     };
 
-    auto makePortTasks = [makeTasks](auto portList, auto inMethod, auto outMethod) {
-        auto inPorts = decltype(portList){};
-        auto outPorts = decltype(portList){};
-        for (const auto& port : portList)
-        {
-            if (port.direction == cfg::PortDirection::In)
-            {
-                inPorts.push_back(port);
-            }
-            if (port.direction == cfg::PortDirection::Out)
-            {
-                outPorts.push_back(port);
-            }
-        }
-        makeTasks(inPorts, inMethod);
-        makeTasks(outPorts, outMethod);
-    };
-
     // Bus Controllers
     makeTasks(participantConfig.ethernetControllers, &mw::IComAdapter::CreateEthController);
     makeTasks(participantConfig.canControllers, &mw::IComAdapter::CreateCanController);
@@ -551,17 +525,6 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
     // Generic Messages
     makeTasks(participantConfig.genericPublishers, &mw::IComAdapter::CreateGenericPublisher);
     makeTasks(participantConfig.genericSubscribers, &mw::IComAdapter::CreateGenericSubscriber);
-
-    // Ports
-    makePortTasks(participantConfig.pwmPorts, &mw::IComAdapter::CreatePwmIn,
-        &mw::IComAdapter::CreatePwmOut);
-    makePortTasks(participantConfig.patternPorts, &mw::IComAdapter::CreatePatternIn,
-        &mw::IComAdapter::CreatePatternOut);
-    makePortTasks(participantConfig.digitalIoPorts, &mw::IComAdapter::CreateDigitalIn,
-        &mw::IComAdapter::CreateDigitalOut);
-    makePortTasks(participantConfig.analogIoPorts, &mw::IComAdapter::CreateAnalogIn,
-        &mw::IComAdapter::CreateAnalogOut);
-
 }
 
 ReplayScheduler::~ReplayScheduler()

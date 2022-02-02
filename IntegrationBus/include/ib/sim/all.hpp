@@ -8,5 +8,4 @@
 #include "generic/all.hpp"
 #include "data/all.hpp"
 #include "lin/all.hpp"
-#include "io/all.hpp"
 #include "rpc/all.hpp"

@@ -10,7 +10,6 @@
 #include "ib/sim/eth/string_utils.hpp"
 #include "ib/sim/fr/string_utils.hpp"
 #include "ib/sim/lin/string_utils.hpp"
-#include "ib/sim/io/string_utils.hpp"
 #include "ib/sim/generic/string_utils.hpp"
 #include "ib/sim/data/string_utils.hpp"
 #include "ib/sim/rpc/string_utils.hpp"
@@ -68,10 +67,6 @@ struct is_printable_vib_type<T, std::enable_if_t<is_one_of_v<T,
         ib::sim::eth::EthTransmitAcknowledge,
         ib::sim::eth::EthStatus,
         ib::sim::eth::EthSetMode,
-        ib::sim::io::AnalogIoMessage,
-        ib::sim::io::DigitalIoMessage,
-        ib::sim::io::PatternIoMessage,
-        ib::sim::io::PwmIoMessage,
         ib::sim::lin::SendFrameRequest,
         ib::sim::lin::SendFrameHeaderRequest,
         ib::sim::lin::Transmission,

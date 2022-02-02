@@ -7,7 +7,6 @@
 #include "ib/sim/can/CanDatatypes.hpp"
 #include "ib/sim/generic/GenericMessageDatatypes.hpp"
 #include "ib/sim/data/DataMessageDatatypes.hpp"
-#include "ib/sim/io/IoDatatypes.hpp"
 #include "ib/sim/lin/LinDatatypes.hpp"
 #include "ib/sim/fr/FrDatatypes.hpp"
 
@@ -22,10 +21,6 @@ enum class TraceMessageType
     ,CanMessage
     ,LinFrame
     ,GenericMessage
-    ,AnlogIoMessage
-    ,DigitalIoMessage
-    ,PatternIoMessage
-    ,PwmIoMessage
     ,FrMessage
     ,InvalidReplayData
     //TODO FrSymbol, PocStatus, TxBufferConfigUpdate, TxBufferUpdate ?
@@ -43,10 +38,6 @@ template<> struct MessageTrait<sim::eth::EthFrame> : TypeIdTrait<TraceMessageTyp
 template<> struct MessageTrait<sim::can::CanMessage> : TypeIdTrait<TraceMessageType::CanMessage> {};
 template<> struct MessageTrait<sim::lin::Frame> : TypeIdTrait<TraceMessageType::LinFrame> {};
 template<> struct MessageTrait<sim::generic::GenericMessage> : TypeIdTrait<TraceMessageType::GenericMessage> {};
-template<> struct MessageTrait<sim::io::AnalogIoMessage> : TypeIdTrait<TraceMessageType::AnlogIoMessage> {};
-template<> struct MessageTrait<sim::io::DigitalIoMessage> : TypeIdTrait<TraceMessageType::DigitalIoMessage> {};
-template<> struct MessageTrait<sim::io::PatternIoMessage> : TypeIdTrait<TraceMessageType::PatternIoMessage> {};
-template<> struct MessageTrait<sim::io::PwmIoMessage> : TypeIdTrait<TraceMessageType::PwmIoMessage> {};
 template<> struct MessageTrait<sim::fr::FrMessage> : TypeIdTrait<TraceMessageType::FrMessage> {};
 
 class TraceMessage

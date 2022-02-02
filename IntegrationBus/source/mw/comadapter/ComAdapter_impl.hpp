@@ -17,10 +17,6 @@
 #include "LinControllerReplay.hpp"
 #include "LinControllerProxy.hpp"
 #include "LinControllerFacade.hpp"
-#include "InPort.hpp"
-#include "InPortReplay.hpp"
-#include "OutPort.hpp"
-#include "OutPortReplay.hpp"
 #include "GenericPublisher.hpp"
 #include "GenericPublisherReplay.hpp"
 #include "GenericSubscriber.hpp"
@@ -248,100 +244,6 @@ auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonical
 {
     auto&& config = get_by_name(_participant.linControllers, canonicalName);
     return CreateControllerForLink<lin::LinControllerFacade>(config, {}, config, _timeProvider.get());
-}
-
-template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateAnalogIn(const std::string& canonicalName) -> sim::io::IAnalogInPort*
-{
-    auto&& config = get_by_name(_participant.analogIoPorts, canonicalName);
-    return CreateInPort<io::AnalogIoMessage>(config);
-}
-
-template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateDigitalIn(const std::string& canonicalName) -> sim::io::IDigitalInPort*
-{
-    auto&& config = get_by_name(_participant.digitalIoPorts, canonicalName);
-    return CreateInPort<io::DigitalIoMessage>(config);
-}
-
-template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreatePwmIn(const std::string& canonicalName) -> sim::io::IPwmInPort*
-{
-    auto&& config = get_by_name(_participant.pwmPorts, canonicalName);
-    return CreateInPort<io::PwmIoMessage>(config);
-}
-
-template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreatePatternIn(const std::string& canonicalName) -> sim::io::IPatternInPort*
-{
-    auto&& config = get_by_name(_participant.patternPorts, canonicalName);
-    return CreateInPort<io::PatternIoMessage>(config);
-}
-
-template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateAnalogOut(const std::string& canonicalName) -> sim::io::IAnalogOutPort*
-{
-    auto&& config = get_by_name(_participant.analogIoPorts, canonicalName);
-    return CreateOutPort<io::AnalogIoMessage>(config);
-}
-
-template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateDigitalOut(const std::string& canonicalName) -> sim::io::IDigitalOutPort*
-{
-    auto&& config = get_by_name(_participant.digitalIoPorts, canonicalName);
-    return CreateOutPort<io::DigitalIoMessage>(config);
-}
-
-template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreatePwmOut(const std::string& canonicalName) -> sim::io::IPwmOutPort*
-{
-    auto&& config = get_by_name(_participant.pwmPorts, canonicalName);
-    return CreateOutPort<io::PwmIoMessage>(config);
-}
-
-template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreatePatternOut(const std::string& canonicalName) -> sim::io::IPatternOutPort*
-{
-    auto&& config = get_by_name(_participant.patternPorts, canonicalName);
-    return CreateOutPort<io::PatternIoMessage>(config);
-}
-
-template <class IbConnectionT>
-template <class MsgT, class ConfigT>
-auto ComAdapter<IbConnectionT>::CreateInPort(const ConfigT& config) -> io::IInPort<MsgT>*
-{
-    if (config.direction != cfg::PortDirection::In)
-        throw cfg::Misconfiguration("Invalid port direction!");
-
-    if (ControllerUsesReplay(config))
-    {
-        return CreateControllerForLink<io::InPortReplay<MsgT>>(config, {}, config, _timeProvider.get());
-    }
-    else
-    {
-        return CreateControllerForLink<io::InPort<MsgT>>(config, {}, config, _timeProvider.get());
-    }
-}
-
-template <class IbConnectionT>
-template <class MsgT, class ConfigT>
-auto ComAdapter<IbConnectionT>::CreateOutPort(const ConfigT& config) -> io::IOutPort<MsgT>*
-{
-    if (config.direction != cfg::PortDirection::Out)
-        throw cfg::Misconfiguration("Invalid port direction!");
-
-    if (ControllerUsesReplay(config))
-    {
-        auto port = CreateControllerForLink<io::OutPortReplay<MsgT>>(config, {}, config, _timeProvider.get());
-        port->Write(config.initvalue, std::chrono::nanoseconds{0});
-        return port;
-    }
-    else
-    {
-        auto port = CreateControllerForLink<io::OutPort<MsgT>>(config, {}, config, _timeProvider.get());
-        port->Write(config.initvalue, std::chrono::nanoseconds{0});
-        return port;
-    }
 }
 
 template <class IbConnectionT>
@@ -808,36 +710,6 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, co
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::io::AnalogIoMessage& msg)
-{
-    SendIbMessageImpl(from, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::io::DigitalIoMessage& msg)
-{
-    SendIbMessageImpl(from, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::io::PatternIoMessage& msg)
-{
-    SendIbMessageImpl(from, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::io::PatternIoMessage&& msg)
-{
-    SendIbMessageImpl(from, std::move(msg));
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::io::PwmIoMessage& msg)
-{
-    SendIbMessageImpl(from, msg);
-}
-
-template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::generic::GenericMessage& msg)
 {
     SendIbMessageImpl(from, msg);
@@ -1160,36 +1032,6 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, co
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::FrameResponseUpdate& msg)
-{
-    SendIbMessageImpl(from, targetParticipantName, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::io::AnalogIoMessage& msg)
-{
-    SendIbMessageImpl(from, targetParticipantName, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::io::DigitalIoMessage& msg)
-{
-    SendIbMessageImpl(from, targetParticipantName, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::io::PatternIoMessage& msg)
-{
-    SendIbMessageImpl(from, targetParticipantName, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::io::PatternIoMessage&& msg)
-{
-    SendIbMessageImpl(from, targetParticipantName, std::move(msg));
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::io::PwmIoMessage& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }

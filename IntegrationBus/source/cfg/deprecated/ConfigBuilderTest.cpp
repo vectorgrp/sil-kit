@@ -263,52 +263,6 @@ TEST_F(ConfigBuilderTest, make_network_simulator)
     EXPECT_EQ(netsim.simulatedSwitches, std::vector<std::string>(switches));
 }
 
-TEST_F(ConfigBuilderTest, make_pwm_port)
-{
-    simulationSetup.AddParticipant("P1")
-        .AddPwmOut("PWM_O")
-            .WithInitValue({3.4, 0.4})
-            .WithUnit("kHz")
-            .WithLink("PWM1");
-    simulationSetup.AddParticipant("P2")
-        .AddPwmIn("PWM_I")
-        .WithLink("PWM1");
-
-    auto config = configBuilder.Build();
-
-    ASSERT_EQ(config.simulationSetup.participants.size(), 2u);
-    auto&& p1 = config.simulationSetup.participants[0];
-    auto&& p2 = config.simulationSetup.participants[1];
-
-    ASSERT_EQ(p1.pwmPorts.size(), 1u);
-    auto&& pwmOut = p1.pwmPorts[0];
-
-    ASSERT_EQ(p2.pwmPorts.size(), 1u);
-    auto&& pwmIn = p2.pwmPorts[0];
-
-    ASSERT_EQ(config.simulationSetup.links.size(), 1u);
-    auto&& link = config.simulationSetup.links[0];
-
-    EXPECT_EQ(link.name, "PWM1");
-    EXPECT_EQ(link.endpoints.size(), 2u);
-    EXPECT_EQ(link.type, Link::Type::PwmIo);
-    EXPECT_NE(std::find(link.endpoints.begin(), link.endpoints.end(), "P1/PWM_O"),
-        link.endpoints.end());
-    EXPECT_NE(std::find(link.endpoints.begin(), link.endpoints.end(), "P2/PWM_I"),
-        link.endpoints.end());
-
-
-    EXPECT_EQ(pwmOut.name, "PWM_O");
-    EXPECT_EQ(pwmOut.linkId, link.id);
-    EXPECT_EQ(pwmOut.endpointId, 1);
-    EXPECT_EQ(pwmOut.direction, PortDirection::Out);
-
-    EXPECT_EQ(pwmIn.name, "PWM_I");
-    EXPECT_EQ(pwmIn.linkId, link.id);
-    EXPECT_EQ(pwmIn.endpointId, 2);
-    EXPECT_EQ(pwmIn.direction, PortDirection::In);
-}
-
 TEST_F(ConfigBuilderTest, configure_participant_sync_type)
 {
     simulationSetup.AddParticipant("P1").WithSyncType(SyncType::TimeQuantum);
