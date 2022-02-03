@@ -65,14 +65,14 @@ protected:
             canmsg.timestamp = 1s;
             canmsg.transmitId = index + 1;
             canmsg.direction = ib::sim::TransmitDirection::RX;
-            canmsg.userContext = (void*)index;
+            canmsg.userContext = (void*)nullptr;
 
             auto& canack = _testMessages[index].expectedAck;
             canack.canId = index;
             canack.timestamp = 1s;
             canack.transmitId = index + 1;
             canack.status = ib::sim::can::CanTransmitStatus::Transmitted;
-            canack.userContext = (void*)index;
+            canack.userContext = (void*)(index+1);
         }
     }
 
@@ -99,7 +99,7 @@ protected:
 
         while (numSent < _testMessages.size())
         {
-            controller->SendMessage(_testMessages.at(numSent).expectedMsg, _testMessages.at(numSent).expectedMsg.userContext); // Don't move the msg to test the altered transmitID
+            controller->SendMessage(_testMessages.at(numSent).expectedMsg, (void*)(numSent+1)); // Don't move the msg to test the altered transmitID
             numSent++;
         }
         std::cout << "All can messages sent" << std::endl;
