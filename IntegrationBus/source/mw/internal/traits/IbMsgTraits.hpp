@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "IbMsgVersion.hpp"
+
 namespace ib {
 namespace mw {
 
@@ -15,6 +17,7 @@ template <class MsgT> struct IbMsgTraits
     : IbMsgTraitTypeName<MsgT>
     , IbMsgTraitHistSize<MsgT>
     , IbMsgTraitEnforceSelfDelivery<MsgT>
+    , IbMsgTraitVersion<MsgT>
 {
 };
 
