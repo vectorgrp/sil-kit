@@ -33,8 +33,8 @@ enum class NetworkType
     LIN,
     Ethernet,
     FlexRay,
-    GenericMessage,
-    DataMessage
+    Data,
+    RPC
 };
 inline auto to_string(NetworkType networkType) -> std::string;
 
@@ -59,8 +59,8 @@ struct Sink
 //! \brief Logger service
 struct Logging
 {
-    ib::util::Optional<bool> logFromRemotes{ false };
-    ib::util::Optional<mw::logging::Level> flushLevel{ mw::logging::Level::Off };
+    bool logFromRemotes{ false };
+    mw::logging::Level flushLevel{ mw::logging::Level::Off };
     std::vector<Sink> sinks;
 };
 
@@ -114,7 +114,7 @@ struct MdfChannel
 
 struct Replay
 {
-    ib::util::Optional<std::string> useTraceSource;
+    std::string useTraceSource;
 
     enum class Direction
     {
@@ -123,9 +123,9 @@ struct Replay
         Receive,
         Both,
     };
-    ib::util::Optional<Direction> direction{ Direction::Undefined };
+    Direction direction{ Direction::Undefined };
     std::vector<std::string> filterMessage;
-    ib::util::Optional<MdfChannel> mdfChannel;
+    MdfChannel mdfChannel;
 };
 
 bool operator==(const Sink& lhs, const Sink& rhs);
@@ -167,8 +167,8 @@ auto to_string(NetworkType networkType) -> std::string
     case NetworkType::LIN: return "LIN";
     case NetworkType::Ethernet: return "Ethernet";
     case NetworkType::FlexRay: return "FlexRay";
-    case NetworkType::GenericMessage: return "GenericMessage";
-    case NetworkType::DataMessage: return "DataMessage";
+    case NetworkType::Data: return "Data";
+    case NetworkType::RPC: return "RPC";
     default: return "Unknown";
     }
 }

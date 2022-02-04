@@ -12,6 +12,7 @@
 #include "ib/sim/fr/FrDatatypes.hpp"
 #include "ib/mw/logging/LoggingDatatypes.hpp"
 #include "ib/sim/data/DataMessageDatatypes.hpp"
+#include "ib/sim/rpc/RpcDatatypes.hpp"
 
 #include "Configuration.hpp"
 #include "Optional.hpp"
@@ -36,7 +37,7 @@ struct CanController
     std::string network;
 
     std::vector<std::string> useTraceSinks;
-    ib::util::Optional<Replay> replay;
+    Replay replay;
 };
 
 // ================================================================================
@@ -52,7 +53,7 @@ struct LinController
     std::string network;
 
     std::vector<std::string> useTraceSinks;
-    ib::util::Optional<Replay> replay;
+    Replay replay;
 };
 
 // ================================================================================
@@ -72,7 +73,7 @@ struct EthernetController
     ib::util::Optional<MacAddress> macAddress{};
 
     std::vector<std::string> useTraceSinks;
-    ib::util::Optional<Replay> replay;
+    Replay replay;
 };
 
 // ================================================================================
@@ -92,37 +93,54 @@ struct FlexRayController
     std::vector<sim::fr::TxBufferConfig> txBufferConfigs;
 
     std::vector<std::string> useTraceSinks;
-    ib::util::Optional<Replay> replay;
+    Replay replay;
 };
 
 // ================================================================================
 //  Data Publisher/Subscriber service
 // ================================================================================
 
-/*! \brief Configuration structure to setup ib::sim::Data::IDataPublisher
- * and ib::sim::Data::IDataSubscriber
- *
- * The DataPort::protocolType and DataPort::definitionUri can only be
- * configured at the Publisher, but the configured values are made available at
- * connected Subscribers as well.
- */
-struct DataPort
+//! \brief Publisher configuration for the Data communication service
+struct DataPublisher
 {
-    static constexpr NetworkType networkType = NetworkType::DataMessage;
-
-    std::string name;
-    std::string network;
-
-    //! \brief De/serialization format bound to a DataPublisher/DataSubscriber.
-    ib::util::Optional<sim::data::DataExchangeFormat> dataExchangeFormat;
+    static constexpr NetworkType networkType = NetworkType::Data;
 
     //! \brief History length of a DataPublisher.
-    ib::util::Optional<size_t> history = 0;
-
-    ib::util::Optional<std::string> pubUUID{ "" };
+    size_t history = 0;
 
     std::vector<std::string> useTraceSinks;
-    ib::util::Optional<Replay> replay;
+    Replay replay;
+};
+
+//! \brief Subscriber configuration for the Data communication service
+struct DataSubscriber
+{
+    static constexpr NetworkType networkType = NetworkType::Data;
+
+    std::vector<std::string> useTraceSinks;
+    Replay replay;
+};
+
+// ================================================================================
+//  RPC Client/Server service
+// ================================================================================
+
+//! \brief Server configuration for the RPC communication service
+struct RpcServer
+{
+    static constexpr NetworkType networkType = NetworkType::RPC;
+
+    std::vector<std::string> useTraceSinks;
+    Replay replay;
+};
+
+//! \brief Client configuration for the RPC communication service
+struct RpcClient
+{
+    static constexpr NetworkType networkType = NetworkType::RPC;
+
+    std::vector<std::string> useTraceSinks;
+    Replay replay;
 };
 
 // ================================================================================
@@ -132,8 +150,8 @@ struct DataPort
 //! \brief Health checking service
 struct HealthCheck
 {
-    ib::util::Optional<std::chrono::milliseconds> softResponseTimeout = (std::chrono::milliseconds::max)();
-    ib::util::Optional<std::chrono::milliseconds> hardResponseTimeout = (std::chrono::milliseconds::max)();
+    ib::util::Optional<std::chrono::milliseconds> softResponseTimeout;
+    ib::util::Optional<std::chrono::milliseconds> hardResponseTimeout;
 };
 
 // ================================================================================
@@ -165,12 +183,12 @@ struct Extensions
 //! \brief ParticipantConfiguration is the main configuration data object for a VIB participant.
 struct ParticipantConfiguration
 {
-    //! \brief Version of the JSON/YAML schema, when loaded from a JSON/YAML file.
-    ib::util::Optional<std::string> schemaVersion{ "1" };
+    //! \brief Version of the JSON/YAML schema.
+    std::string schemaVersion{ "1" };
     //! \brief An optional user description for documentation purposes. Currently unused.
-    ib::util::Optional<std::string> description;
-    //! \brief An optional file path, when loaded from a JSON/YAML file.
-    ib::util::Optional<std::string> configurationFilePath;
+    std::string description;
+    //! \brief An optional file path.
+    std::string configurationFilePath;
 
     //! \brief The participant name. Mandatory.
     ib::util::Optional<std::string> participantName;
@@ -180,20 +198,26 @@ struct ParticipantConfiguration
     std::vector<EthernetController> ethernetControllers;
     std::vector<FlexRayController> flexRayControllers;
 
-    std::vector<DataPort> dataPublishers;
-    std::vector<DataPort> dataSubscribers;
+    std::vector<DataPublisher> dataPublishers;
+    std::vector<DataSubscriber> dataSubscribers;
 
-    ib::util::Optional<Logging> logging;
-    ib::util::Optional<HealthCheck> healthCheck;
-    ib::util::Optional<Tracing> tracing;
-    ib::util::Optional<Extensions> extensions;
+    std::vector<RpcServer> rpcServers;
+    std::vector<RpcClient> rpcClients;
+
+    Logging logging;
+    HealthCheck healthCheck;
+    Tracing tracing;
+    Extensions extensions;
 };
 
 bool operator==(const CanController& lhs, const CanController& rhs);
 bool operator==(const LinController& lhs, const LinController& rhs);
 bool operator==(const EthernetController& lhs, const EthernetController& rhs);
 bool operator==(const FlexRayController& lhs, const FlexRayController& rhs);
-bool operator==(const DataPort& lhs, const DataPort& rhs);
+bool operator==(const DataPublisher& lhs, const DataPublisher& rhs);
+bool operator==(const DataSubscriber& lhs, const DataSubscriber& rhs);
+bool operator==(const RpcServer& lhs, const RpcServer& rhs);
+bool operator==(const RpcClient& lhs, const RpcClient& rhs);
 bool operator==(const HealthCheck& lhs, const HealthCheck& rhs);
 bool operator==(const Tracing& lhs, const Tracing& rhs);
 bool operator==(const Extensions& lhs, const Extensions& rhs);

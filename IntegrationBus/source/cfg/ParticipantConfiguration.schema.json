@@ -687,6 +687,32 @@
       }
     },
 
+    "RpcClients": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "Name": { "$ref": "#/definitions/Name" },
+          "Network": { "$ref": "#/definitions/Network" },
+          "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
+          "Replay": { "$ref": "#/definitions/Replay" }
+        }
+      }
+    },
+
+    "RpcServers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "Name": { "$ref": "#/definitions/Name" },
+          "Network": { "$ref": "#/definitions/Network" },
+          "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
+          "Replay": { "$ref": "#/definitions/Replay" }
+        }
+      }
+    },
+
     "Logging": {
       "$ref": "#/definitions/Logging"
     },

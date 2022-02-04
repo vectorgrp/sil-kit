@@ -556,8 +556,6 @@ bool operator==(const DataPort& lhs, const DataPort& rhs)
     return lhs.name == rhs.name
         && lhs.endpointId == rhs.endpointId
         && lhs.linkType == rhs.linkType
-        && lhs.dataExchangeFormat == rhs.dataExchangeFormat
-        && lhs.history == rhs.history
         && lhs.useTraceSinks == rhs.useTraceSinks
         && lhs.replay == rhs.replay;
 }
@@ -567,7 +565,6 @@ bool operator==(const RpcPort& lhs, const RpcPort& rhs)
     return lhs.name == rhs.name
         && lhs.endpointId == rhs.endpointId
         && lhs.linkType == rhs.linkType
-        && lhs.exchangeFormat == rhs.exchangeFormat
         && lhs.useTraceSinks == rhs.useTraceSinks
         && lhs.replay == rhs.replay;
 }

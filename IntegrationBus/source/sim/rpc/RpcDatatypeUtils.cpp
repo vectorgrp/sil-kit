@@ -6,25 +6,6 @@ namespace ib {
 namespace sim {
 namespace rpc {
 
-bool inline operator==(const CallUUID& lhs, const CallUUID& rhs)
-{
-    return lhs.ab == rhs.ab && lhs.cd == rhs.cd;
-}
-bool inline operator!=(const CallUUID& lhs, const CallUUID& rhs)
-{
-    return lhs.ab != rhs.ab || lhs.cd != rhs.cd;
-}
-
-bool operator==(const FunctionCall& lhs, const FunctionCall& rhs)
-{
-    return lhs.callUUID == rhs.callUUID && lhs.data == rhs.data;
-}
-
-bool operator==(const FunctionCallResponse& lhs, const FunctionCallResponse& rhs)
-{
-    return lhs.callUUID == rhs.callUUID && lhs.data == rhs.data;
-}
-
 bool Match(const RpcExchangeFormat& clientRxf, const RpcExchangeFormat& serverRxf)
 {
     return clientRxf.mediaType == "" || clientRxf.mediaType == serverRxf.mediaType;

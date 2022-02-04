@@ -81,6 +81,24 @@ struct FunctionCallResponse
     std::vector<uint8_t> data;
 };
 
+// ================================================================================
+//  Inline Implementations
+// ================================================================================
+inline bool operator==(const CallUUID& lhs, const CallUUID& rhs)
+{
+    return lhs.ab == rhs.ab && lhs.cd == rhs.cd;
+}
+
+inline bool operator==(const FunctionCall& lhs, const FunctionCall& rhs)
+{
+    return lhs.callUUID == rhs.callUUID && lhs.data == rhs.data;
+}
+
+inline bool operator==(const FunctionCallResponse& lhs, const FunctionCallResponse& rhs)
+{
+    return lhs.callUUID == rhs.callUUID && lhs.data == rhs.data;
+}
+
 } // namespace rpc
 } // namespace sim
 } // namespace ib

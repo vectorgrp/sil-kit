@@ -56,13 +56,28 @@ bool operator==(const FlexRayController& lhs, const FlexRayController& rhs)
         && lhs.replay == rhs.replay;
 }
 
-bool operator==(const DataPort& lhs, const DataPort& rhs)
+bool operator==(const DataPublisher& lhs, const DataPublisher& rhs)
 {
-    return lhs.name == rhs.name
-        && lhs.network == rhs.network
-        && lhs.dataExchangeFormat == rhs.dataExchangeFormat
-        && lhs.history == rhs.history
+    return lhs.history == rhs.history
         && lhs.useTraceSinks == rhs.useTraceSinks
+        && lhs.replay == rhs.replay;
+}
+
+bool operator==(const DataSubscriber& lhs, const DataSubscriber& rhs)
+{
+    return lhs.useTraceSinks == rhs.useTraceSinks
+        && lhs.replay == rhs.replay;
+}
+
+bool operator==(const RpcServer& lhs, const RpcServer& rhs)
+{
+    return lhs.useTraceSinks == rhs.useTraceSinks
+        && lhs.replay == rhs.replay;
+}
+
+bool operator==(const RpcClient& lhs, const RpcClient& rhs)
+{
+    return lhs.useTraceSinks == rhs.useTraceSinks
         && lhs.replay == rhs.replay;
 }
 
@@ -92,6 +107,8 @@ bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfigurat
         && lhs.flexRayControllers == rhs.flexRayControllers
         && lhs.dataPublishers == rhs.dataPublishers
         && lhs.dataSubscribers == rhs.dataSubscribers
+        && lhs.rpcClients == rhs.rpcClients
+        && lhs.rpcServers == rhs.rpcServers
         && lhs.logging == rhs.logging
         && lhs.healthCheck == rhs.healthCheck
         && lhs.tracing == rhs.tracing
@@ -162,7 +179,10 @@ constexpr datatypes::NetworkType datatypes::CanController::networkType;
 constexpr datatypes::NetworkType datatypes::LinController::networkType;
 constexpr datatypes::NetworkType datatypes::EthernetController::networkType;
 constexpr datatypes::NetworkType datatypes::FlexRayController::networkType;
-constexpr datatypes::NetworkType datatypes::DataPort::networkType;
+constexpr datatypes::NetworkType datatypes::DataPublisher::networkType;
+constexpr datatypes::NetworkType datatypes::DataSubscriber::networkType;
+constexpr datatypes::NetworkType datatypes::RpcServer::networkType;
+constexpr datatypes::NetworkType datatypes::RpcClient::networkType;
 #endif
 
 } // inline namespace v1
