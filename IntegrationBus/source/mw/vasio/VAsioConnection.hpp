@@ -267,6 +267,7 @@ private:
             subscriptionInfo.receiverIdx = static_cast<decltype(subscriptionInfo.receiverIdx)>(_vasioReceivers.size());
             subscriptionInfo.networkName = networkName;
             subscriptionInfo.msgTypeName = msgTypeName;
+            subscriptionInfo.version = IbMsgTraits<IbMessageT>::Version();
 
             std::unique_ptr<IVAsioReceiver> rawReceiver = std::make_unique<VAsioReceiver<IbMessageT>>(subscriptionInfo, link, _logger);
             auto* serviceEndpointPtr = dynamic_cast<IIbServiceEndpoint*>(rawReceiver.get());

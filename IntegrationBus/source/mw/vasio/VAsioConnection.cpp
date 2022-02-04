@@ -812,10 +812,35 @@ void VAsioConnection::OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer)
 
 void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer)
 {
+    auto getVersionByTypeName = [](const auto& typeName) {
+        VersionT subscriptionVersion{0};
+        IbMessageTypes supportedMessageTypes{};
+        tt::for_each(supportedMessageTypes, [&subscriptionVersion, &typeName](auto&& myType) {
+            using MsgT = std::decay_t<decltype(myType)>;
+            if (typeName == IbMsgTraits<MsgT>::TypeName())
+            {
+                subscriptionVersion =  IbMsgTraits<MsgT>::Version();
+            }
+        });
+        return subscriptionVersion;
+    };
+
     VAsioMsgSubscriber subscriber;
     buffer >> subscriber;
     bool wasAdded = TryAddRemoteSubscriber(from, subscriber);
 
+    // check our Message version against the remote participant's version
+    auto myMessageVersion = getVersionByTypeName(subscriber.msgTypeName);
+    if (myMessageVersion == 0)
+    {
+        _logger->Warn("Received SubscriptionAnnouncement for message type {} for an unknown version",
+                      subscriber.msgTypeName);
+    }
+    else
+    {
+        // Tell our peer what version of the given message type we have
+        subscriber.version = myMessageVersion;
+    }
     // send acknowledge
     SubscriptionAcknowledge ack;
     ack.subscriber = std::move(subscriber);

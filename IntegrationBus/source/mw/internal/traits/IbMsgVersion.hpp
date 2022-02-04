@@ -7,7 +7,7 @@ namespace mw {
 
 // the ib messages type traits
 using VersionT = uint32_t;
-template <class MsgT> struct IbMsgTraitVersion { static constexpr VersionT *Version(); };
+template <class MsgT> struct IbMsgTraitVersion { static constexpr VersionT Version(); };
 
 //helper to reduce boilerplate
 #define DefineIbMsgTrait_Version(TYPE_NAME, VERSION) \

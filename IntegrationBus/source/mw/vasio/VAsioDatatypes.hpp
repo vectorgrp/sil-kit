@@ -22,6 +22,7 @@ struct VAsioMsgSubscriber
     EndpointId receiverIdx;
     std::string networkName;
     std::string msgTypeName;
+    uint32_t version{0};
 };
 
 struct SubscriptionAcknowledge
