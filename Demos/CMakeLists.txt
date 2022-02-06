@@ -116,6 +116,7 @@ add_subdirectory(ConfigBuilder)
 add_subdirectory(Benchmark)
 add_subdirectory(SimulationControl)
 add_subdirectory(SimulationControlNonBlocking)
+add_subdirectory(DynamicConfigDemo)
 
 message(STATUS "Demos available: ${demo_list}")
 #######################################################################################################################

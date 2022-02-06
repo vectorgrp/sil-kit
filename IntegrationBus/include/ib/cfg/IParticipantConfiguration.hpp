@@ -50,7 +50,8 @@ public:
 * \throw ib::configuration_error The input string violates the
 * JSON format, schema or an integrity rule.
 */
-IntegrationBusAPI auto ReadParticipantConfigurationFromJsonString(const std::string& jsonString) -> std::shared_ptr<IParticipantConfiguration>;
+IntegrationBusAPI auto ReadParticipantConfigurationFromJsonString(const std::string& jsonString)
+    -> std::unique_ptr<IParticipantConfiguration>;
 
 /*! \brief Parse configuration from a JSON file.
 *
@@ -64,7 +65,8 @@ IntegrationBusAPI auto ReadParticipantConfigurationFromJsonString(const std::str
 * the input string violates the JSON format, schema or an
 * integrity rule.
 */
-IntegrationBusAPI auto ReadParticipantConfigurationFromJsonFile(const std::string& jsonFilename) -> std::shared_ptr<IParticipantConfiguration>;
+IntegrationBusAPI auto ReadParticipantConfigurationFromJsonFile(const std::string& jsonFilename)
+    -> std::unique_ptr<IParticipantConfiguration>;
 
 /*! \brief Parse configuration from a YAML file.
 *
@@ -78,7 +80,8 @@ IntegrationBusAPI auto ReadParticipantConfigurationFromJsonFile(const std::strin
 * the input string violates the YAML format, schema or an
 * integrity rule.
 */
-IntegrationBusAPI auto ReadParticipantConfigurationFromYamlFile(const std::string& yamlFilename) -> std::shared_ptr<IParticipantConfiguration>;
+IntegrationBusAPI auto ReadParticipantConfigurationFromYamlFile(const std::string& yamlFilename)
+    -> std::unique_ptr<IParticipantConfiguration>;
 
 
 /*! \brief Parse configuration from a YAML string.
@@ -93,7 +96,8 @@ IntegrationBusAPI auto ReadParticipantConfigurationFromYamlFile(const std::strin
 * YAML format, schema or an integrity rule.
 */
 
-IntegrationBusAPI auto ReadParticipantConfigurationFromYamlString(const std::string& yamlString) -> std::shared_ptr<IParticipantConfiguration>;
+IntegrationBusAPI auto ReadParticipantConfigurationFromYamlString(const std::string& yamlString)
+    -> std::shared_ptr<IParticipantConfiguration>;
 
 } // namespace cfg
 } // namespace ib

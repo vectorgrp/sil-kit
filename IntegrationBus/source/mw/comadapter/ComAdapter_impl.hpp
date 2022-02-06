@@ -122,7 +122,7 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& par
 }
 
 template <class IbConnectionT>
-ComAdapter<IbConnectionT>::ComAdapter(std::unique_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+ComAdapter<IbConnectionT>::ComAdapter(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
                                       const std::string& participantName, cfg::Config config)
     : _config{config}
     , _participant{GetParticipantByName(_config, participantName)} // throws if participantName is not found in _config
@@ -130,9 +130,7 @@ ComAdapter<IbConnectionT>::ComAdapter(std::unique_ptr<ib::cfg::IParticipantConfi
     , _participantId{hash(_participant.name)}
     , _ibConnection{_config, participantName, _participantId}
 {
-    auto conf = *(static_cast<ib::cfg::ParticipantConfiguration*>(participantConfig.get()));
-    _participantConfig = std::make_unique<ib::cfg::ParticipantConfiguration>(conf);
-    //_participantConfig = std::move(std::make_unique<std::cfg::ParticipantConfiguration>(static_pointer_cast<std::cfg::ParticipantConfiguration>()));
+    _participantConfig = std::dynamic_pointer_cast<ib::cfg::ParticipantConfiguration>(participantConfig);
 
     auto&& participantConfigOldConfig = get_by_name(_config.simulationSetup.participants, _participantName);
 

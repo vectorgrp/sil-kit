@@ -2,6 +2,7 @@
 
 #include "ib/cfg/Config.hpp"
 #include "ib/cfg/ConfigBuilder.hpp"
+#include "ib/cfg/IParticipantConfiguration.hpp"
 
 /*! \brief Dummy compilation unit to pull in exports from other ib libs
  *
@@ -19,4 +20,9 @@ void __ib_force_include_config_builder()
 void __ib_force_include_config_parser()
 {
     auto config = ib::cfg::Config::FromJsonFile("");
+}
+
+void __ib_force_include_participant_configuration()
+{
+    auto foo = ib::cfg::ReadParticipantConfigurationFromYamlString("");
 }

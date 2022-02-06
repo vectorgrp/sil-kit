@@ -57,7 +57,7 @@ auto CreateComAdapter(ib::cfg::Config config, const std::string& participantName
     return comAdapter;
 }
 
-auto CreateSimulationParticipant(std::unique_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+auto CreateSimulationParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
                                  const std::string& participantName, const uint32_t domainId, cfg::Config config)
     -> std::unique_ptr<mw::IComAdapter>
 {

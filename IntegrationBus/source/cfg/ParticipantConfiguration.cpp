@@ -136,29 +136,7 @@ std::istream& from_istream(std::istream& in, std::array<uint8_t, 6>& macAddress)
 //  Public API
 // ================================================================================
 
-auto ReadParticipantConfigurationFromYamlString(const std::string& yamlString) -> std::shared_ptr<IParticipantConfiguration>
-{
-    yamlString;
-    throw configuration_error{ "Not implemented" };
-}
 
-auto ReadParticipantConfigurationFromFileString(const std::string& yamlFilename) -> std::shared_ptr<IParticipantConfiguration>
-{
-    yamlFilename;
-    throw configuration_error{ "Not implemented" };
-}
-
-auto ReadParticipantConfigurationFromJsonString(const std::string& jsonString) -> std::shared_ptr<IParticipantConfiguration>
-{
-    jsonString;
-    throw configuration_error{ "Not implemented" };
-}
-
-auto ReadParticipantConfigurationFromJsonFile(const std::string& jsonFilename) -> std::shared_ptr<IParticipantConfiguration>
-{
-    jsonFilename;
-    throw configuration_error{ "Not implemented" };
-}
 
 /*auto ParticipantConfiguration::ToYamlString() -> std::string
 {
@@ -190,4 +168,37 @@ constexpr datatypes::NetworkType datatypes::DataPort::networkType;
 } // inline namespace v1
 
 } // namespace cfg
+auto ib::cfg::ReadParticipantConfigurationFromYamlString(const std::string& yamlString)
+    -> std::shared_ptr<IParticipantConfiguration>
+{
+    yamlString;
+    // Dummy implementation
+    std::cout << "Warning: This implementation currently returns a non-functional dummy." << std::endl;
+    ib::cfg::v1::datatypes::ParticipantConfiguration configDt;
+    ib::cfg::ParticipantConfiguration* config = new ib::cfg::ParticipantConfiguration(std::move(configDt));
+    auto configPtr = std::shared_ptr<ib::cfg::ParticipantConfiguration>(config);
+    return std::move(configPtr);
+}
+
+auto ReadParticipantConfigurationFromFileString(const std::string& yamlFilename)
+    -> std::unique_ptr<ib::cfg::IParticipantConfiguration>
+{
+    yamlFilename;
+    throw configuration_error{"Not implemented"};
+}
+
+auto ReadParticipantConfigurationFromJsonString(const std::string& jsonString)
+    -> std::unique_ptr<ib::cfg::IParticipantConfiguration>
+{
+    jsonString;
+    throw configuration_error{"Not implemented"};
+}
+
+auto ReadParticipantConfigurationFromJsonFile(const std::string& jsonFilename)
+    -> std::unique_ptr<ib::cfg::IParticipantConfiguration>
+{
+    jsonFilename;
+    throw configuration_error{"Not implemented"};
+}
+
 } // namespace ib

@@ -37,7 +37,7 @@ auto CreateComAdapterImpl(ib::cfg::Config config, const std::string& participant
     }
 }
 
-auto CreateVAsioSimulationParticipantImpl(std::unique_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+auto CreateVAsioSimulationParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
                                           const std::string& participantName, cfg::Config config)
     -> std::unique_ptr<IComAdapterInternal>
 {
@@ -50,7 +50,7 @@ auto CreateVAsioSimulationParticipantImpl(std::unique_ptr<ib::cfg::IParticipantC
 #endif
 }
 
-auto CreateSimulationParticipantImpl(std::unique_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+auto CreateSimulationParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
                                      const std::string& participantName, cfg::Config config)
     -> std::unique_ptr<IComAdapterInternal>
 {
