@@ -17,15 +17,6 @@ void LogMsgReceiver::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const 
     _logger->LogReceivedMsg(msg);
 }
 
-void LogMsgReceiver::SetEndpointAddress(const ib::mw::EndpointAddress &address)
-{
-  _serviceDescriptor.legacyEpa = address;
-}
-auto LogMsgReceiver::EndpointAddress(void) const -> const ib::mw::EndpointAddress&
-{
-    return _serviceDescriptor.legacyEpa;
-}
-
 } // namespace logging
 } // namespace mw
 } // namespace ib

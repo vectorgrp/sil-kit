@@ -22,15 +22,6 @@ ServiceDiscovery::~ServiceDiscovery() noexcept
     _shuttingDown = true;
 }
 
-void ServiceDiscovery::SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress)
-{
-    _serviceDescriptor.legacyEpa = endpointAddress;
-}
-auto ServiceDiscovery::EndpointAddress() const -> const ib::mw::EndpointAddress&
-{
-    return _serviceDescriptor.legacyEpa;
-}
-
 void ServiceDiscovery::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
@@ -71,7 +62,7 @@ void ServiceDiscovery::ReceivedServiceRemoval(const ServiceDescriptor& serviceDe
 {
     {
         std::unique_lock<decltype(_serviceMx)> lock(_serviceMx);
-        auto&& announcementMap = _announcedServices[serviceDescriptor.participantName];
+        auto&& announcementMap = _announcedServices[serviceDescriptor.GetParticipantName()];
         auto numErased = announcementMap.erase(to_string(serviceDescriptor));
 
         if (numErased == 0)
@@ -90,13 +81,13 @@ void ServiceDiscovery::ReceivedServiceAddition(const ServiceDescriptor& serviceD
         std::unique_lock<decltype(_serviceMx)> lock(_serviceMx);
         // a remote participant might be unknown, however, it will send an event for its own ServiceDiscovery service
         // when first joining the simulation
-        if(_announcedServices.count(serviceDescriptor.participantName) == 0)
+        if(_announcedServices.count(serviceDescriptor.GetParticipantName()) == 0)
         {
             // A new remote participant, announce our services
-            _comAdapter->SendIbMessage(this, serviceDescriptor.participantName, _announcement);
+            _comAdapter->SendIbMessage(this, serviceDescriptor.GetParticipantName(), _announcement);
         }
 
-        auto&& announcementMap = _announcedServices[serviceDescriptor.participantName];
+        auto&& announcementMap = _announcedServices[serviceDescriptor.GetParticipantName()];
         const auto cachedServiceKey = to_string(serviceDescriptor);
 
         if (announcementMap.count(cachedServiceKey) > 0)
@@ -173,7 +164,7 @@ void ServiceDiscovery::NotifyServiceRemoved(const ServiceDescriptor& serviceDesc
         i != _announcement.services.end();
         ++i)
     {
-        if (i->serviceId == serviceDescriptor.serviceId)
+        if (i->GetServiceId() == serviceDescriptor.GetServiceId())
         {
             _announcement.services.erase(i);
             break;

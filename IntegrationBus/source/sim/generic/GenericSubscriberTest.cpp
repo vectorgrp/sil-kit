@@ -85,7 +85,7 @@ TEST_F(GenericSubscriberTest, get_name_from_subscriber)
     EXPECT_EQ(subscriber.Config(), config);
 }
 
-TEST_F(GenericSubscriberTest, receive_with_tracing)
+TEST_F(GenericSubscriberTest, DISABLED_receive_with_tracing)
 {
     using namespace ib::extensions;
 

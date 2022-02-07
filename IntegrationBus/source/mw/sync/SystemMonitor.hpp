@@ -46,10 +46,6 @@ public:
     auto SystemState() const -> sync::SystemState override;
     auto ParticipantStatus(const std::string& participantId) const -> const sync::ParticipantStatus& override;
 
-    // IIbToSystemMonitor
-    void SetEndpointAddress(const mw::EndpointAddress& addr) override;
-    auto EndpointAddress() const -> const mw::EndpointAddress& override;
-
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantStatus& msg) override;
 
     // IIbServiceEndpoint

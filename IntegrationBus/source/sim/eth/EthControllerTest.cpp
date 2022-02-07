@@ -158,7 +158,7 @@ TEST_F(EthernetControllerTest, trigger_callback_on_receive_ack)
 }
 
 
-TEST_F(EthernetControllerTest, ethcontroller_uses_tracing)
+TEST_F(EthernetControllerTest, DISABLED_ethcontroller_uses_tracing)
 {
     using namespace ib::extensions;
 

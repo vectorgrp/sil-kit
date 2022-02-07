@@ -93,9 +93,6 @@ public:
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const CycleStart& msg) override;
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const PocStatus& msg) override;
 
-    void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
-    auto EndpointAddress() const -> const mw::EndpointAddress& override;
-
     // ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
@@ -149,7 +146,7 @@ private:
 // ==================================================================
 void FrControllerProxy::AddSink(extensions::ITraceMessageSink* sink)
 {
-    _tracer.AddSink(EndpointAddress(), *sink);
+    _tracer.AddSink(ib::mw::EndpointAddress{}, *sink);
 }
 
 void FrControllerProxy::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)

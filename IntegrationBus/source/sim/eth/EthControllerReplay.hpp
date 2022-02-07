@@ -47,9 +47,6 @@ public:
     // IIbToEthController
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg) override;
 
-    void SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress) override;
-    auto EndpointAddress() const -> const ib::mw::EndpointAddress & override;
-
     // ib::mw::sync::ITimeConsumer
     void SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider) override;
 

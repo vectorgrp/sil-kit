@@ -21,7 +21,7 @@ class GenericPortBuilder : public ParentBuilder<ParticipantBuilder>
 public:
     IntegrationBusAPI GenericPortBuilder(ParticipantBuilder *participant, std::string name, mw::EndpointId endpointId);
 
-    IntegrationBusAPI auto WithLink(const std::string& linkname) -> GenericPortBuilder&;
+    IntegrationBusAPI auto WithLink(const std::string& networkName) -> GenericPortBuilder&;
     IntegrationBusAPI auto WithLinkId(int16_t linkId) -> GenericPortBuilder&;
     IntegrationBusAPI auto WithEndpointId(mw::EndpointId id) -> GenericPortBuilder&;
 

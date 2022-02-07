@@ -352,7 +352,7 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
     from->SetUri(announcement.peerUri);
     auto& service = dynamic_cast<IIbServiceEndpoint&>(*from);
     auto serviceDescriptor = service.GetServiceDescriptor();
-    serviceDescriptor.participantName = announcement.peerUri.participantName;
+    serviceDescriptor.SetParticipantName(announcement.peerUri.participantName);
     service.SetServiceDescriptor(serviceDescriptor);
     for (auto&& receiver : _participantAnnouncementReceivers)
     {
@@ -505,8 +505,7 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
 
         // The service ID is incomplete at this stage.
         ServiceDescriptor peerId;
-        peerId.participantName = peerUri.participantName;
-        peerId.legacyEpa.participant = peerUri.participantId;
+        peerId.SetParticipantName(peerUri.participantName);
         peer->SetServiceDescriptor(peerId);
 
         const auto result = _hashToParticipantName.insert({ hash(peerUri.participantName), peerUri.participantName });
@@ -688,8 +687,8 @@ void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
     // link and participant names.
     auto& peerService = dynamic_cast<IIbServiceEndpoint&>(*peer);
     auto peerId = peerService.GetServiceDescriptor();
-    peerId.participantName = peer->GetUri().participantName;
-    peerId.linkName = link->Name();
+    peerId.SetParticipantName(peer->GetUri().participantName);
+    peerId.SetNetworkName(link->Name());
     peerService.SetServiceDescriptor(peerId);
     link->DistributeRemoteIbMessage(&peerService, msg);
 
@@ -749,7 +748,7 @@ void VAsioConnection::ReceiveSubscriptionAcknowledge(IVAsioPeer* from, MessageBu
     if (ack.status != SubscriptionAcknowledge::Status::Success)
     {
         _logger->Error("Failed to subscribe [{}] {} from {}"
-            , ack.subscriber.linkName
+            , ack.subscriber.networkName
             , ack.subscriber.msgTypeName
             , from->GetInfo().participantName);
     }
@@ -779,10 +778,10 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
         if (subscriber.msgTypeName != LinkType::MsgTypeName())
             return;
 
-        auto& ibLink = linkMap[subscriber.linkName];
+        auto& ibLink = linkMap[subscriber.networkName];
         if (!ibLink)
         {
-            ibLink = std::make_shared<LinkType>(subscriber.linkName, _logger);
+            ibLink = std::make_shared<LinkType>(subscriber.networkName, _logger);
         }
 
         ibLink->AddRemoteReceiver(from, subscriber.receiverIdx);
@@ -793,9 +792,9 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
 
 
     if (wasAdded)
-        _logger->Debug("Registered subscription for [{}] {} from {}", subscriber.linkName, subscriber.msgTypeName, from->GetInfo().participantName);
+        _logger->Debug("Registered subscription for [{}] {} from {}", subscriber.networkName, subscriber.msgTypeName, from->GetInfo().participantName);
     else
-        _logger->Warn("Cannot register subscription for [{}] {} from {}", subscriber.linkName, subscriber.msgTypeName, from->GetInfo().participantName);
+        _logger->Warn("Cannot register subscription for [{}] {} from {}", subscriber.networkName, subscriber.msgTypeName, from->GetInfo().participantName);
 
     return wasAdded;
 }
@@ -818,8 +817,7 @@ void VAsioConnection::ReceiveRawIbMessage(IVAsioPeer* from, MessageBuffer&& buff
 
     auto* fromService = dynamic_cast<IIbServiceEndpoint*>(from);
     ServiceDescriptor tmpService(fromService->GetServiceDescriptor());
-    tmpService.legacyEpa = endpoint;
-    tmpService.serviceId = endpoint.endpoint;
+    tmpService.SetServiceId(endpoint.endpoint);
 
     _vasioReceivers[receiverIdx]->ReceiveRawMsg(from, tmpService, std::move(buffer));
 }

@@ -45,9 +45,6 @@ public:
 
     auto Config() const -> const cfg::GenericPort& override;
 
-    void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
-    auto EndpointAddress() const -> const mw::EndpointAddress& override;
-
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
 
@@ -73,7 +70,7 @@ private:
 
 void GenericPublisher::AddSink(extensions::ITraceMessageSink* sink)
 {
-    _tracer.AddSink(EndpointAddress(), *sink);
+    _tracer.AddSink(ib::mw::EndpointAddress{}, *sink);
 }
 
 void GenericPublisher::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)

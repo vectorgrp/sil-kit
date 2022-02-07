@@ -23,7 +23,7 @@ class ControllerBuilder : public ParentBuilder<ParticipantBuilder>
 public:
     ControllerBuilder(ParticipantBuilder *participant, std::string name, mw::EndpointId endpointId);
 
-    auto WithLink(const std::string& linkname) -> ControllerBuilder&;
+    auto WithLink(const std::string& networkName) -> ControllerBuilder&;
     auto WithLinkId(int16_t linkId) -> ControllerBuilder&;
     auto WithEndpointId(mw::EndpointId id) -> ControllerBuilder&;
     IntegrationBusAPI auto WithMacAddress(std::string macAddress) -> ControllerBuilder&;
@@ -61,10 +61,10 @@ auto ControllerBuilder<ControllerCfg>::operator->() -> ParticipantBuilder*
 }
 
 template<class ControllerCfg>
-auto ControllerBuilder<ControllerCfg>::WithLink(const std::string& linkname) -> ControllerBuilder&
+auto ControllerBuilder<ControllerCfg>::WithLink(const std::string& networkName) -> ControllerBuilder&
 {
     auto&& qualifiedName = detail::ParticipantBuilder_MakeQualifiedName(*this, _controller.name);
-    auto&& link = detail::ParticipantBuilder_AddOrGetLink(*this, _controller.linkType, linkname);
+    auto&& link = detail::ParticipantBuilder_AddOrGetLink(*this, _controller.linkType, networkName);
     link.AddEndpoint(qualifiedName);
 
     return WithLinkId(link.LinkId());

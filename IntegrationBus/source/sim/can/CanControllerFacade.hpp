@@ -74,9 +74,6 @@ public:
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanControllerStatus& msg) override;
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanTransmitAcknowledge& msg) override;
 
-    void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
-    auto EndpointAddress() const -> const mw::EndpointAddress& override;
-
     //ITimeConsumer
     void SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider) override;
 
@@ -93,13 +90,15 @@ private:
     //
     auto AllowForwardToDefault(const IIbServiceEndpoint* from) const -> bool;
     auto AllowForwardToProxy(const IIbServiceEndpoint* from) const -> bool;
-    auto IsLinkSimulated() const -> bool;
+    auto IsNetworkSimulated() const -> bool;
+    auto IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
 
 private:
     mw::IComAdapterInternal* _comAdapter{nullptr};
     mw::ServiceDescriptor _serviceDescriptor;
 
-    mw::ServiceDescriptor _remoteBusSimulator;
+    bool _simulatedLinkDetected = false;
+    mw::ServiceDescriptor _simulatedLink;
 
     ICanController* _currentController;
     cfg::CanController _config;

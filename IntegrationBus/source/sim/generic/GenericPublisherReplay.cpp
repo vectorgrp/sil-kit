@@ -41,17 +41,6 @@ auto GenericPublisherReplay::Config() const -> const cfg::GenericPort&
     return _publisher.Config();
 }
 
-
-void GenericPublisherReplay::SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress)
-{
-    _publisher.SetEndpointAddress(endpointAddress);
-}
-
-auto GenericPublisherReplay::EndpointAddress() const -> const ib::mw::EndpointAddress&
-{
-    return _publisher.EndpointAddress();
-}
-
 // ib::mw::sync::ITimeConsumer
 void GenericPublisherReplay::SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)
 {

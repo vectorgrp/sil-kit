@@ -84,7 +84,7 @@ LinController::LinController(mw::IComAdapterInternal* comAdapter, mw::sync::ITim
 
 void LinController::Init(ControllerConfig config)
 {
-    auto& node = GetLinNode(_serviceDescriptor.legacyEpa);
+    auto& node = GetLinNode(_serviceDescriptor.to_endpointAddress());
     node.controllerMode = config.controllerMode;
     node.controllerStatus = ControllerStatus::Operational;
     node.UpdateResponses(config.frameResponses, _logger);
@@ -163,7 +163,7 @@ void LinController::SendFrameHeader(LinIdT linId, std::chrono::nanoseconds times
     SendIbMessage(transmission);
 
     // Dispatch the LIN transmission to our own callbacks
-    FrameResponseMode masterResponseMode = GetLinNode(_serviceDescriptor.legacyEpa).responses[linId].responseMode;
+    FrameResponseMode masterResponseMode = GetLinNode(_serviceDescriptor.to_endpointAddress()).responses[linId].responseMode;
     FrameStatus masterFrameStatus = transmission.status;
     if (masterResponseMode == FrameResponseMode::TxUnconditional)
     {
@@ -188,7 +188,7 @@ void LinController::SetFrameResponse(Frame frame, FrameResponseMode mode)
 
 void LinController::SetFrameResponses(std::vector<FrameResponse> responses)
 {
-    auto& node = GetLinNode(_serviceDescriptor.legacyEpa);
+    auto& node = GetLinNode(_serviceDescriptor.to_endpointAddress());
     node.UpdateResponses(responses, _logger);
 
     FrameResponseUpdate frameResponseUpdate;
@@ -262,8 +262,8 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Trans
         _logger->Warn(
             "LinController received transmission with payload length {} from {{{}, {}}}",
             static_cast<unsigned int>(frame.dataLength),
-            from->GetServiceDescriptor().legacyEpa.participant,
-            from->GetServiceDescriptor().legacyEpa.endpoint);
+            from->GetServiceDescriptor().GetParticipantName(),
+            from->GetServiceDescriptor().GetServiceName());
         return;
     }
 
@@ -272,8 +272,8 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Trans
         _logger->Warn(
             "LinController received transmission with invalid LIN ID {} from {{{}, {}}}",
             frame.id,
-            from->GetServiceDescriptor().legacyEpa.participant,
-            from->GetServiceDescriptor().legacyEpa.endpoint);
+            from->GetServiceDescriptor().GetParticipantName(),
+            from->GetServiceDescriptor().GetServiceName());
         return;
     }
 
@@ -294,13 +294,13 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Trans
 
     case ControllerMode::Master:
         _logger->Warn("LinController in MasterMode received a transmission from {{{}, {}}}. This indicates an erroneous setup as there should be only one LIN master!",
-            from->GetServiceDescriptor().legacyEpa.participant,
-            from->GetServiceDescriptor().legacyEpa.endpoint);
+            from->GetServiceDescriptor().GetParticipantName(),
+            from->GetServiceDescriptor().GetServiceName());
         //[[fallthrough]]
 
     case ControllerMode::Slave:
 
-        auto& thisLinNode = GetLinNode(_serviceDescriptor.legacyEpa);
+        auto& thisLinNode = GetLinNode(_serviceDescriptor.to_endpointAddress());
         switch (thisLinNode.responses[frame.id].responseMode)
         {
         case FrameResponseMode::Unused:
@@ -342,7 +342,7 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Wakeu
 
 void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerConfig& msg)
 {
-    auto& linNode = GetLinNode(from->GetServiceDescriptor().legacyEpa);
+    auto& linNode = GetLinNode(from->GetServiceDescriptor().to_endpointAddress());
 
     linNode.controllerMode = msg.controllerMode;
     linNode.controllerStatus = ControllerStatus::Operational;
@@ -350,35 +350,25 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Contr
 
     for (auto& response : msg.frameResponses)
     {
-        CallHandlers(_frameResponseUpdateHandler, this, to_string(from->GetServiceDescriptor()), response);
+        CallHandlers(_frameResponseUpdateHandler, this, from->GetServiceDescriptor().to_string(), response);
     }
 }
 
 void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerStatusUpdate& msg)
 {
-    auto& linNode = GetLinNode(from->GetServiceDescriptor().legacyEpa);
+    auto& linNode = GetLinNode(from->GetServiceDescriptor().to_endpointAddress());
     linNode.controllerStatus = msg.status;
 }
 
 void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrameResponseUpdate& msg)
 {
-    auto& linNode = GetLinNode(from->GetServiceDescriptor().legacyEpa);
+    auto& linNode = GetLinNode(from->GetServiceDescriptor().to_endpointAddress());
     linNode.UpdateResponses(msg.frameResponses, _logger);
 
     for (auto& response : msg.frameResponses)
     {
-        CallHandlers(_frameResponseUpdateHandler, this, to_string(from->GetServiceDescriptor()), response);
+        CallHandlers(_frameResponseUpdateHandler, this, from->GetServiceDescriptor().to_string(), response);
     }
-}
-
-void LinController::SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress)
-{
-    _serviceDescriptor.legacyEpa = endpointAddress;
-}
-
-auto LinController::EndpointAddress() const -> const ::ib::mw::EndpointAddress&
-{
-    return _serviceDescriptor.legacyEpa;
 }
 
 void LinController::SetTimeProvider(mw::sync::ITimeProvider* timeProvider)
@@ -413,7 +403,7 @@ auto LinController::VeriyChecksum(const Frame& frame, FrameStatus status) -> Fra
     if (status != FrameStatus::LIN_RX_OK)
         return status;
 
-    auto& node = GetLinNode(_serviceDescriptor.legacyEpa);
+    auto& node = GetLinNode(_serviceDescriptor.to_endpointAddress());
     auto& expectedFrame = node.responses[frame.id].frame;
 
     if (expectedFrame.dataLength != frame.dataLength || expectedFrame.checksumModel != frame.checksumModel)

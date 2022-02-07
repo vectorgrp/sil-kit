@@ -19,6 +19,7 @@ inline auto from_string<cfg::Middleware>(const std::string& value) -> cfg::Middl
 
 namespace cfg {
 inline namespace deprecated {
+inline auto to_string(Link::Type linkType) -> std::string;
 
 inline auto to_string(SyncType syncType) -> std::string;
 inline auto operator<<(std::ostream& out, SyncType) -> std::ostream&;
@@ -63,6 +64,24 @@ auto from_string<cfg::Middleware>(const std::string& value) -> cfg::Middleware
 namespace cfg {
 inline namespace deprecated {
 
+
+auto to_string(Link::Type linkType) -> std::string
+{
+  switch (linkType)
+    {
+    case Link::Type::Undefined: return "Undefined";
+    case Link::Type::Invalid: return "Invalid";
+    case Link::Type::CAN: return "CAN";
+    case Link::Type::LIN: return "LIN";
+    case Link::Type::Ethernet: return "Ethernet";
+    case Link::Type::FlexRay: return "FlexRay";
+    case Link::Type::GenericMessage: return "GenericMessage";
+    case Link::Type::DataMessage: return "DataMessage";
+    case Link::Type::Internal: return "Internal";
+    default: return "!!!Unknown!!!";
+  }
+
+}
 auto to_string(SyncType syncType) -> std::string
 {
     switch (syncType)

@@ -115,7 +115,7 @@ void FrControllerFacade::RegisterCycleStartHandler(CycleStartHandler handler)
 // IIbToFrController
 void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessage& msg)
 {
-    if (IsLinkSimulated())
+    if (IsNetworkSimulated())
     {
         if (AllowForwardToProxy(from)) _frControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -127,7 +127,7 @@ void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessageAck& msg)
 {
-    if (IsLinkSimulated())
+    if (IsNetworkSimulated())
     {
         if (AllowForwardToProxy(from)) _frControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -139,7 +139,7 @@ void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbol& msg)
 {
-    if (IsLinkSimulated())
+    if (IsNetworkSimulated())
     {
         if (AllowForwardToProxy(from)) _frControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -151,7 +151,7 @@ void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbolAck& msg)
 {
-    if (IsLinkSimulated())
+    if (IsNetworkSimulated())
     {
         if (AllowForwardToProxy(from)) _frControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -163,7 +163,7 @@ void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const CycleStart& msg)
 {
-    if (IsLinkSimulated() && AllowForwardToProxy(from))
+    if (IsNetworkSimulated() && AllowForwardToProxy(from))
     {
         _frControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -171,33 +171,15 @@ void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const PocStatus& msg)
 {
-    if (IsLinkSimulated() && AllowForwardToProxy(from))
+    if (IsNetworkSimulated() && AllowForwardToProxy(from))
     {
         _frControllerProxy->ReceiveIbMessage(from, msg);
     }
 }
 
-void FrControllerFacade::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
-{
-    _frController->SetEndpointAddress(endpointAddress);
-    _frControllerProxy->SetEndpointAddress(endpointAddress);
-}
-
-auto FrControllerFacade::EndpointAddress() const -> const mw::EndpointAddress&
-{
-    if (IsLinkSimulated())
-    {
-        return _frControllerProxy->EndpointAddress();
-    }
-    else
-    {
-        return _frController->EndpointAddress();
-    }
-}
-
 void FrControllerFacade::SetTimeProvider(mw::sync::ITimeProvider* timeProvider)
 {
-    if (!IsLinkSimulated())
+    if (!IsNetworkSimulated())
     {
         dynamic_cast<FrController*>(_currentController)->SetTimeProvider(timeProvider);
     }
@@ -223,25 +205,23 @@ void FrControllerFacade::SetServiceDescriptor(const mw::ServiceDescriptor& servi
         (mw::service::ServiceDiscoveryEvent::Type discoveryType, const mw::ServiceDescriptor& remoteServiceDescriptor)
         {
             // check if discovered service is a network simulator (if none is known)
-            if (!IsLinkSimulated())
+            if (!IsNetworkSimulated())
             {
                 // check if received descriptor has a matching simulated link
                 if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceCreated
-                    && remoteServiceDescriptor.type == serviceDescriptor.type
-                    && remoteServiceDescriptor.linkName == serviceDescriptor.linkName
-                    && remoteServiceDescriptor.isLinkSimulated)
+                    && IsRelevantNetwork(remoteServiceDescriptor))
                 {
-                    _remoteBusSimulator = remoteServiceDescriptor;
+                    _simulatedLinkDetected = true;
+                    _simulatedLink = remoteServiceDescriptor;
                     _currentController = _frControllerProxy.get();
                 }
             }
             else
             {
                 if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved
-                    && remoteServiceDescriptor.type == serviceDescriptor.type
-                    && remoteServiceDescriptor.linkName == serviceDescriptor.linkName)
+                    && IsRelevantNetwork(remoteServiceDescriptor))
                 {
-                    _remoteBusSimulator.isLinkSimulated = false;
+                    _simulatedLinkDetected = false;
                     _currentController = _frController.get();
                 }
             }
@@ -261,13 +241,19 @@ auto FrControllerFacade::AllowForwardToDefault(const IIbServiceEndpoint* from) c
 auto FrControllerFacade::AllowForwardToProxy(const IIbServiceEndpoint* from) const -> bool
 {
     const auto& fromDescr = from->GetServiceDescriptor();
-    return _remoteBusSimulator.participantName == fromDescr.participantName &&
-           _serviceDescriptor.serviceId == fromDescr.serviceId;
+    return _simulatedLink.GetParticipantName() == fromDescr.GetParticipantName()
+           && _serviceDescriptor.GetServiceId() == fromDescr.GetServiceId();
 }
 
-auto FrControllerFacade::IsLinkSimulated() const -> bool
+auto FrControllerFacade::IsNetworkSimulated() const -> bool
 {
-    return _remoteBusSimulator.isLinkSimulated;
+    return _simulatedLinkDetected;
+}
+
+auto FrControllerFacade::IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool
+{
+    return remoteServiceDescriptor.GetServiceType() == ib::mw::ServiceType::Link
+           && remoteServiceDescriptor.GetNetworkName() == _serviceDescriptor.GetNetworkName();
 }
 
 } // namespace fr

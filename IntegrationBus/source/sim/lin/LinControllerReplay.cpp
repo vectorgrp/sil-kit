@@ -181,23 +181,13 @@ void LinControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* from, const
     _controller.ReceiveIbMessage(from, msg);
 }
 
-void LinControllerReplay::SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress)
-{
-    _controller.SetEndpointAddress(endpointAddress);
-}
-
-auto LinControllerReplay::EndpointAddress() const -> const ::ib::mw::EndpointAddress&
-{
-    return _controller.EndpointAddress();
-}
-
 // ITraceMessageSource
 void LinControllerReplay::AddSink(extensions::ITraceMessageSink* sink)
 {
     // NB: Tracing in _controller is never reached as a Master, because we send with its endpoint address in ReplayMessage
     _controller.AddSink(sink);
     // for active replaying we use our own tracer:
-    _tracer.AddSink(EndpointAddress(), *sink);
+    _tracer.AddSink(ib::mw::EndpointAddress{}, *sink);
 }
 
 // IReplayDataProvider
@@ -248,13 +238,14 @@ void LinControllerReplay::ReplayMessage(const extensions::IReplayMessage* replay
             masterFrameStatus = FrameStatus::LIN_TX_OK;
         }
         // dispatch local frame status handlers
-        if (replayMessage->EndpointAddress() == _controller.EndpointAddress())
-        {
-            for (auto& handler : _frameStatusHandler)
-            {
-                handler(this, tm.frame, masterFrameStatus, tm.timestamp);
-            }
-        }
+        // TODO fix epa check
+        //if (replayMessage->EndpointAddress() == _controller.EndpointAddress())
+        //{
+        //    for (auto& handler : _frameStatusHandler)
+        //    {
+        //        handler(this, tm.frame, masterFrameStatus, tm.timestamp);
+        //    }
+        //}
         // dispatch sleep handler
         if (tm.frame.id == GoToSleepFrame().id && tm.frame.data == GoToSleepFrame().data)
         {

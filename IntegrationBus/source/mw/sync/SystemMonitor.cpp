@@ -84,16 +84,6 @@ auto SystemMonitor::ParticipantStatus(const std::string& participantId) const ->
     return statusIter->second;
 }
 
-void SystemMonitor::SetEndpointAddress(const mw::EndpointAddress& addr)
-{
-    _serviceDescriptor.legacyEpa = addr;
-}
-
-auto SystemMonitor::EndpointAddress() const -> const mw::EndpointAddress&
-{
-    return _serviceDescriptor.legacyEpa;
-}
-
 void SystemMonitor::ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantStatus& newParticipantStatus)
 {
     auto participantId = newParticipantStatus.participantName;

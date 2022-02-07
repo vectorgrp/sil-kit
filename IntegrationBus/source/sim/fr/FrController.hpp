@@ -90,9 +90,6 @@ public:
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbol& msg) override;
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbolAck& msg) override;
 
-    void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
-    auto EndpointAddress() const -> const mw::EndpointAddress& override;
-
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* timeProvider) override;
 
@@ -150,7 +147,7 @@ private:
 // ==================================================================
 void FrController::AddSink(extensions::ITraceMessageSink* sink)
 {
-    _tracer.AddSink(EndpointAddress(), *sink);
+    _tracer.AddSink(ib::mw::EndpointAddress{}, *sink);
 }
 void FrController::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {

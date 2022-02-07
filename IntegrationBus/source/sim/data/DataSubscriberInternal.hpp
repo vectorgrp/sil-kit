@@ -45,9 +45,6 @@ public:
 
     void ReceiveMessage(const std::vector<uint8_t>& data);
 
-    void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
-    auto EndpointAddress() const -> const mw::EndpointAddress& override;
-
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
 

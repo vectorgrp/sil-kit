@@ -67,9 +67,6 @@ public:
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthTransmitAcknowledge& msg) override;
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthStatus& msg) override;
 
-    void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
-    auto EndpointAddress() const -> const mw::EndpointAddress& override;
-
     // ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
@@ -83,7 +80,8 @@ private:
     //
     auto AllowForwardToDefault(const IIbServiceEndpoint* from) const -> bool;
     auto AllowForwardToProxy(const IIbServiceEndpoint* from) const -> bool;
-    auto IsLinkSimulated() const -> bool;
+    auto IsNetworkSimulated() const -> bool;
+    auto IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
 
 private:
     // ----------------------------------------
@@ -92,7 +90,8 @@ private:
     mw::ServiceDescriptor _serviceDescriptor;
     cfg::EthernetController _config;
 
-    mw::ServiceDescriptor _remoteBusSimulator;
+    bool _simulatedLinkDetected = false;
+    mw::ServiceDescriptor _simulatedLink;
 
     IEthController* _currentController;
     std::unique_ptr<EthController> _ethController;

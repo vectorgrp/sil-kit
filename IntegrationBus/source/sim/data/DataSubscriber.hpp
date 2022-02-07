@@ -50,10 +50,7 @@ public:
     //! \brief Accepts any message.
     void ReceiveMessage(const PublisherAnnouncement& msg);
 
-    void AddInternalSubscriber(const std::string& linkName, DataExchangeFormat joinedDataExchangFormat);
-
-    void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
-    auto EndpointAddress() const -> const mw::EndpointAddress& override;
+    void AddInternalSubscriber(const std::string& networkName, DataExchangeFormat joinedDataExchangFormat);
 
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* provider) override;

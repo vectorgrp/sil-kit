@@ -33,8 +33,6 @@ public:
     auto Config() const -> const cfg::GenericPort& override;
 
     void ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const GenericMessage& msg) override;
-    void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
-    auto EndpointAddress() const -> const mw::EndpointAddress& override;
 
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* provider) override;

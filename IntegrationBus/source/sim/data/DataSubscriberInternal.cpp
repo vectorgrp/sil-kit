@@ -27,16 +27,6 @@ void DataSubscriberInternal::SetReceiveMessageHandler(CallbackExchangeFormatT ca
     _callback = std::move(callback);
 }
 
-void DataSubscriberInternal::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
-{
-    _serviceDescriptor.legacyEpa = endpointAddress;
-}
-
-auto DataSubscriberInternal::EndpointAddress() const -> const mw::EndpointAddress&
-{
-    return _serviceDescriptor.legacyEpa;
-}
-
 void DataSubscriberInternal::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const DataMessage& msg)
 {
     if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))

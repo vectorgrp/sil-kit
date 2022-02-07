@@ -35,9 +35,9 @@ struct ReplayServiceDescriptor : public mw::IIbServiceEndpoint
     auto GetServiceDescriptor() const -> const mw::ServiceDescriptor& override
     {
         static mw::ServiceDescriptor id;
-        id.participantName = "__!!Replay";
-        id.serviceName = "ReplayController";
-        id.legacyEpa = ReplayEndpointAddress();
+        id.SetParticipantName("__!!Replay");
+        id.SetServiceName("ReplayController");
+        id.SetServiceId(ReplayEndpointAddress().endpoint);
         return id;
     }
 };

@@ -121,16 +121,6 @@ void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
     }
 }
 
-void EthControllerProxy::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
-{
-    _serviceDescriptor.legacyEpa = endpointAddress;
-}
-
-auto EthControllerProxy::EndpointAddress() const -> const mw::EndpointAddress&
-{
-    return _serviceDescriptor.legacyEpa;
-}
-
 template<typename MsgT>
 void EthControllerProxy::RegisterHandler(CallbackT<MsgT>&& handler)
 {

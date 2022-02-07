@@ -14,10 +14,6 @@ class IIbEndpoint : public IIbReceiver<MsgT...>
 {
 public:
     virtual ~IIbEndpoint() = default;
-
-    //! \brief Setter and getter for the EndpointAddress associated with this controller
-    virtual void SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress) = 0;
-    virtual auto EndpointAddress() const -> const ib::mw::EndpointAddress& = 0;
 };
 
 } // namespace mw

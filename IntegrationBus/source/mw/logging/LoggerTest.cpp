@@ -60,7 +60,8 @@ TEST(LoggerTest, send_log_message_with_sender)
     MockComAdapter mockComAdapter;
 
     LogMsgSender logMsgSender(&mockComAdapter);
-    logMsgSender.SetEndpointAddress(controllerAddress);
+    
+    logMsgSender.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
     LogMsg msg;
     msg.logger_name = "Logger";
@@ -90,7 +91,7 @@ TEST(LoggerTest, send_log_message_from_logger)
     EndpointAddress controllerAddress = {3, 8};
     MockComAdapter mockComAdapter;
     LogMsgSender logMsgSender(&mockComAdapter);
-    logMsgSender.SetEndpointAddress(controllerAddress);
+    logMsgSender.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
     logger.RegisterRemoteLogging([&logMsgSender](logging::LogMsg logMsg) {
 

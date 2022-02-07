@@ -66,9 +66,6 @@ public:
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthTransmitAcknowledge& msg) override;
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthStatus& msg) override;
 
-    void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
-    auto EndpointAddress() const -> const mw::EndpointAddress& override;
-
     // ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
@@ -124,7 +121,7 @@ auto EthControllerProxy::MakeTxId() -> EthTxId
 
 void EthControllerProxy::AddSink(extensions::ITraceMessageSink* sink)
 {
-    _tracer.AddSink(EndpointAddress(), *sink);
+    _tracer.AddSink(ib::mw::EndpointAddress{}, *sink);
 }
 void EthControllerProxy::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {

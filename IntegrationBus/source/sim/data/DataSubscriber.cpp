@@ -42,21 +42,10 @@ void DataSubscriber::SetReceiveMessageHandler(CallbackExchangeFormatT callback)
     }
 }
 
-void DataSubscriber::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
-{
-    _serviceDescriptor.legacyEpa = endpointAddress;
-}
-
-auto DataSubscriber::EndpointAddress() const -> const mw::EndpointAddress&
-{
-    return _serviceDescriptor.legacyEpa;
-}
-
-
-void DataSubscriber::AddInternalSubscriber(const std::string& linkName, DataExchangeFormat joinedDataExchangFormat)
+void DataSubscriber::AddInternalSubscriber(const std::string& networkName, DataExchangeFormat joinedDataExchangFormat)
 {
     auto internalSubscriber = dynamic_cast<DataSubscriberInternal*>(_comAdapter->CreateDataSubscriberInternal(
-        _config.name, linkName, joinedDataExchangFormat, _callback));
+        _config.name, networkName, joinedDataExchangFormat, _callback));
     
     _internalSubscibers.push_back(internalSubscriber);
 }

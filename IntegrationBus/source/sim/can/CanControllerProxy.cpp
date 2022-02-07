@@ -186,16 +186,6 @@ void CanControllerProxy::CallHandlers(const MsgT& msg)
     }
 }
 
-void CanControllerProxy::SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress)
-{
-    _serviceDescriptor.legacyEpa = endpointAddress;
-}
-
-auto CanControllerProxy::EndpointAddress() const -> const ::ib::mw::EndpointAddress&
-{
-    return _serviceDescriptor.legacyEpa;
-}
-
 } // namespace can
 } // namespace sim
 } // namespace ib

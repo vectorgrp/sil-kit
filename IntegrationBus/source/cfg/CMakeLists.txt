@@ -25,6 +25,7 @@ target_link_libraries(IbConfiguration
 
 target_include_directories(IbConfiguration
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
 #add_vib_test(TestMwCfgConfigBuilder 

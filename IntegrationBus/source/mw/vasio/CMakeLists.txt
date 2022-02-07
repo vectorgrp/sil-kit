@@ -50,6 +50,7 @@ target_link_libraries(IbMwVAsio
       asio
     INTERFACE
       IbInternal
+      IbConfiguration
 )
 
 target_compile_definitions(IbMwVAsio PRIVATE ASIO_STANDALONE)

@@ -196,17 +196,6 @@ void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const P
     CallHandlers(msg);
 }
 
-void FrControllerProxy::SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress)
-{
-    _serviceDescriptor.legacyEpa = endpointAddress;
-}
-
-auto FrControllerProxy::EndpointAddress() const -> const ib::mw::EndpointAddress&
-{
-    return _serviceDescriptor.legacyEpa;
-}
-
-
 template<typename MsgT>
 void FrControllerProxy::RegisterHandler(CallbackT<MsgT> handler)
 {

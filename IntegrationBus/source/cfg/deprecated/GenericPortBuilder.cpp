@@ -23,10 +23,10 @@ auto GenericPortBuilder::operator->() -> ParticipantBuilder*
     return Parent();
 }
 
-auto GenericPortBuilder::WithLink(const std::string& linkname) -> GenericPortBuilder&
+auto GenericPortBuilder::WithLink(const std::string& networkName) -> GenericPortBuilder&
 {
     auto&& qualifiedName = Parent()->MakeQualifiedName(_port.name);
-    auto&& link = Parent()->Parent()->AddOrGetLink(_port.linkType, linkname);
+    auto&& link = Parent()->Parent()->AddOrGetLink(_port.linkType, networkName);
     link.AddEndpoint(qualifiedName);
 
     return WithLinkId(link.LinkId());

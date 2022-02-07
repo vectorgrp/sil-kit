@@ -108,7 +108,7 @@ public:
                              size_t history = 0) -> sim::data::IDataPublisher* override;
     auto CreateDataSubscriber(const std::string& canonicalName, const sim::data::DataExchangeFormat& dataExchangeFormat,
                               sim::data::CallbackExchangeFormatT callback) -> sim::data::IDataSubscriber* override;
-    auto CreateDataSubscriberInternal(const std::string& canonicalName, const std::string& linkName,
+    auto CreateDataSubscriberInternal(const std::string& canonicalName, const std::string& networkName, 
                                       const sim::data::DataExchangeFormat& dataExchangeFormat,
                                       sim::data::CallbackExchangeFormatT callback)
         -> sim::data::IDataSubscriber* override;
@@ -302,17 +302,21 @@ private:
     void SendIbMessageImpl(const IIbServiceEndpoint* from, const std::string& targetParticipantName, IbMessageT&& msg);
 
     template<class ControllerT>
-    auto GetController(const std::string& linkName, const std::string& serviceName) -> ControllerT*;
+    auto GetController(const std::string& networkName, const std::string& serviceName) -> ControllerT*;
     template<class ControllerT, typename... Arg>
-    auto CreateController(const cfg::Link& link, const std::string& serviceName, const std::map<std::string, std::string>& supplementalData, Arg&&... arg) -> ControllerT*;
+    auto CreateController(const cfg::Link& link, const std::string& serviceName, const mw::ServiceType serviceType,
+                          const mw::SupplementalData& supplementalData, Arg&&... arg) -> ControllerT*;
     //!< internal services don't have a link config
     template<class ControllerT, typename... Arg>
-    auto CreateController(const std::string& serviceName, const std::map<std::string, std::string>& supplementalData, Arg&&... arg) -> ControllerT*;
+    auto CreateController(const std::string& serviceName, const mw::ServiceType serviceType,
+                          const mw::SupplementalData& supplementalData, Arg&&... arg) -> ControllerT*;
 
     auto GetLinkById(int16_t linkId) -> cfg::Link&;
 
     template<class ControllerT, class ConfigT, typename... Arg>
-    auto CreateControllerForLink(const ConfigT& config, const std::map<std::string, std::string>& supplementalData, Arg&&... arg) -> ControllerT*;
+    auto CreateControllerForLink(const ConfigT& config, const mw::ServiceType& serviceType,
+                                 const mw::SupplementalData& supplementalData, Arg&&... arg)
+        -> ControllerT*;
 
     template<class IIbToSimulatorT>
     void RegisterSimulator(IIbToSimulatorT* busSim, cfg::Link::Type linkType);

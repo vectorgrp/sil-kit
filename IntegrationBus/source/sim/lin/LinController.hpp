@@ -81,9 +81,6 @@ public:
      void ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerStatusUpdate& msg) override;
      void ReceiveIbMessage(const IIbServiceEndpoint* from, const FrameResponseUpdate& msg) override;
 
-     void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
-     auto EndpointAddress() const -> const mw::EndpointAddress& override;
-
      //ib::mw::sync::ITimeConsumer
      void SetTimeProvider(mw::sync::ITimeProvider* timeProvider) override;
 
@@ -158,7 +155,7 @@ auto LinController::GetLinNode(mw::EndpointAddress addr) -> LinNode&
 
 void LinController::AddSink(extensions::ITraceMessageSink* sink)
 {
-    _tracer.AddSink(EndpointAddress(), *sink);
+    _tracer.AddSink(ib::mw::EndpointAddress{}, *sink);
 }
 
 void LinController::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)

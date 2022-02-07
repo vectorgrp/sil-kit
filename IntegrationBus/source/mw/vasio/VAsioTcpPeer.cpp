@@ -381,7 +381,7 @@ void VAsioTcpPeer::Subscribe(VAsioMsgSubscriber subscriber)
         << VAsioMsgKind::SubscriptionAnnouncement
         << subscriber;
 
-    _logger->Debug("Announcing subscription for [{}] {}", subscriber.linkName, subscriber.msgTypeName);
+    _logger->Debug("Announcing subscription for [{}] {}", subscriber.networkName, subscriber.msgTypeName);
 
     SendIbMsg(std::move(buffer));
 }

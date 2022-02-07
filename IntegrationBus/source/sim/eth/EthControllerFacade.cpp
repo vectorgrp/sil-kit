@@ -70,7 +70,7 @@ void EthControllerFacade::RegisterBitRateChangedHandler(BitRateChangedHandler ha
 // IIbToEthController
 void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg)
 {
-    if (IsLinkSimulated())
+    if (IsNetworkSimulated())
     {
         if (AllowForwardToProxy(from)) _ethControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -82,7 +82,7 @@ void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 
 void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthTransmitAcknowledge& msg)
 {
-    if (IsLinkSimulated() && AllowForwardToProxy(from))
+    if (IsNetworkSimulated() && AllowForwardToProxy(from))
     {
         _ethControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -90,27 +90,9 @@ void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 
 void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthStatus& msg)
 {
-    if (IsLinkSimulated() && AllowForwardToProxy(from))
+    if (IsNetworkSimulated() && AllowForwardToProxy(from))
     {
         _ethControllerProxy->ReceiveIbMessage(from, msg);
-    }
-}
-
-void EthControllerFacade::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
-{
-    _ethController->SetEndpointAddress(endpointAddress);
-    _ethControllerProxy->SetEndpointAddress(endpointAddress);
-}
-
-auto EthControllerFacade::EndpointAddress() const -> const mw::EndpointAddress&
-{
-    if (IsLinkSimulated())
-    {
-        return _ethControllerProxy->EndpointAddress();
-    }
-    else
-    {
-        return _ethController->EndpointAddress();
     }
 }
 
@@ -133,25 +115,23 @@ void EthControllerFacade::SetServiceDescriptor(const mw::ServiceDescriptor& serv
         (mw::service::ServiceDiscoveryEvent::Type discoveryType, const mw::ServiceDescriptor& remoteServiceDescriptor)
         {
             // check if discovered service is a network simulator (if none is known)
-            if (!IsLinkSimulated())
+            if (!IsNetworkSimulated())
             {
                 // check if received descriptor has a matching simulated link
                 if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceCreated
-                    && remoteServiceDescriptor.type == serviceDescriptor.type
-                    && remoteServiceDescriptor.linkName == serviceDescriptor.linkName
-                    && remoteServiceDescriptor.isLinkSimulated)
+                    && IsRelevantNetwork(remoteServiceDescriptor))
                 {
-                    _remoteBusSimulator = remoteServiceDescriptor;
+                    _simulatedLinkDetected = true;
+                    _simulatedLink = remoteServiceDescriptor;
                     _currentController = _ethControllerProxy.get();
                 }
             }
             else
             {
                 if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved
-                    && remoteServiceDescriptor.type == serviceDescriptor.type
-                    && remoteServiceDescriptor.linkName == serviceDescriptor.linkName)
+                    && IsRelevantNetwork(remoteServiceDescriptor))
                 {
-                    _remoteBusSimulator.isLinkSimulated = false;
+                    _simulatedLinkDetected = false;
                     _currentController = _ethController.get();
                 }
             }
@@ -166,19 +146,25 @@ auto EthControllerFacade::GetServiceDescriptor() const -> const mw::ServiceDescr
 auto EthControllerFacade::AllowForwardToDefault(const IIbServiceEndpoint* from) const -> bool
 {
     const auto& fromDescr = from->GetServiceDescriptor();
-    return fromDescr.participantName != _serviceDescriptor.participantName;
+    return fromDescr.GetParticipantName() != _serviceDescriptor.GetParticipantName();
 }
 
 auto EthControllerFacade::AllowForwardToProxy(const IIbServiceEndpoint* from) const -> bool
 {
     const auto& fromDescr = from->GetServiceDescriptor();
-    return _remoteBusSimulator.participantName == fromDescr.participantName &&
-           _serviceDescriptor.serviceId == fromDescr.serviceId;
+    return _simulatedLink.GetParticipantName() == fromDescr.GetParticipantName()
+           && _serviceDescriptor.GetServiceId() == fromDescr.GetServiceId();
 }
 
-auto EthControllerFacade::IsLinkSimulated() const -> bool
+auto EthControllerFacade::IsNetworkSimulated() const -> bool
 {
-    return _remoteBusSimulator.isLinkSimulated;
+    return _simulatedLinkDetected;
+}
+
+auto EthControllerFacade::IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool
+{
+    return remoteServiceDescriptor.GetServiceType() == ib::mw::ServiceType::Link
+           && remoteServiceDescriptor.GetNetworkName() == _serviceDescriptor.GetNetworkName();
 }
 
 } // namespace eth

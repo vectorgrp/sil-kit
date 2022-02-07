@@ -98,7 +98,7 @@ struct DistributedTimeQuantumPolicy : ParticipantController::ITimeSyncPolicy
 
     void ReceiveNextSimTask(const IIbServiceEndpoint* from, const NextSimTask& task) override
     {
-        _otherNextTasks[from->GetServiceDescriptor().participantName] = task;
+        _otherNextTasks[from->GetServiceDescriptor().GetParticipantName()] = task;
 
         switch (_controller.State())
         {
@@ -242,16 +242,35 @@ ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, co
     _serviceDiscovery = _comAdapter->GetServiceDiscovery();
     _serviceDiscovery->RegisterServiceDiscoveryHandler([this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType, const ib::mw::ServiceDescriptor& serviceDescriptor)
     {
-        if (!serviceDescriptor.isSynchronized)
+        // general check for correct service type
+        if (serviceDescriptor.GetServiceType() != ib::mw::ServiceType::InternalController)
+        {
             return;
+        }
+
+        // check if received controller is a participantController
+        std::string controllerType;
+        if (!(serviceDescriptor.GetSupplementalDataItem(ib::mw::service::controllerType, controllerType)
+              && controllerType == mw::service::controllerTypeParticipantController))
+        {
+            return;
+        }
+
+        // check if the controller is synchronized
+        // Note: it's not necessary to check the value of IsSynchonized as it will not be set if it is not true
+        std::string isSynchronized;
+        if (!serviceDescriptor.GetSupplementalDataItem(ib::mw::service::controllerIsSynchronized, isSynchronized))
+        {
+            return;
+        }
 
         if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated)
         {
-            _timeSyncPolicy->SynchronizedParticipantAdded(serviceDescriptor.participantName);
+            _timeSyncPolicy->SynchronizedParticipantAdded(serviceDescriptor.GetParticipantName());
         }
         else if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved)
         {
-            _timeSyncPolicy->SynchronizedParticipantRemoved(serviceDescriptor.participantName);
+            _timeSyncPolicy->SynchronizedParticipantRemoved(serviceDescriptor.GetParticipantName());
         }
     });
 
@@ -586,20 +605,10 @@ void ParticipantController::LogCurrentPerformanceStats()
     }
 }
 
-void ParticipantController::SetEndpointAddress(const mw::EndpointAddress& addr)
-{
-    _serviceDescriptor.legacyEpa = addr;
-}
-
-auto ParticipantController::EndpointAddress() const -> const mw::EndpointAddress&
-{
-    return _serviceDescriptor.legacyEpa;
-}     
-
 void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const ParticipantCommand& command)
 {
     // TODO FIXME VIB-551
-    if (command.participant != _serviceDescriptor.legacyEpa.participant)
+    if (command.participant != _serviceDescriptor.GetParticipantId())
         return;
 
     Initialize(command, std::string{"Received ParticipantCommand::"} + to_string(command.kind));
@@ -701,9 +710,6 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, con
 
 void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, const NextSimTask& task)
 {
-    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
-        return;
-
     _timeSyncPolicy->ReceiveNextSimTask(from, task);
 }
 

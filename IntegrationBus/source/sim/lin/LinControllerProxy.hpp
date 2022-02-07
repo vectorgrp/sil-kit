@@ -73,9 +73,6 @@ public:
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerConfig& msg) override;
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const FrameResponseUpdate& msg) override;
 
-    void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
-    auto EndpointAddress() const -> const mw::EndpointAddress& override;
-
 public:
     // ----------------------------------------
     // Public interface methods
@@ -122,7 +119,7 @@ private:
 // ==================================================================
 void LinControllerProxy::AddSink(extensions::ITraceMessageSink* sink)
 {
-    _tracer.AddSink(EndpointAddress(), *sink);
+    _tracer.AddSink(mw::EndpointAddress{}, *sink);
 }
 
 void LinControllerProxy::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)

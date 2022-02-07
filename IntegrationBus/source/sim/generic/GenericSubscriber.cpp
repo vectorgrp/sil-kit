@@ -33,20 +33,8 @@ void GenericSubscriber::SetReceiveMessageHandler(CallbackT callback)
     _callback = std::move(callback);
 }
 
-void GenericSubscriber::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
-{
-    _serviceDescriptor.legacyEpa = endpointAddress;
-}
-
-auto GenericSubscriber::EndpointAddress() const -> const mw::EndpointAddress&
-{
-    return _serviceDescriptor.legacyEpa;
-}
-
 void GenericSubscriber::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const GenericMessage& msg)
 {
-    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
-        return;
     ReceiveMessage(msg);
 }
 

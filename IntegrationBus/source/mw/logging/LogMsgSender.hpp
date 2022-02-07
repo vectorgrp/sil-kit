@@ -24,9 +24,6 @@ public:
     void SendLogMsg(const LogMsg& msg);
     void SendLogMsg(LogMsg&& msg);
 
-    void SetEndpointAddress(const mw::EndpointAddress &address) override;
-    auto EndpointAddress(void) const -> const mw::EndpointAddress & override;
-
     // IIbServiceEndpoint
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;

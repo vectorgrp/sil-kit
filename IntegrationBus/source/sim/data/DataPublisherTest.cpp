@@ -41,7 +41,7 @@ protected:
     DataPublisherTest()
         : publisher{&comAdapter, config, comAdapter.GetTimeProvider()}
     {
-        publisher.SetEndpointAddress(portAddress);
+        publisher.SetServiceDescriptor(from_endpointAddress(portAddress));
     }
 
     // Workaround for MS VS2015 where we cannot intialize the config member directly

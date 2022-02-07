@@ -39,16 +39,6 @@ void DataPublisher::Publish(const uint8_t* data, std::size_t size)
     Publish({data, data + size});
 }
 
-void DataPublisher::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
-{
-    _serviceDescriptor.legacyEpa = endpointAddress;
-}
-
-auto DataPublisher::EndpointAddress() const -> const mw::EndpointAddress&
-{
-    return _serviceDescriptor.legacyEpa;
-}
-
 void DataPublisher::SetTimeProvider(mw::sync::ITimeProvider* provider)
 {
     _timeProvider = provider;

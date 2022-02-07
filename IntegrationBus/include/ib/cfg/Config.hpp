@@ -48,7 +48,8 @@ struct Link
         FlexRay,
         GenericMessage,
         DataMessage,
-        Rpc
+        Rpc,
+        Internal
     };
 
     std::string name;

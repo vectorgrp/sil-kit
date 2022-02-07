@@ -1,0 +1,49 @@
+#pragma once
+#include <string>
+#include "ib/cfg/Config.hpp"
+
+namespace ib {
+namespace mw {
+namespace service {
+
+// controller-specific keys
+const std::string controllerType = "controller.type";
+const std::string controllerIsSynchronized = "controller.isSynchronized"; // for participantController
+
+// simulatedController-specific keys
+// remark: simulated controllers have all attributes of regular controllers in addition to the following
+const std::string simulatedControllerOriginalParticipantName =
+    "controller.netsim.originalParticipantName";
+
+
+// controllerType-specific values
+// Bus types
+const std::string controllerTypeCan = "CAN";
+const std::string controllerTypeEthernet = "Ethernet";
+const std::string controllerTypeFlexRay = "FlexRay";
+const std::string controllerTypeLin = "LIN";
+
+// PubSub types
+const std::string controllerTypeDataPublisher = "DataPublisher";
+const std::string controllerTypeDataSubscriber = "DataSubscriber";
+const std::string controllerTypeDataSubscriberInternal = "DataSubscriberInternal";
+
+// RPC types
+const std::string controllerTypeRpcServer = "RpcServer";
+const std::string controllerTypeRpcClient = "RpcClient";
+const std::string controllerTypeRpcServerInternal = "RpcServerInternal";
+
+// Internal types
+const std::string controllerTypeParticipantController = "ParticipantController";
+const std::string controllerTypeLoggerSender = "LoggerSender";
+const std::string controllerTypeLoggerReceiver = "LoggerReceiver";
+const std::string controllerTypeServiceDiscovery = "ServiceDiscovery";
+const std::string controllerTypeSystemMonitor = "SystemMonitor";
+const std::string controllerTypeSystemController = "SystemController";
+
+// misc / legacy controllers
+const std::string controllerTypeOther = "Other";
+
+} // namespace service
+} // namespace mw
+} // namespace ib

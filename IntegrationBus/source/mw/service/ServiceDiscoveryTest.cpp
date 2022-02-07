@@ -40,10 +40,10 @@ public:
     ServiceDescriptor serviceDescriptor;
     MockServiceDescriptor(EndpointAddress ea)
     {
-        serviceDescriptor.linkName = to_string(ea);
-        serviceDescriptor.participantName = to_string(ea);
-        serviceDescriptor.serviceName = to_string(ea);
-        serviceDescriptor.legacyEpa = ea;
+        serviceDescriptor.SetNetworkName(to_string(ea));
+        serviceDescriptor.SetParticipantName(std::to_string(ea.participant));
+        serviceDescriptor.SetServiceName(to_string(ea));
+        serviceDescriptor.SetServiceId(ea.endpoint);
     }
     void SetServiceDescriptor(const ServiceDescriptor& _serviceDescriptor) override
     {
@@ -85,9 +85,9 @@ protected:
 TEST_F(DiscoveryServiceTest, service_creation_notification)
 {
     ServiceDescriptor senderDescriptor{};
-    senderDescriptor.participantName = "ParticipantA";
-    senderDescriptor.linkName = "Link1";
-    senderDescriptor.serviceName = "ServiceDiscovery";
+    senderDescriptor.SetParticipantName("ParticipantA");
+    senderDescriptor.SetNetworkName("Link1");
+    senderDescriptor.SetServiceName("ServiceDiscovery");
     ServiceDiscovery disco{ &comAdapter, "ParticipantA" };
     disco.SetServiceDescriptor(senderDescriptor);
 
@@ -96,7 +96,7 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
    
     disco.RegisterServiceDiscoveryHandler(
         [&descr](auto eventType, auto&& newServiceDescr) {
-            ASSERT_EQ(descr.supplementalData, newServiceDescr.supplementalData);
+            ASSERT_EQ(descr.GetSupplementalData(), newServiceDescr.GetSupplementalData());
     });
     disco.RegisterServiceDiscoveryHandler([this](auto type, auto&& descr) {
         callbacks.ServiceDiscoveryHandler(type, descr);
@@ -116,7 +116,7 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
 
     // trigger notifications on reception path from different participant
     MockServiceDescriptor otherParticipant{ {1, 2} };
-    descr.participantName = "ParticipantOther";
+    descr.SetParticipantName("ParticipantOther");
     event.service = descr;
     EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated,
         descr)).Times(1);
@@ -135,16 +135,16 @@ TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
     });
 
     ServiceDescriptor senderDescriptor;
-    senderDescriptor.participantName = "ParticipantA";
-    senderDescriptor.linkName = "Link1";
-    senderDescriptor.serviceName = "ServiceDiscovery";
+    senderDescriptor.SetParticipantName("ParticipantA");
+    senderDescriptor.SetNetworkName("Link1");
+    senderDescriptor.SetServiceName("ServiceDiscovery");
 
     ServiceDiscoveryEvent event;
 
     auto sendAnnounce = [&](auto&& serviceName) {
         ServiceDescriptor descr;
         descr = senderDescriptor;
-        descr.serviceName = serviceName;
+        descr.SetServiceName(serviceName);
         // Ensure we only append new services
         event.type = ServiceDiscoveryEvent::Type::ServiceCreated;
         event.service = descr;
@@ -176,15 +176,15 @@ TEST_F(DiscoveryServiceTest, service_removal)
     });
 
     ServiceDescriptor senderDescriptor;
-    senderDescriptor.participantName = "ParticipantA";
-    senderDescriptor.linkName = "Link1";
-    senderDescriptor.serviceName = "ServiceDiscovery";
+    senderDescriptor.SetParticipantName("ParticipantA");
+    senderDescriptor.SetNetworkName("Link1");
+    senderDescriptor.SetServiceName("ServiceDiscovery");
 
     ServiceDiscoveryEvent event;
 
     ServiceDescriptor descr;
     descr = senderDescriptor;
-    descr.serviceName = "TestService";
+    descr.SetServiceName("TestService");
     event.type = ServiceDiscoveryEvent::Type::ServiceCreated;
     event.service = descr;
 
@@ -198,7 +198,7 @@ TEST_F(DiscoveryServiceTest, service_removal)
     disco.ReceiveIbMessage(&otherParticipant, event);
 
     // add a modified one
-    event.service.serviceName = "Modified";
+    event.service.SetServiceName("Modified");
     auto modifiedDescr = event.service;
     EXPECT_CALL(callbacks,
         ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, modifiedDescr)

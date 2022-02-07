@@ -79,16 +79,6 @@ void EthControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* from, const
     _controller.ReceiveIbMessage(from, msg);
 }
 
-void EthControllerReplay::SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress)
-{
-    _controller.SetEndpointAddress(endpointAddress);
-}
-
-auto EthControllerReplay::EndpointAddress() const -> const ib::mw::EndpointAddress&
-{
-    return _controller.EndpointAddress();
-}
-
 // ib::mw::sync::ITimeConsumer
 void EthControllerReplay::SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)
 {

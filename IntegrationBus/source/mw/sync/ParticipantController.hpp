@@ -89,10 +89,6 @@ public:
 
     void LogCurrentPerformanceStats() override;
 
-    // IIbToParticipantController
-    void SetEndpointAddress(const mw::EndpointAddress& addr) override;
-    auto EndpointAddress() const -> const mw::EndpointAddress & override;
-
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const ParticipantCommand& msg) override;
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const SystemCommand& msg) override;
 
@@ -179,7 +175,7 @@ void ParticipantController::SetServiceDescriptor(const mw::ServiceDescriptor& se
     // TODO change to isSynchronized for syncType
     if (_syncType == cfg::SyncType::DistributedTimeQuantum)
     {
-        _serviceDescriptor.isSynchronized = true;
+        _serviceDescriptor.SetSupplementalDataItem(ib::mw::service::controllerIsSynchronized, std::to_string(true));
     }
 }
 

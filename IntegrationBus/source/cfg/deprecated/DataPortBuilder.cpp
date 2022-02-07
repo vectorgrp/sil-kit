@@ -23,10 +23,10 @@ auto DataPortBuilder::operator->() -> ParticipantBuilder*
     return Parent();
 }
 
-auto DataPortBuilder::WithLink(const std::string& linkname) -> DataPortBuilder&
+auto DataPortBuilder::WithLink(const std::string& networkName) -> DataPortBuilder&
 {
     auto&& qualifiedName = Parent()->MakeQualifiedName(_port.name);
-    auto&& link = Parent()->Parent()->AddOrGetLink(_port.linkType, linkname);
+    auto&& link = Parent()->Parent()->AddOrGetLink(_port.linkType, networkName);
     link.AddEndpoint(qualifiedName);
 
     return WithLinkId(link.LinkId());

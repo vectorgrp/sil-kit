@@ -11,15 +11,17 @@ TEST(MwVAsioSerdes, Mw_Service)
     ib::mw::service::ServiceAnnouncement in{};
     in.participantName = "Input";
     for (auto i = 0; i < 10; i++) {
+        ib::mw::SupplementalData supplementalData;
+        supplementalData["hello"] = "world";
+
         ib::mw::ServiceDescriptor descr;
-        descr.participantName = "Participant" + std::to_string(i);
-        descr.serviceName = "Service" + std::to_string(i);
-        descr.linkName = "Link" + std::to_string(i);
-        descr.isLinkSimulated = true;
-        descr.legacyEpa.participant = i;
-        descr.legacyEpa.endpoint = i;
-        descr.supplementalData["hello"] = "world";
-        descr.supplementalData["Second"] = "Supplement";
+        descr.SetParticipantName("Participant" + std::to_string(i));
+        descr.SetNetworkName("Link" + std::to_string(i));
+        descr.SetServiceName("Service" + std::to_string(i));
+        descr.SetServiceId(i);
+        descr.SetServiceType(ib::mw::ServiceType::SimulatedController);
+        descr.SetSupplementalData(supplementalData);
+        descr.SetSupplementalDataItem("Second", "Supplement");
         in.services.push_back(descr);
     }
 
@@ -30,7 +32,10 @@ TEST(MwVAsioSerdes, Mw_Service)
 
     EXPECT_EQ(in, out);
     //ensure that sensible values are present
-    EXPECT_EQ(out.services.at(9).participantName, "Participant9");
-    EXPECT_EQ(out.services.at(9).supplementalData.size(), 2);
+    EXPECT_EQ(out.services.at(9).GetParticipantName(), "Participant9");
+    EXPECT_EQ(out.services.at(9).GetSupplementalData().size(), 2);
+    EXPECT_EQ(out.services.at(9).GetSupplementalData().count("hello"), 1);
+    std::string dummy;
+    EXPECT_EQ(out.services.at(9).GetSupplementalDataItem("Second", dummy), true);
 }
 

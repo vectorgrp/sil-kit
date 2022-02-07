@@ -4,13 +4,14 @@
 
 #include "MessageBuffer.hpp"
 #include "SerdesMw.hpp"
+#include "ServiceDescriptor.hpp"
 
 #include "ServiceDatatypes.hpp"
 
 namespace ib {
 namespace mw {
 
-//Special case for std::map<std::string, std::string> ServiceDescription::supplementalData
+//Special case for std::map<std::string, std::string> as used in ServiceDescription::supplementalData
 // not generic enough to add to MessageBuffer.hpp.
 // We encode it as follows:
 // NUM_ELEMENTS N
@@ -60,14 +61,14 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
     const ib::mw::ServiceDescriptor& msg)
 {
     buffer
-        << msg.participantName
-        << msg.linkName
-        << msg.serviceName
-        << msg.type
-        << msg.legacyEpa
-        << msg.isLinkSimulated
-        << msg.isSynchronized
-        << msg.supplementalData
+        << msg._participantName
+        << msg._serviceType
+        << msg._networkName
+        << msg._networkType
+        << msg._serviceName
+        << msg._serviceId
+        << msg._supplementalData
+        << msg._participantId
         ;
     return buffer;
 }
@@ -76,14 +77,14 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
     ib::mw::ServiceDescriptor& updatedMsg)
 {
     buffer
-        >> updatedMsg.participantName
-        >> updatedMsg.linkName
-        >> updatedMsg.serviceName
-        >> updatedMsg.type
-        >> updatedMsg.legacyEpa
-        >> updatedMsg.isLinkSimulated
-        >> updatedMsg.isSynchronized
-        >> updatedMsg.supplementalData
+        >> updatedMsg._participantName
+        >> updatedMsg._serviceType
+        >> updatedMsg._networkName
+        >> updatedMsg._networkType
+        >> updatedMsg._serviceName
+        >> updatedMsg._serviceId
+        >> updatedMsg._supplementalData
+        >> updatedMsg._participantId
         ;
     return buffer;
 }

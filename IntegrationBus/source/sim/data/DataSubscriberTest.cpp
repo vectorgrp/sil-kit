@@ -35,10 +35,10 @@ protected:
         : subscriber{ &comAdapter, config, comAdapter.GetTimeProvider(), {} }
         , subscriberOther{ &comAdapter, config, comAdapter.GetTimeProvider(), {} }
     {
-        subscriber.SetEndpointAddress(endpointAddress);
+        subscriber.SetServiceDescriptor(from_endpointAddress(endpointAddress));
         subscriber.SetReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));
 
-        subscriberOther.SetEndpointAddress(otherEndpointAddress);
+        subscriberOther.SetServiceDescriptor(from_endpointAddress(otherEndpointAddress));
         subscriberOther.SetReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));
     }
 

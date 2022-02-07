@@ -21,13 +21,13 @@ auto ParticipantBuilder_MakeQualifiedName(Builder &builder, const std::string co
     return participantBuilder->MakeQualifiedName(controllerName);
 }
 template<class Builder, typename LinkType>
-auto ParticipantBuilder_AddOrGetLink(Builder& builder, LinkType linkType, const std::string& linkName) -> LinkBuilder&
+auto ParticipantBuilder_AddOrGetLink(Builder& builder, LinkType linkType, const std::string& networkName) -> LinkBuilder&
 {
     auto* participantBuilder = builder.Parent();
     assert(participantBuilder != nullptr);
     auto* simBuilder = participantBuilder->Parent();
     assert(simBuilder != nullptr);
-    return simBuilder->AddOrGetLink(linkType, linkName);
+    return simBuilder->AddOrGetLink(linkType, networkName);
 }
 
 } // namespace detail

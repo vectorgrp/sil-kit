@@ -32,9 +32,6 @@ public:
 
     auto Config() const -> const cfg::GenericPort& override;
 
-    void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
-    auto EndpointAddress() const -> const mw::EndpointAddress& override;
-
     // ib::mw::sync::ITimeConsumer
     void SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider) override;
 

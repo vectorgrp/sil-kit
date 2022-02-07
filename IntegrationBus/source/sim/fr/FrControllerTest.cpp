@@ -507,7 +507,7 @@ TEST_F(FrControllerTest, call_symbol_ack_handler)
     controller.ReceiveIbMessage(&otherController, ack);
 }
 
-TEST_F(FrControllerTest, send_message_with_tracing)
+TEST_F(FrControllerTest, DISABLED_send_message_with_tracing)
 {
     using namespace ib::extensions;
     const auto now = 42ns;
@@ -568,7 +568,7 @@ TEST_F(FrControllerTest, send_message_with_tracing)
     controller.UpdateTxBuffer(bufferUpdate);
 }
 
-TEST_F(FrControllerTest, trace_on_receive)
+TEST_F(FrControllerTest, DISABLED_trace_on_receive)
 {
     using namespace ib::extensions;
 

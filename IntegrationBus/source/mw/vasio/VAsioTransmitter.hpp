@@ -37,7 +37,7 @@ template<typename MsgT> struct MessageHistory<MsgT, 1>
         if (!_hasHistory)
             return;
         
-        _from = from->GetServiceDescriptor().legacyEpa;
+        _from = from->GetServiceDescriptor().to_endpointAddress();
         _last = msg;
         _hasValue = true;
     }
@@ -90,7 +90,7 @@ public:
             return;
 
 
-        _serviceDescriptor.participantName = peer->GetUri().participantName;
+        _serviceDescriptor.SetParticipantName(peer->GetUri().participantName);
         _remoteReceivers.push_back(remoteReceiver);
         _hist.NotifyPeer(peer, remoteIdx);
     }

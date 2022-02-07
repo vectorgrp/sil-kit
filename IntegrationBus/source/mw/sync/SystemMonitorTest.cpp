@@ -45,7 +45,7 @@ protected:
         , monitor{&comAdapter, testConfig.simulationSetup}
         , monitorFrom{ &comAdapter, testConfig.simulationSetup }
     {
-        monitor.SetEndpointAddress(addr);
+        monitor.SetServiceDescriptor(from_endpointAddress(addr));
     }
 
     void RegisterSystemHandler()
@@ -83,7 +83,7 @@ protected:
         from.participant = participantCfg.id;
         from.endpoint = 1024;
 
-        monitorFrom.SetEndpointAddress(from);
+        monitorFrom.SetServiceDescriptor(from_endpointAddress(from));
         
         monitor.ReceiveIbMessage(&monitorFrom, status);
     }

@@ -40,7 +40,7 @@ protected:
     SystemControllerTest()
         : controller{&comAdapter}
     {
-        controller.SetEndpointAddress(addr);
+        controller.SetServiceDescriptor(descriptor);
     }
 
 
@@ -52,14 +52,15 @@ protected:
     // ----------------------------------------
     // Members
     EndpointAddress addr{103, 1026};
+    ServiceDescriptor descriptor = from_endpointAddress(addr);
 
     MockComAdapter comAdapter;
     SystemController controller;
 };
 
-TEST_F(SystemControllerTest, configure_endpoint_address)
+TEST_F(SystemControllerTest, configure_serviceDescriptor)
 {
-    EXPECT_EQ(controller.EndpointAddress(), addr);
+    EXPECT_EQ(controller.GetServiceDescriptor(), from_endpointAddress(addr));
 }
 
 TEST_F(SystemControllerTest, send_initialize)

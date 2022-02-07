@@ -39,9 +39,6 @@ public:
     void ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const ClientAnnouncement& msg) override;
     void ReceiveMessage(const ClientAnnouncement& msg);
 
-    void SetEndpointAddress(const mw::EndpointAddress& endpointAddress) override;
-    auto EndpointAddress() const -> const mw::EndpointAddress& override;
-
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
 

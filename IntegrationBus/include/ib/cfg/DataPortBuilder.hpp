@@ -21,7 +21,7 @@ class DataPortBuilder : public ParentBuilder<ParticipantBuilder>
 public:
     IntegrationBusAPI DataPortBuilder(ParticipantBuilder *participant, std::string name, mw::EndpointId endpointId);
 
-    IntegrationBusAPI auto WithLink(const std::string& linkname) -> DataPortBuilder&;
+    IntegrationBusAPI auto WithLink(const std::string& networkName) -> DataPortBuilder&;
     IntegrationBusAPI auto WithLinkId(int16_t linkId) -> DataPortBuilder&;
     IntegrationBusAPI auto WithEndpointId(mw::EndpointId id) -> DataPortBuilder&;
 

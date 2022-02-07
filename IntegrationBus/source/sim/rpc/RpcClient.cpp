@@ -116,16 +116,6 @@ void RpcClient::ReceiveMessage(const FunctionCallResponse& msg)
     }
 }
 
-void RpcClient::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
-{
-    _serviceDescriptor.legacyEpa = endpointAddress;
-}
-
-auto RpcClient::EndpointAddress() const -> const mw::EndpointAddress&
-{
-    return _serviceDescriptor.legacyEpa;
-}
-
 void RpcClient::SetTimeProvider(mw::sync::ITimeProvider* provider)
 {
     _timeProvider = provider;

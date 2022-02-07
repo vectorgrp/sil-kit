@@ -170,8 +170,8 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
         _logger->Warn(
             "LinController received transmission with payload length {} from {{{}, {}}}",
             static_cast<unsigned int>(frame.dataLength),
-            from->GetServiceDescriptor().legacyEpa.participant,
-            from->GetServiceDescriptor().legacyEpa.endpoint);
+            from->GetServiceDescriptor().GetParticipantName(),
+            from->GetServiceDescriptor().GetServiceName());
         return;
     }
 
@@ -180,8 +180,8 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
         _logger->Warn(
             "LinController received transmission with invalid LIN ID {} from {{{}, {}}}",
             frame.id,
-            from->GetServiceDescriptor().legacyEpa.participant,
-            from->GetServiceDescriptor().legacyEpa.endpoint);
+            from->GetServiceDescriptor().GetParticipantName(),
+            from->GetServiceDescriptor().GetServiceName());
         return;
     }
 
@@ -218,7 +218,7 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
     for (auto& response : msg.frameResponses)
     {
-        CallEach(_frameResponseUpdateHandler, this, to_string(from->GetServiceDescriptor()), response);
+        CallEach(_frameResponseUpdateHandler, this, from->GetServiceDescriptor().to_string(), response);
     }
 }
 
@@ -231,18 +231,8 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
     for (auto& response : msg.frameResponses)
     {
-        CallEach(_frameResponseUpdateHandler, this, to_string(from->GetServiceDescriptor()), response);
+        CallEach(_frameResponseUpdateHandler, this, from->GetServiceDescriptor().to_string(), response);
     }
-}
-
-void LinControllerProxy::SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress)
-{
-    _serviceDescriptor.legacyEpa = endpointAddress;
-}
-
-auto LinControllerProxy::EndpointAddress() const -> const ::ib::mw::EndpointAddress&
-{
-    return _serviceDescriptor.legacyEpa;
 }
 
 void LinControllerProxy::SetControllerStatus(ControllerStatus status)

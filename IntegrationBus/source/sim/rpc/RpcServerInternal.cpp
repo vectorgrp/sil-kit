@@ -51,15 +51,6 @@ void RpcServerInternal::SetRpcHandler(CallProcessor handler)
     _handler = std::move(handler);
 }
 
-void RpcServerInternal::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
-{
-    _serviceDescriptor.legacyEpa = endpointAddress;
-}
-
-auto RpcServerInternal::EndpointAddress() const -> const mw::EndpointAddress&
-{
-    return _serviceDescriptor.legacyEpa;
-}
 void RpcServerInternal::SetTimeProvider(mw::sync::ITimeProvider* provider)
 {
     _timeProvider = provider;

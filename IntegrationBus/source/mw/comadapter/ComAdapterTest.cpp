@@ -74,15 +74,15 @@ TEST_F(ComAdapterTest, DISABLED_make_network_controller)
 {
     auto participantName = "FRcontroller";
     auto controllerName = "FR1";
-    auto linkName = "P0";
+    auto networkName = "P0";
 
     simulationSetup.AddParticipant(participantName)
         .AddFlexray(controllerName)
         .WithClusterParameters(getClusterParameters())
         .WithNodeParameters(getNodeParameters())
-        .WithLink(linkName);
+        .WithLink(networkName);
 
-    std::initializer_list<std::string> links{ linkName, "P1" };
+    std::initializer_list<std::string> links{ networkName, "P1" };
 
     simulationSetup.AddParticipant("NetworkSimulator")
         .AddNetworkSimulator("BusSim")

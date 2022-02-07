@@ -161,16 +161,6 @@ void CanController::CallHandlers(const MsgT& msg)
     }
 }
 
-void CanController::SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress)
-{
-    _serviceDescriptor.legacyEpa = endpointAddress;
-}
-
-auto CanController::EndpointAddress() const -> const ::ib::mw::EndpointAddress&
-{
-    return _serviceDescriptor.legacyEpa;
-}
-
 void CanController::SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)
 {
     _timeProvider = timeProvider;

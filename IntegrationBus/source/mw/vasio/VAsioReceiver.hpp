@@ -88,7 +88,7 @@ VAsioReceiver<MsgT>::VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::share
     , _link{link}
     , _logger{logger}
 {
-    _serviceDescriptor.linkName = _subscriptionInfo.linkName;
+    _serviceDescriptor.SetNetworkName(_subscriptionInfo.networkName);
 }
 
 template <class MsgT>

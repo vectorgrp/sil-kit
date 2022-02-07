@@ -87,7 +87,7 @@ void CanControllerFacade::RegisterTransmitStatusHandler(MessageStatusHandler han
 // IIbToCanController / IIbToCanControllerProxy
 void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanMessage& msg)
 {
-    if (IsLinkSimulated())
+    if (IsNetworkSimulated())
     {
         if (AllowForwardToProxy(from)) _canControllerProxy->ReceiveIbMessage(from, msg); 
     }
@@ -100,7 +100,7 @@ void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 // IIbToCanControllerProxy only
 void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanControllerStatus& msg)
 {
-    if (IsLinkSimulated() && AllowForwardToProxy(from))
+    if (IsNetworkSimulated() && AllowForwardToProxy(from))
     {
         _canControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -108,34 +108,15 @@ void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 
 void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanTransmitAcknowledge& msg)
 {
-    if (IsLinkSimulated() && AllowForwardToProxy(from))
+    if (IsNetworkSimulated() && AllowForwardToProxy(from))
     {
         _canControllerProxy->ReceiveIbMessage(from, msg);
     }
 }
 
-
-void CanControllerFacade::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
-{
-    _canController->SetEndpointAddress(endpointAddress);
-    _canControllerProxy->SetEndpointAddress(endpointAddress);
-}
-
-auto CanControllerFacade::EndpointAddress() const -> const mw::EndpointAddress&
-{
-    if (IsLinkSimulated())
-    {
-        return _canControllerProxy->EndpointAddress();
-    }
-    else
-    {
-        return _canController->EndpointAddress();
-    }
-}
-
 void CanControllerFacade::SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)
 {
-    if (!IsLinkSimulated())
+    if (!IsNetworkSimulated())
     {
         _canController->SetTimeProvider(timeProvider);
     }
@@ -161,25 +142,23 @@ void CanControllerFacade::SetServiceDescriptor(const mw::ServiceDescriptor& serv
         (mw::service::ServiceDiscoveryEvent::Type discoveryType, const mw::ServiceDescriptor& remoteServiceDescriptor)
         {
             // check if discovered service is a network simulator (if none is known)
-            if (!IsLinkSimulated())
+            if (!IsNetworkSimulated())
             {
                 // check if received descriptor has a matching simulated link
                 if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceCreated
-                    && remoteServiceDescriptor.type == serviceDescriptor.type
-                    && remoteServiceDescriptor.linkName == serviceDescriptor.linkName
-                    && remoteServiceDescriptor.isLinkSimulated)
+                    && IsRelevantNetwork(remoteServiceDescriptor))
                 {
-                    _remoteBusSimulator = remoteServiceDescriptor;
+                    _simulatedLinkDetected = true;
+                    _simulatedLink = remoteServiceDescriptor;
                     _currentController = _canControllerProxy.get();
                 }
             }
             else
             {
                 if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved
-                    && remoteServiceDescriptor.type == serviceDescriptor.type
-                    && remoteServiceDescriptor.linkName == serviceDescriptor.linkName)
+                    && IsRelevantNetwork(remoteServiceDescriptor))
                 {
-                    _remoteBusSimulator.isLinkSimulated = false;
+                    _simulatedLinkDetected = false;
                     _currentController = _canController.get();
                 }
             }
@@ -194,20 +173,26 @@ auto CanControllerFacade::GetServiceDescriptor() const -> const mw::ServiceDescr
 auto CanControllerFacade::AllowForwardToDefault(const IIbServiceEndpoint* from) const -> bool
 {
     const auto& fromDescr = from->GetServiceDescriptor();
-    return fromDescr.participantName != _serviceDescriptor.participantName;
+    return fromDescr.GetParticipantName() != _serviceDescriptor.GetParticipantName();
 }
 
 auto CanControllerFacade::AllowForwardToProxy(const IIbServiceEndpoint* from) const
     -> bool
 {
     const auto& fromDescr = from->GetServiceDescriptor();
-    return _remoteBusSimulator.participantName == fromDescr.participantName &&
-           _serviceDescriptor.serviceId == fromDescr.serviceId;
+    return _simulatedLink.GetParticipantName() == fromDescr.GetParticipantName()
+           && _serviceDescriptor.GetServiceId() == fromDescr.GetServiceId();
 }
 
-auto CanControllerFacade::IsLinkSimulated() const -> bool
+auto CanControllerFacade::IsNetworkSimulated() const -> bool
 {
-    return _remoteBusSimulator.isLinkSimulated;
+    return _simulatedLinkDetected;
+}
+
+auto CanControllerFacade::IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool
+{
+    return remoteServiceDescriptor.GetServiceType() == ib::mw::ServiceType::Link
+           && remoteServiceDescriptor.GetNetworkName() == _serviceDescriptor.GetNetworkName();
 }
 
 } // namespace can

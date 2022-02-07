@@ -47,10 +47,6 @@ public:
     void PrepareColdswap() const override;
     void ExecuteColdswap() const override;
 
-    // IIbToSystemMonitor
-    void SetEndpointAddress(const mw::EndpointAddress& addr) override;
-    auto EndpointAddress() const -> const mw::EndpointAddress& override;
-
 
     // IIbServiceEndpoint
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
@@ -69,7 +65,7 @@ private:
     // ----------------------------------------
     // private members
     IComAdapterInternal* _comAdapter{nullptr};
-    mw::ServiceDescriptor _serviceDescriptor{};
+    mw::ServiceDescriptor _serviceDescriptor;
 };
 
 // ================================================================================

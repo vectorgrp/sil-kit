@@ -67,8 +67,8 @@ TEST(CanControllerTest, send_can_message)
     MockComAdapter mockComAdapter;
 
     ServiceDescriptor senderDescriptor{};
-    senderDescriptor.participantName = "canControllerPlaceholder";
-    senderDescriptor.serviceId = 17;
+    senderDescriptor.SetParticipantName("canControllerPlaceholder");
+    senderDescriptor.SetServiceId(17);
     ib::cfg::CanController cfg;
 
     CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
@@ -92,8 +92,8 @@ TEST(CanControllerTest, receive_can_message)
     using namespace std::placeholders;
 
     ServiceDescriptor senderDescriptor{};
-    senderDescriptor.participantName = "canControllerPlaceholder";
-    senderDescriptor.serviceId = 17;
+    senderDescriptor.SetParticipantName("canControllerPlaceholder");
+    senderDescriptor.SetServiceId(17);
 
     MockComAdapter mockComAdapter;
     CanControllerCallbacks callbackProvider;
@@ -126,8 +126,8 @@ TEST(CanControllerTest, receive_can_message_rx_filter1)
     using namespace std::placeholders;
 
     ServiceDescriptor senderDescriptor{};
-    senderDescriptor.participantName = "canControllerPlaceholder";
-    senderDescriptor.serviceId = 17;
+    senderDescriptor.SetParticipantName("canControllerPlaceholder");
+    senderDescriptor.SetServiceId(17);
 
     MockComAdapter mockComAdapter;
     CanControllerCallbacks callbackProvider;
@@ -158,8 +158,8 @@ TEST(CanControllerTest, receive_can_message_rx_filter2)
     using namespace std::placeholders;
 
     ServiceDescriptor senderDescriptor{};
-    senderDescriptor.participantName = "canControllerPlaceholder";
-    senderDescriptor.serviceId = 17;
+    senderDescriptor.SetParticipantName("canControllerPlaceholder");
+    senderDescriptor.SetServiceId(17);
 
     MockComAdapter mockComAdapter;
     CanControllerCallbacks callbackProvider;
@@ -307,7 +307,7 @@ TEST(CanControllerTest, receive_ack)
 }
 
 
-TEST(CanControllerTest, cancontroller_uses_tracing)
+TEST(CanControllerTest, DISABLED_cancontroller_uses_tracing)
 {
     using namespace ib::extensions;
 

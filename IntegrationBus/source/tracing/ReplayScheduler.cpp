@@ -170,7 +170,7 @@ bool MatchMdfChannel(std::shared_ptr<IReplayChannel> channel, const cfg::MdfChan
 }
 
 // Helper to identify Channel by its name in VIB format
-bool MatchIbChannel(std::shared_ptr<IReplayChannel> channel, const std::string& linkName,
+bool MatchIbChannel(std::shared_ptr<IReplayChannel> channel, const std::string& networkName,
     const std::string& participantName, const std::string& controllerName)
 {
     // The source info contains 'Link/Participant/Controller'
@@ -179,7 +179,7 @@ bool MatchIbChannel(std::shared_ptr<IReplayChannel> channel, const std::string& 
     const auto& link = tokens.at(0);
     const auto& participant = tokens.at(1);
     const auto& service = tokens.at(2);
-    if (link == linkName
+    if (link == networkName
         && participant == participantName
         && service == controllerName)
     {
@@ -230,7 +230,7 @@ auto FindReplayChannel(ib::mw::logging::ILogger* log,
     const cfg::Replay& replayConfig,
     const std::string& controllerName,
     const std::string& participantName,
-    const std::string& linkName,
+    const std::string& networkName,
     const ib::cfg::Link::Type linkType
     ) ->  std::shared_ptr<IReplayChannel>
 {
@@ -263,7 +263,7 @@ auto FindReplayChannel(ib::mw::logging::ILogger* log,
                 log->Trace("Replay: skipping channel '{}' of type {}", channel->Name(), to_string(channel->Type()));
                 continue;
             }
-            if (MatchIbChannel(channel, linkName, participantName, controllerName))
+            if (MatchIbChannel(channel, networkName, participantName, controllerName))
             {
                 channelList.emplace_back(std::move(channel));
             }
@@ -349,11 +349,11 @@ void ReplayScheduler::ConfigureNetworkSimulators(const cfg::Config& config, cons
         {
             throw cfg::Misconfiguration{"Error: MdfChannel selection is not supported for NetworkSimulator replays!"};
         }
-        for (const auto& linkName : simulator.simulatedLinks)
+        for (const auto& networkName : simulator.simulatedLinks)
         {
             try
             {
-                const auto& link = cfg::get_by_name(config.simulationSetup.links, linkName);
+                const auto& link = cfg::get_by_name(config.simulationSetup.links, networkName);
                 //NB currently (v3.3.7) the NetworkSimulator uses the controller's endpoints to create trace channel source infos.
                 // Thus, we try to attach a replay task for each of our simulated link's endpoints.
                 auto replayFile = replayFiles.at(simulator.replay.useTraceSource);
@@ -362,7 +362,7 @@ void ReplayScheduler::ConfigureNetworkSimulators(const cfg::Config& config, cons
                 // The endpoints might have the same name, thus we attach the channels in order we encounter them,
                 // and each channel is used at most once.
                 auto pickChannel = 
-                    [&replayChannels](const auto& linkName, const auto& participantName, const auto& controllerName, const auto linkType) {
+                    [&replayChannels](const auto& networkName, const auto& participantName, const auto& controllerName, const auto linkType) {
                     const auto type = to_channelType(linkType);
 
                     for (auto it = replayChannels.begin(); it != replayChannels.end(); ++it)
@@ -372,7 +372,7 @@ void ReplayScheduler::ConfigureNetworkSimulators(const cfg::Config& config, cons
                         {
                             continue;
                         }
-                        if (MatchIbChannel(channel, linkName, participantName, controllerName))
+                        if (MatchIbChannel(channel, networkName, participantName, controllerName))
                         {
                             //make sure this channel is not shared among endpoints
                             replayChannels.erase(it);
@@ -389,7 +389,7 @@ void ReplayScheduler::ConfigureNetworkSimulators(const cfg::Config& config, cons
                     const auto& controllerName = tokens.at(1);
 
                     auto replayChannel = pickChannel(
-                        linkName,
+                        networkName,
                         participantConfig.name,
                         controllerName,
                         link.type

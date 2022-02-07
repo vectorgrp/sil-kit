@@ -119,6 +119,6 @@ TEST_F(ServiceDiscoveryITest, test_discovery_performance_1000services)
 TEST_F(ServiceDiscoveryITest, test_discovery_performance_2000services)
 {
     BuildConfig(2000);
-    ExecuteTest(2000, 5s);
+    ExecuteTest(2000, 8s);
 }
 } // anonymous namespace

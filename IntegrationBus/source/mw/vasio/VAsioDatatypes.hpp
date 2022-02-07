@@ -20,7 +20,7 @@ struct RegistryMsgHeader
 struct VAsioMsgSubscriber
 {
     uint16_t    receiverIdx;
-    std::string linkName;
+    std::string networkName;
     std::string msgTypeName;
 };
 
@@ -83,7 +83,7 @@ inline bool operator!=(const RegistryMsgHeader& lhs, const RegistryMsgHeader& rh
 inline bool operator==(const VAsioMsgSubscriber& lhs, const VAsioMsgSubscriber& rhs)
 {
     return lhs.receiverIdx == rhs.receiverIdx 
-        && lhs.linkName == rhs.linkName
+        && lhs.networkName == rhs.networkName
         && lhs.msgTypeName == rhs.msgTypeName;
 };
 

@@ -105,7 +105,7 @@ void LinControllerFacade::RegisterFrameResponseUpdateHandler(FrameResponseUpdate
 // IIbToLinController
 void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const Transmission& msg)
 {
-    if (IsLinkSimulated())
+    if (IsNetworkSimulated())
     {
         if (AllowForwardToProxy(from)) _linControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -117,7 +117,7 @@ void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 
 void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const WakeupPulse& msg)
 {
-    if (IsLinkSimulated())
+    if (IsNetworkSimulated())
     {
         if (AllowForwardToProxy(from)) _linControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -129,7 +129,7 @@ void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 
 void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerConfig& msg)
 {
-    if (IsLinkSimulated())
+    if (IsNetworkSimulated())
     {
         if (AllowForwardToProxy(from)) _linControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -141,7 +141,7 @@ void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 
 void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerStatusUpdate& msg)
 {
-    if (!IsLinkSimulated())
+    if (!IsNetworkSimulated())
     {
         if (AllowForwardToDefault(from)) _linController->ReceiveIbMessage(from, msg);
     }
@@ -149,7 +149,7 @@ void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
 
 void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrameResponseUpdate& msg)
 {
-    if (IsLinkSimulated())
+    if (IsNetworkSimulated())
     {
         if (AllowForwardToProxy(from)) _linControllerProxy->ReceiveIbMessage(from, msg);
     }
@@ -159,28 +159,10 @@ void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
     }
 }
 
-void LinControllerFacade::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
-{
-    _linController->SetEndpointAddress(endpointAddress);
-    _linControllerProxy->SetEndpointAddress(endpointAddress);
-}
-
-auto LinControllerFacade::EndpointAddress() const -> const mw::EndpointAddress&
-{
-    if (IsLinkSimulated())
-    {
-        return _linControllerProxy->EndpointAddress();
-    }
-    else
-    {
-        return _linController->EndpointAddress();
-    }
-}
-
 //ib::mw::sync::ITimeConsumer
 void LinControllerFacade::SetTimeProvider(mw::sync::ITimeProvider* timeProvider)
 {
-    if (!IsLinkSimulated())
+    if (!IsNetworkSimulated())
     {
         _linController->SetTimeProvider(timeProvider);
     }
@@ -206,25 +188,23 @@ void LinControllerFacade::SetServiceDescriptor(const mw::ServiceDescriptor& serv
         (mw::service::ServiceDiscoveryEvent::Type discoveryType, const mw::ServiceDescriptor& remoteServiceDescriptor)
         {
             // check if discovered service is a network simulator (if none is known)
-            if (!IsLinkSimulated())
+            if (!IsNetworkSimulated())
             {
                 // check if received descriptor has a matching simulated link
                 if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceCreated
-                    && remoteServiceDescriptor.type == serviceDescriptor.type
-                    && remoteServiceDescriptor.linkName == serviceDescriptor.linkName
-                    && remoteServiceDescriptor.isLinkSimulated)
+                    && IsRelevantNetwork(remoteServiceDescriptor))
                 {
-                    _remoteBusSimulator = remoteServiceDescriptor;
+                    _simulatedLinkDetected = true;
+                    _simulatedLink = remoteServiceDescriptor;
                     _currentController = _linControllerProxy.get();
                 }
             }
             else
             {
                 if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved
-                    && remoteServiceDescriptor.type == serviceDescriptor.type
-                    && remoteServiceDescriptor.linkName == serviceDescriptor.linkName)
+                    && IsRelevantNetwork(remoteServiceDescriptor))
                 {
-                    _remoteBusSimulator.isLinkSimulated = false;
+                    _simulatedLinkDetected = false;
                     _currentController = _linController.get();
                 }
             }
@@ -239,19 +219,25 @@ auto LinControllerFacade::GetServiceDescriptor() const -> const mw::ServiceDescr
 auto LinControllerFacade::AllowForwardToDefault(const IIbServiceEndpoint* from) const -> bool
 {
     const auto& fromDescr = from->GetServiceDescriptor();
-    return fromDescr.participantName != _serviceDescriptor.participantName;
+    return fromDescr.GetParticipantName() != _serviceDescriptor.GetParticipantName();
 }
 
 auto LinControllerFacade::AllowForwardToProxy(const IIbServiceEndpoint* from) const -> bool
 {
     const auto& fromDescr = from->GetServiceDescriptor();
-    return _remoteBusSimulator.participantName == fromDescr.participantName &&
-           _serviceDescriptor.serviceId == fromDescr.serviceId;
+    return _simulatedLink.GetParticipantName() == fromDescr.GetParticipantName()
+           && _serviceDescriptor.GetServiceId() == fromDescr.GetServiceId();
 }
 
-auto LinControllerFacade::IsLinkSimulated() const -> bool
+auto LinControllerFacade::IsNetworkSimulated() const -> bool
 {
-    return _remoteBusSimulator.isLinkSimulated;
+    return _simulatedLinkDetected;
+}
+
+auto LinControllerFacade::IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool
+{
+    return remoteServiceDescriptor.GetServiceType() == ib::mw::ServiceType::Link
+           && remoteServiceDescriptor.GetNetworkName() == _serviceDescriptor.GetNetworkName();
 }
 
 } // namespace lin

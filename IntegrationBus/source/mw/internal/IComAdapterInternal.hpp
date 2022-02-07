@@ -179,7 +179,7 @@ public:
 	
 	// Internal DataSubscriber that is only created on a matching data connection
     virtual sim::data::IDataSubscriber* CreateDataSubscriberInternal(
-        const std::string& canonicalName, const std::string& linkName,
+        const std::string& canonicalName, const std::string& networkName,
         const sim::data::DataExchangeFormat& dataExchangeFormat, sim::data::CallbackExchangeFormatT callback) = 0;
 
     // Internal Rpc server that is only created on a matching rpc connection

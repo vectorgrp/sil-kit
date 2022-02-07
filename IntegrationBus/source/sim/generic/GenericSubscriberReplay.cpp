@@ -36,17 +36,6 @@ auto GenericSubscriberReplay::Config() const -> const cfg::GenericPort&
     return _subscriber.Config();
 }
 
-
-void GenericSubscriberReplay::SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress)
-{
-    _subscriber.SetEndpointAddress(endpointAddress);
-}
-
-auto GenericSubscriberReplay::EndpointAddress() const -> const ib::mw::EndpointAddress&
-{
-    return _subscriber.EndpointAddress();
-}
-
 // ib::mw::sync::ITimeConsumer
 void GenericSubscriberReplay::SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)
 {

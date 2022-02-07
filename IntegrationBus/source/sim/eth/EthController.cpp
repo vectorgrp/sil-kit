@@ -89,16 +89,6 @@ void EthController::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMe
     CallHandlers(msg);
 }
 
-void EthController::SetEndpointAddress(const mw::EndpointAddress& endpointAddress)
-{
-    _serviceDescriptor.legacyEpa = endpointAddress;
-}
-
-auto EthController::EndpointAddress() const -> const mw::EndpointAddress&
-{
-    return _serviceDescriptor.legacyEpa;
-}
-
 template<typename MsgT>
 void EthController::RegisterHandler(CallbackT<MsgT> handler)
 {

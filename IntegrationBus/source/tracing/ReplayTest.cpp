@@ -189,7 +189,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
         cfg.replay.direction = cfg::Replay::Direction::Send;
 
         EthControllerReplay ctrl{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        ctrl.SetEndpointAddress(msg._address);
+        ctrl.SetServiceDescriptor(from_endpointAddress(msg._address));
         EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&ctrl), AnEthMessage(msg)))
             .Times(1);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
@@ -201,7 +201,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
         msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Both;
         EthControllerReplay ctrl{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        ctrl.SetEndpointAddress(msg._address);
+        ctrl.SetServiceDescriptor(from_endpointAddress(msg._address));
         EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&ctrl), AnEthMessage(msg)))
             .Times(1);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
@@ -213,7 +213,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
         msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Send;
         EthControllerReplay ctrl{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        ctrl.SetEndpointAddress(msg._address);
+        ctrl.SetServiceDescriptor(from_endpointAddress(msg._address));
         EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&ctrl), AnEthMessage(msg)))
             .Times(0);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
@@ -241,7 +241,7 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
         msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Receive;
         EthControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        controller.SetEndpointAddress({3,4});
+        controller.SetServiceDescriptor(from_endpointAddress({3,4}));
         controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
         EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), AnEthMessage(msg)))
             .Times(1);
@@ -253,7 +253,7 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
         msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Both;
         EthControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        controller.SetEndpointAddress({3,4});
+        controller.SetServiceDescriptor(from_endpointAddress({3,4}));
         controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
         EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), AnEthMessage(msg)))
             .Times(1);
@@ -264,7 +264,7 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
         msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Receive;
         EthControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        controller.SetEndpointAddress({3,4});
+        controller.SetServiceDescriptor(from_endpointAddress({3,4}));
         controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
         EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), AnEthMessage(msg)))
             .Times(0);
@@ -292,7 +292,7 @@ struct MockCanMessage
     }
 };
 
-TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_send)
+TEST(ReplayTest, DISABLED_cancontroller_replay_config_send)
 {
     MockComAdapter comAdapter{};
 
@@ -307,7 +307,7 @@ TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_send)
         cfg.replay.direction = cfg::Replay::Direction::Send;
     
         CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        can.SetEndpointAddress(msg._address);
+        can.SetServiceDescriptor(from_endpointAddress(msg._address));
         EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&can), ACanMessage(msg)))
             .Times(1);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
@@ -319,7 +319,7 @@ TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_send)
         cfg.replay.direction = cfg::Replay::Direction::Both;
     
         CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        can.SetEndpointAddress(msg._address);
+        can.SetServiceDescriptor(from_endpointAddress(msg._address));
         EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&can), ACanMessage(msg)))
             .Times(1);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
@@ -331,7 +331,7 @@ TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_send)
         cfg.replay.direction = cfg::Replay::Direction::Receive;
     
         CanControllerReplay can{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        can.SetEndpointAddress(msg._address);
+        can.SetServiceDescriptor(from_endpointAddress(msg._address));
         EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&can), ACanMessage(msg)))
             .Times(0);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
@@ -346,7 +346,7 @@ TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_send)
         EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&can), ACanMessage(msg)))
             .Times(0);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
-        can.SetEndpointAddress(msg._address);
+        can.SetServiceDescriptor(from_endpointAddress(msg._address));
         can.ReplayMessage(&msg);
     }
     // Replay Receive / Receive
@@ -359,13 +359,13 @@ TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_send)
         EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&can), ACanMessage(msg)))
             .Times(0);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
-        can.SetEndpointAddress(msg._address);
+        can.SetServiceDescriptor(from_endpointAddress(msg._address));
         can.ReplayMessage(&msg);
     }
     */
 }
 
-TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_receive)
+TEST(ReplayTest, DISABLED_cancontroller_replay_config_receive)
 {
     Callbacks callbacks;
     MockComAdapter comAdapter{};
@@ -383,7 +383,7 @@ TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_receive)
         msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Receive;
         CanControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        controller.SetEndpointAddress({3,4});
+        controller.SetServiceDescriptor(from_endpointAddress({3,4}));
         controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessageCan));
         EXPECT_CALL(callbacks, ReceiveMessageCan(A<ICanController*>(), ACanMessage(msg)))
             .Times(1);
@@ -395,7 +395,7 @@ TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_receive)
         msg._direction = ib::sim::TransmitDirection::RX;
         cfg.replay.direction = cfg::Replay::Direction::Both;
         CanControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        controller.SetEndpointAddress({3,4});
+        controller.SetServiceDescriptor(from_endpointAddress({3,4}));
         controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessageCan));
         EXPECT_CALL(callbacks, ReceiveMessageCan(A<ICanController*>(), ACanMessage(msg)))
             .Times(1);
@@ -406,7 +406,7 @@ TEST(ReplayTest, DEACTIVATE_cancontroller_replay_config_receive)
         msg._direction = ib::sim::TransmitDirection::TX;
         cfg.replay.direction = cfg::Replay::Direction::Receive;
         CanControllerReplay controller{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        controller.SetEndpointAddress({3,4});
+        controller.SetServiceDescriptor(from_endpointAddress({3,4}));
         controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessageCan));
         EXPECT_CALL(callbacks, ReceiveMessageCan(A<ICanController*>(), ACanMessage(msg)))
             .Times(0);
@@ -446,7 +446,7 @@ TEST(ReplayTest, genericpublisher_replay_config_send)
         cfg.replay.direction = cfg::Replay::Direction::Send;
 
         sim::generic::GenericPublisherReplay pub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        pub.SetEndpointAddress(msg._address);
+        pub.SetServiceDescriptor(from_endpointAddress(msg._address));
         EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&pub), AGenericMessage(msg)))
             .Times(1);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
@@ -458,7 +458,7 @@ TEST(ReplayTest, genericpublisher_replay_config_send)
         cfg.replay.direction = cfg::Replay::Direction::Both;
 
         sim::generic::GenericPublisherReplay pub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        pub.SetEndpointAddress(msg._address);
+        pub.SetServiceDescriptor(from_endpointAddress(msg._address));
         EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&pub), AGenericMessage(msg)))
             .Times(1);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
@@ -473,7 +473,7 @@ TEST(ReplayTest, genericpublisher_replay_config_send)
         EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&pub), AGenericMessage(msg)))
             .Times(0);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
-        pub.SetEndpointAddress(msg._address);
+        pub.SetServiceDescriptor(from_endpointAddress(msg._address));
         pub.ReplayMessage(&msg);
     }
     // Replay Receive / Receive
@@ -485,7 +485,7 @@ TEST(ReplayTest, genericpublisher_replay_config_send)
         EXPECT_CALL(comAdapter, SendIbMessage_proxy(AService(&pub), AGenericMessage(msg)))
             .Times(0);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
-        pub.SetEndpointAddress(msg._address);
+        pub.SetServiceDescriptor(from_endpointAddress(msg._address));
         pub.ReplayMessage(&msg);
     }
 }
@@ -505,7 +505,7 @@ TEST(ReplayTest, genericsubscriber_replay_config_send)
         cfg.replay.direction = cfg::Replay::Direction::Send;
 
         sim::generic::GenericSubscriberReplay sub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        sub.SetEndpointAddress(msg._address);
+        sub.SetServiceDescriptor(from_endpointAddress(msg._address));
         EXPECT_CALL(comAdapter, ReceiveIbMessage(msg._address, AGenericMessage(msg)))
             .Times(0);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
@@ -517,7 +517,7 @@ TEST(ReplayTest, genericsubscriber_replay_config_send)
         cfg.replay.direction = cfg::Replay::Direction::Both;
 
         sim::generic::GenericSubscriberReplay sub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        sub.SetEndpointAddress(msg._address);
+        sub.SetServiceDescriptor(from_endpointAddress(msg._address));
         EXPECT_CALL(comAdapter, ReceiveIbMessage(msg._address, AGenericMessage(msg)))
             .Times(0);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
@@ -529,7 +529,7 @@ TEST(ReplayTest, genericsubscriber_replay_config_send)
         cfg.replay.direction = cfg::Replay::Direction::Both;
 
         sim::generic::GenericSubscriberReplay sub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        sub.SetEndpointAddress({1,3});
+        sub.SetServiceDescriptor(from_endpointAddress({1,3}));
         EXPECT_CALL(comAdapter, ReceiveIbMessage(msg._address, AGenericMessage(msg)))
             .Times(0);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
@@ -541,7 +541,7 @@ TEST(ReplayTest, genericsubscriber_replay_config_send)
         cfg.replay.direction = cfg::Replay::Direction::Receive;
 
         sim::generic::GenericSubscriberReplay sub{&comAdapter, cfg, comAdapter.GetTimeProvider()};
-        sub.SetEndpointAddress({1,3});
+        sub.SetServiceDescriptor(from_endpointAddress({1,3}));
         EXPECT_CALL(comAdapter, ReceiveIbMessage(msg._address, AGenericMessage(msg)))
             .Times(0);
         EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);

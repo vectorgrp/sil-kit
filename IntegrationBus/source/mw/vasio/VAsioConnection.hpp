@@ -109,15 +109,15 @@ public:
     }
 
     template <class IbServiceT>
-    void SetHistoryLengthForLink(const std::string& linkName, size_t historyLength, IbServiceT* /*service*/)
+    void SetHistoryLengthForLink(const std::string& networkName, size_t historyLength, IbServiceT* /*service*/)
     {
         // NB: Dummy IbServiceT* is fed in here to deduce IbServiceT, as it is only used in 'typename IbServiceT',
         // which is not sufficient to get the type for some compilers (e.g. Clang)
         typename IbServiceT::IbSendMessagesTypes sendMessageTypes{};
 
-        util::tuple_tools::for_each(sendMessageTypes, [this, &linkName, historyLength](auto&& ibMessage) {
+        util::tuple_tools::for_each(sendMessageTypes, [this, &networkName, historyLength](auto&& ibMessage) {
             using IbMessageT = std::decay_t<decltype(ibMessage)>;
-            auto link = GetLinkByName<IbMessageT>(linkName);
+            auto link = GetLinkByName<IbMessageT>(networkName);
             link->SetHistoryLength(historyLength);
         });
     }
@@ -246,27 +246,27 @@ private:
     const std::string& GetParticipantFromLookup(const std::uint64_t participantId) const;
 
     template<class IbMessageT>
-    auto GetLinkByName(const std::string& linkName) -> std::shared_ptr<IbLink<IbMessageT>>
+    auto GetLinkByName(const std::string& networkName) -> std::shared_ptr<IbLink<IbMessageT>>
     {
-        auto& ibLink = std::get<IbLinkMap<IbMessageT>>(_ibLinks)[linkName];
+        auto& ibLink = std::get<IbLinkMap<IbMessageT>>(_ibLinks)[networkName];
         if (!ibLink)
         {
-            ibLink = std::make_shared<IbLink<IbMessageT>>(linkName, _logger);
+            ibLink = std::make_shared<IbLink<IbMessageT>>(networkName, _logger);
         }
         return ibLink;
     }
 
     template<class IbMessageT, class IbServiceT>
-    void RegisterIbMsgReceiver(const std::string& linkName, ib::mw::IIbMessageReceiver<IbMessageT>* receiver)
+    void RegisterIbMsgReceiver(const std::string& networkName, ib::mw::IIbMessageReceiver<IbMessageT>* receiver)
     {
         assert(_logger);
 
-        auto link = GetLinkByName<IbMessageT>(linkName);
+        auto link = GetLinkByName<IbMessageT>(networkName);
         link->AddLocalReceiver(receiver);
 
         auto vasioReceiver = std::find_if(_vasioReceivers.begin(), _vasioReceivers.end(),
-            [&linkName](auto& receiver) {
-            return receiver->GetDescriptor().linkName == linkName
+            [&networkName](auto& receiver) {
+            return receiver->GetDescriptor().networkName == networkName
                 && receiver->GetDescriptor().msgTypeName == IbMsgTraits<IbMessageT>::TypeName();
         });
         if (vasioReceiver == _vasioReceivers.end())
@@ -274,13 +274,13 @@ private:
             // we have to subscribe to messages from other peers
             VAsioMsgSubscriber subscriptionInfo;
             subscriptionInfo.receiverIdx = static_cast<uint16_t>(_vasioReceivers.size());
-            subscriptionInfo.linkName = linkName;
+            subscriptionInfo.networkName = networkName;
             subscriptionInfo.msgTypeName = IbMsgTraits<IbMessageT>::TypeName();
 
             std::unique_ptr<IVAsioReceiver> rawReceiver = std::make_unique<VAsioReceiver<IbMessageT>>(subscriptionInfo, link, _logger);
             auto* serviceEndpointPtr = dynamic_cast<IIbServiceEndpoint*>(rawReceiver.get());
             ServiceDescriptor tmpServiceDescriptor(dynamic_cast<mw::IIbServiceEndpoint&>(*receiver).GetServiceDescriptor());
-            tmpServiceDescriptor.participantName = _participantName;
+            tmpServiceDescriptor.SetParticipantName(_participantName);
             //Copy the Service Endpoint Id
             serviceEndpointPtr->SetServiceDescriptor(tmpServiceDescriptor);
             _vasioReceivers.emplace_back(std::move(rawReceiver));
@@ -296,11 +296,11 @@ private:
         }
     }
     template<class IbMessageT>
-    void RegisterIbMsgSender(const std::string& linkName, const IIbServiceEndpoint* serviceId)
+    void RegisterIbMsgSender(const std::string& networkName, const IIbServiceEndpoint* serviceId)
     {
-        auto ibLink = GetLinkByName<IbMessageT>(linkName);
+        auto ibLink = GetLinkByName<IbMessageT>(networkName);
         auto&& serviceLinkMap = std::get<IbServiceToLinkMap<IbMessageT>>(_serviceToLinkMap);
-        serviceLinkMap[serviceId->GetServiceDescriptor().linkName] = ibLink;
+        serviceLinkMap[serviceId->GetServiceDescriptor().GetNetworkName()] = ibLink;
     }
 
     template<class IbServiceT>
@@ -342,7 +342,7 @@ private:
     template <class IbMessageT>
     void SendIbMessageImpl(const IIbServiceEndpoint* from, IbMessageT&& msg)
     {
-        const auto& key = from->GetServiceDescriptor().linkName;
+        const auto& key = from->GetServiceDescriptor().GetNetworkName();
 
         auto& linkMap = std::get<IbServiceToLinkMap<std::decay_t<IbMessageT>>>(_serviceToLinkMap);
         if (linkMap.count(key) < 1)
@@ -356,7 +356,7 @@ private:
     template <class IbMessageT>
     void SendIbMessageToTargetImpl(const IIbServiceEndpoint* from, const std::string& targetParticipantName, IbMessageT&& msg)
     {
-      const auto& key = from->GetServiceDescriptor().linkName;
+      const auto& key = from->GetServiceDescriptor().GetNetworkName();
 
       auto& linkMap = std::get<IbServiceToLinkMap<std::decay_t<IbMessageT>>>(_serviceToLinkMap);
       if (linkMap.count(key) < 1)
@@ -414,7 +414,7 @@ private:
     ParticipantId _participantId{0};
     logging::ILogger* _logger{nullptr};
 
-    //! \brief Virtual IB links by linkName according to IbConfig.
+    //! \brief Virtual IB links by networkName according to IbConfig.
     util::tuple_tools::wrapped_tuple<IbLinkMap, IbMessageTypes> _ibLinks;
     //! \brief Lookup for sender objects by ID.
     util::tuple_tools::wrapped_tuple<IbServiceToReceiverMap, IbMessageTypes> _serviceToReceiverMap;

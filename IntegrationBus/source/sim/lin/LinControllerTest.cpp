@@ -584,7 +584,7 @@ TEST_F(LinControllerTest, call_wakeup_handler)
 // Tracing
 ////////////
 
-TEST_F(LinControllerTest, send_with_tracing)
+TEST_F(LinControllerTest, DISABLED_send_with_tracing)
 {
     using namespace ib::extensions;
 

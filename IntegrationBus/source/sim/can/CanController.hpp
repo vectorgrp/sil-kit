@@ -74,9 +74,6 @@ public:
     // IIbToCanController
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanMessage& msg) override;
 
-    void SetEndpointAddress(const ::ib::mw::EndpointAddress& endpointAddress) override;
-    auto EndpointAddress() const -> const ::ib::mw::EndpointAddress& override;
-
     //ITimeConsumer
     void SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider) override;
 
@@ -144,7 +141,7 @@ auto CanController::MakeTxId() -> CanTxId
 
 void CanController::AddSink(extensions::ITraceMessageSink* sink)
 {
-    _tracer.AddSink(EndpointAddress(), *sink);
+    _tracer.AddSink(ib::mw::EndpointAddress{}, *sink);
 }
 
 void CanController::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)

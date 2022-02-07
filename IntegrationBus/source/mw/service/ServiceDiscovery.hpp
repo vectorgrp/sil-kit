@@ -41,9 +41,6 @@ public: //IServiceDiscovery
 
 public: // Interfaces
 
-    //IIbEndpoint
-    void SetEndpointAddress(const ib::mw::EndpointAddress& endpointAddress)  override;
-    auto EndpointAddress() const -> const ib::mw::EndpointAddress& override;
     // IIbServiceEndpoint
     void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
     auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;

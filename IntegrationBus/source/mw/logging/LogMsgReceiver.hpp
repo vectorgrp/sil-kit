@@ -24,8 +24,6 @@ public:
 public:
     void ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const LogMsg& msg) override;
 
-    void SetEndpointAddress(const mw::EndpointAddress &address) override;
-    auto EndpointAddress(void) const -> const mw::EndpointAddress & override;
     // IIbServiceEndpoint
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
