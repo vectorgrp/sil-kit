@@ -304,7 +304,8 @@ ReplayScheduler::ReplayScheduler(const cfg::Config& config,
     // If NetworkSimulator is inactive, configure the replay controllers
     if (participantConfig.networkSimulators.empty())
     {
-        ConfigureControllers(config, participantConfig);
+      // Currently not working
+        //ConfigureControllers(config, participantConfig);
     }
 
     _startTime = _timeProvider->Now();
@@ -518,7 +519,8 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
 
     // Bus Controllers
     makeTasks(participantConfig.ethernetControllers, &mw::IComAdapter::CreateEthController);
-    makeTasks(participantConfig.canControllers, &mw::IComAdapter::CreateCanController);
+    // TODO switch to two arguments once all controllers are changed to take link names
+    //makeTasks(participantConfig.canControllers, &mw::IComAdapter::CreateCanController);
     //TODO makeTasks(participantConfig.flexrayControllers, &mw::IComAdapter::CreateFlexrayController);
     makeTasks(participantConfig.linControllers, &mw::IComAdapter::CreateLinController);
 

@@ -105,7 +105,7 @@ int main(int argc, char** argv)
         auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
         auto* logger = comAdapter->GetLogger();
         auto* participantController = comAdapter->GetParticipantController();
-        auto* canController = comAdapter->CreateCanController("CAN1");
+        auto* canController = comAdapter->CreateCanController("CAN1", "CAN1");
 
         canController->RegisterTransmitStatusHandler(
             [logger](ICanController* /*ctrl*/, const CanTransmitAcknowledge& ack) {

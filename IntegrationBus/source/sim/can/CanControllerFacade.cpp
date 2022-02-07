@@ -3,6 +3,7 @@
 #include "CanControllerFacade.hpp"
 #include "IServiceDiscovery.hpp"
 #include "ServiceDatatypes.hpp"
+#include "ParticipantConfiguration.hpp"
 
 #include <memory>
 
@@ -12,7 +13,7 @@ namespace sim {
 namespace can {
 
   
-CanControllerFacade::CanControllerFacade(mw::IComAdapterInternal* comAdapter, ib::cfg::CanController config,
+CanControllerFacade::CanControllerFacade(mw::IComAdapterInternal* comAdapter, ib::cfg::v1::datatypes::CanController config,
                                          mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _config{config}

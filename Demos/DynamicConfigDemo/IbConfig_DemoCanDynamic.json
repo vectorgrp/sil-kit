@@ -19,8 +19,7 @@
               "Type": "Remote"
             }
           ]
-        },
-        "CanControllers": [ { "Name": "CAN1" } ]
+        }
       },
       {
         "Name": "CanReader",
@@ -34,8 +33,7 @@
         },
         "ParticipantController": {
           "SyncType": "DistributedTimeQuantum"
-        },
-        "CanControllers": [ { "Name": "CAN1" } ]
+        }
       },
       {
         "Name": "SystemController",

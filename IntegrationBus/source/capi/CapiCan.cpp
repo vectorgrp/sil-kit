@@ -20,16 +20,18 @@ struct PendingTransmits {
 };
 PendingTransmits pendingTransmits;
 
-IntegrationBusAPI ib_ReturnCode ib_Can_Controller_Create(ib_Can_Controller** outController, ib_SimulationParticipant* participant, const char* cName)
+IntegrationBusAPI ib_ReturnCode ib_Can_Controller_Create(ib_Can_Controller** outController, ib_SimulationParticipant* participant, const char* cName, const char* cNetwork)
 {
   ASSERT_VALID_OUT_PARAMETER(outController);
   ASSERT_VALID_POINTER_PARAMETER(participant);
   ASSERT_VALID_POINTER_PARAMETER(cName);
+  ASSERT_VALID_POINTER_PARAMETER(cNetwork);
   CAPI_ENTER
   {
     std::string name(cName);
+    std::string network(cNetwork);
     auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
-    auto canController = comAdapter->CreateCanController(name);
+    auto canController = comAdapter->CreateCanController(name, network);
     *outController = reinterpret_cast<ib_Can_Controller*>(canController);
     return ib_ReturnCode_SUCCESS;
   }

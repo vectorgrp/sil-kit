@@ -33,7 +33,7 @@ public:
     CanControllerFacade() = delete;
     CanControllerFacade(const CanControllerFacade&) = default;
     CanControllerFacade(CanControllerFacade&&) = default;
-    CanControllerFacade(mw::IComAdapterInternal* comAdapter, ib::cfg::CanController config,
+    CanControllerFacade(mw::IComAdapterInternal* comAdapter, ib::cfg::v1::datatypes::CanController config,
                         mw::sync::ITimeProvider* timeProvider);
 
 public:
@@ -102,7 +102,7 @@ private:
     mw::ServiceDescriptor _simulatedLink;
 
     ICanController* _currentController;
-    cfg::CanController _config;
+    cfg::v1::datatypes::CanController _config;
     std::unique_ptr<CanController> _canController;
     std::unique_ptr<CanControllerProxy> _canControllerProxy;
 };

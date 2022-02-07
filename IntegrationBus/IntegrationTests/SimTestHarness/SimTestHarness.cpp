@@ -1,11 +1,13 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "SimTestHarness.hpp"
+#include "ParticipantConfiguration.hpp"
 
 #include <algorithm>
 #include <chrono>
 
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/extensions/CreateExtension.hpp"
+
 
 using namespace std::literals::chrono_literals;
 
@@ -52,8 +54,9 @@ public:
     SimSystemController(const ib::cfg::Config& config, uint32_t domainId)
         : _cfg{config}
     {
-        _comAdapter = 
-            ib::CreateComAdapter(_cfg, "SystemController", domainId);
+        auto dynamicConfiguration = ib::cfg::CreateDummyConfiguration();
+
+        _comAdapter = ib::CreateSimulationParticipant(dynamicConfiguration, "SystemController", domainId, _cfg);
 
         _controller = _comAdapter->GetSystemController();
         _monitor = _comAdapter->GetSystemMonitor();
@@ -272,11 +275,12 @@ SimParticipant* SimTestHarness::GetParticipant(const std::string& participantNam
 
 void SimTestHarness::AddParticipant(ib::cfg::Participant participantConfig)
 {
+    auto dynamicConfiguration = ib::cfg::CreateDummyConfiguration();
 
     auto participant = std::make_unique<SimParticipant>();
     participant->_name = participantConfig.name;
     participant->_comAdapter = 
-        ib::CreateComAdapter(_config, participantConfig.name, _domainId);
+        ib::CreateSimulationParticipant(dynamicConfiguration, participantConfig.name, _domainId, _config);
 
     //    Let's make sure the SystemController is cached, in case the user
     //    needs it during simulation (e.g., calling Stop()).

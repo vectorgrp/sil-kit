@@ -10,7 +10,7 @@ namespace can {
 
 
 CanController::CanController(mw::IComAdapterInternal* comAdapter, 
-                             const ib::cfg::CanController& config,
+                             const ib::cfg::v1::datatypes::CanController& config,
                              mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _config{config}
@@ -41,10 +41,10 @@ void CanController::Sleep()
 auto CanController::SendMessage(const CanMessage& msg, void* userContext) -> CanTxId
 {
     // ignore the user's API calls if we're configured for replay
-    if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Send))
-    {
-        return 0;
-    }
+    //if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Send))
+    //{
+    //    return 0;
+    //}
 
     auto msgCopy = msg;
     msgCopy.userContext = userContext;
@@ -72,10 +72,10 @@ auto CanController::SendMessage(const CanMessage& msg, void* userContext) -> Can
 auto CanController::SendMessage(CanMessage&& msg, void* userContext) -> CanTxId
 {
     // ignore the user's API calls if we're configured for replay
-    if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Send))
-    {
-        return 0;
-    }
+    //if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Send))
+    //{
+    //    return 0;
+    //}
 
     msg.userContext = userContext;
     auto txId = MakeTxId();
@@ -134,10 +134,11 @@ void CanController::RegisterHandler(CallbackT<MsgT> handler, std::function<bool(
 void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMessage& msg)
 {
     // ignore messages that do not originate from the replay scheduler 
-    if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Receive))
-    {
-        return;
-    }
+    //if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Receive))
+    //{
+    //    return;
+    //}
+    
     auto msgCopy = msg;
     msgCopy.userContext = nullptr;
     msgCopy.direction = TransmitDirection::RX;
@@ -172,16 +173,16 @@ void CanController::ReplayMessage(const extensions::IReplayMessage* replayMessag
     switch (replayMessage->GetDirection())
     {
     case ib::sim::TransmitDirection::TX:
-        if (IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Send))
-        {
-            ReplaySend(replayMessage);
-        }
+        //if (IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Send))
+        //{
+        //    ReplaySend(replayMessage);
+        //}
         break;
     case ib::sim::TransmitDirection::RX:
-        if (IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Receive))
-        {
-            ReplayReceive(replayMessage);
-        }
+        //if (IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Receive))
+        //{
+        //    ReplayReceive(replayMessage);
+        //}
         break;
     default:
         throw std::runtime_error("CanReplayController: replay message has undefined Direction");

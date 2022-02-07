@@ -186,8 +186,9 @@ int main(int argc, char* argv[])
     ib_SimulationParticipant_SetStopHandler(participant, (void*)&participantHandlerContext, &StopCallback);
     ib_SimulationParticipant_SetShutdownHandler(participant, (void*)&participantHandlerContext, &ShutdownCallback);
 
+    const char* canNetworkName = "CAN1";
     const char* canControllerName = "CAN1";
-    returnCode = ib_Can_Controller_Create(&canController, participant, canControllerName);
+    returnCode = ib_Can_Controller_Create(&canController, participant, canControllerName, canNetworkName);
 
     ib_Can_Controller_RegisterTransmitStatusHandler(
         canController, (void*)&transmitContext, &AckCallback,

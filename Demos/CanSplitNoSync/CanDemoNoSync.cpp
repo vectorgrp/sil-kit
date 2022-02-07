@@ -111,7 +111,7 @@ int main(int argc, char** argv)
         std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
         auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
         auto* logger = comAdapter->GetLogger();
-        auto* canController = comAdapter->CreateCanController("CAN1");
+        auto* canController = comAdapter->CreateCanController("CAN1", "CAN1");
 
         canController->RegisterTransmitStatusHandler(
             [logger](can::ICanController* /*ctrl*/, const can::CanTransmitAcknowledge& ack) {

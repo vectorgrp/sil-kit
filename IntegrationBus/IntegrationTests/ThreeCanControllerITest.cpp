@@ -75,7 +75,7 @@ protected:
     void SetupWriter(ib::test::SimParticipant* writer)
     {
 
-        auto* controller = writer->ComAdapter()->CreateCanController("CAN1");
+        auto* controller = writer->ComAdapter()->CreateCanController("CAN1", "CAN1");
         controller->RegisterTransmitStatusHandler(
             [this, writer](ICanController* /*ctrl*/, const CanTransmitAcknowledge& ack) {
             callbacks.AckHandler(ack);
@@ -103,7 +103,7 @@ protected:
     void SetupReader(ib::test::SimParticipant* reader)
     {
 
-        auto* controller = reader->ComAdapter()->CreateCanController("CAN1");
+        auto* controller = reader->ComAdapter()->CreateCanController("CAN1", "CAN1");
         controller->RegisterTransmitStatusHandler(
             [this](ICanController* /*ctrl*/, const CanTransmitAcknowledge& ack) {
             callbacks.AckHandler(ack);

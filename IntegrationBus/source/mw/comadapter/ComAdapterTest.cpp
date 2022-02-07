@@ -64,7 +64,7 @@ TEST_F(ComAdapterTest, DISABLED_make_basic_controller)
 
     auto comAdapter = CreateNullConnectionComAdapterImpl(config, participantName);
 
-    auto* canController = comAdapter->CreateCanController(controllerName);
+    auto* canController = comAdapter->CreateCanController(controllerName, "CAN1");
     auto basicCanController = dynamic_cast<ib::sim::can::CanController*>(canController);
 
     EXPECT_NE(basicCanController, nullptr);
@@ -127,7 +127,7 @@ TEST_F(ComAdapterTest, DISABLED_make_basic_and_network_controller)
 
     auto comAdapter = CreateNullConnectionComAdapterImpl(config, "P1");
 
-    auto* canController = comAdapter->CreateCanController("CAN1");
+    auto* canController = comAdapter->CreateCanController("CAN1", "CAN1");
     auto* frController = comAdapter->CreateFlexrayController("FR1");
 
     auto basicCanController = dynamic_cast<ib::sim::can::CanController*>(canController);

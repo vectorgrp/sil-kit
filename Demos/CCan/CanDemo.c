@@ -150,10 +150,12 @@ int main(int argc, char* argv[])
     }
     printf("Creating Participant %s for simulation '%s'\n", participantName, domainId);
 
+    const char* canNetworkName = "CAN1";
+
     const char* canControllerName = "CAN1";
-    returnCode = ib_Can_Controller_Create(&canController, participant, canControllerName);
+    returnCode = ib_Can_Controller_Create(&canController, participant, canControllerName, canNetworkName);
     const char* canController2Name = "CAN2";
-    returnCode = ib_Can_Controller_Create(&canController2, participant, canController2Name);
+    returnCode = ib_Can_Controller_Create(&canController2, participant, canController2Name, canNetworkName);
 
     ib_Can_Controller_RegisterTransmitStatusHandler(canController, (void*)&transmitContext, &AckCallback, ib_Can_TransmitStatus_Transmitted | ib_Can_TransmitStatus_Canceled | ib_Can_TransmitStatus_TransmitQueueFull);
     ib_Can_Controller_RegisterReceiveMessageHandler(canController2, (void*)&transmitContext, &ReceiveMessage, ib_Direction_SendReceive);

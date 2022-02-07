@@ -32,8 +32,8 @@ struct CanController
 {
     static constexpr NetworkType networkType = NetworkType::CAN;
 
-    ib::util::Optional<std::string> name;
-    ib::util::Optional<std::string> network;
+    std::string name;
+    std::string network;
 
     std::vector<std::string> useTraceSinks;
     ib::util::Optional<Replay> replay;
@@ -48,8 +48,8 @@ struct LinController
 {
     static constexpr NetworkType networkType = NetworkType::LIN;
 
-    ib::util::Optional<std::string> name;
-    ib::util::Optional<std::string> network;
+    std::string name;
+    std::string network;
 
     std::vector<std::string> useTraceSinks;
     ib::util::Optional<Replay> replay;
@@ -65,8 +65,8 @@ struct EthernetController
 {
     static constexpr NetworkType networkType = NetworkType::Ethernet;
 
-    ib::util::Optional<std::string> name;
-    ib::util::Optional<std::string> network;
+    std::string name;
+    std::string network;
 
     typedef std::array<uint8_t, 6> MacAddress;
     ib::util::Optional<MacAddress> macAddress{};
@@ -84,8 +84,8 @@ struct FlexRayController
 {
     static constexpr NetworkType networkType = NetworkType::FlexRay;
 
-    ib::util::Optional<std::string> name;
-    ib::util::Optional<std::string> network;
+    std::string name;
+    std::string network;
 
     ib::util::Optional<sim::fr::ClusterParameters> clusterParameters{};
     ib::util::Optional<sim::fr::NodeParameters> nodeParameters{};
@@ -110,8 +110,8 @@ struct DataPort
 {
     static constexpr NetworkType networkType = NetworkType::DataMessage;
 
-    ib::util::Optional<std::string> name;
-    ib::util::Optional<std::string> network;
+    std::string name;
+    std::string network;
 
     //! \brief De/serialization format bound to a DataPublisher/DataSubscriber.
     ib::util::Optional<sim::data::DataExchangeFormat> dataExchangeFormat;
@@ -220,6 +220,13 @@ public:
 public:
     datatypes::ParticipantConfiguration _data;
 };
+
+inline auto CreateDummyConfiguration() -> std::shared_ptr<IParticipantConfiguration>
+{
+    ib::cfg::v1::datatypes::ParticipantConfiguration configDt;
+    auto configPtr = std::make_shared<ib::cfg::ParticipantConfiguration>(std::move(configDt));
+    return std::move(configPtr);
+}
 
 } // namespace v1
 

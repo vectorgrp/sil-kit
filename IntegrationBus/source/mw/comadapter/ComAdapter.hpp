@@ -102,7 +102,7 @@ public:
     // Public interface methods
     //
     // IComAdapter
-    auto CreateCanController(const std::string& canonicalName) -> sim::can::ICanController* override;
+    auto CreateCanController(const std::string& canonicalName, const std::string& networkName) -> sim::can::ICanController* override;
     auto CreateEthController(const std::string& canonicalName) -> sim::eth::IEthController* override;
     auto CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFrController* override;
     auto CreateLinController(const std::string& canonicalName) -> sim::lin::ILinController* override;
@@ -310,10 +310,16 @@ private:
                           const mw::SupplementalData& supplementalData, Arg&&... arg) -> ControllerT*;
 
     auto GetLinkById(int16_t linkId) -> cfg::Link&;
+    auto GetNetworkByName(const std::string& networkName) -> cfg::Link&;
 
-    template<class ControllerT, class ConfigT, typename... Arg>
+    template <class ControllerT, class ConfigT, typename... Arg>
     auto CreateControllerForLink(const ConfigT& config, const mw::ServiceType& serviceType,
                                  const mw::SupplementalData& supplementalData, Arg&&... arg)
+        -> ControllerT*;
+
+    template <class ControllerT, class ConfigT, typename... Arg>
+    auto CreateControllerForLinkNew(const ConfigT& config, const mw::ServiceType& serviceType,
+                                    const mw::SupplementalData& supplementalData, Arg&&... arg)
         -> ControllerT*;
 
     template<class IIbToSimulatorT>

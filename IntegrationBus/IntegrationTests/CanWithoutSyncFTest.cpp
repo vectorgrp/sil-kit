@@ -9,6 +9,7 @@
 #include "ib/sim/all.hpp"
 
 #include "CanDatatypesUtils.hpp"
+#include "ParticipantConfiguration.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -81,8 +82,10 @@ protected:
         unsigned numSent{ 0 }, numAcks{ 0 };
         std::promise<void> canWriterAllAcksReceivedPromiseLocal;
 
-        auto comAdapter = ib::CreateComAdapter(_ibConfig, "CanWriter", _domainId);
-        auto* controller = comAdapter->CreateCanController("CAN1");
+        auto dynamicConfiguration = ib::cfg::CreateDummyConfiguration();
+
+        auto comAdapter = ib::CreateSimulationParticipant(dynamicConfiguration, "CanWriter", _domainId, _ibConfig);
+        auto* controller = comAdapter->CreateCanController("CAN1", "CAN1");
 
         controller->RegisterTransmitStatusHandler(
             [this, &canWriterAllAcksReceivedPromiseLocal, &numAcks](ib::sim::can::ICanController* /*ctrl*/, const ib::sim::can::CanTransmitAcknowledge& ack) {
@@ -113,8 +116,10 @@ protected:
         std::promise<void> canReaderAllReceivedPromiseLocal;
         unsigned numReceived{ 0 };
 
-        auto comAdapter = ib::CreateComAdapter(_ibConfig, "CanReader", _domainId);
-        auto* controller = comAdapter->CreateCanController("CAN1");
+        auto dynamicConfiguration = ib::cfg::CreateDummyConfiguration();
+
+        auto comAdapter = ib::CreateSimulationParticipant(dynamicConfiguration, "CanReader", _domainId, _ibConfig);
+        auto* controller = comAdapter->CreateCanController("CAN1", "CAN1");
 
         controller->RegisterReceiveMessageHandler(
             [this, &canReaderAllReceivedPromiseLocal, &numReceived](ib::sim::can::ICanController*, const ib::sim::can::CanMessage& msg) {

@@ -43,12 +43,7 @@ target_include_directories(IbConfiguration
 #    CONFIGS
 #        IbConfig_Example.json
 #        IbConfig_Bad_FileLogger.json
-#        IbConfig_IO-Example.json
 #        IbConfig_Canoe.json
-#        IbConfig_FastRTPS-local.json
-#        IbConfig_FastRTPS-multicast.json
-#        IbConfig_FastRTPS-unicast.json
-#        IbConfig_FastRTPS-configfile.json
 #)
 
 #add_vib_test(TestMwCfgYamlConfig 

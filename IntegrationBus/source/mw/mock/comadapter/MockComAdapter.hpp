@@ -146,7 +146,7 @@ public:
     {
     }
 
-    auto CreateCanController(const std::string& /*canonicalName*/) -> sim::can::ICanController* override { return nullptr; }
+    auto CreateCanController(const std::string& /*canonicalName*/, const std::string& /*networkName*/) -> sim::can::ICanController* override { return nullptr; }
     auto CreateEthController(const std::string& /*canonicalName*/) -> sim::eth::IEthController* override { return nullptr; }
     auto CreateFlexrayController(const std::string& /*canonicalName*/) -> sim::fr::IFrController* override { return nullptr; }
     auto CreateLinController(const std::string& /*canonicalName*/) -> sim::lin::ILinController* override { return nullptr; }

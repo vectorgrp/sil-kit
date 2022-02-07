@@ -112,7 +112,7 @@ int main(int argc, char** argv)
 
         auto* logger = comAdapter->GetLogger();
         auto* participantController = comAdapter->GetParticipantController();
-        auto* canController = comAdapter->CreateCanController("CAN1");
+        auto* canController = comAdapter->CreateCanController("CAN1", "CAN1");
 
         canController->RegisterTransmitStatusHandler(
             [logger](can::ICanController* /*ctrl*/, const can::CanTransmitAcknowledge& ack) {

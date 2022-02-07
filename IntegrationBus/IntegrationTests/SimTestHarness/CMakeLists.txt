@@ -6,6 +6,8 @@ add_library(IbSimTestHarness
 target_link_libraries(IbSimTestHarness
     PUBLIC
         IntegrationBus
+        IbConfiguration
+    INTERFACE IbConfiguration
 )
 target_include_directories(IbSimTestHarness
     INTERFACE

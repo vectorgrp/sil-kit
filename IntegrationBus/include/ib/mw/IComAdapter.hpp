@@ -37,7 +37,7 @@ public:
      */
 
      //! \brief Create a CAN controller at this IB participant.
-    virtual auto CreateCanController(const std::string& canonicalName) -> sim::can::ICanController* = 0;
+    virtual auto CreateCanController(const std::string& canonicalName, const std::string& networkName) -> sim::can::ICanController* = 0;
     //! \brief Create an Ethernet controller at this IB participant.
     virtual auto CreateEthController(const std::string& canonicalName) -> sim::eth::IEthController* = 0;
     //! \brief Create an Ethernet controller at this IB participant.

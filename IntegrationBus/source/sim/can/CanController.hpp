@@ -13,6 +13,8 @@
 #include "IIbServiceEndpoint.hpp"
 #include "IReplayDataController.hpp"
 
+#include "ParticipantConfiguration.hpp"
+
 #include <tuple>
 #include <vector>
 
@@ -38,7 +40,7 @@ public:
     CanController() = delete;
     CanController(const CanController&) = default;
     CanController(CanController&&) = default;
-    CanController(mw::IComAdapterInternal* comAdapter, const ib::cfg::CanController& config,
+    CanController(mw::IComAdapterInternal* comAdapter, const ib::cfg::v1::datatypes::CanController& config,
                   mw::sync::ITimeProvider* timeProvider);
 
 public:
@@ -117,7 +119,7 @@ private:
     // ----------------------------------------
     // private members
     ::ib::mw::IComAdapterInternal* _comAdapter{nullptr};
-    cfg::CanController _config;
+    cfg::v1::datatypes::CanController _config;
     mw::ServiceDescriptor _serviceDescriptor;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
 

@@ -69,7 +69,7 @@ TEST(CanControllerTest, send_can_message)
     ServiceDescriptor senderDescriptor{};
     senderDescriptor.SetParticipantName("canControllerPlaceholder");
     senderDescriptor.SetServiceId(17);
-    ib::cfg::CanController cfg;
+    ib::cfg::v1::datatypes::CanController cfg;
 
     CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
     canController.SetServiceDescriptor(senderDescriptor);
@@ -97,7 +97,7 @@ TEST(CanControllerTest, receive_can_message)
 
     MockComAdapter mockComAdapter;
     CanControllerCallbacks callbackProvider;
-    ib::cfg::CanController cfg;
+    ib::cfg::v1::datatypes::CanController cfg;
 
     CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
     canController.RegisterReceiveMessageHandler(std::bind(&CanControllerCallbacks::ReceiveMessage, &callbackProvider, _1, _2));
@@ -131,7 +131,7 @@ TEST(CanControllerTest, receive_can_message_rx_filter1)
 
     MockComAdapter mockComAdapter;
     CanControllerCallbacks callbackProvider;
-    ib::cfg::CanController cfg;
+    ib::cfg::v1::datatypes::CanController cfg;
     CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
     canController.RegisterReceiveMessageHandler(std::bind(&CanControllerCallbacks::ReceiveMessage, &callbackProvider, _1, _2), (ib::sim::DirectionMask)ib::sim::TransmitDirection::RX);
 
@@ -164,7 +164,7 @@ TEST(CanControllerTest, receive_can_message_rx_filter2)
     MockComAdapter mockComAdapter;
     CanControllerCallbacks callbackProvider;
 
-    ib::cfg::CanController cfg;
+    ib::cfg::v1::datatypes::CanController cfg;
     CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
     canController.RegisterReceiveMessageHandler(std::bind(&CanControllerCallbacks::ReceiveMessage, &callbackProvider, _1, _2), (ib::sim::DirectionMask)ib::sim::TransmitDirection::TX);
 
@@ -191,7 +191,8 @@ TEST(CanControllerTest, receive_can_message_tx_filter1)
     MockComAdapter mockComAdapter;
     CanControllerCallbacks callbackProvider;
 
-    ib::cfg::CanController cfg;
+    ib::cfg::v1::datatypes::CanController cfg;
+    
     CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
     canController.RegisterReceiveMessageHandler(std::bind(&CanControllerCallbacks::ReceiveMessage, &callbackProvider, _1, _2), (ib::sim::DirectionMask)ib::sim::TransmitDirection::TX);
 
@@ -219,7 +220,7 @@ TEST(CanControllerTest, receive_can_message_tx_filter2)
     MockComAdapter mockComAdapter;
     CanControllerCallbacks callbackProvider;
 
-    ib::cfg::CanController cfg;
+    ib::cfg::v1::datatypes::CanController cfg;
     CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
     canController.RegisterReceiveMessageHandler(std::bind(&CanControllerCallbacks::ReceiveMessage, &callbackProvider, _1, _2), (ib::sim::DirectionMask)ib::sim::TransmitDirection::RX);
 
@@ -247,7 +248,7 @@ TEST(CanControllerTest, receive_can_message_tx_filter2)
 TEST(CanControllerTest, start_stop_sleep_reset)
 {
     MockComAdapter mockComAdapter;
-    ib::cfg::CanController cfg;
+    ib::cfg::v1::datatypes::CanController cfg;
 
     CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
 
@@ -269,7 +270,7 @@ TEST(CanControllerTest, start_stop_sleep_reset)
 TEST(CanControllerTest, set_baudrate)
 {
     MockComAdapter mockComAdapter;
-    ib::cfg::CanController cfg;
+    ib::cfg::v1::datatypes::CanController cfg;
 
     CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
 
@@ -288,7 +289,7 @@ TEST(CanControllerTest, receive_ack)
 
     MockComAdapter mockComAdapter;
     CanControllerCallbacks callbackProvider;
-    ib::cfg::CanController cfg;
+    ib::cfg::v1::datatypes::CanController cfg;
 
     CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
     canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
@@ -313,7 +314,7 @@ TEST(CanControllerTest, DISABLED_cancontroller_uses_tracing)
 
     ib::test::MockTraceSink traceSink;
     test::DummyComAdapter comAdapter;
-    ib::cfg::CanController cfg;
+    ib::cfg::v1::datatypes::CanController cfg;
     const std::chrono::nanoseconds now = 1337ns;
     const EndpointAddress controllerAddress = {1,2};
     const EndpointAddress otherAddress = {2,2};

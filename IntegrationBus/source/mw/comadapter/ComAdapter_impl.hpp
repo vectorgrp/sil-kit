@@ -261,15 +261,30 @@ inline void ComAdapter<IbConnectionT>::SetTimeProvider(sync::ITimeProvider* newC
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonicalName) -> can::ICanController*
+auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonicalName, const std::string& networkName) -> can::ICanController*
 {
-    auto&& config = get_by_name(_participant.canControllers, canonicalName);
-
+    // retrieve CAN controller
+    auto& canControllers = _participantConfig->_data.canControllers;
+    auto controllerIter =
+        std::find_if(canControllers.begin(), canControllers.end(), [&canonicalName, &networkName](auto&& controller) {
+            return controller.name == canonicalName && controller.network == networkName;
+        });
+    ib::cfg::v1::datatypes::CanController controller;
+    if (controllerIter != canControllers.end())
+    {
+        controller = *controllerIter;
+    }
+    else
+    {
+        controller.name = canonicalName;
+        controller.network = networkName;
+    }
+    
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeCan;
-
-    return CreateControllerForLink<can::CanControllerFacade>(config, mw::ServiceType::Controller,
-                                                             std::move(supplementalData), config, _timeProvider.get());
+    
+    return CreateControllerForLinkNew<can::CanControllerFacade>(controller, mw::ServiceType::Controller,
+                                                             std::move(supplementalData), controller, _timeProvider.get());
 }
 
 template <class IbConnectionT>
@@ -1331,6 +1346,11 @@ auto ComAdapter<IbConnectionT>::CreateController(const cfg::Link& link, const st
                                                  const mw::SupplementalData& supplementalData,
                                                  Arg&&... arg) -> ControllerT*
 {
+    if (serviceName == "")
+    {
+        throw ib::cfg::Misconfiguration("Services must have a non-empty name.");
+    }
+
     auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
     auto controller = std::make_unique<ControllerT>(this, std::forward<Arg>(arg)...);
     auto* controllerPtr = controller.get();
@@ -1368,6 +1388,18 @@ auto ComAdapter<IbConnectionT>::GetLinkById(int16_t linkId) -> cfg::Link&
     }
 
     throw cfg::Misconfiguration("Invalid linkId " + std::to_string(linkId));
+}
+
+template <class IbConnectionT>
+auto ComAdapter<IbConnectionT>::GetNetworkByName(const std::string& networkName) -> cfg::Link&
+{
+    for (auto&& link : _config.simulationSetup.links)
+    {
+        if (link.name == networkName)
+            return link;
+    }
+
+    throw cfg::Misconfiguration("Invalid linkId " + networkName);
 }
 
 template <class IbConnectionT>
@@ -1421,7 +1453,36 @@ auto ComAdapter<IbConnectionT>::CreateControllerForLink(const ConfigT& config, c
     // Create a new controller, and configure tracing if applicable
     auto* controller = CreateController<ControllerT>(linkCfg, config.name, serviceType, supplementalData, std::forward<Arg>(arg)...);
     auto* traceSource = dynamic_cast<extensions::ITraceMessageSource*>(controller);
-    if (traceSource) { AddTraceSinksToSource(traceSource, config); }
+    if (traceSource)
+    {
+        AddTraceSinksToSource(traceSource, config);
+    }
+
+    return controller;
+}
+
+template <class IbConnectionT>
+template <class ControllerT, class ConfigT, typename... Arg>
+auto ComAdapter<IbConnectionT>::CreateControllerForLinkNew(const ConfigT& config, const mw::ServiceType& serviceType,
+                                const mw::SupplementalData& supplementalData, Arg&&... arg)
+    -> ControllerT*
+{
+    auto&& linkCfg = GetNetworkByName(config.network);
+
+    auto* controllerPtr = GetController<ControllerT>(linkCfg.name, config.name);
+    if (controllerPtr != nullptr)
+    {
+        // We cache the controller and return it here.
+        return controllerPtr;
+    }
+
+    // Create a new controller, and configure tracing if applicable
+    auto* controller = CreateController<ControllerT>(linkCfg, config.name, serviceType, supplementalData, std::forward<Arg>(arg)...);
+    auto* traceSource = dynamic_cast<extensions::ITraceMessageSource*>(controller);
+    if (traceSource)
+    {
+        AddTraceSinksToSource(traceSource, config);
+    }
 
     return controller;
 }

@@ -24,9 +24,9 @@ namespace datatypes {
 bool operator==(const CanController& lhs, const CanController& rhs)
 {
     return lhs.name == rhs.name
-        && lhs.network == rhs.network
-        && lhs.useTraceSinks == rhs.useTraceSinks
-        && lhs.replay == rhs.replay;
+        && lhs.network == rhs.network;
+        //&& lhs.useTraceSinks == rhs.useTraceSinks
+        //&& lhs.replay == rhs.replay;
 }
 
 bool operator==(const LinController& lhs, const LinController& rhs)
