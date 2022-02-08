@@ -82,8 +82,6 @@ public:
 
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::data::DataMessage& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::data::DataMessage&& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::data::PublisherAnnouncement& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::data::PublisherAnnouncement&& msg) = 0;
 
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::rpc::ClientAnnouncement& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::rpc::ClientAnnouncement&& msg) = 0;
@@ -146,8 +144,6 @@ public:
 
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::DataMessage& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::DataMessage&& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::PublisherAnnouncement& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::PublisherAnnouncement&& msg) = 0;
     
 	virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::ClientAnnouncement& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::ClientAnnouncement&& msg) = 0;
@@ -178,9 +174,11 @@ public:
     virtual auto GetServiceDiscovery() -> service::IServiceDiscovery* = 0;
 	
 	// Internal DataSubscriber that is only created on a matching data connection
-    virtual sim::data::IDataSubscriber* CreateDataSubscriberInternal(
-        const std::string& canonicalName, const std::string& networkName,
-        const sim::data::DataExchangeFormat& dataExchangeFormat, sim::data::CallbackExchangeFormatT callback) = 0;
+    virtual auto CreateDataSubscriberInternal(
+        const std::string& topic, const std::string& linkName,
+        const sim::data::DataExchangeFormat& dataExchangeFormat,
+        const std::map<std::string, std::string>& publisherLabels, sim::data::DataHandlerT callback,
+        sim::data::IDataSubscriber* parent) -> sim::data::DataSubscriberInternal*  = 0;
 
     // Internal Rpc server that is only created on a matching rpc connection
     virtual auto CreateRpcServerInternal(const std::string& functionName, const std::string& linkName,

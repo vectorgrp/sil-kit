@@ -17,7 +17,7 @@ namespace {
         }
         for (int i = 0; i < frame1.dataField.size(); i++)
         {
-            if (frame1.dataField[i] != frame2.data.pointer[i]) {
+            if (frame1.dataField[i] != frame2.data.data[i]) {
                 return false;
             }
         }

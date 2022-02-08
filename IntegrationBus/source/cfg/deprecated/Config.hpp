@@ -8,7 +8,6 @@ inline namespace deprecated {
 //!< Apply postprocessing steps to the config, like assigning endpoint addresses and applying legacy fixups.
 void PostProcess(Config& config);
 void UpdateGenericSubscribers(Config& config);
-void UpdateDataSubscribers(Config& config);
 
 } // namespace deprecated
 } // namespace cfg

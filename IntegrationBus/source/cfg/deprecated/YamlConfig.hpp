@@ -66,6 +66,22 @@ auto from_yaml(const YAML::Node& node) -> VibConfigT
 //!< Convert a YAML document node into json, using the internal emitter.
  auto yaml_to_json(YAML::Node node) -> std::string;
 
+
+ template <typename T>
+ auto Serialize(const T& value) -> std::string
+ {
+     return YAML::Dump(to_yaml<T>(value));
+ }
+
+ template <typename T>
+ auto Deserialize(const std::string& str) -> T
+ {
+     std::stringstream ss;
+     ss << str;
+     return from_yaml<T>(YAML::Load(ss));
+ }
+
+
 } // inline namespace deprecated
 } // namespace cfg
 } // namespace ib

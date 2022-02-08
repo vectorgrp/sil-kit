@@ -13,107 +13,172 @@
 #include <cstring>
 #include "CapiImpl.h"
 
-IntegrationBusAPI ib_ReturnCode ib_DataPublisher_Create(
-  ib_DataPublisher** out,
-  ib_SimulationParticipant* participant,
-  const char* topic,
-  ib_DataExchangeFormat* dataTypeInfo,
-  uint8_t history)
+static void assign(std::map<std::string, std::string>& cppLabels, const ib_KeyValueList* cLabels)
 {
-  ASSERT_VALID_OUT_PARAMETER(out);
-  ASSERT_VALID_POINTER_PARAMETER(participant);
-  ASSERT_VALID_POINTER_PARAMETER(topic);
-  ASSERT_VALID_POINTER_PARAMETER(dataTypeInfo);
-  CAPI_ENTER
-  {
-    std::string strTopic(topic);
-    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
-    ib::sim::data::DataExchangeFormat cppDataTypeInfo{std::string(dataTypeInfo->mediaType)};
-    auto dataPublisher = comAdapter->CreateDataPublisher(strTopic, cppDataTypeInfo, history);
-    *out = reinterpret_cast<ib_DataPublisher*>(dataPublisher);
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
+    if (cLabels)
+    {
+        for (uint32_t i = 0; i < cLabels->numLabels; i++)
+        {
+            cppLabels.insert({ cLabels->labels[i].key, cLabels->labels[i].value });
+        }
+    }
 }
 
-
-IntegrationBusAPI ib_ReturnCode ib_DataSubscriber_Create(
-  ib_DataSubscriber** out,
-  ib_SimulationParticipant* participant,
-  const char* topic,
-  ib_DataExchangeFormat* dataTypeInfo,
-  void* context,
-  ib_DataHandler_t dataHandler)
+static void assign(ib_KeyValueList** cLabels, const std::map<std::string, std::string>& cppLabels)
 {
-  ASSERT_VALID_OUT_PARAMETER(out);
-  ASSERT_VALID_POINTER_PARAMETER(participant);
-  ASSERT_VALID_POINTER_PARAMETER(topic);
-  ASSERT_VALID_HANDLER_PARAMETER(dataHandler);
-  ASSERT_VALID_POINTER_PARAMETER(dataTypeInfo);
-  CAPI_ENTER
-  {
-    std::string strTopic(topic);
-    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
-    ib::sim::data::DataExchangeFormat cppDataTypeInfo{ std::string(dataTypeInfo->mediaType) };
-    auto dataSubscriber = comAdapter->CreateDataSubscriber(strTopic, cppDataTypeInfo,
-        [dataHandler, context, out](ib::sim::data::IDataSubscriber* cppSubscriber, const std::vector<uint8_t>& data, const ib::sim::data::DataExchangeFormat& joinedDataExchangeFormat) {
+    size_t numLabels = cppLabels.size();
+    size_t labelsSize = sizeof(ib_KeyValueList) + (numLabels * sizeof(ib_KeyValuePair));
+    *cLabels = (ib_KeyValueList*)malloc(labelsSize);
+    (*cLabels)->numLabels = numLabels;
+
+    uint32_t i = 0;
+    for (auto&& kv : cppLabels)
+    {
+        (*cLabels)->labels[i++] = {kv.first.c_str(), kv.second.c_str()};
+    }
+}
+
+extern "C" {
+
+ib_ReturnCode ib_Data_Publisher_Create(ib_Data_Publisher** outPublisher, ib_SimulationParticipant* participant,
+                                      const char* topic, ib_Data_ExchangeFormat* dataExchangeFormat,
+                                      const ib_KeyValueList* labels, uint8_t history)
+{
+    ASSERT_VALID_OUT_PARAMETER(outPublisher);
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_POINTER_PARAMETER(topic);
+    ASSERT_VALID_POINTER_PARAMETER(dataExchangeFormat);
+    CAPI_ENTER
+    {
+        std::string strTopic(topic);
+        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        ib::sim::data::DataExchangeFormat cppDataTypeInfo{ dataExchangeFormat->mediaType };
+        std::map<std::string, std::string> cppLabels;
+        assign(cppLabels, labels);
+        auto dataPublisher = comAdapter->CreateDataPublisher(strTopic, cppDataTypeInfo, cppLabels, history);
+        *outPublisher = reinterpret_cast<ib_Data_Publisher*>(dataPublisher);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+ib_ReturnCode ib_Data_Publisher_Publish(ib_Data_Publisher* self, const ib_ByteVector* data)
+{
+    ASSERT_VALID_POINTER_PARAMETER(self);
+    ASSERT_VALID_POINTER_PARAMETER(data);
+    CAPI_ENTER
+    {
+        auto cppPublisher = reinterpret_cast<ib::sim::data::IDataPublisher*>(self);
+        cppPublisher->Publish(std::vector<uint8_t>(&(data->data[0]), &(data->data[0]) + data->size));
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+ib_ReturnCode ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_SimulationParticipant* participant,
+                                       const char* topic, ib_Data_ExchangeFormat* dataExchangeFormat,
+                                       const ib_KeyValueList* labels,
+                                       void* defaultDataHandlerContext, ib_Data_Handler_t defaultDataHandler,
+                                       void* newDataSourceContext, ib_Data_NewDataSourceHandler_t newDataSourceHandler)
+{
+    ASSERT_VALID_OUT_PARAMETER(outSubscriber);
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_POINTER_PARAMETER(topic);
+    ASSERT_VALID_HANDLER_PARAMETER(defaultDataHandler);
+    ASSERT_VALID_POINTER_PARAMETER(dataExchangeFormat);
+    ASSERT_VALID_HANDLER_PARAMETER(newDataSourceHandler);
+    CAPI_ENTER
+    {
+        std::string strTopic(topic);
+        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        ib::sim::data::DataExchangeFormat cppDataTypeInfo{ dataExchangeFormat->mediaType };
+        std::map<std::string, std::string> cppLabels;
+        assign(cppLabels, labels);
+
+        auto cppDefaultDataHandler = [defaultDataHandler, defaultDataHandlerContext, outSubscriber](
+                                         ib::sim::data::IDataSubscriber* cppSubscriber,
+                                         const std::vector<uint8_t>& data) {
             uint8_t* payloadPointer = NULL;
             if (data.size() > 0)
             {
                 payloadPointer = (uint8_t* const) & (data[0]);
             }
             const ib_ByteVector ccdata{payloadPointer, data.size()};
-            ib_DataExchangeFormat jdxf;
-            jdxf.mediaType = joinedDataExchangeFormat.mimeType.c_str();
-            dataHandler(context, *out, &ccdata, &jdxf);
-        });
+            defaultDataHandler(defaultDataHandlerContext, *outSubscriber, &ccdata);
+        };
 
-    *out = reinterpret_cast<ib_DataSubscriber*>(dataSubscriber);
+        auto cppNewDataSourceHandler = [newDataSourceHandler, newDataSourceContext, outSubscriber](
+                                           ib::sim::data::IDataSubscriber* subscriber, const std::string& cppTopic,
+                                           const ib::sim::data::DataExchangeFormat& cppDataExchangeFormat,
+                                           const std::map<std::string, std::string>& cppLabels) {
+            ib_Data_ExchangeFormat dxf;
+            dxf.mediaType = cppDataExchangeFormat.mediaType.c_str();
+            ib_KeyValueList* labels;
+            assign(&labels, cppLabels);
+            newDataSourceHandler(newDataSourceContext, *outSubscriber, cppTopic.c_str(), &dxf, labels);
+        };
 
-
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
+        auto dataSubscriber = comAdapter->CreateDataSubscriber(strTopic, cppDataTypeInfo, cppLabels,
+                                                               cppDefaultDataHandler, cppNewDataSourceHandler);
+        *outSubscriber = reinterpret_cast<ib_Data_Subscriber*>(dataSubscriber);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
 }
 
-ib_ReturnCode ib_DataSubscriber_SetReceiveDataHandler(
-  ib_DataSubscriber* subscriber,
-  void* context,
-  ib_DataHandler_t dataHandler)
+ib_ReturnCode ib_Data_Subscriber_SetDefaultReceiveDataHandler(ib_Data_Subscriber* self, void* context,
+                                                      ib_Data_Handler_t dataHandler)
 {
-  ASSERT_VALID_POINTER_PARAMETER(subscriber);
-  ASSERT_VALID_HANDLER_PARAMETER(dataHandler);
-  CAPI_ENTER
-  {
-    auto cppSubscriber = reinterpret_cast<ib::sim::data::IDataSubscriber*>(subscriber);
-    cppSubscriber->SetReceiveMessageHandler(
-      [dataHandler, context, subscriber](ib::sim::data::IDataSubscriber* cppSubscriber, const std::vector<uint8_t>& data, const ib::sim::data::DataExchangeFormat& joinedDataExchangeFormat)
-      {
-        uint8_t* payloadPointer = NULL;
-        if (data.size() > 0)
-        {
-          payloadPointer = (uint8_t* const)&(data[0]);
-        }
-        const ib_ByteVector ccdata{ payloadPointer, data.size() };
-        ib_DataExchangeFormat jdxf;
-        jdxf.mediaType = joinedDataExchangeFormat.mimeType.c_str();
-        dataHandler(context, subscriber,  &ccdata, &jdxf);
-      });
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
+    ASSERT_VALID_POINTER_PARAMETER(self);
+    ASSERT_VALID_HANDLER_PARAMETER(dataHandler);
+    CAPI_ENTER
+    {
+        auto cppSubscriber = reinterpret_cast<ib::sim::data::IDataSubscriber*>(self);
+        cppSubscriber->SetDefaultReceiveMessageHandler(
+            [dataHandler, context, self](ib::sim::data::IDataSubscriber* cppSubscriber,
+                                         const std::vector<uint8_t>& data) {
+                uint8_t* payloadPointer = NULL;
+                if (data.size() > 0)
+                {
+                    payloadPointer = (uint8_t* const) & (data[0]);
+                }
+                const ib_ByteVector ccdata{payloadPointer, data.size()};
+                dataHandler(context, self, &ccdata);
+            });
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
 }
 
-ib_ReturnCode ib_DataPublisher_Publish(ib_DataPublisher* publisher, const ib_ByteVector* data)
+ib_ReturnCode ib_Data_Subscriber_RegisterSpecificDataHandler(ib_Data_Subscriber* self,
+                                                            ib_Data_ExchangeFormat* dataExchangeFormat,
+                                                            const ib_KeyValueList* labels,
+                                                            void* context, ib_Data_Handler_t dataHandler)
 {
-  ASSERT_VALID_POINTER_PARAMETER(publisher);
-  ASSERT_VALID_POINTER_PARAMETER(data);
-  CAPI_ENTER
-  {
-    auto cppPublisher = reinterpret_cast<ib::sim::data::IDataPublisher*>(publisher);
-    cppPublisher->Publish(std::vector<uint8_t>(&(data->pointer[0]), &(data->pointer[0]) + data->size));
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
+    ASSERT_VALID_POINTER_PARAMETER(self);
+    ASSERT_VALID_POINTER_PARAMETER(dataExchangeFormat);
+    ASSERT_VALID_HANDLER_PARAMETER(dataHandler);
+    CAPI_ENTER
+    {
+        auto cppSubscriber = reinterpret_cast<ib::sim::data::IDataSubscriber*>(self);
+        ib::sim::data::DataExchangeFormat cppDataTypeInfo{dataExchangeFormat->mediaType};
+        std::map<std::string, std::string> cppLabels;
+        assign(cppLabels, labels);
+        cppSubscriber->RegisterSpecificDataHandler(cppDataTypeInfo, cppLabels,
+            [dataHandler, context, self](ib::sim::data::IDataSubscriber* cppSubscriber,
+                                         const std::vector<uint8_t>& data) {
+                uint8_t* payloadPointer = NULL;
+                if (data.size() > 0)
+                {
+                    payloadPointer = (uint8_t* const) & (data[0]);
+                }
+                const ib_ByteVector ccdata{payloadPointer, data.size()};
+                dataHandler(context, self, &ccdata);
+            });
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
 }
 

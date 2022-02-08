@@ -27,12 +27,11 @@ void PublishMessage(IDataPublisher* publisher, std::string topicname)
     publisher->Publish(std::move(data));
 }
 
-void ReceiveMessage(IDataSubscriber* subscriber, const std::vector<uint8_t>& data,
-                    const DataExchangeFormat& dataExchangeFormat)
+void ReceiveMessage(IDataSubscriber* subscriber, const std::vector<uint8_t>& data)
 {
     std::string message{data.begin(), data.end()};
     std::cout << ">> Received new " << subscriber->Config().name << " Message: with data=\"" << message << "\""
-              << " mimeType=\"" << dataExchangeFormat.mimeType << "\"" << std::endl;
+              << std::endl;
 }
 
 /**************************************************************************************************
@@ -42,7 +41,7 @@ void ReceiveMessage(IDataSubscriber* subscriber, const std::vector<uint8_t>& dat
 /*
 PubSub1
 Pub: "Topic1", DataExchangeFormat{"A"} -> Subscriber1
-Pub: "Topic2", DataExchangeFormat{"*"} -> Subscriber1, Subscriber2
+Pub: "Topic2", DataExchangeFormat{"A"} -> Subscriber1, Subscriber2
 Sub: "Topic3", DataExchangeFormat{"A"} <- PubSub2
 
 PubSub2
@@ -51,7 +50,7 @@ Pub: "Topic3", DataExchangeFormat{"A"} -> PubSub1, PubSub2
 Sub: "Topic3", DataExchangeFormat{"A"} <- PubSub2                           (self)
 
 Subscriber1
-Sub: "Topic1", DataExchangeFormat{"*"} <- PubSub1, PubSub2                  (two pub)
+Sub: "Topic1", DataExchangeFormat{""}  <- PubSub1, PubSub2                  (two pub)
 Sub: "Topic2", DataExchangeFormat{"A"} <- PubSub1                           (single pub)
 
 Subscriber2
@@ -101,9 +100,9 @@ int main(int argc, char** argv)
         participantController->SetPeriod(1s);
         if (participantName == "PubSub1")
         {
-            auto* PubTopic1 = comAdapter->CreateDataPublisher("Topic1", DataExchangeFormat{"A"}, 0);
-            auto* PubTopic2 = comAdapter->CreateDataPublisher("Topic2", DataExchangeFormat{"*"}, 0);
-            auto* SubTopic3 = comAdapter->CreateDataSubscriber("Topic3", DataExchangeFormat{"A"}, ReceiveMessage);
+            auto* PubTopic1 = comAdapter->CreateDataPublisher("Topic1", DataExchangeFormat{"A"}, {}, 0);
+            auto* PubTopic2 = comAdapter->CreateDataPublisher("Topic2", DataExchangeFormat{"A"}, {}, 0);
+            auto* SubTopic3 = comAdapter->CreateDataSubscriber("Topic3", DataExchangeFormat{"A"}, {}, ReceiveMessage);
 
             participantController->SetSimulationTask(
                 [PubTopic1, PubTopic2](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -117,9 +116,9 @@ int main(int argc, char** argv)
         }
         else if (participantName == "PubSub2")
         {
-            auto* PubTopic1 = comAdapter->CreateDataPublisher("Topic1", DataExchangeFormat{"A"}, 0);
-            auto* PubTopic3 = comAdapter->CreateDataPublisher("Topic3", DataExchangeFormat{"A"}, 0);
-            auto* SubTopic3 = comAdapter->CreateDataSubscriber("Topic3", DataExchangeFormat{"A"}, ReceiveMessage);
+            auto* PubTopic1 = comAdapter->CreateDataPublisher("Topic1", DataExchangeFormat{"A"}, {}, 0);
+            auto* PubTopic3 = comAdapter->CreateDataPublisher("Topic3", DataExchangeFormat{"A"}, {}, 0);
+            auto* SubTopic3 = comAdapter->CreateDataSubscriber("Topic3", DataExchangeFormat{"A"}, {}, ReceiveMessage);
 
             participantController->SetSimulationTask(
                 [PubTopic1, PubTopic3](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -132,8 +131,8 @@ int main(int argc, char** argv)
         }
         else if (participantName == "Subscriber1")
         {
-            auto* SubTopic1 = comAdapter->CreateDataSubscriber("Topic1", DataExchangeFormat{"*"}, ReceiveMessage);
-            auto* SubTopic2 = comAdapter->CreateDataSubscriber("Topic2", DataExchangeFormat{"A"}, ReceiveMessage);
+            auto* SubTopic1 = comAdapter->CreateDataSubscriber("Topic1", DataExchangeFormat{""}, {}, ReceiveMessage);
+            auto* SubTopic2 = comAdapter->CreateDataSubscriber("Topic2", DataExchangeFormat{"A"}, {}, ReceiveMessage);
 
             participantController->SetSimulationTask(
                 [SubTopic1, SubTopic2](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -144,8 +143,8 @@ int main(int argc, char** argv)
         }
         else if (participantName == "Subscriber2")
         {
-            auto* SubTopic2 = comAdapter->CreateDataSubscriber("Topic2", DataExchangeFormat{"A"}, ReceiveMessage);
-            auto* SubTopic3 = comAdapter->CreateDataSubscriber("Topic3", DataExchangeFormat{"B"}, ReceiveMessage);
+            auto* SubTopic2 = comAdapter->CreateDataSubscriber("Topic2", DataExchangeFormat{"A"}, {}, ReceiveMessage);
+            auto* SubTopic3 = comAdapter->CreateDataSubscriber("Topic3", DataExchangeFormat{"B"}, {}, ReceiveMessage);
 
             participantController->SetSimulationTask(
                 [SubTopic2, SubTopic3](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {

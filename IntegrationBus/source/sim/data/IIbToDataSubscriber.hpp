@@ -13,7 +13,7 @@ namespace data {
 
 //! \brief IIbToDataPubSubHandshake interface used by the ComAdapter
 class IIbToDataSubscriber
-    : public mw::IIbEndpoint<PublisherAnnouncement>
+    : public mw::IIbEndpoint<>
     , public mw::IIbSender<>
 {
 };

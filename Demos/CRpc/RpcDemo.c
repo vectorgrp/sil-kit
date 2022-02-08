@@ -57,7 +57,7 @@ void PrintByteVector(const ib_ByteVector* data)
 {
     for (int i = 0; i < data->size; i++)
     {
-        printf("%i", data->pointer[i]);
+        printf("%i", data->data[i]);
         if (i < data->size - 1)
         {
             printf(", ");
@@ -74,7 +74,7 @@ void CallHandler(void* context, ib_Rpc_Server* server, const ib_Rpc_CallHandle* 
     PrintByteVector(argumentData);
     for (int i = 0; i < argumentData->size; i++)
     {
-        tmp[i] = argumentData->pointer[i] + (uint8_t)100;
+        tmp[i] = argumentData->data[i] + (uint8_t)100;
     }
 
     ib_ByteVector returnData = { tmp, argumentData->size };

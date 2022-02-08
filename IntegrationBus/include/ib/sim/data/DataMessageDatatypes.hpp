@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <vector>
 #include <functional>
+#include <map>
 
 namespace ib {
 namespace sim {
@@ -20,11 +21,23 @@ class IDataPublisher;
  * fields
  */
 struct DataExchangeFormat {
-    std::string mimeType;
+    std::string mediaType;
 };
 
+inline bool operator==(const DataExchangeFormat& lhs, const DataExchangeFormat& rhs)
+{
+    return lhs.mediaType == rhs.mediaType;
+}
+
 //! \brief Callback type for new data reception callbacks
-using CallbackExchangeFormatT = std::function<void(ib::sim::data::IDataSubscriber* subscriber, const std::vector<uint8_t>& data, const ib::sim::data::DataExchangeFormat& dataExchangeFormat)>;
+using DataHandlerT =
+    std::function<void(ib::sim::data::IDataSubscriber* subscriber, const std::vector<uint8_t>& data)>;
+
+//! \brief Callback type for new data sources
+using NewDataSourceHandlerT = std::function<void(ib::sim::data::IDataSubscriber* subscriber, const std::string& topic,
+                                                 const ib::sim::data::DataExchangeFormat& dataExchangeFormat,
+                                                 const std::map<std::string, std::string>& labels)>;
+
 
 /*! \brief A data message
  *
@@ -33,26 +46,6 @@ using CallbackExchangeFormatT = std::function<void(ib::sim::data::IDataSubscribe
 struct DataMessage {
     std::vector<uint8_t> data;
 };
-
-struct PublisherAnnouncement
-{
-    std::string        topic;
-    std::string        pubUUID;
-    DataExchangeFormat pubDataExchangeFormat;
-};
-
-// ================================================================================
-//  Inline Implementations
-// ================================================================================
-inline bool operator==(const DataMessage& lhs, const DataMessage& rhs)
-{
-    return lhs.data == rhs.data;
-}
-
-inline bool operator==(const sim::data::DataExchangeFormat& lhs, const sim::data::DataExchangeFormat& rhs)
-{
-    return lhs.mimeType == rhs.mimeType;
-}
 
 } // namespace data
 } // namespace sim

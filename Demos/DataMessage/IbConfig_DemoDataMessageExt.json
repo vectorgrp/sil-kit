@@ -1,0 +1,112 @@
+{
+  "ConfigVersion": "0.0.1",
+  "ConfigName": "DataMessageDemo",
+  "Description": "Sample Configuration for Data Messages",
+
+  "SimulationSetup": {
+
+    "Participants": [
+      {
+        "Name": "Publisher1",
+        "Description": "Publishes different data messages",
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Stdout",
+              "Level": "Info"
+            }
+          ]
+        },
+        "ParticipantController": {
+          "SyncType": "DistributedTimeQuantum"
+        },
+        "DataPublishers": [
+          {
+            "Name": "Topic1"
+          }
+
+        ]
+      },
+      {
+        "Name": "Publisher2",
+        "Description": "Publishes different data messages",
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Stdout",
+              "Level": "Info"
+            }
+          ]
+        },
+        "ParticipantController": {
+          "SyncType": "DistributedTimeQuantum"
+        },
+        "DataPublishers": [
+          {
+            "Name": "Topic1"
+          }
+
+        ]
+      },
+      {
+        "Name": "Subscriber",
+        "Description": "Publishes different data messages",
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Stdout",
+              "Level": "Info"
+            }
+          ]
+        },
+        "ParticipantController": {
+          "SyncType": "DistributedTimeQuantum"
+        },
+        "DataSubscribers": [
+          {
+            "Name": "Topic1"
+          }
+        ]
+      },
+      {
+        "Name": "SystemController",
+
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Remote"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "SystemMonitor",
+        "Description": "Passive SystemMonitor that can be optionally attached. Does not participate in synchronization.",
+
+        "Logger": {
+          "LogFromRemotes": true,
+          "FlushLevel": "Info",
+          "Sinks": [
+            {
+              "Type": "Stdout"
+            }
+          ]
+        }
+      }
+    ],
+    "Links": [
+      {
+        "Name": "TopicLink",       
+        "Endpoints": [          
+          "Publisher1/Topic1",  
+          "Publisher2/Topic1",  
+          "Subscriber/Topic1"  
+        ]
+      }
+    ]
+  },
+
+  "MiddlewareConfig": {
+    "ActiveMiddleware": "VAsio"
+  }
+}

@@ -185,7 +185,6 @@ private:
         sync::ParticipantStatus,
         sim::generic::GenericMessage,
         sim::data::DataMessage,
-        sim::data::PublisherAnnouncement,
         sim::rpc::ClientAnnouncement,
         sim::rpc::ServerAcknowledge,
         sim::rpc::FunctionCall,
@@ -314,10 +313,6 @@ private:
         {
             using IbMessageT = std::decay_t<decltype(ibMessage)>;
             this->RegisterIbMsgReceiver<IbMessageT, IbServiceT>(link, service);
-
-            auto&& receiverMap = std::get<IbServiceToReceiverMap<IbMessageT>>(_serviceToReceiverMap);
-            auto& serviceId = dynamic_cast<IIbServiceEndpoint&>(*service);
-            receiverMap[to_string(serviceId.GetServiceDescriptor())] = service;
         }
         );
 
@@ -416,8 +411,7 @@ private:
 
     //! \brief Virtual IB links by networkName according to IbConfig.
     util::tuple_tools::wrapped_tuple<IbLinkMap, IbMessageTypes> _ibLinks;
-    //! \brief Lookup for sender objects by ID.
-    util::tuple_tools::wrapped_tuple<IbServiceToReceiverMap, IbMessageTypes> _serviceToReceiverMap;
+    //! \brief Lookup for links by name.
     util::tuple_tools::wrapped_tuple<IbServiceToLinkMap, IbMessageTypes> _serviceToLinkMap;
 
     std::vector<std::unique_ptr<IVAsioReceiver>> _vasioReceivers;

@@ -27,7 +27,7 @@ class IIbToRpcClient;
 class IIbToRpcServer;
 class IIbToRpcServerInternal;
 class RpcServerInternal;
-} // namespace rpc
+} // rpc
 } // sim
 namespace mw {
 namespace service {

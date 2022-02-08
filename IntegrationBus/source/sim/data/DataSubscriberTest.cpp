@@ -26,20 +26,19 @@ class DataSubscriberTest : public ::testing::Test
 protected:
     struct Callbacks
     {
-        MOCK_METHOD3(ReceiveData, void(IDataSubscriber*, const std::vector<uint8_t>& data,
-                                       const DataExchangeFormat& dataExchangeFormat));
+        MOCK_METHOD2(ReceiveData, void(IDataSubscriber*, const std::vector<uint8_t>& data));
     };
 
 protected:
     DataSubscriberTest()
-        : subscriber{ &comAdapter, config, comAdapter.GetTimeProvider(), {} }
-        , subscriberOther{ &comAdapter, config, comAdapter.GetTimeProvider(), {} }
+        : subscriber{ &comAdapter, config, comAdapter.GetTimeProvider(), {}, nullptr }
+        , subscriberOther{ &comAdapter, config, comAdapter.GetTimeProvider(), {}, nullptr }
     {
         subscriber.SetServiceDescriptor(from_endpointAddress(endpointAddress));
-        subscriber.SetReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));
+        subscriber.SetDefaultReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));
 
         subscriberOther.SetServiceDescriptor(from_endpointAddress(otherEndpointAddress));
-        subscriberOther.SetReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));
+        subscriberOther.SetDefaultReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));
     }
 
     // Workaround for MS VS2015 where we cannot initialize the config member directly
@@ -69,7 +68,7 @@ TEST_F(DataSubscriberTest, trigger_callback)
 {
     const DataMessage msg{{0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u}};
 
-    EXPECT_CALL(callbacks, ReceiveData(&subscriber, msg.data, DataExchangeFormat{}))
+    EXPECT_CALL(callbacks, ReceiveData(nullptr, msg.data))
         .Times(1);
 
     subscriber.ReceiveIbMessage(&subscriberOther, msg);

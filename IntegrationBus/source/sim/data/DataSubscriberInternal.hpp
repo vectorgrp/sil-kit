@@ -3,42 +3,30 @@
 #pragma once
 
 #include "ib/mw/fwd_decl.hpp"
-#include "ib/sim/data/IDataSubscriber.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
 
 #include "IIbToDataSubscriberInternal.hpp"
 #include "IComAdapterInternal.hpp"
+#include "DataMessageDatatypeUtils.hpp"
 
 namespace ib {
 namespace sim {
 namespace data {
 
 class DataSubscriberInternal
-    : public IDataSubscriber
-    , public IIbToDataSubscriberInternal
+    : public IIbToDataSubscriberInternal
     , public mw::sync::ITimeConsumer
     , public mw::IIbServiceEndpoint
 {
 public:
-    // ----------------------------------------
-    // Constructors and Destructor
-    DataSubscriberInternal() = delete;
-    DataSubscriberInternal(const DataSubscriberInternal&) = default;
-    DataSubscriberInternal(DataSubscriberInternal&&) = default;
-
     DataSubscriberInternal(mw::IComAdapterInternal* comAdapter, cfg::DataPort config,
-        mw::sync::ITimeProvider* timeProvider, CallbackExchangeFormatT callback);
+        mw::sync::ITimeProvider* timeProvider, DataHandlerT defaultHandler, IDataSubscriber* parent);
 
-public:
-    // ----------------------------------------
-    // Operator Implementations
-    DataSubscriberInternal& operator=(DataSubscriberInternal& other) = default;
-    DataSubscriberInternal& operator=(DataSubscriberInternal&& other) = default;
+    void SetDefaultReceiveMessageHandler(DataHandlerT handler);
 
-public:
-    void SetReceiveMessageHandler(CallbackExchangeFormatT callback) override;
+    void RegisterSpecificDataHandlerInternal(DataHandlerT handler);
 
-    auto Config() const -> const cfg::DataPort& override;
+    auto Config() const -> const cfg::DataPort&;
 
     //! \brief Accepts messages originating from IB communications.
     void ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const DataMessage& msg) override;
@@ -57,8 +45,10 @@ private:
     cfg::DataPort _config{};
     mw::IComAdapterInternal* _comAdapter{nullptr};
     mw::ServiceDescriptor _serviceDescriptor{};
-    CallbackExchangeFormatT  _callback;
+    DataHandlerT  _defaultHandler;
+    std::vector<DataHandlerT> _specificHandlers;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
+    IDataSubscriber* _parent{ nullptr };
 };
 
 // ================================================================================

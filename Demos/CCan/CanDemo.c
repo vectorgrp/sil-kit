@@ -84,14 +84,14 @@ void ReceiveMessage(void* context, ib_Can_Controller* controller, ib_Can_Message
 
     for (i = 0; i < message->canFrame->data.size; i++)
     {
-        char ch = message->canFrame->data.pointer[i];
+        char ch = message->canFrame->data.data[i];
         if (isalnum(ch))
         {
             position += sprintf(position, "%c", ch);
         }
         else
         {
-            position += sprintf(position, "<%x>", message->canFrame->data.pointer[i]);
+            position += sprintf(position, "<%x>", message->canFrame->data.data[i]);
         }
     }
     position += sprintf(position, "\n");
@@ -109,7 +109,7 @@ void SendCanMessage()
     canMessageCounter += 1;
     int payloadSize = snprintf(payload, sizeof(payload), "CAN %i", canMessageCounter);
 
-    msg.data.pointer = &payload[0];
+    msg.data.data = &payload[0];
     msg.data.size = payloadSize;
     msg.dlc = payloadSize;
 

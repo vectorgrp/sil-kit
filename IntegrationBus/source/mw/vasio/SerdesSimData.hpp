@@ -21,17 +21,6 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, DataMess
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const PublisherAnnouncement& msg)
-{
-    buffer << msg.topic << msg.pubUUID << msg.pubDataExchangeFormat.mimeType;
-    return buffer;
-}
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, PublisherAnnouncement& msg)
-{
-    buffer >> msg.topic >> msg.pubUUID >> msg.pubDataExchangeFormat.mimeType;
-    return buffer;
-}
-
 } // namespace data    
 } // namespace sim
 } // namespace ib

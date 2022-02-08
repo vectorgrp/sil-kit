@@ -152,25 +152,22 @@ public:
     auto CreateLinController(const std::string& /*canonicalName*/) -> sim::lin::ILinController* override { return nullptr; }
     auto CreateGenericPublisher(const std::string& /*canonicalName*/) -> sim::generic::IGenericPublisher* override { return nullptr; }
     auto CreateGenericSubscriber(const std::string& /*canonicalName*/) -> sim::generic::IGenericSubscriber* override { return nullptr; }
-    auto CreateDataPublisher(const std::string& /*canonicalName*/,
-                             const sim::data::DataExchangeFormat& /*dataExchangeFormat*/, size_t /* history */)
-        -> sim::data::IDataPublisher* override
-    {
-        return nullptr;
-    }
-    auto CreateDataSubscriber(const std::string& /*canonicalName*/,
-                              const sim::data::DataExchangeFormat& /*dataExchangeFormat*/,
-                              sim::data::CallbackExchangeFormatT /* callback*/) -> sim::data::IDataSubscriber* override
-    {
-        return nullptr;
-    }
-    auto CreateDataSubscriberInternal(const std::string& canonicalName, const std::string& linkName,
+    auto CreateDataPublisher(const std::string& /*topic*/,
+                             const ib::sim::data::DataExchangeFormat& /*dataExchangeFormat*/,
+                             const std::map<std::string, std::string>& /*labels*/, size_t /* history */)
+        -> ib::sim::data::IDataPublisher* override  { return nullptr; }
+    auto CreateDataSubscriber(const std::string& /*topic*/,
+                              const ib::sim::data::DataExchangeFormat& /*dataExchangeFormat*/,
+                              const std::map<std::string, std::string>& /*labels*/,
+                              ib::sim::data::DataHandlerT /* callback*/,
+                              ib::sim::data::NewDataSourceHandlerT /*newDataSourceHandler*/)
+        -> ib::sim::data::IDataSubscriber* override { return nullptr; }
+    auto CreateDataSubscriberInternal(const std::string& topic, const std::string& linkName,
                                       const sim::data::DataExchangeFormat& dataExchangeFormat,
-                                      sim::data::CallbackExchangeFormatT /*callback*/)
-        -> sim::data::IDataSubscriber* override
-    {
-        return nullptr;
-    }
+                                      const std::map<std::string, std::string>& /*publisherLabels*/,
+                                      sim::data::DataHandlerT /*callback*/, sim::data::IDataSubscriber* /*parent*/)
+        -> sim::data::DataSubscriberInternal* override { return nullptr; }
+
     auto CreateRpcClient(const std::string& /*functionName*/, const ib::sim::rpc::RpcExchangeFormat /*exchangeFormat*/,
                          ib::sim::rpc::CallReturnHandler /*handler*/) -> ib::sim::rpc::IRpcClient* override
     {
@@ -240,8 +237,6 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::data::DataMessage&& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::data::DataMessage& /*msg*/) override {}
     virtual void SendIbMessage_proxy(const IIbServiceEndpoint* /*from*/, const sim::data::DataMessage& /*msg*/) {}
-    void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, const sim::data::PublisherAnnouncement& /*msg*/) override {}
-    void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, sim::data::PublisherAnnouncement&& /*msg*/) override {}
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::rpc::ClientAnnouncement& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::rpc::ClientAnnouncement&& /*msg*/) override {}
@@ -305,8 +300,6 @@ public:
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::data::DataMessage& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::data::DataMessage&& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::data::PublisherAnnouncement& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::data::PublisherAnnouncement&& /*msg*/) override {}
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::rpc::ClientAnnouncement& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::rpc::ClientAnnouncement&& /*msg*/) override {}

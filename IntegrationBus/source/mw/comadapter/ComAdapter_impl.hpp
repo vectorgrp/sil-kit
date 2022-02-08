@@ -35,6 +35,7 @@
 #include "Logger.hpp"
 #include "TimeProvider.hpp"
 #include "ServiceDiscovery.hpp"
+#include "YamlConfig.hpp"
 
 #include "tuple_tools/bind.hpp"
 #include "tuple_tools/for_each.hpp"
@@ -278,19 +279,22 @@ auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonical
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateDataSubscriberInternal(const std::string& topic, 
-    const std::string& networkName, const sim::data::DataExchangeFormat& dataExchangeFormat, 
-    sim::data::CallbackExchangeFormatT callback) -> sim::data::IDataSubscriber*
+auto ComAdapter<IbConnectionT>::CreateDataSubscriberInternal(const std::string& topic, const std::string& linkName,
+                                                             const sim::data::DataExchangeFormat& dataExchangeFormat,
+                                                             const std::map<std::string, std::string>& publisherLabels,
+                                                             sim::data::DataHandlerT defaultHandler,
+                                                             sim::data::IDataSubscriber* parent)
+    -> sim::data::DataSubscriberInternal*
 {
+    _logger->Trace("Creating internal subscriber for topic={}, linkName={}", topic, linkName);
+
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataSubscriberInternal;
 
-    _logger->Trace("Creating internal subscriber for topic={}, networkName={}", topic, networkName);
-
     // Link config
     cfg::Link link;
-    link.id = static_cast<int16_t>(hash(networkName));
-    link.name = networkName;
+    link.id = static_cast<int16_t>(hash(linkName));
+    link.name = linkName;
     link.type = cfg::Link::Type::DataMessage;
 
     // Controller config
@@ -298,16 +302,16 @@ auto ComAdapter<IbConnectionT>::CreateDataSubscriberInternal(const std::string& 
     config.linkId = link.id;
     config.name = topic;
     config.dataExchangeFormat = dataExchangeFormat;
-
-    return CreateController<sim::data::DataSubscriberInternal>(link, config.name, mw::ServiceType::Controller,
-                                                               supplementalData, config,
-        _timeProvider.get(), callback);
+    config.labels = publisherLabels;
+    return CreateController<sim::data::DataSubscriberInternal>(link, config.name, mw::ServiceType::Controller, std::move(supplementalData), config,
+        _timeProvider.get(), defaultHandler, parent);
 
 }
 
+
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateDataPublisher(const std::string& canonicalName,
-    const ib::sim::data::DataExchangeFormat& dataExchangeFormat,
+auto ComAdapter<IbConnectionT>::CreateDataPublisher(const std::string& topic,
+    const ib::sim::data::DataExchangeFormat& dataExchangeFormat, const std::map<std::string, std::string>& labels,
     size_t history) -> sim::data::IDataPublisher*
 {
     if (history > 1)
@@ -315,10 +319,53 @@ auto ComAdapter<IbConnectionT>::CreateDataPublisher(const std::string& canonical
         throw cfg::Misconfiguration("DataPublishers do not support history > 1.");
     }
 
-    ib::cfg::DataPort config = get_by_name(_participant.dataPublishers, canonicalName);
+    ib::cfg::DataPort config = get_by_name(_participant.dataPublishers, topic);
     config.dataExchangeFormat = dataExchangeFormat;
     config.history = history;
     config.pubUUID = util::uuid::to_string(util::uuid::generate());
+    config.labels = labels;
+    config.name = topic;
+
+    if (ControllerUsesReplay(config))
+    {
+        throw cfg::Misconfiguration("Replay is not supported for DataPublisher/DataSubscriber.");
+        return nullptr;
+    }
+    else
+    {
+        cfg::Link link;
+        link.id = -1;
+        link.name = config.pubUUID;
+        link.type = cfg::Link::Type::DataMessage;
+        link.historyLength = history;
+
+        mw::SupplementalData supplementalData;
+        supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataPublisher;
+        supplementalData[ib::mw::service::supplKeyDataPublisherTopic] = topic;
+        supplementalData[ib::mw::service::supplKeyDataPublisherPubUUID] = config.pubUUID;
+        supplementalData[ib::mw::service::supplKeyDataPublisherPubDxf] = dataExchangeFormat.mediaType;
+        auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
+        supplementalData[ib::mw::service::supplKeyDataPublisherPubLabels] = labelStr;
+
+        auto controller = CreateController<ib::sim::data::DataPublisher>(link,
+            topic, mw::ServiceType::Controller, std::move(supplementalData), config,
+            _timeProvider.get());
+
+        return controller;
+    }
+}
+
+template <class IbConnectionT>
+auto ComAdapter<IbConnectionT>::CreateDataSubscriber(const std::string& topic,
+                                                     const ib::sim::data::DataExchangeFormat& dataExchangeFormat,
+                                                     const std::map<std::string, std::string>& labels,
+                                                     ib::sim::data::DataHandlerT defaultDataHandler,
+                                                     ib::sim::data::NewDataSourceHandlerT newDataSourceHandler)
+    -> sim::data::IDataSubscriber*
+{
+    ib::cfg::DataPort config = get_by_name(_participant.dataSubscribers, topic);
+    config.dataExchangeFormat = dataExchangeFormat;
+    config.labels = labels;
 
     if (ControllerUsesReplay(config))
     {
@@ -328,59 +375,16 @@ auto ComAdapter<IbConnectionT>::CreateDataPublisher(const std::string& canonical
     else
     {
         mw::SupplementalData supplementalData;
-        supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataPublisher;
-        // This controller<DataPublisher> is for the publisher announcement with networkName = topic
-        auto controllerForAnnouncement = CreateControllerForLink<sim::data::DataPublisher>(
-            config, mw::ServiceType::Controller, supplementalData, config, _timeProvider.get());
+        supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataSubscriber;
 
-        // Another controller<DataPublisher> for data publication with networkName = UUID is needed
-        // as the architecture doesn't allow multiple links on a single controller.
-        cfg::Link link;
-        link.id = -1;
-        link.name = config.pubUUID;
-        link.type = cfg::Link::Type::DataMessage;
-        link.historyLength = history;
-
-        ib::cfg::DataPort configForPublishController;
-        configForPublishController.dataExchangeFormat.mimeType = config.dataExchangeFormat.mimeType;
-        configForPublishController.history = config.history;
-        configForPublishController.name = config.pubUUID;
-        configForPublishController.pubUUID = config.pubUUID;
-
-        auto controllerForPublish = CreateController<ib::sim::data::DataPublisher>(
-            link, configForPublishController.name, mw::ServiceType::Controller, std::move(supplementalData), configForPublishController,
-            _timeProvider.get());
-        // Now that we got both controllers, we announce the publisher
-        controllerForAnnouncement->SendPublisherAnnouncement();
-        // The application code is only interested in publication
-        return controllerForPublish;
-    }
-}
-
-template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateDataSubscriber(const std::string& canonicalName,
-    const ib::sim::data::DataExchangeFormat& dataExchangeFormat, ib::sim::data::CallbackExchangeFormatT callback)
-    -> sim::data::IDataSubscriber*
-{
-    mw::SupplementalData supplementalData;
-    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataSubscriber;
-
-    ib::cfg::DataPort config = get_by_name(_participant.dataSubscribers, canonicalName);
-    config.dataExchangeFormat = dataExchangeFormat;
-
-    if (ControllerUsesReplay(config))
-    {
-        throw cfg::Misconfiguration("Replay is not supported for DataPublisher/DataSubscriber.");
-        return nullptr;
-    }
-    else
-    {
         auto controller = CreateControllerForLink<sim::data::DataSubscriber>(
-            config, mw::ServiceType::Controller, std::move(supplementalData),
-                                                                             config, _timeProvider.get(), callback);
+            config, mw::ServiceType::Controller, std::move(supplementalData), config, _timeProvider.get(),
+            defaultDataHandler, newDataSourceHandler);
+        controller->RegisterServiceDiscovery();
         return controller;
     }
 }
+
 
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher*
@@ -827,18 +831,6 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, si
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::data::PublisherAnnouncement& msg)
-{
-    SendIbMessageImpl(from, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::data::PublisherAnnouncement&& msg)
-{
-    SendIbMessageImpl(from, std::move(msg));
-}
-
-template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::ClientAnnouncement& msg)
 {
     SendIbMessageImpl(from, msg);
@@ -1142,79 +1134,78 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, co
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::DataMessage& msg)
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+                                              const sim::data::DataMessage& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::DataMessage&& msg)
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+                                              sim::data::DataMessage&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::PublisherAnnouncement& msg)
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+                                              const sim::rpc::ClientAnnouncement& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::PublisherAnnouncement&& msg)
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+                                              sim::rpc::ClientAnnouncement&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::ClientAnnouncement& msg)
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+                                              const sim::rpc::ServerAcknowledge& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::ClientAnnouncement&& msg)
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+                                              sim::rpc::ServerAcknowledge&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::ServerAcknowledge& msg)
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+                                              const sim::rpc::FunctionCall& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::ServerAcknowledge&& msg)
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+                                              sim::rpc::FunctionCall&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::FunctionCall& msg)
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+                                              const sim::rpc::FunctionCallResponse& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::FunctionCall&& msg)
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+                                              sim::rpc::FunctionCallResponse&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::FunctionCallResponse& msg)
-{
-    SendIbMessageImpl(from, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::FunctionCallResponse&& msg)
-{
-    SendIbMessageImpl(from, std::move(msg));
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::NextSimTask& msg)
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+                                              const sync::NextSimTask& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
@@ -1321,6 +1312,7 @@ auto ComAdapter<IbConnectionT>::CreateController(const cfg::Link& link, const st
     descriptor.SetServiceId(localEndpoint);
     descriptor.SetServiceType(serviceType);
     descriptor.SetSupplementalData(std::move(supplementalData));
+
     controller->SetServiceDescriptor(std::move(descriptor));
 
     _ibConnection.RegisterIbService(link.name, localEndpoint, controllerPtr);

@@ -6,8 +6,8 @@
   "SimulationSetup": {
     "Participants": [
       {
-        "Name": "Participant1",
-        "Description": "Participant with data publisher and subscriber",
+        "Name": "Publisher1",
+        "Description": "Participant with data publisher",
         "Logger": {
           "Sinks": [
             {
@@ -18,11 +18,23 @@
         },
         "DataPublishers": [
           {
-            "Name": "testTopic"
+            "Name": "TopicA"
           }
-        ],
+        ]
+      },
+      {
+        "Name": "Subscriber1",
+        "Description": "Participant with data subscriber",
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Stdout",
+              "Level": "Info"
+            }
+          ]
+        },
         "DataSubscribers": [
-          { "Name": "testTopic" }
+          { "Name": "TopicA" }
         ]
       },
       {
@@ -40,9 +52,10 @@
 
     "Links": [
       {
-        "Name": "testTopic",
+        "Name": "TopicA",
         "Endpoints": [
-          "Participant1/testTopic"
+          "Publisher1/TopicA",
+          "Subscriber1/TopicA"
         ]
       }
     ]

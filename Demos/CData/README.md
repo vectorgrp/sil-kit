@@ -1,14 +1,16 @@
 # C Data Demo
 
-Simple data publish subscribe communication between a publisher and a subscriber on a single participant named
-"Participant1". See the configuration `IbConfig_DemoData_SingleParticipant.json` for the simulation
-setup.
+Asynchronous publish-subscribe communication between two participants named
+"Publisher1" and "Subscriber1". The publisher uses a history length of 1, the subscriber
+registers a specific data handler. See the configuration `IbConfig_DemoData.json` for 
+the simulation setup.
 
 ## Building
 For build instructions refer to the parent demo directory.
 
-
 ## Usage
-The Demo expects a path to the configuration file and the participant's name ("Participant1")
-as arguments.
-> ./IbDemoCData IbConfig_DemoData_SingleParticipant.json Participant1
+The Demo expects a path to the configuration file and the participant's name as arguments.
+Note that the setup is asynchronous, so the subscriber has to be started first.
+
+> ./IbDemoCData IbConfig_DemoData.json Subscriber1
+> ./IbDemoCData IbConfig_DemoData.json Publisher1

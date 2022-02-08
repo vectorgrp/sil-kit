@@ -36,7 +36,7 @@
       },
       {
         "Name": "PubSub2",
-        "Description": "Publishes different generic messages",
+        "Description": "Publishes different data messages",
         "Logger": {
           "Sinks": [
             {
@@ -64,7 +64,7 @@
       },
       {
         "Name": "Subscriber1",
-        "Description": "Subscribes different generic messages",
+        "Description": "Subscribes different data messages",
 
         "Logger": {
           "Sinks": [
@@ -89,7 +89,7 @@
       },
       {
         "Name": "Subscriber2",
-        "Description": "Subscribes different generic messages",
+        "Description": "Subscribes different data messages",
 
         "Logger": {
           "Sinks": [

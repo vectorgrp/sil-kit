@@ -10,8 +10,8 @@ namespace ib {
 namespace sim {
 namespace data {
 
-DataSubscriberInternal::DataSubscriberInternal(mw::IComAdapterInternal* comAdapter, cfg::DataPort config, mw::sync::ITimeProvider* timeProvider, CallbackExchangeFormatT callback)
-  : _comAdapter{comAdapter}, _timeProvider{timeProvider}, _callback{callback}
+DataSubscriberInternal::DataSubscriberInternal(mw::IComAdapterInternal* comAdapter, cfg::DataPort config, mw::sync::ITimeProvider* timeProvider, DataHandlerT defaultHandler, IDataSubscriber* parent)
+  : _comAdapter{comAdapter}, _timeProvider{timeProvider}, _defaultHandler{ defaultHandler }, _parent {parent}
 {
     // NB: _config contains the joined dataExchangeFormat
     _config = std::move(config);
@@ -22,9 +22,14 @@ auto DataSubscriberInternal::Config() const -> const cfg::DataPort&
     return _config;
 }
 
-void DataSubscriberInternal::SetReceiveMessageHandler(CallbackExchangeFormatT callback)
+void DataSubscriberInternal::SetDefaultReceiveMessageHandler(DataHandlerT handler)
 {
-    _callback = std::move(callback);
+    _defaultHandler = std::move(handler);
+}
+
+void DataSubscriberInternal::RegisterSpecificDataHandlerInternal(DataHandlerT handler)
+{
+    _specificHandlers.push_back(handler);
 }
 
 void DataSubscriberInternal::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const DataMessage& msg)
@@ -37,8 +42,23 @@ void DataSubscriberInternal::ReceiveIbMessage(const mw::IIbServiceEndpoint* from
 
 void DataSubscriberInternal::ReceiveMessage(const std::vector<uint8_t>& data)
 {
-    if (_callback)
-        _callback(this, data, _config.dataExchangeFormat);
+    bool anySpecificHandlerExecuted{ false };
+    if (!_specificHandlers.empty())
+    {
+        for (auto handler : _specificHandlers)
+        {
+            if (handler)
+            {
+                handler(_parent, data);
+                anySpecificHandlerExecuted = true;
+            }
+        }
+    }
+
+    if (_defaultHandler && !anySpecificHandlerExecuted)
+    {
+        _defaultHandler(_parent, data);
+    }
 }
 
 void DataSubscriberInternal::SetTimeProvider(mw::sync::ITimeProvider* provider)

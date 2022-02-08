@@ -104,14 +104,13 @@ public:
     auto CreateLinController(const std::string& canonicalName) -> sim::lin::ILinController* override;
     auto CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher* override;
     auto CreateGenericSubscriber(const std::string& canonicalName) -> sim::generic::IGenericSubscriber* override;
-    auto CreateDataPublisher(const std::string& canonicalName, const sim::data::DataExchangeFormat& dataExchangeFormat,
-                             size_t history = 0) -> sim::data::IDataPublisher* override;
-    auto CreateDataSubscriber(const std::string& canonicalName, const sim::data::DataExchangeFormat& dataExchangeFormat,
-                              sim::data::CallbackExchangeFormatT callback) -> sim::data::IDataSubscriber* override;
-    auto CreateDataSubscriberInternal(const std::string& canonicalName, const std::string& networkName, 
-                                      const sim::data::DataExchangeFormat& dataExchangeFormat,
-                                      sim::data::CallbackExchangeFormatT callback)
-        -> sim::data::IDataSubscriber* override;
+    auto CreateDataPublisher(const std::string& topic, const sim::data::DataExchangeFormat& dataExchangeFormat, 
+        const std::map<std::string, std::string>& labels, size_t history = 0)->sim::data::IDataPublisher* override;
+    auto CreateDataSubscriber(const std::string& topic, const sim::data::DataExchangeFormat& dataExchangeFormat, const std::map<std::string, std::string>& labels,
+        sim::data::DataHandlerT defaultDataHandler, sim::data::NewDataSourceHandlerT newDataSourceHandler = nullptr)->sim::data::IDataSubscriber* override;
+    auto CreateDataSubscriberInternal(const std::string& canonicalName, const std::string& linkName, 
+        const sim::data::DataExchangeFormat& dataExchangeFormat, const std::map<std::string, std::string>& publisherLabels, sim::data::DataHandlerT callback, sim::data::IDataSubscriber* parent)
+        ->sim::data::DataSubscriberInternal* override;
     auto CreateRpcClient(const std::string& functionName, const sim::rpc::RpcExchangeFormat exchangeFormat,
                          sim::rpc::CallReturnHandler handler) -> sim::rpc::IRpcClient* override;
     auto CreateRpcServer(const std::string& functionName, const sim::rpc::RpcExchangeFormat exchangeFormat,
@@ -181,9 +180,6 @@ public:
 
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::data::DataMessage& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, sim::data::DataMessage&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::data::PublisherAnnouncement& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, sim::data::PublisherAnnouncement&& msg) override;
-
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::ClientAnnouncement& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::ClientAnnouncement&& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::ServerAcknowledge& msg) override;
@@ -245,8 +241,6 @@ public:
 
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::DataMessage& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::DataMessage&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::PublisherAnnouncement& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::PublisherAnnouncement&& msg) override;
 
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::ClientAnnouncement& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::ClientAnnouncement&& msg) override;

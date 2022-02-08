@@ -101,14 +101,14 @@ void ReceiveMessage(void* context, ib_Ethernet_Controller* controller, ib_Ethern
 
     for (i = PAYLOAD_OFFSET; i < metaData->ethernetFrame->size; i++)
     {
-        char ch = metaData->ethernetFrame->pointer[i];
+        char ch = metaData->ethernetFrame->data[i];
         if (isalnum(ch))
         {
             printf("%c", ch);
         }
         else
         {
-            printf("<%x>", metaData->ethernetFrame->pointer[i]);
+            printf("<%x>", metaData->ethernetFrame->data[i]);
         }
     }
     printf("\n");

@@ -19,15 +19,6 @@ auto DataPublisher::Config() const -> const cfg::DataPort&
     return _config;
 }
 
-void DataPublisher::SendPublisherAnnouncement() const
-{
-    PublisherAnnouncement msg{};
-    msg.topic = _config.name;
-    msg.pubUUID = _config.pubUUID;
-    msg.pubDataExchangeFormat = _config.dataExchangeFormat;
-    _comAdapter->SendIbMessage(this, std::move(msg));
-}
-
 void DataPublisher::Publish(std::vector<uint8_t> data)
 {
     DataMessage msg{std::move(data)};

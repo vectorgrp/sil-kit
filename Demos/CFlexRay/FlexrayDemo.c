@@ -100,7 +100,7 @@ void print_frmessage(FILE* out, const ib_FlexRay_Message* message)
   if ((message->frame->header.flags & ib_FlexRay_Header_NFIndicator) != 0)
   {
     fprintf(out, ", payload=");
-    print_hexbytes(out, message->frame->payload.pointer, message->frame->payload.size);
+    print_hexbytes(out, message->frame->payload.data, message->frame->payload.size);
   }
   fprintf(out, " @%" PRIu64 "\n", message->timestamp);
 }
@@ -244,7 +244,7 @@ void FlexRayNode_txBufferUpdate(FlexRayNode* flexRayNode, ib_NanosecondsTime now
 
   ib_FlexRay_TxBufferUpdate update;
   update.payload.size = strlen(payloadString + 1);
-  update.payload.pointer = (uint8_t*)payloadString;
+  update.payload.data = (uint8_t*)payloadString;
   update.payloadDataValid = ib_True;
   update.txBufferIndex = bufferIdx;
 

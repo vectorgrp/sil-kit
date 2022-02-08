@@ -181,7 +181,7 @@ void ServiceDiscovery::RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT 
 {
     if (_shuttingDown)
     {
-        return; 
+        return;
     }
 
     {

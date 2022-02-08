@@ -33,10 +33,25 @@ typedef struct
 
 struct ib_ByteVector
 {
-    const uint8_t* pointer;
+    const uint8_t* data; // TODO bkd: "pointer" -> "data"
     size_t size;
 };
 typedef struct ib_ByteVector ib_ByteVector;
+
+
+/*! \brief Key-value pair */
+typedef struct ib_KeyValuePair
+{
+    const char* key;
+    const char* value;
+} ib_KeyValuePair;
+
+/*! \brief Key-value list */
+typedef struct ib_KeyValueList
+{
+    size_t numLabels;
+    ib_KeyValuePair labels[1];
+} ib_KeyValueList;
 
 typedef uint8_t ib_Bool;
 #define ib_True  ((ib_Bool)1)

@@ -161,7 +161,7 @@ ib_ReturnCode ib_Can_Controller_SendFrame(ib_Can_Controller* controller, ib_Can_
     auto payloadStr = payloadBuilder.str();
 
     cm.dlc = message->dlc;
-    cm.dataField = std::vector<uint8_t>(&(message->data.pointer[0]), &(message->data.pointer[0]) + message->data.size);
+    cm.dataField = std::vector<uint8_t>(&(message->data.data[0]), &(message->data.data[0]) + message->data.size);
 
     // ack queue is empty 
     auto transmitId = canController->SendMessage(std::move(cm), transmitContext); // AckCallback -> fügt in queue hinzu weil er keine userContext findet

@@ -51,13 +51,16 @@ public:
     virtual auto CreateGenericSubscriber(const std::string& canonicalName) -> sim::generic::IGenericSubscriber* = 0;
     
     //! \brief Create a data publisher at this IB participant.
-    virtual auto CreateDataPublisher(const std::string& canonicalName,
-                                     const sim::data::DataExchangeFormat& dataExchangeFormat, size_t history = 0)
+    virtual auto CreateDataPublisher(const std::string& topic, const sim::data::DataExchangeFormat& dataExchangeFormat,
+                                     const std::map<std::string, std::string>& labels, size_t history = 0)
         -> sim::data::IDataPublisher* = 0;
     //! \brief Create a data subscriber at this IB participant.
-    virtual auto CreateDataSubscriber(const std::string& canonicalName,
-                                      const sim::data::DataExchangeFormat& dataExchangeFormat,
-                                      sim::data::CallbackExchangeFormatT callback) -> sim::data::IDataSubscriber* = 0;
+    virtual auto CreateDataSubscriber(const std::string& topic, const sim::data::DataExchangeFormat& dataExchangeFormat,
+                                      const std::map<std::string, std::string>& labels,
+                                      sim::data::DataHandlerT defaultDataHandler,
+                                      sim::data::NewDataSourceHandlerT newDataSourceHandler = nullptr)
+        -> sim::data::IDataSubscriber* = 0;
+
     
     //! \brief Create a Rpc client at this IB participant.
     virtual auto CreateRpcClient(const std::string& functionName, const sim::rpc::RpcExchangeFormat exchangeFormat,

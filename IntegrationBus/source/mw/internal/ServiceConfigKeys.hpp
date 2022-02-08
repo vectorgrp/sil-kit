@@ -23,8 +23,13 @@ const std::string controllerTypeEthernet = "Ethernet";
 const std::string controllerTypeFlexRay = "FlexRay";
 const std::string controllerTypeLin = "LIN";
 
-// PubSub types
+// PubSub types and supplementalData keys
 const std::string controllerTypeDataPublisher = "DataPublisher";
+const std::string supplKeyDataPublisherTopic = "data::topic";
+const std::string supplKeyDataPublisherPubUUID = "data::pubUUID";
+const std::string supplKeyDataPublisherPubDxf = "data::pubDxf";
+const std::string supplKeyDataPublisherPubLabels = "data::pubLabels";
+
 const std::string controllerTypeDataSubscriber = "DataSubscriber";
 const std::string controllerTypeDataSubscriberInternal = "DataSubscriberInternal";
 

@@ -39,11 +39,12 @@ protected:
 
     struct DataPublisherInfo
     {
-        DataPublisherInfo(const std::string& newTopic, const std::string& newMimeType, uint8_t newHistory,
+        DataPublisherInfo(const std::string& newTopic, const std::string& newMediaType, const std::map<std::string, std::string>& newLabels, uint8_t newHistory,
                           size_t newMessageSizeInBytes,  uint32_t newNumMsgToPublish)
         {
             topic = newTopic;
-            dxf.mimeType = newMimeType;
+            dxf.mediaType = newMediaType;
+            labels = newLabels;
             history = newHistory;
             messageSizeInBytes = newMessageSizeInBytes;
             numMsgToPublish = newNumMsgToPublish;
@@ -51,6 +52,7 @@ protected:
 
         std::string        topic;
         DataExchangeFormat dxf;
+        std::map<std::string, std::string> labels;
         uint8_t            history;
         size_t             messageSizeInBytes;
         uint32_t           numMsgToPublish;
@@ -59,37 +61,66 @@ protected:
         IDataPublisher*    dataPublisher;
     };
 
+    struct SpecificDataHandlerInfo
+    {
+        DataExchangeFormat dataExchangeFormat;
+        std::map<std::string, std::string> labels;
+    };
+
     struct DataSubscriberInfo
     {
-        DataSubscriberInfo(const std::string& newTopic, const std::string& newMimeType, size_t newMessageSizeInBytes,
-                           uint32_t newNumMsgToReceive)
+        DataSubscriberInfo(const std::string& newTopic, const std::string& newMediaType,
+                           const std::map<std::string, std::string>& newLabels, size_t newMessageSizeInBytes,
+                           uint32_t newNumMsgToReceive, uint32_t newExpectedSources,
+                           const std::map<std::string, std::string>& newExpectedLabels,
+                           const std::vector<SpecificDataHandlerInfo>& newSpecificDataHandlers)
         {
             expectIncreasingData = true;
             topic = newTopic;
-            dxf.mimeType = newMimeType;
+            dxf.mediaType = newMediaType;
+            labels = newLabels;
             messageSizeInBytes = newMessageSizeInBytes;
             numMsgToReceive = newNumMsgToReceive;
+            expectedSources = newExpectedSources;
+            expectedLabels = newExpectedLabels;
+            specificDataHandlers = newSpecificDataHandlers;
         }
-        DataSubscriberInfo(const std::string& newTopic, const std::string& newMimeType, size_t newMessageSizeInBytes,
-                           uint32_t newNumMsgToReceive, const std::vector<std::vector<uint8_t>>& newExpectedDataUnordered)
+        DataSubscriberInfo(const std::string& newTopic, const std::string& newMediaType,
+                           const std::map<std::string, std::string>& newLabels, size_t newMessageSizeInBytes,
+                           uint32_t newNumMsgToReceive, uint32_t newExpectedSources,
+                           const std::vector<std::vector<uint8_t>>& newExpectedDataUnordered,
+                           const std::map<std::string, std::string>& newExpectedLabels,
+                           const std::vector<SpecificDataHandlerInfo>& newSpecificDataHandlers)
         {
             expectIncreasingData = false;
             topic = newTopic;
-            dxf.mimeType = newMimeType;
+            dxf.mediaType = newMediaType;
+            labels = newLabels;
             messageSizeInBytes = newMessageSizeInBytes;
             numMsgToReceive = newNumMsgToReceive;
+            expectedSources = newExpectedSources;
             expectedDataUnordered = newExpectedDataUnordered;
+            expectedLabels = newExpectedLabels;
+            specificDataHandlers = newSpecificDataHandlers;
         }
 
         std::string                       topic;
         DataExchangeFormat                dxf;
+        std::map<std::string, std::string> labels;
+        std::map<std::string, std::string> expectedLabels;
         size_t                            messageSizeInBytes;
         uint32_t                          numMsgToReceive;
         bool                              expectIncreasingData;
         std::vector<std::vector<uint8_t>> expectedDataUnordered;
+        std::vector<SpecificDataHandlerInfo> specificDataHandlers;
+
+        uint32_t                          expectedSources;
+        uint32_t                          newSourceCounter{ 0 };
         uint32_t                          receiveMsgCounter{ 0 };
         bool                              allReceived{false};
+        bool allDiscovered{ false };
         IDataSubscriber*                  dataSubscriber;
+
     };
 
     struct PublisherParticipant
@@ -101,12 +132,12 @@ protected:
             dataPublishers = newDataPublishers;
         }
 
-        std::string                    name;
+        std::string name;
         std::vector<DataPublisherInfo> dataPublishers;
-        std::unique_ptr<IComAdapter>   comAdapter;
-        std::promise<void>             startedPromise;
-        std::promise<void>             allSentPromise;
-        bool                           allSent{ false };
+        std::unique_ptr<IComAdapter> comAdapter;
+        std::promise<void> readyToStart;
+        std::promise<void> allSentPromise;
+        bool allSent{false};
     };
     struct SubscriberParticipant
     {
@@ -117,12 +148,14 @@ protected:
             dataSubscribers = newDataSubscribers;
         }
 
-        std::string                     name;
+        std::string name;
         std::vector<DataSubscriberInfo> dataSubscribers;
-        std::unique_ptr<IComAdapter>    comAdapter;
-        std::promise<void>              startedPromise;
-        std::promise<void>              allReceivedPromise;
-        bool                            allReceived{ false };
+        std::unique_ptr<IComAdapter> comAdapter;
+        std::promise<void> readyToStart;
+        std::promise<void> allDiscoveredPromise;
+        bool allDiscovered{false};
+        std::promise<void> allReceivedPromise;
+        bool allReceived{false};
 
     };
 
@@ -135,7 +168,7 @@ protected:
 
     auto BuildConfig(std::vector<PublisherParticipant>& publishers, std::vector<SubscriberParticipant>& subscribers, Middleware middleware, bool sync) -> Config
     {
-        const auto loglevel = logging::Level::Trace;
+        const auto loglevel = logging::Level::Info;
         ConfigBuilder config("PubSubTestConfigGenerated");
         auto&& simulationSetup = config.SimulationSetup();
 
@@ -254,7 +287,7 @@ protected:
 
             for (auto& dp : participant.dataPublishers)
             {
-                dp.dataPublisher = participant.comAdapter->CreateDataPublisher(dp.topic, dp.dxf, dp.history);
+                dp.dataPublisher = participant.comAdapter->CreateDataPublisher(dp.topic, dp.dxf, dp.labels, dp.history);
             }
 
             auto publishTask =
@@ -290,13 +323,19 @@ protected:
                         }
                     }
                 });
-                participant.startedPromise.set_value();
+                auto futureStatus = participant.readyToStart.get_future().wait_for(communicationTimeout);
+                EXPECT_EQ(futureStatus, std::future_status::ready)
+                    << "Test Failure: Awaiting startup timed out on publisher";
+
                 auto finalStateFuture = participantController->RunAsync();
                 auto finalState = finalStateFuture.get();
             }
             else
             {
-                participant.startedPromise.set_value();
+                auto futureStatus = participant.readyToStart.get_future().wait_for(communicationTimeout);
+                EXPECT_EQ(futureStatus, std::future_status::ready)
+                    << "Test Failure: Awaiting startup timed out on publisher";
+
                 while (std::none_of(participant.dataPublishers.begin(), participant.dataPublishers.end(),
                                    [](const DataPublisherInfo& dp) { return dp.allSent; }))
                 {
@@ -343,6 +382,7 @@ protected:
 
             for (auto& ds : participant.dataSubscribers)
             {
+                // Already set the promise if no reception is expected
                 if (std::all_of(participant.dataSubscribers.begin(), participant.dataSubscribers.end(),
                     [](DataSubscriberInfo ds) {
                     return ds.numMsgToReceive == 0; }))
@@ -350,43 +390,94 @@ protected:
                     participant.allReceived = true;
                     participant.allReceivedPromise.set_value();
                 }
+                if (std::all_of(participant.dataSubscribers.begin(), participant.dataSubscribers.end(),
+                                   [](DataSubscriberInfo ds) {
+                                       return ds.expectedSources == 0;
+                                   }))
+                {
+                    participant.allDiscovered = true;
+                    participant.allDiscoveredPromise.set_value();
+                }
 
-
-                ds.dataSubscriber = participant.comAdapter->CreateDataSubscriber(ds.topic, ds.dxf,
-                    [this, sync, &participant, &ds, participantController](IDataSubscriber* subscriber, const std::vector<uint8_t>& data, const DataExchangeFormat& dataExchangeFormat)
+                auto receptionHandler = [this, sync, &participant, &ds, participantController](
+                                            IDataSubscriber* subscriber, const std::vector<uint8_t>& data) {
+                    if (!ds.allReceived)
                     {
-                        if (!ds.allReceived)
+                        if (ds.expectIncreasingData)
                         {
-                            if (ds.expectIncreasingData)
+                            auto expectedData = std::vector<uint8_t>(ds.messageSizeInBytes, ds.receiveMsgCounter);
+                            EXPECT_EQ(data, expectedData);
+                        }
+                        else
+                        {
+                            auto foundDataIter =
+                                std::find(ds.expectedDataUnordered.begin(), ds.expectedDataUnordered.end(), data);
+                            EXPECT_EQ(foundDataIter != ds.expectedDataUnordered.end(), true);
+                            if (foundDataIter != ds.expectedDataUnordered.end())
                             {
-                                auto expectedData = std::vector<uint8_t>(ds.messageSizeInBytes, ds.receiveMsgCounter);
-                                EXPECT_EQ(data, expectedData);
-                            }
-                            else
-                            {
-                                auto foundDataIter = std::find(ds.expectedDataUnordered.begin(), ds.expectedDataUnordered.end(), data);
-                                EXPECT_EQ(foundDataIter != ds.expectedDataUnordered.end(), true);
-                                if (foundDataIter != ds.expectedDataUnordered.end()) {
-                                    ds.expectedDataUnordered.erase(foundDataIter);
-                                }
-                            }
-                            
-                            ds.receiveMsgCounter++;
-                            if (ds.receiveMsgCounter >= ds.numMsgToReceive)
-                            {
-                                ds.allReceived = true;
+                                ds.expectedDataUnordered.erase(foundDataIter);
                             }
                         }
 
-                        if (!participant.allReceived && 
-                            std::all_of(participant.dataSubscribers.begin(), participant.dataSubscribers.end(),
-                                        [](DataSubscriberInfo ds) { return ds.allReceived; }))
+                        ds.receiveMsgCounter++;
+                        if (ds.receiveMsgCounter >= ds.numMsgToReceive) { ds.allReceived = true; }
+                    }
+
+                    if (!participant.allReceived &&
+                        std::all_of(participant.dataSubscribers.begin(), participant.dataSubscribers.end(),
+                                    [](DataSubscriberInfo ds) { return ds.allReceived; }))
+                    {
+                        participant.allReceived = true;
+                        participant.allReceivedPromise.set_value();
+                    }
+                };
+
+                auto newDataSourceHandler = [this, sync, &participant, &ds, participantController, receptionHandler](
+                                                IDataSubscriber* subscriber, const std::string& topic,
+                                                const DataExchangeFormat& dataExchangeFormat,
+                                                const std::map<std::string, std::string>& labels) {
+                    ds.newSourceCounter++;
+                    if (!ds.allDiscovered)
+                    {
+                        if (ds.newSourceCounter >= ds.expectedSources)
                         {
-                            participant.allReceived = true;
-                            participant.allReceivedPromise.set_value();
+                            ds.allDiscovered = true;
                         }
                     }
-                    );
+
+                    for (auto const& kv : labels)
+                    {
+                        EXPECT_EQ(ds.expectedLabels[kv.first], kv.second);
+                    }
+                    for (auto const& sp : ds.specificDataHandlers)
+                    {
+                        if (sp.labels == labels)
+                        {
+                            subscriber->RegisterSpecificDataHandler(sp.dataExchangeFormat, sp.labels, receptionHandler);
+                        }
+                    }
+
+                    if (!participant.allDiscovered
+                        && std::all_of(participant.dataSubscribers.begin(), participant.dataSubscribers.end(),
+                                       [](DataSubscriberInfo ds) {
+                                           return ds.allDiscovered;
+                                       }))
+                    {
+                        participant.allDiscovered = true;
+                        participant.allDiscoveredPromise.set_value();
+                    }
+                };
+                if (ds.specificDataHandlers.empty())
+                {
+                    ds.dataSubscriber = participant.comAdapter->CreateDataSubscriber(
+                        ds.topic, ds.dxf, ds.labels, receptionHandler, newDataSourceHandler);
+                }
+                else
+                {
+                    ds.dataSubscriber = participant.comAdapter->CreateDataSubscriber(
+                        ds.topic, ds.dxf, ds.labels, nullptr, newDataSourceHandler);
+                }
+
             }
 
             if (sync)
@@ -395,14 +486,20 @@ protected:
                 participantController->SetSimulationTask([](std::chrono::nanoseconds now) {
                     });
 
-                participant.startedPromise.set_value();
+                auto futureStatus = participant.readyToStart.get_future().wait_for(communicationTimeout);
+                EXPECT_EQ(futureStatus, std::future_status::ready)
+                    << "Test Failure: Awaiting startup timed out on subscriber";
+
                 auto finalStateFuture = participantController->RunAsync();
                 auto finalState = finalStateFuture.get();
             }
             else
             {
-                participant.startedPromise.set_value();
-                auto futureStatus = participant.allReceivedPromise.get_future().wait_for(communicationTimeout);
+                auto futureStatus = participant.readyToStart.get_future().wait_for(communicationTimeout);
+                EXPECT_EQ(futureStatus, std::future_status::ready)
+                    << "Test Failure: Awaiting startup timed out on subscriber";
+
+                futureStatus = participant.allReceivedPromise.get_future().wait_for(communicationTimeout);
                 EXPECT_EQ(futureStatus, std::future_status::ready) << "Test Failure: Awaiting reception timed out on async participant";
             }
 
@@ -548,23 +645,23 @@ protected:
         }
     }
 
-    void WaitForAllStarted(std::vector<PublisherParticipant>&                  publishers,
-                           std::vector<SubscriberParticipant>& subscribers, bool sync)
+    void WaitForAllDiscoveredAndStart(std::vector<SubscriberParticipant>& subscribers,
+                                      std::vector<PublisherParticipant>& publishers)
     {
-        if (sync)
+        for (auto& s : subscribers)
         {
-            for (auto& s : subscribers)
-            {
-                auto futureStatus = s.startedPromise.get_future().wait_for(communicationTimeout);
-                EXPECT_EQ(futureStatus, std::future_status::ready)
-                    << "Test Failure: Awaiting startup timed out on subscriber";
-            }
-            for (auto& p : publishers)
-            {
-                auto futureStatus = p.startedPromise.get_future().wait_for(communicationTimeout);
-                EXPECT_EQ(futureStatus, std::future_status::ready)
-                    << "Test Failure: Awaiting startup timed out on publisher";
-            }
+            auto futureStatus = s.allDiscoveredPromise.get_future().wait_for(communicationTimeout);
+            EXPECT_EQ(futureStatus, std::future_status::ready)
+                << "Test Failure: Awaiting source discovery timed out on subscriber";
+        }
+
+        for (auto& s : subscribers)
+        {
+            s.readyToStart.set_value();
+        }
+        for (auto& p : publishers)
+        {
+            p.readyToStart.set_value();
         }
     }
 
@@ -602,7 +699,6 @@ protected:
     SystemMaster                                 systemMaster;
     std::vector<std::thread>                     pubSubThreads;
 
-
     std::chrono::milliseconds communicationTimeout{20000ms};
     std::chrono::milliseconds asyncDelayBetweenPublication{500ms};
 };
@@ -626,15 +722,16 @@ TEST_F(DataPubSubITest, test_1pub_1sub_sync_vasio)
 
     std::vector<PublisherParticipant> publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({"Pub1", {{"TopicA", "A", 0, messageSize, numMsgToPublish}}});
-    subscribers.push_back({"Sub1", {{"TopicA", "A", messageSize, numMsgToReceive}}});
+
+    publishers.push_back({ "Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}} });
+    subscribers.push_back({ "Sub1", {{"TopicA",  "A", {}, messageSize, numMsgToReceive, 1, {}, {} }} });
 
     SetupSystem(domainId, sync, publishers, subscribers, middleware);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
 
-    WaitForAllStarted(publishers, subscribers, sync);
+    WaitForAllDiscoveredAndStart(subscribers, publishers);
 
     StopSimOnAllSentAndReceived(publishers, subscribers, sync);
 
@@ -656,15 +753,15 @@ TEST_F(DataPubSubITest, test_1pub_1sub_largemsg_sync_vasio)
 
     std::vector<PublisherParticipant>  publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({"Pub1", {{"TopicA", "A", 0, messageSize, numMsgToPublish}}});
-    subscribers.push_back({"Sub1", {{"TopicA", "A", messageSize, numMsgToReceive}}});
+    publishers.push_back({"Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
+    subscribers.push_back({"Sub1", {{"TopicA",  "A", {}, messageSize, numMsgToReceive, 1, {}, {}}}});
 
     SetupSystem(domainId, sync, publishers, subscribers, middleware);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
 
-    WaitForAllStarted(publishers, subscribers, sync);
+    WaitForAllDiscoveredAndStart(subscribers, publishers);
 
     StopSimOnAllSentAndReceived(publishers, subscribers, sync);
 
@@ -687,13 +784,13 @@ TEST_F(DataPubSubITest, test_1pub_1sub_100topics_sync_vasio)
 
     std::vector<PublisherParticipant>  publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back( { "Pub1" });
+    publishers.push_back({ "Pub1" });
     subscribers.push_back({ "Sub1" });
     for (int i = 0; i < numTopics; i++)
     {
         std::string topic = std::to_string(i);
-        DataPublisherInfo  pInfo{topic, "A", 1, messageSize, numMsgToPublish};
-        DataSubscriberInfo sInfo{topic, "A",    messageSize, numMsgToPublish};
+        DataPublisherInfo  pInfo{ topic,  "A", {}, 1, messageSize, numMsgToPublish };
+        DataSubscriberInfo sInfo{ topic,  "A", {},    messageSize, numMsgToPublish, 1, {}, {} };
         publishers[0].dataPublishers.push_back(std::move(pInfo));
         subscribers[0].dataSubscribers.push_back(std::move(sInfo));
     }
@@ -703,7 +800,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_100topics_sync_vasio)
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
 
-    WaitForAllStarted(publishers, subscribers, sync);
+    WaitForAllDiscoveredAndStart(subscribers, publishers);
 
     StopSimOnAllSentAndReceived(publishers, subscribers, sync);
 
@@ -725,16 +822,16 @@ TEST_F(DataPubSubITest, test_1pub_2sub_sync_vasio)
 
     std::vector<PublisherParticipant>  publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({"Pub1", {{"TopicA", "A", 0, messageSize, numMsgToPublish}}});
-    subscribers.push_back({"Sub1", {{"TopicA", "A", messageSize, numMsgToReceive}}});
-    subscribers.push_back({"Sub2", {{"TopicA", "A", messageSize, numMsgToReceive}}});
+    publishers.push_back({"Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
+    subscribers.push_back({"Sub1", {{"TopicA",  "A", {}, messageSize, numMsgToReceive, 1, {}, {}}}});
+    subscribers.push_back({"Sub2", {{"TopicA",  "A", {}, messageSize, numMsgToReceive, 1, {}, {}}}});
 
     SetupSystem(domainId, sync, publishers, subscribers, middleware);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
 
-    WaitForAllStarted(publishers, subscribers, sync);
+    WaitForAllDiscoveredAndStart(subscribers, publishers);
 
     StopSimOnAllSentAndReceived(publishers, subscribers, sync);
 
@@ -756,22 +853,22 @@ TEST_F(DataPubSubITest, test_2pub_1sub_sync_vasio)
 
     std::vector<PublisherParticipant>  publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({"Pub1", {{"TopicA", "A", 0, messageSize, numMsgToPublish}}});
-    publishers.push_back({"Pub2", {{"TopicA", "A", 0, messageSize, numMsgToPublish}}});
+    publishers.push_back({"Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
+    publishers.push_back({"Pub2", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
     for (uint32_t d = 0; d < numMsgToPublish; d++)
     {
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
     }
-    subscribers.push_back({"Sub1", {{"TopicA", "A", messageSize, numMsgToReceive, expectedDataUnordered}}});
+    subscribers.push_back({ "Sub1", {{"TopicA",  "A", {}, messageSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}}} });
 
     SetupSystem(domainId, sync, publishers, subscribers, middleware);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
 
-    WaitForAllStarted(publishers, subscribers, sync);
+    WaitForAllDiscoveredAndStart(subscribers, publishers);
 
     StopSimOnAllSentAndReceived(publishers, subscribers, sync);
 
@@ -792,9 +889,9 @@ TEST_F(DataPubSubITest, test_3pub_4sub_4topics_sync_vasio)
 
     std::vector<PublisherParticipant>  publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({ "Pub1",  {{"TopicA", "A", 0, messageSize, numMsgToPublish}, {"TopicB", "B", 0, messageSize, numMsgToPublish}} });
-    publishers.push_back({ "Pub2",  {{"TopicA", "A", 0, messageSize, numMsgToPublish}, {"TopicC", "C", 0, messageSize, numMsgToPublish}} });
-    publishers.push_back({ "Pub3",  {{"TopicA", "A", 0, messageSize, numMsgToPublish}, {"TopicD", "D", 0, messageSize, numMsgToPublish}} });
+    publishers.push_back({ "Pub1",  {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}, {"TopicB", "B", {}, 0, messageSize, numMsgToPublish}} });
+    publishers.push_back({ "Pub2",  {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}, {"TopicC", "C", {}, 0, messageSize, numMsgToPublish}} });
+    publishers.push_back({ "Pub3",  {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}, {"TopicD", "D", {}, 0, messageSize, numMsgToPublish}} });
 
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
     for (uint32_t d = 0; d < numMsgToPublish; d++)
@@ -803,17 +900,17 @@ TEST_F(DataPubSubITest, test_3pub_4sub_4topics_sync_vasio)
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
     }
-    subscribers.push_back({ "Sub1", {{"TopicA", "A", messageSize, numMsgToPublish * 3, expectedDataUnordered }} });
-    subscribers.push_back({ "Sub2", {{"TopicB", "B", messageSize, numMsgToPublish}} });
-    subscribers.push_back({ "Sub3", {{"TopicC", "C", messageSize, numMsgToPublish}} });
-    subscribers.push_back({ "Sub4", {{"TopicD", "D", messageSize, numMsgToPublish}} });
+    subscribers.push_back({ "Sub1", {{"TopicA",  "A", {}, messageSize, numMsgToPublish * 3, 3,  expectedDataUnordered, {}, {}}} });
+    subscribers.push_back({"Sub2", {{"TopicB", "B", {}, messageSize, numMsgToPublish, 1, {}, {}}} });
+    subscribers.push_back({ "Sub3", {{"TopicC", "C", {}, messageSize, numMsgToPublish, 1, {}, {}}} });
+    subscribers.push_back({ "Sub4", {{"TopicD", "D", {}, messageSize, numMsgToPublish, 1, {}, {}}}});
 
     SetupSystem(domainId, sync, publishers, subscribers, middleware);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
 
-    WaitForAllStarted(publishers, subscribers, sync);
+    WaitForAllDiscoveredAndStart(subscribers, publishers);
 
     StopSimOnAllSentAndReceived(publishers, subscribers, sync);
 
@@ -835,15 +932,75 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_topic_sync_vasio)
 
     std::vector<PublisherParticipant>  publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({"Pub1", {{"TopicA", "A", 0, messageSize, numMsgToPublish}}});
-    subscribers.push_back({"Sub1", {{"TopicB", "A", messageSize, numMsgToReceive}}});
+    publishers.push_back({"Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
+    subscribers.push_back({"Sub1", {{"TopicB",  "A", {}, messageSize, numMsgToReceive, 0, {}, {}}}});
 
     SetupSystem(domainId, sync, publishers, subscribers, middleware);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
 
-    WaitForAllStarted(publishers, subscribers, sync);
+    WaitForAllDiscoveredAndStart(subscribers, publishers);
+
+    StopSimOnAllSentAndReceived(publishers, subscribers, sync);
+
+    JoinPubSubThreads();
+
+    ShutdownSystem();
+}
+
+// Matching labels
+TEST_F(DataPubSubITest, test_1pub_1sub_label_sync_vasio)
+{
+    const auto middleware = Middleware::VAsio;
+    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+
+    const uint32_t numMsgToPublish = 3;
+    const uint32_t numMsgToReceive = 3;
+    const size_t messageSize = 3;
+    const bool sync = true;
+
+    std::vector<PublisherParticipant> publishers;
+    std::vector<SubscriberParticipant> subscribers;
+    publishers.push_back({"Pub1", {{"TopicA", "A", {{"kA", "vA"}, {"kB", "vB"}}, 0, messageSize, numMsgToPublish}}});
+    subscribers.push_back({"Sub1", {{"TopicA", "A", {{"kA", "vA"}, {"kB", ""}}, messageSize, numMsgToReceive, 1, {{"kA", "vA"}, {"kB", "vB"}}, {}}}});
+
+    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+
+    RunSubscribers(subscribers, domainId, sync);
+    RunPublishers(publishers, domainId, sync);
+
+    WaitForAllDiscoveredAndStart(subscribers, publishers);
+
+    StopSimOnAllSentAndReceived(publishers, subscribers, sync);
+
+    JoinPubSubThreads();
+
+    ShutdownSystem();
+}
+
+// Wrong label value -> Expect no reception
+TEST_F(DataPubSubITest, test_1pub_1sub_wrong_labels_sync_vasio)
+{
+    const auto middleware = Middleware::VAsio;
+    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+
+    const uint32_t numMsgToPublish = 3;
+    const uint32_t numMsgToReceive = 0;
+    const size_t messageSize = 3;
+    const bool sync = true;
+
+    std::vector<PublisherParticipant> publishers;
+    std::vector<SubscriberParticipant> subscribers;
+    publishers.push_back({"Pub1", {{"TopicA", "A", {{"k", "v"}}, 0, messageSize, numMsgToPublish}}});
+    subscribers.push_back({"Sub1", {{"TopicA", "B", {{"k", "wrong"}}, messageSize, numMsgToReceive, 0, {{"k", "v"}}, {}}}});
+
+    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+
+    RunSubscribers(subscribers, domainId, sync);
+    RunPublishers(publishers, domainId, sync);
+
+    WaitForAllDiscoveredAndStart(subscribers, publishers);
 
     StopSimOnAllSentAndReceived(publishers, subscribers, sync);
 
@@ -865,15 +1022,15 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_dxf_sync_vasio)
 
     std::vector<PublisherParticipant>  publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({"Pub1", {{"TopicA", "A", 0, messageSize, numMsgToPublish}}});
-    subscribers.push_back({"Sub1", {{"TopicA", "B", messageSize, numMsgToReceive}}});
+    publishers.push_back({"Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
+    subscribers.push_back({"Sub1", {{"TopicA", "B", {}, messageSize, numMsgToReceive, 0, {}, {}}}});
 
     SetupSystem(domainId, sync, publishers, subscribers, middleware);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
 
-    WaitForAllStarted(publishers, subscribers, sync);
+    WaitForAllDiscoveredAndStart(subscribers, publishers);
 
     StopSimOnAllSentAndReceived(publishers, subscribers, sync);
 
@@ -895,15 +1052,101 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wildcard_dxf_sync_vasio)
 
     std::vector<PublisherParticipant>  publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({"Pub1", {{"TopicA", "A", 0, messageSize, numMsgToPublish}}});
-    subscribers.push_back({"Sub1", {{"TopicA", "*", messageSize, numMsgToReceive}}});
+    publishers.push_back({"Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
+    subscribers.push_back({"Sub1", {{"TopicA", "", {}, messageSize, numMsgToReceive, 1, {}, {}}}});
 
     SetupSystem(domainId, sync, publishers, subscribers, middleware);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
 
-    WaitForAllStarted(publishers, subscribers, sync);
+    WaitForAllDiscoveredAndStart(subscribers, publishers);
+
+    StopSimOnAllSentAndReceived(publishers, subscribers, sync);
+
+    JoinPubSubThreads();
+
+    ShutdownSystem();
+}
+
+//-----------------------
+// Specific handler tests
+//-----------------------
+
+// Check for incoming labels
+TEST_F(DataPubSubITest, test_2pub_1sub_expectlabels_sync_vasio)
+{
+    const auto middleware = Middleware::VAsio;
+    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+
+    const uint32_t numMsgToPublish = 3;
+    const uint32_t numMsgToReceive = numMsgToPublish * 2;
+    const size_t messageSize = 3;
+    const bool sync = true;
+
+    std::vector<PublisherParticipant> publishers;
+    std::vector<SubscriberParticipant> subscribers;
+    publishers.push_back({"Pub1", {{"TopicA", "A", {{"kA", "vA"}}, 0, messageSize, numMsgToPublish}}});
+    publishers.push_back({"Pub2", {{"TopicA", "A", {{"kB", "vB"}}, 0, messageSize, numMsgToPublish}}});
+    std::vector<std::vector<uint8_t>> expectedDataUnordered;
+    for (uint32_t d = 0; d < numMsgToPublish; d++)
+    {
+        expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
+        expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
+    }
+    subscribers.push_back({"Sub1", {{"TopicA", "A", {}, messageSize, numMsgToReceive, 1, expectedDataUnordered, {{"kA", "vA"}, {"kB", "vB"}}, {}}}});
+
+    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+
+    RunSubscribers(subscribers, domainId, sync);
+    RunPublishers(publishers, domainId, sync);
+
+    WaitForAllDiscoveredAndStart(subscribers, publishers);
+
+    StopSimOnAllSentAndReceived(publishers, subscribers, sync);
+
+    JoinPubSubThreads();
+
+    ShutdownSystem();
+}
+
+// Use specific handlers and no default handler
+TEST_F(DataPubSubITest, test_3pub_1sub_specificHandlers_sync_vasio)
+{
+    const auto middleware = Middleware::VAsio;
+    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+
+    const uint32_t numMsgToPublish = 3;
+    const uint32_t numMsgToReceive = numMsgToPublish * 3;
+    const size_t messageSize = 3;
+    const bool sync = true;
+
+    std::vector<PublisherParticipant> publishers;
+    std::vector<SubscriberParticipant> subscribers;
+    publishers.push_back({ "Pub1", {{"TopicA", "A", {{"kA", "vA"}}, 0, messageSize, numMsgToPublish}} });
+    publishers.push_back({ "Pub2", {{"TopicA", "A", {{"kA", "vA"},{"kB", "vB"}}, 0, messageSize, numMsgToPublish}} });
+    // This publisher has the wrong labels and won't be received 
+    publishers.push_back({ "Pub3", {{"TopicA", "A", {{"kC", "vC"}}, 0, messageSize, numMsgToPublish}} });
+    std::vector<std::vector<uint8_t>> expectedDataUnordered;
+    for (uint32_t d = 0; d < numMsgToPublish; d++)
+    {
+        // First specificDataHandler receives by both publishers, so numMsgToPublish * 3 in total
+        expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
+        expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
+        expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
+    }
+    std::vector<SpecificDataHandlerInfo> specificDataHandlers;
+    specificDataHandlers.push_back({ "A", {{"kA", "vA"}} });
+    specificDataHandlers.push_back({ "A", {{"kA", "vA"},{"kB", "vB"}} });
+    subscribers.push_back({ "Sub1",
+        {{"TopicA", "A", {{"kA", ""}}, messageSize, numMsgToReceive, 1, expectedDataUnordered, {{"kA", "vA"}, {"kB", "vB"}, {"kC", "kC"}}, specificDataHandlers}} });
+
+    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+
+    RunSubscribers(subscribers, domainId, sync);
+    RunPublishers(publishers, domainId, sync);
+
+    WaitForAllDiscoveredAndStart(subscribers, publishers);
 
     StopSimOnAllSentAndReceived(publishers, subscribers, sync);
 
@@ -915,40 +1158,6 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wildcard_dxf_sync_vasio)
 //-----------------------------------------------------
 // Async tests: No participantController/SimulationTask
 //-----------------------------------------------------
-
-// Async: Start subscribers first, publish with delay to ensure reception
-TEST_F(DataPubSubITest, test_1pub_1sub_async_vasio)
-{
-    const auto     middleware = Middleware::VAsio;
-    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
-
-    const uint32_t numMsgToPublish = 3;
-    const uint32_t numMsgToReceive = numMsgToPublish;
-    const size_t   messageSize = 3;
-    const bool sync = false;
-
-    std::vector<PublisherParticipant>  publishers;
-    std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back ({ "Pub1", { { "TopicA", "A", 0, messageSize, numMsgToPublish } } });
-    subscribers.push_back({ "Sub1", { { "TopicA", "A",    messageSize, numMsgToReceive } } });
-
-    SetupSystem(domainId, sync, publishers, subscribers, middleware);
-
-    // Async without history: Start subscribers first
-    RunSubscribers(subscribers, domainId, sync);
-    for (auto& s : subscribers)
-    {
-        auto futureStatus = s.startedPromise.get_future().wait_for(communicationTimeout);
-        EXPECT_EQ(futureStatus, std::future_status::ready)
-            << "Test Failure: Awaiting reception timed out on subscriber";
-    }
-    RunPublishers(publishers, domainId, sync);
-
-    JoinPubSubThreads();
-
-    ShutdownSystem();
-}
-
 
 // Async with history: Wait for publication before starting the subscriber
 TEST_F(DataPubSubITest, test_1pub_1sub_async_history_vasio)
@@ -964,23 +1173,24 @@ TEST_F(DataPubSubITest, test_1pub_1sub_async_history_vasio)
 
     std::vector<PublisherParticipant>  publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back ({ "Pub1", { { "TopicA", "A", 1, messageSize, numMsgToPublish } } });
-    subscribers.push_back({ "Sub1", { { "TopicA", "A",    messageSize, numMsgToReceive } } });
+    publishers.push_back ({ "Pub1", { { "TopicA",  "A", {}, 1, messageSize, numMsgToPublish } } });
+    subscribers.push_back({ "Sub1", { { "TopicA",  "A", {},    messageSize, numMsgToReceive, 1, {}, {} } } });
 
     SetupSystem(domainId, sync, publishers, subscribers, middleware);
 
     RunPublishers(publishers, domainId, sync);
-    for (auto& s : publishers)
+    for (auto& p : publishers)
     {
-        auto futureStatus = s.startedPromise.get_future().wait_for(communicationTimeout);
-        EXPECT_EQ(futureStatus, std::future_status::ready)
-            << "Test Failure: Awaiting startup timed out on publisher";
-        futureStatus = s.allSentPromise.get_future().wait_for(communicationTimeout);
+        p.readyToStart.set_value();
+        auto futureStatus = p.allSentPromise.get_future().wait_for(communicationTimeout);
         EXPECT_EQ(futureStatus, std::future_status::ready)
             << "Test Failure: Awaiting transmission timed out on publisher";
     }
-    // Async with history:
     RunSubscribers(subscribers, domainId, sync);
+    for (auto& s : subscribers)
+    {
+        s.readyToStart.set_value();
+    }
 
     JoinPubSubThreads();
 

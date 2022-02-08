@@ -17,26 +17,56 @@ protected:
     DataExchangeFormatTest() {}
 };
 
-TEST_F(DataExchangeFormatTest, wildcard_match)
+TEST_F(DataExchangeFormatTest, match_dataexchangeformat)
 {
-    const DataExchangeFormat defA{"A"};
-    const DataExchangeFormat defMatchA{"A"};
-    const DataExchangeFormat defMatchAWildcard{"*"};
-    const DataExchangeFormat defNoMatchA{"B"};
+    DataExchangeFormat defPub{"A"};
+    DataExchangeFormat defSub{"A"};
+    EXPECT_EQ(Match(defSub, defPub), true); // same string, match
 
-    EXPECT_EQ(Match(defA, defMatchA), true);
-    EXPECT_EQ(Match(defA, defMatchAWildcard), true);
-    EXPECT_EQ(Match(defA, defNoMatchA), false);
+    defSub = {""};
+    EXPECT_EQ(Match(defSub, defPub), true); // empty subscriber dxf = wildcard, match
+
+    defSub = {"B"};
+    EXPECT_EQ(Match(defSub, defPub), false); // different strings, no match
+
+    defPub = {""}; 
+    EXPECT_EQ(Match(defSub, defPub), false); // empty publisher dxf != wildcard, no match
 }
 
-TEST_F(DataExchangeFormatTest, join_dataexchangeformat)
+TEST_F(DataExchangeFormatTest, match_labels)
 {
-    const DataExchangeFormat defA{"A"};
-    const DataExchangeFormat defB{"*"};
-    const DataExchangeFormat defJoined{"A"};
+    std::map<std::string, std::string> innerSet{}; 
+    std::map<std::string, std::string> outerSet{{"KeyA", "ValA"},{"KeyB", "ValB"} ,{"KeyC", "ValC"} };
+    EXPECT_EQ(MatchLabels(innerSet, outerSet), true); // Empty innerSet, match
 
-    EXPECT_EQ(Match(defA, defB), true);
-    EXPECT_EQ(Join(defA, defB), defJoined);
+    innerSet = {{"KeyA", "ValA"}}; 
+    outerSet = {{"KeyA", "ValA"}};
+    EXPECT_EQ(MatchLabels(innerSet, outerSet), true); // Same key+value pair, match
+    
+    innerSet = {{"KeyA", "ValA"}, {"KeyB", "ValB"}, {"KeyC", "ValC"}};
+    outerSet = {{"KeyA", "ValA"}, {"KeyB", "ValB"}, {"KeyC", "ValC"}};
+    EXPECT_EQ(MatchLabels(innerSet, outerSet), true);  // Same 3 key+value pairs, match
+
+    innerSet = {{"KeyC", ""}}; 
+    outerSet = {{"KeyC", "ValC"}};
+    EXPECT_EQ(MatchLabels(innerSet, outerSet), true); // Same key+empty value, match
+
+    innerSet = {{"KeyA", "ValA"}}; 
+    outerSet = {{"KeyA", "ValA"}, {"KeyB", "ValB"} };
+    EXPECT_EQ(MatchLabels(innerSet, outerSet), true); // All labels of inner set in outer set, match
+
+    innerSet = {{"KeyA", "ValA"}, {"KeyB", "ValB"} }; 
+    outerSet = {{"KeyA", "ValA"}};
+    EXPECT_EQ(MatchLabels(innerSet, outerSet), false); // More labels in inner set than outer set, no match
+
+    innerSet = {{"KeyA", "X"}}; 
+    outerSet = {{"KeyA", "ValA"}};
+    EXPECT_EQ(MatchLabels(innerSet, outerSet), false); // Wrong value, no match
+
+    innerSet = {{"X", "ValA"}}; 
+    outerSet = {{"KeyA", "ValA"}};
+    EXPECT_EQ(MatchLabels(innerSet, outerSet), false); // Wrong key, no match
 }
+
 
 } // anonymous namespace

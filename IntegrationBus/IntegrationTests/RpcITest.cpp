@@ -680,7 +680,7 @@ protected:
     std::vector<std::thread>                     rpcThreads;
 
     const uint8_t rpcFuncIncrement = 100;
-    std::chrono::milliseconds communicationTimeout{20000ms};
+    std::chrono::milliseconds communicationTimeout{10000ms};
     std::chrono::milliseconds asyncDelayBetweenCalls{500ms};
 };
 

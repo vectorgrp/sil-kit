@@ -19,6 +19,7 @@ target_link_libraries(IbSimDataMessage
     PRIVATE IbInterface
             IbSetThreadName
             IbInternal
+            IbConfig_deprecated
 )
 
 add_vib_test(TestSimDataPublisher 

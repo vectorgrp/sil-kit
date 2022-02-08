@@ -12,6 +12,7 @@
 #include "IIbToDataSubscriber.hpp"
 #include "IComAdapterInternal.hpp"
 #include "DataSubscriberInternal.hpp"
+#include "DataMessageDatatypeUtils.hpp"
 
 namespace ib {
 namespace sim {
@@ -24,33 +25,22 @@ class DataSubscriber
     , public mw::IIbServiceEndpoint
 {
 public:
-    // ----------------------------------------
-    // Constructors and Destructor
-    DataSubscriber() = delete;
-    DataSubscriber(const DataSubscriber&) = default;
-    DataSubscriber(DataSubscriber&&) = default;
-
     DataSubscriber(mw::IComAdapterInternal* comAdapter, cfg::DataPort config,
-        mw::sync::ITimeProvider* timeProvider, CallbackExchangeFormatT callback);
+        mw::sync::ITimeProvider* timeProvider, DataHandlerT defaultDataHandler, NewDataSourceHandlerT newDataSourceHandler);
 
 public:
-    // ----------------------------------------
-    // Operator Implementations
-    DataSubscriber& operator=(DataSubscriber& other) = default;
-    DataSubscriber& operator=(DataSubscriber&& other) = default;
+    void RegisterServiceDiscovery();
 
-public:
-    void SetReceiveMessageHandler(CallbackExchangeFormatT callback) override;
+    void SetDefaultReceiveMessageHandler(DataHandlerT callback) override;
+
+    void RegisterSpecificDataHandler(const DataExchangeFormat& dataExchangeFormat,
+                                     const std::map<std::string, std::string>& labels,
+                                     DataHandlerT callback) override;
 
     auto Config() const -> const cfg::DataPort& override;
 
-    //! \brief Accepts messages originating from IB communications.
-    void ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const PublisherAnnouncement& msg) override;
-
-    //! \brief Accepts any message.
-    void ReceiveMessage(const PublisherAnnouncement& msg);
-
-    void AddInternalSubscriber(const std::string& networkName, DataExchangeFormat joinedDataExchangFormat);
+    void AddInternalSubscriber(const std::string& linkName, DataExchangeFormat joinedDataExchangFormat,
+                               const std::map<std::string, std::string>& publisherLabels);
 
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
@@ -60,26 +50,31 @@ public:
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 
 private:
+
+    void AssignSpecificDataHandlers();
+
     //private Members
     cfg::DataPort _config{};
     mw::IComAdapterInternal* _comAdapter{nullptr};
     mw::ServiceDescriptor _serviceDescriptor{};
-    CallbackExchangeFormatT  _callback;
+    DataHandlerT  _defaultDataHandler;
+    NewDataSourceHandlerT _newDataSourceHandler;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     std::vector<DataSubscriberInternal*> _internalSubscibers;
-
+    uint64_t _specificDataHandlerId{ 0 };
+    std::vector<SpecificDataHandler> _specificDataHandling;
 };
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
 
-void DataSubscriber::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
+void DataSubscriber::SetServiceDescriptor(const ib::mw::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
 
-auto DataSubscriber::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
+auto DataSubscriber::GetServiceDescriptor() const -> const ib::mw::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }

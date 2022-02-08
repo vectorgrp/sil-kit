@@ -654,4 +654,13 @@ TEST_F(YamlConfigTest, middleware_vasio_convert)
 
 }
 
+TEST_F(YamlConfigTest, map_serdes)
+{
+    std::map<std::string, std::string> mapIn{
+        {"KeyA", "ValA"}, {"KeyB", "ValB"}, {"KeyC", ""}, {"", "ValD"}, {"KeyE\nWithLinebreak", "ValE\nWithLinebreak"}};
+    auto mapStr = ib::cfg::Serialize<std::map<std::string, std::string>>(mapIn);
+    auto mapOut = ib::cfg::Deserialize<std::map<std::string, std::string>>(mapStr);
+    EXPECT_EQ(mapIn, mapOut);
+}
+
 } // anonymous namespace

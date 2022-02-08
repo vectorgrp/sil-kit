@@ -199,7 +199,7 @@ ib_ReturnCode ib_Ethernet_Controller_SendFrame(ib_Ethernet_Controller* controlle
     auto cppController = reinterpret_cast<ib::sim::eth::IEthController*>(controller);
 
     ib::sim::eth::EthFrame ef;
-    std::vector<uint8_t> rawFrame(frame->pointer, frame->pointer + frame->size);
+    std::vector<uint8_t> rawFrame(frame->data, frame->data + frame->size);
     ef.SetRawFrame(rawFrame);
     auto transmitId = cppController->SendFrame(ef);
 

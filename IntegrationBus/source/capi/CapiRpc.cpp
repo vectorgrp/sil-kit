@@ -93,7 +93,7 @@ ib_ReturnCode ib_Rpc_Client_Call(ib_Rpc_Client* self, ib_Rpc_CallHandle** outHan
     CAPI_ENTER
     {
         auto cppClient = reinterpret_cast<ib::sim::rpc::IRpcClient*>(self);
-        auto cppCallHandle = cppClient->Call(std::vector<uint8_t>(&(argumentData->pointer[0]), &(argumentData->pointer[0]) + argumentData->size));
+        auto cppCallHandle = cppClient->Call(std::vector<uint8_t>(&(argumentData->data[0]), &(argumentData->data[0]) + argumentData->size));
         *outHandle = reinterpret_cast<ib_Rpc_CallHandle*>(cppCallHandle);
         return ib_ReturnCode_SUCCESS;
     }
@@ -112,7 +112,7 @@ ib_ReturnCode ib_Rpc_Server_SubmitResult(ib_Rpc_Server* self, ib_Rpc_CallHandle*
     {
         auto cppServer = reinterpret_cast<ib::sim::rpc::IRpcServer*>(self);
         auto cppCallHandle = reinterpret_cast<ib::sim::rpc::IRpcCallHandle*>(callHandle);
-        auto cppReturnData = std::vector<uint8_t>(&(returnData->pointer[0]), &(returnData->pointer[0]) + returnData->size);
+        auto cppReturnData = std::vector<uint8_t>(&(returnData->data[0]), &(returnData->data[0]) + returnData->size);
         cppServer->SubmitResult(cppCallHandle, cppReturnData);
         return ib_ReturnCode_SUCCESS;
     }

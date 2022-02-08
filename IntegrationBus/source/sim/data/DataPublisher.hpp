@@ -23,22 +23,7 @@ class DataPublisher
     , public mw::IIbServiceEndpoint
 {
 public:
-    // ----------------------------------------
-    // Constructors and Destructor
-    DataPublisher() = delete;
-    DataPublisher(const DataPublisher&) = default;
-    DataPublisher(DataPublisher&&) = default;
-
     DataPublisher(mw::IComAdapterInternal* comAdapter, cfg::DataPort config, mw::sync::ITimeProvider* timeProvider);
-
-public:
-    // ----------------------------------------
-    // Operator Implementations
-    DataPublisher& operator=(DataPublisher& other) = default;
-    DataPublisher& operator=(DataPublisher&& other) = default;
-
-public:
-    void SendPublisherAnnouncement() const;
     
     void Publish(std::vector<uint8_t> data) override;
     void Publish(const uint8_t* data, std::size_t size) override;

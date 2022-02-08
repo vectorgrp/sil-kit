@@ -260,6 +260,8 @@ struct DataPort
     size_t history = 0;
 
     std::string pubUUID = "";
+
+    std::map<std::string, std::string> labels;
 };
 
 struct RpcPort

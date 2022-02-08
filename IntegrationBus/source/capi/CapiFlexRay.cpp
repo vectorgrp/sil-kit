@@ -283,8 +283,8 @@ ib_ReturnCode ib_FlexRay_Controller_UpdateTxBuffer(ib_FlexRay_Controller* self, 
     cppUpdate.payloadDataValid = update->payloadDataValid;
     if (update->payloadDataValid)
     {
-      ASSERT_VALID_POINTER_PARAMETER(update->payload.pointer);
-      cppUpdate.payload.assign(update->payload.pointer, update->payload.pointer+update->payload.size);
+      ASSERT_VALID_POINTER_PARAMETER(update->payload.data);
+      cppUpdate.payload.assign(update->payload.data, update->payload.data+update->payload.size);
     }
     cppController->UpdateTxBuffer(cppUpdate);
     return ib_ReturnCode_SUCCESS;
@@ -348,7 +348,7 @@ ib_ReturnCode ib_FlexRay_Controller_RegisterMessageHandler(ib_FlexRay_Controller
         frame.header.flags = msg.frame.header.flags;
         frame.header.headerCrc = msg.frame.header.headerCrc;
         frame.header.payloadLength = msg.frame.header.payloadLength;
-        frame.payload.pointer = (uint8_t*)msg.frame.payload.data();
+        frame.payload.data = (uint8_t*)msg.frame.payload.data();
         frame.payload.size = (uint32_t)msg.frame.payload.size();
         handler(context, ctrl, &message);
       });
@@ -380,7 +380,7 @@ ib_ReturnCode ib_FlexRay_Controller_RegisterMessageAckHandler(ib_FlexRay_Control
         frame.header.flags = msg.frame.header.flags;
         frame.header.headerCrc = msg.frame.header.headerCrc;
         frame.header.payloadLength = msg.frame.header.payloadLength;
-        frame.payload.pointer = (uint8_t*)msg.frame.payload.data();
+        frame.payload.data = (uint8_t*)msg.frame.payload.data();
         frame.payload.size = (uint32_t)msg.frame.payload.size();
         handler(context, ctrl, &message);
       });

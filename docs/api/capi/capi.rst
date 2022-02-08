@@ -100,10 +100,29 @@ Data API
 The Data API provides data publish and subscribe functionalities to the Integration Bus. 
 It consists of DataPublishers and DataSubscribers.
 
-.. doxygenfunction:: ib_DataPublisher_Create
-.. doxygenfunction:: ib_DataSubscriber_Create
-.. doxygenfunction:: ib_DataPublisher_Publish
-.. doxygenfunction:: ib_DataSubscriber_SetReceiveDataHandler
+DataPublishers
+~~~~~~~~~~~~~~
+.. doxygenfunction:: ib_Data_Publisher_Create
+.. doxygenfunction:: ib_Data_Publisher_Publish
+
+DataSubscribers
+~~~~~~~~~~~~~~~
+.. doxygenfunction:: ib_Data_Subscriber_Create
+.. doxygenfunction:: ib_Data_Subscriber_SetDefaultReceiveDataHandler
+.. doxygenfunction:: ib_Data_Subscriber_RegisterSpecificDataHandler
+
+Handlers
+~~~~~~~~
+The DataSubscriber is created with a handler for data reception and a handler
+for notification about new sources:
+
+.. doxygentypedef:: ib_Data_Handler_t
+.. doxygentypedef:: ib_Data_NewDataSourceHandler_t
+
+Data Structures
+~~~~~~~~~~~~~~~
+.. doxygenstruct:: ib_Data_ExchangeFormat
+   :members:
 
 FlexRay API
 -----------

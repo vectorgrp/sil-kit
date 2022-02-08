@@ -14,7 +14,7 @@ namespace data {
 //! \brief IIbToDataSubscriber interface used by the ComAdapter
 class IIbToDataPublisher
     : public mw::IIbEndpoint<>
-    , public mw::IIbSender<DataMessage, PublisherAnnouncement>
+    , public mw::IIbSender<DataMessage>
 {
 };
 

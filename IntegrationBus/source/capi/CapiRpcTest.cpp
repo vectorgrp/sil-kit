@@ -194,7 +194,7 @@ TEST_F(CapiRpcTest, rpc_client_call)
     size_t payloadSize = snprintf((char*)buffer, sizeof(buffer), "RPC %i", messageCounter);
     ib_ByteVector data = { &buffer[0], payloadSize };
 
-    std::vector<uint8_t> refData(&(data.pointer[0]), &(data.pointer[0]) + data.size);
+    std::vector<uint8_t> refData(&(data.data[0]), &(data.data[0]) + data.size);
     EXPECT_CALL(mockRpcClient, Call(PayloadMatcher(refData))).Times(testing::Exactly(1));
     ib_Rpc_CallHandle* callHandle;
     returnCode = ib_Rpc_Client_Call((ib_Rpc_Client*)&mockRpcClient, &callHandle, &data);
@@ -210,7 +210,7 @@ TEST_F(CapiRpcTest, rpc_server_submit)
     size_t        payloadSize = snprintf((char*)buffer, sizeof(buffer), "RPC %i", messageCounter);
     ib_ByteVector data = {&buffer[0], payloadSize};
 
-    std::vector<uint8_t> refData(&(data.pointer[0]), &(data.pointer[0]) + data.size);
+    std::vector<uint8_t> refData(&(data.data[0]), &(data.data[0]) + data.size);
     EXPECT_CALL(mockRpcServer, SubmitResult(callHandlePtr, PayloadMatcher(refData))).Times(testing::Exactly(1));
     returnCode = ib_Rpc_Server_SubmitResult((ib_Rpc_Server*)&mockRpcServer, callHandle, &data);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);

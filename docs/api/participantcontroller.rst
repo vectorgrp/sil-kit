@@ -113,10 +113,11 @@ the :cpp:enumerator:`Stopped<ib::mw::sync::Stopped>` state.
     detail that should not be relied on.
 
 Synchronizing an application thread with the simulation task
-"""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 In special cases, it may be required to synchronize some application thread with the 
 execution of the simulation task. That is, the application wants to execute some code
-between time steps (given by invocations of the simulation task), _but on a different thread_
+between time steps (given by invocations of the simulation task), *but on a different thread*
 than where the simulation task is executing.
 To achieve this, use :cpp:func:`SetSimulationTaskAsync()<ib::mw::sync::IParticipantController::SetSimulationTaskAsync()>` to assign
 the simulation task function, and :cpp:func:`CompleteSimulationTask()<ib::mw::sync::IParticipantController::CompleteSimulationTask()>` to let

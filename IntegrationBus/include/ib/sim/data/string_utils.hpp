@@ -20,8 +20,6 @@ inline std::ostream& operator<<(std::ostream& out, const DataMessage& msg);
 inline std::string   to_string(const DataExchangeFormat& dataExchangeFormat);
 inline std::ostream& operator<<(std::ostream& out, const DataExchangeFormat& dataExchangeFormat);
 
-inline std::string   to_string(const PublisherAnnouncement& msg);
-inline std::ostream& operator<<(std::ostream& out, const PublisherAnnouncement& msg);
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
@@ -48,20 +46,7 @@ std::string to_string(const DataExchangeFormat& dataExchangeFormat)
 std::ostream& operator<<(std::ostream& out, const DataExchangeFormat& dataExchangeFormat)
 {
     return out << "data::DataExchangeFormat{"
-               << "mimeType=" << dataExchangeFormat.mimeType << "}";
-}
-
-std::string to_string(const PublisherAnnouncement& publisherAnnouncement)
-{
-    std::stringstream out;
-    out << publisherAnnouncement;
-    return out.str();
-}
-std::ostream& operator<<(std::ostream& out, const PublisherAnnouncement& publisherAnnouncement)
-{
-    return out << "data::PublisherAnnouncement{"
-               << "topic=" << publisherAnnouncement.topic << ", pubUUID=" << publisherAnnouncement.pubUUID
-               << ", pubDataExchangeFormat=" << publisherAnnouncement.pubDataExchangeFormat << "}";
+               << "mediaType=" << dataExchangeFormat.mediaType << "}";
 }
 
 } // namespace data

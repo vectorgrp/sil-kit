@@ -169,7 +169,7 @@ TEST_F(CapiEthernetTest, ethernet_controller_send_frame)
     ib_Ethernet_Frame ef = { (const uint8_t* const)buffer, PAYLOAD_OFFSET + payloadSize };
 
     EthFrame refFrame{};
-    std::vector<uint8_t> rawFrame(ef.pointer, ef.pointer + ef.size);
+    std::vector<uint8_t> rawFrame(ef.data, ef.data + ef.size);
     refFrame.SetRawFrame(rawFrame);
     EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(refFrame))).Times(testing::Exactly(1));
     returnCode = ib_Ethernet_Controller_SendFrame((ib_Ethernet_Controller*)&mockController, &ef, NULL);
