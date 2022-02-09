@@ -61,7 +61,7 @@ void print_header(FILE* out, ib_FlexRay_Header* header)
         , header->cycleCount);
 }
 
-void print_hexbytes(FILE* out, uint8_t* bytes, size_t size)
+void print_hexbytes(FILE* out, const uint8_t* bytes, size_t size)
 {
   size_t i;
   for (i=0; i<size; i++)
@@ -95,7 +95,9 @@ void print_channel(FILE* out, ib_FlexRay_Channel channel)
 }
 void print_frmessage(FILE* out, const ib_FlexRay_Message* message)
 {
-  fprintf(out, "FrMessage ch=");print_channel(out, message->channel);fprintf(out, ",");
+  fprintf(out, "FrMessage ch=");
+  print_channel(out, message->channel);
+  fprintf(out, ",");
   print_header(out, &(message->frame->header));
   if ((message->frame->header.flags & ib_FlexRay_Header_NFIndicator) != 0)
   {
@@ -103,6 +105,7 @@ void print_frmessage(FILE* out, const ib_FlexRay_Message* message)
     print_hexbytes(out, message->frame->payload.data, message->frame->payload.size);
   }
   fprintf(out, " @%" PRIu64 "\n", message->timestamp);
+  fflush(out);
 }
 
 void print_frmessageack(FILE* out, const ib_FlexRay_MessageAck* message)
@@ -110,6 +113,7 @@ void print_frmessageack(FILE* out, const ib_FlexRay_MessageAck* message)
   fprintf(out, "FrMessageAck ch=");print_channel(out, message->channel);fprintf(out, ",");
   print_header(out, &(message->frame->header));
   fprintf(out, ", txBuffer=%d  @%" PRIu64 "\n", message->txBufferIndex, message->timestamp);
+  fflush(out);
 }
 
 void ReceiveMessage(void* context, ib_FlexRay_Controller* controller, const ib_FlexRay_Message* message)
@@ -344,13 +348,13 @@ char* LoadFile(char const* path)
 
 int main(int argc, char** argv)
 {
-  char*                     participantName;
-  ib_SimulationParticipant* participant;
+   char* participantName;
+   ib_SimulationParticipant* participant;
 
 
   if (argc < 3)
   {
-    printf("usage: IbDemoCCan <ConfigJsonFile> <ParticipantName> [<DomainId>]\n");
+    printf("usage: IbDemoCFlexray <ConfigJsonFile> <ParticipantName> [<DomainId>]\n");
     return 1;
   }
 
@@ -379,8 +383,8 @@ int main(int argc, char** argv)
   // NOTE: must know the name, as there is currently no way to enumerate the configured FR controllers
   const char* flexrayControllerName = "FlexRay1";
 
-  ib_FlexRay_ControllerConfig* config;
-  returnCode = ib_FlexRay_ControllerConfig_Create(participant, &config, flexrayControllerName);
+  ib_FlexRay_ControllerConfig* config = NULL;
+  returnCode = ib_FlexRay_ControllerConfig_Create(&config, participant, flexrayControllerName);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
     printf("ib_FlexRay_ControllerConfig_Create => %s\n", ib_GetLastErrorString());
@@ -462,7 +466,7 @@ int main(int argc, char** argv)
 
 
   ib_FlexRay_Controller* controller;
-  returnCode = ib_FlexRay_Controller_Create(participant, &controller, flexrayControllerName);
+  returnCode = ib_FlexRay_Controller_Create(&controller, participant, flexrayControllerName);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
     printf("ib_FlexRay_Controller_Create => %s\n", ib_GetLastErrorString());
@@ -540,7 +544,8 @@ int main(int argc, char** argv)
   printf("Simulation stopped. Final State: %d\n", finalState);
   printf("Press enter to stop the process...\n");
   char line[2];
-  fgets(line, 2, stdin);
+  char* result = fgets(line, 2, stdin);
+  (void)result;
 
   ib_SimulationParticipant_Destroy(participant);
   if (jsonString)
