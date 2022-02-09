@@ -8,16 +8,16 @@ namespace ib {
 namespace sim {
 namespace fr {
 
- FrControllerFacade::FrControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::FlexrayController config,
+FrControllerFacade::FrControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::FlexRayController config,
                                        mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _config{config}
 {
-    _frControllerProxy = std::make_unique<FrControllerProxy>(comAdapter);
+    _frControllerProxy = std::make_unique<FrControllerProxy>(comAdapter, config);
     _currentController = _frControllerProxy.get();
 }
 
- // CHECK PROXY BEHAVIOR
+// CHECK PROXY BEHAVIOR
 void FrControllerFacade::Configure(const ControllerConfig& config)
 {
     _currentController->Configure(config);

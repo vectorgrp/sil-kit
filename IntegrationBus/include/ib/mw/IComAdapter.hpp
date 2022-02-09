@@ -40,7 +40,10 @@ public:
     virtual auto CreateCanController(const std::string& canonicalName, const std::string& networkName) -> sim::can::ICanController* = 0;
     //! \brief Create an Ethernet controller at this IB participant.
     virtual auto CreateEthController(const std::string& canonicalName) -> sim::eth::IEthController* = 0;
-    //! \brief Create an Ethernet controller at this IB participant.
+    //! \brief Create an FlexRay controller at this IB participant.
+    virtual auto CreateFlexrayController(const std::string& canonicalName, const std::string& networkName)
+        -> sim::fr::IFrController* = 0;
+    //! \brief Create an FlexRay controller at this IB participant.
     virtual auto CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFrController* = 0;
     //! \brief Create a LIN controller at this IB participant.
     virtual auto CreateLinController(const std::string& canonicalName) -> sim::lin::ILinController* = 0;

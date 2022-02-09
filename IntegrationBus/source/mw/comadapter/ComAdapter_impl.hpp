@@ -302,16 +302,43 @@ auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonical
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFrController*
+auto ComAdapter<IbConnectionT>::CreateFlexrayController(const std::string& canonicalName, const std::string& networkName)
+    -> sim::fr::IFrController*
 {
-    auto&& config = get_by_name(_participant.flexrayControllers, canonicalName);
+    // retrieve FR controller
+    auto& flexRayControllerConfigs = _participantConfig->_data.flexRayControllers;
+    auto controllerConfigIter =
+        std::find_if(flexRayControllerConfigs.begin(), flexRayControllerConfigs.end(), [&canonicalName, &networkName](auto&& controllerConfig) {
+            return controllerConfig.name == canonicalName;
+        });
+    ib::cfg::v1::datatypes::FlexRayController controllerConfig;
+    if (controllerConfigIter != flexRayControllerConfigs.end())
+    {
+        controllerConfig = *controllerConfigIter;
+        if (controllerConfig.network != networkName)
+        {
+            PrintWrongNetworkNameForControllerWarning(canonicalName, networkName, controllerConfig.network,
+                                                      ib::cfg::v1::datatypes::NetworkType::FlexRay);
+        }
+    }
+    else
+    {
+        controllerConfig.name = canonicalName;
+        controllerConfig.network = networkName;
+    }
 
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeFlexRay;
 
-    return CreateControllerForLink<fr::FrControllerFacade>(config, mw::ServiceType::Controller,
-                                                           std::move(supplementalData), config,
+    return CreateControllerForLinkNew<fr::FrControllerFacade>(controllerConfig, mw::ServiceType::Controller,
+                                                           std::move(supplementalData), controllerConfig,
                                                            _timeProvider.get());
+}
+
+template <class IbConnectionT>
+auto ComAdapter<IbConnectionT>::CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFrController*
+{
+    return CreateFlexrayController(canonicalName, canonicalName);
 }
 
 template <class IbConnectionT>
@@ -1630,6 +1657,22 @@ template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::ExecuteDeferred(std::function<void()> callback)
 {
     _ibConnection.ExecuteDeferred(std::move(callback));
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::PrintWrongNetworkNameForControllerWarning(const std::string& canonicalName,
+                                                                          const std::string& providedNetworkName,
+                                                                          const std::string& configuredNetworkName,
+                                                                          cfg::v1::datatypes::NetworkType networkType)
+{
+    std::stringstream ss;
+    ss << "The provided configuration contained a " << to_string(networkType) << " controller with the provided name, "
+          "but a different network name.The preconfigured network name will be used." << std::endl
+       << "Controller name: " << canonicalName << std::endl
+       << "Provided network name: " << providedNetworkName << std::endl
+       << "Configured network name: " << configuredNetworkName << std::endl;
+
+    _logger->Warn(ss.str());
 }
 
 } // namespace mw

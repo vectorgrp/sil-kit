@@ -13,6 +13,8 @@
 #include "IComAdapterInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
 
+#include "ParticipantConfiguration.hpp"
+
 namespace ib {
 namespace sim {
 namespace fr {
@@ -38,7 +40,7 @@ public:
     FrControllerProxy() = delete;
     FrControllerProxy(const FrControllerProxy&) = default;
     FrControllerProxy(FrControllerProxy&&) = default;
-    FrControllerProxy(mw::IComAdapterInternal* comAdapter);
+    FrControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::FlexRayController config);
 
 public:
     // ----------------------------------------
@@ -95,6 +97,10 @@ public:
     // IIbServiceEndpoint
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+
+private:
+    void WarnOverride(const std::string& parameterName);
+
 private:
     // ----------------------------------------
     // private data types
@@ -112,6 +118,11 @@ private:
 
     template<typename MsgT>
     inline void SendIbMessage(MsgT&& msg);
+
+    // Check, which config parameters are configurable
+    bool IsClusterParametersConfigurable();
+    bool IsNodeParametersConfigurable();
+    bool IsTxBufferConfigsConfigurable();
 
 private:
     // ----------------------------------------
@@ -133,6 +144,8 @@ private:
     extensions::Tracer _tracer;
 
     CallbackVector<FrSymbol> _wakeupHandlers;
+
+    cfg::v1::datatypes::FlexRayController _config;
 };
 
 

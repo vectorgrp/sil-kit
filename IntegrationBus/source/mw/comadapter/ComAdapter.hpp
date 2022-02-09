@@ -103,6 +103,8 @@ public:
     // IComAdapter
     auto CreateCanController(const std::string& canonicalName, const std::string& networkName) -> sim::can::ICanController* override;
     auto CreateEthController(const std::string& canonicalName) -> sim::eth::IEthController* override;
+    auto CreateFlexrayController(const std::string& canonicalName, const std::string& networkName)
+        -> sim::fr::IFrController* override;
     auto CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFrController* override;
     auto CreateLinController(const std::string& canonicalName) -> sim::lin::ILinController* override;
     auto CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher* override;
@@ -275,6 +277,12 @@ public:
 
     // For Testing Purposes:
     inline auto GetIbConnection() -> IbConnectionT& { return _ibConnection; }
+
+private:
+    void PrintWrongNetworkNameForControllerWarning(const std::string& canonicalName, 
+                                                   const std::string& networkName,
+                                                   const std::string& configuredNetworkName,
+                                                   cfg::v1::datatypes::NetworkType networkType);
 
 private:
     // ----------------------------------------

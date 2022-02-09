@@ -36,6 +36,7 @@ enum class NetworkType
     GenericMessage,
     DataMessage
 };
+inline auto to_string(NetworkType networkType) -> std::string;
 
 // ================================================================================
 //  Logging service
@@ -154,6 +155,22 @@ auto to_string(TraceSink::Type sinkType) -> std::string
         return "Undefined";
     }
     throw ib::type_conversion_error{ "Invalid SinkType" };
+}
+
+auto to_string(NetworkType networkType) -> std::string
+{
+    switch (networkType)
+    {
+    case NetworkType::Undefined: return "Undefined";
+    case NetworkType::Invalid: return "Invalid";
+    case NetworkType::CAN: return "CAN";
+    case NetworkType::LIN: return "LIN";
+    case NetworkType::Ethernet: return "Ethernet";
+    case NetworkType::FlexRay: return "FlexRay";
+    case NetworkType::GenericMessage: return "GenericMessage";
+    case NetworkType::DataMessage: return "DataMessage";
+    default: return "Unknown";
+    }
 }
 
 } // namespace datatypes

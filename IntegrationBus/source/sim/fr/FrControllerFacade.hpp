@@ -14,6 +14,7 @@
 #include "IIbServiceEndpoint.hpp"
 
 #include "FrControllerProxy.hpp"
+#include "ParticipantConfiguration.hpp"
 
 namespace ib {
 namespace sim {
@@ -40,7 +41,7 @@ public:
     FrControllerFacade() = delete;
     FrControllerFacade(const FrControllerFacade&) = default;
     FrControllerFacade(FrControllerFacade&&) = default;
-    FrControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::FlexrayController config, mw::sync::ITimeProvider* timeProvider);
+    FrControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::FlexRayController config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -111,7 +112,7 @@ private:
     // private members
     mw::IComAdapterInternal* _comAdapter = nullptr;
     mw::ServiceDescriptor _serviceDescriptor;
-    cfg::FlexrayController _config;
+    cfg::v1::datatypes::FlexRayController _config;
 
     bool _simulatedLinkDetected = false;
     mw::ServiceDescriptor _simulatedLink;

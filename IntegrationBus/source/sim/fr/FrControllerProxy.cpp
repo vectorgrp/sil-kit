@@ -9,15 +9,34 @@ namespace ib {
 namespace sim {
 namespace fr {
 
-FrControllerProxy::FrControllerProxy(mw::IComAdapterInternal* comAdapter)
-: _comAdapter(comAdapter)
+FrControllerProxy::FrControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::FlexRayController config)
+    : _comAdapter(comAdapter)
+    , _config{config}
 {
 }
 
 void FrControllerProxy::Configure(const ControllerConfig& config)
 {
-    Validate(config.clusterParams);
-    Validate(config.nodeParams);
+    ControllerConfig cfg = config;
+    if (!IsClusterParametersConfigurable())
+    {
+        cfg.clusterParams = _config.clusterParameters.value();
+        WarnOverride("clusterParameters");
+    }
+    if (!IsNodeParametersConfigurable())
+    {
+        cfg.nodeParams = _config.nodeParameters.value();
+        WarnOverride("NodeParamters");
+    }
+    if (!IsTxBufferConfigsConfigurable())
+    {
+        cfg.bufferConfigs = _config.txBufferConfigs;
+        WarnOverride("TxBufferConfigs");
+    }
+
+
+    Validate(cfg.clusterParams);
+    Validate(cfg.nodeParams);
 
     _bufferConfigs = config.bufferConfigs;
     SendIbMessage(config);
@@ -29,6 +48,13 @@ void FrControllerProxy::ReconfigureTxBuffer(uint16_t txBufferIdx, const TxBuffer
     {
         _comAdapter->GetLogger()->Error("FrControllerProxy::ReconfigureTxBuffer() was called with unconfigured txBufferIdx={}", txBufferIdx);
         throw std::out_of_range{"Unconfigured txBufferIdx!"};
+    }
+
+    if (_config.txBufferConfigs.size() > 0)
+    {
+        _comAdapter->GetLogger()->Error("ReconfigureTxBuffer() was called on a preconfigured txBuffer. This is not "
+                                        "allowed and the reconfiguration will be discarded.");
+        return;
     }
 
     TxBufferConfigUpdate update;
@@ -177,6 +203,15 @@ void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const P
     CallHandlers(msg);
 }
 
+void FrControllerProxy::WarnOverride(const std::string& parameterName)
+{
+    std::stringstream ss;
+    ss << "Discarded user-defined configuration of " << parameterName
+       << ", as it was already set in the predefined configuration.";
+
+    _comAdapter->GetLogger()->Warn(ss.str());
+}
+
 template<typename MsgT>
 void FrControllerProxy::RegisterHandler(CallbackT<MsgT> handler)
 {
@@ -200,6 +235,21 @@ void FrControllerProxy::SendIbMessage(MsgT&& msg)
     _comAdapter->SendIbMessage(this, std::forward<MsgT>(msg));
 }
 
+
+bool FrControllerProxy::IsClusterParametersConfigurable()
+{
+    return !_config.clusterParameters.has_value();
+}
+
+bool FrControllerProxy::IsNodeParametersConfigurable()
+{
+    return !_config.nodeParameters.has_value();
+}
+
+bool FrControllerProxy::IsTxBufferConfigsConfigurable()
+{
+    return _config.txBufferConfigs.size() == 0;
+}
 
 
 } // namespace fr

@@ -16,6 +16,8 @@
 
 #include "MockComAdapter.hpp"
 
+#include "ParticipantConfiguration.hpp"
+
 namespace {
 
 using namespace std::chrono_literals;
@@ -59,8 +61,8 @@ protected:
 
 protected:
     FrControllerProxyTest()
-    : proxy(&comAdapter)
-    , proxyFrom(&comAdapter)
+        : proxy(&comAdapter, FrControllerProxyTest::GetDummyConfig())
+        , proxyFrom(&comAdapter, FrControllerProxyTest::GetDummyConfig())
     {
         proxy.SetServiceDescriptor(from_endpointAddress(proxyAddress));
 
@@ -80,6 +82,16 @@ protected:
     FrControllerProxy proxy;
     FrControllerProxy proxyFrom;
     Callbacks callbacks;
+
+    ib::cfg::v1::datatypes::FlexRayController dummyConfig;
+
+    auto static GetDummyConfig() -> ib::cfg::v1::datatypes::FlexRayController 
+    {
+        ib::cfg::v1::datatypes::FlexRayController dummyConfig;
+        dummyConfig.network = "testNetwork";
+        dummyConfig.name = "testController";
+        return dummyConfig;
+    }
 
     auto MakeValidClusterParams() -> ClusterParameters
     {
