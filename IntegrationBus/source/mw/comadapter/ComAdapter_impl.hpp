@@ -105,6 +105,8 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& par
     , _participantId{hash(_participant.name)}
     , _ibConnection{_config, participantName, _participantId}
 {
+    _participantConfig = std::dynamic_pointer_cast<ib::cfg::ParticipantConfiguration>(ib::cfg::v1::CreateDummyConfiguration());
+
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
     auto&& participantConfig = get_by_name(_config.simulationSetup.participants, _participantName);
