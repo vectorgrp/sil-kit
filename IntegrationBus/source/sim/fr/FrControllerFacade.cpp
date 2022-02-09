@@ -13,9 +13,8 @@ namespace fr {
     : _comAdapter{comAdapter}
     , _config{config}
 {
-    _frController = std::make_unique<FrController>(comAdapter, timeProvider);
     _frControllerProxy = std::make_unique<FrControllerProxy>(comAdapter);
-    _currentController = _frController.get();
+    _currentController = _frControllerProxy.get();
 }
 
  // CHECK PROXY BEHAVIOR
@@ -66,49 +65,36 @@ void FrControllerFacade::Wakeup()
 
 void FrControllerFacade::RegisterMessageHandler(MessageHandler handler)
 {
-    _frController->RegisterMessageHandler(handler);
     _frControllerProxy->RegisterMessageHandler(std::move(handler));
 }
 
 void FrControllerFacade::RegisterMessageAckHandler(MessageAckHandler handler)
 {
-    _frController->RegisterMessageAckHandler(handler);
     _frControllerProxy->RegisterMessageAckHandler(std::move(handler));
 }
 
 void FrControllerFacade::RegisterWakeupHandler(WakeupHandler handler)
 {
-    _frController->RegisterWakeupHandler(handler);
     _frControllerProxy->RegisterWakeupHandler(std::move(handler));
-}
-
-void FrControllerFacade::RegisterControllerStatusHandler(ControllerStatusHandler handler)
-{
-    _frController->RegisterControllerStatusHandler(handler);
-    _frControllerProxy->RegisterControllerStatusHandler(std::move(handler));
 }
 
 void FrControllerFacade::RegisterPocStatusHandler(PocStatusHandler handler)
 {
-    _frController->RegisterPocStatusHandler(handler);
     _frControllerProxy->RegisterPocStatusHandler(std::move(handler));
 }
 
 void FrControllerFacade::RegisterSymbolHandler(SymbolHandler handler)
 {
-    _frController->RegisterSymbolHandler(handler);
     _frControllerProxy->RegisterSymbolHandler(std::move(handler));
 }
 
 void FrControllerFacade::RegisterSymbolAckHandler(SymbolAckHandler handler)
 {
-    _frController->RegisterSymbolAckHandler(handler);
     _frControllerProxy->RegisterSymbolAckHandler(std::move(handler));
 }
 
 void FrControllerFacade::RegisterCycleStartHandler(CycleStartHandler handler)
 {
-    _frController->RegisterCycleStartHandler(handler);
     _frControllerProxy->RegisterCycleStartHandler(std::move(handler));
 }
 
@@ -117,7 +103,8 @@ void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 {
     if (IsNetworkSimulated())
     {
-        if (AllowForwardToProxy(from)) _frControllerProxy->ReceiveIbMessage(from, msg);
+        if (AllowForwardToProxy(from))
+            _frControllerProxy->ReceiveIbMessage(from, msg);
     }
     else
     {
@@ -129,7 +116,8 @@ void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 {
     if (IsNetworkSimulated())
     {
-        if (AllowForwardToProxy(from)) _frControllerProxy->ReceiveIbMessage(from, msg);
+        if (AllowForwardToProxy(from))
+            _frControllerProxy->ReceiveIbMessage(from, msg);
     }
     else
     {
@@ -141,7 +129,8 @@ void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 {
     if (IsNetworkSimulated())
     {
-        if (AllowForwardToProxy(from)) _frControllerProxy->ReceiveIbMessage(from, msg);
+        if (AllowForwardToProxy(from))
+            _frControllerProxy->ReceiveIbMessage(from, msg);
     }
     else
     {
@@ -153,7 +142,8 @@ void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 {
     if (IsNetworkSimulated())
     {
-        if (AllowForwardToProxy(from)) _frControllerProxy->ReceiveIbMessage(from, msg);
+        if (AllowForwardToProxy(from))
+            _frControllerProxy->ReceiveIbMessage(from, msg);
     }
     else
     {
@@ -177,18 +167,9 @@ void FrControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
     }
 }
 
-void FrControllerFacade::SetTimeProvider(mw::sync::ITimeProvider* timeProvider)
-{
-    if (!IsNetworkSimulated())
-    {
-        dynamic_cast<FrController*>(_currentController)->SetTimeProvider(timeProvider);
-    }
-}
-
 // ITraceMessageSource
 void FrControllerFacade::AddSink(extensions::ITraceMessageSink* sink)
 {
-    _frController->AddSink(sink);
     _frControllerProxy->AddSink(sink);
 }
 
@@ -196,14 +177,12 @@ void FrControllerFacade::AddSink(extensions::ITraceMessageSink* sink)
 void FrControllerFacade::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
-    _frController->SetServiceDescriptor(serviceDescriptor);
     _frControllerProxy->SetServiceDescriptor(serviceDescriptor);
 
     mw::service::IServiceDiscovery* disc = _comAdapter->GetServiceDiscovery();
     disc->RegisterServiceDiscoveryHandler(
-        [this, serviceDescriptor]
-        (mw::service::ServiceDiscoveryEvent::Type discoveryType, const mw::ServiceDescriptor& remoteServiceDescriptor)
-        {
+        [this, serviceDescriptor](mw::service::ServiceDiscoveryEvent::Type discoveryType,
+                                  const mw::ServiceDescriptor& remoteServiceDescriptor) {
             // check if discovered service is a network simulator (if none is known)
             if (!IsNetworkSimulated())
             {
@@ -216,26 +195,12 @@ void FrControllerFacade::SetServiceDescriptor(const mw::ServiceDescriptor& servi
                     _currentController = _frControllerProxy.get();
                 }
             }
-            else
-            {
-                if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved
-                    && IsRelevantNetwork(remoteServiceDescriptor))
-                {
-                    _simulatedLinkDetected = false;
-                    _currentController = _frController.get();
-                }
-            }
         });
 }
 
 auto FrControllerFacade::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
     return _serviceDescriptor;
-}
-
-auto FrControllerFacade::AllowForwardToDefault(const IIbServiceEndpoint* from) const -> bool
-{
-    throw std::logic_error("This controller mode is not supported anymore");
 }
 
 auto FrControllerFacade::AllowForwardToProxy(const IIbServiceEndpoint* from) const -> bool

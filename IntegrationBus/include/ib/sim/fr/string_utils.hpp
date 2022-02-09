@@ -31,7 +31,6 @@ inline std::string to_string(const ControllerConfig& msg);
 inline std::string to_string(const TxBufferConfig& msg);
 inline std::string to_string(const TxBufferConfigUpdate& msg);
 inline std::string to_string(const TxBufferUpdate& msg);
-inline std::string to_string(const ControllerStatus& msg);
 inline std::string to_string(const PocStatus& msg);
 inline std::string to_string(SlotModeType msg);
 inline std::string to_string(ErrorModeType msg);
@@ -57,7 +56,6 @@ inline std::ostream& operator<<(std::ostream& out, const ControllerConfig& msg);
 inline std::ostream& operator<<(std::ostream& out, const TxBufferConfig& msg);
 inline std::ostream& operator<<(std::ostream& out, const TxBufferConfigUpdate& msg);
 inline std::ostream& operator<<(std::ostream& out, const TxBufferUpdate& msg);
-inline std::ostream& operator<<(std::ostream& out, const ControllerStatus& msg);
 inline std::ostream& operator<<(std::ostream& out, const PocStatus& msg);
 inline std::ostream& operator<<(std::ostream& out, SlotModeType msg);
 inline std::ostream& operator<<(std::ostream& out, ErrorModeType msg);
@@ -229,12 +227,6 @@ std::string to_string(const TxBufferUpdate& msg)
     return out.str();
 }
 
-std::string to_string(const ControllerStatus& msg)
-{
-    std::stringstream out;
-    out << msg;
-    return out.str();
-}
 std::string to_string(const PocStatus& msg)
 {
     std::stringstream out;
@@ -435,14 +427,6 @@ std::ostream& operator<<(std::ostream& out, const TxBufferUpdate& msg)
         out << "f";
     }
     return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const ControllerStatus& msg)
-{
-    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
-    return out << "fr::ControllerStatus{"
-        << msg.pocState
-        << " @" << timestamp.count() << "ms}";
 }
 
 std::ostream& operator<<(std::ostream& out, const PocStatus& msg)

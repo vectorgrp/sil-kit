@@ -434,16 +434,6 @@ enum class PocState : uint8_t
 };
 
 /*!
- * \brief Status of the simulated FlexRay controller
- * \deprecated ControllerStatus is deprecated in favor of PocStatus which follows the AUTOSAR flexray model more closely.
- */
-struct ControllerStatus
-{
-    std::chrono::nanoseconds timestamp;
-    PocState pocState; //!< Status of the Protocol Operation Control (POC).
-};
-
-/*!
 * \brief Indicates what slot mode the POC is in.
 * *AUTOSAR Name:* Fr_SlotModeType
 */

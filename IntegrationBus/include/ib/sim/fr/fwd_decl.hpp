@@ -28,7 +28,6 @@ struct FrSymbolAck;
 struct CycleStart;
 
 struct HostCommand;
-struct ControllerStatus;
 struct PocStatus;
 
 class IFrController;

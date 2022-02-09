@@ -214,7 +214,6 @@ private:
         sim::fr::ControllerConfig,
         sim::fr::TxBufferConfigUpdate,
         sim::fr::TxBufferUpdate,
-        sim::fr::ControllerStatus,
         sim::fr::PocStatus,
         mw::service::ServiceAnnouncement,
         mw::service::ServiceDiscoveryEvent

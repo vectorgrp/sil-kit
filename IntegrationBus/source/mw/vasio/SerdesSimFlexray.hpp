@@ -324,21 +324,6 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, TxBuffer
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const ControllerStatus& status)
-{
-    buffer
-        << status.timestamp
-        << status.pocState;
-    return buffer;
-}
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, ControllerStatus& status)
-{
-    buffer
-        >> status.timestamp
-        >> status.pocState;
-    return buffer;
-}
-
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const PocStatus& status)
 {
     buffer
@@ -354,7 +339,6 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Po
         << status.chiReadyRequest;
     return buffer;
 }
-
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, PocStatus& status)
 {
     buffer

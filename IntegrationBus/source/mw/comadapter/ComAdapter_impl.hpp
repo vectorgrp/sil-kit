@@ -11,7 +11,6 @@
 #include "EthControllerProxy.hpp"
 #include "EthControllerFacade.hpp"
 #include "EthControllerReplay.hpp"
-#include "FrController.hpp"
 #include "FrControllerProxy.hpp"
 #include "FrControllerFacade.hpp"
 #include "LinController.hpp"
@@ -803,12 +802,6 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, co
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::ControllerStatus& msg)
-{
-    SendIbMessageImpl(from, msg);
-}
-
-template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::PocStatus& msg)
 {
     SendIbMessageImpl(from, msg);
@@ -1113,12 +1106,6 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, co
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::TxBufferUpdate& msg)
-{
-    SendIbMessageImpl(from, targetParticipantName, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::ControllerStatus& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }

@@ -323,23 +323,6 @@ TEST(MwVAsioSerdes, SimFlexray_TxBufferUpdate) {
     EXPECT_EQ(in.payload, out.payload);
 }
 
-TEST(MwVAsioSerdes, SimFlexray_ControllerStatus) {
-    using namespace ib::sim::fr;
-    ib::mw::MessageBuffer buffer;
-
-    ControllerStatus in;
-    ControllerStatus out;
-
-    in.timestamp = 230ns;
-    in.pocState = PocState::NormalPassive;
-
-    buffer << in;
-    buffer >> out;
-
-    EXPECT_EQ(in.timestamp, out.timestamp);
-    EXPECT_EQ(in.pocState, out.pocState);
-}
-
 TEST(MwVAsioSerdes, SimFlexray_POCStatus) {
     using namespace ib::sim::fr;
     ib::mw::MessageBuffer buffer;

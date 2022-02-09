@@ -105,20 +105,6 @@ void FrControllerProxy::RegisterWakeupHandler(WakeupHandler handler)
     _wakeupHandlers.emplace_back(std::move(handler));
 }
 
-void FrControllerProxy::RegisterControllerStatusHandler(ControllerStatusHandler handler)
-{
-    if (_comAdapter)
-    {
-        auto* logger = _comAdapter->GetLogger();
-        if (logger)
-        {
-            logger->Warn("RegisterControllerStatusHandler is deprecated! use RegisterPocStatusHandler!");
-        }
-
-    }
-    RegisterHandler(handler);
-}
-
 void FrControllerProxy::RegisterPocStatusHandler(PocStatusHandler handler)
 {
     RegisterHandler(handler);
@@ -188,11 +174,6 @@ void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const C
 
 void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const PocStatus& msg)
 {
-    //interoperability with 3.0.3
-    ControllerStatus status{};
-    status.pocState = msg.state;
-    CallHandlers(status);
-
     CallHandlers(msg);
 }
 

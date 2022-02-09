@@ -51,7 +51,6 @@ protected:
         MOCK_METHOD2(MessageHandler, void(IFrController*, const FrMessage&));
         MOCK_METHOD2(MessageAckHandler, void(IFrController*, const FrMessageAck&));
         MOCK_METHOD2(WakeupHandler, void(IFrController*, const FrSymbol&));
-        MOCK_METHOD2(ControllerStatusHandler, void(IFrController*, const ControllerStatus&));
         MOCK_METHOD2(PocStatusHandler, void(IFrController*, const PocStatus&));
         MOCK_METHOD2(SymbolHandler, void(IFrController*, const FrSymbol&));
         MOCK_METHOD2(SymbolAckHandler, void(IFrController*, const FrSymbolAck&));

@@ -39,7 +39,6 @@ public:
   MOCK_METHOD1(RegisterMessageHandler, void(MessageHandler handler));
   MOCK_METHOD1(RegisterMessageAckHandler, void(MessageAckHandler handler));
   MOCK_METHOD1(RegisterWakeupHandler, void(WakeupHandler handler));
-  MOCK_METHOD1(RegisterControllerStatusHandler, void(ControllerStatusHandler handler));
   MOCK_METHOD1(RegisterPocStatusHandler, void(PocStatusHandler handler));
   MOCK_METHOD1(RegisterSymbolHandler, void(SymbolHandler handler));
   MOCK_METHOD1(RegisterSymbolAckHandler, void(SymbolAckHandler handler));
@@ -90,10 +89,6 @@ public:
     }
 
     static void WakeupHandler(void* context, ib_FlexRay_Controller* controller, const ib_FlexRay_Symbol* symbol)
-    {
-    }
-
-    static void ControllerStatusHandler(void* context, ib_FlexRay_Controller* controller, const ib_FlexRay_ControllerStatus* status)
     {
     }
 

@@ -13,7 +13,6 @@
 #include "IComAdapterInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
 
-#include "FrController.hpp"
 #include "FrControllerProxy.hpp"
 
 namespace ib {
@@ -28,7 +27,6 @@ namespace fr {
 class FrControllerFacade
     : public IFrController
     , public IIbToFrControllerFacade
-    , public mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
     , public mw::IIbServiceEndpoint
 {
@@ -80,10 +78,6 @@ public:
     void RegisterMessageHandler(MessageHandler handler) override;
     void RegisterMessageAckHandler(MessageAckHandler handler) override;
     void RegisterWakeupHandler(WakeupHandler handler) override;
-
-    [[deprecated("superseded by RegisterPocStatusHandler")]] 
-    void RegisterControllerStatusHandler(ControllerStatusHandler handler) override;
-
     void RegisterPocStatusHandler(PocStatusHandler handler) override;
     void RegisterSymbolHandler(SymbolHandler handler) override;
     void RegisterSymbolAckHandler(SymbolAckHandler handler) override;
@@ -97,9 +91,6 @@ public:
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const CycleStart& msg) override;
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const PocStatus& msg) override;
 
-    //ITimeConsumer
-    void SetTimeProvider(mw::sync::ITimeProvider* timeProvider) override;
-
     // ITraceMessageSource
     void AddSink(extensions::ITraceMessageSink* sink) override;
 
@@ -111,7 +102,6 @@ private:
     // ----------------------------------------
     // Private helper methods
     //
-    auto AllowForwardToDefault(const IIbServiceEndpoint* from) const -> bool;
     auto AllowForwardToProxy(const IIbServiceEndpoint* from) const -> bool;
     auto IsNetworkSimulated() const -> bool;
     auto IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
@@ -127,7 +117,6 @@ private:
     mw::ServiceDescriptor _simulatedLink;
 
     IFrController* _currentController;
-    std::unique_ptr<FrController> _frController;
     std::unique_ptr<FrControllerProxy> _frControllerProxy;
 
 };

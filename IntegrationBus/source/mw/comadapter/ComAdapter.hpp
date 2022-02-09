@@ -43,7 +43,6 @@
 #include "IIbToLinControllerFacade.hpp"
 
 #include "IIbToFrBusSimulator.hpp"
-#include "IIbToFrController.hpp"
 #include "IIbToFrControllerProxy.hpp"
 #include "IIbToFrControllerFacade.hpp"
 
@@ -160,7 +159,6 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::ControllerConfig& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::TxBufferConfigUpdate& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::TxBufferUpdate& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::ControllerStatus& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::PocStatus& msg) override;
 
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::SendFrameRequest& msg) override;
@@ -221,7 +219,6 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::ControllerConfig& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::TxBufferConfigUpdate& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::TxBufferUpdate& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::ControllerStatus& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::PocStatus& msg) override;
 
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::SendFrameRequest& msg) override;
@@ -351,7 +348,6 @@ private:
         ControllerMap<sim::eth::IIbToEthController>,
         ControllerMap<sim::eth::IIbToEthControllerProxy>,
         ControllerMap<sim::eth::IIbToEthControllerFacade>,
-        ControllerMap<sim::fr::IIbToFrController>,
         ControllerMap<sim::fr::IIbToFrControllerProxy>,
         ControllerMap<sim::fr::IIbToFrControllerFacade>,
         ControllerMap<sim::lin::IIbToLinController>,

@@ -19,7 +19,6 @@ bool operator==(const TxBufferConfigUpdate& lhs, const TxBufferConfigUpdate& rhs
 bool operator==(const TxBufferUpdate& lhs, const TxBufferUpdate& rhs);
 bool operator==(const ControllerConfig& lhs, const ControllerConfig& rhs);
 bool operator==(const HostCommand& lhs, const HostCommand& rhs);
-bool operator==(const ControllerStatus& lhs, const ControllerStatus& rhs);
 bool operator==(const PocStatus& lhs, const PocStatus& rhs);
 bool operator==(const CycleStart& lhs, const CycleStart& rhs);
 

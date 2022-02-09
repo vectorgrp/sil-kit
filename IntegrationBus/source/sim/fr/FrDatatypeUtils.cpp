@@ -65,11 +65,6 @@ bool operator==(const HostCommand& lhs, const HostCommand& rhs)
     return lhs.command == rhs.command;
 }
 
-bool operator==(const ControllerStatus& lhs, const ControllerStatus& rhs)
-{
-    return lhs.pocState == rhs.pocState;
-}
-
 bool operator==(const PocStatus& lhs, const PocStatus& rhs)
 {
     return lhs.state == rhs.state
