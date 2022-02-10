@@ -6,10 +6,13 @@
 
 #include <chrono>
 #include <functional>
+#include <set>
 #include <string>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+
+#include "UuidRandom.hpp" //for random strings
 
 
 #include "MockComAdapter.hpp"
@@ -81,6 +84,23 @@ protected:
     Callbacks callbacks;
     MockComAdapter comAdapter;
 };
+
+TEST(ServiceDescriptor, portable_hash_function)
+{
+    using namespace ib::util::uuid;
+    const auto numStrings = 1000;
+    std::vector<std::string> testStrings;
+    for (auto i = 0; i < numStrings; i++)
+    {
+        testStrings.push_back(to_string(generate()));
+    }
+    std::set<uint64_t> hashes;
+    for (const auto& s: testStrings)
+    {
+        hashes.insert(ib::mw::hash(s));
+    }
+    ASSERT_EQ(hashes.size(), testStrings.size()) << "The test strings need unique 64-bit hashes";
+}
 
 TEST_F(DiscoveryServiceTest, service_creation_notification)
 {

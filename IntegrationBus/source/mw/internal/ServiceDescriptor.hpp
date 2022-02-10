@@ -11,7 +11,14 @@ namespace mw {
 
 inline uint64_t hash(const std::string& s)
 {
-    return std::hash<std::string>{}(s);
+    //DJB2 from dj bernstein
+    // documented in http://www.cse.yorku.ca/~oz/hash.html
+    uint64_t hash = 5381;
+    for (auto c : s)
+    {
+        hash = (hash << 5) + hash + c; // hash * 33 + c 
+    }
+    return hash;
 }
 
 typedef std::map<std::string, std::string> SupplementalData;

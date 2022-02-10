@@ -19,4 +19,4 @@ target_link_libraries(IbMwService
 
 add_vib_test(TestMwServiceDiscovery
     SOURCES ServiceDiscoveryTest.cpp 
-    LIBS IbMwService IbMwMockComAdapter)
+    LIBS IbMwService IbMwMockComAdapter IbUuid)
