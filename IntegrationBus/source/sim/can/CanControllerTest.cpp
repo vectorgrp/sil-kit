@@ -79,7 +79,11 @@ TEST(CanControllerTest, send_can_message)
     msg.transmitId = 1;
     msg.userContext = 0;
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage(&canController, msg))
+    CanMessage msgCheck = msg;
+    msgCheck.timestamp = 0ns;
+
+
+    EXPECT_CALL(mockComAdapter, SendIbMessage(&canController, msgCheck))
         .Times(1);
     EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now())
         .Times(1);

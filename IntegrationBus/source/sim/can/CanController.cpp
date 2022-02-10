@@ -40,6 +40,7 @@ void CanController::Sleep()
 
 auto CanController::SendMessage(const CanMessage& msg, void* userContext) -> CanTxId
 {
+    auto now = _timeProvider->Now();
     // ignore the user's API calls if we're configured for replay
     //if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Send))
     //{
@@ -50,8 +51,9 @@ auto CanController::SendMessage(const CanMessage& msg, void* userContext) -> Can
     msgCopy.userContext = userContext;
     msgCopy.transmitId = MakeTxId();
     msgCopy.direction = TransmitDirection::TX;
+    msgCopy.timestamp = now;
 
-    _tracer.Trace(ib::sim::TransmitDirection::TX, _timeProvider->Now(), msg);
+    _tracer.Trace(ib::sim::TransmitDirection::TX, now, msg);
     // has to be called before SendIbMessage because of thread change
     CallHandlers(msg);
 
@@ -64,6 +66,7 @@ auto CanController::SendMessage(const CanMessage& msg, void* userContext) -> Can
     ack.transmitId = msgCopy.transmitId;
     ack.timestamp = msg.timestamp;
     ack.userContext = userContext;
+    ack.timestamp = now;
     CallHandlers(ack);
 
     return msgCopy.transmitId;
@@ -71,6 +74,7 @@ auto CanController::SendMessage(const CanMessage& msg, void* userContext) -> Can
 
 auto CanController::SendMessage(CanMessage&& msg, void* userContext) -> CanTxId
 {
+    auto now = _timeProvider->Now();
     // ignore the user's API calls if we're configured for replay
     //if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Send))
     //{
@@ -81,8 +85,9 @@ auto CanController::SendMessage(CanMessage&& msg, void* userContext) -> CanTxId
     auto txId = MakeTxId();
     msg.transmitId = txId;
     msg.direction = TransmitDirection::TX;
+    msg.timestamp = now;
 
-    _tracer.Trace(ib::sim::TransmitDirection::TX, _timeProvider->Now(), msg);
+    _tracer.Trace(ib::sim::TransmitDirection::TX, now, msg);
     CallHandlers(msg);
 
     _comAdapter->SendIbMessage(this, std::move(msg));
@@ -94,6 +99,7 @@ auto CanController::SendMessage(CanMessage&& msg, void* userContext) -> CanTxId
     ack.transmitId = msg.transmitId;
     ack.timestamp = msg.timestamp;
     ack.userContext = userContext;
+    ack.timestamp = now;
     CallHandlers(ack);
 
     return txId;

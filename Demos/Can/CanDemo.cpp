@@ -50,10 +50,9 @@ void ReceiveMessage(const CanMessage& msg, logging::ILogger* logger)
     logger->Info(buffer.str());
 }
 
-void SendMessage(ICanController* controller, std::chrono::nanoseconds now, logging::ILogger* logger)
+void SendMessage(ICanController* controller, logging::ILogger* logger)
 {
     CanMessage msg;
-    msg.timestamp = now;
     msg.canId = 17;
     msg.flags.ide = 0; // Identifier Extension
     msg.flags.rtr = 0; // Remote Transmission Request
@@ -146,7 +145,7 @@ int main(int argc, char** argv)
                 [canController, logger, sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
 
                     std::cout << "now=" << now << ", duration=" << duration << std::endl;
-                    SendMessage(canController, now, logger);
+                    SendMessage(canController, logger);
                     std::this_thread::sleep_for(sleepTimePerTick);
 
             });

@@ -24,6 +24,17 @@ namespace {
 
 using namespace std::chrono_literals;
 
+// basically the same as the normal == operator, but it doesn't compare timestamps
+bool Matches(const ib::sim::can::CanMessage& lhs, const ib::sim::can::CanMessage& rhs)
+{
+    return lhs.transmitId == rhs.transmitId 
+        && lhs.canId == rhs.canId
+        && lhs.flags == rhs.flags 
+        && lhs.dlc == rhs.dlc 
+        && lhs.dataField == rhs.dataField
+        && lhs.userContext == rhs.userContext;
+}
+
 class CanWithoutSyncFTest : public testing::Test
 {
 protected:
@@ -148,7 +159,7 @@ protected:
         canWriterThread.join();
         for (auto&& message : _testMessages)
         {
-            EXPECT_EQ(message.expectedMsg, message.receivedMsg);
+            EXPECT_TRUE(Matches(message.expectedMsg, message.receivedMsg));
             EXPECT_EQ(message.expectedAck, message.receivedAck);
         }
     }
