@@ -24,7 +24,7 @@ namespace mw {
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
     const std::map<std::string, std::string>& msg)
 {
-    buffer << msg.size();
+    buffer << static_cast<uint32_t>(msg.size());
     for (auto&& kv : msg)
     {
         buffer << kv.first
@@ -38,7 +38,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
     std::map<std::string,std::string>& updatedMsg)
 {
     std::map<std::string, std::string> tmp;// do not modify updatedMsg until we validated the input
-    size_t numElements{ 0 };
+    uint32_t numElements{ 0 };
     buffer >> numElements;
 
     for (auto i = 0u; i < numElements; i++)
