@@ -112,11 +112,12 @@ ib_ReturnCode ib_Ethernet_Controller_RegisterFrameAckHandler(ib_Ethernet_Control
     cppController->RegisterMessageAckHandler(
       [handler, context, controller](ib::sim::eth::IEthController* cppController, const ib::sim::eth::EthTransmitAcknowledge& ack)
       {
+        std::unique_lock<std::mutex> lock(pendingEthernetTransmits.mutex);
+
         auto transmitContext = pendingEthernetTransmits.userContextById[ack.transmitId];
         if (transmitContext == nullptr)
         {
-          std::unique_lock<std::mutex> lock(pendingEthernetTransmits.mutex);
-          pendingEthernetTransmits.callbacksById.insert(std::make_pair(ack.transmitId,
+          pendingEthernetTransmits.callbacksById[ack.transmitId] =
             [handler, context, controller, ack]()
             {
               ib_Ethernet_TransmitAcknowledge eta;
@@ -129,7 +130,7 @@ ib_ReturnCode ib_Ethernet_Controller_RegisterFrameAckHandler(ib_Ethernet_Control
               eta.userContext = transmitContext;
 
               handler(context, controller, &eta);
-            }));
+            };
         }
         else
         {

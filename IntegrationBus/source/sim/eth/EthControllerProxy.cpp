@@ -108,17 +108,20 @@ void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
 void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthStatus& msg)
 {
+    // In case we are in early startup, ensure we tell our participants the bit rate first
+    // and the state later.
+    if (msg.bitRate != _ethBitRate)
+    {
+        _ethBitRate = msg.bitRate;
+        CallHandlers(msg.bitRate);
+    }
+
     if (msg.state != _ethState)
     {
         _ethState = msg.state;
         CallHandlers(msg.state);
     }
 
-    if (msg.bitRate != _ethBitRate)
-    {
-        _ethBitRate = msg.bitRate;
-        CallHandlers(msg.bitRate);
-    }
 }
 
 template<typename MsgT>

@@ -157,16 +157,11 @@ ib_ReturnCode ib_Can_Controller_SendFrame(ib_Can_Controller* controller, ib_Can_
     cm.flags.brs = message->flags & ib_Can_FrameFlag_brs ? 1 : 0;
     cm.flags.esi = message->flags & ib_Can_FrameFlag_esi ? 1 : 0;
 
-    static int msgId = 0;
-    std::stringstream payloadBuilder;
-    payloadBuilder << "CAN " << msgId++;
-    auto payloadStr = payloadBuilder.str();
-
     cm.dlc = message->dlc;
     cm.dataField = std::vector<uint8_t>(&(message->data.data[0]), &(message->data.data[0]) + message->data.size);
 
     // ack queue is empty 
-    auto transmitId = canController->SendMessage(std::move(cm), transmitContext); // AckCallback -> fügt in queue hinzu weil er keine userContext findet
+    auto transmitId = canController->SendMessage(std::move(cm), transmitContext);
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE

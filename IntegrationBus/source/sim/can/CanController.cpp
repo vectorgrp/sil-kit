@@ -90,9 +90,7 @@ auto CanController::SendMessage(CanMessage&& msg, void* userContext) -> CanTxId
     _tracer.Trace(ib::sim::TransmitDirection::TX, now, msg);
     CallHandlers(msg);
 
-    _comAdapter->SendIbMessage(this, std::move(msg));
-    
-    // instantly call transmit acknowledge
+    //Prepare instant acknowledge
     CanTransmitAcknowledge ack;
     ack.canId = msg.canId;
     ack.status = CanTransmitStatus::Transmitted;
@@ -100,6 +98,10 @@ auto CanController::SendMessage(CanMessage&& msg, void* userContext) -> CanTxId
     ack.timestamp = msg.timestamp;
     ack.userContext = userContext;
     ack.timestamp = now;
+
+    _comAdapter->SendIbMessage(this, std::move(msg));
+    
+    // call transmit acknowledge
     CallHandlers(ack);
 
     return txId;
