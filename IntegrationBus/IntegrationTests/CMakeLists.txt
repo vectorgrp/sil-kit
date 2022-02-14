@@ -81,7 +81,7 @@ add_vib_test(ITestHopOnHopOff
         IntegrationBus
 )
  
-add_vib_test(FTestDataPubSub
+add_vib_test(ITestDataPubSub
     SOURCES
       DataPubSubITest.cpp
     LIBS

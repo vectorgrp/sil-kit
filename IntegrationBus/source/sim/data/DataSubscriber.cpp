@@ -43,9 +43,8 @@ void DataSubscriber::RegisterServiceDiscovery()
                 DataExchangeFormat pubDataExchangeFormat{ getVal(mw::service::supplKeyDataPublisherPubDxf)};
                 auto pubUUID = getVal(mw::service::supplKeyDataPublisherPubUUID);
                 std::string labelsStr = getVal(mw::service::supplKeyDataPublisherPubLabels);
-
                 std::map<std::string, std::string> publisherLabels = ib::cfg::Deserialize<std::map<std::string, std::string>>(labelsStr);
-                
+
                 if (topic == _config.name && Match(_config.dataExchangeFormat, pubDataExchangeFormat) &&
                     MatchLabels(_config.labels, publisherLabels))
                 {

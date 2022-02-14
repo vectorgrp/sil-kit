@@ -384,14 +384,14 @@ protected:
             {
                 // Already set the promise if no reception is expected
                 if (std::all_of(participant.dataSubscribers.begin(), participant.dataSubscribers.end(),
-                    [](DataSubscriberInfo ds) {
+                    [](const auto& ds) {
                     return ds.numMsgToReceive == 0; }))
                 {
                     participant.allReceived = true;
                     participant.allReceivedPromise.set_value();
                 }
                 if (std::all_of(participant.dataSubscribers.begin(), participant.dataSubscribers.end(),
-                                   [](DataSubscriberInfo ds) {
+                                   [](const auto& ds) {
                                        return ds.expectedSources == 0;
                                    }))
                 {
@@ -425,7 +425,7 @@ protected:
 
                     if (!participant.allReceived &&
                         std::all_of(participant.dataSubscribers.begin(), participant.dataSubscribers.end(),
-                                    [](DataSubscriberInfo ds) { return ds.allReceived; }))
+                                    [](const auto& ds) { return ds.allReceived; }))
                     {
                         participant.allReceived = true;
                         participant.allReceivedPromise.set_value();
@@ -459,7 +459,7 @@ protected:
 
                     if (!participant.allDiscovered
                         && std::all_of(participant.dataSubscribers.begin(), participant.dataSubscribers.end(),
-                                       [](DataSubscriberInfo ds) {
+                                       [](const auto& ds) {
                                            return ds.allDiscovered;
                                        }))
                     {

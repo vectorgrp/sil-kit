@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "ServiceDiscovery.hpp"
-
+#include "ib/mw/logging/ILogger.hpp"
 
 #include <set>
 
@@ -39,7 +39,7 @@ void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const Se
         return; 
     }
     // Service announcement are sent when a new participant joins the simulation 
-    std::unique_lock<decltype(_serviceMx)> lock(_serviceMx);
+    std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
 
     auto&& announcementMap = _announcedServices[msg.participantName];
     for (auto&& service : msg.services)
@@ -60,16 +60,15 @@ void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const Se
 
 void ServiceDiscovery::ReceivedServiceRemoval(const ServiceDescriptor& serviceDescriptor)
 {
-    {
-        std::unique_lock<decltype(_serviceMx)> lock(_serviceMx);
-        auto&& announcementMap = _announcedServices[serviceDescriptor.GetParticipantName()];
-        auto numErased = announcementMap.erase(to_string(serviceDescriptor));
+    std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
 
-        if (numErased == 0)
-        {
-            //we only notify once per event
-            return;
-        }
+    auto&& announcementMap = _announcedServices[serviceDescriptor.GetParticipantName()];
+    auto numErased = announcementMap.erase(to_string(serviceDescriptor));
+
+    if (numErased == 0)
+    {
+        //we only notify once per event
+        return;
     }
 
     CallHandlers(ServiceDiscoveryEvent::Type::ServiceRemoved, serviceDescriptor);
@@ -77,36 +76,37 @@ void ServiceDiscovery::ReceivedServiceRemoval(const ServiceDescriptor& serviceDe
 
 void ServiceDiscovery::ReceivedServiceAddition(const ServiceDescriptor& serviceDescriptor)
 {
+    std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
+
+    auto&& announcementMap = _announcedServices[serviceDescriptor.GetParticipantName()];
+    const auto cachedServiceKey = to_string(serviceDescriptor);
+
+    if (announcementMap.count(cachedServiceKey) > 0)
     {
-        std::unique_lock<decltype(_serviceMx)> lock(_serviceMx);
-        // a remote participant might be unknown, however, it will send an event for its own ServiceDiscovery service
-        // when first joining the simulation
-        if(_announcedServices.count(serviceDescriptor.GetParticipantName()) == 0)
-        {
-            // A new remote participant, announce our services
-            _comAdapter->SendIbMessage(this, serviceDescriptor.GetParticipantName(), _announcement);
-        }
-
-        auto&& announcementMap = _announcedServices[serviceDescriptor.GetParticipantName()];
-        const auto cachedServiceKey = to_string(serviceDescriptor);
-
-        if (announcementMap.count(cachedServiceKey) > 0)
-        {
-            //we already now this participant's service
-            return;
-        }
-
-        // Update the cache
-        announcementMap[cachedServiceKey] = serviceDescriptor;
+        //we already now this participant's service
+        return;
     }
-    
+        
+    // A remote participant might be unknown, however, it will send an event for its own ServiceDiscovery service
+    // when first joining the simulation. React by announcing all services of this participant
+    std::string controllerType;
+    if (serviceDescriptor.GetSupplementalDataItem(mw::service::controllerType, controllerType)
+        && controllerType == mw::service::controllerTypeServiceDiscovery)
+    {
+        _comAdapter->SendIbMessage(this, serviceDescriptor.GetParticipantName(), _announcement);
+
+    }
+
+    // Update the cache
+    announcementMap[cachedServiceKey] = serviceDescriptor;
+
     CallHandlers(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
 }
 
 
 void ServiceDiscovery::CallHandlers(ServiceDiscoveryEvent::Type eventType, const ServiceDescriptor& serviceDescriptor)
 {
-    std::unique_lock<decltype(_handlerMx)> lock(_handlerMx);
+    // CallHandlers must be used with a lock on _discoveryMx
     for (auto&& handler : _handlers)
     {
         handler(eventType, serviceDescriptor);
@@ -141,7 +141,7 @@ void ServiceDiscovery::NotifyServiceCreated(const ServiceDescriptor& serviceDesc
     event.type = ServiceDiscoveryEvent::Type::ServiceCreated;
     event.service = serviceDescriptor;
 
-    std::unique_lock<decltype(_serviceMx)> lock(_serviceMx);
+    std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
     _announcedServices[_participantName][to_string(serviceDescriptor)] = serviceDescriptor;
     _announcement.services.push_back(serviceDescriptor);
 
@@ -154,9 +154,9 @@ void ServiceDiscovery::NotifyServiceRemoved(const ServiceDescriptor& serviceDesc
     {
         return; 
     }
-    std::unique_lock<decltype(_serviceMx)> lock(_serviceMx);
-    auto&& announcementMap = _announcedServices[_participantName];
+    std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
 
+    auto&& announcementMap = _announcedServices[_participantName];
     announcementMap.erase(to_string(serviceDescriptor));
 
     //update our announcement table
@@ -183,23 +183,22 @@ void ServiceDiscovery::RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT 
     {
         return;
     }
+    // Notify the new handler about the existing services and register the handler. 
+    // This must be one atomic operation, as in between calls of ReceivedServiceAddition
+    // in the IO-Worker thread leads to loss of ServiceDiscoveryEvents.
 
+    std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
+    for (auto&& mapKeyval : _announcedServices)
     {
-        std::unique_lock<decltype(_serviceMx)> lock(_serviceMx);
-        //Notify about the existing services
-        for (auto&& mapKeyval : _announcedServices)
-        {
-            //no self notifications
-            if (mapKeyval.first == _participantName)
-                continue;
+        //no self notifications
+        if (mapKeyval.first == _participantName)
+            continue;
 
-            for (auto&& serviceKeyval : mapKeyval.second)
-            {
-                handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceKeyval.second);
-            }
+        for (auto&& serviceKeyval : mapKeyval.second)
+        {
+            handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceKeyval.second);
         }
     }
-    std::unique_lock<decltype(_handlerMx)> lock(_handlerMx);
     _handlers.emplace_back(std::move(handler));
 }
 

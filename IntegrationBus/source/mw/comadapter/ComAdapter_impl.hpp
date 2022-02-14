@@ -362,8 +362,6 @@ auto ComAdapter<IbConnectionT>::CreateDataSubscriberInternal(const std::string& 
                                                              sim::data::IDataSubscriber* parent)
     -> sim::data::DataSubscriberInternal*
 {
-    _logger->Trace("Creating internal subscriber for topic={}, linkName={}", topic, linkName);
-
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataSubscriberInternal;
 
@@ -457,6 +455,7 @@ auto ComAdapter<IbConnectionT>::CreateDataSubscriber(const std::string& topic,
             config, mw::ServiceType::Controller, std::move(supplementalData), config, _timeProvider.get(),
             defaultDataHandler, newDataSourceHandler);
         controller->RegisterServiceDiscovery();
+
         return controller;
     }
 }
