@@ -5,38 +5,15 @@
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/sim/data/all.hpp"
 
+#include "CapiImpl.h"
+#include "TypeConversion.hpp"
+
 #include <string>
 #include <iostream>
 #include <algorithm>
 #include <map>
 #include <mutex>
 #include <cstring>
-#include "CapiImpl.h"
-
-static void assign(std::map<std::string, std::string>& cppLabels, const ib_KeyValueList* cLabels)
-{
-    if (cLabels)
-    {
-        for (uint32_t i = 0; i < cLabels->numLabels; i++)
-        {
-            cppLabels.insert({ cLabels->labels[i].key, cLabels->labels[i].value });
-        }
-    }
-}
-
-static void assign(ib_KeyValueList** cLabels, const std::map<std::string, std::string>& cppLabels)
-{
-    size_t numLabels = cppLabels.size();
-    size_t labelsSize = sizeof(ib_KeyValueList) + (numLabels * sizeof(ib_KeyValuePair));
-    *cLabels = (ib_KeyValueList*)malloc(labelsSize);
-    (*cLabels)->numLabels = numLabels;
-
-    uint32_t i = 0;
-    for (auto&& kv : cppLabels)
-    {
-        (*cLabels)->labels[i++] = {kv.first.c_str(), kv.second.c_str()};
-    }
-}
 
 extern "C" {
 

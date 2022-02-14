@@ -5,6 +5,7 @@
 #include <functional>
 #include <unordered_map>
 #include <mutex>
+#include <vector>
 #include <atomic>
 
 #include "ServiceDatatypes.hpp"
@@ -38,6 +39,7 @@ public: //IServiceDiscovery
     void NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor) override;
     //!< Register a handler for asynchronous service creation notifications
     void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler) override;
+    std::vector<ServiceDescriptor> GetRemoteServices() const override;
 
 public: // Interfaces
 
@@ -60,7 +62,7 @@ private:
     //!< a cache for computing additions/removals per participant
     using ServiceMap = std::unordered_map<std::string /*serviceDescriptor*/, ServiceDescriptor>;
     std::unordered_map<std::string /* participant name */, ServiceMap> _announcedServices; 
-    std::recursive_mutex _discoveryMx;
+    mutable std::recursive_mutex _discoveryMx;
     std::atomic<bool> _shuttingDown{false};
 };
 

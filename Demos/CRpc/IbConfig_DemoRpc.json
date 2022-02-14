@@ -7,7 +7,7 @@
 
     "Participants": [
       {
-        "Name": "Participant",
+        "Name": "Client",
         "Description": "Rpc client",
         "Logger": {
           "Sinks": [
@@ -19,14 +19,32 @@
         },
         "RpcClients": [
           { "Name": "TestFunc" }
-        ],
+        ]
+      },
+      {
+        "Name": "Server",
+        "Description": "Rpc server",
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Stdout",
+              "Level": "Info"
+            }
+          ]
+        },
         "RpcServers": [
           { "Name": "TestFunc" }
         ]
       }
     ],
     "Links": [
-      { "Name": "TestFunc", "Endpoints": [ "Participant/TestFunc" ] }
+      {
+        "Name": "TestFunc",
+        "Endpoints": [
+          "Client/TestFunc",
+          "Server/TestFunc" 
+        ]
+      }
     ]
   },
 

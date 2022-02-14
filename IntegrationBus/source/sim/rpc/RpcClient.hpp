@@ -29,19 +29,14 @@ class RpcClient
 {
 public:
     RpcClient(mw::IComAdapterInternal* comAdapter, cfg::RpcPort config, mw::sync::ITimeProvider* timeProvider,
-              CallReturnHandler handler, IRpcClient* callController);
+              CallReturnHandler handler);
 
-    void SendClientAnnouncement() const;
-    void AddCounterpart();
+    void RegisterServiceDiscovery();
 
     auto Call(std::vector<uint8_t> data) -> IRpcCallHandle* override;
     auto Call(const uint8_t* data, std::size_t size) -> IRpcCallHandle* override;
 
     void SetCallReturnHandler(CallReturnHandler handler) override;
-
-    //! \brief Accepts messages originating from IB communications.
-    void ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const ServerAcknowledge& msg) override;
-    void ReceiveMessage(const ServerAcknowledge& msg);
 
     //! \brief Accepts messages originating from IB communications.
     void ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const FunctionCallResponse& msg) override;

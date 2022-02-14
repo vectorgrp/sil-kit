@@ -10,6 +10,7 @@ Remote procedure call (Rpc)
 .. |SubmitResult| replace:: :cpp:func:`SubmitResult()<ib::sim::rpc::IRpcServer::SubmitResult()>`
 .. |SetRpcHandler| replace:: :cpp:func:`SetRpcHandler()<ib::sim::rpc::IRpcServer::SetRpcHandler()>`
 .. |SetCallReturnHandler| replace:: :cpp:func:`SetCallReturnHandler()<ib::sim::rpc::IRpcClient::SetCallReturnHandler()>`
+.. |DiscoverRpcServers| replace:: :cpp:func:`DiscoverRpcServers()<ib::mw::IComAdapter::DiscoverRpcServers()>`
 .. |IRpcClient| replace:: :cpp:class:`IRpcClient<ib::sim::rpc::IRpcClient>`
 .. |IRpcServer| replace:: :cpp:class:`IRpcClient<ib::sim::rpc::IRpcServer>`
 .. contents::
@@ -23,15 +24,15 @@ This API provides a client-server model for remote calls with arbitrary argument
 The RpcClient dispatches the call (1) with given argument data. The call arrives remotely and is processed by 
 the handler (2) of the RpcServer, submitting (3) the result back to the RpcClient who gets informed 
 about the incoming return data in his call return handler (4). These steps constitute the core Rpc API, where the 
-handlers (2,4) are provided on instantiation and call / submit (1,3) are commands of the RpcClient / RpcServer instances.
+handlers (2,4) are provided on instantiation and call / submit (1,3) are commands of the RpcClient / RpcServer 
+instances. Further, a query can be run providing a list of available RpcServers and their properties.
 
-Linkage
-~~~~~~~
+Function name
+~~~~~~~~~~~~~
 
 RpcClients and RpcServers are linked by a string-based function name. For each link, the endpoints must be unique. 
-That is, on one participant, there can only be one RpcClient / RpcServer on a given function name.
-However, it is possible to use multiple RpcClients / RpcServers on the same function name distributed among different 
-participants.
+That is, on one participant, there can only be one RpcClient / RpcServer on a given function name. However, it is 
+possible to use multiple RpcClients / RpcServers on the same function name distributed among different participants.
 
 RpcExchangeFormat
 ~~~~~~~~~~~~~~~~~
@@ -39,9 +40,26 @@ RpcExchangeFormat
 Both RpcClients and RpcServers define a RpcExchangeFormat, a meta description of the transmitted data. It can
 be used to provide infomation about the de- / serialization of the underlying user data. Just like the function 
 name, the RpcExchangeFormat has to match between RpcClients / RpcServers for communicaiton to take place. 
-The wildcard character "*" will match any other string of that given field of the RpcExchangeFormat. 
-Currently, the RpcExchangeFormat only consists of the field "mimeType". Wildcards encoded in a string 
-(e.g. "json*") are not supported.
+An empty character on a RpcClient will match any other string of that given field of the RpcExchangeFormat. 
+Currently, the RpcExchangeFormat only consists of the field "mediaType".
+
+Labels
+~~~~~~
+
+RpcClients and RpcServers can be annotated with string-based key-value pairs (labels). Additional to the matching 
+requirements regarding functionName and RpcExchangeFormat, RpcServers will only receive calls by RpcClients if their 
+labels apply the following matching rules:
+
+* A RpcClient without labels matches any other RpcServer.
+* If labels are specified on a RpcClients, all of the labels must be found on a RpcServer.
+* An empty value string on a RpcClients's label is a wildcard.
+
+Server Discovery
+~~~~~~~~~~~~~~~~
+
+The simulation can be queried about available RpcServers with |DiscoverRpcServers|. The method takes filter arguments
+for functionName, RpcExchangeFormat and labels. To obtain the results of the query, a handler is given to the method 
+which carries a vector of RpcDiscoveryResult providing the properties of each discovered RpcServer.
 
 Usage
 ~~~~~
@@ -63,8 +81,8 @@ indicating success or an error during the procedure.
 Error handling
 ~~~~~~~~~~~~~~
 
-* If using |Call| with no corresponding server available, the CallReturnHandler is triggered immediately with an invaild
-  call handle and CallStatus::ServerNotReachable. In this case, the call handle returned by |Call| is also invalid.
+* If using |Call| with no corresponding server available, the CallReturnHandler is triggered immediately with a nullptr
+  call handle and CallStatus::ServerNotReachable. In this case, the call handle returned by |Call| is also nullptr.
 * |SubmitResult| must only be used with a valid call handle received in the RpcHandler.
 
 Usage Example

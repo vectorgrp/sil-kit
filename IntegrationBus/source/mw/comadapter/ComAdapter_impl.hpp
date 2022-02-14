@@ -27,6 +27,7 @@
 #include "RpcClient.hpp"
 #include "RpcServer.hpp"
 #include "RpcServerInternal.hpp"
+#include "RpcDiscoverer.hpp"
 #include "ParticipantController.hpp"
 #include "SystemController.hpp"
 #include "SystemMonitor.hpp"
@@ -470,8 +471,8 @@ auto ComAdapter<IbConnectionT>::CreateGenericPublisher(const std::string& canoni
     auto&& config = get_by_name(_participant.genericPublishers, canonicalName);
     if (ControllerUsesReplay(config))
     {
-        return CreateControllerForLink<sim::generic::GenericPublisherReplay>(config, mw::ServiceType::Controller, {},
-                                                                             config, _timeProvider.get());
+        return CreateControllerForLink<sim::generic::GenericPublisherReplay>(
+            config, mw::ServiceType::Controller, std::move(supplementalData), config, _timeProvider.get());
     }
     else
     {
@@ -490,8 +491,8 @@ auto ComAdapter<IbConnectionT>::CreateGenericSubscriber(const std::string& canon
     auto&& config = get_by_name(_participant.genericSubscribers, canonicalName);
     if (ControllerUsesReplay(config))
     {
-        return CreateControllerForLink<sim::generic::GenericSubscriberReplay>(config, mw::ServiceType::Controller, {},
-                                                                              config, _timeProvider.get());
+        return CreateControllerForLink<sim::generic::GenericSubscriberReplay>(
+            config, mw::ServiceType::Controller, std::move(supplementalData), config, _timeProvider.get());
     }
     else
     {
@@ -502,25 +503,31 @@ auto ComAdapter<IbConnectionT>::CreateGenericSubscriber(const std::string& canon
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateRpcServerInternal(const std::string& functionName, const std::string& linkName,
+auto ComAdapter<IbConnectionT>::CreateRpcServerInternal(const std::string& functionName, const std::string& clientUUID,
                                                         const sim::rpc::RpcExchangeFormat exchangeFormat,
+                                                        const std::map<std::string, std::string>& clientLabels,
                                                         sim::rpc::CallProcessor handler, sim::rpc::IRpcServer* parent)
     -> sim::rpc::RpcServerInternal*
 {
-    mw::SupplementalData supplementalData;
-    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcServerInternal;
-
-    _logger->Trace("Creating internal server for functionName={}, linkName={}", functionName, linkName);
+    _logger->Trace("Creating internal server for functionName={}, clientUUID={}", functionName, clientUUID);
 
     cfg::Link link;
-    link.id = static_cast<int16_t>(hash(linkName));
-    link.name = linkName;
+    link.id = static_cast<int16_t>(hash(clientUUID));
+    link.name = clientUUID;
     link.type = cfg::Link::Type::Rpc;
 
     cfg::RpcPort config;
     config.linkId = link.id;
     config.name = functionName;
     config.exchangeFormat = exchangeFormat;
+    config.labels = clientLabels;
+    config.clientUUID = clientUUID;
+	
+    // RpcServerInternal gets discovered by RpcClient which is then ready to detach calls
+    mw::SupplementalData supplementalData;
+    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcServerInternal;
+    supplementalData[ib::mw::service::supplKeyRpcServerInternalClientUUID] = clientUUID;
+
     return CreateController<sim::rpc::RpcServerInternal>(link, config.name, mw::ServiceType::Controller,
                                                          std::move(supplementalData), config, _timeProvider.get(),
                                                          handler, parent);
@@ -529,10 +536,13 @@ auto ComAdapter<IbConnectionT>::CreateRpcServerInternal(const std::string& funct
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateRpcClient(const std::string& functionName,
                                                 const sim::rpc::RpcExchangeFormat exchangeFormat,
+                                                const std::map<std::string, std::string>& labels,
                                                 sim::rpc::CallReturnHandler handler) -> sim::rpc::IRpcClient*
 {
     ib::cfg::RpcPort config = get_by_name(_participant.rpcClients, functionName);
+    config.name = functionName;
     config.exchangeFormat = exchangeFormat;
+    config.labels = labels;
     config.clientUUID = util::uuid::to_string(util::uuid::generate());
 
     if (ControllerUsesReplay(config))
@@ -542,42 +552,42 @@ auto ComAdapter<IbConnectionT>::CreateRpcClient(const std::string& functionName,
     }
     else
     {
-        mw::SupplementalData supplementalData;
-        supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcClient;
 
-        // This controller<RpcClient> is for client calls with linkName = UUID.
-        // Needed, as the architecture doesn't allow multiple links on a single controller.
         cfg::Link link;
         link.id = -1;
         link.name = config.clientUUID;
         link.type = cfg::Link::Type::Rpc;
 
-        cfg::RpcPort callControllerConfig;
-        callControllerConfig.name = functionName;
-        callControllerConfig.clientUUID = config.clientUUID;
-        callControllerConfig.exchangeFormat = exchangeFormat;
+        // RpcClient gets discovered by RpcServer which creates RpcServerInternal on a matching connection
+        mw::SupplementalData supplementalData;
+        supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcClient;
+        supplementalData[ib::mw::service::supplKeyRpcClientFunctionName] = functionName;
+        supplementalData[ib::mw::service::supplKeyRpcClientDxf] = exchangeFormat.mediaType;
+        auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
+        supplementalData[ib::mw::service::supplKeyRpcClientLabels] = labelStr;
+        supplementalData[ib::mw::service::supplKeyRpcClientUUID] = config.clientUUID;
 
-        auto callController = CreateController<ib::sim::rpc::RpcClient>(
-            link, callControllerConfig.name, mw::ServiceType::Controller, supplementalData,
-            callControllerConfig, _timeProvider.get(), handler, nullptr);
+        auto controller = CreateController<ib::sim::rpc::RpcClient>(link, functionName, mw::ServiceType::Controller,
+                                                                    std::move(supplementalData), config,
+                                                                    _timeProvider.get(), handler);
 
-        // This controller<RpcClient> is for the client announcement with linkName = functionName
-        auto announcementController = CreateControllerForLink<sim::rpc::RpcClient>(
-            config, mw::ServiceType::Controller, std::move(supplementalData), config, _timeProvider.get(), handler,
-            callController);
-        announcementController->SendClientAnnouncement();
-
-        return callController;
+        // RpcClient discovers RpcServerInternal and is ready to detach calls
+        controller->RegisterServiceDiscovery();
+ 
+        return controller;
     }
 }
 
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateRpcServer(const std::string& functionName,
                                                 const sim::rpc::RpcExchangeFormat exchangeFormat,
+                                                const std::map<std::string, std::string>& labels,
                                                 sim::rpc::CallProcessor handler) -> sim::rpc::IRpcServer*
 {
     ib::cfg::RpcPort config = get_by_name(_participant.rpcServers, functionName);
+    config.name = functionName;
     config.exchangeFormat = exchangeFormat;
+    config.labels = labels;
 
     if (ControllerUsesReplay(config))
     {
@@ -586,13 +596,31 @@ auto ComAdapter<IbConnectionT>::CreateRpcServer(const std::string& functionName,
     }
     else
     {
+	
+        // RpcServer announces himself to be found by DiscoverRpcServers()
         mw::SupplementalData supplementalData;
         supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcServer;
+        supplementalData[ib::mw::service::supplKeyRpcServerFunctionName] = functionName;
+        supplementalData[ib::mw::service::supplKeyRpcServerDxf] = exchangeFormat.mediaType;
+        auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
+        supplementalData[ib::mw::service::supplKeyRpcServerLabels] = labelStr;
 
-        auto controller = CreateControllerForLink<sim::rpc::RpcServer>(
-            config, mw::ServiceType::Controller, std::move(supplementalData), config, _timeProvider.get(), handler);
+        auto controller = CreateControllerForLink<sim::rpc::RpcServer>(config, mw::ServiceType::Controller, supplementalData, config, _timeProvider.get(), handler);
+        
+        // RpcServer discovers RpcClient and creates RpcServerInternal on a matching connection
+        controller->RegisterServiceDiscovery();
         return controller;
     }
+}
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::DiscoverRpcServers(const std::string& functionName,
+    const sim::rpc::RpcExchangeFormat& exchangeFormat,
+    const std::map<std::string, std::string>& labels,
+    sim::rpc::DiscoveryResultHandler handler)
+{
+    sim::rpc::RpcDiscoverer rpcDiscoverer{ GetServiceDiscovery() };
+    handler(rpcDiscoverer.GetMatchingRpcServers(functionName, exchangeFormat, labels));
 }
 
 template <class IbConnectionT>
@@ -900,30 +928,6 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, si
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::ClientAnnouncement& msg)
-{
-    SendIbMessageImpl(from, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::ClientAnnouncement&& msg)
-{
-    SendIbMessageImpl(from, std::move(msg));
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::ServerAcknowledge& msg)
-{
-    SendIbMessageImpl(from, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::ServerAcknowledge&& msg)
-{
-    SendIbMessageImpl(from, std::move(msg));
-}
-
-template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::FunctionCall& msg)
 {
     SendIbMessageImpl(from, msg);
@@ -1206,34 +1210,6 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, co
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
                                               sim::data::DataMessage&& msg)
-{
-    SendIbMessageImpl(from, std::move(msg));
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
-                                              const sim::rpc::ClientAnnouncement& msg)
-{
-    SendIbMessageImpl(from, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
-                                              sim::rpc::ClientAnnouncement&& msg)
-{
-    SendIbMessageImpl(from, std::move(msg));
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
-                                              const sim::rpc::ServerAcknowledge& msg)
-{
-    SendIbMessageImpl(from, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
-                                              sim::rpc::ServerAcknowledge&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }

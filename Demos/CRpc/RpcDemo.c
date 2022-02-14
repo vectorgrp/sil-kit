@@ -51,6 +51,9 @@ ib_Rpc_Server* server;
 
 uint8_t callCounter = 0;
 
+int receiveCallCount = 0;
+const int numCalls = 10;
+
 char* participantName;
 
 void PrintByteVector(const ib_ByteVector* data)
@@ -69,8 +72,9 @@ void PrintByteVector(const ib_ByteVector* data)
 void CallHandler(void* context, ib_Rpc_Server* server, const ib_Rpc_CallHandle* callHandle,
                         const ib_ByteVector* argumentData)
 {
+    receiveCallCount += 1;
     uint8_t* tmp = (uint8_t*)malloc(argumentData->size * sizeof(uint8_t));
-    printf("[server] Call received: ");
+    printf("[Server] Call received: ");
     PrintByteVector(argumentData);
     for (int i = 0; i < argumentData->size; i++)
     {
@@ -96,6 +100,60 @@ void ResultHandler(void* context, ib_Rpc_Client* client, const ib_Rpc_CallHandle
     }
 }
 
+void DiscoveryResultHandler(void* context, const ib_Rpc_DiscoveryResultList* discoveryResults)
+{
+    for (uint32_t i = 0; i < discoveryResults->numResults; i++)
+    {
+        printf("Discovered RpcServer with functionName=\"%s\", exchangeFormat.mediaType=\"%s\", labels={",
+               discoveryResults->results[i].functionName, discoveryResults->results[i].exchangeFormat->mediaType);
+        for (uint32_t j = 0; j < discoveryResults->results[i].labelList->numLabels; j++)
+        {
+            printf("{\"%s\", \"%s\"}", discoveryResults->results[i].labelList->labels[j].key, discoveryResults->results[i].labelList->labels[j].value);
+        }
+        printf("}\n");
+    }
+}
+
+void Copy_Label(ib_KeyValuePair* dst, const ib_KeyValuePair* src)
+{
+    dst->key = malloc(strlen(src->key) + 1);
+    dst->value = malloc(strlen(src->value) + 1);
+    if (dst->key != NULL && dst->value != NULL)
+    {
+        strcpy((char*)dst->key, src->key);
+        strcpy((char*)dst->value, src->value);
+    }
+}
+
+void Create_Labels(ib_KeyValueList** outLabelList, const ib_KeyValuePair* labels, size_t numLabels)
+{
+    ib_KeyValueList* newLabelList;
+    size_t labelsSize = numLabels * sizeof(ib_KeyValuePair);
+    size_t labelListSize = sizeof(ib_KeyValueList) + labelsSize;
+    newLabelList = (ib_KeyValueList*)malloc(labelListSize);
+    if (newLabelList != NULL)
+    {
+        newLabelList->numLabels = numLabels;
+        for (size_t i = 0; i < numLabels; i++)
+        {
+            Copy_Label(&newLabelList->labels[i], &labels[i]);
+        }
+    }
+    *outLabelList = newLabelList;
+}
+
+void Labels_Destroy(ib_KeyValueList* labelList)
+{
+    if (labelList)
+    {
+        for (size_t i = 0; i < labelList->numLabels; i++)
+        {
+            free((char*)labelList->labels[i].key);
+            free((char*)labelList->labels[i].value);
+        }
+        free(labelList);
+    }
+}
 
 int main(int argc, char* argv[])
 {
@@ -127,20 +185,50 @@ int main(int argc, char* argv[])
     }
     printf("Creating Participant %s for simulation '%s'\n", participantName, domainId);
 
-    ib_Rpc_ExchangeFormat exchangeFormat = { ib_InterfaceIdentifier_RpcExchangeFormat, "*" };
-    returnCode = ib_Rpc_Server_Create(&server, participant, "TestFunc", &exchangeFormat, NULL, &CallHandler);
-    returnCode = ib_Rpc_Client_Create(&client, participant, "TestFunc", &exchangeFormat, NULL, &ResultHandler);
-    
-    for (int i = 0; i < 10; i++) 
+    if (strcmp(participantName, "Client") == 0)
     {
-        uint8_t buffer[3] = { callCounter,callCounter,callCounter };
-        ib_ByteVector argumentData = {&buffer[0], 3};
-        printf("[client] Call detached: ");
-        PrintByteVector(&argumentData);
-        ib_Rpc_CallHandle* callHandle;
-        ib_Rpc_Client_Call(client, &callHandle, &argumentData);
-        callCounter += (uint8_t)1;
-        SleepMs(1000);
+        const char* filterFunctionName = "";
+        ib_Rpc_ExchangeFormat filterExchangeFormat = {ib_InterfaceIdentifier_RpcExchangeFormat, ""};
+        ib_KeyValueList* filterLabelList;
+        size_t numLabels = 1;
+        ib_KeyValuePair filterLabels[1] = {{"KeyA", "ValA"}};
+        Create_Labels(&filterLabelList, filterLabels, numLabels);
+
+        returnCode = ib_Rpc_DiscoverServers(participant, filterFunctionName, &filterExchangeFormat, filterLabelList, NULL, &DiscoveryResultHandler);
+
+        ib_Rpc_ExchangeFormat exchangeFormat = { ib_InterfaceIdentifier_RpcExchangeFormat, "A" };
+        ib_KeyValueList* labelList;
+        numLabels = 1;
+        ib_KeyValuePair labels[1] = { {"KeyA", "ValA"} };
+        Create_Labels(&labelList, labels, numLabels);
+
+        returnCode = ib_Rpc_Client_Create(&client, participant, "TestFunc", &exchangeFormat, labelList, NULL, &ResultHandler);
+
+        for (int i = 0; i < numCalls; i++)
+        {
+            SleepMs(1000);
+            uint8_t buffer[3] = {i, i, i};
+            ib_ByteVector argumentData = { &buffer[0], 3 };
+            printf("[Client] Call detached: ");
+            PrintByteVector(&argumentData);
+            ib_Rpc_CallHandle* callHandle;
+            ib_Rpc_Client_Call(client, &callHandle, &argumentData);
+        }
+    }
+    else if (strcmp(participantName, "Server") == 0)
+    {
+        ib_Rpc_ExchangeFormat exchangeFormat = {ib_InterfaceIdentifier_RpcExchangeFormat, "A"};
+        ib_KeyValueList* labelList;
+        size_t numLabels = 2;
+        ib_KeyValuePair labels[2] = {{"KeyA", "ValA"}, {"KeyB", "ValB"}};
+        Create_Labels(&labelList, labels, numLabels);
+
+        returnCode = ib_Rpc_Server_Create(&server, participant, "TestFunc", &exchangeFormat, labelList, NULL, &CallHandler);
+
+        while (receiveCallCount < numCalls)
+        {
+            SleepMs(100);
+        }
     }
 
     ib_SimulationParticipant_Destroy(participant);

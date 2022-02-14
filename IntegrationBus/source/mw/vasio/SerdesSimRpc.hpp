@@ -15,13 +15,11 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Ca
     buffer << msg.ab << msg.cd;
     return buffer;
 }
-
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CallUUID& msg)
 {
     buffer >> msg.ab >> msg.cd;
     return buffer;
 }
-
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FunctionCall& msg)
 {
     buffer << msg.callUUID << msg.data;
@@ -40,28 +38,6 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Fu
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FunctionCallResponse& msg)
 {
     buffer >> msg.callUUID >> msg.data;
-    return buffer;
-}
-
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const ClientAnnouncement& msg)
-{
-    buffer << msg.functionName << msg.exchangeFormat.mimeType << msg.clientUUID;
-    return buffer;
-}
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, ClientAnnouncement& msg)
-{
-    buffer >> msg.functionName >> msg.exchangeFormat.mimeType >> msg.clientUUID;
-    return buffer;
-}
-
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const ServerAcknowledge& msg)
-{
-    buffer << msg.clientUUID;
-    return buffer;
-}
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, ServerAcknowledge& msg)
-{
-    buffer >> msg.clientUUID;
     return buffer;
 }
 

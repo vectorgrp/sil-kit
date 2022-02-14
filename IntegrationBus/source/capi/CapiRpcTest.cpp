@@ -58,14 +58,50 @@ class MockComAdapter : public ib::mw::test::DummyComAdapter
   public:
     MOCK_METHOD(ib::sim::rpc::IRpcClient*, CreateRpcClient,
                 (const std::string& /*functionName*/, const ib::sim::rpc::RpcExchangeFormat /*exchangeFormat*/,
-                 ib::sim::rpc::CallReturnHandler /*handler*/), (override));
+                 (const std::map<std::string, std::string>& /*labels*/), ib::sim::rpc::CallReturnHandler /*handler*/),
+                (override));
 
     MOCK_METHOD(ib::sim::rpc::IRpcServer*, CreateRpcServer,
-                (const std::string& /*canonicalName*/, 
-                 const ib::sim::rpc::RpcExchangeFormat /*rpcExchangeFormat*/,
-                 ib::sim::rpc::CallProcessor /*handler*/), (override));
+                (const std::string& /*canonicalName*/, const ib::sim::rpc::RpcExchangeFormat /*rpcExchangeFormat*/,
+                 (const std::map<std::string, std::string>& /*labels*/), ib::sim::rpc::CallProcessor /*handler*/),
+                (override));
+
+    MOCK_METHOD(void, DiscoverRpcServers,
+                (const std::string& /*functionName*/, const ib::sim::rpc::RpcExchangeFormat& /*exchangeFormat*/,
+                 (const std::map<std::string, std::string>& /*labels*/), ib::sim::rpc::DiscoveryResultHandler /*handler*/),
+                (override));
 
 };
+
+void Copy_Label(ib_KeyValuePair* dst, const ib_KeyValuePair* src)
+{
+    auto lenKey = strlen(src->key) + 1;
+    auto lenVal = strlen(src->value) + 1;
+    dst->key = (const char*)malloc(lenKey);
+    dst->value = (const char*)malloc(lenVal);
+    if (dst->key != nullptr && dst->value != nullptr)
+    {
+        strcpy((char*)dst->key, src->key);
+        strcpy((char*)dst->value, src->value);
+    }
+}
+
+void Create_Labels(ib_KeyValueList** outLabels, const ib_KeyValuePair* labels, uint32_t numLabels)
+{
+    ib_KeyValueList* newLabels;
+    size_t labelsSize = numLabels * sizeof(ib_KeyValuePair);
+    size_t labelListSize = sizeof(ib_KeyValueList) + labelsSize;
+    newLabels = (ib_KeyValueList*)malloc(labelListSize);
+    if (newLabels != nullptr)
+    {
+        newLabels->numLabels = numLabels;
+        for (uint32_t i = 0; i < numLabels; i++)
+        {
+            Copy_Label(&newLabels->labels[i], &labels[i]);
+        }
+    }
+    *outLabels = newLabels;
+}
 
 class CapiRpcTest : public testing::Test
 {
@@ -78,20 +114,45 @@ public:
         dummyCallHandle = std::make_unique<CallHandleImpl>(ib::sim::rpc::CallUUID{ 1, 1 });
         callHandlePtr = dummyCallHandle.get();
         callHandle = reinterpret_cast<ib_Rpc_CallHandle*>(callHandlePtr);
+
+        uint32_t numLabels = 1;
+        ib_KeyValuePair labels[1] = {{"KeyA", "ValA"}};
+        Create_Labels(&labelList, labels, numLabels);
+
+        exchangeFormat.mediaType = "A";
+
+        dummyContext.someInt = 1234;
+        dummyContextPtr = (void*)&dummyContext;
     }
 
     std::unique_ptr<CallHandleImpl> dummyCallHandle;
     IRpcCallHandle* callHandlePtr;
     ib_Rpc_CallHandle* callHandle;
 
+    typedef struct
+    {
+        uint32_t someInt;
+    } TransmitContext;
+
+    TransmitContext dummyContext;
+    void* dummyContextPtr;
+
+    ib_Rpc_ExchangeFormat exchangeFormat;
+    ib_KeyValueList* labelList;
+    uint32_t numLabels = 1;
+
 };
 
-void RpcHandler(void* context, ib_Rpc_Server* server, ib_Rpc_CallHandle* callHandle,  const ib_ByteVector* argumentData) {
-
+void RpcHandler(void* context, ib_Rpc_Server* server, ib_Rpc_CallHandle* callHandle, const ib_ByteVector* argumentData)
+{
 }
 
-void ResultHandler(void* context, ib_Rpc_Client* client, ib_Rpc_CallHandle* callHandle, ib_Rpc_CallStatus callStatus,
-                   const ib_ByteVector* returnData)
+void CallResultHandler(void* context, ib_Rpc_Client* client, ib_Rpc_CallHandle* callHandle,
+                       ib_Rpc_CallStatus callStatus, const ib_ByteVector* returnData)
+{
+}
+
+void DiscoveryResultHandler(void* context, const ib_Rpc_DiscoveryResultList* discoveryResults)
 {
 }
 
@@ -102,7 +163,8 @@ TEST_F(CapiRpcTest, rpc_client_function_mapping)
     ib_Rpc_ExchangeFormat rpcExchangeFormat;
     rpcExchangeFormat.mediaType = "A";
     EXPECT_CALL(mockSimulationParticipant, CreateRpcClient).Times(testing::Exactly(1));
-    returnCode = ib_Rpc_Client_Create(&client, (ib_SimulationParticipant*)&mockSimulationParticipant, "functionName", &rpcExchangeFormat, nullptr, &ResultHandler);
+    returnCode = ib_Rpc_Client_Create(&client, (ib_SimulationParticipant*)&mockSimulationParticipant, "functionName",
+                                      &rpcExchangeFormat, labelList, nullptr, &CallResultHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
     ib_ByteVector data = { 0, 0 };
@@ -120,7 +182,8 @@ TEST_F(CapiRpcTest, rpc_server_function_mapping)
     ib_Rpc_ExchangeFormat rpcExchangeFormat;
     rpcExchangeFormat.mediaType = "A";
     EXPECT_CALL(mockSimulationParticipant, CreateRpcServer).Times(testing::Exactly(1));
-    returnCode = ib_Rpc_Server_Create(&server, (ib_SimulationParticipant*)&mockSimulationParticipant, "functionName", &rpcExchangeFormat, nullptr, &RpcHandler);
+    returnCode = ib_Rpc_Server_Create(&server, (ib_SimulationParticipant*)&mockSimulationParticipant, "functionName",
+                                      &rpcExchangeFormat, labelList, nullptr, &RpcHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
     
     ib_ByteVector data = {0, 0};
@@ -132,19 +195,22 @@ TEST_F(CapiRpcTest, rpc_server_function_mapping)
 TEST_F(CapiRpcTest, rpc_client_bad_parameters)
 {
     ib_ReturnCode returnCode;
-    ib_Rpc_ExchangeFormat rpcExchangeFormat;
-    rpcExchangeFormat.mediaType = "A";
     ib_Rpc_Client* client;
 
-    returnCode = ib_Rpc_Client_Create(nullptr, (ib_SimulationParticipant*)&mockSimulationParticipant, "functionName", &rpcExchangeFormat, nullptr, &ResultHandler);
+    returnCode = ib_Rpc_Client_Create(nullptr, (ib_SimulationParticipant*)&mockSimulationParticipant, "functionName",
+                                      &exchangeFormat, labelList, dummyContextPtr, &CallResultHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Rpc_Client_Create(&client, nullptr, "functionName", &rpcExchangeFormat, nullptr, &ResultHandler);
+    returnCode = ib_Rpc_Client_Create(&client, nullptr, "functionName", &exchangeFormat, labelList, dummyContextPtr,
+                                      &CallResultHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Rpc_Client_Create(&client, (ib_SimulationParticipant*)&mockSimulationParticipant, nullptr, &rpcExchangeFormat, nullptr, &ResultHandler);
+    returnCode = ib_Rpc_Client_Create(&client, (ib_SimulationParticipant*)&mockSimulationParticipant, nullptr,
+                                      &exchangeFormat, labelList, dummyContextPtr, &CallResultHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Rpc_Client_Create(&client, (ib_SimulationParticipant*)&mockSimulationParticipant, "functionName", nullptr, nullptr, &ResultHandler);
+    returnCode = ib_Rpc_Client_Create(&client, (ib_SimulationParticipant*)&mockSimulationParticipant, "functionName",
+                                      nullptr, labelList, dummyContextPtr, &CallResultHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Rpc_Client_Create(&client, (ib_SimulationParticipant*)&mockSimulationParticipant, "functionName", &rpcExchangeFormat, nullptr, nullptr);
+    returnCode = ib_Rpc_Client_Create(&client, (ib_SimulationParticipant*)&mockSimulationParticipant, "functionName",
+                                      &exchangeFormat, labelList, dummyContextPtr, nullptr);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
     ib_Rpc_CallHandle* callHandle;
@@ -160,19 +226,22 @@ TEST_F(CapiRpcTest, rpc_client_bad_parameters)
 TEST_F(CapiRpcTest, rpc_server_bad_parameters)
 {
     ib_ReturnCode returnCode;
-    ib_Rpc_ExchangeFormat rpcExchangeFormat;
-    rpcExchangeFormat.mediaType = "A";
     ib_Rpc_Server* server;
 
-    returnCode = ib_Rpc_Server_Create(nullptr, (ib_SimulationParticipant*)&mockSimulationParticipant, "functionName", &rpcExchangeFormat, nullptr, &RpcHandler);
+    returnCode = ib_Rpc_Server_Create(nullptr, (ib_SimulationParticipant*)&mockSimulationParticipant, "functionName",
+                                      &exchangeFormat, labelList, dummyContextPtr, &RpcHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Rpc_Server_Create(&server, nullptr, "functionName", &rpcExchangeFormat, nullptr, &RpcHandler);
+    returnCode = ib_Rpc_Server_Create(&server, nullptr, "functionName", &exchangeFormat, labelList, dummyContextPtr,
+                                      &RpcHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Rpc_Server_Create(&server, (ib_SimulationParticipant*)&mockSimulationParticipant, nullptr, &rpcExchangeFormat, nullptr, &RpcHandler);
+    returnCode = ib_Rpc_Server_Create(&server, (ib_SimulationParticipant*)&mockSimulationParticipant, nullptr,
+                                      &exchangeFormat, labelList, dummyContextPtr, &RpcHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Rpc_Server_Create(&server, (ib_SimulationParticipant*)&mockSimulationParticipant, "functionName", nullptr, nullptr, &RpcHandler);
+    returnCode = ib_Rpc_Server_Create(&server, (ib_SimulationParticipant*)&mockSimulationParticipant, "functionName",
+                                      nullptr, labelList, dummyContextPtr, &RpcHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Rpc_Server_Create(&server, (ib_SimulationParticipant*)&mockSimulationParticipant, "functionName", &rpcExchangeFormat, nullptr, nullptr);
+    returnCode = ib_Rpc_Server_Create(&server, (ib_SimulationParticipant*)&mockSimulationParticipant, "functionName",
+                                      &exchangeFormat, labelList, dummyContextPtr, nullptr);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
     ib_ByteVector     data = {0, 0};
@@ -214,6 +283,25 @@ TEST_F(CapiRpcTest, rpc_server_submit)
     EXPECT_CALL(mockRpcServer, SubmitResult(callHandlePtr, PayloadMatcher(refData))).Times(testing::Exactly(1));
     returnCode = ib_Rpc_Server_SubmitResult((ib_Rpc_Server*)&mockRpcServer, callHandle, &data);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+}
+
+TEST_F(CapiRpcTest, rpc_discovery_query)
+{
+    ib_ReturnCode returnCode = 0;
+    returnCode = ib_Rpc_DiscoverServers(nullptr, "functionName",
+                                      &exchangeFormat, labelList, dummyContextPtr, &DiscoveryResultHandler);
+    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = ib_Rpc_DiscoverServers((ib_SimulationParticipant*)&mockSimulationParticipant, "functionName",
+                                        &exchangeFormat, labelList, dummyContextPtr, nullptr);
+    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+    EXPECT_CALL(mockSimulationParticipant, DiscoverRpcServers(testing::_, testing::_, testing::_, testing::_))
+        .Times(testing::Exactly(1));
+    returnCode = ib_Rpc_DiscoverServers((ib_SimulationParticipant*)&mockSimulationParticipant, "functionName",
+                                        &exchangeFormat, labelList, dummyContextPtr, &DiscoveryResultHandler);
+    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+
 }
 
 }

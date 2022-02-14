@@ -9,6 +9,8 @@ add_library(IbSimRpc STATIC
     RpcClient.cpp
     RpcServerInternal.hpp
     RpcServerInternal.cpp
+    RpcDiscoverer.hpp
+    RpcDiscoverer.cpp
 )
 
 target_include_directories(IbSimRpc
@@ -19,5 +21,5 @@ target_link_libraries(IbSimRpc
     PRIVATE IbInterface
             IbInternal
             IbUuid
-    INTERFACE IbInternal
+            IbConfig_deprecated
 )

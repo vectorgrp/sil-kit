@@ -26,8 +26,6 @@ class CallHandleImpl : public IRpcCallHandle
         return otherCallUUID.ab != _callUUID.ab || otherCallUUID.cd != _callUUID.cd;
     }
     
-    bool Valid() const override { return _callUUID.ab != 0 || _callUUID.cd != 0; }
-
     CallUUID _callUUID;
 };
 

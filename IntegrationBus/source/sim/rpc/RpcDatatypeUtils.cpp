@@ -25,14 +25,30 @@ bool operator==(const FunctionCallResponse& lhs, const FunctionCallResponse& rhs
     return lhs.callUUID == rhs.callUUID && lhs.data == rhs.data;
 }
 
-bool wildcardStringMatch(const std::string& s1, const std::string& s2)
+bool Match(const RpcExchangeFormat& clientRxf, const RpcExchangeFormat& serverRxf)
 {
-    return s1 == "*" || s2 == "*" || s1 == s2;
+    return clientRxf.mediaType == "" || clientRxf.mediaType == serverRxf.mediaType;
 }
 
-bool Match(const RpcExchangeFormat& lhs, const RpcExchangeFormat& rhs)
+bool MatchLabels(const std::map<std::string, std::string>& clientLabels,
+                 const std::map<std::string, std::string>& serverLabels)
 {
-    return wildcardStringMatch(lhs.mimeType, rhs.mimeType);
+    if (clientLabels.size() == 0)
+        return true; // clientLabels empty -> match
+
+    if (clientLabels.size() > serverLabels.size())
+        return false; // clientLabels more labels than outer set -> no match
+
+    for (auto&& kv : clientLabels)
+    {
+        auto it = serverLabels.find(kv.first);
+        if (it == serverLabels.end() || // Key not found -> no match
+            (kv.second != "" && kv.second != (*it).second)) // Value does not match (and no wildcard given) -> no match
+        {
+            return false;
+        }
+    }
+    return true; // All of clientLabels are there -> match
 }
 
 } // namespace rpc

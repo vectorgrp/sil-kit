@@ -35,8 +35,18 @@ const std::string controllerTypeDataSubscriberInternal = "DataSubscriberInternal
 
 // RPC types
 const std::string controllerTypeRpcServer = "RpcServer";
+const std::string supplKeyRpcServerFunctionName = "rpc::server::functionName";
+const std::string supplKeyRpcServerDxf = "rpc::server::dxf";
+const std::string supplKeyRpcServerLabels = "rpc::server::labels";
+
 const std::string controllerTypeRpcClient = "RpcClient";
+const std::string supplKeyRpcClientFunctionName = "rpc::client::functionName";
+const std::string supplKeyRpcClientDxf = "rpc::client::dxf";
+const std::string supplKeyRpcClientLabels = "rpc::client::labels";
+const std::string supplKeyRpcClientUUID = "rpc::client::UUID";
+
 const std::string controllerTypeRpcServerInternal = "RpcServerInternal";
+const std::string supplKeyRpcServerInternalClientUUID = "rpc::serverinternal::clientUUID";
 
 // Internal types
 const std::string controllerTypeParticipantController = "ParticipantController";

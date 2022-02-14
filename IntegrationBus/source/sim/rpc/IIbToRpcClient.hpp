@@ -13,8 +13,8 @@ namespace rpc {
 
 //! \brief IIbToRpcClient interface used by the ComAdapter
 class IIbToRpcClient
-    : public mw::IIbEndpoint<ServerAcknowledge, FunctionCallResponse>
-    , public mw::IIbSender<ClientAnnouncement, FunctionCall>
+    : public mw::IIbEndpoint<FunctionCallResponse>
+    , public mw::IIbSender<FunctionCall>
 {
 public:
     virtual ~IIbToRpcClient() noexcept = default;

@@ -177,6 +177,25 @@ void ServiceDiscovery::NotifyServiceRemoved(const ServiceDescriptor& serviceDesc
     _comAdapter->SendIbMessage(this, std::move(event));
 }
 
+std::vector<ServiceDescriptor> ServiceDiscovery::GetRemoteServices() const
+{
+    std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
+    std::vector<ServiceDescriptor> createdServices;
+    for (auto&& mapKeyval : _announcedServices)
+    {
+        //no self notifications
+        if (mapKeyval.first == _participantName)
+            continue;
+
+        for (auto&& serviceKeyval : mapKeyval.second)
+        {
+            createdServices.push_back(serviceKeyval.second);
+        }
+    }
+    return createdServices;
+}
+
+
 void ServiceDiscovery::RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler)
 {
     if (_shuttingDown)

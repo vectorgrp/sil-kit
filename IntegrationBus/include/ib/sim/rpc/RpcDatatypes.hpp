@@ -31,17 +31,25 @@ using CallProcessor = std::function<void(ib::sim::rpc::IRpcServer* server, ib::s
 
 /*! \brief Serialization details.
  *
- * Specification of the format used by individual Rpc Clients and Servers. Single asterisk for wildcard
- * fields
+ * Specification of the format used by individual Rpc Clients and Servers.
  */
 struct RpcExchangeFormat
 {
-    std::string mimeType;
+    std::string mediaType;
 };
+
+struct RpcDiscoveryResult
+{
+    std::string functionName;
+    RpcExchangeFormat exchangeFormat;
+    std::map<std::string, std::string> labels;
+};
+
+using DiscoveryResultHandler = std::function<void(const std::vector<RpcDiscoveryResult>& discoveryResults)>;
 
 inline bool operator==(const RpcExchangeFormat& lhs, const RpcExchangeFormat& rhs)
 {
-    return lhs.mimeType == rhs.mimeType;
+    return lhs.mediaType == rhs.mediaType;
 }
 
 // IbMessages
@@ -71,19 +79,6 @@ struct FunctionCallResponse
 {
     CallUUID callUUID;
     std::vector<uint8_t> data;
-};
-
-struct ClientAnnouncement
-{
-    std::string                        functionName;
-    RpcExchangeFormat                  exchangeFormat;
-    std::string                        clientUUID;
-    std::map<std::string, std::string> labels;
-};
-
-struct ServerAcknowledge
-{
-    std::string clientUUID;
 };
 
 } // namespace rpc

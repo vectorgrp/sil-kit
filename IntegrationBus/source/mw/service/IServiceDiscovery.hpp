@@ -3,6 +3,7 @@
 #pragma once
 
 #include <functional>
+#include <vector>
 #include <ServiceDatatypes.hpp>
 
 namespace ib {
@@ -19,9 +20,11 @@ public: //types
     virtual void NotifyServiceCreated(const ServiceDescriptor& serviceDescriptor) = 0;
     //!< Publish a participant-local service removal to all other participants
     virtual void NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor) = 0;
-
     //!< Register a handler for asynchronous service creation notifications
     virtual void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler) = 0;
+    //!< Get the currently known created services on other participants
+    virtual std::vector<ServiceDescriptor> GetRemoteServices() const = 0;
+
 };
 
 } // namespace sync

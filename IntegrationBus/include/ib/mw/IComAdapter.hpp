@@ -64,13 +64,21 @@ public:
                                       sim::data::NewDataSourceHandlerT newDataSourceHandler = nullptr)
         -> sim::data::IDataSubscriber* = 0;
 
-    
+
     //! \brief Create a Rpc client at this IB participant.
     virtual auto CreateRpcClient(const std::string& functionName, const sim::rpc::RpcExchangeFormat exchangeFormat,
-                                 sim::rpc::CallReturnHandler handler) -> sim::rpc::IRpcClient* = 0;
+                                 const std::map<std::string, std::string>& labels, sim::rpc::CallReturnHandler handler)
+        -> sim::rpc::IRpcClient* = 0;
     //! \brief Create a Rpc server at this IB participant.
     virtual auto CreateRpcServer(const std::string& functionName, const sim::rpc::RpcExchangeFormat exchangeFormat,
-                                 sim::rpc::CallProcessor handler) -> sim::rpc::IRpcServer* = 0;
+                                 const std::map<std::string, std::string>& labels, sim::rpc::CallProcessor handler)
+        -> sim::rpc::IRpcServer* = 0;
+
+    //! \brief Discover available Rpc servers and their properties.
+    virtual void DiscoverRpcServers(const std::string& functionName, 
+                                   const sim::rpc::RpcExchangeFormat& exchangeFormat,
+                                   const std::map<std::string, std::string>& labels,
+                                   sim::rpc::DiscoveryResultHandler handler) = 0;
     
     //! \brief Return the  IParticipantController for the current participant.
     virtual auto GetParticipantController() -> sync::IParticipantController* = 0;

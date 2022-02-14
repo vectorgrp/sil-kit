@@ -24,15 +24,15 @@ inline std::ostream& operator<<(std::ostream& out, const FunctionCall& msg);
 inline std::string   to_string(const FunctionCallResponse& msg);
 inline std::ostream& operator<<(std::ostream& out, const FunctionCallResponse& msg);
 
-inline std::string   to_string(const ClientAnnouncement& msg);
-inline std::ostream& operator<<(std::ostream& out, const ClientAnnouncement& msg);
-
-inline std::string   to_string(const ServerAcknowledge& msg);
-inline std::ostream& operator<<(std::ostream& out, const ServerAcknowledge& msg);
-
 // RpcDatatypes
 inline std::string   to_string(const RpcExchangeFormat& dataExchangeFormat);
 inline std::ostream& operator<<(std::ostream& out, const RpcExchangeFormat& dataExchangeFormat);
+
+inline std::ostream& operator<<(std::ostream& out, const std::map<std::string, std::string>& labels);
+
+inline std::string to_string(const RpcDiscoveryResult& discoveryResult);
+inline std::ostream& operator<<(std::ostream& out, const RpcDiscoveryResult& discoveryResult);
+
 
 // ================================================================================
 //  Inline Implementations
@@ -58,7 +58,7 @@ std::string to_string(const FunctionCall& msg)
 }
 std::ostream& operator<<(std::ostream& out, const FunctionCall& msg)
 {
-    return out << "data::FunctionCall{callUUID=" << msg.callUUID << ", data="
+    return out << "rpc::FunctionCall{callUUID=" << msg.callUUID << ", data="
                << util::AsHexString(msg.data).WithSeparator(" ").WithMaxLength(16)
                << ", size=" << msg.data.size()
                << "}";
@@ -72,38 +72,10 @@ std::string to_string(const FunctionCallResponse& msg)
 }
 std::ostream& operator<<(std::ostream& out, const FunctionCallResponse& msg)
 {
-    return out << "data::FunctionCallResponse{callUUID=" << msg.callUUID << ", data=" << util::AsHexString(msg.data).WithSeparator(" ").WithMaxLength(16)
+    return out << "rpc::FunctionCallResponse{callUUID=" << msg.callUUID
+               << ", data=" << util::AsHexString(msg.data).WithSeparator(" ").WithMaxLength(16)
                << ", size=" << msg.data.size() << "}";
 }
-
-
-std::string to_string(const ClientAnnouncement& clientAnnouncement)
-{
-    std::stringstream out;
-    out << clientAnnouncement;
-    return out.str();
-}
-std::ostream& operator<<(std::ostream& out, const ClientAnnouncement& clientAnnouncement)
-{
-    return out << "data::ClientAnnouncement{"
-               << "functionName=" << clientAnnouncement.functionName 
-               << ", exchangeFormat=" << clientAnnouncement.exchangeFormat
-               << ", clientUUID=" << clientAnnouncement.clientUUID
-               << "}";
-}
-
-std::string to_string(const ServerAcknowledge& serverAcknowledge)
-{
-    std::stringstream out;
-    out << serverAcknowledge;
-    return out.str();
-}
-std::ostream& operator<<(std::ostream& out, const ServerAcknowledge& serverAcknowledge)
-{
-    return out << "data::ServerAcknowledge{"
-               << "clientUUID=" << serverAcknowledge.clientUUID << "}";
-}
-
 
 std::string to_string(const RpcExchangeFormat& rpcExchangeFormat)
 {
@@ -113,8 +85,33 @@ std::string to_string(const RpcExchangeFormat& rpcExchangeFormat)
 }
 std::ostream& operator<<(std::ostream& out, const RpcExchangeFormat& rpcExchangeFormat)
 {
-    return out << "data::RpcExchangeFormat{"
-               << "mimeType=" << rpcExchangeFormat.mimeType << "}";
+    return out << "rpc::RpcExchangeFormat{"
+               << "mediaType=\"" << rpcExchangeFormat.mediaType << "\"}";
+}
+
+std::string to_string(const RpcDiscoveryResult& discoveryResult)
+{
+    std::stringstream out;
+    out << discoveryResult;
+    return out.str();
+}
+
+std::ostream& operator<<(std::ostream& out, const std::map<std::string, std::string>& labels)
+{
+    out << "{";
+    for (auto&& kvp : labels)
+        out << "{\"" << kvp.first << "\", \"" << kvp.second << "\"}";
+    out << "}";
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const RpcDiscoveryResult& discoveryResult)
+{
+    return out << "rpc::RpcDiscoveryResult{"
+               << "functionName=\"" << discoveryResult.functionName
+               << "\", exchangeFormat=" << discoveryResult.exchangeFormat 
+               << ", labels=" << discoveryResult.labels
+               << "}";
 }
 
 } // namespace rpc

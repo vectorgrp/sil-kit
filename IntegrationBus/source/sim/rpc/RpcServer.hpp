@@ -29,15 +29,13 @@ public:
     RpcServer(mw::IComAdapterInternal* comAdapter, cfg::RpcPort config,
         mw::sync::ITimeProvider* timeProvider, CallProcessor handler);
 
+    void RegisterServiceDiscovery();
+
     void SetRpcHandler(CallProcessor handler) override;
 
     auto Config() const -> const cfg::RpcPort& override;
 
     void SubmitResult(IRpcCallHandle* callHandle, std::vector<uint8_t> resultData) override;
-
-    //! \brief Accepts messages originating from IB communications.
-    void ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const ClientAnnouncement& msg) override;
-    void ReceiveMessage(const ClientAnnouncement& msg);
 
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
@@ -48,8 +46,8 @@ public:
 
 private:
 
-    void AddInternalRpcServer();
-    void SendServerAcknowledge();
+    void AddInternalRpcServer(const std::string& clientUUID, RpcExchangeFormat joinedExchangeFormat,
+                              const std::map<std::string, std::string>& clientLabels);
 
     cfg::RpcPort _config{};
     mw::IComAdapterInternal* _comAdapter{nullptr};

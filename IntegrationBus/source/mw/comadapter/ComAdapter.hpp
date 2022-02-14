@@ -116,13 +116,21 @@ public:
     auto CreateDataSubscriberInternal(const std::string& canonicalName, const std::string& linkName, 
         const sim::data::DataExchangeFormat& dataExchangeFormat, const std::map<std::string, std::string>& publisherLabels, sim::data::DataHandlerT callback, sim::data::IDataSubscriber* parent)
         ->sim::data::DataSubscriberInternal* override;
+		
     auto CreateRpcClient(const std::string& functionName, const sim::rpc::RpcExchangeFormat exchangeFormat,
-                         sim::rpc::CallReturnHandler handler) -> sim::rpc::IRpcClient* override;
+                         const std::map<std::string, std::string>& labels, sim::rpc::CallReturnHandler handler)
+        -> sim::rpc::IRpcClient* override;
     auto CreateRpcServer(const std::string& functionName, const sim::rpc::RpcExchangeFormat exchangeFormat,
-                         sim::rpc::CallProcessor handler) -> sim::rpc::IRpcServer* override;
+                         const std::map<std::string, std::string>& labels, sim::rpc::CallProcessor handler)
+        -> sim::rpc::IRpcServer* override;
     auto CreateRpcServerInternal(const std::string& functionName, const std::string& linkName,
-                                 const sim::rpc::RpcExchangeFormat exchangeFormat, sim::rpc::CallProcessor handler,
+                                 const sim::rpc::RpcExchangeFormat exchangeFormat,
+                                 const std::map<std::string, std::string>& labels, sim::rpc::CallProcessor handler,
                                  sim::rpc::IRpcServer* parent) -> sim::rpc::RpcServerInternal* override;
+
+    void DiscoverRpcServers(const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
+                           const std::map<std::string, std::string>& labels,
+                           sim::rpc::DiscoveryResultHandler handler) override;
 
     auto GetParticipantController() -> sync::IParticipantController* override;
     auto GetSystemMonitor() -> sync::ISystemMonitor* override;
@@ -184,10 +192,6 @@ public:
 
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::data::DataMessage& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, sim::data::DataMessage&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::ClientAnnouncement& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::ClientAnnouncement&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::ServerAcknowledge& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::ServerAcknowledge&& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::FunctionCall& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::FunctionCall&& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::FunctionCallResponse& msg) override;
@@ -245,10 +249,6 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::DataMessage& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::DataMessage&& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::ClientAnnouncement& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::ClientAnnouncement&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::ServerAcknowledge& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::ServerAcknowledge&& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::FunctionCall& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::FunctionCall&& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::FunctionCallResponse& msg) override;

@@ -14,11 +14,9 @@ RpcServerInternal::RpcServerInternal(mw::IComAdapterInternal* comAdapter, cfg::R
     _config = std::move(config);
 }
 
+
 void RpcServerInternal::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const FunctionCall &msg)
 {
-    //if (from->GetServiceId().legacyEpa == _serviceId.legacyEpa)
-    //    return;
-
     ReceiveMessage(msg);
 }
 

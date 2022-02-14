@@ -33,7 +33,7 @@ typedef struct
 
 struct ib_ByteVector
 {
-    const uint8_t* data; // TODO bkd: "pointer" -> "data"
+    const uint8_t* data;
     size_t size;
 };
 typedef struct ib_ByteVector ib_ByteVector;

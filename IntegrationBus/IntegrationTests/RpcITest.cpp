@@ -39,92 +39,106 @@ protected:
 
     struct RpcClientInfo
     {
-        RpcClientInfo(const std::string& newFunctionName, const std::string& newMimeType, 
+        RpcClientInfo(const std::string& newFunctionName, const std::string& newMediaType, const std::map<std::string, std::string>& newLabels,
                           size_t newMessageSizeInBytes,  uint32_t newNumCalls, uint32_t newNumCallsToReturn)
         {
             expectIncreasingData = true;
             functionName = newFunctionName;
-            dxf.mimeType = newMimeType;
+            dxf.mediaType = newMediaType;
+            labels = newLabels;
             messageSizeInBytes = newMessageSizeInBytes;
             numCalls = newNumCalls;
             numCallsToReturn = newNumCallsToReturn;
         }
-        RpcClientInfo(const std::string& newFunctionName, const std::string& newMimeType, size_t newMessageSizeInBytes,
+        RpcClientInfo(const std::string& newFunctionName, const std::string& newMediaType, const std::map<std::string, std::string>& newLabels, size_t newMessageSizeInBytes,
                       uint32_t newNumCalls, uint32_t newNumCallsToReturn, const std::vector<std::vector<uint8_t>>& newExpectedReturnDataUnordered)
         {
             expectIncreasingData = false;
             functionName = newFunctionName;
-            dxf.mimeType = newMimeType;
+            dxf.mediaType = newMediaType;
+            labels = newLabels;
             messageSizeInBytes = newMessageSizeInBytes;
             numCalls = newNumCalls;
             numCallsToReturn = newNumCallsToReturn;
             expectedReturnDataUnordered = newExpectedReturnDataUnordered;
         }
 
-        std::string                       functionName;
-        RpcExchangeFormat                 dxf;
-        size_t                            messageSizeInBytes;
-        uint32_t                          numCalls;
-        uint32_t                          numCallsToReturn;
-        bool                              expectIncreasingData;
+        std::string functionName;
+        RpcExchangeFormat dxf;
+        std::map<std::string, std::string> labels;
+        size_t messageSizeInBytes;
+        uint32_t numCalls;
+        uint32_t numCallsToReturn;
+        bool expectIncreasingData;
         std::vector<std::vector<uint8_t>> expectedReturnDataUnordered;
-        uint32_t                          callCounter{0};
-        uint32_t                          callReturnedCounter{0};
-        bool                              allCalled{false};
-        bool                              allCallsReturned{false};
-        IRpcClient*                       rpcClient;
+        uint32_t callCounter{0};
+        uint32_t callReturnedSuccessCounter{0};
+        bool allCalled{false};
+        bool allCallsReturned{false};
+        IRpcClient* rpcClient;
     };
 
     struct RpcServerInfo
     {
-        RpcServerInfo(const std::string& newFunctionName, const std::string& newMimeType, size_t newMessageSizeInBytes,
+        RpcServerInfo(const std::string& newFunctionName, const std::string& newMediaType, const std::map<std::string, std::string>& newLabels, size_t newMessageSizeInBytes,
                            uint32_t newNumCallsToReceive)
         {
             expectIncreasingData = true;
             functionName = newFunctionName;
-            dxf.mimeType = newMimeType;
+            dxf.mediaType = newMediaType;
+            labels = newLabels;
             messageSizeInBytes = newMessageSizeInBytes;
             numCallsToReceive = newNumCallsToReceive;
         }
-        RpcServerInfo(const std::string& newFunctionName, const std::string& newMimeType, size_t newMessageSizeInBytes,
+        RpcServerInfo(const std::string& newFunctionName, const std::string& newMediaType, const std::map<std::string, std::string>& newLabels, size_t newMessageSizeInBytes,
                            uint32_t newNumCallsToReceive, const std::vector<std::vector<uint8_t>>& newExpectedDataUnordered)
         {
             expectIncreasingData = false;
             functionName = newFunctionName;
-            dxf.mimeType = newMimeType;
+            dxf.mediaType = newMediaType;
+            labels = newLabels;
             messageSizeInBytes = newMessageSizeInBytes;
             numCallsToReceive = newNumCallsToReceive;
             expectedDataUnordered = newExpectedDataUnordered;
         }
 
-        std::string                       functionName;
-        RpcExchangeFormat                 dxf;
-        size_t                            messageSizeInBytes;
-        uint32_t                          numCallsToReceive;
-        bool                              expectIncreasingData;
+        std::string functionName;
+        RpcExchangeFormat dxf;
+        std::map<std::string, std::string> labels;
+        size_t messageSizeInBytes;
+        uint32_t numCallsToReceive;
+        bool expectIncreasingData;
         std::vector<std::vector<uint8_t>> expectedDataUnordered;
-        uint32_t                          receiveCallCounter{ 0 };
-        bool                              allReceived{false};
-        IRpcServer*                       rpcServer;
+        uint32_t receiveCallCounter{0};
+        bool allReceived{false};
+        IRpcServer* rpcServer;
     };
 
     struct ClientParticipant
     {
-        ClientParticipant(const std::string& newName) { name = newName; }
-        ClientParticipant(const std::string& newName, const std::vector<RpcClientInfo>& newRpcClients)
+        ClientParticipant(const std::string& newName, const std::vector<std::string>& newExpectedFunctionNames) 
+        { 
+            name = newName; 
+            expectedFunctionNames = newExpectedFunctionNames;
+        }
+        ClientParticipant(const std::string& newName, const std::vector<RpcClientInfo>& newRpcClients, const std::vector<std::string>& newExpectedFunctionNames)
         {
             name = newName;
             rpcClients = newRpcClients;
+            expectedFunctionNames = newExpectedFunctionNames;
         }
 
-        std::string                    name;
-        std::vector<RpcClientInfo>     rpcClients;
-        std::unique_ptr<IComAdapter>   comAdapter;
-        std::promise<void>             startedPromise;
-        bool                           allCalled{false};
-        std::promise<void>             allCalledPromise;
-        std::promise<void>             allCallsReturnedPromise;
-        bool                           allCallsReturned{false};
+        std::string name;
+        std::vector<RpcClientInfo> rpcClients;
+        std::unique_ptr<IComAdapter> comAdapter;
+        std::vector<std::string> expectedFunctionNames;
+        std::promise<void> startedPromise;
+        bool allCalled{false};
+        std::promise<void> allCalledPromise;
+        std::promise<void> allCallsReturnedPromise;
+        bool allCallsReturned{false};
+        std::promise<void> allDiscoveredPromise;
+        bool allDiscovered{false};
     };
     struct ServerParticipant
     {
@@ -273,7 +287,7 @@ protected:
             for (auto& c : participant.rpcClients)
             {
                 c.rpcClient = participant.comAdapter->CreateRpcClient(
-                    c.functionName, c.dxf,
+                    c.functionName, c.dxf, c.labels,
                     [this, &participant, &c](IRpcClient* client, IRpcCallHandle* callHandle,
                         const CallStatus callStatus, const std::vector<uint8_t>& returnData)
                     {
@@ -283,7 +297,7 @@ protected:
                             {
                                 if (c.expectIncreasingData)
                                 {
-                                    auto expectedData = std::vector<uint8_t>(c.messageSizeInBytes, c.callReturnedCounter + rpcFuncIncrement);
+                                    auto expectedData = std::vector<uint8_t>(c.messageSizeInBytes, c.callReturnedSuccessCounter + rpcFuncIncrement);
                                     EXPECT_EQ(returnData, expectedData);
                                 }
                                 else
@@ -296,12 +310,12 @@ protected:
                                         c.expectedReturnDataUnordered.erase(foundDataIter);
                                     }
                                 }
-                            }
 
-                            c.callReturnedCounter++;
-                            if (c.callReturnedCounter >= c.numCallsToReturn)
-                            {
-                                c.allCallsReturned = true;
+                                c.callReturnedSuccessCounter++;
+                                if (c.callReturnedSuccessCounter >= c.numCallsToReturn)
+                                {
+                                    c.allCallsReturned = true;
+                                }
                             }
                         }
 
@@ -321,15 +335,41 @@ protected:
                     {
                         auto argumentData = std::vector<uint8_t>(c.messageSizeInBytes, c.callCounter);
                         auto callHandle = c.rpcClient->Call(argumentData);
-
-                        c.callCounter++;
-                        if (c.callCounter >= c.numCalls)
+                        if (callHandle)
                         {
-                            c.allCalled = true;
+                            c.callCounter++;
+                            if (c.callCounter >= c.numCalls)
+                            {
+                                c.allCalled = true;
+                            }
                         }
+
                     }
                 }
             };
+
+            DiscoveryResultHandler discoveryResultsHandler =
+                [&participant](const std::vector<RpcDiscoveryResult>& discoveryResults) {
+                    for (const auto& entry : discoveryResults)
+                    {
+                        auto foundFunctionNameIter =
+                            std::find(participant.expectedFunctionNames.begin(),
+                                      participant.expectedFunctionNames.end(), entry.functionName);
+                        if (foundFunctionNameIter != participant.expectedFunctionNames.end())
+                        {
+                            participant.expectedFunctionNames.erase(foundFunctionNameIter);
+                        }
+                    }
+                    if (participant.expectedFunctionNames.empty())
+                    {
+                        participant.allDiscovered = true;
+                        participant.allDiscoveredPromise.set_value();
+                    }
+                };
+            while (!participant.allDiscovered)
+            {
+                participant.comAdapter->DiscoverRpcServers("", RpcExchangeFormat{""}, {}, discoveryResultsHandler);
+            }
 
             if (sync)
             {
@@ -350,6 +390,7 @@ protected:
                 });
                 participant.startedPromise.set_value();
                 auto finalStateFuture = participantController->RunAsync();
+
                 auto finalState = finalStateFuture.get();
             }
             else
@@ -378,7 +419,7 @@ protected:
             }
             for (const auto& c : participant.rpcClients)
             {
-                EXPECT_EQ(c.callReturnedCounter, c.numCallsToReturn);
+                EXPECT_EQ(c.callReturnedSuccessCounter, c.numCallsToReturn);
             }
         }
         catch (const Misconfiguration& error)
@@ -417,7 +458,7 @@ protected:
                     participant.allReceivedPromise.set_value();
                 }
 
-                s.rpcServer = participant.comAdapter->CreateRpcServer(s.functionName, s.dxf,
+                s.rpcServer = participant.comAdapter->CreateRpcServer(s.functionName, s.dxf, s.labels,
                     [this, sync, &participant, &s, participantController](IRpcServer*       server,
                                                                            IRpcCallHandle* callHandle,
                                                                            const std::vector<uint8_t>& argumentData)
@@ -640,6 +681,15 @@ protected:
         }
     }
 
+    void WaitForAllServersDiscovered(std::vector<ClientParticipant>& clients)
+    {
+        for (auto& c : clients)
+        {
+            auto futureStatus = c.allDiscoveredPromise.get_future().wait_for(communicationTimeout);
+            EXPECT_EQ(futureStatus, std::future_status::ready) << "Test Failure: Awaiting server discovery timed out";
+        }
+    }
+
     void StopSimOnallCalledAndReceived(std::vector<ClientParticipant>& clients, std::vector<ServerParticipant>& servers, bool sync)
     {
         if (sync)
@@ -680,7 +730,7 @@ protected:
     std::vector<std::thread>                     rpcThreads;
 
     const uint8_t rpcFuncIncrement = 100;
-    std::chrono::milliseconds communicationTimeout{10000ms};
+    std::chrono::milliseconds communicationTimeout{20000ms};
     std::chrono::milliseconds asyncDelayBetweenCalls{500ms};
 };
 
@@ -704,14 +754,15 @@ TEST_F(RpcITest, test_1client_1server_sync_vasio)
 
     std::vector<ClientParticipant> clients;
     std::vector<ServerParticipant> servers;
-    clients.push_back({"Client1", {{"TestFuncA", "A", messageSize, numCalls, numCallsToReturn}}});
-    servers.push_back({"Server1", {{"TestFuncA", "A", messageSize, numCallsToReceive}}});
+    clients.push_back({"Client1", {{"TestFuncA", "A", {}, messageSize, numCalls, numCallsToReturn}}, {"TestFuncA"} });
+    servers.push_back({"Server1", {{"TestFuncA", "A", {}, messageSize, numCallsToReceive}}});
 
     SetupSystem(domainId, sync, clients, servers, middleware);
 
     RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);
 
+    WaitForAllServersDiscovered(clients);
     WaitForAllStarted(clients, servers, sync);
 
     StopSimOnallCalledAndReceived(clients, servers, sync);
@@ -735,14 +786,15 @@ TEST_F(RpcITest, test_1client_1server_largemsg_sync_vasio)
 
     std::vector<ClientParticipant> clients;
     std::vector<ServerParticipant> servers;
-    clients.push_back({"Client1", {{"TestFuncA", "A", messageSize, numCalls, numCallsToReturn}}});
-    servers.push_back({"Server1", {{"TestFuncA", "A", messageSize, numCallsToReceive}}});
+    clients.push_back({"Client1", {{"TestFuncA", "A", {}, messageSize, numCalls, numCallsToReturn}}, {"TestFuncA"} });
+    servers.push_back({"Server1", {{"TestFuncA", "A", {}, messageSize, numCallsToReceive}}});
 
     SetupSystem(domainId, sync, clients, servers, middleware);
 
     RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);
 
+    WaitForAllServersDiscovered(clients);
     WaitForAllStarted(clients, servers, sync);
 
     StopSimOnallCalledAndReceived(clients, servers, sync);
@@ -755,34 +807,40 @@ TEST_F(RpcITest, test_1client_1server_largemsg_sync_vasio)
 // 100 functions and one client/server participant
 TEST_F(RpcITest, test_1client_1server_100functions_sync_vasio)
 {
-    const auto     middleware = Middleware::VAsio;
+    const auto middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numCalls = 3;
     const uint32_t numCallsToReceive = numCalls;
     const uint32_t numCallsToReturn = numCalls;
-    const size_t   messageSize = 3;
-    const bool     sync = true;
-    const int      numFunctions = 100;
+    const size_t messageSize = 3;
+    const bool sync = true;
+    const int numFunctions = 100;
 
     std::vector<ClientParticipant> clients;
     std::vector<ServerParticipant> servers;
-    clients.push_back({"Client1"});
+    std::vector<std::string> expectedFunctionNames{};
+    for (int i = 0; i < numFunctions; i++)
+    {
+        expectedFunctionNames.push_back(std::to_string(i));
+    }
+    clients.push_back({"Client1", expectedFunctionNames});
     servers.push_back({"Server1"});
     for (int i = 0; i < numFunctions; i++)
     {
-        std::string        functionName = std::to_string(i);
-        RpcClientInfo  cInfo{ functionName, "A", messageSize, numCalls, numCallsToReturn };
-        RpcServerInfo  sInfo{ functionName, "A", messageSize, numCalls };
+        std::string functionName = std::to_string(i);
+        RpcClientInfo cInfo{functionName, "A", {}, messageSize, numCalls, numCallsToReturn};
+        RpcServerInfo sInfo{functionName, "A", {}, messageSize, numCalls};
         clients[0].rpcClients.push_back(std::move(cInfo));
         servers[0].rpcServers.push_back(std::move(sInfo));
     }
 
     SetupSystem(domainId, sync, clients, servers, middleware);
 
-    RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);
+    RunServers(servers, domainId, sync);
 
+    WaitForAllServersDiscovered(clients);
     WaitForAllStarted(clients, servers, sync);
 
     StopSimOnallCalledAndReceived(clients, servers, sync);
@@ -813,15 +871,16 @@ TEST_F(RpcITest, test_1client_2server_sync_vasio)
 
     std::vector<ClientParticipant> clients;
     std::vector<ServerParticipant> servers;
-    clients.push_back({"Client1", {{"TestFuncA", "A", messageSize, numCalls, numCallsToReturn, expectedReturnDataUnordered}}});
-    servers.push_back({"Server1", {{"TestFuncA", "A", messageSize, numCallsToReceive}}});
-    servers.push_back({"Server2", {{"TestFuncA", "A", messageSize, numCallsToReceive}}});
+    clients.push_back({"Client1", {{"TestFuncA", "A", {}, messageSize, numCalls, numCallsToReturn, expectedReturnDataUnordered}}, {"TestFuncA"} });
+    servers.push_back({"Server1", {{"TestFuncA", "A", {}, messageSize, numCallsToReceive}}});
+    servers.push_back({"Server2", {{"TestFuncA", "A", {}, messageSize, numCallsToReceive}}});
 
     SetupSystem(domainId, sync, clients, servers, middleware);
 
     RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);
 
+    WaitForAllServersDiscovered(clients);
     WaitForAllStarted(clients, servers, sync);
 
     StopSimOnallCalledAndReceived(clients, servers, sync);
@@ -845,8 +904,8 @@ TEST_F(RpcITest, test_2client_1server_sync_vasio)
 
     std::vector<ClientParticipant> clients;
     std::vector<ServerParticipant> servers;
-    clients.push_back({"Client1", {{"TestFuncA", "A", messageSize, numCalls, numCallsToReturn}}});
-    clients.push_back({"Client2", {{"TestFuncA", "A", messageSize, numCalls, numCallsToReturn}}});
+    clients.push_back({"Client1", {{"TestFuncA", "A", {}, messageSize, numCalls, numCallsToReturn}}, {"TestFuncA"} });
+    clients.push_back({"Client2", {{"TestFuncA", "A", {}, messageSize, numCalls, numCallsToReturn}}, {"TestFuncA"} });
 
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
     for (uint32_t d = 0; d < numCalls; d++)
@@ -854,13 +913,14 @@ TEST_F(RpcITest, test_2client_1server_sync_vasio)
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
     }
-    servers.push_back({"Server1", {{"TestFuncA", "A", messageSize, numCallsToReceive, expectedDataUnordered}}});
+    servers.push_back({"Server1", {{"TestFuncA", "A", {}, messageSize, numCallsToReceive, expectedDataUnordered}}});
 
     SetupSystem(domainId, sync, clients, servers, middleware);
 
     RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);
 
+    WaitForAllServersDiscovered(clients);
     WaitForAllStarted(clients, servers, sync);
 
     StopSimOnallCalledAndReceived(clients, servers, sync);
@@ -870,28 +930,30 @@ TEST_F(RpcITest, test_2client_1server_sync_vasio)
     ShutdownSystem();
 }
 
-// Wrong functionName -> Expect no reception
-TEST_F(RpcITest, test_1client_1server_wrongFunctionName_sync_vasio)
+// Wrong functionName on server2
+TEST_F(RpcITest, test_1client_2server_wrongFunctionName_sync_vasio)
 {
     const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numCalls = 3;
-    const uint32_t numCallsToReceive = 0;
-    const uint32_t numCallsToReturn = numCalls; // NB: We still expect the calls to return, but not with Callstatus::Success and without data
+    const uint32_t numCallsToReceive = 3;
+    const uint32_t numCallsToReturn = 3;
     const size_t   messageSize = 3;
     const bool     sync = true;
 
     std::vector<ClientParticipant> clients;
     std::vector<ServerParticipant> servers;
-    clients.push_back({"Client1", {{"TestFuncA", "A", messageSize, numCalls, numCallsToReturn}}});
-    servers.push_back({"Server1", {{"TestFuncB", "A", messageSize, numCallsToReceive}}});
+    clients.push_back({"Client1", {{"TestFuncA", "A", {}, messageSize, numCalls, numCallsToReturn}}, {"TestFuncA", "TestFuncB"} });
+    servers.push_back({"Server1", {{"TestFuncA", "A", {}, messageSize, numCallsToReceive}}});
+    servers.push_back({"Server2", {{"TestFuncB", "A", {}, messageSize, 0}}});
 
     SetupSystem(domainId, sync, clients, servers, middleware);
 
     RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);
 
+    WaitForAllServersDiscovered(clients);
     WaitForAllStarted(clients, servers, sync);
 
     StopSimOnallCalledAndReceived(clients, servers, sync);
@@ -901,28 +963,64 @@ TEST_F(RpcITest, test_1client_1server_wrongFunctionName_sync_vasio)
     ShutdownSystem();
 }
 
-// Wrong dataExchangeFormat -> Expect no reception
+// Wrong dataExchangeFormat on server2
 TEST_F(RpcITest, test_1client_1server_wrongDataExchangeFormat_sync_vasio)
 {
     const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numCalls = 3;
-    const uint32_t numCallsToReceive = 0;
-    const uint32_t numCallsToReturn = numCalls; // NB: We still expect the calls to return, but not with Callstatus::Success and without data
+    const uint32_t numCallsToReceive = 3;
+    const uint32_t numCallsToReturn = numCalls; 
     const size_t   messageSize = 3;
     const bool     sync = true;
 
     std::vector<ClientParticipant> clients;
     std::vector<ServerParticipant> servers;
-    clients.push_back({"Client1", {{"TestFuncA", "A", messageSize, numCalls, numCallsToReturn}}});
-    servers.push_back({"Server1", {{"TestFuncA", "B", messageSize, numCallsToReceive}}});
+    clients.push_back({"Client1", {{"TestFuncA", "A", {}, messageSize, numCalls, numCallsToReturn}}, {"TestFuncA", "TestFuncA"} });
+    servers.push_back({"Server1", {{"TestFuncA", "A", {}, messageSize, numCallsToReceive}}});
+    servers.push_back({"Server2", {{"TestFuncA", "B", {}, messageSize, 0}}});
 
     SetupSystem(domainId, sync, clients, servers, middleware);
 
     RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);
 
+    WaitForAllServersDiscovered(clients);
+    WaitForAllStarted(clients, servers, sync);
+
+    StopSimOnallCalledAndReceived(clients, servers, sync);
+
+    JoinRpcThreads();
+
+    ShutdownSystem();
+}
+
+// Wrong labels on server2
+TEST_F(RpcITest, test_1client_1server_wrongLabels_sync_vasio)
+{
+    const auto middleware = Middleware::VAsio;
+    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+
+    const uint32_t numCalls = 3;
+    const uint32_t numCallsToReceive = 3;
+    const uint32_t numCallsToReturn = numCalls;
+    const size_t messageSize = 3;
+    const bool sync = true;
+
+    std::vector<ClientParticipant> clients;
+    std::vector<ServerParticipant> servers;
+    clients.push_back(
+        { "Client1", {{"TestFuncA", "A", {{"KeyA", ""},{"KeyB", "ValB"}}, messageSize, numCalls, numCallsToReturn}}, {"TestFuncA", "TestFuncA"} });
+    servers.push_back({"Server1", {{"TestFuncA", "A", {{"KeyA", "ValA"}, {"KeyB", "ValB"}}, messageSize, numCallsToReceive}}});
+    servers.push_back({"Server2", {{"TestFuncA", "A", {{"KeyC", "ValC"}}, messageSize, 0}}});
+
+    SetupSystem(domainId, sync, clients, servers, middleware);
+
+    RunServers(servers, domainId, sync);
+    RunClients(clients, domainId, sync);
+
+    WaitForAllServersDiscovered(clients);
     WaitForAllStarted(clients, servers, sync);
 
     StopSimOnallCalledAndReceived(clients, servers, sync);
@@ -946,14 +1044,15 @@ TEST_F(RpcITest, test_1client_1server_wildcardDxf_sync_vasio)
 
     std::vector<ClientParticipant> clients;
     std::vector<ServerParticipant> servers;
-    clients.push_back({"Client1", {{"TestFuncA", "A", messageSize, numCalls, numCallsToReturn}}});
-    servers.push_back({"Server1", {{"TestFuncA", "*", messageSize, numCallsToReceive}}});
+    clients.push_back({"Client1", {{"TestFuncA", "", {}, messageSize, numCalls, numCallsToReturn}}, {"TestFuncA"} });
+    servers.push_back({"Server1", {{"TestFuncA", "A", {}, messageSize, numCallsToReceive}}});
 
     SetupSystem(domainId, sync, clients, servers, middleware);
 
     RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);
 
+    WaitForAllServersDiscovered(clients);
     WaitForAllStarted(clients, servers, sync);
 
     StopSimOnallCalledAndReceived(clients, servers, sync);
@@ -981,19 +1080,14 @@ TEST_F(RpcITest, test_1client_1server_async_vasio)
 
     std::vector<ClientParticipant> clients;
     std::vector<ServerParticipant> servers;
-    clients.push_back ({"Client1", { { "TestFuncA", "A", messageSize, numCalls, numCallsToReturn } } });
-    servers.push_back({ "Server1", { { "TestFuncA", "A", messageSize, numCallsToReceive } } });
+    clients.push_back({ "Client1", { { "TestFuncA", "A", {}, messageSize, numCalls, numCallsToReturn } }, {"TestFuncA"} });
+    servers.push_back({ "Server1", { { "TestFuncA", "A", {}, messageSize, numCallsToReceive } } });
 
     SetupSystem(domainId, sync, clients, servers, middleware);
 
     RunServers(servers, domainId, sync);
-    for (auto& s : servers)
-    {
-        auto futureStatus = s.startedPromise.get_future().wait_for(communicationTimeout);
-        EXPECT_EQ(futureStatus, std::future_status::ready)
-            << "Test Failure: Awaiting reception timed out on subscriber";
-    }
     RunClients(clients, domainId, sync);
+    WaitForAllServersDiscovered(clients);
 
     JoinRpcThreads();
 

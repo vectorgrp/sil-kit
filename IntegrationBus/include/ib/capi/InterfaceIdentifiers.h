@@ -39,5 +39,6 @@ typedef int32_t ib_InterfaceIdentifier;
 
 // Rpc
 #define ib_InterfaceIdentifier_RpcExchangeFormat           ((ib_InterfaceIdentifier)6001001)
+#define ib_InterfaceIdentifier_RpcDiscoveryResult          ((ib_InterfaceIdentifier)6002001)
 
 IB_END_DECLS

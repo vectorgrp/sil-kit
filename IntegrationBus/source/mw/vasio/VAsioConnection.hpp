@@ -185,8 +185,6 @@ private:
         sync::ParticipantStatus,
         sim::generic::GenericMessage,
         sim::data::DataMessage,
-        sim::rpc::ClientAnnouncement,
-        sim::rpc::ServerAcknowledge,
         sim::rpc::FunctionCall,
         sim::rpc::FunctionCallResponse,
         sim::can::CanMessage,

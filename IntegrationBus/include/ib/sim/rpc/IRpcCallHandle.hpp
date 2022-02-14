@@ -12,8 +12,6 @@ public:
 
     virtual ~IRpcCallHandle() = default;
 
-    virtual bool Valid() const = 0;
-
     virtual bool operator==(const IRpcCallHandle& other) const = 0;
     virtual bool operator!=(const IRpcCallHandle& other) const = 0;
 };

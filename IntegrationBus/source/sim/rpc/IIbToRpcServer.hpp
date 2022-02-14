@@ -13,8 +13,8 @@ namespace rpc {
 
 //! \brief IIbToRpcServer interface used by the ComAdapter
 class IIbToRpcServer
-    : public mw::IIbEndpoint<ClientAnnouncement>
-    , public mw::IIbSender<ServerAcknowledge>
+    : public mw::IIbEndpoint<>
+    , public mw::IIbSender<>
 {
 public:
     virtual ~IIbToRpcServer() noexcept = default;

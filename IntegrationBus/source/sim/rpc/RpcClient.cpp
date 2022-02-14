@@ -3,6 +3,7 @@
 #include "ib/mw/logging/ILogger.hpp"
 
 #include "RpcClient.hpp"
+#include "IServiceDiscovery.hpp"
 #include "IComAdapterInternal.hpp"
 #include "RpcDatatypeUtils.hpp"
 #include "UuidRandom.hpp"
@@ -11,51 +12,55 @@ namespace ib {
 namespace sim {
 namespace rpc {
 
-RpcClient::RpcClient(mw::IComAdapterInternal* comAdapter, cfg::RpcPort config, mw::sync::ITimeProvider* timeProvider, CallReturnHandler handler, IRpcClient* callController)
+RpcClient::RpcClient(mw::IComAdapterInternal* comAdapter, cfg::RpcPort config, mw::sync::ITimeProvider* timeProvider, CallReturnHandler handler)
     : _comAdapter{ comAdapter }, _timeProvider{ timeProvider }, _handler{ std::move(handler) }, _logger{ comAdapter->GetLogger() }
 {
     _config = std::move(config);
-    if (callController) 
-    {
-        // NB: The announceController receives the ServerAcknowledge and has to inform the callController
-        // (living on a UUID link) about matching counterparts
-        _callController = dynamic_cast<RpcClient*>(callController);
-    }
+}
+
+
+void RpcClient::RegisterServiceDiscovery()
+{
+    // The RpcClient discovers RpcServersInternal and is ready to detach calls afterwards
+    _comAdapter->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
+        [this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType,
+               const ib::mw::ServiceDescriptor& serviceDescriptor) {
+
+            std::string controllerType;
+            if (!(serviceDescriptor.GetSupplementalDataItem(mw::service::controllerType, controllerType)
+                  && controllerType == mw::service::controllerTypeRpcServerInternal))
+            {
+                return;
+            }
+
+            auto getVal = [serviceDescriptor](std::string key) {
+                std::string tmp;
+                if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
+                {
+                    throw std::runtime_error{"Unknown key in supplementalData"};
+                }
+                return tmp;
+            };
+
+            auto clientUUID = getVal(mw::service::supplKeyRpcServerInternalClientUUID);
+
+            if (clientUUID == _config.clientUUID)
+            {
+                if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated)
+                {
+                    _numCounterparts++;
+                }
+                else if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved)
+                {
+                    _numCounterparts--;
+                }
+            }
+        });
 }
 
 auto RpcClient::Config() const -> const cfg::RpcPort&
 {
     return _config;
-}
-
-void RpcClient::SendClientAnnouncement() const
-{
-    ClientAnnouncement msg{};
-    msg.functionName = _config.name;
-    msg.exchangeFormat = _config.exchangeFormat;
-    msg.clientUUID = _config.clientUUID;
-    _comAdapter->SendIbMessage(this, std::move(msg));
-}
-
-void RpcClient::AddCounterpart()
-{
-    _numCounterparts++;
-}
-
-void RpcClient::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const ServerAcknowledge& msg)
-{
-    ReceiveMessage(msg);
-}
-
-void RpcClient::ReceiveMessage(const ServerAcknowledge& msg)
-{
-    if (msg.clientUUID == _config.clientUUID)
-    {
-        if (_callController)
-        {
-            _callController->AddCounterpart();
-        }
-    }
 }
 
 IRpcCallHandle* RpcClient::Call(std::vector<uint8_t> data)

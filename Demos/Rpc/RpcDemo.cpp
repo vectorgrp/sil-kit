@@ -34,7 +34,7 @@ void Call(IRpcClient* client)
         static_cast<uint8_t>(rand() % 10) };
 
     auto callHandle = client->Call(argumentData);
-    if (callHandle->Valid())
+    if (callHandle)
     {
         std::cout << "<< Calling '" << client->Config().name << "' with argumentData=" << argumentData << std::endl;
     }
@@ -104,8 +104,11 @@ int main(int argc, char** argv)
 
         auto&& participantController = comAdapter->GetParticipantController();
 
-        participantController->SetInitHandler([&participantName](auto initCmd) {
+        auto initializedPromise = std::promise<void>{};
+
+        participantController->SetInitHandler([&initializedPromise, &participantName](auto initCmd) {
             std::cout << "Initializing " << participantName << std::endl;
+            initializedPromise.set_value();
         });
         participantController->SetStopHandler([]() {
             std::cout << "Stopping..." << std::endl;
@@ -117,8 +120,13 @@ int main(int argc, char** argv)
         participantController->SetPeriod(1s);
         if (participantName == "Client")
         {
-            auto clientA = comAdapter->CreateRpcClient("Add100", RpcExchangeFormat{"application/octet-stream"}, &CallReturn);
-            auto clientB = comAdapter->CreateRpcClient("Sort", RpcExchangeFormat{"*"}, &CallReturn);
+            auto exchangeFormatClientA = RpcExchangeFormat{"application/octet-stream"};
+            std::map<std::string, std::string> labelsClientA{ {"KeyA", "ValA"} };
+            auto clientA = comAdapter->CreateRpcClient("Add100", exchangeFormatClientA, labelsClientA, &CallReturn);
+
+            auto exchangeFormatClientB = RpcExchangeFormat{""};
+            std::map<std::string, std::string> labelsClientB{ {"KeyC", "ValC"} };
+            auto clientB = comAdapter->CreateRpcClient("Sort", exchangeFormatClientB, labelsClientB, &CallReturn);
 
             participantController->SetSimulationTask(
                 [clientA, clientB](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -129,10 +137,15 @@ int main(int argc, char** argv)
                     Call(clientB);
             });
         }
-        else
+        else // "Server"
         {
-            auto serverA = comAdapter->CreateRpcServer("Add100", RpcExchangeFormat{"*"}, &RemoteFunc_Add100);
-            auto serverB = comAdapter->CreateRpcServer("Sort", RpcExchangeFormat{"application/octet-stream"}, &RemoteFunc_Sort);
+            auto exchangeFormatServerA = RpcExchangeFormat{"application/octet-stream"};
+            std::map<std::string, std::string> labelsServerA{ {"KeyA", "ValA"}, {"KeyB", "ValB"}};
+            auto serverA = comAdapter->CreateRpcServer("Add100", exchangeFormatServerA, labelsServerA, &RemoteFunc_Add100);
+            
+            auto exchangeFormatServerB = RpcExchangeFormat{"application/json"};
+            std::map<std::string, std::string> labelsServerB{ {"KeyC", "ValC"}, {"KeyD", "ValD"}};
+            auto serverB = comAdapter->CreateRpcServer("Sort", exchangeFormatServerB, labelsServerB, &RemoteFunc_Sort);
 
             participantController->SetSimulationTask(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -143,7 +156,19 @@ int main(int argc, char** argv)
             });
         }
 
-        auto finalState = participantController->Run();
+        auto futureState = participantController->RunAsync();
+
+        initializedPromise.get_future().wait();
+        DiscoveryResultHandler discoveryResultsHandler = [](const std::vector<RpcDiscoveryResult>& discoveryResults) {
+            std::cout << ">> Found remote RpcServers:" << std::endl;
+            for (const auto& entry : discoveryResults)
+            {
+                std::cout << "   " << entry << std::endl;
+            }
+        };
+        comAdapter->DiscoverRpcServers("", RpcExchangeFormat{""}, {}, discoveryResultsHandler);
+
+        auto finalState = futureState.get();
 
         std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;
