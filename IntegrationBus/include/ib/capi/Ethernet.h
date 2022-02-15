@@ -108,12 +108,13 @@ typedef void (*ib_Ethernet_BitRateChangedHandler_t)(void* context, ib_Ethernet_C
 */
 IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_Create(
   ib_Ethernet_Controller** outController,
-  ib_SimulationParticipant* participant, const char* name);
+  ib_SimulationParticipant* participant, const char* name, const char* network);
 
 typedef ib_ReturnCode(*ib_Ethernet_Controller_Create_t)(
   ib_Ethernet_Controller** outController,
-  ib_SimulationParticipant* participant,
-  const char* name);
+  ib_SimulationParticipant* participant, 
+  const char* name,
+  const char* network);
 
 /*! \brief Activates the Ethernet controller
 *

@@ -518,11 +518,11 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
     };
 
     // Bus Controllers
-    makeTasks(participantConfig.ethernetControllers, &mw::IComAdapter::CreateEthController);
-    // TODO switch to two arguments once all controllers are changed to take link names
+    // TODO FIXME Replay is currently not working so this will be commented out
+    //makeTasks(participantConfig.ethernetControllers, &mw::IComAdapter::CreateEthController);
     //makeTasks(participantConfig.canControllers, &mw::IComAdapter::CreateCanController);
     //TODO makeTasks(participantConfig.flexrayControllers, &mw::IComAdapter::CreateFlexrayController);
-    makeTasks(participantConfig.linControllers, &mw::IComAdapter::CreateLinController);
+    //makeTasks(participantConfig.linControllers, &mw::IComAdapter::CreateLinController);
 
     // Generic Messages
     makeTasks(participantConfig.genericPublishers, &mw::IComAdapter::CreateGenericPublisher);

@@ -549,9 +549,13 @@ typedef void (*ib_FlexRay_CycleStartHandler_t)(void* context, ib_FlexRay_Control
 /* ! \brief Create a FlexRay controller with the given name.
  * ! \note The object returned must not be deallocated using free()!
  */
-IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controller** outController, ib_SimulationParticipant* participant, const char* name);
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controller** outController,
+                                                             ib_SimulationParticipant* participant, const char* name,
+                                                             const char* network);
 
-typedef ib_ReturnCode (*ib_FlexRay_Controller_Create_t)(ib_FlexRay_Controller** outController, ib_SimulationParticipant* participant, const char* name);
+typedef ib_ReturnCode (*ib_FlexRay_Controller_Create_t)(ib_FlexRay_Controller** outController,
+                                                        ib_SimulationParticipant* participant, const char* name,
+                                                        const char* network);
 
 /*! \brief Create and fetch the configuration of the controller with the given name. The configuration settings will be fetched from the .json configuration.
  *! \note The ib_FlexRay_ControllerConfig returned may be deallocated by calling free().

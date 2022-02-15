@@ -9,6 +9,7 @@
 #include "ib/sim/all.hpp"
 
 #include "EthDatatypeUtils.hpp"
+#include "EthControllerFacade.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -79,7 +80,7 @@ protected:
         std::promise<void> ethWriterAllAcksReceivedPromiseLocal;
 
         auto comAdapter = ib::CreateComAdapter(_ibConfig, "EthWriter", _domainId);
-        auto* controller = comAdapter->CreateEthController("ETH1");
+        auto* controller = dynamic_cast<ib::sim::eth::EthControllerFacade*>(comAdapter->CreateEthController("ETH1"));
 
         controller->RegisterMessageAckHandler(
             [this, &ethWriterAllAcksReceivedPromiseLocal, &numAcks](ib::sim::eth::IEthController* /*ctrl*/, const ib::sim::eth::EthTransmitAcknowledge& ack) {

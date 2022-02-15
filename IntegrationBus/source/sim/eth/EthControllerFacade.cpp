@@ -8,7 +8,9 @@ namespace ib {
 namespace sim {
 namespace eth {
 
-EthControllerFacade::EthControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::EthernetController config, mw::sync::ITimeProvider* timeProvider)
+EthControllerFacade::EthControllerFacade(mw::IComAdapterInternal* comAdapter,
+                                         cfg::v1::datatypes::EthernetController config,
+                                         mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _config{config}
 {
@@ -28,9 +30,17 @@ void EthControllerFacade::Deactivate()
     _currentController->Deactivate();
 }
 
+// Provided for testing purposes only
 auto EthControllerFacade::SendMessage(EthMessage msg) -> EthTxId
 {
-    return _currentController->SendMessage(std::move(msg));
+    if (IsNetworkSimulated())
+    {
+        return _ethControllerProxy->SendMessage(std::move(msg));
+    }
+    else
+    {
+        return _ethController->SendMessage(std::move(msg));
+    }
 }
 
 auto EthControllerFacade::SendFrame(EthFrame frame) -> EthTxId

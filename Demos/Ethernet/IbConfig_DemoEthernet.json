@@ -10,7 +10,6 @@
                 "Name": "EthernetWriter",
                 "Description": "Demo Writer",
 
-                "IsSyncMaster": true,
                 "Logger": {
                     "Sinks": [
                         {

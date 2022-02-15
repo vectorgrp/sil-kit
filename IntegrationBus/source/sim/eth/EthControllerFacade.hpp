@@ -13,6 +13,7 @@
 
 #include "EthController.hpp"
 #include "EthControllerProxy.hpp"
+#include "ParticipantConfiguration.hpp"
 
 namespace ib {
 namespace sim {
@@ -35,7 +36,8 @@ public:
     EthControllerFacade() = delete;
     EthControllerFacade(const EthControllerFacade&) = default;
     EthControllerFacade(EthControllerFacade&&) = default;
-    EthControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::EthernetController config, mw::sync::ITimeProvider* timeProvider);
+    EthControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::EthernetController config,
+                        mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -51,8 +53,7 @@ public:
     void Activate() override;
     void Deactivate() override;
 
-    [[deprecated("For MDF4 support, you should migrate to the SendFrame(...) API")]]
-    auto SendMessage(EthMessage msg) -> EthTxId override;
+    auto SendMessage(EthMessage msg) -> EthTxId;
 
     auto SendFrame(EthFrame frame) -> EthTxId override;
     auto SendFrame(EthFrame frame, std::chrono::nanoseconds timestamp) -> EthTxId override;
@@ -88,7 +89,7 @@ private:
     // private members
     mw::IComAdapterInternal* _comAdapter = nullptr;
     mw::ServiceDescriptor _serviceDescriptor;
-    cfg::EthernetController _config;
+    cfg::v1::datatypes::EthernetController _config;
 
     bool _simulatedLinkDetected = false;
     mw::ServiceDescriptor _simulatedLink;

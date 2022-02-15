@@ -14,6 +14,7 @@
 #include "MockComAdapter.hpp"
 
 #include "EthDatatypeUtils.hpp"
+#include "ParticipantConfiguration.hpp"
 
 namespace {
 
@@ -88,7 +89,7 @@ protected:
     MockComAdapter comAdapter;
     Callbacks callbacks;
 
-    ib::cfg::EthernetController _config;
+    ib::cfg::v1::datatypes::EthernetController _config;
     EthControllerProxy proxy;
     EthControllerProxy proxyFrom;
 };

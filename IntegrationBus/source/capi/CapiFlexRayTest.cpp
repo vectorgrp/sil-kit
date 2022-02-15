@@ -50,11 +50,11 @@ class CapiFlexRayTest : public testing::Test
 public:
   CapiFlexRayTest()
     : configBuilder("TestBuilder")
-    , controllerName("FR1")
+        , controllerName("FR1")
+        , networkName("P0")
     , simulationSetup{ configBuilder.SimulationSetup() }
   {
     auto participantName = "FRcontroller";
-    auto networkName = "P0";
 
     simulationSetup.AddParticipant(participantName)
         .AddFlexray(controllerName)
@@ -111,6 +111,7 @@ public:
 
 protected:
     std::string controllerName;
+    std::string networkName;
     ConfigBuilder configBuilder;
     MockComAdapter comAdapter;
     MockFrController mockController;
@@ -122,7 +123,7 @@ TEST_F(CapiFlexRayTest, make_flexray_controller)
 
   ib_ReturnCode returnCode;
   ib_FlexRay_Controller* frController = nullptr;
-  returnCode = ib_FlexRay_Controller_Create(&frController, (ib_SimulationParticipant*)&comAdapter, controllerName.c_str());
+  returnCode = ib_FlexRay_Controller_Create(&frController, (ib_SimulationParticipant*)&comAdapter, controllerName.c_str(), networkName.c_str());
   // needs NullConnectionComAdapter, which won't link with C-API. So just expect a general failure here.
   EXPECT_EQ(returnCode, ib_ReturnCode_UNSPECIFIEDERROR);
   EXPECT_EQ(frController, nullptr);
@@ -205,15 +206,17 @@ TEST_F(CapiFlexRayTest, fr_controller_nullpointer_params)
   memset(&cfg, 0, sizeof(cfg));
   ib_FlexRay_Controller* cController = (ib_FlexRay_Controller*)&mockController;
   ib_FlexRay_Controller* cControllerReturn = nullptr;
-  returnCode = ib_FlexRay_Controller_Create(nullptr, nullptr, nullptr);
+  returnCode = ib_FlexRay_Controller_Create(nullptr, nullptr, nullptr, nullptr);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-  returnCode = ib_FlexRay_Controller_Create(nullptr, nullptr, "bad");
+  returnCode = ib_FlexRay_Controller_Create(nullptr, nullptr, "bad", nullptr);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-  returnCode = ib_FlexRay_Controller_Create(&cControllerReturn, nullptr, "bad");
+  returnCode = ib_FlexRay_Controller_Create(&cControllerReturn, nullptr, "bad", nullptr);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-  returnCode = ib_FlexRay_Controller_Create(nullptr, cMockComAdapter, "bad");
+  returnCode = ib_FlexRay_Controller_Create(nullptr, cMockComAdapter, "bad", "bad");
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-  returnCode = ib_FlexRay_Controller_Create(&cControllerReturn, cMockComAdapter, nullptr);
+  returnCode = ib_FlexRay_Controller_Create(&cControllerReturn, cMockComAdapter, nullptr, "bad");
+  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+  returnCode = ib_FlexRay_Controller_Create(&cControllerReturn, cMockComAdapter, "bad", nullptr);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
   returnCode = ib_FlexRay_ControllerConfig_Create(nullptr, nullptr, nullptr);

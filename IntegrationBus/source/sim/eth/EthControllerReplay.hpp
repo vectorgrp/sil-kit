@@ -20,7 +20,8 @@ class EthControllerReplay
 public:
     // Constructors 
     EthControllerReplay() = delete;
-    EthControllerReplay(mw::IComAdapterInternal* comAdapter, cfg::EthernetController config, mw::sync::ITimeProvider* timeProvider)
+    EthControllerReplay(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::EthernetController config,
+                        mw::sync::ITimeProvider* timeProvider)
         : _controller{comAdapter, config, timeProvider}
         , _replayConfig{config.replay}
     {
@@ -35,7 +36,7 @@ public:
     void Activate() override;
     void Deactivate() override;
 
-    auto SendMessage(EthMessage msg) -> EthTxId override;
+    auto SendMessage(EthMessage msg) -> EthTxId;
 
     auto SendFrame(EthFrame msg) -> EthTxId override;
     auto SendFrame(EthFrame msg, std::chrono::nanoseconds timestamp) -> EthTxId override;
@@ -66,7 +67,7 @@ private:
     void ReplaySend(const extensions::IReplayMessage* replayMessage);
     void ReplayReceive(const extensions::IReplayMessage* replayMessage);
 private:
-    cfg::Replay _replayConfig;
+    ib::util::Optional<cfg::v1::datatypes::Replay> _replayConfig;
     EthController _controller;
 };
 

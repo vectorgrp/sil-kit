@@ -147,8 +147,23 @@ public:
     {
     }
 
-    auto CreateCanController(const std::string& /*canonicalName*/, const std::string& /*networkName*/) -> sim::can::ICanController* override { return nullptr; }
-    auto CreateEthController(const std::string& /*canonicalName*/) -> sim::eth::IEthController* override { return nullptr; }
+    auto CreateCanController(const std::string& /*canonicalName*/, const std::string & /*networkName*/)
+        -> sim::can::ICanController* override
+    {
+        return nullptr;
+    }
+    auto CreateCanController(const std::string & /*canonicalName*/) -> sim::can::ICanController* override
+    {
+        return nullptr;
+    }
+    auto CreateEthController(const std::string & /*canonicalName*/, const std::string& /*networkName*/) -> sim::eth::IEthController* override
+    {
+        return nullptr;
+    }
+    auto CreateEthController(const std::string & /*canonicalName*/) -> sim::eth::IEthController* override
+    {
+        return nullptr;
+    }
     auto CreateFlexrayController(const std::string& /*canonicalName*/) -> sim::fr::IFrController* override
     {
         return nullptr;
@@ -158,7 +173,15 @@ public:
     {
         return nullptr;
     }
-    auto CreateLinController(const std::string& /*canonicalName*/) -> sim::lin::ILinController* override { return nullptr; }
+    auto CreateLinController(const std::string& /*canonicalName*/, const std::string & /*networkName*/)
+        -> sim::lin::ILinController* override
+    {
+        return nullptr;
+    }
+    auto CreateLinController(const std::string & /*canonicalName*/) -> sim::lin::ILinController* override
+    {
+        return nullptr;
+    }
     auto CreateGenericPublisher(const std::string& /*canonicalName*/) -> sim::generic::IGenericPublisher* override { return nullptr; }
     auto CreateGenericSubscriber(const std::string& /*canonicalName*/) -> sim::generic::IGenericSubscriber* override { return nullptr; }
     auto CreateDataPublisher(const std::string& /*topic*/,

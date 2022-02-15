@@ -18,10 +18,10 @@ void EthControllerReplay::Deactivate()
 auto EthControllerReplay::SendMessage(EthMessage msg) -> EthTxId
 {
     // ignore the user's API calls if we're configured for replay
-    if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
-    {
-        return 0;
-    }
+    //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+    //{
+    //    return 0;
+    //}
 
     return _controller.SendMessage(std::move(msg));
 }
@@ -29,10 +29,10 @@ auto EthControllerReplay::SendMessage(EthMessage msg) -> EthTxId
 auto EthControllerReplay::SendFrame(EthFrame msg) -> EthTxId
 {
     // ignore the user's API calls if we're configured for replay
-    if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
-    {
-        return 0;
-    }
+    //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+    //{
+    //    return 0;
+    //}
 
     return _controller.SendFrame(std::move(msg));
 }
@@ -40,10 +40,10 @@ auto EthControllerReplay::SendFrame(EthFrame msg) -> EthTxId
 auto EthControllerReplay::SendFrame(EthFrame msg, std::chrono::nanoseconds timestamp) -> EthTxId
 {
     // ignore the user's API calls if we're configured for replay
-    if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
-    {
-        return 0;
-    }
+    //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+    //{
+    //    return 0;
+    //}
 
     return _controller.SendFrame(std::move(msg), timestamp);
 }
@@ -71,10 +71,10 @@ void EthControllerReplay::RegisterBitRateChangedHandler(BitRateChangedHandler ha
 void EthControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg)
 {
     // ignore messages that do not originate from the replay scheduler 
-    if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
-    {
-        return;
-    }
+    //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
+    //{
+    //    return;
+    //}
 
     _controller.ReceiveIbMessage(from, msg);
 }
@@ -99,16 +99,16 @@ void EthControllerReplay::ReplayMessage(const extensions::IReplayMessage* replay
     switch (replayMessage->GetDirection())
     {
     case ib::sim::TransmitDirection::TX:
-        if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
-        {
-            ReplaySend(replayMessage);
-        }
+        //if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+        //{
+        //    ReplaySend(replayMessage);
+        //}
         break;
     case ib::sim::TransmitDirection::RX:
-        if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
-        {
-            ReplayReceive(replayMessage);
-        }
+        //if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
+        //{
+        //    ReplayReceive(replayMessage);
+        //}
         break;
     default:
         throw std::runtime_error("EthReplayController: replay message has undefined Direction");

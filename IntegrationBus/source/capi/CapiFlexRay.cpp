@@ -173,16 +173,18 @@ static void assign(ib_FlexRay_ControllerConfig** config, const ib::cfg::FlexrayC
 
 extern "C" {
 
-IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controller** outController, ib_SimulationParticipant* participant, const char* cName)
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controller** outController, ib_SimulationParticipant* participant, const char* cName, const char* cNetwork)
 {
   ASSERT_VALID_OUT_PARAMETER(outController);
   ASSERT_VALID_POINTER_PARAMETER(participant);
   ASSERT_VALID_POINTER_PARAMETER(cName);
+  ASSERT_VALID_POINTER_PARAMETER(cNetwork);
   CAPI_ENTER
   {
     ib::mw::IComAdapter* comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
     std::string name(cName);
-    auto controller = comAdapter->CreateFlexrayController(name);
+    std::string network(cNetwork);
+    auto controller = comAdapter->CreateFlexrayController(name, network);
     if (controller == nullptr)
     {
       return ib_ReturnCode_UNSPECIFIEDERROR;

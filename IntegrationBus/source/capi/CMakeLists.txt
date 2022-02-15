@@ -1,6 +1,6 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_vib_test(TestCapiCan SOURCES CapiCanTest.cpp LIBS IbSimCan IbMwMockComAdapter IntegrationBus)
-add_vib_test(TestCapiEthernet SOURCES CapiEthernetTest.cpp LIBS IbSimEthernet IntegrationBus)
+add_vib_test(TestCapiEthernet SOURCES CapiEthernetTest.cpp LIBS IbSimEthernet IbMwMockComAdapter IntegrationBus)
 add_vib_test(TestCapiFlexRay SOURCES CapiFlexRayTest.cpp LIBS IbSimFlexRay IbMwMockComAdapter IntegrationBus)
 add_vib_test(TestCapiData SOURCES CapiDataTest.cpp LIBS IbSimGenericMessage IbMwMockComAdapter IntegrationBus)
 set_target_properties(TestCapiData PROPERTIES

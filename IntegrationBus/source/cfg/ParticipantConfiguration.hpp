@@ -25,6 +25,21 @@ inline namespace v1 {
 namespace datatypes {
 
 // ================================================================================
+//  Internal controller service
+// ================================================================================
+
+//! \brief Generic dummy for all internal controllers - do not make available to public API!
+struct InternalController
+{
+    static constexpr NetworkType networkType = NetworkType::Undefined;
+
+    std::string name;
+    std::string network;
+};
+
+
+
+// ================================================================================
 //  CAN controller service
 // ================================================================================
 

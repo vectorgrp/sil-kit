@@ -14,6 +14,8 @@
 #include "LinController.hpp"
 #include "LinControllerProxy.hpp"
 
+#include "ParticipantConfiguration.hpp"
+
 namespace ib {
 namespace sim {
 namespace lin {
@@ -35,7 +37,7 @@ public:
     LinControllerFacade() = delete;
     LinControllerFacade(const LinControllerFacade&) = default;
     LinControllerFacade(LinControllerFacade&&) = default;
-    LinControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::LinController config, mw::sync::ITimeProvider* timeProvider);
+    LinControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::LinController config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -103,7 +105,7 @@ private:
     // private members
     mw::IComAdapterInternal* _comAdapter;
     mw::ServiceDescriptor _serviceDescriptor;
-    cfg::LinController _config;
+    cfg::v1::datatypes::LinController _config;
 
     bool _simulatedLinkDetected = false;
     mw::ServiceDescriptor _simulatedLink;

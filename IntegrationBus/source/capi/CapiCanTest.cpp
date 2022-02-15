@@ -3,9 +3,11 @@
 #include "gmock/gmock.h"
 #include "ib/capi/IntegrationBus.h"
 #include "ib/sim/can/all.hpp"
+#include "MockComAdapter.hpp"
 
 namespace {
     using namespace ib::sim::can; 
+    using ib::mw::test::DummyComAdapter;
 
     MATCHER_P(CanFrameMatcher, controlFrame, "matches can frames of the c-api to the cpp api") {
         auto frame2 = controlFrame;
@@ -81,6 +83,13 @@ namespace {
     {
     }
 
+    class MockComAdapter : public DummyComAdapter
+    {
+    public:
+        MOCK_METHOD2(CreateCanController, ib::sim::can::ICanController*(const std::string& /*canonicalName*/,
+                                               const std::string& /*networkName*/));
+    };
+
     class CapiCanTest : public testing::Test
     {
     public:
@@ -94,6 +103,13 @@ namespace {
     {
 
         ib_ReturnCode returnCode;
+
+        MockComAdapter mockComAdapter;
+        EXPECT_CALL(mockComAdapter, CreateCanController("ControllerName", "NetworkName")).Times(testing::Exactly(1));
+        ib_Can_Controller* testParam;
+        returnCode = ib_Can_Controller_Create(&testParam, (ib_SimulationParticipant*)&mockComAdapter, "ControllerName",
+                                              "NetworkName");
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         EXPECT_CALL(mockController, SetBaudRate(123,456)).Times(testing::Exactly(1));
         returnCode = ib_Can_Controller_SetBaudRate((ib_Can_Controller*)&mockController, 123, 456);

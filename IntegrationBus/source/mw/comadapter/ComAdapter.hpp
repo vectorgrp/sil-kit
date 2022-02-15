@@ -11,7 +11,6 @@
 #include <tuple>
 
 #include "ib/cfg/Config.hpp"
-#include "ib/cfg/IParticipantConfiguration.hpp"
 #include "ib/mw/all.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/mw/logging/ILogger.hpp"
@@ -101,11 +100,17 @@ public:
     // Public interface methods
     //
     // IComAdapter
-    auto CreateCanController(const std::string& canonicalName, const std::string& networkName) -> sim::can::ICanController* override;
+    auto CreateCanController(const std::string& canonicalName, const std::string& networkName)
+        -> sim::can::ICanController* override;
+    auto CreateCanController(const std::string& canonicalName) -> sim::can::ICanController* override;
+    auto CreateEthController(const std::string& canonicalName, const std::string& networkName)
+        -> sim::eth::IEthController* override;
     auto CreateEthController(const std::string& canonicalName) -> sim::eth::IEthController* override;
     auto CreateFlexrayController(const std::string& canonicalName, const std::string& networkName)
         -> sim::fr::IFrController* override;
     auto CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFrController* override;
+    auto CreateLinController(const std::string& canonicalName, const std::string& networkName)
+        -> sim::lin::ILinController* override;
     auto CreateLinController(const std::string& canonicalName) -> sim::lin::ILinController* override;
     auto CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher* override;
     auto CreateGenericSubscriber(const std::string& canonicalName) -> sim::generic::IGenericSubscriber* override;
@@ -306,25 +311,27 @@ private:
 
     template<class ControllerT>
     auto GetController(const std::string& networkName, const std::string& serviceName) -> ControllerT*;
-    template<class ControllerT, typename... Arg>
+
+    template <class ControllerT, typename... Arg>
+    [[deprecated("Deprecated method. Please switch to any variant that does not use the link class.")]] 
     auto CreateController(const cfg::Link& link, const std::string& serviceName, const mw::ServiceType serviceType,
                           const mw::SupplementalData& supplementalData, Arg&&... arg) -> ControllerT*;
+
     //!< internal services don't have a link config
     template<class ControllerT, typename... Arg>
     auto CreateController(const std::string& serviceName, const mw::ServiceType serviceType,
                           const mw::SupplementalData& supplementalData, Arg&&... arg) -> ControllerT*;
 
+    template <class ConfigT, class ControllerT, typename... Arg>
+    auto CreateController(const ConfigT& config, const mw::ServiceType serviceType,
+                             const mw::SupplementalData& supplementalData, Arg&&... arg)
+        -> ControllerT*;
+
     auto GetLinkById(int16_t linkId) -> cfg::Link&;
-    auto GetNetworkByName(const std::string& networkName) -> cfg::Link&;
 
     template <class ControllerT, class ConfigT, typename... Arg>
     auto CreateControllerForLink(const ConfigT& config, const mw::ServiceType& serviceType,
                                  const mw::SupplementalData& supplementalData, Arg&&... arg)
-        -> ControllerT*;
-
-    template <class ControllerT, class ConfigT, typename... Arg>
-    auto CreateControllerForLinkNew(const ConfigT& config, const mw::ServiceType& serviceType,
-                                    const mw::SupplementalData& supplementalData, Arg&&... arg)
         -> ControllerT*;
 
     template<class IIbToSimulatorT>

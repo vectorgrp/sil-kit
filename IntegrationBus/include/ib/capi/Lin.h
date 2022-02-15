@@ -266,12 +266,14 @@ typedef void (*ib_Lin_WakeupHandler_t)(void* context, ib_Lin_Controller* control
 IntegrationBusAPI ib_ReturnCode ib_Lin_Controller_Create(
   ib_Lin_Controller** outLinController,
   ib_SimulationParticipant *participant,
-  const char* name);
+  const char* name,
+  const char* network);
 
 typedef ib_ReturnCode (*ib_Lin_Controller_Create_t)(
   ib_Lin_Controller** outLinController,
   ib_SimulationParticipant* participant, 
-  const char* name);
+  const char* name,
+  const char* network);
 
 
 /*! \brief Initialize the Lin controller

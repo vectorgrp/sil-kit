@@ -181,8 +181,8 @@ int main(int argc, char* argv[])
     printf("Creating Participant %s for simulation '%s'\n", participantName, domainId);
 
 
-    returnCode = ib_Ethernet_Controller_Create(participant, &ethernetController1, "ETH0");
-    returnCode = ib_Ethernet_Controller_Create(participant, &ethernetController2, "ETH1");
+    returnCode = ib_Ethernet_Controller_Create(participant, &ethernetController1, "ETH0", "ETH0");
+    returnCode = ib_Ethernet_Controller_Create(participant, &ethernetController2, "ETH1", "ETH1");
 
     ib_Ethernet_Controller_RegisterFrameAckHandler(ethernetController1, NULL, &AckCallback);
     ib_Ethernet_Controller_RegisterReceiveMessageHandler(ethernetController2, NULL, &ReceiveMessage);

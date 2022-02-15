@@ -129,11 +129,13 @@ namespace {
         auto                   cfg = ib_Lin_ControllerConfig{};
         ib_Lin_FrameResponse    frameResponses[1] = {ib_Lin_FrameResponse{}};
 
-        returnCode = ib_Lin_Controller_Create(&linController, nullptr, "lin");
+        returnCode = ib_Lin_Controller_Create(&linController, nullptr, "lin", "lin");
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Lin_Controller_Create(nullptr, cMockComAdapter, "lin");
+        returnCode = ib_Lin_Controller_Create(nullptr, cMockComAdapter, "lin", "lin");
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Lin_Controller_Create(&linController, cMockComAdapter, nullptr);
+        returnCode = ib_Lin_Controller_Create(&linController, cMockComAdapter, nullptr, "lin");
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+        returnCode = ib_Lin_Controller_Create(&linController, cMockComAdapter, "lin", nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
         returnCode = ib_Lin_Controller_Init(nullptr, &cfg);

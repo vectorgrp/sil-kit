@@ -4,9 +4,11 @@
 #include "ib/capi/IntegrationBus.h"
 #include "ib/sim/eth/all.hpp"
 #include "EthDatatypeUtils.hpp"
+#include "MockComAdapter.hpp"
 
 namespace {
 using namespace ib::sim::eth;
+using ib::mw::test::DummyComAdapter;
 
 MATCHER_P(EthFrameMatcher, controlFrame, "matches ethernet frames by their content and length") {
     auto frame1 = controlFrame.RawFrame();
@@ -60,12 +62,26 @@ void BitRateChangedHandler(void* context, ib_Ethernet_Controller* controller, ui
 {
 }
 
+    class MockComAdapter : public DummyComAdapter
+{
+public:
+    MOCK_METHOD2(CreateEthController, ib::sim::eth::IEthController*(const std::string& /*canonicalName*/,
+                                                                    const std::string& /*networkName*/));
+};
+
 TEST_F(CapiEthernetTest, ethernet_controller_function_mapping)
 {
     std::array<uint8_t, 60> buffer;
     ib_Ethernet_Frame ef = { buffer.data(), buffer.size() };
 
     ib_ReturnCode returnCode;
+
+    MockComAdapter mockComAdapter;
+    EXPECT_CALL(mockComAdapter, CreateEthController("ControllerName", "NetworkName")).Times(testing::Exactly(1));
+    ib_Ethernet_Controller* testParam;
+    returnCode = ib_Ethernet_Controller_Create(&testParam, (ib_SimulationParticipant*)&mockComAdapter, "ControllerName",
+                                          "NetworkName");
+    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, Activate()).Times(testing::Exactly(1));
     returnCode = ib_Ethernet_Controller_Activate((ib_Ethernet_Controller*)&mockController);

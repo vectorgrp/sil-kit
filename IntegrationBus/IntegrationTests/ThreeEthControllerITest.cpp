@@ -72,7 +72,7 @@ protected:
     {
         std::cout << " Sender init " << participant->Name() << std::endl;
 
-        auto* controller = participant->ComAdapter()->CreateEthController("ETH1");
+        auto* controller = participant->ComAdapter()->CreateEthController("ETH1", "LINK1");
         controller->RegisterMessageAckHandler(
             [this, participant](IEthController*, const EthTransmitAcknowledge& ack) {
             std::cout << participant->Name() << " <- EthTransmitAck" << std::endl;
@@ -86,15 +86,15 @@ protected:
                 if (numSent < testMessages.size())
                 {
                     const auto& message = testMessages.at(numSent);
-                    EthMessage msg;
-                    msg.ethFrame.SetDestinationMac(EthMac{ 0x12,0x23,0x45,0x67,0x89,0x9a });
-                    msg.ethFrame.SetSourceMac(EthMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12});
-                    msg.ethFrame.SetEtherType(0x8100);
-                    msg.ethFrame.SetPayload(reinterpret_cast<const uint8_t*>(message.expectedData.c_str()), message.expectedData.size());
+                    EthFrame frame;
+                    frame.SetDestinationMac(EthMac{ 0x12,0x23,0x45,0x67,0x89,0x9a });
+                    frame.SetSourceMac(EthMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12});
+                    frame.SetEtherType(0x8100);
+                    frame.SetPayload(reinterpret_cast<const uint8_t*>(message.expectedData.c_str()), message.expectedData.size());
 
                     std::cout << participant->Name() << " -> SendMesg @" << now.count() << "ns" << std::endl;
 
-                    controller->SendMessage(std::move(msg));
+                    controller->SendFrame(std::move(frame));
                     numSent++;
                     std::this_thread::sleep_for(100ms);
                 }
@@ -104,7 +104,7 @@ protected:
     void SetupReceiver(ib::test::SimParticipant* participant)
     {
         std::cout << " Receiver init " << participant->Name() << std::endl;
-        auto* controller = participant->ComAdapter()->CreateEthController("ETH1");
+        auto* controller = participant->ComAdapter()->CreateEthController("ETH1", "LINK1");
         controller->RegisterMessageAckHandler(
             [this](IEthController* , const EthTransmitAcknowledge& ack) {
             callbacks.AckHandler(ack);
@@ -143,7 +143,7 @@ protected:
         SetupReceiver(ethReader1);
 
         // reader 2 simply counts the number of messages
-        auto* controller = ethReader2->ComAdapter()->CreateEthController("ETH1");
+        auto* controller = ethReader2->ComAdapter()->CreateEthController("ETH1", "LINK1");
         controller->RegisterReceiveMessageHandler(
             [this](auto, auto) {
                 numReceived2++;

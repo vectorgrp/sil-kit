@@ -382,6 +382,7 @@ int main(int argc, char** argv)
   printf("Creating Participant %s for simulation '%s'\n", participantName, domainId);
   // NOTE: must know the name, as there is currently no way to enumerate the configured FR controllers
   const char* flexrayControllerName = "FlexRay1";
+  const char* flexrayNetworkName = "FlexRay1";
 
   ib_FlexRay_ControllerConfig* config = NULL;
   returnCode = ib_FlexRay_ControllerConfig_Create(&config, participant, flexrayControllerName);
@@ -466,7 +467,7 @@ int main(int argc, char** argv)
 
 
   ib_FlexRay_Controller* controller;
-  returnCode = ib_FlexRay_Controller_Create(&controller, participant, flexrayControllerName);
+  returnCode = ib_FlexRay_Controller_Create(&controller, participant, flexrayControllerName, flexrayNetworkName);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
     printf("ib_FlexRay_Controller_Create => %s\n", ib_GetLastErrorString());

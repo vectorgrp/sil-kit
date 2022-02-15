@@ -11,6 +11,7 @@
 #include "IIbToEthController.hpp"
 #include "IComAdapterInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
+#include "ParticipantConfiguration.hpp"
 
 #include <memory>
 
@@ -35,7 +36,8 @@ public:
     EthController() = delete;
     EthController(const EthController&) = default;
     EthController(EthController&&) = default;
-    EthController(mw::IComAdapterInternal* comAdapter, cfg::EthernetController config, mw::sync::ITimeProvider* timeProvider);
+    EthController(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::EthernetController config,
+                  mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -51,8 +53,7 @@ public:
     void Activate() override;
     void Deactivate() override;
 
-    [[deprecated("For MDF4 support, you should migrate to the SendFrame(...) API")]]
-    auto SendMessage(EthMessage msg) -> EthTxId override;
+    auto SendMessage(EthMessage msg) -> EthTxId;
 
     auto SendFrame(EthFrame msg) -> EthTxId override;
     auto SendFrame(EthFrame msg, std::chrono::nanoseconds timestamp) -> EthTxId override;

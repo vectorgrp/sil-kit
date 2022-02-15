@@ -436,7 +436,8 @@ int main(int argc, char* argv[])
     printf("Creating Participant %s for simulation '%s'\n", participantName, domainId);
 
     const char* controllerName = "LIN1";
-    returnCode = ib_Lin_Controller_Create(&linController, participant, controllerName);
+    const char* networkName = "LIN1";
+    returnCode = ib_Lin_Controller_Create(&linController, participant, controllerName, networkName);
     ib_SimulationParticipant_SetStopHandler(participant, NULL, &StopCallback);
     ib_SimulationParticipant_SetShutdownHandler(participant, NULL, &ShutdownCallback);
     ib_SimulationParticipant_SetPeriod(participant, 1000000);

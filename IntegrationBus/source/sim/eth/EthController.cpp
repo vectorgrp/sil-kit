@@ -11,7 +11,8 @@ namespace ib {
 namespace sim {
 namespace eth {
 
-EthController::EthController(mw::IComAdapterInternal* comAdapter, cfg::EthernetController config, mw::sync::ITimeProvider* timeProvider)
+EthController::EthController(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::EthernetController config,
+                             mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _timeProvider{timeProvider}
 {
