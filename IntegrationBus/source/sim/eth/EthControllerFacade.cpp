@@ -156,7 +156,8 @@ auto EthControllerFacade::GetServiceDescriptor() const -> const mw::ServiceDescr
 auto EthControllerFacade::AllowForwardToDefault(const IIbServiceEndpoint* from) const -> bool
 {
     const auto& fromDescr = from->GetServiceDescriptor();
-    return fromDescr.GetParticipantName() != _serviceDescriptor.GetParticipantName();
+    return !(fromDescr.GetParticipantName() == _serviceDescriptor.GetParticipantName()
+           && fromDescr.GetServiceId() == _serviceDescriptor.GetServiceId());
 }
 
 auto EthControllerFacade::AllowForwardToProxy(const IIbServiceEndpoint* from) const -> bool

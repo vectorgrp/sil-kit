@@ -219,7 +219,8 @@ auto LinControllerFacade::GetServiceDescriptor() const -> const mw::ServiceDescr
 auto LinControllerFacade::AllowForwardToDefault(const IIbServiceEndpoint* from) const -> bool
 {
     const auto& fromDescr = from->GetServiceDescriptor();
-    return fromDescr.GetParticipantName() != _serviceDescriptor.GetParticipantName();
+    return !(fromDescr.GetParticipantName() == _serviceDescriptor.GetParticipantName()
+           && fromDescr.GetServiceId() == _serviceDescriptor.GetServiceId());
 }
 
 auto LinControllerFacade::AllowForwardToProxy(const IIbServiceEndpoint* from) const -> bool

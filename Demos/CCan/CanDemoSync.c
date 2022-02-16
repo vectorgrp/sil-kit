@@ -73,6 +73,12 @@ void InitCallback(void* context, ib_SimulationParticipant* participant, struct i
 {
     ParticipantHandlerContext* tc = (ParticipantHandlerContext*)context;
     printf(">> InitCallback of kind=%i with context=%i\n", command->kind, tc->someInt);
+
+    /* Set baud rate and start the controllers. We omitted the return value check for brevity.*/
+    (void)ib_Can_Controller_SetBaudRate(canController, 10000u, 1000000u);
+    (void)ib_Can_Controller_SetBaudRate(canController2, 10000u, 1000000u);
+    (void)ib_Can_Controller_Start(canController);
+    (void)ib_Can_Controller_Start(canController2);
 }
 
 void StopCallback(void* context, ib_SimulationParticipant* participant)
@@ -89,8 +95,8 @@ void ShutdownCallback(void* context, ib_SimulationParticipant* participant)
 
 void AckCallback(void* context, ib_Can_Controller* controller, struct ib_Can_TransmitAcknowledge* cAck)
 {
-    TransmitContext* tc = (TransmitContext*) cAck->userContext;
-    printf(">> %i for CAN Message with transmitId=%i, timestamp=%llu\n", cAck->status, tc->someInt, cAck->timestamp);
+    //TransmitContext* tc = (TransmitContext*) cAck->userContext;
+    printf(">> %i for CAN Message with timestamp=%llu\n", cAck->status, cAck->timestamp);
 }
 
 void ReceiveMessage(void* context, ib_Can_Controller* controller, ib_Can_Message* message)
@@ -148,7 +154,7 @@ void SimTask(void* context, ib_SimulationParticipant* participant, ib_Nanosecond
     printf(">> Simulation task now=%llu with context=%i\n", now, tc->someInt);
 
     SendCanMessage();
-    SleepMs(500);
+    SleepMs(100);
 }
 
 int main(int argc, char* argv[])
@@ -190,12 +196,16 @@ int main(int argc, char* argv[])
     const char* canControllerName = "CAN1";
     returnCode = ib_Can_Controller_Create(&canController, participant, canControllerName, canNetworkName);
 
+    const char* canController2Name = "CAN2";
+    returnCode = ib_Can_Controller_Create(&canController2, participant, canController2Name, canNetworkName);
+
     ib_Can_Controller_RegisterTransmitStatusHandler(
         canController, (void*)&transmitContext, &AckCallback,
         ib_Can_TransmitStatus_Transmitted | ib_Can_TransmitStatus_Canceled | ib_Can_TransmitStatus_TransmitQueueFull);
-
+    ib_Can_Controller_RegisterReceiveMessageHandler(canController2, (void*)&transmitContext, &ReceiveMessage,
+                                                    ib_Direction_SendReceive);
     simTaskContext.someInt = 456;
-    ib_SimulationParticipant_SetPeriod(participant, 1000);
+    ib_SimulationParticipant_SetPeriod(participant, 1000000);
     ib_SimulationParticipant_SetSimulationTask(participant, (void*)&simTaskContext, &SimTask);
 
     // Non-Blocking variant 

@@ -1,0 +1,83 @@
+{
+  "ConfigVersion": "0.8.1",
+  "ConfigName": "Virtual CANcable1",
+  "Description": "Loopback, a single CANoe with two CAN channels, that are connected together",
+
+  "SimulationSetup": {
+    "Participants": [
+      {
+        "Name": "CANoe",
+        "Description": "CANoe with 2 CAN channels",
+        "CanControllers": [
+          { "Name": "CAN1" },
+          { "Name": "CAN2" }
+        ],
+
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Stdout",
+              "Level": "Trace"
+            }
+          ]
+        },
+        "ParticipantController": {
+          "SyncType": "DiscreteTime"
+        }
+      },
+      {
+        "Name": "NetworkSimulator",
+
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Stdout",
+              "Level": "Trace"
+            }
+          ]
+        },
+        "ParticipantController": {
+          "SyncType": "DiscreteTime"
+        },
+        "NetworkSimulators": [
+          {
+            "Name": "CAN-Simulator",
+            "SimulatedLinks": [
+              "CAN1"
+            ]
+          }
+        ]
+      },
+      {
+        "Name": "SystemController",
+        "Logger": {
+          "Sinks": [
+            {
+              "Type": "Stdout",
+              "Level": "Trace"
+            }
+          ]
+        }
+      }
+    ],
+
+    "Links": [
+      {
+        "Name": "CAN1",
+        "Endpoints": [
+          "CANoe/CAN1",
+          "CANoe/CAN2"
+        ]
+      }
+    ],
+
+    "TimeSync": {
+      "TickPeriodNs": 1000000
+    }
+  },
+
+  "MiddlewareConfig": {
+    "ActiveMiddleware": "VAsio"
+  }
+
+}

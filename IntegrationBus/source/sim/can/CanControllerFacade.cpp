@@ -174,7 +174,8 @@ auto CanControllerFacade::GetServiceDescriptor() const -> const mw::ServiceDescr
 auto CanControllerFacade::AllowForwardToDefault(const IIbServiceEndpoint* from) const -> bool
 {
     const auto& fromDescr = from->GetServiceDescriptor();
-    return fromDescr.GetParticipantName() != _serviceDescriptor.GetParticipantName();
+    return !(fromDescr.GetParticipantName() == _serviceDescriptor.GetParticipantName()
+             && fromDescr.GetServiceId() == _serviceDescriptor.GetServiceId());
 }
 
 auto CanControllerFacade::AllowForwardToProxy(const IIbServiceEndpoint* from) const
