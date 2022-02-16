@@ -161,6 +161,12 @@ public:
     inline MessageBuffer& operator<<(std::chrono::system_clock::time_point time);
     inline MessageBuffer& operator>>(std::chrono::system_clock::time_point& time);
 
+    // --------------------------------------------------------------------------------
+    // void* is used as UserContext pointer. this needs to be stable across 32bit/64bit systems
+
+    inline MessageBuffer& operator<<(const void* t);
+    inline MessageBuffer& operator>>(void*& t);
+
 private:
     // ----------------------------------------
     // private members
@@ -384,6 +390,19 @@ MessageBuffer& MessageBuffer::operator>>(std::chrono::system_clock::time_point& 
     return *this;
 }
 
+inline MessageBuffer& MessageBuffer::operator<<(const void* t)
+{
+    *this << reinterpret_cast<uint64_t>(t);
+    return *this;
+}
+
+inline MessageBuffer& MessageBuffer::operator>>(void*& t)
+{
+    uint64_t value{0};
+    *this >> value;
+    t = reinterpret_cast<void*>(value);
+    return *this;
+}
     
 } // mw
 } // namespace ib

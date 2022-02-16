@@ -17,7 +17,10 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Ca
            << msg.canId
            << *reinterpret_cast<const uint8_t*>(&msg.flags)
            << msg.dlc
-           << msg.dataField;
+           << msg.dataField
+           << msg.direction
+           << msg.userContext
+        ;
     return buffer;
 }
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanMessage& msg)
@@ -29,7 +32,10 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanMessa
            >> msg.canId
            >> flags
            >> dlc
-           >> msg.dataField;
+           >> msg.dataField
+           >> msg.direction
+           >> msg.userContext
+        ;
     *reinterpret_cast<uint8_t*>(&msg.flags) = flags;
     msg.dlc = dlc;
     return buffer;
