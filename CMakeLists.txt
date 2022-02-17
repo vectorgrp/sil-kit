@@ -7,6 +7,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project("IntegrationBus")
 
+option(IB_BUILD_DEMOS "Build the IntegrationBus Demos" ON)
 option(IB_BUILD_STATIC "Compile the Integration Bus as a static library" OFF)
 option(IB_BUILD_TESTS "Enable unit and integration tests for the Integration Bus" ON)
 option(IB_BUILD_DOCS "Build documentation for the Integration Bus (requires Doxygen and Sphinx)" OFF)
@@ -55,7 +56,9 @@ add_subdirectory(ThirdParty)
 # Have both IntegrationBus library and demo project in a single solution
 add_subdirectory(IntegrationBus)
 add_subdirectory(Utilities)
-add_subdirectory(Demos)
+if(IB_BUILD_DEMOS)
+    add_subdirectory(Demos)
+endif()
 # Include the Python-implemented launcher tool for testing and installation
 add_subdirectory(Launcher)
 # Include automated documentation with doxygen and sphinx

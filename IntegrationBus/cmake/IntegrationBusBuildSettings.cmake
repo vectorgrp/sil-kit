@@ -45,6 +45,11 @@ function(ib_enable_threadsan isOn)
 endfunction()
 
 function(ib_enable_warnings target)
+    if(NOT TARGET ${target})
+        # some test targets are declared conditionally
+        return()
+    endif()
+
     if(MSVC)
         # TODO
         #Note this only works on CMake 3.15, otherwise it will produce command
