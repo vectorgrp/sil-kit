@@ -37,7 +37,7 @@
 
         "Links": [
             {
-                "Name": "LAN1",
+                "Name": "Ethernet1",
                 "Endpoints": [
                     "EthernetReaderWriter/ETH0",
                     "EthernetReaderWriter/ETH1"
