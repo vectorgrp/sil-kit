@@ -75,11 +75,16 @@ void CallHandlers(CallbackRangeT& callbacks, const Args&... args)
 
 } // namespace anonymous
 
-LinController::LinController(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider)
+LinController::LinController(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider, ILinController* facade)
     : _comAdapter{comAdapter}
     , _logger{comAdapter->GetLogger()}
     , _timeProvider{timeProvider}
+    , _facade{facade}
 {
+    if (_facade == nullptr)
+    {
+        _facade = this;
+    }
 }
 
 void LinController::Init(ControllerConfig config)

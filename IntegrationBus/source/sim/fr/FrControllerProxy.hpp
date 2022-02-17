@@ -40,7 +40,8 @@ public:
     FrControllerProxy() = delete;
     FrControllerProxy(const FrControllerProxy&) = default;
     FrControllerProxy(FrControllerProxy&&) = default;
-    FrControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::FlexRayController config);
+    FrControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::FlexRayController config,
+                      IFrController* facade = nullptr);
 
 public:
     // ----------------------------------------
@@ -129,6 +130,7 @@ private:
     // private members
     mw::IComAdapterInternal* _comAdapter = nullptr;
     ::ib::mw::ServiceDescriptor _serviceDescriptor;
+    IFrController* _facade = nullptr;
 
     std::vector<TxBufferConfig> _bufferConfigs;
 

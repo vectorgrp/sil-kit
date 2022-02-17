@@ -8,10 +8,14 @@ namespace sim {
 namespace eth {
 
 EthControllerProxy::EthControllerProxy(mw::IComAdapterInternal* comAdapter,
-                                       cfg::v1::datatypes::EthernetController config)
+                                       cfg::v1::datatypes::EthernetController config, IEthController* facade)
     : _comAdapter(comAdapter)
+    , _facade{facade}
 {
-
+    if (_facade == nullptr)
+    {
+        _facade = this;
+    }
 }
 
 void EthControllerProxy::Activate()

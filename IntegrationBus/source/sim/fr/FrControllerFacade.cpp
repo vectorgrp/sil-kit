@@ -13,7 +13,7 @@ FrControllerFacade::FrControllerFacade(mw::IComAdapterInternal* comAdapter, cfg:
     : _comAdapter{comAdapter}
     , _config{config}
 {
-    _frControllerProxy = std::make_unique<FrControllerProxy>(comAdapter, config);
+    _frControllerProxy = std::make_unique<FrControllerProxy>(comAdapter, config, this);
     _currentController = _frControllerProxy.get();
 }
 

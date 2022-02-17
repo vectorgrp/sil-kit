@@ -23,11 +23,16 @@ void CallEach(CallbackRangeT& callbacks, const Args&... args)
 }
 } // end anonymous namespace
 
-LinControllerProxy::LinControllerProxy(mw::IComAdapterInternal* comAdapter)
+LinControllerProxy::LinControllerProxy(mw::IComAdapterInternal* comAdapter, ILinController* facade)
     : _comAdapter{comAdapter}
     , _logger{comAdapter->GetLogger()}
     , _serviceDescriptor{}
+    , _facade{facade}
 {
+    if (_facade == nullptr)
+    {
+        _facade = this;
+    }
 }
 
 void LinControllerProxy::Init(ControllerConfig config)

@@ -12,10 +12,15 @@ namespace sim {
 namespace eth {
 
 EthController::EthController(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::EthernetController config,
-                             mw::sync::ITimeProvider* timeProvider)
+                             mw::sync::ITimeProvider* timeProvider, IEthController* facade)
     : _comAdapter{comAdapter}
     , _timeProvider{timeProvider}
+    , _facade{facade}
 {
+    if (facade == nullptr)
+    {
+        _facade = this;
+    }
 }
 
 void EthController::Activate()
@@ -104,7 +109,7 @@ void EthController::CallHandlers(const MsgT& msg)
     auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
     for (auto&& handler : handlers)
     {
-        handler(this, msg);
+        handler(_facade, msg);
     }
 }
 

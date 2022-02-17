@@ -7,9 +7,14 @@ namespace ib {
 namespace sim {
 namespace can {
 
-CanControllerProxy::CanControllerProxy(mw::IComAdapterInternal* comAdapter)
+CanControllerProxy::CanControllerProxy(mw::IComAdapterInternal* comAdapter, ICanController* facade)
 : _comAdapter(comAdapter)
+    , _facade{facade}
 {
+    if (_facade == nullptr)
+    {
+        _facade = this;
+    }
 }
 
 void CanControllerProxy::SetBaudRate(uint32_t rate, uint32_t fdRate)
@@ -181,7 +186,7 @@ void CanControllerProxy::CallHandlers(const MsgT& msg)
         auto handler = std::get<CallbackT<MsgT>>(handlerTuple);
         if (!filter || filter(msg))
         {
-            handler(this, msg);
+            handler(_facade, msg);
         }
     }
 }

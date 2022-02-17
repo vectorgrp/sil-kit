@@ -11,11 +11,17 @@ namespace can {
 
 CanController::CanController(mw::IComAdapterInternal* comAdapter, 
                              const ib::cfg::v1::datatypes::CanController& config,
-                             mw::sync::ITimeProvider* timeProvider)
+                             mw::sync::ITimeProvider* timeProvider,
+                             ICanController* facade)
     : _comAdapter{comAdapter}
     , _config{config}
     , _timeProvider{timeProvider}
+    , _facade{facade}
 {
+    if (_facade == nullptr)
+    {
+        _facade = this;
+    }
 }
 
 void CanController::SetBaudRate(uint32_t /*rate*/, uint32_t /*fdRate*/)
@@ -165,7 +171,7 @@ void CanController::CallHandlers(const MsgT& msg)
         auto handler = std::get<CallbackT<MsgT>>(handlerTuple);
         if (!filter || filter(msg))
         {
-            handler(this, msg);
+            handler(_facade, msg);
         }
     }
 }

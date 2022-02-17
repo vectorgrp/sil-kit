@@ -14,8 +14,8 @@ EthControllerFacade::EthControllerFacade(mw::IComAdapterInternal* comAdapter,
     : _comAdapter{comAdapter}
     , _config{config}
 {
-    _ethController = std::make_unique<EthController>(comAdapter, config, timeProvider);
-    _ethControllerProxy = std::make_unique<EthControllerProxy>(comAdapter, config);
+    _ethController = std::make_unique<EthController>(comAdapter, config, timeProvider, this);
+    _ethControllerProxy = std::make_unique<EthControllerProxy>(comAdapter, config, this);
     _currentController = _ethController.get();
 }
 

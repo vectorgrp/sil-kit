@@ -18,8 +18,8 @@ CanControllerFacade::CanControllerFacade(mw::IComAdapterInternal* comAdapter, ib
     : _comAdapter{comAdapter}
     , _config{config}
 {
-    _canController = std::make_unique<CanController>(comAdapter, config, timeProvider);
-    _canControllerProxy = std::make_unique<CanControllerProxy>(comAdapter);
+    _canController = std::make_unique<CanController>(comAdapter, config, timeProvider, this);
+    _canControllerProxy = std::make_unique<CanControllerProxy>(comAdapter, this);
     _currentController = _canController.get();
 }
 

@@ -41,7 +41,7 @@ public:
     CanController(const CanController&) = default;
     CanController(CanController&&) = default;
     CanController(mw::IComAdapterInternal* comAdapter, const ib::cfg::v1::datatypes::CanController& config,
-                  mw::sync::ITimeProvider* timeProvider);
+                  mw::sync::ITimeProvider* timeProvider, ICanController* facade = nullptr);
 
 public:
     // ----------------------------------------
@@ -122,6 +122,7 @@ private:
     cfg::v1::datatypes::CanController _config;
     mw::ServiceDescriptor _serviceDescriptor;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
+    ICanController* _facade{nullptr};
 
     CanTxId _canTxId = 0;
 

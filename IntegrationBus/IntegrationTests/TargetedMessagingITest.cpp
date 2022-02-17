@@ -74,12 +74,13 @@ TEST(TargetedMessagingITest, targeted_messaging)
     receiverParticipant->SetPeriod(1ms);
     receiverParticipant->SetSimulationTask(
         [&systemCtrl, &senderCan](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {});
+
     auto* receiverCan = receiverCom->CreateCanController("CAN1", "CAN1");
+
     receiverCan->RegisterReceiveMessageHandler(
         [&receiveCount, &receiverCan](ib::sim::can::ICanController* controller, auto msg) {
             std::cout << "'TargetReceiver' received a message from controller '" << controller
                       << "' with canId=" << msg.canId << std::endl;
-            ASSERT_TRUE(receiverCan != controller) << "Received message from self.";
             ASSERT_TRUE(msg.canId == 42) << "The received canId is wrong. expected=42; received=" << msg.canId;
             receiveCount++;
         });
@@ -90,7 +91,9 @@ TEST(TargetedMessagingITest, targeted_messaging)
     otherReceiverParticipant->SetPeriod(1ms);
     otherReceiverParticipant->SetSimulationTask(
         [&systemCtrl, &senderCan](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {});
+
     auto* otherReceiverCan = otherReceiverCom->CreateCanController("CAN1", "CAN1");
+
     otherReceiverCan->RegisterReceiveMessageHandler([](auto controller, auto) {
         FAIL() << "'otherReceiver' received targeted message from controller '" << controller << "'";
     });

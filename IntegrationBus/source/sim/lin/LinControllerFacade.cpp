@@ -13,8 +13,8 @@ LinControllerFacade::LinControllerFacade(mw::IComAdapterInternal* comAdapter, cf
     : _comAdapter{comAdapter}
     , _config{config}
 {
-    _linController = std::make_unique<LinController>(comAdapter, timeProvider);
-    _linControllerProxy = std::make_unique<LinControllerProxy>(comAdapter);
+    _linController = std::make_unique<LinController>(comAdapter, timeProvider, this);
+    _linControllerProxy = std::make_unique<LinControllerProxy>(comAdapter, this);
     _currentController = _linController.get();
 }
 

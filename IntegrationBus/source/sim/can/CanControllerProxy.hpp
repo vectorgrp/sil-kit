@@ -33,7 +33,7 @@ public:
     CanControllerProxy() = delete;
     CanControllerProxy(const CanControllerProxy&) = default;
     CanControllerProxy(CanControllerProxy&&) = default;
-    CanControllerProxy(mw::IComAdapterInternal* comAdapter);
+    CanControllerProxy(mw::IComAdapterInternal* comAdapter, ICanController* facade = nullptr);
 
 
 public:
@@ -105,6 +105,7 @@ private:
     // private members
     mw::IComAdapterInternal* _comAdapter;
     ::ib::mw::ServiceDescriptor _serviceDescriptor;
+    ICanController* _facade {nullptr};
 
     CanTxId _canTxId = 0;
     CanControllerState _controllerState = CanControllerState::Uninit;

@@ -41,7 +41,7 @@ public:
     LinController() = delete;
     LinController(const LinController&) = default;
     LinController(LinController&&) = default;
-    LinController(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider);
+    LinController(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider, ILinController* facade = nullptr);
 
 public:
     // ----------------------------------------
@@ -122,6 +122,7 @@ private:
     ::ib::mw::ServiceDescriptor _serviceDescriptor;
     mw::logging::ILogger* _logger;
     mw::sync::ITimeProvider* _timeProvider{ nullptr };
+    ILinController* _facade{ nullptr };
 
     ControllerMode   _controllerMode{ControllerMode::Inactive};
     ControllerStatus _controllerStatus{ControllerStatus::Unknown};

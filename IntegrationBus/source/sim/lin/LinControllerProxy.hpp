@@ -34,7 +34,7 @@ public:
     LinControllerProxy() = delete;
     LinControllerProxy(const LinControllerProxy&) = default;
     LinControllerProxy(LinControllerProxy&&) = default;
-    LinControllerProxy(mw::IComAdapterInternal* comAdapter);
+    LinControllerProxy(mw::IComAdapterInternal* comAdapter, ILinController* facade = nullptr);
 
 public:
     // ----------------------------------------
@@ -102,6 +102,7 @@ private:
     mw::IComAdapterInternal* _comAdapter;
     ::ib::mw::ServiceDescriptor _serviceDescriptor;
     mw::logging::ILogger* _logger;
+    ILinController* _facade{ nullptr };
 
     ControllerMode   _controllerMode{ControllerMode::Inactive};
     ControllerStatus _controllerStatus{ControllerStatus::Unknown};

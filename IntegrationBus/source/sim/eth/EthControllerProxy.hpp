@@ -35,7 +35,7 @@ public:
     EthControllerProxy() = delete;
     EthControllerProxy(const EthControllerProxy&) = default;
     EthControllerProxy(EthControllerProxy&&) = default;
-    EthControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::EthernetController config);
+    EthControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::EthernetController config, IEthController* facade = nullptr);
 
 public:
     // ----------------------------------------
@@ -95,6 +95,7 @@ private:
     // private members
     mw::IComAdapterInternal* _comAdapter = nullptr;
     ::ib::mw::ServiceDescriptor _serviceDescriptor;
+    IEthController* _facade{nullptr};
 
     EthTxId _ethTxId = 0;
     EthState _ethState = EthState::Inactive;

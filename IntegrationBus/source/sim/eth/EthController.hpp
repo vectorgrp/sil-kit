@@ -37,7 +37,7 @@ public:
     EthController(const EthController&) = default;
     EthController(EthController&&) = default;
     EthController(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::EthernetController config,
-                  mw::sync::ITimeProvider* timeProvider);
+                  mw::sync::ITimeProvider* timeProvider, IEthController* facade = nullptr);
 
 public:
     // ----------------------------------------
@@ -99,6 +99,7 @@ private:
     ::ib::mw::IComAdapterInternal* _comAdapter = nullptr;
     ::ib::mw::ServiceDescriptor _serviceDescriptor;
     ::ib::mw::sync::ITimeProvider* _timeProvider{ nullptr };
+    IEthController* _facade{nullptr};
 
     EthTxId _ethTxId = 0;
 

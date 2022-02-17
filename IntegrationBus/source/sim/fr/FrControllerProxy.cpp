@@ -9,10 +9,16 @@ namespace ib {
 namespace sim {
 namespace fr {
 
-FrControllerProxy::FrControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::FlexRayController config)
+FrControllerProxy::FrControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::FlexRayController config,
+                                     IFrController* facade)
     : _comAdapter(comAdapter)
     , _config{config}
+    , _facade{facade}
 {
+    if (_facade == nullptr)
+    {
+        _facade = this;
+    }
 }
 
 void FrControllerProxy::Configure(const ControllerConfig& config)
@@ -225,7 +231,7 @@ void FrControllerProxy::CallHandlers(const MsgT& msg)
     auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
     for (auto&& handler : handlers)
     {
-        handler(this, msg);
+        handler(_facade, msg);
     }
 }
 
