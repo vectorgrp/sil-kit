@@ -113,7 +113,7 @@ TEST(CanControllerTest, receive_can_message)
     msg.userContext = (void*)1234;
 
     auto rcvMsg = msg;
-    rcvMsg.userContext = nullptr;
+    rcvMsg.userContext = (void*)1234;
 
     EXPECT_CALL(callbackProvider, ReceiveMessage(&canController, rcvMsg))
         .Times(1);
@@ -144,7 +144,7 @@ TEST(CanControllerTest, receive_can_message_rx_filter1)
     msg.direction = ib::sim::TransmitDirection::RX;
     msg.userContext = (void*)1234;
     auto rcvMessage = msg;
-    rcvMessage.userContext = nullptr;
+    rcvMessage.userContext = (void*)1234;
 
     EXPECT_CALL(callbackProvider, ReceiveMessage(&canController, rcvMessage))
         .Times(1);

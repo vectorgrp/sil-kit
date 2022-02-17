@@ -126,7 +126,6 @@ void CanControllerProxy::RegisterHandler(CallbackT<MsgT> handler, std::function<
 void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMessage& msg)
 {
     auto msgCopy = msg;
-    msgCopy.userContext = nullptr;
     msgCopy.direction = TransmitDirection::RX;
 
     _tracer.Trace(ib::sim::TransmitDirection::RX, msgCopy.timestamp, msgCopy);
@@ -138,10 +137,10 @@ void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 {
     bool handlerCalled = false;
 
-    auto transmittedMsg = _transmittedMessages.find(msg.transmitId);
-    if (transmittedMsg != _transmittedMessages.end())
+    if (msg.status == CanTransmitStatus::Transmitted)
     {
-        if (msg.status == CanTransmitStatus::Transmitted)
+        auto transmittedMsg = _transmittedMessages.find(msg.transmitId);
+        if (transmittedMsg != _transmittedMessages.end())
         {
             _tracer.Trace(ib::sim::TransmitDirection::TX, msg.timestamp,
                 transmittedMsg->second);
@@ -152,6 +151,10 @@ void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
             handlerCalled = true;
         }
 
+    }
+
+    if (_transmittedMessages.count(msg.transmitId) > 0)
+    {
         _transmittedMessages.erase(msg.transmitId);
     }
 

@@ -154,7 +154,6 @@ void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMe
     //}
     
     auto msgCopy = msg;
-    msgCopy.userContext = nullptr;
     msgCopy.direction = TransmitDirection::RX;
     CallHandlers(msgCopy);
 
