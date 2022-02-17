@@ -3,6 +3,7 @@
 #include "ParticipantConfiguration.hpp"
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 
 #include "ib/mw/sync/string_utils.hpp"
@@ -67,7 +68,11 @@ public:
         );
     }
 
-    ~SimSystemController() = default;
+    ~SimSystemController()
+    {
+        _isShuttingDown = true;
+        _comAdapter.reset();
+    }
 
     void InitializeAll()
     {
@@ -81,6 +86,10 @@ public:
 
     void OnParticipantStatusChanged(ib::mw::sync::ParticipantStatus status)
     {
+        if (_isShuttingDown)
+        {
+            return;
+        }
         if (_participantStates.count(status.participantName) > 0
             && _participantStates[status.participantName] != status.state)
         {
@@ -98,6 +107,10 @@ public:
 
     void OnSystemStateChanged(ib::mw::sync::SystemState state)
     {
+        if (_isShuttingDown)
+        {
+            return;
+        }
         std::cout << "SimTestHarness: System State is now " << state << std::endl;
         switch (state)
         {
@@ -119,9 +132,10 @@ public:
 private:
     ib::mw::sync::ISystemController* _controller;
     ib::mw::sync::ISystemMonitor* _monitor;
-    std::unique_ptr<ib::mw::IComAdapter> _comAdapter;
     std::vector<std::string> _syncParticipantNames;
     std::map<std::string, ib::mw::sync::ParticipantState> _participantStates; //for printing status updates
+    std::atomic<bool> _isShuttingDown{false};
+    std::unique_ptr<ib::mw::IComAdapter> _comAdapter;
 };
 
 ////////////////////////////////////////
