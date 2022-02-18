@@ -45,19 +45,6 @@ protected:
         publisher->Publish(std::move(dummyPayload));
     }
 
-    ib::cfg::Config DummyCfg(const std::string& participantName, bool sync)
-    {
-        ib::cfg::Config dummyCfg;
-        ib::cfg::Participant dummyParticipant;
-        if (sync)
-        {
-            dummyParticipant.participantController = ib::cfg::ParticipantController{};
-        }
-        dummyParticipant.name = participantName;
-        dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
-        return dummyCfg;
-    }
-
 protected:
     ib::sim::data::IDataPublisher* publisher{nullptr};
     ib::sim::data::IDataSubscriber* subscriber{nullptr};
@@ -75,12 +62,12 @@ TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
 
     std::string participantNameSender = "Sender";
     auto pubComAdapter = ib::mw::CreateSimulationParticipantImpl(
-        ib::cfg::CreateDummyConfiguration(), participantNameSender, false, DummyCfg(participantNameSender, false));
+        ib::cfg::CreateDummyConfiguration(), participantNameSender, false);
     pubComAdapter->joinIbDomain(domainId);
 
     std::string participantNameReceiver = "Receiver";
     auto subComAdapter = ib::mw::CreateSimulationParticipantImpl(
-        ib::cfg::CreateDummyConfiguration(), participantNameReceiver, false, DummyCfg(participantNameReceiver, false));
+        ib::cfg::CreateDummyConfiguration(), participantNameReceiver, false);
     subComAdapter->joinIbDomain(domainId);
 
     publisher = pubComAdapter->CreateDataPublisher("CrashTopic", ib::sim::data::DataExchangeFormat{}, {}, 0);

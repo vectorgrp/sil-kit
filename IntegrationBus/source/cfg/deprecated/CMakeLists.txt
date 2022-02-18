@@ -67,19 +67,21 @@ target_include_directories(IbConfig_deprecated
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}
 )
 
-add_vib_test(TestMwCfgConfigBuilder SOURCES ConfigBuilderTest.cpp LIBS IbConfig_deprecated)
-add_vib_test(TestMwCfgValidation SOURCES ValidationTest.cpp LIBS IbConfig_deprecated)
-add_vib_test(TestIbConfigExample SOURCES IbConfigExampleTest.cpp
-    LIBS IbMwMockNullConnection
-    CONFIGS
-        IbConfig_Example.json
-        IbConfig_Bad_FileLogger.json
-        IbConfig_Canoe.json
-)
+# TODO: Replace with test for new config
+#add_vib_test(TestMwCfgConfigBuilder SOURCES ConfigBuilderTest.cpp LIBS IbConfig_deprecated)
+#add_vib_test(TestMwCfgValidation SOURCES ValidationTest.cpp LIBS IbConfig_deprecated)
+#add_vib_test(TestIbConfigExample SOURCES IbConfigExampleTest.cpp
+#    LIBS IbMwMockNullConnection
+#    CONFIGS
+#        IbConfig_Example.json
+#        IbConfig_Bad_FileLogger.json
+#        IbConfig_Canoe.json
+#)
+#
+#add_vib_test(TestMwCfgYamlConfig SOURCES YamlConfigTest.cpp LIBS IbConfig_deprecated IbSimGenericMessage yaml-cpp)
+#
+#add_vib_test(TestMwCfgJsonConfig SOURCES JsonConfigTest.cpp LIBS IbConfig_deprecated)
 
-add_vib_test(TestMwCfgYamlConfig SOURCES YamlConfigTest.cpp LIBS IbConfig_deprecated IbSimGenericMessage yaml-cpp)
-
-add_vib_test(TestMwCfgJsonConfig SOURCES JsonConfigTest.cpp LIBS IbConfig_deprecated)
 # we need runtime IntegrationBus DLL on windows:
 #set_tests_properties(TestMwCfgJsonConfig PROPERTIES 
 #    WORKING_DIRECTORY $<TARGET_FILE_DIR:IntegrationBus>)

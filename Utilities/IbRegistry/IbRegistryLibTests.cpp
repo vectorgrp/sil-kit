@@ -131,47 +131,46 @@ TEST_F(IbRegistryLibFixture, load_registry)
 // Registry loaded from the DLL is actually working
 TEST_F(IbRegistryLibFixture, DISABLED_ensure_registry_works)
 {
-    auto domainId = static_cast<uint32_t>(GetTestPid());
+    //auto domainId = static_cast<uint32_t>(GetTestPid());
 
-    std::promise<void> allConnected;
-    std::promise<void> allDisconnected;
-    const auto numIterations = 5;
+    //std::promise<void> allConnected;
+    //std::promise<void> allDisconnected;
+    //const auto numIterations = 5;
 
-    auto registry = CreateIbRegistry(GetConfig());
+    //auto registry = CreateIbRegistry(GetConfig());
 
-    registry->SetAllConnectedHandler([&allConnected]() {
-        std::cout << "connected\n";  allConnected.set_value(); 
-    });
-    registry->SetAllDisconnectedHandler([&allDisconnected]() {
-        std::cout << "disconnected\n";  allDisconnected.set_value();
-    });
-    registry->ProvideDomain(domainId);
+    //registry->SetAllConnectedHandler([&allConnected]() {
+    //    std::cout << "connected\n";  allConnected.set_value(); 
+    //});
+    //registry->SetAllDisconnectedHandler([&allDisconnected]() {
+    //    std::cout << "disconnected\n";  allDisconnected.set_value();
+    //});
+    //registry->ProvideDomain(domainId);
 
-    auto RunParticipant = [this, domainId](auto name) {
-        auto comAdapter = CreateComAdapterImpl(GetConfig(), name);
-        comAdapter->joinIbDomain(domainId);
-        auto participantController = comAdapter->GetParticipantController();
-        participantController->SetSimulationTask([](auto /*now*/, auto /*duration*/) {});
-        participantController->RunAsync();
-        return comAdapter;
-    };
+    //auto RunParticipant = [this, domainId](auto name) {
+    //    auto comAdapter = CreateComAdapterImpl(GetConfig(), name);
+    //    comAdapter->joinIbDomain(domainId);
+    //    auto participantController = comAdapter->GetParticipantController();
+    //    participantController->SetSimulationTask([](auto /*now*/, auto /*duration*/) {});
+    //    participantController->RunAsync();
+    //    return comAdapter;
+    //};
 
-    for (auto i = 0; i < numIterations; i++)
-    {
-        auto allConnectedFuture = allConnected.get_future();
-        auto allDisconnectedFuture = allDisconnected.get_future();
-        {
-            auto p1 = RunParticipant("P1");
-            auto p2 = RunParticipant("P2");
-            auto status = allConnectedFuture.wait_for(60s);
-            ASSERT_EQ(status, std::future_status::ready);
-        }
-        auto status = allDisconnectedFuture.wait_for(60s);
-        ASSERT_EQ(status, std::future_status::ready);
+    //for (auto i = 0; i < numIterations; i++)
+    //{
+    //    auto allConnectedFuture = allConnected.get_future();
+    //    auto allDisconnectedFuture = allDisconnected.get_future();
+    //    {
+    //        auto p1 = RunParticipant("P1");
+    //        auto p2 = RunParticipant("P2");
+    //        auto status = allConnectedFuture.wait_for(60s);
+    //        ASSERT_EQ(status, std::future_status::ready);
+    //    }
+    //    auto status = allDisconnectedFuture.wait_for(60s);
+    //    ASSERT_EQ(status, std::future_status::ready);
 
-        // reset promises
-        allConnected = std::promise<void>{};
-        allDisconnected = std::promise<void>{};
-    }
-
+    //    // reset promises
+    //    allConnected = std::promise<void>{};
+    //    allDisconnected = std::promise<void>{};
+    //}
 }

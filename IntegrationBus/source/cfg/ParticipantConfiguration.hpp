@@ -269,6 +269,7 @@ public:
     datatypes::ParticipantConfiguration _data;
 };
 
+// TODO: Needed in Tests 
 inline auto CreateDummyConfiguration() -> std::shared_ptr<IParticipantConfiguration>
 {
     ib::cfg::v1::datatypes::ParticipantConfiguration configDt;

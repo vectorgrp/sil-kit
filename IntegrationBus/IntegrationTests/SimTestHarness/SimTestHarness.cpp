@@ -53,13 +53,8 @@ public:
     SimSystemController() = delete;
     SimSystemController(const std::vector<std::string>& syncParticipantNames, uint32_t domainId) : _syncParticipantNames{syncParticipantNames}
     {
-        auto dynamicConfiguration = ib::cfg::CreateDummyConfiguration();
-        auto dummyCfg = cfg::Config{};
-        ib::cfg::Participant dummyParticipant;
-        dummyParticipant.name = "SystemController";
-        dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
-
-        _comAdapter = ib::CreateSimulationParticipant(dynamicConfiguration, "SystemController", false, domainId, dummyCfg);
+        _comAdapter =
+            ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), "SystemController", domainId, false);
 
         _controller = _comAdapter->GetSystemController();
         _monitor = _comAdapter->GetSystemMonitor();
@@ -226,18 +221,11 @@ SimParticipant* SimTestHarness::GetParticipant(const std::string& participantNam
 
 void SimTestHarness::AddParticipant(const std::string& participantName)
 {
-    auto dynamicConfiguration = ib::cfg::CreateDummyConfiguration();
-    ib::cfg::Config dummyCfg;
-    ib::cfg::Participant dummyParticipant;
-    dummyParticipant.participantController = ib::cfg::ParticipantController{};
-    dummyParticipant.name = participantName;
-
-    dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
-
     auto participant = std::make_unique<SimParticipant>();
     participant->_name = participantName;
+    
     participant->_comAdapter = 
-        ib::CreateSimulationParticipant(dynamicConfiguration, participantName, true, _domainId, dummyCfg);
+        ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), _domainId, participantName, true);
 
     //    Let's make sure the SystemController is cached, in case the user
     //    needs it during simulation (e.g., calling Stop()).

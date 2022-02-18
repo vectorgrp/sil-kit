@@ -139,7 +139,7 @@ protected:
         try
         {
             participant.comAdapter = ib::CreateSimulationParticipant(
-                ib::cfg::CreateDummyConfiguration(), participant.name, true, domainId, DummyCfg(participant.name, true));
+                ib::cfg::CreateDummyConfiguration(), domainId, participant.name, true);
 
             IParticipantController* participantController;
             participantController = participant.comAdapter->GetParticipantController();
@@ -192,9 +192,7 @@ protected:
     {
         try
         {
-            participant.comAdapter = ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), participant.name, false, domainId,
-                                                                      DummyCfg(participant.name, false));
-
+            participant.comAdapter = ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), domainId, participant.name, false);
             participant.publisher = participant.comAdapter->CreateDataPublisher(topic, exchangeFormat, {}, 0);
             participant.subscriber = participant.comAdapter->CreateDataSubscriber(
                 topic, exchangeFormat, {},
@@ -263,7 +261,7 @@ protected:
         try
         {
             systemMaster.comAdapter = ib::CreateSimulationParticipant(
-                ib::cfg::CreateDummyConfiguration(), systemMasterName, false, domainId, DummyCfg(systemMasterName, false));
+                ib::cfg::CreateDummyConfiguration(), domainId, systemMasterName, false);
 
             systemMaster.systemController = systemMaster.comAdapter->GetSystemController();
             systemMaster.systemMonitor = systemMaster.comAdapter->GetSystemMonitor();

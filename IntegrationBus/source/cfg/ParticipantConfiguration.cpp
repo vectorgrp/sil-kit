@@ -206,21 +206,45 @@ auto ib::cfg::ReadParticipantConfigurationFromYamlString(const std::string& yaml
     return std::move(configPtr);
 }
 
-auto ReadParticipantConfigurationFromFileString(const std::string& yamlFilename)
+auto ib::cfg::ReadParticipantConfigurationFromYamlFile(const std::string& yamlFilename)
     -> std::shared_ptr<ib::cfg::IParticipantConfiguration>
 {
     yamlFilename;
-    throw configuration_error{"Not implemented"};
+    // Dummy implementation
+    std::cout << "Warning: This implementation currently returns a non-functional dummy." << std::endl;
+    ib::cfg::v1::datatypes::ParticipantConfiguration configDt;
+    ib::cfg::ParticipantConfiguration* config = new ib::cfg::ParticipantConfiguration(std::move(configDt));
+
+    // Dummy logging
+    auto sink = cfg::v1::datatypes::Sink{};
+    sink.level = ib::mw::logging::Level::Debug;
+    sink.type = cfg::v1::datatypes::Sink::Type::Stdout;
+    config->_data.logging.sinks.push_back(sink);
+
+    auto configPtr = std::shared_ptr<ib::cfg::ParticipantConfiguration>(config);
+    return std::move(configPtr);
 }
 
-auto ReadParticipantConfigurationFromJsonString(const std::string& jsonString)
+auto ib::cfg::ReadParticipantConfigurationFromJsonString(const std::string& jsonString)
     -> std::shared_ptr<ib::cfg::IParticipantConfiguration>
 {
     jsonString;
-    throw configuration_error{"Not implemented"};
+    // Dummy implementation
+    std::cout << "Warning: This implementation currently returns a non-functional dummy." << std::endl;
+    ib::cfg::v1::datatypes::ParticipantConfiguration configDt;
+    ib::cfg::ParticipantConfiguration* config = new ib::cfg::ParticipantConfiguration(std::move(configDt));
+
+    // Dummy logging
+    auto sink = cfg::v1::datatypes::Sink{};
+    sink.level = ib::mw::logging::Level::Debug;
+    sink.type = cfg::v1::datatypes::Sink::Type::Stdout;
+    config->_data.logging.sinks.push_back(sink);
+
+    auto configPtr = std::shared_ptr<ib::cfg::ParticipantConfiguration>(config);
+    return std::move(configPtr);
 }
 
-auto ReadParticipantConfigurationFromJsonFile(const std::string& jsonFilename)
+auto ib::cfg::ReadParticipantConfigurationFromJsonFile(const std::string& jsonFilename)
     -> std::shared_ptr<ib::cfg::IParticipantConfiguration>
 {
     jsonFilename;

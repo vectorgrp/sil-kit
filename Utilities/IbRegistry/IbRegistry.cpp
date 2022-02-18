@@ -1,5 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
+#include "ib/cfg/IParticipantConfiguration.hpp"
+// TODO: remove next include when middleware config is in participant config
 #include "ib/cfg/vasio/IMiddlewareConfiguration.hpp"
 #include "SignalHandler.hpp"
 #include "VAsioRegistry.hpp"
@@ -37,12 +39,12 @@ int main(int argc, char** argv) try
         }
     }
 
-    // TODO: use ibConfig instead of dummyCfg when parsing ready
-    //auto ibConfig = ib::cfg::vasio::ReadMiddlewareConfigurationFromJsonFile(jsonFilename);
-    auto dummyCfg = ib::cfg::vasio::v1::CreateDummyIMiddlewareConfiguration();
+    // TODO: use this instead when middleware config is in participant config
+    //auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile(jsonFilename);
+    auto ibConfig = ib::cfg::vasio::v1::CreateDummyIMiddlewareConfiguration();
 
     std::cout << "Creating VAsioRegistry for IB domain=" << domainId << std::endl;
-    VAsioRegistry registry{ dummyCfg };
+    VAsioRegistry registry{ ibConfig };
     registry.ProvideDomain(domainId);
 
     if (useSignalHandler)

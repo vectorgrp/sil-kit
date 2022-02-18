@@ -45,19 +45,6 @@ std::istream& operator>>(std::istream& in, nanoseconds& timestamp)
     return in;
 }
 
-ib::cfg::Config DummyCfg(const std::string& participantName, bool sync)
-{
-    ib::cfg::Config dummyCfg;
-    ib::cfg::Participant dummyParticipant;
-    if (sync)
-    {
-        dummyParticipant.participantController = ib::cfg::ParticipantController{};
-    }
-    dummyParticipant.name = participantName;
-    dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
-    return dummyCfg;
-}
-
 class Publisher
 {
 public:
@@ -65,8 +52,7 @@ public:
         : _testSize{testSize}
     {
         std::string participantName = "Publisher" + std::to_string(publisherIndex);
-        _comAdapter = ib::mw::CreateSimulationParticipantImpl(ib::cfg::CreateDummyConfiguration(), participantName, true,
-                                                              DummyCfg(participantName, true));
+        _comAdapter = ib::mw::CreateSimulationParticipantImpl(ib::cfg::CreateDummyConfiguration(), participantName, true);
 
         _comAdapter->joinIbDomain(domainId);
 
@@ -130,7 +116,7 @@ public:
         , _testSize{testSize}
     {
         _comAdapter = ib::mw::CreateSimulationParticipantImpl(
-            ib::cfg::CreateDummyConfiguration(), participantName, true, DummyCfg(participantName, true));
+            ib::cfg::CreateDummyConfiguration(), participantName, true);
         _comAdapter->joinIbDomain(domainId);
 
         _systemController = _comAdapter->GetSystemController();

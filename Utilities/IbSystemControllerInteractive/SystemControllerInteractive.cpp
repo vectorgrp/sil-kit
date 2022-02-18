@@ -13,8 +13,6 @@
 #include "ib/IntegrationBus.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/mw/sync/string_utils.hpp"
-#include "ib/cfg/string_utils.hpp"
-
 
 using namespace ib;
 using namespace ib::mw;
@@ -88,8 +86,11 @@ sync::ParticipantCommand::Kind ToParticipantCommand(const std::string& cmdString
 class InteractiveSystemController
 {
 public:
-    InteractiveSystemController(ISystemController* controller, cfg::Config ibConfig, std::string myName)
-        : _config{std::move(ibConfig)}
+    InteractiveSystemController(ISystemController* controller,
+                                std::shared_ptr<ib::cfg::IParticipantConfiguration> ibConfig, std::string myName,
+                                const std::vector<std::string>& expectedParticipantNames)
+        : _ibConfig{std::move(ibConfig)}
+        , _expectedParticipantNames{expectedParticipantNames}
         , _myParticipantName{std::move(myName)}
         , _controller{controller}
     {
@@ -98,15 +99,12 @@ public:
 
     void ReportSystemConfiguration()
     {
-        std::cout << "The following participants are configured:\n";
-        for (auto&& participantCfg : _config.simulationSetup.participants)
+        std::cout << "The following participants are expected:\n";
+        for (auto&& name : _expectedParticipantNames)
         {
-            std::cout << participantCfg.id << ":\t" << participantCfg.name << " ";
-            if (participantCfg.name == _myParticipantName)
+            std::cout << name << " ";
+            if (name == _myParticipantName)
                 std::cout << "(this process)\t";
-
-            if (participantCfg.participantController)
-                std::cout << "SyncType: " << participantCfg.participantController->syncType << std::endl;
         }
     }
 
@@ -199,7 +197,8 @@ public:
     }
 
 private:
-    cfg::Config _config;
+    std::shared_ptr<ib::cfg::IParticipantConfiguration> _ibConfig;
+    std::vector<std::string> _expectedParticipantNames;
     std::string _myParticipantName;
     ISystemController* _controller{nullptr};
 };
@@ -250,7 +249,7 @@ int main(int argc, char** argv)
     systemMonitor->RegisterParticipantStatusHandler(&ReportParticipantStatus);
     systemMonitor->RegisterSystemStateHandler(&ReportSystemState);
 
-    InteractiveSystemController systemController(comAdapter->GetSystemController(), ibConfig, participantName);
+    InteractiveSystemController systemController(comAdapter->GetSystemController(), ibConfig, participantName, expectedParticipantNames);
     systemController.RunInteractiveLoop();
 
     return 0;

@@ -12,8 +12,6 @@
 
 #include "ib/IntegrationBus.hpp"
 #include "ib/mw/sync/all.hpp"
-#include "ib/mw/sync/string_utils.hpp"
-
 
 using namespace ib;
 using namespace ib::mw;
@@ -31,7 +29,7 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 class IbController
 {
 public:
-    IbController(IComAdapter* comAdapter, cfg::IParticipantConfiguration ibConfig,
+    IbController(ib::mw::IComAdapter* comAdapter, std::shared_ptr<ib::cfg::IParticipantConfiguration> ibConfig,
                  const std::vector<std::string>& expectedParticipantNames)
         : _ibConfig{std::move(ibConfig)}
         , _expectedParticipantNames{expectedParticipantNames}
@@ -158,7 +156,7 @@ public:
     }
 
 private:
-    ib::cfg::IParticipantConfiguration _ibConfig;
+    std::shared_ptr<ib::cfg::IParticipantConfiguration> _ibConfig;
     std::vector<std::string> _expectedParticipantNames;
     bool _stopInitiated{false};
     bool _performRestart{false};
@@ -194,7 +192,7 @@ int main(int argc, char** argv)
 
         std::cout << "Creating SystemController for IB domain=" << domainId << std::endl;
         auto comAdapter = ib::CreateSimulationParticipant(ibConfig, participantName, domainId, false);
-
+        
         IbController ibController(comAdapter.get(), ibConfig, expectedParticipantNames);
 
         // Set numRestarts to values larger than zero to test the restart functionality.

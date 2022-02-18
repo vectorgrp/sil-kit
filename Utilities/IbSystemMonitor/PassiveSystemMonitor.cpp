@@ -42,10 +42,10 @@ int main(int argc, char** argv) try
         domainId = static_cast<uint32_t>(std::stoul(argv[2]));
     }
 
-    auto ibConfig = ib::cfg::Config::FromJsonFile(jsonFilename);
+    auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile(jsonFilename);
 
     std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-    auto comAdapter = ib::CreateComAdapter(std::move(ibConfig), participantName, domainId);
+    auto comAdapter = ib::CreateSimulationParticipant(std::move(ibConfig), domainId, participantName, false);
     auto* logger = comAdapter->GetLogger();
     auto* systemMonitor = comAdapter->GetSystemMonitor();
     

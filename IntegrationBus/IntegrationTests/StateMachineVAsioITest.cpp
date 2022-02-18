@@ -61,20 +61,6 @@ protected:
             _targetStatePromise.set_value();
     }
 
-    ib::cfg::Config DummyCfg(const std::string& participantName, bool sync)
-    {
-        ib::cfg::Config dummyCfg;
-        ib::cfg::Participant dummyParticipant;
-        if (sync)
-        {
-            dummyParticipant.participantController = ib::cfg::ParticipantController{};
-        }
-        dummyParticipant.name = participantName;
-        dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
-        return dummyCfg;
-    }
-
-
 protected:
     ParticipantState _targetState{ParticipantState::Invalid};
     std::promise<void> _targetStatePromise;
@@ -92,7 +78,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
 
     // Setup ComAdapter for TestController
     auto comAdapterController = CreateSimulationParticipantImpl(ib::cfg::CreateDummyConfiguration(), "TestController",
-                                                                false, DummyCfg("TestController", false));
+                                                                false);
    
     comAdapterController->joinIbDomain(domainId);
     auto systemController = comAdapterController->GetSystemController();
@@ -106,7 +92,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
 
     // Setup ComAdapter for Test Unit
     auto comAdapterTestUnit = CreateSimulationParticipantImpl(ib::cfg::CreateDummyConfiguration(), "TestUnit",
-                                                                true, DummyCfg("TestUnit", true));
+                                                                true);
     comAdapterTestUnit->joinIbDomain(domainId);
     auto participantController = comAdapterTestUnit->GetParticipantController();
 

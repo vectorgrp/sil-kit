@@ -216,7 +216,7 @@ protected:
         try
         {
             participant.comAdapter = ib::CreateSimulationParticipant(
-                ib::cfg::CreateDummyConfiguration(), participant.name, sync, domainId, DummyCfg(participant.name, sync));
+                ib::cfg::CreateDummyConfiguration(), domainId, participant.name, sync);
 
             IParticipantController* participantController;
             if (sync)
@@ -313,7 +313,7 @@ protected:
         try
         {
             participant.comAdapter = ib::CreateSimulationParticipant(
-                ib::cfg::CreateDummyConfiguration(), participant.name, sync, domainId, DummyCfg(participant.name, sync));
+                ib::cfg::CreateDummyConfiguration(), domainId, participant.name, sync);
 
             IParticipantController* participantController;
             if (sync)
@@ -468,8 +468,8 @@ protected:
     {
         try
         {
-            ib::cfg::Config dummyCfg;
-            registry = ib::extensions::CreateIbRegistry(dummyCfg);
+            // TODO: Revise
+            registry = ib::extensions::CreateIbRegistry(ib::cfg::Config{});
             registry->ProvideDomain(domainId);
         }
         catch (const Misconfiguration& error)
@@ -491,7 +491,7 @@ protected:
         try
         {
             systemMaster.comAdapter = ib::CreateSimulationParticipant(
-                ib::cfg::CreateDummyConfiguration(), systemMasterName, false, domainId, DummyCfg(systemMasterName, false));
+                ib::cfg::CreateDummyConfiguration(), domainId, systemMasterName, false);
 
             systemMaster.systemController = systemMaster.comAdapter->GetSystemController();
             systemMaster.systemMonitor = systemMaster.comAdapter->GetSystemMonitor();

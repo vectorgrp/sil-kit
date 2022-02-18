@@ -1,15 +1,16 @@
 /* Copyright (c) Vector Informatik GmbH. All rights reserved. */
 
 //#define IntegrationBusAPI_EXPORT
+#include "ParticipantConfiguration.hpp"
+
 #include "ib/capi/IntegrationBus.h"
 #include "ib/IntegrationBus.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/mw/sync/string_utils.hpp"
-#include "ib/sim/generic/all.hpp"
-#include "ib/sim/generic/string_utils.hpp"
 #include "IComAdapterInternal.hpp"
 
+#include <memory>
 #include <string>
 #include <iostream>
 #include <algorithm>
@@ -21,7 +22,8 @@
 extern "C" {
 
 ib_ReturnCode ib_SimulationParticipant_Create(ib_SimulationParticipant** outParticipant, const char* cJsonConfig,
-                                                  const char* cParticipantName, ib_Bool isSynchronized, const char* cDomainId)
+                                                  const char* cParticipantName, const char* cDomainId,
+                                                  ib_Bool isSynchronized)
 {
   ASSERT_VALID_OUT_PARAMETER(outParticipant);
   ASSERT_VALID_POINTER_PARAMETER(cJsonConfig);
@@ -34,10 +36,11 @@ ib_ReturnCode ib_SimulationParticipant_Create(ib_SimulationParticipant** outPart
     std::string domainIdStr(cDomainId);
     uint32_t domainId = atoi(domainIdStr.c_str());
 
-    auto ibConfig = ib::cfg::Config::FromJsonString(jsonConfigStr);
+    auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonString(jsonConfigStr);
 
     std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-    auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId).release();
+        auto comAdapter =
+            ib::CreateSimulationParticipant(ibConfig, participantName, domainId, isSynchronized).release();
         
     if (comAdapter == nullptr)
     {
@@ -268,11 +271,10 @@ ib_ReturnCode ib_SimulationParticipant_Initialize(ib_SimulationParticipant* part
   {
     auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
     ib::mw::IComAdapterInternal* comAdapterInternal = static_cast<ib::mw::IComAdapterInternal*>(comAdapter);
-    auto& ibConfig = comAdapterInternal->GetConfig();
-    const auto& participantConfig = get_by_name(ibConfig.simulationSetup.participants, participantName);
+    std::string name{ participantName };
     auto* systemController = comAdapter->GetSystemController();
 
-    systemController->Initialize(participantConfig.id);
+    systemController->Initialize(name);
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
@@ -286,11 +288,9 @@ ib_ReturnCode ib_SimulationParticipant_ReInitialize(ib_SimulationParticipant* pa
   {
     auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
     ib::mw::IComAdapterInternal* comAdapterInternal = static_cast<ib::mw::IComAdapterInternal*>(comAdapter);
-    auto& ibConfig = comAdapterInternal->GetConfig();
-    const auto& participantConfig = get_by_name(ibConfig.simulationSetup.participants, participantName);
     auto* systemController = comAdapter->GetSystemController();
 
-    systemController->ReInitialize(participantConfig.id);
+    systemController->ReInitialize(participantName);
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE

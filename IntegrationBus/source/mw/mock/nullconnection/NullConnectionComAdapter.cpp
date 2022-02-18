@@ -37,9 +37,11 @@ struct NullConnection
 };
 } // anonymous namespace
     
-auto CreateNullConnectionComAdapterImpl(ib::cfg::Config config, const std::string& participantName) -> std::unique_ptr<IComAdapterInternal>
+auto CreateNullConnectionComAdapterImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+                                        const std::string& participantName, bool isSynchronized)
+    -> std::unique_ptr<IComAdapterInternal>
 {
-    return std::make_unique<ComAdapter<NullConnection>>(std::move(config), participantName);
+    return std::make_unique<ComAdapter<NullConnection>>(std::move(participantConfig), participantName, isSynchronized);
 }
 
 } // mw

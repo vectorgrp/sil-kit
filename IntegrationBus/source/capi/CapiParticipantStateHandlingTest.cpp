@@ -194,12 +194,10 @@ namespace {
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         returnCode = ib_SimulationParticipant_Initialize((ib_SimulationParticipant*)&mockComAdapter, "participant");
-        // there is no valid IbConfig, therefore the participant lookup by name will fail
-        EXPECT_EQ(returnCode, ib_ReturnCode_UNSPECIFIEDERROR);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         returnCode = ib_SimulationParticipant_ReInitialize((ib_SimulationParticipant*)&mockComAdapter, "participant");
-        // there is no valid IbConfig, therefore the participant lookup by name will fail
-        EXPECT_EQ(returnCode, ib_ReturnCode_UNSPECIFIEDERROR);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         EXPECT_CALL(mockComAdapter.mockSystemController, Run()).Times(testing::Exactly(1));
         returnCode = ib_SimulationParticipant_RunSimulation((ib_SimulationParticipant*)&mockComAdapter);

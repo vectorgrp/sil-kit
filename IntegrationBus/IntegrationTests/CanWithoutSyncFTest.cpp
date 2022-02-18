@@ -78,9 +78,7 @@ protected:
         unsigned numSent{ 0 }, numAcks{ 0 };
         std::promise<void> canWriterAllAcksReceivedPromiseLocal;
 
-        auto dynamicConfiguration = ib::cfg::CreateDummyConfiguration();
-
-        auto comAdapter = ib::CreateSimulationParticipant(dynamicConfiguration, "CanWriter", false, _domainId, DummyCfg("CanWriter", false));
+        auto comAdapter = ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), _domainId, "CanWriter", false);
         auto* controller = comAdapter->CreateCanController("CAN1", "CAN1");
 
         controller->RegisterTransmitStatusHandler(
@@ -114,7 +112,7 @@ protected:
 
         auto dynamicConfiguration = ib::cfg::CreateDummyConfiguration();
 
-        auto comAdapter = ib::CreateSimulationParticipant(dynamicConfiguration, "CanReader", false, _domainId, DummyCfg("CanReader",false));
+        auto comAdapter = ib::CreateSimulationParticipant(dynamicConfiguration, _domainId, "CanReader", false);
         auto* controller = comAdapter->CreateCanController("CAN1", "CAN1");
 
         controller->RegisterReceiveMessageHandler(
@@ -147,19 +145,6 @@ protected:
             EXPECT_TRUE(Matches(message.expectedMsg, message.receivedMsg));
             EXPECT_EQ(message.expectedAck, message.receivedAck);
         }
-    }
-
-    ib::cfg::Config DummyCfg(const std::string& participantName, bool sync)
-    {
-        ib::cfg::Config dummyCfg;
-        ib::cfg::Participant dummyParticipant;
-        if (sync)
-        {
-            dummyParticipant.participantController = ib::cfg::ParticipantController{};
-        }
-        dummyParticipant.name = participantName;
-        dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
-        return dummyCfg;
     }
 
     struct Testmessage
