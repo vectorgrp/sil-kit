@@ -31,8 +31,10 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 class IbController
 {
 public:
-    IbController(IComAdapter* comAdapter, cfg::Config ibConfig, const std::vector<std::string>& expectedParticipantNames)
-        : ibConfig{std::move(ibConfig)}
+    IbController(IComAdapter* comAdapter, cfg::IParticipantConfiguration ibConfig,
+                 const std::vector<std::string>& expectedParticipantNames)
+        : _ibConfig{std::move(ibConfig)}
+        , _expectedParticipantNames{expectedParticipantNames}
     {
         _controller = comAdapter->GetSystemController();
         _monitor = comAdapter->GetSystemMonitor();
@@ -110,13 +112,10 @@ public:
 
     void InitializeAllParticipants()
     {
-        for (auto&& participant : ibConfig.simulationSetup.participants)
+        for (auto&& name : _expectedParticipantNames)
         {
-            if (!participant.participantController)
-                continue;
-
-            std::cout << "Sending ParticipantCommand::Init to participant \"" << participant.name << "\"" << std::endl;
-            _controller->Initialize(participant.name);
+            std::cout << "Sending ParticipantCommand::Init to participant \"" << name << "\"" << std::endl;
+            _controller->Initialize(name);
         }
     }
 
@@ -158,10 +157,9 @@ public:
         }
     }
 
-public:
-    // ----------------------------------------
-    //  Public Members
-    ib::cfg::Config ibConfig;
+private:
+    ib::cfg::IParticipantConfiguration _ibConfig;
+    std::vector<std::string> _expectedParticipantNames;
     bool _stopInitiated{false};
     bool _performRestart{false};
     std::promise<bool> _shutdownPromise;
@@ -173,9 +171,9 @@ public:
 
 int main(int argc, char** argv)
 {
-    if (argc < 2)
+    if (argc < 3)
     {
-        std::cerr << "Missing arguments! Start demo with: " << argv[0] << "<ibConfig> <domainId> <ParticipantNames>" << std::endl;
+        std::cerr << "Missing arguments! Start demo with: " << argv[0] << "<ibConfig> <domainId> [participantName1] [participantName2] ..." << std::endl;
         return -1;
     }
     
@@ -184,8 +182,7 @@ int main(int argc, char** argv)
         std::string jsonFilename(argv[1]);
         std::string participantName{"SystemController"};
 
-        uint32_t domainId = 42;
-        domainId = static_cast<uint32_t>(std::stoul(argv[2]));
+        uint32_t domainId = static_cast<uint32_t>(std::stoul(argv[2]));
 
         std::vector<std::string> expectedParticipantNames;
         for (int i = 3; i < argc; i++)
@@ -193,10 +190,10 @@ int main(int argc, char** argv)
             expectedParticipantNames.push_back(argv[i]);
         }
 
-        auto ibConfig = ib::cfg::Config::FromJsonFile(jsonFilename);
+        auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile(jsonFilename);
 
         std::cout << "Creating SystemController for IB domain=" << domainId << std::endl;
-        auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
+        auto comAdapter = ib::CreateSimulationParticipant(ibConfig, participantName, domainId, false);
 
         IbController ibController(comAdapter.get(), ibConfig, expectedParticipantNames);
 

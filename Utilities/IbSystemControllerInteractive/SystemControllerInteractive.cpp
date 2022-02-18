@@ -206,17 +206,17 @@ private:
 
 int main(int argc, char** argv)
 {
-    ib::cfg::Config ibConfig;
-    if (argc < 2)
+    std::shared_ptr<ib::cfg::IParticipantConfiguration> ibConfig;
+    if (argc < 3)
     {
-        std::cerr << "Missing arguments! Start demo with: " << argv[0] << " <IbConfig.json> [domainId]" << std::endl;
+        std::cerr << "Missing arguments! Start demo with: " << argv[0] << " <IbConfig.json> <domainId> [participantName1] [participantName2] ..." << std::endl;
         return -1;
     }
     
     try
     {
         auto jsonFilename = std::string(argv[1]);
-        ibConfig = ib::cfg::Config::FromJsonFile(jsonFilename);
+        ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile(jsonFilename);
     }
     catch (ib::cfg::Misconfiguration& error)
     {
@@ -228,21 +228,25 @@ int main(int argc, char** argv)
     std::string participantName{"SystemController"};
 
     uint32_t domainId = 42;
-    if (argc >= 3)
+    try
     {
-        try
-        {
-            domainId = static_cast<uint32_t>(std::stoul(argv[2]));
-        }
-        catch (std::exception&)
-        {
-        }
+        domainId = static_cast<uint32_t>(std::stoul(argv[2]));
+    }
+    catch (std::exception&)
+    {
+    }
+
+    std::vector<std::string> expectedParticipantNames;
+    for (int i = 3; i < argc; i++)
+    {
+        expectedParticipantNames.push_back(argv[i]);
     }
 
     std::cout << "Creating interactive SystemController for IB domain=" << domainId << std::endl;
-    auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
+    auto comAdapter = ib::CreateSimulationParticipant(ibConfig, participantName, domainId, false);
 
     auto systemMonitor = comAdapter->GetSystemMonitor();
+    systemMonitor->SetSynchronizedParticipants(expectedParticipantNames);
     systemMonitor->RegisterParticipantStatusHandler(&ReportParticipantStatus);
     systemMonitor->RegisterSystemStateHandler(&ReportSystemState);
 
