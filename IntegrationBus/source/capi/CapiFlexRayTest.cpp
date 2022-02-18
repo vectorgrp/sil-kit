@@ -219,14 +219,6 @@ TEST_F(CapiFlexRayTest, fr_controller_nullpointer_params)
   returnCode = ib_FlexRay_Controller_Create(&cControllerReturn, cMockComAdapter, "bad", nullptr);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-  returnCode = ib_FlexRay_ControllerConfig_Create(nullptr, nullptr, nullptr);
-  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-  ib_FlexRay_ControllerConfig* configPtr = NULL;
-  returnCode = ib_FlexRay_ControllerConfig_Create(nullptr, nullptr, "bad");
-  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-  returnCode = ib_FlexRay_ControllerConfig_Create(&configPtr, nullptr, "bad");
-  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
   returnCode = ib_FlexRay_Controller_Configure(cController, nullptr);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 

@@ -557,13 +557,6 @@ typedef ib_ReturnCode (*ib_FlexRay_Controller_Create_t)(ib_FlexRay_Controller** 
                                                         ib_SimulationParticipant* participant, const char* name,
                                                         const char* network);
 
-/*! \brief Create and fetch the configuration of the controller with the given name. The configuration settings will be fetched from the .json configuration.
- *! \note The ib_FlexRay_ControllerConfig returned may be deallocated by calling free().
-*/
-IntegrationBusAPI ib_ReturnCode ib_FlexRay_ControllerConfig_Create(ib_FlexRay_ControllerConfig** controllerConfig, ib_SimulationParticipant* participant, const char* cName);
-
-typedef ib_ReturnCode (*ib_FlexRay_ControllerConfig_Create_t)(ib_FlexRay_ControllerConfig** controllerConfig, ib_SimulationParticipant* participant, const char* cName);
-
 /*! \brief Append a TxBuffer to the given controller configuration.
  *! \note The given controller configuration may get reallocated during this process.
  *  The ib_FlexRay_ControllerConfig returned may be deallocated by calling free().

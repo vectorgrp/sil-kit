@@ -204,6 +204,53 @@ struct FlexRayNode
 
 int main(int argc, char** argv)
 {
+    ib::sim::fr::ClusterParameters clusterParams;
+    clusterParams.gColdstartAttempts = 8;
+    clusterParams.gCycleCountMax = 63;
+    clusterParams.gdActionPointOffset = 2;
+    clusterParams.gdDynamicSlotIdlePhase = 1;
+    clusterParams.gdMiniSlot = 5;
+    clusterParams.gdMiniSlotActionPointOffset = 2;
+    clusterParams.gdStaticSlot = 31;
+    clusterParams.gdSymbolWindow = 1;
+    clusterParams.gdSymbolWindowActionPointOffset = 1;
+    clusterParams.gdTSSTransmitter = 9;
+    clusterParams.gdWakeupTxActive = 60;
+    clusterParams.gdWakeupTxIdle = 180;
+    clusterParams.gListenNoise = 2;
+    clusterParams.gMacroPerCycle = 3636;
+    clusterParams.gMaxWithoutClockCorrectionFatal = 2;
+    clusterParams.gMaxWithoutClockCorrectionPassive = 2;
+    clusterParams.gNumberOfMiniSlots = 291;
+    clusterParams.gNumberOfStaticSlots = 70;
+    clusterParams.gPayloadLengthStatic = 16;
+    clusterParams.gSyncFrameIDCountMax = 15;
+
+    ib::sim::fr::NodeParameters nodeParams;
+    nodeParams.pAllowHaltDueToClock = 1;
+    nodeParams.pAllowPassiveToActive = 0;
+    nodeParams.pChannels = fr::Channel::AB;
+    nodeParams.pClusterDriftDamping = 2;
+    nodeParams.pdAcceptedStartupRange = 212;
+    nodeParams.pdListenTimeout = 400162;
+    nodeParams.pKeySlotId = 10;
+    nodeParams.pKeySlotOnlyEnabled = 0;
+    nodeParams.pKeySlotUsedForStartup = 1;
+    nodeParams.pKeySlotUsedForSync = 0;
+    nodeParams.pLatestTx = 249;
+    nodeParams.pMacroInitialOffsetA = 3;
+    nodeParams.pMacroInitialOffsetB = 3;
+    nodeParams.pMicroInitialOffsetA = 6;
+    nodeParams.pMicroInitialOffsetB = 6;
+    nodeParams.pMicroPerCycle = 200000;
+    nodeParams.pOffsetCorrectionOut = 127;
+    nodeParams.pOffsetCorrectionStart = 3632;
+    nodeParams.pRateCorrectionOut = 81;
+    nodeParams.pWakeupChannel = fr::Channel::A;
+    nodeParams.pWakeupPattern = 33;
+    nodeParams.pdMicrotick = fr::ClockPeriod::T25NS;
+    nodeParams.pSamplesPerMicrotick = 2;
+
     if (argc < 3)
     {
         std::cerr << "Missing arguments! Start demo with: " << argv[0] << " <IbConfig.json> <ParticipantName> [domainId]" << std::endl;
@@ -221,12 +268,12 @@ int main(int argc, char** argv)
             domainId = static_cast<uint32_t>(std::stoul(argv[3]));
         }   
 
-        auto ibConfig = ib::cfg::Config::FromJsonFile(configFilename);
+        auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile(configFilename);
 
         std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-        auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
-        auto* controller = comAdapter->CreateFlexrayController("FlexRay1");
-        auto* participantController = comAdapter->GetParticipantController();
+        auto participant = ib::CreateSimulationParticipant(ibConfig, participantName, domainId, true);
+        auto* controller = participant->CreateFlexrayController("FlexRay1");
+        auto* participantController = participant->GetParticipantController();
 
         std::vector<fr::TxBufferConfig> bufferConfigs;
 
@@ -275,9 +322,9 @@ int main(int argc, char** argv)
 
         fr::ControllerConfig config;
         config.bufferConfigs = bufferConfigs;
-        auto& participantConfig = get_by_name(ibConfig.simulationSetup.participants, participantName);
-        config.clusterParams = participantConfig.flexrayControllers[0].clusterParameters;
-        config.nodeParams = participantConfig.flexrayControllers[0].nodeParameters;
+
+        config.clusterParams = clusterParams;
+        config.nodeParams = nodeParams;
         
         FlexRayNode frNode(controller, std::move(config));
         if (participantName == "Node0")

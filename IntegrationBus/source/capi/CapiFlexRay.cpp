@@ -195,29 +195,6 @@ IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controll
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_FlexRay_ControllerConfig_Create(ib_FlexRay_ControllerConfig** outControllerConfig,
-                                                 ib_SimulationParticipant* participant, const char* cName)
-{
-  ASSERT_VALID_OUT_PARAMETER(outControllerConfig);
-  ASSERT_VALID_POINTER_PARAMETER(participant);
-  ASSERT_VALID_POINTER_PARAMETER(cName);
-  CAPI_ENTER
-  {
-    auto* result = (ib_FlexRay_ControllerConfig*)malloc(sizeof(ib_FlexRay_ControllerConfig));
-    memset(result, 0, sizeof(ib_FlexRay_ControllerConfig));
-    ib::mw::IComAdapter* comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
-    ib::mw::IComAdapterInternal* comAdapterInternal = static_cast<ib::mw::IComAdapterInternal*>(comAdapter);
-    std::string participantName = comAdapterInternal->GetParticipantName();
-    //auto& ibConfig = comAdapterInternal->GetConfig();
-    //auto& participantConfig = get_by_name(ibConfig.simulationSetup.participants, participantName);
-    //auto& flexrayControllerCfg = get_by_name(participantConfig.flexrayControllers, cName);
-    //assign(&result, flexrayControllerCfg);
-    *outControllerConfig = result;
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
-
 ib_ReturnCode ib_FlexRay_Append_TxBufferConfig(ib_FlexRay_ControllerConfig** inOutControllerConfig, const ib_FlexRay_TxBufferConfig* txBufferConfig)
 {
   ASSERT_VALID_POINTER_TO_POINTER_PARAMETER(inOutControllerConfig);
