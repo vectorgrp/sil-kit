@@ -97,12 +97,12 @@ int main(int argc, char** argv)
             domainId = static_cast<uint32_t>(std::stoul(argv[3]));
         }
 
-        auto ibConfig = ib::cfg::Config::FromJsonFile(configFilename);
+        auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile(configFilename);
 
         std::cout << "Creating ComAdapter for participant=" << participantName << " in domain " << domainId << std::endl;
-        auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
+        auto participant = ib::CreateSimulationParticipant(ibConfig, participantName, domainId, true);
 
-        auto&& participantController = comAdapter->GetParticipantController();
+        auto&& participantController = participant->GetParticipantController();
 
         auto initializedPromise = std::promise<void>{};
 
@@ -123,12 +123,12 @@ int main(int argc, char** argv)
             std::string clientAFunctionName = "Add100";
             auto exchangeFormatClientA = RpcExchangeFormat{"application/octet-stream"};
             std::map<std::string, std::string> labelsClientA{ {"KeyA", "ValA"} };
-            auto clientA = comAdapter->CreateRpcClient(clientAFunctionName, exchangeFormatClientA, labelsClientA, &CallReturn);
+            auto clientA = participant->CreateRpcClient(clientAFunctionName, exchangeFormatClientA, labelsClientA, &CallReturn);
 
             std::string clientBFunctionName = "Sort";
             auto exchangeFormatClientB = RpcExchangeFormat{""};
             std::map<std::string, std::string> labelsClientB{ {"KeyC", "ValC"} };
-            auto clientB = comAdapter->CreateRpcClient("Sort", exchangeFormatClientB, labelsClientB, &CallReturn);
+            auto clientB = participant->CreateRpcClient("Sort", exchangeFormatClientB, labelsClientB, &CallReturn);
 
             participantController->SetSimulationTask(
                 [clientA, clientB](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -143,11 +143,11 @@ int main(int argc, char** argv)
         {
             auto exchangeFormatServerA = RpcExchangeFormat{"application/octet-stream"};
             std::map<std::string, std::string> labelsServerA{ {"KeyA", "ValA"}, {"KeyB", "ValB"}};
-            auto serverA = comAdapter->CreateRpcServer("Add100", exchangeFormatServerA, labelsServerA, &RemoteFunc_Add100);
+            auto serverA = participant->CreateRpcServer("Add100", exchangeFormatServerA, labelsServerA, &RemoteFunc_Add100);
             
             auto exchangeFormatServerB = RpcExchangeFormat{"application/json"};
             std::map<std::string, std::string> labelsServerB{ {"KeyC", "ValC"}, {"KeyD", "ValD"}};
-            auto serverB = comAdapter->CreateRpcServer("Sort", exchangeFormatServerB, labelsServerB, &RemoteFunc_Sort);
+            auto serverB = participant->CreateRpcServer("Sort", exchangeFormatServerB, labelsServerB, &RemoteFunc_Sort);
 
             participantController->SetSimulationTask(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -168,7 +168,7 @@ int main(int argc, char** argv)
                 std::cout << "   " << entry << std::endl;
             }
         };
-        comAdapter->DiscoverRpcServers("", RpcExchangeFormat{""}, {}, discoveryResultsHandler);
+        participant->DiscoverRpcServers("", RpcExchangeFormat{""}, {}, discoveryResultsHandler);
 
         auto finalState = futureState.get();
 

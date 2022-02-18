@@ -90,13 +90,13 @@ int main(int argc, char** argv)
             domainId = static_cast<uint32_t>(std::stoul(argv[3]));
         }
 
-        auto ibConfig = ib::cfg::Config::FromJsonFile(configFilename);
+        auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile(configFilename);
 
         std::cout << "Creating DataAdapter for participant=" << participantName << " in domain " << domainId << std::endl;
-        auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
+        auto participant = ib::CreateSimulationParticipant(ibConfig, participantName, domainId, true);
 
         // Set an Init Handler
-        auto&& participantController = comAdapter->GetParticipantController();
+        auto&& participantController = participant->GetParticipantController();
         participantController->SetInitHandler([&participantName](auto initCmd) {
 
             std::cout << "Initializing " << participantName << std::endl;
@@ -121,7 +121,7 @@ int main(int argc, char** argv)
         if (participantName == "Publisher1")
         {
             std::map<std::string, std::string> labels{{"KeyA", "ValA"}, {"KeyB", "ValB"} };
-            auto* publisher = comAdapter->CreateDataPublisher("Topic1", DataExchangeFormat{"A"}, labels, 0);
+            auto* publisher = participant->CreateDataPublisher("Topic1", DataExchangeFormat{"A"}, labels, 0);
 
             participantController->SetSimulationTask(
                 [publisher](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -135,7 +135,7 @@ int main(int argc, char** argv)
         else if (participantName == "Publisher2")
         {
             std::map<std::string, std::string> labels{ {"KeyB", "ValB"}, {"KeyC", "ValC"} };
-            auto* publisher = comAdapter->CreateDataPublisher("Topic1", DataExchangeFormat{"A"}, labels, 0);
+            auto* publisher = participant->CreateDataPublisher("Topic1", DataExchangeFormat{"A"}, labels, 0);
 
             participantController->SetSimulationTask(
                 [publisher](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -147,7 +147,7 @@ int main(int argc, char** argv)
         }
         else //if (participantName == "Subscriber")
         {
-            auto* subscriber = comAdapter->CreateDataSubscriber("Topic1", DataExchangeFormat{"A"}, {}, DefaultDataHandler, NewDataSource);
+            auto* subscriber = participant->CreateDataSubscriber("Topic1", DataExchangeFormat{"A"}, {}, DefaultDataHandler, NewDataSource);
            
             subscriber->RegisterSpecificDataHandler(DataExchangeFormat{"A"}, {{"KeyA", ""}, {"KeyB", ""}},
                                                     SpecificDataHandlerForPub1);
