@@ -1,6 +1,5 @@
 /* Copyright (c) Vector Informatik GmbH. All rights reserved. */
 
-//#define CIntegrationBusAPI_EXPORT
 #include "ib/capi/IntegrationBus.h"
 #include "ib/IntegrationBus.hpp"
 #include "ib/mw/logging/ILogger.hpp"
