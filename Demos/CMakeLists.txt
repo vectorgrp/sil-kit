@@ -110,7 +110,6 @@ add_subdirectory(CData)
 add_subdirectory(Rpc)
 add_subdirectory(CRpc)
 add_subdirectory(Benchmark)
-add_subdirectory(SimulationControl)
 add_subdirectory(SimulationControlNonBlocking)
 
 message(STATUS "Demos available: ${demo_list}")
