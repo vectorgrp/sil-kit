@@ -102,6 +102,9 @@ void SendMessage(eth::IEthController* controller, const eth::EthMac& from, const
 
 int main(int argc, char** argv)
 {
+    ib::sim::eth::EthMac WriterMacAddr = {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1};
+    ib::sim::eth::EthMac ReaderMacAddr = {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC2};
+
     if (argc < 3)
     {
         std::cerr << "Missing arguments! Start demo with: " << argv[0] << " <IbConfig.json> <ParticipantName> [domainId]" << std::endl;
@@ -119,12 +122,12 @@ int main(int argc, char** argv)
             domainId = static_cast<uint32_t>(std::stoul(argv[3]));
         }
 
-        auto ibConfig = ib::cfg::Config::FromJsonFile(configFilename);
+        auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile(configFilename);
 
         std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-        auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
-        auto* ethController = comAdapter->CreateEthController("ETH0");
-        auto* participantController = comAdapter->GetParticipantController();
+        auto participant = ib::CreateSimulationParticipant(ibConfig, participantName, domainId, true);
+        auto* ethController = participant->CreateEthController("ETH0");
+        auto* participantController = participant->GetParticipantController();
 
         ethController->RegisterReceiveMessageHandler(&ReceiveEthMessage);
         ethController->RegisterMessageAckHandler(&EthAckCallback);
@@ -154,14 +157,12 @@ int main(int argc, char** argv)
         participantController->SetPeriod(1ms);
         if (participantName == "EthernetWriter")
         {
-            auto sourceAddr = get_by_name(ibConfig.simulationSetup.participants, "EthernetWriter").ethernetControllers[0].macAddress;
-            auto destinationAddr = get_by_name(ibConfig.simulationSetup.participants, "EthernetReader").ethernetControllers[0].macAddress;
-
             participantController->SetSimulationTask(
-                [ethController, &sourceAddr, &destinationAddr](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+                [ethController, &WriterMacAddr, &ReaderMacAddr](std::chrono::nanoseconds now,
+                                                                  std::chrono::nanoseconds /*duration*/) {
 
                     std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
-                    SendMessage(ethController, sourceAddr, destinationAddr);
+                    SendMessage(ethController, WriterMacAddr, ReaderMacAddr);
                     std::this_thread::sleep_for(1s);
 
             });

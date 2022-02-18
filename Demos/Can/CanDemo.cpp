@@ -97,17 +97,17 @@ int main(int argc, char** argv)
             domainId = static_cast<uint32_t>(std::stoul(argv[3]));
         }   
 
-        auto ibConfig = ib::cfg::Config::FromJsonFile(configFilename);
+        // TODO check: Where should the participant name be provided and where is the check if its already part of the predefined configuration
+        auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile(configFilename);
         auto sleepTimePerTick = 1000ms;
 
         std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
 
-        auto comAdapter = ib::CreateSimulationParticipant(ib::cfg::ReadParticipantConfigurationFromYamlString(""),
-                                                          participantName, true, domainId, ib::cfg::Config{});
+        auto participant = ib::CreateSimulationParticipant(ibConfig, participantName, domainId, true);
 
-        auto* logger = comAdapter->GetLogger();
-        auto* participantController = comAdapter->GetParticipantController();
-        auto* canController = comAdapter->CreateCanController("CAN1", "CAN1");
+        auto* logger = participant->GetLogger();
+        auto* participantController = participant->GetParticipantController();
+        auto* canController = participant->CreateCanController("CAN1");
 
         canController->RegisterTransmitStatusHandler(
             [logger](ICanController* /*ctrl*/, const CanTransmitAcknowledge& ack) {

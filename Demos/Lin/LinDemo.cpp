@@ -292,12 +292,12 @@ int main(int argc, char** argv) try
         domainId = static_cast<uint32_t>(std::stoul(argv[3]));
     }
 
-    auto ibConfig = ib::cfg::Config::FromJsonFile(configFilename);
+    auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile(configFilename);
 
     std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-    auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
-    auto* participantController = comAdapter->GetParticipantController();
-    auto* linController = comAdapter->CreateLinController("LIN1");
+    auto participant = ib::CreateSimulationParticipant(ibConfig, participantName, domainId, true);
+    auto* participantController = participant->GetParticipantController();
+    auto* linController = participant->CreateLinController("LIN1");
 
     // Set a Stop and Shutdown Handler
     participantController->SetStopHandler([]() { std::cout << "Stopping..." << std::endl; });
