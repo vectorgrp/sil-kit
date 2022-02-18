@@ -13,7 +13,14 @@
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "intelliSenseMode": "windows-msvc-x64",
       "installRoot": "${env.InstallDir}\\${name}",
-      "cmakeCommandArgs": "-D IB_BUILD_DEMOS=Off"
+      "cmakeCommandArgs": "",
+      "variables": [
+        {
+          "name": "IB_BUILD_DEMOS",
+          "value": "True",
+          "type": "BOOL"
+        }
+      ]
     },
     {
       "name": "x64-Release",
@@ -23,7 +30,8 @@
       "buildCommandArgs": "-v",
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "intelliSenseMode": "windows-msvc-x64",
-      "installRoot": "${env.InstallDir}\\${name}"
+      "installRoot": "${env.InstallDir}\\${name}",
+      "variables": []
     },
     {
       "name": "x86-Debug",
@@ -33,7 +41,8 @@
       "buildCommandArgs": "-v",
       "inheritEnvironments": [ "msvc_x86" ],
       "intelliSenseMode": "windows-msvc-x86",
-      "installRoot": "${env.InstallDir}\\${name}"
+      "installRoot": "${env.InstallDir}\\${name}",
+      "variables": []
     },
     {
       "name": "x86-Release",
@@ -43,7 +52,8 @@
       "buildCommandArgs": "-v",
       "inheritEnvironments": [ "msvc_x86" ],
       "intelliSenseMode": "windows-msvc-x86",
-      "installRoot": "${env.InstallDir}\\${name}"
+      "installRoot": "${env.InstallDir}\\${name}",
+      "variables": []
     },
     {
       "name": "x64-Debug-WSL-GCC",
@@ -57,7 +67,8 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
       "wslPath": "${defaultWSLPath}",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0"
+      "addressSanitizerRuntimeFlags": "detect_leaks=0",
+      "variables": []
     },
     {
       "name": "x64-Debug-WSL-Clang",
@@ -71,7 +82,8 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_clang_x64" ],
       "wslPath": "${defaultWSLPath}",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0"
+      "addressSanitizerRuntimeFlags": "detect_leaks=0",
+      "variables": []
     },
     {
       "name": "x64-Release-WSL-GCC",
@@ -85,7 +97,8 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
       "wslPath": "${defaultWSLPath}",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0"
+      "addressSanitizerRuntimeFlags": "detect_leaks=0",
+      "variables": []
     },
     {
       "name": "x64-Release-WSL-Clang",
@@ -99,7 +112,8 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_clang_x64" ],
       "wslPath": "${defaultWSLPath}",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0"
+      "addressSanitizerRuntimeFlags": "detect_leaks=0",
+      "variables": []
     }
   ]
 }
