@@ -8,8 +8,8 @@
 
 #include "ib/mw/sync/IParticipantController.hpp"
 #include "ib/mw/sync/ITimeProvider.hpp"
-#include "ib/cfg/Config.hpp"
 
+#include "ParticipantConfiguration.hpp"
 #include "PerformanceMonitor.hpp"
 #include "WatchDog.hpp"
 
@@ -49,9 +49,8 @@ public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     ParticipantController() = default;
-    ParticipantController(IComAdapterInternal* comAdapter, const cfg::SimulationSetup& simulationSetup, const cfg::Participant& participantConfig);
-    ParticipantController(const ParticipantController& other) = default;
-    ParticipantController(ParticipantController&& other) = default;
+    ParticipantController(IComAdapterInternal* comAdapter, const std::string& name, bool isSynchronized,
+                          const cfg::v1::datatypes::HealthCheck& healthCheckConfig);
     ParticipantController& operator=(const ParticipantController& other) = default;
     ParticipantController& operator=(ParticipantController&& other) = default;
 
@@ -71,7 +70,6 @@ public:
     void EnableColdswap() override;
 
     void SetPeriod(std::chrono::nanoseconds period) override;
-    void SetEarliestEventTime(std::chrono::nanoseconds eventTime) override;
 
     auto Run()->ParticipantState override;
     auto RunAsync()->std::future<ParticipantState> override;
@@ -93,6 +91,9 @@ public:
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const SystemCommand& msg) override;
 
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const NextSimTask& task) override;
+
+    // Used to propagate sync participants from monitor
+    void AddSynchronizedParticipants(const ExpectedParticipants& participantNames);
 
     // Used by Policies
     template <class MsgT>
@@ -126,11 +127,11 @@ private:
     IComAdapterInternal* _comAdapter{ nullptr };
     mw::ServiceDescriptor _serviceDescriptor{};
     cfg::SyncType _syncType;
-    cfg::TimeSync _timesyncConfig;
     logging::ILogger* _logger{ nullptr };
     std::shared_ptr<ParticipantTimeProvider> _timeProvider{ nullptr };
 
     std::unique_ptr<ITimeSyncPolicy> _timeSyncPolicy;
+
     bool _coldswapEnabled{ false };
 
     service::IServiceDiscovery* _serviceDiscovery;

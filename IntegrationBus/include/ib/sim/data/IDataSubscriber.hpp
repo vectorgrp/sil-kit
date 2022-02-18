@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include "ib/cfg/Config.hpp"
-
 #include "DataMessageDatatypes.hpp"
 
 namespace ib {
@@ -15,13 +13,6 @@ class IDataSubscriber
 
 public:
     virtual ~IDataSubscriber() = default;
-
-    /*! \brief Get the config struct used to setup this IDataSubscriber
-     *
-     * The protocolType and definitionUri are as configured at the corresponding
-     * \ref IDataPublisher.
-     */
-    virtual auto Config() const -> const cfg::DataPort& = 0;
 
     /*! \brief Set the default handler for data reception
      *

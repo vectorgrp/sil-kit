@@ -7,7 +7,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ib/cfg/ConfigBuilder.hpp"
+#include "ParticipantConfiguration.hpp"
 
 #include "MockComAdapter.hpp"
 
@@ -78,15 +78,14 @@ TEST(LoggerTest, send_log_message_from_logger)
 {
     std::string loggerName{"ParticipantAndLogger"};
 
-    cfg::ConfigBuilder configBuilder("TestBuilder");
-    configBuilder.SimulationSetup()
-        .AddParticipant(loggerName)
-        .ConfigureLogger()
-        .AddSink(cfg::Sink::Type::Remote).WithLogLevel(logging::Level::Debug);
+    cfg::v1::datatypes::Logging config;
+    auto sink = cfg::v1::datatypes::Sink{};
+    sink.level = ib::mw::logging::Level::Debug;
+    sink.type = cfg::v1::datatypes::Sink::Type::Remote;
 
-    auto config = configBuilder.Build();
-    auto&& participantConfig = cfg::get_by_name(config.simulationSetup.participants, loggerName);
-    Logger logger{loggerName, participantConfig.logger};
+    config.sinks.push_back(sink);
+
+    Logger logger{loggerName, config};
 
     EndpointAddress controllerAddress = {3, 8};
     MockComAdapter mockComAdapter;

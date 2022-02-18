@@ -51,9 +51,9 @@ struct Sink
         File
     };
 
-    ib::util::Optional<Type> type{ Type::Remote };
-    ib::util::Optional<mw::logging::Level> level{ mw::logging::Level::Info };
-    ib::util::Optional<std::string> logName;
+    Type type{Type::Remote};
+    mw::logging::Level level{mw::logging::Level::Info};
+    std::string logName;
 };
 
 //! \brief Logger service
@@ -153,8 +153,9 @@ auto to_string(TraceSink::Type sinkType) -> std::string
         return "PcapPipe";
     case TraceSink::Type::Undefined:
         return "Undefined";
+    default:
+        throw ib::type_conversion_error{ "Invalid SinkType" };
     }
-    throw ib::type_conversion_error{ "Invalid SinkType" };
 }
 
 auto to_string(NetworkType networkType) -> std::string

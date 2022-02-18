@@ -58,11 +58,11 @@ auto CreateComAdapter(ib::cfg::Config config, const std::string& participantName
 }
 
 auto CreateSimulationParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                                 const std::string& participantName, const uint32_t domainId, cfg::Config config)
+                                 const std::string& participantName, bool isSynchronized, const uint32_t domainId, cfg::Config config)
     -> std::unique_ptr<mw::IComAdapter>
 {
     //Validate(config);
-    auto comAdapter = mw::CreateSimulationParticipantImpl(std::move(participantConfig), participantName, std::move(config));
+    auto comAdapter = mw::CreateSimulationParticipantImpl(std::move(participantConfig), participantName, isSynchronized, std::move(config));
     comAdapter->joinIbDomain(domainId);
     return comAdapter;
 }

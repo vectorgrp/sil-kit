@@ -525,8 +525,8 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
     //makeTasks(participantConfig.linControllers, &mw::IComAdapter::CreateLinController);
 
     // Generic Messages
-    makeTasks(participantConfig.genericPublishers, &mw::IComAdapter::CreateGenericPublisher);
-    makeTasks(participantConfig.genericSubscribers, &mw::IComAdapter::CreateGenericSubscriber);
+    //makeTasks(participantConfig.genericPublishers, &mw::IComAdapter::CreateGenericPublisher);
+    //makeTasks(participantConfig.genericSubscribers, &mw::IComAdapter::CreateGenericSubscriber);
 }
 
 ReplayScheduler::~ReplayScheduler()

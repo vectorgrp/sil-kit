@@ -8,10 +8,19 @@ namespace ib {
 namespace sim {
 namespace rpc {
 
-RpcServerInternal::RpcServerInternal(mw::IComAdapterInternal* comAdapter, cfg::RpcPort config, mw::sync::ITimeProvider* timeProvider, CallProcessor handler, IRpcServer* parent)
-    : _comAdapter{ comAdapter }, _timeProvider{ timeProvider }, _handler{ std::move(handler) }, _parent{ parent }
+RpcServerInternal::RpcServerInternal(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+                                     const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
+                                     const std::map<std::string, std::string>& labels, const std::string& clientUUID,
+                                     CallProcessor handler, IRpcServer* parent)
+    : _comAdapter{comAdapter}
+    , _timeProvider{timeProvider}
+    , _functionName{functionName}
+    , _exchangeFormat{exchangeFormat}
+    , _labels{labels}
+    , _clientUUID{clientUUID}
+    , _handler{std::move(handler)}
+    , _parent{parent}
 {
-    _config = std::move(config);
 }
 
 

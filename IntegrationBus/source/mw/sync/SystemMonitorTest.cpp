@@ -8,8 +8,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ib/cfg/Config.hpp"
-#include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/util/functional.hpp"
 
 #include "MockComAdapter.hpp"
@@ -40,11 +38,14 @@ protected:
     };
 
 protected:
+
     SystemMonitorTest()
-        : testConfig{MakeTestConfig()}
-        , monitor{&comAdapter, testConfig.simulationSetup}
-        , monitorFrom{ &comAdapter, testConfig.simulationSetup }
+        : monitor{&comAdapter }
+        , monitorFrom{ &comAdapter }
     {
+        syncParticipantNames = {"P1", "P2", "P3"};
+
+        monitor.SetSynchronizedParticipants(syncParticipantNames);
         monitor.SetServiceDescriptor(from_endpointAddress(addr));
     }
 
@@ -61,26 +62,16 @@ protected:
         monitor.RegisterParticipantStatusHandler(bind_method(&callbacks, &Callbacks::ParticipantStatusHandler));
     }
 
-    static auto MakeTestConfig() -> cfg::Config
-    {
-        cfg::ConfigBuilder builder{"TestConfig"};
-        auto&& simulationSetup = builder.SimulationSetup();
-        simulationSetup.AddParticipant("P1").WithParticipantId(1).AddParticipantController().WithSyncType(cfg::SyncType::TimeQuantum);
-        simulationSetup.AddParticipant("P2").WithParticipantId(2).AddParticipantController().WithSyncType(cfg::SyncType::TimeQuantum);
-        simulationSetup.AddParticipant("P3").WithParticipantId(3).AddParticipantController().WithSyncType(cfg::SyncType::TimeQuantum);
-        return builder.Build();
-    }
-
     void SetParticipantStatus(ParticipantId participant, ParticipantState state, std::string reason = std::string{})
     {
-        auto&& participantCfg = testConfig.simulationSetup.participants.at(participant - 1);
+        uint64_t id = participant - 1;
         ParticipantStatus status;
         status.state = state;
-        status.participantName = participantCfg.name;
+        status.participantName = syncParticipantNames.at(id);
         status.enterReason = reason;
 
         EndpointAddress from;
-        from.participant = participantCfg.id;
+        from.participant = id;
         from.endpoint = 1024;
 
         monitorFrom.SetServiceDescriptor(from_endpointAddress(from));
@@ -90,9 +81,9 @@ protected:
 
     void SetAllParticipantStates(ParticipantState state)
     {
-        for (auto&& participantCfg : testConfig.simulationSetup.participants)
+        for (size_t i = 0; i < syncParticipantNames.size(); i++)
         {
-            SetParticipantStatus(participantCfg.id, state);
+            SetParticipantStatus(i+1, state);
         }
         EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
     }
@@ -106,8 +97,9 @@ protected:
     // Members
     EndpointAddress addr{19, 1025};
 
+    std::vector<std::string> syncParticipantNames;
+
     DummyComAdapter comAdapter;
-    cfg::Config testConfig;
     SystemMonitor monitor;
     SystemMonitor monitorFrom;
     Callbacks callbacks;
@@ -125,8 +117,7 @@ TEST_F(SystemMonitorTest, init_with_state_invalid)
 TEST_F(SystemMonitorTest, detect_system_idle)
 {
     RegisterSystemHandler();
-    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Idle))
-        .Times(1);
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Idle)).Times(1);
 
     SetParticipantStatus(1, ParticipantState::Idle);
     EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Idle);

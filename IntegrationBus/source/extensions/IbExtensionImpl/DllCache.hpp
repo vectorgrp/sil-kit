@@ -5,7 +5,7 @@
 #include <string>
 #include <memory>
 
-#include "ib/cfg/Config.hpp"
+#include "ParticipantConfiguration.hpp"
 
 #include "IbExtensions.hpp"
 
@@ -17,13 +17,13 @@ namespace ib { namespace extensions {
 // libraries and reusing them.
 //Usage:
 // static DllCache cache;
-// auto extension = cache.Get("name of extension", config);
+// auto extension = cache.Get("name of extension");
 
 class DllCache
 {
 public:
 
-    auto Get(const std::string& extensionName, const ib::cfg::Config& config)
+    auto Get(const std::string& extensionName, const cfg::v1::datatypes::Extensions& config)
         -> ib::extensions::IIbExtension&
     {
         try {
@@ -31,7 +31,7 @@ public:
             //and cache a reference to it.
             if (!_dll)
             {
-                _dll = ib::extensions::LoadExtension(extensionName, config.extensionConfig);
+                _dll = ib::extensions::LoadExtension(extensionName, config);
                 _extensionName = extensionName;
             }
             if (extensionName != _extensionName)

@@ -3,16 +3,22 @@
 #include "DataSubscriber.hpp"
 #include "IServiceDiscovery.hpp"
 #include "YamlConfig.hpp"
-#include "ib/cfg/Config.hpp"
 
 namespace ib {
 namespace sim {
 namespace data {
 
-DataSubscriber::DataSubscriber(mw::IComAdapterInternal* comAdapter, cfg::DataPort config, mw::sync::ITimeProvider* timeProvider, DataHandlerT defaultDataHandler, NewDataSourceHandlerT newDataSourceHandler)
-    : _comAdapter{ comAdapter }, _timeProvider{ timeProvider }, _defaultDataHandler{ defaultDataHandler }, _newDataSourceHandler{ newDataSourceHandler }
+DataSubscriber::DataSubscriber(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+                               const std::string& topic, DataExchangeFormat dataExchangeFormat, const std::map<std::string, std::string>& labels,
+                               DataHandlerT defaultDataHandler, NewDataSourceHandlerT newDataSourceHandler)
+    : _comAdapter{comAdapter}
+    , _timeProvider{timeProvider}
+    , _topic{topic}
+    , _dataExchangeFormat{dataExchangeFormat}
+    , _labels{labels}
+    , _defaultDataHandler{defaultDataHandler}
+    , _newDataSourceHandler{newDataSourceHandler}
 {
-    _config = std::move(config);
 
 }
 
@@ -45,8 +51,8 @@ void DataSubscriber::RegisterServiceDiscovery()
                 std::string labelsStr = getVal(mw::service::supplKeyDataPublisherPubLabels);
                 std::map<std::string, std::string> publisherLabels = ib::cfg::Deserialize<std::map<std::string, std::string>>(labelsStr);
 
-                if (topic == _config.name && Match(_config.dataExchangeFormat, pubDataExchangeFormat) &&
-                    MatchLabels(_config.labels, publisherLabels))
+                if (topic == _topic && Match(_dataExchangeFormat, pubDataExchangeFormat) &&
+                    MatchLabels(_labels, publisherLabels))
                 {
                     // NB: The internal subscriber carries its publisher's information
                     // that AssignSpecificDataHandlers() needs to check matching between 
@@ -62,11 +68,6 @@ void DataSubscriber::RegisterServiceDiscovery()
                 }
             }
         });
-}
-
-auto DataSubscriber::Config() const -> const cfg::DataPort&
-{
-    return _config;
 }
 
 void DataSubscriber::SetDefaultReceiveMessageHandler(DataHandlerT callback)
@@ -97,8 +98,8 @@ void DataSubscriber::AssignSpecificDataHandlers()
             auto it = dataHandling.registeredInternalSubscribers.find(internalSubscriber);
             if (it == dataHandling.registeredInternalSubscribers.end())
             {
-                if (Match(dataHandling.dataExchangeFormat, internalSubscriber->Config().dataExchangeFormat) &&
-                    MatchLabels(dataHandling.labels, internalSubscriber->Config().labels))
+                if (Match(dataHandling.dataExchangeFormat, internalSubscriber->GetDataExchangeFormat()) &&
+                    MatchLabels(dataHandling.labels, internalSubscriber->GetLabels()))
                 {
                     dataHandling.registeredInternalSubscribers.insert(internalSubscriber);
                     internalSubscriber->RegisterSpecificDataHandlerInternal(dataHandling.specificDataHandler);
@@ -108,11 +109,11 @@ void DataSubscriber::AssignSpecificDataHandlers()
     }
 }
 
-void DataSubscriber::AddInternalSubscriber(const std::string& linkName, DataExchangeFormat joinedDataExchangFormat,
+void DataSubscriber::AddInternalSubscriber(const std::string& pubUUID, DataExchangeFormat joinedDataExchangFormat,
                                            const std::map<std::string, std::string>& publisherLabels)
 {
     auto internalSubscriber = dynamic_cast<DataSubscriberInternal*>(_comAdapter->CreateDataSubscriberInternal(
-        _config.name, linkName, joinedDataExchangFormat, publisherLabels, _defaultDataHandler, this));
+        _topic, pubUUID, joinedDataExchangFormat, publisherLabels, _defaultDataHandler, this));
     
     _internalSubscibers.push_back(internalSubscriber);
 }

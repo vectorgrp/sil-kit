@@ -31,8 +31,8 @@ protected:
 
 protected:
     DataSubscriberTest()
-        : subscriber{ &comAdapter, config, comAdapter.GetTimeProvider(), {}, nullptr }
-        , subscriberOther{ &comAdapter, config, comAdapter.GetTimeProvider(), {}, nullptr }
+        : subscriber{ &comAdapter, comAdapter.GetTimeProvider(), "Topic", DataExchangeFormat{}, {}, {}, nullptr }
+        , subscriberOther{ &comAdapter, comAdapter.GetTimeProvider(), "Topic", DataExchangeFormat{}, {}, {}, nullptr }
     {
         subscriber.SetServiceDescriptor(from_endpointAddress(endpointAddress));
         subscriber.SetDefaultReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));
@@ -41,20 +41,8 @@ protected:
         subscriberOther.SetDefaultReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));
     }
 
-    // Workaround for MS VS2015 where we cannot initialize the config member directly
-    static auto MakeConfig() -> cfg::DataPort
-    {
-        cfg::DataPort config;
-
-        config.name = "Subscriber";
-        config.endpointId = 5;
-        config.linkId = 3;
-
-        return config;
-    }
 
 protected:
-    const cfg::DataPort config{MakeConfig()};
     const EndpointAddress endpointAddress{4, 5};
     const EndpointAddress otherEndpointAddress{5, 7};
 
@@ -72,12 +60,6 @@ TEST_F(DataSubscriberTest, trigger_callback)
         .Times(1);
 
     subscriber.ReceiveIbMessage(&subscriberOther, msg);
-}
-
-TEST_F(DataSubscriberTest, get_name_from_subscriber)
-{
-    EXPECT_EQ(subscriber.Config().name, config.name);
-    EXPECT_EQ(subscriber.Config(), config);
 }
 
 

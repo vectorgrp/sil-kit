@@ -19,11 +19,16 @@ target_include_directories(IbMwSync
 )
 
 target_link_libraries(IbMwSync
-    PUBLIC IbInterface
-           IbUtil
-           IbSetThreadName
-    PUBLIC IbInternal
-    PRIVATE IbMwLogging
+    PUBLIC 
+        IbInterface
+        IbUtil
+        IbSetThreadName
+        IbInternal
+    PRIVATE 
+        IbMwLogging
+        IbConfiguration
+    INTERFACE
+        IbConfiguration
 )
 
 add_vib_test(TestMwParticipantController 

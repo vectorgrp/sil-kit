@@ -39,26 +39,12 @@ class DataPublisherTest : public ::testing::Test
 {
 protected:
     DataPublisherTest()
-        : publisher{&comAdapter, config, comAdapter.GetTimeProvider()}
+        : publisher{ &comAdapter, comAdapter.GetTimeProvider(), "Topic", DataExchangeFormat{}, {}, "pubUUID", 0 }
     {
         publisher.SetServiceDescriptor(from_endpointAddress(portAddress));
     }
 
-    // Workaround for MS VS2015 where we cannot intialize the config member directly
-    static auto MakeConfig() -> cfg::DataPort
-    {
-        cfg::DataPort config;
-
-        config.name = "Publisher";
-        config.endpointId = 5;
-        config.linkId = 3;
-        config.dataExchangeFormat = DataExchangeFormat{"A"};
-        config.history = 0;
-
-        return config;
-    }
 protected:
-    const cfg::DataPort config{MakeConfig()};
     const EndpointAddress portAddress{4, 5};
     const std::vector<uint8_t> sampleData{0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u};
 
@@ -84,12 +70,6 @@ TEST_F(DataPublisherTest, publish_raw)
         .Times(1);
 
     publisher.Publish(sampleData.data(), sampleData.size());
-}
-
-TEST_F(DataPublisherTest, get_name_from_publisher)
-{
-    EXPECT_EQ(publisher.Config().name, config.name);
-    EXPECT_EQ(publisher.Config(), config);
 }
 
 } // anonymous namespace

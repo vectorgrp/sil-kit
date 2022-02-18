@@ -28,7 +28,9 @@ class RpcClient
 
 {
 public:
-    RpcClient(mw::IComAdapterInternal* comAdapter, cfg::RpcPort config, mw::sync::ITimeProvider* timeProvider,
+    RpcClient(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+              const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
+              const std::map<std::string, std::string>& labels, const std::string& clientUUID,
               CallReturnHandler handler);
 
     void RegisterServiceDiscovery();
@@ -42,8 +44,6 @@ public:
     void ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const FunctionCallResponse& msg) override;
     void ReceiveMessage(const FunctionCallResponse& msg);
 
-    auto Config() const -> const cfg::RpcPort& override;
-
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
 
@@ -52,14 +52,19 @@ public:
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor& override;
 
 private:
-    cfg::RpcPort _config{};
-    mw::IComAdapterInternal* _comAdapter{nullptr};
-    mw::ServiceDescriptor _serviceDescriptor{};
-    mw::sync::ITimeProvider* _timeProvider{nullptr};
-    uint32_t _numCounterparts{0};
+    std::string _functionName;
+    sim::rpc::RpcExchangeFormat _exchangeFormat;
+    std::map<std::string, std::string> _labels;
+    std::string _clientUUID;
+
     CallReturnHandler _handler;
-    std::map<std::string, std::pair<uint32_t, std::unique_ptr<CallHandleImpl>>> _detachedCallHandles;
     RpcClient* _callController;
+
+    mw::IComAdapterInternal* _comAdapter{nullptr};
+    mw::sync::ITimeProvider* _timeProvider{nullptr};
+    mw::ServiceDescriptor _serviceDescriptor{};
+    uint32_t _numCounterparts{0};
+    std::map<std::string, std::pair<uint32_t, std::unique_ptr<CallHandleImpl>>> _detachedCallHandles;
     mw::logging::ILogger* _logger;
 };
 

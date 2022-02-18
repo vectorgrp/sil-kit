@@ -58,10 +58,14 @@ public:
     virtual auto CreateLinController(const std::string& canonicalName) -> sim::lin::ILinController* = 0;
 
     //! \brief Create a generic message publisher at this IB participant.
-    virtual auto CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher* = 0;
+    [[deprecated("Use CreateDataPublisher instead")]] 
+    virtual auto CreateGenericPublisher(
+        const std::string& canonicalName) -> sim::generic::IGenericPublisher* = 0;
     //! \brief Create a generic message subscriber at this IB participant.
-    virtual auto CreateGenericSubscriber(const std::string& canonicalName) -> sim::generic::IGenericSubscriber* = 0;
-    
+    [[deprecated("Use CreateDataSubscriber instead")]] 
+    virtual auto CreateGenericSubscriber(
+        const std::string& canonicalName) -> sim::generic::IGenericSubscriber* = 0;
+
     //! \brief Create a data publisher at this IB participant.
     virtual auto CreateDataPublisher(const std::string& topic, const sim::data::DataExchangeFormat& dataExchangeFormat,
                                      const std::map<std::string, std::string>& labels, size_t history = 0)
@@ -72,7 +76,6 @@ public:
                                       sim::data::DataHandlerT defaultDataHandler,
                                       sim::data::NewDataSourceHandlerT newDataSourceHandler = nullptr)
         -> sim::data::IDataSubscriber* = 0;
-
 
     //! \brief Create a Rpc client at this IB participant.
     virtual auto CreateRpcClient(const std::string& functionName, const sim::rpc::RpcExchangeFormat exchangeFormat,

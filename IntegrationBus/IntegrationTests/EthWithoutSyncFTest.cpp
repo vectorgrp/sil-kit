@@ -163,7 +163,7 @@ protected:
 
 TEST_F(EthWithoutSyncFTest, eth_communication_no_simulation_flow_vasio)
 {
-    auto registry = std::make_unique<ib::mw::VAsioRegistry>(_ibConfig);
+    auto registry = std::make_unique<ib::mw::VAsioRegistry>(ib::cfg::vasio::v1::CreateDummyIMiddlewareConfiguration());
     registry->ProvideDomain(_domainId);
     _ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
     ExecuteTest();

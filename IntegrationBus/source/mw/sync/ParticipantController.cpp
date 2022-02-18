@@ -43,7 +43,8 @@ struct DistributedTimeQuantumPolicy : ParticipantController::ITimeSyncPolicy
         _currentTask.timePoint = -1ns;
         _currentTask.duration = 0ns;
         _myNextTask.timePoint = 0ns;
-        _myNextTask.duration = 0ns;
+        // NB: This is used when SetPeriod is never called
+        _myNextTask.duration = 1ms;
     }
 
     void Initialize() override
@@ -57,7 +58,8 @@ struct DistributedTimeQuantumPolicy : ParticipantController::ITimeSyncPolicy
     {
         if (_otherNextTasks.find(otherParticipantName) != _otherNextTasks.end())
         {
-            throw std::runtime_error{ "DiscoveryService should not announce multiple ParticipantControllers per participant." };
+            const std::string errorMessage{ "Participant " + otherParticipantName + " already known."};
+            throw std::runtime_error { errorMessage };
         }
         NextSimTask task;
         task.timePoint = -1ns;
@@ -69,7 +71,8 @@ struct DistributedTimeQuantumPolicy : ParticipantController::ITimeSyncPolicy
     {
         if (_otherNextTasks.find(otherParticipantName) != _otherNextTasks.end())
         {
-            throw std::runtime_error{ "DiscoveryService should not unannounce ParticipantControllers without prior announcement." };
+            const std::string errorMessage{"Participant " + otherParticipantName + " unknown." };
+            throw std::runtime_error{errorMessage};
         }
         auto it = _otherNextTasks.find(otherParticipantName);
         if (it != _otherNextTasks.end())
@@ -107,20 +110,16 @@ struct DistributedTimeQuantumPolicy : ParticipantController::ITimeSyncPolicy
         case ParticipantState::Initializing: // [[fallthrough]]
         case ParticipantState::Initialized:
             return;
-
-        case ParticipantState::Paused:
-            // [[fallthrough]]
+        case ParticipantState::Paused:       // [[fallthrough]]
         case ParticipantState::Running:
             CheckDistributedTimeAdvanceGrant();
             return;
-
         case ParticipantState::Stopping:     // [[fallthrough]]
         case ParticipantState::Stopped:      // [[fallthrough]]
         case ParticipantState::Error:        // [[fallthrough]]
         case ParticipantState::ShuttingDown: // [[fallthrough]]
         case ParticipantState::Shutdown:     // [[fallthrough]]
             return;
-
         default:
             _controller.ReportError("Received NextSimTask in state ParticipantState::" + to_string(_controller.State())); 
             return;
@@ -199,12 +198,12 @@ struct ParticipantTimeProvider : public sync::ITimeProvider
     }
 };
 
-ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, const cfg::SimulationSetup& simulationSetup, const cfg::Participant& participantConfig)
+ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, const std::string& name,
+                                             bool isSynchronized, const cfg::v1::datatypes::HealthCheck& healthCheckConfig)
     : _comAdapter{comAdapter}
-    , _timesyncConfig{simulationSetup.timeSync}
-    , _syncType(participantConfig.participantController->syncType)
+    , _syncType{ cfg::SyncType::Unsynchronized }
     , _logger{comAdapter->GetLogger()}
-    , _watchDog{participantConfig.participantController->execTimeLimitSoft, participantConfig.participantController->execTimeLimitHard}
+    , _watchDog{ healthCheckConfig }
 {
     _watchDog.SetWarnHandler(
         [logger = _logger](std::chrono::milliseconds timeout)
@@ -225,57 +224,52 @@ ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, co
         }
     );
 
-    _status.participantName = participantConfig.name;
+    _status.participantName = name;
+
+    if (isSynchronized)
+    {
+        _syncType = cfg::SyncType::DistributedTimeQuantum;
+    }
 
     try
     {
         _timeSyncPolicy = MakeTimeSyncPolicy(_syncType);
     }
-    catch (const std::exception & e)
+    catch (const std::exception& e)
     {
         _logger->Critical(e.what());
         throw;
     }
 
-    _timeSyncPolicy->SetStepDuration(_timesyncConfig.tickPeriod);
-
-    _serviceDiscovery = _comAdapter->GetServiceDiscovery();
-    _serviceDiscovery->RegisterServiceDiscoveryHandler([this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType, const ib::mw::ServiceDescriptor& serviceDescriptor)
-    {
-        // general check for correct service type
-        if (serviceDescriptor.GetServiceType() != ib::mw::ServiceType::InternalController)
-        {
-            return;
-        }
-
-        // check if received controller is a participantController
-        std::string controllerType;
-        if (!(serviceDescriptor.GetSupplementalDataItem(ib::mw::service::controllerType, controllerType)
-              && controllerType == mw::service::controllerTypeParticipantController))
-        {
-            return;
-        }
-
-        // check if the controller is synchronized
-        // Note: it's not necessary to check the value of IsSynchonized as it will not be set if it is not true
-        std::string isSynchronized;
-        if (!serviceDescriptor.GetSupplementalDataItem(ib::mw::service::controllerIsSynchronized, isSynchronized))
-        {
-            return;
-        }
-
-        if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated)
-        {
-            _timeSyncPolicy->SynchronizedParticipantAdded(serviceDescriptor.GetParticipantName());
-        }
-        else if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved)
-        {
-            _timeSyncPolicy->SynchronizedParticipantRemoved(serviceDescriptor.GetParticipantName());
-        }
-    });
-
     _timeProvider = std::make_shared<ParticipantTimeProvider>();
     _waitingForCompletion = false;
+}
+
+
+void ParticipantController::AddSynchronizedParticipants(const ExpectedParticipants& expectedParticipants)
+{
+    if (_syncType == cfg::SyncType::DistributedTimeQuantum)
+    {
+        auto&& nameIter =
+            std::find(expectedParticipants.names.begin(), expectedParticipants.names.end(), _status.participantName);
+        if (nameIter == expectedParticipants.names.end())
+        {
+            std::stringstream strs;
+            strs << "Synchronized participant " << _status.participantName << " not found in expected participants.";
+            throw std::runtime_error{ strs.str() };
+        }
+
+        // Add sync participants
+        for (auto&& name : expectedParticipants.names)
+        {
+            // Exclude this participant
+            if (name == _status.participantName)
+            {
+                continue;
+            }
+            _timeSyncPolicy->SynchronizedParticipantAdded(name);
+        }
+    }
 }
 
 void ParticipantController::SetInitHandler(InitHandlerT handler)
@@ -318,19 +312,7 @@ void ParticipantController::EnableColdswap()
 
 void ParticipantController::SetPeriod(std::chrono::nanoseconds period)
 {
-    if (_syncType != ib::cfg::SyncType::DistributedTimeQuantum)
-    {
-        auto msPeriod = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(period);
-        _logger->Warn("ParticipantController::SetPeriod({}ms) is ignored", msPeriod.count());
-        _logger->Info("ParticipantController::SetPeriod() can only be used with SyncType::DistributedTimeQuantum (currently active: SyncType::{})", _syncType);
-        return;
-    }
     _timeSyncPolicy->SetStepDuration(period);
-}
-
-void ParticipantController::SetEarliestEventTime(std::chrono::nanoseconds /*eventTime*/)
-{
-    throw std::exception();
 }
 
 auto ParticipantController::MakeTimeSyncPolicy(cfg::SyncType syncType) -> std::unique_ptr<ParticipantController::ITimeSyncPolicy>
@@ -623,6 +605,11 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, con
     // this could happen before the command has been received by the participant,
     // thus missing the command.
     if (command.kind == SystemCommand::Kind::ExecuteColdswap && (State() == ParticipantState::Invalid || State() == ParticipantState::Idle))
+    {
+        return;
+    }
+
+    if (_syncType != cfg::SyncType::DistributedTimeQuantum)
     {
         return;
     }

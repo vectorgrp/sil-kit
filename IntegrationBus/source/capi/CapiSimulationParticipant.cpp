@@ -20,7 +20,8 @@
 
 extern "C" {
 
-ib_ReturnCode ib_SimulationParticipant_Create(ib_SimulationParticipant** outParticipant, const char* cJsonConfig, const char* cParticipantName, const char* cDomainId)
+ib_ReturnCode ib_SimulationParticipant_Create(ib_SimulationParticipant** outParticipant, const char* cJsonConfig,
+                                                  const char* cParticipantName, ib_Bool isSynchronized, const char* cDomainId)
 {
   ASSERT_VALID_OUT_PARAMETER(outParticipant);
   ASSERT_VALID_POINTER_PARAMETER(cJsonConfig);

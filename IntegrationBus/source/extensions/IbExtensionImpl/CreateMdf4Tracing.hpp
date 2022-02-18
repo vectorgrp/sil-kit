@@ -7,6 +7,7 @@
 #include "ib/extensions/ITraceMessageSink.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/cfg/fwd_decl.hpp"
+#include "ib/cfg/Config.hpp"
 
 #include "ib/extensions/IReplay.hpp"
 

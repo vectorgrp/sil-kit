@@ -87,7 +87,7 @@ public:
     ComAdapter(ComAdapter&&) = default;
     ComAdapter(cfg::Config config, const std::string& participantName);
     ComAdapter(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-               const std::string& participantName, cfg::Config config);
+               const std::string& participantName, bool isSynchronized, cfg::Config config);
 
 public:
     // ----------------------------------------
@@ -143,6 +143,7 @@ public:
     auto GetServiceDiscovery() -> service::IServiceDiscovery* override;
     auto GetLogger() -> logging::ILogger* override;
     auto GetParticipantName() const -> const std::string& override { return _participantName; }
+    auto IsSynchronized() const -> bool override { return _isSynchronized; }
     auto GetConfig() const -> const ib::cfg::Config& override { return _config; }
 
     void RegisterCanSimulator(sim::can::IIbToCanSimulator* busSim) override;
@@ -188,6 +189,7 @@ public:
     void SendIbMessage(const IIbServiceEndpoint*, const sync::ParticipantStatus& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const sync::ParticipantCommand& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const sync::SystemCommand& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint*, const sync::ExpectedParticipants& msg) override;
 
     void SendIbMessage(const IIbServiceEndpoint*, const logging::LogMsg& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, logging::LogMsg&& msg) override;
@@ -244,6 +246,7 @@ public:
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::ParticipantStatus& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::ParticipantCommand& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::SystemCommand& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::ExpectedParticipants& msg) override;
 
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const logging::LogMsg& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, logging::LogMsg&& msg) override;
@@ -312,14 +315,9 @@ private:
     template<class ControllerT>
     auto GetController(const std::string& networkName, const std::string& serviceName) -> ControllerT*;
 
-    template <class ControllerT, typename... Arg>
-    [[deprecated("Deprecated method. Please switch to any variant that does not use the link class.")]] 
-    auto CreateController(const cfg::Link& link, const std::string& serviceName, const mw::ServiceType serviceType,
-                          const mw::SupplementalData& supplementalData, Arg&&... arg) -> ControllerT*;
-
     //!< internal services don't have a link config
     template<class ControllerT, typename... Arg>
-    auto CreateController(const std::string& serviceName, const mw::ServiceType serviceType,
+    auto CreateInternalController(const std::string& serviceName, const mw::ServiceType serviceType,
                           const mw::SupplementalData& supplementalData, Arg&&... arg) -> ControllerT*;
 
     template <class ConfigT, class ControllerT, typename... Arg>
@@ -328,11 +326,6 @@ private:
         -> ControllerT*;
 
     auto GetLinkById(int16_t linkId) -> cfg::Link&;
-
-    template <class ControllerT, class ConfigT, typename... Arg>
-    auto CreateControllerForLink(const ConfigT& config, const mw::ServiceType& serviceType,
-                                 const mw::SupplementalData& supplementalData, Arg&&... arg)
-        -> ControllerT*;
 
     template<class IIbToSimulatorT>
     void RegisterSimulator(IIbToSimulatorT* busSim, cfg::Link::Type linkType);
@@ -349,12 +342,13 @@ private:
     std::shared_ptr<ib::cfg::ParticipantConfiguration> _participantConfig;
     const cfg::Participant& _participant;
     std::string _participantName;
+    bool _isSynchronized{ false };
     ParticipantId _participantId{0};
     std::shared_ptr<sync::ITimeProvider> _timeProvider{nullptr};
 
     std::unique_ptr<logging::ILogger> _logger;
     std::vector<std::unique_ptr<extensions::ITraceMessageSink>> _traceSinks;
-    std::unique_ptr<tracing::ReplayScheduler> _replayScheduler;
+    //std::unique_ptr<tracing::ReplayScheduler> _replayScheduler;
 
     std::tuple<
         ControllerMap<sim::can::IIbToCanController>,

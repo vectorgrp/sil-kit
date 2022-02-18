@@ -8,7 +8,7 @@
 #include "CreateComAdapter.hpp"
 #include "VAsioRegistry.hpp"
 
-#include "ib/cfg/ConfigBuilder.hpp"
+#include "ParticipantConfiguration.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/util/functional.hpp"
 
@@ -61,6 +61,20 @@ protected:
             _targetStatePromise.set_value();
     }
 
+    ib::cfg::Config DummyCfg(const std::string& participantName, bool sync)
+    {
+        ib::cfg::Config dummyCfg;
+        ib::cfg::Participant dummyParticipant;
+        if (sync)
+        {
+            dummyParticipant.participantController = ib::cfg::ParticipantController{};
+        }
+        dummyParticipant.name = participantName;
+        dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
+        return dummyCfg;
+    }
+
+
 protected:
     ParticipantState _targetState{ParticipantState::Invalid};
     std::promise<void> _targetStatePromise;
@@ -71,28 +85,19 @@ protected:
 TEST_F(VAsioNetworkITest, vasio_state_machine)
 {
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+    std::vector<std::string> syncParticipantNames{ "TestUnit" };
 
-    // Create a minimal IbConfig
-    ib::cfg::ConfigBuilder builder{"TestConfig"};
-
-    builder.SimulationSetup()
-        .AddParticipant("TestUnit")
-            .AddParticipantController()
-                .WithSyncType(ib::cfg::SyncType::DistributedTimeQuantum);
-    builder.SimulationSetup()
-        .AddParticipant("TestController")
-            .AsSyncMaster();
-
-    auto ibConfig = builder.Build();
-
-    auto registry = std::make_unique<VAsioRegistry>(ibConfig);
+    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::vasio::v1::CreateDummyIMiddlewareConfiguration());
     registry->ProvideDomain(domainId);
 
     // Setup ComAdapter for TestController
-    auto comAdapterController = CreateVAsioComAdapterImpl(ibConfig, "TestController");
+    auto comAdapterController = CreateSimulationParticipantImpl(ib::cfg::CreateDummyConfiguration(), "TestController",
+                                                                false, DummyCfg("TestController", false));
+   
     comAdapterController->joinIbDomain(domainId);
     auto systemController = comAdapterController->GetSystemController();
     auto monitor = comAdapterController->GetSystemMonitor();
+    monitor->SetSynchronizedParticipants(syncParticipantNames);
 
     monitor->RegisterParticipantStateHandler([this](ParticipantState state)
     {
@@ -100,7 +105,8 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     });
 
     // Setup ComAdapter for Test Unit
-    auto comAdapterTestUnit = CreateVAsioComAdapterImpl(ibConfig, "TestUnit");
+    auto comAdapterTestUnit = CreateSimulationParticipantImpl(ib::cfg::CreateDummyConfiguration(), "TestUnit",
+                                                                true, DummyCfg("TestUnit", true));
     comAdapterTestUnit->joinIbDomain(domainId);
     auto participantController = comAdapterTestUnit->GetParticipantController();
 
@@ -116,7 +122,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
         callbacks.ShutdownHandler();
     });
 
-    auto participantName = ib::cfg::get_by_name(ibConfig.simulationSetup.participants, "TestUnit").name;
+    std::string participantName = "TestUnit";
     ParticipantCommand initCommand{hash(participantName), ParticipantCommand::Kind::Initialize};
 
     EXPECT_CALL(callbacks, InitHandler(initCommand.participant, initCommand.kind)).Times(1);

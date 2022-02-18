@@ -27,6 +27,10 @@ bool operator==(const SystemCommand& lhs, const SystemCommand& rhs)
     return lhs.kind == rhs.kind;
 }
 
+bool operator==(const ExpectedParticipants& lhs, const ExpectedParticipants& rhs)
+{
+    return lhs.names == rhs.names;
+}
 
 }
 }

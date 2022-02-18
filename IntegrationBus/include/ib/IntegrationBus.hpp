@@ -20,6 +20,7 @@ namespace ib {
 *
 * \param config Configuration of the participant
 * \param participantName Name of the participant
+* \param isSynchronized Simulation time synchronization
 * \param domainId ID of the domain
 * \return Instance of the communication adapter
 *
@@ -31,6 +32,6 @@ namespace ib {
 IntegrationBusAPI auto CreateComAdapter(ib::cfg::Config config, const std::string& participantName, const uint32_t domainId) -> std::unique_ptr<mw::IComAdapter>;
 IntegrationBusAPI auto CreateSimulationParticipant(
     std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig, const std::string& participantName,
-    const uint32_t domainId, cfg::Config config) -> std::unique_ptr<mw::IComAdapter>;
+    bool isSynchronized, const uint32_t domainId, cfg::Config config) -> std::unique_ptr<mw::IComAdapter>;
 
 } // namespace ib

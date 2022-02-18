@@ -6,7 +6,10 @@
 
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/mw/logging/LoggingDatatypes.hpp"
-#include "ib/cfg/Config.hpp"
+
+#include "Configuration.hpp"
+
+//#include "ib/cfg/Config.hpp"
 
 namespace spdlog {
 class logger;
@@ -24,7 +27,7 @@ class Logger : public ILogger
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    Logger(const std::string& participantName, cfg::Logger config);
+    Logger(const std::string& participantName, cfg::v1::datatypes::Logging config);
 
     // ----------------------------------------
     // Public interface methods
@@ -53,7 +56,7 @@ protected:
 private:
     // ----------------------------------------
     // Private members
-    cfg::Logger _config;
+    cfg::v1::datatypes::Logging _config;
 
     std::shared_ptr<spdlog::logger> _logger;
     std::shared_ptr<spdlog::sinks::sink> _ibRemoteSink;

@@ -12,10 +12,19 @@ namespace ib {
 namespace sim {
 namespace rpc {
 
-RpcClient::RpcClient(mw::IComAdapterInternal* comAdapter, cfg::RpcPort config, mw::sync::ITimeProvider* timeProvider, CallReturnHandler handler)
-    : _comAdapter{ comAdapter }, _timeProvider{ timeProvider }, _handler{ std::move(handler) }, _logger{ comAdapter->GetLogger() }
+RpcClient::RpcClient(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+                     const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
+                     const std::map<std::string, std::string>& labels, const std::string& clientUUID,
+                     CallReturnHandler handler)
+    : _comAdapter{comAdapter}
+    , _timeProvider{timeProvider}
+    , _functionName{functionName}
+    , _exchangeFormat{exchangeFormat}
+    , _labels{labels}
+    , _clientUUID{clientUUID}
+    , _handler{std::move(handler)}
+    , _logger{comAdapter->GetLogger()}
 {
-    _config = std::move(config);
 }
 
 
@@ -44,7 +53,7 @@ void RpcClient::RegisterServiceDiscovery()
 
             auto clientUUID = getVal(mw::service::supplKeyRpcServerInternalClientUUID);
 
-            if (clientUUID == _config.clientUUID)
+            if (clientUUID == _clientUUID)
             {
                 if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated)
                 {
@@ -56,11 +65,6 @@ void RpcClient::RegisterServiceDiscovery()
                 }
             }
         });
-}
-
-auto RpcClient::Config() const -> const cfg::RpcPort&
-{
-    return _config;
 }
 
 IRpcCallHandle* RpcClient::Call(std::vector<uint8_t> data)

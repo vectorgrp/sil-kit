@@ -11,10 +11,17 @@ namespace ib {
 namespace sim {
 namespace rpc {
 
-RpcServer::RpcServer(mw::IComAdapterInternal* comAdapter, cfg::RpcPort config, mw::sync::ITimeProvider* timeProvider, CallProcessor handler)
-  : _comAdapter{comAdapter}, _timeProvider{timeProvider}, _handler{std::move(handler)}, _logger{ comAdapter->GetLogger() }
+RpcServer::RpcServer(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+                     const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
+                     const std::map<std::string, std::string>& labels, CallProcessor handler)
+    : _comAdapter{comAdapter}
+    , _timeProvider{timeProvider}
+    , _functionName{functionName}
+    , _exchangeFormat{exchangeFormat}
+    , _labels{labels}
+    , _handler{std::move(handler)}
+    , _logger{comAdapter->GetLogger()}
 {
-    _config = std::move(config);
 }
 
 void RpcServer::RegisterServiceDiscovery()
@@ -48,19 +55,14 @@ void RpcServer::RegisterServiceDiscovery()
                 std::map<std::string, std::string> clientLabels =
                     ib::cfg::Deserialize<std::map<std::string, std::string>>(labelsStr);
 
-                if (functionName == _config.name && Match(clientExchangeFormat, _config.exchangeFormat)
-                    && MatchLabels(clientLabels, _config.labels))
+                if (functionName == _functionName && Match(clientExchangeFormat, _exchangeFormat)
+                    && MatchLabels(clientLabels, _labels))
                 {
                     AddInternalRpcServer(clientUUID, clientExchangeFormat, clientLabels);
                 }
 
             }
         });
-}
-
-auto RpcServer::Config() const -> const cfg::RpcPort&
-{
-    return _config;
 }
 
 void RpcServer::SubmitResult(IRpcCallHandle* callHandle, std::vector<uint8_t> resultData)
@@ -84,7 +86,7 @@ void RpcServer::AddInternalRpcServer(const std::string& clientUUID, RpcExchangeF
                                      const std::map<std::string, std::string>& clientLabels)
 {
     auto internalRpcServer = dynamic_cast<RpcServerInternal*>(_comAdapter->CreateRpcServerInternal(
-         _config.name, clientUUID, joinedExchangeFormat, clientLabels, _handler, this));
+         _functionName, clientUUID, joinedExchangeFormat, clientLabels, _handler, this));
     _internalRpcServers.push_back(internalRpcServer);
 }
 

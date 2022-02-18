@@ -31,11 +31,12 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 class IbController
 {
 public:
-    IbController(IComAdapter* comAdapter, cfg::Config ibConfig)
+    IbController(IComAdapter* comAdapter, cfg::Config ibConfig, const std::vector<std::string>& expectedParticipantNames)
         : ibConfig{std::move(ibConfig)}
     {
         _controller = comAdapter->GetSystemController();
         _monitor = comAdapter->GetSystemMonitor();
+        _monitor->SetSynchronizedParticipants(expectedParticipantNames);
 
         _monitor->RegisterSystemStateHandler(
             [this](SystemState newState) {
@@ -174,7 +175,7 @@ int main(int argc, char** argv)
 {
     if (argc < 2)
     {
-        std::cerr << "Missing arguments! Start demo with: " << argv[0] << " <IbConfig.json> [domainId]" << std::endl;
+        std::cerr << "Missing arguments! Start demo with: " << argv[0] << "<ibConfig> <domainId> <ParticipantNames>" << std::endl;
         return -1;
     }
     
@@ -184,9 +185,12 @@ int main(int argc, char** argv)
         std::string participantName{"SystemController"};
 
         uint32_t domainId = 42;
-        if (argc >= 3)
+        domainId = static_cast<uint32_t>(std::stoul(argv[2]));
+
+        std::vector<std::string> expectedParticipantNames;
+        for (int i = 3; i < argc; i++)
         {
-            domainId = static_cast<uint32_t>(std::stoul(argv[2]));
+            expectedParticipantNames.push_back(argv[i]);
         }
 
         auto ibConfig = ib::cfg::Config::FromJsonFile(jsonFilename);
@@ -194,7 +198,7 @@ int main(int argc, char** argv)
         std::cout << "Creating SystemController for IB domain=" << domainId << std::endl;
         auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
 
-        IbController ibController(comAdapter.get(), ibConfig);
+        IbController ibController(comAdapter.get(), ibConfig, expectedParticipantNames);
 
         // Set numRestarts to values larger than zero to test the restart functionality.
         int numRestarts = 0;

@@ -373,7 +373,7 @@ int main(int argc, char** argv)
   }
 
   ib_ReturnCode returnCode;
-  returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, domainId);
+  returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, ib_True, domainId);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
     printf("ib_SimulationParticipant_Create => %s\n", ib_GetLastErrorString());

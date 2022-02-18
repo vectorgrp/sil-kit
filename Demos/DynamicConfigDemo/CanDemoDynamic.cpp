@@ -108,7 +108,7 @@ int main(int argc, char** argv)
         std::shared_ptr<ib::cfg::IParticipantConfiguration> dynamicConfig =
             ib::cfg::ReadParticipantConfigurationFromYamlString(dummyPath);
         auto comAdapter =
-            ib::CreateSimulationParticipant(std::move(dynamicConfig), participantName, domainId, ibConfig);
+            ib::CreateSimulationParticipant(std::move(dynamicConfig), participantName, true, domainId, ib::cfg::Config{});
 
         auto* logger = comAdapter->GetLogger();
         auto* participantController = comAdapter->GetParticipantController();

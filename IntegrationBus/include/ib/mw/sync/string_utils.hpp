@@ -23,8 +23,7 @@ inline std::string to_string(SystemCommand::Kind command);
 inline std::string to_string(const ParticipantCommand& command);
 inline std::string to_string(const SystemCommand& command);
 inline std::string to_string(const ParticipantStatus& status);
-
-
+inline std::string to_string(const ExpectedParticipants& participantNames);
 
 inline std::ostream& operator<<(std::ostream& out, ParticipantState state);
 inline std::ostream& operator<<(std::ostream& out, SystemState state);
@@ -34,6 +33,7 @@ inline std::ostream& operator<<(std::ostream& out, SystemCommand::Kind command);
 inline std::ostream& operator<<(std::ostream& out, const ParticipantCommand& command);
 inline std::ostream& operator<<(std::ostream& out, const SystemCommand& command);
 inline std::ostream& operator<<(std::ostream& out, const ParticipantStatus& status);
+inline std::ostream& operator<<(std::ostream& out, const ExpectedParticipants& participantNames);
 
 // ================================================================================
 //  Inline Implementations
@@ -247,6 +247,25 @@ std::ostream& operator<<(std::ostream& out, const ParticipantStatus& status)
         << ", Reason=" << status.enterReason
         << ", Time=" << timeString
         << "}";
+
+    return out;
+}
+
+std::string to_string(const ExpectedParticipants& participants)
+{
+    std::stringstream outStream;
+    outStream << participants;
+    return outStream.str();
+}
+
+std::ostream& operator<<(std::ostream& out, const ExpectedParticipants& participants)
+{
+    out << "sync::ExpectedParticipants{";
+    for (auto&& p : participants.names)
+    {
+        out << p << ", ";
+    }
+    out << "}";
 
     return out;
 }

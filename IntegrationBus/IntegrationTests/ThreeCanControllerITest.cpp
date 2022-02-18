@@ -3,7 +3,6 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
 
@@ -57,19 +56,7 @@ protected:
             testMessages[index].expectedData = messageBuilder.str();
         }
 
-        ib::cfg::ConfigBuilder builder{"TestConfig"};
-
-        builder.SimulationSetup()
-            .AddParticipant("CanWriter")
-            .AddCan("CAN1").WithLink("CAN1");
-        builder.SimulationSetup()
-            .AddParticipant("CanReader1")
-            .AddCan("CAN1").WithLink("CAN1");
-        builder.SimulationSetup()
-            .AddParticipant("CanReader2")
-            .AddCan("CAN1").WithLink("CAN1");
-
-        ibConfig = builder.Build();
+        syncParticipantNames = { "CanWriter", "CanReader1", "CanReader2" };
     }
 
     void SetupWriter(ib::test::SimParticipant* writer)
@@ -128,11 +115,10 @@ protected:
         });
     }
 
-    void ExecuteTest(ib::cfg::Middleware middleware)
+    void ExecuteTest()
     {
-        ibConfig.middlewareConfig.activeMiddleware = middleware;
         const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
-        ib::test::SimTestHarness testHarness(ibConfig, domainId);
+        ib::test::SimTestHarness testHarness(syncParticipantNames, domainId);
 
         auto* canWriter = testHarness.GetParticipant("CanWriter");
         SetupWriter(canWriter);
@@ -174,7 +160,7 @@ protected:
     };
 
 protected:
-    ib::cfg::Config ibConfig;
+    std::vector<std::string> syncParticipantNames;
 
     std::vector<TestMessage> testMessages;
 
@@ -185,9 +171,9 @@ protected:
     Callbacks callbacks;
 };
 
-TEST_F(ThreeCanControllerITest, test_can_ack_callbacks_vasio)
+TEST_F(ThreeCanControllerITest, test_can_ack_callbacks)
 {
-    ExecuteTest(ib::cfg::Middleware::VAsio);
+    ExecuteTest();
 }
 
 } // anonymous namespace

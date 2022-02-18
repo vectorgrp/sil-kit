@@ -6,7 +6,8 @@
 #include <future>
 
 #include "CreateComAdapter.hpp"
-#include "ib/cfg/ConfigBuilder.hpp"
+#include "ParticipantConfiguration.hpp"
+
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
 
@@ -36,25 +37,6 @@ class CatchExceptionsInCallbacksITest : public testing::Test
 protected:
     CatchExceptionsInCallbacksITest()
     {
-        ib::cfg::ConfigBuilder cfgBuilder("CatchMeIfYouCanTestConfig");
-        auto&& simulationSetup = cfgBuilder.SimulationSetup();
-        simulationSetup.AddParticipant("Sender")
-            ->AddGenericPublisher("CrashTopic");
-        simulationSetup.AddParticipant("Receiver")
-            ->AddGenericSubscriber("CrashTopic");
-
-        ibConfig = cfgBuilder.Build();
-    }
-
-    void Subscribe()
-    {
-        subscriber->SetReceiveMessageHandler(
-            [this](auto* /*subscriber*/, const std::vector<uint8_t>& /*data*/)
-            {
-                this->testOk.set_value(true);
-                throw std::runtime_error{"CrashTest"};
-            }
-        );
     }
 
     void Publish()
@@ -63,10 +45,22 @@ protected:
         publisher->Publish(std::move(dummyPayload));
     }
 
+    ib::cfg::Config DummyCfg(const std::string& participantName, bool sync)
+    {
+        ib::cfg::Config dummyCfg;
+        ib::cfg::Participant dummyParticipant;
+        if (sync)
+        {
+            dummyParticipant.participantController = ib::cfg::ParticipantController{};
+        }
+        dummyParticipant.name = participantName;
+        dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
+        return dummyCfg;
+    }
+
 protected:
-    ib::cfg::Config ibConfig;
-    ib::sim::generic::IGenericPublisher* publisher{nullptr};
-    ib::sim::generic::IGenericSubscriber* subscriber{nullptr};
+    ib::sim::data::IDataPublisher* publisher{nullptr};
+    ib::sim::data::IDataSubscriber* subscriber{nullptr};
     std::promise<bool> testOk;
 };
 
@@ -76,21 +70,29 @@ TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
 {
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
-    auto registry = std::make_unique<VAsioRegistry>(ibConfig);
+    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::vasio::v1::CreateDummyIMiddlewareConfiguration());
     registry->ProvideDomain(domainId);
 
-    auto pubComAdapter = CreateVAsioComAdapterImpl(ibConfig, "Sender");
+    std::string participantNameSender = "Sender";
+    auto pubComAdapter = ib::mw::CreateSimulationParticipantImpl(
+        ib::cfg::CreateDummyConfiguration(), participantNameSender, false, DummyCfg(participantNameSender, false));
     pubComAdapter->joinIbDomain(domainId);
 
-    auto subComAdapter = CreateVAsioComAdapterImpl(ibConfig, "Receiver");
+    std::string participantNameReceiver = "Receiver";
+    auto subComAdapter = ib::mw::CreateSimulationParticipantImpl(
+        ib::cfg::CreateDummyConfiguration(), participantNameReceiver, false, DummyCfg(participantNameReceiver, false));
     subComAdapter->joinIbDomain(domainId);
 
-    publisher = pubComAdapter->CreateGenericPublisher("CrashTopic");
-    subscriber = subComAdapter->CreateGenericSubscriber("CrashTopic");
+    publisher = pubComAdapter->CreateDataPublisher("CrashTopic", ib::sim::data::DataExchangeFormat{}, {}, 0);
+    subscriber = subComAdapter->CreateDataSubscriber(
+        "CrashTopic", ib::sim::data::DataExchangeFormat{}, {},
+        [this](auto* /*subscriber*/, const std::vector<uint8_t>& /*data*/) {
+            this->testOk.set_value(true);
+            throw std::runtime_error{"CrashTest"};
+        },
+        nullptr);
 
-    Subscribe();
     std::this_thread::sleep_for(500ms);
-
     std::thread publishThread{[this] { this->Publish(); }};
 
     auto&& future = testOk.get_future();

@@ -30,6 +30,7 @@ add_definitions(-DEXPORT_IntegrationBusAPI)
 target_link_libraries(IbRegistry
     IbMwVAsio
     IbConfig_deprecated
+    IbConfiguration
 )
 install(TARGETS IbRegistry
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}
@@ -44,6 +45,7 @@ add_library(vib-registry
 target_link_libraries(vib-registry
     PRIVATE
         IbConfig_deprecated
+        IbConfiguration
         IbMwVAsio
         IbVersion
         IbExtensions
@@ -55,6 +57,7 @@ set_target_properties(vib-registry PROPERTIES
      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
      ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
+
 add_vib_test(
     TestIbRegistryLib
     SOURCES
@@ -65,6 +68,7 @@ add_vib_test(
         IbFilesystem
         IntegrationBus
 )
+
 if(${IB_BUILD_TESTS})
     target_include_directories(TestIbRegistryLib
         PRIVATE ../../IntegrationBus/IntegrationTests
@@ -74,7 +78,7 @@ if(${IB_BUILD_TESTS})
     # Otherwise we cannot test the extension search path in the configuration
     set_target_properties(TestIbRegistryLib PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_BINARY_DIR}"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     )
     set_tests_properties(TestIbRegistryLib PROPERTIES
         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"

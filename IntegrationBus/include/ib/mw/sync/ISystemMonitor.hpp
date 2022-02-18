@@ -31,6 +31,10 @@ public:
     using ParticipantStatusHandlerT = std::function<void(const ParticipantStatus&)>;
 
 public:
+
+    /* brief Set the names of all synchronized participants */
+     virtual void SetSynchronizedParticipants(const std::vector<std::string>& participantNames) = 0;
+
     /*! \brief Register a callback for ::SystemState changes
      *
      * If the current SystemState is not \ref SystemState::Invalid,

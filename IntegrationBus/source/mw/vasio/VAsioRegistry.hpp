@@ -6,6 +6,7 @@
 #include "VAsioConnection.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/extensions/IIbRegistry.hpp"
+#include "vasio/MiddlewareConfiguration.hpp"
 
 namespace ib {
 namespace mw {
@@ -17,7 +18,7 @@ public:
     VAsioRegistry() = delete;
     VAsioRegistry(const VAsioRegistry&) = delete;
     VAsioRegistry(VAsioRegistry&&) = delete;
-    VAsioRegistry(ib::cfg::Config cfg);
+    VAsioRegistry(std::shared_ptr<ib::cfg::vasio::IMiddlewareConfiguration> cfg);
 
     void ProvideDomain(uint32_t domainId) override;
 
@@ -38,7 +39,6 @@ private:
     // ----------------------------------------
     // private methods
     void OnParticipantAnnouncement(IVAsioPeer* from, const ParticipantAnnouncement& announcement);
-    bool IsExpectedParticipant(const ib::mw::VAsioPeerUri& peerInfo);
     auto FindConnectedPeer(const std::string& name) const->std::vector<ConnectedParticipantInfo>::const_iterator;
     void SendKnownParticipants(IVAsioPeer* peer);
     void OnPeerShutdown(IVAsioPeer* peer);
@@ -53,7 +53,7 @@ private:
     std::function<void()> _onAllParticipantsConnected;
     std::function<void()> _onAllParticipantsDisconnected;
 
-    ib::cfg::VAsio::Config _vasioConfig;
+    std::shared_ptr<ib::cfg::vasio::v1::MiddlewareConfiguration> _vasioConfig;
     VAsioConnection _connection;
 };
 

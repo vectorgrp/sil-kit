@@ -1,6 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "SystemMonitor.hpp"
+#include "IServiceDiscovery.hpp"
+#include "ParticipantController.hpp"
 
 #include <algorithm>
 #include <ctime>
@@ -12,20 +14,92 @@ namespace ib {
 namespace mw {
 namespace sync {
 
-SystemMonitor::SystemMonitor(IComAdapterInternal* comAdapter, cfg::SimulationSetup simulationSetup)
+SystemMonitor::SystemMonitor(IComAdapterInternal* comAdapter)
     : _comAdapter{comAdapter}
-    , _simulationSetup{std::move(simulationSetup)}
     , _logger{comAdapter->GetLogger()}
 {
-    for (auto&& participant : _simulationSetup.participants)
-    {
-        if (!participant.participantController)
-            continue;
+}
 
-        _participantStatus[participant.name] = sync::ParticipantStatus{};
-        _participantStatus[participant.name].state = sync::ParticipantState::Invalid;
+// Used by e.g. IbSystemController
+void SystemMonitor::SetSynchronizedParticipants(const std::vector<std::string>& participantNames)
+{
+    ExpectedParticipants expectedParticipants{ participantNames };
+    UpdateExpectedParticipantNames(expectedParticipants);
+    //  Distribute to other SystemMonitors
+    _comAdapter->SendIbMessage(this, std::move(expectedParticipants));
+
+}
+
+const ib::mw::sync::ExpectedParticipants& SystemMonitor::GetExpectedParticipants() const
+{
+    return _expectedParticipants;
+}
+
+void SystemMonitor::ReceiveIbMessage(const IIbServiceEndpoint* from,
+                                     const sync::ExpectedParticipants& expectedParticipants)
+{
+    UpdateExpectedParticipantNames(expectedParticipants);
+}
+
+void SystemMonitor::UpdateExpectedParticipantNames(const ExpectedParticipants& expectedParticipants)
+{
+    // Prevent calling this method more than once
+    if (!_expectedParticipants.names.empty())
+    {
+        throw std::runtime_error{"Expected participant names are already set."};
+    }
+
+    _expectedParticipants.names = expectedParticipants.names;
+
+    bool anyParticipantStateReceived = false;
+    // Init new participants in status map
+    for (auto&& name : _expectedParticipants.names)
+    {
+        auto&& statusIter = _participantStatus.find(name);
+        if (statusIter == _participantStatus.end())
+        {
+            _participantStatus[name] = sync::ParticipantStatus{};
+            _participantStatus[name].state = sync::ParticipantState::Invalid;
+        }
+        else
+        {
+            anyParticipantStateReceived = true;
+        }
+    }
+
+    // Update / propagate the system state in case ParticipantStatus have been received already
+    if (anyParticipantStateReceived)
+    {
+        auto oldSystemState = _systemState;
+        for (auto&& name : _expectedParticipants.names)
+        {
+            UpdateSystemState(_participantStatus[name]);
+        }
+        if (oldSystemState != _systemState)
+        {
+            for (auto&& handler : _systemStateHandlers)
+                handler(_systemState);
+        }
+    }
+
+    // Add expected participants in sync policy of participantController
+    // if this participant is synchronized and found in expectedNames
+    if (_comAdapter->IsSynchronized())
+    {
+        auto&& nameIter =
+            std::find(_expectedParticipants.names.begin(), _expectedParticipants.names.end(), _comAdapter->GetParticipantName());
+        if (nameIter != _expectedParticipants.names.end())
+        {
+            auto* participantController = dynamic_cast<ib::mw::sync::ParticipantController*>(_comAdapter->GetParticipantController());
+            if (participantController)
+            {
+                participantController->AddSynchronizedParticipants(expectedParticipants);
+            }
+        }
     }
 }
+
+
 
 void SystemMonitor::RegisterSystemStateHandler(SystemStateHandlerT handler)
 {
@@ -73,12 +147,12 @@ auto SystemMonitor::SystemState() const -> sync::SystemState
     return _systemState;
 }
 
-auto SystemMonitor::ParticipantStatus(const std::string& participantId) const -> const sync::ParticipantStatus&
+auto SystemMonitor::ParticipantStatus(const std::string& participantName) const -> const sync::ParticipantStatus&
 {
-    auto&& statusIter = _participantStatus.find(participantId);
+    auto&& statusIter = _participantStatus.find(participantName);
     if (statusIter == _participantStatus.end())
     {
-        throw std::runtime_error{"Unknown ParticipantId"};
+        throw std::runtime_error{"Unknown participantName"};
     }
 
     return statusIter->second;
@@ -86,40 +160,45 @@ auto SystemMonitor::ParticipantStatus(const std::string& participantId) const ->
 
 void SystemMonitor::ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantStatus& newParticipantStatus)
 {
-    auto participantId = newParticipantStatus.participantName;
+    auto participantName = newParticipantStatus.participantName;
 
-    // TODO VIB-560: Need to figure out what the system monitor is supposed to do in the new configuration concept
-    auto&& statusIter = _participantStatus.find(participantId);
-    if (statusIter == _participantStatus.end())
-    {
-        _logger->Warn("Received ParticipantStatus from unknown ParticipantID={}", participantId);
-        return;
-    }
-
-    auto oldParticipantState = _participantStatus[participantId].state;
-    auto oldSystemState = _systemState;
-
+    // Validation
+    auto oldParticipantState = _participantStatus[participantName].state;
+    ValidateParticipantStatusUpdate(newParticipantStatus, oldParticipantState);
     if (oldParticipantState == sync::ParticipantState::Shutdown)
     {
-        _logger->Debug("Ignoring ParticipantState update from participant {} to ParticipantState::{} because participant is already in terminal state ParticipantState::Shutdown.",
-            newParticipantStatus.participantName, newParticipantStatus.state);
+        _logger->Debug("Ignoring ParticipantState update from participant {} to ParticipantState::{} because "
+                       "participant is already in terminal state ParticipantState::Shutdown.",
+                       newParticipantStatus.participantName, newParticipantStatus.state);
         return;
     }
 
-    _participantStatus[participantId] = newParticipantStatus;
-    ValidateParticipantStatusUpdate(newParticipantStatus, oldParticipantState);
-    UpdateSystemState(newParticipantStatus);
+    // Update status map
+    _participantStatus[participantName] = newParticipantStatus;
 
-    for (auto&& handler : _participantStatusHandlers)
-        handler(newParticipantStatus);
-
-    for (auto&& handler : _participantStateHandlers)
-        handler(newParticipantStatus.state);
-
-    if (oldSystemState != _systemState)
+    // On new participant state
+    if (oldParticipantState != newParticipantStatus.state)
     {
-        for (auto&& handler : _systemStateHandlers)
-            handler(_systemState);
+        // Fire status / state handler
+        for (auto&& handler : _participantStatusHandlers)
+            handler(newParticipantStatus);
+
+        for (auto&& handler : _participantStateHandlers)
+            handler(newParticipantStatus.state);
+
+        // Propagate the system state for known participants, ignore otherwise
+        auto&& nameIter = std::find(_expectedParticipants.names.begin(), _expectedParticipants.names.end(), participantName);
+        if (nameIter != _expectedParticipants.names.end())
+        {
+            auto oldSystemState = _systemState;
+            UpdateSystemState(newParticipantStatus);
+
+            if (oldSystemState != _systemState)
+            {
+                for (auto&& handler : _systemStateHandlers)
+                    handler(_systemState);
+            }
+        }
     }
 }
 

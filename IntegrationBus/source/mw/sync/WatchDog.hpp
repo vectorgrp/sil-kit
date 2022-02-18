@@ -6,6 +6,8 @@
 #include <future>
 #include <chrono>
 
+#include "ParticipantConfiguration.hpp"
+
 namespace ib {
 namespace mw {
 namespace sync {
@@ -15,7 +17,7 @@ class WatchDog
 public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
-    WatchDog(std::chrono::milliseconds warnTimeout, std::chrono::milliseconds errorTimeout);
+    WatchDog(const cfg::v1::datatypes::HealthCheck& healthCheckConfig);
     ~WatchDog();
 
 public:

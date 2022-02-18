@@ -1,5 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
+#include "ib/cfg/vasio/IMiddlewareConfiguration.hpp"
 #include "SignalHandler.hpp"
 #include "VAsioRegistry.hpp"
 
@@ -36,10 +37,12 @@ int main(int argc, char** argv) try
         }
     }
 
-    auto ibConfig = ib::cfg::Config::FromJsonFile(jsonFilename);
+    // TODO: use ibConfig instead of dummyCfg when parsing ready
+    //auto ibConfig = ib::cfg::vasio::ReadMiddlewareConfigurationFromJsonFile(jsonFilename);
+    auto dummyCfg = ib::cfg::vasio::v1::CreateDummyIMiddlewareConfiguration();
 
     std::cout << "Creating VAsioRegistry for IB domain=" << domainId << std::endl;
-    VAsioRegistry registry{ibConfig};
+    VAsioRegistry registry{ dummyCfg };
     registry.ProvideDomain(domainId);
 
     if (useSignalHandler)

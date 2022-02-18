@@ -29,20 +29,11 @@ TEST(TargetedMessagingITest, targeted_messaging)
 {
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
-    // Create a minimal IbConfig
-    ib::cfg::ConfigBuilder builder{"TestConfig"};
-
-    builder.ConfigureVAsio();
-
-    builder.SimulationSetup().AddParticipant("Sender").AddCan("CAN1");
-    builder.SimulationSetup().AddParticipant("TargetReceiver").AddCan("CAN1");
-    builder.SimulationSetup().AddParticipant("OtherReceiver").AddCan("CAN1");
-
-    auto ibConfig = builder.Build();
+    std::vector<std::string> syncParticipantNames{ "Sender", "TargetReceiver" , "OtherReceiver" };
 
     auto receiveCount = 0;
 
-    ib::test::SimTestHarness testHarness(ibConfig, domainId);
+    ib::test::SimTestHarness testHarness(syncParticipantNames, domainId);
 
     auto* senderCom = dynamic_cast<ib::mw::IComAdapterInternal*>(testHarness.GetParticipant("Sender")->ComAdapter());
 

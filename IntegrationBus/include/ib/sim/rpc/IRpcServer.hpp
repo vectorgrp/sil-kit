@@ -4,8 +4,6 @@
 
 #include <functional>
 
-#include "ib/cfg/Config.hpp"
-
 #include "RpcDatatypes.hpp"
 
 namespace ib {
@@ -18,10 +16,6 @@ class IRpcServer
 
   public:
     virtual ~IRpcServer() = default;
-
-    /*! \brief Get the config struct used to setup this IRpcServer
-     */
-    virtual auto Config() const -> const cfg::RpcPort& = 0;
 
     /*! \brief Answers an already received call from remote with arbitrary data
     * 

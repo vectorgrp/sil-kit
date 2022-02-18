@@ -29,25 +29,6 @@ add_vib_test(FTestEthWithoutSync
       IntegrationBus
 )
 
-add_vib_test(ITestGenericMessages
-    SOURCES
-      GenericMessagesITest.cpp
-    LIBS
-      IbMwComAdapter
-      ${itest_extra_libs}
-    CONFIGS
-      GenericMessagesITest_IbConfig.json
-)
-
-add_vib_test(ITestLargeMessages
-    SOURCES
-        LargeMessagesITest.cpp
-    LIBS
-        IbMwComAdapter
-        ${itest_extra_libs}
-    CONFIGS
-        LargeMessagesITest_IbConfig.json
-)
 add_vib_test(ITestThreeCanController
     SOURCES
       ThreeCanControllerITest.cpp
@@ -79,6 +60,7 @@ add_vib_test(ITestHopOnHopOff
       HopOnHopOffITest.cpp
     LIBS
         IntegrationBus
+        IbConfiguration
 )
  
 add_vib_test(ITestDataPubSub
@@ -86,6 +68,7 @@ add_vib_test(ITestDataPubSub
       DataPubSubITest.cpp
     LIBS
         IntegrationBus
+        IbConfiguration
 )
 
 add_vib_test(ITestTargetedMessaging
@@ -103,6 +86,7 @@ add_vib_test(ITestRpc
       RpcITest.cpp
     LIBS
       IntegrationBus
+      IbConfiguration
 )
 
 if(IB_MW_ENABLE_VASIO)

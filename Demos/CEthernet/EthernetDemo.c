@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
     }
 
     ib_ReturnCode returnCode;
-    returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, domainId);
+    returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, ib_False, domainId);
     if (returnCode) 
     {
         printf("%s\n", ib_GetLastErrorString());

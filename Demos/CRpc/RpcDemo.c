@@ -81,7 +81,7 @@ void CallHandler(void* context, ib_Rpc_Server* server, const ib_Rpc_CallHandle* 
         tmp[i] = argumentData->data[i] + (uint8_t)100;
     }
 
-    ib_ByteVector returnData = { tmp, argumentData->size };
+    const ib_ByteVector returnData = { tmp, argumentData->size };
     ib_Rpc_Server_SubmitResult(server, callHandle, &returnData);
     free(tmp);
 }
@@ -176,9 +176,9 @@ int main(int argc, char* argv[])
     {
         domainId = argv[3]; 
     }
-
+    
     ib_ReturnCode returnCode;
-    returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, domainId);
+    returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, ib_False, domainId);
     if (returnCode) {
         printf("%s\n", ib_GetLastErrorString());
         return 2;

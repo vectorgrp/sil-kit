@@ -70,7 +70,18 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantStatus& statu
            >> status.refreshTime;
     return buffer;
 }
-    
+
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const ExpectedParticipants& participants)
+{
+    buffer << participants.names;
+    return buffer;
+}
+
+inline MessageBuffer& operator>>(MessageBuffer& buffer, ExpectedParticipants& participants)
+{
+    buffer >> participants.names;
+    return buffer;
+}
 
 } // namespace sync    
 } // namespace mw

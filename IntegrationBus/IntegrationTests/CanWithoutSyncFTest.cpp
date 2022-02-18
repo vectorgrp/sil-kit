@@ -42,24 +42,9 @@ protected:
     CanWithoutSyncFTest()
     {
         _domainId = static_cast<uint32_t>(GetTestPid());
-        SetupConfig();
         SetupTestData();
     }
 
-    void SetupConfig()
-    {
-        ib::cfg::ConfigBuilder builder{ "TestConfig" };
-
-        builder.SimulationSetup().
-            AddParticipant("CanWriter").
-            AddCan("CAN1").WithLink("CAN1");
-
-        builder.SimulationSetup().
-            AddParticipant("CanReader").
-            AddCan("CAN1").WithLink("CAN1");
-
-        _ibConfig = builder.Build();
-    }
 
     void SetupTestData()
     {
@@ -95,7 +80,7 @@ protected:
 
         auto dynamicConfiguration = ib::cfg::CreateDummyConfiguration();
 
-        auto comAdapter = ib::CreateSimulationParticipant(dynamicConfiguration, "CanWriter", _domainId, _ibConfig);
+        auto comAdapter = ib::CreateSimulationParticipant(dynamicConfiguration, "CanWriter", false, _domainId, DummyCfg("CanWriter", false));
         auto* controller = comAdapter->CreateCanController("CAN1", "CAN1");
 
         controller->RegisterTransmitStatusHandler(
@@ -129,7 +114,7 @@ protected:
 
         auto dynamicConfiguration = ib::cfg::CreateDummyConfiguration();
 
-        auto comAdapter = ib::CreateSimulationParticipant(dynamicConfiguration, "CanReader", _domainId, _ibConfig);
+        auto comAdapter = ib::CreateSimulationParticipant(dynamicConfiguration, "CanReader", false, _domainId, DummyCfg("CanReader",false));
         auto* controller = comAdapter->CreateCanController("CAN1", "CAN1");
 
         controller->RegisterReceiveMessageHandler(
@@ -164,6 +149,19 @@ protected:
         }
     }
 
+    ib::cfg::Config DummyCfg(const std::string& participantName, bool sync)
+    {
+        ib::cfg::Config dummyCfg;
+        ib::cfg::Participant dummyParticipant;
+        if (sync)
+        {
+            dummyParticipant.participantController = ib::cfg::ParticipantController{};
+        }
+        dummyParticipant.name = participantName;
+        dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
+        return dummyCfg;
+    }
+
     struct Testmessage
     {
         ib::sim::can::CanMessage expectedMsg;
@@ -173,7 +171,6 @@ protected:
     };
 
     uint32_t _domainId;
-    ib::cfg::Config _ibConfig;
     std::vector<Testmessage> _testMessages;
     std::promise<void> _canReaderRegisteredPromise;
     std::promise<void> _canReaderAllReceivedPromise;
@@ -182,9 +179,8 @@ protected:
 
 TEST_F(CanWithoutSyncFTest, can_communication_no_simulation_flow_vasio)
 {
-    auto registry = std::make_unique<ib::mw::VAsioRegistry>(_ibConfig);
+    auto registry = std::make_unique<ib::mw::VAsioRegistry>(ib::cfg::vasio::v1::CreateDummyIMiddlewareConfiguration());
     registry->ProvideDomain(_domainId);
-    _ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
     ExecuteTest();
 }
 

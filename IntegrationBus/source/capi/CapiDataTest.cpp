@@ -34,22 +34,12 @@ MATCHER_P(PayloadMatcher, controlPayload, "matches data payloads by their conten
 class MockDataPublisher : public ib::sim::data::IDataPublisher
 {
 public:
-    auto Config() const -> const ib::cfg::DataPort&
-    {
-        static const ib::cfg::DataPort portCfg{};
-        return portCfg;
-    };
     MOCK_METHOD1(Publish, void(std::vector<uint8_t> data));
     virtual void Publish(const uint8_t* data, std::size_t size){};
 };
 class MockDataSubscriber : public ib::sim::data::IDataSubscriber
 {
 public:
-    auto Config() const -> const ib::cfg::DataPort&
-    {
-        static const ib::cfg::DataPort portCfg{};
-        return portCfg;
-    };
     MOCK_METHOD1(SetDefaultReceiveMessageHandler, void(DataHandlerT callback));
     MOCK_METHOD((void), RegisterSpecificDataHandler,
                 (const DataExchangeFormat& dataExchangeFormat, (const std::map<std::string, std::string>& labels),

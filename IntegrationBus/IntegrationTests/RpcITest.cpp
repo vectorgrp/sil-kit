@@ -8,15 +8,13 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "ib/extensions/CreateExtension.hpp"
+
 #include "ib/IntegrationBus.hpp"
 #include "ib/cfg/string_utils.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/sim/all.hpp"
-
-#include "ib/cfg/Config.hpp"
-#include "ib/cfg/ConfigBuilder.hpp"
-#include "ib/extensions/CreateExtension.hpp"
-
+#include "ParticipantConfiguration.hpp"
 
 namespace {
 
@@ -241,11 +239,9 @@ protected:
         switch (newState)
         {
         case SystemState::Idle:
-            for (auto&& participant : ibConfig.simulationSetup.participants)
+            for (auto&& name : syncParticipantNames)
             {
-                if (participant.name == systemMasterName)
-                    continue;
-                systemMaster.systemController->Initialize(participant.name);
+                systemMaster.systemController->Initialize(name);
             }
             break;
 
@@ -276,7 +272,8 @@ protected:
     {
         try
         {
-            participant.comAdapter = ib::CreateComAdapter(ibConfig, participant.name, domainId);
+            participant.comAdapter = ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), participant.name, sync, domainId,
+                                                                     DummyCfg(participant.name, sync));
 
             IParticipantController* participantController;
             if (sync)
@@ -441,7 +438,9 @@ protected:
     {
         try
         {
-            participant.comAdapter = ib::CreateComAdapter(ibConfig, participant.name, domainId);
+            participant.comAdapter = ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), participant.name, sync, domainId,
+                                                                     DummyCfg(participant.name, sync));
+
             IParticipantController* participantController;
             if (sync)
             {
@@ -539,11 +538,12 @@ protected:
 
     }
 
-    void RunVasioRegistry(uint32_t domainId)
+    void RunRegistry(uint32_t domainId)
     {
         try
         {
-            registry = ib::extensions::CreateIbRegistry(ibConfig);
+            ib::cfg::Config dummyCfg;
+            registry = ib::extensions::CreateIbRegistry(dummyCfg);
             registry->ProvideDomain(domainId);
         }
         catch (const Misconfiguration& error)
@@ -564,9 +564,13 @@ protected:
     {
         try
         {
-            systemMaster.comAdapter = ib::CreateComAdapter(ibConfig, systemMasterName, domainId);
+            systemMaster.comAdapter = ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), systemMasterName,false, domainId,
+                                                                      DummyCfg(systemMasterName, false));
+
             systemMaster.systemController = systemMaster.comAdapter->GetSystemController();
             systemMaster.systemMonitor = systemMaster.comAdapter->GetSystemMonitor();
+
+            systemMaster.systemMonitor->SetSynchronizedParticipants(syncParticipantNames);
 
             systemMaster.systemMonitor->RegisterSystemStateHandler(
                 [this](SystemState newState) { SystemStateHandler(newState); });
@@ -650,11 +654,20 @@ protected:
     void SetupSystem(uint32_t domainId, bool sync, std::vector<ClientParticipant>& clients,
                      std::vector<ServerParticipant>& servers, Middleware middleware)
     {
-        ibConfig = BuildConfig(clients, servers, middleware, sync);
-        if (middleware == Middleware::VAsio)
+        if (sync)
         {
-            RunVasioRegistry(domainId);
+            for (auto& c : clients)
+            {
+                syncParticipantNames.push_back(c.name);
+            }
+            for (auto& s : servers)
+            {
+                syncParticipantNames.push_back(s.name);
+            }
         }
+
+        RunRegistry(domainId);
+
         if (sync)
         {
             RunSystemMaster(domainId);
@@ -723,11 +736,24 @@ protected:
         registry.reset();
     }
 
+    ib::cfg::Config DummyCfg(const std::string& participantName, bool sync)
+    {
+        ib::cfg::Config dummyCfg;
+        ib::cfg::Participant dummyParticipant;
+        if (sync)
+        {
+            dummyParticipant.participantController = ib::cfg::ParticipantController{};
+        }
+        dummyParticipant.name = participantName;
+        dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
+        return dummyCfg;
+    }
+
 protected:
-    ib::cfg::Config                              ibConfig;
+    std::vector<std::string> syncParticipantNames;
     std::unique_ptr<ib::extensions::IIbRegistry> registry;
-    SystemMaster                                 systemMaster;
-    std::vector<std::thread>                     rpcThreads;
+    SystemMaster systemMaster;
+    std::vector<std::thread> rpcThreads;
 
     const uint8_t rpcFuncIncrement = 100;
     std::chrono::milliseconds communicationTimeout{20000ms};

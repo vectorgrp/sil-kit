@@ -58,7 +58,7 @@ private:
 } // anonymous namespace
 
 
-Logger::Logger(const std::string& participantName, cfg::Logger config)
+Logger::Logger(const std::string& participantName, cfg::v1::datatypes::Logging config)
     : _config{std::move(config)}
 {
     // NB: do not create the _logger in the initializer list. If participantName is empty,
@@ -89,12 +89,12 @@ Logger::Logger(const std::string& participantName, cfg::Logger config)
 
         switch (sink.type)
         {
-        case cfg::Sink::Type::Remote:
+        case cfg::v1::datatypes::Sink::Type::Remote:
             // The remote sink is instantiated and added later together with setting up
             // all necessary connection logic to avoid segmentation errors if sth. goes wrong
             break;
 
-        case cfg::Sink::Type::Stdout:
+        case cfg::v1::datatypes::Sink::Type::Stdout:
         {
 #if _WIN32
             auto stdoutSink = std::make_shared<spdlog::sinks::stdout_sink_mt>();
@@ -105,17 +105,19 @@ Logger::Logger(const std::string& participantName, cfg::Logger config)
             _logger->sinks().emplace_back(std::move(stdoutSink));
             break;
         }
-        case cfg::Sink::Type::File:
+        case cfg::v1::datatypes::Sink::Type::File:
         {
-            auto filename = fmt::format("{}_{:%FT%H-%M-%S}.txt", sink.logname, tmBuffer);
+            //
+            auto filename = fmt::format("{}_{:%FT%H-%M-%S}.txt", sink.logName, tmBuffer);
             auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
             fileSink->set_level(log_level);
             _logger->sinks().push_back(fileSink);
         }
         }
+        
     }
 
-    _logger->flush_on(to_spdlog(_config.flush_level));
+    _logger->flush_on(to_spdlog(_config.flushLevel));
 }
 
 void Logger::Log(Level level, const std::string& msg)
@@ -156,11 +158,17 @@ void Logger::Critical(const std::string& msg)
 void Logger::RegisterRemoteLogging(const LogMsgHandlerT& handler)
 {
     auto remoteSinkRef = std::find_if(_config.sinks.begin(), _config.sinks.end(),
-        [](const cfg::Sink& sink) { return sink.type == cfg::Sink::Type::Remote; });
+        [](const cfg::v1::datatypes::Sink& sink) 
+        { 
+            return sink.type == cfg::v1::datatypes::Sink::Type::Remote;
+        });
 
-    _ibRemoteSink = std::make_shared<IbRemoteSink>(handler);
-    _ibRemoteSink->set_level(to_spdlog(remoteSinkRef->level));
-    _logger->sinks().push_back(_ibRemoteSink);
+    if (remoteSinkRef != _config.sinks.end())
+    {
+        _ibRemoteSink = std::make_shared<IbRemoteSink>(handler);
+        _ibRemoteSink->set_level(to_spdlog(remoteSinkRef->level));
+        _logger->sinks().push_back(_ibRemoteSink);
+    }
 }
 
 void Logger::DisableRemoteLogging()
@@ -189,7 +197,7 @@ void Logger::LogReceivedMsg(const LogMsg& msg)
 
         sink->log(spdlog_msg);
 
-        if (_config.flush_level <= msg.level)
+        if (_config.flushLevel <= msg.level)
             sink->flush();
     }
 }

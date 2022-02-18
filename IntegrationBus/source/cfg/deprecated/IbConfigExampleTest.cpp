@@ -51,7 +51,6 @@ protected:
         CreateLinControllers(*comAdapter, participantCfg);
         CreateEthernetControllers(*comAdapter, participantCfg);
         CreateFlexrayControllers(*comAdapter, participantCfg);
-        CreateGenericPubSub(*comAdapter, participantCfg);
         GetParticipantController(*comAdapter, participantCfg);
         GetSystemMonitor(*comAdapter, participantCfg);
         GetSystemController(*comAdapter, participantCfg);
@@ -82,17 +81,6 @@ protected:
         for (auto&& controller : participantCfg.flexrayControllers)
         {
             EXPECT_NE(comAdapter.CreateFlexrayController(controller.name), nullptr);
-        }
-    }
-    void CreateGenericPubSub(mw::IComAdapter& comAdapter, const cfg::Participant& participantCfg)
-    {
-        for (auto&& pub : participantCfg.genericPublishers)
-        {
-            EXPECT_NE(comAdapter.CreateGenericPublisher(pub.name), nullptr);
-        }
-        for (auto&& sub : participantCfg.genericSubscribers)
-        {
-            EXPECT_NE(comAdapter.CreateGenericSubscriber(sub.name), nullptr);
         }
     }
     void GetParticipantController(mw::IComAdapter& comAdapter, const cfg::Participant& /*participantCfg*/)

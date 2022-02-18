@@ -129,7 +129,7 @@ TEST_F(IbRegistryLibFixture, load_registry)
 
 //This is taken from the integration tests, we need to make sure the 
 // Registry loaded from the DLL is actually working
-TEST_F(IbRegistryLibFixture, ensure_registry_works)
+TEST_F(IbRegistryLibFixture, DISABLED_ensure_registry_works)
 {
     auto domainId = static_cast<uint32_t>(GetTestPid());
 

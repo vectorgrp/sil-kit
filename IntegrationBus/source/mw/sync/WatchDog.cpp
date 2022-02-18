@@ -11,17 +11,23 @@ namespace ib {
 namespace mw {
 namespace sync {
 
-WatchDog::WatchDog(std::chrono::milliseconds warnTimeout, std::chrono::milliseconds errorTimeout)
-    : _warnTimeout{warnTimeout}
-    , _errorTimeout{errorTimeout}
-    , _warnHandler{[](std::chrono::milliseconds) {}}
+WatchDog::WatchDog(const cfg::v1::datatypes::HealthCheck& healthCheckConfig)
+    : _warnHandler{[](std::chrono::milliseconds) {}}
     , _errorHandler{[](std::chrono::milliseconds) {}}
 {
-    if (warnTimeout <= 0ms)
-        throw std::runtime_error{"WatchDog requires warnTimeout > 0ms"};
-    if (errorTimeout <= 0ms)
-        throw std::runtime_error{"WatchDog requires errorTimeout > 0ms"};
-        
+    if (healthCheckConfig.softResponseTimeout.has_value())
+    {
+        _warnTimeout = healthCheckConfig.softResponseTimeout.value();
+        if (_warnTimeout <= 0ms)
+            throw std::runtime_error{"WatchDog requires warnTimeout > 0ms"};
+    }
+
+    if (healthCheckConfig.hardResponseTimeout.has_value())
+    {
+        _errorTimeout = healthCheckConfig.hardResponseTimeout.value();
+        if (_errorTimeout <= 0ms)
+            throw std::runtime_error{"WatchDog requires errorTimeout > 0ms"};
+    }
     _watchThread = std::thread{&WatchDog::Run, this};
 }
 

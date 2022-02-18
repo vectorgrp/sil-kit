@@ -102,15 +102,15 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& par
     : _config{std::move(config)}
     , _participant{GetParticipantByName(_config, participantName)} // throws if participantName is not found in _config
     , _participantName{participantName}
-    , _participantId{hash(_participant.name)}
-    , _ibConnection{_config, participantName, _participantId}
+    , _participantId{hash(participantName)}
+    , _ibConnection{ ib::cfg::vasio::v1::CreateDummyMiddlewareConfiguration(), participantName, _participantId}
 {
     _participantConfig = std::dynamic_pointer_cast<ib::cfg::ParticipantConfiguration>(ib::cfg::v1::CreateDummyConfiguration());
 
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
     auto&& participantConfig = get_by_name(_config.simulationSetup.participants, _participantName);
-    _logger = std::make_unique<logging::Logger>(_participantName, participantConfig.logger);
+    _logger = std::make_unique<logging::Logger>(_participantName, _participantConfig->_data.logging);
     _ibConnection.SetLogger(_logger.get());
 
     _logger->Info("Creating ComAdapter for Participant {}, IntegrationBus-Version: {} {}, Middleware: {}",
@@ -125,22 +125,19 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& par
 
 template <class IbConnectionT>
 ComAdapter<IbConnectionT>::ComAdapter(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                                      const std::string& participantName, cfg::Config config)
+                                      const std::string& participantName, bool isSynchronized, cfg::Config config)
     : _config{config}
-    , _participant{GetParticipantByName(_config, participantName)} // throws if participantName is not found in _config
+    , _participant{} 
     , _participantName{participantName}
-    , _participantId{hash(_participant.name)}
-    , _ibConnection{_config, participantName, _participantId}
+    , _isSynchronized{ isSynchronized }
+    , _participantId{hash(participantName)}
+    , _ibConnection{ib::cfg::vasio::v1::CreateDummyMiddlewareConfiguration(), participantName, _participantId}
 {
-    _participantConfig = std::dynamic_pointer_cast<ib::cfg::ParticipantConfiguration>(participantConfig);
-
-    auto&& participantConfigOldConfig = get_by_name(_config.simulationSetup.participants, _participantName);
+     _participantConfig = std::dynamic_pointer_cast<ib::cfg::ParticipantConfiguration>(participantConfig);
 
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
-    // TODO prepare logger for dynamic configuration, then activate this code
-    //_logger = std::make_unique<logging::Logger>(_participantName, _participantConfig->_data.logging);
-    _logger = std::make_unique<logging::Logger>(_participantName, participantConfigOldConfig.logger);
+    _logger = std::make_unique<logging::Logger>(_participantName, _participantConfig->_data.logging);
     _ibConnection.SetLogger(_logger.get());
     
     _logger->Info("Creating ComAdapter for Participant {}, IntegrationBus-Version: {} {}, Middleware: {}",
@@ -172,9 +169,10 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
     (void)GetServiceDiscovery();
 
     // Create the participants trace message sinks as declared in the configuration.
-    _traceSinks = tracing::CreateTraceMessageSinks(GetLogger(), _config, _participant);
+    //_traceSinks = tracing::CreateTraceMessageSinks(GetLogger(), _config, _participant);
 
-    if (_participant.participantController.has_value())
+    // NB: Create the participantController directly for synchronized participants.
+    if (_isSynchronized)
     {
         auto* participantController =
             static_cast<sync::ParticipantController*>(GetParticipantController());
@@ -182,18 +180,18 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
     }
     _logger->Info("Time provider: {}", _timeProvider->TimeProviderName());
 
-    // Enable replaying mechanism.
-    const auto& participantConfig = get_by_name(_config.simulationSetup.participants, _participantName);
-    if (tracing::HasReplayConfig(participantConfig))
-    {
-        _replayScheduler = std::make_unique<tracing::ReplayScheduler>(_config,
-            participantConfig,
-            _config.simulationSetup.timeSync.tickPeriod,
-            this,
-            _timeProvider.get()
-        );
-        _logger->Info("Replay Scheduler active.");
-    }
+    //// Enable replaying mechanism.
+    //const auto& participantConfig = get_by_name(_config.simulationSetup.participants, _participantName);
+    //if (tracing::HasReplayConfig(participantConfig))
+    //{
+    //    _replayScheduler = std::make_unique<tracing::ReplayScheduler>(_config,
+    //        participantConfig,
+    //        _config.simulationSetup.timeSync.tickPeriod,
+    //        this,
+    //        _timeProvider.get()
+    //    );
+    //    _logger->Info("Replay Scheduler active.");
+    //}
 
     // Ensure shutdowns are cleanly handled.
     auto&& monitor = GetSystemMonitor();
@@ -212,24 +210,24 @@ void ComAdapter<IbConnectionT>::SetupRemoteLogging()
     auto* logger = dynamic_cast<logging::Logger*>(_logger.get());
     if (logger)
     {
-        if (_participant.logger.logFromRemotes)
+        if (_participantConfig->_data.logging.logFromRemotes)
         {
             mw::SupplementalData supplementalData;
             supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeLoggerReceiver;
 
-            CreateController<logging::LogMsgReceiver>("LogMsgReceiver", mw::ServiceType::InternalController,
+            CreateInternalController<logging::LogMsgReceiver>("LogMsgReceiver", mw::ServiceType::InternalController,
                                                       std::move(supplementalData), logger);
         }
 
-        auto sinkIter = std::find_if(_participant.logger.sinks.begin(), _participant.logger.sinks.end(),
-            [](const cfg::Sink& sink) { return sink.type == cfg::Sink::Type::Remote; });
+        auto sinkIter = std::find_if(_participantConfig->_data.logging.sinks.begin(), _participantConfig->_data.logging.sinks.end(),
+            [](const cfg::v1::datatypes::Sink& sink) { return sink.type == cfg::v1::datatypes::Sink::Type::Remote; });
 
-        if (sinkIter != _participant.logger.sinks.end())
+        if (sinkIter != _participantConfig->_data.logging.sinks.end())
         {
             mw::SupplementalData supplementalData;
             supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeLoggerSender;
 
-            auto&& logMsgSender = CreateController<logging::LogMsgSender>(
+            auto&& logMsgSender = CreateInternalController<logging::LogMsgSender>(
                 "LogMsgSender", mw::ServiceType::InternalController, std::move(supplementalData));
 
             logger->RegisterRemoteLogging([logMsgSender](logging::LogMsg logMsg) {
@@ -429,21 +427,13 @@ auto ComAdapter<IbConnectionT>::CreateDataSubscriberInternal(const std::string& 
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataSubscriberInternal;
 
-    // Link config
-    cfg::Link link;
-    link.id = static_cast<int16_t>(hash(linkName));
-    link.name = linkName;
-    link.type = cfg::Link::Type::DataMessage;
+    ib::cfg::v1::datatypes::DataSubscriber controllerConfig;
+    controllerConfig.name = topic;
+    controllerConfig.network = linkName;
 
-    // Controller config
-    cfg::DataPort config;
-    config.linkId = link.id;
-    config.name = topic;
-    config.dataExchangeFormat = dataExchangeFormat;
-    config.labels = publisherLabels;
-    return CreateController<sim::data::DataSubscriberInternal>(link, config.name, mw::ServiceType::Controller, std::move(supplementalData), config,
-        _timeProvider.get(), defaultHandler, parent);
-
+    return CreateController<ib::cfg::v1::datatypes::DataSubscriber, sim::data::DataSubscriberInternal>(
+        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), topic,
+        dataExchangeFormat, publisherLabels, defaultHandler, parent);
 }
 
 
@@ -457,42 +447,42 @@ auto ComAdapter<IbConnectionT>::CreateDataPublisher(const std::string& topic,
         throw cfg::Misconfiguration("DataPublishers do not support history > 1.");
     }
 
-    ib::cfg::DataPort config = get_by_name(_participant.dataPublishers, topic);
-    config.dataExchangeFormat = dataExchangeFormat;
-    config.history = history;
-    config.pubUUID = util::uuid::to_string(util::uuid::generate());
-    config.labels = labels;
-    config.name = topic;
+    std::string pubUUID = util::uuid::to_string(util::uuid::generate());
 
-    if (ControllerUsesReplay(config))
+    // Retrieve controller
+    auto& cfgs = _participantConfig->_data.dataPublishers;
+    auto it = std::find_if(cfgs.begin(), cfgs.end(),
+                                             [topic](auto&& controllerConfig) {
+                                                 return controllerConfig.name == topic;
+                                             });
+    ib::cfg::v1::datatypes::DataPublisher controllerConfig;
+    if (it != cfgs.end())
     {
-        throw cfg::Misconfiguration("Replay is not supported for DataPublisher/DataSubscriber.");
-        return nullptr;
+        controllerConfig = *it;
+        controllerConfig.network = pubUUID;
     }
     else
     {
-        cfg::Link link;
-        link.id = -1;
-        link.name = config.pubUUID;
-        link.type = cfg::Link::Type::DataMessage;
-        link.historyLength = history;
-
-        mw::SupplementalData supplementalData;
-        supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataPublisher;
-        supplementalData[ib::mw::service::supplKeyDataPublisherTopic] = topic;
-        supplementalData[ib::mw::service::supplKeyDataPublisherPubUUID] = config.pubUUID;
-        supplementalData[ib::mw::service::supplKeyDataPublisherPubDxf] = dataExchangeFormat.mediaType;
-        auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
-        supplementalData[ib::mw::service::supplKeyDataPublisherPubLabels] = labelStr;
-
-        auto controller = CreateController<ib::sim::data::DataPublisher>(link,
-            topic, mw::ServiceType::Controller, std::move(supplementalData), config,
-            _timeProvider.get());
-
-        // TODO @bkd: Set history size here?
-
-        return controller;
+        controllerConfig.name = topic;
+        controllerConfig.network = pubUUID;
     }
+
+    mw::SupplementalData supplementalData;
+    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataPublisher;
+    supplementalData[ib::mw::service::supplKeyDataPublisherTopic] = topic;
+    supplementalData[ib::mw::service::supplKeyDataPublisherPubUUID] = pubUUID;
+    supplementalData[ib::mw::service::supplKeyDataPublisherPubDxf] = dataExchangeFormat.mediaType;
+    auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
+    supplementalData[ib::mw::service::supplKeyDataPublisherPubLabels] = labelStr;
+
+    auto controller = CreateController<ib::cfg::v1::datatypes::DataPublisher, ib::sim::data::DataPublisher>(
+        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), topic,
+        dataExchangeFormat, labels, pubUUID, history);
+
+    _ibConnection.SetHistoryLengthForLink(pubUUID, history, controller);
+
+    return controller;
+    
 }
 
 template <class IbConnectionT>
@@ -503,68 +493,53 @@ auto ComAdapter<IbConnectionT>::CreateDataSubscriber(const std::string& topic,
                                                      ib::sim::data::NewDataSourceHandlerT newDataSourceHandler)
     -> sim::data::IDataSubscriber*
 {
-    ib::cfg::DataPort config = get_by_name(_participant.dataSubscribers, topic);
-    config.dataExchangeFormat = dataExchangeFormat;
-    config.labels = labels;
-
-    if (ControllerUsesReplay(config))
+    // Retrieve controller
+    auto& cfgs = _participantConfig->_data.dataSubscribers;
+    auto it = std::find_if(cfgs.begin(), cfgs.end(), [topic](auto&& controllerConfig) {
+        return controllerConfig.name == topic;
+    });
+    ib::cfg::v1::datatypes::DataSubscriber controllerConfig;
+    if (it != cfgs.end())
     {
-        throw cfg::Misconfiguration("Replay is not supported for DataPublisher/DataSubscriber.");
-        return nullptr;
+        controllerConfig = *it;
+        if (controllerConfig.network != topic)
+        {
+            PrintWrongNetworkNameForControllerWarning(topic, topic, controllerConfig.network,
+                                                      ib::cfg::v1::datatypes::NetworkType::Data);
+        }
     }
     else
     {
-        mw::SupplementalData supplementalData;
-        supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataSubscriber;
-
-        auto controller = CreateControllerForLink<sim::data::DataSubscriber>(
-            config, mw::ServiceType::Controller, std::move(supplementalData), config, _timeProvider.get(),
-            defaultDataHandler, newDataSourceHandler);
-        controller->RegisterServiceDiscovery();
-
-        return controller;
+        controllerConfig.name = topic;
+        controllerConfig.network = topic;
     }
+
+    mw::SupplementalData supplementalData;
+    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataSubscriber;
+
+    auto controller = CreateController<ib::cfg::v1::datatypes::DataSubscriber, sim::data::DataSubscriber>(
+        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), topic,
+        dataExchangeFormat, labels, defaultDataHandler, newDataSourceHandler);
+
+    controller->RegisterServiceDiscovery();
+
+    return controller;
+    
 }
 
 
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher*
 {
-    mw::SupplementalData supplementalData;
-    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeOther;
-
-    auto&& config = get_by_name(_participant.genericPublishers, canonicalName);
-    if (ControllerUsesReplay(config))
-    {
-        return CreateControllerForLink<sim::generic::GenericPublisherReplay>(
-            config, mw::ServiceType::Controller, std::move(supplementalData), config, _timeProvider.get());
-    }
-    else
-    {
-        return CreateControllerForLink<sim::generic::GenericPublisher>(
-            config, mw::ServiceType::Controller, std::move(supplementalData), config,
-                                                                       _timeProvider.get());
-    }
+    _logger->Error("GenericPublisher is deprecated");
+    return nullptr;
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateGenericSubscriber(const std::string& canonicalName) -> sim::generic::IGenericSubscriber*
+auto ComAdapter<IbConnectionT>::CreateGenericSubscriber(const std::string& canonicalName)->sim::generic::IGenericSubscriber*
 {
-    mw::SupplementalData supplementalData;
-    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeOther;
-
-    auto&& config = get_by_name(_participant.genericSubscribers, canonicalName);
-    if (ControllerUsesReplay(config))
-    {
-        return CreateControllerForLink<sim::generic::GenericSubscriberReplay>(
-            config, mw::ServiceType::Controller, std::move(supplementalData), config, _timeProvider.get());
-    }
-    else
-    {
-        return CreateControllerForLink<sim::generic::GenericSubscriber>(
-            config, mw::ServiceType::Controller, std::move(supplementalData), config,
-                                                                        _timeProvider.get());
-    }
+    _logger->Error("GenericSubscriber is deprecated");
+    return nullptr;
 }
 
 template <class IbConnectionT>
@@ -576,26 +551,18 @@ auto ComAdapter<IbConnectionT>::CreateRpcServerInternal(const std::string& funct
 {
     _logger->Trace("Creating internal server for functionName={}, clientUUID={}", functionName, clientUUID);
 
-    cfg::Link link;
-    link.id = static_cast<int16_t>(hash(clientUUID));
-    link.name = clientUUID;
-    link.type = cfg::Link::Type::Rpc;
+    ib::cfg::v1::datatypes::RpcServer controllerConfig;
+    controllerConfig.name = functionName;
+    controllerConfig.network = clientUUID;
 
-    cfg::RpcPort config;
-    config.linkId = link.id;
-    config.name = functionName;
-    config.exchangeFormat = exchangeFormat;
-    config.labels = clientLabels;
-    config.clientUUID = clientUUID;
-	
     // RpcServerInternal gets discovered by RpcClient which is then ready to detach calls
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcServerInternal;
     supplementalData[ib::mw::service::supplKeyRpcServerInternalClientUUID] = clientUUID;
 
-    return CreateController<sim::rpc::RpcServerInternal>(link, config.name, mw::ServiceType::Controller,
-                                                         std::move(supplementalData), config, _timeProvider.get(),
-                                                         handler, parent);
+    return CreateController<ib::cfg::v1::datatypes::RpcServer, sim::rpc::RpcServerInternal>(
+        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), functionName,
+        exchangeFormat, clientLabels, clientUUID, handler, parent);
 }
 
 template <class IbConnectionT>
@@ -604,43 +571,42 @@ auto ComAdapter<IbConnectionT>::CreateRpcClient(const std::string& functionName,
                                                 const std::map<std::string, std::string>& labels,
                                                 sim::rpc::CallReturnHandler handler) -> sim::rpc::IRpcClient*
 {
-    ib::cfg::RpcPort config = get_by_name(_participant.rpcClients, functionName);
-    config.name = functionName;
-    config.exchangeFormat = exchangeFormat;
-    config.labels = labels;
-    config.clientUUID = util::uuid::to_string(util::uuid::generate());
+    auto clientUUID = util::uuid::to_string(util::uuid::generate());
 
-    if (ControllerUsesReplay(config))
+    // Retrieve controller
+    auto& cfgs = _participantConfig->_data.rpcClients;
+    auto it = std::find_if(cfgs.begin(), cfgs.end(), [functionName](auto&& controllerConfig) {
+        return controllerConfig.name == functionName;
+    });
+    ib::cfg::v1::datatypes::RpcClient controllerConfig;
+    if (it != cfgs.end())
     {
-        throw cfg::Misconfiguration("Replay is not supported for Rpc.");
-        return nullptr;
+        controllerConfig = *it;
+        controllerConfig.network = clientUUID;
     }
     else
     {
-
-        cfg::Link link;
-        link.id = -1;
-        link.name = config.clientUUID;
-        link.type = cfg::Link::Type::Rpc;
-
-        // RpcClient gets discovered by RpcServer which creates RpcServerInternal on a matching connection
-        mw::SupplementalData supplementalData;
-        supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcClient;
-        supplementalData[ib::mw::service::supplKeyRpcClientFunctionName] = functionName;
-        supplementalData[ib::mw::service::supplKeyRpcClientDxf] = exchangeFormat.mediaType;
-        auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
-        supplementalData[ib::mw::service::supplKeyRpcClientLabels] = labelStr;
-        supplementalData[ib::mw::service::supplKeyRpcClientUUID] = config.clientUUID;
-
-        auto controller = CreateController<ib::sim::rpc::RpcClient>(link, functionName, mw::ServiceType::Controller,
-                                                                    std::move(supplementalData), config,
-                                                                    _timeProvider.get(), handler);
-
-        // RpcClient discovers RpcServerInternal and is ready to detach calls
-        controller->RegisterServiceDiscovery();
- 
-        return controller;
+        controllerConfig.name = functionName;
+        controllerConfig.network = clientUUID;
     }
+
+    // RpcClient gets discovered by RpcServer which creates RpcServerInternal on a matching connection
+    mw::SupplementalData supplementalData;
+    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcClient;
+    supplementalData[ib::mw::service::supplKeyRpcClientFunctionName] = functionName;
+    supplementalData[ib::mw::service::supplKeyRpcClientDxf] = exchangeFormat.mediaType;
+    auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
+    supplementalData[ib::mw::service::supplKeyRpcClientLabels] = labelStr;
+    supplementalData[ib::mw::service::supplKeyRpcClientUUID] = clientUUID;
+
+    auto controller = CreateController<ib::cfg::v1::datatypes::RpcClient, ib::sim::rpc::RpcClient>(
+        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), functionName,
+        exchangeFormat, labels, clientUUID, handler);
+
+    // RpcClient discovers RpcServerInternal and is ready to dispatch calls
+    controller->RegisterServiceDiscovery();
+ 
+    return controller;
 }
 
 template <class IbConnectionT>
@@ -649,33 +615,44 @@ auto ComAdapter<IbConnectionT>::CreateRpcServer(const std::string& functionName,
                                                 const std::map<std::string, std::string>& labels,
                                                 sim::rpc::CallProcessor handler) -> sim::rpc::IRpcServer*
 {
-    ib::cfg::RpcPort config = get_by_name(_participant.rpcServers, functionName);
-    config.name = functionName;
-    config.exchangeFormat = exchangeFormat;
-    config.labels = labels;
-
-    if (ControllerUsesReplay(config))
+    // Retrieve controller
+    auto& cfgs = _participantConfig->_data.rpcServers;
+    auto it = std::find_if(cfgs.begin(), cfgs.end(), [functionName](auto&& controllerConfig) {
+        return controllerConfig.name == functionName;
+    });
+    ib::cfg::v1::datatypes::RpcServer controllerConfig;
+    if (it != cfgs.end())
     {
-        throw cfg::Misconfiguration("Replay is not supported for Rpc.");
-        return nullptr;
+        controllerConfig = *it;
+        if (controllerConfig.network != functionName)
+        {
+            PrintWrongNetworkNameForControllerWarning(functionName, functionName, controllerConfig.network,
+                                                      ib::cfg::v1::datatypes::NetworkType::RPC);
+        }
     }
     else
     {
-	
-        // RpcServer announces himself to be found by DiscoverRpcServers()
-        mw::SupplementalData supplementalData;
-        supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcServer;
-        supplementalData[ib::mw::service::supplKeyRpcServerFunctionName] = functionName;
-        supplementalData[ib::mw::service::supplKeyRpcServerDxf] = exchangeFormat.mediaType;
-        auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
-        supplementalData[ib::mw::service::supplKeyRpcServerLabels] = labelStr;
-
-        auto controller = CreateControllerForLink<sim::rpc::RpcServer>(config, mw::ServiceType::Controller, supplementalData, config, _timeProvider.get(), handler);
-        
-        // RpcServer discovers RpcClient and creates RpcServerInternal on a matching connection
-        controller->RegisterServiceDiscovery();
-        return controller;
+        controllerConfig.name = functionName;
+        controllerConfig.network = functionName;
     }
+	
+    // RpcServer announces himself to be found by DiscoverRpcServers()
+    mw::SupplementalData supplementalData;
+    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcServer;
+    supplementalData[ib::mw::service::supplKeyRpcServerFunctionName] = functionName;
+    supplementalData[ib::mw::service::supplKeyRpcServerDxf] = exchangeFormat.mediaType;
+    auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
+    supplementalData[ib::mw::service::supplKeyRpcServerLabels] = labelStr;
+
+    auto controller = CreateController<ib::cfg::v1::datatypes::RpcServer, sim::rpc::RpcServer>(
+        controllerConfig, mw::ServiceType::Controller, supplementalData, _timeProvider.get(), functionName,
+        exchangeFormat, labels, handler);
+
+    // RpcServer discovers RpcClient and creates RpcServerInternal on a matching connection
+    controller->RegisterServiceDiscovery();
+
+    return controller;
+    
 }
 
 template <class IbConnectionT>
@@ -696,16 +673,9 @@ auto ComAdapter<IbConnectionT>::GetParticipantController() -> sync::IParticipant
     {
         mw::SupplementalData supplementalData;
         supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeParticipantController;
-        // TODO adapt
-        auto participant = GetParticipantByName(_config, _participantName);
-        if (participant.participantController.has_value() && participant.participantController.value().syncType != cfg::SyncType::Unsynchronized)
-        {
-            supplementalData[ib::mw::service::controllerIsSynchronized] = true;
-        }
-
-        controller = CreateController<sync::ParticipantController>("ParticipantController", mw::ServiceType::InternalController,
-                                                                   std::move(supplementalData),
-                                                                   _config.simulationSetup, _participant);
+        controller = CreateInternalController<sync::ParticipantController>(
+            "ParticipantController", mw::ServiceType::InternalController, std::move(supplementalData), _participantName,
+            _isSynchronized, _participantConfig->_data.healthCheck);
     }
 
     return controller;
@@ -720,9 +690,8 @@ auto ComAdapter<IbConnectionT>::GetSystemMonitor() -> sync::ISystemMonitor*
         mw::SupplementalData supplementalData;
         supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeSystemMonitor;
 
-        controller = CreateController<sync::SystemMonitor>("SystemMonitor", mw::ServiceType::InternalController,
-                                                           std::move(supplementalData),
-                                                           _config.simulationSetup);
+        controller = CreateInternalController<sync::SystemMonitor>("SystemMonitor", mw::ServiceType::InternalController,
+                                                           std::move(supplementalData));
     }
     return controller;
 }
@@ -736,7 +705,7 @@ auto ComAdapter<IbConnectionT>::GetServiceDiscovery() -> service::IServiceDiscov
         mw::SupplementalData supplementalData;
         supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeServiceDiscovery;
 
-        controller = CreateController<service::ServiceDiscovery>(
+        controller = CreateInternalController<service::ServiceDiscovery>(
             "ServiceDiscovery", mw::ServiceType::InternalController, std::move(supplementalData),
                                                                  _participantName);
     }
@@ -752,7 +721,7 @@ auto ComAdapter<IbConnectionT>::GetSystemController() -> sync::ISystemController
         mw::SupplementalData supplementalData;
         supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeSystemController;
 
-        return CreateController<sync::SystemController>("SystemController", mw::ServiceType::InternalController,
+        return CreateInternalController<sync::SystemController>("SystemController", mw::ServiceType::InternalController,
                                                         std::move(supplementalData));
     }
     return controller;
@@ -1039,6 +1008,13 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, co
 {
     SendIbMessageImpl(from, msg);
 }
+
+template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::ExpectedParticipants& msg)
+{
+    SendIbMessageImpl(from, msg);
+}
+
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const logging::LogMsg& msg)
@@ -1333,6 +1309,12 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, co
 }
 
 template <class IbConnectionT>
+void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::ExpectedParticipants& msg)
+{
+    SendIbMessageImpl(from, targetParticipantName, msg);
+}
+
+template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const logging::LogMsg& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
@@ -1383,7 +1365,7 @@ auto ComAdapter<IbConnectionT>::GetController(const std::string& networkName, co
 
 template <class IbConnectionT>
 template<class ControllerT, typename... Arg>
-auto ComAdapter<IbConnectionT>::CreateController(const std::string& serviceName, const mw::ServiceType serviceType,
+auto ComAdapter<IbConnectionT>::CreateInternalController(const std::string& serviceName, const mw::ServiceType serviceType,
                                                  const mw::SupplementalData& supplementalData,
                                                  Arg&&... arg) -> ControllerT*
 {
@@ -1393,45 +1375,6 @@ auto ComAdapter<IbConnectionT>::CreateController(const std::string& serviceName,
 
     return CreateController<cfg::v1::datatypes::InternalController, ControllerT>(
         config, serviceType, supplementalData, std::forward<Arg>(arg)...);
-}
-
-template <class IbConnectionT>
-template <class ControllerT, typename... Arg>
-auto ComAdapter<IbConnectionT>::CreateController(const cfg::Link& link, const std::string& serviceName,
-                                                 const mw::ServiceType serviceType,
-                                                 const mw::SupplementalData& supplementalData,
-                                                 Arg&&... arg) -> ControllerT*
-{
-    if (serviceName == "")
-    {
-        throw ib::cfg::Misconfiguration("Services must have a non-empty name.");
-    }
-
-    auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
-    auto controller = std::make_unique<ControllerT>(this, std::forward<Arg>(arg)...);
-    auto* controllerPtr = controller.get();
-
-    auto localEndpoint = _localEndpointId++;
-
-    auto descriptor = ServiceDescriptor{};
-    descriptor.SetNetworkName(link.name);
-    descriptor.SetParticipantName(_participantName);
-    descriptor.SetServiceName(serviceName);
-    descriptor.SetNetworkType(link.type);
-    descriptor.SetServiceId(localEndpoint);
-    descriptor.SetServiceType(serviceType);
-    descriptor.SetSupplementalData(std::move(supplementalData));
-
-    controller->SetServiceDescriptor(std::move(descriptor));
-
-    _ibConnection.RegisterIbService(link.name, localEndpoint, controllerPtr);
-    _ibConnection.SetHistoryLengthForLink(link.name, link.historyLength, controllerPtr);
-    const auto qualifiedName = link.name + "/" + serviceName;
-    controllerMap[qualifiedName] = std::move(controller);
-
-    GetServiceDiscovery()->NotifyServiceCreated(controllerPtr->GetServiceDescriptor());
-
-    return controllerPtr;
 }
 
 template <class IbConnectionT>
@@ -1472,8 +1415,6 @@ auto ComAdapter<IbConnectionT>::CreateController(const ConfigT& config,
     controller->SetServiceDescriptor(std::move(descriptor));
 
     _ibConnection.RegisterIbService(config.network, localEndpoint, controllerPtr);
-    // @bkd turned off here - should be moved elsewhere...
-    //_ibConnection.SetHistoryLengthForLink(config.network, link.historyLength, controllerPtr);
     const auto qualifiedName = config.network + "/" + config.name;
     controllerMap[qualifiedName] = std::move(controller);
 
@@ -1531,32 +1472,6 @@ void ComAdapter<IbConnectionT>::AddTraceSinksToSource(extensions::ITraceMessageS
         }
         traceSource->AddSink((*sinkIter).get());
     }
-}
-
-template <class IbConnectionT>
-template <class ControllerT, class ConfigT, typename... Arg>
-auto ComAdapter<IbConnectionT>::CreateControllerForLink(const ConfigT& config, const mw::ServiceType& serviceType,
-                                                        const mw::SupplementalData& supplementalData,
-                                                        Arg&&... arg) -> ControllerT*
-{
-    auto&& linkCfg = GetLinkById(config.linkId);
-
-    auto* controllerPtr = GetController<ControllerT>(linkCfg.name, config.name);
-    if (controllerPtr != nullptr)
-    {
-        // We cache the controller and return it here.
-        return controllerPtr;
-    }
-
-    // Create a new controller, and configure tracing if applicable
-    auto* controller = CreateController<ControllerT>(linkCfg, config.name, serviceType, supplementalData, std::forward<Arg>(arg)...);
-    auto* traceSource = dynamic_cast<extensions::ITraceMessageSource*>(controller);
-    if (traceSource)
-    {
-        AddTraceSinksToSource(traceSource, config);
-    }
-
-    return controller;
 }
 
 template <class IbConnectionT>
@@ -1641,27 +1556,27 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
                 }
             }
         }
-        // register each simulator as trace source
-        auto* traceSource = dynamic_cast<extensions::ITraceMessageSource*>(busSim);
-        if (traceSource)
-        {
-            AddTraceSinksToSource(traceSource, simulatorConfig);
-        }
+        //// register each simulator as trace source
+        //auto* traceSource = dynamic_cast<extensions::ITraceMessageSource*>(busSim);
+        //if (traceSource)
+        //{
+        //    AddTraceSinksToSource(traceSource, simulatorConfig);
+        //}
     }
 
-    // register the network simulator for replay
-    if (_replayScheduler && tracing::HasReplayConfig(_participant))
-    {
-        try
-        {
-            _replayScheduler->ConfigureNetworkSimulators(_config, _participant,
-                dynamic_cast<tracing::IReplayDataController&>(*busSim));
-        }
-        catch (const std::exception& e)
-        {
-            _logger->Error("Cannot configure replaying on network simulator: {}", e.what());
-        }
-    }
+    //// register the network simulator for replay
+    //if (_replayScheduler && tracing::HasReplayConfig(_participant))
+    //{
+    //    try
+    //    {
+    //        _replayScheduler->ConfigureNetworkSimulators(_config, _participant,
+    //            dynamic_cast<tracing::IReplayDataController&>(*busSim));
+    //    }
+    //    catch (const std::exception& e)
+    //    {
+    //        _logger->Error("Cannot configure replaying on network simulator: {}", e.what());
+    //    }
+    //}
 
     simulator = busSim;
 }

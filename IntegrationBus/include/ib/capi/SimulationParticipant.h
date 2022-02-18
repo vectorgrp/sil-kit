@@ -79,10 +79,10 @@ typedef uint64_t ib_NanosecondsTime; //!< Simulation time
 *
 */
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Create(ib_SimulationParticipant** outParticipant, 
-    const char* cJsonConfig, const char* cParticipantName, const char* cDomainId);
+    const char* cJsonConfig, const char* cParticipantName, ib_Bool isSynchronized, const char* cDomainId);
 
 typedef ib_ReturnCode (*ib_SimulationParticipant_Create_t)(ib_SimulationParticipant** outParticipant, 
-    const char* cJsonConfig, const char* cParticipantName, const char* cDomainId);
+    const char* cJsonConfig, const char* cParticipantName, ib_Bool isSynchronized, const char* cDomainId);
     
 /*! \brief Destroy a simulation participant and its associated simulation elements.
 *

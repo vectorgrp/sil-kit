@@ -171,7 +171,7 @@ auto VAsioTcpPeer::GetLocalAddress() const -> std::string
 
 bool VAsioTcpPeer::ConnectLocal(const std::string& socketPath)
 {
-    if (!_ibConnection->Config().middlewareConfig.vasio.enableDomainSockets)
+    if (!_ibConnection->Config()->_data.enableDomainSockets)
     {
         return false;
     }
@@ -204,7 +204,7 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
         _logger->Warn("Unable to resolve hostname \"{}:{}\": {}", host, port, err.what());
         return false;
     }
-    const auto& config = _ibConnection->Config().middlewareConfig.vasio;
+    auto config = _ibConnection->Config();
     for (auto&& resolverEntry : resolverResults)
     {
         try
@@ -215,25 +215,25 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
 
             _socket.connect(resolverEntry.endpoint());
 
-            if (config.tcpNoDelay)
+            if (config->_data.tcpNoDelay)
             {
                 _socket.set_option(asio::ip::tcp::no_delay{true});
             }
 
-            if (config.tcpQuickAck)
+            if (config->_data.tcpQuickAck)
             {
                 _enableQuickAck = true;
                 EnableQuickAck(_logger, _socket);
             }
 
-            if(config.tcpReceiveBufferSize > 0)
+            if(config->_data.tcpReceiveBufferSize > 0)
             {
-                _socket.set_option(asio::socket_base::receive_buffer_size{config.tcpReceiveBufferSize});
+                _socket.set_option(asio::socket_base::receive_buffer_size{config->_data.tcpReceiveBufferSize});
             }
 
-            if (config.tcpSendBufferSize > 0)
+            if (config->_data.tcpSendBufferSize > 0)
             {
-                _socket.set_option(asio::socket_base::send_buffer_size{config.tcpSendBufferSize});
+                _socket.set_option(asio::socket_base::send_buffer_size{config->_data.tcpSendBufferSize});
             }
 
 

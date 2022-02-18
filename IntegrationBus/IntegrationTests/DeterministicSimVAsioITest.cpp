@@ -10,7 +10,7 @@
 #include "CreateComAdapter.hpp"
 #include "VAsioRegistry.hpp"
 
-#include "ib/cfg/ConfigBuilder.hpp"
+#include "ParticipantConfiguration.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/sim/all.hpp"
 
@@ -25,9 +25,11 @@ using namespace std::chrono;
 using namespace ib::cfg;
 using namespace ib::mw;
 using namespace ib::mw::sync;
-using namespace ib::sim::generic;
+using namespace ib::sim::data;
 
 const std::string testMessage{"TestMessage"};
+std::vector<std::string> syncParticipantNames;
+auto period = std::chrono::milliseconds(1);
 
 std::ostream& operator<<(std::ostream& out, const nanoseconds& timestamp)
 {
@@ -43,19 +45,36 @@ std::istream& operator>>(std::istream& in, nanoseconds& timestamp)
     return in;
 }
 
+ib::cfg::Config DummyCfg(const std::string& participantName, bool sync)
+{
+    ib::cfg::Config dummyCfg;
+    ib::cfg::Participant dummyParticipant;
+    if (sync)
+    {
+        dummyParticipant.participantController = ib::cfg::ParticipantController{};
+    }
+    dummyParticipant.name = participantName;
+    dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
+    return dummyCfg;
+}
+
 class Publisher
 {
 public:
-    Publisher(const Config& ibConfig, const uint32_t domainId, const uint32_t publisherIndex, const uint32_t testSize)
+    Publisher(const uint32_t domainId, const uint32_t publisherIndex, const uint32_t testSize)
         : _testSize{testSize}
     {
-        _comAdapter = CreateComAdapterImpl(ibConfig, "Publisher" + std::to_string(publisherIndex));
+        std::string participantName = "Publisher" + std::to_string(publisherIndex);
+        _comAdapter = ib::mw::CreateSimulationParticipantImpl(ib::cfg::CreateDummyConfiguration(), participantName, true,
+                                                              DummyCfg(participantName, true));
+
         _comAdapter->joinIbDomain(domainId);
 
-        const auto topicName = "GenericData" + std::to_string(publisherIndex);
+        const auto topicName = "Topic" + std::to_string(publisherIndex);
         auto&& participantController = _comAdapter->GetParticipantController();
-        auto* publisher = _comAdapter->CreateGenericPublisher(topicName);
+        auto* publisher = _comAdapter->CreateDataPublisher(topicName, DataExchangeFormat{}, {}, 0);
 
+        participantController->SetPeriod(period);
         participantController->SetSimulationTask(
             [this, publisher](const nanoseconds now, nanoseconds /*duration*/) {
 
@@ -83,7 +102,7 @@ public:
     }
 
 private:
-    void PublishMessage(IGenericPublisher* publisher, const nanoseconds now, const uint32_t index) const
+    void PublishMessage(IDataPublisher* publisher, const nanoseconds now, const uint32_t index) const
     {
         // Send testMessage with current tick (now) and current index
         std::stringstream stream;
@@ -105,17 +124,19 @@ private:
 class Subscriber
 {
 public:
-    Subscriber(Config ibConfig, const uint32_t domainId, const uint32_t& publisherCount, const uint32_t testSize)
-        : _ibConfig{std::move(ibConfig)}
-        , _publisherCount{publisherCount}
+    Subscriber(const std::vector<std::string>& syncParticipantNames, const std::string& participantName, const uint32_t domainId, const uint32_t& publisherCount, const uint32_t testSize)
+        : _publisherCount{publisherCount}
         , _messageIndexes(publisherCount, 0u)
         , _testSize{testSize}
     {
-        _comAdapter = CreateComAdapterImpl(_ibConfig, "Subscriber");
+        _comAdapter = ib::mw::CreateSimulationParticipantImpl(
+            ib::cfg::CreateDummyConfiguration(), participantName, true, DummyCfg(participantName, true));
         _comAdapter->joinIbDomain(domainId);
 
         _systemController = _comAdapter->GetSystemController();
         _monitor = _comAdapter->GetSystemMonitor();
+
+        _monitor->SetSynchronizedParticipants(syncParticipantNames);
 
         _monitor->RegisterSystemStateHandler(
             [this](SystemState newState) {
@@ -126,13 +147,13 @@ public:
 
         for (auto publisherIndex = 0u; publisherIndex < _publisherCount; publisherIndex++)
         {
-            auto* subscriber = _comAdapter->CreateGenericSubscriber("GenericData" + std::to_string(publisherIndex));
-            subscriber->SetReceiveMessageHandler(
-                [this, publisherIndex](IGenericSubscriber* subscriber, const std::vector<uint8_t>& data) {
-                ReceiveMessage(subscriber, data, publisherIndex);
-            });
+            auto* subscriber = _comAdapter->CreateDataSubscriber(
+                "Topic" + std::to_string(publisherIndex), DataExchangeFormat{}, {},
+                [this, publisherIndex](IDataSubscriber* subscriber, const std::vector<uint8_t>& data) {
+                    ReceiveMessage(subscriber, data, publisherIndex);
+                });
         }
-
+        participantController->SetPeriod(period);
         participantController->SetSimulationTask(
             [this](const nanoseconds now, nanoseconds /*duration*/) {
 
@@ -171,15 +192,13 @@ private:
 
     void InitializeAllParticipants()
     {
-        for (auto&& participant : _ibConfig.simulationSetup.participants)
+        for (auto&& name : syncParticipantNames)
         {
-            if (!participant.participantController)
-                continue;
-            _systemController->Initialize(participant.name);
+            _systemController->Initialize(name);
         }
     }
 
-    void ReceiveMessage(IGenericSubscriber* /*subscriber*/, const std::vector<uint8_t>& data, const uint32_t publisherIndex)
+    void ReceiveMessage(IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data, const uint32_t publisherIndex)
     {
         auto& messageIndex = _messageIndexes[publisherIndex];
         const std::string message{data.begin(), data.end()};
@@ -208,7 +227,7 @@ private:
         // currentTick is incremented by one millisecond with every simulation tick.
         // So sentTick should be equal to currentTick or one millisecond (=tick) further,
         // if currentTick has not yet been updated in the current tick.
-        ASSERT_TRUE(_currentTick == sentTick || _currentTick + _ibConfig.simulationSetup.timeSync.tickPeriod == sentTick);
+        ASSERT_TRUE(_currentTick == sentTick || _currentTick + period == sentTick);
 
         // This expectation tests the order of the messages per publisher.
         // For each publisher each send message should come in order. The order is tested 
@@ -226,7 +245,6 @@ private:
 
 private:
     std::unique_ptr<IComAdapterInternal> _comAdapter{nullptr};
-    Config _ibConfig;
     ISystemController* _systemController{nullptr};
     ISystemMonitor* _monitor{nullptr};
 
@@ -245,32 +263,8 @@ protected:
         domainId = static_cast<uint32_t>(GetTestPid());
     }
 
-    void buildConfig(const uint32_t publisherCount)
-    {
-        ConfigBuilder builder{"TestConfig"};
-
-        auto&& subscriber = builder.SimulationSetup().AddParticipant("Subscriber").AsSyncMaster();
-        subscriber.AddParticipantController().WithSyncType(SyncType::DistributedTimeQuantum);
-
-        for (auto i = 0u; i < publisherCount; i++)
-        {
-            subscriber.AddGenericSubscriber("GenericData" + std::to_string(i)).WithLink("GenericData" + std::to_string(i));
-
-            auto&& participantB = builder.SimulationSetup().AddParticipant("Publisher" + std::to_string(i));
-            participantB.AddParticipantController().WithSyncType(SyncType::DistributedTimeQuantum);
-            participantB.AddGenericPublisher("GenericData" + std::to_string(i)).WithLink("GenericData" + std::to_string(i));
-        }
-
-        builder.WithActiveMiddleware(Middleware::VAsio).SimulationSetup()
-            .ConfigureTimeSync()
-            .WithTickPeriod(std::chrono::milliseconds(1));
-
-        ibConfig = builder.Build();
-    }
-
 protected:
     uint32_t domainId;
-    Config ibConfig;
 };
 
 TEST_F(DeterministicSimVAsioITest, deterministic_simulation_vasio)
@@ -278,20 +272,25 @@ TEST_F(DeterministicSimVAsioITest, deterministic_simulation_vasio)
     const uint32_t publisherCount = 3;
     const uint32_t testSize = 5000;
 
-    buildConfig(publisherCount);
+    std::string subscriberName = "Subscriber";
+    syncParticipantNames.push_back(subscriberName);
+    for (auto i = 0u; i < publisherCount; i++)
+    {
+        syncParticipantNames.push_back("Publisher" + std::to_string(i));
+    }
 
-    VAsioRegistry registry{ibConfig};
+    VAsioRegistry registry{ ib::cfg::vasio::v1::CreateDummyIMiddlewareConfiguration() };
     registry.ProvideDomain(domainId);
 
-    // The subscriber takes part of the system controller and initiates simulation state changes
-    Subscriber subscriber(ibConfig, domainId, publisherCount, testSize);
+    // The subscriber assumes the role of the system controller and initiates simulation state changes
+    Subscriber subscriber(syncParticipantNames, subscriberName, domainId, publisherCount, testSize);
     auto subscriberFuture = subscriber.RunAsync();
 
     std::vector<Publisher> publishers;
     publishers.reserve(publisherCount);
     for (auto i = 0u; i < publisherCount; i++)
     {
-        publishers.emplace_back(ibConfig, domainId, i, testSize);
+        publishers.emplace_back(domainId, i, testSize);
         publishers[i].RunAsync();
     }
 

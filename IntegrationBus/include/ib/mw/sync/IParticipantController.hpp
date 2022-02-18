@@ -96,12 +96,6 @@ public:
      */
     virtual void SetPeriod(std::chrono::nanoseconds period) = 0;
 
-    /*! \brief Set the simulation time for the next pending event.
-     *
-     * Can only be used with event triggered synchronization.
-     */
-    virtual void SetEarliestEventTime(std::chrono::nanoseconds eventTime) = 0;
-
     /*! \brief Start blocking operation
      *
      * Executes simulation until shutdown is received. The simulation

@@ -198,7 +198,7 @@ template <class T> struct Zero { using Type = T; };
 
 using asio::ip::tcp;
 
-VAsioConnection::VAsioConnection(cfg::Config config, std::string participantName, ParticipantId participantId)
+VAsioConnection::VAsioConnection(std::shared_ptr<ib::cfg::vasio::v1::MiddlewareConfiguration> config, std::string participantName, ParticipantId participantId)
     : _config{std::move(config)}
     , _participantName{std::move(participantName)}
     , _participantId{participantId}
@@ -233,7 +233,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
 {
     assert(_logger);
 
-    if (_config.middlewareConfig.vasio.enableDomainSockets)
+    if (_config->_data.enableDomainSockets)
     {
         // We pick a random file name for local domain sockets
         try
@@ -249,8 +249,6 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     // We let the operating system choose a free TCP port
     // The address will be substituted by the registry, from the actual connection endpoint's address.
     AcceptConnectionsOn(tcp::endpoint{asio::ip::tcp::v4(), 0});
-
-    auto& vasioConfig = _config.middlewareConfig.vasio;
 
     VAsioPeerUri registryUri;
     registryUri.participantName = "IbRegistry";
@@ -270,9 +268,9 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     // NB: We attempt to connect multiple times. The registry might be a separate process
     //     which may still be initializing when we are running. For example, this happens when all
     //     participants are started in a shell, and the registry is started in the background.
-
-    auto multipleConnectAttempts = [ &registry, &vasioConfig](const auto& registryUri) {
-        for (auto i = 0; i < vasioConfig.registry.connectAttempts; i++)
+    auto registryCfg = _config->_data.registry;
+    auto multipleConnectAttempts = [ &registry, &registryCfg](const auto& registryUri) {
+        for (auto i = 0; i < registryCfg.connectAttempts; i++)
         {
             try
             {
@@ -294,9 +292,9 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     if (!ok)
     {
         registryUri.acceptorUris.clear();
-        auto registryPort = static_cast<uint16_t>(vasioConfig.registry.port + domainId);
+        auto registryPort = static_cast<uint16_t>(registryCfg.port + domainId);
         registryUri.acceptorUris.push_back(
-            Uri{ vasioConfig.registry.hostname,  registryPort }.EncodedString()
+            Uri{ registryCfg.hostname,  registryPort }.EncodedString()
         );
         ok = multipleConnectAttempts(registryUri);
 
@@ -308,7 +306,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
         registryUri.acceptorUris.push_back(localUri);
 
         _logger->Error("Failed to connect to VAsio registry (number of attempts: {})",
-            vasioConfig.registry.connectAttempts);
+            _config->_data.registry.connectAttempts);
         _logger->Info("   Make sure that the IbRegistry is up and running and is listening on the following URIs: {}.",
             printUris(registryUri));
         _logger->Info("   If a registry is unable to open a listening socket it will only be reachable via local domain sockets, which depend on the working directory.");

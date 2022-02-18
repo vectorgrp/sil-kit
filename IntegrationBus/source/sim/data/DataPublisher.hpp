@@ -23,12 +23,12 @@ class DataPublisher
     , public mw::IIbServiceEndpoint
 {
 public:
-    DataPublisher(mw::IComAdapterInternal* comAdapter, cfg::DataPort config, mw::sync::ITimeProvider* timeProvider);
+    DataPublisher(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider, const std::string& topic,
+                  DataExchangeFormat dataExchangeFormat, const std::map<std::string, std::string>& labels,
+                  const std::string& pubUUID, size_t history);
     
     void Publish(std::vector<uint8_t> data) override;
     void Publish(const uint8_t* data, std::size_t size) override;
-
-    auto Config() const -> const cfg::DataPort& override;
 
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
@@ -39,10 +39,15 @@ public:
 
 
 private:
-    cfg::DataPort _config{};
+    std::string _topic;
+    DataExchangeFormat _dataExchangeFormat;
+    std::map<std::string, std::string> _labels;
+    std::string _pubUUID;
+    size_t _history;
+
     mw::IComAdapterInternal* _comAdapter{nullptr};
-    mw::ServiceDescriptor _serviceDescriptor{};
     mw::sync::ITimeProvider* _timeProvider{nullptr};
+    mw::ServiceDescriptor _serviceDescriptor{};
 };
 
 // ================================================================================

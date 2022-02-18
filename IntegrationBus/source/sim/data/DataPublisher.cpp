@@ -8,15 +8,18 @@ namespace ib {
 namespace sim {
 namespace data {
 
-DataPublisher::DataPublisher(mw::IComAdapterInternal* comAdapter, cfg::DataPort config, mw::sync::ITimeProvider* timeProvider)
-  : _comAdapter{comAdapter}, _timeProvider{timeProvider}
+DataPublisher::DataPublisher(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+                             const std::string& topic, DataExchangeFormat dataExchangeFormat,
+                             const std::map<std::string, std::string>& labels, const std::string& pubUUID,
+                             size_t history)
+    : _comAdapter{comAdapter}
+    , _timeProvider{timeProvider}
+    , _topic{topic}
+    , _dataExchangeFormat{dataExchangeFormat}
+    , _labels{labels}
+    , _pubUUID{pubUUID}
+    , _history{history}
 {
-    _config = std::move(config);
-}
-
-auto DataPublisher::Config() const -> const cfg::DataPort&
-{
-    return _config;
 }
 
 void DataPublisher::Publish(std::vector<uint8_t> data)

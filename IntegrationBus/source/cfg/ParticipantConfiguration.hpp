@@ -120,8 +120,8 @@ struct DataPublisher
 {
     static constexpr NetworkType networkType = NetworkType::Data;
 
-    //! \brief History length of a DataPublisher.
-    size_t history = 0;
+    std::string name;
+    std::string network;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -131,6 +131,9 @@ struct DataPublisher
 struct DataSubscriber
 {
     static constexpr NetworkType networkType = NetworkType::Data;
+
+    std::string name;
+    std::string network;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -145,6 +148,9 @@ struct RpcServer
 {
     static constexpr NetworkType networkType = NetworkType::RPC;
 
+    std::string name;
+    std::string network;
+
     std::vector<std::string> useTraceSinks;
     Replay replay;
 };
@@ -154,12 +160,15 @@ struct RpcClient
 {
     static constexpr NetworkType networkType = NetworkType::RPC;
 
+    std::string name;
+    std::string network;
+
     std::vector<std::string> useTraceSinks;
     Replay replay;
 };
 
 // ================================================================================
-//  Heath checking service
+//  Health checking service
 // ================================================================================
 
 //! \brief Health checking service
@@ -264,7 +273,7 @@ inline auto CreateDummyConfiguration() -> std::shared_ptr<IParticipantConfigurat
 {
     ib::cfg::v1::datatypes::ParticipantConfiguration configDt;
     auto configPtr = std::make_shared<ib::cfg::ParticipantConfiguration>(std::move(configDt));
-    return std::move(configPtr);
+    return configPtr;
 }
 
 } // namespace v1

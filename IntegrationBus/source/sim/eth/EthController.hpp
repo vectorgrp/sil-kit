@@ -5,7 +5,6 @@
 #include "ib/sim/eth/IEthController.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
 #include "ib/mw/fwd_decl.hpp"
-#include "ib/cfg/Config.hpp"
 #include "ib/extensions/ITraceMessageSource.hpp"
 
 #include "IIbToEthController.hpp"

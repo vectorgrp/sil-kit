@@ -9,8 +9,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ib/cfg/Config.hpp"
-#include "ib/cfg/ConfigBuilder.hpp"
+#include "ParticipantConfiguration.hpp"
 
 #include "ib/mw/sync/string_utils.hpp"
 
@@ -37,6 +36,7 @@ protected:
 protected:
     WatchDogTest()
     {
+
     }
 
 protected:
@@ -51,17 +51,18 @@ protected:
 
 TEST_F(WatchDogTest, throw_if_warn_timeout_is_zero)
 {
-    EXPECT_THROW(WatchDog(0ms,10ms), std::runtime_error);
+    EXPECT_THROW(WatchDog(cfg::v1::datatypes::HealthCheck{ 0ms,10ms }), std::runtime_error);
 }
 
 TEST_F(WatchDogTest, throw_if_error_timeout_is_zero)
 {
-    EXPECT_THROW(WatchDog(10ms,0ms), std::runtime_error);
+    EXPECT_THROW(WatchDog(cfg::v1::datatypes::HealthCheck{ 10ms,0ms }), std::runtime_error);
 }
 
 TEST_F(WatchDogTest, warn_after_timeout)
 {
-    WatchDog watchDog{10ms, std::chrono::milliseconds::max()};
+    
+    WatchDog watchDog{ cfg::v1::datatypes::HealthCheck{10ms, std::chrono::milliseconds::max()} };
     watchDog.SetWarnHandler([this](auto timeout) { callbacks.WarnHandler(timeout); });
 
     watchDog.Start();
@@ -72,7 +73,7 @@ TEST_F(WatchDogTest, warn_after_timeout)
 
 TEST_F(WatchDogTest, error_after_timeout)
 {
-    WatchDog watchDog{10ms, 50ms};
+    WatchDog watchDog{ cfg::v1::datatypes::HealthCheck{10ms, 50ms} };
     watchDog.SetErrorHandler([this](auto timeout) { callbacks.ErrorHandler(timeout); });
 
     watchDog.Start();
@@ -83,7 +84,8 @@ TEST_F(WatchDogTest, error_after_timeout)
 
 TEST_F(WatchDogTest, warn_only_once)
 {
-    WatchDog watchDog{10ms, std::chrono::milliseconds::max()};
+
+    WatchDog watchDog{ cfg::v1::datatypes::HealthCheck{10ms, std::chrono::milliseconds::max()} };
     watchDog.SetWarnHandler([this](auto timeout) { callbacks.WarnHandler(timeout); });
     watchDog.SetErrorHandler([this](auto timeout) { callbacks.ErrorHandler(timeout); });
 
@@ -96,7 +98,7 @@ TEST_F(WatchDogTest, warn_only_once)
 
 TEST_F(WatchDogTest, error_only_once)
 {
-    WatchDog watchDog{10ms, 50ms};
+    WatchDog watchDog{ cfg::v1::datatypes::HealthCheck{10ms, 50ms} };
     watchDog.SetErrorHandler([this](auto timeout) { callbacks.ErrorHandler(timeout); });
 
     watchDog.Start();
@@ -107,7 +109,7 @@ TEST_F(WatchDogTest, error_only_once)
 
 TEST_F(WatchDogTest, no_callback_if_reset_in_time)
 {
-    WatchDog watchDog{2s, 3s};
+    WatchDog watchDog{ cfg::v1::datatypes::HealthCheck{2000ms, 3000ms} };
     watchDog.SetWarnHandler([this](auto timeout) { callbacks.WarnHandler(timeout); });
     watchDog.SetErrorHandler([this](auto timeout) { callbacks.ErrorHandler(timeout); });
 

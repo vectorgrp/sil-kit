@@ -30,7 +30,7 @@ void PublishMessage(IDataPublisher* publisher, std::string topicname)
 void ReceiveMessage(IDataSubscriber* subscriber, const std::vector<uint8_t>& data)
 {
     std::string message{data.begin(), data.end()};
-    std::cout << ">> Received new " << subscriber->Config().name << " Message: with data=\"" << message << "\""
+    std::cout << ">> Received new Message: with data=\"" << message << "\""
               << std::endl;
 }
 
@@ -85,7 +85,6 @@ int main(int argc, char** argv)
         auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
 
         auto&& participantController = comAdapter->GetParticipantController();
-
         participantController->SetInitHandler([&participantName](auto initCmd) {
             std::cout << "Initializing " << participantName << std::endl;
         });

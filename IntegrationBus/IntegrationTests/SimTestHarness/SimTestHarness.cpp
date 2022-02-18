@@ -51,15 +51,19 @@ class SimSystemController
 {
 public:
     SimSystemController() = delete;
-    SimSystemController(const ib::cfg::Config& config, uint32_t domainId)
-        : _cfg{config}
+    SimSystemController(const std::vector<std::string>& syncParticipantNames, uint32_t domainId) : _syncParticipantNames{syncParticipantNames}
     {
         auto dynamicConfiguration = ib::cfg::CreateDummyConfiguration();
+        auto dummyCfg = cfg::Config{};
+        ib::cfg::Participant dummyParticipant;
+        dummyParticipant.name = "SystemController";
+        dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
 
-        _comAdapter = ib::CreateSimulationParticipant(dynamicConfiguration, "SystemController", domainId, _cfg);
+        _comAdapter = ib::CreateSimulationParticipant(dynamicConfiguration, "SystemController", false, domainId, dummyCfg);
 
         _controller = _comAdapter->GetSystemController();
         _monitor = _comAdapter->GetSystemMonitor();
+        _monitor->SetSynchronizedParticipants(_syncParticipantNames);
 
         _monitor->RegisterSystemStateHandler(
             std::bind(&SimSystemController::OnSystemStateChanged, this, std::placeholders::_1)
@@ -73,13 +77,11 @@ public:
 
     void InitializeAll()
     {
-        for (const auto& participant : _cfg.simulationSetup.participants)
+        for (const auto& name : _syncParticipantNames)
         {
-            if (!participant.participantController)
-                continue;
             std::cout << "SimTestHarness: Sending ParticipantCommand::Init to participant \""
-                << participant.name << "\"" << std::endl;
-            _controller->Initialize(participant.name);
+                << name << "\"" << std::endl;
+            _controller->Initialize(name);
         }
     }
 
@@ -121,81 +123,36 @@ public:
         }
     }
 private:
-    ib::cfg::Config _cfg;
-
     ib::mw::sync::ISystemController* _controller;
     ib::mw::sync::ISystemMonitor* _monitor;
     std::unique_ptr<ib::mw::IComAdapter> _comAdapter;
+    std::vector<std::string> _syncParticipantNames;
     std::map<std::string, ib::mw::sync::ParticipantState> _participantStates; //for printing status updates
 };
 
 ////////////////////////////////////////
 // SimTestHarness
 ////////////////////////////////////////
-SimTestHarness::SimTestHarness(ib::cfg::Config config, uint32_t domainId, bool deferParticipantCreation)
-    : _config{config}
+SimTestHarness::SimTestHarness(const std::vector<std::string>& syncParticipantNames, uint32_t domainId, bool deferParticipantCreation)
+    : _syncParticipantNames{ syncParticipantNames }
     , _domainId{domainId}
 {
-    // we might have to declare a sync master among the participants
-    bool needSyncMaster =
-        _config.middlewareConfig.activeMiddleware == ib::cfg::Middleware::FastRTPS;
-    for (auto& participantConfig : _config.simulationSetup.participants)
-    {
-        if (participantConfig.isSyncMaster)
-        {
-            //the user configured a sync  master
-            needSyncMaster = false;
-            break;
-        }
-    }
 
-    if (needSyncMaster)
-    {
-        // no sync master was defined, so pick one at random:
-        _config.simulationSetup.participants.at(0).isSyncMaster = true;
-    }
-
-    // add participant for system controller
-    {
-        ib::mw::ParticipantId id{0};
-        for (const auto& participant : config.simulationSetup.participants)
-        {
-            id = ::std::max(participant.id, id);
-        }
-        ib::cfg::Participant scCfg{};
-        scCfg.name = "SystemController";
-        scCfg.id = id + 1;
-        _config.simulationSetup.participants.emplace_back(std::move(scCfg));
-    }
-    // start registry for VAsio
-    if (_config.middlewareConfig.activeMiddleware == ib::cfg::Middleware::VAsio)
-    {
-        _registry = ib::extensions::CreateIbRegistry(_config);
-        _registry->ProvideDomain(_domainId);
-    }
+    // start registry
+    ib::cfg::Config dummyCfg;
+    _registry = ib::extensions::CreateIbRegistry(dummyCfg);
+    _registry->ProvideDomain(_domainId);
 
     // configure and add participants
-    _config.simulationSetup.timeSync.tickPeriod = std::chrono::milliseconds{1};
-    for (auto& participantConfig : _config.simulationSetup.participants)
+    if (!deferParticipantCreation)
     {
-        if (participantConfig.name == "SystemController")
+        for (auto&& name : _syncParticipantNames)
         {
-            continue;
-        }
-
-        if (!participantConfig.participantController)
-        {
-            ib::cfg::ParticipantController pc{};
-            pc.syncType = ib::cfg::SyncType::DiscreteTime;
-            participantConfig.participantController = std::move(pc);
-        }
-        if (!deferParticipantCreation)
-        {
-            AddParticipant(participantConfig);
+            AddParticipant(name);
         }
     }
 
-    _simSystemController = std::make_unique<SimSystemController>(_config, _domainId);
+    _simSystemController = std::make_unique<SimSystemController>(_syncParticipantNames, _domainId);
 }
 
 SimTestHarness::~SimTestHarness() = default;
@@ -256,15 +213,9 @@ SimParticipant* SimTestHarness::GetParticipant(const std::string& participantNam
     if (_simParticipants.count(participantName) == 0)
     {
         //deferred participant creation
-        auto it = std::find_if(_config.simulationSetup.participants.begin(),
-            _config.simulationSetup.participants.end(),
-            [&participantName](auto cfg)
-            {
-                return cfg.name == participantName;
-            }
-        );
+        auto it = std::find(_syncParticipantNames.begin(), _syncParticipantNames.end(), participantName);
                 
-        if (it == _config.simulationSetup.participants.end())
+        if (it == _syncParticipantNames.end())
         {
             throw std::runtime_error{ "SimTestHarness::GetParticipant: unknown participant " + participantName };
         }
@@ -273,14 +224,20 @@ SimParticipant* SimTestHarness::GetParticipant(const std::string& participantNam
     return _simParticipants[participantName].get();
 }
 
-void SimTestHarness::AddParticipant(ib::cfg::Participant participantConfig)
+void SimTestHarness::AddParticipant(const std::string& participantName)
 {
     auto dynamicConfiguration = ib::cfg::CreateDummyConfiguration();
+    ib::cfg::Config dummyCfg;
+    ib::cfg::Participant dummyParticipant;
+    dummyParticipant.participantController = ib::cfg::ParticipantController{};
+    dummyParticipant.name = participantName;
+
+    dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
 
     auto participant = std::make_unique<SimParticipant>();
-    participant->_name = participantConfig.name;
+    participant->_name = participantName;
     participant->_comAdapter = 
-        ib::CreateSimulationParticipant(dynamicConfiguration, participantConfig.name, _domainId, _config);
+        ib::CreateSimulationParticipant(dynamicConfiguration, participantName, true, _domainId, dummyCfg);
 
     //    Let's make sure the SystemController is cached, in case the user
     //    needs it during simulation (e.g., calling Stop()).
@@ -294,11 +251,11 @@ void SimTestHarness::AddParticipant(ib::cfg::Participant participantConfig)
         //std::cout << name << ": SimulationTask not defined!" << std::endl;
     });
 
-    partCtrl->SetInitHandler([name = participantConfig.name](auto){
+    partCtrl->SetInitHandler([name = participantName](auto){
         std::cout << "SimTestHarness: "  << name << " Init was called!" << std::endl;
     });
 
-    _simParticipants[participantConfig.name] = std::move(participant);
+    _simParticipants[participantName] = std::move(participant);
 }
 
 

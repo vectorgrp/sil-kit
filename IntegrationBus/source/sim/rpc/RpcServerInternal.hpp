@@ -24,8 +24,10 @@ class RpcServerInternal : public IIbToRpcServerInternal,
                   public mw::IIbServiceEndpoint
 {
   public:
-    RpcServerInternal(mw::IComAdapterInternal* comAdapter, cfg::RpcPort config, mw::sync::ITimeProvider* timeProvider,
-        ib::sim::rpc::CallProcessor handler, IRpcServer* parent);
+    RpcServerInternal(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+                      const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
+                      const std::map<std::string, std::string>& labels, const std::string& clientUUID,
+                      ib::sim::rpc::CallProcessor handler, IRpcServer* parent);
 
     void SetRpcHandler(CallProcessor handler);
 
@@ -44,13 +46,18 @@ class RpcServerInternal : public IIbToRpcServerInternal,
 
   private:
 
-    // private Members
-    cfg::RpcPort             _config{};
+    std::string _functionName;
+    sim::rpc::RpcExchangeFormat _exchangeFormat;
+    std::map<std::string, std::string> _labels;
+    std::string _clientUUID;
+    CallProcessor _handler;
+    IRpcServer* _parent;
+
+    cfg::RpcPort _config{};
     mw::IComAdapterInternal* _comAdapter{nullptr};
-    mw::ServiceDescriptor    _serviceDescriptor{};
     mw::sync::ITimeProvider* _timeProvider{nullptr};
-    CallProcessor            _handler;
-    IRpcServer*              _parent;
+    mw::ServiceDescriptor _serviceDescriptor{};
+
     std::map<std::string, std::unique_ptr<CallHandleImpl>> _receivedCallHandles;
 
 };

@@ -58,14 +58,13 @@ bool operator==(const FlexRayController& lhs, const FlexRayController& rhs)
 
 bool operator==(const DataPublisher& lhs, const DataPublisher& rhs)
 {
-    return lhs.history == rhs.history
-        && lhs.useTraceSinks == rhs.useTraceSinks
+    return lhs.useTraceSinks == rhs.useTraceSinks 
         && lhs.replay == rhs.replay;
 }
 
 bool operator==(const DataSubscriber& lhs, const DataSubscriber& rhs)
 {
-    return lhs.useTraceSinks == rhs.useTraceSinks
+    return lhs.useTraceSinks == rhs.useTraceSinks 
         && lhs.replay == rhs.replay;
 }
 
@@ -196,6 +195,13 @@ auto ib::cfg::ReadParticipantConfigurationFromYamlString(const std::string& yaml
     std::cout << "Warning: This implementation currently returns a non-functional dummy." << std::endl;
     ib::cfg::v1::datatypes::ParticipantConfiguration configDt;
     ib::cfg::ParticipantConfiguration* config = new ib::cfg::ParticipantConfiguration(std::move(configDt));
+
+    // Dummy logging
+    auto sink = cfg::v1::datatypes::Sink{};
+    sink.level = ib::mw::logging::Level::Debug;
+    sink.type = cfg::v1::datatypes::Sink::Type::Stdout;
+    config->_data.logging.sinks.push_back(sink);
+
     auto configPtr = std::shared_ptr<ib::cfg::ParticipantConfiguration>(config);
     return std::move(configPtr);
 }

@@ -26,14 +26,13 @@ class RpcServer
     , public mw::IIbServiceEndpoint
 {
 public:
-    RpcServer(mw::IComAdapterInternal* comAdapter, cfg::RpcPort config,
-        mw::sync::ITimeProvider* timeProvider, CallProcessor handler);
+    RpcServer(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+              const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
+              const std::map<std::string, std::string>& labels, CallProcessor handler);
 
     void RegisterServiceDiscovery();
 
     void SetRpcHandler(CallProcessor handler) override;
-
-    auto Config() const -> const cfg::RpcPort& override;
 
     void SubmitResult(IRpcCallHandle* callHandle, std::vector<uint8_t> resultData) override;
 
@@ -49,12 +48,15 @@ private:
     void AddInternalRpcServer(const std::string& clientUUID, RpcExchangeFormat joinedExchangeFormat,
                               const std::map<std::string, std::string>& clientLabels);
 
-    cfg::RpcPort _config{};
-    mw::IComAdapterInternal* _comAdapter{nullptr};
-    mw::ServiceDescriptor _serviceDescriptor{};
-    mw::sync::ITimeProvider* _timeProvider{nullptr};
-    std::vector<RpcServerInternal*> _internalRpcServers;
+    std::string _functionName;
+    sim::rpc::RpcExchangeFormat _exchangeFormat;
+    std::map<std::string, std::string> _labels;
     CallProcessor _handler;
+
+    mw::IComAdapterInternal* _comAdapter{nullptr};
+    mw::sync::ITimeProvider* _timeProvider{nullptr};
+    mw::ServiceDescriptor _serviceDescriptor{};
+    std::vector<RpcServerInternal*> _internalRpcServers;
     mw::logging::ILogger* _logger;
 
 };

@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <string>
+#include <vector>
 
 #include "ib/mw/EndpointAddress.hpp"
 
@@ -85,6 +86,10 @@ enum class SystemState : uint8_t {
     Shutdown //!< The shutdown state
 };
 
+struct ExpectedParticipants
+{
+    std::vector<std::string> names;
+};
 
 } // namespace sync
 } // namespace mw

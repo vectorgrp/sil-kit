@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
 
@@ -56,16 +55,7 @@ protected:
             testMessages[index].expectedData = messageBuilder.str();
         }
 
-        ib::cfg::ConfigBuilder builder{"TestConfig"};
-        auto &&setup = builder.SimulationSetup();
-        setup.AddParticipant("EthWriter")
-            ->AddEthernet("ETH1").WithLink("LINK1");
-        setup.AddParticipant("EthReader1")
-            ->AddEthernet("ETH1").WithLink("LINK1");
-        setup.AddParticipant("EthReader2")
-            ->AddEthernet("ETH1").WithLink("LINK1");
-
-        ibConfig = builder.Build();
+        syncParticipantNames = { "EthWriter" ,"EthReader1" ,"EthReader2" };
     }
 
     void SetupSender(ib::test::SimParticipant* participant)
@@ -132,7 +122,7 @@ protected:
 
     void ExecuteTest()
     {
-        ib::test::SimTestHarness testHarness(ibConfig, domainId);
+        ib::test::SimTestHarness testHarness(syncParticipantNames, domainId);
 
         //participant setup
         auto* ethWriter  = testHarness.GetParticipant("EthWriter");
@@ -179,7 +169,8 @@ protected:
 
 protected:
     uint32_t domainId;
-    ib::cfg::Config ibConfig;
+    //ib::cfg::Config ibConfig;
+    std::vector<std::string> syncParticipantNames;
 
     struct TestMessage
     {
@@ -195,10 +186,8 @@ protected:
     Callbacks callbacks;
 };
 
-TEST_F(ThreeEthControllerITest, test_eth_ack_callbacks_vasio)
+TEST_F(ThreeEthControllerITest, test_eth_ack_callbacks)
 {
-    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
-
     ExecuteTest();
 }
 
@@ -239,11 +228,14 @@ auto makeLoggingConfig() -> ib::cfg::Config
     return builder.Build();
 }
 
-TEST_F(ThreeEthControllerITest, test_vasio_logging_orthogonal)
-{
-    ibConfig = makeLoggingConfig();
-    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
 
-    ExecuteTest();
-}
+// TODO Reactivate after logging can be configured
+//TEST_F(ThreeEthControllerITest, DISABLED_test_vasio_logging_orthogonal)
+//{
+//    ibConfig = makeLoggingConfig();
+//    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
+//
+//    ExecuteTest();
+//}
+
 } // anonymous namespace

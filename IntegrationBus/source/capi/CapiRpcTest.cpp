@@ -26,11 +26,6 @@ MATCHER_P(PayloadMatcher, controlPayload, "matches data payloads by their conten
 
 class MockRpcClient : public ib::sim::rpc::IRpcClient {
 public:
-    auto Config() const -> const ib::cfg::RpcPort&
-    {
-        static const ib::cfg::RpcPort portCfg{};
-        return portCfg;
-    };
     MOCK_METHOD1(Call, ib::sim::rpc::IRpcCallHandle*(std::vector<uint8_t> data));
     virtual ib::sim::rpc::IRpcCallHandle* Call(const uint8_t* data, std::size_t size) { return nullptr; };
 
@@ -40,11 +35,6 @@ public:
 };
 class MockRpcServer : public ib::sim::rpc::IRpcServer{
 public:
-    auto Config() const -> const ib::cfg::RpcPort&
-    {
-        static const ib::cfg::RpcPort portCfg{};
-        return portCfg;
-    };
     MOCK_METHOD2(SubmitResult, void(ib::sim::rpc::IRpcCallHandle* callHandle, std::vector<uint8_t> resultData));
 
     MOCK_METHOD1(SetRpcHandler,

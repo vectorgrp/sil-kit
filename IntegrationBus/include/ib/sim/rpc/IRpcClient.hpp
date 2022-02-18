@@ -4,7 +4,6 @@
 
 #include <future>
 
-#include "ib/cfg/Config.hpp"
 #include "RpcDatatypes.hpp"
 
 namespace ib {
@@ -16,11 +15,7 @@ class IRpcClient
 {
 public:
 
-
     virtual ~IRpcClient() = default;
-
-    //! \brief Get the config struct used to setup this IRpcClient
-    virtual auto Config() const -> const cfg::RpcPort& = 0;
 
     /*! \brief Detach a call to one or multiple corresponding Rpc servers
     * 

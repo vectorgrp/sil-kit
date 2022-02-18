@@ -13,7 +13,7 @@ namespace mw {
 namespace {
 struct NullConnection
 {
-    NullConnection(ib::cfg::Config /*config*/, std::string /*participantName*/, ib::mw::ParticipantId /*participantId*/) {}
+    NullConnection(std::shared_ptr<ib::cfg::vasio::v1::MiddlewareConfiguration> /*config*/, std::string /*participantName*/, ib::mw::ParticipantId /*participantId*/) {}
 
     void SetLogger(logging::ILogger* /*logger*/) {}
     void JoinDomain(uint32_t /*domainId*/) {}

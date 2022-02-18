@@ -36,7 +36,7 @@ void Call(IRpcClient* client)
     auto callHandle = client->Call(argumentData);
     if (callHandle)
     {
-        std::cout << "<< Calling '" << client->Config().name << "' with argumentData=" << argumentData << std::endl;
+        std::cout << "<< Calling with argumentData=" << argumentData << std::endl;
     }
 }
 
@@ -46,13 +46,13 @@ void CallReturn(IRpcClient* client, IRpcCallHandle* callHandle,
     switch (callStatus)
     {
     case CallStatus::Success:
-        std::cout << ">> '" << client->Config().name << "' returned with returnData=" << returnData << std::endl;
+        std::cout << ">> Call returned with returnData=" << returnData << std::endl;
         break;
     case CallStatus::ServerNotReachable:
-        std::cout << "Warning: Calling '" << client->Config().name << "' failed with CallStatus::ServerNotReachable" << std::endl;
+        std::cout << "Warning: Call failed with CallStatus::ServerNotReachable" << std::endl;
         break;
     case CallStatus::UndefinedError:
-        std::cout << "Warning: Calling '" << client->Config().name << "' failed with CallStatus::UndefinedError" << std::endl;
+        std::cout << "Warning: Call failed with CallStatus::UndefinedError" << std::endl;
         break;
     }
 }
@@ -62,7 +62,7 @@ void RemoteFunc_Add100(IRpcServer* server, IRpcCallHandle* callHandle, const std
     auto returnData{ argumentData };
     for (auto& v : returnData)
         v += 100;
-    std::cout << ">> Received call to '" << server->Config().name << "' with argumentData=" << argumentData
+    std::cout << ">> Received call with argumentData=" << argumentData
               << ", returning resultData=" << returnData << std::endl;
 
     server->SubmitResult(callHandle, returnData);
@@ -72,7 +72,7 @@ void RemoteFunc_Sort(IRpcServer* server, IRpcCallHandle* callHandle, const std::
 {
     auto returnData{argumentData};
     std::sort(returnData.begin(), returnData.end());
-    std::cout << ">> Received call to '" << server->Config().name << "' with argumentData=" << argumentData
+    std::cout << ">> Received call with argumentData=" << argumentData
               << ", returning resultData=" << returnData << std::endl;
 
     server->SubmitResult(callHandle, returnData);
@@ -120,10 +120,12 @@ int main(int argc, char** argv)
         participantController->SetPeriod(1s);
         if (participantName == "Client")
         {
+            std::string clientAFunctionName = "Add100";
             auto exchangeFormatClientA = RpcExchangeFormat{"application/octet-stream"};
             std::map<std::string, std::string> labelsClientA{ {"KeyA", "ValA"} };
-            auto clientA = comAdapter->CreateRpcClient("Add100", exchangeFormatClientA, labelsClientA, &CallReturn);
+            auto clientA = comAdapter->CreateRpcClient(clientAFunctionName, exchangeFormatClientA, labelsClientA, &CallReturn);
 
+            std::string clientBFunctionName = "Sort";
             auto exchangeFormatClientB = RpcExchangeFormat{""};
             std::map<std::string, std::string> labelsClientB{ {"KeyC", "ValC"} };
             auto clientB = comAdapter->CreateRpcClient("Sort", exchangeFormatClientB, labelsClientB, &CallReturn);

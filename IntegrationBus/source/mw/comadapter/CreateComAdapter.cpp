@@ -38,11 +38,11 @@ auto CreateComAdapterImpl(ib::cfg::Config config, const std::string& participant
 }
 
 auto CreateVAsioSimulationParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                                          const std::string& participantName, cfg::Config config)
+                                          const std::string& participantName, bool isSynchronized, cfg::Config config)
     -> std::unique_ptr<IComAdapterInternal>
 {
 #if defined(IB_MW_HAVE_VASIO)
-    return std::make_unique<ComAdapter<VAsioConnection>>(std::move(participantConfig), participantName, std::move(config));
+    return std::make_unique<ComAdapter<VAsioConnection>>(std::move(participantConfig), participantName, isSynchronized, std::move(config));
 #else
     std::cout << "ERROR: CreateVasioComAdapterImpl(): IntegrationBus was compiled without \"IB_MW_HAVE_VASIO\""
               << std::endl;
@@ -51,10 +51,10 @@ auto CreateVAsioSimulationParticipantImpl(std::shared_ptr<ib::cfg::IParticipantC
 }
 
 auto CreateSimulationParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                                     const std::string& participantName, cfg::Config config)
+                                     const std::string& participantName, bool isSynchronized, cfg::Config config)
     -> std::unique_ptr<IComAdapterInternal>
 {
-    return CreateVAsioSimulationParticipantImpl(std::move(participantConfig), participantName, std::move(config));
+    return CreateVAsioSimulationParticipantImpl(std::move(participantConfig), participantName, isSynchronized, std::move(config));
 }
 
 } // mw

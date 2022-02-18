@@ -21,7 +21,7 @@ The main entry point of the C API is the function to obtain a ib_SimulationParti
     const char* participantName = "CanWriter";
     const char* domainId = "1";
     ib_ReturnCode result = ib_SimulationParticipant_Create(&participant, jsonString,
-                                                            participantName, domainId);
+                                                            participantName, ib_False, domainId);
 
 All further services of the C API of the IntegrationBus are requested through this SimulationParticipant.
 

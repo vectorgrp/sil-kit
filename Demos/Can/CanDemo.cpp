@@ -101,7 +101,10 @@ int main(int argc, char** argv)
         auto sleepTimePerTick = 1000ms;
 
         std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-        auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
+
+        auto comAdapter = ib::CreateSimulationParticipant(ib::cfg::ReadParticipantConfigurationFromYamlString(""),
+                                                          participantName, true, domainId, ib::cfg::Config{});
+
         auto* logger = comAdapter->GetLogger();
         auto* participantController = comAdapter->GetParticipantController();
         auto* canController = comAdapter->CreateCanController("CAN1", "CAN1");

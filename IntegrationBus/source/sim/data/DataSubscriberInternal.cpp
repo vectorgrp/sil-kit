@@ -10,16 +10,19 @@ namespace ib {
 namespace sim {
 namespace data {
 
-DataSubscriberInternal::DataSubscriberInternal(mw::IComAdapterInternal* comAdapter, cfg::DataPort config, mw::sync::ITimeProvider* timeProvider, DataHandlerT defaultHandler, IDataSubscriber* parent)
-  : _comAdapter{comAdapter}, _timeProvider{timeProvider}, _defaultHandler{ defaultHandler }, _parent {parent}
+DataSubscriberInternal::DataSubscriberInternal(mw::IComAdapterInternal* comAdapter,
+                                               mw::sync::ITimeProvider* timeProvider, const std::string& topic,
+                                               DataExchangeFormat dataExchangeFormat,
+                                               const std::map<std::string, std::string>& labels,
+                                               DataHandlerT defaultHandler, IDataSubscriber* parent)
+    : _comAdapter{comAdapter}
+    , _timeProvider{timeProvider}
+    , _topic{topic}
+    , _dataExchangeFormat{dataExchangeFormat}
+    , _labels{labels}
+    , _defaultHandler{defaultHandler}
+    , _parent{parent}
 {
-    // NB: _config contains the joined dataExchangeFormat
-    _config = std::move(config);
-}
-
-auto DataSubscriberInternal::Config() const -> const cfg::DataPort&
-{
-    return _config;
 }
 
 void DataSubscriberInternal::SetDefaultReceiveMessageHandler(DataHandlerT handler)

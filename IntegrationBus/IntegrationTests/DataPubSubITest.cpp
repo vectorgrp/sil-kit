@@ -8,15 +8,13 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "ib/extensions/CreateExtension.hpp"
+
 #include "ib/IntegrationBus.hpp"
 #include "ib/cfg/string_utils.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/sim/all.hpp"
-
-#include "ib/cfg/Config.hpp"
-#include "ib/cfg/ConfigBuilder.hpp"
-#include "ib/extensions/CreateExtension.hpp"
-
+#include "ParticipantConfiguration.hpp"
 
 namespace {
 
@@ -166,64 +164,6 @@ protected:
         ISystemMonitor*              systemMonitor;
     };
 
-    auto BuildConfig(std::vector<PublisherParticipant>& publishers, std::vector<SubscriberParticipant>& subscribers, Middleware middleware, bool sync) -> Config
-    {
-        const auto loglevel = logging::Level::Info;
-        ConfigBuilder config("PubSubTestConfigGenerated");
-        auto&& simulationSetup = config.SimulationSetup();
-
-        auto syncType = SyncType::Unsynchronized;
-        if (sync)
-        {
-            syncType = SyncType::DistributedTimeQuantum;
-        }
-
-        uint32_t participantCount = static_cast<uint32_t>(publishers.size() + subscribers.size());
-        std::vector<ParticipantBuilder*> participants;
-        for (const auto& pub : publishers)
-        {
-            for (const auto& dp : pub.dataPublishers)
-            {
-                simulationSetup.AddOrGetLink(Link::Type::DataMessage, dp.topic);
-            }
-            auto&& participant = simulationSetup.AddParticipant(pub.name);
-            participant.ConfigureLogger().WithFlushLevel(loglevel).AddSink(Sink::Type::Stdout).WithLogLevel(loglevel);
-            if (sync)
-            {
-                participant.AddParticipantController().WithSyncType(syncType);
-            }
-            for (const auto& dp : pub.dataPublishers)
-            {
-                participant.AddDataPublisher(dp.topic).WithLink(dp.topic);
-            }
-            participants.emplace_back(&participant);
-        }
-        for (const auto& sub : subscribers)
-        {
-            for (const auto& dp : sub.dataSubscribers)
-            {
-                simulationSetup.AddOrGetLink(Link::Type::DataMessage, dp.topic);
-            }
-            auto&& participant = simulationSetup.AddParticipant(sub.name);
-            participant.ConfigureLogger().WithFlushLevel(loglevel).AddSink(Sink::Type::Stdout).WithLogLevel(loglevel);
-            if (sync)
-            {
-                participant.AddParticipantController().WithSyncType(syncType);
-            }
-            for (const auto& dp : sub.dataSubscribers)
-            {
-                participant.AddDataSubscriber(dp.topic).WithLink(dp.topic);
-            }
-            participants.emplace_back(&participant);
-        }
-
-        auto&& systemMasterParticipant = simulationSetup.AddParticipant(systemMasterName);
-        systemMasterParticipant.ConfigureLogger().WithFlushLevel(loglevel).AddSink(Sink::Type::Stdout).WithLogLevel(loglevel);
-
-        config.WithActiveMiddleware(middleware);
-        return config.Build();
-    }
-
     void ParticipantStatusHandler(const ParticipantStatus& newStatus)
     {
         switch (newStatus.state)
@@ -242,11 +182,9 @@ protected:
         switch (newState)
         {
         case SystemState::Idle:
-            for (auto&& participant : ibConfig.simulationSetup.participants)
+            for (auto&& name : syncParticipantNames)
             {
-                if (participant.name == systemMasterName)
-                    continue;
-                systemMaster.systemController->Initialize(participant.name);
+                systemMaster.systemController->Initialize(name);
             }
             break;
 
@@ -277,7 +215,8 @@ protected:
     {
         try
         {
-            participant.comAdapter = ib::CreateComAdapter(ibConfig, participant.name, domainId);
+            participant.comAdapter = ib::CreateSimulationParticipant(
+                ib::cfg::CreateDummyConfiguration(), participant.name, sync, domainId, DummyCfg(participant.name, sync));
 
             IParticipantController* participantController;
             if (sync)
@@ -373,7 +312,9 @@ protected:
     {
         try
         {
-            participant.comAdapter = ib::CreateComAdapter(ibConfig, participant.name, domainId);
+            participant.comAdapter = ib::CreateSimulationParticipant(
+                ib::cfg::CreateDummyConfiguration(), participant.name, sync, domainId, DummyCfg(participant.name, sync));
+
             IParticipantController* participantController;
             if (sync)
             {
@@ -523,11 +464,12 @@ protected:
 
     }
 
-    void RunVasioRegistry(uint32_t domainId)
+    void RunRegistry(uint32_t domainId)
     {
         try
         {
-            registry = ib::extensions::CreateIbRegistry(ibConfig);
+            ib::cfg::Config dummyCfg;
+            registry = ib::extensions::CreateIbRegistry(dummyCfg);
             registry->ProvideDomain(domainId);
         }
         catch (const Misconfiguration& error)
@@ -548,9 +490,13 @@ protected:
     {
         try
         {
-            systemMaster.comAdapter = ib::CreateComAdapter(ibConfig, systemMasterName, domainId);
+            systemMaster.comAdapter = ib::CreateSimulationParticipant(
+                ib::cfg::CreateDummyConfiguration(), systemMasterName, false, domainId, DummyCfg(systemMasterName, false));
+
             systemMaster.systemController = systemMaster.comAdapter->GetSystemController();
             systemMaster.systemMonitor = systemMaster.comAdapter->GetSystemMonitor();
+
+            systemMaster.systemMonitor->SetSynchronizedParticipants(syncParticipantNames);
 
             systemMaster.systemMonitor->RegisterSystemStateHandler(
                 [this](SystemState newState) { SystemStateHandler(newState); });
@@ -632,13 +578,22 @@ protected:
     }
 
     void SetupSystem(uint32_t domainId, bool sync, std::vector<PublisherParticipant>& publishers,
-                     std::vector<SubscriberParticipant>& subscribers, Middleware middleware)
+                     std::vector<SubscriberParticipant>& subscribers)
     {
-        ibConfig = BuildConfig(publishers, subscribers, middleware, sync);
-        if (middleware == Middleware::VAsio)
+        if (sync)
         {
-            RunVasioRegistry(domainId);
+            for (auto& s : subscribers)
+            {
+                syncParticipantNames.push_back(s.name);
+            }
+            for (auto& p : publishers)
+            {
+                syncParticipantNames.push_back(p.name);
+            }
         }
+
+        RunRegistry(domainId);
+
         if (sync)
         {
             RunSystemMaster(domainId);
@@ -693,11 +648,24 @@ protected:
         registry.reset();
     }
 
+    ib::cfg::Config DummyCfg(const std::string& participantName, bool sync)
+    {
+        ib::cfg::Config dummyCfg;
+        ib::cfg::Participant dummyParticipant;
+        if (sync)
+        {
+            dummyParticipant.participantController = ib::cfg::ParticipantController{};
+        }
+        dummyParticipant.name = participantName;
+        dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
+        return dummyCfg;
+    }
+
 protected:
-    ib::cfg::Config                              ibConfig;
+    std::vector<std::string> syncParticipantNames;
     std::unique_ptr<ib::extensions::IIbRegistry> registry;
-    SystemMaster                                 systemMaster;
-    std::vector<std::thread>                     pubSubThreads;
+    SystemMaster systemMaster;
+    std::vector<std::thread> pubSubThreads;
 
     std::chrono::milliseconds communicationTimeout{20000ms};
     std::chrono::milliseconds asyncDelayBetweenPublication{500ms};
@@ -712,7 +680,6 @@ protected:
 // One publisher participant, one subscriber participant
 TEST_F(DataPubSubITest, test_1pub_1sub_sync_vasio)
 {
-    const auto middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numMsgToPublish = 3;
@@ -726,7 +693,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_sync_vasio)
     publishers.push_back({ "Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}} });
     subscribers.push_back({ "Sub1", {{"TopicA",  "A", {}, messageSize, numMsgToReceive, 1, {}, {} }} });
 
-    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+    SetupSystem(domainId, sync, publishers, subscribers);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
@@ -756,7 +723,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_largemsg_sync_vasio)
     publishers.push_back({"Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
     subscribers.push_back({"Sub1", {{"TopicA",  "A", {}, messageSize, numMsgToReceive, 1, {}, {}}}});
 
-    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+    SetupSystem(domainId, sync, publishers, subscribers);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
@@ -773,7 +740,6 @@ TEST_F(DataPubSubITest, test_1pub_1sub_largemsg_sync_vasio)
 // 100 topics on one publisher/subscriber participant
 TEST_F(DataPubSubITest, test_1pub_1sub_100topics_sync_vasio)
 {
-    const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numMsgToPublish = 1;
@@ -795,7 +761,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_100topics_sync_vasio)
         subscribers[0].dataSubscribers.push_back(std::move(sInfo));
     }
 
-    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+    SetupSystem(domainId, sync, publishers, subscribers);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
@@ -812,7 +778,6 @@ TEST_F(DataPubSubITest, test_1pub_1sub_100topics_sync_vasio)
 // One publisher participant, two subscribers participants on same topic
 TEST_F(DataPubSubITest, test_1pub_2sub_sync_vasio)
 {
-    const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numMsgToPublish = 3;
@@ -826,7 +791,7 @@ TEST_F(DataPubSubITest, test_1pub_2sub_sync_vasio)
     subscribers.push_back({"Sub1", {{"TopicA",  "A", {}, messageSize, numMsgToReceive, 1, {}, {}}}});
     subscribers.push_back({"Sub2", {{"TopicA",  "A", {}, messageSize, numMsgToReceive, 1, {}, {}}}});
 
-    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+    SetupSystem(domainId, sync, publishers, subscribers);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
@@ -843,7 +808,6 @@ TEST_F(DataPubSubITest, test_1pub_2sub_sync_vasio)
 // Two publisher participants, one subscriber participant on same topic: Expect all to arrive but arbitrary reception order
 TEST_F(DataPubSubITest, test_2pub_1sub_sync_vasio)
 {
-    const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numMsgToPublish = 3;
@@ -863,7 +827,7 @@ TEST_F(DataPubSubITest, test_2pub_1sub_sync_vasio)
     }
     subscribers.push_back({ "Sub1", {{"TopicA",  "A", {}, messageSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}}} });
 
-    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+    SetupSystem(domainId, sync, publishers, subscribers);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
@@ -880,7 +844,6 @@ TEST_F(DataPubSubITest, test_2pub_1sub_sync_vasio)
 // Seven participants, multiple topics
 TEST_F(DataPubSubITest, test_3pub_4sub_4topics_sync_vasio)
 {
-    const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numMsgToPublish = 3;
@@ -905,7 +868,7 @@ TEST_F(DataPubSubITest, test_3pub_4sub_4topics_sync_vasio)
     subscribers.push_back({ "Sub3", {{"TopicC", "C", {}, messageSize, numMsgToPublish, 1, {}, {}}} });
     subscribers.push_back({ "Sub4", {{"TopicD", "D", {}, messageSize, numMsgToPublish, 1, {}, {}}}});
 
-    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+    SetupSystem(domainId, sync, publishers, subscribers);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
@@ -922,7 +885,6 @@ TEST_F(DataPubSubITest, test_3pub_4sub_4topics_sync_vasio)
 // Wrong topic -> Expect no reception
 TEST_F(DataPubSubITest, test_1pub_1sub_wrong_topic_sync_vasio)
 {
-    const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numMsgToPublish = 3;
@@ -935,7 +897,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_topic_sync_vasio)
     publishers.push_back({"Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
     subscribers.push_back({"Sub1", {{"TopicB",  "A", {}, messageSize, numMsgToReceive, 0, {}, {}}}});
 
-    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+    SetupSystem(domainId, sync, publishers, subscribers);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
@@ -952,7 +914,6 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_topic_sync_vasio)
 // Matching labels
 TEST_F(DataPubSubITest, test_1pub_1sub_label_sync_vasio)
 {
-    const auto middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numMsgToPublish = 3;
@@ -965,7 +926,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_label_sync_vasio)
     publishers.push_back({"Pub1", {{"TopicA", "A", {{"kA", "vA"}, {"kB", "vB"}}, 0, messageSize, numMsgToPublish}}});
     subscribers.push_back({"Sub1", {{"TopicA", "A", {{"kA", "vA"}, {"kB", ""}}, messageSize, numMsgToReceive, 1, {{"kA", "vA"}, {"kB", "vB"}}, {}}}});
 
-    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+    SetupSystem(domainId, sync, publishers, subscribers);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
@@ -982,7 +943,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_label_sync_vasio)
 // Wrong label value -> Expect no reception
 TEST_F(DataPubSubITest, test_1pub_1sub_wrong_labels_sync_vasio)
 {
-    const auto middleware = Middleware::VAsio;
+    
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numMsgToPublish = 3;
@@ -995,7 +956,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_labels_sync_vasio)
     publishers.push_back({"Pub1", {{"TopicA", "A", {{"k", "v"}}, 0, messageSize, numMsgToPublish}}});
     subscribers.push_back({"Sub1", {{"TopicA", "B", {{"k", "wrong"}}, messageSize, numMsgToReceive, 0, {{"k", "v"}}, {}}}});
 
-    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+    SetupSystem(domainId, sync, publishers, subscribers);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
@@ -1012,7 +973,6 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_labels_sync_vasio)
 // Wrong dataExchangeFormat -> Expect no reception
 TEST_F(DataPubSubITest, test_1pub_1sub_wrong_dxf_sync_vasio)
 {
-    const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numMsgToPublish = 3;
@@ -1025,7 +985,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_dxf_sync_vasio)
     publishers.push_back({"Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
     subscribers.push_back({"Sub1", {{"TopicA", "B", {}, messageSize, numMsgToReceive, 0, {}, {}}}});
 
-    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+    SetupSystem(domainId, sync, publishers, subscribers);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
@@ -1042,7 +1002,6 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_dxf_sync_vasio)
 // Wildcard dataExchangeFormat on subscriber
 TEST_F(DataPubSubITest, test_1pub_1sub_wildcard_dxf_sync_vasio)
 {
-    const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numMsgToPublish = 3;
@@ -1055,7 +1014,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wildcard_dxf_sync_vasio)
     publishers.push_back({"Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
     subscribers.push_back({"Sub1", {{"TopicA", "", {}, messageSize, numMsgToReceive, 1, {}, {}}}});
 
-    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+    SetupSystem(domainId, sync, publishers, subscribers);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
@@ -1076,7 +1035,6 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wildcard_dxf_sync_vasio)
 // Check for incoming labels
 TEST_F(DataPubSubITest, test_2pub_1sub_expectlabels_sync_vasio)
 {
-    const auto middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numMsgToPublish = 3;
@@ -1096,7 +1054,7 @@ TEST_F(DataPubSubITest, test_2pub_1sub_expectlabels_sync_vasio)
     }
     subscribers.push_back({"Sub1", {{"TopicA", "A", {}, messageSize, numMsgToReceive, 1, expectedDataUnordered, {{"kA", "vA"}, {"kB", "vB"}}, {}}}});
 
-    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+    SetupSystem(domainId, sync, publishers, subscribers);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
@@ -1113,7 +1071,6 @@ TEST_F(DataPubSubITest, test_2pub_1sub_expectlabels_sync_vasio)
 // Use specific handlers and no default handler
 TEST_F(DataPubSubITest, test_3pub_1sub_specificHandlers_sync_vasio)
 {
-    const auto middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numMsgToPublish = 3;
@@ -1141,7 +1098,7 @@ TEST_F(DataPubSubITest, test_3pub_1sub_specificHandlers_sync_vasio)
     subscribers.push_back({ "Sub1",
         {{"TopicA", "A", {{"kA", ""}}, messageSize, numMsgToReceive, 1, expectedDataUnordered, {{"kA", "vA"}, {"kB", "vB"}, {"kC", "kC"}}, specificDataHandlers}} });
 
-    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+    SetupSystem(domainId, sync, publishers, subscribers);
 
     RunSubscribers(subscribers, domainId, sync);
     RunPublishers(publishers, domainId, sync);
@@ -1162,8 +1119,6 @@ TEST_F(DataPubSubITest, test_3pub_1sub_specificHandlers_sync_vasio)
 // Async with history: Wait for publication before starting the subscriber
 TEST_F(DataPubSubITest, test_1pub_1sub_async_history_vasio)
 {
-    
-    const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numMsgToPublish = 1;
@@ -1176,7 +1131,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_async_history_vasio)
     publishers.push_back ({ "Pub1", { { "TopicA",  "A", {}, 1, messageSize, numMsgToPublish } } });
     subscribers.push_back({ "Sub1", { { "TopicA",  "A", {},    messageSize, numMsgToReceive, 1, {}, {} } } });
 
-    SetupSystem(domainId, sync, publishers, subscribers, middleware);
+    SetupSystem(domainId, sync, publishers, subscribers);
 
     RunPublishers(publishers, domainId, sync);
     for (auto& p : publishers)

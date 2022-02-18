@@ -55,14 +55,7 @@ protected:
             messageBuilder << "Test Message " << index;
             testMessages[index].expectedData = messageBuilder.str();
         }
-
-        ib::cfg::ConfigBuilder builder{"TestConfig"};
-
-        builder.SimulationSetup()
-            .AddParticipant("CanWriter")
-            .AddCan("CAN1").WithLink("CAN1");
-
-        ibConfig = builder.Build();
+        syncParticipantNames = {"CanWriter"};
     }
 
     void SetupWriter(ib::test::SimParticipant* participant)
@@ -100,9 +93,8 @@ protected:
 
     void ExecuteTest(ib::cfg::Middleware middleware)
     {
-        ibConfig.middlewareConfig.activeMiddleware = middleware;
         const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
-        ib::test::SimTestHarness testHarness(ibConfig, domainId);
+        ib::test::SimTestHarness testHarness(syncParticipantNames, domainId);
 
         auto* canWriter = testHarness.GetParticipant("CanWriter");
         SetupWriter(canWriter);
@@ -131,8 +123,7 @@ protected:
     };
 
 protected:
-    ib::cfg::Config ibConfig;
-
+    std::vector<std::string> syncParticipantNames;
     std::vector<TestMessage> testMessages;
 
     unsigned numSent{0},

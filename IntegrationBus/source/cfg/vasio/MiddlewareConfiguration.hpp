@@ -25,10 +25,10 @@ namespace datatypes {
 
 struct Registry
 {
-    ib::util::Optional<std::string> hostname{"localhost"};
-    ib::util::Optional<uint16_t> port{8500};
-    ib::util::Optional<::ib::cfg::datatypes::Logging> logging;
-    ib::util::Optional<int> connectAttempts{1}; //!<  Number of connection attempts to the registry a participant should perform.
+    std::string hostname{"localhost"};
+    uint16_t port{8500};
+    ib::cfg::v1::datatypes::Logging logging;
+    int connectAttempts{1}; //!<  Number of connection attempts to the registry a participant should perform.
 };
 
 struct MiddlewareConfiguration
@@ -44,7 +44,7 @@ struct MiddlewareConfiguration
     int tcpReceiveBufferSize{ -1 };
     int tcpSendBufferSize{ -1 };
     bool tcpNoDelay{ false }; //!< Disables Nagle's algorithm.
-    bool tcpQuickAck{ false }; //!< Setting this Linux specific flag disables delayed TCP/IP acknowledgements.
+    bool tcpQuickAck{ false }; //!< Setting this Linux specific flag disables delayed TCP/IP acknowledgments.
     bool enableDomainSockets{ true }; //!< By default local domain socket is preferred to TCP/IP sockets.
 };
 
@@ -68,6 +68,18 @@ public:
 public:
     datatypes::MiddlewareConfiguration _data;
 };
+
+inline auto CreateDummyIMiddlewareConfiguration() -> std::shared_ptr<IMiddlewareConfiguration>
+{
+    ib::cfg::vasio::v1::datatypes::MiddlewareConfiguration configDt;
+    auto configPtr = std::make_shared<ib::cfg::vasio::MiddlewareConfiguration>(std::move(configDt));
+    return std::move(configPtr);
+}
+
+inline auto CreateDummyMiddlewareConfiguration() -> std::shared_ptr<MiddlewareConfiguration>
+{
+    return std::make_shared<ib::cfg::vasio::MiddlewareConfiguration>(ib::cfg::vasio::v1::datatypes::MiddlewareConfiguration{});
+}
 
 } // inline namespace v1
 

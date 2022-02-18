@@ -41,21 +41,21 @@ void PublishMessage(IDataPublisher* publisher, std::string msg)
 void DefaultDataHandler(IDataSubscriber* subscriber, const std::vector<uint8_t>& data)
 {
     std::string message{data.begin(), data.end()};
-    std::cout << ">> [DefaultDataHandler] Received new " << subscriber->Config().name << " Message: with data=\""
+    std::cout << ">> [DefaultDataHandler] Received new Message: with data=\""
               << message << "\"" << std::endl;
 }
 
 void SpecificDataHandlerForPub1(IDataSubscriber* subscriber, const std::vector<uint8_t>& data)
 {
     std::string message{data.begin(), data.end()};
-    std::cout << ">> [SpecificDataHandlerForPublisher1] Received new " << subscriber->Config().name << " Message: with data=\""
+    std::cout << ">> [SpecificDataHandlerForPublisher1] Received new Message: with data=\""
               << message << std::endl;
 }
 
 void SpecificDataHandlerForPub2(IDataSubscriber* subscriber, const std::vector<uint8_t>& data)
 {
     std::string message{data.begin(), data.end()};
-    std::cout << ">> [SpecificDataHandlerForPublisher2] Received new " << subscriber->Config().name << " Message: with data=\""
+    std::cout << ">> [SpecificDataHandlerForPublisher2] Received new Message: with data=\""
               << message << "\"" << std::endl;
 }
 

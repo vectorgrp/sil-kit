@@ -25,8 +25,9 @@ class DataSubscriber
     , public mw::IIbServiceEndpoint
 {
 public:
-    DataSubscriber(mw::IComAdapterInternal* comAdapter, cfg::DataPort config,
-        mw::sync::ITimeProvider* timeProvider, DataHandlerT defaultDataHandler, NewDataSourceHandlerT newDataSourceHandler);
+    DataSubscriber(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider, const std::string& topic,
+                   DataExchangeFormat dataExchangeFormat, const std::map<std::string, std::string>& labels,
+                   DataHandlerT defaultDataHandler, NewDataSourceHandlerT newDataSourceHandler);
 
 public:
     void RegisterServiceDiscovery();
@@ -37,9 +38,7 @@ public:
                                      const std::map<std::string, std::string>& labels,
                                      DataHandlerT callback) override;
 
-    auto Config() const -> const cfg::DataPort& override;
-
-    void AddInternalSubscriber(const std::string& linkName, DataExchangeFormat joinedDataExchangFormat,
+    void AddInternalSubscriber(const std::string& pubUUID, DataExchangeFormat joinedDataExchangFormat,
                                const std::map<std::string, std::string>& publisherLabels);
 
     //ib::mw::sync::ITimeConsumer
@@ -53,13 +52,16 @@ private:
 
     void AssignSpecificDataHandlers();
 
-    //private Members
-    cfg::DataPort _config{};
-    mw::IComAdapterInternal* _comAdapter{nullptr};
-    mw::ServiceDescriptor _serviceDescriptor{};
-    DataHandlerT  _defaultDataHandler;
+    std::string _topic;
+    DataExchangeFormat _dataExchangeFormat;
+    std::map<std::string, std::string> _labels;
+    DataHandlerT _defaultDataHandler;
     NewDataSourceHandlerT _newDataSourceHandler;
+
+    mw::IComAdapterInternal* _comAdapter{nullptr};
     mw::sync::ITimeProvider* _timeProvider{nullptr};
+    mw::ServiceDescriptor _serviceDescriptor{};
+
     std::vector<DataSubscriberInternal*> _internalSubscibers;
     uint64_t _specificDataHandlerId{ 0 };
     std::vector<SpecificDataHandler> _specificDataHandling;

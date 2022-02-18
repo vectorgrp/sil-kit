@@ -11,15 +11,13 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "ib/extensions/CreateExtension.hpp"
+
 #include "ib/IntegrationBus.hpp"
 #include "ib/cfg/string_utils.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/sim/all.hpp"
-
-#include "ib/cfg/Config.hpp"
-#include "ib/cfg/ConfigBuilder.hpp"
-#include "ib/extensions/CreateExtension.hpp"
-
+#include "ParticipantConfiguration.hpp"
 
 namespace {
 
@@ -27,13 +25,14 @@ using namespace std::chrono_literals;
 using namespace ib::mw;
 using namespace ib::mw::sync;
 using namespace ib::cfg;
-using namespace ib::sim::generic;
+using namespace ib::sim::data;
 
 const std::string systemMasterName{"SystemMaster"};
 const std::string pubName{"Pub"};
 const std::string subName{"Sub"};
-const std::string linkName{"Link"};
-static uint8_t    numParticipants;
+const std::string topic{"Topic"};
+const DataExchangeFormat exchangeFormat{ "A" };
+static uint8_t numParticipants;
 std::chrono::milliseconds communicationTimeout{2000ms};
 std::chrono::milliseconds asyncDelayBetweenPublication{50ms};
 
@@ -55,8 +54,8 @@ protected:
         std::string                  name;
         uint8_t id;
         std::unique_ptr<IComAdapter> comAdapter;
-        IGenericPublisher*           publisher;
-        IGenericSubscriber*          subscriber;
+        IDataPublisher* publisher;
+        IDataSubscriber* subscriber;
         std::set<uint8_t> receivedIds;
         bool allReceived{ false };
         std::promise<void>           allReceivedPromise;
@@ -86,44 +85,12 @@ protected:
         ISystemMonitor*              systemMonitor;
     };
 
-    auto BuildConfig(std::vector<TestParticipant>& syncParticipants, std::vector<TestParticipant>& asyncParticipants, Middleware middleware) -> Config
-    {
-        const auto level = logging::Level::Info;
-        ConfigBuilder config("PubSubTestConfigGenerated");
-        auto&& simulationSetup = config.SimulationSetup();
-
-        std::vector<ParticipantBuilder*> participants;
-        for (const auto& p : syncParticipants)
-        {
-            auto&& participant = simulationSetup.AddParticipant(p.name);
-            participant.ConfigureLogger().WithFlushLevel(level).AddSink(Sink::Type::Stdout).WithLogLevel(level);
-            participant.AddParticipantController().WithSyncType(SyncType::DistributedTimeQuantum);
-            participant.AddGenericPublisher(pubName).WithLink(linkName);
-            participant.AddGenericSubscriber(subName).WithLink(linkName);
-            participants.emplace_back(&participant);
-        }
-        for (const auto& p : asyncParticipants)
-        {
-            auto&& participant = simulationSetup.AddParticipant(p.name);
-            participant.ConfigureLogger().WithFlushLevel(level).AddSink(Sink::Type::Stdout).WithLogLevel(level);
-            participant.AddGenericPublisher(pubName).WithLink(linkName);
-            participant.AddGenericSubscriber(subName).WithLink(linkName);
-            participants.emplace_back(&participant);
-        }
-
-        auto&& systemMasterParticipant = simulationSetup.AddParticipant(systemMasterName);
-        systemMasterParticipant.ConfigureLogger().WithFlushLevel(level).AddSink(Sink::Type::Stdout).WithLogLevel(level);
-
-        config.WithActiveMiddleware(middleware);
-        return config.Build();
-    }
-
     void ParticipantStatusHandler(const ParticipantStatus& newStatus)
     {
         switch (newStatus.state)
         {
         case ParticipantState::Error:
-            systemMaster.systemController->Shutdown();
+            //systemMaster.systemController->Shutdown();
             break;
 
         default:
@@ -136,11 +103,11 @@ protected:
         switch (newState)
         {
         case SystemState::Idle:
-            for (auto&& participant : ibConfig.simulationSetup.participants)
+            for (auto&& name : syncParticipantNames)
             {
-                if (participant.name == systemMasterName)
+                if (name == systemMasterName)
                     continue;
-                systemMaster.systemController->Initialize(participant.name);
+                systemMaster.systemController->Initialize(name);
             }
             break;
 
@@ -171,23 +138,28 @@ protected:
     {
         try
         {
-            participant.comAdapter = ib::CreateComAdapter(ibConfig, participant.name, domainId);
+            participant.comAdapter = ib::CreateSimulationParticipant(
+                ib::cfg::CreateDummyConfiguration(), participant.name, true, domainId, DummyCfg(participant.name, true));
 
             IParticipantController* participantController;
             participantController = participant.comAdapter->GetParticipantController();
-            participant.publisher = participant.comAdapter->CreateGenericPublisher(pubName);
-            participant.subscriber = participant.comAdapter->CreateGenericSubscriber(subName);
-            participant.subscriber->SetReceiveMessageHandler([&participant](IGenericSubscriber* subscriber, const std::vector<uint8_t>& data) {
+            participant.publisher = participant.comAdapter->CreateDataPublisher(topic, exchangeFormat, {}, 0);
+            participant.subscriber = participant.comAdapter->CreateDataSubscriber(
+                topic, exchangeFormat, {},
+                [&participant](IDataSubscriber* subscriber, const std::vector<uint8_t>& data) {
                     if (!participant.allReceived)
                     {
                         participant.receivedIds.insert(data[0]);
-                        if (participant.receivedIds.size() == numParticipants)
+                        // No self delivery: Expect numParticipants-1 receptions
+                        if (participant.receivedIds.size() == numParticipants-1)
                         {
                             participant.allReceived = true;
                             participant.allReceivedPromise.set_value();
                         }
                     }
-                });
+                },
+                nullptr);
+
             participantController->SetPeriod(1s);
             participantController->SetSimulationTask(
                 [&participant, this](std::chrono::nanoseconds now) {
@@ -220,22 +192,25 @@ protected:
     {
         try
         {
-            participant.comAdapter = ib::CreateComAdapter(ibConfig, participant.name, domainId);
+            participant.comAdapter = ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), participant.name, false, domainId,
+                                                                      DummyCfg(participant.name, false));
 
-            participant.publisher = participant.comAdapter->CreateGenericPublisher(pubName);
-            participant.subscriber = participant.comAdapter->CreateGenericSubscriber(subName);
-            participant.subscriber->SetReceiveMessageHandler(
-                [&participant](IGenericSubscriber* subscriber, const std::vector<uint8_t>& data) {
+            participant.publisher = participant.comAdapter->CreateDataPublisher(topic, exchangeFormat, {}, 0);
+            participant.subscriber = participant.comAdapter->CreateDataSubscriber(
+                topic, exchangeFormat, {},
+                [&participant](IDataSubscriber* subscriber, const std::vector<uint8_t>& data) {
                     if (!participant.allReceived)
                     {
                         participant.receivedIds.insert(data[0]);
-                        if (participant.receivedIds.size() == numParticipants)
+                        // No self delivery: Expect numParticipants-1 receptions
+                        if (participant.receivedIds.size() == numParticipants - 1)
                         {
                             participant.allReceived = true;
                             participant.allReceivedPromise.set_value();
                         }
                     }
-                });
+                },
+                nullptr);
 
             while (runAsync)
             {
@@ -261,11 +236,12 @@ protected:
         participant.comAdapter.reset();
     }
 
-    void RunVasioRegistry(uint32_t domainId)
+    void RunRegistry(uint32_t domainId)
     {
         try
         {
-            registry = ib::extensions::CreateIbRegistry(ibConfig);
+            ib::cfg::Config dummyCfg;
+            registry = ib::extensions::CreateIbRegistry(dummyCfg);
             registry->ProvideDomain(domainId);
         }
         catch (const Misconfiguration& error)
@@ -286,9 +262,13 @@ protected:
     {
         try
         {
-            systemMaster.comAdapter = ib::CreateComAdapter(ibConfig, systemMasterName, domainId);
+            systemMaster.comAdapter = ib::CreateSimulationParticipant(
+                ib::cfg::CreateDummyConfiguration(), systemMasterName, false, domainId, DummyCfg(systemMasterName, false));
+
             systemMaster.systemController = systemMaster.comAdapter->GetSystemController();
             systemMaster.systemMonitor = systemMaster.comAdapter->GetSystemMonitor();
+
+            systemMaster.systemMonitor->SetSynchronizedParticipants(syncParticipantNames);
 
             systemMaster.systemMonitor->RegisterSystemStateHandler(
                 [this](SystemState newState) { SystemStateHandler(newState); });
@@ -383,12 +363,12 @@ protected:
 
     void SetupSystem(uint32_t domainId, std::vector<TestParticipant>& syncParticipants, std::vector<TestParticipant>& asyncParticipants, Middleware middleware)
     {
-        ibConfig = BuildConfig(syncParticipants, asyncParticipants, middleware);
-        if (middleware == Middleware::VAsio)
+        for (auto&& p : syncParticipants)
         {
-            RunVasioRegistry(domainId);
+            syncParticipantNames.push_back(p.name);
         }
 
+        RunRegistry(domainId);
         RunSystemMaster(domainId);
         
     }
@@ -401,12 +381,25 @@ protected:
         registry.reset();
     }
 
+    ib::cfg::Config DummyCfg(const std::string& participantName, bool sync)
+    {
+        ib::cfg::Config dummyCfg;
+        ib::cfg::Participant dummyParticipant;
+        if (sync)
+        {
+            dummyParticipant.participantController = ib::cfg::ParticipantController{};
+        }
+        dummyParticipant.name = participantName;
+        dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
+        return dummyCfg;
+    }
+
 protected:
-    ib::cfg::Config                              ibConfig;
+    std::vector<std::string> syncParticipantNames;
     std::unique_ptr<ib::extensions::IIbRegistry> registry;
-    SystemMaster                                 systemMaster;
-    std::vector<std::thread>                     syncParticipantThreads;
-    std::vector<std::thread>                     asyncParticipantThreads;
+    SystemMaster systemMaster;
+    std::vector<std::thread> syncParticipantThreads;
+    std::vector<std::thread> asyncParticipantThreads;
 
     std::chrono::seconds simtimeToPass{ 3s };
     bool runAsync{ true };
@@ -434,6 +427,7 @@ TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
 
     RunSyncParticipants(syncParticipants, domainId);
 
+    std::cout << "Await simtime progress" << std::endl;
     // Await simtime progress
     for (auto& p : syncParticipants)
     {
@@ -444,15 +438,20 @@ TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
 
     for (int i = 0; i < 3; i++)
     {
+        std::cout << ">> Cycle " << i + 1 << "/3" << std::endl;
+        std::cout << ">> Hop on async participants" << std::endl;
+
         // Hop on with async participant
         RunAsyncParticipants(asyncParticipants, domainId);
 
+        std::cout << ">> Await successful communication of async/sync participants" << std::endl;
         // Await successful communication of async/sync participants
         for (auto& p : syncParticipants)
             p.AwaitCommunication();
         for (auto& p : asyncParticipants)
             p.AwaitCommunication();
 
+        std::cout << ">> Hop off async participants" << std::endl;
         // Hop off: Stop while-loop of async participants
         StopAsyncParticipants();
 
@@ -460,6 +459,8 @@ TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
         numParticipants = static_cast<uint8_t>(syncParticipants.size());
         for (auto& p : syncParticipants)
             p.ResetReception();
+
+        std::cout << ">> Await successful communication of remaining sync participants" << std::endl;
         for (auto& p : syncParticipants)
             p.AwaitCommunication();
 
@@ -473,7 +474,7 @@ TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
     }
 
     // Stop sync participants
-    systemMaster.systemController->Stop();
+    systemMaster.systemController->Shutdown();
     StopSyncParticipants();
 
     ShutdownSystem();

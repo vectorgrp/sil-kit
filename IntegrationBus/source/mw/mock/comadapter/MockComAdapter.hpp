@@ -94,7 +94,6 @@ public:
     MOCK_METHOD1(SetSimulationTask, void(std::function<void(std::chrono::nanoseconds now)>));
     MOCK_METHOD0(EnableColdswap, void());
     MOCK_METHOD1(SetPeriod, void(std::chrono::nanoseconds period));
-    MOCK_METHOD1(SetEarliestEventTime, void(std::chrono::nanoseconds eventTime));
     MOCK_METHOD0(Run, sync::ParticipantState());
     MOCK_METHOD0(RunAsync, std::future<sync::ParticipantState>());
     MOCK_METHOD1(ReportError, void(std::string errorMsg));
@@ -116,6 +115,7 @@ public:
     MOCK_METHOD1(RegisterParticipantStatusHandler, void(ParticipantStatusHandlerT));
     MOCK_CONST_METHOD0(SystemState,  sync::SystemState());
     MOCK_CONST_METHOD1(ParticipantStatus, const sync::ParticipantStatus&(const std::string& participantId));
+    MOCK_METHOD((void), SetSynchronizedParticipants, (const std::vector<std::string>& participantNames));
 };
 
 class MockSystemController : public sync::ISystemController {
@@ -285,6 +285,7 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::ParticipantStatus& /*msg*/) {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::ParticipantCommand& /*msg*/) {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::SystemCommand& /*msg*/) {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::ExpectedParticipants& /*msg*/) {}
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, logging::LogMsg&& /*msg*/) {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const logging::LogMsg& /*msg*/) {}
@@ -343,6 +344,7 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::ParticipantStatus& /*msg*/) {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::ParticipantCommand& /*msg*/) {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::SystemCommand& /*msg*/) {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::ExpectedParticipants& /*msg*/) {}
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, logging::LogMsg&& /*msg*/) {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const logging::LogMsg& /*msg*/) {}
@@ -354,7 +356,8 @@ public:
     void OnAllMessagesDelivered(std::function<void()> /*callback*/) {}
     void FlushSendBuffers() {}
     void ExecuteDeferred(std::function<void()> callback) {}
-    auto GetParticipantName() const -> const std::string& override { throw std::runtime_error("invalid call"); }
+    auto GetParticipantName() const -> const std::string& override { return _name; }
+    auto IsSynchronized() const -> bool override { return _isSynchronized; }
     auto GetConfig() const -> const ib::cfg::Config& override { return _config; }
 
     virtual auto GetTimeProvider() -> sync::ITimeProvider* { return &mockTimeProvider; }
@@ -363,6 +366,8 @@ public:
 
     auto GetServiceDiscovery() -> service::IServiceDiscovery* override { return &mockServiceDiscovery; }
 
+    const std::string _name = "MockComAdapter";
+    bool _isSynchronized{ false };
     cfg::Config _config;
     DummyLogger logger;
     MockTimeProvider mockTimeProvider;

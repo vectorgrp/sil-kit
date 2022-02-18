@@ -29,7 +29,7 @@ public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     SystemMonitor() = default;
-    SystemMonitor(IComAdapterInternal* comAdapter, cfg::SimulationSetup simulationSetup);
+    SystemMonitor(IComAdapterInternal* comAdapter);
     SystemMonitor(const SystemMonitor& other) = default;
     SystemMonitor(SystemMonitor&& other) = default;
     SystemMonitor& operator=(const SystemMonitor& other) = default;
@@ -38,7 +38,9 @@ public:
 public:
     // ----------------------------------------
     // Public Interface Methods
+
     // ISystemMonitor
+    void SetSynchronizedParticipants(const std::vector<std::string>& participantNames) override;
     void RegisterSystemStateHandler(SystemStateHandlerT handler) override;
     void RegisterParticipantStateHandler(ParticipantStateHandlerT handler) override;
     void RegisterParticipantStatusHandler(ParticipantStatusHandlerT handler) override;
@@ -47,6 +49,7 @@ public:
     auto ParticipantStatus(const std::string& participantId) const -> const sync::ParticipantStatus& override;
 
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantStatus& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::ExpectedParticipants& msg) override;
 
     // IIbServiceEndpoint
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
@@ -55,6 +58,8 @@ public:
 public:
     // ----------------------------------------
     // Other Public Methods
+
+    const sync::ExpectedParticipants& GetExpectedParticipants() const;
 
     /*! \brief Get the current transition violation count
      *
@@ -69,6 +74,8 @@ private:
     bool AllParticipantsInState(std::initializer_list<sync::ParticipantState> acceptedStates) const;
     void ValidateParticipantStatusUpdate(const sync::ParticipantStatus& newStatus, sync::ParticipantState oldState);
     void UpdateSystemState(const sync::ParticipantStatus& newStatus);
+    void UpdateExpectedParticipantNames(const ExpectedParticipants& expectedParticipants);
+
     inline void SetSystemState(sync::SystemState newState);
 
 private:
@@ -76,9 +83,9 @@ private:
     // private members
     IComAdapterInternal* _comAdapter{nullptr};
     mw::ServiceDescriptor _serviceDescriptor{};
-    cfg::SimulationSetup _simulationSetup;
     logging::ILogger* _logger{nullptr};
 
+    ExpectedParticipants _expectedParticipants{};
     std::map<std::string, sync::ParticipantStatus> _participantStatus;
     sync::SystemState _systemState{sync::SystemState::Invalid};
 

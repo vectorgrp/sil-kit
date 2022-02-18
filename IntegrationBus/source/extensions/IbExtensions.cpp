@@ -8,7 +8,6 @@
 #include <type_traits>
 
 #include "ib/version.hpp"
-#include "ib/cfg/ExtensionConfigBuilder.hpp"
 
 #include "detail/LoadExtension.hpp"
 #include "IbExtensionBase.hpp"
@@ -161,18 +160,12 @@ SymType* GetSymbol(detail::LibraryHandle hnd, const std::string& sym_name)
 
 ///////////////////////////////////////////////////////////////////////////
 
-
-
-auto LoadExtension(const std::string& name)
-    -> std::shared_ptr<IIbExtension>
+auto LoadExtension(const std::string& name) -> std::shared_ptr<IIbExtension>
 {
-    return LoadExtension(name, cfg::ExtensionConfig());
+    return LoadExtension(name, cfg::v1::datatypes::Extensions{});
 }
 
-auto LoadExtension(
-        const std::string& name,
-        const cfg::ExtensionConfig& config
-    ) -> std::shared_ptr<IIbExtension>
+auto LoadExtension(const std::string& name, const cfg::v1::datatypes::Extensions& config) -> std::shared_ptr<IIbExtension>
 {
     using namespace detail;
 

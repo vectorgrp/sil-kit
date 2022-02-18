@@ -2,7 +2,6 @@
 
 #include "VAsioRegistry.hpp"
 
-#include "ib/cfg/Config.hpp"
 #include "Logger.hpp"
 
 using asio::ip::tcp;
@@ -26,11 +25,11 @@ bool isCatchallAddress(const std::string& hostUrl)
 namespace ib {
 namespace mw {
 
-VAsioRegistry::VAsioRegistry(ib::cfg::Config cfg)
-    : _vasioConfig{cfg.middlewareConfig.vasio}
-    , _connection{cfg, "IbRegistry", 0}
+VAsioRegistry::VAsioRegistry(std::shared_ptr<ib::cfg::vasio::IMiddlewareConfiguration> cfg) :
+    _vasioConfig{ std::dynamic_pointer_cast<ib::cfg::vasio::v1::MiddlewareConfiguration>(cfg) },
+    _connection{ _vasioConfig, "IbRegistry", 0 }
 {
-    _logger = std::make_unique<logging::Logger>("IbRegistry", cfg.middlewareConfig.vasio.registry.logger);
+    _logger = std::make_unique<logging::Logger>("IbRegistry", _vasioConfig->_data.registry.logging);
     _connection.SetLogger(_logger.get());
 
     _connection.RegisterMessageReceiver([this](IVAsioPeer* from, const ParticipantAnnouncement& announcement)
@@ -57,7 +56,7 @@ void VAsioRegistry::ProvideDomain(uint32_t domainId)
             e.what());
     }
 
-    auto registryPort = static_cast<uint16_t>(_vasioConfig.registry.port + domainId);
+    auto registryPort = static_cast<uint16_t>(_vasioConfig->_data.registry.port + domainId);
     tcp::endpoint endpoint_v4(tcp::v4(), registryPort);
     try
     {
@@ -94,18 +93,6 @@ void VAsioRegistry::SetAllDisconnectedHandler(std::function<void()> handler)
 auto VAsioRegistry::GetLogger() -> logging::ILogger*
 {
     return _logger.get();
-}
-
-bool VAsioRegistry::IsExpectedParticipant(const ib::mw::VAsioPeerUri& peerInfo)
-{
-    for (auto& participant : _connection.Config().simulationSetup.participants)
-    {
-        if (/*participant.id == peerInfo.participantId && */participant.name == peerInfo.participantName)
-        {
-            return true;
-        }
-    }
-    return false;
 }
 
 auto VAsioRegistry::FindConnectedPeer(const std::string& name) const -> std::vector<ConnectedParticipantInfo>::const_iterator
@@ -162,15 +149,6 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
             "Ignoring announcement from participant name={}, which is already connected",
             peerUri.participantName);
         return;
-    }
-
-    if (!IsExpectedParticipant(peerUri))
-    {
-        _logger->Warn(
-            "Participant {} is not part of the simulation setup config."
-            " Dynamically joining a simulation is an experimental feature "
-            " and is currently only supported in unsynchronized simulations."
-            , peerUri.participantName);
     }
 
     SendKnownParticipants(from);
@@ -276,14 +254,15 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
 
 bool VAsioRegistry::AllParticipantsAreConnected() const
 {
-    for (auto&& participant : _connection.Config().simulationSetup.participants)
+    return false;
+    /*for (auto&& participant : _connection.Config().simulationSetup.participants)
     {
         if (FindConnectedPeer(participant.name) == _connectedParticipants.end())
         {
             return false;
         }
     }
-    return true;
+    return true;*/
 }
 
 } // namespace mw

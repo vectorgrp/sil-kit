@@ -4,7 +4,6 @@
 
 #include <memory>
 
-#include "ib/cfg/Config.hpp"
 #include "ib/version.hpp"
 
 #include "VAsioRegistry.hpp"
@@ -22,15 +21,15 @@ class IbRegistryFactory
 {
 public:
     //public IIbRegistryFactory methods
-    auto Create(ib::cfg::Config )
+    auto Create(std::shared_ptr<ib::cfg::vasio::IMiddlewareConfiguration> cfg)
         -> std::unique_ptr<ib::extensions::IIbRegistry> override;
 
 };
 
-auto IbRegistryFactory::Create(ib::cfg::Config cfg)
+auto IbRegistryFactory::Create(std::shared_ptr<ib::cfg::vasio::IMiddlewareConfiguration> cfg)
         -> std::unique_ptr<ib::extensions::IIbRegistry>
 {
-    return  std::make_unique<ib::mw::VAsioRegistry>(std::move(cfg));
+    return std::make_unique<ib::mw::VAsioRegistry>(cfg);
 }
 
 

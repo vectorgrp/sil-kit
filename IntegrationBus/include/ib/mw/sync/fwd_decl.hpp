@@ -11,6 +11,7 @@ struct NextSimTask;
 struct ParticipantCommand;
 struct SystemCommand;
 struct ParticipantStatus;
+struct ExpectedParticipants;
 
 class IParticipantController;
 

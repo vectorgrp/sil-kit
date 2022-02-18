@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include "ib/cfg/Config.hpp"
-
 #include "DataMessageDatatypes.hpp"
 
 namespace ib {
@@ -14,9 +12,6 @@ class IDataPublisher
 {
 public:
     virtual ~IDataPublisher() = default;
-
-    //! \brief Get the config struct used to setup this IDataPublisher
-    virtual auto Config() const -> const cfg::DataPort& = 0;
 
     /*! \brief Publish a new value
      *

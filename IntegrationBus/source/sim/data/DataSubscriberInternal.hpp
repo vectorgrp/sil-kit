@@ -19,14 +19,14 @@ class DataSubscriberInternal
     , public mw::IIbServiceEndpoint
 {
 public:
-    DataSubscriberInternal(mw::IComAdapterInternal* comAdapter, cfg::DataPort config,
-        mw::sync::ITimeProvider* timeProvider, DataHandlerT defaultHandler, IDataSubscriber* parent);
+    DataSubscriberInternal(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+                           const std::string& topic, DataExchangeFormat dataExchangeFormat,
+                           const std::map<std::string, std::string>& labels, DataHandlerT defaultHandler,
+                           IDataSubscriber* parent);
 
     void SetDefaultReceiveMessageHandler(DataHandlerT handler);
 
     void RegisterSpecificDataHandlerInternal(DataHandlerT handler);
-
-    auto Config() const -> const cfg::DataPort&;
 
     //! \brief Accepts messages originating from IB communications.
     void ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const DataMessage& msg) override;
@@ -36,13 +36,18 @@ public:
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
 
+    DataExchangeFormat GetDataExchangeFormat() { return _dataExchangeFormat; };
+    std::map <std::string, std::string> GetLabels() { return _labels; };
+
     // IIbServiceEndpoint
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 
 private:
-    //private Members
-    cfg::DataPort _config{};
+    std::string _topic;
+    DataExchangeFormat _dataExchangeFormat;
+    std::map <std::string, std::string> _labels;
+
     mw::IComAdapterInternal* _comAdapter{nullptr};
     mw::ServiceDescriptor _serviceDescriptor{};
     DataHandlerT  _defaultHandler;

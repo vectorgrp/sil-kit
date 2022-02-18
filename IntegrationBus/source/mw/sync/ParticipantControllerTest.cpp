@@ -9,8 +9,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ib/cfg/Config.hpp"
-#include "ib/cfg/ConfigBuilder.hpp"
+#include "ParticipantConfiguration.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/util/functional.hpp"
 
@@ -70,22 +69,8 @@ protected:
 protected:
     ParticipantControllerTest()
     {
-        MakeConfig(cfg::SyncType::DistributedTimeQuantum);
+        testParticipants = { "SUT", "P2" };
     }
-
-    void MakeConfig(cfg::SyncType syncType)
-    {
-        cfg::ConfigBuilder builder{"TestConfig"};
-        auto&& sim = builder.SimulationSetup();
-
-        sim.ConfigureTimeSync().WithTickPeriod(1ms);
-        sim.AddParticipant("SUT").AddParticipantController().WithSyncType(syncType);
-        sim.AddParticipant("P2").AddParticipantController().WithSyncType(syncType);
-
-        auto config = builder.Build();
-        simulationSetup = std::move(config.simulationSetup);
-    }
-
 
 protected:
     // ----------------------------------------
@@ -102,7 +87,8 @@ protected:
 
     MockComAdapter comAdapter;
     Callbacks callbacks;
-    cfg::SimulationSetup simulationSetup;
+    std::vector<std::string> testParticipants;
+    cfg::v1::datatypes::HealthCheck healthCheckConfig;
 };
 
 // Factory method to create a ParticipantStatus matcher that checks the state field
@@ -113,7 +99,9 @@ auto AParticipantStatusWithState(ParticipantState expected)
 
 TEST_F(ParticipantControllerTest, report_commands_as_error_before_run_was_called)
 {
-    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig);
+    controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
+
     controller.SetServiceDescriptor(from_endpointAddress(addr));
 
     EXPECT_CALL(comAdapter, SendIbMessage(&controller, A<const ParticipantStatus&>()))
@@ -128,7 +116,8 @@ TEST_F(ParticipantControllerTest, report_commands_as_error_before_run_was_called
 
 TEST_F(ParticipantControllerTest, call_init_handler)
 {
-    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
     auto descriptor = from_endpointAddress(addr);
     controller.SetServiceDescriptor(descriptor);
     controller.SetInitHandler(bind_method(&callbacks, &Callbacks::InitHandler));
@@ -144,7 +133,9 @@ TEST_F(ParticipantControllerTest, call_init_handler)
 
 TEST_F(ParticipantControllerTest, call_stop_handler)
 {
-    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
+
     auto descriptor = from_endpointAddress(addr);
     controller.SetServiceDescriptor(descriptor);
     controller.SetSimulationTask([](auto) {});
@@ -169,7 +160,8 @@ TEST_F(ParticipantControllerTest, call_stop_handler)
 
 TEST_F(ParticipantControllerTest, dont_switch_to_stopped_if_stop_handler_reported_an_error)
 {
-    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
 
     auto descriptor = from_endpointAddress(addr);
     controller.SetServiceDescriptor(descriptor);
@@ -195,7 +187,9 @@ TEST_F(ParticipantControllerTest, dont_switch_to_stopped_if_stop_handler_reporte
 
 TEST_F(ParticipantControllerTest, must_set_simtask_before_calling_run)
 {
-    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
+
     controller.SetServiceDescriptor(from_endpointAddress(addr));
     EXPECT_THROW(controller.Run(), std::exception);
     EXPECT_EQ(controller.State(), ParticipantState::Error);
@@ -203,7 +197,9 @@ TEST_F(ParticipantControllerTest, must_set_simtask_before_calling_run)
 
 TEST_F(ParticipantControllerTest, calling_run_announces_idle_state)
 {
-    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
+
     controller.SetServiceDescriptor(from_endpointAddress(addr));
     controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
 
@@ -216,61 +212,11 @@ TEST_F(ParticipantControllerTest, calling_run_announces_idle_state)
     EXPECT_EQ(controller.State(), ParticipantState::Idle);
 }
 
-// TODO replace time mode by a supported one (distributed time quantum)
-// TODO deactivated test for now
-TEST_F(ParticipantControllerTest, DISABLED_run_async)
-{
-    const auto& participant = simulationSetup.participants.at(0);
-    ParticipantController controller(&comAdapter, simulationSetup, participant);
-    ServiceDescriptor id{};
-    id.SetNetworkName("default");
-    id.SetParticipantName(participant.name);
-    id.SetServiceId(addr.endpoint);
-    controller.SetServiceDescriptor(from_endpointAddress(addr));//legacy interface
-    controller.SetServiceDescriptor(id);
-
-    controller.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
-    controller.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
-    controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
-
-    // Run() --> Idle
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
-    auto finalState = controller.RunAsync();
-
-    // Cmd::Initialize --> Initializing --> Initialized
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Initializing))).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Initialized))).Times(1);
-    controller.ReceiveIbMessage(&masterId, ParticipantCommand{addr.participant, ParticipantCommand::Kind::Initialize});
-    EXPECT_EQ(controller.State(), ParticipantState::Initialized);
-
-    // Cmd::Run --> Running --> Call SimTask()
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Running))).Times(1);
-    EXPECT_CALL(callbacks, SimTask(_)).Times(1);
-    controller.ReceiveIbMessage(&masterId, SystemCommand{SystemCommand::Kind::Run});
-    EXPECT_EQ(controller.State(), ParticipantState::Running);
-
-    // Cmd::Stop --> Stopping --> Call StopHandler() --> Stopped
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
-    EXPECT_CALL(callbacks, StopHandler()).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopped))).Times(1);
-    controller.ReceiveIbMessage(&masterId, SystemCommand{SystemCommand::Kind::Stop});
-    EXPECT_EQ(controller.State(), ParticipantState::Stopped);
-
-    // Cmd::Shutdown --> ShuttingDown --> Call ShutdownHandler() --> Shutdown
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::ShuttingDown))).Times(1);
-    EXPECT_CALL(callbacks, ShutdownHandler()).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Shutdown))).Times(1);
-    controller.ReceiveIbMessage(&masterId, SystemCommand{SystemCommand::Kind::Shutdown});
-    EXPECT_EQ(controller.State(), ParticipantState::Shutdown);
-
-    ASSERT_EQ(finalState.wait_for(1ms), std::future_status::ready);
-    EXPECT_EQ(finalState.get(), ParticipantState::Shutdown);
-}
-
-
 TEST_F(ParticipantControllerTest, refreshstatus_must_not_modify_other_fields)
 {
-    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
+
     controller.SetServiceDescriptor(from_endpointAddress(addr));
     controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
 
@@ -298,11 +244,11 @@ TEST_F(ParticipantControllerTest, refreshstatus_must_not_modify_other_fields)
 
 TEST_F(ParticipantControllerTest, run_async_with_synctype_distributedtimequantum)
 {
-    //MakeConfig(cfg::SyncType::DistributedTimeQuantum);
-    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
+
     auto descriptor = from_endpointAddress(addr);
     controller.SetServiceDescriptor(descriptor);
-    controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
 
     controller.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
     controller.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
@@ -323,6 +269,8 @@ TEST_F(ParticipantControllerTest, run_async_with_synctype_distributedtimequantum
     EXPECT_CALL(callbacks, SimTask(_)).Times(2);
     controller.ReceiveIbMessage(&masterId, SystemCommand{SystemCommand::Kind::Run});
     EXPECT_EQ(controller.State(), ParticipantState::Running);
+
+    // Trigger two SimTasks
     NextSimTask nextTask;
     nextTask.timePoint = 0ms;
     nextTask.duration = 1ms;
@@ -351,7 +299,9 @@ TEST_F(ParticipantControllerTest, run_async_with_synctype_distributedtimequantum
 
 TEST_F(ParticipantControllerTest, force_shutdown)
 {
-    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
+
     controller.SetServiceDescriptor(from_endpointAddress(addr));
     controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
 
@@ -382,7 +332,9 @@ TEST_F(ParticipantControllerTest, force_shutdown)
 
 TEST_F(ParticipantControllerTest, force_shutdown_is_ignored_if_not_stopped)
 {
-    ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
+    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
+
     controller.SetServiceDescriptor(from_endpointAddress(addr));
     controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
 
@@ -403,15 +355,5 @@ TEST_F(ParticipantControllerTest, force_shutdown_is_ignored_if_not_stopped)
     EXPECT_EQ(controller.State(), ParticipantState::Idle);
     ASSERT_EQ(finalState.wait_for(1ms), std::future_status::timeout);
 }
-
-// TODO reactivate after synchronized handling is clarified
-TEST_F(ParticipantControllerTest, DISABLED_auto_configure_isSynchronized_with_synctype_distributedtimequantum)
-{
-  ParticipantController controller(&comAdapter, simulationSetup, simulationSetup.participants[0]);
-  controller.SetServiceDescriptor(from_endpointAddress(addr));
-
-  //EXPECT_EQ(controller.GetServiceDescriptor().isSynchronized, true);
-}
-
 
 } // anonymous namespace for test

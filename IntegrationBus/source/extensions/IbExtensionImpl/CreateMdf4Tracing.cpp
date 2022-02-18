@@ -23,14 +23,20 @@ auto CreateMdf4Tracing(cfg::Config config,
     const std::string& sinkName)
     -> std::unique_ptr<ITraceMessageSink>
 {
-    auto& factory = FactorySingleton<ITraceMessageSinkFactory>("vibe-mdf4tracing", config);
+    // Preliminary convert old config
+    ib::cfg::v1::datatypes::Extensions dummyExtentionCfg{config.extensionConfig.searchPathHints};
+
+    auto& factory = FactorySingleton<ITraceMessageSinkFactory>("vibe-mdf4tracing", dummyExtentionCfg);
     return factory.Create(std::move(config), logger, participantName, sinkName);
 }
 
 auto CreateMdf4Replay(cfg::Config config, ib::mw::logging::ILogger* logger, const std::string& fileName)
     -> std::shared_ptr<IReplayFile>
 {
-    auto& factory = FactorySingleton<IReplayDataProvider>("vibe-mdf4tracing", config);
+    // Preliminary convert old config
+    ib::cfg::v1::datatypes::Extensions dummyExtentionCfg{ config.extensionConfig.searchPathHints };
+    
+    auto& factory = FactorySingleton<IReplayDataProvider>("vibe-mdf4tracing", dummyExtentionCfg);
     return factory.OpenFile(config, fileName, logger);
 }
 

@@ -9,7 +9,7 @@
 #include <typeinfo>
 #include <future>
 
-#include "ib/cfg/Config.hpp"
+#include "vasio/MiddlewareConfiguration.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 
 #include "tuple_tools/for_each.hpp"
@@ -70,7 +70,7 @@ public:
     VAsioConnection() = default;
     VAsioConnection(const VAsioConnection&) = delete; //clang warning: this is implicity deleted by asio::io_context
     VAsioConnection(VAsioConnection&&) = delete; // ditto asio::io_context
-    VAsioConnection(cfg::Config config, std::string participantName, ParticipantId participantId);
+    VAsioConnection(std::shared_ptr<ib::cfg::vasio::v1::MiddlewareConfiguration> config, std::string participantName, ParticipantId participantId);
     ~VAsioConnection();
 
 public:
@@ -144,7 +144,7 @@ public:
         asio::post(_ioContext.get_executor(), std::move(function));
     }
 
-    inline auto Config() const -> const ib::cfg::Config&
+    inline auto Config() const -> std::shared_ptr<ib::cfg::vasio::v1::MiddlewareConfiguration>
     {
         return _config;
     }
@@ -183,6 +183,7 @@ private:
         sync::SystemCommand,
         sync::ParticipantCommand,
         sync::ParticipantStatus,
+        sync::ExpectedParticipants,
         sim::generic::GenericMessage,
         sim::data::DataMessage,
         sim::rpc::FunctionCall,
@@ -401,7 +402,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    cfg::Config _config;
+    std::shared_ptr<ib::cfg::vasio::v1::MiddlewareConfiguration> _config;
     std::string _participantName;
     ParticipantId _participantId{0};
     logging::ILogger* _logger{nullptr};

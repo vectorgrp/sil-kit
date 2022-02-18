@@ -26,42 +26,26 @@ auto Now()
 class ServiceDiscoveryITest : public testing::Test
 {
 protected:
-    void BuildConfig(int numberOfServices)
-    {
-        domainId = static_cast<uint32_t>(GetTestPid());
-        //generate significant amount of service descriptors that need to be transferred
 
-        ib::cfg::ConfigBuilder builder{"TestConfig"};
-        auto&& setup = builder.SimulationSetup();
-        auto&& publisher = setup.AddParticipant("Publisher");
-        auto&& subscriber = setup.AddParticipant("Subscriber");
-        auto&& subscriber2 = setup.AddParticipant("Subscriber2");
-        for(auto i = 0; i < numberOfServices; i++)
-        {
-            const auto topic = "TopicName-" + std::to_string(i);
-            publisher->AddGenericPublisher(topic);
-            subscriber->AddGenericSubscriber(topic);
-            subscriber2->AddGenericSubscriber(topic);
-        }
-        publisher->ConfigureLogger()
-            .AddSink(ib::cfg::Sink::Type::Stdout)
-            .WithLogLevel(ib::mw::logging::Level::Info)
-            ;
-        ibConfig = builder.Build();
-        ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
+    ServiceDiscoveryITest()
+    {
     }
 
     void ExecuteTest(int numberOfServices, std::chrono::seconds timeout)
     {
         auto start = Now();
 
-        ib::test::SimTestHarness testHarness(ibConfig, domainId, true);
+        std::vector<std::string> syncParticipantNames = {"Publisher", "Subscriber", "Subscriber2"};
+        auto domainId = static_cast<uint32_t>(GetTestPid());
+
+        ib::test::SimTestHarness testHarness(syncParticipantNames, domainId, true);
         auto&& publisher = testHarness.GetParticipant("Publisher")->ComAdapter();
         
         for (auto i = 0; i < numberOfServices; i++)
         {
             const auto topic = "TopicName-" + std::to_string(i);
-            (void)publisher->CreateGenericPublisher(topic);//ensure the service discovery is engaged
+            (void)publisher->CreateDataPublisher(topic, ib::sim::data::DataExchangeFormat{}, {},
+                                                 0); 
         }
         auto logger = publisher->GetLogger();
         auto&& participantController = publisher->GetParticipantController();
@@ -77,7 +61,10 @@ protected:
             for (auto i = 0; i < numberOfServices; i++)
             {
                 const auto topic = "TopicName-" + std::to_string(i);
-                (void)subscriber->CreateGenericSubscriber(topic);//ensure the service discovery is engaged
+                (void)subscriber->CreateDataSubscriber(
+                    topic, ib::sim::data::DataExchangeFormat{}, {},
+                    [](ib::sim::data::IDataSubscriber* subscriber, const std::vector<uint8_t>& data) {
+                    }); 
             }
         };
         //ensure the subscriber is created after the publisher, to check announcements, not just incremental notifications
@@ -98,27 +85,23 @@ protected:
             << timeout.count();
     }
 protected:
-    uint32_t domainId;
-    ib::cfg::Config ibConfig;
+    std::vector<std::string> syncParticipantNames;
 };
 
 
 // Stress testing the discovery mechanism, it shouldn't slow down the IB performance
 
+TEST_F(ServiceDiscoveryITest, test_discovery_performance_10services)
+{
+    ExecuteTest(10, 1s);
+}
 TEST_F(ServiceDiscoveryITest, test_discovery_performance_100services)
 {
-    BuildConfig(100);
-    ExecuteTest(100, 1s);
-}
-TEST_F(ServiceDiscoveryITest, test_discovery_performance_1000services)
-{
-    BuildConfig(1000);
-    ExecuteTest(1000, 3s);
+    ExecuteTest(100, 5s);
 }
 
-TEST_F(ServiceDiscoveryITest, test_discovery_performance_2000services)
+TEST_F(ServiceDiscoveryITest, test_discovery_performance_200services)
 {
-    BuildConfig(2000);
-    ExecuteTest(2000, 8s);
+    ExecuteTest(200, 25s);
 }
 } // anonymous namespace

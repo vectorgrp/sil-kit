@@ -14,7 +14,7 @@ namespace ib { namespace extensions {
 // which keeps the shared library loaded during the lifetime of the calling process.
 
 template<typename FactoryT> 
-auto FactorySingleton(const std::string& extensionName, const ib::cfg::Config& config) 
+auto FactorySingleton(const std::string& extensionName, const cfg::v1::datatypes::Extensions& config)
     -> FactoryT&
 {
     static DllCache cache;
