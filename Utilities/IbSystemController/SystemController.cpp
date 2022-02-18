@@ -169,26 +169,26 @@ private:
 
 int main(int argc, char** argv)
 {
-    if (argc < 3)
+    if (argc < 2)
     {
-        std::cerr << "Missing arguments! Start demo with: " << argv[0] << "<ibConfig> <domainId> [participantName1] [participantName2] ..." << std::endl;
+        std::cerr << "Missing arguments! Start demo with: " << argv[0] << " <domainId> <participantName1> [participantName2] ..." << std::endl;
         return -1;
     }
     
     try
     {
-        std::string jsonFilename(argv[1]);
         std::string participantName{"SystemController"};
 
-        uint32_t domainId = static_cast<uint32_t>(std::stoul(argv[2]));
+        uint32_t domainId = static_cast<uint32_t>(std::stoul(argv[1]));
 
         std::vector<std::string> expectedParticipantNames;
-        for (int i = 3; i < argc; i++)
+        for (int i = 2; i < argc; i++)
         {
             expectedParticipantNames.push_back(argv[i]);
         }
 
-        auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile(jsonFilename);
+        // TODO provide empty config
+        auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile("");
 
         std::cout << "Creating SystemController for IB domain=" << domainId << std::endl;
         auto comAdapter = ib::CreateSimulationParticipant(ibConfig, participantName, domainId, false);

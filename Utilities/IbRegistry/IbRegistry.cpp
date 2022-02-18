@@ -18,16 +18,16 @@ int main(int argc, char** argv) try
 
     if (argc < 2)
     {
-        std::cerr << "Missing arguments! Start registry with: " << argv[0] << " <IbConfig.json> [--use-signal-handler] [domainId]" << std::endl;
+        std::cerr << "Missing arguments! Start registry with: " << argv[0] << " [--use-signal-handler] [domainId]" << std::endl;
         return -1;
     }
 
-    std::string jsonFilename(argv[1]);
+    //std::string jsonFilename(argv[1]);
 
     uint32_t domainId = 42;
 
     //check for optional use-signal-handler/domainId arguments
-    for (auto i = 2; i < argc && i < 4; i++)
+    for (auto i = 1; i < argc && i < 3; i++)
     {
         if (argv[i] == std::string{"--use-signal-handler"})
         {
