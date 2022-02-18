@@ -45,24 +45,12 @@ void PatchConfigForVAsio(cfg::Config& config)
 }
 } // anonymous namespace
 
-auto CreateComAdapter(ib::cfg::Config config, const std::string& participantName, const uint32_t domainId) -> std::unique_ptr<mw::IComAdapter>
-{
-    Validate(config);
-    if (config.middlewareConfig.activeMiddleware == cfg::Middleware::VAsio)
-    {
-        PatchConfigForVAsio(config);
-    }
-    auto comAdapter = mw::CreateComAdapterImpl(std::move(config), participantName);
-    comAdapter->joinIbDomain(domainId);
-    return comAdapter;
-}
-
 auto CreateSimulationParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                                 const std::string& participantName, bool isSynchronized, const uint32_t domainId, cfg::Config config)
+                                 const std::string& participantName, bool isSynchronized, const uint32_t domainId)
     -> std::unique_ptr<mw::IComAdapter>
 {
     //Validate(config);
-    auto comAdapter = mw::CreateSimulationParticipantImpl(std::move(participantConfig), participantName, isSynchronized, std::move(config));
+    auto comAdapter = mw::CreateSimulationParticipantImpl(std::move(participantConfig), participantName, isSynchronized);
     comAdapter->joinIbDomain(domainId);
     return comAdapter;
 }

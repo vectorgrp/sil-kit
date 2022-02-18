@@ -358,7 +358,6 @@ public:
     void ExecuteDeferred(std::function<void()> callback) {}
     auto GetParticipantName() const -> const std::string& override { return _name; }
     auto IsSynchronized() const -> bool override { return _isSynchronized; }
-    auto GetConfig() const -> const ib::cfg::Config& override { return _config; }
 
     virtual auto GetTimeProvider() -> sync::ITimeProvider* { return &mockTimeProvider; }
     virtual void SendIbMessage_proxy(const IIbServiceEndpoint* /*from*/, const sim::generic::GenericMessage& /*msg*/) {} //helper for gtest workaround

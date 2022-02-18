@@ -8,41 +8,12 @@
 namespace ib {
 namespace mw {
 
-auto CreateVAsioComAdapterImpl(ib::cfg::Config config, const std::string& participantName) -> std::unique_ptr<IComAdapterInternal>
-{
-#if defined(IB_MW_HAVE_VASIO)
-    return std::make_unique<ComAdapter<VAsioConnection>>(std::move(config), participantName);
-#else
-    std::cout << "ERROR: CreateVasioComAdapterImpl(): IntegrationBus was compiled without \"IB_MW_HAVE_VASIO\"" << std::endl;
-    throw std::runtime_error("VIB was compiled without IB_MW_HAVE_VASIO");
-#endif
-}
-
-auto CreateComAdapterImpl(ib::cfg::Config config, const std::string& participantName) -> std::unique_ptr<IComAdapterInternal>
-{
-    switch (config.middlewareConfig.activeMiddleware)
-    {
-    // VAsio is used as default if unconfigured
-    case ib::cfg::Middleware::NotConfigured:
-    // [[fallthrough]];
-
-    case ib::cfg::Middleware::VAsio:
-        return CreateVAsioComAdapterImpl(std::move(config), participantName);
-    
-    case ib::cfg::Middleware::FastRTPS:
-        std::cout <<"WARNING: FastRTPS is discontinued" << std::endl;
-        throw ib::cfg::Misconfiguration{"FastRTPS is discontinued"};
-    default:
-        throw ib::cfg::Misconfiguration{ "Unknown active middleware selected" };
-    }
-}
-
 auto CreateVAsioSimulationParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                                          const std::string& participantName, bool isSynchronized, cfg::Config config)
+                                          const std::string& participantName, bool isSynchronized)
     -> std::unique_ptr<IComAdapterInternal>
 {
 #if defined(IB_MW_HAVE_VASIO)
-    return std::make_unique<ComAdapter<VAsioConnection>>(std::move(participantConfig), participantName, isSynchronized, std::move(config));
+    return std::make_unique<ComAdapter<VAsioConnection>>(std::move(participantConfig), participantName, isSynchronized);
 #else
     std::cout << "ERROR: CreateVasioComAdapterImpl(): IntegrationBus was compiled without \"IB_MW_HAVE_VASIO\""
               << std::endl;
@@ -51,10 +22,10 @@ auto CreateVAsioSimulationParticipantImpl(std::shared_ptr<ib::cfg::IParticipantC
 }
 
 auto CreateSimulationParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                                     const std::string& participantName, bool isSynchronized, cfg::Config config)
+                                     const std::string& participantName, bool isSynchronized)
     -> std::unique_ptr<IComAdapterInternal>
 {
-    return CreateVAsioSimulationParticipantImpl(std::move(participantConfig), participantName, isSynchronized, std::move(config));
+    return CreateVAsioSimulationParticipantImpl(std::move(participantConfig), participantName, isSynchronized);
 }
 
 } // mw

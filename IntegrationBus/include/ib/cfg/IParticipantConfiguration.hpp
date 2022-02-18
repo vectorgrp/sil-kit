@@ -51,7 +51,7 @@ public:
 * JSON format, schema or an integrity rule.
 */
 IntegrationBusAPI auto ReadParticipantConfigurationFromJsonString(const std::string& jsonString)
-    -> std::unique_ptr<IParticipantConfiguration>;
+    -> std::shared_ptr<IParticipantConfiguration>;
 
 /*! \brief Parse configuration from a JSON file.
 *
@@ -66,7 +66,7 @@ IntegrationBusAPI auto ReadParticipantConfigurationFromJsonString(const std::str
 * integrity rule.
 */
 IntegrationBusAPI auto ReadParticipantConfigurationFromJsonFile(const std::string& jsonFilename)
-    -> std::unique_ptr<IParticipantConfiguration>;
+    -> std::shared_ptr<IParticipantConfiguration>;
 
 /*! \brief Parse configuration from a YAML file.
 *
@@ -81,7 +81,7 @@ IntegrationBusAPI auto ReadParticipantConfigurationFromJsonFile(const std::strin
 * integrity rule.
 */
 IntegrationBusAPI auto ReadParticipantConfigurationFromYamlFile(const std::string& yamlFilename)
-    -> std::unique_ptr<IParticipantConfiguration>;
+    -> std::shared_ptr<IParticipantConfiguration>;
 
 
 /*! \brief Parse configuration from a YAML string.

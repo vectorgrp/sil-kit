@@ -207,24 +207,36 @@ auto ib::cfg::ReadParticipantConfigurationFromYamlString(const std::string& yaml
 }
 
 auto ReadParticipantConfigurationFromFileString(const std::string& yamlFilename)
-    -> std::unique_ptr<ib::cfg::IParticipantConfiguration>
+    -> std::shared_ptr<ib::cfg::IParticipantConfiguration>
 {
     yamlFilename;
     throw configuration_error{"Not implemented"};
 }
 
 auto ReadParticipantConfigurationFromJsonString(const std::string& jsonString)
-    -> std::unique_ptr<ib::cfg::IParticipantConfiguration>
+    -> std::shared_ptr<ib::cfg::IParticipantConfiguration>
 {
     jsonString;
     throw configuration_error{"Not implemented"};
 }
 
 auto ReadParticipantConfigurationFromJsonFile(const std::string& jsonFilename)
-    -> std::unique_ptr<ib::cfg::IParticipantConfiguration>
+    -> std::shared_ptr<ib::cfg::IParticipantConfiguration>
 {
     jsonFilename;
-    throw configuration_error{"Not implemented"};
+    // Dummy implementation
+    std::cout << "Warning: This implementation currently returns a non-functional dummy." << std::endl;
+    ib::cfg::v1::datatypes::ParticipantConfiguration configDt;
+    ib::cfg::ParticipantConfiguration* config = new ib::cfg::ParticipantConfiguration(std::move(configDt));
+
+    // Dummy logging
+    auto sink = cfg::v1::datatypes::Sink{};
+    sink.level = ib::mw::logging::Level::Debug;
+    sink.type = cfg::v1::datatypes::Sink::Type::Stdout;
+    config->_data.logging.sinks.push_back(sink);
+
+    auto configPtr = std::shared_ptr<ib::cfg::ParticipantConfiguration>(config);
+    return std::move(configPtr);
 }
 
 } // namespace ib

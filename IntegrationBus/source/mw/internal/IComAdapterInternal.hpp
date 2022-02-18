@@ -22,7 +22,6 @@ public:
     // Public methods
     virtual auto GetParticipantName() const -> const std::string& = 0;
     virtual auto IsSynchronized() const -> bool = 0;
-    virtual auto GetConfig() const -> const ib::cfg::Config & = 0;
 
     /*! \brief Join the middleware domain as a participant.
     *

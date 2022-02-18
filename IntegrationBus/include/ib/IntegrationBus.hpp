@@ -29,9 +29,8 @@ namespace ib {
 * a valid participant in the config file.
 * \throw std::exception The participant could not be created.
 */
-IntegrationBusAPI auto CreateComAdapter(ib::cfg::Config config, const std::string& participantName, const uint32_t domainId) -> std::unique_ptr<mw::IComAdapter>;
 IntegrationBusAPI auto CreateSimulationParticipant(
     std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig, const std::string& participantName,
-    bool isSynchronized, const uint32_t domainId, cfg::Config config) -> std::unique_ptr<mw::IComAdapter>;
+    bool isSynchronized, const uint32_t domainId) -> std::unique_ptr<mw::IComAdapter>;
 
 } // namespace ib

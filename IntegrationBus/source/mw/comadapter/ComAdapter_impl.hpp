@@ -98,37 +98,9 @@ bool ControllerUsesReplay(const ConfigT& controllerConfig)
 } // namespace anonymous
 
 template <class IbConnectionT>
-ComAdapter<IbConnectionT>::ComAdapter(cfg::Config config, const std::string& participantName)
-    : _config{std::move(config)}
-    , _participant{GetParticipantByName(_config, participantName)} // throws if participantName is not found in _config
-    , _participantName{participantName}
-    , _participantId{hash(participantName)}
-    , _ibConnection{ ib::cfg::vasio::v1::CreateDummyMiddlewareConfiguration(), participantName, _participantId}
-{
-    _participantConfig = std::dynamic_pointer_cast<ib::cfg::ParticipantConfiguration>(ib::cfg::v1::CreateDummyConfiguration());
-
-    // NB: do not create the _logger in the initializer list. If participantName is empty,
-    //  this will cause a fairly unintuitive exception in spdlog.
-    auto&& participantConfig = get_by_name(_config.simulationSetup.participants, _participantName);
-    _logger = std::make_unique<logging::Logger>(_participantName, _participantConfig->_data.logging);
-    _ibConnection.SetLogger(_logger.get());
-
-    _logger->Info("Creating ComAdapter for Participant {}, IntegrationBus-Version: {} {}, Middleware: {}",
-        _participantName, version::String(), version::SprintName(),
-        to_string(_config.middlewareConfig.activeMiddleware));
-    if (!_config.configFilePath.empty())
-        _logger->Info("Using IbConfig: {}", _config.configFilePath);
-
-    //set up default time provider used for controller instantiation
-    _timeProvider = std::make_shared<sync::WallclockProvider>(_config.simulationSetup.timeSync.tickPeriod);
-}
-
-template <class IbConnectionT>
 ComAdapter<IbConnectionT>::ComAdapter(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                                      const std::string& participantName, bool isSynchronized, cfg::Config config)
-    : _config{config}
-    , _participant{} 
-    , _participantName{participantName}
+                                      const std::string& participantName, bool isSynchronized)
+    : _participantName{participantName}
     , _isSynchronized{ isSynchronized }
     , _participantId{hash(participantName)}
     , _ibConnection{ib::cfg::vasio::v1::CreateDummyMiddlewareConfiguration(), participantName, _participantId}
@@ -143,8 +115,6 @@ ComAdapter<IbConnectionT>::ComAdapter(std::shared_ptr<ib::cfg::IParticipantConfi
     _logger->Info("Creating ComAdapter for Participant {}, IntegrationBus-Version: {} {}, Middleware: {}",
                   _participantName, version::String(), version::SprintName(),
                   "VAsio");
-    if (!_config.configFilePath.empty())
-        _logger->Info("Using IbConfig: {}", _config.configFilePath);
 
     //set up default time provider used for controller instantiation
     // TODO decide upon timePeriod
@@ -1430,24 +1400,12 @@ auto ComAdapter<IbConnectionT>::CreateController(const ConfigT& config,
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::GetLinkById(int16_t linkId) -> cfg::Link&
-{
-    for (auto&& link : _config.simulationSetup.links)
-    {
-        if (link.id == linkId)
-            return link;
-    }
-
-    throw cfg::Misconfiguration("Invalid linkId " + std::to_string(linkId));
-}
-
-template <class IbConnectionT>
 template <class ConfigT>
 void ComAdapter<IbConnectionT>::AddTraceSinksToSource(extensions::ITraceMessageSource* traceSource, ConfigT config)
 {
     if (config.useTraceSinks.empty())
     {
-        GetLogger()->Debug("Tracer on {}/{} not enabled, skipping", _participant.name, config.name);
+        GetLogger()->Debug("Tracer on {}/{} not enabled, skipping", _participantName, config.name);
         return;
     }
     auto findSinkByName = [this](const auto& name)
@@ -1478,6 +1436,7 @@ template <class IbConnectionT>
 template <class IIbToSimulatorT>
 void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::Link::Type linkType)
 {
+    /*
     auto&& simulator = std::get<IIbToSimulatorT*>(_simulators);
     if (simulator)
     {
@@ -1579,11 +1538,13 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
     //}
 
     simulator = busSim;
+    */
 }
 
 template <class IbConnectionT>
 bool ComAdapter<IbConnectionT>::ControllerUsesNetworkSimulator(const std::string& controllerName) const
 {
+    /*
     auto endpointName = _participantName + "/" + controllerName;
     const auto networkSimulators = FindNetworkSimulators(_config.simulationSetup);
   
@@ -1608,7 +1569,7 @@ bool ComAdapter<IbConnectionT>::ControllerUsesNetworkSimulator(const std::string
                 return true;
         }
     }
-
+    */
     return false;
 }
 

@@ -85,9 +85,8 @@ public:
     ComAdapter() = default;
     ComAdapter(const ComAdapter&) = default;
     ComAdapter(ComAdapter&&) = default;
-    ComAdapter(cfg::Config config, const std::string& participantName);
     ComAdapter(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-               const std::string& participantName, bool isSynchronized, cfg::Config config);
+               const std::string& participantName, bool isSynchronized);
 
 public:
     // ----------------------------------------
@@ -144,7 +143,6 @@ public:
     auto GetLogger() -> logging::ILogger* override;
     auto GetParticipantName() const -> const std::string& override { return _participantName; }
     auto IsSynchronized() const -> bool override { return _isSynchronized; }
-    auto GetConfig() const -> const ib::cfg::Config& override { return _config; }
 
     void RegisterCanSimulator(sim::can::IIbToCanSimulator* busSim) override;
     void RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim) override;
@@ -325,8 +323,6 @@ private:
                              const mw::SupplementalData& supplementalData, Arg&&... arg)
         -> ControllerT*;
 
-    auto GetLinkById(int16_t linkId) -> cfg::Link&;
-
     template<class IIbToSimulatorT>
     void RegisterSimulator(IIbToSimulatorT* busSim, cfg::Link::Type linkType);
 
@@ -338,9 +334,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    cfg::Config _config;
     std::shared_ptr<ib::cfg::ParticipantConfiguration> _participantConfig;
-    const cfg::Participant& _participant;
     std::string _participantName;
     bool _isSynchronized{ false };
     ParticipantId _participantId{0};
