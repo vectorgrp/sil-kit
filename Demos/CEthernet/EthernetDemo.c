@@ -157,12 +157,14 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    char* jsonString = LoadFile(argv[1]);
-    if (jsonString == NULL)
-    {
-        printf("Error: cannot open config file %s\n", argv[1]);
-        return 1;
-    }
+    // dummy allocation for now
+    char* jsonString = (char*)malloc(sizeof(char));
+    //char* jsonString = LoadFile(argv[1]);
+    //if (jsonString == NULL)
+    //{
+    //    printf("Error: cannot open config file %s\n", argv[1]);
+    //    return 1;
+    //}
     participantName = argv[2]; 
 
     const char* domainId = "42";
@@ -172,7 +174,7 @@ int main(int argc, char* argv[])
     }
 
     ib_ReturnCode returnCode;
-    returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, ib_False, domainId);
+    returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, domainId, ib_False);
     if (returnCode) 
     {
         printf("%s\n", ib_GetLastErrorString());
