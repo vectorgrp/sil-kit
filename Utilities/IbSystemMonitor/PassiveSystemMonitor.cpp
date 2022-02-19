@@ -45,7 +45,7 @@ int main(int argc, char** argv) try
     auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile(jsonFilename);
 
     std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-    auto comAdapter = ib::CreateSimulationParticipant(std::move(ibConfig), domainId, participantName, false);
+    auto comAdapter = ib::CreateSimulationParticipant(std::move(ibConfig), participantName, domainId, false);
     auto* logger = comAdapter->GetLogger();
     auto* systemMonitor = comAdapter->GetSystemMonitor();
     

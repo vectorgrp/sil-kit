@@ -25,33 +25,35 @@ ib_ReturnCode ib_SimulationParticipant_Create(ib_SimulationParticipant** outPart
                                                   const char* cParticipantName, const char* cDomainId,
                                                   ib_Bool isSynchronized)
 {
-  ASSERT_VALID_OUT_PARAMETER(outParticipant);
-  ASSERT_VALID_POINTER_PARAMETER(cJsonConfig);
-  ASSERT_VALID_POINTER_PARAMETER(cParticipantName);
-  ASSERT_VALID_POINTER_PARAMETER(cDomainId);
-  CAPI_ENTER
-  {
-    std::string jsonConfigStr(cJsonConfig);
-    std::string participantName(cParticipantName);
-    std::string domainIdStr(cDomainId);
-    uint32_t domainId = atoi(domainIdStr.c_str());
+    ASSERT_VALID_OUT_PARAMETER(outParticipant);
+    ASSERT_VALID_POINTER_PARAMETER(cJsonConfig);
+    ASSERT_VALID_POINTER_PARAMETER(cParticipantName);
+    ASSERT_VALID_POINTER_PARAMETER(cDomainId);
+    CAPI_ENTER
+    {
+        std::string jsonConfigStr(cJsonConfig);
+        std::string participantName(cParticipantName);
+        std::string domainIdStr(cDomainId);
+        uint32_t domainId = atoi(domainIdStr.c_str());
 
-    auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonString(jsonConfigStr);
+        auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonString(jsonConfigStr);
 
-    std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
+        std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId
+                    << std::endl;
         auto comAdapter =
             ib::CreateSimulationParticipant(ibConfig, participantName, domainId, isSynchronized).release();
-        
-    if (comAdapter == nullptr)
-    {
-      ib_error_string = "Creating Simulation Participant failed due to unknown error and returned null pointer.";
-      return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
 
-    *outParticipant = reinterpret_cast<ib_SimulationParticipant*>(comAdapter);
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
+        if (comAdapter == nullptr)
+        {
+            ib_error_string =
+                "Creating Simulation Participant failed due to unknown error and returned null pointer.";
+            return ib_ReturnCode_UNSPECIFIEDERROR;
+        }
+
+        *outParticipant = reinterpret_cast<ib_SimulationParticipant*>(comAdapter);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
 }
 
 ib_ReturnCode ib_SimulationParticipant_Destroy(ib_SimulationParticipant* participant)

@@ -52,7 +52,8 @@ public:
         : _testSize{testSize}
     {
         std::string participantName = "Publisher" + std::to_string(publisherIndex);
-        _comAdapter = ib::mw::CreateSimulationParticipantImpl(ib::cfg::CreateDummyConfiguration(), participantName, true);
+        _comAdapter =
+            ib::mw::CreateSimulationParticipantImpl(ib::cfg::CreateDummyConfiguration(), participantName, true);
 
         _comAdapter->joinIbDomain(domainId);
 

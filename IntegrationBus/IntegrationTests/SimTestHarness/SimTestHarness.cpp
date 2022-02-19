@@ -223,9 +223,9 @@ void SimTestHarness::AddParticipant(const std::string& participantName)
 {
     auto participant = std::make_unique<SimParticipant>();
     participant->_name = participantName;
-    
-    participant->_comAdapter = 
-        ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), _domainId, participantName, true);
+
+    participant->_comAdapter =
+        ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), participantName, _domainId, true);
 
     //    Let's make sure the SystemController is cached, in case the user
     //    needs it during simulation (e.g., calling Stop()).

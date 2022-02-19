@@ -78,7 +78,8 @@ protected:
         unsigned numSent{ 0 }, numAcks{ 0 };
         std::promise<void> canWriterAllAcksReceivedPromiseLocal;
 
-        auto comAdapter = ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), _domainId, "CanWriter", false);
+        auto comAdapter =
+            ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), "CanWriter", _domainId, false);
         auto* controller = comAdapter->CreateCanController("CAN1", "CAN1");
 
         controller->RegisterTransmitStatusHandler(
@@ -112,7 +113,7 @@ protected:
 
         auto dynamicConfiguration = ib::cfg::CreateDummyConfiguration();
 
-        auto comAdapter = ib::CreateSimulationParticipant(dynamicConfiguration, _domainId, "CanReader", false);
+        auto comAdapter = ib::CreateSimulationParticipant(dynamicConfiguration, "CanReader", _domainId, false);
         auto* controller = comAdapter->CreateCanController("CAN1", "CAN1");
 
         controller->RegisterReceiveMessageHandler(

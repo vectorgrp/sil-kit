@@ -272,7 +272,8 @@ protected:
     {
         try
         {
-            participant.comAdapter = ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), domainId, participant.name, sync);
+            participant.comAdapter =
+                ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), participant.name, domainId, sync);
 
             IParticipantController* participantController;
             if (sync)
@@ -437,7 +438,8 @@ protected:
     {
         try
         {
-            participant.comAdapter = ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), domainId, participant.name, sync);
+            participant.comAdapter =
+                ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), participant.name, domainId, sync);
 
             IParticipantController* participantController;
             if (sync)
@@ -562,7 +564,8 @@ protected:
     {
         try
         {
-            systemMaster.comAdapter = ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), domainId, systemMasterName, false);
+            systemMaster.comAdapter =
+                ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), systemMasterName, domainId, false);
 
             systemMaster.systemController = systemMaster.comAdapter->GetSystemController();
             systemMaster.systemMonitor = systemMaster.comAdapter->GetSystemMonitor();
