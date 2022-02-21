@@ -72,7 +72,7 @@ public:
         return _name;
     }
 
-    void RegisterNextSimStepHandler(NextSimStepHandlerT handler)
+    void RegisterNextSimStepHandler(NextSimStepHandlerT handler) override
     {
         _handlers.emplace_back(std::move(handler));
     }
@@ -281,17 +281,17 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::rpc::FunctionCallResponse& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::rpc::FunctionCallResponse&& /*msg*/) override {}
 
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::NextSimTask& /*msg*/) {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::ParticipantStatus& /*msg*/) {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::ParticipantCommand& /*msg*/) {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::SystemCommand& /*msg*/) {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::ExpectedParticipants& /*msg*/) {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::NextSimTask& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::ParticipantStatus& /*msg*/)  override{}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::ParticipantCommand& /*msg*/)  override{}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::SystemCommand& /*msg*/)  override{}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::ExpectedParticipants& /*msg*/)  override{}
 
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, logging::LogMsg&& /*msg*/) {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const logging::LogMsg& /*msg*/) {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, logging::LogMsg&& /*msg*/)  override{}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const logging::LogMsg& /*msg*/)  override{}
 
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const service::ServiceAnnouncement& /*msg*/) {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const service::ServiceDiscoveryEvent& /*msg*/) {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const service::ServiceAnnouncement& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const service::ServiceDiscoveryEvent& /*msg*/)  override{}
 
     // targeted messaging
 
@@ -340,28 +340,28 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::rpc::FunctionCallResponse& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::rpc::FunctionCallResponse&& /*msg*/) override {}
 
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::NextSimTask& /*msg*/) {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::ParticipantStatus& /*msg*/) {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::ParticipantCommand& /*msg*/) {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::SystemCommand& /*msg*/) {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::ExpectedParticipants& /*msg*/) {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::NextSimTask& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::ParticipantStatus& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::ParticipantCommand& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::SystemCommand& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::ExpectedParticipants& /*msg*/) override {}
 
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, logging::LogMsg&& /*msg*/) {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const logging::LogMsg& /*msg*/) {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, logging::LogMsg&& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const logging::LogMsg& /*msg*/) override {}
 
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const service::ServiceAnnouncement& /*msg*/) {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const service::ServiceDiscoveryEvent& /*msg*/) {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const service::ServiceAnnouncement& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const service::ServiceDiscoveryEvent& /*msg*/) override {}
 
 
-    void OnAllMessagesDelivered(std::function<void()> /*callback*/) {}
-    void FlushSendBuffers() {}
-    void ExecuteDeferred(std::function<void()> callback) {}
+    void OnAllMessagesDelivered(std::function<void()> /*callback*/) override {}
+    void FlushSendBuffers() override {}
+    void ExecuteDeferred(std::function<void()> callback) override {}
     auto GetParticipantName() const -> const std::string& override { return _name; }
     auto IsSynchronized() const -> bool override { return _isSynchronized; }
 
     virtual auto GetTimeProvider() -> sync::ITimeProvider* { return &mockTimeProvider; }
     virtual void SendIbMessage_proxy(const IIbServiceEndpoint* /*from*/, const sim::generic::GenericMessage& /*msg*/) {} //helper for gtest workaround
-    void joinIbDomain(uint32_t ) {}
+    void joinIbDomain(uint32_t ) override {}
 
     auto GetServiceDiscovery() -> service::IServiceDiscovery* override { return &mockServiceDiscovery; }
 

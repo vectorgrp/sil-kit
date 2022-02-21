@@ -62,11 +62,11 @@ public:
         std::chrono::nanoseconds timestamp, const ib::sim::fr::FrMessage& message));
 
 
-    auto GetLogger() const -> logging::ILogger*
+    auto GetLogger() const -> logging::ILogger* override
     {
         return nullptr;
     }
-    auto Name() const -> const std::string&
+    auto Name() const -> const std::string& override
     {
         return mockName;
     }
