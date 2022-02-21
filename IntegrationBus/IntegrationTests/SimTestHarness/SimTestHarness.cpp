@@ -57,7 +57,7 @@ public:
             ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), "SystemController", domainId, false);
 
         _controller = _comAdapter->GetSystemController();
-        _controller->SetSynchronizedParticipants(_syncParticipantNames);
+        _controller->SetRequiredParticipants(_syncParticipantNames);
         _monitor = _comAdapter->GetSystemMonitor();
         _monitor->RegisterSystemStateHandler(
             std::bind(&SimSystemController::OnSystemStateChanged, this, std::placeholders::_1)

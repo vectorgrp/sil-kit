@@ -128,7 +128,7 @@ public:
     MOCK_CONST_METHOD0(Shutdown, void());
     MOCK_CONST_METHOD0(PrepareColdswap, void());
     MOCK_CONST_METHOD0(ExecuteColdswap, void());
-    MOCK_METHOD((void), SetSynchronizedParticipants, (const std::vector<std::string>& participantNames));
+    MOCK_METHOD((void), SetRequiredParticipants, (const std::vector<std::string>& participantNames));
 };
 
 class MockServiceDiscovery : public service::IServiceDiscovery

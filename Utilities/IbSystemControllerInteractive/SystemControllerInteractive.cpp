@@ -246,7 +246,7 @@ int main(int argc, char** argv)
 
     auto systemMonitor = comAdapter->GetSystemMonitor();
     auto systemController = comAdapter->GetSystemController();
-    systemController->SetSynchronizedParticipants(expectedParticipantNames);
+    systemController->SetRequiredParticipants(expectedParticipantNames);
     systemMonitor->RegisterParticipantStatusHandler(&ReportParticipantStatus);
     systemMonitor->RegisterSystemStateHandler(&ReportSystemState);
 

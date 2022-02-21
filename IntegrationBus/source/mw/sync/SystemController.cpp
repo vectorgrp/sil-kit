@@ -57,7 +57,7 @@ void SystemController::ExecuteColdswap() const
     SendSystemCommand(SystemCommand::Kind::ExecuteColdswap);
 }
 
-void SystemController::SetSynchronizedParticipants(const std::vector<std::string>& participantNames)
+void SystemController::SetRequiredParticipants(const std::vector<std::string>& participantNames)
 {
     ExpectedParticipants expectedParticipants{participantNames};
     //  Distribute to SystemMonitors (including self delivery) 

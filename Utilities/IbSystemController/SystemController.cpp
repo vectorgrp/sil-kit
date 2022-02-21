@@ -35,7 +35,7 @@ public:
         , _expectedParticipantNames{expectedParticipantNames}
     {
         _controller = comAdapter->GetSystemController();
-        _controller->SetSynchronizedParticipants(expectedParticipantNames);
+        _controller->SetRequiredParticipants(expectedParticipantNames);
 
         _monitor = comAdapter->GetSystemMonitor();
         _monitor->RegisterSystemStateHandler(

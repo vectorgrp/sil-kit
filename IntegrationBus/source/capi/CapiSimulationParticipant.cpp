@@ -460,5 +460,4 @@ ib_ReturnCode ib_SimulationParticipant_RegisterParticipantStateHandler(ib_Simula
   CAPI_LEAVE
 }
 
-
 }

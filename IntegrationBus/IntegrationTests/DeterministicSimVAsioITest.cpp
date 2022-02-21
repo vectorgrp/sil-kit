@@ -121,7 +121,7 @@ public:
         _comAdapter->joinIbDomain(domainId);
 
         _systemController = _comAdapter->GetSystemController();
-        _systemController->SetSynchronizedParticipants(syncParticipantNames);
+        _systemController->SetRequiredParticipants(syncParticipantNames);
 
         _monitor = _comAdapter->GetSystemMonitor();
         _monitor->RegisterSystemStateHandler(

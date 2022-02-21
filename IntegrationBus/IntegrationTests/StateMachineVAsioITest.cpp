@@ -82,7 +82,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
    
     comAdapterController->joinIbDomain(domainId);
     auto systemController = comAdapterController->GetSystemController();
-    systemController->SetSynchronizedParticipants(syncParticipantNames);
+    systemController->SetRequiredParticipants(syncParticipantNames);
     auto monitor = comAdapterController->GetSystemMonitor();
     monitor->RegisterParticipantStateHandler([this](ParticipantState state)
     {

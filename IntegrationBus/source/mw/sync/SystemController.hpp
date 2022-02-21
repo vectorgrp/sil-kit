@@ -46,7 +46,7 @@ public:
     void Shutdown() const override;
     void PrepareColdswap() const override;
     void ExecuteColdswap() const override;
-    void SetSynchronizedParticipants(const std::vector<std::string>& participantNames) override;
+    void SetRequiredParticipants(const std::vector<std::string>& participantNames) override;
 
     // IIbServiceEndpoint
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;

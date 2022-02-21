@@ -106,7 +106,7 @@ public:
     virtual void ExecuteColdswap() const = 0;
 
     /* brief Set the names of all synchronized participants */
-    virtual void SetSynchronizedParticipants(const std::vector<std::string>& participantNames) = 0;
+    virtual void SetRequiredParticipants(const std::vector<std::string>& participantNames) = 0;
 };
 
 } // namespace sync
