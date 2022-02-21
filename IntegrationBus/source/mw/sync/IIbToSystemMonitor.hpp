@@ -12,7 +12,7 @@ namespace sync {
 
 class IIbToSystemMonitor
     : public mw::IIbEndpoint<ParticipantStatus, ExpectedParticipants>
-    , public mw::IIbSender<ExpectedParticipants>
+    , public mw::IIbSender<>
 {
 };
 

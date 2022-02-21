@@ -383,7 +383,7 @@ int main(int argc, char** argv)
             auto controller = comAdapter->GetSystemController();
             auto monitor = comAdapter->GetSystemMonitor();
 
-            monitor->SetSynchronizedParticipants(participantNames);
+            controller->SetSynchronizedParticipants(participantNames);
 
             monitor->RegisterSystemStateHandler([controller, participantNames](SystemState newState) {
                 SystemStateHandler(controller, newState, participantNames);

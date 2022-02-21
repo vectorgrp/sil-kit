@@ -245,12 +245,13 @@ int main(int argc, char** argv)
     auto comAdapter = ib::CreateSimulationParticipant(ibConfig, participantName, domainId, false);
 
     auto systemMonitor = comAdapter->GetSystemMonitor();
-    systemMonitor->SetSynchronizedParticipants(expectedParticipantNames);
+    auto systemController = comAdapter->GetSystemController();
+    systemController->SetSynchronizedParticipants(expectedParticipantNames);
     systemMonitor->RegisterParticipantStatusHandler(&ReportParticipantStatus);
     systemMonitor->RegisterSystemStateHandler(&ReportSystemState);
 
-    InteractiveSystemController systemController(comAdapter->GetSystemController(), ibConfig, participantName, expectedParticipantNames);
-    systemController.RunInteractiveLoop();
+    InteractiveSystemController systemControllerIA(comAdapter->GetSystemController(), ibConfig, participantName, expectedParticipantNames);
+    systemControllerIA.RunInteractiveLoop();
 
     return 0;
 }

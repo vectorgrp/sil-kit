@@ -40,7 +40,6 @@ public:
     // Public Interface Methods
 
     // ISystemMonitor
-    void SetSynchronizedParticipants(const std::vector<std::string>& participantNames) override;
     void RegisterSystemStateHandler(SystemStateHandlerT handler) override;
     void RegisterParticipantStateHandler(ParticipantStateHandlerT handler) override;
     void RegisterParticipantStatusHandler(ParticipantStatusHandlerT handler) override;
@@ -67,6 +66,8 @@ public:
      */
     inline auto InvalidTransitionCount() const -> unsigned int;
 
+    void UpdateExpectedParticipantNames(const ExpectedParticipants& expectedParticipants);
+
 private:
     // ----------------------------------------
     // private methods
@@ -74,7 +75,6 @@ private:
     bool AllParticipantsInState(std::initializer_list<sync::ParticipantState> acceptedStates) const;
     void ValidateParticipantStatusUpdate(const sync::ParticipantStatus& newStatus, sync::ParticipantState oldState);
     void UpdateSystemState(const sync::ParticipantStatus& newStatus);
-    void UpdateExpectedParticipantNames(const ExpectedParticipants& expectedParticipants);
 
     inline void SetSystemState(sync::SystemState newState);
 

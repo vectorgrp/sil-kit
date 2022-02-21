@@ -12,7 +12,7 @@ namespace sync {
 
 class IIbToSystemController
     : public mw::IIbEndpoint<>
-    , public mw::IIbSender<ParticipantCommand, SystemCommand>
+    , public mw::IIbSender<ParticipantCommand, SystemCommand, ExpectedParticipants>
 {
 };
 

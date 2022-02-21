@@ -115,7 +115,6 @@ public:
     MOCK_METHOD1(RegisterParticipantStatusHandler, void(ParticipantStatusHandlerT));
     MOCK_CONST_METHOD0(SystemState,  sync::SystemState());
     MOCK_CONST_METHOD1(ParticipantStatus, const sync::ParticipantStatus&(const std::string& participantId));
-    MOCK_METHOD((void), SetSynchronizedParticipants, (const std::vector<std::string>& participantNames));
 };
 
 class MockSystemController : public sync::ISystemController {
@@ -129,6 +128,7 @@ public:
     MOCK_CONST_METHOD0(Shutdown, void());
     MOCK_CONST_METHOD0(PrepareColdswap, void());
     MOCK_CONST_METHOD0(ExecuteColdswap, void());
+    MOCK_METHOD((void), SetSynchronizedParticipants, (const std::vector<std::string>& participantNames));
 };
 
 class MockServiceDiscovery : public service::IServiceDiscovery

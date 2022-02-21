@@ -267,7 +267,7 @@ protected:
             systemMaster.systemController = systemMaster.comAdapter->GetSystemController();
             systemMaster.systemMonitor = systemMaster.comAdapter->GetSystemMonitor();
 
-            systemMaster.systemMonitor->SetSynchronizedParticipants(syncParticipantNames);
+            systemMaster.systemController->SetSynchronizedParticipants(syncParticipantNames);
 
             systemMaster.systemMonitor->RegisterSystemStateHandler(
                 [this](SystemState newState) { SystemStateHandler(newState); });

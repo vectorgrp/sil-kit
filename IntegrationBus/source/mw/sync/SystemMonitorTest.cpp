@@ -43,9 +43,8 @@ protected:
         : monitor{&comAdapter }
         , monitorFrom{ &comAdapter }
     {
-        syncParticipantNames = {"P1", "P2", "P3"};
-
-        monitor.SetSynchronizedParticipants(syncParticipantNames);
+        syncParticipantNames = { "P1", "P2", "P3" };
+        monitor.UpdateExpectedParticipantNames(ib::mw::sync::ExpectedParticipants{ syncParticipantNames });
         monitor.SetServiceDescriptor(from_endpointAddress(addr));
     }
 

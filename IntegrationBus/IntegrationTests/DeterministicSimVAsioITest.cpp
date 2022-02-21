@@ -121,10 +121,9 @@ public:
         _comAdapter->joinIbDomain(domainId);
 
         _systemController = _comAdapter->GetSystemController();
+        _systemController->SetSynchronizedParticipants(syncParticipantNames);
+
         _monitor = _comAdapter->GetSystemMonitor();
-
-        _monitor->SetSynchronizedParticipants(syncParticipantNames);
-
         _monitor->RegisterSystemStateHandler(
             [this](SystemState newState) {
             this->OnSystemStateChanged(newState);

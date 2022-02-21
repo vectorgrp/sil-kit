@@ -35,9 +35,9 @@ public:
         , _expectedParticipantNames{expectedParticipantNames}
     {
         _controller = comAdapter->GetSystemController();
-        _monitor = comAdapter->GetSystemMonitor();
-        _monitor->SetSynchronizedParticipants(expectedParticipantNames);
+        _controller->SetSynchronizedParticipants(expectedParticipantNames);
 
+        _monitor = comAdapter->GetSystemMonitor();
         _monitor->RegisterSystemStateHandler(
             [this](SystemState newState) {
                 this->OnSystemStateChanged(newState);

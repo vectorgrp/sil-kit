@@ -104,6 +104,10 @@ public:
     *  The command is only allowed if system is in SystemState::ColdswapReady
     */
     virtual void ExecuteColdswap() const = 0;
+
+    /* brief Set the names of all synchronized participants */
+    virtual void SetSynchronizedParticipants(const std::vector<std::string>& participantNames) = 0;
+
 };
 
 } // namespace sync

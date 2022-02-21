@@ -78,6 +78,5 @@ DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, ParticipantCommand)
 DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, ParticipantStatus)
 DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, SystemCommand)
 
-
 } // mw
 } // namespace ib

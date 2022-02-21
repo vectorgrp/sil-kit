@@ -20,16 +20,6 @@ SystemMonitor::SystemMonitor(IComAdapterInternal* comAdapter)
 {
 }
 
-// Used by e.g. IbSystemController
-void SystemMonitor::SetSynchronizedParticipants(const std::vector<std::string>& participantNames)
-{
-    ExpectedParticipants expectedParticipants{ participantNames };
-    UpdateExpectedParticipantNames(expectedParticipants);
-    //  Distribute to other SystemMonitors
-    _comAdapter->SendIbMessage(this, std::move(expectedParticipants));
-
-}
-
 const ib::mw::sync::ExpectedParticipants& SystemMonitor::GetExpectedParticipants() const
 {
     return _expectedParticipants;
