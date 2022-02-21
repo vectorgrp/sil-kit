@@ -109,7 +109,7 @@ add_subdirectory(DataMessage)
 add_subdirectory(CData)
 add_subdirectory(Rpc)
 add_subdirectory(CRpc)
-#add_subdirectory(Benchmark)
+add_subdirectory(Benchmark)
 
 message(STATUS "Demos available: ${demo_list}")
 #######################################################################################################################

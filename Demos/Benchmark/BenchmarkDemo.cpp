@@ -12,14 +12,12 @@
 #include "ib/mw/sync/all.hpp"
 #include "ib/cfg/string_utils.hpp"
 
-#include "ib/cfg/Config.hpp"
-#include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/extensions/CreateExtension.hpp"
 
 using namespace ib::mw;
 using namespace ib::mw::sync;
 using namespace ib::cfg;
-using namespace ib::sim::generic;
+using namespace ib::sim::data;
 using namespace std::chrono_literals;
 
 std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
@@ -33,7 +31,6 @@ void PrintUsage(const std::string& executableName)
 {
     std::cout << "Usage:" << std::endl
         << executableName
-        << " [middleware]"
         << " [numberOfSimulations]"
         << " [simulationDuration]"
         << " [numberOfParticipants]"
@@ -45,7 +42,6 @@ void PrintUsage(const std::string& executableName)
         << "\t--help\tshow this message." << std::endl
         << "\t--disable-domainsockets\tDisable local domain sockets." << std::endl
         << "\t--enable-nodelay\tEnable the TCP NO_DELAY flag." << std::endl
-        << "\t--middleware\tSet middleware to either [VAsio, FastRTPS]" << std::endl
         << "\t--domain-id\tSet domain id to NUM" << std::endl
         << "\t--message-size\tSet message size to BYTES" << std::endl
         << "\t--message-count\tSet number of messages to be send in each simulation iteration to NUM" << std::endl
@@ -57,7 +53,6 @@ void PrintUsage(const std::string& executableName)
 
 struct BenchmarkConfig
 {
-    Middleware usedMiddleware = Middleware::VAsio;
     uint32_t numberOfSimulations = 5;
     std::chrono::seconds simulationDuration = 1s;
     uint32_t numberOfParticipants = 4;
@@ -78,7 +73,7 @@ bool Parse(int argc, char** argv, BenchmarkConfig& config)
         return static_cast<uint32_t>(std::stoul(str));
     };
 
-    // test and remvoe the flag from args, returns true if flag was present
+    // test and remove the flag from args, returns true if flag was present
     auto consumeFlag = [&args](const auto& namedOption) {
         auto it = std::find(args.begin(), args.end(), namedOption);
         if (it != args.end())
@@ -149,7 +144,6 @@ bool Parse(int argc, char** argv, BenchmarkConfig& config)
         }
     };
     // Parse and consume the optional named arguments
-    parseOptional("--middleware", config.usedMiddleware, &ib::from_string<Middleware>);
     parseOptional("--domain-id", config.domainId, asNum);
     parseOptional("--message-size", config.messageSizeInBytes, asNum);
     parseOptional("--message-count", config.messageCount, asNum);
@@ -177,19 +171,17 @@ bool Parse(int argc, char** argv, BenchmarkConfig& config)
     {
         switch (args.size())
         {
-        case 7: config.domainId = asNum(args.at(6));
+        case 6: config.domainId = asNum(args.at(6));
             // [[fallthrough]]
-        case 6: config.messageSizeInBytes = asNum(args.at(5));
+        case 5: config.messageSizeInBytes = asNum(args.at(5));
             // [[fallthrough]]
-        case 5: config.messageCount = asNum(args.at(4));
+        case 4: config.messageCount = asNum(args.at(4));
             // [[fallthrough]]
-        case 4: config.numberOfParticipants = asNum(args.at(3));
+        case 3: config.numberOfParticipants = asNum(args.at(3));
             // [[fallthrough]]
-        case 3: config.simulationDuration = std::chrono::seconds(asNum(args.at(2)));
+        case 2: config.simulationDuration = std::chrono::seconds(asNum(args.at(2)));
             // [[fallthrough]]
-        case 2: config.numberOfSimulations = asNum(args.at(1));
-            // [[fallthrough]]
-        case 1: config.usedMiddleware = ib::from_string<Middleware>(args.at(0));
+        case 1: config.numberOfSimulations = asNum(args.at(1));
             break;
         default:
             if (haveUserOptions)
@@ -241,7 +233,7 @@ bool Validate(const BenchmarkConfig& config)
     return true;
 }
 
-void PublishMessages(IGenericPublisher* publisher, uint32_t messageCount, uint32_t messageSizeInBytes)
+void PublishMessages(IDataPublisher* publisher, uint32_t messageCount, uint32_t messageSizeInBytes)
 {
     for (uint32_t i = 0; i < messageCount; i++)
     {
@@ -250,7 +242,7 @@ void PublishMessages(IGenericPublisher* publisher, uint32_t messageCount, uint32
     }
 }
 
-void ReceiveMessage(IGenericSubscriber* subscriber, const std::vector<uint8_t>& data)
+void ReceiveMessage(IDataSubscriber* subscriber, const std::vector<uint8_t>& data)
 {
     // do nothing
 }
@@ -268,16 +260,14 @@ void ParticipantStatusHandler(ISystemController* controller, const ParticipantSt
     }
 }
 
-void SystemStateHandler(ISystemController* controller, SystemState newState, const Config& ibConfig)
+void SystemStateHandler(ISystemController* controller, SystemState newState, const std::vector<std::string>& expectedParticipants)
 {
     switch (newState)
     {
     case SystemState::Idle:
-        for (auto&& participant : ibConfig.simulationSetup.participants)
+        for (auto&& name : expectedParticipants)
         {
-            if (participant.name == "SyncMaster")
-                continue;
-            controller->Initialize(participant.name);
+            controller->Initialize(name);
         }
         break;
 
@@ -294,101 +284,25 @@ void SystemStateHandler(ISystemController* controller, SystemState newState, con
     }
 }
 
-auto BuildConfig(uint32_t participantCount, Middleware middleware) -> Config
-{
-    ConfigBuilder config("BenchmarkConfigGenerated");
-    auto&& simulationSetup = config.SimulationSetup();
-
-    auto syncType = middleware == Middleware::FastRTPS ? SyncType::DiscreteTime : SyncType::DistributedTimeQuantum;
-
-    std::vector<ParticipantBuilder*> participants;
-    for (uint32_t participantCounter = 0; participantCounter < participantCount; participantCounter++)
-    {
-        std::stringstream linkName;
-        linkName << "LinkOfPubOfPart" << participantCounter;
-        simulationSetup.AddOrGetLink(Link::Type::GenericMessage, linkName.str());
-
-        std::stringstream participantName;
-        participantName << "Participant" << participantCounter;
-        auto&& participant = simulationSetup.AddParticipant(participantName.str());
-
-        participant.AddParticipantController().WithSyncType(syncType);
-
-        const auto level = logging::Level::Info;
-        participant.ConfigureLogger()
-            .WithFlushLevel(level)
-            .AddSink(Sink::Type::Stdout)
-            .WithLogLevel(level);
-
-        std::stringstream publisherName;
-        publisherName << "PubOfPart" << participantCounter;
-        participant.AddGenericPublisher(publisherName.str()).WithLink(linkName.str());
-        participants.emplace_back(&participant);
-    }
-
-    for (uint32_t participantCounter = 0; participantCounter < participantCount; participantCounter++)
-    {
-        for (uint32_t peerParticipantCounter = 0; peerParticipantCounter < participantCount; peerParticipantCounter++)
-        {
-            if (participantCounter == peerParticipantCounter)
-                continue;
-
-            std::stringstream linkName;
-            linkName << "LinkOfPubOfPart" << participantCounter;
-
-            std::stringstream subscriberName;
-            subscriberName << "SubOfPart" << peerParticipantCounter << "fromPart" << participantCounter;
-
-            participants.at(peerParticipantCounter)->AddGenericSubscriber(subscriberName.str()).WithLink(linkName.str());
-        }
-    }
-
-    simulationSetup.AddParticipant("SyncMaster")
-        .AsSyncMaster()
-        .ConfigureLogger()
-        .WithFlushLevel(logging::Level::Critical)
-        .AddSink(Sink::Type::Stdout)
-        .WithLogLevel(logging::Level::Critical);
-
-    simulationSetup.ConfigureTimeSync()
-        .WithLooseSyncPolicy()
-        .WithTickPeriod(1ms);
-
-    config.WithActiveMiddleware(middleware);
-
-    return config.Build();
-}
-
-
 void ParticipantsThread(
+    std::shared_ptr<ib::cfg::IParticipantConfiguration> ibConfig,
     const BenchmarkConfig& benchmark,
-    const Config& ibConfig,
-    const Participant& participant,
+    const std::string& participantName,
+    uint32_t participantIndex,
     size_t& messageCounter)
 {
-    auto comAdapter = ib::CreateComAdapter(ibConfig, participant.name, benchmark.domainId);
+    auto comAdapter = ib::CreateSimulationParticipant(ibConfig, participantName, benchmark.domainId, true);
     auto&& participantController = comAdapter->GetParticipantController();
    
-    std::vector<IGenericPublisher*> publishers;
-    for (auto& genericPublisher : participant.genericPublishers)
-    {
-        publishers.emplace_back(comAdapter->CreateGenericPublisher(genericPublisher.name));
-    }
+    auto publisher = comAdapter->CreateDataPublisher("Topic", DataExchangeFormat{}, {}, 0);
+    auto subscriber = comAdapter->CreateDataSubscriber("Topic", DataExchangeFormat{}, {}, [&messageCounter](auto*, auto&) {
+        // this is handled in I/O thread, so no data races on counter.
+        messageCounter++;
+    });
 
-    std::vector<IGenericSubscriber*> subscribers;
-    for (auto& genericSubscriber : participant.genericSubscribers)
-    {
-        auto thisSubscriber = comAdapter->CreateGenericSubscriber(genericSubscriber.name);
-        thisSubscriber->SetReceiveMessageHandler([&messageCounter](auto*, auto&) {
-            // this is handled in I/O thread, so no data races on counter.
-            messageCounter++;
-        });
-        subscribers.emplace_back(thisSubscriber);
-    }
-
-    const auto isVerbose = participant.id == 1;
+    const auto isVerbose = participantIndex == 0;
     participantController->SetSimulationTask(
-        [=, &publishers](std::chrono::nanoseconds now) {
+        [=, &publisher](std::chrono::nanoseconds now) {
 
         if (now > benchmark.simulationDuration)
         {
@@ -407,11 +321,7 @@ void ParticipantsThread(
                     std::cout << std::endl;
             }
         }
-
-        for (auto&& publisher : publishers)
-        {
-            PublishMessages(publisher, benchmark.messageCount, benchmark.messageSizeInBytes);
-        }
+        PublishMessages(publisher, benchmark.messageCount, benchmark.messageSizeInBytes);
     });
 
     participantController->Run();
@@ -422,61 +332,61 @@ void ParticipantsThread(
 **************************************************************************************************/
 int main(int argc, char** argv)
 {
+    auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile("");
     BenchmarkConfig benchmark;
     if (!Parse(argc, argv, benchmark) || !Validate(benchmark))
     {
         return -1;
     }
 
-    auto ibConfig = BuildConfig(benchmark.numberOfParticipants, benchmark.usedMiddleware);
-
     if (benchmark.disableLocaldomainSockets)
     {
-        ibConfig.middlewareConfig.vasio.enableDomainSockets = false;
+        //ibConfig.middlewareConfig.vasio.enableDomainSockets = false;
     }
 
     if (benchmark.tcpNoDelay)
     {
-        ibConfig.middlewareConfig.vasio.tcpNoDelay = true;
-        ibConfig.middlewareConfig.vasio.tcpQuickAck = true;
+        //ibConfig.middlewareConfig.vasio.tcpNoDelay = true;
+        //ibConfig.middlewareConfig.vasio.tcpQuickAck = true;
     }
 
     try
     {
         using namespace ib::extensions;
         std::unique_ptr<IIbRegistry> registry;
-        if (benchmark.usedMiddleware == Middleware::VAsio)
-        {
-            registry = ib::extensions::CreateIbRegistry(ibConfig);
-            registry->ProvideDomain(benchmark.domainId);
-        }
+        // TODO use new config
+        registry = ib::extensions::CreateIbRegistry(ib::cfg::Config{});
+        registry->ProvideDomain(benchmark.domainId);
 
         std::vector<size_t> messageCounts;
         std::vector<std::chrono::nanoseconds> measuredRealDurations;
 
         for (uint32_t simulationRun = 1; simulationRun <= benchmark.numberOfSimulations; simulationRun++)
         {
-            std::vector<size_t> counters(ibConfig.simulationSetup.participants.size(), 0);
+            std::vector<size_t> counters(benchmark.numberOfParticipants, 0);
             std::cout << "Simulation " << simulationRun << ": ";
             auto startTimestamp = std::chrono::system_clock::now();
 
+            std::vector<std::string> participantNames;
             std::vector<std::thread> threads;
             size_t idx = 0;
-            for (auto &&participant : ibConfig.simulationSetup.participants)
+            for (uint32_t participantIndex = 0; participantIndex < benchmark.numberOfParticipants; participantIndex++)
             {
-                if (participant.name == "SyncMaster")
-                    continue;
+                std::string participantName = "Participant" + std::to_string(participantIndex);
+                participantNames.push_back(participantName);
                 auto& counter = counters.at(idx);
                 idx++;
-                threads.emplace_back(&ParticipantsThread, benchmark, ibConfig, participant, std::ref(counter));
+                threads.emplace_back(&ParticipantsThread, ibConfig, benchmark,  participantName, participantIndex, std::ref(counter));
             }
 
-            auto comAdapter = ib::CreateComAdapter(ibConfig, "SyncMaster", benchmark.domainId);
+            auto comAdapter = ib::CreateSimulationParticipant(ibConfig, "SystemController", benchmark.domainId, false);
             auto controller = comAdapter->GetSystemController();
             auto monitor = comAdapter->GetSystemMonitor();
 
-            monitor->RegisterSystemStateHandler([controller, &ibConfig](SystemState newState) {
-                SystemStateHandler(controller, newState, ibConfig);
+            monitor->SetSynchronizedParticipants(participantNames);
+
+            monitor->RegisterSystemStateHandler([controller, participantNames](SystemState newState) {
+                SystemStateHandler(controller, newState, participantNames);
             });
 
             monitor->RegisterParticipantStatusHandler([controller](const ParticipantStatus& newStatus) {
@@ -502,7 +412,6 @@ int main(int argc, char** argv)
 
         std::cout << std::endl;
         std::cout << "Completed simulations with the following parameters:" << std::endl;
-        std::cout << "Middleware = " << benchmark.usedMiddleware << std::endl;
         std::cout << "Number of simulations = " << benchmark.numberOfSimulations << std::endl;
         std::cout << "Simulation duration = " << benchmark.simulationDuration << std::endl;
         std::cout << "Number of participants = " << benchmark.numberOfParticipants << std::endl;
