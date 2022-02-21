@@ -1,4 +1,3 @@
-#include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/capi/FlexRay.h"
 #include "ib/capi/IntegrationBus.h"
 #include "ib/sim/fr/all.hpp"
@@ -49,29 +48,12 @@ class CapiFlexRayTest : public testing::Test
 {
 public:
   CapiFlexRayTest()
-    : configBuilder("TestBuilder")
-        , controllerName("FR1")
-        , networkName("P0")
-    , simulationSetup{ configBuilder.SimulationSetup() }
   {
-    auto participantName = "FRcontroller";
 
-    simulationSetup.AddParticipant(participantName)
-        .AddFlexray(controllerName)
-        .WithClusterParameters(getClusterParameters())
-        .WithNodeParameters(getNodeParameters())
-        .WithLink(networkName);
-
-    std::initializer_list<std::string> links{ networkName, "P1" };
-
-    simulationSetup.AddParticipant("NetworkSimulator")
-        .AddNetworkSimulator("BusSim")
-        .WithLinks(links);
   }
 
   void SetUp() override
   {
-    ibConfig = configBuilder.Build();
   }
   void TearDown() override
   {
@@ -112,11 +94,8 @@ public:
 protected:
     std::string controllerName;
     std::string networkName;
-    ConfigBuilder configBuilder;
     MockComAdapter comAdapter;
     MockFrController mockController;
-    SimulationSetupBuilder& simulationSetup;
-    ib::cfg::Config ibConfig;
 };
 TEST_F(CapiFlexRayTest, make_flexray_controller)
 {

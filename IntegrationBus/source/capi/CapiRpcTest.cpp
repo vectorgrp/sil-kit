@@ -4,7 +4,6 @@
 #include "gmock/gmock.h"
 #include "ib/capi/IntegrationBus.h"
 #include "ib/sim/rpc/all.hpp"
-#include "ib/cfg/Config.hpp"
 #include "MockComAdapter.hpp"
 #include "RpcCallHandle.hpp"
 

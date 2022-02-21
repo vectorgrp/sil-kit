@@ -239,8 +239,7 @@ protected:
     {
         try
         {
-            ib::cfg::Config dummyCfg;
-            registry = ib::extensions::CreateIbRegistry(dummyCfg);
+            registry = ib::extensions::CreateIbRegistry(ib::cfg::Config{});
             registry->ProvideDomain(domainId);
         }
         catch (const Misconfiguration& error)
@@ -378,19 +377,6 @@ protected:
         syncParticipantThreads.clear();
         systemMaster.comAdapter.reset();
         registry.reset();
-    }
-
-    ib::cfg::Config DummyCfg(const std::string& participantName, bool sync)
-    {
-        ib::cfg::Config dummyCfg;
-        ib::cfg::Participant dummyParticipant;
-        if (sync)
-        {
-            dummyParticipant.participantController = ib::cfg::ParticipantController{};
-        }
-        dummyParticipant.name = participantName;
-        dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
-        return dummyCfg;
     }
 
 protected:

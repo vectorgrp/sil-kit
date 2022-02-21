@@ -8,7 +8,6 @@
 #include "gmock/gmock.h"
 #include "ib/capi/IntegrationBus.h"
 #include "ib/sim/data/all.hpp"
-#include "ib/cfg/Config.hpp"
 #include "MockComAdapter.hpp"
 
 namespace {

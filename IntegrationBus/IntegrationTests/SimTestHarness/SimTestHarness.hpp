@@ -12,7 +12,6 @@
 #include <cstdint>
 
 #include "ib/IntegrationBus.hpp"
-#include "ib/cfg/Config.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/extensions/IIbRegistry.hpp"
 

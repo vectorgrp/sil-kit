@@ -648,19 +648,6 @@ protected:
         registry.reset();
     }
 
-    ib::cfg::Config DummyCfg(const std::string& participantName, bool sync)
-    {
-        ib::cfg::Config dummyCfg;
-        ib::cfg::Participant dummyParticipant;
-        if (sync)
-        {
-            dummyParticipant.participantController = ib::cfg::ParticipantController{};
-        }
-        dummyParticipant.name = participantName;
-        dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
-        return dummyCfg;
-    }
-
 protected:
     std::vector<std::string> syncParticipantNames;
     std::unique_ptr<ib::extensions::IIbRegistry> registry;

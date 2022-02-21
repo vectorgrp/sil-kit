@@ -163,64 +163,6 @@ protected:
         ISystemMonitor*              systemMonitor;
     };
 
-    auto BuildConfig(std::vector<ClientParticipant>& clients, std::vector<ServerParticipant>& servers, Middleware middleware, bool sync) -> Config
-    {
-        const auto loglevel = logging::Level::Info;
-        ConfigBuilder config("RpcTestConfigGenerated");
-        auto&& simulationSetup = config.SimulationSetup();
-
-        auto syncType = SyncType::Unsynchronized;
-        if (sync)
-        {
-            syncType = SyncType::DistributedTimeQuantum;
-        }
-
-        uint32_t participantCount = static_cast<uint32_t>(clients.size() + servers.size());
-        std::vector<ParticipantBuilder*> participants;
-        for (const auto& client : clients)
-        {
-            for (const auto& c : client.rpcClients)
-            {
-                simulationSetup.AddOrGetLink(Link::Type::Rpc, c.functionName);
-            }
-            auto&& participant = simulationSetup.AddParticipant(client.name);
-            participant.ConfigureLogger().WithFlushLevel(loglevel).AddSink(Sink::Type::Stdout).WithLogLevel(loglevel);
-            if (sync)
-            {
-                participant.AddParticipantController().WithSyncType(syncType);
-            }
-            for (const auto& c : client.rpcClients)
-            {
-                participant.AddRpcClient(c.functionName).WithLink(c.functionName);
-            }
-            participants.emplace_back(&participant);
-        }
-        for (const auto& server : servers)
-        {
-            for (const auto& s : server.rpcServers)
-            {
-                simulationSetup.AddOrGetLink(Link::Type::Rpc, s.functionName);
-            }
-            auto&& participant = simulationSetup.AddParticipant(server.name);
-            participant.ConfigureLogger().WithFlushLevel(loglevel).AddSink(Sink::Type::Stdout).WithLogLevel(loglevel);
-            if (sync)
-            {
-                participant.AddParticipantController().WithSyncType(syncType);
-            }
-            for (const auto& s : server.rpcServers)
-            {
-                participant.AddRpcServer(s.functionName).WithLink(s.functionName);
-            }
-            participants.emplace_back(&participant);
-        }
-
-        auto&& systemMasterParticipant = simulationSetup.AddParticipant(systemMasterName);
-        systemMasterParticipant.ConfigureLogger().WithFlushLevel(loglevel).AddSink(Sink::Type::Stdout).WithLogLevel(loglevel);
-
-        config.WithActiveMiddleware(middleware);
-        return config.Build();
-    }
-
     void ParticipantStatusHandler(const ParticipantStatus& newStatus)
     {
         switch (newStatus.state)
@@ -542,8 +484,7 @@ protected:
     {
         try
         {
-            ib::cfg::Config dummyCfg;
-            registry = ib::extensions::CreateIbRegistry(dummyCfg);
+            registry = ib::extensions::CreateIbRegistry(ib::cfg::Config{});
             registry->ProvideDomain(domainId);
         }
         catch (const Misconfiguration& error)
@@ -734,19 +675,6 @@ protected:
         rpcThreads.clear();
         systemMaster.comAdapter.reset();
         registry.reset();
-    }
-
-    ib::cfg::Config DummyCfg(const std::string& participantName, bool sync)
-    {
-        ib::cfg::Config dummyCfg;
-        ib::cfg::Participant dummyParticipant;
-        if (sync)
-        {
-            dummyParticipant.participantController = ib::cfg::ParticipantController{};
-        }
-        dummyParticipant.name = participantName;
-        dummyCfg.simulationSetup.participants.push_back(dummyParticipant);
-        return dummyCfg;
     }
 
 protected:

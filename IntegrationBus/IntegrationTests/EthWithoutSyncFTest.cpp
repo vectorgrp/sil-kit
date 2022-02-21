@@ -31,23 +31,7 @@ protected:
     EthWithoutSyncFTest()
     {
         _domainId = static_cast<uint32_t>(GetTestPid());
-        SetupConfig();
         SetupTestData();
-    }
-
-    void SetupConfig()
-    {
-        ib::cfg::ConfigBuilder builder{ "TestConfig" };
-
-        builder.SimulationSetup().
-            AddParticipant("EthWriter").
-            AddEthernet("ETH1").WithLink("ETH1");
-
-        builder.SimulationSetup().
-            AddParticipant("EthReader").
-            AddEthernet("ETH1").WithLink("ETH1");
-
-        _ibConfig = builder.Build();
     }
 
     void SetupTestData()
@@ -155,7 +139,6 @@ protected:
     };
 
     uint32_t _domainId;
-    ib::cfg::Config _ibConfig;
     std::vector<Testmessage> _testMessages;
     std::promise<void> _ethReaderRegisteredPromise;
     std::promise<void> _ethReaderAllReceivedPromise;
@@ -166,7 +149,6 @@ TEST_F(EthWithoutSyncFTest, eth_communication_no_simulation_flow_vasio)
 {
     auto registry = std::make_unique<ib::mw::VAsioRegistry>(ib::cfg::vasio::v1::CreateDummyIMiddlewareConfiguration());
     registry->ProvideDomain(_domainId);
-    _ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
     ExecuteTest();
 }
 

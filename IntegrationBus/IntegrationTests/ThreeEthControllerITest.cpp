@@ -169,7 +169,6 @@ protected:
 
 protected:
     uint32_t domainId;
-    //ib::cfg::Config ibConfig;
     std::vector<std::string> syncParticipantNames;
 
     struct TestMessage
@@ -196,38 +195,6 @@ TEST_F(ThreeEthControllerITest, test_eth_ack_callbacks)
 //   We are adding debug loggers here to verify that the logging
 //   mechanism isn't affected by the ComAdapter' connection lifecycle and its
 //   internal debugging/tracing calls.
-
-auto makeLoggingConfig() -> ib::cfg::Config
-{
-    ib::cfg::ConfigBuilder builder{"DebugLogTestConfig"};
-    auto &&setup = builder.SimulationSetup();
-    auto& writer = setup.AddParticipant("EthWriter");
-    writer->AddEthernet("ETH1").WithLink("LINK1");
-    writer->ConfigureLogger()
-        ->EnableLogFromRemotes()
-        ->WithFlushLevel(ib::mw::logging::Level::Debug)
-        ->AddSink(ib::cfg::Sink::Type::Stdout)
-        .WithLogLevel(ib::mw::logging::Level::Debug);
-
-    auto& reader1 = setup.AddParticipant("EthReader1");
-    reader1->AddEthernet("ETH1").WithLink("LINK1");
-    reader1->ConfigureLogger()
-        ->EnableLogFromRemotes()
-        ->WithFlushLevel(ib::mw::logging::Level::Debug)
-        ->AddSink(ib::cfg::Sink::Type::Remote)
-        .WithLogLevel(ib::mw::logging::Level::Debug);
-
-    auto& reader2 = setup.AddParticipant("EthReader2");
-    reader2->AddEthernet("ETH1").WithLink("LINK1");
-    reader2->ConfigureLogger()
-        ->EnableLogFromRemotes()
-        ->WithFlushLevel(ib::mw::logging::Level::Debug)
-        ->AddSink(ib::cfg::Sink::Type::Remote)
-        .WithLogLevel(ib::mw::logging::Level::Debug);
-
-    return builder.Build();
-}
-
 
 // TODO Reactivate after logging can be configured
 //TEST_F(ThreeEthControllerITest, DISABLED_test_vasio_logging_orthogonal)
