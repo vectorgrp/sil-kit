@@ -46,7 +46,7 @@ void PatchConfigForVAsio(cfg::Config& config)
 } // anonymous namespace
 
 auto CreateSimulationParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                                 const std::string& participantName, bool isSynchronized, const uint32_t domainId)
+                                 const std::string& participantName, const uint32_t domainId, bool isSynchronized)
     -> std::unique_ptr<mw::IComAdapter>
 {
     //Validate(config);
