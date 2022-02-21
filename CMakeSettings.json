@@ -14,13 +14,7 @@
       "intelliSenseMode": "windows-msvc-x64",
       "installRoot": "${env.InstallDir}\\${name}",
       "cmakeCommandArgs": "",
-      "variables": [
-        {
-          "name": "IB_BUILD_DEMOS",
-          "value": "True",
-          "type": "BOOL"
-        }
-      ]
+      "variables": []
     },
     {
       "name": "x64-Release",
@@ -77,7 +71,7 @@
       "buildRoot": "${env.BuildDir}\\${name}",
       "installRoot": "${env.InstallDir}\\${name}",
       "cmakeExecutable": "/usr/local/bin/cmake",
-      "cmakeCommandArgs": "-D IB_BUILD_DEMOS=Off -D IB_ENABLE_THREADSAN=Off",
+      "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_clang_x64" ],

@@ -107,7 +107,6 @@ public:
 
     /* brief Set the names of all synchronized participants */
     virtual void SetSynchronizedParticipants(const std::vector<std::string>& participantNames) = 0;
-
 };
 
 } // namespace sync
