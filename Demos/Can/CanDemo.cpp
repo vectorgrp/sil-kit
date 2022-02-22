@@ -97,7 +97,6 @@ int main(int argc, char** argv)
             domainId = static_cast<uint32_t>(std::stoul(argv[3]));
         }   
 
-        // TODO check: Where should the participant name be provided and where is the check if its already part of the predefined configuration
         auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile(configFilename);
         auto sleepTimePerTick = 1000ms;
 
@@ -141,15 +140,22 @@ int main(int argc, char** argv)
 
         });
 
-        participantController->SetPeriod(200us);
+        participantController->SetPeriod(5ms);
+
         if (participantName == "CanWriter")
         {
             participantController->SetSimulationTask(
-                [canController, logger, sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+                [canController, logger, sleepTimePerTick, &participantController](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
 
                     std::cout << "now=" << now << ", duration=" << duration << std::endl;
                     SendMessage(canController, logger);
                     std::this_thread::sleep_for(sleepTimePerTick);
+
+                    if (now == 100ms)
+                    {
+                        std::cout << "Switching to period length of 1ms..." << std::endl;
+                        participantController->SetPeriod(1ms);
+                    }
 
             });
 
@@ -159,11 +165,16 @@ int main(int argc, char** argv)
         else
         {
             participantController->SetSimulationTask(
-                [sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+                [sleepTimePerTick, &participantController](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
 
                     std::cout << "now=" << now << ", duration=" << duration << std::endl;
                     std::this_thread::sleep_for(sleepTimePerTick);
 
+                    if (now == 100ms)
+                    {
+                        std::cout << "Switching to period length of 1ms..." << std::endl;
+                        participantController->SetPeriod(1ms);
+                    }
             });
         }
 
