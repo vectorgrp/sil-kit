@@ -404,12 +404,14 @@ int main(int argc, char** argv)
     return 1;
   }
 
-  char* jsonString = LoadFile(argv[1]);
-  if (jsonString == NULL)
-  {
-    printf("Error: cannot open config file %s\n", argv[1]);
-    return 1;
-  }
+  // dummy allocation for now
+  char* jsonString = (char*)malloc(sizeof(char));
+  //char* jsonString = LoadFile(argv[1]);
+  //if (jsonString == NULL)
+  //{
+  //    printf("Error: cannot open config file %s\n", argv[1]);
+  //    return 1;
+  //}
   participantName = argv[2];
 
   const char* domainId = "42";
@@ -474,6 +476,8 @@ int main(int argc, char** argv)
   }
   else if (!strcmp(participantName, "Node1"))
   {
+    config->nodeParams.pKeySlotId = 11;
+
     // initialize bufferConfig to send some FrMessages
     ib_FlexRay_TxBufferConfig cfg;
     cfg.channels = ib_FlexRay_Channel_AB;

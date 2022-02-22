@@ -198,6 +198,49 @@ struct FlexRayNode
     MasterState busState = MasterState::Ignore;
 };
 
+
+auto MakeNodeParams(const std::string& participantName) -> ib::sim::fr::NodeParameters
+{
+    ib::sim::fr::NodeParameters nodeParams;
+    nodeParams.pAllowHaltDueToClock = 1;
+    nodeParams.pAllowPassiveToActive = 0;
+    nodeParams.pChannels = fr::Channel::AB;
+    nodeParams.pClusterDriftDamping = 2;
+    nodeParams.pdAcceptedStartupRange = 212;
+    nodeParams.pdListenTimeout = 400162;
+    nodeParams.pKeySlotOnlyEnabled = 0;
+    nodeParams.pKeySlotUsedForStartup = 1;
+    nodeParams.pKeySlotUsedForSync = 0;
+    nodeParams.pLatestTx = 249;
+    nodeParams.pMacroInitialOffsetA = 3;
+    nodeParams.pMacroInitialOffsetB = 3;
+    nodeParams.pMicroInitialOffsetA = 6;
+    nodeParams.pMicroInitialOffsetB = 6;
+    nodeParams.pMicroPerCycle = 200000;
+    nodeParams.pOffsetCorrectionOut = 127;
+    nodeParams.pOffsetCorrectionStart = 3632;
+    nodeParams.pRateCorrectionOut = 81;
+    nodeParams.pWakeupChannel = fr::Channel::A;
+    nodeParams.pWakeupPattern = 33;
+    nodeParams.pdMicrotick = fr::ClockPeriod::T25NS;
+    nodeParams.pSamplesPerMicrotick = 2;
+
+    if (participantName == "Node0")
+    {
+        nodeParams.pKeySlotId = 10;
+    }
+    else if (participantName == "Node1")
+    {
+        nodeParams.pKeySlotId = 11;
+    }
+    else
+    {
+        throw std::runtime_error("Invalid participant name.");
+    }
+
+    return nodeParams;
+}
+
 /**************************************************************************************************
  * Main Function
  **************************************************************************************************/
@@ -225,31 +268,6 @@ int main(int argc, char** argv)
     clusterParams.gNumberOfStaticSlots = 70;
     clusterParams.gPayloadLengthStatic = 16;
     clusterParams.gSyncFrameIDCountMax = 15;
-
-    ib::sim::fr::NodeParameters nodeParams;
-    nodeParams.pAllowHaltDueToClock = 1;
-    nodeParams.pAllowPassiveToActive = 0;
-    nodeParams.pChannels = fr::Channel::AB;
-    nodeParams.pClusterDriftDamping = 2;
-    nodeParams.pdAcceptedStartupRange = 212;
-    nodeParams.pdListenTimeout = 400162;
-    nodeParams.pKeySlotId = 10;
-    nodeParams.pKeySlotOnlyEnabled = 0;
-    nodeParams.pKeySlotUsedForStartup = 1;
-    nodeParams.pKeySlotUsedForSync = 0;
-    nodeParams.pLatestTx = 249;
-    nodeParams.pMacroInitialOffsetA = 3;
-    nodeParams.pMacroInitialOffsetB = 3;
-    nodeParams.pMicroInitialOffsetA = 6;
-    nodeParams.pMicroInitialOffsetB = 6;
-    nodeParams.pMicroPerCycle = 200000;
-    nodeParams.pOffsetCorrectionOut = 127;
-    nodeParams.pOffsetCorrectionStart = 3632;
-    nodeParams.pRateCorrectionOut = 81;
-    nodeParams.pWakeupChannel = fr::Channel::A;
-    nodeParams.pWakeupPattern = 33;
-    nodeParams.pdMicrotick = fr::ClockPeriod::T25NS;
-    nodeParams.pSamplesPerMicrotick = 2;
 
     if (argc < 3)
     {
@@ -324,8 +342,9 @@ int main(int argc, char** argv)
         config.bufferConfigs = bufferConfigs;
 
         config.clusterParams = clusterParams;
-        config.nodeParams = nodeParams;
         
+        config.nodeParams = MakeNodeParams(participantName);
+
         FlexRayNode frNode(controller, std::move(config));
         if (participantName == "Node0")
         {
