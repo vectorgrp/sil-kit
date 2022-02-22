@@ -25,7 +25,6 @@ public:
     PcapSink() = delete;
     PcapSink(const PcapSink&) = delete;
     PcapSink(mw::logging::ILogger* logger, std::string name);
-    PcapSink(PcapSink&&) = default;
     ~PcapSink() = default;
 
     // ----------------------------------------

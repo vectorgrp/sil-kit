@@ -48,11 +48,8 @@ public:
 public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
-    ParticipantController() = default;
     ParticipantController(IComAdapterInternal* comAdapter, const std::string& name, bool isSynchronized,
                           const cfg::v1::datatypes::HealthCheck& healthCheckConfig);
-    ParticipantController& operator=(const ParticipantController& other) = default;
-    ParticipantController& operator=(ParticipantController&& other) = default;
 
 public:
     // ----------------------------------------
