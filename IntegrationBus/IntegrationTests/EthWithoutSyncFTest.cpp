@@ -20,6 +20,8 @@
 #   include "VAsioRegistry.hpp"
 #endif
 
+#include "MockParticipantConfiguration.hpp"
+
 namespace {
 
 using namespace std::chrono_literals;
@@ -64,7 +66,7 @@ protected:
         std::promise<void> ethWriterAllAcksReceivedPromiseLocal;
         
         auto comAdapter =
-            ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), "EthWriter", _domainId, false);
+            ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), "EthWriter", _domainId, false);
         auto* controller = dynamic_cast<ib::sim::eth::EthControllerFacade*>(comAdapter->CreateEthController("ETH1"));
 
         controller->RegisterMessageAckHandler(
@@ -95,7 +97,7 @@ protected:
         unsigned numReceived{ 0 };
         std::promise<void> ethReaderAllReceivedPromiseLocal;
         auto comAdapter =
-            ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), "EthReader", _domainId, false);
+            ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), "EthReader", _domainId, false);
         auto* controller = comAdapter->CreateEthController("ETH1");
 
         controller->RegisterReceiveMessageHandler(
@@ -147,7 +149,7 @@ protected:
 
 TEST_F(EthWithoutSyncFTest, eth_communication_no_simulation_flow_vasio)
 {
-    auto registry = std::make_unique<ib::mw::VAsioRegistry>(ib::cfg::vasio::v1::CreateDummyIMiddlewareConfiguration());
+    auto registry = std::make_unique<ib::mw::VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
     registry->ProvideDomain(_domainId);
     ExecuteTest();
 }

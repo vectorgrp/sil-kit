@@ -11,6 +11,7 @@
 #include "IbExtensionBase.hpp"
 #include "IbExtensionMacros.hpp"
 #include "IIbRegistry.hpp"
+#include "ParticipantConfiguration.hpp"
 
 
 //This factory class exposes a parameterized CTor of VAsioRegistry
@@ -21,12 +22,12 @@ class IbRegistryFactory
 {
 public:
     //public IIbRegistryFactory methods
-    auto Create(std::shared_ptr<ib::cfg::vasio::IMiddlewareConfiguration> cfg)
+    auto Create(std::shared_ptr<ib::cfg::IParticipantConfiguration> cfg)
         -> std::unique_ptr<ib::extensions::IIbRegistry> override;
 
 };
 
-auto IbRegistryFactory::Create(std::shared_ptr<ib::cfg::vasio::IMiddlewareConfiguration> cfg)
+auto IbRegistryFactory::Create(std::shared_ptr<ib::cfg::IParticipantConfiguration> cfg)
         -> std::unique_ptr<ib::extensions::IIbRegistry>
 {
     return std::make_unique<ib::mw::VAsioRegistry>(cfg);

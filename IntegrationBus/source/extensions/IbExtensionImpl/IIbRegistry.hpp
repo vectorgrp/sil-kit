@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "ib/extensions/IIbRegistry.hpp"
-#include "ib/cfg/vasio/IMiddlewareConfiguration.hpp"
+#include "ib/cfg/IParticipantConfiguration.hpp"
 
 //! \brief Creates an instance of IIbRegistry. Used for loading the extension 
 //         when there is no direct access to the CTor of the actual extension
@@ -18,6 +18,6 @@ class IIbRegistryFactory
 {
 public:
     virtual ~IIbRegistryFactory() = default;
-    virtual auto Create(std::shared_ptr<ib::cfg::vasio::IMiddlewareConfiguration> cfg)
+    virtual auto Create(std::shared_ptr<ib::cfg::IParticipantConfiguration> cfg)
         -> std::unique_ptr<ib::extensions::IIbRegistry>  = 0;
 };

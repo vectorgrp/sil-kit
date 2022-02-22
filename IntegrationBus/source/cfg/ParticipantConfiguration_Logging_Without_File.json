@@ -1,0 +1,16 @@
+{
+  "$schema": "./ParticipantConfiguration.schema.json",
+  "SchemaVersion": "1",
+  "Description": "Sample Configuration",
+  "ParticipantName": "ParticipantWithoutLogFile",
+  "Logging": {
+    "LogFromRemotes": true,
+    "FlushLevel": "Info",
+    "Sinks": [
+      {
+        "Type": "File",
+        "Level": "Trace"
+      }
+    ]
+  }
+}

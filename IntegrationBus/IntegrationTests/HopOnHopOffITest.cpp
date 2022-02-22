@@ -17,7 +17,8 @@
 #include "ib/cfg/string_utils.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/sim/all.hpp"
-#include "ParticipantConfiguration.hpp"
+
+#include "MockParticipantConfiguration.hpp"
 
 namespace {
 
@@ -139,7 +140,7 @@ protected:
         try
         {
             participant.comAdapter =
-                ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), participant.name, domainId, true);
+                ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, true);
 
             IParticipantController* participantController;
             participantController = participant.comAdapter->GetParticipantController();
@@ -193,7 +194,7 @@ protected:
         try
         {
             participant.comAdapter =
-                ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), participant.name, domainId, false);
+                ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, false);
             participant.publisher = participant.comAdapter->CreateDataPublisher(topic, exchangeFormat, {}, 0);
             participant.subscriber = participant.comAdapter->CreateDataSubscriber(
                 topic, exchangeFormat, {},
@@ -261,7 +262,7 @@ protected:
         try
         {
             systemMaster.comAdapter =
-                ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), systemMasterName, domainId, false);
+                ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), systemMasterName, domainId, false);
 
             systemMaster.systemController = systemMaster.comAdapter->GetSystemController();
             systemMaster.systemMonitor = systemMaster.comAdapter->GetSystemMonitor();

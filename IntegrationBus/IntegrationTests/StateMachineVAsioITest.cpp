@@ -8,7 +8,6 @@
 #include "CreateComAdapter.hpp"
 #include "VAsioRegistry.hpp"
 
-#include "ParticipantConfiguration.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/util/functional.hpp"
 
@@ -16,6 +15,7 @@
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
+#include "MockParticipantConfiguration.hpp"
 
 namespace {
 
@@ -73,12 +73,12 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
     std::vector<std::string> syncParticipantNames{ "TestUnit" };
 
-    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::vasio::v1::CreateDummyIMiddlewareConfiguration());
+    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
     registry->ProvideDomain(domainId);
 
     // Setup ComAdapter for TestController
     auto comAdapterController =
-        CreateSimulationParticipantImpl(ib::cfg::CreateDummyConfiguration(), "TestController", false);
+        CreateSimulationParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestController", false);
    
     comAdapterController->joinIbDomain(domainId);
     auto systemController = comAdapterController->GetSystemController();
@@ -90,7 +90,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     });
 
     // Setup ComAdapter for Test Unit
-    auto comAdapterTestUnit = CreateSimulationParticipantImpl(ib::cfg::CreateDummyConfiguration(), "TestUnit", true);
+    auto comAdapterTestUnit = CreateSimulationParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestUnit", true);
     comAdapterTestUnit->joinIbDomain(domainId);
     auto participantController = comAdapterTestUnit->GetParticipantController();
 

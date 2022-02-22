@@ -1,13 +1,14 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "NullConnectionComAdapter.hpp"
-#include "CanControllerFacade.hpp"
-#include "ParticipantConfiguration.hpp"
 #include <chrono>
 #include <string>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+
+#include "NullConnectionComAdapter.hpp"
+#include "CanControllerFacade.hpp"
+#include "MockParticipantConfiguration.hpp"
 
 namespace {
 
@@ -25,7 +26,7 @@ protected:
 // TODO: Fix
 TEST_F(ComAdapterTest, DISABLED_throw_on_empty_participant_name)
 {
-    EXPECT_THROW(CreateNullConnectionComAdapterImpl(ib::cfg::CreateDummyConfiguration(),"", false), ib::cfg::Misconfiguration);
+    EXPECT_THROW(CreateNullConnectionComAdapterImpl(ib::cfg::MockParticipantConfiguration(),"", false), ib::cfg::Misconfiguration);
 }
 
 // TODO: Add test to validate participantName and configured participant name
@@ -36,7 +37,7 @@ TEST_F(ComAdapterTest, DISABLED_warn_on_participant_name_mismatch)
 
 TEST_F(ComAdapterTest, make_basic_controller)
 {
-    auto comAdapter = CreateNullConnectionComAdapterImpl(ib::cfg::CreateDummyConfiguration(), "TestParticipant", false);
+    auto comAdapter = CreateNullConnectionComAdapterImpl(ib::cfg::MockParticipantConfiguration(), "TestParticipant", false);
 
     auto* canController = comAdapter->CreateCanController("CAN1");
     auto basicCanController = dynamic_cast<ib::sim::can::CanControllerFacade*>(canController);

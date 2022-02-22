@@ -3,8 +3,6 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "GetTestPid.hpp"
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -14,7 +12,9 @@
 #include "ib/cfg/string_utils.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/sim/all.hpp"
-#include "ParticipantConfiguration.hpp"
+
+#include "GetTestPid.hpp"
+#include "MockParticipantConfiguration.hpp"
 
 namespace {
 
@@ -216,7 +216,7 @@ protected:
         try
         {
             participant.comAdapter =
-                ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), participant.name, domainId, sync);
+                ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, sync);
 
             IParticipantController* participantController;
             if (sync)
@@ -313,7 +313,7 @@ protected:
         try
         {
             participant.comAdapter =
-                ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), participant.name, domainId, sync);
+                ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, sync);
 
             IParticipantController* participantController;
             if (sync)
@@ -491,7 +491,7 @@ protected:
         try
         {
             systemMaster.comAdapter =
-                ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), systemMasterName, domainId, false);
+                ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), systemMasterName, domainId, false);
 
             systemMaster.systemController = systemMaster.comAdapter->GetSystemController();
             systemMaster.systemMonitor = systemMaster.comAdapter->GetSystemMonitor();

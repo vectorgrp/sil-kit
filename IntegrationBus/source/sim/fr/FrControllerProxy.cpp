@@ -36,7 +36,7 @@ void FrControllerProxy::Configure(const ControllerConfig& config)
     }
     if (!IsTxBufferConfigsConfigurable())
     {
-        cfg.bufferConfigs = _config.txBufferConfigs;
+        cfg.bufferConfigs = _config.txBufferConfigurations;
         WarnOverride("TxBufferConfigs");
     }
 
@@ -56,7 +56,7 @@ void FrControllerProxy::ReconfigureTxBuffer(uint16_t txBufferIdx, const TxBuffer
         throw std::out_of_range{"Unconfigured txBufferIdx!"};
     }
 
-    if (_config.txBufferConfigs.size() > 0)
+    if (_config.txBufferConfigurations.size() > 0)
     {
         _comAdapter->GetLogger()->Error("ReconfigureTxBuffer() was called on a preconfigured txBuffer. This is not "
                                         "allowed and the reconfiguration will be discarded.");
@@ -254,7 +254,7 @@ bool FrControllerProxy::IsNodeParametersConfigurable()
 
 bool FrControllerProxy::IsTxBufferConfigsConfigurable()
 {
-    return _config.txBufferConfigs.size() == 0;
+    return _config.txBufferConfigurations.size() == 0;
 }
 
 

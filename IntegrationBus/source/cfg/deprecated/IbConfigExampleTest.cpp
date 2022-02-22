@@ -5,12 +5,14 @@
 #include <thread>
 #include <future>
 
-#include "NullConnectionComAdapter.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+
+#include "NullConnectionComAdapter.hpp"
+#include "MockParticipantConfiguration.hpp"
 
 namespace {
 
@@ -45,7 +47,8 @@ protected:
         std::cout << "Verifying participant " << participantName << '\n';
         auto&& participantCfg = cfg::get_by_name(ibConfig.simulationSetup.participants, participantName);
 
-        auto comAdapter = ib::mw::CreateNullConnectionComAdapterImpl(ibConfig, participantName);
+        auto isSynchronized = participantCfg.participantController.value().syncType != ib::cfg::deprecated::SyncType::Unsynchronized;
+        auto comAdapter = ib::mw::CreateNullConnectionComAdapterImpl(ib::cfg::MockParticipantConfiguration(), participantName, isSynchronized);
 
         CreateCanControllers(*comAdapter, participantCfg);
         CreateLinControllers(*comAdapter, participantCfg);

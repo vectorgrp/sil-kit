@@ -1,0 +1,87 @@
+{
+  "$schema": "./ParticipantConfiguration.schema.json",
+  "SchemaVersion": "1",
+  "ParticipantName": "CANoe",
+  "Description": "Participant which covers most parameters",
+
+  "CanControllers": [
+    { "Name": "CAN1" },
+    { "Name": "CAN2" },
+    { "Name": "CAN3" },
+    { "Name": "CAN4" }
+  ],
+  "LinControllers": [
+    { "Name": "LIN1" },
+    { "Name": "LIN2" },
+    { "Name": "LIN3" },
+    { "Name": "LIN4" }
+  ],
+  "FlexRayControllers": [
+    {
+      "Name": "FlexRay1"
+    },
+    {
+      "Name": "FlexRay2"
+    },
+    {
+      "Name": "FlexRay3"
+    },
+    {
+      "Name": "FlexRay4"
+    }
+  ],
+  "EthernetControllers": [
+    {
+      "Name": "ETH1",
+      "MacAddr": "F7:04:68:71:AA:A0"
+    },
+    {
+      "Name": "ETH2",
+      "MacAddr": "F7:04:68:71:AA:A1"
+    },
+    {
+      "Name": "ETH3",
+      "MacAddr": "F7:04:68:71:AA:A2"
+    },
+    {
+      "Name": "ETH4",
+      "MacAddr": "F7:04:68:71:AA:A3"
+    }
+  ],
+  "DataPublishers": [
+
+  ],
+  "DataSubscribers": [
+
+  ],
+  "RpcServers": [
+
+  ],
+  "RpcClients": [
+
+  ],
+  "Logging": [
+    "LogFromRemotes": true,
+    "FlushLevel": "Info",
+    "Sinks": [
+      {
+        "Type": "File",
+        "Level": "Trace",
+        "LogName":  "MyLog"
+      }
+    ]
+
+  ],
+  "HealthCheck": [
+
+  ],
+  "Tracing": [
+
+  ],
+  "Extensions": [
+
+  ],
+  "Middleware": [
+
+  ]
+}

@@ -18,6 +18,7 @@ add_vib_test(FTestCanWithoutSync
       IbSimCan
       ${itest_extra_libs}
       IntegrationBus
+      IbCfgMockParticipantConfiguration
 )
 
 add_vib_test(FTestEthWithoutSync
@@ -27,6 +28,7 @@ add_vib_test(FTestEthWithoutSync
       IbSimEthernet
       ${itest_extra_libs}
       IntegrationBus
+      IbCfgMockParticipantConfiguration
 )
 
 add_vib_test(ITestThreeCanController
@@ -52,6 +54,7 @@ add_vib_test(ITestCatchExceptionsInCallbacks
       CatchExceptionsInCallbacksITest.cpp
     LIBS
       IbMwComAdapter
+      IbCfgMockParticipantConfiguration
       ${itest_extra_libs}
 )
 
@@ -60,7 +63,7 @@ add_vib_test(ITestHopOnHopOff
       HopOnHopOffITest.cpp
     LIBS
         IntegrationBus
-        IbConfiguration
+        IbCfgMockParticipantConfiguration
 )
  
 add_vib_test(ITestDataPubSub
@@ -68,7 +71,7 @@ add_vib_test(ITestDataPubSub
       DataPubSubITest.cpp
     LIBS
         IntegrationBus
-        IbConfiguration
+        IbCfgMockParticipantConfiguration
 )
 
 add_vib_test(ITestTargetedMessaging
@@ -86,7 +89,7 @@ add_vib_test(ITestRpc
       RpcITest.cpp
     LIBS
       IntegrationBus
-      IbConfiguration
+      IbCfgMockParticipantConfiguration
 )
 
 if(IB_MW_ENABLE_VASIO)
@@ -96,6 +99,7 @@ if(IB_MW_ENABLE_VASIO)
         LIBS
           IbMwComAdapter
           IbMwVAsio
+          IbCfgMockParticipantConfiguration
     )
 
     add_vib_test(ITestDeterministicSimVAsio
@@ -104,6 +108,7 @@ if(IB_MW_ENABLE_VASIO)
         LIBS
           IbMwComAdapter
           IbMwVAsio
+          IbCfgMockParticipantConfiguration
     )
 
     add_vib_test(ITestIbRegistryReusage

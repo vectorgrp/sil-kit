@@ -12,6 +12,6 @@ auto CreateNullConnectionComAdapterImpl(std::shared_ptr<ib::cfg::IParticipantCon
                                         const std::string& participantName, bool isSynchronized)
     -> std::unique_ptr<IComAdapterInternal>;
 
-} // mw
+} // namespace mw
 } // namespace ib
 

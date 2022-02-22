@@ -8,23 +8,21 @@
 #include "IbExtensions.hpp"
 #include "IIbRegistry.hpp"
 #include "FactorySingleton.hpp"
-#include "vasio/MiddlewareConfiguration.hpp"
 #include "ParticipantConfiguration.hpp"
 
-namespace ib { namespace extensions {
+namespace ib {
+namespace extensions {
 
 auto CreateIbRegistry(ib::cfg::Config config)
     -> std::unique_ptr<IIbRegistry>
 {
     // Preliminary convert old config
-    ib::cfg::v1::datatypes::Extensions dummyExtentionCfg{config.extensionConfig.searchPathHints};
-    auto dummyCfg = ib::cfg::vasio::v1::CreateDummyIMiddlewareConfiguration();
+    ib::cfg::v1::datatypes::Extensions dummyExtensionCfg{config.extensionConfig.searchPathHints};
+    auto dummyCfg = std::make_shared<ib::cfg::v1::datatypes::ParticipantConfiguration>();
 
-    auto& factory = FactorySingleton<IIbRegistryFactory>("vib-registry", dummyExtentionCfg);
+    auto& factory = FactorySingleton<IIbRegistryFactory>("vib-registry", dummyExtensionCfg);
     return factory.Create(std::move(dummyCfg));
 }
 
-    
-
-}//end namespace extensions
-}//end namespace ib
+} // namespace extensions
+} // namespace ib

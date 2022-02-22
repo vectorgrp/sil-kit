@@ -51,8 +51,8 @@ struct Sink
         File
     };
 
-    Type type{Type::Remote};
-    mw::logging::Level level{mw::logging::Level::Info};
+    Type type{ Type::Remote };
+    mw::logging::Level level{ mw::logging::Level::Info };
     std::string logName;
 };
 
@@ -78,10 +78,10 @@ struct TraceSink
         Mdf4File
     };
 
-    ib::util::Optional<Type> type{ Type::Undefined };
-    ib::util::Optional<std::string> name;
-    ib::util::Optional<std::string> outputPath;
-    //ib::util::Optional<bool> enabled{ true };
+    Type type{ Type::Undefined };
+    std::string name;
+    std::string outputPath;
+    //bool enabled{ true };
 };
 
 struct TraceSource
@@ -93,10 +93,10 @@ struct TraceSource
         Mdf4File
     };
 
-    ib::util::Optional<Type> type{ Type::Undefined };
-    ib::util::Optional<std::string> name;
-    ib::util::Optional<std::string> inputPath;
-    //ib::util::Optional<bool> enabled{ true };
+    Type type{ Type::Undefined };
+    std::string name;
+    std::string inputPath;
+    //bool enabled{ true };
 };
 
 //!< MdfChannel identification for replaying, refer to ASAM MDF 4.1 Specification, Chapter 5.4.3

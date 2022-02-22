@@ -1,6 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "SimTestHarness.hpp"
-#include "ParticipantConfiguration.hpp"
 
 #include <algorithm>
 #include <atomic>
@@ -9,6 +8,7 @@
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/extensions/CreateExtension.hpp"
 
+#include "MockParticipantConfiguration.hpp"
 
 using namespace std::literals::chrono_literals;
 
@@ -55,7 +55,7 @@ public:
     SimSystemController(const std::vector<std::string>& syncParticipantNames, uint32_t domainId) : _syncParticipantNames{syncParticipantNames}
     {
         _comAdapter =
-            ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), "SystemController", domainId, false);
+            ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), "SystemController", domainId, false);
 
         _controller = _comAdapter->GetSystemController();
         _controller->SetRequiredParticipants(_syncParticipantNames);
@@ -237,7 +237,7 @@ void SimTestHarness::AddParticipant(const std::string& participantName)
     participant->_name = participantName;
 
     participant->_comAdapter =
-        ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), participantName, _domainId, true);
+        ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), participantName, _domainId, true);
 
     //    Let's make sure the SystemController is cached, in case the user
     //    needs it during simulation (e.g., calling Stop()).

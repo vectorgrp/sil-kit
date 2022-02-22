@@ -334,7 +334,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    std::shared_ptr<ib::cfg::ParticipantConfiguration> _participantConfig;
+    std::shared_ptr<ib::cfg::v1::datatypes::ParticipantConfiguration> _participantConfig;
     std::string _participantName;
     bool _isSynchronized{ false };
     ParticipantId _participantId{0};

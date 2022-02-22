@@ -9,12 +9,12 @@
 #include "ib/sim/all.hpp"
 
 #include "CanDatatypesUtils.hpp"
-#include "ParticipantConfiguration.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
+#include "MockParticipantConfiguration.hpp"
 
 #if IB_MW_HAVE_VASIO
 #   include "VAsioRegistry.hpp"
@@ -79,7 +79,7 @@ protected:
         std::promise<void> canWriterAllAcksReceivedPromiseLocal;
 
         auto comAdapter =
-            ib::CreateSimulationParticipant(ib::cfg::CreateDummyConfiguration(), "CanWriter", _domainId, false);
+            ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), "CanWriter", _domainId, false);
         auto* controller = comAdapter->CreateCanController("CAN1", "CAN1");
 
         controller->RegisterTransmitStatusHandler(
@@ -111,9 +111,7 @@ protected:
         std::promise<void> canReaderAllReceivedPromiseLocal;
         unsigned numReceived{ 0 };
 
-        auto dynamicConfiguration = ib::cfg::CreateDummyConfiguration();
-
-        auto comAdapter = ib::CreateSimulationParticipant(dynamicConfiguration, "CanReader", _domainId, false);
+        auto comAdapter = ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), "CanReader", _domainId, false);
         auto* controller = comAdapter->CreateCanController("CAN1", "CAN1");
 
         controller->RegisterReceiveMessageHandler(
@@ -165,7 +163,7 @@ protected:
 
 TEST_F(CanWithoutSyncFTest, can_communication_no_simulation_flow_vasio)
 {
-    auto registry = std::make_unique<ib::mw::VAsioRegistry>(ib::cfg::vasio::v1::CreateDummyIMiddlewareConfiguration());
+    auto registry = std::make_unique<ib::mw::VAsioRegistry>(ib::cfg::ParticipantConfigurationFromString("ParticipantName: Registry"));
     registry->ProvideDomain(_domainId);
     ExecuteTest();
 }

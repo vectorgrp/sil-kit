@@ -4,16 +4,16 @@ add_library(IbConfiguration STATIC
     Configuration.cpp
     ParticipantConfiguration.hpp
     ParticipantConfiguration.cpp
-    vasio/MiddlewareConfiguration.hpp
-    vasio/MiddlewareConfiguration.cpp
-#    YamlConfig.hpp
-#    YamlConfig.cpp
-#    YamlConfigConversion.hpp
-#    YamlConfigConversion.cpp
-#    YamlSchema.hpp
-#    YamlSchema.cpp
-#    YamlValidator.hpp
-#    YamlValidator.cpp
+    Validation.hpp
+    Validation.cpp
+    YamlParser.hpp
+    YamlParser.cpp
+    YamlConversion.hpp
+    YamlConversion.cpp
+    YamlSchema.hpp
+    YamlSchema.cpp
+    YamlValidator.hpp
+    YamlValidator.cpp
 )
 
 target_link_libraries(IbConfiguration
@@ -29,40 +29,33 @@ target_include_directories(IbConfiguration
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
-#add_vib_test(TestMwCfgConfigBuilder 
-#    SOURCES ConfigBuilderTest.cpp 
-#    LIBS IbConfiguration
-#)
-#add_vib_test(TestMwCfgValidation 
-#    SOURCES ValidationTest.cpp 
-#    LIBS IbConfiguration
-#)
-#add_vib_test(TestIbConfigExample 
-#    SOURCES IbConfigExampleTest.cpp
-#    LIBS IbMwMockNullConnection
-#    CONFIGS
-#        IbConfig_Example.json
-#        IbConfig_Bad_FileLogger.json
-#        IbConfig_Canoe.json
-#)
+add_vib_test(TestMwCfgValidation 
+    SOURCES ValidationTest.cpp 
+    LIBS IbConfiguration
+)
 
-#add_vib_test(TestMwCfgYamlConfig 
-#    SOURCES YamlConfigTest.cpp 
-#    LIBS IbConfig IbSimGenericMessage yaml-cpp
-#)
+add_vib_test(TestParticipantConfiguration 
+    SOURCES ParticipantConfigurationTest.cpp
+    LIBS IbMwMockNullConnection
+    CONFIGS
+        ParticipantConfiguration_Minimal.json
+        ParticipantConfiguration_Full.json
+        ParticipantConfiguration_Logging_Without_File.json
+)
 
-#add_vib_test(TestMwCfgJsonConfig 
-#    SOURCES JsonConfigTest.cpp 
-#    LIBS IbConfiguration
-#)
-## we need runtime IntegrationBus DLL on windows:
-##set_tests_properties(TestMwCfgJsonConfig PROPERTIES 
-##    WORKING_DIRECTORY $<TARGET_FILE_DIR:IntegrationBus>)
+add_vib_test(TestMwCfgYamlParser 
+    SOURCES YamlParserTest.cpp 
+    LIBS IbConfiguration yaml-cpp
+)
+
+add_vib_test(TestMwCfgYamlValidator 
+    SOURCES YamlValidatorTest.cpp 
+    LIBS IbConfiguration yaml-cpp
+)
 
 ib_enable_warnings(IbConfiguration)
-#ib_enable_warnings(TestMwCfgConfigBuilder)
-#ib_enable_warnings(TestMwCfgValidation)
-#ib_enable_warnings(TestMwCfgYamlConfig)
-#ib_enable_warnings(TestMwCfgJsonConfig)
+ib_enable_warnings(TestMwCfgValidation)
+ib_enable_warnings(TestMwCfgYamlParser)
+ib_enable_warnings(TestMwCfgYamlValidator)
 
-
+add_subdirectory(mock)

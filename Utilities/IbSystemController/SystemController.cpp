@@ -187,13 +187,13 @@ int main(int argc, char** argv)
             expectedParticipantNames.push_back(argv[i]);
         }
 
-        // TODO provide empty config
-        auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile("");
+        // TODO: Use config file from (optional) command-line argument
+        auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile("");
 
         std::cout << "Creating SystemController for IB domain=" << domainId << std::endl;
-        auto comAdapter = ib::CreateSimulationParticipant(ibConfig, participantName, domainId, false);
+        auto comAdapter = ib::CreateSimulationParticipant(participantConfiguration, participantName, domainId, false);
         
-        IbController ibController(comAdapter.get(), ibConfig, expectedParticipantNames);
+        IbController ibController(comAdapter.get(), participantConfiguration, expectedParticipantNames);
 
         // Set numRestarts to values larger than zero to test the restart functionality.
         int numRestarts = 0;

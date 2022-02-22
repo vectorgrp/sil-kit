@@ -332,7 +332,7 @@ void ParticipantsThread(
 **************************************************************************************************/
 int main(int argc, char** argv)
 {
-    auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile("");
+    auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile("");
     BenchmarkConfig benchmark;
     if (!Parse(argc, argv, benchmark) || !Validate(benchmark))
     {
@@ -376,10 +376,10 @@ int main(int argc, char** argv)
                 participantNames.push_back(participantName);
                 auto& counter = counters.at(idx);
                 idx++;
-                threads.emplace_back(&ParticipantsThread, ibConfig, benchmark,  participantName, participantIndex, std::ref(counter));
+                threads.emplace_back(&ParticipantsThread, participantConfiguration, benchmark,  participantName, participantIndex, std::ref(counter));
             }
 
-            auto comAdapter = ib::CreateSimulationParticipant(ibConfig, "SystemController", benchmark.domainId, false);
+            auto comAdapter = ib::CreateSimulationParticipant(participantConfiguration, "SystemController", benchmark.domainId, false);
             auto controller = comAdapter->GetSystemController();
             auto monitor = comAdapter->GetSystemMonitor();
 

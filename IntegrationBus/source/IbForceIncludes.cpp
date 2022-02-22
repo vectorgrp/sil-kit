@@ -24,9 +24,6 @@ void __ib_force_include_config_parser()
 
 void __ib_force_include_participant_configuration()
 {
-    auto foo = ib::cfg::ReadParticipantConfigurationFromJsonFile("");
-    auto foo2 = ib::cfg::ReadParticipantConfigurationFromJsonString("");
-    auto foo3 = ib::cfg::ReadParticipantConfigurationFromYamlFile("");
-    auto foo4 = ib::cfg::ReadParticipantConfigurationFromYamlString("");
+    auto foo1 = ib::cfg::ParticipantConfigurationFromString("");
+    auto foo2 = ib::cfg::ParticipantConfigurationFromFile("");
 }
-

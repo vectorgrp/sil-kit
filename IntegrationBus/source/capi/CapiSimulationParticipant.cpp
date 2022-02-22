@@ -21,22 +21,22 @@
 
 extern "C" {
 
-ib_ReturnCode ib_SimulationParticipant_Create(ib_SimulationParticipant** outParticipant, const char* cJsonConfig,
+ib_ReturnCode ib_SimulationParticipant_Create(ib_SimulationParticipant** outParticipant, const char* cParticipantConfigurationString,
                                                   const char* cParticipantName, const char* cDomainId,
                                                   ib_Bool isSynchronized)
 {
     ASSERT_VALID_OUT_PARAMETER(outParticipant);
-    ASSERT_VALID_POINTER_PARAMETER(cJsonConfig);
+    ASSERT_VALID_POINTER_PARAMETER(cParticipantConfigurationString);
     ASSERT_VALID_POINTER_PARAMETER(cParticipantName);
     ASSERT_VALID_POINTER_PARAMETER(cDomainId);
     CAPI_ENTER
     {
-        std::string jsonConfigStr(cJsonConfig);
+        std::string participantConfigurationStr(cParticipantConfigurationString);
         std::string participantName(cParticipantName);
         std::string domainIdStr(cDomainId);
         uint32_t domainId = atoi(domainIdStr.c_str());
 
-        auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonString(jsonConfigStr);
+        auto ibConfig = ib::cfg::ParticipantConfigurationFromString(participantConfigurationStr);
 
         std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId
                     << std::endl;

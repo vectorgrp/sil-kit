@@ -6,7 +6,6 @@
 #include <future>
 
 #include "CreateComAdapter.hpp"
-#include "ParticipantConfiguration.hpp"
 
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
@@ -15,6 +14,7 @@
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
+#include "MockParticipantConfiguration.hpp"
 
 #if IB_MW_HAVE_VASIO
 #   include "VAsioRegistry.hpp"
@@ -57,17 +57,17 @@ TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
 {
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
-    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::vasio::v1::CreateDummyIMiddlewareConfiguration());
+    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
     registry->ProvideDomain(domainId);
 
     std::string participantNameSender = "Sender";
     auto pubComAdapter = ib::mw::CreateSimulationParticipantImpl(
-        ib::cfg::CreateDummyConfiguration(), participantNameSender, false);
+        ib::cfg::MockParticipantConfiguration(), participantNameSender, false);
     pubComAdapter->joinIbDomain(domainId);
 
     std::string participantNameReceiver = "Receiver";
     auto subComAdapter = ib::mw::CreateSimulationParticipantImpl(
-        ib::cfg::CreateDummyConfiguration(), participantNameReceiver, false);
+        ib::cfg::MockParticipantConfiguration(), participantNameReceiver, false);
     subComAdapter->joinIbDomain(domainId);
 
     publisher = pubComAdapter->CreateDataPublisher("CrashTopic", ib::sim::data::DataExchangeFormat{}, {}, 0);

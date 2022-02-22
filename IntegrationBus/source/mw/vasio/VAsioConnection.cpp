@@ -198,7 +198,7 @@ template <class T> struct Zero { using Type = T; };
 
 using asio::ip::tcp;
 
-VAsioConnection::VAsioConnection(std::shared_ptr<ib::cfg::vasio::v1::MiddlewareConfiguration> config, std::string participantName, ParticipantId participantId)
+VAsioConnection::VAsioConnection(std::shared_ptr<ib::cfg::v1::datatypes::ParticipantConfiguration> config, std::string participantName, ParticipantId participantId)
     : _config{std::move(config)}
     , _participantName{std::move(participantName)}
     , _participantId{participantId}
@@ -233,7 +233,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
 {
     assert(_logger);
 
-    if (_config->_data.enableDomainSockets)
+    if (_config->middleware.enableDomainSockets)
     {
         // We pick a random file name for local domain sockets
         try
@@ -268,7 +268,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     // NB: We attempt to connect multiple times. The registry might be a separate process
     //     which may still be initializing when we are running. For example, this happens when all
     //     participants are started in a shell, and the registry is started in the background.
-    auto registryCfg = _config->_data.registry;
+    auto registryCfg = _config->middleware.registry;
     auto multipleConnectAttempts = [ &registry, &registryCfg](const auto& registryUri) {
         for (auto i = 0; i < registryCfg.connectAttempts; i++)
         {
@@ -306,7 +306,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
         registryUri.acceptorUris.push_back(localUri);
 
         _logger->Error("Failed to connect to VAsio registry (number of attempts: {})",
-            _config->_data.registry.connectAttempts);
+            _config->middleware.registry.connectAttempts);
         _logger->Info("   Make sure that the IbRegistry is up and running and is listening on the following URIs: {}.",
             printUris(registryUri));
         _logger->Info("   If a registry is unable to open a listening socket it will only be reachable via local domain sockets, which depend on the working directory.");

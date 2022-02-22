@@ -4,10 +4,10 @@ add_library(IbSimTestHarness
     SimTestHarness.cpp
 )
 target_link_libraries(IbSimTestHarness
-    PUBLIC
+    PRIVATE
         IntegrationBus
-        IbConfiguration
-    INTERFACE IbConfiguration
+    PUBLIC
+        IbCfgMockParticipantConfiguration
 )
 target_include_directories(IbSimTestHarness
     INTERFACE

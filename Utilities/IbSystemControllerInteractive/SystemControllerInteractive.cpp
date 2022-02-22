@@ -87,9 +87,9 @@ class InteractiveSystemController
 {
 public:
     InteractiveSystemController(ISystemController* controller,
-                                std::shared_ptr<ib::cfg::IParticipantConfiguration> ibConfig, std::string myName,
+                                std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfiguration, std::string myName,
                                 const std::vector<std::string>& expectedParticipantNames)
-        : _ibConfig{std::move(ibConfig)}
+        : _participantConfiguration{std::move(participantConfiguration)}
         , _expectedParticipantNames{expectedParticipantNames}
         , _myParticipantName{std::move(myName)}
         , _controller{controller}
@@ -197,7 +197,7 @@ public:
     }
 
 private:
-    std::shared_ptr<ib::cfg::IParticipantConfiguration> _ibConfig;
+    std::shared_ptr<ib::cfg::IParticipantConfiguration> _participantConfiguration;
     std::vector<std::string> _expectedParticipantNames;
     std::string _myParticipantName;
     ISystemController* _controller{nullptr};
@@ -205,17 +205,17 @@ private:
 
 int main(int argc, char** argv)
 {
-    std::shared_ptr<ib::cfg::IParticipantConfiguration> ibConfig;
+    std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfiguration;
     if (argc < 3)
     {
-        std::cerr << "Missing arguments! Start demo with: " << argv[0] << " <IbConfig.json> <domainId> [participantName1] [participantName2] ..." << std::endl;
+        std::cerr << "Missing arguments! Start demo with: " << argv[0] << " <ParticipantConfiguration.yaml|json> <domainId> [participantName1] [participantName2] ..." << std::endl;
         return -1;
     }
     
     try
     {
-        auto jsonFilename = std::string(argv[1]);
-        ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile(jsonFilename);
+        auto configFilename = std::string(argv[1]);
+        participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(configFilename);
     }
     catch (ib::cfg::Misconfiguration& error)
     {
@@ -242,7 +242,7 @@ int main(int argc, char** argv)
     }
 
     std::cout << "Creating interactive SystemController for IB domain=" << domainId << std::endl;
-    auto comAdapter = ib::CreateSimulationParticipant(ibConfig, participantName, domainId, false);
+    auto comAdapter = ib::CreateSimulationParticipant(participantConfiguration, participantName, domainId, false);
 
     auto systemMonitor = comAdapter->GetSystemMonitor();
     auto systemController = comAdapter->GetSystemController();
@@ -250,7 +250,7 @@ int main(int argc, char** argv)
     systemMonitor->RegisterParticipantStatusHandler(&ReportParticipantStatus);
     systemMonitor->RegisterSystemStateHandler(&ReportSystemState);
 
-    InteractiveSystemController systemControllerIA(comAdapter->GetSystemController(), ibConfig, participantName, expectedParticipantNames);
+    InteractiveSystemController systemControllerIA(comAdapter->GetSystemController(), participantConfiguration, participantName, expectedParticipantNames);
     systemControllerIA.RunInteractiveLoop();
 
     return 0;

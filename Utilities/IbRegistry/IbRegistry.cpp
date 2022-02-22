@@ -1,8 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "ib/cfg/IParticipantConfiguration.hpp"
-// TODO: remove next include when middleware config is in participant config
-#include "ib/cfg/vasio/IMiddlewareConfiguration.hpp"
 #include "SignalHandler.hpp"
 #include "VAsioRegistry.hpp"
 
@@ -18,16 +16,16 @@ int main(int argc, char** argv) try
 
     if (argc < 2)
     {
-        std::cerr << "Missing arguments! Start registry with: " << argv[0] << " [--use-signal-handler] [domainId]" << std::endl;
+        std::cerr << "Missing arguments! Start registry with: " << argv[0] << " <ParticipantConfiguration.yaml|json> [--use-signal-handler] [domainId]" << std::endl;
         return -1;
     }
 
-    //std::string jsonFilename(argv[1]);
+    std::string participantConfigurationFilename(argv[1]);
 
     uint32_t domainId = 42;
 
     //check for optional use-signal-handler/domainId arguments
-    for (auto i = 1; i < argc && i < 3; i++)
+    for (auto i = 2; i < argc && i < 3; i++)
     {
         if (argv[i] == std::string{"--use-signal-handler"})
         {
@@ -39,12 +37,10 @@ int main(int argc, char** argv) try
         }
     }
 
-    // TODO: use this instead when middleware config is in participant config
-    //auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile(jsonFilename);
-    auto ibConfig = ib::cfg::vasio::v1::CreateDummyIMiddlewareConfiguration();
+    auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
     std::cout << "Creating VAsioRegistry for IB domain=" << domainId << std::endl;
-    VAsioRegistry registry{ ibConfig };
+    VAsioRegistry registry{ participantConfiguration };
     registry.ProvideDomain(domainId);
 
     if (useSignalHandler)

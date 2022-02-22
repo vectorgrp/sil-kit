@@ -67,29 +67,29 @@ target_include_directories(IbConfig_deprecated
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}
 )
 
-# TODO: Replace with test for new config
-#add_vib_test(TestMwCfgConfigBuilder SOURCES ConfigBuilderTest.cpp LIBS IbConfig_deprecated)
-#add_vib_test(TestMwCfgValidation SOURCES ValidationTest.cpp LIBS IbConfig_deprecated)
-#add_vib_test(TestIbConfigExample SOURCES IbConfigExampleTest.cpp
-#    LIBS IbMwMockNullConnection
-#    CONFIGS
-#        IbConfig_Example.json
-#        IbConfig_Bad_FileLogger.json
-#        IbConfig_Canoe.json
-#)
-#
-#add_vib_test(TestMwCfgYamlConfig SOURCES YamlConfigTest.cpp LIBS IbConfig_deprecated IbSimGenericMessage yaml-cpp)
-#
-#add_vib_test(TestMwCfgJsonConfig SOURCES JsonConfigTest.cpp LIBS IbConfig_deprecated)
+add_vib_test(TestMwCfgConfigBuilder_deprecated SOURCES ConfigBuilderTest.cpp LIBS IbConfig_deprecated)
+add_vib_test(TestMwCfgValidation_deprecated SOURCES ValidationTest.cpp LIBS IbConfig_deprecated)
+add_vib_test(TestIbConfigExample_deprecated SOURCES IbConfigExampleTest.cpp
+    LIBS
+        IbMwMockNullConnection 
+        IbCfgMockParticipantConfiguration
+    CONFIGS
+        IbConfig_Example.json
+        IbConfig_Bad_FileLogger.json
+        IbConfig_Canoe.json
+)
 
+add_vib_test(TestMwCfgYamlConfig_deprecated SOURCES YamlConfigTest.cpp LIBS IbConfig_deprecated IbSimGenericMessage yaml-cpp)
+
+add_vib_test(TestMwCfgJsonConfig_deprecated SOURCES JsonConfigTest.cpp LIBS IbConfig_deprecated)
 # we need runtime IntegrationBus DLL on windows:
-#set_tests_properties(TestMwCfgJsonConfig PROPERTIES 
+#set_tests_properties(TestMwCfgJsonConfig_deprecated PROPERTIES 
 #    WORKING_DIRECTORY $<TARGET_FILE_DIR:IntegrationBus>)
 
 ib_enable_warnings(IbConfig_deprecated)
-ib_enable_warnings(TestMwCfgConfigBuilder)
-ib_enable_warnings(TestMwCfgValidation)
-ib_enable_warnings(TestMwCfgYamlConfig)
-ib_enable_warnings(TestMwCfgJsonConfig)
+ib_enable_warnings(TestMwCfgConfigBuilder_deprecated)
+ib_enable_warnings(TestMwCfgValidation_deprecated)
+ib_enable_warnings(TestMwCfgYamlConfig_deprecated)
+ib_enable_warnings(TestMwCfgJsonConfig_deprecated)
 
 

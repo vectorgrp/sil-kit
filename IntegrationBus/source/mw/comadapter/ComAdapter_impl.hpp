@@ -36,6 +36,7 @@
 #include "Logger.hpp"
 #include "TimeProvider.hpp"
 #include "ServiceDiscovery.hpp"
+#include "ParticipantConfiguration.hpp"
 #include "YamlConfig.hpp"
 
 #include "tuple_tools/bind.hpp"
@@ -100,16 +101,15 @@ bool ControllerUsesReplay(const ConfigT& controllerConfig)
 template <class IbConnectionT>
 ComAdapter<IbConnectionT>::ComAdapter(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
                                       const std::string& participantName, bool isSynchronized)
-    : _participantName{participantName}
+    : _participantName{ participantName }
     , _isSynchronized{ isSynchronized }
-    , _participantId{hash(participantName)}
-    , _ibConnection{ib::cfg::vasio::v1::CreateDummyMiddlewareConfiguration(), participantName, _participantId}
+    , _participantId{ hash(participantName) }
+    , _participantConfig{ std::dynamic_pointer_cast<ib::cfg::v1::datatypes::ParticipantConfiguration>(participantConfig) }
+    , _ibConnection{ _participantConfig, participantName, _participantId }
 {
-     _participantConfig = std::dynamic_pointer_cast<ib::cfg::ParticipantConfiguration>(participantConfig);
-
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
-    _logger = std::make_unique<logging::Logger>(_participantName, _participantConfig->_data.logging);
+    _logger = std::make_unique<logging::Logger>(_participantName, _participantConfig->logging);
     _ibConnection.SetLogger(_logger.get());
     
     _logger->Info("Creating ComAdapter for Participant {}, IntegrationBus-Version: {} {}, Middleware: {}",
@@ -180,7 +180,7 @@ void ComAdapter<IbConnectionT>::SetupRemoteLogging()
     auto* logger = dynamic_cast<logging::Logger*>(_logger.get());
     if (logger)
     {
-        if (_participantConfig->_data.logging.logFromRemotes)
+        if (_participantConfig->logging.logFromRemotes)
         {
             mw::SupplementalData supplementalData;
             supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeLoggerReceiver;
@@ -189,10 +189,10 @@ void ComAdapter<IbConnectionT>::SetupRemoteLogging()
                                                       std::move(supplementalData), logger);
         }
 
-        auto sinkIter = std::find_if(_participantConfig->_data.logging.sinks.begin(), _participantConfig->_data.logging.sinks.end(),
+        auto sinkIter = std::find_if(_participantConfig->logging.sinks.begin(), _participantConfig->logging.sinks.end(),
             [](const cfg::v1::datatypes::Sink& sink) { return sink.type == cfg::v1::datatypes::Sink::Type::Remote; });
 
-        if (sinkIter != _participantConfig->_data.logging.sinks.end())
+        if (sinkIter != _participantConfig->logging.sinks.end())
         {
             mw::SupplementalData supplementalData;
             supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeLoggerSender;
@@ -234,7 +234,7 @@ template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonicalName, const std::string& networkName) -> can::ICanController*
 {
     // retrieve CAN controller
-    auto& canControllers = _participantConfig->_data.canControllers;
+    auto& canControllers = _participantConfig->canControllers;
     auto controllerIter =
         std::find_if(canControllers.begin(), canControllers.end(), [&canonicalName, &networkName](auto&& controller) {
             return controller.name == canonicalName && controller.network == networkName;
@@ -271,7 +271,7 @@ auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonical
     -> eth::IEthController*
 {
     // retrieve Ethernet controller
-    auto& ethernetControllerConfigs = _participantConfig->_data.ethernetControllers;
+    auto& ethernetControllerConfigs = _participantConfig->ethernetControllers;
     auto controllerConfigIter = std::find_if(ethernetControllerConfigs.begin(), ethernetControllerConfigs.end(),
                                              [&canonicalName, &networkName](auto&& controllerConfig) {
                                                  return controllerConfig.name == canonicalName;
@@ -311,7 +311,7 @@ auto ComAdapter<IbConnectionT>::CreateFlexrayController(const std::string& canon
     -> sim::fr::IFrController*
 {
     // retrieve FR controller
-    auto& flexRayControllerConfigs = _participantConfig->_data.flexRayControllers;
+    auto& flexRayControllerConfigs = _participantConfig->flexRayControllers;
     auto controllerConfigIter =
         std::find_if(flexRayControllerConfigs.begin(), flexRayControllerConfigs.end(), [&canonicalName, &networkName](auto&& controllerConfig) {
             return controllerConfig.name == canonicalName;
@@ -351,7 +351,7 @@ auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonical
     -> lin::ILinController*
 {
     // retrieve LIN controller
-    auto& linControllerConfigs = _participantConfig->_data.linControllers;
+    auto& linControllerConfigs = _participantConfig->linControllers;
     auto controllerConfigIter = std::find_if(linControllerConfigs.begin(), linControllerConfigs.end(),
                                              [&canonicalName, &networkName](auto&& controllerConfig) {
                                                  return controllerConfig.name == canonicalName;
@@ -420,7 +420,7 @@ auto ComAdapter<IbConnectionT>::CreateDataPublisher(const std::string& topic,
     std::string pubUUID = util::uuid::to_string(util::uuid::generate());
 
     // Retrieve controller
-    auto& cfgs = _participantConfig->_data.dataPublishers;
+    auto& cfgs = _participantConfig->dataPublishers;
     auto it = std::find_if(cfgs.begin(), cfgs.end(),
                                              [topic](auto&& controllerConfig) {
                                                  return controllerConfig.name == topic;
@@ -464,7 +464,7 @@ auto ComAdapter<IbConnectionT>::CreateDataSubscriber(const std::string& topic,
     -> sim::data::IDataSubscriber*
 {
     // Retrieve controller
-    auto& cfgs = _participantConfig->_data.dataSubscribers;
+    auto& cfgs = _participantConfig->dataSubscribers;
     auto it = std::find_if(cfgs.begin(), cfgs.end(), [topic](auto&& controllerConfig) {
         return controllerConfig.name == topic;
     });
@@ -544,7 +544,7 @@ auto ComAdapter<IbConnectionT>::CreateRpcClient(const std::string& functionName,
     auto clientUUID = util::uuid::to_string(util::uuid::generate());
 
     // Retrieve controller
-    auto& cfgs = _participantConfig->_data.rpcClients;
+    auto& cfgs = _participantConfig->rpcClients;
     auto it = std::find_if(cfgs.begin(), cfgs.end(), [functionName](auto&& controllerConfig) {
         return controllerConfig.name == functionName;
     });
@@ -586,7 +586,7 @@ auto ComAdapter<IbConnectionT>::CreateRpcServer(const std::string& functionName,
                                                 sim::rpc::CallProcessor handler) -> sim::rpc::IRpcServer*
 {
     // Retrieve controller
-    auto& cfgs = _participantConfig->_data.rpcServers;
+    auto& cfgs = _participantConfig->rpcServers;
     auto it = std::find_if(cfgs.begin(), cfgs.end(), [functionName](auto&& controllerConfig) {
         return controllerConfig.name == functionName;
     });
@@ -645,7 +645,7 @@ auto ComAdapter<IbConnectionT>::GetParticipantController() -> sync::IParticipant
         supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeParticipantController;
         controller = CreateInternalController<sync::ParticipantController>(
             "ParticipantController", mw::ServiceType::InternalController, std::move(supplementalData), _participantName,
-            _isSynchronized, _participantConfig->_data.healthCheck);
+            _isSynchronized, _participantConfig->healthCheck);
     }
 
     return controller;

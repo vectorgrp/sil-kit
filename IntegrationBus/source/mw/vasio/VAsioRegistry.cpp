@@ -25,11 +25,11 @@ bool isCatchallAddress(const std::string& hostUrl)
 namespace ib {
 namespace mw {
 
-VAsioRegistry::VAsioRegistry(std::shared_ptr<ib::cfg::vasio::IMiddlewareConfiguration> cfg) :
-    _vasioConfig{ std::dynamic_pointer_cast<ib::cfg::vasio::v1::MiddlewareConfiguration>(cfg) },
+VAsioRegistry::VAsioRegistry(std::shared_ptr<ib::cfg::IParticipantConfiguration> cfg) :
+    _vasioConfig{ std::dynamic_pointer_cast<ib::cfg::v1::datatypes::ParticipantConfiguration>(cfg) },
     _connection{ _vasioConfig, "IbRegistry", 0 }
 {
-    _logger = std::make_unique<logging::Logger>("IbRegistry", _vasioConfig->_data.registry.logging);
+    _logger = std::make_unique<logging::Logger>("IbRegistry", _vasioConfig->middleware.registry.logging);
     _connection.SetLogger(_logger.get());
 
     _connection.RegisterMessageReceiver([this](IVAsioPeer* from, const ParticipantAnnouncement& announcement)
@@ -56,7 +56,7 @@ void VAsioRegistry::ProvideDomain(uint32_t domainId)
             e.what());
     }
 
-    auto registryPort = static_cast<uint16_t>(_vasioConfig->_data.registry.port + domainId);
+    auto registryPort = static_cast<uint16_t>(_vasioConfig->middleware.registry.port + domainId);
     tcp::endpoint endpoint_v4(tcp::v4(), registryPort);
     try
     {

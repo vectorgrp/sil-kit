@@ -1,8 +1,12 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "ParticipantConfiguration.hpp"
 
+#include <fstream>
 #include <sstream>
 #include <iomanip>
+
+#include "YamlParser.hpp"
+#include "YamlValidator.hpp"
 
 namespace ib {
 namespace cfg {
@@ -13,6 +17,41 @@ inline namespace v1 {
 //  Helper functions
 // ================================================================================
 namespace {
+
+auto ReadFile(const std::string& filename) -> std::string
+{
+    std::ifstream fs(filename);
+
+    if (!fs.is_open())
+        throw ib::configuration_error("Invalid configuration filename '" + filename + "'");
+
+    std::stringstream buffer;
+    buffer << fs.rdbuf();
+
+    return buffer.str();
+}
+
+auto Parse(const std::string& text) -> ib::cfg::v1::datatypes::ParticipantConfiguration
+{
+    std::stringstream warnings;
+    ib::cfg::YamlValidator validator;
+    if (!validator.Validate(text, warnings))
+    {
+        throw ib::configuration_error{ "YAML validation returned errors: \n" + warnings.str() };
+    }
+    if (warnings.str().size() > 0)
+    {
+        std::cout << "YAML validation returned warnings: " << warnings.str() << std::endl;
+    }
+    YAML::Node doc = YAML::Load(text);
+
+    auto configuration = ib::cfg::from_yaml<ib::cfg::v1::datatypes::ParticipantConfiguration>(doc);
+    configuration.configurationFilePath.clear();
+
+    //PostProcess(config);
+
+    return configuration;
+}
 
 } // anonymous namespace
 
@@ -97,6 +136,24 @@ bool operator==(const Extensions& lhs, const Extensions& rhs)
     return lhs.searchPathHints == rhs.searchPathHints;
 }
 
+bool operator==(const Registry& lhs, const Registry& rhs)
+{
+    return lhs.port == rhs.port
+        && lhs.hostname == rhs.hostname
+        && lhs.logging == rhs.logging
+        && lhs.connectAttempts == rhs.connectAttempts;
+}
+
+bool operator==(const Middleware& lhs, const Middleware& rhs)
+{
+    return lhs.registry == rhs.registry
+        && lhs.enableDomainSockets == rhs.enableDomainSockets
+        && lhs.tcpNoDelay == rhs.tcpNoDelay
+        && lhs.tcpQuickAck == rhs.tcpQuickAck
+        && lhs.tcpReceiveBufferSize == rhs.tcpReceiveBufferSize
+        && lhs.tcpSendBufferSize == rhs.tcpSendBufferSize;
+}
+
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs)
 {
     return lhs.participantName == rhs.participantName
@@ -152,18 +209,6 @@ std::istream& from_istream(std::istream& in, std::array<uint8_t, 6>& macAddress)
 //  Public API
 // ================================================================================
 
-
-
-/*auto ParticipantConfiguration::ToYamlString() -> std::string
-{
-    throw configuration_error{ "Not implemented" };
-}
-
-auto ParticipantConfiguration::ToJsonString() -> std::string
-{
-    throw configuration_error{ "Not implemented" };
-}*/
-
 #if __cplusplus ==  201402L
 // When compiling as C++14, the 'static constexpr variable definitions' are not
 // properly exported in the dll (and not properly odr-used from users of the DLL).
@@ -186,81 +231,22 @@ constexpr datatypes::NetworkType datatypes::RpcClient::networkType;
 
 } // inline namespace v1
 
+auto ParticipantConfigurationFromString(const std::string& text)
+-> std::shared_ptr<ib::cfg::IParticipantConfiguration>
+{
+    auto configuration = ib::cfg::Parse(text);
+
+    return std::make_shared<ib::cfg::v1::datatypes::ParticipantConfiguration>(std::move(configuration));
+}
+
+auto ParticipantConfigurationFromFile(const std::string& filename)
+-> std::shared_ptr<ib::cfg::IParticipantConfiguration>
+{
+    auto text = ib::cfg::ReadFile(filename);
+    auto configuration = ib::cfg::Parse(text);
+
+    return std::make_shared<ib::cfg::v1::datatypes::ParticipantConfiguration>(std::move(configuration));
+}
+
 } // namespace cfg
-auto ib::cfg::ReadParticipantConfigurationFromYamlString(const std::string& yamlString)
-    -> std::shared_ptr<IParticipantConfiguration>
-{
-    yamlString;
-    // Dummy implementation
-    std::cout << "Warning: This implementation currently returns a non-functional dummy." << std::endl;
-    ib::cfg::v1::datatypes::ParticipantConfiguration configDt;
-    ib::cfg::ParticipantConfiguration* config = new ib::cfg::ParticipantConfiguration(std::move(configDt));
-
-    // Dummy logging
-    auto sink = cfg::v1::datatypes::Sink{};
-    sink.level = ib::mw::logging::Level::Debug;
-    sink.type = cfg::v1::datatypes::Sink::Type::Stdout;
-    config->_data.logging.sinks.push_back(sink);
-
-    auto configPtr = std::shared_ptr<ib::cfg::ParticipantConfiguration>(config);
-    return std::move(configPtr);
-}
-
-auto ib::cfg::ReadParticipantConfigurationFromYamlFile(const std::string& yamlFilename)
-    -> std::shared_ptr<ib::cfg::IParticipantConfiguration>
-{
-    yamlFilename;
-    // Dummy implementation
-    std::cout << "Warning: This implementation currently returns a non-functional dummy." << std::endl;
-    ib::cfg::v1::datatypes::ParticipantConfiguration configDt;
-    ib::cfg::ParticipantConfiguration* config = new ib::cfg::ParticipantConfiguration(std::move(configDt));
-
-    // Dummy logging
-    auto sink = cfg::v1::datatypes::Sink{};
-    sink.level = ib::mw::logging::Level::Debug;
-    sink.type = cfg::v1::datatypes::Sink::Type::Stdout;
-    config->_data.logging.sinks.push_back(sink);
-
-    auto configPtr = std::shared_ptr<ib::cfg::ParticipantConfiguration>(config);
-    return std::move(configPtr);
-}
-
-auto ib::cfg::ReadParticipantConfigurationFromJsonString(const std::string& jsonString)
-    -> std::shared_ptr<ib::cfg::IParticipantConfiguration>
-{
-    jsonString;
-    // Dummy implementation
-    std::cout << "Warning: This implementation currently returns a non-functional dummy." << std::endl;
-    ib::cfg::v1::datatypes::ParticipantConfiguration configDt;
-    ib::cfg::ParticipantConfiguration* config = new ib::cfg::ParticipantConfiguration(std::move(configDt));
-
-    // Dummy logging
-    auto sink = cfg::v1::datatypes::Sink{};
-    sink.level = ib::mw::logging::Level::Debug;
-    sink.type = cfg::v1::datatypes::Sink::Type::Stdout;
-    config->_data.logging.sinks.push_back(sink);
-
-    auto configPtr = std::shared_ptr<ib::cfg::ParticipantConfiguration>(config);
-    return std::move(configPtr);
-}
-
-auto ib::cfg::ReadParticipantConfigurationFromJsonFile(const std::string& jsonFilename)
-    -> std::shared_ptr<ib::cfg::IParticipantConfiguration>
-{
-    jsonFilename;
-    // Dummy implementation
-    std::cout << "Warning: This implementation currently returns a non-functional dummy." << std::endl;
-    ib::cfg::v1::datatypes::ParticipantConfiguration configDt;
-    ib::cfg::ParticipantConfiguration* config = new ib::cfg::ParticipantConfiguration(std::move(configDt));
-
-    // Dummy logging
-    auto sink = cfg::v1::datatypes::Sink{};
-    sink.level = ib::mw::logging::Level::Debug;
-    sink.type = cfg::v1::datatypes::Sink::Type::Stdout;
-    config->_data.logging.sinks.push_back(sink);
-
-    auto configPtr = std::shared_ptr<ib::cfg::ParticipantConfiguration>(config);
-    return std::move(configPtr);
-}
-
 } // namespace ib

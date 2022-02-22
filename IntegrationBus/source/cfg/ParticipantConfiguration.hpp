@@ -1,5 +1,4 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
-
 #pragma once
 
 #include <array>
@@ -37,8 +36,6 @@ struct InternalController
     std::string network;
 };
 
-
-
 // ================================================================================
 //  CAN controller service
 // ================================================================================
@@ -75,7 +72,6 @@ struct LinController
 //  Ethernet controller service
 // ================================================================================
 
-
 //! \brief Ethernet controller service
 struct EthernetController
 {
@@ -85,7 +81,7 @@ struct EthernetController
     std::string network;
 
     typedef std::array<uint8_t, 6> MacAddress;
-    ib::util::Optional<MacAddress> macAddress{};
+    ib::util::Optional<MacAddress> macAddress;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -103,9 +99,9 @@ struct FlexRayController
     std::string name;
     std::string network;
 
-    ib::util::Optional<sim::fr::ClusterParameters> clusterParameters{};
-    ib::util::Optional<sim::fr::NodeParameters> nodeParameters{};
-    std::vector<sim::fr::TxBufferConfig> txBufferConfigs;
+    ib::util::Optional<sim::fr::ClusterParameters> clusterParameters;
+    ib::util::Optional<sim::fr::NodeParameters> nodeParameters;
+    std::vector<sim::fr::TxBufferConfig> txBufferConfigurations;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -122,6 +118,9 @@ struct DataPublisher
 
     std::string name;
     std::string network;
+
+    //! \brief History length of a DataPublisher.
+    ib::util::Optional<size_t> history{ 0 };
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -201,12 +200,40 @@ struct Extensions
 };
 
 // ================================================================================
+//  VAsio Middleware
+// ================================================================================
+
+struct Registry
+{
+    std::string hostname{ "localhost" };
+    uint16_t port{ 8500 };
+    Logging logging;
+    int connectAttempts{ 1 }; //!<  Number of connection attempts to the registry a participant should perform.
+};
+
+struct Middleware
+{
+    Registry registry;
+    int tcpReceiveBufferSize{ -1 };
+    int tcpSendBufferSize{ -1 };
+    bool tcpNoDelay{ false }; //!< Disables Nagle's algorithm.
+    bool tcpQuickAck{ false }; //!< Setting this Linux specific flag disables delayed TCP/IP acknowledgements.
+    bool enableDomainSockets{ true }; //!< By default local domain socket is preferred to TCP/IP sockets.
+};
+
+// ================================================================================
 //  Root
 // ================================================================================
 
 //! \brief ParticipantConfiguration is the main configuration data object for a VIB participant.
 struct ParticipantConfiguration
+    : public IParticipantConfiguration
 {
+    ParticipantConfiguration() = default;
+
+    //virtual auto ToYamlString() -> std::string override;
+    //virtual auto ToJsonString() -> std::string override;
+
     //! \brief Version of the JSON/YAML schema.
     std::string schemaVersion{ "1" };
     //! \brief An optional user description for documentation purposes. Currently unused.
@@ -215,7 +242,7 @@ struct ParticipantConfiguration
     std::string configurationFilePath;
 
     //! \brief The participant name. Mandatory.
-    ib::util::Optional<std::string> participantName;
+    std::string participantName;
 
     std::vector<CanController> canControllers;
     std::vector<LinController> linControllers;
@@ -232,6 +259,7 @@ struct ParticipantConfiguration
     HealthCheck healthCheck;
     Tracing tracing;
     Extensions extensions;
+    Middleware middleware;
 };
 
 bool operator==(const CanController& lhs, const CanController& rhs);
@@ -245,6 +273,8 @@ bool operator==(const RpcClient& lhs, const RpcClient& rhs);
 bool operator==(const HealthCheck& lhs, const HealthCheck& rhs);
 bool operator==(const Tracing& lhs, const Tracing& rhs);
 bool operator==(const Extensions& lhs, const Extensions& rhs);
+bool operator==(const Registry& lhs, const Registry& rhs);
+bool operator==(const Middleware& lhs, const Middleware& rhs);
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs);
 
 // Note: For better maintainability we do not overload operator<< for std::array.
@@ -253,31 +283,6 @@ std::istream& from_istream(std::istream& in, std::array<uint8_t, 6>& macAddress)
 
 } // namespace datatypes
 
-class ParticipantConfiguration 
-    : public IParticipantConfiguration
-{
-public:
-    ParticipantConfiguration(datatypes::ParticipantConfiguration&& data)
-        : _data(std::move(data))
-    {
-    }
-
-    //virtual auto ToYamlString() -> std::string override;
-    //virtual auto ToJsonString() -> std::string override;
-
-public:
-    datatypes::ParticipantConfiguration _data;
-};
-
-// TODO: Needed in Tests 
-inline auto CreateDummyConfiguration() -> std::shared_ptr<IParticipantConfiguration>
-{
-    ib::cfg::v1::datatypes::ParticipantConfiguration configDt;
-    auto configPtr = std::make_shared<ib::cfg::ParticipantConfiguration>(std::move(configDt));
-    return configPtr;
-}
-
 } // namespace v1
-
 } // namespace cfg
 } // namespace ib

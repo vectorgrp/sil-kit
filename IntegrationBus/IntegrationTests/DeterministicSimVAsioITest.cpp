@@ -10,7 +10,6 @@
 #include "CreateComAdapter.hpp"
 #include "VAsioRegistry.hpp"
 
-#include "ParticipantConfiguration.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/sim/all.hpp"
 
@@ -18,6 +17,7 @@
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
+#include "MockParticipantConfiguration.hpp"
 
 namespace {
 
@@ -53,7 +53,7 @@ public:
     {
         std::string participantName = "Publisher" + std::to_string(publisherIndex);
         _comAdapter =
-            ib::mw::CreateSimulationParticipantImpl(ib::cfg::CreateDummyConfiguration(), participantName, true);
+            ib::mw::CreateSimulationParticipantImpl(ib::cfg::MockParticipantConfiguration(), participantName, true);
 
         _comAdapter->joinIbDomain(domainId);
 
@@ -117,7 +117,7 @@ public:
         , _testSize{testSize}
     {
         _comAdapter = ib::mw::CreateSimulationParticipantImpl(
-            ib::cfg::CreateDummyConfiguration(), participantName, true);
+            ib::cfg::MockParticipantConfiguration(), participantName, true);
         _comAdapter->joinIbDomain(domainId);
 
         _systemController = _comAdapter->GetSystemController();
@@ -265,7 +265,7 @@ TEST_F(DeterministicSimVAsioITest, deterministic_simulation_vasio)
         syncParticipantNames.push_back("Publisher" + std::to_string(i));
     }
 
-    VAsioRegistry registry{ ib::cfg::vasio::v1::CreateDummyIMiddlewareConfiguration() };
+    VAsioRegistry registry{ ib::cfg::MockParticipantConfiguration() };
     registry.ProvideDomain(domainId);
 
     // The subscriber assumes the role of the system controller and initiates simulation state changes

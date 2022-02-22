@@ -803,6 +803,48 @@
         }
       },
       "additionalProperties": false
+    },
+
+    "Middleware": {
+      "type": "object",
+      "title": "Optional configuration of the VAsio middleware",
+      "properties": {
+        "Registry": {
+          "type": "object",
+          "title": "The registry used for the VAsio middleware.",
+          "properties": {
+            "HostName": {
+              "type": "string",
+              "default": "localhost"
+            },
+            "Port": {
+              "type": "integer",
+              "default": "8500"
+            },
+            "Logging": { "$ref": "#/definitions/Logging" },
+            "ConnectAttempts": {
+              "type": "integer",
+              "default": "1"
+            }
+          },
+          "additionalProperties": false
+        },
+        "TcpNoDelay": {
+          "type": "boolean",
+          "default": "true"
+        },
+        "TcpQuickAck": {
+          "type": "boolean",
+          "default": "false"
+        },
+        "TcpSendBufferSize": {
+          "type": "integer"
+        },
+        "TcpReceiveBufferSize": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
     }
 
   },

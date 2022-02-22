@@ -10,9 +10,6 @@
 #include "VAsioConnection.hpp"
 #include "Uri.hpp"
 
-
-
-
 using namespace asio::ip;
 
 #ifdef __linux__
@@ -171,7 +168,7 @@ auto VAsioTcpPeer::GetLocalAddress() const -> std::string
 
 bool VAsioTcpPeer::ConnectLocal(const std::string& socketPath)
 {
-    if (!_ibConnection->Config()->_data.enableDomainSockets)
+    if (!_ibConnection->Config()->middleware.enableDomainSockets)
     {
         return false;
     }
@@ -215,25 +212,25 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
 
             _socket.connect(resolverEntry.endpoint());
 
-            if (config->_data.tcpNoDelay)
+            if (config->middleware.tcpNoDelay)
             {
                 _socket.set_option(asio::ip::tcp::no_delay{true});
             }
 
-            if (config->_data.tcpQuickAck)
+            if (config->middleware.tcpQuickAck)
             {
                 _enableQuickAck = true;
                 EnableQuickAck(_logger, _socket);
             }
 
-            if(config->_data.tcpReceiveBufferSize > 0)
+            if(config->middleware.tcpReceiveBufferSize > 0)
             {
-                _socket.set_option(asio::socket_base::receive_buffer_size{config->_data.tcpReceiveBufferSize});
+                _socket.set_option(asio::socket_base::receive_buffer_size{config->middleware.tcpReceiveBufferSize});
             }
 
-            if (config->_data.tcpSendBufferSize > 0)
+            if (config->middleware.tcpSendBufferSize > 0)
             {
-                _socket.set_option(asio::socket_base::send_buffer_size{config->_data.tcpSendBufferSize});
+                _socket.set_option(asio::socket_base::send_buffer_size{config->middleware.tcpSendBufferSize});
             }
 
 

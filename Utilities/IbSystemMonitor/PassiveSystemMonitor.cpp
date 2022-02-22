@@ -29,11 +29,11 @@ int main(int argc, char** argv) try
 {
     if (argc < 2)
     {
-        std::cerr << "Missing arguments! Start demo with: " << argv[0] << " <IbConfig.json> [domainId]" << std::endl;
+        std::cerr << "Missing arguments! Start demo with: " << argv[0] << " <ParticipantConfiguration.yaml|json> [domainId]" << std::endl;
         return -1;
     }
 
-    std::string jsonFilename(argv[1]);
+    std::string participantConfigurationFilename(argv[1]);
     std::string participantName{"SystemMonitor"};
 
     uint32_t domainId = 42;
@@ -42,10 +42,10 @@ int main(int argc, char** argv) try
         domainId = static_cast<uint32_t>(std::stoul(argv[2]));
     }
 
-    auto ibConfig = ib::cfg::ReadParticipantConfigurationFromJsonFile(jsonFilename);
+    auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
     std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-    auto comAdapter = ib::CreateSimulationParticipant(std::move(ibConfig), participantName, domainId, false);
+    auto comAdapter = ib::CreateSimulationParticipant(std::move(participantConfiguration), participantName, domainId, false);
     auto* logger = comAdapter->GetLogger();
     auto* systemMonitor = comAdapter->GetSystemMonitor();
     
