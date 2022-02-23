@@ -188,7 +188,7 @@ int main(int argc, char** argv)
         }
 
         // TODO: Use config file from (optional) command-line argument
-        auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile("");
+        auto participantConfiguration = ib::cfg::ParticipantConfigurationFromString("{}");
 
         std::cout << "Creating SystemController for IB domain=" << domainId << std::endl;
         auto comAdapter = ib::CreateSimulationParticipant(participantConfiguration, participantName, domainId, false);
