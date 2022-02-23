@@ -805,6 +805,60 @@ TEST_F(RpcITest, test_1client_1server_100functions_sync_vasio)
     ShutdownSystem();
 }
 
+// Two clients/servers with same functionName on one participant
+TEST_F(RpcITest, test_1client_1server_samefunctionname_sync_vasio)
+{
+    const auto middleware = Middleware::VAsio;
+    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+
+    const uint32_t numCalls = 3;
+    const uint32_t numCallsToReceive = numCalls * 2;
+    const uint32_t numCallsToReturn = numCalls * 2;
+    const size_t messageSize = 3;
+    const bool sync = true;
+
+    std::vector<ClientParticipant> clients;
+    std::vector<ServerParticipant> servers;
+
+    std::vector<std::vector<uint8_t>> expectedReturnDataUnordered;
+    for (uint32_t d = 0; d < numCalls; d++)
+    {
+        expectedReturnDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d + rpcFuncIncrement));
+        expectedReturnDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d + rpcFuncIncrement));
+    }
+
+    clients.push_back({"Client1",
+                       {{"TestFuncA", "A", {}, messageSize, numCalls, numCallsToReturn, expectedReturnDataUnordered},
+                        {"TestFuncA", "A", {}, messageSize, numCalls, numCallsToReturn, expectedReturnDataUnordered}},
+                       {"TestFuncA"}});
+
+    std::vector<std::vector<uint8_t>> expectedDataUnordered;
+    for (uint32_t d = 0; d < numCalls; d++)
+    {
+        expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
+        expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
+    }
+
+    servers.push_back({"Server1",
+                       {{"TestFuncA", "A", {}, messageSize, numCallsToReceive, expectedDataUnordered},
+                        {"TestFuncA", "A", {}, messageSize, numCallsToReceive, expectedDataUnordered}}});
+
+    SetupSystem(domainId, sync, clients, servers, middleware);
+
+    RunServers(servers, domainId, sync);
+    RunClients(clients, domainId, sync);
+
+    WaitForAllServersDiscovered(clients);
+    WaitForAllStarted(clients, servers, sync);
+
+    StopSimOnallCalledAndReceived(clients, servers, sync);
+
+    JoinRpcThreads();
+
+    ShutdownSystem();
+}
+
+
 // One client participant, two server participants
 TEST_F(RpcITest, test_1client_2server_sync_vasio)
 {

@@ -66,6 +66,7 @@ private:
     uint32_t _numCounterparts{0};
     std::map<std::string, std::pair<uint32_t, std::unique_ptr<CallHandleImpl>>> _detachedCallHandles;
     mw::logging::ILogger* _logger;
+
 };
 
 // ================================================================================

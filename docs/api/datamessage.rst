@@ -27,10 +27,9 @@ a common topic, DataSubscriber can register specific reception handlers targetin
 Topics
 ~~~~~~
 
-DataPublishers and DataSubscribers are identified by a topic name and are connected by links. For each link, the 
-endpoints must be unique. That is, on one participant, there can only be one publisher / subscriber on a given topic.
-However, it is possible to use multiple publishers/subscribers on the same topic distributed among different 
-participants.
+DataPublishers and DataSubscribers are identified by a topic name and are connected by links. It is possible to use 
+multiple DataPublishers / DataSubscribers with the same topic on the same participant. However, DataSubscribers will 
+only receive publications from remote, not from DataPublishers on the same participant.
 
 DataExchangeFormat
 ~~~~~~~~~~~~~~~~~~

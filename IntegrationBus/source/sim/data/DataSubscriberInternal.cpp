@@ -45,7 +45,7 @@ void DataSubscriberInternal::ReceiveIbMessage(const mw::IIbServiceEndpoint* from
 
 void DataSubscriberInternal::ReceiveMessage(const std::vector<uint8_t>& data)
 {
-    bool anySpecificHandlerExecuted{ false };
+    bool anySpecificHandlerExecuted{false};
     if (!_specificHandlers.empty())
     {
         for (auto handler : _specificHandlers)
@@ -61,6 +61,11 @@ void DataSubscriberInternal::ReceiveMessage(const std::vector<uint8_t>& data)
     if (_defaultHandler && !anySpecificHandlerExecuted)
     {
         _defaultHandler(_parent, data);
+    }
+
+    if (!_defaultHandler && !anySpecificHandlerExecuted)
+    {
+        _comAdapter->GetLogger()->Warn("DataSubscriber on topic " + _topic + " received data, but has no default or specific handler assigned");
     }
 }
 

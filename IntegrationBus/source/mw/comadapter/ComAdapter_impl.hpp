@@ -403,7 +403,8 @@ auto ComAdapter<IbConnectionT>::CreateDataSubscriberInternal(const std::string& 
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataSubscriberInternal;
 
     ib::cfg::v1::datatypes::DataSubscriber controllerConfig;
-    controllerConfig.name = topic;
+    // Use a unique name to avoid collisions of several subscribers on same topic on one participant
+    controllerConfig.name = util::uuid::to_string(util::uuid::generate());
     controllerConfig.network = linkName;
 
     return CreateController<ib::cfg::v1::datatypes::DataSubscriber, sim::data::DataSubscriberInternal>(
@@ -488,6 +489,8 @@ auto ComAdapter<IbConnectionT>::CreateDataSubscriber(const std::string& topic,
         controllerConfig.name = topic;
         controllerConfig.network = topic;
     }
+    // Use unique network name that same topic for multiple DataSubscribers on one participant works
+    controllerConfig.network = util::uuid::to_string(util::uuid::generate());
 
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataSubscriber;
@@ -527,7 +530,8 @@ auto ComAdapter<IbConnectionT>::CreateRpcServerInternal(const std::string& funct
     _logger->Trace("Creating internal server for functionName={}, clientUUID={}", functionName, clientUUID);
 
     ib::cfg::v1::datatypes::RpcServer controllerConfig;
-    controllerConfig.name = functionName;
+    // Use a unique name to avoid collisions of several RpcSevers on same functionName on one participant
+    controllerConfig.name = util::uuid::to_string(util::uuid::generate());
     controllerConfig.network = clientUUID;
 
     // RpcServerInternal gets discovered by RpcClient which is then ready to detach calls
@@ -610,6 +614,8 @@ auto ComAdapter<IbConnectionT>::CreateRpcServer(const std::string& functionName,
         controllerConfig.name = functionName;
         controllerConfig.network = functionName;
     }
+    // Use unique network name that same functionName for multiple RpcServers on one participant works
+    controllerConfig.network = util::uuid::to_string(util::uuid::generate());
 	
     // RpcServer announces himself to be found by DiscoverRpcServers()
     mw::SupplementalData supplementalData;

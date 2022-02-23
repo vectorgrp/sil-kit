@@ -58,7 +58,6 @@ private:
     mw::ServiceDescriptor _serviceDescriptor{};
     std::vector<RpcServerInternal*> _internalRpcServers;
     mw::logging::ILogger* _logger;
-
 };
 
 // ================================================================================

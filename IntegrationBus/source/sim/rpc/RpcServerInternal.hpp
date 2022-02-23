@@ -57,9 +57,7 @@ class RpcServerInternal : public IIbToRpcServerInternal,
     mw::IComAdapterInternal* _comAdapter{nullptr};
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     mw::ServiceDescriptor _serviceDescriptor{};
-
     std::map<std::string, std::unique_ptr<CallHandleImpl>> _receivedCallHandles;
-
 };
 
 // ================================================================================

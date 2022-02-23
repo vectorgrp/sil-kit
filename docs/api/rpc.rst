@@ -30,9 +30,9 @@ instances. Further, a query can be run providing a list of available RpcServers 
 Function name
 ~~~~~~~~~~~~~
 
-RpcClients and RpcServers are linked by a string-based function name. For each link, the endpoints must be unique. 
-That is, on one participant, there can only be one RpcClient / RpcServer on a given function name. However, it is 
-possible to use multiple RpcClients / RpcServers on the same function name distributed among different participants.
+RpcClients and RpcServers are linked by a string-based function name. It is possible to use multiple RpcClients / 
+RpcServers with the same function name on the same participant. However, RpcServers will only receive calls from 
+remote, not from RpcClients on the same participant.
 
 RpcExchangeFormat
 ~~~~~~~~~~~~~~~~~

@@ -278,11 +278,6 @@ protected:
                 while (std::none_of(participant.dataPublishers.begin(), participant.dataPublishers.end(),
                                    [](const DataPublisherInfo& dp) { return dp.allSent; }))
                 {
-                    // NB: For async, the position of the sleep (before or after publishTask) is critical:
-                    //  Before: Allows the discovery to complete and the subscriber gets the first message
-                    //  After:  The first message might get lost without history
-                    // No way around that without counterpart discovery.
-                    std::this_thread::sleep_for(asyncDelayBetweenPublication);
                     publishTask();
                 }
                 participant.allSentPromise.set_value();
@@ -724,6 +719,47 @@ TEST_F(DataPubSubITest, test_1pub_1sub_largemsg_sync_vasio)
     ShutdownSystem();
 }
 
+// Two publishers/subscribers with same topic on one participant
+TEST_F(DataPubSubITest, test_1pub_1sub_sametopic_sync_vasio)
+{
+    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+
+    const uint32_t numMsgToPublish = 3;
+    const uint32_t numMsgToReceive = numMsgToPublish * 2;
+    const size_t messageSize = 3;
+    const bool sync = true;
+
+    std::vector<PublisherParticipant> publishers;
+    std::vector<SubscriberParticipant> subscribers;
+
+    publishers.push_back(
+        {"Pub1",
+         {{"TopicA", "A", {}, 0, messageSize, numMsgToPublish}, {"TopicA", "A", {}, 0, messageSize, numMsgToPublish}}});
+
+    std::vector<std::vector<uint8_t>> expectedDataUnordered;
+    for (uint32_t d = 0; d < numMsgToPublish; d++)
+    {
+        expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
+        expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
+    }
+    subscribers.push_back({"Sub1",
+                           {{"TopicA", "A", {}, messageSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}},
+                            {"TopicA", "A", {}, messageSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}}}});
+
+    SetupSystem(domainId, sync, publishers, subscribers);
+
+    RunSubscribers(subscribers, domainId, sync);
+    RunPublishers(publishers, domainId, sync);
+
+    WaitForAllDiscoveredAndStart(subscribers, publishers);
+
+    StopSimOnAllSentAndReceived(publishers, subscribers, sync);
+
+    JoinPubSubThreads();
+
+    ShutdownSystem();
+}
+
 // 100 topics on one publisher/subscriber participant
 TEST_F(DataPubSubITest, test_1pub_1sub_100topics_sync_vasio)
 {
@@ -1138,6 +1174,46 @@ TEST_F(DataPubSubITest, test_1pub_1sub_async_history_vasio)
 
     ShutdownSystem();
 }
+
+// Async with history and specific data handler
+TEST_F(DataPubSubITest, test_1pub_1sub_async_history_specifichandler_vasio)
+{
+    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+
+    const uint32_t numMsgToPublish = 1;
+    const uint32_t numMsgToReceive = numMsgToPublish;
+    const size_t messageSize = 3;
+    const bool sync = false;
+
+    std::vector<PublisherParticipant> publishers;
+    std::vector<SubscriberParticipant> subscribers;
+    publishers.push_back({"Pub1", {{"TopicA", "A", {}, 1, messageSize, numMsgToPublish}}});
+
+    std::vector<SpecificDataHandlerInfo> specificDataHandlers;
+    specificDataHandlers.push_back({"A", {}});
+    subscribers.push_back({"Sub1", {{"TopicA", "A", {}, messageSize, numMsgToReceive, 1, {}, specificDataHandlers}}});
+
+    SetupSystem(domainId, sync, publishers, subscribers);
+
+    RunPublishers(publishers, domainId, sync);
+    for (auto& p : publishers)
+    {
+        p.readyToStart.set_value();
+        auto futureStatus = p.allSentPromise.get_future().wait_for(communicationTimeout);
+        EXPECT_EQ(futureStatus, std::future_status::ready)
+            << "Test Failure: Awaiting transmission timed out on publisher";
+    }
+    RunSubscribers(subscribers, domainId, sync);
+    for (auto& s : subscribers)
+    {
+        s.readyToStart.set_value();
+    }
+
+    JoinPubSubThreads();
+
+    ShutdownSystem();
+}
+
 #endif
 
 } // anonymous namespace

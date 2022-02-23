@@ -61,7 +61,6 @@ ib_ReturnCode ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_S
     ASSERT_VALID_OUT_PARAMETER(outSubscriber);
     ASSERT_VALID_POINTER_PARAMETER(participant);
     ASSERT_VALID_POINTER_PARAMETER(topic);
-    ASSERT_VALID_HANDLER_PARAMETER(defaultDataHandler);
     ASSERT_VALID_POINTER_PARAMETER(dataExchangeFormat);
     ASSERT_VALID_HANDLER_PARAMETER(newDataSourceHandler);
     CAPI_ENTER

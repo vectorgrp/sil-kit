@@ -228,11 +228,6 @@ TEST_F(CapiDataTest, data_subscriber_bad_parameters)
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
     returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_SimulationParticipant*)&mockSimulationParticipant, "topic",
-                                           &dataExchangeFormat, labelList, dummyContextPtr, nullptr,
-                                           dummyContextPtr, &NewDataSourceHandler);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
-    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_SimulationParticipant*)&mockSimulationParticipant, "topic",
                                            &dataExchangeFormat, labelList, dummyContextPtr,
                                            &DefaultDataHandler, dummyContextPtr, nullptr);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
