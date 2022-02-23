@@ -112,7 +112,7 @@ ib_ReturnCode ib_Ethernet_Controller_RegisterFrameAckHandler(ib_Ethernet_Control
   {
     auto cppController = reinterpret_cast<ib::sim::eth::IEthController*>(controller);
     cppController->RegisterMessageAckHandler(
-      [handler, context, controller](ib::sim::eth::IEthController* cppController, const ib::sim::eth::EthTransmitAcknowledge& ack)
+      [handler, context, controller](ib::sim::eth::IEthController* , const ib::sim::eth::EthTransmitAcknowledge& ack)
       {
         std::unique_lock<std::mutex> lock(pendingEthernetTransmits.mutex);
 
@@ -161,7 +161,7 @@ ib_ReturnCode ib_Ethernet_Controller_RegisterStateChangedHandler(ib_Ethernet_Con
   {
     auto cppController = reinterpret_cast<ib::sim::eth::IEthController*>(controller);
     cppController->RegisterStateChangedHandler(
-      [handler, context, controller](ib::sim::eth::IEthController* cppController, const ib::sim::eth::EthState& state)
+      [handler, context, controller](ib::sim::eth::IEthController* , const ib::sim::eth::EthState& state)
       {
         ib_Ethernet_State cstate = (ib_Ethernet_State)state;
         handler(context, controller, cstate);
@@ -179,7 +179,7 @@ ib_ReturnCode ib_Ethernet_Controller_RegisterBitRateChangedHandler(ib_Ethernet_C
   {
     auto cppController = reinterpret_cast<ib::sim::eth::IEthController*>(controller);
     cppController->RegisterBitRateChangedHandler(
-      [handler, context, controller](ib::sim::eth::IEthController* cppController, const uint32_t& bitrate)
+      [handler, context, controller](ib::sim::eth::IEthController* , const uint32_t& bitrate)
       {
           handler(context, controller, bitrate);
       });

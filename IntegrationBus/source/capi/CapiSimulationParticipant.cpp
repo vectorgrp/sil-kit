@@ -226,7 +226,7 @@ ib_ReturnCode ib_SimulationParticipant_SetSimulationTask(ib_SimulationParticipan
     auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
     auto* participantController = comAdapter->GetParticipantController();
     participantController->SetSimulationTask(
-      [handler, context, participant](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+      [handler, context, participant](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
           handler(context, participant, static_cast<ib_NanosecondsTime>(now.count()));
       });
     return ib_ReturnCode_SUCCESS;
@@ -243,7 +243,7 @@ ib_ReturnCode ib_SimulationParticipant_SetSimulationTaskAsync(ib_SimulationParti
     auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
     auto* participantController = comAdapter->GetParticipantController();
     participantController->SetSimulationTaskAsync(
-      [handler, context, participant](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+      [handler, context, participant](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
           handler(context, participant, static_cast<ib_NanosecondsTime>(now.count()));
       });
     return ib_ReturnCode_SUCCESS;

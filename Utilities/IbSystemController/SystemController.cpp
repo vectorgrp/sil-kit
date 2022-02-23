@@ -89,6 +89,9 @@ public:
         case SystemState::Shutdown:
             _shutdownPromise.set_value(true);
             return;
+        default:
+            //not handled
+            break;
         }
     }
 
@@ -105,6 +108,10 @@ public:
                 std::cout << "Detected voluntary stop by participant " << newStatus.participantName << std::endl;
                 Stop();
             }
+            break;
+        default:
+            // not handled
+            break;
         }
     }
 

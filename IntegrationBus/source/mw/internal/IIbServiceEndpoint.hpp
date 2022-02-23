@@ -46,7 +46,7 @@ inline auto from_endpointAddress(const EndpointAddress& epa) -> ServiceDescripto
 {
     ServiceDescriptor endpoint{};
     endpoint.SetParticipantName(std::to_string(epa.participant));
-    endpoint.SetServiceName(std::to_string(epa.endpoint));
+    endpoint.SetServiceName(std::to_string((unsigned int)epa.endpoint));
     endpoint.SetServiceId(epa.endpoint);
     endpoint.SetNetworkName("generated");
     return endpoint;

@@ -147,7 +147,7 @@ std::string to_string(ControllerStatus status)
         return "SleepPending";
     }
     throw ib::type_conversion_error{};
-};
+}
 
 
 std::string to_string(const Frame& frame)

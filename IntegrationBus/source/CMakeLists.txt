@@ -59,6 +59,8 @@ add_library(IntegrationBus ${ibLibType}
     IbForceIncludes.cpp
 )
 
+ib_enable_warnings(IntegrationBus)
+
 if(IB_BUILD_STATIC)
     target_compile_definitions(IntegrationBus PUBLIC -D IB_BUILD_STATIC=1)
     target_compile_definitions(IntegrationBus PUBLIC -D CIntegrationBusAPI_STATIC=1)

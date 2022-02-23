@@ -349,7 +349,7 @@ std::ostream& operator<<(std::ostream& out, const CycleStart& cycleStart)
         << "fr::CycleStart{t=" << timestamp.count()
         << "ms, cycleCounter=" << static_cast<uint32_t>(cycleStart.cycleCounter)
         << "}";
-};
+}
 
 std::ostream& operator<<(std::ostream& out, const FrMessage& msg)
 {

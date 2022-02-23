@@ -77,7 +77,7 @@ ib_ReturnCode ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_S
             uint8_t* payloadPointer = NULL;
             if (data.size() > 0)
             {
-                payloadPointer = (uint8_t* const) & (data[0]);
+                payloadPointer = (uint8_t*) &(data[0]);
             }
             const ib_ByteVector ccdata{payloadPointer, data.size()};
             defaultDataHandler(defaultDataHandlerContext, *outSubscriber, &ccdata);
@@ -116,7 +116,7 @@ ib_ReturnCode ib_Data_Subscriber_SetDefaultReceiveDataHandler(ib_Data_Subscriber
                 uint8_t* payloadPointer = NULL;
                 if (data.size() > 0)
                 {
-                    payloadPointer = (uint8_t* const) & (data[0]);
+                    payloadPointer = (uint8_t*) &(data[0]);
                 }
                 const ib_ByteVector ccdata{payloadPointer, data.size()};
                 dataHandler(context, self, &ccdata);
@@ -146,7 +146,7 @@ ib_ReturnCode ib_Data_Subscriber_RegisterSpecificDataHandler(ib_Data_Subscriber*
                 uint8_t* payloadPointer = NULL;
                 if (data.size() > 0)
                 {
-                    payloadPointer = (uint8_t* const) & (data[0]);
+                    payloadPointer = (uint8_t* ) &(data[0]);
                 }
                 const ib_ByteVector ccdata{payloadPointer, data.size()};
                 dataHandler(context, self, &ccdata);

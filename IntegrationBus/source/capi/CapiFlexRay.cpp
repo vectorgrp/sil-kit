@@ -150,7 +150,7 @@ static void assign(ib_FlexRay_ControllerConfig** config, const ib::sim::fr::Cont
   assign(&(*config)->clusterParams, cppConfig.clusterParams);
   assign(&(*config)->nodeParams, cppConfig.nodeParams);
 
-  for (int i = 0;i < cppConfig.bufferConfigs.size(); i++)
+  for (size_t i = 0;i < cppConfig.bufferConfigs.size(); i++)
   {
     ib_FlexRay_TxBufferConfig txBufferConfig;
     assign(&txBufferConfig, cppConfig.bufferConfigs[i]);
@@ -163,7 +163,7 @@ static void assign(ib_FlexRay_ControllerConfig** config, const ib::cfg::FlexrayC
   assign(&(*config)->clusterParams, cppConfig.clusterParameters);
   assign(&(*config)->nodeParams, cppConfig.nodeParameters);
   (*config)->numBufferConfigs = 0;
-  for (int i = 0;i < cppConfig.txBufferConfigs.size(); i++)
+  for (size_t i = 0;i < cppConfig.txBufferConfigs.size(); i++)
   {
     ib_FlexRay_TxBufferConfig txBufferConfig;
     assign(&txBufferConfig, cppConfig.txBufferConfigs[i]);

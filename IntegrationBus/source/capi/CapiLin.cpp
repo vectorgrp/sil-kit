@@ -50,7 +50,6 @@ ib_ReturnCode ib_Lin_Controller_Create(ib_Lin_Controller** outLinController, ib_
     ASSERT_VALID_POINTER_PARAMETER(network);
     CAPI_ENTER
     {
-        std::string name(name);
         auto        comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
         auto        cppLinController = comAdapter->CreateLinController(name, network);
         if (cppLinController == nullptr)
