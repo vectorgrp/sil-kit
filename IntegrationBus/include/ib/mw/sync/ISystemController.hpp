@@ -105,7 +105,10 @@ public:
     */
     virtual void ExecuteColdswap() const = 0;
 
-    /* brief Set the names of all synchronized participants */
+    /*! \brief Set the names of all synchronized participants
+    *
+    *  Set the list of synchronized participant.
+    */
     virtual void SetRequiredParticipants(const std::vector<std::string>& participantNames) = 0;
 };
 

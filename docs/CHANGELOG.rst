@@ -5,6 +5,135 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.7.0] - unreleased
+--------------------------------
+
+Changed
+~~~~~~~
+
+.. admonition:: Note: the IntegrationBus configuration and command line usage changed!
+
+   The old simulation setup based configuration mechanism was replaced by a 
+   dynamic configuration:
+   The configuration file syntax changed and the utility command arguments changed.
+   **Please note, the documentation is not yet updated to reflect all changes.**
+
+- Switched to dynamic configuration concept: a simulation setup description is no
+  longer necessary for running a simulation.
+  All participants announce and register their services upon connecting to the registry.
+
+    - Removed support of old config format from public includes ``ib/cfg/Config.hpp``
+
+    - Removed CreateComAdapter (use CreateSimulationParticipant instead)
+
+    + old:
+
+    .. code-block:: c++
+
+       auto comAdapter = ib::CreateComAdapter(config, "ParticipantName", domainId);
+
+    + new:
+
+    .. code-block:: c++
+
+       auto participant = ib::CreateSimulationParticipant(config, "ParticipantName", domainId, true);
+
+        
+    - CreateSimulationParticipant takes the new configuration as first argument.
+      To configure a synchronized participant, set the fourth argument to `true`.
+    - Demos: 
+        - Removed demos CanDemoNoSync, DynamicConfig, TickTickDone, GenericMessage, SimulationControl, SimulationControlNonBlocking as they are outdated
+        - Updated remaining demos to use CreateSimulationParticipant and updated the configuration files.
+    - Startup: 
+        - IbSystemController (reference implementation) does not take JSON file as first argument anymore and takes all expected synchronized participants as command line arguments.
+
+            .. code-block:: sh
+
+             .\IbSystemController.exe 42 CanWriter CanReader
+            
+    - SystemController API:
+      The system controller now expects a complete list of synchronized participants for proper working:
+    
+     :cpp:func:`ib::mw::sync::ISystemController::SetRequiredParticipants()`
+        
+
+
+.. admonition:: Note: the VIBE Network Simulator configuration format has changed!
+
+  The format of the Network Simulator configuration has changed. Refer to the
+  sample configuration files distributed with the VIBE-NetworkSimulator package.
+
+
+
+- The network simulator's configuration was changed.
+  Please note, that the documentation does not yet reflect these changes.
+  The new configuration format resembles the ``NetworkSimulator`` block of the legacy config format but is stripped down to the minimum:
+  it contains blocks for ``Switches`` and ``SimulatedNetworks`` (which were previously called ``SimulatedLinks``):
+
+  + Sample of the new Network Simulator format:
+    
+    .. code-block:: javascript
+
+        {
+            "SchemaVersion": "1",
+            "Description": "Small sample config with Link names from the VIB Demos",
+            "Switches": [
+                {
+                    "Name": "FrontSwitch",
+                    "Ports": [
+                        {
+                            "Name": "Port0",
+                            "VlanIds": [1],
+                            "Network": "FS-Port0"
+                        },
+                        {
+                            "Name": "Port1",
+                            "VlanIds": [1],
+                            "Network": "FS-Port1"
+                        }
+                    ]
+                }
+            ],
+            "SimulatedNetworks": [
+                {
+                    "Name": "CAN1",
+                    "Type": "CAN"
+                },
+                {
+                    "Name": "LIN1",
+                    "Type": "LIN"
+                },
+                {
+                    "Name": "FlexRay1",
+                    "Type": "FlexRay"
+                },
+                {
+                    "Name": "ETH1",
+                    "Type": "Ethernet"
+                },
+                {
+                    "Name": "FS-Port0",
+                    "Type": "Ethernet"
+                },
+                {
+                    "Name": "FS-Port1",
+                    "Type": "Ethernet"
+                }
+            ]
+        }
+
+  The Network Simulator is shipped with two sample configuration files and
+  the process invocation is the same: ``VIBE-NetworkSimulator ParticipantName path/to/configFile``
+
+Compatibility with 3.6.3
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Note: The versions from 3.6.3 up to 3.6.16 changed a lot of key APIs and network compatibilties.
+
+- Application binary interface (ABI): No 
+- Application software interface (API): No
+- Middleware network protocol (VAsio): No
+
+
 [3.6.3] - 2022-01
 --------------------------------
 
