@@ -41,7 +41,7 @@ def isClangBuild(label) {
 
 def setBuildRetention(bi) {
     if(gitBranch == 'master' || gitBranch == 'origin/master') {
-        bi.retention(maxBuilds: 20, deleteBuildArtifacts: true, async: true)
+        bi.retention(maxBuilds: 40, deleteBuildArtifacts: true, async: true)
     } else {
         bi.retention(maxBuilds: 2, maxDays: 50, deleteBuildArtifacts: true, async: true)
     }
