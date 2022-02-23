@@ -7,5 +7,5 @@ target_sources(IbDemoDataMessage
 
 make_ib_demo(IbDemoDataMessageExt DataMessageDemoExt.cpp)
 target_sources(IbDemoDataMessageExt
-    PRIVATE IbConfig_DemoDataMessageExt.json
+    PRIVATE IbConfig_DemoDataMessage.json
 )

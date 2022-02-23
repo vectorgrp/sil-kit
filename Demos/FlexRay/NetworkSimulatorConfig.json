@@ -1,0 +1,10 @@
+{
+  "SchemaVersion": "1",
+  "Description": "VIBE-Networksimulator configuration for FlexRay Demo",
+  "SimulatedNetworks": [
+    {
+      "Name": "FlexRay1",
+      "Type": "FlexRay"
+    }
+  ]
+}

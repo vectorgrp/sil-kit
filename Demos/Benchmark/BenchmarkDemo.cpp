@@ -332,7 +332,7 @@ void ParticipantsThread(
 **************************************************************************************************/
 int main(int argc, char** argv)
 {
-    auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile("");
+    auto participantConfiguration = ib::cfg::ParticipantConfigurationFromString("{}");
     BenchmarkConfig benchmark;
     if (!Parse(argc, argv, benchmark) || !Validate(benchmark))
     {

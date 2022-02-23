@@ -1,5 +1,5 @@
 {
-  "Description": "Sample Configuration for Data Messages",
+  "Description": "Sample configuration for FlexRay",
 
   "Logging": {
     "Sinks": [

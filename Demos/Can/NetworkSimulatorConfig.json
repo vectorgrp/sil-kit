@@ -1,0 +1,10 @@
+{
+  "SchemaVersion": "1",
+  "Description": "VIBE-Networksimulator configuration for CAN Demo",
+  "SimulatedNetworks": [
+    {
+      "Name": "CAN1",
+      "Type": "CAN"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "SchemaVersion": "1",
+  "Description": "VIBE-Networksimulator configuration for Ethernet Demo",
+  "Switches": [
+    {
+      "Name": "FrontSwitch",
+      "Ports": [
+        {
+          "Name": "Port0",
+          "VlanIds": [1],
+          "Network": "FS-Port0"
+        },
+        {
+          "Name": "Port1",
+          "VlanIds": [1],
+          "Network": "FS-Port1"
+        }
+      ]
+    }
+  ],
+  "SimulatedNetworks": [
+    {
+      "Name": "ETH0",
+      "Type": "Ethernet"
+    },
+    {
+      "Name": "FS-Port0",
+      "Type": "Ethernet"
+    },
+    {
+      "Name": "FS-Port1",
+      "Type": "Ethernet"
+    }
+  ]
+}

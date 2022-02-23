@@ -1,0 +1,10 @@
+{
+  "SchemaVersion": "1",
+  "Description": "VIBE-Networksimulator configuration for LIN Demo",
+  "SimulatedNetworks": [
+    {
+      "Name": "LIN1",
+      "Type": "LIN"
+    }
+  ]
+}
