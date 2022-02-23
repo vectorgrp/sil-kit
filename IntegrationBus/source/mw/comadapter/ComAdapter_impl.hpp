@@ -243,6 +243,11 @@ auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonical
     if (controllerIter != canControllers.end())
     {
         controllerConfig = *controllerIter;
+        if (controllerConfig.network != networkName)
+        {
+            PrintWrongNetworkNameForControllerWarning(canonicalName, networkName, controllerConfig.network,
+                                                      ib::cfg::v1::datatypes::NetworkType::CAN);
+        }
     }
     else
     {
@@ -363,7 +368,7 @@ auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonical
         if (controllerConfig.network != networkName)
         {
             PrintWrongNetworkNameForControllerWarning(canonicalName, networkName, controllerConfig.network,
-                                                      ib::cfg::v1::datatypes::NetworkType::FlexRay);
+                                                      ib::cfg::v1::datatypes::NetworkType::LIN);
         }
     }
     else
