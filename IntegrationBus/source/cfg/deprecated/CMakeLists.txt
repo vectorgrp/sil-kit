@@ -2,48 +2,8 @@
 add_library(IbConfig_deprecated STATIC
     Config.cpp
     Config.hpp
-    ConfigBuilder.cpp
-    ConfigBuilder.hpp
-    ControllerBuilder.cpp
-    LoggerBuilder.hpp
-    LoggerBuilder.cpp
-    SinkBuilder.hpp
-    SinkBuilder.cpp
-    GenericPortBuilder.cpp
-    GenericPortBuilder.hpp
-    DataPortBuilder.cpp
-    DataPortBuilder.hpp
-    RpcPortBuilder.cpp
-    RpcPortBuilder.hpp
-    LinkBuilder.cpp
-    LinkBuilder.hpp
-    NetworkSimulatorBuilder.cpp
-    ParticipantBuilder.cpp
-    ParticipantBuilder.hpp
-    ParticipantControllerBuilder.cpp
-    ParticipantControllerBuilder.hpp
-    SimulationSetupBuilder.cpp
-    SimulationSetupBuilder.hpp
-    SwitchBuilder.cpp
-    SwitchBuilder.hpp
-    SwitchPortBuilder.cpp
-    SwitchPortBuilder.hpp
-    TimeSyncBuilder.cpp
-    TimeSyncBuilder.hpp
     Validation.hpp
     Validation.cpp
-    VAsioConfigBuilder.cpp
-    VAsioConfigBuilder.hpp
-    VAsioRegistryBuilder.cpp
-    VAsioRegistryBuilder.hpp
-    ExtensionConfigBuilder.cpp
-    ExtensionConfigBuilder.hpp
-    TraceSinkBuilder.hpp
-    TraceSinkBuilder.cpp
-    TraceSourceBuilder.hpp
-    TraceSourceBuilder.cpp
-    ReplayBuilder.hpp
-    ReplayBuilder.cpp
 
     YamlConfig.hpp
     YamlConfig.cpp
@@ -67,7 +27,6 @@ target_include_directories(IbConfig_deprecated
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}
 )
 
-add_vib_test(TestMwCfgConfigBuilder_deprecated SOURCES ConfigBuilderTest.cpp LIBS IbConfig_deprecated)
 add_vib_test(TestMwCfgValidation_deprecated SOURCES ValidationTest.cpp LIBS IbConfig_deprecated)
 add_vib_test(TestIbConfigExample_deprecated SOURCES IbConfigExampleTest.cpp
     LIBS
@@ -87,7 +46,6 @@ add_vib_test(TestMwCfgJsonConfig_deprecated SOURCES JsonConfigTest.cpp LIBS IbCo
 #    WORKING_DIRECTORY $<TARGET_FILE_DIR:IntegrationBus>)
 
 ib_enable_warnings(IbConfig_deprecated)
-ib_enable_warnings(TestMwCfgConfigBuilder_deprecated)
 ib_enable_warnings(TestMwCfgValidation_deprecated)
 ib_enable_warnings(TestMwCfgYamlConfig_deprecated)
 ib_enable_warnings(TestMwCfgJsonConfig_deprecated)

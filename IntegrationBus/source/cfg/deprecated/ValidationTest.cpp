@@ -13,7 +13,6 @@
 #include "ib/util/functional.hpp"
 
 #include "YamlConfig.hpp"
-#include "ib/cfg/ConfigBuilder.hpp"
 
 namespace {
 

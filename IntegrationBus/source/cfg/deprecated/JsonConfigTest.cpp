@@ -9,6 +9,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+// TODO remove completely
+#if (0)
 #include "ib/util/functional.hpp"
 #include "ib/cfg/ConfigBuilder.hpp"
 
@@ -969,3 +971,5 @@ TEST_F(JsonConfigTest, replay_mdfchannel_identification)
     ASSERT_EQ(mdfChannel, mdfChannel2);
 }
 } // anonymous namespace
+
+#endif(0)

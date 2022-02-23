@@ -11,7 +11,6 @@
 #include "ib/sim/can/CanDatatypes.hpp"
 #include "CanControllerFacade.hpp"
 
-#include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/util/functional.hpp"
 

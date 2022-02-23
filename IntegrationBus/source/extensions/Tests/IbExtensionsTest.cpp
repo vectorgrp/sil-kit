@@ -3,7 +3,6 @@
 #include <tuple>
 
 #include "ib/version.hpp"
-#include "ib/cfg/ExtensionConfigBuilder.hpp"
 #include "ParticipantConfiguration.hpp"
 
 #include "gtest/gtest.h"

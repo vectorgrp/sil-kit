@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include "ib/cfg/ConfigBuilder.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
 

@@ -20,19 +20,6 @@ struct TimeSync;
 struct Config;
 class Misconfiguration;
 
-class LoggerBuilder;
-class ParticipantBuilder;
-class ParticipantControllerBuilder;
-template<class ControllerCfg>
-class ControllerBuilder;
-class ConfigBuilder;
-class SimulationSetupBuilder;
-class SwitchBuilder;
-class NetworkSimulatorBuilder;
-class SwitchPortBuilder;
-class SwitchBuilder;
-class TimeSyncBuilder;
-
 } // namespace deprecated
 
 } // namespace cfg
