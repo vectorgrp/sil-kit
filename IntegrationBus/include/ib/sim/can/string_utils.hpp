@@ -51,7 +51,7 @@ std::string to_string(CanControllerState state)
     case CanControllerState::Sleep:
         return "Sleep";
     };
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 std::string to_string(CanErrorState state)
@@ -67,7 +67,7 @@ std::string to_string(CanErrorState state)
     case CanErrorState::BusOff:
         return "BusOff";
     }
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 std::string to_string(CanMessage::CanReceiveFlags flags)
@@ -90,7 +90,7 @@ std::string to_string(CanTransmitStatus status)
     case CanTransmitStatus::DuplicatedTransmitId:
         return "DuplicatedTransmitId";
     }
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 std::string to_string(const CanMessage& msg)

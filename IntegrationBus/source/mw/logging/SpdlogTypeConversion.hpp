@@ -30,7 +30,7 @@ inline auto to_spdlog(Level level) -> spdlog::level::level_enum
     case Level::Off:
         return spdlog::level::off;
     }
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 inline auto from_spdlog(spdlog::level::level_enum level) -> Level
@@ -52,7 +52,7 @@ inline auto from_spdlog(spdlog::level::level_enum level) -> Level
     case spdlog::level::off:
         return Level::Off;
     }
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 inline auto from_spdlog(const spdlog::source_loc& spdLoc) -> SourceLoc

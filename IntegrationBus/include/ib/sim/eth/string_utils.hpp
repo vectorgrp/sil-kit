@@ -55,7 +55,7 @@ std::string to_string(EthTransmitStatus value)
     case  EthTransmitStatus::InvalidFrameFormat:
         return "InvalidFrameFormat";
     };
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 std::string to_string(EthState value)
@@ -69,7 +69,7 @@ std::string to_string(EthState value)
     case EthState::LinkUp:
         return "LinkUp";
     };
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 std::string to_string(EthMode value)
@@ -81,7 +81,7 @@ std::string to_string(EthMode value)
     case EthMode::Active:
         return "Active";
     };
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 std::string to_string(const EthFrame& msg)

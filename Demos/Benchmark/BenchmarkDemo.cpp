@@ -437,7 +437,7 @@ int main(int argc, char** argv)
             }
         }
     }
-    catch (const ib::configuration_error& error)
+    catch (const ib::ConfigurationError& error)
     {
         std::cerr << "Invalid configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

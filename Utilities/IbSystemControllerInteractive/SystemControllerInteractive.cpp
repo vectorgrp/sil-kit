@@ -42,7 +42,7 @@ sync::SystemCommand::Kind ToSystemCommand(const std::string& cmdString)
     else if (cmdString == "ExecuteColdswap")
         return SystemCommand::Kind::ExecuteColdswap;
 
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 void ReportParticipantStatus(const ib::mw::sync::ParticipantStatus& status)
@@ -80,7 +80,7 @@ sync::ParticipantCommand::Kind ToParticipantCommand(const std::string& cmdString
     else if (cmdString == "ReInitialize")
         return ParticipantCommand::Kind::ReInitialize;
 
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 class InteractiveSystemController
@@ -132,7 +132,7 @@ public:
                 SendCommand(systemCommand);
                 continue;
             }
-            catch (const ib::type_conversion_error&)
+            catch (const ib::TypeConversionError&)
             {
                 // pass
             }
@@ -146,7 +146,7 @@ public:
                 SendCommand(participantCommand, participantName);
                 continue;
             }
-            catch (const ib::type_conversion_error&)
+            catch (const ib::TypeConversionError&)
             {
                 // pass
             }
@@ -217,7 +217,7 @@ int main(int argc, char** argv)
         auto configFilename = std::string(argv[1]);
         participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(configFilename);
     }
-    catch (ib::configuration_error& error)
+    catch (ib::ConfigurationError& error)
     {
         std::cerr << "Invalid configuration: " << (&error)->what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

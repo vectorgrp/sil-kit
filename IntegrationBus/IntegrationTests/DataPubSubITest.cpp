@@ -287,7 +287,7 @@ protected:
                 EXPECT_EQ(dp.publishMsgCounter, dp.numMsgToPublish);
             }
         }
-        catch (const ib::configuration_error& error)
+        catch (const ib::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -443,7 +443,7 @@ protected:
                 EXPECT_EQ(ds.receiveMsgCounter, ds.numMsgToReceive);
             }
         }
-        catch (const ib::configuration_error& error)
+        catch (const ib::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -466,7 +466,7 @@ protected:
             registry = ib::extensions::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
             registry->ProvideDomain(domainId);
         }
-        catch (const ib::configuration_error& error)
+        catch (const ib::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -500,7 +500,7 @@ protected:
                     ParticipantStatusHandler(newStatus);
                 });
         }
-        catch (const ib::configuration_error& error)
+        catch (const ib::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -525,7 +525,7 @@ protected:
             }
 
         }
-        catch (const ib::configuration_error& error)
+        catch (const ib::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -549,7 +549,7 @@ protected:
                     [this, &subscriberParticipant, domainId, sync] { SubscriberThread(subscriberParticipant, domainId, sync); });
             }
         }
-        catch (const ib::configuration_error& error)
+        catch (const ib::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;

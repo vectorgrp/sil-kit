@@ -22,18 +22,18 @@ void ValidateTraceSinks(const ib::cfg::v1::datatypes::ParticipantConfiguration& 
     {
         if (sink.name.empty())
         {
-            throw ib::configuration_error{ "On Participant " + configuration.participantName + ": TraceSink \"Name\" must not be empty!" };
+            throw ib::ConfigurationError{ "On Participant " + configuration.participantName + ": TraceSink \"Name\" must not be empty!" };
         }
         if (sink.outputPath.empty())
         {
-            throw ib::configuration_error{ "On Participant " + configuration.participantName + ": TraceSink \"OutputPath\" must not be empty!" };
+            throw ib::ConfigurationError{ "On Participant " + configuration.participantName + ": TraceSink \"OutputPath\" must not be empty!" };
         }
         sinkNames.insert(sink.name);
     }
 
     if (sinkNames.size() != configuration.tracing.traceSinks.size())
     {
-        throw ib::configuration_error{ "TraceSinks must have unique names!" };
+        throw ib::ConfigurationError{ "TraceSinks must have unique names!" };
     }
 
     auto sinkExists = [&sinkNames](const auto& name) -> bool {
@@ -52,12 +52,12 @@ void ValidateTraceSinks(const ib::cfg::v1::datatypes::ParticipantConfiguration& 
                 if (traceSink.empty())
                 {
                     ss << "has an empty string in a  UseTraceSinks field!";
-                    throw ib::configuration_error{ ss.str() };
+                    throw ib::ConfigurationError{ ss.str() };
                 }
                 if (!sinkExists(traceSink))
                 {
                     ss << "has a UseTraceSinks field which refers to a non-existing TraceSink: " << traceSink;
-                    throw ib::configuration_error{ ss.str() };
+                    throw ib::ConfigurationError{ ss.str() };
                 }
             }
         }
@@ -80,18 +80,18 @@ void ValidateTraceSources(const ib::cfg::v1::datatypes::ParticipantConfiguration
     {
         if (source.name.empty())
         {
-            throw ib::configuration_error{ "On Participant " + configuration.participantName + ": TraceSource \"Name\" must not be empty!" };
+            throw ib::ConfigurationError{ "On Participant " + configuration.participantName + ": TraceSource \"Name\" must not be empty!" };
         }
 
         if (source.inputPath.empty())
         {
-            throw ib::configuration_error{ "On Participant " + configuration.participantName + ": TraceSource \"InputPath\" must not be empty!" };
+            throw ib::ConfigurationError{ "On Participant " + configuration.participantName + ": TraceSource \"InputPath\" must not be empty!" };
         }
 
         auto ok = sourceNames.insert(source.name);
         if (!ok.second)
         {
-            throw ib::configuration_error{ "TraceSources must have a unique name: duplicate entry is " + source.name };
+            throw ib::ConfigurationError{ "TraceSources must have a unique name: duplicate entry is " + source.name };
         }
     }
 
@@ -115,7 +115,7 @@ void ValidateTraceSources(const ib::cfg::v1::datatypes::ParticipantConfiguration
             {
                 ss << "has a Replay::UseTraceSource field which refers to a non-existing TraceSource: "
                     << controller.replay.useTraceSource;
-                throw ib::configuration_error{ ss.str() };
+                throw ib::ConfigurationError{ ss.str() };
             }
         }
     };

@@ -93,7 +93,7 @@ auto ConvertFromFile(const std::string& fileName, bool outputAsJson) -> Conversi
         std::ifstream fs(filename);
 
         if (!fs.is_open())
-            throw ib::configuration_error("Invalid IB config filename '" + filename + "'");
+            throw ib::ConfigurationError("Invalid IB config filename '" + filename + "'");
 
         std::stringstream buffer;
         buffer << fs.rdbuf();

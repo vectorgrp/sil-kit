@@ -167,7 +167,7 @@ int main(int argc, char** argv)
         std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
     }
-    catch (const ib::configuration_error& error)
+    catch (const ib::ConfigurationError& error)
     {
         std::cerr << "Invalid configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

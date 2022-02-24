@@ -50,7 +50,7 @@ TEST(TestMwCfgValidation, throw_if_usetracesinks_refers_to_unknown_trace_sink)
     controller.useTraceSinks.push_back("UndefinedSink");
     cfg.ethernetControllers.emplace_back(std::move(controller));
 
-    EXPECT_THROW(Validate(cfg), ib::configuration_error);
+    EXPECT_THROW(Validate(cfg), ib::ConfigurationError);
 }
 
 TEST(TestMwCfgValidation, throw_if_usetracesinks_refers_to_empty_sink_name)
@@ -69,7 +69,7 @@ TEST(TestMwCfgValidation, throw_if_usetracesinks_refers_to_empty_sink_name)
     controller.useTraceSinks.push_back("");
     cfg.ethernetControllers.emplace_back(std::move(controller));
 
-    EXPECT_THROW(Validate(cfg), ib::configuration_error);
+    EXPECT_THROW(Validate(cfg), ib::ConfigurationError);
 }
 
 TEST(TestMwCfgValidation, throw_if_replay_refers_to_unknown_source_name)
@@ -91,7 +91,7 @@ TEST(TestMwCfgValidation, throw_if_replay_refers_to_unknown_source_name)
     controller.replay.direction = Replay::Direction::Send;
     cfg.ethernetControllers.emplace_back(std::move(controller));
 
-    EXPECT_THROW(Validate(cfg), ib::configuration_error);
+    EXPECT_THROW(Validate(cfg), ib::ConfigurationError);
 }
 
 TEST(TestMwCfgValidation, throw_if_tracesink_has_empty_fields)
@@ -115,19 +115,19 @@ TEST(TestMwCfgValidation, throw_if_tracesink_has_empty_fields)
     auto& sourceRef = cfg.tracing.traceSources.at(0);
 
     sourceRef.inputPath = "";
-    EXPECT_THROW(Validate(cfg), ib::configuration_error);
+    EXPECT_THROW(Validate(cfg), ib::ConfigurationError);
 
     sourceRef.inputPath = "SomeFile";
     sourceRef.name = "";
-    EXPECT_THROW(Validate(cfg), ib::configuration_error);
+    EXPECT_THROW(Validate(cfg), ib::ConfigurationError);
 
     auto& sinkRef = cfg.tracing.traceSinks.at(0);
 
     sinkRef.outputPath = "";
-    EXPECT_THROW(Validate(cfg), ib::configuration_error);
+    EXPECT_THROW(Validate(cfg), ib::ConfigurationError);
 
     sinkRef.outputPath = "SomeFile";
     sinkRef.name = "";
-    EXPECT_THROW(Validate(cfg), ib::configuration_error);
+    EXPECT_THROW(Validate(cfg), ib::ConfigurationError);
 }
 } // anonymous namespace

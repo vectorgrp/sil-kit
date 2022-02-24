@@ -277,7 +277,7 @@ auto FindReplayChannel(ib::mw::logging::ILogger* log,
             << to_string(replayConfig.mdfChannel)
             << " found " << channelList.size() << " channels in \"" << replayFile->FilePath() << "\"."
             << " MdfChannel config must yield a unique channel!";
-        throw ib::configuration_error{ msg.str() };
+        throw ib::ConfigurationError{ msg.str() };
     }
 
     if (channelList.size() < 1)
@@ -346,7 +346,7 @@ void ReplayScheduler::ConfigureNetworkSimulators(const cfg::Config& config, cons
         // MdfChannel configuration is not supported on NetSim!
         if (HasMdfChannelSelection(simulator.replay.mdfChannel))
         {
-            throw ib::configuration_error{"Error: MdfChannel selection is not supported for NetworkSimulator replays!"};
+            throw ib::ConfigurationError{"Error: MdfChannel selection is not supported for NetworkSimulator replays!"};
         }
         for (const auto& networkName : simulator.simulatedLinks)
         {
@@ -501,7 +501,7 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
 
                 _replayTasks.emplace_back(std::move(task));
             }
-            catch (const ib::configuration_error& ex)
+            catch (const ib::ConfigurationError& ex)
             {
                 _log->Error("ReplayScheduler: misconfiguration of controller " + controllerConfig.name
                     + ": " + ex.what());

@@ -1069,7 +1069,7 @@ Node Converter::encode(const TraceSink::Type& obj)
         node = "PcapPipe";
         break;
     default:
-        throw configuration_error{ "Unknown TraceSink Type" };
+        throw ConfigurationError{ "Unknown TraceSink Type" };
     }
     return node;
 }
@@ -1135,7 +1135,7 @@ Node Converter::encode(const TraceSource::Type& obj)
         node = "PcapFile";
         break;
     default:
-        throw configuration_error{ "Unknown TraceSource Type" };
+        throw ConfigurationError{ "Unknown TraceSource Type" };
     }
     return node;
 }

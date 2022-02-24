@@ -84,7 +84,7 @@ std::string to_string(ClockPeriod period)
     case ClockPeriod::T50NS:
         return "50ns";
     };
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 std::string to_string(TransmissionMode mode)
@@ -96,7 +96,7 @@ std::string to_string(TransmissionMode mode)
     case TransmissionMode::Continuous:
         return "Continuous";
     };
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
     
 std::string to_string(ChiCommand command)
@@ -116,7 +116,7 @@ std::string to_string(ChiCommand command)
     case ChiCommand::WAKEUP:
         return "WAKEUP";
     };
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
     
 std::string to_string(SymbolPattern pattern)
@@ -147,7 +147,7 @@ std::string to_string(PocState state)
     case PocState::Halt:
         return "Halt";
     }
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 std::string to_string(const Header& header)
@@ -452,7 +452,7 @@ std::ostream& operator<<(std::ostream& out, SlotModeType msg)
         out << "All"; break;
 
     default:
-        throw ib::type_conversion_error{};
+        throw ib::TypeConversionError{};
     }
     return out;
 }
@@ -472,7 +472,7 @@ std::ostream& operator<<(std::ostream& out, ErrorModeType msg)
 
 
     default:
-        throw ib::type_conversion_error{};
+        throw ib::TypeConversionError{};
     }
     return out;
 }
@@ -515,7 +515,7 @@ std::ostream& operator<<(std::ostream& out, StartupStateType msg)
         out << "ExternalStartup"; break;
 
     default:
-        throw ib::type_conversion_error{};
+        throw ib::TypeConversionError{};
     }
 
     return out;
@@ -546,7 +546,7 @@ std::ostream& operator<<(std::ostream& out, WakeupStatusType msg)
     case WakeupStatusType::Transmitted:
         out << "Transmitted"; break;
     default:
-        throw ib::type_conversion_error{};
+        throw ib::TypeConversionError{};
     }
 
     return out;

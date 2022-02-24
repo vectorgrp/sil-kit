@@ -61,7 +61,7 @@ std::string to_string(ChecksumModel model)
     case ChecksumModel::Classic:
         return "Classic";
     }
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 std::string to_string(FrameResponseType responseType)
@@ -75,7 +75,7 @@ std::string to_string(FrameResponseType responseType)
     case FrameResponseType::SlaveToSlave:
         return "SlaveToSlave";
     }
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 std::string to_string(FrameResponseMode responseMode)
@@ -89,7 +89,7 @@ std::string to_string(FrameResponseMode responseMode)
     case FrameResponseMode::TxUnconditional:
         return "TxUnconditional";
     }
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 std::string to_string(FrameStatus frameStatus)
@@ -115,7 +115,7 @@ std::string to_string(FrameStatus frameStatus)
     case FrameStatus::LIN_RX_NO_RESPONSE:
         return "LIN_RX_NO_RESPONSE";
     }
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 std::string to_string(ControllerMode mode)
@@ -129,7 +129,7 @@ std::string to_string(ControllerMode mode)
     case ControllerMode::Slave:
         return "Slave";
     }
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 
@@ -146,7 +146,7 @@ std::string to_string(ControllerStatus status)
     case ControllerStatus::SleepPending:
         return "SleepPending";
     }
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 
@@ -214,7 +214,7 @@ std::ostream& operator<<(std::ostream& out, ChecksumModel model)
     {
         return out << to_string(model);
     }
-    catch (const ib::type_conversion_error&)
+    catch (const ib::TypeConversionError&)
     {
         return out << "ChecksumModel{" << static_cast<uint32_t>(model) << "}";
     }
@@ -225,7 +225,7 @@ std::ostream& operator<<(std::ostream& out, FrameResponseType responseType)
     {
         return out << to_string(responseType);
     }
-    catch (const ib::type_conversion_error&)
+    catch (const ib::TypeConversionError&)
     {
         return out << "FrameResponseType{" << static_cast<uint32_t>(responseType) << "}";
     }
@@ -237,7 +237,7 @@ std::ostream& operator<<(std::ostream& out, FrameResponseMode responseMode)
     {
         return out << to_string(responseMode);
     }
-    catch (const ib::type_conversion_error&)
+    catch (const ib::TypeConversionError&)
     {
         return out << "FrameResponseMode{" << static_cast<uint32_t>(responseMode) << "}";
     }
@@ -249,7 +249,7 @@ std::ostream& operator<<(std::ostream& out, FrameStatus frameStatus)
     {
         return out << to_string(frameStatus);
     }
-    catch (const ib::type_conversion_error&)
+    catch (const ib::TypeConversionError&)
     {
         return out << "FrameStatus{" << static_cast<uint32_t>(frameStatus) << "}";
     }
@@ -261,7 +261,7 @@ std::ostream& operator<<(std::ostream& out, ControllerMode mode)
     {
         return out << to_string(mode);
     }
-    catch (const ib::type_conversion_error&)
+    catch (const ib::TypeConversionError&)
     {
         return out << "ControllerMode{" << static_cast<uint32_t>(mode) << "}";
     }
@@ -273,7 +273,7 @@ std::ostream& operator<<(std::ostream& out, ControllerStatus status)
     {
         return out << to_string(status);
     }
-    catch (const ib::type_conversion_error&)
+    catch (const ib::TypeConversionError&)
     {
         return out << "ControllerStatus{" << static_cast<uint32_t>(status) << "}";
     }

@@ -36,7 +36,7 @@ auto to_yaml(const VibConfigT& vibValue) -> YAML::Node
         std::stringstream ss;
         ss << "YAML Error @ " << ex.mark
             << ": " << ex.msg;
-        throw configuration_error{ ss.str() };
+        throw ConfigurationError{ ss.str() };
     }
 }
 template<typename VibConfigT>
@@ -51,7 +51,7 @@ auto from_yaml(const YAML::Node& node) -> VibConfigT
         std::stringstream ss;
         ss << "YAML Error @ " << ex.mark
             << ": " << ex.msg;
-        throw configuration_error{ ss.str() };
+        throw ConfigurationError{ ss.str() };
     }
 }
 

@@ -102,7 +102,7 @@ protected:
 
 TEST_F(ParticipantConfigurationExamplesITest, DISABLED_throw_if_logging_is_configured_without_filename)
 {
-    EXPECT_THROW(ib::cfg::ParticipantConfigurationFromFile("ParticipantConfiguration_Logging_Without_File.json"), ib::configuration_error);
+    EXPECT_THROW(ib::cfg::ParticipantConfigurationFromFile("ParticipantConfiguration_Logging_Without_File.json"), ib::ConfigurationError);
 }
 
 TEST_F(ParticipantConfigurationExamplesITest, DISABLED_minimal_configuration_file)

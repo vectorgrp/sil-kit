@@ -23,7 +23,7 @@ auto ReadFile(const std::string& filename) -> std::string
     std::ifstream fs(filename);
 
     if (!fs.is_open())
-        throw ib::configuration_error("Invalid configuration filename '" + filename + "'");
+        throw ib::ConfigurationError("Invalid configuration filename '" + filename + "'");
 
     std::stringstream buffer;
     buffer << fs.rdbuf();
@@ -37,7 +37,7 @@ auto Parse(const std::string& text) -> ib::cfg::v1::datatypes::ParticipantConfig
     ib::cfg::YamlValidator validator;
     if (!validator.Validate(text, warnings))
     {
-        throw ib::configuration_error{ "YAML validation returned errors: \n" + warnings.str() };
+        throw ib::ConfigurationError{ "YAML validation returned errors: \n" + warnings.str() };
     }
     if (warnings.str().size() > 0)
     {

@@ -392,7 +392,7 @@ auto ComAdapter<IbConnectionT>::CreateDataPublisher(const std::string& topic,
 {
     if (history > 1)
     {
-        throw ib::configuration_error("DataPublishers do not support history > 1.");
+        throw ib::ConfigurationError("DataPublishers do not support history > 1.");
     }
 
     std::string pubUUID = util::uuid::to_string(util::uuid::generate());
@@ -1300,7 +1300,7 @@ auto ComAdapter<IbConnectionT>::CreateController(const ConfigT& config,
 {
     if (config.name == "")
     {
-        throw ib::configuration_error("Services must have a non-empty name.");
+        throw ib::ConfigurationError("Services must have a non-empty name.");
     }
 
     // If possible, load controller from cache
@@ -1370,7 +1370,7 @@ void ComAdapter<IbConnectionT>::AddTraceSinksToSource(extensions::ITraceMessageS
                 << sinkName;
 
             GetLogger()->Error(ss.str());
-            throw ib::configuration_error(ss.str());
+            throw ib::ConfigurationError(ss.str());
         }
         traceSource->AddSink((*sinkIter).get());
     }

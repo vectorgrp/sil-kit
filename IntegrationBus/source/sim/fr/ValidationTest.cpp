@@ -20,14 +20,14 @@ TEST(TestSimFrValidation, throw_if_gColdstartAttempts_is_out_of_range)
 {
     ClusterParameters clusterParams;
     clusterParams.gColdstartAttempts = 0;
-    EXPECT_THROW(Validate(clusterParams), ib::configuration_error);
+    EXPECT_THROW(Validate(clusterParams), ib::ConfigurationError);
 }
 
 TEST(TestSimFrValidation, throw_if_pAllowHaltDueToClock_is_not_0_or_1)
 {
     NodeParameters nodeParams;
     nodeParams.pAllowHaltDueToClock = 2;
-    EXPECT_THROW(Validate(nodeParams), ib::configuration_error);
+    EXPECT_THROW(Validate(nodeParams), ib::ConfigurationError);
 }
 
 TEST(TestSimFrValidation, valid_cluster_params_lower_boundary_must_not_throw)

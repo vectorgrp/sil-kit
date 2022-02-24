@@ -73,7 +73,7 @@ std::string to_string(ParticipantState state)
     case ParticipantState::Shutdown:
         return "Shutdown";
     }
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
     
 std::string to_string(SystemState state)
@@ -111,7 +111,7 @@ std::string to_string(SystemState state)
     case SystemState::Shutdown:
         return "Shutdown";
     }
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 std::string to_string(ParticipantCommand::Kind command)
@@ -125,7 +125,7 @@ std::string to_string(ParticipantCommand::Kind command)
     case ParticipantCommand::Kind::ReInitialize:
         return "ReInitialize";
     }
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
     
 std::string to_string(SystemCommand::Kind command)
@@ -145,7 +145,7 @@ std::string to_string(SystemCommand::Kind command)
     case SystemCommand::Kind::ExecuteColdswap:
         return "ExecuteColdswap";
     }
-    throw ib::type_conversion_error{};
+    throw ib::TypeConversionError{};
 }
 
 std::string to_string(const ParticipantCommand& command)
@@ -175,7 +175,7 @@ std::ostream& operator<<(std::ostream& out, ParticipantState state)
     {
         return out << to_string(state);
     }
-    catch (const ib::type_conversion_error&)
+    catch (const ib::TypeConversionError&)
     {
         return out << "ParticipantState{" << static_cast<uint32_t>(state) << "}";
     }
@@ -187,7 +187,7 @@ std::ostream& operator<<(std::ostream& out, SystemState state)
     {
         return out << to_string(state);
     }
-    catch (const ib::type_conversion_error&)
+    catch (const ib::TypeConversionError&)
     {
         return out << "SystemState{" << static_cast<uint32_t>(state) << "}";
     }
@@ -199,7 +199,7 @@ std::ostream& operator<<(std::ostream& out, ParticipantCommand::Kind command)
     {
         return out << to_string(command);
     }
-    catch (const ib::type_conversion_error&)
+    catch (const ib::TypeConversionError&)
     {
         return out << "ParticipantCommand::Kind{" << static_cast<uint32_t>(command) << "}";
     }
@@ -211,7 +211,7 @@ std::ostream& operator<<(std::ostream& out, SystemCommand::Kind command)
     {
         return out << to_string(command);
     }
-    catch (const ib::type_conversion_error&)
+    catch (const ib::TypeConversionError&)
     {
         return out << "SystemCommand::Kind{" << static_cast<uint32_t>(command) << "}";
     }

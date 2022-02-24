@@ -154,7 +154,7 @@ auto to_string(TraceSink::Type sinkType) -> std::string
     case TraceSink::Type::Undefined:
         return "Undefined";
     default:
-        throw ib::type_conversion_error{ "Invalid SinkType" };
+        throw ib::TypeConversionError{ "Invalid SinkType" };
     }
 }
 
