@@ -237,7 +237,7 @@ auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonical
     auto& canControllers = _participantConfig->canControllers;
     auto controllerIter =
         std::find_if(canControllers.begin(), canControllers.end(), [&canonicalName, &networkName](auto&& controller) {
-            return controller.name == canonicalName && controller.network == networkName;
+            return controller.name == canonicalName;
         });
     ib::cfg::v1::datatypes::CanController controllerConfig;
     if (controllerIter != canControllers.end())
