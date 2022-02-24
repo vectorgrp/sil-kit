@@ -20,6 +20,7 @@ target_include_directories(IbSimGenericMessage
 target_link_libraries(IbSimGenericMessage
     PRIVATE IbInterface
             IbTracing
+            IbInternal
     INTERFACE IbInternal
 )
 

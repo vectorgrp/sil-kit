@@ -17,6 +17,7 @@ target_include_directories(IbSimCan
 
 target_link_libraries(IbSimCan
     PRIVATE IbInterface
+            IbInternal
             IbTracing
             IbConfiguration
     INTERFACE IbInternal
