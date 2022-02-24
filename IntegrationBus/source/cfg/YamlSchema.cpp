@@ -114,6 +114,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
     YamlSchemaElem ethernetControllers("EthernetControllers",
         {
             {"Name"},
+            {"Network"},
             {"UseTraceSinks"},
             {"MacAddress"},
             {"PcapFile"},
