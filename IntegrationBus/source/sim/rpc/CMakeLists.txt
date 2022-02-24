@@ -21,5 +21,5 @@ target_link_libraries(IbSimRpc
     PRIVATE IbInterface
             IbInternal
             IbUuid
-            IbConfig_deprecated
+            IbConfiguration
 )

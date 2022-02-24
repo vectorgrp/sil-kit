@@ -6,7 +6,6 @@
 #include <cassert>
 #include <future>
 
-#include "ib/cfg/string_utils.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 
@@ -201,7 +200,7 @@ struct ParticipantTimeProvider : public sync::ITimeProvider
 ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, const std::string& name,
                                              bool isSynchronized, const cfg::v1::datatypes::HealthCheck& healthCheckConfig)
     : _comAdapter{comAdapter}
-    , _syncType{ cfg::SyncType::Unsynchronized }
+    , _isSynchronized{isSynchronized}
     , _logger{comAdapter->GetLogger()}
     , _watchDog{ healthCheckConfig }
 {
@@ -226,14 +225,9 @@ ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, co
 
     _status.participantName = name;
 
-    if (isSynchronized)
-    {
-        _syncType = cfg::SyncType::DistributedTimeQuantum;
-    }
-
     try
     {
-        _timeSyncPolicy = MakeTimeSyncPolicy(_syncType);
+        _timeSyncPolicy = MakeTimeSyncPolicy(_isSynchronized);
     }
     catch (const std::exception& e)
     {
@@ -248,7 +242,7 @@ ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, co
 
 void ParticipantController::AddSynchronizedParticipants(const ExpectedParticipants& expectedParticipants)
 {
-    if (_syncType == cfg::SyncType::DistributedTimeQuantum)
+    if (_isSynchronized)
     {
         auto&& nameIter =
             std::find(expectedParticipants.names.begin(), expectedParticipants.names.end(), _status.participantName);
@@ -315,22 +309,16 @@ void ParticipantController::SetPeriod(std::chrono::nanoseconds period)
     _timeSyncPolicy->SetStepDuration(period);
 }
 
-auto ParticipantController::MakeTimeSyncPolicy(cfg::SyncType syncType) -> std::unique_ptr<ParticipantController::ITimeSyncPolicy>
+auto ParticipantController::MakeTimeSyncPolicy(bool isSynchronized)
+    -> std::unique_ptr<ParticipantController::ITimeSyncPolicy>
 {
-    switch (syncType)
+    if (isSynchronized)
     {
-    case cfg::SyncType::DistributedTimeQuantum:
         return std::make_unique<DistributedTimeQuantumPolicy>(*this, _comAdapter);
-    case cfg::SyncType::DiscreteEvent:
-    case cfg::SyncType::TimeQuantum:
-    case cfg::SyncType::DiscreteTime:
-    case cfg::SyncType::DiscreteTimePassive:
-        _logger->Warn("ParticipantController was created with SyncType DistributedTimeQuantum because {} is deprecated", to_string(syncType));
-        return std::make_unique<DistributedTimeQuantumPolicy>(*this, _comAdapter);
-    case cfg::SyncType::Unsynchronized:
+    }
+    else
+    {
         return std::make_unique<UnsynchronizedPolicy>();
-    default:
-        throw ib::cfg::Misconfiguration("Invalid SyncType " + to_string(syncType));
     }
 }
 
@@ -609,7 +597,7 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, con
         return;
     }
 
-    if (_syncType != cfg::SyncType::DistributedTimeQuantum)
+    if (!_isSynchronized)
     {
         return;
     }

@@ -13,15 +13,12 @@
 namespace ib {
 namespace extensions {
 
-auto CreateIbRegistry(ib::cfg::Config config)
+auto CreateIbRegistry(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
     -> std::unique_ptr<IIbRegistry>
 {
-    // Preliminary convert old config
-    ib::cfg::v1::datatypes::Extensions dummyExtensionCfg{config.extensionConfig.searchPathHints};
-    auto dummyCfg = std::make_shared<ib::cfg::v1::datatypes::ParticipantConfiguration>();
-
-    auto& factory = FactorySingleton<IIbRegistryFactory>("vib-registry", dummyExtensionCfg);
-    return factory.Create(std::move(dummyCfg));
+    auto cfg = std::dynamic_pointer_cast<cfg::datatypes::ParticipantConfiguration>(config);
+    auto& factory = FactorySingleton<IIbRegistryFactory>("vib-registry", cfg->extensions);
+    return factory.Create(std::move(cfg));
 }
 
 } // namespace extensions

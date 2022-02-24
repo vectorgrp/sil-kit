@@ -53,7 +53,6 @@ class RpcServerInternal : public IIbToRpcServerInternal,
     CallProcessor _handler;
     IRpcServer* _parent;
 
-    cfg::RpcPort _config{};
     mw::IComAdapterInternal* _comAdapter{nullptr};
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     mw::ServiceDescriptor _serviceDescriptor{};

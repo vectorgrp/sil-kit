@@ -14,7 +14,7 @@ target_sources(IbUtil INTERFACE
 )
 
 target_include_directories(IbUtil
-    INTERFACE .
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
 add_subdirectory(tests)

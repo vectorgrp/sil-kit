@@ -26,7 +26,7 @@ protected:
 // TODO: Fix
 TEST_F(ComAdapterTest, DISABLED_throw_on_empty_participant_name)
 {
-    EXPECT_THROW(CreateNullConnectionComAdapterImpl(ib::cfg::MockParticipantConfiguration(),"", false), ib::cfg::Misconfiguration);
+    EXPECT_THROW(CreateNullConnectionComAdapterImpl(ib::cfg::MockParticipantConfiguration(),"", false), ib::configuration_error);
 }
 
 // TODO: Add test to validate participantName and configured participant name

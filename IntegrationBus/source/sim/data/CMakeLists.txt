@@ -6,7 +6,7 @@ add_library(IbSimDataMessage STATIC
     DataPublisher.cpp
     DataSubscriber.hpp
     DataSubscriber.cpp
-    
+
     DataSubscriberInternal.hpp
     DataSubscriberInternal.cpp
 )
@@ -19,16 +19,16 @@ target_link_libraries(IbSimDataMessage
     PRIVATE IbInterface
             IbSetThreadName
             IbInternal
-            IbConfig_deprecated
+            IbConfiguration
 )
 
 add_vib_test(TestSimDataPublisher 
     SOURCES DataPublisherTest.cpp 
-    LIBS IbSimDataMessage IbConfig_deprecated IbMwMockComAdapter IbInternal
+    LIBS IbSimDataMessage IbMwMockComAdapter IbInternal
 )
 add_vib_test(TestSimDataSubscriber 
     SOURCES DataSubscriberTest.cpp 
-    LIBS IbSimDataMessage IbConfig_deprecated IbMwMockComAdapter IbInternal
+    LIBS IbSimDataMessage IbMwMockComAdapter IbInternal
 )
 add_vib_test(TestDataExchangeFormat 
     SOURCES DataExchangeFormatTest.cpp 

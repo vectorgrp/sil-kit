@@ -64,5 +64,5 @@ endif()
 
 add_vib_test(TestMwLoggingLogger 
     SOURCES LoggerTest.cpp 
-    LIBS IbMwLogging IbConfig_deprecated IbMwMockComAdapter
+    LIBS IbMwLogging IbMwMockComAdapter
 )

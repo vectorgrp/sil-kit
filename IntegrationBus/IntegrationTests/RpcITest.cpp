@@ -11,7 +11,6 @@
 #include "ib/extensions/CreateExtension.hpp"
 
 #include "ib/IntegrationBus.hpp"
-#include "ib/cfg/string_utils.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/sim/all.hpp"
 
@@ -362,7 +361,7 @@ protected:
                 EXPECT_EQ(c.callReturnedSuccessCounter, c.numCallsToReturn);
             }
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -466,7 +465,7 @@ protected:
                 EXPECT_EQ(s.receiveCallCounter, s.numCallsToReceive);
             }
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -485,10 +484,10 @@ protected:
     {
         try
         {
-            registry = ib::extensions::CreateIbRegistry(ib::cfg::Config{});
+            registry = ib::extensions::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
             registry->ProvideDomain(domainId);
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -522,7 +521,7 @@ protected:
                     ParticipantStatusHandler(newStatus);
                 });
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -547,7 +546,7 @@ protected:
             }
 
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -571,7 +570,7 @@ protected:
                     [this, &serverParticipant, domainId, sync] { ServerThread(serverParticipant, domainId, sync); });
             }
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -594,7 +593,7 @@ protected:
     }
 
     void SetupSystem(uint32_t domainId, bool sync, std::vector<ClientParticipant>& clients,
-                     std::vector<ServerParticipant>& servers, Middleware middleware)
+                     std::vector<ServerParticipant>& servers)
     {
         if (sync)
         {
@@ -698,7 +697,6 @@ protected:
 // One client participant, one server participant
 TEST_F(RpcITest, test_1client_1server_sync_vasio)
 {
-    const auto middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numCalls = 3;
@@ -712,7 +710,7 @@ TEST_F(RpcITest, test_1client_1server_sync_vasio)
     clients.push_back({"Client1", {{"TestFuncA", "A", {}, messageSize, numCalls, numCallsToReturn}}, {"TestFuncA"} });
     servers.push_back({"Server1", {{"TestFuncA", "A", {}, messageSize, numCallsToReceive}}});
 
-    SetupSystem(domainId, sync, clients, servers, middleware);
+    SetupSystem(domainId, sync, clients, servers);
 
     RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);
@@ -730,7 +728,6 @@ TEST_F(RpcITest, test_1client_1server_sync_vasio)
 // Large messages
 TEST_F(RpcITest, test_1client_1server_largemsg_sync_vasio)
 {
-    const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numCalls = 3;
@@ -744,7 +741,7 @@ TEST_F(RpcITest, test_1client_1server_largemsg_sync_vasio)
     clients.push_back({"Client1", {{"TestFuncA", "A", {}, messageSize, numCalls, numCallsToReturn}}, {"TestFuncA"} });
     servers.push_back({"Server1", {{"TestFuncA", "A", {}, messageSize, numCallsToReceive}}});
 
-    SetupSystem(domainId, sync, clients, servers, middleware);
+    SetupSystem(domainId, sync, clients, servers);
 
     RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);
@@ -762,7 +759,6 @@ TEST_F(RpcITest, test_1client_1server_largemsg_sync_vasio)
 // 100 functions and one client/server participant
 TEST_F(RpcITest, test_1client_1server_100functions_sync_vasio)
 {
-    const auto middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numCalls = 3;
@@ -790,7 +786,7 @@ TEST_F(RpcITest, test_1client_1server_100functions_sync_vasio)
         servers[0].rpcServers.push_back(std::move(sInfo));
     }
 
-    SetupSystem(domainId, sync, clients, servers, middleware);
+    SetupSystem(domainId, sync, clients, servers);
 
     RunClients(clients, domainId, sync);
     RunServers(servers, domainId, sync);
@@ -808,7 +804,6 @@ TEST_F(RpcITest, test_1client_1server_100functions_sync_vasio)
 // Two clients/servers with same functionName on one participant
 TEST_F(RpcITest, test_1client_1server_samefunctionname_sync_vasio)
 {
-    const auto middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numCalls = 3;
@@ -843,7 +838,7 @@ TEST_F(RpcITest, test_1client_1server_samefunctionname_sync_vasio)
                        {{"TestFuncA", "A", {}, messageSize, numCallsToReceive, expectedDataUnordered},
                         {"TestFuncA", "A", {}, messageSize, numCallsToReceive, expectedDataUnordered}}});
 
-    SetupSystem(domainId, sync, clients, servers, middleware);
+    SetupSystem(domainId, sync, clients, servers);
 
     RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);
@@ -862,7 +857,6 @@ TEST_F(RpcITest, test_1client_1server_samefunctionname_sync_vasio)
 // One client participant, two server participants
 TEST_F(RpcITest, test_1client_2server_sync_vasio)
 {
-    const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numCalls = 3;
@@ -884,7 +878,7 @@ TEST_F(RpcITest, test_1client_2server_sync_vasio)
     servers.push_back({"Server1", {{"TestFuncA", "A", {}, messageSize, numCallsToReceive}}});
     servers.push_back({"Server2", {{"TestFuncA", "A", {}, messageSize, numCallsToReceive}}});
 
-    SetupSystem(domainId, sync, clients, servers, middleware);
+    SetupSystem(domainId, sync, clients, servers);
 
     RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);
@@ -902,7 +896,6 @@ TEST_F(RpcITest, test_1client_2server_sync_vasio)
 // Two client participants, one server participant
 TEST_F(RpcITest, test_2client_1server_sync_vasio)
 {
-    const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numCalls = 3;
@@ -924,7 +917,7 @@ TEST_F(RpcITest, test_2client_1server_sync_vasio)
     }
     servers.push_back({"Server1", {{"TestFuncA", "A", {}, messageSize, numCallsToReceive, expectedDataUnordered}}});
 
-    SetupSystem(domainId, sync, clients, servers, middleware);
+    SetupSystem(domainId, sync, clients, servers);
 
     RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);
@@ -942,7 +935,6 @@ TEST_F(RpcITest, test_2client_1server_sync_vasio)
 // Wrong functionName on server2
 TEST_F(RpcITest, test_1client_2server_wrongFunctionName_sync_vasio)
 {
-    const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numCalls = 3;
@@ -957,7 +949,7 @@ TEST_F(RpcITest, test_1client_2server_wrongFunctionName_sync_vasio)
     servers.push_back({"Server1", {{"TestFuncA", "A", {}, messageSize, numCallsToReceive}}});
     servers.push_back({"Server2", {{"TestFuncB", "A", {}, messageSize, 0}}});
 
-    SetupSystem(domainId, sync, clients, servers, middleware);
+    SetupSystem(domainId, sync, clients, servers);
 
     RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);
@@ -975,7 +967,6 @@ TEST_F(RpcITest, test_1client_2server_wrongFunctionName_sync_vasio)
 // Wrong dataExchangeFormat on server2
 TEST_F(RpcITest, test_1client_1server_wrongDataExchangeFormat_sync_vasio)
 {
-    const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numCalls = 3;
@@ -990,7 +981,7 @@ TEST_F(RpcITest, test_1client_1server_wrongDataExchangeFormat_sync_vasio)
     servers.push_back({"Server1", {{"TestFuncA", "A", {}, messageSize, numCallsToReceive}}});
     servers.push_back({"Server2", {{"TestFuncA", "B", {}, messageSize, 0}}});
 
-    SetupSystem(domainId, sync, clients, servers, middleware);
+    SetupSystem(domainId, sync, clients, servers);
 
     RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);
@@ -1008,7 +999,6 @@ TEST_F(RpcITest, test_1client_1server_wrongDataExchangeFormat_sync_vasio)
 // Wrong labels on server2
 TEST_F(RpcITest, test_1client_1server_wrongLabels_sync_vasio)
 {
-    const auto middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numCalls = 3;
@@ -1024,7 +1014,7 @@ TEST_F(RpcITest, test_1client_1server_wrongLabels_sync_vasio)
     servers.push_back({"Server1", {{"TestFuncA", "A", {{"KeyA", "ValA"}, {"KeyB", "ValB"}}, messageSize, numCallsToReceive}}});
     servers.push_back({"Server2", {{"TestFuncA", "A", {{"KeyC", "ValC"}}, messageSize, 0}}});
 
-    SetupSystem(domainId, sync, clients, servers, middleware);
+    SetupSystem(domainId, sync, clients, servers);
 
     RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);
@@ -1042,7 +1032,6 @@ TEST_F(RpcITest, test_1client_1server_wrongLabels_sync_vasio)
 // Wildcard dataExchangeFormat on server
 TEST_F(RpcITest, test_1client_1server_wildcardDxf_sync_vasio)
 {
-    const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numCalls = 3;
@@ -1056,7 +1045,7 @@ TEST_F(RpcITest, test_1client_1server_wildcardDxf_sync_vasio)
     clients.push_back({"Client1", {{"TestFuncA", "", {}, messageSize, numCalls, numCallsToReturn}}, {"TestFuncA"} });
     servers.push_back({"Server1", {{"TestFuncA", "A", {}, messageSize, numCallsToReceive}}});
 
-    SetupSystem(domainId, sync, clients, servers, middleware);
+    SetupSystem(domainId, sync, clients, servers);
 
     RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);
@@ -1078,7 +1067,6 @@ TEST_F(RpcITest, test_1client_1server_wildcardDxf_sync_vasio)
 // Async: Start servers first, call with delay to ensure reception
 TEST_F(RpcITest, test_1client_1server_async_vasio)
 {
-    const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numCalls = 3;
@@ -1092,7 +1080,7 @@ TEST_F(RpcITest, test_1client_1server_async_vasio)
     clients.push_back({ "Client1", { { "TestFuncA", "A", {}, messageSize, numCalls, numCallsToReturn } }, {"TestFuncA"} });
     servers.push_back({ "Server1", { { "TestFuncA", "A", {}, messageSize, numCallsToReceive } } });
 
-    SetupSystem(domainId, sync, clients, servers, middleware);
+    SetupSystem(domainId, sync, clients, servers);
 
     RunServers(servers, domainId, sync);
     RunClients(clients, domainId, sync);

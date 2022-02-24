@@ -10,7 +10,8 @@ class PcapReplay
     : public extensions::IReplayDataProvider
 {
 public:
-    auto OpenFile(const cfg::Config& config,
+    // TODO adapt once tracing is reinstated 
+    auto OpenFile(/*const cfg::Config& config,*/
         const std::string& filePath,
         ib::mw::logging::ILogger* ibLogger)
         -> std::shared_ptr<extensions::IReplayFile> override;

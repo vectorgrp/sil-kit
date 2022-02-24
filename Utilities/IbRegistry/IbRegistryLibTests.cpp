@@ -161,4 +161,4 @@ TEST_F(IbRegistryLibFixture, DISABLED_ensure_registry_works)
     //}
 }
 
-#endif(0)
+#endif // 0

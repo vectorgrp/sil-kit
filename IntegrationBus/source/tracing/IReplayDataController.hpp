@@ -1,10 +1,10 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
-#include "ib/cfg/Config.hpp"
 #include "ib/extensions/IReplay.hpp"
 #include "ib/mw/EndpointAddress.hpp"
 #include "IIbServiceEndpoint.hpp"
+#include "Configuration.hpp"
 
 #include <limits>
 
@@ -12,10 +12,9 @@ namespace ib {
 namespace tracing {
 
 //!< Helper to check whether Direction `dir` is active in the config 
-inline bool IsReplayEnabledFor(const cfg::Replay& cfg, cfg::Replay::Direction dir)
+inline bool IsReplayEnabledFor(const cfg::datatypes::Replay& cfg, cfg::datatypes::Replay::Direction dir)
 {
-    return cfg.direction == dir
-        || cfg.direction == cfg::Replay::Direction::Both;
+    return cfg.direction == dir || cfg.direction == cfg::datatypes::Replay::Direction::Both;
 }
 
 //!< For replaying in the receive path we use an unlikely EndpointAddress

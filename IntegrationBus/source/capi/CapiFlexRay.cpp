@@ -1,12 +1,15 @@
 /* Copyright (c) Vector Informatik GmbH. All rights reserved. */
 
-#include "ib/capi/IntegrationBus.h"
-#include "ib/IntegrationBus.hpp"
-#include "IComAdapterInternal.hpp"
 #include <string>
 #include <string.h>
-#include "CapiImpl.h"
+
+#include "ib/capi/IntegrationBus.h"
+#include "ib/IntegrationBus.hpp"
 #include "ib/sim/fr/all.hpp"
+
+#include "IComAdapterInternal.hpp"
+#include "CapiImpl.h"
+#include "ParticipantConfiguration.hpp"
 
 static void assign(ib::sim::fr::TxBufferConfig& cppConfig, const ib_FlexRay_TxBufferConfig* config)
 {
@@ -158,19 +161,6 @@ static void assign(ib_FlexRay_ControllerConfig** config, const ib::sim::fr::Cont
   }
 }
 
-static void assign(ib_FlexRay_ControllerConfig** config, const ib::cfg::FlexrayController& cppConfig)
-{
-  assign(&(*config)->clusterParams, cppConfig.clusterParameters);
-  assign(&(*config)->nodeParams, cppConfig.nodeParameters);
-  (*config)->numBufferConfigs = 0;
-  for (size_t i = 0;i < cppConfig.txBufferConfigs.size(); i++)
-  {
-    ib_FlexRay_TxBufferConfig txBufferConfig;
-    assign(&txBufferConfig, cppConfig.txBufferConfigs[i]);
-    ib_FlexRay_Append_TxBufferConfig(config, &txBufferConfig);
-  }
-}
-
 extern "C" {
 
 IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controller** outController, ib_SimulationParticipant* participant, const char* cName, const char* cNetwork)
@@ -201,18 +191,19 @@ ib_ReturnCode ib_FlexRay_Append_TxBufferConfig(ib_FlexRay_ControllerConfig** inO
   ASSERT_VALID_POINTER_PARAMETER(txBufferConfig);
   CAPI_ENTER
   {
-    uint32_t numberOfTxBufferConfigs = (*inOutControllerConfig)->numBufferConfigs + 1;
+    uint32_t numberOfTxBufferConfigurations = (*inOutControllerConfig)->numBufferConfigs + 1;
     // NOTE: ib_FlexRay_ControllerConfig already contains one ib_FlexRay_TxBufferConfig,
     // so add numberOfTxBufferConfigs-1 times sizeof(ib_FlexRay_TxBufferConfig)
-    size_t newSize = sizeof(ib_FlexRay_ControllerConfig) + ((numberOfTxBufferConfigs-1) * sizeof(ib_FlexRay_TxBufferConfig));
+    size_t newSize = sizeof(ib_FlexRay_ControllerConfig)
+                     + ((numberOfTxBufferConfigurations - 1) * sizeof(ib_FlexRay_TxBufferConfig));
     ib_FlexRay_ControllerConfig* result = (ib_FlexRay_ControllerConfig*)realloc(*inOutControllerConfig, newSize);
     if (result == nullptr)
     {
       ib_error_string = std::string("could not realloc controller config to ") + std::to_string(newSize) + " bytes.";
       return ib_ReturnCode_UNSPECIFIEDERROR;
     }
-    memcpy(&result->bufferConfigs[numberOfTxBufferConfigs-1], txBufferConfig, sizeof(ib_FlexRay_TxBufferConfig));
-    result->numBufferConfigs = numberOfTxBufferConfigs;
+    memcpy(&result->bufferConfigs[numberOfTxBufferConfigurations-1], txBufferConfig, sizeof(ib_FlexRay_TxBufferConfig));
+    result->numBufferConfigs = numberOfTxBufferConfigurations;
     *inOutControllerConfig = result;
     return ib_ReturnCode_SUCCESS;
   }

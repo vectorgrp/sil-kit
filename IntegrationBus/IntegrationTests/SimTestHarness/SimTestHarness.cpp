@@ -147,7 +147,7 @@ SimTestHarness::SimTestHarness(const std::vector<std::string>& syncParticipantNa
 {
 
     // start registry
-    _registry = ib::extensions::CreateIbRegistry(ib::cfg::Config{});
+    _registry = ib::extensions::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
     _registry->ProvideDomain(_domainId);
 
     // configure and add participants

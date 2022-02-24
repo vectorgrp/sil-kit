@@ -1,8 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
-#include "Tracing.hpp"
-
 #include "ib/extensions/ITraceMessageSink.hpp"
 
 namespace ib {
@@ -35,9 +33,6 @@ public:
         case TraceMessageType::FrMessage:
             Trace(dir, address, timestamp, message.Get<ib::sim::fr::FrMessage>());
             break;
-        case TraceMessageType::GenericMessage:
-            Trace(dir, address, timestamp, message.Get<ib::sim::generic::GenericMessage>());
-            break;
         default:
             throw std::runtime_error("Invalid replay data");
         }
@@ -51,9 +46,6 @@ public:
 
     MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
         std::chrono::nanoseconds timestamp, const ib::sim::lin::Frame& message));
-
-    MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
-        std::chrono::nanoseconds timestamp, const ib::sim::generic::GenericMessage& message));
 
     MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
         std::chrono::nanoseconds timestamp, const ib::sim::data::DataMessage& message));

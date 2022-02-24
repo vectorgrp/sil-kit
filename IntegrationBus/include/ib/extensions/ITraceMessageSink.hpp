@@ -8,7 +8,6 @@
 #include <tuple>
 
 #include "ib/mw/fwd_decl.hpp"
-#include "ib/cfg/fwd_decl.hpp"
 #include "ib/mw/logging/fwd_decl.hpp"
 
 #include "ib/extensions/TraceMessage.hpp"
@@ -50,7 +49,8 @@ class ITraceMessageSinkFactory
 {
 public:
     virtual ~ITraceMessageSinkFactory() = default;
-    virtual auto Create(cfg::Config config,
+    // TODO
+    virtual auto Create(/*cfg::Config config, */
             ib::mw::logging::ILogger* logger,
             std::string participantName,
             std::string sinkName

@@ -2,7 +2,7 @@
 
 #include "DataSubscriber.hpp"
 #include "IServiceDiscovery.hpp"
-#include "YamlConfig.hpp"
+#include "YamlParser.hpp"
 
 namespace ib {
 namespace sim {

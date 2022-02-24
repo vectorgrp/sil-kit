@@ -10,7 +10,6 @@
 #include "ib/sim/eth/string_utils.hpp"
 #include "ib/sim/fr/string_utils.hpp"
 #include "ib/sim/lin/string_utils.hpp"
-#include "ib/sim/generic/string_utils.hpp"
 #include "ib/sim/data/string_utils.hpp"
 #include "ib/sim/rpc/string_utils.hpp"
 // from internal
@@ -52,7 +51,6 @@ struct is_printable_vib_type<T, std::enable_if_t<is_one_of_v<T,
         ib::mw::sync::ParticipantCommand,
         ib::mw::sync::ParticipantStatus,
         ib::mw::sync::ExpectedParticipants,
-        ib::sim::generic::GenericMessage,
         ib::sim::data::DataMessage,
         ib::sim::rpc::FunctionCall,
         ib::sim::rpc::FunctionCallResponse,

@@ -51,14 +51,12 @@ if(IB_BUILD_COMPONENT_TRACING)
             IbSimCan
             IbSimFlexRay
             IbSimLin
-            IbSimGenericMessage
             IbSimDataMessage
         PRIVATE
             IbSimEthernet
             IbSimCan
             IbSimFlexRay
             IbSimLin
-            IbSimGenericMessage
             IbSimDataMessage
     )
 

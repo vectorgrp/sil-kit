@@ -20,6 +20,7 @@ target_link_libraries(IbSimFlexRay
             IbInternal
             IbMwLogging
             IbTracing
+            IbConfiguration
 )
 
 add_vib_test(TestSimFrValidation SOURCES ValidationTest.cpp LIBS IbSimFlexRay)
@@ -30,4 +31,5 @@ add_vib_test(TestSimFrController
         IbSimFlexRay
         IbMwMockComAdapter
         IbTracing
+        IbConfiguration
 )

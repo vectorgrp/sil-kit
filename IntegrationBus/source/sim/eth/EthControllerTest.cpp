@@ -161,6 +161,7 @@ TEST_F(EthernetControllerTest, trigger_callback_on_receive_ack)
 
 TEST_F(EthernetControllerTest, DISABLED_ethcontroller_uses_tracing)
 {
+#if (0)
     using namespace ib::extensions;
 
     const auto now = 1337ns;
@@ -194,6 +195,7 @@ TEST_F(EthernetControllerTest, DISABLED_ethcontroller_uses_tracing)
     ethMsg.ethFrame = ethFrame;
     ethMsg.timestamp = now;
     ethController.ReceiveIbMessage(&controllerOther, ethMsg);
+#endif // 0
 }
 
 } // anonymous namespace

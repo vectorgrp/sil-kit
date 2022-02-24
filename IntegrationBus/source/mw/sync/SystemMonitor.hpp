@@ -5,7 +5,6 @@
 #include <map>
 #include <memory>
 
-#include "ib/cfg/Config.hpp"
 #include "ib/mw/sync/ISystemMonitor.hpp"
 
 #include "IIbToSystemMonitor.hpp"

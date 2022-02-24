@@ -1,6 +1,5 @@
 #pragma once
 #include <string>
-#include "ib/cfg/Config.hpp"
 
 namespace ib {
 namespace mw {

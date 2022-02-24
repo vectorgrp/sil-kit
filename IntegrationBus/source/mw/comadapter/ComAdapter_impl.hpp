@@ -17,10 +17,6 @@
 #include "LinControllerReplay.hpp"
 #include "LinControllerProxy.hpp"
 #include "LinControllerFacade.hpp"
-#include "GenericPublisher.hpp"
-#include "GenericPublisherReplay.hpp"
-#include "GenericSubscriber.hpp"
-#include "GenericSubscriberReplay.hpp"
 #include "DataPublisher.hpp"
 #include "DataSubscriber.hpp"
 #include "DataSubscriberInternal.hpp"
@@ -37,13 +33,12 @@
 #include "TimeProvider.hpp"
 #include "ServiceDiscovery.hpp"
 #include "ParticipantConfiguration.hpp"
-#include "YamlConfig.hpp"
+#include "YamlParser.hpp"
 
 #include "tuple_tools/bind.hpp"
 #include "tuple_tools/for_each.hpp"
 #include "tuple_tools/predicative_get.hpp"
 
-#include "ib/cfg/string_utils.hpp"
 #include "ib/version.hpp"
 
 #include "ComAdapter.hpp"
@@ -74,28 +69,6 @@ struct IsControllerMap : std::false_type {};
 template<class T, class U>
 struct IsControllerMap<std::unordered_map<std::string, std::unique_ptr<T>>, U> : std::is_base_of<T, U> {};
 
-
-// Helper to find all the NetworkSimulator configuration blocks,
-// which now reside in the participant configuration.
-auto FindNetworkSimulators(const cfg::SimulationSetup& simulationSetup) 
-    -> std::vector<cfg::NetworkSimulator>
-{
-    std::vector<cfg::NetworkSimulator> result;
-    for (const auto& participant : simulationSetup.participants)
-    {
-        std::copy(participant.networkSimulators.begin(), participant.networkSimulators.end(),
-            std::back_inserter(result));
-    }
-    return result;
-}
-
-template<typename ConfigT>
-bool ControllerUsesReplay(const ConfigT& controllerConfig)
-{
-    return controllerConfig.replay.direction != cfg::Replay::Direction::Undefined
-        && !controllerConfig.replay.useTraceSource.empty();
-}
-
 } // namespace anonymous
 
 template <class IbConnectionT>
@@ -117,7 +90,6 @@ ComAdapter<IbConnectionT>::ComAdapter(std::shared_ptr<ib::cfg::IParticipantConfi
                   "VAsio");
 
     //set up default time provider used for controller instantiation
-    // TODO decide upon timePeriod
     _timeProvider = std::make_shared<sync::WallclockProvider>(1ms);
 }
 
@@ -420,7 +392,7 @@ auto ComAdapter<IbConnectionT>::CreateDataPublisher(const std::string& topic,
 {
     if (history > 1)
     {
-        throw cfg::Misconfiguration("DataPublishers do not support history > 1.");
+        throw ib::configuration_error("DataPublishers do not support history > 1.");
     }
 
     std::string pubUUID = util::uuid::to_string(util::uuid::generate());
@@ -503,21 +475,6 @@ auto ComAdapter<IbConnectionT>::CreateDataSubscriber(const std::string& topic,
 
     return controller;
     
-}
-
-
-template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher*
-{
-    _logger->Error("GenericPublisher is deprecated");
-    return nullptr;
-}
-
-template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateGenericSubscriber(const std::string& canonicalName)->sim::generic::IGenericSubscriber*
-{
-    _logger->Error("GenericSubscriber is deprecated");
-    return nullptr;
 }
 
 template <class IbConnectionT>
@@ -717,25 +674,25 @@ auto ComAdapter<IbConnectionT>::GetLogger() -> logging::ILogger*
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::RegisterCanSimulator(can::IIbToCanSimulator* busSim,  const std::vector<std::string>& networkNames)
 {
-    RegisterSimulator(busSim, cfg::Link::Type::CAN, networkNames);
+    RegisterSimulator(busSim, cfg::datatypes::NetworkType::CAN, networkNames);
 }
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim,  const std::vector<std::string>& networkNames)
 {
-    RegisterSimulator(busSim, cfg::Link::Type::Ethernet, networkNames);
+    RegisterSimulator(busSim, cfg::datatypes::NetworkType::Ethernet, networkNames);
 }
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* busSim,  const std::vector<std::string>& networkNames)
 {
-    RegisterSimulator(busSim, cfg::Link::Type::FlexRay, networkNames);
+    RegisterSimulator(busSim, cfg::datatypes::NetworkType::FlexRay, networkNames);
 }
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::RegisterLinSimulator(sim::lin::IIbToLinSimulator* busSim,  const std::vector<std::string>& networkNames)
 {
-    RegisterSimulator(busSim, cfg::Link::Type::LIN, networkNames);
+    RegisterSimulator(busSim, cfg::datatypes::NetworkType::LIN, networkNames);
 }
 
 template <class IbConnectionT>
@@ -916,18 +873,6 @@ template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::FrameResponseUpdate& msg)
 {
     SendIbMessageImpl(from, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::generic::GenericMessage& msg)
-{
-    SendIbMessageImpl(from, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::generic::GenericMessage&& msg)
-{
-    SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
@@ -1211,18 +1156,6 @@ void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, co
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::generic::GenericMessage& msg)
-{
-    SendIbMessageImpl(from, targetParticipantName, msg);
-}
-
-template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::generic::GenericMessage&& msg)
-{
-    SendIbMessageImpl(from, targetParticipantName, std::move(msg));
-}
-
-template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
                                               const sim::data::DataMessage& msg)
 {
@@ -1367,7 +1300,7 @@ auto ComAdapter<IbConnectionT>::CreateController(const ConfigT& config,
 {
     if (config.name == "")
     {
-        throw ib::cfg::Misconfiguration("Services must have a non-empty name.");
+        throw ib::configuration_error("Services must have a non-empty name.");
     }
 
     // If possible, load controller from cache
@@ -1388,7 +1321,7 @@ auto ComAdapter<IbConnectionT>::CreateController(const ConfigT& config,
     descriptor.SetNetworkName(config.network);
     descriptor.SetParticipantName(_participantName);
     descriptor.SetServiceName(config.name);
-    descriptor.SetNetworkType(static_cast<cfg::Link::Type>(config.networkType));
+    descriptor.SetNetworkType(config.networkType);
     descriptor.SetServiceId(localEndpoint);
     descriptor.SetServiceType(serviceType);
     descriptor.SetSupplementalData(std::move(supplementalData));
@@ -1437,7 +1370,7 @@ void ComAdapter<IbConnectionT>::AddTraceSinksToSource(extensions::ITraceMessageS
                 << sinkName;
 
             GetLogger()->Error(ss.str());
-            throw cfg::Misconfiguration(ss.str());
+            throw ib::configuration_error(ss.str());
         }
         traceSource->AddSink((*sinkIter).get());
     }
@@ -1445,9 +1378,8 @@ void ComAdapter<IbConnectionT>::AddTraceSinksToSource(extensions::ITraceMessageS
 
 template <class IbConnectionT>
 template <class IIbToSimulatorT>
-void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim,
-        cfg::Link::Type linkType,
-        const std::vector<std::string>& simulatedNetworkNames)
+void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::datatypes::NetworkType linkType,
+                                                  const std::vector<std::string>& simulatedNetworkNames)
 {
     auto& serviceEndpoint = dynamic_cast<mw::IIbServiceEndpoint&>(*busSim);
     auto oldDescriptor = serviceEndpoint.GetServiceDescriptor();
@@ -1467,38 +1399,6 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim,
         _ibConnection.RegisterIbService(network, unused, busSim);
     }
     serviceEndpoint.SetServiceDescriptor(oldDescriptor); //restore 
-}
-
-template <class IbConnectionT>
-bool ComAdapter<IbConnectionT>::ControllerUsesNetworkSimulator(const std::string& controllerName) const
-{
-    /*
-    auto endpointName = _participantName + "/" + controllerName;
-    const auto networkSimulators = FindNetworkSimulators(_config.simulationSetup);
-  
-    if (networkSimulators.empty())
-    {
-        // no participant with a network simulators present in config
-        return false;
-    }
-
-    for (auto&& link : _config.simulationSetup.links)
-    {
-        auto endpointIter = std::find(link.endpoints.begin(), link.endpoints.end(), endpointName);
-
-        if (endpointIter == link.endpoints.end())
-            continue;
-
-        //check if the link is a network simulator's simulated link
-        for (const auto& simulator : networkSimulators)
-        {
-            auto linkIter = std::find(simulator.simulatedLinks.begin(), simulator.simulatedLinks.end(), link.name);
-            if (linkIter != simulator.simulatedLinks.end())
-                return true;
-        }
-    }
-    */
-    return false;
 }
 
 template <class IbConnectionT>

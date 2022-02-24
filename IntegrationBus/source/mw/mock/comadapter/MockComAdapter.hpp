@@ -16,7 +16,6 @@
 #include "ib/sim/eth/EthDatatypes.hpp"
 #include "ib/sim/fr/FrDatatypes.hpp"
 #include "ib/sim/lin/LinDatatypes.hpp"
-#include "ib/sim/generic/GenericMessageDatatypes.hpp"
 #include "ib/sim/data/DataMessageDatatypes.hpp"
 #include "ib/sim/rpc/RpcDatatypes.hpp"
 
@@ -182,8 +181,6 @@ public:
     {
         return nullptr;
     }
-    auto CreateGenericPublisher(const std::string& /*canonicalName*/) -> sim::generic::IGenericPublisher* override { return nullptr; }
-    auto CreateGenericSubscriber(const std::string& /*canonicalName*/) -> sim::generic::IGenericSubscriber* override { return nullptr; }
     auto CreateDataPublisher(const std::string& /*topic*/,
                              const ib::sim::data::DataExchangeFormat& /*dataExchangeFormat*/,
                              const std::map<std::string, std::string>& /*labels*/, size_t /* history */)
@@ -269,9 +266,6 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::lin::ControllerStatusUpdate& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::lin::WakeupPulse& /*msg*/) override {}
 
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::generic::GenericMessage&& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::generic::GenericMessage& /*msg*/) override {}
-
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::data::DataMessage&& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::data::DataMessage& /*msg*/) override {}
     virtual void SendIbMessage_proxy(const IIbServiceEndpoint* /*from*/, const sim::data::DataMessage& /*msg*/) {}
@@ -329,9 +323,6 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::lin::ControllerStatusUpdate& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::lin::WakeupPulse& /*msg*/) override {}
 
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::generic::GenericMessage&& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::generic::GenericMessage& /*msg*/) override {}
-
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::data::DataMessage& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::data::DataMessage&& /*msg*/) override {}
 
@@ -360,14 +351,12 @@ public:
     auto IsSynchronized() const -> bool override { return _isSynchronized; }
 
     virtual auto GetTimeProvider() -> sync::ITimeProvider* { return &mockTimeProvider; }
-    virtual void SendIbMessage_proxy(const IIbServiceEndpoint* /*from*/, const sim::generic::GenericMessage& /*msg*/) {} //helper for gtest workaround
     void joinIbDomain(uint32_t ) override {}
 
     auto GetServiceDiscovery() -> service::IServiceDiscovery* override { return &mockServiceDiscovery; }
 
     const std::string _name = "MockComAdapter";
     bool _isSynchronized{ false };
-    cfg::Config _config;
     DummyLogger logger;
     MockTimeProvider mockTimeProvider;
     MockParticipantController mockParticipantController;

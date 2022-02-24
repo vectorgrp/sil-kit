@@ -12,7 +12,6 @@ target_link_libraries(IbMwComAdapter
     PUBLIC
         IbInternal
         IbMwLogging
-        IbConfig_deprecated
         IbConfiguration
         IbUtil
         IbSetThreadName
@@ -22,7 +21,6 @@ target_link_libraries(IbMwComAdapter
         IbSimEthernet
         IbSimFlexRay
         IbSimLin
-        IbSimGenericMessage
         IbSimDataMessage
         IbSimRpc
         IbTracing

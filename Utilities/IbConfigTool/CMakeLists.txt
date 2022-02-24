@@ -24,7 +24,6 @@ set_target_properties(${EXE} PROPERTIES
 target_link_libraries(${EXE}
     PRIVATE
     IbInterface
-    IbConfig_deprecated
 )
 install(TARGETS ${EXE}
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}

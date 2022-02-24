@@ -12,8 +12,12 @@ target_include_directories(IbMwService
 
 target_link_libraries(IbMwService
     PUBLIC IbInterface
-    PRIVATE IbInternal
-    INTERFACE IbInternal
+    PRIVATE 
+        IbInternal
+        IbConfiguration
+    INTERFACE 
+        IbInternal
+        IbConfiguration
 )
 
 

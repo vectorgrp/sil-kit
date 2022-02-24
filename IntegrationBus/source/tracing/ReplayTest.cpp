@@ -14,9 +14,9 @@
 #include "Timer.hpp"
 
 #include "EthControllerReplay.hpp"
+#if 0 // Replay is inactive for now
 #include "GenericPublisherReplay.hpp"
 #include "GenericSubscriberReplay.hpp"
-#if 0 // Replay is inactive for now
 namespace {
 
 using namespace ib;

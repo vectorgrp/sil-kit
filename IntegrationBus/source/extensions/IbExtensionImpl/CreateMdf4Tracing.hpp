@@ -5,16 +5,14 @@
 #include <string>
 
 #include "ib/extensions/ITraceMessageSink.hpp"
-#include "ib/mw/logging/ILogger.hpp"
-#include "ib/cfg/fwd_decl.hpp"
-#include "ib/cfg/Config.hpp"
-
 #include "ib/extensions/IReplay.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 
+#include "ParticipantConfiguration.hpp"
 
 namespace ib { namespace extensions {
 
-auto CreateMdf4Tracing(cfg::Config config,
+auto CreateMdf4Tracing(cfg::datatypes::ParticipantConfiguration config,
     ib::mw::logging::ILogger* logger, const std::string& participantName, const std::string& sinkName)
     -> std::unique_ptr<ITraceMessageSink>;
 
@@ -22,7 +20,8 @@ auto CreateMdf4Tracing(cfg::Config config,
 // MDF4 Replay 
 //////////////////////////////////////////////////////////////////////
 
-auto CreateMdf4Replay(cfg::Config config, ib::mw::logging::ILogger* logger, const std::string& fileName)
+auto CreateMdf4Replay(cfg::datatypes::ParticipantConfiguration config, ib::mw::logging::ILogger* logger,
+                      const std::string& fileName)
     -> std::shared_ptr<IReplayFile>;
 
 }//end namespace extensions

@@ -107,7 +107,7 @@ auto CreateTraceMessageSinks(
 }
 
     
-auto CreateReplayFiles(mw::logging::ILogger* logger, const cfg::Config& config,
+auto CreateReplayFiles(mw::logging::ILogger* logger, /*const cfg::Config& config,*/
     const cfg::Participant& participantConfig)
     -> std::map<std::string, std::shared_ptr<extensions::IReplayFile>>
 {
@@ -126,7 +126,7 @@ auto CreateReplayFiles(mw::logging::ILogger* logger, const cfg::Config& config,
         case cfg::TraceSource::Type::PcapFile:
         {
             auto provider = PcapReplay{};
-            auto file = provider.OpenFile(config, source.inputPath, logger);
+            auto file = provider.OpenFile(/*config, */source.inputPath, logger);
             replayFiles.insert({source.name, std::move(file)});
             break;
         }

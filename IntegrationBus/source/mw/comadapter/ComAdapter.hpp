@@ -10,7 +10,6 @@
 #include <map>
 #include <tuple>
 
-#include "ib/cfg/Config.hpp"
 #include "ib/mw/all.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/mw/logging/ILogger.hpp"
@@ -19,8 +18,6 @@
 #include "ib/extensions/ITraceMessageSource.hpp"
 
 #include "ParticipantConfiguration.hpp"
-#include "Tracing.hpp"
-#include "ReplayScheduler.hpp"
 
 // Interfaces relying on IbInternal
 #include "IIbToLogMsgSender.hpp"
@@ -44,9 +41,6 @@
 #include "IIbToFrBusSimulator.hpp"
 #include "IIbToFrControllerProxy.hpp"
 #include "IIbToFrControllerFacade.hpp"
-
-#include "IIbToGenericSubscriber.hpp"
-#include "IIbToGenericPublisher.hpp"
 
 #include "IIbToDataPublisher.hpp"
 #include "IIbToDataSubscriber.hpp"
@@ -111,8 +105,6 @@ public:
     auto CreateLinController(const std::string& canonicalName, const std::string& networkName)
         -> sim::lin::ILinController* override;
     auto CreateLinController(const std::string& canonicalName) -> sim::lin::ILinController* override;
-    auto CreateGenericPublisher(const std::string& canonicalName) -> sim::generic::IGenericPublisher* override;
-    auto CreateGenericSubscriber(const std::string& canonicalName) -> sim::generic::IGenericSubscriber* override;
     auto CreateDataPublisher(const std::string& topic, const sim::data::DataExchangeFormat& dataExchangeFormat, 
         const std::map<std::string, std::string>& labels, size_t history = 0)->sim::data::IDataPublisher* override;
     auto CreateDataSubscriber(const std::string& topic, const sim::data::DataExchangeFormat& dataExchangeFormat, const std::map<std::string, std::string>& labels,
@@ -192,9 +184,6 @@ public:
     void SendIbMessage(const IIbServiceEndpoint*, const logging::LogMsg& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, logging::LogMsg&& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::generic::GenericMessage& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, sim::generic::GenericMessage&& msg) override;
-
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::data::DataMessage& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, sim::data::DataMessage&& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::FunctionCall& msg) override;
@@ -248,9 +237,6 @@ public:
 
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const logging::LogMsg& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, logging::LogMsg&& msg) override;
-
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::generic::GenericMessage& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::generic::GenericMessage&& msg) override;
 
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::DataMessage& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::DataMessage&& msg) override;
@@ -324,9 +310,7 @@ private:
         -> ControllerT*;
 
     template<class IIbToSimulatorT>
-    void RegisterSimulator(IIbToSimulatorT* busSim, cfg::Link::Type linkType, const std::vector<std::string>& simulatedNetworkNames);
-
-    bool ControllerUsesNetworkSimulator(const std::string& controllerName) const;
+    void RegisterSimulator(IIbToSimulatorT* busSim, cfg::datatypes::NetworkType linkType, const std::vector<std::string>& simulatedNetworkNames);
    
     template<class ConfigT>
     void AddTraceSinksToSource(extensions::ITraceMessageSource* controller, ConfigT config);
@@ -356,8 +340,6 @@ private:
         ControllerMap<sim::lin::IIbToLinController>,
         ControllerMap<sim::lin::IIbToLinControllerProxy>,
         ControllerMap<sim::lin::IIbToLinControllerFacade>,
-        ControllerMap<sim::generic::IIbToGenericPublisher>,
-        ControllerMap<sim::generic::IIbToGenericSubscriber>,
         ControllerMap<sim::data::IIbToDataPublisher>,
         ControllerMap<sim::data::IIbToDataSubscriber>,
         ControllerMap<sim::data::IIbToDataSubscriberInternal>,
@@ -381,27 +363,6 @@ private:
 
     IbConnectionT _ibConnection;
 };
-
-inline auto GetParticipantByName(const cfg::Config& config, const std::string& participantName) -> const cfg::Participant&;
-
-// ================================================================================
-//  Inline Implementations
-// ================================================================================
-auto GetParticipantByName(const cfg::Config& config, const std::string& participantName) -> const cfg::Participant&
-{
-    if (participantName.size() == 0)
-    {
-        throw ib::cfg::Misconfiguration{"Cannot create a ComAdapter with empty name."};
-    }
-    try
-    {
-        return get_by_name(config.simulationSetup.participants, participantName);
-    }
-    catch (const ib::cfg::Misconfiguration&)
-    {
-        throw ib::cfg::Misconfiguration{"ParticipantName '" + participantName + "' does not exist in IbConfig{name='" + config.name + "'}"};
-    }
-}
 
 } // mw
 } // namespace ib

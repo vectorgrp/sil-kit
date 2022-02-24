@@ -1,11 +1,12 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "ib/mw/logging/ILogger.hpp"
+
 #include "IServiceDiscovery.hpp"
-#include "YamlConfig.hpp"
 #include "RpcServer.hpp"
 #include "RpcDatatypeUtils.hpp"
 #include "UuidRandom.hpp"
+#include "YamlParser.hpp"
 
 namespace ib {
 namespace sim {

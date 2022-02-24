@@ -383,7 +383,7 @@ int main(int argc, char** argv)
         std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
     }
-    catch (const ib::cfg::Misconfiguration& error)
+    catch (const ib::configuration_error& error)
     {
         std::cerr << "Invalid configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

@@ -14,7 +14,6 @@
 #include "ib/extensions/CreateExtension.hpp"
 
 #include "ib/IntegrationBus.hpp"
-#include "ib/cfg/string_utils.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/sim/all.hpp"
 
@@ -174,7 +173,7 @@ protected:
             auto finalStateFuture = participantController->RunAsync();
             auto finalState = finalStateFuture.get();
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -219,7 +218,7 @@ protected:
             }
 
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -240,10 +239,10 @@ protected:
     {
         try
         {
-            registry = ib::extensions::CreateIbRegistry(ib::cfg::Config{});
+            registry = ib::extensions::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
             registry->ProvideDomain(domainId);
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -277,7 +276,7 @@ protected:
                     ParticipantStatusHandler(newStatus);
                 });
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -302,7 +301,7 @@ protected:
             }
 
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -327,7 +326,7 @@ protected:
                 asyncParticipantThreads.emplace_back([this, &p, domainId] { AsyncParticipantThread(p, domainId); });
             }
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -360,7 +359,7 @@ protected:
         asyncParticipantThreads.clear();
     }
 
-    void SetupSystem(uint32_t domainId, std::vector<TestParticipant>& syncParticipants, std::vector<TestParticipant>& asyncParticipants, Middleware middleware)
+    void SetupSystem(uint32_t domainId, std::vector<TestParticipant>& syncParticipants, std::vector<TestParticipant>& asyncParticipants)
     {
         for (auto&& p : syncParticipants)
         {
@@ -398,7 +397,6 @@ protected:
 TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
 {
     numParticipants = 0;
-    const auto middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     std::vector<TestParticipant> syncParticipants;
@@ -409,7 +407,7 @@ TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
     asyncParticipants.push_back({ "AsyncParticipant1" });
     asyncParticipants.push_back({ "AsyncParticipant2" });
 
-    SetupSystem(domainId, syncParticipants, asyncParticipants, middleware);
+    SetupSystem(domainId, syncParticipants, asyncParticipants);
 
     RunSyncParticipants(syncParticipants, domainId);
 
@@ -470,7 +468,6 @@ TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
 TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToEmpty)
 {
     numParticipants = 0;
-    const auto middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     std::vector<TestParticipant> syncParticipants;
@@ -478,7 +475,7 @@ TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToEmpty)
     asyncParticipants.push_back({ "AsyncParticipant1" });
     asyncParticipants.push_back({ "AsyncParticipant2" });
 
-    SetupSystem(domainId, syncParticipants, asyncParticipants, middleware);
+    SetupSystem(domainId, syncParticipants, asyncParticipants);
 
     for (int i = 0; i < 3; i++)
     {

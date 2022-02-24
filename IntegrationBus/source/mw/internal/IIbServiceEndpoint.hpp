@@ -8,8 +8,8 @@
 #include <vector>
 #include <functional>
 
-#include <ib/cfg/Config.hpp>
-#include <ib/mw/EndpointAddress.hpp>
+#include "ib/mw/EndpointAddress.hpp"
+
 #include "ServiceDescriptor.hpp"
 #include "ServiceConfigKeys.hpp"
 

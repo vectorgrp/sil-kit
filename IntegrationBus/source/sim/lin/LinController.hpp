@@ -19,6 +19,7 @@
 #include "IIbToLinController.hpp"
 #include "IComAdapterInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
+#include "ParticipantConfiguration.hpp"
 
 namespace ib {
 namespace sim {

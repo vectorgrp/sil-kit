@@ -7,8 +7,6 @@
 namespace ib {
 namespace sim {
 
-using LinkId = int16_t;
-
 /*! \brief TODO description
  */
 enum class TransmitDirection : uint8_t

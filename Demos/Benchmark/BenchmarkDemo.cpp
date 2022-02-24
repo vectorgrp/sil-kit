@@ -10,7 +10,6 @@
 #include "ib/IntegrationBus.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/mw/sync/all.hpp"
-#include "ib/cfg/string_utils.hpp"
 
 #include "ib/extensions/CreateExtension.hpp"
 
@@ -355,7 +354,7 @@ int main(int argc, char** argv)
         using namespace ib::extensions;
         std::unique_ptr<IIbRegistry> registry;
         // TODO use new config
-        registry = ib::extensions::CreateIbRegistry(ib::cfg::Config{});
+        registry = ib::extensions::CreateIbRegistry(ib::cfg::ParticipantConfigurationFromString("{}"));
         registry->ProvideDomain(benchmark.domainId);
 
         std::vector<size_t> messageCounts;
@@ -438,7 +437,7 @@ int main(int argc, char** argv)
             }
         }
     }
-    catch (const Misconfiguration& error)
+    catch (const ib::configuration_error& error)
     {
         std::cerr << "Invalid configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

@@ -8,7 +8,6 @@
 #include <functional>
 
 #include "ib/mw/fwd_decl.hpp"
-#include "ib/cfg/fwd_decl.hpp"
 #include "ib/sim/fwd_decl.hpp"
 
 #include "ib/sim/data/DataMessageDatatypes.hpp"
@@ -42,29 +41,23 @@ public:
     //! \brief Create a CAN controller at this IB participant.
     virtual auto CreateCanController(const std::string& canonicalName) -> sim::can::ICanController* = 0;
     //! \brief Create an Ethernet controller at this IB participant.
+
     virtual auto CreateEthController(const std::string& canonicalName, const std::string& networkName)
         -> sim::eth::IEthController* = 0;
     //! \brief Create an Ethernet controller at this IB participant.
     virtual auto CreateEthController(const std::string& canonicalName) -> sim::eth::IEthController* = 0;
     //! \brief Create an FlexRay controller at this IB participant.
+
     virtual auto CreateFlexrayController(const std::string& canonicalName, const std::string& networkName)
         -> sim::fr::IFrController* = 0;
     //! \brief Create an FlexRay controller at this IB participant.
     virtual auto CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFrController* = 0;
     //! \brief Create a LIN controller at this IB participant.
+
     virtual auto CreateLinController(const std::string& canonicalName, const std::string& networkName)
         -> sim::lin::ILinController* = 0;
     //! \brief Create a LIN controller at this IB participant.
     virtual auto CreateLinController(const std::string& canonicalName) -> sim::lin::ILinController* = 0;
-
-    //! \brief Create a generic message publisher at this IB participant.
-    [[deprecated("Use CreateDataPublisher instead")]] 
-    virtual auto CreateGenericPublisher(
-        const std::string& canonicalName) -> sim::generic::IGenericPublisher* = 0;
-    //! \brief Create a generic message subscriber at this IB participant.
-    [[deprecated("Use CreateDataSubscriber instead")]] 
-    virtual auto CreateGenericSubscriber(
-        const std::string& canonicalName) -> sim::generic::IGenericSubscriber* = 0;
 
     //! \brief Create a data publisher at this IB participant.
     virtual auto CreateDataPublisher(const std::string& topic, const sim::data::DataExchangeFormat& dataExchangeFormat,

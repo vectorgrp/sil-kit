@@ -21,7 +21,6 @@
 #include "SerdesMwLogging.hpp"
 #include "SerdesMwSync.hpp"
 #include "SerdesMwVAsio.hpp"
-#include "SerdesSimGeneric.hpp"
 #include "SerdesSimData.hpp"
 #include "SerdesSimRpc.hpp"
 #include "SerdesSimCan.hpp"
@@ -184,7 +183,6 @@ private:
         sync::ParticipantCommand,
         sync::ParticipantStatus,
         sync::ExpectedParticipants,
-        sim::generic::GenericMessage,
         sim::data::DataMessage,
         sim::rpc::FunctionCall,
         sim::rpc::FunctionCallResponse,

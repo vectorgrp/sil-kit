@@ -90,7 +90,7 @@ protected:
         });
     }
 
-    void ExecuteTest(ib::cfg::Middleware middleware)
+    void ExecuteTest()
     {
         const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
         ib::test::SimTestHarness testHarness(syncParticipantNames, domainId);
@@ -133,7 +133,7 @@ protected:
 
 TEST_F(SingleParticipantITest, test_single_participant_vasio)
 {
-    ExecuteTest(ib::cfg::Middleware::VAsio);
+    ExecuteTest();
 }
 
 } // anonymous namespace

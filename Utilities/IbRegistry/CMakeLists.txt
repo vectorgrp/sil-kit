@@ -29,7 +29,6 @@ add_definitions(-DEXPORT_IntegrationBusAPI)
 
 target_link_libraries(IbRegistry
     IbMwVAsio
-    IbConfig_deprecated
     IbConfiguration
 )
 install(TARGETS IbRegistry
@@ -44,7 +43,6 @@ add_library(vib-registry
 )
 target_link_libraries(vib-registry
     PRIVATE
-        IbConfig_deprecated
         IbConfiguration
         IbMwVAsio
         IbVersion

@@ -7,7 +7,7 @@
 
 #include "ib/IbMacros.hpp"
 #include "ib/extensions/IIbRegistry.hpp"
-#include "ib/cfg/Config.hpp"
+#include "ib/cfg/IParticipantConfiguration.hpp"
 
 
 namespace ib { namespace extensions {
@@ -20,7 +20,7 @@ namespace ib { namespace extensions {
 * Throws std::runtime_error on error.
 */
 
-IntegrationBusAPI auto CreateIbRegistry(ib::cfg::Config config)
+IntegrationBusAPI auto CreateIbRegistry(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
     -> std::unique_ptr<IIbRegistry>;
 
 }//end namespace extensions

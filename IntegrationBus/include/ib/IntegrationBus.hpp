@@ -6,7 +6,6 @@
 #include <thread>
 
 #include "ib/IbMacros.hpp"
-#include "ib/cfg/Config.hpp"
 #include "ib/mw/IComAdapter.hpp"
 #include "ib/cfg/IParticipantConfiguration.hpp"
 
@@ -23,7 +22,7 @@ namespace ib {
 * \param domainId ID of the domain
 * \return Instance of the communication adapter
 *
-* \throw ib::cfg::Misconfiguration if the config has errors
+* \throw ib::configuration_error if the config has errors
 * \throw std::runtime_error Parameter participantName does not name
 * a valid participant in the config file.
 * \throw std::exception The participant could not be created.

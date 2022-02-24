@@ -9,7 +9,6 @@
 #include "ib/extensions/CreateExtension.hpp"
 
 #include "ib/IntegrationBus.hpp"
-#include "ib/cfg/string_utils.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/sim/all.hpp"
 
@@ -288,7 +287,7 @@ protected:
                 EXPECT_EQ(dp.publishMsgCounter, dp.numMsgToPublish);
             }
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -444,7 +443,7 @@ protected:
                 EXPECT_EQ(ds.receiveMsgCounter, ds.numMsgToReceive);
             }
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -464,10 +463,10 @@ protected:
         try
         {
             // TODO: Revise
-            registry = ib::extensions::CreateIbRegistry(ib::cfg::Config{});
+            registry = ib::extensions::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
             registry->ProvideDomain(domainId);
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -501,7 +500,7 @@ protected:
                     ParticipantStatusHandler(newStatus);
                 });
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -526,7 +525,7 @@ protected:
             }
 
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -550,7 +549,7 @@ protected:
                     [this, &subscriberParticipant, domainId, sync] { SubscriberThread(subscriberParticipant, domainId, sync); });
             }
         }
-        catch (const Misconfiguration& error)
+        catch (const ib::configuration_error& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -692,7 +691,6 @@ TEST_F(DataPubSubITest, test_1pub_1sub_sync_vasio)
 // Large messages
 TEST_F(DataPubSubITest, test_1pub_1sub_largemsg_sync_vasio)
 {
-    const auto     middleware = Middleware::VAsio;
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
 
     const uint32_t numMsgToPublish = 3;

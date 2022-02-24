@@ -2,7 +2,7 @@
 
 #include "RpcDiscoverer.hpp"
 #include "RpcDatatypeUtils.hpp"
-#include "YamlConfig.hpp"
+#include "YamlParser.hpp"
 
 namespace ib {
 namespace sim {

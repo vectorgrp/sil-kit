@@ -217,7 +217,7 @@ int main(int argc, char** argv)
         auto configFilename = std::string(argv[1]);
         participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(configFilename);
     }
-    catch (ib::cfg::Misconfiguration& error)
+    catch (ib::configuration_error& error)
     {
         std::cerr << "Invalid configuration: " << (&error)->what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

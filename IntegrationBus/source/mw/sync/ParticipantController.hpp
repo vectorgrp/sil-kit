@@ -108,7 +108,7 @@ public:
 private:
     // ----------------------------------------
     // private methods
-    auto MakeTimeSyncPolicy(cfg::SyncType syncType) -> std::unique_ptr<ParticipantController::ITimeSyncPolicy>;
+    auto MakeTimeSyncPolicy(bool isSynchronized) -> std::unique_ptr<ParticipantController::ITimeSyncPolicy>;
     
     void ChangeState(ParticipantState newState, std::string reason);
     void Initialize(const ParticipantCommand& command, std::string reason);
@@ -123,7 +123,7 @@ private:
     // private members
     IComAdapterInternal* _comAdapter{ nullptr };
     mw::ServiceDescriptor _serviceDescriptor{};
-    cfg::SyncType _syncType;
+    bool _isSynchronized;
     logging::ILogger* _logger{ nullptr };
     std::shared_ptr<ParticipantTimeProvider> _timeProvider{ nullptr };
 
@@ -170,8 +170,7 @@ void ParticipantController::SendIbMessage(MsgT&& msg) const
 void ParticipantController::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
-    // TODO change to isSynchronized for syncType
-    if (_syncType == cfg::SyncType::DistributedTimeQuantum)
+    if (_isSynchronized)
     {
         _serviceDescriptor.SetSupplementalDataItem(ib::mw::service::controllerIsSynchronized, std::to_string(true));
     }
