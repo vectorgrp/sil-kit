@@ -155,6 +155,14 @@ add_vib_test(FTestServiceDiscoveryPerf
       IbSimTestHarness
       ${itest_extra_libs}
 )
+add_vib_test(ITestAsyncSimTask
+    SOURCES
+      AsyncSimTaskITest.cpp
+    LIBS
+      IbMwComAdapter
+      IbSimTestHarness
+      ${itest_extra_libs}
+)
 
 # Windows specific tests
 if(WIN32)

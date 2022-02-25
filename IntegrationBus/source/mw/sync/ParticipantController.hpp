@@ -5,6 +5,7 @@
 #include <future>
 #include <tuple>
 #include <map>
+#include <atomic>
 
 #include "ib/mw/sync/IParticipantController.hpp"
 #include "ib/mw/sync/ITimeProvider.hpp"
@@ -153,9 +154,10 @@ private:
     std::promise<void> _pauseDonePromise;
     std::future<void> _pauseDone;
 
-    bool  _waitingForCompletion;
-    std::condition_variable  _waitingForCompletionCv;
-    std::mutex _waitingForCompletionMutex;
+    // NonBlocking mode
+    std::promise<void> _nonBlockingDone;
+    std::future<void> _nonBlockingWait;
+    std::atomic<bool> _isExecutingSimtask{false};
 };
 
 // ================================================================================

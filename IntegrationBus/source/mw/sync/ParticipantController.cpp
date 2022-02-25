@@ -140,15 +140,14 @@ private:
         _myNextTask.timePoint = _currentTask.timePoint + _currentTask.duration;
         if (_blocking)
         {
-          _controller.ExecuteSimTask(_currentTask.timePoint, _currentTask.duration);
-          _controller.AwaitNotPaused();
-          RequestNextStep();
+            _controller.ExecuteSimTask(_currentTask.timePoint, _currentTask.duration);
+            _controller.AwaitNotPaused();
+            RequestNextStep();
         }
         else
         {
-          _controller.ExecuteSimTaskNonBlocking(_currentTask.timePoint, _currentTask.duration);
-          _controller.AwaitNotPaused();
-          RequestNextStep();
+            _controller.ExecuteSimTaskNonBlocking(_currentTask.timePoint, _currentTask.duration);
+            _controller.AwaitNotPaused();
         }
 
         for (auto&& otherTask : _otherNextTasks)
@@ -236,9 +235,7 @@ ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, co
     }
 
     _timeProvider = std::make_shared<ParticipantTimeProvider>();
-    _waitingForCompletion = false;
 }
-
 
 void ParticipantController::AddSynchronizedParticipants(const ExpectedParticipants& expectedParticipants)
 {
@@ -347,7 +344,7 @@ void ParticipantController::ReportError(std::string errorMsg)
 
     if (State() == ParticipantState::Shutdown)
     {
-        _logger->Warn("ParticipantController::ReportError() was called in terminal state ParticipantState::Shutdown; transition to ParticipantState::Error is ignored.");
+        _logger->Warn("ParticipantController::ReportError( was called in terminal state ParticipantState::Shutdown; transition to ParticipantState::Error is ignored.");
         return;
     }
     ChangeState(ParticipantState::Error, std::move(errorMsg));
@@ -690,6 +687,8 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, con
 
 void ParticipantController::ExecuteSimTask(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration)
 {
+    _isExecutingSimtask = true;
+
     assert(_simTask);
     using DoubleMSecs = std::chrono::duration<double, std::milli>;
 
@@ -708,33 +707,42 @@ void ParticipantController::ExecuteSimTask(std::chrono::nanoseconds timePoint, s
     _waitTimeMonitor.StartMeasurement();
 
 
+    _isExecutingSimtask = false;
 }
 
 void ParticipantController::ExecuteSimTaskNonBlocking(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration)
 {
     assert(_simTask);
-    std::unique_lock<std::mutex> cvLock(_waitingForCompletionMutex);
-    if (_waitingForCompletion)
+    if (_nonBlockingWait.valid())
     {
-      throw std::runtime_error("SimulationTask already waiting for completion");
+          throw std::runtime_error("ParticipantController::ExecuteSimTaskNonBlocking:"
+              " SimulationTask already waiting for completion");
     }
 
+    _nonBlockingDone = std::promise<void>{};
+    _nonBlockingWait = _nonBlockingDone.get_future();
     ExecuteSimTask(timePoint, duration);
-
-    _waitingForCompletion = true;
-    while (_waitingForCompletion)
-        _waitingForCompletionCv.wait_for(cvLock, std::chrono::milliseconds(10));
+    _nonBlockingDone.set_value();
 }
 
 void ParticipantController::CompleteSimulationTask()
 {
-    std::unique_lock<std::mutex> cvLock(_waitingForCompletionMutex);
-    if (!_waitingForCompletion)
+    if (!_nonBlockingWait.valid())
     {
-      throw std::runtime_error("bad call to CompleteSimulationTask");
+      throw std::runtime_error("ParticipantController::CompleteSimulationTask:"
+          " No ExecuteSimTaskNonBlocking was called.");
     }
-    _waitingForCompletion = false;
-    _waitingForCompletionCv.notify_all();
+    if (_isExecutingSimtask)
+    {
+        // reset the future, so we are re-entrant in the IO-path
+        _nonBlockingWait = decltype(_nonBlockingWait){};
+        _timeSyncPolicy->RequestNextStep();
+    }
+    else
+    {
+        //Do only block if CompleteSimulationTask() is called outside of ExecuteSimTask
+        _nonBlockingWait.wait();
+    }
 }
 
 void ParticipantController::ChangeState(ParticipantState newState, std::string reason)

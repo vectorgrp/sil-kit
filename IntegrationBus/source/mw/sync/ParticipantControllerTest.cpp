@@ -356,4 +356,90 @@ TEST_F(ParticipantControllerTest, force_shutdown_is_ignored_if_not_stopped)
     ASSERT_EQ(finalState.wait_for(1ms), std::future_status::timeout);
 }
 
+static auto timeout(std::chrono::seconds sec)
+{
+    util::Timer testTimeout;
+    testTimeout.WithPeriod(sec, [&testTimeout](auto) {
+        testTimeout.Stop();
+        FAIL() << "Test Timeout";
+    });
+    return testTimeout;
+}
+
+
+TEST_F(ParticipantControllerTest, async_sim_task_throw_if_not_running)
+{
+    {
+        ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+        controller.SetSimulationTaskAsync([](auto, auto) { });
+        EXPECT_THROW(controller.CompleteSimulationTask(), std::runtime_error);
+    }
+}
+TEST_F(ParticipantControllerTest, async_sim_task)
+{
+    {
+        bool ok = false;
+        ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+        controller.SetSimulationTaskAsync([&](auto, auto) {
+            ok = true;
+            std::cout << "Setting CompleteSimulationTask()" << std::endl;
+            controller.CompleteSimulationTask();
+        });
+        controller.ExecuteSimTaskNonBlocking(1ns, 1ns);
+        ASSERT_TRUE(ok) << " SimTask was called (otherwise we would time out due to deadlock";
+    }
+}
+
+TEST_F(ParticipantControllerTest, async_sim_task_completion_different_thread)
+{
+    {
+        std::promise<void> startup;
+        auto startupFuture = startup.get_future();
+        ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+
+        controller.SetSimulationTaskAsync([&](auto, auto) {
+        });
+
+        std::thread otherThread{[startupFuture = std::move(startupFuture), &controller]() {
+            startupFuture.wait();
+            controller.CompleteSimulationTask();
+        }};
+
+        controller.ExecuteSimTaskNonBlocking(1ns, 1ns);
+        startup.set_value();
+        otherThread.join();
+    }
+}
+
+TEST_F(ParticipantControllerTest, async_sim_task_async_execute_different_thread)
+{
+    {
+        std::promise<void> startup;
+        auto startupFuture = startup.get_future();
+        ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+
+        controller.SetSimulationTaskAsync([&](auto, auto) {
+        });
+
+        std::thread otherThread{[&startup, &controller]() {
+            controller.ExecuteSimTaskNonBlocking(1ns, 1ns);
+            startup.set_value();
+        }};
+
+        startupFuture.wait();
+        controller.CompleteSimulationTask();
+        otherThread.join();
+    }
+}
+
+TEST_F(ParticipantControllerTest, async_sim_task_destructor_no_deadlock)
+{
+    {
+        ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+        controller.SetSimulationTaskAsync([](auto, auto) { });
+        controller.ExecuteSimTaskNonBlocking(1ns, 1ns);
+        //Destructor must not block
+    }
+}
+
 } // anonymous namespace for test

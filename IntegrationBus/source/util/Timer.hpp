@@ -14,6 +14,8 @@ class Timer
 {
 public:
     Timer() = default;
+    Timer(Timer&&) = default;
+    Timer& operator=(Timer&&) = default;
 
     ~Timer()
     {
