@@ -111,6 +111,15 @@ if(IB_MW_ENABLE_VASIO)
           IbCfgMockParticipantConfiguration
     )
 
+    add_vib_test(ITestDifferentPeriods
+        SOURCES
+          DifferentPeriodsITest.cpp
+        LIBS
+          IbMwComAdapter
+          IbMwVAsio
+          IbCfgMockParticipantConfiguration
+    )
+
     add_vib_test(ITestIbRegistryReusage
         SOURCES
           IbRegistryReusage.cpp
