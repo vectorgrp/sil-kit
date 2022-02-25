@@ -186,7 +186,8 @@ void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const F
     case SymbolPattern::Wudop:
         for (auto&& handler : _wakeupHandlers)
         {
-            handler(this, msg);
+
+            handler(_facade, msg);
         }
     }
 
