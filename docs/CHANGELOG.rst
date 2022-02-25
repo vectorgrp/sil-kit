@@ -5,6 +5,21 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.7.2] - unreleased
+--------------------------------
+
+Fixed
+~~~~~
+- Controller pointer in FlexRay Controller Wakeup handler
+
+[3.7.1] - unreleased
+--------------------------------
+
+Fixed
+~~~~~
+- New Configuration format Network name override for Can and Ethernet
+
+
 [3.7.0] - unreleased
 --------------------------------
 
