@@ -1,34 +1,127 @@
 // vim: set ft=groovy:
-// a simple cmake and ctest  CI file
 
-//##########################################
-// modify these top level variables to change the build targets and cmake options
-//##########################################
+//#################
+// Global Variables
+//#################
+
 // pipeline config
 projectName="vib-main"
 artifactName='IntegrationBus'
 keepNumBuilds=10 //number of log files on Jenkins, workspaces are always cleaned
-publishToArtifactory=true
-//debug binaries are only build when doing a release to customers
-buildDebugBin=true
-cleanBuild=true
+publishToArtifactory=false
+buildDebugBin=false //debug binaries are only build when doing a release to customers
 
-//linux docker image
-dockerImage ="vib/ubuntu"
-dockerImageDir ="./IntegrationBus/ci" //for packaging additional files in docker, e.g. "."
-dockerImageFile ="${dockerImageDir}/Dockerfile.vib-ubuntu"
 // artifactory for archiving / packaging
 artifactoryServer = Artifactory.server('IntegrationBusArtifactory')
 artifactoryRepo = '***VIB-820 Removed***'
 artifactoryBuildInfo = Artifactory.newBuildInfo()
 
-//  global cmake args for all builds
-cmakeArgsRelease="-DIB_INSTALL_SOURCE=ON " //only distribute source and docs in release mode
-cmakeArgs =" -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=ON "
-gitBranch="master" // overriden in parallel pipeline based on scm vars
+def gitBranch="master" // overriden in parallel pipeline based on scm vars
+
+def buildConfigs = [
+    // Windows builds:
+    [
+
+        Name: "VS2017-Win64",
+        NodeLabel: "ninja && buildtools2019",
+        Arch:"x64",
+        MsvcVersion:"14.1",
+        PublishArtifacts: true,
+        CmakeArgs: ""
+    ]
+    ,[
+        Name:"VS2015-Win64",
+        NodeLabel: "ninja && buildtools2019",
+        Arch:"x64",
+        MsvcVersion:"14.0",
+        PublishArtifacts: true,
+        CmakeArgs: "",
+    ]
+    ,[
+        Name: "VS2017-Win32",
+        NodeLabel: "ninja && buildtools2019",
+        Arch:"x64_x86",
+        MsvcVersion:"14.1",
+        PublishArtifacts: true,
+        CmakeArgs: "",
+    ]
+    ,[
+        Name: "VS2015-Win32",
+        NodeLabel: "ninja && buildtools2019",
+        Arch:"x64_x86",
+        MsvcVersion:"14.0",
+        PublishArtifacts: true,
+        CmakeArgs: "",
+    ]
+    // Linux builds:
+    ,[
+        Name: "Ubuntu-18.04-clang",
+        NodeLabel: "docker && linux",
+        DockerImage: "vib-ubuntu",
+        DockerBuildArgs: "--build-arg UBUNTU_VERSION=18.04",
+        PublishArtifacts: false,
+        CmakeArgs: "-D CMAKE_C_COMPILER=clang -D CMAKE_CXX_COMPILER=clang++",
+    ]
+    ,[
+        Name: "Ubuntu-18.04-gcc",
+        NodeLabel: "docker && linux",
+        DockerImage: "vib-ubuntu",
+        DockerBuildArgs: "--build-arg UBUNTU_VERSION=18.04",
+        PublishArtifacts: true,
+        CmakeArgs: "-D CMAKE_C_COMPILER=gcc -D CMAKE_CXX_COMPILER=g++",
+    ]
+    ,[
+        Name: "Ubuntu-20.04-gcc-10",
+        NodeLabel: "docker && linux",
+        DockerImage: "vib-ubuntu",
+        DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
+        PublishArtifacts: false,
+        CmakeArgs: "-D CMAKE_C_COMPILER=gcc-10 -D CMAKE_CXX_COMPILER=g++-10",
+    ]
+    ,[
+        Name: "Ubuntu-20.04-clang-12",
+        NodeLabel: "docker && linux",
+        DockerImage: "vib-ubuntu",
+        DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
+        PublishArtifacts: false,
+        CmakeArgs: "-D CMAKE_C_COMPILER=clang-12 -D CMAKE_CXX_COMPILER=clang++-12",
+    ]
+    // Sanitizer builds:
+    ,[
+        Name: "Ubuntu-thread-sanitizer",
+        NodeLabel: "docker && linux",
+        DockerImage: "vib-ubuntu",
+        DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
+        PublishArtifacts: false,
+        CmakeArgs: "-D CMAKE_C_COMPILER=clang-12 -D CMAKE_CXX_COMPILER=clang++-12 -D IB_ENABLE_THREADSAN=ON",
+    ]
+    ,[
+        Name: "Ubuntu-address-sanitizer",
+        NodeLabel: "docker && linux",
+        DockerImage: "vib-ubuntu",
+        DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
+        PublishArtifacts: false,
+        CmakeArgs: "-D CMAKE_C_COMPILER=clang-12 -D CMAKE_CXX_COMPILER=clang++-12 -D IB_ENABLE_ASAN=ON",
+    ]
+]
+
+
 //##########################################
 // Utilities
 //##########################################
+@NonCPS
+def isFullBuildRequired(branchName) {
+    // Master and Pull Requests are always full builds
+    if(branchName == 'master' || branchName.startsWith("PR-")) {
+        return true;
+    }
+    // A user requests a fullbuild by adding a "/full" suffix
+    if(branchName.contains("/full")) {
+        return true;
+    }
+    return false
+}
+
 @NonCPS
 def isDockerNode(label) {
     return label.toUpperCase().contains('DOCKER')
@@ -71,18 +164,23 @@ def shallowCheckoutGit() {
         ])
 }
 
-def archiveToArtifactory(scm, pattern) {
+def archiveToArtifactory(config, scm, pattern) {
     //find the file to upload
+    if (! publishToArtifactory ) {
+        print("INFO: skipping publishing ${config.Name} to artifactory because of user request")
+        return
+    }
+    if(! config["PublishArtifacts"]) {
+        print("INFO: skipping publishing ${config.Name} to artifactory because of config")
+        return
+    }
+
     def files = findFiles(glob: pattern)
     if(files.size() != 1) {
         error("ERROR: single file ${pattern} required: findFiles returned: ${files}")
     } else {
-        print("INFO: found build artifact ${files[0]}")
-        if (! publishToArtifactory ) {
-            print("INFO: skipping publishing to artifactory because of user request")
-            return
-        }
 
+        print("INFO: found build artifact ${files[0]}")
         def fileName = files[0].name
         def spec = """{
             "files": [{
@@ -100,28 +198,36 @@ def archiveToArtifactory(scm, pattern) {
     }
 }
 
+def buildDocker(config) {
+    stage("Building Docker Image") {
+        def dockerImage = config["DockerImage"]
+        def dockerDir = "./IntegrationBus/ci/docker"
+        def buildArgs = "--build-arg ARTIFACTORY=${artifactoryServer.url} "
+        print("Building docker image ${dockerImage}")
+        if("DockerBuildArgs" in config) {
+            buildArgs += config["DockerBuildArgs"]
+        }
+        // We assume the docker file (located in the docker subfolder) is named exactly like the docker image
+        buildArgs += " -f ${dockerDir}/${dockerImage} ${dockerDir}"
+        docker.build(dockerImage, buildArgs)
+    }
+}
 // runOnNode: a helper that runs the userStages closure on an appropriate node
 // i.e., this allows running the same stages on docker and windows
-def runOnNode(buildFlags, userStages) {
-    def buildName = buildFlags["name"]
-    def dockerExtraArgs = ""
-    if( "ubuntu_version" in buildFlags) {
-        dockerExtraArgs = " --build-arg UBUNTU_VERSION=${buildFlags.ubuntu_version}"
-    }
-
+def runOnNode(config, userStages) {
+    def buildName = config["Name"]
     def wsDir = "workspace/${env.JOB_NAME}/" \
                  + buildName.replaceAll(" ", "_") + "_${env.BUILD_NUMBER}"
     return {
-        node(buildFlags["agent"]) {
+        node(config["NodeLabel"]) {
             ws(wsDir) {
                 try {
-                    if(isDockerNode(buildFlags["agent"])) {
+                    if(isDockerNode(config["NodeLabel"])) {
                         //the built image should be cached and shared anyway
                         shallowCheckoutGit()
-                        docker.build(dockerImage,  //XXX this might require a checkout for ./ci to be present
-                                "--build-arg ARTIFACTORY=${artifactoryServer.url} ${dockerExtraArgs} -f ${dockerImageFile} ${dockerImageDir}")
                         print("Calling docker inside in ${pwd()}")
-                        docker.image(dockerImage).inside {
+                        buildDocker(config)
+                        docker.image(config["DockerImage"]).inside {
                             userStages()
                         }
                     } else {
@@ -156,14 +262,27 @@ def getVsBuildEnv(arch, version){
 }
 
 //helper to invoke  cmake platform independently with uniform arguments
-def runCmake(buildType, extraArgs=""){
+def runCmake(config, buildType) {
+    def cmakeArgs = config["CmakeArgs"]
+    cmakeArgs += " -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=ON "
+
+    if(buildType == "Release") {
+        //only distribute source and docs in release mode
+        cmakeArgs +="-DIB_INSTALL_SOURCE=ON "
+    }
+    if(!isUnix()) {
+        cmakeArgs += " -D CMAKE_C_COMPILER=cl -D CMAKE_CXX_COMPILER=cl"
+        def msvcVersion = config["MsvcVersion"]
+        cmakeArgs += " -DMSVC_TOOLSET_VERSION=${msvcVersion}" //needed for binary download URL resolution
+    }
+
     cmakeBuild(
         installation: 'InSearchPath',
-        cleanBuild: cleanBuild,
+        cleanBuild: true,
         buildType: "${buildType}",
         buildDir: "_build_${buildType}",
         generator: "Ninja",
-        cmakeArgs: "${cmakeArgs} -DCMAKE_BUILD_TYPE=${buildType} ${extraArgs}",
+        cmakeArgs: "${cmakeArgs} -DCMAKE_BUILD_TYPE=${buildType} ",
         steps: [[args: "--target package --config ${buildType}  --parallel", withCmake: true]]
     )
 }
@@ -201,37 +320,20 @@ def runWithOutput(what) {
 //##########################################
 
 // instantiate a build on an appropriate node
-def doBuild(Map buildFlags) {
-    return runOnNode(buildFlags, {
-        def buildName = buildFlags["name"]
+def doBuild(Map config) {
+    return runOnNode(config, {
+        def buildName = config["Name"]
 
-        def extraArgs = ""
         def buildEnv = []
         def scmVars = [:]
 
         stage("Git checkout and ENV setup (${buildName})") {
-            if("cc" in buildFlags) {
-                cc = buildFlags["cc"]
-                buildEnv.add("CC=${cc}")
-                extraArgs += " -DCMAKE_C_COMPILER=${cc}"
-            }
-            if("cxx" in buildFlags) {
-                cxx = buildFlags["cxx"]
-                buildEnv.add("CXX=${cxx}")
-                extraArgs += " -DCMAKE_CXX_COMPILER=${cxx}"
-                
-            }
-            if("msvc_version" in buildFlags) {
+            if("MsvcVersion" in config) {
                 // visual studio toolset selection via vcvarsall env
-                buildEnv = buildEnv + getVsBuildEnv(buildFlags["arch"], buildFlags["msvc_version"])
+                buildEnv = buildEnv + getVsBuildEnv(config["Arch"], config["MsvcVersion"])
                 buildEnv.add("MSBUILDDISABLENODEREUSE=1") //fixes spurious windows failures
-
-                msvc_toolset = buildFlags["msvc_version"].replace(".","") // 14.1 -> 141
-                extraArgs += " -DMSVC_TOOLSET_VERSION=${msvc_toolset}" //needed for binary download URL resolution
-                extraArgs += " -DCMAKE_CXX_COMPILER=cl -DCMAKE_C_COMPILER=cl"
             }
 
-            print("DEBUG extraArgs=${extraArgs}")
             scmVars = checkoutGit()
 
             // For reproducible build set SOURCE_DATE_EPOCH to time of last commit
@@ -249,7 +351,7 @@ def doBuild(Map buildFlags) {
             print("${buildName} --  running cmake Release")
             withEnv(buildEnv) {
                 print("Debug: TZ=${env.TZ} LC_ALL=${env.LC_ALL}")
-                runCmake("Release", "${cmakeArgsRelease}" + "${extraArgs}" )
+                runCmake(config, "Release" )
             }
         }
         stage("Unit Tests Release (${buildName})") {
@@ -283,20 +385,20 @@ def doBuild(Map buildFlags) {
             stage("Cmake Debug Build (${buildName})") {
                 print("${buildName} --  running cmake Debug")
                 withEnv(buildEnv) {
-                    runCmake("Debug", extraArgs)
+                    runCmake(config, "Debug")
                 }
             }
 
             stage(" Bundle and Archive Packages (${buildName})") {
-                run "python ${dockerImageDir}/package.py \"_build_Release/${artifactName}-*-Release.zip\" \"_build_Debug/${artifactName}-*-Debug.zip\""
-                archiveToArtifactory(scmVars, "${artifactName}-*.zip")
+                run "python ./IntegrationBus/ci/package.py \"_build_Release/${artifactName}-*-Release.zip\" \"_build_Debug/${artifactName}-*-Debug.zip\""
+                archiveToArtifactory(config, scmVars, "${artifactName}-*.zip")
 
                 // safe the PDB files on windows
                 if(!isUnix()) {
                     // package PDB files without rebuilding
                     def pdbArchive = "_build_Debug/IntegrationBus-${buildName}-PDB.zip"
                     run "python -mzipfile -c ${pdbArchive} _build_Debug/package-pdb/ _build_Release/package-pdb/"
-                    archiveToArtifactory(scmVars, pdbArchive)
+                    archiveToArtifactory(config, scmVars, pdbArchive)
                 }
             }
         }
@@ -305,24 +407,69 @@ def doBuild(Map buildFlags) {
 
 // node main entry. parallel invocation of all builds, packaging
 node {
-    // pipeline settings
-    properties([
-        buildDiscarder(logRotator(numToKeepStr: "${keepNumBuilds}")),
-    ])   
-
-    def builds = [:]
-
-    // "Name of the target" : "Name of the target", "required node label", "generator name")
-    builds.put("VS2017-Win64", doBuild(name: "VS2017-Win64", agent: "ninja && buildtools2019", arch:"x64", msvc_version:"14.1") )
-    builds.put("VS2015-Win64", doBuild(name: "VS2015-Win64", agent: "ninja && buildtools2019", arch:"x64", msvc_version:"14.0") )
-    builds.put("VS2017-Win32", doBuild(name: "VS2017-Win32", agent: "ninja && buildtools2019", arch:"x64_x86", msvc_version:"14.1") )
-    builds.put("VS2015-Win32", doBuild(name: "VS2015-Win32", agent: "ninja && buildtools2019", arch:"x64_x86", msvc_version:"14.0") )
-    builds.put("Ubuntu-18.04-clang", doBuild(name: "Ubuntu-18.04-clang", agent: "docker && linux", cc:"clang", cxx:"clang++") )
-    builds.put("Ubuntu-18.04-gcc"  , doBuild(name: "Ubuntu-18.04-gcc",   agent: "docker && linux", cc: "gcc",  cxx:"g++") )
-    builds.put("Ubuntu-20.04-gcc"  , doBuild(name: "Ubuntu-20.04-gcc",   agent: "docker && linux", cc: "gcc",  cxx:"g++", ubuntu_version: "20.04") )
-    
     try {
+        properties([
+            buildDiscarder(logRotator(numToKeepStr: "${keepNumBuilds}")),
+            parameters([
+                booleanParam(name: "ForceFullBuild", defaultValue: false, description: "Force a full build with artificat uploads")
+                ,booleanParam(name: "UseThreadSanitizer", defaultValue: false,
+                    description: "Build with thread sanitizer, pelase refer to the  output logs of tests")
+                ,booleanParam(name: "UseAddressSanitizer", defaultValue: false,
+                    description: "Build with thread sanitizer, pelase refer to the  output logs of tests")
+            ])
+        ])  
+
+        def doFullBuild = isFullBuildRequired(env.BRANCH_NAME)
+        if(params.ForceFullBuild) {
+            print("Forcing a full build at user request!")
+            doFullBuild = true
+        }
+
+        def configNames = []
+
+        if(params.UseAddressSanitizer) {
+            print("Building on Ubuntu with -f sanitizer=thread")
+            configNames = [
+                "Ubuntu-thread-sanitizer"
+            ]
+        }
+        else if (params.UseThreadSanitizer) {
+            print("Building on Ubuntu with -f sanitizer=address")
+            configNames = [
+                "Ubuntu-address-sanitizer"
+            ]
+        }
+        else if(doFullBuild) {
+            print("Doing a full build and publishing artifacts on branch ${env.BRANCH_NAME}")
+            configNames = [
+                "VS2015-Win32",
+                "VS2015-Win64",
+                "VS2017-Win32",
+                "VS2017-Win64",
+                "Ubuntu-18.04-gcc",
+                "Ubuntu-20.04-clang-12", // most modern compiler, no artifacts
+            ]
+            publishToArtifactory = true
+            buildDebugBin = true
+        } else {
+            print("Doing a minimal build without publishing artifacts on branch ${env.BRANCH_NAME}")
+            configNames = [
+                "VS2015-Win32", // out of date implementation of C++14
+                "Ubuntu-20.04-clang-12", // most modern compiler
+            ]
+        }
+        def builds = [:]
+        configNames.each {
+            def configName = it
+            def buildConfig = buildConfigs.find { it.Name == configName}
+            if(!doFullBuild) {
+                buildConfig["PublishArtifacts"] = false
+            }
+            builds.put(it, doBuild(buildConfig))
+        }
+
         parallel(builds)
+
     }
     finally {
         if(publishToArtifactory) {
@@ -330,6 +477,10 @@ node {
                 print("INFO: publishing artifactory build info for branch ${gitBranch}")
                 setBuildRetention(artifactoryBuildInfo)
                 artifactoryServer.publishBuildInfo(artifactoryBuildInfo)
+            }
+        } else {
+            stage("Done (No Publishing)") {
+                print("INFO: not publishing artifacts")
             }
         }
         cleanWs(cleanWhenNotBuilt: true, cleanWhenFailure: true,
