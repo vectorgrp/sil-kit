@@ -813,7 +813,7 @@
           "type": "object",
           "title": "The registry used for the VAsio middleware.",
           "properties": {
-            "HostName": {
+            "Hostname": {
               "type": "string",
               "default": "localhost"
             },
