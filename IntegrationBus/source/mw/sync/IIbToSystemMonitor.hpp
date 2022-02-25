@@ -3,7 +3,7 @@
 #pragma once
 
 #include "ib/mw/sync/SyncDatatypes.hpp"
-#include "IIbEndpoint.hpp"
+#include "IIbReceiver.hpp"
 #include "IIbSender.hpp"
 
 namespace ib {
@@ -11,7 +11,7 @@ namespace mw {
 namespace sync {
 
 class IIbToSystemMonitor
-    : public mw::IIbEndpoint<ParticipantStatus, ExpectedParticipants>
+    : public mw::IIbReceiver<ParticipantStatus, ExpectedParticipants>
     , public mw::IIbSender<>
 {
 };

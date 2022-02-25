@@ -5,7 +5,7 @@
 
 #include "ib/mw/logging/LoggingDatatypes.hpp"
 
-#include "IIbEndpoint.hpp"
+#include "IIbReceiver.hpp"
 #include "IIbSender.hpp"
 
 namespace ib {
@@ -13,7 +13,7 @@ namespace mw {
 namespace logging {
 
 class IIbToLogMsgSender
-    : public mw::IIbEndpoint<>
+    : public mw::IIbReceiver<>
     , public mw::IIbSender<LogMsg>
 {
 };

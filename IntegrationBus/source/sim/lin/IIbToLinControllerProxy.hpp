@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "IIbEndpoint.hpp"
+#include "IIbReceiver.hpp"
 #include "IIbSender.hpp"
 #include "ib/sim/lin/LinDatatypes.hpp"
 
@@ -15,7 +15,7 @@ namespace lin {
  *  Used by the ComAdapter, implemented by the LinControllerProxy
  */
 class IIbToLinControllerProxy
-    : public mw::IIbEndpoint<Transmission, WakeupPulse, ControllerConfig, FrameResponseUpdate>
+    : public mw::IIbReceiver<Transmission, WakeupPulse, ControllerConfig, FrameResponseUpdate>
     , public mw::IIbSender<SendFrameRequest, SendFrameHeaderRequest, WakeupPulse, ControllerConfig, ControllerStatusUpdate, FrameResponseUpdate>
 {
 };

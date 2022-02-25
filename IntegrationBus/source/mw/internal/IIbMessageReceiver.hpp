@@ -1,6 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
+#include "ib/mw/EndpointAddress.hpp"
 
 #include "IIbServiceEndpoint.hpp"
 

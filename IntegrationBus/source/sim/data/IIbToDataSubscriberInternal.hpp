@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "IIbEndpoint.hpp"
+#include "IIbReceiver.hpp"
 #include "IIbSender.hpp"
 
 #include "ib/sim/data/fwd_decl.hpp"
@@ -13,7 +13,7 @@ namespace data {
 
 //! \brief IIbToDataSubscriber interface used by the ComAdapter
 class IIbToDataSubscriberInternal
-    : public mw::IIbEndpoint<DataMessage>
+    : public mw::IIbReceiver<DataMessage>
     , public mw::IIbSender<>
 {
 };

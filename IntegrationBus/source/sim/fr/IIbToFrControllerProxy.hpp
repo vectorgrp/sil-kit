@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "IIbEndpoint.hpp"
+#include "IIbReceiver.hpp"
 #include "IIbSender.hpp"
 #include "ib/sim/fr/fwd_decl.hpp"
 
@@ -15,8 +15,8 @@ namespace fr {
  *  Used by the ComAdapter, implemented by the FrControllerProxy
  */
 class IIbToFrControllerProxy
-    : public ib::mw::IIbEndpoint<FrMessage, FrMessageAck, FrSymbol, FrSymbolAck, CycleStart, PocStatus>
-    , public ib::mw::IIbSender<HostCommand, ControllerConfig, TxBufferConfigUpdate, TxBufferUpdate>
+    : public mw::IIbReceiver<FrMessage, FrMessageAck, FrSymbol, FrSymbolAck, CycleStart, PocStatus>
+    , public mw::IIbSender<HostCommand, ControllerConfig, TxBufferConfigUpdate, TxBufferUpdate>
 {
 };
 

@@ -12,7 +12,7 @@
 
 #include "IComAdapterInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
-#include "IIbEndpoint.hpp"
+#include "IIbReceiver.hpp"
 #include "IIbSender.hpp"
 #include "IServiceDiscovery.hpp"
 
@@ -21,7 +21,7 @@ namespace mw {
 namespace service {
 
 class ServiceDiscovery
-    : public mw::IIbEndpoint<ServiceAnnouncement, ServiceDiscoveryEvent>
+    : public mw::IIbReceiver<ServiceAnnouncement, ServiceDiscoveryEvent>
     , public mw::IIbSender<ServiceAnnouncement, ServiceDiscoveryEvent>
     , public IIbServiceEndpoint
     , public service::IServiceDiscovery

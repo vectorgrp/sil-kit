@@ -1,9 +1,9 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
+#include <tuple>
 
 #include "IIbMessageReceiver.hpp"
-#include <tuple>
 
 namespace ib {
 namespace mw {
@@ -13,6 +13,7 @@ class IIbReceiver : public IIbMessageReceiver<MsgT>...
 {
 public:
     using IbReceiveMessagesTypes = std::tuple<MsgT...>;
+    virtual ~IIbReceiver() = default;
 };
 
 } // namespace mw

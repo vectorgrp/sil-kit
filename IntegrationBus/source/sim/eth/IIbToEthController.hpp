@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "IIbEndpoint.hpp"
+#include "IIbReceiver.hpp"
 #include "IIbSender.hpp"
 #include "ib/sim/eth/fwd_decl.hpp"
 
@@ -15,8 +15,8 @@ namespace eth {
  *  Used by the ComAdapter, implemented by the EthController
  */
 class IIbToEthController
-    : public ib::mw::IIbEndpoint<EthMessage>
-    , public ib::mw::IIbSender<EthMessage>
+    : public mw::IIbReceiver<EthMessage>
+    , public mw::IIbSender<EthMessage>
 {
 };
 

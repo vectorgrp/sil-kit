@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "IIbEndpoint.hpp"
+#include "IIbReceiver.hpp"
 #include "IIbSender.hpp"
 
 #include "ib/sim/rpc/fwd_decl.hpp"
@@ -13,7 +13,7 @@ namespace rpc {
 
 //! \brief IIbToRpcClient interface used by the ComAdapter
 class IIbToRpcClient
-    : public mw::IIbEndpoint<FunctionCallResponse>
+    : public mw::IIbReceiver<FunctionCallResponse>
     , public mw::IIbSender<FunctionCall>
 {
 public:

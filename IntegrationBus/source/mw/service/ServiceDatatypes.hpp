@@ -6,7 +6,7 @@
 #include <map>
 #include <sstream>
 
-#include "IIbEndpoint.hpp" //for ServiceId
+#include "IIbServiceEndpoint.hpp" // ServiceDescription
 
 namespace ib {
 namespace mw {
