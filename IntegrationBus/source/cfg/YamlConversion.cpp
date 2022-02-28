@@ -13,105 +13,6 @@ using namespace ib;
 // Local utilities
 namespace {
 
-class ConversionError : public YAML::BadConversion
-{
-public:
-    ConversionError(const YAML::Node& node, const std::string& message)
-        : BadConversion(node.Mark())
-    {
-        msg = message;
-    }
-};
-
-// Helper to parse a node as the given type or throw our ConversionError with the type's name in the error message.
-template<typename T> struct ParseTypeName { static constexpr const char* name = "Unknown Type"; };
-
-template<typename T> struct ParseTypeName<std::vector<T>> { static constexpr const char* name = ParseTypeName<T>::name; };
-
-#define VIB_DECLARE_PARSE_TYPE_NAME(TYPE) \
-    template<> struct ParseTypeName<TYPE> { static constexpr const char* name = #TYPE ; }
-
-VIB_DECLARE_PARSE_TYPE_NAME(int16_t);
-VIB_DECLARE_PARSE_TYPE_NAME(uint16_t);
-VIB_DECLARE_PARSE_TYPE_NAME(uint64_t);
-VIB_DECLARE_PARSE_TYPE_NAME(int64_t);
-VIB_DECLARE_PARSE_TYPE_NAME(int8_t);
-VIB_DECLARE_PARSE_TYPE_NAME(uint8_t);
-VIB_DECLARE_PARSE_TYPE_NAME(int);
-VIB_DECLARE_PARSE_TYPE_NAME(double);
-VIB_DECLARE_PARSE_TYPE_NAME(bool);
-VIB_DECLARE_PARSE_TYPE_NAME(std::chrono::milliseconds);
-VIB_DECLARE_PARSE_TYPE_NAME(std::chrono::nanoseconds);
-VIB_DECLARE_PARSE_TYPE_NAME(std::vector<std::string>);
-VIB_DECLARE_PARSE_TYPE_NAME(std::string);
-
-VIB_DECLARE_PARSE_TYPE_NAME(Logging);
-VIB_DECLARE_PARSE_TYPE_NAME(Sink);
-VIB_DECLARE_PARSE_TYPE_NAME(Sink::Type);
-VIB_DECLARE_PARSE_TYPE_NAME(ib::mw::logging::Level);
-
-VIB_DECLARE_PARSE_TYPE_NAME(MdfChannel);
-VIB_DECLARE_PARSE_TYPE_NAME(Replay);
-VIB_DECLARE_PARSE_TYPE_NAME(Replay::Direction);
-
-VIB_DECLARE_PARSE_TYPE_NAME(CanController);
-
-VIB_DECLARE_PARSE_TYPE_NAME(LinController);
-
-VIB_DECLARE_PARSE_TYPE_NAME(EthernetController);
-
-VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::ClusterParameters);
-VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::NodeParameters);
-VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::TxBufferConfig);
-VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::Channel);
-VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::ClockPeriod);
-VIB_DECLARE_PARSE_TYPE_NAME(ib::sim::fr::TransmissionMode);
-VIB_DECLARE_PARSE_TYPE_NAME(FlexRayController);
-
-VIB_DECLARE_PARSE_TYPE_NAME(DataPublisher);
-VIB_DECLARE_PARSE_TYPE_NAME(DataSubscriber);
-VIB_DECLARE_PARSE_TYPE_NAME(RpcServer);
-VIB_DECLARE_PARSE_TYPE_NAME(RpcClient);
-
-VIB_DECLARE_PARSE_TYPE_NAME(HealthCheck);
-
-VIB_DECLARE_PARSE_TYPE_NAME(Tracing);
-VIB_DECLARE_PARSE_TYPE_NAME(TraceSink);
-VIB_DECLARE_PARSE_TYPE_NAME(TraceSink::Type);
-VIB_DECLARE_PARSE_TYPE_NAME(TraceSource);
-VIB_DECLARE_PARSE_TYPE_NAME(TraceSource::Type);
-
-VIB_DECLARE_PARSE_TYPE_NAME(Extensions);
-
-VIB_DECLARE_PARSE_TYPE_NAME(Registry);
-VIB_DECLARE_PARSE_TYPE_NAME(Middleware);
-
-VIB_DECLARE_PARSE_TYPE_NAME(ParticipantConfiguration);
-
-#undef VIB_DECLARE_PARSE_TYPE_NAME
-
-template<typename ValueT>
-auto parse_as(const YAML::Node& node) -> ValueT
-{
-    try
-    {
-        return node.as<ValueT>();
-    }
-    catch(const ConversionError&)
-    {
-        // We already have a concise error message, propagate it to our caller
-        throw;
-    }
-    catch (const YAML::Exception& ex)
-    {
-        std::stringstream ss;
-        ss << "Cannot parse as Type \"" << ParseTypeName<ValueT>::name
-            << "\". Exception: \"" << ex.what()
-            << "\". While parsing: " << YAML::Dump(node);
-        throw ConversionError(node, ss.str());
-    }
-}
-
 inline auto nibble_to_char(char nibble) -> char
 {
     nibble &= 0xf;
@@ -183,15 +84,6 @@ auto macaddress_decode(const YAML::Node& node) ->ib::util::Optional < std::array
     return macAddress;
 }
 
-template<typename ConfigT, typename std::enable_if<
-    (std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value), bool>::type = true>
-void optional_encode(const ib::util::Optional<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
-{
-    if (value.has_value())
-    {
-        node[fieldName] = value.value();
-    }
-}
 //template<typename ConfigT>
 template<typename ConfigT, typename std::enable_if<
     !(std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value), bool>::type = true>
@@ -202,6 +94,7 @@ void optional_encode(const ib::util::Optional<ConfigT>& value, YAML::Node& node,
         node[fieldName] = YAML::Converter::encode(value.value());
     }
 }
+
 template<typename ConfigT>
 void optional_encode(const std::vector<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
 {
@@ -219,23 +112,6 @@ void optional_encode(const Replay& value, YAML::Node& node, const std::string& f
     }
 }
 
-template<typename ConfigT>
-void optional_decode(ib::util::Optional<ConfigT>& value, const YAML::Node& node, const std::string& fieldName)
-{
-    if (node.IsMap() && node[fieldName]) //operator[] does not modify node
-    {
-        value = parse_as<ConfigT>(node[fieldName]);
-    }
-}
-
-template<typename ConfigT>
-void optional_decode(ConfigT& value, const YAML::Node& node, const std::string& fieldName)
-{
-    if (node.IsMap() && node[fieldName]) //operator[] does not modify node
-    {
-        value = parse_as<ConfigT>(node[fieldName]);
-    }
-}
 
 template <typename ConfigT>
 auto non_default_encode(const std::vector<ConfigT>& values, YAML::Node& node, const std::string& fieldName, const std::vector<ConfigT>& defaultValue)

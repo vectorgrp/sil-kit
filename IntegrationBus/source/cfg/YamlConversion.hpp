@@ -8,65 +8,57 @@
 
 #include "yaml-cpp/yaml.h"
 
+#include "VibYamlHelper.hpp"
+
 // YAML-cpp serialization/deserialization for ParticipantConfiguration data types
 namespace YAML {
 
 using namespace ib::cfg::v1::datatypes;
 
-// Encode/Decode implementation is provided as templated static methods, to reduce boiler plate code.
-struct Converter
-{
-    // required for YAML::convert<T>:
-    template<typename IbDataType>
-    static Node encode(const IbDataType& obj);
-    template<typename IbDataType>
-    static bool decode(const Node& node, IbDataType& obj);
-};
+DEFINE_VIB_CONVERT(std::chrono::milliseconds);
+DEFINE_VIB_CONVERT(std::chrono::nanoseconds);
 
-template<> struct convert<std::chrono::milliseconds> : public Converter {};
-template<> struct convert<std::chrono::nanoseconds> : public Converter {};
+DEFINE_VIB_CONVERT(Logging);
+DEFINE_VIB_CONVERT(Sink);
+DEFINE_VIB_CONVERT(Sink::Type);
+DEFINE_VIB_CONVERT(ib::mw::logging::Level);
 
-template<> struct convert<Logging> : public Converter {};
-template<> struct convert<Sink> : public Converter {};
-template<> struct convert<Sink::Type> : public Converter {};
-template<> struct convert<ib::mw::logging::Level> : public Converter {};
+DEFINE_VIB_CONVERT(MdfChannel);
+DEFINE_VIB_CONVERT(Replay);
+DEFINE_VIB_CONVERT(Replay::Direction);
 
-template<> struct convert<MdfChannel> : public Converter {};
-template<> struct convert<Replay> : public Converter {};
-template<> struct convert<Replay::Direction> : public Converter {};
+DEFINE_VIB_CONVERT(CanController);
 
-template<> struct convert<CanController> : public Converter {};
+DEFINE_VIB_CONVERT(LinController);
 
-template<> struct convert<LinController> : public Converter {};
+DEFINE_VIB_CONVERT(EthernetController);
 
-template<> struct convert<EthernetController> : public Converter {};
+DEFINE_VIB_CONVERT(ib::sim::fr::ClusterParameters);
+DEFINE_VIB_CONVERT(ib::sim::fr::NodeParameters);
+DEFINE_VIB_CONVERT(ib::sim::fr::TxBufferConfig);
+DEFINE_VIB_CONVERT(ib::sim::fr::Channel);
+DEFINE_VIB_CONVERT(ib::sim::fr::ClockPeriod);
+DEFINE_VIB_CONVERT(ib::sim::fr::TransmissionMode);
+DEFINE_VIB_CONVERT(FlexRayController);
 
-template<> struct convert<ib::sim::fr::ClusterParameters> : public Converter {};
-template<> struct convert<ib::sim::fr::NodeParameters> : public Converter {};
-template<> struct convert<ib::sim::fr::TxBufferConfig> : public Converter {};
-template<> struct convert<ib::sim::fr::Channel> : public Converter {};
-template<> struct convert<ib::sim::fr::ClockPeriod> : public Converter {};
-template<> struct convert<ib::sim::fr::TransmissionMode> : public Converter {};
-template<> struct convert<FlexRayController> : public Converter {};
+DEFINE_VIB_CONVERT(DataPublisher);
+DEFINE_VIB_CONVERT(DataSubscriber);
+DEFINE_VIB_CONVERT(RpcServer);
+DEFINE_VIB_CONVERT(RpcClient);
 
-template<> struct convert<DataPublisher> : public Converter {};
-template<> struct convert<DataSubscriber> : public Converter {};
-template<> struct convert<RpcServer> : public Converter {};
-template<> struct convert<RpcClient> : public Converter {};
+DEFINE_VIB_CONVERT(HealthCheck);
 
-template<> struct convert<HealthCheck> : public Converter {};
+DEFINE_VIB_CONVERT(Tracing);
+DEFINE_VIB_CONVERT(TraceSink);
+DEFINE_VIB_CONVERT(TraceSink::Type);
+DEFINE_VIB_CONVERT(TraceSource);
+DEFINE_VIB_CONVERT(TraceSource::Type);
 
-template<> struct convert<Tracing> : public Converter {};
-template<> struct convert<TraceSink> : public Converter {};
-template<> struct convert<TraceSink::Type> : public Converter {};
-template<> struct convert<TraceSource> : public Converter {};
-template<> struct convert<TraceSource::Type> : public Converter {};
+DEFINE_VIB_CONVERT(Registry);
+DEFINE_VIB_CONVERT(Middleware);
 
-template<> struct convert<Registry> : public Converter {};
-template<> struct convert<Middleware> : public Converter {};
+DEFINE_VIB_CONVERT(Extensions);
 
-template<> struct convert<Extensions> : public Converter {};
-
-template<> struct convert<ParticipantConfiguration> : public Converter {};
+DEFINE_VIB_CONVERT(ParticipantConfiguration);
 
 } // namespace YAML
