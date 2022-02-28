@@ -33,6 +33,7 @@ class MockComAdapter : public DummyComAdapter
 {
 public:
     MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const ParticipantStatus& msg));
+    MOCK_METHOD(void, SendIbMessage, (const IIbServiceEndpoint*, const NextSimTask& msg));
 };
 
 class MockServiceDescriptor : public IIbServiceEndpoint
@@ -356,36 +357,35 @@ TEST_F(ParticipantControllerTest, force_shutdown_is_ignored_if_not_stopped)
     ASSERT_EQ(finalState.wait_for(1ms), std::future_status::timeout);
 }
 
-static auto timeout(std::chrono::seconds sec)
-{
-    util::Timer testTimeout;
-    testTimeout.WithPeriod(sec, [&testTimeout](auto) {
-        testTimeout.Stop();
-        FAIL() << "Test Timeout";
-    });
-    return testTimeout;
-}
-
-
-TEST_F(ParticipantControllerTest, async_sim_task_throw_if_not_running)
-{
-    {
-        ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
-        controller.SetSimulationTaskAsync([](auto, auto) { });
-        EXPECT_THROW(controller.CompleteSimulationTask(), std::runtime_error);
-    }
-}
 TEST_F(ParticipantControllerTest, async_sim_task)
 {
     {
         bool ok = false;
-        ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+        ParticipantController controller(&comAdapter, "P2", true, healthCheckConfig); 
+        controller.SetServiceDescriptor(p2Id.GetServiceDescriptor());
+
         controller.SetSimulationTaskAsync([&](auto, auto) {
             ok = true;
             std::cout << "Setting CompleteSimulationTask()" << std::endl;
             controller.CompleteSimulationTask();
         });
-        controller.ExecuteSimTaskNonBlocking(1ns, 1ns);
+        //Ensure we are running
+        controller.RunAsync();
+        ParticipantCommand partiCmd{p2Id.GetServiceDescriptor().GetParticipantId(), ParticipantCommand::Kind::Initialize};
+        controller.ReceiveIbMessage(&masterId,partiCmd);
+
+        SystemCommand cmd{SystemCommand::Kind::Run};
+        controller.ReceiveIbMessage(&masterId, cmd);
+
+        // Request a simulation step
+        EXPECT_CALL(comAdapter, SendIbMessage(_, A<const NextSimTask&>())).Times(1);
+
+        NextSimTask nst;
+        nst.duration = 1ns;
+        nst.timePoint = 1ns;
+        controller.ReceiveIbMessage(&masterId, nst);
+
+
         ASSERT_TRUE(ok) << " SimTask was called (otherwise we would time out due to deadlock";
     }
 }
@@ -395,50 +395,34 @@ TEST_F(ParticipantControllerTest, async_sim_task_completion_different_thread)
     {
         std::promise<void> startup;
         auto startupFuture = startup.get_future();
-        ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+        ParticipantController controller(&comAdapter, "P2", true, healthCheckConfig); 
+        controller.SetServiceDescriptor(p2Id.GetServiceDescriptor());
 
         controller.SetSimulationTaskAsync([&](auto, auto) {
         });
+        //Ensure we are running
+        controller.RunAsync();
+        ParticipantCommand partiCmd{p2Id.GetServiceDescriptor().GetParticipantId(), ParticipantCommand::Kind::Initialize};
+        controller.ReceiveIbMessage(&masterId,partiCmd);
 
-        std::thread otherThread{[startupFuture = std::move(startupFuture), &controller]() {
-            startupFuture.wait();
+        SystemCommand cmd{SystemCommand::Kind::Run};
+        controller.ReceiveIbMessage(&masterId, cmd);
+
+        bool timedOut = false;
+        std::thread otherThread{[startupFuture = std::move(startupFuture), &controller, &timedOut]() {
+            auto status = startupFuture.wait_for(2s);
+            timedOut = status == std::future_status::timeout;
             controller.CompleteSimulationTask();
         }};
 
-        controller.ExecuteSimTaskNonBlocking(1ns, 1ns);
+        NextSimTask nst; //NB: VS2015 does not like nst{1ns, 1ns};
+        nst.duration = 1ns;
+        nst.timePoint = 1ns;
+        controller.ReceiveIbMessage(&masterId, nst);
+
         startup.set_value();
         otherThread.join();
-    }
-}
-
-TEST_F(ParticipantControllerTest, async_sim_task_async_execute_different_thread)
-{
-    {
-        std::promise<void> startup;
-        auto startupFuture = startup.get_future();
-        ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
-
-        controller.SetSimulationTaskAsync([&](auto, auto) {
-        });
-
-        std::thread otherThread{[&startup, &controller]() {
-            controller.ExecuteSimTaskNonBlocking(1ns, 1ns);
-            startup.set_value();
-        }};
-
-        startupFuture.wait();
-        controller.CompleteSimulationTask();
-        otherThread.join();
-    }
-}
-
-TEST_F(ParticipantControllerTest, async_sim_task_destructor_no_deadlock)
-{
-    {
-        ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
-        controller.SetSimulationTaskAsync([](auto, auto) { });
-        controller.ExecuteSimTaskNonBlocking(1ns, 1ns);
-        //Destructor must not block
+        ASSERT_FALSE(timedOut) << "Signaling thread was never called";
     }
 }
 

@@ -5,7 +5,6 @@
 #include <future>
 #include <tuple>
 #include <map>
-#include <atomic>
 
 #include "ib/mw/sync/IParticipantController.hpp"
 #include "ib/mw/sync/ITimeProvider.hpp"
@@ -97,7 +96,6 @@ public:
     template <class MsgT>
     void SendIbMessage(MsgT&& msg) const;
     void ExecuteSimTask(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration);
-    void ExecuteSimTaskNonBlocking(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration);
 
     // Get the instance of the internal ITimeProvider that is updated with our simulation time
     auto GetTimeProvider()->std::shared_ptr<sync::ITimeProvider>;
@@ -153,11 +151,6 @@ private:
     // until Continue()'  is called;
     std::promise<void> _pauseDonePromise;
     std::future<void> _pauseDone;
-
-    // NonBlocking mode
-    std::promise<void> _nonBlockingDone;
-    std::future<void> _nonBlockingWait;
-    std::atomic<bool> _isExecutingSimtask{false};
 };
 
 // ================================================================================

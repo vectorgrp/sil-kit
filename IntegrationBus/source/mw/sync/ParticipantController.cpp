@@ -138,16 +138,12 @@ private:
         // No other participant has a lower time point: It is our turn
         _currentTask = _myNextTask;
         _myNextTask.timePoint = _currentTask.timePoint + _currentTask.duration;
+        _controller.ExecuteSimTask(_currentTask.timePoint, _currentTask.duration);
+        _controller.AwaitNotPaused();
         if (_blocking)
         {
-            _controller.ExecuteSimTask(_currentTask.timePoint, _currentTask.duration);
-            _controller.AwaitNotPaused();
+            //NB: CompleteSimulationTask does invoke this explicitly on the API caller's request:
             RequestNextStep();
-        }
-        else
-        {
-            _controller.ExecuteSimTaskNonBlocking(_currentTask.timePoint, _currentTask.duration);
-            _controller.AwaitNotPaused();
         }
 
         for (auto&& otherTask : _otherNextTasks)
@@ -344,7 +340,7 @@ void ParticipantController::ReportError(std::string errorMsg)
 
     if (State() == ParticipantState::Shutdown)
     {
-        _logger->Warn("ParticipantController::ReportError( was called in terminal state ParticipantState::Shutdown; transition to ParticipantState::Error is ignored.");
+        _logger->Warn("ParticipantController::ReportError() was called in terminal state ParticipantState::Shutdown; transition to ParticipantState::Error is ignored.");
         return;
     }
     ChangeState(ParticipantState::Error, std::move(errorMsg));
@@ -687,8 +683,6 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, con
 
 void ParticipantController::ExecuteSimTask(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration)
 {
-    _isExecutingSimtask = true;
-
     assert(_simTask);
     using DoubleMSecs = std::chrono::duration<double, std::milli>;
 
@@ -705,44 +699,12 @@ void ParticipantController::ExecuteSimTask(std::chrono::nanoseconds timePoint, s
 
     _logger->Trace("Finished Simulation Task. Execution time was: {}ms", std::chrono::duration_cast<DoubleMSecs>(_execTimeMonitor.CurrentDuration()).count());
     _waitTimeMonitor.StartMeasurement();
-
-
-    _isExecutingSimtask = false;
-}
-
-void ParticipantController::ExecuteSimTaskNonBlocking(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration)
-{
-    assert(_simTask);
-    if (_nonBlockingWait.valid())
-    {
-          throw std::runtime_error("ParticipantController::ExecuteSimTaskNonBlocking:"
-              " SimulationTask already waiting for completion");
-    }
-
-    _nonBlockingDone = std::promise<void>{};
-    _nonBlockingWait = _nonBlockingDone.get_future();
-    ExecuteSimTask(timePoint, duration);
-    _nonBlockingDone.set_value();
 }
 
 void ParticipantController::CompleteSimulationTask()
 {
-    if (!_nonBlockingWait.valid())
-    {
-      throw std::runtime_error("ParticipantController::CompleteSimulationTask:"
-          " No ExecuteSimTaskNonBlocking was called.");
-    }
-    if (_isExecutingSimtask)
-    {
-        // reset the future, so we are re-entrant in the IO-path
-        _nonBlockingWait = decltype(_nonBlockingWait){};
-        _timeSyncPolicy->RequestNextStep();
-    }
-    else
-    {
-        //Do only block if CompleteSimulationTask() is called outside of ExecuteSimTask
-        _nonBlockingWait.wait();
-    }
+    _logger->Debug("CompleteSimulationTask: calling _timeSyncPolicy->RequestNextStep");
+    _timeSyncPolicy->RequestNextStep();
 }
 
 void ParticipantController::ChangeState(ParticipantState newState, std::string reason)
