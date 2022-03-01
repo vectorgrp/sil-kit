@@ -138,9 +138,18 @@ if(IB_MW_ENABLE_VASIO)
     )
 endif()
 
-add_vib_test(FTestServiceDiscovery
+add_vib_test(ITestServiceDiscovery
     SOURCES
-      ServiceDiscoveryFTest.cpp
+      ServiceDiscoveryITest.cpp
+    LIBS
+      IbMwComAdapter
+      IbSimTestHarness
+      ${itest_extra_libs}
+)
+
+add_vib_test(FTestServiceDiscoveryPerf
+    SOURCES
+      ServiceDiscoveryPerfFTest.cpp
     LIBS
       IbMwComAdapter
       IbSimTestHarness

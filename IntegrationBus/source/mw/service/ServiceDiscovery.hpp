@@ -40,6 +40,8 @@ public: //IServiceDiscovery
     //!< Register a handler for asynchronous service creation notifications
     void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler) override;
     std::vector<ServiceDescriptor> GetRemoteServices() const override;
+    //!< React on a leaving participant 
+    void OnParticpantShutdown(const std::string& participantName) override;
 
 public: // Interfaces
 
@@ -51,7 +53,7 @@ public: // Interfaces
 private: //methods
     void ReceivedServiceRemoval(const ServiceDescriptor&);
     void ReceivedServiceAddition(const ServiceDescriptor&);
-    void CallHandlers(ServiceDiscoveryEvent::Type eventType, const ServiceDescriptor& serviceDescriptor);
+    void CallHandlers(ServiceDiscoveryEvent::Type eventType, const ServiceDescriptor& serviceDescriptor) const;
 
 private:
     IComAdapterInternal* _comAdapter{nullptr};

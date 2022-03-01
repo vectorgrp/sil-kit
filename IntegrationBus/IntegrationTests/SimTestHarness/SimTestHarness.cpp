@@ -78,8 +78,8 @@ public:
     {
         for (const auto& name : _syncParticipantNames)
         {
-            std::cout << "SimTestHarness: Sending ParticipantCommand::Init to participant \""
-                << name << "\"" << std::endl;
+            //std::cout << "SimTestHarness: Sending ParticipantCommand::Init to participant \""
+            //    << name << "\"" << std::endl;
             _controller->Initialize(name);
         }
     }
@@ -89,12 +89,6 @@ public:
         if (_isShuttingDown)
         {
             return;
-        }
-        if (_participantStates.count(status.participantName) > 0
-            && _participantStates[status.participantName] != status.state)
-        {
-            std::cout << "SimTestHarness: participant state of " << status.participantName << " is now " << status.state
-                      << std::endl;
         }
         _participantStates[status.participantName] = status.state;
 
@@ -111,7 +105,7 @@ public:
         {
             return;
         }
-        std::cout << "SimTestHarness: System State is now " << state << std::endl;
+        //std::cout << "SimTestHarness: System State is now " << state << std::endl;
         switch (state)
         {
         case ib::mw::sync::SystemState::Idle:
@@ -198,9 +192,8 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
         if (timeSlept >= testRunTimeout)
         {
             // need to stop the participants
-            std::cout << "SimTestHarness: participant "
-                << participant->Name()
-                << ": timeout " << testRunTimeout.count() << " reached. Stopping." << std::endl;
+            std::cout << "SimTestHarness: participant " << participant->Name() << ": timeout " << testRunTimeout.count()
+                      << " reached. Stopping." << std::endl;
             participant->Stop();
             timeRemaining = 0s;
             continue;
@@ -248,11 +241,9 @@ void SimTestHarness::AddParticipant(const std::string& participantName)
     // by default, we do no operation during simulation task, the user should override this
     auto* partCtrl = participant->ComAdapter()->GetParticipantController();
     partCtrl->SetSimulationTask([name = participant->Name()](auto, auto) {
-        //std::cout << name << ": SimulationTask not defined!" << std::endl;
     });
 
     partCtrl->SetInitHandler([name = participantName](auto){
-        std::cout << "SimTestHarness: "  << name << " Init was called!" << std::endl;
     });
 
     _simParticipants[participantName] = std::move(participant);

@@ -34,6 +34,9 @@ struct NullConnection
     void FlushSendBuffers() {}
     void ExecuteDeferred(std::function<void()> /*callback*/) {}
     void NotifyShutdown() {}
+    void RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> /*callback*/) {}
+
+
 };
 } // anonymous namespace
     

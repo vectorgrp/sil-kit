@@ -22,11 +22,11 @@ auto Now()
     return std::chrono::duration_cast<std::chrono::nanoseconds>(now);
 }
 
-class ServiceDiscoveryITest : public testing::Test
+class ServiceDiscoveryPerfFTest : public testing::Test
 {
 protected:
 
-    ServiceDiscoveryITest()
+    ServiceDiscoveryPerfFTest()
     {
     }
 
@@ -75,7 +75,7 @@ protected:
         std::chrono::duration<double> duration = Now() - start;
         std::cout << "Test with " << numberOfServices << " services startup time: " << duration.count() << "sec" << std::endl;
 
-        ASSERT_LT(duration, timeout) << "ServiceDiscovery shout not have substantial impact on startup time"
+        ASSERT_LT(duration, timeout) << "ServiceDiscovery should not have substantial impact on startup time"
             << ": duration=" << duration.count();
 
         auto ok = testHarness.Run(timeout); // short timeout is significant for this test
@@ -90,16 +90,16 @@ protected:
 
 // Stress testing the discovery mechanism, it shouldn't slow down the IB performance
 
-TEST_F(ServiceDiscoveryITest, test_discovery_performance_10services)
+TEST_F(ServiceDiscoveryPerfFTest, test_discovery_performance_10services)
 {
     ExecuteTest(10, 1s);
 }
-TEST_F(ServiceDiscoveryITest, test_discovery_performance_100services)
+TEST_F(ServiceDiscoveryPerfFTest, test_discovery_performance_100services)
 {
     ExecuteTest(100, 5s);
 }
 
-TEST_F(ServiceDiscoveryITest, test_discovery_performance_200services)
+TEST_F(ServiceDiscoveryPerfFTest, test_discovery_performance_200services)
 {
     ExecuteTest(200, 25s);
 }

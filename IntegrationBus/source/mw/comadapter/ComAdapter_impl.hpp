@@ -646,6 +646,10 @@ auto ComAdapter<IbConnectionT>::GetServiceDiscovery() -> service::IServiceDiscov
         controller = CreateInternalController<service::ServiceDiscovery>(
             "ServiceDiscovery", mw::ServiceType::InternalController, std::move(supplementalData),
                                                                  _participantName);
+        
+        _ibConnection.RegisterPeerShutdownCallback([controller](IVAsioPeer* peer) {
+            controller->OnParticpantShutdown(peer->GetInfo().participantName);
+        });
     }
     return controller;
 }

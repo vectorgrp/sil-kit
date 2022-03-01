@@ -104,7 +104,7 @@ void ServiceDiscovery::ReceivedServiceAddition(const ServiceDescriptor& serviceD
 }
 
 
-void ServiceDiscovery::CallHandlers(ServiceDiscoveryEvent::Type eventType, const ServiceDescriptor& serviceDescriptor)
+void ServiceDiscovery::CallHandlers(ServiceDiscoveryEvent::Type eventType, const ServiceDescriptor& serviceDescriptor) const
 {
     // CallHandlers must be used with a lock on _discoveryMx
     for (auto&& handler : _handlers)
@@ -195,6 +195,26 @@ std::vector<ServiceDescriptor> ServiceDiscovery::GetRemoteServices() const
     return createdServices;
 }
 
+
+void ServiceDiscovery::OnParticpantShutdown(const std::string& participantName)
+{
+    if (participantName == _participantName)
+    {
+        return;
+    }
+
+    // Locally announce removal of all services from the leaving participant
+    std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
+    auto announcedIt = _announcedServices.find(participantName);
+    if (announcedIt != _announcedServices.end())
+    {
+        for (const auto serviceMap : (*announcedIt).second)
+        {
+            CallHandlers(ServiceDiscoveryEvent::Type::ServiceRemoved, serviceMap.second);
+        }
+        _announcedServices.erase(announcedIt);
+    }
+}
 
 void ServiceDiscovery::RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler)
 {
