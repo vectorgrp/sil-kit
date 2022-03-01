@@ -215,9 +215,9 @@ auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonical
     if (controllerIter != canControllers.end())
     {
         controllerConfig = *controllerIter;
-        if (controllerConfig.network != networkName)
+        if (controllerConfig.network.has_value() && controllerConfig.network.value() != networkName)
         {
-            PrintWrongNetworkNameForControllerWarning(canonicalName, networkName, controllerConfig.network,
+            PrintWrongNetworkNameForControllerWarning(canonicalName, networkName, *controllerConfig.network,
                                                       ib::cfg::v1::datatypes::NetworkType::CAN);
         }
     }
@@ -257,9 +257,9 @@ auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonical
     if (controllerConfigIter != ethernetControllerConfigs.end())
     {
         controllerConfig = *controllerConfigIter;
-        if (controllerConfig.network != networkName)
+        if (controllerConfig.network.has_value() && controllerConfig.network.value() != networkName)
         {
-            PrintWrongNetworkNameForControllerWarning(canonicalName, networkName, controllerConfig.network,
+            PrintWrongNetworkNameForControllerWarning(canonicalName, networkName, *controllerConfig.network,
                                                       ib::cfg::v1::datatypes::NetworkType::Ethernet);
         }
     }
@@ -297,9 +297,9 @@ auto ComAdapter<IbConnectionT>::CreateFlexrayController(const std::string& canon
     if (controllerConfigIter != flexRayControllerConfigs.end())
     {
         controllerConfig = *controllerConfigIter;
-        if (controllerConfig.network != networkName)
+        if (controllerConfig.network.has_value() && controllerConfig.network.value() != networkName)
         {
-            PrintWrongNetworkNameForControllerWarning(canonicalName, networkName, controllerConfig.network,
+            PrintWrongNetworkNameForControllerWarning(canonicalName, networkName, *controllerConfig.network,
                                                       ib::cfg::v1::datatypes::NetworkType::FlexRay);
         }
     }
@@ -337,9 +337,9 @@ auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonical
     if (controllerConfigIter != linControllerConfigs.end())
     {
         controllerConfig = *controllerConfigIter;
-        if (controllerConfig.network != networkName)
+        if (controllerConfig.network.has_value() && controllerConfig.network.value() != networkName)
         {
-            PrintWrongNetworkNameForControllerWarning(canonicalName, networkName, controllerConfig.network,
+            PrintWrongNetworkNameForControllerWarning(canonicalName, networkName, *controllerConfig.network,
                                                       ib::cfg::v1::datatypes::NetworkType::LIN);
         }
     }
@@ -450,9 +450,9 @@ auto ComAdapter<IbConnectionT>::CreateDataSubscriber(const std::string& topic,
     if (it != cfgs.end())
     {
         controllerConfig = *it;
-        if (controllerConfig.network != topic)
+        if (controllerConfig.network.has_value() && controllerConfig.network.value() != topic)
         {
-            PrintWrongNetworkNameForControllerWarning(topic, topic, controllerConfig.network,
+            PrintWrongNetworkNameForControllerWarning(topic, topic, *controllerConfig.network,
                                                       ib::cfg::v1::datatypes::NetworkType::Data);
         }
     }
@@ -560,9 +560,9 @@ auto ComAdapter<IbConnectionT>::CreateRpcServer(const std::string& functionName,
     if (it != cfgs.end())
     {
         controllerConfig = *it;
-        if (controllerConfig.network != functionName)
+        if (controllerConfig.network.has_value() && controllerConfig.network.value() != functionName)
         {
-            PrintWrongNetworkNameForControllerWarning(functionName, functionName, controllerConfig.network,
+            PrintWrongNetworkNameForControllerWarning(functionName, functionName, *controllerConfig.network,
                                                       ib::cfg::v1::datatypes::NetworkType::RPC);
         }
     }
@@ -1308,7 +1308,7 @@ auto ComAdapter<IbConnectionT>::CreateController(const ConfigT& config,
     }
 
     // If possible, load controller from cache
-    auto* controllerPtr = GetController<ControllerT>(config.network, config.name);
+    auto* controllerPtr = GetController<ControllerT>(*config.network, config.name);
     if (controllerPtr != nullptr)
     {
         // We cache the controller and return it here.
@@ -1322,7 +1322,7 @@ auto ComAdapter<IbConnectionT>::CreateController(const ConfigT& config,
     auto localEndpoint = _localEndpointId++;
 
     auto descriptor = ServiceDescriptor{};
-    descriptor.SetNetworkName(config.network);
+    descriptor.SetNetworkName(*config.network);
     descriptor.SetParticipantName(_participantName);
     descriptor.SetServiceName(config.name);
     descriptor.SetNetworkType(config.networkType);
@@ -1332,8 +1332,8 @@ auto ComAdapter<IbConnectionT>::CreateController(const ConfigT& config,
 
     controller->SetServiceDescriptor(std::move(descriptor));
 
-    _ibConnection.RegisterIbService(config.network, localEndpoint, controllerPtr);
-    const auto qualifiedName = config.network + "/" + config.name;
+    _ibConnection.RegisterIbService(*config.network, localEndpoint, controllerPtr);
+    const auto qualifiedName = *config.network + "/" + config.name;
     controllerMap[qualifiedName] = std::move(controller);
 
     // TODO uncomment once trace & replay work again

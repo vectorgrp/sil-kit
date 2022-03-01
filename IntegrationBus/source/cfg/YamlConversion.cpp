@@ -24,7 +24,7 @@ auto macaddress_encode(const ib::util::Optional<std::array<uint8_t, 6>>& macAddr
     }
 }
 
-auto macaddress_decode(const YAML::Node& node) ->ib::util::Optional < std::array<uint8_t, 6>>
+auto macaddress_decode(const YAML::Node& node) -> ib::util::Optional<std::array<uint8_t, 6>>
 {
     std::array<uint8_t, 6> macAddress;
 
@@ -379,7 +379,7 @@ Node Converter::encode(const CanController& obj)
     static const CanController defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    non_default_encode(obj.network, node, "Network", defaultObj.network);
+    optional_encode(obj.network, node, "Network");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
     return node;
@@ -400,7 +400,7 @@ Node Converter::encode(const LinController& obj)
     static const LinController defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    non_default_encode(obj.network, node, "Network", defaultObj.network);
+    optional_encode(obj.network, node, "Network");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
     return node;
@@ -421,7 +421,7 @@ Node Converter::encode(const EthernetController& obj)
     static const EthernetController defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    non_default_encode(obj.network, node, "Network", defaultObj.network);
+    optional_encode(obj.network, node, "Network");
     macaddress_encode(obj.macAddress, node, "MacAddress");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
@@ -699,7 +699,7 @@ Node Converter::encode(const FlexRayController& obj)
     static const FlexRayController defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    non_default_encode(obj.network, node, "Network", defaultObj.network);
+    optional_encode(obj.network, node, "Network");
     if (obj.clusterParameters.has_value())
     {
         node["ClusterParameters"] = encode(obj.clusterParameters.value());
@@ -734,7 +734,7 @@ Node Converter::encode(const DataPublisher& obj)
     static const DataPublisher defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    non_default_encode(obj.network, node, "Network", defaultObj.network);
+    optional_encode(obj.network, node, "Network");
     //optional_encode(obj.history, node, "History");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
@@ -757,7 +757,7 @@ Node Converter::encode(const DataSubscriber& obj)
     static const DataSubscriber defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    non_default_encode(obj.network, node, "Network", defaultObj.network);
+    optional_encode(obj.network, node, "Network");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
     return node;
@@ -778,7 +778,7 @@ Node Converter::encode(const RpcServer& obj)
     static const RpcServer defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    non_default_encode(obj.network, node, "Network", defaultObj.network);
+    optional_encode(obj.network, node, "Network");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
     return node;
@@ -799,7 +799,7 @@ Node Converter::encode(const RpcClient& obj)
     static const RpcClient defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    non_default_encode(obj.network, node, "Network", defaultObj.network);
+    optional_encode(obj.network, node, "Network");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
     return node;

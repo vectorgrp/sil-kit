@@ -186,17 +186,17 @@ TEST_F(YamlParserTest, yaml_complete_configuration)
 
     EXPECT_TRUE(config.canControllers.size() == 2);
     EXPECT_TRUE(config.canControllers.at(0).name == "CAN1");
-    EXPECT_TRUE(config.canControllers.at(0).network.empty());
+    EXPECT_TRUE(!config.canControllers.at(0).network.has_value());
     EXPECT_TRUE(config.canControllers.at(1).name == "MyCAN2");
-    EXPECT_TRUE(config.canControllers.at(1).network == "CAN2");
+    EXPECT_TRUE(config.canControllers.at(1).network.has_value() && config.canControllers.at(1).network.value() == "CAN2");
 
     EXPECT_TRUE(config.linControllers.size() == 1);
     EXPECT_TRUE(config.linControllers.at(0).name == "SimpleEcu1_LIN1");
-    EXPECT_TRUE(config.linControllers.at(0).network == "LIN1");
+    EXPECT_TRUE(config.linControllers.at(0).network.has_value() && config.linControllers.at(0).network.value() == "LIN1");
 
     EXPECT_TRUE(config.flexRayControllers.size() == 1);
     EXPECT_TRUE(config.flexRayControllers.at(0).name == "FlexRay1");
-    EXPECT_TRUE(config.flexRayControllers.at(0).network.empty());
+    EXPECT_TRUE(!config.flexRayControllers.at(0).network.has_value());
 
     EXPECT_TRUE(config.dataPublishers.size() == 1);
     EXPECT_TRUE(config.dataPublishers.at(0).name == "DataPubSubGroundTruth");

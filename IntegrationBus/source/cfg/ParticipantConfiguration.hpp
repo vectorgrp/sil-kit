@@ -33,7 +33,7 @@ struct InternalController
     static constexpr NetworkType networkType = NetworkType::Undefined;
 
     std::string name;
-    std::string network;
+    ib::util::Optional<std::string> network;
 };
 
 // ================================================================================
@@ -46,7 +46,7 @@ struct CanController
     static constexpr NetworkType networkType = NetworkType::CAN;
 
     std::string name;
-    std::string network;
+    ib::util::Optional<std::string> network;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -62,7 +62,7 @@ struct LinController
     static constexpr NetworkType networkType = NetworkType::LIN;
 
     std::string name;
-    std::string network;
+    ib::util::Optional<std::string> network;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -78,7 +78,7 @@ struct EthernetController
     static constexpr NetworkType networkType = NetworkType::Ethernet;
 
     std::string name;
-    std::string network;
+    ib::util::Optional<std::string> network;
 
     typedef std::array<uint8_t, 6> MacAddress;
     ib::util::Optional<MacAddress> macAddress;
@@ -97,7 +97,7 @@ struct FlexRayController
     static constexpr NetworkType networkType = NetworkType::FlexRay;
 
     std::string name;
-    std::string network;
+    ib::util::Optional<std::string> network;
 
     ib::util::Optional<sim::fr::ClusterParameters> clusterParameters;
     ib::util::Optional<sim::fr::NodeParameters> nodeParameters;
@@ -117,7 +117,7 @@ struct DataPublisher
     static constexpr NetworkType networkType = NetworkType::Data;
 
     std::string name;
-    std::string network;
+    ib::util::Optional<std::string> network;
 
     //! \brief History length of a DataPublisher.
     ib::util::Optional<size_t> history{ 0 };
@@ -132,7 +132,7 @@ struct DataSubscriber
     static constexpr NetworkType networkType = NetworkType::Data;
 
     std::string name;
-    std::string network;
+    ib::util::Optional<std::string> network;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -148,7 +148,7 @@ struct RpcServer
     static constexpr NetworkType networkType = NetworkType::RPC;
 
     std::string name;
-    std::string network;
+    ib::util::Optional<std::string> network;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -160,7 +160,7 @@ struct RpcClient
     static constexpr NetworkType networkType = NetworkType::RPC;
 
     std::string name;
-    std::string network;
+    ib::util::Optional<std::string> network;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
