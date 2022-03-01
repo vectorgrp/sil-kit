@@ -38,7 +38,7 @@ struct CanMessage
     } flags; //!< CAN Arbitration and Control Field Flags
     uint8_t dlc : 4; //!< Data Length Code - determined by the Network Simulator
     std::vector<uint8_t> dataField; //!< CAN Datafield
-    TransmitDirection direction; //!< Receive/Transmit direction
+    TransmitDirection direction{TransmitDirection::Undefined}; //!< Receive/Transmit direction
     void* userContext; //!< Optional pointer provided by user when sending the frame
 };
 

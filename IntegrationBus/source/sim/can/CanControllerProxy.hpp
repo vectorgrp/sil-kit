@@ -120,7 +120,6 @@ private:
     > _callbacks;
 
     extensions::Tracer _tracer;
-    std::map<CanTxId, CanMessage> _transmittedMessages;
 };
 
 // ================================================================================

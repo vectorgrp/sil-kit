@@ -11,12 +11,11 @@ namespace sim {
  */
 enum class TransmitDirection : uint8_t
 {
-    /*!
-    */
+    // Undefined
+    Undefined = 0,
+    // Transmit
     TX = 1,
-
-    /*!
-    */
+    // Receive
     RX = 2,
 };
 using DirectionMask = uint8_t;

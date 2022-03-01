@@ -67,9 +67,6 @@ auto CanControllerProxy::SendMessage(const CanMessage& msg, void* userContext) -
     msgCopy.transmitId = MakeTxId();
     msgCopy.userContext = userContext;
 
-    //keep a copy until acknowledged by network simulator
-    _transmittedMessages[msgCopy.transmitId] = msg;
-
     _comAdapter->SendIbMessage(this, msgCopy);
     return msgCopy.transmitId;
 }
@@ -80,9 +77,6 @@ auto CanControllerProxy::SendMessage(CanMessage&& msg, void* userContext) -> Can
 
     msg.transmitId = txId;
     msg.userContext = userContext;
-
-    //keep a copy until acknowledged by network simulator
-    _transmittedMessages[msg.transmitId] = msg;
 
     _comAdapter->SendIbMessage(this, std::move(msg));
 
@@ -125,44 +119,13 @@ void CanControllerProxy::RegisterHandler(CallbackT<MsgT> handler, std::function<
 
 void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMessage& msg)
 {
-    auto msgCopy = msg;
-    msgCopy.direction = TransmitDirection::RX;
-
-    _tracer.Trace(ib::sim::TransmitDirection::RX, msgCopy.timestamp, msgCopy);
-
-    CallHandlers(msgCopy);
+    _tracer.Trace(ib::sim::TransmitDirection::RX, msg.timestamp, msg);
+    CallHandlers(msg);
 }
 
 void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanTransmitAcknowledge& msg)
 {
-    bool handlerCalled = false;
-
-    if (msg.status == CanTransmitStatus::Transmitted)
-    {
-        auto transmittedMsg = _transmittedMessages.find(msg.transmitId);
-        if (transmittedMsg != _transmittedMessages.end())
-        {
-            _tracer.Trace(ib::sim::TransmitDirection::TX, msg.timestamp,
-                transmittedMsg->second);
-            CallHandlers(msg);
-            auto msgCopy = transmittedMsg->second;
-            msgCopy.direction = TransmitDirection::TX;
-            CallHandlers(msgCopy);
-            handlerCalled = true;
-        }
-
-    }
-
-    if (_transmittedMessages.count(msg.transmitId) > 0)
-    {
-        _transmittedMessages.erase(msg.transmitId);
-    }
-
-    if (!handlerCalled)
-    {
-        CallHandlers(msg);
-    }
-
+    CallHandlers(msg);
 }
 
 void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanControllerStatus& msg)

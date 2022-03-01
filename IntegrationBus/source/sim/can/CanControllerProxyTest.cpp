@@ -79,6 +79,7 @@ TEST(CanControllerProxyTest, receive_can_message)
     canController.RegisterReceiveMessageHandler(std::bind(&CanControllerProxyCallbacks::ReceiveMessage, &callbackProvider, _1, _2));
 
     CanMessage msg{};
+    msg.direction = ib::sim::TransmitDirection::RX;
 
     EXPECT_CALL(callbackProvider, ReceiveMessage(&canController, msg))
         .Times(1);
