@@ -398,6 +398,19 @@ typedef void (*ib_ParticipantStateHandler_t)(void* context, ib_SimulationPartici
 IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_RegisterParticipantStateHandler(ib_SimulationParticipant* participant,
   void* context, ib_ParticipantStateHandler_t handler);
 
+
+/*! \brief Set the names of the participants that are required for the simulation
+  *
+  * Only these participants are taken into account to define the system state.
+  * Further, the simulation time propagation also relies on the required participants.
+  * This information is distributed to other participants, so it only has to be set by a
+  * single member of the simulation.
+  *
+  * \param requiredParticipantNames The list of required participant names
+  */
+IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetRequiredParticipants(
+    ib_SimulationParticipant* participant, const ib_StringList* requiredParticipantNames);
+
 IB_END_DECLS
 
 #pragma pack(pop)

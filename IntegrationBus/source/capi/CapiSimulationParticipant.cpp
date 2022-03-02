@@ -10,6 +10,9 @@
 #include "ib/mw/sync/string_utils.hpp"
 #include "IComAdapterInternal.hpp"
 
+#include "CapiImpl.h"
+#include "TypeConversion.hpp"
+
 #include <memory>
 #include <string>
 #include <iostream>
@@ -17,7 +20,6 @@
 #include <map>
 #include <mutex>
 #include <cstring>
-#include "CapiImpl.h"
 
 extern "C" {
 
@@ -441,7 +443,6 @@ ib_ReturnCode ib_SimulationParticipant_RegisterSystemStateHandler(ib_SimulationP
   CAPI_LEAVE
 }
 
-
 ib_ReturnCode ib_SimulationParticipant_RegisterParticipantStateHandler(ib_SimulationParticipant* participant, void* context, ib_ParticipantStateHandler_t handler)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -458,6 +459,23 @@ ib_ReturnCode ib_SimulationParticipant_RegisterParticipantStateHandler(ib_Simula
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
+}
+
+ib_ReturnCode ib_SimulationParticipant_SetRequiredParticipants(ib_SimulationParticipant* participant,
+                                                               const ib_StringList* requiredParticipantNames)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_POINTER_PARAMETER(requiredParticipantNames);
+    CAPI_ENTER
+    {
+        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        auto* systemController = comAdapter->GetSystemController();
+        std::vector<std::string> cppNames;
+        assign(cppNames, requiredParticipantNames);
+        systemController->SetRequiredParticipants(cppNames);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
 }
 
 }

@@ -9,12 +9,41 @@ namespace {
     using namespace ib::mw::sync;
     using ib::mw::test::DummyComAdapter;
 
+    void Create_StringList(ib_StringList** outStringList, const char** strings, uint32_t numStrings)
+    {
+        ib_StringList* newStrings;
+        size_t stringsSize = numStrings * sizeof(char*);
+        size_t stringListSize = sizeof(ib_StringList) + stringsSize;
+        newStrings = (ib_StringList*)malloc(stringListSize);
+        if (newStrings != nullptr)
+        {
+            newStrings->numStrings = numStrings;
+            for (uint32_t i = 0; i < numStrings; i++)
+            {
+                auto len = strlen(strings[i]) + 1;
+                newStrings->strings[i] = (char*)malloc(len);
+                if (newStrings->strings[i] != nullptr)
+                {
+                    strcpy((char*)newStrings->strings[i], strings[i]);
+                }
+            }
+        }
+        *outStringList = newStrings;
+    }
+
 	class CapiParticipantStateHandlingTest : public testing::Test
 	{
 	protected: 
         ib::mw::test::DummyComAdapter mockComAdapter;
 
-        CapiParticipantStateHandlingTest() {}
+        CapiParticipantStateHandlingTest() 
+        {
+            uint32_t numNames = 2;
+            const char* names[2] = {"Participant1", "Participant2"};
+            Create_StringList(&participantNames, names, numNames);
+        }
+
+        ib_StringList* participantNames;
 
 	};
 
@@ -150,6 +179,12 @@ namespace {
         returnCode = ib_SimulationParticipant_RegisterSystemStateHandler((ib_SimulationParticipant*)&mockComAdapter, nullptr, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
+        returnCode = ib_SimulationParticipant_SetRequiredParticipants(nullptr, participantNames);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_SimulationParticipant_SetRequiredParticipants((ib_SimulationParticipant*)&mockComAdapter, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
     }
 
     TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_function_mapping)
@@ -225,6 +260,10 @@ namespace {
 
         EXPECT_CALL(mockComAdapter.mockSystemController, Shutdown()).Times(testing::Exactly(1));
         returnCode = ib_SimulationParticipant_Shutdown((ib_SimulationParticipant*)&mockComAdapter);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockComAdapter.mockSystemController, SetRequiredParticipants(testing::_)).Times(testing::Exactly(1));
+        returnCode = ib_SimulationParticipant_SetRequiredParticipants((ib_SimulationParticipant*)&mockComAdapter, participantNames);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
     }

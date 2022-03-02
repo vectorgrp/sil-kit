@@ -44,11 +44,50 @@ General API
 SimulationParticipant API
 -------------------------
 
+Most creator functions for other objects (such as bus controllers) require an ib_SimulationParticipant, 
+which is the factory object, as input parameter.
+
+Participant creation
+~~~~~~~~~~~~~~~~~~~~
 .. doxygenfunction:: ib_SimulationParticipant_Create
 .. doxygenfunction:: ib_SimulationParticipant_Destroy
 
-Most creator functions for other objects (such as bus controllers) require an ib_SimulationParticipant, 
-which is the factory object, as input parameter.
+State handlers
+~~~~~~~~~~~~~~
+.. doxygenfunction:: ib_SimulationParticipant_SetInitHandler
+.. doxygenfunction:: ib_SimulationParticipant_SetStopHandler
+.. doxygenfunction:: ib_SimulationParticipant_SetShutdownHandler
+
+Simulation tasks
+~~~~~~~~~~~~~~~~
+.. doxygenfunction:: ib_SimulationParticipant_SetPeriod
+.. doxygenfunction:: ib_SimulationParticipant_SetSimulationTask
+.. doxygenfunction:: ib_SimulationParticipant_SetSimulationTaskAsync
+.. doxygenfunction:: ib_SimulationParticipant_CompleteSimulationTask
+
+Running
+~~~~~~~
+.. doxygenfunction:: ib_SimulationParticipant_Run
+.. doxygenfunction:: ib_SimulationParticipant_RunAsync
+.. doxygenfunction:: ib_SimulationParticipant_WaitForRunAsyncToComplete
+
+System control
+~~~~~~~~~~~~~~
+.. doxygenfunction:: ib_SimulationParticipant_Initialize
+.. doxygenfunction:: ib_SimulationParticipant_ReInitialize
+.. doxygenfunction:: ib_SimulationParticipant_RunSimulation
+.. doxygenfunction:: ib_SimulationParticipant_StopSimulation
+.. doxygenfunction:: ib_SimulationParticipant_Pause
+.. doxygenfunction:: ib_SimulationParticipant_Continue
+.. doxygenfunction:: ib_SimulationParticipant_Shutdown
+.. doxygenfunction:: ib_SimulationParticipant_PrepareColdswap
+.. doxygenfunction:: ib_SimulationParticipant_ExecuteColdswap
+.. doxygenfunction:: ib_SimulationParticipant_GetParticipantState
+.. doxygenfunction:: ib_SimulationParticipant_GetSystemState
+.. doxygenfunction:: ib_SimulationParticipant_RegisterSystemStateHandler
+.. doxygenfunction:: ib_SimulationParticipant_RegisterParticipantStateHandler
+.. doxygenfunction:: ib_SimulationParticipant_SetRequiredParticipants
+
 
 Can API
 -------

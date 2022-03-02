@@ -26,3 +26,14 @@ static void assign(ib_KeyValueList** cLabels, const std::map<std::string, std::s
         (*cLabels)->labels[i++] = {kv.first.c_str(), kv.second.c_str()};
     }
 }
+
+static void assign(std::vector<std::string>& cppStrings, const ib_StringList* cStrings)
+{
+    if (cStrings)
+    {
+        for (uint32_t i = 0; i < cStrings->numStrings; i++)
+        {
+            cppStrings.push_back(cStrings->strings[i]);
+        }
+    }
+}
