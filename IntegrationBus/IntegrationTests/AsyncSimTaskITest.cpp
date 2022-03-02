@@ -146,4 +146,81 @@ TEST(AsyncSimTaskITest, test_async_simtask_completion_from_foreign_thread)
         << " expectedTime=" << expectedTime.count()
         << " syncTime=" << syncTime.count();
 }
+
+TEST(AsyncSimTaskITest, test_async_simtask_different_periods)
+{
+    // The async and sync participant use different time periods to validate the that a slower participant does
+    // not execute its simtask too often.
+
+    SimTestHarness testHarness({"Sync", "Async"}, 42);
+
+    auto syncTime{0ns};
+    auto asyncTime{0ns};
+    const int periodFactor = 10;
+
+    auto* sync = testHarness.GetParticipant("Sync")->ComAdapter()->GetParticipantController();
+    auto* asyncComAdapter = testHarness.GetParticipant("Async")->ComAdapter();
+    auto* async = testHarness.GetParticipant("Async")->ComAdapter()->GetParticipantController();
+    int countSync = 0;
+    int countAsync = 0;
+    sync->SetPeriod(1ms);
+    sync->SetSimulationTask([&syncTime, &countSync](auto now) {
+        syncTime = now;
+        countSync++;
+    });
+
+    async->SetPeriod(periodFactor * 1ms);
+    async->SetSimulationTaskAsync([&](auto now, auto) {
+        asyncTime = now;
+        countAsync++;
+        if (countAsync > periodFactor * 100000)
+        {
+            asyncComAdapter->GetSystemController()->Stop();
+        }
+        async->CompleteSimulationTask();
+    });
+    // validate that they are called approximately equally often
+    ASSERT_TRUE(std::abs(countAsync * periodFactor - countSync) < periodFactor);
+}
+
+
+TEST(AsyncSimTaskITest, test_async_simtask_multiple_completion_calls)
+{
+    // Verify that multiple CompleteSimTask calls do not trigger malicious behaviour
+
+    SimTestHarness testHarness({"Sync", "Async"}, 42);
+
+    auto syncTime{0ns};
+    auto asyncTime{0ns};
+    const int periodFactor = 7;
+
+    auto* sync = testHarness.GetParticipant("Sync")->ComAdapter()->GetParticipantController();
+    auto* asyncComAdapter = testHarness.GetParticipant("Async")->ComAdapter();
+    auto* async = testHarness.GetParticipant("Async")->ComAdapter()->GetParticipantController();
+    int countSync = 0;
+    int countAsync = 0;
+    sync->SetPeriod(1ms);
+    sync->SetSimulationTask([&syncTime, &countSync](auto now) {
+        ASSERT_TRUE(now - syncTime == 1ms);
+        syncTime = now;
+        countSync++;
+    });
+
+    async->SetPeriod(periodFactor * 1ms);
+    async->SetSimulationTaskAsync([&](auto now, auto) {
+        ASSERT_TRUE(now - asyncTime == periodFactor * 1ms);
+        asyncTime = now;
+        countAsync++;
+        if (countAsync > periodFactor * 100000)
+        {
+            asyncComAdapter->GetSystemController()->Stop();
+        }
+        async->CompleteSimulationTask();
+        async->CompleteSimulationTask();
+        async->CompleteSimulationTask();
+    });
+    // validate that they are called approximately equally often
+    ASSERT_TRUE(std::abs(countAsync * periodFactor - countSync) < periodFactor);
+}
+
 } // anonymous namespace
