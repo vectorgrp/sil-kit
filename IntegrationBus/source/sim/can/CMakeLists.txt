@@ -28,8 +28,10 @@ add_vib_test(TestSimCanController
     SOURCES 
         CanControllerTest.cpp 
         CanControllerProxyTest.cpp 
+        CanControllerFacadeTest.cpp
     LIBS 
         IbSimCan 
         IbMwMockComAdapter
         IbTracing
+        IbMwMockNullConnection
 )

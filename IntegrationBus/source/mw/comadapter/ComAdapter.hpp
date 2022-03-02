@@ -79,7 +79,7 @@ public:
     ComAdapter() = default;
     ComAdapter(const ComAdapter&) = default;
     ComAdapter(ComAdapter&&) = default;
-    ComAdapter(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+    ComAdapter(cfg::datatypes::ParticipantConfiguration participantConfig,
                const std::string& participantName, bool isSynchronized);
 
 public:
@@ -271,7 +271,7 @@ public:
     inline auto GetIbConnection() -> IbConnectionT& { return _ibConnection; }
 
 private:
-    void PrintWrongNetworkNameForControllerWarning(const std::string& canonicalName, 
+    void LogWrongNetworkNameForController(const std::string& canonicalName, 
                                                    const std::string& networkName,
                                                    const std::string& configuredNetworkName,
                                                    cfg::v1::datatypes::NetworkType networkType);
@@ -320,7 +320,7 @@ private:
     // private members
     std::string _participantName;
     bool _isSynchronized{ false };
-    std::shared_ptr<ib::cfg::v1::datatypes::ParticipantConfiguration> _participantConfig;
+    const ib::cfg::datatypes::ParticipantConfiguration _participantConfig;
     ParticipantId _participantId{0};
 
     std::shared_ptr<sync::ITimeProvider> _timeProvider{nullptr};

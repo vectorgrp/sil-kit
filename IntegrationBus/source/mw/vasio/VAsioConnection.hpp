@@ -69,7 +69,7 @@ public:
     VAsioConnection() = default;
     VAsioConnection(const VAsioConnection&) = delete; //clang warning: this is implicity deleted by asio::io_context
     VAsioConnection(VAsioConnection&&) = delete; // ditto asio::io_context
-    VAsioConnection(std::shared_ptr<ib::cfg::v1::datatypes::ParticipantConfiguration> config, std::string participantName, ParticipantId participantId);
+    VAsioConnection(ib::cfg::datatypes::ParticipantConfiguration config, std::string participantName, ParticipantId participantId);
     ~VAsioConnection();
 
 public:
@@ -143,7 +143,7 @@ public:
         asio::post(_ioContext.get_executor(), std::move(function));
     }
 
-    inline auto Config() const -> std::shared_ptr<ib::cfg::v1::datatypes::ParticipantConfiguration>
+    inline auto Config() const -> const ib::cfg::datatypes::ParticipantConfiguration&
     {
         return _config;
     }
@@ -400,7 +400,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    std::shared_ptr<ib::cfg::v1::datatypes::ParticipantConfiguration> _config;
+    ib::cfg::datatypes::ParticipantConfiguration _config;
     std::string _participantName;
     ParticipantId _participantId{0};
     logging::ILogger* _logger{nullptr};

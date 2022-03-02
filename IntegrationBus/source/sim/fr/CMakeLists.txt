@@ -27,9 +27,11 @@ add_vib_test(TestSimFrValidation SOURCES ValidationTest.cpp LIBS IbSimFlexRay)
 add_vib_test(TestSimFrController 
     SOURCES 
         FrControllerProxyTest.cpp 
+        FrControllerFacadeTest.cpp 
     LIBS 
         IbSimFlexRay
         IbMwMockComAdapter
         IbTracing
         IbConfiguration
+        IbMwMockNullConnection
 )

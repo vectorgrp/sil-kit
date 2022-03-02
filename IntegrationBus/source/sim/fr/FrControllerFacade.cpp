@@ -17,7 +17,6 @@ FrControllerFacade::FrControllerFacade(mw::IComAdapterInternal* comAdapter, cfg:
     _currentController = _frControllerProxy.get();
 }
 
-// CHECK PROXY BEHAVIOR
 void FrControllerFacade::Configure(const ControllerConfig& config)
 {
     _currentController->Configure(config);

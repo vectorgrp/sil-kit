@@ -49,6 +49,11 @@ public:
     auto value() const -> const T& { return _value; };
     auto value() -> T& { return _value; };
 
+    /// <summary>
+    /// Be aware that this does NOT actually delete the value!
+    /// </summary>
+    void reset() { _has_value = false; }
+
 private:
     // ----------------------------------------
     // private members

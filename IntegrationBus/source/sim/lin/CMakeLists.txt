@@ -29,8 +29,10 @@ add_vib_test(TestSimLin
         LinTestUtils.hpp
         LinControllerTest.cpp
         LinControllerProxyTest.cpp
+        LinControllerFacadeTest.cpp
     LIBS
         IbSimLin
         IbMwMockComAdapter
         IbTracing
+        IbMwMockNullConnection
 )

@@ -193,7 +193,7 @@ struct ParticipantTimeProvider : public sync::ITimeProvider
 };
 
 ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, const std::string& name,
-                                             bool isSynchronized, const cfg::v1::datatypes::HealthCheck& healthCheckConfig)
+                                             bool isSynchronized, const cfg::datatypes::HealthCheck& healthCheckConfig)
     : _comAdapter{comAdapter}
     , _isSynchronized{isSynchronized}
     , _logger{comAdapter->GetLogger()}

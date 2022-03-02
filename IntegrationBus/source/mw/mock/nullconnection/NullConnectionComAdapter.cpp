@@ -1,6 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "NullConnectionComAdapter.hpp"
+#include "CreateComAdapter.hpp"
 
 #include "ib/mw/logging/ILogger.hpp"
 
@@ -13,7 +14,7 @@ namespace mw {
 namespace {
 struct NullConnection
 {
-    NullConnection(std::shared_ptr<ib::cfg::v1::datatypes::ParticipantConfiguration> /*config*/, std::string /*participantName*/, ib::mw::ParticipantId /*participantId*/) {}
+    NullConnection(ib::cfg::datatypes::ParticipantConfiguration /*config*/, std::string /*participantName*/, ib::mw::ParticipantId /*participantId*/) {}
 
     void SetLogger(logging::ILogger* /*logger*/) {}
     void JoinDomain(uint32_t /*domainId*/) {}
@@ -44,7 +45,8 @@ auto CreateNullConnectionComAdapterImpl(std::shared_ptr<ib::cfg::IParticipantCon
                                         const std::string& participantName, bool isSynchronized)
     -> std::unique_ptr<IComAdapterInternal>
 {
-    return std::make_unique<ComAdapter<NullConnection>>(std::move(participantConfig), participantName, isSynchronized);
+    auto&& cfg = ib::mw::ValidateAndSanitizeConfig(participantConfig, participantName);
+    return std::make_unique<ComAdapter<NullConnection>>(std::move(cfg), participantName, isSynchronized);
 }
 
 } // namespace mw

@@ -44,8 +44,8 @@ void FrControllerProxy::Configure(const ControllerConfig& config)
     Validate(cfg.clusterParams);
     Validate(cfg.nodeParams);
 
-    _bufferConfigs = config.bufferConfigs;
-    SendIbMessage(config);
+    _bufferConfigs = cfg.bufferConfigs;
+    SendIbMessage(cfg);
 }
 
 void FrControllerProxy::ReconfigureTxBuffer(uint16_t txBufferIdx, const TxBufferConfig& config)

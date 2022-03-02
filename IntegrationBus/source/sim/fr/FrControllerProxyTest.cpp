@@ -63,6 +63,7 @@ protected:
     FrControllerProxyTest()
         : proxy(&comAdapter, FrControllerProxyTest::GetDummyConfig())
         , proxyFrom(&comAdapter, FrControllerProxyTest::GetDummyConfig())
+        , proxyConfigured(&comAdapter, FrControllerProxyTest::GetDummyConfigWithValues())
     {
         proxy.SetServiceDescriptor(from_endpointAddress(proxyAddress));
 
@@ -81,19 +82,30 @@ protected:
     MockComAdapter comAdapter;
     FrControllerProxy proxy;
     FrControllerProxy proxyFrom;
+    FrControllerProxy proxyConfigured;
     Callbacks callbacks;
 
-    ib::cfg::v1::datatypes::FlexRayController dummyConfig;
+    ib::cfg::datatypes::FlexRayController dummyConfig;
 
-    auto static GetDummyConfig() -> ib::cfg::v1::datatypes::FlexRayController 
+    auto static GetDummyConfig() -> ib::cfg::datatypes::FlexRayController 
     {
-        ib::cfg::v1::datatypes::FlexRayController dummyConfig;
+        ib::cfg::datatypes::FlexRayController dummyConfig;
         dummyConfig.network = "testNetwork";
         dummyConfig.name = "testController";
         return dummyConfig;
     }
+    auto static GetDummyConfigWithValues() -> ib::cfg::datatypes::FlexRayController
+    {
+        ib::cfg::datatypes::FlexRayController dummyConfig;
+        dummyConfig.network = "testNetwork";
+        dummyConfig.name = "testController";
+        dummyConfig.clusterParameters = MakeValidClusterParams();
+        dummyConfig.nodeParameters = MakeValidNodeParams();
+        dummyConfig.txBufferConfigurations.push_back(MakeValidTxBufferConfig());
+        return dummyConfig;
+    }
 
-    auto MakeValidClusterParams() -> ClusterParameters
+    auto static MakeValidClusterParams() -> ClusterParameters
     {
         ClusterParameters clusterParams;
         clusterParams.gColdstartAttempts = 2;
@@ -120,7 +132,7 @@ protected:
         return clusterParams;
     }
 
-    auto MakeValidNodeParams() -> NodeParameters
+    auto static MakeValidNodeParams() -> NodeParameters
     {
         NodeParameters nodeParams;
         nodeParams.pAllowHaltDueToClock = 0;
@@ -149,29 +161,120 @@ protected:
 
         return nodeParams;
     }
+
+    auto static MakeValidTxBufferConfig() -> TxBufferConfig 
+    {
+        TxBufferConfig bufferCfg{};
+        bufferCfg.channels = Channel::AB;
+        bufferCfg.hasPayloadPreambleIndicator = false;
+        bufferCfg.offset = 0;
+        bufferCfg.repetition = 0;
+        bufferCfg.slotId = 17;
+        bufferCfg.transmissionMode = TransmissionMode::SingleShot;
+        
+        return bufferCfg;
+    }
 };
 
 TEST_F(FrControllerProxyTest, send_controller_config)
 {
-    TxBufferConfig bufferCfg{};
-    bufferCfg.channels = Channel::AB;
-    bufferCfg.hasPayloadPreambleIndicator = false;
-    bufferCfg.offset = 0;
-    bufferCfg.repetition = 0;
-    bufferCfg.slotId = 17;
-    bufferCfg.transmissionMode = TransmissionMode::SingleShot;
-
     // Configure Controller
     ControllerConfig controllerCfg{};
     controllerCfg.clusterParams = MakeValidClusterParams();
     controllerCfg.nodeParams = MakeValidNodeParams();
 
-    controllerCfg.bufferConfigs.push_back(bufferCfg);
+    controllerCfg.bufferConfigs.push_back(MakeValidTxBufferConfig());
 
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, controllerCfg))
-        .Times(1);
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, controllerCfg)).Times(1);
 
     proxy.Configure(controllerCfg);
+}
+
+TEST_F(FrControllerProxyTest, send_controller_config_override_identical)
+{
+    // Configure Controller
+    ControllerConfig configuredControllerCfg{};
+    ControllerConfig testControllerCfg{};
+
+    configuredControllerCfg.clusterParams = MakeValidClusterParams();
+    configuredControllerCfg.nodeParams = MakeValidNodeParams();
+    configuredControllerCfg.bufferConfigs.push_back(MakeValidTxBufferConfig());
+
+    testControllerCfg.clusterParams = MakeValidClusterParams();
+    testControllerCfg.nodeParams = MakeValidNodeParams();
+    testControllerCfg.bufferConfigs.push_back(MakeValidTxBufferConfig());
+
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxyConfigured, configuredControllerCfg)).Times(1);
+    proxyConfigured.Configure(testControllerCfg);
+}
+
+TEST_F(FrControllerProxyTest, send_controller_config_override_cluster_params)
+{
+    // Configure Controller
+    ControllerConfig configuredControllerCfg{};
+    ControllerConfig testControllerCfg{};
+
+    configuredControllerCfg.clusterParams = MakeValidClusterParams();
+    configuredControllerCfg.nodeParams = MakeValidNodeParams();
+    configuredControllerCfg.bufferConfigs.push_back(MakeValidTxBufferConfig());
+
+    // Change clusterParams in tester and make sure they are ignored
+    testControllerCfg.clusterParams = MakeValidClusterParams();
+    testControllerCfg.clusterParams.gNumberOfMiniSlots = 999; // was 0
+    testControllerCfg.clusterParams.gMacroPerCycle = 1337; // was 0
+
+    // default values (not configured)
+    testControllerCfg.nodeParams = MakeValidNodeParams();
+    testControllerCfg.bufferConfigs.push_back(MakeValidTxBufferConfig());
+
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxyConfigured, configuredControllerCfg)).Times(1);
+    proxyConfigured.Configure(testControllerCfg);
+}
+
+TEST_F(FrControllerProxyTest, send_controller_config_override_node_params)
+{
+    // Configure Controller
+    ControllerConfig configuredControllerCfg{};
+    ControllerConfig testControllerCfg{};
+
+    configuredControllerCfg.clusterParams = MakeValidClusterParams();
+    configuredControllerCfg.nodeParams = MakeValidNodeParams();
+    configuredControllerCfg.bufferConfigs.push_back(MakeValidTxBufferConfig());
+
+    // Change clusterParams in tester and make sure they are ignored
+    testControllerCfg.nodeParams = MakeValidNodeParams();
+    testControllerCfg.nodeParams.pKeySlotId = 42; // was 0
+    testControllerCfg.nodeParams.pChannels = Channel::B; // was A
+
+    // default values (not configured)
+    testControllerCfg.clusterParams = MakeValidClusterParams();
+    testControllerCfg.bufferConfigs.push_back(MakeValidTxBufferConfig());
+
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxyConfigured, configuredControllerCfg)).Times(1);
+    proxyConfigured.Configure(testControllerCfg);
+}
+
+TEST_F(FrControllerProxyTest, send_controller_config_override_tx_buffer)
+{
+    // Configure Controller
+    ControllerConfig configuredControllerCfg{};
+    ControllerConfig testControllerCfg{};
+
+    configuredControllerCfg.clusterParams = MakeValidClusterParams();
+    configuredControllerCfg.nodeParams = MakeValidNodeParams();
+    configuredControllerCfg.bufferConfigs.push_back(MakeValidTxBufferConfig());
+
+    // Change clusterParams in tester and make sure they are ignored
+    auto txBufferConfig = MakeValidTxBufferConfig();
+    txBufferConfig.slotId = 42; // was 17
+    testControllerCfg.bufferConfigs.push_back(txBufferConfig);
+
+    // default values (not configured)
+    testControllerCfg.clusterParams = MakeValidClusterParams();
+    testControllerCfg.nodeParams = MakeValidNodeParams();
+
+    EXPECT_CALL(comAdapter, SendIbMessage(&proxyConfigured, configuredControllerCfg)).Times(1);
+    proxyConfigured.Configure(testControllerCfg);
 }
 
 TEST_F(FrControllerProxyTest, send_txbuffer_configupdate)

@@ -8,7 +8,7 @@
 namespace ib {
 namespace mw {
 
-auto CreateVAsioSimulationParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+auto CreateVAsioSimulationParticipantImpl(cfg::datatypes::ParticipantConfiguration participantConfig,
                                           const std::string& participantName, bool isSynchronized)
     -> std::unique_ptr<IComAdapterInternal>
 {
@@ -25,7 +25,26 @@ auto CreateSimulationParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfig
                                      const std::string& participantName, bool isSynchronized)
     -> std::unique_ptr<IComAdapterInternal>
 {
-    return CreateVAsioSimulationParticipantImpl(std::move(participantConfig), participantName, isSynchronized);
+    auto&& cfg = ValidateAndSanitizeConfig(participantConfig, participantName);
+
+    return CreateVAsioSimulationParticipantImpl(std::move(cfg), participantName, isSynchronized);
+}
+
+auto ValidateAndSanitizeConfig(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+                               const std::string& participantName) -> cfg::datatypes::ParticipantConfiguration
+{
+    if (participantName.empty())
+    {
+        throw ib::ConfigurationError("An empty participant name is not allowed");
+    }
+
+    // try to cast to ParticipantConfiguration to check if the shared pointer is valid
+    auto cfg = std::dynamic_pointer_cast<cfg::datatypes::ParticipantConfiguration>(participantConfig);
+    if (cfg == nullptr)
+    {
+        return {};
+    }
+    return *cfg;
 }
 
 } // mw

@@ -17,7 +17,7 @@ class WatchDog
 public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
-    WatchDog(const cfg::v1::datatypes::HealthCheck& healthCheckConfig);
+    WatchDog(const cfg::datatypes::HealthCheck& healthCheckConfig);
     ~WatchDog();
 
 public:
@@ -29,10 +29,18 @@ public:
     void SetWarnHandler(std::function<void(std::chrono::milliseconds)> handler);
     void SetErrorHandler(std::function<void(std::chrono::milliseconds)> handler);
 
+    // For testing purposes only
+    std::chrono::milliseconds GetWarnTimeout();
+    std::chrono::milliseconds GetErrorTimeout();
+
 private:
     // ----------------------------------------
     // private methods
     void Run();
+
+public:
+    const std::chrono::milliseconds _defaultTimeout = std::chrono::milliseconds::max();
+
 
 private:
     // ----------------------------------------
@@ -42,8 +50,8 @@ private:
     std::atomic<std::chrono::steady_clock::duration> _startTime{std::chrono::steady_clock::duration::min()};
 
     std::chrono::milliseconds _resolution = std::chrono::milliseconds{2};
-    std::chrono::milliseconds _warnTimeout = std::chrono::milliseconds::max();
-    std::chrono::milliseconds _errorTimeout = std::chrono::milliseconds::max();
+    std::chrono::milliseconds _warnTimeout = _defaultTimeout;
+    std::chrono::milliseconds _errorTimeout = _defaultTimeout;
 
     std::function<void(std::chrono::milliseconds)> _warnHandler;
     std::function<void(std::chrono::milliseconds)> _errorHandler;

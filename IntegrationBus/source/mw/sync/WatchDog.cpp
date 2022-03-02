@@ -11,7 +11,7 @@ namespace ib {
 namespace mw {
 namespace sync {
 
-WatchDog::WatchDog(const cfg::v1::datatypes::HealthCheck& healthCheckConfig)
+WatchDog::WatchDog(const cfg::datatypes::HealthCheck& healthCheckConfig)
     : _warnHandler{[](std::chrono::milliseconds) {}}
     , _errorHandler{[](std::chrono::milliseconds) {}}
 {
@@ -124,6 +124,19 @@ void WatchDog::Run()
         }
     }
 }
+
+
+    // For testing purposes only
+std::chrono::milliseconds WatchDog::GetWarnTimeout()
+{
+    return _warnTimeout;
+}
+
+std::chrono::milliseconds WatchDog::GetErrorTimeout()
+{
+    return _errorTimeout;
+}
+
 
     
 } // namespace sync

@@ -31,8 +31,10 @@ add_vib_test(TestSimEthController
     SOURCES 
         EthControllerTest.cpp
         EthControllerProxyTest.cpp
+        EthControllerFacadeTest.cpp
     LIBS
         IbSimEthernet
         IbMwMockComAdapter
         IbTracing
+        IbMwMockNullConnection
 )
