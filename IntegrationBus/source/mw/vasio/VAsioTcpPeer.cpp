@@ -194,7 +194,7 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
     tcp::resolver::results_type resolverResults;
     try
     {
-        resolverResults = resolver.resolve(host, std::to_string(port));
+        resolverResults = resolver.resolve(host, std::to_string(static_cast<int>(port)));
     }
     catch (asio::system_error& err)
     {

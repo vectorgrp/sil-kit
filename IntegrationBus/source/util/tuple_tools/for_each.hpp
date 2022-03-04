@@ -34,6 +34,7 @@ inline void for_each_impl(Tuple&& tuple, Func&& func, std::index_sequence<I...>)
             Predicate<std::tuple_element_t<I, std::decay_t<Tuple>>>::value
         >(func, std::get<I>(std::forward<Tuple>(tuple)))...
     };
+    (void)results;
 }
 
 template<template <class...> class Predicate, class Func, std::size_t... I>

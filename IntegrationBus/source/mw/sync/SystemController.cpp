@@ -11,16 +11,6 @@ SystemController::SystemController(IComAdapterInternal* comAdapter)
 {
 }
 
-void SystemController::Initialize(ParticipantId participantId) const
-{
-    SendParticipantCommand(participantId, ParticipantCommand::Kind::Initialize);
-}
-
-void SystemController::ReInitialize(ParticipantId participantId) const
-{
-    SendParticipantCommand(participantId, ParticipantCommand::Kind::ReInitialize);
-}
-
 void SystemController::Initialize(const std::string& participantName) const
 {
     SendParticipantCommand(hash(participantName), ParticipantCommand::Kind::Initialize);

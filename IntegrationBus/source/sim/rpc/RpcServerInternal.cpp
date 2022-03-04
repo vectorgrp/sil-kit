@@ -12,19 +12,19 @@ RpcServerInternal::RpcServerInternal(mw::IComAdapterInternal* comAdapter, mw::sy
                                      const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
                                      const std::map<std::string, std::string>& labels, const std::string& clientUUID,
                                      CallProcessor handler, IRpcServer* parent)
-    : _comAdapter{comAdapter}
-    , _timeProvider{timeProvider}
-    , _functionName{functionName}
+    : _functionName{functionName}
     , _exchangeFormat{exchangeFormat}
     , _labels{labels}
     , _clientUUID{clientUUID}
     , _handler{std::move(handler)}
     , _parent{parent}
+    , _timeProvider{ timeProvider }
+    , _comAdapter{comAdapter}
 {
 }
 
 
-void RpcServerInternal::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const FunctionCall &msg)
+void RpcServerInternal::ReceiveIbMessage(const mw::IIbServiceEndpoint* /*from*/, const FunctionCall &msg)
 {
     ReceiveMessage(msg);
 }

@@ -4,14 +4,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <inttypes.h>
 
 #include "ib/capi/IntegrationBus.h"
 
 #ifdef WIN32
+#pragma warning(disable : 4100 5105)
 #include "Windows.h"
-#   define SleepMs(X) Sleep(X)
+#define SleepMs(X) Sleep(X)
 #else
-#   include "unistd.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <unistd.h>
 #define SleepMs(X) usleep((X)*1000)
 #endif
 
@@ -150,16 +154,16 @@ Schedule*                 masterSchedule;
 Timer                     slaveTimer;
 ib_NanosecondsTime        slaveNow;
 
-void StopCallback(void* context, ib_SimulationParticipant* participant)
+void StopCallback(void* context, ib_SimulationParticipant* cbParticipant)
 {
     printf("Stopping...\n");
 }
-void ShutdownCallback(void* context, ib_SimulationParticipant* participant)
+void ShutdownCallback(void* context, ib_SimulationParticipant* cbParticipant)
 {
     printf("Shutting down...\n");
 }
 
-void Master_InitCallback(void* context, ib_SimulationParticipant* participant, struct ib_ParticipantCommand* command)
+void Master_InitCallback(void* context, ib_SimulationParticipant* cbParticipant, struct ib_ParticipantCommand* command)
 {
     printf("Initializing LinMaster\n");
     controllerConfig = (ib_Lin_ControllerConfig*)malloc(sizeof(ib_Lin_ControllerConfig));
@@ -182,9 +186,9 @@ void Master_doAction(ib_NanosecondsTime now)
     Schedule_ExecuteTask(masterSchedule, now);
 }
 
-void Master_SimTask(void* context, ib_SimulationParticipant* participant, ib_NanosecondsTime now)
+void Master_SimTask(void* context, ib_SimulationParticipant* cbParticipant, ib_NanosecondsTime now)
 {
-    printf("now=%llums\n", now / 1000000);
+    printf("now%"PRIu64"ms\n", now / 1000000);
     Master_doAction(now);
 }
 
@@ -297,7 +301,7 @@ void Master_GoToSleep(ib_NanosecondsTime now)
     ib_Lin_Controller_GoToSleep(linController);
 }
 
-void Slave_InitCallback(void* context, ib_SimulationParticipant* participant, struct ib_ParticipantCommand* command)
+void Slave_InitCallback(void* context, ib_SimulationParticipant* cbParticipant, struct ib_ParticipantCommand* command)
 {
     printf("Initializing LinSlave\n");
 
@@ -369,10 +373,9 @@ void Slave_DoAction(ib_NanosecondsTime now)
     Timer_ExecuteAction(&slaveTimer, now);
 }
 
-
-void Slave_SimTask(void* context, ib_SimulationParticipant* participant, ib_NanosecondsTime now)
+void Slave_SimTask(void* context, ib_SimulationParticipant* cbParticipant, ib_NanosecondsTime now)
 {
-    printf("now=%llums\n", now / 1000000);
+    printf("now=%"PRIu64"ms\n", now / 1000000);
     Slave_DoAction(now);
     SleepMs(500);
 }
@@ -380,14 +383,14 @@ void Slave_SimTask(void* context, ib_SimulationParticipant* participant, ib_Nano
 void Slave_FrameStatusHandler(void* context, ib_Lin_Controller* controller, const ib_Lin_Frame* frame,
                               ib_Lin_FrameStatus status, ib_NanosecondsTime timestamp)
 {
-    printf(">> lin::Frame{id=%d, cs=%d, dl=%d, d={%d %d %d %d %d %d %d %d}} status=%d timestamp=%llums\n", frame->id,
+    printf(">> lin::Frame{id=%d, cs=%d, dl=%d, d={%d %d %d %d %d %d %d %d}} status=%d timestamp=%"PRIu64"ms\n", frame->id,
            frame->checksumModel, frame->dataLength, frame->data[0], frame->data[1], frame->data[2], frame->data[3],
            frame->data[4], frame->data[5], frame->data[6], frame->data[7], status, timestamp/1000000);
 }
 
 void Slave_WakeupPulse(ib_NanosecondsTime now) 
 {
-    printf("<< Wakeup pulse @%llums\n", now/1000000);
+    printf("<< Wakeup pulse @%"PRIu64"ms\n", now/1000000);
     ib_Lin_Controller_Wakeup(linController);
 }
 
@@ -480,3 +483,7 @@ int main(int argc, char* argv[])
 
     return EXIT_SUCCESS;
 }
+
+#ifndef WIN32
+#pragma GCC diagnostic pop
+#endif

@@ -5,14 +5,18 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <inttypes.h>
 
 #include "ib/capi/IntegrationBus.h"
 
 #ifdef WIN32
+#pragma warning(disable: 4100 5105)
 #include "Windows.h"
-#   define SleepMs(X) Sleep(X)
+#define SleepMs(X) Sleep(X)
 #else
-#   include "unistd.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <unistd.h>
 #define SleepMs(X) usleep((X)*1000)
 #endif
 
@@ -69,7 +73,7 @@ typedef struct {
 } SimTaskContext;
 SimTaskContext simTaskContext;
 
-void InitCallback(void* context, ib_SimulationParticipant* participant, struct ib_ParticipantCommand* command)
+void InitCallback(void* context, ib_SimulationParticipant* cbParticipant, struct ib_ParticipantCommand* command)
 {
     ParticipantHandlerContext* tc = (ParticipantHandlerContext*)context;
     printf(">> InitCallback of kind=%i with context=%i\n", command->kind, tc->someInt);
@@ -81,13 +85,13 @@ void InitCallback(void* context, ib_SimulationParticipant* participant, struct i
     (void)ib_Can_Controller_Start(canController2);
 }
 
-void StopCallback(void* context, ib_SimulationParticipant* participant)
+void StopCallback(void* context, ib_SimulationParticipant* cbParticipant)
 {
     ParticipantHandlerContext* tc = (ParticipantHandlerContext*)context;
     printf(">> StopCallback with context=%i\n", tc->someInt);
 }
 
-void ShutdownCallback(void* context, ib_SimulationParticipant* participant)
+void ShutdownCallback(void* context, ib_SimulationParticipant* cbParticipant)
 {
     ParticipantHandlerContext* tc = (ParticipantHandlerContext*)context;
     printf(">> ShutdownCallback with context=%i\n", tc->someInt);
@@ -96,14 +100,14 @@ void ShutdownCallback(void* context, ib_SimulationParticipant* participant)
 void AckCallback(void* context, ib_Can_Controller* controller, struct ib_Can_TransmitAcknowledge* cAck)
 {
     //TransmitContext* tc = (TransmitContext*) cAck->userContext;
-    printf(">> %i for CAN Message with timestamp=%llu\n", cAck->status, cAck->timestamp);
+    printf(">> %i for CAN Message with timestamp=%"PRIu64"\n", cAck->status, cAck->timestamp);
 }
 
 void ReceiveMessage(void* context, ib_Can_Controller* controller, ib_Can_Message* message)
 {
     TransmitContext* txContext = (TransmitContext*)(context);
     unsigned int i;
-    printf(">> CAN Message: canId=%i timestamp=%llu ",
+    printf(">> CAN Message: canId=%i timestamp=%"PRIu64" ",
         message->canFrame->id, message->timestamp);
     if (txContext != NULL)
     {
@@ -134,12 +138,11 @@ void SendCanMessage()
     msg.id = 17;
     msg.flags = ib_Can_FrameFlag_brs;
 
-    static int msgId = 0;
     char payload[64];
     canMessageCounter += 1;
-    int payloadSize = snprintf(payload, sizeof(payload), "CAN %i", canMessageCounter);
+    uint8_t payloadSize = (uint8_t)snprintf(payload, sizeof(payload), "CAN %i", canMessageCounter);
 
-    msg.data.data = &payload[0];
+    msg.data.data = (uint8_t*)&payload[0];
     msg.data.size = payloadSize;
     msg.dlc = payloadSize;
 
@@ -148,10 +151,10 @@ void SendCanMessage()
     printf("CAN Message sent with transmitId=%i\n", transmitContext.someInt);
 }
 
-void SimTask(void* context, ib_SimulationParticipant* participant, ib_NanosecondsTime now)
+void SimTask(void* context, ib_SimulationParticipant* cbParticipant, ib_NanosecondsTime now)
 {
     SimTaskContext* tc = (SimTaskContext*)context;
-    printf(">> Simulation task now=%llu with context=%i\n", now, tc->someInt);
+    printf(">> Simulation task now=%"PRIu64" with context=%i\n", now, tc->someInt);
 
     SendCanMessage();
     SleepMs(100);
@@ -225,3 +228,7 @@ int main(int argc, char* argv[])
 
     return EXIT_SUCCESS;
 }
+
+#ifndef WIN32
+#pragma GCC diagnostic pop
+#endif

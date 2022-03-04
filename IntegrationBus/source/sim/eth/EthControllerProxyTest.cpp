@@ -138,7 +138,7 @@ TEST_F(EthernetControllerProxyTest, send_eth_message)
 
     EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
 
-    EthMessage msg;
+    EthMessage msg{};
     msg.timestamp = now;
     proxy.SendMessage(msg);
 }

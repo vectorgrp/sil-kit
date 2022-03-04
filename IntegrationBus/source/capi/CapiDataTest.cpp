@@ -14,13 +14,14 @@ namespace {
 using namespace ib::sim::data;
 using ib::mw::test::DummyComAdapter;
 
-MATCHER_P(PayloadMatcher, controlPayload, "matches data payloads by their content and length")
+MATCHER_P(PayloadMatcher, controlPayload, "")
 {
+    *result_listener << "matches data payloads by their content and length";
     if (arg.size() != controlPayload.size())
     {
         return false;
     }
-    for (int i = 0; i < arg.size(); i++)
+    for (size_t i = 0; i < arg.size(); i++)
     {
         if (arg[i] != controlPayload[i])
         {
@@ -34,7 +35,7 @@ class MockDataPublisher : public ib::sim::data::IDataPublisher
 {
 public:
     MOCK_METHOD1(Publish, void(std::vector<uint8_t> data));
-    virtual void Publish(const uint8_t* data, std::size_t size){};
+    virtual void Publish(const uint8_t* /*data*/, std::size_t /*size*/){};
 };
 class MockDataSubscriber : public ib::sim::data::IDataSubscriber
 {
@@ -121,15 +122,14 @@ public:
 
     ib_Data_ExchangeFormat dataExchangeFormat;
     ib_KeyValueList* labelList;
-    uint32_t numLabels = 1;
 };
 
-void DefaultDataHandler(void* context, ib_Data_Subscriber* subscriber, const ib_ByteVector* data)
+void DefaultDataHandler(void* /*context*/, ib_Data_Subscriber* /*subscriber*/, const ib_ByteVector* /*data*/)
 {
 }
 
-void NewDataSourceHandler(void* context, ib_Data_Subscriber* subscriber, const char* topic,
-                          const ib_Data_ExchangeFormat* dataExchangeFormat, const ib_KeyValueList* labelList)
+void NewDataSourceHandler(void* /*context*/, ib_Data_Subscriber* /*subscriber*/, const char* /*topic*/,
+                          const ib_Data_ExchangeFormat* /*dataExchangeFormat*/, const ib_KeyValueList* /*labelList*/)
 {
 }
 

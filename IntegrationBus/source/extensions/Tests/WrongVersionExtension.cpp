@@ -15,5 +15,5 @@ IB_DECLARE_EXTENSION(
     1,
     2,
     3
-);
+)
 

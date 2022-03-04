@@ -32,7 +32,7 @@ const std::string pubName{"Pub"};
 const std::string subName{"Sub"};
 const std::string topic{"Topic"};
 const DataExchangeFormat exchangeFormat{ "A" };
-static uint8_t numParticipants;
+static size_t numParticipants;
 std::chrono::milliseconds communicationTimeout{2000ms};
 std::chrono::milliseconds asyncDelayBetweenPublication{50ms};
 
@@ -49,7 +49,7 @@ protected:
         TestParticipant(const std::string& newName)
         {
             name = newName;
-            id = numParticipants++;
+            id = static_cast<uint8_t>(numParticipants++);
         }
         std::string                  name;
         uint8_t id;
@@ -146,7 +146,7 @@ protected:
             participant.publisher = participant.comAdapter->CreateDataPublisher(topic, exchangeFormat, {}, 0);
             participant.subscriber = participant.comAdapter->CreateDataSubscriber(
                 topic, exchangeFormat, {},
-                [&participant](IDataSubscriber* subscriber, const std::vector<uint8_t>& data) {
+                [&participant](IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data) {
                     if (!participant.allReceived)
                     {
                         participant.receivedIds.insert(data[0]);
@@ -171,7 +171,7 @@ protected:
                     }
                 });
             auto finalStateFuture = participantController->RunAsync();
-            auto finalState = finalStateFuture.get();
+            finalStateFuture.get();
         }
         catch (const ib::ConfigurationError& error)
         {
@@ -197,7 +197,7 @@ protected:
             participant.publisher = participant.comAdapter->CreateDataPublisher(topic, exchangeFormat, {}, 0);
             participant.subscriber = participant.comAdapter->CreateDataSubscriber(
                 topic, exchangeFormat, {},
-                [&participant](IDataSubscriber* subscriber, const std::vector<uint8_t>& data) {
+                [&participant](IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data) {
                     if (!participant.allReceived)
                     {
                         participant.receivedIds.insert(data[0]);
@@ -359,7 +359,7 @@ protected:
         asyncParticipantThreads.clear();
     }
 
-    void SetupSystem(uint32_t domainId, std::vector<TestParticipant>& syncParticipants, std::vector<TestParticipant>& asyncParticipants)
+    void SetupSystem(uint32_t domainId, std::vector<TestParticipant>& syncParticipants)
     {
         for (auto&& p : syncParticipants)
         {
@@ -407,7 +407,7 @@ TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
     asyncParticipants.push_back({ "AsyncParticipant1" });
     asyncParticipants.push_back({ "AsyncParticipant2" });
 
-    SetupSystem(domainId, syncParticipants, asyncParticipants);
+    SetupSystem(domainId, syncParticipants);
 
     RunSyncParticipants(syncParticipants, domainId);
 
@@ -440,7 +440,7 @@ TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
         StopAsyncParticipants();
 
         // Reset communication and wait for reception once more for remaining sync participants
-        numParticipants = static_cast<uint8_t>(syncParticipants.size());
+        numParticipants = syncParticipants.size();
         for (auto& p : syncParticipants)
             p.ResetReception();
 
@@ -449,7 +449,7 @@ TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
             p.AwaitCommunication();
 
         // Reset communication to repeat the cycle
-        numParticipants = static_cast<uint8_t>(syncParticipants.size() + asyncParticipants.size());
+        numParticipants = syncParticipants.size() + asyncParticipants.size();
         for (auto& p : syncParticipants)
             p.ResetReception();
         for (auto& p : asyncParticipants)
@@ -475,7 +475,7 @@ TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToEmpty)
     asyncParticipants.push_back({ "AsyncParticipant1" });
     asyncParticipants.push_back({ "AsyncParticipant2" });
 
-    SetupSystem(domainId, syncParticipants, asyncParticipants);
+    SetupSystem(domainId, syncParticipants);
 
     for (int i = 0; i < 3; i++)
     {

@@ -16,7 +16,6 @@
 #include <cstring>
 #include "CapiImpl.h"
 
-#pragma region ETHERNET
 std::map<uint32_t, void*> ethernetTransmitContextMap;
 std::map<uint32_t, int> ethernetTransmitContextMapCounter;
 int transmitAckListeners = 0;
@@ -127,9 +126,9 @@ ib_ReturnCode ib_Ethernet_Controller_RegisterFrameAckHandler(ib_Ethernet_Control
               eta.status = (ib_Ethernet_TransmitStatus)ack.status;
               eta.timestamp = ack.timestamp.count();
 
-              auto transmitContext = pendingEthernetTransmits.userContextById[ack.transmitId];
+              auto tmpContext = pendingEthernetTransmits.userContextById[ack.transmitId];
               pendingEthernetTransmits.userContextById.erase(ack.transmitId);
-              eta.userContext = transmitContext;
+              eta.userContext = tmpContext;
 
               handler(context, controller, &eta);
             };
@@ -141,9 +140,9 @@ ib_ReturnCode ib_Ethernet_Controller_RegisterFrameAckHandler(ib_Ethernet_Control
           eta.status = (ib_Ethernet_TransmitStatus)ack.status;
           eta.timestamp = ack.timestamp.count();
 
-          auto transmitContext = pendingEthernetTransmits.userContextById[ack.transmitId];
+          auto tmpContext = pendingEthernetTransmits.userContextById[ack.transmitId];
           pendingEthernetTransmits.userContextById.erase(ack.transmitId);
-          eta.userContext = transmitContext;
+          eta.userContext = tmpContext;
 
           handler(context, controller, &eta);
         }
@@ -217,6 +216,4 @@ ib_ReturnCode ib_Ethernet_Controller_SendFrame(ib_Ethernet_Controller* controlle
   }
   CAPI_LEAVE
 }
-
-#pragma endregion ETHERNET
 

@@ -62,7 +62,7 @@ protected:
                 const auto topic = "TopicName-" + std::to_string(i);
                 (void)subscriber->CreateDataSubscriber(
                     topic, ib::sim::data::DataExchangeFormat{}, {},
-                    [](ib::sim::data::IDataSubscriber* subscriber, const std::vector<uint8_t>& data) {
+                    [](ib::sim::data::IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& /*data*/) {
                     }); 
             }
         };
@@ -83,8 +83,6 @@ protected:
             << " Expected a short startup time, not blocked by service discovery: timeout="
             << timeout.count();
     }
-protected:
-    std::vector<std::string> syncParticipantNames;
 };
 
 

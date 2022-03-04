@@ -10,8 +10,6 @@
 
 extern "C" {
 
-#pragma region Logger
-
 IntegrationBusAPI ib_ReturnCode ib_Logger_Log(ib_Logger* self, ib_LoggingLevel level, const char* message)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
@@ -26,7 +24,5 @@ IntegrationBusAPI ib_ReturnCode ib_Logger_Log(ib_Logger* self, ib_LoggingLevel l
     }
     CAPI_LEAVE
 }
-
-#pragma endregion Logger
 
 }

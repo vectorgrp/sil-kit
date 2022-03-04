@@ -118,8 +118,6 @@ public:
 
 class MockSystemController : public sync::ISystemController {
 public:
-    MOCK_CONST_METHOD1(Initialize, void(ParticipantId participantId));
-    MOCK_CONST_METHOD1(ReInitialize, void(ParticipantId participantId));
     MOCK_METHOD(void, Initialize, (const std::string& participantId), (const, override));
     MOCK_METHOD(void, ReInitialize, (const std::string& participantId), (const, override));
     MOCK_CONST_METHOD0(Run, void());
@@ -193,8 +191,8 @@ public:
                               ib::sim::data::DataHandlerT /* callback*/,
                               ib::sim::data::NewDataSourceHandlerT /*newDataSourceHandler*/)
         -> ib::sim::data::IDataSubscriber* override { return nullptr; }
-    auto CreateDataSubscriberInternal(const std::string& topic, const std::string& linkName,
-                                      const sim::data::DataExchangeFormat& dataExchangeFormat,
+    auto CreateDataSubscriberInternal(const std::string& /*topic*/, const std::string& /*linkName*/,
+                                      const sim::data::DataExchangeFormat& /*dataExchangeFormat*/,
                                       const std::map<std::string, std::string>& /*publisherLabels*/,
                                       sim::data::DataHandlerT /*callback*/, sim::data::IDataSubscriber* /*parent*/)
         -> sim::data::DataSubscriberInternal* override { return nullptr; }
@@ -270,7 +268,6 @@ public:
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::data::DataMessage&& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::data::DataMessage& /*msg*/) override {}
-    virtual void SendIbMessage_proxy(const IIbServiceEndpoint* /*from*/, const sim::data::DataMessage& /*msg*/) {}
    
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::rpc::FunctionCall& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::rpc::FunctionCall&& /*msg*/) override {}
@@ -348,7 +345,7 @@ public:
 
     void OnAllMessagesDelivered(std::function<void()> /*callback*/) override {}
     void FlushSendBuffers() override {}
-    void ExecuteDeferred(std::function<void()> callback) override {}
+    void ExecuteDeferred(std::function<void()> /*callback*/) override {}
     auto GetParticipantName() const -> const std::string& override { return _name; }
     auto IsSynchronized() const -> bool override { return _isSynchronized; }
 

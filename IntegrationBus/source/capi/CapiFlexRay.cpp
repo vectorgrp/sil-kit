@@ -17,20 +17,9 @@ static void assign(ib::sim::fr::TxBufferConfig& cppConfig, const ib_FlexRay_TxBu
   cppConfig.slotId = config->slotId;
   cppConfig.offset = config->offset;
   cppConfig.repetition = config->repetition;
-  cppConfig.hasPayloadPreambleIndicator = config->hasPayloadPreambleIndicator;
+  cppConfig.hasPayloadPreambleIndicator = config->hasPayloadPreambleIndicator == ib_True;
   cppConfig.headerCrc = config->headerCrc;
   cppConfig.transmissionMode = (ib::sim::fr::TransmissionMode)config->transmissionMode;
-}
-
-static void assign(ib_FlexRay_TxBufferConfig* config, const ib::sim::fr::TxBufferConfig& cppConfig)
-{
-  config->channels = (ib_FlexRay_Channel)cppConfig.channels;
-  config->slotId = cppConfig.slotId;
-  config->offset = cppConfig.offset;
-  config->repetition = cppConfig.repetition;
-  config->hasPayloadPreambleIndicator = cppConfig.hasPayloadPreambleIndicator;
-  config->headerCrc = cppConfig.headerCrc;
-  config->transmissionMode = (ib_FlexRay_TransmissionMode)cppConfig.transmissionMode;
 }
 
 static void assign(ib::sim::fr::ClusterParameters& cppClusterParameters, const ib_FlexRay_ClusterParameters* clusterParameters)
@@ -55,30 +44,6 @@ static void assign(ib::sim::fr::ClusterParameters& cppClusterParameters, const i
   cppClusterParameters.gNumberOfStaticSlots = clusterParameters->gNumberOfStaticSlots;
   cppClusterParameters.gPayloadLengthStatic = clusterParameters->gPayloadLengthStatic;
   cppClusterParameters.gSyncFrameIDCountMax = clusterParameters->gSyncFrameIDCountMax;
-}
-
-static void assign(ib_FlexRay_ClusterParameters* clusterParameters, const ib::sim::fr::ClusterParameters& cppClusterParameters)
-{
-  clusterParameters->gColdstartAttempts = cppClusterParameters.gColdstartAttempts;
-  clusterParameters->gCycleCountMax = cppClusterParameters.gCycleCountMax;
-  clusterParameters->gdActionPointOffset = cppClusterParameters.gdActionPointOffset;
-  clusterParameters->gdDynamicSlotIdlePhase = cppClusterParameters.gdDynamicSlotIdlePhase;
-  clusterParameters->gdMiniSlot = cppClusterParameters.gdMiniSlot;
-  clusterParameters->gdMiniSlotActionPointOffset = cppClusterParameters.gdMiniSlotActionPointOffset;
-  clusterParameters->gdStaticSlot = cppClusterParameters.gdStaticSlot;
-  clusterParameters->gdSymbolWindow = cppClusterParameters.gdSymbolWindow;
-  clusterParameters->gdSymbolWindowActionPointOffset = cppClusterParameters.gdSymbolWindowActionPointOffset;
-  clusterParameters->gdTSSTransmitter = cppClusterParameters.gdTSSTransmitter;
-  clusterParameters->gdWakeupTxActive = cppClusterParameters.gdWakeupTxActive;
-  clusterParameters->gdWakeupTxIdle = cppClusterParameters.gdWakeupTxIdle;
-  clusterParameters->gListenNoise = cppClusterParameters.gListenNoise;
-  clusterParameters->gMacroPerCycle = cppClusterParameters.gMacroPerCycle;
-  clusterParameters->gMaxWithoutClockCorrectionFatal = cppClusterParameters.gMaxWithoutClockCorrectionFatal;
-  clusterParameters->gMaxWithoutClockCorrectionPassive = cppClusterParameters.gMaxWithoutClockCorrectionPassive;
-  clusterParameters->gNumberOfMiniSlots = cppClusterParameters.gNumberOfMiniSlots;
-  clusterParameters->gNumberOfStaticSlots = cppClusterParameters.gNumberOfStaticSlots;
-  clusterParameters->gPayloadLengthStatic = cppClusterParameters.gPayloadLengthStatic;
-  clusterParameters->gSyncFrameIDCountMax = cppClusterParameters.gSyncFrameIDCountMax;
 }
 
 static void assign(ib::sim::fr::NodeParameters& cppNodeParameters, const ib_FlexRay_NodeParameters* nodeParameters)
@@ -108,33 +73,6 @@ static void assign(ib::sim::fr::NodeParameters& cppNodeParameters, const ib_Flex
   cppNodeParameters.pSamplesPerMicrotick = nodeParameters->pSamplesPerMicrotick;
 }
 
-static void assign(ib_FlexRay_NodeParameters* nodeParameters, const ib::sim::fr::NodeParameters& cppNodeParameters)
-{
-  nodeParameters->pAllowHaltDueToClock = cppNodeParameters.pAllowHaltDueToClock;
-  nodeParameters->pAllowPassiveToActive = cppNodeParameters.pAllowPassiveToActive;
-  nodeParameters->pChannels = (ib_FlexRay_Channel)cppNodeParameters.pChannels;
-  nodeParameters->pClusterDriftDamping = cppNodeParameters.pClusterDriftDamping;
-  nodeParameters->pdAcceptedStartupRange = cppNodeParameters.pdAcceptedStartupRange;
-  nodeParameters->pdListenTimeout = cppNodeParameters.pdListenTimeout;
-  nodeParameters->pKeySlotId = cppNodeParameters.pKeySlotId;
-  nodeParameters->pKeySlotOnlyEnabled = cppNodeParameters.pKeySlotOnlyEnabled;
-  nodeParameters->pKeySlotUsedForStartup = cppNodeParameters.pKeySlotUsedForStartup;
-  nodeParameters->pKeySlotUsedForSync = cppNodeParameters.pKeySlotUsedForSync;
-  nodeParameters->pLatestTx = cppNodeParameters.pLatestTx;
-  nodeParameters->pMacroInitialOffsetA = cppNodeParameters.pMacroInitialOffsetA;
-  nodeParameters->pMacroInitialOffsetB = cppNodeParameters.pMacroInitialOffsetB;
-  nodeParameters->pMicroInitialOffsetA = cppNodeParameters.pMicroInitialOffsetA;
-  nodeParameters->pMicroInitialOffsetB = cppNodeParameters.pMicroInitialOffsetB;
-  nodeParameters->pMicroPerCycle = cppNodeParameters.pMicroPerCycle;
-  nodeParameters->pOffsetCorrectionOut = cppNodeParameters.pOffsetCorrectionOut;
-  nodeParameters->pOffsetCorrectionStart = cppNodeParameters.pOffsetCorrectionStart;
-  nodeParameters->pRateCorrectionOut = cppNodeParameters.pRateCorrectionOut;
-  nodeParameters->pWakeupChannel = (ib_FlexRay_Channel)cppNodeParameters.pWakeupChannel;
-  nodeParameters->pWakeupPattern = cppNodeParameters.pWakeupPattern;
-  nodeParameters->pdMicrotick = (ib_FlexRay_ClockPeriod)cppNodeParameters.pdMicrotick;
-  nodeParameters->pSamplesPerMicrotick = cppNodeParameters.pSamplesPerMicrotick;
-}
-
 static void assign(ib::sim::fr::ControllerConfig& cppConfig, const ib_FlexRay_ControllerConfig* config)
 {
   assign(cppConfig.clusterParams, &config->clusterParams);
@@ -145,19 +83,6 @@ static void assign(ib::sim::fr::ControllerConfig& cppConfig, const ib_FlexRay_Co
     ib::sim::fr::TxBufferConfig txBufferConfig;
     assign(txBufferConfig, &config->bufferConfigs[i]);
     cppConfig.bufferConfigs.push_back(std::move(txBufferConfig));
-  }
-}
-
-static void assign(ib_FlexRay_ControllerConfig** config, const ib::sim::fr::ControllerConfig& cppConfig)
-{
-  assign(&(*config)->clusterParams, cppConfig.clusterParams);
-  assign(&(*config)->nodeParams, cppConfig.nodeParams);
-
-  for (size_t i = 0;i < cppConfig.bufferConfigs.size(); i++)
-  {
-    ib_FlexRay_TxBufferConfig txBufferConfig;
-    assign(&txBufferConfig, cppConfig.bufferConfigs[i]);
-    ib_FlexRay_Append_TxBufferConfig(config, &txBufferConfig);
   }
 }
 
@@ -251,7 +176,7 @@ ib_ReturnCode ib_FlexRay_Controller_UpdateTxBuffer(ib_FlexRay_Controller* self, 
     ib::sim::fr::IFrController* cppController = reinterpret_cast<ib::sim::fr::IFrController*>(self);
     ib::sim::fr::TxBufferUpdate cppUpdate;
     cppUpdate.txBufferIndex = update->txBufferIndex;
-    cppUpdate.payloadDataValid = update->payloadDataValid;
+    cppUpdate.payloadDataValid = update->payloadDataValid == ib_True;
     if (update->payloadDataValid)
     {
       ASSERT_VALID_POINTER_PARAMETER(update->payload.data);

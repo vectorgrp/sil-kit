@@ -20,7 +20,7 @@ bool operator==(const ParticipantStatus& lhs, const ParticipantStatus& rhs)
         && lhs.enterReason == rhs.enterReason
         && lhs.enterTime == rhs.enterTime
         && lhs.refreshTime == rhs.refreshTime;
-};
+}
 
 bool operator==(const SystemCommand& lhs, const SystemCommand& rhs)
 {

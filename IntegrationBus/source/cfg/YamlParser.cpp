@@ -97,9 +97,9 @@ void EmitScalar(YAML::ostream_wrapper& out, YAML::Node val)
     }
     catch (...)
     {
-        auto emitAs = [](const auto& valStr, auto& output) {
+        auto emitAs = [](const auto& valStrRef, auto& output) {
             std::stringstream buf;
-            buf << std::fixed << std::setprecision(10) << valStr;
+            buf << std::fixed << std::setprecision(10) << valStrRef;
             if ((buf >> output) && buf.eof())
             {
                 return true;

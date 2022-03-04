@@ -2,10 +2,13 @@
 
 #ifdef WIN32
 #define _CRT_SECURE_NO_WARNINGS
+#pragma warning(disable : 4100 5105)
 #include "Windows.h"
 #   define SleepMs(X) Sleep(X)
 #else
-#   include "unistd.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <unistd.h>
 #define SleepMs(X) usleep((X)*1000)
 #endif
 
@@ -62,7 +65,7 @@ const int numPublications = 10;
 
 char* participantName;
 
-void NewDataSourceHandler(void* context, ib_Data_Subscriber* dataSubscriber, const char* topic,
+void NewDataSourceHandler(void* context, ib_Data_Subscriber* cbDataSubscriber, const char* topic,
                           const ib_Data_ExchangeFormat* dataExchangeFormat, const ib_KeyValueList* labelList)
 {
     printf("<< Received new data source: topic=\"%s\", mediaType=\"%s\", labels={", topic,
@@ -78,11 +81,9 @@ void NewDataSourceHandler(void* context, ib_Data_Subscriber* dataSubscriber, con
 void SpecificDataHandler(void* context, ib_Data_Subscriber* subscriber, const ib_ByteVector* data)
 {
     receiveCount += 1;
-    TransmitContext* tc = (TransmitContext*)context;
-
     printf("<< [SpecificDataHandler] Data received: ");
 
-    for (int i = 0; i < data->size; i++)
+    for (size_t i = 0; i < data->size; i++)
     {
         char ch = data->data[i];
         printf("%c", ch);
@@ -93,11 +94,9 @@ void SpecificDataHandler(void* context, ib_Data_Subscriber* subscriber, const ib
 void DefaultDataHandler(void* context, ib_Data_Subscriber* subscriber, const ib_ByteVector* data)
 {
     receiveCount += 1;
-    TransmitContext* tc = (TransmitContext*)context;
-
     printf("<< [DefaultDataHandler] Data received: ");
 
-    for (int i = 0; i < data->size; i++)
+    for (size_t i = 0; i < data->size; i++)
     {
         char ch = data->data[i];
         printf("%c", ch);
@@ -274,3 +273,7 @@ int main(int argc, char* argv[])
 
     return EXIT_SUCCESS;
 }
+
+#ifndef WIN32
+#pragma GCC diagnostic pop
+#endif

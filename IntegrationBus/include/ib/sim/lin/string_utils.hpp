@@ -315,7 +315,6 @@ std::ostream& operator<<(std::ostream& out, const Transmission& transmission)
 }
 std::ostream& operator<<(std::ostream& out, const WakeupPulse& pulse)
 {
-    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(pulse.timestamp);
     return out << "lin::WakeupPulse{@" << pulse.timestamp.count() << "ms}";
 }
 

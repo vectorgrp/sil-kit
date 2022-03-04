@@ -318,10 +318,11 @@ private:
 private:
     // ----------------------------------------
     // private members
-    std::shared_ptr<ib::cfg::v1::datatypes::ParticipantConfiguration> _participantConfig;
     std::string _participantName;
     bool _isSynchronized{ false };
+    std::shared_ptr<ib::cfg::v1::datatypes::ParticipantConfiguration> _participantConfig;
     ParticipantId _participantId{0};
+
     std::shared_ptr<sync::ITimeProvider> _timeProvider{nullptr};
 
     std::unique_ptr<logging::ILogger> _logger;
@@ -362,6 +363,7 @@ private:
     > _simulators {nullptr, nullptr, nullptr, nullptr};
 
     IbConnectionT _ibConnection;
+
 };
 
 } // mw

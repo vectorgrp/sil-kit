@@ -17,8 +17,8 @@ bool ValidateDoc(YAML::Node& doc, const ib::cfg::YamlValidator& v,
     using namespace ib::cfg;
     bool ok = true;
     std::set<std::string> declaredKeys;
-    auto isAlreadyDefined = [&declaredKeys](auto keyName) {
-        auto it = declaredKeys.insert(keyName);
+    auto isAlreadyDefined = [&declaredKeys](auto keyNameToCheck) {
+        auto it = declaredKeys.insert(keyNameToCheck);
         return !std::get<1>(it);
     };
 

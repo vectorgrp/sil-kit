@@ -32,7 +32,7 @@ auto ServiceDiscovery::GetServiceDescriptor() const -> const mw::ServiceDescript
     return _serviceDescriptor;
 }
 
-void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const ServiceAnnouncement& msg)
+void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const ServiceAnnouncement& msg)
 {
     if (_shuttingDown)
     {
@@ -89,9 +89,9 @@ void ServiceDiscovery::ReceivedServiceAddition(const ServiceDescriptor& serviceD
         
     // A remote participant might be unknown, however, it will send an event for its own ServiceDiscovery service
     // when first joining the simulation. React by announcing all services of this participant
-    std::string controllerType;
-    if (serviceDescriptor.GetSupplementalDataItem(mw::service::controllerType, controllerType)
-        && controllerType == mw::service::controllerTypeServiceDiscovery)
+    std::string supplControllerType;
+    if (serviceDescriptor.GetSupplementalDataItem(mw::service::controllerType, supplControllerType)
+        && supplControllerType == mw::service::controllerTypeServiceDiscovery)
     {
         _comAdapter->SendIbMessage(this, serviceDescriptor.GetParticipantName(), _announcement);
 
@@ -113,7 +113,7 @@ void ServiceDiscovery::CallHandlers(ServiceDiscoveryEvent::Type eventType, const
     }
 }
 
-void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* from, const ServiceDiscoveryEvent& msg)
+void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const ServiceDiscoveryEvent& msg)
 {
     if (_shuttingDown)
     {
@@ -208,7 +208,7 @@ void ServiceDiscovery::OnParticpantShutdown(const std::string& participantName)
     auto announcedIt = _announcedServices.find(participantName);
     if (announcedIt != _announcedServices.end())
     {
-        for (const auto serviceMap : (*announcedIt).second)
+        for (const auto& serviceMap : (*announcedIt).second)
         {
             CallHandlers(ServiceDiscoveryEvent::Type::ServiceRemoved, serviceMap.second);
         }

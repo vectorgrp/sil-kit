@@ -10,15 +10,13 @@ namespace data {
 
 DataPublisher::DataPublisher(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
                              const std::string& topic, DataExchangeFormat dataExchangeFormat,
-                             const std::map<std::string, std::string>& labels, const std::string& pubUUID,
-                             size_t history)
-    : _comAdapter{comAdapter}
-    , _timeProvider{timeProvider}
-    , _topic{topic}
+                             const std::map<std::string, std::string>& labels, const std::string& pubUUID)
+    : _topic{topic}
     , _dataExchangeFormat{dataExchangeFormat}
     , _labels{labels}
     , _pubUUID{pubUUID}
-    , _history{history}
+    , _timeProvider{timeProvider}
+    , _comAdapter{comAdapter}
 {
 }
 

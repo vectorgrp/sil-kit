@@ -76,8 +76,8 @@ ComAdapter<IbConnectionT>::ComAdapter(std::shared_ptr<ib::cfg::IParticipantConfi
                                       const std::string& participantName, bool isSynchronized)
     : _participantName{ participantName }
     , _isSynchronized{ isSynchronized }
-    , _participantId{ hash(participantName) }
     , _participantConfig{ std::dynamic_pointer_cast<ib::cfg::v1::datatypes::ParticipantConfiguration>(participantConfig) }
+    , _participantId{hash(participantName)}
     , _ibConnection{ _participantConfig, participantName, _participantId }
 {
     // NB: do not create the _logger in the initializer list. If participantName is empty,
@@ -189,7 +189,7 @@ template<class IbConnectionT>
 inline void ComAdapter<IbConnectionT>::SetTimeProvider(sync::ITimeProvider* newClock)
 {
     // register the time provider with all already instantiated controllers
-    auto setTimeProvider = [this, newClock](auto& controllers) {
+    auto setTimeProvider = [newClock](auto& controllers) {
         for (auto& controller: controllers)
         {
             auto* ctl = dynamic_cast<ib::mw::sync::ITimeConsumer*>(controller.second.get());
@@ -208,7 +208,7 @@ auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonical
     // retrieve CAN controller
     auto& canControllers = _participantConfig->canControllers;
     auto controllerIter =
-        std::find_if(canControllers.begin(), canControllers.end(), [&canonicalName, &networkName](auto&& controller) {
+        std::find_if(canControllers.begin(), canControllers.end(), [&canonicalName](auto&& controller) {
             return controller.name == canonicalName;
         });
     ib::cfg::v1::datatypes::CanController controllerConfig;
@@ -250,7 +250,7 @@ auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonical
     // retrieve Ethernet controller
     auto& ethernetControllerConfigs = _participantConfig->ethernetControllers;
     auto controllerConfigIter = std::find_if(ethernetControllerConfigs.begin(), ethernetControllerConfigs.end(),
-                                             [&canonicalName, &networkName](auto&& controllerConfig) {
+                                             [&canonicalName](auto&& controllerConfig) {
                                                  return controllerConfig.name == canonicalName;
                                              });
     ib::cfg::v1::datatypes::EthernetController controllerConfig;
@@ -290,7 +290,7 @@ auto ComAdapter<IbConnectionT>::CreateFlexrayController(const std::string& canon
     // retrieve FR controller
     auto& flexRayControllerConfigs = _participantConfig->flexRayControllers;
     auto controllerConfigIter =
-        std::find_if(flexRayControllerConfigs.begin(), flexRayControllerConfigs.end(), [&canonicalName, &networkName](auto&& controllerConfig) {
+        std::find_if(flexRayControllerConfigs.begin(), flexRayControllerConfigs.end(), [&canonicalName](auto&& controllerConfig) {
             return controllerConfig.name == canonicalName;
         });
     ib::cfg::v1::datatypes::FlexRayController controllerConfig;
@@ -330,7 +330,7 @@ auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonical
     // retrieve LIN controller
     auto& linControllerConfigs = _participantConfig->linControllers;
     auto controllerConfigIter = std::find_if(linControllerConfigs.begin(), linControllerConfigs.end(),
-                                             [&canonicalName, &networkName](auto&& controllerConfig) {
+                                             [&canonicalName](auto&& controllerConfig) {
                                                  return controllerConfig.name == canonicalName;
                                              });
     ib::cfg::v1::datatypes::LinController controllerConfig;
@@ -425,7 +425,7 @@ auto ComAdapter<IbConnectionT>::CreateDataPublisher(const std::string& topic,
 
     auto controller = CreateController<ib::cfg::v1::datatypes::DataPublisher, ib::sim::data::DataPublisher>(
         controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), topic,
-        dataExchangeFormat, labels, pubUUID, history);
+        dataExchangeFormat, labels, pubUUID);
 
     _ibConnection.SetHistoryLengthForLink(pubUUID, history, controller);
 
@@ -1163,42 +1163,42 @@ template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
                                               const sim::data::DataMessage& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
                                               sim::data::DataMessage&& msg)
 {
-    SendIbMessageImpl(from, std::move(msg));
+    SendIbMessageImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
                                               const sim::rpc::FunctionCall& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
                                               sim::rpc::FunctionCall&& msg)
 {
-    SendIbMessageImpl(from, std::move(msg));
+    SendIbMessageImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
                                               const sim::rpc::FunctionCallResponse& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
 void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
                                               sim::rpc::FunctionCallResponse&& msg)
 {
-    SendIbMessageImpl(from, std::move(msg));
+    SendIbMessageImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class IbConnectionT>

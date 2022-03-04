@@ -10,6 +10,7 @@ LogMsgReceiver::LogMsgReceiver(IComAdapterInternal* comAdapter, Logger* logger)
     : _comAdapter{comAdapter}
     , _logger{logger}
 {
+    (void)_comAdapter;
 }
 
 void LogMsgReceiver::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const LogMsg& msg)

@@ -47,17 +47,16 @@ private:
 
     void AddInternalRpcServer(const std::string& clientUUID, RpcExchangeFormat joinedExchangeFormat,
                               const std::map<std::string, std::string>& clientLabels);
-
     std::string _functionName;
     sim::rpc::RpcExchangeFormat _exchangeFormat;
     std::map<std::string, std::string> _labels;
     CallProcessor _handler;
 
-    mw::IComAdapterInternal* _comAdapter{nullptr};
-    mw::sync::ITimeProvider* _timeProvider{nullptr};
     mw::ServiceDescriptor _serviceDescriptor{};
     std::vector<RpcServerInternal*> _internalRpcServers;
     mw::logging::ILogger* _logger;
+    mw::sync::ITimeProvider* _timeProvider{nullptr};
+    mw::IComAdapterInternal* _comAdapter{nullptr};
 };
 
 // ================================================================================

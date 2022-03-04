@@ -5,6 +5,28 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.X.X] - unreleased
+--------------------------------
+
+Removed
+~~~~~~~
+
+- Removed deprecated ISystemController functions Initialize/Reinitialize via numeric participant id. Use participant names instead.
+
+    + old:
+
+    .. code-block:: c++
+        
+      void ib::mw::sync::ISystemController::Initialize(ParticipantId) const;
+      void ib::mw::sync::ISystemController::ReInitialize(ParticipantId participantId) const;
+
+    + new:
+
+    .. code-block:: c++
+       
+       void ib::mw::sync::ISystemController::Initialize(const std::string& participantName) const;
+       void ib::mw::sync::ISystemController::ReInitialize(const std::string& participantName) const;
+
 [3.7.2] - unreleased
 --------------------------------
 

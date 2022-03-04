@@ -71,27 +71,29 @@ ib_ReturnCode ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_S
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
 
-        auto cppDefaultDataHandler = [defaultDataHandler, defaultDataHandlerContext, outSubscriber](
+        auto cppDefaultDataHandler = [defaultDataHandler, defaultDataHandlerContext](
                                          ib::sim::data::IDataSubscriber* cppSubscriber,
                                          const std::vector<uint8_t>& data) {
+            auto* cSubscriber = reinterpret_cast<ib_Data_Subscriber*>(cppSubscriber);
             uint8_t* payloadPointer = NULL;
             if (data.size() > 0)
             {
                 payloadPointer = (uint8_t*) &(data[0]);
             }
             const ib_ByteVector ccdata{payloadPointer, data.size()};
-            defaultDataHandler(defaultDataHandlerContext, *outSubscriber, &ccdata);
+            defaultDataHandler(defaultDataHandlerContext, cSubscriber, &ccdata);
         };
 
-        auto cppNewDataSourceHandler = [newDataSourceHandler, newDataSourceContext, outSubscriber](
-                                           ib::sim::data::IDataSubscriber* subscriber, const std::string& cppTopic,
+        auto cppNewDataSourceHandler = [newDataSourceHandler, newDataSourceContext](
+                                           ib::sim::data::IDataSubscriber* cppSubscriber, const std::string& cppTopic,
                                            const ib::sim::data::DataExchangeFormat& cppDataExchangeFormat,
-                                           const std::map<std::string, std::string>& cppLabels) {
+                                           const std::map<std::string, std::string>& cppLabelsHandler) {
+            auto* cSubscriber = reinterpret_cast<ib_Data_Subscriber*>(cppSubscriber);
             ib_Data_ExchangeFormat dxf;
             dxf.mediaType = cppDataExchangeFormat.mediaType.c_str();
-            ib_KeyValueList* labels;
-            assign(&labels, cppLabels);
-            newDataSourceHandler(newDataSourceContext, *outSubscriber, cppTopic.c_str(), &dxf, labels);
+            ib_KeyValueList* clabelsHandler;
+            assign(&clabelsHandler, cppLabelsHandler);
+            newDataSourceHandler(newDataSourceContext, cSubscriber, cppTopic.c_str(), &dxf, clabelsHandler);
         };
 
         auto dataSubscriber = comAdapter->CreateDataSubscriber(strTopic, cppDataTypeInfo, cppLabels,
@@ -111,15 +113,16 @@ ib_ReturnCode ib_Data_Subscriber_SetDefaultReceiveDataHandler(ib_Data_Subscriber
     {
         auto cppSubscriber = reinterpret_cast<ib::sim::data::IDataSubscriber*>(self);
         cppSubscriber->SetDefaultReceiveMessageHandler(
-            [dataHandler, context, self](ib::sim::data::IDataSubscriber* cppSubscriber,
+            [dataHandler, context](ib::sim::data::IDataSubscriber* cppSubscriberHandler,
                                          const std::vector<uint8_t>& data) {
+                auto* cSubscriber = reinterpret_cast<ib_Data_Subscriber*>(cppSubscriberHandler);
                 uint8_t* payloadPointer = NULL;
                 if (data.size() > 0)
                 {
                     payloadPointer = (uint8_t*) &(data[0]);
                 }
                 const ib_ByteVector ccdata{payloadPointer, data.size()};
-                dataHandler(context, self, &ccdata);
+                dataHandler(context, cSubscriber, &ccdata);
             });
         return ib_ReturnCode_SUCCESS;
     }
@@ -141,15 +144,16 @@ ib_ReturnCode ib_Data_Subscriber_RegisterSpecificDataHandler(ib_Data_Subscriber*
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
         cppSubscriber->RegisterSpecificDataHandler(cppDataTypeInfo, cppLabels,
-            [dataHandler, context, self](ib::sim::data::IDataSubscriber* cppSubscriber,
+            [dataHandler, context](ib::sim::data::IDataSubscriber* cppSubscriberHandler,
                                          const std::vector<uint8_t>& data) {
+                auto* cSubscriber = reinterpret_cast<ib_Data_Subscriber*>(cppSubscriberHandler);
                 uint8_t* payloadPointer = NULL;
                 if (data.size() > 0)
                 {
                     payloadPointer = (uint8_t* ) &(data[0]);
                 }
                 const ib_ByteVector ccdata{payloadPointer, data.size()};
-                dataHandler(context, self, &ccdata);
+                dataHandler(context, cSubscriber, &ccdata);
             });
         return ib_ReturnCode_SUCCESS;
     }

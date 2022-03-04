@@ -26,7 +26,7 @@ inline auto ToFrameResponseMode(FrameResponseType responseType) -> FrameResponse
         return FrameResponseMode::Unused;
     }
     return FrameResponseMode::Unused;
-};
+}
 
 inline auto ToTxFrameStatus(FrameStatus status) -> FrameStatus
 {
@@ -340,7 +340,7 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Trans
     }
 }
 
-void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const WakeupPulse& /*msg*/)
+void LinController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const WakeupPulse& /*msg*/)
 {
     CallHandlers(_wakeupHandler, this);
 }

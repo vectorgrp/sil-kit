@@ -43,7 +43,7 @@ ib_ReturnCode ib_SimulationParticipant_Create(ib_SimulationParticipant** outPart
         std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId
                     << std::endl;
         auto comAdapter =
-            ib::CreateSimulationParticipant(ibConfig, participantName, domainId, isSynchronized).release();
+            ib::CreateSimulationParticipant(ibConfig, participantName, domainId, isSynchronized == ib_True).release();
 
         if (comAdapter == nullptr)
         {
@@ -274,7 +274,6 @@ ib_ReturnCode ib_SimulationParticipant_Initialize(ib_SimulationParticipant* part
   CAPI_ENTER
   {
     auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
-    ib::mw::IComAdapterInternal* comAdapterInternal = static_cast<ib::mw::IComAdapterInternal*>(comAdapter);
     std::string name{ participantName };
     auto* systemController = comAdapter->GetSystemController();
 
@@ -291,7 +290,6 @@ ib_ReturnCode ib_SimulationParticipant_ReInitialize(ib_SimulationParticipant* pa
   CAPI_ENTER
   {
     auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
-    ib::mw::IComAdapterInternal* comAdapterInternal = static_cast<ib::mw::IComAdapterInternal*>(comAdapter);
     auto* systemController = comAdapter->GetSystemController();
 
     systemController->ReInitialize(participantName);

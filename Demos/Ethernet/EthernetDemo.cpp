@@ -133,7 +133,7 @@ int main(int argc, char** argv)
         ethController->RegisterMessageAckHandler(&EthAckCallback);
 
         // Set an Init Handler
-        participantController->SetInitHandler([&participantName, ethController](auto initCmd) {
+        participantController->SetInitHandler([&participantName, ethController](auto /*initCmd*/) {
 
             std::cout << "Initializing " << participantName << std::endl;
             ethController->Activate();

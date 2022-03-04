@@ -9,10 +9,13 @@
 #include "ib/capi/IntegrationBus.h"
 
 #ifdef WIN32
+#pragma warning(disable : 4100 5105)
 #include "Windows.h"
 #   define SleepMs(X) Sleep(X)
 #else
-#   include "unistd.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <unistd.h>
 #define SleepMs(X) usleep((X)*1000)
 #endif
 
@@ -104,12 +107,11 @@ void SendCanMessage()
     msg.id = 17;
     msg.flags = ib_Can_FrameFlag_brs;
 
-    static int msgId = 0;
     char payload[64];
     canMessageCounter += 1;
-    int payloadSize = snprintf(payload, sizeof(payload), "CAN %i", canMessageCounter);
+    uint8_t payloadSize = (uint8_t)snprintf(payload, sizeof(payload), "CAN %i", canMessageCounter);
 
-    msg.data.data = &payload[0];
+    msg.data.data = (uint8_t*)&payload[0];
     msg.data.size = payloadSize;
     msg.dlc = payloadSize;
 
@@ -168,10 +170,14 @@ int main(int argc, char* argv[])
     }
 
     ib_SimulationParticipant_Destroy(participant);
-    if (jsonString && jsonString != "")
+    if (jsonString)
     {
         free(jsonString);
     }
 
     return EXIT_SUCCESS;
 }
+
+#ifndef WIN32
+#pragma GCC diagnostic pop
+#endif

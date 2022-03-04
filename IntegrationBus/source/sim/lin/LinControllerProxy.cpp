@@ -209,7 +209,7 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
     }
 }
 
-void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const WakeupPulse& /*msg*/)
+void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const WakeupPulse& /*msg*/)
 {
     CallEach(_wakeupHandler, this);
 }

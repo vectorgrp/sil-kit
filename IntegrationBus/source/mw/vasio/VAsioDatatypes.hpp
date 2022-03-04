@@ -85,7 +85,7 @@ inline bool operator==(const VAsioMsgSubscriber& lhs, const VAsioMsgSubscriber& 
     return lhs.receiverIdx == rhs.receiverIdx 
         && lhs.networkName == rhs.networkName
         && lhs.msgTypeName == rhs.msgTypeName;
-};
+}
 
 } // namespace mw
 } // namespace ib

@@ -87,7 +87,7 @@ ib_ReturnCode ib_Can_Controller_RegisterTransmitStatusHandler(ib_Can_Controller*
         tcack.timestamp = ack.timestamp.count();
         tcack.status = (ib_Can_TransmitStatus)ack.status;
         callback(context, controller, &tcack);
-      }, statusMask);
+      }, static_cast<ib::sim::can::CanTransmitStatusMask>(statusMask));
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
@@ -161,7 +161,7 @@ ib_ReturnCode ib_Can_Controller_SendFrame(ib_Can_Controller* controller, ib_Can_
     cm.dataField = std::vector<uint8_t>(&(message->data.data[0]), &(message->data.data[0]) + message->data.size);
 
     // ack queue is empty 
-    auto transmitId = canController->SendMessage(std::move(cm), transmitContext);
+    canController->SendMessage(std::move(cm), transmitContext);
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE

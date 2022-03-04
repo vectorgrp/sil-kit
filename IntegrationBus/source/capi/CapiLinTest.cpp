@@ -29,12 +29,12 @@ namespace {
         MOCK_METHOD1(RegisterFrameResponseUpdateHandler, void(FrameResponseUpdateHandler));
     };
 
-    void CFrameStatusHandler(void* context, ib_Lin_Controller* controller, const ib_Lin_Frame* frame,
-                             ib_Lin_FrameStatus status, ib_NanosecondsTime timestamp) { }
+    void CFrameStatusHandler(void* /*context*/, ib_Lin_Controller* /*controller*/, const ib_Lin_Frame* /*frame*/,
+                             ib_Lin_FrameStatus /*status*/, ib_NanosecondsTime /*timestamp*/) { }
 
-    void CGoToSleepHandler(void* context, ib_Lin_Controller* controller) { }
+    void CGoToSleepHandler(void* /*context*/, ib_Lin_Controller* /*controller*/) { }
 
-    void CWakeupHandler(void* context, ib_Lin_Controller* controller) { }
+    void CWakeupHandler(void* /*context*/, ib_Lin_Controller* /*controller*/) { }
 
     class CapiLinTest : public testing::Test
     {

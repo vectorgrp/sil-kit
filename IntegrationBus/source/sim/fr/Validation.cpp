@@ -22,7 +22,7 @@ void Validate(const ClusterParameters& clusterParameters)
     if (clusterParameters.gdActionPointOffset < 1 || clusterParameters.gdActionPointOffset > 63)
         throw ib::ConfigurationError{"gdActionPointOffset must be in range 1 - 63"};
 
-    if (clusterParameters.gdDynamicSlotIdlePhase < 0 || clusterParameters.gdDynamicSlotIdlePhase > 2)
+    if (clusterParameters.gdDynamicSlotIdlePhase > 2)
         throw ib::ConfigurationError{"gdDynamicSlotIdlePhase must be in range 0 - 2"};
 
     if (clusterParameters.gdMiniSlot < 2 || clusterParameters.gdMiniSlot > 63)
@@ -34,7 +34,7 @@ void Validate(const ClusterParameters& clusterParameters)
     if (clusterParameters.gdStaticSlot < 3 || clusterParameters.gdStaticSlot > 664)
         throw ib::ConfigurationError{"gdStaticSlot must be in range 3 - 664"};
 
-    if (clusterParameters.gdSymbolWindow < 0 || clusterParameters.gdSymbolWindow > 162)
+    if (clusterParameters.gdSymbolWindow > 162)
         throw ib::ConfigurationError{"gdSymbolWindow must be in range 0 - 162"};
 
     if (clusterParameters.gdSymbolWindowActionPointOffset < 1 || clusterParameters.gdSymbolWindowActionPointOffset > 63)
@@ -61,13 +61,13 @@ void Validate(const ClusterParameters& clusterParameters)
     if (clusterParameters.gMaxWithoutClockCorrectionPassive < 1 || clusterParameters.gMaxWithoutClockCorrectionPassive > 15)
         throw ib::ConfigurationError{"gMaxWithoutClockCorrectionPassive must be in range 1 - 15"};
 
-    if (clusterParameters.gNumberOfMiniSlots < 0 || clusterParameters.gNumberOfMiniSlots > 7988)
+    if (clusterParameters.gNumberOfMiniSlots > 7988)
         throw ib::ConfigurationError{"gNumberOfMiniSlots must be in range 0 - 7988"};
 
     if (clusterParameters.gNumberOfStaticSlots < 2 || clusterParameters.gNumberOfStaticSlots > 1023)
         throw ib::ConfigurationError{"gNumberOfStaticSlots must be in range 2 - 1023"};
 
-    if (clusterParameters.gPayloadLengthStatic < 0 || clusterParameters.gPayloadLengthStatic > 127)
+    if (clusterParameters.gPayloadLengthStatic > 127)
         throw ib::ConfigurationError{"gPayloadLengthStatic must be in range 0 - 127"};
 
     if (clusterParameters.gSyncFrameIDCountMax < 2 || clusterParameters.gSyncFrameIDCountMax > 15)
@@ -76,13 +76,13 @@ void Validate(const ClusterParameters& clusterParameters)
 
 void Validate(const NodeParameters& nodeParameters)
 {
-    if (nodeParameters.pAllowHaltDueToClock < 0 || nodeParameters.pAllowHaltDueToClock > 1)
+    if (nodeParameters.pAllowHaltDueToClock > 1)
         throw ib::ConfigurationError{"pAllowHaltDueToClock must be 0 or 1"};
 
-    if (nodeParameters.pAllowPassiveToActive < 0 || nodeParameters.pAllowPassiveToActive > 31)
+    if (nodeParameters.pAllowPassiveToActive > 31)
         throw ib::ConfigurationError{"pAllowPassiveToActive must be in range 0 - 31"};
 
-    if (nodeParameters.pClusterDriftDamping < 0 || nodeParameters.pClusterDriftDamping > 10)
+    if (nodeParameters.pClusterDriftDamping > 10)
         throw ib::ConfigurationError{"pClusterDriftDamping must be in range 0 - 10"};
 
     if (nodeParameters.pdAcceptedStartupRange < 29 || nodeParameters.pdAcceptedStartupRange > 2743)
@@ -91,19 +91,19 @@ void Validate(const NodeParameters& nodeParameters)
     if (nodeParameters.pdListenTimeout < 1926 || nodeParameters.pdListenTimeout > 2567692)
         throw ib::ConfigurationError{"pdListenTimeout must be in range 1926 - 2567692"};
 
-    if (nodeParameters.pKeySlotId < 0 || nodeParameters.pKeySlotId > 1023)
+    if (nodeParameters.pKeySlotId > 1023)
         throw ib::ConfigurationError{"pKeySlotId must be in range 0 - 1023"};
 
-    if (nodeParameters.pKeySlotOnlyEnabled < 0 || nodeParameters.pKeySlotOnlyEnabled > 1)
+    if (nodeParameters.pKeySlotOnlyEnabled > 1)
         throw ib::ConfigurationError{"pKeySlotOnlyEnabled must be 0 or 1"};
 
-    if (nodeParameters.pKeySlotUsedForStartup < 0 || nodeParameters.pKeySlotUsedForStartup > 1)
+    if (nodeParameters.pKeySlotUsedForStartup > 1)
         throw ib::ConfigurationError{"pKeySlotUsedForStartup must be 0 or 1"};
 
-    if (nodeParameters.pKeySlotUsedForSync < 0 || nodeParameters.pKeySlotUsedForSync > 1)
+    if (nodeParameters.pKeySlotUsedForSync > 1)
         throw ib::ConfigurationError{"pKeySlotUsedForSync must be 0 or 1"};
 
-    if (nodeParameters.pLatestTx < 0 || nodeParameters.pLatestTx > 7988)
+    if (nodeParameters.pLatestTx > 7988)
         throw ib::ConfigurationError{"pLatestTx must be in range 0 - 7988"};
 
     if (nodeParameters.pMacroInitialOffsetA < 2 || nodeParameters.pMacroInitialOffsetA > 68)
@@ -133,7 +133,7 @@ void Validate(const NodeParameters& nodeParameters)
     if (nodeParameters.pWakeupChannel != Channel::A && nodeParameters.pWakeupChannel != Channel::B)
         throw ib::ConfigurationError{"pWakeupChannel must be either Channel A or Channel B"};
 
-    if (nodeParameters.pWakeupPattern < 0 || nodeParameters.pWakeupPattern > 63)
+    if (nodeParameters.pWakeupPattern > 63)
         throw ib::ConfigurationError{"pWakeupPattern must be in range 0 - 63"};
 
     if (nodeParameters.pSamplesPerMicrotick < 1 || nodeParameters.pSamplesPerMicrotick > 2)

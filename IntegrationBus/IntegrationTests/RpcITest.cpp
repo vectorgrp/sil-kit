@@ -217,7 +217,7 @@ protected:
             participant.comAdapter =
                 ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, sync);
 
-            IParticipantController* participantController;
+            IParticipantController* participantController = nullptr;
             if (sync)
             {
                 participantController = participant.comAdapter->GetParticipantController();
@@ -227,7 +227,7 @@ protected:
             {
                 c.rpcClient = participant.comAdapter->CreateRpcClient(
                     c.functionName, c.dxf, c.labels,
-                    [this, &participant, &c](IRpcClient* client, IRpcCallHandle* callHandle,
+                    [this, &participant, &c](IRpcClient* /*client*/, IRpcCallHandle* /*callHandle*/,
                         const CallStatus callStatus, const std::vector<uint8_t>& returnData)
                     {
                         if (!c.allCallsReturned)
@@ -236,7 +236,7 @@ protected:
                             {
                                 if (c.expectIncreasingData)
                                 {
-                                    auto expectedData = std::vector<uint8_t>(c.messageSizeInBytes, c.callReturnedSuccessCounter + rpcFuncIncrement);
+                                    auto expectedData = std::vector<uint8_t>(c.messageSizeInBytes, static_cast<uint8_t>(c.callReturnedSuccessCounter + rpcFuncIncrement));
                                     EXPECT_EQ(returnData, expectedData);
                                 }
                                 else
@@ -260,26 +260,26 @@ protected:
 
                         if (!participant.allCallsReturned &&
                             std::all_of(participant.rpcClients.begin(), participant.rpcClients.end(),
-                                [](RpcClientInfo c) { return c.allCallsReturned; }))
+                                [](RpcClientInfo clientInfo) { return clientInfo.allCallsReturned; }))
                         {
                             participant.allCallsReturned = true;
                             participant.allCallsReturnedPromise.set_value();
                         }
                     });
             }
-            auto callTask = [this, participantController, &participant]() {
-                for (auto& c : participant.rpcClients)
+            auto callTask = [&participant]() {
+                for (auto& clientInfo : participant.rpcClients)
                 {
-                    if (!c.allCalled)
+                    if (!clientInfo.allCalled)
                     {
-                        auto argumentData = std::vector<uint8_t>(c.messageSizeInBytes, c.callCounter);
-                        auto callHandle = c.rpcClient->Call(argumentData);
+                        auto argumentData = std::vector<uint8_t>(clientInfo.messageSizeInBytes, static_cast<uint8_t>(clientInfo.callCounter));
+                        auto callHandle = clientInfo.rpcClient->Call(argumentData);
                         if (callHandle)
                         {
-                            c.callCounter++;
-                            if (c.callCounter >= c.numCalls)
+                            clientInfo.callCounter++;
+                            if (clientInfo.callCounter >= clientInfo.numCalls)
                             {
-                                c.allCalled = true;
+                                clientInfo.allCalled = true;
                             }
                         }
 
@@ -313,7 +313,7 @@ protected:
             if (sync)
             {
                 participantController->SetPeriod(1s);
-                participantController->SetSimulationTask([participantController, &participant, callTask](std::chrono::nanoseconds now)
+                participantController->SetSimulationTask([&participant, callTask](std::chrono::nanoseconds now)
                 {
                     if (now >= 10s)
                     {
@@ -329,8 +329,7 @@ protected:
                 });
                 participant.startedPromise.set_value();
                 auto finalStateFuture = participantController->RunAsync();
-
-                auto finalState = finalStateFuture.get();
+                finalStateFuture.get();
             }
             else
             {
@@ -383,7 +382,7 @@ protected:
             participant.comAdapter =
                 ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, sync);
 
-            IParticipantController* participantController;
+            IParticipantController* participantController = nullptr;
             if (sync)
             {
                 participantController = participant.comAdapter->GetParticipantController();
@@ -399,13 +398,17 @@ protected:
                     participant.allReceivedPromise.set_value();
                 }
 
-                s.rpcServer = participant.comAdapter->CreateRpcServer(s.functionName, s.dxf, s.labels,
-                    [this, sync, &participant, &s, participantController](IRpcServer*       server,
-                                                                           IRpcCallHandle* callHandle,
-                                                                           const std::vector<uint8_t>& argumentData)
+                s.rpcServer = participant.comAdapter->CreateRpcServer(
+                    s.functionName, s.dxf, s.labels,
+                    [this, &participant, &s](IRpcServer* server, IRpcCallHandle* callHandle,
+                                             const std::vector<uint8_t>& argumentData)
                     {
                         std::vector<uint8_t> returnData{argumentData};
-                        std::transform(std::begin(returnData), std::end(returnData), std::begin(returnData), [this](uint8_t x) {return x + rpcFuncIncrement; });
+                        for (auto& d : returnData)
+                        {
+                            d += rpcFuncIncrement;
+                        }
+                        //std::transform(std::begin(returnData), std::end(returnData), std::begin(returnData), [this](uint8_t x) {return x + rpcFuncIncrement; });
 
                         server->SubmitResult(callHandle, returnData);
 
@@ -413,7 +416,7 @@ protected:
                         {
                             if (s.expectIncreasingData)
                             {
-                                auto expectedData = std::vector<uint8_t>(s.messageSizeInBytes, s.receiveCallCounter);
+                                auto expectedData = std::vector<uint8_t>(s.messageSizeInBytes, static_cast<uint8_t>(s.receiveCallCounter));
                                 EXPECT_EQ(argumentData, expectedData);
                             }
                             else
@@ -446,12 +449,12 @@ protected:
             if (sync)
             {
                 participantController->SetPeriod(1s);
-                participantController->SetSimulationTask([](std::chrono::nanoseconds now) {
+                participantController->SetSimulationTask([](std::chrono::nanoseconds /*now*/) {
                     });
 
                 participant.startedPromise.set_value();
                 auto finalStateFuture = participantController->RunAsync();
-                auto finalState = finalStateFuture.get();
+                finalStateFuture.get();
             }
             else
             {
@@ -683,7 +686,7 @@ protected:
     SystemMaster systemMaster;
     std::vector<std::thread> rpcThreads;
 
-    const uint8_t rpcFuncIncrement = 100;
+    const uint8_t rpcFuncIncrement = 100u;
     std::chrono::milliseconds communicationTimeout{20000ms};
     std::chrono::milliseconds asyncDelayBetweenCalls{500ms};
 };
@@ -781,7 +784,7 @@ TEST_F(RpcITest, test_1client_1server_100functions_sync_vasio)
     {
         std::string functionName = std::to_string(i);
         RpcClientInfo cInfo{functionName, "A", {}, messageSize, numCalls, numCallsToReturn};
-        RpcServerInfo sInfo{functionName, "A", {}, messageSize, numCalls};
+        RpcServerInfo sInfo{functionName, "A", {}, messageSize, numCallsToReceive };
         clients[0].rpcClients.push_back(std::move(cInfo));
         servers[0].rpcServers.push_back(std::move(sInfo));
     }
@@ -816,7 +819,7 @@ TEST_F(RpcITest, test_1client_1server_samefunctionname_sync_vasio)
     std::vector<ServerParticipant> servers;
 
     std::vector<std::vector<uint8_t>> expectedReturnDataUnordered;
-    for (uint32_t d = 0; d < numCalls; d++)
+    for (uint8_t d = 0; d < numCalls; d++)
     {
         expectedReturnDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d + rpcFuncIncrement));
         expectedReturnDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d + rpcFuncIncrement));
@@ -828,7 +831,7 @@ TEST_F(RpcITest, test_1client_1server_samefunctionname_sync_vasio)
                        {"TestFuncA"}});
 
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
-    for (uint32_t d = 0; d < numCalls; d++)
+    for (uint8_t d = 0; d < numCalls; d++)
     {
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
@@ -866,7 +869,7 @@ TEST_F(RpcITest, test_1client_2server_sync_vasio)
     const bool     sync = true;
 
     std::vector<std::vector<uint8_t>> expectedReturnDataUnordered;
-    for (uint32_t d = 0; d < numCalls; d++)
+    for (uint8_t d = 0; d < numCalls; d++)
     {
         expectedReturnDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d + rpcFuncIncrement));
         expectedReturnDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d + rpcFuncIncrement));
@@ -910,7 +913,7 @@ TEST_F(RpcITest, test_2client_1server_sync_vasio)
     clients.push_back({"Client2", {{"TestFuncA", "A", {}, messageSize, numCalls, numCallsToReturn}}, {"TestFuncA"} });
 
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
-    for (uint32_t d = 0; d < numCalls; d++)
+    for (uint8_t d = 0; d < numCalls; d++)
     {
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));

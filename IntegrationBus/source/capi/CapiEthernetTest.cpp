@@ -10,13 +10,15 @@ namespace {
 using namespace ib::sim::eth;
 using ib::mw::test::DummyComAdapter;
 
-MATCHER_P(EthFrameMatcher, controlFrame, "matches ethernet frames by their content and length") {
+MATCHER_P(EthFrameMatcher, controlFrame, "") 
+{
+    *result_listener << "matches ethernet frames by their content and length";
     auto frame1 = controlFrame.RawFrame();
     auto frame2 = arg.RawFrame();
     if (frame1.size() != frame2.size()) {
         return false;
     }
-    for (int i = 0; i < frame1.size(); i++) {
+    for (size_t i = 0; i < frame1.size(); i++) {
         if (frame1[i] != frame2[i]) {
             return false;
         }
@@ -46,19 +48,19 @@ public:
     }
 };
 
-void AckCallback(void* context, ib_Ethernet_Controller* controller, struct ib_Ethernet_TransmitAcknowledge* cAck)
+void AckCallback(void* /*context*/, ib_Ethernet_Controller* /*controller*/, struct ib_Ethernet_TransmitAcknowledge* /*cAck*/)
 {
 }
 
-void ReceiveMessage(void* context, ib_Ethernet_Controller* controller, ib_Ethernet_Message* metaData)
+void ReceiveMessage(void* /*context*/, ib_Ethernet_Controller* /*controller*/, ib_Ethernet_Message* /*metaData*/)
 {
 }
 
-void StateChangedHandler(void* context, ib_Ethernet_Controller* controller, ib_Ethernet_State state)
+void StateChangedHandler(void* /*context*/, ib_Ethernet_Controller* /*controller*/, ib_Ethernet_State /*state*/)
 {
 }
 
-void BitRateChangedHandler(void* context, ib_Ethernet_Controller* controller, uint32_t bitrate)
+void BitRateChangedHandler(void* /*context*/, ib_Ethernet_Controller* /*controller*/, uint32_t /*bitrate*/)
 {
 }
 

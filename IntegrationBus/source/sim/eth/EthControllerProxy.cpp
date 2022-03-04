@@ -8,7 +8,7 @@ namespace sim {
 namespace eth {
 
 EthControllerProxy::EthControllerProxy(mw::IComAdapterInternal* comAdapter,
-                                       cfg::v1::datatypes::EthernetController config, IEthController* facade)
+                                       cfg::v1::datatypes::EthernetController /*config*/, IEthController* facade)
     : _comAdapter(comAdapter)
     , _facade{facade}
 {
@@ -54,7 +54,7 @@ auto EthControllerProxy::SendMessage(EthMessage msg) -> EthTxId
 
 auto EthControllerProxy::SendFrame(EthFrame frame) -> EthTxId
 {
-    EthMessage msg;
+    EthMessage msg{};
     msg.ethFrame = std::move(frame);
     return SendMessage(std::move(msg));
 }
@@ -86,7 +86,7 @@ void EthControllerProxy::RegisterBitRateChangedHandler(BitRateChangedHandler han
 }
 
 
-void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg)
+void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthMessage& msg)
 {
     _tracer.Trace(ib::sim::TransmitDirection::RX,
         msg.timestamp, msg.ethFrame);
@@ -94,7 +94,7 @@ void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
     CallHandlers(msg);
 }
 
-void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthTransmitAcknowledge& msg)
+void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthTransmitAcknowledge& msg)
 {
     auto transmittedMsg = _transmittedMessages.find(msg.transmitId);
     if (transmittedMsg != _transmittedMessages.end())
@@ -111,7 +111,7 @@ void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
     CallHandlers(msg);
 }
 
-void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthStatus& msg)
+void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthStatus& msg)
 {
     // In case we are in early startup, ensure we tell our participants the bit rate first
     // and the state later.

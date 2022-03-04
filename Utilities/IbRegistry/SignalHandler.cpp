@@ -62,7 +62,7 @@ private:
     {
         std::vector<uint8_t> buf(1);
         //blocking read until Notify() was called
-        auto ok = ReadFile(_readEnd, buf.data(), buf.size(), nullptr, nullptr);
+        auto ok = ReadFile(_readEnd, buf.data(), static_cast<DWORD>(buf.size()), nullptr, nullptr);
         if (!ok)
             throw std::runtime_error("SignalMonitor::workerMain: cannot read from pipe.");
 

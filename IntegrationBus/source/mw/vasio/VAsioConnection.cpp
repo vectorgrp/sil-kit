@@ -204,7 +204,7 @@ VAsioConnection::VAsioConnection(std::shared_ptr<ib::cfg::v1::datatypes::Partici
     , _participantId{participantId}
 {
     RegisterPeerShutdownCallback([this](IVAsioPeer* peer) { UpdateParticipantStatusOnConnectionLoss(peer); });
-    _hashToParticipantName.insert(std::pair<std::size_t, std::string>(hash(_participantName), _participantName));
+    _hashToParticipantName.insert(std::pair<uint64_t, std::string>(hash(_participantName), _participantName));
 }
 
 VAsioConnection::~VAsioConnection()
@@ -269,12 +269,12 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     //     which may still be initializing when we are running. For example, this happens when all
     //     participants are started in a shell, and the registry is started in the background.
     auto registryCfg = _config->middleware.registry;
-    auto multipleConnectAttempts = [ &registry, &registryCfg](const auto& registryUri) {
+    auto multipleConnectAttempts = [ &registry, &registryCfg](const auto& registryUriRef) {
         for (auto i = 0; i < registryCfg.connectAttempts; i++)
         {
             try
             {
-                registry->Connect(registryUri);
+                registry->Connect(registryUriRef);
                 return true;
             }
             catch (const std::exception&)
@@ -364,9 +364,11 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
 void VAsioConnection::SendParticipantAnnoucement(IVAsioPeer* peer)
 {
     //Legacy Info for interop
-    VAsioPeerInfo localInfo{ _participantName, _participantId };
+    VAsioPeerInfo localInfo;
+    localInfo.participantName = _participantName;
+    localInfo.participantId = _participantId;
     //URI encoded infos
-    VAsioPeerUri uri{ _participantName, _participantId };
+    VAsioPeerUri uri{ _participantName, _participantId, {} };
 
     //Ensure that the local acceptor is the first entry in the acceptorUris
     auto&& localAcceptor = GetAcceptor<asio::local::stream_protocol::acceptor>();
@@ -450,7 +452,7 @@ void VAsioConnection::SendParticipantAnnoucementReply(IVAsioPeer* peer)
 
 void VAsioConnection::AddParticipantToLookup(const std::string& participantName)
 {
-  const auto result = _hashToParticipantName.insert(std::pair<std::size_t, std::string>(hash(participantName), participantName));
+  const auto result = _hashToParticipantName.insert({ hash(participantName), participantName });
   if (result.second == false)
   {
     _logger->Warn("Warning: Received announcement of participant '{}', which was already announced before.", participantName);
@@ -459,7 +461,7 @@ void VAsioConnection::AddParticipantToLookup(const std::string& participantName)
 
 const std::string& VAsioConnection::GetParticipantFromLookup(const std::uint64_t participantId) const
 {
-  const auto participantIter = _hashToParticipantName.find(participantId);
+    const auto participantIter = _hashToParticipantName.find(participantId);
   if (participantIter == _hashToParticipantName.end())
   {
     throw std::runtime_error{ "VAsioConnection: could not find participant in participant cache" };
@@ -528,7 +530,7 @@ void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
         // interop with older VIB participants:
         for (auto&& peerInfo : participantsMsg.peerInfos)
         {
-            VAsioPeerUri uri{ peerInfo.participantName, peerInfo.participantId };
+            VAsioPeerUri uri{ peerInfo.participantName, peerInfo.participantId, {} };
             uri.acceptorUris.push_back(
                 Uri{ peerInfo.acceptorHost, peerInfo.acceptorPort }.EncodedString()
             );
@@ -670,8 +672,6 @@ void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
 
     auto& info = peer->GetInfo();
 
-    EndpointAddress address{info.participantId, 1024};
-
     ib::mw::sync::ParticipantStatus msg;
     msg.participantName = info.participantName;
     msg.state = ib::mw::sync::ParticipantState::Error;
@@ -810,8 +810,6 @@ void VAsioConnection::ReceiveRawIbMessage(IVAsioPeer* from, MessageBuffer&& buff
 
     EndpointAddress endpoint;
     buffer >> endpoint;
-
-    const auto& participantName = GetParticipantFromLookup(endpoint.participant);
 
     auto* fromService = dynamic_cast<IIbServiceEndpoint*>(from);
     ServiceDescriptor tmpService(fromService->GetServiceDescriptor());

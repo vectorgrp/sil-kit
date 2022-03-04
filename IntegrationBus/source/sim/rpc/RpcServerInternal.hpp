@@ -45,7 +45,6 @@ class RpcServerInternal : public IIbToRpcServerInternal,
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor& override;
 
   private:
-
     std::string _functionName;
     sim::rpc::RpcExchangeFormat _exchangeFormat;
     std::map<std::string, std::string> _labels;
@@ -53,10 +52,10 @@ class RpcServerInternal : public IIbToRpcServerInternal,
     CallProcessor _handler;
     IRpcServer* _parent;
 
-    mw::IComAdapterInternal* _comAdapter{nullptr};
-    mw::sync::ITimeProvider* _timeProvider{nullptr};
     mw::ServiceDescriptor _serviceDescriptor{};
     std::map<std::string, std::unique_ptr<CallHandleImpl>> _receivedCallHandles;
+    mw::sync::ITimeProvider* _timeProvider{nullptr};
+    mw::IComAdapterInternal* _comAdapter{nullptr};
 };
 
 // ================================================================================

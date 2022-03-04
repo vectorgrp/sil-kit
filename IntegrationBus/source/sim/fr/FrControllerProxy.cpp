@@ -12,8 +12,8 @@ namespace fr {
 FrControllerProxy::FrControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::FlexRayController config,
                                      IFrController* facade)
     : _comAdapter(comAdapter)
-    , _config{config}
     , _facade{facade}
+    , _config{config}
 {
     if (_facade == nullptr)
     {
@@ -157,14 +157,14 @@ void FrControllerProxy::RegisterCycleStartHandler(CycleStartHandler handler)
     RegisterHandler(handler);
 }
 
-void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessage& msg)
+void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const FrMessage& msg)
 {
     _tracer.Trace(ib::sim::TransmitDirection::RX, msg.timestamp, msg);
 
     CallHandlers(msg);
 }
 
-void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessageAck& msg)
+void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const FrMessageAck& msg)
 {
     FrMessage tmp;
     tmp.frame = msg.frame;
@@ -175,7 +175,7 @@ void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const F
     CallHandlers(msg);
 }
 
-void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbol& msg)
+void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const FrSymbol& msg)
 {
     // Call wakeup handlers on WUS and WUDOP
     switch (msg.pattern)
@@ -195,17 +195,17 @@ void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const F
     CallHandlers(msg);
 }
 
-void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbolAck& msg)
+void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const FrSymbolAck& msg)
 {
     CallHandlers(msg);
 }
 
-void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CycleStart& msg)
+void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const CycleStart& msg)
 {
     CallHandlers(msg);
 }
 
-void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const PocStatus& msg)
+void FrControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const PocStatus& msg)
 {
     CallHandlers(msg);
 }

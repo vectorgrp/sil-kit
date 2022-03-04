@@ -65,16 +65,20 @@ TEST_F(SystemControllerTest, configure_serviceDescriptor)
 
 TEST_F(SystemControllerTest, send_initialize)
 {
-    ParticipantCommand cmd{5, ParticipantCommand::Kind::Initialize};
+    std::string name = "Participant";
+    auto nameHash = hash(name);
+    ParticipantCommand cmd{ nameHash, ParticipantCommand::Kind::Initialize};
     EXPECT_CALL(comAdapter, SendIbMessage(&controller, cmd)).Times(1);
-    controller.Initialize(5);
+    controller.Initialize(name);
 }
 
 TEST_F(SystemControllerTest, send_reinitialize)
 {
-    ParticipantCommand cmd{5, ParticipantCommand::Kind::ReInitialize};
+    std::string name = "Participant";
+    auto nameHash = hash(name);
+    ParticipantCommand cmd{ nameHash, ParticipantCommand::Kind::ReInitialize};
     EXPECT_CALL(comAdapter, SendIbMessage(&controller, cmd)).Times(1);
-    controller.ReInitialize(5);
+    controller.ReInitialize(name);
 }
 
 TEST_F(SystemControllerTest, send_run)

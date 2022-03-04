@@ -58,15 +58,13 @@ private:
     std::string _clientUUID;
 
     CallReturnHandler _handler;
-    RpcClient* _callController;
 
-    mw::IComAdapterInternal* _comAdapter{nullptr};
-    mw::sync::ITimeProvider* _timeProvider{nullptr};
     mw::ServiceDescriptor _serviceDescriptor{};
     uint32_t _numCounterparts{0};
     std::map<std::string, std::pair<uint32_t, std::unique_ptr<CallHandleImpl>>> _detachedCallHandles;
     mw::logging::ILogger* _logger;
-
+    mw::sync::ITimeProvider* _timeProvider{nullptr};
+    mw::IComAdapterInternal* _comAdapter{nullptr};
 };
 
 // ================================================================================

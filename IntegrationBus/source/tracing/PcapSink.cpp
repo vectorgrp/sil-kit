@@ -102,8 +102,8 @@ void PcapSink::Trace(ib::sim::TransmitDirection /*unused*/,
     Pcap::PacketHeader pcapPacketHeader;
     pcapPacketHeader.orig_len = static_cast<uint32_t>(message.GetFrameSize());
     pcapPacketHeader.incl_len = pcapPacketHeader.orig_len;
-    pcapPacketHeader.ts_sec = usec.count() / tosec;
-    pcapPacketHeader.ts_usec = usec.count() % tosec;
+    pcapPacketHeader.ts_sec = static_cast<uint32_t>(usec.count() / tosec);
+    pcapPacketHeader.ts_usec = static_cast<uint32_t>(usec.count() % tosec);
 
     bool ok = true;
     if (_file.is_open())

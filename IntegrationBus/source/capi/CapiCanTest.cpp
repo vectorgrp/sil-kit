@@ -9,7 +9,8 @@ namespace {
     using namespace ib::sim::can; 
     using ib::mw::test::DummyComAdapter;
 
-    MATCHER_P(CanFrameMatcher, controlFrame, "matches can frames of the c-api to the cpp api") {
+    MATCHER_P(CanFrameMatcher, controlFrame, "") {
+        *result_listener << "matches can frames of the c-api to the cpp api";
         auto frame2 = controlFrame;
         ib::sim::can::CanMessage frame;
         auto frame1 = arg;
@@ -17,7 +18,7 @@ namespace {
         {
             return false;
         }
-        for (int i = 0; i < frame1.dataField.size(); i++)
+        for (size_t i = 0; i < frame1.dataField.size(); i++)
         {
             if (frame1.dataField[i] != frame2.data.data[i]) {
                 return false;
@@ -67,19 +68,19 @@ namespace {
         MOCK_METHOD2(RegisterTransmitStatusHandler, void(MessageStatusHandler, CanTransmitStatusMask));
     };
 
-    void AckCallback(void* context, ib_Can_Controller* controller, ib_Can_TransmitAcknowledge* ack)
+    void AckCallback(void* /*context*/, ib_Can_Controller* /*controller*/, ib_Can_TransmitAcknowledge* /*ack*/)
     {
     }
 
-    void ReceiveMessage(void* context, ib_Can_Controller* controller, ib_Can_Message* metaData)
+    void ReceiveMessage(void* /*context*/, ib_Can_Controller* /*controller*/, ib_Can_Message* /*metaData*/)
     {
     }
 
-    void StateChangedHandler(void* context, ib_Can_Controller* controller, ib_Can_ControllerState state)
+    void StateChangedHandler(void* /*context*/, ib_Can_Controller* /*controller*/, ib_Can_ControllerState /*state*/)
     {
     }
 
-    void ErrorStateHandler(void* context, ib_Can_Controller* controller, ib_Can_ErrorState state)
+    void ErrorStateHandler(void* /*context*/, ib_Can_Controller* /*controller*/, ib_Can_ErrorState /*state*/)
     {
     }
 

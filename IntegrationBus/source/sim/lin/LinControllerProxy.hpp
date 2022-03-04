@@ -100,8 +100,8 @@ private:
     // ----------------------------------------
     // private members
     mw::IComAdapterInternal* _comAdapter;
-    ::ib::mw::ServiceDescriptor _serviceDescriptor;
     mw::logging::ILogger* _logger;
+    ::ib::mw::ServiceDescriptor _serviceDescriptor;
     ILinController* _facade{ nullptr };
 
     ControllerMode   _controllerMode{ControllerMode::Inactive};

@@ -58,13 +58,13 @@ private:
     DataHandlerT _defaultDataHandler;
     NewDataSourceHandlerT _newDataSourceHandler;
 
-    mw::IComAdapterInternal* _comAdapter{nullptr};
-    mw::sync::ITimeProvider* _timeProvider{nullptr};
     mw::ServiceDescriptor _serviceDescriptor{};
 
     std::vector<DataSubscriberInternal*> _internalSubscibers;
     uint64_t _specificDataHandlerId{ 0 };
     std::vector<SpecificDataHandler> _specificDataHandling;
+    mw::sync::ITimeProvider* _timeProvider{nullptr};
+    mw::IComAdapterInternal* _comAdapter{nullptr};
 };
 
 // ================================================================================

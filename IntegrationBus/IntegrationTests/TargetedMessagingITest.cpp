@@ -45,7 +45,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
     });
     senderParticipant->SetPeriod(1ms);
     senderParticipant->SetSimulationTask(
-        [&systemCtrl, &senderCan, &senderCom](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+        [&systemCtrl, &senderCan, &senderCom](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
             auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
             std::cout << "Sender: Current time=" << nowMs.count() << "ms" << std::endl;
             if (now == 0ms)
@@ -62,13 +62,13 @@ TEST(TargetedMessagingITest, targeted_messaging)
         dynamic_cast<ib::mw::IComAdapterInternal*>(testHarness.GetParticipant("TargetReceiver")->ComAdapter());
     auto* receiverParticipant = receiverCom->GetParticipantController();
     receiverParticipant->SetPeriod(1ms);
-    receiverParticipant->SetSimulationTask(
-        [&systemCtrl, &senderCan](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {});
+    receiverParticipant->SetSimulationTask([](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
+    });
 
     auto* receiverCan = receiverCom->CreateCanController("CAN1", "CAN1");
 
     receiverCan->RegisterReceiveMessageHandler(
-        [&receiveCount, &receiverCan](ib::sim::can::ICanController* controller, auto msg) {
+        [&receiveCount](ib::sim::can::ICanController* controller, auto msg) {
             std::cout << "'TargetReceiver' received a message from controller '" << controller
                       << "' with canId=" << msg.canId << std::endl;
             ASSERT_TRUE(msg.canId == 42) << "The received canId is wrong. expected=42; received=" << msg.canId;
@@ -80,7 +80,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
     auto* otherReceiverParticipant = otherReceiverCom->GetParticipantController();
     otherReceiverParticipant->SetPeriod(1ms);
     otherReceiverParticipant->SetSimulationTask(
-        [&systemCtrl, &senderCan](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {});
+        [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {});
 
     auto* otherReceiverCan = otherReceiverCom->CreateCanController("CAN1", "CAN1");
 

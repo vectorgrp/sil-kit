@@ -7,7 +7,6 @@ namespace service {
 
 // controller-specific keys
 const std::string controllerType = "controller.type";
-const std::string controllerIsSynchronized = "controller.isSynchronized"; // for participantController
 
 // simulatedController-specific keys
 // remark: simulated controllers have all attributes of regular controllers in addition to the following

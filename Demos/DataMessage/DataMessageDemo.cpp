@@ -29,7 +29,7 @@ void PublishMessage(IDataPublisher* publisher, std::string topicname)
     publisher->Publish(serializer.ReleaseBuffer());
 }
 
-void ReceiveMessage(IDataSubscriber* subscriber, const std::vector<uint8_t>& data)
+void ReceiveMessage(IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data)
 {
     ib::util::serdes::sil::Deserializer deserializer(data);
     const auto message = deserializer.Deserialize<std::string>();
@@ -87,7 +87,7 @@ int main(int argc, char** argv)
         auto participant = ib::CreateSimulationParticipant(participantConfiguration, participantName, domainId, true);
 
         auto&& participantController = participant->GetParticipantController();
-        participantController->SetInitHandler([&participantName](auto initCmd) {
+        participantController->SetInitHandler([&participantName](auto /*initCmd*/) {
             std::cout << "Initializing " << participantName << std::endl;
         });
         participantController->SetStopHandler([]() {
@@ -103,7 +103,7 @@ int main(int argc, char** argv)
         {
             auto* PubTopic1 = participant->CreateDataPublisher("Topic1", DataExchangeFormat{"A"}, {}, 0);
             auto* PubTopic2 = participant->CreateDataPublisher("Topic2", DataExchangeFormat{"A"}, {}, 0);
-            auto* SubTopic3 = participant->CreateDataSubscriber("Topic3", DataExchangeFormat{"A"}, {}, ReceiveMessage);
+            participant->CreateDataSubscriber("Topic3", DataExchangeFormat{"A"}, {}, ReceiveMessage);
 
             participantController->SetSimulationTask(
                 [PubTopic1, PubTopic2](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -119,7 +119,7 @@ int main(int argc, char** argv)
         {
             auto* PubTopic1 = participant->CreateDataPublisher("Topic1", DataExchangeFormat{"A"}, {}, 0);
             auto* PubTopic3 = participant->CreateDataPublisher("Topic3", DataExchangeFormat{"A"}, {}, 0);
-            auto* SubTopic3 = participant->CreateDataSubscriber("Topic3", DataExchangeFormat{"A"}, {}, ReceiveMessage);
+            participant->CreateDataSubscriber("Topic3", DataExchangeFormat{"A"}, {}, ReceiveMessage);
 
             participantController->SetSimulationTask(
                 [PubTopic1, PubTopic3](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -132,11 +132,11 @@ int main(int argc, char** argv)
         }
         else if (participantName == "Subscriber1")
         {
-            auto* SubTopic1 = participant->CreateDataSubscriber("Topic1", DataExchangeFormat{""}, {}, ReceiveMessage);
-            auto* SubTopic2 = participant->CreateDataSubscriber("Topic2", DataExchangeFormat{"A"}, {}, ReceiveMessage);
+            participant->CreateDataSubscriber("Topic1", DataExchangeFormat{""}, {}, ReceiveMessage);
+            participant->CreateDataSubscriber("Topic2", DataExchangeFormat{"A"}, {}, ReceiveMessage);
 
             participantController->SetSimulationTask(
-                [SubTopic1, SubTopic2](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+                [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                     std::this_thread::sleep_for(1s);
@@ -144,11 +144,11 @@ int main(int argc, char** argv)
         }
         else if (participantName == "Subscriber2")
         {
-            auto* SubTopic2 = participant->CreateDataSubscriber("Topic2", DataExchangeFormat{"A"}, {}, ReceiveMessage);
-            auto* SubTopic3 = participant->CreateDataSubscriber("Topic3", DataExchangeFormat{"B"}, {}, ReceiveMessage);
+            participant->CreateDataSubscriber("Topic2", DataExchangeFormat{"A"}, {}, ReceiveMessage);
+            participant->CreateDataSubscriber("Topic3", DataExchangeFormat{"B"}, {}, ReceiveMessage);
 
             participantController->SetSimulationTask(
-                [SubTopic2, SubTopic3](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+                [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                     std::this_thread::sleep_for(1s);

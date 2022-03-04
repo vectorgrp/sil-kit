@@ -232,13 +232,13 @@ void LinControllerReplay::ReplayMessage(const extensions::IReplayMessage* replay
         tm.status = FrameStatus::LIN_RX_OK;
         _comAdapter->SendIbMessage(this, tm);
 
-        FrameStatus masterFrameStatus = tm.status;
-        if (mode == FrameResponseMode::TxUnconditional)
-        {
-            masterFrameStatus = FrameStatus::LIN_TX_OK;
-        }
         // dispatch local frame status handlers
         // TODO fix epa check
+        //FrameStatus masterFrameStatus = tm.status;
+        //if (mode == FrameResponseMode::TxUnconditional)
+        //{
+        //    masterFrameStatus = FrameStatus::LIN_TX_OK;
+        //}
         //if (replayMessage->EndpointAddress() == _controller.EndpointAddress())
         //{
         //    for (auto& handler : _frameStatusHandler)

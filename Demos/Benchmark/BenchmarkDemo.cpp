@@ -103,7 +103,6 @@ bool Parse(int argc, char** argv, BenchmarkConfig& config)
     // or throw if an invalid argument is given.
     bool haveUserOptions = false;
     auto getArg = [&args, &haveUserOptions](const auto& name) {
-        auto i = 0;
         auto argIt = std::find(args.begin(), args.end(), name);
         if (argIt == args.end())
         {
@@ -125,7 +124,7 @@ bool Parse(int argc, char** argv, BenchmarkConfig& config)
         haveUserOptions = true;
         return result;
     };
-    auto parseOptional = [ &getArg, &asNum](const auto& argName, auto& outputValue, auto conversionFunc) {
+    auto parseOptional = [ &getArg](const auto& argName, auto& outputValue, auto conversionFunc) {
         auto arg = getArg( argName);
         if (!arg.empty())
         {
@@ -241,7 +240,7 @@ void PublishMessages(IDataPublisher* publisher, uint32_t messageCount, uint32_t 
     }
 }
 
-void ReceiveMessage(IDataSubscriber* subscriber, const std::vector<uint8_t>& data)
+void ReceiveMessage(IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& /*data*/)
 {
     // do nothing
 }
@@ -294,7 +293,7 @@ void ParticipantsThread(
     auto&& participantController = comAdapter->GetParticipantController();
    
     auto publisher = comAdapter->CreateDataPublisher("Topic", DataExchangeFormat{}, {}, 0);
-    auto subscriber = comAdapter->CreateDataSubscriber("Topic", DataExchangeFormat{}, {}, [&messageCounter](auto*, auto&) {
+    comAdapter->CreateDataSubscriber("Topic", DataExchangeFormat{}, {}, [&messageCounter](auto*, auto&) {
         // this is handled in I/O thread, so no data races on counter.
         messageCounter++;
     });

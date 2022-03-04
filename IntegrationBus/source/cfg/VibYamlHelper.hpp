@@ -18,14 +18,21 @@ using namespace ib::cfg;
 template <typename T>
 struct ParseTypeName
 {
-    static constexpr const char* name = "Unknown Type";
+    static constexpr const char* Name() { return  "Unknown Type"; }
 };
 
 #define DEFINE_VIB_PARSE_TYPE_NAME(TYPE) \
-    template<> struct ParseTypeName<TYPE> { static constexpr const char* name = #TYPE ; }
+    template<> struct ParseTypeName<TYPE> { static constexpr const char* Name(){ return #TYPE;} }
 
 
-template<typename T> struct ParseTypeName<std::vector<T>> { static constexpr const char* name = ParseTypeName<T>::name; };
+template <typename T>
+struct ParseTypeName<std::vector<T>>
+{
+    static constexpr const char* Name()
+    {
+        return ParseTypeName<T>::Name();
+    }
+};
 // Encode/Decode implementation is provided as templated static methods, to reduce boiler plate code.
 struct Converter
 {
@@ -88,7 +95,7 @@ auto parse_as(const YAML::Node& node) -> ValueT
     catch (const YAML::Exception& ex)
     {
         std::stringstream ss;
-        ss << "Cannot parse as Type \"" << YAML::ParseTypeName<ValueT>::name << "\". Exception: \"" << ex.what()
+        ss << "Cannot parse as Type \"" << YAML::ParseTypeName<ValueT>::Name() << "\". Exception: \"" << ex.what()
            << "\". While parsing: " << YAML::Dump(node);
         throw ConversionError(node, ss.str());
     }

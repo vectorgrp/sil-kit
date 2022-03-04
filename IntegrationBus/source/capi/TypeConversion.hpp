@@ -1,8 +1,12 @@
 /* Copyright (c) Vector Informatik GmbH. All rights reserved. */
 
+#pragma once
+
 #include "ib/capi/Types.h"
 
-static void assign(std::map<std::string, std::string>& cppLabels, const ib_KeyValueList* cLabels)
+namespace {
+
+inline void assign(std::map<std::string, std::string>& cppLabels, const ib_KeyValueList* cLabels)
 {
     if (cLabels)
     {
@@ -13,7 +17,7 @@ static void assign(std::map<std::string, std::string>& cppLabels, const ib_KeyVa
     }
 }
 
-static void assign(ib_KeyValueList** cLabels, const std::map<std::string, std::string>& cppLabels)
+inline void assign(ib_KeyValueList** cLabels, const std::map<std::string, std::string>& cppLabels)
 {
     size_t numLabels = cppLabels.size();
     size_t labelsSize = sizeof(ib_KeyValueList) + (numLabels * sizeof(ib_KeyValuePair));
@@ -27,7 +31,7 @@ static void assign(ib_KeyValueList** cLabels, const std::map<std::string, std::s
     }
 }
 
-static void assign(std::vector<std::string>& cppStrings, const ib_StringList* cStrings)
+inline void assign(std::vector<std::string>& cppStrings, const ib_StringList* cStrings)
 {
     if (cStrings)
     {
@@ -37,3 +41,5 @@ static void assign(std::vector<std::string>& cppStrings, const ib_StringList* cS
         }
     }
 }
+
+} // anonymous namespace

@@ -111,7 +111,7 @@ private:
 class Subscriber
 {
 public:
-    Subscriber(const std::vector<std::string>& syncParticipantNames, const std::string& participantName, const uint32_t domainId, const uint32_t& publisherCount, const uint32_t testSize)
+    Subscriber(const std::string& participantName, const uint32_t domainId, const uint32_t& publisherCount, const uint32_t testSize)
         : _publisherCount{publisherCount}
         , _messageIndexes(publisherCount, 0u)
         , _testSize{testSize}
@@ -133,7 +133,7 @@ public:
 
         for (auto publisherIndex = 0u; publisherIndex < _publisherCount; publisherIndex++)
         {
-            auto* subscriber = _comAdapter->CreateDataSubscriber(
+            _comAdapter->CreateDataSubscriber(
                 "Topic" + std::to_string(publisherIndex), DataExchangeFormat{}, {},
                 [this, publisherIndex](IDataSubscriber* subscriber, const std::vector<uint8_t>& data) {
                     ReceiveMessage(subscriber, data, publisherIndex);
@@ -269,7 +269,7 @@ TEST_F(DeterministicSimVAsioITest, deterministic_simulation_vasio)
     registry.ProvideDomain(domainId);
 
     // The subscriber assumes the role of the system controller and initiates simulation state changes
-    Subscriber subscriber(syncParticipantNames, subscriberName, domainId, publisherCount, testSize);
+    Subscriber subscriber(subscriberName, domainId, publisherCount, testSize);
     auto subscriberFuture = subscriber.RunAsync();
 
     std::vector<Publisher> publishers;

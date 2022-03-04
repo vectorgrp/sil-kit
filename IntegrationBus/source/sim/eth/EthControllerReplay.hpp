@@ -22,8 +22,8 @@ public:
     EthControllerReplay() = delete;
     EthControllerReplay(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::EthernetController config,
                         mw::sync::ITimeProvider* timeProvider)
-        : _controller{comAdapter, config, timeProvider}
-        , _replayConfig{config.replay}
+        : _replayConfig{ config.replay }
+        , _controller{ comAdapter, config, timeProvider }
     {
 
     }

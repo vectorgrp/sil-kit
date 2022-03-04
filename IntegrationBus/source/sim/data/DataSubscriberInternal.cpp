@@ -15,13 +15,13 @@ DataSubscriberInternal::DataSubscriberInternal(mw::IComAdapterInternal* comAdapt
                                                DataExchangeFormat dataExchangeFormat,
                                                const std::map<std::string, std::string>& labels,
                                                DataHandlerT defaultHandler, IDataSubscriber* parent)
-    : _comAdapter{comAdapter}
-    , _timeProvider{timeProvider}
-    , _topic{topic}
+    : _topic{topic}
     , _dataExchangeFormat{dataExchangeFormat}
     , _labels{labels}
     , _defaultHandler{defaultHandler}
     , _parent{parent}
+    , _timeProvider{timeProvider}
+    , _comAdapter{comAdapter}
 {
 }
 

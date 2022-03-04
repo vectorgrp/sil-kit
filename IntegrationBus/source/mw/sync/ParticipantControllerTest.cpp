@@ -96,7 +96,7 @@ protected:
 auto AParticipantStatusWithState(ParticipantState expected)
 {
     return MatcherCast<const ParticipantStatus&>(Field(&ParticipantStatus::state, expected));
-};
+}
 
 TEST_F(ParticipantControllerTest, report_commands_as_error_before_run_was_called)
 {

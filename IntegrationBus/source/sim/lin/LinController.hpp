@@ -144,7 +144,7 @@ private:
 auto LinController::GetLinNode(mw::EndpointAddress addr) -> LinNode&
 {
     auto iter = std::lower_bound(_linNodes.begin(), _linNodes.end(), addr,
-        [](const LinNode& lhs, const mw::EndpointAddress& addr) { return lhs.ibAddress < addr; }
+        [](const LinNode& lhs, const mw::EndpointAddress& address) { return lhs.ibAddress < address; }
     );
     if (iter == _linNodes.end() || iter->ibAddress != addr)
     {

@@ -44,32 +44,56 @@ function(ib_enable_threadsan isOn)
     endif()
 endfunction()
 
-function(ib_enable_warnings target)
-    if(NOT TARGET ${target})
-        # some test targets are declared conditionally
-        return()
-    endif()
-
+# Clean warning defaults set in CMAKE_*_FLAGS by CMake < 3.15
+function(ib_clean_default_compileflags)
     if(MSVC)
-        # TODO
-        #Note this only works on CMake 3.15, otherwise it will produce command
-        # line warnings because /W3 is overriden with /W4
-        #set(_flags /W4)
+        foreach (flag_var
+            CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
+            CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
+            CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+            CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+
+            # Clean /W3 to avoid /W3 /W4 override warnings
+            string(REPLACE "/W3" "" ${flag_var} "${${flag_var}}")
+            set(${flag_var} "${${flag_var}}" PARENT_SCOPE)
+        endforeach()
+    endif()
+endfunction()
+
+function(ib_enable_warnings isOn)
+    if(MSVC)
+        # Conditionally treat warnings as errors, exclude 1919 = VS 15.0 (v141 toolset) 
+        set(_warnAsError "")
+        if (${isOn} AND MSVC_VERSION GREATER 1919)
+            set(_warnAsError "/WX")
+        endif()
+        set(_flags 
+            /W4
+            /wd4100 # disable unreferenced formal parameter
+            ${_warnAsError}
+            )
     else()
+        # Conditionally treat warnings as errors
+        if (${isOn})
+            set(_warnAsError "-Werror")
+        endif()
+
         set(_flags
             -pedantic
             -Wall
             -Wextra
             -Wcast-align
             -Wformat=2
-            -Wshadow 
-            -Wsign-promo 
-            -Wstrict-overflow=5
-            -Wno-unused
+            -Wstrict-overflow=1         # > 1 fails in fmt-6.1.0
             -Wpacked
+            -Wno-implicit-fallthrough   
+            -Wno-shadow                 # Appears in ThirdParty/spdlog/include/spdlog/common.h:214:9
+            -Wno-format-nonliteral      # Warning in fmt-6.1.0/include/fmt/chrono.h:392:48
+            ${_warnAsError}
             )
-        target_compile_options(${target} PRIVATE ${_flags})
+
     endif()
+    add_compile_options(${_flags})
 endfunction()
 
 macro(ib_check_reproducible)

@@ -26,20 +26,15 @@ using ::ib::mw::test::DummyComAdapter;
 class MockComAdapter : public DummyComAdapter
 {
 public:
-    void SendIbMessage(const IIbServiceEndpoint* from, DataMessage&& msg) override
-    {
-        SendIbMessage_proxy(from, msg);
-    }
 
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const DataMessage&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(const IIbServiceEndpoint*, const DataMessage&));
+    MOCK_METHOD(void, SendIbMessage, (const IIbServiceEndpoint*, DataMessage&&));
 };
 
 class DataPublisherTest : public ::testing::Test
 {
 protected:
     DataPublisherTest()
-        : publisher{ &comAdapter, comAdapter.GetTimeProvider(), "Topic", DataExchangeFormat{}, {}, "pubUUID", 0 }
+        : publisher{ &comAdapter, comAdapter.GetTimeProvider(), "Topic", DataExchangeFormat{}, {}, "pubUUID" }
     {
         publisher.SetServiceDescriptor(from_endpointAddress(portAddress));
     }
@@ -54,9 +49,9 @@ protected:
 
 TEST_F(DataPublisherTest, publish_vector)
 {
-    const DataMessage msg{sampleData};
+    DataMessage msg{sampleData};
 
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(&publisher, msg))
+    EXPECT_CALL(comAdapter, SendIbMessage(&publisher, std::move(msg)))
         .Times(1);
 
     publisher.Publish(sampleData);
@@ -64,9 +59,9 @@ TEST_F(DataPublisherTest, publish_vector)
 
 TEST_F(DataPublisherTest, publish_raw)
 {
-    const DataMessage msg{sampleData};
+    DataMessage msg{sampleData};
 
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(&publisher, msg))
+    EXPECT_CALL(comAdapter, SendIbMessage(&publisher, std::move(msg)))
         .Times(1);
 
     publisher.Publish(sampleData.data(), sampleData.size());

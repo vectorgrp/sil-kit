@@ -20,7 +20,7 @@ struct MessageHistory {};
 // MessageHistory<.., 0>: message history is disabled
 template<typename MsgT> struct MessageHistory<MsgT, 0>
 {
-    void SetHistoryLength(size_t historyLength) {}
+    void SetHistoryLength(size_t) {}
     void Save(const IIbServiceEndpoint*, const MsgT& ) {}
     void NotifyPeer(IVAsioPeer*, uint16_t) {}
 };

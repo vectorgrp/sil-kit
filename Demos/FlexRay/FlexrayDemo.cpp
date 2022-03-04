@@ -173,11 +173,11 @@ struct FlexRayNode
         oldPocStatus = pocStatus;
     }
 
-    void WakeupHandler(fr::IFrController* controller, const fr::FrSymbol& symbol)
+    void WakeupHandler(fr::IFrController* frController, const fr::FrSymbol& symbol)
     {
         std::cout << ">> WAKEUP! (" << symbol.pattern << ")" << std::endl;
-        controller->AllowColdstart();
-        controller->Run();
+        frController->AllowColdstart();
+        frController->Run();
     }
 
 

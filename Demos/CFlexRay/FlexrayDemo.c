@@ -10,10 +10,13 @@
 #include "ib/capi/IntegrationBus.h"
 
 #ifdef WIN32
+#pragma warning(disable: 4100)
 #include "Windows.h"
 #define SleepMs(X) Sleep(X)
 #else
-#include "unistd.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <unistd.h>
 #define SleepMs(X) usleep((X)*1000)
 #endif
 
@@ -237,10 +240,9 @@ void FlexRayNode_txBufferUpdate(FlexRayNode* flexRayNode, ib_NanosecondsTime now
   if (flexRayNode->_controllerConfig->numBufferConfigs == 0)
     return;
 
-  static int msgNumber = -1;
-  msgNumber++;
+  static uint16_t msgNumber = 0;
 
-  int bufferIdx = msgNumber % flexRayNode->_controllerConfig->numBufferConfigs;
+  uint16_t bufferIdx = msgNumber % (uint16_t)(flexRayNode->_controllerConfig->numBufferConfigs);
 
   // prepare a friendly message as payload
   char payloadString[128];
@@ -257,6 +259,8 @@ void FlexRayNode_txBufferUpdate(FlexRayNode* flexRayNode, ib_NanosecondsTime now
   {
     printf("ib_FlexRay_Controller_UpdateTxBuffer => %s\n", ib_GetLastErrorString());
   }
+
+  msgNumber++;
 }
 
 // Reconfigure buffers: Swap Channels A and B
@@ -299,7 +303,6 @@ void FlexRayNode_PocStatusHandler(void* context, ib_FlexRay_Controller* controll
 
 void FlexRayNode_WakeupHandler(void* context, ib_FlexRay_Controller* controller, const ib_FlexRay_Symbol* symbol)
 {
-  FlexRayNode* flexRayNode = (FlexRayNode*)context;
   printf(">> WAKEUP! (%d)\n", symbol->pattern);
   ib_FlexRay_Controller_ExecuteCmd(controller, ib_FlexRay_ChiCommand_ALLOW_COLDSTART);
   ib_FlexRay_Controller_ExecuteCmd(controller, ib_FlexRay_ChiCommand_RUN);
@@ -600,3 +603,7 @@ int main(int argc, char** argv)
       free(jsonString);
   }
 }
+
+#ifndef WIN32
+#pragma GCC diagnostic pop
+#endif

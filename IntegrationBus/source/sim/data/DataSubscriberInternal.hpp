@@ -46,14 +46,14 @@ public:
 private:
     std::string _topic;
     DataExchangeFormat _dataExchangeFormat;
-    std::map <std::string, std::string> _labels;
+    std::map<std::string, std::string> _labels;
+    DataHandlerT _defaultHandler;
+    IDataSubscriber* _parent{nullptr};
 
-    mw::IComAdapterInternal* _comAdapter{nullptr};
     mw::ServiceDescriptor _serviceDescriptor{};
-    DataHandlerT  _defaultHandler;
     std::vector<DataHandlerT> _specificHandlers;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
-    IDataSubscriber* _parent{ nullptr };
+    mw::IComAdapterInternal* _comAdapter{nullptr};
 };
 
 // ================================================================================

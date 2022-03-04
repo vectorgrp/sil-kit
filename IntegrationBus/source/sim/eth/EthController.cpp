@@ -11,7 +11,7 @@ namespace ib {
 namespace sim {
 namespace eth {
 
-EthController::EthController(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::EthernetController config,
+EthController::EthController(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::EthernetController /*config*/,
                              mw::sync::ITimeProvider* timeProvider, IEthController* facade)
     : _comAdapter{comAdapter}
     , _timeProvider{timeProvider}
@@ -88,7 +88,7 @@ void EthController::RegisterBitRateChangedHandler(BitRateChangedHandler /*handle
 }
 
 
-void EthController::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg)
+void EthController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthMessage& msg)
 {
     _tracer.Trace(ib::sim::TransmitDirection::RX, msg.timestamp, msg.ethFrame);
 

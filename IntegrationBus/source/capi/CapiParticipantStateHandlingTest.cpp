@@ -1,3 +1,9 @@
+/* Copyright (c) Vector Informatik GmbH. All rights reserved. */
+
+#ifdef WIN32
+#    define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "ib/capi/IntegrationBus.h"
@@ -47,14 +53,11 @@ namespace {
 
 	};
 
-    void InitCallback(void* context, ib_SimulationParticipant* participant,
-        ib_ParticipantCommand* command) {}
-    void StopCallback(void* context, ib_SimulationParticipant* participant) {}
-    void ShutdownCallback(void* context, ib_SimulationParticipant* participant) {}
-
-    void SimTask(void* context, ib_SimulationParticipant* participant, ib_NanosecondsTime now) {}
-    void SystemStateHandler(void* context, ib_SimulationParticipant* participant, ib_SystemState state) {}
-    void ParticipantStateHandler(void* context, ib_SimulationParticipant* participant, const char* participantId, ib_ParticipantState state) {}
+    void InitCallback(void* /*context*/, ib_SimulationParticipant* /*participant*/,
+        ib_ParticipantCommand* /*command*/) {}
+    void StopCallback(void* /*context*/, ib_SimulationParticipant* /*participant*/) {}
+    void ShutdownCallback(void* /*context*/, ib_SimulationParticipant* /*participant*/) {}
+    void SystemStateHandler(void* /*context*/, ib_SimulationParticipant* /*participant*/, ib_SystemState /*state*/) {}
 
     TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_nullpointer_params)
     {

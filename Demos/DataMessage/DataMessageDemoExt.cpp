@@ -40,7 +40,7 @@ void PublishMessage(IDataPublisher* publisher, std::string msg)
     publisher->Publish(serializer.ReleaseBuffer());
 }
 
-void DefaultDataHandler(IDataSubscriber* subscriber, const std::vector<uint8_t>& data)
+void DefaultDataHandler(IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data)
 {
     ib::util::serdes::sil::Deserializer deserializer(data);
     const auto message = deserializer.Deserialize<std::string>();
@@ -48,7 +48,7 @@ void DefaultDataHandler(IDataSubscriber* subscriber, const std::vector<uint8_t>&
               << message << "\"" << std::endl;
 }
 
-void SpecificDataHandlerForPub1(IDataSubscriber* subscriber, const std::vector<uint8_t>& data)
+void SpecificDataHandlerForPub1(IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data)
 {
     ib::util::serdes::sil::Deserializer deserializer(data);
     const auto message = deserializer.Deserialize<std::string>();
@@ -56,7 +56,7 @@ void SpecificDataHandlerForPub1(IDataSubscriber* subscriber, const std::vector<u
               << message << std::endl;
 }
 
-void SpecificDataHandlerForPub2(IDataSubscriber* subscriber, const std::vector<uint8_t>& data)
+void SpecificDataHandlerForPub2(IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data)
 {
     ib::util::serdes::sil::Deserializer deserializer(data);
     const auto message = deserializer.Deserialize<std::string>();
@@ -64,7 +64,7 @@ void SpecificDataHandlerForPub2(IDataSubscriber* subscriber, const std::vector<u
               << message << "\"" << std::endl;
 }
 
-void NewDataSource(IDataSubscriber* subscriber, const std::string& topic,
+void NewDataSource(IDataSubscriber* /*subscriber*/, const std::string& topic,
                    const DataExchangeFormat& dataExchangeFormat,
                    const std::map<std::string, std::string>& labels)
 {
@@ -102,7 +102,7 @@ int main(int argc, char** argv)
 
         // Set an Init Handler
         auto&& participantController = participant->GetParticipantController();
-        participantController->SetInitHandler([&participantName](auto initCmd) {
+        participantController->SetInitHandler([&participantName](auto /*initCmd*/) {
 
             std::cout << "Initializing " << participantName << std::endl;
 

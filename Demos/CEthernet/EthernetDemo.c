@@ -9,10 +9,13 @@
 #include "ib/capi/IntegrationBus.h"
 
 #ifdef WIN32
+#pragma warning(disable: 4100 5105)
 #include "Windows.h"
-#   define SleepMs(X) Sleep(X)
+#define SleepMs(X) Sleep(X)
 #else
-#   include "unistd.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <unistd.h>
 #define SleepMs(X) usleep((X)*1000)
 #endif
 
@@ -56,7 +59,6 @@ void MacToBytes(uint8_t* outBytes, const char* mac)
         if (macCopy[i] == ':' || i==17)
         {
             macCopy[i] = '\0';
-            long curByte = strtol(ptrMac, NULL, 16);
             *ptrBytes = (uint8_t)strtol(ptrMac, NULL, 16);
             ptrMac += 3;
             ptrBytes += 1;
@@ -201,3 +203,7 @@ int main(int argc, char* argv[])
 
     return EXIT_SUCCESS;
 }
+
+#ifndef WIN32
+#pragma GCC diagnostic pop
+#endif

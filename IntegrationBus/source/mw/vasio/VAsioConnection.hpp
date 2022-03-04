@@ -116,7 +116,7 @@ public:
 
         util::tuple_tools::for_each(sendMessageTypes, [this, &networkName, historyLength](auto&& ibMessage) {
             using IbMessageT = std::decay_t<decltype(ibMessage)>;
-            auto link = GetLinkByName<IbMessageT>(networkName);
+            auto link = this->GetLinkByName<IbMessageT>(networkName); 
             link->SetHistoryLength(historyLength);
         });
     }
@@ -260,9 +260,9 @@ private:
         link->AddLocalReceiver(receiver);
 
         auto vasioReceiver = std::find_if(_vasioReceivers.begin(), _vasioReceivers.end(),
-            [&networkName](auto& receiver) {
-            return receiver->GetDescriptor().networkName == networkName
-                && receiver->GetDescriptor().msgTypeName == IbMsgTraits<IbMessageT>::TypeName();
+            [&networkName](auto& msgReceiver) {
+            return msgReceiver->GetDescriptor().networkName == networkName
+                && msgReceiver->GetDescriptor().msgTypeName == IbMsgTraits<IbMessageT>::TypeName();
         });
         if (vasioReceiver == _vasioReceivers.end())
         {
@@ -446,10 +446,9 @@ private:
 
     //We violate the strict layering architecture, so that we can cleanly shutdown without false error messages.
     bool _isShuttingDown{false};
-    EndpointId _endpointCounter{0};
 
   // Hold mapping from hash to participantName
-    std::map<std::size_t, std::string> _hashToParticipantName;
+    std::map<uint64_t, std::string> _hashToParticipantName;
 };
 
 } // mw

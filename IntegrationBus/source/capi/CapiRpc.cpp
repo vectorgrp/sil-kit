@@ -55,18 +55,19 @@ ib_ReturnCode ib_Rpc_Client_Create(ib_Rpc_Client** out, ib_SimulationParticipant
         assign(cppLabels, labels);
         auto rcpClient = comAdapter->CreateRpcClient(
             functionName, cppExchangeFormat, cppLabels,
-            [resultHandler, context, out] (ib::sim::rpc::IRpcClient* client, ib::sim::rpc::IRpcCallHandle* callHandle,
+            [resultHandler, context] (ib::sim::rpc::IRpcClient* cppClient, ib::sim::rpc::IRpcCallHandle* callHandle,
                   const ib::sim::rpc::CallStatus callStatus, const std::vector<uint8_t>& returnData) 
             {
+                auto* cClient = reinterpret_cast<ib_Rpc_Client*>(cppClient);
                 uint8_t* payloadPointer = NULL;
                 if (returnData.size() > 0)
                 {
-                    payloadPointer = (uint8_t* const) &(returnData[0]);
+                    payloadPointer = (uint8_t*)&(returnData[0]);
                 }
                 const ib_ByteVector cReturnData{payloadPointer, returnData.size()};
                 ib_Rpc_CallHandle* cCallHandle = reinterpret_cast<ib_Rpc_CallHandle*>(callHandle);
                 ib_Rpc_CallStatus cCallStatus = (ib_Rpc_CallStatus)callStatus;
-                resultHandler(context, *out, cCallHandle, cCallStatus, &cReturnData);
+                resultHandler(context, cClient, cCallHandle, cCallStatus, &cReturnData);
             });
 
         *out = reinterpret_cast<ib_Rpc_Client*>(rcpClient);
@@ -93,17 +94,18 @@ ib_ReturnCode ib_Rpc_Server_Create(ib_Rpc_Server** out, ib_SimulationParticipant
         assign(cppLabels, labels);
         auto rcpServer = comAdapter->CreateRpcServer(
             functionName, cppExchangeFormat, cppLabels,
-            [callHandler, context, out](ib::sim::rpc::IRpcServer* server, ib::sim::rpc::IRpcCallHandle* callHandle,
+            [callHandler, context](ib::sim::rpc::IRpcServer* cppServer, ib::sim::rpc::IRpcCallHandle* callHandle,
                   const std::vector<uint8_t>& argumentData)
             {
+                auto* cServer = reinterpret_cast<ib_Rpc_Server*>(cppServer);
                 uint8_t* payloadPointer = NULL;
                 if (argumentData.size() > 0)
                 {
-                    payloadPointer = (uint8_t* const)&(argumentData[0]);
+                    payloadPointer = (uint8_t*)&(argumentData[0]);
                 }
                 const ib_ByteVector cArgumentData{payloadPointer, argumentData.size()};
                 ib_Rpc_CallHandle* cCallHandle = reinterpret_cast<ib_Rpc_CallHandle*>(callHandle);
-                callHandler(context, *out, cCallHandle, &cArgumentData);
+                callHandler(context, cServer, cCallHandle, &cArgumentData);
             });
 
         *out = reinterpret_cast<ib_Rpc_Server*>(rcpServer);

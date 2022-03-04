@@ -16,11 +16,7 @@ using ::testing::_;
 
 class MockComAdapter : public DummyComAdapter
 {
-public:
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const HostCommand&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const ControllerConfig&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const TxBufferConfigUpdate&));
-    MOCK_METHOD2(SendIbMessage, void(EndpointAddress, const TxBufferUpdate&));
+
 };
 
 class MockFrController : public ib::sim::fr::IFrController
@@ -58,35 +54,34 @@ public:
   void TearDown() override
   {
   }
-  static ib::sim::fr::ClusterParameters getClusterParameters();
-  static ib::sim::fr::NodeParameters getNodeParameters();
+
   struct Callbacks
   {
-    static void MessageHandler(void* context, ib_FlexRay_Controller* controller, const ib_FlexRay_Message* message)
+    static void MessageHandler(void* /*context*/, ib_FlexRay_Controller* /*controller*/, const ib_FlexRay_Message* /*message*/)
     {
     }
 
-    static void MessageAckHandler(void* context, ib_FlexRay_Controller* controller, const ib_FlexRay_MessageAck* acknowledge)
+    static void MessageAckHandler(void* /*context*/, ib_FlexRay_Controller* /*controller*/, const ib_FlexRay_MessageAck* /*acknowledge*/)
     {
     }
 
-    static void WakeupHandler(void* context, ib_FlexRay_Controller* controller, const ib_FlexRay_Symbol* symbol)
+    static void WakeupHandler(void* /*context*/, ib_FlexRay_Controller* /*controller*/, const ib_FlexRay_Symbol* /*symbol*/)
     {
     }
 
-    static void PocStatusHandler(void* context, ib_FlexRay_Controller* controller, const ib_FlexRay_PocStatus* status)
+    static void PocStatusHandler(void* /*context*/, ib_FlexRay_Controller* /*controller*/, const ib_FlexRay_PocStatus* /*status*/)
     {
     }
 
-    static void SymbolHandler(void* context, ib_FlexRay_Controller* controller, const ib_FlexRay_Symbol* symbol)
+    static void SymbolHandler(void* /*context*/, ib_FlexRay_Controller* /*controller*/, const ib_FlexRay_Symbol* /*symbol*/)
     {
     }
 
-    static void SymbolAckHandler(void* context, ib_FlexRay_Controller* controller, const ib_FlexRay_SymbolAck* acknowledge)
+    static void SymbolAckHandler(void* /*context*/, ib_FlexRay_Controller* /*controller*/, const ib_FlexRay_SymbolAck* /*acknowledge*/)
     {
     }
 
-    static void CycleStartHandler(void* context, ib_FlexRay_Controller* controller, const ib_FlexRay_CycleStart* cycleStart)
+    static void CycleStartHandler(void* /*context*/, ib_FlexRay_Controller* /*controller*/, const ib_FlexRay_CycleStart* /*cycleStart*/)
     {
     }
   };
@@ -178,9 +173,8 @@ TEST_F(CapiFlexRayTest, fr_controller_function_mapping)
 TEST_F(CapiFlexRayTest, fr_controller_nullpointer_params)
 {
 
-  auto                   cMockComAdapter = (ib_SimulationParticipant*)&comAdapter;
-  auto                   cMockController = (ib_Lin_Controller*)&mockController;
-  ib_ReturnCode               returnCode;
+  auto cMockComAdapter = (ib_SimulationParticipant*)&comAdapter;
+  ib_ReturnCode returnCode;
   ib_FlexRay_ControllerConfig cfg;
   memset(&cfg, 0, sizeof(cfg));
   ib_FlexRay_Controller* cController = (ib_FlexRay_Controller*)&mockController;
@@ -244,61 +238,6 @@ TEST_F(CapiFlexRayTest, fr_controller_nullpointer_params)
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
   returnCode = ib_FlexRay_Controller_RegisterCycleStartHandler(cController, NULL, nullptr);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-}
-
-ib::sim::fr::ClusterParameters CapiFlexRayTest::getClusterParameters()
-{
-    ib::sim::fr::ClusterParameters clusterParams;
-    clusterParams.gColdstartAttempts = 8;
-    clusterParams.gCycleCountMax = 63;
-    clusterParams.gdActionPointOffset = 2;
-    clusterParams.gdDynamicSlotIdlePhase = 1;
-    clusterParams.gdMiniSlot = 5;
-    clusterParams.gdMiniSlotActionPointOffset = 2;
-    clusterParams.gdStaticSlot = 31;
-    clusterParams.gdSymbolWindow = 1;
-    clusterParams.gdSymbolWindowActionPointOffset = 1;
-    clusterParams.gdTSSTransmitter = 9;
-    clusterParams.gdWakeupTxActive = 60;
-    clusterParams.gdWakeupTxIdle = 180;
-    clusterParams.gListenNoise = 2;
-    clusterParams.gMacroPerCycle = 3636;
-    clusterParams.gMaxWithoutClockCorrectionFatal = 2;
-    clusterParams.gMaxWithoutClockCorrectionPassive = 2;
-    clusterParams.gNumberOfMiniSlots = 291;
-    clusterParams.gNumberOfStaticSlots = 70;
-    clusterParams.gPayloadLengthStatic = 16;
-    clusterParams.gSyncFrameIDCountMax = 15;
-    return clusterParams;
-}
-
-ib::sim::fr::NodeParameters CapiFlexRayTest::getNodeParameters()
-{
-    ib::sim::fr::NodeParameters nodeParams;
-    nodeParams.pAllowHaltDueToClock = 1;
-    nodeParams.pAllowPassiveToActive = 0;
-    nodeParams.pChannels = ib::sim::fr::Channel::AB;
-    nodeParams.pClusterDriftDamping = 2;
-    nodeParams.pdAcceptedStartupRange = 212;
-    nodeParams.pdListenTimeout = 400162;
-    nodeParams.pKeySlotId = 0;
-    nodeParams.pKeySlotOnlyEnabled = 0;
-    nodeParams.pKeySlotUsedForStartup = 0;
-    nodeParams.pKeySlotUsedForSync = 0;
-    nodeParams.pLatestTx = 249;
-    nodeParams.pMacroInitialOffsetA = 3;
-    nodeParams.pMacroInitialOffsetB = 3;
-    nodeParams.pMicroInitialOffsetA = 6;
-    nodeParams.pMicroInitialOffsetB = 6;
-    nodeParams.pMicroPerCycle = 200000;
-    nodeParams.pOffsetCorrectionOut = 127;
-    nodeParams.pOffsetCorrectionStart = 3632;
-    nodeParams.pRateCorrectionOut = 81;
-    nodeParams.pWakeupChannel = ib::sim::fr::Channel::A;
-    nodeParams.pWakeupPattern = 33;
-    nodeParams.pdMicrotick = ib::sim::fr::ClockPeriod::T25NS;
-    nodeParams.pSamplesPerMicrotick = 2;
-    return nodeParams;
 }
 
 } // namespace

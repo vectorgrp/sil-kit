@@ -58,9 +58,7 @@ public:
 
         _isRunning = true;
         _promise = std::promise<void>{};
-        _thread = std::move(std::thread{&Timer::ThreadMain, this,
-            std::move(_promise.get_future())});
-
+        _thread = std::thread{&Timer::ThreadMain, this, _promise.get_future()};
     }
 
     bool IsActive() const

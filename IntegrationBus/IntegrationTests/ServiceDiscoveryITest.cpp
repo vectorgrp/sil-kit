@@ -34,7 +34,7 @@ protected:
 TEST_F(ServiceDiscoveryITest, discover_service_removal_on_participant_shutdown)
 {
     auto domainId = static_cast<uint32_t>(GetTestPid());
-    int numberOfServices = 5;
+    size_t numberOfServices = 5;
     std::string subscriberName = "Subscriber";
     std::string publisherName = "Publisher";
 
@@ -50,7 +50,7 @@ TEST_F(ServiceDiscoveryITest, discover_service_removal_on_participant_shutdown)
         ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), subscriberName, domainId, false);
 
     // Services
-    for (auto i = 0; i < numberOfServices; i++)
+    for (auto i = 0u; i < numberOfServices; i++)
     {
         const auto topic = "TopicName-" + std::to_string(i);
         publisher->CreateDataPublisher(topic, ib::sim::data::DataExchangeFormat{}, {}, 0);

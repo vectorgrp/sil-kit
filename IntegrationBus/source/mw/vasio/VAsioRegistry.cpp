@@ -175,14 +175,14 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
 
     // In case the peer is remote we need to replace all local addresses with 
     // the endpoint address known to the registry.
-    auto replaceLocalhostUri = [&peer](auto& peerUri) {
+    auto replaceLocalhostUri = [&peer](auto& peerUriToPatch) {
         const auto registryUri = Uri{ peer->GetLocalAddress() };
         if (registryUri.Type() == Uri::UriType::Local)
         {
             // don't touch local domain socket URIs
             return;
         }
-        for (auto& uri : peerUri.acceptorUris)
+        for (auto& uri : peerUriToPatch.acceptorUris)
         {
             auto parsedUri = Uri{ uri };
             if (parsedUri.Type() == Uri::UriType::Local)
@@ -198,15 +198,15 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
     };
 
     // Also provide VAsioPeerInfos for legacy participants
-    auto uriToPeerInfos = [](const auto& peerUri, auto& peerInfoVec) {
-        for (const auto& uriStr : peerUri.acceptorUris) {
+    auto uriToPeerInfos = [](const auto& peerUriSrc, auto& peerInfoVec) {
+        for (const auto& uriStr : peerUriSrc.acceptorUris) {
             auto uri = Uri{ uriStr };
             if (uri.Type() == Uri::UriType::Tcp) {
                 VAsioPeerInfo pi{};
                 pi.acceptorHost = uri.Host();
                 pi.acceptorPort = uri.Port();
-                pi.participantId = peerUri.participantId;
-                pi.participantName = peerUri.participantName;
+                pi.participantId = peerUriSrc.participantId;
+                pi.participantName = peerUriSrc.participantName;
                 peerInfoVec.emplace_back(std::move(pi));
             }
         }

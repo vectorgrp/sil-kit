@@ -22,13 +22,13 @@ struct NullConnection
     inline void RegisterIbService(const std::string& /*topicName*/, mw::EndpointId /*endpointId*/, IbServiceT* /*receiver*/) {}
 
     template <class IbServiceT>
-    inline void SetHistoryLengthForLink(const std::string& /*linkName*/, size_t /*history*/, IbServiceT* /*service*/) {};
+    inline void SetHistoryLengthForLink(const std::string& /*linkName*/, size_t /*history*/, IbServiceT* /*service*/) {}
 
     template<typename IbMessageT>
-    void SendIbMessage(const mw::IIbServiceEndpoint* /*from*/, IbMessageT&& /*msg*/) {};
+    void SendIbMessage(const mw::IIbServiceEndpoint* /*from*/, IbMessageT&& /*msg*/) {}
 
     template<typename IbMessageT>
-    void SendIbMessage(const mw::IIbServiceEndpoint* /*from*/, const std::string& /*target*/, IbMessageT&& /*msg*/) {};
+    void SendIbMessage(const mw::IIbServiceEndpoint* /*from*/, const std::string& /*target*/, IbMessageT&& /*msg*/) {}
 
     void OnAllMessagesDelivered(std::function<void()> /*callback*/) {}
     void FlushSendBuffers() {}

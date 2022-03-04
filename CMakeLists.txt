@@ -19,6 +19,7 @@ option(IB_ENABLE_ASAN "Enable -f sanitize=address for builds (requires gcc, clan
 option(IB_ENABLE_UBSAN "Enable -f sanitize=undefined for builds (requires gcc, clang)" OFF)
 option(IB_ENABLE_THREADSAN "Enable -f sanitize=thread for builds (requires gcc, clang)" OFF)
 option(IB_MW_ENABLE_VASIO "Build VAsio Middleware" ON)
+option(IB_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${CMAKE_CURRENT_LIST_DIR}/IntegrationBus/cmake)
 include(IntegrationBusInstall)
@@ -35,24 +36,27 @@ if(MSVC)
 endif()
 
 # Configure build settings like warning and sanitizers
-
 include(IntegrationBusBuildSettings)
 ib_enable_asan(${IB_ENABLE_ASAN})
 ib_enable_ubsan(${IB_ENABLE_UBSAN})
 ib_enable_threadsan(${IB_ENABLE_THREADSAN})
 ib_check_reproducible()
+ib_clean_default_compileflags()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Globally add -fPIC compiler option
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-
 ###############################################################################
 # Include the IntegrationBus projects to be built
 ###############################################################################
 # Dependencies
 add_subdirectory(ThirdParty)
+
+# Globally set the warning compile options AFTER including ThirdParty
+ib_enable_warnings(${IB_WARNINGS_AS_ERRORS})
+
 # Have both IntegrationBus library and demo project in a single solution
 add_subdirectory(IntegrationBus)
 add_subdirectory(Utilities)
@@ -63,7 +67,6 @@ endif()
 add_subdirectory(Launcher)
 # Include automated documentation with doxygen and sphinx
 add_subdirectory(docs)
-
 
 ################################################################################
 # Distribution of the source code

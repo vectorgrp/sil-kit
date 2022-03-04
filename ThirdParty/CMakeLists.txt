@@ -1,3 +1,9 @@
+# Clean /W3 from default CMake flags to avoid warning override messages
+ib_clean_default_compileflags()
+
+# Disable warnings in ThirdParty folder
+add_compile_options(-w)
+
 function(addTestProject)
     # Prevent overriding the parent project's compiler/linker settings on Windows
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)

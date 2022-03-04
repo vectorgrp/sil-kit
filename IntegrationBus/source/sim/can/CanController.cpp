@@ -116,7 +116,7 @@ auto CanController::SendMessage(CanMessage&& msg, void* userContext) -> CanTxId
 void CanController::RegisterReceiveMessageHandler(ReceiveMessageHandler handler, DirectionMask directionMask)
 {
     std::function<bool(const CanMessage&)> filter = [directionMask](const CanMessage& msg) {
-        return (DirectionMask)msg.direction & (DirectionMask)directionMask;
+        return ((DirectionMask)msg.direction & (DirectionMask)directionMask) != 0;
     };
     RegisterHandler(handler, std::move(filter));
 }
@@ -132,7 +132,7 @@ void CanController::RegisterErrorStateChangedHandler(ErrorStateChangedHandler /*
 void CanController::RegisterTransmitStatusHandler(MessageStatusHandler handler, CanTransmitStatusMask statusMask)
 {
     std::function<bool(const CanTransmitAcknowledge& )> filter = [statusMask](const CanTransmitAcknowledge& ack) {
-        return (CanTransmitStatusMask)ack.status & (CanTransmitStatusMask)statusMask; 
+        return ((CanTransmitStatusMask)ack.status & (CanTransmitStatusMask)statusMask) != 0; 
     };
     RegisterHandler(handler, filter);
 }
@@ -145,7 +145,7 @@ void CanController::RegisterHandler(CallbackT<MsgT> handler, std::function<bool(
     handlers.push_back(handler_tuple);
 }
 
-void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMessage& msg)
+void CanController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const CanMessage& msg)
 {
     // ignore messages that do not originate from the replay scheduler 
     //if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Receive))

@@ -22,12 +22,12 @@ struct UnsynchronizedPolicy : ParticipantController::ITimeSyncPolicy
     {
     }
     void Initialize() override { }
-    void SynchronizedParticipantAdded(const std::string& otherParticipantName) override { }
-    void SynchronizedParticipantRemoved(const std::string& otherParticipantName) override { }
+    void SynchronizedParticipantAdded(const std::string& /*otherParticipantName*/) override { }
+    void SynchronizedParticipantRemoved(const std::string& /*otherParticipantName*/) override { }
     void RequestInitialStep() override { }
     void RequestNextStep() override { }
-    void SetStepDuration(std::chrono::nanoseconds duration) override { }
-    void ReceiveNextSimTask(const IIbServiceEndpoint* from, const NextSimTask& task) override { }
+    void SetStepDuration(std::chrono::nanoseconds /*duration*/) override { }
+    void ReceiveNextSimTask(const IIbServiceEndpoint* /*from*/, const NextSimTask& /*task*/) override { }
     void SetBlockingMode(bool) override { }
 };
 

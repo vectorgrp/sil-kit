@@ -9,7 +9,7 @@ namespace sim {
 namespace fr {
 
 FrControllerFacade::FrControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::FlexRayController config,
-                                       mw::sync::ITimeProvider* timeProvider)
+                                       mw::sync::ITimeProvider* /*timeProvider*/)
     : _comAdapter{comAdapter}
     , _config{config}
 {

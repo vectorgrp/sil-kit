@@ -115,11 +115,11 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
     descr = senderDescriptor;
    
     disco.RegisterServiceDiscoveryHandler(
-        [&descr](auto eventType, auto&& newServiceDescr) {
+        [&descr](auto /*eventType*/, auto&& newServiceDescr) {
             ASSERT_EQ(descr.GetSupplementalData(), newServiceDescr.GetSupplementalData());
     });
-    disco.RegisterServiceDiscoveryHandler([this](auto type, auto&& descr) {
-        callbacks.ServiceDiscoveryHandler(type, descr);
+    disco.RegisterServiceDiscoveryHandler([this](auto type, auto&& serviceDescr) {
+        callbacks.ServiceDiscoveryHandler(type, serviceDescr);
     });
 
     // reference data for validation

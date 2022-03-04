@@ -25,7 +25,7 @@ const ib::mw::sync::ExpectedParticipants& SystemMonitor::GetExpectedParticipants
     return _expectedParticipants;
 }
 
-void SystemMonitor::ReceiveIbMessage(const IIbServiceEndpoint* from,
+void SystemMonitor::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/,
                                      const sync::ExpectedParticipants& expectedParticipants)
 {
     UpdateExpectedParticipantNames(expectedParticipants);
@@ -148,7 +148,7 @@ auto SystemMonitor::ParticipantStatus(const std::string& participantName) const 
     return statusIter->second;
 }
 
-void SystemMonitor::ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantStatus& newParticipantStatus)
+void SystemMonitor::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const sync::ParticipantStatus& newParticipantStatus)
 {
     auto participantName = newParticipantStatus.participantName;
 

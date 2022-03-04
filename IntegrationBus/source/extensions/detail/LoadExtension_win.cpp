@@ -88,7 +88,7 @@ std::string GetProcessPath()
 {
     std::vector<char> buf;
     buf.resize(MAX_PATH);
-    ::GetModuleFileNameA(nullptr, buf.data(), buf.size());
+    ::GetModuleFileNameA(nullptr, buf.data(), static_cast<DWORD>(buf.size()));
     std::string path(buf.data(), buf.size());
 
     auto sep = path.find_last_of('\\');

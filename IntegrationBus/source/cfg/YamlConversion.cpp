@@ -13,56 +13,6 @@ using namespace ib;
 // Local utilities
 namespace {
 
-inline auto nibble_to_char(char nibble) -> char
-{
-    nibble &= 0xf;
-    if (0 <= nibble && nibble < 10)
-        return '0' + nibble;
-    else
-        return 'a' + (nibble - 10);
-}
-
-inline auto char_to_nibble(char c) -> char
-{
-    if (c < '0' || c > 'f')
-        throw std::runtime_error("OutOfRange");
-
-
-    if (c < 'a')
-        return c - '0';
-    else
-        return c - 'a' + 10;
-}
-
-auto hex_encode(const std::vector<uint8_t>& data) -> std::string
-{
-    std::stringstream out;
-    for (auto&& byte : data)
-    {
-        out << nibble_to_char(byte >> 4)
-            << nibble_to_char(byte);
-    }
-    return out.str();
-}
-
-auto hex_decode(const std::string& str) -> std::vector<uint8_t>
-{
-    if (str.size() % 2 != 0)
-        throw std::runtime_error("InvalidStrFormat");
-
-    std::vector<uint8_t> result;
-    result.reserve(str.size() / 2);
-
-    for (auto iter = str.begin(); iter != str.end(); iter += 2)
-    {
-        char high = char_to_nibble(*iter);
-        char low = char_to_nibble(*(iter + 1));
-
-        result.push_back(high << 4 | low);
-    }
-    return result;
-}
-
 auto macaddress_encode(const ib::util::Optional<std::array<uint8_t, 6>>& macAddress, YAML::Node& node, const std::string& fieldName)
 {
     if (macAddress.has_value())
@@ -867,7 +817,6 @@ bool Converter::decode(const Node& node, RpcClient& obj)
 template <>
 Node Converter::encode(const HealthCheck& obj)
 {
-    static const HealthCheck defaultObj{};
     Node node;
     optional_encode(obj.softResponseTimeout, node, "SoftResponseTimeout");
     optional_encode(obj.hardResponseTimeout, node, "HardResponseTimeout");

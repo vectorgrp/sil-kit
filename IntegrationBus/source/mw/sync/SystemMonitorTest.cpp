@@ -66,7 +66,7 @@ protected:
         uint64_t id = participant - 1;
         ParticipantStatus status;
         status.state = state;
-        status.participantName = syncParticipantNames.at(id);
+        status.participantName = syncParticipantNames.at(static_cast<size_t>(id));
         status.enterReason = reason;
 
         EndpointAddress from;

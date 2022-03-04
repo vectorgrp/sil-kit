@@ -64,7 +64,7 @@ protected:
 
         auto* controller = writer->ComAdapter()->CreateCanController("CAN1", "CAN1");
         controller->RegisterTransmitStatusHandler(
-            [this, writer](ICanController* /*ctrl*/, const CanTransmitAcknowledge& ack) {
+            [this](ICanController* /*ctrl*/, const CanTransmitAcknowledge& ack) {
             callbacks.AckHandler(ack);
         });
 

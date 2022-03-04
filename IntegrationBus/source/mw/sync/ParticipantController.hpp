@@ -130,8 +130,6 @@ private:
 
     bool _coldswapEnabled{ false };
 
-    service::IServiceDiscovery* _serviceDiscovery;
-
     bool _isRunning{ false };
     ParticipantStatus _status;
 
@@ -165,10 +163,6 @@ void ParticipantController::SendIbMessage(MsgT&& msg) const
 void ParticipantController::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
-    if (_isSynchronized)
-    {
-        _serviceDescriptor.SetSupplementalDataItem(ib::mw::service::controllerIsSynchronized, std::to_string(true));
-    }
 }
 
 auto ParticipantController::GetServiceDescriptor() const -> const mw::ServiceDescriptor&

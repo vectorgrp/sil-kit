@@ -1,5 +1,9 @@
 // Copyright (c) 2020 Vector Informatik GmbH. All rights reserved.
 
+#ifdef WIN32
+#    define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include "IbExtensions.hpp"
 
 #include <sstream>

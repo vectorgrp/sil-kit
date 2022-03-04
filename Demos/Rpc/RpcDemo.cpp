@@ -40,7 +40,7 @@ void Call(IRpcClient* client)
     }
 }
 
-void CallReturn(IRpcClient* client, IRpcCallHandle* callHandle,
+void CallReturn(IRpcClient* /*cbClient*/, IRpcCallHandle* /*callHandle*/,
     const CallStatus callStatus, const std::vector<uint8_t>& returnData)
 {
     switch (callStatus)
@@ -106,7 +106,7 @@ int main(int argc, char** argv)
 
         auto initializedPromise = std::promise<void>{};
 
-        participantController->SetInitHandler([&initializedPromise, &participantName](auto initCmd) {
+        participantController->SetInitHandler([&initializedPromise, &participantName](auto /*initCmd*/) {
             std::cout << "Initializing " << participantName << std::endl;
             initializedPromise.set_value();
         });
@@ -143,11 +143,11 @@ int main(int argc, char** argv)
         {
             auto exchangeFormatServerA = RpcExchangeFormat{"application/octet-stream"};
             std::map<std::string, std::string> labelsServerA{ {"KeyA", "ValA"}, {"KeyB", "ValB"}};
-            auto serverA = participant->CreateRpcServer("Add100", exchangeFormatServerA, labelsServerA, &RemoteFunc_Add100);
+            participant->CreateRpcServer("Add100", exchangeFormatServerA, labelsServerA, &RemoteFunc_Add100);
             
             auto exchangeFormatServerB = RpcExchangeFormat{"application/json"};
             std::map<std::string, std::string> labelsServerB{ {"KeyC", "ValC"}, {"KeyD", "ValD"}};
-            auto serverB = participant->CreateRpcServer("Sort", exchangeFormatServerB, labelsServerB, &RemoteFunc_Sort);
+            participant->CreateRpcServer("Sort", exchangeFormatServerB, labelsServerB, &RemoteFunc_Sort);
 
             participantController->SetSimulationTask(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {

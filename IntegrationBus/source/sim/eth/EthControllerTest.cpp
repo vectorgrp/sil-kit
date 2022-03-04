@@ -35,7 +35,9 @@ using namespace ib::sim::eth;
 using ::ib::mw::test::DummyComAdapter;
 using ::ib::test::MockTraceSink;
 
-MATCHER_P(EthernetTransmitAckWithouthTransmitIdMatcher, truthAck, "matches EthernetTransmitAcks without checking the transmit id") {
+MATCHER_P(EthernetTransmitAckWithouthTransmitIdMatcher, truthAck, "") 
+{
+    *result_listener << "matches EthernetTransmitAcks without checking the transmit id";
     auto frame1 = truthAck;
     auto frame2 = arg;
     return frame1.sourceMac == frame2.sourceMac && frame1.status == frame2.status && frame1.timestamp == frame2.timestamp;
@@ -155,7 +157,7 @@ TEST_F(EthernetControllerTest, trigger_callback_on_receive_ack)
     EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(ack)))
         .Times(1);
 
-    auto tid = controller.SendMessage(msg);
+    controller.SendMessage(msg);
 }
 
 

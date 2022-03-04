@@ -2,10 +2,13 @@
 
 #ifdef WIN32
 #define _CRT_SECURE_NO_WARNINGS
+#pragma warning(disable : 4100 5105)
 #include "Windows.h"
 #define SleepMs(X) Sleep(X)
 #else
-#   include "unistd.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <unistd.h>
 #define SleepMs(X) usleep((X)*1000)
 #endif
 
@@ -58,7 +61,7 @@ char* participantName;
 
 void PrintByteVector(const ib_ByteVector* data)
 {
-    for (int i = 0; i < data->size; i++)
+    for (size_t i = 0; i < data->size; i++)
     {
         printf("%i", data->data[i]);
         if (i < data->size - 1)
@@ -69,24 +72,24 @@ void PrintByteVector(const ib_ByteVector* data)
     printf("\n");
 }
 
-void CallHandler(void* context, ib_Rpc_Server* server, const ib_Rpc_CallHandle* callHandle,
+void CallHandler(void* context, ib_Rpc_Server* cbServer, ib_Rpc_CallHandle* callHandle,
                         const ib_ByteVector* argumentData)
 {
     receiveCallCount += 1;
     uint8_t* tmp = (uint8_t*)malloc(argumentData->size * sizeof(uint8_t));
     printf("[Server] Call received: ");
     PrintByteVector(argumentData);
-    for (int i = 0; i < argumentData->size; i++)
+    for (size_t i = 0; i < argumentData->size; i++)
     {
         tmp[i] = argumentData->data[i] + (uint8_t)100;
     }
 
     const ib_ByteVector returnData = { tmp, argumentData->size };
-    ib_Rpc_Server_SubmitResult(server, callHandle, &returnData);
+    ib_Rpc_Server_SubmitResult(cbServer, callHandle, &returnData);
     free(tmp);
 }
 
-void ResultHandler(void* context, ib_Rpc_Client* client, const ib_Rpc_CallHandle* callHandle,
+void ResultHandler(void* context, ib_Rpc_Client* cbClient, ib_Rpc_CallHandle* callHandle,
                        ib_Rpc_CallStatus callStatus, const ib_ByteVector* returnData)
 {
     if (callStatus == ib_Rpc_CallStatus_SUCCESS)
@@ -204,7 +207,7 @@ int main(int argc, char* argv[])
 
         returnCode = ib_Rpc_Client_Create(&client, participant, "TestFunc", &exchangeFormat, labelList, NULL, &ResultHandler);
 
-        for (int i = 0; i < numCalls; i++)
+        for (uint8_t i = 0; i < numCalls; i++)
         {
             SleepMs(1000);
             uint8_t buffer[3] = {i, i, i};
@@ -239,3 +242,7 @@ int main(int argc, char* argv[])
 
     return EXIT_SUCCESS;
 }
+
+#ifndef WIN32
+#pragma GCC diagnostic pop
+#endif

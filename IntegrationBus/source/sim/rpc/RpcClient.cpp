@@ -16,14 +16,14 @@ RpcClient::RpcClient(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvide
                      const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
                      const std::map<std::string, std::string>& labels, const std::string& clientUUID,
                      CallReturnHandler handler)
-    : _comAdapter{comAdapter}
-    , _timeProvider{timeProvider}
-    , _functionName{functionName}
+    : _functionName{functionName}
     , _exchangeFormat{exchangeFormat}
     , _labels{labels}
     , _clientUUID{clientUUID}
     , _handler{std::move(handler)}
     , _logger{comAdapter->GetLogger()}
+    , _timeProvider{timeProvider} 
+    , _comAdapter{comAdapter}
 {
 }
 
@@ -99,7 +99,7 @@ void RpcClient::SetCallReturnHandler(CallReturnHandler handler)
     _handler = std::move(handler);
 }
 
-void RpcClient::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const FunctionCallResponse& msg)
+void RpcClient::ReceiveIbMessage(const mw::IIbServiceEndpoint* /*from*/, const FunctionCallResponse& msg)
 {
     ReceiveMessage(msg);
 }

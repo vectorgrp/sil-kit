@@ -118,7 +118,7 @@ int main(int argc, char** argv)
             });
 
         // Set an Init Handler
-        participantController->SetInitHandler([canController, &participantName](auto initCmd) {
+        participantController->SetInitHandler([canController, &participantName](auto /*initCmd*/) {
 
             std::cout << "Initializing " << participantName << std::endl;
             canController->SetBaudRate(10'000, 1'000'000);

@@ -53,9 +53,4 @@ add_vib_test(TestMwCfgYamlValidator
     LIBS IbConfiguration yaml-cpp
 )
 
-ib_enable_warnings(IbConfiguration)
-ib_enable_warnings(TestMwCfgValidation)
-ib_enable_warnings(TestMwCfgYamlParser)
-ib_enable_warnings(TestMwCfgYamlValidator)
-
 add_subdirectory(mock)

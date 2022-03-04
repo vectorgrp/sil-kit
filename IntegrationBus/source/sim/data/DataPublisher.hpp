@@ -25,7 +25,7 @@ class DataPublisher
 public:
     DataPublisher(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider, const std::string& topic,
                   DataExchangeFormat dataExchangeFormat, const std::map<std::string, std::string>& labels,
-                  const std::string& pubUUID, size_t history);
+                  const std::string& pubUUID);
     
     void Publish(std::vector<uint8_t> data) override;
     void Publish(const uint8_t* data, std::size_t size) override;
@@ -43,11 +43,10 @@ private:
     DataExchangeFormat _dataExchangeFormat;
     std::map<std::string, std::string> _labels;
     std::string _pubUUID;
-    size_t _history;
 
-    mw::IComAdapterInternal* _comAdapter{nullptr};
-    mw::sync::ITimeProvider* _timeProvider{nullptr};
     mw::ServiceDescriptor _serviceDescriptor{};
+    mw::sync::ITimeProvider* _timeProvider{nullptr};
+    mw::IComAdapterInternal* _comAdapter{nullptr};
 };
 
 // ================================================================================

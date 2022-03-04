@@ -196,7 +196,7 @@ public:
     }
 
 
-    void ReceiveFrameStatus(ILinController* controller, const Frame& frame, FrameStatus frameStatus, std::chrono::nanoseconds timestamp)
+    void ReceiveFrameStatus(ILinController* /*linController*/, const Frame& frame, FrameStatus frameStatus, std::chrono::nanoseconds /*timestamp*/)
     {
         switch (frameStatus)
         {
@@ -210,13 +210,13 @@ public:
         schedule.ScheduleNextTask();
     }
 
-    void WakeupHandler(ILinController* controller)
+    void WakeupHandler(ILinController* linController)
     {
-        if (controller->Status() != ControllerStatus::Sleep)
-            std::cout << "WARNING: Received Wakeup pulse while ControllerStatus is " << controller->Status() << "." << std::endl;
+        if (linController->Status() != ControllerStatus::Sleep)
+            std::cout << "WARNING: Received Wakeup pulse while ControllerStatus is " << linController->Status() << "." << std::endl;
 
         std::cout << ">> Wakeup pulse received" << std::endl;
-        controller->WakeupInternal();
+        linController->WakeupInternal();
         schedule.ScheduleNextTask();
     }
 
@@ -230,7 +230,7 @@ private:
 class LinSlave
 {
 public:
-    LinSlave(ILinController* controller) : controller{controller} {}
+    LinSlave() {}
 
     void DoAction(std::chrono::nanoseconds now_)
     {
@@ -238,7 +238,7 @@ public:
         timer.ExecuteAction(now);
     }
 
-    void FrameStatusHandler(ILinController* controller, const Frame& frame, FrameStatus status, std::chrono::nanoseconds timestamp)
+    void FrameStatusHandler(ILinController* /*linController*/, const Frame& frame, FrameStatus status, std::chrono::nanoseconds timestamp)
     {
         std::cout << ">> " << frame
                   << " status=" << status
@@ -246,26 +246,25 @@ public:
                   << std::endl;
     }
 
-    void GoToSleepHandler(ILinController* controller)
+    void GoToSleepHandler(ILinController* linController)
     {
         std::cout << "LIN Slave received go-to-sleep command; entering sleep mode." << std::endl;
         // wakeup in 10 ms
         timer.Set(now + 10ms,
-            [controller](std::chrono::nanoseconds now) {
-                std::cout << "<< Wakeup pulse @" << now << std::endl;
-                controller->Wakeup();
+            [linController](std::chrono::nanoseconds tnow) {
+                std::cout << "<< Wakeup pulse @" << tnow << std::endl;
+                linController->Wakeup();
             });
-        controller->GoToSleepInternal();
+        linController->GoToSleepInternal();
     }
 
-    void WakeupHandler(ILinController* controller)
+    void WakeupHandler(ILinController* linController)
     {
         std::cout << "LIN Slave received wakeup pulse; entering normal operation mode." << std::endl;
-        controller->WakeupInternal();
+        linController->WakeupInternal();
     }
 
 private:
-    ILinController* controller{nullptr};
     Timer timer;
     std::chrono::nanoseconds now{0ns};
 };
@@ -305,11 +304,11 @@ int main(int argc, char** argv) try
     participantController->SetPeriod(1ms);
 
     LinMaster master{linController};
-    LinSlave slave{linController};
+    LinSlave slave;
 
     if (participantName == "LinMaster")
     {
-        participantController->SetInitHandler([&participantName, linController](auto initCmd) {
+        participantController->SetInitHandler([&participantName, linController](auto /*initCmd*/) {
 
             std::cout << "Initializing " << participantName << std::endl;
 
@@ -335,7 +334,7 @@ int main(int argc, char** argv) try
     }
     else
     {
-        participantController->SetInitHandler([&participantName, linController](auto initCmd) {
+        participantController->SetInitHandler([&participantName, linController](auto /*initCmd*/) {
 
             std::cout << "Initializing " << participantName << std::endl;
 
@@ -397,7 +396,7 @@ int main(int argc, char** argv) try
         linController->RegisterWakeupHandler(util::bind_method(&slave, &LinSlave::WakeupHandler));
 
         participantController->SetSimulationTask(
-            [&slave, linController](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+            [&slave](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
 
                 std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
                 slave.DoAction(now);

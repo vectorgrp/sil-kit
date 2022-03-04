@@ -1,5 +1,9 @@
 /* Copyright (c) Vector Informatik GmbH. All rights reserved. */
 
+#ifdef WIN32
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "ib/capi/IntegrationBus.h"
@@ -11,11 +15,12 @@ namespace {
 using namespace ib::sim::rpc;
 using ib::mw::test::DummyComAdapter;
 
-MATCHER_P(PayloadMatcher, controlPayload, "matches data payloads by their content and length") {
+MATCHER_P(PayloadMatcher, controlPayload, "") {
+    *result_listener << "matches data payloads by their content and length";
     if (arg.size() != controlPayload.size()) {
         return false;
     }
-    for (int i = 0; i < arg.size(); i++) {
+    for (size_t i = 0; i < arg.size(); i++) {
         if (arg[i] != controlPayload[i]) {
             return false;
         }
@@ -26,7 +31,7 @@ MATCHER_P(PayloadMatcher, controlPayload, "matches data payloads by their conten
 class MockRpcClient : public ib::sim::rpc::IRpcClient {
 public:
     MOCK_METHOD1(Call, ib::sim::rpc::IRpcCallHandle*(std::vector<uint8_t> data));
-    virtual ib::sim::rpc::IRpcCallHandle* Call(const uint8_t* data, std::size_t size) { return nullptr; };
+    virtual ib::sim::rpc::IRpcCallHandle* Call(const uint8_t* /*data*/, std::size_t /*size*/) { return nullptr; };
 
     MOCK_METHOD1(SetCallReturnHandler,
                  void(std::function<void(ib::sim::rpc::IRpcClient* client, IRpcCallHandle* callHandle, const ib::sim::rpc::CallStatus callStatus,
@@ -128,20 +133,19 @@ public:
 
     ib_Rpc_ExchangeFormat exchangeFormat;
     ib_KeyValueList* labelList;
-    uint32_t numLabels = 1;
 
 };
 
-void RpcHandler(void* context, ib_Rpc_Server* server, ib_Rpc_CallHandle* callHandle, const ib_ByteVector* argumentData)
+void RpcHandler(void* /*context*/, ib_Rpc_Server* /*server*/, ib_Rpc_CallHandle* /*callHandle*/, const ib_ByteVector* /*argumentData*/)
 {
 }
 
-void CallResultHandler(void* context, ib_Rpc_Client* client, ib_Rpc_CallHandle* callHandle,
-                       ib_Rpc_CallStatus callStatus, const ib_ByteVector* returnData)
+void CallResultHandler(void* /*context*/, ib_Rpc_Client* /*client*/, ib_Rpc_CallHandle* /*callHandle*/,
+                       ib_Rpc_CallStatus /*callStatus*/, const ib_ByteVector* /*returnData*/)
 {
 }
 
-void DiscoveryResultHandler(void* context, const ib_Rpc_DiscoveryResultList* discoveryResults)
+void DiscoveryResultHandler(void* /*context*/, const ib_Rpc_DiscoveryResultList* /*discoveryResults*/)
 {
 }
 
@@ -157,7 +161,6 @@ TEST_F(CapiRpcTest, rpc_client_function_mapping)
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
     ib_ByteVector data = { 0, 0 };
-    ib_Rpc_CallHandle* callHandle;
     EXPECT_CALL(mockRpcClient, Call(testing::_)).Times(testing::Exactly(1));
     returnCode = ib_Rpc_Client_Call((ib_Rpc_Client*)&mockRpcClient, &callHandle, &data);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
@@ -202,8 +205,7 @@ TEST_F(CapiRpcTest, rpc_client_bad_parameters)
                                       &exchangeFormat, labelList, dummyContextPtr, nullptr);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    ib_Rpc_CallHandle* callHandle;
-    ib_ByteVector      data = {0, 0};
+    ib_ByteVector data = {0, 0};
     returnCode = ib_Rpc_Client_Call(nullptr, &callHandle, &data);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
     returnCode = ib_Rpc_Client_Call((ib_Rpc_Client*)&mockRpcClient, nullptr, &data);
@@ -254,7 +256,6 @@ TEST_F(CapiRpcTest, rpc_client_call)
 
     std::vector<uint8_t> refData(&(data.data[0]), &(data.data[0]) + data.size);
     EXPECT_CALL(mockRpcClient, Call(PayloadMatcher(refData))).Times(testing::Exactly(1));
-    ib_Rpc_CallHandle* callHandle;
     returnCode = ib_Rpc_Client_Call((ib_Rpc_Client*)&mockRpcClient, &callHandle, &data);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 }

@@ -18,7 +18,7 @@ namespace {
 
 	};
 
-    void SimTask(void* context, ib_SimulationParticipant* participant, ib_NanosecondsTime now) {}
+    void SimTask(void* /*context*/, ib_SimulationParticipant* /*participant*/, ib_NanosecondsTime /*now*/) {}
 
     TEST_F(CapiTimeSyncTest, participant_state_handling_nullpointer_params)
     {

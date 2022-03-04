@@ -217,7 +217,7 @@ protected:
             participant.comAdapter =
                 ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, sync);
 
-            IParticipantController* participantController;
+            IParticipantController* participantController = nullptr;
             if (sync)
             {
                 participantController = participant.comAdapter->GetParticipantController();
@@ -229,12 +229,12 @@ protected:
             }
 
             auto publishTask =
-                [this, participantController, &participant]() {
+                [&participant]() {
                 for (auto& dp : participant.dataPublishers)
                 {
                     if (!dp.allSent)
                     {
-                        auto data = std::vector<uint8_t>(dp.messageSizeInBytes, dp.publishMsgCounter);
+                        auto data = std::vector<uint8_t>(dp.messageSizeInBytes, static_cast<uint8_t>(dp.publishMsgCounter));
                         dp.dataPublisher->Publish(data);
                         dp.publishMsgCounter++;
                         if (dp.publishMsgCounter >= dp.numMsgToPublish)
@@ -248,7 +248,7 @@ protected:
             if (sync)
             {
                 participantController->SetPeriod(1s);
-                participantController->SetSimulationTask([participantController, &participant, publishTask](std::chrono::nanoseconds now) {
+                participantController->SetSimulationTask([&participant, publishTask](std::chrono::nanoseconds now) {
                     if (now >= 10s)
                     {
                         publishTask();
@@ -266,7 +266,7 @@ protected:
                     << "Test Failure: Awaiting startup timed out on publisher";
 
                 auto finalStateFuture = participantController->RunAsync();
-                auto finalState = finalStateFuture.get();
+                finalStateFuture.get();
             }
             else
             {
@@ -309,7 +309,7 @@ protected:
             participant.comAdapter =
                 ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, sync);
 
-            IParticipantController* participantController;
+            IParticipantController* participantController = nullptr;
             if (sync)
             {
                 participantController = participant.comAdapter->GetParticipantController();
@@ -319,28 +319,28 @@ protected:
             {
                 // Already set the promise if no reception is expected
                 if (std::all_of(participant.dataSubscribers.begin(), participant.dataSubscribers.end(),
-                    [](const auto& ds) {
-                    return ds.numMsgToReceive == 0; }))
+                    [](const auto& dsInfo) {
+                    return dsInfo.numMsgToReceive == 0; }))
                 {
                     participant.allReceived = true;
                     participant.allReceivedPromise.set_value();
                 }
                 if (std::all_of(participant.dataSubscribers.begin(), participant.dataSubscribers.end(),
-                                   [](const auto& ds) {
-                                       return ds.expectedSources == 0;
+                                   [](const auto& dsInfo) {
+                                       return dsInfo.expectedSources == 0;
                                    }))
                 {
                     participant.allDiscovered = true;
                     participant.allDiscoveredPromise.set_value();
                 }
 
-                auto receptionHandler = [this, sync, &participant, &ds, participantController](
-                                            IDataSubscriber* subscriber, const std::vector<uint8_t>& data) {
+                auto receptionHandler = [&participant, &ds](IDataSubscriber* /*subscriber*/,
+                                                            const std::vector<uint8_t>& data) {
                     if (!ds.allReceived)
                     {
                         if (ds.expectIncreasingData)
                         {
-                            auto expectedData = std::vector<uint8_t>(ds.messageSizeInBytes, ds.receiveMsgCounter);
+                            auto expectedData = std::vector<uint8_t>(ds.messageSizeInBytes, static_cast<uint8_t>(ds.receiveMsgCounter));
                             EXPECT_EQ(data, expectedData);
                         }
                         else
@@ -360,16 +360,16 @@ protected:
 
                     if (!participant.allReceived &&
                         std::all_of(participant.dataSubscribers.begin(), participant.dataSubscribers.end(),
-                                    [](const auto& ds) { return ds.allReceived; }))
+                                    [](const auto& dsInfo) { return dsInfo.allReceived; }))
                     {
                         participant.allReceived = true;
                         participant.allReceivedPromise.set_value();
                     }
                 };
 
-                auto newDataSourceHandler = [this, sync, &participant, &ds, participantController, receptionHandler](
-                                                IDataSubscriber* subscriber, const std::string& topic,
-                                                const DataExchangeFormat& dataExchangeFormat,
+                auto newDataSourceHandler = [&participant, &ds, receptionHandler](
+                                                IDataSubscriber* subscriber, const std::string& /*topic*/,
+                                                const DataExchangeFormat& /*dataExchangeFormat*/,
                                                 const std::map<std::string, std::string>& labels) {
                     ds.newSourceCounter++;
                     if (!ds.allDiscovered)
@@ -394,8 +394,8 @@ protected:
 
                     if (!participant.allDiscovered
                         && std::all_of(participant.dataSubscribers.begin(), participant.dataSubscribers.end(),
-                                       [](const auto& ds) {
-                                           return ds.allDiscovered;
+                                       [](const auto& dsInfo) {
+                                           return dsInfo.allDiscovered;
                                        }))
                     {
                         participant.allDiscovered = true;
@@ -418,7 +418,7 @@ protected:
             if (sync)
             {
                 participantController->SetPeriod(1s);
-                participantController->SetSimulationTask([](std::chrono::nanoseconds now) {
+                participantController->SetSimulationTask([](std::chrono::nanoseconds /*now*/) {
                     });
 
                 auto futureStatus = participant.readyToStart.get_future().wait_for(communicationTimeout);
@@ -426,7 +426,7 @@ protected:
                     << "Test Failure: Awaiting startup timed out on subscriber";
 
                 auto finalStateFuture = participantController->RunAsync();
-                auto finalState = finalStateFuture.get();
+                finalStateFuture.get();
             }
             else
             {
@@ -671,8 +671,8 @@ TEST_F(DataPubSubITest, test_1pub_1sub_sync_vasio)
     std::vector<PublisherParticipant> publishers;
     std::vector<SubscriberParticipant> subscribers;
 
-    publishers.push_back({ "Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}} });
-    subscribers.push_back({ "Sub1", {{"TopicA",  "A", {}, messageSize, numMsgToReceive, 1, {}, {} }} });
+    publishers.push_back({ "Pub1", {{"TopicA",  {"A"}, {}, 0, messageSize, numMsgToPublish}} });
+    subscribers.push_back({ "Sub1", {{"TopicA",  {"A"}, {}, messageSize, numMsgToReceive, 1, {}, {} }} });
 
     SetupSystem(domainId, sync, publishers, subscribers);
 
@@ -700,8 +700,8 @@ TEST_F(DataPubSubITest, test_1pub_1sub_largemsg_sync_vasio)
 
     std::vector<PublisherParticipant>  publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({"Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
-    subscribers.push_back({"Sub1", {{"TopicA",  "A", {}, messageSize, numMsgToReceive, 1, {}, {}}}});
+    publishers.push_back({"Pub1", {{"TopicA",  {"A"}, {}, 0, messageSize, numMsgToPublish}}});
+    subscribers.push_back({"Sub1", {{"TopicA",  {"A"}, {}, messageSize, numMsgToReceive, 1, {}, {}}}});
 
     SetupSystem(domainId, sync, publishers, subscribers);
 
@@ -732,17 +732,17 @@ TEST_F(DataPubSubITest, test_1pub_1sub_sametopic_sync_vasio)
 
     publishers.push_back(
         {"Pub1",
-         {{"TopicA", "A", {}, 0, messageSize, numMsgToPublish}, {"TopicA", "A", {}, 0, messageSize, numMsgToPublish}}});
+         {{"TopicA", {"A"}, {}, 0, messageSize, numMsgToPublish}, {"TopicA", {"A"}, {}, 0, messageSize, numMsgToPublish}}});
 
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
-    for (uint32_t d = 0; d < numMsgToPublish; d++)
+    for (uint8_t d = 0; d < numMsgToPublish; d++)
     {
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
     }
     subscribers.push_back({"Sub1",
-                           {{"TopicA", "A", {}, messageSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}},
-                            {"TopicA", "A", {}, messageSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}}}});
+                           {{"TopicA", {"A"}, {}, messageSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}},
+                            {"TopicA", {"A"}, {}, messageSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}}}});
 
     SetupSystem(domainId, sync, publishers, subscribers);
 
@@ -776,8 +776,8 @@ TEST_F(DataPubSubITest, test_1pub_1sub_100topics_sync_vasio)
     for (int i = 0; i < numTopics; i++)
     {
         std::string topic = std::to_string(i);
-        DataPublisherInfo  pInfo{ topic,  "A", {}, 1, messageSize, numMsgToPublish };
-        DataSubscriberInfo sInfo{ topic,  "A", {},    messageSize, numMsgToPublish, 1, {}, {} };
+        DataPublisherInfo  pInfo{ topic,  {"A"}, {}, 1, messageSize, numMsgToPublish };
+        DataSubscriberInfo sInfo{ topic,  {"A"}, {},    messageSize, numMsgToReceive, 1, {}, {} };
         publishers[0].dataPublishers.push_back(std::move(pInfo));
         subscribers[0].dataSubscribers.push_back(std::move(sInfo));
     }
@@ -808,9 +808,9 @@ TEST_F(DataPubSubITest, test_1pub_2sub_sync_vasio)
 
     std::vector<PublisherParticipant>  publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({"Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
-    subscribers.push_back({"Sub1", {{"TopicA",  "A", {}, messageSize, numMsgToReceive, 1, {}, {}}}});
-    subscribers.push_back({"Sub2", {{"TopicA",  "A", {}, messageSize, numMsgToReceive, 1, {}, {}}}});
+    publishers.push_back({"Pub1", {{"TopicA",  {"A"}, {}, 0, messageSize, numMsgToPublish}}});
+    subscribers.push_back({"Sub1", {{"TopicA",  {"A"}, {}, messageSize, numMsgToReceive, 1, {}, {}}}});
+    subscribers.push_back({"Sub2", {{"TopicA",  {"A"}, {}, messageSize, numMsgToReceive, 1, {}, {}}}});
 
     SetupSystem(domainId, sync, publishers, subscribers);
 
@@ -838,15 +838,15 @@ TEST_F(DataPubSubITest, test_2pub_1sub_sync_vasio)
 
     std::vector<PublisherParticipant>  publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({"Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
-    publishers.push_back({"Pub2", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
+    publishers.push_back({"Pub1", {{"TopicA",  {"A"}, {}, 0, messageSize, numMsgToPublish}}});
+    publishers.push_back({"Pub2", {{"TopicA",  {"A"}, {}, 0, messageSize, numMsgToPublish}}});
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
-    for (uint32_t d = 0; d < numMsgToPublish; d++)
+    for (uint8_t d = 0; d < numMsgToPublish; d++)
     {
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
     }
-    subscribers.push_back({ "Sub1", {{"TopicA",  "A", {}, messageSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}}} });
+    subscribers.push_back({ "Sub1", {{"TopicA",  {"A"}, {}, messageSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}}} });
 
     SetupSystem(domainId, sync, publishers, subscribers);
 
@@ -873,21 +873,21 @@ TEST_F(DataPubSubITest, test_3pub_4sub_4topics_sync_vasio)
 
     std::vector<PublisherParticipant>  publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({ "Pub1",  {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}, {"TopicB", "B", {}, 0, messageSize, numMsgToPublish}} });
-    publishers.push_back({ "Pub2",  {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}, {"TopicC", "C", {}, 0, messageSize, numMsgToPublish}} });
-    publishers.push_back({ "Pub3",  {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}, {"TopicD", "D", {}, 0, messageSize, numMsgToPublish}} });
+    publishers.push_back({ "Pub1",  {{"TopicA",  {"A"}, {}, 0, messageSize, numMsgToPublish}, {"TopicB", "B", {}, 0, messageSize, numMsgToPublish}} });
+    publishers.push_back({ "Pub2",  {{"TopicA",  {"A"}, {}, 0, messageSize, numMsgToPublish}, {"TopicC", "C", {}, 0, messageSize, numMsgToPublish}} });
+    publishers.push_back({ "Pub3",  {{"TopicA",  {"A"}, {}, 0, messageSize, numMsgToPublish}, {"TopicD", "D", {}, 0, messageSize, numMsgToPublish}} });
 
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
-    for (uint32_t d = 0; d < numMsgToPublish; d++)
+    for (uint8_t d = 0; d < numMsgToPublish; d++)
     {
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
     }
-    subscribers.push_back({ "Sub1", {{"TopicA",  "A", {}, messageSize, numMsgToPublish * 3, 3,  expectedDataUnordered, {}, {}}} });
-    subscribers.push_back({"Sub2", {{"TopicB", "B", {}, messageSize, numMsgToPublish, 1, {}, {}}} });
-    subscribers.push_back({ "Sub3", {{"TopicC", "C", {}, messageSize, numMsgToPublish, 1, {}, {}}} });
-    subscribers.push_back({ "Sub4", {{"TopicD", "D", {}, messageSize, numMsgToPublish, 1, {}, {}}}});
+    subscribers.push_back({ "Sub1", {{"TopicA", {"A"}, {}, messageSize, numMsgToPublish * 3, 3,  expectedDataUnordered, {}, {}}} });
+    subscribers.push_back({"Sub2", {{"TopicB", {"B"}, {}, messageSize, numMsgToPublish, 1, {}, {}}}});
+    subscribers.push_back({"Sub3", {{"TopicC", {"C"}, {}, messageSize, numMsgToPublish, 1, {}, {}}}});
+    subscribers.push_back({"Sub4", {{"TopicD", {"D"}, {}, messageSize, numMsgToPublish, 1, {}, {}}}});
 
     SetupSystem(domainId, sync, publishers, subscribers);
 
@@ -915,8 +915,8 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_topic_sync_vasio)
 
     std::vector<PublisherParticipant>  publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({"Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
-    subscribers.push_back({"Sub1", {{"TopicB",  "A", {}, messageSize, numMsgToReceive, 0, {}, {}}}});
+    publishers.push_back({"Pub1", {{"TopicA",  {"A"}, {}, 0, messageSize, numMsgToPublish}}});
+    subscribers.push_back({"Sub1", {{"TopicB",  {"A"}, {}, messageSize, numMsgToReceive, 0, {}, {}}}});
 
     SetupSystem(domainId, sync, publishers, subscribers);
 
@@ -944,8 +944,8 @@ TEST_F(DataPubSubITest, test_1pub_1sub_label_sync_vasio)
 
     std::vector<PublisherParticipant> publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({"Pub1", {{"TopicA", "A", {{"kA", "vA"}, {"kB", "vB"}}, 0, messageSize, numMsgToPublish}}});
-    subscribers.push_back({"Sub1", {{"TopicA", "A", {{"kA", "vA"}, {"kB", ""}}, messageSize, numMsgToReceive, 1, {{"kA", "vA"}, {"kB", "vB"}}, {}}}});
+    publishers.push_back({"Pub1", {{"TopicA", {"A"}, {{"kA", "vA"}, {"kB", "vB"}}, 0, messageSize, numMsgToPublish}}});
+    subscribers.push_back({"Sub1", {{"TopicA", {"A"}, {{"kA", "vA"}, {"kB", ""}}, messageSize, numMsgToReceive, 1, {{"kA", "vA"}, {"kB", "vB"}}, {}}}});
 
     SetupSystem(domainId, sync, publishers, subscribers);
 
@@ -974,8 +974,8 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_labels_sync_vasio)
 
     std::vector<PublisherParticipant> publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({"Pub1", {{"TopicA", "A", {{"k", "v"}}, 0, messageSize, numMsgToPublish}}});
-    subscribers.push_back({"Sub1", {{"TopicA", "B", {{"k", "wrong"}}, messageSize, numMsgToReceive, 0, {{"k", "v"}}, {}}}});
+    publishers.push_back({"Pub1", {{"TopicA", {"A"}, {{"k", "v"}}, 0, messageSize, numMsgToPublish}}});
+    subscribers.push_back({ "Sub1", {{"TopicA", {"B"}, {{"k", "wrong"}}, messageSize, numMsgToReceive, 0, {{"k", "v"}}, {}}} });
 
     SetupSystem(domainId, sync, publishers, subscribers);
 
@@ -1003,8 +1003,8 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_dxf_sync_vasio)
 
     std::vector<PublisherParticipant>  publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({"Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
-    subscribers.push_back({"Sub1", {{"TopicA", "B", {}, messageSize, numMsgToReceive, 0, {}, {}}}});
+    publishers.push_back({"Pub1", {{"TopicA",  {"A"}, {}, 0, messageSize, numMsgToPublish}}});
+    subscribers.push_back({ "Sub1", {{"TopicA", {"B"}, {}, messageSize, numMsgToReceive, 0, {}, {}}} });
 
     SetupSystem(domainId, sync, publishers, subscribers);
 
@@ -1032,8 +1032,8 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wildcard_dxf_sync_vasio)
 
     std::vector<PublisherParticipant>  publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({"Pub1", {{"TopicA",  "A", {}, 0, messageSize, numMsgToPublish}}});
-    subscribers.push_back({"Sub1", {{"TopicA", "", {}, messageSize, numMsgToReceive, 1, {}, {}}}});
+    publishers.push_back({"Pub1", {{"TopicA",  {"A"}, {}, 0, messageSize, numMsgToPublish}}});
+    subscribers.push_back({ "Sub1", {{"TopicA", {""}, {}, messageSize, numMsgToReceive, 1, {}, {}}} });
 
     SetupSystem(domainId, sync, publishers, subscribers);
 
@@ -1065,15 +1065,15 @@ TEST_F(DataPubSubITest, test_2pub_1sub_expectlabels_sync_vasio)
 
     std::vector<PublisherParticipant> publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({"Pub1", {{"TopicA", "A", {{"kA", "vA"}}, 0, messageSize, numMsgToPublish}}});
-    publishers.push_back({"Pub2", {{"TopicA", "A", {{"kB", "vB"}}, 0, messageSize, numMsgToPublish}}});
+    publishers.push_back({"Pub1", {{"TopicA", {"A"}, {{"kA", "vA"}}, 0, messageSize, numMsgToPublish}}});
+    publishers.push_back({"Pub2", {{"TopicA", {"A"}, {{"kB", "vB"}}, 0, messageSize, numMsgToPublish}}});
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
-    for (uint32_t d = 0; d < numMsgToPublish; d++)
+    for (uint8_t d = 0; d < numMsgToPublish; d++)
     {
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
     }
-    subscribers.push_back({"Sub1", {{"TopicA", "A", {}, messageSize, numMsgToReceive, 1, expectedDataUnordered, {{"kA", "vA"}, {"kB", "vB"}}, {}}}});
+    subscribers.push_back({"Sub1", {{"TopicA", {"A"}, {}, messageSize, numMsgToReceive, 1, expectedDataUnordered, {{"kA", "vA"}, {"kB", "vB"}}, {}}}});
 
     SetupSystem(domainId, sync, publishers, subscribers);
 
@@ -1101,12 +1101,12 @@ TEST_F(DataPubSubITest, test_3pub_1sub_specificHandlers_sync_vasio)
 
     std::vector<PublisherParticipant> publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({ "Pub1", {{"TopicA", "A", {{"kA", "vA"}}, 0, messageSize, numMsgToPublish}} });
-    publishers.push_back({ "Pub2", {{"TopicA", "A", {{"kA", "vA"},{"kB", "vB"}}, 0, messageSize, numMsgToPublish}} });
+    publishers.push_back({ "Pub1", {{"TopicA", {"A"}, {{"kA", "vA"}}, 0, messageSize, numMsgToPublish}} });
+    publishers.push_back({ "Pub2", {{"TopicA", {"A"}, {{"kA", "vA"},{"kB", "vB"}}, 0, messageSize, numMsgToPublish}} });
     // This publisher has the wrong labels and won't be received 
-    publishers.push_back({ "Pub3", {{"TopicA", "A", {{"kC", "vC"}}, 0, messageSize, numMsgToPublish}} });
+    publishers.push_back({ "Pub3", {{"TopicA", {"A"}, {{"kC", "vC"}}, 0, messageSize, numMsgToPublish}} });
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
-    for (uint32_t d = 0; d < numMsgToPublish; d++)
+    for (uint8_t d = 0; d < numMsgToPublish; d++)
     {
         // First specificDataHandler receives by both publishers, so numMsgToPublish * 3 in total
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
@@ -1114,10 +1114,10 @@ TEST_F(DataPubSubITest, test_3pub_1sub_specificHandlers_sync_vasio)
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(messageSize, d));
     }
     std::vector<SpecificDataHandlerInfo> specificDataHandlers;
-    specificDataHandlers.push_back({ "A", {{"kA", "vA"}} });
-    specificDataHandlers.push_back({ "A", {{"kA", "vA"},{"kB", "vB"}} });
+    specificDataHandlers.push_back({ {"A"}, {{"kA", "vA"}} });
+    specificDataHandlers.push_back({ {"A"}, {{"kA", "vA"},{"kB", "vB"}} });
     subscribers.push_back({ "Sub1",
-        {{"TopicA", "A", {{"kA", ""}}, messageSize, numMsgToReceive, 1, expectedDataUnordered, {{"kA", "vA"}, {"kB", "vB"}, {"kC", "kC"}}, specificDataHandlers}} });
+        {{"TopicA", {"A"}, {{"kA", ""}}, messageSize, numMsgToReceive, 1, expectedDataUnordered, {{"kA", "vA"}, {"kB", "vB"}, {"kC", "kC"}}, specificDataHandlers}} });
 
     SetupSystem(domainId, sync, publishers, subscribers);
 
@@ -1149,8 +1149,8 @@ TEST_F(DataPubSubITest, test_1pub_1sub_async_history_vasio)
 
     std::vector<PublisherParticipant>  publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back ({ "Pub1", { { "TopicA",  "A", {}, 1, messageSize, numMsgToPublish } } });
-    subscribers.push_back({ "Sub1", { { "TopicA",  "A", {},    messageSize, numMsgToReceive, 1, {}, {} } } });
+    publishers.push_back ({ "Pub1", { { "TopicA",  {"A"}, {}, 1, messageSize, numMsgToPublish } } });
+    subscribers.push_back({ "Sub1", { { "TopicA",  {"A"}, {},    messageSize, numMsgToReceive, 1, {}, {} } } });
 
     SetupSystem(domainId, sync, publishers, subscribers);
 
@@ -1185,11 +1185,11 @@ TEST_F(DataPubSubITest, test_1pub_1sub_async_history_specifichandler_vasio)
 
     std::vector<PublisherParticipant> publishers;
     std::vector<SubscriberParticipant> subscribers;
-    publishers.push_back({"Pub1", {{"TopicA", "A", {}, 1, messageSize, numMsgToPublish}}});
+    publishers.push_back({"Pub1", {{"TopicA", {"A"}, {}, 1, messageSize, numMsgToPublish}}});
 
     std::vector<SpecificDataHandlerInfo> specificDataHandlers;
-    specificDataHandlers.push_back({"A", {}});
-    subscribers.push_back({"Sub1", {{"TopicA", "A", {}, messageSize, numMsgToReceive, 1, {}, specificDataHandlers}}});
+    specificDataHandlers.push_back({{"A"}, {}});
+    subscribers.push_back({"Sub1", {{"TopicA", {"A"}, {}, messageSize, numMsgToReceive, 1, {}, specificDataHandlers}}});
 
     SetupSystem(domainId, sync, publishers, subscribers);
 

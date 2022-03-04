@@ -48,7 +48,7 @@ void SetThreadName(const std::string& threadName)
         HANDLE       threadHandle = GetCurrentThread();
         std::wstring threadnameW = ToWString(threadName.c_str());
         HRESULT      hr = (*sSetThreadDescriptionProc)(threadHandle, threadnameW.c_str());
-
+        (void)hr;
         assert(SUCCEEDED(hr));
     }
 }
@@ -66,6 +66,7 @@ void SetThreadName(const std::string& threadName)
     // The function pthread_setname_np fails if the length of the specified name exceeds the allowed
     // limit. (16 characters including the terminating null byte)
     assert(rc == 0); 
+    (void)rc;
 }
 
 #endif

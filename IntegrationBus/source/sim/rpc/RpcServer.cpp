@@ -15,14 +15,15 @@ namespace rpc {
 RpcServer::RpcServer(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
                      const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
                      const std::map<std::string, std::string>& labels, CallProcessor handler)
-    : _comAdapter{comAdapter}
-    , _timeProvider{timeProvider}
-    , _functionName{functionName}
+    : _functionName{functionName}
     , _exchangeFormat{exchangeFormat}
     , _labels{labels}
     , _handler{std::move(handler)}
     , _logger{comAdapter->GetLogger()}
+    , _timeProvider{timeProvider}
+    , _comAdapter{comAdapter}
 {
+
 }
 
 void RpcServer::RegisterServiceDiscovery()

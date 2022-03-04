@@ -44,7 +44,6 @@ TEST_F(YamlValidatorTest, validate_without_warnings)
     cfg.middleware.registry.connectAttempts = 1234;
     cfg.middleware.registry.hostname = "not localhost";
     cfg.middleware.registry.port = 3456;
-    cfg.middleware.registry.logging.logFromRemotes;
     cfg.middleware.tcpNoDelay = true;
     cfg.middleware.tcpQuickAck = true;
     cfg.middleware.tcpReceiveBufferSize = 1234;

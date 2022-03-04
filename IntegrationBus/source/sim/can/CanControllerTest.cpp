@@ -31,11 +31,11 @@ using namespace ib::sim::can;
 
 using ib::mw::test::DummyComAdapter;
 
-MATCHER_P(CanTransmitAckWithouthTransmitIdMatcher, truthAck, "matches CanTransmitAcks without checking the transmit id") {
+MATCHER_P(CanTransmitAckWithouthTransmitIdMatcher, truthAck, "") {
+    *result_listener << "matches CanTransmitAcks without checking the transmit id";
     auto frame1 = truthAck;
     auto frame2 = arg;
     return frame1.canId == frame2.canId && frame1.status == frame2.status && frame1.timestamp == frame2.timestamp;
-    return true;
 }
 
 class MockComAdapter : public DummyComAdapter
@@ -121,7 +121,6 @@ TEST(CanControllerTest, receive_can_message)
 
     CanController canControllerPlaceholder(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(senderDescriptor);
-    auto& id = canControllerPlaceholder.GetServiceDescriptor();
     canController.ReceiveIbMessage(&canControllerPlaceholder, msg);
 }
 
@@ -152,7 +151,6 @@ TEST(CanControllerTest, receive_can_message_rx_filter1)
 
     CanController canControllerPlaceholder(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(senderDescriptor);
-    auto& id = canControllerPlaceholder.GetServiceDescriptor();
     canController.ReceiveIbMessage(&canControllerPlaceholder, msg);
 }
 
@@ -182,7 +180,6 @@ TEST(CanControllerTest, receive_can_message_rx_filter2)
 
     CanController canControllerPlaceholder(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(senderDescriptor);
-    auto& id = canControllerPlaceholder.GetServiceDescriptor();
     canController.ReceiveIbMessage(&canControllerPlaceholder, msg);
 }
 
@@ -210,7 +207,6 @@ TEST(CanControllerTest, receive_can_message_tx_filter1)
 
     CanController canControllerPlaceholder(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(from_endpointAddress(senderAddress));
-    auto& id = canControllerPlaceholder.GetServiceDescriptor();
     canController.SendMessage(msg);
 }
 
@@ -238,7 +234,6 @@ TEST(CanControllerTest, receive_can_message_tx_filter2)
 
     CanController canControllerPlaceholder(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(from_endpointAddress(senderAddress));
-    auto& id = canControllerPlaceholder.GetServiceDescriptor();
     canController.SendMessage(msg);
 }
 
@@ -289,7 +284,6 @@ TEST(CanControllerTest, receive_ack)
     using namespace std::placeholders;
 
     EndpointAddress controllerAddress = { 3, 8 };
-    EndpointAddress senderAddress = { 4, 9 };
 
     MockComAdapter mockComAdapter;
     CanControllerCallbacks callbackProvider;
@@ -300,10 +294,9 @@ TEST(CanControllerTest, receive_ack)
     canController.RegisterTransmitStatusHandler(std::bind(&CanControllerCallbacks::ReceiveAck, &callbackProvider, _1, _2));
 
     CanMessage msg{};
-    CanTransmitAcknowledge ack1{ 0, msg.canId, 0ns, CanTransmitStatus::Transmitted, nullptr };
-    CanTransmitAcknowledge ack2{ 0, msg.canId, 0ns, CanTransmitStatus::Transmitted, nullptr };
+    CanTransmitAcknowledge expectedAck{ 0, msg.canId, 0ns, CanTransmitStatus::Transmitted, nullptr };
 
-    EXPECT_CALL(callbackProvider, ReceiveAck(&canController, CanTransmitAckWithouthTransmitIdMatcher(ack1)))
+    EXPECT_CALL(callbackProvider, ReceiveAck(&canController, CanTransmitAckWithouthTransmitIdMatcher(expectedAck)))
         .Times(2);
     auto txId1 = canController.SendMessage(msg);
     auto txId2 = canController.SendMessage(msg);

@@ -11,13 +11,13 @@ namespace data {
 DataSubscriber::DataSubscriber(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
                                const std::string& topic, DataExchangeFormat dataExchangeFormat, const std::map<std::string, std::string>& labels,
                                DataHandlerT defaultDataHandler, NewDataSourceHandlerT newDataSourceHandler)
-    : _comAdapter{comAdapter}
-    , _timeProvider{timeProvider}
-    , _topic{topic}
+    : _topic{topic}
     , _dataExchangeFormat{dataExchangeFormat}
     , _labels{labels}
     , _defaultDataHandler{defaultDataHandler}
     , _newDataSourceHandler{newDataSourceHandler}
+    , _timeProvider{timeProvider}
+    , _comAdapter{ comAdapter }
 {
 
 }
@@ -83,7 +83,7 @@ void DataSubscriber::RegisterSpecificDataHandler(const DataExchangeFormat& dataE
                                                  const std::map<std::string, std::string>& labels,
                                                  DataHandlerT specificDataHandler)
 {
-    _specificDataHandling.push_back({ _specificDataHandlerId++, dataExchangeFormat, labels, specificDataHandler });
+    _specificDataHandling.push_back({ _specificDataHandlerId++, dataExchangeFormat, labels, specificDataHandler, {} });
     // NB: Try to assign specific handlers here as _specificDataHandling has changed
     AssignSpecificDataHandlers();
 }

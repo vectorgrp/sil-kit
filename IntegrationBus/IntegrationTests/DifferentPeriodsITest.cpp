@@ -63,7 +63,7 @@ public:
 
         participantController->SetPeriod(period);
         participantController->SetSimulationTask(
-            [this, publisher, publisherIndex, period](const nanoseconds now, nanoseconds /*duration*/) {
+            [this, publisher, period](const nanoseconds now, nanoseconds /*duration*/) {
                 ASSERT_TRUE((now.count() % period.count()) == 0);
                 if (_messageIndex < _numMessages)
                 {
@@ -135,7 +135,7 @@ public:
 
         for (auto publisherIndex = 0u; publisherIndex < _publisherCount; publisherIndex++)
         {
-            auto* subscriber = _comAdapter->CreateDataSubscriber(
+            _comAdapter->CreateDataSubscriber(
                 "Topic" + std::to_string(publisherIndex), DataExchangeFormat{}, {},
                 [this, publisherIndex](IDataSubscriber* subscriber, const std::vector<uint8_t>& data) {
                     ReceiveMessage(subscriber, data, publisherIndex);
@@ -185,7 +185,7 @@ private:
         }
     }
 
-    void ReceiveMessage(IDataSubscriber* subscriber, const std::vector<uint8_t>& data,
+    void ReceiveMessage(IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data,
                         const uint32_t publisherIndex)
     {
         auto& messageIndex = _messageIndexes[publisherIndex];
@@ -229,13 +229,14 @@ private:
     }
 
 private:
-    std::unique_ptr<IComAdapterInternal> _comAdapter{nullptr};
-    ISystemController* _systemController{nullptr};
-    ISystemMonitor* _monitor{nullptr};
-    std::vector<std::string> _syncParticipantNames;
     uint32_t _publisherCount{0u};
     std::vector<uint32_t> _messageIndexes;
     uint32_t _numMessages{0u};
+    std::vector<std::string> _syncParticipantNames;
+    std::unique_ptr<IComAdapterInternal> _comAdapter{nullptr};
+    ISystemController* _systemController{nullptr};
+    ISystemMonitor* _monitor{nullptr};
+
     std::chrono::nanoseconds _currentTime{0ns};
 };
 

@@ -44,7 +44,6 @@ TEST(MwVAsioSerdes, MwSync_ParticipantStatus)
 
     auto now = std::chrono::system_clock::now();
     decltype(now) nowUs = std::chrono::system_clock::time_point{std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch())};
-    decltype(now) outNow;
 
     ParticipantStatus in;
     ParticipantStatus out{};

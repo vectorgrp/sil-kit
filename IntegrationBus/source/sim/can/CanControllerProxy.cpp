@@ -86,7 +86,7 @@ auto CanControllerProxy::SendMessage(CanMessage&& msg, void* userContext) -> Can
 void CanControllerProxy::RegisterReceiveMessageHandler(ReceiveMessageHandler handler, DirectionMask directionMask)
 {
     std::function<bool(const CanMessage&)> filter = [directionMask](const CanMessage& msg) {
-        return (DirectionMask)msg.direction & (DirectionMask)directionMask;
+        return (((DirectionMask)msg.direction & (DirectionMask)directionMask)) != 0;
     };
     RegisterHandler(handler, std::move(filter));
 }
@@ -104,7 +104,7 @@ void CanControllerProxy::RegisterErrorStateChangedHandler(ErrorStateChangedHandl
 void CanControllerProxy::RegisterTransmitStatusHandler(MessageStatusHandler handler, CanTransmitStatusMask statusMask)
 {
     std::function<bool(const CanTransmitAcknowledge&)> filter = [statusMask](const CanTransmitAcknowledge& ack) {
-        return (CanTransmitStatusMask)ack.status & (CanTransmitStatusMask)statusMask;
+        return ((CanTransmitStatusMask)ack.status & (CanTransmitStatusMask)statusMask) != 0;
     };
     RegisterHandler(handler, filter);
 }
@@ -117,18 +117,18 @@ void CanControllerProxy::RegisterHandler(CallbackT<MsgT> handler, std::function<
     handlers.push_back(handler_tuple);
 }
 
-void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanMessage& msg)
+void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const CanMessage& msg)
 {
     _tracer.Trace(ib::sim::TransmitDirection::RX, msg.timestamp, msg);
     CallHandlers(msg);
 }
 
-void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanTransmitAcknowledge& msg)
+void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const CanTransmitAcknowledge& msg)
 {
     CallHandlers(msg);
 }
 
-void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanControllerStatus& msg)
+void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const CanControllerStatus& msg)
 {
     if (_controllerState != msg.controllerState)
     {

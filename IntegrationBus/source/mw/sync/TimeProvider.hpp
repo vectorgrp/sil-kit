@@ -34,11 +34,11 @@ private:
 // Inline Implementations
 /////////////////////////////////////////////////////////////////////
 
-void WallclockProvider::RegisterNextSimStepHandler(NextSimStepHandlerT handler)
+void WallclockProvider::RegisterNextSimStepHandler(NextSimStepHandlerT simStepHandler)
 {
     {
         std::unique_lock<std::mutex> lock{_mx};
-        _handlers.emplace_back(std::move(handler));
+        _handlers.emplace_back(std::move(simStepHandler));
     }
 
     _timer.WithPeriod(_tickPeriod, [this](const auto& now) {
