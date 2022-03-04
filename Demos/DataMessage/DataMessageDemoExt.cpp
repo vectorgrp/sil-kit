@@ -8,6 +8,7 @@
 #include "ib/sim/all.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/mw/sync/string_utils.hpp"
+#include "ib/util/serdes/sil/Serialization.hpp"
 
 using namespace ib::mw;
 using namespace ib::sim::data;
@@ -34,27 +35,31 @@ void PublishMessage(IDataPublisher* publisher, std::string msg)
 
     std::cout << "<< Send DataMessage with data=" << message << std::endl;
 
-    std::vector<uint8_t> data{message.begin(), message.end()};
-    publisher->Publish(std::move(data));
+    ib::util::serdes::sil::Serializer serializer;
+    serializer.Serialize(message);
+    publisher->Publish(serializer.ReleaseBuffer());
 }
 
 void DefaultDataHandler(IDataSubscriber* subscriber, const std::vector<uint8_t>& data)
 {
-    std::string message{data.begin(), data.end()};
+    ib::util::serdes::sil::Deserializer deserializer(data);
+    const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> [DefaultDataHandler] Received new Message: with data=\""
               << message << "\"" << std::endl;
 }
 
 void SpecificDataHandlerForPub1(IDataSubscriber* subscriber, const std::vector<uint8_t>& data)
 {
-    std::string message{data.begin(), data.end()};
+    ib::util::serdes::sil::Deserializer deserializer(data);
+    const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> [SpecificDataHandlerForPublisher1] Received new Message: with data=\""
               << message << std::endl;
 }
 
 void SpecificDataHandlerForPub2(IDataSubscriber* subscriber, const std::vector<uint8_t>& data)
 {
-    std::string message{data.begin(), data.end()};
+    ib::util::serdes::sil::Deserializer deserializer(data);
+    const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> [SpecificDataHandlerForPublisher2] Received new Message: with data=\""
               << message << "\"" << std::endl;
 }
@@ -117,11 +122,13 @@ int main(int argc, char** argv)
 
         });
 
+        const DataExchangeFormat dataExchangeFormat{ ib::util::serdes::sil::MediaType() };
+
         participantController->SetPeriod(1s);
         if (participantName == "Publisher1")
         {
             std::map<std::string, std::string> labels{{"KeyA", "ValA"}, {"KeyB", "ValB"} };
-            auto* publisher = participant->CreateDataPublisher("Topic1", DataExchangeFormat{"A"}, labels, 0);
+            auto* publisher = participant->CreateDataPublisher("Topic1", dataExchangeFormat, labels, 0);
 
             participantController->SetSimulationTask(
                 [publisher](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -135,7 +142,7 @@ int main(int argc, char** argv)
         else if (participantName == "Publisher2")
         {
             std::map<std::string, std::string> labels{ {"KeyB", "ValB"}, {"KeyC", "ValC"} };
-            auto* publisher = participant->CreateDataPublisher("Topic1", DataExchangeFormat{"A"}, labels, 0);
+            auto* publisher = participant->CreateDataPublisher("Topic1", dataExchangeFormat, labels, 0);
 
             participantController->SetSimulationTask(
                 [publisher](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -147,11 +154,11 @@ int main(int argc, char** argv)
         }
         else //if (participantName == "Subscriber")
         {
-            auto* subscriber = participant->CreateDataSubscriber("Topic1", DataExchangeFormat{"A"}, {}, DefaultDataHandler, NewDataSource);
+            auto* subscriber = participant->CreateDataSubscriber("Topic1", dataExchangeFormat, {}, DefaultDataHandler, NewDataSource);
            
-            subscriber->RegisterSpecificDataHandler(DataExchangeFormat{"A"}, {{"KeyA", ""}, {"KeyB", ""}},
+            subscriber->RegisterSpecificDataHandler(dataExchangeFormat, {{"KeyA", ""}, {"KeyB", ""}},
                                                     SpecificDataHandlerForPub1);
-            subscriber->RegisterSpecificDataHandler(DataExchangeFormat{"A"}, {{"KeyC", ""}},
+            subscriber->RegisterSpecificDataHandler(dataExchangeFormat, {{"KeyC", ""}},
                                                     SpecificDataHandlerForPub2);
 
             participantController->SetSimulationTask(

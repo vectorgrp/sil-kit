@@ -8,6 +8,7 @@
 #include "ib/sim/all.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/mw/sync/string_utils.hpp"
+#include "ib/util/serdes/sil/Serialization.hpp"
 
 using namespace ib::mw;
 using namespace ib::sim::data;
@@ -23,15 +24,16 @@ void PublishMessage(IDataPublisher* publisher, std::string topicname)
 
     std::cout << "<< Send DataMessage with data=" << message << std::endl;
 
-    std::vector<uint8_t> data{message.begin(), message.end()};
-    publisher->Publish(std::move(data));
+    ib::util::serdes::sil::Serializer serializer;
+    serializer.Serialize(message);
+    publisher->Publish(serializer.ReleaseBuffer());
 }
 
 void ReceiveMessage(IDataSubscriber* subscriber, const std::vector<uint8_t>& data)
 {
-    std::string message{data.begin(), data.end()};
-    std::cout << ">> Received new Message: with data=\"" << message << "\""
-              << std::endl;
+    ib::util::serdes::sil::Deserializer deserializer(data);
+    const auto message = deserializer.Deserialize<std::string>();
+    std::cout << ">> Received new Message: with data=\"" << message << "\"" << std::endl;
 }
 
 /**************************************************************************************************
