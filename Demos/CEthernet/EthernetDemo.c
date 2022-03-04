@@ -9,7 +9,7 @@
 #include "ib/capi/IntegrationBus.h"
 
 #ifdef WIN32
-#pragma warning(disable: 4100 5105)
+#pragma warning(disable: 4100 5105 4204)
 #include "Windows.h"
 #define SleepMs(X) Sleep(X)
 #else
@@ -72,6 +72,8 @@ ib_Ethernet_Controller* ethernetController2;
 
 char* participantName;
 uint8_t ethernetMessageCounter = 0;
+uint8_t buffer[100];
+
 #define SOURCE_MAC_SIZE 6
 #define DESTINATION_MAC_SIZE 6
 #define ETHERTYPE_MAC_SIZE 2
@@ -118,8 +120,6 @@ void ReceiveMessage(void* context, ib_Ethernet_Controller* controller, ib_Ethern
 
 void SendEthernetMessage()
 {
-    uint8_t buffer[100];
-
     // set destination mac
     uint8_t destinationMac[6] = { 0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1 };
     memcpy(&(buffer[0]), destinationMac, sizeof(destinationMac));

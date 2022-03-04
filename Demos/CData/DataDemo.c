@@ -2,7 +2,7 @@
 
 #ifdef WIN32
 #define _CRT_SECURE_NO_WARNINGS
-#pragma warning(disable : 4100 5105)
+#pragma warning(disable : 4100 5105 4204)
 #include "Windows.h"
 #   define SleepMs(X) Sleep(X)
 #else
@@ -59,7 +59,9 @@ ib_Data_Publisher* dataPublisher1;
 ib_Data_Publisher* dataPublisher2;
 ib_Data_Subscriber* dataSubscriber;
 
-int publishCount = 0;
+uint8_t payload[1] = {0};
+
+uint8_t publishCount = 0;
 int receiveCount = 0;
 const int numPublications = 10;
 
@@ -106,11 +108,9 @@ void DefaultDataHandler(void* context, ib_Data_Subscriber* subscriber, const ib_
 
 void PublishMessage()
 {
-    char payload[64];
     publishCount += 1;
-    int payloadSize = snprintf(payload, sizeof(payload), "Data Message %i", publishCount);
-
-    ib_ByteVector dataBlob = {(const uint8_t* const)&payload[0], payloadSize};
+    payload[0] = publishCount;
+    ib_ByteVector dataBlob = {payload, 1};
 
     ib_Data_Publisher_Publish(dataPublisher1, &dataBlob);
     ib_Data_Publisher_Publish(dataPublisher2, &dataBlob);

@@ -2,7 +2,7 @@
 
 #ifdef WIN32
 #define _CRT_SECURE_NO_WARNINGS
-#pragma warning(disable : 4100 5105)
+#pragma warning(disable : 4100 5105 4204)
 #include "Windows.h"
 #define SleepMs(X) Sleep(X)
 #else
@@ -59,6 +59,8 @@ const int numCalls = 10;
 
 char* participantName;
 
+uint8_t buffer[3];
+
 void PrintByteVector(const ib_ByteVector* data)
 {
     for (size_t i = 0; i < data->size; i++)
@@ -73,7 +75,7 @@ void PrintByteVector(const ib_ByteVector* data)
 }
 
 void CallHandler(void* context, ib_Rpc_Server* cbServer, ib_Rpc_CallHandle* callHandle,
-                        const ib_ByteVector* argumentData)
+                 const ib_ByteVector* argumentData)
 {
     receiveCallCount += 1;
     uint8_t* tmp = (uint8_t*)malloc(argumentData->size * sizeof(uint8_t));
@@ -210,7 +212,9 @@ int main(int argc, char* argv[])
         for (uint8_t i = 0; i < numCalls; i++)
         {
             SleepMs(1000);
-            uint8_t buffer[3] = {i, i, i};
+            buffer[0] = i;
+            buffer[1] = i;
+            buffer[2] = i;
             ib_ByteVector argumentData = { &buffer[0], 3 };
             printf("[Client] Call detached: ");
             PrintByteVector(&argumentData);
