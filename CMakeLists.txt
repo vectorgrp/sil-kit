@@ -11,6 +11,7 @@ option(IB_BUILD_DEMOS "Build the IntegrationBus Demos" ON)
 option(IB_BUILD_STATIC "Compile the Integration Bus as a static library" OFF)
 option(IB_BUILD_TESTS "Enable unit and integration tests for the Integration Bus" ON)
 option(IB_BUILD_DOCS "Build documentation for the Integration Bus (requires Doxygen and Sphinx)" OFF)
+option(IB_BUILD_DOCS_NEW "Build documentation for VIB 4.0" OFF)
 option(IB_INSTALL_SOURCE "Install and package the source tree" OFF)
 if(IB_INSTALL_SOURCE)
     set(IB_BUILD_DOCS ON CACHE BOOL "Force IB_BUILD_DOCS ON due to IB_INSTALL_SOURCE" FORCE)
@@ -67,6 +68,7 @@ endif()
 add_subdirectory(Launcher)
 # Include automated documentation with doxygen and sphinx
 add_subdirectory(docs)
+add_subdirectory(docs_new)
 
 ################################################################################
 # Distribution of the source code
