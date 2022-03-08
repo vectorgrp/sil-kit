@@ -22,7 +22,7 @@ using ParticipantId = uint64_t;
  *   e.g., multiple CAN controllers attached to different buses. A EndpointId
  *   is only valid in the scope of a specific Instruction Bus participant.
  */
-using EndpointId = uint16_t;
+using EndpointId = uint64_t;
 
 /*! \brief Global address of a ComEndpoint
  *

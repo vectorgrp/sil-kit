@@ -31,7 +31,7 @@ public:
     inline auto Name() const -> const std::string& { return _name; }
 
     void AddLocalReceiver(ReceiverT* receiver);
-    void AddRemoteReceiver(IVAsioPeer* peer, uint16_t remoteIdx);
+    void AddRemoteReceiver(IVAsioPeer* peer, EndpointId remoteIdx);
 
     void DistributeRemoteIbMessage(const IIbServiceEndpoint* from, const MsgT& msg);
     void DistributeLocalIbMessage(const IIbServiceEndpoint* sender, const MsgT& msg);
@@ -73,7 +73,7 @@ void IbLink<MsgT>::AddLocalReceiver(ReceiverT* receiver)
 }
 
 template <class MsgT>
-void IbLink<MsgT>::AddRemoteReceiver(IVAsioPeer* peer, uint16_t remoteIdx)
+void IbLink<MsgT>::AddRemoteReceiver(IVAsioPeer* peer, EndpointId remoteIdx)
 {
     _vasioTransmitter.AddRemoteReceiver(peer, remoteIdx);
 }

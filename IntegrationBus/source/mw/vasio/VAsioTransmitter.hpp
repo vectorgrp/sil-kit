@@ -22,7 +22,7 @@ template<typename MsgT> struct MessageHistory<MsgT, 0>
 {
     void SetHistoryLength(size_t) {}
     void Save(const IIbServiceEndpoint*, const MsgT& ) {}
-    void NotifyPeer(IVAsioPeer*, uint16_t) {}
+    void NotifyPeer(IVAsioPeer*, EndpointId) {}
 };
 // MessageHistory<.., 1>: save last message and notify peers about it
 template<typename MsgT> struct MessageHistory<MsgT, 1>
@@ -41,7 +41,7 @@ template<typename MsgT> struct MessageHistory<MsgT, 1>
         _last = msg;
         _hasValue = true;
     }
-    void NotifyPeer(IVAsioPeer* peer, uint16_t remoteIdx)
+    void NotifyPeer(IVAsioPeer* peer, EndpointId remoteIdx)
     {
         if (!_hasValue || !_hasHistory)
             return;
@@ -67,7 +67,7 @@ private:
 
 struct RemoteReceiver {
     IVAsioPeer* peer;
-    uint16_t remoteIdx;
+    EndpointId remoteIdx;
 };
 
 template <class MsgT>
@@ -80,7 +80,7 @@ class VAsioTransmitter
 public:
     // ----------------------------------------
     // Public methods
-    void AddRemoteReceiver(IVAsioPeer* peer, uint16_t remoteIdx)
+    void AddRemoteReceiver(IVAsioPeer* peer, EndpointId remoteIdx)
     {
         RemoteReceiver remoteReceiver;
         remoteReceiver.peer = peer;

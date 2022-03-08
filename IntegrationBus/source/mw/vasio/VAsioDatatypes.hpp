@@ -19,7 +19,7 @@ struct RegistryMsgHeader
 
 struct VAsioMsgSubscriber
 {
-    uint16_t    receiverIdx;
+    EndpointId receiverIdx;
     std::string networkName;
     std::string msgTypeName;
 };

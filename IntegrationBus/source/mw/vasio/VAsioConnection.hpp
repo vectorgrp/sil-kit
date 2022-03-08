@@ -268,7 +268,7 @@ private:
         {
             // we have to subscribe to messages from other peers
             VAsioMsgSubscriber subscriptionInfo;
-            subscriptionInfo.receiverIdx = static_cast<uint16_t>(_vasioReceivers.size());
+            subscriptionInfo.receiverIdx = static_cast<decltype(subscriptionInfo.receiverIdx)>(_vasioReceivers.size());
             subscriptionInfo.networkName = networkName;
             subscriptionInfo.msgTypeName = IbMsgTraits<IbMessageT>::TypeName();
 

@@ -799,14 +799,13 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
 
 void VAsioConnection::ReceiveRawIbMessage(IVAsioPeer* from, MessageBuffer&& buffer)
 {
-    uint16_t receiverIdx;
+    EndpointId receiverIdx;
     buffer >> receiverIdx;
     if (receiverIdx >= _vasioReceivers.size())
     {
         _logger->Warn("Ignoring RawIbMessage for unknown receiverIdx={}", receiverIdx);
         return;
     }
-
 
     EndpointAddress endpoint;
     buffer >> endpoint;

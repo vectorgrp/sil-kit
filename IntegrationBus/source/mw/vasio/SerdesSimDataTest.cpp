@@ -14,7 +14,7 @@ struct PackedMsg
 {
     uint32_t msgSizePlaceholder;
     ib::mw::VAsioMsgKind msgKind{ib::mw::VAsioMsgKind::IbSimMsg};
-    uint16_t receiverIdx;
+    ib::mw::EndpointId receiverIdx;
     ib::mw::EndpointAddress from;
     std::vector<uint8_t> data;
 
