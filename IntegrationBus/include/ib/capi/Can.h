@@ -28,8 +28,8 @@ struct ib_Can_Message
 {
     ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
     ib_NanosecondsTime timestamp; //!< Reception time
-    ib_Can_Frame* canFrame; //!< The Can Frame that corresponds to the meta data
-    ib_Direction direction;
+    ib_Can_Frame* canFrame; //!< The CAN Frame that corresponds to the meta data
+    ib_Direction direction; //!< The transmit direction of the CAN frame (TX/RX)
     void* userContext; //!< Optional pointer provided by user when sending the frame
 };
 
@@ -282,6 +282,7 @@ typedef ib_ReturnCode (*ib_Can_Controller_RegisterTransmitStatusHandler_t)(
 * \param controller The Can controller for which the message callback should be registered.
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on reception.
+* \param directionMask A bit mask defining the transmit direction of the messages (rx/tx)
 */
 IntegrationBusAPI ib_ReturnCode ib_Can_Controller_RegisterReceiveMessageHandler(
     ib_Can_Controller* controller, 
