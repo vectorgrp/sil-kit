@@ -20,7 +20,7 @@ option(IB_ENABLE_ASAN "Enable -f sanitize=address for builds (requires gcc, clan
 option(IB_ENABLE_UBSAN "Enable -f sanitize=undefined for builds (requires gcc, clang)" OFF)
 option(IB_ENABLE_THREADSAN "Enable -f sanitize=thread for builds (requires gcc, clang)" OFF)
 option(IB_MW_ENABLE_VASIO "Build VAsio Middleware" ON)
-option(IB_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
+option(IB_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${CMAKE_CURRENT_LIST_DIR}/IntegrationBus/cmake)
 include(IntegrationBusInstall)

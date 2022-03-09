@@ -10,8 +10,10 @@
 #define IB_END_DECLS 
 #endif
 
+#ifdef IB_BUILD_STATIC
+#    define IntegrationBusAPI
+# elif defined(EXPORT_IntegrationBusAPI)
 // define compiler specific export / import attributes
-#ifdef EXPORT_IntegrationBusAPI
 // define IntegrationBusAPI as EXPORT
 #    if defined(_MSC_VER)
 #        define IntegrationBusAPI __declspec(dllexport)
@@ -32,3 +34,4 @@
 #        pragma warning Unknown dynamic link import semantics.
 #    endif
 #endif  
+

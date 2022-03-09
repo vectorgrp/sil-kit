@@ -60,7 +60,6 @@ add_library(IntegrationBus ${ibLibType}
 
 if(IB_BUILD_STATIC)
     target_compile_definitions(IntegrationBus PUBLIC -D IB_BUILD_STATIC=1)
-    target_compile_definitions(IntegrationBus PUBLIC -D CIntegrationBusAPI_STATIC=1)
 endif()
 
 # Published extension implementations follow here for the extension loading

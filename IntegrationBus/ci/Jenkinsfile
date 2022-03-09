@@ -268,7 +268,7 @@ def runCmake(config, buildType) {
 
     if(buildType == "Release") {
         //only distribute source and docs in release mode
-        cmakeArgs +="-DIB_INSTALL_SOURCE=ON "
+        cmakeArgs +="-DIB_INSTALL_SOURCE=ON -DIB_WARNINGS_AS_ERRORS=ON"
     }
     if(!isUnix()) {
         cmakeArgs += " -D CMAKE_C_COMPILER=cl -D CMAKE_CXX_COMPILER=cl"
