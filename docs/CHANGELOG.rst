@@ -5,13 +5,16 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.X.X] - unreleased
+[3.7.8] - 2022-03-09
 --------------------------------
+This is an internal build.
 
 Removed
 ~~~~~~~
 
-- Removed deprecated ISystemController functions Initialize/Reinitialize via numeric participant id. Use participant names instead.
+- Removed deprecated ISystemController functions `Initialize()` and `Reinitialize()` 
+  which took a numeric participant id as argument.
+  Use participant names instead.
 
     + old:
 
@@ -26,6 +29,66 @@ Removed
        
        void ib::mw::sync::ISystemController::Initialize(const std::string& participantName) const;
        void ib::mw::sync::ISystemController::ReInitialize(const std::string& participantName) const;
+
+
+- Removed the ConfigBuilder from the public API in the `include/ib` directory.
+  The following headers were removed:
+    
+  .. code-block:: sh
+
+    include/ib/cfg/ConfigBuilder.hpp
+    include/ib/cfg/ControllerBuilder.hpp
+    include/ib/cfg/DataPortBuilder.hpp
+    include/ib/cfg/ExtensionConfigBuilder.hpp
+    include/ib/cfg/GenericPortBuilder.hpp
+    include/ib/cfg/LinkBuilder.hpp
+    include/ib/cfg/LoggerBuilder.hpp
+    include/ib/cfg/NetworkSimulatorBuilder.hpp
+    include/ib/cfg/ParentBuilder.hpp
+    include/ib/cfg/ParticipantBuilder.hpp
+    include/ib/cfg/ParticipantBuilder_detail.hpp
+    include/ib/cfg/ReplayBuilder.hpp
+    include/ib/cfg/RpcPortBuilder.hpp
+    include/ib/cfg/SimulationSetupBuilder.hpp
+    include/ib/cfg/SinkBuilder.hpp
+    include/ib/cfg/SwitchBuilder.hpp
+    include/ib/cfg/SwitchPortBuilder.hpp
+    include/ib/cfg/TimeSyncBuilder.hpp
+    include/ib/cfg/TraceSinkBuilder.hpp
+    include/ib/cfg/TraceSourceBuilder.hpp
+    include/ib/cfg/VAsioConfigBuilder.hpp
+    include/ib/cfg/VAsioRegistryBuilder.hpp
+
+- Removed all Configuration headers from `include/ib`. The configuration structure is no longer public.
+  Use the opaque :cpp:class:`ib::cfg::IParticipantConfiguration` instead.
+  The following headers were removed:
+
+  .. code-block:: sh
+
+     IntegrationBus/include/ib/cfg/OptionalCfg.hpp
+     IntegrationBus/include/ib/cfg/all.hpp
+     IntegrationBus/include/ib/cfg/fwd_decl.hpp
+     IntegrationBus/include/ib/cfg/string_utils.hpp
+
+Changed
+~~~~~~~
+- Adapted the demos to the new configuration file format.
+   - Removed all old configuration files.
+   - New configuration files only define a logger.
+   - Bus system demos also provide an additional configuration file for VIBE-NetSim.
+- Network names on controllers are optional.
+
+Fixed:
+~~~~~~
+- Reduced a lot of compiler warnings. On CI builds, warnings are treated as errors.
+- FlexRay: FlexRayController.Configure(...): values provided in the configuration file were not correctly overriding user-defined values.
+- All Bus Systems: Fixed bugs related to configured controllers that had no defined network.
+- CAN-Controller: Fixed a bug that prevented users from creating configured CAN controllers if the network was configured and the provided network name did not match the configured one.
+- Fixed deadlock in destructor when :cpp:func:`SetSimulationTaskAsync()<ib::mw::sync::IParticipantController::SetSimulationTaskAsync()>`
+  is used.
+- Fixed LinkUp/LinkDown transmission in VIBE-NetworkSimulator.
+- Fixed ethernet frame transmission with multiple switches in VIBE-NetworkSimulator.
+
 
 [3.7.2] - unreleased
 --------------------------------
