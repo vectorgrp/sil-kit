@@ -1,0 +1,20 @@
+on:
+  push:
+    branches:
+      - 'master'
+jobs:
+  sync_repo:
+    name: Sync branch to remote Git project
+    runs-on: Linux
+    environment: SyncRemoteRepoEnv
+    
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: ./.github/actions/repo-sync
+        with:
+          app-key:          ${{ secrets.VECTOR_APP_KEY }}
+          app-id:           ${{ secrets.VECTOR_APP_ID }}
+          remote-repo-url:  ${{ secrets.REMOTE_REPO_URL }}
+          remote-branch:    ${{ secrets.REMOTE_BRANCH }}
+          local-branch:     origin/master

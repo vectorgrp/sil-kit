@@ -1,0 +1,35 @@
+# Copyright (c) Vector Informatik GmbH. All rights reserved.
+name: "Repo Sync"
+description: "Synchronize a GitHub for Enterprise repo with a GitHub.com repo"
+
+inputs:
+  remote-repo-url:
+    description: "The remote GitHub.com repo HTTPS URL"
+    required: true
+  app-id:
+    description: "The GitHub App ID used for authentication"
+    required: true
+  app-key:
+    description: "A private key associated with the remote GitHub App used for authentication"
+    required: true
+  local-branch:
+    description: "The local git branch to sync with the remote repo"
+    required: true
+  remote-branch:
+    description: "The remote git branch to sync with the local branch"
+    required: true
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    REPO_SYNC_APP_KEY: ${{ inputs.app-key }}
+    REPO_SYNC_APP_ID:  ${{ inputs.app-id }}
+    REMOTE_REPO_URL:   ${{ inputs.remote-repo-url}}
+    REMOTE_BRANCH:     ${{ inputs.remote-branch }}
+    LOCAL_BRANCH:      ${{ inputs.local-branch }}
+
+
+branding:
+  icon: 'arrow-up-circle'
+  color: 'purple'
