@@ -111,6 +111,7 @@ if(IB_INSTALL_SOURCE)
         DIRECTORY
             ${CMAKE_CURRENT_SOURCE_DIR}/Launcher
             ${CMAKE_CURRENT_SOURCE_DIR}/docs
+            ${CMAKE_CURRENT_SOURCE_DIR}/docs_new
         DESTINATION ${INSTALL_SOURCE_DIR}
     )
     install(
