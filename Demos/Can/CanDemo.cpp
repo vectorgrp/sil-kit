@@ -52,17 +52,17 @@ void ReceiveMessage(const CanMessage& msg, logging::ILogger* logger)
 
 void SendMessage(ICanController* controller, logging::ILogger* logger)
 {
-    CanMessage msg;
-    msg.canId = 17;
+    CanMessage msg {};
+    msg.canId = 3;
     msg.flags.ide = 0; // Identifier Extension
     msg.flags.rtr = 0; // Remote Transmission Request
-    msg.flags.fdf = 0; // FD Format Indicator
+    msg.flags.fdf = 1; // FD Format Indicator
     msg.flags.brs = 1; // Bit Rate Switch  (for FD Format only)
     msg.flags.esi = 0; // Error State indicator (for FD Format only)
 
     static int msgId = 0;
     std::stringstream payloadBuilder;
-    payloadBuilder << "CAN " << msgId++;
+    payloadBuilder << "CAN " << (msgId++)%100;
     auto payloadStr = payloadBuilder.str();
 
     msg.dataField.assign(payloadStr.begin(), payloadStr.end());
@@ -144,7 +144,7 @@ int main(int argc, char** argv)
 
         if (participantName == "CanWriter")
         {
-            participantController->SetSimulationTask(
+            /*participantController->SetSimulationTask(
                 [canController, logger, sleepTimePerTick, &participantController](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
 
                     std::cout << "now=" << now << ", duration=" << duration << std::endl;
@@ -160,7 +160,12 @@ int main(int argc, char** argv)
             });
 
             // This process will disconnect and reconnect during a coldswap
-            participantController->EnableColdswap();
+            participantController->EnableColdswap();*/
+            while (true)
+            {
+                SendMessage(canController, logger);
+                std::this_thread::sleep_for(sleepTimePerTick);
+            }
         }
         else
         {
