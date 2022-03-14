@@ -202,6 +202,9 @@ VAsioConnection::VAsioConnection(ib::cfg::ParticipantConfiguration config, std::
     : _config{std::move(config)}
     , _participantName{std::move(participantName)}
     , _participantId{participantId}
+    , _tcp4Acceptor{_ioContext}
+    , _tcp6Acceptor{_ioContext}
+    , _localAcceptor{_ioContext}
 {
     RegisterPeerShutdownCallback([this](IVAsioPeer* peer) { UpdateParticipantStatusOnConnectionLoss(peer); });
     _hashToParticipantName.insert(std::pair<uint64_t, std::string>(hash(_participantName), _participantName));
@@ -215,11 +218,10 @@ VAsioConnection::~VAsioConnection()
         _ioWorker.join();
     }
 
-    auto&& localAcceptor = GetAcceptor<asio::local::stream_protocol::acceptor>();
-    if (localAcceptor)
+    if (_localAcceptor.is_open())
     {
         //clean up local ipc sockets
-        (void)fs::remove(localAcceptor->local_endpoint().path());
+        (void)fs::remove(_localAcceptor.local_endpoint().path());
     }
 
 }
@@ -246,21 +248,11 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
                 ex.what(), fs::current_path().string());
         }
     }
+
     // We let the operating system choose a free TCP port
     // The address will be substituted by the registry, from the actual connection endpoint's address.
-    AcceptConnectionsOn(tcp::endpoint{asio::ip::tcp::v4(), 0});
-
-    VAsioPeerUri registryUri;
-    registryUri.participantName = "IbRegistry";
-    registryUri.participantId = 0;
-
-    //setup local acceptor URI
-    auto registryLocalEndpoint = makeLocalEndpoint(registryUri.participantName,
-        registryUri.participantId, domainId);
-    const auto localUri = Uri{registryLocalEndpoint}.EncodedString();
-    registryUri.acceptorUris.push_back(localUri);
-
-    _logger->Debug("Connecting to VAsio registry");
+    AcceptConnectionsOn(_tcp4Acceptor, tcp::endpoint{asio::ip::tcp::v4(), 0});
+    AcceptConnectionsOn(_tcp6Acceptor, tcp::endpoint{asio::ip::tcp::v6(), 0});
 
     auto registry = std::make_unique<VAsioTcpPeer>(_ioContext.get_executor(), this, _logger);
     bool ok = false;
@@ -285,12 +277,30 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
         return false;
     };
 
+    // Compute a list of Registry URIs and attempt to connect as per config
+    VAsioPeerUri registryUri;
+    registryUri.participantName = "IbRegistry";
+    registryUri.participantId = 0;
+
+    // setup local acceptor URI (we can infer this based on the IbRegistry's name)
+    auto registryLocalEndpoint = makeLocalEndpoint(registryUri.participantName,
+        registryUri.participantId, domainId);
+    const auto localUri = Uri{registryLocalEndpoint}.EncodedString();
+    registryUri.acceptorUris.push_back(localUri);
+
+    _logger->Debug("Connecting to VAsio registry");
+
+
     // First, attempt local connections if available:
-    ok = multipleConnectAttempts(registryUri);
+    if (_config.middleware.enableDomainSockets)
+    {
+        ok = multipleConnectAttempts(registryUri);
+    }
 
     // Fall back to TCP connections:
     if (!ok)
     {
+        // setup TCP remote URI
         registryUri.acceptorUris.clear();
         auto registryPort = static_cast<uint16_t>(registryCfg.port + domainId);
         registryUri.acceptorUris.push_back(
@@ -371,23 +381,29 @@ void VAsioConnection::SendParticipantAnnoucement(IVAsioPeer* peer)
     VAsioPeerUri uri{ _participantName, _participantId, {} };
 
     //Ensure that the local acceptor is the first entry in the acceptorUris
-    auto&& localAcceptor = GetAcceptor<asio::local::stream_protocol::acceptor>();
-    if (localAcceptor)
+    if (_localAcceptor.is_open())
     {
         uri.acceptorUris.push_back(
-            Uri{ localAcceptor->local_endpoint() }.EncodedString()
+            Uri{ _localAcceptor.local_endpoint() }.EncodedString()
         );
     }
-    auto&& tcpAcceptor = GetAcceptor<asio::ip::tcp::acceptor>();
-    if (!tcpAcceptor)
+
+    if (!_tcp4Acceptor.is_open() && !_tcp4Acceptor.is_open())
     {
-        throw std::runtime_error{ "VasioConnection: cannot send announcement on TCP: tcp-acceptor is missing" };
+        throw std::runtime_error{ "VasioConnection: cannot send announcement on TCP: tcp-acceptors for IPv4 and IPv6 are missing" };
     }
 
-    auto epUri = Uri{tcpAcceptor->local_endpoint()};
+    auto epUri = Uri{_tcp4Acceptor.local_endpoint()};
     localInfo.acceptorHost = epUri.Host();
     localInfo.acceptorPort = epUri.Port();
     uri.acceptorUris.emplace_back(epUri.EncodedString());
+    if (_tcp6Acceptor.is_open())
+    {
+        epUri = Uri{_tcp6Acceptor.local_endpoint()};
+        localInfo.acceptorHost = epUri.Host();
+        localInfo.acceptorPort = epUri.Port();
+        uri.acceptorUris.emplace_back(epUri.EncodedString());
+    }
 
     ParticipantAnnouncement announcement;
     announcement.peerInfo = std::move(localInfo);
@@ -569,13 +585,17 @@ void VAsioConnection::AcceptLocalConnections(uint32_t domainId)
     //file must not exist before we bind/listen on it
     (void)fs::remove(localEndpoint.path());
 
-    AcceptConnectionsOn(localEndpoint);
+    AcceptConnectionsOn(_localAcceptor, localEndpoint);
 }
 
 void VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName, uint16_t port)
 {
     //Default to TCP IPv4 catchall
     tcp::endpoint endpoint(tcp::v4(), port);
+
+    auto isIpv4 = [](const auto endpoint) {
+        return endpoint.protocol().family() == asio::ip::tcp::v4().family();
+    };
 
     if (! hostName.empty())
     {
@@ -587,7 +607,7 @@ void VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName, uint16
             _logger->Debug( "Accepting connections at {}:{} @{}",
                 resolverResults->host_name(),
                 resolverResults->service_name(),
-                (resolverResults->endpoint().protocol().family() == asio::ip::tcp::v4().family() ? "TCPv4" : "TCPv6"));
+                (isIpv4(resolverResults->endpoint()) ? "TCPv4" : "TCPv6"));
         }
         catch (asio::system_error& err)
         {
@@ -598,15 +618,20 @@ void VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName, uint16
          endpoint = resolverResults->endpoint();
     }
 
-    AcceptConnectionsOn(endpoint);
+    if (isIpv4(endpoint))
+    {
+        AcceptConnectionsOn(_tcp4Acceptor, endpoint);
+    }
+    else
+    {
+        AcceptConnectionsOn(_tcp6Acceptor, endpoint);
+    }
 }
 
-template<typename EndpointT>
-void VAsioConnection::AcceptConnectionsOn(EndpointT endpoint)
+template<typename AcceptorT, typename EndpointT>
+void VAsioConnection::AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoint)
 {
-    using AcceptorT = typename EndpointT::protocol_type::acceptor;
-    auto&& acceptor = std::get<std::unique_ptr<AcceptorT>>(_acceptors);
-    if (acceptor)
+    if (acceptor.is_open())
     {
         // we already have an acceptor for the given endpoint type
         std::stringstream endpointName;
@@ -614,27 +639,25 @@ void VAsioConnection::AcceptConnectionsOn(EndpointT endpoint)
         throw std::logic_error{ "VAsioConnection: acceptor already open for endpoint type: " 
             + endpointName.str()};
     }
-
     try
     {
-        acceptor = std::make_unique<AcceptorT>(_ioContext);
-        acceptor->open(endpoint.protocol());
-        SetPlatformOptions(*acceptor);
-        acceptor->bind(endpoint);
+        acceptor.open(endpoint.protocol());
+        SetPlatformOptions(acceptor);
+        acceptor.bind(endpoint);
         SetSocketPermissions(endpoint);
-        acceptor->listen();
-        SetListenOptions(_logger, *acceptor);
+        acceptor.listen();
+        SetListenOptions(_logger, acceptor);
     }
     catch (const std::exception& e)
     {
         _logger->Error("VAsioConnection failed to listening on {}: {}", endpoint, e.what());
-        acceptor.reset();
+        acceptor = AcceptorT{_ioContext}; // Reset socket
         throw;
     }
 
-    _logger->Debug("VAsioConnection is listening on {}", acceptor->local_endpoint());
+    _logger->Debug("VAsioConnection is listening on {}", acceptor.local_endpoint());
 
-    AcceptNextConnection(*acceptor);
+    AcceptNextConnection(acceptor);
 }
 
 template<typename AcceptorT>

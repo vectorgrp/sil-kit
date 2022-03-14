@@ -66,7 +66,6 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    VAsioConnection() = default;
     VAsioConnection(const VAsioConnection&) = delete; //clang warning: this is implicity deleted by asio::io_context
     VAsioConnection(VAsioConnection&&) = delete; // ditto asio::io_context
     VAsioConnection(ib::cfg::ParticipantConfiguration config, std::string participantName, ParticipantId participantId);
@@ -165,8 +164,8 @@ public:
 
 private:
 
-    template<typename EndpointT>
-    void AcceptConnectionsOn(EndpointT endpoint);
+    template<typename AcceptorT, typename EndpointT>
+    void AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoint);
 
     // ----------------------------------------
     // private data types
@@ -391,16 +390,6 @@ private:
     template<typename AcceptorT>
     void AcceptNextConnection(AcceptorT& acceptor);
 
-    template<typename AcceptorT>
-    auto GetAcceptor() const -> AcceptorT*
-    {
-        auto&& acceptor =  std::get<std::unique_ptr<AcceptorT>>(_acceptors);
-        if (acceptor)
-        {
-            return acceptor.get();
-        }
-        return nullptr;
-    }
 private:
     // ----------------------------------------
     // private members
@@ -427,11 +416,11 @@ private:
     // their destructor will crash!
     std::unique_ptr<IVAsioPeer> _registry{nullptr};
     std::vector<std::shared_ptr<IVAsioPeer>> _peers;
-    std::unique_ptr<asio::ip::tcp::acceptor> _tcpAcceptor;
-    std::tuple<
-        std::unique_ptr<asio::ip::tcp::acceptor>,
-        std::unique_ptr<asio::local::stream_protocol::acceptor>
-    > _acceptors;
+
+    // We support IPv6, IPv4 and Local Domain sockets for incoming connections:
+    asio::ip::tcp::acceptor _tcp4Acceptor;
+    asio::ip::tcp::acceptor _tcp6Acceptor;
+    asio::local::stream_protocol::acceptor _localAcceptor;
 
     // After receiving the list of known participants from the registry, we keep
     // track of the sent ParticipantAnnouncements and wait for the corresponding

@@ -175,6 +175,7 @@ bool VAsioTcpPeer::ConnectLocal(const std::string& socketPath)
 
     try
     {
+        _logger->Debug("VAsioTcpPeer: Connecting to {}", socketPath);
         asio::local::stream_protocol::endpoint ep{socketPath};
         _socket.connect(ep);
         return true;
@@ -195,10 +196,6 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
     try
     {
         resolverResults = resolver.resolve(host, std::to_string(static_cast<int>(port)));
-        _logger->Debug( "VAsioTcpPeer: Connecting to IbRegistry at {}:{} @{}",
-            resolverResults->host_name(),
-            resolverResults->service_name(),
-            (resolverResults->endpoint().protocol().family() == asio::ip::tcp::v4().family() ? "TCPv4" : "TCPv6"));
     }
     catch (asio::system_error& err)
     {
@@ -210,6 +207,11 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
     {
         try
         {
+            _logger->Debug( "VAsioTcpPeer: Connecting to {}:{} ({})",
+                resolverEntry.host_name(),
+                resolverEntry.service_name(),
+                (resolverEntry.endpoint().protocol().family() == asio::ip::tcp::v4().family() ? "TCPv4" : "TCPv6")
+            );
             // Set  pre-connection platform options
             _socket.open(resolverEntry.endpoint().protocol());
             SetConnectOptions(_logger, _socket);
@@ -264,17 +266,20 @@ void VAsioTcpPeer::Connect(VAsioPeerUri peerInfo)
             return Uri{uriStr};
     });
 
-    //Attempt local connections first
-    auto localUri = std::find_if(uris.begin(), uris.end(),
-        [](const auto& uri) {
-            return uri.Type() == Uri::UriType::Local;
-    });
-    if (localUri != uris.end())
+    if (_ibConnection->Config().middleware.enableDomainSockets)
     {
-        attemptedUris << localUri->EncodedString() << ",";
-        if (ConnectLocal(localUri->Path()))
+        //Attempt local connections first
+        auto localUri = std::find_if(uris.begin(), uris.end(),
+            [](const auto& uri) {
+                return uri.Type() == Uri::UriType::Local;
+        });
+        if (localUri != uris.end())
         {
-            return;
+            attemptedUris << localUri->EncodedString() << ",";
+            if (ConnectLocal(localUri->Path()))
+            {
+                return;
+            }
         }
     }
 
@@ -304,7 +309,7 @@ void VAsioTcpPeer::Connect(VAsioPeerUri peerInfo)
 
     if (!_socket.is_open())
     {
-        auto errorMsg = fmt::format("Failed to connect to host URIs: {}",
+        auto errorMsg = fmt::format("Failed to connect to host URIs: \"{}\"",
             attemptedUris.str());
         _logger->Debug(errorMsg);
         _logger->Debug("Tried the following URIs: {}", attemptedUris.str());
