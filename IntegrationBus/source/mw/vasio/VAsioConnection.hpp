@@ -152,9 +152,9 @@ public:
     void RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)> callback);
     void OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer);
 
-    template<typename EndpointT>
-    void AcceptConnectionsOn(EndpointT endpoint);
+    // Listening Sockets (acceptors)
     void AcceptLocalConnections(uint32_t domainId);
+    void AcceptTcpConnectionsOn(const std::string& hostname, uint16_t port);
 
     void StartIoWorker();
 
@@ -164,6 +164,10 @@ public:
     void NotifyShutdown();
 
 private:
+
+    template<typename EndpointT>
+    void AcceptConnectionsOn(EndpointT endpoint);
+
     // ----------------------------------------
     // private data types
     template <class MsgT>

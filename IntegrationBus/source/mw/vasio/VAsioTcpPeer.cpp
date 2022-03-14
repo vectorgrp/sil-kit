@@ -195,6 +195,10 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
     try
     {
         resolverResults = resolver.resolve(host, std::to_string(static_cast<int>(port)));
+        _logger->Debug( "VAsioTcpPeer: Connecting to IbRegistry at {}:{} @{}",
+            resolverResults->host_name(),
+            resolverResults->service_name(),
+            (resolverResults->endpoint().protocol().family() == asio::ip::tcp::v4().family() ? "TCPv4" : "TCPv6"));
     }
     catch (asio::system_error& err)
     {

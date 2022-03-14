@@ -56,19 +56,20 @@ void VAsioRegistry::ProvideDomain(uint32_t domainId)
             e.what());
     }
 
+
+    const auto hostname = _vasioConfig->middleware.registry.hostname;
     auto registryPort = static_cast<uint16_t>(_vasioConfig->middleware.registry.port + domainId);
-    tcp::endpoint endpoint_v4(tcp::v4(), registryPort);
     try
     {
-        _connection.AcceptConnectionsOn(endpoint_v4);
-        //tcp::endpoint endpoint_v6(tcp::v6(), registryPort);
-        //FIXME allow ipv6: _connection.AcceptConnectionsOn(endpoint_v6);
+        // Resolve the configured hostname and accept on the given port:
+        _connection.AcceptTcpConnectionsOn(hostname, registryPort);
         isAccepting = true;
     }
     catch (const std::exception& e)
     {
-        _logger->Error("VAsioRegistry failed to create listening socket {} for domainId={}. Reason: {}",
-            endpoint_v4,
+        _logger->Error("VAsioRegistry failed to create listening socket {}:{} for domainId={}. Reason: {}",
+            hostname,
+            registryPort,
             domainId,
             e.what());
         // For scenarios where multiple instances run on the same host, binding on TCP/IP

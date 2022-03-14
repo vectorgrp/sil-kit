@@ -572,6 +572,35 @@ void VAsioConnection::AcceptLocalConnections(uint32_t domainId)
     AcceptConnectionsOn(localEndpoint);
 }
 
+void VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName, uint16_t port)
+{
+    //Default to TCP IPv4 catchall
+    tcp::endpoint endpoint(tcp::v4(), port);
+
+    if (! hostName.empty())
+    {
+        tcp::resolver resolver(_ioContext);
+        tcp::resolver::results_type resolverResults;
+        try
+        {
+            resolverResults = resolver.resolve(hostName,std::to_string(static_cast<int>(port)));
+            _logger->Debug( "Accepting connections at {}:{} @{}",
+                resolverResults->host_name(),
+                resolverResults->service_name(),
+                (resolverResults->endpoint().protocol().family() == asio::ip::tcp::v4().family() ? "TCPv4" : "TCPv6"));
+        }
+        catch (asio::system_error& err)
+        {
+            _logger->Error("VAsioConnection::AcceptConnectionsOn: Unable to resolve hostname \"{}:{}\": {}", hostName, port, err.what());
+            return;
+        }
+
+         endpoint = resolverResults->endpoint();
+    }
+
+    AcceptConnectionsOn(endpoint);
+}
+
 template<typename EndpointT>
 void VAsioConnection::AcceptConnectionsOn(EndpointT endpoint)
 {
