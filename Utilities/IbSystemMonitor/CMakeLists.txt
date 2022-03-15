@@ -18,6 +18,7 @@ set_target_properties(IbSystemMonitor PROPERTIES
 
 target_link_libraries(IbSystemMonitor
     IntegrationBus
+    IbUtil
 )
 install(TARGETS IbSystemMonitor
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}

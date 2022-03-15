@@ -23,7 +23,7 @@ auto ReadFile(const std::string& filename) -> std::string
     std::ifstream fs(filename);
 
     if (!fs.is_open())
-        throw ib::ConfigurationError("Invalid configuration filename '" + filename + "'");
+        throw ib::ConfigurationError("the file could not be opened");
 
     std::stringstream buffer;
     buffer << fs.rdbuf();
@@ -41,11 +41,13 @@ auto Parse(const std::string& text) -> ib::cfg::v1::datatypes::ParticipantConfig
     }
     if (warnings.str().size() > 0)
     {
-        std::cout << "YAML validation returned warnings: " << warnings.str() << std::endl;
+        std::cout << "YAML validation returned warnings: \n" << warnings.str() << std::endl;
     }
     YAML::Node doc = YAML::Load(text);
 
-    auto configuration = ib::cfg::from_yaml<ib::cfg::v1::datatypes::ParticipantConfiguration>(doc);
+    auto configuration = !doc.IsNull() ?
+        ib::cfg::from_yaml<ib::cfg::v1::datatypes::ParticipantConfiguration>(doc) :
+        ib::cfg::v1::datatypes::ParticipantConfiguration{};
     configuration.configurationFilePath.clear();
 
     //PostProcess(config);

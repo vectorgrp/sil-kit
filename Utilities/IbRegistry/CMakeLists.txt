@@ -30,6 +30,7 @@ add_definitions(-DEXPORT_IntegrationBusAPI)
 target_link_libraries(IbRegistry
     IbMwVAsio
     IbConfiguration
+    IbVersion
 )
 install(TARGETS IbRegistry
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}

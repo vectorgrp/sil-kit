@@ -8,10 +8,14 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <iterator>
 #include <thread>
 
+#include "ib/version.hpp"
 #include "ib/IntegrationBus.hpp"
 #include "ib/mw/sync/all.hpp"
+
+#include "CommandlineParser.hpp"
 
 using namespace ib;
 using namespace ib::mw;
@@ -29,15 +33,15 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 class IbController
 {
 public:
-    IbController(ib::mw::IComAdapter* comAdapter, std::shared_ptr<ib::cfg::IParticipantConfiguration> ibConfig,
+    IbController(ib::mw::IComAdapter* participant, std::shared_ptr<ib::cfg::IParticipantConfiguration> ibConfig,
                  const std::vector<std::string>& expectedParticipantNames)
         : _ibConfig{std::move(ibConfig)}
         , _expectedParticipantNames{expectedParticipantNames}
     {
-        _controller = comAdapter->GetSystemController();
+        _controller = participant->GetSystemController();
         _controller->SetRequiredParticipants(expectedParticipantNames);
 
-        _monitor = comAdapter->GetSystemMonitor();
+        _monitor = participant->GetSystemMonitor();
         _monitor->RegisterSystemStateHandler(
             [this](SystemState newState) {
                 this->OnSystemStateChanged(newState);
@@ -176,31 +180,104 @@ private:
 
 int main(int argc, char** argv)
 {
-    if (argc < 2)
-    {
-        std::cerr << "Missing arguments! Start demo with: " << argv[0] << " <domainId> <participantName1> [participantName2] ..." << std::endl;
-        return -1;
-    }
-    
+    ib::util::CommandlineParser commandlineParser;
+    commandlineParser.Add<ib::util::CommandlineParser::Flag>("version", "v", "[--version]",
+        "-v, --version: Get version info.");
+    commandlineParser.Add<ib::util::CommandlineParser::Flag>("help", "h", "[--help]",
+        "-h, --help: Get this help.");
+    commandlineParser.Add<ib::util::CommandlineParser::Option>("domain", "d", "42", "[--domain <domainId>]",
+        "-d, --domain <domainId>: The domain ID which is used by the Integration Bus. Defaults to 42.");
+    commandlineParser.Add<ib::util::CommandlineParser::Option>("name", "n", "SystemController", "[--name <participantName>]",
+        "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to 'SystemController'.");
+    commandlineParser.Add<ib::util::CommandlineParser::Option>("configuration", "c", "", "[--configuration <configuration>]",
+        "-c, --configuration: Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.");
+    commandlineParser.Add<ib::util::CommandlineParser::PositionalList>("participantNames", "<participantName1> [<participantName2> ...]",
+        "<participantName1>, <participantName2>, ...: Names of participants to wait for before starting simulation.");
+
+    std::cout << "Vector Integration Bus (VIB) -- System Controller" << std::endl
+        << std::endl;
+
     try
     {
-        std::string participantName{"SystemController"};
+        commandlineParser.ParseArguments(argc, argv);
+    }
+    catch (std::runtime_error & e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
+        commandlineParser.PrintUsageInfo(std::cerr, argv[0]);
 
-        uint32_t domainId = static_cast<uint32_t>(std::stoul(argv[1]));
+        return -1;
+    }
 
-        std::vector<std::string> expectedParticipantNames;
-        for (int i = 2; i < argc; i++)
-        {
-            expectedParticipantNames.push_back(argv[i]);
-        }
+    if (commandlineParser.Get<ib::util::CommandlineParser::Flag>("help").Value())
+    {
+        commandlineParser.PrintUsageInfo(std::cout, argv[0]);
 
-        // TODO: Use config file from (optional) command-line argument
-        auto participantConfiguration = ib::cfg::ParticipantConfigurationFromString("{}");
+        return 0;
+    }
 
-        std::cout << "Creating SystemController for IB domain=" << domainId << std::endl;
-        auto comAdapter = ib::CreateSimulationParticipant(participantConfiguration, participantName, domainId, false);
-        
-        IbController ibController(comAdapter.get(), participantConfiguration, expectedParticipantNames);
+    if (commandlineParser.Get<ib::util::CommandlineParser::Flag>("version").Value())
+    {
+        std::string ibHash{ ib::version::GitHash() };
+        auto ibShortHash = ibHash.substr(0, 7);
+        std::cout
+            << "Version Info:" << std::endl
+            << " - Vector Integration Bus (VIB): " << ib::version::String() << " (" << ib::version::SprintName() << "), #" << ibShortHash << std::endl;
+
+        return 0;
+    }
+
+    if (!commandlineParser.Get<ib::util::CommandlineParser::PositionalList>("participantNames").HasValues())
+    {
+        std::cerr << "Error: Arguments '<participantName1> [<participantName2> ...]' are missing" << std::endl;
+        commandlineParser.PrintUsageInfo(std::cerr, argv[0]);
+
+        return -1;
+    }
+
+    auto domain{ commandlineParser.Get<ib::util::CommandlineParser::Option>("domain").Value() };
+    auto participantName{ commandlineParser.Get<ib::util::CommandlineParser::Option>("name").Value() };
+    auto configurationFilename{ commandlineParser.Get<ib::util::CommandlineParser::Option>("configuration").Value() };
+    auto expectedParticipantNames{ commandlineParser.Get<ib::util::CommandlineParser::PositionalList>("participantNames").Values() };
+
+    uint32_t domainId;
+    try
+    {
+        domainId = static_cast<uint32_t>(std::stoul(domain));
+    }
+    catch (std::exception&)
+    {
+        std::cerr << "Error: Domain '" << domain << "' is not a valid number" << std::endl;
+
+        return -1;
+    }
+
+    std::shared_ptr<ib::cfg::IParticipantConfiguration> configuration;
+    try
+    {
+        configuration = !configurationFilename.empty() ?
+            ib::cfg::ParticipantConfigurationFromFile(configurationFilename) :
+            ib::cfg::ParticipantConfigurationFromString("");
+    }
+    catch (const ib::ConfigurationError & error)
+    {
+        std::cerr << "Error: Failed to load configuration '" << configurationFilename << "', " << error.what() << std::endl;
+        std::cout << "Press enter to stop the process..." << std::endl;
+        std::cin.ignore();
+
+        return -2;
+    }
+
+    try
+    {
+        std::cout << "Creating participant '" << participantName << "' at domain " << domainId << ", expecting ";
+        std::cout << (expectedParticipantNames.size() > 1 ? "participants '" : "participant '");
+        std::copy(expectedParticipantNames.begin(), std::prev(expectedParticipantNames.end()), std::ostream_iterator<std::string>(std::cout, "', '"));
+        std::cout << expectedParticipantNames.back() << "'..." << std::endl;
+
+        auto participant = ib::CreateSimulationParticipant(configuration, participantName, domainId, false);
+
+        IbController ibController(participant.get(), configuration, expectedParticipantNames);
 
         // Set numRestarts to values larger than zero to test the restart functionality.
         int numRestarts = 0;
@@ -212,23 +289,17 @@ int main(int argc, char** argv)
             ibController.StopAndRestart();
         }
 
-        std::cout << "Press enter to Shutdown the Integration Bus..." << std::endl;
+        std::cout << "Press enter to shutdown the Integration Bus..." << std::endl;
         std::cin.ignore();
 
         ibController.Shutdown();
-    }
-    catch (const ib::ConfigurationError& error)
-    {
-        std::cerr << "Invalid configuration: " << error.what() << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
-        std::cin.ignore();
-        return -2;
     }
     catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
+
         return -3;
     }
 

@@ -145,7 +145,7 @@ int main(int argc, char** argv)
         if (participantName == "CanWriter")
         {
             participantController->SetSimulationTask(
-                [canController, logger, sleepTimePerTick, &participantController](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+                [canController, logger, sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
 
                     std::cout << "now=" << now << ", duration=" << duration << std::endl;
                     SendMessage(canController, logger);
@@ -159,7 +159,7 @@ int main(int argc, char** argv)
         else
         {
             participantController->SetSimulationTask(
-                [sleepTimePerTick, &participantController](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+                [sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
 
                     std::cout << "now=" << now << ", duration=" << duration << std::endl;
                     std::this_thread::sleep_for(sleepTimePerTick);

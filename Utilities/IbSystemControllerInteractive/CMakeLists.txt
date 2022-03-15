@@ -18,6 +18,7 @@ set_target_properties(IbSystemControllerInteractive PROPERTIES
 
 target_link_libraries(IbSystemControllerInteractive
     IntegrationBus
+    IbUtil
 )
 install(TARGETS IbSystemControllerInteractive
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}
