@@ -40,8 +40,6 @@ ib_ReturnCode ib_SimulationParticipant_Create(ib_SimulationParticipant** outPart
 
         auto ibConfig = ib::cfg::ParticipantConfigurationFromString(participantConfigurationStr);
 
-        std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId
-                    << std::endl;
         auto comAdapter =
             ib::CreateSimulationParticipant(ibConfig, participantName, domainId, isSynchronized == ib_True).release();
 
@@ -50,6 +48,13 @@ ib_ReturnCode ib_SimulationParticipant_Create(ib_SimulationParticipant** outPart
             ib_error_string =
                 "Creating Simulation Participant failed due to unknown error and returned null pointer.";
             return ib_ReturnCode_UNSPECIFIEDERROR;
+        }
+
+        auto* logger = comAdapter->GetLogger();
+        if(logger)
+        {
+            logger->Info("Creating ComAdapter for Participant={} in Domain {}",
+                participantName, domainId);
         }
 
         *outParticipant = reinterpret_cast<ib_SimulationParticipant*>(comAdapter);

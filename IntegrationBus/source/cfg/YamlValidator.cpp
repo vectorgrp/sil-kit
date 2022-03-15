@@ -137,7 +137,6 @@ bool YamlValidator::LoadSchema(std::string schemaVersion)
     }
     else
     {
-        std::cout << "Warning: Unknown YAML schema version " << schemaVersion << std::endl;
         return false;
     }
     //the root element in schema can be skipped
