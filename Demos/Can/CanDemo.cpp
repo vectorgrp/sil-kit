@@ -144,28 +144,17 @@ int main(int argc, char** argv)
 
         if (participantName == "CanWriter")
         {
-            /*participantController->SetSimulationTask(
+            participantController->SetSimulationTask(
                 [canController, logger, sleepTimePerTick, &participantController](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
 
                     std::cout << "now=" << now << ", duration=" << duration << std::endl;
                     SendMessage(canController, logger);
                     std::this_thread::sleep_for(sleepTimePerTick);
 
-                    if (now == 100ms)
-                    {
-                        std::cout << "Switching to period length of 1ms..." << std::endl;
-                        participantController->SetPeriod(1ms);
-                    }
-
             });
 
             // This process will disconnect and reconnect during a coldswap
-            participantController->EnableColdswap();*/
-            while (true)
-            {
-                SendMessage(canController, logger);
-                std::this_thread::sleep_for(sleepTimePerTick);
-            }
+            participantController->EnableColdswap();
         }
         else
         {
@@ -174,17 +163,8 @@ int main(int argc, char** argv)
 
                     std::cout << "now=" << now << ", duration=" << duration << std::endl;
                     std::this_thread::sleep_for(sleepTimePerTick);
-
-                    if (now == 100ms)
-                    {
-                        std::cout << "Switching to period length of 1ms..." << std::endl;
-                        participantController->SetPeriod(1ms);
-                    }
             });
         }
-
-        //auto finalStateFuture = participantController->RunAsync();
-        //auto finalState = finalStateFuture.get();
 
         auto finalState = participantController->Run();
 
