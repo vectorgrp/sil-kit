@@ -51,7 +51,13 @@ NamedPipeWin::NamedPipeWin(const std::string& name)
 
 NamedPipeWin::~NamedPipeWin()
 {
-    closeConnection();
+    try {
+        Close();
+    }
+    catch (...)
+    {
+        // ignore error in destructor
+    }
 }
 bool NamedPipeWin::Write(const char* buffer, size_t size)
 {
@@ -75,7 +81,7 @@ bool NamedPipeWin::Write(const char* buffer, size_t size)
         auto ok = WriteFile(_pipeHandle, buffer, static_cast<DWORD>(size), &cbWritten, NULL);
         if (!ok && GetLastError() == ERROR_NO_DATA)
         {
-            closeConnection();
+            Close();
         }
         else if (!ok || cbWritten != size)
         {
@@ -85,7 +91,7 @@ bool NamedPipeWin::Write(const char* buffer, size_t size)
     return cbWritten == size;
 }
 
-void NamedPipeWin::closeConnection()
+void NamedPipeWin::Close()
 {
     if (isValid())
     {
@@ -93,7 +99,13 @@ void NamedPipeWin::closeConnection()
         isClosed &= FlushFileBuffers(_pipeHandle);
         isClosed &= DisconnectNamedPipe(_pipeHandle);
         isClosed &= CloseHandle(_pipeHandle);
-        if (!isClosed) std::cerr << "ERROR: Closing the PCAP pipe handle was not successful." << std::endl;
+        if (!isClosed)
+        {
+            std::stringstream msg;
+            msg << "NamedPipeWin::Close(): Closing the pipe handle was not successful: "
+                << GetPipeError();
+            throw std::runtime_error{msg.str()};
+        }
 
         _pipeHandle = INVALID_HANDLE_VALUE;
     }

@@ -10,7 +10,7 @@
 #include <sstream>
 #include <cerrno>
 #include <exception>
-#include <iostream>
+#include <sstream>
 
 namespace ib {
 namespace tracing {
@@ -38,21 +38,29 @@ void NamedPipeLinux::Close()
 {
     if(_isOwner)
     {
+        _isOwner=false;
         int err = ::unlink(_name.c_str());
         if(err == -1)
         {
-            std::cerr  << "Error deleting pipe \"" << _name << "\""
+            std::stringstream msg;
+            msg  << "NamedPipeLinux: Error deleting pipe \"" << _name << "\""
                 << ": errno: " << err
                 << ": " << strerror(errno)
                 ;
+            throw std::runtime_error{msg.str()};
 
         }
-        _isOwner=false;
     }
 }
 NamedPipeLinux::~NamedPipeLinux()
 {
-    Close();
+    try {
+        Close();
+    }
+    catch (...)
+    {
+        //do not throw in destructor
+    }
 }
 
 bool NamedPipeLinux::Write(const char* buffer, size_t bufferSize)

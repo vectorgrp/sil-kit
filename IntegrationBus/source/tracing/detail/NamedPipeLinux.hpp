@@ -19,6 +19,7 @@ public:
     // ----------------------------------------
     // Public interface methods
     bool Write(const char* buffer, size_t bufferSize) override;
+    void Close() override;
 private:
     // ----------------------------------------
     // private members
@@ -26,10 +27,6 @@ private:
     std::fstream _file;
     bool _isOwner{false};
     bool _isOpen{false};
-private:
-    // ----------------------------------------
-    // private methods
-    void Close();
 };
 
 } //end namespace detail

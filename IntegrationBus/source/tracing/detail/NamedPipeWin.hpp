@@ -20,7 +20,7 @@ public:
     // ----------------------------------------
     // Public interface methods
     bool Write(const char* buffer, size_t size) override;
-
+    void Close() override;
 private:
     // ----------------------------------------
     // private members
@@ -30,7 +30,6 @@ private:
     // ----------------------------------------
     // private methods
     bool isValid() const { return _pipeHandle != INVALID_HANDLE_VALUE; }
-    void closeConnection();
 
     bool _isConnected{false};
 };

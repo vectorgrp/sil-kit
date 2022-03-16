@@ -25,8 +25,14 @@ public:
     virtual bool Write(const char* buffer, size_t bufferSize) = 0;
 
     // ----------------------------------------
+    // Close the pipe, throw exception if closing failed
+    virtual void Close() = 0;
+
+    // ----------------------------------------
     // Factory method
     static auto Create(const std::string& name) -> Ptr;
+    
+
 };
 
 } //end namespace detail
