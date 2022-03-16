@@ -14,6 +14,11 @@ namespace util {
 
 #if defined(_WIN32)
 
+#if defined(__MINGW32__)
+//squelch mingw crossbuild warnings
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
+
 typedef HRESULT(WINAPI* SetThreadDescriptionProc)(HANDLE hThread, PCWSTR lpThreadDescription);
 
 inline std::wstring ToWString(const char* str)

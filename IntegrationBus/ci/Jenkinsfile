@@ -10,7 +10,6 @@ artifactName='IntegrationBus'
 keepNumBuilds=10 //number of log files on Jenkins, workspaces are always cleaned
 publishToArtifactory=false
 buildDebugBin=false //debug binaries are only build when doing a release to customers
-
 // artifactory for archiving / packaging
 artifactoryServer = Artifactory.server('IntegrationBusArtifactory')
 artifactoryRepo = '***VIB-820 Removed***'
@@ -53,7 +52,17 @@ def buildConfigs = [
         PublishArtifacts: true,
         CmakeArgs: "",
     ]
+
     // Linux builds:
+    ,[
+        Name: "MinGW", // We cross compile from ubuntu to windows
+        NodeLabel: "docker && linux",
+        DockerImage: "vib-ubuntu",
+        DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
+        PublishArtifacts: true,
+        CmakeArgs: " -D CMAKE_TOOLCHAIN_FILE=IntegrationBus/cmake/CrossBuildMingw.toolchain ",
+        IsCrossBuild: true
+    ]
     ,[
         Name: "Ubuntu-18.04-clang",
         NodeLabel: "docker && linux",
@@ -268,9 +277,16 @@ def runCmake(config, buildType) {
 
     if(buildType == "Release") {
         //only distribute source and docs in release mode
-        cmakeArgs +="-DIB_INSTALL_SOURCE=ON -DIB_WARNINGS_AS_ERRORS=ON"
+        cmakeArgs +=" -DIB_INSTALL_SOURCE=ON "
     }
-    if(!isUnix()) {
+
+    if(params.ErrorsAsWarnings) {
+        print("Setting Build with Warnings as Errors")
+        cmakeArgs +=" -DIB_WARNINGS_AS_ERRORS=ON "
+    }
+
+    // Add CL compiler for VS (MS Visual Studio) builds
+    if(config["Name"] =~ /^VS/) {
         cmakeArgs += " -D CMAKE_C_COMPILER=cl -D CMAKE_CXX_COMPILER=cl"
         def msvcVersion = config["MsvcVersion"]
         cmakeArgs += " -DMSVC_TOOLSET_VERSION=${msvcVersion}" //needed for binary download URL resolution
@@ -354,30 +370,41 @@ def doBuild(Map config) {
                 runCmake(config, "Release" )
             }
         }
-        stage("Unit Tests Release (${buildName})") {
-            dir("_build_Release") {
 
-                timeout(time: 10, unit: 'MINUTES') {
-                    ctest(
-                        installation: 'InSearchPath',
-                        arguments: "--verbose --build-config Release -R '^Test.*'"
-                    )
-                }
-                junit("**/*gtestresults.xml")
-
-            }
+        // Skip Tests when cross-building        
+        def isCrossBuild  = false
+        if("IsCrossBuild" in config) {
+            isCrossBuild = config["IsCrossBuild"]
         }
 
-        stage("Integration Tests Release (${buildName})") {
-            dir("_build_Release") {
-                timeout(time: 10, unit: 'MINUTES') {
-                    ctest(
-                        installation: 'InSearchPath',
-                        arguments: "--verbose --build-config Release -R '^ITest.*'"
-                    )
-                }
-                junit("**/*gtestresults.xml")
+        if(isCrossBuild) {
+            print("${buildName} --  skipping tests in crossbuild")
+        } else {
+            stage("Unit Tests Release (${buildName})") {
+                dir("_build_Release") {
 
+                    timeout(time: 10, unit: 'MINUTES') {
+                        ctest(
+                            installation: 'InSearchPath',
+                            arguments: "--verbose --build-config Release -R '^Test.*'"
+                        )
+                    }
+                    junit("**/*gtestresults.xml")
+
+                }
+            }
+
+            stage("Integration Tests Release (${buildName})") {
+                dir("_build_Release") {
+                    timeout(time: 10, unit: 'MINUTES') {
+                        ctest(
+                            installation: 'InSearchPath',
+                            arguments: "--verbose --build-config Release -R '^ITest.*'"
+                        )
+                    }
+                    junit("**/*gtestresults.xml")
+
+                }
             }
         }
 
@@ -388,7 +415,11 @@ def doBuild(Map config) {
                     runCmake(config, "Debug")
                 }
             }
+        } else {
+            print("Skipping Debug Build")
+        }
 
+        if(publishToArtifactory ) {
             stage(" Bundle and Archive Packages (${buildName})") {
                 run "python ./IntegrationBus/ci/package.py \"_build_Release/${artifactName}-*-Release.zip\" \"_build_Debug/${artifactName}-*-Debug.zip\""
                 archiveToArtifactory(config, scmVars, "${artifactName}-*.zip")
@@ -411,11 +442,16 @@ node {
         properties([
             buildDiscarder(logRotator(numToKeepStr: "${keepNumBuilds}")),
             parameters([
-                booleanParam(name: "ForceFullBuild", defaultValue: false, description: "Force a full build with artificat uploads")
+                booleanParam(name: "ForceFullBuild", defaultValue: false,
+                    description: "Force a full build with artificat uploads")
+                ,booleanParam(name: "ForceArtifactUpload", defaultValue: true,
+                    description: "Force uploading artifact uploads")
                 ,booleanParam(name: "UseThreadSanitizer", defaultValue: false,
                     description: "Build with thread sanitizer, pelase refer to the  output logs of tests")
                 ,booleanParam(name: "UseAddressSanitizer", defaultValue: false,
                     description: "Build with thread sanitizer, pelase refer to the  output logs of tests")
+                ,booleanParam(name: "ErrorsAsWarnings", defaultValue: false,
+                    description: "Build with compiler set to emit warnings as hard errors")
             ])
         ])  
 
@@ -454,18 +490,31 @@ node {
         } else {
             print("Doing a minimal build without publishing artifacts on branch ${env.BRANCH_NAME}")
             configNames = [
-                "VS2015-Win32", // out of date implementation of C++14
-                "Ubuntu-20.04-clang-12", // most modern compiler
+                //"VS2015-Win32", // out of date implementation of C++14
+                //"Ubuntu-20.04-clang-12", // most modern compiler
+                "MinGW", //MinGW gcc 8.1
             ]
         }
         def builds = [:]
         configNames.each {
             def configName = it
             def buildConfig = buildConfigs.find { it.Name == configName}
-            if(!doFullBuild) {
-                buildConfig["PublishArtifacts"] = false
+            if(params.ForceArtifactUpload) {
+                print("ForceArtifactUpload: PublishArtifacts is enabled for ${configName}")
+                buildConfig["PublishArtifacts"] = true
+                buildDebugBin = true
+            } else {
+                if(!doFullBuild) {
+                    print("PublishArtifacts is disabled for ${configName}")
+                    buildConfig["PublishArtifacts"] = false
+                }
             }
             builds.put(it, doBuild(buildConfig))
+        }
+
+        if(params.ForceArtifactUpload) {
+            print("Forcing Artifact Upload")
+            publishToArtifactory = true
         }
 
         parallel(builds)

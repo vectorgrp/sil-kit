@@ -31,6 +31,7 @@ RUN apt-get update && \
     g++ \
     clang \
     python3-pip \
+    mingw-w64 \
     python3-jinja2
 
 # ensure we have newer compilers than the defaults

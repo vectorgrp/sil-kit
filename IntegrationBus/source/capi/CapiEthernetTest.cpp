@@ -184,7 +184,7 @@ TEST_F(CapiEthernetTest, ethernet_controller_send_frame)
         "This is the demonstration ethernet frame number %i.",
          ethernetMessageCounter);
 
-    ib_Ethernet_Frame ef = { (const uint8_t* const)buffer, PAYLOAD_OFFSET + payloadSize };
+    ib_Ethernet_Frame ef = { (const uint8_t*)buffer, PAYLOAD_OFFSET + payloadSize };
 
     EthFrame refFrame{};
     std::vector<uint8_t> rawFrame(ef.data, ef.data + ef.size);
