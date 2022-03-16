@@ -1,6 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include <tuple>
+#include <iostream>
 
 #include "ib/version.hpp"
 #include "ParticipantConfiguration.hpp"
@@ -8,6 +9,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+#include "MockComAdapter.hpp" //for DummyLogger
 #include "IbExtensions.hpp"
 #include "DummyExtension.hpp"
 #include "Filesystem.hpp"
@@ -23,14 +25,36 @@ using namespace testing;
 
 namespace
 {
-    std::string GetCurrentWorkingDir()
+std::string GetCurrentWorkingDir()
+{
+    return ib::filesystem::current_path().string();
+}
+
+void SetCurrentWorkingDir(const std::string& cwd)
+{
+    ib::filesystem::current_path(cwd);
+}
+
+class StdoutLogger: public ib::mw::test::DummyLogger 
+{
+public:
+    void Info(const std::string& msg) override
     {
-        return ib::filesystem::current_path().string();
+        std::cout << "IbExtensionTest: Info: " << msg << std::endl;
     }
-    void SetCurrentWorkingDir(const std::string& cwd)
+    void Debug(const std::string& msg) override
     {
-        ib::filesystem::current_path(cwd);
+        std::cout << "IbExtensionTest: Debug: " << msg << std::endl;
     }
+    void Warn(const std::string& msg) override
+    {
+        std::cout << "IbExtensionTest: Warn: " << msg << std::endl;
+    }
+    void Error(const std::string& msg) override
+    {
+        std::cout << "IbExtensionTest: Error: " << msg << std::endl;
+    }
+};
 }
 
 class IbExtensionsTest : public Test
@@ -48,6 +72,7 @@ protected:
     }
 
     static std::string currentWorkingDir;
+    StdoutLogger logger;
 };
 
 std::string IbExtensionsTest::currentWorkingDir;
@@ -59,10 +84,10 @@ TEST_F(IbExtensionsTest, load_dummy_lib)
     {
         const auto testDir = ib::filesystem::path{"vib_library_test"};
         ib::filesystem::current_path(testDir);
-        auto dummyExtension = ib::extensions::LoadExtension("DummyExtension");
+        auto dummyExtension = ib::extensions::LoadExtension(&logger, "DummyExtension");
 
         {
-            auto otherInstance = ib::extensions::LoadExtension("DummyExtension");
+            auto otherInstance = ib::extensions::LoadExtension(&logger, "DummyExtension");
             std::cout <<" created second instance of DummyExtension" << std::endl;
         }
         ASSERT_NE(dummyExtension, nullptr);
@@ -90,8 +115,8 @@ TEST_F(IbExtensionsTest, dynamic_cast)
 {
     const auto testDir = ib::filesystem::path{"vib_library_test"};
     ib::filesystem::current_path(testDir);
-    // test wether dynamic cast of dynamic extension works
-    auto extensionBase = ib::extensions::LoadExtension("DummyExtension");
+    // test if dynamic cast of dynamic extension works
+    auto extensionBase = ib::extensions::LoadExtension(&logger, "DummyExtension");
     auto* dummy = dynamic_cast<DummyExtension*>(extensionBase.get());
     ASSERT_NE(dummy, nullptr);
     dummy->SetDummyValue(12345L);
@@ -102,7 +127,7 @@ TEST_F(IbExtensionsTest, wrong_version_number)
 {
     try
     {
-        auto extension = ib::extensions::LoadExtension("WrongVersionExtension");
+        auto extension = ib::extensions::LoadExtension(&logger, "WrongVersionExtension");
         triple version;
         triple reference{
             ib::version::Major(),
@@ -127,7 +152,7 @@ TEST_F(IbExtensionsTest, wrong_version_number)
 
 TEST_F(IbExtensionsTest, wrong_build_system)
 {
-    auto extension = ib::extensions::LoadExtension("WrongBuildSystem");
+    auto extension = ib::extensions::LoadExtension(&logger, "WrongBuildSystem");
     //should print a harmless warning on stdout
 }
 
@@ -136,8 +161,8 @@ TEST_F(IbExtensionsTest, multiple_extensions_loaded)
     const auto testDir = ib::filesystem::path{"vib_library_test"};
     ib::filesystem::current_path(testDir);
     //check that multiple instances don't interfere
-    auto base1 = ib::extensions::LoadExtension("DummyExtension");
-    auto base2 = ib::extensions::LoadExtension("DummyExtension");
+    auto base1 = ib::extensions::LoadExtension(&logger, "DummyExtension");
+    auto base2 = ib::extensions::LoadExtension(&logger, "DummyExtension");
 
     auto* mod1 = dynamic_cast<DummyExtension*>(base1.get());
     auto* mod2 = dynamic_cast<DummyExtension*>(base2.get());
@@ -155,7 +180,7 @@ TEST_F(IbExtensionsTest, load_from_envvar)
     setenv("TEST_VAR", testDir.c_str(), 1); // should be invariant
     ib::cfg::Extensions config;
     config.searchPathHints.emplace_back("ENV:TEST_VAR");
-    auto base1 = ib::extensions::LoadExtension("DummyExtension", config);
+    auto base1 = ib::extensions::LoadExtension(&logger, "DummyExtension", config);
     auto* mod1 = dynamic_cast<DummyExtension*>(base1.get());
     mod1->SetDummyValue(1);
     EXPECT_EQ(mod1->GetDummyValue(), 1);

@@ -10,6 +10,7 @@
 
 #include "ParticipantConfiguration.hpp"
 #include "ib/extensions/ExtensionError.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 
 #include "IIbExtension.hpp"
 
@@ -36,13 +37,15 @@ using ExtensionPathHints = std::vector<std::string>;
 //         decorating the name with platform specific prefix, suffix and
 //         extensions.
 // The first match is loaded.
-auto LoadExtension(const std::string& undecorated_name) -> std::shared_ptr<IIbExtension>;
+auto LoadExtension(mw::logging::ILogger* logger,
+    const std::string& undecorated_name) -> std::shared_ptr<IIbExtension>;
 
 //! \brief Loads the extension by name and uses the additional search path hints from
 //         the extension configuration.
 //! NB: a path hint can contain the prefix "ENV:" to refer to an environment
 //! variable name.
-auto LoadExtension(const std::string& undecorated_name, const cfg::Extensions& config)
+auto LoadExtension(mw::logging::ILogger* logger,
+    const std::string& undecorated_name, const cfg::Extensions& config)
     -> std::shared_ptr<IIbExtension>;
 
 }//end namespace extensions

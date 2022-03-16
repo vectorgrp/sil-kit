@@ -29,7 +29,7 @@ set_target_properties(WrongBuildSystem PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
 
-add_vib_test(TestIbExtensions SOURCES IbExtensionsTest.cpp LIBS IbExtensions IbFilesystem)
+add_vib_test(TestIbExtensions SOURCES IbExtensionsTest.cpp LIBS IbExtensions IbFilesystem IbMwMockComAdapter)
 
 if(${IB_BUILD_TESTS})
     add_dependencies(TestIbExtensions

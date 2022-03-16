@@ -23,7 +23,9 @@ class DllCache
 {
 public:
 
-    auto Get(const std::string& extensionName, const cfg::Extensions& config)
+    auto Get(mw::logging::ILogger* logger,
+        const std::string& extensionName,
+        const cfg::Extensions& config)
         -> ib::extensions::IIbExtension&
     {
         try {
@@ -31,7 +33,7 @@ public:
             //and cache a reference to it.
             if (!_dll)
             {
-                _dll = ib::extensions::LoadExtension(extensionName, config);
+                _dll = ib::extensions::LoadExtension(logger, extensionName, config);
                 _extensionName = extensionName;
             }
             if (extensionName != _extensionName)
@@ -43,8 +45,13 @@ public:
         }
         catch (const ib::extensions::ExtensionError& err)
         {
-            std::cout << "ERROR loading '" << extensionName << "' extension: " << err.what() << std::endl;
-            throw;
+            std::stringstream msg;
+            msg << "ERROR loading VIB extension '" << extensionName << "': " << err.what();
+            if(logger)
+            {
+                logger->Error(msg.str());
+            }
+            throw ib::extensions::ExtensionError{msg.str()};
         }
     }
 

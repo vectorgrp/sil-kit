@@ -47,7 +47,7 @@ bool isBuildCompatible(const BuildInfoType& myInfos, const BuildInfoType& otherI
     return ok;
 }
 
-void VerifyExtension(const IbExtensionDescriptor_t* descr)
+void VerifyExtension(ib::mw::logging::ILogger* logger, const IbExtensionDescriptor_t* descr)
 {
     if(descr == nullptr)
     {
@@ -86,6 +86,10 @@ void VerifyExtension(const IbExtensionDescriptor_t* descr)
             << to_string(extensionBuild)
             << "."
             ;
+        if (logger)
+        {
+            logger->Warn(ss.str());
+        }
         throw ExtensionError(ss.str());
     }
 
@@ -93,16 +97,22 @@ void VerifyExtension(const IbExtensionDescriptor_t* descr)
     const std::string mod_sys{descr->system_name};
     if(my_sys == "UNKNOWN")
     {
-        std::cout << "WARNING: build misconfigured: host system is UNKNOWN"
-            << std::endl;
+        if(logger)
+        {
+            logger->Warn("VIB extension verification: build system is misconfigured, the host system is UNKNOWN");
+        }
     }
 
     if(my_sys != mod_sys)
     {
-        //XXX this should go to the logger
-        std::cout << "WARNING: host system \"" << my_sys 
+        std::stringstream msg;
+        msg << "VIB extension verification: host system \"" << my_sys 
             <<"\" differs from module system:\"" << mod_sys
-            << "\"" << std::endl;
+            << "\"";
+        if (logger)
+        {
+            logger->Warn(msg.str());
+        }
     }
 }
 
@@ -164,12 +174,14 @@ SymType* GetSymbol(detail::LibraryHandle hnd, const std::string& sym_name)
 
 ///////////////////////////////////////////////////////////////////////////
 
-auto LoadExtension(const std::string& name) -> std::shared_ptr<IIbExtension>
+auto LoadExtension(mw::logging::ILogger* logger,
+    const std::string& name) -> std::shared_ptr<IIbExtension>
 {
-    return LoadExtension(name, cfg::Extensions{});
+    return LoadExtension(logger, name, cfg::Extensions{});
 }
 
-auto LoadExtension(const std::string& name, const cfg::Extensions& config) -> std::shared_ptr<IIbExtension>
+auto LoadExtension(mw::logging::ILogger* logger,
+    const std::string& name, const cfg::Extensions& config) -> std::shared_ptr<IIbExtension>
 {
     using namespace detail;
 
@@ -181,7 +193,7 @@ auto LoadExtension(const std::string& name, const cfg::Extensions& config) -> st
     auto paths = FindLibrary(name, searchPathHints);
     detail::LibraryHandle lib_handle = nullptr;
 
-    auto check_lib = [](const std::string &path) 
+    auto check_lib = [logger](const std::string &path) 
         -> detail::LibraryHandle {
         try
         {
@@ -189,15 +201,18 @@ auto LoadExtension(const std::string& name, const cfg::Extensions& config) -> st
             //find required C symbols for extension entry
             auto extension_descr = GetSymbol<decltype(vib_extension_descriptor)>
                             (lib, "vib_extension_descriptor");
-            VerifyExtension(extension_descr);
+            VerifyExtension(logger, extension_descr);
             return lib;
         }
         catch(const ExtensionError& ex)
         {
-            std::cout
-                << "DEBUG: check_lib(" << path <<"): "
-                << ex.what()
-                << std::endl;
+            std::stringstream msg;
+            msg << "LoadExtension: check_lib(" << path <<") failed: "
+                << ex.what();
+            if (logger)
+            {
+                logger->Debug(msg.str());
+            }
             return nullptr;
         }
     };
@@ -209,7 +224,13 @@ auto LoadExtension(const std::string& name, const cfg::Extensions& config) -> st
         lib_handle = check_lib(path);
         if(lib_handle != nullptr)
         {
-            std::cout << "Loaded VIB Extension \"" << name << "\": " << path << std::endl; //XXX this should go to the logger
+            std::stringstream msg;
+            msg << "Loaded VIB Extension \"" << name << "\" from path: "
+                << path;
+            if (logger)
+            {
+                logger->Info(msg.str());
+            }
             break;
         }
     }

@@ -4,6 +4,8 @@
 #include <memory>
 #include <sstream>
 
+#include "ib/mw/logging/ILogger.hpp"
+
 #include "IbExtensions.hpp"
 #include "DllCache.hpp"
 
@@ -14,12 +16,14 @@ namespace ib { namespace extensions {
 // which keeps the shared library loaded during the lifetime of the calling process.
 
 template<typename FactoryT> 
-auto FactorySingleton(const std::string& extensionName, const cfg::Extensions& config)
+auto FactorySingleton(mw::logging::ILogger* logger,
+    const std::string& extensionName,
+    const cfg::Extensions& config)
     -> FactoryT&
 {
     static DllCache cache;
     //the dll instance must be kept alive, especially when exceptions are thrown in the factory
-    auto& ibExtension = cache.Get(extensionName, config);
+    auto& ibExtension = cache.Get(logger, extensionName, config);
     try
     {
         auto& factory = dynamic_cast<FactoryT&>(ibExtension);
@@ -28,9 +32,9 @@ auto FactorySingleton(const std::string& extensionName, const cfg::Extensions& c
     catch (const std::bad_cast& err)
     {
         std::stringstream msg;
-        msg << "ERROR loading " << extensionName
-            << ": " << err.what();
-        std::cout << msg.str() << std::endl;
+        msg << "Error loading VIB extension '" << extensionName
+            << "': " << err.what();
+        logger->Error(msg.str());
         throw ExtensionError(msg.str());
     }
 

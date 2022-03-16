@@ -24,7 +24,7 @@ auto CreateMdf4Tracing(cfg::ParticipantConfiguration config,
     -> std::unique_ptr<ITraceMessageSink>
 {
     // TODO fix factory analogous to CreateIbRegistry once tracing will be reinstated
-    auto& factory = FactorySingleton<ITraceMessageSinkFactory>("vibe-mdf4tracing", config.extensions);
+    auto& factory = FactorySingleton<ITraceMessageSinkFactory>(logger, "vibe-mdf4tracing", config.extensions);
     return factory.Create(/*std::move(config), */logger, participantName, sinkName);
 }
 
@@ -33,7 +33,7 @@ auto CreateMdf4Replay(cfg::ParticipantConfiguration config, ib::mw::logging::ILo
     -> std::shared_ptr<IReplayFile>
 {
     // TODO fix factory analogous to CreateIbRegistry once tracing will be reinstated
-    auto& factory = FactorySingleton<IReplayDataProvider>("vibe-mdf4tracing", config.extensions);
+    auto& factory = FactorySingleton<IReplayDataProvider>(logger, "vibe-mdf4tracing", config.extensions);
     return factory.OpenFile(/*config, */fileName, logger);
 }
 

@@ -7,6 +7,7 @@
 
 #include "ib/IbMacros.hpp"
 #include "ib/extensions/IIbRegistry.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 #include "ib/cfg/IParticipantConfiguration.hpp"
 
 
@@ -21,6 +22,10 @@ namespace ib { namespace extensions {
 */
 
 IntegrationBusAPI auto CreateIbRegistry(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
+    -> std::unique_ptr<IIbRegistry>;
+
+IntegrationBusAPI auto CreateIbRegistry(mw::logging::ILogger* logger,
+    std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
     -> std::unique_ptr<IIbRegistry>;
 
 }//end namespace extensions
