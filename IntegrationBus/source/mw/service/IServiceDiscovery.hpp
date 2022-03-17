@@ -23,7 +23,7 @@ public: //types
     //!< Register a handler for asynchronous service creation notifications
     virtual void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler) = 0;
     //!< Get the currently known created services on other participants
-    virtual std::vector<ServiceDescriptor> GetRemoteServices() const = 0;
+    virtual std::vector<ServiceDescriptor> GetServices() const = 0;
     //!< React on a participant shutdown
     virtual void OnParticpantShutdown(const std::string& participantName) = 0;
 

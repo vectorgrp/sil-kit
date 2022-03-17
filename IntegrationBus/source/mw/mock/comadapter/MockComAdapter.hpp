@@ -134,7 +134,7 @@ public:
     MOCK_METHOD(void, NotifyServiceCreated, (const ServiceDescriptor& serviceDescriptor), (override));
     MOCK_METHOD(void, NotifyServiceRemoved, (const ServiceDescriptor& serviceDescriptor), (override));
     MOCK_METHOD(void, RegisterServiceDiscoveryHandler, (ServiceDiscoveryHandlerT handler), (override));
-    MOCK_METHOD(std::vector<ServiceDescriptor>, GetRemoteServices, (), (const, override));
+    MOCK_METHOD(std::vector<ServiceDescriptor>, GetServices, (), (const, override));
     MOCK_METHOD(void, OnParticpantShutdown, (const std::string& participantName), (override));
 
 };

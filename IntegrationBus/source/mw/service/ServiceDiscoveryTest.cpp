@@ -126,11 +126,11 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
     ServiceDiscoveryEvent event;
     event.type = ServiceDiscoveryEvent::Type::ServiceCreated;
     event.service = descr;
-    //Notify should publish a message
+    // NotifyServiceCreated should publish a message
     EXPECT_CALL(comAdapter, SendIbMessage(&disco, event)).Times(1);
-    // no callbacks on sending our own
+    // NotifyServiceCreated should also trigger ourself
     EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated,
-        descr)).Times(0);
+        descr)).Times(1);
     // trigger notification on the same participant
     disco.NotifyServiceCreated(descr);
 

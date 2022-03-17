@@ -39,7 +39,7 @@ public: //IServiceDiscovery
     void NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor) override;
     //!< Register a handler for asynchronous service creation notifications
     void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler) override;
-    std::vector<ServiceDescriptor> GetRemoteServices() const override;
+    std::vector<ServiceDescriptor> GetServices() const override;
     //!< React on a leaving participant 
     void OnParticpantShutdown(const std::string& participantName) override;
 
@@ -60,10 +60,9 @@ private:
     std::string _participantName;
     ServiceDescriptor _serviceDescriptor; //!< for the ServiceDiscovery controller itself
     std::vector<ServiceDiscoveryHandlerT> _handlers;
-    ServiceAnnouncement _announcement;
     //!< a cache for computing additions/removals per participant
     using ServiceMap = std::unordered_map<std::string /*serviceDescriptor*/, ServiceDescriptor>;
-    std::unordered_map<std::string /* participant name */, ServiceMap> _announcedServices; 
+    std::unordered_map<std::string /* participant name */, ServiceMap> _servicesByParticipant; 
     mutable std::recursive_mutex _discoveryMx;
     std::atomic<bool> _shuttingDown{false};
 };

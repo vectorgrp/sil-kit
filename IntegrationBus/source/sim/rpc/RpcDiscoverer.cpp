@@ -17,7 +17,7 @@ std::vector<RpcDiscoveryResult> RpcDiscoverer::GetMatchingRpcServers(
     const std::map<std::string, std::string>& labels) const
 {
     std::vector<RpcDiscoveryResult> discoveryResults;
-    auto serviceDescriptors = _serviceDiscovery->GetRemoteServices();
+    auto serviceDescriptors = _serviceDiscovery->GetServices();
 
     for (const auto& serviceDescriptor : serviceDescriptors)
     {
