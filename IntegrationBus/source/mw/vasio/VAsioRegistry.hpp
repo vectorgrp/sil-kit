@@ -52,7 +52,7 @@ private:
     std::function<void()> _onAllParticipantsConnected;
     std::function<void()> _onAllParticipantsDisconnected;
 
-    std::shared_ptr<ib::cfg::v1::datatypes::ParticipantConfiguration> _vasioConfig;
+    std::shared_ptr<ib::cfg::ParticipantConfiguration> _vasioConfig;
     VAsioConnection _connection;
 };
 

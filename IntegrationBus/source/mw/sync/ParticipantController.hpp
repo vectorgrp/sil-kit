@@ -49,7 +49,7 @@ public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     ParticipantController(IComAdapterInternal* comAdapter, const std::string& name, bool isSynchronized,
-                          const cfg::v1::datatypes::HealthCheck& healthCheckConfig);
+                          const cfg::HealthCheck& healthCheckConfig);
 
 public:
     // ----------------------------------------

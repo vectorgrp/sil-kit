@@ -21,16 +21,16 @@ public:
     FlexRayControllerFacadeTest(){};
 };
 
-auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::datatypes::ParticipantConfiguration>
+auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantConfiguration>
 {
     auto mockConfig =
-        std::make_shared<ib::cfg::datatypes::ParticipantConfiguration>(ib::cfg::datatypes::ParticipantConfiguration());
+        std::make_shared<ib::cfg::ParticipantConfiguration>(ib::cfg::ParticipantConfiguration());
 
-    ib::cfg::datatypes::FlexRayController controllerNoNetworkCfg;
+    ib::cfg::FlexRayController controllerNoNetworkCfg;
     controllerNoNetworkCfg.name = "ControllerWithoutNetwork";
     mockConfig->flexRayControllers.push_back(controllerNoNetworkCfg);
 
-    ib::cfg::datatypes::FlexRayController controllerWithNetworkCfg;
+    ib::cfg::FlexRayController controllerWithNetworkCfg;
     controllerWithNetworkCfg.name = "ControllerWithNetwork";
     controllerWithNetworkCfg.network = "ConfigNet";
     mockConfig->flexRayControllers.push_back(controllerWithNetworkCfg);

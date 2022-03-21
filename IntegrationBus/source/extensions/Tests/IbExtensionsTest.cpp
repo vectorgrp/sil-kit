@@ -153,7 +153,7 @@ TEST_F(IbExtensionsTest, load_from_envvar)
 {
     const auto testDir = ib::filesystem::path{"vib_library_test"};
     setenv("TEST_VAR", testDir.c_str(), 1); // should be invariant
-    ib::cfg::v1::datatypes::Extensions config;
+    ib::cfg::Extensions config;
     config.searchPathHints.emplace_back("ENV:TEST_VAR");
     auto base1 = ib::extensions::LoadExtension("DummyExtension", config);
     auto* mod1 = dynamic_cast<DummyExtension*>(base1.get());

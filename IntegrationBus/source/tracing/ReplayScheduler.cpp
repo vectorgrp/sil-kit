@@ -130,13 +130,13 @@ TraceMessageType to_channelType(cfg::Link::Type linkType)
 {
     switch (linkType)
     {
-    case cfg::datatypes::NetworkType::Ethernet:
+    case cfg::NetworkType::Ethernet:
         return TraceMessageType::EthFrame;
-    case cfg::datatypes::NetworkType::CAN:
+    case cfg::NetworkType::CAN:
         return TraceMessageType::CanMessage;
-    case cfg::datatypes::NetworkType::LIN:
+    case cfg::NetworkType::LIN:
         return TraceMessageType::LinFrame;
-    case cfg::datatypes::NetworkType::FlexRay:
+    case cfg::NetworkType::FlexRay:
         return TraceMessageType::FrMessage;
     default:
         throw std::runtime_error("Unknown channel Type");

@@ -27,7 +27,7 @@ class Logger : public ILogger
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    Logger(const std::string& participantName, cfg::v1::datatypes::Logging config);
+    Logger(const std::string& participantName, cfg::Logging config);
 
     // ----------------------------------------
     // Public interface methods
@@ -56,7 +56,7 @@ protected:
 private:
     // ----------------------------------------
     // Private members
-    cfg::v1::datatypes::Logging _config;
+    cfg::Logging _config;
 
     std::shared_ptr<spdlog::logger> _logger;
     std::shared_ptr<spdlog::sinks::sink> _ibRemoteSink;

@@ -73,8 +73,8 @@ public:
     std::string GetNetworkName() const { return _networkName; }
     void SetNetworkName(std::string val) {_networkName = std::move(val); }
 
-    ib::cfg::datatypes::NetworkType GetNetworkType() const { return _networkType; }
-    void SetNetworkType(ib::cfg::datatypes::NetworkType val) { _networkType = std::move(val); }
+    ib::cfg::NetworkType GetNetworkType() const { return _networkType; }
+    void SetNetworkType(ib::cfg::NetworkType val) { _networkType = std::move(val); }
 
     std::string GetServiceName() const { return _serviceName; }
     void SetServiceName(std::string val) {_serviceName = std::move(val); }
@@ -104,7 +104,7 @@ public:
     ParticipantId _participantId{0};
     ServiceType _serviceType{ServiceType::Undefined};
     std::string _networkName; //!< the service's link name
-    ib::cfg::datatypes::NetworkType _networkType{ib::cfg::datatypes::NetworkType::Invalid};
+    ib::cfg::NetworkType _networkType{ib::cfg::NetworkType::Invalid};
     std::string _serviceName;
     EndpointId _serviceId;
     SupplementalData _supplementalData;
@@ -142,7 +142,7 @@ std::string ServiceDescriptor::to_string() const
     {
         ss 
             << separator
-            << cfg::datatypes::to_string(GetNetworkType())
+            << cfg::to_string(GetNetworkType())
             << separator
             << GetNetworkName()
             ;

@@ -89,7 +89,7 @@ protected:
     MockComAdapter comAdapter;
     Callbacks callbacks;
     std::vector<std::string> testParticipants;
-    cfg::v1::datatypes::HealthCheck healthCheckConfig;
+    cfg::HealthCheck healthCheckConfig;
 };
 
 // Factory method to create a ParticipantStatus matcher that checks the state field

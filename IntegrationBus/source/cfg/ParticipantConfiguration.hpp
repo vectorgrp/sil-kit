@@ -19,9 +19,7 @@
 namespace ib {
 namespace cfg {
 
-inline namespace v1 {
-
-namespace datatypes {
+inline namespace v4 {
 
 // ================================================================================
 //  Internal controller service
@@ -281,8 +279,6 @@ bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfigurat
 std::ostream& to_ostream(std::ostream& out, const std::array<uint8_t, 6>& macAddress);
 std::istream& from_istream(std::istream& in, std::array<uint8_t, 6>& macAddress);
 
-} // namespace datatypes
-
-} // namespace v1
+} // namespace v4
 } // namespace cfg
 } // namespace ib

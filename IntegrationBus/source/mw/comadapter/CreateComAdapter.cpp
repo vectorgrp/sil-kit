@@ -8,7 +8,7 @@
 namespace ib {
 namespace mw {
 
-auto CreateVAsioSimulationParticipantImpl(cfg::datatypes::ParticipantConfiguration participantConfig,
+auto CreateVAsioSimulationParticipantImpl(cfg::ParticipantConfiguration participantConfig,
                                           const std::string& participantName, bool isSynchronized)
     -> std::unique_ptr<IComAdapterInternal>
 {
@@ -31,7 +31,7 @@ auto CreateSimulationParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfig
 }
 
 auto ValidateAndSanitizeConfig(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                               const std::string& participantName) -> cfg::datatypes::ParticipantConfiguration
+                               const std::string& participantName) -> cfg::ParticipantConfiguration
 {
     if (participantName.empty())
     {
@@ -39,7 +39,7 @@ auto ValidateAndSanitizeConfig(std::shared_ptr<ib::cfg::IParticipantConfiguratio
     }
 
     // try to cast to ParticipantConfiguration to check if the shared pointer is valid
-    auto cfg = std::dynamic_pointer_cast<cfg::datatypes::ParticipantConfiguration>(participantConfig);
+    auto cfg = std::dynamic_pointer_cast<cfg::ParticipantConfiguration>(participantConfig);
     if (cfg == nullptr)
     {
         return {};

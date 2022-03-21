@@ -12,9 +12,9 @@ namespace ib {
 namespace tracing {
 
 //!< Helper to check whether Direction `dir` is active in the config 
-inline bool IsReplayEnabledFor(const cfg::datatypes::Replay& cfg, cfg::datatypes::Replay::Direction dir)
+inline bool IsReplayEnabledFor(const cfg::Replay& cfg, cfg::Replay::Direction dir)
 {
-    return cfg.direction == dir || cfg.direction == cfg::datatypes::Replay::Direction::Both;
+    return cfg.direction == dir || cfg.direction == cfg::Replay::Direction::Both;
 }
 
 //!< For replaying in the receive path we use an unlikely EndpointAddress

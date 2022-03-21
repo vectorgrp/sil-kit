@@ -8,7 +8,7 @@ namespace ib {
 namespace sim {
 namespace fr {
 
-FrControllerFacade::FrControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::FlexRayController config,
+FrControllerFacade::FrControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::FlexRayController config,
                                        mw::sync::ITimeProvider* /*timeProvider*/)
     : _comAdapter{comAdapter}
     , _config{config}

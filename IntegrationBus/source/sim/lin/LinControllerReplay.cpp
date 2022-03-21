@@ -10,11 +10,11 @@
 #include "ib/sim/lin/string_utils.hpp"
 
 namespace {
-inline bool IsReplayEnabled(const ib::cfg::datatypes::Replay& config)
+inline bool IsReplayEnabled(const ib::cfg::Replay& config)
 {
     // Replaying on a master node requires send and receive, implicitly.
-    return ib::tracing::IsReplayEnabledFor(config, ib::cfg::datatypes::Replay::Direction::Send)
-        || ib::tracing::IsReplayEnabledFor(config, ib::cfg::datatypes::Replay::Direction::Receive)
+    return ib::tracing::IsReplayEnabledFor(config, ib::cfg::Replay::Direction::Send)
+        || ib::tracing::IsReplayEnabledFor(config, ib::cfg::Replay::Direction::Receive)
         ;
 }
 }
@@ -23,7 +23,7 @@ namespace sim {
 namespace lin {
 
 
-LinControllerReplay::LinControllerReplay(mw::IComAdapterInternal* comAdapter, cfg::datatypes::LinController config,
+LinControllerReplay::LinControllerReplay(mw::IComAdapterInternal* comAdapter, cfg::LinController config,
             mw::sync::ITimeProvider* timeProvider)
     : _replayConfig{config.replay}
     , _controller{comAdapter, timeProvider}

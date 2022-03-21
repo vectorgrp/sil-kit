@@ -9,7 +9,7 @@ namespace ib {
 namespace sim {
 namespace fr {
 
-FrControllerProxy::FrControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::FlexRayController config,
+FrControllerProxy::FrControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::FlexRayController config,
                                      IFrController* facade)
     : _comAdapter(comAdapter)
     , _facade{facade}

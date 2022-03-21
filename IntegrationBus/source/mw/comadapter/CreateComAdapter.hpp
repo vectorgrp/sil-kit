@@ -13,7 +13,7 @@ auto CreateSimulationParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfig
     -> std::unique_ptr<IComAdapterInternal>;
 
 auto ValidateAndSanitizeConfig(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                               const std::string& participantName) -> ib::cfg::datatypes::ParticipantConfiguration;
+                               const std::string& participantName) -> ib::cfg::ParticipantConfiguration;
 } // mw
 } // namespace ib
 

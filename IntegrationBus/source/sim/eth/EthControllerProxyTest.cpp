@@ -89,7 +89,7 @@ protected:
     MockComAdapter comAdapter;
     Callbacks callbacks;
 
-    ib::cfg::v1::datatypes::EthernetController _config;
+    ib::cfg::EthernetController _config;
     EthControllerProxy proxy;
     EthControllerProxy proxyFrom;
 };

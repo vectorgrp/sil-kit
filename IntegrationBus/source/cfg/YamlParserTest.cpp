@@ -15,7 +15,6 @@ class YamlParserTest : public testing::Test
 };
 
 using namespace ib::cfg;
-using namespace ib::cfg::v1::datatypes;
 using namespace std::chrono_literals;
 
 //!< Yaml config which has almost complete list of config elements.

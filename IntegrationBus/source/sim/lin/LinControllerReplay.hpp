@@ -22,7 +22,7 @@ public:
     // ----------------------------------------
     // Public Data Types
 
-    LinControllerReplay(mw::IComAdapterInternal* comAdapter, cfg::datatypes::LinController config,
+    LinControllerReplay(mw::IComAdapterInternal* comAdapter, cfg::LinController config,
             mw::sync::ITimeProvider* timeProvider);
 
 public:
@@ -75,7 +75,7 @@ public:
 private:
     // ----------------------------------------
     // private members
-    cfg::datatypes::Replay _replayConfig{};
+    cfg::Replay _replayConfig{};
     LinController _controller;
     mw::IComAdapterInternal* _comAdapter{nullptr};
     // for local callbacks

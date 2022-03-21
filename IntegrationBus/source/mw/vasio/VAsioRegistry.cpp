@@ -26,7 +26,7 @@ namespace ib {
 namespace mw {
 
 VAsioRegistry::VAsioRegistry(std::shared_ptr<ib::cfg::IParticipantConfiguration> cfg) :
-    _vasioConfig{ std::dynamic_pointer_cast<ib::cfg::v1::datatypes::ParticipantConfiguration>(cfg) },
+    _vasioConfig{ std::dynamic_pointer_cast<ib::cfg::ParticipantConfiguration>(cfg) },
     _connection{ *_vasioConfig, "IbRegistry", 0 }
 {
     _logger = std::make_unique<logging::Logger>("IbRegistry", _vasioConfig->middleware.registry.logging);

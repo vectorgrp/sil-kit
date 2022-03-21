@@ -26,7 +26,6 @@ using testing::Return;
 
 using namespace ib::mw;
 using namespace ib::cfg;
-using namespace ib::cfg::v1::datatypes;
 
 using namespace std::chrono_literals;
 

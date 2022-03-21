@@ -13,7 +13,7 @@
 // YAML-cpp serialization/deserialization for ParticipantConfiguration data types
 namespace YAML {
 
-using namespace ib::cfg::v1::datatypes;
+using namespace ib::cfg;
 
 DEFINE_VIB_CONVERT(std::chrono::milliseconds);
 DEFINE_VIB_CONVERT(std::chrono::nanoseconds);

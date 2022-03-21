@@ -34,7 +34,7 @@ public:
     EthControllerProxy() = delete;
     EthControllerProxy(const EthControllerProxy&) = default;
     EthControllerProxy(EthControllerProxy&&) = default;
-    EthControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::EthernetController config, IEthController* facade = nullptr);
+    EthControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::EthernetController config, IEthController* facade = nullptr);
 
 public:
     // ----------------------------------------

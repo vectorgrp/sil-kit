@@ -11,11 +11,11 @@ using namespace std::chrono_literals;
 
 namespace ib {
 namespace cfg {
-inline namespace v1 {
+inline namespace v4 {
 
 namespace {
 
-void ValidateTraceSinks(const ib::cfg::v1::datatypes::ParticipantConfiguration& configuration)
+void ValidateTraceSinks(const ib::cfg::v4::ParticipantConfiguration& configuration)
 {
     std::set<std::string> sinkNames;
     for (const auto& sink : configuration.tracing.traceSinks)
@@ -73,7 +73,7 @@ void ValidateTraceSinks(const ib::cfg::v1::datatypes::ParticipantConfiguration& 
     validateController(configuration.rpcClients);
 }
 
-void ValidateTraceSources(const ib::cfg::v1::datatypes::ParticipantConfiguration& configuration)
+void ValidateTraceSources(const ib::cfg::v4::ParticipantConfiguration& configuration)
 {
     std::set<std::string> sourceNames;
     for (const auto& source : configuration.tracing.traceSources)
@@ -132,12 +132,12 @@ void ValidateTraceSources(const ib::cfg::v1::datatypes::ParticipantConfiguration
 
 } // anonymous namespace
 
-void Validate(const ib::cfg::v1::datatypes::ParticipantConfiguration& configuration)
+void Validate(const ib::cfg::v4::ParticipantConfiguration& configuration)
 {
     ValidateTraceSinks(configuration);
     ValidateTraceSources(configuration);
 }
 
-} // namespace v1
+} // namespace v4
 } // namespace cfg
 } // namespace ib

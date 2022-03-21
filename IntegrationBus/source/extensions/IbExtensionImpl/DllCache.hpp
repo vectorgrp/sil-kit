@@ -23,7 +23,7 @@ class DllCache
 {
 public:
 
-    auto Get(const std::string& extensionName, const cfg::v1::datatypes::Extensions& config)
+    auto Get(const std::string& extensionName, const cfg::Extensions& config)
         -> ib::extensions::IIbExtension&
     {
         try {

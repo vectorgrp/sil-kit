@@ -33,9 +33,9 @@ struct YamlSchemaElem
     }
 };
 
-inline namespace v1 {
+inline namespace v4 {
 auto MakeYamlSchema() -> YamlSchemaElem;
-} // inline namespace v1
+} // inline namespace v4
 
 } // namespace cfg
 } // namespace ib

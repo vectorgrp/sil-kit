@@ -166,10 +166,10 @@ SymType* GetSymbol(detail::LibraryHandle hnd, const std::string& sym_name)
 
 auto LoadExtension(const std::string& name) -> std::shared_ptr<IIbExtension>
 {
-    return LoadExtension(name, cfg::v1::datatypes::Extensions{});
+    return LoadExtension(name, cfg::Extensions{});
 }
 
-auto LoadExtension(const std::string& name, const cfg::v1::datatypes::Extensions& config) -> std::shared_ptr<IIbExtension>
+auto LoadExtension(const std::string& name, const cfg::Extensions& config) -> std::shared_ptr<IIbExtension>
 {
     using namespace detail;
 

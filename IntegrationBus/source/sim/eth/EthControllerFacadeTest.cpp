@@ -21,16 +21,16 @@ public:
     EthernetControllerFacadeTest(){};
 };
 
-auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::datatypes::ParticipantConfiguration>
+auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantConfiguration>
 {
     auto mockConfig =
-        std::make_shared<ib::cfg::datatypes::ParticipantConfiguration>(ib::cfg::datatypes::ParticipantConfiguration());
+        std::make_shared<ib::cfg::ParticipantConfiguration>(ib::cfg::ParticipantConfiguration());
 
-    ib::cfg::datatypes::EthernetController controllerNoNetworkCfg;
+    ib::cfg::EthernetController controllerNoNetworkCfg;
     controllerNoNetworkCfg.name = "ControllerWithoutNetwork";
     mockConfig->ethernetControllers.push_back(controllerNoNetworkCfg);
 
-    ib::cfg::datatypes::EthernetController controllerWithNetworkCfg;
+    ib::cfg::EthernetController controllerWithNetworkCfg;
     controllerWithNetworkCfg.name = "ControllerWithNetwork";
     controllerWithNetworkCfg.network = "ConfigNet";
     mockConfig->ethernetControllers.push_back(controllerWithNetworkCfg);

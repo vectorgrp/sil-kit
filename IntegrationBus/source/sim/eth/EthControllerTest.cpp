@@ -95,7 +95,7 @@ protected:
     MockComAdapter comAdapter;
     Callbacks callbacks;
 
-    ib::cfg::v1::datatypes::EthernetController _config;
+    ib::cfg::EthernetController _config;
     EthController controller;
     EthController controllerOther;
 };
@@ -170,7 +170,7 @@ TEST_F(EthernetControllerTest, DISABLED_ethcontroller_uses_tracing)
     ON_CALL(comAdapter.mockTimeProvider.mockTime, Now())
         .WillByDefault(testing::Return(now));
 
-    ib::cfg::v1::datatypes::EthernetController config{};
+    ib::cfg::EthernetController config{};
     auto ethController = EthController(&comAdapter, config, comAdapter.GetTimeProvider());
     ethController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
     ethController.AddSink(&traceSink);

@@ -85,18 +85,18 @@ protected:
     FrControllerProxy proxyConfigured;
     Callbacks callbacks;
 
-    ib::cfg::datatypes::FlexRayController dummyConfig;
+    ib::cfg::FlexRayController dummyConfig;
 
-    auto static GetDummyConfig() -> ib::cfg::datatypes::FlexRayController 
+    auto static GetDummyConfig() -> ib::cfg::FlexRayController 
     {
-        ib::cfg::datatypes::FlexRayController dummyConfig;
+        ib::cfg::FlexRayController dummyConfig;
         dummyConfig.network = "testNetwork";
         dummyConfig.name = "testController";
         return dummyConfig;
     }
-    auto static GetDummyConfigWithValues() -> ib::cfg::datatypes::FlexRayController
+    auto static GetDummyConfigWithValues() -> ib::cfg::FlexRayController
     {
-        ib::cfg::datatypes::FlexRayController dummyConfig;
+        ib::cfg::FlexRayController dummyConfig;
         dummyConfig.network = "testNetwork";
         dummyConfig.name = "testController";
         dummyConfig.clusterParameters = MakeValidClusterParams();

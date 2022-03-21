@@ -133,7 +133,7 @@ bool YamlValidator::LoadSchema(std::string schemaVersion)
 {
     if (schemaVersion == "1")
     {
-        _schema = v1::MakeYamlSchema();
+        _schema = MakeYamlSchema();
     }
     else
     {

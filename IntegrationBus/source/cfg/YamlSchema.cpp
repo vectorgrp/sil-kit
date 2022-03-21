@@ -4,7 +4,7 @@
 
 namespace ib {
 namespace cfg {
-inline namespace v1 {
+inline namespace v4 {
 
 //!< Create the YAML schema for VAsio ParticipantConfigurations.
 auto MakeYamlSchema() -> YamlSchemaElem
@@ -212,6 +212,6 @@ auto MakeYamlSchema() -> YamlSchemaElem
     return yamlSchema;
 }
 
-} // inline namespace v1
+} // inline namespace v4
 } // namespace cfg
 } // namespace ib

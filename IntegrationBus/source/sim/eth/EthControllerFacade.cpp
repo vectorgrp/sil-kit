@@ -9,7 +9,7 @@ namespace sim {
 namespace eth {
 
 EthControllerFacade::EthControllerFacade(mw::IComAdapterInternal* comAdapter,
-                                         cfg::v1::datatypes::EthernetController config,
+                                         cfg::EthernetController config,
                                          mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _config{config}

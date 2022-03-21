@@ -36,7 +36,7 @@ public:
     // Constructors and Destructor
     LinControllerFacade() = delete;
     LinControllerFacade(LinControllerFacade&&) = default;
-    LinControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::LinController config, mw::sync::ITimeProvider* timeProvider);
+    LinControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::LinController config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -103,7 +103,7 @@ private:
     // private members
     mw::IComAdapterInternal* _comAdapter;
     mw::ServiceDescriptor _serviceDescriptor;
-    cfg::v1::datatypes::LinController _config;
+    cfg::LinController _config;
 
     bool _simulatedLinkDetected = false;
     mw::ServiceDescriptor _simulatedLink;

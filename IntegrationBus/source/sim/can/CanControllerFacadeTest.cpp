@@ -21,16 +21,16 @@ public:
     CanControllerFacadeTest(){};
 };
 
-auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::datatypes::ParticipantConfiguration>
+auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantConfiguration>
 {
     auto mockConfig =
-        std::make_shared<ib::cfg::datatypes::ParticipantConfiguration>(ib::cfg::datatypes::ParticipantConfiguration());
+        std::make_shared<ib::cfg::ParticipantConfiguration>(ib::cfg::ParticipantConfiguration());
 
-    ib::cfg::datatypes::CanController controllerNoNetworkCfg;
+    ib::cfg::CanController controllerNoNetworkCfg;
     controllerNoNetworkCfg.name = "ControllerWithoutNetwork";
     mockConfig->canControllers.push_back(controllerNoNetworkCfg);
 
-    ib::cfg::datatypes::CanController controllerWithNetworkCfg;
+    ib::cfg::CanController controllerWithNetworkCfg;
     controllerWithNetworkCfg.name = "ControllerWithNetwork";
     controllerWithNetworkCfg.network = "ConfigNet";
     mockConfig->canControllers.push_back(controllerWithNetworkCfg);

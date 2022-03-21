@@ -42,7 +42,7 @@ auto LoadExtension(const std::string& undecorated_name) -> std::shared_ptr<IIbEx
 //         the extension configuration.
 //! NB: a path hint can contain the prefix "ENV:" to refer to an environment
 //! variable name.
-auto LoadExtension(const std::string& undecorated_name, const cfg::v1::datatypes::Extensions& config)
+auto LoadExtension(const std::string& undecorated_name, const cfg::Extensions& config)
     -> std::shared_ptr<IIbExtension>;
 
 }//end namespace extensions

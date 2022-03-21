@@ -8,7 +8,7 @@ namespace sim {
 namespace eth {
 
 EthControllerProxy::EthControllerProxy(mw::IComAdapterInternal* comAdapter,
-                                       cfg::v1::datatypes::EthernetController /*config*/, IEthController* facade)
+                                       cfg::EthernetController /*config*/, IEthController* facade)
     : _comAdapter(comAdapter)
     , _facade{facade}
 {

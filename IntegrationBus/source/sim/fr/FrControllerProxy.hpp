@@ -40,7 +40,7 @@ public:
     FrControllerProxy() = delete;
     FrControllerProxy(const FrControllerProxy&) = default;
     FrControllerProxy(FrControllerProxy&&) = default;
-    FrControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::FlexRayController config,
+    FrControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::FlexRayController config,
                       IFrController* facade = nullptr);
 
 public:
@@ -147,7 +147,7 @@ private:
 
     CallbackVector<FrSymbol> _wakeupHandlers;
 
-    cfg::v1::datatypes::FlexRayController _config;
+    cfg::FlexRayController _config;
 };
 
 

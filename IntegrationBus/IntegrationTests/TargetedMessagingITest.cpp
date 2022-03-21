@@ -39,7 +39,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
     auto systemCtrl = senderCom->GetSystemController();
 
     auto* senderParticipant = senderCom->GetParticipantController();
-    auto* senderCan = dynamic_cast<ib::sim::can::CanControllerFacade*>(senderCom->CreateCanController("CAN1", "CAN1"));
+    auto* senderCan = dynamic_cast<ib::sim::can::CanControllerFacade*>(senderCom->CreateCanController("CAN1"));
     senderCan->RegisterReceiveMessageHandler([](auto controller, auto) {
         FAIL() << ": 'Sender' received targeted message from controller '" << controller << "'";
     });
@@ -65,7 +65,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
     receiverParticipant->SetSimulationTask([](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
     });
 
-    auto* receiverCan = receiverCom->CreateCanController("CAN1", "CAN1");
+    auto* receiverCan = receiverCom->CreateCanController("CAN1");
 
     receiverCan->RegisterReceiveMessageHandler(
         [&receiveCount](ib::sim::can::ICanController* controller, auto msg) {
@@ -82,7 +82,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
     otherReceiverParticipant->SetSimulationTask(
         [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {});
 
-    auto* otherReceiverCan = otherReceiverCom->CreateCanController("CAN1", "CAN1");
+    auto* otherReceiverCan = otherReceiverCom->CreateCanController("CAN1");
 
     otherReceiverCan->RegisterReceiveMessageHandler([](auto controller, auto) {
         FAIL() << "'otherReceiver' received targeted message from controller '" << controller << "'";

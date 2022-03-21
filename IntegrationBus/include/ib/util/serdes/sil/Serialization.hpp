@@ -10,7 +10,7 @@ namespace util {
 namespace serdes {
 namespace sil {
 
-inline namespace v1 {
+inline namespace v4 {
 
 /*! \brief The media / mime type the serializer / deserializer can be used for.
  *  \returns the media / mime type the serializer / deserializer can be used for. */
@@ -19,7 +19,7 @@ constexpr auto MediaType() -> const char*
     return "application/vnd.vector.sil.data; protocolVersion=1";
 }
 
-} // namespace v1
+} // namespace v4
 
 } // namespace sil
 } // namespace serdes

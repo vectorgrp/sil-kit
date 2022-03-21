@@ -5,9 +5,7 @@
 namespace ib {
 namespace cfg {
 
-inline namespace v1 {
-
-namespace datatypes {
+inline namespace v4 {
 
 bool operator==(const Sink& lhs, const Sink& rhs)
 {
@@ -56,9 +54,7 @@ bool operator==(const MdfChannel& lhs, const MdfChannel& rhs)
         && lhs.groupPath == rhs.groupPath;
 }
 
-} // namespace datatypes
-
-} // inline namespace v1
+} // inline namespace v4
 
 } // namespace cfg
 } // namespace ib

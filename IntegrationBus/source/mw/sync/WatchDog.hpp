@@ -17,7 +17,7 @@ class WatchDog
 public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
-    WatchDog(const cfg::datatypes::HealthCheck& healthCheckConfig);
+    WatchDog(const cfg::HealthCheck& healthCheckConfig);
     ~WatchDog();
 
 public:

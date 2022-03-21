@@ -14,7 +14,7 @@ namespace mw {
 namespace {
 struct NullConnection
 {
-    NullConnection(ib::cfg::datatypes::ParticipantConfiguration /*config*/, std::string /*participantName*/, ib::mw::ParticipantId /*participantId*/) {}
+    NullConnection(ib::cfg::ParticipantConfiguration /*config*/, std::string /*participantName*/, ib::mw::ParticipantId /*participantId*/) {}
 
     void SetLogger(logging::ILogger* /*logger*/) {}
     void JoinDomain(uint32_t /*domainId*/) {}

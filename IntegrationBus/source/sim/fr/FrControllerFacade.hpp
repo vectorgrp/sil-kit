@@ -40,7 +40,7 @@ public:
     // Constructors and Destructor
     FrControllerFacade() = delete;
     FrControllerFacade(FrControllerFacade&&) = default;
-    FrControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::FlexRayController config, mw::sync::ITimeProvider* timeProvider);
+    FrControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::FlexRayController config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -110,7 +110,7 @@ private:
     // private members
     mw::IComAdapterInternal* _comAdapter = nullptr;
     mw::ServiceDescriptor _serviceDescriptor;
-    cfg::v1::datatypes::FlexRayController _config;
+    cfg::FlexRayController _config;
 
     bool _simulatedLinkDetected = false;
     mw::ServiceDescriptor _simulatedLink;

@@ -10,7 +10,7 @@ namespace can {
 
 
 CanController::CanController(mw::IComAdapterInternal* comAdapter, 
-                             const ib::cfg::v1::datatypes::CanController& config,
+                             const ib::cfg::CanController& config,
                              mw::sync::ITimeProvider* timeProvider,
                              ICanController* facade)
     : _comAdapter{comAdapter}

@@ -72,10 +72,10 @@ TEST(LoggerTest, send_log_message_from_logger)
 {
     std::string loggerName{"ParticipantAndLogger"};
 
-    cfg::v1::datatypes::Logging config;
-    auto sink = cfg::v1::datatypes::Sink{};
+    cfg::Logging config;
+    auto sink = cfg::Sink{};
     sink.level = ib::mw::logging::Level::Debug;
-    sink.type = cfg::v1::datatypes::Sink::Type::Remote;
+    sink.type = cfg::Sink::Type::Remote;
 
     config.sinks.push_back(sink);
 

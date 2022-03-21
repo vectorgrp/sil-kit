@@ -80,7 +80,7 @@ protected:
 
         auto comAdapter =
             ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), "CanWriter", _domainId, false);
-        auto* controller = comAdapter->CreateCanController("CAN1", "CAN1");
+        auto* controller = comAdapter->CreateCanController("CAN1");
 
         controller->RegisterTransmitStatusHandler(
             [this, &canWriterAllAcksReceivedPromiseLocal, &numAcks](ib::sim::can::ICanController* /*ctrl*/, const ib::sim::can::CanTransmitAcknowledge& ack) {

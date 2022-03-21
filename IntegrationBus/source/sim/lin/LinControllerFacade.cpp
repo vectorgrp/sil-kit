@@ -8,7 +8,7 @@ namespace ib {
 namespace sim {
 namespace lin {
 
-LinControllerFacade::LinControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::LinController config,
+LinControllerFacade::LinControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::LinController config,
                                          mw::sync::ITimeProvider* timeProvider)
     : _comAdapter{comAdapter}
     , _config{config}

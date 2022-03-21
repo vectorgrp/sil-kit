@@ -17,9 +17,7 @@
 namespace ib {
 namespace cfg {
 
-inline namespace v1 {
-
-namespace datatypes {
+inline namespace v4 {
 
 // ================================================================================
 //  Shared configuration declarations
@@ -174,9 +172,7 @@ auto to_string(NetworkType networkType) -> std::string
     }
 }
 
-} // namespace datatypes
-
-} // inline namespace v1
+} // inline namespace v4
 
 } // namespace cfg
 } // namespace ib

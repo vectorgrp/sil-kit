@@ -16,7 +16,7 @@ namespace extensions {
 auto CreateIbRegistry(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
     -> std::unique_ptr<IIbRegistry>
 {
-    auto cfg = std::dynamic_pointer_cast<cfg::datatypes::ParticipantConfiguration>(config);
+    auto cfg = std::dynamic_pointer_cast<cfg::ParticipantConfiguration>(config);
     auto& factory = FactorySingleton<IIbRegistryFactory>("vib-registry", cfg->extensions);
     return factory.Create(std::move(cfg));
 }

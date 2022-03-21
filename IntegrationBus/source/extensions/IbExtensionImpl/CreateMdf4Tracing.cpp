@@ -17,7 +17,7 @@
 
 namespace ib { namespace extensions {
 
-auto CreateMdf4Tracing(cfg::datatypes::ParticipantConfiguration config,
+auto CreateMdf4Tracing(cfg::ParticipantConfiguration config,
     ib::mw::logging::ILogger* logger,
     const std::string& participantName,
     const std::string& sinkName)
@@ -28,7 +28,7 @@ auto CreateMdf4Tracing(cfg::datatypes::ParticipantConfiguration config,
     return factory.Create(/*std::move(config), */logger, participantName, sinkName);
 }
 
-auto CreateMdf4Replay(cfg::datatypes::ParticipantConfiguration config, ib::mw::logging::ILogger* logger,
+auto CreateMdf4Replay(cfg::ParticipantConfiguration config, ib::mw::logging::ILogger* logger,
                       const std::string& fileName)
     -> std::shared_ptr<IReplayFile>
 {

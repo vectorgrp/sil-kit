@@ -6,7 +6,6 @@
 #include <chrono>
 #include <type_traits>
 
-using namespace ib::cfg::v1::datatypes;
 using namespace ib::cfg;
 using namespace ib;
 

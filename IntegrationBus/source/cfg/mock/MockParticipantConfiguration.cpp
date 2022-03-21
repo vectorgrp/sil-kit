@@ -9,7 +9,7 @@ namespace cfg {
 
 auto MockParticipantConfiguration() -> std::shared_ptr<ib::cfg::IParticipantConfiguration>
 {
-    return std::make_shared<ib::cfg::v1::datatypes::ParticipantConfiguration>();
+    return std::make_shared<ib::cfg::ParticipantConfiguration>();
 }
 
 } // namespace cfg

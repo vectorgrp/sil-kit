@@ -6,7 +6,7 @@
 
 namespace ib {
 namespace cfg {
-inline namespace v1 {
+inline namespace v4 {
 
 /* NOTA BENE
  * 1.) When adding new validation functions, please stick to the following pattern:
@@ -19,8 +19,8 @@ inline namespace v1 {
  * the validation method for the SimulationSetup
  */
 
-void Validate(const ib::cfg::v1::datatypes::ParticipantConfiguration& configuration);
+void Validate(const ib::cfg::v4::ParticipantConfiguration& configuration);
 
-} // namespace v1
+} // namespace v4
 } // namespace cfg
 } // namespace ib

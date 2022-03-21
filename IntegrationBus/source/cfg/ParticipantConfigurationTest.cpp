@@ -25,7 +25,7 @@ using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
 
-using namespace ib::cfg::v1::datatypes;
+using namespace ib::cfg;
 
 // TODO: Use API getters once they are available
 class ParticipantConfigurationExamplesITest : public testing::Test
@@ -33,9 +33,9 @@ class ParticipantConfigurationExamplesITest : public testing::Test
 protected:
     ParticipantConfigurationExamplesITest() { }
 
-    void VerifyGetters(std::shared_ptr<ib::cfg::IParticipantConfiguration> cfg)
+    void VerifyGetters(std::shared_ptr<IParticipantConfiguration> cfg)
     {
-        auto participantConfig = *std::dynamic_pointer_cast<ib::cfg::v1::datatypes::ParticipantConfiguration>(cfg);
+        auto participantConfig = *std::dynamic_pointer_cast<ParticipantConfiguration>(cfg);
 
         std::cout << "Verifying participant " << participantConfig.participantName << '\n';
 

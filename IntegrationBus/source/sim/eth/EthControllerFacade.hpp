@@ -35,7 +35,7 @@ public:
     // Constructors and Destructor
     EthControllerFacade() = delete;
     EthControllerFacade(EthControllerFacade&&) = default;
-    EthControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::EthernetController config,
+    EthControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::EthernetController config,
                         mw::sync::ITimeProvider* timeProvider);
 
 public:
@@ -87,7 +87,7 @@ private:
     // private members
     mw::IComAdapterInternal* _comAdapter = nullptr;
     mw::ServiceDescriptor _serviceDescriptor;
-    cfg::v1::datatypes::EthernetController _config;
+    cfg::EthernetController _config;
 
     bool _simulatedLinkDetected = false;
     mw::ServiceDescriptor _simulatedLink;

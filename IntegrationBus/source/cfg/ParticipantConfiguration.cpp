@@ -11,7 +11,7 @@
 namespace ib {
 namespace cfg {
 
-inline namespace v1 {
+inline namespace v4 {
 
 // ================================================================================
 //  Helper functions
@@ -31,7 +31,7 @@ auto ReadFile(const std::string& filename) -> std::string
     return buffer.str();
 }
 
-auto Parse(const std::string& text) -> ib::cfg::v1::datatypes::ParticipantConfiguration
+auto Parse(const std::string& text) -> ib::cfg::ParticipantConfiguration
 {
     std::stringstream warnings;
     ib::cfg::YamlValidator validator;
@@ -46,8 +46,8 @@ auto Parse(const std::string& text) -> ib::cfg::v1::datatypes::ParticipantConfig
     YAML::Node doc = YAML::Load(text);
 
     auto configuration = !doc.IsNull() ?
-        ib::cfg::from_yaml<ib::cfg::v1::datatypes::ParticipantConfiguration>(doc) :
-        ib::cfg::v1::datatypes::ParticipantConfiguration{};
+        ib::cfg::from_yaml<ib::cfg::v4::ParticipantConfiguration>(doc) :
+        ib::cfg::v4::ParticipantConfiguration{};
     configuration.configurationFilePath.clear();
 
     //PostProcess(config);
@@ -60,8 +60,6 @@ auto Parse(const std::string& text) -> ib::cfg::v1::datatypes::ParticipantConfig
 // ================================================================================
 //  Implementation data types
 // ================================================================================
-namespace datatypes {
-
 bool operator==(const CanController& lhs, const CanController& rhs)
 {
     return lhs.name == rhs.name
@@ -205,8 +203,6 @@ std::istream& from_istream(std::istream& in, std::array<uint8_t, 6>& macAddress)
     return in;
 }
 
-} // namespace datatypes
-
 // ================================================================================
 //  Public API
 // ================================================================================
@@ -221,24 +217,24 @@ std::istream& from_istream(std::istream& in, std::array<uint8_t, 6>& macAddress)
 // 
 // As a workaround, the missing symbols are defined in this translation
 // unit.
-constexpr datatypes::NetworkType datatypes::CanController::networkType;
-constexpr datatypes::NetworkType datatypes::LinController::networkType;
-constexpr datatypes::NetworkType datatypes::EthernetController::networkType;
-constexpr datatypes::NetworkType datatypes::FlexRayController::networkType;
-constexpr datatypes::NetworkType datatypes::DataPublisher::networkType;
-constexpr datatypes::NetworkType datatypes::DataSubscriber::networkType;
-constexpr datatypes::NetworkType datatypes::RpcServer::networkType;
-constexpr datatypes::NetworkType datatypes::RpcClient::networkType;
+constexpr NetworkType CanController::networkType;
+constexpr NetworkType LinController::networkType;
+constexpr NetworkType EthernetController::networkType;
+constexpr NetworkType FlexRayController::networkType;
+constexpr NetworkType DataPublisher::networkType;
+constexpr NetworkType DataSubscriber::networkType;
+constexpr NetworkType RpcServer::networkType;
+constexpr NetworkType RpcClient::networkType;
 #endif
 
-} // inline namespace v1
+} // inline namespace v4
 
 auto ParticipantConfigurationFromString(const std::string& text)
 -> std::shared_ptr<ib::cfg::IParticipantConfiguration>
 {
     auto configuration = ib::cfg::Parse(text);
 
-    return std::make_shared<ib::cfg::v1::datatypes::ParticipantConfiguration>(std::move(configuration));
+    return std::make_shared<ib::cfg::ParticipantConfiguration>(std::move(configuration));
 }
 
 auto ParticipantConfigurationFromFile(const std::string& filename)
@@ -247,7 +243,7 @@ auto ParticipantConfigurationFromFile(const std::string& filename)
     auto text = ib::cfg::ReadFile(filename);
     auto configuration = ib::cfg::Parse(text);
 
-    return std::make_shared<ib::cfg::v1::datatypes::ParticipantConfiguration>(std::move(configuration));
+    return std::make_shared<ib::cfg::ParticipantConfiguration>(std::move(configuration));
 }
 
 } // namespace cfg

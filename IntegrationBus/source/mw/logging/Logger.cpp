@@ -58,7 +58,7 @@ private:
 } // anonymous namespace
 
 
-Logger::Logger(const std::string& participantName, cfg::v1::datatypes::Logging config)
+Logger::Logger(const std::string& participantName, cfg::Logging config)
     : _config{std::move(config)}
 {
     // NB: do not create the _logger in the initializer list. If participantName is empty,
@@ -89,12 +89,12 @@ Logger::Logger(const std::string& participantName, cfg::v1::datatypes::Logging c
 
         switch (sink.type)
         {
-        case cfg::v1::datatypes::Sink::Type::Remote:
+        case cfg::Sink::Type::Remote:
             // The remote sink is instantiated and added later together with setting up
             // all necessary connection logic to avoid segmentation errors if sth. goes wrong
             break;
 
-        case cfg::v1::datatypes::Sink::Type::Stdout:
+        case cfg::Sink::Type::Stdout:
         {
 #if _WIN32
             auto stdoutSink = std::make_shared<spdlog::sinks::stdout_sink_mt>();
@@ -105,7 +105,7 @@ Logger::Logger(const std::string& participantName, cfg::v1::datatypes::Logging c
             _logger->sinks().emplace_back(std::move(stdoutSink));
             break;
         }
-        case cfg::v1::datatypes::Sink::Type::File:
+        case cfg::Sink::Type::File:
         {
             //
             auto filename = fmt::format("{}_{:%FT%H-%M-%S}.txt", sink.logName, tmBuffer);
@@ -158,9 +158,9 @@ void Logger::Critical(const std::string& msg)
 void Logger::RegisterRemoteLogging(const LogMsgHandlerT& handler)
 {
     auto remoteSinkRef = std::find_if(_config.sinks.begin(), _config.sinks.end(),
-        [](const cfg::v1::datatypes::Sink& sink) 
+        [](const cfg::Sink& sink) 
         { 
-            return sink.type == cfg::v1::datatypes::Sink::Type::Remote;
+            return sink.type == cfg::Sink::Type::Remote;
         });
 
     if (remoteSinkRef != _config.sinks.end())

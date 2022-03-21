@@ -198,7 +198,7 @@ template <class T> struct Zero { using Type = T; };
 
 using asio::ip::tcp;
 
-VAsioConnection::VAsioConnection(ib::cfg::datatypes::ParticipantConfiguration config, std::string participantName, ParticipantId participantId)
+VAsioConnection::VAsioConnection(ib::cfg::ParticipantConfiguration config, std::string participantName, ParticipantId participantId)
     : _config{std::move(config)}
     , _participantName{std::move(participantName)}
     , _participantId{participantId}

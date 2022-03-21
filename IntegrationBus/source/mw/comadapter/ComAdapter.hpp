@@ -79,7 +79,7 @@ public:
     ComAdapter() = default;
     ComAdapter(const ComAdapter&) = default;
     ComAdapter(ComAdapter&&) = default;
-    ComAdapter(cfg::datatypes::ParticipantConfiguration participantConfig,
+    ComAdapter(cfg::ParticipantConfiguration participantConfig,
                const std::string& participantName, bool isSynchronized);
 
 public:
@@ -274,7 +274,7 @@ private:
     void LogWrongNetworkNameForController(const std::string& canonicalName, 
                                                    const std::string& networkName,
                                                    const std::string& configuredNetworkName,
-                                                   cfg::v1::datatypes::NetworkType networkType);
+                                                   cfg::NetworkType networkType);
 
 private:
     // ----------------------------------------
@@ -310,7 +310,7 @@ private:
         -> ControllerT*;
 
     template<class IIbToSimulatorT>
-    void RegisterSimulator(IIbToSimulatorT* busSim, cfg::datatypes::NetworkType linkType, const std::vector<std::string>& simulatedNetworkNames);
+    void RegisterSimulator(IIbToSimulatorT* busSim, cfg::NetworkType linkType, const std::vector<std::string>& simulatedNetworkNames);
    
     template<class ConfigT>
     void AddTraceSinksToSource(extensions::ITraceMessageSource* controller, ConfigT config);
@@ -320,7 +320,7 @@ private:
     // private members
     std::string _participantName;
     bool _isSynchronized{ false };
-    const ib::cfg::datatypes::ParticipantConfiguration _participantConfig;
+    const ib::cfg::ParticipantConfiguration _participantConfig;
     ParticipantId _participantId{0};
 
     std::shared_ptr<sync::ITimeProvider> _timeProvider{nullptr};

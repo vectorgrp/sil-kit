@@ -38,7 +38,7 @@ TEST_F(YamlValidatorTest, yaml_doc_relations)
 
 TEST_F(YamlValidatorTest, validate_without_warnings)
 {
-    v1::datatypes::ParticipantConfiguration cfg;
+    ParticipantConfiguration cfg;
     cfg.schemaVersion = "1";
     cfg.middleware.enableDomainSockets = true;
     cfg.middleware.registry.connectAttempts = 1234;

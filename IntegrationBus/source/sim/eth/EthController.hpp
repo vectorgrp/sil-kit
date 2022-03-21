@@ -34,7 +34,7 @@ public:
     // Constructors and Destructor
     EthController() = delete;
     EthController(EthController&&) = default;
-    EthController(mw::IComAdapterInternal* comAdapter, cfg::v1::datatypes::EthernetController config,
+    EthController(mw::IComAdapterInternal* comAdapter, cfg::EthernetController config,
                   mw::sync::ITimeProvider* timeProvider, IEthController* facade = nullptr);
 
 public:

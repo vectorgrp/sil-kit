@@ -42,7 +42,7 @@ TEST_F(ComAdapterTest, use_configured_name_on_participant_name_mismatch)
 {
     const auto configuredParticipantName = "ConfiguredParticipantName";
     auto mockConfig =
-        std::make_shared<ib::cfg::datatypes::ParticipantConfiguration>(ib::cfg::datatypes::ParticipantConfiguration());
+        std::make_shared<ib::cfg::ParticipantConfiguration>(ib::cfg::ParticipantConfiguration());
     mockConfig->participantName = configuredParticipantName;
 
 
