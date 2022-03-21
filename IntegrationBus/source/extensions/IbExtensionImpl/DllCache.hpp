@@ -46,7 +46,7 @@ public:
         catch (const ib::extensions::ExtensionError& err)
         {
             std::stringstream msg;
-            msg << "ERROR loading VIB extension '" << extensionName << "': " << err.what();
+            msg << "Error loading VIB extension '" << extensionName << "': " << err.what();
             if(logger)
             {
                 logger->Error(msg.str());

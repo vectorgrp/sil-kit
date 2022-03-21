@@ -85,7 +85,9 @@ bool NamedPipeWin::Write(const char* buffer, size_t size)
         }
         else if (!ok || cbWritten != size)
         {
-            throw std::runtime_error("NamedPipeWin::Write returned error: " + GetPipeError());
+            std::stringstream msg;
+            msg << "Failed to connect pipe '" << _name << "': " << GetPipeError();
+            throw std::runtime_error(msg.str());
         }
     }
     return cbWritten == size;
@@ -102,8 +104,7 @@ void NamedPipeWin::Close()
         if (!isClosed)
         {
             std::stringstream msg;
-            msg << "NamedPipeWin::Close(): Closing the pipe handle was not successful: "
-                << GetPipeError();
+            msg << "Failed to close pipe '" << _name << "': " << GetPipeError();
             throw std::runtime_error{msg.str()};
         }
 

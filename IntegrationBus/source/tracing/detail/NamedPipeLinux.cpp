@@ -43,9 +43,9 @@ void NamedPipeLinux::Close()
         if(err == -1)
         {
             std::stringstream msg;
-            msg  << "NamedPipeLinux: Error deleting pipe \"" << _name << "\""
-                << ": errno: " << err
-                << ": " << strerror(errno)
+            msg  << "Failed to delete pipe '" << _name << "':"
+                << strerror(errno)
+                << " (errno " << err << ")"
                 ;
             throw std::runtime_error{msg.str()};
 

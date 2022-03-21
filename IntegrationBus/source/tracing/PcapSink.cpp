@@ -81,7 +81,7 @@ void PcapSink::Close()
         }
         catch (const std::runtime_error& err)
         {
-            _logger->Warn("PcapSink::Close() failed: {}", err.what());
+            _logger->Warn("Failed to close PCAP sink: {}", err.what());
         }
         _pipe.reset();
     }

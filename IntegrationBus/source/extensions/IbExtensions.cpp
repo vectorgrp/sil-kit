@@ -106,9 +106,9 @@ void VerifyExtension(ib::mw::logging::ILogger* logger, const IbExtensionDescript
     if(my_sys != mod_sys)
     {
         std::stringstream msg;
-        msg << "VIB extension verification: host system \"" << my_sys 
-            <<"\" differs from module system:\"" << mod_sys
-            << "\"";
+        msg << "VIB extension verification: Host system '" << my_sys 
+            <<"' differs from module system '" << mod_sys
+            << "'";
         if (logger)
         {
             logger->Warn(msg.str());
@@ -207,7 +207,7 @@ auto LoadExtension(mw::logging::ILogger* logger,
         catch(const ExtensionError& ex)
         {
             std::stringstream msg;
-            msg << "LoadExtension: check_lib(" << path <<") failed: "
+            msg << "Failed to verify VIB extension located at path'" << path <<"': "
                 << ex.what();
             if (logger)
             {
@@ -225,8 +225,7 @@ auto LoadExtension(mw::logging::ILogger* logger,
         if(lib_handle != nullptr)
         {
             std::stringstream msg;
-            msg << "Loaded VIB Extension \"" << name << "\" from path: "
-                << path;
+            msg << "Loaded VIB extension '" << name << "' from path '" << path << "'";
             if (logger)
             {
                 logger->Info(msg.str());
