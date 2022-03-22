@@ -106,11 +106,11 @@ public:
             });
         if (receiverIter == _remoteReceivers.end())
         {
-            std::stringstream msg;
-            msg << "Error: Attempt to send targeted message to participant '"
+            std::stringstream ss;
+            ss << "Error: Attempt to send targeted message to participant '"
                 << targetParticipantName
                 << "', which is not a valid remote receiver.";
-            throw std::runtime_error{msg.str()};
+            throw std::runtime_error{ss.str()};
         }
         ib::mw::MessageBuffer buffer;
         uint32_t msgSizePlaceholder{0u};
