@@ -27,7 +27,7 @@ function(get_compiler_arch outComp outArch outPlatform  )
 	elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "4")
 		set(SYSTEM_BITNESS "32")
 	else()
-		message(FATAL_ERROR "Bitness is not supported: ${CMAKE_SIZEOF_VOID_P}")
+		message(FATAL_ERROR "Bitness is not supported: \"${CMAKE_SIZEOF_VOID_P}\"")
 	endif()
 	#get OS
 	if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")

@@ -6,6 +6,7 @@
 #include <ctime>
 #include <cstring>
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <sstream>
 #include <iterator>
@@ -53,17 +54,17 @@ void ReportParticipantStatus(const ib::mw::sync::ParticipantStatus& status)
 {
     std::time_t enterTime = std::chrono::system_clock::to_time_t(status.enterTime);
     std::tm tmBuffer;
-#if defined(_MSC_VER)
+#if defined(_WIN32)
     localtime_s(&tmBuffer, &enterTime);
 #else
     localtime_r(&enterTime, &tmBuffer);
 #endif
 
-    char timeString[32];
-    std::strftime(timeString, sizeof(timeString), "%F %T", &tmBuffer);
+    std::stringstream timeStr;
+    timeStr << std::put_time(&tmBuffer, "%F %T ");
 
     std::cout
-        << timeString
+        << timeStr.str()
         << " " << status.participantName
         << "\t State: " << status.state
         << "\t Reason: " << status.enterReason

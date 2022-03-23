@@ -2,7 +2,7 @@
 
 #pragma once
 
-#if defined(_MSC_VER)
+#if defined(_WIN32)
 
     #include <process.h>
     inline auto GetTestPid()

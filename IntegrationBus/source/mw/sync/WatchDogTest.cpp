@@ -3,6 +3,7 @@
 #include "WatchDog.hpp"
 
 #include <chrono>
+#include <thread>
 #include <functional>
 #include <string>
 

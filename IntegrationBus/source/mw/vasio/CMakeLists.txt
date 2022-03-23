@@ -61,7 +61,11 @@ target_include_directories(IbMwVAsio
 if (MSVC)
     target_compile_options(IbMwVAsio PRIVATE "/bigobj")
     target_compile_definitions(IbMwVAsio PUBLIC _WIN32_WINNT=0x0601)
-endif (MSVC)
+endif()
+if(MINGW)
+    target_compile_definitions(IbMwVAsio PUBLIC _WIN32_WINNT=0x0601)
+    target_link_libraries(IbMwVAsio PUBLIC -lwsock32 -lws2_32) #windows socket/ wsa
+endif()
 
 add_vib_test(TestMwVAsio_MessageBuffer SOURCES MessageBufferTest.cpp)
 add_vib_test(TestMwVAsio_SerdesMw SOURCES SerdesMwTest.cpp)

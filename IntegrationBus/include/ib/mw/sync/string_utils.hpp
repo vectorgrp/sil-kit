@@ -5,6 +5,7 @@
 #include "ib/mw/sync/SyncDatatypes.hpp"
 
 #include <string>
+#include <iomanip> //std::put_time
 #include <ostream>
 #include <sstream>
 #include <ctime>
@@ -233,19 +234,16 @@ std::ostream& operator<<(std::ostream& out, const ParticipantStatus& status)
 {
     std::time_t enterTime = std::chrono::system_clock::to_time_t(status.enterTime);
     std::tm tmBuffer;
-#if defined(_MSC_VER)
+#if defined(_WIN32)
     localtime_s(&tmBuffer, &enterTime);
 #else
     localtime_r(&enterTime, &tmBuffer);
 #endif
 
-    char timeString[32];
-    std::strftime(timeString, sizeof(timeString), "%FT%T", &tmBuffer);
-
     out << "sync::ParticipantStatus{" << status.participantName
         << ", State=" << status.state
         << ", Reason=" << status.enterReason
-        << ", Time=" << timeString
+        << ", Time=" << std::put_time(&tmBuffer, "%FT%T")
         << "}";
 
     return out;

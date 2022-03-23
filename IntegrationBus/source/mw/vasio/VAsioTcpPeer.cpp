@@ -38,6 +38,15 @@ static void EnableQuickAck(ib::mw::logging::ILogger* log, asio::generic::stream_
 
 #else  //windows 
 #include <mstcpip.h>
+#  if defined(__MINGW32__)
+
+static void SetConnectOptions(ib::mw::logging::ILogger* ,
+    asio::generic::stream_protocol::socket&)
+{
+    // SIO_LOOPBACK_FAST_PATH not defined 
+}
+
+#   else
 
 static void SetConnectOptions(ib::mw::logging::ILogger* logger,
     asio::generic::stream_protocol::socket& socket)
@@ -61,6 +70,8 @@ static void SetConnectOptions(ib::mw::logging::ILogger* logger,
         logger->Warn("VAsioTcpPeer: Setting Loopback FastPath failed: WSA IOCtl last error: {}", lastError);
     }
 }
+
+#   endif //!__MINGW32__
 
 static void EnableQuickAck(ib::mw::logging::ILogger* ,
     asio::generic::stream_protocol::socket& )

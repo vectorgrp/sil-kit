@@ -15,7 +15,7 @@
 # elif defined(EXPORT_IntegrationBusAPI)
 // define compiler specific export / import attributes
 // define IntegrationBusAPI as EXPORT
-#    if defined(_MSC_VER)
+#    if defined(_WIN32)
 #        define IntegrationBusAPI __declspec(dllexport)
 #    elif defined(__GNUC__)
 #        define IntegrationBusAPI __attribute__((visibility("default")))
@@ -25,7 +25,7 @@
 #    endif
 #else
 // declare IntegrationBusAPI as IMPORT
-#    if defined(_MSC_VER)
+#    if defined(_WIN32)
 #        define IntegrationBusAPI __declspec(dllimport)
 #    elif defined(__GNUC__)
 #        define IntegrationBusAPI

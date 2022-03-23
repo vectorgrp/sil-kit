@@ -71,7 +71,7 @@ if(UNIX)
             -Werror -Wfatal-errors
     )
 
-elseif(MSVC)
+elseif(MSVC OR MINGW)
 
     target_sources(IbExtensions PRIVATE detail/LoadExtension_win.cpp)
 

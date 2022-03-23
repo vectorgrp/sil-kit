@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <ctime>
+#include <iomanip> //std:put_time
 
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/mw/sync/string_utils.hpp"
@@ -282,19 +283,19 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const sync::ParticipantStatu
 
     std::time_t enterTime = std::chrono::system_clock::to_time_t(newStatus.enterTime);
     std::tm tmBuffer;
-#if defined(_MSC_VER)
+#if defined(_WIN32)
     localtime_s(&tmBuffer, &enterTime);
 #else
     localtime_r(&enterTime, &tmBuffer);
 #endif
-    char timeString[32];
-    std::strftime(timeString, sizeof(timeString), "%FT%T", &tmBuffer);
+    std::stringstream timeBuf;
+    timeBuf <<  std::put_time(&tmBuffer, "%FT%T");
 
     _logger->Error(
         "SystemMonitor detected invalid ParticipantState transition from {} to {} EnterTime={}, EnterReason=\"{}\"",
         oldState,
         newStatus.state,
-        timeString,
+        timeBuf.str(),
         newStatus.enterReason);
 
     _invalidTransitionCount++;

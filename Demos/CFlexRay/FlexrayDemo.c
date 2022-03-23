@@ -11,7 +11,7 @@
 
 #ifdef WIN32
 #pragma warning(disable: 4100)
-#include "Windows.h"
+#include "windows.h"
 #define SleepMs(X) Sleep(X)
 #else
 #pragma GCC diagnostic push

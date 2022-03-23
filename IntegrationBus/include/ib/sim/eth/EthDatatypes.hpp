@@ -41,9 +41,14 @@ struct EthTagControlInformation
 class EthFrame
 {
 public:
-    IntegrationBusAPI EthFrame() = default;
-    IntegrationBusAPI EthFrame(const EthFrame& other) = default;
-    IntegrationBusAPI EthFrame(EthFrame&& other) = default;
+    // MinGW does not allow exporting defaulted members as dllimport
+    // so we user-default them inline after the EthFrame declaration.
+    inline EthFrame();
+    inline EthFrame(const EthFrame& other);
+    inline EthFrame(EthFrame&& other);
+    inline auto operator=(const EthFrame& other) -> EthFrame &;
+    inline auto operator=(EthFrame&& other) -> EthFrame&;
+
     IntegrationBusAPI explicit EthFrame(const std::vector<uint8_t>& rawFrame);
     /*! \brief Constructor of an ethernet frame
     *
@@ -52,8 +57,6 @@ public:
     IntegrationBusAPI explicit EthFrame(std::vector<uint8_t>&& rawFrame);
     IntegrationBusAPI explicit EthFrame(const uint8_t* rawFrame, size_t size_t);
 
-    IntegrationBusAPI auto operator=(const EthFrame& other) -> EthFrame & = default;
-    IntegrationBusAPI auto operator=(EthFrame&& other) -> EthFrame& = default;
 
     //! \brief Get the destination MAC address from the ethernet frame.
     IntegrationBusAPI auto GetDestinationMac() const -> EthMac;
@@ -96,6 +99,16 @@ public:
 private:
     std::vector<uint8_t> _rawFrame;
 };
+////////////////////////////////////////////////////////////////////////////////
+// EthFrame Inline definitions
+////////////////////////////////////////////////////////////////////////////////
+
+//explcitily defaulted, must be split from declaration because of MinGW
+EthFrame::EthFrame() = default;
+EthFrame::EthFrame(const EthFrame& other) = default;
+EthFrame::EthFrame(EthFrame&& other) = default;
+auto EthFrame::operator=(const EthFrame& other) -> EthFrame & = default;
+auto EthFrame::operator=(EthFrame&& other) -> EthFrame& = default;
 
 //! \brief An Ethernet transmit id
 using EthTxId = uint32_t;

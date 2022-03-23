@@ -174,7 +174,7 @@ add_vib_test(ITestLin
 )
 
 # Windows specific tests
-if(WIN32)
+if(MSVC)
     add_vib_test(ITestCompatibilityWithWindowsHeaders
         SOURCES
         CompatibilityWithWindowsHeadersITest.cpp

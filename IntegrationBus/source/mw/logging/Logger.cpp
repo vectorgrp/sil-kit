@@ -75,7 +75,7 @@ Logger::Logger(const std::string& participantName, cfg::Logging config)
     // Generate a tm object for the timestamp once, so that all file loggers will have the very same timestamp.
     auto timeNow = std::time(nullptr);
     std::tm tmBuffer{};
-#if defined(_MSC_VER)
+#if defined(_WIN32)
     localtime_s(&tmBuffer, &timeNow);
 #else
     localtime_r(&timeNow, &tmBuffer);

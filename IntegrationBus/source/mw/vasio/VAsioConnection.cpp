@@ -49,6 +49,7 @@ void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
     acceptor.set_option(exclusive_addruse{true});
 }
 
+#   if !defined(__MINGW32__)
 template<>
 void SetListenOptions(ib::mw::logging::ILogger* logger,
     asio::ip::tcp::acceptor& acceptor)
@@ -72,6 +73,7 @@ void SetListenOptions(ib::mw::logging::ILogger* logger,
         logger->Warn("VAsioConnection: Setting Loopback FastPath failed: WSA IOCtl last error: {}", lastError);
     }
 }
+#   endif //__MINGW32__
 #else
 
 template<>

@@ -15,7 +15,7 @@ static std::unique_ptr<SignalMonitor> gSignalMonitor;
 // Inline Platform Specific Implementations
 ////////////////////////////////////////////
 #if WIN32
-#include <Windows.h>
+#include <windows.h>
 
 namespace {
 using namespace ib::registry;

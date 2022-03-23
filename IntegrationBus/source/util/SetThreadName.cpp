@@ -4,7 +4,7 @@
 #include <cassert>
 
 #if _WIN32
-#include <Windows.h> // HANDLE, PCWSTR
+#include <windows.h> // HANDLE, PCWSTR
 #else
 #include <pthread.h>
 #endif

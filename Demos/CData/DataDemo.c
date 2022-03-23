@@ -3,7 +3,7 @@
 #ifdef WIN32
 #define _CRT_SECURE_NO_WARNINGS
 #pragma warning(disable : 4100 5105 4204)
-#include "Windows.h"
+#include "windows.h"
 #   define SleepMs(X) Sleep(X)
 #else
 #pragma GCC diagnostic push

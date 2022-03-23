@@ -58,6 +58,7 @@ add_library(IntegrationBus ${ibLibType}
     IbForceIncludes.cpp
 )
 
+
 if(IB_BUILD_STATIC)
     target_compile_definitions(IntegrationBus PUBLIC -D IB_BUILD_STATIC=1)
 endif()
