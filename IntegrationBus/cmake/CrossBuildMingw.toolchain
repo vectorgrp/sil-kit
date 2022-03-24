@@ -8,8 +8,22 @@ set(CMAKE_C_COMPILER   ${TOOL_TRIPLE}-gcc${THREAD_FLAVOR_SUFFIX})
 set(CMAKE_CXX_COMPILER ${TOOL_TRIPLE}-g++${THREAD_FLAVOR_SUFFIX})
 set(CMAKE_RC_COMPILER ${TOOL_TRIPLE}-windres)
 
-#fix missing symbols when using winpthread
-link_libraries(-static-libgcc -static-libstdc++)
+# Handling the pthread depencency on Win32:
+# - fix missing symbols when using winpthreads:
+set(_c_flags "-static-libgcc -static-libstdc++ -m64")
+# - statically link winpthread, so we do not have a shared library
+#   dependency on IntegrationBus.dll
+set(_l_flags "-Wl,-Bstatic,--whole-archive -lwinpthread -Wl,-Bdynamic,--no-whole-archive")
+set(CMAKE_EXE_LINKER_FLAGS_INIT "${_c_flags} ${_l_flags}")
+set(CMAKE_SHARED_LINKER_FLAGS_INIT "${_c_flags} ${_l_flags}")
+#ensure assembler does not run out of space when building Debug binaries
+# - use optimizations to reduce binary size:
+set(CMAKE_CXX_FLAGS_DEBUG_INIT "${_c_flags} -g3 -O2 ")
+# - tell the assembler to use big objects:
+set(_asm_flags "-m64 -Wa,-mbig-obj" )
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${_asm_flags}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${_asm_flags}")
+
 
 # where is the target environment located
 set(CMAKE_FIND_ROOT_PATH  /usr/${TOOL_TRIPLE})
