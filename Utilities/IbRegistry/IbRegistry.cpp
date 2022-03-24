@@ -19,7 +19,7 @@ int main(int argc, char** argv)
         "-v, --version: Get version info.");
     commandlineParser.Add<ib::util::CommandlineParser::Flag>("help", "h", "[--help]",
         "-h, --help: Get this help.");
-    commandlineParser.Add<ib::util::CommandlineParser::Flag>("use-signal-handler", "s", "[--name <participantName>]",
+    commandlineParser.Add<ib::util::CommandlineParser::Flag>("use-signal-handler", "s", "[--use-signal-handler]",
         "-s, --use-signal-handler: Exit this process when a signal is received. If not set, the process runs infinitely.");
     commandlineParser.Add<ib::util::CommandlineParser::Option>("domain", "d", "42", "[--domain <domainId>]",
         "-d, --domain <domainId>: The domain ID which is used by the Integration Bus. Defaults to 42.");
