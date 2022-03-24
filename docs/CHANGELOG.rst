@@ -5,6 +5,49 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.7.13] - 2022-03-24
+--------------------------------
+This is an internal build.
+
+Changed
+~~~~~~~
+- Added a new command line parser for all utilities, to have a consistent user experience.
+  Long and short options are supported, invoke the utilities with `--help` to
+  see a list of supported options:
+
+    + old: 
+
+    .. code-block:: sh
+
+       IbRegistry Configuration.json 42
+
+    + new: 
+    .. code-block:: sh
+
+       IbRegistry --domain 42 Configuration.json
+       #the following lists all supported options:
+       IbRegistry --help
+
+    + old: 
+
+    .. code-block:: sh
+
+       IbSystemController  42 participant1 participant2 ...
+
+    + new: 
+    .. code-block:: sh
+
+       IbSystemController  --domain 42 participant1 participant2 ...
+
+  The VIBE-NetworkSimulator also supports this new command line interface.
+
+Fixed:
+~~~~~~
+- The IntegrationBus shared library does not log to stdout anymore.
+  The internal logger is now used when loading extensions or creating named pipes.
+- CAN: send a valid FD frame in CAN Demo by setting hte FD format indicator.
+
+
 [3.7.8] - 2022-03-09
 --------------------------------
 This is an internal build.
