@@ -60,7 +60,7 @@ def buildConfigs = [
         DockerImage: "vib-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
         PublishArtifacts: true,
-        CmakeArgs: " -D CMAKE_TOOLCHAIN_FILE=IntegrationBus/cmake/CrossBuildMingw.toolchain ",
+        CmakeArgs: " -D CMAKE_TOOLCHAIN_FILE=IntegrationBus/cmake/mingw-w64-toolchain.cmake ",
         IsCrossBuild: true
     ]
     ,[
@@ -444,7 +444,7 @@ node {
             parameters([
                 booleanParam(name: "ForceFullBuild", defaultValue: false,
                     description: "Force a full build with artificat uploads")
-                ,booleanParam(name: "ForceArtifactUpload", defaultValue: true,
+                ,booleanParam(name: "ForceArtifactUpload", defaultValue: false,
                     description: "Force uploading artifact uploads")
                 ,booleanParam(name: "UseThreadSanitizer", defaultValue: false,
                     description: "Build with thread sanitizer, pelase refer to the  output logs of tests")
@@ -484,15 +484,15 @@ node {
                 "VS2017-Win64",
                 "Ubuntu-18.04-gcc",
                 "Ubuntu-20.04-clang-12", // most modern compiler, no artifacts
+                "MinGW",
             ]
             publishToArtifactory = true
             buildDebugBin = true
         } else {
             print("Doing a minimal build without publishing artifacts on branch ${env.BRANCH_NAME}")
             configNames = [
-                //"VS2015-Win32", // out of date implementation of C++14
-                //"Ubuntu-20.04-clang-12", // most modern compiler
-                "MinGW", //MinGW gcc 8.1
+                "VS2015-Win32", // out of date implementation of C++14
+                "Ubuntu-20.04-clang-12", // most modern compiler
             ]
         }
         def builds = [:]
