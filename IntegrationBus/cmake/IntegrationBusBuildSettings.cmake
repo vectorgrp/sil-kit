@@ -61,34 +61,52 @@ function(ib_clean_default_compileflags)
 endfunction()
 
 function(ib_enable_warnings isOn)
-    if(MSVC)
-        # Conditionally treat warnings as errors, exclude 1919 = VS 15.0 (v141 toolset) 
-        set(_warnAsError "")
-        if (${isOn} AND MSVC_VERSION GREATER 1919)
+    # Conditionally treat warnings as errors
+    set(_warnAsError "")
+    if (${isOn})
+        if(MSVC_VERSION GREATER 1919)
             set(_warnAsError "/WX")
+        else()
+            #assume compiler is clang or gcc
+            set(_warnAsError "-Werror")
         endif()
+    endif()
+
+    # actual warning flags per platform/compiler
+    if(MSVC)
         set(_flags 
             /W4
             /wd4100 # disable unreferenced formal parameter
             ${_warnAsError}
             )
-    else()
-        # Conditionally treat warnings as errors
-        if (${isOn})
-            set(_warnAsError "-Werror")
-        endif()
-
+    elseif(MINGW)
         set(_flags
             -pedantic
             -Wall
             -Wextra
             -Wcast-align
-            -Wformat=2
-            -Wstrict-overflow=1         # > 1 fails in fmt-6.1.0
             -Wpacked
             -Wno-implicit-fallthrough   
+
+            -Wno-shadow                 # Appears in ThirdParty/spdlog/include/spdlog/common.h:214:9
+            -Wno-format                 # MinGW-gcc does not recognize %zu
+            -Wno-unused-parameter       # follow up of the %zu format bug, a lot of unused parameters
+            -Wstrict-overflow=1         # > 1 fails in fmt-6.1.0
+            ${_warnAsError}
+            )
+    else()
+        set(_flags
+            -pedantic
+            -Wall
+            -Wextra
+            -Wcast-align
+            -Wpacked
+            -Wno-implicit-fallthrough   
+            -Wformat=2
+
             -Wno-shadow                 # Appears in ThirdParty/spdlog/include/spdlog/common.h:214:9
             -Wno-format-nonliteral      # Warning in fmt-6.1.0/include/fmt/chrono.h:392:48
+            -Wstrict-overflow=1         # > 1 fails in fmt-6.1.0
             ${_warnAsError}
             )
 
