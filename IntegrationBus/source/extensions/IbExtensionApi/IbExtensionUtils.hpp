@@ -53,10 +53,7 @@ constexpr uint32_t BuildinfoCPlusPlus()
 // version.
 constexpr uint32_t BuildinfoCompiler()
 {
-#ifdef __GNUC__
-    // the major version of a GNU compiler, the C++ macro _GLIBCXX_RELEASE defaults to this
-    return __GNUC__;
-#elif defined(_MSC_VER)
+#if defined(_MSC_VER)
 #   if defined(IB_MSVC_TOOLSET_VERSION)
     // We rely on CMake to provide proper toolset version.
     return IB_MSVC_TOOLSET_VERSION;
@@ -64,6 +61,16 @@ constexpr uint32_t BuildinfoCompiler()
     // In case newer, future toolset is not recognized by CMake:
     // On VS2015/17/19 _MSVC_STL_VERSION contains the toolset number, e.g. 141, 142 etc.
     return _MSVC_STL_VERSION;
+#   endif
+#else
+#   if defined(_WIN32) && defined(__GNUC__)
+    //MinGW
+    return 0;
+#   elif defined( __GNUC__)
+    // the major version of a GNU compiler, the C++ macro _GLIBCXX_RELEASE defaults to this
+    return __GNUC__;
+#   else
+    #error Platform has no Extension support
 #   endif
 #endif
 }

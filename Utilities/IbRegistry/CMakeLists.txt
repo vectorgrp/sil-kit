@@ -1,6 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 cmake_minimum_required(VERSION 3.8)
-project("IntegrationBus-Registry" LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 14)
 
 include(IntegrationBusInstall)
@@ -97,9 +96,8 @@ if(MSVC)
     
 endif()
 
-
 #make sure we don't ship .lib files on Windows
-if(MSVC)
+if(MSVC OR MINGW)
     set(_dest "RUNTIME")
 else()
     set(_dest "LIBRARY")

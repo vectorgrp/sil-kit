@@ -58,6 +58,11 @@ add_subdirectory(ThirdParty)
 # Globally set the warning compile options AFTER including ThirdParty
 ib_enable_warnings(${IB_WARNINGS_AS_ERRORS})
 
+if(MINGW)
+    set(CMAKE_SHARED_LIBRARY_PREFIX "") #skip 'lib' prefix for extensions and IB
+    set(CMAKE_STATIC_LIBRARY_PREFIX "") #skip 'lib' prefix for import libs
+endif()
+
 # Have both IntegrationBus library and demo project in a single solution
 add_subdirectory(IntegrationBus)
 add_subdirectory(Utilities)
