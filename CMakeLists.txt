@@ -61,6 +61,11 @@ ib_enable_warnings(${IB_WARNINGS_AS_ERRORS})
 if(MINGW)
     set(CMAKE_SHARED_LIBRARY_PREFIX "") #skip 'lib' prefix for extensions and IB
     set(CMAKE_STATIC_LIBRARY_PREFIX "") #skip 'lib' prefix for import libs
+    # Debug builds grow too big for the assembler, add flags to reduce size
+    if(CMAKE_BUILD_TYPE MATCHES "Debug")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g3 -O2 -Wa,-mbig-obj")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -O2  -Wa,-mbig-obj")
+    endif()
 endif()
 
 # Have both IntegrationBus library and demo project in a single solution

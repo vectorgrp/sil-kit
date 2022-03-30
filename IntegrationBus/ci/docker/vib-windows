@@ -1,0 +1,23 @@
+# escape=`
+
+FROM ***VIB-820 Removed***/vector/windows/servercore/bare:ltsc2019
+
+# install all the necessary packages
+RUN choco install -y --no-progress ninja --version 1.10.1 && `
+   choco install -y --no-progress cmake.portable --version 3.19.1 && `
+   choco install -y --no-progress python3 --version 3.10.2 && `
+   choco install -y --no-progress git-vector && `
+   choco install -y --no-progress doxygen.portable 
+
+
+# Fetch winlibs mingw build
+COPY fetch_mingw.py C:/
+ARG ARTIFACTORY
+RUN py -3 fetch_mingw.py
+
+# Sphinx documentation system
+RUN pip3 config --global set global.trusted-host "pypi.org files.pythonhosted.org"
+RUN pip3 install Jinja2==3.0.0
+RUN pip3 install docutils==0.12
+RUN pip3 install sphinx==3.1.2
+RUN pip3 install six

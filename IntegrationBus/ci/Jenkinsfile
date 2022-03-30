@@ -10,6 +10,7 @@ artifactName='IntegrationBus'
 keepNumBuilds=10 //number of log files on Jenkins, workspaces are always cleaned
 publishToArtifactory=false
 buildDebugBin=false //debug binaries are only build when doing a release to customers
+buildWarningsAsErrors=true // compiler warnings are treated as errors
 // artifactory for archiving / packaging
 artifactoryServer = Artifactory.server('IntegrationBusArtifactory')
 artifactoryRepo = '***VIB-820 Removed***'
@@ -53,16 +54,17 @@ def buildConfigs = [
         CmakeArgs: "",
     ]
 
-    // Linux builds:
     ,[
         Name: "MinGW", // We cross compile from ubuntu to windows
-        NodeLabel: "docker && linux",
-        DockerImage: "vib-ubuntu",
-        DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
+        NodeLabel: "docker && windows",
+        DockerImage: "vib-windows",
+        //DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
         PublishArtifacts: true,
-        CmakeArgs: " -D CMAKE_TOOLCHAIN_FILE=IntegrationBus/cmake/mingw-w64-toolchain.cmake ",
-        IsCrossBuild: true
+        CmakeArgs: " -D CMAKE_C_COMPILER=C:/mingw64/bin/x86_64-w64-mingw32-gcc.exe  -D CMAKE_CXX_COMPILER=C:/mingw64/bin/x86_64-w64-mingw32-g++.exe",
+        WarningsAsErrors: false, // we have some spurious warnings here, will be ignored
     ]
+
+    // Linux builds:
     ,[
         Name: "Ubuntu-18.04-clang",
         NodeLabel: "docker && linux",
@@ -213,7 +215,7 @@ def buildDocker(config) {
         def dockerDir = "./IntegrationBus/ci/docker"
         def buildArgs = "--build-arg ARTIFACTORY=${artifactoryServer.url} "
         print("Building docker image ${dockerImage}")
-        if("DockerBuildArgs" in config) {
+        if(config.containsKey("DockerBuildArgs")) {
             buildArgs += config["DockerBuildArgs"]
         }
         // We assume the docker file (located in the docker subfolder) is named exactly like the docker image
@@ -280,9 +282,19 @@ def runCmake(config, buildType) {
         cmakeArgs +=" -DIB_INSTALL_SOURCE=ON "
     }
 
-    if(params.ErrorsAsWarnings) {
-        print("Setting Build with Warnings as Errors")
-        cmakeArgs +=" -DIB_WARNINGS_AS_ERRORS=ON "
+    if (config.containsKey("WarningsAsErrors")) {
+        def isEnabled = config["WarningsAsErrors"].toBoolean()
+        if(isEnabled) {
+            print("Enabling Warnings-as-Errors for the current build config")
+            cmakeArgs +=" -DIB_WARNINGS_AS_ERRORS=ON "
+        } else {
+            print("Disabling Warnings-as-Errors for the current build config")
+        }
+    } else {
+         if (buildWarningsAsErrors ) {
+            print("Setting Build with Warnings as Errors (globally set)")
+            cmakeArgs +=" -DIB_WARNINGS_AS_ERRORS=ON "
+        }
     }
 
     // Add CL compiler for VS (MS Visual Studio) builds
@@ -344,7 +356,7 @@ def doBuild(Map config) {
         def scmVars = [:]
 
         stage("Git checkout and ENV setup (${buildName})") {
-            if("MsvcVersion" in config) {
+            if(config.containsKey("MsvcVersion")) {
                 // visual studio toolset selection via vcvarsall env
                 buildEnv = buildEnv + getVsBuildEnv(config["Arch"], config["MsvcVersion"])
                 buildEnv.add("MSBUILDDISABLENODEREUSE=1") //fixes spurious windows failures
@@ -373,7 +385,7 @@ def doBuild(Map config) {
 
         // Skip Tests when cross-building        
         def isCrossBuild  = false
-        if("IsCrossBuild" in config) {
+        if(config.containsKey("IsCrossBuild")) {
             isCrossBuild = config["IsCrossBuild"]
         }
 
@@ -450,8 +462,6 @@ node {
                     description: "Build with thread sanitizer, pelase refer to the  output logs of tests")
                 ,booleanParam(name: "UseAddressSanitizer", defaultValue: false,
                     description: "Build with thread sanitizer, pelase refer to the  output logs of tests")
-                ,booleanParam(name: "ErrorsAsWarnings", defaultValue: false,
-                    description: "Build with compiler set to emit warnings as hard errors")
             ])
         ])  
 

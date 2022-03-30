@@ -66,4 +66,9 @@ function(add_vib_test)
              COMMAND ${executableName} --gtest_output=xml:${executableName}_gtestresults.xml
              WORKING_DIRECTORY $<TARGET_FILE_DIR:${executableName}>
     )
+    #ensure test execution has the MinGW libraries in PATH
+    if(MINGW)
+        get_filename_component(compilerDir ${CMAKE_CXX_COMPILER} DIRECTORY)
+        set_tests_properties(${executableName} PROPERTIES ENVIRONMENT "PATH=${compilerDir};")
+    endif()
 endfunction(add_vib_test)

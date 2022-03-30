@@ -66,7 +66,7 @@ function(ib_enable_warnings isOn)
     if (${isOn})
         if(MSVC_VERSION GREATER 1919)
             set(_warnAsError "/WX")
-        else()
+        elseif(UNIX OR MINGW)
             #assume compiler is clang or gcc
             set(_warnAsError "-Werror")
         endif()
