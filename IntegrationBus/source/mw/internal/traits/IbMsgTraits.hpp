@@ -71,6 +71,7 @@ DefineIbMsgTrait_HistSize(ib::mw::sync, ParticipantStatus, 1)
 DefineIbMsgTrait_HistSize(ib::mw::service, ServiceAnnouncement, 1)
 DefineIbMsgTrait_HistSize(ib::sim::data, DataMessage, 1)
 DefineIbMsgTrait_HistSize(ib::mw::sync, ExpectedParticipants, 1)
+DefineIbMsgTrait_HistSize(ib::sim::lin, ControllerConfig, 1)
 
 //Messages with enforced self delivery
 DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, ParticipantCommand)

@@ -164,6 +164,15 @@ add_vib_test(ITestAsyncSimTask
       ${itest_extra_libs}
 )
 
+add_vib_test(ITestLin
+    SOURCES
+      LinITest.cpp
+    LIBS
+      IbMwComAdapter
+      IbSimTestHarness
+      ${itest_extra_libs}
+)
+
 # Windows specific tests
 if(WIN32)
     add_vib_test(ITestCompatibilityWithWindowsHeaders
