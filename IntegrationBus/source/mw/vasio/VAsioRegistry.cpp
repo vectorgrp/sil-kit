@@ -10,7 +10,7 @@ namespace {
 bool isLocalhostAddress(const std::string& hostUrl)
 {
     return hostUrl.find("tcp://127.") == 0 //ipv4
-        || hostUrl.find("tcp://::1") == 0 //ipv6, abbreviated
+        || hostUrl.find("tcp://[::1]") == 0 //ipv6, abbreviated
         || hostUrl.find("tcp://[0:0:0:0:0:0:0:1]") == 0 //ipv6 addresses are long...
         ;
 }

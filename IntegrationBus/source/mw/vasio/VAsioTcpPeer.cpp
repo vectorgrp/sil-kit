@@ -71,6 +71,17 @@ static void EnableQuickAck(ib::mw::logging::ILogger* ,
 
 #endif  // __linux__
 
+static auto strip(std::string value, const std::string& chars) -> std::string
+{
+    size_t it;
+    while((it = value.find_first_of(chars)) != value.npos)
+    {
+        value.erase(it, 1);
+    }
+
+    return value;
+}
+
 namespace ib {
 namespace mw {
 
@@ -193,13 +204,14 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
 {
     tcp::resolver resolver(_socket.get_executor());
     tcp::resolver::results_type resolverResults;
+    auto strippedHost = strip(host, "[]"); //no ipv6 brackets
     try
     {
-        resolverResults = resolver.resolve(host, std::to_string(static_cast<int>(port)));
+        resolverResults = resolver.resolve(strippedHost, std::to_string(static_cast<int>(port)));
     }
     catch (asio::system_error& err)
     {
-        _logger->Warn("Unable to resolve hostname \"{}:{}\": {}", host, port, err.what());
+        _logger->Warn("Unable to resolve hostname \"{}:{}\": {}", strippedHost, port, err.what());
         return false;
     }
     auto config = _ibConnection->Config();
@@ -207,7 +219,7 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
     {
         try
         {
-            _logger->Debug( "VAsioTcpPeer: Connecting to {}:{} ({})",
+            _logger->Debug( "VAsioTcpPeer: Connecting to [{}]:{} ({})",
                 resolverEntry.host_name(),
                 resolverEntry.service_name(),
                 (resolverEntry.endpoint().protocol().family() == asio::ip::tcp::v4().family() ? "TCPv4" : "TCPv6")
@@ -242,9 +254,10 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
 
             return true;
         }
-        catch (asio::system_error& /*err*/)
+        catch (asio::system_error& err)
         {
             // reset the socket
+            _logger->Debug("VAsioTcpPeer: connect failed: {}", err.what());
             _socket = decltype(_socket){_socket.get_executor()};
         }
     }

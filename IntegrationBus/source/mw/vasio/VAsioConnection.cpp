@@ -312,14 +312,19 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     // Neither local nor tcp is working.
     if (!ok)
     {
-        //re-add local URI for debugging purposes:
-        registryUri.acceptorUris.push_back(localUri);
+        if (_config.middleware.enableDomainSockets)
+        {
+            //re-add local URI for user info output:
+            registryUri.acceptorUris.push_back(localUri);
+        }
 
         _logger->Error("Failed to connect to VAsio registry (number of attempts: {})",
                        _config.middleware.registry.connectAttempts);
         _logger->Info("   Make sure that the IbRegistry is up and running and is listening on the following URIs: {}.",
             printUris(registryUri));
-        _logger->Info("   If a registry is unable to open a listening socket it will only be reachable via local domain sockets, which depend on the working directory.");
+        _logger->Info("   If a registry is unable to open a listening socket it will only be reachable"
+                      " via local domain sockets, which depend on the working directory"
+                      " and the middleware configuration ('enableDomainSockets').");
         _logger->Info("   Make sure that the hostname can be resolved and is reachable.");
         _logger->Info("   You can configure the IbRegistry hostname and port via the IbConfig.");
         _logger->Info("   The IbRegistry executable can be found in your IB installation folder:");
