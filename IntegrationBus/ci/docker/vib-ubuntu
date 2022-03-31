@@ -30,7 +30,8 @@ RUN apt-get update && \
     libssl-dev \
     g++ \
     clang \
-    python3-pip
+    python3-pip \
+    python3-jinja2
 
 # ensure we have newer compilers than the defaults
 RUN if [ "${UBUNTU_VERSION}" = "20.04" ]; then \
