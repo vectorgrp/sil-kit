@@ -1,11 +1,13 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include <algorithm>
-#include <iostream>
-#include <string>
 #include <cstring>
+#include <iostream>
+#include <iterator>
+#include <string>
 #include <sstream>
 #include <thread>
+#include <vector>
 
 #include "ib/IntegrationBus.hpp"
 #include "ib/mw/logging/ILogger.hpp"
@@ -82,7 +84,15 @@ int main(int argc, char** argv)
 {
     if (argc < 3)
     {
-        std::cerr << "Missing arguments! Start demo with: " << argv[0] << " <ParticipantConfiguration.yaml|json> <ParticipantName> [domainId]" << std::endl;
+        std::cerr << "Missing arguments! Start demo with: " << argv[0]
+                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [domainId] [--async]" << std::endl;
+        return -1;
+    }
+
+    if (argc > 5)
+    {
+        std::cerr << "Too many arguments! Start demo with: " << argv[0]
+                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [domainId] [--async]" << std::endl;
         return -1;
     }
     
@@ -92,20 +102,41 @@ int main(int argc, char** argv)
         std::string participantName(argv[2]);
 
         uint32_t domainId = 42;
-        if (argc >= 4)
+
+        bool runSync = true;
+
+        std::vector<std::string> args;
+        std::copy((argv + 3), (argv + argc), std::back_inserter(args));
+
+        for (auto arg : args)
         {
-            domainId = static_cast<uint32_t>(std::stoul(argv[3]));
-        }   
+            if (arg == "--async")
+            {
+                runSync = false;
+            }
+            else
+            {
+                try
+                {
+                    domainId = static_cast<uint32_t>(std::stoul(arg));
+                }
+                catch (...)
+                {
+                    std::cout << "Error: expected a numeric argument for [domainId] but got '" << arg << "'"
+                              << std::endl;
+                    return -1;
+                }
+            }
+        }
 
         auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
         auto sleepTimePerTick = 1000ms;
 
         std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
 
-        auto participant = ib::CreateSimulationParticipant(participantConfiguration, participantName, domainId, true);
+        auto participant = ib::CreateSimulationParticipant(participantConfiguration, participantName, domainId, runSync);
 
         auto* logger = participant->GetLogger();
-        auto* participantController = participant->GetParticipantController();
         auto* canController = participant->CreateCanController("CAN1");
 
         canController->RegisterTransmitStatusHandler(
@@ -117,60 +148,85 @@ int main(int argc, char** argv)
                 ReceiveMessage(msg, logger);
             });
 
-        // Set an Init Handler
-        participantController->SetInitHandler([canController, &participantName](auto /*initCmd*/) {
-
-            std::cout << "Initializing " << participantName << std::endl;
-            canController->SetBaudRate(10'000, 1'000'000);
-            canController->Start();
-
-        });
-
-        // Set a Stop Handler
-        participantController->SetStopHandler([]() {
-
-            std::cout << "Stopping..." << std::endl;
-
-        });
-
-        // Set a Shutdown Handler
-        participantController->SetShutdownHandler([]() {
-
-            std::cout << "Shutting down..." << std::endl;
-
-        });
-
-        participantController->SetPeriod(5ms);
-
-        if (participantName == "CanWriter")
+        if (runSync)
         {
-            participantController->SetSimulationTask(
-                [canController, logger, sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
-
-                    std::cout << "now=" << now << ", duration=" << duration << std::endl;
-                    SendMessage(canController, logger);
-                    std::this_thread::sleep_for(sleepTimePerTick);
-
+            auto* participantController = participant->GetParticipantController();
+            // Set an Init Handler
+            participantController->SetInitHandler([canController, &participantName](auto /*initCmd*/) {
+                std::cout << "Initializing " << participantName << std::endl;
+                canController->SetBaudRate(10'000, 1'000'000);
+                canController->Start();
             });
 
-            // This process will disconnect and reconnect during a coldswap
-            participantController->EnableColdswap();
+            // Set a Stop Handler
+            participantController->SetStopHandler([]() {
+                std::cout << "Stopping..." << std::endl;
+            });
+
+            // Set a Shutdown Handler
+            participantController->SetShutdownHandler([]() {
+                std::cout << "Shutting down..." << std::endl;
+            });
+
+            participantController->SetPeriod(5ms);
+            if (participantName == "CanWriter")
+            {
+                participantController->SetSimulationTask(
+                    [canController, logger, sleepTimePerTick](std::chrono::nanoseconds now,
+                                                              std::chrono::nanoseconds duration) {
+                        std::cout << "now=" << now << ", duration=" << duration << std::endl;
+                        SendMessage(canController, logger);
+                        std::this_thread::sleep_for(sleepTimePerTick);
+                    });
+
+                // This process will disconnect and reconnect during a coldswap
+                participantController->EnableColdswap();
+            }
+            else
+            {
+                participantController->SetSimulationTask(
+                    [sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+                        std::cout << "now=" << now << ", duration=" << duration << std::endl;
+                        std::this_thread::sleep_for(sleepTimePerTick);
+                    });
+            }
+
+            auto finalState = participantController->Run();
+
+            std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
+            std::cout << "Press enter to stop the process..." << std::endl;
+            std::cin.ignore();
         }
         else
         {
-            participantController->SetSimulationTask(
-                [sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+            bool isStopped = false;
+            std::thread workerThread;
 
-                    std::cout << "now=" << now << ", duration=" << duration << std::endl;
-                    std::this_thread::sleep_for(sleepTimePerTick);
-            });
+            if (participantName == "CanWriter")
+            {
+                workerThread = std::thread{[&]() {
+                    while (!isStopped)
+                    {
+                        SendMessage(canController, logger);
+                        std::this_thread::sleep_for(sleepTimePerTick);
+                    }
+                }};
+            }
+            else
+            {
+                workerThread = std::thread{[&]() {
+                    while (!isStopped)
+                    {
+                        std::this_thread::sleep_for(sleepTimePerTick);
+                    }
+                }};
+            }
+
+            std::cout << "Press enter to stop the process..." << std::endl;
+            std::cin.ignore();
+            isStopped = true;
+            workerThread.join();
         }
-
-        auto finalState = participantController->Run();
-
-        std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
-        std::cin.ignore();
     }
     catch (const ib::ConfigurationError& error)
     {

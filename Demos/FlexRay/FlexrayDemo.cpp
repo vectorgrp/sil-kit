@@ -115,8 +115,8 @@ struct FlexRayNode
 
         // prepare a friendly message as payload
         std::stringstream payloadStream;
-        payloadStream << "FrMessage#" << msgNumber
-                      << " sent from buffer " << bufferIdx;
+        payloadStream << "FrMessage#" << std::setw(4) << msgNumber
+                      << "; bufferId=" << bufferIdx;
         auto payloadString = payloadStream.str();
 
 
@@ -227,11 +227,11 @@ auto MakeNodeParams(const std::string& participantName) -> ib::sim::fr::NodePara
 
     if (participantName == "Node0")
     {
-        nodeParams.pKeySlotId = 10;
+        nodeParams.pKeySlotId = 40;
     }
     else if (participantName == "Node1")
     {
-        nodeParams.pKeySlotId = 11;
+        nodeParams.pKeySlotId = 60;
     }
     else
     {
@@ -255,7 +255,7 @@ int main(int argc, char** argv)
     clusterParams.gdMiniSlot = 5;
     clusterParams.gdMiniSlotActionPointOffset = 2;
     clusterParams.gdStaticSlot = 31;
-    clusterParams.gdSymbolWindow = 1;
+    clusterParams.gdSymbolWindow = 0;
     clusterParams.gdSymbolWindowActionPointOffset = 1;
     clusterParams.gdTSSTransmitter = 9;
     clusterParams.gdWakeupTxActive = 60;
@@ -266,7 +266,7 @@ int main(int argc, char** argv)
     clusterParams.gMaxWithoutClockCorrectionPassive = 2;
     clusterParams.gNumberOfMiniSlots = 291;
     clusterParams.gNumberOfStaticSlots = 70;
-    clusterParams.gPayloadLengthStatic = 16;
+    clusterParams.gPayloadLengthStatic = 13;
     clusterParams.gSyncFrameIDCountMax = 15;
 
     if (argc < 3)
@@ -290,7 +290,7 @@ int main(int argc, char** argv)
 
         std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
         auto participant = ib::CreateSimulationParticipant(participantConfiguration, participantName, domainId, true);
-        auto* controller = participant->CreateFlexrayController("FlexRay1");
+        auto* controller = participant->CreateFlexrayController("FlexRay1", "PowerTrain1");
         auto* participantController = participant->GetParticipantController();
 
         std::vector<fr::TxBufferConfig> bufferConfigs;
@@ -300,7 +300,7 @@ int main(int argc, char** argv)
             // initialize bufferConfig to send some FrMessages
             fr::TxBufferConfig cfg;
             cfg.channels = fr::Channel::AB;
-            cfg.slotId = 10;
+            cfg.slotId = 40;
             cfg.offset = 0;
             cfg.repetition = 1;
             cfg.hasPayloadPreambleIndicator = false;
@@ -309,11 +309,11 @@ int main(int argc, char** argv)
             bufferConfigs.push_back(cfg);
 
             cfg.channels = fr::Channel::A;
-            cfg.slotId = 20;
+            cfg.slotId = 41;
             bufferConfigs.push_back(cfg);
 
             cfg.channels = fr::Channel::B;
-            cfg.slotId = 30;
+            cfg.slotId = 42;
             bufferConfigs.push_back(cfg);
         }
         else if (participantName == "Node1")
@@ -321,7 +321,7 @@ int main(int argc, char** argv)
             // initialize bufferConfig to send some FrMessages
             fr::TxBufferConfig cfg;
             cfg.channels = fr::Channel::AB;
-            cfg.slotId = 11;
+            cfg.slotId = 60;
             cfg.offset = 0;
             cfg.repetition = 1;
             cfg.hasPayloadPreambleIndicator = false;
@@ -330,11 +330,11 @@ int main(int argc, char** argv)
             bufferConfigs.push_back(cfg);
 
             cfg.channels = fr::Channel::A;
-            cfg.slotId = 21;
+            cfg.slotId = 61;
             bufferConfigs.push_back(cfg);
 
             cfg.channels = fr::Channel::B;
-            cfg.slotId = 31;
+            cfg.slotId = 62;
             bufferConfigs.push_back(cfg);
         }
 

@@ -70,6 +70,12 @@ int main(int argc, char** argv)
         return -1;
     }
 
+    auto dataExchangeFormatAll = DataExchangeFormat{""};
+    auto dataExchangeFormatA = DataExchangeFormat{"A"};
+    auto dataExchangeFormatB = DataExchangeFormat{"B"};
+
+    std::map<std::string, std::string> labelsEmpty;
+
     try
     {
         std::string participantConfigurationFilename(argv[1]);
@@ -101,9 +107,9 @@ int main(int argc, char** argv)
         participantController->SetPeriod(1s);
         if (participantName == "PubSub1")
         {
-            auto* PubTopic1 = participant->CreateDataPublisher("Topic1", DataExchangeFormat{"A"}, {}, 0);
-            auto* PubTopic2 = participant->CreateDataPublisher("Topic2", DataExchangeFormat{"A"}, {}, 0);
-            participant->CreateDataSubscriber("Topic3", DataExchangeFormat{"A"}, {}, ReceiveMessage);
+            auto* PubTopic1 = participant->CreateDataPublisher("Topic1", dataExchangeFormatA, labelsEmpty, 0);
+            auto* PubTopic2 = participant->CreateDataPublisher("Topic2", dataExchangeFormatA, labelsEmpty, 0);
+            participant->CreateDataSubscriber("Topic3", dataExchangeFormatA, {}, ReceiveMessage);
 
             participantController->SetSimulationTask(
                 [PubTopic1, PubTopic2](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -117,9 +123,9 @@ int main(int argc, char** argv)
         }
         else if (participantName == "PubSub2")
         {
-            auto* PubTopic1 = participant->CreateDataPublisher("Topic1", DataExchangeFormat{"A"}, {}, 0);
-            auto* PubTopic3 = participant->CreateDataPublisher("Topic3", DataExchangeFormat{"A"}, {}, 0);
-            participant->CreateDataSubscriber("Topic3", DataExchangeFormat{"A"}, {}, ReceiveMessage);
+            auto* PubTopic1 = participant->CreateDataPublisher("Topic1", dataExchangeFormatA, labelsEmpty, 0);
+            auto* PubTopic3 = participant->CreateDataPublisher("Topic3", dataExchangeFormatA, labelsEmpty, 0);
+            participant->CreateDataSubscriber("Topic3", dataExchangeFormatA, {}, ReceiveMessage);
 
             participantController->SetSimulationTask(
                 [PubTopic1, PubTopic3](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -132,8 +138,8 @@ int main(int argc, char** argv)
         }
         else if (participantName == "Subscriber1")
         {
-            participant->CreateDataSubscriber("Topic1", DataExchangeFormat{""}, {}, ReceiveMessage);
-            participant->CreateDataSubscriber("Topic2", DataExchangeFormat{"A"}, {}, ReceiveMessage);
+            participant->CreateDataSubscriber("Topic1", dataExchangeFormatAll, labelsEmpty, ReceiveMessage);
+            participant->CreateDataSubscriber("Topic2", dataExchangeFormatA, labelsEmpty, ReceiveMessage);
 
             participantController->SetSimulationTask(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -144,8 +150,8 @@ int main(int argc, char** argv)
         }
         else if (participantName == "Subscriber2")
         {
-            participant->CreateDataSubscriber("Topic2", DataExchangeFormat{"A"}, {}, ReceiveMessage);
-            participant->CreateDataSubscriber("Topic3", DataExchangeFormat{"B"}, {}, ReceiveMessage);
+            participant->CreateDataSubscriber("Topic2", dataExchangeFormatA, labelsEmpty, ReceiveMessage);
+            participant->CreateDataSubscriber("Topic3", dataExchangeFormatB, labelsEmpty, ReceiveMessage);
 
             participantController->SetSimulationTask(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {

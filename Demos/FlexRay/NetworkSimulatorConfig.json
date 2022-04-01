@@ -3,7 +3,7 @@
   "Description": "VIBE-Networksimulator configuration for FlexRay Demo",
   "SimulatedNetworks": [
     {
-      "Name": "FlexRay1",
+      "Name": "PowerTrain1",
       "Type": "FlexRay"
     }
   ]

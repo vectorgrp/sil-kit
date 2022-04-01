@@ -20,7 +20,7 @@
   ],
   "SimulatedNetworks": [
     {
-      "Name": "ETH0",
+      "Name": "Eth1",
       "Type": "Ethernet"
     },
     {
