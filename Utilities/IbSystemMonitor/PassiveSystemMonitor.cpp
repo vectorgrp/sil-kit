@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     commandlineParser.Add<ib::util::CommandlineParser::Option>("domain", "d", "42", "[--domain <domainId>]",
         "-d, --domain <domainId>: The domain ID which is used by the Integration Bus. Defaults to 42.");
     commandlineParser.Add<ib::util::CommandlineParser::Option>("name", "n", "SystemMonitor", "[--name <participantName>]",
-        "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to 'SystemController'.");
+        "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to 'SystemMonitor'.");
     commandlineParser.Add<ib::util::CommandlineParser::Option>("configuration", "c", "", "[--configuration <configuration>]",
         "-c, --configuration: Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.");
 
