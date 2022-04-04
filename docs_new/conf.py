@@ -40,7 +40,13 @@ master_doc = 'contents'
 # ones.
 extensions = [ 
     #'sphinx_rtd_theme',
+    'sphinx.ext.autosectionlabel',
     "breathe" ]
+
+# Additional flags to further configure Sphinx
+numfig = True
+numfig_secnum_depth = 1
+numfig_format = {'figure': 'Figure %s'}
 
 # Breathe Configuration
 # The breathe project property is already set in the CMakeLists.txt

@@ -105,7 +105,7 @@ of the VIB are free to implement their own system and state handling.
 
 .. _sec:util-system-controller:
 
-!!! SystemController
+!!! IbSystemController
 ~~~~~~~~~~~~~~~~
 
 .. list-table::
@@ -140,7 +140,7 @@ of the VIB are free to implement their own system and state handling.
 
 .. _sec:util-system-controller-interactive:
 
-!!! SystemControllerInteractive
+!!! IbSystemControllerInteractive
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
@@ -174,7 +174,7 @@ of the VIB are free to implement their own system and state handling.
 
 .. _sec:util-system-monitor:
 
-!!! SystemMonitor
+!!! IbSystemMonitor
 ~~~~~~~~~~~~~
 
 .. list-table::

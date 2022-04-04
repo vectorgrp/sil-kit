@@ -1,6 +1,9 @@
-========================
+
+==========================
 !!! VIBE Network Simulator
-========================
+==========================
+
+.. _chap:VIBE-NetSim:
 
 The VIBE Network Simulator supports simulation of CAN, LIN, Ethernet,
 and FlexRay networks. Compared to the simple, functional simulation,
