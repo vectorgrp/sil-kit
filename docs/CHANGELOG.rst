@@ -5,7 +5,7 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.7.17] -
+[3.7.18] - 2022-04-05
 --------------------------------
 
 Added
@@ -25,6 +25,23 @@ Added
         libstdc++-6.dll
         libwinpthread-1.dll
    
+Fixed
+~~~~~
+- Fixed typo in IbRegistry command help output.
+- Fixed typo in IbSystemMonitor command help output.
+- The IbRegistry hostname defined in the configuration is now resolved and
+  used to create listening sockets.
+  IPv6 addresses are not supported, yet.
+- The `lin::ControllerConfig` data type now uses a message history of size 1.
+  If the value was set by a `LinController::Init` call, it will be
+  retained and automatically transmitted to newly connecting participants.
+  
+Changed
+~~~~~~~
+- Demo adaptions
+  - Ethernet Demo only uses Set/GetRawFrame calls
+  - CAN & Ethernet demo can now run as asynchronous participants (add `--async` as command line argument)
+
 
 [3.7.13] - 2022-03-24
 --------------------------------
