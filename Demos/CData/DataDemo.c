@@ -109,7 +109,8 @@ void DefaultDataHandler(void* context, ib_Data_Subscriber* subscriber, const ib_
 void PublishMessage()
 {
     publishCount += 1;
-    payload[0] = publishCount;
+    publishCount = publishCount % 10;
+    payload[0] = publishCount + '0';
     ib_ByteVector dataBlob = {payload, 1};
 
     ib_Data_Publisher_Publish(dataPublisher1, &dataBlob);
