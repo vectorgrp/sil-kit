@@ -5,6 +5,27 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.7.17] -
+--------------------------------
+
+Added
+~~~~~
+- Support for MinGW builds was added.
+  The CI builds use the native MinGW builds from winlibs, but a
+  cross-compile CMake toolchain file is provided in `IntegrationBus/cmake/mingw-w64-toolchain.cmake`.
+  Warnings are not treated as errors for this compilation target, due to some known
+  issues in the MinGW-w64 toolchain.
+
+  MinGW libraries are not distributed as part of VIB packages.
+  The user must ensure that the following libraries are in PATH:
+
+    .. code-block:: sh
+
+        libgcc_s_seh-1.dll
+        libstdc++-6.dll
+        libwinpthread-1.dll
+   
+
 [3.7.13] - 2022-03-24
 --------------------------------
 This is an internal build.
