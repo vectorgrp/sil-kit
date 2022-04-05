@@ -1,0 +1,4 @@
+/* custom styling adaption to fix word wrap in read the docs template */
+.wy-table-responsive table td, .wy-table-responsive table th {
+    white-space: inherit !important;
+}

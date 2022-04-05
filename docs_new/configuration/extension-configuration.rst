@@ -1,5 +1,5 @@
 ===================================================
-!!! Extension Config
+Extensions Configuration
 ===================================================
 
 .. contents:: :local:
@@ -8,16 +8,19 @@
 
 .. _sec:cfg-extension-configuration-overview:
 
-!!! Overview
+Overview
 ========================================
 
-The ExtensionConfig is an optional section in the IbConfig.json containing all extension-related
-settings, e.g. for the :doc:`../vibes/vibregistry`.
+The :doc:`Vector Integration Bus Extensions<../vibes/overview>` are developed by Vector and provided in binary form.
+To facilitate the lookup of these binaries, specific search paths can be configured in the extensions configuration.
+
+Configuration
+--------------------
 
 
 .. code-block:: javascript
 
-    "ExtensionConfig": {
+    "Extensions": {
         "SearchPathHints": [
             "ENV:XYZ"
             "../extensions",
