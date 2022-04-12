@@ -82,7 +82,9 @@ int main(int argc, char** argv)
 {
     if (argc < 3)
     {
-        std::cerr << "Missing arguments! Start demo with: " << argv[0] << " <ParticipantConfiguration.yaml|json> <ParticipantName> [domainId]" << std::endl;
+        std::cerr << "Missing arguments! Start demo with: " << argv[0]
+                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [domainId]" << std::endl
+                  << "Use \"Server\" or \"Client\" as <ParticipantName>." << std::endl;
         return -1;
     }
 

@@ -66,7 +66,9 @@ int main(int argc, char** argv)
 {
     if (argc < 3)
     {
-        std::cerr << "Missing arguments! Start demo with: " << argv[0] << " <ParticipantConfiguration.yaml|json> <ParticipantName> [domainId]" << std::endl;
+        std::cerr << "Missing arguments! Start demo with: " << argv[0]
+                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [domainId]" << std::endl
+                  << "Use \"Publisher1\", \"Publisher2\", \"Subscriber1\" or \"Subscriber2\" as <ParticipantName>." << std::endl;
         return -1;
     }
 
@@ -105,7 +107,7 @@ int main(int argc, char** argv)
         });
 
         participantController->SetPeriod(1s);
-        if (participantName == "PubSub1")
+        if (participantName == "Publisher1")
         {
             auto* PubTopic1 = participant->CreateDataPublisher("Topic1", dataExchangeFormatA, labelsEmpty, 0);
             auto* PubTopic2 = participant->CreateDataPublisher("Topic2", dataExchangeFormatA, labelsEmpty, 0);
@@ -121,7 +123,7 @@ int main(int argc, char** argv)
 
             });
         }
-        else if (participantName == "PubSub2")
+        else if (participantName == "Publisher2")
         {
             auto* PubTopic1 = participant->CreateDataPublisher("Topic1", dataExchangeFormatA, labelsEmpty, 0);
             auto* PubTopic3 = participant->CreateDataPublisher("Topic3", dataExchangeFormatA, labelsEmpty, 0);

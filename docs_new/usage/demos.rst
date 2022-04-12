@@ -1,30 +1,53 @@
 ======================
-!!! Demos
+Demos
 ======================
 
 This document describes the usage of the demo projects that are
 included with the Vector Integration Bus project and what their
 expected output and or results are. All demo source code is located in
-the GIT repository in the folder Demos.
+the Git repository in the folder Demos.
 
-.. |UtilDir| replace:: build/Utilities/Release/bin
-.. |DemoDir| replace:: build/Demos/Release/bin
+.. |UtilDir| replace:: build/Release
+.. |DemoDir| replace:: build/Release
 .. |SystemMonitor| replace::  |UtilDir|/IbSystemMonitor
 .. |SystemController| replace::  |UtilDir|/IbSystemController
 
 .. admonition:: Note
 
    All paths on the following pages are relative to the top level of
-   the GIT repository. Build artifacts are assumed to be located in a
+   the Git repository. Build artifacts are assumed to be located in a
    ``build`` subdirectory.
-   Utilities are build in  ``build/Utilities/<CONFIG>/bin`` where '<CONFIG>' is the current cmake build configuration. For simplicity's sake all paths assume a Release configuration.
+   For simplicity's sake all paths assume a Release configuration.
 
 
 To build the demos, please refer to :ref:`sec:build-demos`.
 
+
+.. _sec:build-demos:
+
+Building the Demos
+~~~~~~~~~~~~~~~~~~
+
+Building the demos from within the source tree is straight forward,
+just build the  ``Demos`` CMake target:
+    
+    cmake --build . --target Demos
+
+The individual demos are build as a dependency.
+
+.. admonition:: Note
+   
+   The distributed Demos, as packaged by CPack, are preconfigured to build against 
+   a copy of the VIB binaries in ``../IntegrationBus/`` .
+   This can be overriden by providing your own ``IntegrationBus`` CMake target library,
+   before the demos are configured by cmake.
+   Or by changing the ``find_package(IntegrationBus ... PATHS path/to/VIB)`` statement directly
+   in the ``IntegrationBus-Demos/CMakeLists.txt`` directory.
+
+
 .. _sec:util-can-demo:
 
-!!! CAN Demo
+CAN Demo
 ~~~~~~~~
 
 .. list-table::
@@ -36,28 +59,36 @@ To build the demos, please refer to :ref:`sec:build-demos`.
    *  -  Source location
       -  Demos/Can
    *  -  Requirements
-      -  * :ref:`SystemController<sec:util-system-controller>`
-         * :ref:`SystemMonitor (optional)<sec:util-system-monitor>`
+      -  * :ref:`SystemController<sec:util-system-controller>` (not needed for unsynchronized execution)
+         * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
          * :doc:`NetworkSimulator<../vibes/networksimulator>` (optional)
    *  -  Parameters
-      -  There are up to 3 positional arguments:
-         
-         #. Filename of the IB Configuration to be used; must be either of the two provided DemoCan configs.
-         #. Name of the participant in the configuration; must be either CanWriter or CanReader.
-         #. Domain ID (optional); defaults to ``42``.
+      -  <ParticipantConfiguration.json|yaml> 
+           File name of the ParticipantConfiguration to be used; 
+           use ``IbConfig_DemoCan.json`` for an example configuration.
+         <ParticipantName> 
+           The name of the participant within the simulation; must either be ``CanWriter`` or 
+           ``CanReader``.
+         [domainId] 
+           Domain id of the registry to connect to; defaults to 42 (optional).
+         [\-\-async] 
+           If async flag is set, the participant will join the simulation unsynchronized and it will not need
+           the SystemController to start.
    *  -  Parameter Example
       -  .. parsed-literal:: 
             
             # Creates a CAN Writer Process in the default domain 42:
             |DemoDir|/IbDemoCan Demos/Can/IbConfig_DemoCan.json CanWriter
    *  -  System Example
-      -  .. parsed-literal:: 
+      - For synchronized execution:
+
+        .. parsed-literal:: 
 
             # VIBE Network Simulator (assumed to be in PATH, optional):
-            NetworkSimulator BusSimulator Demos/Can/IbConfig_DemoCan_NetSim.json
+            NetworkSimulator Demos/Can/NetworkSimulatorConfig.json
 
             # System Monitor (optional):
-            |SystemMonitor| Demos/Can/IbConfig_DemoCan.json
+            |SystemMonitor|
 
             # CAN Reader:
             |DemoDir|/IbDemoCan Demos/Can/IbConfig_DemoCan.json CanReader
@@ -65,11 +96,21 @@ To build the demos, please refer to :ref:`sec:build-demos`.
             # CAN Writer:
             |DemoDir|/IbDemoCan Demos/Can/IbConfig_DemoCan.json CanWriter
 
-            # System Controller:
-            |SystemController| Demos/Can/IbConfig_DemoCan.json
+            # System Controller (add NetworkSimulator as third parameter if using VIBE Network Simulator):
+            |SystemController| CanReader CanWriter 
+
+        For unsynchronized execution:
+
+        .. parsed-literal:: 
+
+            # CAN Reader:
+            |DemoDir|/IbDemoCan Demos/Can/IbConfig_DemoCan.json CanReader --async
+
+            # CAN Writer:
+            |DemoDir|/IbDemoCan Demos/Can/IbConfig_DemoCan.json CanWriter --async
 
 
-!!! Ethernet Demo
+Ethernet Demo
 ~~~~~~~~~~~~~
 
 .. list-table::
@@ -81,28 +122,36 @@ To build the demos, please refer to :ref:`sec:build-demos`.
    *  -  Source location
       -  Demos/Ethernet
    *  -  Requirements
-      -  * :ref:`SystemController<sec:util-system-controller>`
-         * :ref:`SystemMonitor (optional)<sec:util-system-monitor>`
+      -  * :ref:`SystemController<sec:util-system-controller>` (not needed for unsynchronized execution)
+         * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
          * :doc:`NetworkSimulator<../vibes/networksimulator>` (optional)
    *  -  Parameters
-      -  There are up to 3 positional arguments:
-         
-         #. Filename of the IB Configuration to be used; must be either of the two provided DemoEthernet configs.
-         #. Name of the participant in the configuration; must be either EthernetWriter or EthernetReader.
-         #. Domain ID (optional); defaults to ``42``.
+      -  <ParticipantConfiguration.json|yaml> 
+           File name of the ParticipantConfiguraiton to be used; 
+           use ``IbConfig_DemoEthernet.json`` for an example configuration.
+         <ParticipantName> 
+           The name of the participant within the simulation; must either be ``EthernetWriter`` or 
+           ``EthernetReader``.
+         [domainId] 
+           Domain id of the registry to connect to; defaults to 42 (optional).
+         [\-\-async] 
+           If async flag is set, the participant will join the simulation unsynchronized and it will not need
+           the SystemController to start.
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
             # Creates an Ethernet Writer Process in the default domain 42:
             |DemoDir|/IbDemoEthernet Demos/Ethernet/IbConfig_DemoEthernet.json EthernetWriter
    *  -  System Example
-      -  .. parsed-literal:: 
+      - For synchronized execution:
+
+        .. parsed-literal:: 
 
             # VIBE Network Simulator (assumed to be in PATH, optional):
-            NetworkSimulator BusSimulator Demos/Ethernet/IbConfig_DemoEthernet_NetSim.json
+            NetworkSimulator Demos/Ethernet/NetworkSimulatorConfig.json
 
             # System Monitor (optional):
-            |SystemMonitor| Demos/Ethernet/IbConfig_DemoEthernet.json
+            |SystemMonitor|
 
             # Ethernet Reader:
             |DemoDir|/IbDemoEthernet Demos/Ethernet/IbConfig_DemoEthernet.json EthernetReader
@@ -110,14 +159,25 @@ To build the demos, please refer to :ref:`sec:build-demos`.
             # Ethernet Writer:
             |DemoDir|/IbDemoEthernet Demos/Ethernet/IbConfig_DemoEthernet.json EthernetWriter
 
-            # System Controller:
-            |SystemController| Demos/Ethernet/IbConfig_DemoEthernet.json
+            # System Controller (add NetworkSimulator as third parameter if using VIBE Network Simulator):
+            |SystemController| EthernetReader Ethernet Writer
+
+        For unsynchronized execution:
+
+        .. parsed-literal:: 
+
+            # Ethernet Reader:
+            |DemoDir|/IbDemoEthernet Demos/Ethernet/IbConfig_DemoEthernet.json EthernetReader --async
+
+            # Ethernet Writer:
+            |DemoDir|/IbDemoEthernet Demos/Ethernet/IbConfig_DemoEthernet.json EthernetWriter --async
+
    *  -  Notes
       -  | \- The writer sends Ethernet messages at a fixed rate of one message per quantum.
          | \- Both reader and writer sleep for 1 second per quantum to slow down execution.
 
 
-!!! LIN Demo
+LIN Demo
 ~~~~~~~~
 
 .. list-table::
@@ -130,14 +190,17 @@ To build the demos, please refer to :ref:`sec:build-demos`.
       -  Demos/Lin
    *  -  Requirements
       -  * :ref:`SystemController<sec:util-system-controller>`
-         * :ref:`SystemMonitor (optional)<sec:util-system-monitor>`
+         * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
          * :doc:`NetworkSimulator<../vibes/networksimulator>` (optional)
    *  -  Parameters
-      -  There are up to 3 positional arguments:
-         
-         #. Filename of the IB Configuration to be used; must be either of the two provided DemoLin configs.
-         #. Name of the participant in the configuration; must be either LinMaster or LinSlave.
-         #. Domain ID (optional); defaults to ``42``.
+      -  <ParticipantConfiguration.json|yaml> 
+           File name of the ParticipantConfiguraiton to be used; 
+           use ``IbConfig_DemoLin.json`` for an example configuration.
+         <ParticipantName> 
+           The name of the participant within the simulation; must either be ``EthernetWriter`` or 
+           ``EthernetReader``.
+         [domainId] 
+           Domain id of the registry to connect to; defaults to 42 (optional).
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
@@ -147,10 +210,10 @@ To build the demos, please refer to :ref:`sec:build-demos`.
       -  .. parsed-literal:: 
 
             # VIBE Network Simulator (assumed to be in PATH, optional):
-            NetworkSimulator BusSimulator Demos/Lin/IbConfig_DemoLin_NetSim.json
+            NetworkSimulator Demos/Lin/NetworkSimulatorConfig.json
 
             # System Monitor (optional):
-            |SystemMonitor| Demos/Lin/IbConfig_DemoLin.json
+            |SystemMonitor|
 
             # LIN Master:
             |DemoDir|/IbDemoLin Demos/Lin/IbConfig_DemoLin.json LinMaster
@@ -159,14 +222,13 @@ To build the demos, please refer to :ref:`sec:build-demos`.
             |DemoDir|/IbDemoLin Demos/Lin/IbConfig_DemoLin.json LinSlave
 
             # System Controller:
-            |SystemController| Demos/Lin/IbConfig_DemoLin.json
+            |SystemController| LinSlave LinMaster
    *  -  Notes
-      -  | \- Both Master and Slave sleep for 1 second per quantum to slow down execution.
-         | \- The master alternatively sends and requests LIN messages. It sends a message for LIN ID 17 and requests a message for LIN ID 34.
-         | \- The slave is configured to trigger a callback on LIN ID 17 and replies with the String "Hello!" on LIN ID 34.
+      -  | \- The LIN demo can only run in a synchronized mode.
+         | \- Both Master and Slave sleep for 500 millisecond per simulation task to slow down execution.
 
 
-!!! FlexRay Demo
+FlexRay Demo
 ~~~~~~~~~~~~
 
 .. list-table::
@@ -179,14 +241,18 @@ To build the demos, please refer to :ref:`sec:build-demos`.
       -  Demos/FlexRay
    *  -  Requirements
       -  * :ref:`SystemController<sec:util-system-controller>`
-         * :ref:`SystemMonitor (optional)<sec:util-system-monitor>`
-         * :doc:`NetworkSimulator<../vibes/networksimulator>` (optional)
+         * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
+         * :doc:`NetworkSimulator<../vibes/networksimulator>`
    *  -  Parameters
-      -  There are up to 3 positional arguments:
-         
-         #. Filename of the IB Configuration to be used; must be either of the two provided DemoFlexray configs.
-         #. Name of the participant in the configuration; must be either Node0 or Node1.
-         #. Domain ID (optional); defaults to ``42``.
+      -  <ParticipantConfiguration.json|yaml> 
+           File name of the ParticipantConfiguraiton to be used; 
+           use ``IbConfig_DemoFlexRay.json`` for an example configuration.
+         <ParticipantName> 
+           The name of the participant within the simulation; must either be ``Node0`` or 
+           ``Node1``.
+         [domainId] 
+           Domain id of the registry to connect to; defaults to 42 (optional).
+
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
@@ -195,11 +261,11 @@ To build the demos, please refer to :ref:`sec:build-demos`.
    *  -  System Example
       -  .. parsed-literal:: 
 
-            # VIBE Network Simulator (assumed to be in PATH, optional):
-            NetworkSimulator BusSimulator Demos/FlexRay/IbConfig_DemoFlexray_NetSim.json
+            # VIBE Network Simulator (assumed to be in PATH, necessary):
+            NetworkSimulator Demos/FlexRay/NetworkSimulatorConfig.json
 
             # System Monitor (optional):
-            |SystemMonitor| Demos/FlexRay/IbConfig_DemoFlexray.json
+            |SystemMonitor|
 
             # Node 0:
             |DemoDir|/IbDemoFlexray Demos/FlexRay/IbConfig_DemoFlexray.json Node0
@@ -208,25 +274,114 @@ To build the demos, please refer to :ref:`sec:build-demos`.
             |DemoDir|/IbDemoFlexray Demos/FlexRay/IbConfig_DemoFlexray.json Node1
 
             # System Controller:
-            |SystemController| Demos/FlexRay/IbConfig_DemoFlexray.json
+            |SystemController| Node0 Node1
    *  -  Notes
       -  Starting the FlexRay cycle takes quite some time, which is accurately modeled by the NetworkSimulator. 
          It takes somewhat between 50 and 100 ms until the first FlexRay messages are transmitted.
 
 
-!!! Data Message Demo
+Data Message Demo
 ~~~~~~~~~~~~~~~~~~~~
 
-TODO
+.. list-table::
+   :widths: 17 220
+   :stub-columns: 1
 
-!!! RPC Demo
+   *  -  Abstract
+      -  Data Message Publish Subscribe Demo for a set of Publishers/Subscribers
+   *  -  Source location
+      -  Demos/DataMessage
+   *  -  Requirements
+      -  * :ref:`SystemController<sec:util-system-controller>`
+         * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
+   *  -  Parameters
+      -  <ParticipantConfiguration.json|yaml> 
+           File name of the ParticipantConfiguraiton to be used; 
+           use ``IbConfig_DemoDataMessage.json`` for an example configuration.
+         <ParticipantName> 
+           The name of the participant within the simulation; must either be ``Publisher1``, ``Publisher2``, ``Subscriber1`` or 
+           ``Subscriber2``.
+         [domainId] 
+           Domain id of the registry to connect to; defaults to 42 (optional).
+
+   *  -  Parameter Example
+      -  .. parsed-literal:: 
+
+            # Creates a FlexRay Process for Node 0 in the default domain 42:
+            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json Publisher1
+   *  -  System Example
+      -  .. parsed-literal:: 
+
+            # System Monitor (optional):
+            |SystemMonitor|
+
+            # Publisher 1:
+            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json Publisher1
+
+            # Publisher 2:
+            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json Publisher2
+            
+            # Subscriber 1:
+            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json Subscriber1
+            
+            # Subscriber 2:
+            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json Subscriber2
+
+            # System Controller:
+            |SystemController| Publisher 1 Publisher2 Subscriber1 Subscriber2
+   *  -  Notes
+      -  Any combination of publishers or subscribers is applicable for this demo.
+
+RPC Demo
 ~~~~~~~~~~~~~~~~~~~~
 
-TODO
+
+.. list-table::
+   :widths: 17 220
+   :stub-columns: 1
+
+   *  -  Abstract
+      -  Remote Procedure Call Demo. The client triggers remote procedure calls on the server.
+   *  -  Source location
+      -  Demos/DataMessage
+   *  -  Requirements
+      -  * :ref:`SystemController<sec:util-system-controller>`
+         * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
+   *  -  Parameters
+      -  <ParticipantConfiguration.json|yaml> 
+           File name of the ParticipantConfiguraiton to be used; 
+           use ``IbConfig_DemoRpc.json`` for an example configuration.
+         <ParticipantName> 
+           The name of the participant within the simulation; must either be ``Server`` or 
+           ``Client``.
+         [domainId] 
+           Domain id of the registry to connect to; defaults to 42 (optional).
+
+   *  -  Parameter Example
+      -  .. parsed-literal:: 
+
+            # Creates a FlexRay Process for Node 0 in the default domain 42:
+            |DemoDir|/IbDemoRpc Demos/Rpc/IbConfig_DemoRpc.json Server
+   *  -  System Example
+      -  .. parsed-literal:: 
+
+            # System Monitor (optional):
+            |SystemMonitor|
+
+            # Server:
+            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json Publisher1
+
+            # Client:
+            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json Publisher2
+            
+            # System Controller:
+            |SystemController| Server Client
+   *  -  Notes
+      -  Any combination of publishers or subscribers is usable for this demo.
 
 .. _sec:util-benchmark-demo:
 
-!!! Benchmark Demo
+Benchmark Demo
 ~~~~~~~~~~~~~~
 
 .. list-table::
@@ -262,6 +417,6 @@ TODO
             # 10 participants, 1 message of 200 bytes per participant pair per tick) a hundred times.
             |DemoDir|/IbDemoBenchmark VAsio 100 5 10 1 200 50
    *  -  Notes
-      -  | \- Generic publisher / subscribers are used as participants.
+      -  | \- DataPublisher / DataSubscribers are used in the participants.
          | \- The tick period is 1ms and each tick, each particpant sends the specified number of messages to every other particpant.
-         | \- All participants, the SyncMaster and the VAsio registry (VAsio only) run in the same process.
+         | \- All participants and the VAsio registry (VAsio only) run in the same process.
