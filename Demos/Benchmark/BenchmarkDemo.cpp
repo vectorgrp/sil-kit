@@ -292,8 +292,8 @@ void ParticipantsThread(
     auto comAdapter = ib::CreateSimulationParticipant(ibConfig, participantName, benchmark.domainId, true);
     auto&& participantController = comAdapter->GetParticipantController();
    
-    auto publisher = comAdapter->CreateDataPublisher("Topic", DataExchangeFormat{}, {}, 0);
-    comAdapter->CreateDataSubscriber("Topic", DataExchangeFormat{}, {}, [&messageCounter](auto*, auto&) {
+    auto publisher = comAdapter->CreateDataPublisher("Topic", {}, {}, 0);
+    comAdapter->CreateDataSubscriber("Topic", {}, {}, [&messageCounter](auto*, auto&) {
         // this is handled in I/O thread, so no data races on counter.
         messageCounter++;
     });

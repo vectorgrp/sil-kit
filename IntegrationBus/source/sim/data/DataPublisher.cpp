@@ -9,10 +9,10 @@ namespace sim {
 namespace data {
 
 DataPublisher::DataPublisher(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
-                             const std::string& topic, DataExchangeFormat dataExchangeFormat,
+                             const std::string& topic, const std::string& mediaType,
                              const std::map<std::string, std::string>& labels, const std::string& pubUUID)
     : _topic{topic}
-    , _dataExchangeFormat{dataExchangeFormat}
+    , _mediaType{mediaType}
     , _labels{labels}
     , _pubUUID{pubUUID}
     , _timeProvider{timeProvider}

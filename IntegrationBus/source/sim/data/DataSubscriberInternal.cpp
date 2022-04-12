@@ -10,13 +10,12 @@ namespace ib {
 namespace sim {
 namespace data {
 
-DataSubscriberInternal::DataSubscriberInternal(mw::IComAdapterInternal* comAdapter,
-                                               mw::sync::ITimeProvider* timeProvider, const std::string& topic,
-                                               DataExchangeFormat dataExchangeFormat,
+DataSubscriberInternal::DataSubscriberInternal(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+                                               const std::string& topic, const std::string& mediaType,
                                                const std::map<std::string, std::string>& labels,
                                                DataHandlerT defaultHandler, IDataSubscriber* parent)
     : _topic{topic}
-    , _dataExchangeFormat{dataExchangeFormat}
+    , _mediaType{mediaType}
     , _labels{labels}
     , _defaultHandler{defaultHandler}
     , _parent{parent}

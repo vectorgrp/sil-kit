@@ -31,7 +31,7 @@ const std::string systemMasterName{"SystemMaster"};
 const std::string pubName{"Pub"};
 const std::string subName{"Sub"};
 const std::string topic{"Topic"};
-const DataExchangeFormat exchangeFormat{ "A" };
+const std::string mediaType{ "A" };
 static size_t numParticipants;
 std::chrono::milliseconds communicationTimeout{2000ms};
 std::chrono::milliseconds asyncDelayBetweenPublication{50ms};
@@ -143,9 +143,9 @@ protected:
 
             IParticipantController* participantController;
             participantController = participant.comAdapter->GetParticipantController();
-            participant.publisher = participant.comAdapter->CreateDataPublisher(topic, exchangeFormat, {}, 0);
+            participant.publisher = participant.comAdapter->CreateDataPublisher(topic, mediaType, {}, 0);
             participant.subscriber = participant.comAdapter->CreateDataSubscriber(
-                topic, exchangeFormat, {},
+                topic, mediaType, {},
                 [&participant](IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data) {
                     if (!participant.allReceived)
                     {
@@ -194,9 +194,9 @@ protected:
         {
             participant.comAdapter =
                 ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, false);
-            participant.publisher = participant.comAdapter->CreateDataPublisher(topic, exchangeFormat, {}, 0);
+            participant.publisher = participant.comAdapter->CreateDataPublisher(topic, mediaType, {}, 0);
             participant.subscriber = participant.comAdapter->CreateDataSubscriber(
-                topic, exchangeFormat, {},
+                topic, mediaType, {},
                 [&participant](IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data) {
                     if (!participant.allReceived)
                     {

@@ -59,7 +59,7 @@ public:
 
         const auto topicName = "Topic" + std::to_string(publisherIndex);
         auto&& participantController = _comAdapter->GetParticipantController();
-        auto* publisher = _comAdapter->CreateDataPublisher(topicName, DataExchangeFormat{}, {}, 0);
+        auto* publisher = _comAdapter->CreateDataPublisher(topicName, {}, {}, 0);
 
         participantController->SetPeriod(period);
         participantController->SetSimulationTask(
@@ -136,7 +136,7 @@ public:
         for (auto publisherIndex = 0u; publisherIndex < _publisherCount; publisherIndex++)
         {
             _comAdapter->CreateDataSubscriber(
-                "Topic" + std::to_string(publisherIndex), DataExchangeFormat{}, {},
+                "Topic" + std::to_string(publisherIndex), {}, {},
                 [this, publisherIndex](IDataSubscriber* subscriber, const std::vector<uint8_t>& data) {
                     ReceiveMessage(subscriber, data, publisherIndex);
                 });

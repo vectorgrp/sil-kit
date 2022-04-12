@@ -24,12 +24,11 @@ public:
     /*! \brief Register a handler for data received by DataPublishers matching specific criteria
      * 
      * Specific data handlers can be used to distinguish publications on a single topic. If all of the labels provided
-     * here appear in the labels of a DataPublisher, publications are redirected to the specific handler. A label key 
-     * must match, an empty string in the value of a label given here is a wildcard. Likewise, the 
-     * dataExchangeFormat must match the one given by a DataPublisher. An empty string in a field of the 
-     * dataExchangeFormat provided here also is a wildcard.
+     * here appear in the labels of a DataPublisher, publications are redirected to the specific handler. A label key
+     * must match, an empty string in the value of a label given here is a wildcard. Likewise, the mediaType must match
+     * the one given by a DataPublisher. An empty string in the mediaType provided here also is a wildcard.
      */
-    virtual void RegisterSpecificDataHandler(const DataExchangeFormat& dataExchangeFormat,
+    virtual void RegisterSpecificDataHandler(const std::string& mediaType,
                                              const std::map<std::string, std::string>& labels,
                                              DataHandlerT callback) = 0;
 };

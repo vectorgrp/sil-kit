@@ -9,10 +9,10 @@ namespace sim {
 namespace data {
 
 DataSubscriber::DataSubscriber(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
-                               const std::string& topic, DataExchangeFormat dataExchangeFormat, const std::map<std::string, std::string>& labels,
+                               const std::string& topic, const std::string& mediaType, const std::map<std::string, std::string>& labels,
                                DataHandlerT defaultDataHandler, NewDataSourceHandlerT newDataSourceHandler)
     : _topic{topic}
-    , _dataExchangeFormat{dataExchangeFormat}
+    , _mediaType{mediaType}
     , _labels{labels}
     , _defaultDataHandler{defaultDataHandler}
     , _newDataSourceHandler{newDataSourceHandler}
@@ -46,22 +46,22 @@ void DataSubscriber::RegisterServiceDiscovery()
                 };
 
                 auto topic = getVal(mw::service::supplKeyDataPublisherTopic);
-                DataExchangeFormat pubDataExchangeFormat{ getVal(mw::service::supplKeyDataPublisherPubDxf)};
+                std::string pubMediaType{ getVal(mw::service::supplKeyDataPublisherPubDxf)};
                 auto pubUUID = getVal(mw::service::supplKeyDataPublisherPubUUID);
                 std::string labelsStr = getVal(mw::service::supplKeyDataPublisherPubLabels);
                 std::map<std::string, std::string> publisherLabels = ib::cfg::Deserialize<std::map<std::string, std::string>>(labelsStr);
 
-                if (topic == _topic && Match(_dataExchangeFormat, pubDataExchangeFormat) &&
+                if (topic == _topic && MatchMediaType(_mediaType, pubMediaType) &&
                     MatchLabels(_labels, publisherLabels))
                 {
                     // NB: The internal subscriber carries its publisher's information
                     // that AssignSpecificDataHandlers() needs to check matching between 
-                    // user given dxf/labels and the publisher's dxf/labels.
-                    AddInternalSubscriber(pubUUID, pubDataExchangeFormat, publisherLabels);
+                    // user given mediaType/labels and the publisher's mediaType/labels.
+                    AddInternalSubscriber(pubUUID, pubMediaType, publisherLabels);
 
                     if (_newDataSourceHandler)
                     {
-                        _newDataSourceHandler(this, topic, pubDataExchangeFormat, publisherLabels);
+                        _newDataSourceHandler(this, topic, pubMediaType, publisherLabels);
                     }
                     // NB: Try to assign specific handlers here as _internalSubscibers has changed
                     AssignSpecificDataHandlers();
@@ -79,11 +79,11 @@ void DataSubscriber::SetDefaultReceiveMessageHandler(DataHandlerT callback)
 }
 
 
-void DataSubscriber::RegisterSpecificDataHandler(const DataExchangeFormat& dataExchangeFormat,
+void DataSubscriber::RegisterSpecificDataHandler(const std::string& mediaType,
                                                  const std::map<std::string, std::string>& labels,
                                                  DataHandlerT specificDataHandler)
 {
-    _specificDataHandling.push_back({ _specificDataHandlerId++, dataExchangeFormat, labels, specificDataHandler, {} });
+    _specificDataHandling.push_back({ _specificDataHandlerId++, mediaType, labels, specificDataHandler, {} });
     // NB: Try to assign specific handlers here as _specificDataHandling has changed
     AssignSpecificDataHandlers();
 }
@@ -98,7 +98,7 @@ void DataSubscriber::AssignSpecificDataHandlers()
             auto it = dataHandling.registeredInternalSubscribers.find(internalSubscriber);
             if (it == dataHandling.registeredInternalSubscribers.end())
             {
-                if (Match(dataHandling.dataExchangeFormat, internalSubscriber->GetDataExchangeFormat()) &&
+                if (MatchMediaType(dataHandling.mediaType, internalSubscriber->GetMediaType()) &&
                     MatchLabels(dataHandling.labels, internalSubscriber->GetLabels()))
                 {
                     dataHandling.registeredInternalSubscribers.insert(internalSubscriber);
@@ -109,11 +109,11 @@ void DataSubscriber::AssignSpecificDataHandlers()
     }
 }
 
-void DataSubscriber::AddInternalSubscriber(const std::string& pubUUID, DataExchangeFormat joinedDataExchangFormat,
+void DataSubscriber::AddInternalSubscriber(const std::string& pubUUID, const std::string& joinedMediaType,
                                            const std::map<std::string, std::string>& publisherLabels)
 {
     auto internalSubscriber = dynamic_cast<DataSubscriberInternal*>(_comAdapter->CreateDataSubscriberInternal(
-        _topic, pubUUID, joinedDataExchangFormat, publisherLabels, _defaultDataHandler, this));
+        _topic, pubUUID, joinedMediaType, publisherLabels, _defaultDataHandler, this));
     
     _internalSubscibers.push_back(internalSubscriber);
 }

@@ -181,18 +181,16 @@ public:
     {
         return nullptr;
     }
-    auto CreateDataPublisher(const std::string& /*topic*/,
-                             const ib::sim::data::DataExchangeFormat& /*dataExchangeFormat*/,
+    auto CreateDataPublisher(const std::string& /*topic*/, const std::string& /*mediaType*/,
                              const std::map<std::string, std::string>& /*labels*/, size_t /* history */)
         -> ib::sim::data::IDataPublisher* override  { return nullptr; }
-    auto CreateDataSubscriber(const std::string& /*topic*/,
-                              const ib::sim::data::DataExchangeFormat& /*dataExchangeFormat*/,
+    auto CreateDataSubscriber(const std::string& /*topic*/, const std::string& /*mediaType*/,
                               const std::map<std::string, std::string>& /*labels*/,
                               ib::sim::data::DataHandlerT /* callback*/,
                               ib::sim::data::NewDataSourceHandlerT /*newDataSourceHandler*/)
         -> ib::sim::data::IDataSubscriber* override { return nullptr; }
     auto CreateDataSubscriberInternal(const std::string& /*topic*/, const std::string& /*linkName*/,
-                                      const sim::data::DataExchangeFormat& /*dataExchangeFormat*/,
+                                      const std::string& /*mediaType*/,
                                       const std::map<std::string, std::string>& /*publisherLabels*/,
                                       sim::data::DataHandlerT /*callback*/, sim::data::IDataSubscriber* /*parent*/)
         -> sim::data::DataSubscriberInternal* override { return nullptr; }

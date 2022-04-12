@@ -394,7 +394,7 @@ auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonical
 
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateDataSubscriberInternal(const std::string& topic, const std::string& linkName,
-                                                             const sim::data::DataExchangeFormat& dataExchangeFormat,
+                                                             const std::string& mediaType,
                                                              const std::map<std::string, std::string>& publisherLabels,
                                                              sim::data::DataHandlerT defaultHandler,
                                                              sim::data::IDataSubscriber* parent)
@@ -410,13 +410,13 @@ auto ComAdapter<IbConnectionT>::CreateDataSubscriberInternal(const std::string& 
 
     return CreateController<ib::cfg::DataSubscriber, sim::data::DataSubscriberInternal>(
         controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), topic,
-        dataExchangeFormat, publisherLabels, defaultHandler, parent);
+        mediaType, publisherLabels, defaultHandler, parent);
 }
 
 
 template <class IbConnectionT>
 auto ComAdapter<IbConnectionT>::CreateDataPublisher(const std::string& topic,
-    const ib::sim::data::DataExchangeFormat& dataExchangeFormat, const std::map<std::string, std::string>& labels,
+    const std::string& mediaType, const std::map<std::string, std::string>& labels,
     size_t history) -> sim::data::IDataPublisher*
 {
     if (history > 1)
@@ -448,13 +448,13 @@ auto ComAdapter<IbConnectionT>::CreateDataPublisher(const std::string& topic,
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataPublisher;
     supplementalData[ib::mw::service::supplKeyDataPublisherTopic] = topic;
     supplementalData[ib::mw::service::supplKeyDataPublisherPubUUID] = pubUUID;
-    supplementalData[ib::mw::service::supplKeyDataPublisherPubDxf] = dataExchangeFormat.mediaType;
+    supplementalData[ib::mw::service::supplKeyDataPublisherPubDxf] = mediaType;
     auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
     supplementalData[ib::mw::service::supplKeyDataPublisherPubLabels] = labelStr;
 
     auto controller = CreateController<ib::cfg::DataPublisher, ib::sim::data::DataPublisher>(
         controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), topic,
-        dataExchangeFormat, labels, pubUUID);
+        mediaType, labels, pubUUID);
 
     _ibConnection.SetHistoryLengthForLink(pubUUID, history, controller);
 
@@ -463,8 +463,7 @@ auto ComAdapter<IbConnectionT>::CreateDataPublisher(const std::string& topic,
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateDataSubscriber(const std::string& topic,
-                                                     const ib::sim::data::DataExchangeFormat& dataExchangeFormat,
+auto ComAdapter<IbConnectionT>::CreateDataSubscriber(const std::string& topic, const std::string& mediaType,
                                                      const std::map<std::string, std::string>& labels,
                                                      ib::sim::data::DataHandlerT defaultDataHandler,
                                                      ib::sim::data::NewDataSourceHandlerT newDataSourceHandler)
@@ -498,7 +497,7 @@ auto ComAdapter<IbConnectionT>::CreateDataSubscriber(const std::string& topic,
 
     auto controller = CreateController<ib::cfg::DataSubscriber, sim::data::DataSubscriber>(
         controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), topic,
-        dataExchangeFormat, labels, defaultDataHandler, newDataSourceHandler);
+        mediaType, labels, defaultDataHandler, newDataSourceHandler);
 
     controller->RegisterServiceDiscovery();
 

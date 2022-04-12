@@ -213,8 +213,8 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_labels_sync_vasio)
     RunSyncTest(pubsubs);
 }
 
-// Wrong dataExchangeFormat -> Expect no reception
-TEST_F(DataPubSubITest, test_1pub_1sub_wrong_dxf_sync_vasio)
+// Wrong mediaType -> Expect no reception
+TEST_F(DataPubSubITest, test_1pub_1sub_wrong_mediatype_sync_vasio)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = 0;
@@ -226,8 +226,8 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_dxf_sync_vasio)
     RunSyncTest(pubsubs);
 }
 
-// Wildcard dataExchangeFormat on subscriber
-TEST_F(DataPubSubITest, test_1pub_1sub_wildcard_dxf_sync_vasio)
+// Wildcard mediaType on subscriber
+TEST_F(DataPubSubITest, test_1pub_1sub_wildcard_mediatype_sync_vasio)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;

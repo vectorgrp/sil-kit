@@ -17,26 +17,26 @@ protected:
     DataExchangeFormatTest() {}
 };
 
-TEST_F(DataExchangeFormatTest, match_dataexchangeformat)
+TEST_F(DataExchangeFormatTest, match_mediatype)
 {
-    DataExchangeFormat defPub{"A"};
-    DataExchangeFormat defSub{"A"};
-    EXPECT_EQ(Match(defSub, defPub), true); // same string, match
+    std::string mediaTypePub{"A"};
+    std::string mediaTypeSub{"A"};
+    EXPECT_EQ(MatchMediaType(mediaTypeSub, mediaTypePub), true); // same string, match
 
-    defSub = {""};
-    EXPECT_EQ(Match(defSub, defPub), true); // empty subscriber dxf = wildcard, match
+    mediaTypeSub = "";
+    EXPECT_EQ(MatchMediaType(mediaTypeSub, mediaTypePub), true); // empty subscriber mediaType = wildcard, match
 
-    defSub = {"B"};
-    EXPECT_EQ(Match(defSub, defPub), false); // different strings, no match
+    mediaTypeSub = "B";
+    EXPECT_EQ(MatchMediaType(mediaTypeSub, mediaTypePub), false); // different strings, no match
 
-    defPub = {""}; 
-    EXPECT_EQ(Match(defSub, defPub), false); // empty publisher dxf != wildcard, no match
+    mediaTypePub = "";
+    EXPECT_EQ(MatchMediaType(mediaTypeSub, mediaTypePub), false); // empty publisher mediaType != wildcard, no match
 }
 
 TEST_F(DataExchangeFormatTest, match_labels)
 {
     std::map<std::string, std::string> innerSet{}; 
-    std::map<std::string, std::string> outerSet{{"KeyA", "ValA"},{"KeyB", "ValB"} ,{"KeyC", "ValC"} };
+    std::map<std::string, std::string> outerSet{{"KeyA", "ValA"}, {"KeyB", "ValB"} ,{"KeyC", "ValC"}};
     EXPECT_EQ(MatchLabels(innerSet, outerSet), true); // Empty innerSet, match
 
     innerSet = {{"KeyA", "ValA"}}; 

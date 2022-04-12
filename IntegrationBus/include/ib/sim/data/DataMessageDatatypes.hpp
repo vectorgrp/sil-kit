@@ -6,6 +6,7 @@
 #include <vector>
 #include <functional>
 #include <map>
+#include <string>
 
 namespace ib {
 namespace sim {
@@ -15,27 +16,13 @@ namespace data {
 class IDataSubscriber;
 class IDataPublisher;
 
-/*! \brief Serialization details.
- *
- * Specification of the data format used by individual DataPublishers and DataSubscribers. Single asterisk for wildcard
- * fields
- */
-struct DataExchangeFormat {
-    std::string mediaType;
-};
-
-inline bool operator==(const DataExchangeFormat& lhs, const DataExchangeFormat& rhs)
-{
-    return lhs.mediaType == rhs.mediaType;
-}
-
 //! \brief Callback type for new data reception callbacks
 using DataHandlerT =
     std::function<void(ib::sim::data::IDataSubscriber* subscriber, const std::vector<uint8_t>& data)>;
 
 //! \brief Callback type for new data sources
-using NewDataSourceHandlerT = std::function<void(ib::sim::data::IDataSubscriber* subscriber, const std::string& topic,
-                                                 const ib::sim::data::DataExchangeFormat& dataExchangeFormat,
+using NewDataSourceHandlerT = std::function<void(ib::sim::data::IDataSubscriber* subscriber,
+                                                 const std::string& topic, const std::string& mediaType,
                                                  const std::map<std::string, std::string>& labels)>;
 
 

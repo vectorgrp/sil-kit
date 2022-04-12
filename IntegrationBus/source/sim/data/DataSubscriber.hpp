@@ -26,7 +26,7 @@ class DataSubscriber
 {
 public:
     DataSubscriber(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider, const std::string& topic,
-                   DataExchangeFormat dataExchangeFormat, const std::map<std::string, std::string>& labels,
+                   const std::string& mediaType, const std::map<std::string, std::string>& labels,
                    DataHandlerT defaultDataHandler, NewDataSourceHandlerT newDataSourceHandler);
 
 public:
@@ -34,11 +34,11 @@ public:
 
     void SetDefaultReceiveMessageHandler(DataHandlerT callback) override;
 
-    void RegisterSpecificDataHandler(const DataExchangeFormat& dataExchangeFormat,
+    void RegisterSpecificDataHandler(const std::string& mediaType,
                                      const std::map<std::string, std::string>& labels,
                                      DataHandlerT callback) override;
 
-    void AddInternalSubscriber(const std::string& pubUUID, DataExchangeFormat joinedDataExchangFormat,
+    void AddInternalSubscriber(const std::string& pubUUID, const std::string& joinedMediaType,
                                const std::map<std::string, std::string>& publisherLabels);
 
     //ib::mw::sync::ITimeConsumer
@@ -53,7 +53,7 @@ private:
     void AssignSpecificDataHandlers();
 
     std::string _topic;
-    DataExchangeFormat _dataExchangeFormat;
+    std::string _mediaType;
     std::map<std::string, std::string> _labels;
     DataHandlerT _defaultDataHandler;
     NewDataSourceHandlerT _newDataSourceHandler;

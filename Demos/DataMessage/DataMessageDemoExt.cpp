@@ -65,10 +65,10 @@ void SpecificDataHandlerForPub2(IDataSubscriber* /*subscriber*/, const std::vect
 }
 
 void NewDataSource(IDataSubscriber* /*subscriber*/, const std::string& topic,
-                   const DataExchangeFormat& dataExchangeFormat,
+                   const std::string& mediaType,
                    const std::map<std::string, std::string>& labels)
 {
-    std::cout << ">> New data source: topic=" << topic << " dataExchangeFormat=" << dataExchangeFormat
+    std::cout << ">> New data source: topic=" << topic << " mediaType=" << mediaType
               << " labels=" << labels << "" << std::endl;
 }
 
@@ -122,13 +122,13 @@ int main(int argc, char** argv)
 
         });
 
-        const DataExchangeFormat dataExchangeFormat{ ib::util::serdes::sil::MediaType() };
+        const std::string mediaType{ ib::util::serdes::sil::MediaType() };
 
         participantController->SetPeriod(1s);
         if (participantName == "Publisher1")
         {
             std::map<std::string, std::string> labels{{"KeyA", "ValA"}, {"KeyB", "ValB"} };
-            auto* publisher = participant->CreateDataPublisher("Topic1", dataExchangeFormat, labels, 0);
+            auto* publisher = participant->CreateDataPublisher("Topic1", mediaType, labels, 0);
 
             participantController->SetSimulationTask(
                 [publisher](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -142,7 +142,7 @@ int main(int argc, char** argv)
         else if (participantName == "Publisher2")
         {
             std::map<std::string, std::string> labels{ {"KeyB", "ValB"}, {"KeyC", "ValC"} };
-            auto* publisher = participant->CreateDataPublisher("Topic1", dataExchangeFormat, labels, 0);
+            auto* publisher = participant->CreateDataPublisher("Topic1", mediaType, labels, 0);
 
             participantController->SetSimulationTask(
                 [publisher](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -154,11 +154,11 @@ int main(int argc, char** argv)
         }
         else //if (participantName == "Subscriber")
         {
-            auto* subscriber = participant->CreateDataSubscriber("Topic1", dataExchangeFormat, {}, DefaultDataHandler, NewDataSource);
+            auto* subscriber = participant->CreateDataSubscriber("Topic1", mediaType, {}, DefaultDataHandler, NewDataSource);
            
-            subscriber->RegisterSpecificDataHandler(dataExchangeFormat, {{"KeyA", ""}, {"KeyB", ""}},
+            subscriber->RegisterSpecificDataHandler(mediaType, {{"KeyA", ""}, {"KeyB", ""}},
                                                     SpecificDataHandlerForPub1);
-            subscriber->RegisterSpecificDataHandler(dataExchangeFormat, {{"KeyC", ""}},
+            subscriber->RegisterSpecificDataHandler(mediaType, {{"KeyC", ""}},
                                                     SpecificDataHandlerForPub2);
 
             participantController->SetSimulationTask(

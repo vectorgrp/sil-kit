@@ -11,9 +11,9 @@ bool operator==(const DataMessage& lhs, const DataMessage& rhs)
     return lhs.data == rhs.data;
 }
 
-bool Match(const DataExchangeFormat& subscriberDxf, const DataExchangeFormat& publisherDxf)
+bool MatchMediaType(const std::string& subMediaType, const std::string& pubMediaType)
 {
-    return subscriberDxf.mediaType == "" || subscriberDxf.mediaType == publisherDxf.mediaType;
+    return subMediaType == "" || subMediaType == pubMediaType;
 }
 
 bool MatchLabels(const std::map<std::string, std::string>& subscriberLabels, const std::map<std::string, std::string>& publisherLabels)

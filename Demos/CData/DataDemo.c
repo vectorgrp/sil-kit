@@ -68,10 +68,9 @@ const int numPublications = 10;
 char* participantName;
 
 void NewDataSourceHandler(void* context, ib_Data_Subscriber* cbDataSubscriber, const char* topic,
-                          const ib_Data_ExchangeFormat* dataExchangeFormat, const ib_KeyValueList* labelList)
+                          const char* mediaType, const ib_KeyValueList* labelList)
 {
-    printf("<< Received new data source: topic=\"%s\", mediaType=\"%s\", labels={", topic,
-           dataExchangeFormat->mediaType);
+    printf("<< Received new data source: topic=\"%s\", mediaType=\"%s\", labels={", topic, mediaType);
     for (uint32_t i = 0; i < labelList->numLabels; i++)
     {
         printf("{%s, %s}", labelList->labels[i].key, labelList->labels[i].value);
@@ -174,11 +173,11 @@ int main(int argc, char* argv[])
         printf("Error: cannot open config file %s\n", argv[1]);
         return 1;
     }
-    participantName = argv[2]; 
+    participantName = argv[2];
     const char* domainId = "42";
     if (argc >= 4)
     {
-        domainId = argv[3]; 
+        domainId = argv[3];
     }
 
     // Participant
@@ -192,8 +191,8 @@ int main(int argc, char* argv[])
 
     if (strcmp(participantName, "Subscriber1") == 0)
     {
-        ib_Data_ExchangeFormat subDataExchangeFormat = { ib_InterfaceIdentifier_DataExchangeFormat, "text/plain" };
-        
+        const char* subMediaType = "text/plain";
+
         // For subscriber labels:
         // The key must appear in the publisher's labels for communication to take place.
         // No labels at all is wildcard.
@@ -204,17 +203,17 @@ int main(int argc, char* argv[])
         Create_Labels(&subLabelList, subLabels, numSubLabels);
         transmitContext.someInt = 1234;
 
-        returnCode = ib_Data_Subscriber_Create(&dataSubscriber, participant, "TopicA", &subDataExchangeFormat,
-                                               subLabelList, (void*)&transmitContext, &DefaultDataHandler,
+        returnCode = ib_Data_Subscriber_Create(&dataSubscriber, participant, "TopicA", subMediaType, subLabelList,
+                                               (void*)&transmitContext, &DefaultDataHandler,
                                                (void*)&transmitContext, &NewDataSourceHandler);
 
-        // This redirects publications by dataPublisher2 (label {"KeyA", "ValA"}, {"KeyB", "ValB"}) 
+        // This redirects publications by dataPublisher2 (label {"KeyA", "ValA"}, {"KeyB", "ValB"})
         // to the SpecificDataHandler (empty value is wildcard)
         ib_KeyValueList* specificLabelList;
         numSubLabels = 2;
         ib_KeyValuePair specificLabels[2] = { {"KeyA", ""}, {"KeyB", ""} };
         Create_Labels(&specificLabelList, specificLabels, numSubLabels);
-        ib_Data_Subscriber_RegisterSpecificDataHandler(dataSubscriber, &subDataExchangeFormat, specificLabelList,
+        ib_Data_Subscriber_RegisterSpecificDataHandler(dataSubscriber, subMediaType, specificLabelList,
                                                        (void*)&transmitContext, &SpecificDataHandler);
 
         if (returnCode)
@@ -233,23 +232,23 @@ int main(int argc, char* argv[])
     }
     else if (strcmp(participantName, "Publisher1") == 0)
     {
-        ib_Data_ExchangeFormat pubDataExchangeFormat = { ib_InterfaceIdentifier_DataExchangeFormat, "text/plain" };
+        const char * pubMediaType = "text/plain";
         uint8_t history = 1;
 
         ib_KeyValueList* pubLabelList1;
         size_t numPubLabels1 = 1;
         ib_KeyValuePair pubLabels1[1] = { {"KeyA", "ValA"} };
         Create_Labels(&pubLabelList1, pubLabels1, numPubLabels1);
-        returnCode = ib_Data_Publisher_Create(&dataPublisher1, participant, "TopicA", &pubDataExchangeFormat,
-                                             pubLabelList1, history);
+        returnCode = ib_Data_Publisher_Create(&dataPublisher1, participant, "TopicA", pubMediaType, pubLabelList1,
+                                              history);
 
         ib_KeyValueList* pubLabelList2;
         size_t numPubLabels2 = 2;
         ib_KeyValuePair pubLabels2[2] = { {"KeyA", "ValA"}, {"KeyB", "ValB"} };
         Create_Labels(&pubLabelList2, pubLabels2, numPubLabels2);
 
-        returnCode = ib_Data_Publisher_Create(&dataPublisher2, participant, "TopicA", &pubDataExchangeFormat,
-                                             pubLabelList2, history);
+        returnCode = ib_Data_Publisher_Create(&dataPublisher2, participant, "TopicA", pubMediaType, pubLabelList2,
+                                              history);
         if (returnCode)
         {
             printf("%s\n", ib_GetLastErrorString());

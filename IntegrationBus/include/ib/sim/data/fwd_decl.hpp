@@ -8,7 +8,6 @@ namespace data {
 
 struct PublisherAnnouncement;
 struct DataMessage;
-struct DataExchangeFormat;
 
 class IDataPublisher;
 class IDataSubscriber;

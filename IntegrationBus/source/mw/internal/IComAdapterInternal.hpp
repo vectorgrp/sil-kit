@@ -161,8 +161,7 @@ public:
 	
 	// Internal DataSubscriber that is only created on a matching data connection
     virtual auto CreateDataSubscriberInternal(
-        const std::string& topic, const std::string& linkName,
-        const sim::data::DataExchangeFormat& dataExchangeFormat,
+        const std::string& topic, const std::string& linkName, const std::string& mediaType,
         const std::map<std::string, std::string>& publisherLabels, sim::data::DataHandlerT callback,
         sim::data::IDataSubscriber* parent) -> sim::data::DataSubscriberInternal*  = 0;
 

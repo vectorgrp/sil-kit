@@ -34,7 +34,7 @@ class DataPublisherTest : public ::testing::Test
 {
 protected:
     DataPublisherTest()
-        : publisher{ &comAdapter, comAdapter.GetTimeProvider(), "Topic", DataExchangeFormat{}, {}, "pubUUID" }
+        : publisher{ &comAdapter, comAdapter.GetTimeProvider(), "Topic", {}, {}, "pubUUID" }
     {
         publisher.SetServiceDescriptor(from_endpointAddress(portAddress));
     }

@@ -5,6 +5,109 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.7.x] - 2022-04-x
+--------------------------------
+
+Removed
+~~~~~~~
+
+- Replaced the single-member struct ``DataExchangeFormat`` with its sole member, the media type string.
+  The following data type and some associated free functions were removed:
+  
+  - ``IntegrationBus/include/ib/sim/data/DataMessageDatatypes.hpp``
+
+    .. code-block:: c++
+
+      struct ib::sim::data::DataExchangeFormat;
+      bool operator ==(const DataExchangeFormat &, const DataExchangeFormat &);
+
+  - ``IntegrationBus/include/ib/sim/data/string_utils.hpp``
+  
+    .. code-block:: c++
+
+      ib::sim::data::to_string(const DataExchangeFormat&) -> std::string;
+      ib::sim::data::operator<<(std::ostream& out, const DataExchangeFormat& dataExchangeFormat) -> std::ostream&;
+
+  - ``IntegrationBus/include/ib/capi/DataPubSub.h``
+  
+    .. code-block:: c++
+      
+      typedef struct { ... } ib_Data_ExchangeFormat;
+
+Changed
+~~~~~~~
+
+- Replaced the single-member struct ``DataExchangeFormat`` with its sole member, the media type string.
+  The following method and function type signatures have changed:
+
+  - ``IntegrationBus/include/ib/mw/IComAdapter.hpp``
+
+    + old:
+
+    .. code-block:: c++
+      
+      IComAdapter::CreateDataPublisher(..., const DataExchangeFormat&, ...) -> ...;
+      IComAdapter::CreateDataSubscriber(..., const DataExchangeFormat&, ...) -> ...;
+
+    + new:
+
+    .. code-block:: c++
+      
+      IComAdapter::CreateDataPublisher(..., const std::string& ...) -> ...;
+      IComAdapter::CreateDataSubscriber(..., const std::string& ...) -> ...;
+
+  - ``IntegrationBus/include/ib/sim/data/DataMessageDatatypes.hpp``
+  
+    + old:
+
+    .. code-block:: c++
+      
+      NewDataSourceHandlerT = std::function<void(..., const DataExchangeFormat&, ...)>;
+    
+    + new:
+
+    .. code-block:: c++
+      
+      NewDataSourceHandlerT = std::function<void(..., const std::string&, ...)>;
+      
+  - ``IntegrationBus/include/ib/sim/data/IDataSubscriber.hpp``
+  
+    + old:
+
+    .. code-block:: c++
+      
+      IDataSubscriber::RegisterSpecificDataHandler(const DataExchangeFormat&, ...) -> ...;
+    
+    + new:
+
+    .. code-block:: c++
+      
+      IDataSubscriber::RegisterSpecificDataHandler(const std::string&, ...) -> ...;
+      
+  - ``IntegrationBus/include/ib/capi/DataPubSub.h``
+  
+    + old:
+
+    .. code-block:: c++
+      
+      typedef void (*ib_Data_NewDataSourceHandler_t)(..., const ib_Data_ExchangeFormat* dataExchangeFormat, ...);
+      IntegrationBusAPI ib_ReturnCode ib_Data_Publisher_Create(..., ib_Data_ExchangeFormat* dataExchangeFormat, ...);
+      typedef ib_ReturnCode (*ib_Data_Publisher_Create_t)(..., ib_Data_ExchangeFormat* dataExchangeFormat, ...);
+      IntegrationBusAPI ib_ReturnCode ib_Data_Subscriber_Create(..., ib_Data_ExchangeFormat* dataExchangeFormat, ...);
+      typedef ib_ReturnCode (*ib_Data_Subscriber_Create_t)(..., ib_Data_ExchangeFormat* dataExchangeFormat, ...);
+      IntegrationBusAPI ib_ReturnCode ib_Data_Subscriber_RegisterSpecificDataHandler(..., ib_Data_ExchangeFormat* dataExchangeFormat, ...);
+    
+    + new:
+
+    .. code-block:: c++
+      
+      typedef void (*ib_Data_NewDataSourceHandler_t)(..., const char* mediaType, ...);
+      IntegrationBusAPI ib_ReturnCode ib_Data_Publisher_Create(..., const char* mediaType, ...);
+      typedef ib_ReturnCode (*ib_Data_Publisher_Create_t)(..., const char* mediaType, ...);
+      IntegrationBusAPI ib_ReturnCode ib_Data_Subscriber_Create(..., const char* mediaType, ...);
+      typedef ib_ReturnCode (*ib_Data_Subscriber_Create_t)(..., const char* mediaType, ...);
+      IntegrationBusAPI ib_ReturnCode ib_Data_Subscriber_RegisterSpecificDataHandler(..., const char* mediaType, ...);
+
 [3.7.18] - 2022-04-05
 --------------------------------
 

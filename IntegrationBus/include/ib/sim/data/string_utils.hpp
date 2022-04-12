@@ -17,9 +17,6 @@ namespace data {
 inline std::string to_string(const DataMessage& msg);
 inline std::ostream& operator<<(std::ostream& out, const DataMessage& msg);
 
-inline std::string   to_string(const DataExchangeFormat& dataExchangeFormat);
-inline std::ostream& operator<<(std::ostream& out, const DataExchangeFormat& dataExchangeFormat);
-
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
@@ -35,18 +32,6 @@ std::ostream& operator<<(std::ostream& out, const DataMessage& msg)
                << util::AsHexString(msg.data).WithSeparator(" ").WithMaxLength(16)
                << ", size=" << msg.data.size()
                << "}";
-}
-
-std::string to_string(const DataExchangeFormat& dataExchangeFormat)
-{
-    std::stringstream out;
-    out << dataExchangeFormat;
-    return out.str();
-}
-std::ostream& operator<<(std::ostream& out, const DataExchangeFormat& dataExchangeFormat)
-{
-    return out << "data::DataExchangeFormat{"
-               << "mediaType=" << dataExchangeFormat.mediaType << "}";
 }
 
 } // namespace data

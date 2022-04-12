@@ -31,8 +31,8 @@ protected:
 
 protected:
     DataSubscriberTest()
-        : subscriber{ &comAdapter, comAdapter.GetTimeProvider(), "Topic", DataExchangeFormat{}, {}, {}, nullptr }
-        , subscriberOther{ &comAdapter, comAdapter.GetTimeProvider(), "Topic", DataExchangeFormat{}, {}, {}, nullptr }
+        : subscriber{ &comAdapter, comAdapter.GetTimeProvider(), "Topic", {}, {}, {}, nullptr }
+        , subscriberOther{ &comAdapter, comAdapter.GetTimeProvider(), "Topic", {}, {}, {}, nullptr }
     {
         subscriber.SetServiceDescriptor(from_endpointAddress(endpointAddress));
         subscriber.SetDefaultReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));

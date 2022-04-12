@@ -25,8 +25,8 @@ inline std::string   to_string(const FunctionCallResponse& msg);
 inline std::ostream& operator<<(std::ostream& out, const FunctionCallResponse& msg);
 
 // RpcDatatypes
-inline std::string   to_string(const RpcExchangeFormat& dataExchangeFormat);
-inline std::ostream& operator<<(std::ostream& out, const RpcExchangeFormat& dataExchangeFormat);
+inline std::string   to_string(const RpcExchangeFormat& rpcExchangeFormat);
+inline std::ostream& operator<<(std::ostream& out, const RpcExchangeFormat& rpcExchangeFormat);
 
 inline std::ostream& operator<<(std::ostream& out, const std::map<std::string, std::string>& labels);
 

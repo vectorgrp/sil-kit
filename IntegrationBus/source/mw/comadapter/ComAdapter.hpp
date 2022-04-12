@@ -105,12 +105,12 @@ public:
     auto CreateLinController(const std::string& canonicalName, const std::string& networkName)
         -> sim::lin::ILinController* override;
     auto CreateLinController(const std::string& canonicalName) -> sim::lin::ILinController* override;
-    auto CreateDataPublisher(const std::string& topic, const sim::data::DataExchangeFormat& dataExchangeFormat, 
+    auto CreateDataPublisher(const std::string& topic, const std::string& mediaType, 
         const std::map<std::string, std::string>& labels, size_t history = 0)->sim::data::IDataPublisher* override;
-    auto CreateDataSubscriber(const std::string& topic, const sim::data::DataExchangeFormat& dataExchangeFormat, const std::map<std::string, std::string>& labels,
+    auto CreateDataSubscriber(const std::string& topic, const std::string& mediaType, const std::map<std::string, std::string>& labels,
         sim::data::DataHandlerT defaultDataHandler, sim::data::NewDataSourceHandlerT newDataSourceHandler = nullptr)->sim::data::IDataSubscriber* override;
     auto CreateDataSubscriberInternal(const std::string& canonicalName, const std::string& linkName, 
-        const sim::data::DataExchangeFormat& dataExchangeFormat, const std::map<std::string, std::string>& publisherLabels, sim::data::DataHandlerT callback, sim::data::IDataSubscriber* parent)
+        const std::string& mediaType, const std::map<std::string, std::string>& publisherLabels, sim::data::DataHandlerT callback, sim::data::IDataSubscriber* parent)
         ->sim::data::DataSubscriberInternal* override;
 		
     auto CreateRpcClient(const std::string& functionName, const sim::rpc::RpcExchangeFormat exchangeFormat,

@@ -33,7 +33,7 @@ protected:
                           size_t newMessageSizeInBytes, uint32_t newNumMsgToPublish)
         {
             topic = newTopic;
-            dxf.mediaType = newMediaType;
+            mediaType = newMediaType;
             labels = newLabels;
             history = newHistory;
             messageSizeInBytes = newMessageSizeInBytes;
@@ -41,7 +41,7 @@ protected:
         }
 
         std::string topic;
-        DataExchangeFormat dxf;
+        std::string mediaType;
         std::map<std::string, std::string> labels;
         uint8_t history;
         size_t messageSizeInBytes;
@@ -67,7 +67,7 @@ protected:
 
     struct SpecificDataHandlerInfo
     {
-        DataExchangeFormat dataExchangeFormat;
+        std::string mediaType;
         std::map<std::string, std::string> labels;
     };
 
@@ -81,7 +81,7 @@ protected:
         {
             expectIncreasingData = true;
             topic = newTopic;
-            dxf.mediaType = newMediaType;
+            mediaType = newMediaType;
             labels = newLabels;
             messageSizeInBytes = newMessageSizeInBytes;
             numMsgToReceive = newNumMsgToReceive;
@@ -98,7 +98,7 @@ protected:
         {
             expectIncreasingData = false;
             topic = newTopic;
-            dxf.mediaType = newMediaType;
+            mediaType = newMediaType;
             labels = newLabels;
             messageSizeInBytes = newMessageSizeInBytes;
             numMsgToReceive = newNumMsgToReceive;
@@ -109,7 +109,7 @@ protected:
         }
 
         std::string topic;
-        DataExchangeFormat dxf;
+        std::string mediaType;
         std::map<std::string, std::string> labels;
         std::map<std::string, std::string> expectedLabels;
         size_t messageSizeInBytes;
@@ -174,7 +174,7 @@ protected:
             {
                 if (sp.labels == dataSourceLabels)
                 {
-                    subscriber->RegisterSpecificDataHandler(sp.dataExchangeFormat, sp.labels, receptionHandler);
+                    subscriber->RegisterSpecificDataHandler(sp.mediaType, sp.labels, receptionHandler);
                 }
             }
         }
@@ -299,7 +299,7 @@ protected:
 
                 auto newDataSourceHandler = [&participant, &ds, receptionHandler](
                                                 IDataSubscriber* subscriber, const std::string& /*topic*/,
-                                                const DataExchangeFormat& /*dataExchangeFormat*/,
+                                                const std::string& /*mediaType*/,
                                                 const std::map<std::string, std::string>& dataSourceLabels) {
                     ds.OnNewDataSource(subscriber, dataSourceLabels, receptionHandler);
                     participant.CheckAllDiscoveredPromise();
@@ -309,12 +309,12 @@ protected:
                 {
                     // Create DataSubscriber with default handler
                     ds.dataSubscriber = participant.comAdapter->CreateDataSubscriber(
-                        ds.topic, ds.dxf, ds.labels, receptionHandler, newDataSourceHandler);
+                        ds.topic, ds.mediaType, ds.labels, receptionHandler, newDataSourceHandler);
                 }
                 else
                 {
                     // Create DataSubscriber without default handler
-                    ds.dataSubscriber = participant.comAdapter->CreateDataSubscriber(ds.topic, ds.dxf, ds.labels,
+                    ds.dataSubscriber = participant.comAdapter->CreateDataSubscriber(ds.topic, ds.mediaType, ds.labels,
                                                                                      nullptr, newDataSourceHandler);
                 }
             }
@@ -322,7 +322,7 @@ protected:
             // Setup/Create Publishers
             for (auto& dp : participant.dataPublishers)
             {
-                dp.dataPublisher = participant.comAdapter->CreateDataPublisher(dp.topic, dp.dxf, dp.labels, dp.history);
+                dp.dataPublisher = participant.comAdapter->CreateDataPublisher(dp.topic, dp.mediaType, dp.labels, dp.history);
             }
             auto publishTask = [&participant]() {
                 for (auto& dp : participant.dataPublishers)

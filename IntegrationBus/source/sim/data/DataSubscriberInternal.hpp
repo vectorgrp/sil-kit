@@ -20,7 +20,7 @@ class DataSubscriberInternal
 {
 public:
     DataSubscriberInternal(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
-                           const std::string& topic, DataExchangeFormat dataExchangeFormat,
+                           const std::string& topic, const std::string& mediaType,
                            const std::map<std::string, std::string>& labels, DataHandlerT defaultHandler,
                            IDataSubscriber* parent);
 
@@ -36,7 +36,7 @@ public:
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
 
-    DataExchangeFormat GetDataExchangeFormat() { return _dataExchangeFormat; };
+    std::string GetMediaType() { return _mediaType; };
     std::map <std::string, std::string> GetLabels() { return _labels; };
 
     // IIbServiceEndpoint
@@ -45,7 +45,7 @@ public:
 
 private:
     std::string _topic;
-    DataExchangeFormat _dataExchangeFormat;
+    std::string _mediaType;
     std::map<std::string, std::string> _labels;
     DataHandlerT _defaultHandler;
     IDataSubscriber* _parent{nullptr};
