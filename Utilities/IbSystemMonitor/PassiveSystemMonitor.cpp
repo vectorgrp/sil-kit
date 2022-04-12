@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     commandlineParser.Add<ib::util::CommandlineParser::Flag>("help", "h", "[--help]",
         "-h, --help: Get this help.");
     commandlineParser.Add<ib::util::CommandlineParser::Option>("domain", "d", "42", "[--domain <domainId>]",
-        "-d, --domain <domainId>: The domain ID which is used by the Integration Bus. Defaults to 42.");
+        "-d, --domain <domainId>: The domain ID that is used by the Integration Bus. Defaults to 42.");
     commandlineParser.Add<ib::util::CommandlineParser::Option>("name", "n", "SystemMonitor", "[--name <participantName>]",
         "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to 'SystemMonitor'.");
     commandlineParser.Add<ib::util::CommandlineParser::Option>("configuration", "c", "", "[--configuration <configuration>]",

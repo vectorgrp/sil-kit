@@ -22,7 +22,7 @@ int main(int argc, char** argv)
     commandlineParser.Add<ib::util::CommandlineParser::Flag>("use-signal-handler", "s", "[--use-signal-handler]",
         "-s, --use-signal-handler: Exit this process when a signal is received. If not set, the process runs infinitely.");
     commandlineParser.Add<ib::util::CommandlineParser::Option>("domain", "d", "42", "[--domain <domainId>]",
-        "-d, --domain <domainId>: The domain ID which is used by the Integration Bus. Defaults to 42.");
+        "-d, --domain <domainId>: The domain ID that is used by the Integration Bus. Defaults to 42.");
     commandlineParser.Add<ib::util::CommandlineParser::Positional>("configuration", "[<configuration>]",
         "<configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.");
 

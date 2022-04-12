@@ -1,5 +1,5 @@
 ==============
-!!! Utilities
+Utilities
 ==============
 
 .. contents::
@@ -7,65 +7,14 @@
    :depth: 1
 
 Running a Vector Integration Bus (VIB) system is supported by several utilities.
-The launcher's purpose is to simplify starting ensembles  of participants
-and other simulation utilities from a given configuration file.
 The registry is a mandatory part of the VAsio middleware -- it implements
 connection and service discovery for participants.
 The system monitor and controller are provided for convenience. They implement
 a simulation-wide state tracking and system command handling which is required
-in every simulation. However, using these processes is not mandatory -- users
+in every simulation. However, using these utilities is not mandatory -- users
 of the VIB are free to implement their own system and state handling.
 
-.. _sec:util-launcher:
-
-!!! Launcher
-~~~~~~~~
-
-.. list-table::
-   :widths: 17 205
-   :stub-columns: 1
-
-   *  -  Abstract
-      -  The Launcher script allows starting multiple participants of a
-         VIB system.
-         Nevertheless, all participants, e.g. the Demos, may be executed
-         manually as described in the corresponding section.
-   *  -  Source location
-      -  ``Launcher``
-   *  -  Requirements
-      -  * `Python <https://www.python.org/downloads/>`_  v3.x+
-         * Adaptation of the :doc:`LaunchConfigurations <../configuration/launch-configurations>` section in the
-           Integration Bus config (e.g. Demos/Can/IbConfig_DemoCan.json).
-         * Adaptation of INTEGRATIONBUS_BINPATH & INTEGRATIONBUS_LIBPATH
-           in process environment. Default is to
-           infer the IntegrationBus paths from the path of IbLauncher.py.
-   *  -  Parameters
-      -  There are eight arguments:
-
-         #. Filename of the IB Configuration to be used (IB config file).
-         #. Launch configuration ``[-c] CONFIG`` (e.g. Installation/Developer-WinDebug/Developer-WinRelease/Developer-Linux)
-         #. Network node ``[-n NODE]``, optional
-         #. Domain ID (optional); defaults to ``42``.
-         #. Command ``[-x COMMAND]`` (e.g. setup/run/teardown/setup-run-teardown(default)), optional
-         #. Logfile ``[-l LOGFILE]``, optional
-         #. Retries ``[-r RETRIES]``, optional
-         #. Quiet execution ``[-q]``, optional
-   *  -  Usage Example
-      -  .. code-block:: powershell
-
-            # Launch CAN demo w/o Network Simulator VIBE:
-            IbLauncher.py Demos/Can/IbConfig_DemoCan.json -c Installation
-
-   *  -  Notes
-      -  * The distribution package contains the launcher in the
-           ``Integrationbus/bin/`` directory.
-         * INTEGRATIONBUS_BINPATH & INTEGRATIONBUS_LIBPATH may be defined
-           as environment variables.
-
-
-.. _sec:util-registry:
-
-!!! VAsio Registry
+IbRegistry
 ~~~~~~~~~~~~~~
 
 .. list-table::
@@ -74,38 +23,34 @@ of the VIB are free to implement their own system and state handling.
 
    *  - Abstract
       - The Registry enables discovery between IB participants when using the
-        VAsio middleware. It is mandatory, when using the VAsio middleware.
+        VAsio middleware. It is mandatory when using the VAsio middleware.
 
    *  - Source location
       - ``Utilities/IbRegistry``
    *  - Requirements
       - None
    *  - Parameters
-      - There are up to three positional arguments:
-
-        #. Filename of the IB Configuration to be used (IB config file).
-        #. Domain ID (optional); defaults to ``42``.
-        #. ``--use-signal-handler`` (optional); Uses a signal handler for shutdown and does not read from stdin.
+      - -v, --version               Get version info.
+        -h, --help                  Show the help of the IbRegistry.
+        -s, --use-signal-handler    Exit this process when a signal is received. If not set, the process runs infinitely.
+        -d, --domain <domainId>     The domain ID that is used by the Integration Bus. Defaults to 42.
+        <configuration>             Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
 
    *  - Usage Example
       - .. code-block:: powershell
 
-            # Start the IbRegistry using the CAN demo configuration
-            IbRegistry Demos/Can/IbConfig_DemoCan.json 42
+            # Start the IbRegistry
+            IbRegistry
 
    *  - Notes
-      -  * The distribution package contains the IbRegistry shared libraries in the
-           ``Integrationbus-NonRedistributable/`` directory of the distribution.
-         * The IbRegistry is packaged in the ``IntegrationBus/bin`` directory.
+      -  * The IbRegistry is packaged in the ``IntegrationBus/bin`` directory.
          * When using the VAsio middleware, the IbRegistry must be started
-           before the IB participants. When using the Launcher, the IbRegistry
-           is automatically started if the IbConfig specifies VAsio as the
-           :doc:`active middleware<../configuration/middleware-configuration>`.
+           before the IB participants.
 
 
 .. _sec:util-system-controller:
 
-!!! IbSystemController
+IbSystemController
 ~~~~~~~~~~~~~~~~
 
 .. list-table::
@@ -120,18 +65,21 @@ of the VIB are free to implement their own system and state handling.
    *  -  Source location
       -  ``Utilities/IbSystemController``
    *  -  Requirements
-      -  The SystemController requires an established Integration Bus System.
-         Thus, it has to be started after other (active) participants.
+      -  The SystemController needs a running IbRegistry to connect to. 
+         Furthermore, it requires a list of synchronized participants that are needed to start the simulation as input.
    *  -  Parameters
-      -  There are up to two positional argument:
+      -  -v, --version                                Get version info.
+         -h, --help                                   Show the help of the IbSystemController.
+         -d, --domain <domainId>                      The domain ID which is used by the Integration Bus. Defaults to 42.
+         -n, --name <participantName>                 The participant name used to take part in the simulation. Defaults to 'SystemController'.
+         -c, --configuration                          Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
+         <participantName1>, <participantName2>, ...  Names of participants to wait for before starting simulation.
 
-         #. Filename of the IB Configuration to be used (IB config file).
-         #. Domain ID (optional); defaults to ``42``.
    *  -  Usage Example
       -  .. code-block:: powershell
 
-            # Start SystemController for CAN Demo w/o Network Simulator VIBE:
-            IbSystemController Demos/Can/IbConfig_DemoCan.json
+            # Start SystemController and wait for Participant1 and Participant2:
+            IbSystemController Participant1 Participant2
    *  -  Notes
       -  * The distribution package contains the IbSystemController in the
            ``Integrationbus/bin/`` directory.
@@ -140,7 +88,7 @@ of the VIB are free to implement their own system and state handling.
 
 .. _sec:util-system-controller-interactive:
 
-!!! IbSystemControllerInteractive
+IbSystemControllerInteractive
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
@@ -148,25 +96,26 @@ of the VIB are free to implement their own system and state handling.
    :stub-columns: 1
 
    *  -  Abstract
-      -  This variant of the system controller allows setting the system states
+      -  This variant of the system controller allows sending system commands
          manually via a command line interface. A user can enter commands on
-         standard input, e.g. "Run", "Stop", "Shutdown".
+         standard input: "Run", "Stop", "Shutdown"
    *  -  Source location
       -  ``Utilities/IbSystemControllerInteractive``
    *  -  Requirements
-      -  The SystemControllerInteractive requires an established Integration Bus
-         System.
-         Thus, it has to be started after other (active) participants.
+      -  The SystemController needs a running IbRegistry to connect to. 
+         Furthermore, it requires a list of synchronized participants that are needed to start the simulation as input.
    *  -  Parameters
-      -  There are up to two positional argument:
-
-         #. Filename of the IB Configuration to be used (IB config file).
-         #. Domain ID (optional); defaults to ``42``.
+      -  -v, --version                                Get version info.
+         -h, --help                                   Show the help of the IbSystemControllerInteractive.
+         -d, --domain <domainId>                      The domain ID which is used by the Integration Bus. Defaults to 42.
+         -n, --name <participantName>                 The participant name used to take part in the simulation. Defaults to 'SystemController'.
+         -c, --configuration                          Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
+         <participantName1>, <participantName2>, ...  Names of participants that are required for the simulation (e.g. synchronized paricipants).
    *  -  Usage Example
       -  .. code-block:: powershell
 
-            # Start SystemControllerInteractive for CAN Demo w/o Network Simulator VIBE:
-            IbSystemControllerInteractive Demos/Can/IbConfig_DemoCan.json
+            # Start SystemControllerInteractive for two participants and a Network Simulator VIBE called NetworkSimulator:
+            IbSystemControllerInteractive Participant1 Participant2 NetworkSimulator
    *  -  Notes
       -  * The distribution package contains the IbSystemControllerInteractive
            in the ``Integrationbus/bin/`` directory.
@@ -174,7 +123,7 @@ of the VIB are free to implement their own system and state handling.
 
 .. _sec:util-system-monitor:
 
-!!! IbSystemMonitor
+IbSystemMonitor
 ~~~~~~~~~~~~~
 
 .. list-table::
@@ -183,21 +132,23 @@ of the VIB are free to implement their own system and state handling.
 
    *  -  Abstract
       -  The SystemMonitor visualizes the states of the participants of an
-         Integration Bus system.
+         Integration Bus simulation.
    *  -  Source location
       -  ``Utilities/IbSystemMonitor``
    *  -  Requirements
-      -  None
+      -  Requires a running IbRegistry to connect to.
    *  -  Parameters
-      -  There are up to two positional arguments:
-          
-         #. Filename of the IB Configuration to be used (IB config file).
-         #. Domain ID (optional); defaults to ``42``.
+      -  -v, --version                   Get version info.
+         -h, --help                      Show the help of the IbSystemMonitor.
+         -d, --domain <domainId>         The domain ID that is used by the Integration Bus. Defaults to 42.
+         -n, --name <participantName>    The participant name used to take part in the simulation. Defaults to 'SystemController'.
+         -c, --configuration             Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
+
    *  -  Usage Example
       -  .. code-block:: powershell
             
-            # Start SystemMonitor for CAN Demo w/o Network Simulator VIBE:
-            IbSystemMonitor Demos/Can/IbConfig_DemoCan.json
+            # Start SystemMonitor
+            IbSystemMonitor
    *  -  Notes
       -  * The distribution package contains the IbSystemMonitor in the
            ``Integrationbus/bin/`` directory.
