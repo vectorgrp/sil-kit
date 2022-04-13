@@ -7,7 +7,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "NullConnectionComAdapter.hpp"
+#include "NullConnectionParticipant.hpp"
 
 #include "CanControllerFacade.hpp"
 
@@ -45,10 +45,10 @@ TEST(CanControllerFacadeTest, create_controller_unconfigured)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto comAdapter = ib::mw::CreateNullConnectionComAdapterImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
     auto controller =
-        dynamic_cast<CanControllerFacade*>(comAdapter->CreateCanController(controllerName));
+        dynamic_cast<CanControllerFacade*>(participant->CreateCanController(controllerName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
@@ -62,10 +62,10 @@ TEST(CanControllerFacadeTest, create_controller_configured_no_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto comAdapter = ib::mw::CreateNullConnectionComAdapterImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
     auto controller =
-        dynamic_cast<CanControllerFacade*>(comAdapter->CreateCanController(controllerName, networkName));
+        dynamic_cast<CanControllerFacade*>(participant->CreateCanController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
@@ -79,10 +79,10 @@ TEST(CanControllerFacadeTest, create_controller_configured_with_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto comAdapter = ib::mw::CreateNullConnectionComAdapterImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
     auto controller =
-        dynamic_cast<CanControllerFacade*>(comAdapter->CreateCanController(controllerName, networkName));
+        dynamic_cast<CanControllerFacade*>(participant->CreateCanController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);

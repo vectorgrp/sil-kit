@@ -34,9 +34,9 @@ struct UnsynchronizedPolicy : ParticipantController::ITimeSyncPolicy
 //! brief Synchronization policy of the VAsio middleware
 struct DistributedTimeQuantumPolicy : ParticipantController::ITimeSyncPolicy
 {
-    DistributedTimeQuantumPolicy(ParticipantController& controller, IComAdapterInternal* comAdapter)
+    DistributedTimeQuantumPolicy(ParticipantController& controller, IParticipantInternal* participant)
         : _controller(controller)
-        , _comAdapter(comAdapter)
+        , _participant(participant)
         , _blocking(true)
     {
         _currentTask.timePoint = -1ns;
@@ -85,7 +85,7 @@ struct DistributedTimeQuantumPolicy : ParticipantController::ITimeSyncPolicy
         _controller.SendIbMessage(_myNextTask);
         // Bootstrap checked execution, in case there is no other participant.
         // Else, checked execution is initiated when we receive their NextSimTask messages.
-        _comAdapter->ExecuteDeferred([this]() { this->CheckDistributedTimeAdvanceGrant(); });
+        _participant->ExecuteDeferred([this]() { this->CheckDistributedTimeAdvanceGrant(); });
     }
 
     void RequestNextStep() override
@@ -153,11 +153,11 @@ private:
         }
 
         // Still, no other participant has a lower time point: Check again later
-        _comAdapter->ExecuteDeferred([this]() { this->CheckDistributedTimeAdvanceGrant(); });
+        _participant->ExecuteDeferred([this]() { this->CheckDistributedTimeAdvanceGrant(); });
     }
 
     ParticipantController& _controller;
-    IComAdapterInternal* _comAdapter;
+    IParticipantInternal* _participant;
     NextSimTask _currentTask;
     NextSimTask _myNextTask;
     std::map<std::string, NextSimTask> _otherNextTasks;
@@ -192,11 +192,11 @@ struct ParticipantTimeProvider : public sync::ITimeProvider
     }
 };
 
-ParticipantController::ParticipantController(IComAdapterInternal* comAdapter, const std::string& name,
+ParticipantController::ParticipantController(IParticipantInternal* participant, const std::string& name,
                                              bool isSynchronized, const cfg::HealthCheck& healthCheckConfig)
-    : _comAdapter{comAdapter}
+    : _participant{participant}
     , _isSynchronized{isSynchronized}
-    , _logger{comAdapter->GetLogger()}
+    , _logger{participant->GetLogger()}
     , _watchDog{ healthCheckConfig }
 {
     _watchDog.SetWarnHandler(
@@ -307,7 +307,7 @@ auto ParticipantController::MakeTimeSyncPolicy(bool isSynchronized)
 {
     if (isSynchronized)
     {
-        return std::make_unique<DistributedTimeQuantumPolicy>(*this, _comAdapter);
+        return std::make_unique<DistributedTimeQuantumPolicy>(*this, _participant);
     }
     else
     {
@@ -476,9 +476,9 @@ void ParticipantController::PrepareColdswap()
     _logger->Info("preparing coldswap...");
     ChangeState(ParticipantState::ColdswapPrepare, "Starting coldswap preparations");
 
-    _comAdapter->OnAllMessagesDelivered([this]() {
+    _participant->OnAllMessagesDelivered([this]() {
 
-        _comAdapter->FlushSendBuffers();
+        _participant->FlushSendBuffers();
         ChangeState(ParticipantState::ColdswapReady, "Finished coldswap preparations.");
         _logger->Info("ready for coldswap...");
 
@@ -487,10 +487,10 @@ void ParticipantController::PrepareColdswap()
 
 void ParticipantController::ShutdownForColdswap()
 {
-    _comAdapter->FlushSendBuffers();
+    _participant->FlushSendBuffers();
     ChangeState(ParticipantState::ColdswapShutdown, "Coldswap was enabled for this participant.");
 
-    _comAdapter->OnAllMessagesDelivered([this]() {
+    _participant->OnAllMessagesDelivered([this]() {
 
         _finalStatePromise.set_value(State());
 
@@ -499,7 +499,7 @@ void ParticipantController::ShutdownForColdswap()
 
 void ParticipantController::IgnoreColdswap()
 {
-    _comAdapter->FlushSendBuffers();
+    _participant->FlushSendBuffers();
     ChangeState(ParticipantState::ColdswapIgnored, "Coldswap was not enabled for this participant.");
 }
 

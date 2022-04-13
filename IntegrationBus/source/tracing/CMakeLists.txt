@@ -74,8 +74,8 @@ if(IB_BUILD_COMPONENT_TRACING)
         message(FATAL_ERROR "ERROR: unsupported platform for NamedPipe!")
     endif()
 
-    add_vib_test(TestTracing_Replay SOURCES ReplayTest.cpp LIBS IbMwMockComAdapter IbTracing )
-    add_vib_test(TestTracing_Pcap SOURCES PcapTest.cpp LIBS IbTracing IbMwMockComAdapter )
+    add_vib_test(TestTracing_Replay SOURCES ReplayTest.cpp LIBS IbMwMockParticipant IbTracing )
+    add_vib_test(TestTracing_Pcap SOURCES PcapTest.cpp LIBS IbTracing IbMwMockParticipant )
 else()
     # At least provide some mocks for testing
     add_library(IbTracing INTERFACE)

@@ -42,7 +42,7 @@ The subdirectory layout follows mostly a uniform scheme for substantial VIB comp
 !!! Using the VIB Headers
 ---------------------
 The main header file is ``ib/IntegrationBus.hpp`` which defines the 
-:cpp:func:`CreateComAdapter()<ib::CreateComAdapter()>` function.
+:cpp:func:`CreateParticipant()<ib::CreateParticipant()>` function.
 Version information can be retrieved using the ``ib/version.hpp`` header 
 and its functions, e.g. by using the 
 :cpp:func:`version::String()<ib::version::String()>` function.

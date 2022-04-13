@@ -6,7 +6,7 @@
 #include "ib/mw/sync/ITimeConsumer.hpp"
 
 #include "IIbToDataSubscriberInternal.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "DataMessageDatatypeUtils.hpp"
 
 namespace ib {
@@ -19,7 +19,7 @@ class DataSubscriberInternal
     , public mw::IIbServiceEndpoint
 {
 public:
-    DataSubscriberInternal(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+    DataSubscriberInternal(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
                            const std::string& topic, const std::string& mediaType,
                            const std::map<std::string, std::string>& labels, DataHandlerT defaultHandler,
                            IDataSubscriber* parent);
@@ -53,7 +53,7 @@ private:
     mw::ServiceDescriptor _serviceDescriptor{};
     std::vector<DataHandlerT> _specificHandlers;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
-    mw::IComAdapterInternal* _comAdapter{nullptr};
+    mw::IParticipantInternal* _participant{nullptr};
 };
 
 // ================================================================================

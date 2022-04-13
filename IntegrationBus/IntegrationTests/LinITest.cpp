@@ -119,30 +119,30 @@ struct TestResult
 
 struct LinNode
 {
-    LinNode(IComAdapter* comAdapter, ILinController* controller, const std::string& name)
+    LinNode(IParticipant* participant, ILinController* controller, const std::string& name)
         : controller{controller}
         , _name{name}
-        , _comAdapter{comAdapter}
+        , _participant{participant}
     {
     }
 
     void Stop() 
     { 
-        _comAdapter->GetSystemController()->Stop(); 
+        _participant->GetSystemController()->Stop(); 
     }
 
     ILinController* controller{nullptr};
     std::string _name;
     ControllerConfig _controllerConfig;
     TestResult _result;
-    IComAdapter* _comAdapter{nullptr};
+    IParticipant* _participant{nullptr};
 };
 
 class LinMaster : public LinNode
 {
 public:
-    LinMaster(IComAdapter* comAdapter, ILinController* controller)
-        : LinNode(comAdapter, controller, "LinMaster")
+    LinMaster(IParticipant* participant, ILinController* controller)
+        : LinNode(participant, controller, "LinMaster")
     {
         schedule = {
             {0ns, [this](std::chrono::nanoseconds now) { SendFrame_16(now); }},
@@ -251,8 +251,8 @@ private:
 class LinSlave : public LinNode
 {
 public:
-    LinSlave(IComAdapter* comAdapter, ILinController* controller)
-        : LinNode(comAdapter, controller, "LinSlave")
+    LinSlave(IParticipant* participant, ILinController* controller)
+        : LinNode(participant, controller, "LinSlave")
     {
     }
 
@@ -376,15 +376,15 @@ TEST_F(LinITest, sync_lin_simulation)
     //Create a simulation setup with 2 participants
     {
         const std::string participantName = "LinMaster";
-        auto&& comAdapter = _simTestHarness->GetParticipant(participantName)->ComAdapter();
-        auto&& participantController = comAdapter->GetParticipantController();
-        auto&& linController = comAdapter->CreateLinController("LinController1", "LIN_1");
+        auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
+        auto&& participantController = participant->GetParticipantController();
+        auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
         participantController->SetInitHandler([participantName, linController](auto /*initCmd*/) {
             auto config = MakeControllerConfig(participantName);
             linController->Init(config);
             });
 
-        auto master = std::make_unique<LinMaster>(comAdapter, linController);
+        auto master = std::make_unique<LinMaster>(participant, linController);
 
         linController->RegisterFrameStatusHandler(util::bind_method(master.get(), &LinMaster::ReceiveFrameStatus));
         linController->RegisterWakeupHandler(util::bind_method(master.get(), &LinMaster::WakeupHandler));
@@ -398,9 +398,9 @@ TEST_F(LinITest, sync_lin_simulation)
 
     {
         const std::string participantName = "LinSlave";
-        auto&& comAdapter = _simTestHarness->GetParticipant(participantName)->ComAdapter();
-        auto&& participantController = comAdapter->GetParticipantController();
-        auto&& linController = comAdapter->CreateLinController("LinController1", "LIN_1");
+        auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
+        auto&& participantController = participant->GetParticipantController();
+        auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
 
 
         auto config = MakeControllerConfig(participantName);
@@ -408,7 +408,7 @@ TEST_F(LinITest, sync_lin_simulation)
             linController->Init(config);
           });
 
-        auto slave = std::make_unique<LinSlave>(comAdapter, linController);
+        auto slave = std::make_unique<LinSlave>(participant, linController);
         linController->RegisterFrameStatusHandler(util::bind_method(slave.get(), &LinSlave::FrameStatusHandler));
         linController->RegisterGoToSleepHandler(util::bind_method(slave.get(), &LinSlave::GoToSleepHandler));
 

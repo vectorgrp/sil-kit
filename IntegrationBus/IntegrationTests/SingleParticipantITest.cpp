@@ -60,7 +60,7 @@ protected:
     void SetupWriter(ib::test::SimParticipant* participant)
     {
 
-        auto* controller = participant->ComAdapter()->CreateCanController("CAN1");
+        auto* controller = participant->Participant()->CreateCanController("CAN1");
         controller->RegisterTransmitStatusHandler(
             [this, participant](ICanController* /*ctrl*/, const CanTransmitAcknowledge& ack) {
                 callbacks.AckHandler(ack);
@@ -71,7 +71,7 @@ protected:
                 }
             });
 
-        auto* participantController = participant->ComAdapter()->GetParticipantController();
+        auto* participantController = participant->Participant()->GetParticipantController();
         participantController->SetSimulationTask(
             [this, controller](auto, auto)
             {

@@ -8,13 +8,13 @@ namespace ib {
 namespace sim {
 namespace lin {
 
-LinControllerFacade::LinControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::LinController config,
+LinControllerFacade::LinControllerFacade(mw::IParticipantInternal* participant, cfg::LinController config,
                                          mw::sync::ITimeProvider* timeProvider)
-    : _comAdapter{comAdapter}
+    : _participant{participant}
     , _config{config}
 {
-    _linController = std::make_unique<LinController>(comAdapter, timeProvider, this);
-    _linControllerProxy = std::make_unique<LinControllerProxy>(comAdapter, this);
+    _linController = std::make_unique<LinController>(participant, timeProvider, this);
+    _linControllerProxy = std::make_unique<LinControllerProxy>(participant, this);
     _currentController = _linController.get();
 }
 
@@ -182,7 +182,7 @@ void LinControllerFacade::SetServiceDescriptor(const mw::ServiceDescriptor& serv
     _linController->SetServiceDescriptor(serviceDescriptor);
     _linControllerProxy->SetServiceDescriptor(serviceDescriptor);
 
-    mw::service::IServiceDiscovery* disc = _comAdapter->GetServiceDiscovery();
+    mw::service::IServiceDiscovery* disc = _participant->GetServiceDiscovery();
     disc->RegisterServiceDiscoveryHandler(
         [this, serviceDescriptor]
         (mw::service::ServiceDiscoveryEvent::Type discoveryType, const mw::ServiceDescriptor& remoteServiceDescriptor)

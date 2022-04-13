@@ -102,13 +102,13 @@ typedef void (*ib_Rpc_DiscoveryResultHandler_t)(void* context, const ib_Rpc_Disc
 * \param context A user provided context pointer that is passed to the callHandler on call.
 * \param callHandler A callback function that is triggered on invocation of the server functionality.
 */
-IntegrationBusAPI ib_ReturnCode ib_Rpc_Server_Create(ib_Rpc_Server** out, ib_SimulationParticipant* participant,
+IntegrationBusAPI ib_ReturnCode ib_Rpc_Server_Create(ib_Rpc_Server** out, ib_Participant* participant,
                                                      const char* functionName, ib_Rpc_ExchangeFormat* exchangeFormat,
                                                      const ib_KeyValueList* labels, void* context,
                                                      ib_Rpc_CallHandler_t callHandler);
 
 
-typedef ib_ReturnCode (*ib_Rpc_Server_Create_t)(ib_Rpc_Server** out, ib_SimulationParticipant* participant,
+typedef ib_ReturnCode (*ib_Rpc_Server_Create_t)(ib_Rpc_Server** out, ib_Participant* participant,
                                                 const char* functionName, ib_Rpc_ExchangeFormat* exchangeFormat,
                                                 const ib_KeyValueList* labels, void* context,
                                                 ib_Rpc_CallHandler_t callHandler);
@@ -124,13 +124,13 @@ typedef ib_ReturnCode (*ib_Rpc_Server_Create_t)(ib_Rpc_Server** out, ib_Simulati
 * \param resultHandler A callback that is called when a call result is received.
 * 
 */
-IntegrationBusAPI ib_ReturnCode ib_Rpc_Client_Create(ib_Rpc_Client** out, ib_SimulationParticipant* participant,
+IntegrationBusAPI ib_ReturnCode ib_Rpc_Client_Create(ib_Rpc_Client** out, ib_Participant* participant,
                                                      const char* functionName, ib_Rpc_ExchangeFormat* exchangeFormat,
                                                      const ib_KeyValueList* labels, void* context,
                                                      ib_Rpc_ResultHandler_t resultHandler);
 
 
-typedef ib_ReturnCode (*ib_Rpc_Client_Create_t)(ib_Rpc_Client** out, ib_SimulationParticipant* participant,
+typedef ib_ReturnCode (*ib_Rpc_Client_Create_t)(ib_Rpc_Client** out, ib_Participant* participant,
                                                 const char* functionName, ib_Rpc_ExchangeFormat* exchangeFormat,
                                                 const ib_KeyValueList* labels, void* context,
                                                 ib_Rpc_ResultHandler_t resultHandler);
@@ -165,12 +165,12 @@ typedef ib_ReturnCode(*ib_Rpc_Server_SubmitResult_t)(ib_Rpc_Server* self, ib_Rpc
 * \param labels Only discover Rpc servers containing these labels. Use NULL to not filter for labels.
 * \param context A user provided context that is reobtained in the resultHandler.
 */
-IntegrationBusAPI ib_ReturnCode ib_Rpc_DiscoverServers(ib_SimulationParticipant* participant, const char* functionName,
+IntegrationBusAPI ib_ReturnCode ib_Rpc_DiscoverServers(ib_Participant* participant, const char* functionName,
                                                        ib_Rpc_ExchangeFormat* exchangeFormat,
                                                        const ib_KeyValueList* labels, void* context,
                                                        ib_Rpc_DiscoveryResultHandler_t resultHandler);
 
-typedef ib_ReturnCode(*ib_Rpc_DiscoverServers_t)(ib_SimulationParticipant* participant, const char* functionName,
+typedef ib_ReturnCode(*ib_Rpc_DiscoverServers_t)(ib_Participant* participant, const char* functionName,
                                                 ib_Rpc_ExchangeFormat* exchangeFormat, const ib_KeyValueList* labels,
                                                 void* context, ib_Rpc_DiscoveryResultHandler_t resultHandler);
 

@@ -14,7 +14,7 @@ namespace can {
 
 /*! \brief IIbToCanSimulator interface
  *
- *  Used by the ComAdapter
+ *  Used by the Participant
  */
 class IIbToCanSimulator
     : public mw::IIbReceiver<CanMessage, CanConfigureBaudrate, CanSetControllerMode>

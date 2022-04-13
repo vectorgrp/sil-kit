@@ -17,7 +17,7 @@
 #include "ib/sim/datatypes.hpp"
 
 #include "IIbToLinController.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
 #include "ParticipantConfiguration.hpp"
 
@@ -42,7 +42,7 @@ public:
     LinController() = delete;
     LinController(const LinController&) = default;
     LinController(LinController&&) = default;
-    LinController(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider, ILinController* facade = nullptr);
+    LinController(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider, ILinController* facade = nullptr);
 
 public:
     // ----------------------------------------
@@ -119,7 +119,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    mw::IComAdapterInternal* _comAdapter;
+    mw::IParticipantInternal* _participant;
     ::ib::mw::ServiceDescriptor _serviceDescriptor;
     mw::logging::ILogger* _logger;
     mw::sync::ITimeProvider* _timeProvider{ nullptr };

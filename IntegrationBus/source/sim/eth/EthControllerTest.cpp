@@ -11,7 +11,7 @@
 
 #include "ib/util/functional.hpp"
 
-#include "MockComAdapter.hpp"
+#include "MockParticipant.hpp"
 #include "MockTraceSink.hpp"
 
 #include "EthDatatypeUtils.hpp"
@@ -32,7 +32,7 @@ using namespace ib::mw;
 using namespace ib::sim;
 using namespace ib::sim::eth;
 
-using ::ib::mw::test::DummyComAdapter;
+using ::ib::mw::test::DummyParticipant;
 using ::ib::test::MockTraceSink;
 
 MATCHER_P(EthernetTransmitAckWithouthTransmitIdMatcher, truthAck, "") 
@@ -48,7 +48,7 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<co
     return testing::Field(&EthMessage::timestamp, timestamp);
 }
 
-class MockComAdapter : public DummyComAdapter
+class MockParticipant : public DummyParticipant
 {
 public:
     void SendIbMessage(const IIbServiceEndpoint* from, EthMessage&& msg) override
@@ -76,8 +76,8 @@ protected:
 
 protected:
     EthernetControllerTest()
-        : controller(&comAdapter, _config, comAdapter.GetTimeProvider())
-        , controllerOther(&comAdapter, _config, comAdapter.GetTimeProvider())
+        : controller(&participant, _config, participant.GetTimeProvider())
+        , controllerOther(&participant, _config, participant.GetTimeProvider())
     {
         controller.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
@@ -92,7 +92,7 @@ protected:
     const EndpointAddress otherAddress = {7, 2};
 
     MockTraceSink traceSink;
-    MockComAdapter comAdapter;
+    MockParticipant participant;
     Callbacks callbacks;
 
     ib::cfg::EthernetController _config;
@@ -104,10 +104,10 @@ protected:
 TEST_F(EthernetControllerTest, send_eth_message)
 {
     const auto now = 12345ns;
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(&controller, AnEthMessageWith(now)))
+    EXPECT_CALL(participant, SendIbMessage_proxy(&controller, AnEthMessageWith(now)))
         .Times(1);
 
-    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
+    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
 
     EthMessage msg;
     msg.ethFrame.SetSourceMac(EthMac{ 0,0,0,0,0,0 });
@@ -118,14 +118,14 @@ TEST_F(EthernetControllerTest, send_eth_message)
 //! \brief using the new SendFrame API must invoke the TimeProvider
 TEST_F(EthernetControllerTest, send_eth_frame)
 {
-    ON_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+    ON_CALL(participant.mockTimeProvider.mockTime, Now())
         .WillByDefault(testing::Return(42ns));
 
     const auto now = 42ns;
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(&controller, AnEthMessageWith(now)))
+    EXPECT_CALL(participant, SendIbMessage_proxy(&controller, AnEthMessageWith(now)))
         .Times(1);
 
-    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(1);
 
     EthFrame ethFrame;
     ethFrame.SetSourceMac(EthMac{ 0,0,0,0,0,0 });
@@ -167,11 +167,11 @@ TEST_F(EthernetControllerTest, DISABLED_ethcontroller_uses_tracing)
     using namespace ib::extensions;
 
     const auto now = 1337ns;
-    ON_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+    ON_CALL(participant.mockTimeProvider.mockTime, Now())
         .WillByDefault(testing::Return(now));
 
     ib::cfg::EthernetController config{};
-    auto ethController = EthController(&comAdapter, config, comAdapter.GetTimeProvider());
+    auto ethController = EthController(&participant, config, participant.GetTimeProvider());
     ethController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
     ethController.AddSink(&traceSink);
 
@@ -181,7 +181,7 @@ TEST_F(EthernetControllerTest, DISABLED_ethcontroller_uses_tracing)
     ethFrame.SetSourceMac(EthMac{9,8,7,6,5,4});
 
     //Send direction
-    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
         Trace(ib::sim::TransmitDirection::TX, controllerAddress, now, ethFrame))

@@ -24,7 +24,7 @@ The first transition performed by the system controller, usually when
 is accomplished by initializing all participants::
 
   // Initialize a participant by providing its id.
-  auto* systemController = comAdapter->GetSystemController();
+  auto* systemController = participant->GetSystemController();
   systemController->Initialize(participant.id);
 
 After all participants are successfully initialized and the system is in
@@ -32,7 +32,7 @@ After all participants are successfully initialized and the system is in
 by calling the :cpp:func:`Run()<ib::mw::sync::ISystemController::Run()>` command::
 
   // Initiate state transition from Idle to Running for all participants.
-  auto* systemController = comAdapter->GetSystemController();
+  auto* systemController = participant->GetSystemController();
   systemController->Run();
 
 After all participants are successfully running and the system is in
@@ -40,18 +40,18 @@ After all participants are successfully running and the system is in
 the :cpp:func:`Stop()<ib::mw::sync::ISystemController::Stop()>` command::
 
   // Initiate state transition from Running to Stopped for all participants.
-  auto* systemController = comAdapter->GetSystemController();
+  auto* systemController = participant->GetSystemController();
   systemController->Stop();
 
 If the system is in :cpp:enumerator:`SystemState::Stopped<ib::mw::sync::Stopped>`, participants can either
 be reinitialize or the system can be shut down::
 
   // Reinitialize a participant by providing its id.
-  auto* systemController = comAdapter->GetSystemController();
+  auto* systemController = participant->GetSystemController();
   systemController->ReInitialize(participant.id);
 
   // Shut down all participants.
-  auto* systemController = comAdapter->GetSystemController();
+  auto* systemController = participant->GetSystemController();
   systemController->Shutdown();
 
 After a participant is in :cpp:enumerator:`ParticipantState::Shutdown<ib::mw::sync::Shutdown>`,

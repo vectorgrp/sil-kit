@@ -7,7 +7,7 @@
 #include <sstream>
 #include <numeric>
 
-#include "CreateComAdapter.hpp"
+#include "CreateParticipant.hpp"
 #include "VAsioRegistry.hpp"
 #include "MockParticipantConfiguration.hpp"
 
@@ -52,14 +52,14 @@ public:
         : _numMessages{numMessages}
     {
         std::string participantName = "Publisher" + std::to_string(publisherIndex);
-        _comAdapter =
-            ib::mw::CreateSimulationParticipantImpl(ib::cfg::MockParticipantConfiguration(), participantName, true);
+        _participant =
+            ib::mw::CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), participantName, true);
 
-        _comAdapter->joinIbDomain(domainId);
+        _participant->joinIbDomain(domainId);
 
         const auto topicName = "Topic" + std::to_string(publisherIndex);
-        auto&& participantController = _comAdapter->GetParticipantController();
-        auto* publisher = _comAdapter->CreateDataPublisher(topicName, {}, {}, 0);
+        auto&& participantController = _participant->GetParticipantController();
+        auto* publisher = _participant->CreateDataPublisher(topicName, {}, {}, 0);
 
         participantController->SetPeriod(period);
         participantController->SetSimulationTask(
@@ -74,7 +74,7 @@ public:
 
     void RunAsync()
     {
-        auto&& participantController = _comAdapter->GetParticipantController();
+        auto&& participantController = _participant->GetParticipantController();
         _simulationFuture = participantController->RunAsync();
     }
 
@@ -101,7 +101,7 @@ private:
     }
 
 private:
-    std::unique_ptr<IComAdapterInternal> _comAdapter{nullptr};
+    std::unique_ptr<IParticipantInternal> _participant{nullptr};
 
     uint32_t _messageIndex{0u};
     uint32_t _numMessages{0u};
@@ -118,24 +118,24 @@ public:
         , _numMessages{numMessages}
         , _syncParticipantNames { syncParticipantNames }
     {
-        _comAdapter = ib::mw::CreateSimulationParticipantImpl(
+        _participant = ib::mw::CreateParticipantImpl(
             ib::cfg::MockParticipantConfiguration(), participantName, true);
-        _comAdapter->joinIbDomain(domainId);
+        _participant->joinIbDomain(domainId);
 
-        _systemController = _comAdapter->GetSystemController();
+        _systemController = _participant->GetSystemController();
         _systemController->SetRequiredParticipants(_syncParticipantNames);
 
-        _monitor = _comAdapter->GetSystemMonitor();
+        _monitor = _participant->GetSystemMonitor();
         _monitor->RegisterSystemStateHandler(
             [this](SystemState newState) {
             this->OnSystemStateChanged(newState);
         });
 
-        auto&& participantController = _comAdapter->GetParticipantController();
+        auto&& participantController = _participant->GetParticipantController();
 
         for (auto publisherIndex = 0u; publisherIndex < _publisherCount; publisherIndex++)
         {
-            _comAdapter->CreateDataSubscriber(
+            _participant->CreateDataSubscriber(
                 "Topic" + std::to_string(publisherIndex), {}, {},
                 [this, publisherIndex](IDataSubscriber* subscriber, const std::vector<uint8_t>& data) {
                     ReceiveMessage(subscriber, data, publisherIndex);
@@ -151,7 +151,7 @@ public:
 
     std::future<ParticipantState> RunAsync() const
     {
-        auto&& participantController = _comAdapter->GetParticipantController();
+        auto&& participantController = _participant->GetParticipantController();
         return participantController->RunAsync();
     }
 
@@ -233,7 +233,7 @@ private:
     std::vector<uint32_t> _messageIndexes;
     uint32_t _numMessages{0u};
     std::vector<std::string> _syncParticipantNames;
-    std::unique_ptr<IComAdapterInternal> _comAdapter{nullptr};
+    std::unique_ptr<IParticipantInternal> _participant{nullptr};
     ISystemController* _systemController{nullptr};
     ISystemMonitor* _monitor{nullptr};
 

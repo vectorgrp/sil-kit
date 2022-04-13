@@ -12,7 +12,7 @@ namespace fr {
 
 /*! \brief IIbToFrControllerProxy interface
  *
- *  Used by the ComAdapter, implemented by the FrControllerProxy
+ *  Used by the Participant, implemented by the FrControllerProxy
  */
 class IIbToFrControllerProxy
     : public mw::IIbReceiver<FrMessage, FrMessageAck, FrSymbol, FrSymbolAck, CycleStart, PocStatus>

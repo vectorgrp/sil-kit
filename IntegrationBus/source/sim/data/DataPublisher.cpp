@@ -1,14 +1,14 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "DataPublisher.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "DataMessageDatatypeUtils.hpp"
 
 namespace ib {
 namespace sim {
 namespace data {
 
-DataPublisher::DataPublisher(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+DataPublisher::DataPublisher(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
                              const std::string& topic, const std::string& mediaType,
                              const std::map<std::string, std::string>& labels, const std::string& pubUUID)
     : _topic{topic}
@@ -16,14 +16,14 @@ DataPublisher::DataPublisher(mw::IComAdapterInternal* comAdapter, mw::sync::ITim
     , _labels{labels}
     , _pubUUID{pubUUID}
     , _timeProvider{timeProvider}
-    , _comAdapter{comAdapter}
+    , _participant{participant}
 {
 }
 
 void DataPublisher::Publish(std::vector<uint8_t> data)
 {
     DataMessage msg{std::move(data)};
-    _comAdapter->SendIbMessage(this, std::move(msg));
+    _participant->SendIbMessage(this, std::move(msg));
 }
 
 void DataPublisher::Publish(const uint8_t* data, std::size_t size)

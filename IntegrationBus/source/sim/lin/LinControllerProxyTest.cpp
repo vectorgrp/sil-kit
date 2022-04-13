@@ -31,9 +31,9 @@ class LinControllerProxyTest : public testing::Test
 
 protected:
     LinControllerProxyTest()
-    : proxy(&comAdapter)
-    , proxy2(&comAdapter)
-    , proxyVibe(&comAdapter)
+    : proxy(&participant)
+    , proxy2(&participant)
+    , proxyVibe(&participant)
     {
         frameStatusHandler =
             [this](ILinController* ctrl, const Frame& frame, FrameStatus status, std::chrono::nanoseconds) {
@@ -50,7 +50,7 @@ protected:
     const EndpointAddress addr1_proxy{7, 5};
     const EndpointAddress addr2_proxy{4, 9};
 
-    LinMockComAdapter comAdapter;
+    LinMockParticipant participant;
     LinControllerProxy proxy;
     LinControllerProxy proxy2;
     // FIXME check, if this should be a VIBE controller
@@ -61,7 +61,7 @@ protected:
 
 TEST_F(LinControllerProxyTest, send_frame)
 {
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, A<const ControllerConfig&>()));
+    EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
     proxy.Init(config);
     proxy.RegisterFrameStatusHandler(frameStatusHandler);
@@ -70,14 +70,14 @@ TEST_F(LinControllerProxyTest, send_frame)
     expectedMsg.frame = MakeFrame(17, ChecksumModel::Enhanced, 4, {1,2,3,4,5,6,7,8});
     expectedMsg.responseType = FrameResponseType::SlaveResponse;
 
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, expectedMsg)).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&proxy, expectedMsg)).Times(1);
 
     proxy.SendFrame(expectedMsg.frame, expectedMsg.responseType);
 }
 
 TEST_F(LinControllerProxyTest, send_frame_header)
 {
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, A<const ControllerConfig&>()));
+    EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
     proxy.Init(config);
     proxy.RegisterFrameStatusHandler(frameStatusHandler);
@@ -85,14 +85,14 @@ TEST_F(LinControllerProxyTest, send_frame_header)
     SendFrameHeaderRequest expectedMsg;
     expectedMsg.id = 13;
 
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, expectedMsg)).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&proxy, expectedMsg)).Times(1);
 
     proxy.SendFrameHeader(expectedMsg.id);
 }
 
 TEST_F(LinControllerProxyTest, call_frame_status_handler)
 {
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, A<const ControllerConfig&>()));
+    EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Slave);
     proxy.Init(config);
     proxy.RegisterFrameStatusHandler(frameStatusHandler);
@@ -110,7 +110,7 @@ TEST_F(LinControllerProxyTest, call_frame_status_handler)
 
 TEST_F(LinControllerProxyTest, set_frame_response)
 {
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, A<const ControllerConfig&>()));
+    EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Slave);
     proxy.Init(config);
     
@@ -122,14 +122,14 @@ TEST_F(LinControllerProxyTest, set_frame_response)
     FrameResponseUpdate expectedMsg;
     expectedMsg.frameResponses.push_back(response);
 
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, expectedMsg)).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&proxy, expectedMsg)).Times(1);
 
     proxy.SetFrameResponse(response.frame, response.responseMode);
 }
 
 TEST_F(LinControllerProxyTest, set_frame_responses)
 {
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, A<const ControllerConfig&>()));
+    EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Slave);
     proxy.Init(config);
 
@@ -150,7 +150,7 @@ TEST_F(LinControllerProxyTest, set_frame_responses)
     FrameResponseUpdate expectedMsg;
     expectedMsg.frameResponses = responses;
 
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, expectedMsg)).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&proxy, expectedMsg)).Times(1);
 
     proxy.SetFrameResponses(responses);
 }
@@ -158,7 +158,7 @@ TEST_F(LinControllerProxyTest, set_frame_responses)
 TEST_F(LinControllerProxyTest, trigger_frame_response_update_handler)
 {
     // Configure Master
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, A<const ControllerConfig&>()));
+    EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
     proxy.Init(config);
 
@@ -187,7 +187,7 @@ TEST_F(LinControllerProxyTest, trigger_frame_response_update_handler)
 TEST_F(LinControllerProxyTest, trigger_frame_response_update_handler_for_slave_config)
 {
     // Configure Master
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, A<const ControllerConfig&>()));
+    EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
     proxy.Init(config);
 
@@ -215,7 +215,7 @@ TEST_F(LinControllerProxyTest, trigger_frame_response_update_handler_for_slave_c
 TEST_F(LinControllerProxyTest, go_to_sleep)
 {
     // Configure Master
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, A<const ControllerConfig&>()));
+    EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
     proxy.Init(config);
 
@@ -224,9 +224,9 @@ TEST_F(LinControllerProxyTest, go_to_sleep)
     expectedMsg.frame = GoToSleepFrame();
     expectedMsg.responseType = FrameResponseType::MasterResponse;
 
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, expectedMsg))
+    EXPECT_CALL(participant, SendIbMessage(&proxy, expectedMsg))
         .Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, AControllerStatusUpdateWith(ControllerStatus::SleepPending)))
+    EXPECT_CALL(participant, SendIbMessage(&proxy, AControllerStatusUpdateWith(ControllerStatus::SleepPending)))
         .Times(1);
 
     proxy.GoToSleep();
@@ -235,13 +235,13 @@ TEST_F(LinControllerProxyTest, go_to_sleep)
 TEST_F(LinControllerProxyTest, go_to_sleep_internal)
 {
     // Configure Master
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, A<const ControllerConfig&>()));
+    EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
     proxy.Init(config);
 
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, A<const SendFrameRequest&>()))
+    EXPECT_CALL(participant, SendIbMessage(&proxy, A<const SendFrameRequest&>()))
         .Times(0);
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, AControllerStatusUpdateWith(ControllerStatus::Sleep)))
+    EXPECT_CALL(participant, SendIbMessage(&proxy, AControllerStatusUpdateWith(ControllerStatus::Sleep)))
         .Times(1);
 
     proxy.GoToSleepInternal();
@@ -250,7 +250,7 @@ TEST_F(LinControllerProxyTest, go_to_sleep_internal)
 TEST_F(LinControllerProxyTest, call_gotosleep_handler)
 {
     // Configure Master
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, A<const ControllerConfig&>()));
+    EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Slave);
     proxy.Init(config);
     proxy.RegisterFrameStatusHandler(frameStatusHandler);
@@ -269,7 +269,7 @@ TEST_F(LinControllerProxyTest, call_gotosleep_handler)
 TEST_F(LinControllerProxyTest, not_call_gotosleep_handler)
 {
     // Configure Master
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, A<const ControllerConfig&>()));
+    EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Slave);
     proxy.Init(config);
     proxy.RegisterFrameStatusHandler(frameStatusHandler);
@@ -289,13 +289,13 @@ TEST_F(LinControllerProxyTest, not_call_gotosleep_handler)
 TEST_F(LinControllerProxyTest, wake_up)
 {
     // Configure Master
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, A<const ControllerConfig&>()));
+    EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
     proxy.Init(config);
 
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, A<const WakeupPulse&>()))
+    EXPECT_CALL(participant, SendIbMessage(&proxy, A<const WakeupPulse&>()))
         .Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, AControllerStatusUpdateWith(ControllerStatus::Operational)))
+    EXPECT_CALL(participant, SendIbMessage(&proxy, AControllerStatusUpdateWith(ControllerStatus::Operational)))
         .Times(1);
 
     proxy.Wakeup();
@@ -304,14 +304,14 @@ TEST_F(LinControllerProxyTest, wake_up)
 TEST_F(LinControllerProxyTest, wake_up_internal)
 {
     // Configure Master
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, A<const ControllerConfig&>()));
+    EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
     proxy.Init(config);
 
 
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, A<const WakeupPulse&>()))
+    EXPECT_CALL(participant, SendIbMessage(&proxy, A<const WakeupPulse&>()))
         .Times(0);
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, AControllerStatusUpdateWith(ControllerStatus::Operational)))
+    EXPECT_CALL(participant, SendIbMessage(&proxy, AControllerStatusUpdateWith(ControllerStatus::Operational)))
         .Times(1);
 
     proxy.WakeupInternal();
@@ -321,7 +321,7 @@ TEST_F(LinControllerProxyTest, wake_up_internal)
 TEST_F(LinControllerProxyTest, call_wakeup_handler)
 {
     // Configure Master
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, A<const ControllerConfig&>()));
+    EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Slave);
     proxy.Init(config);
     proxy.RegisterFrameStatusHandler(frameStatusHandler);

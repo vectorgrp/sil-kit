@@ -12,7 +12,7 @@ namespace fr {
 
 /*! \brief IIbToFrControllerFacade interface
  *
- *  Used by the ComAdapter, implemented by the FrControllerFacade
+ *  Used by the Participant, implemented by the FrControllerFacade
  */
 class IIbToFrControllerFacade
     : public mw::IIbReceiver<FrMessage, FrMessageAck, FrSymbol, FrSymbolAck, CycleStart, PocStatus>

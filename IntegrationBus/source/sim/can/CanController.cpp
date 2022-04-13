@@ -9,11 +9,11 @@ namespace sim {
 namespace can {
 
 
-CanController::CanController(mw::IComAdapterInternal* comAdapter, 
+CanController::CanController(mw::IParticipantInternal* participant, 
                              const ib::cfg::CanController& config,
                              mw::sync::ITimeProvider* timeProvider,
                              ICanController* facade)
-    : _comAdapter{comAdapter}
+    : _participant{participant}
     , _config{config}
     , _timeProvider{timeProvider}
     , _facade{facade}
@@ -63,7 +63,7 @@ auto CanController::SendMessage(const CanMessage& msg, void* userContext) -> Can
     // has to be called before SendIbMessage because of thread change
     CallHandlers(msg);
 
-    _comAdapter->SendIbMessage(this, msgCopy);
+    _participant->SendIbMessage(this, msgCopy);
 
     // instantly call transmit acknowledge
     CanTransmitAcknowledge ack;
@@ -105,7 +105,7 @@ auto CanController::SendMessage(CanMessage&& msg, void* userContext) -> CanTxId
     ack.userContext = userContext;
     ack.timestamp = now;
 
-    _comAdapter->SendIbMessage(this, std::move(msg));
+    _participant->SendIbMessage(this, std::move(msg));
     
     // call transmit acknowledge
     CallHandlers(ack);

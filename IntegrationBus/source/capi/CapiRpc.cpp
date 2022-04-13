@@ -36,7 +36,7 @@ static void assign(ib_Rpc_DiscoveryResultList** cResultList, const std::vector<i
 
 extern "C" {
 
-ib_ReturnCode ib_Rpc_Client_Create(ib_Rpc_Client** out, ib_SimulationParticipant* participant,
+ib_ReturnCode ib_Rpc_Client_Create(ib_Rpc_Client** out, ib_Participant* participant,
                                        const char* functionName, ib_Rpc_ExchangeFormat* exchangeFormat,
                                        const ib_KeyValueList* labels, void* context,
                                        ib_Rpc_ResultHandler_t resultHandler)
@@ -50,10 +50,10 @@ ib_ReturnCode ib_Rpc_Client_Create(ib_Rpc_Client** out, ib_SimulationParticipant
     {
         std::string strFunctionName(functionName);
         ib::sim::rpc::RpcExchangeFormat cppExchangeFormat{std::string(exchangeFormat->mediaType)};
-        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
-        auto rcpClient = comAdapter->CreateRpcClient(
+        auto rcpClient = cppParticipant->CreateRpcClient(
             functionName, cppExchangeFormat, cppLabels,
             [resultHandler, context] (ib::sim::rpc::IRpcClient* cppClient, ib::sim::rpc::IRpcCallHandle* callHandle,
                   const ib::sim::rpc::CallStatus callStatus, const std::vector<uint8_t>& returnData) 
@@ -76,7 +76,7 @@ ib_ReturnCode ib_Rpc_Client_Create(ib_Rpc_Client** out, ib_SimulationParticipant
     CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Rpc_Server_Create(ib_Rpc_Server** out, ib_SimulationParticipant* participant, const char* functionName,
+ib_ReturnCode ib_Rpc_Server_Create(ib_Rpc_Server** out, ib_Participant* participant, const char* functionName,
                                    ib_Rpc_ExchangeFormat* exchangeFormat, const ib_KeyValueList* labels, void* context,
                                    ib_Rpc_CallHandler_t callHandler)
 {
@@ -89,10 +89,10 @@ ib_ReturnCode ib_Rpc_Server_Create(ib_Rpc_Server** out, ib_SimulationParticipant
     {
         std::string strFunctionName(functionName);
         ib::sim::rpc::RpcExchangeFormat cppExchangeFormat{std::string(exchangeFormat->mediaType)};
-        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
-        auto rcpServer = comAdapter->CreateRpcServer(
+        auto rcpServer = cppParticipant->CreateRpcServer(
             functionName, cppExchangeFormat, cppLabels,
             [callHandler, context](ib::sim::rpc::IRpcServer* cppServer, ib::sim::rpc::IRpcCallHandle* callHandle,
                   const std::vector<uint8_t>& argumentData)
@@ -148,7 +148,7 @@ ib_ReturnCode ib_Rpc_Server_SubmitResult(ib_Rpc_Server* self, ib_Rpc_CallHandle*
     CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Rpc_DiscoverServers(ib_SimulationParticipant* participant, const char* functionName,
+ib_ReturnCode ib_Rpc_DiscoverServers(ib_Participant* participant, const char* functionName,
                                      ib_Rpc_ExchangeFormat* exchangeFormat, const ib_KeyValueList* labels,
                                      void* context, ib_Rpc_DiscoveryResultHandler_t resultHandler)
 {
@@ -156,12 +156,12 @@ ib_ReturnCode ib_Rpc_DiscoverServers(ib_SimulationParticipant* participant, cons
     ASSERT_VALID_HANDLER_PARAMETER(resultHandler);
     CAPI_ENTER
     {
-        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
         std::string cppFunctionName(functionName);
         ib::sim::rpc::RpcExchangeFormat cppExchangeFormat{std::string(exchangeFormat->mediaType)};
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
-        comAdapter->DiscoverRpcServers(
+        cppParticipant->DiscoverRpcServers(
             cppFunctionName, cppExchangeFormat, cppLabels,
             [resultHandler, context](const std::vector<ib::sim::rpc::RpcDiscoveryResult>& cppDiscoveryResults) {
                 ib_Rpc_DiscoveryResultList* results;

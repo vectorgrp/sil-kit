@@ -40,7 +40,6 @@ Changed
 - Replaced the single-member struct ``DataExchangeFormat`` with its sole member, the media type string.
   The following method and function type signatures have changed:
 
-  - ``IntegrationBus/include/ib/mw/IComAdapter.hpp``
 
     + old:
 
@@ -107,6 +106,28 @@ Changed
       IntegrationBusAPI ib_ReturnCode ib_Data_Subscriber_Create(..., const char* mediaType, ...);
       typedef ib_ReturnCode (*ib_Data_Subscriber_Create_t)(..., const char* mediaType, ...);
       IntegrationBusAPI ib_ReturnCode ib_Data_Subscriber_RegisterSpecificDataHandler(..., const char* mediaType, ...);
+
+- Renamed ``ib::mw::IComAdapter`` to ``ib::mw::IParticipant``, and 
+  renamed ``IntegrationBus/include/ib/mw/IComAdapter.hpp`` to ``IntegrationBus/include/ib/mw/IParticipant.hpp``.
+  Further renamed method ``ib::CreateSimulationParticipant(...)`` to ``ib::CreateParticipant(...)``:
+
+  - ``IntegrationBus/include/ib/IntegrationBus.hpp``
+  
+    + old:
+
+    .. code-block:: c++
+      
+      IntegrationBusAPI auto CreateSimulationParticipant(
+          std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig, const std::string& participantName,
+          const uint32_t domainId, bool isSynchronized) -> std::unique_ptr<mw::IComAdapter>;
+    
+    + new:
+
+    .. code-block:: c++
+      
+      IntegrationBusAPI auto CreateParticipant(
+          std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig, const std::string& participantName,
+          const uint32_t domainId, bool isSynchronized) -> std::unique_ptr<mw::IParticipant>;
 
 [3.7.18] - 2022-04-05
 --------------------------------

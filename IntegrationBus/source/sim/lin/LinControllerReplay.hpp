@@ -22,7 +22,7 @@ public:
     // ----------------------------------------
     // Public Data Types
 
-    LinControllerReplay(mw::IComAdapterInternal* comAdapter, cfg::LinController config,
+    LinControllerReplay(mw::IParticipantInternal* participant, cfg::LinController config,
             mw::sync::ITimeProvider* timeProvider);
 
 public:
@@ -77,7 +77,7 @@ private:
     // private members
     cfg::Replay _replayConfig{};
     LinController _controller;
-    mw::IComAdapterInternal* _comAdapter{nullptr};
+    mw::IParticipantInternal* _participant{nullptr};
     // for local callbacks
     std::vector<FrameStatusHandler> _frameStatusHandler; 
     std::vector<GoToSleepHandler> _goToSleepHandler;

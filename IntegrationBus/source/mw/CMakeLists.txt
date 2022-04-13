@@ -1,7 +1,7 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_subdirectory(internal)
 add_subdirectory(service)
-add_subdirectory(comadapter)
+add_subdirectory(participant)
 if(IB_MW_ENABLE_VASIO)
     message(STATUS "Enabling VAsio Middleware")
     add_subdirectory(vasio)

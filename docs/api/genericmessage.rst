@@ -2,9 +2,9 @@
 Generic Message API
 ===================
 .. Macros for docs use
-.. |IComAdapter| replace:: :cpp:class:`IComAdapter<ib::mw::IComAdapter>`
-.. |CreateGenericPublisher| replace:: :cpp:func:`CreateGenericPublisher<ib::mw::IComAdapter::CreateGenericPublisher()>`
-.. |CreateGenericSubscriber| replace:: :cpp:func:`CreateGenericSubscriber<ib::mw::IComAdapter::CreateGenericSubscriber()>`
+.. |IParticipant| replace:: :cpp:class:`IParticipant<ib::mw::IParticipant>`
+.. |CreateGenericPublisher| replace:: :cpp:func:`CreateGenericPublisher<ib::mw::IParticipant::CreateGenericPublisher()>`
+.. |CreateGenericSubscriber| replace:: :cpp:func:`CreateGenericSubscriber<ib::mw::IParticipant::CreateGenericSubscriber()>`
 .. |Publish| replace:: :cpp:func:`Publish()<ib::sim::generic::IGenericPublisher::Publish()>`
 .. |SetReceiveMessageHandler| replace:: :cpp:func:`SetReceiveMessageHandler()<ib::sim::generic::IGenericSubscriber::SetReceiveMessageHandler()>`
 .. |IGenericPublisher| replace:: :cpp:class:`IGenericPublisher<ib::sim::generic::IGenericPublisher>`
@@ -27,7 +27,7 @@ Publisher and subscribers may only be connected by a single link.
 That is, a susbcriber may not be served by mutliple publishers.
 
 
-The Publisher and Subscriber interfaces are instantiated from an |IComAdapter|
+The Publisher and Subscriber interfaces are instantiated from an |IParticipant|
 interface by calling |CreateGenericPublisher| and |CreateGenericSubscriber|, respectively.
 Their name is used in the configuration and instantiation of the interfaces.
 Additionally, publishers can specify a protocol and a datatype definition URI, which can be
@@ -39,15 +39,15 @@ be set on a subscriber using the |SetReceiveMessageHandler| method.
 
 Usage Examples
 ~~~~~~~~~~~~~~
-The interfaces for the publish/subscribe mechanism can be instantiated from an IComAdapter:
+The interfaces for the publish/subscribe mechanism can be instantiated from an IParticipant:
 
 .. code-block:: cpp
 
-    auto comAdapter = ib::CreateComAdapter(std::move(config), participant_name, domainId);
-    auto* publishData = comAdapter->CreateGenericPublisher("Message1");
+    auto participant = ib::CreateParticipant(std::move(config), participant_name, domainId);
+    auto* publishData = participant->CreateGenericPublisher("Message1");
     publishData->Publish(user_data);
 
-    auto* subscribeData = comAdapter->CreateGenericSubscriber("Message1");
+    auto* subscribeData = participant->CreateGenericSubscriber("Message1");
     subscribeData->SetReceiveMessageHandler([](IGenericSubscriber* subscriber,
                         const std::vector<uint8_t>& data) {
         //handle data

@@ -15,9 +15,9 @@ namespace ib {
 namespace mw {
 namespace sync {
 
-SystemMonitor::SystemMonitor(IComAdapterInternal* comAdapter)
-    : _comAdapter{comAdapter}
-    , _logger{comAdapter->GetLogger()}
+SystemMonitor::SystemMonitor(IParticipantInternal* participant)
+    : _participant{participant}
+    , _logger{participant->GetLogger()}
 {
 }
 
@@ -75,13 +75,13 @@ void SystemMonitor::UpdateExpectedParticipantNames(const ExpectedParticipants& e
 
     // Add expected participants in sync policy of participantController
     // if this participant is synchronized and found in expectedNames
-    if (_comAdapter->IsSynchronized())
+    if (_participant->IsSynchronized())
     {
         auto&& nameIter =
-            std::find(_expectedParticipants.names.begin(), _expectedParticipants.names.end(), _comAdapter->GetParticipantName());
+            std::find(_expectedParticipants.names.begin(), _expectedParticipants.names.end(), _participant->GetParticipantName());
         if (nameIter != _expectedParticipants.names.end())
         {
-            auto* participantController = dynamic_cast<ib::mw::sync::ParticipantController*>(_comAdapter->GetParticipantController());
+            auto* participantController = dynamic_cast<ib::mw::sync::ParticipantController*>(_participant->GetParticipantController());
             if (participantController)
             {
                 participantController->AddSynchronizedParticipants(expectedParticipants);

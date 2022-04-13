@@ -1,35 +1,35 @@
 =============
-ComAdapter
+Participant
 =============
 
 .. contents:: :local:
    :depth: 1
 
 This document described the main entry point to the VIB simulation.
-The ComAdapter layer provides the interface between a middleware, which implements
+The Participant layer provides the interface between a middleware, which implements
 the distributed communication, and the high level simulation services.
 Refer to :ref:`Base Architecture<base-architecture>` for an overview of the VIB.
 
-.. |IComAdapter| replace:: :cpp:class:`IComAdapter<ib::mw::IComAdapter>` 
+.. |IParticipant| replace:: :cpp:class:`IParticipant<ib::mw::IParticipant>` 
 
-Accessing the ComAdapter
+Accessing the Participant
 ~~~~~~~~~~~~~~~~~~~~~~~~
-To create an |IComAdapter| you have to include the 
-:ref:`ib/IntegrationBus.hpp<sec:header-vib-main>` and call the :ref:`ComAdapter API<sec:comadapter-factory>`
+To create an |IParticipant| you have to include the 
+:ref:`ib/IntegrationBus.hpp<sec:header-vib-main>` and call the :ref:`Participant API<sec:participant-factory>`
 factory function::
 
     auto config = ib::cfg::Config::FromJsonFile("your_config.json");
-    auto comAdapter = ib::CreateComAdapter(config, "ParticipantName", domainId);
+    auto participant = ib::CreateParticipant(config, "ParticipantName", domainId);
 
-To take part in the simulation, the ComAdapter needs to be initialized with a proper
+To take part in the simulation, the Participant needs to be initialized with a proper
 configuration, a participant name and a domain ID.
 
-.. _sec:icomadapter-api:
+.. _sec:iparticipant-api:
 
-The IComAdapter API
+The IParticipant API
 ~~~~~~~~~~~~~~~~~~~
 
-The instantiated |IComAdapter| can then be used to access the other services
+The instantiated |IParticipant| can then be used to access the other services
 of the VIB.
 
 .. admonition:: Warning.
@@ -41,7 +41,7 @@ of the VIB.
     :cpp:func:`SimTask<ib::mw::sync::IParticipantController::SetSimulationTask()>`.
 
 
-.. doxygenclass:: ib::mw::IComAdapter
+.. doxygenclass:: ib::mw::IParticipant
    :members:
 
 

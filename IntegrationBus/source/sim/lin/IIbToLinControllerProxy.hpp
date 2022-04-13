@@ -12,7 +12,7 @@ namespace lin {
 
 /*! \brief IIbToLinControllerProxy interface
  *
- *  Used by the ComAdapter, implemented by the LinControllerProxy
+ *  Used by the Participant, implemented by the LinControllerProxy
  */
 class IIbToLinControllerProxy
     : public mw::IIbReceiver<Transmission, WakeupPulse, ControllerConfig, FrameResponseUpdate>

@@ -2,7 +2,7 @@
 VIB Quick Start
 ===============
 
-.. |ComAdapter| replace:: :ref:`ComAdapter<sec:comadapter-factory>`
+.. |Participant| replace:: :ref:`Participant<sec:participant-factory>`
 
 .. contents::
    :local:
@@ -28,10 +28,10 @@ Terminology
  * - :ref:`Participant<sec:cfg-participant>`
    - A communication node in the distributed simulation. Every simulation must
      at least define one participant.
- * - :doc:`ComAdapter<../api/comadapter>`
+ * - :doc:`Participant<../api/participant>`
    - Entry point to the VIB library. Abstracts away the underlying middleware.
      Allows creation of vehicle network controllers and other services. Each
-     participant has its own ComAdapter instance.
+     participant has its own Participant instance.
  * - :ref:`Services<sec:api-services>`
    - Participants interact with each other through the means of services, e.g.,
      a :doc:`CAN Controller<../api/can>` or a :doc:`Generic Message
@@ -122,8 +122,8 @@ One thread will act as a publisher by sending a test string to its subscribers:
 
 
 First, the configured middleware domain is joined as the named participant using the
-|ComAdapter|.
-Creating the ComAdapter properly initializes the VIB library and allows to instantiate
+|Participant|.
+Creating the Participant properly initializes the VIB library and allows to instantiate
 :doc:`Services<../api/api>` and offers access to the
 :doc:`Participant Controller<../api/participantcontroller>`.
 

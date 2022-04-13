@@ -7,7 +7,7 @@
 #include <sstream>
 #include <numeric>
 
-#include "CreateComAdapter.hpp"
+#include "CreateParticipant.hpp"
 #include "VAsioRegistry.hpp"
 
 #include "ib/mw/sync/all.hpp"
@@ -45,12 +45,12 @@ TEST(IbRegistryReusageITest, DISABLED_IbRegistry_must_be_reusable_after_shutdown
     //registry.ProvideDomain(domainId);
 
     //auto RunParticipant = [&ibConfig, domainId](auto name) {
-    //    auto comAdapter = CreateComAdapterImpl(ibConfig, name);
-    //    comAdapter->joinIbDomain(domainId);
-    //    auto participantController = comAdapter->GetParticipantController();
+    //    auto participant = CreateParticipantImpl(ibConfig, name);
+    //    participant->joinIbDomain(domainId);
+    //    auto participantController = participant->GetParticipantController();
     //    participantController->SetSimulationTask([](auto /*now*/, auto /*duration*/) {});
     //    participantController->RunAsync();
-    //    return comAdapter;
+    //    return participant;
     //};
 
     //for (auto i = 0; i < numIterations; i++)

@@ -20,7 +20,7 @@
 #include "ib/sim/rpc/RpcDatatypes.hpp"
 
 #include "TimeProvider.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "IServiceDiscovery.hpp"
 
 #include "gtest/gtest.h"
@@ -139,10 +139,10 @@ public:
 
 };
 
-class DummyComAdapter : public IComAdapterInternal
+class DummyParticipant : public IParticipantInternal
 {
 public:
-    DummyComAdapter()
+    DummyParticipant()
     {
     }
 
@@ -352,7 +352,7 @@ public:
 
     auto GetServiceDiscovery() -> service::IServiceDiscovery* override { return &mockServiceDiscovery; }
 
-    const std::string _name = "MockComAdapter";
+    const std::string _name = "MockParticipant";
     bool _isSynchronized{ false };
     DummyLogger logger;
     MockTimeProvider mockTimeProvider;

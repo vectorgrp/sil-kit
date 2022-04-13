@@ -2,15 +2,15 @@
 
 #pragma once
 
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "ParticipantConfiguration.hpp"
 
 namespace ib {
 namespace mw {
 
-auto CreateSimulationParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+auto CreateParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
                                      const std::string& participantName, bool isSynchronized)
-    -> std::unique_ptr<IComAdapterInternal>;
+    -> std::unique_ptr<IParticipantInternal>;
 
 auto ValidateAndSanitizeConfig(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
                                const std::string& participantName) -> ib::cfg::ParticipantConfiguration;

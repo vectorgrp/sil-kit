@@ -7,7 +7,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "NullConnectionComAdapter.hpp"
+#include "NullConnectionParticipant.hpp"
 
 #include "FrControllerFacade.hpp"
 
@@ -45,9 +45,9 @@ TEST(FlexRayControllerFacadeTest, create_controller_unconfigured)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto comAdapter = ib::mw::CreateNullConnectionComAdapterImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
-    auto controller = dynamic_cast<FrControllerFacade*>(comAdapter->CreateFlexrayController(controllerName));
+    auto controller = dynamic_cast<FrControllerFacade*>(participant->CreateFlexrayController(controllerName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
@@ -61,10 +61,10 @@ TEST(FlexRayControllerFacadeTest, create_controller_configured_no_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto comAdapter = ib::mw::CreateNullConnectionComAdapterImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
     auto controller =
-        dynamic_cast<FrControllerFacade*>(comAdapter->CreateFlexrayController(controllerName, networkName));
+        dynamic_cast<FrControllerFacade*>(participant->CreateFlexrayController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
@@ -78,10 +78,10 @@ TEST(FlexRayControllerFacadeTest, create_controller_configured_with_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto comAdapter = ib::mw::CreateNullConnectionComAdapterImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
     auto controller =
-        dynamic_cast<FrControllerFacade*>(comAdapter->CreateFlexrayController(controllerName, networkName));
+        dynamic_cast<FrControllerFacade*>(participant->CreateFlexrayController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);

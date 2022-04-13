@@ -43,11 +43,11 @@ TEST_F(ServiceDiscoveryITest, discover_service_removal_on_participant_shutdown)
     registry->ProvideDomain(domainId);
 
     // Publisher that will leave the simulation and trigger service removal
-    auto&& publisher =  ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), publisherName, domainId, false);
+    auto&& publisher =  ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), publisherName, domainId, false);
 
     // Subscriber that monitors the services
     auto&& subscriber =
-        ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), subscriberName, domainId, false);
+        ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), subscriberName, domainId, false);
 
     // Services
     for (auto i = 0u; i < numberOfServices; i++)
@@ -60,8 +60,8 @@ TEST_F(ServiceDiscoveryITest, discover_service_removal_on_participant_shutdown)
     std::vector<std::string> createdServiceNames;
     std::vector<std::string> removedServiceNames;
 
-    // Cast to internal comAdapter for access to service discovery
-    auto subscriberServiceDiscovery = dynamic_cast<IComAdapterInternal*>(subscriber.get())->GetServiceDiscovery();
+    // Cast to internal participant for access to service discovery
+    auto subscriberServiceDiscovery = dynamic_cast<IParticipantInternal*>(subscriber.get())->GetServiceDiscovery();
     
     auto allCreated = std::promise<void>();
     auto allRemoved = std::promise<void>();

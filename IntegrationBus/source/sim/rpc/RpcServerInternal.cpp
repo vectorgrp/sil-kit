@@ -8,7 +8,7 @@ namespace ib {
 namespace sim {
 namespace rpc {
 
-RpcServerInternal::RpcServerInternal(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+RpcServerInternal::RpcServerInternal(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
                                      const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
                                      const std::map<std::string, std::string>& labels, const std::string& clientUUID,
                                      CallProcessor handler, IRpcServer* parent)
@@ -19,7 +19,7 @@ RpcServerInternal::RpcServerInternal(mw::IComAdapterInternal* comAdapter, mw::sy
     , _handler{std::move(handler)}
     , _parent{parent}
     , _timeProvider{ timeProvider }
-    , _comAdapter{comAdapter}
+    , _participant{participant}
 {
 }
 
@@ -48,7 +48,7 @@ void RpcServerInternal::SubmitResult(IRpcCallHandle* callHandlePtr, const std::v
     auto it = _receivedCallHandles.find(callHandleStr);
     if (it != _receivedCallHandles.end())
     {
-        _comAdapter->SendIbMessage(this, FunctionCallResponse{ callHandle._callUUID, resultData });
+        _participant->SendIbMessage(this, FunctionCallResponse{ callHandle._callUUID, resultData });
         _receivedCallHandles.erase(callHandleStr);
     }
 }

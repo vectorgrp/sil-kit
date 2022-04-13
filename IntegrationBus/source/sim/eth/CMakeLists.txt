@@ -34,7 +34,7 @@ add_vib_test(TestSimEthController
         EthControllerFacadeTest.cpp
     LIBS
         IbSimEthernet
-        IbMwMockComAdapter
+        IbMwMockParticipant
         IbTracing
         IbMwMockNullConnection
 )

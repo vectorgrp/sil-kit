@@ -62,7 +62,7 @@ add_vib_test(
         IbRegistryLibTests.cpp
     LIBS
         IbExtensions
-        IbMwComAdapter
+        IbMwParticipant
         IbFilesystem
         IntegrationBus
 )

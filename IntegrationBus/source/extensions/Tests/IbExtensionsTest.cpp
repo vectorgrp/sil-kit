@@ -9,7 +9,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "MockComAdapter.hpp" //for DummyLogger
+#include "MockParticipant.hpp" //for DummyLogger
 #include "IbExtensions.hpp"
 #include "DummyExtension.hpp"
 #include "Filesystem.hpp"

@@ -6,8 +6,8 @@ namespace ib {
 namespace mw {
 namespace sync {
 
-SystemController::SystemController(IComAdapterInternal* comAdapter)
-    : _comAdapter{comAdapter}
+SystemController::SystemController(IParticipantInternal* participant)
+    : _participant{participant}
 {
 }
 
@@ -43,7 +43,7 @@ void SystemController::PrepareColdswap() const
 
 void SystemController::ExecuteColdswap() const
 {
-    _comAdapter->FlushSendBuffers();
+    _participant->FlushSendBuffers();
     SendSystemCommand(SystemCommand::Kind::ExecuteColdswap);
 }
 
@@ -51,7 +51,7 @@ void SystemController::SetRequiredParticipants(const std::vector<std::string>& p
 {
     ExpectedParticipants expectedParticipants{participantNames};
     //  Distribute to SystemMonitors (including self delivery) 
-    _comAdapter->SendIbMessage(this, std::move(expectedParticipants));
+    _participant->SendIbMessage(this, std::move(expectedParticipants));
 }
 
 } // namespace sync

@@ -48,7 +48,7 @@ char* LoadFile(char const* path)
     return result;
 }
 
-ib_SimulationParticipant* participant;
+ib_Participant* participant;
 ib_Can_Controller* canController;
 ib_Can_Controller* canController2;
 ib_Logger* logger;
@@ -145,12 +145,12 @@ int main(int argc, char* argv[])
     }
 
     ib_ReturnCode returnCode;
-    returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, domainId, ib_False);
+    returnCode = ib_Participant_Create(&participant, jsonString, participantName, domainId, ib_False);
     if (returnCode) {
         printf("%s\n", ib_GetLastErrorString());
         return 2;
     }
-    printf("Creating Participant %s for simulation '%s'\n", participantName, domainId);
+    printf("Creating participant '%s' for simulation '%s'\n", participantName, domainId);
 
     const char* canNetworkName = "CAN1";
 
@@ -162,14 +162,14 @@ int main(int argc, char* argv[])
     ib_Can_Controller_RegisterTransmitStatusHandler(canController, (void*)&transmitContext, &AckCallback, ib_Can_TransmitStatus_Transmitted | ib_Can_TransmitStatus_Canceled | ib_Can_TransmitStatus_TransmitQueueFull);
     ib_Can_Controller_RegisterReceiveMessageHandler(canController2, (void*)&transmitContext, &ReceiveMessage, ib_Direction_SendReceive);
 
-    ib_SimulationParticipant_GetLogger(&logger, participant);
+    ib_Participant_GetLogger(&logger, participant);
 
     for (int i = 0; i < 10; i++) {
         SendCanMessage();
         SleepMs(1000);
     }
 
-    ib_SimulationParticipant_Destroy(participant);
+    ib_Participant_Destroy(participant);
     if (jsonString)
     {
         free(jsonString);

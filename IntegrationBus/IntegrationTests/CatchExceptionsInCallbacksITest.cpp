@@ -5,7 +5,7 @@
 #include <thread>
 #include <future>
 
-#include "CreateComAdapter.hpp"
+#include "CreateParticipant.hpp"
 
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
@@ -61,17 +61,17 @@ TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
     registry->ProvideDomain(domainId);
 
     std::string participantNameSender = "Sender";
-    auto pubComAdapter = ib::mw::CreateSimulationParticipantImpl(
+    auto pubParticipant = ib::mw::CreateParticipantImpl(
         ib::cfg::MockParticipantConfiguration(), participantNameSender, false);
-    pubComAdapter->joinIbDomain(domainId);
+    pubParticipant->joinIbDomain(domainId);
 
     std::string participantNameReceiver = "Receiver";
-    auto subComAdapter = ib::mw::CreateSimulationParticipantImpl(
+    auto subParticipant = ib::mw::CreateParticipantImpl(
         ib::cfg::MockParticipantConfiguration(), participantNameReceiver, false);
-    subComAdapter->joinIbDomain(domainId);
+    subParticipant->joinIbDomain(domainId);
 
-    publisher = pubComAdapter->CreateDataPublisher("CrashTopic", {}, {}, 0);
-    subscriber = subComAdapter->CreateDataSubscriber(
+    publisher = pubParticipant->CreateDataPublisher("CrashTopic", {}, {}, 0);
+    subscriber = subParticipant->CreateDataSubscriber(
         "CrashTopic", {}, {},
         [this](auto* /*subscriber*/, const std::vector<uint8_t>& /*data*/) {
             this->testOk.set_value(true);

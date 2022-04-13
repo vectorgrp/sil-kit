@@ -5,7 +5,7 @@
 #include "ib/extensions/ITraceMessageSource.hpp"
 
 #include "IIbToCanControllerFacade.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
 
 #include "CanController.hpp"
@@ -32,7 +32,7 @@ public:
     // Constructors and Destructor
     CanControllerFacade() = delete;
     CanControllerFacade(CanControllerFacade&&) = default;
-    CanControllerFacade(mw::IComAdapterInternal* comAdapter, ib::cfg::CanController config,
+    CanControllerFacade(mw::IParticipantInternal* participant, ib::cfg::CanController config,
                         mw::sync::ITimeProvider* timeProvider);
 
 public:
@@ -93,7 +93,7 @@ private:
     auto IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
 
 private:
-    mw::IComAdapterInternal* _comAdapter{nullptr};
+    mw::IParticipantInternal* _participant{nullptr};
     mw::ServiceDescriptor _serviceDescriptor;
 
     bool _simulatedLinkDetected = false;

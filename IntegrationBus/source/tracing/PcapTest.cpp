@@ -10,7 +10,7 @@
 #include "gmock/gmock.h"
 
 #include "Pcap.hpp"
-#include "MockComAdapter.hpp"
+#include "MockParticipant.hpp"
 
 
 namespace {

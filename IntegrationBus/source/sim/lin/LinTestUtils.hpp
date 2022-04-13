@@ -7,7 +7,7 @@
 #include "ib/mw/EndpointAddress.hpp"
 #include "ib/sim/lin/LinDatatypes.hpp"
 
-#include "MockComAdapter.hpp"
+#include "MockParticipant.hpp"
 
 namespace ib {
 namespace sim {
@@ -17,7 +17,7 @@ class ILinController;
 
 namespace test {
 
-class LinMockComAdapter : public mw::test::DummyComAdapter
+class LinMockParticipant : public mw::test::DummyParticipant
 {
 public:
     MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const SendFrameRequest&));

@@ -7,7 +7,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "NullConnectionComAdapter.hpp"
+#include "NullConnectionParticipant.hpp"
 
 #include "LinControllerFacade.hpp"
 
@@ -45,10 +45,10 @@ TEST(LinControllerFacadeTest, create_controller_unconfigured)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto comAdapter = ib::mw::CreateNullConnectionComAdapterImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
     auto controller =
-        dynamic_cast<LinControllerFacade*>(comAdapter->CreateLinController(controllerName));
+        dynamic_cast<LinControllerFacade*>(participant->CreateLinController(controllerName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
@@ -62,9 +62,9 @@ TEST(LinControllerFacadeTest, create_controller_configured_no_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto comAdapter = ib::mw::CreateNullConnectionComAdapterImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
-    auto controller = dynamic_cast<LinControllerFacade*>(comAdapter->CreateLinController(controllerName, networkName));
+    auto controller = dynamic_cast<LinControllerFacade*>(participant->CreateLinController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
@@ -78,9 +78,9 @@ TEST(LinControllerFacadeTest, create_controller_configured_with_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto comAdapter = ib::mw::CreateNullConnectionComAdapterImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
-    auto controller = dynamic_cast<LinControllerFacade*>(comAdapter->CreateLinController(controllerName, networkName));
+    auto controller = dynamic_cast<LinControllerFacade*>(participant->CreateLinController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);

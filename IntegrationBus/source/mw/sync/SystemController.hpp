@@ -8,7 +8,7 @@
 #include <cassert>
 
 #include "IIbToSystemController.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 
 namespace ib {
 namespace mw {
@@ -27,7 +27,7 @@ public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     SystemController() = default;
-    SystemController(IComAdapterInternal* comAdapter);
+    SystemController(IParticipantInternal* participant);
     SystemController(const SystemController& other) = default;
     SystemController(SystemController&& other) = default;
     SystemController& operator=(const SystemController& other) = default;
@@ -62,7 +62,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    IComAdapterInternal* _comAdapter{nullptr};
+    IParticipantInternal* _participant{nullptr};
     mw::ServiceDescriptor _serviceDescriptor;
 };
 
@@ -72,8 +72,8 @@ private:
 template <class MsgT>
 void SystemController::SendIbMessage(MsgT&& msg) const
 {
-    assert(_comAdapter);
-    _comAdapter->SendIbMessage(this, std::forward<MsgT>(msg));
+    assert(_participant);
+    _participant->SendIbMessage(this, std::forward<MsgT>(msg));
 }
 
 void SystemController::SendParticipantCommand(ParticipantId participantId, ParticipantCommand::Kind kind) const

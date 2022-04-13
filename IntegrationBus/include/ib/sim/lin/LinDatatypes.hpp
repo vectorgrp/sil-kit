@@ -270,7 +270,7 @@ enum class ControllerStatus
 
 
 // ================================================================================
-//  Messages used at the ComAdapter Interface
+//  Messages used at the Participant Interface
 // ================================================================================
 //! \brief Data type representing a finished LIN transmission, independent of success or error.
 struct Transmission

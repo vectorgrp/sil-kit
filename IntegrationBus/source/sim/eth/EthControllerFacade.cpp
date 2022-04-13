@@ -8,14 +8,14 @@ namespace ib {
 namespace sim {
 namespace eth {
 
-EthControllerFacade::EthControllerFacade(mw::IComAdapterInternal* comAdapter,
+EthControllerFacade::EthControllerFacade(mw::IParticipantInternal* participant,
                                          cfg::EthernetController config,
                                          mw::sync::ITimeProvider* timeProvider)
-    : _comAdapter{comAdapter}
+    : _participant{participant}
     , _config{config}
 {
-    _ethController = std::make_unique<EthController>(comAdapter, config, timeProvider, this);
-    _ethControllerProxy = std::make_unique<EthControllerProxy>(comAdapter, config, this);
+    _ethController = std::make_unique<EthController>(participant, config, timeProvider, this);
+    _ethControllerProxy = std::make_unique<EthControllerProxy>(participant, config, this);
     _currentController = _ethController.get();
 }
 
@@ -119,7 +119,7 @@ void EthControllerFacade::SetServiceDescriptor(const mw::ServiceDescriptor& serv
     _ethController->SetServiceDescriptor(serviceDescriptor);
     _ethControllerProxy->SetServiceDescriptor(serviceDescriptor);
 
-    mw::service::IServiceDiscovery* disc = _comAdapter->GetServiceDiscovery();
+    mw::service::IServiceDiscovery* disc = _participant->GetServiceDiscovery();
     disc->RegisterServiceDiscoveryHandler(
         [this, serviceDescriptor]
         (mw::service::ServiceDiscoveryEvent::Type discoveryType, const mw::ServiceDescriptor& remoteServiceDescriptor)

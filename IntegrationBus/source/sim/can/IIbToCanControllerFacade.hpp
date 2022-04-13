@@ -13,7 +13,7 @@ namespace can {
 
 /*! \brief IIbToCanControllerFacade interface
  *
- *  Used by the ComAdapter, implemented by the CanControllerFacade
+ *  Used by the Participant, implemented by the CanControllerFacade
  */
 class IIbToCanControllerFacade
     : public mw::IIbReceiver<CanMessage, CanTransmitAcknowledge, CanControllerStatus>

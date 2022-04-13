@@ -151,11 +151,11 @@ typedef void (*ib_Can_ErrorStateChangedHandler_t)(void* context, ib_Can_Controll
  * The object returned must not be deallocated using free()!
  */
 IntegrationBusAPI ib_ReturnCode ib_Can_Controller_Create(ib_Can_Controller** outCanController,
-                                                         ib_SimulationParticipant* participant, const char* name,
+                                                         ib_Participant* participant, const char* name,
                                                          const char* network);
 
 typedef ib_ReturnCode (*ib_Can_Controller_Create_t)(ib_Can_Controller** outCanController,
-                                                    ib_SimulationParticipant* participant, const char* name,
+                                                    ib_Participant* participant, const char* name,
                                                     const char* network);
 
 /*! \brief Start the CAN controller

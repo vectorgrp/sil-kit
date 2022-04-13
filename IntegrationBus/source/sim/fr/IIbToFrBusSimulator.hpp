@@ -14,7 +14,7 @@ namespace fr {
 
 /*! \brief IIbToFrBusSimulator interface
  *
- *  Used by the ComAdapter
+ *  Used by the Participant
  */
 class IIbToFrBusSimulator
     : public mw::IIbReceiver<HostCommand, ControllerConfig, TxBufferConfigUpdate, TxBufferUpdate>

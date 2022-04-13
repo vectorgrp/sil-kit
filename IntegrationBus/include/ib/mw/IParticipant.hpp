@@ -19,10 +19,10 @@ namespace mw {
 /*! \brief Communication interface to be used by IB participants
  *
  */
-class IComAdapter
+class IParticipant
 {
 public:
-    virtual ~IComAdapter() = default;
+    virtual ~IParticipant() = default;
 
     /* Methods Create*Controller() create controllers at this IB participant.
      *

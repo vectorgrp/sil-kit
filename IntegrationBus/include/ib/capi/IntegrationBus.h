@@ -13,7 +13,7 @@
 #include "ib/capi/FlexRay.h"
 #include "ib/capi/Logger.h"
 #include "ib/capi/InterfaceIdentifiers.h"
-#include "ib/capi/SimulationParticipant.h"
+#include "ib/capi/Participant.h"
 
 
 IB_BEGIN_DECLS
@@ -42,9 +42,9 @@ IntegrationBusAPI const char* ib_GetLastErrorString();
 
 typedef  const char*(*ib_GetLastErrorString_t)();
 
-typedef ib_ReturnCode(*ib_SimulationParticipant_GetLogger_t)(
+typedef ib_ReturnCode(*ib_Participant_GetLogger_t)(
     ib_Logger** outLogger,
-    ib_SimulationParticipant* participant);
+    ib_Participant* participant);
 
 /*! \brief Obtain the logger of a particular simulation participant.
  *
@@ -55,9 +55,9 @@ typedef ib_ReturnCode(*ib_SimulationParticipant_GetLogger_t)(
  * There is no futher cleanup necessary, except for destroying the simulation participant at the end of the
  * simulation.
  */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_GetLogger(
+IntegrationBusAPI ib_ReturnCode ib_Participant_GetLogger(
     ib_Logger** outLogger,
-    ib_SimulationParticipant* participant);
+    ib_Participant* participant);
 
 
 IB_END_DECLS

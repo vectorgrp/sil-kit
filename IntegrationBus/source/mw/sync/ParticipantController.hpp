@@ -14,7 +14,7 @@
 #include "WatchDog.hpp"
 
 #include "IIbToParticipantController.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 
 namespace ib {
 namespace mw {
@@ -48,7 +48,7 @@ public:
 public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
-    ParticipantController(IComAdapterInternal* comAdapter, const std::string& name, bool isSynchronized,
+    ParticipantController(IParticipantInternal* participant, const std::string& name, bool isSynchronized,
                           const cfg::HealthCheck& healthCheckConfig);
 
 public:
@@ -120,7 +120,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    IComAdapterInternal* _comAdapter{ nullptr };
+    IParticipantInternal* _participant{ nullptr };
     mw::ServiceDescriptor _serviceDescriptor{};
     bool _isSynchronized;
     logging::ILogger* _logger{ nullptr };
@@ -157,7 +157,7 @@ private:
 template <class MsgT>
 void ParticipantController::SendIbMessage(MsgT&& msg) const
 {
-    _comAdapter->SendIbMessage(this, std::forward<MsgT>(msg));
+    _participant->SendIbMessage(this, std::forward<MsgT>(msg));
 }
 
 void ParticipantController::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)

@@ -3,14 +3,14 @@ Remote procedure call (Rpc)
 ===========================
 
 .. Macros for docs use
-.. |IComAdapter| replace:: :cpp:class:`IComAdapter<ib::mw::IComAdapter>`
-.. |CreateRpcClient| replace:: :cpp:func:`CreateRpcClient<ib::mw::IComAdapter::CreateRpcClient()>`
-.. |CreateRpcServer| replace:: :cpp:func:`CreateRpcServer<ib::mw::IComAdapter::CreateRpcServer()>`
+.. |IParticipant| replace:: :cpp:class:`IParticipant<ib::mw::IParticipant>`
+.. |CreateRpcClient| replace:: :cpp:func:`CreateRpcClient<ib::mw::IParticipant::CreateRpcClient()>`
+.. |CreateRpcServer| replace:: :cpp:func:`CreateRpcServer<ib::mw::IParticipant::CreateRpcServer()>`
 .. |Call| replace:: :cpp:func:`Call()<ib::sim::rpc::IRpcClient::Call()>`
 .. |SubmitResult| replace:: :cpp:func:`SubmitResult()<ib::sim::rpc::IRpcServer::SubmitResult()>`
 .. |SetRpcHandler| replace:: :cpp:func:`SetRpcHandler()<ib::sim::rpc::IRpcServer::SetRpcHandler()>`
 .. |SetCallReturnHandler| replace:: :cpp:func:`SetCallReturnHandler()<ib::sim::rpc::IRpcClient::SetCallReturnHandler()>`
-.. |DiscoverRpcServers| replace:: :cpp:func:`DiscoverRpcServers()<ib::mw::IComAdapter::DiscoverRpcServers()>`
+.. |DiscoverRpcServers| replace:: :cpp:func:`DiscoverRpcServers()<ib::mw::IParticipant::DiscoverRpcServers()>`
 .. |IRpcClient| replace:: :cpp:class:`IRpcClient<ib::sim::rpc::IRpcClient>`
 .. |IRpcServer| replace:: :cpp:class:`IRpcClient<ib::sim::rpc::IRpcServer>`
 .. contents::
@@ -64,7 +64,7 @@ which carries a vector of RpcDiscoveryResult providing the properties of each di
 Usage
 ~~~~~
 
-The RpcClient and RpcServer interfaces are instantiated from an |IComAdapter| interface by calling 
+The RpcClient and RpcServer interfaces are instantiated from an |IParticipant| interface by calling 
 |CreateRpcClient| and |CreateRpcServer|, respectively. The controller name corresponds to the function name and
 is used in the configuration and instantiation of the interfaces.
 
@@ -88,7 +88,7 @@ Error handling
 Usage Example
 ~~~~~~~~~~~~~
 
-The interfaces for the Rpc mechanism can be instantiated from an IComAdapter:
+The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
 
 .. code-block:: cpp
 
@@ -96,8 +96,8 @@ The interfaces for the Rpc mechanism can be instantiated from an IComAdapter:
     // Client participant
     // ------------------
 
-    auto comAdapter = ib::CreateComAdapter(std::move(config), participant_name, domainId);
-    auto* client = comAdapter->CreateRpcClient("TestFunc", RpcExchangeFormat{"application/octet-stream"}, 
+    auto participant = ib::CreateParticipant(std::move(config), participant_name, domainId);
+    auto* client = participant->CreateRpcClient("TestFunc", RpcExchangeFormat{"application/octet-stream"}, 
         [](IRpcClient* client, const CallHandle callHandle, const CallStatus callStatus, const std::vector<uint8_t>& returnData) {
             // handle returnData
         });
@@ -110,8 +110,8 @@ The interfaces for the Rpc mechanism can be instantiated from an IComAdapter:
     // Server participant
     // ------------------
 
-    auto comAdapter = ib::CreateComAdapter(std::move(config), participant_name, domainId);
-    auto* server = comAdapter->CreateRpcServer("TestFunc", RpcExchangeFormat{"application/octet-stream"},
+    auto participant = ib::CreateParticipant(std::move(config), participant_name, domainId);
+    auto* server = participant->CreateRpcServer("TestFunc", RpcExchangeFormat{"application/octet-stream"},
         [](IRpcServer* server, const CallHandle callHandle, const std::vector<uint8_t>& argumentData) {
             // handle argumentData
             // define resultData

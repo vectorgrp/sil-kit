@@ -6,11 +6,11 @@ namespace ib {
 namespace mw {
 namespace logging {
 
-LogMsgReceiver::LogMsgReceiver(IComAdapterInternal* comAdapter, Logger* logger)
-    : _comAdapter{comAdapter}
+LogMsgReceiver::LogMsgReceiver(IParticipantInternal* participant, Logger* logger)
+    : _participant{participant}
     , _logger{logger}
 {
-    (void)_comAdapter;
+    (void)_participant;
 }
 
 void LogMsgReceiver::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const LogMsg& msg)

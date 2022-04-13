@@ -29,7 +29,7 @@ PendingEthernetTransmits pendingEthernetTransmits;
 
 #define ETHERNET_MIN_FRAME_SIZE 60
 
-IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_Create(ib_Ethernet_Controller** outController, ib_SimulationParticipant* participant, const char* name, const char* network)
+IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_Create(ib_Ethernet_Controller** outController, ib_Participant* participant, const char* name, const char* network)
 {
   ASSERT_VALID_OUT_PARAMETER(outController);
   ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -39,8 +39,8 @@ IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_Create(ib_Ethernet_Contro
   {
     std::string strName(name);
     std::string strNetwork(network);
-    auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
-    auto ethernetController = comAdapter->CreateEthController(strName, strNetwork);
+    auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
+    auto ethernetController = cppParticipant->CreateEthController(strName, strNetwork);
     *outController = reinterpret_cast<ib_Ethernet_Controller*>(ethernetController);
     return ib_ReturnCode_SUCCESS;
   }

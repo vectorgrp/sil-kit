@@ -11,7 +11,7 @@
 #include "ib/mw/sync/ITimeConsumer.hpp"
 
 #include "IIbToRpcServer.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "RpcServerInternal.hpp"
 #include "RpcCallHandle.hpp"
 
@@ -26,7 +26,7 @@ class RpcServer
     , public mw::IIbServiceEndpoint
 {
 public:
-    RpcServer(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+    RpcServer(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
               const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
               const std::map<std::string, std::string>& labels, CallProcessor handler);
 
@@ -56,7 +56,7 @@ private:
     std::vector<RpcServerInternal*> _internalRpcServers;
     mw::logging::ILogger* _logger;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
-    mw::IComAdapterInternal* _comAdapter{nullptr};
+    mw::IParticipantInternal* _participant{nullptr};
 };
 
 // ================================================================================

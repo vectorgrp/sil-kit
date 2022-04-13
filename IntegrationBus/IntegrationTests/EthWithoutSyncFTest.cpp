@@ -65,9 +65,9 @@ protected:
         unsigned numSent{ 0 }, numAcks{ 0 };
         std::promise<void> ethWriterAllAcksReceivedPromiseLocal;
         
-        auto comAdapter =
-            ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), "EthWriter", _domainId, false);
-        auto* controller = dynamic_cast<ib::sim::eth::EthControllerFacade*>(comAdapter->CreateEthController("ETH1"));
+        auto participant =
+            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "EthWriter", _domainId, false);
+        auto* controller = dynamic_cast<ib::sim::eth::EthControllerFacade*>(participant->CreateEthController("ETH1"));
 
         controller->RegisterMessageAckHandler(
             [this, &ethWriterAllAcksReceivedPromiseLocal, &numAcks](ib::sim::eth::IEthController* /*ctrl*/, const ib::sim::eth::EthTransmitAcknowledge& ack) {
@@ -96,9 +96,9 @@ protected:
     {
         unsigned numReceived{ 0 };
         std::promise<void> ethReaderAllReceivedPromiseLocal;
-        auto comAdapter =
-            ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), "EthReader", _domainId, false);
-        auto* controller = comAdapter->CreateEthController("ETH1");
+        auto participant =
+            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "EthReader", _domainId, false);
+        auto* controller = participant->CreateEthController("ETH1");
 
         controller->RegisterReceiveMessageHandler(
             [this, &ethReaderAllReceivedPromiseLocal, &numReceived](ib::sim::eth::IEthController*, const ib::sim::eth::EthMessage& msg) {

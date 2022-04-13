@@ -289,11 +289,11 @@ void ParticipantsThread(
     uint32_t participantIndex,
     size_t& messageCounter)
 {
-    auto comAdapter = ib::CreateSimulationParticipant(ibConfig, participantName, benchmark.domainId, true);
-    auto&& participantController = comAdapter->GetParticipantController();
+    auto participant = ib::CreateParticipant(ibConfig, participantName, benchmark.domainId, true);
+    auto&& participantController = participant->GetParticipantController();
    
-    auto publisher = comAdapter->CreateDataPublisher("Topic", {}, {}, 0);
-    comAdapter->CreateDataSubscriber("Topic", {}, {}, [&messageCounter](auto*, auto&) {
+    auto publisher = participant->CreateDataPublisher("Topic", {}, {}, 0);
+    participant->CreateDataSubscriber("Topic", {}, {}, [&messageCounter](auto*, auto&) {
         // this is handled in I/O thread, so no data races on counter.
         messageCounter++;
     });
@@ -377,9 +377,9 @@ int main(int argc, char** argv)
                 threads.emplace_back(&ParticipantsThread, participantConfiguration, benchmark,  participantName, participantIndex, std::ref(counter));
             }
 
-            auto comAdapter = ib::CreateSimulationParticipant(participantConfiguration, "SystemController", benchmark.domainId, false);
-            auto controller = comAdapter->GetSystemController();
-            auto monitor = comAdapter->GetSystemMonitor();
+            auto participant = ib::CreateParticipant(participantConfiguration, "SystemController", benchmark.domainId, false);
+            auto controller = participant->GetSystemController();
+            auto monitor = participant->GetSystemMonitor();
 
             controller->SetRequiredParticipants(participantNames);
 
@@ -396,7 +396,7 @@ int main(int argc, char** argv)
                 thread.join();
             }
 
-            comAdapter.reset();
+            participant.reset();
 
             auto endTimestamp = std::chrono::system_clock::now();
             measuredRealDurations.emplace_back(endTimestamp - startTimestamp);

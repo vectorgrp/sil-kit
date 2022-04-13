@@ -295,8 +295,8 @@ int main(int argc, char** argv) try
 
     auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
-    std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
-    auto participant = ib::CreateSimulationParticipant(participantConfiguration, participantName, domainId, true);
+    std::cout << "Creating participant '" << participantName << "' in domain " << domainId << std::endl;
+    auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId, true);
     auto* participantController = participant->GetParticipantController();
     auto* linController = participant->CreateLinController("LIN1");
 

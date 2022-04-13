@@ -64,7 +64,7 @@ bool NamedPipeWin::Write(const char* buffer, size_t size)
     if (!_isConnected)
     {
         //explicitly synchronize here with our Pipe partner
-        // this cannot be done in Open() as we would block inside of the ComAdapter setup
+        // this cannot be done in Open() as we would block inside of the Participant setup
         auto ok = ConnectNamedPipe(_pipeHandle, NULL);
         if (ok == 0 && (GetLastError() != ERROR_PIPE_CONNECTED))
         {

@@ -23,11 +23,11 @@ namespace sim {
 namespace lin {
 
 
-LinControllerReplay::LinControllerReplay(mw::IComAdapterInternal* comAdapter, cfg::LinController config,
+LinControllerReplay::LinControllerReplay(mw::IParticipantInternal* participant, cfg::LinController config,
             mw::sync::ITimeProvider* timeProvider)
     : _replayConfig{config.replay}
-    , _controller{comAdapter, timeProvider}
-    , _comAdapter{comAdapter}
+    , _controller{participant, timeProvider}
+    , _participant{participant}
     , _timeProvider{timeProvider}
 {
 }
@@ -44,7 +44,7 @@ void LinControllerReplay::Init(ControllerConfig config)
     // Replaying is only supported on a master node.
     if (_mode == ControllerMode::Slave && IsReplayEnabled(_replayConfig))
     {
-        _comAdapter->GetLogger()->Warn("Replaying on a slave controller is not supported! "
+        _participant->GetLogger()->Warn("Replaying on a slave controller is not supported! "
             "Please use tracing and replay on a master controller!");
         throw std::runtime_error("Replaying is not supported on Slave controllers!");
     }
@@ -60,42 +60,42 @@ void LinControllerReplay::SendFrame(Frame, FrameResponseType)
     // SendFrame is an API only used by a master, we ensure that the API
     // is not called during a replay. That is, we don't support mixing
     // replay frames and user-supplied frames.
-    _comAdapter->GetLogger()->Debug("Replaying: ignoring call to {}.", __FUNCTION__);
+    _participant->GetLogger()->Debug("Replaying: ignoring call to {}.", __FUNCTION__);
     return;
 }
 
 void LinControllerReplay::SendFrame(Frame , FrameResponseType , std::chrono::nanoseconds)
 {
     // We don't allow mixing user API calls while replaying on a master.
-    _comAdapter->GetLogger()->Debug("Replaying: ignoring call to {}.", __FUNCTION__);
+    _participant->GetLogger()->Debug("Replaying: ignoring call to {}.", __FUNCTION__);
     return;
 }
 
 void LinControllerReplay::SendFrameHeader(LinIdT)
 {
     // We don't allow mixing user API calls while replaying.
-    _comAdapter->GetLogger()->Debug("Replaying: ignoring call to {}.", __FUNCTION__);
+    _participant->GetLogger()->Debug("Replaying: ignoring call to {}.", __FUNCTION__);
     return;
 }
 
 void LinControllerReplay::SendFrameHeader(LinIdT, std::chrono::nanoseconds)
 {
     // We don't allow mixing user API calls while replaying.
-    _comAdapter->GetLogger()->Debug("Replaying: ignoring call to {}.", __FUNCTION__);
+    _participant->GetLogger()->Debug("Replaying: ignoring call to {}.", __FUNCTION__);
     return;
 }
 
 void LinControllerReplay::SetFrameResponse(Frame, FrameResponseMode)
 {
     // We don't allow mixing user API calls while replaying.
-    _comAdapter->GetLogger()->Debug("Replaying: ignoring call to {}.", __FUNCTION__);
+    _participant->GetLogger()->Debug("Replaying: ignoring call to {}.", __FUNCTION__);
     return;
 }
 
 void LinControllerReplay::SetFrameResponses(std::vector<FrameResponse>)
 {
     // we don't allow mixing user API calls while replaying
-    _comAdapter->GetLogger()->Debug("Replaying: ignoring call to {}.", __FUNCTION__);
+    _participant->GetLogger()->Debug("Replaying: ignoring call to {}.", __FUNCTION__);
     return;
 }
 
@@ -219,7 +219,7 @@ void LinControllerReplay::ReplayMessage(const extensions::IReplayMessage* replay
     response.responseMode = mode;
     FrameResponseUpdate responseUpdate;
     responseUpdate.frameResponses.emplace_back(std::move(response));
-    _comAdapter->SendIbMessage(this, responseUpdate);
+    _participant->SendIbMessage(this, responseUpdate);
 
     if (_mode == ControllerMode::Master)
     {
@@ -230,7 +230,7 @@ void LinControllerReplay::ReplayMessage(const extensions::IReplayMessage* replay
         tm.timestamp = replayMessage->Timestamp();
         tm.frame = std::move(frame);
         tm.status = FrameStatus::LIN_RX_OK;
-        _comAdapter->SendIbMessage(this, tm);
+        _participant->SendIbMessage(this, tm);
 
         // dispatch local frame status handlers
         // TODO fix epa check

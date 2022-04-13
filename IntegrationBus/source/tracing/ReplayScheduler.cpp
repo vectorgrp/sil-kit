@@ -7,7 +7,7 @@
 #include <sstream>
 
 #include "ib/cfg/Config.hpp"
-#include "ib/mw/IComAdapter.hpp"
+#include "ib/mw/IParticipant.hpp"
 #include "ib/mw/sync/ISystemMonitor.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/extensions/string_utils.hpp"
@@ -291,13 +291,13 @@ auto FindReplayChannel(ib::mw::logging::ILogger* log,
 ReplayScheduler::ReplayScheduler(const cfg::Config& config,
     const cfg::Participant& participantConfig,
     std::chrono::nanoseconds tickPeriod,
-    mw::IComAdapter* comAdapter,
+    mw::IParticipant* participant,
     mw::sync::ITimeProvider* timeProvider)
-    : _comAdapter{comAdapter}
+    : _participant{participant}
     , _timeProvider{timeProvider}
     , _tickPeriod{tickPeriod}
 {
-    _log = _comAdapter->GetLogger();
+    _log = _participant->GetLogger();
 
     // If NetworkSimulator is inactive, configure the replay controllers
     if (participantConfig.networkSimulators.empty())
@@ -463,7 +463,7 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
                     continue;
                 }
 
-                auto createController = std::bind(createMethod, _comAdapter, std::placeholders::_1);
+                auto createController = std::bind(createMethod, _participant, std::placeholders::_1);
                 auto* controller = createController(controllerConfig.name);
 
                 if (controller == nullptr)
@@ -517,10 +517,10 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
 
     // Bus Controllers
     // TODO FIXME Replay is currently not working so this will be commented out
-    //makeTasks(participantConfig.ethernetControllers, &mw::IComAdapter::CreateEthController);
-    //makeTasks(participantConfig.canControllers, &mw::IComAdapter::CreateCanController);
-    //TODO makeTasks(participantConfig.flexrayControllers, &mw::IComAdapter::CreateFlexrayController);
-    //makeTasks(participantConfig.linControllers, &mw::IComAdapter::CreateLinController);
+    //makeTasks(participantConfig.ethernetControllers, &mw::IParticipant::CreateEthController);
+    //makeTasks(participantConfig.canControllers, &mw::IParticipant::CreateCanController);
+    //TODO makeTasks(participantConfig.flexrayControllers, &mw::IParticipant::CreateFlexrayController);
+    //makeTasks(participantConfig.linControllers, &mw::IParticipant::CreateLinController);
 }
 
 ReplayScheduler::~ReplayScheduler()

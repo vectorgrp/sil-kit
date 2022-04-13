@@ -11,9 +11,9 @@ namespace ib {
 namespace sim {
 namespace eth {
 
-EthController::EthController(mw::IComAdapterInternal* comAdapter, cfg::EthernetController /*config*/,
+EthController::EthController(mw::IParticipantInternal* participant, cfg::EthernetController /*config*/,
                              mw::sync::ITimeProvider* timeProvider, IEthController* facade)
-    : _comAdapter{comAdapter}
+    : _participant{participant}
     , _timeProvider{timeProvider}
     , _facade{facade}
 {
@@ -42,7 +42,7 @@ auto EthController::SendMessage(EthMessage msg) -> EthTxId
 
     _tracer.Trace(ib::sim::TransmitDirection::TX, msg.timestamp, msg.ethFrame);
 
-    _comAdapter->SendIbMessage(this, std::move(msg));
+    _participant->SendIbMessage(this, std::move(msg));
 
     EthTransmitAcknowledge ack;
     ack.timestamp = msg.timestamp;

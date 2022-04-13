@@ -12,7 +12,7 @@
 #include "ib/mw/fwd_decl.hpp"
 
 #include "IIbToLinControllerProxy.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 
 namespace ib {
 namespace sim {
@@ -34,7 +34,7 @@ public:
     LinControllerProxy() = delete;
     LinControllerProxy(const LinControllerProxy&) = default;
     LinControllerProxy(LinControllerProxy&&) = default;
-    LinControllerProxy(mw::IComAdapterInternal* comAdapter, ILinController* facade = nullptr);
+    LinControllerProxy(mw::IParticipantInternal* participant, ILinController* facade = nullptr);
 
 public:
     // ----------------------------------------
@@ -99,7 +99,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    mw::IComAdapterInternal* _comAdapter;
+    mw::IParticipantInternal* _participant;
     mw::logging::ILogger* _logger;
     ::ib::mw::ServiceDescriptor _serviceDescriptor;
     ILinController* _facade{ nullptr };

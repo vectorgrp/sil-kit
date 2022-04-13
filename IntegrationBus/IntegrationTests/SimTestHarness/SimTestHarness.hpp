@@ -32,14 +32,14 @@ public:
     SimParticipant() = default;
 
     const std::string& Name() const;
-    ib::mw::IComAdapter* ComAdapter() const;
+    ib::mw::IParticipant* Participant() const;
     FutureResult& Result();
     void Stop();
 
 private:
     std::string _name;
     FutureResult _result;
-    std::unique_ptr<ib::mw::IComAdapter> _comAdapter;
+    std::unique_ptr<ib::mw::IParticipant> _participant;
 
     friend class SimTestHarness;
 };

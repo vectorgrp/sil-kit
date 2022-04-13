@@ -6,7 +6,7 @@
 #include <future>
 #include <memory>
 
-#include "NullConnectionComAdapter.hpp"
+#include "NullConnectionParticipant.hpp"
 #include "ParticipantConfiguration.hpp"
 #include "ib/sim/all.hpp"
 #include "ib/util/functional.hpp"
@@ -39,67 +39,67 @@ protected:
 
         std::cout << "Verifying participant " << participantConfig.participantName << '\n';
 
-        auto comAdapter = ib::mw::CreateNullConnectionComAdapterImpl(cfg, participantConfig.participantName, false);
+        auto participant = ib::mw::CreateNullConnectionParticipantImpl(cfg, participantConfig.participantName, false);
 
         /*
-        GetCanControllers(*comAdapter, participantConfig);
-        GetLinControllers(*comAdapter, participantConfig);
-        GetEthernetControllers(*comAdapter, participantConfig);
-        GetFlexRayControllers(*comAdapter, participantConfig);
-        GetDataPublishersSubscribers(*comAdapter, participantConfig);
-        GetRpcServersClients(*comAdapter, participantConfig);
+        GetCanControllers(*participant, participantConfig);
+        GetLinControllers(*participant, participantConfig);
+        GetEthernetControllers(*participant, participantConfig);
+        GetFlexRayControllers(*participant, participantConfig);
+        GetDataPublishersSubscribers(*participant, participantConfig);
+        GetRpcServersClients(*participant, participantConfig);
         */
     }
 
     /*
-    void GetCanControllers(ib::mw::IComAdapter& comAdapter, const ParticipantConfiguration& cfg)
+    void GetCanControllers(ib::mw::IParticipant& participant, const ParticipantConfiguration& cfg)
     {
         for (auto&& controller : cfg.canControllers)
         {
-            EXPECT_NE(comAdapter.GetCanController(controller.name, "CAN1"), nullptr);
+            EXPECT_NE(participant.GetCanController(controller.name, "CAN1"), nullptr);
         }
     }
-    void GetLinControllers(ib::mw::IComAdapter& comAdapter, const ParticipantConfiguration& cfg)
+    void GetLinControllers(ib::mw::IParticipant& participant, const ParticipantConfiguration& cfg)
     {
         for (auto&& controller : cfg.linControllers)
         {
-            EXPECT_NE(comAdapter.GetLinController(controller.name), nullptr);
+            EXPECT_NE(participant.GetLinController(controller.name), nullptr);
         }
     }
-    void GetEthernetControllers(ib::mw::IComAdapter& comAdapter, const ParticipantConfiguration& cfg)
+    void GetEthernetControllers(ib::mw::IParticipant& participant, const ParticipantConfiguration& cfg)
     {
         for (auto&& controller : cfg.ethernetControllers)
         {
-            EXPECT_NE(comAdapter.GetEthController(controller.name), nullptr);
+            EXPECT_NE(participant.GetEthController(controller.name), nullptr);
         }
     }
-    void GetFlexRayControllers(ib::mw::IComAdapter& comAdapter, const ParticipantConfiguration& cfg)
+    void GetFlexRayControllers(ib::mw::IParticipant& participant, const ParticipantConfiguration& cfg)
     {
         for (auto&& controller : cfg.flexRayControllers)
         {
-            EXPECT_NE(comAdapter.GetFlexrayController(controller.name), nullptr);
+            EXPECT_NE(participant.GetFlexrayController(controller.name), nullptr);
         }
     }
-    void GetDataPublishersSubscribers(ib::mw::IComAdapter& comAdapter, const ParticipantConfiguration& cfg)
+    void GetDataPublishersSubscribers(ib::mw::IParticipant& participant, const ParticipantConfiguration& cfg)
     {
         for (auto&& pub : cfg.dataPublishers)
         {
-            EXPECT_NE(comAdapter.GetDataPublisher(pub.name), nullptr);
+            EXPECT_NE(participant.GetDataPublisher(pub.name), nullptr);
         }
         for (auto&& sub : cfg.dataSubscribers)
         {
-            EXPECT_NE(comAdapter.GetDataSubscriber(sub.name), nullptr);
+            EXPECT_NE(participant.GetDataSubscriber(sub.name), nullptr);
         }
     }
-    void GetRpcServersClients(ib::mw::IComAdapter& comAdapter, const ParticipantConfiguration& cfg)
+    void GetRpcServersClients(ib::mw::IParticipant& participant, const ParticipantConfiguration& cfg)
     {
         for (auto&& server : cfg.rpcServers)
         {
-            EXPECT_NE(comAdapter.GetRpcServer(pub.name), nullptr);
+            EXPECT_NE(participant.GetRpcServer(pub.name), nullptr);
         }
         for (auto&& client : cfg.rpcClients)
         {
-            EXPECT_NE(comAdapter.GetRpcClient(sub.name), nullptr);
+            EXPECT_NE(participant.GetRpcClient(sub.name), nullptr);
         }
     }
     */

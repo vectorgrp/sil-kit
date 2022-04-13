@@ -9,9 +9,9 @@ namespace ib {
 namespace sim {
 namespace fr {
 
-FrControllerProxy::FrControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::FlexRayController config,
+FrControllerProxy::FrControllerProxy(mw::IParticipantInternal* participant, cfg::FlexRayController config,
                                      IFrController* facade)
-    : _comAdapter(comAdapter)
+    : _participant(participant)
     , _facade{facade}
     , _config{config}
 {
@@ -52,13 +52,13 @@ void FrControllerProxy::ReconfigureTxBuffer(uint16_t txBufferIdx, const TxBuffer
 {
     if (txBufferIdx >= _bufferConfigs.size())
     {
-        _comAdapter->GetLogger()->Error("FrControllerProxy::ReconfigureTxBuffer() was called with unconfigured txBufferIdx={}", txBufferIdx);
+        _participant->GetLogger()->Error("FrControllerProxy::ReconfigureTxBuffer() was called with unconfigured txBufferIdx={}", txBufferIdx);
         throw std::out_of_range{"Unconfigured txBufferIdx!"};
     }
 
     if (_config.txBufferConfigurations.size() > 0)
     {
-        _comAdapter->GetLogger()->Error("ReconfigureTxBuffer() was called on a preconfigured txBuffer. This is not "
+        _participant->GetLogger()->Error("ReconfigureTxBuffer() was called on a preconfigured txBuffer. This is not "
                                         "allowed and the reconfiguration will be discarded.");
         return;
     }
@@ -73,7 +73,7 @@ void FrControllerProxy::UpdateTxBuffer(const TxBufferUpdate& update)
 {
     if (update.txBufferIndex >= _bufferConfigs.size())
     {
-        _comAdapter->GetLogger()->Error("FrControllerProxy::UpdateTxBuffer() was called with unconfigured txBufferIndex={}", update.txBufferIndex);
+        _participant->GetLogger()->Error("FrControllerProxy::UpdateTxBuffer() was called with unconfigured txBufferIndex={}", update.txBufferIndex);
         throw std::out_of_range{"Unconfigured txBufferIndex!"};
     }
 
@@ -216,7 +216,7 @@ void FrControllerProxy::WarnOverride(const std::string& parameterName)
     ss << "Discarded user-defined configuration of " << parameterName
        << ", as it was already set in the predefined configuration.";
 
-    _comAdapter->GetLogger()->Warn(ss.str());
+    _participant->GetLogger()->Warn(ss.str());
 }
 
 template<typename MsgT>
@@ -239,7 +239,7 @@ void FrControllerProxy::CallHandlers(const MsgT& msg)
 template<typename MsgT>
 void FrControllerProxy::SendIbMessage(MsgT&& msg)
 {
-    _comAdapter->SendIbMessage(this, std::forward<MsgT>(msg));
+    _participant->SendIbMessage(this, std::forward<MsgT>(msg));
 }
 
 

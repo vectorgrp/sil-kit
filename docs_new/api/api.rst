@@ -1,7 +1,7 @@
 =======
 !!! API
 =======
-.. |ComAdapter| replace:: :doc:`ComAdapter<comadapter>`
+.. |Participant| replace:: :doc:`Participant<participant>`
 .. |header| replace:: :doc:`header<header>`
 
 
@@ -13,7 +13,7 @@ the :doc:`Quick Start<../usage/quickstart>`.
 !!! VIB Entry Point and API Organization
 ------------------------------------
 
-The ComAdapter constitutes the main entry point into the Integration Bus API.
+The Participant constitutes the main entry point into the Integration Bus API.
 
 .. toctree::
    :maxdepth: 1

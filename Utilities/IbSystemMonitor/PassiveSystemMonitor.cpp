@@ -112,7 +112,7 @@ int main(int argc, char** argv)
     {
         std::cout << "Creating participant '" << participantName << "' at domain " << domainId << std::endl;
 
-        auto participant = ib::CreateSimulationParticipant(std::move(configuration), participantName, domainId, false);
+        auto participant = ib::CreateParticipant(std::move(configuration), participantName, domainId, false);
 
         auto* logger = participant->GetLogger();
         auto* systemMonitor = participant->GetSystemMonitor();

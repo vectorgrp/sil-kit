@@ -1,33 +1,33 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "CreateComAdapter.hpp"
+#include "CreateParticipant.hpp"
 
-#include "ComAdapter.hpp"
+#include "Participant.hpp"
 #include <iostream>
 
 namespace ib {
 namespace mw {
 
-auto CreateVAsioSimulationParticipantImpl(cfg::ParticipantConfiguration participantConfig,
+auto CreateVAsioParticipantImpl(cfg::ParticipantConfiguration participantConfig,
                                           const std::string& participantName, bool isSynchronized)
-    -> std::unique_ptr<IComAdapterInternal>
+    -> std::unique_ptr<IParticipantInternal>
 {
 #if defined(IB_MW_HAVE_VASIO)
-    return std::make_unique<ComAdapter<VAsioConnection>>(std::move(participantConfig), participantName, isSynchronized);
+    return std::make_unique<Participant<VAsioConnection>>(std::move(participantConfig), participantName, isSynchronized);
 #else
-    std::cout << "ERROR: CreateVasioComAdapterImpl(): IntegrationBus was compiled without \"IB_MW_HAVE_VASIO\""
+    std::cout << "ERROR: CreateVasioParticipantImpl(): IntegrationBus was compiled without \"IB_MW_HAVE_VASIO\""
               << std::endl;
     throw std::runtime_error("VIB was compiled without IB_MW_HAVE_VASIO");
 #endif
 }
 
-auto CreateSimulationParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+auto CreateParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
                                      const std::string& participantName, bool isSynchronized)
-    -> std::unique_ptr<IComAdapterInternal>
+    -> std::unique_ptr<IParticipantInternal>
 {
     auto&& cfg = ValidateAndSanitizeConfig(participantConfig, participantName);
 
-    return CreateVAsioSimulationParticipantImpl(std::move(cfg), participantName, isSynchronized);
+    return CreateVAsioParticipantImpl(std::move(cfg), participantName, isSynchronized);
 }
 
 auto ValidateAndSanitizeConfig(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,

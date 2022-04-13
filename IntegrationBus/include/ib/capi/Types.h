@@ -10,7 +10,7 @@
 
 IB_BEGIN_DECLS
 
-typedef struct ib_SimulationParticipant ib_SimulationParticipant;
+typedef struct ib_Participant ib_Participant;
 
 typedef int32_t ib_ReturnCode;
 

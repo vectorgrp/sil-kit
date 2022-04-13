@@ -14,23 +14,23 @@ Experimental C API
 VIB Entry Point and API Organization
 ====================================
 
-The main entry point of the C API is the function to obtain a ib_SimulationParticipant*::
+The main entry point of the C API is the function to obtain a ib_Participant*::
 
-    ib_SimulationParticipant* participant = NULL;
+    ib_Participant* participant = NULL;
     const char* jsonString = "{ ... }";
     const char* participantName = "CanWriter";
     const char* domainId = "1";
-    ib_ReturnCode result = ib_SimulationParticipant_Create(&participant, jsonString,
+    ib_ReturnCode result = ib_Participant_Create(&participant, jsonString,
                                                             participantName, domainId, ib_False);
 
-All further services of the C API of the IntegrationBus are requested through this SimulationParticipant.
+All further services of the C API of the IntegrationBus are requested through this Participant.
 
-Entities obtained through the SimulationParticipant must not be destroyed/deleted by the user of the API.
-All entities, that are provided through the API expect for the ib_SimulationParticipant are destroyed through
+Entities obtained through the Participant must not be destroyed/deleted by the user of the API.
+All entities, that are provided through the API expect for the ib_Participant are destroyed through
 the internals of the Integration Bus implementation.
 
-After creation of a SimulationParticipant it must be ensured that eventually ib_SimulationParticipant_Destroy is called
-with the corresponding pointer to the ib_SimulationParticipant entity.
+After creation of a Participant it must be ensured that eventually ib_Participant_Destroy is called
+with the corresponding pointer to the ib_Participant entity.
 
 
 API and Data Type Reference
@@ -41,52 +41,52 @@ General API
 .. doxygenfunction:: ib_ReturnCodeToString
 .. doxygenfunction:: ib_GetLastErrorString
 
-SimulationParticipant API
+Participant API
 -------------------------
 
-Most creator functions for other objects (such as bus controllers) require an ib_SimulationParticipant, 
+Most creator functions for other objects (such as bus controllers) require an ib_Participant, 
 which is the factory object, as input parameter.
 
 Participant creation
 ~~~~~~~~~~~~~~~~~~~~
-.. doxygenfunction:: ib_SimulationParticipant_Create
-.. doxygenfunction:: ib_SimulationParticipant_Destroy
+.. doxygenfunction:: ib_Participant_Create
+.. doxygenfunction:: ib_Participant_Destroy
 
 State handlers
 ~~~~~~~~~~~~~~
-.. doxygenfunction:: ib_SimulationParticipant_SetInitHandler
-.. doxygenfunction:: ib_SimulationParticipant_SetStopHandler
-.. doxygenfunction:: ib_SimulationParticipant_SetShutdownHandler
+.. doxygenfunction:: ib_Participant_SetInitHandler
+.. doxygenfunction:: ib_Participant_SetStopHandler
+.. doxygenfunction:: ib_Participant_SetShutdownHandler
 
 Simulation tasks
 ~~~~~~~~~~~~~~~~
-.. doxygenfunction:: ib_SimulationParticipant_SetPeriod
-.. doxygenfunction:: ib_SimulationParticipant_SetSimulationTask
-.. doxygenfunction:: ib_SimulationParticipant_SetSimulationTaskAsync
-.. doxygenfunction:: ib_SimulationParticipant_CompleteSimulationTask
+.. doxygenfunction:: ib_Participant_SetPeriod
+.. doxygenfunction:: ib_Participant_SetSimulationTask
+.. doxygenfunction:: ib_Participant_SetSimulationTaskAsync
+.. doxygenfunction:: ib_Participant_CompleteSimulationTask
 
 Running
 ~~~~~~~
-.. doxygenfunction:: ib_SimulationParticipant_Run
-.. doxygenfunction:: ib_SimulationParticipant_RunAsync
-.. doxygenfunction:: ib_SimulationParticipant_WaitForRunAsyncToComplete
+.. doxygenfunction:: ib_Participant_Run
+.. doxygenfunction:: ib_Participant_RunAsync
+.. doxygenfunction:: ib_Participant_WaitForRunAsyncToComplete
 
 System control
 ~~~~~~~~~~~~~~
-.. doxygenfunction:: ib_SimulationParticipant_Initialize
-.. doxygenfunction:: ib_SimulationParticipant_ReInitialize
-.. doxygenfunction:: ib_SimulationParticipant_RunSimulation
-.. doxygenfunction:: ib_SimulationParticipant_StopSimulation
-.. doxygenfunction:: ib_SimulationParticipant_Pause
-.. doxygenfunction:: ib_SimulationParticipant_Continue
-.. doxygenfunction:: ib_SimulationParticipant_Shutdown
-.. doxygenfunction:: ib_SimulationParticipant_PrepareColdswap
-.. doxygenfunction:: ib_SimulationParticipant_ExecuteColdswap
-.. doxygenfunction:: ib_SimulationParticipant_GetParticipantState
-.. doxygenfunction:: ib_SimulationParticipant_GetSystemState
-.. doxygenfunction:: ib_SimulationParticipant_RegisterSystemStateHandler
-.. doxygenfunction:: ib_SimulationParticipant_RegisterParticipantStateHandler
-.. doxygenfunction:: ib_SimulationParticipant_SetRequiredParticipants
+.. doxygenfunction:: ib_Participant_Initialize
+.. doxygenfunction:: ib_Participant_ReInitialize
+.. doxygenfunction:: ib_Participant_RunSimulation
+.. doxygenfunction:: ib_Participant_StopSimulation
+.. doxygenfunction:: ib_Participant_Pause
+.. doxygenfunction:: ib_Participant_Continue
+.. doxygenfunction:: ib_Participant_Shutdown
+.. doxygenfunction:: ib_Participant_PrepareColdswap
+.. doxygenfunction:: ib_Participant_ExecuteColdswap
+.. doxygenfunction:: ib_Participant_GetParticipantState
+.. doxygenfunction:: ib_Participant_GetSystemState
+.. doxygenfunction:: ib_Participant_RegisterSystemStateHandler
+.. doxygenfunction:: ib_Participant_RegisterParticipantStateHandler
+.. doxygenfunction:: ib_Participant_SetRequiredParticipants
 
 
 Can API
@@ -335,7 +335,7 @@ Enumerations and Typedefs
 
 The Logger API can be used to write log messages.
 
-.. doxygenfunction:: ib_SimulationParticipant_GetLogger
+.. doxygenfunction:: ib_Participant_GetLogger
 .. doxygenfunction:: ib_Logger_Log
 
 Enumerations and Typedefs

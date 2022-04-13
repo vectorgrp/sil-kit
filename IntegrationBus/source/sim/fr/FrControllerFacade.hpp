@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "IIbToFrControllerFacade.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
 
 #include "FrControllerProxy.hpp"
@@ -40,7 +40,7 @@ public:
     // Constructors and Destructor
     FrControllerFacade() = delete;
     FrControllerFacade(FrControllerFacade&&) = default;
-    FrControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::FlexRayController config, mw::sync::ITimeProvider* timeProvider);
+    FrControllerFacade(mw::IParticipantInternal* participant, cfg::FlexRayController config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -108,7 +108,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    mw::IComAdapterInternal* _comAdapter = nullptr;
+    mw::IParticipantInternal* _participant = nullptr;
     mw::ServiceDescriptor _serviceDescriptor;
     cfg::FlexRayController _config;
 

@@ -3,9 +3,9 @@
 ===================
 
 .. Macros for docs use
-.. |IComAdapter| replace:: :cpp:class:`IComAdapter<ib::mw::IComAdapter>`
-.. |CreateDataPublisher| replace:: :cpp:func:`CreateDataPublisher<ib::mw::IComAdapter::CreateDataPublisher()>`
-.. |CreateDataSubscriber| replace:: :cpp:func:`CreateDataSubscriber<ib::mw::IComAdapter::CreateDataSubscriber()>`
+.. |IParticipant| replace:: :cpp:class:`IParticipant<ib::mw::IParticipant>`
+.. |CreateDataPublisher| replace:: :cpp:func:`CreateDataPublisher<ib::mw::IParticipant::CreateDataPublisher()>`
+.. |CreateDataSubscriber| replace:: :cpp:func:`CreateDataSubscriber<ib::mw::IParticipant::CreateDataSubscriber()>`
 .. |Publish| replace:: :cpp:func:`Publish()<ib::sim::data::IDataPublisher::Publish()>`
 .. |SetDefaultReceiveMessageHandler| replace:: :cpp:func:`SetDefaultReceiveMessageHandler()<ib::sim::data::IDataSubscriber::SetDefaultReceiveMessageHandler()>`
 .. |RegisterSpecificDataHandler| replace:: :cpp:func:`RegisterSpecificDataHandler()<ib::sim::data::IDataSubscriber::RegisterSpecificDataHandler()>`
@@ -77,7 +77,7 @@ messages to be delivered.
 !!! Usage
 ~~~~~
 
-The Publisher and Subscriber interfaces are instantiated from an |IComAdapter| interface by calling 
+The Publisher and Subscriber interfaces are instantiated from an |IParticipant| interface by calling 
 |CreateDataPublisher| and |CreateDataSubscriber|, respectively. Their name corresponds to the topic and is used in the
 configuration and instantiation of the interfaces.
 
@@ -87,14 +87,14 @@ specified on creation of the DataSubscriber and can be overwritten using the |Se
 !!! Usage Examples
 ~~~~~~~~~~~~~~
 
-The interfaces for the publish/subscribe mechanism can be instantiated from an IComAdapter:
+The interfaces for the publish/subscribe mechanism can be instantiated from an IParticipant:
 
 .. code-block:: cpp
 
     // Participant1 (Publisher)
     // ------------------------
 
-    auto* publisher = comAdapter->CreateDataPublisher("Topic1", "json", {"KeyA", "ValA"}, 1);
+    auto* publisher = participant->CreateDataPublisher("Topic1", "json", {"KeyA", "ValA"}, 1);
     publisher->Publish(user_data);
 
 
@@ -111,7 +111,7 @@ The interfaces for the publish/subscribe mechanism can be instantiated from an I
         // handle new sources
     });
 
-    auto* subscriber = comAdapter->CreateDataSubscriber("Topic1", "", {}, defaultDataHandler, newDataSourceHandler);
+    auto* subscriber = participant->CreateDataSubscriber("Topic1", "", {}, defaultDataHandler, newDataSourceHandler);
 
     auto specificDataHandler = [](IDataSubscriber* subscriber, const std::vector<uint8_t>& data) 
     {

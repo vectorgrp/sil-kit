@@ -4,7 +4,7 @@
 The Participant Controller
 ==============================
 .. |IParticipantController| replace:: :cpp:class:`IParticipantController<ib::mw::sync::IParticipantController>`
-.. |ComAdapter| replace:: :doc:`ComAdapter<comadapter>`
+.. |Participant| replace:: :doc:`Participant<participant>`
 
 .. contents::
     :local:
@@ -20,9 +20,9 @@ refer to the :ref:`participant lifecycle<sec:sim-participant-lifecycle>` section
 
 Using the Participant Controller
 -------------------------------------
-An |IParticipantController| instance can be retrieved from a connected |ComAdapter|::
+An |IParticipantController| instance can be retrieved from a connected |Participant|::
    
-    auto* participantController = comAdapter->GetParticipantController();
+    auto* participantController = participant->GetParticipantController();
 
 Setting a simulation task, even an empty one, is mandatory for participants using
 the participant controller interface.

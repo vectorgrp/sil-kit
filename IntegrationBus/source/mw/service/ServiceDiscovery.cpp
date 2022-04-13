@@ -6,8 +6,8 @@ namespace ib {
 namespace mw {
 namespace service {
 
-ServiceDiscovery::ServiceDiscovery(IComAdapterInternal* comadapter, const std::string& participantName)
-    : _comAdapter{comadapter}
+ServiceDiscovery::ServiceDiscovery(IParticipantInternal* participant, const std::string& participantName)
+    : _participant{participant}
     , _participantName{participantName}
 {
 }
@@ -98,7 +98,7 @@ void ServiceDiscovery::ReceivedServiceAddition(const ServiceDescriptor& serviceD
             {
                 localServices.services.push_back(thisParticipantServiceMap.second);
             }
-            _comAdapter->SendIbMessage(this, serviceDescriptor.GetParticipantName(), std::move(localServices));
+            _participant->SendIbMessage(this, serviceDescriptor.GetParticipantName(), std::move(localServices));
         }
     }
 
@@ -147,7 +147,7 @@ void ServiceDiscovery::NotifyServiceCreated(const ServiceDescriptor& serviceDesc
     ServiceDiscoveryEvent event;
     event.type = ServiceDiscoveryEvent::Type::ServiceCreated;
     event.service = serviceDescriptor;
-    _comAdapter->SendIbMessage(this, std::move(event));
+    _participant->SendIbMessage(this, std::move(event));
 
 }
 
@@ -164,7 +164,7 @@ void ServiceDiscovery::NotifyServiceRemoved(const ServiceDescriptor& serviceDesc
     ServiceDiscoveryEvent event;
     event.type = ServiceDiscoveryEvent::Type::ServiceRemoved;
     event.service = serviceDescriptor;
-    _comAdapter->SendIbMessage(this, std::move(event));
+    _participant->SendIbMessage(this, std::move(event));
 }
 
 std::vector<ServiceDescriptor> ServiceDiscovery::GetServices() const

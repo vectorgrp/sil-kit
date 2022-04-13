@@ -7,7 +7,7 @@ namespace mw {
 
 struct EndpointAddress;
 
-class IComAdapter;
+class IParticipant;
     
 } // namespace mw
 } // namespace ib

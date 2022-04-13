@@ -41,7 +41,7 @@
 
 #include "ib/version.hpp"
 
-#include "ComAdapter.hpp"
+#include "Participant.hpp"
 
 #include "MessageTracing.hpp" // log tracing
 #include "UuidRandom.hpp"
@@ -72,7 +72,7 @@ struct IsControllerMap<std::unordered_map<std::string, std::unique_ptr<T>>, U> :
 } // namespace anonymous
 
 template <class IbConnectionT>
-ComAdapter<IbConnectionT>::ComAdapter(cfg::ParticipantConfiguration participantConfig,
+Participant<IbConnectionT>::Participant(cfg::ParticipantConfiguration participantConfig,
                                       const std::string& participantName, bool isSynchronized)
     : _participantName{ participantName }
     , _isSynchronized{ isSynchronized }
@@ -93,7 +93,7 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::ParticipantConfiguration participantC
     _logger = std::make_unique<logging::Logger>(_participantName, _participantConfig.logging);
     _ibConnection.SetLogger(_logger.get());
     
-    _logger->Info("Creating ComAdapter for Participant {}, IntegrationBus-Version: {} {}, Middleware: {}",
+    _logger->Info("Creating Participant for Participant {}, IntegrationBus-Version: {} {}, Middleware: {}",
                   _participantName, version::String(), version::SprintName(),
                   "VAsio");
 
@@ -107,7 +107,7 @@ ComAdapter<IbConnectionT>::ComAdapter(cfg::ParticipantConfiguration participantC
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::joinIbDomain(uint32_t domainId)
+void Participant<IbConnectionT>::joinIbDomain(uint32_t domainId)
 {
     _ibConnection.JoinDomain(domainId);
     onIbDomainJoined();
@@ -116,7 +116,7 @@ void ComAdapter<IbConnectionT>::joinIbDomain(uint32_t domainId)
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::onIbDomainJoined()
+void Participant<IbConnectionT>::onIbDomainJoined()
 {
     SetupRemoteLogging();
 
@@ -160,7 +160,7 @@ void ComAdapter<IbConnectionT>::onIbDomainJoined()
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SetupRemoteLogging()
+void Participant<IbConnectionT>::SetupRemoteLogging()
 {
     auto* logger = dynamic_cast<logging::Logger*>(_logger.get());
     if (logger)
@@ -199,7 +199,7 @@ void ComAdapter<IbConnectionT>::SetupRemoteLogging()
 }
 
 template<class IbConnectionT>
-inline void ComAdapter<IbConnectionT>::SetTimeProvider(sync::ITimeProvider* newClock)
+inline void Participant<IbConnectionT>::SetTimeProvider(sync::ITimeProvider* newClock)
 {
     // register the time provider with all already instantiated controllers
     auto setTimeProvider = [newClock](auto& controllers) {
@@ -216,7 +216,7 @@ inline void ComAdapter<IbConnectionT>::SetTimeProvider(sync::ITimeProvider* newC
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonicalName, const std::string& networkName) -> can::ICanController*
+auto Participant<IbConnectionT>::CreateCanController(const std::string& canonicalName, const std::string& networkName) -> can::ICanController*
 {
     // retrieve CAN controller
     auto& canControllers = _participantConfig.canControllers;
@@ -254,14 +254,14 @@ auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonical
 
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateCanController(const std::string& canonicalName)
+auto Participant<IbConnectionT>::CreateCanController(const std::string& canonicalName)
     -> can::ICanController*
 {
     return CreateCanController(canonicalName, canonicalName);
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonicalName, const std::string& networkName)
+auto Participant<IbConnectionT>::CreateEthController(const std::string& canonicalName, const std::string& networkName)
     -> eth::IEthController*
 {
     // retrieve Ethernet controller
@@ -299,13 +299,13 @@ auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonical
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateEthController(const std::string& canonicalName) -> eth::IEthController*
+auto Participant<IbConnectionT>::CreateEthController(const std::string& canonicalName) -> eth::IEthController*
 {
     return CreateEthController(canonicalName, canonicalName);
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateFlexrayController(const std::string& canonicalName, const std::string& networkName)
+auto Participant<IbConnectionT>::CreateFlexrayController(const std::string& canonicalName, const std::string& networkName)
     -> sim::fr::IFrController*
 {
     // retrieve FR controller
@@ -343,13 +343,13 @@ auto ComAdapter<IbConnectionT>::CreateFlexrayController(const std::string& canon
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFrController*
+auto Participant<IbConnectionT>::CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFrController*
 {
     return CreateFlexrayController(canonicalName, canonicalName);
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonicalName, const std::string& networkName)
+auto Participant<IbConnectionT>::CreateLinController(const std::string& canonicalName, const std::string& networkName)
     -> lin::ILinController*
 {
     // retrieve LIN controller
@@ -387,13 +387,13 @@ auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonical
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateLinController(const std::string& canonicalName) -> lin::ILinController*
+auto Participant<IbConnectionT>::CreateLinController(const std::string& canonicalName) -> lin::ILinController*
 {
     return CreateLinController(canonicalName, canonicalName);
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateDataSubscriberInternal(const std::string& topic, const std::string& linkName,
+auto Participant<IbConnectionT>::CreateDataSubscriberInternal(const std::string& topic, const std::string& linkName,
                                                              const std::string& mediaType,
                                                              const std::map<std::string, std::string>& publisherLabels,
                                                              sim::data::DataHandlerT defaultHandler,
@@ -415,7 +415,7 @@ auto ComAdapter<IbConnectionT>::CreateDataSubscriberInternal(const std::string& 
 
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateDataPublisher(const std::string& topic,
+auto Participant<IbConnectionT>::CreateDataPublisher(const std::string& topic,
     const std::string& mediaType, const std::map<std::string, std::string>& labels,
     size_t history) -> sim::data::IDataPublisher*
 {
@@ -463,7 +463,8 @@ auto ComAdapter<IbConnectionT>::CreateDataPublisher(const std::string& topic,
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateDataSubscriber(const std::string& topic, const std::string& mediaType,
+auto Participant<IbConnectionT>::CreateDataSubscriber(const std::string& topic,
+                                                     const std::string& mediaType,
                                                      const std::map<std::string, std::string>& labels,
                                                      ib::sim::data::DataHandlerT defaultDataHandler,
                                                      ib::sim::data::NewDataSourceHandlerT newDataSourceHandler)
@@ -506,7 +507,7 @@ auto ComAdapter<IbConnectionT>::CreateDataSubscriber(const std::string& topic, c
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateRpcServerInternal(const std::string& functionName, const std::string& clientUUID,
+auto Participant<IbConnectionT>::CreateRpcServerInternal(const std::string& functionName, const std::string& clientUUID,
                                                         const sim::rpc::RpcExchangeFormat exchangeFormat,
                                                         const std::map<std::string, std::string>& clientLabels,
                                                         sim::rpc::CallProcessor handler, sim::rpc::IRpcServer* parent)
@@ -530,7 +531,7 @@ auto ComAdapter<IbConnectionT>::CreateRpcServerInternal(const std::string& funct
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateRpcClient(const std::string& functionName,
+auto Participant<IbConnectionT>::CreateRpcClient(const std::string& functionName,
                                                 const sim::rpc::RpcExchangeFormat exchangeFormat,
                                                 const std::map<std::string, std::string>& labels,
                                                 sim::rpc::CallReturnHandler handler) -> sim::rpc::IRpcClient*
@@ -574,7 +575,7 @@ auto ComAdapter<IbConnectionT>::CreateRpcClient(const std::string& functionName,
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::CreateRpcServer(const std::string& functionName,
+auto Participant<IbConnectionT>::CreateRpcServer(const std::string& functionName,
                                                 const sim::rpc::RpcExchangeFormat exchangeFormat,
                                                 const std::map<std::string, std::string>& labels,
                                                 sim::rpc::CallProcessor handler) -> sim::rpc::IRpcServer*
@@ -622,7 +623,7 @@ auto ComAdapter<IbConnectionT>::CreateRpcServer(const std::string& functionName,
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::DiscoverRpcServers(const std::string& functionName,
+void Participant<IbConnectionT>::DiscoverRpcServers(const std::string& functionName,
     const sim::rpc::RpcExchangeFormat& exchangeFormat,
     const std::map<std::string, std::string>& labels,
     sim::rpc::DiscoveryResultHandler handler)
@@ -632,7 +633,7 @@ void ComAdapter<IbConnectionT>::DiscoverRpcServers(const std::string& functionNa
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::GetParticipantController() -> sync::IParticipantController*
+auto Participant<IbConnectionT>::GetParticipantController() -> sync::IParticipantController*
 {
     auto* controller = GetController<sync::ParticipantController>("default", "ParticipantController");
     if (!controller)
@@ -648,7 +649,7 @@ auto ComAdapter<IbConnectionT>::GetParticipantController() -> sync::IParticipant
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::GetSystemMonitor() -> sync::ISystemMonitor*
+auto Participant<IbConnectionT>::GetSystemMonitor() -> sync::ISystemMonitor*
 {
     auto* controller = GetController<sync::SystemMonitor>("default", "SystemMonitor");
     if (!controller)
@@ -663,7 +664,7 @@ auto ComAdapter<IbConnectionT>::GetSystemMonitor() -> sync::ISystemMonitor*
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::GetServiceDiscovery() -> service::IServiceDiscovery*
+auto Participant<IbConnectionT>::GetServiceDiscovery() -> service::IServiceDiscovery*
 {
     auto* controller = GetController<service::ServiceDiscovery>("default", "ServiceDiscovery");
     if (!controller)
@@ -683,7 +684,7 @@ auto ComAdapter<IbConnectionT>::GetServiceDiscovery() -> service::IServiceDiscov
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::GetSystemController() -> sync::ISystemController*
+auto Participant<IbConnectionT>::GetSystemController() -> sync::ISystemController*
 {
     auto* controller = GetController<sync::SystemController>("default", "SystemController");
     if (!controller)
@@ -698,309 +699,309 @@ auto ComAdapter<IbConnectionT>::GetSystemController() -> sync::ISystemController
 }
 
 template <class IbConnectionT>
-auto ComAdapter<IbConnectionT>::GetLogger() -> logging::ILogger*
+auto Participant<IbConnectionT>::GetLogger() -> logging::ILogger*
 {
     return _logger.get();
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::RegisterCanSimulator(can::IIbToCanSimulator* busSim,  const std::vector<std::string>& networkNames)
+void Participant<IbConnectionT>::RegisterCanSimulator(can::IIbToCanSimulator* busSim,  const std::vector<std::string>& networkNames)
 {
     RegisterSimulator(busSim, cfg::NetworkType::CAN, networkNames);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim,  const std::vector<std::string>& networkNames)
+void Participant<IbConnectionT>::RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim,  const std::vector<std::string>& networkNames)
 {
     RegisterSimulator(busSim, cfg::NetworkType::Ethernet, networkNames);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* busSim,  const std::vector<std::string>& networkNames)
+void Participant<IbConnectionT>::RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* busSim,  const std::vector<std::string>& networkNames)
 {
     RegisterSimulator(busSim, cfg::NetworkType::FlexRay, networkNames);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::RegisterLinSimulator(sim::lin::IIbToLinSimulator* busSim,  const std::vector<std::string>& networkNames)
+void Participant<IbConnectionT>::RegisterLinSimulator(sim::lin::IIbToLinSimulator* busSim,  const std::vector<std::string>& networkNames)
 {
     RegisterSimulator(busSim, cfg::NetworkType::LIN, networkNames);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanMessage& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanMessage& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, can::CanMessage&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, can::CanMessage&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanTransmitAcknowledge& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanTransmitAcknowledge& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanControllerStatus& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanControllerStatus& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanConfigureBaudrate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanConfigureBaudrate& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanSetControllerMode& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanSetControllerMode& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthMessage& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthMessage& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, eth::EthMessage&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, eth::EthMessage&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthTransmitAcknowledge& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthTransmitAcknowledge& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthStatus& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthStatus& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthSetMode& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthSetMode& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FrMessage& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FrMessage& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::fr::FrMessage&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::fr::FrMessage&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FrMessageAck& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FrMessageAck& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::fr::FrMessageAck&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::fr::FrMessageAck&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FrSymbol& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FrSymbol& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FrSymbolAck& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FrSymbolAck& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::CycleStart& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::CycleStart& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::HostCommand& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::HostCommand& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::ControllerConfig& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::ControllerConfig& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::TxBufferConfigUpdate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::TxBufferConfigUpdate& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::TxBufferUpdate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::TxBufferUpdate& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::PocStatus& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::PocStatus& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::SendFrameRequest& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::SendFrameRequest& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::SendFrameHeaderRequest& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::SendFrameHeaderRequest& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::Transmission& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::Transmission& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::WakeupPulse& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::WakeupPulse& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::ControllerConfig& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::ControllerConfig& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::ControllerStatusUpdate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::ControllerStatusUpdate& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::FrameResponseUpdate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::FrameResponseUpdate& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::data::DataMessage& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::data::DataMessage& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::data::DataMessage&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::data::DataMessage&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::FunctionCall& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::FunctionCall& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::FunctionCall&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::FunctionCall&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::FunctionCallResponse& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::FunctionCallResponse& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::FunctionCallResponse&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::FunctionCallResponse&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::NextSimTask& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::NextSimTask& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantStatus& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantStatus& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantCommand& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantCommand& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::SystemCommand& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::SystemCommand& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::ExpectedParticipants& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::ExpectedParticipants& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const logging::LogMsg& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const logging::LogMsg& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, logging::LogMsg&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, logging::LogMsg&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const service::ServiceAnnouncement& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const service::ServiceAnnouncement& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const service::ServiceDiscoveryEvent& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const service::ServiceDiscoveryEvent& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
 template <typename IbMessageT>
-void ComAdapter<IbConnectionT>::SendIbMessageImpl(const IIbServiceEndpoint* from, IbMessageT&& msg)
+void Participant<IbConnectionT>::SendIbMessageImpl(const IIbServiceEndpoint* from, IbMessageT&& msg)
 {
     TraceTx(_logger.get(), from, msg);
     _ibConnection.SendIbMessage(from, std::forward<IbMessageT>(msg));
@@ -1008,285 +1009,285 @@ void ComAdapter<IbConnectionT>::SendIbMessageImpl(const IIbServiceEndpoint* from
 
 // targeted messaging
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanMessage& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanMessage& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, can::CanMessage&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, can::CanMessage&& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanTransmitAcknowledge& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanTransmitAcknowledge& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanControllerStatus& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanControllerStatus& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanConfigureBaudrate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanConfigureBaudrate& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanSetControllerMode& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanSetControllerMode& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthMessage& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthMessage& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, eth::EthMessage&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, eth::EthMessage&& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthTransmitAcknowledge& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthTransmitAcknowledge& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthStatus& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthStatus& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthSetMode& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthSetMode& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FrMessage& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FrMessage& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::fr::FrMessage&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::fr::FrMessage&& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FrMessageAck& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FrMessageAck& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::fr::FrMessageAck&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::fr::FrMessageAck&& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FrSymbol& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FrSymbol& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FrSymbolAck& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FrSymbolAck& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::CycleStart& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::CycleStart& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::HostCommand& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::HostCommand& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::ControllerConfig& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::ControllerConfig& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::TxBufferConfigUpdate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::TxBufferConfigUpdate& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::TxBufferUpdate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::TxBufferUpdate& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::PocStatus& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::PocStatus& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::SendFrameRequest& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::SendFrameRequest& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::SendFrameHeaderRequest& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::SendFrameHeaderRequest& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::Transmission& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::Transmission& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::WakeupPulse& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::WakeupPulse& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::ControllerConfig& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::ControllerConfig& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::ControllerStatusUpdate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::ControllerStatusUpdate& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::FrameResponseUpdate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::FrameResponseUpdate& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
                                               const sim::data::DataMessage& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
                                               sim::data::DataMessage&& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
                                               const sim::rpc::FunctionCall& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
                                               sim::rpc::FunctionCall&& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
                                               const sim::rpc::FunctionCallResponse& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
                                               sim::rpc::FunctionCallResponse&& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
                                               const sync::NextSimTask& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::ParticipantStatus& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::ParticipantStatus& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::ParticipantCommand& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::ParticipantCommand& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::SystemCommand& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::SystemCommand& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::ExpectedParticipants& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::ExpectedParticipants& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const logging::LogMsg& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const logging::LogMsg& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, logging::LogMsg&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, logging::LogMsg&& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const service::ServiceAnnouncement& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const service::ServiceAnnouncement& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const service::ServiceDiscoveryEvent& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const service::ServiceDiscoveryEvent& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
 template <typename IbMessageT>
-void ComAdapter<IbConnectionT>::SendIbMessageImpl(const IIbServiceEndpoint* from, const std::string& targetParticipantName, IbMessageT&& msg)
+void Participant<IbConnectionT>::SendIbMessageImpl(const IIbServiceEndpoint* from, const std::string& targetParticipantName, IbMessageT&& msg)
 {
     TraceTx(_logger.get(), from, msg);
     _ibConnection.SendIbMessage(from, targetParticipantName, std::forward<IbMessageT>(msg));
@@ -1295,7 +1296,7 @@ void ComAdapter<IbConnectionT>::SendIbMessageImpl(const IIbServiceEndpoint* from
 
 template <class IbConnectionT>
 template <class ControllerT>
-auto ComAdapter<IbConnectionT>::GetController(const std::string& networkName, const std::string& serviceName) -> ControllerT*
+auto Participant<IbConnectionT>::GetController(const std::string& networkName, const std::string& serviceName) -> ControllerT*
 {
     auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
     const auto&& qualifiedName = networkName + "/" + serviceName;
@@ -1311,7 +1312,7 @@ auto ComAdapter<IbConnectionT>::GetController(const std::string& networkName, co
 
 template <class IbConnectionT>
 template<class ControllerT, typename... Arg>
-auto ComAdapter<IbConnectionT>::CreateInternalController(const std::string& serviceName, const mw::ServiceType serviceType,
+auto Participant<IbConnectionT>::CreateInternalController(const std::string& serviceName, const mw::ServiceType serviceType,
                                                  const mw::SupplementalData& supplementalData,
                                                  Arg&&... arg) -> ControllerT*
 {
@@ -1325,7 +1326,7 @@ auto ComAdapter<IbConnectionT>::CreateInternalController(const std::string& serv
 
 template <class IbConnectionT>
 template <class ConfigT, class ControllerT, typename... Arg>
-auto ComAdapter<IbConnectionT>::CreateController(const ConfigT& config,
+auto Participant<IbConnectionT>::CreateController(const ConfigT& config,
                                                     const mw::ServiceType serviceType,
                                                     const mw::SupplementalData& supplementalData, Arg&&... arg)
     -> ControllerT*
@@ -1377,7 +1378,7 @@ auto ComAdapter<IbConnectionT>::CreateController(const ConfigT& config,
 
 template <class IbConnectionT>
 template <class ConfigT>
-void ComAdapter<IbConnectionT>::AddTraceSinksToSource(extensions::ITraceMessageSource* traceSource, ConfigT config)
+void Participant<IbConnectionT>::AddTraceSinksToSource(extensions::ITraceMessageSource* traceSource, ConfigT config)
 {
     if (config.useTraceSinks.empty())
     {
@@ -1410,7 +1411,7 @@ void ComAdapter<IbConnectionT>::AddTraceSinksToSource(extensions::ITraceMessageS
 
 template <class IbConnectionT>
 template <class IIbToSimulatorT>
-void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::NetworkType linkType,
+void Participant<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::NetworkType linkType,
                                                   const std::vector<std::string>& simulatedNetworkNames)
 {
     auto& serviceEndpoint = dynamic_cast<mw::IIbServiceEndpoint&>(*busSim);
@@ -1434,25 +1435,25 @@ void ComAdapter<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::OnAllMessagesDelivered(std::function<void()> callback)
+void Participant<IbConnectionT>::OnAllMessagesDelivered(std::function<void()> callback)
 {
     _ibConnection.OnAllMessagesDelivered(std::move(callback));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::FlushSendBuffers()
+void Participant<IbConnectionT>::FlushSendBuffers()
 {
     _ibConnection.FlushSendBuffers();
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::ExecuteDeferred(std::function<void()> callback)
+void Participant<IbConnectionT>::ExecuteDeferred(std::function<void()> callback)
 {
     _ibConnection.ExecuteDeferred(std::move(callback));
 }
 
 template <class IbConnectionT>
-void ComAdapter<IbConnectionT>::LogWrongNetworkNameForController(const std::string& canonicalName,
+void Participant<IbConnectionT>::LogWrongNetworkNameForController(const std::string& canonicalName,
                                                                           const std::string& providedNetworkName,
                                                                           const std::string& configuredNetworkName,
                                                                           cfg::NetworkType networkType)

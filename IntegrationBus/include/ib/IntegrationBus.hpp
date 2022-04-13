@@ -6,7 +6,7 @@
 #include <thread>
 
 #include "ib/IbMacros.hpp"
-#include "ib/mw/IComAdapter.hpp"
+#include "ib/mw/IParticipant.hpp"
 #include "ib/cfg/IParticipantConfiguration.hpp"
 
 namespace ib {
@@ -27,8 +27,8 @@ namespace ib {
 * a valid participant in the config file.
 * \throw std::exception The participant could not be created.
 */
-IntegrationBusAPI auto CreateSimulationParticipant(
+IntegrationBusAPI auto CreateParticipant(
     std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig, const std::string& participantName,
-    const uint32_t domainId, bool isSynchronized) -> std::unique_ptr<mw::IComAdapter>;
+    const uint32_t domainId, bool isSynchronized) -> std::unique_ptr<mw::IParticipant>;
 
 } // namespace ib

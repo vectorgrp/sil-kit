@@ -134,9 +134,9 @@ int main(int argc, char** argv)
         auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
         auto sleepTimePerTick = 1000ms;
 
-        std::cout << "Creating ComAdapter for Participant=" << participantName << " in Domain " << domainId << std::endl;
+        std::cout << "Creating participant '" << participantName << "' in domain " << domainId << std::endl;
 
-        auto participant = ib::CreateSimulationParticipant(participantConfiguration, participantName, domainId, runSync);
+        auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId, runSync);
 
         auto* logger = participant->GetLogger();
         auto* canController = participant->CreateCanController("CAN1");

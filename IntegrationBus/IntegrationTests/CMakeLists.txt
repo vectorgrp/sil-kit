@@ -35,7 +35,7 @@ add_vib_test(ITestThreeCanController
     SOURCES
       ThreeCanControllerITest.cpp
     LIBS
-        IbMwComAdapter
+        IbMwParticipant
         IbSimTestHarness
         ${itest_extra_libs}
 )
@@ -45,7 +45,7 @@ add_vib_test(ITestThreeEthController
       ThreeEthControllerITest.cpp
     LIBS
       IbSimTestHarness
-      IbMwComAdapter
+      IbMwParticipant
       ${itest_extra_libs}
 )
 
@@ -53,7 +53,7 @@ add_vib_test(ITestCatchExceptionsInCallbacks
     SOURCES
       CatchExceptionsInCallbacksITest.cpp
     LIBS
-      IbMwComAdapter
+      IbMwParticipant
       IbCfgMockParticipantConfiguration
       ${itest_extra_libs}
 )
@@ -97,7 +97,7 @@ if(IB_MW_ENABLE_VASIO)
         SOURCES
           StateMachineVAsioITest.cpp
         LIBS
-          IbMwComAdapter
+          IbMwParticipant
           IbMwVAsio
           IbCfgMockParticipantConfiguration
     )
@@ -106,7 +106,7 @@ if(IB_MW_ENABLE_VASIO)
         SOURCES
           DeterministicSimVAsioITest.cpp
         LIBS
-          IbMwComAdapter
+          IbMwParticipant
           IbMwVAsio
           IbCfgMockParticipantConfiguration
     )
@@ -115,7 +115,7 @@ if(IB_MW_ENABLE_VASIO)
         SOURCES
           DifferentPeriodsITest.cpp
         LIBS
-          IbMwComAdapter
+          IbMwParticipant
           IbMwVAsio
           IbCfgMockParticipantConfiguration
     )
@@ -124,7 +124,7 @@ if(IB_MW_ENABLE_VASIO)
         SOURCES
           IbRegistryReusage.cpp
         LIBS
-          IbMwComAdapter
+          IbMwParticipant
           IbMwVAsio
     )
 
@@ -132,7 +132,7 @@ if(IB_MW_ENABLE_VASIO)
         SOURCES
           SingleParticipantITest.cpp
         LIBS
-          IbMwComAdapter
+          IbMwParticipant
           IbSimTestHarness
           IbMwVAsio
     )
@@ -142,7 +142,7 @@ add_vib_test(ITestServiceDiscovery
     SOURCES
       ServiceDiscoveryITest.cpp
     LIBS
-      IbMwComAdapter
+      IbMwParticipant
       IbSimTestHarness
       ${itest_extra_libs}
 )
@@ -151,7 +151,7 @@ add_vib_test(FTestServiceDiscoveryPerf
     SOURCES
       ServiceDiscoveryPerfFTest.cpp
     LIBS
-      IbMwComAdapter
+      IbMwParticipant
       IbSimTestHarness
       ${itest_extra_libs}
 )
@@ -159,7 +159,7 @@ add_vib_test(ITestAsyncSimTask
     SOURCES
       AsyncSimTaskITest.cpp
     LIBS
-      IbMwComAdapter
+      IbMwParticipant
       IbSimTestHarness
       ${itest_extra_libs}
 )
@@ -168,7 +168,7 @@ add_vib_test(ITestLin
     SOURCES
       LinITest.cpp
     LIBS
-      IbMwComAdapter
+      IbMwParticipant
       IbSimTestHarness
       ${itest_extra_libs}
 )
@@ -179,6 +179,6 @@ if(MSVC)
         SOURCES
         CompatibilityWithWindowsHeadersITest.cpp
         LIBS
-        IbMwComAdapter
+        IbMwParticipant
         )
 endif()

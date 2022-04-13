@@ -75,9 +75,9 @@ void CallHandlers(CallbackRangeT& callbacks, const Args&... args)
 
 } // namespace anonymous
 
-LinController::LinController(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider, ILinController* facade)
-    : _comAdapter{comAdapter}
-    , _logger{comAdapter->GetLogger()}
+LinController::LinController(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider, ILinController* facade)
+    : _participant{participant}
+    , _logger{participant->GetLogger()}
     , _timeProvider{timeProvider}
     , _facade{facade}
 {
@@ -423,7 +423,7 @@ auto LinController::VeriyChecksum(const Frame& frame, FrameStatus status) -> Fra
 template <typename MsgT>
 void LinController::SendIbMessage(MsgT&& msg)
 {
-    _comAdapter->SendIbMessage(this, std::forward<MsgT>(msg));
+    _participant->SendIbMessage(this, std::forward<MsgT>(msg));
 }
 
 // ================================================================================

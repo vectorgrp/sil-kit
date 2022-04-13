@@ -78,9 +78,9 @@ protected:
         unsigned numSent{ 0 }, numAcks{ 0 };
         std::promise<void> canWriterAllAcksReceivedPromiseLocal;
 
-        auto comAdapter =
-            ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), "CanWriter", _domainId, false);
-        auto* controller = comAdapter->CreateCanController("CAN1");
+        auto participant =
+            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "CanWriter", _domainId, false);
+        auto* controller = participant->CreateCanController("CAN1");
 
         controller->RegisterTransmitStatusHandler(
             [this, &canWriterAllAcksReceivedPromiseLocal, &numAcks](ib::sim::can::ICanController* /*ctrl*/, const ib::sim::can::CanTransmitAcknowledge& ack) {
@@ -111,8 +111,8 @@ protected:
         std::promise<void> canReaderAllReceivedPromiseLocal;
         unsigned numReceived{ 0 };
 
-        auto comAdapter = ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), "CanReader", _domainId, false);
-        auto* controller = comAdapter->CreateCanController("CAN1", "CAN1");
+        auto participant = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "CanReader", _domainId, false);
+        auto* controller = participant->CreateCanController("CAN1", "CAN1");
 
         controller->RegisterReceiveMessageHandler(
             [this, &canReaderAllReceivedPromiseLocal, &numReceived](ib::sim::can::ICanController*, const ib::sim::can::CanMessage& msg) {

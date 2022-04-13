@@ -33,7 +33,7 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 class IbController
 {
 public:
-    IbController(ib::mw::IComAdapter* participant, std::shared_ptr<ib::cfg::IParticipantConfiguration> ibConfig,
+    IbController(ib::mw::IParticipant* participant, std::shared_ptr<ib::cfg::IParticipantConfiguration> ibConfig,
                  const std::vector<std::string>& expectedParticipantNames)
         : _ibConfig{std::move(ibConfig)}
         , _expectedParticipantNames{expectedParticipantNames}
@@ -275,7 +275,7 @@ int main(int argc, char** argv)
         std::copy(expectedParticipantNames.begin(), std::prev(expectedParticipantNames.end()), std::ostream_iterator<std::string>(std::cout, "', '"));
         std::cout << expectedParticipantNames.back() << "'..." << std::endl;
 
-        auto participant = ib::CreateSimulationParticipant(configuration, participantName, domainId, false);
+        auto participant = ib::CreateParticipant(configuration, participantName, domainId, false);
 
         IbController ibController(participant.get(), configuration, expectedParticipantNames);
 

@@ -12,7 +12,7 @@ namespace lin {
 
 /*! \brief IIbToLinControllerFacade interface
  *
- *  Used by the ComAdapter, implemented by the LinControllerFacade
+ *  Used by the Participant, implemented by the LinControllerFacade
  */
 class IIbToLinControllerFacade
     : public mw::IIbReceiver<Transmission, WakeupPulse, ControllerConfig, ControllerStatusUpdate, FrameResponseUpdate>

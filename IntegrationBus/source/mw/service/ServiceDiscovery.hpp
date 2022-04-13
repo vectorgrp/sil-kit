@@ -10,7 +10,7 @@
 
 #include "ServiceDatatypes.hpp"
 
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
 #include "IIbReceiver.hpp"
 #include "IIbSender.hpp"
@@ -29,7 +29,7 @@ class ServiceDiscovery
 public: 
     using IServiceDiscovery::ServiceDiscoveryHandlerT;
 
-    ServiceDiscovery(IComAdapterInternal* comadapter, const std::string& participantName);
+    ServiceDiscovery(IParticipantInternal* participant, const std::string& participantName);
     virtual ~ServiceDiscovery() noexcept;
   
 public: //IServiceDiscovery
@@ -56,7 +56,7 @@ private: //methods
     void CallHandlers(ServiceDiscoveryEvent::Type eventType, const ServiceDescriptor& serviceDescriptor) const;
 
 private:
-    IComAdapterInternal* _comAdapter{nullptr};
+    IParticipantInternal* _participant{nullptr};
     std::string _participantName;
     ServiceDescriptor _serviceDescriptor; //!< for the ServiceDiscovery controller itself
     std::vector<ServiceDiscoveryHandlerT> _handlers;

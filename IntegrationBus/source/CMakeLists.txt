@@ -45,7 +45,7 @@ add_library(IntegrationBus ${ibLibType}
     IntegrationBus.hpp
     IntegrationBus.cpp
     "capi/TypeConversion.hpp"
-    "capi/CapiSimulationParticipant.cpp"
+    "capi/CapiParticipant.cpp"
     "capi/CapiCan.cpp"
     "capi/CapiEthernet.cpp"
     "capi/CapiFlexRay.cpp"
@@ -124,7 +124,7 @@ target_link_libraries(IntegrationBus
     PRIVATE
     IbInternal
     IbConfiguration
-    IbMwComAdapter
+    IbMwParticipant
     IbExtensions
 )
 

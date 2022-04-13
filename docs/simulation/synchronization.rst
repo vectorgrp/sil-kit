@@ -1,7 +1,7 @@
 Synchronization
 ===================
 .. macros for internal use
-.. |ComAdapter| replace:: :doc:`ComAdapter<../api/comadapter>`
+.. |Participant| replace:: :doc:`Participant<../api/participant>`
 .. |Middleware| replace:: :doc:`Middleware<../configuration/middleware-configuration>`
 .. |Participant| replace:: :doc:`Participant<../api/participantcontroller>`
 .. |SystemController| replace:: :cpp:class:`ISystemController<ib::mw::sim::ISystemController>`

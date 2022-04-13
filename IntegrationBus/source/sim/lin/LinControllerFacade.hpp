@@ -9,7 +9,7 @@
 #include "ib/mw/fwd_decl.hpp"
 
 #include "IIbToLinControllerFacade.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 
 #include "LinController.hpp"
 #include "LinControllerProxy.hpp"
@@ -36,7 +36,7 @@ public:
     // Constructors and Destructor
     LinControllerFacade() = delete;
     LinControllerFacade(LinControllerFacade&&) = default;
-    LinControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::LinController config, mw::sync::ITimeProvider* timeProvider);
+    LinControllerFacade(mw::IParticipantInternal* participant, cfg::LinController config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -101,7 +101,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    mw::IComAdapterInternal* _comAdapter;
+    mw::IParticipantInternal* _participant;
     mw::ServiceDescriptor _serviceDescriptor;
     cfg::LinController _config;
 

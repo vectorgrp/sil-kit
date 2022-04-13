@@ -146,7 +146,7 @@ void Schedule_Destroy(Schedule* schedule)
     }
 }
 
-ib_SimulationParticipant* participant;
+ib_Participant* participant;
 ib_Lin_Controller*         linController;
 ib_Lin_ControllerConfig*   controllerConfig;
 char*                     participantName;
@@ -154,16 +154,16 @@ Schedule*                 masterSchedule;
 Timer                     slaveTimer;
 ib_NanosecondsTime        slaveNow;
 
-void StopCallback(void* context, ib_SimulationParticipant* cbParticipant)
+void StopCallback(void* context, ib_Participant* cbParticipant)
 {
     printf("Stopping...\n");
 }
-void ShutdownCallback(void* context, ib_SimulationParticipant* cbParticipant)
+void ShutdownCallback(void* context, ib_Participant* cbParticipant)
 {
     printf("Shutting down...\n");
 }
 
-void Master_InitCallback(void* context, ib_SimulationParticipant* cbParticipant, struct ib_ParticipantCommand* command)
+void Master_InitCallback(void* context, ib_Participant* cbParticipant, struct ib_ParticipantCommand* command)
 {
     printf("Initializing LinMaster\n");
     controllerConfig = (ib_Lin_ControllerConfig*)malloc(sizeof(ib_Lin_ControllerConfig));
@@ -186,7 +186,7 @@ void Master_doAction(ib_NanosecondsTime now)
     Schedule_ExecuteTask(masterSchedule, now);
 }
 
-void Master_SimTask(void* context, ib_SimulationParticipant* cbParticipant, ib_NanosecondsTime now)
+void Master_SimTask(void* context, ib_Participant* cbParticipant, ib_NanosecondsTime now)
 {
     printf("now%"PRIu64"ms\n", now / 1000000);
     Master_doAction(now);
@@ -301,7 +301,7 @@ void Master_GoToSleep(ib_NanosecondsTime now)
     ib_Lin_Controller_GoToSleep(linController);
 }
 
-void Slave_InitCallback(void* context, ib_SimulationParticipant* cbParticipant, struct ib_ParticipantCommand* command)
+void Slave_InitCallback(void* context, ib_Participant* cbParticipant, struct ib_ParticipantCommand* command)
 {
     printf("Initializing LinSlave\n");
 
@@ -373,7 +373,7 @@ void Slave_DoAction(ib_NanosecondsTime now)
     Timer_ExecuteAction(&slaveTimer, now);
 }
 
-void Slave_SimTask(void* context, ib_SimulationParticipant* cbParticipant, ib_NanosecondsTime now)
+void Slave_SimTask(void* context, ib_Participant* cbParticipant, ib_NanosecondsTime now)
 {
     printf("now=%"PRIu64"ms\n", now / 1000000);
     Slave_DoAction(now);
@@ -431,19 +431,19 @@ int main(int argc, char* argv[])
     }
 
     ib_ReturnCode returnCode;
-    returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, domainId, ib_True);
+    returnCode = ib_Participant_Create(&participant, jsonString, participantName, domainId, ib_True);
     if (returnCode) {
         printf("%s\n", ib_GetLastErrorString());
         return 2;
     }
-    printf("Creating Participant %s for simulation '%s'\n", participantName, domainId);
+    printf("Creating participant '%s' for simulation '%s'\n", participantName, domainId);
 
     const char* controllerName = "LIN1";
     const char* networkName = "LIN1";
     returnCode = ib_Lin_Controller_Create(&linController, participant, controllerName, networkName);
-    ib_SimulationParticipant_SetStopHandler(participant, NULL, &StopCallback);
-    ib_SimulationParticipant_SetShutdownHandler(participant, NULL, &ShutdownCallback);
-    ib_SimulationParticipant_SetPeriod(participant, 1000000);
+    ib_Participant_SetStopHandler(participant, NULL, &StopCallback);
+    ib_Participant_SetShutdownHandler(participant, NULL, &ShutdownCallback);
+    ib_Participant_SetPeriod(participant, 1000000);
     
     if (strcmp(participantName, "LinMaster") == 0)
     {
@@ -451,26 +451,26 @@ int main(int argc, char* argv[])
                          {0, &Master_SendFrame_19}, {0, &Master_SendFrame_34}, {5000000, &Master_GoToSleep}};
         Schedule_Create(&masterSchedule, tasks, 6);
 
-        ib_SimulationParticipant_SetInitHandler(participant, NULL, &Master_InitCallback);
+        ib_Participant_SetInitHandler(participant, NULL, &Master_InitCallback);
         ib_Lin_Controller_RegisterFrameStatusHandler(linController, NULL, &Master_ReceiveFrameStatus);
         ib_Lin_Controller_RegisterWakeupHandler(linController, NULL, &Master_WakeupHandler);
-        ib_SimulationParticipant_SetSimulationTask(participant, NULL, &Master_SimTask);
+        ib_Participant_SetSimulationTask(participant, NULL, &Master_SimTask);
     }
     else
     {
-        ib_SimulationParticipant_SetInitHandler(participant, NULL, &Slave_InitCallback);
+        ib_Participant_SetInitHandler(participant, NULL, &Slave_InitCallback);
         ib_Lin_Controller_RegisterFrameStatusHandler(linController, NULL, &Slave_FrameStatusHandler);
         ib_Lin_Controller_RegisterGoToSleepHandler(linController, NULL, &Slave_GoToSleepHandler);
         ib_Lin_Controller_RegisterWakeupHandler(linController, NULL, &Slave_WakeupHandler);
-        ib_SimulationParticipant_SetSimulationTask(participant, NULL, &Slave_SimTask);
+        ib_Participant_SetSimulationTask(participant, NULL, &Slave_SimTask);
     }
 
     ib_ParticipantState outFinalParticipantState;
-    returnCode = ib_SimulationParticipant_Run(participant, &outFinalParticipantState);
+    returnCode = ib_Participant_Run(participant, &outFinalParticipantState);
 
     printf("Simulation stopped. Final State:%d\n", outFinalParticipantState);
 
-    ib_SimulationParticipant_Destroy(participant);
+    ib_Participant_Destroy(participant);
     if (jsonString)
     {
         free(jsonString);

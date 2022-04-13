@@ -23,9 +23,9 @@ void CallEach(CallbackRangeT& callbacks, const Args&... args)
 }
 } // end anonymous namespace
 
-LinControllerProxy::LinControllerProxy(mw::IComAdapterInternal* comAdapter, ILinController* facade)
-    : _comAdapter{comAdapter}
-    , _logger{comAdapter->GetLogger()}
+LinControllerProxy::LinControllerProxy(mw::IParticipantInternal* participant, ILinController* facade)
+    : _participant{participant}
+    , _logger{participant->GetLogger()}
     , _serviceDescriptor{}
     , _facade{facade}
 {
@@ -265,7 +265,7 @@ void LinControllerProxy::SetControllerStatus(ControllerStatus status)
 template <typename MsgT>
 void LinControllerProxy::SendIbMessage(MsgT&& msg)
 {
-    _comAdapter->SendIbMessage(this, std::forward<MsgT>(msg));
+    _participant->SendIbMessage(this, std::forward<MsgT>(msg));
 }
 
 

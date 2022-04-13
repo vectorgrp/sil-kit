@@ -24,11 +24,11 @@ target_link_libraries(IbSimDataMessage
 
 add_vib_test(TestSimDataPublisher 
     SOURCES DataPublisherTest.cpp 
-    LIBS IbSimDataMessage IbMwMockComAdapter IbInternal
+    LIBS IbSimDataMessage IbMwMockParticipant IbInternal
 )
 add_vib_test(TestSimDataSubscriber 
     SOURCES DataSubscriberTest.cpp 
-    LIBS IbSimDataMessage IbMwMockComAdapter IbInternal
+    LIBS IbSimDataMessage IbMwMockParticipant IbInternal
 )
 add_vib_test(TestDataExchangeFormat 
     SOURCES DataExchangeFormatTest.cpp 

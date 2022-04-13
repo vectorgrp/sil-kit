@@ -13,7 +13,7 @@ namespace eth {
 
 /*! \brief IIbToEthSimulator interface
 *
-*  Used by the ComAdapter, implemented by the EthSimulator
+*  Used by the Participant, implemented by the EthSimulator
 */
 class IIbToEthSimulator
     : public mw::IIbReceiver<EthMessage, EthSetMode>

@@ -30,7 +30,7 @@ add_vib_test(TestSimFrController
         FrControllerFacadeTest.cpp 
     LIBS 
         IbSimFlexRay
-        IbMwMockComAdapter
+        IbMwMockParticipant
         IbTracing
         IbConfiguration
         IbMwMockNullConnection

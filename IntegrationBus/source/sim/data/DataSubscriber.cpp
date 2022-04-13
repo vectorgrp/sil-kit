@@ -8,7 +8,7 @@ namespace ib {
 namespace sim {
 namespace data {
 
-DataSubscriber::DataSubscriber(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+DataSubscriber::DataSubscriber(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
                                const std::string& topic, const std::string& mediaType, const std::map<std::string, std::string>& labels,
                                DataHandlerT defaultDataHandler, NewDataSourceHandlerT newDataSourceHandler)
     : _topic{topic}
@@ -17,14 +17,14 @@ DataSubscriber::DataSubscriber(mw::IComAdapterInternal* comAdapter, mw::sync::IT
     , _defaultDataHandler{defaultDataHandler}
     , _newDataSourceHandler{newDataSourceHandler}
     , _timeProvider{timeProvider}
-    , _comAdapter{ comAdapter }
+    , _participant{ participant }
 {
 
 }
 
 void DataSubscriber::RegisterServiceDiscovery()
 {
-    _comAdapter->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
+    _participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
         [this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType,
                const ib::mw::ServiceDescriptor& serviceDescriptor) {
             if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated)
@@ -112,7 +112,7 @@ void DataSubscriber::AssignSpecificDataHandlers()
 void DataSubscriber::AddInternalSubscriber(const std::string& pubUUID, const std::string& joinedMediaType,
                                            const std::map<std::string, std::string>& publisherLabels)
 {
-    auto internalSubscriber = dynamic_cast<DataSubscriberInternal*>(_comAdapter->CreateDataSubscriberInternal(
+    auto internalSubscriber = dynamic_cast<DataSubscriberInternal*>(_participant->CreateDataSubscriberInternal(
         _topic, pubUUID, joinedMediaType, publisherLabels, _defaultDataHandler, this));
     
     _internalSubscibers.push_back(internalSubscriber);

@@ -4,7 +4,7 @@
 #include "ib/capi/IntegrationBus.h"
 #include "ib/mw/all.hpp"
 
-#include "MockComAdapter.hpp"
+#include "MockParticipant.hpp"
 
 namespace {
         const char* IB_CONFIG_STRING = "{"
@@ -54,12 +54,12 @@ const char* IB_MALFORMED_CONFIG_STRING = ""
 
     using namespace ib::sim::can;
 
-    using ib::mw::test::DummyComAdapter;
+    using ib::mw::test::DummyParticipant;
 
     class CapiIntegrationBusTest : public testing::Test
     {
     public: 
-        ib::mw::test::DummyComAdapter mockComAdapter;
+        ib::mw::test::DummyParticipant mockParticipant;
         CapiIntegrationBusTest()
         {
             
@@ -70,14 +70,14 @@ const char* IB_MALFORMED_CONFIG_STRING = ""
     {
         ib_ReturnCode returnCode;
 
-        ib_SimulationParticipant* participant = nullptr;
-        returnCode = ib_SimulationParticipant_Create(&participant, IB_CONFIG_STRING, "Participant1", "42", ib_False);
+        ib_Participant* participant = nullptr;
+        returnCode = ib_Participant_Create(&participant, IB_CONFIG_STRING, "Participant1", "42", ib_False);
         // since there is no IbRegistry, the call should fail
         EXPECT_EQ(returnCode, ib_ReturnCode_UNSPECIFIEDERROR);
         EXPECT_TRUE(participant == nullptr);
 
-        // since there is no IbRegistry with which one could create a ComAdapter, we check against nullptr
-        returnCode = ib_SimulationParticipant_Destroy(nullptr);
+        // since there is no IbRegistry with which one could create a Participant, we check against nullptr
+        returnCode = ib_Participant_Destroy(nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
     }
 
@@ -86,26 +86,26 @@ const char* IB_MALFORMED_CONFIG_STRING = ""
     {
         ib_ReturnCode returnCode;
 
-        ib_SimulationParticipant* participant = nullptr;
-        returnCode = ib_SimulationParticipant_Create(nullptr, IB_CONFIG_STRING, "Participant1", "42", ib_False);
+        ib_Participant* participant = nullptr;
+        returnCode = ib_Participant_Create(nullptr, IB_CONFIG_STRING, "Participant1", "42", ib_False);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_SimulationParticipant_Create(&participant, nullptr, "Participant1", "42", ib_False);
+        returnCode = ib_Participant_Create(&participant, nullptr, "Participant1", "42", ib_False);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_SimulationParticipant_Create(&participant, IB_CONFIG_STRING, nullptr, "42", ib_False);
+        returnCode = ib_Participant_Create(&participant, IB_CONFIG_STRING, nullptr, "42", ib_False);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_SimulationParticipant_Create(&participant, IB_CONFIG_STRING, "Participant1", nullptr, ib_False);
+        returnCode = ib_Participant_Create(&participant, IB_CONFIG_STRING, "Participant1", nullptr, ib_False);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
         returnCode =
-            ib_SimulationParticipant_Create(&participant, IB_MALFORMED_CONFIG_STRING, "Participant1", "42", ib_False);
+            ib_Participant_Create(&participant, IB_MALFORMED_CONFIG_STRING, "Participant1", "42", ib_False);
         EXPECT_EQ(returnCode, ib_ReturnCode_UNSPECIFIEDERROR);
 
         returnCode =
-            ib_SimulationParticipant_Create(&participant, IB_CONFIG_STRING, "ParticipantNotExisting", "42", ib_False);
+            ib_Participant_Create(&participant, IB_CONFIG_STRING, "ParticipantNotExisting", "42", ib_False);
         EXPECT_EQ(returnCode, ib_ReturnCode_UNSPECIFIEDERROR);
 
-        // since there is no IbRegistry with which one could create a ComAdapter, we check against nullptr
-        returnCode = ib_SimulationParticipant_Destroy(nullptr);
+        // since there is no IbRegistry with which one could create a Participant, we check against nullptr
+        returnCode = ib_Participant_Destroy(nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
     }
 

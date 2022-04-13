@@ -62,7 +62,7 @@ protected:
     {
         std::cout << " Sender init " << participant->Name() << std::endl;
 
-        auto* controller = participant->ComAdapter()->CreateEthController("ETH1", "LINK1");
+        auto* controller = participant->Participant()->CreateEthController("ETH1", "LINK1");
         controller->RegisterMessageAckHandler(
             [this, participant](IEthController*, const EthTransmitAcknowledge& ack) {
             std::cout << participant->Name() << " <- EthTransmitAck" << std::endl;
@@ -70,7 +70,7 @@ protected:
             numAcked++;
         });
         auto* participantController = 
-            participant->ComAdapter()->GetParticipantController();
+            participant->Participant()->GetParticipantController();
         participantController->SetSimulationTask(
             [this, participant, controller](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
                 if (numSent < testMessages.size())
@@ -94,7 +94,7 @@ protected:
     void SetupReceiver(ib::test::SimParticipant* participant)
     {
         std::cout << " Receiver init " << participant->Name() << std::endl;
-        auto* controller = participant->ComAdapter()->CreateEthController("ETH1", "LINK1");
+        auto* controller = participant->Participant()->CreateEthController("ETH1", "LINK1");
         controller->RegisterMessageAckHandler(
             [this](IEthController* , const EthTransmitAcknowledge& ack) {
             callbacks.AckHandler(ack);
@@ -133,7 +133,7 @@ protected:
         SetupReceiver(ethReader1);
 
         // reader 2 simply counts the number of messages
-        auto* controller = ethReader2->ComAdapter()->CreateEthController("ETH1", "LINK1");
+        auto* controller = ethReader2->Participant()->CreateEthController("ETH1", "LINK1");
         controller->RegisterReceiveMessageHandler(
             [this](auto, auto) {
                 numReceived2++;
@@ -193,7 +193,7 @@ TEST_F(ThreeEthControllerITest, test_eth_ack_callbacks)
 //AFTMAGT-252: debug messages caused a segfault when the LogMsg RTPS topic
 //             was already destroyed during teardown.
 //   We are adding debug loggers here to verify that the logging
-//   mechanism isn't affected by the ComAdapter' connection lifecycle and its
+//   mechanism isn't affected by the Participant' connection lifecycle and its
 //   internal debugging/tracing calls.
 
 // TODO Reactivate after logging can be configured

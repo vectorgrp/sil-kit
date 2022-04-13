@@ -1,13 +1,13 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_library(IbMwComAdapter STATIC
-    ComAdapter.hpp
-    ComAdapter_impl.hpp
-    ComAdapter.cpp
-    CreateComAdapter.hpp
-    CreateComAdapter.cpp
+add_library(IbMwParticipant STATIC
+    Participant.hpp
+    Participant_impl.hpp
+    Participant.cpp
+    CreateParticipant.hpp
+    CreateParticipant.cpp
 )
 
-target_link_libraries(IbMwComAdapter
+target_link_libraries(IbMwParticipant
     INTERFACE  IbInterface
     PUBLIC
         IbInternal
@@ -31,18 +31,18 @@ target_link_libraries(IbMwComAdapter
 )
 
 if (IB_MW_ENABLE_VASIO)
-    target_link_libraries(IbMwComAdapter PUBLIC IbMwVAsio)
+    target_link_libraries(IbMwParticipant PUBLIC IbMwVAsio)
 endif()
 
-target_include_directories(IbMwComAdapter
+target_include_directories(IbMwParticipant
     PUBLIC .
 )
 
 if (MSVC)
-    target_compile_options(IbMwComAdapter PRIVATE "/bigobj")
+    target_compile_options(IbMwParticipant PRIVATE "/bigobj")
 endif (MSVC)
 
-add_vib_test(TestMwComAdapter 
-    SOURCES ComAdapterTest.cpp 
+add_vib_test(TestMwParticipant 
+    SOURCES ParticipantTest.cpp 
     LIBS IbMwMockNullConnection IbCfgMockParticipantConfiguration
 )

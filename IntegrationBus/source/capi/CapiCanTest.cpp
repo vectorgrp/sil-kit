@@ -3,11 +3,11 @@
 #include "gmock/gmock.h"
 #include "ib/capi/IntegrationBus.h"
 #include "ib/sim/can/all.hpp"
-#include "MockComAdapter.hpp"
+#include "MockParticipant.hpp"
 
 namespace {
     using namespace ib::sim::can; 
-    using ib::mw::test::DummyComAdapter;
+    using ib::mw::test::DummyParticipant;
 
     MATCHER_P(CanFrameMatcher, controlFrame, "") {
         *result_listener << "matches can frames of the c-api to the cpp api";
@@ -84,7 +84,7 @@ namespace {
     {
     }
 
-    class MockComAdapter : public DummyComAdapter
+    class MockParticipant : public DummyParticipant
     {
     public:
         MOCK_METHOD2(CreateCanController, ib::sim::can::ICanController*(const std::string& /*canonicalName*/,
@@ -105,10 +105,10 @@ namespace {
 
         ib_ReturnCode returnCode;
 
-        MockComAdapter mockComAdapter;
-        EXPECT_CALL(mockComAdapter, CreateCanController("ControllerName", "NetworkName")).Times(testing::Exactly(1));
+        MockParticipant mockParticipant;
+        EXPECT_CALL(mockParticipant, CreateCanController("ControllerName", "NetworkName")).Times(testing::Exactly(1));
         ib_Can_Controller* testParam;
-        returnCode = ib_Can_Controller_Create(&testParam, (ib_SimulationParticipant*)&mockComAdapter, "ControllerName",
+        returnCode = ib_Can_Controller_Create(&testParam, (ib_Participant*)&mockParticipant, "ControllerName",
                                               "NetworkName");
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 

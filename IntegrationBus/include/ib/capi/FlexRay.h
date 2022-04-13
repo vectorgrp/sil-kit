@@ -550,11 +550,11 @@ typedef void (*ib_FlexRay_CycleStartHandler_t)(void* context, ib_FlexRay_Control
  * ! \note The object returned must not be deallocated using free()!
  */
 IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controller** outController,
-                                                             ib_SimulationParticipant* participant, const char* name,
+                                                             ib_Participant* participant, const char* name,
                                                              const char* network);
 
 typedef ib_ReturnCode (*ib_FlexRay_Controller_Create_t)(ib_FlexRay_Controller** outController,
-                                                        ib_SimulationParticipant* participant, const char* name,
+                                                        ib_Participant* participant, const char* name,
                                                         const char* network);
 
 /*! \brief Append a TxBuffer to the given controller configuration.

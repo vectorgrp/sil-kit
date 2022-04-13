@@ -12,7 +12,7 @@ namespace eth {
 
 /*! \brief IIbToEthController interface
  *
- *  Used by the ComAdapter, implemented by the EthController
+ *  Used by the Participant, implemented by the EthController
  */
 class IIbToEthController
     : public mw::IIbReceiver<EthMessage>

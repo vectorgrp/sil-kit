@@ -2,15 +2,15 @@
 
 #pragma once
 
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "ib/cfg/IParticipantConfiguration.hpp"
 
 namespace ib {
 namespace mw {
 
-auto CreateNullConnectionComAdapterImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+auto CreateNullConnectionParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
                                         const std::string& participantName, bool isSynchronized)
-    -> std::unique_ptr<IComAdapterInternal>;
+    -> std::unique_ptr<IParticipantInternal>;
 
 } // namespace mw
 } // namespace ib

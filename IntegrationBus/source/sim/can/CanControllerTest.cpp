@@ -9,7 +9,7 @@
 
 #include "ib/sim/can/string_utils.hpp"
 
-#include "MockComAdapter.hpp"
+#include "MockParticipant.hpp"
 #include "MockTraceSink.hpp"
 
 #include "CanController.hpp"
@@ -29,7 +29,7 @@ using testing::NiceMock;
 using namespace ib::mw;
 using namespace ib::sim::can;
 
-using ib::mw::test::DummyComAdapter;
+using ib::mw::test::DummyParticipant;
 
 MATCHER_P(CanTransmitAckWithouthTransmitIdMatcher, truthAck, "") {
     *result_listener << "matches CanTransmitAcks without checking the transmit id";
@@ -38,7 +38,7 @@ MATCHER_P(CanTransmitAckWithouthTransmitIdMatcher, truthAck, "") {
     return frame1.canId == frame2.canId && frame1.status == frame2.status && frame1.timestamp == frame2.timestamp;
 }
 
-class MockComAdapter : public DummyComAdapter
+class MockParticipant : public DummyParticipant
 {
 public:
     MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const CanMessage&));
@@ -64,14 +64,14 @@ public:
 
 TEST(CanControllerTest, send_can_message)
 {
-    MockComAdapter mockComAdapter;
+    MockParticipant mockParticipant;
 
     ServiceDescriptor senderDescriptor{};
     senderDescriptor.SetParticipantName("canControllerPlaceholder");
     senderDescriptor.SetServiceId(17);
     ib::cfg::CanController cfg;
 
-    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    CanController canController(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canController.SetServiceDescriptor(senderDescriptor);
 
 
@@ -83,9 +83,9 @@ TEST(CanControllerTest, send_can_message)
     msgCheck.timestamp = 0ns;
 
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage(&canController, msgCheck))
+    EXPECT_CALL(mockParticipant, SendIbMessage(&canController, msgCheck))
         .Times(1);
-    EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(mockParticipant.mockTimeProvider.mockTime, Now())
         .Times(1);
 
     canController.SendMessage(msg);
@@ -99,11 +99,11 @@ TEST(CanControllerTest, receive_can_message)
     senderDescriptor.SetParticipantName("canControllerPlaceholder");
     senderDescriptor.SetServiceId(17);
 
-    MockComAdapter mockComAdapter;
+    MockParticipant mockParticipant;
     CanControllerCallbacks callbackProvider;
     ib::cfg::CanController cfg;
 
-    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    CanController canController(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canController.RegisterReceiveMessageHandler(std::bind(&CanControllerCallbacks::ReceiveMessage, &callbackProvider, _1, _2));
 
     CanMessage msg;
@@ -117,9 +117,9 @@ TEST(CanControllerTest, receive_can_message)
 
     EXPECT_CALL(callbackProvider, ReceiveMessage(&canController, rcvMsg))
         .Times(1);
-    EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+    EXPECT_CALL(mockParticipant.mockTimeProvider.mockTime, Now()).Times(1);
 
-    CanController canControllerPlaceholder(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    CanController canControllerPlaceholder(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(senderDescriptor);
     canController.ReceiveIbMessage(&canControllerPlaceholder, msg);
 }
@@ -132,10 +132,10 @@ TEST(CanControllerTest, receive_can_message_rx_filter1)
     senderDescriptor.SetParticipantName("canControllerPlaceholder");
     senderDescriptor.SetServiceId(17);
 
-    MockComAdapter mockComAdapter;
+    MockParticipant mockParticipant;
     CanControllerCallbacks callbackProvider;
     ib::cfg::CanController cfg;
-    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    CanController canController(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canController.RegisterReceiveMessageHandler(std::bind(&CanControllerCallbacks::ReceiveMessage, &callbackProvider, _1, _2), (ib::sim::DirectionMask)ib::sim::TransmitDirection::RX);
 
     CanMessage msg;
@@ -147,9 +147,9 @@ TEST(CanControllerTest, receive_can_message_rx_filter1)
 
     EXPECT_CALL(callbackProvider, ReceiveMessage(&canController, rcvMessage))
         .Times(1);
-    EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+    EXPECT_CALL(mockParticipant.mockTimeProvider.mockTime, Now()).Times(1);
 
-    CanController canControllerPlaceholder(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    CanController canControllerPlaceholder(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(senderDescriptor);
     canController.ReceiveIbMessage(&canControllerPlaceholder, msg);
 }
@@ -163,11 +163,11 @@ TEST(CanControllerTest, receive_can_message_rx_filter2)
     senderDescriptor.SetParticipantName("canControllerPlaceholder");
     senderDescriptor.SetServiceId(17);
 
-    MockComAdapter mockComAdapter;
+    MockParticipant mockParticipant;
     CanControllerCallbacks callbackProvider;
 
     ib::cfg::CanController cfg;
-    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    CanController canController(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canController.RegisterReceiveMessageHandler(std::bind(&CanControllerCallbacks::ReceiveMessage, &callbackProvider, _1, _2), (ib::sim::DirectionMask)ib::sim::TransmitDirection::TX);
 
     CanMessage msg;
@@ -176,9 +176,9 @@ TEST(CanControllerTest, receive_can_message_rx_filter2)
 
     EXPECT_CALL(callbackProvider, ReceiveMessage(&canController, msg))
         .Times(0);
-    EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+    EXPECT_CALL(mockParticipant.mockTimeProvider.mockTime, Now()).Times(1);
 
-    CanController canControllerPlaceholder(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    CanController canControllerPlaceholder(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(senderDescriptor);
     canController.ReceiveIbMessage(&canControllerPlaceholder, msg);
 }
@@ -189,12 +189,12 @@ TEST(CanControllerTest, receive_can_message_tx_filter1)
 
     EndpointAddress senderAddress{ 17, 4 };
 
-    MockComAdapter mockComAdapter;
+    MockParticipant mockParticipant;
     CanControllerCallbacks callbackProvider;
 
     ib::cfg::CanController cfg;
     
-    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    CanController canController(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canController.RegisterReceiveMessageHandler(std::bind(&CanControllerCallbacks::ReceiveMessage, &callbackProvider, _1, _2), (ib::sim::DirectionMask)ib::sim::TransmitDirection::TX);
 
     CanMessage msg;
@@ -203,9 +203,9 @@ TEST(CanControllerTest, receive_can_message_tx_filter1)
 
     EXPECT_CALL(callbackProvider, ReceiveMessage(&canController, msg))
         .Times(1);
-    EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+    EXPECT_CALL(mockParticipant.mockTimeProvider.mockTime, Now()).Times(1);
 
-    CanController canControllerPlaceholder(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    CanController canControllerPlaceholder(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(from_endpointAddress(senderAddress));
     canController.SendMessage(msg);
 }
@@ -217,11 +217,11 @@ TEST(CanControllerTest, receive_can_message_tx_filter2)
 
     EndpointAddress senderAddress{ 17, 4 };
 
-    MockComAdapter mockComAdapter;
+    MockParticipant mockParticipant;
     CanControllerCallbacks callbackProvider;
 
     ib::cfg::CanController cfg;
-    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    CanController canController(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canController.RegisterReceiveMessageHandler(std::bind(&CanControllerCallbacks::ReceiveMessage, &callbackProvider, _1, _2), (ib::sim::DirectionMask)ib::sim::TransmitDirection::RX);
 
     CanMessage msg;
@@ -230,9 +230,9 @@ TEST(CanControllerTest, receive_can_message_tx_filter2)
 
     EXPECT_CALL(callbackProvider, ReceiveMessage(&canController, msg))
         .Times(0);
-    EXPECT_CALL(mockComAdapter.mockTimeProvider.mockTime, Now()).Times(1);
+    EXPECT_CALL(mockParticipant.mockTimeProvider.mockTime, Now()).Times(1);
 
-    CanController canControllerPlaceholder(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    CanController canControllerPlaceholder(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(from_endpointAddress(senderAddress));
     canController.SendMessage(msg);
 }
@@ -246,12 +246,12 @@ TEST(CanControllerTest, receive_can_message_tx_filter2)
  */
 TEST(CanControllerTest, start_stop_sleep_reset)
 {
-    MockComAdapter mockComAdapter;
+    MockParticipant mockParticipant;
     ib::cfg::CanController cfg;
 
-    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    CanController canController(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage(A<const IIbServiceEndpoint*>(), A<const CanSetControllerMode&>()))
+    EXPECT_CALL(mockParticipant, SendIbMessage(A<const IIbServiceEndpoint*>(), A<const CanSetControllerMode&>()))
         .Times(0);
 
     canController.Start();
@@ -268,12 +268,12 @@ TEST(CanControllerTest, start_stop_sleep_reset)
 */
 TEST(CanControllerTest, set_baudrate)
 {
-    MockComAdapter mockComAdapter;
+    MockParticipant mockParticipant;
     ib::cfg::CanController cfg;
 
-    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    CanController canController(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const CanConfigureBaudrate&>()))
+    EXPECT_CALL(mockParticipant, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const CanConfigureBaudrate&>()))
         .Times(0);
 
     canController.SetBaudRate(3000, 500000);
@@ -285,11 +285,11 @@ TEST(CanControllerTest, receive_ack)
 
     EndpointAddress controllerAddress = { 3, 8 };
 
-    MockComAdapter mockComAdapter;
+    MockParticipant mockParticipant;
     CanControllerCallbacks callbackProvider;
     ib::cfg::CanController cfg;
 
-    CanController canController(&mockComAdapter, cfg, mockComAdapter.GetTimeProvider());
+    CanController canController(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
     canController.RegisterTransmitStatusHandler(std::bind(&CanControllerCallbacks::ReceiveAck, &callbackProvider, _1, _2));
 
@@ -310,17 +310,17 @@ TEST(CanControllerTest, DISABLED_cancontroller_uses_tracing)
     using namespace ib::extensions;
 
     ib::test::MockTraceSink traceSink;
-    test::DummyComAdapter comAdapter;
+    test::DummyParticipant participant;
     ib::cfg::CanController cfg;
     const std::chrono::nanoseconds now = 1337ns;
     const EndpointAddress controllerAddress = {1,2};
     const EndpointAddress otherAddress = {2,2};
 
-    ON_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+    ON_CALL(participant.mockTimeProvider.mockTime, Now())
         .WillByDefault(testing::Return(now));
 
 
-    auto controller = CanController(&comAdapter, cfg, comAdapter.GetTimeProvider());
+    auto controller = CanController(&participant, cfg, participant.GetTimeProvider());
     controller.SetServiceDescriptor(from_endpointAddress(controllerAddress));
     controller.AddSink(&traceSink);
 
@@ -328,7 +328,7 @@ TEST(CanControllerTest, DISABLED_cancontroller_uses_tracing)
     CanMessage msg{};
 
     //Send direction
-    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
         Trace(ib::sim::TransmitDirection::TX, controllerAddress, now, msg))
@@ -336,13 +336,13 @@ TEST(CanControllerTest, DISABLED_cancontroller_uses_tracing)
     controller.SendMessage(msg);
 
     // Receive direction
-    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
         Trace(ib::sim::TransmitDirection::RX, controllerAddress, now, msg))
         .Times(1);
 
-    CanController canControllerPlaceholder(&comAdapter, cfg, comAdapter.GetTimeProvider());
+    CanController canControllerPlaceholder(&participant, cfg, participant.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(from_endpointAddress(otherAddress));
     controller.ReceiveIbMessage(&canControllerPlaceholder, msg);
 }

@@ -15,7 +15,7 @@
 #include "UuidRandom.hpp" //for random strings
 
 
-#include "MockComAdapter.hpp"
+#include "MockParticipant.hpp"
 
 namespace {
 
@@ -28,9 +28,9 @@ using namespace ib::mw;
 using namespace ib::mw::service;
 using namespace ib::util;
 
-using ::ib::mw::test::DummyComAdapter;
+using ::ib::mw::test::DummyParticipant;
 
-class MockComAdapter : public DummyComAdapter
+class MockParticipant : public DummyParticipant
 {
 public:
     MOCK_METHOD(void, SendIbMessage, (const IIbServiceEndpoint*, const ServiceAnnouncement&), (override));
@@ -82,7 +82,7 @@ protected:
     // Members
 
     Callbacks callbacks;
-    MockComAdapter comAdapter;
+    MockParticipant participant;
 };
 
 TEST(ServiceDescriptor, portable_hash_function)
@@ -108,7 +108,7 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
     senderDescriptor.SetParticipantName("ParticipantA");
     senderDescriptor.SetNetworkName("Link1");
     senderDescriptor.SetServiceName("ServiceDiscovery");
-    ServiceDiscovery disco{ &comAdapter, "ParticipantA" };
+    ServiceDiscovery disco{ &participant, "ParticipantA" };
     disco.SetServiceDescriptor(senderDescriptor);
 
     ServiceDescriptor descr;
@@ -127,7 +127,7 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
     event.type = ServiceDiscoveryEvent::Type::ServiceCreated;
     event.service = descr;
     // NotifyServiceCreated should publish a message
-    EXPECT_CALL(comAdapter, SendIbMessage(&disco, event)).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&disco, event)).Times(1);
     // NotifyServiceCreated should also trigger ourself
     EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated,
         descr)).Times(1);
@@ -148,7 +148,7 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
 TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
 {
     MockServiceDescriptor otherParticipant{ {1, 2} };
-    ServiceDiscovery disco{ &comAdapter, "ParticipantA" };
+    ServiceDiscovery disco{ &participant, "ParticipantA" };
 
     disco.RegisterServiceDiscoveryHandler([this](auto type, auto&& descr) {
         callbacks.ServiceDiscoveryHandler(type, descr);
@@ -189,7 +189,7 @@ TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
 TEST_F(DiscoveryServiceTest, service_removal)
 {
     MockServiceDescriptor otherParticipant{ {1, 2} };
-    ServiceDiscovery disco{ &comAdapter, "ParticipantA" };
+    ServiceDiscovery disco{ &participant, "ParticipantA" };
 
     disco.RegisterServiceDiscoveryHandler([this](auto type, auto&& descr) {
         callbacks.ServiceDiscoveryHandler(type, descr);

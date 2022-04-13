@@ -42,7 +42,7 @@ static void assign(ib::sim::lin::ControllerConfig& cppConfig, const ib_Lin_Contr
 
 extern "C" {
 
-ib_ReturnCode ib_Lin_Controller_Create(ib_Lin_Controller** outLinController, ib_SimulationParticipant* participant, const char* name, const char* network)
+ib_ReturnCode ib_Lin_Controller_Create(ib_Lin_Controller** outLinController, ib_Participant* participant, const char* name, const char* network)
 {
     ASSERT_VALID_POINTER_PARAMETER(participant);
     ASSERT_VALID_OUT_PARAMETER(outLinController);
@@ -50,8 +50,8 @@ ib_ReturnCode ib_Lin_Controller_Create(ib_Lin_Controller** outLinController, ib_
     ASSERT_VALID_POINTER_PARAMETER(network);
     CAPI_ENTER
     {
-        auto        comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
-        auto        cppLinController = comAdapter->CreateLinController(name, network);
+        auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
+        auto cppLinController = cppParticipant->CreateLinController(name, network);
         if (cppLinController == nullptr)
         {
             return ib_ReturnCode_UNSPECIFIEDERROR;

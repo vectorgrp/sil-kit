@@ -24,7 +24,7 @@ To be notified about transitions of the ParticipantState, a ParticipantStateHand
   auto participantStateHandler =
       [](sync::ParticipantState state) {};
 
-  auto* systemMonitor = comAdapter->GetSystemMonitor();
+  auto* systemMonitor = participant->GetSystemMonitor();
   systemMonitor->RegisterParticipantStateHandler(participantStateHandler);
 
 The ParticipantState changes are always called together with the
@@ -38,7 +38,7 @@ ParticipantStatusHandler can be registered as follows::
   auto participantStatusHandler =
       [](const sync::ParticipantStatus& participantStatus) {};
 
-  auto* systemMonitor = comAdapter->GetSystemMonitor();
+  auto* systemMonitor = participant->GetSystemMonitor();
   systemMonitor->RegisterParticipantStatusHandler(participantStatusHandler);
 
 Last but not least a SystemStateHandler can be registered to get informed about system state transitions::
@@ -47,7 +47,7 @@ Last but not least a SystemStateHandler can be registered to get informed about 
   auto systemStateHandler =
       [](sync::SystemState state) {};
 
-  auto* systemMonitor = comAdapter->GetSystemMonitor();
+  auto* systemMonitor = participant->GetSystemMonitor();
   systemMonitor->RegisterSystemStateHandler(systemStateHandler);
 
 

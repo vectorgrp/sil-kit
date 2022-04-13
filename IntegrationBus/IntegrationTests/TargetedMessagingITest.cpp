@@ -6,7 +6,7 @@
 #include <future>
 
 #include "SimTestHarness.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "ib/sim/can/all.hpp"
 #include "ib/sim/can/CanDatatypes.hpp"
 #include "CanControllerFacade.hpp"
@@ -34,7 +34,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
 
     ib::test::SimTestHarness testHarness(syncParticipantNames, domainId);
 
-    auto* senderCom = dynamic_cast<ib::mw::IComAdapterInternal*>(testHarness.GetParticipant("Sender")->ComAdapter());
+    auto* senderCom = dynamic_cast<ib::mw::IParticipantInternal*>(testHarness.GetParticipant("Sender")->Participant());
 
     auto systemCtrl = senderCom->GetSystemController();
 
@@ -59,7 +59,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
         });
 
     auto* receiverCom =
-        dynamic_cast<ib::mw::IComAdapterInternal*>(testHarness.GetParticipant("TargetReceiver")->ComAdapter());
+        dynamic_cast<ib::mw::IParticipantInternal*>(testHarness.GetParticipant("TargetReceiver")->Participant());
     auto* receiverParticipant = receiverCom->GetParticipantController();
     receiverParticipant->SetPeriod(1ms);
     receiverParticipant->SetSimulationTask([](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
@@ -76,7 +76,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
         });
 
     auto* otherReceiverCom =
-        dynamic_cast<ib::mw::IComAdapterInternal*>(testHarness.GetParticipant("OtherReceiver")->ComAdapter());
+        dynamic_cast<ib::mw::IParticipantInternal*>(testHarness.GetParticipant("OtherReceiver")->Participant());
     auto* otherReceiverParticipant = otherReceiverCom->GetParticipantController();
     otherReceiverParticipant->SetPeriod(1ms);
     otherReceiverParticipant->SetSimulationTask(

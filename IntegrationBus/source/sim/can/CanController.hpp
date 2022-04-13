@@ -9,7 +9,7 @@
 #include "ib/extensions/ITraceMessageSource.hpp"
 
 #include "IIbToCanController.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
 #include "IReplayDataController.hpp"
 
@@ -40,7 +40,7 @@ public:
     CanController() = delete;
     CanController(const CanController&) = default;
     CanController(CanController&&) = default;
-    CanController(mw::IComAdapterInternal* comAdapter, const ib::cfg::CanController& config,
+    CanController(mw::IParticipantInternal* participant, const ib::cfg::CanController& config,
                   mw::sync::ITimeProvider* timeProvider, ICanController* facade = nullptr);
 
 public:
@@ -118,7 +118,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    ::ib::mw::IComAdapterInternal* _comAdapter{nullptr};
+    ::ib::mw::IParticipantInternal* _participant{nullptr};
     cfg::CanController _config;
     mw::ServiceDescriptor _serviceDescriptor;
     mw::sync::ITimeProvider* _timeProvider{nullptr};

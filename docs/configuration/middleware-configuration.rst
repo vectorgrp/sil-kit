@@ -21,7 +21,7 @@ The active middleware can be configured as follows.
 .. admonition:: Note
 
     FastRTPS is now discontinued.
-    All users should use the generic :cpp:func:`CreateComAdapter<ib::CreateComAdapter()>` API
+    All users should use the generic :cpp:func:`CreateParticipant<ib::CreateParticipant()>` API
     together with the VAsio middleware (which is the default).
 
 
@@ -107,11 +107,11 @@ running on localhost listening on Port 8500. These values can be changed via the
      - Number of connects to the registry a participant should attempt before giving up and signaling an error.
        By default, only a single connect is attempted.
 
-.. _sec:comadapter-factory:
+.. _sec:participant-factory:
 
-ComAdapter Factory Method
+Participant Factory Method
 ----------------------------------------
 
-CreateComAdapter
+CreateParticipant
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygenfunction:: ib::CreateComAdapter
+.. doxygenfunction:: ib::CreateParticipant

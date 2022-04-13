@@ -7,9 +7,9 @@ namespace ib {
 namespace sim {
 namespace eth {
 
-EthControllerProxy::EthControllerProxy(mw::IComAdapterInternal* comAdapter,
+EthControllerProxy::EthControllerProxy(mw::IParticipantInternal* participant,
                                        cfg::EthernetController /*config*/, IEthController* facade)
-    : _comAdapter(comAdapter)
+    : _participant(participant)
     , _facade{facade}
 {
     if (_facade == nullptr)
@@ -25,7 +25,7 @@ void EthControllerProxy::Activate()
         return;
 
     EthSetMode msg { EthMode::Active };
-    _comAdapter->SendIbMessage(this, msg);
+    _participant->SendIbMessage(this, msg);
 }
 
 void EthControllerProxy::Deactivate()
@@ -35,7 +35,7 @@ void EthControllerProxy::Deactivate()
         return;
 
     EthSetMode msg{ EthMode::Inactive };
-    _comAdapter->SendIbMessage(this, msg);
+    _participant->SendIbMessage(this, msg);
 }
 
 auto EthControllerProxy::SendMessage(EthMessage msg) -> EthTxId
@@ -46,7 +46,7 @@ auto EthControllerProxy::SendMessage(EthMessage msg) -> EthTxId
     // we keep a copy until the transmission was acknowledged before tracing the message
     _transmittedMessages[msg.transmitId] = msg.ethFrame;
 
-    _comAdapter->SendIbMessage(this, std::move(msg));
+    _participant->SendIbMessage(this, std::move(msg));
 
 
     return txId;

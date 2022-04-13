@@ -17,7 +17,7 @@
 
 extern "C" {
 
-ib_ReturnCode ib_Data_Publisher_Create(ib_Data_Publisher** outPublisher, ib_SimulationParticipant* participant,
+ib_ReturnCode ib_Data_Publisher_Create(ib_Data_Publisher** outPublisher, ib_Participant* participant,
                                        const char* topic, const char* mediaType, const ib_KeyValueList* labels,
                                        uint8_t history)
 {
@@ -28,11 +28,11 @@ ib_ReturnCode ib_Data_Publisher_Create(ib_Data_Publisher** outPublisher, ib_Simu
     CAPI_ENTER
     {
         std::string strTopic(topic);
-        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
         std::string cppMediaType{ mediaType };
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
-        auto dataPublisher = comAdapter->CreateDataPublisher(strTopic, cppMediaType, cppLabels, history);
+        auto dataPublisher = cppParticipant->CreateDataPublisher(strTopic, cppMediaType, cppLabels, history);
         *outPublisher = reinterpret_cast<ib_Data_Publisher*>(dataPublisher);
         return ib_ReturnCode_SUCCESS;
     }
@@ -52,7 +52,7 @@ ib_ReturnCode ib_Data_Publisher_Publish(ib_Data_Publisher* self, const ib_ByteVe
     CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_SimulationParticipant* participant,
+ib_ReturnCode ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_Participant* participant,
                                        const char* topic, const char* mediaType,
                                        const ib_KeyValueList* labels,
                                        void* defaultDataHandlerContext, ib_Data_Handler_t defaultDataHandler,
@@ -66,7 +66,7 @@ ib_ReturnCode ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_S
     CAPI_ENTER
     {
         std::string strTopic(topic);
-        auto comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+        auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
         std::string cppMediaType{ mediaType };
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
@@ -95,7 +95,7 @@ ib_ReturnCode ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_S
             newDataSourceHandler(newDataSourceContext, cSubscriber, cppTopic.c_str(), mediaType, clabelsHandler);
         };
 
-        auto dataSubscriber = comAdapter->CreateDataSubscriber(strTopic, cppMediaType, cppLabels,
+        auto dataSubscriber = cppParticipant->CreateDataSubscriber(strTopic, cppMediaType, cppLabels,
                                                                cppDefaultDataHandler, cppNewDataSourceHandler);
         *outSubscriber = reinterpret_cast<ib_Data_Subscriber*>(dataSubscriber);
         return ib_ReturnCode_SUCCESS;

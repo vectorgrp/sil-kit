@@ -4,7 +4,7 @@
 
 #include <atomic>
 
-#include "ib/mw/IComAdapter.hpp"
+#include "ib/mw/IParticipant.hpp"
 
 // IbInternal component:
 #include "internal_fwd.hpp"
@@ -15,7 +15,7 @@
 namespace ib {
 namespace mw {
 
-class IComAdapterInternal : public IComAdapter
+class IParticipantInternal : public IParticipant
 {
 public:
     // ----------------------------------------

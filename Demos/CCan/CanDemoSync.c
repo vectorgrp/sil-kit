@@ -49,7 +49,7 @@ char* LoadFile(char const* path)
     return result;
 }
 
-ib_SimulationParticipant* participant;
+ib_Participant* participant;
 ib_Can_Controller* canController;
 ib_Can_Controller* canController2;
 
@@ -73,7 +73,7 @@ typedef struct {
 } SimTaskContext;
 SimTaskContext simTaskContext;
 
-void InitCallback(void* context, ib_SimulationParticipant* cbParticipant, struct ib_ParticipantCommand* command)
+void InitCallback(void* context, ib_Participant* cbParticipant, struct ib_ParticipantCommand* command)
 {
     ParticipantHandlerContext* tc = (ParticipantHandlerContext*)context;
     printf(">> InitCallback of kind=%i with context=%i\n", command->kind, tc->someInt);
@@ -85,13 +85,13 @@ void InitCallback(void* context, ib_SimulationParticipant* cbParticipant, struct
     (void)ib_Can_Controller_Start(canController2);
 }
 
-void StopCallback(void* context, ib_SimulationParticipant* cbParticipant)
+void StopCallback(void* context, ib_Participant* cbParticipant)
 {
     ParticipantHandlerContext* tc = (ParticipantHandlerContext*)context;
     printf(">> StopCallback with context=%i\n", tc->someInt);
 }
 
-void ShutdownCallback(void* context, ib_SimulationParticipant* cbParticipant)
+void ShutdownCallback(void* context, ib_Participant* cbParticipant)
 {
     ParticipantHandlerContext* tc = (ParticipantHandlerContext*)context;
     printf(">> ShutdownCallback with context=%i\n", tc->someInt);
@@ -151,7 +151,7 @@ void SendCanMessage()
     printf("CAN Message sent with transmitId=%i\n", transmitContext.someInt);
 }
 
-void SimTask(void* context, ib_SimulationParticipant* cbParticipant, ib_NanosecondsTime now)
+void SimTask(void* context, ib_Participant* cbParticipant, ib_NanosecondsTime now)
 {
     SimTaskContext* tc = (SimTaskContext*)context;
     printf(">> Simulation task now=%"PRIu64" with context=%i\n", now, tc->someInt);
@@ -183,17 +183,17 @@ int main(int argc, char* argv[])
     }
 
     ib_ReturnCode returnCode;
-    returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, domainId, ib_True);
+    returnCode = ib_Participant_Create(&participant, jsonString, participantName, domainId, ib_True);
     if (returnCode) {
         printf("%s\n", ib_GetLastErrorString());
         return 2;
     }
-    printf("Creating Participant %s for simulation '%s'\n", participantName, domainId);
+    printf("Creating participant '%s' for simulation '%s'\n", participantName, domainId);
 
     participantHandlerContext.someInt = 123;
-    ib_SimulationParticipant_SetInitHandler(participant, (void*)&participantHandlerContext, &InitCallback);
-    ib_SimulationParticipant_SetStopHandler(participant, (void*)&participantHandlerContext, &StopCallback);
-    ib_SimulationParticipant_SetShutdownHandler(participant, (void*)&participantHandlerContext, &ShutdownCallback);
+    ib_Participant_SetInitHandler(participant, (void*)&participantHandlerContext, &InitCallback);
+    ib_Participant_SetStopHandler(participant, (void*)&participantHandlerContext, &StopCallback);
+    ib_Participant_SetShutdownHandler(participant, (void*)&participantHandlerContext, &ShutdownCallback);
 
     const char* canNetworkName = "CAN1";
     const char* canControllerName = "CAN1";
@@ -208,19 +208,19 @@ int main(int argc, char* argv[])
     ib_Can_Controller_RegisterReceiveMessageHandler(canController2, (void*)&transmitContext, &ReceiveMessage,
                                                     ib_Direction_SendReceive);
     simTaskContext.someInt = 456;
-    ib_SimulationParticipant_SetPeriod(participant, 1000000);
-    ib_SimulationParticipant_SetSimulationTask(participant, (void*)&simTaskContext, &SimTask);
+    ib_Participant_SetPeriod(participant, 1000000);
+    ib_Participant_SetSimulationTask(participant, (void*)&simTaskContext, &SimTask);
 
     // Non-Blocking variant 
-    ib_SimulationParticipant_RunAsync(participant);
+    ib_Participant_RunAsync(participant);
     ib_ParticipantState outFinalParticipantState;
-    ib_SimulationParticipant_WaitForRunAsyncToComplete(participant, &outFinalParticipantState);
+    ib_Participant_WaitForRunAsyncToComplete(participant, &outFinalParticipantState);
 
     // Blocking variant 
     // ib_ParticipantState outFinalParticipantState;
-    //ib_ParticipantState finalState = ib_SimulationParticipant_Run(participant, &outFinalParticipantState);
+    //ib_ParticipantState finalState = ib_Participant_Run(participant, &outFinalParticipantState);
 
-    ib_SimulationParticipant_Destroy(participant);
+    ib_Participant_Destroy(participant);
     if (jsonString)
     {
         free(jsonString);

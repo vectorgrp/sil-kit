@@ -43,12 +43,12 @@ typedef void (*ib_Data_NewDataSourceHandler_t)(void* context, ib_Data_Subscriber
 * Restricted to {0|1}.
 */
 IntegrationBusAPI ib_ReturnCode ib_Data_Publisher_Create(ib_Data_Publisher** outPublisher,
-                                                         ib_SimulationParticipant* participant, const char* topic,
-                                                         const char* mediaType, const ib_KeyValueList* labels,
-                                                         uint8_t history);
+                                                        ib_Participant* participant, const char* topic,
+                                                        const char* mediaType, const ib_KeyValueList* labels,
+                                                        uint8_t history);
 
 typedef ib_ReturnCode (*ib_Data_Publisher_Create_t)(ib_Data_Publisher** outPublisher,
-                                                    ib_SimulationParticipant* participant, const char* topic,
+                                                   ib_Participant* participant, const char* topic,
                                                     const char* mediaType, const ib_KeyValueList* labels,
                                                     uint8_t history);
 
@@ -65,13 +65,13 @@ typedef ib_ReturnCode (*ib_Data_Publisher_Create_t)(ib_Data_Publisher** outPubli
 * \param newDataSourceHandler A handler that is called if a new matching publisher is discovered.
 */
 IntegrationBusAPI ib_ReturnCode
-ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_SimulationParticipant* participant, const char* topic,
+ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_Participant* participant, const char* topic,
                           const char* mediaType, const ib_KeyValueList* labels,
                           void* defaultDataHandlerContext, ib_Data_Handler_t defaultDataHandler,
                           void* newDataSourceContext, ib_Data_NewDataSourceHandler_t newDataSourceHandler);
 
 typedef ib_ReturnCode (*ib_Data_Subscriber_Create_t)(ib_Data_Subscriber** outSubscriber,
-                                                     ib_SimulationParticipant* participant, const char* topic,
+                                                     ib_Participant* participant, const char* topic,
                                                      const char* mediaType, const ib_KeyValueList* labels,
                                                      void* defaultDataHandlerContext,
                                                      ib_Data_Handler_t defaultDataHandler, void* newDataSourceContext,

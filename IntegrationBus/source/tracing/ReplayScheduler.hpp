@@ -7,7 +7,7 @@
 #include <memory>
 
 #include "ib/mw/sync/ITimeProvider.hpp"
-#include "ib/mw/IComAdapter.hpp"
+#include "ib/mw/IParticipant.hpp"
 #include "ib/cfg/fwd_decl.hpp"
 
 #include "IReplayDataController.hpp"
@@ -19,7 +19,7 @@ class ReplayScheduler
 {
 public:
     ReplayScheduler(const cfg::Config& config,  const cfg::Participant& participantConfig,
-        std::chrono::nanoseconds tickPeriod, mw::IComAdapter* comAdapter, mw::sync::ITimeProvider* timeProvider);
+        std::chrono::nanoseconds tickPeriod, mw::IParticipant* participant, mw::sync::ITimeProvider* timeProvider);
     ~ReplayScheduler();
     void ConfigureNetworkSimulators(const cfg::Config& config, const cfg::Participant& participantConfig,
         tracing::IReplayDataController& netsim);
@@ -43,7 +43,7 @@ private:
     std::chrono::nanoseconds _tickPeriod{0};
     std::chrono::nanoseconds _startTime{std::chrono::nanoseconds::min()};
     mw::logging::ILogger* _log{nullptr};
-    mw::IComAdapter* _comAdapter{nullptr};
+    mw::IParticipant* _participant{nullptr};
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     std::vector<ReplayTask> _replayTasks;
     bool _isDone{false};

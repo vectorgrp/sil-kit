@@ -16,9 +16,9 @@ const auto domainId = 123;
 
 void publisher_main(Config config)
 {
-    auto comAdapter = ib::CreateComAdapter(std::move(config), "PublisherParticipant", domainId);
-    auto* publisher = comAdapter->CreateGenericPublisher("DataService");
-    auto* participantCtrl = comAdapter->GetParticipantController();
+    auto participant = ib::CreateParticipant(std::move(config), "PublisherParticipant", domainId);
+    auto* publisher = participant->CreateGenericPublisher("DataService");
+    auto* participantCtrl = participant->GetParticipantController();
 
     participantCtrl->SetSimulationTask(
         [publisher, participantCtrl](std::chrono::nanoseconds now) {
@@ -43,9 +43,9 @@ void publisher_main(Config config)
 
 void subscriber_main(Config config)
 {
-    auto comAdapter = ib::CreateComAdapter(std::move(config), "SubscriberParticipant", domainId);
-    auto* subscriber = comAdapter->CreateGenericSubscriber("DataService");
-    auto* participantCtrl = comAdapter->GetParticipantController();
+    auto participant = ib::CreateParticipant(std::move(config), "SubscriberParticipant", domainId);
+    auto* subscriber = participant->CreateGenericSubscriber("DataService");
+    auto* participantCtrl = participant->GetParticipantController();
 
     //Register callback for reception of messages
     subscriber->SetReceiveMessageHandler(

@@ -4,17 +4,17 @@
 
 #include "Validation.hpp"
 
-#include "CreateComAdapter.hpp"
+#include "CreateParticipant.hpp"
 
 namespace ib {
-auto CreateSimulationParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
                                  const std::string& participantName, const uint32_t domainId, bool isSynchronized)
-    -> std::unique_ptr<mw::IComAdapter>
+    -> std::unique_ptr<mw::IParticipant>
 {
     //Validate(config);
-    auto comAdapter = mw::CreateSimulationParticipantImpl(std::move(participantConfig), participantName, isSynchronized);
-    comAdapter->joinIbDomain(domainId);
-    return comAdapter;
+    auto participant = mw::CreateParticipantImpl(std::move(participantConfig), participantName, isSynchronized);
+    participant->joinIbDomain(domainId);
+    return participant;
 }
 }
 

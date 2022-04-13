@@ -243,7 +243,7 @@ The supported VIB data types and runtime behaviors are detailed in section
 
 Replaying Features
 ~~~~~~~~~~~~~~~~~~~~
-The tracing and replaying functionality is built into the ComAdapter and its service controllers.
+The tracing and replaying functionality is built into the Participant and its service controllers.
 Users can trace data frames on the controllers of a participant or on simulated links of the :doc:`/vibes/networksimulator`.
 This functionality is controlled by configuration statements in the :ref:`VIB configuration<sec:cfg-participant-tracing>`.
 
@@ -536,7 +536,7 @@ Registered user callbacks are served with Replay Messages if the configured dire
 Architecture
 ~~~~~~~~~~~~
 
-The trace and replay mechanism is an extension to the existing :cpp:class:`IComAdapter<ib::mw::IComAdapter>`, and consists of several parts:
+The trace and replay mechanism is an extension to the existing :cpp:class:`IParticipant<ib::mw::IParticipant>`, and consists of several parts:
 
 To have a consistent time base during the simulation and throughout the participant, an instance of :cpp:class:`ITimeProvider<ib::sim::sync::ITimeProvider>` is used.
 It gives access to the current simulation time, or as a fallback the wall-clock time if no participant controller is configured.
@@ -557,9 +557,9 @@ Tracing
 ^^^^^^^
 The architecture of the tracing facility is shown in :ref:`the following
 figure<figure:tracing>`.
-The ComAdapter takes care of configuring controllers with their trace sinks upon
+The Participant takes care of configuring controllers with their trace sinks upon
 creation.
-If the ComAdapter has a participant controller, then the virtual simulation time will be used in a time provider instance.
+If the Participant has a participant controller, then the virtual simulation time will be used in a time provider instance.
 This time provider is used to get the current time stamp when messages are pushed to a trace sink.
 
 

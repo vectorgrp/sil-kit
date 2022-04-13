@@ -9,7 +9,7 @@
 
 #include "ParticipantConfiguration.hpp"
 
-#include "MockComAdapter.hpp"
+#include "MockParticipant.hpp"
 
 #include "Logger.hpp"
 #include "LogMsgSender.hpp"
@@ -30,9 +30,9 @@ using namespace ib;
 using namespace ib::mw;
 using namespace ib::mw::logging;
 
-using ib::mw::test::DummyComAdapter;
+using ib::mw::test::DummyParticipant;
 
-class MockComAdapter : public DummyComAdapter
+class MockParticipant : public DummyParticipant
 {
 public:
     MOCK_METHOD((void), SendIbMessage, (const IIbServiceEndpoint*, LogMsg&&));
@@ -51,9 +51,9 @@ TEST(LoggerTest, send_log_message_with_sender)
 {
     EndpointAddress controllerAddress = {3, 8};
 
-    MockComAdapter mockComAdapter;
+    MockParticipant mockParticipant;
 
-    LogMsgSender logMsgSender(&mockComAdapter);
+    LogMsgSender logMsgSender(&mockParticipant);
     
     logMsgSender.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
@@ -62,7 +62,7 @@ TEST(LoggerTest, send_log_message_with_sender)
     msg.level = Level::Info;
     msg.payload = std::string{"some payload"};
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage(&logMsgSender, std::move(msg)))
+    EXPECT_CALL(mockParticipant, SendIbMessage(&logMsgSender, std::move(msg)))
         .Times(1);
 
     logMsgSender.SendLogMsg(std::move(msg));
@@ -82,8 +82,8 @@ TEST(LoggerTest, send_log_message_from_logger)
     Logger logger{loggerName, config};
 
     EndpointAddress controllerAddress = {3, 8};
-    MockComAdapter mockComAdapter;
-    LogMsgSender logMsgSender(&mockComAdapter);
+    MockParticipant mockParticipant;
+    LogMsgSender logMsgSender(&mockParticipant);
     logMsgSender.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
     logger.RegisterRemoteLogging([&logMsgSender](logging::LogMsg logMsg) {
@@ -94,13 +94,13 @@ TEST(LoggerTest, send_log_message_from_logger)
 
     std::string payload{"Test log message"};
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage(&logMsgSender,
+    EXPECT_CALL(mockParticipant, SendIbMessage(&logMsgSender,
         ALogMsgWith(loggerName, Level::Info, payload)))
         .Times(1);
 
     logger.Info(payload);
 
-    EXPECT_CALL(mockComAdapter, SendIbMessage(&logMsgSender,
+    EXPECT_CALL(mockParticipant, SendIbMessage(&logMsgSender,
         ALogMsgWith(loggerName, Level::Critical, payload)))
         .Times(1);
 

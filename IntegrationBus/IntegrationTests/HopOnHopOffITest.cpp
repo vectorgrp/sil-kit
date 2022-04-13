@@ -53,7 +53,7 @@ protected:
         }
         std::string                  name;
         uint8_t id;
-        std::unique_ptr<IComAdapter> comAdapter;
+        std::unique_ptr<IParticipant> participant;
         IDataPublisher* publisher;
         IDataSubscriber* subscriber;
         std::set<uint8_t> receivedIds;
@@ -80,7 +80,7 @@ protected:
 
     struct SystemMaster
     {
-        std::unique_ptr<IComAdapter> comAdapter;
+        std::unique_ptr<IParticipant> participant;
         ISystemController*           systemController;
         ISystemMonitor*              systemMonitor;
     };
@@ -138,13 +138,13 @@ protected:
     {
         try
         {
-            participant.comAdapter =
-                ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, true);
+            participant.participant =
+                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, true);
 
             IParticipantController* participantController;
-            participantController = participant.comAdapter->GetParticipantController();
-            participant.publisher = participant.comAdapter->CreateDataPublisher(topic, mediaType, {}, 0);
-            participant.subscriber = participant.comAdapter->CreateDataSubscriber(
+            participantController = participant.participant->GetParticipantController();
+            participant.publisher = participant.participant->CreateDataPublisher(topic, mediaType, {}, 0);
+            participant.subscriber = participant.participant->CreateDataSubscriber(
                 topic, mediaType, {},
                 [&participant](IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data) {
                     if (!participant.allReceived)
@@ -192,10 +192,10 @@ protected:
     {
         try
         {
-            participant.comAdapter =
-                ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, false);
-            participant.publisher = participant.comAdapter->CreateDataPublisher(topic, mediaType, {}, 0);
-            participant.subscriber = participant.comAdapter->CreateDataSubscriber(
+            participant.participant =
+                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, false);
+            participant.publisher = participant.participant->CreateDataPublisher(topic, mediaType, {}, 0);
+            participant.subscriber = participant.participant->CreateDataSubscriber(
                 topic, mediaType, {},
                 [&participant](IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data) {
                     if (!participant.allReceived)
@@ -232,7 +232,7 @@ protected:
         }
 
         // Explicitly delete the com adapter to end the async participant
-        participant.comAdapter.reset();
+        participant.participant.reset();
     }
 
     void RunRegistry(uint32_t domainId)
@@ -260,11 +260,11 @@ protected:
     {
         try
         {
-            systemMaster.comAdapter =
-                ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), systemMasterName, domainId, false);
+            systemMaster.participant =
+                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), systemMasterName, domainId, false);
 
-            systemMaster.systemController = systemMaster.comAdapter->GetSystemController();
-            systemMaster.systemMonitor = systemMaster.comAdapter->GetSystemMonitor();
+            systemMaster.systemController = systemMaster.participant->GetSystemController();
+            systemMaster.systemMonitor = systemMaster.participant->GetSystemMonitor();
 
             systemMaster.systemController->SetRequiredParticipants(syncParticipantNames);
 
@@ -375,7 +375,7 @@ protected:
     {
         asyncParticipantThreads.clear();
         syncParticipantThreads.clear();
-        systemMaster.comAdapter.reset();
+        systemMaster.participant.reset();
         registry.reset();
     }
 

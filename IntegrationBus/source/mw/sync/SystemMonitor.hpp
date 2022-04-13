@@ -8,7 +8,7 @@
 #include "ib/mw/sync/ISystemMonitor.hpp"
 
 #include "IIbToSystemMonitor.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
 
 namespace ib {
@@ -28,7 +28,7 @@ public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     SystemMonitor() = default;
-    SystemMonitor(IComAdapterInternal* comAdapter);
+    SystemMonitor(IParticipantInternal* participant);
     SystemMonitor(const SystemMonitor& other) = default;
     SystemMonitor(SystemMonitor&& other) = default;
     SystemMonitor& operator=(const SystemMonitor& other) = default;
@@ -80,7 +80,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    IComAdapterInternal* _comAdapter{nullptr};
+    IParticipantInternal* _participant{nullptr};
     mw::ServiceDescriptor _serviceDescriptor{};
     logging::ILogger* _logger{nullptr};
 

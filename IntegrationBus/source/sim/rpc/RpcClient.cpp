@@ -4,7 +4,7 @@
 
 #include "RpcClient.hpp"
 #include "IServiceDiscovery.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "RpcDatatypeUtils.hpp"
 #include "UuidRandom.hpp"
 
@@ -12,7 +12,7 @@ namespace ib {
 namespace sim {
 namespace rpc {
 
-RpcClient::RpcClient(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+RpcClient::RpcClient(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
                      const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
                      const std::map<std::string, std::string>& labels, const std::string& clientUUID,
                      CallReturnHandler handler)
@@ -21,9 +21,9 @@ RpcClient::RpcClient(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvide
     , _labels{labels}
     , _clientUUID{clientUUID}
     , _handler{std::move(handler)}
-    , _logger{comAdapter->GetLogger()}
+    , _logger{participant->GetLogger()}
     , _timeProvider{timeProvider} 
-    , _comAdapter{comAdapter}
+    , _participant{participant}
 {
 }
 
@@ -31,7 +31,7 @@ RpcClient::RpcClient(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvide
 void RpcClient::RegisterServiceDiscovery()
 {
     // The RpcClient discovers RpcServersInternal and is ready to detach calls afterwards
-    _comAdapter->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
+    _participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
         [this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType,
                const ib::mw::ServiceDescriptor& serviceDescriptor) {
 
@@ -83,7 +83,7 @@ IRpcCallHandle* RpcClient::Call(std::vector<uint8_t> data)
         auto* callHandlePtr = callHandle.get();
         _detachedCallHandles[to_string(callUUID)] = std::make_pair(_numCounterparts, std::move(callHandle));
         FunctionCall msg{std::move(callUUID), std::move(data)};
-        _comAdapter->SendIbMessage(this, std::move(msg));
+        _participant->SendIbMessage(this, std::move(msg));
 
         return callHandlePtr;
     }

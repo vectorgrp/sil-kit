@@ -32,7 +32,7 @@ add_vib_test(TestSimLin
         LinControllerFacadeTest.cpp
     LIBS
         IbSimLin
-        IbMwMockComAdapter
+        IbMwMockParticipant
         IbTracing
         IbMwMockNullConnection
 )

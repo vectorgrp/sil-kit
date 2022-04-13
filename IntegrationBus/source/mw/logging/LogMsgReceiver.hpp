@@ -4,7 +4,7 @@
 
 #include "Logger.hpp"
 
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "IIbToLogMsgReceiver.hpp"
 #include "IIbServiceEndpoint.hpp"
 
@@ -19,7 +19,7 @@ class LogMsgReceiver
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    LogMsgReceiver(IComAdapterInternal* comAdapter, Logger* logger);
+    LogMsgReceiver(IParticipantInternal* participant, Logger* logger);
 
 public:
     void ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const LogMsg& msg) override;
@@ -32,7 +32,7 @@ public:
 private:
     // ----------------------------------------
     // private members
-    IComAdapterInternal* _comAdapter{nullptr};
+    IParticipantInternal* _participant{nullptr};
     mw::ServiceDescriptor _serviceDescriptor{};
     
     logging::Logger* _logger;

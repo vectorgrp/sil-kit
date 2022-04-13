@@ -8,12 +8,12 @@ namespace ib {
 namespace sim {
 namespace fr {
 
-FrControllerFacade::FrControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::FlexRayController config,
+FrControllerFacade::FrControllerFacade(mw::IParticipantInternal* participant, cfg::FlexRayController config,
                                        mw::sync::ITimeProvider* /*timeProvider*/)
-    : _comAdapter{comAdapter}
+    : _participant{participant}
     , _config{config}
 {
-    _frControllerProxy = std::make_unique<FrControllerProxy>(comAdapter, config, this);
+    _frControllerProxy = std::make_unique<FrControllerProxy>(participant, config, this);
     _currentController = _frControllerProxy.get();
 }
 
@@ -178,7 +178,7 @@ void FrControllerFacade::SetServiceDescriptor(const mw::ServiceDescriptor& servi
     _serviceDescriptor = serviceDescriptor;
     _frControllerProxy->SetServiceDescriptor(serviceDescriptor);
 
-    mw::service::IServiceDiscovery* disc = _comAdapter->GetServiceDiscovery();
+    mw::service::IServiceDiscovery* disc = _participant->GetServiceDiscovery();
     disc->RegisterServiceDiscoveryHandler(
         [this, serviceDescriptor](mw::service::ServiceDiscoveryEvent::Type discoveryType,
                                   const mw::ServiceDescriptor& remoteServiceDescriptor) {

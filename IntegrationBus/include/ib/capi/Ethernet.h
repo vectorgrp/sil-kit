@@ -104,15 +104,15 @@ typedef void (*ib_Ethernet_BitRateChangedHandler_t)(void* context, ib_Ethernet_C
 * \result A return code identifying the success/failure of the call.
 * ! \note The object returned must not be deallocated using free()!
 * 
-* \see ib::mw::IComAdapter::CreateEthController
+* \see ib::mw::IParticipant::CreateEthController
 */
 IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_Create(
   ib_Ethernet_Controller** outController,
-  ib_SimulationParticipant* participant, const char* name, const char* network);
+  ib_Participant* participant, const char* name, const char* network);
 
 typedef ib_ReturnCode(*ib_Ethernet_Controller_Create_t)(
   ib_Ethernet_Controller** outController,
-  ib_SimulationParticipant* participant, 
+  ib_Participant* participant, 
   const char* name,
   const char* network);
 

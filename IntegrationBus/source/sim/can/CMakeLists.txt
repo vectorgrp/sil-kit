@@ -31,7 +31,7 @@ add_vib_test(TestSimCanController
         CanControllerFacadeTest.cpp
     LIBS 
         IbSimCan 
-        IbMwMockComAdapter
+        IbMwMockParticipant
         IbTracing
         IbMwMockNullConnection
 )

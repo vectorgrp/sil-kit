@@ -6,19 +6,19 @@ namespace ib {
 namespace mw {
 namespace logging {
 
-LogMsgSender::LogMsgSender(IComAdapterInternal* comAdapter)
-    : _comAdapter{comAdapter}
+LogMsgSender::LogMsgSender(IParticipantInternal* participant)
+    : _participant{participant}
 {
 }
 
 void LogMsgSender::SendLogMsg(const LogMsg& msg)
 {
-    _comAdapter->SendIbMessage(this, msg);
+    _participant->SendIbMessage(this, msg);
 }
 
 void LogMsgSender::SendLogMsg(LogMsg&& msg)
 {
-    _comAdapter->SendIbMessage(this, std::move(msg));
+    _participant->SendIbMessage(this, std::move(msg));
 }
 
 } // namespace logging

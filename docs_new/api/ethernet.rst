@@ -186,7 +186,7 @@ The trace sink type has to be specified as "PcapPipe" in the configuration:
     
 
 The VIB process responsible for the Ethernet Controller "ETH0" will open the
-specified named pipe "EthernetPipe" during start up of the ComAdapter.
+specified named pipe "EthernetPipe" during start up of the Participant.
 When the IntegrationBus writes the first message to the pipe, the VIB process will be blocked
 until another process connects to the named pipe and reads the traced ethernet
 messages from the pipe.

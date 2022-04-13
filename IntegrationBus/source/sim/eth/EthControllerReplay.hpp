@@ -20,10 +20,10 @@ class EthControllerReplay
 public:
     // Constructors 
     EthControllerReplay() = delete;
-    EthControllerReplay(mw::IComAdapterInternal* comAdapter, cfg::EthernetController config,
+    EthControllerReplay(mw::IParticipantInternal* participant, cfg::EthernetController config,
                         mw::sync::ITimeProvider* timeProvider)
         : _replayConfig{ config.replay }
-        , _controller{ comAdapter, config, timeProvider }
+        , _controller{ participant, config, timeProvider }
     {
 
     }

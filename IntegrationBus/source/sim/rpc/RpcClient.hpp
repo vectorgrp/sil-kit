@@ -13,7 +13,7 @@
 #include "ib/mw/sync/ITimeConsumer.hpp"
 
 #include "IIbToRpcClient.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "RpcCallHandle.hpp"
 
 namespace ib {
@@ -28,7 +28,7 @@ class RpcClient
 
 {
 public:
-    RpcClient(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+    RpcClient(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
               const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
               const std::map<std::string, std::string>& labels, const std::string& clientUUID,
               CallReturnHandler handler);
@@ -64,7 +64,7 @@ private:
     std::map<std::string, std::pair<uint32_t, std::unique_ptr<CallHandleImpl>>> _detachedCallHandles;
     mw::logging::ILogger* _logger;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
-    mw::IComAdapterInternal* _comAdapter{nullptr};
+    mw::IParticipantInternal* _participant{nullptr};
 };
 
 // ================================================================================

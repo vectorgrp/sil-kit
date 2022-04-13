@@ -1,12 +1,12 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "NullConnectionComAdapter.hpp"
-#include "CreateComAdapter.hpp"
+#include "NullConnectionParticipant.hpp"
+#include "CreateParticipant.hpp"
 
 #include "ib/mw/logging/ILogger.hpp"
 
-#include "ComAdapter.hpp"
-#include "ComAdapter_impl.hpp"
+#include "Participant.hpp"
+#include "Participant_impl.hpp"
 
 namespace ib {
 namespace mw {
@@ -41,12 +41,12 @@ struct NullConnection
 };
 } // anonymous namespace
     
-auto CreateNullConnectionComAdapterImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+auto CreateNullConnectionParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
                                         const std::string& participantName, bool isSynchronized)
-    -> std::unique_ptr<IComAdapterInternal>
+    -> std::unique_ptr<IParticipantInternal>
 {
     auto&& cfg = ib::mw::ValidateAndSanitizeConfig(participantConfig, participantName);
-    return std::make_unique<ComAdapter<NullConnection>>(std::move(cfg), participantName, isSynchronized);
+    return std::make_unique<Participant<NullConnection>>(std::move(cfg), participantName, isSynchronized);
 }
 
 } // namespace mw

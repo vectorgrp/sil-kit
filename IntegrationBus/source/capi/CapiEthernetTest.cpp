@@ -4,11 +4,11 @@
 #include "ib/capi/IntegrationBus.h"
 #include "ib/sim/eth/all.hpp"
 #include "EthDatatypeUtils.hpp"
-#include "MockComAdapter.hpp"
+#include "MockParticipant.hpp"
 
 namespace {
 using namespace ib::sim::eth;
-using ib::mw::test::DummyComAdapter;
+using ib::mw::test::DummyParticipant;
 
 MATCHER_P(EthFrameMatcher, controlFrame, "") 
 {
@@ -64,7 +64,7 @@ void BitRateChangedHandler(void* /*context*/, ib_Ethernet_Controller* /*controll
 {
 }
 
-    class MockComAdapter : public DummyComAdapter
+    class MockParticipant : public DummyParticipant
 {
 public:
     MOCK_METHOD2(CreateEthController, ib::sim::eth::IEthController*(const std::string& /*canonicalName*/,
@@ -78,10 +78,10 @@ TEST_F(CapiEthernetTest, ethernet_controller_function_mapping)
 
     ib_ReturnCode returnCode;
 
-    MockComAdapter mockComAdapter;
-    EXPECT_CALL(mockComAdapter, CreateEthController("ControllerName", "NetworkName")).Times(testing::Exactly(1));
+    MockParticipant mockParticipant;
+    EXPECT_CALL(mockParticipant, CreateEthController("ControllerName", "NetworkName")).Times(testing::Exactly(1));
     ib_Ethernet_Controller* testParam;
-    returnCode = ib_Ethernet_Controller_Create(&testParam, (ib_SimulationParticipant*)&mockComAdapter, "ControllerName",
+    returnCode = ib_Ethernet_Controller_Create(&testParam, (ib_Participant*)&mockParticipant, "ControllerName",
                                           "NetworkName");
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 

@@ -45,7 +45,7 @@ public:
 
     void ShutdownInfrastructure()
     {
-        _systemMaster.comAdapter.reset();
+        _systemMaster.participant.reset();
         _registry.reset();
     }
 
@@ -59,11 +59,11 @@ private:
 
     void RunSystemMaster(uint32_t domainId, const std::vector<std::string>& requiredParticipantNames)
     {
-        _systemMaster.comAdapter =
-            ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), "SystemMaster", domainId, false);
+        _systemMaster.participant =
+            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "SystemMaster", domainId, false);
 
-        _systemMaster.systemController = _systemMaster.comAdapter->GetSystemController();
-        _systemMaster.systemMonitor = _systemMaster.comAdapter->GetSystemMonitor();
+        _systemMaster.systemController = _systemMaster.participant->GetSystemController();
+        _systemMaster.systemMonitor = _systemMaster.participant->GetSystemMonitor();
         _systemMaster.systemController->SetRequiredParticipants(requiredParticipantNames);
 
         _systemMaster.systemMonitor->RegisterSystemStateHandler([this, requiredParticipantNames](SystemState newState) {
@@ -95,7 +95,7 @@ private:
 
     struct SystemMaster
     {
-        std::unique_ptr<IComAdapter> comAdapter;
+        std::unique_ptr<IParticipant> participant;
         ISystemController* systemController;
         ISystemMonitor* systemMonitor;
     };

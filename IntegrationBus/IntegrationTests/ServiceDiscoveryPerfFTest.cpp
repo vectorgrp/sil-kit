@@ -38,7 +38,7 @@ protected:
         auto domainId = static_cast<uint32_t>(GetTestPid());
 
         ib::test::SimTestHarness testHarness(syncParticipantNames, domainId, true);
-        auto&& publisher = testHarness.GetParticipant("Publisher")->ComAdapter();
+        auto&& publisher = testHarness.GetParticipant("Publisher")->Participant();
         
         for (auto i = 0; i < numberOfServices; i++)
         {
@@ -54,7 +54,7 @@ protected:
     
         auto makeSubscriber = [&](auto subscriberName)
         {
-            auto&& subscriber = testHarness.GetParticipant(subscriberName)->ComAdapter();
+            auto&& subscriber = testHarness.GetParticipant(subscriberName)->Participant();
 
             for (auto i = 0; i < numberOfServices; i++)
             {

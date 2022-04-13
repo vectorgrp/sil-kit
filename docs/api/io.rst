@@ -38,10 +38,10 @@ the timing information if desired.
 Using the IO Service API
 -----------------------------
 IO Ports can be created directly on an instance of an 
-:cpp:class:`IComAdapter<ib::mw::IComAdapter>` interface::
+:cpp:class:`IParticipant<ib::mw::IParticipant>` interface::
 
-   auto* dioOut = comAdapter->CreateDigitalOut("DIO");
-   auto* dioIn = comAdapter->CreateDigitalIn("DIO");
+   auto* dioOut = participant->CreateDigitalOut("DIO");
+   auto* dioIn = participant->CreateDigitalIn("DIO");
 
 Ports are connected by giving them the same, canonical name when creating corresponding In- and OutPorts.
 
@@ -55,7 +55,7 @@ invoked on the OutPort::
 In this example, the IDigitalOutPort takes a boolean value of true.
 The port's value and timestamp are combined into an
 :cpp:class:`IO message<template\<typename ValueT>ib::sim::io::IoMessage>` which is then transmitted
-through the connected :cpp:class:`IComAdapter<ib::mw::IComAdapter>`.
+through the connected :cpp:class:`IParticipant<ib::mw::IParticipant>`.
 
 .. admonition:: Note
 

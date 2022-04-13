@@ -78,10 +78,10 @@ typedef uint64_t ib_NanosecondsTime; //!< Simulation time
 * \param cDomainId ID of the domain/simulation to join
 *
 */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Create(ib_SimulationParticipant** outParticipant, 
+IntegrationBusAPI ib_ReturnCode ib_Participant_Create(ib_Participant** outParticipant, 
     const char* cJsonConfig, const char* cParticipantName, const char* cDomainId, ib_Bool isSynchronized);
 
-typedef ib_ReturnCode (*ib_SimulationParticipant_Create_t)(ib_SimulationParticipant** outParticipant, 
+typedef ib_ReturnCode (*ib_Participant_Create_t)(ib_Participant** outParticipant, 
     const char* cJsonConfig, const char* cParticipantName, const char* cDomainId, ib_Bool isSynchronized);
     
 /*! \brief Destroy a simulation participant and its associated simulation elements.
@@ -91,17 +91,17 @@ typedef ib_ReturnCode (*ib_SimulationParticipant_Create_t)(ib_SimulationParticip
 * \param participant The simulation participant to be destroyed.
 *
 */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Destroy(ib_SimulationParticipant* participant);
+IntegrationBusAPI ib_ReturnCode ib_Participant_Destroy(ib_Participant* participant);
 
-typedef ib_ReturnCode (*ib_SimulationParticipant_Destroy_t)(ib_SimulationParticipant* participant);
+typedef ib_ReturnCode (*ib_Participant_Destroy_t)(ib_Participant* participant);
 
 /*! \brief  The handler to be called on initialization
  *
- * \param context The user provided context passed in \ref ib_SimulationParticipant_SetInitHandler
+ * \param context The user provided context passed in \ref ib_Participant_SetInitHandler
  * \param participant The simulation participant receiving the (re-)initialization command
  * \param command The \ref ib_ParticipantCommand that triggered the initialization
  */
-typedef void (*ib_ParticipantInitHandler_t)(void* context, ib_SimulationParticipant* participant,
+typedef void (*ib_ParticipantInitHandler_t)(void* context, ib_Participant* participant,
     ib_ParticipantCommand* command);
 /*! \brief Register a callback to perform initialization
  *
@@ -116,18 +116,18 @@ typedef void (*ib_ParticipantInitHandler_t)(void* context, ib_SimulationParticip
  * \param context A user provided context accessible in the handler
  * \param handler The handler to be called on initialization
  */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetInitHandler(ib_SimulationParticipant* participant,
+IntegrationBusAPI ib_ReturnCode ib_Participant_SetInitHandler(ib_Participant* participant,
     void* context, ib_ParticipantInitHandler_t handler);
 
-typedef ib_ReturnCode(*ib_SimulationParticipant_SetInitHandler_t)(ib_SimulationParticipant* participant,
+typedef ib_ReturnCode(*ib_Participant_SetInitHandler_t)(ib_Participant* participant,
     void* context, ib_ParticipantInitHandler_t handler);
 
 /*! \brief The handler to be called on a simulation stop
  *
- * \param context The user provided context passed in \ref ib_SimulationParticipant_SetStopHandler
+ * \param context The user provided context passed in \ref ib_Participant_SetStopHandler
  * \param participant The simulation participant receiving the stop command
  */
-typedef void (*ib_ParticipantStopHandler_t)(void* context, ib_SimulationParticipant* participant);
+typedef void (*ib_ParticipantStopHandler_t)(void* context, ib_Participant* participant);
 /*! \brief Register a callback that is executed on simulation stop
  *
  * The handler is called when a \ref SystemCommand::Kind::Stop has been
@@ -140,18 +140,18 @@ typedef void (*ib_ParticipantStopHandler_t)(void* context, ib_SimulationParticip
  * \param context A user provided context accessible in the handler
  * \param handler The handler to be called
  */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetStopHandler(ib_SimulationParticipant* participant,
+IntegrationBusAPI ib_ReturnCode ib_Participant_SetStopHandler(ib_Participant* participant,
     void* context, ib_ParticipantStopHandler_t handler);
 
-typedef ib_ReturnCode(*ib_SimulationParticipant_SetStopHandler_t)(ib_SimulationParticipant* participant,
+typedef ib_ReturnCode(*ib_Participant_SetStopHandler_t)(ib_Participant* participant,
     void* context, ib_ParticipantStopHandler_t handler);
 
 /*! \brief The handler to be called on a simulation shutdown
  *
- * \param context The user provided context passed in \ref ib_SimulationParticipant_SetShutdownHandler
+ * \param context The user provided context passed in \ref ib_Participant_SetShutdownHandler
  * \param participant The simulation participant receiving the shutdown command
  */
-typedef void (*ib_ParticipantShutdownHandler_t)(void* context, ib_SimulationParticipant* participant);
+typedef void (*ib_ParticipantShutdownHandler_t)(void* context, ib_Participant* participant);
 /*! \brief Register a callback that is executed on simulation shutdown.
  *
  * The handler is called when the \ref SystemCommand::Kind::Shutdown
@@ -164,10 +164,10 @@ typedef void (*ib_ParticipantShutdownHandler_t)(void* context, ib_SimulationPart
  * \param context A user provided context accessible in the handler
  * \param handler The handler to be called
  */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetShutdownHandler(ib_SimulationParticipant* participant,
+IntegrationBusAPI ib_ReturnCode ib_Participant_SetShutdownHandler(ib_Participant* participant,
     void* context, ib_ParticipantShutdownHandler_t handler);
 
-typedef ib_ReturnCode(*ib_SimulationParticipant_SetShutdownHandler_t)(ib_SimulationParticipant* participant,
+typedef ib_ReturnCode(*ib_Participant_SetShutdownHandler_t)(ib_Participant* participant,
     void* context, ib_ParticipantShutdownHandler_t handler);
 
 
@@ -180,11 +180,11 @@ typedef ib_ReturnCode(*ib_SimulationParticipant_SetShutdownHandler_t)(ib_Simulat
  * \param outParticipantState Pointer for storing the final participant state (out parameter)
  * 
  */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Run(
-    ib_SimulationParticipant* participant, ib_ParticipantState* outParticipantState);
+IntegrationBusAPI ib_ReturnCode ib_Participant_Run(
+    ib_Participant* participant, ib_ParticipantState* outParticipantState);
 
-typedef ib_ReturnCode (*ib_SimulationParticipant_Run_t)(
-    ib_SimulationParticipant* participant, ib_ParticipantState* outParticipantState);
+typedef ib_ReturnCode (*ib_Participant_Run_t)(
+    ib_Participant* participant, ib_ParticipantState* outParticipantState);
 
 /*! \brief Start the non blocking run operation, returns immediately
  *
@@ -198,25 +198,25 @@ typedef ib_ReturnCode (*ib_SimulationParticipant_Run_t)(
  *
  * \param participant The simulation participant to start running
  */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_RunAsync(ib_SimulationParticipant* participant);
+IntegrationBusAPI ib_ReturnCode ib_Participant_RunAsync(ib_Participant* participant);
 
-typedef ib_ReturnCode (*ib_SimulationParticipant_RunAsync_t)(ib_SimulationParticipant* participant);
+typedef ib_ReturnCode (*ib_Participant_RunAsync_t)(ib_Participant* participant);
 
 /*! \brief Wait for to asynchronous run operation to complete and return the final participant state
  *
  * Blocks until the simulation is shutdown. Prior to this method,
- * \ref ib_SimulationParticipant_RunAsync has to be called.
+ * \ref ib_Participant_RunAsync has to be called.
  *
  * \param participant The simulation participant to wait for completing the asynchronous run operation
  * \param outParticipantState Pointer for storing the final participant state (out parameter)
  */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_WaitForRunAsyncToComplete(
-    ib_SimulationParticipant* participant, ib_ParticipantState* outParticipantState);
+IntegrationBusAPI ib_ReturnCode ib_Participant_WaitForRunAsyncToComplete(
+    ib_Participant* participant, ib_ParticipantState* outParticipantState);
 
-typedef ib_ReturnCode (*ib_SimulationParticipant_WaitForRunAsyncToComplete_t)(
-    ib_SimulationParticipant* participant, ib_ParticipantState* outParticipantState);
+typedef ib_ReturnCode (*ib_Participant_WaitForRunAsyncToComplete_t)(
+    ib_Participant* participant, ib_ParticipantState* outParticipantState);
 
-typedef ib_ReturnCode (*ib_SimulationParticipant_SetPeriod_t)(ib_SimulationParticipant* participant,
+typedef ib_ReturnCode (*ib_Participant_SetPeriod_t)(ib_Participant* participant,
                                                               ib_NanosecondsTime period);
 /*! \brief Set the simulation duration to be requested
  *
@@ -225,16 +225,16 @@ typedef ib_ReturnCode (*ib_SimulationParticipant_SetPeriod_t)(ib_SimulationParti
  * \param participant The simulation participant
  * \param period The cycle time of the simulation task
  */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetPeriod(ib_SimulationParticipant* participant,
+IntegrationBusAPI ib_ReturnCode ib_Participant_SetPeriod(ib_Participant* participant,
                                                                     ib_NanosecondsTime        period);
 
 /*! \brief The handler to be called if the simulation task is due
  *
- * \param context The user provided context passed in \ref ib_SimulationParticipant_RunAsync
+ * \param context The user provided context passed in \ref ib_Participant_RunAsync
  * \param participant The simulation participant
  * \param now The current simulation time
  */
-typedef void (*ib_ParticipantSimulationTaskHandler_t)(void* context, ib_SimulationParticipant* participant,
+typedef void (*ib_ParticipantSimulationTaskHandler_t)(void* context, ib_Participant* participant,
                                                    ib_NanosecondsTime now);
 /*! \brief Set the task to be executed with each grant / tick
  *
@@ -244,10 +244,10 @@ typedef void (*ib_ParticipantSimulationTaskHandler_t)(void* context, ib_Simulati
  * \param context A user provided context accessible in the handler
  * \param handler The handler to be called if the simulation task is due
  */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetSimulationTask(ib_SimulationParticipant* participant,
+IntegrationBusAPI ib_ReturnCode ib_Participant_SetSimulationTask(ib_Participant* participant,
     void* context, ib_ParticipantSimulationTaskHandler_t handler);
 
-typedef ib_ReturnCode(*ib_SimulationParticipant_SetSimulationTask_t)(ib_SimulationParticipant* participant,
+typedef ib_ReturnCode(*ib_Participant_SetSimulationTask_t)(ib_Participant* participant,
     void* context, ib_ParticipantSimulationTaskHandler_t handler);
 
 /*! \brief Set the task to be executed with each grant / tick
@@ -257,7 +257,7 @@ typedef ib_ReturnCode(*ib_SimulationParticipant_SetSimulationTask_t)(ib_Simulati
  * The difference to SetSimulationTask is, that after execution of the simulation task
  * the advance in simulation time will NOT be signaled to other participants.
  * Progress in simulation time (including all other participants) will cease.
- * Instead, ib_SimulationParticipant_CompleteSimulationTask must be called
+ * Instead, ib_Participant_CompleteSimulationTask must be called
  * FROM ANY OTHER THREAD to 'unlock' the thread executing the simulation task, and let it execute again.
  * Thus, a fine grained control over the whole simulation time progress can be achieved
  * by calling CompleteSimulationTask from an application thread.
@@ -267,19 +267,19 @@ typedef ib_ReturnCode(*ib_SimulationParticipant_SetSimulationTask_t)(ib_Simulati
  * \param context A user provided context accessible in the handler
  * \param handler The handler to be called if the simulation task is due
  */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetSimulationTaskAsync(ib_SimulationParticipant* participant,
+IntegrationBusAPI ib_ReturnCode ib_Participant_SetSimulationTaskAsync(ib_Participant* participant,
     void* context, ib_ParticipantSimulationTaskHandler_t handler);
 
-typedef ib_ReturnCode(*ib_SimulationParticipant_SetSimulationTaskNonBlocking_t)(ib_SimulationParticipant* participant,
+typedef ib_ReturnCode(*ib_Participant_SetSimulationTaskNonBlocking_t)(ib_Participant* participant,
     void* context, ib_ParticipantSimulationTaskHandler_t handler);
 
 /*! \brief Complete the current step of a non-blocking simulation task.
  *
  * \param participant The simulation participant
  */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_CompleteSimulationTask(ib_SimulationParticipant* participant);
+IntegrationBusAPI ib_ReturnCode ib_Participant_CompleteSimulationTask(ib_Participant* participant);
 
-typedef ib_ReturnCode(*ib_SimulationParticipant_CompleteSimulationTask_t)(ib_SimulationParticipant* participant);
+typedef ib_ReturnCode(*ib_Participant_CompleteSimulationTask_t)(ib_Participant* participant);
 
 /*! \brief Send \ref the Initialize command to a specific participant
   *
@@ -289,7 +289,7 @@ typedef ib_ReturnCode(*ib_SimulationParticipant_CompleteSimulationTask_t)(ib_Sim
   *
   *  NB: Parametrization is yet to be determined.
   */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Initialize(ib_SimulationParticipant* participant, const char* participantName);
+IntegrationBusAPI ib_ReturnCode ib_Participant_Initialize(ib_Participant* participant, const char* participantName);
 
 /*! \brief Send \ref the ReInitialize command to a specific participant
   *
@@ -304,19 +304,19 @@ IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Initialize(ib_Simulatio
   *     a SystemCommand to ReInitialize all participants without sending
   *     new parameters.
   */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_ReInitialize(ib_SimulationParticipant* participant, const char* participantName);
+IntegrationBusAPI ib_ReturnCode ib_Participant_ReInitialize(ib_Participant* participant, const char* participantName);
 
 /*! \brief Send \ref the Run command to all participants
   *
   *  The command is only allowed if system is in state ib_SystemState_Initialized.
   */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_RunSimulation(ib_SimulationParticipant* participant);
+IntegrationBusAPI ib_ReturnCode ib_Participant_RunSimulation(ib_Participant* participant);
 
 /*! \brief Send \ref the Stop command to all participants
   *
   *  The command is only allowed if system is in ib_SystemState_Running.
   */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_StopSimulation(ib_SimulationParticipant* participant);
+IntegrationBusAPI ib_ReturnCode ib_Participant_StopSimulation(ib_Participant* participant);
 
 /*! \brief Pause execution of the participant
   *
@@ -328,21 +328,21 @@ IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_StopSimulation(ib_Simul
   *
   * Precondition: State() == \ref ib_ParticipantState_Running
   */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Pause(ib_SimulationParticipant* participant, const char* reason);
+IntegrationBusAPI ib_ReturnCode ib_Participant_Pause(ib_Participant* participant, const char* reason);
 
 /*! \brief Switch back to \ref ib_ParticipantState_Running
   * after having paused.
   *
   * Precondition: State() == \ref ib_ParticipantState_Paused
   */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Continue(ib_SimulationParticipant* participant);
+IntegrationBusAPI ib_ReturnCode ib_Participant_Continue(ib_Participant* participant);
 
 /*! \brief Send \ref the Shutdown command to all participants
   *
   *  The command is only allowed if system is in
   *  ib_SystemState_Stopped or ib_SystemState_Error.
   */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Shutdown(ib_SimulationParticipant* participant);
+IntegrationBusAPI ib_ReturnCode ib_Participant_Shutdown(ib_Participant* participant);
 
 /*! \brief Send \ref the PrepareColdswap command to all participants
 *
@@ -354,7 +354,7 @@ IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_Shutdown(ib_SimulationP
 *  The command is only allowed if system is in
 *  ib_SystemState_Stopped or ib_SystemState_Error.
 */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_PrepareColdswap(ib_SimulationParticipant* participant);
+IntegrationBusAPI ib_ReturnCode ib_Participant_PrepareColdswap(ib_Participant* participant);
 
 /*! \brief Send \ref the ExecuteColdswap command to all participants
 *
@@ -365,17 +365,17 @@ IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_PrepareColdswap(ib_Simu
 *
 *  The command is only allowed if system is in ib_SystemState_ColdswapReady
 */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_ExecuteColdswap(ib_SimulationParticipant* participant);
+IntegrationBusAPI ib_ReturnCode ib_Participant_ExecuteColdswap(ib_Participant* participant);
 
 /*! \brief Get the current participant state of the participant given by participantName
   */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_GetParticipantState(ib_ParticipantState* outParticipantState,
-  ib_SimulationParticipant* participant, const char* participantName);
+IntegrationBusAPI ib_ReturnCode ib_Participant_GetParticipantState(ib_ParticipantState* outParticipantState,
+  ib_Participant* participant, const char* participantName);
 
 //! \brief Get the current ::SystemState
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_GetSystemState(ib_SystemState* outSystemState, ib_SimulationParticipant* participant);
+IntegrationBusAPI ib_ReturnCode ib_Participant_GetSystemState(ib_SystemState* outSystemState, ib_Participant* participant);
 
-typedef void (*ib_SystemStateHandler_t)(void* context, ib_SimulationParticipant* participant,
+typedef void (*ib_SystemStateHandler_t)(void* context, ib_Participant* participant,
     ib_SystemState state);
 
 /*! \brief Register a callback for ::SystemState changes
@@ -383,10 +383,10 @@ typedef void (*ib_SystemStateHandler_t)(void* context, ib_SimulationParticipant*
   * If the current SystemState is not \ref ib_SystemState_Invalid,
   * the handler will be called immediately.
   */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_RegisterSystemStateHandler(ib_SimulationParticipant* participant,
+IntegrationBusAPI ib_ReturnCode ib_Participant_RegisterSystemStateHandler(ib_Participant* participant,
   void* context, ib_SystemStateHandler_t handler);
 
-typedef void (*ib_ParticipantStateHandler_t)(void* context, ib_SimulationParticipant* participant,
+typedef void (*ib_ParticipantStateHandler_t)(void* context, ib_Participant* participant,
     const char* participantName, ib_ParticipantState state);
 
 /*! \brief Register a callback for ::ParticipantState changes
@@ -395,7 +395,7 @@ typedef void (*ib_ParticipantStateHandler_t)(void* context, ib_SimulationPartici
   * not in \ref ib_ParticipantState_Invalid.
   *
   */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_RegisterParticipantStateHandler(ib_SimulationParticipant* participant,
+IntegrationBusAPI ib_ReturnCode ib_Participant_RegisterParticipantStateHandler(ib_Participant* participant,
   void* context, ib_ParticipantStateHandler_t handler);
 
 
@@ -408,8 +408,8 @@ IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_RegisterParticipantStat
   *
   * \param requiredParticipantNames The list of required participant names
   */
-IntegrationBusAPI ib_ReturnCode ib_SimulationParticipant_SetRequiredParticipants(
-    ib_SimulationParticipant* participant, const ib_StringList* requiredParticipantNames);
+IntegrationBusAPI ib_ReturnCode ib_Participant_SetRequiredParticipants(
+    ib_Participant* participant, const ib_StringList* requiredParticipantNames);
 
 IB_END_DECLS
 

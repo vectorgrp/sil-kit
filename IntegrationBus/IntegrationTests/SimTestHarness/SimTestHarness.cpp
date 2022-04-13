@@ -29,9 +29,9 @@ const std::string& SimParticipant::Name() const
     return _name;
 }
 
-ib::mw::IComAdapter* SimParticipant::ComAdapter() const
+ib::mw::IParticipant* SimParticipant::Participant() const
 {
-    return _comAdapter.get();
+    return _participant.get();
 }
 
 std::future<ib::mw::sync::ParticipantState>& SimParticipant::Result()
@@ -41,7 +41,7 @@ std::future<ib::mw::sync::ParticipantState>& SimParticipant::Result()
 
 void SimParticipant::Stop()
 {
-    ComAdapter()->GetSystemController()->Stop();
+    Participant()->GetSystemController()->Stop();
 }
 
 
@@ -54,12 +54,12 @@ public:
     SimSystemController() = delete;
     SimSystemController(const std::vector<std::string>& syncParticipantNames, uint32_t domainId) : _syncParticipantNames{syncParticipantNames}
     {
-        _comAdapter =
-            ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), "SystemController", domainId, false);
+        _participant =
+            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "SystemController", domainId, false);
 
-        _controller = _comAdapter->GetSystemController();
+        _controller = _participant->GetSystemController();
         _controller->SetRequiredParticipants(_syncParticipantNames);
-        _monitor = _comAdapter->GetSystemMonitor();
+        _monitor = _participant->GetSystemMonitor();
         _monitor->RegisterSystemStateHandler(
             std::bind(&SimSystemController::OnSystemStateChanged, this, std::placeholders::_1)
         );
@@ -71,7 +71,7 @@ public:
     ~SimSystemController()
     {
         _isShuttingDown = true;
-        _comAdapter.reset();
+        _participant.reset();
     }
 
     void InitializeAll()
@@ -129,7 +129,7 @@ private:
     std::vector<std::string> _syncParticipantNames;
     std::map<std::string, ib::mw::sync::ParticipantState> _participantStates; //for printing status updates
     std::atomic<bool> _isShuttingDown{false};
-    std::unique_ptr<ib::mw::IComAdapter> _comAdapter;
+    std::unique_ptr<ib::mw::IParticipant> _participant;
 };
 
 ////////////////////////////////////////
@@ -164,7 +164,7 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
     for (auto& kv : _simParticipants)
     {
         auto& participant = kv.second;
-        auto* participantController = participant->ComAdapter()->GetParticipantController();
+        auto* participantController = participant->Participant()->GetParticipantController();
         participant->_result = participantController->RunAsync();
     }
 
@@ -229,17 +229,17 @@ void SimTestHarness::AddParticipant(const std::string& participantName)
     auto participant = std::make_unique<SimParticipant>();
     participant->_name = participantName;
 
-    participant->_comAdapter =
-        ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(), participantName, _domainId, true);
+    participant->_participant =
+        ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participantName, _domainId, true);
 
     //    Let's make sure the SystemController is cached, in case the user
     //    needs it during simulation (e.g., calling Stop()).
-    auto* systemCtrl = participant->ComAdapter()->GetSystemController();
+    auto* systemCtrl = participant->Participant()->GetSystemController();
     (void)systemCtrl;
 
     // mandatory sim task for time synced simulation
     // by default, we do no operation during simulation task, the user should override this
-    auto* partCtrl = participant->ComAdapter()->GetParticipantController();
+    auto* partCtrl = participant->Participant()->GetParticipantController();
     partCtrl->SetSimulationTask([name = participant->Name()](auto, auto) {
     });
 

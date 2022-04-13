@@ -11,7 +11,7 @@
 
 #include "ib/util/functional.hpp"
 
-#include "MockComAdapter.hpp"
+#include "MockParticipant.hpp"
 
 #include "EthDatatypeUtils.hpp"
 #include "ParticipantConfiguration.hpp"
@@ -32,7 +32,7 @@ using namespace ib::mw;
 using namespace ib::sim;
 using namespace ib::sim::eth;
 
-using ::ib::mw::test::DummyComAdapter;
+using ::ib::mw::test::DummyParticipant;
 
 
 auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<const EthMessage&>
@@ -40,7 +40,7 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<co
     return testing::Field(&EthMessage::timestamp, timestamp);
 }
 
-class MockComAdapter : public DummyComAdapter
+class MockParticipant : public DummyParticipant
 {
 public:
     void SendIbMessage(const IIbServiceEndpoint* from, EthMessage&& msg) override
@@ -68,8 +68,8 @@ protected:
 
 protected:
     EthernetControllerProxyTest()
-        : proxy(&comAdapter, _config)
-        , proxyFrom(&comAdapter, _config)
+        : proxy(&participant, _config)
+        , proxyFrom(&participant, _config)
     {
         proxy.SetServiceDescriptor(from_endpointAddress(proxyAddress));
 
@@ -86,7 +86,7 @@ protected:
     const EndpointAddress controllerAddress = {7, 8};
     const EndpointAddress otherControllerAddress = { 7, 125 };
 
-    MockComAdapter comAdapter;
+    MockParticipant participant;
     Callbacks callbacks;
 
     ib::cfg::EthernetController _config;
@@ -114,10 +114,10 @@ TEST_F(EthernetControllerProxyTest, keep_track_of_state)
     EthSetMode Activate{ EthMode::Active };
     EthSetMode Deactivate{ EthMode::Inactive };
 
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, Activate))
+    EXPECT_CALL(participant, SendIbMessage(&proxy, Activate))
         .Times(1);
 
-    EXPECT_CALL(comAdapter, SendIbMessage(&proxy, Deactivate))
+    EXPECT_CALL(participant, SendIbMessage(&proxy, Deactivate))
         .Times(1);
 
     proxy.Deactivate();
@@ -133,10 +133,10 @@ TEST_F(EthernetControllerProxyTest, keep_track_of_state)
 TEST_F(EthernetControllerProxyTest, send_eth_message)
 {
     const auto now = 12345ns;
-    EXPECT_CALL(comAdapter, SendIbMessage_proxy(&proxy, AnEthMessageWith(now)))
+    EXPECT_CALL(participant, SendIbMessage_proxy(&proxy, AnEthMessageWith(now)))
         .Times(1);
 
-    EXPECT_CALL(comAdapter.mockTimeProvider.mockTime, Now()).Times(0);
+    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
 
     EthMessage msg{};
     msg.timestamp = now;
@@ -179,7 +179,7 @@ TEST_F(EthernetControllerProxyTest, must_not_generate_ack)
     EthMessage msg;
     msg.transmitId = 17;
 
-    EXPECT_CALL(comAdapter, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const EthTransmitAcknowledge&>()))
+    EXPECT_CALL(participant, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const EthTransmitAcknowledge&>()))
         .Times(0);
 
     proxy.ReceiveIbMessage(&proxyFrom, msg);

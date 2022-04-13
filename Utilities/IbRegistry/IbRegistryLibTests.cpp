@@ -18,7 +18,7 @@
 #include "ib/sim/all.hpp"
 
 #include "GetTestPid.hpp"
-#include "CreateComAdapter.hpp"
+#include "CreateParticipant.hpp"
 #include "Filesystem.hpp"
 
 #include "ParticipantConfiguration.hpp"
@@ -134,12 +134,12 @@ TEST_F(IbRegistryLibFixture, DISABLED_ensure_registry_works)
     //registry->ProvideDomain(domainId);
 
     //auto RunParticipant = [this, domainId](auto name) {
-    //    auto comAdapter = CreateComAdapterImpl(GetConfig(), name);
-    //    comAdapter->joinIbDomain(domainId);
-    //    auto participantController = comAdapter->GetParticipantController();
+    //    auto participant = CreateParticipantImpl(GetConfig(), name);
+    //    participant->joinIbDomain(domainId);
+    //    auto participantController = participant->GetParticipantController();
     //    participantController->SetSimulationTask([](auto /*now*/, auto /*duration*/) {});
     //    participantController->RunAsync();
-    //    return comAdapter;
+    //    return participant;
     //};
 
     //for (auto i = 0; i < numIterations; i++)

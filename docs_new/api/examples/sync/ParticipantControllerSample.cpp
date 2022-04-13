@@ -1,7 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
-auto comAdapter = ib::CreateComAdapter(ibConfig, participantName, domainId);
-auto* participantController = comAdapter->GetParticipantController();
-auto* canController = comAdapter->CreateCanController("CAN1", "CAN1");
+auto participant = ib::CreateParticipant(ibConfig, participantName, domainId);
+auto* participantController = participant->GetParticipantController();
+auto* canController = participant->CreateCanController("CAN1", "CAN1");
 
 canController->RegisterTransmitStatusHandler(
 	[](can::ICanController* /*ctrl*/, const can::CanTransmitAcknowledge& ack) {

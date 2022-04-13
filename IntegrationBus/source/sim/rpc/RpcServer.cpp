@@ -12,16 +12,16 @@ namespace ib {
 namespace sim {
 namespace rpc {
 
-RpcServer::RpcServer(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+RpcServer::RpcServer(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
                      const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
                      const std::map<std::string, std::string>& labels, CallProcessor handler)
     : _functionName{functionName}
     , _exchangeFormat{exchangeFormat}
     , _labels{labels}
     , _handler{std::move(handler)}
-    , _logger{comAdapter->GetLogger()}
+    , _logger{participant->GetLogger()}
     , _timeProvider{timeProvider}
-    , _comAdapter{comAdapter}
+    , _participant{participant}
 {
 
 }
@@ -29,7 +29,7 @@ RpcServer::RpcServer(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvide
 void RpcServer::RegisterServiceDiscovery()
 {
     // RpcServer discovers RpcClient and adds RpcServerInternal on a matching connection
-    _comAdapter->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
+    _participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
         [this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType,
                const ib::mw::ServiceDescriptor& serviceDescriptor) {
             if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated)
@@ -87,7 +87,7 @@ void RpcServer::SubmitResult(IRpcCallHandle* callHandle, std::vector<uint8_t> re
 void RpcServer::AddInternalRpcServer(const std::string& clientUUID, RpcExchangeFormat joinedExchangeFormat,
                                      const std::map<std::string, std::string>& clientLabels)
 {
-    auto internalRpcServer = dynamic_cast<RpcServerInternal*>(_comAdapter->CreateRpcServerInternal(
+    auto internalRpcServer = dynamic_cast<RpcServerInternal*>(_participant->CreateRpcServerInternal(
          _functionName, clientUUID, joinedExchangeFormat, clientLabels, _handler, this));
     _internalRpcServers.push_back(internalRpcServer);
 }

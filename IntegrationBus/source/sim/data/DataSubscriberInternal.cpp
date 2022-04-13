@@ -10,7 +10,7 @@ namespace ib {
 namespace sim {
 namespace data {
 
-DataSubscriberInternal::DataSubscriberInternal(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+DataSubscriberInternal::DataSubscriberInternal(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider, 
                                                const std::string& topic, const std::string& mediaType,
                                                const std::map<std::string, std::string>& labels,
                                                DataHandlerT defaultHandler, IDataSubscriber* parent)
@@ -20,7 +20,7 @@ DataSubscriberInternal::DataSubscriberInternal(mw::IComAdapterInternal* comAdapt
     , _defaultHandler{defaultHandler}
     , _parent{parent}
     , _timeProvider{timeProvider}
-    , _comAdapter{comAdapter}
+    , _participant{participant}
 {
 }
 
@@ -64,7 +64,7 @@ void DataSubscriberInternal::ReceiveMessage(const std::vector<uint8_t>& data)
 
     if (!_defaultHandler && !anySpecificHandlerExecuted)
     {
-        _comAdapter->GetLogger()->Warn("DataSubscriber on topic " + _topic + " received data, but has no default or specific handler assigned");
+        _participant->GetLogger()->Warn("DataSubscriber on topic " + _topic + " received data, but has no default or specific handler assigned");
     }
 }
 

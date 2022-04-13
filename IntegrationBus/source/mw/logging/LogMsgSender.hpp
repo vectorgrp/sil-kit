@@ -4,7 +4,7 @@
 
 
 #include "IIbToLogMsgSender.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
 
 namespace ib {
@@ -18,7 +18,7 @@ class LogMsgSender
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    LogMsgSender(IComAdapterInternal* comAdapter);
+    LogMsgSender(IParticipantInternal* participant);
 
 public:
     void SendLogMsg(const LogMsg& msg);
@@ -35,7 +35,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    IComAdapterInternal* _comAdapter{nullptr};
+    IParticipantInternal* _participant{nullptr};
     mw::ServiceDescriptor _serviceDescriptor{};
 };
 

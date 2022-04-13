@@ -11,7 +11,7 @@ namespace ib {
 namespace sim {
 namespace data {
 
-//! \brief IIbToDataSubscriber interface used by the ComAdapter
+//! \brief IIbToDataSubscriber interface used by the Participant
 class IIbToDataSubscriberInternal
     : public mw::IIbReceiver<DataMessage>
     , public mw::IIbSender<>

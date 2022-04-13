@@ -10,7 +10,7 @@
 #include "ib/mw/fwd_decl.hpp"
 
 #include "IIbToEthControllerProxy.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "ParticipantConfiguration.hpp"
 
 namespace ib {
@@ -34,7 +34,7 @@ public:
     EthControllerProxy() = delete;
     EthControllerProxy(const EthControllerProxy&) = default;
     EthControllerProxy(EthControllerProxy&&) = default;
-    EthControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::EthernetController config, IEthController* facade = nullptr);
+    EthControllerProxy(mw::IParticipantInternal* participant, cfg::EthernetController config, IEthController* facade = nullptr);
 
 public:
     // ----------------------------------------
@@ -92,7 +92,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    mw::IComAdapterInternal* _comAdapter = nullptr;
+    mw::IParticipantInternal* _participant = nullptr;
     ::ib::mw::ServiceDescriptor _serviceDescriptor;
     IEthController* _facade{nullptr};
 

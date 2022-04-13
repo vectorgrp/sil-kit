@@ -9,7 +9,7 @@
 #include "ib/mw/fwd_decl.hpp"
 
 #include "IIbToEthControllerFacade.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 
 #include "EthController.hpp"
 #include "EthControllerProxy.hpp"
@@ -35,7 +35,7 @@ public:
     // Constructors and Destructor
     EthControllerFacade() = delete;
     EthControllerFacade(EthControllerFacade&&) = default;
-    EthControllerFacade(mw::IComAdapterInternal* comAdapter, cfg::EthernetController config,
+    EthControllerFacade(mw::IParticipantInternal* participant, cfg::EthernetController config,
                         mw::sync::ITimeProvider* timeProvider);
 
 public:
@@ -85,7 +85,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    mw::IComAdapterInternal* _comAdapter = nullptr;
+    mw::IParticipantInternal* _participant = nullptr;
     mw::ServiceDescriptor _serviceDescriptor;
     cfg::EthernetController _config;
 

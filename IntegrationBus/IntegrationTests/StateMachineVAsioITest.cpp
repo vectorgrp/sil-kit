@@ -5,7 +5,7 @@
 #include <thread>
 #include <future>
 
-#include "CreateComAdapter.hpp"
+#include "CreateParticipant.hpp"
 #include "VAsioRegistry.hpp"
 
 #include "ib/mw/sync/all.hpp"
@@ -76,23 +76,23 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
     registry->ProvideDomain(domainId);
 
-    // Setup ComAdapter for TestController
-    auto comAdapterController =
-        CreateSimulationParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestController", false);
+    // Setup Participant for TestController
+    auto participant =
+        CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestController", false);
    
-    comAdapterController->joinIbDomain(domainId);
-    auto systemController = comAdapterController->GetSystemController();
+    participant->joinIbDomain(domainId);
+    auto systemController = participant->GetSystemController();
     systemController->SetRequiredParticipants(syncParticipantNames);
-    auto monitor = comAdapterController->GetSystemMonitor();
+    auto monitor = participant->GetSystemMonitor();
     monitor->RegisterParticipantStateHandler([this](ParticipantState state)
     {
         this->ParticipantStateHandler(state);
     });
 
-    // Setup ComAdapter for Test Unit
-    auto comAdapterTestUnit = CreateSimulationParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestUnit", true);
-    comAdapterTestUnit->joinIbDomain(domainId);
-    auto participantController = comAdapterTestUnit->GetParticipantController();
+    // Setup Participant for Test Unit
+    auto participantTestUnit = CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestUnit", true);
+    participantTestUnit->joinIbDomain(domainId);
+    auto participantController = participantTestUnit->GetParticipantController();
 
     participantController->SetInitHandler([&callbacks = callbacks](ParticipantCommand initCommand) {
         callbacks.InitHandler(initCommand.participant, initCommand.kind);

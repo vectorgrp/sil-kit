@@ -11,7 +11,7 @@ namespace ib {
 namespace sim {
 namespace rpc {
 
-//! \brief IIbToRpcServer interface used by the ComAdapter
+//! \brief IIbToRpcServer interface used by the Participant
 class IIbToRpcServerInternal
     : public mw::IIbReceiver<FunctionCall>
     , public mw::IIbSender<FunctionCallResponse>

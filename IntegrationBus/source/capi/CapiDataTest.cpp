@@ -8,11 +8,11 @@
 #include "gmock/gmock.h"
 #include "ib/capi/IntegrationBus.h"
 #include "ib/sim/data/all.hpp"
-#include "MockComAdapter.hpp"
+#include "MockParticipant.hpp"
 
 namespace {
 using namespace ib::sim::data;
-using ib::mw::test::DummyComAdapter;
+using ib::mw::test::DummyParticipant;
 
 MATCHER_P(PayloadMatcher, controlPayload, "")
 {
@@ -47,7 +47,7 @@ public:
                 (override));
 };
 
-class MockComAdapter : public ib::mw::test::DummyComAdapter
+class MockParticipant : public ib::mw::test::DummyParticipant
 {
 public:
     MOCK_METHOD(ib::sim::data::IDataPublisher*, CreateDataPublisher,
@@ -97,7 +97,7 @@ class CapiDataTest : public testing::Test
 public:
     MockDataPublisher mockDataPublisher;
     MockDataSubscriber mockDataSubscriber;
-    MockComAdapter mockSimulationParticipant;
+    MockParticipant mockParticipant;
 
     CapiDataTest()
     {
@@ -138,8 +138,8 @@ TEST_F(CapiDataTest, data_publisher_function_mapping)
     ib_ReturnCode returnCode;
     ib_Data_Publisher* publisher;
 
-    EXPECT_CALL(mockSimulationParticipant, CreateDataPublisher).Times(testing::Exactly(1));
-    returnCode = ib_Data_Publisher_Create(&publisher, (ib_SimulationParticipant*)&mockSimulationParticipant, "topic",
+    EXPECT_CALL(mockParticipant, CreateDataPublisher).Times(testing::Exactly(1));
+    returnCode = ib_Data_Publisher_Create(&publisher, (ib_Participant*)&mockParticipant, "topic",
                                           mediaType, labelList, 0);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
@@ -155,8 +155,8 @@ TEST_F(CapiDataTest, data_subscriber_function_mapping)
 
     ib_Data_Subscriber* subscriber;
 
-    EXPECT_CALL(mockSimulationParticipant, CreateDataSubscriber).Times(testing::Exactly(1));
-    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_SimulationParticipant*)&mockSimulationParticipant, "topic",
+    EXPECT_CALL(mockParticipant, CreateDataSubscriber).Times(testing::Exactly(1));
+    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, "topic",
                                            mediaType, labelList, nullptr, &DefaultDataHandler,
                                            nullptr, &NewDataSourceHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
@@ -180,18 +180,18 @@ TEST_F(CapiDataTest, data_publisher_bad_parameters)
     ib_ReturnCode returnCode;
     ib_Data_Publisher* publisher;
 
-    returnCode = ib_Data_Publisher_Create(nullptr, (ib_SimulationParticipant*)&mockSimulationParticipant, "topic",
+    returnCode = ib_Data_Publisher_Create(nullptr, (ib_Participant*)&mockParticipant, "topic",
                                           mediaType, labelList, 0);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
     returnCode = ib_Data_Publisher_Create(&publisher, nullptr, "topic", mediaType, labelList, 0);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Publisher_Create(&publisher, (ib_SimulationParticipant*)&mockSimulationParticipant, nullptr,
+    returnCode = ib_Data_Publisher_Create(&publisher, (ib_Participant*)&mockParticipant, nullptr,
                                           mediaType, labelList, 0);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Publisher_Create(&publisher, (ib_SimulationParticipant*)&mockSimulationParticipant, "topic",
+    returnCode = ib_Data_Publisher_Create(&publisher, (ib_Participant*)&mockParticipant, "topic",
                                           nullptr, labelList, 0);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
@@ -207,7 +207,7 @@ TEST_F(CapiDataTest, data_subscriber_bad_parameters)
     ib_ReturnCode returnCode;
     ib_Data_Subscriber* subscriber;
 
-    returnCode = ib_Data_Subscriber_Create(nullptr, (ib_SimulationParticipant*)&mockSimulationParticipant, "topic",
+    returnCode = ib_Data_Subscriber_Create(nullptr, (ib_Participant*)&mockParticipant, "topic",
                                            mediaType, labelList, dummyContextPtr,
                                            &DefaultDataHandler, dummyContextPtr, &NewDataSourceHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
@@ -217,17 +217,17 @@ TEST_F(CapiDataTest, data_subscriber_bad_parameters)
                                   dummyContextPtr, &DefaultDataHandler, dummyContextPtr, &NewDataSourceHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_SimulationParticipant*)&mockSimulationParticipant, nullptr,
+    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, nullptr,
                                            mediaType, labelList, dummyContextPtr,
                                            &DefaultDataHandler, dummyContextPtr, &NewDataSourceHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_SimulationParticipant*)&mockSimulationParticipant, "topic",
+    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, "topic",
                                            nullptr, labelList, dummyContextPtr, &DefaultDataHandler,
                                            dummyContextPtr, &NewDataSourceHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_SimulationParticipant*)&mockSimulationParticipant, "topic",
+    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, "topic",
                                            mediaType, labelList, dummyContextPtr,
                                            &DefaultDataHandler, dummyContextPtr, nullptr);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);

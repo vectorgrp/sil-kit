@@ -11,7 +11,7 @@
 
 #include "ib/mw/sync/string_utils.hpp"
 
-#include "MockComAdapter.hpp"
+#include "MockParticipant.hpp"
 #include "SyncDatatypeUtils.hpp"
 
 namespace {
@@ -25,9 +25,9 @@ using namespace ib::mw;
 using namespace ib::mw::sync;
 using namespace ib::util;
 
-using ::ib::mw::test::DummyComAdapter;
+using ::ib::mw::test::DummyParticipant;
 
-class MockComAdapter : public DummyComAdapter
+class MockParticipant : public DummyParticipant
 {
 public:
     MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const ParticipantCommand& msg));
@@ -38,7 +38,7 @@ class SystemControllerTest : public testing::Test
 {
 protected:
     SystemControllerTest()
-        : controller{&comAdapter}
+        : controller{&participant}
     {
         controller.SetServiceDescriptor(descriptor);
     }
@@ -54,7 +54,7 @@ protected:
     EndpointAddress addr{103, 1026};
     ServiceDescriptor descriptor = from_endpointAddress(addr);
 
-    MockComAdapter comAdapter;
+    MockParticipant participant;
     SystemController controller;
 };
 
@@ -68,7 +68,7 @@ TEST_F(SystemControllerTest, send_initialize)
     std::string name = "Participant";
     auto nameHash = hash(name);
     ParticipantCommand cmd{ nameHash, ParticipantCommand::Kind::Initialize};
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, cmd)).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, cmd)).Times(1);
     controller.Initialize(name);
 }
 
@@ -77,42 +77,42 @@ TEST_F(SystemControllerTest, send_reinitialize)
     std::string name = "Participant";
     auto nameHash = hash(name);
     ParticipantCommand cmd{ nameHash, ParticipantCommand::Kind::ReInitialize};
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, cmd)).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, cmd)).Times(1);
     controller.ReInitialize(name);
 }
 
 TEST_F(SystemControllerTest, send_run)
 {
     SystemCommand cmd{SystemCommand::Kind::Run};
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, cmd)).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, cmd)).Times(1);
     controller.Run();
 }
     
 TEST_F(SystemControllerTest, send_stop)
 {
     SystemCommand cmd{SystemCommand::Kind::Stop};
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, cmd)).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, cmd)).Times(1);
     controller.Stop();
 }
     
 TEST_F(SystemControllerTest, send_shutdown)
 {
     SystemCommand cmd{SystemCommand::Kind::Shutdown};
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, cmd)).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, cmd)).Times(1);
     controller.Shutdown();
 }
 
 TEST_F(SystemControllerTest, send_preparecoldswap)
 {
     SystemCommand cmd{SystemCommand::Kind::PrepareColdswap};
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, cmd)).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, cmd)).Times(1);
     controller.PrepareColdswap();
 }
     
 TEST_F(SystemControllerTest, send_executecoldswap)
 {
     SystemCommand cmd{SystemCommand::Kind::ExecuteColdswap};
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, cmd)).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, cmd)).Times(1);
     controller.ExecuteColdswap();
 }
 

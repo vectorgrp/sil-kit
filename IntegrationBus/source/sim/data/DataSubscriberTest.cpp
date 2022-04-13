@@ -7,7 +7,7 @@
 
 #include "ib/util/functional.hpp"
 
-#include "MockComAdapter.hpp"
+#include "MockParticipant.hpp"
 
 #include "DataMessageDatatypeUtils.hpp"
 
@@ -31,8 +31,8 @@ protected:
 
 protected:
     DataSubscriberTest()
-        : subscriber{ &comAdapter, comAdapter.GetTimeProvider(), "Topic", {}, {}, {}, nullptr }
-        , subscriberOther{ &comAdapter, comAdapter.GetTimeProvider(), "Topic", {}, {}, {}, nullptr }
+        : subscriber{ &participant, participant.GetTimeProvider(), "Topic", {}, {}, {}, nullptr }
+        , subscriberOther{ &participant, participant.GetTimeProvider(), "Topic", {}, {}, {}, nullptr }
     {
         subscriber.SetServiceDescriptor(from_endpointAddress(endpointAddress));
         subscriber.SetDefaultReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));
@@ -46,7 +46,7 @@ protected:
     const EndpointAddress endpointAddress{4, 5};
     const EndpointAddress otherEndpointAddress{5, 7};
 
-    ib::mw::test::DummyComAdapter comAdapter;
+    ib::mw::test::DummyParticipant participant;
     Callbacks                     callbacks;
     DataSubscriberInternal        subscriber;
     DataSubscriberInternal        subscriberOther;

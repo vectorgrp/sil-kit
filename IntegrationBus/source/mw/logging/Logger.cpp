@@ -65,11 +65,11 @@ Logger::Logger(const std::string& participantName, cfg::Logging config)
     //  this will cause a fairly unintuitive exception in spdlog.
     _logger = spdlog::create<spdlog::sinks::null_sink_st>(participantName);
 
-    // NB: logger gets dropped from registry immediately after creating so that two comAdapter with the same
+    // NB: logger gets dropped from registry immediately after creating so that two participant with the same
     // participantName won't lead to a spdlog exception because a logger with this name does already exist.
     spdlog::drop(participantName);
     
-    // set_default_logger should not be used here, as there can only be one default logger and if another comAdapter
+    // set_default_logger should not be used here, as there can only be one default logger and if another participant
     // gets created, the first default logger will be dropped from the registry as well.
 
     // Generate a tm object for the timestamp once, so that all file loggers will have the very same timestamp.

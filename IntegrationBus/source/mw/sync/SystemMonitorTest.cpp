@@ -10,7 +10,7 @@
 
 #include "ib/util/functional.hpp"
 
-#include "MockComAdapter.hpp"
+#include "MockParticipant.hpp"
 #include "SyncDatatypeUtils.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 
@@ -25,7 +25,7 @@ using namespace ib::mw;
 using namespace ib::mw::sync;
 using namespace ib::util;
 
-using ::ib::mw::test::DummyComAdapter;
+using ::ib::mw::test::DummyParticipant;
 
 class SystemMonitorTest : public testing::Test
 {
@@ -40,8 +40,8 @@ protected:
 protected:
 
     SystemMonitorTest()
-        : monitor{&comAdapter }
-        , monitorFrom{ &comAdapter }
+        : monitor{&participant }
+        , monitorFrom{ &participant }
     {
         syncParticipantNames = { "P1", "P2", "P3" };
         monitor.UpdateExpectedParticipantNames(ib::mw::sync::ExpectedParticipants{ syncParticipantNames });
@@ -61,9 +61,9 @@ protected:
         monitor.RegisterParticipantStatusHandler(bind_method(&callbacks, &Callbacks::ParticipantStatusHandler));
     }
 
-    void SetParticipantStatus(ParticipantId participant, ParticipantState state, std::string reason = std::string{})
+    void SetParticipantStatus(ParticipantId participantId, ParticipantState state, std::string reason = std::string{})
     {
-        uint64_t id = participant - 1;
+        uint64_t id = participantId - 1;
         ParticipantStatus status;
         status.state = state;
         status.participantName = syncParticipantNames.at(static_cast<size_t>(id));
@@ -98,7 +98,7 @@ protected:
 
     std::vector<std::string> syncParticipantNames;
 
-    DummyComAdapter comAdapter;
+    DummyParticipant participant;
     SystemMonitor monitor;
     SystemMonitor monitorFrom;
     Callbacks callbacks;

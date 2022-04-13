@@ -33,15 +33,15 @@ target_link_libraries(IbMwSync
 
 add_vib_test(TestMwParticipantController 
     SOURCES ParticipantControllerTest.cpp 
-    LIBS IbMwSync IbMwMockComAdapter
+    LIBS IbMwSync IbMwMockParticipant
 )
 add_vib_test(TestMwSystemController 
     SOURCES SystemControllerTest.cpp 
-    LIBS IbMwSync IbMwMockComAdapter
+    LIBS IbMwSync IbMwMockParticipant
 )
 add_vib_test(TestMwSystemMonitor 
     SOURCES SystemMonitorTest.cpp 
-    LIBS IbMwSync IbMwMockComAdapter
+    LIBS IbMwSync IbMwMockParticipant
 )
 add_vib_test(TestMwWatchDog
     SOURCES WatchDogTest.cpp

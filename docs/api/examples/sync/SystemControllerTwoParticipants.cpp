@@ -1,11 +1,11 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Setup of the Participants
-auto comAdapter1 = ib::CreateComAdapter(ibConfig, participantName1, domainId);
-auto comAdapter2 = ib::CreateComAdapter(ibConfig, participantName2, domainId);
+auto participant1 = ib::CreateParticipant(ibConfig, participantName1, domainId);
+auto participant2 = ib::CreateParticipant(ibConfig, participantName2, domainId);
 
-auto* systemController = comAdapter1->GetSystemController();
-auto* systemMonitor = comAdapter1->GetSystemMonitor();
+auto* systemController = participant1->GetSystemController();
+auto* systemMonitor = participant1->GetSystemMonitor();
 
 // Register SystemStateHandler to trigger the commands of the System Controller in the correct system states.
 // For more information about the use of the System Monitor refer to the corresponding section.
@@ -42,8 +42,8 @@ systemMonitor->RegisterSystemStateHandler(systemStateHandler);
 
 // ParticipantController needs to call Run or RunAsync for a transition to ParticipantState::Idle.
 // For more information about the use of the Participant Controller refer to the corresponding section.
-auto* participantController1 = comAdapter1->GetParticipantController();
-auto* participantController2 = comAdapter2->GetParticipantController();
+auto* participantController1 = participant1->GetParticipantController();
+auto* participantController2 = participant2->GetParticipantController();
 
 participantController1->SetSimulationTask(
     [](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {}

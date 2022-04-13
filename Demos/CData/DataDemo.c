@@ -54,7 +54,7 @@ typedef struct
 } TransmitContext;
 TransmitContext transmitContext;
 
-ib_SimulationParticipant* participant;
+ib_Participant* participant;
 ib_Data_Publisher* dataPublisher1;
 ib_Data_Publisher* dataPublisher2;
 ib_Data_Subscriber* dataSubscriber;
@@ -182,12 +182,12 @@ int main(int argc, char* argv[])
 
     // Participant
     ib_ReturnCode returnCode;
-    returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, domainId, ib_False);
+    returnCode = ib_Participant_Create(&participant, jsonString, participantName, domainId, ib_False);
     if (returnCode) {
         printf("%s\n", ib_GetLastErrorString());
         return 2;
     }
-    printf("Creating Participant %s for simulation '%s'\n", participantName, domainId);
+    printf("Creating participant '%s' for simulation '%s'\n", participantName, domainId);
 
     if (strcmp(participantName, "Subscriber1") == 0)
     {
@@ -269,7 +269,7 @@ int main(int argc, char* argv[])
     {
         free(jsonString);
     }
-    ib_SimulationParticipant_Destroy(participant);
+    ib_Participant_Destroy(participant);
 
     return EXIT_SUCCESS;
 }

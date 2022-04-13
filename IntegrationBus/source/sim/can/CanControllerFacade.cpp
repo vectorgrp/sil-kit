@@ -13,13 +13,13 @@ namespace sim {
 namespace can {
 
   
-CanControllerFacade::CanControllerFacade(mw::IComAdapterInternal* comAdapter, ib::cfg::CanController config,
+CanControllerFacade::CanControllerFacade(mw::IParticipantInternal* participant, ib::cfg::CanController config,
                                          mw::sync::ITimeProvider* timeProvider)
-    : _comAdapter{comAdapter}
+    : _participant{participant}
     , _config{config}
 {
-    _canController = std::make_unique<CanController>(comAdapter, config, timeProvider, this);
-    _canControllerProxy = std::make_unique<CanControllerProxy>(comAdapter, this);
+    _canController = std::make_unique<CanController>(participant, config, timeProvider, this);
+    _canControllerProxy = std::make_unique<CanControllerProxy>(participant, this);
     _currentController = _canController.get();
 }
 
@@ -137,7 +137,7 @@ void CanControllerFacade::SetServiceDescriptor(const mw::ServiceDescriptor& serv
     _canController->SetServiceDescriptor(serviceDescriptor);
     _canControllerProxy->SetServiceDescriptor(serviceDescriptor);
 
-    mw::service::IServiceDiscovery* disc = _comAdapter->GetServiceDiscovery();
+    mw::service::IServiceDiscovery* disc = _participant->GetServiceDiscovery();
     disc->RegisterServiceDiscoveryHandler(
         [this, serviceDescriptor]
         (mw::service::ServiceDiscoveryEvent::Type discoveryType, const mw::ServiceDescriptor& remoteServiceDescriptor)

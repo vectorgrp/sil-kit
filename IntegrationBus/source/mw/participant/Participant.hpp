@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 
 #include <memory>
 #include <vector>
@@ -57,7 +57,7 @@
 // IbMwService
 #include "ServiceDiscovery.hpp"
 
-// Add connection types here and make sure they are instantiated in ComAdapter.cpp
+// Add connection types here and make sure they are instantiated in Participant.cpp
 #if defined(IB_MW_HAVE_VASIO)
 #   include "VAsioConnection.hpp"
 #endif
@@ -67,7 +67,7 @@ namespace ib {
 namespace mw {
 
 template <class IbConnectionT>
-class ComAdapter : public IComAdapterInternal
+class Participant : public IParticipantInternal
 {
 public:
     // ----------------------------------------
@@ -76,23 +76,23 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    ComAdapter() = default;
-    ComAdapter(const ComAdapter&) = default;
-    ComAdapter(ComAdapter&&) = default;
-    ComAdapter(cfg::ParticipantConfiguration participantConfig,
+    Participant() = default;
+    Participant(const Participant&) = default;
+    Participant(Participant&&) = default;
+    Participant(cfg::ParticipantConfiguration participantConfig,
                const std::string& participantName, bool isSynchronized);
 
 public:
     // ----------------------------------------
     // Operator Implementations
-    ComAdapter& operator=(ComAdapter& other) = default;
-    ComAdapter& operator=(ComAdapter&& other) = default;
+    Participant& operator=(Participant& other) = default;
+    Participant& operator=(Participant&& other) = default;
 
 public:
     // ----------------------------------------
     // Public interface methods
     //
-    // IComAdapter
+    // IParticipant
     auto CreateCanController(const std::string& canonicalName, const std::string& networkName)
         -> sim::can::ICanController* override;
     auto CreateCanController(const std::string& canonicalName) -> sim::can::ICanController* override;

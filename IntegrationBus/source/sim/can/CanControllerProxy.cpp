@@ -7,8 +7,8 @@ namespace ib {
 namespace sim {
 namespace can {
 
-CanControllerProxy::CanControllerProxy(mw::IComAdapterInternal* comAdapter, ICanController* facade)
-: _comAdapter(comAdapter)
+CanControllerProxy::CanControllerProxy(mw::IParticipantInternal* participant, ICanController* facade)
+: _participant(participant)
     , _facade{facade}
 {
     if (_facade == nullptr)
@@ -21,7 +21,7 @@ void CanControllerProxy::SetBaudRate(uint32_t rate, uint32_t fdRate)
 {
     _baudRate.baudRate = rate;
     _baudRate.fdBaudRate = fdRate;
-    _comAdapter->SendIbMessage(this, _baudRate);
+    _participant->SendIbMessage(this, _baudRate);
 }
 
 void CanControllerProxy::Reset()
@@ -32,7 +32,7 @@ void CanControllerProxy::Reset()
     mode.flags.resetErrorHandling = 1;
     mode.mode = CanControllerState::Uninit;
 
-    _comAdapter->SendIbMessage(this, mode);
+    _participant->SendIbMessage(this, mode);
 }
 
 void CanControllerProxy::Start()
@@ -58,7 +58,7 @@ void CanControllerProxy::ChangeControllerMode(CanControllerState state)
     mode.flags.resetErrorHandling = 0;
     mode.mode = state;
 
-    _comAdapter->SendIbMessage(this, mode);
+    _participant->SendIbMessage(this, mode);
 }
 
 auto CanControllerProxy::SendMessage(const CanMessage& msg, void* userContext) -> CanTxId
@@ -67,7 +67,7 @@ auto CanControllerProxy::SendMessage(const CanMessage& msg, void* userContext) -
     msgCopy.transmitId = MakeTxId();
     msgCopy.userContext = userContext;
 
-    _comAdapter->SendIbMessage(this, msgCopy);
+    _participant->SendIbMessage(this, msgCopy);
     return msgCopy.transmitId;
 }
 
@@ -78,7 +78,7 @@ auto CanControllerProxy::SendMessage(CanMessage&& msg, void* userContext) -> Can
     msg.transmitId = txId;
     msg.userContext = userContext;
 
-    _comAdapter->SendIbMessage(this, std::move(msg));
+    _participant->SendIbMessage(this, std::move(msg));
 
     return txId;
 }

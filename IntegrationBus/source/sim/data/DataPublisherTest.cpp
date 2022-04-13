@@ -7,7 +7,7 @@
 
 #include "ib/util/functional.hpp"
 
-#include "MockComAdapter.hpp"
+#include "MockParticipant.hpp"
 
 #include "DataMessageDatatypeUtils.hpp"
 
@@ -21,9 +21,9 @@ using namespace ib;
 using namespace ib::mw;
 using namespace ib::sim::data;
 
-using ::ib::mw::test::DummyComAdapter;
+using ::ib::mw::test::DummyParticipant;
 
-class MockComAdapter : public DummyComAdapter
+class MockParticipant : public DummyParticipant
 {
 public:
 
@@ -34,7 +34,7 @@ class DataPublisherTest : public ::testing::Test
 {
 protected:
     DataPublisherTest()
-        : publisher{ &comAdapter, comAdapter.GetTimeProvider(), "Topic", {}, {}, "pubUUID" }
+        : publisher{ &participant, participant.GetTimeProvider(), "Topic", {}, {}, "pubUUID" }
     {
         publisher.SetServiceDescriptor(from_endpointAddress(portAddress));
     }
@@ -43,7 +43,7 @@ protected:
     const EndpointAddress portAddress{4, 5};
     const std::vector<uint8_t> sampleData{0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u};
 
-    MockComAdapter comAdapter;
+    MockParticipant participant;
     DataPublisher publisher;
 };
 
@@ -51,7 +51,7 @@ TEST_F(DataPublisherTest, publish_vector)
 {
     DataMessage msg{sampleData};
 
-    EXPECT_CALL(comAdapter, SendIbMessage(&publisher, std::move(msg)))
+    EXPECT_CALL(participant, SendIbMessage(&publisher, std::move(msg)))
         .Times(1);
 
     publisher.Publish(sampleData);
@@ -61,7 +61,7 @@ TEST_F(DataPublisherTest, publish_raw)
 {
     DataMessage msg{sampleData};
 
-    EXPECT_CALL(comAdapter, SendIbMessage(&publisher, std::move(msg)))
+    EXPECT_CALL(participant, SendIbMessage(&publisher, std::move(msg)))
         .Times(1);
 
     publisher.Publish(sampleData.data(), sampleData.size());

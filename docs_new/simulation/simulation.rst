@@ -107,7 +107,7 @@ Once all needed controllers are registered and a simulation task was set, the pa
 .. _subsubsec:sim-lifecycle-systemMonitor:
 
 **System monitor:**
-To observe the state transitions of other participants, users first need to retrieve the |SystemMonitorAPI| interface via :cpp:func:`GetSystemMonitor()<ib::mw::IComAdapter::GetSystemMonitor()>`.
+To observe the state transitions of other participants, users first need to retrieve the |SystemMonitorAPI| interface via :cpp:func:`GetSystemMonitor()<ib::mw::IParticipant::GetSystemMonitor()>`.
 Afterwards, they can register a participant status callback via :cpp:func:`RegisterParticipantStatusHandler()<ib::mw::sync::ISystemMonitor::RegisterParticipantStatusHandler()>`
 In addition, users can register a callback for changes of the overall system state via :cpp:func:`RegisterSystemStateHandler()<ib::mw::sync::ISystemMonitor::RegisterSystemStateHandler()>`.
 This is a convenience function, as the system state could be manually calculated based on the state of each participant.

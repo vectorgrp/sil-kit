@@ -308,7 +308,7 @@ void FlexRayNode_WakeupHandler(void* context, ib_FlexRay_Controller* controller,
   ib_FlexRay_Controller_ExecuteCmd(controller, ib_FlexRay_ChiCommand_RUN);
 }
 
-void FlexRayNode_SimulationTask(void* context, ib_SimulationParticipant* participant, ib_NanosecondsTime time)
+void FlexRayNode_SimulationTask(void* context, ib_Participant* participant, ib_NanosecondsTime time)
 {
   FlexRayNode* node = (FlexRayNode*)context;
   uint64_t nowMs = time / 1000000ULL;
@@ -352,7 +352,7 @@ char* LoadFile(char const* path)
 int main(int argc, char** argv)
 {
    char* participantName;
-   ib_SimulationParticipant* participant;
+   ib_Participant* participant;
 
    ib_FlexRay_ClusterParameters clusterParams;
    clusterParams.gColdstartAttempts = 8;
@@ -422,13 +422,13 @@ int main(int argc, char** argv)
   }
 
   ib_ReturnCode returnCode;
-  returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, domainId, ib_True);
+  returnCode = ib_Participant_Create(&participant, jsonString, participantName, domainId, ib_True);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
-    printf("ib_SimulationParticipant_Create => %s\n", ib_GetLastErrorString());
+    printf("ib_Participant_Create => %s\n", ib_GetLastErrorString());
     return 2;
   }
-  printf("Creating Participant %s for simulation '%s'\n", participantName, domainId);
+  printf("Creating participant '%s' for simulation '%s'\n", participantName, domainId);
   // NOTE: must know the name, as there is currently no way to enumerate the configured FR controllers
   const char* flexrayControllerName = "FlexRay1";
   const char* flexrayNetworkName = "FlexRay1";
@@ -577,18 +577,18 @@ int main(int argc, char** argv)
   }
 
   // premature API: to be replaced
-  returnCode = ib_SimulationParticipant_SetSimulationTask(participant, frNode, &FlexRayNode_SimulationTask);
+  returnCode = ib_Participant_SetSimulationTask(participant, frNode, &FlexRayNode_SimulationTask);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
-    printf("ib_SimulationParticipant_SetSimulationTask => %s\n", ib_GetLastErrorString());
+    printf("ib_Participant_SetSimulationTask => %s\n", ib_GetLastErrorString());
     return 2;
   }
 
   ib_ParticipantState finalState;
-  returnCode = ib_SimulationParticipant_Run(participant, &finalState);
+  returnCode = ib_Participant_Run(participant, &finalState);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
-    printf("ib_SimulationParticipant_Run => %s\n", ib_GetLastErrorString());
+    printf("ib_Participant_Run => %s\n", ib_GetLastErrorString());
     return 2;
   }
   printf("Simulation stopped. Final State: %d\n", finalState);
@@ -597,7 +597,7 @@ int main(int argc, char** argv)
   char* result = fgets(line, 2, stdin);
   (void)result;
 
-  ib_SimulationParticipant_Destroy(participant);
+  ib_Participant_Destroy(participant);
   if (jsonString)
   {
       free(jsonString);

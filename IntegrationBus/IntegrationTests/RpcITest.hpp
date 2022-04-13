@@ -200,7 +200,7 @@ protected:
         std::string name;
         std::vector<RpcClientInfo> rpcClients;
         std::vector<RpcServerInfo> rpcServers;
-        std::unique_ptr<IComAdapter> comAdapter;
+        std::unique_ptr<IParticipant> participant;
         std::vector<std::string> expectedFunctionNames;
         bool allCalled{false};
         std::promise<void> allCalledPromise;
@@ -300,7 +300,7 @@ protected:
     {
         try
         {
-            participant.comAdapter = ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(),
+            participant.participant = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(),
                                                                      participant.name, domainId, sync);
 
             // Create Clients
@@ -320,7 +320,7 @@ protected:
                 };
 
                 c.rpcClient =
-                    participant.comAdapter->CreateRpcClient(c.functionName, c.dxf, c.labels, callReturnHandler);
+                    participant.participant->CreateRpcClient(c.functionName, c.dxf, c.labels, callReturnHandler);
             }
             auto callTask = [&participant]() {
                 for (auto& client : participant.rpcClients)
@@ -349,7 +349,7 @@ protected:
                     participant.CheckAllCallsReceivedPromise();
                 };
 
-                s.rpcServer = participant.comAdapter->CreateRpcServer(s.functionName, s.dxf, s.labels, processCalls);
+                s.rpcServer = participant.participant->CreateRpcServer(s.functionName, s.dxf, s.labels, processCalls);
             }
 
             // Check RpcDiscovery after creating the local servers to discover them as well
@@ -362,13 +362,13 @@ protected:
 
                 while (!participant.allDiscovered)
                 {
-                    participant.comAdapter->DiscoverRpcServers("", RpcExchangeFormat{""}, {}, discoveryResultsHandler);
+                    participant.participant->DiscoverRpcServers("", RpcExchangeFormat{""}, {}, discoveryResultsHandler);
                 }
             }
 
             if (sync)
             {
-                IParticipantController* participantController = participant.comAdapter->GetParticipantController();
+                IParticipantController* participantController = participant.participant->GetParticipantController();
                 participantController->SetPeriod(1s);
                 participantController->SetSimulationTask([&participant, callTask](std::chrono::nanoseconds /*now*/) {
                     callTask();

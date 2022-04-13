@@ -11,7 +11,7 @@
 #include "ib/sim/rpc/IRpcServer.hpp"
 #include "ib/sim/rpc/IRpcCallHandle.hpp"
 
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "IIbToRpcServerInternal.hpp"
 #include "RpcCallHandle.hpp"
 
@@ -24,7 +24,7 @@ class RpcServerInternal : public IIbToRpcServerInternal,
                   public mw::IIbServiceEndpoint
 {
   public:
-    RpcServerInternal(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider,
+    RpcServerInternal(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
                       const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
                       const std::map<std::string, std::string>& labels, const std::string& clientUUID,
                       ib::sim::rpc::CallProcessor handler, IRpcServer* parent);
@@ -55,7 +55,7 @@ class RpcServerInternal : public IIbToRpcServerInternal,
     mw::ServiceDescriptor _serviceDescriptor{};
     std::map<std::string, std::unique_ptr<CallHandleImpl>> _receivedCallHandles;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
-    mw::IComAdapterInternal* _comAdapter{nullptr};
+    mw::IParticipantInternal* _participant{nullptr};
 };
 
 // ================================================================================

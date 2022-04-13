@@ -13,7 +13,7 @@
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/util/functional.hpp"
 
-#include "MockComAdapter.hpp"
+#include "MockParticipant.hpp"
 #include "SyncDatatypeUtils.hpp"
 
 namespace {
@@ -27,9 +27,9 @@ using namespace ib::mw;
 using namespace ib::mw::sync;
 using namespace ib::util;
 
-using ::ib::mw::test::DummyComAdapter;
+using ::ib::mw::test::DummyParticipant;
 
-class MockComAdapter : public DummyComAdapter
+class MockParticipant : public DummyParticipant
 {
 public:
     MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const ParticipantStatus& msg));
@@ -86,7 +86,7 @@ protected:
     MockServiceDescriptor p2Id{ addrP2, "P2" };
     MockServiceDescriptor masterId{ masterAddr, "Master" };
 
-    MockComAdapter comAdapter;
+    MockParticipant participant;
     Callbacks callbacks;
     std::vector<std::string> testParticipants;
     cfg::HealthCheck healthCheckConfig;
@@ -100,12 +100,12 @@ auto AParticipantStatusWithState(ParticipantState expected)
 
 TEST_F(ParticipantControllerTest, report_commands_as_error_before_run_was_called)
 {
-    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig);
+    ParticipantController controller(&participant, testParticipants[0], true, healthCheckConfig);
     controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
 
     controller.SetServiceDescriptor(from_endpointAddress(addr));
 
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, A<const ParticipantStatus&>()))
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const ParticipantStatus&>()))
         .Times(1);
 
     SystemCommand runCommand{SystemCommand::Kind::Run};
@@ -117,7 +117,7 @@ TEST_F(ParticipantControllerTest, report_commands_as_error_before_run_was_called
 
 TEST_F(ParticipantControllerTest, call_init_handler)
 {
-    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    ParticipantController controller(&participant, testParticipants[0], true, healthCheckConfig); 
     controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
     auto descriptor = from_endpointAddress(addr);
     controller.SetServiceDescriptor(descriptor);
@@ -134,7 +134,7 @@ TEST_F(ParticipantControllerTest, call_init_handler)
 
 TEST_F(ParticipantControllerTest, call_stop_handler)
 {
-    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    ParticipantController controller(&participant, testParticipants[0], true, healthCheckConfig); 
     controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
 
     auto descriptor = from_endpointAddress(addr);
@@ -151,8 +151,8 @@ TEST_F(ParticipantControllerTest, call_stop_handler)
 
     controller.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
     EXPECT_CALL(callbacks, StopHandler()).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopped))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopped))).Times(1);
 
     SystemCommand stopCommand{SystemCommand::Kind::Stop};
     controller.ReceiveIbMessage(&masterId, stopCommand);
@@ -161,7 +161,7 @@ TEST_F(ParticipantControllerTest, call_stop_handler)
 
 TEST_F(ParticipantControllerTest, dont_switch_to_stopped_if_stop_handler_reported_an_error)
 {
-    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    ParticipantController controller(&participant, testParticipants[0], true, healthCheckConfig); 
     controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
 
     auto descriptor = from_endpointAddress(addr);
@@ -178,8 +178,8 @@ TEST_F(ParticipantControllerTest, dont_switch_to_stopped_if_stop_handler_reporte
 
     controller.SetStopHandler([&controller = controller] { controller.ReportError("StopHandlerFailed!!"); });
 
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Error))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Error))).Times(1);
 
     SystemCommand stopCommand{SystemCommand::Kind::Stop};
     controller.ReceiveIbMessage(&masterId, stopCommand);
@@ -188,7 +188,7 @@ TEST_F(ParticipantControllerTest, dont_switch_to_stopped_if_stop_handler_reporte
 
 TEST_F(ParticipantControllerTest, must_set_simtask_before_calling_run)
 {
-    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    ParticipantController controller(&participant, testParticipants[0], true, healthCheckConfig); 
     controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
 
     controller.SetServiceDescriptor(from_endpointAddress(addr));
@@ -198,7 +198,7 @@ TEST_F(ParticipantControllerTest, must_set_simtask_before_calling_run)
 
 TEST_F(ParticipantControllerTest, calling_run_announces_idle_state)
 {
-    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    ParticipantController controller(&participant, testParticipants[0], true, healthCheckConfig); 
     controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
 
     controller.SetServiceDescriptor(from_endpointAddress(addr));
@@ -206,7 +206,7 @@ TEST_F(ParticipantControllerTest, calling_run_announces_idle_state)
 
     EXPECT_EQ(controller.State(), ParticipantState::Invalid);
 
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle)))
         .Times(1);
     controller.RunAsync();
 
@@ -215,7 +215,7 @@ TEST_F(ParticipantControllerTest, calling_run_announces_idle_state)
 
 TEST_F(ParticipantControllerTest, refreshstatus_must_not_modify_other_fields)
 {
-    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    ParticipantController controller(&participant, testParticipants[0], true, healthCheckConfig); 
     controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
 
     controller.SetServiceDescriptor(from_endpointAddress(addr));
@@ -223,7 +223,7 @@ TEST_F(ParticipantControllerTest, refreshstatus_must_not_modify_other_fields)
 
     EXPECT_EQ(controller.State(), ParticipantState::Invalid);
 
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle)))
         .Times(2);
     controller.RunAsync();
 
@@ -245,7 +245,7 @@ TEST_F(ParticipantControllerTest, refreshstatus_must_not_modify_other_fields)
 
 TEST_F(ParticipantControllerTest, run_async_with_synctype_distributedtimequantum)
 {
-    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    ParticipantController controller(&participant, testParticipants[0], true, healthCheckConfig); 
     controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
 
     auto descriptor = from_endpointAddress(addr);
@@ -256,17 +256,17 @@ TEST_F(ParticipantControllerTest, run_async_with_synctype_distributedtimequantum
     controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
 
     // Run() --> Idle
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
     auto finalState = controller.RunAsync();
 
     // Cmd::Initialize --> Initializing --> Initialized
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Initializing))).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Initialized))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Initializing))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Initialized))).Times(1);
     controller.ReceiveIbMessage(&masterId, ParticipantCommand{descriptor.GetParticipantId(), ParticipantCommand::Kind::Initialize});
     EXPECT_EQ(controller.State(), ParticipantState::Initialized);
 
     // Cmd::Run --> Running --> Call SimTask()
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Running))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Running))).Times(1);
     EXPECT_CALL(callbacks, SimTask(_)).Times(2);
     controller.ReceiveIbMessage(&masterId, SystemCommand{SystemCommand::Kind::Run});
     EXPECT_EQ(controller.State(), ParticipantState::Running);
@@ -281,16 +281,16 @@ TEST_F(ParticipantControllerTest, run_async_with_synctype_distributedtimequantum
     controller.ReceiveIbMessage(&p2Id, nextTask);
 
     // Cmd::Stop --> Stopping --> Call StopHandler() --> Stopped
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
     EXPECT_CALL(callbacks, StopHandler()).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopped))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopped))).Times(1);
     controller.ReceiveIbMessage(&masterId, SystemCommand{SystemCommand::Kind::Stop});
     EXPECT_EQ(controller.State(), ParticipantState::Stopped);
 
     // Cmd::Shutdown --> ShuttingDown --> Call ShutdownHandler() --> Shutdown
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::ShuttingDown))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::ShuttingDown))).Times(1);
     EXPECT_CALL(callbacks, ShutdownHandler()).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Shutdown))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Shutdown))).Times(1);
     controller.ReceiveIbMessage(&masterId, SystemCommand{SystemCommand::Kind::Shutdown});
     EXPECT_EQ(controller.State(), ParticipantState::Shutdown);
 
@@ -300,7 +300,7 @@ TEST_F(ParticipantControllerTest, run_async_with_synctype_distributedtimequantum
 
 TEST_F(ParticipantControllerTest, force_shutdown)
 {
-    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    ParticipantController controller(&participant, testParticipants[0], true, healthCheckConfig); 
     controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
 
     controller.SetServiceDescriptor(from_endpointAddress(addr));
@@ -310,20 +310,20 @@ TEST_F(ParticipantControllerTest, force_shutdown)
     controller.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
 
     // Run() --> Idle
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
     auto finalState = controller.RunAsync();
 
     // Stop() --> Stopping --> Call StopHandler() --> Stopped
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopping))).Times(1);
     EXPECT_CALL(callbacks, StopHandler()).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopped))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Stopped))).Times(1);
     controller.Stop("I quit!");
     EXPECT_EQ(controller.State(), ParticipantState::Stopped);
 
     // ForceShutdown() --> ShuttingDown --> Call ShutdownHandler() --> Shutdown
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::ShuttingDown))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::ShuttingDown))).Times(1);
     EXPECT_CALL(callbacks, ShutdownHandler()).Times(1);
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Shutdown))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Shutdown))).Times(1);
     controller.ForceShutdown("I really, really quit!");
     EXPECT_EQ(controller.State(), ParticipantState::Shutdown);
 
@@ -333,7 +333,7 @@ TEST_F(ParticipantControllerTest, force_shutdown)
 
 TEST_F(ParticipantControllerTest, force_shutdown_is_ignored_if_not_stopped)
 {
-    ParticipantController controller(&comAdapter, testParticipants[0], true, healthCheckConfig); 
+    ParticipantController controller(&participant, testParticipants[0], true, healthCheckConfig); 
     controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
 
     controller.SetServiceDescriptor(from_endpointAddress(addr));
@@ -343,13 +343,13 @@ TEST_F(ParticipantControllerTest, force_shutdown_is_ignored_if_not_stopped)
     controller.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
 
     // Run() --> Idle
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
     auto finalState = controller.RunAsync();
 
     // ForceShutdown() --> Log::Error --> don't change state, don't call shutdown handlers
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, A<const ParticipantStatus&>())).Times(0);
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const ParticipantStatus&>())).Times(0);
     EXPECT_CALL(callbacks, ShutdownHandler()).Times(0);
-    EXPECT_CALL(comAdapter, SendIbMessage(&controller, A<const ParticipantStatus&>())).Times(0);
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const ParticipantStatus&>())).Times(0);
     controller.ForceShutdown("I really, really quit!");
 
     // command shall be ignored. State shall be unchanged
@@ -361,7 +361,7 @@ TEST_F(ParticipantControllerTest, async_sim_task)
 {
     {
         bool ok = false;
-        ParticipantController controller(&comAdapter, "P2", true, healthCheckConfig); 
+        ParticipantController controller(&participant, "P2", true, healthCheckConfig); 
         controller.SetServiceDescriptor(p2Id.GetServiceDescriptor());
 
         controller.SetSimulationTaskAsync([&](auto, auto) {
@@ -378,7 +378,7 @@ TEST_F(ParticipantControllerTest, async_sim_task)
         controller.ReceiveIbMessage(&masterId, cmd);
 
         // Request a simulation step
-        EXPECT_CALL(comAdapter, SendIbMessage(_, A<const NextSimTask&>())).Times(1);
+        EXPECT_CALL(participant, SendIbMessage(_, A<const NextSimTask&>())).Times(1);
 
         NextSimTask nst;
         nst.duration = 1ns;
@@ -395,7 +395,7 @@ TEST_F(ParticipantControllerTest, async_sim_task_completion_different_thread)
     {
         std::promise<void> startup;
         auto startupFuture = startup.get_future();
-        ParticipantController controller(&comAdapter, "P2", true, healthCheckConfig); 
+        ParticipantController controller(&participant, "P2", true, healthCheckConfig); 
         controller.SetServiceDescriptor(p2Id.GetServiceDescriptor());
 
         controller.SetSimulationTaskAsync([&](auto, auto) {

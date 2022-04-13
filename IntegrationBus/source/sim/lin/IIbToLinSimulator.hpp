@@ -13,7 +13,7 @@ namespace lin {
 
 /*! \brief IIbToLinSimulator interface
 *
-*  Used by the ComAdapter, implemented by the LinSimulator
+*  Used by the Participant, implemented by the LinSimulator
 */
 class IIbToLinSimulator
     : public mw::IIbReceiver<SendFrameRequest, SendFrameHeaderRequest, WakeupPulse, ControllerConfig, ControllerStatusUpdate, FrameResponseUpdate>

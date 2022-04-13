@@ -8,7 +8,7 @@
 #include "ib/extensions/ITraceMessageSource.hpp"
 
 #include "IIbToEthController.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
 #include "ParticipantConfiguration.hpp"
 
@@ -34,7 +34,7 @@ public:
     // Constructors and Destructor
     EthController() = delete;
     EthController(EthController&&) = default;
-    EthController(mw::IComAdapterInternal* comAdapter, cfg::EthernetController config,
+    EthController(mw::IParticipantInternal* participant, cfg::EthernetController config,
                   mw::sync::ITimeProvider* timeProvider, IEthController* facade = nullptr);
 
 public:
@@ -93,7 +93,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    ::ib::mw::IComAdapterInternal* _comAdapter = nullptr;
+    ::ib::mw::IParticipantInternal* _participant = nullptr;
     ::ib::mw::ServiceDescriptor _serviceDescriptor;
     ::ib::mw::sync::ITimeProvider* _timeProvider{ nullptr };
     IEthController* _facade{nullptr};

@@ -24,7 +24,7 @@ referred to as *participant configuration*, ``IbConfig.json``, or ``IbConfig.yam
 it is intended to be used to configure behavior and connections of a simulation participant that was distributed in 
 binary form.
 A participant configuration can be passed to a simulation when a simulation participant is created 
-through :cpp:func:`CreateSimulationParticipant()<ib::CreateSimulationParticipant()>`
+through :cpp:func:`CreateParticipant()<ib::CreateParticipant()>`
 
 Configuration parameters that are specified within the participant configuration override corresponding 
 programmatically defined values, i.e. the ``ParticipantName`` field of the participant configuration overrides the 

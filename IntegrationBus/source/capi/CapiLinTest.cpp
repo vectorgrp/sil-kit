@@ -3,11 +3,11 @@
 #include "gmock/gmock.h"
 #include "ib/capi/IntegrationBus.h"
 #include "ib/sim/lin/all.hpp"
-#include "MockComAdapter.hpp"
+#include "MockParticipant.hpp"
 
 namespace {
     using namespace ib::sim::lin;
-    using ib::mw::test::DummyComAdapter;
+    using ib::mw::test::DummyParticipant;
 
     class MockLinController : public ib::sim::lin::ILinController {
     public:
@@ -43,7 +43,7 @@ namespace {
 
     protected:
         MockLinController mockController;
-        ib::mw::test::DummyComAdapter mockComAdapter;
+        ib::mw::test::DummyParticipant mockParticipant;
     };
 
     TEST_F(CapiLinTest, lin_controller_function_mapping)
@@ -121,7 +121,7 @@ namespace {
     {
 
         ib_ReturnCode          returnCode;
-        auto                   cMockComAdapter = (ib_SimulationParticipant*)&mockComAdapter;
+        auto                   cMockParticipant = (ib_Participant*)&mockParticipant;
         auto                   cMockController = (ib_Lin_Controller*)&mockController;
         ib_Lin_Controller*      linController;
         ib_Lin_Frame            frame;
@@ -131,11 +131,11 @@ namespace {
 
         returnCode = ib_Lin_Controller_Create(&linController, nullptr, "lin", "lin");
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Lin_Controller_Create(nullptr, cMockComAdapter, "lin", "lin");
+        returnCode = ib_Lin_Controller_Create(nullptr, cMockParticipant, "lin", "lin");
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Lin_Controller_Create(&linController, cMockComAdapter, nullptr, "lin");
+        returnCode = ib_Lin_Controller_Create(&linController, cMockParticipant, nullptr, "lin");
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Lin_Controller_Create(&linController, cMockComAdapter, "lin", nullptr);
+        returnCode = ib_Lin_Controller_Create(&linController, cMockParticipant, "lin", nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
         returnCode = ib_Lin_Controller_Init(nullptr, &cfg);

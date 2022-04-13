@@ -48,7 +48,7 @@ char* LoadFile(char const* path)
 }
 
 
-ib_SimulationParticipant* participant;
+ib_Participant* participant;
 ib_Rpc_Client* client;
 ib_Rpc_Server* server;
 
@@ -183,12 +183,12 @@ int main(int argc, char* argv[])
     }
     
     ib_ReturnCode returnCode;
-    returnCode = ib_SimulationParticipant_Create(&participant, jsonString, participantName, domainId, ib_False);
+    returnCode = ib_Participant_Create(&participant, jsonString, participantName, domainId, ib_False);
     if (returnCode) {
         printf("%s\n", ib_GetLastErrorString());
         return 2;
     }
-    printf("Creating Participant %s for simulation '%s'\n", participantName, domainId);
+    printf("Creating participant '%s' for simulation '%s'\n", participantName, domainId);
 
     if (strcmp(participantName, "Client") == 0)
     {
@@ -238,7 +238,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    ib_SimulationParticipant_Destroy(participant);
+    ib_Participant_Destroy(participant);
     if (jsonString)
     {
         free(jsonString);

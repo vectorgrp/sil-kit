@@ -7,7 +7,7 @@
 #include "ib/IntegrationBus.hpp"
 #include "ib/sim/fr/all.hpp"
 
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "CapiImpl.h"
 #include "ParticipantConfiguration.hpp"
 
@@ -88,7 +88,7 @@ static void assign(ib::sim::fr::ControllerConfig& cppConfig, const ib_FlexRay_Co
 
 extern "C" {
 
-IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controller** outController, ib_SimulationParticipant* participant, const char* cName, const char* cNetwork)
+IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controller** outController, ib_Participant* participant, const char* cName, const char* cNetwork)
 {
   ASSERT_VALID_OUT_PARAMETER(outController);
   ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -96,10 +96,10 @@ IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controll
   ASSERT_VALID_POINTER_PARAMETER(cNetwork);
   CAPI_ENTER
   {
-    ib::mw::IComAdapter* comAdapter = reinterpret_cast<ib::mw::IComAdapter*>(participant);
+    auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
     std::string name(cName);
     std::string network(cNetwork);
-    auto controller = comAdapter->CreateFlexrayController(name, network);
+    auto controller = cppParticipant->CreateFlexrayController(name, network);
     if (controller == nullptr)
     {
       return ib_ReturnCode_UNSPECIFIEDERROR;

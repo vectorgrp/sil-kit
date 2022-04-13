@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "IIbToFrControllerProxy.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
 
 #include "ParticipantConfiguration.hpp"
@@ -40,7 +40,7 @@ public:
     FrControllerProxy() = delete;
     FrControllerProxy(const FrControllerProxy&) = default;
     FrControllerProxy(FrControllerProxy&&) = default;
-    FrControllerProxy(mw::IComAdapterInternal* comAdapter, cfg::FlexRayController config,
+    FrControllerProxy(mw::IParticipantInternal* participant, cfg::FlexRayController config,
                       IFrController* facade = nullptr);
 
 public:
@@ -128,7 +128,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    mw::IComAdapterInternal* _comAdapter = nullptr;
+    mw::IParticipantInternal* _participant = nullptr;
     ::ib::mw::ServiceDescriptor _serviceDescriptor;
     IFrController* _facade = nullptr;
 

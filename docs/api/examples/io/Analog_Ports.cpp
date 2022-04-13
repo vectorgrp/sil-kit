@@ -17,9 +17,9 @@ const std::string portName{"AIO"};
 
 void writer(Config config)
 {
-    auto comAdapter = ib::CreateComAdapter(config, "AnalogWriter", domainId);
-    auto* analogOut = comAdapter->CreateAnalogOut(portName);
-    auto* participantCtrl = comAdapter->GetParticipantController();
+    auto participant = ib::CreateParticipant(config, "AnalogWriter", domainId);
+    auto* analogOut = participant->CreateAnalogOut(portName);
+    auto* participantCtrl = participant->GetParticipantController();
 
     participantCtrl->SetPeriod(1ms);
 
@@ -38,9 +38,9 @@ void writer(Config config)
 }
 void reader(Config config)
 {
-    auto comAdapter = ib::CreateComAdapter(config, "AnalogReader", domainId);
-    auto* analogIn = comAdapter->CreateAnalogIn(portName);
-    auto* participantCtrl = comAdapter->GetParticipantController();
+    auto participant = ib::CreateParticipant(config, "AnalogReader", domainId);
+    auto* analogIn = participant->CreateAnalogIn(portName);
+    auto* participantCtrl = participant->GetParticipantController();
 
     participantCtrl->SetPeriod(1ms);
 

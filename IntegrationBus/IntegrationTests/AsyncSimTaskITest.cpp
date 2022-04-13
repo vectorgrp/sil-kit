@@ -28,9 +28,9 @@ TEST(AsyncSimTaskITest, test_async_simtask_nodeadlock)
 
     auto syncTimeNs{0ns};
 
-    auto* sync = testHarness.GetParticipant("Sync")->ComAdapter()->GetParticipantController();
-    auto* asyncComAdapter = testHarness.GetParticipant("Async")->ComAdapter();
-    auto* async = testHarness.GetParticipant("Async")->ComAdapter()->GetParticipantController();
+    auto* sync = testHarness.GetParticipant("Sync")->Participant()->GetParticipantController();
+    auto* asyncParticipant = testHarness.GetParticipant("Async")->Participant();
+    auto* async = testHarness.GetParticipant("Async")->Participant()->GetParticipantController();
 
     sync->SetSimulationTask([&syncTimeNs](auto now) {
         std::cout << "Sync SimTask now=" << now.count() << std::endl;
@@ -44,7 +44,7 @@ TEST(AsyncSimTaskITest, test_async_simtask_nodeadlock)
         if (now == expectedTime)
         {
             std::cout << "Stopping simulation at expected time" << std::endl;
-            asyncComAdapter->GetSystemController()->Stop();
+            asyncParticipant->GetSystemController()->Stop();
         }
         if (now < expectedTime)
         {
@@ -102,9 +102,9 @@ TEST(AsyncSimTaskITest, test_async_simtask_completion_from_foreign_thread)
 
     auto syncTime{0ns};
 
-    auto* sync = testHarness.GetParticipant("Sync")->ComAdapter()->GetParticipantController();
-    auto* asyncComAdapter = testHarness.GetParticipant("Async")->ComAdapter();
-    auto* async = testHarness.GetParticipant("Async")->ComAdapter()->GetParticipantController();
+    auto* sync = testHarness.GetParticipant("Sync")->Participant()->GetParticipantController();
+    auto* asyncParticipant = testHarness.GetParticipant("Async")->Participant();
+    auto* async = testHarness.GetParticipant("Async")->Participant()->GetParticipantController();
 
     sync->SetSimulationTask([&syncTime](auto now) {
         syncTime = now;
@@ -114,7 +114,7 @@ TEST(AsyncSimTaskITest, test_async_simtask_completion_from_foreign_thread)
         if (now == expectedTime)
         {
             std::cout << "Stopping simulation at expected time" << std::endl;
-            asyncComAdapter->GetSystemController()->Stop();
+            asyncParticipant->GetSystemController()->Stop();
             startupPromise.set_value(true);
             return;
         }
@@ -158,9 +158,9 @@ TEST(AsyncSimTaskITest, test_async_simtask_different_periods)
     auto asyncTime{0ns};
     const int periodFactor = 10;
 
-    auto* sync = testHarness.GetParticipant("Sync")->ComAdapter()->GetParticipantController();
-    auto* asyncComAdapter = testHarness.GetParticipant("Async")->ComAdapter();
-    auto* async = testHarness.GetParticipant("Async")->ComAdapter()->GetParticipantController();
+    auto* sync = testHarness.GetParticipant("Sync")->Participant()->GetParticipantController();
+    auto* asyncParticipant = testHarness.GetParticipant("Async")->Participant();
+    auto* async = testHarness.GetParticipant("Async")->Participant()->GetParticipantController();
     int countSync = 0;
     int countAsync = 0;
     sync->SetPeriod(1ms);
@@ -175,7 +175,7 @@ TEST(AsyncSimTaskITest, test_async_simtask_different_periods)
         countAsync++;
         if (countAsync > periodFactor * 100000)
         {
-            asyncComAdapter->GetSystemController()->Stop();
+            asyncParticipant->GetSystemController()->Stop();
         }
         async->CompleteSimulationTask();
     });
@@ -194,9 +194,9 @@ TEST(AsyncSimTaskITest, test_async_simtask_multiple_completion_calls)
     auto asyncTime{0ns};
     const int periodFactor = 7;
 
-    auto* sync = testHarness.GetParticipant("Sync")->ComAdapter()->GetParticipantController();
-    auto* asyncComAdapter = testHarness.GetParticipant("Async")->ComAdapter();
-    auto* async = testHarness.GetParticipant("Async")->ComAdapter()->GetParticipantController();
+    auto* sync = testHarness.GetParticipant("Sync")->Participant()->GetParticipantController();
+    auto* asyncParticipant = testHarness.GetParticipant("Async")->Participant();
+    auto* async = testHarness.GetParticipant("Async")->Participant()->GetParticipantController();
     int countSync = 0;
     int countAsync = 0;
     sync->SetPeriod(1ms);
@@ -213,7 +213,7 @@ TEST(AsyncSimTaskITest, test_async_simtask_multiple_completion_calls)
         countAsync++;
         if (countAsync > periodFactor * 100000)
         {
-            asyncComAdapter->GetSystemController()->Stop();
+            asyncParticipant->GetSystemController()->Stop();
         }
         async->CompleteSimulationTask();
         async->CompleteSimulationTask();

@@ -11,7 +11,7 @@ namespace ib {
 namespace sim {
 namespace data {
 
-//! \brief IIbToDataPubSubHandshake interface used by the ComAdapter
+//! \brief IIbToDataPubSubHandshake interface used by the Participant
 class IIbToDataSubscriber
     : public mw::IIbReceiver<>
     , public mw::IIbSender<>

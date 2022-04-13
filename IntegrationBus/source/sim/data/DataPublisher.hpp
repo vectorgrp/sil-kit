@@ -10,7 +10,7 @@
 #include "ib/mw/sync/ITimeConsumer.hpp"
 
 #include "IIbToDataPublisher.hpp"
-#include "IComAdapterInternal.hpp"
+#include "IParticipantInternal.hpp"
 
 namespace ib {
 namespace sim {
@@ -23,7 +23,7 @@ class DataPublisher
     , public mw::IIbServiceEndpoint
 {
 public:
-    DataPublisher(mw::IComAdapterInternal* comAdapter, mw::sync::ITimeProvider* timeProvider, const std::string& topic,
+    DataPublisher(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider, const std::string& topic,
                   const std::string& mediaType, const std::map<std::string, std::string>& labels,
                   const std::string& pubUUID);
     
@@ -46,7 +46,7 @@ private:
 
     mw::ServiceDescriptor _serviceDescriptor{};
     mw::sync::ITimeProvider* _timeProvider{nullptr};
-    mw::IComAdapterInternal* _comAdapter{nullptr};
+    mw::IParticipantInternal* _participant{nullptr};
 };
 
 // ================================================================================

@@ -1,7 +1,7 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_library(IbMwMockNullConnection STATIC
-    NullConnectionComAdapter.cpp
-    NullConnectionComAdapter.hpp
+    NullConnectionParticipant.cpp
+    NullConnectionParticipant.hpp
 )
 
 target_include_directories(IbMwMockNullConnection
@@ -9,7 +9,7 @@ target_include_directories(IbMwMockNullConnection
 )
 
 target_link_libraries(IbMwMockNullConnection
-    PUBLIC IbMwComAdapter
+    PUBLIC IbMwParticipant
 )
 
 if (MSVC)

@@ -194,7 +194,7 @@ protected:
         std::string name;
         std::vector<DataSubscriberInfo> dataSubscribers;
         std::vector<DataPublisherInfo> dataPublishers;
-        std::unique_ptr<IComAdapter> comAdapter;
+        std::unique_ptr<IParticipant> participant;
 
         // Sub
         std::promise<void> allDiscoveredPromise;
@@ -281,7 +281,7 @@ protected:
     {
         try
         {
-            participant.comAdapter = ib::CreateSimulationParticipant(ib::cfg::MockParticipantConfiguration(),
+            participant.participant = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(),
                                                                      participant.name, domainId, sync);
 
             // Already set the promise if no reception/discovery is expected
@@ -308,13 +308,13 @@ protected:
                 if (ds.specificDataHandlers.empty())
                 {
                     // Create DataSubscriber with default handler
-                    ds.dataSubscriber = participant.comAdapter->CreateDataSubscriber(
+                    ds.dataSubscriber = participant.participant->CreateDataSubscriber(
                         ds.topic, ds.mediaType, ds.labels, receptionHandler, newDataSourceHandler);
                 }
                 else
                 {
                     // Create DataSubscriber without default handler
-                    ds.dataSubscriber = participant.comAdapter->CreateDataSubscriber(ds.topic, ds.mediaType, ds.labels,
+                    ds.dataSubscriber = participant.participant->CreateDataSubscriber(ds.topic, ds.mediaType, ds.labels,
                                                                                      nullptr, newDataSourceHandler);
                 }
             }
@@ -322,7 +322,7 @@ protected:
             // Setup/Create Publishers
             for (auto& dp : participant.dataPublishers)
             {
-                dp.dataPublisher = participant.comAdapter->CreateDataPublisher(dp.topic, dp.mediaType, dp.labels, dp.history);
+                dp.dataPublisher = participant.participant->CreateDataPublisher(dp.topic, dp.mediaType, dp.labels, dp.history);
             }
             auto publishTask = [&participant]() {
                 for (auto& dp : participant.dataPublishers)
@@ -333,7 +333,7 @@ protected:
 
             if (sync)
             {
-                IParticipantController* participantController = participant.comAdapter->GetParticipantController();
+                IParticipantController* participantController = participant.participant->GetParticipantController();
                 participantController->SetPeriod(1s);
                 participantController->SetSimulationTask([&participant, publishTask](std::chrono::nanoseconds /*now*/) {
                     if (!participant.dataPublishers.empty())
