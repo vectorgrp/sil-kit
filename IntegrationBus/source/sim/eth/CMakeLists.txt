@@ -16,10 +16,12 @@ add_library(IbSimEthernet STATIC
 )
 
 target_link_libraries(IbSimEthernet
-    PRIVATE IbInternal
-    PRIVATE IbInterface
-    PRIVATE IbMwLogging
-    PRIVATE IbTracing
+    PUBLIC
+        IbTracing
+    PRIVATE
+        IbInternal
+        IbInterface
+        IbMwLogging
 )
 
 target_include_directories(IbSimEthernet

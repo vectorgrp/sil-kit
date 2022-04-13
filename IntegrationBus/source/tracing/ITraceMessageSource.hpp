@@ -6,9 +6,10 @@
 #include <vector>
 #include <functional>
 
-#include "ib/mw/EndpointAddress.hpp"
-#include "ib/extensions/TraceMessage.hpp"
-#include "ib/extensions/ITraceMessageSink.hpp"
+#include "ITraceMessageSink.hpp"
+
+#include "EndpointAddress.hpp"
+#include "TraceMessage.hpp"
 
 namespace ib {
 namespace extensions {

@@ -7,11 +7,11 @@
 #include <map>
 
 #include "ib/sim/can/ICanController.hpp"
-#include "ib/extensions/ITraceMessageSource.hpp"
 #include "ib/mw/fwd_decl.hpp"
 
 #include "IIbToCanControllerProxy.hpp"
 #include "IParticipantInternal.hpp"
+#include "ITraceMessageSource.hpp"
 
 namespace ib {
 namespace sim {

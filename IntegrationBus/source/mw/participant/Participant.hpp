@@ -14,9 +14,6 @@
 #include "ib/sim/all.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 
-#include "ib/extensions/ITraceMessageSink.hpp"
-#include "ib/extensions/ITraceMessageSource.hpp"
-
 #include "ParticipantConfiguration.hpp"
 
 // Interfaces relying on IbInternal
@@ -53,6 +50,9 @@
 #include "IIbToSystemMonitor.hpp"
 #include "IIbToSystemController.hpp"
 #include "IIbToParticipantController.hpp"
+
+#include "ITraceMessageSink.hpp"
+#include "ITraceMessageSource.hpp"
 
 // IbMwService
 #include "ServiceDiscovery.hpp"
@@ -112,7 +112,7 @@ public:
     auto CreateDataSubscriberInternal(const std::string& canonicalName, const std::string& linkName, 
         const std::string& mediaType, const std::map<std::string, std::string>& publisherLabels, sim::data::DataHandlerT callback, sim::data::IDataSubscriber* parent)
         ->sim::data::DataSubscriberInternal* override;
-		
+
     auto CreateRpcClient(const std::string& functionName, const sim::rpc::RpcExchangeFormat exchangeFormat,
                          const std::map<std::string, std::string>& labels, sim::rpc::CallReturnHandler handler)
         -> sim::rpc::IRpcClient* override;
@@ -248,7 +248,7 @@ public:
 
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const service::ServiceAnnouncement& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const service::ServiceDiscoveryEvent& msg) override;
-	
+
     void OnAllMessagesDelivered(std::function<void()> callback) override;
     void FlushSendBuffers() override;
     void ExecuteDeferred(std::function<void()> callback) override;
@@ -271,7 +271,7 @@ public:
     inline auto GetIbConnection() -> IbConnectionT& { return _ibConnection; }
 
 private:
-    void LogWrongNetworkNameForController(const std::string& canonicalName, 
+    void LogWrongNetworkNameForController(const std::string& canonicalName,
                                                    const std::string& networkName,
                                                    const std::string& configuredNetworkName,
                                                    cfg::NetworkType networkType);
@@ -311,7 +311,7 @@ private:
 
     template<class IIbToSimulatorT>
     void RegisterSimulator(IIbToSimulatorT* busSim, cfg::NetworkType linkType, const std::vector<std::string>& simulatedNetworkNames);
-   
+
     template<class ConfigT>
     void AddTraceSinksToSource(extensions::ITraceMessageSource* controller, ConfigT config);
 

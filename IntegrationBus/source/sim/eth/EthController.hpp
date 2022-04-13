@@ -5,11 +5,11 @@
 #include "ib/sim/eth/IEthController.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
 #include "ib/mw/fwd_decl.hpp"
-#include "ib/extensions/ITraceMessageSource.hpp"
 
 #include "IIbToEthController.hpp"
 #include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
+#include "ITraceMessageSource.hpp"
 #include "ParticipantConfiguration.hpp"
 
 #include <memory>

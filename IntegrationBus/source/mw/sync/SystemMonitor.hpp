@@ -44,7 +44,7 @@ public:
     void RegisterParticipantStatusHandler(ParticipantStatusHandlerT handler) override;
 
     auto SystemState() const -> sync::SystemState override;
-    auto ParticipantStatus(const std::string& participantId) const -> const sync::ParticipantStatus& override;
+    auto ParticipantStatus(const std::string& participantName) const -> const sync::ParticipantStatus& override;
 
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantStatus& msg) override;
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::ExpectedParticipants& msg) override;

@@ -19,7 +19,7 @@ public:
     using StopHandlerT = std::function<void()>;
     using ShutdownHandlerT = std::function<void()>;
     using SimTaskT = std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)>;
-    using TaskHandleT = void*;
+
 public:
     /*! \brief Register a callback to perform initialization.
      *
@@ -39,7 +39,7 @@ public:
      * thread that received the command. After the handler has been
      * processed, the participant switches to the
      * \ref ParticipantState::Stopped state.
-     * 
+     *
      * Throwing an error inside the handler will cause a call to
      * ReportError().
      */
@@ -52,16 +52,16 @@ public:
      * thread that received the command. After the handler has been
      * processed, the participant switches to the
      * \ref ParticipantState::Shutdown state and is allowed to terminate.
-     * 
+     *
      * Throwing an error inside the handler will cause a call to
      * ReportError().
      */
     virtual void SetShutdownHandler(ShutdownHandlerT handler) = 0;
-    
+
     /*! \brief Set the task to be executed with each grant / tick
      *
      * Can be changed at runtime. Execution context depends on the run type.
-     * 
+     *
      * Throwing an error inside the handler will cause a call to
      * ReportError().
      */
@@ -71,7 +71,7 @@ public:
      * Can be changed at runtime. Execution context depends on the run type.
      * Execution will perform one simulation step at a time.
      * CompleteSimulationTask is required to signal completion of the simulation step.
-     * 
+     *
      * Throwing an error inside the handler will cause a call to
      * ReportError().
      */
@@ -122,7 +122,7 @@ public:
      * NB: RunAsync() cannot be used with
      * \ref ib::cfg::TimeSync::SyncPolicy::Strict,
      * which will inherently lead to a deadlock!
-     * 
+     *
      * \return Future that will hold the final state of the participant
      * once the ParticipantController finishes operation.
      */
@@ -153,12 +153,12 @@ public:
      * Precondition: State() == \ref ParticipantState::Paused
      */
     virtual void Continue() = 0;
-    
+
     /*! \brief Stop execution of the participant.
      *
      * Allows the participant to exit the RunAsync loop, e.g., if it
      * is unable to further progress its simulation.
-     * 
+     *
      * Calls the StopHandler and then switches to the
      * \ref ParticipantState::Stopped state.
      *

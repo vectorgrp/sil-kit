@@ -65,7 +65,7 @@ add_vib_test(ITestHopOnHopOff
         IntegrationBus
         IbCfgMockParticipantConfiguration
 )
- 
+
 add_vib_test(ITestDataPubSub
     SOURCES
       DataPubSubITest.cpp
@@ -79,7 +79,7 @@ add_vib_test(ITestTargetedMessaging
       TargetedMessagingITest.cpp
     LIBS
       IbTracing
-      IbSimCan 
+      IbSimCan
       IbSimTestHarness
       IbInternal
 )

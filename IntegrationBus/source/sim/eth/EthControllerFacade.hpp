@@ -5,11 +5,11 @@
 #include <memory>
 
 #include "ib/sim/eth/IEthController.hpp"
-#include "ib/extensions/ITraceMessageSource.hpp"
 #include "ib/mw/fwd_decl.hpp"
 
 #include "IIbToEthControllerFacade.hpp"
 #include "IParticipantInternal.hpp"
+#include "ITraceMessageSource.hpp"
 
 #include "EthController.hpp"
 #include "EthControllerProxy.hpp"

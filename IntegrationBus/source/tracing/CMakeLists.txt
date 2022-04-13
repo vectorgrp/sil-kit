@@ -1,7 +1,7 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 ######################################################################
 # VIB Tracing and Replay component
-# - Some tracing and replay functionality is implemented in 
+# - Some tracing and replay functionality is implemented in
 #   the external vibe-mdf4tracing extension.
 ######################################################################
 
@@ -19,9 +19,9 @@ if(IB_BUILD_COMPONENT_TRACING)
         Tracing.hpp
         Tracing.cpp
 
-        #public interface used for trace sink implementations
-        ${CMAKE_CURRENT_LIST_DIR}/../../include/ib/extensions/ITraceMessageSink.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/../../include/ib/extensions/TraceMessage.hpp
+        ITraceMessageSink.hpp
+        ITraceMessageSource.hpp
+        TraceMessage.hpp
 
         #Trace Replaying utilities
         IReplayDataController.hpp
@@ -34,25 +34,19 @@ if(IB_BUILD_COMPONENT_TRACING)
     )
 
     target_include_directories(IbTracing
-        PRIVATE 
+        PRIVATE
             ${CMAKE_CURRENT_LIST_DIR}
             detail
-        PUBLIC 
+        PUBLIC
             ${CMAKE_CURRENT_LIST_DIR}
             ${CMAKE_CURRENT_LIST_DIR}/mock/
     )
     target_link_libraries(IbTracing
-        PRIVATE 
+        PRIVATE
             IbInterface
             IbMwLogging
-            IbExtensions
-        INTERFACE
-            IbSimEthernet
-            IbSimCan
-            IbSimFlexRay
-            IbSimLin
-            IbSimDataMessage
-        PRIVATE
+        PUBLIC
+            IbInternal
             IbSimEthernet
             IbSimCan
             IbSimFlexRay
@@ -80,12 +74,13 @@ else()
     # At least provide some mocks for testing
     add_library(IbTracing INTERFACE)
     target_include_directories(IbTracing
-        INTERFACE 
+        INTERFACE
             ${CMAKE_CURRENT_LIST_DIR}
             ${CMAKE_CURRENT_LIST_DIR}/mock/
     )
     target_link_libraries(IbTracing
         INTERFACE
+            IbInternal
             IbSimEthernet
     )
 endif()

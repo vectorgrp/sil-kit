@@ -4,9 +4,9 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ib/mw/EndpointAddress.hpp"
 #include "ib/sim/lin/LinDatatypes.hpp"
 
+#include "EndpointAddress.hpp"
 #include "MockParticipant.hpp"
 
 namespace ib {

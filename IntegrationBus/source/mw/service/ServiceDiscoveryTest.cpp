@@ -2,7 +2,7 @@
 
 #include "ServiceDiscovery.hpp"
 
-#include "ib/mw/string_utils.hpp"
+#include "string_utils_internal.hpp"
 
 #include <chrono>
 #include <functional>
@@ -113,7 +113,7 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
 
     ServiceDescriptor descr;
     descr = senderDescriptor;
-   
+
     disco.RegisterServiceDiscoveryHandler(
         [&descr](auto /*eventType*/, auto&& newServiceDescr) {
             ASSERT_EQ(descr.GetSupplementalData(), newServiceDescr.GetSupplementalData());
@@ -169,7 +169,7 @@ TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
         event.type = ServiceDiscoveryEvent::Type::ServiceCreated;
         event.service = descr;
 
-        // Expect that each service is only handled by a single notification handler 
+        // Expect that each service is only handled by a single notification handler
         // e.g., no duplicate notifications
         EXPECT_CALL(callbacks,
             ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, descr)

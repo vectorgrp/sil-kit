@@ -2,9 +2,8 @@
 
 #pragma once
 
+#include "EndpointAddress.hpp"
 #include "MessageBuffer.hpp"
-
-#include "ib/mw/EndpointAddress.hpp"
 
 namespace ib {
 namespace mw {
@@ -15,7 +14,6 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const EndpointAddress& a
            << addr.endpoint;
     return buffer;
 }
-    
 
 inline MessageBuffer& operator>>(MessageBuffer& buffer, EndpointAddress& addr)
 {
@@ -24,6 +22,5 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, EndpointAddress& addr)
     return buffer;
 }
 
-    
 } // mw
 } // namespace ib

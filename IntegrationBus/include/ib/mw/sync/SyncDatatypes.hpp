@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "ib/mw/EndpointAddress.hpp"
+#include "ib/mw/ParticipantId.hpp"
 
 namespace ib {
 namespace mw {

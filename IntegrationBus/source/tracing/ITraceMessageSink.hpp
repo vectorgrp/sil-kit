@@ -10,7 +10,8 @@
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/mw/logging/fwd_decl.hpp"
 
-#include "ib/extensions/TraceMessage.hpp"
+#include "EndpointAddress.hpp"
+#include "TraceMessage.hpp"
 
 namespace ib {
 namespace extensions {
@@ -31,7 +32,7 @@ class ITraceMessageSink
 public:
     virtual ~ITraceMessageSink() = default;
 
-   
+
     virtual void Open(SinkType type, const std::string& outputPath) = 0;
     virtual void Close() = 0;
     virtual auto GetLogger() const -> mw::logging::ILogger* = 0;

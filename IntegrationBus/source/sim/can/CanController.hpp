@@ -6,12 +6,12 @@
 
 #include "ib/sim/can/ICanController.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
-#include "ib/extensions/ITraceMessageSource.hpp"
 
 #include "IIbToCanController.hpp"
 #include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
 #include "IReplayDataController.hpp"
+#include "ITraceMessageSource.hpp"
 
 #include "ParticipantConfiguration.hpp"
 

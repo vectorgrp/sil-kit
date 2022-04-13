@@ -5,10 +5,8 @@
 namespace ib {
 namespace mw {
 
-struct EndpointAddress;
-
 class IParticipant;
-    
+
 } // namespace mw
 } // namespace ib
 

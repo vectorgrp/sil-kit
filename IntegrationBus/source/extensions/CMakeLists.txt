@@ -41,11 +41,12 @@ target_link_libraries(IbExtensions
     PUBLIC  IbInterface
             IbConfiguration
     PRIVATE IbVersion
+            IbTracing
 )
 
 #Reproducible build: do not include CMAKE_SYSTEM_VERSION, it contains kernel version
 # and build ID.
-set(extension_os "${CMAKE_SYSTEM_NAME}") 
+set(extension_os "${CMAKE_SYSTEM_NAME}")
 
 if(UNIX)
     include(get_compiler_arch)
@@ -61,7 +62,7 @@ if(UNIX)
     target_sources(IbExtensions PRIVATE detail/LoadExtension_posix.cpp)
 
     #make sure we don't compile obviously bad code
-    target_compile_options(IbExtensions 
+    target_compile_options(IbExtensions
         PRIVATE
             -pedantic -Wall -Wextra
             -Wcast-align -Wformat=2 -Wmissing-declarations

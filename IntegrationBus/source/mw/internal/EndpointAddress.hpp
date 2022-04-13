@@ -4,17 +4,10 @@
 
 #include <cstdint>
 
+#include "ib/mw/ParticipantId.hpp"
+
 namespace ib {
 namespace mw {
-
-/*! \brief Global identifier for Integration Bus participants
- *
- *  The execution of IB participants is governed by the central
- *  /ExecutionController/. Particpants must interact with the controller
- *  via ISyncAdapter::SynchronizeDT or ISyncAdapter::SynchronizeET but
- *  not both.
-*/
-using ParticipantId = uint64_t;
 
 /*! \brief Participant specific identifier for its communication endpoints.
  *

@@ -2,11 +2,11 @@
 
 #include "ib/sim/can/ICanController.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
-#include "ib/extensions/ITraceMessageSource.hpp"
 
 #include "IIbToCanControllerFacade.hpp"
 #include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
+#include "ITraceMessageSource.hpp"
 
 #include "CanController.hpp"
 #include "ParticipantConfiguration.hpp"

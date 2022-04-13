@@ -8,11 +8,11 @@
 #include <vector>
 
 #include "ib/sim/lin/ILinController.hpp"
-#include "ib/extensions/ITraceMessageSource.hpp"
 #include "ib/mw/fwd_decl.hpp"
 
 #include "IIbToLinControllerProxy.hpp"
 #include "IParticipantInternal.hpp"
+#include "ITraceMessageSource.hpp"
 
 namespace ib {
 namespace sim {

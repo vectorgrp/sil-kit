@@ -6,11 +6,12 @@
 #include <map>
 
 #include "ib/sim/eth/IEthController.hpp"
-#include "ib/extensions/ITraceMessageSource.hpp"
 #include "ib/mw/fwd_decl.hpp"
 
 #include "IIbToEthControllerProxy.hpp"
 #include "IParticipantInternal.hpp"
+#include "ITraceMessageSource.hpp"
+
 #include "ParticipantConfiguration.hpp"
 
 namespace ib {

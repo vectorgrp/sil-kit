@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "ib/mw/EndpointAddress.hpp"
+#include "EndpointAddress.hpp"
 
 namespace ib {
 namespace mw {

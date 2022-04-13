@@ -113,7 +113,7 @@ public:
     MOCK_METHOD1(RegisterParticipantStateHandler, void(ParticipantStateHandlerT));
     MOCK_METHOD1(RegisterParticipantStatusHandler, void(ParticipantStatusHandlerT));
     MOCK_CONST_METHOD0(SystemState,  sync::SystemState());
-    MOCK_CONST_METHOD1(ParticipantStatus, const sync::ParticipantStatus&(const std::string& participantId));
+    MOCK_CONST_METHOD1(ParticipantStatus, const sync::ParticipantStatus&(const std::string& participantName));
 };
 
 class MockSystemController : public sync::ISystemController {
@@ -266,7 +266,7 @@ public:
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::data::DataMessage&& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::data::DataMessage& /*msg*/) override {}
-   
+
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::rpc::FunctionCall& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::rpc::FunctionCall&& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::rpc::FunctionCallResponse& /*msg*/) override {}

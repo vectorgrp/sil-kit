@@ -17,6 +17,7 @@ inline std::ostream& operator<<(std::ostream& out, const ib::mw::EndpointAddress
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
+
 std::string to_string(const ib::mw::EndpointAddress& ibAddress)
 {
     std::stringstream outStream;

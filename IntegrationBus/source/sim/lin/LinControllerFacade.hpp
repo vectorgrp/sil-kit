@@ -5,11 +5,11 @@
 #include <memory>
 
 #include "ib/sim/lin/ILinController.hpp"
-#include "ib/extensions/ITraceMessageSource.hpp"
 #include "ib/mw/fwd_decl.hpp"
 
 #include "IIbToLinControllerFacade.hpp"
 #include "IParticipantInternal.hpp"
+#include "ITraceMessageSource.hpp"
 
 #include "LinController.hpp"
 #include "LinControllerProxy.hpp"
@@ -78,7 +78,7 @@ public:
 public:
     // ----------------------------------------
     // Public interface methods
-  
+
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* timeProvider) override;
 

@@ -11,9 +11,19 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 Removed
 ~~~~~~~
 
+- The typedef ``ib::mw::sync::IParticipantController::TaskHandleT`` was removed due to not being used anywhere.
+
+- The header ``IntegrationBus/include/ib/mw/sync/ISyncMaster.hpp`` was removed due to not being used anywhere.
+
+  - ``IntegrationBus/include/ib/mw/sync/all.hpp``
+
+    .. code-block:: c++
+
+      #include "ISyncMaster.hpp"
+
 - Replaced the single-member struct ``DataExchangeFormat`` with its sole member, the media type string.
   The following data type and some associated free functions were removed:
-  
+
   - ``IntegrationBus/include/ib/sim/data/DataMessageDatatypes.hpp``
 
     .. code-block:: c++
@@ -22,20 +32,74 @@ Removed
       bool operator ==(const DataExchangeFormat &, const DataExchangeFormat &);
 
   - ``IntegrationBus/include/ib/sim/data/string_utils.hpp``
-  
+
     .. code-block:: c++
 
       ib::sim::data::to_string(const DataExchangeFormat&) -> std::string;
       ib::sim::data::operator<<(std::ostream& out, const DataExchangeFormat& dataExchangeFormat) -> std::ostream&;
 
   - ``IntegrationBus/include/ib/capi/DataPubSub.h``
-  
+
     .. code-block:: c++
-      
+
       typedef struct { ... } ib_Data_ExchangeFormat;
 
 Changed
 ~~~~~~~
+
+- The header ``EndpointAddress.hpp``, ``IReplay.hpp``, ``ITraceMessageSink.hpp``, ``ITraceMessageSource.hpp`` and
+  ``TraceMessage.hpp`` are now internal headers.
+  The typedef ``ib::mw::ParticipantId`` which used to be defined here was moved into its own public header file.
+
+  - ``IntegrationBus/include/ib/mw/EndpointAddress.hpp`` moved to ``IntegrationBus/source/mw/internal/EndpointAddress.hpp``
+
+  - ``IntegrationBus/include/ib/extensions/IReplay.hpp`` moved to ``IntegrationBus/source/tracing/IReplay.hpp``
+
+  - ``IntegrationBus/include/ib/extensions/ITraceMessageSink.hpp`` moved to ``IntegrationBus/source/tracing/ITraceMessageSink.hpp``
+
+  - ``IntegrationBus/include/ib/extensions/ITraceMessageSource.hpp`` moved to ``IntegrationBus/source/tracing/ITraceMessageSource.hpp``
+
+  - ``IntegrationBus/include/ib/extensions/TraceMessage.hpp`` moved to ``IntegrationBus/source/tracing/TraceMessage.hpp``
+
+  - ``IntegrationBus/include/ib/mw/internal/string_utils.hpp`` moved to ``IntegrationBus/source/mw/internal/string_utils_internal.hpp``
+
+  - ``IntegrationBus/include/ib/mw/ParticipantId.hpp``
+
+    + new:
+
+    .. code-block:: c++
+
+      using ParticipantId = ...;
+
+  - ``IntegrationBus/include/ib/mw/all.hpp``
+
+    + removed
+
+    .. code-block:: c++
+
+      #include "EndpointAddress.hpp"
+
+  - ``IntegrationBus/include/ib/mw/fwd_decl.hpp``
+
+    + removed
+
+    .. code-block:: c++
+
+      struct EndpointAddress;
+
+  - ``IntegrationBus/include/ib/mw/sync/SyncDatatypes.hpp``
+
+    + old:
+
+    .. code-block:: c++
+
+      #include "ib/mw/EndpointAddress.hpp"
+
+    + new:
+
+    .. code-block:: c++
+
+      #include "ib/mw/ParticipantId.hpp"
 
 - Replaced the single-member struct ``DataExchangeFormat`` with its sole member, the media type string.
   The following method and function type signatures have changed:
@@ -44,62 +108,62 @@ Changed
     + old:
 
     .. code-block:: c++
-      
+
       IComAdapter::CreateDataPublisher(..., const DataExchangeFormat&, ...) -> ...;
       IComAdapter::CreateDataSubscriber(..., const DataExchangeFormat&, ...) -> ...;
 
     + new:
 
     .. code-block:: c++
-      
+
       IComAdapter::CreateDataPublisher(..., const std::string& ...) -> ...;
       IComAdapter::CreateDataSubscriber(..., const std::string& ...) -> ...;
 
   - ``IntegrationBus/include/ib/sim/data/DataMessageDatatypes.hpp``
-  
+
     + old:
 
     .. code-block:: c++
-      
+
       NewDataSourceHandlerT = std::function<void(..., const DataExchangeFormat&, ...)>;
-    
+
     + new:
 
     .. code-block:: c++
-      
+
       NewDataSourceHandlerT = std::function<void(..., const std::string&, ...)>;
-      
+
   - ``IntegrationBus/include/ib/sim/data/IDataSubscriber.hpp``
-  
+
     + old:
 
     .. code-block:: c++
-      
+
       IDataSubscriber::RegisterSpecificDataHandler(const DataExchangeFormat&, ...) -> ...;
-    
+
     + new:
 
     .. code-block:: c++
-      
+
       IDataSubscriber::RegisterSpecificDataHandler(const std::string&, ...) -> ...;
-      
+
   - ``IntegrationBus/include/ib/capi/DataPubSub.h``
-  
+
     + old:
 
     .. code-block:: c++
-      
+
       typedef void (*ib_Data_NewDataSourceHandler_t)(..., const ib_Data_ExchangeFormat* dataExchangeFormat, ...);
       IntegrationBusAPI ib_ReturnCode ib_Data_Publisher_Create(..., ib_Data_ExchangeFormat* dataExchangeFormat, ...);
       typedef ib_ReturnCode (*ib_Data_Publisher_Create_t)(..., ib_Data_ExchangeFormat* dataExchangeFormat, ...);
       IntegrationBusAPI ib_ReturnCode ib_Data_Subscriber_Create(..., ib_Data_ExchangeFormat* dataExchangeFormat, ...);
       typedef ib_ReturnCode (*ib_Data_Subscriber_Create_t)(..., ib_Data_ExchangeFormat* dataExchangeFormat, ...);
       IntegrationBusAPI ib_ReturnCode ib_Data_Subscriber_RegisterSpecificDataHandler(..., ib_Data_ExchangeFormat* dataExchangeFormat, ...);
-    
+
     + new:
 
     .. code-block:: c++
-      
+
       typedef void (*ib_Data_NewDataSourceHandler_t)(..., const char* mediaType, ...);
       IntegrationBusAPI ib_ReturnCode ib_Data_Publisher_Create(..., const char* mediaType, ...);
       typedef ib_ReturnCode (*ib_Data_Publisher_Create_t)(..., const char* mediaType, ...);

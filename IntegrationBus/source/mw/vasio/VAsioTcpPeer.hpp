@@ -8,9 +8,9 @@
 #include <queue>
 #include <mutex>
 
-#include "ib/mw/EndpointAddress.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 
+#include "EndpointAddress.hpp"
 #include "MessageBuffer.hpp"
 #include "VAsioPeerInfo.hpp"
 #include "IIbServiceEndpoint.hpp"

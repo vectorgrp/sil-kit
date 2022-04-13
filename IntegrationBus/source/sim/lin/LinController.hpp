@@ -11,7 +11,6 @@
 
 #include "ib/sim/lin/ILinController.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
-#include "ib/extensions/ITraceMessageSource.hpp"
 
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/sim/datatypes.hpp"
@@ -19,6 +18,8 @@
 #include "IIbToLinController.hpp"
 #include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
+#include "ITraceMessageSource.hpp"
+
 #include "ParticipantConfiguration.hpp"
 
 namespace ib {
@@ -115,7 +116,7 @@ private:
     inline void SendIbMessage(MsgT&& msg);
 
     inline auto GetLinNode(mw::EndpointAddress addr) -> LinNode&;
-    
+
 private:
     // ----------------------------------------
     // private members

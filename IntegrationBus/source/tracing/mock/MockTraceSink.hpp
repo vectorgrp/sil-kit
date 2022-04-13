@@ -1,7 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
-#include "ib/extensions/ITraceMessageSink.hpp"
+
+#include "ITraceMessageSink.hpp"
 
 namespace ib {
 namespace test {

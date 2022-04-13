@@ -6,9 +6,9 @@
 #include <fstream>
 #include <memory>
 
-#include "ib/mw/EndpointAddress.hpp"
-#include "ib/extensions/ITraceMessageSink.hpp"
+#include "ITraceMessageSink.hpp"
 
+#include "EndpointAddress.hpp"
 #include "EthFrame.hpp"
 #include "detail/NamedPipe.hpp"
 
@@ -16,7 +16,7 @@ namespace ib {
 namespace tracing {
 
 
-class PcapSink 
+class PcapSink
     : public extensions::ITraceMessageSink
 {
 public:
@@ -41,7 +41,7 @@ public:
         std::chrono::nanoseconds timestamp,
         const extensions::TraceMessage& msg
     ) override;
-   
+
     auto GetLogger() const -> mw::logging::ILogger* override;
 
     auto Name() const -> const std::string& override;

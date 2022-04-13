@@ -7,8 +7,8 @@
 #include "ib/sim/can/CanDatatypes.hpp"
 #include "ib/sim/lin/LinDatatypes.hpp"
 
-#include "ib/extensions/ITraceMessageSink.hpp"
-#include "ib/extensions/IReplay.hpp"
+#include "ITraceMessageSink.hpp"
+#include "IReplay.hpp"
 
 #include "IbExtensions.hpp"
 #include "CreateMdf4Tracing.hpp"

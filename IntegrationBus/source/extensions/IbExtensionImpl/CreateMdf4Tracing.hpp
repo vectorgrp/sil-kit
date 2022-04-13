@@ -4,9 +4,10 @@
 
 #include <string>
 
-#include "ib/extensions/ITraceMessageSink.hpp"
-#include "ib/extensions/IReplay.hpp"
 #include "ib/mw/logging/ILogger.hpp"
+
+#include "ITraceMessageSink.hpp"
+#include "IReplay.hpp"
 
 #include "ParticipantConfiguration.hpp"
 
@@ -17,7 +18,7 @@ auto CreateMdf4Tracing(cfg::ParticipantConfiguration config,
     -> std::unique_ptr<ITraceMessageSink>;
 
 //////////////////////////////////////////////////////////////////////
-// MDF4 Replay 
+// MDF4 Replay
 //////////////////////////////////////////////////////////////////////
 
 auto CreateMdf4Replay(cfg::ParticipantConfiguration config, ib::mw::logging::ILogger* logger,

@@ -1,5 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 #include "ServiceDiscovery.hpp"
+#include "EndpointAddress.hpp"
+
 #include "ib/mw/logging/ILogger.hpp"
 
 namespace ib {
@@ -32,9 +35,9 @@ void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, cons
 {
     if (_shuttingDown)
     {
-        return; 
+        return;
     }
-    // Service announcement are sent when a new participant joins the simulation 
+    // Service announcement are sent when a new participant joins the simulation
     std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
 
     auto&& announcementMap = _servicesByParticipant[msg.participantName];
@@ -121,7 +124,7 @@ void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, cons
 {
     if (_shuttingDown)
     {
-        return; 
+        return;
     }
 
     if (msg.type == ServiceDiscoveryEvent::Type::ServiceCreated)
@@ -138,7 +141,7 @@ void ServiceDiscovery::NotifyServiceCreated(const ServiceDescriptor& serviceDesc
 {
     if (_shuttingDown)
     {
-        return; 
+        return;
     }
 
     // No self delivery for ServiceDiscoveryEvent, trigger directly in this thread context
@@ -155,7 +158,7 @@ void ServiceDiscovery::NotifyServiceRemoved(const ServiceDescriptor& serviceDesc
 {
     if (_shuttingDown)
     {
-        return; 
+        return;
     }
 
     // No self delivery for ServiceDiscoveryEvent, trigger directly in this thread context
@@ -209,7 +212,7 @@ void ServiceDiscovery::RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT 
     {
         return;
     }
-    // Notify the new handler about the existing services and register the handler. 
+    // Notify the new handler about the existing services and register the handler.
     // This must be one atomic operation, as in between calls of ReceivedServiceAddition
     // in the IO-Worker thread leads to loss of ServiceDiscoveryEvents.
     std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);

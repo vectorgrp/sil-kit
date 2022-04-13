@@ -3,7 +3,6 @@
 #pragma once
 
 #include "ib/sim/fr/IFrController.hpp"
-#include "ib/extensions/ITraceMessageSource.hpp"
 #include "ib/mw/fwd_decl.hpp"
 
 #include <tuple>
@@ -12,6 +11,7 @@
 #include "IIbToFrControllerProxy.hpp"
 #include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
+#include "ITraceMessageSource.hpp"
 
 #include "ParticipantConfiguration.hpp"
 

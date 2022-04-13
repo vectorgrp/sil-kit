@@ -9,11 +9,12 @@
 #include <cstdint>
 #include <iterator>
 
-#include "ib/extensions/TraceMessage.hpp"
-#include "ib/extensions/ITraceMessageSink.hpp" //for 'enum class Direction'
-#include "ib/mw/EndpointAddress.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/sim/datatypes.hpp"
+
+#include "TraceMessage.hpp"
+#include "ITraceMessageSink.hpp" //for 'enum class Direction'
+#include "EndpointAddress.hpp"
 
 namespace ib {
 namespace extensions {
@@ -22,7 +23,7 @@ class IReplayMessage;
 class IReplayChannel;
 class IReplayFile;
 
-//for use in DLL 
+//for use in DLL
 class IReplayDataProvider
 {
 public:

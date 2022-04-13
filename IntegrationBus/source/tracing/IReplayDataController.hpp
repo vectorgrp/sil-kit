@@ -1,17 +1,19 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
-#include "ib/extensions/IReplay.hpp"
-#include "ib/mw/EndpointAddress.hpp"
+
 #include "IIbServiceEndpoint.hpp"
+
 #include "Configuration.hpp"
+#include "IReplay.hpp"
+#include "EndpointAddress.hpp"
 
 #include <limits>
 
 namespace ib {
 namespace tracing {
 
-//!< Helper to check whether Direction `dir` is active in the config 
+//!< Helper to check whether Direction `dir` is active in the config
 inline bool IsReplayEnabledFor(const cfg::Replay& cfg, cfg::Replay::Direction dir)
 {
     return cfg.direction == dir || cfg.direction == cfg::Replay::Direction::Both;

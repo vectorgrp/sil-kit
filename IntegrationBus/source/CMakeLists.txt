@@ -64,7 +64,7 @@ if(IB_BUILD_STATIC)
 endif()
 
 # Published extension implementations follow here for the extension loading
-# side of the code. The actual shared library code might reside 
+# side of the code. The actual shared library code might reside
 # anywhere.
 # Note to future self:
 #    It would be desirable to have the extension loading code inside of the
@@ -99,7 +99,7 @@ if (MSVC)
     )
 elseif(UNIX)
     #for reproducible builds
-    target_link_options(IntegrationBus 
+    target_link_options(IntegrationBus
         PRIVATE -Wl,--build-id=none)
     # strip symbols
     #if(CMAKE_BUILD_TYPE STREQUAL Release)

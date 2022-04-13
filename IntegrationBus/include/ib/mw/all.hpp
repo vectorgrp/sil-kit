@@ -1,5 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
-#include "EndpointAddress.hpp"
+
 #include "IParticipant.hpp"
 
 // also include subdirectories

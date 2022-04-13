@@ -30,10 +30,11 @@ add_library(IbMwVAsio STATIC
     Uri.cpp
 )
 
-target_link_libraries(IbMwVAsio 
+target_link_libraries(IbMwVAsio
     PUBLIC
       IbUtil
       IbInterface
+      IbInternal
       IbMwSync
       IbMwLogging
       IbMwService
@@ -47,7 +48,6 @@ target_link_libraries(IbMwVAsio
       IbFilesystem
       asio
     INTERFACE
-      IbInternal
       IbConfiguration
 )
 
@@ -68,11 +68,11 @@ if(MINGW)
 endif()
 
 add_vib_test(TestMwVAsio_MessageBuffer SOURCES MessageBufferTest.cpp)
-add_vib_test(TestMwVAsio_SerdesMw SOURCES SerdesMwTest.cpp)
+add_vib_test(TestMwVAsio_SerdesMw SOURCES SerdesMwTest.cpp LIBS IbInternal)
 add_vib_test(TestMwVAsio_SerdesMwSync SOURCES SerdesMwSyncTest.cpp LIBS IbMwSync)
 add_vib_test(TestMwVAsio_SerdesSimCan SOURCES SerdesSimCanTest.cpp)
 add_vib_test(TestMwVAsio_SerdesSimEthernet SOURCES SerdesSimEthernetTest.cpp LIBS IbSimEthernet)
 add_vib_test(TestMwVAsio_SerdesSimLin SOURCES SerdesSimLinTest.cpp)
 add_vib_test(TestMwVAsio_SerdesSimFlexray SOURCES SerdesSimFlexrayTest.cpp)
-add_vib_test(TestMwVAsio_SerdesSimData SOURCES SerdesSimDataTest.cpp)
+add_vib_test(TestMwVAsio_SerdesSimData SOURCES SerdesSimDataTest.cpp LIBS IbInternal)
 add_vib_test(TestMwVAsio_SerdesMwService SOURCES SerdesMwServiceTest.cpp LIBS IbMwService)
