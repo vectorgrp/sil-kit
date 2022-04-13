@@ -1,6 +1,12 @@
 =============================================
-Vector Integration Bus (VIB)
+!!! Vector Integration Bus (VIB)
 =============================================
+
+.. admonition:: Warning:
+
+   Currently, the Vector Integration Bus documentation is being reviewed and adapted to match the current state
+   of the development. Sections with a leading "!!!" prefix in their title have not been reviewed so far and might
+   me outdated.
 
 The Vector Integration Bus is a runtime component that enables distributed simulation for
 automotive applications. For this, the Vector Integration Bus provides:
@@ -24,7 +30,7 @@ For getting started developing with the Vector Integration Bus, see the :doc:`qu
 
 .. _base-architecture:
 
-VIB Architecture
+!!! VIB Architecture
 ----------------------------
 
 The Vector Integration Bus implements a layered architecture comprising three layers:
@@ -32,7 +38,7 @@ The Vector Integration Bus implements a layered architecture comprising three la
 .. figure:: _static/IntegrationBusArchitecture.png
     :align: center
 
-Supported Services
+!!! Supported Services
 ------------------
 
 The currently supported services of the VIB consist of the following categories:
@@ -41,7 +47,7 @@ The currently supported services of the VIB consist of the following categories:
 * **Generic Messages:** without any data type constraints
 * **IO Ports:** Analog IO, Digital IO, Pattern IO and Pulse-width modulation (PWM) IO
 
-Vehicle Networks
+!!! Vehicle Networks
 ~~~~~~~~~~~~~~~~
 
 The VIB provides means to simulate CAN / CAN FD, Ethernet, FlexRay, and LIN networks.
@@ -49,7 +55,7 @@ All networks can be simulated with two different levels of detail: simple, funct
 or high detail, timing accurate simulation. Timing accurate simulation requires the Vector Network
 Simulator, which is part of the :doc:`Vector Integration Bus Extensions (VIBEs) <vibes/overview>`.
 
-Vehicle Network Controllers
+!!! Vehicle Network Controllers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Applications access vehicle networks using matching controller models. While the
@@ -67,7 +73,7 @@ and points out the differences between simple simulation and high detail VIBE si
 Network Simulator. In addition, the use of other services (Generic Message, IO, ...) is presented in detail.
 
 
-VIB Prerequisites for Usage
+!!! VIB Prerequisites for Usage
 ---------------------------
 
 * For Windows:

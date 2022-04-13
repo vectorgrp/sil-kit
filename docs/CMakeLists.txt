@@ -54,7 +54,7 @@ if(${IB_BUILD_DOCS})
                        VERBATIM
                        )
 
-    add_custom_target(Doxygen ALL DEPENDS ${DOXYGEN_INDEX_FILE})
+    add_custom_target(DoxygenNewConfig ALL DEPENDS ${DOXYGEN_INDEX_FILE})
     install(DIRECTORY ${SPHINX_BUILD}/
             DESTINATION ${INSTALL_DOC_DIR})
     install(
@@ -65,6 +65,6 @@ if(${IB_BUILD_DOCS})
     )
 
     #add sample code so it shows in the IDE, but don't build or install it
-    add_executable(sample_vib EXCLUDE_FROM_ALL usage/sample_vib/simple.cpp)
-    target_link_libraries(sample_vib PRIVATE IntegrationBus)
+    add_executable(sample_vib_new_config EXCLUDE_FROM_ALL usage/sample_vib/simple.cpp)
+    target_link_libraries(sample_vib_new_config PRIVATE IntegrationBus)
 endif()

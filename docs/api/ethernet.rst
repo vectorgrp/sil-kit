@@ -1,5 +1,5 @@
 ====================
-Ethernet Service API
+!!! Ethernet Service API
 ====================
 
 
@@ -10,10 +10,10 @@ Ethernet Service API
 
 .. highlight:: cpp
 
-Using the Ethernet Controller
+!!! Using the Ethernet Controller
 ------------------------------------
 
-Initialization
+!!! Initialization
 ~~~~~~~~~~~~~~~~~~~~
 
 Before the Ethernet Controller can send messages, the link must first be established
@@ -31,7 +31,7 @@ can be called in the InitHandler of a ParticipantController.
   and :ref:`Network Simulators<sec:cfg-network-simulators>`).
 
 
-Sending Ethernet Messages
+!!! Sending Ethernet Messages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Data is transfered in the form of an :cpp:class:`EthMessage<ib::sim::eth::EthMessage>`.
@@ -82,7 +82,7 @@ Finally, :cpp:enumerator:`InvalidFrameFormat<ib::sim::eth::InvalidFrameFormat>` 
 if the Ethernet frame is too small or too large.
 
 
-Receiving Ethernet Messages or EthState changes
+!!! Receiving Ethernet Messages or EthState changes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To receive Ethernet frames from other Ethernet controller, a ReceiveMessageHandler must be
@@ -108,7 +108,7 @@ must be registered, which is called whenever the status changes::
 
 .. _sec:api-ethernet-tracing:
 
-Message Tracing
+!!! Message Tracing
 ~~~~~~~~~~~~~~~
 
 The Ethernet Controller is able to trace all received Ethernet messages in PCAP format, either
@@ -118,7 +118,7 @@ By default, message tracing is disabled, but it can be enabled in the settings
 of an Ethernet Controller (see: :ref:`Ethernet Controller Configuration<sec:cfg-participant-ethernet>`).
 Refer to the :ref:`sec:cfg-participant-tracing` configuration section for usage instructions.
 
-PCAP File
+!!! PCAP File
 __________
 
 To trace all received Ethernet messages in a PCAP file, you have to specify a trace sink
@@ -160,7 +160,7 @@ After you successfully run and stopped the simulation, you will find the file
 It can be loaded into a tool like
 `Wireshark <https://www.wireshark.org/>`_ where you can examine the Ethernet trace.
 
-PCAP Named Pipe
+!!! PCAP Named Pipe
 _________________
 
 Using a named pipe allows attaching another program to trace messages of a
@@ -202,14 +202,14 @@ The following will attach *wireshark* to the named pipe created by your VIB simu
   wireshark -ni \\.\pipe\EthernetPipe
 
 
-API and Data Type Reference
+!!! API and Data Type Reference
 --------------------------------------------------
-Ethernet Controller API
+!!! Ethernet Controller API
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygenclass:: ib::sim::eth::IEthController
    :members:
 
-Data Structures
+!!! Data Structures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygenstruct:: ib::sim::eth::EthMessage
    :members:
@@ -222,7 +222,7 @@ Data Structures
 .. doxygenstruct:: ib::sim::eth::EthStatus
    :members:
 
-Enumerations and Typedefs
+!!! Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygentypedef:: ib::sim::eth::EthTxId
 .. doxygentypedef:: ib::sim::eth::EthMac
@@ -231,7 +231,7 @@ Enumerations and Typedefs
 .. doxygenenum:: ib::sim::eth::EthState
 
 
-Usage Examples
+!!! Usage Examples
 ----------------------------------------------------
 
 This section contains complete examples that show the usage and the interaction
@@ -245,7 +245,7 @@ Assumptions:
   :cpp:class:`IEthController*<ib::sim::eth::IEthController>`.
 - All Ethernet controllers are connected to the same switch.
 
-Simple Ethernet Sender / Receiver Example (without VIBE NetworkSimulator)
+!!! Simple Ethernet Sender / Receiver Example (without VIBE NetworkSimulator)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows a successful data transfer from one Ethernet controller
@@ -258,7 +258,7 @@ will always return :cpp:enumerator:`EthTransmitStatus::Transmitted<ib::sim::eth:
    :language: cpp
 
 
-State Transition Example (only with VIBE NetworkSimulator)
+!!! State Transition Example (only with VIBE NetworkSimulator)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows the possible state transitions for an Ethernet controller.
@@ -268,7 +268,7 @@ This example shows the possible state transitions for an Ethernet controller.
    :language: cpp
 
 
-Erroneous Transmissions (only with VIBE NetworkSimulator)
+!!! Erroneous Transmissions (only with VIBE NetworkSimulator)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows different possible erroneous Ethernet transmissions 

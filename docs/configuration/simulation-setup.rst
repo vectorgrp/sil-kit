@@ -1,11 +1,11 @@
 ===================================================
-Simulation Setup
+!!! Simulation Setup
 ===================================================
 
 .. contents:: :local:
    :depth: 3
 
-Overview
+!!! Overview
 ========================================
 The SimulationSetup is a mandatory section in the IbConfig.json. It configures
 all the participants of an VIB simulation and determines how the participants
@@ -54,7 +54,7 @@ configuration.
 
 .. _sec:cfg-participant:
     
-Participants
+!!! Participants
 ========================================
 The Participants section is a list of two or more participant
 configuration. Each participant configuration contains general information,
@@ -177,7 +177,7 @@ This allows tracing simulation messages into binary files.
 
 .. _sec:cfg-participant-controller:
        
-ParticipantController
+!!! ParticipantController
 ----------------------------------------
 
 The optional ParticipantController section enables synchronization with other
@@ -223,7 +223,7 @@ execution limit of 1.010 seconds and a hard limit of 1.5 seconds:
 
 .. _sec:cfg-participant-logger:
        
-Logger
+!!! Logger
 ----------------------------------------
 The Logger configuration is part of the :ref:`participant
 configuration<sec:cfg-participant>`, which allows individual logging behavior
@@ -291,7 +291,7 @@ logs to a file, the following configuration could be used:
 
 .. _sec:cfg-participant-tracing:
        
-Message Tracing
+!!! Message Tracing
 ----------------------------------------
 To enable message tracing on a participant, two configuration options must be set:
 at least one trace sink has to be defined in a *TraceSinks* block of the configuration, and a
@@ -343,7 +343,7 @@ refer to :ref:`EthernetController API<sec:api-ethernet-tracing>`.
 
 .. _sec:cfg-participant-tracesink:
 
-TraceSink
+!!! TraceSink
 ----------------------------------------
 The TraceSink configuration is part of the :ref:`participant
 configuration<sec:cfg-participant>`.
@@ -378,7 +378,7 @@ It allows to trace the IB simulation messages into binary files.
 
 .. _sec:cfg-participant-replaying:
 
-Message Replaying
+!!! Message Replaying
 ----------------------------------------
 
 Similar to the :ref:`sec:cfg-participant-tracing` configuration, two options
@@ -416,7 +416,7 @@ the participant, and a *Replay* block has to be defined in a service instance:
 
 .. _sec:cfg-participant-tracesource:
 
-TraceSource
+!!! TraceSource
 ----------------------------------------
 
 The TraceSource configuration is part of the :ref:`participant
@@ -453,7 +453,7 @@ live simulations.
 
 .. _sec:cfg-participant-replay:
 
-Replay Configuration
+!!! Replay Configuration
 ----------------------------------------
 The replay configuration is part of a participant's service.
 
@@ -507,7 +507,7 @@ Refer to :ref:`sec:replay-foreign` for guidelines on how to use the ``MdfChannel
 
 .. _sec:cfg-participant-can:
 
-CanControllers
+!!! CanControllers
 ----------------------------------------
 
 .. list-table:: CanController Configuration
@@ -528,7 +528,7 @@ CanControllers
 
 .. _sec:cfg-participant-lin:
 
-LinControllers
+!!! LinControllers
 ----------------------------------------
 
 .. list-table:: LinController Configuration
@@ -550,7 +550,7 @@ LinControllers
 
 .. _sec:cfg-participant-ethernet:
 
-EthernetControllers
+!!! EthernetControllers
 ----------------------------------------
 The Ethernet controller configuration is part of the :ref:`participant
 configuration<sec:cfg-participant>`.
@@ -597,7 +597,7 @@ configuration<sec:cfg-participant>`.
 
 .. _sec:cfg-participant-flexray:
 
-FlexRayControllers
+!!! FlexRayControllers
 ----------------------------------------
 The Ethernet controller configuration is part of the :ref:`participant
 configuration<sec:cfg-participant>`.
@@ -647,7 +647,7 @@ configuration<sec:cfg-participant>`.
 
 .. _sec:cfg-participant-genericpublisher:
 
-GenericPublishers
+!!! GenericPublishers
 ----------------------------------------
 The Generic Publisher configuration is part of the :ref:`participant
 configuration<sec:cfg-participant>`.
@@ -686,7 +686,7 @@ configuration<sec:cfg-participant>`.
 
 .. _sec:cfg-participant-genericsub:
 
-GenericSubscribers
+!!! GenericSubscribers
 ----------------------------------------
 The Generic Subscriber configuration is part of the :ref:`participant
 configuration<sec:cfg-participant>`.
@@ -713,420 +713,3 @@ configuration<sec:cfg-participant>`.
      - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
        by this service. (optional)
 
-
-.. _sec:cfg-participant-ioport:
-
-.. _sec:cfg-participant-digital-out:
-
-Digital-Out (Ports)
-----------------------------------------
-The Digital-Out Ports configuration is part of the :ref:`participant
-configuration<sec:cfg-participant>`. The name and initial state of the participant's 
-digital output port instances can be configured in this section:
-
-.. deprecated:: 3.0.7
-.. code-block:: javascript
-
-  "Digital-Out": [
-      { "DO-Port-Name": false }
-  ]
-
-.. versionadded:: 3.0.8
-.. code-block:: javascript
-    
-    "Digital-Out": [
-        { "Name" : "DO-Port-Name", "value" : false}
-    ]
-
-A Digital-Out Port is specified by giving the name and initial state.
-
-.. _sec:cfg-participant-digital-in:
-
-Digital-In (Ports)
-----------------------------------------
-The Digital-In Ports configuration is part of the :ref:`participant
-configuration<sec:cfg-participant>`.
-The names of the participant's  digital input port instances can be configured.
-
-.. code-block:: javascript
-    
-    "Digital-In": [
-        { "Name" : "DI-Port-Name"}
-    ]
-
-.. list-table:: Digital-In Port Configuration
-   :widths: 15 85
-   :header-rows: 1
-
-   * - Property Name
-     - Description
-   * - Name
-     - The name of the Digital-In port
-   * - UseTraceSinks
-     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
-       this port. Trace sinks are referred to by their name and can be used
-       by multiple services. (optional)
-   * - Replay
-     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
-       by this port. (optional)
-
-
-.. _sec:cfg-participant-analog-out:
-
-Analog-Out (Ports)
-----------------------------------------
-The Analog-Out Ports configuration is part of the :ref:`participant
-configuration<sec:cfg-participant>`. The name and initial behavior of the participant's 
-analog output port instances can be configured in this section:
-
-.. deprecated:: 3.0.7
-.. code-block:: javascript
-
-  "Analog-Out": [
-      { "AO-Port-Name": { "value": 7.3, "unit": "V" } }
-  ]
-
-.. versionadded:: 3.0.8
-.. code-block:: javascript
-
-  "Analog-Out": [
-      { "Name": "AO-Port-Name", "value": 7.3, "unit": "V" }
-  ]
-
-.. list-table:: Analog-Out Configuration
-   :widths: 15 85
-   :header-rows: 1
-
-   * - Property Name
-     - Description
-   * - Name
-     - The name of the Analog-Out port
-   * - value
-     - The initial voltage value
-   * - unit
-     - The unit of the voltage value ("mV", "V", "kV")
-   * - UseTraceSinks
-     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
-       this port. Trace sinks are referred to by their name and can be used
-       by multiple services. (optional)
-   * - Replay
-     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
-       by this port. (optional)
-
-
-.. _sec:cfg-participant-analog-in:
-
-Analog-In (Ports)
-----------------------------------------
-The Analog-In Ports configuration is part of the :ref:`participant
-configuration<sec:cfg-participant>`.
-The names of the participant's  analog input port instances can be configured.
-
-.. code-block:: javascript
-    
-    "Analog-In": [
-        { "Name" : "AI-Port-Name"}
-    ]
-
-.. list-table:: Analog-In Port Configuration
-   :widths: 15 85
-   :header-rows: 1
-
-   * - Property Name
-     - Description
-   * - Name
-     - The name of the Analog-In port
-   * - UseTraceSinks
-     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
-       this port. Trace sinks are referred to by their name and can be used
-       by multiple services. (optional)
-   * - Replay
-     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
-       by this port. (optional)
-
-.. _sec:cfg-participant-pwm-out:
-
-Pwm-Out (Ports)
-----------------------------------------
-The Pwm-Out Ports configuration is part of the :ref:`participant
-configuration<sec:cfg-participant>`. The name and initial behavior of the participant's 
-pulse-width modulation output port instances can be configured in this section:
-
-.. deprecated:: 3.0.7
-.. code-block:: javascript
-
-  "Pwm-Out": [
-    { "PWM-Port-Name": { "freq": { "value": 2.5, "unit": "Hz" }, "duty": 0.4 } }
-  ]
-
-.. versionadded:: 3.0.8
-.. code-block:: javascript
-
-  "Pwm-Out": [
-    {
-      "Name": "PWM-Port-Name",
-      "freq": { "value": 2.5, "unit": "Hz" },
-      "duty": 0.4
-    }
-  ]
-
-
-.. list-table:: Pwm-Out Configuration
-   :widths: 15 85
-   :header-rows: 1
-
-   * - Property Name
-     - Description
-   * - Name
-     - The name of the Pwm-Out port
-   * - freq
-     - The initial frequency is specified by its unit ("Hz", "kHz", "MHz", "GHz", "THz") and value.
-   * - duty
-     - The duty cycle specifies the percentage of time of each cycle that the signal stays in the
-       active state. The value range is between 0 (always off) and 1 (always on)
-   * - UseTraceSinks
-     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
-       this port. Trace sinks are referred to by their name and can be used
-       by multiple services. (optional)
-   * - Replay
-     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
-       by this port. (optional)
-
-
-.. _sec:cfg-participant-pwm-in:
-
-Pwm-In (Ports)
-----------------------------------------
-The Pwm-In Ports configuration is part of the :ref:`participant
-configuration<sec:cfg-participant>`.
-The names of the participant's  Pwm input port instances can be configured.
-
-.. code-block:: javascript
-    
-    "Pwm-In": [
-        { "Name" : "PWM-Port-Name"}
-    ]
-
-.. list-table:: Pwm-In Port Configuration
-   :widths: 15 85
-   :header-rows: 1
-
-   * - Property Name
-     - Description
-   * - Name
-     - The name of the Pwm-In port
-   * - UseTraceSinks
-     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
-       this port. Trace sinks are referred to by their name and can be used
-       by multiple services. (optional)
-   * - Replay
-     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
-       by this port. (optional)
-
-.. _sec:cfg-participant-pattern-out:
-
-Pattern-Out (Ports)
-----------------------------------------
-The Pattern-Out Ports configuration is part of the :ref:`participant
-configuration<sec:cfg-participant>`.
-
-.. deprecated:: 3.0.7
-.. code-block:: javascript
-  
-  "Pattern-Out": [
-      { "Pattern-Port-Name": "626565702d62656570" }
-  ]
-
-.. versionadded:: 3.0.8
-.. code-block:: javascript
-  
-  "Pattern-Out": [
-      { "Name": "Pattern-Port-Name", "value": "626565702d62656570" }
-  ]
-
-The pattern-out port instances are specified by giving their name 
-and a hexadecimal pattern string.
-
-.. _sec:cfg-participant-pattern-in:
-
-Pattern-In (Ports)
-----------------------------------------
-The Pattern-In Ports configuration is part of the :ref:`participant
-configuration<sec:cfg-participant>`.
-The names of the participant's  pattern input port instances can be configured.
-
-.. code-block:: javascript
-    
-    "Pattern-In": [
-        { "Name" : "Pattern-Port-Name"}
-    ]
-
-.. list-table:: Pattern-In Port Configuration
-   :widths: 15 85
-   :header-rows: 1
-
-   * - Property Name
-     - Description
-   * - Name
-     - The name of the Pattern-In port
-   * - UseTraceSinks
-     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
-       this port. Trace sinks are referred to by their name and can be used
-       by multiple services. (optional)
-   * - Replay
-     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
-       by this port. (optional)
-
-
-.. _sec:cfg-network-simulators:
-
-NetworkSimulators
------------------
-
-The Network Simulators section of the participant allows to configure 
-which `Links`_ and `Switches`_ should be simulated by a NetworkSimulator. 
-This section is optional.
-
-.. code-block:: javascript
-
-  "NetworkSimulators": [
-      {
-          "Name": "Ethernet-Simulator",
-          "SimulatedLinks": [
-              "FS-Port0",
-              "FS-Port1",
-              ...
-          ],
-          "SimulatedSwitches": [
-              "FrontSwitch",
-              ...
-          ]
-      },
-      ...
-  ],
-
-.. list-table:: NetworkSimulator Configuration
-   :widths: 15 85
-   :header-rows: 1
-
-   * - Property Name
-     - Description
-   * - Name
-     - The name of the simulator
-   * - SimulatedLinks
-     - List of links that should be simulated by this network simulator.
-   * - SimulatedSwitches
-     - List of switches that should be simulated by this network simulator.
-   * - UseTraceSinks
-     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
-       the network simulator. Trace sinks are referred to by their name and can be used
-       by multiple controllers. (optional)
-   * - Replay
-     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
-       by this network simulator. (optional)
-
-
-.. _sec:cfg-switches:
-
-Switches
-========================================
-The Switches section describes the Ethernet Switches that can be simulated
-by the :ref:`Network Simulators<sec:cfg-network-simulators>`. 
-In simulations without Network Simulator, this section is not needed.
-
-.. code-block:: javascript
-
-  "Switches": [
-      {
-          "Name": "FrontSwitch",
-          "Description":  "Located in the front of the car",
-          "Ports": [
-              {
-                  "Name": "Port0",
-                  "VlanIds": [1]
-              },
-              ...
-          ]
-      },
-      ...
-  ]
-
-.. list-table:: Switch Configuration
-   :widths: 15 85
-   :header-rows: 1
-
-   * - Property Name
-     - Description
-   * - Name
-     - The name of the network switch
-   * - Description
-     - A human readable description of the switch
-   * - Ports
-     - List of the Ports of the switch. Each port should be assigned a "Name" and
-       a list of "VlanIds" can be specified.
-
-
-
-.. _sec:cfg-links:
-
-Links
-========================================
-The Links section of the SimulationSetup configuration describes how
-the components of the simulation are connected.
-
-.. code-block:: javascript
-
-  "Links": [
-    {
-        "Name": "CAN1",
-        "Endpoints": [
-            "Participant1/CAN1",
-            "Participant2/CAN1",
-            ...
-        ]
-    },
-    ...
-  ]
-
-.. list-table:: Link Configuration
-   :widths: 15 85
-   :header-rows: 1
-
-   * - Property Name
-     - Description
-   * - Name
-     - The name of the link
-   * - Endpoints
-     - List of endpoints (can be Participants' Controllers, IO Ports and Switch Ports)
-       that are connected to the link.
-
-
-
-
-
-.. _sec:cfg-time-sync:
-
-TimeSync
-========================================
-The TimeSync section of the SimulationSetup configuration allows to configure
-how participants should be synchronized.
-
-.. code-block:: javascript
-
-  "TimeSync": {
-      "SyncPolicy": "Loose",
-      "TickPeriodNs": 1000000
-  }
-
-.. list-table:: TimeSync Configuration
-   :widths: 15 85
-   :header-rows: 1
-
-   * - Property Name
-     - Description
-   * - SyncPolicy
-     - The time sync policy that is used. Allowed values are "Loose" and "Strict".
-       This setting determines whether to wait until data is delivered to other participants 
-       (=Strict) or not (=Loose). The default is Loose.
-   * - TickPeriodNs
-     - Tick period in nano seconds for DiscreteTime synchronization.

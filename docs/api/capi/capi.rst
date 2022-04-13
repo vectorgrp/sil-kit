@@ -1,7 +1,7 @@
 .. _sec:capi:
 
 ===================
-Experimental C API
+!!! Experimental C API
 ===================
 
 .. contents::
@@ -11,7 +11,7 @@ Experimental C API
 
 .. highlight:: c
 
-VIB Entry Point and API Organization
+!!! VIB Entry Point and API Organization
 ====================================
 
 The main entry point of the C API is the function to obtain a ib_Participant*::
@@ -33,63 +33,24 @@ After creation of a Participant it must be ensured that eventually ib_Participan
 with the corresponding pointer to the ib_Participant entity.
 
 
-API and Data Type Reference
+!!! API and Data Type Reference
 ===========================
 
-General API
+!!! General API
 -----------
 .. doxygenfunction:: ib_ReturnCodeToString
 .. doxygenfunction:: ib_GetLastErrorString
 
-Participant API
+!!! Participant API
 -------------------------
+
+.. doxygenfunction:: ib_Participant_Create
+.. doxygenfunction:: ib_Participant_Destroy
 
 Most creator functions for other objects (such as bus controllers) require an ib_Participant, 
 which is the factory object, as input parameter.
 
-Participant creation
-~~~~~~~~~~~~~~~~~~~~
-.. doxygenfunction:: ib_Participant_Create
-.. doxygenfunction:: ib_Participant_Destroy
-
-State handlers
-~~~~~~~~~~~~~~
-.. doxygenfunction:: ib_Participant_SetInitHandler
-.. doxygenfunction:: ib_Participant_SetStopHandler
-.. doxygenfunction:: ib_Participant_SetShutdownHandler
-
-Simulation tasks
-~~~~~~~~~~~~~~~~
-.. doxygenfunction:: ib_Participant_SetPeriod
-.. doxygenfunction:: ib_Participant_SetSimulationTask
-.. doxygenfunction:: ib_Participant_SetSimulationTaskAsync
-.. doxygenfunction:: ib_Participant_CompleteSimulationTask
-
-Running
-~~~~~~~
-.. doxygenfunction:: ib_Participant_Run
-.. doxygenfunction:: ib_Participant_RunAsync
-.. doxygenfunction:: ib_Participant_WaitForRunAsyncToComplete
-
-System control
-~~~~~~~~~~~~~~
-.. doxygenfunction:: ib_Participant_Initialize
-.. doxygenfunction:: ib_Participant_ReInitialize
-.. doxygenfunction:: ib_Participant_RunSimulation
-.. doxygenfunction:: ib_Participant_StopSimulation
-.. doxygenfunction:: ib_Participant_Pause
-.. doxygenfunction:: ib_Participant_Continue
-.. doxygenfunction:: ib_Participant_Shutdown
-.. doxygenfunction:: ib_Participant_PrepareColdswap
-.. doxygenfunction:: ib_Participant_ExecuteColdswap
-.. doxygenfunction:: ib_Participant_GetParticipantState
-.. doxygenfunction:: ib_Participant_GetSystemState
-.. doxygenfunction:: ib_Participant_RegisterSystemStateHandler
-.. doxygenfunction:: ib_Participant_RegisterParticipantStateHandler
-.. doxygenfunction:: ib_Participant_SetRequiredParticipants
-
-
-Can API
+!!! Can API
 -------
 .. doxygenfunction:: ib_Can_Controller_Create
 .. doxygenfunction:: ib_Can_Controller_Start
@@ -103,14 +64,14 @@ Can API
 .. doxygenfunction:: ib_Can_Controller_RegisterStateChangedHandler
 .. doxygenfunction:: ib_Can_Controller_RegisterErrorStateChangedHandler
 
-Ethernet API
+!!! Ethernet API
 ------------
 The Ethernet API consists of two main parts:
 
 # The Ethernet controller
 # The Ethernet frame
 
-Ethernet Controller
+!!! Ethernet Controller
 ~~~~~~~~~~~~~~~~~~~
 
 The Ethernet controller interacts with the corresponding Ethernet bus and send Ethernet frames.
@@ -125,7 +86,7 @@ The Ethernet frames are the single messages/frames, that are transmitted over th
 .. doxygenfunction:: ib_Ethernet_Controller_RegisterBitRateChangedHandler
 .. doxygenfunction:: ib_Ethernet_Controller_SendFrame
 
-Ethernet Frame
+!!! Ethernet Frame
 ~~~~~~~~~~~~~~
 
 The ib_Ethernet_Frame corresponds to an ethernet raw frame.
@@ -134,23 +95,23 @@ The union type within the ib_Ethernet_Frame helps when manual construction of a 
 
 .. note:: For an example of manual frame construction one can refer to the C Ethernet demo.
 
-Data API
+!!! Data API
 --------
 The Data API provides data publish and subscribe functionalities to the Integration Bus. 
 It consists of DataPublishers and DataSubscribers.
 
-DataPublishers
+!!! DataPublishers
 ~~~~~~~~~~~~~~
 .. doxygenfunction:: ib_Data_Publisher_Create
 .. doxygenfunction:: ib_Data_Publisher_Publish
 
-DataSubscribers
+!!! DataSubscribers
 ~~~~~~~~~~~~~~~
 .. doxygenfunction:: ib_Data_Subscriber_Create
 .. doxygenfunction:: ib_Data_Subscriber_SetDefaultReceiveDataHandler
 .. doxygenfunction:: ib_Data_Subscriber_RegisterSpecificDataHandler
 
-Handlers
+!!! Handlers
 ~~~~~~~~
 The DataSubscriber is created with a handler for data reception and a handler
 for notification about new sources:
@@ -158,17 +119,17 @@ for notification about new sources:
 .. doxygentypedef:: ib_Data_Handler_t
 .. doxygentypedef:: ib_Data_NewDataSourceHandler_t
 
-Data Structures
+!!! Data Structures
 ~~~~~~~~~~~~~~~
 .. doxygenstruct:: ib_Data_ExchangeFormat
    :members:
 
-Rpc API
+!!! Rpc API
 -------
 The Rpc API provides client/server based Rpc functionality. 
 It consists of RpcClients and RpcServers and a method to discover remote RpcServers.
 
-RpcClients
+!!! RpcClients
 ~~~~~~~~~~
 .. doxygenfunction:: ib_Rpc_Client_Create
 .. doxygenfunction:: ib_Rpc_Client_Call
@@ -176,7 +137,7 @@ RpcClients
 A RpcClient is created with a handler for the call return by RpcServers:
 .. doxygentypedef:: ib_Rpc_ResultHandler_t
 
-RpcServers
+!!! RpcServers
 ~~~~~~~~~~
 .. doxygenfunction:: ib_Rpc_Server_Create
 .. doxygenfunction:: ib_Rpc_Server_SubmitResult
@@ -184,7 +145,7 @@ RpcServers
 A RpcServers is created with a handler to process incoming calls by RpcClients:
 .. doxygentypedef:: ib_Rpc_CallHandler_t
 
-RpcServer Discovery
+!!! RpcServer Discovery
 ~~~~~~~~~~~~~~~~~~~
 
 A participant can poll for already known RpcServers:
@@ -195,7 +156,7 @@ The method takes a handler with the discovery results:
 
 .. doxygentypedef:: ib_Rpc_DiscoveryResultHandler_t
 
-Data Structures
+!!! Data Structures
 ~~~~~~~~~~~~~~~
 .. doxygenstruct:: ib_Rpc_ExchangeFormat
    :members:
@@ -204,7 +165,7 @@ Data Structures
 .. doxygentypedef:: ib_Rpc_CallHandle
 .. doxygentypedef:: ib_Rpc_CallStatus
 
-FlexRay API
+!!! FlexRay API
 -----------
 The FlexRay API consists of the following parts:
 
@@ -214,7 +175,7 @@ The FlexRay API consists of the following parts:
   Message, MessageAck, Wakeup, ControllerStatus, PocStatus, Symbol, SymbolAck, CycleStart
   
  
-FlexRay Controller
+!!! FlexRay Controller
 ~~~~~~~~~~~~~~~~~~
 A FlexRay controller interacts with the configured FlexRay bus and sends FlexRay frames and other events on it's own behalf.
 Note that it is not possible to explicitly send frames or other events, nor exist any API functions to construct these events.
@@ -244,7 +205,7 @@ To configure these frames, the API provides functions to manipulate TX buffers.
 .. doxygenfunction:: ib_FlexRay_Controller_RegisterSymbolAckHandler
 .. doxygenfunction:: ib_FlexRay_Controller_RegisterCycleStartHandler
 
-Data Structures
+!!! Data Structures
 ~~~~~~~~~~~~~~~
 .. doxygenstruct:: ib_FlexRay_Message
    :members:
@@ -259,7 +220,7 @@ Data Structures
 .. doxygenstruct:: ib_FlexRay_PocStatus
    :members:
 
-Enumerations and Typedefs
+!!! Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygentypedef:: ib_FlexRay_MacroTick
 .. doxygentypedef:: ib_FlexRay_MicroTick
@@ -275,12 +236,12 @@ Enumerations and Typedefs
 .. doxygentypedef:: ib_FlexRay_WakeupStatusType
 
 
-Lin API
+!!! Lin API
 -------
 The Lin API for the C language provides communication in a Lin-Bus master/slave-architecture. 
 The functionality is analogous to the C++ API described in :ref:`sec:lin`.
   
-Lin Controller
+!!! Lin Controller
 ~~~~~~~~~~~~~~
 
 **A Lin controller is created with the following function:**
@@ -311,7 +272,7 @@ Lin Controller
 .. doxygenfunction:: ib_Lin_Controller_Wakeup
 .. doxygenfunction:: ib_Lin_Controller_WakeupInternal
 
-Data Structures
+!!! Data Structures
 ~~~~~~~~~~~~~~~
 .. doxygenstruct:: ib_Lin_ControllerConfig
    :members:
@@ -320,7 +281,7 @@ Data Structures
 .. doxygenstruct:: ib_Lin_FrameResponse
    :members:
 
-Enumerations and Typedefs
+!!! Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygentypedef:: ib_Lin_Controller
 .. doxygentypedef:: ib_Lin_ControllerStatus
@@ -338,6 +299,6 @@ The Logger API can be used to write log messages.
 .. doxygenfunction:: ib_Participant_GetLogger
 .. doxygenfunction:: ib_Logger_Log
 
-Enumerations and Typedefs
+!!! Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygentypedef:: ib_LoggingLevel

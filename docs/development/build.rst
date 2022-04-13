@@ -1,11 +1,11 @@
 ====================================
-Getting Started as a VIB Developer
+!!! Getting Started as a VIB Developer
 ====================================
 
 .. contents::
 
 
-Build Prerequisites
+!!! Build Prerequisites
 ~~~~~~~~~~~~~~~~~~~~
 To get started developing you'll need the following prerequisites:
  - `Git`_
@@ -21,7 +21,7 @@ For generating the documentation, you will require:
  - doxygen
 
 
-Build Configuration
+!!! Build Configuration
 ~~~~~~~~~~~~~~~~~~~
 The VIB build system is based on CMake and can be customized at configuration time.
 The following options are available:
@@ -40,7 +40,7 @@ In general, the options can be combined and set using the cmake-gui, your IDE, o
     cmake .. -D IB_BUILD_TESTS=ON -D IB_BUILD_DOCS=ON 
 
 
-Building Documentation
+!!! Building Documentation
 ~~~~~~~~~~~~~~~~~~~~~~
 
 You will need to set the IB_BUILD_DOCS option::
@@ -54,7 +54,7 @@ The documentation target is called *Doxygen*::
 Refer to :doc:`rst-help` for guidelines on formatting the documentation.
 
 
-Packaging
+!!! Packaging
 ~~~~~~~~~
 VIB uses CPack to generate the release distributions in ZIP form.
 It can be packaged using the *package* target::
@@ -91,7 +91,7 @@ Its contents are as follows:
 
 .. _sec:build-demos:
 
-Building the Demos
+!!! Building the Demos
 ~~~~~~~~~~~~~~~~~~
 
 Building the demos from within the source tree is straight forward: 
@@ -106,7 +106,7 @@ Or by changing the ``find_package(IntegrationBus ... PATHS path/to/VIB)`` statem
 in the ``IntegrationBus-Demos/CMakeLists.txt`` directory.
 
 
-Architecture
+!!! Architecture
 ~~~~~~~~~~~~
 
 Have a look at our :ref:`architecture overview <base-architecture>`.

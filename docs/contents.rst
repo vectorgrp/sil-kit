@@ -1,18 +1,19 @@
 ==========
-Contents
+!!! Contents
 ==========
            
 .. toctree::
   :maxdepth: 2
-
+  
   index
   usage/quickstart
-  vibes/overview
-  configuration/configuration
-  api/api
   simulation/simulation
-  usage/utilities
+  api/api
   usage/demos
+  configuration/configuration
+  usage/utilities
   usage/replay
+  vibes/overview
   CHANGELOG
   licenses/license
+  glossary

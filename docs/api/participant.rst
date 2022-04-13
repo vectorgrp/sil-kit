@@ -1,5 +1,5 @@
 =============
-Participant
+!!! Participant
 =============
 
 .. contents:: :local:
@@ -12,7 +12,7 @@ Refer to :ref:`Base Architecture<base-architecture>` for an overview of the VIB.
 
 .. |IParticipant| replace:: :cpp:class:`IParticipant<ib::mw::IParticipant>` 
 
-Accessing the Participant
+!!! Accessing the Participant
 ~~~~~~~~~~~~~~~~~~~~~~~~
 To create an |IParticipant| you have to include the 
 :ref:`ib/IntegrationBus.hpp<sec:header-vib-main>` and call the :ref:`Participant API<sec:participant-factory>`
@@ -26,7 +26,7 @@ configuration, a participant name and a domain ID.
 
 .. _sec:iparticipant-api:
 
-The IParticipant API
+!!! The IParticipant API
 ~~~~~~~~~~~~~~~~~~~
 
 The instantiated |IParticipant| can then be used to access the other services
@@ -45,7 +45,7 @@ of the VIB.
    :members:
 
 
-VIB Version
+!!! VIB Version
 ~~~~~~~~~~~
 Version information about the currently running VIB instance
 can be queried using the following functions:

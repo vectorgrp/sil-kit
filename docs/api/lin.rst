@@ -1,7 +1,7 @@
 .. _sec:lin:
 
 ===================
-LIN Service API
+!!! LIN Service API
 ===================
 
 .. contents::
@@ -11,10 +11,10 @@ LIN Service API
 
 .. highlight:: cpp
    
-Using the LIN Controller
+!!! Using the LIN Controller
 -------------------------
 
-Initialization
+!!! Initialization
 ~~~~~~~~~~~~~~~~~~~~
 
 Before the LIN Controller can be used, it must be initialized. The
@@ -49,7 +49,7 @@ Note that :cpp:func:`ILinController::Init()<ib::sim::lin::ILinController::Init>`
 should be called in the InitHandler of a ParticipantController.
 
 
-Initiating LIN Transmissions
+!!! Initiating LIN Transmissions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Data is transfered in the form of a LIN
@@ -62,7 +62,7 @@ which requires that a corresponding frame response was configured
 befor at any LIN controller
 (:cpp:func:`ILinController::SetFrameResponse()<ib::sim::lin::ILinController::SetFrameResponse>`).
 
-Sending Data to Slaves
+!!! Sending Data to Slaves
 ________________________________________
 
 To send data, a LIN :cpp:class:`Frame<ib::sim::lin::Frame>` must be setup with the LIN ID,
@@ -123,7 +123,7 @@ A successful transmission is confirmed via the registered callback, e.g.::
     :cpp:func:`ILinController::SendFrameHeader()<void ib::sim::lin::ILinController::SendFrameHeader(LinIdT, std::chrono::nanoseconds)>`.
 
 
-Receiving Data from a Slave
+!!! Receiving Data from a Slave
 __________________________________________
 
 To receive data from a LIN slave, a FrameStatusHandler must be registered, which is called by the LIN
@@ -182,21 +182,21 @@ registered frameStatusHandler will be called as follows::
     If no LIN slave provides a frame response, the FrameStatus::LIN_RX_NO_RESPONSE will be
     used.
 
-Message Tracing
+!!! Message Tracing
 ~~~~~~~~~~~~~~~
 The LinController supports message tracing in MDF4 format.
 This is provided by the :ref:`VIBE MDF4Tracing<mdf4tracing>` extension.
 Refer to the :ref:`sec:cfg-participant-tracing` configuration section for usage instructions.
 
      
-API and Data Type Reference
+!!! API and Data Type Reference
 --------------------------------------------------
-LIN Controller API
+!!! LIN Controller API
 ~~~~~~~~~~~~~~~~~~~~
 .. doxygenclass:: ib::sim::lin::ILinController
    :members:
 
-Data Structures
+!!! Data Structures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygenstruct:: ib::sim::lin::Frame
    :members:
@@ -205,7 +205,7 @@ Data Structures
 .. doxygenstruct:: ib::sim::lin::ControllerConfig
    :members:
 
-Enumerations and Typedefs
+!!! Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygentypedef:: ib::sim::lin::LinIdT
 .. doxygenenum:: ib::sim::lin::ChecksumModel
@@ -218,7 +218,7 @@ Enumerations and Typedefs
 .. doxygenenum:: ib::sim::lin::ControllerStatus
      
 
-Usage Examples
+!!! Usage Examples
 ----------------------------------------------------
 
 This section contains more complex examples that show the interaction of two or
@@ -242,7 +242,7 @@ Assumptions:
   usages of the API.
 
   
-Successful Transmission from Master to Slave
+!!! Successful Transmission from Master to Slave
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows a successful data transfer from a LIN master to a LIN
@@ -252,7 +252,7 @@ slave. The transmission must be initiated by the master.
    examples/lin/Master_to_Slave_LIN_TX_OK.cpp
    :language: cpp
    
-Successful Transmission from Slave to Master
+!!! Successful Transmission from Slave to Master
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows a successful data transfer from a LIN Slave to a LIN
@@ -262,7 +262,7 @@ master. The transmission must be initiated by the master.
    examples/lin/Slave_to_Master_LIN_RX_OK.cpp
    :language: cpp
 
-Successful Transmission from Slave to Slave
+!!! Successful Transmission from Slave to Slave
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows how data is transferred from one LIN slave to another
@@ -272,7 +272,7 @@ one. The data transfer must be initiated by a LIN master.
    examples/lin/Slave_to_Slave_LIN_TX_OK.cpp
    :language: cpp
               
-Erroneous Transmission from Master to Slave - Multiple Responses
+!!! Erroneous Transmission from Master to Slave - Multiple Responses
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows what happens when a master atempts to send a Frame while
@@ -282,7 +282,7 @@ there is slave that has configured a TX response for the same LIN ID.
    examples/lin/Master_to_Slave_LIN_TX_ERROR.cpp
    :language: cpp
    
-Erroneous Transmission from Slave to Master - No Response
+!!! Erroneous Transmission from Slave to Master - No Response
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows what happens when a master initiates a transmission and no
@@ -298,7 +298,7 @@ slave hasconfigured a TX response for the this LIN ID.
    behavior and error code would be the same for the non-AUTOSAR
    interface.
 
-Erroneous Transmission from Slave to Master - Multiple Responses
+!!! Erroneous Transmission from Slave to Master - Multiple Responses
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows what happens when a master initiates a transmission where
@@ -308,7 +308,7 @@ multiple slaves have configured TX responses for the same LIN ID.
    examples/lin/Slave_to_Master_LIN_RX_ERROR.cpp
    :language: cpp
 
-Go To Sleep
+!!! Go To Sleep
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows how to initiate a Go To Sleep and when the controller switch
@@ -324,7 +324,7 @@ from operational to sleep mode.
     ID 0x3C for reception. However, the FrameStatusHandler is
     only called if ID 0x3C is configured for reception.
 
-Wake Up
+!!! Wake Up
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows how to wake up a LIN bus. The example assumes that both
@@ -335,7 +335,7 @@ the end of the previous example.
    examples/lin/Wake_Up.cpp
    :language: cpp
 
-FrameResponseUpdateHandler
+!!! FrameResponseUpdateHandler
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows how the FrameResponseUpdate handler provides direct access to
@@ -349,7 +349,7 @@ diagnostic purposes and not required for regular operation of a LIN controller.
 
 
               
-The new LIN Controller API
+!!! The new LIN Controller API
 ----------------------------------------------------
 
 This version of the Vector Integration Bus introduces a redesigned LIN API with a clear
@@ -368,7 +368,7 @@ to adapt to the changes. This section lists the major changes and the documentat
 the new API provides examples on how to use it.
 
 
-Major Changes
+!!! Major Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Compared to the previous design, the new LIN Controller API provides the following
@@ -400,7 +400,7 @@ benefits:
 
 .. _sec:datatype-changes:
 
-Overview of Data Type Changes
+!!! Overview of Data Type Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   - :cpp:type:`LinId` has been renamed to :cpp:type:`LinIdT<ib::sim::lin::LinIdT>`.
   - The old enum :cpp:enum:`ControllerMode<ib::sim::lin::ControllerMode_>`,

@@ -12,6 +12,7 @@
 
 import os
 import sys
+#import sphinx_rtd_theme
 sys.path.insert(0, os.path.abspath('../ThirdParty/breathe/'))
 
 # -- Project information -----------------------------------------------------
@@ -19,9 +20,9 @@ sys.path.insert(0, os.path.abspath('../ThirdParty/breathe/'))
 project = 'IntegrationBus'
 copyright = 'Vector Informatik GmbH. All rights reserved.'
 author = 'Vector Informatik GmbH'
-version = '1.0.0'
+version = '4.0.0'
 # The full version, including alpha/beta/rc tags
-release = '1.0.0'
+release = '4.0.0'
 
 ###  The master toctree document. ###
 # This is used mainly for the html_sidebars: globaltoc.html to show a
@@ -36,7 +37,15 @@ master_doc = 'contents'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = [ "breathe" ]
+extensions = [ 
+    #'sphinx_rtd_theme',
+    'sphinx.ext.autosectionlabel',
+    "breathe" ]
+
+# Additional flags to further configure Sphinx
+numfig = True
+numfig_secnum_depth = 1
+numfig_format = {'figure': 'Figure %s'}
 
 # Breathe Configuration
 # The breathe project property is already set in the CMakeLists.txt
@@ -60,6 +69,7 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
+#html_theme = 'sphinx_rtd_theme'
 html_theme = 'bizstyle'
 
 html_sidebars = {
@@ -71,3 +81,7 @@ html_sidebars = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+html_css_files = [
+    #'custom.css'
+]

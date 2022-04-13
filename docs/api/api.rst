@@ -1,15 +1,16 @@
 =======
-VIB API
+!!! API
 =======
 .. |Participant| replace:: :doc:`Participant<participant>`
 .. |header| replace:: :doc:`header<header>`
+
 
 This document describes the user available programming interfaces of the Vector
 Integration Bus (VIB). If you are not yet familiar with the VIB, have a look at
 the :doc:`Quick Start<../usage/quickstart>`.
 
 
-VIB Entry Point and API Organization
+!!! VIB Entry Point and API Organization
 ------------------------------------
 
 The Participant constitutes the main entry point into the Integration Bus API.
@@ -22,9 +23,9 @@ The Participant constitutes the main entry point into the Integration Bus API.
 
 .. _sec:api-services:
 
-Services
+!!! Services
 --------
-Vehicle Network Controller
+!!! Vehicle Network Controller
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 Several different vehicular networks are supported by corresponding
 controller interfaces.
@@ -37,7 +38,7 @@ controller interfaces.
   flexray
   ethernet
 
-Data Messages, Generic Messages, Rpc and IO
+!!! Data Messages and Rpc
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 These services do not model a real-world bus and can be used for
@@ -47,11 +48,9 @@ generic programming and interoperability tasks.
   :maxdepth: 1
   
   datamessage
-  genericmessage
   rpc
-  io
 
-State Handling and Synchronization
+!!! State Handling and Synchronization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The following services provide time synchronization and orchestrated state
@@ -64,7 +63,7 @@ management.
   systemcontroller
   systemmonitor
 
-Experimental C API
+!!! Experimental C API
 ------------------------------------
 The Integration Bus API contains an experimental C API, that enables C 
 developers to integrate the Integration Bus directly into their
@@ -80,7 +79,7 @@ applications.
 
   capi/capi
 
-Developer Documentation
+!!! Developer Documentation
 -----------------------
 The following documentation is intended for developers working on the 
 Integration Bus itself.

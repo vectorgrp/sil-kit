@@ -1,5 +1,5 @@
 ===============
-VIB Quick Start
+!!! Quick Start
 ===============
 
 .. |Participant| replace:: :ref:`Participant<sec:participant-factory>`
@@ -19,7 +19,7 @@ required to understand the functionality is briefly discussed, then the build pr
 
 .. _sec:quickstart-terminology:
 
-Terminology
+!!! Terminology
 -----------
 
 .. list-table:: 
@@ -66,11 +66,11 @@ for example the :ref:`VAsio Middleware<sec:mwcfg-vasio>` requires the :ref:`sec:
 The :ref:`sec:util-launcher` is designed to simplify starting ensembles of programs
 that make up elaborate simulations environments.
 
-Writing your first VIB application
+!!! Writing your first VIB application
 ----------------------------------
 This tutorial assumes that you are familiar with `CMake (https://cmake.org) <https://cmake.org>`_ and C++.
 
-Using the VIB package
+!!! Using the VIB package
 ~~~~~~~~~~~~~~~~~~~~~
 The VIB distribution contains a self-contained and deployable installation in the *IntegrationBus* directory.
 The  CMake build configuration required is exported to ``IntegrationBus/lib/cmake/IntegrationBus`` and
@@ -89,7 +89,7 @@ If you use another method to build your software you can directly use the ``Inte
 
 .. _sec:quickstart-simple:
 
-A simple Generic Message application
+!!! A simple Generic Message application
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 We'll create a simple, self-contained VIB application that uses :doc:`Generic Messages<../api/genericmessage>`
 to exchange user-defined data among its participants.
@@ -167,7 +167,7 @@ The complete source code of this sample can be found here: :download:`CMakeLists
 :download:`simple.cpp<sample_vib/simple.cpp>` :download:`simple.json<sample_vib/simple.json>`
 
 
-Further Reading
+!!! Further Reading
 ---------------
 
 More real-world examples, involving time synchronization and simulated

@@ -1,5 +1,5 @@
 ===================
-CAN Service API
+!!! CAN Service API
 ===================
 
 .. contents::
@@ -9,10 +9,10 @@ CAN Service API
 
 .. highlight:: cpp
 
-Using the CAN Controller
+!!! Using the CAN Controller
 -------------------------
 
-Initialization
+!!! Initialization
 ~~~~~~~~~~~~~~~~~~~~
 
 Before the CAN Controller can be used, the baud rate needs to be set by passing it to
@@ -36,7 +36,7 @@ Then, the controller is started::
    to have no effect.
 
 
-Sending CAN Messages
+!!! Sending CAN Messages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Data is transfered in the form of a :cpp:class:`CanMessage<ib::sim::can::CanMessage>`.
@@ -72,7 +72,7 @@ possible that the transmit queue overflows causing the handler to be called with
 :cpp:enumerator:`TransmitQueueFull<ib::sim::can::TransmitQueueFull>` signaling a transmission failure.
 
 
-Receiving CAN Messages
+!!! Receiving CAN Messages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To receive data from other CAN controller, a ReceiveMessageHandler must be
@@ -83,27 +83,27 @@ registered, which is called by the CAN controller whenever a CAN message is rece
       [](ICanController*, const CanMessage&) {};
   canController->RegisterReceiveMessageHandler(receiveMessageHandler);
 
-Message Tracing
+!!! Message Tracing
 ~~~~~~~~~~~~~~~
 The CanController supports message tracing in MDF4 format.
 This is provided by the :ref:`VIBE MDF4Tracing<mdf4tracing>` extension.
 Refer to the :ref:`sec:cfg-participant-tracing` configuration section for usage instructions.
 
-API and Data Type Reference
+!!! API and Data Type Reference
 --------------------------------------------------
-CAN Controller API
+!!! CAN Controller API
 ~~~~~~~~~~~~~~~~~~~~
 .. doxygenclass:: ib::sim::can::ICanController
    :members:
 
-Data Structures
+!!! Data Structures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygenstruct:: ib::sim::can::CanMessage
    :members:
 .. doxygenstruct:: ib::sim::can::CanTransmitAcknowledge
    :members:
 
-Enumerations and Typedefs
+!!! Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygentypedef:: ib::sim::can::CanTxId
 .. doxygenenum:: ib::sim::can::CanControllerState
@@ -111,7 +111,7 @@ Enumerations and Typedefs
 .. doxygenenum:: ib::sim::can::CanTransmitStatus
 
 
-Usage Examples
+!!! Usage Examples
 ----------------------------------------------------
 
 This section contains complete examples that show the usage of the CAN controller
@@ -119,13 +119,13 @@ and the interaction of two or more controllers. Although the CAN controllers wou
 typically belong to different participants and reside in different processes,
 their interaction is shown sequentially to demonstrate cause and effect.
 
-Assumptions:
+!!! Assumptions:
 
 - *canReceiver*, *canSender* are of type
   :cpp:class:`ICanController*<ib::sim::can::ICanController>`.
 - All CAN controllers are connected on the same CAN bus.
 
-Simple CAN Sender / Receiver Example
+!!! Simple CAN Sender / Receiver Example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows a successful data transfer from one CAN controller

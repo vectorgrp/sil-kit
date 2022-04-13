@@ -1,7 +1,7 @@
 .. _sec:mwcfg:
 
 ===================================================
-Middleware Config
+Middleware Configuration
 ===================================================
 
 .. contents:: :local:
@@ -10,51 +10,41 @@ Middleware Config
 Overview
 --------------------
 
-Throughout its development, Vector Integration Bus offered multiple middlewares to choose from.
-The now discontinued FastRtps based middleware is no longer supported, however it remains
-visible in configuration values.
-The currently supported middleware is boost ASIO based and was specifically designed for the Vector
+The Vector Integration Bus is powered by the Vector VAsio middleware. 
+This middleware is open source and included in the sources of the Vector Integration Bus.
+The currently supported middleware is *Boost.Asio* based and was specifically designed for the Vector
 Integration Bus as a transport layer.
 
-The active middleware can be configured as follows.
-
-.. admonition:: Note
-
-    FastRTPS is now discontinued.
-    All users should use the generic :cpp:func:`CreateParticipant<ib::CreateParticipant()>` API
-    together with the VAsio middleware (which is the default).
-
+The middleware can be configured as follows.
 
 .. _sec:mwcfg-vasio:
 
-Configuring the VAsio Middleware
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Configuration
+--------------------
 
 For the initial discovery of the VIB participants, the VAsio middleware uses a registry
 process at a preconfigured hostname and port. By default, the registry is expected to be
 running on localhost listening on Port 8500. These values can be changed via the new
-*/MiddlewareConfig/VAsio* section, e.g.:
+*/Middleware/Registry* section, e.g.:
 
 
 .. code-block:: javascript
 
     {
         ...
-        "MiddlewareConfig": {
-            "ActiveMiddleware": "VAsio",
-            "VAsio": {
-                "Registry": {
-                    "Hostname": "remotehost",
-                    "Port": 14014,
-                    "Logger": {
-                        ...
-                    },
-                    "ConnectAttempts": 1
+        "Middleware": {
+            "Registry": {
+                "Hostname": "remotehost",
+                "Port": 14014,
+                "Logging": {
+                    ...
                 },
-                "TcpNoDelay": false,
-                "TcpQuickAck": false,
-                "TcpSendBufferSize": 1024,
-                "TcpReceiveBufferSize": 1024,
+                "ConnectAttempts": 1
+            },
+            "TcpNoDelay": false,
+            "TcpQuickAck": false,
+            "TcpSendBufferSize": 1024,
+            "TcpReceiveBufferSize": 1024
             }
         }
     }
@@ -98,20 +88,12 @@ running on localhost listening on Port 8500. These values can be changed via the
 
    * - Port
      - The base port to be used by participants when connecting to the IbRegistry.
-       By default, the registry is expected to listen on the port 8500 + *IbDomainId*.
+       By default, the registry is expected to listen on port 8500 + *IbDomainId*.
 
-   * - Logger
+   * - Logging
      - Optional :ref:`Logger configuration<sec:cfg-participant-logger>` for the logger used by the registry.
 
    * - ConnectAttempts
      - Number of connects to the registry a participant should attempt before giving up and signaling an error.
        By default, only a single connect is attempted.
 
-.. _sec:participant-factory:
-
-Participant Factory Method
-----------------------------------------
-
-CreateParticipant
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygenfunction:: ib::CreateParticipant

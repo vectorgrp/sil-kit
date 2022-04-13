@@ -1,4 +1,4 @@
-VIB-Registry Library
+!!! VIB-Registry Library
 ~~~~~~~~~~~~~~~~~~~~
 
 The VIB Registry, required to run the VAsio middleware, can be used as an
@@ -15,7 +15,7 @@ Normally it is used as a standalone executable for deployments, refer to
     ``IntegrationBus-NonRedistributable/`` subdirectory of the official VIB
     package.
 
-Usage
+!!! Usage
 -----
 The prerequisites to run the VIB Registry from the shared library are as
 follows:
@@ -29,7 +29,7 @@ follows:
 Use the public API described below in your VIB application to implicitly load
 and use the shared library.
 
-VIB-Registry API
+!!! VIB-Registry API
 ----------------
 The vib-registry shared library needs to reside in the search path specified in the
 extension configuration (see :doc:`../configuration/extension-configuration`).
