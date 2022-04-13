@@ -123,11 +123,13 @@ public:
             throw std::runtime_error("SignalMonitor: cannot set write end of pipe to non blocking: " + ErrorMessage());
 
         signal(SIGINT, &systemHandler);
+        signal(SIGTERM, &systemHandler);
         _worker = std::thread{std::bind(&SignalMonitor::workerMain, this)};
     }
     ~SignalMonitor()
     {
         signal(SIGINT, SIG_DFL);
+        signal(SIGTERM, SIG_DFL);
         Notify(-1);
         _worker.join();
         ::close(_pipe[0]);
