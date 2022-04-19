@@ -19,8 +19,6 @@ class ISystemMonitor;
 
 class ISystemController;
 
-class ISyncMaster;
-
 class ITimeProvider;
 } // namespace sync
 } // namespace mw
