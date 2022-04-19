@@ -22,7 +22,7 @@ DataPublisher::DataPublisher(mw::IParticipantInternal* participant, mw::sync::IT
 
 void DataPublisher::Publish(std::vector<uint8_t> data)
 {
-    DataMessage msg{std::move(data)};
+    DataMessageEvent msg{_timeProvider->Now(), std::move(data)};
     _participant->SendIbMessage(this, std::move(msg));
 }
 

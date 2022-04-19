@@ -35,14 +35,14 @@ typedef struct ib_Rpc_Client ib_Rpc_Client;
 
 /*! \brief Properties of a discovered Rpc server
 * 
-* \param functionName The name of the function provided the Rpc server.
+* \param rpcChannel The name of the function provided the Rpc server.
 * \param exchangeFormat The exchangeFormat of the Rpc server.
 * \param labelList The labels of the Rpc server.
 */
 typedef struct ib_Rpc_DiscoveryResult
 {
     ib_InterfaceIdentifier interfaceId;
-    const char* functionName;
+    const char* rpcChannel;
     ib_Rpc_ExchangeFormat* exchangeFormat;
     ib_KeyValueList* labelList;
 } ib_Rpc_DiscoveryResult;
@@ -95,7 +95,8 @@ typedef void (*ib_Rpc_DiscoveryResultHandler_t)(void* context, const ib_Rpc_Disc
 /*! \brief Create a Rpc server on a simulation participant with the provided properties.
 * \param out Pointer to which the resulting Rpc server reference will be written.
 * \param participant The simulation participant for which the Rpc server should be created.
-* \param functionName The name by which Rpc clients identify and connect to this Rpc server.
+* \param controllerName The name of this controller.
+* \param rpcChannel The name by which Rpc clients identify and connect to this Rpc server.
 * \param exchangeFormat A meta description of the data that will be processed and returned by this Rpc server.
 * \param labels A list of key-value pairs of this Rpc server. The labels are relevant for matching Rpc clients and
 * Rpc servers.
@@ -103,20 +104,22 @@ typedef void (*ib_Rpc_DiscoveryResultHandler_t)(void* context, const ib_Rpc_Disc
 * \param callHandler A callback function that is triggered on invocation of the server functionality.
 */
 IntegrationBusAPI ib_ReturnCode ib_Rpc_Server_Create(ib_Rpc_Server** out, ib_Participant* participant,
-                                                     const char* functionName, ib_Rpc_ExchangeFormat* exchangeFormat,
+                                                     const char* controllerName, const char* rpcChannel,
+                                                     ib_Rpc_ExchangeFormat* exchangeFormat,
                                                      const ib_KeyValueList* labels, void* context,
                                                      ib_Rpc_CallHandler_t callHandler);
 
 
 typedef ib_ReturnCode (*ib_Rpc_Server_Create_t)(ib_Rpc_Server** out, ib_Participant* participant,
-                                                const char* functionName, ib_Rpc_ExchangeFormat* exchangeFormat,
-                                                const ib_KeyValueList* labels, void* context,
-                                                ib_Rpc_CallHandler_t callHandler);
+                                                const char* controllerName, const char* rpcChannel,
+                                                ib_Rpc_ExchangeFormat* exchangeFormat, const ib_KeyValueList* labels,
+                                                void* context, ib_Rpc_CallHandler_t callHandler);
 
 /*! \brief Create a Rpc client on a simulation participant with the provided properties.
 * \param out Pointer to which the resulting Rpc client reference will be written.
 * \param participant The simulation participant for which the Rpc client should be created.
-* \param functionName The functionName by which the Rpc server is identified.
+* \param controllerName The name of this controller.
+* \param rpcChannel The rpcChannel by which the Rpc server is identified.
 * \param exchangeFormat A meta description of the data that will be provided by this client.
 * \param labels A list of key-value pairs of this Rpc client. The labels are relevant for matching Rpc clients and 
 * Rpc servers.
@@ -125,15 +128,16 @@ typedef ib_ReturnCode (*ib_Rpc_Server_Create_t)(ib_Rpc_Server** out, ib_Particip
 * 
 */
 IntegrationBusAPI ib_ReturnCode ib_Rpc_Client_Create(ib_Rpc_Client** out, ib_Participant* participant,
-                                                     const char* functionName, ib_Rpc_ExchangeFormat* exchangeFormat,
+                                                     const char* controllerName, const char* rpcChannel,
+                                                     ib_Rpc_ExchangeFormat* exchangeFormat,
                                                      const ib_KeyValueList* labels, void* context,
                                                      ib_Rpc_ResultHandler_t resultHandler);
 
 
 typedef ib_ReturnCode (*ib_Rpc_Client_Create_t)(ib_Rpc_Client** out, ib_Participant* participant,
-                                                const char* functionName, ib_Rpc_ExchangeFormat* exchangeFormat,
-                                                const ib_KeyValueList* labels, void* context,
-                                                ib_Rpc_ResultHandler_t resultHandler);
+                                                const char* controllerName, const char* rpcChannel,
+                                                ib_Rpc_ExchangeFormat* exchangeFormat, const ib_KeyValueList* labels,
+                                                void* context, ib_Rpc_ResultHandler_t resultHandler);
 
 /*! \brief Detach a call to one or multiple corresponding Rpc servers
 * \param self The Rpc Client that should trigger the remote procedure call.
@@ -160,17 +164,17 @@ typedef ib_ReturnCode(*ib_Rpc_Server_SubmitResult_t)(ib_Rpc_Server* self, ib_Rpc
 
 /*! \brief Query for available Rpc servers and their properties. The results are provided in the resultsHandler.
 * \param participant The simulation participant launching the query.
-* \param functionName Only discover Rpc servers with this functionName. Leave empty for a wildcard.
+* \param rpcChannel Only discover Rpc servers with this rpcChannel. Leave empty for a wildcard.
 * \param exchangeFormat Only discover Rpc servers with this exchangeFormat. Leave empty for a wildcard.
 * \param labels Only discover Rpc servers containing these labels. Use NULL to not filter for labels.
 * \param context A user provided context that is reobtained in the resultHandler.
 */
-IntegrationBusAPI ib_ReturnCode ib_Rpc_DiscoverServers(ib_Participant* participant, const char* functionName,
+IntegrationBusAPI ib_ReturnCode ib_Rpc_DiscoverServers(ib_Participant* participant, const char* rpcChannel,
                                                        ib_Rpc_ExchangeFormat* exchangeFormat,
                                                        const ib_KeyValueList* labels, void* context,
                                                        ib_Rpc_DiscoveryResultHandler_t resultHandler);
 
-typedef ib_ReturnCode(*ib_Rpc_DiscoverServers_t)(ib_Participant* participant, const char* functionName,
+typedef ib_ReturnCode(*ib_Rpc_DiscoverServers_t)(ib_Participant* participant, const char* rpcChannel,
                                                 ib_Rpc_ExchangeFormat* exchangeFormat, const ib_KeyValueList* labels,
                                                 void* context, ib_Rpc_DiscoveryResultHandler_t resultHandler);
 

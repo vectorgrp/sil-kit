@@ -28,10 +28,11 @@ protected:
 
     struct DataPublisherInfo
     {
-        DataPublisherInfo(const std::string& newTopic, const std::string& newMediaType,
+        DataPublisherInfo(const std::string& newControllerName, const std::string& newTopic, const std::string& newMediaType,
                           const std::map<std::string, std::string>& newLabels, uint8_t newHistory,
                           size_t newMessageSizeInBytes, uint32_t newNumMsgToPublish)
         {
+            controllerName = newControllerName;
             topic = newTopic;
             mediaType = newMediaType;
             labels = newLabels;
@@ -40,6 +41,7 @@ protected:
             numMsgToPublish = newNumMsgToPublish;
         }
 
+        std::string controllerName;
         std::string topic;
         std::string mediaType;
         std::map<std::string, std::string> labels;
@@ -73,13 +75,14 @@ protected:
 
     struct DataSubscriberInfo
     {
-        DataSubscriberInfo(const std::string& newTopic, const std::string& newMediaType,
+        DataSubscriberInfo(const std::string& newControllerName, const std::string& newTopic, const std::string& newMediaType,
                            const std::map<std::string, std::string>& newLabels, size_t newMessageSizeInBytes,
                            uint32_t newNumMsgToReceive, uint32_t newExpectedSources,
                            const std::map<std::string, std::string>& newExpectedLabels,
                            const std::vector<SpecificDataHandlerInfo>& newSpecificDataHandlers)
         {
             expectIncreasingData = true;
+            controllerName = newControllerName;
             topic = newTopic;
             mediaType = newMediaType;
             labels = newLabels;
@@ -89,7 +92,7 @@ protected:
             expectedLabels = newExpectedLabels;
             specificDataHandlers = newSpecificDataHandlers;
         }
-        DataSubscriberInfo(const std::string& newTopic, const std::string& newMediaType,
+        DataSubscriberInfo(const std::string& newControllerName, const std::string& newTopic, const std::string& newMediaType,
                            const std::map<std::string, std::string>& newLabels, size_t newMessageSizeInBytes,
                            uint32_t newNumMsgToReceive, uint32_t newExpectedSources,
                            const std::vector<std::vector<uint8_t>>& newExpectedDataUnordered,
@@ -97,6 +100,7 @@ protected:
                            const std::vector<SpecificDataHandlerInfo>& newSpecificDataHandlers)
         {
             expectIncreasingData = false;
+            controllerName = newControllerName;
             topic = newTopic;
             mediaType = newMediaType;
             labels = newLabels;
@@ -108,6 +112,7 @@ protected:
             specificDataHandlers = newSpecificDataHandlers;
         }
 
+        std::string controllerName;
         std::string topic;
         std::string mediaType;
         std::map<std::string, std::string> labels;
@@ -125,7 +130,7 @@ protected:
         bool allDiscovered{false};
         IDataSubscriber* dataSubscriber;
 
-        void OnDataReception(const std::vector<uint8_t>& data)
+        void OnDataReception(const DataMessageEvent& dataMessageEvent)
         {
             if (!allReceived)
             {
@@ -133,11 +138,11 @@ protected:
                 {
                     auto expectedData =
                         std::vector<uint8_t>(messageSizeInBytes, static_cast<uint8_t>(receiveMsgCounter));
-                    EXPECT_EQ(data, expectedData);
+                    EXPECT_EQ(dataMessageEvent.data, expectedData);
                 }
                 else
                 {
-                    auto foundDataIter = std::find(expectedDataUnordered.begin(), expectedDataUnordered.end(), data);
+                    auto foundDataIter = std::find(expectedDataUnordered.begin(), expectedDataUnordered.end(), dataMessageEvent.data);
                     EXPECT_EQ(foundDataIter != expectedDataUnordered.end(), true);
                     if (foundDataIter != expectedDataUnordered.end())
                     {
@@ -153,8 +158,8 @@ protected:
             }
         }
 
-        void OnNewDataSource(IDataSubscriber* subscriber, const std::map<std::string, std::string>& dataSourceLabels,
-                             ib::sim::data::DataHandlerT receptionHandler)
+        void OnNewDataSource(IDataSubscriber* subscriber, const NewDataPublisherEvent& dataSource,
+                             ib::sim::data::DataMessageHandlerT receptionHandler)
         {
             newSourceCounter++;
             if (!allDiscovered)
@@ -165,16 +170,16 @@ protected:
                 }
             }
 
-            for (auto const& kv : dataSourceLabels)
+            for (auto const& kv : dataSource.labels)
             {
                 EXPECT_EQ(expectedLabels[kv.first], kv.second);
             }
 
             for (auto const& sp : specificDataHandlers)
             {
-                if (sp.labels == dataSourceLabels)
+                if (sp.labels == dataSource.labels)
                 {
-                    subscriber->RegisterSpecificDataHandler(sp.mediaType, sp.labels, receptionHandler);
+                    subscriber->AddExplicitDataMessageHandler(receptionHandler, sp.mediaType, sp.labels);
                 }
             }
         }
@@ -184,13 +189,16 @@ protected:
     {
         PubSubParticipant(const std::string& newName) { name = newName; }
         PubSubParticipant(const std::string& newName, const std::vector<DataPublisherInfo>& newDataPublishers,
-                          const std::vector<DataSubscriberInfo>& newDataSubscribers)
+            const std::vector<DataSubscriberInfo>& newDataSubscribers,
+            std::shared_ptr<ib::cfg::IParticipantConfiguration> newConfig = ib::cfg::MockParticipantConfiguration())
         {
+            config = newConfig;
             name = newName;
             dataSubscribers = newDataSubscribers;
             dataPublishers = newDataPublishers;
         }
 
+        std::shared_ptr<ib::cfg::IParticipantConfiguration> config;
         std::string name;
         std::vector<DataSubscriberInfo> dataSubscribers;
         std::vector<DataPublisherInfo> dataPublishers;
@@ -281,8 +289,7 @@ protected:
     {
         try
         {
-            participant.participant = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(),
-                                                                     participant.name, domainId, sync);
+            participant.participant = ib::CreateParticipant(participant.config, participant.name, domainId, sync);
 
             // Already set the promise if no reception/discovery is expected
             participant.PrepareAllReceivedPromise();
@@ -292,16 +299,14 @@ protected:
             for (auto& ds : participant.dataSubscribers)
             {
                 auto receptionHandler = [&participant, &ds](IDataSubscriber* /*subscriber*/,
-                                                            const std::vector<uint8_t>& data) {
-                    ds.OnDataReception(data);
+                                                            const DataMessageEvent& dataMessageEvent) {
+                    ds.OnDataReception(dataMessageEvent);
                     participant.CheckAllReceivedPromise();
                 };
 
                 auto newDataSourceHandler = [&participant, &ds, receptionHandler](
-                                                IDataSubscriber* subscriber, const std::string& /*topic*/,
-                                                const std::string& /*mediaType*/,
-                                                const std::map<std::string, std::string>& dataSourceLabels) {
-                    ds.OnNewDataSource(subscriber, dataSourceLabels, receptionHandler);
+                                                IDataSubscriber* subscriber, const NewDataPublisherEvent& dataSource) {
+                    ds.OnNewDataSource(subscriber, dataSource, receptionHandler);
                     participant.CheckAllDiscoveredPromise();
                 };
 
@@ -309,12 +314,12 @@ protected:
                 {
                     // Create DataSubscriber with default handler
                     ds.dataSubscriber = participant.participant->CreateDataSubscriber(
-                        ds.topic, ds.mediaType, ds.labels, receptionHandler, newDataSourceHandler);
+                        ds.controllerName, ds.topic, ds.mediaType, ds.labels, receptionHandler, newDataSourceHandler);
                 }
                 else
                 {
                     // Create DataSubscriber without default handler
-                    ds.dataSubscriber = participant.participant->CreateDataSubscriber(ds.topic, ds.mediaType, ds.labels,
+                    ds.dataSubscriber = participant.participant->CreateDataSubscriber(ds.controllerName, ds.topic, ds.mediaType, ds.labels,
                                                                                      nullptr, newDataSourceHandler);
                 }
             }
@@ -322,7 +327,7 @@ protected:
             // Setup/Create Publishers
             for (auto& dp : participant.dataPublishers)
             {
-                dp.dataPublisher = participant.participant->CreateDataPublisher(dp.topic, dp.mediaType, dp.labels, dp.history);
+                dp.dataPublisher = participant.participant->CreateDataPublisher(dp.controllerName, dp.topic, dp.mediaType, dp.labels, dp.history);
             }
             auto publishTask = [&participant]() {
                 for (auto& dp : participant.dataPublishers)

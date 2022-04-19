@@ -6,7 +6,7 @@ namespace ib {
 namespace sim {
 namespace data {
 
-bool operator==(const DataMessage& lhs, const DataMessage& rhs)
+bool operator==(const DataMessageEvent& lhs, const DataMessageEvent& rhs)
 {
     return lhs.data == rhs.data;
 }

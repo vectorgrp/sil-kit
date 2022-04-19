@@ -14,21 +14,21 @@ namespace ib {
 namespace sim {
 namespace data {
 
-inline std::string to_string(const DataMessage& msg);
-inline std::ostream& operator<<(std::ostream& out, const DataMessage& msg);
+inline std::string to_string(const DataMessageEvent& msg);
+inline std::ostream& operator<<(std::ostream& out, const DataMessageEvent& msg);
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-std::string to_string(const DataMessage& msg)
+std::string to_string(const DataMessageEvent& msg)
 {
     std::stringstream out;
     out << msg;
     return out.str();
 }
-std::ostream& operator<<(std::ostream& out, const DataMessage& msg)
+std::ostream& operator<<(std::ostream& out, const DataMessageEvent& msg)
 {
-    return out << "data::DataMessage{data="
+    return out << "data::DataMessageEvent{data="
                << util::AsHexString(msg.data).WithSeparator(" ").WithMaxLength(16)
                << ", size=" << msg.data.size()
                << "}";

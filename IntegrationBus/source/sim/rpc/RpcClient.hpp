@@ -29,7 +29,7 @@ class RpcClient
 {
 public:
     RpcClient(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
-              const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
+              const std::string& rpcChannel, const sim::rpc::RpcExchangeFormat& exchangeFormat,
               const std::map<std::string, std::string>& labels, const std::string& clientUUID,
               CallReturnHandler handler);
 
@@ -52,7 +52,7 @@ public:
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor& override;
 
 private:
-    std::string _functionName;
+    std::string _rpcChannel;
     sim::rpc::RpcExchangeFormat _exchangeFormat;
     std::map<std::string, std::string> _labels;
     std::string _clientUUID;

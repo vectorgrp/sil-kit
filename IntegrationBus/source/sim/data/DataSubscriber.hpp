@@ -27,16 +27,15 @@ class DataSubscriber
 public:
     DataSubscriber(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider, const std::string& topic,
                    const std::string& mediaType, const std::map<std::string, std::string>& labels,
-                   DataHandlerT defaultDataHandler, NewDataSourceHandlerT newDataSourceHandler);
+                   DataMessageHandlerT defaultDataHandler, NewDataPublisherHandlerT newDataSourceHandler);
 
 public:
     void RegisterServiceDiscovery();
 
-    void SetDefaultReceiveMessageHandler(DataHandlerT callback) override;
+    void SetDefaultDataMessageHandler(DataMessageHandlerT callback) override;
 
-    void RegisterSpecificDataHandler(const std::string& mediaType,
-                                     const std::map<std::string, std::string>& labels,
-                                     DataHandlerT callback) override;
+    void AddExplicitDataMessageHandler(DataMessageHandlerT callback, const std::string& mediaType,
+                                       const std::map<std::string, std::string>& labels) override;
 
     void AddInternalSubscriber(const std::string& pubUUID, const std::string& joinedMediaType,
                                const std::map<std::string, std::string>& publisherLabels);
@@ -55,8 +54,8 @@ private:
     std::string _topic;
     std::string _mediaType;
     std::map<std::string, std::string> _labels;
-    DataHandlerT _defaultDataHandler;
-    NewDataSourceHandlerT _newDataSourceHandler;
+    DataMessageHandlerT _defaultDataHandler;
+    NewDataPublisherHandlerT _newDataSourceHandler;
 
     mw::ServiceDescriptor _serviceDescriptor{};
 

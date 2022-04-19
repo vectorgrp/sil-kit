@@ -7,6 +7,7 @@
 #include <functional>
 #include <map>
 #include <string>
+#include <chrono>
 
 namespace ib {
 namespace sim {
@@ -16,23 +17,35 @@ namespace data {
 class IDataSubscriber;
 class IDataPublisher;
 
-//! \brief Callback type for new data reception callbacks
-using DataHandlerT =
-    std::function<void(ib::sim::data::IDataSubscriber* subscriber, const std::vector<uint8_t>& data)>;
-
-//! \brief Callback type for new data sources
-using NewDataSourceHandlerT = std::function<void(ib::sim::data::IDataSubscriber* subscriber,
-                                                 const std::string& topic, const std::string& mediaType,
-                                                 const std::map<std::string, std::string>& labels)>;
-
-
-/*! \brief A data message
- *
- * Data messages run over an abstract channel, without timing effects and/or data type constraints
- */
-struct DataMessage {
+//! \brief An incoming DataMessage of a DataPublisher containing raw data and timestamp
+struct DataMessageEvent
+{
+    //! Send timestamp of the event
+    std::chrono::nanoseconds timestamp;
+    //! Data field containing the payload
     std::vector<uint8_t> data;
 };
+
+//! \brief Callback type for new data reception callbacks
+using DataMessageHandlerT =
+    std::function<void(ib::sim::data::IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent)>;
+
+//! \brief Information about a newly discovered DataPublisher
+struct NewDataPublisherEvent
+{
+    //! Reception timestamp of the event
+    std::chrono::nanoseconds timestamp;
+    //! The topic string of the discovered DataPublisher.
+    std::string topic;
+    //! The mediaType of the discovered DataPublisher.
+    std::string mediaType;
+    //! The labels of the discovered DataPublisher.
+    std::map<std::string, std::string> labels;
+};
+
+//! \brief Callback type for new data publishers
+using NewDataPublisherHandlerT =
+    std::function<void(ib::sim::data::IDataSubscriber* subscriber, const NewDataPublisherEvent& newDataPublisherEvent)>;
 
 } // namespace data
 } // namespace sim

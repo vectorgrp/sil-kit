@@ -15,7 +15,7 @@ public:
     RpcDiscoverer(mw::service::IServiceDiscovery* serviceDiscovery);
 
     std::vector<RpcDiscoveryResult> GetMatchingRpcServers(
-        const std::string& functionName, const RpcExchangeFormat& exchangeFormat,
+        const std::string& rpcChannel, const RpcExchangeFormat& exchangeFormat,
         const std::map<std::string, std::string>& labels) const;
 
 private:

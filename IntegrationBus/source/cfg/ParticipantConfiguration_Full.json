@@ -49,16 +49,44 @@
     }
   ],
   "DataPublishers": [
-
+    {
+      "Name": "Publisher1",
+      "Topic": "Temperature"
+    },
+    {
+      "Name": "Publisher2",
+      "Topic": "SensorData"
+    }
   ],
   "DataSubscribers": [
-
+    {
+      "Name": "Subscriber1",
+      "Topic": "Temperature"
+    },
+    {
+      "Name": "Subscriber2",
+      "Topic": "SensorData"
+    }
   ],
   "RpcServers": [
-
+    {
+      "Name": "RpcServer1",
+      "RpcChannel": "ReadSensor"
+    },
+    {
+      "Name": "RpcServer2",
+      "RpcChannel": "ReadSensor"
+    }
   ],
   "RpcClients": [
-
+    {
+      "Name": "RpcClient1",
+      "RpcChannel": "ReadSensor"
+    },
+    {
+      "Name": "RpcClient2",
+      "RpcChannel": "ReadSensor"
+    }
   ],
   "Logging": [
     "LogFromRemotes": true,

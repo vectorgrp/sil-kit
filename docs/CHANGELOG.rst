@@ -8,6 +8,38 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [3.7.x] - 2022-04-x
 --------------------------------
 
+Added
+~~~~~
+
+- Participant (formerly 'ComAdapter') methods to create DataPublisher, DataSubscriber, RpcClient and RpcServer now have an additional 
+  argument for the controller name. The controller name is used to to reference the controller in the configuration file 
+  (formerly, 'topic'/'functionName' was used).
+
+  - ``IntegrationBus/include/ib/mw/IComAdapter.hpp``
+
+    + new:
+
+    .. code-block:: c++
+      
+      IComAdapter::CreateDataPublisher(const string& canonicalName, ...) -> ...;
+      IComAdapter::CreateDataSubscriber(const string& canonicalName, ...) -> ...;
+      IComAdapter::CreateRpcClient(const string& canonicalName, ...) -> ...;
+      IComAdapter::CreateRpcServer(const string& canonicalName, ...) -> ...;
+
+- Participant methods to create DataPublisher, DataSubscriber, RpcClient and RpcServer now have an simplified
+  overload with the controller name ('canonicalName') as single argument. In this variant, the controller name is used as topic/rpcChannel.
+  
+  - ``IntegrationBus/include/ib/mw/IParticipant.hpp``
+
+    + new:
+
+    .. code-block:: c++
+      
+      IParticipant::CreateDataPublisher(const string& canonicalName) -> ...;
+      IParticipant::CreateDataSubscriber(const string& canonicalName) -> ...;
+      IParticipant::CreateRpcClient(const string& canonicalName) -> ...;
+      IParticipant::CreateRpcServer(const string& canonicalName) -> ...;
+
 Removed
 ~~~~~~~
 
@@ -46,6 +78,66 @@ Removed
 
 Changed
 ~~~~~~~
+
+- Renamed Public-API for DataSubscriber:
+
+    + old: 
+    
+    .. code-block:: c++
+    
+    // Cpp-API
+    IDataSubscriber::SetDefaultReceiveMessageHandler(...);
+    IDataSubscriber::RegisterSpecificDataHandler(...);
+
+    + new:
+
+    .. code-block:: c++
+
+    // Cpp-API
+    IDataSubscriber::SetDefaultDataMessageHandler(...);
+    IDataSubscriber::AddExplicitDataMessageHandler(...);
+
+- Renamed/wrapped structs and using statements in PubSub-context for the C/CPP-API:
+
+    + old: 
+    
+    .. code-block:: c++
+
+    // Cpp-API
+    using DataHandlerT =
+    std::function<void(ib::sim::data::IDataSubscriber* subscriber, const std::vector<uint8_t>& data)>;
+
+    using NewDataSourceHandlerT = std::function<void(ib::sim::data::IDataSubscriber* subscriber,
+                                                 const std::string& topic, const std::string& mediaType,
+                                                 const std::map<std::string, std::string>& labels)>;
+
+    // C-API
+    typedef void (*ib_Data_Handler_t)(void* context, ib_Data_Subscriber* subscriber, const ib_ByteVector* data);
+
+    typedef void (*ib_Data_NewDataSourceHandler_t)(void* context, ib_Data_Subscriber* subscriber, const char* topic,
+                                                   const char* mediaType, const ib_KeyValueList* labels);
+    + new:
+
+    The new DataMessageEvent now contains a timestamp with the send time set by the DataPublisher. 
+    Formerly, the reception callback only contained the raw data. The information about a new DataPublisher in the 
+    NewDataPublisherHandlerT now is bundeled in a stuct called 'NewDataPublisherEvent' also containing a reception
+    timestamp.
+
+    .. code-block:: c++
+
+    // Cpp-API
+    using DataMessageHandlerT =
+    std::function<void(ib::sim::data::IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent)>;
+
+    using NewDataPublisherHandlerT =
+    std::function<void(ib::sim::data::IDataSubscriber* subscriber, const NewDataPublisherEvent& newDataPublisherEvent)>;
+
+    // C-API
+    typedef void (*ib_Data_DataMessageHandler_t)(void* context, ib_Data_Subscriber* subscriber, 
+                                                const ib_Data_DataMessageEvent* dataMessageEvent);
+
+    typedef void (*ib_Data_NewDataPublisherHandler_t)(void* context, ib_Data_Subscriber* subscriber,
+                                                      const ib_Data_NewDataPublisherEvent* newDataPublisherEvent);
 
 - The header ``EndpointAddress.hpp``, ``IReplay.hpp``, ``ITraceMessageSink.hpp``, ``ITraceMessageSource.hpp`` and
   ``TraceMessage.hpp`` are now internal headers.

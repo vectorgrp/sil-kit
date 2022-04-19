@@ -40,7 +40,7 @@ struct RpcExchangeFormat
 
 struct RpcDiscoveryResult
 {
-    std::string functionName;
+    std::string rpcChannel;
     RpcExchangeFormat exchangeFormat;
     std::map<std::string, std::string> labels;
 };

@@ -53,8 +53,10 @@ TEST_F(ServiceDiscoveryITest, discover_service_removal_on_participant_shutdown)
     for (auto i = 0u; i < numberOfServices; i++)
     {
         const auto topic = "TopicName-" + std::to_string(i);
-        publisher->CreateDataPublisher(topic, {}, {}, 0);
-        subscriber->CreateDataSubscriber(topic, {}, {}, nullptr);
+        const auto pubControllerName = "PubCtrl" + std::to_string(i);
+        const auto subControllerName = "SubCtrl" + std::to_string(i);
+        publisher->CreateDataPublisher(pubControllerName, topic, {}, {}, 0);
+        subscriber->CreateDataSubscriber(subControllerName, topic, {}, {}, nullptr);
     }
 
     std::vector<std::string> createdServiceNames;

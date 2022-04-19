@@ -7,7 +7,7 @@ namespace sim {
 namespace data {
 
 struct PublisherAnnouncement;
-struct DataMessage;
+struct DataMessageEvent;
 
 class IDataPublisher;
 class IDataSubscriber;

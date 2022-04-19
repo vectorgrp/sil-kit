@@ -60,27 +60,43 @@ public:
     virtual auto CreateLinController(const std::string& canonicalName) -> sim::lin::ILinController* = 0;
 
     //! \brief Create a data publisher at this IB participant.
-    virtual auto CreateDataPublisher(const std::string& topic, const std::string& mediaType,
+    virtual auto CreateDataPublisher(const std::string& canonicalName, const std::string& topic,
+                                     const std::string& mediaType,
                                      const std::map<std::string, std::string>& labels, size_t history = 0)
         -> sim::data::IDataPublisher* = 0;
+    //! \brief Create a data publisher at this IB participant.
+    virtual auto CreateDataPublisher(const std::string& canonicalName) -> sim::data::IDataPublisher* = 0;
+
     //! \brief Create a data subscriber at this IB participant.
-    virtual auto CreateDataSubscriber(const std::string& topic, const std::string& mediaType,
+    virtual auto CreateDataSubscriber(const std::string& canonicalName, const std::string& topic,
+                                      const std::string& mediaType,
                                       const std::map<std::string, std::string>& labels,
-                                      sim::data::DataHandlerT defaultDataHandler,
-                                      sim::data::NewDataSourceHandlerT newDataSourceHandler = nullptr)
+                                      sim::data::DataMessageHandlerT defaultDataMessageHandler,
+                                      sim::data::NewDataPublisherHandlerT newDataPublisherHandler = nullptr)
         -> sim::data::IDataSubscriber* = 0;
+    //! \brief Create a data subscriber at this IB participant.
+    virtual auto CreateDataSubscriber(const std::string& canonicalName) -> sim::data::IDataSubscriber* = 0;
 
     //! \brief Create a Rpc client at this IB participant.
-    virtual auto CreateRpcClient(const std::string& functionName, const sim::rpc::RpcExchangeFormat exchangeFormat,
+    virtual auto CreateRpcClient(const std::string& canonicalName, const std::string& channel,
+                                 const sim::rpc::RpcExchangeFormat exchangeFormat,
                                  const std::map<std::string, std::string>& labels, sim::rpc::CallReturnHandler handler)
         -> sim::rpc::IRpcClient* = 0;
+    //! \brief Create a Rpc client at this IB participant.
+    virtual auto CreateRpcClient(const std::string& canonicalName)
+        -> sim::rpc::IRpcClient* = 0;
+
     //! \brief Create a Rpc server at this IB participant.
-    virtual auto CreateRpcServer(const std::string& functionName, const sim::rpc::RpcExchangeFormat exchangeFormat,
+    virtual auto CreateRpcServer(const std::string& canonicalName, const std::string& channel,
+                                 const sim::rpc::RpcExchangeFormat exchangeFormat,
                                  const std::map<std::string, std::string>& labels, sim::rpc::CallProcessor handler)
         -> sim::rpc::IRpcServer* = 0;
 
+    //! \brief Create a Rpc server at this IB participant.
+    virtual auto CreateRpcServer(const std::string& canonicalName) -> sim::rpc::IRpcServer* = 0;
+
     //! \brief Discover available Rpc servers and their properties.
-    virtual void DiscoverRpcServers(const std::string& functionName, 
+    virtual void DiscoverRpcServers(const std::string& rpcChannel, 
                                    const sim::rpc::RpcExchangeFormat& exchangeFormat,
                                    const std::map<std::string, std::string>& labels,
                                    sim::rpc::DiscoveryResultHandler handler) = 0;

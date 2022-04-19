@@ -35,7 +35,8 @@ typedef int32_t ib_InterfaceIdentifier;
 #define ib_InterfaceIdentifier_LinControllerConfig         ((ib_InterfaceIdentifier)4003001)
 
 // Data
-#define ib_InterfaceIdentifier_DataExchangeFormat          ((ib_InterfaceIdentifier)5001001)
+#define ib_InterfaceIdentifier_DataMessageEvent            ((ib_InterfaceIdentifier)5001001)
+#define ib_InterfaceIdentifier_NewDataPublisherEvent       ((ib_InterfaceIdentifier)5001002)
 
 // Rpc
 #define ib_InterfaceIdentifier_RpcExchangeFormat           ((ib_InterfaceIdentifier)6001001)

@@ -9,10 +9,10 @@ namespace sim {
 namespace rpc {
 
 RpcServerInternal::RpcServerInternal(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
-                                     const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
+                                     const std::string& rpcChannel, const sim::rpc::RpcExchangeFormat& exchangeFormat,
                                      const std::map<std::string, std::string>& labels, const std::string& clientUUID,
                                      CallProcessor handler, IRpcServer* parent)
-    : _functionName{functionName}
+    : _rpcChannel{rpcChannel}
     , _exchangeFormat{exchangeFormat}
     , _labels{labels}
     , _clientUUID{clientUUID}

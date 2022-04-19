@@ -47,7 +47,7 @@ Currently, the RpcExchangeFormat only consists of the field "mediaType".
 ~~~~~~
 
 RpcClients and RpcServers can be annotated with string-based key-value pairs (labels). Additional to the matching 
-requirements regarding functionName and RpcExchangeFormat, RpcServers will only receive calls by RpcClients if their 
+requirements regarding rpcChannel and RpcExchangeFormat, RpcServers will only receive calls by RpcClients if their 
 labels apply the following matching rules:
 
 * A RpcClient without labels matches any other RpcServer.
@@ -58,7 +58,7 @@ labels apply the following matching rules:
 ~~~~~~~~~~~~~~~~
 
 The simulation can be queried about available RpcServers with |DiscoverRpcServers|. The method takes filter arguments
-for functionName, RpcExchangeFormat and labels. To obtain the results of the query, a handler is given to the method 
+for rpcChannel, RpcExchangeFormat and labels. To obtain the results of the query, a handler is given to the method 
 which carries a vector of RpcDiscoveryResult providing the properties of each discovered RpcServer.
 
 !!! Usage

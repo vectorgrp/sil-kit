@@ -43,7 +43,8 @@ protected:
         for (auto i = 0; i < numberOfServices; i++)
         {
             const auto topic = "TopicName-" + std::to_string(i);
-            (void)publisher->CreateDataPublisher(topic, {}, {}, 0);
+            const auto controllerName = "PubCtrl" + std::to_string(i);
+            (void)publisher->CreateDataPublisher(controllerName, topic, {}, {}, 0); 
         }
         auto logger = publisher->GetLogger();
         auto&& participantController = publisher->GetParticipantController();
@@ -59,9 +60,10 @@ protected:
             for (auto i = 0; i < numberOfServices; i++)
             {
                 const auto topic = "TopicName-" + std::to_string(i);
+                const auto controllerName = "SubCtrl" + std::to_string(i);
                 (void)subscriber->CreateDataSubscriber(
-                    topic, {}, {},
-                    [](ib::sim::data::IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& /*data*/) {
+                    controllerName, topic, {}, {},
+                    [](ib::sim::data::IDataSubscriber* /*subscriber*/, const ib::sim::data::DataMessageEvent& /*data*/) {
                     }); 
             }
         };

@@ -22,16 +22,16 @@ void PublishMessage(IDataPublisher* publisher, std::string topicname)
     messageBuilder << topicname << " LocalMsgId=" << msgIdx++;
     auto message = messageBuilder.str();
 
-    std::cout << "<< Send DataMessage with data=" << message << std::endl;
+    std::cout << "<< Send DataMessageEvent with data=" << message << std::endl;
 
     ib::util::serdes::sil::Serializer serializer;
     serializer.Serialize(message);
     publisher->Publish(serializer.ReleaseBuffer());
 }
 
-void ReceiveMessage(IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data)
+void ReceiveMessage(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
 {
-    ib::util::serdes::sil::Deserializer deserializer(data);
+    ib::util::serdes::sil::Deserializer deserializer(dataMessageEvent.data);
     const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> Received new Message: with data=\"" << message << "\"" << std::endl;
 }
@@ -107,11 +107,11 @@ int main(int argc, char** argv)
         });
 
         participantController->SetPeriod(1s);
-        if (participantName == "Publisher1")
+        if (participantName == "PubSub1")
         {
-            auto* PubTopic1 = participant->CreateDataPublisher("Topic1", mediaTypeA, labelsEmpty, 0);
-            auto* PubTopic2 = participant->CreateDataPublisher("Topic2", mediaTypeA, labelsEmpty, 0);
-            participant->CreateDataSubscriber("Topic3", mediaTypeA, {}, ReceiveMessage);
+            auto* PubTopic1 = participant->CreateDataPublisher("PubCtrl1", "Topic1", mediaTypeA, labelsEmpty, 0);
+            auto* PubTopic2 = participant->CreateDataPublisher("PubCtrl2", "Topic2", mediaTypeA, labelsEmpty, 0);
+            participant->CreateDataSubscriber("SubCtrl1", "Topic3", mediaTypeA, {}, ReceiveMessage);
 
             participantController->SetSimulationTask(
                 [PubTopic1, PubTopic2](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -123,11 +123,11 @@ int main(int argc, char** argv)
 
             });
         }
-        else if (participantName == "Publisher2")
+        else if (participantName == "PubSub2")
         {
-            auto* PubTopic1 = participant->CreateDataPublisher("Topic1", mediaTypeA, labelsEmpty, 0);
-            auto* PubTopic3 = participant->CreateDataPublisher("Topic3", mediaTypeA, labelsEmpty, 0);
-            participant->CreateDataSubscriber("Topic3", mediaTypeA, {}, ReceiveMessage);
+            auto* PubTopic1 = participant->CreateDataPublisher("PubCtrl1", "Topic1", mediaTypeA, labelsEmpty, 0);
+            auto* PubTopic3 = participant->CreateDataPublisher("PubCtrl2", "Topic3", mediaTypeA, labelsEmpty, 0);
+            participant->CreateDataSubscriber("SubCtrl1", "Topic3", mediaTypeA, {}, ReceiveMessage);
 
             participantController->SetSimulationTask(
                 [PubTopic1, PubTopic3](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -140,8 +140,8 @@ int main(int argc, char** argv)
         }
         else if (participantName == "Subscriber1")
         {
-            participant->CreateDataSubscriber("Topic1", mediaTypeAll, labelsEmpty, ReceiveMessage);
-            participant->CreateDataSubscriber("Topic2", mediaTypeA, labelsEmpty, ReceiveMessage);
+            participant->CreateDataSubscriber("SubCtrl1", "Topic1", mediaTypeAll, labelsEmpty, ReceiveMessage);
+            participant->CreateDataSubscriber("SubCtrl2", "Topic2", mediaTypeA, labelsEmpty, ReceiveMessage);
 
             participantController->SetSimulationTask(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -152,8 +152,8 @@ int main(int argc, char** argv)
         }
         else if (participantName == "Subscriber2")
         {
-            participant->CreateDataSubscriber("Topic2", mediaTypeA, labelsEmpty, ReceiveMessage);
-            participant->CreateDataSubscriber("Topic3", mediaTypeB, labelsEmpty, ReceiveMessage);
+            participant->CreateDataSubscriber("SubCtrl1", "Topic2", mediaTypeA, labelsEmpty, ReceiveMessage);
+            participant->CreateDataSubscriber("SubCtrl2", "Topic3", mediaTypeB, labelsEmpty, ReceiveMessage);
 
             participantController->SetSimulationTask(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {

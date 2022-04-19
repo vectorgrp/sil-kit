@@ -105,28 +105,47 @@ public:
     auto CreateLinController(const std::string& canonicalName, const std::string& networkName)
         -> sim::lin::ILinController* override;
     auto CreateLinController(const std::string& canonicalName) -> sim::lin::ILinController* override;
-    auto CreateDataPublisher(const std::string& topic, const std::string& mediaType, 
-        const std::map<std::string, std::string>& labels, size_t history = 0)->sim::data::IDataPublisher* override;
-    auto CreateDataSubscriber(const std::string& topic, const std::string& mediaType, const std::map<std::string, std::string>& labels,
-        sim::data::DataHandlerT defaultDataHandler, sim::data::NewDataSourceHandlerT newDataSourceHandler = nullptr)->sim::data::IDataSubscriber* override;
-    auto CreateDataSubscriberInternal(const std::string& canonicalName, const std::string& linkName, 
-        const std::string& mediaType, const std::map<std::string, std::string>& publisherLabels, sim::data::DataHandlerT callback, sim::data::IDataSubscriber* parent)
-        ->sim::data::DataSubscriberInternal* override;
 
-    auto CreateRpcClient(const std::string& functionName, const sim::rpc::RpcExchangeFormat exchangeFormat,
+    auto CreateDataPublisher(const std::string& canonicalName, const std::string& topic,
+                             const std::string& mediaType,
+                             const std::map<std::string, std::string>& labels, size_t history = 0)
+        -> sim::data::IDataPublisher* override;
+    auto CreateDataPublisher(const std::string& canonicalName) -> sim::data::IDataPublisher* override;
+
+    auto CreateDataSubscriber(const std::string& canonicalName, const std::string& topic,
+                              const std::string& mediaType,
+                              const std::map<std::string, std::string>& labels,
+                              sim::data::DataMessageHandlerT defaultDataHandler,
+                              sim::data::NewDataPublisherHandlerT newDataSourceHandler = nullptr)
+        -> sim::data::IDataSubscriber* override;
+    auto CreateDataSubscriber(const std::string& canonicalName) -> sim::data::IDataSubscriber* override;
+
+    auto CreateDataSubscriberInternal(const std::string& canonicalName, const std::string& linkName,
+                                      const std::string& mediaType,
+                                      const std::map<std::string, std::string>& publisherLabels,
+                                      sim::data::DataMessageHandlerT callback, sim::data::IDataSubscriber* parent)
+        -> sim::data::DataSubscriberInternal* override;
+
+    auto CreateRpcClient(const std::string& canonicalName, const std::string& rpcChannel,
+                         const sim::rpc::RpcExchangeFormat exchangeFormat,
                          const std::map<std::string, std::string>& labels, sim::rpc::CallReturnHandler handler)
         -> sim::rpc::IRpcClient* override;
-    auto CreateRpcServer(const std::string& functionName, const sim::rpc::RpcExchangeFormat exchangeFormat,
+    auto CreateRpcClient(const std::string& canonicalName) -> sim::rpc::IRpcClient* override;
+
+    auto CreateRpcServer(const std::string& canonicalName, const std::string& rpcChannel,
+                         const sim::rpc::RpcExchangeFormat exchangeFormat,
                          const std::map<std::string, std::string>& labels, sim::rpc::CallProcessor handler)
         -> sim::rpc::IRpcServer* override;
-    auto CreateRpcServerInternal(const std::string& functionName, const std::string& linkName,
+    auto CreateRpcServer(const std::string& canonicalName) -> sim::rpc::IRpcServer* override;
+
+    auto CreateRpcServerInternal(const std::string& rpcChannel, const std::string& linkName,
                                  const sim::rpc::RpcExchangeFormat exchangeFormat,
                                  const std::map<std::string, std::string>& labels, sim::rpc::CallProcessor handler,
                                  sim::rpc::IRpcServer* parent) -> sim::rpc::RpcServerInternal* override;
 
-    void DiscoverRpcServers(const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
-                           const std::map<std::string, std::string>& labels,
-                           sim::rpc::DiscoveryResultHandler handler) override;
+    void DiscoverRpcServers(const std::string& rpcChannel, const sim::rpc::RpcExchangeFormat& exchangeFormat,
+                            const std::map<std::string, std::string>& labels,
+                            sim::rpc::DiscoveryResultHandler handler) override;
 
     auto GetParticipantController() -> sync::IParticipantController* override;
     auto GetSystemMonitor() -> sync::ISystemMonitor* override;
@@ -184,8 +203,8 @@ public:
     void SendIbMessage(const IIbServiceEndpoint*, const logging::LogMsg& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, logging::LogMsg&& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::data::DataMessage& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, sim::data::DataMessage&& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const sim::data::DataMessageEvent& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, sim::data::DataMessageEvent&& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::FunctionCall& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::FunctionCall&& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::FunctionCallResponse& msg) override;
@@ -238,8 +257,8 @@ public:
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const logging::LogMsg& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, logging::LogMsg&& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::DataMessage& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::DataMessage&& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::DataMessageEvent& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::DataMessageEvent&& msg) override;
 
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::FunctionCall& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::FunctionCall&& msg) override;
@@ -271,12 +290,6 @@ public:
     inline auto GetIbConnection() -> IbConnectionT& { return _ibConnection; }
 
 private:
-    void LogWrongNetworkNameForController(const std::string& canonicalName,
-                                                   const std::string& networkName,
-                                                   const std::string& configuredNetworkName,
-                                                   cfg::NetworkType networkType);
-
-private:
     // ----------------------------------------
     // private datatypes
     template<typename ControllerT>
@@ -285,6 +298,21 @@ private:
 private:
     // ----------------------------------------
     // private methods
+
+    //!< Search for the controller configuration by name and set configured values. Initialize with controller name if no config is found.
+    template <typename ConfigT>
+    auto GetConfigByControllerName(const std::vector<ConfigT>& controllers, const std::string& canonicalName)
+        -> ConfigT;
+
+    //!< Update the controller configuration for a given optional field. Prefers configured values over programmatically passed values.
+    template <typename ValueT>
+    void UpdateOptionalConfigValue(const std::string& canonicalName, ib::util::Optional<ValueT>& configuredValue,
+                                   const ValueT& passedValue);
+
+    template <typename ValueT>
+    void LogMismatchBetweenConfigAndPassedValue(const std::string& controllerName, const ValueT& passedValue,
+                                                const ValueT& configuredValue);
+
     void onIbDomainJoined();
 
     void SetupRemoteLogging();
@@ -304,10 +332,16 @@ private:
     auto CreateInternalController(const std::string& serviceName, const mw::ServiceType serviceType,
                           const mw::SupplementalData& supplementalData, Arg&&... arg) -> ControllerT*;
 
+    //!< Internal controller creation, explicit network argument for ConfigT without network
+    template <class ConfigT, class ControllerT, typename... Arg>
+    auto CreateController(const ConfigT& config, const std::string& network, const mw::ServiceType serviceType,
+                          const mw::SupplementalData& supplementalData, Arg&&... arg) -> ControllerT*;
+
+    //!< Internal controller creation, expects config.network
     template <class ConfigT, class ControllerT, typename... Arg>
     auto CreateController(const ConfigT& config, const mw::ServiceType serviceType,
-                             const mw::SupplementalData& supplementalData, Arg&&... arg)
-        -> ControllerT*;
+                          const mw::SupplementalData& supplementalData, Arg&&... arg) -> ControllerT*;
+
 
     template<class IIbToSimulatorT>
     void RegisterSimulator(IIbToSimulatorT* busSim, cfg::NetworkType linkType, const std::vector<std::string>& simulatedNetworkNames);

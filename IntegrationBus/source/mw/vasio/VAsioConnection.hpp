@@ -186,7 +186,7 @@ private:
         sync::ParticipantCommand,
         sync::ParticipantStatus,
         sync::ExpectedParticipants,
-        sim::data::DataMessage,
+        sim::data::DataMessageEvent,
         sim::rpc::FunctionCall,
         sim::rpc::FunctionCallResponse,
         sim::can::CanMessage,

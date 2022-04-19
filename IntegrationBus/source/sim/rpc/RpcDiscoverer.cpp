@@ -13,7 +13,7 @@ RpcDiscoverer::RpcDiscoverer(mw::service::IServiceDiscovery* serviceDiscovery) :
 }
 
 std::vector<RpcDiscoveryResult> RpcDiscoverer::GetMatchingRpcServers(
-    const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
+    const std::string& rpcChannel, const sim::rpc::RpcExchangeFormat& exchangeFormat,
     const std::map<std::string, std::string>& labels) const
 {
     std::vector<RpcDiscoveryResult> discoveryResults;
@@ -40,7 +40,7 @@ std::vector<RpcDiscoveryResult> RpcDiscoverer::GetMatchingRpcServers(
             auto rpcServerLabels =
                 ib::cfg::Deserialize<std::map<std::string, std::string>>(labelsStr);
 
-            if ((functionName == "" || functionName == rpcServerFunctionName)
+            if ((rpcChannel == "" || rpcChannel == rpcServerFunctionName)
                 && Match(exchangeFormat, rpcServerExchangeFormat) && MatchLabels(labels, rpcServerLabels))
             {
                 discoveryResults.push_back({rpcServerFunctionName, rpcServerExchangeFormat, rpcServerLabels});

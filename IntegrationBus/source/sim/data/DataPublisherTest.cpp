@@ -27,7 +27,7 @@ class MockParticipant : public DummyParticipant
 {
 public:
 
-    MOCK_METHOD(void, SendIbMessage, (const IIbServiceEndpoint*, DataMessage&&));
+    MOCK_METHOD(void, SendIbMessage, (const IIbServiceEndpoint*, DataMessageEvent&&));
 };
 
 class DataPublisherTest : public ::testing::Test
@@ -49,7 +49,7 @@ protected:
 
 TEST_F(DataPublisherTest, publish_vector)
 {
-    DataMessage msg{sampleData};
+    DataMessageEvent msg{0ns, sampleData};
 
     EXPECT_CALL(participant, SendIbMessage(&publisher, std::move(msg)))
         .Times(1);
@@ -59,7 +59,7 @@ TEST_F(DataPublisherTest, publish_vector)
 
 TEST_F(DataPublisherTest, publish_raw)
 {
-    DataMessage msg{sampleData};
+    DataMessageEvent msg{0ns, sampleData};
 
     EXPECT_CALL(participant, SendIbMessage(&publisher, std::move(msg)))
         .Times(1);

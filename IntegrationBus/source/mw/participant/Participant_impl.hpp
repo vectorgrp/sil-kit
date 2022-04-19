@@ -216,34 +216,50 @@ inline void Participant<IbConnectionT>::SetTimeProvider(sync::ITimeProvider* new
 }
 
 template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateCanController(const std::string& canonicalName, const std::string& networkName) -> can::ICanController*
+template <typename ConfigT>
+auto Participant<IbConnectionT>::GetConfigByControllerName(const std::vector<ConfigT>& controllers,
+                                                          const std::string& canonicalName) -> ConfigT
 {
-    // retrieve CAN controller
-    auto& canControllers = _participantConfig.canControllers;
-    auto controllerConfigIter =
-        std::find_if(canControllers.begin(), canControllers.end(), [&canonicalName](auto&& controller) {
-            return controller.name == canonicalName;
-        });
-    ib::cfg::CanController controllerConfig;
-    if (controllerConfigIter != canControllers.end())
+    ConfigT controllerConfig;
+    auto it = std::find_if(controllers.begin(), controllers.end(), [canonicalName](auto&& controllerConfig) {
+        return controllerConfig.name == canonicalName;
+    });
+    if (it != controllers.end())
     {
-        controllerConfig = *controllerConfigIter;
-        if (!controllerConfig.network.has_value())
-        {
-            controllerConfig.network = networkName;
-        }
-        if (controllerConfig.network.value() != networkName)
-        {
-            LogWrongNetworkNameForController(canonicalName, networkName, *controllerConfig.network,
-                                                      ib::cfg::NetworkType::CAN);
-        }
+        controllerConfig = *it;
     }
     else
     {
+        // Controller is not found in config. Just set the controller name.
         controllerConfig.name = canonicalName;
-        controllerConfig.network = networkName;
     }
-    
+    return controllerConfig;
+}
+
+template <class IbConnectionT>
+template <typename ValueT>
+void Participant<IbConnectionT>::UpdateOptionalConfigValue(const std::string& controllerName,
+                                                           ib::util::Optional<ValueT>& configuredValue,
+                                                           const ValueT& passedValue)
+{
+    if (!configuredValue.has_value())
+    {
+        // Optional value is not set. Use passed value.
+        configuredValue = passedValue;
+    }
+    else if (configuredValue.value() != passedValue)
+    {
+        // Value is configured but differs from passed value. Keep configured value and inform about mismatch.
+        LogMismatchBetweenConfigAndPassedValue(controllerName, passedValue, configuredValue.value());
+    }
+}
+
+template <class IbConnectionT>
+auto Participant<IbConnectionT>::CreateCanController(const std::string& canonicalName, const std::string& networkName) -> can::ICanController*
+{
+    ib::cfg::CanController controllerConfig = GetConfigByControllerName(_participantConfig.canControllers, canonicalName);
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.network, networkName);
+
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeCan;
 
@@ -264,31 +280,8 @@ template <class IbConnectionT>
 auto Participant<IbConnectionT>::CreateEthController(const std::string& canonicalName, const std::string& networkName)
     -> eth::IEthController*
 {
-    // retrieve Ethernet controller
-    auto& ethernetControllerConfigs = _participantConfig.ethernetControllers;
-    auto controllerConfigIter = std::find_if(ethernetControllerConfigs.begin(), ethernetControllerConfigs.end(),
-                                             [&canonicalName](auto&& controllerConfig) {
-                                                 return controllerConfig.name == canonicalName;
-                                             });
-    ib::cfg::EthernetController controllerConfig;
-    if (controllerConfigIter != ethernetControllerConfigs.end())
-    {
-        controllerConfig = *controllerConfigIter;
-        if (!controllerConfig.network.has_value())
-        {
-            controllerConfig.network = networkName;
-        }
-        if (controllerConfig.network.value() != networkName)
-        {
-            LogWrongNetworkNameForController(canonicalName, networkName, *controllerConfig.network,
-                                                      ib::cfg::NetworkType::Ethernet);
-        }
-    }
-    else
-    {
-        controllerConfig.name = canonicalName;
-        controllerConfig.network = networkName;
-    }
+    ib::cfg::EthernetController controllerConfig = GetConfigByControllerName(_participantConfig.ethernetControllers, canonicalName);
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.network, networkName);
 
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeEthernet;
@@ -308,31 +301,8 @@ template <class IbConnectionT>
 auto Participant<IbConnectionT>::CreateFlexrayController(const std::string& canonicalName, const std::string& networkName)
     -> sim::fr::IFrController*
 {
-    // retrieve FR controller
-    auto& flexRayControllerConfigs = _participantConfig.flexRayControllers;
-    auto controllerConfigIter =
-        std::find_if(flexRayControllerConfigs.begin(), flexRayControllerConfigs.end(), [&canonicalName](auto&& controllerConfig) {
-            return controllerConfig.name == canonicalName;
-        });
-    ib::cfg::FlexRayController controllerConfig;
-    if (controllerConfigIter != flexRayControllerConfigs.end())
-    {
-        controllerConfig = *controllerConfigIter;
-        if (!controllerConfig.network.has_value())
-        {
-            controllerConfig.network = networkName;
-        }
-        if (controllerConfig.network.value() != networkName)
-        {
-            LogWrongNetworkNameForController(canonicalName, networkName, *controllerConfig.network,
-                                                      ib::cfg::NetworkType::FlexRay);
-        }
-    }
-    else
-    {
-        controllerConfig.name = canonicalName;
-        controllerConfig.network = networkName;
-    }
+    ib::cfg::FlexRayController controllerConfig = GetConfigByControllerName(_participantConfig.flexRayControllers, canonicalName);
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.network, networkName);
 
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeFlexRay;
@@ -352,31 +322,8 @@ template <class IbConnectionT>
 auto Participant<IbConnectionT>::CreateLinController(const std::string& canonicalName, const std::string& networkName)
     -> lin::ILinController*
 {
-    // retrieve LIN controller
-    auto& linControllerConfigs = _participantConfig.linControllers;
-    auto controllerConfigIter = std::find_if(linControllerConfigs.begin(), linControllerConfigs.end(),
-                                             [&canonicalName](auto&& controllerConfig) {
-                                                 return controllerConfig.name == canonicalName;
-                                             });
-    ib::cfg::LinController controllerConfig;
-    if (controllerConfigIter != linControllerConfigs.end())
-    {
-        controllerConfig = *controllerConfigIter;
-        if (!controllerConfig.network.has_value())
-        {
-            controllerConfig.network = networkName;
-        }
-        if (controllerConfig.network.value() != networkName)
-        {
-            LogWrongNetworkNameForController(canonicalName, networkName, *controllerConfig.network,
-                                                      ib::cfg::NetworkType::LIN);
-        }
-    }
-    else
-    {
-        controllerConfig.name = canonicalName;
-        controllerConfig.network = networkName;
-    }
+    ib::cfg::LinController controllerConfig = GetConfigByControllerName(_participantConfig.linControllers, canonicalName);
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.network, networkName);
 
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeLin;
@@ -396,7 +343,7 @@ template <class IbConnectionT>
 auto Participant<IbConnectionT>::CreateDataSubscriberInternal(const std::string& topic, const std::string& linkName,
                                                              const std::string& mediaType,
                                                              const std::map<std::string, std::string>& publisherLabels,
-                                                             sim::data::DataHandlerT defaultHandler,
+                                                             sim::data::DataMessageHandlerT defaultHandler,
                                                              sim::data::IDataSubscriber* parent)
     -> sim::data::DataSubscriberInternal*
 {
@@ -406,16 +353,15 @@ auto Participant<IbConnectionT>::CreateDataSubscriberInternal(const std::string&
     ib::cfg::DataSubscriber controllerConfig;
     // Use a unique name to avoid collisions of several subscribers on same topic on one participant
     controllerConfig.name = util::uuid::to_string(util::uuid::generate());
-    controllerConfig.network = linkName;
+    std::string network = linkName;
 
     return CreateController<ib::cfg::DataSubscriber, sim::data::DataSubscriberInternal>(
-        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), topic,
+        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), topic,
         mediaType, publisherLabels, defaultHandler, parent);
 }
 
-
 template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateDataPublisher(const std::string& topic,
+auto Participant<IbConnectionT>::CreateDataPublisher(const std::string& canonicalName, const std::string& topic,
     const std::string& mediaType, const std::map<std::string, std::string>& labels,
     size_t history) -> sim::data::IDataPublisher*
 {
@@ -424,101 +370,81 @@ auto Participant<IbConnectionT>::CreateDataPublisher(const std::string& topic,
         throw ib::ConfigurationError("DataPublishers do not support history > 1.");
     }
 
-    std::string pubUUID = util::uuid::to_string(util::uuid::generate());
+    std::string network = util::uuid::to_string(util::uuid::generate());
 
-    // Retrieve controller
-    auto& cfgs = _participantConfig.dataPublishers;
-    auto it = std::find_if(cfgs.begin(), cfgs.end(),
-                                             [topic](auto&& controllerConfig) {
-                                                 return controllerConfig.name == topic;
-                                             });
-    ib::cfg::DataPublisher controllerConfig;
-    if (it != cfgs.end())
-    {
-        controllerConfig = *it;
-        controllerConfig.network = pubUUID;
-    }
-    else
-    {
-        controllerConfig.name = topic;
-        controllerConfig.network = pubUUID;
-    }
+    ib::cfg::DataPublisher controllerConfig = GetConfigByControllerName(_participantConfig.dataPublishers, canonicalName);
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.topic, topic);
 
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataPublisher;
-    supplementalData[ib::mw::service::supplKeyDataPublisherTopic] = topic;
-    supplementalData[ib::mw::service::supplKeyDataPublisherPubUUID] = pubUUID;
-    supplementalData[ib::mw::service::supplKeyDataPublisherPubDxf] = mediaType;
+    supplementalData[ib::mw::service::supplKeyDataPublisherTopic] = controllerConfig.topic.value();
+    supplementalData[ib::mw::service::supplKeyDataPublisherPubUUID] = network;
+    supplementalData[ib::mw::service::supplKeyDataPublisherMediaType] = mediaType;
     auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
     supplementalData[ib::mw::service::supplKeyDataPublisherPubLabels] = labelStr;
 
     auto controller = CreateController<ib::cfg::DataPublisher, ib::sim::data::DataPublisher>(
-        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), topic,
-        mediaType, labels, pubUUID);
+        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), controllerConfig.topic.value(),
+        mediaType, labels, network);
 
-    _ibConnection.SetHistoryLengthForLink(pubUUID, history, controller);
+    _ibConnection.SetHistoryLengthForLink(network, history, controller);
 
     return controller;
     
 }
 
 template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateDataSubscriber(const std::string& topic,
+auto Participant<IbConnectionT>::CreateDataPublisher(const std::string& canonicalName) -> sim::data::IDataPublisher*
+{
+    return CreateDataPublisher(canonicalName, canonicalName, { "" }, {}, 0);
+}
+
+template <class IbConnectionT>
+auto Participant<IbConnectionT>::CreateDataSubscriber(const std::string& canonicalName, const std::string& topic,
                                                      const std::string& mediaType,
                                                      const std::map<std::string, std::string>& labels,
-                                                     ib::sim::data::DataHandlerT defaultDataHandler,
-                                                     ib::sim::data::NewDataSourceHandlerT newDataSourceHandler)
+                                                     ib::sim::data::DataMessageHandlerT defaultDataHandler,
+                                                     ib::sim::data::NewDataPublisherHandlerT newDataSourceHandler)
     -> sim::data::IDataSubscriber*
 {
-    // Retrieve controller
-    auto& cfgs = _participantConfig.dataSubscribers;
-    auto it = std::find_if(cfgs.begin(), cfgs.end(), [topic](auto&& controllerConfig) {
-        return controllerConfig.name == topic;
-    });
-    ib::cfg::DataSubscriber controllerConfig;
-    if (it != cfgs.end())
-    {
-        controllerConfig = *it;
-        if (controllerConfig.network.has_value() && controllerConfig.network.value() != topic)
-        {
-            LogWrongNetworkNameForController(topic, topic, *controllerConfig.network,
-                                                      ib::cfg::NetworkType::Data);
-        }
-    }
-    else
-    {
-        controllerConfig.name = topic;
-        controllerConfig.network = topic;
-    }
+    ib::cfg::DataSubscriber controllerConfig = GetConfigByControllerName(_participantConfig.dataSubscribers, canonicalName);
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.topic, topic);
+
     // Use unique network name that same topic for multiple DataSubscribers on one participant works
-    controllerConfig.network = util::uuid::to_string(util::uuid::generate());
+    std::string network = util::uuid::to_string(util::uuid::generate());
 
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataSubscriber;
 
     auto controller = CreateController<ib::cfg::DataSubscriber, sim::data::DataSubscriber>(
-        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), topic,
-        mediaType, labels, defaultDataHandler, newDataSourceHandler);
+        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(),
+        controllerConfig.topic.value(), mediaType, labels, defaultDataHandler, newDataSourceHandler);
 
     controller->RegisterServiceDiscovery();
 
     return controller;
-    
 }
 
 template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateRpcServerInternal(const std::string& functionName, const std::string& clientUUID,
+auto Participant<IbConnectionT>::CreateDataSubscriber(const std::string& canonicalName) -> sim::data::IDataSubscriber*
+{
+    return CreateDataSubscriber(canonicalName, canonicalName, { "" }, {}, nullptr, nullptr);
+}
+
+
+template <class IbConnectionT>
+auto Participant<IbConnectionT>::CreateRpcServerInternal(const std::string& rpcChannel, const std::string& clientUUID,
                                                         const sim::rpc::RpcExchangeFormat exchangeFormat,
                                                         const std::map<std::string, std::string>& clientLabels,
                                                         sim::rpc::CallProcessor handler, sim::rpc::IRpcServer* parent)
     -> sim::rpc::RpcServerInternal*
 {
-    _logger->Trace("Creating internal server for functionName={}, clientUUID={}", functionName, clientUUID);
+    _logger->Trace("Creating internal server for rpcChannel={}, clientUUID={}", rpcChannel, clientUUID);
 
     ib::cfg::RpcServer controllerConfig;
-    // Use a unique name to avoid collisions of several RpcSevers on same functionName on one participant
+    // Use a unique name to avoid collisions of several RpcSevers on same rpcChannel on one participant
     controllerConfig.name = util::uuid::to_string(util::uuid::generate());
-    controllerConfig.network = clientUUID;
+    std::string network = clientUUID;
 
     // RpcServerInternal gets discovered by RpcClient which is then ready to detach calls
     mw::SupplementalData supplementalData;
@@ -526,47 +452,33 @@ auto Participant<IbConnectionT>::CreateRpcServerInternal(const std::string& func
     supplementalData[ib::mw::service::supplKeyRpcServerInternalClientUUID] = clientUUID;
 
     return CreateController<ib::cfg::RpcServer, sim::rpc::RpcServerInternal>(
-        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), functionName,
+        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), rpcChannel,
         exchangeFormat, clientLabels, clientUUID, handler, parent);
 }
 
 template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateRpcClient(const std::string& functionName,
+auto Participant<IbConnectionT>::CreateRpcClient(const std::string& canonicalName, const std::string& rpcChannel,
                                                 const sim::rpc::RpcExchangeFormat exchangeFormat,
                                                 const std::map<std::string, std::string>& labels,
                                                 sim::rpc::CallReturnHandler handler) -> sim::rpc::IRpcClient*
 {
-    auto clientUUID = util::uuid::to_string(util::uuid::generate());
+    auto network = util::uuid::to_string(util::uuid::generate());
 
-    // Retrieve controller
-    auto& cfgs = _participantConfig.rpcClients;
-    auto it = std::find_if(cfgs.begin(), cfgs.end(), [functionName](auto&& controllerConfig) {
-        return controllerConfig.name == functionName;
-    });
-    ib::cfg::RpcClient controllerConfig;
-    if (it != cfgs.end())
-    {
-        controllerConfig = *it;
-        controllerConfig.network = clientUUID;
-    }
-    else
-    {
-        controllerConfig.name = functionName;
-        controllerConfig.network = clientUUID;
-    }
+    ib::cfg::RpcClient controllerConfig = GetConfigByControllerName(_participantConfig.rpcClients, canonicalName);
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.rpcChannel, rpcChannel);
 
     // RpcClient gets discovered by RpcServer which creates RpcServerInternal on a matching connection
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcClient;
-    supplementalData[ib::mw::service::supplKeyRpcClientFunctionName] = functionName;
+    supplementalData[ib::mw::service::supplKeyRpcClientFunctionName] = controllerConfig.rpcChannel.value();
     supplementalData[ib::mw::service::supplKeyRpcClientDxf] = exchangeFormat.mediaType;
     auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
     supplementalData[ib::mw::service::supplKeyRpcClientLabels] = labelStr;
-    supplementalData[ib::mw::service::supplKeyRpcClientUUID] = clientUUID;
+    supplementalData[ib::mw::service::supplKeyRpcClientUUID] = network;
 
     auto controller = CreateController<ib::cfg::RpcClient, ib::sim::rpc::RpcClient>(
-        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), functionName,
-        exchangeFormat, labels, clientUUID, handler);
+        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(),
+        controllerConfig.rpcChannel.value(), exchangeFormat, labels, network, handler);
 
     // RpcClient discovers RpcServerInternal and is ready to dispatch calls
     controller->RegisterServiceDiscovery();
@@ -575,61 +487,55 @@ auto Participant<IbConnectionT>::CreateRpcClient(const std::string& functionName
 }
 
 template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateRpcServer(const std::string& functionName,
+auto Participant<IbConnectionT>::CreateRpcClient(const std::string& canonicalName) -> sim::rpc::IRpcClient*
+{
+    return CreateRpcClient(canonicalName, canonicalName, { "" }, {}, nullptr);
+}
+
+template <class IbConnectionT>
+auto Participant<IbConnectionT>::CreateRpcServer(const std::string& canonicalName, const std::string& rpcChannel,
                                                 const sim::rpc::RpcExchangeFormat exchangeFormat,
                                                 const std::map<std::string, std::string>& labels,
                                                 sim::rpc::CallProcessor handler) -> sim::rpc::IRpcServer*
 {
-    // Retrieve controller
-    auto& cfgs = _participantConfig.rpcServers;
-    auto it = std::find_if(cfgs.begin(), cfgs.end(), [functionName](auto&& controllerConfig) {
-        return controllerConfig.name == functionName;
-    });
-    ib::cfg::RpcServer controllerConfig;
-    if (it != cfgs.end())
-    {
-        controllerConfig = *it;
-        if (controllerConfig.network.has_value() && controllerConfig.network.value() != functionName)
-        {
-            LogWrongNetworkNameForController(functionName, functionName, *controllerConfig.network,
-                                                      ib::cfg::NetworkType::RPC);
-        }
-    }
-    else
-    {
-        controllerConfig.name = functionName;
-        controllerConfig.network = functionName;
-    }
-    // Use unique network name that same functionName for multiple RpcServers on one participant works
-    controllerConfig.network = util::uuid::to_string(util::uuid::generate());
+    // Use unique network name that same rpcChannel for multiple RpcServers on one participant works
+    std::string network = util::uuid::to_string(util::uuid::generate());
+
+    ib::cfg::RpcServer controllerConfig = GetConfigByControllerName(_participantConfig.rpcServers, canonicalName);
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.rpcChannel, rpcChannel);
 	
     // RpcServer announces himself to be found by DiscoverRpcServers()
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcServer;
-    supplementalData[ib::mw::service::supplKeyRpcServerFunctionName] = functionName;
+    supplementalData[ib::mw::service::supplKeyRpcServerFunctionName] = controllerConfig.rpcChannel.value();
     supplementalData[ib::mw::service::supplKeyRpcServerDxf] = exchangeFormat.mediaType;
     auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
     supplementalData[ib::mw::service::supplKeyRpcServerLabels] = labelStr;
 
     auto controller = CreateController<ib::cfg::RpcServer, sim::rpc::RpcServer>(
-        controllerConfig, mw::ServiceType::Controller, supplementalData, _timeProvider.get(), functionName,
+        controllerConfig, network, mw::ServiceType::Controller, supplementalData, _timeProvider.get(), controllerConfig.rpcChannel.value(),
         exchangeFormat, labels, handler);
 
     // RpcServer discovers RpcClient and creates RpcServerInternal on a matching connection
     controller->RegisterServiceDiscovery();
 
     return controller;
-    
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::DiscoverRpcServers(const std::string& functionName,
+auto Participant<IbConnectionT>::CreateRpcServer(const std::string& canonicalName) -> sim::rpc::IRpcServer*
+{
+    return CreateRpcServer(canonicalName, canonicalName, { "" }, {}, nullptr);
+}
+
+template <class IbConnectionT>
+void Participant<IbConnectionT>::DiscoverRpcServers(const std::string& rpcChannel,
     const sim::rpc::RpcExchangeFormat& exchangeFormat,
     const std::map<std::string, std::string>& labels,
     sim::rpc::DiscoveryResultHandler handler)
 {
     sim::rpc::RpcDiscoverer rpcDiscoverer{ GetServiceDiscovery() };
-    handler(rpcDiscoverer.GetMatchingRpcServers(functionName, exchangeFormat, labels));
+    handler(rpcDiscoverer.GetMatchingRpcServers(rpcChannel, exchangeFormat, labels));
 }
 
 template <class IbConnectionT>
@@ -909,13 +815,13 @@ void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, c
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::data::DataMessage& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::data::DataMessageEvent& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::data::DataMessage&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::data::DataMessageEvent&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
@@ -1190,14 +1096,14 @@ void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, c
 
 template <class IbConnectionT>
 void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
-                                              const sim::data::DataMessage& msg)
+                                              const sim::data::DataMessageEvent& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
 void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
-                                              sim::data::DataMessage&& msg)
+                                              sim::data::DataMessageEvent&& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, std::move(msg));
 }
@@ -1326,9 +1232,20 @@ auto Participant<IbConnectionT>::CreateInternalController(const std::string& ser
 
 template <class IbConnectionT>
 template <class ConfigT, class ControllerT, typename... Arg>
-auto Participant<IbConnectionT>::CreateController(const ConfigT& config,
-                                                    const mw::ServiceType serviceType,
-                                                    const mw::SupplementalData& supplementalData, Arg&&... arg)
+auto Participant<IbConnectionT>::CreateController(const ConfigT& config, const mw::ServiceType serviceType,
+                                                  const mw::SupplementalData& supplementalData, Arg&&... arg)
+    -> ControllerT*
+{
+    assert(config.network.has_value());
+    return CreateController<ConfigT, ControllerT>(config, *config.network, serviceType, supplementalData,
+                                                  std::forward<Arg>(arg)...);
+}
+
+template <class IbConnectionT>
+template <class ConfigT, class ControllerT, typename... Arg>
+auto Participant<IbConnectionT>::CreateController(const ConfigT& config, const std::string& network,
+                                                  const mw::ServiceType serviceType,
+                                                  const mw::SupplementalData& supplementalData, Arg&&... arg)
     -> ControllerT*
 {
     if (config.name == "")
@@ -1337,7 +1254,7 @@ auto Participant<IbConnectionT>::CreateController(const ConfigT& config,
     }
 
     // If possible, load controller from cache
-    auto* controllerPtr = GetController<ControllerT>(*config.network, config.name);
+    auto* controllerPtr = GetController<ControllerT>(network, config.name);
     if (controllerPtr != nullptr)
     {
         // We cache the controller and return it here.
@@ -1351,7 +1268,7 @@ auto Participant<IbConnectionT>::CreateController(const ConfigT& config,
     auto localEndpoint = _localEndpointId++;
 
     auto descriptor = ServiceDescriptor{};
-    descriptor.SetNetworkName(*config.network);
+    descriptor.SetNetworkName(network);
     descriptor.SetParticipantName(_participantName);
     descriptor.SetServiceName(config.name);
     descriptor.SetNetworkType(config.networkType);
@@ -1361,8 +1278,8 @@ auto Participant<IbConnectionT>::CreateController(const ConfigT& config,
 
     controller->SetServiceDescriptor(std::move(descriptor));
 
-    _ibConnection.RegisterIbService(*config.network, localEndpoint, controllerPtr);
-    const auto qualifiedName = *config.network + "/" + config.name;
+    _ibConnection.RegisterIbService(network, localEndpoint, controllerPtr);
+    const auto qualifiedName = network + "/" + config.name;
     controllerMap[qualifiedName] = std::move(controller);
 
     // TODO uncomment once trace & replay work again
@@ -1453,17 +1370,17 @@ void Participant<IbConnectionT>::ExecuteDeferred(std::function<void()> callback)
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::LogWrongNetworkNameForController(const std::string& canonicalName,
-                                                                          const std::string& providedNetworkName,
-                                                                          const std::string& configuredNetworkName,
-                                                                          cfg::NetworkType networkType)
+template <typename ValueT>
+void Participant<IbConnectionT>::LogMismatchBetweenConfigAndPassedValue(const std::string& canonicalName,
+                                                                        const ValueT& passedValue,
+                                                                        const ValueT& configuredValue)
 {
     std::stringstream ss;
-    ss << "The provided configuration contained a " << to_string(networkType) << " controller with the provided name, "
-          "but a different network name. The configured network name will be used." << std::endl
+    ss << "Mismatch between a configured and programmatically passed value. The configured value will be used."
+       << std::endl
        << "Controller name: " << canonicalName << std::endl
-       << "Provided network name: " << providedNetworkName << std::endl
-       << "Configured network name: " << configuredNetworkName << std::endl;
+       << "Passed value: " << passedValue << std::endl
+       << "Configured value: " << configuredValue << std::endl;
 
     _logger->Info(ss.str());
 }

@@ -1,90 +1,105 @@
-===================
-!!! Data Message API
-===================
+================
+Data Message API
+================
 
 .. Macros for docs use
 .. |IParticipant| replace:: :cpp:class:`IParticipant<ib::mw::IParticipant>`
 .. |CreateDataPublisher| replace:: :cpp:func:`CreateDataPublisher<ib::mw::IParticipant::CreateDataPublisher()>`
 .. |CreateDataSubscriber| replace:: :cpp:func:`CreateDataSubscriber<ib::mw::IParticipant::CreateDataSubscriber()>`
 .. |Publish| replace:: :cpp:func:`Publish()<ib::sim::data::IDataPublisher::Publish()>`
-.. |SetDefaultReceiveMessageHandler| replace:: :cpp:func:`SetDefaultReceiveMessageHandler()<ib::sim::data::IDataSubscriber::SetDefaultReceiveMessageHandler()>`
-.. |RegisterSpecificDataHandler| replace:: :cpp:func:`RegisterSpecificDataHandler()<ib::sim::data::IDataSubscriber::RegisterSpecificDataHandler()>`
+.. |SetDefaultDataMessageHandler| replace:: :cpp:func:`SetDefaultDataMessageHandler()<ib::sim::data::IDataSubscriber::SetDefaultDataMessageHandler()>`
+.. |AddExplicitDataMessageHandler| replace:: :cpp:func:`AddExplicitDataMessageHandler()<ib::sim::data::IDataSubscriber::AddExplicitDataMessageHandler()>`
 .. |IDataPublisher| replace:: :cpp:class:`IDataPublisher<ib::sim::data::IDataPublisher>`
 .. |IDataSubscriber| replace:: :cpp:class:`IDataPublisher<ib::sim::data::IDataSubscriber>`
 .. contents::
    :local:
    :depth: 3
 
-!!! Using the Data Message API
+Using the Data Message API
 --------------------------
 
 The Data Message API provides a topic-based publish / subscribe mechanism to exchange plain byte vectors containing
-arbitrary user data. Published messages are transmitted immediately to all connected subscribers, that is, without 
-any modelled latency. DataSubscribers set a default handler that is called upon incoming data on their topic. Another 
-handler notifies the DataSubscriber about new DataPublishers on its topic. For a more advanced routing of messages on 
-a common topic, DataSubscriber can register specific reception handlers targeting certain annotated DataPublishers.
+arbitrary user data. Published messages are transmitted immediately to all matching subscribers, that is, without 
+any modelled latency.
 
-!!! Topics
+Data can be transmitted using the |Publish| method of a DataPublisher, either providing a standard vector of data or a
+data pointer and size. DataSubscribers can provide a handler that is called upon incoming data on their topic.
+
+Topics
 ~~~~~~
 
-DataPublishers and DataSubscribers are identified by a topic name and are connected by links. For each link, the 
-endpoints must be unique. That is, on one participant, there can only be one publisher / subscriber on a given topic.
-However, it is possible to use multiple publishers/subscribers on the same topic distributed among different 
-participants.
+DataPublishers and DataSubscribers provide a topic name, communications only takes place among controllers with the 
+same topic. The topic has no wildcard functionality.
 
-!!! Media type
-~~~~~~~~~~~~~~
+Media type
+~~~~~~~~~~
 
 Both DataPublishers and DataSubscribers define a media type, a meta description of the transmitted data. It can be used
 to provide infomation about the de- / serialization of the underlying user data. Just like the topic, the media type has
 to match between DataPublishers / DataSubscribers for communicaiton to take place. An empty string on a DataSubscriber
-will match any other string as the media type of a DataPublisher.
+is a wildcard and will match any other media type of a DataPublisher.
 
-!!! Labels
+Labels
 ~~~~~~
 
 DataPublishers and DataSubscribers can be annotated with string-based key-value pairs (labels). Additional to the
 matching requirements regarding topic and media type, DataSubscribers will only receive messages by DataPublishers if
 their labels apply the following matching rules:
 
-* A DataSubscriber without labels matches any other DataPublisher on that topic.
+* A DataSubscriber without labels matches any other DataPublisher.
 * If labels are specified on a DataSubscriber, all of the labels must be found on a DataPublisher.
-* An empty value string on a DataSubscriber's label is a wildcard.
+* An empty label value on a DataSubscriber is a wildcard for the DataPublisher label value of their common label key.
 
-!!! Specific handlers
+Explicit handlers
 ~~~~~~~~~~~~~~~~~
 
 In a scenario where multiple DataPublishers publish on a common topic but a DataSubscriber wants to treat the incoming
-messages differently, the DataSubscriber can route the publications to specific data handlers based on the
-DataPublishers labels and media type using the |RegisterSpecificDataHandler| method on a DataSubscriber instance.  The
+messages differently, the DataSubscriber can route the publications to explicit data handlers based on the
+DataPublishers labels and media type using the |AddExplicitDataMessageHandler| method on a DataSubscriber instance. The
 labels and media type given there will be used to redirect incoming messages by matching DataPublishers to one or more
-specific data handlers instead of the default handler.  The latter will not be invoked if a specific handler is
-availabe. Note that the wildcard patters for DataSubscribers also apply to labels / media types given to
-|RegisterSpecificDataHandler|: An empty string in a label value or any field of the media type is a wildcard.
+explicit data handlers instead of the default handler. The latter will not be invoked if a specific handler is
+availabe. Note that the wildcard patters for DataSubscribers also apply to labels / media type given to
+|AddExplicitDataMessageHandler|: An empty string in a label value or the media type is a wildcard.
 
-If the labels / media types of DataPublishers are unknown beforehand, |RegisterSpecificDataHandler| can be used in the
-handler for new data sources which provides this information. Note that multiple specific data handlers can be
-registered, possibly resulting in multiple calls for one incoming data message.
+If the labels / media type of DataPublishers are unknown beforehand, this information can be obtained by another 
+handler on the DataSubscriber that notifies about new DataPublishers on its topic.
 
-!!! History
+History
 ~~~~~~~
 
-DataPublishers additionally specify a history length N (currently 0 or 1). DataSubscribers that are created after a 
+DataPublishers additionally specify a history length N (restricted to 0 or 1). DataSubscribers that are created after a 
 publication will still receive the N historic Data Messages from a DataPublisher with history > 0. Note that the
 particiant that created the DataPublisher still has to be connected to the distributed simulation for the historic 
 messages to be delivered.
 
-!!! Usage
+Configuration
+~~~~~~~~~~~~~
+
+The controller name passed in |CreateDataPublisher| and |CreateDataSubscriber| is used to identify the controller in 
+a YAML/json configuration. Currently, only the topic can be configured. If a topic is set in the configuration, it will
+be preferred over a programmatically set topic.
+
+.. code-block:: yaml
+
+    ParticipantName: Participant1
+    DataPublishers:
+    - Name: DataPublisherController1
+      Topic: TopicA
+    DataSubscribers:
+    - Name: DataSubscriberController1
+      Topic: TopicB
+
+Usage
 ~~~~~
 
 The Publisher and Subscriber interfaces are instantiated from an |IParticipant| interface by calling 
-|CreateDataPublisher| and |CreateDataSubscriber|, respectively. Their name corresponds to the topic and is used in the
-configuration and instantiation of the interfaces.
+|CreateDataPublisher| and |CreateDataSubscriber|, respectively. 
 
-Data can be transmitted using the |Publish| method. The data is received and delivered via a callback, which has to be
-specified on creation of the DataSubscriber and can be overwritten using the |SetDefaultReceiveMessageHandler| method.
+The simplified overloads only need a controller name as a single argument which will be used as topic. Media type, 
+labels and handlers are left emtpy in this variant. Note that in this case, the DataSubscriber still has to provide a 
+handler for incoming messages via |SetDefaultDataMessageHandler|.
 
-!!! Usage Examples
+Usage Examples
 ~~~~~~~~~~~~~~
 
 The interfaces for the publish/subscribe mechanism can be instantiated from an IParticipant:
@@ -94,58 +109,58 @@ The interfaces for the publish/subscribe mechanism can be instantiated from an I
     // Participant1 (Publisher)
     // ------------------------
 
-    auto* publisher = participant->CreateDataPublisher("Topic1", "json", {"KeyA", "ValA"}, 1);
+    auto* publisher = participant->CreateDataPublisher("PubCtrl1", "Topic1", "json", {"KeyA", "ValA"}, 1);
     publisher->Publish(user_data);
-
 
     // Participant2 (Subscriber)
     // -------------------------
 
-    auto defaultDataHandler = [](IDataSubscriber* subscriber, const std::vector<uint8_t>& data) 
+    auto defaultDataHandler = [](IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent) 
     {
-        // handle data
+        // publication timestamp in dataMessageEvent.timestamp
+        // raw data in dataMessageEvent.data
     });
-    auto newDataSourceHandler = [](IDataSubscriber* subscriber, const std::string& topic,
-                   const std::string& mediaType, const std::map<std::string, std::string>& labels)
+    auto newDataPublisherHandler = [](IDataSubscriber* subscriber, const NewDataPublisherEvent& dataSource)
     {
         // handle new sources
     });
 
-    auto* subscriber = participant->CreateDataSubscriber("Topic1", "", {}, defaultDataHandler, newDataSourceHandler);
+    auto* subscriber = participant->CreateDataSubscriber("SubCtrl1", "Topic1", "", {}, defaultDataHandler, newDataPublisherHandler);
 
-    auto specificDataHandler = [](IDataSubscriber* subscriber, const std::vector<uint8_t>& data) 
+    auto explicitDataHandler = [](IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent) 
     {
         // handle data for publishers with label key "KeyB"
     });
-    subscriber->RegisterSpecificDataHandler("", {{"KeyB", ""}}, specificDataHandler);
+    subscriber->AddExplicitDataMessageHandler("", {{"KeyB", ""}}, explicitDataHandler);
 
 
-!!! API and Data Type Reference
+API and Data Type Reference
 ---------------------------
 
 The |IDataPublisher| provides a simple publish interface for standard vector. For convenience an overload for raw data 
-pointer  and size exists.
+pointer and size exists.
 
-The |IDataSubscriber| provides a callback registration mechanism.
+The |IDataSubscriber| provides a callback registration mechanism for the default callback via 
+|SetDefaultDataMessageHandler| and for targeting explicit DataPublishers via |AddExplicitDataMessageHandler|.
 
-The publisher's and subscriber's read-only :cpp:class:`configuration<ib::cfg::DataPort>` can also be accessed. Note that
-the media type, history and labels can only be set on the creation calls and not via the configuration mechanism.
-
-!!! Data Publisher API
+Data Publisher API
 ~~~~~~~~~~~~~~~~~~
 
     .. doxygenclass:: ib::sim::data::IDataPublisher
        :members:
 
-!!! Data Subscriber API
+Data Subscriber API
 ~~~~~~~~~~~~~~~~~~~
 
     .. doxygenclass:: ib::sim::data::IDataSubscriber
        :members:
 
-
-!!! Data Structures
+Data Structures
 ~~~~~~~~~~~~~~~
 
-    .. doxygenstruct:: ib::cfg::DataPort
+    .. doxygenstruct:: ib::sim::data::DataMessageEvent
        :members:
+
+    .. doxygenstruct:: ib::sim::data::NewDataPublisherEvent
+       :members:
+       

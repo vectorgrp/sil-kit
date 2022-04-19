@@ -63,43 +63,42 @@ uint8_t payload[1] = {0};
 
 uint8_t publishCount = 0;
 int receiveCount = 0;
-const int numPublications = 10;
+const int numPublications = 30;
 
 char* participantName;
 
-void NewDataSourceHandler(void* context, ib_Data_Subscriber* cbDataSubscriber, const char* topic,
-                          const char* mediaType, const ib_KeyValueList* labelList)
+void NewDataSourceHandler(void* context, ib_Data_Subscriber* cbDataSubscriber, const ib_Data_NewDataPublisherEvent* newDataPublisherEvent)
 {
-    printf("<< Received new data source: topic=\"%s\", mediaType=\"%s\", labels={", topic, mediaType);
-    for (uint32_t i = 0; i < labelList->numLabels; i++)
+    printf("<< Received new data source: topic=\"%s\", mediaType=\"%s\", labels={", newDataPublisherEvent->topic, newDataPublisherEvent->mediaType);
+    for (uint32_t i = 0; i < newDataPublisherEvent->labels->numLabels; i++)
     {
-        printf("{%s, %s}", labelList->labels[i].key, labelList->labels[i].value);
+        printf("{%s, %s}", newDataPublisherEvent->labels->labels[i].key, newDataPublisherEvent->labels->labels[i].value);
     }
     printf("}\n");
 
 }
 
-void SpecificDataHandler(void* context, ib_Data_Subscriber* subscriber, const ib_ByteVector* data)
+void SpecificDataHandler(void* context, ib_Data_Subscriber* subscriber, const ib_Data_DataMessageEvent* dataMessageEvent)
 {
     receiveCount += 1;
     printf("<< [SpecificDataHandler] Data received: ");
 
-    for (size_t i = 0; i < data->size; i++)
+    for (size_t i = 0; i < dataMessageEvent->data.size; i++)
     {
-        char ch = data->data[i];
+        char ch = dataMessageEvent->data.data[i];
         printf("%c", ch);
     }
     printf("\n");
 }
 
-void DefaultDataHandler(void* context, ib_Data_Subscriber* subscriber, const ib_ByteVector* data)
+void DefaultDataHandler(void* context, ib_Data_Subscriber* subscriber, const ib_Data_DataMessageEvent* dataMessageEvent)
 {
     receiveCount += 1;
     printf("<< [DefaultDataHandler] Data received: ");
 
-    for (size_t i = 0; i < data->size; i++)
+    for (size_t i = 0; i < dataMessageEvent->data.size; i++)
     {
-        char ch = data->data[i];
+        char ch = dataMessageEvent->data.data[i];
         printf("%c", ch);
     }
     printf("\n");
@@ -203,8 +202,8 @@ int main(int argc, char* argv[])
         Create_Labels(&subLabelList, subLabels, numSubLabels);
         transmitContext.someInt = 1234;
 
-        returnCode = ib_Data_Subscriber_Create(&dataSubscriber, participant, "TopicA", subMediaType, subLabelList,
-                                               (void*)&transmitContext, &DefaultDataHandler,
+        returnCode = ib_Data_Subscriber_Create(&dataSubscriber, participant, "SubCtrl1", "TopicA", subMediaType,
+                                               subLabelList, (void*)&transmitContext, &DefaultDataHandler,
                                                (void*)&transmitContext, &NewDataSourceHandler);
 
         // This redirects publications by dataPublisher2 (label {"KeyA", "ValA"}, {"KeyB", "ValB"})
@@ -213,8 +212,8 @@ int main(int argc, char* argv[])
         numSubLabels = 2;
         ib_KeyValuePair specificLabels[2] = { {"KeyA", ""}, {"KeyB", ""} };
         Create_Labels(&specificLabelList, specificLabels, numSubLabels);
-        ib_Data_Subscriber_RegisterSpecificDataHandler(dataSubscriber, subMediaType, specificLabelList,
-                                                       (void*)&transmitContext, &SpecificDataHandler);
+        ib_Data_Subscriber_AddExplicitDataMessageHandler(dataSubscriber, (void*)&transmitContext, &SpecificDataHandler,
+														 subMediaType, specificLabelList);
 
         if (returnCode)
         {
@@ -239,16 +238,16 @@ int main(int argc, char* argv[])
         size_t numPubLabels1 = 1;
         ib_KeyValuePair pubLabels1[1] = { {"KeyA", "ValA"} };
         Create_Labels(&pubLabelList1, pubLabels1, numPubLabels1);
-        returnCode = ib_Data_Publisher_Create(&dataPublisher1, participant, "TopicA", pubMediaType, pubLabelList1,
-                                              history);
+        returnCode = ib_Data_Publisher_Create(&dataPublisher1, participant, "PubCtrl1", "TopicA", pubMediaType,
+                                             pubLabelList1, history);
 
         ib_KeyValueList* pubLabelList2;
         size_t numPubLabels2 = 2;
         ib_KeyValuePair pubLabels2[2] = { {"KeyA", "ValA"}, {"KeyB", "ValB"} };
         Create_Labels(&pubLabelList2, pubLabels2, numPubLabels2);
 
-        returnCode = ib_Data_Publisher_Create(&dataPublisher2, participant, "TopicA", pubMediaType, pubLabelList2,
-                                              history);
+        returnCode = ib_Data_Publisher_Create(&dataPublisher2, participant, "PubCtrl2", "TopicA", pubMediaType,
+                                             pubLabelList2, history);
         if (returnCode)
         {
             printf("%s\n", ib_GetLastErrorString());

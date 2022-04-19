@@ -125,12 +125,12 @@ int main(int argc, char** argv)
             std::string clientAFunctionName = "Add100";
             auto exchangeFormatClientA = RpcExchangeFormat{"application/octet-stream"};
             std::map<std::string, std::string> labelsClientA{ {"KeyA", "ValA"} };
-            auto clientA = participant->CreateRpcClient(clientAFunctionName, exchangeFormatClientA, labelsClientA, &CallReturn);
+            auto clientA = participant->CreateRpcClient("ClientCtrl1", clientAFunctionName, exchangeFormatClientA, labelsClientA, &CallReturn);
 
             std::string clientBFunctionName = "Sort";
             auto exchangeFormatClientB = RpcExchangeFormat{""};
             std::map<std::string, std::string> labelsClientB{ {"KeyC", "ValC"} };
-            auto clientB = participant->CreateRpcClient("Sort", exchangeFormatClientB, labelsClientB, &CallReturn);
+            auto clientB = participant->CreateRpcClient("ClientCtrl2", "Sort", exchangeFormatClientB, labelsClientB, &CallReturn);
 
             participantController->SetSimulationTask(
                 [clientA, clientB](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -145,11 +145,11 @@ int main(int argc, char** argv)
         {
             auto exchangeFormatServerA = RpcExchangeFormat{"application/octet-stream"};
             std::map<std::string, std::string> labelsServerA{ {"KeyA", "ValA"}, {"KeyB", "ValB"}};
-            participant->CreateRpcServer("Add100", exchangeFormatServerA, labelsServerA, &RemoteFunc_Add100);
+            participant->CreateRpcServer("ServerCtrl1", "Add100", exchangeFormatServerA, labelsServerA, &RemoteFunc_Add100);
             
             auto exchangeFormatServerB = RpcExchangeFormat{"application/json"};
             std::map<std::string, std::string> labelsServerB{ {"KeyC", "ValC"}, {"KeyD", "ValD"}};
-            participant->CreateRpcServer("Sort", exchangeFormatServerB, labelsServerB, &RemoteFunc_Sort);
+            participant->CreateRpcServer("ServerCtrl2", "Sort", exchangeFormatServerB, labelsServerB, &RemoteFunc_Sort);
 
             participantController->SetSimulationTask(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {

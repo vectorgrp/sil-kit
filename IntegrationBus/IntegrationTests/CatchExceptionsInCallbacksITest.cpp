@@ -70,10 +70,10 @@ TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
         ib::cfg::MockParticipantConfiguration(), participantNameReceiver, false);
     subParticipant->joinIbDomain(domainId);
 
-    publisher = pubParticipant->CreateDataPublisher("CrashTopic", {}, {}, 0);
+    publisher = pubParticipant->CreateDataPublisher("PubCtrl1", "CrashTopic", {}, {}, 0);
     subscriber = subParticipant->CreateDataSubscriber(
-        "CrashTopic", {}, {},
-        [this](auto* /*subscriber*/, const std::vector<uint8_t>& /*data*/) {
+        "SubCtrl1", "CrashTopic", {}, {},
+        [this](auto* /*subscriber*/, const ib::sim::data::DataMessageEvent& /*data*/) {
             this->testOk.set_value(true);
             throw std::runtime_error{"CrashTest"};
         },

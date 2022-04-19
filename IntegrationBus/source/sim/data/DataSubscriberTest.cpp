@@ -26,7 +26,7 @@ class DataSubscriberTest : public ::testing::Test
 protected:
     struct Callbacks
     {
-        MOCK_METHOD2(ReceiveData, void(IDataSubscriber*, const std::vector<uint8_t>& data));
+        MOCK_METHOD2(ReceiveData, void(IDataSubscriber*, const DataMessageEvent& dataMessageEvent));
     };
 
 protected:
@@ -35,10 +35,10 @@ protected:
         , subscriberOther{ &participant, participant.GetTimeProvider(), "Topic", {}, {}, {}, nullptr }
     {
         subscriber.SetServiceDescriptor(from_endpointAddress(endpointAddress));
-        subscriber.SetDefaultReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));
+        subscriber.SetDefaultDataMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));
 
         subscriberOther.SetServiceDescriptor(from_endpointAddress(otherEndpointAddress));
-        subscriberOther.SetDefaultReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));
+        subscriberOther.SetDefaultDataMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));
     }
 
 
@@ -54,9 +54,9 @@ protected:
 
 TEST_F(DataSubscriberTest, trigger_callback)
 {
-    const DataMessage msg{{0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u}};
+    const DataMessageEvent msg{0ns, {0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u}};
 
-    EXPECT_CALL(callbacks, ReceiveData(nullptr, msg.data))
+    EXPECT_CALL(callbacks, ReceiveData(nullptr, msg))
         .Times(1);
 
     subscriber.ReceiveIbMessage(&subscriberOther, msg);

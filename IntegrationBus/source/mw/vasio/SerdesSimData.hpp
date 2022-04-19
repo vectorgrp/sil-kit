@@ -10,14 +10,16 @@ namespace ib {
 namespace sim {
 namespace data {
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const DataMessage& msg)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const DataMessageEvent& msg)
 {
-    buffer << msg.data;
+    buffer << msg.data
+           << msg.timestamp;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, DataMessage& msg)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, DataMessageEvent& msg)
 {
-    buffer >> msg.data;
+    buffer >> msg.data
+           >> msg.timestamp;
     return buffer;
 }
 

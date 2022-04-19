@@ -30,7 +30,7 @@ add_vib_test(TestSimDataSubscriber
     SOURCES DataSubscriberTest.cpp 
     LIBS IbSimDataMessage IbMwMockParticipant IbInternal
 )
-add_vib_test(TestDataExchangeFormat 
-    SOURCES DataExchangeFormatTest.cpp 
+add_vib_test(TestPubSubMatching
+    SOURCES PubSubMatchingTest.cpp 
     LIBS IbSimDataMessage
 )

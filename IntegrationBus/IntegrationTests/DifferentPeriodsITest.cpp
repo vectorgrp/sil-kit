@@ -59,7 +59,7 @@ public:
 
         const auto topicName = "Topic" + std::to_string(publisherIndex);
         auto&& participantController = _participant->GetParticipantController();
-        auto* publisher = _participant->CreateDataPublisher(topicName, {}, {}, 0);
+        auto* publisher = _participant->CreateDataPublisher("PubCtrl1", topicName, {}, {}, 0);
 
         participantController->SetPeriod(period);
         participantController->SetSimulationTask(
@@ -136,9 +136,9 @@ public:
         for (auto publisherIndex = 0u; publisherIndex < _publisherCount; publisherIndex++)
         {
             _participant->CreateDataSubscriber(
-                "Topic" + std::to_string(publisherIndex), {}, {},
-                [this, publisherIndex](IDataSubscriber* subscriber, const std::vector<uint8_t>& data) {
-                    ReceiveMessage(subscriber, data, publisherIndex);
+                "SubCtrl1", "Topic" + std::to_string(publisherIndex), {}, {},
+                [this, publisherIndex](IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent) {
+                    ReceiveMessage(subscriber, dataMessageEvent, publisherIndex);
                 });
         }
         participantController->SetPeriod(subscriberPeriod);
@@ -185,11 +185,11 @@ private:
         }
     }
 
-    void ReceiveMessage(IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data,
+    void ReceiveMessage(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent,
                         const uint32_t publisherIndex)
     {
         auto& messageIndex = _messageIndexes[publisherIndex];
-        const std::string message{data.begin(), data.end()};
+        const std::string message{ dataMessageEvent.data.begin(), dataMessageEvent.data.end()};
 
         std::string receivedMessage;
         nanoseconds sentTime = {};

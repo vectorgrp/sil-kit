@@ -40,10 +40,10 @@ public:
 class MockDataSubscriber : public ib::sim::data::IDataSubscriber
 {
 public:
-    MOCK_METHOD1(SetDefaultReceiveMessageHandler, void(DataHandlerT callback));
-    MOCK_METHOD((void), RegisterSpecificDataHandler,
-                (const std::string& mediaType, (const std::map<std::string, std::string>& labels),
-                 (DataHandlerT callback)),
+    MOCK_METHOD1(SetDefaultDataMessageHandler, void(DataMessageHandlerT callback));
+    MOCK_METHOD((void), AddExplicitDataMessageHandler,
+                ((DataMessageHandlerT callback), const std::string& mediaType,
+                 (const std::map<std::string, std::string>& labels)),
                 (override));
 };
 
@@ -51,14 +51,14 @@ class MockParticipant : public ib::mw::test::DummyParticipant
 {
 public:
     MOCK_METHOD(ib::sim::data::IDataPublisher*, CreateDataPublisher,
-                (const std::string& /*topic*/, const std::string& /*mediaType*/,
+                (const std::string& /*controllerName*/, const std::string& /*topic*/, const std::string& /*mediaType*/,
                  (const std::map<std::string, std::string>& /*labels*/), size_t /* history */),
                 (override));
 
     MOCK_METHOD(ib::sim::data::IDataSubscriber*, CreateDataSubscriber,
-                (const std::string& /*topic*/, const std::string& /*mediaType*/,
-                 (const std::map<std::string, std::string>& /*labels*/), (ib::sim::data::DataHandlerT /* callback*/),
-                 (ib::sim::data::NewDataSourceHandlerT /* callback*/)),
+                (const std::string& /*controllerName*/, const std::string& /*topic*/, const std::string& /*mediaType*/,
+                 (const std::map<std::string, std::string>& /*labels*/), (ib::sim::data::DataMessageHandlerT /* callback*/),
+                 (ib::sim::data::NewDataPublisherHandlerT /* callback*/)),
                 (override));
 };
 
@@ -124,12 +124,11 @@ public:
     ib_KeyValueList* labelList;
 };
 
-void DefaultDataHandler(void* /*context*/, ib_Data_Subscriber* /*subscriber*/, const ib_ByteVector* /*data*/)
+void DefaultDataHandler(void* /*context*/, ib_Data_Subscriber* /*subscriber*/, const ib_Data_DataMessageEvent* /*dataMessageEvent*/)
 {
 }
 
-void NewDataSourceHandler(void* /*context*/, ib_Data_Subscriber* /*subscriber*/, const char* /*topic*/,
-                          const char* /*mediaType*/, const ib_KeyValueList* /*labelList*/)
+void NewDataSourceHandler(void* /*context*/, ib_Data_Subscriber* /*subscriber*/, const ib_Data_NewDataPublisherEvent* /*newDataPublisherEvent*/)
 {
 }
 
@@ -138,8 +137,8 @@ TEST_F(CapiDataTest, data_publisher_function_mapping)
     ib_ReturnCode returnCode;
     ib_Data_Publisher* publisher;
 
-    EXPECT_CALL(mockParticipant, CreateDataPublisher).Times(testing::Exactly(1));
-    returnCode = ib_Data_Publisher_Create(&publisher, (ib_Participant*)&mockParticipant, "topic",
+    EXPECT_CALL(mockParticipant, CreateDataPublisher("publisher", "topic", mediaType, testing::_, 0)).Times(testing::Exactly(1));
+    returnCode = ib_Data_Publisher_Create(&publisher, (ib_Participant*)&mockParticipant, "publisher", "topic",
                                           mediaType, labelList, 0);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
@@ -155,22 +154,21 @@ TEST_F(CapiDataTest, data_subscriber_function_mapping)
 
     ib_Data_Subscriber* subscriber;
 
-    EXPECT_CALL(mockParticipant, CreateDataSubscriber).Times(testing::Exactly(1));
-    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, "topic",
+    EXPECT_CALL(mockParticipant, CreateDataSubscriber("subscriber", "topic", mediaType, testing::_, testing::_, testing::_)).Times(testing::Exactly(1));
+    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, "subscriber", "topic",
                                            mediaType, labelList, nullptr, &DefaultDataHandler,
                                            nullptr, &NewDataSourceHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-    EXPECT_CALL(mockDataSubscriber, SetDefaultReceiveMessageHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_Data_Subscriber_SetDefaultReceiveDataHandler((ib_Data_Subscriber*)&mockDataSubscriber, nullptr,
+    EXPECT_CALL(mockDataSubscriber, SetDefaultDataMessageHandler(testing::_)).Times(testing::Exactly(1));
+    returnCode = ib_Data_Subscriber_SetDefaultDataMessageHandler((ib_Data_Subscriber*)&mockDataSubscriber, nullptr,
                                                           &DefaultDataHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-    EXPECT_CALL(mockDataSubscriber, RegisterSpecificDataHandler(testing::_, testing::_, testing::_))
+    EXPECT_CALL(mockDataSubscriber, AddExplicitDataMessageHandler(testing::_, mediaType, testing::_))
         .Times(testing::Exactly(1));
-    returnCode =
-        ib_Data_Subscriber_RegisterSpecificDataHandler((ib_Data_Subscriber*)&mockDataSubscriber, mediaType,
-                                                       labelList, nullptr, &DefaultDataHandler);
+    returnCode = ib_Data_Subscriber_AddExplicitDataMessageHandler((ib_Data_Subscriber*)&mockDataSubscriber, nullptr,
+                                                                  &DefaultDataHandler, mediaType, labelList);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 }
 
@@ -180,18 +178,22 @@ TEST_F(CapiDataTest, data_publisher_bad_parameters)
     ib_ReturnCode returnCode;
     ib_Data_Publisher* publisher;
 
-    returnCode = ib_Data_Publisher_Create(nullptr, (ib_Participant*)&mockParticipant, "topic",
+    returnCode = ib_Data_Publisher_Create(nullptr, (ib_Participant*)&mockParticipant, "publisher", "topic",
                                           mediaType, labelList, 0);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Publisher_Create(&publisher, nullptr, "topic", mediaType, labelList, 0);
+    returnCode = ib_Data_Publisher_Create(&publisher, nullptr, "publisher", "topic", mediaType, labelList, 0);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
     returnCode = ib_Data_Publisher_Create(&publisher, (ib_Participant*)&mockParticipant, nullptr,
+                                          "topic", mediaType, labelList, 0);
+    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+    returnCode = ib_Data_Publisher_Create(&publisher, (ib_Participant*)&mockParticipant, "publisher", nullptr,
                                           mediaType, labelList, 0);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Publisher_Create(&publisher, (ib_Participant*)&mockParticipant, "topic",
+    returnCode = ib_Data_Publisher_Create(&publisher, (ib_Participant*)&mockParticipant, "publisher", "topic",
                                           nullptr, labelList, 0);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
@@ -207,49 +209,55 @@ TEST_F(CapiDataTest, data_subscriber_bad_parameters)
     ib_ReturnCode returnCode;
     ib_Data_Subscriber* subscriber;
 
-    returnCode = ib_Data_Subscriber_Create(nullptr, (ib_Participant*)&mockParticipant, "topic",
+    returnCode = ib_Data_Subscriber_Create(nullptr, (ib_Participant*)&mockParticipant, "subscriber", "topic",
                                            mediaType, labelList, dummyContextPtr,
                                            &DefaultDataHandler, dummyContextPtr, &NewDataSourceHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
     returnCode =
-        ib_Data_Subscriber_Create(&subscriber, nullptr, "topic", mediaType, labelList,
+        ib_Data_Subscriber_Create(&subscriber, nullptr, "subscriber", "topic", mediaType, labelList,
                                   dummyContextPtr, &DefaultDataHandler, dummyContextPtr, &NewDataSourceHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, nullptr,
-                                           mediaType, labelList, dummyContextPtr,
+    returnCode =
+        ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, nullptr, "topic", mediaType, labelList,
+                                  dummyContextPtr, &DefaultDataHandler, dummyContextPtr, &NewDataSourceHandler);
+    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, "subscriber", nullptr,
+        mediaType, labelList, dummyContextPtr,
                                            &DefaultDataHandler, dummyContextPtr, &NewDataSourceHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, "topic",
+    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, "subscriber", "topic",
                                            nullptr, labelList, dummyContextPtr, &DefaultDataHandler,
                                            dummyContextPtr, &NewDataSourceHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, "topic",
+    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, "subscriber", "topic",
                                            mediaType, labelList, dummyContextPtr,
                                            &DefaultDataHandler, dummyContextPtr, nullptr);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Subscriber_SetDefaultReceiveDataHandler(nullptr, dummyContextPtr, &DefaultDataHandler);
+    returnCode = ib_Data_Subscriber_SetDefaultDataMessageHandler(nullptr, dummyContextPtr, &DefaultDataHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
     returnCode =
-        ib_Data_Subscriber_SetDefaultReceiveDataHandler((ib_Data_Subscriber*)&mockDataSubscriber, dummyContextPtr, nullptr);
+        ib_Data_Subscriber_SetDefaultDataMessageHandler((ib_Data_Subscriber*)&mockDataSubscriber, dummyContextPtr, nullptr);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Subscriber_RegisterSpecificDataHandler(nullptr, mediaType, labelList,
-                                                                dummyContextPtr, &DefaultDataHandler);
+    returnCode = ib_Data_Subscriber_AddExplicitDataMessageHandler(nullptr, dummyContextPtr, &DefaultDataHandler,
+                                                                  mediaType, labelList);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Subscriber_RegisterSpecificDataHandler(
-        (ib_Data_Subscriber*)&mockDataSubscriber, nullptr, labelList, dummyContextPtr, &DefaultDataHandler);
+    returnCode = ib_Data_Subscriber_AddExplicitDataMessageHandler(
+        (ib_Data_Subscriber*)&mockDataSubscriber, dummyContextPtr, nullptr, mediaType, labelList);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Subscriber_RegisterSpecificDataHandler(
-        (ib_Data_Subscriber*)&mockDataSubscriber, mediaType, labelList, dummyContextPtr, nullptr);
+    returnCode = ib_Data_Subscriber_AddExplicitDataMessageHandler(
+        (ib_Data_Subscriber*)&mockDataSubscriber, dummyContextPtr, &DefaultDataHandler, nullptr, labelList);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
 }
 
 TEST_F(CapiDataTest, data_publisher_publish)

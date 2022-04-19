@@ -10,7 +10,7 @@ namespace data {
 
 DataSubscriber::DataSubscriber(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
                                const std::string& topic, const std::string& mediaType, const std::map<std::string, std::string>& labels,
-                               DataHandlerT defaultDataHandler, NewDataSourceHandlerT newDataSourceHandler)
+                               DataMessageHandlerT defaultDataHandler, NewDataPublisherHandlerT newDataSourceHandler)
     : _topic{topic}
     , _mediaType{mediaType}
     , _labels{labels}
@@ -46,7 +46,7 @@ void DataSubscriber::RegisterServiceDiscovery()
                 };
 
                 auto topic = getVal(mw::service::supplKeyDataPublisherTopic);
-                std::string pubMediaType{ getVal(mw::service::supplKeyDataPublisherPubDxf)};
+                std::string pubMediaType{ getVal(mw::service::supplKeyDataPublisherMediaType)};
                 auto pubUUID = getVal(mw::service::supplKeyDataPublisherPubUUID);
                 std::string labelsStr = getVal(mw::service::supplKeyDataPublisherPubLabels);
                 std::map<std::string, std::string> publisherLabels = ib::cfg::Deserialize<std::map<std::string, std::string>>(labelsStr);
@@ -61,7 +61,7 @@ void DataSubscriber::RegisterServiceDiscovery()
 
                     if (_newDataSourceHandler)
                     {
-                        _newDataSourceHandler(this, topic, pubMediaType, publisherLabels);
+                        _newDataSourceHandler(this, { _timeProvider->Now(), topic, pubMediaType, publisherLabels });
                     }
                     // NB: Try to assign specific handlers here as _internalSubscibers has changed
                     AssignSpecificDataHandlers();
@@ -70,18 +70,18 @@ void DataSubscriber::RegisterServiceDiscovery()
         });
 }
 
-void DataSubscriber::SetDefaultReceiveMessageHandler(DataHandlerT callback)
+void DataSubscriber::SetDefaultDataMessageHandler(DataMessageHandlerT callback)
 {
     for (auto* internalSubscriber : _internalSubscibers)
     {
-        internalSubscriber->SetDefaultReceiveMessageHandler(callback);
+        internalSubscriber->SetDefaultDataMessageHandler(callback);
     }
 }
 
 
-void DataSubscriber::RegisterSpecificDataHandler(const std::string& mediaType,
-                                                 const std::map<std::string, std::string>& labels,
-                                                 DataHandlerT specificDataHandler)
+void DataSubscriber::AddExplicitDataMessageHandler(DataMessageHandlerT specificDataHandler,
+                                                   const std::string& mediaType,
+                                                   const std::map<std::string, std::string>& labels)
 {
     _specificDataHandling.push_back({ _specificDataHandlerId++, mediaType, labels, specificDataHandler, {} });
     // NB: Try to assign specific handlers here as _specificDataHandling has changed

@@ -13,7 +13,7 @@ namespace data {
 DataSubscriberInternal::DataSubscriberInternal(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider, 
                                                const std::string& topic, const std::string& mediaType,
                                                const std::map<std::string, std::string>& labels,
-                                               DataHandlerT defaultHandler, IDataSubscriber* parent)
+                                               DataMessageHandlerT defaultHandler, IDataSubscriber* parent)
     : _topic{topic}
     , _mediaType{mediaType}
     , _labels{labels}
@@ -24,25 +24,25 @@ DataSubscriberInternal::DataSubscriberInternal(mw::IParticipantInternal* partici
 {
 }
 
-void DataSubscriberInternal::SetDefaultReceiveMessageHandler(DataHandlerT handler)
+void DataSubscriberInternal::SetDefaultDataMessageHandler(DataMessageHandlerT handler)
 {
     _defaultHandler = std::move(handler);
 }
 
-void DataSubscriberInternal::RegisterSpecificDataHandlerInternal(DataHandlerT handler)
+void DataSubscriberInternal::RegisterSpecificDataHandlerInternal(DataMessageHandlerT handler)
 {
     _specificHandlers.push_back(handler);
 }
 
-void DataSubscriberInternal::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const DataMessage& msg)
+void DataSubscriberInternal::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const DataMessageEvent& dataMessageEvent)
 {
     if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
 
-    ReceiveMessage(msg.data);
+    ReceiveMessage(dataMessageEvent);
 }
 
-void DataSubscriberInternal::ReceiveMessage(const std::vector<uint8_t>& data)
+void DataSubscriberInternal::ReceiveMessage(const DataMessageEvent& dataMessageEvent)
 {
     bool anySpecificHandlerExecuted{false};
     if (!_specificHandlers.empty())
@@ -51,7 +51,7 @@ void DataSubscriberInternal::ReceiveMessage(const std::vector<uint8_t>& data)
         {
             if (handler)
             {
-                handler(_parent, data);
+                handler(_parent, dataMessageEvent);
                 anySpecificHandlerExecuted = true;
             }
         }
@@ -59,7 +59,7 @@ void DataSubscriberInternal::ReceiveMessage(const std::vector<uint8_t>& data)
 
     if (_defaultHandler && !anySpecificHandlerExecuted)
     {
-        _defaultHandler(_parent, data);
+        _defaultHandler(_parent, dataMessageEvent);
     }
 
     if (!_defaultHandler && !anySpecificHandlerExecuted)

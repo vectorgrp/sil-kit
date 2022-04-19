@@ -21,17 +21,17 @@ class DataSubscriberInternal
 public:
     DataSubscriberInternal(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
                            const std::string& topic, const std::string& mediaType,
-                           const std::map<std::string, std::string>& labels, DataHandlerT defaultHandler,
+                           const std::map<std::string, std::string>& labels, DataMessageHandlerT defaultHandler,
                            IDataSubscriber* parent);
 
-    void SetDefaultReceiveMessageHandler(DataHandlerT handler);
+    void SetDefaultDataMessageHandler(DataMessageHandlerT handler);
 
-    void RegisterSpecificDataHandlerInternal(DataHandlerT handler);
+    void RegisterSpecificDataHandlerInternal(DataMessageHandlerT handler);
 
     //! \brief Accepts messages originating from IB communications.
-    void ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const DataMessage& msg) override;
+    void ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const DataMessageEvent& dataMessageEvent) override;
 
-    void ReceiveMessage(const std::vector<uint8_t>& data);
+    void ReceiveMessage(const DataMessageEvent& dataMessageEvent);
 
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
@@ -47,11 +47,11 @@ private:
     std::string _topic;
     std::string _mediaType;
     std::map<std::string, std::string> _labels;
-    DataHandlerT _defaultHandler;
+    DataMessageHandlerT _defaultHandler;
     IDataSubscriber* _parent{nullptr};
 
     mw::ServiceDescriptor _serviceDescriptor{};
-    std::vector<DataHandlerT> _specificHandlers;
+    std::vector<DataMessageHandlerT> _specificHandlers;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     mw::IParticipantInternal* _participant{nullptr};
 };

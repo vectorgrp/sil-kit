@@ -37,7 +37,6 @@ struct NullConnection
     void NotifyShutdown() {}
     void RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> /*callback*/) {}
 
-
 };
 } // anonymous namespace
     

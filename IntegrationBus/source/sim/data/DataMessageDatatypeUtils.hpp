@@ -14,7 +14,7 @@ namespace data {
 
 class DataSubscriberInternal;
 
-bool operator==(const DataMessage& lhs, const DataMessage& rhs);
+bool operator==(const DataMessageEvent& lhs, const DataMessageEvent& rhs);
 
 bool MatchMediaType(const std::string& subMediaType, const std::string& pubMediaType);
 
@@ -25,7 +25,7 @@ struct SpecificDataHandler
     uint64_t id;
     std::string mediaType;
     std::map<std::string, std::string> labels;
-    DataHandlerT specificDataHandler;
+    DataMessageHandlerT specificDataHandler;
     std::set<DataSubscriberInternal*> registeredInternalSubscribers;
 };
 

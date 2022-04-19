@@ -49,7 +49,7 @@ public:
         std::chrono::nanoseconds timestamp, const ib::sim::lin::Frame& message));
 
     MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
-        std::chrono::nanoseconds timestamp, const ib::sim::data::DataMessage& message));
+        std::chrono::nanoseconds timestamp, const ib::sim::data::DataMessageEvent& message));
 
     MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
         std::chrono::nanoseconds timestamp, const ib::sim::fr::FrMessage& message));

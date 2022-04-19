@@ -14,7 +14,7 @@ namespace data {
 //! \brief IIbToDataSubscriber interface used by the Participant
 class IIbToDataPublisher
     : public mw::IIbReceiver<>
-    , public mw::IIbSender<DataMessage>
+    , public mw::IIbSender<DataMessageEvent>
 {
 };
 

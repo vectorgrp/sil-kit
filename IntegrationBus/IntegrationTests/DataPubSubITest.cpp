@@ -20,8 +20,8 @@ TEST_F(DataPubSubITest, test_1pub_1sub_sync_vasio)
     const uint32_t numMsgToReceive = numMsgToPublish;
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({ "Pub1", {{"TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {} });
-    pubsubs.push_back({ "Sub1", {},  { {"TopicA",  {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {} }} });
+    pubsubs.push_back({ "Pub1", {{ "PubCtrl1", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {} });
+    pubsubs.push_back({ "Sub1", {}, {{"SubCtrl1", "TopicA",  {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {} }} });
 
     RunSyncTest(pubsubs);
 }
@@ -35,14 +35,69 @@ TEST_F(DataPubSubITest, test_2_mixed_participants)
     std::vector<PubSubParticipant> pubsubs;
     pubsubs.push_back({
         "PubSub1",
-        {{"TopicB", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, // Pub info
-        {{"TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}, // Sub info
+        {{"PubCtrl1", "TopicB", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, // Pub info
+        {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}, // Sub info
     });
 
     pubsubs.push_back({
         "PubSub2",
-        {{"TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, // Pub info
-        {{"TopicB", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}, // Sub info
+        {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, // Pub info
+        {{"SubCtrl1", "TopicB", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}, // Sub info
+    });
+
+    RunSyncTest(pubsubs);
+}
+
+// Two mixed pub/sub participants with configuration
+TEST_F(DataPubSubITest, test_2_mixed_participants_configured)
+{
+    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
+    const uint32_t numMsgToReceive = numMsgToPublish;
+
+    const auto configStringPubSub1 = R"raw(
+ParticipantName: PubSub1
+DataPublishers:
+- Name: PubCtrl1
+  Topic: TopicB
+- Name: PubCtrl2
+DataSubscribers:
+- Name: SubCtrl1
+  Topic: TopicA
+)raw";
+
+    const auto configStringPubSub2 = R"raw(
+ParticipantName: PubSub2
+DataPublishers:
+- Name: PubCtrl1
+  Topic: TopicA
+DataSubscribers:
+- Name: SubCtrl1
+  Topic: TopicB
+- Name: SubCtrl2
+)raw";
+
+    auto configPubSub1 = ib::cfg::ParticipantConfigurationFromString(configStringPubSub1);
+    auto configPubSub2 = ib::cfg::ParticipantConfigurationFromString(configStringPubSub2);
+
+    std::vector<PubSubParticipant> pubsubs;
+    pubsubs.push_back({
+        "PubSub1",
+        {
+            {"PubCtrl1", "ShouldBeOverwritten", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}, // Publishes for PubSub2->SubCtrl1
+            {"PubCtrl2", "TopicC", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish} // Has no topic configured.
+        }, 
+        {{"SubCtrl1", "ShouldBeOverwritten", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}},  // Receives by PubSub2->PubCtrl1
+        configPubSub1
+    });
+
+    pubsubs.push_back({
+        "PubSub2",
+         {{"PubCtrl1", "ShouldBeOverwritten", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, // Publishes for PubSub1->SubCtrl1
+         {
+             {"SubCtrl1", "ShouldBeOverwritten", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}, // Receives by PubSub1->PubCtrl1
+             {"SubCtrl2", "TopicC", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}, // Has no topic configured.
+         },
+        configPubSub2
     });
 
     RunSyncTest(pubsubs);
@@ -56,8 +111,8 @@ TEST_F(DataPubSubITest, test_1pub_1sub_largemsg_sync_vasio)
     const size_t   messageSize = 250000;
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({ "Pub1", {{"TopicA",  {"A"}, {}, 0, messageSize, numMsgToPublish}}, {} });
-    pubsubs.push_back({ "Sub1", {},  { {"TopicA",  {"A"}, {}, messageSize, numMsgToReceive, 1, {}, {}}} });
+    pubsubs.push_back({ "Pub1", {{"PubCtrl1", "TopicA",  {"A"}, {}, 0, messageSize, numMsgToPublish}}, {} });
+    pubsubs.push_back({ "Sub1", {},  {{"SubCtrl1", "TopicA",  {"A"}, {}, messageSize, numMsgToReceive, 1, {}, {}}} });
 
     RunSyncTest(pubsubs);
 }
@@ -70,8 +125,8 @@ TEST_F(DataPubSubITest, test_1pub_1sub_sametopic_sync_vasio)
 
     std::vector<PubSubParticipant> pubsubs;
     pubsubs.push_back({"Pub1",
-                       {{"TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish},
-                        {"TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}},
+                       {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish},
+                        {"PubCtrl2", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}},
                        {}});
 
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
@@ -82,8 +137,8 @@ TEST_F(DataPubSubITest, test_1pub_1sub_sametopic_sync_vasio)
     }
     pubsubs.push_back({"Sub1",
                        {},
-                       {{"TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}},
-                        {"TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}}}});
+                       {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}},
+                        {"SubCtrl2", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}}}});
 
     RunSyncTest(pubsubs);
 }
@@ -103,8 +158,10 @@ TEST_F(DataPubSubITest, test_1pub_1sub_100topics_sync_vasio)
     for (int i = 0; i < numTopics; i++)
     {
         std::string topic = std::to_string(i);
-        DataPublisherInfo  pInfo{ topic,  {"A"}, {}, 1, defaultMsgSize, numMsgToPublish };
-        DataSubscriberInfo sInfo{ topic,  {"A"}, {},    defaultMsgSize, numMsgToReceive, 1, {}, {} };
+        std::string pubControllerName = "PubCtrl" + std::to_string(i);
+        std::string subControllerName = "SubCtrl" + std::to_string(i);
+        DataPublisherInfo  pInfo{ pubControllerName, topic,  {"A"}, {}, 1, defaultMsgSize, numMsgToPublish };
+        DataSubscriberInfo sInfo{ subControllerName, topic,  {"A"}, {},    defaultMsgSize, numMsgToReceive, 1, {}, {} };
         pubsubs[0].dataPublishers.push_back(std::move(pInfo));
         pubsubs[1].dataSubscribers.push_back(std::move(sInfo));
     }
@@ -120,9 +177,9 @@ TEST_F(DataPubSubITest, test_1pub_2sub_sync_vasio)
     const uint32_t numMsgToReceive = numMsgToPublish;
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({"Pub1", {{"TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}},{}});
-    pubsubs.push_back({"Sub1", {}, {{"TopicA",  {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}});
-    pubsubs.push_back({"Sub2", {}, {{"TopicA",  {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}});
+    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}},{}});
+    pubsubs.push_back({"Sub1", {}, {{"SubCtrl1", "TopicA",  {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}});
+    pubsubs.push_back({"Sub2", {}, {{"SubCtrl1", "TopicA",  {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}});
 
     RunSyncTest(pubsubs);
 }
@@ -134,15 +191,15 @@ TEST_F(DataPubSubITest, test_2pub_1sub_sync_vasio)
     const uint32_t numMsgToReceive = numMsgToPublish * 2;
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({"Pub1", {{"TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
-    pubsubs.push_back({"Pub2", {{"TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
+    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
+    pubsubs.push_back({"Pub2", {{"PubCtrl2", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
     for (uint8_t d = 0; d < numMsgToPublish; d++)
     {
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
     }
-    pubsubs.push_back({ "Sub1", {}, {{"TopicA",  {"A"}, {}, defaultMsgSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}}} });
+    pubsubs.push_back({ "Sub1", {}, {{"SubCtrl1", "TopicA",  {"A"}, {}, defaultMsgSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}}} });
 
     RunSyncTest(pubsubs);
 }
@@ -155,9 +212,9 @@ TEST_F(DataPubSubITest, test_3pub_4sub_4topics_sync_vasio)
 
     std::vector<PubSubParticipant> pubsubs;
     
-    pubsubs.push_back({ "Pub1",  {{"TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}, {"TopicB", "B", {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
-    pubsubs.push_back({ "Pub2",  {{"TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}, {"TopicC", "C", {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
-    pubsubs.push_back({ "Pub3",  {{"TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}, {"TopicD", "D", {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
+    pubsubs.push_back({ "Pub1",  {{"PubCtrl1", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}, {"PubCtrl2", "TopicB", "B", {}, 0, defaultMsgSize, numMsgToPublish}}, {} });
+    pubsubs.push_back({ "Pub2",  {{"PubCtrl1", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}, {"PubCtrl2", "TopicC", "C", {}, 0, defaultMsgSize, numMsgToPublish}}, {} });
+    pubsubs.push_back({ "Pub3",  {{"PubCtrl1", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}, {"PubCtrl2", "TopicD", "D", {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
 
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
     for (uint8_t d = 0; d < numMsgToPublish; d++)
@@ -166,10 +223,10 @@ TEST_F(DataPubSubITest, test_3pub_4sub_4topics_sync_vasio)
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
     }
-    pubsubs.push_back({"Sub1", {}, {{"TopicA", {"A"}, {}, defaultMsgSize, numMsgToPublish * 3, 3,  expectedDataUnordered, {}, {}}} });
-    pubsubs.push_back({"Sub2", {}, {{"TopicB", {"B"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}});
-    pubsubs.push_back({"Sub3", {}, {{"TopicC", {"C"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}});
-    pubsubs.push_back({"Sub4", {}, {{"TopicD", {"D"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}});
+    pubsubs.push_back({"Sub1", {}, {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToPublish * 3, 3,  expectedDataUnordered, {}, {}}} });
+    pubsubs.push_back({"Sub2", {}, {{"SubCtrl1", "TopicB", {"B"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}});
+    pubsubs.push_back({"Sub3", {}, {{"SubCtrl1", "TopicC", {"C"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}});
+    pubsubs.push_back({"Sub4", {}, {{"SubCtrl1", "TopicD", {"D"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}});
 
     RunSyncTest(pubsubs);
 }
@@ -181,8 +238,8 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_topic_sync_vasio)
     const uint32_t numMsgToReceive = 0;
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({"Pub1", {{"TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
-    pubsubs.push_back({"Sub1", {}, {{"TopicB", {"A"}, {}, defaultMsgSize, numMsgToReceive, 0, {}, {}}}});
+    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
+    pubsubs.push_back({"Sub1", {}, {{"SubCtrl1", "TopicB", {"A"}, {}, defaultMsgSize, numMsgToReceive, 0, {}, {}}}});
 
     RunSyncTest(pubsubs);
 }
@@ -194,8 +251,8 @@ TEST_F(DataPubSubITest, test_1pub_1sub_label_sync_vasio)
     const uint32_t numMsgToReceive = numMsgToPublish;
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({"Pub1", {{"TopicA", {"A"}, {{"kA", "vA"}, {"kB", "vB"}}, 0, defaultMsgSize, numMsgToPublish}},{}});
-    pubsubs.push_back({"Sub1", {}, {{"TopicA", {"A"}, {{"kA", "vA"}, {"kB", ""}}, defaultMsgSize, numMsgToReceive, 1, {{"kA", "vA"}, {"kB", "vB"}}, {}}}});
+    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {{"kA", "vA"}, {"kB", "vB"}}, 0, defaultMsgSize, numMsgToPublish}},{}});
+    pubsubs.push_back({"Sub1", {}, {{"SubCtrl1", "TopicA", {"A"}, {{"kA", "vA"}, {"kB", ""}}, defaultMsgSize, numMsgToReceive, 1, {{"kA", "vA"}, {"kB", "vB"}}, {}}}});
 
     RunSyncTest(pubsubs);
 }
@@ -207,34 +264,34 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_labels_sync_vasio)
     const uint32_t numMsgToReceive = 0;
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({"Pub1", {{"TopicA", {"A"}, {{"k", "v"}}, 0, defaultMsgSize, numMsgToPublish}},{}});
-    pubsubs.push_back({ "Sub1", {},  {{"TopicA", {"B"}, {{"k", "wrong"}}, defaultMsgSize, numMsgToReceive, 0, {{"k", "v"}}, {}}} });
+    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {{"k", "v"}}, 0, defaultMsgSize, numMsgToPublish}},{}});
+    pubsubs.push_back({ "Sub1", {},  {{"SubCtrl1", "TopicA", {"B"}, {{"k", "wrong"}}, defaultMsgSize, numMsgToReceive, 0, {{"k", "v"}}, {}}} });
 
     RunSyncTest(pubsubs);
 }
 
-// Wrong mediaType -> Expect no reception
+// Wrong mediatype -> Expect no reception
 TEST_F(DataPubSubITest, test_1pub_1sub_wrong_mediatype_sync_vasio)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = 0;
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({"Pub1", {{"TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}},{}});
-    pubsubs.push_back({"Sub1", {}, {{"TopicA", {"B"}, {}, defaultMsgSize, numMsgToReceive, 0, {}, {}}}});
+    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}},{}});
+    pubsubs.push_back({"Sub1", {}, {{"SubCtrl1", "TopicA", {"B"}, {}, defaultMsgSize, numMsgToReceive, 0, {}, {}}}});
 
     RunSyncTest(pubsubs);
 }
 
-// Wildcard mediaType on subscriber
+// Wildcard mediatype on subscriber
 TEST_F(DataPubSubITest, test_1pub_1sub_wildcard_mediatype_sync_vasio)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({"Pub1", {{"TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
-    pubsubs.push_back({ "Sub1", {}, {{"TopicA", {""}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}} });
+    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
+    pubsubs.push_back({ "Sub1", {}, {{"SubCtrl1", "TopicA", {""}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}} });
 
     RunSyncTest(pubsubs);
 }
@@ -250,15 +307,15 @@ TEST_F(DataPubSubITest, test_2pub_1sub_expectlabels_sync_vasio)
     const uint32_t numMsgToReceive = numMsgToPublish * 2;
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({"Pub1", {{"TopicA", {"A"}, {{"kA", "vA"}}, 0, defaultMsgSize, numMsgToPublish}},{}});
-    pubsubs.push_back({"Pub2", {{"TopicA", {"A"}, {{"kB", "vB"}}, 0, defaultMsgSize, numMsgToPublish}},{}});
+    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {{"kA", "vA"}}, 0, defaultMsgSize, numMsgToPublish}},{}});
+    pubsubs.push_back({"Pub2", {{"PubCtrl1", "TopicA", {"A"}, {{"kB", "vB"}}, 0, defaultMsgSize, numMsgToPublish}},{}});
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
     for (uint8_t d = 0; d < numMsgToPublish; d++)
     {
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
     }
-    pubsubs.push_back({"Sub1", {}, {{"TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, expectedDataUnordered, {{"kA", "vA"}, {"kB", "vB"}}, {}}}});
+    pubsubs.push_back({"Sub1", {}, {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, expectedDataUnordered, {{"kA", "vA"}, {"kB", "vB"}}, {}}}});
 
     RunSyncTest(pubsubs);
 }
@@ -270,10 +327,10 @@ TEST_F(DataPubSubITest, test_3pub_1sub_specificHandlers_sync_vasio)
     const uint32_t numMsgToReceive = numMsgToPublish * 3;
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({ "Pub1", {{"TopicA", {"A"}, {{"kA", "vA"}}, 0, defaultMsgSize, numMsgToPublish}}, {}});
-    pubsubs.push_back({ "Pub2", {{"TopicA", {"A"}, {{"kA", "vA"},{"kB", "vB"}}, 0, defaultMsgSize, numMsgToPublish}}, {}});
+    pubsubs.push_back({ "Pub1", {{"PubCtrl1", "TopicA", {"A"}, {{"kA", "vA"}}, 0, defaultMsgSize, numMsgToPublish}}, {}});
+    pubsubs.push_back({ "Pub2", {{"PubCtrl1", "TopicA", {"A"}, {{"kA", "vA"},{"kB", "vB"}}, 0, defaultMsgSize, numMsgToPublish}}, {}});
     // This publisher has the wrong labels and won't be received 
-    pubsubs.push_back({ "Pub3", {{"TopicA", {"A"}, {{"kC", "vC"}}, 0, defaultMsgSize, numMsgToPublish}}, {}});
+    pubsubs.push_back({ "Pub3", {{"PubCtrl1", "TopicA", {"A"}, {{"kC", "vC"}}, 0, defaultMsgSize, numMsgToPublish}}, {}});
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
     for (uint8_t d = 0; d < numMsgToPublish; d++)
     {
@@ -286,7 +343,7 @@ TEST_F(DataPubSubITest, test_3pub_1sub_specificHandlers_sync_vasio)
     specificDataHandlers.push_back({ {"A"}, {{"kA", "vA"}} });
     specificDataHandlers.push_back({ {"A"}, {{"kA", "vA"},{"kB", "vB"}} });
     pubsubs.push_back({ "Sub1", {}, 
-        {{"TopicA", {"A"}, {{"kA", ""}}, defaultMsgSize, numMsgToReceive, 1, expectedDataUnordered, {{"kA", "vA"}, {"kB", "vB"}, {"kC", "kC"}}, specificDataHandlers}} });
+        {{"SubCtrl1", "TopicA", {"A"}, {{"kA", ""}}, defaultMsgSize, numMsgToReceive, 1, expectedDataUnordered, {{"kA", "vA"}, {"kB", "vB"}, {"kC", "kC"}}, specificDataHandlers}} });
 
     RunSyncTest(pubsubs);
 }
@@ -303,8 +360,8 @@ TEST_F(DataPubSubITest, test_1_participant_selfdelivery)
 
     std::vector<PubSubParticipant> pubsubs;
     pubsubs.push_back({"PubSub1",
-                       {{"TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, // Pub
-                       {{"TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}}); // Sub
+                       {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, // Pub
+                       {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}}); // Sub
 
     RunSyncTest(pubsubs);
 }
@@ -323,10 +380,10 @@ TEST_F(DataPubSubITest, test_1_participant_selfdelivery_same_topic)
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
     }
     pubsubs.push_back({"PubSub1",
-                       {{"TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish},
-                        {"TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}},
-                       {{"TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}},
-                        {"TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}}}});
+                       {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish},
+                        {"PubCtrl2", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}},
+                       {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}},
+                        {"SubCtrl2", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}}}});
 
     RunSyncTest(pubsubs);
 }
@@ -342,9 +399,9 @@ TEST_F(DataPubSubITest, test_1pub_1sub_async_history_vasio)
     const uint32_t numMsgToReceive = numMsgToPublish;
 
     std::vector<PubSubParticipant> publishers;
-    publishers.push_back({"Pub1", {{"TopicA", {"A"}, {}, 1, defaultMsgSize, numMsgToPublish}}, {}});
+    publishers.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 1, defaultMsgSize, numMsgToPublish}}, {}});
     std::vector<PubSubParticipant> subscribers;
-    subscribers.push_back({"Sub1", {}, {{"TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}});
+    subscribers.push_back({"Sub1", {}, {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}});
 
     RunAsyncTest(publishers, subscribers);
 }
@@ -356,12 +413,12 @@ TEST_F(DataPubSubITest, test_1pub_1sub_async_history_specifichandler_vasio)
     const uint32_t numMsgToReceive = numMsgToPublish;
 
     std::vector<PubSubParticipant> publishers;
-    publishers.push_back({"Pub1", {{"TopicA", {"A"}, {}, 1, defaultMsgSize, numMsgToPublish}}, {}});
+    publishers.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 1, defaultMsgSize, numMsgToPublish}}, {}});
 
     std::vector<PubSubParticipant> subscribers;
     std::vector<SpecificDataHandlerInfo> specificDataHandlers;
     specificDataHandlers.push_back({{"A"}, {}});
-    subscribers.push_back({"Sub1", {}, {{"TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, specificDataHandlers}}});
+    subscribers.push_back({"Sub1", {}, {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, specificDataHandlers}}});
 
     RunAsyncTest(publishers, subscribers);
 }

@@ -134,7 +134,8 @@ FlexRayControllers:
   UseTraceSinks:
   - Sink1
 DataPublishers:
-- Name: DataPubSubGroundTruth
+- Name: Publisher1
+  Topic: Temperature
   UseTraceSinks:
   - Sink1
 Logging:
@@ -198,7 +199,8 @@ TEST_F(YamlParserTest, yaml_complete_configuration)
     EXPECT_TRUE(!config.flexRayControllers.at(0).network.has_value());
 
     EXPECT_TRUE(config.dataPublishers.size() == 1);
-    EXPECT_TRUE(config.dataPublishers.at(0).name == "DataPubSubGroundTruth");
+    EXPECT_TRUE(config.dataPublishers.at(0).name == "Publisher1");
+    EXPECT_TRUE(config.dataPublishers.at(0).topic.has_value() && config.dataPublishers.at(0).topic.value() == "Temperature");
     
     EXPECT_TRUE(config.logging.sinks.size() == 1);
     EXPECT_TRUE(config.logging.sinks.at(0).type == Sink::Type::File);

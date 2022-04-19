@@ -181,41 +181,68 @@ public:
     {
         return nullptr;
     }
-    auto CreateDataPublisher(const std::string& /*topic*/, const std::string& /*mediaType*/,
+    auto CreateDataPublisher(const std::string& /*controllerName*/, const std::string& /*topic*/,
+                             const std::string& /*mediaType*/,
                              const std::map<std::string, std::string>& /*labels*/, size_t /* history */)
-        -> ib::sim::data::IDataPublisher* override  { return nullptr; }
-    auto CreateDataSubscriber(const std::string& /*topic*/, const std::string& /*mediaType*/,
+        -> ib::sim::data::IDataPublisher* override
+    {
+        return nullptr;
+    }
+    auto CreateDataPublisher(const std::string& /*controllerName*/) -> ib::sim::data::IDataPublisher* override
+    {
+        return nullptr;
+    }
+    auto CreateDataSubscriber(const std::string& /*controllerName*/, const std::string& /*topic*/,
+                              const std::string& /*mediaType*/,
                               const std::map<std::string, std::string>& /*labels*/,
-                              ib::sim::data::DataHandlerT /* callback*/,
-                              ib::sim::data::NewDataSourceHandlerT /*newDataSourceHandler*/)
-        -> ib::sim::data::IDataSubscriber* override { return nullptr; }
+                              ib::sim::data::DataMessageHandlerT /* callback*/,
+                              ib::sim::data::NewDataPublisherHandlerT /*newDataSourceHandler*/)
+        -> ib::sim::data::IDataSubscriber* override
+    {
+        return nullptr;
+    }
+    auto CreateDataSubscriber(const std::string& /*controllerName*/) -> ib::sim::data::IDataSubscriber* override
+    {
+        return nullptr;
+    }
     auto CreateDataSubscriberInternal(const std::string& /*topic*/, const std::string& /*linkName*/,
                                       const std::string& /*mediaType*/,
                                       const std::map<std::string, std::string>& /*publisherLabels*/,
-                                      sim::data::DataHandlerT /*callback*/, sim::data::IDataSubscriber* /*parent*/)
+                                      sim::data::DataMessageHandlerT /*callback*/, sim::data::IDataSubscriber* /*parent*/)
         -> sim::data::DataSubscriberInternal* override { return nullptr; }
 
-    auto CreateRpcClient(const std::string& /*functionName*/, const ib::sim::rpc::RpcExchangeFormat /*exchangeFormat*/,
+    auto CreateRpcClient(const std::string& /*controllerName*/, const std::string& /*rpcChannel*/,
+                         const ib::sim::rpc::RpcExchangeFormat /*exchangeFormat*/,
                          const std::map<std::string, std::string>& /*labels*/,
                          ib::sim::rpc::CallReturnHandler /*handler*/) -> ib::sim::rpc::IRpcClient* override
     {
         return nullptr;
     }
-    auto CreateRpcServer(const std::string& /*functionName*/, const ib::sim::rpc::RpcExchangeFormat /*exchangeFormat*/,
+    auto CreateRpcClient(const std::string& /*controllerName*/) -> ib::sim::rpc::IRpcClient* override
+    {
+        return nullptr;
+    }
+    auto CreateRpcServer(const std::string& /*controllerName*/, const std::string& /*rpcChannel*/,
+                         const ib::sim::rpc::RpcExchangeFormat /*exchangeFormat*/,
                          const std::map<std::string, std::string>& /*labels*/, ib::sim::rpc::CallProcessor /*handler*/)
         -> ib::sim::rpc::IRpcServer* override
     {
         return nullptr;
     }
-    auto CreateRpcServerInternal(const std::string& /*functionName*/, const std::string& /*linkName*/,
+    auto CreateRpcServer(const std::string& /*controllerName*/) -> ib::sim::rpc::IRpcServer* override
+    {
+        return nullptr;
+    }
+    auto CreateRpcServerInternal(const std::string& /*rpcChannel*/, const std::string& /*linkName*/,
                                  const sim::rpc::RpcExchangeFormat /*exchangeFormat*/,
-                                 const std::map<std::string, std::string>& /*labels*/, sim::rpc::CallProcessor /*handler*/,
-                                 sim::rpc::IRpcServer* /*parent*/) -> ib::sim::rpc::RpcServerInternal* override
+                                 const std::map<std::string, std::string>& /*labels*/,
+                                 sim::rpc::CallProcessor /*handler*/, sim::rpc::IRpcServer* /*parent*/)
+        -> ib::sim::rpc::RpcServerInternal* override
     {
         return nullptr;
     }
 
-    void DiscoverRpcServers(const std::string& /*functionName*/, const sim::rpc::RpcExchangeFormat& /*exchangeFormat*/,
+    void DiscoverRpcServers(const std::string& /*rpcChannel*/, const sim::rpc::RpcExchangeFormat& /*exchangeFormat*/,
         const std::map<std::string, std::string>& /*labels*/,
         sim::rpc::DiscoveryResultHandler /*handler*/) override {};
 
@@ -264,8 +291,8 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::lin::ControllerStatusUpdate& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::lin::WakeupPulse& /*msg*/) override {}
 
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::data::DataMessage&& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::data::DataMessage& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::data::DataMessageEvent&& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::data::DataMessageEvent& /*msg*/) override {}
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::rpc::FunctionCall& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::rpc::FunctionCall&& /*msg*/) override {}
@@ -320,8 +347,8 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::lin::ControllerStatusUpdate& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::lin::WakeupPulse& /*msg*/) override {}
 
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::data::DataMessage& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::data::DataMessage&& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::data::DataMessageEvent& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::data::DataMessageEvent&& /*msg*/) override {}
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::rpc::FunctionCall& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::rpc::FunctionCall&& /*msg*/) override {}

@@ -33,43 +33,41 @@ void PublishMessage(IDataPublisher* publisher, std::string msg)
     messageBuilder << msg << " LocalMsgId=" << msgIdx++;
     auto message = messageBuilder.str();
 
-    std::cout << "<< Send DataMessage with data=" << message << std::endl;
+    std::cout << "<< Send DataMessageEvent with data=" << message << std::endl;
 
     ib::util::serdes::sil::Serializer serializer;
     serializer.Serialize(message);
     publisher->Publish(serializer.ReleaseBuffer());
 }
 
-void DefaultDataHandler(IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data)
+void DefaultDataHandler(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
 {
-    ib::util::serdes::sil::Deserializer deserializer(data);
+    ib::util::serdes::sil::Deserializer deserializer(dataMessageEvent.data);
     const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> [DefaultDataHandler] Received new Message: with data=\""
               << message << "\"" << std::endl;
 }
 
-void SpecificDataHandlerForPub1(IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data)
+void SpecificDataHandlerForPub1(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
 {
-    ib::util::serdes::sil::Deserializer deserializer(data);
+    ib::util::serdes::sil::Deserializer deserializer(dataMessageEvent.data);
     const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> [SpecificDataHandlerForPublisher1] Received new Message: with data=\""
               << message << std::endl;
 }
 
-void SpecificDataHandlerForPub2(IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data)
+void SpecificDataHandlerForPub2(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
 {
-    ib::util::serdes::sil::Deserializer deserializer(data);
+    ib::util::serdes::sil::Deserializer deserializer(dataMessageEvent.data);
     const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> [SpecificDataHandlerForPublisher2] Received new Message: with data=\""
               << message << "\"" << std::endl;
 }
 
-void NewDataSource(IDataSubscriber* /*subscriber*/, const std::string& topic,
-                   const std::string& mediaType,
-                   const std::map<std::string, std::string>& labels)
+void NewDataSource(IDataSubscriber* /*subscriber*/, const NewDataPublisherEvent& dataSource)
 {
-    std::cout << ">> New data source: topic=" << topic << " mediaType=" << mediaType
-              << " labels=" << labels << "" << std::endl;
+    std::cout << ">> New data source: topic=" << dataSource.topic << " mediaType=" << dataSource.mediaType
+              << " labels=" << dataSource.labels << "" << std::endl;
 }
 
 /**************************************************************************************************
@@ -128,7 +126,7 @@ int main(int argc, char** argv)
         if (participantName == "Publisher1")
         {
             std::map<std::string, std::string> labels{{"KeyA", "ValA"}, {"KeyB", "ValB"} };
-            auto* publisher = participant->CreateDataPublisher("Topic1", mediaType, labels, 0);
+            auto* publisher = participant->CreateDataPublisher("PubCtrl1", "Topic1", mediaType, labels, 0);
 
             participantController->SetSimulationTask(
                 [publisher](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -142,7 +140,7 @@ int main(int argc, char** argv)
         else if (participantName == "Publisher2")
         {
             std::map<std::string, std::string> labels{ {"KeyB", "ValB"}, {"KeyC", "ValC"} };
-            auto* publisher = participant->CreateDataPublisher("Topic1", mediaType, labels, 0);
+            auto* publisher = participant->CreateDataPublisher("PubCtrl1", "Topic1", mediaType, labels, 0);
 
             participantController->SetSimulationTask(
                 [publisher](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -154,12 +152,11 @@ int main(int argc, char** argv)
         }
         else //if (participantName == "Subscriber")
         {
-            auto* subscriber = participant->CreateDataSubscriber("Topic1", mediaType, {}, DefaultDataHandler, NewDataSource);
+            auto* subscriber = participant->CreateDataSubscriber("SubCtrl1", "Topic1", mediaType, {}, DefaultDataHandler, NewDataSource);
            
-            subscriber->RegisterSpecificDataHandler(mediaType, {{"KeyA", ""}, {"KeyB", ""}},
-                                                    SpecificDataHandlerForPub1);
-            subscriber->RegisterSpecificDataHandler(mediaType, {{"KeyC", ""}},
-                                                    SpecificDataHandlerForPub2);
+            subscriber->AddExplicitDataMessageHandler(SpecificDataHandlerForPub1, mediaType,
+                                                      {{"KeyA", ""}, {"KeyB", ""}});
+            subscriber->AddExplicitDataMessageHandler(SpecificDataHandlerForPub2, mediaType, {{"KeyC", ""}});
 
             participantController->SetSimulationTask(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {

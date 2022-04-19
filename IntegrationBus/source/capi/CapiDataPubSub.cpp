@@ -18,21 +18,21 @@
 extern "C" {
 
 ib_ReturnCode ib_Data_Publisher_Create(ib_Data_Publisher** outPublisher, ib_Participant* participant,
-                                       const char* topic, const char* mediaType, const ib_KeyValueList* labels,
-                                       uint8_t history)
-{
+                                           const char* controllerName, const char* topic,
+                                           const char* mediaType, const ib_KeyValueList* labels,
+                                           uint8_t history)
+    {
     ASSERT_VALID_OUT_PARAMETER(outPublisher);
     ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_POINTER_PARAMETER(controllerName);
     ASSERT_VALID_POINTER_PARAMETER(topic);
     ASSERT_VALID_POINTER_PARAMETER(mediaType);
     CAPI_ENTER
     {
-        std::string strTopic(topic);
         auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
-        std::string cppMediaType{ mediaType };
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
-        auto dataPublisher = cppParticipant->CreateDataPublisher(strTopic, cppMediaType, cppLabels, history);
+        auto dataPublisher = cppParticipant->CreateDataPublisher(controllerName, topic, mediaType, cppLabels, history);
         *outPublisher = reinterpret_cast<ib_Data_Publisher*>(dataPublisher);
         return ib_ReturnCode_SUCCESS;
     }
@@ -53,49 +53,60 @@ ib_ReturnCode ib_Data_Publisher_Publish(ib_Data_Publisher* self, const ib_ByteVe
 }
 
 ib_ReturnCode ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_Participant* participant,
-                                       const char* topic, const char* mediaType,
-                                       const ib_KeyValueList* labels,
-                                       void* defaultDataHandlerContext, ib_Data_Handler_t defaultDataHandler,
-                                       void* newDataSourceContext, ib_Data_NewDataSourceHandler_t newDataSourceHandler)
+                                        const char* controllerName, const char* topic, const char* mediaType,
+                                        const ib_KeyValueList* labels, void* defaultDataHandlerContext,
+                                        ib_Data_DataMessageHandler_t defaultDataHandler, void* newDataSourceContext,
+                                        ib_Data_NewDataPublisherHandler_t newDataSourceHandler)
 {
     ASSERT_VALID_OUT_PARAMETER(outSubscriber);
     ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_POINTER_PARAMETER(controllerName);
     ASSERT_VALID_POINTER_PARAMETER(topic);
     ASSERT_VALID_POINTER_PARAMETER(mediaType);
     ASSERT_VALID_HANDLER_PARAMETER(newDataSourceHandler);
     CAPI_ENTER
     {
-        std::string strTopic(topic);
         auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
-        std::string cppMediaType{ mediaType };
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
 
         auto cppDefaultDataHandler = [defaultDataHandler, defaultDataHandlerContext](
                                          ib::sim::data::IDataSubscriber* cppSubscriber,
-                                         const std::vector<uint8_t>& data) {
+                                         const ib::sim::data::DataMessageEvent& cppDataMessageEvent) {
             auto* cSubscriber = reinterpret_cast<ib_Data_Subscriber*>(cppSubscriber);
             uint8_t* payloadPointer = NULL;
-            if (data.size() > 0)
+            if (cppDataMessageEvent.data.size() > 0)
             {
-                payloadPointer = (uint8_t*) &(data[0]);
+                payloadPointer = (uint8_t*) &(cppDataMessageEvent.data[0]);
             }
-            const ib_ByteVector ccdata{payloadPointer, data.size()};
-            defaultDataHandler(defaultDataHandlerContext, cSubscriber, &ccdata);
+
+            ib_Data_DataMessageEvent cDataMessageEvent;
+            cDataMessageEvent.interfaceId = ib_InterfaceIdentifier_DataMessageEvent;
+            cDataMessageEvent.timestamp = cppDataMessageEvent.timestamp.count();
+            cDataMessageEvent.data = { payloadPointer, cppDataMessageEvent.data.size() };
+            
+            defaultDataHandler(defaultDataHandlerContext, cSubscriber, &cDataMessageEvent);
         };
 
         auto cppNewDataSourceHandler = [newDataSourceHandler, newDataSourceContext](
-                                           ib::sim::data::IDataSubscriber* cppSubscriber, const std::string& cppTopic,
-                                           const std::string& cppMediaType,
-                                           const std::map<std::string, std::string>& cppLabelsHandler) {
+                                           ib::sim::data::IDataSubscriber* cppSubscriber,
+                                           const ib::sim::data::NewDataPublisherEvent& cppNewDataPublisherEvent) {
             auto* cSubscriber = reinterpret_cast<ib_Data_Subscriber*>(cppSubscriber);
-            const char* mediaType = cppMediaType.c_str();
-            ib_KeyValueList* clabelsHandler;
-            assign(&clabelsHandler, cppLabelsHandler);
-            newDataSourceHandler(newDataSourceContext, cSubscriber, cppTopic.c_str(), mediaType, clabelsHandler);
+
+            ib_KeyValueList* cLabels;
+            assign(&cLabels, cppNewDataPublisherEvent.labels);
+
+            ib_Data_NewDataPublisherEvent cNewDataPublisherEvent;
+            cNewDataPublisherEvent.interfaceId = ib_InterfaceIdentifier_NewDataPublisherEvent;
+            cNewDataPublisherEvent.timestamp = cppNewDataPublisherEvent.timestamp.count();
+            cNewDataPublisherEvent.topic = cppNewDataPublisherEvent.topic.c_str();
+            cNewDataPublisherEvent.mediaType = cppNewDataPublisherEvent.mediaType.c_str();
+            cNewDataPublisherEvent.labels = cLabels;
+
+            newDataSourceHandler(newDataSourceContext, cSubscriber, &cNewDataPublisherEvent);
         };
 
-        auto dataSubscriber = cppParticipant->CreateDataSubscriber(strTopic, cppMediaType, cppLabels,
+        auto dataSubscriber = cppParticipant->CreateDataSubscriber(controllerName, topic, mediaType, cppLabels,
                                                                cppDefaultDataHandler, cppNewDataSourceHandler);
         *outSubscriber = reinterpret_cast<ib_Data_Subscriber*>(dataSubscriber);
         return ib_ReturnCode_SUCCESS;
@@ -103,35 +114,39 @@ ib_ReturnCode ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_P
     CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Data_Subscriber_SetDefaultReceiveDataHandler(ib_Data_Subscriber* self, void* context,
-                                                              ib_Data_Handler_t dataHandler)
+ib_ReturnCode ib_Data_Subscriber_SetDefaultDataMessageHandler(ib_Data_Subscriber* self, void* context,
+                                                      ib_Data_DataMessageHandler_t dataHandler)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_HANDLER_PARAMETER(dataHandler);
     CAPI_ENTER
     {
         auto cppSubscriber = reinterpret_cast<ib::sim::data::IDataSubscriber*>(self);
-        cppSubscriber->SetDefaultReceiveMessageHandler(
-            [dataHandler, context](ib::sim::data::IDataSubscriber* cppSubscriberHandler,
-                                         const std::vector<uint8_t>& data) {
+    cppSubscriber->SetDefaultDataMessageHandler(
+        [dataHandler, context](ib::sim::data::IDataSubscriber* cppSubscriberHandler,
+            const ib::sim::data::DataMessageEvent& cppDataMessageEvent) {
                 auto* cSubscriber = reinterpret_cast<ib_Data_Subscriber*>(cppSubscriberHandler);
                 uint8_t* payloadPointer = NULL;
-                if (data.size() > 0)
+                if (cppDataMessageEvent.data.size() > 0)
                 {
-                    payloadPointer = (uint8_t*) &(data[0]);
+                    payloadPointer = (uint8_t*)&(cppDataMessageEvent.data[0]);
                 }
-                const ib_ByteVector ccdata{payloadPointer, data.size()};
-                dataHandler(context, cSubscriber, &ccdata);
+                ib_Data_DataMessageEvent cDataMessageEvent;
+                cDataMessageEvent.interfaceId = ib_InterfaceIdentifier_DataMessageEvent;
+                cDataMessageEvent.timestamp = cppDataMessageEvent.timestamp.count();
+                cDataMessageEvent.data = { payloadPointer, cppDataMessageEvent.data.size() };
+
+                dataHandler(context, cSubscriber, &cDataMessageEvent);
             });
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Data_Subscriber_RegisterSpecificDataHandler(ib_Data_Subscriber* self,
-                                                             const char* mediaType,
-                                                             const ib_KeyValueList* labels,
-                                                             void* context, ib_Data_Handler_t dataHandler)
+ib_ReturnCode ib_Data_Subscriber_AddExplicitDataMessageHandler(ib_Data_Subscriber* self, void* context,
+                                                               ib_Data_DataMessageHandler_t dataHandler,
+                                                               const char* mediaType,
+                                                               const ib_KeyValueList* labels)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(mediaType);
@@ -139,21 +154,24 @@ ib_ReturnCode ib_Data_Subscriber_RegisterSpecificDataHandler(ib_Data_Subscriber*
     CAPI_ENTER
     {
         auto cppSubscriber = reinterpret_cast<ib::sim::data::IDataSubscriber*>(self);
-        std::string cppMediaType{mediaType};
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
-        cppSubscriber->RegisterSpecificDataHandler(cppMediaType, cppLabels,
+        cppSubscriber->AddExplicitDataMessageHandler(
             [dataHandler, context](ib::sim::data::IDataSubscriber* cppSubscriberHandler,
-                                         const std::vector<uint8_t>& data) {
+                                         const ib::sim::data::DataMessageEvent& cppDataMessageEvent) {
                 auto* cSubscriber = reinterpret_cast<ib_Data_Subscriber*>(cppSubscriberHandler);
                 uint8_t* payloadPointer = NULL;
-                if (data.size() > 0)
+                if (cppDataMessageEvent.data.size() > 0)
                 {
-                    payloadPointer = (uint8_t* ) &(data[0]);
+                    payloadPointer = (uint8_t* ) &(cppDataMessageEvent.data[0]);
                 }
-                const ib_ByteVector ccdata{payloadPointer, data.size()};
-                dataHandler(context, cSubscriber, &ccdata);
-            });
+                ib_Data_DataMessageEvent cDataMessageEvent;
+                cDataMessageEvent.interfaceId = ib_InterfaceIdentifier_DataMessageEvent;
+                cDataMessageEvent.timestamp = cppDataMessageEvent.timestamp.count();
+                cDataMessageEvent.data = { payloadPointer, cppDataMessageEvent.data.size() };
+
+                dataHandler(context, cSubscriber, &cDataMessageEvent);
+            }, mediaType, cppLabels);
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE

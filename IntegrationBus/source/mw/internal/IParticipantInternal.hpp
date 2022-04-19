@@ -76,8 +76,8 @@ public:
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::ControllerStatusUpdate& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::FrameResponseUpdate& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::data::DataMessage& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::data::DataMessage&& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::data::DataMessageEvent& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::data::DataMessageEvent&& msg) = 0;
 
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::rpc::FunctionCall& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::rpc::FunctionCall&& msg) = 0;
@@ -131,8 +131,8 @@ public:
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::ControllerStatusUpdate& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::FrameResponseUpdate& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::DataMessage& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::DataMessage&& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::DataMessageEvent& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::DataMessageEvent&& msg) = 0;
     
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::FunctionCall& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::FunctionCall&& msg) = 0;
@@ -161,12 +161,13 @@ public:
 	
 	// Internal DataSubscriber that is only created on a matching data connection
     virtual auto CreateDataSubscriberInternal(
-        const std::string& topic, const std::string& linkName, const std::string& mediaType,
-        const std::map<std::string, std::string>& publisherLabels, sim::data::DataHandlerT callback,
+        const std::string& topic, const std::string& linkName,
+        const std::string& mediaType,
+        const std::map<std::string, std::string>& publisherLabels, sim::data::DataMessageHandlerT callback,
         sim::data::IDataSubscriber* parent) -> sim::data::DataSubscriberInternal*  = 0;
 
     // Internal Rpc server that is only created on a matching rpc connection
-    virtual auto CreateRpcServerInternal(const std::string& functionName, const std::string& linkName,
+    virtual auto CreateRpcServerInternal(const std::string& rpcChannel, const std::string& linkName,
                                          const sim::rpc::RpcExchangeFormat exchangeFormat,
                                          const std::map<std::string, std::string>& labels,
                                          sim::rpc::CallProcessor handler, sim::rpc::IRpcServer* parent)

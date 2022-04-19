@@ -156,24 +156,28 @@ auto MakeYamlSchema() -> YamlSchemaElem
         ethernetControllers,
         {"DataPublishers", {
                 {"Name"},
+                {"Topic"},
                 {"UseTraceSinks"},
                 replay,
             }
         },
         {"DataSubscribers", {
                 {"Name"},
+                {"Topic"},
                 {"UseTraceSinks"},
                 replay,
             }
         },
         {"RpcClients", {
                 {"Name"},
+                {"Channel"},
                 {"UseTraceSinks"},
                 replay,
             }
         },
         {"RpcServers", {
                 {"Name"},
+                {"Channel"},
                 {"UseTraceSinks"},
                 replay,
             }

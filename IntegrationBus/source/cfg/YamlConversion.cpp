@@ -733,7 +733,7 @@ Node Converter::encode(const DataPublisher& obj)
     static const DataPublisher defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    optional_encode(obj.network, node, "Network");
+    optional_encode(obj.topic, node, "Topic");
     //optional_encode(obj.history, node, "History");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
@@ -743,7 +743,7 @@ template <>
 bool Converter::decode(const Node& node, DataPublisher& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
-    optional_decode(obj.network, node, "Network");
+    optional_decode(obj.topic, node, "Topic");
     //optional_decode(obj.history, node, "Replay");
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
@@ -756,7 +756,7 @@ Node Converter::encode(const DataSubscriber& obj)
     static const DataSubscriber defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    optional_encode(obj.network, node, "Network");
+    optional_encode(obj.topic, node, "Topic");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
     return node;
@@ -765,7 +765,7 @@ template <>
 bool Converter::decode(const Node& node, DataSubscriber& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
-    optional_decode(obj.network, node, "Network");
+    optional_decode(obj.topic, node, "Topic");
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
     return true;
@@ -777,7 +777,7 @@ Node Converter::encode(const RpcServer& obj)
     static const RpcServer defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    optional_encode(obj.network, node, "Network");
+    optional_encode(obj.rpcChannel, node, "Channel");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
     return node;
@@ -786,7 +786,7 @@ template <>
 bool Converter::decode(const Node& node, RpcServer& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
-    optional_decode(obj.network, node, "Network");
+    optional_decode(obj.rpcChannel, node, "Channel");
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
     return true;
@@ -798,7 +798,7 @@ Node Converter::encode(const RpcClient& obj)
     static const RpcClient defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    optional_encode(obj.network, node, "Network");
+    optional_encode(obj.rpcChannel, node, "Channel");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
     return node;
@@ -807,7 +807,7 @@ template <>
 bool Converter::decode(const Node& node, RpcClient& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
-    optional_decode(obj.network, node, "Network");
+    optional_decode(obj.rpcChannel, node, "Channel");
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
     return true;

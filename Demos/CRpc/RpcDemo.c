@@ -109,8 +109,8 @@ void DiscoveryResultHandler(void* context, const ib_Rpc_DiscoveryResultList* dis
 {
     for (uint32_t i = 0; i < discoveryResults->numResults; i++)
     {
-        printf("Discovered RpcServer with functionName=\"%s\", exchangeFormat.mediaType=\"%s\", labels={",
-               discoveryResults->results[i].functionName, discoveryResults->results[i].exchangeFormat->mediaType);
+        printf("Discovered RpcServer with rpcChannel=\"%s\", exchangeFormat.mediaType=\"%s\", labels={",
+               discoveryResults->results[i].rpcChannel, discoveryResults->results[i].exchangeFormat->mediaType);
         for (uint32_t j = 0; j < discoveryResults->results[i].labelList->numLabels; j++)
         {
             printf("{\"%s\", \"%s\"}", discoveryResults->results[i].labelList->labels[j].key, discoveryResults->results[i].labelList->labels[j].value);
@@ -207,7 +207,7 @@ int main(int argc, char* argv[])
         ib_KeyValuePair labels[1] = { {"KeyA", "ValA"} };
         Create_Labels(&labelList, labels, numLabels);
 
-        returnCode = ib_Rpc_Client_Create(&client, participant, "TestFunc", &exchangeFormat, labelList, NULL, &ResultHandler);
+        returnCode = ib_Rpc_Client_Create(&client, participant, "ClientCtrl1", "TestFunc", &exchangeFormat, labelList, NULL, &ResultHandler);
 
         for (uint8_t i = 0; i < numCalls; i++)
         {
@@ -230,7 +230,7 @@ int main(int argc, char* argv[])
         ib_KeyValuePair labels[2] = {{"KeyA", "ValA"}, {"KeyB", "ValB"}};
         Create_Labels(&labelList, labels, numLabels);
 
-        returnCode = ib_Rpc_Server_Create(&server, participant, "TestFunc", &exchangeFormat, labelList, NULL, &CallHandler);
+        returnCode = ib_Rpc_Server_Create(&server, participant, "ServerCtrl1", "TestFunc", &exchangeFormat, labelList, NULL, &CallHandler);
 
         while (receiveCallCount < numCalls)
         {

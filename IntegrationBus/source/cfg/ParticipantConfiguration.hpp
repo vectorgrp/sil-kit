@@ -115,7 +115,7 @@ struct DataPublisher
     static constexpr NetworkType networkType = NetworkType::Data;
 
     std::string name;
-    ib::util::Optional<std::string> network;
+    ib::util::Optional<std::string> topic;
 
     //! \brief History length of a DataPublisher.
     ib::util::Optional<size_t> history{ 0 };
@@ -130,7 +130,7 @@ struct DataSubscriber
     static constexpr NetworkType networkType = NetworkType::Data;
 
     std::string name;
-    ib::util::Optional<std::string> network;
+    ib::util::Optional<std::string> topic;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -146,7 +146,7 @@ struct RpcServer
     static constexpr NetworkType networkType = NetworkType::RPC;
 
     std::string name;
-    ib::util::Optional<std::string> network;
+    ib::util::Optional<std::string> rpcChannel;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -158,7 +158,7 @@ struct RpcClient
     static constexpr NetworkType networkType = NetworkType::RPC;
 
     std::string name;
-    ib::util::Optional<std::string> network;
+    ib::util::Optional<std::string> rpcChannel;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;

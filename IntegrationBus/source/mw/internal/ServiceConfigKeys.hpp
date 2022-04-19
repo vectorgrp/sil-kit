@@ -25,7 +25,7 @@ const std::string controllerTypeLin = "LIN";
 const std::string controllerTypeDataPublisher = "DataPublisher";
 const std::string supplKeyDataPublisherTopic = "data::topic";
 const std::string supplKeyDataPublisherPubUUID = "data::pubUUID";
-const std::string supplKeyDataPublisherPubDxf = "data::pubDxf";
+const std::string supplKeyDataPublisherMediaType = "data::pubMediaType";
 const std::string supplKeyDataPublisherPubLabels = "data::pubLabels";
 
 const std::string controllerTypeDataSubscriber = "DataSubscriber";
@@ -33,12 +33,12 @@ const std::string controllerTypeDataSubscriberInternal = "DataSubscriberInternal
 
 // RPC types
 const std::string controllerTypeRpcServer = "RpcServer";
-const std::string supplKeyRpcServerFunctionName = "rpc::server::functionName";
+const std::string supplKeyRpcServerFunctionName = "rpc::server::rpcChannel";
 const std::string supplKeyRpcServerDxf = "rpc::server::dxf";
 const std::string supplKeyRpcServerLabels = "rpc::server::labels";
 
 const std::string controllerTypeRpcClient = "RpcClient";
-const std::string supplKeyRpcClientFunctionName = "rpc::client::functionName";
+const std::string supplKeyRpcClientFunctionName = "rpc::client::rpcChannel";
 const std::string supplKeyRpcClientDxf = "rpc::client::dxf";
 const std::string supplKeyRpcClientLabels = "rpc::client::labels";
 const std::string supplKeyRpcClientUUID = "rpc::client::UUID";

@@ -13,9 +13,9 @@ namespace sim {
 namespace rpc {
 
 RpcServer::RpcServer(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
-                     const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
+                     const std::string& rpcChannel, const sim::rpc::RpcExchangeFormat& exchangeFormat,
                      const std::map<std::string, std::string>& labels, CallProcessor handler)
-    : _functionName{functionName}
+    : _rpcChannel{rpcChannel}
     , _exchangeFormat{exchangeFormat}
     , _labels{labels}
     , _handler{std::move(handler)}
@@ -50,14 +50,14 @@ void RpcServer::RegisterServiceDiscovery()
                     return tmp;
                 };
 
-                auto functionName = getVal(mw::service::supplKeyRpcClientFunctionName);
+                auto rpcChannel = getVal(mw::service::supplKeyRpcClientFunctionName);
                 RpcExchangeFormat clientExchangeFormat{getVal(mw::service::supplKeyRpcClientDxf)};
                 auto clientUUID = getVal(mw::service::supplKeyRpcClientUUID);
                 std::string labelsStr = getVal(mw::service::supplKeyRpcClientLabels);
                 std::map<std::string, std::string> clientLabels =
                     ib::cfg::Deserialize<std::map<std::string, std::string>>(labelsStr);
 
-                if (functionName == _functionName && Match(clientExchangeFormat, _exchangeFormat)
+                if (rpcChannel == _rpcChannel && Match(clientExchangeFormat, _exchangeFormat)
                     && MatchLabels(clientLabels, _labels))
                 {
                     AddInternalRpcServer(clientUUID, clientExchangeFormat, clientLabels);
@@ -88,7 +88,7 @@ void RpcServer::AddInternalRpcServer(const std::string& clientUUID, RpcExchangeF
                                      const std::map<std::string, std::string>& clientLabels)
 {
     auto internalRpcServer = dynamic_cast<RpcServerInternal*>(_participant->CreateRpcServerInternal(
-         _functionName, clientUUID, joinedExchangeFormat, clientLabels, _handler, this));
+         _rpcChannel, clientUUID, joinedExchangeFormat, clientLabels, _handler, this));
     _internalRpcServers.push_back(internalRpcServer);
 }
 

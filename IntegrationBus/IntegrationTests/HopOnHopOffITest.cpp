@@ -143,13 +143,13 @@ protected:
 
             IParticipantController* participantController;
             participantController = participant.participant->GetParticipantController();
-            participant.publisher = participant.participant->CreateDataPublisher(topic, mediaType, {}, 0);
+            participant.publisher = participant.participant->CreateDataPublisher("TestPublisher", topic, mediaType, {}, 0);
             participant.subscriber = participant.participant->CreateDataSubscriber(
-                topic, mediaType, {},
-                [&participant](IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data) {
+				"TestSubscriber", topic, mediaType, {},
+                [&participant](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
                     if (!participant.allReceived)
                     {
-                        participant.receivedIds.insert(data[0]);
+                        participant.receivedIds.insert(dataMessageEvent.data[0]);
                         // No self delivery: Expect numParticipants-1 receptions
                         if (participant.receivedIds.size() == numParticipants-1)
                         {
@@ -194,13 +194,13 @@ protected:
         {
             participant.participant =
                 ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, false);
-            participant.publisher = participant.participant->CreateDataPublisher(topic, mediaType, {}, 0);
+            participant.publisher = participant.participant->CreateDataPublisher("TestPublisher", topic, mediaType, {}, 0);
             participant.subscriber = participant.participant->CreateDataSubscriber(
-                topic, mediaType, {},
-                [&participant](IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>& data) {
+                "TestSubscriber", topic, mediaType, {},
+                [&participant](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
                     if (!participant.allReceived)
                     {
-                        participant.receivedIds.insert(data[0]);
+                        participant.receivedIds.insert(dataMessageEvent.data[0]);
                         // No self delivery: Expect numParticipants-1 receptions
                         if (participant.receivedIds.size() == numParticipants - 1)
                         {

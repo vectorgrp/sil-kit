@@ -25,7 +25,7 @@ class RpcServerInternal : public IIbToRpcServerInternal,
 {
   public:
     RpcServerInternal(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
-                      const std::string& functionName, const sim::rpc::RpcExchangeFormat& exchangeFormat,
+                      const std::string& rpcChannel, const sim::rpc::RpcExchangeFormat& exchangeFormat,
                       const std::map<std::string, std::string>& labels, const std::string& clientUUID,
                       ib::sim::rpc::CallProcessor handler, IRpcServer* parent);
 
@@ -45,7 +45,7 @@ class RpcServerInternal : public IIbToRpcServerInternal,
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor& override;
 
   private:
-    std::string _functionName;
+    std::string _rpcChannel;
     sim::rpc::RpcExchangeFormat _exchangeFormat;
     std::map<std::string, std::string> _labels;
     std::string _clientUUID;

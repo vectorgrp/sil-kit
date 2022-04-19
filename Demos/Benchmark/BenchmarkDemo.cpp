@@ -292,8 +292,8 @@ void ParticipantsThread(
     auto participant = ib::CreateParticipant(ibConfig, participantName, benchmark.domainId, true);
     auto&& participantController = participant->GetParticipantController();
    
-    auto publisher = participant->CreateDataPublisher("Topic", {}, {}, 0);
-    participant->CreateDataSubscriber("Topic", {}, {}, [&messageCounter](auto*, auto&) {
+   auto publisher = participant->CreateDataPublisher("PubCtrl1", "Topic", {}, {}, 0);
+   participant->CreateDataSubscriber("SubCtrl1", "Topic", {}, {}, [&messageCounter](auto*, auto&) {
         // this is handled in I/O thread, so no data races on counter.
         messageCounter++;
     });
