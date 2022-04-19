@@ -101,15 +101,15 @@ Changed
     
     .. code-block:: c++
     
-    IDataSubscriber::SetDefaultReceiveMessageHandler(...);
-    IDataSubscriber::RegisterSpecificDataHandler(...);
+      IDataSubscriber::SetDefaultReceiveMessageHandler(...);
+      IDataSubscriber::RegisterSpecificDataHandler(...);
 
     + new:
 
     .. code-block:: c++
 
-    IDataSubscriber::SetDefaultDataMessageHandler(...);
-    IDataSubscriber::AddExplicitDataMessageHandler(...);
+      IDataSubscriber::SetDefaultDataMessageHandler(...);
+      IDataSubscriber::AddExplicitDataMessageHandler(...);
 
   - ``IntegrationBus/include/ib/capi/DataPubSub.h``
 
@@ -117,15 +117,15 @@ Changed
 
     .. code-block:: c++
     
-    typedef ib_ReturnCode (*ib_Data_Subscriber_SetDefaultReceiveDataHandler_t)(...);
-    typedef ib_ReturnCode (*ib_Data_Subscriber_RegisterSpecificDataHandler_t)(...);
+      typedef ib_ReturnCode (*ib_Data_Subscriber_SetDefaultReceiveDataHandler_t)(...);
+      typedef ib_ReturnCode (*ib_Data_Subscriber_RegisterSpecificDataHandler_t)(...);
 
     + new:
 
     .. code-block:: c++
 
-    typedef ib_ReturnCode (*ib_Data_Subscriber_SetDefaultDataMessageHandler_t)(...);
-    typedef ib_ReturnCode (*ib_Data_Subscriber_AddExplicitDataMessageHandler_t)(...);
+      typedef ib_ReturnCode (*ib_Data_Subscriber_SetDefaultDataMessageHandler_t)(...);
+      typedef ib_ReturnCode (*ib_Data_Subscriber_AddExplicitDataMessageHandler_t)(...);
 
 - Renamed/wrapped structs and using statements in PubSub-context for the C/Cpp-API:
 
@@ -133,19 +133,19 @@ Changed
     
     .. code-block:: c++
 
-    // Cpp-API
-    using DataHandlerT =
-    std::function<void(ib::sim::data::IDataSubscriber* subscriber, const std::vector<uint8_t>& data)>;
-
-    using NewDataSourceHandlerT = std::function<void(ib::sim::data::IDataSubscriber* subscriber,
-                                                 const std::string& topic, const std::string& mediaType,
-                                                 const std::map<std::string, std::string>& labels)>;
-
-    // C-API
-    typedef void (*ib_Data_Handler_t)(void* context, ib_Data_Subscriber* subscriber, const ib_ByteVector* data);
-
-    typedef void (*ib_Data_NewDataSourceHandler_t)(void* context, ib_Data_Subscriber* subscriber, const char* topic,
-                                                   const char* mediaType, const ib_KeyValueList* labels);
+      // Cpp-API
+      using DataHandlerT =
+      std::function<void(ib::sim::data::IDataSubscriber* subscriber, const std::vector<uint8_t>& data)>;
+      
+      using NewDataSourceHandlerT = std::function<void(ib::sim::data::IDataSubscriber* subscriber,
+                                                      const std::string& topic, const std::string& mediaType,
+                                                      const std::map<std::string, std::string>& labels)>;
+      
+      // C-API
+      typedef void (*ib_Data_Handler_t)(void* context, ib_Data_Subscriber* subscriber, const ib_ByteVector* data);
+      
+      typedef void (*ib_Data_NewDataSourceHandler_t)(void* context, ib_Data_Subscriber* subscriber, const char* topic,
+                                                      const char* mediaType, const ib_KeyValueList* labels);
     + new:
 
     The new DataMessageEvent now contains a timestamp with the send time set by the DataPublisher. 
@@ -155,19 +155,19 @@ Changed
 
     .. code-block:: c++
 
-    // Cpp-API
-    using DataMessageHandlerT =
-    std::function<void(ib::sim::data::IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent)>;
-
-    using NewDataPublisherHandlerT =
-    std::function<void(ib::sim::data::IDataSubscriber* subscriber, const NewDataPublisherEvent& newDataPublisherEvent)>;
-
-    // C-API
-    typedef void (*ib_Data_DataMessageHandler_t)(void* context, ib_Data_Subscriber* subscriber, 
-                                                const ib_Data_DataMessageEvent* dataMessageEvent);
-
-    typedef void (*ib_Data_NewDataPublisherHandler_t)(void* context, ib_Data_Subscriber* subscriber,
-                                                      const ib_Data_NewDataPublisherEvent* newDataPublisherEvent);
+      // Cpp-API
+      using DataMessageHandlerT =
+      std::function<void(ib::sim::data::IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent)>;
+      
+      using NewDataPublisherHandlerT =
+      std::function<void(ib::sim::data::IDataSubscriber* subscriber, const NewDataPublisherEvent& newDataPublisherEvent)>;
+      
+      // C-API
+      typedef void (*ib_Data_DataMessageHandler_t)(void* context, ib_Data_Subscriber* subscriber, 
+                                                  const ib_Data_DataMessageEvent* dataMessageEvent);
+      
+      typedef void (*ib_Data_NewDataPublisherHandler_t)(void* context, ib_Data_Subscriber* subscriber,
+                                                        const ib_Data_NewDataPublisherEvent* newDataPublisherEvent);
 
 - The header ``EndpointAddress.hpp``, ``IReplay.hpp``, ``ITraceMessageSink.hpp``, ``ITraceMessageSource.hpp`` and
   ``TraceMessage.hpp`` are now internal headers.
