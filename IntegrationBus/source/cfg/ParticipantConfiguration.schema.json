@@ -411,22 +411,6 @@
       ]
     },
 
-    "GenericPublisherProtocol": {
-      "type": "string",
-      "enum": [
-        "Undefined",
-        "ROS",
-        "SOME/IP"
-      ],
-      "default": "Undefined"
-    },
-
-    "GenericPublisherDefinitionUri": {
-      "type": "string",
-      "title": "Location of the corresponding message definition file; Paths can be relative to the location of this configuration file.",
-      "format": "uri"
-    },
-
     "Topic": {
       "type": "string",
       "title": "Name of the communication channel between DataPublisher and DataSubscribers."
@@ -435,65 +419,6 @@
     "RpcChannel": {
       "type": "string",
       "title": "Name of the communication channel between RpcClients and RpcServers."
-    },
-
-    "PatternOutValue": {
-      "type": "string",
-      "pattern": "^[0-9a-zA-Z]*$",
-      "title": "Name and hex encoded init value of a pattern output"
-    },
-
-    "PwmOutFrequency": {
-      "type": "object",
-      "title": "Frequency and unit of the PWM output",
-      "properties": {
-        "Value": {
-          "type": "number"
-        },
-        "Unit": {
-          "type": "string",
-          "enum": [
-            "Hz",
-            "kHz",
-            "MHz",
-            "GHz",
-            "THz"
-          ]
-        }
-      },
-      "additionalProperties": false
-    },
-
-    "PwmOutDuty": {
-      "type": "number",
-      "minimum": 0,
-      "maximum": 1,
-      "title": "Duty cycle of the PWM output",
-      "examples": [
-        "V",
-        "A",
-        "kHz"
-      ]
-    },
-
-    "DigitalOutValue": {
-      "type": "boolean",
-      "title": "Initial value of the digital output port"
-    },
-
-    "AnalogOutValue": {
-      "type": "number",
-      "title": "Initial value of the analog output port"
-    },
-
-    "AnalogOutUnit": {
-      "type": "string",
-      "title": "Physical unit of the analog output port value",
-      "examples": [
-        "V",
-        "A",
-        "kHz"
-      ]
     },
 
     "Logging": {
