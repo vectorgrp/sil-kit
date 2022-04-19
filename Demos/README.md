@@ -3,27 +3,14 @@
 This directory contains sample projects that demonstrate how the IntegrationBus
 API can be used:
 
-* **Can, Lin, FlexRay, Ethernet, IO, GenericMessage**:
+* **Can, Lin, FlexRay, Ethernet, DataMessage, Rpc **:
   Write or read participants that are able to connect to IntegrationBus and use buses of
-  all supported protocols including CAN, LIN, FlexRay, Ethernet, I/O (analog,
-  digital, pattern signals and PWM), and the Generic Message service.
+  all supported protocols including CAN, LIN, FlexRay, Ethernet, DataMessage and the RPC service.
 
-* **TickTickDone**:
-  Installing a Tick-Tick-Done-based synchronization mechanism.
-
-* **ConfigBuilder**:
-  Processing JSON configuration files that adhere to the IbConfig.schema.json
-  format.
 
 * **Benchmark**:
   A simple command line tool that allows to measure VIB simulation performance
   with configurable parameters.
-
-* **CCan**:
-  A C-based demo that demonstrates CAN communications.
-
-* **CEthernet**:
-  A C-based demo that demonstrates Ethernet communications.
 
 The build system is based on cmake.
 Supported target platforms and build tools:
