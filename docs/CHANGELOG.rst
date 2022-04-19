@@ -5,8 +5,24 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.7.x] - 2022-04-x
+[3.99.x] - 2022-04-x
 --------------------------------
+
+This delivery is the first public delivery since 3.6.1. Since then, development has focused on preparing the public
+open source release of the Vector Integration Bus in August 2022. This delivery is not ABI/API/network compatible to
+earlier 3.x deliveries. Future 3.99.x deliveries are not expected to be API/ABI/network compatible to each other as we finalize 
+the API and network layer for the public open source 4.0 release. These deliveries are intended for evaluation purposes 
+and to make the current status of the Vector Integration Bus as transparent as possible.
+
+In this delivery we stabilize the DataMessage API such that it resembles the final API as closely as possible.
+
+Major changes since 3.6.1 (see changelog for details):
+
+ - Introduction of optional and distributed participant configuration
+ - DataMessage API as replacement for IoControllers and GenericMessage API
+ - Remote Procedure Call API
+ - Refactoring of CLI of Utilities to be consistent
+ - Tracing and Replay currently not functional
 
 Added
 ~~~~~
@@ -33,12 +49,6 @@ Removed
 
 - The header ``IntegrationBus/include/ib/mw/sync/ISyncMaster.hpp`` was removed due to not being used anywhere.
 
-  - ``IntegrationBus/include/ib/mw/sync/all.hpp``
-
-    .. code-block:: c++
-
-      #include "ISyncMaster.hpp"
-
 - Replaced the single-member struct ``DataExchangeFormat`` with its sole member, the media type string.
   The following data type and some associated free functions were removed:
 
@@ -64,6 +74,9 @@ Removed
 
 Changed
 ~~~~~~~
+
+- Updated documentation of :doc:`./usage/demos`, :doc:`./usage/utilities` and :doc:`./configuration/configuration`
+
 
 - Participant (formerly 'ComAdapter') methods to create DataPublisher, DataSubscriber, RpcClient and RpcServer now have an additional 
   argument for the controller name. The controller name is used to to reference the controller in the configuration file 
@@ -172,18 +185,6 @@ Changed
   ``TraceMessage.hpp`` are now internal headers.
   The typedef ``ib::mw::ParticipantId`` which used to be defined here was moved into its own public header file.
 
-  - ``IntegrationBus/include/ib/mw/EndpointAddress.hpp`` moved to ``IntegrationBus/source/mw/internal/EndpointAddress.hpp``
-
-  - ``IntegrationBus/include/ib/extensions/IReplay.hpp`` moved to ``IntegrationBus/source/tracing/IReplay.hpp``
-
-  - ``IntegrationBus/include/ib/extensions/ITraceMessageSink.hpp`` moved to ``IntegrationBus/source/tracing/ITraceMessageSink.hpp``
-
-  - ``IntegrationBus/include/ib/extensions/ITraceMessageSource.hpp`` moved to ``IntegrationBus/source/tracing/ITraceMessageSource.hpp``
-
-  - ``IntegrationBus/include/ib/extensions/TraceMessage.hpp`` moved to ``IntegrationBus/source/tracing/TraceMessage.hpp``
-
-  - ``IntegrationBus/include/ib/mw/internal/string_utils.hpp`` moved to ``IntegrationBus/source/mw/internal/string_utils_internal.hpp``
-
   - ``IntegrationBus/include/ib/mw/ParticipantId.hpp``
 
     + new:
@@ -191,22 +192,6 @@ Changed
     .. code-block:: c++
 
       using ParticipantId = ...;
-
-  - ``IntegrationBus/include/ib/mw/all.hpp``
-
-    + removed
-
-    .. code-block:: c++
-
-      #include "EndpointAddress.hpp"
-
-  - ``IntegrationBus/include/ib/mw/fwd_decl.hpp``
-
-    + removed
-
-    .. code-block:: c++
-
-      struct EndpointAddress;
 
   - ``IntegrationBus/include/ib/mw/sync/SyncDatatypes.hpp``
 
@@ -350,6 +335,8 @@ Changed
 - Demo adaptions
   - Ethernet Demo only uses Set/GetRawFrame calls
   - CAN & Ethernet demo can now run as asynchronous participants (add `--async` as command line argument)
+
+- Updated documentation of :doc:`./vibes/networksimulator` and :doc:`./simulation/simulation`
 
 
 [3.7.13] - 2022-03-24
