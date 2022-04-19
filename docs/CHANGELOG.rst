@@ -11,34 +11,6 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 Added
 ~~~~~
 
-- Participant (formerly 'ComAdapter') methods to create DataPublisher, DataSubscriber, RpcClient and RpcServer now have an additional 
-  argument for the controller name. The controller name is used to to reference the controller in the configuration file 
-  (formerly, 'topic'/'functionName' was used).
-
-  - ``IntegrationBus/include/ib/mw/IComAdapter.hpp``
-
-    + new:
-
-    .. code-block:: c++
-      
-      IComAdapter::CreateDataPublisher(const string& canonicalName, ...) -> ...;
-      IComAdapter::CreateDataSubscriber(const string& canonicalName, ...) -> ...;
-      IComAdapter::CreateRpcClient(const string& canonicalName, ...) -> ...;
-      IComAdapter::CreateRpcServer(const string& canonicalName, ...) -> ...;
-
-  - ``IntegrationBus/include/ib/capi/DataPubSub.h``
-
-    + new:
-
-    .. code-block:: c++
-  
-      typedef ib_ReturnCode (*ib_Data_Publisher_Create_t)(ib_Data_Publisher** outPublisher, ib_Participant* participant,
-                                                        const char* controllerName, ...);
-
-      typedef ib_ReturnCode (*ib_Data_Subscriber_Create_t)(ib_Data_Subscriber** outSubscriber, ib_Participant* participant,
-                                                              const char* controllerName, ...);
-  
-
 - Participant methods to create DataPublisher, DataSubscriber, RpcClient and RpcServer now have an simplified
   overload with the controller name ('canonicalName') as single argument. In this variant, the controller name is used as topic/rpcChannel.
   The C-Api doesn't provide these simplified methods.
@@ -92,6 +64,33 @@ Removed
 
 Changed
 ~~~~~~~
+
+- Participant (formerly 'ComAdapter') methods to create DataPublisher, DataSubscriber, RpcClient and RpcServer now have an additional 
+  argument for the controller name. The controller name is used to to reference the controller in the configuration file 
+  (formerly, 'topic'/'functionName' was used).
+
+  - ``IntegrationBus/include/ib/mw/IComAdapter.hpp``
+
+    + new:
+
+    .. code-block:: c++
+      
+      IComAdapter::CreateDataPublisher(const string& canonicalName, ...) -> ...;
+      IComAdapter::CreateDataSubscriber(const string& canonicalName, ...) -> ...;
+      IComAdapter::CreateRpcClient(const string& canonicalName, ...) -> ...;
+      IComAdapter::CreateRpcServer(const string& canonicalName, ...) -> ...;
+
+  - ``IntegrationBus/include/ib/capi/DataPubSub.h``
+
+    + new:
+
+    .. code-block:: c++
+  
+      typedef ib_ReturnCode (*ib_Data_Publisher_Create_t)(ib_Data_Publisher** outPublisher, ib_Participant* participant,
+                                                        const char* controllerName, ...);
+
+      typedef ib_ReturnCode (*ib_Data_Subscriber_Create_t)(ib_Data_Subscriber** outSubscriber, ib_Participant* participant,
+                                                              const char* controllerName, ...);
 
 - Renamed Public-API for DataSubscriber:
 
