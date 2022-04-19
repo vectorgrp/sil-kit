@@ -5,7 +5,7 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.99.x] - 2022-04-x
+[3.99.19] - 2022-04-19
 --------------------------------
 
 This delivery is the first public delivery since 3.6.1. Since then, development has focused on preparing the public
