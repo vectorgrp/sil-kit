@@ -299,6 +299,509 @@ Changed
           std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig, const std::string& participantName,
           const uint32_t domainId, bool isSynchronized) -> std::unique_ptr<mw::IParticipant>;
 
+.. raw:: html
+
+  <details>
+  <summary>Complete list of changes to the C++ API (click to expand)</summary>
+
+.. code-block:: c++
+
+  --- IntegrationBus/include/ib/IntegrationBus.hpp
+
+  -CreateSimulationParticipant(...) -> std::unique_ptr<mw::IComAdapter>;
+  +CreateParticipant(...) -> std::unique_ptr<mw::IParticipant>;
+
+  --- IntegrationBus/include/ib/mw/IParticipant.hpp
+
+  rename from IntegrationBus/include/ib/mw/IComAdapter.hpp
+  rename to IntegrationBus/include/ib/mw/IParticipant.hpp
+
+  -class IComAdapter
+  +class IParticipant
+
+  -    virtual ~IComAdapter() = default;
+  +    virtual ~IParticipant() = default;
+
+  +    virtual auto CreateDataPublisher(const std::string& canonicalName) -> sim::data::IDataPublisher* = 0;
+  +    virtual auto CreateDataSubscriber(const std::string& canonicalName) -> sim::data::IDataSubscriber* = 0;
+  +    virtual auto CreateRpcClient(const std::string& canonicalName) -> sim::rpc::IRpcClient* = 0;
+  +    virtual auto CreateRpcServer(const std::string& canonicalName) -> sim::rpc::IRpcServer* = 0;
+
+  -    virtual auto CreateDataPublisher(const std::string& topic, const sim::data::DataExchangeFormat& dataExchangeFormat, ...);
+  +    virtual auto CreateDataPublisher(const std::string& canonicalName, const std::string& topic, const std::string& mediaType, ...);
+
+  -    virtual auto CreateDataSubscriber(
+  -            const std::string& topic,
+  -            const sim::data::DataExchangeFormat& dataExchangeFormat,
+  -            ...,
+  -            sim::data::DataHandlerT defaultDataHandler,
+  -            sim::data::NewDataSourceHandlerT newDataSourceHandler = nullptr) -> ...;
+  +    virtual auto CreateDataSubscriber(
+  +            const std::string& canonicalName,
+  +            const std::string& topic, const std::string& mediaType,
+  +            ...,
+  +            sim::data::DataMessageHandlerT defaultDataMessageHandler,
+  +            sim::data::NewDataPublisherHandlerT newDataPublisherHandler = nullptr) -> ...;
+
+  -    virtual auto CreateRpcClient(const std::string& functionName, ...) -> ...;
+  +    virtual auto CreateRpcClient(const std::string& canonicalName, const std::string& channel, ...) -> ...;
+
+  -    virtual auto CreateRpcServer(const std::string& functionName, ...) -> ...;
+  +    virtual auto CreateRpcServer(const std::string& canonicalName, const std::string& channel, ...) -> ...;
+
+  -    virtual void DiscoverRpcServers(const std::string& functionName, ...);
+  +    virtual void DiscoverRpcServers(const std::string& rpcChannel, ...);
+
+  --- IntegrationBus/include/ib/mw/ParticipantId.hpp
+
+  +using ParticipantId = uint64_t;
+
+  --- IntegrationBus/include/ib/mw/sync/IParticipantController.hpp
+
+  -using TaskHandleT = void*;
+
+  --- IntegrationBus/include/ib/mw/sync/ISyncMaster.hpp
+
+  removed IntegrationBus/include/ib/mw/sync/ISyncMaster.hpp
+
+  --- IntegrationBus/include/ib/mw/sync/ISystemMonitor.hpp
+
+  -    virtual auto ParticipantStatus(const std::string& participantId) const -> const sync::ParticipantStatus& = 0;
+  +    virtual auto ParticipantStatus(const std::string& participantName) const -> const sync::ParticipantStatus& = 0;
+
+  --- IntegrationBus/include/ib/sim/data/DataMessageDatatypes.hpp
+
+  -struct DataExchangeFormat {
+  -    std::string mediaType;
+  -};
+
+  -inline bool operator==(const DataExchangeFormat& lhs, const DataExchangeFormat& rhs)
+
+  -using DataHandlerT =
+  -    std::function<void(ib::sim::data::IDataSubscriber* subscriber, const std::vector<uint8_t>& data)>;
+  +using DataMessageHandlerT =
+  +    std::function<void(ib::sim::data::IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent)>;
+
+  -struct DataMessage {
+  -    std::vector<uint8_t> data;
+  -};
+  +struct DataMessageEvent
+  +{
+  +    std::chrono::nanoseconds timestamp;
+  +    std::vector<uint8_t> data;
+  +};
+
+  +struct NewDataPublisherEvent
+  +{
+  +    std::chrono::nanoseconds timestamp;
+  +    std::string topic;
+  +    std::string mediaType;
+  +    std::map<std::string, std::string> labels;
+  +};
+
+  -using NewDataSourceHandlerT = std::function<void(ib::sim::data::IDataSubscriber* subscriber, const std::string& topic,
+  -                                                 const ib::sim::data::DataExchangeFormat& dataExchangeFormat,
+  -                                                 const std::map<std::string, std::string>& labels)>;
+  +using NewDataPublisherHandlerT =
+  +    std::function<void(ib::sim::data::IDataSubscriber* subscriber, const NewDataPublisherEvent& newDataPublisherEvent)>;
+
+  --- IntegrationBus/include/ib/sim/data/IDataSubscriber.hpp
+
+  -    virtual void SetDefaultReceiveMessageHandler(DataHandlerT callback) = 0;
+  +    virtual void SetDefaultDataMessageHandler(DataMessageHandlerT callback) = 0;
+
+  -    virtual void RegisterSpecificDataHandler(const DataExchangeFormat& dataExchangeFormat,
+  -                                             const std::map<std::string, std::string>& labels,
+  -                                             DataHandlerT callback) = 0;
+  +    virtual void AddExplicitDataMessageHandler(DataMessageHandlerT callback,
+  +                                               const std::string& mediaType,
+  +                                               const std::map<std::string, std::string>& labels) = 0;
+
+  --- IntegrationBus/include/ib/sim/data/fwd_decl.hpp
+
+  -struct DataMessage;
+  -struct DataExchangeFormat;
+  +struct DataMessageEvent;
+
+  --- IntegrationBus/include/ib/sim/data/string_utils.hpp
+
+  -inline std::string to_string(const DataExchangeFormat& dataExchangeFormat);
+  -inline std::ostream& operator<<(std::ostream& out, const DataExchangeFormat& dataExchangeFormat);
+
+  -inline std::string to_string(const DataMessage& msg);
+  +inline std::string to_string(const DataMessageEvent& msg);
+
+  -inline std::ostream& operator<<(std::ostream& out, const DataMessage& msg);
+  +inline std::ostream& operator<<(std::ostream& out, const DataMessageEvent& msg);
+
+  -std::string to_string(const DataMessage& msg)
+  +std::string to_string(const DataMessageEvent& msg)
+
+  -std::ostream& operator<<(std::ostream& out, const DataMessage& msg)
+  +std::ostream& operator<<(std::ostream& out, const DataMessageEvent& msg)
+
+  -std::string to_string(const DataExchangeFormat& dataExchangeFormat)
+  -std::ostream& operator<<(std::ostream& out, const DataExchangeFormat& dataExchangeFormat)
+
+  --- IntegrationBus/include/ib/sim/rpc/RpcDatatypes.hpp
+
+   struct RpcDiscoveryResult
+   {
+  -    std::string functionName;
+  +    std::string rpcChannel;
+       ...
+   };
+
+  --- IntegrationBus/include/ib/sim/rpc/string_utils.hpp
+
+  -inline std::string   to_string(const RpcExchangeFormat& dataExchangeFormat);
+  +inline std::string   to_string(const RpcExchangeFormat& rpcExchangeFormat);
+
+  -inline std::ostream& operator<<(std::ostream& out, const RpcExchangeFormat& dataExchangeFormat);
+  +inline std::ostream& operator<<(std::ostream& out, const RpcExchangeFormat& rpcExchangeFormat);
+
+.. raw:: html
+
+  </details>
+
+.. raw:: html
+
+  <details>
+  <summary>Complete List of changes to the C API (click to expand)</summary>
+
+.. code-block:: c++
+
+  --- IntegrationBus/include/ib/capi/Types.h
+
+  -typedef struct ib_SimulationParticipant ib_SimulationParticipant;
+  +typedef struct ib_Participant ib_Participant;
+
+  --- IntegrationBus/include/ib/capi/IntegrationBus.h
+
+  -typedef ib_ReturnCode(*ib_SimulationParticipant_GetLogger_t)(..., ib_SimulationParticipant* participant);
+  +typedef ib_ReturnCode(*ib_Participant_GetLogger_t)(..., ib_Participant* participant);
+
+  -ib_ReturnCode ib_SimulationParticipant_GetLogger(..., ib_SimulationParticipant* participant);
+  +ib_ReturnCode ib_Participant_GetLogger(..., ib_Participant* participant);
+
+  --- IntegrationBus/include/ib/capi/InterfaceIdentifiers.h
+
+  -#define ib_InterfaceIdentifier_DataExchangeFormat          ((ib_InterfaceIdentifier)5001001)
+  +#define ib_InterfaceIdentifier_DataMessageEvent            ((ib_InterfaceIdentifier)5001001)
+  +#define ib_InterfaceIdentifier_NewDataPublisherEvent       ((ib_InterfaceIdentifier)5001002)
+
+  --- IntegrationBus/include/ib/capi/Participant.h
+
+  rename from IntegrationBus/include/ib/capi/SimulationParticipant.h
+  rename to IntegrationBus/include/ib/capi/Participant.h
+
+  -ib_ReturnCode ib_SimulationParticipant_Create(ib_SimulationParticipant** outParticipant, ...);
+  +ib_ReturnCode ib_Participant_Create(ib_Participant** outParticipant, ...);
+
+  -typedef ib_ReturnCode (*ib_SimulationParticipant_Create_t)(ib_SimulationParticipant** outParticipant, ...);
+  +typedef ib_ReturnCode (*ib_Participant_Create_t)(ib_Participant** outParticipant, ...);
+
+  -ib_ReturnCode ib_SimulationParticipant_Destroy(ib_SimulationParticipant* participant);
+  +ib_ReturnCode ib_Participant_Destroy(ib_Participant* participant);
+
+  -typedef ib_ReturnCode (*ib_SimulationParticipant_Destroy_t)(ib_SimulationParticipant* participant);
+  +typedef ib_ReturnCode (*ib_Participant_Destroy_t)(ib_Participant* participant);
+
+  -typedef void (*ib_ParticipantInitHandler_t)(..., ib_SimulationParticipant* participant, ...);
+  +typedef void (*ib_ParticipantInitHandler_t)(.., ib_Participant* participant, ...);
+
+  -ib_ReturnCode ib_SimulationParticipant_SetInitHandler(ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Participant_SetInitHandler(ib_Participant* participant, ...);
+
+  -typedef ib_ReturnCode(*ib_SimulationParticipant_SetInitHandler_t)(ib_SimulationParticipant* participant, ...);
+  +typedef ib_ReturnCode(*ib_Participant_SetInitHandler_t)(ib_Participant* participant, ...);
+
+  -typedef void (*ib_ParticipantStopHandler_t)(..., ib_SimulationParticipant* participant);
+  +typedef void (*ib_ParticipantStopHandler_t)(..., ib_Participant* participant);
+
+  -ib_ReturnCode ib_SimulationParticipant_SetStopHandler(ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Participant_SetStopHandler(ib_Participant* participant, ...);
+
+  -typedef ib_ReturnCode(*ib_SimulationParticipant_SetStopHandler_t)(ib_SimulationParticipant* participant, ...);
+  +typedef ib_ReturnCode(*ib_Participant_SetStopHandler_t)(ib_Participant* participant, ...);
+
+  -typedef void (*ib_ParticipantShutdownHandler_t)(..., ib_SimulationParticipant* participant);
+  +typedef void (*ib_ParticipantShutdownHandler_t)(..., ib_Participant* participant);
+
+  -ib_ReturnCode ib_SimulationParticipant_SetShutdownHandler(ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Participant_SetShutdownHandler(ib_Participant* participant, ...);
+
+  -typedef ib_ReturnCode(*ib_SimulationParticipant_SetShutdownHandler_t)(ib_SimulationParticipant* participant, ...);
+  +typedef ib_ReturnCode(*ib_Participant_SetShutdownHandler_t)(ib_Participant* participant, ...);
+
+  -ib_ReturnCode ib_SimulationParticipant_Run(ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Participant_Run(ib_Participant* participant, ...);
+
+  -typedef ib_ReturnCode (*ib_SimulationParticipant_Run_t)(ib_SimulationParticipant* participant, ...);
+  +typedef ib_ReturnCode (*ib_Participant_Run_t)(ib_Participant* participant, ...);
+
+  -ib_ReturnCode ib_SimulationParticipant_RunAsync(ib_SimulationParticipant* participant);
+  +ib_ReturnCode ib_Participant_RunAsync(ib_Participant* participant);
+
+  -typedef ib_ReturnCode (*ib_SimulationParticipant_RunAsync_t)(ib_SimulationParticipant* participant);
+  +typedef ib_ReturnCode (*ib_Participant_RunAsync_t)(ib_Participant* participant);
+
+  -ib_ReturnCode ib_SimulationParticipant_WaitForRunAsyncToComplete(ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Participant_WaitForRunAsyncToComplete(ib_Participant* participant, ...);
+
+  -typedef ib_ReturnCode (*ib_SimulationParticipant_WaitForRunAsyncToComplete_t)(ib_SimulationParticipant* participant, ...);
+  +typedef ib_ReturnCode (*ib_Participant_WaitForRunAsyncToComplete_t)(ib_Participant* participant, ...);
+
+  -typedef ib_ReturnCode (*ib_SimulationParticipant_SetPeriod_t)(ib_SimulationParticipant* participant, ...);
+  +typedef ib_ReturnCode (*ib_Participant_SetPeriod_t)(ib_Participant* participant, ...);
+
+  -ib_ReturnCode ib_SimulationParticipant_SetPeriod(ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Participant_SetPeriod(ib_Participant* participant, ...);
+
+  -typedef void (*ib_ParticipantSimulationTaskHandler_t)(..., ib_SimulationParticipant* participant, ...);
+  +typedef void (*ib_ParticipantSimulationTaskHandler_t)(..., ib_Participant* participant, ...);
+
+  -ib_ReturnCode ib_SimulationParticipant_SetSimulationTask(ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Participant_SetSimulationTask(ib_Participant* participant, ...);
+
+  -typedef ib_ReturnCode(*ib_SimulationParticipant_SetSimulationTask_t)(ib_SimulationParticipant* participant, ...);
+  +typedef ib_ReturnCode(*ib_Participant_SetSimulationTask_t)(ib_Participant* participant, ...);
+
+  -ib_ReturnCode ib_SimulationParticipant_SetSimulationTaskAsync(ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Participant_SetSimulationTaskAsync(ib_Participant* participant, ...);
+
+  -typedef ib_ReturnCode(*ib_SimulationParticipant_SetSimulationTaskNonBlocking_t)(ib_SimulationParticipant* participant, ...);
+  +typedef ib_ReturnCode(*ib_Participant_SetSimulationTaskNonBlocking_t)(ib_Participant* participant, ...);
+
+  -ib_ReturnCode ib_SimulationParticipant_CompleteSimulationTask(ib_SimulationParticipant* participant);
+  +ib_ReturnCode ib_Participant_CompleteSimulationTask(ib_Participant* participant);
+
+  -typedef ib_ReturnCode(*ib_SimulationParticipant_CompleteSimulationTask_t)(ib_SimulationParticipant* participant);
+  +typedef ib_ReturnCode(*ib_Participant_CompleteSimulationTask_t)(ib_Participant* participant);
+
+  -ib_ReturnCode ib_SimulationParticipant_Initialize(ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Participant_Initialize(ib_Participant* participant, ...);
+
+  -ib_ReturnCode ib_SimulationParticipant_ReInitialize(ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Participant_ReInitialize(ib_Participant* participant, ...);
+
+  -ib_ReturnCode ib_SimulationParticipant_RunSimulation(ib_SimulationParticipant* participant);
+  +ib_ReturnCode ib_Participant_RunSimulation(ib_Participant* participant);
+
+  -ib_ReturnCode ib_SimulationParticipant_StopSimulation(ib_SimulationParticipant* participant);
+  +ib_ReturnCode ib_Participant_StopSimulation(ib_Participant* participant);
+
+  -ib_ReturnCode ib_SimulationParticipant_Pause(ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Participant_Pause(ib_Participant* participant, ...);
+
+  -ib_ReturnCode ib_SimulationParticipant_Continue(ib_SimulationParticipant* participant);
+  +ib_ReturnCode ib_Participant_Continue(ib_Participant* participant);
+
+  -ib_ReturnCode ib_SimulationParticipant_Shutdown(ib_SimulationParticipant* participant);
+  +ib_ReturnCode ib_Participant_Shutdown(ib_Participant* participant);
+
+  -ib_ReturnCode ib_SimulationParticipant_PrepareColdswap(ib_SimulationParticipant* participant);
+  +ib_ReturnCode ib_Participant_PrepareColdswap(ib_Participant* participant);
+
+  -ib_ReturnCode ib_SimulationParticipant_ExecuteColdswap(ib_SimulationParticipant* participant);
+  +ib_ReturnCode ib_Participant_ExecuteColdswap(ib_Participant* participant);
+
+  -ib_ReturnCode ib_SimulationParticipant_GetParticipantState(..., ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Participant_GetParticipantState(..., ib_Participant* participant, ...);
+
+  -ib_ReturnCode ib_SimulationParticipant_GetSystemState(..., ib_SimulationParticipant* participant);
+  +ib_ReturnCode ib_Participant_GetSystemState(..., ib_Participant* participant);
+
+  -typedef void (*ib_SystemStateHandler_t)(..., ib_SimulationParticipant* participant, ...);
+  +typedef void (*ib_SystemStateHandler_t)(..., ib_Participant* participant, ...);
+
+  -ib_ReturnCode ib_SimulationParticipant_RegisterSystemStateHandler(ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Participant_RegisterSystemStateHandler(ib_Participant* participant, ...);
+
+  -typedef void (*ib_ParticipantStateHandler_t)(..., ib_SimulationParticipant* participant, ...);
+  +typedef void (*ib_ParticipantStateHandler_t)(..., ib_Participant* participant, ...);
+
+  -ib_ReturnCode ib_SimulationParticipant_RegisterParticipantStateHandler(ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Participant_RegisterParticipantStateHandler(ib_Participant* participant, ...);
+
+  -ib_ReturnCode ib_SimulationParticipant_SetRequiredParticipants(ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Participant_SetRequiredParticipants(ib_Participant* participant, ...);
+
+  --- IntegrationBus/include/ib/capi/Can.h
+
+  -ib_ReturnCode ib_Can_Controller_Create(..., ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Can_Controller_Create(..., ib_Participant* participant, ...);
+
+  -typedef ib_ReturnCode (*ib_Can_Controller_Create_t)(..., ib_SimulationParticipant* participant, ...);
+  +typedef ib_ReturnCode (*ib_Can_Controller_Create_t)(..., ib_Participant* participant, ...);
+
+  --- IntegrationBus/include/ib/capi/Ethernet.h
+
+  -ib_ReturnCode ib_Ethernet_Controller_Create(..., ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Ethernet_Controller_Create(..., ib_Participant* participant, ...);
+
+  -typedef ib_ReturnCode(*ib_Ethernet_Controller_Create_t)(..., ib_SimulationParticipant* participant, ...);
+
+  --- IntegrationBus/include/ib/capi/FlexRay.h
+  -ib_ReturnCode ib_FlexRay_Controller_Create(..., ib_SimulationParticipant* participant, ...);
+  -ib_ReturnCode ib_FlexRay_Controller_Create(..., ib_Participant* participant, ...);
+
+  -typedef ib_ReturnCode (*ib_FlexRay_Controller_Create_t)(..., ib_SimulationParticipant* participant, ...);
+  +typedef ib_ReturnCode (*ib_FlexRay_Controller_Create_t)(..., ib_Participant* participant, ...);
+
+  --- IntegrationBus/include/ib/capi/Lin.h
+
+  -ib_ReturnCode ib_Lin_Controller_Create(..., ib_SimulationParticipant *participant, ...);
+  +ib_ReturnCode ib_Lin_Controller_Create(..., ib_Participant *participant, ...);
+
+  -typedef ib_ReturnCode (*ib_Lin_Controller_Create_t)(..., ib_SimulationParticipant* participant, ...);
+  -typedef ib_ReturnCode (*ib_Lin_Controller_Create_t)(..., ib_Participant* participant, ...);
+
+  --- IntegrationBus/include/ib/capi/Rpc.h
+
+   typedef struct ib_Rpc_DiscoveryResult
+   {
+       ...
+  -    const char* functionName;
+  +    const char* rpcChannel;
+       ...
+   } ib_Rpc_DiscoveryResult;
+
+  -ib_ReturnCode ib_Rpc_Server_Create(..., ib_SimulationParticipant* participant, const char* functionName, ...)
+  +ib_ReturnCode ib_Rpc_Server_Create(..., ib_Participant* participant, const char* controllerName, const char* rpcChannel, ...);
+
+  -typedef ib_ReturnCode (*ib_Rpc_Server_Create_t)(..., ib_SimulationParticipant* participant, const char* functionName, ...);
+  +typedef ib_ReturnCode (*ib_Rpc_Server_Create_t)(..., ib_Participant* participant, const char* controllerName, const char* rpcChannel, ...);
+
+  -ib_ReturnCode ib_Rpc_Client_Create(..., ib_SimulationParticipant* participant, const char* functionName, ...);
+  +ib_ReturnCode ib_Rpc_Client_Create(..., ib_Participant* participant, const char* controllerName, const char* rpcChannel, ...);
+
+  -typedef ib_ReturnCode (*ib_Rpc_Client_Create_t)(..., ib_SimulationParticipant* participant, const char* functionName, ...);
+  +typedef ib_ReturnCode (*ib_Rpc_Client_Create_t)(..., ib_Participant* participant, const char* controllerName, const char* rpcChannel, ...);
+
+  -ib_ReturnCode ib_Rpc_DiscoverServers(ib_SimulationParticipant* participant, const char* functionName, ...);
+  +ib_ReturnCode ib_Rpc_DiscoverServers(ib_Participant* participant, const char* rpcChannel, ...);
+
+  -typedef ib_ReturnCode(*ib_Rpc_DiscoverServers_t)(ib_SimulationParticipant* participant, const char* functionName, ...);
+  +typedef ib_ReturnCode(*ib_Rpc_DiscoverServers_t)(ib_Participant* participant, const char* rpcChannel, ...);
+
+  --- IntegrationBus/include/ib/capi/DataPubSub.h
+
+  -typedef struct { ... } ib_Data_ExchangeFormat;
+
+  +typedef struct
+  +{
+  +    ib_InterfaceIdentifier interfaceId;
+  +    ib_NanosecondsTime timestamp;
+  +    ib_ByteVector data;
+  +} ib_Data_DataMessageEvent;
+
+  +typedef struct
+  +{
+  +    ib_InterfaceIdentifier interfaceId;
+  +    ib_NanosecondsTime timestamp;
+  +    const char* topic;
+  +    const char* mediaType;
+  +    ib_KeyValueList* labels;
+  +} ib_Data_NewDataPublisherEvent;
+
+  -typedef void (*ib_Data_Handler_t)(..., const ib_ByteVector* data);
+  +typedef void (*ib_Data_DataMessageHandler_t)(..., const ib_Data_DataMessageEvent* dataMessageEvent);
+
+  -typedef void (*ib_Data_NewDataSourceHandler_t)(..., const char* topic, const ib_Data_ExchangeFormat* dataExchangeFormat, const ib_KeyValueList* labels);
+  +typedef void (*ib_Data_NewDataPublisherHandler_t)(..., const ib_Data_NewDataPublisherEvent* newDataPublisherEvent);
+
+  -ib_ReturnCode ib_Data_Publisher_Create(..., ib_SimulationParticipant* participant, const char* topic, ib_Data_ExchangeFormat* dataExchangeFormat, ...);
+  +ib_ReturnCode ib_Data_Publisher_Create(..., ib_Participant* participant, const char* controllerName, const char* topic, const char* mediaType, ...);
+
+  -typedef ib_ReturnCode (*ib_Data_Publisher_Create_t)(..., ib_SimulationParticipant* participant, const char* topic, ib_Data_ExchangeFormat* dataExchangeFormat, ...);
+  +typedef ib_ReturnCode (*ib_Data_Publisher_Create_t)(..., ib_Participant* participant, const char* controllerName, const char* topic, const char* mediaType, ...);
+
+  -ib_ReturnCode ib_Data_Subscriber_Create(
+  -        ...,
+  -        ib_SimulationParticipant* participant,
+  -        const char* topic,
+  -        ib_Data_ExchangeFormat* dataExchangeFormat,
+  -        ...,
+  -        ib_Data_Handler_t defaultDataHandler,
+  -        ...,
+  -        ib_Data_NewDataSourceHandler_t newDataSourceHandler);
+  +ib_ReturnCode ib_Data_Subscriber_Create(
+  +        ...,
+  +        ib_Participant* participant,
+  +        const char* controllerName,
+  +        const char* topic,
+  +        const char* mediaType,
+  +        ...,
+  +        ib_Data_DataMessageHandler_t defaultDataHandler,
+  +        ...,
+  +        ib_Data_NewDataPublisherHandler_t newDataSourceHandler);
+
+  -typedef ib_ReturnCode (*ib_Data_Subscriber_Create_t)(
+  -        ...,
+  -        ib_SimulationParticipant* participant,
+  -        const char* topic,
+  -        ib_Data_ExchangeFormat* dataExchangeFormat,
+  -        ...,
+  -        ib_Data_Handler_t defaultDataHandler,
+  -        ...,
+  -        ib_Data_NewDataSourceHandler_t newDataSourceHandler);
+  +typedef ib_ReturnCode (*ib_Data_Subscriber_Create_t)(
+  +        ...,
+  +        ib_Participant* participant,
+  +        const char* controllerName,
+  +        const char* topic,
+  +        const char* mediaType,
+  +        ...,
+  +        ib_Data_DataMessageHandler_t defaultDataHandler,
+  +        ...,
+  +        ib_Data_NewDataPublisherHandler_t newDataSourceHandler);
+
+  -typedef ib_ReturnCode (*ib_Data_Subscriber_SetDefaultReceiveDataHandler_t)(
+  -        ...,
+  -        ib_Data_Handler_t dataHandler);
+  +typedef ib_ReturnCode (*ib_Data_Subscriber_SetDefaultDataMessageHandler_t)(
+  +        ...,
+  +        ib_Data_DataMessageHandler_t dataHandler);
+
+  -ib_ReturnCode ib_Data_Subscriber_SetDefaultReceiveDataHandler(
+  -        ...,
+  -        ib_Data_Handler_t dataHandler);
+  +ib_ReturnCode ib_Data_Subscriber_SetDefaultDataMessageHandler(
+  +        ...,
+  +        ib_Data_DataMessageHandler_t dataHandler);
+
+  -ib_ReturnCode ib_Data_Subscriber_RegisterSpecificDataHandler(
+  -        ib_Data_Subscriber* self,
+  -        ib_Data_ExchangeFormat* dataExchangeFormat,
+  -        const ib_KeyValueList* labels,
+  -        void* context,
+  -        ib_Data_Handler_t dataHandler);
+  +ib_ReturnCode ib_Data_Subscriber_AddExplicitDataMessageHandler(
+  +        ib_Data_Subscriber* self,
+  +        void* context,
+  +        ib_Data_DataMessageHandler_t dataHandler,
+  +        const char* mediaType,
+  +        const ib_KeyValueList* labels);
+
+  -typedef ib_ReturnCode (*ib_Data_Subscriber_RegisterSpecificDataHandler_t)(
+  -        ib_Data_Subscriber* self,
+  -        ib_Data_ExchangeFormat* dataExchangeFormat,
+  -        const ib_KeyValueList* labels,
+  -        void* context,
+  -        ib_Data_Handler_t dataHandler);
+  +typedef ib_ReturnCode (*ib_Data_Subscriber_AddExplicitDataMessageHandler_t)(
+  +        ib_Data_Subscriber* self,
+  +        void* context,
+  +        ib_Data_DataMessageHandler_t dataHandler,
+  +        const char* mediaType,
+  +        const ib_KeyValueList* labels);
+
+.. raw:: html
+
+  </details>
+
+
 [3.7.18] - 2022-04-05
 --------------------------------
 
