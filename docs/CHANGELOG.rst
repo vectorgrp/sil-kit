@@ -5,6 +5,78 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.99.x] - 2022-04-y
+--------------------------------
+
+Removed
+~~~~~~~
+
+- In the Cpp-Api, the SystemMonitor's ``RegisterParticipantStateHandler`` is removed, its functionality is already 
+  covered by ``RegisterParticipantStatusHandler``.
+
+  - IntegrationBus/include/ib/mw/sync/ISystemMonitor.hpp 
+
+      + old: 
+      
+      .. code-block:: c++
+
+        ISystemMonitor::RegisterParticipantStateHandler(ParticipantStateHandlerT handler);
+
+Changed
+~~~~~~~
+
+- In the C-Api, the Participant's ``ib_Participant_RegisterParticipantStateHandler`` is removed and replaced by
+  the more detailed variant ``ib_Participant_RegisterParticipantStatusHandler``.
+  
+  - IntegrationBus/include/ib/capi/Participant.h
+  
+      + old: 
+      
+      .. code-block:: c++
+
+        typedef void (*ib_ParticipantStateHandler_t)(void* context, ib_Participant* participant,
+            const char* participantName, ib_ParticipantState state);
+
+        // typedef was missing, API is:
+        IntegrationBusAPI ib_ReturnCode ib_Participant_RegisterParticipantStateHandler(ib_Participant* participant,
+            void* context, ib_ParticipantStateHandler_t handler);
+      
+      + new: 
+      
+      .. code-block:: c++
+
+        typedef struct 
+        {
+            ib_InterfaceIdentifier interfaceId;
+            const char* participantName; //!< Name of the participant.
+            ib_ParticipantState participantState; //!< The new state of the participant.
+            const char* enterReason; //!< The reason for the participant to enter the new state.
+            ib_NanosecondsWallclockTime enterTime; //!< The enter time of the participant.
+            ib_NanosecondsWallclockTime refreshTime; //!< The refresh time.
+        } ib_ParticipantStatus;
+
+        typedef void (*ib_ParticipantStatusHandler_t)(void* context, ib_Participant* participant,
+            const char* participantName, ib_ParticipantStatus status);
+            
+        typedef ib_ReturnCode (*ib_Participant_RegisterParticipantStatusHandler_t)(ib_Participant* participant, void* context,
+            ib_ParticipantStatusHandler_t handler);
+            
+
+Removed
+~~~~~~~
+
+- The SystemMonitor's ``RegisterParticipantStateHandler`` is removed, its functionality is already covered by
+  ``RegisterParticipantStatusHandler``.
+
+  - IntegrationBus/include/ib/mw/sync/ISystemMonitor.hpp 
+
+      + old: 
+      
+      .. code-block:: c++
+
+        ISystemMonitor::RegisterParticipantStateHandler(ParticipantStateHandlerT handler);
+
+
 [3.99.19] - 2022-04-19
 --------------------------------
 

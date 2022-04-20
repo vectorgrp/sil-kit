@@ -67,6 +67,19 @@ typedef int8_t ib_SystemState;
 
 typedef uint64_t ib_NanosecondsTime; //!< Simulation time
 
+typedef uint64_t ib_NanosecondsWallclockTime; //!< Wall clock time since epoch
+
+//!< Details about a status change of a participant.
+typedef struct 
+{
+    ib_InterfaceIdentifier interfaceId;
+    const char* participantName; //!< Name of the participant.
+    ib_ParticipantState participantState; //!< The new state of the participant.
+    const char* enterReason; //!< The reason for the participant to enter the new state.
+    ib_NanosecondsWallclockTime enterTime; //!< The enter time of the participant.
+    ib_NanosecondsWallclockTime refreshTime; //!< The refresh time.
+} ib_ParticipantStatus;
+
 /*! \brief Join the IB simulation with the domainId as a participant.
 *
 * Join the IB simulation and become a participant
@@ -386,18 +399,21 @@ typedef void (*ib_SystemStateHandler_t)(void* context, ib_Participant* participa
 IntegrationBusAPI ib_ReturnCode ib_Participant_RegisterSystemStateHandler(ib_Participant* participant,
   void* context, ib_SystemStateHandler_t handler);
 
-typedef void (*ib_ParticipantStateHandler_t)(void* context, ib_Participant* participant,
-    const char* participantName, ib_ParticipantState state);
 
-/*! \brief Register a callback for ::ParticipantState changes
+typedef void (*ib_ParticipantStatusHandler_t)(void* context, ib_Participant* participant,
+    const char* participantName, ib_ParticipantStatus status);
+
+/*! \brief Register a callback for status changes of participants.
   *
   * The handler will be called immediately for any participant that is
   * not in \ref ib_ParticipantState_Invalid.
   *
   */
-IntegrationBusAPI ib_ReturnCode ib_Participant_RegisterParticipantStateHandler(ib_Participant* participant,
-  void* context, ib_ParticipantStateHandler_t handler);
+IntegrationBusAPI ib_ReturnCode ib_Participant_RegisterParticipantStatusHandler(ib_Participant* participant,
+  void* context, ib_ParticipantStatusHandler_t handler);
 
+typedef ib_ReturnCode (*ib_Participant_RegisterParticipantStatusHandler_t)(ib_Participant* participant, void* context,
+                                                                           ib_ParticipantStatusHandler_t handler);
 
 /*! \brief Set the names of the participants that are required for the simulation
   *

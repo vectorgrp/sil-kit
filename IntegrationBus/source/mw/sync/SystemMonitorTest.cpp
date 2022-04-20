@@ -33,7 +33,6 @@ protected:
     struct Callbacks
     {
         MOCK_METHOD1(SystemStateHandler, void(SystemState));
-        MOCK_METHOD1(ParticipantStateHandler, void(ParticipantState));
         MOCK_METHOD1(ParticipantStatusHandler, void(ParticipantStatus));
     };
 
@@ -51,10 +50,6 @@ protected:
     void RegisterSystemHandler()
     {
         monitor.RegisterSystemStateHandler(bind_method(&callbacks, &Callbacks::SystemStateHandler));
-    }
-    void RegisterParticipantStateHandler()
-    {
-        monitor.RegisterParticipantStateHandler(bind_method(&callbacks, &Callbacks::ParticipantStateHandler));
     }
     void RegisterParticipantStatusHandler()
     {

@@ -103,21 +103,6 @@ void SystemMonitor::RegisterSystemStateHandler(SystemStateHandlerT handler)
     }
 }
 
-void SystemMonitor::RegisterParticipantStateHandler(ParticipantStateHandlerT handler)
-{
-    _participantStateHandlers.emplace_back(std::move(handler));
-
-    auto&& newHandler = _participantStateHandlers[_participantStateHandlers.size() - 1];
-    for (auto&& kv : _participantStatus)
-    {
-        auto&& participantStatus = kv.second;
-        if (participantStatus.state == sync::ParticipantState::Invalid)
-            continue;
-
-        newHandler(participantStatus.state);
-    }
-}
-
 void SystemMonitor::RegisterParticipantStatusHandler(ParticipantStatusHandlerT handler)
 {
     _participantStatusHandlers.emplace_back(std::move(handler));
@@ -173,9 +158,6 @@ void SystemMonitor::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const s
         // Fire status / state handler
         for (auto&& handler : _participantStatusHandlers)
             handler(newParticipantStatus);
-
-        for (auto&& handler : _participantStateHandlers)
-            handler(newParticipantStatus.state);
 
         // Propagate the system state for known participants, ignore otherwise
         auto&& nameIter = std::find(_expectedParticipants.names.begin(), _expectedParticipants.names.end(), participantName);

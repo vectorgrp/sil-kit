@@ -40,7 +40,7 @@ protected:
         MOCK_METHOD2(InitHandler, void(ib::mw::ParticipantId, ParticipantCommand::Kind));
         MOCK_METHOD0(StopHandler, void());
         MOCK_METHOD0(ShutdownHandler, void());
-        MOCK_METHOD1(ParticipantStateHandler, void(ParticipantState));
+        MOCK_METHOD1(ParticipantStateHandler, void(ParticipantState)); // Helper to only check for status.state; no longer part of the API
     };
 
 protected:
@@ -53,7 +53,7 @@ protected:
         return _targetStatePromise.get_future();
     }
 
-    void ParticipantStateHandler(ParticipantState state)
+    void ParticipantStateHandler(const ParticipantState& state)
     {
         callbacks.ParticipantStateHandler(state);
 
@@ -84,9 +84,9 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     auto systemController = participant->GetSystemController();
     systemController->SetRequiredParticipants(syncParticipantNames);
     auto monitor = participant->GetSystemMonitor();
-    monitor->RegisterParticipantStateHandler([this](ParticipantState state)
+    monitor->RegisterParticipantStatusHandler([this](ParticipantStatus status)
     {
-        this->ParticipantStateHandler(state);
+        this->ParticipantStateHandler(status.state);
     });
 
     // Setup Participant for Test Unit
@@ -112,16 +112,17 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     EXPECT_CALL(callbacks, InitHandler(initCommand.participant, initCommand.kind)).Times(1);
     EXPECT_CALL(callbacks, StopHandler()).Times(1);
     EXPECT_CALL(callbacks, ShutdownHandler()).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Invalid)).Times(0);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Idle)).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Initializing)).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Initialized)).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Running)).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopping)).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopped)).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ShuttingDown)).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Shutdown)).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Error)).Times(0);
+
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Invalid      )).Times(0);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Idle         )).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Initializing )).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Initialized  )).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Running      )).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopping     )).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopped      )).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ShuttingDown )).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Shutdown     )).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Error        )).Times(0);
 
     // Perform the actual test
     auto stateReached = SetTargetState(ParticipantState::Idle);

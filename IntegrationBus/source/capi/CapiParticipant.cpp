@@ -446,7 +446,7 @@ ib_ReturnCode ib_Participant_RegisterSystemStateHandler(ib_Participant* particip
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Participant_RegisterParticipantStateHandler(ib_Participant* participant, void* context, ib_ParticipantStateHandler_t handler)
+ib_ReturnCode ib_Participant_RegisterParticipantStatusHandler(ib_Participant* participant, void* context, ib_ParticipantStatusHandler_t handler)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);
   ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -456,8 +456,15 @@ ib_ReturnCode ib_Participant_RegisterParticipantStateHandler(ib_Participant* par
     auto* systemMonitor = cppParticipant->GetSystemMonitor();
 
     systemMonitor->RegisterParticipantStatusHandler(
-      [handler, context, participant](ib::mw::sync::ParticipantStatus status) {
-          handler(context, participant, status.participantName.c_str(), (ib_ParticipantState)status.state);
+      [handler, context, participant](ib::mw::sync::ParticipantStatus cppStatus) {
+            ib_ParticipantStatus cStatus;
+            cStatus.interfaceId = ib_InterfaceIdentifier_ParticipantStatus;
+            cStatus.enterReason = cppStatus.enterReason.c_str();
+            cStatus.enterTime = std::chrono::duration_cast<std::chrono::nanoseconds>(cppStatus.enterTime.time_since_epoch()).count();
+            cStatus.participantName = cppStatus.participantName.c_str();
+            cStatus.participantState = (ib_ParticipantState)cppStatus.state;
+            cStatus.refreshTime = std::chrono::duration_cast<std::chrono::nanoseconds>(cppStatus.refreshTime.time_since_epoch()).count();
+          handler(context, participant, cppStatus.participantName.c_str(), cStatus);
       });
     return ib_ReturnCode_SUCCESS;
   }

@@ -18,25 +18,13 @@ changes of the ParticipantState or the SystemState that occur during the simulat
 Register callbacks for state transitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To be notified about transitions of the ParticipantState, a ParticipantStateHandler has to be registered::
+To be notified about transitions of the ParticipantState, a ParticipantStatusHandler has to be registered. The
+:cpp:class:`ParticipantStatus<ib::mw::sync::ParticipantStatus>` contains the new ParticipantState and further details 
+about the transition such as the name of the participant, the reason for the status change and timing information::
 
-  // Register ParticipantStateHandler to receive ParticipantState transitions from all participants.
-  auto participantStateHandler =
-      [](sync::ParticipantState state) {};
-
-  auto* systemMonitor = participant->GetSystemMonitor();
-  systemMonitor->RegisterParticipantStateHandler(participantStateHandler);
-
-The ParticipantState changes are always called together with the
-:cpp:class:`ParticipantStatus<ib::mw::sync::ParticipantStatus>` changes. The
-:cpp:class:`ParticipantStatus<ib::mw::sync::ParticipantStatus>` provides access to some additional
-information such as the name of the participant and the reason for the status change. To be notified about
-transitions of the :cpp:class:`ParticipantStatus<ib::mw::sync::ParticipantStatus>`, a
-ParticipantStatusHandler can be registered as follows::
-
-  // Register ParticipantStatusHandler to receive ParticipantStatus transitions from all participants.
+  // Register ParticipantStatusHandler to receive ParticipantStatus updates from all participants.
   auto participantStatusHandler =
-      [](const sync::ParticipantStatus& participantStatus) {};
+      [](sync::ParticipantStatus status) {};
 
   auto* systemMonitor = participant->GetSystemMonitor();
   systemMonitor->RegisterParticipantStatusHandler(participantStatusHandler);

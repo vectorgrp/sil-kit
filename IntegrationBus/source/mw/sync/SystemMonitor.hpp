@@ -40,7 +40,6 @@ public:
 
     // ISystemMonitor
     void RegisterSystemStateHandler(SystemStateHandlerT handler) override;
-    void RegisterParticipantStateHandler(ParticipantStateHandlerT handler) override;
     void RegisterParticipantStatusHandler(ParticipantStatusHandlerT handler) override;
 
     auto SystemState() const -> sync::SystemState override;
@@ -90,7 +89,6 @@ private:
 
     unsigned int _invalidTransitionCount{0u};
 
-    std::vector<ParticipantStateHandlerT> _participantStateHandlers;
     std::vector<ParticipantStatusHandlerT> _participantStatusHandlers;
     std::vector<SystemStateHandlerT> _systemStateHandlers;
 };

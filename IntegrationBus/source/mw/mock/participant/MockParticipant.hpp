@@ -110,7 +110,6 @@ public:
 class MockSystemMonitor : public sync::ISystemMonitor {
 public:
     MOCK_METHOD1(RegisterSystemStateHandler, void(SystemStateHandlerT));
-    MOCK_METHOD1(RegisterParticipantStateHandler, void(ParticipantStateHandlerT));
     MOCK_METHOD1(RegisterParticipantStatusHandler, void(ParticipantStatusHandlerT));
     MOCK_CONST_METHOD0(SystemState,  sync::SystemState());
     MOCK_CONST_METHOD1(ParticipantStatus, const sync::ParticipantStatus&(const std::string& participantName));

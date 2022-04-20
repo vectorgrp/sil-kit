@@ -20,11 +20,6 @@ public:
     */
     using SystemStateHandlerT = std::function<void(SystemState)>;
 
-    /*! Callback type to indicate that a ::ParticipantState has been received.
-    *  Cf., \ref RegisterParticipantStateHandler(ParticipantStateHandlerT);
-    */
-    using ParticipantStateHandlerT = std::function<void(ParticipantState)>;
-
     /*! Callback type to indicate that a ParticipantStatus has been received.
     *  Cf., \ref RegisterParticipantStatusHandler(ParticipantStatusHandlerT);
     */
@@ -38,23 +33,11 @@ public:
      */
     virtual void RegisterSystemStateHandler(SystemStateHandlerT handler) = 0;
 
-    /*! \brief Register a callback for ::ParticipantState changes
-     *
-     * The handler will be called immediately for any participant that is
-     * not in \ref ParticipantState::Invalid.
-     *
-     * NB: ParticipantStatusHandlers and ParticipantStateHandlers are
-     * always called in combination.
-     */
-    virtual void RegisterParticipantStateHandler(ParticipantStateHandlerT handler) = 0;
-
     /*! \brief Register a callback for \ref ParticipantStatus changes
      *
      * The handler will be called immediately for any participant that is
      * not in \ref ParticipantState::Invalid.
      *
-     * NB: ParticipantStatusHandlers and ParticipantStateHandlers are
-     * always called in combination.
      */
     virtual void RegisterParticipantStatusHandler(ParticipantStatusHandlerT handler) = 0;
 
