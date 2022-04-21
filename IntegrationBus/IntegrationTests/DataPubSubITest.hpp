@@ -199,6 +199,7 @@ protected:
         }
 
         std::shared_ptr<ib::cfg::IParticipantConfiguration> config;
+        bool delayedDefaultDataHandler = false;
         std::string name;
         std::vector<DataSubscriberInfo> dataSubscribers;
         std::vector<DataPublisherInfo> dataPublishers;
@@ -313,8 +314,19 @@ protected:
                 if (ds.specificDataHandlers.empty())
                 {
                     // Create DataSubscriber with default handler
-                    ds.dataSubscriber = participant.participant->CreateDataSubscriber(
-                        ds.controllerName, ds.topic, ds.mediaType, ds.labels, receptionHandler, newDataSourceHandler);
+                    if(participant.delayedDefaultDataHandler)
+                    {
+                        ds.dataSubscriber = participant.participant->CreateDataSubscriber(
+                            ds.controllerName, ds.topic, ds.mediaType, ds.labels, nullptr,
+                            newDataSourceHandler);
+                        ds.dataSubscriber->SetDefaultDataMessageHandler(receptionHandler);
+                    }
+                    else
+                    {
+                        ds.dataSubscriber = participant.participant->CreateDataSubscriber(
+                            ds.controllerName, ds.topic, ds.mediaType, ds.labels, receptionHandler,
+                            newDataSourceHandler);
+                    }
                 }
                 else
                 {
@@ -485,7 +497,5 @@ protected:
 
 protected:
     std::vector<std::thread> _pubSubThreads;
-
-private:
     TestInfrastructure _testSystem;
 };

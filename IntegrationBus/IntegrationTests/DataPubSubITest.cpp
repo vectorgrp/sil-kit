@@ -14,6 +14,22 @@ namespace {
 //--------------------------------------
 
 // One publisher participant, one subscriber participant
+TEST_F(DataPubSubITest, test_1pub_1sub_delayed_default_handler)
+{
+    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
+    const uint32_t numMsgToReceive = numMsgToPublish;
+
+    std::vector<PubSubParticipant> pubsubs;
+    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
+    PubSubParticipant subscriber{
+        "Sub1", {}, {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}};
+    subscriber.delayedDefaultDataHandler = true;
+    pubsubs.push_back(std::move(subscriber));
+
+    RunSyncTest(pubsubs);
+}
+
+// One publisher participant, one subscriber participant
 TEST_F(DataPubSubITest, test_1pub_1sub_sync_vasio)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;

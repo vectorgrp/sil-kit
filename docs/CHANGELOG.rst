@@ -5,22 +5,27 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.99.x] - 2022-04-y
+[3.99.20] - 2022-04-20
 --------------------------------
 
-Removed
-~~~~~~~
+This delivery is the first public delivery since 3.6.1. Since then, development has focused on preparing the public
+open source release of the Vector Integration Bus in August 2022. This delivery is not ABI/API/network compatible to
+earlier 3.x deliveries. Future 3.99.x deliveries are not expected to be API/ABI/network compatible to each other as we finalize 
+the API and network layer for the public open source 4.0 release. These deliveries are intended for evaluation purposes 
+and to make the current status of the Vector Integration Bus as transparent as possible.
 
-- In the Cpp-Api, the SystemMonitor's ``RegisterParticipantStateHandler`` is removed, its functionality is already 
-  covered by ``RegisterParticipantStatusHandler``.
+In this delivery the DataMessage API is stabilized such that it resembles the final API as closely as possible.
+See the earlier changelog entries since 3.6.1 for further information considering API changes (especially 3.99.19).
+Other parts will still undergo changes for improved consistency within the API.
 
-  - IntegrationBus/include/ib/mw/sync/ISystemMonitor.hpp 
+Major changes since 3.6.1 (see changelog for details):
 
-      + old: 
-      
-      .. code-block:: c++
+ - Introduction of optional and distributed participant configuration
+ - DataMessage API as replacement for IoControllers and GenericMessage API
+ - Remote Procedure Call API
+ - Refactoring of CLI of Utilities to be consistent
+ - Tracing and Replay currently not functional
 
-        ISystemMonitor::RegisterParticipantStateHandler(ParticipantStateHandlerT handler);
 
 Changed
 ~~~~~~~
@@ -76,25 +81,16 @@ Removed
 
         ISystemMonitor::RegisterParticipantStateHandler(ParticipantStateHandlerT handler);
 
+Fixed
+~~~~~~~
+
+- Fixed bug of no data transmission related to delayed DefaultDataMessageHandler registration
+
 
 [3.99.19] - 2022-04-19
 --------------------------------
 
-This delivery is the first public delivery since 3.6.1. Since then, development has focused on preparing the public
-open source release of the Vector Integration Bus in August 2022. This delivery is not ABI/API/network compatible to
-earlier 3.x deliveries. Future 3.99.x deliveries are not expected to be API/ABI/network compatible to each other as we finalize 
-the API and network layer for the public open source 4.0 release. These deliveries are intended for evaluation purposes 
-and to make the current status of the Vector Integration Bus as transparent as possible.
-
-In this delivery we stabilize the DataMessage API such that it resembles the final API as closely as possible.
-
-Major changes since 3.6.1 (see changelog for details):
-
- - Introduction of optional and distributed participant configuration
- - DataMessage API as replacement for IoControllers and GenericMessage API
- - Remote Procedure Call API
- - Refactoring of CLI of Utilities to be consistent
- - Tracing and Replay currently not functional
+In this delivery we stabilized the DataMessage API.
 
 Added
 ~~~~~
@@ -370,6 +366,10 @@ Changed
       IntegrationBusAPI auto CreateParticipant(
           std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig, const std::string& participantName,
           const uint32_t domainId, bool isSynchronized) -> std::unique_ptr<mw::IParticipant>;
+
+    .. Admonition:: Note
+       
+       The isSynchronized parameter is temporary and will be removed in the future.
 
 .. raw:: html
 

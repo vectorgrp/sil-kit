@@ -72,6 +72,7 @@ void DataSubscriber::RegisterServiceDiscovery()
 
 void DataSubscriber::SetDefaultDataMessageHandler(DataMessageHandlerT callback)
 {
+    _defaultDataHandler = callback;
     for (auto* internalSubscriber : _internalSubscibers)
     {
         internalSubscriber->SetDefaultDataMessageHandler(callback);
