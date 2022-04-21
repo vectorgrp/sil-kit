@@ -87,6 +87,64 @@ Fixed
 - Fixed bug of no data transmission related to delayed DefaultDataMessageHandler registration
 
 
+.. raw:: html
+
+  <details>
+  <summary>Complete list of changes to the C++ API (click to expand)</summary>
+
+.. code-block:: c++
+
+  --- a/IntegrationBus/include/ib/mw/sync/ISystemMonitor.hpp
+
+   class ISystemMonitor
+
+  -    using ParticipantStateHandlerT = std::function<void(ParticipantState)>;
+  -    virtual void RegisterParticipantStateHandler(ParticipantStateHandlerT handler) = 0;
+
+.. raw:: html
+
+  </details>
+
+
+.. raw:: html
+
+  <details>
+  <summary>Complete list of changes to the C API (click to expand)</summary>
+
+.. code-block:: c++
+
+  --- IntegrationBus/include/ib/capi/InterfaceIdentifiers.h
+
+  +#define ib_InterfaceIdentifier_ParticipantStatus           ((ib_InterfaceIdentifier)7001001)
+
+  --- a/IntegrationBus/include/ib/capi/Participant.h
+
+  +typedef uint64_t ib_NanosecondsWallclockTime; //!< Wall clock time since epoch
+
+  +typedef struct
+  +{
+  +    ib_InterfaceIdentifier interfaceId;
+  +    const char* participantName; //!< Name of the participant.
+  +    ib_ParticipantState participantState; //!< The new state of the participant.
+  +    const char* enterReason; //!< The reason for the participant to enter the new state.
+  +    ib_NanosecondsWallclockTime enterTime; //!< The enter time of the participant.
+  +    ib_NanosecondsWallclockTime refreshTime; //!< The refresh time.
+  +} ib_ParticipantStatus;
+
+  -typedef void (*ib_ParticipantStateHandler_t)(void* context, ib_Participant* participant, const char* participantName, ib_ParticipantState state);
+
+  +typedef void (*ib_ParticipantStatusHandler_t)(void* context, ib_Participant* participant, const char* participantName, ib_ParticipantStatus status);
+
+  -IntegrationBusAPI ib_ReturnCode ib_Participant_RegisterParticipantStateHandler(ib_Participant* participant, void* context, ib_ParticipantStateHandler_t handler);
+  +IntegrationBusAPI ib_ReturnCode ib_Participant_RegisterParticipantStatusHandler(ib_Participant* participant, void* context, ib_ParticipantStatusHandler_t handler);
+
+  +typedef ib_ReturnCode (*ib_Participant_RegisterParticipantStatusHandler_t)(ib_Participant* participant, void* context, ib_ParticipantStatusHandler_t handler);
+
+.. raw:: html
+
+  </details>
+
+
 [3.99.19] - 2022-04-19
 --------------------------------
 
