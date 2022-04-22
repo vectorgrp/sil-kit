@@ -1,24 +1,23 @@
 =============
-!!! Participant
+Participant
 =============
 
 .. contents:: :local:
    :depth: 1
 
-This document described the main entry point to the VIB simulation.
-The Participant layer provides the interface between a middleware, which implements
-the distributed communication, and the high level simulation services.
-Refer to :ref:`Base Architecture<base-architecture>` for an overview of the VIB.
+This document describes the main entry point to the VIB simulation, the participant.
+By creating a participant with a given configuration, a connection 
+to a simulation is established and the configured participant joins the simulation.
 
 .. |IParticipant| replace:: :cpp:class:`IParticipant<ib::mw::IParticipant>` 
 
-!!! Accessing the Participant
+Creating the Participant
 ~~~~~~~~~~~~~~~~~~~~~~~~
 To create an |IParticipant| you have to include the 
 :ref:`ib/IntegrationBus.hpp<sec:header-vib-main>` and call the :ref:`Participant API<sec:participant-factory>`
 factory function::
 
-    auto config = ib::cfg::Config::FromJsonFile("your_config.json");
+    auto config = ib::cfg::ParticipantConfigurationFromFile("your_config.json");
     auto participant = ib::CreateParticipant(config, "ParticipantName", domainId);
 
 To take part in the simulation, the Participant needs to be initialized with a proper
@@ -26,7 +25,7 @@ configuration, a participant name and a domain ID.
 
 .. _sec:iparticipant-api:
 
-!!! The IParticipant API
+The IParticipant API
 ~~~~~~~~~~~~~~~~~~~
 
 The instantiated |IParticipant| can then be used to access the other services
@@ -45,7 +44,7 @@ of the VIB.
    :members:
 
 
-!!! VIB Version
+VIB Version
 ~~~~~~~~~~~
 Version information about the currently running VIB instance
 can be queried using the following functions:
@@ -65,9 +64,3 @@ can be queried using the following functions:
     .. doxygenfunction:: ib::version::SprintName()
 
     .. doxygenfunction:: ib::version::GitHash()
-
-..          
-..
-..    .. doxygenstruct:: ib::mw::EndpointAddress
-..       :members:
-..

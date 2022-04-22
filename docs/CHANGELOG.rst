@@ -2653,7 +2653,7 @@ Added
   generate an Ib Config, the new FastRTPS HistoryDepth can be configured this way.
 - New documentation for the configuration mechanism, cf. :doc:`../configuration/configuration`
 - New documentation for FastRTPS configuration, cf. :doc:`../configuration/middleware-configuration`
-- Extend the simulation setup documentation, cf. :doc:`../configuration/simulation-setup`
+- Extend the simulation setup documentation, cf. ../configuration/simulation-setup
 
 Changed
 ~~~~~~~

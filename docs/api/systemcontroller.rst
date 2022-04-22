@@ -1,5 +1,5 @@
 =======================
-!!! System Controller
+System Controller
 =======================
 
 .. contents::
@@ -23,9 +23,9 @@ The first transition performed by the system controller, usually when
 :cpp:enumerator:`SystemState::Idle<ib::mw::sync::Idle>` is reached,
 is accomplished by initializing all participants::
 
-  // Initialize a participant by providing its id.
+  // Initialize a participant by providing its name.
   auto* systemController = participant->GetSystemController();
-  systemController->Initialize(participant.id);
+  systemController->Initialize(participant.name);
 
 After all participants are successfully initialized and the system is in
 :cpp:enumerator:`SystemState::Initialized<ib::mw::sync::Initialized>`, the next transition can be initiated
@@ -46,9 +46,9 @@ the :cpp:func:`Stop()<ib::mw::sync::ISystemController::Stop()>` command::
 If the system is in :cpp:enumerator:`SystemState::Stopped<ib::mw::sync::Stopped>`, participants can either
 be reinitialize or the system can be shut down::
 
-  // Reinitialize a participant by providing its id.
+  // Reinitialize a participant by providing its name.
   auto* systemController = participant->GetSystemController();
-  systemController->ReInitialize(participant.id);
+  systemController->ReInitialize(participant.name);
 
   // Shut down all participants.
   auto* systemController = participant->GetSystemController();

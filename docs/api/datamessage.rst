@@ -34,7 +34,8 @@ same topic. The topic has no wildcard functionality.
 Media type
 ~~~~~~~~~~
 
-Both DataPublishers and DataSubscribers define a media type, a meta description of the transmitted data. It can be used
+Both DataPublishers and DataSubscribers define a media type in accordance to 
+`RFC2046 <https://datatracker.ietf.org/doc/html/rfc2046>`_, a meta description of the transmitted data. It can be used
 to provide infomation about the de- / serialization of the underlying user data. Just like the topic, the media type has
 to match between DataPublishers / DataSubscribers for communicaiton to take place. An empty string on a DataSubscriber
 is a wildcard and will match any other media type of a DataPublisher.

@@ -1,5 +1,5 @@
 ===================
-!!! FlexRay Service API
+FlexRay Service API
 ===================
 
 
@@ -10,16 +10,22 @@
 
 .. highlight:: cpp
 
-!!! Using the FlexRay Controller
+Using the FlexRay Controller
 ------------------------------------
 
-!!! Initialization
+.. admonition:: Note
+
+  The FlexRay service needs a detailed simulation based on the :ref:`VIBE Network Simulator<chap:VIBE-NetSim>`.
+  Because of the intrinsic complexity within FlexRay, no trivial simulation exists.
+
+
+Initialization
 ~~~~~~~~~~~~~~~~~~~~
 
 Before the FlexRay controller can be used and participate in the FlexRay communication cycles,
 it must be configured, and then a Startup phase must take place at the beginning of the simulation.
 
-!!! Configuration
+Configuration
 _______________________________________
 
 The configuration is performed by setting up a :cpp:class:`ControllerConfig<ib::sim::fr::ControllerConfig>` and passing it to
@@ -68,7 +74,7 @@ The following example configures a FlexRay controller with two
 Note that :cpp:func:`IFrController::Configure()<ib::sim::fr::IFrController::Configure>`
 should be called in the InitHandler of a ParticipantController.
 
-!!! Startup
+Startup
 _______________________________________
 
 At least two FlexRay controllers are always required for a successful startup in a FlexRay cluster.
@@ -106,7 +112,7 @@ the PocState state changed from :cpp:enumerator:`PocState::Wakeup<ib::sim::fr::W
 Note that the leading coldstart node must send these commands in the next FlexRay cycle and not
 directly in a registered handler like the ControllerStateHandler.
 
-!!! Tx Buffer Update (Sending FlexRay Messages)
+Tx Buffer Update (Sending FlexRay Messages)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In each FlexRay cycle, data can be sent by using the
@@ -133,7 +139,7 @@ be registered::
       [](IFrController*, const FrMessageAck& ack) {};
   frController->RegisterMessageAckHandler(messageAckHandler);
 
-!!! Receiving FlexRay Messages
+Receiving FlexRay Messages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To receive data from other FlexRay controller, a MessageHandler must be registered,
@@ -152,7 +158,7 @@ is received::
 
 .. _sec:poc-status-changes:
 
-!!! Receiving POC status changes
+Receiving POC status changes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The protocol operation control (POC) status is a structure consisting of
@@ -198,25 +204,26 @@ registered with a call to
 
 The handler will be invoked whenever the controller's PocStatus is updated.
 
+ Message Tracing
+~~~~~~~~~~~~~~~
+
 .. admonition:: Note
 
-    POC members beside PocStatus::state are updated when using an accurate simulation with
-    the VIBE network simulator.
+  Currently the Message Tracing functionality is not available, but it will be reintegrated in the future.
 
-!!! Message Tracing
-~~~~~~~~~~~~~~~
+
 The FrController supports message tracing in MDF4 format.
 This is provided by the :ref:`VIBE MDF4Tracing<mdf4tracing>` extension.
 Refer to the :ref:`sec:cfg-participant-tracing` configuration section for usage instructions.
 
-!!! API and Data Type Reference
+API and Data Type Reference
 --------------------------------------------------
-!!! FlexRay Controller API
+FlexRay Controller API
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygenclass:: ib::sim::fr::IFrController
   :members:
 
-!!! Data Structures
+Data Structures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygenstruct:: ib::sim::fr::FrMessage
   :members:
@@ -229,8 +236,6 @@ Refer to the :ref:`sec:cfg-participant-tracing` configuration section for usage 
 .. doxygenstruct:: ib::sim::fr::FrSymbol
   :members:
 .. doxygenstruct:: ib::sim::fr::FrSymbolAck
-  :members:
-.. doxygenstruct:: ib::sim::fr::ControllerStatus
   :members:
 .. doxygenstruct:: ib::sim::fr::PocStatus
   :members:
@@ -247,7 +252,7 @@ Refer to the :ref:`sec:cfg-participant-tracing` configuration section for usage 
 .. doxygenstruct:: ib::sim::fr::TxBufferUpdate
   :members:
 
-!!! Enumerations and Typedefs
+Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygentypedef:: ib::sim::fr::FrMacroTick
 .. doxygentypedef:: ib::sim::fr::FrMicroTick

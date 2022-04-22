@@ -1,5 +1,5 @@
 ===================
-!!! CAN Service API
+CAN Service API
 ===================
 
 .. contents::
@@ -9,15 +9,20 @@
 
 .. highlight:: cpp
 
-!!! Using the CAN Controller
+Using the CAN Controller
 -------------------------
 
-!!! Initialization
+The CAN Service API provides a CAN bus abstraction through :cpp:class:`CanControllers<ib::sim::can::ICanController>`.
+A CAN controller can be created by calling :cpp:func:`IParticiant::CreateCanController()<ib::mw::IParticipant::CreateCanController>`.
+
+Initialization
 ~~~~~~~~~~~~~~~~~~~~
 
-Before the CAN Controller can be used, the baud rate needs to be set by passing it to
-:cpp:func:`ICanController::SetBaudRate()<ib::sim::can::ICanController::SetBaudRate>`. Then, it has to be
-started explicitly by calling :cpp:func:`ICanController::Start()<ib::sim::can::ICanController::Start>`.
+For a detailed simulation with the :ref:`VIBE Network Simulator<chap:VIBE-NetSim>`, the baud rate of a CAN controller needs to be set by passing it to
+:cpp:func:`ICanController::SetBaudRate()<ib::sim::can::ICanController::SetBaudRate>` before using it. 
+Furthermore, it has to be started explicitly by calling 
+:cpp:func:`ICanController::Start()<ib::sim::can::ICanController::Start>`. 
+These functions can but do not have to be called in a simple functional simulation without :ref:`VIBE Network Simulator<chap:VIBE-NetSim>`.
 
 The following example configures a CAN controller with a baud rate of 10'000 baud
 for regular CAN messages and a baud rate of 1'000'000 baud for CAN FD messages.
@@ -36,12 +41,12 @@ Then, the controller is started::
    to have no effect.
 
 
-!!! Sending CAN Messages
+Sending CAN Messages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Data is transfered in the form of a :cpp:class:`CanMessage<ib::sim::can::CanMessage>`.
 To send a :cpp:class:`CanMessage<ib::sim::can::CanMessage>`, it must be setup with
-a CAN ID, the data to be transmitted and an optional timestamp. In VIBE simulation
+a CAN ID and the data to be transmitted. In VIBE simulation
 the :cpp:class:`CanMessage::CanReceiveFlags<ib::sim::can::CanMessage::CanReceiveFlags>` are also relevant::
 
   // Prepare a CAN message with id 0x17
@@ -57,7 +62,7 @@ the :cpp:class:`CanMessage::CanReceiveFlags<ib::sim::can::CanMessage::CanReceive
 
   canController.SendMessage(canMessage);
 
-To be notified for the success or failure of the transmission, a MessageStatusHandler should
+To be notified of the success or failure of the transmission, a MessageStatusHandler should
 be registered::
   
   // Register MessageStatusHandler to receive CAN acknowledges from other CAN controller.
@@ -65,17 +70,17 @@ be registered::
       [](ICanController*, const can::CanTransmitAcknowledge& ack) {};
   canController->RegisterTransmitStatusHandler(messageStatusHandler);
 
-The CanTransmitAcknowledge received in the MessageStatusHandler will always have the value
+The :cpp:class:`CanTransmitAcknowledge<ib::sim::can::CanTransmitAcknowledge>` received in the MessageStatusHandler will always have the value
 :cpp:enumerator:`Transmitted<ib::sim::can::Transmitted>` in a simple simulation without VIBE NetworkSimulator,
 which indicates a successful transmission. If the VIBE NetworkSimulator is used, it is
 possible that the transmit queue overflows causing the handler to be called with
 :cpp:enumerator:`TransmitQueueFull<ib::sim::can::TransmitQueueFull>` signaling a transmission failure.
 
 
-!!! Receiving CAN Messages
+Receiving CAN Messages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To receive data from other CAN controller, a ReceiveMessageHandler must be
+To receive data from other CAN controllers, a ReceiveMessageHandler must be
 registered, which is called by the CAN controller whenever a CAN message is received::
 
   // Register ReceiveMessageHandler to receive CAN messages from other CAN controller.
@@ -83,27 +88,35 @@ registered, which is called by the CAN controller whenever a CAN message is rece
       [](ICanController*, const CanMessage&) {};
   canController->RegisterReceiveMessageHandler(receiveMessageHandler);
 
-!!! Message Tracing
+An optional second parameter allows to specify the direction (TX, RX, TX/RX) of the CanFrames to be received. 
+By default, only CanFrames of the direction TX are handled.
+
+Message Tracing
 ~~~~~~~~~~~~~~~
+
+.. admonition:: Note
+
+  Currently the Message Tracing functionality is not available, but it will be reintegrated in the future.
+
 The CanController supports message tracing in MDF4 format.
 This is provided by the :ref:`VIBE MDF4Tracing<mdf4tracing>` extension.
 Refer to the :ref:`sec:cfg-participant-tracing` configuration section for usage instructions.
 
-!!! API and Data Type Reference
+API and Data Type Reference
 --------------------------------------------------
-!!! CAN Controller API
+CAN Controller API
 ~~~~~~~~~~~~~~~~~~~~
 .. doxygenclass:: ib::sim::can::ICanController
    :members:
 
-!!! Data Structures
+Data Structures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygenstruct:: ib::sim::can::CanMessage
    :members:
 .. doxygenstruct:: ib::sim::can::CanTransmitAcknowledge
    :members:
 
-!!! Enumerations and Typedefs
+Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygentypedef:: ib::sim::can::CanTxId
 .. doxygenenum:: ib::sim::can::CanControllerState
@@ -111,7 +124,7 @@ Refer to the :ref:`sec:cfg-participant-tracing` configuration section for usage 
 .. doxygenenum:: ib::sim::can::CanTransmitStatus
 
 
-!!! Usage Examples
+Usage Examples
 ----------------------------------------------------
 
 This section contains complete examples that show the usage of the CAN controller
@@ -119,13 +132,13 @@ and the interaction of two or more controllers. Although the CAN controllers wou
 typically belong to different participants and reside in different processes,
 their interaction is shown sequentially to demonstrate cause and effect.
 
-!!! Assumptions:
+Assumptions:
 
 - *canReceiver*, *canSender* are of type
   :cpp:class:`ICanController*<ib::sim::can::ICanController>`.
 - All CAN controllers are connected on the same CAN bus.
 
-!!! Simple CAN Sender / Receiver Example
+Simple CAN Sender / Receiver Example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows a successful data transfer from one CAN controller

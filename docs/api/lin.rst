@@ -1,7 +1,7 @@
 .. _sec:lin:
 
 ===================
-!!! LIN Service API
+LIN Service API
 ===================
 
 .. contents::
@@ -11,10 +11,10 @@
 
 .. highlight:: cpp
    
-!!! Using the LIN Controller
+Using the LIN Controller
 -------------------------
 
-!!! Initialization
+Initialization
 ~~~~~~~~~~~~~~~~~~~~
 
 Before the LIN Controller can be used, it must be initialized. The
@@ -49,7 +49,7 @@ Note that :cpp:func:`ILinController::Init()<ib::sim::lin::ILinController::Init>`
 should be called in the InitHandler of a ParticipantController.
 
 
-!!! Initiating LIN Transmissions
+Initiating LIN Transmissions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Data is transfered in the form of a LIN
@@ -62,7 +62,7 @@ which requires that a corresponding frame response was configured
 befor at any LIN controller
 (:cpp:func:`ILinController::SetFrameResponse()<ib::sim::lin::ILinController::SetFrameResponse>`).
 
-!!! Sending Data to Slaves
+Sending Data to Slaves
 ________________________________________
 
 To send data, a LIN :cpp:class:`Frame<ib::sim::lin::Frame>` must be setup with the LIN ID,
@@ -123,11 +123,11 @@ A successful transmission is confirmed via the registered callback, e.g.::
     :cpp:func:`ILinController::SendFrameHeader()<void ib::sim::lin::ILinController::SendFrameHeader(LinIdT, std::chrono::nanoseconds)>`.
 
 
-!!! Receiving Data from a Slave
+Receiving Data from a Slave
 __________________________________________
 
 To receive data from a LIN slave, a FrameStatusHandler must be registered, which is called by the LIN
-controller whenever a frame was received::
+controller whenever a frame is received::
 
     // Register FrameStatusHandler to receive data from the LIN slave
     auto frameStatusHandler =
@@ -164,7 +164,7 @@ low-level, non-AUTOSAR interface.
         master->SendFrameHeader(0x11);
 
     
-The end of the transmission will be confirmed by calling the registered FrameStatusHandler
+The end of the transmission will be confirmed by the VIB by a call to the registered FrameStatusHandler
 (here, frameStatusHandler) with FrameStatus indicating the success or failure of
 the transmission.
 
@@ -182,21 +182,26 @@ registered frameStatusHandler will be called as follows::
     If no LIN slave provides a frame response, the FrameStatus::LIN_RX_NO_RESPONSE will be
     used.
 
-!!! Message Tracing
+Message Tracing
 ~~~~~~~~~~~~~~~
+
+.. admonition:: Note
+
+  Currently the Message Tracing functionality is not available, but it will be reintegrated in the future.
+
 The LinController supports message tracing in MDF4 format.
 This is provided by the :ref:`VIBE MDF4Tracing<mdf4tracing>` extension.
 Refer to the :ref:`sec:cfg-participant-tracing` configuration section for usage instructions.
 
      
-!!! API and Data Type Reference
+API and Data Type Reference
 --------------------------------------------------
-!!! LIN Controller API
+LIN Controller API
 ~~~~~~~~~~~~~~~~~~~~
 .. doxygenclass:: ib::sim::lin::ILinController
    :members:
 
-!!! Data Structures
+Data Structures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygenstruct:: ib::sim::lin::Frame
    :members:
@@ -205,7 +210,7 @@ Refer to the :ref:`sec:cfg-participant-tracing` configuration section for usage 
 .. doxygenstruct:: ib::sim::lin::ControllerConfig
    :members:
 
-!!! Enumerations and Typedefs
+Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygentypedef:: ib::sim::lin::LinIdT
 .. doxygenenum:: ib::sim::lin::ChecksumModel
@@ -218,7 +223,7 @@ Refer to the :ref:`sec:cfg-participant-tracing` configuration section for usage 
 .. doxygenenum:: ib::sim::lin::ControllerStatus
      
 
-!!! Usage Examples
+Usage Examples
 ----------------------------------------------------
 
 This section contains more complex examples that show the interaction of two or
@@ -231,7 +236,7 @@ Assumptions:
 - *master*, *slave*, *slave1*, and *slave2* are of type
   :cpp:class:`ILinController*<ib::sim::lin::ILinController>`.
 - *timeEndOfFrame* indicates the end of frame time stamp when using the VIBE
-  NetworkSimulator. A time stamp can also be provided when initiating a transmission through
+  NetworkSimulator. A timestamp can also be provided when initiating a transmission through
   :cpp:func:`ILinController::SendFrame()<void ib::sim::lin::ILinController::SendFrame(Frame, FrameResponseType, std::chrono::nanoseconds)>`
   or
   :cpp:func:`ILinController::SendFrameHeader()<void ib::sim::lin::ILinController::SendFrameHeader(LinIdT, std::chrono::nanoseconds)>`.
@@ -242,7 +247,7 @@ Assumptions:
   usages of the API.
 
   
-!!! Successful Transmission from Master to Slave
+Successful Transmission from Master to Slave
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows a successful data transfer from a LIN master to a LIN
@@ -252,7 +257,7 @@ slave. The transmission must be initiated by the master.
    examples/lin/Master_to_Slave_LIN_TX_OK.cpp
    :language: cpp
    
-!!! Successful Transmission from Slave to Master
+Successful Transmission from Slave to Master
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows a successful data transfer from a LIN Slave to a LIN
@@ -262,7 +267,7 @@ master. The transmission must be initiated by the master.
    examples/lin/Slave_to_Master_LIN_RX_OK.cpp
    :language: cpp
 
-!!! Successful Transmission from Slave to Slave
+Successful Transmission from Slave to Slave
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows how data is transferred from one LIN slave to another
@@ -272,7 +277,7 @@ one. The data transfer must be initiated by a LIN master.
    examples/lin/Slave_to_Slave_LIN_TX_OK.cpp
    :language: cpp
               
-!!! Erroneous Transmission from Master to Slave - Multiple Responses
+Erroneous Transmission from Master to Slave - Multiple Responses
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows what happens when a master atempts to send a Frame while
@@ -282,7 +287,7 @@ there is slave that has configured a TX response for the same LIN ID.
    examples/lin/Master_to_Slave_LIN_TX_ERROR.cpp
    :language: cpp
    
-!!! Erroneous Transmission from Slave to Master - No Response
+Erroneous Transmission from Slave to Master - No Response
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows what happens when a master initiates a transmission and no
@@ -298,7 +303,7 @@ slave hasconfigured a TX response for the this LIN ID.
    behavior and error code would be the same for the non-AUTOSAR
    interface.
 
-!!! Erroneous Transmission from Slave to Master - Multiple Responses
+Erroneous Transmission from Slave to Master - Multiple Responses
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows what happens when a master initiates a transmission where
@@ -308,7 +313,7 @@ multiple slaves have configured TX responses for the same LIN ID.
    examples/lin/Slave_to_Master_LIN_RX_ERROR.cpp
    :language: cpp
 
-!!! Go To Sleep
+Go To Sleep
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows how to initiate a Go To Sleep and when the controller switch
@@ -324,7 +329,7 @@ from operational to sleep mode.
     ID 0x3C for reception. However, the FrameStatusHandler is
     only called if ID 0x3C is configured for reception.
 
-!!! Wake Up
+Wake Up
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows how to wake up a LIN bus. The example assumes that both
@@ -335,7 +340,7 @@ the end of the previous example.
    examples/lin/Wake_Up.cpp
    :language: cpp
 
-!!! FrameResponseUpdateHandler
+FrameResponseUpdateHandler
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows how the FrameResponseUpdate handler provides direct access to
@@ -345,92 +350,3 @@ diagnostic purposes and not required for regular operation of a LIN controller.
 .. literalinclude::
    examples/lin/FrameResponseUpdateHandler.cpp
    :language: cpp
-
-
-
-              
-!!! The new LIN Controller API
-----------------------------------------------------
-
-This version of the Vector Integration Bus introduces a redesigned LIN API with a clear
-new interface. The main reasons for the redesign were inconsistencies in the usage and an
-incoherent interface. E.g., callbacks for successful transmission and reception varied
-depending on the configuration as a slave or a master, there was no clear API to initiate
-slave-to-slave data transfers or to initiate only a header transmission without needing to
-provide a payload.
-
-To overcome these issues, we decided to provide a LIN controller API that follows the
-AUTOSAR LIN driver API, a widely adopted standard. Further more, we added a few extensions
-for a more low level send interface.
-
-While, on the first glance, the API seems to be very different, it should be fairly easy
-to adapt to the changes. This section lists the major changes and the documentation for
-the new API provides examples on how to use it.
-
-
-!!! Major Changes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Compared to the previous design, the new LIN Controller API provides the following
-benefits:
-
-  - A uniform user experience for trivial simulation and VIBE simulation
-  - A flexible API to initiate data transfers:
-      + An AUTOSAR compatible API with
-        :cpp:func:`ILinController::SendFrame()<ib::sim::lin::ILinController::SendFrame>`
-      + A low-level, non-AUTOSAR API with
-        :cpp:func:`ILinController::SetFrameResponse()<ib::sim::lin::ILinController::SetFrameResponse>`
-        and
-        :cpp:func:`ILinController::SendFrameHeader()<ib::sim::lin::ILinController::SendFrameHeader>`
-  - An AUTOSAR compatible, unified callback for all LIN transmissions,
-    i.e., for frame reception and TX acknowledges for both LIN
-    mastersand LIN slaves:
-    :cpp:func:`ILinController::RegisterFrameStatusHandler()<ib::sim::lin::ILinController::RegisterFrameStatusHandler>`,
-    which uses a revised :cpp:enum:`FrameStatus<ib::sim::lin::FrameStatus>` type that now uses AUTOSAR identifiers.
-  - An AUTOSAR compatible interface for GoToSleep and Wake-Up
-      * :cpp:func:`ILinController::GoToSleep<ib::sim::lin::ILinController::GoToSleep>`
-      * :cpp:func:`ILinController::GoToSleepInternal<ib::sim::lin::ILinController::GoToSleepInternal>`
-      * :cpp:func:`ILinController::Wakeup<ib::sim::lin::ILinController::Wakeup>`
-      * :cpp:func:`ILinController::WakeupInternal<ib::sim::lin::ILinController::WakeupInternal>`
-  - Initialization using a single method with a single config struct:
-    :cpp:func:`ILinController::Init()<ib::sim::lin::ILinController::Init>`
-  - A new callback to get direct access to all FrameResponse updates from connected slaves:
-    :cpp:func:`ILinController::RegisterFrameResponseUpdateHandler<ib::sim::lin::ILinController::RegisterFrameResponseUpdateHandler>`
-
-
-.. _sec:datatype-changes:
-
-!!! Overview of Data Type Changes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  - :cpp:type:`LinId` has been renamed to :cpp:type:`LinIdT<ib::sim::lin::LinIdT>`.
-  - The old enum :cpp:enum:`ControllerMode<ib::sim::lin::ControllerMode_>`,
-    which combined master, slave, and sleep states, has been split into
-    :cpp:enum:`ControllerMode<ib::sim::lin::ControllerMode>` (indicating Master
-    or Slave operation) and
-    :cpp:enum:`ControllerStatus<ib::sim::lin::ControllerStatus>` (indicating
-    operational and sleep states).
-  - :cpp:enum:`ChecksumModel<ib::sim::lin::ChecksumModel>` is unchanged.
-  - :cpp:enum:`ResponseMode` has been renamed to
-    :cpp:enum:`FrameResponseMode<ib::sim::lin::FrameResponseMode>`; the enumeration
-    values habe been left unchanged.
-  - The old :cpp:class:`Payload` data type, which combined a fixed size
-    std::array<uint8_t> and a size value, has been removed. The
-    :cpp:class:`Frame<ib::sim::lin::Frame>` now provides dataLength and data
-    fields directly.
-  - :cpp:enum:`MessageStatus` has been renamed to
-    :cpp:enum:`FrameStatus<ib::sim::lin::FrameStatus>` and the enumeration names have been
-    changed to AUTOSAR naming. For details, check the following conversion table:
-
-    ==================== ====================
-    MessageStatus (old)  FrameStatus (new) 
-    ==================== ====================
-    TxSuccess            LIN_TX_OK
-    RxSuccess            LIN_RX_OK
-    TxResponseError      LIN_TX_ERROR
-    RxResponseError      LIN_RX_ERROR
-    RxNoResponse         LIN_RX_NO_RESPONSE
-    HeaderError          LIN_TX_HEADER_ERROR
-    Canceled             NOT_OK
-    Busy                 LIN_TX_BUSY
-    \-                   LIN_RX_BUSY
-    ==================== ====================

@@ -1,5 +1,5 @@
 ===========================
-!!! Remote procedure call (Rpc)
+Remote procedure call (Rpc)
 ===========================
 
 .. Macros for docs use
@@ -17,7 +17,7 @@
    :local:
    :depth: 3
 
-!!! Using the Rpc API
+Using the Rpc API
 -----------------
 
 This API provides a client-server model for remote calls with arbitrary argument- and return data. 
@@ -27,23 +27,23 @@ about the incoming return data in his call return handler (4). These steps const
 handlers (2,4) are provided on instantiation and call / submit (1,3) are commands of the RpcClient / RpcServer 
 instances. Further, a query can be run providing a list of available RpcServers and their properties.
 
-!!! Function name
+Function name
 ~~~~~~~~~~~~~
 
-RpcClients and RpcServers are linked by a string-based function name. For each link, the endpoints must be unique. 
-That is, on one participant, there can only be one RpcClient / RpcServer on a given function name. However, it is 
-possible to use multiple RpcClients / RpcServers on the same function name distributed among different participants.
+RpcClients and RpcServers are linked by a string-based function name. For a server to receive a rpc call, the 
+function name must match the function name of the client triggering the call.
 
-!!! RpcExchangeFormat
+RpcExchangeFormat
 ~~~~~~~~~~~~~~~~~
 
-Both RpcClients and RpcServers define a RpcExchangeFormat, a meta description of the transmitted data. It can
+Both RpcClients and RpcServers define a RpcExchangeFormat containing a media type in accordance to 
+`RFC2046 <https://datatracker.ietf.org/doc/html/rfc2046>`_, a meta description of the transmitted data. It can
 be used to provide infomation about the de- / serialization of the underlying user data. Just like the function 
 name, the RpcExchangeFormat has to match between RpcClients / RpcServers for communicaiton to take place. 
-An empty character on a RpcClient will match any other string of that given field of the RpcExchangeFormat. 
+An empty string on a RpcClient will match any other string of that given field of the RpcExchangeFormat for a server. 
 Currently, the RpcExchangeFormat only consists of the field "mediaType".
 
-!!! Labels
+Labels
 ~~~~~~
 
 RpcClients and RpcServers can be annotated with string-based key-value pairs (labels). Additional to the matching 
@@ -54,22 +54,22 @@ labels apply the following matching rules:
 * If labels are specified on a RpcClients, all of the labels must be found on a RpcServer.
 * An empty value string on a RpcClients's label is a wildcard.
 
-!!! Server Discovery
+Server Discovery
 ~~~~~~~~~~~~~~~~
 
 The simulation can be queried about available RpcServers with |DiscoverRpcServers|. The method takes filter arguments
 for rpcChannel, RpcExchangeFormat and labels. To obtain the results of the query, a handler is given to the method 
 which carries a vector of RpcDiscoveryResult providing the properties of each discovered RpcServer.
 
-!!! Usage
+Usage
 ~~~~~
 
 The RpcClient and RpcServer interfaces are instantiated from an |IParticipant| interface by calling 
 |CreateRpcClient| and |CreateRpcServer|, respectively. The controller name corresponds to the function name and
 is used in the configuration and instantiation of the interfaces.
 
-The RpcClient can detach a call using the |Call| method providing argument data as a vector of bytes. The method is
-non-blocking and returns a call handle which can be used later for identification. The call arrives at the 
+The RpcClient can trigger a call using the |Call| method providing argument data as a vector of bytes. The method is
+non-blocking and returns a call handle which can be used later for identification of the call. The call arrives at the 
 RpcServer and is delivered via a callback, which has to be specified on creation of the RpcServer and can be 
 overwritten using the |SetRpcHandler| method. There, the argument data and call handle arrive and can be processed.
 The RpcServer can submit the answer to the call at a later point in time with the call handle obtained in the 
@@ -78,14 +78,14 @@ The RpcClient receives the call return in a callback which is also specified on 
 |SetCallReturnHandler|. The callback provides the original call handle, the return data and a call status 
 indicating success or an error during the procedure.
 
-!!! Error handling
+Error handling
 ~~~~~~~~~~~~~~
 
 * If using |Call| with no corresponding server available, the CallReturnHandler is triggered immediately with a nullptr
   call handle and CallStatus::ServerNotReachable. In this case, the call handle returned by |Call| is also nullptr.
 * |SubmitResult| must only be used with a valid call handle received in the RpcHandler.
 
-!!! Usage Example
+Usage Example
 ~~~~~~~~~~~~~
 
 The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
@@ -118,20 +118,15 @@ The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
             server->SubmitResult(callHandle, resultData)
         });
 
-!!! RpcClient API
+RpcClient API
 ~~~~~~~~~~~~~~~~~~
 
     .. doxygenclass:: ib::sim::rpc::IRpcClient
        :members:
 
-!!! RpcServers API
+RpcServers API
 ~~~~~~~~~~~~~~~~~~~
 
     .. doxygenclass:: ib::sim::rpc::IRpcServer
        :members:
 
-!!! Data Structures
-~~~~~~~~~~~~~~~
-
-    .. doxygenstruct:: ib::cfg::RpcPort
-       :members:

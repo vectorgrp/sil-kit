@@ -16,11 +16,9 @@ auto systemStateHandler =
         case SystemState::Idle:
             // ------------------------------------------------------------
             // Transition from SystemState::Idle to SystemState::Initialized:
-            for (auto&& participant : ibConfig.simulationSetup.participants)
-            {
-                // Each participant must be in ParticipantState::Idle.
-                systemController->Initialize(participant.id);
-            }
+            systemController->Initialize(participantName1);
+            systemController->Initialize(participantName2);
+
             return;
         case SystemState::Initialized:
             // ------------------------------------------------------------

@@ -20,13 +20,12 @@ std::string message{"Ensure that the payload is long enough to constitute "
                     "a valid ethernet frame ------------------------------"};
 std::vector<uint8_t> payload{message.begin(), message.end()};
 
-EthMessage ethMessage;
-ethMessage.timestamp = now;
-ethMessage.ethFrame.SetSourceMac(sourceAddress);
-ethMessage.ethFrame.SetDestinationMac(destinationAddress);
-ethMessage.ethFrame.SetPayload(payload);
+EthFrame ethFrame;
+ethFrame.SetSourceMac(sourceAddress);
+ethFrame.SetDestinationMac(destinationAddress);
+ethFrame.SetPayload(payload);
 
-ethernetSender->SendMessage(ethMessage);
+ethernetSender->SendFrame(ethFrame);
 
 // The MessageAckHandler callback will be triggered and call the registered handler:
 sender_MessageAckHandler(ethernetSender, ethTransmitAcknowledge);
@@ -49,7 +48,7 @@ sender_MessageAckHandler(ethernetSender, ethTransmitAcknowledge);
 // Assumption: Ethernet link is already successfully established.
 for (auto i = 0; i < 50; i++)
 {
-    ethernetSender->SendMessage(ethMessage);
+    ethernetSender->SendFrame(ethFrame);
 }
 
 // Sending 50 messages directly one after the other will call the registered sender_MessageAckHandler
@@ -62,8 +61,8 @@ for (auto i = 0; i < 50; i++)
 std::string shortMsg{"Short message"};
 std::vector<uint8_t> shortPayload{shortMsg.begin(), shortMsg.end()};
 
-ethMessage.ethFrame.SetPayload(shortPayload);
-ethernetSender->SendMessage(ethMessage);
+ethFrame.SetPayload(shortPayload);
+ethernetSender->SendFrame(ethFrame);
 
 // The MessageAckHandler callback will be triggered and call the registered handler:
 sender_MessageAckHandler(ethernetSender, ethTransmitAcknowledge);

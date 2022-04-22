@@ -1,7 +1,7 @@
 .. _sec:api-participant-controller:
 
 ==============================
-!!! The Participant Controller
+The Participant Controller
 ==============================
 .. |IParticipantController| replace:: :cpp:class:`IParticipantController<ib::mw::sync::IParticipantController>`
 .. |Participant| replace:: :doc:`Participant<participant>`
@@ -16,9 +16,9 @@ The Participant Controller is the main interface to model a member of a simulati
 It allows to set a simulation task, query the state, issuing commands, and to register callbacks
 for state changes.
 For an overview of a participants state and its relation to the simulation
-refer to the :ref:`participant lifecycle<sec:sim-participant-lifecycle>` section.
+refer to the :ref:`participant lifecycle section<sec:sim-lifecycle-syncParticipants>`.
 
-!!! Using the Participant Controller
+Using the Participant Controller
 -------------------------------------
 An |IParticipantController| instance can be retrieved from a connected |Participant|::
    
@@ -70,7 +70,7 @@ The ``Init`` handler should be used to intialize and configure other
 :doc:`services and controllers<api>` before first use in the running state.
 
 
-!!! Controlling the Participant
+Controlling the Participant
 """""""""""""""""""""""""""
 After successful initialization, the participant will enter the :cpp:enumerator:`Running<ib::mw::sync::Running>` state.
 The participant can now access the current simulation time using the
@@ -112,7 +112,7 @@ the :cpp:enumerator:`Stopped<ib::mw::sync::Stopped>` state.
     sends an appropriate system-wide ``Stop`` command -- this is an implementation
     detail that should not be relied on.
 
-!!! Synchronizing an application thread with the simulation task
+Synchronizing an application thread with the simulation task
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 In special cases, it may be required to synchronize some application thread with the 
@@ -126,12 +126,17 @@ By invoking :cpp:func:`CompleteSimulationTask()<ib::mw::sync::IParticipantContro
 (implemented in :cpp:func:`RunAsync<ib::mw::sync::IParticipantController::RunAsync()>`) will continue to the next time step.
 
 
-!!! Setup Dependent Configuration
-"""""""""""""""""""""""""""""
-When using time quantum or distributed time quantum synchronization (see :ref:`sec:sim-time-sync`),
-the simulation duration that is being requested can be set using 
-:cpp:func:`SetPeriod()<ib::mw::sync::IParticipantController::SetPeriod()>`.
+Changing simulation task duration
+""""""""""""""""""""""""""""""""""
+Within the VIB, :cpp:func:`SetPeriod()<ib::mw::sync::IParticipantController::SetPeriod()>` specifies the simulation 
+time duration of each simulation task invocation. It corresponds to the simulation time difference between each 
+task execution.
+The simulation task duration can be changed at any time by calling
+:cpp:func:`SetPeriod()<ib::mw::sync::IParticipantController::SetPeriod()>`. When calling it within a simulation task, 
+the duration of the current simulation task will already be affected by the call.
 
+Coldswap Feature
+""""""""""""""""""""""
 It is possible to disconnect and reconnect individual participants between
 consecutive simulation runs. This is referred to as a cold swap. If a
 participant is
@@ -141,13 +146,13 @@ routine. By default, this feature is disabled. The actual cold swapping is
 initiated by the
 :cpp:func:`SystemController<ib::mw::sync::ISystemController::PrepareColdswap()>`.
 
-!!! API and Data Type Reference
+API and Data Type Reference
 -------------------------------
 
 .. doxygenclass:: ib::mw::sync::IParticipantController
    :members:
 
-!!! Usage Example
+Usage Example
 --------------
 The following example is based on the ``IbCanDemo`` source code which is
 distributed with the VIB, and slightly abridged for clarity.

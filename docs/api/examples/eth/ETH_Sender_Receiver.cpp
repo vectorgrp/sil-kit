@@ -28,15 +28,14 @@ std::string message{"Ensure that the payload is long enough to constitute "
                     "a valid ethernet frame ------------------------------"};
 std::vector<uint8_t> payload{message.begin(), message.end()};
 
-EthMessage ethMessage;
-ethMessage.timestamp = now;
-ethMessage.ethFrame.SetSourceMac(sourceAddress);
-ethMessage.ethFrame.SetDestinationMac(destinationAddress);
-ethMessage.ethFrame.SetPayload(payload);
+EthFrame ethFrame;
+ethFrame.SetSourceMac(sourceAddress);
+ethFrame.SetDestinationMac(destinationAddress);
+ethFrame.SetPayload(payload);
 
 // The returned transmitId can be used to check if the ethTransmitAcknowledge
 // that should be triggerd after a successful reception has the same transmitId.
-auto transmitId = ethernetSender->SendMessage(ethMessage);
+auto transmitId = ethernetSender->SendFrame(ethFrame);
 
 
 // ------------------------------------------------------------
