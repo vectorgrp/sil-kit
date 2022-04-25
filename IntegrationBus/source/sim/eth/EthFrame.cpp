@@ -75,7 +75,7 @@ inline void set_value(const std::array<uint8_t, N>& array, std::vector<uint8_t>&
     std::copy(array.begin(), array.end(), storage.begin() + offset);
 }
 
-inline void get_value(EthTagControlInformation& tci, const std::vector<uint8_t>& storage, size_t offset)
+inline void get_value(EthernetTagControlInformation& tci, const std::vector<uint8_t>& storage, size_t offset)
 {
     uint16_t rawTci = get_value<uint16_t>(storage, offset);
     
@@ -83,7 +83,7 @@ inline void get_value(EthTagControlInformation& tci, const std::vector<uint8_t>&
     tci.dei = (rawTci >> 12) & 0x0001;
     tci.vid = rawTci & 0x0fff;
 }
-inline void set_value(const EthTagControlInformation& tci, std::vector<uint8_t>& storage, size_t offset)
+inline void set_value(const EthernetTagControlInformation& tci, std::vector<uint8_t>& storage, size_t offset)
 {
     uint16_t rawTci = (tci.pcp & 0x03) << 13
                     | (tci.dei & 0x01) << 12
@@ -95,34 +95,34 @@ inline void set_value(const EthTagControlInformation& tci, std::vector<uint8_t>&
 } // anonymous namespace for local helpers
 
 
-EthFrame::EthFrame(const std::vector<uint8_t>& rawFrame)
+EthernetFrame::EthernetFrame(const std::vector<uint8_t>& rawFrame)
 : _rawFrame(rawFrame)
 {
 }
 
-EthFrame::EthFrame(std::vector<uint8_t>&& rawFrame)
+EthernetFrame::EthernetFrame(std::vector<uint8_t>&& rawFrame)
 : _rawFrame(std::move(rawFrame))
 {
 }
 
-EthFrame::EthFrame(const uint8_t* rawFrame, size_t size_t)
+EthernetFrame::EthernetFrame(const uint8_t* rawFrame, size_t size_t)
 : _rawFrame(rawFrame, rawFrame + size_t)
 {
 }
 
-auto EthFrame::GetDestinationMac() const -> EthMac
+auto EthernetFrame::GetDestinationMac() const -> EthernetMac
 {
     if (_rawFrame.empty())
     {
-        throw std::runtime_error("EthFrame:GetDestinationMac(): empty raw frame!");
+        throw std::runtime_error("EthernetFrame:GetDestinationMac(): empty raw frame!");
     }
 
-    EthMac dest;
+    EthernetMac dest;
     get_value(dest, _rawFrame, DestinationMac::Start);
     return dest;
 }
 
-void EthFrame::SetDestinationMac(const EthMac& dest)
+void EthernetFrame::SetDestinationMac(const EthernetMac& dest)
 {
     if (_rawFrame.empty())
     {
@@ -132,19 +132,19 @@ void EthFrame::SetDestinationMac(const EthMac& dest)
     set_value(dest, _rawFrame, DestinationMac::Start);
 }
 
-auto EthFrame::GetSourceMac() const -> EthMac
+auto EthernetFrame::GetSourceMac() const -> EthernetMac
 {
     if (_rawFrame.empty())
     {
-        throw std::runtime_error("EthFrame:GetSourceMac(): empty raw frame!");
+        throw std::runtime_error("EthernetFrame:GetSourceMac(): empty raw frame!");
     }
 
-    EthMac source;
+    EthernetMac source;
     get_value(source, _rawFrame, SourceMac::Start);
     return source;
 }
 
-void EthFrame::SetSourceMac(const EthMac& source)
+void EthernetFrame::SetSourceMac(const EthernetMac& source)
 {
     if (_rawFrame.empty())
     {
@@ -154,19 +154,19 @@ void EthFrame::SetSourceMac(const EthMac& source)
     set_value(source, _rawFrame, SourceMac::Start);
 }
 
-auto EthFrame::GetVlanTag() const -> EthTagControlInformation
+auto EthernetFrame::GetVlanTag() const -> EthernetTagControlInformation
 {
     if (_rawFrame.empty())
     {
         throw std::exception();
     }
 
-    EthTagControlInformation tci;
+    EthernetTagControlInformation tci;
     get_value(tci, _rawFrame, VlanTag::Start + 2);
     return tci;
 }
 
-void EthFrame::SetVlanTag(const EthTagControlInformation& tci)
+void EthernetFrame::SetVlanTag(const EthernetTagControlInformation& tci)
 {
     if (_rawFrame.empty())
     {
@@ -177,7 +177,7 @@ void EthFrame::SetVlanTag(const EthTagControlInformation& tci)
     set_value(tci, _rawFrame, VlanTag::Start + 2);
 }
 
-auto EthFrame::GetEtherType() const -> uint16_t
+auto EthernetFrame::GetEtherType() const -> uint16_t
 {
     if (_rawFrame.empty())
     {
@@ -187,7 +187,7 @@ auto EthFrame::GetEtherType() const -> uint16_t
     return get_value<uint16_t>(_rawFrame, EtherType::Start);
 }
 
-void EthFrame::SetEtherType(uint16_t etherType)
+void EthernetFrame::SetEtherType(uint16_t etherType)
 {
     if (_rawFrame.empty())
     {
@@ -197,23 +197,23 @@ void EthFrame::SetEtherType(uint16_t etherType)
     set_value(etherType, _rawFrame, EtherType::Start);
 }
 
-auto EthFrame::GetFrameSize() const -> size_t
+auto EthernetFrame::GetFrameSize() const -> size_t
 {
     return _rawFrame.size();
 }
 
-auto EthFrame::GetHeaderSize() const -> size_t
+auto EthernetFrame::GetHeaderSize() const -> size_t
 {
     return EtherType::End;
 }
 
-auto EthFrame::GetPayloadSize() const -> size_t
+auto EthernetFrame::GetPayloadSize() const -> size_t
 {
     // the payload is the entire frame without header and checksum
     return GetFrameSize() - GetHeaderSize() - CrcSize;
 }
 
-auto EthFrame::GetPayload() -> util::vector_view<uint8_t>
+auto EthernetFrame::GetPayload() -> util::vector_view<uint8_t>
 {
     auto view = ::ib::util::make_vector_view(_rawFrame);
     view.trim_front(GetHeaderSize());
@@ -221,7 +221,7 @@ auto EthFrame::GetPayload() -> util::vector_view<uint8_t>
     return view;
 }
 
-auto EthFrame::GetPayload() const -> util::vector_view<const uint8_t>
+auto EthernetFrame::GetPayload() const -> util::vector_view<const uint8_t>
 {
     auto view = ::ib::util::make_vector_view(_rawFrame);
     view.trim_front(GetHeaderSize());
@@ -229,7 +229,7 @@ auto EthFrame::GetPayload() const -> util::vector_view<const uint8_t>
     return view;
 }
 
-void EthFrame::SetPayload(const std::vector<uint8_t>& payload)
+void EthernetFrame::SetPayload(const std::vector<uint8_t>& payload)
 {
     auto payloadOffset = GetHeaderSize();
     _rawFrame.resize(payloadOffset + payload.size() + CrcSize);
@@ -239,7 +239,7 @@ void EthFrame::SetPayload(const std::vector<uint8_t>& payload)
     // FIXME: calculate a checksum?
 }
 
-void EthFrame::SetPayload(const uint8_t* payload, size_t size)
+void EthernetFrame::SetPayload(const uint8_t* payload, size_t size)
 {
     auto payloadOffset = GetHeaderSize();
     _rawFrame.resize(payloadOffset + size + CrcSize);
@@ -247,12 +247,12 @@ void EthFrame::SetPayload(const uint8_t* payload, size_t size)
     std::copy(payload, payload + size, _rawFrame.begin() + payloadOffset);
 }
 
-auto EthFrame::RawFrame() const -> const std::vector<uint8_t>&
+auto EthernetFrame::RawFrame() const -> const std::vector<uint8_t>&
 {
     return _rawFrame;
 }
 
-void EthFrame::SetRawFrame(const std::vector<uint8_t>& raw)
+void EthernetFrame::SetRawFrame(const std::vector<uint8_t>& raw)
 {
     _rawFrame = raw;
 }

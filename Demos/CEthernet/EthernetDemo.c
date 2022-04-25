@@ -71,7 +71,7 @@ ib_Ethernet_Controller* ethernetController1;
 ib_Ethernet_Controller* ethernetController2;
 
 char* participantName;
-uint8_t ethernetMessageCounter = 0;
+uint8_t ethernetFrameCounter = 0;
 uint8_t buffer[100];
 
 #define SOURCE_MAC_SIZE 6
@@ -85,17 +85,19 @@ typedef struct  {
 
 TransmitContext transmitContext;
 
-void AckCallback(void* context, ib_Ethernet_Controller* controller, struct ib_Ethernet_TransmitAcknowledge* cAck)
+void FrameTransmitHandler(void* context, ib_Ethernet_Controller* controller,
+                          struct ib_Ethernet_FrameTransmitEvent* frameTransmitEvent)
 {
-    TransmitContext* tc = (TransmitContext*) cAck->userContext;
-    printf(">> %i for Ethernet Message with transmitId=%i, timestamp=%" PRIu64 "\n", cAck->status, tc->someInt, cAck->timestamp);
+    TransmitContext* tc = (TransmitContext*)frameTransmitEvent->userContext;
+    printf(">> %i for Ethernet frame with transmitId=%i, timestamp=%" PRIu64 "\n", frameTransmitEvent->status,
+           tc->someInt, frameTransmitEvent->timestamp);
 }
 
-void ReceiveMessage(void* context, ib_Ethernet_Controller* controller, ib_Ethernet_Message* metaData)
+void FrameHandler(void* context, ib_Ethernet_Controller* controller, ib_Ethernet_FrameEvent* frameEvent)
 {
     TransmitContext* txContext = (TransmitContext*)(context);
     unsigned int i;
-    printf(">> Ethernet Message: timestamp=%" PRIu64 "\n", metaData->timestamp);
+    printf(">> Ethernet FrameEvent: timestamp=%" PRIu64 "\n", frameEvent->timestamp);
     if (txContext != NULL)
     {
         printf("transmitContext=%d ", txContext->someInt);
@@ -103,22 +105,22 @@ void ReceiveMessage(void* context, ib_Ethernet_Controller* controller, ib_Ethern
 
     printf(": ");
 
-    for (i = PAYLOAD_OFFSET; i < metaData->ethernetFrame->size; i++)
+    for (i = PAYLOAD_OFFSET; i < frameEvent->ethernetFrame->size; i++)
     {
-        char ch = metaData->ethernetFrame->data[i];
+        char ch = frameEvent->ethernetFrame->data[i];
         if (isalnum(ch))
         {
             printf("%c", ch);
         }
         else
         {
-            printf("<%x>", metaData->ethernetFrame->data[i]);
+            printf("<%x>", frameEvent->ethernetFrame->data[i]);
         }
     }
     printf("\n");
 }
 
-void SendEthernetMessage()
+void SendFrame()
 {
     // set destination mac
     uint8_t destinationMac[6] = { 0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1 };
@@ -133,22 +135,22 @@ void SendEthernetMessage()
     buffer[13] = 0x08;
 
     // set payload
-    ethernetMessageCounter += 1;
+    ethernetFrameCounter += 1;
     int payloadSize = snprintf((char*)buffer + PAYLOAD_OFFSET, sizeof(buffer) - PAYLOAD_OFFSET, 
-        "This is the demonstration ethernet frame number %i.", ethernetMessageCounter);
+        "This is the demonstration Ethernet frame number %i.", ethernetFrameCounter);
 
     if (payloadSize <= 0)
     {
-        fprintf(stderr, "Error: SendEthernetMessage cannot create payload. snprintf returned %d\n", payloadSize);
+        fprintf(stderr, "Error: SendFrame cannot create payload. snprintf returned %d\n", payloadSize);
         exit(-2);
     }
 
     ib_Ethernet_Frame ef = {(const uint8_t*) buffer, PAYLOAD_OFFSET + payloadSize};
 
-    transmitContext.someInt = ethernetMessageCounter;
+    transmitContext.someInt = ethernetFrameCounter;
     ib_Ethernet_Controller_SendFrame(ethernetController1, &ef, (void*)&transmitContext);
     
-    printf("Ethernet Message sent \n");
+    printf("Ethernet frame sent \n");
 }
 
 int main(int argc, char* argv[])
@@ -186,12 +188,12 @@ int main(int argc, char* argv[])
     returnCode = ib_Ethernet_Controller_Create(&ethernetController1, participant, "ETH0", "Ethernet1");
     returnCode = ib_Ethernet_Controller_Create(&ethernetController2, participant, "ETH1", "Ethernet1");
 
-    ib_Ethernet_Controller_RegisterFrameAckHandler(ethernetController1, NULL, &AckCallback);
-    ib_Ethernet_Controller_RegisterReceiveMessageHandler(ethernetController2, NULL, &ReceiveMessage);
+    ib_Ethernet_Controller_AddFrameTransmitHandler(ethernetController1, NULL, &FrameTransmitHandler);
+    ib_Ethernet_Controller_AddFrameHandler(ethernetController2, NULL, &FrameHandler);
 
     for (int i = 0; i < 10; i ++) 
     {
-        SendEthernetMessage();
+        SendFrame();
         SleepMs(1000);
     }
 

@@ -5,6 +5,251 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+
+[3.99.x] - 2022-04-y
+--------------------------------
+
+Changed
+~~~~~~~
+
+- Ethernet
+
+  - Renamed files
+
+    - ``IntegrationBus/include/ib/sim/eth/EthDatatypes.hpp`` to ``EthernetDatatypes.hpp``
+    - ``IntegrationBus/include/ib/sim/eth/IEthController.hpp`` to ``IEthernetController.hpp``
+
+  - ``IntegrationBus/include/ib/mw/IParticipant.hpp``
+  
+    + old:
+    .. code-block:: c++
+
+      IParticipant::CreateEthController(const std::string& canonicalName, const std::string& networkName)
+      IParticipant::CreateEthController(const std::string& canonicalName) -> sim::eth::IEthController*;
+
+    + new:
+    .. code-block:: c++
+
+      IParticipant::CreateEthernetController(const std::string& canonicalName, const std::string& networkName)
+      IParticipant::CreateEthernetController(const std::string& canonicalName) -> sim::eth::IEthernetController*;
+
+  - ``IntegrationBus/include/ib/sim/eth/IEthController.hpp``
+
+    + old:
+    .. code-block:: c++
+
+      using ReceiveMessageHandler = CallbackT<EthMessage>;
+      using MessageAckHandler     = CallbackT<EthTransmitAcknowledge>;
+      using StateChangedHandler   = CallbackT<EthState>;
+      using BitRateChangedHandler = CallbackT<uint32_t>;
+
+      IEthController::RegisterReceiveMessageHandler(ReceiveMessageHandler handler);
+      IEthController::RegisterMessageAckHandler(MessageAckHandler handler);
+      IEthController::RegisterStateChangedHandler(StateChangedHandler handler);
+      IEthController::RegisterBitRateChangedHandler(BitRateChangedHandler handler);
+      IEthController::SendFrame(EthFrame msg) -> EthTxId;
+
+    + new:
+    .. code-block:: c++
+
+      using FrameHandler         = CallbackT<EthernetFrameEvent>;
+      using FrameTransmitHandler = CallbackT<EthernetFrameTransmitEvent>;
+      using StateChangeHandler   = CallbackT<EthernetStateChangeEvent>;
+      using BitrateChangeHandler = CallbackT<EthernetBitrateChangeEvent>;
+
+      IEthernetController::AddFrameHandler(FrameHandler handler);
+      IEthernetController::AddFrameTransmitHandler(FrameTransmitHandler handler);
+      IEthernetController::AddStateChangeHandler(StateChangeHandler handler);
+      IEthernetController::AddBitrateChangeHandler(BitrateChangeHandler handler);
+      IEthernetController::SendFrame(EthernetFrame msg) -> EthernetTxId;
+
+  - ``IntegrationBus/include/ib/sim/eth/EthDatatypes.hpp`` (C++-Api)
+    
+    For clarity, only the renaming overview is given in *old* and *new*. Internal member names have changed accordingly.
+    Additional data types follow in *added*.
+
+    + old: 
+    .. code-block:: c++
+
+      EthMac
+      EthVid
+      EthTagControlInformation
+      EthFrame
+      EthTxId 
+      EthMessage
+      EthTransmitStatus
+      EthTransmitAcknowledge
+      EthState
+      EthStatus
+      EthMode
+      EthSetMode
+
+    + new:
+    .. code-block:: c++
+
+      EthernetMac
+      EthernetVid
+      EthernetTagControlInformation
+      EthernetFrame
+      EthernetTxId
+      EthernetFrameEvent
+      EthernetTransmitStatus
+      EthernetFrameTransmitEvent
+      EthernetState
+      EthernetStatus
+      EthernetMode
+      EthernetSetMode
+
+    + added:
+    .. code-block:: c++
+      
+      struct EthernetStateChangeEvent
+      {
+          std::chrono::nanoseconds timestamp; //!< Timestamp of the state change.
+          EthernetState state; //!< State of the Ethernet controller.
+      };
+
+      using EthernetBitrate = uint32_t;
+      
+      struct EthernetBitrateChangeEvent
+      {
+          std::chrono::nanoseconds timestamp; //!< Timestamp of the state change.
+          EthernetBitrate bitrate; //!< Bit rate in kBit/sec of the link when in state LinkUp, otherwise zero.
+      };
+
+  - ``IntegrationBus/include/ib/capi/Ethernet.h``
+
+    - Data types
+
+      + old: 
+      .. code-block:: c++
+      
+        ib_Ethernet_Message
+        ib_Ethernet_TransmitAcknowledge
+      
+      + new:
+      .. code-block:: c++
+      
+        ib_Ethernet_FrameEvent
+        ib_Ethernet_FrameTransmitEvent
+      
+      + added:
+      .. code-block:: c++
+
+
+        typedef struct 
+        {
+            ib_InterfaceIdentifier interfaceId; //!< The interface id that specifies which version of this struct was obtained
+            ib_NanosecondsTime timestamp; //!< Timestamp of the state change event
+            ib_Ethernet_State state; //!< New state of the Ethernet controller
+        } ib_Ethernet_StateChangeEvent;
+
+        typedef uint32_t ib_Ethernet_Bitrate; //!< Bitrate in kBit/sec
+
+        typedef struct
+        {
+            ib_InterfaceIdentifier interfaceId; //!< The interface id that specifies which version of this struct was obtained
+            ib_NanosecondsTime timestamp; //!< Timestamp of the bitrate change event
+            ib_Ethernet_Bitrate bitrate; //!< New bitrate in kBit/sec
+        } ib_Ethernet_BitrateChangeEvent;
+
+    - Handlers
+
+      + old: 
+      .. code-block:: c++
+      
+        typedef void (*ib_Ethernet_ReceiveMessageHandler_t)(void* context, ib_Ethernet_Controller* controller, 
+            ib_Ethernet_Message* message);
+      
+        typedef void (*ib_Ethernet_FrameAckHandler_t)(void* context, ib_Ethernet_Controller* controller, 
+            ib_Ethernet_TransmitAcknowledge* acknowledge);
+      
+        typedef void (*ib_Ethernet_StateChangedHandler_t)(void* context, ib_Ethernet_Controller* controller,
+            ib_Ethernet_State state);
+      
+        typedef void (*ib_Ethernet_BitRateChangedHandler_t)(void* context, ib_Ethernet_Controller* controller,
+            uint32_t bitrate);
+      
+      + new:
+      .. code-block:: c++
+      
+        typedef void (*ib_Ethernet_FrameHandler_t)(void* context, ib_Ethernet_Controller* controller, 
+            ib_Ethernet_FrameEvent* frameEvent);
+      
+        typedef void (*ib_Ethernet_FrameTransmitHandler_t)(void* context, ib_Ethernet_Controller* controller, 
+            ib_Ethernet_FrameTransmitEvent* frameTransmitEvent);
+      
+        typedef void (*ib_Ethernet_StateChangeHandler_t)(void* context, ib_Ethernet_Controller* controller,
+            ib_Ethernet_StateChangeEvent stateChangeEvent);
+      
+        typedef void (*ib_Ethernet_BitrateChangeHandler_t)(void* context, ib_Ethernet_Controller* controller,
+            ib_Ethernet_BitrateChangeEvent bitrateChangeEvent);
+      
+    - Methods
+
+      + old: 
+      .. code-block:: c++
+
+        typedef ib_ReturnCode(*ib_Ethernet_Controller_RegisterReceiveMessageHandler_t)(
+          ib_Ethernet_Controller* controller, 
+          void* context,
+          ib_Ethernet_ReceiveMessageHandler_t handler);
+
+        typedef ib_ReturnCode(*ib_Ethernet_Controller_RegisterFrameAckHandler_t)(
+          ib_Ethernet_Controller* controller,
+          void* context,
+          ib_Ethernet_FrameAckHandler_t handler);
+
+        typedef ib_ReturnCode(*ib_Ethernet_Controller_RegisterStateChangedHandler_t)(
+          ib_Ethernet_Controller* controller,
+          void* context,
+          ib_Ethernet_StateChangedHandler_t handler);
+
+        typedef ib_ReturnCode(*ib_Ethernet_Controller_RegisterBitRateChangedHandler_t)(
+          ib_Ethernet_Controller* controller, 
+          void* context,
+          ib_Ethernet_BitRateChangedHandler_t handler);
+
+        typedef ib_ReturnCode(*ib_Ethernet_Controller_SendFrame_t)(
+          ib_Ethernet_Controller* controller,
+          ib_Ethernet_Frame* frame,
+          void* userContext);
+
+      + new:
+      .. code-block:: c++
+      
+        typedef ib_ReturnCode(*ib_Ethernet_Controller_AddFrameHandler_t)(
+          ib_Ethernet_Controller* controller, 
+          void* context,
+          ib_Ethernet_FrameHandler_t handler);
+
+        typedef ib_ReturnCode(*ib_Ethernet_Controller_AddFrameTransmitHandler_t)(
+          ib_Ethernet_Controller* controller,
+          void* context,
+          ib_Ethernet_FrameTransmitHandler_t handler);
+
+        typedef ib_ReturnCode(*ib_Ethernet_Controller_AddStateChangeHandler_t)(
+          ib_Ethernet_Controller* controller,
+          void* context,
+          ib_Ethernet_StateChangeHandler_t handler);
+
+        typedef ib_ReturnCode(*ib_Ethernet_Controller_AddBitrateChangeHandler_t)(
+          ib_Ethernet_Controller* controller, 
+          void* context,
+          ib_Ethernet_BitrateChangeHandler_t handler);
+
+Removed
+~~~~~~~
+
+- In the Cpp-Api, the Ethernet Controller's ``SendFrame`` variant with explicit timestamp is removed.
+
+  - ``IntegrationBus/include/ib/sim/eth/IEthController.hpp``
+
+      + old: 
+      .. code-block:: c++
+
+        IEthController::SendFrame(EthFrame msg, std::chrono::nanoseconds timestamp) -> EthTxId;
+
 [3.99.20] - 2022-04-20
 --------------------------------
 

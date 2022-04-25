@@ -13,14 +13,14 @@ TEST(MwVAsioSerdes, SimEthernet_EthMessage)
     using namespace ib::sim::eth;
     ib::mw::MessageBuffer buffer;
 
-    EthMessage in;
-    EthMessage out;
+    EthernetFrameEvent in;
+    EthernetFrameEvent out;
 
     std::string payload{ "Hello from ethernet writer!  msgId = 1 -------------------------------------------------------" };
-    EthMac sourceMac{1, 2, 3, 4, 5, 6};
-    EthMac destinationMac{6, 5, 4, 3, 2, 1};
+    EthernetMac sourceMac{1, 2, 3, 4, 5, 6};
+    EthernetMac destinationMac{6, 5, 4, 3, 2, 1};
 
-    EthTagControlInformation tci;
+    EthernetTagControlInformation tci;
     tci.pcp = 3;
     tci.dei = 0;
     tci.vid = 1;
@@ -58,12 +58,12 @@ TEST(MwVAsioSerdes, SimEthernet_EthTransmitAcknowledge)
     using namespace ib::sim::eth;
     ib::mw::MessageBuffer buffer;
 
-    EthTransmitAcknowledge in;
-    EthTransmitAcknowledge out;
+    EthernetFrameTransmitEvent in;
+    EthernetFrameTransmitEvent out;
 
     in.transmitId = 5;
     in.timestamp = 13ns;
-    in.status = EthTransmitStatus::Transmitted;
+    in.status = EthernetTransmitStatus::Transmitted;
 
     buffer << in;
     buffer >> out;
@@ -78,19 +78,19 @@ TEST(MwVAsioSerdes, SimEthernet_EthStatus)
     using namespace ib::sim::eth;
     ib::mw::MessageBuffer buffer;
 
-    EthStatus in;
-    EthStatus out;
+    EthernetStatus in;
+    EthernetStatus out;
 
     in.timestamp = 13ns;
-    in.state = EthState::LinkUp;
-    in.bitRate = 4294967295;
+    in.state = EthernetState::LinkUp;
+    in.bitrate = 4294967295;
 
     buffer << in;
     buffer >> out;
 
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.state, out.state);
-    EXPECT_EQ(in.bitRate, out.bitRate);
+    EXPECT_EQ(in.bitrate, out.bitrate);
 }
 
 TEST(MwVAsioSerdes, SimEthernet_EthSetMode)
@@ -98,10 +98,10 @@ TEST(MwVAsioSerdes, SimEthernet_EthSetMode)
     using namespace ib::sim::eth;
     ib::mw::MessageBuffer buffer;
 
-    EthSetMode in;
-    EthSetMode out;
+    EthernetSetMode in;
+    EthernetSetMode out;
 
-    in.mode = EthMode::Active;
+    in.mode = EthernetMode::Active;
 
     buffer << in;
     buffer >> out;

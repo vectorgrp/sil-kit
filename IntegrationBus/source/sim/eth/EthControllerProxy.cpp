@@ -8,7 +8,7 @@ namespace sim {
 namespace eth {
 
 EthControllerProxy::EthControllerProxy(mw::IParticipantInternal* participant,
-                                       cfg::EthernetController /*config*/, IEthController* facade)
+                                       cfg::EthernetController /*config*/, IEthernetController* facade)
     : _participant(participant)
     , _facade{facade}
 {
@@ -21,24 +21,24 @@ EthControllerProxy::EthControllerProxy(mw::IParticipantInternal* participant,
 void EthControllerProxy::Activate()
 {
     // Check if the Controller has already been activated
-    if (_ethState != EthState::Inactive)
+    if (_ethState != EthernetState::Inactive)
         return;
 
-    EthSetMode msg { EthMode::Active };
+    EthernetSetMode msg { EthernetMode::Active };
     _participant->SendIbMessage(this, msg);
 }
 
 void EthControllerProxy::Deactivate()
 {
     // Check if the Controller has already been deactivated
-    if (_ethState == EthState::Inactive)
+    if (_ethState == EthernetState::Inactive)
         return;
 
-    EthSetMode msg{ EthMode::Inactive };
+    EthernetSetMode msg{ EthernetMode::Inactive };
     _participant->SendIbMessage(this, msg);
 }
 
-auto EthControllerProxy::SendMessage(EthMessage msg) -> EthTxId
+auto EthControllerProxy::SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId
 {
     auto txId = MakeTxId();
     msg.transmitId = txId;
@@ -48,45 +48,38 @@ auto EthControllerProxy::SendMessage(EthMessage msg) -> EthTxId
 
     _participant->SendIbMessage(this, std::move(msg));
 
-
     return txId;
 }
 
-auto EthControllerProxy::SendFrame(EthFrame frame) -> EthTxId
+auto EthControllerProxy::SendFrame(EthernetFrame frame) -> EthernetTxId
 {
-    EthMessage msg{};
+    EthernetFrameEvent msg{};
     msg.ethFrame = std::move(frame);
-    return SendMessage(std::move(msg));
+    return SendFrameEvent(std::move(msg));
 }
 
-auto EthControllerProxy::SendFrame(EthFrame frame, std::chrono::nanoseconds /*time stamp provided by VIBE netsim*/) -> EthTxId
-{
-    return SendFrame(std::move(frame));
-}
-
-
-void EthControllerProxy::RegisterReceiveMessageHandler(ReceiveMessageHandler handler)
+void EthControllerProxy::AddFrameHandler(FrameHandler handler)
 {
     RegisterHandler(std::move(handler));
 }
 
-void EthControllerProxy::RegisterMessageAckHandler(MessageAckHandler handler)
+void EthControllerProxy::AddFrameTransmitHandler(FrameTransmitHandler handler)
 {
     RegisterHandler(std::move(handler));
 }
 
-void EthControllerProxy::RegisterStateChangedHandler(StateChangedHandler handler)
+void EthControllerProxy::AddStateChangeHandler(StateChangeHandler handler)
 {
     RegisterHandler(std::move(handler));
 }
 
-void EthControllerProxy::RegisterBitRateChangedHandler(BitRateChangedHandler handler)
+void EthControllerProxy::AddBitrateChangeHandler(BitrateChangeHandler handler)
 {
     RegisterHandler(std::move(handler));
 }
 
 
-void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthMessage& msg)
+void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthernetFrameEvent& msg)
 {
     _tracer.Trace(ib::sim::TransmitDirection::RX,
         msg.timestamp, msg.ethFrame);
@@ -94,12 +87,12 @@ void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, co
     CallHandlers(msg);
 }
 
-void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthTransmitAcknowledge& msg)
+void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthernetFrameTransmitEvent& msg)
 {
     auto transmittedMsg = _transmittedMessages.find(msg.transmitId);
     if (transmittedMsg != _transmittedMessages.end())
     {
-        if (msg.status == EthTransmitStatus::Transmitted)
+        if (msg.status == EthernetTransmitStatus::Transmitted)
         {
             _tracer.Trace(ib::sim::TransmitDirection::TX, msg.timestamp,
                 transmittedMsg->second);
@@ -111,20 +104,20 @@ void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, co
     CallHandlers(msg);
 }
 
-void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthStatus& msg)
+void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthernetStatus& msg)
 {
     // In case we are in early startup, ensure we tell our participants the bit rate first
     // and the state later.
-    if (msg.bitRate != _ethBitRate)
+    if (msg.bitrate != _ethBitRate)
     {
-        _ethBitRate = msg.bitRate;
-        CallHandlers(msg.bitRate);
+        _ethBitRate = msg.bitrate;
+        CallHandlers(EthernetBitrateChangeEvent{ msg.timestamp, msg.bitrate });
     }
 
     if (msg.state != _ethState)
     {
         _ethState = msg.state;
-        CallHandlers(msg.state);
+        CallHandlers(EthernetStateChangeEvent{ msg.timestamp, msg.state });
     }
 
 }

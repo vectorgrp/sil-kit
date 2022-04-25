@@ -1,4 +1,4 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
-#include "EthDatatypes.hpp"
-#include "IEthController.hpp"
+#include "EthernetDatatypes.hpp"
+#include "IEthernetController.hpp"
 #include "string_utils.hpp"

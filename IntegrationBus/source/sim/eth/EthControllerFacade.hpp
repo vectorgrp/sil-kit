@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include "ib/sim/eth/IEthController.hpp"
+#include "ib/sim/eth/IEthernetController.hpp"
 #include "ib/mw/fwd_decl.hpp"
 
 #include "IIbToEthControllerFacade.hpp"
@@ -21,7 +21,7 @@ namespace eth {
 
 
 class EthControllerFacade
-    : public IEthController
+    : public IEthernetController
     , public IIbToEthControllerFacade
     , public extensions::ITraceMessageSource
     , public mw::IIbServiceEndpoint
@@ -47,24 +47,23 @@ public:
     // ----------------------------------------
     // Public interface methods
     //
-    // IEthController
+    // IEthernetController
     void Activate() override;
     void Deactivate() override;
 
-    auto SendMessage(EthMessage msg) -> EthTxId;
+    auto SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId;
 
-    auto SendFrame(EthFrame frame) -> EthTxId override;
-    auto SendFrame(EthFrame frame, std::chrono::nanoseconds timestamp) -> EthTxId override;
+    auto SendFrame(EthernetFrame frame) -> EthernetTxId override;
 
-    void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) override;
-    void RegisterMessageAckHandler(MessageAckHandler handler) override;
-    void RegisterStateChangedHandler(StateChangedHandler handler) override;
-    void RegisterBitRateChangedHandler(BitRateChangedHandler handler) override;
+    void AddFrameHandler(FrameHandler handler) override;
+    void AddFrameTransmitHandler(FrameTransmitHandler handler) override;
+    void AddStateChangeHandler(StateChangeHandler handler) override;
+    void AddBitrateChangeHandler(BitrateChangeHandler handler) override;
 
     // IIbToEthController
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthTransmitAcknowledge& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthStatus& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameEvent& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameTransmitEvent& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetStatus& msg) override;
 
     // ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
@@ -92,7 +91,7 @@ private:
     bool _simulatedLinkDetected = false;
     mw::ServiceDescriptor _simulatedLink;
 
-    IEthController* _currentController;
+    IEthernetController* _currentController;
     std::unique_ptr<EthController> _ethController;
     std::unique_ptr<EthControllerProxy> _ethControllerProxy;
 };

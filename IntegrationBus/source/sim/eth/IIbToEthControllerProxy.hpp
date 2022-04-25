@@ -15,8 +15,8 @@ namespace eth {
  *  Used by the Participant, implemented by the EthControllerProxy
  */
 class IIbToEthControllerProxy
-    : public mw::IIbReceiver<EthMessage, EthTransmitAcknowledge, EthStatus>
-    , public mw::IIbSender<EthMessage, EthSetMode>
+    : public mw::IIbReceiver<EthernetFrameEvent, EthernetFrameTransmitEvent, EthernetStatus>
+    , public mw::IIbSender<EthernetFrameEvent, EthernetSetMode>
 {
 };
 

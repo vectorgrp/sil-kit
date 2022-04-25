@@ -92,13 +92,13 @@ void PcapSink::Trace(ib::sim::TransmitDirection /*unused*/,
         std::chrono::nanoseconds timestamp,
         const extensions::TraceMessage& traceMessage)
 {
-    if (traceMessage.Type() != extensions::TraceMessageType::EthFrame)
+    if (traceMessage.Type() != extensions::TraceMessageType::EthernetFrame)
     {
         std::stringstream ss;
         ss << "Error: unsupported message type: " << traceMessage;
         throw std::runtime_error(ss.str());
     }
-    const auto& message = traceMessage.Get<sim::eth::EthFrame>();
+    const auto& message = traceMessage.Get<sim::eth::EthernetFrame>();
 
     std::unique_lock<decltype(_lock)> lock;
     

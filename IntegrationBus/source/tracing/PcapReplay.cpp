@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "ib/sim/eth/EthDatatypes.hpp"
+#include "ib/sim/eth/EthernetDatatypes.hpp"
 
 #include "PcapReader.hpp"
 
@@ -30,7 +30,7 @@ public:
     auto Type() const -> ib::extensions::TraceMessageType override
     {
         //our version supports only ethernet
-        return TraceMessageType::EthFrame;
+        return TraceMessageType::EthernetFrame;
     }
 
     auto StartTime() const -> std::chrono::nanoseconds override

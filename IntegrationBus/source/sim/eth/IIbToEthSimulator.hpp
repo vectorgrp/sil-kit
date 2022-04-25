@@ -16,8 +16,8 @@ namespace eth {
 *  Used by the Participant, implemented by the EthSimulator
 */
 class IIbToEthSimulator
-    : public mw::IIbReceiver<EthMessage, EthSetMode>
-    , public mw::IIbSender<EthMessage, EthTransmitAcknowledge, EthStatus>
+    : public mw::IIbReceiver<EthernetFrameEvent, EthernetSetMode>
+    , public mw::IIbSender<EthernetFrameEvent, EthernetFrameTransmitEvent, EthernetStatus>
 {
 public:
     virtual ~IIbToEthSimulator() = default;

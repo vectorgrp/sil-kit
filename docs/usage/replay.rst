@@ -282,7 +282,7 @@ The following table details which replay and tracing modes are supported by each
      - 
 
    * - Ethernet
-     - ib::sim::eth::EthFrame
+     - ib::sim::eth::EthernetFrame
      - X
      - X
 
@@ -506,8 +506,8 @@ Registered user callbacks are served with Replay Messages if the configured dire
    * - :cpp:func:`ib::sim::lin::ILinController::SendFrame`
    * - :cpp:func:`ib::sim::lin::ILinController::SendFrameHeader`
    * - :cpp:func:`ib::sim::lin::ILinController::SetFrameResponse`
-   * - :cpp:func:`ib::sim::eth::IEthController::SendMessage`
-   * - :cpp:func:`ib::sim::eth::IEthController::SendFrame`
+   * - :cpp:func:`ib::sim::eth::IEthernetController::SendMessage`
+   * - :cpp:func:`ib::sim::eth::IEthernetController::SendFrame`
    * - :cpp:func:`ib::sim::fr::IFrController::ReconfigureTxBuffer`
    * - :cpp:func:`ib::sim::fr::IFrController::UpdateTxBuffer`
    * - :cpp:func:`ib::sim::io::IOutPort::Write`
@@ -524,7 +524,7 @@ Registered user callbacks are served with Replay Messages if the configured dire
    * - Handler type
    * - :cpp:type:`ib::sim::can::ICanController::ReceiveMessageHandler`
    * - :cpp:type:`ib::sim::lin::ILinController::FrameStatusHandler`
-   * - :cpp:type:`ib::sim::eth::IEthController::ReceiveMessageHandler`
+   * - :cpp:type:`ib::sim::eth::IEthernetController::ReceiveMessageHandler`
    * - :cpp:type:`ib::sim::fr::IFrController::MessageHandler`
    * - :cpp:type:`ib::sim::io::IInPort::CallbackT`
    * - :cpp:type:`ib::sim::generic::IGenericSubscriber::CallbackT`

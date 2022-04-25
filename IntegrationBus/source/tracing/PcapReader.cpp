@@ -1,7 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "PcapReader.hpp"
 
-#include "ib/sim/eth/EthDatatypes.hpp"
+#include "ib/sim/eth/EthernetDatatypes.hpp"
 
 #include "Pcap.hpp"
 
@@ -15,7 +15,7 @@ using namespace ib::mw::logging;
 
 class PcapMessage
     : public ib::extensions::IReplayMessage
-    , public ib::sim::eth::EthFrame
+    , public ib::sim::eth::EthernetFrame
 {
 public:
 
@@ -56,7 +56,7 @@ auto PcapMessage::EndpointAddress() const -> ib::mw::EndpointAddress
 
 auto PcapMessage::Type() const -> TraceMessageType
 {
-    return TraceMessageType::EthFrame;
+    return TraceMessageType::EthernetFrame;
 }
 
 //////////////////////////////////////////////////////////////////////

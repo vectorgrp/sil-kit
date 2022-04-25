@@ -3,7 +3,7 @@
 #include <iostream>
 
 // concrete type needed for interface
-#include "ib/sim/eth/EthDatatypes.hpp"
+#include "ib/sim/eth/EthernetDatatypes.hpp"
 #include "ib/sim/can/CanDatatypes.hpp"
 #include "ib/sim/lin/LinDatatypes.hpp"
 

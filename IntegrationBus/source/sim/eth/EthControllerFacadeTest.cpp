@@ -48,7 +48,7 @@ TEST(EthernetControllerFacadeTest, create_controller_unconfigured)
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
     auto controller =
-        dynamic_cast<EthControllerFacade*>(participant->CreateEthController(controllerName));
+        dynamic_cast<EthControllerFacade*>(participant->CreateEthernetController(controllerName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
@@ -65,7 +65,7 @@ TEST(EthernetControllerFacadeTest, create_controller_configured_no_network)
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
     auto controller =
-        dynamic_cast<EthControllerFacade*>(participant->CreateEthController(controllerName, networkName));
+        dynamic_cast<EthControllerFacade*>(participant->CreateEthernetController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
@@ -82,7 +82,7 @@ TEST(EthernetControllerFacadeTest, create_controller_configured_with_network)
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
     auto controller =
-        dynamic_cast<EthControllerFacade*>(participant->CreateEthController(controllerName, networkName));
+        dynamic_cast<EthControllerFacade*>(participant->CreateEthernetController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);

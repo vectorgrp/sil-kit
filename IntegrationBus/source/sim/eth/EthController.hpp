@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "ib/sim/eth/IEthController.hpp"
+#include "ib/sim/eth/IEthernetController.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
 #include "ib/mw/fwd_decl.hpp"
 
@@ -19,7 +19,7 @@ namespace sim {
 namespace eth {
 
 class EthController
-    : public IEthController
+    : public IEthernetController
     , public IIbToEthController
     , public ib::mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
@@ -35,7 +35,7 @@ public:
     EthController() = delete;
     EthController(EthController&&) = default;
     EthController(mw::IParticipantInternal* participant, cfg::EthernetController config,
-                  mw::sync::ITimeProvider* timeProvider, IEthController* facade = nullptr);
+                  mw::sync::ITimeProvider* timeProvider, IEthernetController* facade = nullptr);
 
 public:
     // ----------------------------------------
@@ -46,22 +46,21 @@ public:
     // ----------------------------------------
     // Public interface methods
     //
-    // IEthController
+    // IEthernetController
     void Activate() override;
     void Deactivate() override;
 
-    auto SendMessage(EthMessage msg) -> EthTxId;
+    auto SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId;
 
-    auto SendFrame(EthFrame msg) -> EthTxId override;
-    auto SendFrame(EthFrame msg, std::chrono::nanoseconds timestamp) -> EthTxId override;
+    auto SendFrame(EthernetFrame msg) -> EthernetTxId override;
 
-    void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) override;
-    void RegisterMessageAckHandler(MessageAckHandler handler) override;
-    void RegisterStateChangedHandler(StateChangedHandler handler) override;
-    void RegisterBitRateChangedHandler(BitRateChangedHandler handler) override;
+    void AddFrameHandler(FrameHandler handler) override;
+    void AddFrameTransmitHandler(FrameTransmitHandler handler) override;
+    void AddStateChangeHandler(StateChangeHandler handler) override;
+    void AddBitrateChangeHandler(BitrateChangeHandler handler) override;
 
     // IIbToEthController
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameEvent& msg) override;
 
     // ib::mw::sync::ITimeConsumer
     void SetTimeProvider(ib::mw::sync::ITimeProvider*) override;
@@ -88,7 +87,7 @@ private:
     template<typename MsgT>
     void CallHandlers(const MsgT& msg);
 
-    inline auto MakeTxId() -> EthTxId;
+    inline auto MakeTxId() -> EthernetTxId;
 
 private:
     // ----------------------------------------
@@ -96,26 +95,26 @@ private:
     ::ib::mw::IParticipantInternal* _participant = nullptr;
     ::ib::mw::ServiceDescriptor _serviceDescriptor;
     ::ib::mw::sync::ITimeProvider* _timeProvider{ nullptr };
-    IEthController* _facade{nullptr};
+    IEthernetController* _facade{nullptr};
 
-    EthTxId _ethTxId = 0;
+    EthernetTxId _ethernetTxId = 0;
 
     std::tuple<
-        CallbackVector<EthMessage>,
-        CallbackVector<EthTransmitAcknowledge>
+        CallbackVector<EthernetFrameEvent>,
+        CallbackVector<EthernetFrameTransmitEvent>
     > _callbacks;
 
     extensions::Tracer _tracer;
 
-    std::vector<std::pair<EthMac, EthTxId>> _pendingAcks;
+    std::vector<std::pair<EthernetMac, EthernetTxId>> _pendingAcks;
 };
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-auto EthController::MakeTxId() -> EthTxId
+auto EthController::MakeTxId() -> EthernetTxId
 {
-    return ++_ethTxId;
+    return ++_ethernetTxId;
 }
 
 void EthController::AddSink(extensions::ITraceMessageSink* sink)

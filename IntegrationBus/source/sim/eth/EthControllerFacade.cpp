@@ -19,7 +19,7 @@ EthControllerFacade::EthControllerFacade(mw::IParticipantInternal* participant,
     _currentController = _ethController.get();
 }
 
-// IEthController
+// IEthernetController
 void EthControllerFacade::Activate()
 {
     _currentController->Activate();
@@ -31,54 +31,49 @@ void EthControllerFacade::Deactivate()
 }
 
 // Provided for testing purposes only
-auto EthControllerFacade::SendMessage(EthMessage msg) -> EthTxId
+auto EthControllerFacade::SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId
 {
     if (IsNetworkSimulated())
     {
-        return _ethControllerProxy->SendMessage(std::move(msg));
+        return _ethControllerProxy->SendFrameEvent(std::move(msg));
     }
     else
     {
-        return _ethController->SendMessage(std::move(msg));
+        return _ethController->SendFrameEvent(std::move(msg));
     }
 }
 
-auto EthControllerFacade::SendFrame(EthFrame frame) -> EthTxId
+auto EthControllerFacade::SendFrame(EthernetFrame frame) -> EthernetTxId
 {
     return _currentController->SendFrame(std::move(frame));
 }
 
-auto EthControllerFacade::SendFrame(EthFrame frame, std::chrono::nanoseconds timestamp) -> EthTxId
+void EthControllerFacade::AddFrameHandler(FrameHandler handler)
 {
-    return _currentController->SendFrame(std::move(frame), std::move(timestamp));
+    _ethController->AddFrameHandler(handler);
+    _ethControllerProxy->AddFrameHandler(std::move(handler));
 }
 
-void EthControllerFacade::RegisterReceiveMessageHandler(ReceiveMessageHandler handler)
+void EthControllerFacade::AddFrameTransmitHandler(FrameTransmitHandler handler)
 {
-    _ethController->RegisterReceiveMessageHandler(handler);
-    _ethControllerProxy->RegisterReceiveMessageHandler(std::move(handler));
+    _ethController->AddFrameTransmitHandler(handler);
+    _ethControllerProxy->AddFrameTransmitHandler(std::move(handler));
 }
 
-void EthControllerFacade::RegisterMessageAckHandler(MessageAckHandler handler)
+void EthControllerFacade::AddStateChangeHandler(StateChangeHandler handler)
 {
-    _ethController->RegisterMessageAckHandler(handler);
-    _ethControllerProxy->RegisterMessageAckHandler(std::move(handler));
+    _ethController->AddStateChangeHandler(handler);
+    _ethControllerProxy->AddStateChangeHandler(std::move(handler));
 }
 
-void EthControllerFacade::RegisterStateChangedHandler(StateChangedHandler handler)
+void EthControllerFacade::AddBitrateChangeHandler(BitrateChangeHandler handler)
 {
-    _ethController->RegisterStateChangedHandler(handler);
-    _ethControllerProxy->RegisterStateChangedHandler(std::move(handler));
-}
-
-void EthControllerFacade::RegisterBitRateChangedHandler(BitRateChangedHandler handler)
-{
-    _ethController->RegisterBitRateChangedHandler(handler);
-    _ethControllerProxy->RegisterBitRateChangedHandler(std::move(handler));
+    _ethController->AddBitrateChangeHandler(handler);
+    _ethControllerProxy->AddBitrateChangeHandler(std::move(handler));
 }
 
 // IIbToEthController
-void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg)
+void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameEvent& msg)
 {
     if (IsNetworkSimulated())
     {
@@ -90,7 +85,7 @@ void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
     }
 }
 
-void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthTransmitAcknowledge& msg)
+void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameTransmitEvent& msg)
 {
     if (IsNetworkSimulated() && AllowForwardToProxy(from))
     {
@@ -98,7 +93,7 @@ void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
     }
 }
 
-void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthStatus& msg)
+void EthControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetStatus& msg)
 {
     if (IsNetworkSimulated() && AllowForwardToProxy(from))
     {

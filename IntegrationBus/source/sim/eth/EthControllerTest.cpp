@@ -43,24 +43,24 @@ MATCHER_P(EthernetTransmitAckWithouthTransmitIdMatcher, truthAck, "")
     return frame1.sourceMac == frame2.sourceMac && frame1.status == frame2.status && frame1.timestamp == frame2.timestamp;
 }
 
-auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<const EthMessage&>
+auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<const EthernetFrameEvent&>
 {
-    return testing::Field(&EthMessage::timestamp, timestamp);
+    return testing::Field(&EthernetFrameEvent::timestamp, timestamp);
 }
 
 class MockParticipant : public DummyParticipant
 {
 public:
-    void SendIbMessage(const IIbServiceEndpoint* from, EthMessage&& msg) override
+    void SendIbMessage(const IIbServiceEndpoint* from, EthernetFrameEvent&& msg) override
     {
         SendIbMessage_proxy(from, msg);
     }
 
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthMessage&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(const IIbServiceEndpoint*, const EthMessage&));
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthTransmitAcknowledge&));
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthStatus&));
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthSetMode&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetFrameEvent&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(const IIbServiceEndpoint*, const EthernetFrameEvent&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetFrameTransmitEvent&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetStatus&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetSetMode&));
 };
 
 class EthernetControllerTest : public testing::Test
@@ -68,10 +68,10 @@ class EthernetControllerTest : public testing::Test
 protected:
     struct Callbacks
     {
-        MOCK_METHOD2(ReceiveMessage, void(eth::IEthController*, const eth::EthMessage&));
-        MOCK_METHOD2(MessageAck, void(eth::IEthController*, eth::EthTransmitAcknowledge));
-        MOCK_METHOD2(StateChanged, void(eth::IEthController*, eth::EthState));
-        MOCK_METHOD2(BitRateChanged, void(eth::IEthController*, uint32_t));
+        MOCK_METHOD2(ReceiveMessage, void(eth::IEthernetController*, const eth::EthernetFrameEvent&));
+        MOCK_METHOD2(MessageAck, void(eth::IEthernetController*, eth::EthernetFrameTransmitEvent));
+        MOCK_METHOD2(StateChanged, void(eth::IEthernetController*, eth::EthernetState));
+        MOCK_METHOD2(BitRateChanged, void(eth::IEthernetController*, eth::EthernetBitrate));
     };
 
 protected:
@@ -81,8 +81,8 @@ protected:
     {
         controller.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
-        controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
-        controller.RegisterMessageAckHandler(ib::util::bind_method(&callbacks, &Callbacks::MessageAck));
+        controller.AddFrameHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
+        controller.AddFrameTransmitHandler(ib::util::bind_method(&callbacks, &Callbacks::MessageAck));
 
         controllerOther.SetServiceDescriptor(from_endpointAddress(otherAddress));
     }
@@ -109,10 +109,10 @@ TEST_F(EthernetControllerTest, send_eth_message)
 
     EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
 
-    EthMessage msg;
-    msg.ethFrame.SetSourceMac(EthMac{ 0,0,0,0,0,0 });
+    EthernetFrameEvent msg;
+    msg.ethFrame.SetSourceMac(EthernetMac{ 0,0,0,0,0,0 });
     msg.timestamp = now;
-    controller.SendMessage(msg);
+    controller.SendFrameEvent(msg);
 }
 
 //! \brief using the new SendFrame API must invoke the TimeProvider
@@ -127,17 +127,17 @@ TEST_F(EthernetControllerTest, send_eth_frame)
 
     EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(1);
 
-    EthFrame ethFrame;
-    ethFrame.SetSourceMac(EthMac{ 0,0,0,0,0,0 });
+    EthernetFrame ethFrame;
+    ethFrame.SetSourceMac(EthernetMac{ 0,0,0,0,0,0 });
     controller.SendFrame(ethFrame);
 }
 
-/*! \brief Passing an EthMessage to an EthControllers must trigger the registered callback
+/*! \brief Passing an EthernetFrameEvent to an EthControllers must trigger the registered callback
  */
 TEST_F(EthernetControllerTest, trigger_callback_on_receive_message)
 {
-    EthMessage msg;
-    msg.ethFrame.SetSourceMac(EthMac{ 0,0,0,0,0,0 });
+    EthernetFrameEvent msg;
+    msg.ethFrame.SetSourceMac(EthernetMac{ 0,0,0,0,0,0 });
 
     EXPECT_CALL(callbacks, ReceiveMessage(&controller, msg))
         .Times(1);
@@ -150,14 +150,14 @@ TEST_F(EthernetControllerTest, trigger_callback_on_receive_message)
  */
 TEST_F(EthernetControllerTest, trigger_callback_on_receive_ack)
 {
-    EthMessage msg{};
-    msg.ethFrame.SetSourceMac(EthMac{1,2,3,4,5,6});
+    EthernetFrameEvent msg{};
+    msg.ethFrame.SetSourceMac(EthernetMac{1,2,3,4,5,6});
 
-    EthTransmitAcknowledge ack{ 0, EthMac{1,2,3,4,5,6}, 0ms, EthTransmitStatus::Transmitted };
+    EthernetFrameTransmitEvent ack{ 0, EthernetMac{1,2,3,4,5,6}, 0ms, EthernetTransmitStatus::Transmitted };
     EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(ack)))
         .Times(1);
 
-    controller.SendMessage(msg);
+    controller.SendFrameEvent(msg);
 }
 
 
@@ -176,9 +176,9 @@ TEST_F(EthernetControllerTest, DISABLED_ethcontroller_uses_tracing)
     ethController.AddSink(&traceSink);
 
 
-    EthFrame ethFrame{};
-    ethFrame.SetDestinationMac(EthMac{1,2,3,4,5,6});
-    ethFrame.SetSourceMac(EthMac{9,8,7,6,5,4});
+    EthernetFrame ethFrame{};
+    ethFrame.SetDestinationMac(EthernetMac{1,2,3,4,5,6});
+    ethFrame.SetSourceMac(EthernetMac{9,8,7,6,5,4});
 
     //Send direction
     EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
@@ -193,7 +193,7 @@ TEST_F(EthernetControllerTest, DISABLED_ethcontroller_uses_tracing)
         Trace(ib::sim::TransmitDirection::RX, controllerAddress, now, ethFrame))
         .Times(1);
 
-    EthMessage ethMsg{};
+    EthernetFrameEvent ethMsg{};
     ethMsg.ethFrame = ethFrame;
     ethMsg.timestamp = now;
     ethController.ReceiveIbMessage(&controllerOther, ethMsg);

@@ -11,7 +11,6 @@
 
 IB_BEGIN_DECLS
 
-
 typedef int32_t ib_Ethernet_TransmitStatus;
 
 /*! The message was successfully transmitted on the CAN bus. */
@@ -29,7 +28,6 @@ typedef int32_t ib_Ethernet_TransmitStatus;
 /*! The given raw Ethernet frame is ill formated (e.g. frame length is too small or too large, etc.). */
 #define ib_Ethernet_TransmitStatus_InvalidFrameFormat ((ib_Ethernet_TransmitStatus) 4)
 
-
 typedef int32_t ib_Ethernet_State;
 
 //!< The Ethernet controller is switched off (default after reset).
@@ -41,70 +39,83 @@ typedef int32_t ib_Ethernet_State;
 //!< The Ethernet controller is active and the link to another Ethernet controller is established.
 #define ib_Ethernet_State_LinkUp ((ib_Ethernet_State) 2)
 
-typedef ib_ByteVector ib_Ethernet_Frame;
-
-struct ib_Ethernet_Message
+typedef struct 
 {
     ib_InterfaceIdentifier interfaceId; //!< The interface id that specifies which version of this struct was obtained
-    ib_NanosecondsTime timestamp;
-    ib_Ethernet_Frame* ethernetFrame;
-};
+    ib_NanosecondsTime timestamp; //!< Timestamp of the state change event
+    ib_Ethernet_State state; //!< New state of the Ethernet controller
+} ib_Ethernet_StateChangeEvent;
 
-typedef struct ib_Ethernet_Message ib_Ethernet_Message;
+typedef uint32_t ib_Ethernet_Bitrate; //!< Bitrate in kBit/sec
 
-struct ib_Ethernet_TransmitAcknowledge
+typedef struct
+{
+    ib_InterfaceIdentifier interfaceId; //!< The interface id that specifies which version of this struct was obtained
+    ib_NanosecondsTime timestamp; //!< Timestamp of the bitrate change event
+    ib_Ethernet_Bitrate bitrate; //!< New bitrate in kBit/sec
+} ib_Ethernet_BitrateChangeEvent;
+
+typedef ib_ByteVector ib_Ethernet_Frame; //!< A raw Ethernet frame
+
+typedef struct 
+{
+    ib_InterfaceIdentifier interfaceId; //!< The interface id that specifies which version of this struct was obtained
+    ib_NanosecondsTime timestamp; //!< Send time
+    ib_Ethernet_Frame* ethernetFrame; //!< The raw Ethernet frame
+} ib_Ethernet_FrameEvent;
+
+struct ib_Ethernet_FrameTransmitEvent
 {
     ib_InterfaceIdentifier interfaceId; //!< The interface id that specifies which version of this struct was obtained
     void* userContext; //!< Value that was provided by user in corresponding parameter on send of Ethernet frame
     ib_NanosecondsTime timestamp; //!< Reception time
     ib_Ethernet_TransmitStatus status; //!< Status of the EthernetTransmitRequest
 };
-
-typedef struct ib_Ethernet_TransmitAcknowledge ib_Ethernet_TransmitAcknowledge;
+typedef struct ib_Ethernet_FrameTransmitEvent ib_Ethernet_FrameTransmitEvent;
 
 typedef struct ib_Ethernet_Controller ib_Ethernet_Controller;
 
 /*! Callback type to indicate that a EthernetMessage has been received.
 * \param context The context provided by the user upon registration.
 * \param controller The Ethernet controller that received the message.
-* \param metaData The struct containing meta data and referencing the Ethernet frame itself.
+* \param frameEvent Contains the raw frame and the timestamp of the event.
 */
-typedef void (*ib_Ethernet_ReceiveMessageHandler_t)(void* context, ib_Ethernet_Controller* controller, 
-  ib_Ethernet_Message* message);
+typedef void (*ib_Ethernet_FrameHandler_t)(void* context, ib_Ethernet_Controller* controller, 
+  ib_Ethernet_FrameEvent* frameEvent);
     
 /*! Callback type to indicate that a EthernetFrame has been sent.
 * \param context The by the user provided context on registration.
 * \param controller The Ethernet controller that received the acknowledge.
-* \param acknowledge The acknowledge and its data.
+* \param frameTransmitEvent Contains the transmit status and the timestamp of the event.
 */
-typedef void (*ib_Ethernet_FrameAckHandler_t)(void* context, ib_Ethernet_Controller* controller, 
-  ib_Ethernet_TransmitAcknowledge* acknowledge);
+typedef void (*ib_Ethernet_FrameTransmitHandler_t)(void* context, ib_Ethernet_Controller* controller, 
+  ib_Ethernet_FrameTransmitEvent* frameTransmitEvent);
     
 /*! Callback type to indicate that the Ethernet controller state has changed.
 * \param context The by the user provided context on registration.
 * \param controller The Ethernet controller whose state did change.
-* \param state The new state.
+* \param stateChangeEvent Contains the new state and the timestamp of the event.
 */
-typedef void (*ib_Ethernet_StateChangedHandler_t)(void* context, ib_Ethernet_Controller* controller,
-  ib_Ethernet_State state);
+typedef void (*ib_Ethernet_StateChangeHandler_t)(void* context, ib_Ethernet_Controller* controller,
+  ib_Ethernet_StateChangeEvent stateChangeEvent);
 
 /*! Callback type to indicate that the link bit rate has changed.
-* \param context The by the user provided context on registration.
+* \param context Context pointer provided by the user on registration.
 * \param controller The Ethernet controller that is affected.
-* \param bitrate The new bitrate in kbits per second of the Ethernet link.
+* \param bitrateChangeEvent Contains the new bitrate and the timestamp of the event.
 */
-typedef void (*ib_Ethernet_BitRateChangedHandler_t)(void* context, ib_Ethernet_Controller* controller,
-  uint32_t bitrate);
+typedef void (*ib_Ethernet_BitrateChangeHandler_t)(void* context, ib_Ethernet_Controller* controller,
+  ib_Ethernet_BitrateChangeEvent bitrateChangeEvent);
 
 /*! \brief Create an Ethernet controller at this IB simulation participant.
 * 
-* \param outController A pointer to a pointer in which the ethernet controller will be stored (out parameter).
-* \param participant The simulation participant for whicht the ethernet controller should be created.
+* \param outController A pointer to a pointer in which the Ethernet controller will be stored (out parameter).
+* \param participant The simulation participant for which the Ethernet controller should be created.
 * \param name The utf8 encoded name of the new Ethernet controller.
 * \result A return code identifying the success/failure of the call.
 * ! \note The object returned must not be deallocated using free()!
 * 
-* \see ib::mw::IParticipant::CreateEthController
+* \see ib::mw::IParticipant::CreateEthernetController
 */
 IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_Create(
   ib_Ethernet_Controller** outController,
@@ -125,10 +136,10 @@ typedef ib_ReturnCode(*ib_Ethernet_Controller_Create_t)(
 * NB: Only supported in VIBE simulation! In simple simulation,
 * messages can be sent without need to call ib_Ethernet_Controller_Activate()
 * 
-* \param controller The ethernet controller to be activated.
+* \param controller The Ethernet controller to be activated.
 * \result A return code identifying the success/failure of the call.
 * 
-* \see ib::sim::eth::IEthController::Activate
+* \see ib::sim::eth::IEthernetController::Activate
 */
 IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_Activate(ib_Ethernet_Controller* controller);
 
@@ -143,10 +154,10 @@ typedef ib_ReturnCode(*ib_Ethernet_Controller_Activate_t)(ib_Ethernet_Controller
 * NB: Only supported in VIBE simulation! In simple simulation,
 * ib_Ethernet_Controller_Deactivate() has no effects and messages can still be sent.
 * 
-* \param controller The ethernet controller to be deactivated.
+* \param controller The Ethernet controller to be deactivated.
 * \result A return code identifying the success/failure of the call.
 * 
-* \see ib::sim::eth::IEthController::Deactivate
+* \see ib::sim::eth::IEthernetController::Deactivate
 */
 IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_Deactivate(ib_Ethernet_Controller* controller);
 
@@ -161,17 +172,17 @@ typedef ib_ReturnCode(*ib_Ethernet_Controller_Deactivate_t)(ib_Ethernet_Controll
 * \param handler The handler to be called on reception.
 * \result A return code identifying the success/failure of the call.
 * 
-* \see ib::sim::eth::IEthController::RegisterReceiveMessageHandler
+* \see ib::sim::eth::IEthernetController::AddFrameHandler
 */
-IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_RegisterReceiveMessageHandler(
+IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_AddFrameHandler(
   ib_Ethernet_Controller* controller, 
   void* context, 
-  ib_Ethernet_ReceiveMessageHandler_t handler);
+  ib_Ethernet_FrameHandler_t handler);
 
-typedef ib_ReturnCode(*ib_Ethernet_Controller_RegisterReceiveMessageHandler_t)(
+typedef ib_ReturnCode(*ib_Ethernet_Controller_AddFrameHandler_t)(
   ib_Ethernet_Controller* controller, 
   void* context,
-  ib_Ethernet_ReceiveMessageHandler_t handler);
+  ib_Ethernet_FrameHandler_t handler);
 
 /*! \brief Register a callback for Ethernet transmit acknowledgments
 *
@@ -188,17 +199,17 @@ typedef ib_ReturnCode(*ib_Ethernet_Controller_RegisterReceiveMessageHandler_t)(
 * \param handler The handler to be called on reception.
 * \result A return code identifying the success/failure of the call.
 * 
-* \see ib::sim::eth::IEthController::RegisterMessageAckHandler
+* \see ib::sim::eth::IEthernetController::AddFrameTransmitHandler
 */
-IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_RegisterFrameAckHandler(
+IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_AddFrameTransmitHandler(
   ib_Ethernet_Controller* controller,
   void* context,
-  ib_Ethernet_FrameAckHandler_t handler);
+  ib_Ethernet_FrameTransmitHandler_t handler);
 
-typedef ib_ReturnCode(*ib_Ethernet_Controller_RegisterFrameAckHandler_t)(
+typedef ib_ReturnCode(*ib_Ethernet_Controller_AddFrameTransmitHandler_t)(
   ib_Ethernet_Controller* controller,
   void* context,
-  ib_Ethernet_FrameAckHandler_t handler);
+  ib_Ethernet_FrameTransmitHandler_t handler);
 
 /*! \brief Register a callback for changes of the controller state
 *
@@ -216,17 +227,17 @@ typedef ib_ReturnCode(*ib_Ethernet_Controller_RegisterFrameAckHandler_t)(
 * \param handler The handler to be called on reception.
 * \result A return code identifying the success/failure of the call.
 * 
-* \see ib::sim::eth::IEthController::RegisterStateChangedHandler
+* \see ib::sim::eth::IEthernetController::AddStateChangeHandler
 */
-IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_RegisterStateChangedHandler(
+IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_AddStateChangeHandler(
   ib_Ethernet_Controller* controller, 
   void* context,
-  ib_Ethernet_StateChangedHandler_t handler);
+  ib_Ethernet_StateChangeHandler_t handler);
 
-typedef ib_ReturnCode(*ib_Ethernet_Controller_RegisterStateChangedHandler_t)(
+typedef ib_ReturnCode(*ib_Ethernet_Controller_AddStateChangeHandler_t)(
   ib_Ethernet_Controller* controller,
   void* context,
-  ib_Ethernet_StateChangedHandler_t handler);
+  ib_Ethernet_StateChangeHandler_t handler);
 
 /*! \brief Register a callback for changes of the link bit rate
 *
@@ -241,23 +252,23 @@ typedef ib_ReturnCode(*ib_Ethernet_Controller_RegisterStateChangedHandler_t)(
 * \param handler The handler to be called on change.
 * \result A return code identifying the success/failure of the call.
 * 
-* \see ib::sim::eth::IEthController::RegisterBitRateChangedHandler
+* \see ib::sim::eth::IEthernetController::AddBitrateChangeHandler
 */
-IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_RegisterBitRateChangedHandler(
+IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_AddBitrateChangeHandler(
   ib_Ethernet_Controller* controller, 
   void* context,
-  ib_Ethernet_BitRateChangedHandler_t handler);
+  ib_Ethernet_BitrateChangeHandler_t handler);
 
-typedef ib_ReturnCode(*ib_Ethernet_Controller_RegisterBitRateChangedHandler_t)(
+typedef ib_ReturnCode(*ib_Ethernet_Controller_AddBitrateChangeHandler_t)(
   ib_Ethernet_Controller* controller, 
   void* context,
-  ib_Ethernet_BitRateChangedHandler_t handler);
+  ib_Ethernet_BitrateChangeHandler_t handler);
 
 /*! \brief Send an Ethernet frame
 *
 * NB: In VIBE simulation, requires previous activation of the
 * controller and a successfully established link. Also, the
-* entire EthFrame must be valid, e.g., destination and source MAC
+* entire EthernetFrame must be valid, e.g., destination and source MAC
 * addresses must be valid, ether type and vlan tags must be
 * correct, payload size must be valid.
 *
@@ -272,7 +283,7 @@ typedef ib_ReturnCode(*ib_Ethernet_Controller_RegisterBitRateChangedHandler_t)(
 * \param userContext The user provided context pointer, that is reobtained in the frame ack handler
 * \result A return code identifying the success/failure of the call.
 * 
-* \see ib::sim::eth::IEthController::SendFrame
+* \see ib::sim::eth::IEthernetController::SendFrame
 */
 IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_SendFrame(
   ib_Ethernet_Controller* controller,

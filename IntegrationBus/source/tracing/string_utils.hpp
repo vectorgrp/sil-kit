@@ -40,7 +40,7 @@ std::string to_string(TraceMessageType type)
 {
     switch (type)
     {
-    case TraceMessageType::EthFrame: return "EthFrame";
+    case TraceMessageType::EthernetFrame: return "EthernetFrame";
     case TraceMessageType::CanMessage: return "CanMessage";
     case TraceMessageType::LinFrame: return "LinFrame";
     case TraceMessageType::GenericMessage: return "GenericMessage";

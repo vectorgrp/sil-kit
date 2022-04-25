@@ -277,8 +277,8 @@ auto Participant<IbConnectionT>::CreateCanController(const std::string& canonica
 }
 
 template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateEthController(const std::string& canonicalName, const std::string& networkName)
-    -> eth::IEthController*
+auto Participant<IbConnectionT>::CreateEthernetController(const std::string& canonicalName, const std::string& networkName)
+    -> eth::IEthernetController*
 {
     ib::cfg::EthernetController controllerConfig = GetConfigByControllerName(_participantConfig.ethernetControllers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.network, networkName);
@@ -292,9 +292,9 @@ auto Participant<IbConnectionT>::CreateEthController(const std::string& canonica
 }
 
 template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateEthController(const std::string& canonicalName) -> eth::IEthController*
+auto Participant<IbConnectionT>::CreateEthernetController(const std::string& canonicalName) -> eth::IEthernetController*
 {
-    return CreateEthController(canonicalName, canonicalName);
+    return CreateEthernetController(canonicalName, canonicalName);
 }
 
 template <class IbConnectionT>
@@ -671,31 +671,31 @@ void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, c
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthMessage& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthernetFrameEvent& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, eth::EthMessage&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, eth::EthernetFrameEvent&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthTransmitAcknowledge& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthernetFrameTransmitEvent& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthStatus& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthernetStatus& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthSetMode& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthernetSetMode& msg)
 {
     SendIbMessageImpl(from, msg);
 }
@@ -951,31 +951,31 @@ void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, c
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthMessage& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthernetFrameEvent& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, eth::EthMessage&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, eth::EthernetFrameEvent&& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthTransmitAcknowledge& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthernetFrameTransmitEvent& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthStatus& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthernetStatus& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthSetMode& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthernetSetMode& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }

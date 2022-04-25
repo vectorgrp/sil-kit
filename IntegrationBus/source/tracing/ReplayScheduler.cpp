@@ -131,7 +131,7 @@ TraceMessageType to_channelType(cfg::Link::Type linkType)
     switch (linkType)
     {
     case cfg::NetworkType::Ethernet:
-        return TraceMessageType::EthFrame;
+        return TraceMessageType::EthernetFrame;
     case cfg::NetworkType::CAN:
         return TraceMessageType::CanMessage;
     case cfg::NetworkType::LIN:
@@ -517,7 +517,7 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
 
     // Bus Controllers
     // TODO FIXME Replay is currently not working so this will be commented out
-    //makeTasks(participantConfig.ethernetControllers, &mw::IParticipant::CreateEthController);
+    //makeTasks(participantConfig.ethernetControllers, &mw::IParticipant::CreateEthernetController);
     //makeTasks(participantConfig.canControllers, &mw::IParticipant::CreateCanController);
     //TODO makeTasks(participantConfig.flexrayControllers, &mw::IParticipant::CreateFlexrayController);
     //makeTasks(participantConfig.linControllers, &mw::IParticipant::CreateLinController);

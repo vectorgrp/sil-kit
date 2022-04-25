@@ -3,7 +3,7 @@
 #pragma once
 
 // NB: type erasing in TraceMessage requires us to use concrete types
-#include "ib/sim/eth/EthDatatypes.hpp"
+#include "ib/sim/eth/EthernetDatatypes.hpp"
 #include "ib/sim/can/CanDatatypes.hpp"
 #include "ib/sim/data/DataMessageDatatypes.hpp"
 #include "ib/sim/lin/LinDatatypes.hpp"
@@ -16,7 +16,7 @@ namespace extensions {
 // helpers  to associate a TraceMessage-Type enum to a C++ type
 enum class TraceMessageType
 {
-    EthFrame
+    EthernetFrame
     ,CanMessage
     ,LinFrame
     ,FrMessage
@@ -32,7 +32,7 @@ struct TypeIdTrait
 
 template<class MsgT> struct MessageTrait;
 // specializations for supported (C++) Types
-template<> struct MessageTrait<sim::eth::EthFrame> : TypeIdTrait<TraceMessageType::EthFrame> {};
+template<> struct MessageTrait<sim::eth::EthernetFrame> : TypeIdTrait<TraceMessageType::EthernetFrame> {};
 template<> struct MessageTrait<sim::can::CanMessage> : TypeIdTrait<TraceMessageType::CanMessage> {};
 template<> struct MessageTrait<sim::lin::Frame> : TypeIdTrait<TraceMessageType::LinFrame> {};
 template<> struct MessageTrait<sim::fr::FrMessage> : TypeIdTrait<TraceMessageType::FrMessage> {};

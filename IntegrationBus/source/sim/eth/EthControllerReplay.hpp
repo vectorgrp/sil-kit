@@ -10,7 +10,7 @@ namespace sim {
 namespace eth {
 
 class EthControllerReplay
-    : public IEthController
+    : public IEthernetController
     , public IIbToEthController
     , public ib::mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
@@ -32,21 +32,20 @@ public:
     // ----------------------------------------
     // Public interface methods
     //
-    // IEthController
+    // IEthernetController
     void Activate() override;
     void Deactivate() override;
 
-    auto SendMessage(EthMessage msg) -> EthTxId;
+    auto SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId;
 
-    auto SendFrame(EthFrame msg) -> EthTxId override;
-    auto SendFrame(EthFrame msg, std::chrono::nanoseconds timestamp) -> EthTxId override;
-    void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) override;
-    void RegisterMessageAckHandler(MessageAckHandler handler) override;
-    void RegisterStateChangedHandler(StateChangedHandler handler) override;
-    void RegisterBitRateChangedHandler(BitRateChangedHandler handler) override;
+    auto SendFrame(EthernetFrame msg) -> EthernetTxId override;
+    void AddFrameHandler(FrameHandler handler) override;
+    void AddFrameTransmitHandler(FrameTransmitHandler handler) override;
+    void AddStateChangeHandler(StateChangeHandler handler) override;
+    void AddBitrateChangeHandler(BitrateChangeHandler handler) override;
 
     // IIbToEthController
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameEvent& msg) override;
 
     // ib::mw::sync::ITimeConsumer
     void SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider) override;

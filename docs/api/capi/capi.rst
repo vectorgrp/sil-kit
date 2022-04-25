@@ -64,7 +64,7 @@ which is the factory object, as input parameter.
 .. doxygenfunction:: ib_Can_Controller_RegisterStateChangedHandler
 .. doxygenfunction:: ib_Can_Controller_RegisterErrorStateChangedHandler
 
-!!! Ethernet API
+Ethernet API
 ------------
 The Ethernet API consists of two main parts:
 
@@ -72,26 +72,25 @@ The Ethernet API consists of two main parts:
 # The Ethernet frame
 
 !!! Ethernet Controller
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
-The Ethernet controller interacts with the corresponding Ethernet bus and send Ethernet frames.
-The Ethernet frames are the single messages/frames, that are transmitted over the Ethernet bus.
+An Ethernet controller can interact with the corresponding Ethernet bus and send Ethernet frames.
 
 .. doxygenfunction:: ib_Ethernet_Controller_Create
 .. doxygenfunction:: ib_Ethernet_Controller_Activate
 .. doxygenfunction:: ib_Ethernet_Controller_Deactivate
-.. doxygenfunction:: ib_Ethernet_Controller_RegisterReceiveMessageHandler
-.. doxygenfunction:: ib_Ethernet_Controller_RegisterFrameAckHandler
-.. doxygenfunction:: ib_Ethernet_Controller_RegisterStateChangedHandler
-.. doxygenfunction:: ib_Ethernet_Controller_RegisterBitRateChangedHandler
+.. doxygenfunction:: ib_Ethernet_Controller_AddFrameHandler
+.. doxygenfunction:: ib_Ethernet_Controller_AddFrameTransmitHandler
+.. doxygenfunction:: ib_Ethernet_Controller_AddStateChangeHandler
+.. doxygenfunction:: ib_Ethernet_Controller_AddBitrateChangeHandler
 .. doxygenfunction:: ib_Ethernet_Controller_SendFrame
 
 !!! Ethernet Frame
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
-The ib_Ethernet_Frame corresponds to an ethernet raw frame.
-A basic frame consists of the destination mac, the source mac, the ethertype and a payload.
-The union type within the ib_Ethernet_Frame helps when manual construction of a frame is necessary (frameHeader, frameHeaderVlanTagged).
+The ib_Ethernet_Frame is a raw Ethernet frame consisting of the destination mac, the source mac, the ethertype and a 
+payload. The union type within the ib_Ethernet_Frame helps when manual construction of a frame is necessary 
+(frameHeader, frameHeaderVlanTagged).
 
 .. note:: For an example of manual frame construction one can refer to the C Ethernet demo.
 

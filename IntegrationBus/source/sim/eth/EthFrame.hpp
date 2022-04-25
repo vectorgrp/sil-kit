@@ -1,2 +1,2 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
-#include "ib/sim/eth/EthDatatypes.hpp"
+#include "ib/sim/eth/EthernetDatatypes.hpp"

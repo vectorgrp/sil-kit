@@ -50,15 +50,15 @@ auto AService(const IIbServiceEndpoint* service) -> testing::Matcher<const IIbSe
   );
 }
 
-auto AnEthMessage(const EthFrame& msg) -> testing::Matcher<const EthMessage&>
+auto AnEthMessage(const EthernetFrame& msg) -> testing::Matcher<const EthernetFrameEvent&>
 {
     using namespace testing;
-    return Field(&EthMessage::ethFrame,
+    return Field(&EthernetFrameEvent::ethFrame,
         AllOf(
-            Property(&EthFrame::GetDestinationMac, ElementsAreArray(msg.GetDestinationMac()))
-            , Property(&EthFrame::GetSourceMac, ElementsAreArray(msg.GetSourceMac()))
-            , Property(&EthFrame::GetEtherType, Eq(msg.GetEtherType()))
-            , Property(&EthFrame::GetPayloadSize, Eq(msg.GetPayloadSize()))
+            Property(&EthernetFrame::GetDestinationMac, ElementsAreArray(msg.GetDestinationMac()))
+            , Property(&EthernetFrame::GetSourceMac, ElementsAreArray(msg.GetSourceMac()))
+            , Property(&EthernetFrame::GetEtherType, Eq(msg.GetEtherType()))
+            , Property(&EthernetFrame::GetPayloadSize, Eq(msg.GetPayloadSize()))
         )
     );
 }
@@ -104,15 +104,15 @@ class MockParticipant : public DummyParticipant
 {
 public:
     //Ethernet calls
-    void SendIbMessage(const IIbServiceEndpoint* from, EthMessage&& msg) override
+    void SendIbMessage(const IIbServiceEndpoint* from, EthernetFrameEvent&& msg) override
     {
         SendIbMessage_proxy(from, msg);
     }
-    MOCK_METHOD2(SendIbMessage, void(IIbServiceEndpoint*, const EthMessage&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(const IIbServiceEndpoint*, const EthMessage&));
-    MOCK_METHOD2(SendIbMessage, void(IIbServiceEndpoint*, const EthTransmitAcknowledge&));
-    MOCK_METHOD2(SendIbMessage, void(IIbServiceEndpoint*, const EthStatus&));
-    MOCK_METHOD2(SendIbMessage, void(IIbServiceEndpoint*, const EthSetMode&));
+    MOCK_METHOD2(SendIbMessage, void(IIbServiceEndpoint*, const EthernetFrameEvent&));
+    MOCK_METHOD2(SendIbMessage_proxy, void(const IIbServiceEndpoint*, const EthernetFrameEvent&));
+    MOCK_METHOD2(SendIbMessage, void(IIbServiceEndpoint*, const EthernetFrameTransmitEvent&));
+    MOCK_METHOD2(SendIbMessage, void(IIbServiceEndpoint*, const EthernetStatus&));
+    MOCK_METHOD2(SendIbMessage, void(IIbServiceEndpoint*, const EthernetSetMode&));
     //  Generic Message calls
     MOCK_METHOD2(SendIbMessage_proxy, void(const IIbServiceEndpoint*, const GenericMessage&));
     void SendIbMessage(const IIbServiceEndpoint* from, GenericMessage&& msg) override
@@ -132,7 +132,7 @@ public:
 
 struct Callbacks
 {
-    MOCK_METHOD2(ReceiveMessage, void(IEthController*, const EthMessage&));
+    MOCK_METHOD2(ReceiveMessage, void(IEthernetController*, const EthernetFrameEvent&));
     MOCK_METHOD2(ReceiveMessageCan, void(ICanController*, const CanMessage&));
 };
 
@@ -164,13 +164,13 @@ struct MockReplayMessage
 
 struct MockEthFrame 
     : public MockReplayMessage
-    , public EthFrame
+    , public EthernetFrame
 {
     MockEthFrame()
     {
-        SetSourceMac(EthMac{1,2,3,4,5,6});
-        SetDestinationMac(EthMac{7,8,9,0xa,0xb,0xc});
-        _type = extensions::TraceMessageType::EthFrame;
+        SetSourceMac(EthernetMac{1,2,3,4,5,6});
+        SetDestinationMac(EthernetMac{7,8,9,0xa,0xb,0xc});
+        _type = extensions::TraceMessageType::EthernetFrame;
     }
 };
 
@@ -242,8 +242,8 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
         cfg.replay.direction = cfg::Replay::Direction::Receive;
         EthControllerReplay controller{&participant, cfg, participant.GetTimeProvider()};
         controller.SetServiceDescriptor(from_endpointAddress({3,4}));
-        controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
-        EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), AnEthMessage(msg)))
+        controller.AddFrameHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
+        EXPECT_CALL(callbacks, ReceiveMessage(A<IEthernetController*>(), AnEthMessage(msg)))
             .Times(1);
         controller.ReplayMessage(&msg);
     }
@@ -254,8 +254,8 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
         cfg.replay.direction = cfg::Replay::Direction::Both;
         EthControllerReplay controller{&participant, cfg, participant.GetTimeProvider()};
         controller.SetServiceDescriptor(from_endpointAddress({3,4}));
-        controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
-        EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), AnEthMessage(msg)))
+        controller.AddFrameHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
+        EXPECT_CALL(callbacks, ReceiveMessage(A<IEthernetController*>(), AnEthMessage(msg)))
             .Times(1);
         controller.ReplayMessage(&msg);
     }
@@ -265,8 +265,8 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
         cfg.replay.direction = cfg::Replay::Direction::Receive;
         EthControllerReplay controller{&participant, cfg, participant.GetTimeProvider()};
         controller.SetServiceDescriptor(from_endpointAddress({3,4}));
-        controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
-        EXPECT_CALL(callbacks, ReceiveMessage(A<IEthController*>(), AnEthMessage(msg)))
+        controller.AddFrameHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
+        EXPECT_CALL(callbacks, ReceiveMessage(A<IEthernetController*>(), AnEthMessage(msg)))
             .Times(0);
         controller.ReplayMessage(&msg);
     }
@@ -384,7 +384,7 @@ TEST(ReplayTest, DISABLED_cancontroller_replay_config_receive)
         cfg.replay.direction = cfg::Replay::Direction::Receive;
         CanControllerReplay controller{&participant, cfg, participant.GetTimeProvider()};
         controller.SetServiceDescriptor(from_endpointAddress({3,4}));
-        controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessageCan));
+        controller.AddFrameHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessageCan));
         EXPECT_CALL(callbacks, ReceiveMessageCan(A<ICanController*>(), ACanMessage(msg)))
             .Times(1);
         controller.ReplayMessage(&msg);
@@ -396,7 +396,7 @@ TEST(ReplayTest, DISABLED_cancontroller_replay_config_receive)
         cfg.replay.direction = cfg::Replay::Direction::Both;
         CanControllerReplay controller{&participant, cfg, participant.GetTimeProvider()};
         controller.SetServiceDescriptor(from_endpointAddress({3,4}));
-        controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessageCan));
+        controller.AddFrameHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessageCan));
         EXPECT_CALL(callbacks, ReceiveMessageCan(A<ICanController*>(), ACanMessage(msg)))
             .Times(1);
         controller.ReplayMessage(&msg);
@@ -407,7 +407,7 @@ TEST(ReplayTest, DISABLED_cancontroller_replay_config_receive)
         cfg.replay.direction = cfg::Replay::Direction::Receive;
         CanControllerReplay controller{&participant, cfg, participant.GetTimeProvider()};
         controller.SetServiceDescriptor(from_endpointAddress({3,4}));
-        controller.RegisterReceiveMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessageCan));
+        controller.AddFrameHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessageCan));
         EXPECT_CALL(callbacks, ReceiveMessageCan(A<ICanController*>(), ACanMessage(msg)))
             .Times(0);
         controller.ReplayMessage(&msg);

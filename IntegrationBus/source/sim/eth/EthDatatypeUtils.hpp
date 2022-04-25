@@ -4,17 +4,20 @@
 
 #include <iostream>
 
-#include "ib/sim/eth/EthDatatypes.hpp"
+#include "ib/sim/eth/EthernetDatatypes.hpp"
 
 namespace ib {
 namespace sim {
 namespace eth {
 
-bool operator==(const EthTagControlInformation& lhs, const EthTagControlInformation& rhs);
-bool operator==(const EthMessage& lhs, const EthMessage& rhs);
-bool operator==(const EthFrame& lhs, const EthFrame& rhs);
-bool operator==(const EthTransmitAcknowledge& lhs, const EthTransmitAcknowledge& rhs);
-bool operator==(const EthSetMode& lhs, const EthSetMode& rhs);
+bool operator==(const EthernetTagControlInformation& lhs, const EthernetTagControlInformation& rhs);
+bool operator==(const EthernetFrameEvent& lhs, const EthernetFrameEvent& rhs);
+bool operator==(const EthernetFrame& lhs, const EthernetFrame& rhs);
+bool operator==(const EthernetFrameTransmitEvent& lhs, const EthernetFrameTransmitEvent& rhs);
+bool operator==(const EthernetSetMode& lhs, const EthernetSetMode& rhs);
+bool operator==(const EthernetStateChangeEvent& lhs, const EthernetStateChangeEvent& rhs);
+bool operator==(const EthernetBitrateChangeEvent& lhs, const EthernetBitrateChangeEvent& rhs);
+bool operator!=(const EthernetBitrateChangeEvent& lhs, const EthernetBitrateChangeEvent& rhs); // For NeMatcher in EthControllerProxyTest
 
 } // namespace ib
 } // namespace sim

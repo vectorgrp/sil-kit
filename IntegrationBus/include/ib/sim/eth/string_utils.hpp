@@ -8,83 +8,83 @@
 #include "ib/exception.hpp"
 #include "ib/util/PrintableHexString.hpp"
 
-#include "EthDatatypes.hpp"
+#include "EthernetDatatypes.hpp"
 
 namespace ib {
 namespace sim {
 namespace eth {
 
-inline std::string to_string(EthTransmitStatus value);
-inline std::string to_string(EthState value);
-inline std::string to_string(EthMode value);
+inline std::string to_string(EthernetTransmitStatus value);
+inline std::string to_string(EthernetState value);
+inline std::string to_string(EthernetMode value);
 
-inline std::string to_string(const EthFrame& msg);
-inline std::string to_string(const EthMessage& msg);
-inline std::string to_string(const EthTransmitAcknowledge& msg);
-inline std::string to_string(const EthStatus& msg);
-inline std::string to_string(const EthSetMode& msg);
+inline std::string to_string(const EthernetFrame& msg);
+inline std::string to_string(const EthernetFrameEvent& msg);
+inline std::string to_string(const EthernetFrameTransmitEvent& msg);
+inline std::string to_string(const EthernetStatus& msg);
+inline std::string to_string(const EthernetSetMode& msg);
 
 
-inline std::ostream& operator<<(std::ostream& out, EthTransmitStatus value);
-inline std::ostream& operator<<(std::ostream& out, EthState value);
-inline std::ostream& operator<<(std::ostream& out, EthMode value);
+inline std::ostream& operator<<(std::ostream& out, EthernetTransmitStatus value);
+inline std::ostream& operator<<(std::ostream& out, EthernetState value);
+inline std::ostream& operator<<(std::ostream& out, EthernetMode value);
 
-inline std::ostream& operator<<(std::ostream& out, const EthFrame& msg);
-inline std::ostream& operator<<(std::ostream& out, const EthMessage& msg);
-inline std::ostream& operator<<(std::ostream& out, const EthTransmitAcknowledge& msg);
-inline std::ostream& operator<<(std::ostream& out, const EthStatus& msg);
-inline std::ostream& operator<<(std::ostream& out, const EthSetMode& msg);
+inline std::ostream& operator<<(std::ostream& out, const EthernetFrame& msg);
+inline std::ostream& operator<<(std::ostream& out, const EthernetFrameEvent& msg);
+inline std::ostream& operator<<(std::ostream& out, const EthernetFrameTransmitEvent& msg);
+inline std::ostream& operator<<(std::ostream& out, const EthernetStatus& msg);
+inline std::ostream& operator<<(std::ostream& out, const EthernetSetMode& msg);
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-std::string to_string(EthTransmitStatus value)
+std::string to_string(EthernetTransmitStatus value)
 {
     switch (value)
     {
-    case  EthTransmitStatus::Transmitted:
+    case  EthernetTransmitStatus::Transmitted:
         return "Transmitted";
-    case  EthTransmitStatus::ControllerInactive:
+    case  EthernetTransmitStatus::ControllerInactive:
         return "ControllerInactive";
-    case  EthTransmitStatus::LinkDown:
+    case  EthernetTransmitStatus::LinkDown:
         return "LinkDown";
-    case  EthTransmitStatus::Dropped:
+    case  EthernetTransmitStatus::Dropped:
         return "Dropped";
-    case  EthTransmitStatus::DuplicatedTransmitId:
+    case  EthernetTransmitStatus::DuplicatedTransmitId:
         return "DuplicatedTransmitId";
-    case  EthTransmitStatus::InvalidFrameFormat:
+    case  EthernetTransmitStatus::InvalidFrameFormat:
         return "InvalidFrameFormat";
     };
     throw ib::TypeConversionError{};
 }
 
-std::string to_string(EthState value)
+std::string to_string(EthernetState value)
 {
     switch (value)
     {
-    case EthState::Inactive:
+    case EthernetState::Inactive:
         return "Inactive";
-    case EthState::LinkDown:
+    case EthernetState::LinkDown:
         return "LinkDown";
-    case EthState::LinkUp:
+    case EthernetState::LinkUp:
         return "LinkUp";
     };
     throw ib::TypeConversionError{};
 }
 
-std::string to_string(EthMode value)
+std::string to_string(EthernetMode value)
 {
     switch (value)
     {
-    case EthMode::Inactive:
+    case EthernetMode::Inactive:
         return "Inactive";
-    case EthMode::Active:
+    case EthernetMode::Active:
         return "Active";
     };
     throw ib::TypeConversionError{};
 }
 
-std::string to_string(const EthFrame& msg)
+std::string to_string(const EthernetFrame& msg)
 {
     std::stringstream out;
     out << msg;
@@ -92,28 +92,28 @@ std::string to_string(const EthFrame& msg)
 }
 
 
-std::string to_string(const EthMessage& msg)
+std::string to_string(const EthernetFrameEvent& msg)
 {
     std::stringstream out;
     out << msg;
     return out.str();
 }
 
-std::string to_string(const EthTransmitAcknowledge& msg)
+std::string to_string(const EthernetFrameTransmitEvent& msg)
 {
     std::stringstream out;
     out << msg;
     return out.str();
 }
 
-std::string to_string(const EthStatus& msg)
+std::string to_string(const EthernetStatus& msg)
 {
     std::stringstream out;
     out << msg;
     return out.str();
 }
 
-std::string to_string(const EthSetMode& msg)
+std::string to_string(const EthernetSetMode& msg)
 {
     std::stringstream out;
     out << msg;
@@ -122,30 +122,30 @@ std::string to_string(const EthSetMode& msg)
 
 
     
-std::ostream& operator<<(std::ostream& out, EthTransmitStatus value)
+std::ostream& operator<<(std::ostream& out, EthernetTransmitStatus value)
 {
     return out << to_string(value);
 }
-std::ostream& operator<<(std::ostream& out, EthState value)
+std::ostream& operator<<(std::ostream& out, EthernetState value)
 {
     return out << to_string(value);
 }
-std::ostream& operator<<(std::ostream& out, EthMode value)
+std::ostream& operator<<(std::ostream& out, EthernetMode value)
 {
     return out << to_string(value);
 }
 
-std::ostream& operator<<(std::ostream& out, const EthFrame& msg)
+std::ostream& operator<<(std::ostream& out, const EthernetFrame& msg)
 {
     if (msg.GetFrameSize() == 0)
     {
         return out
-            << "EthFrame{size=0}";
+            << "EthernetFrame{size=0}";
     }
     else
     {
         return out
-            << "EthFrame{src=" << util::AsHexString(msg.GetSourceMac()).WithSeparator(":")
+            << "EthernetFrame{src=" << util::AsHexString(msg.GetSourceMac()).WithSeparator(":")
             << ", dst=" << util::AsHexString(msg.GetDestinationMac()).WithSeparator(":")
             << ", size=" << msg.GetFrameSize()
             << ", payload=[" << util::AsHexString(msg.GetPayload()).WithSeparator(" ").WithMaxLength(8)
@@ -153,21 +153,21 @@ std::ostream& operator<<(std::ostream& out, const EthFrame& msg)
     }
 }
 
-std::ostream& operator<<(std::ostream& out, const EthMessage& msg)
+std::ostream& operator<<(std::ostream& out, const EthernetFrameEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     return out
-        << "eth::EthMessage{txId=" << msg.transmitId
+        << "eth::EthernetFrameEvent{txId=" << msg.transmitId
         << ", " << msg.ethFrame
         << " @" << timestamp.count() << "ms"
         << "}";
 }
 
-std::ostream& operator<<(std::ostream& out, const EthTransmitAcknowledge& msg)
+std::ostream& operator<<(std::ostream& out, const EthernetFrameTransmitEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     out
-        << "eth::EthTransmitAcknowledge{txId=" << msg.transmitId
+        << "eth::EthernetFrameTransmitEvent{txId=" << msg.transmitId
         << ", src=" << util::AsHexString(msg.sourceMac).WithSeparator(":")
         << ", status=" << msg.status
         << " @" << timestamp.count() << "ms"
@@ -176,21 +176,21 @@ std::ostream& operator<<(std::ostream& out, const EthTransmitAcknowledge& msg)
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const EthStatus& msg)
+std::ostream& operator<<(std::ostream& out, const EthernetStatus& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     return out
-        << "eth::EthStatus{"
+        << "eth::EthernetStatus{"
         << "state=" << msg.state
-        << "bitrate=" << msg.bitRate
+        << "bitrate=" << msg.bitrate
         << " @" << timestamp.count() << "ms"
         << "}";
 }
 
-std::ostream& operator<<(std::ostream& out, const EthSetMode& msg)
+std::ostream& operator<<(std::ostream& out, const EthernetSetMode& msg)
 {
     return out
-        << "eth::EthSetMode{" << msg.mode << "}";
+        << "eth::EthernetSetMode{" << msg.mode << "}";
 }
 
 

@@ -12,7 +12,7 @@ namespace sim {
 namespace eth {
 
 EthController::EthController(mw::IParticipantInternal* participant, cfg::EthernetController /*config*/,
-                             mw::sync::ITimeProvider* timeProvider, IEthController* facade)
+                             mw::sync::ITimeProvider* timeProvider, IEthernetController* facade)
     : _participant{participant}
     , _timeProvider{timeProvider}
     , _facade{facade}
@@ -33,7 +33,7 @@ void EthController::Deactivate()
     // only supported when using a Network Simulator --> implement in EthControllerProxy
 }
 
-auto EthController::SendMessage(EthMessage msg) -> EthTxId
+auto EthController::SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId
 {
     auto txId = MakeTxId();
     _pendingAcks.emplace_back(msg.ethFrame.GetSourceMac(), txId);
@@ -44,51 +44,48 @@ auto EthController::SendMessage(EthMessage msg) -> EthTxId
 
     _participant->SendIbMessage(this, std::move(msg));
 
-    EthTransmitAcknowledge ack;
+    EthernetFrameTransmitEvent ack;
     ack.timestamp = msg.timestamp;
     ack.transmitId = msg.transmitId;
     ack.sourceMac = msg.ethFrame.GetSourceMac();
-    ack.status = EthTransmitStatus::Transmitted;
+    ack.status = EthernetTransmitStatus::Transmitted;
     CallHandlers(ack);
 
     return txId;
 }
 
-auto EthController::SendFrame(EthFrame frame) -> EthTxId
+auto EthController::SendFrame(EthernetFrame frame) -> EthernetTxId
 {
-    return SendFrame(std::move(frame), _timeProvider->Now());
-}
-
-auto EthController::SendFrame(EthFrame frame, std::chrono::nanoseconds timestamp) -> EthTxId
-{
-    EthMessage msg{};
-    msg.timestamp = timestamp;
+    EthernetFrameEvent msg{};
+    msg.timestamp = _timeProvider->Now();
     msg.ethFrame = std::move(frame);
-    return SendMessage(std::move(msg));
+
+
+    return SendFrameEvent(std::move(msg));
 }
 
-void EthController::RegisterReceiveMessageHandler(ReceiveMessageHandler handler)
+void EthController::AddFrameHandler(FrameHandler handler)
 {
     RegisterHandler(handler);
 }
 
-void EthController::RegisterMessageAckHandler(MessageAckHandler handler)
+void EthController::AddFrameTransmitHandler(FrameTransmitHandler handler)
 {
     RegisterHandler(handler);
 }
 
-void EthController::RegisterStateChangedHandler(StateChangedHandler /*handler*/)
+void EthController::AddStateChangeHandler(StateChangeHandler /*handler*/)
 {
     // only supported when using a Network Simulator --> implement in EthControllerProxy
 }
 
-void EthController::RegisterBitRateChangedHandler(BitRateChangedHandler /*handler*/)
+void EthController::AddBitrateChangeHandler(BitrateChangeHandler /*handler*/)
 {
     // only supported when using a Network Simulator --> implement in EthControllerProxy
 }
 
 
-void EthController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthMessage& msg)
+void EthController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthernetFrameEvent& msg)
 {
     _tracer.Trace(ib::sim::TransmitDirection::RX, msg.timestamp, msg.ethFrame);
 

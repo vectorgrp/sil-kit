@@ -2,135 +2,169 @@
 Ethernet Service API
 ====================
 
+.. Macros for docs use
+.. |IParticipant| replace:: :cpp:class:`IParticipant<ib::mw::IParticipant>`
+.. |CreateEthernetController| replace:: :cpp:func:`CreateEthernetController<ib::mw::IParticipant::CreateEthernetController()>`
+.. |IEthernetController| replace:: :cpp:class:`IEthernetController<ib::sim::eth::IEthernetController>`
+.. |Activate| replace:: :cpp:func:`Activate()<ib::sim::eth::IEthernetController::Activate>`
+.. |SendFrame| replace:: :cpp:func:`SendFrame()<ib::sim::eth::IEthernetController::SendFrame>`
+.. |AddFrameTransmitHandler| replace:: :cpp:func:`AddFrameTransmitHandler()<ib::sim::eth::IEthernetController::AddFrameTransmitHandler>`
+.. |AddStateChangeHandler| replace:: :cpp:func:`AddStateChangeHandler()<ib::sim::eth::IEthernetController::AddStateChangeHandler>`
+.. |AddFrameHandler| replace:: :cpp:func:`AddFrameHandler()<ib::sim::eth::IEthernetController::AddFrameHandler>`
+
+.. |EthernetFrame| replace:: :cpp:class:`EthernetFrame<ib::sim::eth::EthernetFrame>`
+.. |EthernetFrameEvent| replace:: :cpp:class:`EthernetFrameEvent<ib::sim::eth::EthernetFrameEvent>`
+.. |EthernetFrameTransmitEvent| replace:: :cpp:class:`EthernetFrameTransmitEvent<ib::sim::eth::EthernetFrameTransmitEvent>`
+.. |EthernetTransmitStatus| replace:: :cpp:class:`EthernetTransmitStatus<ib::sim::eth::EthernetTransmitStatus>`
+
+.. |Transmitted| replace:: :cpp:enumerator:`EthernetTransmitStatus::Transmitted<ib::sim::eth::Transmitted>`
+.. |ControllerInactive| replace:: :cpp:enumerator:`EthernetTransmitStatus::ControllerInactive<ib::sim::eth::ControllerInactive>`
+.. |LinkDown| replace:: :cpp:enumerator:`EthernetTransmitStatus::LinkDown<ib::sim::eth::LinkDown>`
+.. |Dropped| replace:: :cpp:enumerator:`EthernetTransmitStatus::Dropped<ib::sim::eth::Dropped>`
+.. |InvalidFrameFormat| replace:: :cpp:enumerator:`EthernetTransmitStatus::InvalidFrameFormat<ib::sim::eth::InvalidFrameFormat>`
 
 .. contents::
    :local:
    :depth: 3
 
-
 .. highlight:: cpp
 
 Using the Ethernet Controller
-------------------------------------
+-----------------------------
 
-Initialization
-~~~~~~~~~~~~~~~~~~~~
+The Ethernet Service API provides an Ethernet bus abstraction through the |IEthernetController| interface.
+An Ethernet controller is created by calling |CreateEthernetController| given a controller name and (optional) network 
+name::
 
-For a detailed simulation with the :ref:`VIBE Network Simulator<chap:VIBE-NetSim>`, the link must first be established
-by calling :cpp:func:`IEthController::Activate()<ib::sim::eth::IEthController::Activate>` before sending messages::
+  auto* ethernetController = participant->CreateEthernetController("Eth1", "Eth");
 
-    ethernetController->Activate();
-
-Note that :cpp:func:`IEthController::Activate()<ib::sim::eth::IEthController::Activate>`
-can be called in the InitHandler of a ParticipantController. 
-In a simple functional simulation without :ref:`VIBE Network Simulator<chap:VIBE-NetSim>` this function performs no 
-operation.
-
-.. admonition:: Note
-
-  If the VIBE NetworkSimulator is used, an Ethernet Controller should be connected to a switch
-  for a valid simulation (for configuration details, refer to the sections :ref:`Switches<sec:cfg-switches>`
-  and :ref:`Network Simulators<sec:cfg-network-simulators>`).
-
+Ethernet controllers will only communicate within the same network. If no network name is provided, the controller name
+will be used as the network name.
 
 Sending Ethernet Frames
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
-An Ethernet Controller can send :cpp:class:`EthFrame<ib::sim::eth::EthFrame>`s and receive 
-:cpp:class:`EthMessage<ib::sim::eth::EthMessage>`s. In addition to the :cpp:class:`EthFrame<ib::sim::eth::EthFrame>`, 
-the :cpp:class:`EthMessage<ib::sim::eth::EthMessage>` consists of a transmitId, used to identify
-the acknowledge of the message and an optional timestamp.
-To send an Ethernet Frame, the :cpp:class:`EthFrame<ib::sim::eth::EthFrame>`
-must be setup with a source and destination MAC address and the payload to be transmitted::
+An |EthernetFrame| is sent with |SendFrame| and received as an |EthernetFrameEvent|. The |EthernetFrame| must be setup
+with a source and destination MAC address and the payload to be transmitted::
 
   // Prepare an Ethernet frame
   std::array<uint8_t, 6> sourceAddress{"F6", "04", "68", "71", "AA", "C1"};
   std::array<uint8_t, 6> destinationAddress{"F6", "04", "68", "71", "AA", "C2"};
 
   std::string message("Ensure that the payload is long enough to constitute"
-                      " a valid ethernet frame ----------------------------");
+                      " a valid Ethernet frame ----------------------------");
   std::vector<uint8_t> payload{message.begin(), message.end()};
 
-  EthFrame ethFrame;
+  EthernetFrame ethFrame;
   ethFrame.SetSourceMac(sourceAddress);
   ethFrame.SetDestinationMac(destinationAddress);
   ethFrame.SetPayload(payload);
 
   ethernetController->SendFrame(ethFrame);
 
-To be notified for the success or failure of the transmission, a MessageAckHandler should
-be registered::
+Transmission acknowledgement
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To be notified of the success or failure of the transmission, a ``FrameTransmitHandler`` can be registered using
+|AddFrameTransmitHandler|::
   
-  // Register MessageAckHandler to receive Ethernet acknowledges from other Ethernet controller.
-  auto messageAckHandler =
-      [](IEthController*, const EthTransmitAcknowledge& ack) {};
-  ethernetController->RegisterMessageAckHandler(messageAckHandler);
-
-The :cpp:class:`EthTransmitAcknowledge<ib::sim::eth::EthTransmitAcknowledge>` received in the MessageAckHandler
-will always contain an EthTransmitStatus with the value 
-:cpp:enumerator:`Transmitted<ib::sim::eth::Transmitted>` in a simple simulation without VIBE NetworkSimulator,
-which indicates a successful transmission.
-
-If the VIBE NetworkSimulator is used, other status values are possible.
-:cpp:enumerator:`ControllerInactive<ib::sim::eth::ControllerInactive>` is returned
-as long as an Ethernet Controller tries to send messages before
-:cpp:func:`IEthController::Activate()<ib::sim::eth::IEthController::Activate>` is called. If
-:cpp:func:`IEthController::Activate()<ib::sim::eth::IEthController::Activate>` has been called,
-the EthTransmitStatus for sent messages will be
-:cpp:enumerator:`LinkDown<ib::sim::eth::LinkDown>` as long as the Ethernet link to another
-Ethernet Controller has not yet been established. Furthermore, it is possible that the transmit queue
-overflows causing the handler to be called with :cpp:enumerator:`Dropped<ib::sim::eth::Dropped>`.
-Finally, :cpp:enumerator:`InvalidFrameFormat<ib::sim::eth::InvalidFrameFormat>` is returned, e.g.
-if the Ethernet frame is too small or too large.
-
-
-Receiving Ethernet Messages or EthState changes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-To receive Ethernet frames from other Ethernet controller, a ReceiveMessageHandler must be
-registered, which is called by the Ethernet controller whenever an Ethernet message is received::
-
-  // Register ReceiveMessageHandler to receive Ethernet messages from other CAN controller.
-  auto receiveMessageHandler =
-      [](IEthController*, const EthMessage&) {};
-  ethernetController->RegisterReceiveMessageHandler(receiveMessageHandler);
-
-To receive EthState changes of an Ethernet controller, a StateChangedHandler
-must be registered, which is called whenever the status changes::
-
-  // Register StateChangedHandler to receive EthState changes from the Ethernet controller.
-  auto stateChangedHandler =
-      [](IEthController*, const EthState&) {};
-  ethernetController->RegisterStateChangedHandler(stateChangedHandler);
+  auto frameTransmitHandler = [](IEthernetController*, const EthernetFrameTransmitEvent& frameTransmitEvent) 
+  {
+    // Handle frameTransmitEvent
+  };
+  ethernetController->AddFrameTransmitHandler(frameTransmitHandler);
 
 .. admonition:: Note
 
-  State changes are only supported when using the VIBE NetworkSimulator.
+  In a simple simulation without the VIBE NetworkSimulator, the |EthernetTransmitStatus| of the 
+  |EthernetFrameTransmitEvent| will always be |Transmitted|. 
 
+Receiving Ethernet FrameEvents
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _sec:api-ethernet-tracing:
+An |EthernetFrame| is received as an |EthernetFrameEvent| consisting of a transmitId used to identify
+the acknowledge of the frame, a timestamp and the actual |EthernetFrame|.
+
+To receive Ethernet frames, a FrameHandler must be registered using |AddFrameHandler|. The handler is called whenever 
+an Ethernet frame is received::
+
+  auto frameHandler = [](IEthernetController*, const EthernetFrameEvent& frameEvent) 
+  {
+    // Handle frameEvent
+  };
+  ethernetController->AddFrameHandler(frameHandler);
+
+Usage with the VIBE NetworkSimulator
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Initialization
+______________
+
+If used within a simulated Ethernet network, the Ethernet controller first has to call |Activate| before being able to
+send frames. Note that |Activate| can be called in the InitHandler of a ParticipantController.
+
+Switches
+________
+
+An Ethernet controller should be connected to a switch for a valid simulation. For further details, refer to 
+:ref:`simulating Ethernet switches<vibes/networksimulator:Ethernet>` and the 
+:ref:`Network Simulator configuration<vibes/networksimulator:Configuration>`.
+
+Receive state change events
+___________________________
+
+State changes are only supported when using the VIBE NetworkSimulator. To receive state changes of an Ethernet 
+controller, a ``StateChangeHandler`` must be registered using |AddStateChangeHandler|::
+
+  auto stateChangedHandler = [](IEthernetController*, const EthernetStateChangeEvent& stateChangeEvent) 
+  {
+    // Handle stateChangeEvent;
+  };
+  ethernetController->AddStateChangeHandler(stateChangedHandler);
+
+Acknowledgements
+________________
+
+When sending frames, the |EthernetTransmitStatus| of the |EthernetFrameTransmitEvent| received in the
+``FrameTransmitHandler`` will be one of the following values:
+
+- |Transmitted|: Successful transmission.
+- |ControllerInactive|: The sending Ethernet controller tried to send a frame before |Activate| was called.
+- |LinkDown|: |Activate| has been called but the link to another Ethernet Controller has not yet been established.
+- |Dropped|: Indicates a transmit queue overflow.
+- |InvalidFrameFormat|: The Ethernet frame is invalid, e.g. too small or too large.
 
 Message Tracing
 ~~~~~~~~~~~~~~~
 
 .. admonition:: Note
-
+  
   Currently the Message Tracing functionality is not available, but it will be reintegrated in the future.
 
-The Ethernet Controller is able to trace all received Ethernet messages in PCAP format, either
-in a dedicated file or into a named pipe.
-MDF4 tracing is supported by the :ref:`VIBE MDF4Tracing<mdf4tracing>`.
-By default, message tracing is disabled, but it can be enabled in the settings
-of an Ethernet Controller (see: :ref:`Ethernet Controller Configuration<sec:cfg-participant-ethernet>`).
-Refer to the :ref:`sec:cfg-participant-tracing` configuration section for usage instructions.
+The Ethernet Controller is able to trace all received Ethernet frames in PCAP format, either in a dedicated file or 
+into a named pipe. MDF4 tracing is supported by the :ref:`VIBE MDF4Tracing<mdf4tracing>`. By default, message tracing
+is disabled, but it can be enabled in the settings of an Ethernet Controller 
+(see: :ref:`Ethernet Controller Configuration<sec:cfg-participant-ethernet>`). Refer to the 
+:ref:`sec:cfg-participant-tracing` configuration section for usage instructions.
 
 PCAP File
-__________
+_________
 
-To trace all received Ethernet messages in a PCAP file, you have to specify a trace sink
-of type 'PcapFile' in the configuration of the Ethernet Controller and add an appropriate
-trace sink to the configuration:
+To trace all received Ethernet frames in a PCAP file, you have to specify a trace sink of type 'PcapFile' in the 
+configuration of the Ethernet Controller and add an appropriate trace sink to the configuration:
 
+.. deprecated:: 3.0.8
+.. code-block:: javascript
+    
+  "EthernetControllers": [
+      {
+          "Name": "ETH0",
+          "MacAddress": "00:08:15:ab:cd:f0",
+          "PcapFile": "pcap_output_trace.pcap"
+      }
+  ]
+
+.. versionadded:: 3.0.8
 .. code-block:: javascript
 
   "EthernetControllers": [
@@ -149,17 +183,15 @@ trace sink to the configuration:
   ]
   
 
-After you successfully ran and stopped the simulation, you will find the file
-"Ethernet.pcap" in the simulation's working directory.
-It can be loaded into a tool like
-`Wireshark <https://www.wireshark.org/>`_ where you can examine the Ethernet trace.
+After you successfully ran and stopped the simulation, you will find the file "Ethernet.pcap" in the simulation's 
+working directory. It can be loaded into a tool like `Wireshark <https://www.wireshark.org/>`_ where you can examine 
+the Ethernet trace.
 
 PCAP Named Pipe
-_________________
+_______________
 
-Using a named pipe allows attaching another program to trace messages of a
-IB ethernet controller. 
-The trace sink type has to be specified as "PcapPipe" in the configuration:
+Using a named pipe allows attaching another program to trace frames of an Ethernet controller. The trace sink type
+has to be specified as "PcapPipe" in the configuration:
 
 .. code-block:: javascript
 
@@ -179,16 +211,13 @@ The trace sink type has to be specified as "PcapPipe" in the configuration:
   ]
     
 
-The VIB process responsible for the Ethernet Controller "ETH0" will open the
-specified named pipe "EthernetPipe" during start up of the Participant.
-When the IntegrationBus writes the first message to the pipe, the VIB process will be blocked
-until another process connects to the named pipe and reads the traced ethernet
-messages from the pipe.
+The VIB process responsible for the Ethernet Controller "ETH0" will open the specified named pipe "EthernetPipe" during
+start up of the Participant. When the IntegrationBus writes the first message to the pipe, the VIB process will be 
+blocked until another process connects to the named pipe and reads the traced messages from the pipe.
 
-The reading process could be a tool like `Wireshark <https://www.wireshark.org/>`_,
-which allows visualizing live trace messages.
-Under Windows, named pipes reside in a special filesystem namespace prefixed with "\\.\pipe\".
-The following will attach *wireshark* to the named pipe created by your VIB simulation:
+The reading process could be a tool like `Wireshark <https://www.wireshark.org/>`_, which allows visualizing live trace
+messages. Under Windows, named pipes reside in a special filesystem namespace prefixed with "\\.\pipe\". The following 
+snippet will attach *wireshark* to the named pipe created by your VIB simulation:
 
 .. code-block:: powershell
 
@@ -197,55 +226,58 @@ The following will attach *wireshark* to the named pipe created by your VIB simu
 
 
 API and Data Type Reference
---------------------------------------------------
+---------------------------
+
 Ethernet Controller API
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygenclass:: ib::sim::eth::IEthController
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. doxygenclass:: ib::sim::eth::IEthernetController
    :members:
 
 Data Structures
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygenstruct:: ib::sim::eth::EthMessage
+~~~~~~~~~~~~~~~
+
+.. doxygenstruct:: ib::sim::eth::EthernetFrameEvent
    :members:
-.. doxygenclass:: ib::sim::eth::EthFrame
+.. doxygenclass:: ib::sim::eth::EthernetFrame
    :members:
-.. doxygenstruct:: ib::sim::eth::EthTagControlInformation
+.. doxygenstruct:: ib::sim::eth::EthernetTagControlInformation
    :members:
-.. doxygenstruct:: ib::sim::eth::EthTransmitAcknowledge
+.. doxygenstruct:: ib::sim::eth::EthernetFrameTransmitEvent
    :members:
-.. doxygenstruct:: ib::sim::eth::EthStatus
+.. doxygenstruct:: ib::sim::eth::EthernetStateChangeEvent
+   :members:
+.. doxygenstruct:: ib::sim::eth::EthernetBitrateChangeEvent
    :members:
 
 Enumerations and Typedefs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygentypedef:: ib::sim::eth::EthTxId
-.. doxygentypedef:: ib::sim::eth::EthMac
-.. doxygentypedef:: ib::sim::eth::EthVid
-.. doxygenenum:: ib::sim::eth::EthTransmitStatus
-.. doxygenenum:: ib::sim::eth::EthState
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. doxygentypedef:: ib::sim::eth::EthernetTxId
+.. doxygentypedef:: ib::sim::eth::EthernetMac
+.. doxygentypedef:: ib::sim::eth::EthernetVid
+.. doxygentypedef:: ib::sim::eth::EthernetBitrate
+.. doxygenenum:: ib::sim::eth::EthernetTransmitStatus
+.. doxygenenum:: ib::sim::eth::EthernetState
 
 Usage Examples
-----------------------------------------------------
+--------------
 
-This section contains complete examples that show the usage and the interaction
-of two Ethernet controllers. Although the Ethernet controllers would
-typically belong to different participants and reside in different processes,
-their interaction is shown sequentially to demonstrate cause and effect.
+This section contains complete examples that show the usage and the interaction of two Ethernet controllers. Although 
+the Ethernet controllers would typically belong to different participants and reside in different processes, their 
+interaction is shown sequentially to demonstrate cause and effect.
 
 Assumptions:
 
-- *ethernetReceiver*, *ethernetSender* are of type
-  :cpp:class:`IEthController*<ib::sim::eth::IEthController>`.
+- *ethernetReceiver*, *ethernetSender* are of type |IEthernetController|.
 - All Ethernet controllers are connected to the same switch.
 
 Simple Ethernet Sender / Receiver Example (without VIBE NetworkSimulator)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows a successful data transfer from one Ethernet controller
-to another. For simplicity this example is considered to be without the VIBE NetworkSimulator
-so that an :cpp:class:`EthTransmitAcknowledge<ib::sim::eth::EthTransmitAcknowledge>`
-will always return :cpp:enumerator:`EthTransmitStatus::Transmitted<ib::sim::eth::Transmitted>`.
+This example shows a successful data transfer from one Ethernet controller to another. For simplicity this example is 
+considered to be without the VIBE NetworkSimulator so that an |EthernetFrameTransmitEvent| will always return 
+|Transmitted|
 
 .. literalinclude::
    examples/eth/ETH_Sender_Receiver.cpp
@@ -253,7 +285,7 @@ will always return :cpp:enumerator:`EthTransmitStatus::Transmitted<ib::sim::eth:
 
 
 State Transition Example (only with VIBE NetworkSimulator)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows the possible state transitions for an Ethernet controller.
 
@@ -263,10 +295,9 @@ This example shows the possible state transitions for an Ethernet controller.
 
 
 Erroneous Transmissions (only with VIBE NetworkSimulator)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows different possible erroneous Ethernet transmissions 
-when using the VIBE NetworkSimulator.
+This example shows different possible erroneous Ethernet transmissions when using the VIBE NetworkSimulator.
 
 .. literalinclude::
    examples/eth/ETH_Erroneous_Transmissions.cpp

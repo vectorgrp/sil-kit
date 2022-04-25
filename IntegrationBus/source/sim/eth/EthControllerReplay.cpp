@@ -15,7 +15,7 @@ void EthControllerReplay::Deactivate()
     _controller.Deactivate();
 }
 
-auto EthControllerReplay::SendMessage(EthMessage msg) -> EthTxId
+auto EthControllerReplay::SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId
 {
     // ignore the user's API calls if we're configured for replay
     //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
@@ -23,10 +23,10 @@ auto EthControllerReplay::SendMessage(EthMessage msg) -> EthTxId
     //    return 0;
     //}
 
-    return _controller.SendMessage(std::move(msg));
+    return _controller.SendFrameEvent(std::move(msg));
 }
 
-auto EthControllerReplay::SendFrame(EthFrame msg) -> EthTxId
+auto EthControllerReplay::SendFrame(EthernetFrame msg) -> EthernetTxId
 {
     // ignore the user's API calls if we're configured for replay
     //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
@@ -37,38 +37,27 @@ auto EthControllerReplay::SendFrame(EthFrame msg) -> EthTxId
     return _controller.SendFrame(std::move(msg));
 }
 
-auto EthControllerReplay::SendFrame(EthFrame msg, std::chrono::nanoseconds timestamp) -> EthTxId
+void EthControllerReplay::AddFrameHandler(FrameHandler handler)
 {
-    // ignore the user's API calls if we're configured for replay
-    //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
-    //{
-    //    return 0;
-    //}
-
-    return _controller.SendFrame(std::move(msg), timestamp);
+    _controller.AddFrameHandler(std::move(handler));
 }
 
-void EthControllerReplay::RegisterReceiveMessageHandler(ReceiveMessageHandler handler)
+void EthControllerReplay::AddFrameTransmitHandler(FrameTransmitHandler handler)
 {
-    _controller.RegisterReceiveMessageHandler(std::move(handler));
+    _controller.AddFrameTransmitHandler(std::move(handler));
+}
+void EthControllerReplay::AddStateChangeHandler(StateChangeHandler handler)
+{
+    _controller.AddStateChangeHandler(std::move(handler));
 }
 
-void EthControllerReplay::RegisterMessageAckHandler(MessageAckHandler handler)
+void EthControllerReplay::AddBitrateChangeHandler(BitrateChangeHandler handler)
 {
-    _controller.RegisterMessageAckHandler(std::move(handler));
-}
-void EthControllerReplay::RegisterStateChangedHandler(StateChangedHandler handler)
-{
-    _controller.RegisterStateChangedHandler(std::move(handler));
-}
-
-void EthControllerReplay::RegisterBitRateChangedHandler(BitRateChangedHandler handler)
-{
-    _controller.RegisterBitRateChangedHandler(std::move(handler));
+    _controller.AddBitrateChangeHandler(std::move(handler));
 }
 
 // IIbToEthController
-void EthControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg)
+void EthControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameEvent& msg)
 {
     // ignore messages that do not originate from the replay scheduler 
     //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
@@ -122,15 +111,15 @@ void EthControllerReplay::ReplaySend(const extensions::IReplayMessage* replayMes
 {
     // need to copy the message here.
     // will throw if invalid message type.
-    sim::eth::EthFrame msg = dynamic_cast<const sim::eth::EthFrame&>(*replayMessage);
+    sim::eth::EthernetFrame msg = dynamic_cast<const sim::eth::EthernetFrame&>(*replayMessage);
     _controller.SendFrame(std::move(msg));
 }
 
 void EthControllerReplay::ReplayReceive(const extensions::IReplayMessage* replayMessage)
 {
     static tracing::ReplayServiceDescriptor replayService;
-    sim::eth::EthFrame frame = dynamic_cast<const sim::eth::EthFrame&>(*replayMessage);
-    sim::eth::EthMessage msg{};
+    sim::eth::EthernetFrame frame = dynamic_cast<const sim::eth::EthernetFrame&>(*replayMessage);
+    sim::eth::EthernetFrameEvent msg{};
     msg.ethFrame = std::move(frame);
     msg.timestamp = replayMessage->Timestamp();
     _controller.ReceiveIbMessage(&replayService, msg);

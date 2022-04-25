@@ -6,13 +6,12 @@ namespace ib {
 namespace sim {
 namespace eth {
 
-//struct EthTagControlInformation;
-struct EthMessage;
-struct EthTransmitAcknowledge;
-struct EthStatus;
-struct EthSetMode;
+struct EthernetFrameEvent;
+struct EthernetFrameTransmitEvent;
+struct EthernetStatus;
+struct EthernetSetMode;
 
-class IEthController;
+class IEthernetController;
 } // namespace eth
 } // namespace sim
 } // namespace ib

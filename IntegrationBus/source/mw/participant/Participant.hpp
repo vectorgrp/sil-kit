@@ -96,9 +96,9 @@ public:
     auto CreateCanController(const std::string& canonicalName, const std::string& networkName)
         -> sim::can::ICanController* override;
     auto CreateCanController(const std::string& canonicalName) -> sim::can::ICanController* override;
-    auto CreateEthController(const std::string& canonicalName, const std::string& networkName)
-        -> sim::eth::IEthController* override;
-    auto CreateEthController(const std::string& canonicalName) -> sim::eth::IEthController* override;
+    auto CreateEthernetController(const std::string& canonicalName, const std::string& networkName)
+        -> sim::eth::IEthernetController* override;
+    auto CreateEthernetController(const std::string& canonicalName) -> sim::eth::IEthernetController* override;
     auto CreateFlexrayController(const std::string& canonicalName, const std::string& networkName)
         -> sim::fr::IFrController* override;
     auto CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFrController* override;
@@ -167,11 +167,11 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::can::CanConfigureBaudrate& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::can::CanSetControllerMode& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::eth::EthMessage& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, sim::eth::EthMessage&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::eth::EthTransmitAcknowledge& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::eth::EthStatus& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::eth::EthSetMode& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const sim::eth::EthernetFrameEvent& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, sim::eth::EthernetFrameEvent&& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const sim::eth::EthernetFrameTransmitEvent& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const sim::eth::EthernetStatus& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const sim::eth::EthernetSetMode& msg) override;
 
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FrMessage& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, sim::fr::FrMessage&& msg) override;
@@ -221,11 +221,11 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanConfigureBaudrate& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanSetControllerMode& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::eth::EthMessage& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::eth::EthMessage&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::eth::EthTransmitAcknowledge& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::eth::EthStatus& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::eth::EthSetMode& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::eth::EthernetFrameEvent& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::eth::EthernetFrameEvent&& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::eth::EthernetFrameTransmitEvent& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::eth::EthernetStatus& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::eth::EthernetSetMode& msg) override;
 
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FrMessage& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::fr::FrMessage&& msg) override;

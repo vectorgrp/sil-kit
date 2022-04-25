@@ -4,13 +4,13 @@
 
 #include "MessageBuffer.hpp"
 
-#include "ib/sim/eth/EthDatatypes.hpp"
+#include "ib/sim/eth/EthernetDatatypes.hpp"
 
 namespace ib {
 namespace sim {
 namespace eth {
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthMessage& msg)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthernetFrameEvent& msg)
 {
     buffer << msg.transmitId
            << msg.timestamp
@@ -18,7 +18,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Et
 
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthMessage& msg)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthernetFrameEvent& msg)
 {
     std::vector<uint8_t> rawFrame;
 
@@ -26,12 +26,12 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthMessa
            >> msg.timestamp
            >> rawFrame;
 
-    msg.ethFrame = EthFrame{std::move(rawFrame)};
+    msg.ethFrame = EthernetFrame{std::move(rawFrame)};
 
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthTransmitAcknowledge& ack)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthernetFrameTransmitEvent& ack)
 {
     buffer << ack.transmitId
            << ack.sourceMac
@@ -39,7 +39,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Et
            << ack.status;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthTransmitAcknowledge& ack)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthernetFrameTransmitEvent& ack)
 {
     buffer >> ack.transmitId
            >> ack.sourceMac
@@ -48,27 +48,27 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthTrans
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthStatus& msg)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthernetStatus& msg)
 {
     buffer << msg.timestamp
            << msg.state
-           << msg.bitRate;
+           << msg.bitrate;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthStatus& msg)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthernetStatus& msg)
 {
     buffer >> msg.timestamp
            >> msg.state
-           >> msg.bitRate;
+           >> msg.bitrate;
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthSetMode& msg)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthernetSetMode& msg)
 {
     buffer << msg.mode;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthSetMode& msg)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthernetSetMode& msg)
 {
     buffer >> msg.mode;
     return buffer;

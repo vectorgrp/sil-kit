@@ -45,8 +45,8 @@ protected:
             messageBuilder << "Test Message " << index;
             std::string messageString = messageBuilder.str();
             auto& ethmsg = _testMessages[index].expectedMsg;
-            auto sourceMac = ib::sim::eth::EthMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12 };
-            ethmsg.ethFrame.SetDestinationMac(ib::sim::eth::EthMac{ 0x12,0x23,0x45,0x67,0x89,0x9a });
+            auto sourceMac = ib::sim::eth::EthernetMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12 };
+            ethmsg.ethFrame.SetDestinationMac(ib::sim::eth::EthernetMac{ 0x12,0x23,0x45,0x67,0x89,0x9a });
             ethmsg.ethFrame.SetSourceMac(sourceMac);
             ethmsg.ethFrame.SetEtherType(0x8100);
             ethmsg.ethFrame.SetPayload(reinterpret_cast<const uint8_t*>(messageString.c_str()), messageString.size());
@@ -67,10 +67,10 @@ protected:
         
         auto participant =
             ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "EthWriter", _domainId, false);
-        auto* controller = dynamic_cast<ib::sim::eth::EthControllerFacade*>(participant->CreateEthController("ETH1"));
+        auto* controller = dynamic_cast<ib::sim::eth::EthControllerFacade*>(participant->CreateEthernetController("ETH1"));
 
-        controller->RegisterMessageAckHandler(
-            [this, &ethWriterAllAcksReceivedPromiseLocal, &numAcks](ib::sim::eth::IEthController* /*ctrl*/, const ib::sim::eth::EthTransmitAcknowledge& ack) {
+        controller->AddFrameTransmitHandler(
+            [this, &ethWriterAllAcksReceivedPromiseLocal, &numAcks](ib::sim::eth::IEthernetController* /*ctrl*/, const ib::sim::eth::EthernetFrameTransmitEvent& ack) {
                 _testMessages.at(numAcks++).receivedAck = ack;
                 if (numAcks >= _testMessages.size())
                 {
@@ -84,7 +84,7 @@ protected:
 
         while (numSent < _testMessages.size())
         {
-            controller->SendMessage(_testMessages.at(numSent++).expectedMsg); // Don't move the msg to test the altered transmitID
+            controller->SendFrameEvent(_testMessages.at(numSent++).expectedMsg); // Don't move the msg to test the altered transmitID
         }
         std::cout << "All eth messages sent" << std::endl;
 
@@ -98,10 +98,10 @@ protected:
         std::promise<void> ethReaderAllReceivedPromiseLocal;
         auto participant =
             ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "EthReader", _domainId, false);
-        auto* controller = participant->CreateEthController("ETH1");
+        auto* controller = participant->CreateEthernetController("ETH1");
 
-        controller->RegisterReceiveMessageHandler(
-            [this, &ethReaderAllReceivedPromiseLocal, &numReceived](ib::sim::eth::IEthController*, const ib::sim::eth::EthMessage& msg) {
+        controller->AddFrameHandler(
+            [this, &ethReaderAllReceivedPromiseLocal, &numReceived](ib::sim::eth::IEthernetController*, const ib::sim::eth::EthernetFrameEvent& msg) {
 
                 _testMessages.at(numReceived++).receivedMsg = msg;
                 if (numReceived >= _testMessages.size())
@@ -134,10 +134,10 @@ protected:
 
     struct Testmessage
     {
-        ib::sim::eth::EthMessage expectedMsg;
-        ib::sim::eth::EthMessage receivedMsg;
-        ib::sim::eth::EthTransmitAcknowledge expectedAck;
-        ib::sim::eth::EthTransmitAcknowledge receivedAck;
+        ib::sim::eth::EthernetFrameEvent expectedMsg;
+        ib::sim::eth::EthernetFrameEvent receivedMsg;
+        ib::sim::eth::EthernetFrameTransmitEvent expectedAck;
+        ib::sim::eth::EthernetFrameTransmitEvent receivedAck;
     };
 
     uint32_t _domainId;

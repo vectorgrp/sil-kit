@@ -15,8 +15,8 @@ namespace eth {
  *  Used by the Participant, implemented by the EthController
  */
 class IIbToEthController
-    : public mw::IIbReceiver<EthMessage>
-    , public mw::IIbSender<EthMessage>
+    : public mw::IIbReceiver<EthernetFrameEvent>
+    , public mw::IIbSender<EthernetFrameEvent>
 {
 };
 

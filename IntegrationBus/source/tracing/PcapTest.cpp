@@ -4,7 +4,7 @@
 
 #include <cstring>
 
-#include "ib/sim/eth/EthDatatypes.hpp"
+#include "ib/sim/eth/EthernetDatatypes.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -18,7 +18,7 @@ using namespace ib::tracing;
 using namespace ib::sim::eth;
 using namespace ib::mw::test;
 
-std::vector<char> MakePcapTestData(EthFrame& frame, size_t numMessages)
+std::vector<char> MakePcapTestData(EthernetFrame& frame, size_t numMessages)
 {
     std::vector<char> data;
     std::vector<uint8_t> payload(1500, '\0');
@@ -26,8 +26,8 @@ std::vector<char> MakePcapTestData(EthFrame& frame, size_t numMessages)
     Pcap::GlobalHeader ghdr{};
     Pcap::PacketHeader phdr{};
 
-    frame.SetDestinationMac(EthMac{1,2,3,4,5,6});
-    frame.SetSourceMac(EthMac{7,8,9,0xa,0xb,0xc});
+    frame.SetDestinationMac(EthernetMac{1,2,3,4,5,6});
+    frame.SetSourceMac(EthernetMac{7,8,9,0xa,0xb,0xc});
     frame.SetEtherType(0x0800);
     frame.SetPayload(payload);
 
@@ -56,7 +56,7 @@ std::vector<char> MakePcapTestData(EthFrame& frame, size_t numMessages)
 
 TEST(ReplayTest, read_from_pcap)
 {
-    EthFrame frame{};
+    EthernetFrame frame{};
     DummyLogger log;
     std::stringstream ss;
 
@@ -76,7 +76,7 @@ TEST(ReplayTest, read_from_pcap)
         numMessages++;
 
         //validate contents of messages
-        auto ethMsg = dynamic_cast<EthFrame&>(*msg);
+        auto ethMsg = dynamic_cast<EthernetFrame&>(*msg);
         EXPECT_EQ(ethMsg.GetEtherType(), frame.GetEtherType());
         EXPECT_EQ(ethMsg.GetSourceMac(), frame.GetSourceMac());
         EXPECT_EQ(ethMsg.GetDestinationMac(), frame.GetDestinationMac());

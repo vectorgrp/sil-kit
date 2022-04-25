@@ -8,35 +8,50 @@ namespace ib {
 namespace sim {
 namespace eth {
 
-bool operator==(const EthTagControlInformation& lhs, const EthTagControlInformation& rhs)
+bool operator==(const EthernetTagControlInformation& lhs, const EthernetTagControlInformation& rhs)
 {
     return lhs.pcp == rhs.pcp
         && lhs.dei == rhs.dei
         && lhs.vid == rhs.vid;
 }
 
-bool operator==(const EthMessage& lhs, const EthMessage& rhs)
+bool operator==(const EthernetFrameEvent& lhs, const EthernetFrameEvent& rhs)
 {
     return lhs.transmitId == rhs.transmitId
         && lhs.timestamp == rhs.timestamp
         && lhs.ethFrame.RawFrame() == rhs.ethFrame.RawFrame();
 }
 
-bool operator==(const EthFrame& lhs, const EthFrame& rhs)
+bool operator==(const EthernetFrame& lhs, const EthernetFrame& rhs)
 {
     return lhs.RawFrame() == rhs.RawFrame();
 }
 
-bool operator==(const EthTransmitAcknowledge& lhs, const EthTransmitAcknowledge& rhs)
+bool operator==(const EthernetFrameTransmitEvent& lhs, const EthernetFrameTransmitEvent& rhs)
 {
     return lhs.transmitId == rhs.transmitId
         && lhs.timestamp == rhs.timestamp
         && lhs.status == rhs.status;
 }
 
-bool operator==(const EthSetMode& lhs, const EthSetMode& rhs)
+bool operator==(const EthernetSetMode& lhs, const EthernetSetMode& rhs)
 {
     return lhs.mode == rhs.mode;
+}
+
+bool operator==(const EthernetStateChangeEvent& lhs, const EthernetStateChangeEvent& rhs)
+{
+    return lhs.state == rhs.state && lhs.timestamp == rhs.timestamp;
+}
+
+bool operator==(const EthernetBitrateChangeEvent& lhs, const EthernetBitrateChangeEvent& rhs)
+{
+    return lhs.bitrate == rhs.bitrate && lhs.timestamp == rhs.timestamp;
+}
+
+bool operator!=(const EthernetBitrateChangeEvent& lhs, const EthernetBitrateChangeEvent& rhs)
+{
+    return lhs.bitrate != rhs.bitrate || lhs.timestamp != rhs.timestamp;
 }
 
 } // namespace eth

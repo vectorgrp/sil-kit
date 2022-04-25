@@ -5,7 +5,7 @@
 #include <memory>
 #include <map>
 
-#include "ib/sim/eth/IEthController.hpp"
+#include "ib/sim/eth/IEthernetController.hpp"
 #include "ib/mw/fwd_decl.hpp"
 
 #include "IIbToEthControllerProxy.hpp"
@@ -20,7 +20,7 @@ namespace eth {
 
 
 class EthControllerProxy
-    : public IEthController
+    : public IEthernetController
     , public IIbToEthControllerProxy
     , public extensions::ITraceMessageSource
     , public mw::IIbServiceEndpoint
@@ -35,7 +35,7 @@ public:
     EthControllerProxy() = delete;
     EthControllerProxy(const EthControllerProxy&) = default;
     EthControllerProxy(EthControllerProxy&&) = default;
-    EthControllerProxy(mw::IParticipantInternal* participant, cfg::EthernetController config, IEthController* facade = nullptr);
+    EthControllerProxy(mw::IParticipantInternal* participant, cfg::EthernetController config, IEthernetController* facade = nullptr);
 
 public:
     // ----------------------------------------
@@ -47,24 +47,23 @@ public:
     // ----------------------------------------
     // Public interface methods
     //
-    // IEthController
+    // IEthernetController
     void Activate() override;
     void Deactivate() override;
 
-    auto SendMessage(EthMessage msg) -> EthTxId;
+    auto SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId;
 
-    auto SendFrame(EthFrame frame) -> EthTxId override;
-    auto SendFrame(EthFrame frame, std::chrono::nanoseconds timestamp) -> EthTxId override;
+    auto SendFrame(EthernetFrame frame) -> EthernetTxId override;
 
-    void RegisterReceiveMessageHandler(ReceiveMessageHandler handler) override;
-    void RegisterMessageAckHandler(MessageAckHandler handler) override;
-    void RegisterStateChangedHandler(StateChangedHandler handler) override;
-    void RegisterBitRateChangedHandler(BitRateChangedHandler handler) override;
+    void AddFrameHandler(FrameHandler handler) override;
+    void AddFrameTransmitHandler(FrameTransmitHandler handler) override;
+    void AddStateChangeHandler(StateChangeHandler handler) override;
+    void AddBitrateChangeHandler(BitrateChangeHandler handler) override;
 
     // IIbToEthController
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthMessage& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthTransmitAcknowledge& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthStatus& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameEvent& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameTransmitEvent& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetStatus& msg) override;
 
     // ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
@@ -88,36 +87,36 @@ private:
     template<typename MsgT>
     void CallHandlers(const MsgT& msg);
 
-    inline auto MakeTxId() -> EthTxId;
+    inline auto MakeTxId() -> EthernetTxId;
 
 private:
     // ----------------------------------------
     // private members
     mw::IParticipantInternal* _participant = nullptr;
     ::ib::mw::ServiceDescriptor _serviceDescriptor;
-    IEthController* _facade{nullptr};
+    IEthernetController* _facade{nullptr};
 
-    EthTxId _ethTxId = 0;
-    EthState _ethState = EthState::Inactive;
+    EthernetTxId _ethernetTxId = 0;
+    EthernetState _ethState = EthernetState::Inactive;
     uint32_t _ethBitRate = 0;
 
     std::tuple<
-        CallbackVector<EthMessage>,
-        CallbackVector<EthTransmitAcknowledge>,
-        CallbackVector<EthState>,
-        CallbackVector<uint32_t>
+        CallbackVector<EthernetFrameEvent>,
+        CallbackVector<EthernetFrameTransmitEvent>,
+        CallbackVector<EthernetStateChangeEvent>,
+        CallbackVector<EthernetBitrateChangeEvent>
     > _callbacks;
 
     extensions::Tracer _tracer;
-    std::map<EthTxId, EthFrame> _transmittedMessages;
+    std::map<EthernetTxId, EthernetFrame> _transmittedMessages;
 };
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-auto EthControllerProxy::MakeTxId() -> EthTxId
+auto EthControllerProxy::MakeTxId() -> EthernetTxId
 {
-    return ++_ethTxId;
+    return ++_ethernetTxId;
 }
 
 void EthControllerProxy::AddSink(extensions::ITraceMessageSink* sink)

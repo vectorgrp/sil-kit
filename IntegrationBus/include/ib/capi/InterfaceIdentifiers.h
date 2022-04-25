@@ -16,9 +16,10 @@ typedef int32_t ib_InterfaceIdentifier;
 #define ib_InterfaceIdentifier_CanFrame_Meta               ((ib_InterfaceIdentifier)1003001)
 
 // Ethernet
-#define ib_InterfaceIdentifier_EthernetFrame               ((ib_InterfaceIdentifier)2001001)
-#define ib_InterfaceIdentifier_EthernetTransmitAcknowledge ((ib_InterfaceIdentifier)2002001)
-#define ib_InterfaceIdentifier_EthernetFrame_Meta          ((ib_InterfaceIdentifier)2003001)
+#define ib_InterfaceIdentifier_EthernetFrameEvent          ((ib_InterfaceIdentifier)2001001)
+#define ib_InterfaceIdentifier_EthernetFrameTransmitEvent  ((ib_InterfaceIdentifier)2002001)
+#define ib_InterfaceIdentifier_EthernetStateChangeEvent    ((ib_InterfaceIdentifier)2003001)
+#define ib_InterfaceIdentifier_EthernetBitrateChangeEvent  ((ib_InterfaceIdentifier)2004001)
 
 // FlexRay
 #define ib_InterfaceIdentifier_FlexRayMessage              ((ib_InterfaceIdentifier)3001001)

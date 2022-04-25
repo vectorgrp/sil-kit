@@ -25,7 +25,7 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
     return out;
 }
 
-std::vector<uint8_t> CreateRawFrame(const eth::EthMac& destinationAddress, const eth::EthMac& sourceAddress,
+std::vector<uint8_t> CreateRawFrame(const eth::EthernetMac& destinationAddress, const eth::EthernetMac& sourceAddress,
                                     const std::vector<uint8_t>& payload)
 {
     const std::vector<uint8_t> etherType = {0x00, 0x00};
@@ -57,32 +57,32 @@ std::string GetPayloadStringFromRawFrame(const std::vector<uint8_t>& rawFrame)
     return payloadString;
 }
 
-void EthAckCallback(eth::IEthController* /*controller*/, const eth::EthTransmitAcknowledge& ack)
+void FrameTransmitHandler(eth::IEthernetController* /*controller*/, const eth::EthernetFrameTransmitEvent& frameTransmitEvent)
 {
-    if (ack.status == eth::EthTransmitStatus::Transmitted)
+    if (frameTransmitEvent.status == eth::EthernetTransmitStatus::Transmitted)
     {
-        std::cout << ">> ACK for ETH Message with transmitId=" << ack.transmitId << std::endl;
+        std::cout << ">> ACK for Ethernet frame with transmitId=" << frameTransmitEvent.transmitId << std::endl;
     }
     else
     {
-        std::cout << ">> NACK for ETH Message with transmitId=" << ack.transmitId;
-        switch (ack.status)
+        std::cout << ">> NACK for Ethernet frame with transmitId=" << frameTransmitEvent.transmitId;
+        switch (frameTransmitEvent.status)
         {
-        case eth::EthTransmitStatus::Transmitted:
+        case eth::EthernetTransmitStatus::Transmitted:
             break;
-        case eth::EthTransmitStatus::InvalidFrameFormat:
+        case eth::EthernetTransmitStatus::InvalidFrameFormat:
             std::cout << ": InvalidFrameFormat";
             break;
-        case eth::EthTransmitStatus::ControllerInactive:
+        case eth::EthernetTransmitStatus::ControllerInactive:
             std::cout << ": ControllerInactive";
             break;
-        case eth::EthTransmitStatus::LinkDown:
+        case eth::EthernetTransmitStatus::LinkDown:
             std::cout << ": LinkDown";
             break;
-        case eth::EthTransmitStatus::Dropped:
+        case eth::EthernetTransmitStatus::Dropped:
             std::cout << ": Dropped";
             break;
-        case eth::EthTransmitStatus::DuplicatedTransmitId:
+        case eth::EthernetTransmitStatus::DuplicatedTransmitId:
             std::cout << ": DuplicatedTransmitId";
             break;
         }
@@ -91,20 +91,20 @@ void EthAckCallback(eth::IEthController* /*controller*/, const eth::EthTransmitA
     }
 }
 
-void ReceiveEthMessage(eth::IEthController* /*controller*/, const eth::EthMessage& msg)
+void FrameHandler(eth::IEthernetController* /*controller*/, const eth::EthernetFrameEvent& frameEvent)
 {
-    auto rawFrame = msg.ethFrame.RawFrame();
+    auto rawFrame = frameEvent.ethFrame.RawFrame();
     auto payload = GetPayloadStringFromRawFrame(rawFrame);
-    std::cout << ">> ETH Message: \""
+    std::cout << ">> Ethernet frame: \""
               << payload
               << "\"" << std::endl;
 }
 
-void SendMessage(eth::IEthController* controller, const eth::EthMac& from, const eth::EthMac& to)
+void SendFrame(eth::IEthernetController* controller, const eth::EthernetMac& from, const eth::EthernetMac& to)
 {
-    static int msgId = 0;
+    static int frameId = 0;
     std::stringstream stream;
-    stream << "Hello from Ethernet writer! (msgId=" << msgId++<< ")"
+    stream << "Hello from Ethernet writer! (frameId =" << frameId++<< ")"
               "----------------------------------------------------"; // ensure that the payload is long enough to constitute a valid Ethernet frame
 
     auto payloadString = stream.str();
@@ -113,9 +113,9 @@ void SendMessage(eth::IEthController* controller, const eth::EthMac& from, const
 
     std::vector<uint8_t> rawFrame = CreateRawFrame(to, from, payload);
 
-    eth::EthFrame frame;
+    eth::EthernetFrame frame;
     frame.SetRawFrame(rawFrame);
-
+    
     auto transmitId = controller->SendFrame(std::move(frame));
     std::cout << "<< ETH Frame sent with transmitId=" << transmitId << std::endl;
 }
@@ -126,9 +126,9 @@ void SendMessage(eth::IEthController* controller, const eth::EthMac& from, const
 
 int main(int argc, char** argv)
 {
-    ib::sim::eth::EthMac WriterMacAddr = {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1};
-    //ib::sim::eth::EthMac ReaderMacAddr = {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC2};
-    ib::sim::eth::EthMac BroadcastMacAddr = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    ib::sim::eth::EthernetMac WriterMacAddr = {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1};
+    //ib::sim::eth::EthernetMac ReaderMacAddr = {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC2};
+    ib::sim::eth::EthernetMac BroadcastMacAddr = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
     if (argc < 3)
     {
@@ -184,18 +184,18 @@ int main(int argc, char** argv)
 
         std::cout << "Creating participant '" << participantName << "' in domain " << domainId << std::endl;
         auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId, runSync);
-        auto* ethController = participant->CreateEthController("Eth1");
+        auto* ethernetController = participant->CreateEthernetController("Eth1");
 
-        ethController->RegisterReceiveMessageHandler(&ReceiveEthMessage);
-        ethController->RegisterMessageAckHandler(&EthAckCallback);
+        ethernetController->AddFrameHandler(&FrameHandler);
+        ethernetController->AddFrameTransmitHandler(&FrameTransmitHandler);
 
         if (runSync)
         {
             auto* participantController = participant->GetParticipantController();
             // Set an Init Handler
-            participantController->SetInitHandler([&participantName, ethController](auto /*initCmd*/) {
+            participantController->SetInitHandler([&participantName, ethernetController](auto /*initCmd*/) {
                 std::cout << "Initializing " << participantName << std::endl;
-                ethController->Activate();
+                ethernetController->Activate();
             });
 
             // Set a Stop Handler
@@ -212,12 +212,12 @@ int main(int argc, char** argv)
             if (participantName == "EthernetWriter")
             {
                 participantController->SetSimulationTask(
-                    [ethController, WriterMacAddr, destinationAddress = BroadcastMacAddr](
+                    [ethernetController, WriterMacAddr, destinationAddress = BroadcastMacAddr](
                         std::chrono::nanoseconds now,
                                                                     std::chrono::nanoseconds /*duration*/) {
                         std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count()
                                   << "ms" << std::endl;
-                        SendMessage(ethController, WriterMacAddr, destinationAddress);
+                        SendFrame(ethernetController, WriterMacAddr, destinationAddress);
                         std::this_thread::sleep_for(1s);
                     });
             }
@@ -250,7 +250,7 @@ int main(int argc, char** argv)
                 workerThread = std::thread{[&]() {
                     while (!isStopped)
                     {
-                        SendMessage(ethController, WriterMacAddr, BroadcastMacAddr);
+                        SendFrame(ethernetController, WriterMacAddr, BroadcastMacAddr);
                         std::this_thread::sleep_for(1s);
                     }
                 }};

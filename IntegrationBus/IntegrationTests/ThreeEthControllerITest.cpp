@@ -28,10 +28,10 @@ using testing::NiceMock;
 using testing::Return;
 
 
-auto MatchTxId(EthTxId transmitId) -> testing::Matcher<const EthTransmitAcknowledge&>
+auto MatchTxId(EthernetTxId transmitId) -> testing::Matcher<const EthernetFrameTransmitEvent&>
 {
     using namespace testing;
-    return Field(&EthTransmitAcknowledge::transmitId, transmitId);
+    return Field(&EthernetFrameTransmitEvent::transmitId, transmitId);
 }
 
 class ThreeEthControllerITest : public testing::Test
@@ -39,7 +39,7 @@ class ThreeEthControllerITest : public testing::Test
 protected:
     struct Callbacks
     {
-        MOCK_METHOD1(AckHandler, void(const EthTransmitAcknowledge&));
+        MOCK_METHOD1(AckHandler, void(const EthernetFrameTransmitEvent&));
     };
 
 protected:
@@ -62,9 +62,9 @@ protected:
     {
         std::cout << " Sender init " << participant->Name() << std::endl;
 
-        auto* controller = participant->Participant()->CreateEthController("ETH1", "LINK1");
-        controller->RegisterMessageAckHandler(
-            [this, participant](IEthController*, const EthTransmitAcknowledge& ack) {
+        auto* controller = participant->Participant()->CreateEthernetController("ETH1", "LINK1");
+        controller->AddFrameTransmitHandler(
+            [this, participant](IEthernetController*, const EthernetFrameTransmitEvent& ack) {
             std::cout << participant->Name() << " <- EthTransmitAck" << std::endl;
             callbacks.AckHandler(ack);
             numAcked++;
@@ -76,9 +76,9 @@ protected:
                 if (numSent < testMessages.size())
                 {
                     const auto& message = testMessages.at(numSent);
-                    EthFrame frame;
-                    frame.SetDestinationMac(EthMac{ 0x12,0x23,0x45,0x67,0x89,0x9a });
-                    frame.SetSourceMac(EthMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12});
+                    EthernetFrame frame;
+                    frame.SetDestinationMac(EthernetMac{ 0x12,0x23,0x45,0x67,0x89,0x9a });
+                    frame.SetSourceMac(EthernetMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12});
                     frame.SetEtherType(0x8100);
                     frame.SetPayload(reinterpret_cast<const uint8_t*>(message.expectedData.c_str()), message.expectedData.size());
 
@@ -94,14 +94,14 @@ protected:
     void SetupReceiver(ib::test::SimParticipant* participant)
     {
         std::cout << " Receiver init " << participant->Name() << std::endl;
-        auto* controller = participant->Participant()->CreateEthController("ETH1", "LINK1");
-        controller->RegisterMessageAckHandler(
-            [this](IEthController* , const EthTransmitAcknowledge& ack) {
+        auto* controller = participant->Participant()->CreateEthernetController("ETH1", "LINK1");
+        controller->AddFrameTransmitHandler(
+            [this](IEthernetController* , const EthernetFrameTransmitEvent& ack) {
             callbacks.AckHandler(ack);
         });
 
-        controller->RegisterReceiveMessageHandler(
-            [this, participant](IEthController*, const EthMessage& msg) {
+        controller->AddFrameHandler(
+            [this, participant](IEthernetController*, const EthernetFrameEvent& msg) {
                 const auto& pl = msg.ethFrame.GetPayload();
                 std::string message(pl.begin(), pl.end());
                 std::cout << participant->Name() 
@@ -133,8 +133,8 @@ protected:
         SetupReceiver(ethReader1);
 
         // reader 2 simply counts the number of messages
-        auto* controller = ethReader2->Participant()->CreateEthController("ETH1", "LINK1");
-        controller->RegisterReceiveMessageHandler(
+        auto* controller = ethReader2->Participant()->CreateEthernetController("ETH1", "LINK1");
+        controller->AddFrameHandler(
             [this](auto, auto) {
                 numReceived2++;
             }

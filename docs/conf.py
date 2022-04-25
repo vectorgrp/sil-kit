@@ -42,6 +42,10 @@ extensions = [
     'sphinx.ext.autosectionlabel',
     "breathe" ]
 
+# For automatic creation of labels per section
+autosectionlabel_prefix_document = True
+autosectionlabel_maxdepth = 10
+
 # Additional flags to further configure Sphinx
 numfig = True
 numfig_secnum_depth = 1

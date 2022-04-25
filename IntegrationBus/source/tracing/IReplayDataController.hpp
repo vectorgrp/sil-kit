@@ -50,7 +50,7 @@ public:
 
     //! \brief Replay the given message.
     // The controller is responsible for converting the replay message into a
-    // concrete type, e.g. sim::eth::EthFrame.
+    // concrete type, e.g. sim::eth::EthernetFrame.
     virtual void ReplayMessage(const extensions::IReplayMessage* message) = 0;
 };
 } //end namespace tracing
