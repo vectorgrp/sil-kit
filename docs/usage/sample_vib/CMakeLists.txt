@@ -6,5 +6,6 @@ find_package(IntegrationBus
     REQUIRED CONFIG
     PATHS "${CMAKE_CURRENT_LIST_DIR}/IntegrationBus"
 )
+find_package(Threads REQUIRED)
 add_executable(${PROJECT_NAME} simple.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE IntegrationBus::IntegrationBus)
+target_link_libraries(${PROJECT_NAME} PRIVATE IntegrationBus::IntegrationBus Threads::Threads)

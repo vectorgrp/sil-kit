@@ -1,5 +1,5 @@
 ===============
-!!! Quick Start
+Quick Start
 ===============
 
 .. |Participant| replace:: :ref:`Participant<sec:participant-factory>`
@@ -12,65 +12,53 @@ The Vector Integration Bus (VIB) is a C++ library for the distributed simulation
 It is designed to work on Windows and Linux.
 This quick start demonstrates how to get started using the pre-built VIB release distribution.
 
-For building from the source tree, refer to :doc:`../development/build`.
-
 This guide will walk you through setting up a VIB project from scratch. First, the terminology
 required to understand the functionality is briefly discussed, then the build process and the actual code.
 
 .. _sec:quickstart-terminology:
 
-!!! Terminology
+Terminology
 -----------
 
 .. list-table:: 
  :widths: 20 80
 
- * - :ref:`Participant<sec:cfg-participant>`
-   - A communication node in the distributed simulation. Every simulation must
-     at least define one participant.
  * - :doc:`Participant<../api/participant>`
-   - Entry point to the VIB library. Abstracts away the underlying middleware.
-     Allows creation of vehicle network controllers and other services. Each
-     participant has its own Participant instance.
+   - A communication node in the distributed simulation and entry point to the VIB library. 
+     Allows creation of vehicle network controllers and other services. 
  * - :ref:`Services<sec:api-services>`
    - Participants interact with each other through the means of services, e.g.,
-     a :doc:`CAN Controller<../api/can>` or a :doc:`Generic Message
-     Publisher<../api/genericmessage>`. A special service is the
+     a :doc:`CAN Controller<../api/can>` or a :doc:`DataPublisher<../api/datamessage>`. A special service is the
      :doc:`Participant Controller<../api/participantcontroller>`, which
      provides state handling and time synchronization.
- * - :ref:`Links<sec:cfg-links>`
-   - A virtual connection between services of different participants. A link can, e.g., represent a CAN bus.
  * - :doc:`Configuration<../configuration/configuration>`
-   - A simulation is defined by its configuration. E.g., the configuration
-     specifies participants and their services used in the simulation.
+   - The optional participant configuration file allows to easily configure a participant and its interconnection within the 
+     simulation. It can be used to change a participants behavior without needing to recompile its sources.
  * - Domain Id
    - A numerical label to uniquely identify a simulation run.
-     This allows running multiple simulations on the same hosts.
+     This allows running multiple simulations on the same host.
  * - :doc:`Middleware<../configuration/middleware-configuration>`
    - The concrete distributed communication implementation. That is, the software layer
      implementing the distributed message passing mechanism.
- * - :ref:`Synchronization (SyncType) <sec:cfg-participant-controller>`
-   - A configuration option that determines if and how a participant synchronizes with all other participants.
- * - :ref:`Simulation Time (TimeSync) <sec:cfg-time-sync>`
-   - The granularity of the simulation time depends on the configured protocol.
+ * - :ref:`Simulation Time <sec:cfg-time-sync>`
+   - The simulated time within a simulation as it is perceived by a participant. Participants might be synchronized or
+     unsynchronized.
 
 A simulation consists of participants, which all share the same domain identifier.
-The participants might be physically distributed in a network, but not necessarily so.
+The participants might be physically distributed in a network or running on the same host.
 The simulation is identified by its domain among all network hosts taking part in the simulation.
 
 Thus, it is feasible to have multiple simulations running in parallel on the same host computer.
-Some participants have special roles, depending on the configuration of the middleware,
-syncronization protocol or :doc:`../vibes/overview`.
-Some configurations require auxiliary programs to run on your host computer(s),
-for example the :ref:`VAsio Middleware<sec:mwcfg-vasio>` requires the :ref:`sec:util-registry` to work properly.
-The :ref:`sec:util-launcher` is designed to simplify starting ensembles of programs
-that make up elaborate simulations environments.
+Some participants can have special roles, depending on e.g. the synchronization and detail of the simulation or
+:doc:`../vibes/overview`.
+Additionally the :ref:`VAsio Middleware<sec:mwcfg-vasio>` of the Vector Integration Bus requires the
+:ref:`sec:util-registry` to work properly.
 
-!!! Writing your first VIB application
+Writing your first VIB application
 ----------------------------------
 This tutorial assumes that you are familiar with `CMake (https://cmake.org) <https://cmake.org>`_ and C++.
 
-!!! Using the VIB package
+Using the VIB package
 ~~~~~~~~~~~~~~~~~~~~~
 The VIB distribution contains a self-contained and deployable installation in the *IntegrationBus* directory.
 The  CMake build configuration required is exported to ``IntegrationBus/lib/cmake/IntegrationBus`` and
@@ -89,9 +77,9 @@ If you use another method to build your software you can directly use the ``Inte
 
 .. _sec:quickstart-simple:
 
-!!! A simple Generic Message application
+A simple Data Message application
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-We'll create a simple, self-contained VIB application that uses :doc:`Generic Messages<../api/genericmessage>`
+We'll create a simple, self-contained VIB application that uses :doc:`Data Messages<../api/datamessage>`
 to exchange user-defined data among its participants.
 The messages are exchanged using a publish / subscribe pattern.
 
@@ -105,12 +93,12 @@ The file will be loaded by our application and from helper :doc:`utilities`::
     auto config = Config::FromJsonFile("simple.json")
 
 
-The configuration consists of the active middleware, two participants that make
-up our simulation (``PublisherParticipant`` and ``SubscriberParticipant``), and
-additional information like the synchronization mode and granularity at which
-simulation time advances.  The participants both have links to the
-``DataService`` generic message resource.  These configured names will also be
-referenced directly in the C++ code.
+The configuration file itself contains an empty JSON object, that later on can be used to configure our simulation participants 
+without recompiling it.
+
+.. literalinclude::
+   sample_vib/simple.json
+   :language: javascript
 
 The application will run two participants concurrently, each in their own thread.
 One thread will act as a publisher by sending a test string to its subscribers:
@@ -118,16 +106,15 @@ One thread will act as a publisher by sending a test string to its subscribers:
 .. literalinclude::
    sample_vib/simple.cpp
    :language: cpp
-   :lines: 16-41
+   :lines: 14-40
 
 
-First, the configured middleware domain is joined as the named participant using the
-|Participant|.
+First, the configured middleware domain is joined by creating a participant ``PublisherParticipant``.
 Creating the Participant properly initializes the VIB library and allows to instantiate
 :doc:`Services<../api/api>` and offers access to the
 :doc:`Participant Controller<../api/participantcontroller>`.
 
-Next, we create a :cpp:class:`publisher<ib::sim::generic::IGenericPublisher>` for the ``DataService`` resource.
+Next, we create a :cpp:class:`publisher<ib::sim::data::IDataPublisher>` for the ``DataService`` topic.
 This allows sending data through its :cpp:func:`Publish()<ib::sim::generic::IGenericPublisher::Publish()>`
 method, when we are in an active simulation.
 
@@ -146,12 +133,12 @@ The subscriber runs in its own thread, too:
 .. literalinclude::
    sample_vib/simple.cpp
    :language: cpp
-   :lines: 43-69
+   :lines: 42-68
 
 The setup is similar to the publisher, except that we instantiate a 
-:cpp:class:`subscriber<ib::sim::generic::IGenericSubscriber>` interface.
+:cpp:class:`subscriber<ib::sim::data::IDataSubscriber>` interface.
 This allows us to register a
-:cpp:func:`SetReceiveMessageHandler()<ib::sim::generic::IGenericSubscriber::SetReceiveMessageHandler()>`
+:cpp:func:`SetDefaultDataMessageHandler()<ib::sim::data::IDataSubscriber::SetDefaultDataMessageHandler()>`
 callback to receive data value updates.
 The simulation task has to be defined, even though no simulation work is performed.
 
@@ -163,16 +150,31 @@ simulation until the return key is pressed. For convenience and to reduce code
 duplication, these utility programs are implemented in separate executables and
 distributed in binary forms.
 
+The final simulation setup can be run through the following commands:
+
+.. code-block::
+      
+      # Start the VAsio Registry
+      ./IbRegistry.exe
+
+      # Start the System Controller and tell it to wait for PublisherParticipant and SubscriberParticipant
+      ./IbSystemController PublisherParticipant SubscriberParticipant
+
+      # Start the application running the two participants
+      # Make sure that the IntegrationBus.dll and simple.json are available 
+      ./SampleVib.exe
+
 The complete source code of this sample can be found here: :download:`CMakeLists.txt<sample_vib/CMakeLists.txt>`
 :download:`simple.cpp<sample_vib/simple.cpp>` :download:`simple.json<sample_vib/simple.json>`
 
 
-!!! Further Reading
+Further Reading
 ---------------
 
 More real-world examples, involving time synchronization and simulated
 automotive networks, can be found in the :doc:`API sections<../api/api>`.  Also,
 studying the source code of the bundled :doc:`demo applications<demos>` is a
 good start. The simulation lifecycle and supported simulation time
-synchronization are discussed in :doc:`../simulation/statehandling` and
-:doc:`../simulation/synchronization` .
+synchronization are discussed in :doc:`../simulation/simulation`. 
+Additionally, :doc:`../configuration/configuration` describes how the participant configuration file can be used
+to change the behavior of participants.
