@@ -62,22 +62,23 @@ typedef struct {
 
 TransmitContext transmitContext;
 
-void AckCallback(void* context, ib_Can_Controller* controller, struct ib_Can_TransmitAcknowledge* cAck)
+void FrameTransmitHandler(void* context, ib_Can_Controller* controller, struct ib_Can_FrameTransmitEvent* cAck)
 {
     TransmitContext* tc = (TransmitContext*)cAck->userContext;
     char buffer[256];
-    sprintf(buffer, ">> %i for CAN Message with transmitId=%i, timestamp=%"PRIu64"\n", cAck->status, tc->someInt, cAck->timestamp);
+    sprintf(buffer, ">> %i for CAN Message with transmitId=%i, timestamp=%" PRIu64 "\n", cAck->status, tc->someInt,
+            cAck->timestamp);
     ib_Logger_Log(logger, ib_LoggingLevel_Info, buffer);
 }
 
-void ReceiveMessage(void* context, ib_Can_Controller* controller, ib_Can_Message* message)
+void FrameHandler(void* context, ib_Can_Controller* controller, ib_Can_FrameEvent* frameEvent)
 {
     TransmitContext* txContext = (TransmitContext*)(context);
     unsigned int i;
     char buffer[512];
     char* position = buffer;
     position += sprintf(position, ">> CAN Message: canId=%i timestamp=%"PRIu64"\n",
-        message->canFrame->id, message->timestamp);
+        frameEvent->frame->id, frameEvent->timestamp);
     if (txContext != NULL)
     {
         position += sprintf(position, "transmitContext=%d ", txContext->someInt);
@@ -85,38 +86,38 @@ void ReceiveMessage(void* context, ib_Can_Controller* controller, ib_Can_Message
 
     position += sprintf(position, ": ");
 
-    for (i = 0; i < message->canFrame->data.size; i++)
+    for (i = 0; i < frameEvent->frame->data.size; i++)
     {
-        char ch = message->canFrame->data.data[i];
+        char ch = frameEvent->frame->data.data[i];
         if (isalnum(ch))
         {
             position += sprintf(position, "%c", ch);
         }
         else
         {
-            position += sprintf(position, "<%x>", message->canFrame->data.data[i]);
+            position += sprintf(position, "<%x>", frameEvent->frame->data.data[i]);
         }
     }
     position += sprintf(position, "\n");
     ib_Logger_Log(logger, ib_LoggingLevel_Info, buffer);
 }
 
-void SendCanMessage()
+void SendFrame()
 {
-    ib_Can_Frame msg;
-    msg.id = 17;
-    msg.flags = ib_Can_FrameFlag_brs;
+    ib_Can_Frame canFrame;
+    canFrame.id = 17;
+    canFrame.flags = ib_Can_FrameFlag_brs;
 
     char payload[64];
     canMessageCounter += 1;
     uint8_t payloadSize = (uint8_t)snprintf(payload, sizeof(payload), "CAN %i", canMessageCounter);
 
-    msg.data.data = (uint8_t*)&payload[0];
-    msg.data.size = payloadSize;
-    msg.dlc = payloadSize;
+    canFrame.data.data = (uint8_t*)&payload[0];
+    canFrame.data.size = payloadSize;
+    canFrame.dlc = payloadSize;
 
     transmitContext.someInt = 1234;
-    ib_Can_Controller_SendFrame(canController, &msg, (void*)&transmitContext);
+    ib_Can_Controller_SendFrame(canController, &canFrame, (void*)&transmitContext);
     char buffer[256];
     sprintf(buffer, "<< CAN Message sent with transmitId=%i\n", transmitContext.someInt);
     ib_Logger_Log(logger, ib_LoggingLevel_Info, buffer);
@@ -159,13 +160,16 @@ int main(int argc, char* argv[])
     const char* canController2Name = "CAN2";
     returnCode = ib_Can_Controller_Create(&canController2, participant, canController2Name, canNetworkName);
 
-    ib_Can_Controller_RegisterTransmitStatusHandler(canController, (void*)&transmitContext, &AckCallback, ib_Can_TransmitStatus_Transmitted | ib_Can_TransmitStatus_Canceled | ib_Can_TransmitStatus_TransmitQueueFull);
-    ib_Can_Controller_RegisterReceiveMessageHandler(canController2, (void*)&transmitContext, &ReceiveMessage, ib_Direction_SendReceive);
+    ib_Can_Controller_AddFrameTransmitHandler(
+        canController, (void*)&transmitContext, &FrameTransmitHandler,
+        ib_Can_TransmitStatus_Transmitted | ib_Can_TransmitStatus_Canceled | ib_Can_TransmitStatus_TransmitQueueFull);
+
+    ib_Can_Controller_AddFrameHandler(canController2, (void*)&transmitContext, &FrameHandler, ib_Direction_SendReceive);
 
     ib_Participant_GetLogger(&logger, participant);
 
     for (int i = 0; i < 10; i++) {
-        SendCanMessage();
+        SendFrame();
         SleepMs(1000);
     }
 

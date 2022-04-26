@@ -43,14 +43,6 @@
 
 #include "asio.hpp"
 
-
-#ifdef SendMessage
-#if SendMessage == SendMessageA
-#undef SendMessage
-#endif
-#endif
-
-
 namespace ib {
 namespace mw {
 
@@ -189,8 +181,8 @@ private:
         sim::data::DataMessageEvent,
         sim::rpc::FunctionCall,
         sim::rpc::FunctionCallResponse,
-        sim::can::CanMessage,
-        sim::can::CanTransmitAcknowledge,
+        sim::can::CanFrameEvent,
+        sim::can::CanFrameTransmitEvent,
         sim::can::CanControllerStatus,
         sim::can::CanConfigureBaudrate,
         sim::can::CanSetControllerMode,

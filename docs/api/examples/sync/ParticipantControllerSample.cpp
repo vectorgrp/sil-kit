@@ -3,12 +3,12 @@ auto participant = ib::CreateParticipant(ibConfig, participantName, domainId);
 auto* participantController = participant->GetParticipantController();
 auto* canController = participant->CreateCanController("CAN1", "CAN1");
 
-canController->RegisterTransmitStatusHandler(
-	[](can::ICanController* /*ctrl*/, const can::CanTransmitAcknowledge& ack) {
+canController->AddFrameTransmitHandler(
+	[](can::ICanController* /*ctrl*/, const can::CanFrameTransmitEvent& ack) {
 		//async handle transmit status
 });
-canController->RegisterReceiveMessageHandler(
-	[](can::ICanController* /*ctrl*/, const can::CanMessage& msg) {
+canController->AddFrameHandler(
+	[](can::ICanController* /*ctrl*/, const can::CanFrameEvent& frameEvent) {
 		//async handle message reception
 });
 
@@ -36,10 +36,10 @@ if (participantName == "CanWriter")
 	participantController->SetSimulationTask(
 		[canController, sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
 			std::cout << "now=" << now << ", duration=" << duration << std::endl;
-			ib::mw::sim::can::CanMessage msg;
+			ib::mw::sim::can::CanFrame msg;
 			msg.timestamp = now;
 			msg.canId = 17;
-			canController->SendMessage(std::move(msg));
+			canController->SendFrame(std::move(msg));
 	});
 
 	// This process will disconnect and reconnect during a coldswap

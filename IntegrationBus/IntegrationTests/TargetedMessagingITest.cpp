@@ -40,7 +40,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
 
     auto* senderParticipant = senderCom->GetParticipantController();
     auto* senderCan = dynamic_cast<ib::sim::can::CanControllerFacade*>(senderCom->CreateCanController("CAN1"));
-    senderCan->RegisterReceiveMessageHandler([](auto controller, auto) {
+    senderCan->AddFrameHandler([](auto controller, auto) {
         FAIL() << ": 'Sender' received targeted message from controller '" << controller << "'";
     });
     senderParticipant->SetPeriod(1ms);
@@ -50,8 +50,8 @@ TEST(TargetedMessagingITest, targeted_messaging)
             std::cout << "Sender: Current time=" << nowMs.count() << "ms" << std::endl;
             if (now == 0ms)
             {
-                ib::sim::can::CanMessage msg;
-                msg.canId = 42;
+                ib::sim::can::CanFrameEvent msg;
+                msg.frame.canId = 42;
                 senderCom->SendIbMessage(senderCan, "TargetReceiver", msg);
             }
 
@@ -67,11 +67,11 @@ TEST(TargetedMessagingITest, targeted_messaging)
 
     auto* receiverCan = receiverCom->CreateCanController("CAN1");
 
-    receiverCan->RegisterReceiveMessageHandler(
+    receiverCan->AddFrameHandler(
         [&receiveCount](ib::sim::can::ICanController* controller, auto msg) {
             std::cout << "'TargetReceiver' received a message from controller '" << controller
-                      << "' with canId=" << msg.canId << std::endl;
-            ASSERT_TRUE(msg.canId == 42) << "The received canId is wrong. expected=42; received=" << msg.canId;
+                      << "' with canId=" << msg.frame.canId << std::endl;
+            ASSERT_TRUE(msg.frame.canId == 42) << "The received canId is wrong. expected=42; received=" << msg.frame.canId;
             receiveCount++;
         });
 
@@ -84,7 +84,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
 
     auto* otherReceiverCan = otherReceiverCom->CreateCanController("CAN1");
 
-    otherReceiverCan->RegisterReceiveMessageHandler([](auto controller, auto) {
+    otherReceiverCan->AddFrameHandler([](auto controller, auto) {
         FAIL() << "'otherReceiver' received targeted message from controller '" << controller << "'";
     });
 

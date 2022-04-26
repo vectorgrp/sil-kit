@@ -16,21 +16,23 @@ namespace can {
 
 inline std::string to_string(CanControllerState state);
 inline std::string to_string(CanErrorState state);
-inline std::string to_string(CanMessage::CanReceiveFlags flags);
+inline std::string to_string(CanFrame::CanReceiveFlags flags);
 inline std::string to_string(CanTransmitStatus status);
-inline std::string to_string(const CanMessage& msg);
+inline std::string to_string(const CanFrame& msg);
+inline std::string to_string(const CanFrameEvent& msg);
 inline std::string to_string(const CanControllerStatus& status);
-inline std::string to_string(const CanTransmitAcknowledge& ack);
+inline std::string to_string(const CanFrameTransmitEvent& ack);
 inline std::string to_string(const CanConfigureBaudrate& rate);
 inline std::string to_string(const CanSetControllerMode& mode);
 
 inline std::ostream& operator<<(std::ostream& out, CanControllerState state);
 inline std::ostream& operator<<(std::ostream& out, CanErrorState state);
-inline std::ostream& operator<<(std::ostream& out, CanMessage::CanReceiveFlags flags);
+inline std::ostream& operator<<(std::ostream& out, CanFrame::CanReceiveFlags flags);
 inline std::ostream& operator<<(std::ostream& out, CanTransmitStatus status);
-inline std::ostream& operator<<(std::ostream& out, const CanMessage& msg);
+inline std::ostream& operator<<(std::ostream& out, const CanFrame& msg);
+inline std::ostream& operator<<(std::ostream& out, const CanFrameEvent& msg);
 inline std::ostream& operator<<(std::ostream& out, const CanControllerStatus& status);
-inline std::ostream& operator<<(std::ostream& out, const CanTransmitAcknowledge& status);
+inline std::ostream& operator<<(std::ostream& out, const CanFrameTransmitEvent& status);
 inline std::ostream& operator<<(std::ostream& out, const CanConfigureBaudrate& rate);
 inline std::ostream& operator<<(std::ostream& out, const CanSetControllerMode& mode);
 
@@ -70,7 +72,7 @@ std::string to_string(CanErrorState state)
     throw ib::TypeConversionError{};
 }
 
-std::string to_string(CanMessage::CanReceiveFlags flags)
+std::string to_string(CanFrame::CanReceiveFlags flags)
 {
     std::stringstream outStream;
     outStream << flags;
@@ -93,7 +95,14 @@ std::string to_string(CanTransmitStatus status)
     throw ib::TypeConversionError{};
 }
 
-std::string to_string(const CanMessage& msg)
+std::string to_string(const CanFrame& msg)
+{
+    std::stringstream outStream;
+    outStream << msg;
+    return outStream.str();
+}
+
+std::string to_string(const CanFrameEvent& msg)
 {
     std::stringstream outStream;
     outStream << msg;
@@ -107,7 +116,7 @@ std::string to_string(const CanControllerStatus& status)
     return outStream.str();
 }
 
-std::string to_string(const CanTransmitAcknowledge& ack)
+std::string to_string(const CanFrameTransmitEvent& ack)
 {
     std::stringstream outStream;
     outStream << ack;
@@ -140,7 +149,7 @@ std::ostream& operator<<(std::ostream& out, CanErrorState state)
     return out << to_string(state);
 }
 
-std::ostream& operator<<(std::ostream& out, CanMessage::CanReceiveFlags flags)
+std::ostream& operator<<(std::ostream& out, CanFrame::CanReceiveFlags flags)
 {
     out << "["
         << (flags.ide ? "ide," : "")
@@ -158,17 +167,25 @@ std::ostream& operator<<(std::ostream& out, CanTransmitStatus status)
     return out << to_string(status);
 }
 
-std::ostream& operator<<(std::ostream& out, const CanMessage& msg)
+std::ostream& operator<<(std::ostream& out, const CanFrame& msg)
 {
-    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     return out
-        << "can::CanMessage{txId=" << msg.transmitId
-        << ", userContext=" << msg.userContext
+        << "can::CanFrame{userContext=" << msg.userContext
         << ", canId=" << msg.canId
         << ", flags=" << msg.flags
         << ", dlc=" << static_cast<uint32_t>(msg.dlc)
         << ", data=[" << util::AsHexString(msg.dataField).WithSeparator(" ").WithMaxLength(8)
-        << "], data.size=" << msg.dataField.size()
+        << "], data.size=" << msg.dataField.size() << "}";
+}
+
+
+std::ostream& operator<<(std::ostream& out, const CanFrameEvent& msg)
+{
+    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
+    return out
+        << "can::CanFrameEvent{txId=" << msg.transmitId
+        << ", userContext=" << msg.frame.userContext
+        << ", frame=" << msg.frame
         << " @" << timestamp.count() << "ms}";
 }
 
@@ -181,7 +198,7 @@ std::ostream& operator<<(std::ostream& out, const CanControllerStatus& status)
         << " @" << timestamp.count() << "ms}";
 }
 
-std::ostream& operator<<(std::ostream& out, const CanTransmitAcknowledge& status)
+std::ostream& operator<<(std::ostream& out, const CanFrameTransmitEvent& status)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(status.timestamp);
     return out

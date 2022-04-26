@@ -25,14 +25,14 @@ namespace {
 using namespace std::chrono_literals;
 
 // basically the same as the normal == operator, but it doesn't compare timestamps
-bool Matches(const ib::sim::can::CanMessage& lhs, const ib::sim::can::CanMessage& rhs)
+bool Matches(const ib::sim::can::CanFrameEvent& lhs, const ib::sim::can::CanFrameEvent& rhs)
 {
     return lhs.transmitId == rhs.transmitId 
-        && lhs.canId == rhs.canId
-        && lhs.flags == rhs.flags 
-        && lhs.dlc == rhs.dlc 
-        && lhs.dataField == rhs.dataField
-        && lhs.userContext == rhs.userContext;
+        && lhs.frame.canId == rhs.frame.canId
+        && lhs.frame.flags == rhs.frame.flags
+        && lhs.frame.dlc == rhs.frame.dlc
+        && lhs.frame.dataField == rhs.frame.dataField
+        && lhs.frame.userContext == rhs.frame.userContext;
 }
 
 class CanWithoutSyncFTest : public testing::Test
@@ -55,14 +55,14 @@ protected:
             messageBuilder << "Test Message " << index;
             std::string messageString = messageBuilder.str();
             auto& canmsg = _testMessages[index].expectedMsg;
-            canmsg.canId = index;
-            canmsg.dataField.assign(messageString.begin(), messageString.end());
-            canmsg.dlc = canmsg.dataField.size();
-            canmsg.flags = ib::sim::can::CanMessage::CanReceiveFlags{ 1,0,1,0,1 };
+            canmsg.frame.canId = index;
+            canmsg.frame.dataField.assign(messageString.begin(), messageString.end());
+            canmsg.frame.dlc = canmsg.frame.dataField.size();
+            canmsg.frame.flags = ib::sim::can::CanFrame::CanReceiveFlags{ 1,0,1,0,1 };
             canmsg.timestamp = 1s;
             canmsg.transmitId = index + 1;
-            canmsg.direction = ib::sim::TransmitDirection::RX;
-            canmsg.userContext = (void*)((size_t)index+1);
+            canmsg.frame.direction = ib::sim::TransmitDirection::RX;
+            canmsg.frame.userContext = (void*)((size_t)index+1);
 
             auto& canack = _testMessages[index].expectedAck;
             canack.canId = index;
@@ -82,8 +82,8 @@ protected:
             ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "CanWriter", _domainId, false);
         auto* controller = participant->CreateCanController("CAN1");
 
-        controller->RegisterTransmitStatusHandler(
-            [this, &canWriterAllAcksReceivedPromiseLocal, &numAcks](ib::sim::can::ICanController* /*ctrl*/, const ib::sim::can::CanTransmitAcknowledge& ack) {
+        controller->AddFrameTransmitHandler(
+            [this, &canWriterAllAcksReceivedPromiseLocal, &numAcks](ib::sim::can::ICanController* /*ctrl*/, const ib::sim::can::CanFrameTransmitEvent& ack) {
                 _testMessages.at(numAcks++).receivedAck = ack;
                 if (numAcks >= _testMessages.size())
                 {
@@ -97,7 +97,7 @@ protected:
 
         while (numSent < _testMessages.size())
         {
-            controller->SendMessage(_testMessages.at(numSent).expectedMsg, (void*)((size_t)numSent+1)); // Don't move the msg to test the altered transmitID
+            controller->SendFrame(_testMessages.at(numSent).expectedMsg.frame, (void*)((size_t)numSent+1)); // Don't move the msg to test the altered transmitID
             numSent++;
         }
         std::cout << "All can messages sent" << std::endl;
@@ -114,8 +114,8 @@ protected:
         auto participant = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "CanReader", _domainId, false);
         auto* controller = participant->CreateCanController("CAN1", "CAN1");
 
-        controller->RegisterReceiveMessageHandler(
-            [this, &canReaderAllReceivedPromiseLocal, &numReceived](ib::sim::can::ICanController*, const ib::sim::can::CanMessage& msg) {
+        controller->AddFrameHandler(
+            [this, &canReaderAllReceivedPromiseLocal, &numReceived](ib::sim::can::ICanController*, const ib::sim::can::CanFrameEvent& msg) {
 
                 _testMessages.at(numReceived++).receivedMsg = msg;
                 if (numReceived >= _testMessages.size())
@@ -148,10 +148,10 @@ protected:
 
     struct Testmessage
     {
-        ib::sim::can::CanMessage expectedMsg;
-        ib::sim::can::CanMessage receivedMsg;
-        ib::sim::can::CanTransmitAcknowledge expectedAck;
-        ib::sim::can::CanTransmitAcknowledge receivedAck;
+        ib::sim::can::CanFrameEvent expectedMsg;
+        ib::sim::can::CanFrameEvent receivedMsg;
+        ib::sim::can::CanFrameTransmitEvent expectedAck;
+        ib::sim::can::CanFrameTransmitEvent receivedAck;
     };
 
     uint32_t _domainId;

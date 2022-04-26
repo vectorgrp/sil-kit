@@ -59,10 +59,10 @@ which is the factory object, as input parameter.
 .. doxygenfunction:: ib_Can_Controller_Sleep
 .. doxygenfunction:: ib_Can_Controller_SendFrame
 .. doxygenfunction:: ib_Can_Controller_SetBaudRate
-.. doxygenfunction:: ib_Can_Controller_RegisterTransmitStatusHandler
-.. doxygenfunction:: ib_Can_Controller_RegisterReceiveMessageHandler
-.. doxygenfunction:: ib_Can_Controller_RegisterStateChangedHandler
-.. doxygenfunction:: ib_Can_Controller_RegisterErrorStateChangedHandler
+.. doxygenfunction:: ib_Can_Controller_AddFrameTransmitHandler
+.. doxygenfunction:: ib_Can_Controller_AddFrameHandler
+.. doxygenfunction:: ib_Can_Controller_AddStateChangeHandler
+.. doxygenfunction:: ib_Can_Controller_AddErrorStateChangeHandler
 
 Ethernet API
 ------------

@@ -54,21 +54,20 @@ public:
     void Stop() override;
     void Sleep() override;
 
-    auto SendMessage(const CanMessage& msg, void* userContext = nullptr) -> CanTxId override;
-    auto SendMessage(CanMessage&& msg, void* userContext = nullptr) -> CanTxId override;
+    auto SendFrame(const CanFrame& msg, void* userContext = nullptr) -> CanTxId override;
 
-    void RegisterReceiveMessageHandler(ReceiveMessageHandler handler, DirectionMask directionMask = (DirectionMask)TransmitDirection::RX | (DirectionMask)TransmitDirection::TX) override;
-    void RegisterStateChangedHandler(StateChangedHandler handler) override;
-    void RegisterErrorStateChangedHandler(ErrorStateChangedHandler handler) override;
-    void RegisterTransmitStatusHandler(MessageStatusHandler handler, CanTransmitStatusMask statusMask = (CanTransmitStatusMask)CanTransmitStatus::Transmitted
+    void AddFrameHandler(FrameHandler handler, DirectionMask directionMask = (DirectionMask)TransmitDirection::RX | (DirectionMask)TransmitDirection::TX) override;
+    void AddStateChangeHandler(StateChangeHandler handler) override;
+    void AddErrorStateChangeHandler(ErrorStateChangeHandler handler) override;
+    void AddFrameTransmitHandler(FrameTransmitHandler handler, CanTransmitStatusMask statusMask = (CanTransmitStatusMask)CanTransmitStatus::Transmitted
         | (CanTransmitStatusMask)CanTransmitStatus::Canceled
         | (CanTransmitStatusMask)CanTransmitStatus::DuplicatedTransmitId
         | (CanTransmitStatusMask)CanTransmitStatus::TransmitQueueFull) override;
 
     // IIbToCanController
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanMessage& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanFrameEvent& msg) override;
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanControllerStatus& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanTransmitAcknowledge& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanFrameTransmitEvent& msg) override;
 
     //ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
@@ -113,10 +112,10 @@ private:
     CanConfigureBaudrate _baudRate = { 0, 0 };
 
     std::tuple<
-        CallbackVector<CanMessage>,
-        CallbackVector<CanControllerState>,
-        CallbackVector<CanErrorState>,
-        CallbackVector<CanTransmitAcknowledge>
+        CallbackVector<CanFrameEvent>,
+        CallbackVector<CanStateChangeEvent>,
+        CallbackVector<CanErrorStateChangeEvent>,
+        CallbackVector<CanFrameTransmitEvent>
     > _callbacks;
 
     extensions::Tracer _tracer;

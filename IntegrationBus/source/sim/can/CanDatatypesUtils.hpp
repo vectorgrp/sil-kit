@@ -10,11 +10,14 @@ namespace ib {
 namespace sim {
 namespace can {
 
-bool operator==(const CanMessage::CanReceiveFlags& lhs, const CanMessage::CanReceiveFlags& rhs);
-bool operator==(const CanMessage& lhs, const CanMessage& rhs);
-bool operator==(const CanTransmitAcknowledge& lhs, const CanTransmitAcknowledge& rhs);
+bool operator==(const CanFrame::CanReceiveFlags& lhs, const CanFrame::CanReceiveFlags& rhs);
+bool operator==(const CanFrame& lhs, const CanFrame& rhs);
+bool operator==(const CanFrameEvent& lhs, const CanFrameEvent& rhs);
+bool operator==(const CanFrameTransmitEvent& lhs, const CanFrameTransmitEvent& rhs);
 bool operator==(const CanSetControllerMode& lhs, const CanSetControllerMode& rhs);
 bool operator==(const CanConfigureBaudrate& lhs, const CanConfigureBaudrate& rhs);
+bool operator==(const CanStateChangeEvent& lhs, const CanStateChangeEvent& rhs);
+bool operator==(const CanErrorStateChangeEvent& lhs, const CanErrorStateChangeEvent& rhs);
 
 
 }

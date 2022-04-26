@@ -97,18 +97,18 @@ void ShutdownCallback(void* context, ib_Participant* cbParticipant)
     printf(">> ShutdownCallback with context=%i\n", tc->someInt);
 }
 
-void AckCallback(void* context, ib_Can_Controller* controller, struct ib_Can_TransmitAcknowledge* cAck)
+void FrameTransmitHandler(void* context, ib_Can_Controller* controller, struct ib_Can_FrameTransmitEvent* cAck)
 {
     //TransmitContext* tc = (TransmitContext*) cAck->userContext;
     printf(">> %i for CAN Message with timestamp=%"PRIu64"\n", cAck->status, cAck->timestamp);
 }
 
-void ReceiveMessage(void* context, ib_Can_Controller* controller, ib_Can_Message* message)
+void FrameHandler(void* context, ib_Can_Controller* controller, ib_Can_FrameEvent* frameEvent)
 {
     TransmitContext* txContext = (TransmitContext*)(context);
     unsigned int i;
-    printf(">> CAN Message: canId=%i timestamp=%"PRIu64" ",
-        message->canFrame->id, message->timestamp);
+    printf(">> CAN frameEvent: canId=%i timestamp=%"PRIu64" ",
+        frameEvent->frame->id, frameEvent->timestamp);
     if (txContext != NULL)
     {
         printf("transmitContext=%d ", txContext->someInt);
@@ -116,38 +116,38 @@ void ReceiveMessage(void* context, ib_Can_Controller* controller, ib_Can_Message
 
     printf(": ");
 
-    for (i = 0; i < message->canFrame->data.size; i++)
+    for (i = 0; i < frameEvent->frame->data.size; i++)
     {
-        char ch = message->canFrame->data.data[i];
+        char ch = frameEvent->frame->data.data[i];
         if (isalnum(ch))
         {
             printf("%c", ch);
         }
         else
         {
-            printf("<%x>", message->canFrame->data.data[i]);
+            printf("<%x>", frameEvent->frame->data.data[i]);
         }
     }
     printf("\n");
 }
 
-void SendCanMessage()
+void SendFrame()
 {
 
-    ib_Can_Frame msg;
-    msg.id = 17;
-    msg.flags = ib_Can_FrameFlag_brs;
+    ib_Can_Frame canFrame;
+    canFrame.id = 17;
+    canFrame.flags = ib_Can_FrameFlag_brs;
 
     char payload[64];
     canMessageCounter += 1;
     uint8_t payloadSize = (uint8_t)snprintf(payload, sizeof(payload), "CAN %i", canMessageCounter);
 
-    msg.data.data = (uint8_t*)&payload[0];
-    msg.data.size = payloadSize;
-    msg.dlc = payloadSize;
+    canFrame.data.data = (uint8_t*)&payload[0];
+    canFrame.data.size = payloadSize;
+    canFrame.dlc = payloadSize;
 
     transmitContext.someInt = 1234;
-    ib_Can_Controller_SendFrame(canController, &msg, (void*)&transmitContext);
+    ib_Can_Controller_SendFrame(canController, &canFrame, (void*)&transmitContext);
     printf("CAN Message sent with transmitId=%i\n", transmitContext.someInt);
 }
 
@@ -156,7 +156,7 @@ void SimTask(void* context, ib_Participant* cbParticipant, ib_NanosecondsTime no
     SimTaskContext* tc = (SimTaskContext*)context;
     printf(">> Simulation task now=%"PRIu64" with context=%i\n", now, tc->someInt);
 
-    SendCanMessage();
+    SendFrame();
     SleepMs(100);
 }
 
@@ -202,10 +202,10 @@ int main(int argc, char* argv[])
     const char* canController2Name = "CAN2";
     returnCode = ib_Can_Controller_Create(&canController2, participant, canController2Name, canNetworkName);
 
-    ib_Can_Controller_RegisterTransmitStatusHandler(
-        canController, (void*)&transmitContext, &AckCallback,
+    ib_Can_Controller_AddFrameTransmitHandler(
+        canController, (void*)&transmitContext, &FrameTransmitHandler,
         ib_Can_TransmitStatus_Transmitted | ib_Can_TransmitStatus_Canceled | ib_Can_TransmitStatus_TransmitQueueFull);
-    ib_Can_Controller_RegisterReceiveMessageHandler(canController2, (void*)&transmitContext, &ReceiveMessage,
+    ib_Can_Controller_AddFrameHandler(canController2, (void*)&transmitContext, &FrameHandler,
                                                     ib_Direction_SendReceive);
     simTaskContext.someInt = 456;
     ib_Participant_SetPeriod(participant, 1000000);

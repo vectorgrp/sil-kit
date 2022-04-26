@@ -27,12 +27,12 @@ using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
 
-auto AnAckWithTxIdAndCanId(CanTxId transmitId, uint32_t canId) -> testing::Matcher<const CanTransmitAcknowledge&>
+auto AnAckWithTxIdAndCanId(CanTxId transmitId, uint32_t canId) -> testing::Matcher<const CanFrameTransmitEvent&>
 {
     using namespace testing;
     return AllOf(
-        Field(&CanTransmitAcknowledge::transmitId, transmitId),
-        Field(&CanTransmitAcknowledge::canId, canId)
+        Field(&CanFrameTransmitEvent::transmitId, transmitId),
+        Field(&CanFrameTransmitEvent::canId, canId)
     );
 }
 
@@ -41,7 +41,7 @@ class SingleParticipantITest : public testing::Test
 protected:
     struct Callbacks
     {
-        MOCK_METHOD1(AckHandler, void(const CanTransmitAcknowledge&));
+        MOCK_METHOD1(AckHandler, void(const CanFrameTransmitEvent&));
     };
 
 protected:
@@ -61,8 +61,8 @@ protected:
     {
 
         auto* controller = participant->Participant()->CreateCanController("CAN1");
-        controller->RegisterTransmitStatusHandler(
-            [this, participant](ICanController* /*ctrl*/, const CanTransmitAcknowledge& ack) {
+        controller->AddFrameTransmitHandler(
+            [this, participant](ICanController* /*ctrl*/, const CanFrameTransmitEvent& ack) {
                 callbacks.AckHandler(ack);
                 numAcked++;
                 if (numAcked >= testMessages.size())
@@ -78,12 +78,12 @@ protected:
                 if (numSent < testMessages.size())
                 {
                     const auto& message = testMessages.at(numSent);
-                    CanMessage msg;
+                    CanFrame msg;
                     msg.canId = 1;
                     msg.dataField.assign(message.expectedData.begin(), message.expectedData.end());
                     msg.dlc = msg.dataField.size();
 
-                    controller->SendMessage(std::move(msg));
+                    controller->SendFrame(std::move(msg));
                     numSent++;
                     std::this_thread::sleep_for(100ms);
                 }

@@ -44,7 +44,7 @@ void CanController::Sleep()
 {
 }
 
-auto CanController::SendMessage(const CanMessage& msg, void* userContext) -> CanTxId
+auto CanController::SendFrame(const CanFrame& frame, void* userContext) -> CanTxId
 {
     auto now = _timeProvider->Now();
     // ignore the user's API calls if we're configured for replay
@@ -53,85 +53,50 @@ auto CanController::SendMessage(const CanMessage& msg, void* userContext) -> Can
     //    return 0;
     //}
 
-    auto msgCopy = msg;
-    msgCopy.userContext = userContext;
-    msgCopy.transmitId = MakeTxId();
-    msgCopy.direction = TransmitDirection::TX;
-    msgCopy.timestamp = now;
+    CanFrameEvent canFrameEvent{};
+    canFrameEvent.frame = frame;
+    canFrameEvent.frame.userContext = userContext;
+    canFrameEvent.frame.direction = TransmitDirection::TX;
+    canFrameEvent.transmitId = MakeTxId();
+    canFrameEvent.timestamp = now;
 
-    _tracer.Trace(ib::sim::TransmitDirection::TX, now, msg);
+    _tracer.Trace(ib::sim::TransmitDirection::TX, now, canFrameEvent);
     // has to be called before SendIbMessage because of thread change
-    CallHandlers(msg);
+    CallHandlers(canFrameEvent);
 
-    _participant->SendIbMessage(this, msgCopy);
+    _participant->SendIbMessage(this, canFrameEvent);
 
     // instantly call transmit acknowledge
-    CanTransmitAcknowledge ack;
-    ack.canId = msg.canId;
+    CanFrameTransmitEvent ack{};
+    ack.canId = frame.canId;
     ack.status = CanTransmitStatus::Transmitted;
-    ack.transmitId = msgCopy.transmitId;
-    ack.timestamp = msg.timestamp;
+    ack.transmitId = canFrameEvent.transmitId;
     ack.userContext = userContext;
     ack.timestamp = now;
     CallHandlers(ack);
 
-    return msgCopy.transmitId;
+    return canFrameEvent.transmitId;
 }
 
-auto CanController::SendMessage(CanMessage&& msg, void* userContext) -> CanTxId
+void CanController::AddFrameHandler(FrameHandler handler, DirectionMask directionMask)
 {
-    auto now = _timeProvider->Now();
-    // ignore the user's API calls if we're configured for replay
-    //if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Send))
-    //{
-    //    return 0;
-    //}
-
-    msg.userContext = userContext;
-    auto txId = MakeTxId();
-    msg.transmitId = txId;
-    msg.direction = TransmitDirection::TX;
-    msg.timestamp = now;
-
-    _tracer.Trace(ib::sim::TransmitDirection::TX, now, msg);
-    CallHandlers(msg);
-
-    //Prepare instant acknowledge
-    CanTransmitAcknowledge ack;
-    ack.canId = msg.canId;
-    ack.status = CanTransmitStatus::Transmitted;
-    ack.transmitId = msg.transmitId;
-    ack.timestamp = msg.timestamp;
-    ack.userContext = userContext;
-    ack.timestamp = now;
-
-    _participant->SendIbMessage(this, std::move(msg));
-    
-    // call transmit acknowledge
-    CallHandlers(ack);
-
-    return txId;
-}
-
-void CanController::RegisterReceiveMessageHandler(ReceiveMessageHandler handler, DirectionMask directionMask)
-{
-    std::function<bool(const CanMessage&)> filter = [directionMask](const CanMessage& msg) {
-        return ((DirectionMask)msg.direction & (DirectionMask)directionMask) != 0;
+    std::function<bool(const CanFrameEvent&)> filter = [directionMask](const CanFrameEvent& msg) {
+        return ((DirectionMask)msg.frame.direction & (DirectionMask)directionMask) != 0;
     };
     RegisterHandler(handler, std::move(filter));
 }
 
-void CanController::RegisterStateChangedHandler(StateChangedHandler /*handler*/)
+void CanController::AddStateChangeHandler(StateChangeHandler /*handler*/)
 {
 }
 
-void CanController::RegisterErrorStateChangedHandler(ErrorStateChangedHandler /*handler*/)
+void CanController::AddErrorStateChangeHandler(ErrorStateChangeHandler /*handler*/)
 {
 }
 
-void CanController::RegisterTransmitStatusHandler(MessageStatusHandler handler, CanTransmitStatusMask statusMask)
+void CanController::AddFrameTransmitHandler(FrameTransmitHandler handler, CanTransmitStatusMask statusMask)
 {
-    std::function<bool(const CanTransmitAcknowledge& )> filter = [statusMask](const CanTransmitAcknowledge& ack) {
+    std::function<bool(const CanFrameTransmitEvent& )> filter = [statusMask](const CanFrameTransmitEvent& ack) {
         return ((CanTransmitStatusMask)ack.status & (CanTransmitStatusMask)statusMask) != 0; 
     };
     RegisterHandler(handler, filter);
@@ -145,7 +110,7 @@ void CanController::RegisterHandler(CallbackT<MsgT> handler, std::function<bool(
     handlers.push_back(handler_tuple);
 }
 
-void CanController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const CanMessage& msg)
+void CanController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const CanFrameEvent& canFrameEvent)
 {
     // ignore messages that do not originate from the replay scheduler 
     //if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Receive))
@@ -153,8 +118,8 @@ void CanController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const C
     //    return;
     //}
     
-    auto msgCopy = msg;
-    msgCopy.direction = TransmitDirection::RX;
+    auto msgCopy = canFrameEvent;
+    msgCopy.frame.direction = TransmitDirection::RX;
     CallHandlers(msgCopy);
 
     _tracer.Trace(ib::sim::TransmitDirection::RX, _timeProvider->Now(), std::move(msgCopy));
@@ -207,14 +172,14 @@ void CanController::ReplaySend(const extensions::IReplayMessage* replayMessage)
 {
     // need to copy the message here.
     // will throw if invalid message type.
-    auto msg = dynamic_cast<const sim::can::CanMessage&>(*replayMessage);
-    SendMessage(std::move(msg));
+    auto msg = dynamic_cast<const sim::can::CanFrameEvent&>(*replayMessage);
+    SendFrame(std::move(msg.frame));
 }
 
 void CanController::ReplayReceive(const extensions::IReplayMessage* replayMessage)
 {
     static tracing::ReplayServiceDescriptor replayService;
-    auto msg = dynamic_cast<const sim::can::CanMessage&>(*replayMessage);
+    auto msg = dynamic_cast<const sim::can::CanFrameEvent&>(*replayMessage);
     ReceiveIbMessage(&replayService, msg);
 }
 

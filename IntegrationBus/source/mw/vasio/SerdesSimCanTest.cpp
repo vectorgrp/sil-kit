@@ -13,34 +13,34 @@ TEST(MwVAsioSerdes, SimCan_CanMessage)
     using namespace ib::sim::can;
     ib::mw::MessageBuffer buffer;
 
-    CanMessage in;
-    CanMessage out;
+    CanFrameEvent in;
+    CanFrameEvent out;
 
     std::string payload{"TEST"};
     in.transmitId = 5;
     in.timestamp = 13ns;
-    in.canId = 7;
-    in.flags.ide = 1;
-    in.flags.rtr = 0;
-    in.flags.fdf = 1;
-    in.flags.brs = 0;
-    in.flags.esi = 1;
-    in.dlc = 5;
-    in.dataField = std::vector<uint8_t>{payload.begin(), payload.end()};
+    in.frame.canId = 7;
+    in.frame.flags.ide = 1;
+    in.frame.flags.rtr = 0;
+    in.frame.flags.fdf = 1;
+    in.frame.flags.brs = 0;
+    in.frame.flags.esi = 1;
+    in.frame.dlc = 5;
+    in.frame.dataField = std::vector<uint8_t>{payload.begin(), payload.end()};
 
     buffer << in;
     buffer >> out;
 
     EXPECT_EQ(in.transmitId, out.transmitId);
     EXPECT_EQ(in.timestamp, out.timestamp);
-    EXPECT_EQ(in.canId, out.canId);
-    EXPECT_EQ(in.flags.ide, out.flags.ide);
-    EXPECT_EQ(in.flags.rtr, out.flags.rtr);
-    EXPECT_EQ(in.flags.fdf, out.flags.fdf);
-    EXPECT_EQ(in.flags.brs, out.flags.brs);
-    EXPECT_EQ(in.flags.esi, out.flags.esi);
-    EXPECT_EQ(in.dlc, out.dlc);
-    EXPECT_EQ(in.dataField, out.dataField);
+    EXPECT_EQ(in.frame.canId, out.frame.canId);
+    EXPECT_EQ(in.frame.flags.ide, out.frame.flags.ide);
+    EXPECT_EQ(in.frame.flags.rtr, out.frame.flags.rtr);
+    EXPECT_EQ(in.frame.flags.fdf, out.frame.flags.fdf);
+    EXPECT_EQ(in.frame.flags.brs, out.frame.flags.brs);
+    EXPECT_EQ(in.frame.flags.esi, out.frame.flags.esi);
+    EXPECT_EQ(in.frame.dlc, out.frame.dlc);
+    EXPECT_EQ(in.frame.dataField, out.frame.dataField);
 }
 
 TEST(MwVAsioSerdes, SimCan_CanTransmitAcknowledge)
@@ -48,8 +48,8 @@ TEST(MwVAsioSerdes, SimCan_CanTransmitAcknowledge)
     using namespace ib::sim::can;
     ib::mw::MessageBuffer buffer;
 
-    CanTransmitAcknowledge in;
-    CanTransmitAcknowledge out;
+    CanFrameTransmitEvent in;
+    CanFrameTransmitEvent out;
 
     in.transmitId = 5;
     in.timestamp = 13ns;

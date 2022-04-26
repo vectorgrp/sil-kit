@@ -17,8 +17,8 @@ namespace can {
  *  Used by the Participant
  */
 class IIbToCanSimulator
-    : public mw::IIbReceiver<CanMessage, CanConfigureBaudrate, CanSetControllerMode>
-    , public mw::IIbSender<CanMessage, CanTransmitAcknowledge, CanControllerStatus>
+    : public mw::IIbReceiver<CanFrameEvent, CanConfigureBaudrate, CanSetControllerMode>
+    , public mw::IIbSender<CanFrameEvent, CanFrameTransmitEvent, CanControllerStatus>
 {
 public:
     ~IIbToCanSimulator() = default;

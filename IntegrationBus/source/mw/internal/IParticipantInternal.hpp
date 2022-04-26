@@ -42,9 +42,9 @@ public:
     // The SendIbMessages are virtual functions so we can mock them in testing.
     // For performance reasons this may change in the future.
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::can::CanMessage& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::can::CanMessage&& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::can::CanTransmitAcknowledge& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::can::CanFrameEvent& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::can::CanFrameEvent&& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::can::CanFrameTransmitEvent& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::can::CanControllerStatus& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::can::CanConfigureBaudrate& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::can::CanSetControllerMode& msg) = 0;
@@ -97,9 +97,9 @@ public:
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const service::ServiceDiscoveryEvent& msg) = 0;
 
     // targeted messaging
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanMessage& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::can::CanMessage&& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanTransmitAcknowledge& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanFrameEvent& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::can::CanFrameEvent&& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanFrameTransmitEvent& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanControllerStatus& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanConfigureBaudrate& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanSetControllerMode& msg) = 0;

@@ -12,8 +12,10 @@ typedef int32_t ib_InterfaceIdentifier;
 
 // CAN
 #define ib_InterfaceIdentifier_CanFrame                    ((ib_InterfaceIdentifier)1001001)
-#define ib_InterfaceIdentifier_CanTransmitAcknowledge      ((ib_InterfaceIdentifier)1002001)
-#define ib_InterfaceIdentifier_CanFrame_Meta               ((ib_InterfaceIdentifier)1003001)
+#define ib_InterfaceIdentifier_CanFrameTransmitEvent       ((ib_InterfaceIdentifier)1002001)
+#define ib_InterfaceIdentifier_CanFrameEvent               ((ib_InterfaceIdentifier)1003001)
+#define ib_InterfaceIdentifier_CanStateChangeEvent         ((ib_InterfaceIdentifier)1004001)
+#define ib_InterfaceIdentifier_CanErrorStateChangeEvent    ((ib_InterfaceIdentifier)1005001)
 
 // Ethernet
 #define ib_InterfaceIdentifier_EthernetFrameEvent          ((ib_InterfaceIdentifier)2001001)

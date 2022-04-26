@@ -8,7 +8,7 @@ namespace ib {
 namespace sim {
 namespace can {
 
-bool operator==(const CanMessage::CanReceiveFlags& lhs, const CanMessage::CanReceiveFlags& rhs)
+bool operator==(const CanFrame::CanReceiveFlags& lhs, const CanFrame::CanReceiveFlags& rhs)
 {
     return lhs.ide == rhs.ide
         && lhs.rtr == rhs.rtr
@@ -17,18 +17,22 @@ bool operator==(const CanMessage::CanReceiveFlags& lhs, const CanMessage::CanRec
         && lhs.esi == rhs.esi;
 }
 
-bool operator==(const CanMessage& lhs, const CanMessage& rhs)
+bool operator==(const CanFrame& lhs, const CanFrame& rhs)
 {
-    return lhs.transmitId == rhs.transmitId
-        && lhs.timestamp == rhs.timestamp
-        && lhs.canId == rhs.canId
+    return lhs.canId == rhs.canId
         && lhs.flags == rhs.flags
         && lhs.dlc == rhs.dlc
         && lhs.dataField == rhs.dataField
         && lhs.userContext == rhs.userContext;
 }
 
-bool operator==(const CanTransmitAcknowledge& lhs, const CanTransmitAcknowledge& rhs)
+bool operator==(const CanFrameEvent& lhs, const CanFrameEvent& rhs)
+{
+    return lhs.transmitId == rhs.transmitId && lhs.timestamp == rhs.timestamp
+        && lhs.frame == rhs.frame;
+}
+
+bool operator==(const CanFrameTransmitEvent& lhs, const CanFrameTransmitEvent& rhs)
 {
     return lhs.transmitId == rhs.transmitId
         && lhs.status == rhs.status && lhs.userContext == rhs.userContext;
@@ -45,6 +49,18 @@ bool operator==(const CanConfigureBaudrate& lhs, const CanConfigureBaudrate& rhs
 {
     return lhs.baudRate == rhs.baudRate
         && lhs.fdBaudRate == rhs.fdBaudRate;
+}
+
+bool operator==(const CanStateChangeEvent& lhs, const CanStateChangeEvent& rhs)
+{
+    return lhs.timestamp == rhs.timestamp 
+        && lhs.state == rhs.state;
+}
+
+bool operator==(const CanErrorStateChangeEvent& lhs, const CanErrorStateChangeEvent& rhs)
+{
+    return lhs.timestamp == rhs.timestamp
+        && lhs.errorState == rhs.errorState;
 }
 
 

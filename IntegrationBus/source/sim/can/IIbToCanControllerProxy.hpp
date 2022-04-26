@@ -16,8 +16,8 @@ namespace can {
  *  Used by the Participant, implemented by the CanController
  */
 class IIbToCanControllerProxy
-    : public mw::IIbReceiver<CanMessage, CanTransmitAcknowledge, CanControllerStatus>
-    , public mw::IIbSender<CanMessage, CanConfigureBaudrate, CanSetControllerMode>
+    : public mw::IIbReceiver<CanFrameEvent, CanFrameTransmitEvent, CanControllerStatus>
+    , public mw::IIbSender<CanFrameEvent, CanConfigureBaudrate, CanSetControllerMode>
 {
 };
 

@@ -12,6 +12,204 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 Changed
 ~~~~~~~
 
+- Can
+
+  - ``IntegrationBus/include/ib/sim/can/ICanController.hpp``
+
+    + old:
+    .. code-block:: c++
+
+      using ReceiveMessageHandler    = CallbackT<CanMessage>;
+      using StateChangedHandler      = CallbackT<CanState>;
+      using ErrorStateChangedHandler = CallbackT<CanErrorState>;
+      using MessageStatusHandler     = CallbackT<CanTransmitAcknowledge>;
+
+      ICanController::RegisterReceiveMessageHandler(ReceiveMessageHandler handler);
+      ICanController::RegisterStateChangedHandler(StateChangedHandler handler);
+      ICanController::RegisterErrorStateChangedHandler(ErrorStateChangedHandler handler);
+      ICanController::RegisterTransmitStatusHandler(MessageAckHandler handler);
+      ICanController::SendMessage(const CanMessage& msg, void* userContext = nullptr) -> CanTxId;
+
+    + new:
+    .. code-block:: c++
+
+      using FrameHandler             = CallbackT<CanFrameEvent>;
+      using StateChangeHandler       = CallbackT<CanStateChangeEvent>;
+      using ErrorStateChangeHandler  = CallbackT<CanErrorStateChangeEvent>;
+      using FrameTransmitHandler     = CallbackT<CanFrameTransmitEvent>;
+
+      ICanController::AddFrameHandler(FrameHandler handler);
+      ICanController::AddStateChangeHandler(StateChangeHandler handler);
+      ICanController::AddErrorStateChangeHandler(ErrorStateChangeHandler handler);
+      ICanController::AddFrameTransmitHandler(FrameTransmitHandler handler);
+      ICanController::SendFrame(const CanFrame& msg, void* userContext = nullptr) -> CanTxId;
+
+  - ``IntegrationBus/include/ib/sim/can/CanDatatypes.hpp`` (C++-Api)
+
+    + old: 
+    .. code-block:: c++
+
+      struct CanMessage
+      {
+          CanTxId transmitId; //!< Set by the CanController, used for acknowledgements
+          std::chrono::nanoseconds timestamp; //!< Reception time
+
+          // CAN message content
+          ...
+      };
+
+      struct CanTransmitAcknowledge {...};
+
+    + new:
+    .. code-block:: c++
+
+      struct CanFrame
+      {
+          // CAN frame content
+          ...
+      };
+
+      struct CanFrameTransmitEvent {...};
+
+    + added:
+    .. code-block:: c++
+      
+      struct CanFrameEvent
+      {
+          CanTxId transmitId; //!< Set by the CanController, used for acknowledgements
+          std::chrono::nanoseconds timestamp; //!< Send time
+          CanFrame frame; //!< The incoming CAN Frame
+      };
+      
+      struct CanStateChangeEvent
+      {
+          std::chrono::nanoseconds timestamp; //!< Timestamp of the state change.
+          CanControllerState state; //!< The new state
+      };
+      
+      struct CanErrorStateChangeEvent
+      {
+          std::chrono::nanoseconds timestamp; //!< Timestamp of the state change.
+          CanErrorState errorState; //!< The new error state
+      };
+
+  - ``IntegrationBus/include/ib/capi/Can.h``
+
+    - Data types
+
+      + old: 
+      .. code-block:: c++
+      
+        struct ib_Can_Frame
+        {
+            ...
+            uint32_t flags; //!< CAN Arbitration and Control Field Flags; see ib_Can_MessageFlag
+            ...
+        };
+
+        struct ib_Can_Message{...};
+        struct ib_Can_TransmitAcknowledge{...};
+      
+      + new:
+      .. code-block:: c++
+      
+        struct ib_Can_Frame
+        {
+            ...
+            ib_Can_FrameFlag flags; //!< CAN Arbitration and Control Field Flags; see ib_Can_FrameFlag
+            ...
+        };
+
+        struct ib_Can_FrameEvent{...};
+        struct ib_Can_FrameTransmitEvent{...};
+      
+      + added:
+      .. code-block:: c++
+
+        struct ib_Can_StateChangeEvent
+        {
+            ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+            ib_NanosecondsTime timestamp; //!< Reception time
+            ib_Can_ControllerState state; //!< CAN controller state
+        };
+
+        struct ib_Can_ErrorStateChangeEvent
+        {
+            ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+            ib_NanosecondsTime timestamp; //!< Reception time
+            ib_Can_ErrorState errorState; //!< CAN controller error state
+        };
+
+    - Handlers
+
+      + old: 
+      .. code-block:: c++
+      
+        typedef void (*ib_Can_TransmitStatusHandler_t)(void* context, ib_Can_Controller* controller, 
+          ib_Can_TransmitAcknowledge* acknowledge);
+      
+        typedef void (*ib_Can_ReceiveMessageHandler_t)(void* context, ib_Can_Controller* controller, 
+          ib_Can_Message* metaData);
+
+        typedef void (*ib_Can_StateChangedHandler_t)(void* context, ib_Can_Controller* controller, 
+          ib_Can_ControllerState state);
+        
+        typedef void (*ib_Can_ErrorStateChangedHandler_t)(void* context, ib_Can_Controller* controller, 
+          ib_Can_ErrorState errorState);
+
+      + new:
+      .. code-block:: c++
+
+        typedef void (*ib_Can_FrameTransmitHandler_t)(void* context, ib_Can_Controller* controller,
+          ib_Can_FrameTransmitEvent* frameTransmitEvent);
+
+        typedef void (*ib_Can_FrameHandler_t)(void* context, ib_Can_Controller* controller,
+          ib_Can_FrameEvent* frameEvent);
+
+        typedef void (*ib_Can_StateChangeHandler_t)(void* context, ib_Can_Controller* controller,
+          ib_Can_StateChangeEvent stateChangeEvent);
+
+        typedef void (*ib_Can_ErrorStateChangeHandler_t)(void* context, ib_Can_Controller* controller,
+          ib_Can_ErrorStateChangeEvent errorStateChangeEvent);
+      
+    - Methods
+
+      + old: 
+      .. code-block:: c++
+
+        typedef ib_ReturnCode (*ib_Can_Controller_RegisterTransmitStatusHandler_t)(
+          ib_Can_Controller* controller, 
+          void* context, 
+          ib_Can_TransmitStatusHandler_t handler,
+          ib_Can_TransmitStatus statusMask);
+
+        typedef ib_ReturnCode (*ib_Can_Controller_RegisterReceiveMessageHandler_t)(ib_Can_Controller* controller, void* context, 
+          ib_Can_ReceiveMessageHandler_t handler);
+
+        typedef ib_ReturnCode (*ib_Can_Controller_RegisterStateChangedHandler_t)(ib_Can_Controller* controller, void* context, 
+          ib_Can_StateChangedHandler_t handler);
+
+        typedef ib_ReturnCode (*ib_Can_Controller_RegisterErrorStateChangedHandler_t)(ib_Can_Controller* controller, 
+          void* context, ib_Can_ErrorStateChangedHandler_t handler);
+
+      + new:
+      .. code-block:: c++
+      
+        typedef ib_ReturnCode (*ib_Can_Controller_AddFrameTransmitHandler_t)(
+          ib_Can_Controller* controller, 
+          void* context, 
+          ib_Can_FrameTransmitHandler_t handler,
+          ib_Can_TransmitStatus statusMask);
+
+        typedef ib_ReturnCode (*ib_Can_Controller_AddFrameHandler_t)(ib_Can_Controller* controller, void* context, 
+          ib_Can_FrameHandler_t handler);
+
+        typedef ib_ReturnCode (*ib_Can_Controller_AddStateChangeHandler_t)(ib_Can_Controller* controller, void* context, 
+          ib_Can_StateChangeHandler_t handler);
+
+        typedef ib_ReturnCode (*ib_Can_Controller_AddErrorStateChangeHandler_t)(ib_Can_Controller* controller, 
+          void* context, ib_Can_ErrorStateChangeHandler_t handler);
+
 - Ethernet
 
   - Renamed files
@@ -240,6 +438,15 @@ Changed
 
 Removed
 ~~~~~~~
+
+- In the Cpp-Api, the Can Controller's ``SendMessage`` variant with R-value CanFrame is removed.
+
+  - ``IntegrationBus/include/ib/sim/can/ICanController.hpp``
+
+      + old: 
+      .. code-block:: c++
+
+        ICanController::SendMessage(CanMessage&& msg, void* userContext = nullptr) -> CanTxId;
 
 - In the Cpp-Api, the Ethernet Controller's ``SendFrame`` variant with explicit timestamp is removed.
 

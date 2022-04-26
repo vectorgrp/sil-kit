@@ -160,9 +160,9 @@ public:
     void RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* busSim, const std::vector<std::string>& networkNames) override;
     void RegisterLinSimulator(sim::lin::IIbToLinSimulator* busSim, const std::vector<std::string>& networkNames) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::can::CanMessage& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, sim::can::CanMessage&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::can::CanTransmitAcknowledge& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const sim::can::CanFrameEvent& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, sim::can::CanFrameEvent&& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const sim::can::CanFrameTransmitEvent& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::can::CanControllerStatus& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::can::CanConfigureBaudrate& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::can::CanSetControllerMode& msg) override;
@@ -214,9 +214,9 @@ public:
     void SendIbMessage(const IIbServiceEndpoint*, const service::ServiceDiscoveryEvent& msg) override;
 
     // targeted messaging
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanMessage& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::can::CanMessage&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanTransmitAcknowledge& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanFrameEvent& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::can::CanFrameEvent&& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanFrameTransmitEvent& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanControllerStatus& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanConfigureBaudrate& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanSetControllerMode& msg) override;

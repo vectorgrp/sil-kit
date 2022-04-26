@@ -50,43 +50,39 @@ void CanControllerFacade::Sleep()
     _currentController->Sleep();
 }
 
-auto CanControllerFacade::SendMessage(const CanMessage& msg, void* userContext) ->CanTxId
+auto CanControllerFacade::SendFrame(const CanFrame& msg, void* userContext) ->CanTxId
 {
-    return _currentController->SendMessage(msg, userContext);
+    return _currentController->SendFrame(msg, userContext);
 }
 
-auto CanControllerFacade::SendMessage(CanMessage&& msg, void* userContext) -> CanTxId
-{
-    return _currentController->SendMessage(std::move(msg), userContext);
-}
 
 // IIbToCanController
-void CanControllerFacade::RegisterReceiveMessageHandler(ReceiveMessageHandler handler, DirectionMask directionMask)
+void CanControllerFacade::AddFrameHandler(FrameHandler handler, DirectionMask directionMask)
 {
-    _canController->RegisterReceiveMessageHandler(handler, directionMask);
-    _canControllerProxy->RegisterReceiveMessageHandler(std::move(handler), directionMask);
+    _canController->AddFrameHandler(handler, directionMask);
+    _canControllerProxy->AddFrameHandler(std::move(handler), directionMask);
 }
 
-void CanControllerFacade::RegisterStateChangedHandler(StateChangedHandler handler)
+void CanControllerFacade::AddStateChangeHandler(StateChangeHandler handler)
 {
-    _canController->RegisterStateChangedHandler(handler);
-    _canControllerProxy->RegisterStateChangedHandler(std::move(handler));
+    _canController->AddStateChangeHandler(handler);
+    _canControllerProxy->AddStateChangeHandler(std::move(handler));
 }
 
-void CanControllerFacade::RegisterErrorStateChangedHandler(ErrorStateChangedHandler handler)
+void CanControllerFacade::AddErrorStateChangeHandler(ErrorStateChangeHandler handler)
 {
-    _canController->RegisterErrorStateChangedHandler(handler);
-    _canControllerProxy->RegisterErrorStateChangedHandler(std::move(handler));
+    _canController->AddErrorStateChangeHandler(handler);
+    _canControllerProxy->AddErrorStateChangeHandler(std::move(handler));
 }
 
-void CanControllerFacade::RegisterTransmitStatusHandler(MessageStatusHandler handler, CanTransmitStatusMask statusMask)
+void CanControllerFacade::AddFrameTransmitHandler(FrameTransmitHandler handler, CanTransmitStatusMask statusMask)
 {
-    _canController->RegisterTransmitStatusHandler(handler, statusMask);
-    _canControllerProxy->RegisterTransmitStatusHandler(std::move(handler), statusMask);
+    _canController->AddFrameTransmitHandler(handler, statusMask);
+    _canControllerProxy->AddFrameTransmitHandler(std::move(handler), statusMask);
 }
 
 // IIbToCanController / IIbToCanControllerProxy
-void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanMessage& msg)
+void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanFrameEvent& msg)
 {
     if (IsNetworkSimulated())
     {
@@ -107,7 +103,7 @@ void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
     }
 }
 
-void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanTransmitAcknowledge& msg)
+void CanControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanFrameTransmitEvent& msg)
 {
     if (IsNetworkSimulated() && AllowForwardToProxy(from))
     {

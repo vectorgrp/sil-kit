@@ -46,13 +46,6 @@
 #include "MessageTracing.hpp" // log tracing
 #include "UuidRandom.hpp"
 
-#ifdef SendMessage
-#if SendMessage == SendMessageA
-#undef SendMessage
-#endif
-#endif //SendMessage
-
-
 namespace ib {
 namespace mw {
 
@@ -635,19 +628,19 @@ void Participant<IbConnectionT>::RegisterLinSimulator(sim::lin::IIbToLinSimulato
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanMessage& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanFrameEvent& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, can::CanMessage&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, can::CanFrameEvent&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanTransmitAcknowledge& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanFrameTransmitEvent& msg)
 {
     SendIbMessageImpl(from, msg);
 }
@@ -915,19 +908,19 @@ void Participant<IbConnectionT>::SendIbMessageImpl(const IIbServiceEndpoint* fro
 
 // targeted messaging
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanMessage& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanFrameEvent& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, can::CanMessage&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, can::CanFrameEvent&& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanTransmitAcknowledge& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanFrameTransmitEvent& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }

@@ -61,49 +61,38 @@ void CanControllerProxy::ChangeControllerMode(CanControllerState state)
     _participant->SendIbMessage(this, mode);
 }
 
-auto CanControllerProxy::SendMessage(const CanMessage& msg, void* userContext) -> CanTxId
+auto CanControllerProxy::SendFrame(const CanFrame& frame, void* userContext) -> CanTxId
 {
-    auto msgCopy = msg;
-    msgCopy.transmitId = MakeTxId();
-    msgCopy.userContext = userContext;
+    CanFrameEvent canFrameEvent{};
+    canFrameEvent.frame = frame;
+    canFrameEvent.transmitId = MakeTxId();
+    canFrameEvent.frame.userContext = userContext;
 
-    _participant->SendIbMessage(this, msgCopy);
-    return msgCopy.transmitId;
+    _participant->SendIbMessage(this, canFrameEvent);
+    return canFrameEvent.transmitId;
 }
 
-auto CanControllerProxy::SendMessage(CanMessage&& msg, void* userContext) -> CanTxId
+void CanControllerProxy::AddFrameHandler(FrameHandler handler, DirectionMask directionMask)
 {
-    auto txId = MakeTxId();
-
-    msg.transmitId = txId;
-    msg.userContext = userContext;
-
-    _participant->SendIbMessage(this, std::move(msg));
-
-    return txId;
-}
-
-void CanControllerProxy::RegisterReceiveMessageHandler(ReceiveMessageHandler handler, DirectionMask directionMask)
-{
-    std::function<bool(const CanMessage&)> filter = [directionMask](const CanMessage& msg) {
-        return (((DirectionMask)msg.direction & (DirectionMask)directionMask)) != 0;
+    std::function<bool(const CanFrameEvent&)> filter = [directionMask](const CanFrameEvent& frameEvent) {
+        return (((DirectionMask)frameEvent.frame.direction & (DirectionMask)directionMask)) != 0;
     };
     RegisterHandler(handler, std::move(filter));
 }
 
-void CanControllerProxy::RegisterStateChangedHandler(StateChangedHandler handler)
+void CanControllerProxy::AddStateChangeHandler(StateChangeHandler handler)
 {
     RegisterHandler(handler);
 }
 
-void CanControllerProxy::RegisterErrorStateChangedHandler(ErrorStateChangedHandler handler)
+void CanControllerProxy::AddErrorStateChangeHandler(ErrorStateChangeHandler handler)
 {
     RegisterHandler(handler);
 }
 
-void CanControllerProxy::RegisterTransmitStatusHandler(MessageStatusHandler handler, CanTransmitStatusMask statusMask)
+void CanControllerProxy::AddFrameTransmitHandler(FrameTransmitHandler handler, CanTransmitStatusMask statusMask)
 {
-    std::function<bool(const CanTransmitAcknowledge&)> filter = [statusMask](const CanTransmitAcknowledge& ack) {
+    std::function<bool(const CanFrameTransmitEvent&)> filter = [statusMask](const CanFrameTransmitEvent& ack) {
         return ((CanTransmitStatusMask)ack.status & (CanTransmitStatusMask)statusMask) != 0;
     };
     RegisterHandler(handler, filter);
@@ -117,13 +106,13 @@ void CanControllerProxy::RegisterHandler(CallbackT<MsgT> handler, std::function<
     handlers.push_back(handler_tuple);
 }
 
-void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const CanMessage& msg)
+void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const CanFrameEvent& msg)
 {
     _tracer.Trace(ib::sim::TransmitDirection::RX, msg.timestamp, msg);
     CallHandlers(msg);
 }
 
-void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const CanTransmitAcknowledge& msg)
+void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const CanFrameTransmitEvent& msg)
 {
     CallHandlers(msg);
 }
@@ -133,12 +122,12 @@ void CanControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, co
     if (_controllerState != msg.controllerState)
     {
         _controllerState = msg.controllerState;
-        CallHandlers(msg.controllerState);
+        CallHandlers(CanStateChangeEvent{ msg.timestamp, msg.controllerState });
     }
     if (_errorState != msg.errorState)
     {
         _errorState = msg.errorState;
-        CallHandlers(msg.errorState);
+        CallHandlers(CanErrorStateChangeEvent{ msg.timestamp, msg.errorState });
     }
 }
 

@@ -26,11 +26,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-
-#ifdef SendMessage
-#undef SendMessage
-#endif
-
 namespace ib {
 namespace mw {
 namespace test {
@@ -256,9 +251,9 @@ public:
     void RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* , const std::vector<std::string>&) override {}
     void RegisterLinSimulator(sim::lin::IIbToLinSimulator*, const std::vector<std::string>&) override {}
 
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::can::CanMessage&& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::can::CanMessage& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::can::CanTransmitAcknowledge& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::can::CanFrameEvent&& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::can::CanFrameEvent& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::can::CanFrameTransmitEvent& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::can::CanControllerStatus& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::can::CanConfigureBaudrate& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::can::CanSetControllerMode& /*msg*/) override {}
@@ -312,9 +307,9 @@ public:
 
     // targeted messaging
 
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::can::CanMessage&& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::can::CanMessage& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::can::CanTransmitAcknowledge& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::can::CanFrameEvent&& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::can::CanFrameEvent& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::can::CanFrameTransmitEvent& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::can::CanControllerStatus& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::can::CanConfigureBaudrate& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::can::CanSetControllerMode& /*msg*/) override {}

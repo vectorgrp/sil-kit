@@ -6,11 +6,14 @@ namespace ib {
 namespace sim {
 namespace can {
 
-struct CanMessage;
+struct CanFrame;
+struct CanFrameEvent;
 struct CanControllerStatus;
 struct CanConfigureBaudrate;
 struct CanSetControllerMode;
-struct CanTransmitAcknowledge;
+struct CanFrameTransmitEvent;
+struct CanStateChangeEvent;
+struct CanErrorStateChangeEvent;
 
 class ICanController;
 

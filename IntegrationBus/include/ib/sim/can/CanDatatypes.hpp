@@ -15,18 +15,13 @@ namespace sim {
 //! The CAN namespace
 namespace can {
 
-using CanTxId = uint32_t;
+using CanTxId = uint32_t; //!< Set by the CanController, used for acknowledgements
 
-
-/*! \brief A CAN message
+/*! \brief A CAN Frame
  */
-struct CanMessage
+struct CanFrame
 {
-    // Meta Data
-    CanTxId transmitId; //!< Set by the CanController, used for acknowledgements
-    std::chrono::nanoseconds timestamp; //!< Reception time
-
-    // CAN message content
+    // CAN frame content
     uint32_t canId; //!< CAN Identifier
     struct CanReceiveFlags
     {
@@ -37,9 +32,18 @@ struct CanMessage
         uint8_t esi : 1; //!< Error State indicator (for FD Format only)
     } flags; //!< CAN Arbitration and Control Field Flags
     uint8_t dlc : 4; //!< Data Length Code - determined by the Network Simulator
-    std::vector<uint8_t> dataField; //!< CAN Datafield
+    std::vector<uint8_t> dataField; //!< The raw CAN data field
     TransmitDirection direction{TransmitDirection::Undefined}; //!< Receive/Transmit direction
     void* userContext; //!< Optional pointer provided by user when sending the frame
+};
+
+/*! \brief //! \brief The event of an incoming CAN frame including transmit ID, timestamp and the actual frame
+ */
+struct CanFrameEvent
+{
+    CanTxId transmitId; //!< Set by the CanController, used for acknowledgements
+    std::chrono::nanoseconds timestamp; //!< Send time
+    CanFrame frame; //!< The incoming CAN Frame
 };
 
 /*! \brief CAN Controller state according to AUTOSAR specification AUTOSAR_SWS_CANDriver 4.3.1
@@ -126,10 +130,10 @@ enum class CanTransmitStatus : CanTransmitStatusMask
 
 /*! \brief The acknowledgment of a CAN message, sent to the controller
  */
-struct CanTransmitAcknowledge
+struct CanFrameTransmitEvent
 {
-    CanTxId transmitId; //!< Identifies the CanTransmitRequest to which this CanTransmitAcknowledge refers to.
-    uint32_t canId; //!< Identifies the CAN id to which this CanTransmitAcknowledge refers to.
+    CanTxId transmitId; //!< Identifies the CanTransmitRequest to which this CanFrameTransmitEvent refers to.
+    uint32_t canId; //!< Identifies the CAN id to which this CanFrameTransmitEvent refers to.
     std::chrono::nanoseconds timestamp; //!< Timestamp of the CAN acknowledge.
     CanTransmitStatus status; //!< Status of the CanTransmitRequest.
     void* userContext; //!< Optional pointer provided by user when sending the frame
@@ -153,6 +157,22 @@ struct CanSetControllerMode
         uint8_t cancelTransmitRequests : 1; //!< Cancel all outstanding transmit requests (flush transmit queue of controller).
     } flags;
     CanControllerState mode; //!< State that the CAN controller should reach.
+};
+
+/*! \brief An incoming state change event
+ */
+struct CanStateChangeEvent
+{
+    std::chrono::nanoseconds timestamp; //!< Timestamp of the state change.
+    CanControllerState state; //!< The new state
+};
+
+/*! \brief An incoming error state change event
+ */
+struct CanErrorStateChangeEvent
+{
+    std::chrono::nanoseconds timestamp; //!< Timestamp of the state change.
+    CanErrorState errorState; //!< The new error state
 };
 
 } // namespace can

@@ -17,7 +17,7 @@ namespace extensions {
 enum class TraceMessageType
 {
     EthernetFrame
-    ,CanMessage
+    ,CanFrameEvent
     ,LinFrame
     ,FrMessage
     ,InvalidReplayData
@@ -33,7 +33,7 @@ struct TypeIdTrait
 template<class MsgT> struct MessageTrait;
 // specializations for supported (C++) Types
 template<> struct MessageTrait<sim::eth::EthernetFrame> : TypeIdTrait<TraceMessageType::EthernetFrame> {};
-template<> struct MessageTrait<sim::can::CanMessage> : TypeIdTrait<TraceMessageType::CanMessage> {};
+template<> struct MessageTrait<sim::can::CanFrameEvent> : TypeIdTrait<TraceMessageType::CanFrameEvent> {};
 template<> struct MessageTrait<sim::lin::Frame> : TypeIdTrait<TraceMessageType::LinFrame> {};
 template<> struct MessageTrait<sim::fr::FrMessage> : TypeIdTrait<TraceMessageType::FrMessage> {};
 

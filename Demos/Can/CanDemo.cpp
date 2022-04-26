@@ -33,7 +33,7 @@ std::ostream& operator<<(std::ostream& out, nanoseconds timestamp)
 }
 }
 
-void AckCallback(const CanTransmitAcknowledge& ack, logging::ILogger* logger)
+void FrameTransmitHandler(const CanFrameTransmitEvent& ack, logging::ILogger* logger)
 {
     std::stringstream buffer;
     buffer << ">> " << ack.status
@@ -42,35 +42,35 @@ void AckCallback(const CanTransmitAcknowledge& ack, logging::ILogger* logger)
     logger->Info(buffer.str());
 }
 
-void ReceiveMessage(const CanMessage& msg, logging::ILogger* logger)
+void FrameHandler(const CanFrameEvent& frameEvent, logging::ILogger* logger)
 {
-    std::string payload(msg.dataField.begin(), msg.dataField.end());
+    std::string payload(frameEvent.frame.dataField.begin(), frameEvent.frame.dataField.end());
     std::stringstream buffer;
-    buffer << ">> CAN Message: canId=" << msg.canId
-           << " timestamp=" << msg.timestamp
+    buffer << ">> CAN Message: canId=" << frameEvent.frame.canId
+           << " timestamp=" << frameEvent.timestamp
            << " \"" << payload << "\"";
     logger->Info(buffer.str());
 }
 
-void SendMessage(ICanController* controller, logging::ILogger* logger)
+void SendFrame(ICanController* controller, logging::ILogger* logger)
 {
-    CanMessage msg {};
-    msg.canId = 3;
-    msg.flags.ide = 0; // Identifier Extension
-    msg.flags.rtr = 0; // Remote Transmission Request
-    msg.flags.fdf = 1; // FD Format Indicator
-    msg.flags.brs = 1; // Bit Rate Switch  (for FD Format only)
-    msg.flags.esi = 0; // Error State indicator (for FD Format only)
+    CanFrame canFrame {};
+    canFrame.canId = 3;
+    canFrame.flags.ide = 0; // Identifier Extension
+    canFrame.flags.rtr = 0; // Remote Transmission Request
+    canFrame.flags.fdf = 1; // FD Format Indicator
+    canFrame.flags.brs = 1; // Bit Rate Switch  (for FD Format only)
+    canFrame.flags.esi = 0; // Error State indicator (for FD Format only)
 
     static int msgId = 0;
     std::stringstream payloadBuilder;
     payloadBuilder << "CAN " << (msgId++)%100;
     auto payloadStr = payloadBuilder.str();
 
-    msg.dataField.assign(payloadStr.begin(), payloadStr.end());
-    msg.dlc = msg.dataField.size();
+    canFrame.dataField.assign(payloadStr.begin(), payloadStr.end());
+    canFrame.dlc = canFrame.dataField.size();
 
-    auto transmitId = controller->SendMessage(std::move(msg));
+    auto transmitId = controller->SendFrame(std::move(canFrame));
     std::stringstream buffer;
     buffer << "<< CAN Message sent with transmitId=" << transmitId;
     logger->Info(buffer.str());
@@ -141,13 +141,13 @@ int main(int argc, char** argv)
         auto* logger = participant->GetLogger();
         auto* canController = participant->CreateCanController("CAN1");
 
-        canController->RegisterTransmitStatusHandler(
-            [logger](ICanController* /*ctrl*/, const CanTransmitAcknowledge& ack) {
-                AckCallback(ack, logger);
+        canController->AddFrameTransmitHandler(
+            [logger](ICanController* /*ctrl*/, const CanFrameTransmitEvent& ack) {
+                FrameTransmitHandler(ack, logger);
             });
-        canController->RegisterReceiveMessageHandler(
-            [logger](ICanController* /*ctrl*/, const CanMessage& msg) {
-                ReceiveMessage(msg, logger);
+        canController->AddFrameHandler(
+            [logger](ICanController* /*ctrl*/, const CanFrameEvent& frameEvent) {
+                FrameHandler(frameEvent, logger);
             });
 
         if (runSync)
@@ -177,7 +177,7 @@ int main(int argc, char** argv)
                     [canController, logger, sleepTimePerTick](std::chrono::nanoseconds now,
                                                               std::chrono::nanoseconds duration) {
                         std::cout << "now=" << now << ", duration=" << duration << std::endl;
-                        SendMessage(canController, logger);
+                        SendFrame(canController, logger);
                         std::this_thread::sleep_for(sleepTimePerTick);
                     });
 
@@ -209,7 +209,7 @@ int main(int argc, char** argv)
                 workerThread = std::thread{[&]() {
                     while (!isStopped)
                     {
-                        SendMessage(canController, logger);
+                        SendFrame(canController, logger);
                         std::this_thread::sleep_for(sleepTimePerTick);
                     }
                 }};

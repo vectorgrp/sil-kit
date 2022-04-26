@@ -11,30 +11,6 @@
 
 IB_BEGIN_DECLS
 
-/*! \brief A CAN frame
-    */
-struct ib_Can_Frame
-{
-    uint32_t id; //!< CAN Identifier
-    uint32_t flags; //!< CAN Arbitration and Control Field Flags; see ib_Can_MessageFlag
-    uint8_t dlc; //!< Data Length Code - determined by the Network Simulator
-
-    ib_ByteVector data; //!< Data field containing the payload
-};
-
-typedef struct ib_Can_Frame ib_Can_Frame;
-
-struct ib_Can_Message
-{
-    ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
-    ib_NanosecondsTime timestamp; //!< Reception time
-    ib_Can_Frame* canFrame; //!< The CAN Frame that corresponds to the meta data
-    ib_Direction direction; //!< The transmit direction of the CAN frame (TX/RX)
-    void* userContext; //!< Optional pointer provided by user when sending the frame
-};
-
-typedef struct ib_Can_Message ib_Can_Message;
-
 /*! The available flags within the flags member of a Can frame.
 */
 typedef uint32_t ib_Can_FrameFlag;
@@ -43,6 +19,28 @@ typedef uint32_t ib_Can_FrameFlag;
 #define ib_Can_FrameFlag_fdf (((ib_Can_FrameFlag) 1) << 12) //!< FD Format Indicator
 #define ib_Can_FrameFlag_brs (((ib_Can_FrameFlag) 1) << 13) //!< Bit Rate Switch  (for FD Format only)
 #define ib_Can_FrameFlag_esi (((ib_Can_FrameFlag) 1) << 14) //!< Error State indicator (for FD Format only)
+
+/*! \brief A CAN frame
+    */
+struct ib_Can_Frame
+{
+    uint32_t id; //!< CAN Identifier
+    ib_Can_FrameFlag flags; //!< CAN Arbitration and Control Field Flags; see ib_Can_FrameFlag
+    uint8_t dlc; //!< Data Length Code - determined by the Network Simulator
+
+    ib_ByteVector data; //!< Data field containing the payload
+};
+typedef struct ib_Can_Frame ib_Can_Frame;
+
+struct ib_Can_FrameEvent
+{
+    ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+    ib_NanosecondsTime timestamp; //!< Reception time
+    ib_Can_Frame* frame; //!< The CAN Frame that corresponds to the meta data
+    ib_Direction direction; //!< The transmit direction of the CAN frame (TX/RX)
+    void* userContext; //!< Optional pointer provided by user when sending the frame
+};
+typedef struct ib_Can_FrameEvent ib_Can_FrameEvent;
 
 
 typedef int32_t ib_Can_TransmitStatus;
@@ -65,14 +63,14 @@ typedef int32_t ib_Can_TransmitStatus;
 
 /*! \brief The acknowledgment of a CAN message, sent to the controller
 */
-struct ib_Can_TransmitAcknowledge
+struct ib_Can_FrameTransmitEvent
 {
+    ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
     void* userContext; //!< Value that was provided by user in corresponding parameter on send of Can frame
     ib_NanosecondsTime timestamp; //!< Reception time
     ib_Can_TransmitStatus status; //!< Status of the CanTransmitRequest
 };
-
-typedef struct ib_Can_TransmitAcknowledge ib_Can_TransmitAcknowledge;
+typedef struct ib_Can_FrameTransmitEvent ib_Can_FrameTransmitEvent;
 
 /*! \brief CAN Controller state according to AUTOSAR specification AUTOSAR_SWS_CANDriver 4.3.1
 */
@@ -89,6 +87,16 @@ typedef int32_t ib_Can_ControllerState;
 /*! CAN controller is in sleep mode which is similar to the Stopped state.
 */
 #define ib_Can_ControllerState_Sleep   ((ib_Can_ControllerState) 3)
+
+/*! \brief An incoming state change of a CAN controller
+*/
+struct ib_Can_StateChangeEvent
+{
+    ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+    ib_NanosecondsTime timestamp; //!< Reception time
+    ib_Can_ControllerState state; //!< CAN controller state
+};
+typedef struct ib_Can_StateChangeEvent ib_Can_StateChangeEvent;
 
 /*! \brief Error state of a CAN node according to CAN specification.
 */
@@ -110,6 +118,16 @@ typedef int ib_Can_ErrorState;
 */
 #define ib_Can_ErrorState_BusOff       ((ib_Can_ControllerState) 3)
 
+/*! \brief An incoming state change of a CAN controller
+*/
+struct ib_Can_ErrorStateChangeEvent
+{
+    ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+    ib_NanosecondsTime timestamp; //!< Reception time
+    ib_Can_ErrorState errorState; //!< CAN controller error state
+};
+typedef struct ib_Can_ErrorStateChangeEvent ib_Can_ErrorStateChangeEvent;
+
 typedef struct ib_Can_Controller ib_Can_Controller;
 
 /*! Callback type to indicate that a CanTransmitAcknowledge has been received.
@@ -117,28 +135,32 @@ typedef struct ib_Can_Controller ib_Can_Controller;
 * \param controller The Can controller that received the acknowledge.
 * \param acknowledge The acknowledge and its data.
 */
-typedef void (*ib_Can_TransmitStatusHandler_t)(void* context, ib_Can_Controller* controller, ib_Can_TransmitAcknowledge* acknowledge);
+typedef void (*ib_Can_FrameTransmitHandler_t)(void* context, ib_Can_Controller* controller,
+                                              ib_Can_FrameTransmitEvent* frameTransmitEvent);
 
 /*! Callback type to indicate that a CanMessage has been received.
 * \param context The by the user provided context on registration.
 * \param controller The Can controller that received the message.
-* \param metaData The struct containing meta data and referencing the can frame itself.
+* \param frameEvent The incoming CAN frame event containing timestamp, transmit ID and referencing the CAN frame itself.
 */
-typedef void (*ib_Can_ReceiveMessageHandler_t)(void* context, ib_Can_Controller* controller, ib_Can_Message* metaData);
+typedef void (*ib_Can_FrameHandler_t)(void* context, ib_Can_Controller* controller,
+                                               ib_Can_FrameEvent* frameEvent);
 
 /*! Callback type to indicate that the State of the Can Controller has changed.
 * \param context The by the user provided context on registration.
 * \param controller The Can controller that changed its state.
-* \param state The new state of the Can controller.
+* \param stateChangeEvent The state change event containing timestamp and new state.
 */
-typedef void (*ib_Can_StateChangedHandler_t)(void* context, ib_Can_Controller* controller, ib_Can_ControllerState state);
+typedef void (*ib_Can_StateChangeHandler_t)(void* context, ib_Can_Controller* controller,
+                                             ib_Can_StateChangeEvent stateChangeEvent);
 
 /*! Callback type to indicate that the controller Can error state has changed.
 * \param context The by the user provided context on registration.
 * \param controller The Can controller that received the message.
-* \param errorState The new can error state.
+* \param errorStateChangeEvent The error state change event containing timestamp and new error state.
 */
-typedef void (*ib_Can_ErrorStateChangedHandler_t)(void* context, ib_Can_Controller* controller, ib_Can_ErrorState errorState);
+typedef void (*ib_Can_ErrorStateChangeHandler_t)(void* context, ib_Can_Controller* controller,
+                                                  ib_Can_ErrorStateChangeEvent errorStateChangeEvent);
 
 /*! \brief Create a CAN controller at this IB simulation participant.
  * \param outCanController Pointer that refers to the resulting Can controller (out parameter).
@@ -146,7 +168,7 @@ typedef void (*ib_Can_ErrorStateChangedHandler_t)(void* context, ib_Can_Controll
  * \param name The name of the new Can controller.
  *
  * The lifetime of the resulting Can controller is directly bound to the lifetime of the simulation participant.
- * There is no futher cleanup necessary except for destroying the simulation participant at the end of the 
+ * There is no further cleanup necessary except for destroying the simulation participant at the end of the 
  * simulation.
  * The object returned must not be deallocated using free()!
  */
@@ -221,7 +243,7 @@ typedef ib_ReturnCode(*ib_Can_Controller_Sleep_t)(ib_Can_Controller* controller)
 * \param controller The Can controller that should send the Can frame.
 * \param frame The Can frame to transmit.
 * \param userContext A user provided context pointer, that is
-* reobtained in the ib_Can_Controller_RegisterTransmitStatusHandler
+* reobtained in the ib_Can_Controller_AddFrameTransmitHandler
 * handler.
 */
 IntegrationBusAPI ib_ReturnCode ib_Can_Controller_SendFrame(ib_Can_Controller* controller, ib_Can_Frame* frame, 
@@ -230,9 +252,9 @@ IntegrationBusAPI ib_ReturnCode ib_Can_Controller_SendFrame(ib_Can_Controller* c
 typedef ib_ReturnCode (*ib_Can_Controller_SendFrame_t)(ib_Can_Controller* controller, ib_Can_Frame* frame, 
     void* userContext);
 
-/*! \brief Configure the baudrate of the controller
+/*! \brief Configure the baud rate of the controller
 *
-* \param controller The Can controller for which the baudrate should be changed.
+* \param controller The Can controller for which the baud rate should be changed.
 *
 * \param rate Baud rate for regular (non FD) CAN messages given
 * in bps; valid range: 0 to 2'000'000
@@ -262,16 +284,16 @@ typedef ib_ReturnCode(*ib_Can_Controller_SetBaudRate_t)(ib_Can_Controller* contr
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on transmit acknowledge.
 */
-IntegrationBusAPI ib_ReturnCode ib_Can_Controller_RegisterTransmitStatusHandler(
+IntegrationBusAPI ib_ReturnCode ib_Can_Controller_AddFrameTransmitHandler(
     ib_Can_Controller* controller, 
     void* context, 
-    ib_Can_TransmitStatusHandler_t handler,
+    ib_Can_FrameTransmitHandler_t handler,
     ib_Can_TransmitStatus statusMask);
 
-typedef ib_ReturnCode (*ib_Can_Controller_RegisterTransmitStatusHandler_t)(
+typedef ib_ReturnCode (*ib_Can_Controller_AddFrameTransmitHandler_t)(
     ib_Can_Controller* controller, 
     void* context, 
-    ib_Can_TransmitStatusHandler_t handler,
+    ib_Can_FrameTransmitHandler_t handler,
     ib_Can_TransmitStatus statusMask);
 
 /*! \brief Register a callback for CAN message reception
@@ -284,14 +306,14 @@ typedef ib_ReturnCode (*ib_Can_Controller_RegisterTransmitStatusHandler_t)(
 * \param handler The handler to be called on reception.
 * \param directionMask A bit mask defining the transmit direction of the messages (rx/tx)
 */
-IntegrationBusAPI ib_ReturnCode ib_Can_Controller_RegisterReceiveMessageHandler(
+IntegrationBusAPI ib_ReturnCode ib_Can_Controller_AddFrameHandler(
     ib_Can_Controller* controller, 
     void* context, 
-    ib_Can_ReceiveMessageHandler_t handler,
+    ib_Can_FrameHandler_t handler,
     ib_Direction directionMask);
     
-typedef ib_ReturnCode (*ib_Can_Controller_RegisterReceiveMessageHandler_t)(ib_Can_Controller* controller, void* context, 
-    ib_Can_ReceiveMessageHandler_t handler);
+typedef ib_ReturnCode (*ib_Can_Controller_AddFrameHandler_t)(ib_Can_Controller* controller, void* context, 
+    ib_Can_FrameHandler_t handler);
 /*! \brief Register a callback for controller state changes
 *
 * The registered handler is called when the CanControllerState of
@@ -306,11 +328,11 @@ typedef ib_ReturnCode (*ib_Can_Controller_RegisterReceiveMessageHandler_t)(ib_Ca
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on state change.
 */
-IntegrationBusAPI ib_ReturnCode ib_Can_Controller_RegisterStateChangedHandler(ib_Can_Controller* controller, 
-    void* context, ib_Can_StateChangedHandler_t handler);
+IntegrationBusAPI ib_ReturnCode ib_Can_Controller_AddStateChangeHandler(ib_Can_Controller* controller, 
+    void* context, ib_Can_StateChangeHandler_t handler);
 
-typedef ib_ReturnCode (*ib_Can_Controller_RegisterStateChangedHandler_t)(ib_Can_Controller* controller, void* context, 
-    ib_Can_StateChangedHandler_t handler);
+typedef ib_ReturnCode (*ib_Can_Controller_AddStateChangeHandler_t)(ib_Can_Controller* controller, void* context, 
+    ib_Can_StateChangeHandler_t handler);
     
 /*! \brief Register a callback for changes of the controller's error state
 *
@@ -326,11 +348,11 @@ typedef ib_ReturnCode (*ib_Can_Controller_RegisterStateChangedHandler_t)(ib_Can_
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on error state change.
 */
-IntegrationBusAPI ib_ReturnCode ib_Can_Controller_RegisterErrorStateChangedHandler(ib_Can_Controller* controller, 
-    void* context, ib_Can_ErrorStateChangedHandler_t handler);
+IntegrationBusAPI ib_ReturnCode ib_Can_Controller_AddErrorStateChangeHandler(ib_Can_Controller* controller, 
+    void* context, ib_Can_ErrorStateChangeHandler_t handler);
 
-typedef ib_ReturnCode (*ib_Can_Controller_RegisterErrorStateChangedHandler_t)(ib_Can_Controller* controller, 
-    void* context, ib_Can_ErrorStateChangedHandler_t handler);
+typedef ib_ReturnCode (*ib_Can_Controller_AddErrorStateChangeHandler_t)(ib_Can_Controller* controller, 
+    void* context, ib_Can_ErrorStateChangeHandler_t handler);
 
 IB_END_DECLS
 

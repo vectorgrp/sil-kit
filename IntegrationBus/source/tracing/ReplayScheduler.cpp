@@ -133,7 +133,7 @@ TraceMessageType to_channelType(cfg::Link::Type linkType)
     case cfg::NetworkType::Ethernet:
         return TraceMessageType::EthernetFrame;
     case cfg::NetworkType::CAN:
-        return TraceMessageType::CanMessage;
+        return TraceMessageType::CanFrameEvent;
     case cfg::NetworkType::LIN:
         return TraceMessageType::LinFrame;
     case cfg::NetworkType::FlexRay:

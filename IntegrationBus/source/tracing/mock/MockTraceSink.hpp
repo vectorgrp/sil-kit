@@ -22,8 +22,8 @@ public:
     {
         switch (message.Type())
         {
-        case TraceMessageType::CanMessage:
-            Trace(dir, address, timestamp, message.Get<ib::sim::can::CanMessage>());
+        case TraceMessageType::CanFrameEvent:
+            Trace(dir, address, timestamp, message.Get<ib::sim::can::CanFrameEvent>());
             break;
         case TraceMessageType::EthernetFrame:
             Trace(dir, address, timestamp, message.Get<ib::sim::eth::EthernetFrame>());
@@ -40,7 +40,7 @@ public:
     }
 
     MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
-        std::chrono::nanoseconds timestamp, const ib::sim::can::CanMessage& message));
+        std::chrono::nanoseconds timestamp, const ib::sim::can::CanFrame& message));
 
     MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
         std::chrono::nanoseconds timestamp, const ib::sim::eth::EthernetFrame& message));

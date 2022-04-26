@@ -10,38 +10,39 @@ namespace ib {
 namespace sim {
 namespace can {
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanMessage& msg)
+
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanFrameEvent& msg)
 {
     buffer << msg.transmitId
-           << msg.timestamp
-           << msg.canId
-           << *reinterpret_cast<const uint8_t*>(&msg.flags)
-           << msg.dlc
-           << msg.dataField
-           << msg.direction
-           << msg.userContext
+        << msg.timestamp
+        << msg.frame.canId
+        << *reinterpret_cast<const uint8_t*>(&msg.frame.flags)
+        << msg.frame.dlc
+        << msg.frame.dataField
+        << msg.frame.direction
+        << msg.frame.userContext
         ;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanMessage& msg)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanFrameEvent& msg)
 {
     uint8_t flags;
     uint8_t dlc;
     buffer >> msg.transmitId
-           >> msg.timestamp
-           >> msg.canId
-           >> flags
-           >> dlc
-           >> msg.dataField
-           >> msg.direction
-           >> msg.userContext
+        >> msg.timestamp
+        >> msg.frame.canId
+        >> flags
+        >> dlc
+        >> msg.frame.dataField
+        >> msg.frame.direction
+        >> msg.frame.userContext
         ;
-    *reinterpret_cast<uint8_t*>(&msg.flags) = flags;
-    msg.dlc = dlc;
+    *reinterpret_cast<uint8_t*>(&msg.frame.flags) = flags;
+    msg.frame.dlc = dlc;
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanTransmitAcknowledge& ack)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanFrameTransmitEvent& ack)
 {
     buffer << ack.transmitId
            << ack.canId
@@ -49,7 +50,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Ca
            << ack.status;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanTransmitAcknowledge& ack)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanFrameTransmitEvent& ack)
 {
     buffer >> ack.transmitId
            >> ack.canId

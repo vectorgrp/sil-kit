@@ -20,30 +20,30 @@ public:
     template<typename MsgT>
     using CallbackT = std::function<void(ICanController* controller, const MsgT& msg)>;
 
-    /*! Callback type to indicate that a CanMessage has been received.
-    *  Cf., \ref RegisterReceiveMessageHandler(ReceiveMessageHandler);
+    /*! Callback type to indicate that a CanFrameEvent has been received.
+    *  Cf., \ref AddFrameHandler(FrameHandler);
     */
-    using ReceiveMessageHandler    = CallbackT<CanMessage>;
+    using FrameHandler = CallbackT<CanFrameEvent>;
 
     /*! Callback type to indicate that the ::CanControllerState has changed.
-    *  Cf., \ref RegisterStateChangedHandler(StateChangedHandler);
+    *  Cf., \ref AddStateChangeHandler(StateChangeHandler);
     */
-    using StateChangedHandler      = CallbackT<CanControllerState>;
+    using StateChangeHandler = CallbackT<CanStateChangeEvent>;
 
     /*! Callback type to indicate that the controller ::CanErrorState has changed.
-    *  Cf., \ref RegisterErrorStateChangedHandler(ErrorStateChangedHandler);
+    *  Cf., \ref AddErrorStateChangeHandler(ErrorStateChangeHandler);
     */
-    using ErrorStateChangedHandler = CallbackT<CanErrorState>;
+    using ErrorStateChangeHandler = CallbackT<CanErrorStateChangeEvent>;
 
-    /*! Callback type to indicate that a CanTransmitAcknowledge has been received.
-    *  Cf., \ref RegisterTransmitStatusHandler(MessageStatusHandler);
+    /*! Callback type to indicate that a CanFrameTransmitEvent has been received.
+    *  Cf., \ref AddFrameTransmitHandler(FrameTransmitHandler);
     */
-    using MessageStatusHandler     = CallbackT<CanTransmitAcknowledge>;
+    using FrameTransmitHandler = CallbackT<CanFrameTransmitEvent>;
 
 public:
     virtual ~ICanController() = default;
 
-    /*! \brief Configure the baudrate of the controller
+    /*! \brief Configure the baud rate of the controller
      *
      * \param rate Baud rate for regular (non FD) CAN messages given
      * in bps; valid range: 0 to 2'000'000
@@ -100,9 +100,9 @@ public:
      */
     virtual void Sleep() = 0;
 
-    /*! \brief Request the transmission of a CanMessage
+    /*! \brief Request the transmission of a CanFrame
      *
-     * NB: In VIBE simulation, the CanMessage must provide a valid CAN
+     * NB: In VIBE simulation, the CanFrame must provide a valid CAN
      * ID and valid flags. The data length code is optional and is
      * automatically derived by the VIBE CAN simulator based on the
      * provided flags and the length of the dataField. The controller
@@ -117,37 +117,17 @@ public:
      * reobtained when receiving the message.
      *
      * \return Unique TX identifier to relate the request to following
-     * CanTransmitAcknowledge messages.
+     * CanFrameTransmitEvent messages.
      */
-    virtual auto SendMessage(const CanMessage& msg, void* userContext = nullptr) -> CanTxId = 0;
-
-    /*! \brief Request the transmission of a CanMessage
-     *
-     * NB: In VIBE simulation, the CanMessage must provide a valid CAN
-     * ID and valid flags. The data length code is optional and is
-     * automatically derived by the VIBE CAN simulator based on the
-     * provided flags and the length of the dataField. The controller
-     * must be in the Started state to transmit and receive messages.
-     *
-     * NB: In simple simulation, the requirements for VIBE simulation
-     * are not enforced. I.e., CanMessages are distributed to
-     * connected controllers regardless of the content and controller
-     * states are not checked.
-     *
-     * \param userContext An optional user provided pointer that is
-     * reobtained when receiving the message.
-     * 
-     * \return Unique TX identifier to relate the request to following
-     * CanTransmitAcknowledge messages.
-     */
-    virtual auto SendMessage(CanMessage&& msg, void* userContext = nullptr) -> CanTxId = 0;
+    virtual auto SendFrame(const CanFrame& msg, void* userContext = nullptr) -> CanTxId = 0;
 
     /*! \brief Register a callback for CAN message reception
      *
      * The registered handler is called when the controller receives a
-     * new CanMessage.
+     * new CanFrame.
      */
-    virtual void RegisterReceiveMessageHandler(ReceiveMessageHandler handler, DirectionMask directionMask = (DirectionMask)TransmitDirection::RX | (DirectionMask)TransmitDirection::TX) = 0;
+    virtual void AddFrameHandler(FrameHandler handler,
+                                 DirectionMask directionMask = (DirectionMask)TransmitDirection::RX) = 0;
 
     /*! \brief Register a callback for controller state changes
      *
@@ -159,7 +139,7 @@ public:
      * NB: Only supported in VIBE simulation. In simple simulation,
      * the handler is never called.
      */
-    virtual void RegisterStateChangedHandler(StateChangedHandler handler) = 0;
+    virtual void AddStateChangeHandler(StateChangeHandler handler) = 0;
 
     /*! \brief Register a callback for changes of the controller's error state
      *
@@ -171,7 +151,7 @@ public:
      * NB: Only supported in VIBE simulation. In simple simulation,
      * the handler is never called.
      */
-    virtual void RegisterErrorStateChangedHandler(ErrorStateChangedHandler handler) = 0;
+    virtual void AddErrorStateChangeHandler(ErrorStateChangeHandler handler) = 0;
 
     /*! \brief Register a callback for the TX status of sent CAN messages
      *
@@ -181,7 +161,7 @@ public:
      * NB: Full support in VIBE simulation. In simple simulation, all
      * messages are automatically positively acknowledged.
      */
-    virtual void RegisterTransmitStatusHandler(MessageStatusHandler handler, 
+    virtual void AddFrameTransmitHandler(FrameTransmitHandler handler, 
         CanTransmitStatusMask statusMask = (CanTransmitStatusMask)CanTransmitStatus::Transmitted 
             | (CanTransmitStatusMask)CanTransmitStatus::Canceled
             | (CanTransmitStatusMask)CanTransmitStatus::DuplicatedTransmitId
