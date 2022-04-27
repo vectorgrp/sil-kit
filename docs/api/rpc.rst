@@ -1,6 +1,6 @@
-===========================
-Remote procedure call (Rpc)
-===========================
+=================================
+Remote procedure call (Rpc) API
+=================================
 
 .. Macros for docs use
 .. |IParticipant| replace:: :cpp:class:`IParticipant<ib::mw::IParticipant>`

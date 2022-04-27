@@ -1,7 +1,7 @@
 .. _sec:api-participant-controller:
 
 ==============================
-The Participant Controller
+Participant Controller
 ==============================
 .. |IParticipantController| replace:: :cpp:class:`IParticipantController<ib::mw::sync::IParticipantController>`
 .. |Participant| replace:: :doc:`Participant<participant>`
