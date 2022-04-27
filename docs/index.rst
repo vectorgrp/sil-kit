@@ -2,12 +2,6 @@
 Vector Integration Bus (VIB)
 =============================================
 
-.. admonition:: Warning:
-
-   Currently, the Vector Integration Bus documentation is being reviewed and adapted to match the current state
-   of the development. Sections with a leading "!!!" prefix in their title have not been reviewed so far and might
-   me outdated.
-
 The Vector Integration Bus is a runtime component that enables distributed simulation for
 automotive applications. For this, the Vector Integration Bus provides:
 

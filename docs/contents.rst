@@ -1,5 +1,5 @@
 ==========
-!!! Contents
+Contents
 ==========
            
 .. toctree::
@@ -12,8 +12,6 @@
   usage/demos
   configuration/configuration
   usage/utilities
-  usage/replay
   vibes/overview
   CHANGELOG
   licenses/license
-  glossary
