@@ -60,8 +60,8 @@ protected:
     void SetupWriter(ib::test::SimParticipant* participant)
     {
 
-        auto* controller = participant->Participant()->CreateCanController("CAN1");
-        controller->AddFrameTransmitHandler(
+        auto* canController = participant->Participant()->CreateCanController("CAN1");
+        canController->AddFrameTransmitHandler(
             [this, participant](ICanController* /*ctrl*/, const CanFrameTransmitEvent& ack) {
                 callbacks.AckHandler(ack);
                 numAcked++;
@@ -73,8 +73,9 @@ protected:
 
         auto* participantController = participant->Participant()->GetParticipantController();
         participantController->SetSimulationTask(
-            [this, controller](auto, auto)
+            [this, canController, participantController](auto, auto)
             {
+                EXPECT_EQ(participantController->State(), sync::ParticipantState::Running);
                 if (numSent < testMessages.size())
                 {
                     const auto& message = testMessages.at(numSent);
@@ -83,7 +84,7 @@ protected:
                     msg.dataField.assign(message.expectedData.begin(), message.expectedData.end());
                     msg.dlc = msg.dataField.size();
 
-                    controller->SendFrame(std::move(msg));
+                    canController->SendFrame(std::move(msg));
                     numSent++;
                     std::this_thread::sleep_for(100ms);
                 }

@@ -25,13 +25,6 @@ using namespace ib::mw::sync;
 
 using namespace std::chrono_literals;
 
-//std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
-//{
-//    auto seconds = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(timestamp);
-//    out << seconds.count() << "s";
-//    return out;
-//}
-
 sync::SystemCommand::Kind ToSystemCommand(const std::string& cmdString)
 {
     if (cmdString == "Invalid")
@@ -99,31 +92,17 @@ public:
         , _myParticipantName{std::move(myName)}
         , _controller{controller}
     {
-        ReportSystemConfiguration();
-    }
-
-    void ReportSystemConfiguration()
-    {
-        std::cout << "The following participants are expected:\n";
-        for (auto&& name : _expectedParticipantNames)
-        {
-            std::cout << name << " ";
-            if (name == _myParticipantName)
-                std::cout << "(this process)\t";
-        }
     }
 
     void RunInteractiveLoop()
     {
-        while (true)
-        {
-            ParseAndDispatchCommand(std::cin);
-        }
+        ParseAndDispatchCommand(std::cin);
     }
 
     void ParseAndDispatchCommand(std::istream& instream)
     {
         std::string cmdRraw;
+        std::cout << "> ";
         while (std::getline(instream, cmdRraw))
         {
             std::istringstream cmdStream(cmdRraw);
@@ -131,10 +110,16 @@ public:
             std::string cmdName;
             cmdStream >> cmdName;
 
+            if (cmdName == "Exit")
+            {
+                return;
+            }
+
             try
             {
                 SystemCommand::Kind systemCommand = ToSystemCommand(cmdName);
                 SendCommand(systemCommand);
+                std::cout << "> ";
                 continue;
             }
             catch (const ib::TypeConversionError&)
@@ -147,8 +132,13 @@ public:
                 ParticipantCommand::Kind participantCommand = ToParticipantCommand(cmdName);
                 std::string participantName;
                 cmdStream >> participantName;
+                if (participantName.empty())
+                {
+                    throw ib::TypeConversionError{};
+                }
 
                 SendCommand(participantCommand, participantName);
+                std::cout << "> ";
                 continue;
             }
             catch (const ib::TypeConversionError&)
@@ -156,14 +146,18 @@ public:
                 // pass
             }
 
-            std::cerr << "Invalid command: \"" << cmdName << "\"" << std::endl;
+            std::cerr << "Invalid command: '" << cmdName << "'" << std::endl;
+            std::cout << "Available system commands: 'Run', 'Stop', 'Shutdown', 'PrepareColdswap', 'ExecuteColdswap'" << std::endl;
+            std::cout << "Available participant commands: 'Initialize <participantName>', 'ReInitialize <participantName>'" << std::endl;
+            std::cout << "Command 'Exit' ends the process" << std::endl;
+            std::cout << "> ";
         }
 
     }
 
     void SendCommand(SystemCommand::Kind systemCommand)
     {
-        std::cout << "Sending: SystemCommand::" << systemCommand << std::endl;
+        std::cout << "Sending SystemCommand::" << systemCommand << std::endl;
         switch (systemCommand)
         {
         case SystemCommand::Kind::Invalid:
@@ -188,7 +182,7 @@ public:
 
     void SendCommand(ParticipantCommand::Kind participantCommand, std::string participantName)
     {
-        std::cout << "Sending: ParticipantCommand::" << participantCommand << " to " << participantName << std::endl;
+        std::cout << "Sending ParticipantCommand::" << participantCommand << " to participant '" << participantName << "'" << std::endl;
         switch (participantCommand)
         {
         case ParticipantCommand::Kind::Invalid:

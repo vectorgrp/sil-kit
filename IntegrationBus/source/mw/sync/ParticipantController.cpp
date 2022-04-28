@@ -129,6 +129,12 @@ struct DistributedTimeQuantumPolicy : ParticipantController::ITimeSyncPolicy
 private:
     void CheckDistributedTimeAdvanceGrant()
     {
+        // Deferred execution of this callback was initiated, but simulation stopped in the meantime
+        if (_controller.State() != ParticipantState::Running)
+        {
+            return;
+        }
+
         for (auto&& otherTask : _otherNextTasks)
         {
             if (_myNextTask.timePoint > otherTask.second.timePoint)
