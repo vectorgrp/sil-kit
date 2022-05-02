@@ -64,8 +64,9 @@ protected:
 
         auto* controller = writer->Participant()->CreateCanController("CAN1", "CAN1");
         controller->AddFrameTransmitHandler(
-            [this](ICanController* /*ctrl*/, const CanFrameTransmitEvent& ack) {
+            [this](ICanController* ctrl, const CanFrameTransmitEvent& ack) {
             callbacks.AckHandler(ack);
+            EXPECT_EQ(reinterpret_cast<void*>(ctrl), ack.userContext);
         });
 
         auto* participantController = writer->Participant()->GetParticipantController();
@@ -80,7 +81,7 @@ protected:
                     msg.dataField.assign(message.expectedData.begin(), message.expectedData.end());
                     msg.dlc = msg.dataField.size();
 
-                    controller->SendFrame(std::move(msg));
+                    controller->SendFrame(std::move(msg), reinterpret_cast<void*>(controller));
                     numSent++;
                     std::this_thread::sleep_for(100ms);
                 }

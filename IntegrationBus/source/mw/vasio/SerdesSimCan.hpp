@@ -47,7 +47,8 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Ca
     buffer << ack.transmitId
            << ack.canId
            << ack.timestamp
-           << ack.status;
+           << ack.status
+           << ack.userContext;
     return buffer;
 }
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanFrameTransmitEvent& ack)
@@ -55,7 +56,8 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanFrame
     buffer >> ack.transmitId
            >> ack.canId
            >> ack.timestamp
-           >> ack.status;
+           >> ack.status
+           >> ack.userContext;
     return buffer;
 }
 

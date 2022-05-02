@@ -5,6 +5,20 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.99.22] - unreleased
+----------------------
+
+Fixed
+~~~~~
+- CAN: fixed network transmission of the userContext member. This breaks network compatibility to
+  the previous 3.99.21 release.
+
+Compatibility with 3.99.21
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): No
+- Application software interface (API): No
+- Middleware network protocol (VAsio): No
 
 [3.99.X] - 2022-05-03
 ----------------------
