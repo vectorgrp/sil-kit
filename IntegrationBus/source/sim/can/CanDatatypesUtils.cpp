@@ -8,7 +8,7 @@ namespace ib {
 namespace sim {
 namespace can {
 
-bool operator==(const CanFrame::CanReceiveFlags& lhs, const CanFrame::CanReceiveFlags& rhs)
+bool operator==(const CanFrame::CanFrameFlags& lhs, const CanFrame::CanFrameFlags& rhs)
 {
     return lhs.ide == rhs.ide
         && lhs.rtr == rhs.rtr

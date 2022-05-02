@@ -16,7 +16,7 @@ namespace can {
 
 inline std::string to_string(CanControllerState state);
 inline std::string to_string(CanErrorState state);
-inline std::string to_string(CanFrame::CanReceiveFlags flags);
+inline std::string to_string(CanFrame::CanFrameFlags flags);
 inline std::string to_string(CanTransmitStatus status);
 inline std::string to_string(const CanFrame& msg);
 inline std::string to_string(const CanFrameEvent& msg);
@@ -27,7 +27,7 @@ inline std::string to_string(const CanSetControllerMode& mode);
 
 inline std::ostream& operator<<(std::ostream& out, CanControllerState state);
 inline std::ostream& operator<<(std::ostream& out, CanErrorState state);
-inline std::ostream& operator<<(std::ostream& out, CanFrame::CanReceiveFlags flags);
+inline std::ostream& operator<<(std::ostream& out, CanFrame::CanFrameFlags flags);
 inline std::ostream& operator<<(std::ostream& out, CanTransmitStatus status);
 inline std::ostream& operator<<(std::ostream& out, const CanFrame& msg);
 inline std::ostream& operator<<(std::ostream& out, const CanFrameEvent& msg);
@@ -72,7 +72,7 @@ std::string to_string(CanErrorState state)
     throw ib::TypeConversionError{};
 }
 
-std::string to_string(CanFrame::CanReceiveFlags flags)
+std::string to_string(CanFrame::CanFrameFlags flags)
 {
     std::stringstream outStream;
     outStream << flags;
@@ -149,7 +149,7 @@ std::ostream& operator<<(std::ostream& out, CanErrorState state)
     return out << to_string(state);
 }
 
-std::ostream& operator<<(std::ostream& out, CanFrame::CanReceiveFlags flags)
+std::ostream& operator<<(std::ostream& out, CanFrame::CanFrameFlags flags)
 {
     out << "["
         << (flags.ide ? "ide," : "")

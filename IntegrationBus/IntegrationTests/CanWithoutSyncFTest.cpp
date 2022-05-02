@@ -58,7 +58,7 @@ protected:
             canmsg.frame.canId = index;
             canmsg.frame.dataField.assign(messageString.begin(), messageString.end());
             canmsg.frame.dlc = canmsg.frame.dataField.size();
-            canmsg.frame.flags = ib::sim::can::CanFrame::CanReceiveFlags{ 1,0,1,0,1 };
+            canmsg.frame.flags = ib::sim::can::CanFrame::CanFrameFlags{ 1,0,1,0,1 };
             canmsg.timestamp = 1s;
             canmsg.transmitId = index + 1;
             canmsg.frame.direction = ib::sim::TransmitDirection::RX;

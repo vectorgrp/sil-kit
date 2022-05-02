@@ -6,6 +6,34 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
+[3.99.X] - 2022-05-03
+----------------------
+
+Compatibility with 3.99.21
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): 
+- Application software interface (API): 
+- Middleware network protocol (VAsio): 
+
+Changed
+~~~~~~~
+
+- Can
+
+  - ``IntegrationBus/include/ib/sim/can/CanDatatypes.hpp``
+
+    + old:
+    .. code-block:: c++
+
+      struct CanReceiveFlags
+
+    + new:
+    .. code-block:: c++
+
+      struct CanFrameFlags
+
+
 [3.99.21] - 2022-05-03
 ----------------------
 

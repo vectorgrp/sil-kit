@@ -23,7 +23,7 @@ struct CanFrame
 {
     // CAN frame content
     uint32_t canId; //!< CAN Identifier
-    struct CanReceiveFlags
+    struct CanFrameFlags
     {
         uint8_t ide : 1; //!< Identifier Extension
         uint8_t rtr : 1; //!< Remote Transmission Request

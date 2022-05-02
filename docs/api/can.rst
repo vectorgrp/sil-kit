@@ -25,7 +25,7 @@ CAN Service API
 
 .. |CanControllerState| replace:: :cpp:class:`CanControllerState<ib::sim::can::CanControllerState>`
 .. |CanErrorState| replace:: :cpp:class:`CanErrorState<ib::sim::can::CanErrorState>`
-.. |CanReceiveFlags| replace:: :cpp:class:`CanFrame::CanReceiveFlags<ib::sim::can::CanFrame::CanReceiveFlags>`
+.. |CanFrameFlags| replace:: :cpp:class:`CanFrame::CanFrameFlags<ib::sim::can::CanFrame::CanFrameFlags>`
 .. |CanTransmitStatus| replace:: :cpp:class:`CanTransmitStatus<ib::sim::can::CanTransmitStatus>`
 
 .. |Transmitted| replace:: :cpp:enumerator:`CanTransmitStatus::Transmitted<ib::sim::can::Transmitted>`
@@ -61,7 +61,7 @@ Sending CAN Frames
 ~~~~~~~~~~~~~~~~~~
 
 Data is transfered in the form of a |CanFrame| and received as a |CanFrameEvent|. To send a |CanFrame|, it must be setup 
-with a CAN ID and the data to be transmitted. In VIBE simulation the |CanReceiveFlags| are also relevant::
+with a CAN ID and the data to be transmitted. In VIBE simulation the |CanFrameFlags| are also relevant::
 
   // Prepare a CAN message with id 0x17
   CanFrame canFrame;
