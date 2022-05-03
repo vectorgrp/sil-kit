@@ -6,8 +6,15 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
-[3.99.x] - 2022-04-y
---------------------------------
+[3.99.21] - 2022-05-03
+----------------------
+
+Compatibility with 3.99.20
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): No
+- Application software interface (API): No
+- Middleware network protocol (VAsio): No
 
 Changed
 ~~~~~~~
@@ -16,17 +23,9 @@ Changed
 
   - Functional changes
   
-    - Sending a wakeup pulse ´´ILinController::Wakeup()´´ now also triggers all ``WakeupHandler``-callbacks on the controller that initiated the
+    - Sending a wakeup pulse Â´Â´ILinController::Wakeup()Â´Â´ now also triggers all ``WakeupHandler``-callbacks on the controller that initiated the
       wakeup pulse in a trivial simulation. Formerly, this was only the case in a detailed simulation. The direction can be distinguished with
-      the new ´´LinWakeupEvent.direction´´.
-
-  - ``IntegrationBus/include/ib/mw/IParticipant.hpp``
-  
-    + old:
-    .. code-block:: c++
-
-    + new:
-    .. code-block:: c++
+      the new Â´Â´LinWakeupEvent.directionÂ´Â´.
 
   - ``IntegrationBus/include/ib/sim/lin/ILinController.hpp``
 
@@ -638,6 +637,12 @@ Removed
       .. code-block:: c++
 
         IEthController::SendFrame(EthFrame msg, std::chrono::nanoseconds timestamp) -> EthTxId;
+
+Fixed
+~~~~~
+
+- Guard against execution of an already scheduled *SimulationTask* if the state of the simulation is not *Running*.
+
 
 [3.99.20] - 2022-04-20
 --------------------------------
