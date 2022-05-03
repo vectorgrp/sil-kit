@@ -47,7 +47,7 @@ auto LinControllerProxy::Status() const noexcept -> ControllerStatus
     return _controllerStatus;
 }
 
-void LinControllerProxy::SendFrame(Frame frame, FrameResponseType responseType)
+void LinControllerProxy::SendFrame(LinFrame frame, FrameResponseType responseType)
 {
     if (_controllerMode != ControllerMode::Master)
     {
@@ -60,14 +60,6 @@ void LinControllerProxy::SendFrame(Frame frame, FrameResponseType responseType)
     sendFrame.frame = frame;
     sendFrame.responseType = responseType;
     SendIbMessage(sendFrame);
-}
-
-void LinControllerProxy::SendFrame(Frame frame, FrameResponseType responseType, std::chrono::nanoseconds timestamp)
-{
-    // VIBE-NetSim provides the timestamps, so we don't need a separate time provider.
-    _tracer.Trace(ib::sim::TransmitDirection::TX,  timestamp, frame);
-
-    SendFrame(std::move(frame), std::move(responseType));
 }
 
 void LinControllerProxy::SendFrameHeader(LinIdT linId)
@@ -83,13 +75,7 @@ void LinControllerProxy::SendFrameHeader(LinIdT linId)
     SendIbMessage(header);
 }
 
-void LinControllerProxy::SendFrameHeader(LinIdT linId, std::chrono::nanoseconds /*timestamp*/)
-{
-    // VIBE-NetSim provides its own timestamps, thus /timestamp/ is ignored.
-    SendFrameHeader(linId);
-}
-
-void LinControllerProxy::SetFrameResponse(Frame frame, FrameResponseMode mode)
+void LinControllerProxy::SetFrameResponse(LinFrame frame, FrameResponseMode mode)
 {
     FrameResponse response;
     response.frame = std::move(frame);
@@ -136,6 +122,7 @@ void LinControllerProxy::GoToSleepInternal()
 
 void LinControllerProxy::Wakeup()
 {
+    // Send without direction, netsim will distribute with correct directions
     WakeupPulse pulse;
     SendIbMessage(pulse);
     WakeupInternal();
@@ -146,22 +133,22 @@ void LinControllerProxy::WakeupInternal()
     SetControllerStatus(ControllerStatus::Operational);
 }
 
-void LinControllerProxy::RegisterFrameStatusHandler(FrameStatusHandler handler)
+void LinControllerProxy::AddFrameStatusHandler(FrameStatusHandler handler)
 {
     _frameStatusHandler.emplace_back(std::move(handler));
 }
 
-void LinControllerProxy::RegisterGoToSleepHandler(GoToSleepHandler handler)
+void LinControllerProxy::AddGoToSleepHandler(GoToSleepHandler handler)
 {
     _goToSleepHandler.emplace_back(std::move(handler));
 }
 
-void LinControllerProxy::RegisterWakeupHandler(WakeupHandler handler)
+void LinControllerProxy::AddWakeupHandler(WakeupHandler handler)
 {
     _wakeupHandler.emplace_back(std::move(handler));
 }
 
-void LinControllerProxy::RegisterFrameResponseUpdateHandler(FrameResponseUpdateHandler handler)
+void LinControllerProxy::AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler)
 {
     _frameResponseUpdateHandler.emplace_back(std::move(handler));
 }
@@ -196,7 +183,7 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
     _tracer.Trace(ib::sim::TransmitDirection::RX,  msg.timestamp, frame);
 
     // Dispatch frame to handlers
-    CallEach(_frameStatusHandler, this, frame, msg.status, msg.timestamp);
+    CallEach(_frameStatusHandler, this, LinFrameStatusEvent{ msg.timestamp, frame, msg.status });
 
     // Dispatch GoToSleep frames to dedicated handlers
     if (frame.id == GoToSleepFrame().id && frame.data == GoToSleepFrame().data)
@@ -204,14 +191,14 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
         // only call GoToSleepHandlers for slaves, i.e., not for the master that issued the GoToSleep command.
         if (_controllerMode == ControllerMode::Slave)
         {
-            CallEach(_goToSleepHandler, this);
+            CallEach(_goToSleepHandler, this, LinGoToSleepEvent{ msg.timestamp });
         }
     }
 }
 
-void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const WakeupPulse& /*msg*/)
+void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const WakeupPulse& msg)
 {
-    CallEach(_wakeupHandler, this);
+    CallEach(_wakeupHandler, this, LinWakeupEvent{ msg.timestamp, msg.direction } );
 }
 
 void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerConfig& msg)
@@ -219,11 +206,13 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
     // We also receive FrameResponseUpdate from other controllers, although we would not need them in VIBE simulation.
     // However, we also want to make users of FrameResponseUpdateHandlers happy when using the VIBE simulation.
     // NOTE: only self-delivered messages are rejected
-  if (from->GetServiceDescriptor() == _serviceDescriptor) return;
+    if (from->GetServiceDescriptor() == _serviceDescriptor)
+        return;
 
     for (auto& response : msg.frameResponses)
     {
-        CallEach(_frameResponseUpdateHandler, this, from->GetServiceDescriptor().to_string(), response);
+        CallEach(_frameResponseUpdateHandler, this, 
+            LinFrameResponseUpdateEvent{ from->GetServiceDescriptor().to_string(), response});
     }
 }
 
@@ -236,7 +225,8 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
 
     for (auto& response : msg.frameResponses)
     {
-        CallEach(_frameResponseUpdateHandler, this, from->GetServiceDescriptor().to_string(), response);
+        CallEach(_frameResponseUpdateHandler, this, 
+            LinFrameResponseUpdateEvent{ from->GetServiceDescriptor().to_string(), response});
     }
 }
 

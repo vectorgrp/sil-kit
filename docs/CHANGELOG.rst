@@ -12,6 +12,167 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 Changed
 ~~~~~~~
 
+- Lin
+
+  - Functional changes
+  
+    - Sending a wakeup pulse 创ILinController::Wakeup()创 now also triggers all ``WakeupHandler``-callbacks on the controller that initiated the
+      wakeup pulse in a trivial simulation. Formerly, this was only the case in a detailed simulation. The direction can be distinguished with
+      the new 创LinWakeupEvent.direction创.
+
+  - ``IntegrationBus/include/ib/mw/IParticipant.hpp``
+  
+    + old:
+    .. code-block:: c++
+
+    + new:
+    .. code-block:: c++
+
+  - ``IntegrationBus/include/ib/sim/lin/ILinController.hpp``
+
+    + old:
+    .. code-block:: c++
+
+      using FrameStatusHandler = std::function<void(ILinController*, const LinFrame&, FrameStatus, std::chrono::nanoseconds timestamp)>;
+      using WakeupHandler = std::function<void(ILinController*)>;
+      using GoToSleepHandler = std::function<void(ILinController*)>;
+
+      ILinController::RegisterFrameStatusHandler(FrameStatusHandler); 
+      ILinController::RegisterGoToSleepHandler(GoToSleepHandler); 
+      ILinController::RegisterWakeupHandler(WakeupHandler); 
+      ILinController::RegisterFrameResponseUpdateHandler(FrameResponseUpdateHandler); 
+
+    + new:
+    .. code-block:: c++
+
+      using FrameStatusHandler = std::function<void(ILinController*, const LinFrameStatusEvent& frameStatusEvent)>;
+      using WakeupHandler = std::function<void(ILinController*, const LinWakeupEvent& wakeupEvent)>;
+      using GoToSleepHandler = std::function<void(ILinController*, const LinGoToSleepEvent& goToSleepEvent)>;
+
+      ILinController::AddFrameStatusHandler(FrameStatusHandler); 
+      ILinController::AddGoToSleepHandler(GoToSleepHandler);
+      ILinController::AddWakeupHandler(WakeupHandler); 
+      ILinController::AddFrameResponseUpdateHandler(FrameResponseUpdateHandler); 
+      
+  - ``IntegrationBus/include/ib/sim/lin/LinDatatypes.hpp`` (C++-Api)
+
+    + old: 
+    .. code-block:: c++
+    
+      struct Frame {...};
+
+    + new:
+    .. code-block:: c++
+
+      struct LinFrame {...};
+
+    + added:
+    .. code-block:: c++
+    
+      struct LinFrameStatusEvent
+      {
+          std::chrono::nanoseconds timestamp;
+          const LinFrame& frame;
+          FrameStatus status;
+      };
+
+      struct LinWakeupEvent
+      {
+          std::chrono::nanoseconds timestamp;
+          TransmitDirection direction;
+      };
+
+      struct LinGoToSleepEvent
+      {
+          std::chrono::nanoseconds timestamp;
+      };
+
+  - ``IntegrationBus/include/ib/capi/Lin.h``
+
+    - Data types
+
+      + added:
+      .. code-block:: c++
+
+        struct ib_Lin_FrameStatusEvent
+        {
+            ib_InterfaceIdentifier interfaceId;
+            ib_NanosecondsTime timestamp;
+            ib_Lin_Frame* frame;
+            ib_Lin_FrameStatus status;
+        };
+
+        struct ib_Lin_WakeupEvent
+        {
+            ib_InterfaceIdentifier interfaceId;
+            ib_NanosecondsTime timestamp; 
+            ib_Direction direction;
+        };
+
+        struct ib_Lin_GoToSleepEvent
+        {
+            ib_InterfaceIdentifier interfaceId;
+            ib_NanosecondsTime timestamp;
+        };
+
+    - Handlers
+
+      + old: 
+      .. code-block:: c++
+      
+        typedef void (*ib_Lin_FrameStatusHandler_t)(void* context, ib_Lin_Controller* controller, const ib_Lin_Frame* frame,
+          ib_Lin_FrameStatus status, ib_NanosecondsTime timestamp);
+          
+        typedef void (*ib_Lin_GoToSleepHandler_t)(void* context, ib_Lin_Controller* controller);
+
+        typedef void (*ib_Lin_WakeupHandler_t)(void* context, ib_Lin_Controller* controller);
+                           
+      + new:
+      .. code-block:: c++
+        
+        typedef void (*ib_Lin_FrameStatusHandler_t)(void* context, ib_Lin_Controller* controller,
+          const ib_Lin_FrameStatusEvent* frameStatusEvent);
+
+        typedef void (*ib_Lin_GoToSleepHandler_t)(void* context, ib_Lin_Controller* controller,
+          const ib_Lin_GoToSleepEvent* goToSleepEvent);
+
+        typedef void (*ib_Lin_WakeupHandler_t)(void* context, ib_Lin_Controller* controller, 
+          const ib_Lin_WakeupEvent* wakeUpEvent);
+
+
+    - Methods
+
+      + old: 
+      .. code-block:: c++
+      
+        typedef ib_ReturnCode(*ib_Lin_Controller_RegisterFrameStatusHandler_t)(ib_Lin_Controller* controller, void* context,
+          ib_Lin_FrameStatusHandler_t handler);
+          
+        typedef ib_ReturnCode(*ib_Lin_Controller_RegisterGoToSleepHandler_t)(ib_Lin_Controller* controller, void* context,
+          ib_Lin_GoToSleepHandler_t handler);  
+          
+        typedef ib_ReturnCode(*ib_Lin_Controller_RegisterWakeupHandler_t)(ib_Lin_Controller* controller, void* context,
+          ib_Lin_WakeupHandler_t handler); 
+          
+        typedef ib_ReturnCode(*ib_Lin_Controller_SetFrameResponse_t)(ib_Lin_Controller* controller, const ib_Lin_Frame* frame,
+          ib_Lin_FrameResponseMode mode);
+  
+
+      + new:
+      .. code-block:: c++
+      
+        typedef ib_ReturnCode(*ib_Lin_Controller_AddFrameStatusHandler_t)(ib_Lin_Controller* controller, void* context,
+          ib_Lin_FrameStatusHandler_t handler);
+          
+        typedef ib_ReturnCode(*ib_Lin_Controller_AddGoToSleepHandler_t)(ib_Lin_Controller* controller, void* context,
+          ib_Lin_GoToSleepHandler_t handler);  
+
+        typedef ib_ReturnCode(*ib_Lin_Controller_AddWakeupHandler_t)(ib_Lin_Controller* controller, void* context,
+          ib_Lin_WakeupHandler_t handler); 
+          
+        typedef ib_ReturnCode(*ib_Lin_Controller_SetFrameResponse_t)(ib_Lin_Controller* controller, 
+          const ib_Lin_FrameResponse* frameResponse);
+
 - Can
 
   - ``IntegrationBus/include/ib/sim/can/ICanController.hpp``
@@ -438,6 +599,27 @@ Changed
 
 Removed
 ~~~~~~~
+
+- The Lin Controller's ``SendFrame`` and ``SendFrameHeader`` with explicit timestamp are removed.
+
+  - ``IntegrationBus/include/ib/sim/lin/ILinController.hpp``
+
+      + old: 
+      .. code-block:: c++
+
+        ILinController::SendFrame(LinFrame frame, FrameResponseType responseType, std::chrono::nanoseconds timestamp);
+        ILinController::SendFrameHeader(LinIdT linId, std::chrono::nanoseconds timestamp);
+        
+  - ``IntegrationBus/include/ib/capi/Lin.h``
+
+      + old: 
+      .. code-block:: c++
+
+        typedef ib_ReturnCode (*ib_Lin_Controller_SendFrameWithTimestamp_t)(ib_Lin_Controller* controller, const ib_Lin_Frame* frame,
+          ib_Lin_FrameResponseType responseType, ib_NanosecondsTime timestamp);
+          
+        typedef ib_ReturnCode (*ib_Lin_Controller_SendFrameHeaderWithTimestamp_t)(ib_Lin_Controller* controller, ib_Lin_Id linId,
+          ib_NanosecondsTime timestamp);
 
 - In the Cpp-Api, the Can Controller's ``SendMessage`` variant with R-value CanFrame is removed.
 

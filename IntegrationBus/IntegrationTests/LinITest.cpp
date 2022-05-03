@@ -114,7 +114,7 @@ struct TestResult
     size_t numberReceivedInSleep{0}; //!< Number of received frames while in sleepMode
     std::vector<std::chrono::nanoseconds> sendTimes;
     std::vector<std::chrono::nanoseconds> receiveTimes;
-    std::map<FrameStatus, std::vector<Frame>> receivedFrames;
+    std::map<FrameStatus, std::vector<LinFrame>> receivedFrames;
 };
 
 struct LinNode
@@ -164,61 +164,61 @@ public:
 
     void SendFrame_16(std::chrono::nanoseconds now)
     {
-        Frame frame;
+        LinFrame frame;
         frame.id = 16;
         frame.checksumModel = ChecksumModel::Classic;
         frame.dataLength = 6;
         frame.data = std::array<uint8_t, 8>{1, 6, 1, 6, 1, 6, 1, 6};
 
         _result.sendTimes.push_back(now);
-        controller->SendFrame(frame, FrameResponseType::MasterResponse, now);
+        controller->SendFrame(frame, FrameResponseType::MasterResponse);
     }
         
     void SendFrame_17(std::chrono::nanoseconds now)
     {
-        Frame frame;
+        LinFrame frame;
         frame.id = 17;
         frame.checksumModel = ChecksumModel::Classic;
         frame.dataLength = 6;
         frame.data = std::array<uint8_t, 8>{1,7,1,7,1,7,1,7};
 
         _result.sendTimes.push_back(now);
-        controller->SendFrame(frame, FrameResponseType::MasterResponse, now);
+        controller->SendFrame(frame, FrameResponseType::MasterResponse);
     }
 
     void SendFrame_18(std::chrono::nanoseconds now)
     {
-        Frame frame;
+        LinFrame frame;
         frame.id = 18;
         frame.checksumModel = ChecksumModel::Enhanced;
         frame.dataLength = 8;
         frame.data = std::array<uint8_t, 8>{0};
 
         _result.sendTimes.push_back(now);
-        controller->SendFrame(frame, FrameResponseType::MasterResponse, now);
+        controller->SendFrame(frame, FrameResponseType::MasterResponse);
     }
 
     void SendFrame_19(std::chrono::nanoseconds now)
     {
-        Frame frame;
+        LinFrame frame;
         frame.id = 19;
         frame.checksumModel = ChecksumModel::Classic;
         frame.dataLength = 8;
         frame.data = std::array<uint8_t, 8>{0};
 
         _result.sendTimes.push_back(now);
-        controller->SendFrame(frame, FrameResponseType::MasterResponse, now);
+        controller->SendFrame(frame, FrameResponseType::MasterResponse);
     }
 
     void SendFrame_34(std::chrono::nanoseconds now)
     {
-        Frame frame;
+        LinFrame frame;
         frame.id = 34;
         frame.checksumModel = ChecksumModel::Enhanced;
         frame.dataLength = 6;
 
         _result.sendTimes.push_back(now);
-        controller->SendFrame(frame, FrameResponseType::SlaveResponse, now);
+        controller->SendFrame(frame, FrameResponseType::SlaveResponse);
     }
 
     void GoToSleep()
@@ -227,14 +227,14 @@ public:
         _result.gotoSleepSent = true;
     }
 
-    void ReceiveFrameStatus(ILinController* /*controller*/, const Frame& frame, FrameStatus frameStatus, std::chrono::nanoseconds timestamp)
+    void ReceiveFrameStatus(ILinController* /*controller*/, const LinFrameStatusEvent& frameStatusEvent)
     {
-        _result.receivedFrames[frameStatus].push_back(frame);
-        _result.receiveTimes.push_back(timestamp);
+        _result.receivedFrames[frameStatusEvent.status].push_back(frameStatusEvent.frame);
+        _result.receiveTimes.push_back(frameStatusEvent.timestamp);
         schedule.ScheduleNextTask();
     }
 
-    void WakeupHandler(ILinController* linController)
+    void WakeupHandler(ILinController* linController, const LinWakeupEvent& /*wakeupEvent*/)
     {
         linController->WakeupInternal();
         _result.wakeupReceived = true;
@@ -262,9 +262,9 @@ public:
         timer.ExecuteAction(now);
     }
 
-    void FrameStatusHandler(ILinController* linController, const Frame& frame, FrameStatus status, std::chrono::nanoseconds /*timestamp*/)
+    void FrameStatusHandler(ILinController* linController, const LinFrameStatusEvent& frameStatusEvent)
     {
-        _result.receivedFrames[status].push_back(frame);
+        _result.receivedFrames[frameStatusEvent.status].push_back(frameStatusEvent.frame);
 
         for (const auto& response: _controllerConfig.frameResponses)
         {
@@ -272,7 +272,7 @@ public:
             {
               _result.numberReceivedInSleep++;
             }
-            if (response.frame.id == frame.id && response.frame.checksumModel == frame.checksumModel)
+            if (response.frame.id == frameStatusEvent.frame.id && response.frame.checksumModel == frameStatusEvent.frame.checksumModel)
             {
                 _result.numberReceived++;
                 if (_result.numberReceived == _controllerConfig.frameResponses.size())
@@ -283,7 +283,7 @@ public:
         }
     }
 
-    void GoToSleepHandler(ILinController* linController)
+    void GoToSleepHandler(ILinController* linController, const LinGoToSleepEvent& /*goToSleepEvent*/)
     {
         // wakeup in 10 ms
         timer.Set(now + 10ms,
@@ -386,8 +386,8 @@ TEST_F(LinITest, sync_lin_simulation)
 
         auto master = std::make_unique<LinMaster>(participant, linController);
 
-        linController->RegisterFrameStatusHandler(util::bind_method(master.get(), &LinMaster::ReceiveFrameStatus));
-        linController->RegisterWakeupHandler(util::bind_method(master.get(), &LinMaster::WakeupHandler));
+        linController->AddFrameStatusHandler(util::bind_method(master.get(), &LinMaster::ReceiveFrameStatus));
+        linController->AddWakeupHandler(util::bind_method(master.get(), &LinMaster::WakeupHandler));
 
         participantController->SetSimulationTask(
             [master = master.get(), participantName](auto now) {
@@ -409,8 +409,8 @@ TEST_F(LinITest, sync_lin_simulation)
           });
 
         auto slave = std::make_unique<LinSlave>(participant, linController);
-        linController->RegisterFrameStatusHandler(util::bind_method(slave.get(), &LinSlave::FrameStatusHandler));
-        linController->RegisterGoToSleepHandler(util::bind_method(slave.get(), &LinSlave::GoToSleepHandler));
+        linController->AddFrameStatusHandler(util::bind_method(slave.get(), &LinSlave::FrameStatusHandler));
+        linController->AddGoToSleepHandler(util::bind_method(slave.get(), &LinSlave::GoToSleepHandler));
 
         //to validate the inputs
         slave->_controllerConfig = config;

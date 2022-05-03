@@ -9,11 +9,11 @@ slave->Init(slaveConfig);
 
 // Register FrameStatusHandler to receive data
 auto slave_FrameStatusHandler =
-    [](ILinController*, const Frame&, FrameStatus, std::chrono::nanoseconds) {};
-slave->RegisterFrameStatusHandler(slave_FrameStatusHandler);
+    [](ILinController*,  const LinFrameStatusEvent& frameStatusEvent) {};
+slave->AddFrameStatusHandler(slave_FrameStatusHandler);
 
 // Setup ID 0x10 for reception
-Frame rxFrame;
+LinFrame rxFrame;
 rxFrame.id = 0x10;
 rxFrame.checksumModel = ChecksumModel::Enhanced;
 rxFrame.dataLength = 8;
@@ -30,13 +30,13 @@ master->Init(masterConfig);
 
 // Register FrameStatusHandler to receive confirmation of the successful transmission
 auto master_FrameStatusHandler =
-    [](ILinController*, const Frame&, FrameStatus, std::chrono::nanoseconds) {};
-master->RegisterFrameStatusHandler(master_FrameStatusHandler);
+    [](ILinController*,  const LinFrameStatusEvent& frameStatusEvent) {};
+master->AddFrameStatusHandler(master_FrameStatusHandler);
 
 // ------------------------------------------------------------
 // Perform TX from master to slave, i.e., the master provides the
 // frame response.
-Frame masterFrame;
+LinFrame masterFrame;
 masterFrame.id = 0x10;
 masterFrame.checksumModel = ChecksumModel::Enhanced;
 masterFrame.dataLength = 8;
@@ -62,6 +62,6 @@ else
 // In both cases (AUTOSAR and non-AUTOSAR), the following callbacks will be triggered:
 //  - TX confirmation for the master, who initiated the transmission
 //    and provided the frame response
-master_FrameStatusHandler(master, masterFrame, FrameStatus::LIN_TX_OK, timeEndOfFrame);
+master_FrameStatusHandler(master, LinFrameStatusEvent{ timeEndOfFrame, masterFrame, FrameStatus::LIN_TX_OK });
 //  - RX for the slave, who received the frame response
-slave_FrameStatusHandler(slave, masterFrame, FrameStatus::LIN_RX_OK, timeEndOfFrame);
+slave_FrameStatusHandler(slave, LinFrameStatusEvent{ timeEndOfFrame, masterFrame, FrameStatus::LIN_RX_OK });

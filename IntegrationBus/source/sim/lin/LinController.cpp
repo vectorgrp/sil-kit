@@ -104,23 +104,13 @@ auto LinController::Status() const noexcept -> ControllerStatus
     return _controllerStatus;
 }
 
-void LinController::SendFrame(Frame frame, FrameResponseType responseType)
-{
-    SendFrame(std::move(frame), std::move(responseType), _timeProvider->Now());
-}
-
-void LinController::SendFrame(Frame frame, FrameResponseType responseType, std::chrono::nanoseconds timestamp)
+void LinController::SendFrame(LinFrame frame, FrameResponseType responseType)
 {
     SetFrameResponse(frame, ToFrameResponseMode(responseType));
-    SendFrameHeader(frame.id, timestamp);
+    SendFrameHeader(frame.id);
 }
 
 void LinController::SendFrameHeader(LinIdT linId)
-{
-    SendFrameHeader(linId, _timeProvider->Now());
-}
-
-void LinController::SendFrameHeader(LinIdT linId, std::chrono::nanoseconds timestamp)
 {
     if (_controllerMode != ControllerMode::Master)
     {
@@ -133,7 +123,7 @@ void LinController::SendFrameHeader(LinIdT linId, std::chrono::nanoseconds times
     // setup a reply
     Transmission transmission;
     transmission.frame.id = linId;
-    transmission.timestamp = timestamp;
+    transmission.timestamp = _timeProvider->Now();
 
     auto numResponses = 0;
     for (auto&& node : _linNodes)
@@ -168,20 +158,23 @@ void LinController::SendFrameHeader(LinIdT linId, std::chrono::nanoseconds times
     SendIbMessage(transmission);
 
     // Dispatch the LIN transmission to our own callbacks
-    FrameResponseMode masterResponseMode = GetLinNode(_serviceDescriptor.to_endpointAddress()).responses[linId].responseMode;
+    FrameResponseMode masterResponseMode =
+        GetLinNode(_serviceDescriptor.to_endpointAddress()).responses[linId].responseMode;
     FrameStatus masterFrameStatus = transmission.status;
     if (masterResponseMode == FrameResponseMode::TxUnconditional)
     {
         masterFrameStatus = ToTxFrameStatus(masterFrameStatus);
     }
 
-    _tracer.Trace(ToTracingDir(masterFrameStatus), timestamp, transmission.frame);
+    _tracer.Trace(ToTracingDir(masterFrameStatus), transmission.timestamp, transmission.frame);
 
     // dispatch the reply locally...
-    CallHandlers(_frameStatusHandler, this, transmission.frame, masterFrameStatus, transmission.timestamp);
+    CallHandlers(_frameStatusHandler, this,
+                 LinFrameStatusEvent{transmission.timestamp, transmission.frame, masterFrameStatus});
+
 }
 
-void LinController::SetFrameResponse(Frame frame, FrameResponseMode mode)
+void LinController::SetFrameResponse(LinFrame frame, FrameResponseMode mode)
 {
     FrameResponse response;
     response.frame = std::move(frame);
@@ -227,8 +220,11 @@ void LinController::GoToSleepInternal()
 
 void LinController::Wakeup()
 {
-    WakeupPulse pulse;
+    // Send to others with direction=RX
+    WakeupPulse pulse{ _timeProvider->Now(), TransmitDirection::RX }; 
     SendIbMessage(pulse);
+    // No self delivery: directly call handlers with direction=TX
+    CallHandlers(_wakeupHandler, this, LinWakeupEvent{ pulse.timestamp, TransmitDirection::TX});
     WakeupInternal();
 }
 
@@ -237,22 +233,22 @@ void LinController::WakeupInternal()
     SetControllerStatus(ControllerStatus::Operational);
 }
 
-void LinController::RegisterFrameStatusHandler(FrameStatusHandler handler)
+void LinController::AddFrameStatusHandler(FrameStatusHandler handler)
 {
     _frameStatusHandler.emplace_back(std::move(handler));
 }
 
-void LinController::RegisterGoToSleepHandler(GoToSleepHandler handler)
+void LinController::AddGoToSleepHandler(GoToSleepHandler handler)
 {
     _goToSleepHandler.emplace_back(std::move(handler));
 }
 
-void LinController::RegisterWakeupHandler(WakeupHandler handler)
+void LinController::AddWakeupHandler(WakeupHandler handler)
 {
     _wakeupHandler.emplace_back(std::move(handler));
 }
 
-void LinController::RegisterFrameResponseUpdateHandler(FrameResponseUpdateHandler handler)
+void LinController::AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler)
 {
     _frameResponseUpdateHandler.emplace_back(std::move(handler));
 }
@@ -317,7 +313,8 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Trans
             {
                 _tracer.Trace(ib::sim::TransmitDirection::RX, _timeProvider->Now(), frame);
             }
-            CallHandlers(_frameStatusHandler, this, frame, msgStatus, msg.timestamp);
+
+            CallHandlers(_frameStatusHandler, this, LinFrameStatusEvent{ msg.timestamp, frame, msgStatus });
             break;
         }
         case FrameResponseMode::TxUnconditional:
@@ -327,7 +324,8 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Trans
             {
                 _tracer.Trace(ib::sim::TransmitDirection::TX, _timeProvider->Now(), frame);
             }
-            CallHandlers(_frameStatusHandler, this, frame, ToTxFrameStatus(msg.status), msg.timestamp);
+            CallHandlers(_frameStatusHandler, this,
+                         LinFrameStatusEvent{msg.timestamp, frame, ToTxFrameStatus(msg.status)});
             break;
         }
 
@@ -335,14 +333,14 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Trans
         if (frame.id == GoToSleepFrame().id && frame.data == GoToSleepFrame().data)
         {
             _tracer.Trace(ToTracingDir(msg.status), _timeProvider->Now(), frame);
-            CallHandlers(_goToSleepHandler, this);
+            CallHandlers(_goToSleepHandler, this, LinGoToSleepEvent{ _timeProvider->Now() });
         }
     }
 }
 
-void LinController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const WakeupPulse& /*msg*/)
+void LinController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const WakeupPulse& msg)
 {
-    CallHandlers(_wakeupHandler, this);
+    CallHandlers(_wakeupHandler, this, LinWakeupEvent{ msg.timestamp, msg.direction});
 }
 
 void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerConfig& msg)
@@ -355,7 +353,9 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Contr
 
     for (auto& response : msg.frameResponses)
     {
-        CallHandlers(_frameResponseUpdateHandler, this, from->GetServiceDescriptor().to_string(), response);
+        CallHandlers(
+            _frameResponseUpdateHandler, this,
+            LinFrameResponseUpdateEvent{ from->GetServiceDescriptor().to_string(), response});
     }
 }
 
@@ -372,7 +372,9 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Frame
 
     for (auto& response : msg.frameResponses)
     {
-        CallHandlers(_frameResponseUpdateHandler, this, from->GetServiceDescriptor().to_string(), response);
+        CallHandlers(
+            _frameResponseUpdateHandler, this,
+            LinFrameResponseUpdateEvent{ from->GetServiceDescriptor().to_string(), response});
     }
 }
 
@@ -403,7 +405,7 @@ void LinController::SetControllerStatus(ControllerStatus status)
     SendIbMessage(msg);
 }
 
-auto LinController::VeriyChecksum(const Frame& frame, FrameStatus status) -> FrameStatus
+auto LinController::VeriyChecksum(const LinFrame& frame, FrameStatus status) -> FrameStatus
 {
     if (status != FrameStatus::LIN_RX_OK)
         return status;

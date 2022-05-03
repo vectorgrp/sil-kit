@@ -7,7 +7,7 @@
 #include "CapiImpl.h"
 #include <cstring>
 
-static void assign(ib::sim::lin::Frame& cppFrame, const ib_Lin_Frame* cFrame) 
+static void assign(ib::sim::lin::LinFrame& cppFrame, const ib_Lin_Frame* cFrame) 
 {
     cppFrame.id = static_cast<ib::sim::lin::LinIdT>(cFrame->id);
     cppFrame.checksumModel = static_cast<ib::sim::lin::ChecksumModel>(cFrame->checksumModel);
@@ -17,7 +17,7 @@ static void assign(ib::sim::lin::Frame& cppFrame, const ib_Lin_Frame* cFrame)
 
 static void assign(ib::sim::lin::FrameResponse& cppFrameResponse, const ib_Lin_FrameResponse* cFrameResponse)
 {
-    assign(cppFrameResponse.frame, &cFrameResponse->frame);
+    assign(cppFrameResponse.frame, cFrameResponse->frame);
     cppFrameResponse.responseMode = static_cast<ib::sim::lin::FrameResponseMode>(cFrameResponse->responseMode);
 }
 
@@ -98,31 +98,13 @@ ib_ReturnCode ib_Lin_Controller_SendFrame(ib_Lin_Controller* controller, const i
     CAPI_ENTER
     {
         auto linController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
-        ib::sim::lin::Frame cppFrame;
+        ib::sim::lin::LinFrame cppFrame;
         assign(cppFrame, frame);
         linController->SendFrame(cppFrame, static_cast<ib::sim::lin::FrameResponseType>(responseType));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
 }
-
-ib_ReturnCode ib_Lin_Controller_SendFrameWithTimestamp(ib_Lin_Controller* controller, const ib_Lin_Frame* frame,
-                                                      ib_Lin_FrameResponseType responseType,
-                                                      ib_NanosecondsTime      timestamp)
-{
-    ASSERT_VALID_POINTER_PARAMETER(controller);
-    ASSERT_VALID_POINTER_PARAMETER(frame);
-    CAPI_ENTER
-    {
-        auto linController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
-        ib::sim::lin::Frame cppFrame;
-        assign(cppFrame, frame);
-        linController->SendFrame(cppFrame, static_cast<ib::sim::lin::FrameResponseType>(responseType), std::chrono::nanoseconds(timestamp));
-        return ib_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
-}
-
 
 ib_ReturnCode ib_Lin_Controller_SendFrameHeader(ib_Lin_Controller* controller, ib_Lin_Id linId)
 {
@@ -136,38 +118,26 @@ ib_ReturnCode ib_Lin_Controller_SendFrameHeader(ib_Lin_Controller* controller, i
     CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Lin_Controller_SendFrameHeaderWithTimestamp(ib_Lin_Controller* controller, ib_Lin_Id linId,
-                                                            ib_NanosecondsTime timestamp)
+ib_ReturnCode ib_Lin_Controller_SetFrameResponse(ib_Lin_Controller* controller,
+                                                 const ib_Lin_FrameResponse* frameResponse)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_POINTER_PARAMETER(frameResponse);
     CAPI_ENTER
     {
         auto linController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
-        linController->SendFrameHeader(static_cast<ib::sim::lin::LinIdT>(linId), std::chrono::nanoseconds(timestamp));
+        ib::sim::lin::LinFrame cppFrame;
+        assign(cppFrame, frameResponse->frame);
+        linController->SetFrameResponse(cppFrame,
+                                        static_cast<ib::sim::lin::FrameResponseMode>(frameResponse->responseMode));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Lin_Controller_SetFrameResponse(ib_Lin_Controller* controller, const ib_Lin_Frame* frame,
-                                                                   ib_Lin_FrameResponseMode mode)
-{
-    ASSERT_VALID_POINTER_PARAMETER(controller);
-    ASSERT_VALID_POINTER_PARAMETER(frame);
-    CAPI_ENTER
-    {
-        auto linController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
-        ib::sim::lin::Frame cppFrame;
-        assign(cppFrame, frame);
-        linController->SetFrameResponse(cppFrame, static_cast<ib::sim::lin::FrameResponseMode>(mode));
-        return ib_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
-}
-
-
-ib_ReturnCode ib_Lin_Controller_SetFrameResponses(ib_Lin_Controller* controller, const ib_Lin_FrameResponse* frameResponses,
-                                                 uint32_t numFrameResponses)
+ib_ReturnCode ib_Lin_Controller_SetFrameResponses(ib_Lin_Controller* controller,
+                                                  const ib_Lin_FrameResponse* frameResponses,
+                                                  uint32_t numFrameResponses)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_POINTER_PARAMETER(frameResponses);
@@ -230,7 +200,7 @@ ib_ReturnCode ib_Lin_Controller_WakeupInternal(ib_Lin_Controller* controller)
     CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Lin_Controller_RegisterFrameStatusHandler(ib_Lin_Controller* controller, void* context,
+ib_ReturnCode ib_Lin_Controller_AddFrameStatusHandler(ib_Lin_Controller* controller, void* context,
                                                           ib_Lin_FrameStatusHandler_t handler)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -238,26 +208,30 @@ ib_ReturnCode ib_Lin_Controller_RegisterFrameStatusHandler(ib_Lin_Controller* co
     CAPI_ENTER
     {
         auto linController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
-        linController->RegisterFrameStatusHandler(
+        linController->AddFrameStatusHandler(
             [handler, context, controller](
-                ib::sim::lin::ILinController* /*ctrl*/, const ib::sim::lin::Frame& cppFrame,
-                ib::sim::lin::FrameStatus cppFrameStatus, std::chrono::nanoseconds cppTimestamp) 
+                ib::sim::lin::ILinController* /*ctrl*/, const ib::sim::lin::LinFrameStatusEvent& cppFrameStatusEvent) 
             {
                 ib_Lin_Frame cFrame;
-                cFrame.id = static_cast<ib_Lin_Id>(cppFrame.id);
-                cFrame.checksumModel = static_cast<ib_Lin_ChecksumModel>(cppFrame.checksumModel);
-                cFrame.dataLength = static_cast<ib_Lin_DataLength>(cppFrame.dataLength);
-                memcpy(cFrame.data, cppFrame.data.data(), 8);
+                cFrame.id = static_cast<ib_Lin_Id>(cppFrameStatusEvent.frame.id);
+                cFrame.checksumModel = static_cast<ib_Lin_ChecksumModel>(cppFrameStatusEvent.frame.checksumModel);
+                cFrame.dataLength = static_cast<ib_Lin_DataLength>(cppFrameStatusEvent.frame.dataLength);
+                memcpy(cFrame.data, cppFrameStatusEvent.frame.data.data(), 8);
 
-                handler(context, controller, &cFrame, static_cast<ib_Lin_FrameStatus>(cppFrameStatus),
-                        static_cast<ib_NanosecondsTime>(cppTimestamp.count()));
+                ib_Lin_FrameStatusEvent cFrameStatusEvent{};
+                cFrameStatusEvent.interfaceId = ib_InterfaceIdentifier_LinFrameStatusEvent;
+                cFrameStatusEvent.timestamp = (ib_NanosecondsTime)cppFrameStatusEvent.timestamp.count();
+                cFrameStatusEvent.frame = &cFrame;
+                cFrameStatusEvent.status = (ib_Lin_FrameStatus)cppFrameStatusEvent.status;
+
+                handler(context, controller, &cFrameStatusEvent);
             });
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Lin_Controller_RegisterGoToSleepHandler(ib_Lin_Controller* controller, void* context,
+ib_ReturnCode ib_Lin_Controller_AddGoToSleepHandler(ib_Lin_Controller* controller, void* context,
                                                         ib_Lin_GoToSleepHandler_t handler)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -265,14 +239,19 @@ ib_ReturnCode ib_Lin_Controller_RegisterGoToSleepHandler(ib_Lin_Controller* cont
     CAPI_ENTER
     {
         auto linController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
-        linController->RegisterGoToSleepHandler(
-            [handler, context, controller](ib::sim::lin::ILinController* /*ctrl*/) { handler(context, controller); });
+        linController->AddGoToSleepHandler(
+            [handler, context, controller](ib::sim::lin::ILinController* /*ctrl*/,
+                                           const ib::sim::lin::LinGoToSleepEvent& cppGoToSleepEvent) {
+                ib_Lin_GoToSleepEvent goToSleepEvent{ib_InterfaceIdentifier_LinGoToSleepEvent,
+                                                     (ib_NanosecondsTime)cppGoToSleepEvent.timestamp.count()};
+                handler(context, controller, &goToSleepEvent);
+            });
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Lin_Controller_RegisterWakeupHandler(ib_Lin_Controller* controller, void* context,
+ib_ReturnCode ib_Lin_Controller_AddWakeupHandler(ib_Lin_Controller* controller, void* context,
                                                      ib_Lin_WakeupHandler_t handler)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -280,8 +259,14 @@ ib_ReturnCode ib_Lin_Controller_RegisterWakeupHandler(ib_Lin_Controller* control
     CAPI_ENTER
     {
         auto linController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
-        linController->RegisterWakeupHandler(
-            [handler, context, controller](ib::sim::lin::ILinController* /*ctrl*/) { handler(context, controller); });
+        linController->AddWakeupHandler(
+            [handler, context, controller](ib::sim::lin::ILinController* /*ctrl*/,
+                                           const ib::sim::lin::LinWakeupEvent& cppWakeupEvent) {
+                ib_Lin_WakeupEvent wakeupEvent{ib_InterfaceIdentifier_LinWakeupEvent,
+                                               (ib_NanosecondsTime)cppWakeupEvent.timestamp.count(),
+                                               (ib_Direction)cppWakeupEvent.direction};
+                handler(context, controller, &wakeupEvent);
+        });
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE

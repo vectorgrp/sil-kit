@@ -64,6 +64,7 @@ typedef uint8_t ib_Bool;
 #define ib_True  ((ib_Bool)1)
 #define ib_False ((ib_Bool)0)
 
+// NB: Should map to ib::sim::TransmitDirection
 /*! \brief An enum type defining the transmit direction within the simulation */
 typedef uint8_t ib_Direction;
 #define ib_Direction_Undefined      ((ib_Direction) 0)

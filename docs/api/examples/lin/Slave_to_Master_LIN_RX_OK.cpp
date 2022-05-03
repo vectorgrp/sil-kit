@@ -10,11 +10,11 @@ slave->Init(slaveConfig);
 // Register FrameStatusHandler to receive an acknowledgment for
 // the successful transmission
 auto slave_FrameStatusHandler =
-    [](ILinController*, const Frame&, FrameStatus, std::chrono::nanoseconds) {};
-slave->RegisterFrameStatusHandler(slave_FrameStatusHandler);
+    [](ILinController*,  const LinFrameStatusEvent& frameStatusEvent) {};
+slave->AddFrameStatusHandler(slave_FrameStatusHandler);
 
 // Setup a TX Response for LIN ID 0x11
-Frame slaveFrame;
+LinFrame slaveFrame;
 slaveFrame.id = 0x11;
 slaveFrame.dataLength = 8;
 slaveFrame.data = {'S', 'L', 'A', 'V', 'E', 0, 0, 0};
@@ -32,8 +32,8 @@ master->Init(masterConfig);
 
 // Register FrameStatusHandler to receive data from the LIN slave
 auto master_FrameStatusHandler =
-    [](ILinController*, const Frame&, FrameStatus, std::chrono::nanoseconds) {};
-master->RegisterFrameStatusHandler(master_FrameStatusHandler);
+    [](ILinController*,  const LinFrameStatusEvent& frameStatusEvent) {};
+master->AddFrameStatusHandler(master_FrameStatusHandler);
 
 // ------------------------------------------------------------
 // Perform TX from slave to master, i.e., the slave provides the
@@ -41,7 +41,7 @@ master->RegisterFrameStatusHandler(master_FrameStatusHandler);
 if (UseAutosarInterface)
 {
     // AUTOSAR API
-    Frame frameRequest;
+    LinFrame frameRequest;
     frameRequest.id = 0x11;
     frameRequest.checksumModel = ChecksumModel::Enhanced;
 
@@ -52,7 +52,7 @@ else
     // alternative, non-AUTOSAR API
 
     // 1. setup the master response
-    Frame frameRequest;
+    LinFrame frameRequest;
     frameRequest.id = 0x11;
     frameRequest.checksumModel = ChecksumModel::Enhanced;
     master->SetFrameResponse(frameRequest, SlaveFrameResponseMode::Rx);
@@ -65,6 +65,6 @@ else
 
 // In both cases (AUTOSAR and non-AUTOSAR), the following callbacks will be triggered:
 //  - RX for the master, who received the frame response
-master_FrameStatusHandler(master, slaveFrame, FrameStatus::LIN_RX_OK, timeEndOfFrame);
+master_FrameStatusHandler(master, LinFrameStatusEvent{ timeEndOfFrame, slaveFrame, FrameStatus::LIN_RX_OK });
 //  - TX confirmation for the slave, who provided the frame response
-slave_FrameStatusHandler(slave, slaveFrame, FrameStatus::LIN_TX_OK, timeEndOfFrame);
+slave_FrameStatusHandler(slave, LinFrameStatusEvent{ timeEndOfFrame, slaveFrame, FrameStatus::LIN_TX_OK });

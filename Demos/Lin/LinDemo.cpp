@@ -4,6 +4,7 @@
 #include <thread>
 
 #include "ib/IntegrationBus.hpp"
+#include "ib/sim/string_utils.hpp"
 #include "ib/sim/lin/all.hpp"
 #include "ib/sim/lin/string_utils.hpp"
 #include "ib/mw/sync/all.hpp"
@@ -122,7 +123,7 @@ public:
         };
     }
 
-    void doAction(std::chrono::nanoseconds now)
+    void DoAction(std::chrono::nanoseconds now)
     {
         if (controller->Status() != ControllerStatus::Operational)
             return;
@@ -130,62 +131,62 @@ public:
         schedule.ExecuteTask(now);
     }
 
-    void SendFrame_16(std::chrono::nanoseconds now)
+    void SendFrame_16(std::chrono::nanoseconds /*now*/)
     {
-        Frame frame;
+        LinFrame frame;
         frame.id = 16;
         frame.checksumModel = ChecksumModel::Classic;
         frame.dataLength = 6;
         frame.data = std::array<uint8_t, 8>{1, 6, 1, 6, 1, 6, 1, 6};
 
-        controller->SendFrame(frame, FrameResponseType::MasterResponse, now);
+        controller->SendFrame(frame, FrameResponseType::MasterResponse);
         std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(frame.id) << std::endl;
     }
         
-    void SendFrame_17(std::chrono::nanoseconds now)
+    void SendFrame_17(std::chrono::nanoseconds /*now*/)
     {
-        Frame frame;
+        LinFrame frame;
         frame.id = 17;
         frame.checksumModel = ChecksumModel::Classic;
         frame.dataLength = 6;
         frame.data = std::array<uint8_t, 8>{1,7,1,7,1,7,1,7};
 
-        controller->SendFrame(frame, FrameResponseType::MasterResponse, now);
+        controller->SendFrame(frame, FrameResponseType::MasterResponse);
         std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(frame.id) << std::endl;
     }
 
-    void SendFrame_18(std::chrono::nanoseconds now)
+    void SendFrame_18(std::chrono::nanoseconds /*now*/)
     {
-        Frame frame;
+        LinFrame frame;
         frame.id = 18;
         frame.checksumModel = ChecksumModel::Enhanced;
         frame.dataLength = 8;
         frame.data = std::array<uint8_t, 8>{0};
 
-        controller->SendFrame(frame, FrameResponseType::MasterResponse, now);
+        controller->SendFrame(frame, FrameResponseType::MasterResponse);
         std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(frame.id) << std::endl;
     }
 
-    void SendFrame_19(std::chrono::nanoseconds now)
+    void SendFrame_19(std::chrono::nanoseconds /*now*/)
     {
-        Frame frame;
+        LinFrame frame;
         frame.id = 19;
         frame.checksumModel = ChecksumModel::Classic;
         frame.dataLength = 8;
         frame.data = std::array<uint8_t, 8>{0};
 
-        controller->SendFrame(frame, FrameResponseType::MasterResponse, now);
+        controller->SendFrame(frame, FrameResponseType::MasterResponse);
         std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(frame.id) << std::endl;
     }
 
-    void SendFrame_34(std::chrono::nanoseconds now)
+    void SendFrame_34(std::chrono::nanoseconds /*now*/)
     {
-        Frame frame;
+        LinFrame frame;
         frame.id = 34;
         frame.checksumModel = ChecksumModel::Enhanced;
         frame.dataLength = 6;
 
-        controller->SendFrame(frame, FrameResponseType::SlaveResponse, now);
+        controller->SendFrame(frame, FrameResponseType::SlaveResponse);
         std::cout << "<< LIN Frame Header sent for ID=" << static_cast<unsigned int>(frame.id) << std::endl;
     }
 
@@ -196,9 +197,9 @@ public:
     }
 
 
-    void ReceiveFrameStatus(ILinController* /*linController*/, const Frame& frame, FrameStatus frameStatus, std::chrono::nanoseconds /*timestamp*/)
+    void ReceiveFrameStatus(ILinController* /*linController*/, const LinFrameStatusEvent& frameStatusEvent)
     {
-        switch (frameStatus)
+        switch (frameStatusEvent.status)
         {
         case FrameStatus::LIN_RX_OK: break; // good case, no need to warn
         case FrameStatus::LIN_TX_OK: break; // good case, no need to warn
@@ -206,16 +207,16 @@ public:
             std::cout << "WARNING: LIN transmission failed!" << std::endl;
         }
 
-        std::cout << ">> " << frame << " status=" << frameStatus << std::endl;
+        std::cout << ">> " << frameStatusEvent.frame << " status=" << frameStatusEvent.status << std::endl;
         schedule.ScheduleNextTask();
     }
 
-    void WakeupHandler(ILinController* linController)
+    void WakeupHandler(ILinController* linController, const LinWakeupEvent& wakeupEvent)
     {
         if (linController->Status() != ControllerStatus::Sleep)
             std::cout << "WARNING: Received Wakeup pulse while ControllerStatus is " << linController->Status() << "." << std::endl;
 
-        std::cout << ">> Wakeup pulse received" << std::endl;
+        std::cout << ">> Wakeup pulse received; direction=" << wakeupEvent.direction << std::endl;
         linController->WakeupInternal();
         schedule.ScheduleNextTask();
     }
@@ -238,15 +239,15 @@ public:
         timer.ExecuteAction(now);
     }
 
-    void FrameStatusHandler(ILinController* /*linController*/, const Frame& frame, FrameStatus status, std::chrono::nanoseconds timestamp)
+    void FrameStatusHandler(ILinController* /*linController*/, const LinFrameStatusEvent& frameStatusEvent)
     {
-        std::cout << ">> " << frame
-                  << " status=" << status
-                  << " timestamp=" << timestamp
+        std::cout << ">> " << frameStatusEvent.frame
+                  << " status=" << frameStatusEvent.status
+                  << " timestamp=" << frameStatusEvent.timestamp
                   << std::endl;
     }
 
-    void GoToSleepHandler(ILinController* linController)
+    void GoToSleepHandler(ILinController* linController, const LinGoToSleepEvent& /*goToSleepEvent*/)
     {
         std::cout << "LIN Slave received go-to-sleep command; entering sleep mode." << std::endl;
         // wakeup in 10 ms
@@ -258,10 +259,16 @@ public:
         linController->GoToSleepInternal();
     }
 
-    void WakeupHandler(ILinController* linController)
+    void WakeupHandler(ILinController* linController, const LinWakeupEvent& wakeupEvent)
     {
-        std::cout << "LIN Slave received wakeup pulse; entering normal operation mode." << std::endl;
-        linController->WakeupInternal();
+        std::cout << "LIN Slave received wakeup pulse; direction=" << wakeupEvent.direction
+                  << "; Entering normal operation mode." << std::endl;
+
+        // No need to set the controller status if we sent the wakeup
+        if (wakeupEvent.direction == TransmitDirection::RX)
+        {
+            linController->WakeupInternal();
+        }
     }
 
 private:
@@ -280,7 +287,7 @@ int main(int argc, char** argv) try
     {
         std::cerr << "Missing arguments! Start demo with: " << argv[0]
                   << " <ParticipantConfiguration.yaml|json> <ParticipantName> [domainId]" << std::endl
-                  << "Use \"LinMaster\" or \"CanReader\" as <ParticipantName>." << std::endl;
+                  << "Use \"LinMaster\" or \"LinSlave\" as <ParticipantName>." << std::endl;
         return -1;
     }
 
@@ -321,8 +328,8 @@ int main(int argc, char** argv) try
 
             });
 
-        linController->RegisterFrameStatusHandler(util::bind_method(&master, &LinMaster::ReceiveFrameStatus));
-        linController->RegisterWakeupHandler(util::bind_method(&master, &LinMaster::WakeupHandler));
+        linController->AddFrameStatusHandler(util::bind_method(&master, &LinMaster::ReceiveFrameStatus));
+        linController->AddWakeupHandler(util::bind_method(&master, &LinMaster::WakeupHandler));
 
         participantController->SetSimulationTask(
             [&master](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -330,7 +337,7 @@ int main(int argc, char** argv) try
                 auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                 std::cout << "now=" << nowMs.count() << "ms" << std::endl;
 
-                master.doAction(now);
+                master.DoAction(now);
 
             });
     }
@@ -393,9 +400,9 @@ int main(int argc, char** argv) try
             linController->Init(config);
             });
 
-        linController->RegisterFrameStatusHandler(util::bind_method(&slave, &LinSlave::FrameStatusHandler));
-        linController->RegisterGoToSleepHandler(util::bind_method(&slave, &LinSlave::GoToSleepHandler));
-        linController->RegisterWakeupHandler(util::bind_method(&slave, &LinSlave::WakeupHandler));
+        linController->AddFrameStatusHandler(util::bind_method(&slave, &LinSlave::FrameStatusHandler));
+        linController->AddGoToSleepHandler(util::bind_method(&slave, &LinSlave::GoToSleepHandler));
+        linController->AddWakeupHandler(util::bind_method(&slave, &LinSlave::WakeupHandler));
 
         participantController->SetSimulationTask(
             [&slave](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {

@@ -36,21 +36,21 @@ inline auto MakeControllerConfig(ControllerMode mode) -> ControllerConfig
     return config;
 }
 
-inline auto MakeFrame(LinIdT linId, ChecksumModel checksumModel = ChecksumModel::Undefined, uint8_t dataLength = 0, std::array<uint8_t, 8> data = std::array<uint8_t, 8>{}) -> Frame
+inline auto MakeFrame(LinIdT linId, ChecksumModel checksumModel = ChecksumModel::Undefined, uint8_t dataLength = 0, std::array<uint8_t, 8> data = std::array<uint8_t, 8>{}) -> LinFrame
 {
-    Frame frame;
+    LinFrame frame;
     frame.id = linId;
     frame.checksumModel = checksumModel;
     frame.dataLength = dataLength;
     frame.data = data;
     return frame;
 }
-inline auto AFrameWithId(LinIdT linId) -> testing::Matcher<const Frame&>
+inline auto AFrameWithId(LinIdT linId) -> testing::Matcher<const LinFrame&>
 {
     using namespace testing;
-    return Field(&Frame::id, linId);
+    return Field(&LinFrame::id, linId);
 }
-inline auto ATransmissionWith(Frame frame) -> testing::Matcher<const Transmission&>
+inline auto ATransmissionWith(LinFrame frame) -> testing::Matcher<const Transmission&>
 {
     using namespace testing;
     return Field(&Transmission::frame, frame);
@@ -68,7 +68,7 @@ inline auto ATransmissionWith(FrameStatus status, std::chrono::nanoseconds times
         Field(&Transmission::timestamp, timestamp)
     );
 }
-inline auto ATransmissionWith(Frame frame, FrameStatus status) -> testing::Matcher<const Transmission&>
+inline auto ATransmissionWith(LinFrame frame, FrameStatus status) -> testing::Matcher<const Transmission&>
 {
     using namespace testing;
     return AllOf(
@@ -76,7 +76,7 @@ inline auto ATransmissionWith(Frame frame, FrameStatus status) -> testing::Match
         Field(&Transmission::status, status)
     );
 }
-inline auto ATransmissionWith(Frame frame, FrameStatus status, std::chrono::nanoseconds timestamp) -> testing::Matcher<const Transmission&>
+inline auto ATransmissionWith(LinFrame frame, FrameStatus status, std::chrono::nanoseconds timestamp) -> testing::Matcher<const Transmission&>
 {
     using namespace testing;
     return AllOf(
@@ -94,7 +94,7 @@ inline auto AControllerStatusUpdateWith(ControllerStatus status) -> testing::Mat
 
 struct Callbacks
 {
-    MOCK_METHOD3(FrameStatusHandler, void(ILinController*, const Frame&, FrameStatus));
+    MOCK_METHOD3(FrameStatusHandler, void(ILinController*, const LinFrame&, FrameStatus));
     MOCK_METHOD1(GoToSleepHandler, void(ILinController*));
     MOCK_METHOD1(WakeupHandler, void(ILinController*));
     MOCK_METHOD3(FrameResponseUpdateHandler, void(ILinController*, const std::string&, const FrameResponse&));

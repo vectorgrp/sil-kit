@@ -192,10 +192,10 @@ void Master_SimTask(void* context, ib_Participant* cbParticipant, ib_Nanoseconds
     Master_doAction(now);
 }
 
-void Master_ReceiveFrameStatus(void* context, ib_Lin_Controller* controller, const ib_Lin_Frame* frame,
-                               ib_Lin_FrameStatus status, ib_NanosecondsTime timestamp)
+void Master_ReceiveFrameStatus(void* context, ib_Lin_Controller* controller, const ib_Lin_FrameStatusEvent* frameStatusEvent)
 {
-    switch (status)
+
+    switch (frameStatusEvent->status)
     {
     case ib_Lin_FrameStatus_LIN_RX_OK:
         break; // good case, no need to warn
@@ -205,14 +205,16 @@ void Master_ReceiveFrameStatus(void* context, ib_Lin_Controller* controller, con
         printf("WARNING: LIN transmission failed!\n");
     }
 
-    printf(">> lin::Frame{id=%d, cs=%d, dl=%d, d={%d %d %d %d %d %d %d %d}} status=%d\n", frame->id, frame->checksumModel,
+    ib_Lin_Frame* frame = frameStatusEvent->frame;
+    printf(">> lin::Frame{id=%d, cs=%d, dl=%d, d={%d %d %d %d %d %d %d %d}} status=%d\n", frame->id,
+           frame->checksumModel,
            frame->dataLength, frame->data[0], frame->data[1], frame->data[2], frame->data[3], frame->data[4],
-           frame->data[5], frame->data[6], frame->data[7], status);
+           frame->data[5], frame->data[6], frame->data[7], frameStatusEvent->status);
 
     Schedule_ScheduleNextTask(masterSchedule);
 }
 
-void Master_WakeupHandler(void* context, ib_Lin_Controller* controller)
+void Master_WakeupHandler(void* context, ib_Lin_Controller* controller, const ib_Lin_WakeupEvent* wakeUpEvent)
 {
     ib_Lin_ControllerStatus status;
     ib_Lin_Controller_Status(controller, &status);
@@ -222,7 +224,8 @@ void Master_WakeupHandler(void* context, ib_Lin_Controller* controller)
         printf("WARNING: Received Wakeup pulse while ControllerStatus is %d.\n", status);
 
     }
-    printf(">> Wakeup pulse received\n");
+    printf(">> Wakeup pulse received @%" PRIu64 "ms; direction=%d\n", wakeUpEvent->timestamp / 1000000,
+           wakeUpEvent->direction);
     ib_Lin_Controller_WakeupInternal(controller);
     Schedule_ScheduleNextTask(masterSchedule);
 }
@@ -237,7 +240,7 @@ void Master_SendFrame_16(ib_NanosecondsTime now)
     uint8_t tmp[8] = {1, 6, 1, 6, 1, 6, 1, 6};
     memcpy(frame.data, tmp, sizeof(tmp));
 
-    ib_Lin_Controller_SendFrameWithTimestamp(linController, &frame, ib_Lin_FrameResponseType_MasterResponse, now);
+    ib_Lin_Controller_SendFrame(linController, &frame, ib_Lin_FrameResponseType_MasterResponse);
     printf("<< LIN Frame sent with ID=%d\n", frame.id);
 }
 
@@ -251,7 +254,7 @@ void Master_SendFrame_17(ib_NanosecondsTime now)
     uint8_t tmp[8] = {1, 7, 1, 7, 1, 7, 1, 7};
     memcpy(frame.data, tmp, sizeof(tmp));
 
-    ib_Lin_Controller_SendFrameWithTimestamp(linController, &frame, ib_Lin_FrameResponseType_MasterResponse, now);
+    ib_Lin_Controller_SendFrame(linController, &frame, ib_Lin_FrameResponseType_MasterResponse);
     printf("<< LIN Frame sent with ID=%d\n", frame.id);
 }
 
@@ -265,7 +268,7 @@ void Master_SendFrame_18(ib_NanosecondsTime now)
     uint8_t tmp[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     memcpy(frame.data, tmp, sizeof(tmp));
 
-    ib_Lin_Controller_SendFrameWithTimestamp(linController, &frame, ib_Lin_FrameResponseType_MasterResponse, now);
+    ib_Lin_Controller_SendFrame(linController, &frame, ib_Lin_FrameResponseType_MasterResponse);
     printf("<< LIN Frame sent with ID=%d\n", frame.id);
 }
 
@@ -279,7 +282,7 @@ void Master_SendFrame_19(ib_NanosecondsTime now)
     uint8_t tmp[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     memcpy(frame.data, tmp, sizeof(tmp));
 
-    ib_Lin_Controller_SendFrameWithTimestamp(linController, &frame, ib_Lin_FrameResponseType_MasterResponse, now);
+    ib_Lin_Controller_SendFrame(linController, &frame, ib_Lin_FrameResponseType_MasterResponse);
     printf("<< LIN Frame sent with ID=%d\n", frame.id);
 }
 
@@ -291,7 +294,7 @@ void Master_SendFrame_34(ib_NanosecondsTime now)
     frame.checksumModel = ib_Lin_ChecksumModel_Enhanced;
     frame.dataLength = 6;
 
-    ib_Lin_Controller_SendFrameWithTimestamp(linController, &frame, ib_Lin_FrameResponseType_SlaveResponse, now);
+    ib_Lin_Controller_SendFrame(linController, &frame, ib_Lin_FrameResponseType_SlaveResponse);
     printf("<< LIN Frame Header sent for ID=%d\n", frame.id);
 }
 
@@ -308,9 +311,12 @@ void Slave_InitCallback(void* context, ib_Participant* cbParticipant, struct ib_
     // Configure LIN Controller to receive a FrameResponse for LIN ID 16
     ib_Lin_FrameResponse response_16;
     response_16.interfaceId = ib_InterfaceIdentifier_LinFrameResponse;
-    response_16.frame.id = 16;
-    response_16.frame.checksumModel = ib_Lin_ChecksumModel_Classic;
-    response_16.frame.dataLength = 6;
+    ib_Lin_Frame frame16;
+    frame16.interfaceId = ib_InterfaceIdentifier_LinFrame;
+    frame16.id = 16;
+    frame16.checksumModel = ib_Lin_ChecksumModel_Classic;
+    frame16.dataLength = 6;
+    response_16.frame = &frame16;
     response_16.responseMode = ib_Lin_FrameResponseMode_Rx;
 
     // Configure LIN Controller to receive a FrameResponse for LIN ID 17
@@ -318,37 +324,50 @@ void Slave_InitCallback(void* context, ib_Participant* cbParticipant, struct ib_
     //    this message and not trigger a callback. This is also the default.
     ib_Lin_FrameResponse response_17;
     response_17.interfaceId = ib_InterfaceIdentifier_LinFrameResponse;
-    response_17.frame.id = 17;
-    response_17.frame.checksumModel = ib_Lin_ChecksumModel_Classic;
-    response_17.frame.dataLength = 6;
+    ib_Lin_Frame frame17;
+    frame17.interfaceId = ib_InterfaceIdentifier_LinFrame;
+    frame17.id = 17;
+    frame17.checksumModel = ib_Lin_ChecksumModel_Classic;
+    frame17.dataLength = 6;
+    response_17.frame = &frame17;
     response_17.responseMode = ib_Lin_FrameResponseMode_Unused;
 
     // Configure LIN Controller to receive LIN ID 18
     //  - ChecksumModel does not match with master --> Receive with LIN_RX_ERROR
     ib_Lin_FrameResponse response_18;
     response_18.interfaceId = ib_InterfaceIdentifier_LinFrameResponse;
-    response_18.frame.id = 18;
-    response_18.frame.checksumModel = ib_Lin_ChecksumModel_Classic;
-    response_18.frame.dataLength = 8;
+    ib_Lin_Frame frame18;
+    frame18.interfaceId = ib_InterfaceIdentifier_LinFrame;
+    frame18.id = 18;
+    frame18.checksumModel = ib_Lin_ChecksumModel_Classic;
+    frame18.dataLength = 8;
+    response_18.frame = &frame18;
     response_18.responseMode = ib_Lin_FrameResponseMode_Rx;
 
     // Configure LIN Controller to receive LIN ID 19
     //  - dataLength does not match with master --> Receive with LIN_RX_ERROR
     ib_Lin_FrameResponse response_19;
     response_19.interfaceId = ib_InterfaceIdentifier_LinFrameResponse;
-    response_19.frame.id = 19;
-    response_19.frame.checksumModel = ib_Lin_ChecksumModel_Enhanced;
-    response_19.frame.dataLength = 1;
+    ib_Lin_Frame frame19;
+    frame19.interfaceId = ib_InterfaceIdentifier_LinFrame;
+    frame19.id = 19;
+    frame19.checksumModel = ib_Lin_ChecksumModel_Enhanced;
+    frame19.dataLength = 1;
+    response_19.frame = &frame19;
     response_19.responseMode = ib_Lin_FrameResponseMode_Rx;
 
     // Configure LIN Controller to send a FrameResponse for LIN ID 34
     ib_Lin_FrameResponse response_34;
     response_34.interfaceId = ib_InterfaceIdentifier_LinFrameResponse;
-    response_34.frame.id = 34;
-    response_34.frame.checksumModel = ib_Lin_ChecksumModel_Enhanced;
-    response_34.frame.dataLength = 6;
+
+    ib_Lin_Frame frame34;
+    frame34.interfaceId = ib_InterfaceIdentifier_LinFrame;
+    frame34.id = 34;
+    frame34.checksumModel = ib_Lin_ChecksumModel_Enhanced;
+    frame34.dataLength = 6;
     uint8_t tmp[8] = {3, 4, 3, 4, 3, 4, 3, 4};
-    memcpy(response_34.frame.data, tmp, sizeof(tmp));
+    memcpy(frame34.data, tmp, sizeof(tmp));
+    response_34.frame = &frame34;
     response_34.responseMode = ib_Lin_FrameResponseMode_TxUnconditional;
 
     const uint32_t numFrameResponses = 5;
@@ -380,12 +399,12 @@ void Slave_SimTask(void* context, ib_Participant* cbParticipant, ib_NanosecondsT
     SleepMs(500);
 }
 
-void Slave_FrameStatusHandler(void* context, ib_Lin_Controller* controller, const ib_Lin_Frame* frame,
-                              ib_Lin_FrameStatus status, ib_NanosecondsTime timestamp)
+void Slave_FrameStatusHandler(void* context, ib_Lin_Controller* controller, const ib_Lin_FrameStatusEvent* frameStatusEvent)
 {
+    ib_Lin_Frame* frame = frameStatusEvent->frame;
     printf(">> lin::Frame{id=%d, cs=%d, dl=%d, d={%d %d %d %d %d %d %d %d}} status=%d timestamp=%"PRIu64"ms\n", frame->id,
            frame->checksumModel, frame->dataLength, frame->data[0], frame->data[1], frame->data[2], frame->data[3],
-           frame->data[4], frame->data[5], frame->data[6], frame->data[7], status, timestamp/1000000);
+           frame->data[4], frame->data[5], frame->data[6], frame->data[7], frameStatusEvent->status, frameStatusEvent->timestamp/1000000);
 }
 
 void Slave_WakeupPulse(ib_NanosecondsTime now) 
@@ -394,18 +413,24 @@ void Slave_WakeupPulse(ib_NanosecondsTime now)
     ib_Lin_Controller_Wakeup(linController);
 }
 
-void Slave_GoToSleepHandler(void* context, ib_Lin_Controller* controller)
+void Slave_GoToSleepHandler(void* context, ib_Lin_Controller* controller, const ib_Lin_GoToSleepEvent* goToSleepEvent)
 {
-    printf("LIN Slave received go-to-sleep command; entering sleep mode.\n");
+    printf("LIN Slave received go-to-sleep command @%" PRIu64 "ms; entering sleep mode.\n",
+           goToSleepEvent->timestamp / 1000000);
     // wakeup in 10 ms
     Timer_Set(&slaveTimer, slaveNow + 10000000, &Slave_WakeupPulse);
     ib_Lin_Controller_GoToSleepInternal(controller);
 }
 
-void Slave_WakeupHandler(void* context, ib_Lin_Controller* controller)
+void Slave_WakeupHandler(void* context, ib_Lin_Controller* controller, const ib_Lin_WakeupEvent* wakeUpEvent)
 {
-    printf(">> LIN Slave received wakeup pulse; entering normal operation mode.\n");
-    ib_Lin_Controller_WakeupInternal(controller);
+    printf(">> LIN Slave received wakeup pulse @%" PRIu64 "ms; direction=%d; entering normal operation mode.\n",
+           wakeUpEvent->timestamp / 1000000, wakeUpEvent->direction);
+
+    if (wakeUpEvent->direction == ib_Direction_Receive)
+    {
+        ib_Lin_Controller_WakeupInternal(controller);
+    }
 }
 
 int main(int argc, char* argv[])
@@ -452,16 +477,16 @@ int main(int argc, char* argv[])
         Schedule_Create(&masterSchedule, tasks, 6);
 
         ib_Participant_SetInitHandler(participant, NULL, &Master_InitCallback);
-        ib_Lin_Controller_RegisterFrameStatusHandler(linController, NULL, &Master_ReceiveFrameStatus);
-        ib_Lin_Controller_RegisterWakeupHandler(linController, NULL, &Master_WakeupHandler);
+        ib_Lin_Controller_AddFrameStatusHandler(linController, NULL, &Master_ReceiveFrameStatus);
+        ib_Lin_Controller_AddWakeupHandler(linController, NULL, &Master_WakeupHandler);
         ib_Participant_SetSimulationTask(participant, NULL, &Master_SimTask);
     }
     else
     {
         ib_Participant_SetInitHandler(participant, NULL, &Slave_InitCallback);
-        ib_Lin_Controller_RegisterFrameStatusHandler(linController, NULL, &Slave_FrameStatusHandler);
-        ib_Lin_Controller_RegisterGoToSleepHandler(linController, NULL, &Slave_GoToSleepHandler);
-        ib_Lin_Controller_RegisterWakeupHandler(linController, NULL, &Slave_WakeupHandler);
+        ib_Lin_Controller_AddFrameStatusHandler(linController, NULL, &Slave_FrameStatusHandler);
+        ib_Lin_Controller_AddGoToSleepHandler(linController, NULL, &Slave_GoToSleepHandler);
+        ib_Lin_Controller_AddWakeupHandler(linController, NULL, &Slave_WakeupHandler);
         ib_Participant_SetSimulationTask(participant, NULL, &Slave_SimTask);
     }
 

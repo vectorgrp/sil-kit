@@ -36,6 +36,9 @@ typedef int32_t ib_InterfaceIdentifier;
 #define ib_InterfaceIdentifier_LinFrame                    ((ib_InterfaceIdentifier)4001001)
 #define ib_InterfaceIdentifier_LinFrameResponse            ((ib_InterfaceIdentifier)4002001)
 #define ib_InterfaceIdentifier_LinControllerConfig         ((ib_InterfaceIdentifier)4003001)
+#define ib_InterfaceIdentifier_LinFrameStatusEvent         ((ib_InterfaceIdentifier)4004001)
+#define ib_InterfaceIdentifier_LinGoToSleepEvent           ((ib_InterfaceIdentifier)4005001)
+#define ib_InterfaceIdentifier_LinWakeupEvent              ((ib_InterfaceIdentifier)4006001)
 
 // Data
 #define ib_InterfaceIdentifier_DataMessageEvent            ((ib_InterfaceIdentifier)5001001)

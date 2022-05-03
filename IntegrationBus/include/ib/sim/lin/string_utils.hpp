@@ -21,7 +21,7 @@ inline std::string to_string(FrameStatus frameStatus);
 inline std::string to_string(ControllerMode mode);
 inline std::string to_string(ControllerStatus status);
 
-inline std::string to_string(const Frame& frame);
+inline std::string to_string(const LinFrame& frame);
 inline std::string to_string(const SendFrameRequest& request);
 inline std::string to_string(const SendFrameHeaderRequest& request);
 inline std::string to_string(const Transmission& transmission);
@@ -37,7 +37,7 @@ inline std::ostream& operator<<(std::ostream& out, FrameStatus frameStatus);
 inline std::ostream& operator<<(std::ostream& out, ControllerMode mode);           
 inline std::ostream& operator<<(std::ostream& out, ControllerStatus status);
 
-inline std::ostream& operator<<(std::ostream& out, const Frame& frame);
+inline std::ostream& operator<<(std::ostream& out, const LinFrame& frame);
 inline std::ostream& operator<<(std::ostream& out, const SendFrameRequest& request);
 inline std::ostream& operator<<(std::ostream& out, const SendFrameHeaderRequest& request);
 inline std::ostream& operator<<(std::ostream& out, const Transmission& transmission);
@@ -150,7 +150,7 @@ std::string to_string(ControllerStatus status)
 }
 
 
-std::string to_string(const Frame& frame)
+std::string to_string(const LinFrame& frame)
 {
     std::stringstream out;
     out << frame;
@@ -279,12 +279,12 @@ std::ostream& operator<<(std::ostream& out, ControllerStatus status)
     }
 }
 
-std::ostream& operator<<(std::ostream& out, const Frame& frame)
+std::ostream& operator<<(std::ostream& out, const LinFrame& frame)
 {
     //instead of ios::copyfmt (which set badbit) we use a temporary stream 
     std::stringstream buf;
     buf
-        << "lin::Frame{id=" << static_cast<uint16_t>(frame.id)
+        << "lin::LinFrame{id=" << static_cast<uint16_t>(frame.id)
         << ", cs=" << to_string(frame.checksumModel)
         << ", dl=" << static_cast<uint16_t>(frame.dataLength)
         << ", d={" << util::AsHexString(frame.data).WithSeparator(" ")

@@ -8,8 +8,8 @@ masterConfig.baudRate = 20000;
 master->Init(masterConfig);
 
 auto master_FrameResponseUpdateHandler =
-    [](ILinController*, mw::EndpointAddress, const FrameResponse&) {};
-master->RegisterFrameResponseUpdateHandler(master_FrameResponseUpdateHandler);
+    [](ILinController*, LinFrameResponseUpdateEvent frameResponseUpdateEvent) {};
+master->AddFrameResponseUpdateHandler(master_FrameResponseUpdateHandler);
 
 // ------------------------------------------------------------
 // Slave Setup
@@ -20,7 +20,7 @@ slaveConfig.baudRate = 20000;
 slave->Init(slaveConfig);
 
 // Setup a TX Response for LIN ID 0x11
-Frame slaveFrame;
+LinFrame slaveFrame;
 slaveFrame.id = 0x11;
 slaveFrame.checksumModel = ChecksumModel::Enhanced;
 slaveFrame.dataLength = 8;
@@ -32,13 +32,12 @@ slave->SetFrameResponse(slaveFrame, FrameResponseMode::TxUnconditional);
 FrameResponse responseUpdate;
 responseUpdate.frame = slaveFrame;
 responseUpdate.responseMode = FrameResponseMode::TxUnconditional;
-master_FrameResponseUpdateHandler(master, slaveAddress, responseUpdate);
-
+master_FrameResponseUpdateHandler(master, LinFrameResponseUpdateEvent{ slaveAddress, responseUpdate });
 
 // NB: SlaveFrameResponseUpdateHandler is not triggered when
 // SetFrameResponse is called at the controller where the callback
 // is registered
-Frame masterFrame;
+LinFrame masterFrame;
 masterFrame.id = 0x10;
 masterFrame.dataLength = 8;
 masterFrame.data = {'M', 'A', 'S', 'T', 'E', 'R', 0, 0};

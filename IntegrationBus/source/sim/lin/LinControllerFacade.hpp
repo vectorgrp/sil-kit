@@ -51,11 +51,9 @@ public:
     void Init(ControllerConfig config) override;
     auto Status() const noexcept->ControllerStatus override;
 
-    void SendFrame(Frame frame, FrameResponseType responseType) override;
-    void SendFrame(Frame frame, FrameResponseType responseType, std::chrono::nanoseconds timestamp) override;
+    void SendFrame(LinFrame frame, FrameResponseType responseType) override;
     void SendFrameHeader(LinIdT linId) override;
-    void SendFrameHeader(LinIdT linId, std::chrono::nanoseconds timestamp) override;
-    void SetFrameResponse(Frame frame, FrameResponseMode mode) override;
+    void SetFrameResponse(LinFrame frame, FrameResponseMode mode) override;
     void SetFrameResponses(std::vector<FrameResponse> responses) override;
 
     void GoToSleep() override;
@@ -63,10 +61,10 @@ public:
     void Wakeup() override;
     void WakeupInternal() override;
 
-    void RegisterFrameStatusHandler(FrameStatusHandler handler) override;
-    void RegisterGoToSleepHandler(GoToSleepHandler handler) override;
-    void RegisterWakeupHandler(WakeupHandler handler) override;
-    void RegisterFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) override;
+    void AddFrameStatusHandler(FrameStatusHandler handler) override;
+    void AddGoToSleepHandler(GoToSleepHandler handler) override;
+    void AddWakeupHandler(WakeupHandler handler) override;
+    void AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) override;
 
     // IIbToLinController
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const Transmission& msg) override;

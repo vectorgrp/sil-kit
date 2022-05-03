@@ -13,8 +13,8 @@ TEST(MwVAsioSerdes, SimLin_Frame)
     using namespace ib::sim::lin;
     ib::mw::MessageBuffer buffer;
 
-    Frame in;
-    Frame out;
+    LinFrame in;
+    LinFrame out;
 
     in.id = 7;
     in.checksumModel = ChecksumModel::Classic;

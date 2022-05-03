@@ -13,7 +13,7 @@ namespace sim {
 //! The LIN namespace
 namespace lin {
 
-/*! \brief The identifier of a LIN \ref Frame
+/*! \brief The identifier of a LIN \ref LinFrame
  *
  * This type represents all valid identifier used by ILinController::SendFrame(), ILinController::SendFrameHeader().
  *
@@ -21,9 +21,9 @@ namespace lin {
  */
 using LinIdT = uint8_t;
 
-/*! \brief The checksum model of a LIN \ref Frame
+/*! \brief The checksum model of a LIN \ref LinFrame
  *
- * This type is used to specify the Checksum model to be used for the LIN \ref Frame.
+ * This type is used to specify the Checksum model to be used for the LIN \ref LinFrame.
  *
  * *AUTOSAR Name:* Lin_FrameCsModelType 
  */
@@ -34,7 +34,7 @@ enum class ChecksumModel : uint8_t
     Classic = 2   //!< Classic checksum model 
 };
 
-/*! \brief The data length of a LIN \ref Frame in bytes
+/*! \brief The data length of a LIN \ref LinFrame in bytes
  *
  * This type is used to specify the number of data bytes to copy.
  *
@@ -44,13 +44,13 @@ enum class ChecksumModel : uint8_t
  */
 using DataLengthT = uint8_t;
 
-/*! \brief A LIN Frame
+/*! \brief A LIN LinFrame
 *
 * This Type is used to provide LIN ID, checksum model, data length and data.
 *
 * *AUTOSAR Name:* Lin_PduType
 */
-struct Frame
+struct LinFrame
 {
     LinIdT                 id{0}; //!< Lin Identifier
     ChecksumModel          checksumModel{ChecksumModel::Undefined}; //!< Checksum Model
@@ -58,8 +58,8 @@ struct Frame
     std::array<uint8_t, 8> data{}; //!< The actual payload
 };
 
-//! \brief Create a Frame that corresponds to a Go-To-Sleep command
-inline auto GoToSleepFrame() -> Frame;
+//! \brief Create a LinFrame that corresponds to a Go-To-Sleep command
+inline auto GoToSleepFrame() -> LinFrame;
 
 
 /*! \brief Controls the behavior of ILinController::SendFrame()
@@ -109,7 +109,7 @@ struct FrameResponse
      * If responseMode is FrameResponseMode::TxUnconditional, the
      * frame data is used for the transaction.
      */
-    Frame frame;
+    LinFrame frame;
     //! Determines if the FrameResponse is used for transmission
     //! (TxUnconditional), reception (Rx) or ignored (Unused).
     FrameResponseMode responseMode{FrameResponseMode::Unused};
@@ -269,6 +269,39 @@ enum class ControllerStatus
 };
 
 
+//! \brief A LIN frame status event delivered in the \ref ILinController::FrameStatusHandler.
+struct LinFrameStatusEvent
+{
+    std::chrono::nanoseconds timestamp; //!< Time of the event.
+    LinFrame frame;
+    FrameStatus status;
+};
+
+//! \brief A LIN wakeup event delivered in the \ref ILinController::WakeupHandler.
+struct LinWakeupEvent
+{
+    std::chrono::nanoseconds timestamp; //!< Time of the event.
+    TransmitDirection direction; //!< The direction of the wakeup pulse.
+};
+
+//! \brief A LIN wakeup event delivered in the \ref ILinController::GoToSleepHandler.
+struct LinGoToSleepEvent
+{
+    std::chrono::nanoseconds timestamp; //!< Time of the event.
+};
+
+/*! \brief A LIN frame response update event delivered in the \ref ILinController::FrameResponseUpdateHandler
+*
+* The event is received for every FrameResponse whenever a ControllerConfig is received or a controller calls
+* \ref ILinController::SetFrameResponses. This event is mainly for diagnostic purposes and contains no timestamp.
+* 
+*/
+struct LinFrameResponseUpdateEvent
+{
+    const std::string& senderID; //!< String identifier of the controller providing the update.
+    const FrameResponse& frameResponse; //!< The frameResponse of the update.
+};
+
 // ================================================================================
 //  Messages used at the Participant Interface
 // ================================================================================
@@ -276,8 +309,8 @@ enum class ControllerStatus
 struct Transmission
 {
     std::chrono::nanoseconds timestamp; //!< Time at the end of the transmission. Only valid in VIBE simulation.
-    Frame frame;                        //!< The transmitted frame
-    FrameStatus status;                 //!< Tthe status of the transmitted frame
+    LinFrame frame;                        //!< The transmitted frame
+    FrameStatus status;                 //!< The status of the transmitted frame
 };
 
 /*! \brief Data type representing a request to perform an AUTOSAR SendFrame operation.
@@ -286,7 +319,7 @@ struct Transmission
  */
 struct SendFrameRequest
 {
-    Frame frame;                    //!< Provide the LIN ID, checksum model, expected data length and optional data.
+    LinFrame frame;                    //!< Provide the LIN ID, checksum model, expected data length and optional data.
     FrameResponseType responseType; //!< Determines whether to provide a frame response or not.
 };
 
@@ -316,24 +349,25 @@ struct ControllerStatusUpdate
 struct WakeupPulse
 {
     std::chrono::nanoseconds timestamp; //!< Time of the WakeUp pulse. Only valid in VIBE Simulation.
+    TransmitDirection direction; //!< The direction of the wakeup pulse.
 };
 
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-//! \brief Factory method for a Frame representing a Go-To-Sleep signal
-inline auto GoToSleepFrame() -> Frame
+//! \brief Factory method for a LinFrame representing a Go-To-Sleep signal
+inline auto GoToSleepFrame() -> LinFrame
 {
-    Frame frame;
+    LinFrame frame;
     frame.id = 0x3c;
     frame.checksumModel = ChecksumModel::Classic;
     frame.dataLength = 8;
     frame.data = {0x0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
     return frame;
 }
-//! \brief operator== for Frame
-inline bool operator==(const Frame& lhs, const Frame& rhs)
+//! \brief operator== for LinFrame
+inline bool operator==(const LinFrame& lhs, const LinFrame& rhs)
 {
     return lhs.id == rhs.id
         && lhs.checksumModel == rhs.checksumModel

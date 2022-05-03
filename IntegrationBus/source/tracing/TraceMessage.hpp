@@ -34,7 +34,7 @@ template<class MsgT> struct MessageTrait;
 // specializations for supported (C++) Types
 template<> struct MessageTrait<sim::eth::EthernetFrame> : TypeIdTrait<TraceMessageType::EthernetFrame> {};
 template<> struct MessageTrait<sim::can::CanFrameEvent> : TypeIdTrait<TraceMessageType::CanFrameEvent> {};
-template<> struct MessageTrait<sim::lin::Frame> : TypeIdTrait<TraceMessageType::LinFrame> {};
+template<> struct MessageTrait<sim::lin::LinFrame> : TypeIdTrait<TraceMessageType::LinFrame> {};
 template<> struct MessageTrait<sim::fr::FrMessage> : TypeIdTrait<TraceMessageType::FrMessage> {};
 
 class TraceMessage

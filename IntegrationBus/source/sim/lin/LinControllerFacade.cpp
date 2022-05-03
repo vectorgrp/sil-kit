@@ -28,14 +28,9 @@ auto LinControllerFacade::Status() const noexcept->ControllerStatus
     return _currentController->Status();
 }
 
-void LinControllerFacade::SendFrame(Frame frame, FrameResponseType responseType)
+void LinControllerFacade::SendFrame(LinFrame frame, FrameResponseType responseType)
 {
     _currentController->SendFrame(std::move(frame), std::move(responseType));
-}
-
-void LinControllerFacade::SendFrame(Frame frame, FrameResponseType responseType, std::chrono::nanoseconds timestamp)
-{
-    _currentController->SendFrame(std::move(frame), std::move(responseType), std::move(timestamp));
 }
 
 void LinControllerFacade::SendFrameHeader(LinIdT linId)
@@ -43,12 +38,7 @@ void LinControllerFacade::SendFrameHeader(LinIdT linId)
     _currentController->SendFrameHeader(std::move(linId));
 }
 
-void LinControllerFacade::SendFrameHeader(LinIdT linId, std::chrono::nanoseconds timestamp)
-{
-    _currentController->SendFrameHeader(std::move(linId), std::move(timestamp));
-}
-
-void LinControllerFacade::SetFrameResponse(Frame frame, FrameResponseMode mode)
+void LinControllerFacade::SetFrameResponse(LinFrame frame, FrameResponseMode mode)
 {
     _currentController->SetFrameResponse(std::move(frame), std::move(mode));
 }
@@ -78,28 +68,28 @@ void LinControllerFacade::WakeupInternal()
     _currentController->WakeupInternal();
 }
 
-void LinControllerFacade::RegisterFrameStatusHandler(FrameStatusHandler handler)
+void LinControllerFacade::AddFrameStatusHandler(FrameStatusHandler handler)
 {
-    _linController->RegisterFrameStatusHandler(handler);
-    _linControllerProxy->RegisterFrameStatusHandler(std::move(handler));
+    _linController->AddFrameStatusHandler(handler);
+    _linControllerProxy->AddFrameStatusHandler(std::move(handler));
 }
 
-void LinControllerFacade::RegisterGoToSleepHandler(GoToSleepHandler handler)
+void LinControllerFacade::AddGoToSleepHandler(GoToSleepHandler handler)
 {
-    _linController->RegisterGoToSleepHandler(handler);
-    _linControllerProxy->RegisterGoToSleepHandler(std::move(handler));
+    _linController->AddGoToSleepHandler(handler);
+    _linControllerProxy->AddGoToSleepHandler(std::move(handler));
 }
 
-void LinControllerFacade::RegisterWakeupHandler(WakeupHandler handler)
+void LinControllerFacade::AddWakeupHandler(WakeupHandler handler)
 {
-    _linController->RegisterWakeupHandler(handler);
-    _linControllerProxy->RegisterWakeupHandler(std::move(handler));
+    _linController->AddWakeupHandler(handler);
+    _linControllerProxy->AddWakeupHandler(std::move(handler));
 }
 
-void LinControllerFacade::RegisterFrameResponseUpdateHandler(FrameResponseUpdateHandler handler)
+void LinControllerFacade::AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler)
 {
-    _linController->RegisterFrameResponseUpdateHandler(handler);
-    _linControllerProxy->RegisterFrameResponseUpdateHandler(std::move(handler));
+    _linController->AddFrameResponseUpdateHandler(handler);
+    _linControllerProxy->AddFrameResponseUpdateHandler(std::move(handler));
 }
 
 // IIbToLinController

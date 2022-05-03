@@ -200,7 +200,7 @@ To configure these frames, the API provides functions to manipulate TX buffers.
 
 .. doxygenfunction:: ib_FlexRay_Controller_RegisterMessageHandler
 .. doxygenfunction:: ib_FlexRay_Controller_RegisterMessageAckHandler
-.. doxygenfunction:: ib_FlexRay_Controller_RegisterWakeupHandler
+.. doxygenfunction:: ib_FlexRay_Controller_AddWakeupHandler
 .. doxygenfunction:: ib_FlexRay_Controller_RegisterPocStatusHandler
 .. doxygenfunction:: ib_FlexRay_Controller_RegisterSymbolHandler
 .. doxygenfunction:: ib_FlexRay_Controller_RegisterSymbolAckHandler
@@ -255,9 +255,9 @@ The functionality is analogous to the C++ API described in :ref:`sec:lin`.
 
 **The following set of functions can be used to register event handlers on the controller:**
 
-.. doxygenfunction:: ib_Lin_Controller_RegisterFrameStatusHandler
-.. doxygenfunction:: ib_Lin_Controller_RegisterGoToSleepHandler
-.. doxygenfunction:: ib_Lin_Controller_RegisterWakeupHandler
+.. doxygenfunction:: ib_Lin_Controller_AddFrameStatusHandler
+.. doxygenfunction:: ib_Lin_Controller_AddGoToSleepHandler
+.. doxygenfunction:: ib_Lin_Controller_AddWakeupHandler
 
 **The following functions operate on a configured controller:**
 

@@ -9,13 +9,15 @@ slave->Init(slaveConfig);
 
 // Register FrameStatusHandler to receive data
 auto slave_FrameStatusHandler =
-    [](ILinController*, const Frame&, FrameStatus, std::chrono::nanoseconds) {};
-slave->RegisterFrameStatusHandler(slave_FrameStatusHandler);
+    [](ILinController*, const LinFrameStatusEvent frameStatusEvent) {};
+slave->AddFrameStatusHandler(slave_FrameStatusHandler);
 
 // Set sleep mode for the slave upon reception of a GoToSleep Frame
 auto slave_GoToSleepHandler =
-    [](ILinController* slave) { slave->GoToSleepInternal(); };
-slave->RegisterGoToSleepHandler(slave_GoToSleepHandler);
+    [](ILinController* slave, const LinGoToSleepEvent& goToSleepEvent) { 
+    slave->GoToSleepInternal(); 
+};
+slave->AddGoToSleepHandler(slave_GoToSleepHandler);
 
 // ------------------------------------------------------------
 // Master Setup
@@ -27,8 +29,8 @@ master->Init(masterConfig);
 
 // Register FrameStatusHandler to receive confirmation of the successful transmission
 auto master_FrameStatusHandler =
-    [](ILinController*, const Frame&, FrameStatus, std::chrono::nanoseconds) {};
-master->RegisterFrameStatusHandler(master_FrameStatusHandler);
+    [](ILinController*, const LinFrameStatusEvent frameStatusEvent) {};
+master->AddFrameStatusHandler(master_FrameStatusHandler);
 
 
 // ------------------------------------------------------------
@@ -39,7 +41,7 @@ master->GoToSleep();
 assert(master->Status() == ControllerStatus::Sleep);
 
 // The slave will receive the go-to-sleep frame and trigger the callback:
-slave_GoToSleepHandler(slave);
+slave_GoToSleepHandler(goToSleepEvent);
 
 // the registered callback sets sleep state for the slave, after which also the slave is in sleep state:
 assert(master->Status() == ControllerStatus::Sleep);

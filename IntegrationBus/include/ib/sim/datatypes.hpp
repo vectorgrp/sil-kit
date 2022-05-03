@@ -7,7 +7,7 @@
 namespace ib {
 namespace sim {
 
-/*! \brief TODO description
+/*! \brief Flag indicating the direction of a message
  */
 enum class TransmitDirection : uint8_t
 {
@@ -17,6 +17,8 @@ enum class TransmitDirection : uint8_t
     TX = 1,
     // Receive
     RX = 2,
+    // Send/Receive
+    TXRX = 3,
 };
 using DirectionMask = uint8_t;
 

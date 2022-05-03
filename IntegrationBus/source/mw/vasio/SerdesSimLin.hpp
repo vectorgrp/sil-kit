@@ -10,7 +10,7 @@ namespace ib {
 namespace sim {
 namespace lin {
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Frame& frame)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinFrame& frame)
 {
     buffer
         << frame.id
@@ -19,7 +19,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Fr
         << frame.data;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, Frame& frame)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinFrame& frame)
 {
     buffer
         >> frame.id
@@ -76,13 +76,15 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, Transmis
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const WakeupPulse& pulse)
 {
     buffer
-        << pulse.timestamp;
+        << pulse.timestamp
+        << pulse.direction;
     return buffer;
 }
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, WakeupPulse& pulse)
 {
     buffer
-        >> pulse.timestamp;
+        >> pulse.timestamp
+        >> pulse.direction;
     return buffer;
 }
 

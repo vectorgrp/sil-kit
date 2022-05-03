@@ -35,9 +35,19 @@ protected:
     , proxy2(&participant)
     , proxyVibe(&participant)
     {
-        frameStatusHandler =
-            [this](ILinController* ctrl, const Frame& frame, FrameStatus status, std::chrono::nanoseconds) {
-            callbacks.FrameStatusHandler(ctrl, frame, status);
+        frameStatusHandler = [this](ILinController* ctrl, const LinFrameStatusEvent& frameStatusEvent) {
+            callbacks.FrameStatusHandler(ctrl, frameStatusEvent.frame, frameStatusEvent.status);
+        };
+        goToSleepHandler = [this](ILinController* ctrl, const LinGoToSleepEvent& /*goToSleepEvent*/) {
+            callbacks.GoToSleepHandler(ctrl);
+        };
+        wakeupHandler = [this](ILinController* ctrl, const LinWakeupEvent& /*wakeupEvent*/) {
+            callbacks.WakeupHandler(ctrl);
+        };
+        frameResponseUpdateHandler = [this](ILinController* ctrl,
+                                            const LinFrameResponseUpdateEvent& frameResponseUpdateEvent) {
+            callbacks.FrameResponseUpdateHandler(ctrl, frameResponseUpdateEvent.senderID,
+                                                 frameResponseUpdateEvent.frameResponse);
         };
 
         proxy.SetServiceDescriptor(from_endpointAddress(addr1_proxy));
@@ -57,6 +67,9 @@ protected:
     LinControllerProxy proxyVibe;
     Callbacks callbacks;
     LinControllerProxy::FrameStatusHandler frameStatusHandler;
+    LinControllerProxy::GoToSleepHandler goToSleepHandler;
+    LinControllerProxy::WakeupHandler wakeupHandler;
+    LinControllerProxy::FrameResponseUpdateHandler frameResponseUpdateHandler;
 };
 
 TEST_F(LinControllerProxyTest, send_frame)
@@ -64,7 +77,7 @@ TEST_F(LinControllerProxyTest, send_frame)
     EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
     proxy.Init(config);
-    proxy.RegisterFrameStatusHandler(frameStatusHandler);
+    proxy.AddFrameStatusHandler(frameStatusHandler);
 
     SendFrameRequest expectedMsg;
     expectedMsg.frame = MakeFrame(17, ChecksumModel::Enhanced, 4, {1,2,3,4,5,6,7,8});
@@ -80,7 +93,7 @@ TEST_F(LinControllerProxyTest, send_frame_header)
     EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
     proxy.Init(config);
-    proxy.RegisterFrameStatusHandler(frameStatusHandler);
+    proxy.AddFrameStatusHandler(frameStatusHandler);
 
     SendFrameHeaderRequest expectedMsg;
     expectedMsg.id = 13;
@@ -95,10 +108,10 @@ TEST_F(LinControllerProxyTest, call_frame_status_handler)
     EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Slave);
     proxy.Init(config);
-    proxy.RegisterFrameStatusHandler(frameStatusHandler);
+    proxy.AddFrameStatusHandler(frameStatusHandler);
 
     // Receive Transmission
-    Frame rxFrame = MakeFrame(17, ChecksumModel::Enhanced, 4, {1,2,3,4,0,0,0,0});
+    LinFrame rxFrame = MakeFrame(17, ChecksumModel::Enhanced, 4, {1,2,3,4,0,0,0,0});
 
     // Expect LIN_RX_OK
     EXPECT_CALL(callbacks, FrameStatusHandler(&proxy, rxFrame, FrameStatus::LIN_RX_OK)).Times(1);
@@ -162,7 +175,7 @@ TEST_F(LinControllerProxyTest, trigger_frame_response_update_handler)
     ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
     proxy.Init(config);
 
-    proxy.RegisterFrameResponseUpdateHandler(bind_method(&callbacks, &Callbacks::FrameResponseUpdateHandler));
+    proxy.AddFrameResponseUpdateHandler(frameResponseUpdateHandler);
 
     FrameResponse response1;
     response1.frame = MakeFrame(17, ChecksumModel::Enhanced);
@@ -191,7 +204,7 @@ TEST_F(LinControllerProxyTest, trigger_frame_response_update_handler_for_slave_c
     ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
     proxy.Init(config);
 
-    proxy.RegisterFrameResponseUpdateHandler(bind_method(&callbacks, &Callbacks::FrameResponseUpdateHandler));
+    proxy.AddFrameResponseUpdateHandler(frameResponseUpdateHandler);
 
     FrameResponse response1;
     response1.frame = MakeFrame(17, ChecksumModel::Enhanced);
@@ -253,10 +266,10 @@ TEST_F(LinControllerProxyTest, call_gotosleep_handler)
     EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Slave);
     proxy.Init(config);
-    proxy.RegisterFrameStatusHandler(frameStatusHandler);
-    proxy.RegisterGoToSleepHandler(bind_method(&callbacks, &Callbacks::GoToSleepHandler));
+    proxy.AddFrameStatusHandler(frameStatusHandler);
+    proxy.AddGoToSleepHandler(goToSleepHandler);
 
-    EXPECT_CALL(callbacks, FrameStatusHandler(&proxy, A<const Frame&>(), _)).Times(1);
+    EXPECT_CALL(callbacks, FrameStatusHandler(&proxy, A<const LinFrame&>(), _)).Times(1);
     EXPECT_CALL(callbacks, GoToSleepHandler(&proxy)).Times(1);
 
     Transmission goToSleep;
@@ -272,10 +285,10 @@ TEST_F(LinControllerProxyTest, not_call_gotosleep_handler)
     EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Slave);
     proxy.Init(config);
-    proxy.RegisterFrameStatusHandler(frameStatusHandler);
-    proxy.RegisterGoToSleepHandler(bind_method(&callbacks, &Callbacks::GoToSleepHandler));
+    proxy.AddFrameStatusHandler(frameStatusHandler);
+    proxy.AddGoToSleepHandler(goToSleepHandler);
 
-    EXPECT_CALL(callbacks, FrameStatusHandler(&proxy, A<const Frame&>(), _)).Times(1);
+    EXPECT_CALL(callbacks, FrameStatusHandler(&proxy, A<const LinFrame&>(), _)).Times(1);
     EXPECT_CALL(callbacks, GoToSleepHandler(&proxy)).Times(0);
 
     Transmission goToSleep;
@@ -324,10 +337,10 @@ TEST_F(LinControllerProxyTest, call_wakeup_handler)
     EXPECT_CALL(participant, SendIbMessage(&proxy, A<const ControllerConfig&>()));
     ControllerConfig config = MakeControllerConfig(ControllerMode::Slave);
     proxy.Init(config);
-    proxy.RegisterFrameStatusHandler(frameStatusHandler);
-    proxy.RegisterWakeupHandler(bind_method(&callbacks, &Callbacks::WakeupHandler));
+    proxy.AddFrameStatusHandler(frameStatusHandler);
+    proxy.AddWakeupHandler(wakeupHandler);
 
-    EXPECT_CALL(callbacks, FrameStatusHandler(&proxy, A<const Frame&>(), _)).Times(0);
+    EXPECT_CALL(callbacks, FrameStatusHandler(&proxy, A<const LinFrame&>(), _)).Times(0);
     EXPECT_CALL(callbacks, WakeupHandler(&proxy)).Times(1);
 
     WakeupPulse wakeupPulse;
