@@ -120,7 +120,7 @@ int main(int argc, char** argv)
 
         });
 
-        const std::string mediaType{ ib::util::serdes::sil::MediaType() };
+        const std::string mediaType{ ib::util::serdes::sil::MediaTypeData() };
 
         participantController->SetPeriod(1s);
         if (participantName == "Publisher1")
