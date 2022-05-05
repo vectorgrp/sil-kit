@@ -93,18 +93,19 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
 {
     buffer << announcement.messageHeader
         << announcement.peerInfo
-        << announcement.peerUri;
+        << announcement.peerUri
+        << announcement.capabilities
+        ;
 
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncement& announcement)
 {
     buffer >> announcement.messageHeader
-        >> announcement.peerInfo;
-    if (buffer.RemainingBytesLeft() > 0)
-    {
-        buffer >> announcement.peerUri;
-    }
+        >> announcement.peerInfo
+        >> announcement.peerUri
+        >> announcement.capabilities
+        ;
     return buffer;
 }
 

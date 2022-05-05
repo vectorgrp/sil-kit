@@ -9,6 +9,8 @@
 #include <array>
 #include <limits>
 #include <cstring>
+#include <stdexcept>
+#include <map>
 
 #include "ib/util/vector_view.hpp"
 
@@ -44,6 +46,7 @@ public:
 
     //! \brief Return the underlying data storage by std::move and reset pointers
     inline auto ReleaseStorage() -> std::vector<uint8_t>;
+    //! \brief The original data size set in the constructor (independent of current deserialization operation)
     inline auto DataSize() const noexcept -> size_t;
     inline auto RemainingBytesLeft() const noexcept -> size_t;
 public:
@@ -167,6 +170,11 @@ public:
     inline MessageBuffer& operator<<(const void* t);
     inline MessageBuffer& operator>>(void*& t);
 
+    // --------------------------------------------------------------------------------
+    // std::map<string,string> 
+    inline MessageBuffer& operator<<(const std::map<std::string, std::string>& msg);
+    inline MessageBuffer& operator>>(std::map<std::string, std::string>& updatedMsg);
+
 private:
     // ----------------------------------------
     // private members
@@ -200,7 +208,7 @@ auto MessageBuffer::DataSize() const noexcept -> size_t
 
 inline auto MessageBuffer::RemainingBytesLeft() const noexcept -> size_t
 {
-    return (_rPos > _dataSize) ? 0 : (_dataSize - _rPos);
+    return (_rPos > _storage.size()) ? 0 : (_storage.size() - _rPos);
 }
 
 // --------------------------------------------------------------------------------
@@ -390,6 +398,8 @@ MessageBuffer& MessageBuffer::operator>>(std::chrono::system_clock::time_point& 
     return *this;
 }
 
+// --------------------------------------------------------------------------------
+// void ptrs
 inline MessageBuffer& MessageBuffer::operator<<(const void* t)
 {
     *this << reinterpret_cast<uint64_t>(t);
@@ -401,6 +411,52 @@ inline MessageBuffer& MessageBuffer::operator>>(void*& t)
     uint64_t value{0};
     *this >> value;
     t = reinterpret_cast<void*>(value);
+    return *this;
+}
+
+
+// --------------------------------------------------------------------------------
+//Special case for std::map<std::string, std::string> as used in ServiceDescription::supplementalData
+// We encode it as follows:
+// 0    NUM_ELEMENTS N
+// 1    STRING key1
+// 2    STRING value1
+// ...
+// 2N    STRING keyN
+// 2N+1  STRING valueN
+// 
+// NB: for a generic approach we would have to encode the key type and the element type somehow
+
+inline MessageBuffer& MessageBuffer::operator<<(const std::map<std::string, std::string>& msg)
+{
+    *this << static_cast<uint32_t>(msg.size());
+    for (auto&& kv : msg)
+    {
+        *this << kv.first
+            << kv.second
+            ;
+    }
+    return *this;
+}
+
+inline MessageBuffer& MessageBuffer::operator>>(std::map<std::string,std::string>& updatedMsg)
+{
+    std::map<std::string, std::string> tmp;// do not modify updatedMsg until we validated the input
+    uint32_t numElements{ 0 };
+    *this >> numElements;
+
+    for (auto i = 0u; i < numElements; i++)
+    {
+        std::string key;
+        std::string value;
+        *this >> key >> value;
+        tmp[key] = std::move(value);
+    }
+    if (numElements != tmp.size())
+    {
+        throw std::runtime_error("MessageBuffer unable to deserialize std::map<std::string, std::string>");
+    }
+    updatedMsg = std::move(tmp);
     return *this;
 }
     
