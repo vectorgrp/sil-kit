@@ -67,6 +67,8 @@ if(MINGW)
     target_link_libraries(IbMwVAsio PUBLIC -lwsock32 -lws2_32) #windows socket/ wsa
 endif()
 
+add_vib_test(TestMwVAsioConnection SOURCES VAsioConnectionTest.cpp LIBS IbMwVAsio IbMwMockParticipant)
+
 add_vib_test(TestMwVAsio_MessageBuffer SOURCES MessageBufferTest.cpp)
 add_vib_test(TestMwVAsio_SerdesMw SOURCES SerdesMwTest.cpp LIBS IbInternal)
 add_vib_test(TestMwVAsio_SerdesMwSync SOURCES SerdesMwSyncTest.cpp LIBS IbMwSync)
