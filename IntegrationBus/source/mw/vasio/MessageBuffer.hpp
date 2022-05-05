@@ -29,7 +29,7 @@ public:
     // ----------------------------------------
     // Constructors and Destructor
     inline MessageBuffer() = default;
-    inline MessageBuffer(std::vector<uint8_t> data, std::size_t dataSize);
+    inline MessageBuffer(std::vector<uint8_t> data);
 
     MessageBuffer(const MessageBuffer& other) = default;
     MessageBuffer(MessageBuffer&& other) = default;
@@ -46,8 +46,6 @@ public:
 
     //! \brief Return the underlying data storage by std::move and reset pointers
     inline auto ReleaseStorage() -> std::vector<uint8_t>;
-    //! \brief The original data size set in the constructor (independent of current deserialization operation)
-    inline auto DataSize() const noexcept -> size_t;
     inline auto RemainingBytesLeft() const noexcept -> size_t;
 public:
     // ----------------------------------------
@@ -181,17 +179,15 @@ private:
     std::vector<uint8_t> _storage;
     std::size_t _wPos{0u};
     std::size_t _rPos{0u};
-    std::size_t _dataSize{0u};
 };
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-MessageBuffer::MessageBuffer(std::vector<uint8_t> data, std::size_t dataSize)
+MessageBuffer::MessageBuffer(std::vector<uint8_t> data)
     : _storage{std::move(data)}
     , _wPos{_storage.size()}
     , _rPos{0u}
-    , _dataSize{dataSize}
 {
 }
 
@@ -200,10 +196,6 @@ auto MessageBuffer::ReleaseStorage() -> std::vector<uint8_t>
     _wPos = 0u;
     _rPos = 0u;
     return std::move(_storage);
-}
-auto MessageBuffer::DataSize() const noexcept -> size_t
-{
-    return _dataSize;
 }
 
 inline auto MessageBuffer::RemainingBytesLeft() const noexcept -> size_t

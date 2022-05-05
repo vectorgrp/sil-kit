@@ -20,13 +20,13 @@ bool operator==(const VAsioPeerUri& lhs, const VAsioPeerUri& rhs)
 	return lhs.participantId == rhs.participantId
 		&& lhs.participantName == rhs.participantName
 		&& lhs.acceptorUris == rhs.acceptorUris
+        && lhs.capabilities == rhs.capabilities
 		;
 }
 
 bool operator==(const ParticipantAnnouncement& lhs, const ParticipantAnnouncement& rhs)
 {
-	return lhs.capabilities == rhs.capabilities
-		&& lhs.messageHeader == rhs.messageHeader
+	return lhs.messageHeader == rhs.messageHeader
 		&& lhs.peerUri == rhs.peerUri
 		;
 }
@@ -55,6 +55,7 @@ auto MakePeerUri() -> VAsioPeerUri
 	in.participantName = "Test";
 	in.acceptorUris.push_back("local:///tmp/participant1");
 	in.acceptorUris.push_back("tcp://localhost");
+	in.capabilities = "compression=gzip;future-proof=true";
 	return in;
 }
 
@@ -89,8 +90,6 @@ TEST(MwVAsioSerdes, vasio_participantAnouncement)
 
 	in.messageHeader = RegistryMsgHeader{};
 	in.peerUri = MakePeerUri();
-	in.capabilities["compression"] = "gzip";
-	in.capabilities["serdes"] = "protobuf";
 
 	buffer << in;
 	buffer >> out;

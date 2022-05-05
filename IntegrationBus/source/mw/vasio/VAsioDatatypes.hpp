@@ -4,7 +4,6 @@
 
 #include <vector>
 #include <array>
-#include <map>
 #include <string>
 
 #include "VAsioPeerInfo.hpp"
@@ -43,8 +42,6 @@ struct ParticipantAnnouncement
     ib::mw::VAsioPeerInfo peerInfo;
     //!< additional field as of VIB >3.4.1, will be ignored by older participants
     VAsioPeerUri peerUri;
-    //!< a list of the participant's capabilities (e.g., if we add support for compression in the future, there might be a {"compression", "gzip"} entry)
-    std::map<std::string, std::string> capabilities;
 };
 
 struct ParticipantAnnouncementReply

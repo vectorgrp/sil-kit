@@ -420,7 +420,7 @@ void VAsioConnection::SendParticipantAnnoucement(IVAsioPeer* peer)
     localInfo.participantName = _participantName;
     localInfo.participantId = _participantId;
     //URI encoded infos
-    VAsioPeerUri uri{ _participantName, _participantId, {} };
+    VAsioPeerUri uri{ _participantName, _participantId, {}, {/*capabilities*/}};
 
     //Ensure that the local acceptor is the first entry in the acceptorUris
     if (_localAcceptor.is_open())
@@ -588,7 +588,7 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, MessageBuffer&& 
         // interop with older VIB participants:
         for (auto&& peerInfo : participantsMsg.peerInfos)
         {
-            VAsioPeerUri uri{ peerInfo.participantName, peerInfo.participantId, {} };
+            VAsioPeerUri uri{ peerInfo.participantName, peerInfo.participantId, {}, {} };
             uri.acceptorUris.push_back(
                 Uri{ peerInfo.acceptorHost, peerInfo.acceptorPort }.EncodedString()
             );

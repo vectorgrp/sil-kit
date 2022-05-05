@@ -47,7 +47,9 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const VAsioPeerUri& peer
 {
     buffer << peerUri.participantName
            << peerUri.participantId
-           << peerUri.acceptorUris;
+           << peerUri.acceptorUris
+           << peerUri.capabilities
+           ;
     return buffer;
 }
 
@@ -55,7 +57,9 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioPeerUri& peerUri)
 {
     buffer >> peerUri.participantName
            >> peerUri.participantId
-           >> peerUri.acceptorUris;
+           >> peerUri.acceptorUris
+           >> peerUri.capabilities
+        ;
     return buffer;
 }
 
@@ -94,7 +98,6 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
     buffer << announcement.messageHeader
         << announcement.peerInfo
         << announcement.peerUri
-        << announcement.capabilities
         ;
 
     return buffer;
@@ -104,7 +107,6 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncement&
     buffer >> announcement.messageHeader
         >> announcement.peerInfo
         >> announcement.peerUri
-        >> announcement.capabilities
         ;
     return buffer;
 }

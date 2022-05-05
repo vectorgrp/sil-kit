@@ -500,7 +500,7 @@ void VAsioTcpPeer::DispatchBuffer()
         memcpy(&msgSize, _msgBuffer.data(), sizeof msgSize);
         //ensure buffer does not contain data from contiguous messages
         _msgBuffer.resize(msgSize);
-        MessageBuffer msgBuffer{std::move(_msgBuffer), msgSize};
+        MessageBuffer msgBuffer{std::move(_msgBuffer)};
         msgBuffer >> msgSize; //drop message size by adjusting internal read pos
         _ibConnection->OnSocketData(this, std::move(msgBuffer));
 

@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include "EndpointAddress.hpp"
 
@@ -29,6 +30,10 @@ struct VAsioPeerUri
     std::string participantName;
     ParticipantId participantId;
     std::vector<std::string> acceptorUris;
+    //!< The capabilities of the peer, encoded in a string.
+    //! this is left as simple to decode as possible, in case we need
+    //! it to upgrade the connection to a different protocol in the future.
+    std::string capabilities;
 };
 
 } // mw
