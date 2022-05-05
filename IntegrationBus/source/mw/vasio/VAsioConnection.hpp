@@ -257,8 +257,8 @@ private:
         auto link = GetLinkByName<IbMessageT>(networkName);
         link->AddLocalReceiver(receiver);
 
-        std::string msgTypeName = IbMsgTraits<IbMessageT>::TypeName();
-        const std::string uniqueReceiverId = networkName + "/" + msgTypeName;
+        std::string msgSerdesName = IbMsgTraits<IbMessageT>::SerdesName();
+        const std::string uniqueReceiverId = networkName + "/" + msgSerdesName;
         bool isNewReceiver = _vasioUniqueReceiverIds.insert(uniqueReceiverId).second;
         if (isNewReceiver)
         {
@@ -266,7 +266,7 @@ private:
             VAsioMsgSubscriber subscriptionInfo;
             subscriptionInfo.receiverIdx = static_cast<decltype(subscriptionInfo.receiverIdx)>(_vasioReceivers.size());
             subscriptionInfo.networkName = networkName;
-            subscriptionInfo.msgTypeName = msgTypeName;
+            subscriptionInfo.msgTypeName = msgSerdesName;
             subscriptionInfo.version = IbMsgTraits<IbMessageT>::Version();
 
             std::unique_ptr<IVAsioReceiver> rawReceiver = std::make_unique<VAsioReceiver<IbMessageT>>(subscriptionInfo, link, _logger);

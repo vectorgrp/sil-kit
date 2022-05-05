@@ -28,6 +28,7 @@ public:
     // ----------------------------------------
     // Public methods
     static constexpr auto MsgTypeName() -> const char* { return IbMsgTraits<MsgT>::TypeName(); }
+    static constexpr auto MessageSerdesName() -> const char* { return IbMsgTraits<MsgT>::SerdesName(); }
     inline auto Name() const -> const std::string& { return _name; }
 
     void AddLocalReceiver(ReceiverT* receiver);

@@ -812,12 +812,12 @@ void VAsioConnection::OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer)
 
 void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer)
 {
-    auto getVersionByTypeName = [](const auto& typeName) {
+    auto getVersionForSerdes = [](const auto& typeName) {
         VersionT subscriptionVersion{0};
         IbMessageTypes supportedMessageTypes{};
         tt::for_each(supportedMessageTypes, [&subscriptionVersion, &typeName](auto&& myType) {
             using MsgT = std::decay_t<decltype(myType)>;
-            if (typeName == IbMsgTraits<MsgT>::TypeName())
+            if (typeName == IbMsgTraits<MsgT>::SerdesName())
             {
                 subscriptionVersion =  IbMsgTraits<MsgT>::Version();
             }
@@ -830,7 +830,7 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageB
     bool wasAdded = TryAddRemoteSubscriber(from, subscriber);
 
     // check our Message version against the remote participant's version
-    auto myMessageVersion = getVersionByTypeName(subscriber.msgTypeName);
+    auto myMessageVersion = getVersionForSerdes(subscriber.msgTypeName);
     if (myMessageVersion == 0)
     {
         _logger->Warn("Received SubscriptionAnnouncement for message type {} for an unknown version",
@@ -893,7 +893,7 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
 
         using LinkType = typename std::decay_t<decltype(linkMap)>::mapped_type::element_type;
 
-        if (subscriber.msgTypeName != LinkType::MsgTypeName())
+        if (subscriber.msgTypeName != LinkType::MessageSerdesName())
             return;
 
         auto& ibLink = linkMap[subscriber.networkName];

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "IbMsgVersion.hpp"
+#include "IbMsgSerdesName.hpp"
 
 namespace ib {
 namespace mw {
@@ -18,6 +19,7 @@ template <class MsgT> struct IbMsgTraits
     , IbMsgTraitHistSize<MsgT>
     , IbMsgTraitEnforceSelfDelivery<MsgT>
     , IbMsgTraitVersion<MsgT>
+    , IbMsgTraitSerdesName<MsgT>
 {
 };
 
