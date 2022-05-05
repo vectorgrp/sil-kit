@@ -63,3 +63,13 @@ management.
   systemcontroller
   systemmonitor
 
+C-API
+------------------------------------
+
+The Vector Integration Bus provides an additional C API, that allows to use the Vector Integration Bus directly
+with the C programming language:
+
+.. toctree::
+   :maxdepth: 1
+   
+   capi/capi

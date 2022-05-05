@@ -271,6 +271,33 @@ ib_ReturnCode ib_Participant_CompleteSimulationTask(ib_Participant* participant)
   CAPI_LEAVE
 }
 
+ib_ReturnCode ib_Participant_Pause(ib_Participant* participant, const char* reason)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_POINTER_PARAMETER(reason);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
+        auto* participantController = cppParticipant->GetParticipantController();
+        participantController->Pause(reason);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+ib_ReturnCode ib_Participant_Continue(ib_Participant* participant)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
+        auto* participantController = cppParticipant->GetParticipantController();
+        participantController->Continue();
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
 // SystemController related functions
 ib_ReturnCode ib_Participant_Initialize(ib_Participant* participant, const char* participantName)
 {
@@ -329,33 +356,6 @@ ib_ReturnCode ib_Participant_StopSimulation(ib_Participant* participant)
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Participant_Pause(ib_Participant* participant, const char* reason)
-{
-  ASSERT_VALID_POINTER_PARAMETER(participant);
-  ASSERT_VALID_POINTER_PARAMETER(reason);
-  CAPI_ENTER
-  {
-    auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
-    auto* participantController = cppParticipant->GetParticipantController();
-    participantController->Pause(reason);
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
-
-ib_ReturnCode ib_Participant_Continue(ib_Participant* participant)
-{
-  ASSERT_VALID_POINTER_PARAMETER(participant);
-  CAPI_ENTER
-  {
-    auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
-    auto* participantController = cppParticipant->GetParticipantController();
-    participantController->Continue();
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
-
 
 ib_ReturnCode ib_Participant_Shutdown(ib_Participant* participant)
 {
@@ -394,6 +394,23 @@ ib_ReturnCode ib_Participant_ExecuteColdswap(ib_Participant* participant)
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
+}
+
+ib_ReturnCode ib_Participant_SetRequiredParticipants(ib_Participant* participant,
+                                                     const ib_StringList* requiredParticipantNames)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_POINTER_PARAMETER(requiredParticipantNames);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
+        auto* systemController = cppParticipant->GetSystemController();
+        std::vector<std::string> cppNames;
+        assign(cppNames, requiredParticipantNames);
+        systemController->SetRequiredParticipants(cppNames);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
 }
 
 // SystemMonitor related functions
@@ -469,23 +486,6 @@ ib_ReturnCode ib_Participant_RegisterParticipantStatusHandler(ib_Participant* pa
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
-}
-
-ib_ReturnCode ib_Participant_SetRequiredParticipants(ib_Participant* participant,
-                                                               const ib_StringList* requiredParticipantNames)
-{
-    ASSERT_VALID_POINTER_PARAMETER(participant);
-    ASSERT_VALID_POINTER_PARAMETER(requiredParticipantNames);
-    CAPI_ENTER
-    {
-        auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
-        auto* systemController = cppParticipant->GetSystemController();
-        std::vector<std::string> cppNames;
-        assign(cppNames, requiredParticipantNames);
-        systemController->SetRequiredParticipants(cppNames);
-        return ib_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
 }
 
 }
