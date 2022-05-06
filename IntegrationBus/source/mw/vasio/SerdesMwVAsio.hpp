@@ -67,7 +67,9 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const VAsioMsgSubscriber
 {
     buffer << subscriber.receiverIdx
            << subscriber.networkName
-           << subscriber.msgTypeName;
+           << subscriber.msgTypeName
+           << subscriber.version
+        ;
     return buffer;
 }
 
@@ -75,7 +77,9 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioMsgSubscriber& subs
 {
     buffer >> subscriber.receiverIdx
            >> subscriber.networkName
-           >> subscriber.msgTypeName;
+           >> subscriber.msgTypeName
+           >> subscriber.version
+        ;
     return buffer;
 }
 

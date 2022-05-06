@@ -812,14 +812,21 @@ void VAsioConnection::OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer)
 
 void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer)
 {
-    auto getVersionForSerdes = [](const auto& typeName) {
+    //Note: there may be multiple types that match the SerdesName
+    // we try to find a version to match it, for backward compatibility.
+    auto getVersionForSerdes = [](const auto& typeName, auto remoteVersion) {
         VersionT subscriptionVersion{0};
         IbMessageTypes supportedMessageTypes{};
-        tt::for_each(supportedMessageTypes, [&subscriptionVersion, &typeName](auto&& myType) {
+
+        tt::for_each(supportedMessageTypes,
+            [&subscriptionVersion, &typeName, remoteVersion](auto&& myType) {
             using MsgT = std::decay_t<decltype(myType)>;
             if (typeName == IbMsgTraits<MsgT>::SerdesName())
             {
-                subscriptionVersion =  IbMsgTraits<MsgT>::Version();
+                if(IbMsgTraits<MsgT>::Version() <= remoteVersion)
+                {
+                    subscriptionVersion =  IbMsgTraits<MsgT>::Version();
+                }
             }
         });
         return subscriptionVersion;
@@ -830,7 +837,7 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageB
     bool wasAdded = TryAddRemoteSubscriber(from, subscriber);
 
     // check our Message version against the remote participant's version
-    auto myMessageVersion = getVersionForSerdes(subscriber.msgTypeName);
+    auto myMessageVersion = getVersionForSerdes(subscriber.msgTypeName, subscriber.version);
     if (myMessageVersion == 0)
     {
         _logger->Warn("Received SubscriptionAnnouncement for message type {} for an unknown version",
@@ -870,7 +877,6 @@ void VAsioConnection::ReceiveSubscriptionAcknowledge(IVAsioPeer* from, MessageBu
             , ack.subscriber.msgTypeName
             , from->GetInfo().participantName);
     }
-
     // we remove the pending subscription in any case. As there will not follow a new, successful acknowledge
     auto iter = std::find(_pendingSubscriptionAcknowledges.begin(),
                           _pendingSubscriptionAcknowledges.end(),

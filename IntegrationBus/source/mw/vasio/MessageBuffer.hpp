@@ -42,6 +42,22 @@ public:
 
 public:
     // ----------------------------------------
+    // Public methods for format versioning
+
+    uint32_t _formatVersion{0};
+
+    void SetFormatVersion(uint32_t version)
+    {
+        _formatVersion = version;
+    }
+    auto GetFormatVersion() -> uint32_t
+    {
+        return _formatVersion;
+    }
+
+
+public:
+    // ----------------------------------------
     // Public methods
 
     //! \brief Return the underlying data storage by std::move and reset pointers

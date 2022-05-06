@@ -497,7 +497,6 @@ void ParticipantController::ShutdownForColdswap()
     ChangeState(ParticipantState::ColdswapShutdown, "Coldswap was enabled for this participant.");
 
     _participant->OnAllMessagesDelivered([this]() {
-
         _finalStatePromise.set_value(State());
 
     });

@@ -82,6 +82,14 @@ inline bool operator!=(const RegistryMsgHeader& lhs, const RegistryMsgHeader& rh
         || lhs.versionLow != rhs.versionLow;
 }
 
+inline bool operator==(const RegistryMsgHeader& lhs, const RegistryMsgHeader& rhs)
+{
+    return lhs.preambel == rhs.preambel
+        && lhs.versionHigh == rhs.versionHigh
+        && lhs.versionLow == rhs.versionLow
+        ;
+}
+
 inline bool operator==(const VAsioMsgSubscriber& lhs, const VAsioMsgSubscriber& rhs)
 {
     return lhs.receiverIdx == rhs.receiverIdx 

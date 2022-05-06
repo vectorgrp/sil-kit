@@ -39,14 +39,17 @@
 #include "traits/IbMsgTraits.hpp"
 #include "traits/IbServiceTraits.hpp"
 
+// private data types for unit testing support:
+#include "TestDataTypes.hpp"
+
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/sim/can/string_utils.hpp"
 
 #include "asio.hpp"
 
+
 namespace ib {
 namespace mw {
-
 
 class VAsioTcpPeer;
 
@@ -209,7 +212,12 @@ private:
         sim::fr::FlexrayTxBufferUpdate,
         sim::fr::FlexrayPocStatusEvent,
         mw::service::ParticipantDiscoveryEvent,
-        mw::service::ServiceDiscoveryEvent
+        mw::service::ServiceDiscoveryEvent,
+
+        // Private testing data types
+        mw::test::version1::TestMessage,
+        mw::test::version2::TestMessage,
+        mw::test::TestFrameEvent
     >;
 
 private:
@@ -287,6 +295,7 @@ private:
             }
         }
     }
+
     template<class IbMessageT>
     void RegisterIbMsgSender(const std::string& networkName, const IIbServiceEndpoint* serviceId)
     {
@@ -435,8 +444,11 @@ private:
     //We violate the strict layering architecture, so that we can cleanly shutdown without false error messages.
     bool _isShuttingDown{false};
 
-  // Hold mapping from hash to participantName
+    // Hold mapping from hash to participantName
     std::map<uint64_t, std::string> _hashToParticipantName;
+
+    // unit testing support
+    friend class VAsioConnectionTest;
 };
 
 } // mw
