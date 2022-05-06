@@ -1,8 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Slave Setup
-ControllerConfig slaveConfig;
-slaveConfig.controllerMode = ControllerMode::Slave;
+LinControllerConfig slaveConfig;
+slaveConfig.controllerMode = LinControllerMode::Slave;
 slaveConfig.baudRate = 20000;
 
 slave->Init(slaveConfig);
@@ -15,15 +15,15 @@ slave->AddFrameStatusHandler(slave_FrameStatusHandler);
 // Setup ID 0x10 for reception
 LinFrame rxFrame;
 rxFrame.id = 0x10;
-rxFrame.checksumModel = ChecksumModel::Enhanced;
+rxFrame.checksumModel = LinChecksumModel::Enhanced;
 rxFrame.dataLength = 8;
 
-slave->SetFrameResponse(rxFrame, FrameResponseMode::Rx);
+slave->SetFrameResponse(rxFrame, LinFrameResponseMode::Rx);
 
 // ------------------------------------------------------------
 // Master Setup
-ControllerConfig masterConfig;
-masterConfig.controllerMode = ControllerMode::Master;
+LinControllerConfig masterConfig;
+masterConfig.controllerMode = LinControllerMode::Master;
 masterConfig.baudRate = 20000;
 
 master->Init(masterConfig);
@@ -38,30 +38,30 @@ master->AddFrameStatusHandler(master_FrameStatusHandler);
 // frame response.
 LinFrame masterFrame;
 masterFrame.id = 0x10;
-masterFrame.checksumModel = ChecksumModel::Enhanced;
+masterFrame.checksumModel = LinChecksumModel::Enhanced;
 masterFrame.dataLength = 8;
 masterFrame.data = {'M', 'A', 'S', 'T', 'E', 'R', 0, 0};
 
 if (UseAutosarInterface)
 {
     // AUTOSAR API
-    master->SendFrame(masterFrame, FrameResponseType::MasterResponse);
+    master->SendFrame(masterFrame, LinFrameResponseType::MasterResponse);
 }
 else
 {
     // alternative, non-AUTOSAR API
 
     // 1. setup the master response
-    master->SetFrameResponse(masterFrame, FrameResponseMode::TxUnconditional);
+    master->SetFrameResponse(masterFrame, LinFrameResponseMode::TxUnconditional);
     // 2. transmit the frame header, the master response will be transmitted automatically.
     master->SendFrameHeader(0x10);
 
-    // Note: SendFrameHeader() can be called again without setting a new FrameResponse
+    // Note: SendFrameHeader() can be called again without setting a new LinFrameResponse
 }
 
 // In both cases (AUTOSAR and non-AUTOSAR), the following callbacks will be triggered:
 //  - TX confirmation for the master, who initiated the transmission
 //    and provided the frame response
-master_FrameStatusHandler(master, LinFrameStatusEvent{ timeEndOfFrame, masterFrame, FrameStatus::LIN_TX_OK });
+master_FrameStatusHandler(master, LinFrameStatusEvent{ timeEndOfFrame, masterFrame, LinFrameStatus::LIN_TX_OK });
 //  - RX for the slave, who received the frame response
-slave_FrameStatusHandler(slave, LinFrameStatusEvent{ timeEndOfFrame, masterFrame, FrameStatus::LIN_RX_OK });
+slave_FrameStatusHandler(slave, LinFrameStatusEvent{ timeEndOfFrame, masterFrame, LinFrameStatus::LIN_RX_OK });

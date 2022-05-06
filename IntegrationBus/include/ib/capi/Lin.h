@@ -48,12 +48,12 @@ typedef uint32_t ib_Lin_BaudRate;
 
 //! \brief Controls the behavior of a Lin Slave task for a particular Lin ID
 typedef uint8_t ib_Lin_FrameResponseMode;
-//! The FrameResponse corresponding to the ID is neither received nor
+//! The LinFrameResponse corresponding to the ID is neither received nor
 //! transmitted by the Lin slave.
 #define ib_Lin_FrameResponseMode_Unused ((ib_Lin_FrameResponseMode)0)
-//! The FrameResponse corresponding to the ID is received by the Lin slave.
+//! The LinFrameResponse corresponding to the ID is received by the Lin slave.
 #define ib_Lin_FrameResponseMode_Rx ((ib_Lin_FrameResponseMode)1)
-//! The FrameResponse corresponding to the ID is transmitted unconditionally
+//! The LinFrameResponse corresponding to the ID is transmitted unconditionally
 //! by the Lin slave.
 #define ib_Lin_FrameResponseMode_TxUnconditional ((ib_Lin_FrameResponseMode)2)
 
@@ -203,7 +203,7 @@ struct ib_Lin_FrameResponse
      * frame data is used for the transaction.
      */
     ib_Lin_Frame* frame;
-    //! Determines if the FrameResponse is used for transmission
+    //! Determines if the LinFrameResponse is used for transmission
     //! (TxUnconditional), reception (Rx) or ignored (Unused).
     ib_Lin_FrameResponseMode responseMode;
 };
@@ -223,7 +223,7 @@ struct ib_Lin_ControllerConfig
     ib_Lin_BaudRate baudRate;
 
     uint32_t numFrameResponses;
-    /*! Optional FrameResponse configuration.
+    /*! Optional LinFrameResponse configuration.
      *
      * FrameResponses can also be configured at a later point using
      * \ref ib_Lin_Controller_SetFrameResponse() and
@@ -358,7 +358,7 @@ IntegrationBusAPI ib_ReturnCode ib_Lin_Controller_SendFrameHeader(ib_Lin_Control
 
 typedef ib_ReturnCode(*ib_Lin_Controller_SendFrameHeader_t)(ib_Lin_Controller* controller, ib_Lin_Id linId);
 
-/*! FrameResponse configuration for Slaves or non-AUTOSAR Lin
+/*! LinFrameResponse configuration for Slaves or non-AUTOSAR Lin
  *  Masters The corresponding Lin ID does not need to be
  *  previously configured. */
 IntegrationBusAPI ib_ReturnCode ib_Lin_Controller_SetFrameResponse(ib_Lin_Controller* controller,
@@ -367,7 +367,7 @@ IntegrationBusAPI ib_ReturnCode ib_Lin_Controller_SetFrameResponse(ib_Lin_Contro
 typedef ib_ReturnCode (*ib_Lin_Controller_SetFrameResponse_t)(ib_Lin_Controller* controller,
                                                               const ib_Lin_FrameResponse* frameResponse);
 
-/*! FrameResponse configuration for Slaves or non-AUTOSAR Lin Masters.
+/*! LinFrameResponse configuration for Slaves or non-AUTOSAR Lin Masters.
  *
  * Configures multiple responses at once. Corresponding IDs do not
  * need to be previously configured.
@@ -386,6 +386,7 @@ typedef ib_ReturnCode (*ib_Lin_Controller_SetFrameResponses_t)(ib_Lin_Controller
 /*! \brief Transmit a go-to-sleep-command and set ib_Lin_ControllerStatus_Sleep and enable wake-up
  *
  * *AUTOSAR Name:* Lin_GoToSleep
+ * \return ib_ReturnCode_SUCCESS or ib_ReturnCode_WRONGSTATE if issued with wrong \ref ib_Lin_ControllerMode
  */
 IntegrationBusAPI ib_ReturnCode ib_Lin_Controller_GoToSleep(ib_Lin_Controller* controller);
 
@@ -393,6 +394,7 @@ typedef ib_ReturnCode(*ib_Lin_Controller_GoToSleep_t)(ib_Lin_Controller* control
 /*! \brief Set ib_Lin_ControllerStatus_Sleep without sending a go-to-sleep command.
  *
  * *AUTOSAR Name:* Lin_GoToSleepInternal
+ * \return ib_ReturnCode_SUCCESS or ib_ReturnCode_WRONGSTATE if issued with wrong \ref ib_Lin_ControllerMode
  */
 IntegrationBusAPI ib_ReturnCode ib_Lin_Controller_GoToSleepInternal(ib_Lin_Controller* controller);
 
@@ -400,6 +402,7 @@ typedef ib_ReturnCode(*ib_Lin_Controller_GoToSleepInternal_t)(ib_Lin_Controller*
 /*! \brief Generate a wake up pulse and set ib_Lin_ControllerStatus_Operational.
  *
  * *AUTOSAR Name:* Lin_Wakeup
+ * \return ib_ReturnCode_SUCCESS or ib_ReturnCode_WRONGSTATE if issued with wrong \ref ib_Lin_ControllerMode
  */
 IntegrationBusAPI ib_ReturnCode ib_Lin_Controller_Wakeup(ib_Lin_Controller* controller);
 
@@ -407,6 +410,7 @@ typedef ib_ReturnCode(*ib_Lin_Controller_Wakeup_t)(ib_Lin_Controller* controller
 /*! Set ib_Lin_ControllerStatus_Operational without generating a wake up pulse.
  *
  * *AUTOSAR Name:* Lin_WakeupInternal
+ * \return ib_ReturnCode_SUCCESS or ib_ReturnCode_WRONGSTATE if issued with wrong \ref ib_Lin_ControllerMode
  */
 IntegrationBusAPI ib_ReturnCode ib_Lin_Controller_WakeupInternal(ib_Lin_Controller* controller);
 

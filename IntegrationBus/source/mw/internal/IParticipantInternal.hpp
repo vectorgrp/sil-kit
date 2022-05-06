@@ -68,13 +68,13 @@ public:
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::fr::TxBufferUpdate& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::fr::PocStatus& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::SendFrameRequest& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::SendFrameHeaderRequest& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::Transmission& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::WakeupPulse& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::ControllerConfig& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::ControllerStatusUpdate& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::FrameResponseUpdate& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::LinSendFrameRequest& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::LinSendFrameHeaderRequest& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::LinTransmission& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::LinWakeupPulse& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::LinControllerConfig& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::LinControllerStatusUpdate& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::LinFrameResponseUpdate& msg) = 0;
 
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::data::DataMessageEvent& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::data::DataMessageEvent&& msg) = 0;
@@ -123,13 +123,13 @@ public:
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::TxBufferUpdate& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::PocStatus& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::SendFrameRequest& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::SendFrameHeaderRequest& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::Transmission& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::WakeupPulse& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::ControllerConfig& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::ControllerStatusUpdate& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::FrameResponseUpdate& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinSendFrameRequest& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinSendFrameHeaderRequest& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinTransmission& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinWakeupPulse& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinControllerConfig& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinControllerStatusUpdate& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinFrameResponseUpdate& msg) = 0;
 
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::DataMessageEvent& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::DataMessageEvent&& msg) = 0;

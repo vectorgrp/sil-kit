@@ -15,8 +15,8 @@ namespace lin {
  *  Used by the Participant, implemented by the LinControllerFacade
  */
 class IIbToLinControllerFacade
-    : public mw::IIbReceiver<Transmission, WakeupPulse, ControllerConfig, ControllerStatusUpdate, FrameResponseUpdate>
-    , public mw::IIbSender<Transmission, SendFrameRequest, SendFrameHeaderRequest, WakeupPulse, ControllerConfig, ControllerStatusUpdate, FrameResponseUpdate>
+    : public mw::IIbReceiver<LinTransmission, LinWakeupPulse, LinControllerConfig, LinControllerStatusUpdate, LinFrameResponseUpdate>
+    , public mw::IIbSender<LinTransmission, LinSendFrameRequest, LinSendFrameHeaderRequest, LinWakeupPulse, LinControllerConfig, LinControllerStatusUpdate, LinFrameResponseUpdate>
 {
 public:
     virtual ~IIbToLinControllerFacade() noexcept = default;

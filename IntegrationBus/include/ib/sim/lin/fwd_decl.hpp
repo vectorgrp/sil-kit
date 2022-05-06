@@ -9,13 +9,13 @@ namespace sim {
 namespace lin { 
 
 struct LinFrame;
-struct Transmission;
-struct WakeupPulse;
-struct SendFrameRequest;
-struct SendFrameHeaderRequest;
-struct ControllerConfig;
-struct ControllerStatusUpdate;
-struct FrameResponseUpdate;
+struct LinTransmission;
+struct LinWakeupPulse;
+struct LinSendFrameRequest;
+struct LinSendFrameHeaderRequest;
+struct LinControllerConfig;
+struct LinControllerStatusUpdate;
+struct LinFrameResponseUpdate;
 
 class ILinController;
 

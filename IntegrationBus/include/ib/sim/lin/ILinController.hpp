@@ -19,20 +19,20 @@ namespace lin {
  * AUTOSAR-like LIN master interface:
  *
  * - \ref SendFrame() transfers a frame from or to a LIN
- * master. Requires \ref ControllerMode::Master.
+ * master. Requires \ref LinControllerMode::Master.
  *
  *
  * non-AUTOSAR interface:
  *
  * - \ref SetFrameResponse() configures
  * the response for a particular LIN identifier. Can be used with \ref
- * ControllerMode::Master and \ref ControllerMode::Slave.
+ * LinControllerMode::Master and \ref LinControllerMode::Slave.
  *
  * - \ref SendFrameHeader() initiates the transmission of a
  * LIN frame for a particular LIN identifier. For a successful
  * transmission, exactly one LIN slave or master must have previously
  * set a corresponding frame response for unconditional
- * transmission. Requires \ref ControllerMode::Master.
+ * transmission. Requires \ref LinControllerMode::Master.
  * 
  */
 class ILinController
@@ -70,10 +70,10 @@ public:
      *
      * *AUTOSAR Name:* Lin_Init
      */
-    virtual void Init(ControllerConfig config) = 0;
+    virtual void Init(LinControllerConfig config) = 0;
 
     //! \brief Get the current status of the LIN Controller, i.e., Operational or Sleep.
-    virtual auto Status() const noexcept -> ControllerStatus = 0;
+    virtual auto Status() const noexcept -> LinControllerStatus = 0;
 
     /*! \brief AUTOSAR LIN master interface
      *
@@ -93,17 +93,17 @@ public:
      * \param frame provides the LIN identifier, checksum model, and optional data
      * \param responseType determines if *frame.data* must is used for the frame response.
      */
-    virtual void SendFrame(LinFrame frame, FrameResponseType responseType) = 0;
+    virtual void SendFrame(LinFrame frame, LinFrameResponseType responseType) = 0;
 
     //! Send Interface for a non-AUTOSAR LIN Master
     virtual void SendFrameHeader(LinIdT linId) = 0;
 
-    /*! FrameResponse configuration for Slaves or non-AUTOSAR LIN
+    /*! LinFrameResponse configuration for Slaves or non-AUTOSAR LIN
      *  Masters The corresponding LIN ID does not need to be
      *  previously configured. */
-    virtual void SetFrameResponse(LinFrame frame, FrameResponseMode mode) = 0;
+    virtual void SetFrameResponse(LinFrame frame, LinFrameResponseMode mode) = 0;
 
-    /*! FrameResponse configuration for Slaves or non-AUTOSAR LIN Masters.
+    /*! LinFrameResponse configuration for Slaves or non-AUTOSAR LIN Masters.
      * 
      * Configures multiple responses at once. Corresponding IDs do not
      * need to be previously configured.
@@ -112,30 +112,34 @@ public:
      * an empty vector does not clear or reset the currently
      * configured FrameResponses.
      */
-    virtual void SetFrameResponses(std::vector<FrameResponse> responses) = 0;
+    virtual void SetFrameResponses(std::vector<LinFrameResponse> responses) = 0;
 
     /*! \brief Transmit a go-to-sleep-command and set ControllerState::Sleep and enable wake-up
      *
      * *AUTOSAR Name:* Lin_GoToSleep
+     * \throw ib::StateError Command issued with wrong LinControllerMode
      */
     virtual void GoToSleep() = 0;
     /*! \brief Set ControllerState::Sleep without sending a go-to-sleep command.
      *
      * *AUTOSAR Name:* Lin_GoToSleepInternal
+     * \throw ib::StateError Command issued with wrong LinControllerMode
      */
     virtual void GoToSleepInternal() = 0;
     /*! \brief Generate a wake up pulse and set ControllerState::Operational.
      *
      * *AUTOSAR Name:* Lin_Wakeup
+     * \throw ib::StateError Command issued with wrong LinControllerMode
      */
     virtual void Wakeup() = 0;
     /*! Set ControllerState::Operational without generating a wake up pulse.
      *
      * *AUTOSAR Name:* Lin_WakeupInternal
+     * \throw ib::StateError Command issued with wrong LinControllerMode
      */
     virtual void WakeupInternal() = 0;
 
-    /*! \brief Report the \ref FrameStatus of a LIN \ref LinFrame
+    /*! \brief Report the \ref LinFrameStatus of a LIN \ref LinFrame
      * transmission and provides the transmitted frame.
      *
      * The FrameStatusHandler is called once per call to
@@ -166,11 +170,11 @@ public:
      * GoToSleepInternal() must be called manually
      *
      * NB: This handler will always be called, independently of the
-     * \ref FrameResponseMode configuration for LIN ID 0x3C. However,
+     * \ref LinFrameResponseMode configuration for LIN ID 0x3C. However,
      * regarding the FrameStatusHandler, the go-to-sleep frame is
      * treated like every other frame, i.e. the FrameStatusHandler is
      * only called for LIN ID 0x3C if configured as
-     * FrameResponseMode::Rx.
+     * LinFrameResponseMode::Rx.
      */
     virtual void AddGoToSleepHandler(GoToSleepHandler handler) = 0;
 
@@ -183,7 +187,7 @@ public:
     virtual void AddWakeupHandler(WakeupHandler handler) = 0;
 
     /*! \brief The FrameResponseUpdateHandler provides direct access
-     * to the FrameResponse configuration of other LIN controllers.
+     * to the LinFrameResponse configuration of other LIN controllers.
      *
      * NB: This callback is mainly for diagnostic purposes and is NOT
      * needed for regular LIN controller operation.

@@ -125,7 +125,7 @@ public:
 
     void DoAction(std::chrono::nanoseconds now)
     {
-        if (controller->Status() != ControllerStatus::Operational)
+        if (controller->Status() != LinControllerStatus::Operational)
             return;
 
         schedule.ExecuteTask(now);
@@ -135,11 +135,11 @@ public:
     {
         LinFrame frame;
         frame.id = 16;
-        frame.checksumModel = ChecksumModel::Classic;
+        frame.checksumModel = LinChecksumModel::Classic;
         frame.dataLength = 6;
         frame.data = std::array<uint8_t, 8>{1, 6, 1, 6, 1, 6, 1, 6};
 
-        controller->SendFrame(frame, FrameResponseType::MasterResponse);
+        controller->SendFrame(frame, LinFrameResponseType::MasterResponse);
         std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(frame.id) << std::endl;
     }
         
@@ -147,11 +147,11 @@ public:
     {
         LinFrame frame;
         frame.id = 17;
-        frame.checksumModel = ChecksumModel::Classic;
+        frame.checksumModel = LinChecksumModel::Classic;
         frame.dataLength = 6;
         frame.data = std::array<uint8_t, 8>{1,7,1,7,1,7,1,7};
 
-        controller->SendFrame(frame, FrameResponseType::MasterResponse);
+        controller->SendFrame(frame, LinFrameResponseType::MasterResponse);
         std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(frame.id) << std::endl;
     }
 
@@ -159,11 +159,11 @@ public:
     {
         LinFrame frame;
         frame.id = 18;
-        frame.checksumModel = ChecksumModel::Enhanced;
+        frame.checksumModel = LinChecksumModel::Enhanced;
         frame.dataLength = 8;
         frame.data = std::array<uint8_t, 8>{0};
 
-        controller->SendFrame(frame, FrameResponseType::MasterResponse);
+        controller->SendFrame(frame, LinFrameResponseType::MasterResponse);
         std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(frame.id) << std::endl;
     }
 
@@ -171,11 +171,11 @@ public:
     {
         LinFrame frame;
         frame.id = 19;
-        frame.checksumModel = ChecksumModel::Classic;
+        frame.checksumModel = LinChecksumModel::Classic;
         frame.dataLength = 8;
         frame.data = std::array<uint8_t, 8>{0};
 
-        controller->SendFrame(frame, FrameResponseType::MasterResponse);
+        controller->SendFrame(frame, LinFrameResponseType::MasterResponse);
         std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(frame.id) << std::endl;
     }
 
@@ -183,10 +183,10 @@ public:
     {
         LinFrame frame;
         frame.id = 34;
-        frame.checksumModel = ChecksumModel::Enhanced;
+        frame.checksumModel = LinChecksumModel::Enhanced;
         frame.dataLength = 6;
 
-        controller->SendFrame(frame, FrameResponseType::SlaveResponse);
+        controller->SendFrame(frame, LinFrameResponseType::SlaveResponse);
         std::cout << "<< LIN Frame Header sent for ID=" << static_cast<unsigned int>(frame.id) << std::endl;
     }
 
@@ -201,8 +201,8 @@ public:
     {
         switch (frameStatusEvent.status)
         {
-        case FrameStatus::LIN_RX_OK: break; // good case, no need to warn
-        case FrameStatus::LIN_TX_OK: break; // good case, no need to warn
+        case LinFrameStatus::LIN_RX_OK: break; // good case, no need to warn
+        case LinFrameStatus::LIN_TX_OK: break; // good case, no need to warn
         default:
             std::cout << "WARNING: LIN transmission failed!" << std::endl;
         }
@@ -213,8 +213,11 @@ public:
 
     void WakeupHandler(ILinController* linController, const LinWakeupEvent& wakeupEvent)
     {
-        if (linController->Status() != ControllerStatus::Sleep)
-            std::cout << "WARNING: Received Wakeup pulse while ControllerStatus is " << linController->Status() << "." << std::endl;
+        if (linController->Status() != LinControllerStatus::Sleep)
+        {
+            std::cout << "WARNING: Received Wakeup pulse while LinControllerStatus is " << linController->Status()
+                      << "." << std::endl;
+        }
 
         std::cout << ">> Wakeup pulse received; direction=" << wakeupEvent.direction << std::endl;
         linController->WakeupInternal();
@@ -321,8 +324,8 @@ int main(int argc, char** argv) try
 
             std::cout << "Initializing " << participantName << std::endl;
 
-            ControllerConfig config;
-            config.controllerMode = ControllerMode::Master;
+            LinControllerConfig config;
+            config.controllerMode = LinControllerMode::Master;
             config.baudRate = 20'000;
             linController->Init(config);
 
@@ -347,49 +350,49 @@ int main(int argc, char** argv) try
 
             std::cout << "Initializing " << participantName << std::endl;
 
-            // Configure LIN Controller to receive a FrameResponse for LIN ID 16
-            FrameResponse response_16;
+            // Configure LIN Controller to receive a LinFrameResponse for LIN ID 16
+            LinFrameResponse response_16;
             response_16.frame.id = 16;
-            response_16.frame.checksumModel = ChecksumModel::Classic;
+            response_16.frame.checksumModel = LinChecksumModel::Classic;
             response_16.frame.dataLength = 6;
-            response_16.responseMode = FrameResponseMode::Rx;
+            response_16.responseMode = LinFrameResponseMode::Rx;
 
-            // Configure LIN Controller to receive a FrameResponse for LIN ID 17
-            //  - This FrameResponseMode::Unused causes the controller to ignore
+            // Configure LIN Controller to receive a LinFrameResponse for LIN ID 17
+            //  - This LinFrameResponseMode::Unused causes the controller to ignore
             //    this message and not trigger a callback. This is also the default.
-            FrameResponse response_17;
+            LinFrameResponse response_17;
             response_17.frame.id = 17;
-            response_17.frame.checksumModel = ChecksumModel::Classic;
+            response_17.frame.checksumModel = LinChecksumModel::Classic;
             response_17.frame.dataLength = 6;
-            response_17.responseMode = FrameResponseMode::Unused;
+            response_17.responseMode = LinFrameResponseMode::Unused;
 
             // Configure LIN Controller to receive LIN ID 18
-            //  - ChecksumModel does not match with master --> Receive with LIN_RX_ERROR
-            FrameResponse response_18;
+            //  - LinChecksumModel does not match with master --> Receive with LIN_RX_ERROR
+            LinFrameResponse response_18;
             response_18.frame.id = 18;
-            response_18.frame.checksumModel = ChecksumModel::Classic;
+            response_18.frame.checksumModel = LinChecksumModel::Classic;
             response_18.frame.dataLength = 8;
-            response_18.responseMode = FrameResponseMode::Rx;
+            response_18.responseMode = LinFrameResponseMode::Rx;
 
             // Configure LIN Controller to receive LIN ID 19
             //  - dataLength does not match with master --> Receive with LIN_RX_ERROR
-            FrameResponse response_19;
+            LinFrameResponse response_19;
             response_19.frame.id = 19;
-            response_19.frame.checksumModel = ChecksumModel::Enhanced;
+            response_19.frame.checksumModel = LinChecksumModel::Enhanced;
             response_19.frame.dataLength = 1;
-            response_19.responseMode = FrameResponseMode::Rx;
+            response_19.responseMode = LinFrameResponseMode::Rx;
 
 
-            // Configure LIN Controller to send a FrameResponse for LIN ID 34
-            FrameResponse response_34;
+            // Configure LIN Controller to send a LinFrameResponse for LIN ID 34
+            LinFrameResponse response_34;
             response_34.frame.id = 34;
-            response_34.frame.checksumModel = ChecksumModel::Enhanced;
+            response_34.frame.checksumModel = LinChecksumModel::Enhanced;
             response_34.frame.dataLength = 6;
             response_34.frame.data = std::array<uint8_t, 8>{3,4,3,4,3,4,3,4};
-            response_34.responseMode = FrameResponseMode::TxUnconditional;
+            response_34.responseMode = LinFrameResponseMode::TxUnconditional;
 
-            ControllerConfig config;
-            config.controllerMode = ControllerMode::Slave;
+            LinControllerConfig config;
+            config.controllerMode = LinControllerMode::Slave;
             config.baudRate = 20'000;
             config.frameResponses.push_back(response_16);
             config.frameResponses.push_back(response_17);

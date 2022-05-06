@@ -15,8 +15,8 @@ namespace lin {
  *  Used by the Participant, implemented by the LinController
  */
 class IIbToLinController
-    : public mw::IIbReceiver<Transmission, WakeupPulse, ControllerConfig, ControllerStatusUpdate, FrameResponseUpdate>
-    , public mw::IIbSender<Transmission, WakeupPulse, ControllerConfig, ControllerStatusUpdate, FrameResponseUpdate>
+    : public mw::IIbReceiver<LinTransmission, LinWakeupPulse, LinControllerConfig, LinControllerStatusUpdate, LinFrameResponseUpdate>
+    , public mw::IIbSender<LinTransmission, LinWakeupPulse, LinControllerConfig, LinControllerStatusUpdate, LinFrameResponseUpdate>
 {
 };
 

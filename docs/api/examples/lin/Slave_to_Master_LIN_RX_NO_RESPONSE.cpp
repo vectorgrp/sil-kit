@@ -1,8 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Slave Setup
-ControllerConfig slaveConfig;
-slaveConfig.controllerMode = ControllerMode::Slave;
+LinControllerConfig slaveConfig;
+slaveConfig.controllerMode = LinControllerMode::Slave;
 slaveConfig.baudRate = 20000;
 
 slave->Init(slaveConfig);
@@ -16,8 +16,8 @@ slave->AddFrameStatusHandler(slave_FrameStatusHandler);
 
 // ------------------------------------------------------------
 // Master Setup
-ControllerConfig masterConfig;
-masterConfig.controllerMode = ControllerMode::Master;
+LinControllerConfig masterConfig;
+masterConfig.controllerMode = LinControllerMode::Master;
 masterConfig.baudRate = 20000;
 
 master->Init(masterConfig);
@@ -32,13 +32,13 @@ master->AddFrameStatusHandler(master_FrameStatusHandler);
 // to provide the frame response.
 LinFrame frameRequest;
 frameRequest.id = 0x11;
-frameRequest.checksumModel = ChecksumModel::Enhanced;
+frameRequest.checksumModel = LinChecksumModel::Enhanced;
 
 // Use AUTOSAR interface to initiate the transmission.
-master->SendFrame(frameRequest, FrameResponseType::SlaveResponse);
+master->SendFrame(frameRequest, LinFrameResponseType::SlaveResponse);
 
 // ------------------------------------------------------------
 // The following master callback will be triggered:
 //  - LIN_RX_NO_RESPONSE for the master, since no slave did provide a response
-master_FrameStatusHandler(master, LinFrameStatusEvent{ timeEndOfFrame, frameRequest, FrameStatus::LIN_RX_NO_RESPONSE });
+master_FrameStatusHandler(master, LinFrameStatusEvent{ timeEndOfFrame, frameRequest, LinFrameStatus::LIN_RX_NO_RESPONSE });
 //  The slave_FrameStatusHandler will not be called!

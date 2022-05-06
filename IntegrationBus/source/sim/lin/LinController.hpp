@@ -56,13 +56,13 @@ public:
     // Public interface methods
     //
     // ILinController
-    void Init(ControllerConfig config) override;
-    auto Status() const noexcept -> ControllerStatus override;
+    void Init(LinControllerConfig config) override;
+    auto Status() const noexcept -> LinControllerStatus override;
 
-    void SendFrame(LinFrame frame, FrameResponseType responseType) override;
+    void SendFrame(LinFrame frame, LinFrameResponseType responseType) override;
     void SendFrameHeader(LinIdT linId) override;
-    void SetFrameResponse(LinFrame frame, FrameResponseMode mode) override;
-    void SetFrameResponses(std::vector<FrameResponse> responses) override;
+    void SetFrameResponse(LinFrame frame, LinFrameResponseMode mode) override;
+    void SetFrameResponses(std::vector<LinFrameResponse> responses) override;
 
     void GoToSleep() override;
     void GoToSleepInternal() override;
@@ -75,11 +75,11 @@ public:
     void AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) override;
 
      // IIbToLinController
-     void ReceiveIbMessage(const IIbServiceEndpoint* from, const Transmission& msg) override;
-     void ReceiveIbMessage(const IIbServiceEndpoint* from, const WakeupPulse& msg) override;
-     void ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerConfig& msg) override;
-     void ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerStatusUpdate& msg) override;
-     void ReceiveIbMessage(const IIbServiceEndpoint* from, const FrameResponseUpdate& msg) override;
+     void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinTransmission& msg) override;
+     void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinWakeupPulse& msg) override;
+     void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerConfig& msg) override;
+     void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerStatusUpdate& msg) override;
+     void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinFrameResponseUpdate& msg) override;
 
      //ib::mw::sync::ITimeConsumer
      void SetTimeProvider(mw::sync::ITimeProvider* timeProvider) override;
@@ -97,18 +97,18 @@ private:
     struct LinNode
     {
         mw::EndpointAddress           ibAddress;
-        ControllerMode                controllerMode{ControllerMode::Inactive};
-        ControllerStatus              controllerStatus{ControllerStatus::Unknown};
-        std::array<FrameResponse, 64> responses;
+        LinControllerMode                controllerMode{LinControllerMode::Inactive};
+        LinControllerStatus              controllerStatus{LinControllerStatus::Unknown};
+        std::array<LinFrameResponse, 64> responses;
 
-        void UpdateResponses(std::vector<FrameResponse> responses_, mw::logging::ILogger* logger);
+        void UpdateResponses(std::vector<LinFrameResponse> responses_, mw::logging::ILogger* logger);
     };
 
 private:
     // ----------------------------------------
     // private methods
-    void SetControllerStatus(ControllerStatus status);
-    auto VeriyChecksum(const LinFrame& frame, FrameStatus status) -> FrameStatus;
+    void SetControllerStatus(LinControllerStatus status);
+    auto VeriyChecksum(const LinFrame& frame, LinFrameStatus status) -> LinFrameStatus;
 
     template <typename MsgT>
     inline void SendIbMessage(MsgT&& msg);
@@ -124,8 +124,8 @@ private:
     mw::sync::ITimeProvider* _timeProvider{ nullptr };
     ILinController* _facade{ nullptr };
 
-    ControllerMode   _controllerMode{ControllerMode::Inactive};
-    ControllerStatus _controllerStatus{ControllerStatus::Unknown};
+    LinControllerMode   _controllerMode{LinControllerMode::Inactive};
+    LinControllerStatus _controllerStatus{LinControllerStatus::Unknown};
 
     std::vector<LinNode> _linNodes;
 

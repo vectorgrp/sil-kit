@@ -20,23 +20,23 @@ namespace test {
 class LinMockParticipant : public mw::test::DummyParticipant
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const SendFrameRequest&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const SendFrameHeaderRequest&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const Transmission&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const FrameResponseUpdate&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const ControllerConfig&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const ControllerStatusUpdate&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const WakeupPulse&));
+    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const LinSendFrameRequest&));
+    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const LinSendFrameHeaderRequest&));
+    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const LinTransmission&));
+    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const LinFrameResponseUpdate&));
+    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const LinControllerConfig&));
+    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const LinControllerStatusUpdate&));
+    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const LinWakeupPulse&));
 };
 
-inline auto MakeControllerConfig(ControllerMode mode) -> ControllerConfig
+inline auto MakeControllerConfig(LinControllerMode mode) -> LinControllerConfig
 {
-    ControllerConfig config;
+    LinControllerConfig config;
     config.controllerMode = mode;
     return config;
 }
 
-inline auto MakeFrame(LinIdT linId, ChecksumModel checksumModel = ChecksumModel::Undefined, uint8_t dataLength = 0, std::array<uint8_t, 8> data = std::array<uint8_t, 8>{}) -> LinFrame
+inline auto MakeFrame(LinIdT linId, LinChecksumModel checksumModel = LinChecksumModel::Undefined, uint8_t dataLength = 0, std::array<uint8_t, 8> data = std::array<uint8_t, 8>{}) -> LinFrame
 {
     LinFrame frame;
     frame.id = linId;
@@ -50,54 +50,54 @@ inline auto AFrameWithId(LinIdT linId) -> testing::Matcher<const LinFrame&>
     using namespace testing;
     return Field(&LinFrame::id, linId);
 }
-inline auto ATransmissionWith(LinFrame frame) -> testing::Matcher<const Transmission&>
+inline auto ATransmissionWith(LinFrame frame) -> testing::Matcher<const LinTransmission&>
 {
     using namespace testing;
-    return Field(&Transmission::frame, frame);
+    return Field(&LinTransmission::frame, frame);
 }
-inline auto ATransmissionWith(FrameStatus status) -> testing::Matcher<const Transmission&>
+inline auto ATransmissionWith(LinFrameStatus status) -> testing::Matcher<const LinTransmission&>
 {
     using namespace testing;
-    return Field(&Transmission::status, status);
+    return Field(&LinTransmission::status, status);
 }
-inline auto ATransmissionWith(FrameStatus status, std::chrono::nanoseconds timestamp) -> testing::Matcher<const Transmission&>
+inline auto ATransmissionWith(LinFrameStatus status, std::chrono::nanoseconds timestamp) -> testing::Matcher<const LinTransmission&>
 {
     using namespace testing;
     return AllOf(
-        Field(&Transmission::status, status),
-        Field(&Transmission::timestamp, timestamp)
+        Field(&LinTransmission::status, status),
+        Field(&LinTransmission::timestamp, timestamp)
     );
 }
-inline auto ATransmissionWith(LinFrame frame, FrameStatus status) -> testing::Matcher<const Transmission&>
+inline auto ATransmissionWith(LinFrame frame, LinFrameStatus status) -> testing::Matcher<const LinTransmission&>
 {
     using namespace testing;
     return AllOf(
-        Field(&Transmission::frame, frame),
-        Field(&Transmission::status, status)
+        Field(&LinTransmission::frame, frame),
+        Field(&LinTransmission::status, status)
     );
 }
-inline auto ATransmissionWith(LinFrame frame, FrameStatus status, std::chrono::nanoseconds timestamp) -> testing::Matcher<const Transmission&>
+inline auto ATransmissionWith(LinFrame frame, LinFrameStatus status, std::chrono::nanoseconds timestamp) -> testing::Matcher<const LinTransmission&>
 {
     using namespace testing;
     return AllOf(
-        Field(&Transmission::frame, frame),
-        Field(&Transmission::status, status),
-        Field(&Transmission::timestamp, timestamp)
+        Field(&LinTransmission::frame, frame),
+        Field(&LinTransmission::status, status),
+        Field(&LinTransmission::timestamp, timestamp)
     );
 }
 
-inline auto AControllerStatusUpdateWith(ControllerStatus status) -> testing::Matcher<const ControllerStatusUpdate&>
+inline auto AControllerStatusUpdateWith(LinControllerStatus status) -> testing::Matcher<const LinControllerStatusUpdate&>
 {
     using namespace testing;
-    return Field(&ControllerStatusUpdate::status, status);
+    return Field(&LinControllerStatusUpdate::status, status);
 }
 
 struct Callbacks
 {
-    MOCK_METHOD3(FrameStatusHandler, void(ILinController*, const LinFrame&, FrameStatus));
+    MOCK_METHOD3(FrameStatusHandler, void(ILinController*, const LinFrame&, LinFrameStatus));
     MOCK_METHOD1(GoToSleepHandler, void(ILinController*));
     MOCK_METHOD1(WakeupHandler, void(ILinController*));
-    MOCK_METHOD3(FrameResponseUpdateHandler, void(ILinController*, const std::string&, const FrameResponse&));
+    MOCK_METHOD3(FrameResponseUpdateHandler, void(ILinController*, const std::string&, const LinFrameResponse&));
 };
 
 

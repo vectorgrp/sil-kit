@@ -766,43 +766,43 @@ void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, c
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::SendFrameRequest& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinSendFrameRequest& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::SendFrameHeaderRequest& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinSendFrameHeaderRequest& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::Transmission& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinTransmission& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::WakeupPulse& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinWakeupPulse& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::ControllerConfig& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinControllerConfig& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::ControllerStatusUpdate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinControllerStatusUpdate& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::FrameResponseUpdate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinFrameResponseUpdate& msg)
 {
     SendIbMessageImpl(from, msg);
 }
@@ -1046,43 +1046,43 @@ void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, c
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::SendFrameRequest& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinSendFrameRequest& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::SendFrameHeaderRequest& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinSendFrameHeaderRequest& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::Transmission& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinTransmission& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::WakeupPulse& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinWakeupPulse& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::ControllerConfig& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinControllerConfig& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::ControllerStatusUpdate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinControllerStatusUpdate& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::FrameResponseUpdate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinFrameResponseUpdate& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }

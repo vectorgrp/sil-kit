@@ -114,7 +114,7 @@ struct TestResult
     size_t numberReceivedInSleep{0}; //!< Number of received frames while in sleepMode
     std::vector<std::chrono::nanoseconds> sendTimes;
     std::vector<std::chrono::nanoseconds> receiveTimes;
-    std::map<FrameStatus, std::vector<LinFrame>> receivedFrames;
+    std::map<LinFrameStatus, std::vector<LinFrame>> receivedFrames;
 };
 
 struct LinNode
@@ -133,7 +133,7 @@ struct LinNode
 
     ILinController* controller{nullptr};
     std::string _name;
-    ControllerConfig _controllerConfig;
+    LinControllerConfig _controllerConfig;
     TestResult _result;
     IParticipant* _participant{nullptr};
 };
@@ -156,7 +156,7 @@ public:
 
     void doAction(std::chrono::nanoseconds now)
     {
-        if (controller->Status() != ControllerStatus::Operational)
+        if (controller->Status() != LinControllerStatus::Operational)
             return;
 
         schedule.ExecuteTask(now);
@@ -166,59 +166,59 @@ public:
     {
         LinFrame frame;
         frame.id = 16;
-        frame.checksumModel = ChecksumModel::Classic;
+        frame.checksumModel = LinChecksumModel::Classic;
         frame.dataLength = 6;
         frame.data = std::array<uint8_t, 8>{1, 6, 1, 6, 1, 6, 1, 6};
 
         _result.sendTimes.push_back(now);
-        controller->SendFrame(frame, FrameResponseType::MasterResponse);
+        controller->SendFrame(frame, LinFrameResponseType::MasterResponse);
     }
         
     void SendFrame_17(std::chrono::nanoseconds now)
     {
         LinFrame frame;
         frame.id = 17;
-        frame.checksumModel = ChecksumModel::Classic;
+        frame.checksumModel = LinChecksumModel::Classic;
         frame.dataLength = 6;
         frame.data = std::array<uint8_t, 8>{1,7,1,7,1,7,1,7};
 
         _result.sendTimes.push_back(now);
-        controller->SendFrame(frame, FrameResponseType::MasterResponse);
+        controller->SendFrame(frame, LinFrameResponseType::MasterResponse);
     }
 
     void SendFrame_18(std::chrono::nanoseconds now)
     {
         LinFrame frame;
         frame.id = 18;
-        frame.checksumModel = ChecksumModel::Enhanced;
+        frame.checksumModel = LinChecksumModel::Enhanced;
         frame.dataLength = 8;
         frame.data = std::array<uint8_t, 8>{0};
 
         _result.sendTimes.push_back(now);
-        controller->SendFrame(frame, FrameResponseType::MasterResponse);
+        controller->SendFrame(frame, LinFrameResponseType::MasterResponse);
     }
 
     void SendFrame_19(std::chrono::nanoseconds now)
     {
         LinFrame frame;
         frame.id = 19;
-        frame.checksumModel = ChecksumModel::Classic;
+        frame.checksumModel = LinChecksumModel::Classic;
         frame.dataLength = 8;
         frame.data = std::array<uint8_t, 8>{0};
 
         _result.sendTimes.push_back(now);
-        controller->SendFrame(frame, FrameResponseType::MasterResponse);
+        controller->SendFrame(frame, LinFrameResponseType::MasterResponse);
     }
 
     void SendFrame_34(std::chrono::nanoseconds now)
     {
         LinFrame frame;
         frame.id = 34;
-        frame.checksumModel = ChecksumModel::Enhanced;
+        frame.checksumModel = LinChecksumModel::Enhanced;
         frame.dataLength = 6;
 
         _result.sendTimes.push_back(now);
-        controller->SendFrame(frame, FrameResponseType::SlaveResponse);
+        controller->SendFrame(frame, LinFrameResponseType::SlaveResponse);
     }
 
     void GoToSleep()
@@ -268,7 +268,7 @@ public:
 
         for (const auto& response: _controllerConfig.frameResponses)
         {
-            if (linController->Status() == ControllerStatus::Sleep)
+            if (linController->Status() == LinControllerStatus::Sleep)
             {
               _result.numberReceivedInSleep++;
             }
@@ -302,52 +302,52 @@ private:
 
 auto MakeControllerConfig(const std::string& participantName)
 {
-    ControllerConfig config;
-    config.controllerMode = ControllerMode::Master;
+    LinControllerConfig config;
+    config.controllerMode = LinControllerMode::Master;
     config.baudRate = 20'000;
 
     if (participantName == "LinSlave")
     {
-        config.controllerMode = ControllerMode::Slave;
-        // Configure LIN Controller to receive a FrameResponse for LIN ID 16
-        FrameResponse response_16;
+        config.controllerMode = LinControllerMode::Slave;
+        // Configure LIN Controller to receive a LinFrameResponse for LIN ID 16
+        LinFrameResponse response_16;
         response_16.frame.id = 16;
-        response_16.frame.checksumModel = ChecksumModel::Classic;
+        response_16.frame.checksumModel = LinChecksumModel::Classic;
         response_16.frame.dataLength = 6;
-        response_16.responseMode = FrameResponseMode::Rx;
+        response_16.responseMode = LinFrameResponseMode::Rx;
 
-        // Configure LIN Controller to receive a FrameResponse for LIN ID 17
-        //  - This FrameResponseMode::Unused causes the controller to ignore
+        // Configure LIN Controller to receive a LinFrameResponse for LIN ID 17
+        //  - This LinFrameResponseMode::Unused causes the controller to ignore
         //    this message and not trigger a callback. This is also the default.
-        FrameResponse response_17;
+        LinFrameResponse response_17;
         response_17.frame.id = 17;
-        response_17.frame.checksumModel = ChecksumModel::Classic;
+        response_17.frame.checksumModel = LinChecksumModel::Classic;
         response_17.frame.dataLength = 6;
-        response_17.responseMode = FrameResponseMode::Unused;
+        response_17.responseMode = LinFrameResponseMode::Unused;
 
         // Configure LIN Controller to receive LIN ID 18
-        //  - ChecksumModel does not match with master --> Receive with LIN_RX_ERROR
-        FrameResponse response_18;
+        //  - LinChecksumModel does not match with master --> Receive with LIN_RX_ERROR
+        LinFrameResponse response_18;
         response_18.frame.id = 18;
-        response_18.frame.checksumModel = ChecksumModel::Classic;
+        response_18.frame.checksumModel = LinChecksumModel::Classic;
         response_18.frame.dataLength = 8;
-        response_18.responseMode = FrameResponseMode::Rx;
+        response_18.responseMode = LinFrameResponseMode::Rx;
 
         // Configure LIN Controller to receive LIN ID 19
         //  - dataLength does not match with master --> Receive with LIN_RX_ERROR
-        FrameResponse response_19;
+        LinFrameResponse response_19;
         response_19.frame.id = 19;
-        response_19.frame.checksumModel = ChecksumModel::Enhanced;
+        response_19.frame.checksumModel = LinChecksumModel::Enhanced;
         response_19.frame.dataLength = 1;
-        response_19.responseMode = FrameResponseMode::Rx;
+        response_19.responseMode = LinFrameResponseMode::Rx;
 
-        // Configure LIN Controller to send a FrameResponse for LIN ID 34
-        FrameResponse response_34;
+        // Configure LIN Controller to send a LinFrameResponse for LIN ID 34
+        LinFrameResponse response_34;
         response_34.frame.id = 34;
-        response_34.frame.checksumModel = ChecksumModel::Enhanced;
+        response_34.frame.checksumModel = LinChecksumModel::Enhanced;
         response_34.frame.dataLength = 6;
         response_34.frame.data = std::array<uint8_t, 8>{3, 4, 3, 4, 3, 4, 3, 4};
-        response_34.responseMode = FrameResponseMode::TxUnconditional;
+        response_34.responseMode = LinFrameResponseMode::TxUnconditional;
 
         config.frameResponses.push_back(response_16);
         config.frameResponses.push_back(response_17);
@@ -460,23 +460,23 @@ TEST_F(LinITest, sync_lin_simulation)
     auto&& slaveRecvFrames = linNodes.at(1)->_result.receivedFrames;
 
     // 4x acks with TX_OK for id 16,17,18,19 on master
-    EXPECT_EQ(masterRecvFrames[FrameStatus::LIN_TX_OK].size(), 4); 
+    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 4); 
     // Only id 16 is valid for slave and received with LIN_RX_OK and given data
-    EXPECT_EQ(slaveRecvFrames[FrameStatus::LIN_RX_OK].size(), 1);
-    EXPECT_EQ(slaveRecvFrames[FrameStatus::LIN_RX_OK][0].id, 16);
-    EXPECT_EQ(slaveRecvFrames[FrameStatus::LIN_RX_OK][0].data, (std::array<uint8_t, 8>{1, 6, 1, 6, 1, 6, 1, 6}));
+    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 1);
+    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 16);
+    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][0].data, (std::array<uint8_t, 8>{1, 6, 1, 6, 1, 6, 1, 6}));
     
-    // id 17: sent with FrameResponseMode::Unused and should not trigger the reception callback for slaves
-    // id 18: ChecksumModel does not match with master --> Receive with LIN_RX_ERROR
+    // id 17: sent with LinFrameResponseMode::Unused and should not trigger the reception callback for slaves
+    // id 18: LinChecksumModel does not match with master --> Receive with LIN_RX_ERROR
     // id 19: dataLength does not match with master --> Receive with LIN_RX_ERROR
-    EXPECT_EQ(slaveRecvFrames[FrameStatus::LIN_RX_ERROR].size(), 2);
+    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_ERROR].size(), 2);
 
     // id 34: sent by slave (slave should see TX, master should see RX with given data)
-    EXPECT_EQ(slaveRecvFrames[FrameStatus::LIN_TX_OK].size(), 1);
-    EXPECT_EQ(slaveRecvFrames[FrameStatus::LIN_TX_OK][0].id, 34);
-    EXPECT_EQ(masterRecvFrames[FrameStatus::LIN_RX_OK].size(), 1);
-    EXPECT_EQ(masterRecvFrames[FrameStatus::LIN_RX_OK][0].id, 34);
-    EXPECT_EQ(masterRecvFrames[FrameStatus::LIN_RX_OK][0].data, (std::array<uint8_t, 8>{3, 4, 3, 4, 3, 4, 3, 4}));
+    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 1);
+    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_TX_OK][0].id, 34);
+    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 1);
+    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 34);
+    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_RX_OK][0].data, (std::array<uint8_t, 8>{3, 4, 3, 4, 3, 4, 3, 4}));
 }
 
 } //end namespace

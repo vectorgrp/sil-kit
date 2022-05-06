@@ -16,8 +16,8 @@ namespace lin {
 *  Used by the Participant, implemented by the LinSimulator
 */
 class IIbToLinSimulator
-    : public mw::IIbReceiver<SendFrameRequest, SendFrameHeaderRequest, WakeupPulse, ControllerConfig, ControllerStatusUpdate, FrameResponseUpdate>
-    , public mw::IIbSender<Transmission, WakeupPulse, ControllerConfig, FrameResponseUpdate>
+    : public mw::IIbReceiver<LinSendFrameRequest, LinSendFrameHeaderRequest, LinWakeupPulse, LinControllerConfig, LinControllerStatusUpdate, LinFrameResponseUpdate>
+    , public mw::IIbSender<LinTransmission, LinWakeupPulse, LinControllerConfig, LinFrameResponseUpdate>
 {
 public:
     virtual ~IIbToLinSimulator() = default;

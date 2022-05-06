@@ -1,8 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Master Setup
-ControllerConfig masterConfig;
-masterConfig.controllerMode = ControllerMode::Master;
+LinControllerConfig masterConfig;
+masterConfig.controllerMode = LinControllerMode::Master;
 masterConfig.baudRate = 20000;
 
 master->Init(masterConfig);
@@ -13,8 +13,8 @@ master->AddFrameResponseUpdateHandler(master_FrameResponseUpdateHandler);
 
 // ------------------------------------------------------------
 // Slave Setup
-ControllerConfig slaveConfig;
-slaveConfig.controllerMode = ControllerMode::Slave;
+LinControllerConfig slaveConfig;
+slaveConfig.controllerMode = LinControllerMode::Slave;
 slaveConfig.baudRate = 20000;
 
 slave->Init(slaveConfig);
@@ -22,16 +22,16 @@ slave->Init(slaveConfig);
 // Setup a TX Response for LIN ID 0x11
 LinFrame slaveFrame;
 slaveFrame.id = 0x11;
-slaveFrame.checksumModel = ChecksumModel::Enhanced;
+slaveFrame.checksumModel = LinChecksumModel::Enhanced;
 slaveFrame.dataLength = 8;
 slaveFrame.data = {'S', 'L', 'A', 'V', 'E', 0, 0, 0};
 
-slave->SetFrameResponse(slaveFrame, FrameResponseMode::TxUnconditional);
+slave->SetFrameResponse(slaveFrame, LinFrameResponseMode::TxUnconditional);
 
 // SetFrameResponse will result in a callback to the SlaveFrameResponseUpdateHandler:
-FrameResponse responseUpdate;
+LinFrameResponse responseUpdate;
 responseUpdate.frame = slaveFrame;
-responseUpdate.responseMode = FrameResponseMode::TxUnconditional;
+responseUpdate.responseMode = LinFrameResponseMode::TxUnconditional;
 master_FrameResponseUpdateHandler(master, LinFrameResponseUpdateEvent{ slaveAddress, responseUpdate });
 
 // NB: SlaveFrameResponseUpdateHandler is not triggered when
@@ -41,7 +41,7 @@ LinFrame masterFrame;
 masterFrame.id = 0x10;
 masterFrame.dataLength = 8;
 masterFrame.data = {'M', 'A', 'S', 'T', 'E', 'R', 0, 0};
-masterFrame.checksumModel = ChecksumModel::Enhanced;
+masterFrame.checksumModel = LinChecksumModel::Enhanced;
 
-master->SetFrameResponse(masterFrame, FrameResponseMode::TxUnconditional);
+master->SetFrameResponse(masterFrame, LinFrameResponseMode::TxUnconditional);
 // master_SlaveFrameResponseUpdate handler is not invoked.

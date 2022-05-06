@@ -221,7 +221,7 @@ void Master_WakeupHandler(void* context, ib_Lin_Controller* controller, const ib
 
     if ( status != ib_Lin_ControllerStatus_Sleep)
     {
-        printf("WARNING: Received Wakeup pulse while ControllerStatus is %d.\n", status);
+        printf("WARNING: Received Wakeup pulse while ib_Lin_ControllerStatus is %d.\n", status);
 
     }
     printf(">> Wakeup pulse received @%" PRIu64 "ms; direction=%d\n", wakeUpEvent->timestamp / 1000000,
@@ -308,7 +308,7 @@ void Slave_InitCallback(void* context, ib_Participant* cbParticipant, struct ib_
 {
     printf("Initializing LinSlave\n");
 
-    // Configure LIN Controller to receive a FrameResponse for LIN ID 16
+    // Configure LIN Controller to receive a LinFrameResponse for LIN ID 16
     ib_Lin_FrameResponse response_16;
     response_16.interfaceId = ib_InterfaceIdentifier_LinFrameResponse;
     ib_Lin_Frame frame16;
@@ -319,7 +319,7 @@ void Slave_InitCallback(void* context, ib_Participant* cbParticipant, struct ib_
     response_16.frame = &frame16;
     response_16.responseMode = ib_Lin_FrameResponseMode_Rx;
 
-    // Configure LIN Controller to receive a FrameResponse for LIN ID 17
+    // Configure LIN Controller to receive a LinFrameResponse for LIN ID 17
     //  - This ib_Lin_FrameResponseMode_Unused causes the controller to ignore
     //    this message and not trigger a callback. This is also the default.
     ib_Lin_FrameResponse response_17;
@@ -333,7 +333,7 @@ void Slave_InitCallback(void* context, ib_Participant* cbParticipant, struct ib_
     response_17.responseMode = ib_Lin_FrameResponseMode_Unused;
 
     // Configure LIN Controller to receive LIN ID 18
-    //  - ChecksumModel does not match with master --> Receive with LIN_RX_ERROR
+    //  - LinChecksumModel does not match with master --> Receive with LIN_RX_ERROR
     ib_Lin_FrameResponse response_18;
     response_18.interfaceId = ib_InterfaceIdentifier_LinFrameResponse;
     ib_Lin_Frame frame18;
@@ -356,7 +356,7 @@ void Slave_InitCallback(void* context, ib_Participant* cbParticipant, struct ib_
     response_19.frame = &frame19;
     response_19.responseMode = ib_Lin_FrameResponseMode_Rx;
 
-    // Configure LIN Controller to send a FrameResponse for LIN ID 34
+    // Configure LIN Controller to send a LinFrameResponse for LIN ID 34
     ib_Lin_FrameResponse response_34;
     response_34.interfaceId = ib_InterfaceIdentifier_LinFrameResponse;
 

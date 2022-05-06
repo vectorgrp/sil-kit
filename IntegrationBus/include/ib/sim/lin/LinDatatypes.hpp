@@ -27,7 +27,7 @@ using LinIdT = uint8_t;
  *
  * *AUTOSAR Name:* Lin_FrameCsModelType 
  */
-enum class ChecksumModel : uint8_t
+enum class LinChecksumModel : uint8_t
 {
     Undefined = 0,//!< Undefined / unconfigured checksum model
     Enhanced = 1, //!< Enhanced checksum model
@@ -42,7 +42,7 @@ enum class ChecksumModel : uint8_t
  *
  * *Range:* 1...8
  */
-using DataLengthT = uint8_t;
+using LinDataLengthT = uint8_t;
 
 /*! \brief A LIN LinFrame
 *
@@ -53,8 +53,8 @@ using DataLengthT = uint8_t;
 struct LinFrame
 {
     LinIdT                 id{0}; //!< Lin Identifier
-    ChecksumModel          checksumModel{ChecksumModel::Undefined}; //!< Checksum Model
-    DataLengthT            dataLength{0}; //!< Data length
+    LinChecksumModel          checksumModel{LinChecksumModel::Undefined}; //!< Checksum Model
+    LinDataLengthT            dataLength{0}; //!< Data length
     std::array<uint8_t, 8> data{}; //!< The actual payload
 };
 
@@ -69,7 +69,7 @@ inline auto GoToSleepFrame() -> LinFrame;
  *
  * *AUTOSAR Name:* Lin_FrameResponseType
  */ 
-enum class FrameResponseType : uint8_t
+enum class LinFrameResponseType : uint8_t
 {
     //! Response is generated from this (master) node 
     MasterResponse = 0,
@@ -85,34 +85,34 @@ enum class FrameResponseType : uint8_t
 };
 
 //! \brief Controls the behavior of a LIN Slave task for a particular LIN ID
-enum class FrameResponseMode : uint8_t
+enum class LinFrameResponseMode : uint8_t
 {
-    //! The FrameResponse corresponding to the ID is neither received nor
+    //! The LinFrameResponse corresponding to the ID is neither received nor
     //! transmitted by the LIN slave.
     Unused = 0,
 
-    //! The FrameResponse corresponding to the ID is received by the LIN slave.
+    //! The LinFrameResponse corresponding to the ID is received by the LIN slave.
     Rx = 1,
 
-    //! The FrameResponse corresponding to the ID is transmitted unconditionally
+    //! The LinFrameResponse corresponding to the ID is transmitted unconditionally
     //! by the LIN slave.
     TxUnconditional = 2
 };
 
 /*! \brief Configuration data for a LIN Slave task for a particular LIN ID.
  */
-struct FrameResponse
+struct LinFrameResponse
 {
     /*! frame must provide the LIN \ref LinIdT for which the response is
      *  configured.
      *
-     * If responseMode is FrameResponseMode::TxUnconditional, the
+     * If responseMode is LinFrameResponseMode::TxUnconditional, the
      * frame data is used for the transaction.
      */
     LinFrame frame;
-    //! Determines if the FrameResponse is used for transmission
+    //! Determines if the LinFrameResponse is used for transmission
     //! (TxUnconditional), reception (Rx) or ignored (Unused).
-    FrameResponseMode responseMode{FrameResponseMode::Unused};
+    LinFrameResponseMode responseMode{LinFrameResponseMode::Unused};
 };
 
 /*! \brief The state of a LIN transmission
@@ -128,7 +128,7 @@ struct FrameResponse
  * returned by the API service Lin_GetStatus().
  *
  */
-enum class FrameStatus : uint8_t
+enum class LinFrameStatus : uint8_t
 {
     /*! (currently not in use)
      *
@@ -205,9 +205,9 @@ enum class FrameStatus : uint8_t
 
 /*! Used to configure a LIN controller as a master or slave.
  *
- *  Cf. \ref ControllerConfig, \ref ILinController::Init()
+ *  Cf. \ref LinControllerConfig, \ref ILinController::Init()
  */
-enum class ControllerMode : uint8_t
+enum class LinControllerMode : uint8_t
 {
     /*! The LIN controller has not been configured yet and is
      *  inactive. This does not indicate sleep mode.
@@ -223,33 +223,33 @@ enum class ControllerMode : uint8_t
  *
  * *Range:* 200...20'000 Bd
  */
-using BaudRateT = uint32_t;
+using LinBaudRateT = uint32_t;
 
 
 /*! Configuration data to initialize the LIN Controller
- *  Cf.: \ref ILinController::Init(ControllerConfig config);
+ *  Cf.: \ref ILinController::Init(LinControllerConfig config);
  */
-struct ControllerConfig
+struct LinControllerConfig
 {
     //! Configure as LIN master or LIN slave
-    ControllerMode controllerMode{ControllerMode::Inactive};
+    LinControllerMode controllerMode{LinControllerMode::Inactive};
     /*! The operational baud rate of the controller. Only relevant for VIBE
      * simulation.
      */
-    BaudRateT baudRate{0};
-    /*! Optional FrameResponse configuration.
+    LinBaudRateT baudRate{0};
+    /*! Optional LinFrameResponse configuration.
      *  
      * FrameResponses can also be configured at a later point using
      * ILinController::SetFrameResponse() and
      * ILinController::SetFrameResponses().
      */
-    std::vector<FrameResponse> frameResponses; 
+    std::vector<LinFrameResponse> frameResponses; 
 };
 
 /*! The operational state of the controller, i.e., operational or
  *  sleeping.
  */
-enum class ControllerStatus
+enum class LinControllerStatus
 {
     //! The controller state is not yet known.
     Unknown = 0,
@@ -274,7 +274,7 @@ struct LinFrameStatusEvent
 {
     std::chrono::nanoseconds timestamp; //!< Time of the event.
     LinFrame frame;
-    FrameStatus status;
+    LinFrameStatus status;
 };
 
 //! \brief A LIN wakeup event delivered in the \ref ILinController::WakeupHandler.
@@ -292,61 +292,61 @@ struct LinGoToSleepEvent
 
 /*! \brief A LIN frame response update event delivered in the \ref ILinController::FrameResponseUpdateHandler
 *
-* The event is received for every FrameResponse whenever a ControllerConfig is received or a controller calls
+* The event is received for every LinFrameResponse whenever a LinControllerConfig is received or a controller calls
 * \ref ILinController::SetFrameResponses. This event is mainly for diagnostic purposes and contains no timestamp.
 * 
 */
 struct LinFrameResponseUpdateEvent
 {
     const std::string& senderID; //!< String identifier of the controller providing the update.
-    const FrameResponse& frameResponse; //!< The frameResponse of the update.
+    const LinFrameResponse& frameResponse; //!< The frameResponse of the update.
 };
 
 // ================================================================================
 //  Messages used at the Participant Interface
 // ================================================================================
 //! \brief Data type representing a finished LIN transmission, independent of success or error.
-struct Transmission
+struct LinTransmission
 {
     std::chrono::nanoseconds timestamp; //!< Time at the end of the transmission. Only valid in VIBE simulation.
     LinFrame frame;                        //!< The transmitted frame
-    FrameStatus status;                 //!< The status of the transmitted frame
+    LinFrameStatus status;                 //!< The status of the transmitted frame
 };
 
 /*! \brief Data type representing a request to perform an AUTOSAR SendFrame operation.
  *
  * Sent from LinController proxies to the VIBE NetworkSimulator.
  */
-struct SendFrameRequest
+struct LinSendFrameRequest
 {
     LinFrame frame;                    //!< Provide the LIN ID, checksum model, expected data length and optional data.
-    FrameResponseType responseType; //!< Determines whether to provide a frame response or not.
+    LinFrameResponseType responseType; //!< Determines whether to provide a frame response or not.
 };
 
 /*! \brief Data type representing a request to perform an non-AUTOSAR send operation.
 *
 * Sent from LinController proxies to the VIBE NetworkSimulator.
 */
-struct SendFrameHeaderRequest
+struct LinSendFrameHeaderRequest
 {
     LinIdT id; //!< The LinIdT of the header to be transmitted
 };
 
-//! \brief Data type used to inform other LIN participants (LIN controllers and VIBE Simulator) about changed FrameResponse data.
-struct FrameResponseUpdate
+//! \brief Data type used to inform other LIN participants (LIN controllers and VIBE Simulator) about changed LinFrameResponse data.
+struct LinFrameResponseUpdate
 {
-    std::vector<FrameResponse> frameResponses; //!< Vector of new FrameResponses.
+    std::vector<LinFrameResponse> frameResponses; //!< Vector of new FrameResponses.
 };
 
-//! \brief Data type used to inform other LIN participants (LIN controllers and VIBE Simulator) about changed ControllerStatus.
-struct ControllerStatusUpdate
+//! \brief Data type used to inform other LIN participants (LIN controllers and VIBE Simulator) about changed LinControllerStatus.
+struct LinControllerStatusUpdate
 {
     std::chrono::nanoseconds timestamp; //!< Time of the controller status change.
-    ControllerStatus status;            //!< The new controller status
+    LinControllerStatus status;            //!< The new controller status
 };
 
 //! \brief Data type representing a LIN WakeUp pulse.
-struct WakeupPulse
+struct LinWakeupPulse
 {
     std::chrono::nanoseconds timestamp; //!< Time of the WakeUp pulse. Only valid in VIBE Simulation.
     TransmitDirection direction; //!< The direction of the wakeup pulse.
@@ -361,7 +361,7 @@ inline auto GoToSleepFrame() -> LinFrame
 {
     LinFrame frame;
     frame.id = 0x3c;
-    frame.checksumModel = ChecksumModel::Classic;
+    frame.checksumModel = LinChecksumModel::Classic;
     frame.dataLength = 8;
     frame.data = {0x0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
     return frame;
@@ -374,50 +374,50 @@ inline bool operator==(const LinFrame& lhs, const LinFrame& rhs)
         && lhs.dataLength == rhs.dataLength
         && lhs.data == rhs.data;
 }
-//! \brief operator== for SendFrameRequest
-inline bool operator==(const SendFrameRequest& lhs, const SendFrameRequest& rhs)
+//! \brief operator== for LinSendFrameRequest
+inline bool operator==(const LinSendFrameRequest& lhs, const LinSendFrameRequest& rhs)
 {
     return lhs.frame == rhs.frame
         && lhs.responseType == rhs.responseType;
 }
-//! \brief operator== for SendFrameHeaderRequest
-inline bool operator==(const SendFrameHeaderRequest& lhs, const SendFrameHeaderRequest& rhs)
+//! \brief operator== for LinSendFrameHeaderRequest
+inline bool operator==(const LinSendFrameHeaderRequest& lhs, const LinSendFrameHeaderRequest& rhs)
 {
     return lhs.id == rhs.id;
 }
-//! \brief operator== for Transmission
-inline bool operator==(const Transmission& lhs, const Transmission& rhs)
+//! \brief operator== for LinTransmission
+inline bool operator==(const LinTransmission& lhs, const LinTransmission& rhs)
 {
     return lhs.timestamp == rhs.timestamp
         && lhs.frame == rhs.frame
         && lhs.status == rhs.status;
 }
-//! \brief operator== for WakeupPulse
-inline bool operator==(const WakeupPulse& lhs, const WakeupPulse& rhs)
+//! \brief operator== for LinWakeupPulse
+inline bool operator==(const LinWakeupPulse& lhs, const LinWakeupPulse& rhs)
 {
     return lhs.timestamp == rhs.timestamp;
 }
-//! \brief operator== for FrameResponse
-inline bool operator==(const FrameResponse& lhs, const FrameResponse& rhs)
+//! \brief operator== for LinFrameResponse
+inline bool operator==(const LinFrameResponse& lhs, const LinFrameResponse& rhs)
 {
     return lhs.frame == rhs.frame
         && lhs.responseMode == rhs.responseMode;
 }
-//! \brief operator== for ControllerConfig
-inline bool operator==(const ControllerConfig& lhs, const ControllerConfig& rhs)
+//! \brief operator== for LinControllerConfig
+inline bool operator==(const LinControllerConfig& lhs, const LinControllerConfig& rhs)
 {
     return lhs.controllerMode == rhs.controllerMode
         && lhs.baudRate == rhs.baudRate
         && lhs.frameResponses == rhs.frameResponses;
 }
-//! \brief operator== for ControllerStatusUpdate
-inline bool operator==(const ControllerStatusUpdate& lhs, const ControllerStatusUpdate& rhs)
+//! \brief operator== for LinControllerStatusUpdate
+inline bool operator==(const LinControllerStatusUpdate& lhs, const LinControllerStatusUpdate& rhs)
 {
     return lhs.timestamp == rhs.timestamp
         && lhs.status == rhs.status;
 }
-//! \brief operator== for FrameResponseUpdate
-inline bool operator==(const FrameResponseUpdate& lhs, const FrameResponseUpdate& rhs)
+//! \brief operator== for LinFrameResponseUpdate
+inline bool operator==(const LinFrameResponseUpdate& lhs, const LinFrameResponseUpdate& rhs)
 {
     return lhs.frameResponses == rhs.frameResponses;
 }

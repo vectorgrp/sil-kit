@@ -29,14 +29,14 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinFrame
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const SendFrameRequest& frame)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinSendFrameRequest& frame)
 {
     buffer
         << frame.frame
         << frame.responseType;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, SendFrameRequest& frame)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinSendFrameRequest& frame)
 {
     buffer
         >> frame.frame
@@ -44,19 +44,19 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, SendFram
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const SendFrameHeaderRequest& header)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinSendFrameHeaderRequest& header)
 {
     buffer
         << header.id;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, SendFrameHeaderRequest& header)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinSendFrameHeaderRequest& header)
 {
     buffer
         >> header.id;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Transmission& transmission)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinTransmission& transmission)
 {
     buffer
         << transmission.timestamp
@@ -64,7 +64,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Tr
         << transmission.status;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, Transmission& transmission)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinTransmission& transmission)
 {
     buffer
         >> transmission.timestamp
@@ -73,14 +73,14 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, Transmis
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const WakeupPulse& pulse)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinWakeupPulse& pulse)
 {
     buffer
         << pulse.timestamp
         << pulse.direction;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, WakeupPulse& pulse)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinWakeupPulse& pulse)
 {
     buffer
         >> pulse.timestamp
@@ -88,14 +88,14 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, WakeupPu
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FrameResponse& response)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinFrameResponse& response)
 {
     buffer
         << response.frame
         << response.responseMode;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FrameResponse& response)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinFrameResponse& response)
 {
     buffer
         >> response.frame
@@ -103,7 +103,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FrameRes
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const ControllerConfig& config)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinControllerConfig& config)
 {
     buffer
         << config.controllerMode
@@ -111,7 +111,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Co
         << config.frameResponses;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, ControllerConfig& config)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinControllerConfig& config)
 {
     buffer
         >> config.controllerMode
@@ -120,14 +120,14 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, Controll
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const ControllerStatusUpdate& msg)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinControllerStatusUpdate& msg)
 {
     buffer
         << msg.timestamp
         << msg.status;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, ControllerStatusUpdate& msg)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinControllerStatusUpdate& msg)
 {
     buffer
         >> msg.timestamp
@@ -135,13 +135,13 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, Controll
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FrameResponseUpdate& update)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinFrameResponseUpdate& update)
 {
     buffer
         << update.frameResponses;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FrameResponseUpdate& update)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinFrameResponseUpdate& update)
 {
     buffer
         >> update.frameResponses;

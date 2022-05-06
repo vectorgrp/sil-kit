@@ -1,8 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Slave Setup
-ControllerConfig slaveConfig;
-slaveConfig.controllerMode = ControllerMode::Slave;
+LinControllerConfig slaveConfig;
+slaveConfig.controllerMode = LinControllerMode::Slave;
 slaveConfig.baudRate = 20000;
 
 slave->Init(slaveConfig);
@@ -21,8 +21,8 @@ slave->AddGoToSleepHandler(slave_GoToSleepHandler);
 
 // ------------------------------------------------------------
 // Master Setup
-ControllerConfig masterConfig;
-masterConfig.controllerMode = ControllerMode::Master;
+LinControllerConfig masterConfig;
+masterConfig.controllerMode = LinControllerMode::Master;
 masterConfig.baudRate = 20000;
 
 master->Init(masterConfig);
@@ -38,10 +38,10 @@ master->AddFrameStatusHandler(master_FrameStatusHandler);
 master->GoToSleep();
 
 // The master will enter sleep state immediately, i.e., the following condition is true:
-assert(master->Status() == ControllerStatus::Sleep);
+assert(master->Status() == LinControllerStatus::Sleep);
 
 // The slave will receive the go-to-sleep frame and trigger the callback:
 slave_GoToSleepHandler(goToSleepEvent);
 
 // the registered callback sets sleep state for the slave, after which also the slave is in sleep state:
-assert(master->Status() == ControllerStatus::Sleep);
+assert(master->Status() == LinControllerStatus::Sleep);

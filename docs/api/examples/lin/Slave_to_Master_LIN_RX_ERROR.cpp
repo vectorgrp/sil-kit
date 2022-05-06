@@ -1,8 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Slave 1 Setup (Sender)
-ControllerConfig slaveConfig;
-slaveConfig.controllerMode = ControllerMode::Slave;
+LinControllerConfig slaveConfig;
+slaveConfig.controllerMode = LinControllerMode::Slave;
 slaveConfig.baudRate = 20000;
 
 slave1->Init(slaveConfig);
@@ -15,16 +15,16 @@ slave1->AddFrameStatusHandler(slave1_FrameStatusHandler);
 // Setup a TX Response for LIN ID 0x11
 LinFrame slave1Frame;
 slave1Frame.id = 0x11;
-slave1Frame.checksumModel = ChecksumModel::Enhanced;
+slave1Frame.checksumModel = LinChecksumModel::Enhanced;
 slave1Frame.dataLength = 8;
 slave1Frame.data = {'S', 'L', 'A', 'V', 'E', '1', 0, 0};
 
-slave1->SetFrameResponse(slave1Frame, FrameResponseMode::TxUnconditional);
+slave1->SetFrameResponse(slave1Frame, LinFrameResponseMode::TxUnconditional);
 
 // ------------------------------------------------------------
 // Slave 2 Setup (Second Sender)
-ControllerConfig slave2Config;
-slave2Config.controllerMode = ControllerMode::Slave;
+LinControllerConfig slave2Config;
+slave2Config.controllerMode = LinControllerMode::Slave;
 slave2Config.baudRate = 20000;
 
 slave2->Init(slave2Config);
@@ -37,16 +37,16 @@ slave2->AddFrameStatusHandler(slave2_FrameStatusHandler);
 // Also setup a TX Response for LIN ID 0x11
 LinFrame slave2Frame;
 slave2Frame.id = 0x11;
-slave2Frame.checksumModel = ChecksumModel::Enhanced;
+slave2Frame.checksumModel = LinChecksumModel::Enhanced;
 slave2Frame.dataLength = 8;
 slave2Frame.data = {'S', 'L', 'A', 'V', 'E', '2', 0, 0};
 
-slave2->SetFrameResponse(slave2Frame, FrameResponseMode::TxUnconditional);
+slave2->SetFrameResponse(slave2Frame, LinFrameResponseMode::TxUnconditional);
 
 // ------------------------------------------------------------
 // Master Setup
-ControllerConfig masterConfig;
-masterConfig.controllerMode = ControllerMode::Master;
+LinControllerConfig masterConfig;
+masterConfig.controllerMode = LinControllerMode::Master;
 masterConfig.baudRate = 20000;
 
 master->Init(masterConfig);
@@ -62,15 +62,15 @@ master->AddFrameStatusHandler(master_FrameStatusHandler);
 // slave1 and slave2 have done so.
 LinFrame frameRequest;
 frameRequest.id = 0x11;
-frameRequest.checksumModel = ChecksumModel::Enhanced;
+frameRequest.checksumModel = LinChecksumModel::Enhanced;
 
 // Use AUTOSAR interface to initiate the transmission.
-master->SendFrame(frameRequest, FrameResponseType::SlaveResponse);
+master->SendFrame(frameRequest, LinFrameResponseType::SlaveResponse);
 
 // ------------------------------------------------------------
 // The following callbacks will be triggered:
 //  - LIN_RX_ERROR for the master, due to the collision 
-master_FrameStatusHandler(master, LinFrameStatusEvent{ timeEndOfFrame, frameRequest, FrameStatus::LIN_RX_ERROR });
+master_FrameStatusHandler(master, LinFrameStatusEvent{ timeEndOfFrame, frameRequest, LinFrameStatus::LIN_RX_ERROR });
 //  - LIN_TX_ERROR for both slaves
-slave1_FrameStatusHandler(slave1, LinFrameStatusEvent{timeEndOfFrame, frameRequest, FrameStatus::LIN_TX_ERROR});
-slave2_FrameStatusHandler(slave2, LinFrameStatusEvent{timeEndOfFrame, frameRequest, FrameStatus::LIN_TX_ERROR});
+slave1_FrameStatusHandler(slave1, LinFrameStatusEvent{timeEndOfFrame, frameRequest, LinFrameStatus::LIN_TX_ERROR});
+slave2_FrameStatusHandler(slave2, LinFrameStatusEvent{timeEndOfFrame, frameRequest, LinFrameStatus::LIN_TX_ERROR});

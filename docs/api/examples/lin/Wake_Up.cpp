@@ -12,11 +12,11 @@ master->AddWakeupHandler(master_WakeupHandler);
 slave->Wakeup();
 
 // The slave will immediately enter operational state:
-assert(slave->Status() == ControllerStatus::Operational);
+assert(slave->Status() == LinControllerStatus::Operational);
 
 // The master will receive the wake up pulse and the registered callback is
 // triggered by the controller:
 master_WakeupHandler(LinWakeupEvent{ timestamp, master } );
 
 // the registered callback puts the master back into operational state, i.e.:
-assert(master->Status() == ControllerStatus::Operational);
+assert(master->Status() == LinControllerStatus::Operational);

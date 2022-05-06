@@ -22,6 +22,7 @@ typedef int32_t ib_ReturnCode;
 #define ib_ReturnCode_BUFFERTOOSMALL     ((ib_ReturnCode) 5)
 #define ib_ReturnCode_TIMEOUT            ((ib_ReturnCode) 6)
 #define ib_ReturnCode_UNSUPPORTEDSERVICE ((ib_ReturnCode) 7)
+#define ib_ReturnCode_WRONGSTATE         ((ib_ReturnCode) 8) // Returned on exception ib::StateError (CapiImpl.h)
 
 typedef uint64_t ib_NanosecondsTime;
 

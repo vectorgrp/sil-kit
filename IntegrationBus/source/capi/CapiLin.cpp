@@ -10,32 +10,32 @@
 static void assign(ib::sim::lin::LinFrame& cppFrame, const ib_Lin_Frame* cFrame) 
 {
     cppFrame.id = static_cast<ib::sim::lin::LinIdT>(cFrame->id);
-    cppFrame.checksumModel = static_cast<ib::sim::lin::ChecksumModel>(cFrame->checksumModel);
-    cppFrame.dataLength = static_cast<ib::sim::lin::DataLengthT>(cFrame->dataLength);
+    cppFrame.checksumModel = static_cast<ib::sim::lin::LinChecksumModel>(cFrame->checksumModel);
+    cppFrame.dataLength = static_cast<ib::sim::lin::LinDataLengthT>(cFrame->dataLength);
     memcpy(cppFrame.data.data(), cFrame->data, 8);
 }
 
-static void assign(ib::sim::lin::FrameResponse& cppFrameResponse, const ib_Lin_FrameResponse* cFrameResponse)
+static void assign(ib::sim::lin::LinFrameResponse& cppFrameResponse, const ib_Lin_FrameResponse* cFrameResponse)
 {
     assign(cppFrameResponse.frame, cFrameResponse->frame);
-    cppFrameResponse.responseMode = static_cast<ib::sim::lin::FrameResponseMode>(cFrameResponse->responseMode);
+    cppFrameResponse.responseMode = static_cast<ib::sim::lin::LinFrameResponseMode>(cFrameResponse->responseMode);
 }
 
-static void assign(std::vector<ib::sim::lin::FrameResponse>& cppFrameResponses,
+static void assign(std::vector<ib::sim::lin::LinFrameResponse>& cppFrameResponses,
                    const ib_Lin_FrameResponse* cFrameResponses, uint32_t numFrameResponses)
 {
     for (uint32_t i = 0; i < numFrameResponses; i++)
     {
-        ib::sim::lin::FrameResponse frameResponse;
+        ib::sim::lin::LinFrameResponse frameResponse;
         assign(frameResponse, &cFrameResponses[i]);
         cppFrameResponses.push_back(std::move(frameResponse));
     }
 }
 
-static void assign(ib::sim::lin::ControllerConfig& cppConfig, const ib_Lin_ControllerConfig* cConfig)
+static void assign(ib::sim::lin::LinControllerConfig& cppConfig, const ib_Lin_ControllerConfig* cConfig)
 {
-    cppConfig.baudRate = static_cast<ib::sim::lin::BaudRateT>(cConfig->baudRate);
-    cppConfig.controllerMode = static_cast<ib::sim::lin::ControllerMode>(cConfig->controllerMode);
+    cppConfig.baudRate = static_cast<ib::sim::lin::LinBaudRateT>(cConfig->baudRate);
+    cppConfig.controllerMode = static_cast<ib::sim::lin::LinControllerMode>(cConfig->controllerMode);
     assign(cppConfig.frameResponses, cConfig->frameResponses, cConfig->numFrameResponses);
 }
 
@@ -69,7 +69,7 @@ ib_ReturnCode ib_Lin_Controller_Init(ib_Lin_Controller* controller, const ib_Lin
     CAPI_ENTER
     {
         auto linController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
-        auto cppControllerConfig = ib::sim::lin::ControllerConfig{};
+        auto cppControllerConfig = ib::sim::lin::LinControllerConfig{};
         assign(cppControllerConfig, config);
         linController->Init(cppControllerConfig);
         return ib_ReturnCode_SUCCESS;
@@ -100,7 +100,7 @@ ib_ReturnCode ib_Lin_Controller_SendFrame(ib_Lin_Controller* controller, const i
         auto linController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
         ib::sim::lin::LinFrame cppFrame;
         assign(cppFrame, frame);
-        linController->SendFrame(cppFrame, static_cast<ib::sim::lin::FrameResponseType>(responseType));
+        linController->SendFrame(cppFrame, static_cast<ib::sim::lin::LinFrameResponseType>(responseType));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -129,7 +129,7 @@ ib_ReturnCode ib_Lin_Controller_SetFrameResponse(ib_Lin_Controller* controller,
         ib::sim::lin::LinFrame cppFrame;
         assign(cppFrame, frameResponse->frame);
         linController->SetFrameResponse(cppFrame,
-                                        static_cast<ib::sim::lin::FrameResponseMode>(frameResponse->responseMode));
+                                        static_cast<ib::sim::lin::LinFrameResponseMode>(frameResponse->responseMode));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -144,7 +144,7 @@ ib_ReturnCode ib_Lin_Controller_SetFrameResponses(ib_Lin_Controller* controller,
     CAPI_ENTER
     {
         auto linController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
-        std::vector<ib::sim::lin::FrameResponse> cppFrameResponses;
+        std::vector<ib::sim::lin::LinFrameResponse> cppFrameResponses;
         assign(cppFrameResponses, frameResponses, numFrameResponses);
         linController->SetFrameResponses(std::move(cppFrameResponses));
         return ib_ReturnCode_SUCCESS;

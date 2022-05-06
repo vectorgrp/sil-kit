@@ -35,28 +35,28 @@ LinControllerProxy::LinControllerProxy(mw::IParticipantInternal* participant, IL
     }
 }
 
-void LinControllerProxy::Init(ControllerConfig config)
+void LinControllerProxy::Init(LinControllerConfig config)
 {
     _controllerMode = config.controllerMode;
-    _controllerStatus = ControllerStatus::Operational;
+    _controllerStatus = LinControllerStatus::Operational;
     SendIbMessage(config);
 }
 
-auto LinControllerProxy::Status() const noexcept -> ControllerStatus
+auto LinControllerProxy::Status() const noexcept -> LinControllerStatus
 {
     return _controllerStatus;
 }
 
-void LinControllerProxy::SendFrame(LinFrame frame, FrameResponseType responseType)
+void LinControllerProxy::SendFrame(LinFrame frame, LinFrameResponseType responseType)
 {
-    if (_controllerMode != ControllerMode::Master)
+    if (_controllerMode != LinControllerMode::Master)
     {
         std::string errorMsg{"LinController::SendFrame() must only be called in master mode!"};
         _logger->Error(errorMsg);
         throw std::runtime_error{errorMsg};
     }
 
-    SendFrameRequest sendFrame;
+    LinSendFrameRequest sendFrame;
     sendFrame.frame = frame;
     sendFrame.responseType = responseType;
     SendIbMessage(sendFrame);
@@ -64,73 +64,80 @@ void LinControllerProxy::SendFrame(LinFrame frame, FrameResponseType responseTyp
 
 void LinControllerProxy::SendFrameHeader(LinIdT linId)
 {
-    if (_controllerMode != ControllerMode::Master)
+    if (_controllerMode != LinControllerMode::Master)
     {
         std::string errorMsg{"LinController::SendFrameHeader() must only be called in master mode!"};
         _logger->Error(errorMsg);
         throw std::runtime_error{errorMsg};
     }
-    SendFrameHeaderRequest header;
+    LinSendFrameHeaderRequest header;
     header.id = linId;
     SendIbMessage(header);
 }
 
-void LinControllerProxy::SetFrameResponse(LinFrame frame, FrameResponseMode mode)
+void LinControllerProxy::SetFrameResponse(LinFrame frame, LinFrameResponseMode mode)
 {
-    FrameResponse response;
+    LinFrameResponse response;
     response.frame = std::move(frame);
     response.responseMode = mode;
 
-    std::vector<FrameResponse> responses{1, response};
+    std::vector<LinFrameResponse> responses{1, response};
     SetFrameResponses(std::move(responses));
 }
 
-void LinControllerProxy::SetFrameResponses(std::vector<FrameResponse> responses)
+void LinControllerProxy::SetFrameResponses(std::vector<LinFrameResponse> responses)
 {
-    FrameResponseUpdate frameResponseUpdate;
+    LinFrameResponseUpdate frameResponseUpdate;
     frameResponseUpdate.frameResponses = std::move(responses);
     SendIbMessage(frameResponseUpdate);
 }
 
 void LinControllerProxy::GoToSleep()
 {
-    if (_controllerMode != ControllerMode::Master)
+    if (_controllerMode != LinControllerMode::Master)
     {
-        std::string errorMsg{"LinController::GoToSleep() must only be called in master mode!"};
+        std::string errorMsg{"LinController::GoToSleep() must not be called for slaves or uninitialized masters!"};
         _logger->Error(errorMsg);
-        throw std::logic_error{errorMsg};
+        throw ib::StateError{errorMsg};
     }
 
-    SendFrameRequest gotosleepFrame;
+    LinSendFrameRequest gotosleepFrame;
     gotosleepFrame.frame = GoToSleepFrame();
-    gotosleepFrame.responseType = FrameResponseType::MasterResponse;
+    gotosleepFrame.responseType = LinFrameResponseType::MasterResponse;
 
     SendIbMessage(gotosleepFrame);
    
     // We signal SleepPending to the network simulator, so it will be able
     // to finish sleep frame transmissions before entering Sleep state.
     // cf. AUTOSAR SWS LIN Driver section 7.3.3 [SWS_Lin_00263]
-    SetControllerStatus(ControllerStatus::SleepPending);
+    SetControllerStatus(LinControllerStatus::SleepPending);
     // we don't expose the internal SleepPending state to users
-    _controllerStatus = ControllerStatus::Sleep;
+    _controllerStatus = LinControllerStatus::Sleep;
 }
 
 void LinControllerProxy::GoToSleepInternal()
 {
-    SetControllerStatus(ControllerStatus::Sleep);
+    SetControllerStatus(LinControllerStatus::Sleep);
 }
 
 void LinControllerProxy::Wakeup()
 {
+    if (_controllerMode == LinControllerMode::Inactive)
+    {
+        std::string errorMsg{"LinController::Wakeup() must not be called before LinController::Init()"};
+        _logger->Error(errorMsg);
+        throw ib::StateError{errorMsg};
+    }
+
     // Send without direction, netsim will distribute with correct directions
-    WakeupPulse pulse;
+    LinWakeupPulse pulse;
     SendIbMessage(pulse);
     WakeupInternal();
 }
 
 void LinControllerProxy::WakeupInternal()
 {
-    SetControllerStatus(ControllerStatus::Operational);
+    SetControllerStatus(LinControllerStatus::Operational);
 }
 
 void LinControllerProxy::AddFrameStatusHandler(FrameStatusHandler handler)
@@ -153,7 +160,7 @@ void LinControllerProxy::AddFrameResponseUpdateHandler(FrameResponseUpdateHandle
     _frameResponseUpdateHandler.emplace_back(std::move(handler));
 }
 
-void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const Transmission& msg)
+void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinTransmission& msg)
 {
     auto& frame = msg.frame;
 
@@ -177,7 +184,7 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
         return;
     }
 
-    if (_controllerMode == ControllerMode::Inactive)
+    if (_controllerMode == LinControllerMode::Inactive)
         _logger->Warn("Inactive LinControllerProxy received a transmission.");
 
     _tracer.Trace(ib::sim::TransmitDirection::RX,  msg.timestamp, frame);
@@ -189,21 +196,21 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
     if (frame.id == GoToSleepFrame().id && frame.data == GoToSleepFrame().data)
     {
         // only call GoToSleepHandlers for slaves, i.e., not for the master that issued the GoToSleep command.
-        if (_controllerMode == ControllerMode::Slave)
+        if (_controllerMode == LinControllerMode::Slave)
         {
             CallEach(_goToSleepHandler, this, LinGoToSleepEvent{ msg.timestamp });
         }
     }
 }
 
-void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const WakeupPulse& msg)
+void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const LinWakeupPulse& msg)
 {
     CallEach(_wakeupHandler, this, LinWakeupEvent{ msg.timestamp, msg.direction } );
 }
 
-void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerConfig& msg)
+void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerConfig& msg)
 {
-    // We also receive FrameResponseUpdate from other controllers, although we would not need them in VIBE simulation.
+    // We also receive LinFrameResponseUpdate from other controllers, although we would not need them in VIBE simulation.
     // However, we also want to make users of FrameResponseUpdateHandlers happy when using the VIBE simulation.
     // NOTE: only self-delivered messages are rejected
     if (from->GetServiceDescriptor() == _serviceDescriptor)
@@ -216,9 +223,9 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
     }
 }
 
-void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrameResponseUpdate& msg)
+void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinFrameResponseUpdate& msg)
 {
-    // We also receive FrameResponseUpdate from other controllers, although we would not need them in VIBE simulation.
+    // We also receive LinFrameResponseUpdate from other controllers, although we would not need them in VIBE simulation.
     // However, we also want to make users of FrameResponseUpdateHandlers happy when using the VIBE simulation.
     // NOTE: only self-delivered messages are rejected
     if (from->GetServiceDescriptor() == _serviceDescriptor) return;
@@ -230,13 +237,13 @@ void LinControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* from, const 
     }
 }
 
-void LinControllerProxy::SetControllerStatus(ControllerStatus status)
+void LinControllerProxy::SetControllerStatus(LinControllerStatus status)
 {
-    if (_controllerMode == ControllerMode::Inactive)
+    if (_controllerMode == LinControllerMode::Inactive)
     {
         std::string errorMsg{"LinController::Wakeup()/Sleep() must not be called before LinController::Init()"};
         _logger->Error(errorMsg);
-        throw std::runtime_error{errorMsg};
+        throw ib::StateError{errorMsg};
     }
 
     if (_controllerStatus == status)
@@ -246,7 +253,7 @@ void LinControllerProxy::SetControllerStatus(ControllerStatus status)
 
     _controllerStatus = status;
 
-    ControllerStatusUpdate msg;
+    LinControllerStatusUpdate msg;
     msg.status = status;
 
     SendIbMessage(msg);

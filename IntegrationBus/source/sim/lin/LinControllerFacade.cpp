@@ -18,17 +18,17 @@ LinControllerFacade::LinControllerFacade(mw::IParticipantInternal* participant, 
     _currentController = _linController.get();
 }
 
-void LinControllerFacade::Init(ControllerConfig config)
+void LinControllerFacade::Init(LinControllerConfig config)
 {
     _currentController->Init(std::move(config));
 }
 
-auto LinControllerFacade::Status() const noexcept->ControllerStatus
+auto LinControllerFacade::Status() const noexcept->LinControllerStatus
 {
     return _currentController->Status();
 }
 
-void LinControllerFacade::SendFrame(LinFrame frame, FrameResponseType responseType)
+void LinControllerFacade::SendFrame(LinFrame frame, LinFrameResponseType responseType)
 {
     _currentController->SendFrame(std::move(frame), std::move(responseType));
 }
@@ -38,12 +38,12 @@ void LinControllerFacade::SendFrameHeader(LinIdT linId)
     _currentController->SendFrameHeader(std::move(linId));
 }
 
-void LinControllerFacade::SetFrameResponse(LinFrame frame, FrameResponseMode mode)
+void LinControllerFacade::SetFrameResponse(LinFrame frame, LinFrameResponseMode mode)
 {
     _currentController->SetFrameResponse(std::move(frame), std::move(mode));
 }
 
-void LinControllerFacade::SetFrameResponses(std::vector<FrameResponse> responses)
+void LinControllerFacade::SetFrameResponses(std::vector<LinFrameResponse> responses)
 {
     _currentController->SetFrameResponses(std::move(responses));
 }
@@ -93,7 +93,7 @@ void LinControllerFacade::AddFrameResponseUpdateHandler(FrameResponseUpdateHandl
 }
 
 // IIbToLinController
-void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const Transmission& msg)
+void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinTransmission& msg)
 {
     if (IsNetworkSimulated())
     {
@@ -105,7 +105,7 @@ void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
     }
 }
 
-void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const WakeupPulse& msg)
+void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinWakeupPulse& msg)
 {
     if (IsNetworkSimulated())
     {
@@ -117,7 +117,7 @@ void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
     }
 }
 
-void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerConfig& msg)
+void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerConfig& msg)
 {
     if (IsNetworkSimulated())
     {
@@ -129,7 +129,7 @@ void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
     }
 }
 
-void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerStatusUpdate& msg)
+void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerStatusUpdate& msg)
 {
     if (!IsNetworkSimulated())
     {
@@ -137,7 +137,7 @@ void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const
     }
 }
 
-void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const FrameResponseUpdate& msg)
+void LinControllerFacade::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinFrameResponseUpdate& msg)
 {
     if (IsNetworkSimulated())
     {

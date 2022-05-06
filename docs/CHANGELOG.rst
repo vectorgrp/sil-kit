@@ -8,6 +8,63 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [3.99.22] - unreleased
 ----------------------
 
+Changed
+~~~~~~~
+
+- Lin
+
+  "Lin"-prefix for related data types.
+
+  - ``IntegrationBus/include/ib/sim/lin/LinDatatypes.hpp``
+
+    + old:
+    .. code-block:: c++
+      
+      ChecksumModel
+      DataLengthT
+      FrameResponseType
+      FrameResponseMode
+      FrameResponse
+      FrameStatus
+      ControllerMode
+      BaudRateT
+      ControllerConfig
+      ControllerStatus
+
+    + new:
+    .. code-block:: c++
+      
+      LinChecksumModel
+      LinDataLengthT
+      LinFrameResponseType
+      LinFrameResponseMode
+      LinFrameResponse
+      LinFrameStatus
+      LinControllerMode
+      LinBaudRateT
+      LinControllerConfig
+      LinControllerStatus
+
+Added
+~~~~~
+
+- Lin
+
+  Improved error handling for Wakeup/GoToSleep.
+
+  - ``IntegrationBus/include/ib/sim/lin/ILinController.hpp``
+
+    ``ILinController::GoToSleep()``, ``ILinController::GoToSleepInternal()``, ``ILinController::Wakeup()`` and 
+    ``ILinController::WakeupInternal()`` now throw a ``ib::StateError`` exception if issued in wrong 
+    ``LinControllerMode``.
+
+  - ``IntegrationBus/include/ib/capi/Lin.h``
+  
+    ``ib_Lin_Controller_GoToSleep()``, ``ib_Lin_Controller_GoToSleepInternal()``, ``ib_Lin_Controller_Wakeup()`` and 
+    ``ib_Lin_Controller_WakeupInternal()`` now return ``ib_ReturnCode_WRONGSTATE`` if issued in wrong 
+    ``ib_Lin_ControllerMode``.
+
+
 Fixed
 ~~~~~
 - CAN: fixed network transmission of the userContext member. This breaks network compatibility to
@@ -1640,7 +1697,7 @@ Fixed
 - The IbRegistry hostname defined in the configuration is now resolved and
   used to create listening sockets.
   IPv6 addresses are not supported, yet.
-- The `lin::ControllerConfig` data type now uses a message history of size 1.
+- The `lin::LinControllerConfig` data type now uses a message history of size 1.
   If the value was set by a `LinController::Init` call, it will be
   retained and automatically transmitted to newly connecting participants.
   
@@ -2134,7 +2191,7 @@ Complete list of methods removed from the interface ``class IComAdapter`` in ``i
      virtual void SendIbMessage(EndpointAddress from, const sim::lin::SendFrameHeaderRequest& msg) = 0;
      virtual void SendIbMessage(EndpointAddress from, const sim::lin::Transmission& msg) = 0;
      virtual void SendIbMessage(EndpointAddress from, const sim::lin::WakeupPulse& msg) = 0;
-     virtual void SendIbMessage(EndpointAddress from, const sim::lin::ControllerConfig& msg) = 0;
+     virtual void SendIbMessage(EndpointAddress from, const sim::lin::LinControllerConfig& msg) = 0;
      virtual void SendIbMessage(EndpointAddress from, const sim::lin::ControllerStatusUpdate& msg) = 0;
      virtual void SendIbMessage(EndpointAddress from, const sim::lin::FrameResponseUpdate& msg) = 0;
     

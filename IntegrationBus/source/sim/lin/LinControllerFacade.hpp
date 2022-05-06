@@ -48,13 +48,13 @@ public:
     // Public interface methods
     //
     // ILinController
-    void Init(ControllerConfig config) override;
-    auto Status() const noexcept->ControllerStatus override;
+    void Init(LinControllerConfig config) override;
+    auto Status() const noexcept->LinControllerStatus override;
 
-    void SendFrame(LinFrame frame, FrameResponseType responseType) override;
+    void SendFrame(LinFrame frame, LinFrameResponseType responseType) override;
     void SendFrameHeader(LinIdT linId) override;
-    void SetFrameResponse(LinFrame frame, FrameResponseMode mode) override;
-    void SetFrameResponses(std::vector<FrameResponse> responses) override;
+    void SetFrameResponse(LinFrame frame, LinFrameResponseMode mode) override;
+    void SetFrameResponses(std::vector<LinFrameResponse> responses) override;
 
     void GoToSleep() override;
     void GoToSleepInternal() override;
@@ -67,11 +67,11 @@ public:
     void AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) override;
 
     // IIbToLinController
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const Transmission& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const WakeupPulse& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerConfig& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const ControllerStatusUpdate& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FrameResponseUpdate& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinTransmission& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinWakeupPulse& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerConfig& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerStatusUpdate& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinFrameResponseUpdate& msg) override;
 
 public:
     // ----------------------------------------

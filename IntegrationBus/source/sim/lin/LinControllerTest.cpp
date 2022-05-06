@@ -79,275 +79,275 @@ protected:
 
 TEST_F(LinControllerTest, send_frame_with_master_response)
 {
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
 
-    LinFrame frame = MakeFrame(17, ChecksumModel::Enhanced);
+    LinFrame frame = MakeFrame(17, LinChecksumModel::Enhanced);
 
     controller.AddFrameStatusHandler(frameStatusHandler);
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const FrameResponseUpdate&>()))
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinFrameResponseUpdate&>()))
         .Times(1);
-    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(frame, FrameStatus::LIN_RX_OK, 35s)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(frame, LinFrameStatus::LIN_RX_OK, 35s)))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, frame, FrameStatus::LIN_TX_OK))
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, frame, LinFrameStatus::LIN_TX_OK))
         .Times(1);
 
-    controller.SendFrame(frame, FrameResponseType::MasterResponse);
+    controller.SendFrame(frame, LinFrameResponseType::MasterResponse);
 }
 
 TEST_F(LinControllerTest, send_frame_without_configured_response)
 {
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
     controller.AddFrameStatusHandler(frameStatusHandler);
 
     LinFrame frame = MakeFrame(17);
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const FrameResponseUpdate&>()))
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinFrameResponseUpdate&>()))
         .Times(1);
-    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(FrameStatus::LIN_RX_NO_RESPONSE, 35s)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(LinFrameStatus::LIN_RX_NO_RESPONSE, 35s)))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, A<const LinFrame&>(), FrameStatus::LIN_RX_NO_RESPONSE))
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, A<const LinFrame&>(), LinFrameStatus::LIN_RX_NO_RESPONSE))
         .Times(1);
-    controller.SendFrame(frame, FrameResponseType::SlaveResponse);
+    controller.SendFrame(frame, LinFrameResponseType::SlaveResponse);
 }
 
 TEST_F(LinControllerTest, send_frame_with_one_slave_response)
 {
     // Configure Slave 1
-    ControllerConfig slaveConfig = MakeControllerConfig(ControllerMode::Slave);
-    FrameResponse response;
-    response.frame = MakeFrame(17, ChecksumModel::Enhanced, 4, {1,2,3,4,5,6,7,8});
-    response.responseMode = FrameResponseMode::TxUnconditional;
+    LinControllerConfig slaveConfig = MakeControllerConfig(LinControllerMode::Slave);
+    LinFrameResponse response;
+    response.frame = MakeFrame(17, LinChecksumModel::Enhanced, 4, {1,2,3,4,5,6,7,8});
+    response.responseMode = LinFrameResponseMode::TxUnconditional;
     slaveConfig.frameResponses.push_back(response);
 
     controller.ReceiveIbMessage(&controller2, slaveConfig);
 
     // Configure Master
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
     controller.AddFrameStatusHandler(frameStatusHandler);
     
     // Send Frame
-    LinFrame frame = MakeFrame(17, ChecksumModel::Enhanced);
+    LinFrame frame = MakeFrame(17, LinChecksumModel::Enhanced);
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const FrameResponseUpdate&>())).Times(1);
-    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(response.frame, FrameStatus::LIN_RX_OK, 35s)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinFrameResponseUpdate&>())).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(response.frame, LinFrameStatus::LIN_RX_OK, 35s)))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, response.frame, FrameStatus::LIN_RX_OK))
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, response.frame, LinFrameStatus::LIN_RX_OK))
         .Times(1);
 
-    controller.SendFrame(frame, FrameResponseType::SlaveResponse);
+    controller.SendFrame(frame, LinFrameResponseType::SlaveResponse);
 }
 
 TEST_F(LinControllerTest, send_frame_with_multiple_slave_responses)
 {
     // Configure Slave 1
-    ControllerConfig slaveConfig = MakeControllerConfig(ControllerMode::Slave);
-    FrameResponse response;
-    response.frame = MakeFrame(17, ChecksumModel::Enhanced, 4, {1,2,3,4,5,6,7,8});
-    response.responseMode = FrameResponseMode::TxUnconditional;
+    LinControllerConfig slaveConfig = MakeControllerConfig(LinControllerMode::Slave);
+    LinFrameResponse response;
+    response.frame = MakeFrame(17, LinChecksumModel::Enhanced, 4, {1,2,3,4,5,6,7,8});
+    response.responseMode = LinFrameResponseMode::TxUnconditional;
     slaveConfig.frameResponses.push_back(response);
 
     controller.ReceiveIbMessage(&controller2, slaveConfig);
 
     // Configure Slave 2
-    slaveConfig.frameResponses[0].frame = MakeFrame(17, ChecksumModel::Classic, 2, {0,1,0,1,0,1,0,1});
+    slaveConfig.frameResponses[0].frame = MakeFrame(17, LinChecksumModel::Classic, 2, {0,1,0,1,0,1,0,1});
 
     controller.ReceiveIbMessage(&controller3, slaveConfig);
 
     // Configure Master
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
     controller.AddFrameStatusHandler(frameStatusHandler);
     
     // Send Frame
-    LinFrame frame = MakeFrame(17, ChecksumModel::Enhanced);
+    LinFrame frame = MakeFrame(17, LinChecksumModel::Enhanced);
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const FrameResponseUpdate&>())).Times(1);
-    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(FrameStatus::LIN_RX_ERROR, 35s)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinFrameResponseUpdate&>())).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(LinFrameStatus::LIN_RX_ERROR, 35s)))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, A<const LinFrame&>(), FrameStatus::LIN_RX_ERROR))
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, A<const LinFrame&>(), LinFrameStatus::LIN_RX_ERROR))
         .Times(1);
 
-    controller.SendFrame(frame, FrameResponseType::SlaveResponse);
+    controller.SendFrame(frame, LinFrameResponseType::SlaveResponse);
 }
 
 TEST_F(LinControllerTest, send_frame_with_one_slave_sleeping)
 {
     // Configure Slave 1
-    ControllerConfig slaveConfig = MakeControllerConfig(ControllerMode::Slave);
-    FrameResponse response;
-    response.frame = MakeFrame(17, ChecksumModel::Enhanced, 4, {1,2,3,4,5,6,7,8});
-    response.responseMode = FrameResponseMode::TxUnconditional;
+    LinControllerConfig slaveConfig = MakeControllerConfig(LinControllerMode::Slave);
+    LinFrameResponse response;
+    response.frame = MakeFrame(17, LinChecksumModel::Enhanced, 4, {1,2,3,4,5,6,7,8});
+    response.responseMode = LinFrameResponseMode::TxUnconditional;
     slaveConfig.frameResponses.push_back(response);
 
     controller.ReceiveIbMessage(&controller2, slaveConfig);
 
-    ControllerStatusUpdate slaveStatus;
-    slaveStatus.status = ControllerStatus::Sleep;
+    LinControllerStatusUpdate slaveStatus;
+    slaveStatus.status = LinControllerStatus::Sleep;
     controller.ReceiveIbMessage(&controller2, slaveStatus);
 
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const ControllerConfig&>()));
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
     controller.AddFrameStatusHandler(frameStatusHandler);
     
     // Send Frame
-    LinFrame frame = MakeFrame(17, ChecksumModel::Enhanced);
+    LinFrame frame = MakeFrame(17, LinChecksumModel::Enhanced);
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const FrameResponseUpdate&>())).Times(1);
-    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(FrameStatus::LIN_RX_NO_RESPONSE, 35s)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinFrameResponseUpdate&>())).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(LinFrameStatus::LIN_RX_NO_RESPONSE, 35s)))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, AFrameWithId(17), FrameStatus::LIN_RX_NO_RESPONSE))
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, AFrameWithId(17), LinFrameStatus::LIN_RX_NO_RESPONSE))
         .Times(1);
 
-    controller.SendFrame(frame, FrameResponseType::SlaveResponse);
+    controller.SendFrame(frame, LinFrameResponseType::SlaveResponse);
 }
 
 TEST_F(LinControllerTest, send_frame_with_one_slave_response_removed)
 {
     // Configure Slave 1
-    ControllerConfig slaveConfig = MakeControllerConfig(ControllerMode::Slave);
-    FrameResponse response;
-    response.frame = MakeFrame(17, ChecksumModel::Enhanced, 4, {1,2,3,4,5,6,7,8});
-    response.responseMode = FrameResponseMode::TxUnconditional;
+    LinControllerConfig slaveConfig = MakeControllerConfig(LinControllerMode::Slave);
+    LinFrameResponse response;
+    response.frame = MakeFrame(17, LinChecksumModel::Enhanced, 4, {1,2,3,4,5,6,7,8});
+    response.responseMode = LinFrameResponseMode::TxUnconditional;
     slaveConfig.frameResponses.push_back(response);
 
     controller.ReceiveIbMessage(&controller2, slaveConfig);
 
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const ControllerConfig&>()));
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
     controller.AddFrameStatusHandler(frameStatusHandler);
     
     // Send Frame
-    LinFrame frame = MakeFrame(17, ChecksumModel::Enhanced);
+    LinFrame frame = MakeFrame(17, LinChecksumModel::Enhanced);
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const FrameResponseUpdate&>())).Times(1);
-    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(response.frame, FrameStatus::LIN_RX_OK)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinFrameResponseUpdate&>())).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(response.frame, LinFrameStatus::LIN_RX_OK)))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, response.frame, FrameStatus::LIN_RX_OK))
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, response.frame, LinFrameStatus::LIN_RX_OK))
         .Times(1);
 
-    controller.SendFrame(frame, FrameResponseType::SlaveResponse);
+    controller.SendFrame(frame, LinFrameResponseType::SlaveResponse);
 
     // Remove Frame Response by marking it as unused
-    response.responseMode = FrameResponseMode::Unused;
-    FrameResponseUpdate responseUpdate;
+    response.responseMode = LinFrameResponseMode::Unused;
+    LinFrameResponseUpdate responseUpdate;
     responseUpdate.frameResponses.push_back(response);
     controller.ReceiveIbMessage(&controller2, responseUpdate);
 
     // Send Frame again
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const FrameResponseUpdate&>())).Times(1);
-    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(FrameStatus::LIN_RX_NO_RESPONSE)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinFrameResponseUpdate&>())).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(LinFrameStatus::LIN_RX_NO_RESPONSE)))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, AFrameWithId(17), FrameStatus::LIN_RX_NO_RESPONSE))
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, AFrameWithId(17), LinFrameStatus::LIN_RX_NO_RESPONSE))
         .Times(1);
 
-    controller.SendFrame(frame, FrameResponseType::SlaveResponse);
+    controller.SendFrame(frame, LinFrameResponseType::SlaveResponse);
 }
 
 TEST_F(LinControllerTest, send_frame_header_with_master_response)
 {
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
 
-    LinFrame frame = MakeFrame(17, ChecksumModel::Enhanced);
+    LinFrame frame = MakeFrame(17, LinChecksumModel::Enhanced);
 
     controller.AddFrameStatusHandler(frameStatusHandler);
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const FrameResponseUpdate&>()))
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinFrameResponseUpdate&>()))
         .Times(1);
-    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(frame, FrameStatus::LIN_RX_OK, 35s)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(frame, LinFrameStatus::LIN_RX_OK, 35s)))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, frame, FrameStatus::LIN_TX_OK))
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, frame, LinFrameStatus::LIN_TX_OK))
         .Times(1);
 
-    controller.SetFrameResponse(frame, FrameResponseMode::TxUnconditional);
+    controller.SetFrameResponse(frame, LinFrameResponseMode::TxUnconditional);
     controller.SendFrameHeader(17);
 }
 
 TEST_F(LinControllerTest, send_frame_header_remove_master_response)
 {
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const ControllerConfig&>()));
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
     controller.AddFrameStatusHandler(frameStatusHandler);
 
     // Set Frame Response and Send Header
-    LinFrame frame = MakeFrame(17, ChecksumModel::Enhanced);
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const FrameResponseUpdate&>()))
+    LinFrame frame = MakeFrame(17, LinChecksumModel::Enhanced);
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinFrameResponseUpdate&>()))
         .Times(1);
-    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(frame, FrameStatus::LIN_RX_OK)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(frame, LinFrameStatus::LIN_RX_OK)))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, frame, FrameStatus::LIN_TX_OK))
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, frame, LinFrameStatus::LIN_TX_OK))
         .Times(1);
 
-    controller.SetFrameResponse(frame, FrameResponseMode::TxUnconditional);
+    controller.SetFrameResponse(frame, LinFrameResponseMode::TxUnconditional);
     controller.SendFrameHeader(17);
 
     // Mark Frame as Unused and Send Header Again
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const FrameResponseUpdate&>()))
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinFrameResponseUpdate&>()))
         .Times(1);
-    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(FrameStatus::LIN_RX_NO_RESPONSE)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(LinFrameStatus::LIN_RX_NO_RESPONSE)))
         .Times(1);
-    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, AFrameWithId(17), FrameStatus::LIN_RX_NO_RESPONSE))
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, AFrameWithId(17), LinFrameStatus::LIN_RX_NO_RESPONSE))
         .Times(1);
-    controller.SetFrameResponse(frame, FrameResponseMode::Unused);
+    controller.SetFrameResponse(frame, LinFrameResponseMode::Unused);
     controller.SendFrameHeader(17);
 }
 
 TEST_F(LinControllerTest, trigger_slave_callbacks)
 {
     // Configure Slave
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const ControllerConfig&>()));
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Slave);
-    FrameResponse response;
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
+    LinFrameResponse response;
     
-    response.frame = MakeFrame(17, ChecksumModel::Enhanced, 4);
-    response.responseMode = FrameResponseMode::Rx;
+    response.frame = MakeFrame(17, LinChecksumModel::Enhanced, 4);
+    response.responseMode = LinFrameResponseMode::Rx;
     config.frameResponses.push_back(response);
 
-    LinFrame txFrame = MakeFrame(18, ChecksumModel::Classic, 2, {1,2,0,0,0,0,0,0});
+    LinFrame txFrame = MakeFrame(18, LinChecksumModel::Classic, 2, {1,2,0,0,0,0,0,0});
     response.frame = txFrame;
-    response.responseMode = FrameResponseMode::TxUnconditional;
+    response.responseMode = LinFrameResponseMode::TxUnconditional;
     config.frameResponses.push_back(response);
 
     controller.Init(config);
     controller.AddFrameStatusHandler(frameStatusHandler);
 
-    // Receive Transmission
-    Transmission transmission;
+    // Receive LinTransmission
+    LinTransmission transmission;
 
     // Expect LIN_RX_OK
-    transmission.frame = MakeFrame(17, ChecksumModel::Enhanced, 4, {1,2,3,4,0,0,0,0});
-    transmission.status = FrameStatus::LIN_RX_OK;
-    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, transmission.frame, FrameStatus::LIN_RX_OK)).Times(1);
+    transmission.frame = MakeFrame(17, LinChecksumModel::Enhanced, 4, {1,2,3,4,0,0,0,0});
+    transmission.status = LinFrameStatus::LIN_RX_OK;
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, transmission.frame, LinFrameStatus::LIN_RX_OK)).Times(1);
     controller.ReceiveIbMessage(&controller2, transmission);
 
     // Expect LIN_RX_ERRROR due to dataLength mismatch
-    transmission.frame = MakeFrame(17, ChecksumModel::Enhanced, 2, {1,2,0,0,0,0,0,0});
-    transmission.status = FrameStatus::LIN_RX_OK;
-    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, transmission.frame, FrameStatus::LIN_RX_ERROR)).Times(1);
+    transmission.frame = MakeFrame(17, LinChecksumModel::Enhanced, 2, {1,2,0,0,0,0,0,0});
+    transmission.status = LinFrameStatus::LIN_RX_OK;
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, transmission.frame, LinFrameStatus::LIN_RX_ERROR)).Times(1);
     controller.ReceiveIbMessage(&controller2, transmission);
 
     // Expect LIN_RX_ERRROR due to checksumModel mismatch
-    transmission.frame = MakeFrame(17, ChecksumModel::Classic, 4, {1,2,3,4,0,0,0,0});
-    transmission.status = FrameStatus::LIN_RX_OK;
-    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, transmission.frame, FrameStatus::LIN_RX_ERROR)).Times(1);
+    transmission.frame = MakeFrame(17, LinChecksumModel::Classic, 4, {1,2,3,4,0,0,0,0});
+    transmission.status = LinFrameStatus::LIN_RX_OK;
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, transmission.frame, LinFrameStatus::LIN_RX_ERROR)).Times(1);
     controller.ReceiveIbMessage(&controller2, transmission);
 
     // Expect LIN_TX_OK
-    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, txFrame, FrameStatus::LIN_TX_OK)).Times(1);
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, txFrame, LinFrameStatus::LIN_TX_OK)).Times(1);
     transmission.frame = txFrame;
     controller.ReceiveIbMessage(&controller2, transmission);
 
     // Expect no call at all
-    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, A<const LinFrame&>(), A<FrameStatus>())).Times(0);
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, A<const LinFrame&>(), A<LinFrameStatus>())).Times(0);
     transmission.frame.id = 19;
     controller.ReceiveIbMessage(&controller2, transmission);
 }
@@ -355,18 +355,18 @@ TEST_F(LinControllerTest, trigger_slave_callbacks)
 TEST_F(LinControllerTest, distribute_frame_response_updates)
 {
     // Configure Slave
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const ControllerConfig&>()));
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Slave);
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
     controller.Init(config);
 
-    FrameResponseUpdate responseUpdate;
-    FrameResponse response1;
-    response1.frame = MakeFrame(17, ChecksumModel::Enhanced);
-    response1.responseMode = FrameResponseMode::Rx;
+    LinFrameResponseUpdate responseUpdate;
+    LinFrameResponse response1;
+    response1.frame = MakeFrame(17, LinChecksumModel::Enhanced);
+    response1.responseMode = LinFrameResponseMode::Rx;
     responseUpdate.frameResponses.push_back(response1);
-    FrameResponse response2;
-    response2.frame = MakeFrame(19, ChecksumModel::Classic);
-    response2.responseMode = FrameResponseMode::TxUnconditional;
+    LinFrameResponse response2;
+    response2.frame = MakeFrame(19, LinChecksumModel::Classic);
+    response2.responseMode = LinFrameResponseMode::TxUnconditional;
     responseUpdate.frameResponses.push_back(response2);
 
     EXPECT_CALL(participant, SendIbMessage(&controller, responseUpdate))
@@ -378,20 +378,20 @@ TEST_F(LinControllerTest, distribute_frame_response_updates)
 TEST_F(LinControllerTest, trigger_frame_response_update_handler)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const ControllerConfig&>()));
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
 
     controller.AddFrameResponseUpdateHandler(frameResponseUpdateHandler);
 
-    FrameResponseUpdate responseUpdate;
-    FrameResponse response1;
-    response1.frame = MakeFrame(17, ChecksumModel::Enhanced);
-    response1.responseMode = FrameResponseMode::Rx;
+    LinFrameResponseUpdate responseUpdate;
+    LinFrameResponse response1;
+    response1.frame = MakeFrame(17, LinChecksumModel::Enhanced);
+    response1.responseMode = LinFrameResponseMode::Rx;
     responseUpdate.frameResponses.push_back(response1);
-    FrameResponse response2;
-    response2.frame = MakeFrame(19, ChecksumModel::Classic);
-    response2.responseMode = FrameResponseMode::TxUnconditional;
+    LinFrameResponse response2;
+    response2.frame = MakeFrame(19, LinChecksumModel::Classic);
+    response2.responseMode = LinFrameResponseMode::TxUnconditional;
     responseUpdate.frameResponses.push_back(response2);
 
     EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, to_string(controller2.GetServiceDescriptor()), response1))
@@ -405,13 +405,13 @@ TEST_F(LinControllerTest, trigger_frame_response_update_handler)
 TEST_F(LinControllerTest, go_to_sleep)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const ControllerConfig&>()));
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(GoToSleepFrame(), FrameStatus::LIN_RX_OK)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(GoToSleepFrame(), LinFrameStatus::LIN_RX_OK)))
         .Times(1);
-    EXPECT_CALL(participant, SendIbMessage(&controller, AControllerStatusUpdateWith(ControllerStatus::Sleep)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, AControllerStatusUpdateWith(LinControllerStatus::Sleep)))
         .Times(1);
 
     controller.GoToSleep();
@@ -420,13 +420,13 @@ TEST_F(LinControllerTest, go_to_sleep)
 TEST_F(LinControllerTest, go_to_sleep_internal)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const ControllerConfig&>()));
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(GoToSleepFrame(), FrameStatus::LIN_RX_OK)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, ATransmissionWith(GoToSleepFrame(), LinFrameStatus::LIN_RX_OK)))
         .Times(0);
-    EXPECT_CALL(participant, SendIbMessage(&controller, AControllerStatusUpdateWith(ControllerStatus::Sleep)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, AControllerStatusUpdateWith(LinControllerStatus::Sleep)))
         .Times(1);
 
     controller.GoToSleepInternal();
@@ -435,8 +435,8 @@ TEST_F(LinControllerTest, go_to_sleep_internal)
 TEST_F(LinControllerTest, call_gotosleep_handler)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const ControllerConfig&>()));
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Slave);
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
     controller.Init(config);
     controller.AddFrameStatusHandler(frameStatusHandler);
     controller.AddGoToSleepHandler(goToSleepHandler);
@@ -444,9 +444,9 @@ TEST_F(LinControllerTest, call_gotosleep_handler)
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, A<const LinFrame&>(), _)).Times(0);
     EXPECT_CALL(callbacks, GoToSleepHandler(&controller)).Times(1);
 
-    Transmission goToSleep;
+    LinTransmission goToSleep;
     goToSleep.frame = GoToSleepFrame();
-    goToSleep.status = FrameStatus::LIN_RX_OK;
+    goToSleep.status = LinFrameStatus::LIN_RX_OK;
 
     controller.ReceiveIbMessage(&controller2, goToSleep);
 }
@@ -454,8 +454,8 @@ TEST_F(LinControllerTest, call_gotosleep_handler)
 TEST_F(LinControllerTest, not_call_gotosleep_handler)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const ControllerConfig&>()));
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Slave);
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
     controller.Init(config);
     controller.AddFrameStatusHandler(frameStatusHandler);
     controller.AddGoToSleepHandler(goToSleepHandler);
@@ -463,10 +463,10 @@ TEST_F(LinControllerTest, not_call_gotosleep_handler)
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, A<const LinFrame&>(), _)).Times(0);
     EXPECT_CALL(callbacks, GoToSleepHandler(&controller)).Times(0);
 
-    Transmission goToSleep;
+    LinTransmission goToSleep;
     goToSleep.frame = GoToSleepFrame();
     goToSleep.frame.data[0] = 1;
-    goToSleep.status = FrameStatus::LIN_RX_OK;
+    goToSleep.status = LinFrameStatus::LIN_RX_OK;
 
     controller.ReceiveIbMessage(&controller2, goToSleep);
 }
@@ -474,14 +474,14 @@ TEST_F(LinControllerTest, not_call_gotosleep_handler)
 TEST_F(LinControllerTest, wake_up)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const ControllerConfig&>()));
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
 
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const WakeupPulse&>()))
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinWakeupPulse&>()))
         .Times(1);
-    EXPECT_CALL(participant, SendIbMessage(&controller, AControllerStatusUpdateWith(ControllerStatus::Operational)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, AControllerStatusUpdateWith(LinControllerStatus::Operational)))
         .Times(1);
 
     controller.Wakeup();
@@ -490,14 +490,14 @@ TEST_F(LinControllerTest, wake_up)
 TEST_F(LinControllerTest, wake_up_internal)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const ControllerConfig&>()));
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
 
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const WakeupPulse&>()))
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinWakeupPulse&>()))
         .Times(0);
-    EXPECT_CALL(participant, SendIbMessage(&controller, AControllerStatusUpdateWith(ControllerStatus::Operational)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, AControllerStatusUpdateWith(LinControllerStatus::Operational)))
         .Times(1);
 
     controller.WakeupInternal();
@@ -507,8 +507,8 @@ TEST_F(LinControllerTest, wake_up_internal)
 TEST_F(LinControllerTest, call_wakeup_handler)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const ControllerConfig&>()));
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Slave);
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
     controller.Init(config);
     controller.AddFrameStatusHandler(frameStatusHandler);
     controller.AddWakeupHandler(wakeupHandler);
@@ -516,9 +516,30 @@ TEST_F(LinControllerTest, call_wakeup_handler)
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, A<const LinFrame&>(), _)).Times(0);
     EXPECT_CALL(callbacks, WakeupHandler(&controller)).Times(1);
 
-    WakeupPulse wakeupPulse;
+    LinWakeupPulse wakeupPulse;
 
     controller.ReceiveIbMessage(&controller2, wakeupPulse);
+}
+
+// No initialization causes exception
+TEST_F(LinControllerTest, go_to_sleep_uninitialized)
+{
+    EXPECT_THROW(controller.GoToSleep(), ib::StateError);
+}
+
+TEST_F(LinControllerTest, go_to_sleep_internal_uninitialized)
+{
+    EXPECT_THROW(controller.GoToSleepInternal(), ib::StateError);
+}
+
+TEST_F(LinControllerTest, wake_up_uninitialized)
+{
+    EXPECT_THROW(controller.Wakeup(), ib::StateError);
+}
+
+TEST_F(LinControllerTest, wake_up_internal_uninitialized)
+{
+    EXPECT_THROW(controller.WakeupInternal(), ib::StateError);
 }
 
 
@@ -536,9 +557,9 @@ TEST_F(LinControllerTest, DISABLED_send_with_tracing)
 
     controller.AddSink(&traceSink);
 
-    ControllerConfig config = MakeControllerConfig(ControllerMode::Master);
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
-    LinFrame frame = MakeFrame(17, ChecksumModel::Enhanced);
+    LinFrame frame = MakeFrame(17, LinChecksumModel::Enhanced);
 
     EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
         .Times(1);
@@ -546,7 +567,7 @@ TEST_F(LinControllerTest, DISABLED_send_with_tracing)
         Trace(ib::sim::TransmitDirection::TX, ibAddr1, now, frame))
         .Times(1);
 
-    controller.SendFrame(frame, FrameResponseType::MasterResponse);
+    controller.SendFrame(frame, LinFrameResponseType::MasterResponse);
 }
 
 } // anonymous namespace

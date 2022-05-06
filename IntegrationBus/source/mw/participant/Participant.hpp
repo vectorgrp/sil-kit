@@ -186,13 +186,13 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::TxBufferUpdate& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::PocStatus& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::SendFrameRequest& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::SendFrameHeaderRequest& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::Transmission& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::WakeupPulse& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::ControllerConfig& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::ControllerStatusUpdate& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::FrameResponseUpdate& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinSendFrameRequest& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinSendFrameHeaderRequest& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinTransmission& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinWakeupPulse& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinControllerConfig& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinControllerStatusUpdate& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinFrameResponseUpdate& msg) override;
 
     void SendIbMessage(const IIbServiceEndpoint*, const sync::NextSimTask& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const sync::ParticipantStatus& msg) override;
@@ -240,13 +240,13 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::TxBufferUpdate& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::PocStatus& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::SendFrameRequest& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::SendFrameHeaderRequest& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::Transmission& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::WakeupPulse& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::ControllerConfig& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::ControllerStatusUpdate& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::FrameResponseUpdate& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinSendFrameRequest& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinSendFrameHeaderRequest& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinTransmission& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinWakeupPulse& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinControllerConfig& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinControllerStatusUpdate& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinFrameResponseUpdate& msg) override;
 
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::NextSimTask& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::ParticipantStatus& msg) override;

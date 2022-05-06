@@ -12,6 +12,10 @@ IB_BEGIN_DECLS
     try
 
 #define CAPI_LEAVE \
+    catch (const ib::StateError& e) { \
+        ib_error_string = e.what(); \
+        return ib_ReturnCode_WRONGSTATE; \
+    } \
     catch (const std::runtime_error& e) { \
         ib_error_string = e.what(); \
         return ib_ReturnCode_UNSPECIFIEDERROR; \

@@ -11,14 +11,14 @@ namespace {
 
     class MockLinController : public ib::sim::lin::ILinController {
     public:
-        MOCK_METHOD1(Init, void(ControllerConfig config));
-        MOCK_METHOD(ControllerStatus, Status, (), (const, noexcept));
-        MOCK_METHOD2(SendFrame, void(LinFrame frame, FrameResponseType responseType));
-        MOCK_METHOD3(SendFrame, void(LinFrame frame, FrameResponseType responseType, std::chrono::nanoseconds timestamp));
+        MOCK_METHOD1(Init, void(LinControllerConfig config));
+        MOCK_METHOD(LinControllerStatus, Status, (), (const, noexcept));
+        MOCK_METHOD2(SendFrame, void(LinFrame frame, LinFrameResponseType responseType));
+        MOCK_METHOD3(SendFrame, void(LinFrame frame, LinFrameResponseType responseType, std::chrono::nanoseconds timestamp));
         MOCK_METHOD1(SendFrameHeader, void(LinIdT linId));
         MOCK_METHOD2(SendFrameHeader, void(LinIdT linId, std::chrono::nanoseconds timestamp));
-        MOCK_METHOD2(SetFrameResponse, void(LinFrame frame, FrameResponseMode mode));
-        MOCK_METHOD1(SetFrameResponses, void(std::vector<FrameResponse> responses));
+        MOCK_METHOD2(SetFrameResponse, void(LinFrame frame, LinFrameResponseMode mode));
+        MOCK_METHOD1(SetFrameResponses, void(std::vector<LinFrameResponse> responses));
         MOCK_METHOD0(GoToSleep, void());
         MOCK_METHOD0(GoToSleepInternal, void());
         MOCK_METHOD0(Wakeup, void());

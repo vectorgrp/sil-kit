@@ -17,7 +17,7 @@ TEST(MwVAsioSerdes, SimLin_Frame)
     LinFrame out;
 
     in.id = 7;
-    in.checksumModel = ChecksumModel::Classic;
+    in.checksumModel = LinChecksumModel::Classic;
     in.dataLength = 6;
     in.data = std::array<uint8_t, 8>{'V', 'E', 'C', 'T', 'O', 'R', 0, 0};
 
@@ -32,14 +32,14 @@ TEST(MwVAsioSerdes, SimLin_SendFrameRequest)
     using namespace ib::sim::lin;
     ib::mw::MessageBuffer buffer;
 
-    SendFrameRequest in;
-    SendFrameRequest out;
+    LinSendFrameRequest in;
+    LinSendFrameRequest out;
 
     in.frame.id = 19;
-    in.frame.checksumModel = ChecksumModel::Enhanced;
+    in.frame.checksumModel = LinChecksumModel::Enhanced;
     in.frame.dataLength = 8;
     in.frame.data = std::array<uint8_t, 8>{'A', 2, 3, 6, 'c', 'Z', 'K'};
-    in.responseType = FrameResponseType::SlaveToSlave;
+    in.responseType = LinFrameResponseType::SlaveToSlave;
 
     buffer << in;
     buffer >> out;
@@ -52,8 +52,8 @@ TEST(MwVAsioSerdes, SimLin_SendFrameHeaderRequest)
     using namespace ib::sim::lin;
     ib::mw::MessageBuffer buffer;
 
-    SendFrameHeaderRequest in;
-    SendFrameHeaderRequest out;
+    LinSendFrameHeaderRequest in;
+    LinSendFrameHeaderRequest out;
 
     in.id = 49;
 
@@ -67,15 +67,15 @@ TEST(MwVAsioSerdes, SimLin_Transmission)
     using namespace ib::sim::lin;
     ib::mw::MessageBuffer buffer;
 
-    Transmission in;
-    Transmission out;
+    LinTransmission in;
+    LinTransmission out;
 
     in.timestamp = 13ns;
     in.frame.id = 19;
-    in.frame.checksumModel = ChecksumModel::Enhanced;
+    in.frame.checksumModel = LinChecksumModel::Enhanced;
     in.frame.dataLength = 8;
     in.frame.data = std::array<uint8_t, 8>{'A', 2, 3, 6, 'c', 'Z', 'K'};
-    in.status = FrameStatus::LIN_TX_OK;
+    in.status = LinFrameStatus::LIN_TX_OK;
 
     buffer << in;
     buffer >> out;
@@ -88,8 +88,8 @@ TEST(MwVAsioSerdes, SimLin_WakeupPulse)
     using namespace ib::sim::lin;
     ib::mw::MessageBuffer buffer;
 
-    WakeupPulse in;
-    WakeupPulse out;
+    LinWakeupPulse in;
+    LinWakeupPulse out;
 
     in.timestamp = 13ns;
 
@@ -104,14 +104,14 @@ TEST(MwVAsioSerdes, SimLin_FrameResponse)
     using namespace ib::sim::lin;
     ib::mw::MessageBuffer buffer;
 
-    FrameResponse in;
-    FrameResponse out;
+    LinFrameResponse in;
+    LinFrameResponse out;
 
     in.frame.id = 50;
-    in.frame.checksumModel = ChecksumModel::Enhanced;
+    in.frame.checksumModel = LinChecksumModel::Enhanced;
     in.frame.dataLength = 2;
     in.frame.data = std::array<uint8_t, 8>{'A', 'B', 'E', 'c', 'A', 'B', 'E', 'c'};
-    in.responseMode = FrameResponseMode::TxUnconditional;
+    in.responseMode = LinFrameResponseMode::TxUnconditional;
 
     buffer << in;
     buffer >> out;
@@ -124,21 +124,21 @@ TEST(MwVAsioSerdes, SimLin_ControllerConfig)
     using namespace ib::sim::lin;
     ib::mw::MessageBuffer buffer;
 
-    FrameResponse response1;
+    LinFrameResponse response1;
     response1.frame.id = 50;
-    response1.frame.checksumModel = ChecksumModel::Enhanced;
+    response1.frame.checksumModel = LinChecksumModel::Enhanced;
     response1.frame.dataLength = 2;
     response1.frame.data = std::array<uint8_t, 8>{'A', 'B', 'E', 'c', 'A', 'B', 'E', 'c'};
-    response1.responseMode = FrameResponseMode::TxUnconditional;
-    FrameResponse response2;
+    response1.responseMode = LinFrameResponseMode::TxUnconditional;
+    LinFrameResponse response2;
     response1.frame.id = 36;
-    response1.frame.checksumModel = ChecksumModel::Classic;
-    response1.responseMode = FrameResponseMode::Rx;
+    response1.frame.checksumModel = LinChecksumModel::Classic;
+    response1.responseMode = LinFrameResponseMode::Rx;
 
 
-    ControllerConfig in;
-    ControllerConfig out;
-    in.controllerMode = ControllerMode::Slave;
+    LinControllerConfig in;
+    LinControllerConfig out;
+    in.controllerMode = LinControllerMode::Slave;
     in.baudRate = 1235345;
     in.frameResponses.push_back(response1);
     in.frameResponses.push_back(response2);
@@ -154,11 +154,11 @@ TEST(MwVAsioSerdes, SimLin_ControllerStatusUpdate)
     using namespace ib::sim::lin;
     ib::mw::MessageBuffer buffer;
 
-    ControllerStatusUpdate in;
-    ControllerStatusUpdate out;
+    LinControllerStatusUpdate in;
+    LinControllerStatusUpdate out;
 
     in.timestamp = 10s;
-    in.status = ControllerStatus::Sleep;
+    in.status = LinControllerStatus::Sleep;
 
     buffer << in;
     buffer >> out;
@@ -171,20 +171,20 @@ TEST(MwVAsioSerdes, SimLin_FrameResponseUpdate)
     using namespace ib::sim::lin;
     ib::mw::MessageBuffer buffer;
 
-    FrameResponse response1;
+    LinFrameResponse response1;
     response1.frame.id = 50;
-    response1.frame.checksumModel = ChecksumModel::Enhanced;
+    response1.frame.checksumModel = LinChecksumModel::Enhanced;
     response1.frame.dataLength = 2;
     response1.frame.data = std::array<uint8_t, 8>{'A', 'B', 'E', 'c', 'A', 'B', 'E', 'c'};
-    response1.responseMode = FrameResponseMode::TxUnconditional;
-    FrameResponse response2;
+    response1.responseMode = LinFrameResponseMode::TxUnconditional;
+    LinFrameResponse response2;
     response1.frame.id = 36;
-    response1.frame.checksumModel = ChecksumModel::Classic;
-    response1.responseMode = FrameResponseMode::Rx;
+    response1.frame.checksumModel = LinChecksumModel::Classic;
+    response1.responseMode = LinFrameResponseMode::Rx;
 
 
-    FrameResponseUpdate in;
-    FrameResponseUpdate out;
+    LinFrameResponseUpdate in;
+    LinFrameResponseUpdate out;
 
     in.frameResponses.push_back(response1);
     in.frameResponses.push_back(response2);
