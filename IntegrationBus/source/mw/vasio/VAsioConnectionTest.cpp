@@ -87,6 +87,9 @@ struct MockVAsioPeer
         _serviceDescriptor._serviceId = 1;
         _serviceDescriptor._participantId = 1;
 
+        _serviceDescriptor._serviceId = 1;
+        _serviceDescriptor._participantId = 1;
+
         ON_CALL(*this, GetLocalAddress()).WillByDefault(Return("127.0.0.1"));
         ON_CALL(*this, GetRemoteAddress()).WillByDefault(Return("127.0.0.1"));
         ON_CALL(*this, GetInfo()).WillByDefault(ReturnRef(_peerInfo));
