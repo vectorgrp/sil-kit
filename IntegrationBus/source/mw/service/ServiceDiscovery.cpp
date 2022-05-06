@@ -1,8 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "ServiceDiscovery.hpp"
-#include "EndpointAddress.hpp"
-
 #include "ib/mw/logging/ILogger.hpp"
 
 namespace ib {
@@ -12,8 +10,11 @@ namespace service {
 ServiceDiscovery::ServiceDiscovery(IParticipantInternal* participant, const std::string& participantName)
     : _participant{participant}
     , _participantName{participantName}
+    , _specificDiscoveryStore{ participantName }
+
 {
 }
+
 ServiceDiscovery::~ServiceDiscovery() noexcept
 {
     // We might still receive asynchronous IB messages or callbacks
@@ -31,109 +32,58 @@ auto ServiceDiscovery::GetServiceDescriptor() const -> const mw::ServiceDescript
     return _serviceDescriptor;
 }
 
-void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const ServiceAnnouncement& msg)
+void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const ParticipantDiscoveryEvent& msg)
 {
     if (_shuttingDown)
     {
         return;
     }
+    OnParticpantAddition(msg);
+}
+
+void ServiceDiscovery::OnParticpantAddition(const ParticipantDiscoveryEvent& msg)
+{
     // Service announcement are sent when a new participant joins the simulation
     std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
+    auto&& fromParticipant = msg.participantName;
+    auto&& announcementMap = _servicesByParticipant[fromParticipant];
 
-    auto&& announcementMap = _servicesByParticipant[msg.participantName];
-    for (auto&& service : msg.services)
+    for (auto&& serviceDescriptor : msg.services)
     {
-        const auto serviceName = to_string(service);
+        // Check if already known
+        const auto serviceName = to_string(serviceDescriptor);
         if (announcementMap.count(serviceName) > 0)
         {
-            //we already know this service, do not advertise it again
             continue;
         }
         else
         {
-            announcementMap[serviceName] = service;
-            CallHandlers(ServiceDiscoveryEvent::Type::ServiceCreated , service);
+            _specificDiscoveryStore.ServiceChange(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
+            // Store by service name
+            announcementMap[serviceName] = serviceDescriptor;
+            CallHandlers(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
         }
     }
 }
 
-void ServiceDiscovery::ReceivedServiceRemoval(const ServiceDescriptor& serviceDescriptor)
+void ServiceDiscovery::OnParticpantRemoval(const std::string& participantName)
 {
-    std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
-
-    auto&& announcementMap = _servicesByParticipant[serviceDescriptor.GetParticipantName()];
-    auto numErased = announcementMap.erase(to_string(serviceDescriptor));
-
-    if (numErased == 0)
+    if (participantName == _participantName)
     {
-        //we only notify once per event
         return;
     }
 
-    CallHandlers(ServiceDiscoveryEvent::Type::ServiceRemoved, serviceDescriptor);
-}
-
-void ServiceDiscovery::ReceivedServiceAddition(const ServiceDescriptor& serviceDescriptor)
-{
+    // Locally announce removal of all services from the leaving participant
     std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
-
-    auto&& announcementMap = _servicesByParticipant[serviceDescriptor.GetParticipantName()];
-    const auto cachedServiceKey = to_string(serviceDescriptor);
-    if (announcementMap.count(cachedServiceKey) > 0)
+    auto announcedIt = _servicesByParticipant.find(participantName);
+    if (announcedIt != _servicesByParticipant.end())
     {
-        //we already now this participant's service
-        return;
-    }
-
-    // If we receive the event from ourselves, we must skip announcing the whole participant
-    if (serviceDescriptor.GetParticipantName() != _participantName)
-    {
-        // A remote participant might be unknown, however, it will send an event for its own ServiceDiscovery service
-        // when first joining the simulation. React by announcing all services of this participant
-        std::string supplControllerType;
-        if (serviceDescriptor.GetSupplementalDataItem(mw::service::controllerType, supplControllerType)
-            && supplControllerType == mw::service::controllerTypeServiceDiscovery)
+        for (const auto& serviceMap : (*announcedIt).second)
         {
-            ServiceAnnouncement localServices;
-            localServices.participantName = _participantName;
-            localServices.services.reserve(announcementMap.size());
-            for (const auto& thisParticipantServiceMap : _servicesByParticipant[_participantName])
-            {
-                localServices.services.push_back(thisParticipantServiceMap.second);
-            }
-            _participant->SendIbMessage(this, serviceDescriptor.GetParticipantName(), std::move(localServices));
+            _specificDiscoveryStore.ServiceChange(ServiceDiscoveryEvent::Type::ServiceRemoved, serviceMap.second);
+            CallHandlers(ServiceDiscoveryEvent::Type::ServiceRemoved, serviceMap.second);
         }
-    }
-
-    // Update the cache
-    announcementMap[cachedServiceKey] = serviceDescriptor;
-
-    CallHandlers(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
-}
-
-void ServiceDiscovery::CallHandlers(ServiceDiscoveryEvent::Type eventType, const ServiceDescriptor& serviceDescriptor) const
-{
-    // CallHandlers must be used with a lock on _discoveryMx
-    for (auto&& handler : _handlers)
-    {
-        handler(eventType, serviceDescriptor);
-    }
-}
-
-void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const ServiceDiscoveryEvent& msg)
-{
-    if (_shuttingDown)
-    {
-        return;
-    }
-
-    if (msg.type == ServiceDiscoveryEvent::Type::ServiceCreated)
-    {
-        ReceivedServiceAddition(msg.service);
-    }
-    else
-    {
-        ReceivedServiceRemoval(msg.service);
+        _servicesByParticipant.erase(announcedIt);
     }
 }
 
@@ -145,15 +95,15 @@ void ServiceDiscovery::NotifyServiceCreated(const ServiceDescriptor& serviceDesc
     }
 
     // No self delivery for ServiceDiscoveryEvent, trigger directly in this thread context
-    ReceivedServiceAddition(serviceDescriptor);
+    OnServiceAddition(serviceDescriptor);
 
     ServiceDiscoveryEvent event;
     event.type = ServiceDiscoveryEvent::Type::ServiceCreated;
-    event.service = serviceDescriptor;
+    event.serviceDescriptor = serviceDescriptor;
     _participant->SendIbMessage(this, std::move(event));
-
 }
 
+// TODO: Is never called, connect once services can be removed
 void ServiceDiscovery::NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor)
 {
     if (_shuttingDown)
@@ -162,12 +112,99 @@ void ServiceDiscovery::NotifyServiceRemoved(const ServiceDescriptor& serviceDesc
     }
 
     // No self delivery for ServiceDiscoveryEvent, trigger directly in this thread context
-    ReceivedServiceRemoval(serviceDescriptor);
+    OnServiceRemoval(serviceDescriptor);
 
     ServiceDiscoveryEvent event;
     event.type = ServiceDiscoveryEvent::Type::ServiceRemoved;
-    event.service = serviceDescriptor;
+    event.serviceDescriptor = serviceDescriptor;
     _participant->SendIbMessage(this, std::move(event));
+}
+
+void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const ServiceDiscoveryEvent& msg)
+{
+    if (_shuttingDown)
+    {
+        return;
+    }
+
+    if (msg.type == ServiceDiscoveryEvent::Type::ServiceCreated)
+    {
+        OnServiceAddition(msg.serviceDescriptor);
+    }
+    else
+    {
+        OnServiceRemoval(msg.serviceDescriptor);
+    }
+}
+
+void ServiceDiscovery::OnServiceAddition(const ServiceDescriptor& serviceDescriptor)
+{
+    std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
+    auto&& fromParticipant = serviceDescriptor.GetParticipantName();
+    auto&& announcementMap = _servicesByParticipant[fromParticipant];
+    const auto cachedServiceKey = to_string(serviceDescriptor);
+    if (announcementMap.count(cachedServiceKey) > 0)
+    {
+        //we already now this participant's service
+        return;
+    }
+
+    // If we receive the event from ourselves, we skip announcing ourselves
+    if (fromParticipant != _participantName)
+    {
+        std::string supplControllerTypeName;
+        serviceDescriptor.GetSupplementalDataItem(mw::service::controllerType, supplControllerTypeName);
+
+        // A remote participant might be unknown, however, it will send an event for its own ServiceDiscovery service
+        // when first joining the simulation. React by announcing all services of this participant
+        if (supplControllerTypeName == mw::service::controllerTypeServiceDiscovery)
+        {
+            AnnounceLocalParticipantTo(fromParticipant);
+        }
+    }
+
+    // Update the cache
+    announcementMap[cachedServiceKey] = serviceDescriptor;
+
+    _specificDiscoveryStore.ServiceChange(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
+    CallHandlers(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
+}
+
+void ServiceDiscovery::AnnounceLocalParticipantTo(const std::string& otherParticipant)
+{
+    ParticipantDiscoveryEvent localServices;
+    localServices.participantName = _participantName;
+    localServices.services.reserve(_servicesByParticipant[_participantName].size());
+    for (const auto& thisParticipantServiceMap : _servicesByParticipant[_participantName])
+    {
+        localServices.services.push_back(thisParticipantServiceMap.second);
+    }
+    _participant->SendIbMessage(this, otherParticipant, std::move(localServices));
+}
+
+void ServiceDiscovery::OnServiceRemoval(const ServiceDescriptor& serviceDescriptor)
+{
+    std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
+    auto&& fromParticipant = serviceDescriptor.GetParticipantName();
+    auto&& announcementMap = _servicesByParticipant[fromParticipant];
+    auto numErased = announcementMap.erase(to_string(serviceDescriptor));
+    if (numErased == 0)
+    {
+        //we only notify once per event
+        return;
+    }
+
+    _specificDiscoveryStore.ServiceChange(ServiceDiscoveryEvent::Type::ServiceRemoved, serviceDescriptor);
+    CallHandlers(ServiceDiscoveryEvent::Type::ServiceRemoved, serviceDescriptor);
+}
+
+void ServiceDiscovery::CallHandlers(ServiceDiscoveryEvent::Type eventType, const ServiceDescriptor& serviceDescriptor) const
+{
+    // CallHandlers must be used with a lock on _discoveryMx
+    for (auto&& handler : _handlers)
+    {
+        handler(eventType, serviceDescriptor);
+    }
 }
 
 std::vector<ServiceDescriptor> ServiceDiscovery::GetServices() const
@@ -185,27 +222,6 @@ std::vector<ServiceDescriptor> ServiceDiscovery::GetServices() const
     return createdServices;
 }
 
-
-void ServiceDiscovery::OnParticpantShutdown(const std::string& participantName)
-{
-    if (participantName == _participantName)
-    {
-        return;
-    }
-
-    // Locally announce removal of all services from the leaving participant
-    std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
-    auto announcedIt = _servicesByParticipant.find(participantName);
-    if (announcedIt != _servicesByParticipant.end())
-    {
-        for (const auto& serviceMap : (*announcedIt).second)
-        {
-            CallHandlers(ServiceDiscoveryEvent::Type::ServiceRemoved, serviceMap.second);
-        }
-        _servicesByParticipant.erase(announcedIt);
-    }
-}
-
 void ServiceDiscovery::RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler)
 {
     if (_shuttingDown)
@@ -213,7 +229,7 @@ void ServiceDiscovery::RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT 
         return;
     }
     // Notify the new handler about the existing services and register the handler.
-    // This must be one atomic operation, as in between calls of ReceivedServiceAddition
+    // This must be one atomic operation, as in between calls of OnServiceAddition
     // in the IO-Worker thread leads to loss of ServiceDiscoveryEvents.
     std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
     for (auto&& participantServices : _servicesByParticipant)
@@ -224,6 +240,19 @@ void ServiceDiscovery::RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT 
         }
     }
     _handlers.emplace_back(std::move(handler));
+}
+
+void ServiceDiscovery::RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler,
+                                                               const std::string& controllerTypeName,
+                                                               const std::string& supplDataValue)
+{
+    if (_shuttingDown)
+    {
+        return;
+    }
+
+    std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
+    _specificDiscoveryStore.RegisterSpecificServiceDiscoveryHandler(handler, controllerTypeName, supplDataValue);
 }
 
 } // namespace service

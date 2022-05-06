@@ -144,20 +144,26 @@ TEST_F(RpcITest, test_1client_2server_sync_vasio)
 }
 
 // Two client participants, one server participant
-TEST_F(RpcITest, test_2client_1server_sync_vasio)
+TEST_F(RpcITest, test_Nclient_1server_sync_vasio)
 {
-    const uint32_t numCallsToReceive = defaultNumCalls*2;
+    const uint32_t numClients = 2;
+    const uint32_t numCallsToReceive = defaultNumCalls * numClients;
     const uint32_t numCallsToReturn = defaultNumCalls;
 
     std::vector<RpcParticipant> rpcs;
-    rpcs.push_back({"Client1", {}, {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}}, {"TestFuncA"} });
-    rpcs.push_back({"Client2", {}, {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}}, {"TestFuncA"} });
-
+    for (uint32_t i = 0; i < numClients; i++)
+    {
+        std::string participantName = "Client" + std::to_string(i+1);
+        rpcs.push_back({ participantName, {}, {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}}, {"TestFuncA"} });
+    }
+    
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
     for (uint8_t d = 0; d < defaultNumCalls; d++)
     {
-        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
-        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
+        for (uint32_t i = 0; i < numClients; i++)
+        {
+            expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
+        }
     }
     rpcs.push_back({ "Server1", {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive, expectedDataUnordered}}, {}, {} });
 
@@ -179,7 +185,7 @@ TEST_F(RpcITest, test_1client_2server_wrongFunctionName_sync_vasio)
 }
 
 // Wrong rpcExchangeFormat on server2
-TEST_F(RpcITest, test_1client_1server_wrongRpcExchangeFormat_sync_vasio)
+TEST_F(RpcITest, test_1client_1server_wrongDataExchangeFormat_sync_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls; 

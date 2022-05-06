@@ -3,6 +3,8 @@ add_library(IbMwService STATIC
     ServiceDatatypes.hpp
     ServiceDiscovery.hpp
     ServiceDiscovery.cpp
+    SpecificDiscoveryStore.cpp
+    SpecificDiscoveryStore.hpp
 )
 
 target_include_directories(IbMwService
@@ -15,6 +17,7 @@ target_link_libraries(IbMwService
     PRIVATE 
         IbInternal
         IbConfiguration
+        IbMwLogging
     INTERFACE 
         IbInternal
         IbConfiguration

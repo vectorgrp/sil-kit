@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <tuple>
 #include <typeinfo>
 #include <future>
@@ -207,7 +208,7 @@ private:
         sim::fr::TxBufferConfigUpdate,
         sim::fr::TxBufferUpdate,
         sim::fr::PocStatus,
-        mw::service::ServiceAnnouncement,
+        mw::service::ParticipantDiscoveryEvent,
         mw::service::ServiceDiscoveryEvent
     >;
 
@@ -254,18 +255,16 @@ private:
         auto link = GetLinkByName<IbMessageT>(networkName);
         link->AddLocalReceiver(receiver);
 
-        auto vasioReceiver = std::find_if(_vasioReceivers.begin(), _vasioReceivers.end(),
-            [&networkName](auto& msgReceiver) {
-            return msgReceiver->GetDescriptor().networkName == networkName
-                && msgReceiver->GetDescriptor().msgTypeName == IbMsgTraits<IbMessageT>::TypeName();
-        });
-        if (vasioReceiver == _vasioReceivers.end())
+        std::string msgTypeName = IbMsgTraits<IbMessageT>::TypeName();
+        const std::string uniqueReceiverId = networkName + "/" + msgTypeName;
+        bool isNewReceiver = _vasioUniqueReceiverIds.insert(uniqueReceiverId).second;
+        if (isNewReceiver)
         {
             // we have to subscribe to messages from other peers
             VAsioMsgSubscriber subscriptionInfo;
             subscriptionInfo.receiverIdx = static_cast<decltype(subscriptionInfo.receiverIdx)>(_vasioReceivers.size());
             subscriptionInfo.networkName = networkName;
-            subscriptionInfo.msgTypeName = IbMsgTraits<IbMessageT>::TypeName();
+            subscriptionInfo.msgTypeName = msgTypeName;
 
             std::unique_ptr<IVAsioReceiver> rawReceiver = std::make_unique<VAsioReceiver<IbMessageT>>(subscriptionInfo, link, _logger);
             auto* serviceEndpointPtr = dynamic_cast<IIbServiceEndpoint*>(rawReceiver.get());
@@ -396,6 +395,7 @@ private:
     util::tuple_tools::wrapped_tuple<IbServiceToLinkMap, IbMessageTypes> _serviceToLinkMap;
 
     std::vector<std::unique_ptr<IVAsioReceiver>> _vasioReceivers;
+    std::unordered_set<std::string> _vasioUniqueReceiverIds;
 
     // FIXME: generalize the reception of registry data
     std::vector<ParticipantAnnouncementReceiver> _participantAnnouncementReceivers;

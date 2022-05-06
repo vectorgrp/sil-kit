@@ -33,7 +33,7 @@ using ::ib::mw::test::DummyParticipant;
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD(void, SendIbMessage, (const IIbServiceEndpoint*, const ServiceAnnouncement&), (override));
+    MOCK_METHOD(void, SendIbMessage, (const IIbServiceEndpoint*, const ParticipantDiscoveryEvent&), (override));
     MOCK_METHOD(void, SendIbMessage, (const IIbServiceEndpoint*, const ServiceDiscoveryEvent&), (override));
 };
 
@@ -125,7 +125,7 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
     // reference data for validation
     ServiceDiscoveryEvent event;
     event.type = ServiceDiscoveryEvent::Type::ServiceCreated;
-    event.service = descr;
+    event.serviceDescriptor = descr;
     // NotifyServiceCreated should publish a message
     EXPECT_CALL(participant, SendIbMessage(&disco, event)).Times(1);
     // NotifyServiceCreated should also trigger ourself
@@ -137,7 +137,7 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
     // trigger notifications on reception path from different participant
     MockServiceDescriptor otherParticipant{ {1, 2} };
     descr.SetParticipantName("ParticipantOther");
-    event.service = descr;
+    event.serviceDescriptor = descr;
     EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated,
         descr)).Times(1);
 
@@ -167,9 +167,9 @@ TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
         descr.SetServiceName(serviceName);
         // Ensure we only append new services
         event.type = ServiceDiscoveryEvent::Type::ServiceCreated;
-        event.service = descr;
+        event.serviceDescriptor = descr;
 
-        // Expect that each service is only handled by a single notification handler
+        // Expect that each serviceDescriptor is only handled by a single notification handler
         // e.g., no duplicate notifications
         EXPECT_CALL(callbacks,
             ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, descr)
@@ -206,7 +206,7 @@ TEST_F(DiscoveryServiceTest, service_removal)
     descr = senderDescriptor;
     descr.SetServiceName("TestService");
     event.type = ServiceDiscoveryEvent::Type::ServiceCreated;
-    event.service = descr;
+    event.serviceDescriptor = descr;
 
     // Test addition
     EXPECT_CALL(callbacks,
@@ -218,8 +218,8 @@ TEST_F(DiscoveryServiceTest, service_removal)
     disco.ReceiveIbMessage(&otherParticipant, event);
 
     // add a modified one
-    event.service.SetServiceName("Modified");
-    auto modifiedDescr = event.service;
+    event.serviceDescriptor.SetServiceName("Modified");
+    auto modifiedDescr = event.serviceDescriptor;
     EXPECT_CALL(callbacks,
         ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, modifiedDescr)
     ).Times(1);

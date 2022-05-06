@@ -30,8 +30,9 @@ protected:
 
 };
 
-
-TEST_F(ServiceDiscoveryITest, discover_service_removal_on_participant_shutdown)
+// Tests that the service discovery handler fires for created services
+// All created should be removed as well if a participant leaves
+TEST_F(ServiceDiscoveryITest, discover_services)
 {
     auto domainId = static_cast<uint32_t>(GetTestPid());
     size_t numberOfServices = 5;
@@ -118,5 +119,90 @@ TEST_F(ServiceDiscoveryITest, discover_service_removal_on_participant_shutdown)
     std::sort(removedServiceNames.begin(), removedServiceNames.end());
     EXPECT_EQ(createdServiceNames, removedServiceNames);
 }
+
+// Tests that the specific service discovery handler fires for created services
+// All created should be removed as well if a participant leaves
+TEST_F(ServiceDiscoveryITest, discover_specific_services)
+{
+    auto domainId = static_cast<uint32_t>(GetTestPid());
+    size_t numberOfServices = 5;
+    std::string subscriberName = "Subscriber";
+    std::string publisherName = "Publisher";
+
+    // Registry
+    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
+    registry->ProvideDomain(domainId);
+
+    // Publisher that will leave the simulation and trigger service removal
+    auto&& publisher = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), publisherName, domainId, false);
+
+    // Subscriber that monitors the services
+    auto&& subscriber = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), subscriberName, domainId, false);
+
+    // Services
+    const auto topic = "Topic";
+    for (auto i = 0u; i < numberOfServices; i++)
+    {
+        const auto pubControllerName = "PubCtrl" + std::to_string(i);
+        publisher->CreateDataPublisher(pubControllerName, topic, {}, {}, 0);
+    }
+
+    std::vector<std::string> createdServiceNames;
+    std::vector<std::string> removedServiceNames;
+
+    // Cast to internal participant for access to service discovery
+    auto subscriberServiceDiscovery = dynamic_cast<IParticipantInternal*>(subscriber.get())->GetServiceDiscovery();
+
+    auto allCreated = std::promise<void>();
+    auto allRemoved = std::promise<void>();
+    // Participants are already there, so the registration will trigger the provided handler immediately
+    subscriberServiceDiscovery->RegisterSpecificServiceDiscoveryHandler(
+        [numberOfServices, &allRemoved, &allCreated, &createdServiceNames, &removedServiceNames, publisherName](
+            auto discoveryType, const auto& service) {
+            switch (discoveryType)
+            {
+            case ib::mw::service::ServiceDiscoveryEvent::Type::Invalid: break;
+            case ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated:
+                if (service.GetParticipantName() == publisherName)
+                {
+                    createdServiceNames.push_back(service.GetServiceName());
+                    if (createdServiceNames.size() == numberOfServices)
+                    {
+                        allCreated.set_value();
+                    }
+                }
+                break;
+            case ib::mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved:
+                if (service.GetParticipantName() == publisherName)
+                {
+                    removedServiceNames.push_back(service.GetServiceName());
+                    if (removedServiceNames.size() == createdServiceNames.size())
+                    {
+                        allRemoved.set_value();
+                    }
+                }
+                break;
+            default: break;
+            }
+        }, ib::mw::service::controllerTypeDataPublisher, topic);
+
+    // Await the creation
+    allCreated.get_future().wait_for(10s);
+
+    // Kill the publisher
+    publisher.reset();
+
+    // Await the removal
+    allRemoved.get_future().wait_for(10s);
+
+    // The DataPublisher services get discovered by the specific handler
+    ASSERT_TRUE(createdServiceNames.size() == numberOfServices);
+
+    // All that got discovered should be removed as well
+    std::sort(createdServiceNames.begin(), createdServiceNames.end());
+    std::sort(removedServiceNames.begin(), removedServiceNames.end());
+    EXPECT_EQ(createdServiceNames, removedServiceNames);
+}
+
 
 } // anonymous namespace

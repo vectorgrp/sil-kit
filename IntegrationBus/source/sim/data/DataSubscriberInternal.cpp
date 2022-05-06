@@ -22,6 +22,7 @@ DataSubscriberInternal::DataSubscriberInternal(mw::IParticipantInternal* partici
     , _timeProvider{timeProvider}
     , _participant{participant}
 {
+    (void)_participant;
 }
 
 void DataSubscriberInternal::SetDefaultDataMessageHandler(DataMessageHandlerT handler)

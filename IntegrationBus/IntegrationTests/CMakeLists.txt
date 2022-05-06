@@ -155,6 +155,16 @@ add_vib_test(FTestServiceDiscoveryPerf
       IbSimTestHarness
       ${itest_extra_libs}
 )
+
+add_vib_test(FTestPubSubPerf
+    SOURCES
+      PubSubPerfFTest.cpp
+    LIBS
+      IbMwParticipant
+      IbSimTestHarness
+      ${itest_extra_libs}
+)
+
 add_vib_test(ITestAsyncSimTask
     SOURCES
       AsyncSimTaskITest.cpp

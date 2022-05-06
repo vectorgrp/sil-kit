@@ -8,7 +8,7 @@ TEST(MwVAsioSerdes, Mw_Service)
 {
     ib::mw::MessageBuffer buffer;
 
-    ib::mw::service::ServiceAnnouncement in{};
+    ib::mw::service::ParticipantDiscoveryEvent in{};
     in.participantName = "Input";
     for (auto i = 0; i < 10; i++) {
         ib::mw::SupplementalData supplementalData;
@@ -25,7 +25,7 @@ TEST(MwVAsioSerdes, Mw_Service)
         in.services.push_back(descr);
     }
 
-    ib::mw::service::ServiceAnnouncement out{};
+    ib::mw::service::ParticipantDiscoveryEvent out{};
     
     buffer << in;
     buffer >> out;

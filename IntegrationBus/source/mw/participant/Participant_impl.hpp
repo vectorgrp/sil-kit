@@ -572,11 +572,10 @@ auto Participant<IbConnectionT>::GetServiceDiscovery() -> service::IServiceDisco
         supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeServiceDiscovery;
 
         controller = CreateInternalController<service::ServiceDiscovery>(
-            "ServiceDiscovery", mw::ServiceType::InternalController, std::move(supplementalData),
-                                                                 _participantName);
+            "ServiceDiscovery", mw::ServiceType::InternalController, std::move(supplementalData), _participantName);
         
         _ibConnection.RegisterPeerShutdownCallback([controller](IVAsioPeer* peer) {
-            controller->OnParticpantShutdown(peer->GetInfo().participantName);
+            controller->OnParticpantRemoval(peer->GetInfo().participantName);
         });
     }
     return controller;
@@ -887,7 +886,7 @@ void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, l
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const service::ServiceAnnouncement& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const service::ParticipantDiscoveryEvent& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
@@ -1173,7 +1172,7 @@ void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, c
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const service::ServiceAnnouncement& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const service::ParticipantDiscoveryEvent& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }

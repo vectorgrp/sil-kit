@@ -24,18 +24,11 @@ DataSubscriber::DataSubscriber(mw::IParticipantInternal* participant, mw::sync::
 
 void DataSubscriber::RegisterServiceDiscovery()
 {
-    _participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
+    _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(
         [this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType,
                const ib::mw::ServiceDescriptor& serviceDescriptor) {
             if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated)
             {
-                std::string controllerType;
-                if (!(serviceDescriptor.GetSupplementalDataItem(mw::service::controllerType, controllerType) &&
-                    controllerType == mw::service::controllerTypeDataPublisher))
-                {
-                    return;
-                }
-
                 auto getVal = [serviceDescriptor](std::string key) {
                     std::string tmp;
                     if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
@@ -67,7 +60,7 @@ void DataSubscriber::RegisterServiceDiscovery()
                     AssignSpecificDataHandlers();
                 }
             }
-        });
+        }, mw::service::controllerTypeDataPublisher, _topic);
 }
 
 void DataSubscriber::SetDefaultDataMessageHandler(DataMessageHandlerT callback)

@@ -210,7 +210,7 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::FunctionCallResponse& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::FunctionCallResponse&& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint*, const service::ServiceAnnouncement& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint*, const service::ParticipantDiscoveryEvent& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const service::ServiceDiscoveryEvent& msg) override;
 
     // targeted messaging
@@ -265,7 +265,7 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::FunctionCallResponse& msg) override;
     void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::FunctionCallResponse&& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const service::ServiceAnnouncement& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const service::ParticipantDiscoveryEvent& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const service::ServiceDiscoveryEvent& msg) override;
 
     void OnAllMessagesDelivered(std::function<void()> callback) override;

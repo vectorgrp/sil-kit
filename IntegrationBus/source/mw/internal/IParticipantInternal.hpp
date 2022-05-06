@@ -93,7 +93,7 @@ public:
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const logging::LogMsg& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, logging::LogMsg&& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const service::ServiceAnnouncement& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const service::ParticipantDiscoveryEvent& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const service::ServiceDiscoveryEvent& msg) = 0;
 
     // targeted messaging
@@ -148,7 +148,7 @@ public:
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const logging::LogMsg& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, logging::LogMsg&& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const service::ServiceAnnouncement& msg) = 0;
+    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const service::ParticipantDiscoveryEvent& msg) = 0;
     virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const service::ServiceDiscoveryEvent& msg) = 0;
 
     // For Connection/middleware support:

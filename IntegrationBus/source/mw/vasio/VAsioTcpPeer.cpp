@@ -473,7 +473,7 @@ void VAsioTcpPeer::DispatchBuffer()
     }
 
     // validate the received size
-    if (_currentMsgSize == 0 || _currentMsgSize > 1024 * 1024)
+    if (_currentMsgSize == 0 || _currentMsgSize > 1024 * 1024 * 1024)
     {
         _logger->Error("Received invalid Message Size: {}", _currentMsgSize);
         Shutdown();

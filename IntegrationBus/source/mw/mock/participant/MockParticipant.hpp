@@ -127,9 +127,13 @@ class MockServiceDiscovery : public service::IServiceDiscovery
 public:
     MOCK_METHOD(void, NotifyServiceCreated, (const ServiceDescriptor& serviceDescriptor), (override));
     MOCK_METHOD(void, NotifyServiceRemoved, (const ServiceDescriptor& serviceDescriptor), (override));
-    MOCK_METHOD(void, RegisterServiceDiscoveryHandler, (ServiceDiscoveryHandlerT handler), (override));
+    MOCK_METHOD(void, RegisterServiceDiscoveryHandler, (ib::mw::service::ServiceDiscoveryHandlerT handler), (override));
+    MOCK_METHOD(void, RegisterSpecificServiceDiscoveryHandler,
+                (ib::mw::service::ServiceDiscoveryHandlerT handler, const std::string& controllerTypeName,
+                 const std::string& supplDataValue),
+                (override));
     MOCK_METHOD(std::vector<ServiceDescriptor>, GetServices, (), (const, override));
-    MOCK_METHOD(void, OnParticpantShutdown, (const std::string& participantName), (override));
+    MOCK_METHOD(void, OnParticpantRemoval, (const std::string& participantName), (override));
 
 };
 
@@ -302,7 +306,7 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, logging::LogMsg&& /*msg*/)  override{}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const logging::LogMsg& /*msg*/)  override{}
 
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const service::ServiceAnnouncement& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const service::ParticipantDiscoveryEvent& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const service::ServiceDiscoveryEvent& /*msg*/)  override{}
 
     // targeted messaging
@@ -358,7 +362,7 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, logging::LogMsg&& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const logging::LogMsg& /*msg*/) override {}
 
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const service::ServiceAnnouncement& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const service::ParticipantDiscoveryEvent& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const service::ServiceDiscoveryEvent& /*msg*/) override {}
 
 

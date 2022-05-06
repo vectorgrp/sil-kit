@@ -306,7 +306,7 @@ protected:
     {
         try
         {
-            participant.participant = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(),
+            participant.participant = ib::CreateParticipant(ib::cfg::MockParticipantConfigurationWithLogging(ib::mw::logging::Level::Info),
                                                                      participant.name, domainId, sync);
 
             // Create Clients
@@ -328,13 +328,7 @@ protected:
                 c.rpcClient =
                     participant.participant->CreateRpcClient(c.controllerName, c.rpcChannel, c.dxf, c.labels, callReturnHandler);
             }
-            auto callTask = [&participant]() {
-                for (auto& client : participant.rpcClients)
-                {
-                    client.Call();
-                }
-            };
-
+           
             // Create Servers
             for (auto& s : participant.rpcServers)
             {
@@ -376,8 +370,11 @@ protected:
             {
                 IParticipantController* participantController = participant.participant->GetParticipantController();
                 participantController->SetPeriod(1s);
-                participantController->SetSimulationTask([&participant, callTask](std::chrono::nanoseconds /*now*/) {
-                    callTask();
+                participantController->SetSimulationTask([&participant](std::chrono::nanoseconds /*now*/) {
+                    for (auto& client : participant.rpcClients)
+                    {
+                        client.Call();
+                    }
                     participant.CheckAllCalledPromise();
                 });
                 auto finalStateFuture = participantController->RunAsync();
@@ -394,7 +391,10 @@ protected:
                         }))
                     {
                         std::this_thread::sleep_for(500ms);
-                        callTask();
+                        for (auto& client : participant.rpcClients)
+                        {
+                            client.Call();
+                        };
                     }
                     participant.allCalledPromise.set_value();
                 }

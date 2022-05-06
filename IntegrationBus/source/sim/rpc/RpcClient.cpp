@@ -31,16 +31,9 @@ RpcClient::RpcClient(mw::IParticipantInternal* participant, mw::sync::ITimeProvi
 void RpcClient::RegisterServiceDiscovery()
 {
     // The RpcClient discovers RpcServersInternal and is ready to detach calls afterwards
-    _participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
+    _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(
         [this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType,
                const ib::mw::ServiceDescriptor& serviceDescriptor) {
-
-            std::string controllerType;
-            if (!(serviceDescriptor.GetSupplementalDataItem(mw::service::controllerType, controllerType)
-                  && controllerType == mw::service::controllerTypeRpcServerInternal))
-            {
-                return;
-            }
 
             auto getVal = [serviceDescriptor](std::string key) {
                 std::string tmp;
@@ -64,7 +57,7 @@ void RpcClient::RegisterServiceDiscovery()
                     _numCounterparts--;
                 }
             }
-        });
+        }, mw::service::controllerTypeRpcServerInternal, _clientUUID);
 }
 
 IRpcCallHandle* RpcClient::Call(std::vector<uint8_t> data)
@@ -84,7 +77,6 @@ IRpcCallHandle* RpcClient::Call(std::vector<uint8_t> data)
         _detachedCallHandles[to_string(callUUID)] = std::make_pair(_numCounterparts, std::move(callHandle));
         FunctionCall msg{std::move(callUUID), std::move(data)};
         _participant->SendIbMessage(this, std::move(msg));
-
         return callHandlePtr;
     }
 }

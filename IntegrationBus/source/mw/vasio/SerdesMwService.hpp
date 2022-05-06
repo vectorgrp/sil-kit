@@ -90,9 +90,9 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
 }
 
 namespace service {
-// ServiceAnnouncement
+// ParticipantDiscoveryEvent
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
-    const ServiceAnnouncement& msg)
+    const ParticipantDiscoveryEvent& msg)
 {
     buffer << msg.participantName
         << msg.version
@@ -102,7 +102,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
 }
 
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
-    ServiceAnnouncement& updatedMsg)
+    ParticipantDiscoveryEvent& updatedMsg)
 {
     buffer >> updatedMsg.participantName
         >> updatedMsg.version
@@ -117,7 +117,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
     const ServiceDiscoveryEvent& msg)
 {
     buffer << msg.type
-        << msg.service
+        << msg.serviceDescriptor
         ;
     return buffer;
 }
@@ -126,7 +126,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
     ServiceDiscoveryEvent& updatedMsg)
 {
     buffer >> updatedMsg.type
-        >> updatedMsg.service
+        >> updatedMsg.serviceDescriptor
         ;
     return buffer;
 }

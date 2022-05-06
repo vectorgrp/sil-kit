@@ -29,17 +29,11 @@ RpcServer::RpcServer(mw::IParticipantInternal* participant, mw::sync::ITimeProvi
 void RpcServer::RegisterServiceDiscovery()
 {
     // RpcServer discovers RpcClient and adds RpcServerInternal on a matching connection
-    _participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
+    _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(
         [this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType,
                const ib::mw::ServiceDescriptor& serviceDescriptor) {
             if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated)
             {
-                std::string controllerType;
-                if (!(serviceDescriptor.GetSupplementalDataItem(mw::service::controllerType, controllerType)
-                      && controllerType == mw::service::controllerTypeRpcClient))
-                {
-                    return;
-                }
 
                 auto getVal = [serviceDescriptor](std::string key) {
                     std::string tmp;
@@ -64,7 +58,7 @@ void RpcServer::RegisterServiceDiscovery()
                 }
 
             }
-        });
+        }, mw::service::controllerTypeRpcClient, _rpcChannel);
 }
 
 void RpcServer::SubmitResult(IRpcCallHandle* callHandle, std::vector<uint8_t> resultData)
@@ -94,6 +88,7 @@ void RpcServer::AddInternalRpcServer(const std::string& clientUUID, RpcExchangeF
 
 void RpcServer::SetRpcHandler(CallProcessor handler)
 {
+	_handler = handler;
     for (auto* internalRpcServer : _internalRpcServers)
     {
         internalRpcServer->SetRpcHandler(handler);

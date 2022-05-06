@@ -21,10 +21,10 @@ struct ServiceDiscoveryEvent
         ServiceRemoved,
     };
     Type type{ Type::Invalid };
-    ServiceDescriptor service;
+    ServiceDescriptor serviceDescriptor;
 };
 
-struct ServiceAnnouncement //requires history >= 1
+struct ParticipantDiscoveryEvent //requires history >= 1
 {
     std::string participantName;
     uint64_t version{1}; //!< version indicator is manually set and changed when announcements break compatibility
@@ -37,16 +37,16 @@ struct ServiceAnnouncement //requires history >= 1
 inline bool operator==(const ServiceDiscoveryEvent& lhs, const ServiceDiscoveryEvent& rhs)
 {
     return lhs.type == rhs.type
-        && lhs.service == rhs.service
+        && lhs.serviceDescriptor == rhs.serviceDescriptor
         ;
 }
-inline bool operator==(const ServiceAnnouncement& lhs, const ServiceAnnouncement& rhs)
+inline bool operator==(const ParticipantDiscoveryEvent& lhs, const ParticipantDiscoveryEvent& rhs)
 {
     return lhs.participantName == rhs.participantName
         && lhs.services == rhs.services
         ;
 }
-inline bool operator!=(const ServiceAnnouncement& lhs, const ServiceAnnouncement& rhs)
+inline bool operator!=(const ParticipantDiscoveryEvent& lhs, const ParticipantDiscoveryEvent& rhs)
 {
     return !(lhs == rhs);
 }
@@ -69,13 +69,13 @@ inline std::ostream& operator<<(std::ostream& out, const ServiceDiscoveryEvent::
 }
 inline std::ostream& operator<<(std::ostream& out, const ServiceDiscoveryEvent& event)
 {
-    out << "ServiceDiscoveryEvent{" << event.type << ", " << event.service << "}";
+    out << "ServiceDiscoveryEvent{" << event.type << ", " << event.serviceDescriptor << "}";
     return out;
 }
 
-inline std::ostream& operator<<(std::ostream& out, const ServiceAnnouncement& serviceAnnouncement)
+inline std::ostream& operator<<(std::ostream& out, const ParticipantDiscoveryEvent& serviceAnnouncement)
 {
-    out << "ServiceAnnouncement{\"" << serviceAnnouncement.participantName
+    out << "ParticipantDiscoveryEvent{\"" << serviceAnnouncement.participantName
         << "\", services=["
         ;
     for (auto&& service : serviceAnnouncement.services)
@@ -87,7 +87,7 @@ inline std::ostream& operator<<(std::ostream& out, const ServiceAnnouncement& se
     out << "] }";
     return out;
 }
-inline std::string to_string(const ServiceAnnouncement& serviceAnnouncement)
+inline std::string to_string(const ParticipantDiscoveryEvent& serviceAnnouncement)
 {
     std::stringstream str;
     str << serviceAnnouncement;
