@@ -49,13 +49,11 @@ public:
 
     auto GetInfo() const -> const VAsioPeerInfo& override;
     void SetInfo(VAsioPeerInfo info) override;
-    void SetUri(VAsioPeerUri peerUri) override;
-    auto GetUri() const -> const VAsioPeerUri& override;
     //!< Return the socket address as URI encoded string or throw if not connected
     auto GetRemoteAddress() const -> std::string override;
     auto GetLocalAddress() const -> std::string override;
 
-    void Connect(VAsioPeerUri info);
+    void Connect(VAsioPeerInfo info);
 
     inline auto Socket() -> asio::generic::stream_protocol::socket& { return _socket; }
 
@@ -82,7 +80,6 @@ private:
     asio::generic::stream_protocol::socket _socket;
     VAsioConnection* _ibConnection{nullptr};
     VAsioPeerInfo _info;
-    VAsioPeerUri _uri;
 
     logging::ILogger* _logger;
 

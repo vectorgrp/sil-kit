@@ -91,7 +91,7 @@ public:
             return;
 
 
-        _serviceDescriptor.SetParticipantName(peer->GetUri().participantName);
+        _serviceDescriptor.SetParticipantName(peer->GetInfo().participantName);
         _remoteReceivers.push_back(remoteReceiver);
         _hist.NotifyPeer(peer, remoteIdx);
     }
@@ -102,7 +102,7 @@ public:
         _hist.Save(from, msg);
         auto&& receiverIter = std::find_if(_remoteReceivers.begin(), _remoteReceivers.end(), [targetParticipantName](auto&& receiver) 
             {
-                return receiver.peer->GetUri().participantName == targetParticipantName;
+                return receiver.peer->GetInfo().participantName == targetParticipantName;
             });
         if (receiverIter == _remoteReceivers.end())
         {

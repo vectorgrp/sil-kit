@@ -101,23 +101,13 @@ auto VAsioRegistry::GetLogger() -> logging::ILogger*
 auto VAsioRegistry::FindConnectedPeer(const std::string& name) const -> std::vector<ConnectedParticipantInfo>::const_iterator
 {
     return std::find_if(_connectedParticipants.begin(), _connectedParticipants.end(),
-        [&name](const auto& connectedParticipant) { return connectedParticipant.peerUri.participantName == name; });
+        [&name](const auto& connectedParticipant) { return connectedParticipant.peerInfo.participantName == name; });
 }
 
 void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const ParticipantAnnouncement& announcement)
 {
 
-    auto peerUri = announcement.peerUri;
-
-    if (peerUri.acceptorUris.empty())
-    {
-        // fall back to legacy peer info
-        peerUri.participantId = announcement.peerInfo.participantId;
-        peerUri.participantName = announcement.peerInfo.participantName;
-        peerUri.acceptorUris.push_back(
-            Uri{ announcement.peerInfo.acceptorHost, announcement.peerInfo.acceptorPort }.EncodedString()
-        );
-    }
+    auto peerInfo = announcement.peerInfo;
 
     // NB When we have a remote client we might need to patch its acceptor name (host or ip address).
     // In a distributed simulation the participants will listen on an IPADDRANY address
@@ -128,7 +118,7 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
     const auto fromUri = Uri{from->GetRemoteAddress()};
     if (fromUri.Type() == Uri::UriType::Tcp)
     {
-        for (auto& uri : peerUri.acceptorUris)
+        for (auto& uri : peerInfo.acceptorUris)
         {
             //parse to get listening port of peer
             const auto origUri = Uri{ uri };
@@ -146,11 +136,11 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
         }
     }
 
-    if (FindConnectedPeer(peerUri.participantName) != _connectedParticipants.end())
+    if (FindConnectedPeer(peerInfo.participantName) != _connectedParticipants.end())
     {
         _logger->Warn(
             "Ignoring announcement from participant name={}, which is already connected",
-            peerUri.participantName);
+            peerInfo.participantName);
         return;
     }
 
@@ -158,7 +148,7 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
 
     ConnectedParticipantInfo newParticipantInfo;
     newParticipantInfo.peer = from;
-    newParticipantInfo.peerUri = peerUri;
+    newParticipantInfo.peerInfo = peerInfo;
     _connectedParticipants.emplace_back(std::move(newParticipantInfo));
 
     if (AllParticipantsAreConnected())
@@ -200,31 +190,14 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
         }
     };
 
-    // Also provide VAsioPeerInfos for legacy participants
-    auto uriToPeerInfos = [](const auto& peerUriSrc, auto& peerInfoVec) {
-        for (const auto& uriStr : peerUriSrc.acceptorUris) {
-            auto uri = Uri{ uriStr };
-            if (uri.Type() == Uri::UriType::Tcp) {
-                VAsioPeerInfo pi{};
-                pi.acceptorHost = uri.Host();
-                pi.acceptorPort = uri.Port();
-                pi.participantId = peerUriSrc.participantId;
-                pi.participantName = peerUriSrc.participantName;
-                peerInfoVec.emplace_back(std::move(pi));
-            }
-        }
-    };
     for (const auto& connectedParticipant : _connectedParticipants)
     {
         // don't advertise the peer to itself
         if (connectedParticipant.peer == peer) continue;
 
-        auto peerUri = connectedParticipant.peerUri;
-        replaceLocalhostUri(peerUri);
-        knownParticipantsMsg.peerUris.push_back(peerUri);
-
-        // backwards compatibility with PeerInfos
-        uriToPeerInfos(peerUri, knownParticipantsMsg.peerInfos);
+        auto peerInfo = connectedParticipant.peerInfo;
+        replaceLocalhostUri(peerInfo);
+        knownParticipantsMsg.peerInfos.push_back(peerInfo);
     }
 
     MessageBuffer sendBuffer;

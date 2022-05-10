@@ -8,7 +8,7 @@ using namespace std::chrono_literals;
 
 namespace ib { namespace mw {
 
-bool operator==(const VAsioPeerUri& lhs, const VAsioPeerUri& rhs)
+bool operator==(const VAsioPeerInfo& lhs, const VAsioPeerInfo& rhs)
 {
 	return lhs.participantId == rhs.participantId
 		&& lhs.participantName == rhs.participantName
@@ -20,7 +20,7 @@ bool operator==(const VAsioPeerUri& lhs, const VAsioPeerUri& rhs)
 bool operator==(const ParticipantAnnouncement& lhs, const ParticipantAnnouncement& rhs)
 {
 	return lhs.messageHeader == rhs.messageHeader
-		&& lhs.peerUri == rhs.peerUri
+		&& lhs.peerInfo == rhs.peerInfo
 		;
 }
 
@@ -32,7 +32,7 @@ bool operator==(const ParticipantAnnouncementReply& lhs, const ParticipantAnnoun
 bool operator==(const KnownParticipants& lhs, const KnownParticipants& rhs)
 {
 	return lhs.messageHeader == rhs.messageHeader
-		&& lhs.peerUris == rhs.peerUris
+		&& lhs.peerInfos == rhs.peerInfos
 		;
 }
 
@@ -41,9 +41,9 @@ bool operator==(const KnownParticipants& lhs, const KnownParticipants& rhs)
 
 namespace {
 using namespace ib::mw;
-auto MakePeerUri() -> VAsioPeerUri
+auto MakePeerInfo() -> VAsioPeerInfo
 {
-	VAsioPeerUri in{};
+	VAsioPeerInfo in{};
 	in.participantId = 1234;
 	in.participantName = "Test";
 	in.acceptorUris.push_back("local:///tmp/participant1");
@@ -67,8 +67,8 @@ TEST(MwVAsioSerdes, vasio_RegistryMsgHeader)
 TEST(MwVAsioSerdes, vasio_peerUri)
 {
 	MessageBuffer buffer;
-	VAsioPeerUri in = MakePeerUri();
-	VAsioPeerUri out{};
+	VAsioPeerInfo in = MakePeerInfo();
+	VAsioPeerInfo out{};
 
 	buffer << in;
 	buffer >> out;
@@ -82,7 +82,7 @@ TEST(MwVAsioSerdes, vasio_participantAnouncement)
 	ParticipantAnnouncement in{}, out{};
 
 	in.messageHeader = RegistryMsgHeader{};
-	in.peerUri = MakePeerUri();
+	in.peerInfo = MakePeerInfo();
 
 	buffer << in;
 	buffer >> out;
@@ -136,11 +136,11 @@ TEST(MwVAsioSerdes, vasio_knownParticipants)
 	in.messageHeader = RegistryMsgHeader{};
 	for(auto i = 0; i < 10; i++)
 	{
-		VAsioPeerUri vpi;
+		VAsioPeerInfo vpi;
 		vpi.participantId = i;
 		vpi.participantName  = "VPI" + std::to_string(i);
 		vpi.acceptorUris.push_back("local://localhost");
-		in.peerUris.emplace_back(std::move(vpi));
+		in.peerInfos.emplace_back(std::move(vpi));
 	}
 
 	buffer << in;

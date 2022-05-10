@@ -25,8 +25,6 @@ public:
 
     virtual auto GetInfo() const -> const VAsioPeerInfo& = 0;
     virtual void SetInfo(VAsioPeerInfo info) = 0;
-    virtual void SetUri(VAsioPeerUri info) = 0;
-    virtual auto GetUri() const -> const VAsioPeerUri& = 0;
     //! Remote socket endpoint address.
     virtual auto GetRemoteAddress() const -> std::string = 0;
     //! Local socket endpoint address.

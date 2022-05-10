@@ -30,8 +30,9 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const VAsioPeerInfo& pee
 {
     buffer << peerInfo.participantName
            << peerInfo.participantId
-           << peerInfo.acceptorHost
-           << peerInfo.acceptorPort;
+           << peerInfo.acceptorUris
+           << peerInfo.capabilities
+           ;
     return buffer;
 }
 
@@ -39,26 +40,8 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioPeerInfo& peerInfo)
 {
     buffer >> peerInfo.participantName
            >> peerInfo.participantId
-           >> peerInfo.acceptorHost
-           >> peerInfo.acceptorPort;
-    return buffer;
-}
-inline MessageBuffer& operator<<(MessageBuffer& buffer, const VAsioPeerUri& peerUri)
-{
-    buffer << peerUri.participantName
-           << peerUri.participantId
-           << peerUri.acceptorUris
-           << peerUri.capabilities
-           ;
-    return buffer;
-}
-
-inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioPeerUri& peerUri)
-{
-    buffer >> peerUri.participantName
-           >> peerUri.participantId
-           >> peerUri.acceptorUris
-           >> peerUri.capabilities
+           >> peerInfo.acceptorUris
+           >> peerInfo.capabilities
         ;
     return buffer;
 }
@@ -101,7 +84,6 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
 {
     buffer << announcement.messageHeader
         << announcement.peerInfo
-        << announcement.peerUri
         ;
 
     return buffer;
@@ -110,7 +92,6 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncement&
 {
     buffer >> announcement.messageHeader
         >> announcement.peerInfo
-        >> announcement.peerUri
         ;
     return buffer;
 }
@@ -130,17 +111,14 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const KnownParticipants&
 {
     buffer << participants.messageHeader
         << participants.peerInfos
-        << participants.peerUris;
+        ;
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, KnownParticipants& participants)
 {
     buffer >> participants.messageHeader
-        >> participants.peerInfos;
-    if (buffer.RemainingBytesLeft() > 0)
-    {
-        buffer >> participants.peerUris;
-    }
+        >> participants.peerInfos
+        ;
     return buffer;
 }
 

@@ -77,23 +77,19 @@ struct MockVAsioPeer
     , public IIbServiceEndpoint
     , public IVasioProtocolPeer
 {
-    VAsioPeerUri _peerUri;
     VAsioPeerInfo _peerInfo;
     ServiceDescriptor _serviceDescriptor;
     MockVAsioPeer()
     {
-        _peerUri.participantId = 1234;
-        _peerUri.participantName = "MockVAsioPeer";
-        _peerUri.acceptorUris.push_back("tcp://localhost:1234");
-        _peerInfo.acceptorHost = "localhost";
-        _peerInfo.acceptorPort = 1234;
+        _peerInfo.participantId = 1234;
+        _peerInfo.participantName = "MockVAsioPeer";
+        _peerInfo.acceptorUris.push_back("tcp://localhost:1234");
 
         _serviceDescriptor._serviceId = 1;
         _serviceDescriptor._participantId = 1;
 
         ON_CALL(*this, GetLocalAddress()).WillByDefault(Return("127.0.0.1"));
         ON_CALL(*this, GetRemoteAddress()).WillByDefault(Return("127.0.0.1"));
-        ON_CALL(*this, GetUri()).WillByDefault(ReturnRef(_peerUri));
         ON_CALL(*this, GetInfo()).WillByDefault(ReturnRef(_peerInfo));
         ON_CALL(*this, GetServiceDescriptor()).WillByDefault(ReturnRef(_serviceDescriptor));
     }
@@ -103,8 +99,6 @@ struct MockVAsioPeer
     MOCK_METHOD(void, Subscribe, (VAsioMsgSubscriber), (override));
     MOCK_METHOD(const VAsioPeerInfo&, GetInfo, (), (const, override));
     MOCK_METHOD(void, SetInfo, (VAsioPeerInfo), (override));
-    MOCK_METHOD(void, SetUri, (VAsioPeerUri), (override));
-    MOCK_METHOD(const VAsioPeerUri&, GetUri, (), (override, const));
     MOCK_METHOD(std::string, GetRemoteAddress, (), (const, override));
     MOCK_METHOD(std::string, GetLocalAddress, (), (const, override));
 
@@ -252,7 +246,7 @@ protected:
 TEST_F(VAsioConnectionTest, unsupported_version_connect)
 {
     ParticipantAnnouncement announcement{};
-    announcement.peerUri = _from.GetUri();
+    announcement.peerInfo = _from.GetInfo();
     announcement.messageHeader.versionHigh = 1;
 
     auto buffer = Serialize(announcement);
@@ -266,7 +260,7 @@ TEST_F(VAsioConnectionTest, unsupported_version_connect)
 TEST_F(VAsioConnectionTest, current_version_connect)
 {
     ParticipantAnnouncement announcement{}; //sets correct version in header
-    announcement.peerUri = _from.GetUri();
+    announcement.peerInfo = _from.GetInfo();
 
     auto buffer = Serialize(announcement);
     DropMessageSize(buffer);

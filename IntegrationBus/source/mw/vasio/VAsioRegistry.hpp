@@ -31,7 +31,7 @@ private:
     // private data types
     struct ConnectedParticipantInfo {
         IVAsioPeer* peer;
-        ib::mw::VAsioPeerUri peerUri;
+        ib::mw::VAsioPeerInfo peerInfo;
     };
 
 private:

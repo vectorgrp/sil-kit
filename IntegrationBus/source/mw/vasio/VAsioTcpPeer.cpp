@@ -133,16 +133,6 @@ void VAsioTcpPeer::SetInfo(VAsioPeerInfo peerInfo)
     _info = std::move(peerInfo);
 }
 
-void VAsioTcpPeer::SetUri(VAsioPeerUri peerUri)
-{
-    _uri = std::move(peerUri);
-}
-
-auto VAsioTcpPeer::GetUri() const -> const VAsioPeerUri&
-{
-    return _uri;
-}
-
 static auto GetSocketAddress(const asio::generic::stream_protocol::socket& socket,
     bool remoteEndpoint) -> std::string 
 {
@@ -274,16 +264,14 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
     }
     return false;
 }
-void VAsioTcpPeer::Connect(VAsioPeerUri peerInfo)
+void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
 {
-    _info.participantId = peerInfo.participantId;
-    _info.participantName = peerInfo.participantName;
-    _uri = std::move(peerInfo);
+    _info = std::move(peerInfo);
 
     std::stringstream attemptedUris;
 
     // parse endpoints into Uri objects
-    const auto& uriStrings = _uri.acceptorUris;
+    const auto& uriStrings = _info.acceptorUris;
     std::vector<Uri> uris;
     std::transform(uriStrings.begin(), uriStrings.end(), std::back_inserter(uris),
         [](const auto& uriStr) {
@@ -317,9 +305,6 @@ void VAsioTcpPeer::Connect(VAsioPeerUri peerInfo)
                 attemptedUris << uri.EncodedString() << ",";
                 if (ConnectTcp(uri.Host(), uri.Port()))
                 {
-                    // For backward compatibility between VAsioPeerUri and VAsioPeerInfo:
-                    _info.acceptorHost = uri.Host();
-                    _info.acceptorPort = uri.Port();
                     return;
                 }
             }

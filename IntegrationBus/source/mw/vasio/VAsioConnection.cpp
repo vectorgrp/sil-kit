@@ -150,7 +150,7 @@ auto makeLocalEndpoint(const std::string& participantName, const ib::mw::Partici
 }
 
 //Debug  print of given peer infos
-auto printUris(const ib::mw::VAsioPeerUri& info) -> std::string 
+auto printUris(const ib::mw::VAsioPeerInfo& info) -> std::string 
 {
     std::stringstream ss;
     for (auto& uri : info.acceptorUris)
@@ -304,7 +304,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     };
 
     // Compute a list of Registry URIs and attempt to connect as per config
-    VAsioPeerUri registryUri;
+    VAsioPeerInfo registryUri;
     registryUri.participantName = "IbRegistry";
     registryUri.participantId = 0;
 
@@ -358,7 +358,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
         throw std::runtime_error{"ERROR: Failed to connect to VAsio registry"};
     }
 
-    _logger->Info("Connected to registry {}", printUris(registry->GetUri()));
+    _logger->Info("Connected to registry {}", printUris(registry->GetInfo()));
     registry->StartAsyncRead();
 
     SendParticipantAnnoucement(registry.get());
@@ -399,10 +399,9 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
     _logger->Debug("Received participant announcement from {}", announcement.peerInfo.participantName);
 
     from->SetInfo(announcement.peerInfo);
-    from->SetUri(announcement.peerUri);
     auto& service = dynamic_cast<IIbServiceEndpoint&>(*from);
     auto serviceDescriptor = service.GetServiceDescriptor();
-    serviceDescriptor.SetParticipantName(announcement.peerUri.participantName);
+    serviceDescriptor.SetParticipantName(announcement.peerInfo.participantName);
     service.SetServiceDescriptor(serviceDescriptor);
     for (auto&& receiver : _participantAnnouncementReceivers)
     {
@@ -416,16 +415,13 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
 void VAsioConnection::SendParticipantAnnoucement(IVAsioPeer* peer)
 {
     //Legacy Info for interop
-    VAsioPeerInfo localInfo;
-    localInfo.participantName = _participantName;
-    localInfo.participantId = _participantId;
     //URI encoded infos
-    VAsioPeerUri uri{ _participantName, _participantId, {}, {/*capabilities*/}};
+    VAsioPeerInfo info{ _participantName, _participantId, {}, {/*capabilities*/}};
 
     //Ensure that the local acceptor is the first entry in the acceptorUris
     if (_localAcceptor.is_open())
     {
-        uri.acceptorUris.push_back(
+        info.acceptorUris.push_back(
             Uri{ _localAcceptor.local_endpoint() }.EncodedString()
         );
     }
@@ -436,20 +432,15 @@ void VAsioConnection::SendParticipantAnnoucement(IVAsioPeer* peer)
     }
 
     auto epUri = Uri{_tcp4Acceptor.local_endpoint()};
-    localInfo.acceptorHost = epUri.Host();
-    localInfo.acceptorPort = epUri.Port();
-    uri.acceptorUris.emplace_back(epUri.EncodedString());
+    info.acceptorUris.emplace_back(epUri.EncodedString());
     if (_tcp6Acceptor.is_open())
     {
         epUri = Uri{_tcp6Acceptor.local_endpoint()};
-        localInfo.acceptorHost = epUri.Host();
-        localInfo.acceptorPort = epUri.Port();
-        uri.acceptorUris.emplace_back(epUri.EncodedString());
+        info.acceptorUris.emplace_back(epUri.EncodedString());
     }
 
     ParticipantAnnouncement announcement;
-    announcement.peerInfo = std::move(localInfo);
-    announcement.peerUri = std::move(uri);
+    announcement.peerInfo = std::move(info);
 
     MessageBuffer buffer;
     uint32_t msgSizePlaceholder{0u};
@@ -576,24 +567,9 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, MessageBuffer&& 
         AddPeer(std::move(peer));
     };
     // check URI first
-    if (!participantsMsg.peerUris.empty())
+    for (auto&& uri : participantsMsg.peerInfos)
     {
-        for (auto&& uri : participantsMsg.peerUris)
-        {
-            connectPeer(uri);
-        }
-    }
-    else
-    {
-        // interop with older VIB participants:
-        for (auto&& peerInfo : participantsMsg.peerInfos)
-        {
-            VAsioPeerUri uri{ peerInfo.participantName, peerInfo.participantId, {}, {} };
-            uri.acceptorUris.push_back(
-                Uri{ peerInfo.acceptorHost, peerInfo.acceptorPort }.EncodedString()
-            );
-            connectPeer(uri);
-        }
+        connectPeer(uri);
     }
 
     if (_pendingParticipantReplies.empty())
@@ -780,7 +756,7 @@ void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
     // link and participant names.
     auto& peerService = dynamic_cast<IIbServiceEndpoint&>(*peer);
     auto peerId = peerService.GetServiceDescriptor();
-    peerId.SetParticipantName(peer->GetUri().participantName);
+    peerId.SetParticipantName(peer->GetInfo().participantName);
     peerId.SetNetworkName(link->Name());
     peerService.SetServiceDescriptor(peerId);
     link->DistributeRemoteIbMessage(&peerService, msg);
