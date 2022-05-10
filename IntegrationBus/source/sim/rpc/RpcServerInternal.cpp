@@ -9,20 +9,19 @@ namespace sim {
 namespace rpc {
 
 RpcServerInternal::RpcServerInternal(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
-                                     const std::string& rpcChannel, const sim::rpc::RpcExchangeFormat& exchangeFormat,
+                                     const std::string& rpcChannel, const std::string& mediaType,
                                      const std::map<std::string, std::string>& labels, const std::string& clientUUID,
                                      CallProcessor handler, IRpcServer* parent)
     : _rpcChannel{rpcChannel}
-    , _exchangeFormat{exchangeFormat}
+    , _mediaType{mediaType}
     , _labels{labels}
     , _clientUUID{clientUUID}
     , _handler{std::move(handler)}
     , _parent{parent}
-    , _timeProvider{ timeProvider }
+    , _timeProvider{timeProvider}
     , _participant{participant}
 {
 }
-
 
 void RpcServerInternal::ReceiveIbMessage(const mw::IIbServiceEndpoint* /*from*/, const FunctionCall &msg)
 {

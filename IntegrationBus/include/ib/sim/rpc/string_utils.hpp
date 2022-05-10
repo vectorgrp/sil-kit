@@ -25,9 +25,6 @@ inline std::string   to_string(const FunctionCallResponse& msg);
 inline std::ostream& operator<<(std::ostream& out, const FunctionCallResponse& msg);
 
 // RpcDatatypes
-inline std::string   to_string(const RpcExchangeFormat& rpcExchangeFormat);
-inline std::ostream& operator<<(std::ostream& out, const RpcExchangeFormat& rpcExchangeFormat);
-
 inline std::ostream& operator<<(std::ostream& out, const std::map<std::string, std::string>& labels);
 
 inline std::string to_string(const RpcDiscoveryResult& discoveryResult);
@@ -77,18 +74,6 @@ std::ostream& operator<<(std::ostream& out, const FunctionCallResponse& msg)
                << ", size=" << msg.data.size() << "}";
 }
 
-std::string to_string(const RpcExchangeFormat& rpcExchangeFormat)
-{
-    std::stringstream out;
-    out << rpcExchangeFormat;
-    return out.str();
-}
-std::ostream& operator<<(std::ostream& out, const RpcExchangeFormat& rpcExchangeFormat)
-{
-    return out << "rpc::RpcExchangeFormat{"
-               << "mediaType=\"" << rpcExchangeFormat.mediaType << "\"}";
-}
-
 std::string to_string(const RpcDiscoveryResult& discoveryResult)
 {
     std::stringstream out;
@@ -109,7 +94,7 @@ std::ostream& operator<<(std::ostream& out, const RpcDiscoveryResult& discoveryR
 {
     return out << "rpc::RpcDiscoveryResult{"
                << "rpcChannel=\"" << discoveryResult.rpcChannel
-               << "\", exchangeFormat=" << discoveryResult.exchangeFormat 
+               << "\", mediaType=" << discoveryResult.mediaType
                << ", labels=" << discoveryResult.labels
                << "}";
 }

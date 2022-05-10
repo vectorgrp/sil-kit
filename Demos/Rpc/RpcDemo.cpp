@@ -123,14 +123,16 @@ int main(int argc, char** argv)
         if (participantName == "Client")
         {
             std::string clientAFunctionName = "Add100";
-            auto exchangeFormatClientA = RpcExchangeFormat{"application/octet-stream"};
-            std::map<std::string, std::string> labelsClientA{ {"KeyA", "ValA"} };
-            auto clientA = participant->CreateRpcClient("ClientCtrl1", clientAFunctionName, exchangeFormatClientA, labelsClientA, &CallReturn);
+            auto mediaTypeClientA = std::string{"application/octet-stream"};
+            std::map<std::string, std::string> labelsClientA{{"KeyA", "ValA"}};
+            auto clientA = participant->CreateRpcClient("ClientCtrl1", clientAFunctionName, mediaTypeClientA,
+                                                        labelsClientA, &CallReturn);
 
             std::string clientBFunctionName = "Sort";
-            auto exchangeFormatClientB = RpcExchangeFormat{""};
-            std::map<std::string, std::string> labelsClientB{ {"KeyC", "ValC"} };
-            auto clientB = participant->CreateRpcClient("ClientCtrl2", "Sort", exchangeFormatClientB, labelsClientB, &CallReturn);
+            auto mediaTypeClientB = std::string{""};
+            std::map<std::string, std::string> labelsClientB{{"KeyC", "ValC"}};
+            auto clientB =
+                participant->CreateRpcClient("ClientCtrl2", "Sort", mediaTypeClientB, labelsClientB, &CallReturn);
 
             participantController->SetSimulationTask(
                 [clientA, clientB](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -143,13 +145,13 @@ int main(int argc, char** argv)
         }
         else // "Server"
         {
-            auto exchangeFormatServerA = RpcExchangeFormat{"application/octet-stream"};
-            std::map<std::string, std::string> labelsServerA{ {"KeyA", "ValA"}, {"KeyB", "ValB"}};
-            participant->CreateRpcServer("ServerCtrl1", "Add100", exchangeFormatServerA, labelsServerA, &RemoteFunc_Add100);
-            
-            auto exchangeFormatServerB = RpcExchangeFormat{"application/json"};
-            std::map<std::string, std::string> labelsServerB{ {"KeyC", "ValC"}, {"KeyD", "ValD"}};
-            participant->CreateRpcServer("ServerCtrl2", "Sort", exchangeFormatServerB, labelsServerB, &RemoteFunc_Sort);
+            auto mediaTypeServerA = std::string{"application/octet-stream"};
+            std::map<std::string, std::string> labelsServerA{{"KeyA", "ValA"}, {"KeyB", "ValB"}};
+            participant->CreateRpcServer("ServerCtrl1", "Add100", mediaTypeServerA, labelsServerA, &RemoteFunc_Add100);
+
+            auto mediaTypeServerB = std::string{"application/json"};
+            std::map<std::string, std::string> labelsServerB{{"KeyC", "ValC"}, {"KeyD", "ValD"}};
+            participant->CreateRpcServer("ServerCtrl2", "Sort", mediaTypeServerB, labelsServerB, &RemoteFunc_Sort);
 
             participantController->SetSimulationTask(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -170,7 +172,7 @@ int main(int argc, char** argv)
                 std::cout << "   " << entry << std::endl;
             }
         };
-        participant->DiscoverRpcServers("", RpcExchangeFormat{""}, {}, discoveryResultsHandler);
+        participant->DiscoverRpcServers("", "", {}, discoveryResultsHandler);
 
         auto finalState = futureState.get();
 

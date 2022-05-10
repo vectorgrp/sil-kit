@@ -45,6 +45,57 @@ Changed
       LinControllerConfig
       LinControllerStatus
 
+- Replaced the single-member struct ``RpcExchangeFormat`` with its sole member, the media type string.
+  The related data types were removed and some associated functions have changed:
+
+  - ``IntegrationBus/include/ib/mw/IParticipant.hpp``
+
+    + old
+    .. code-block:: c++
+
+      class IParticipant
+          auto CreateRpcClient(..., RpcExchangeFormat exchangeFormat, ...) -> ...
+          auto CreateRpcServer(..., RpcExchangeFormat exchangeFormat, ...) -> ...
+          auto DiscoverRpcServers(..., RpcExchangeFormat exchangeFormat, ...) -> ...
+
+    + new
+    .. code-block:: c++
+
+      class IParticipant
+          auto CreateRpcClient(..., const std::string& mediaType, ...) -> ...
+          auto CreateRpcServer(..., const std::string& mediaType, ...) -> ...
+          auto DiscoverRpcServers(..., const std::string& mediaType, ...) -> ...
+
+  - ``IntegrationBus/include/ib/sim/rpc/RpcDatatypes.hpp``
+
+    + old
+    .. code-block:: c++
+
+      struct RpcExchangeFormat { ... };
+      bool operator ==(const RpcExchangeFormat &, const RpcExchangeFormat &);
+
+  - ``IntegrationBus/include/ib/sim/rpc/string_utils.hpp``
+
+    + old
+    .. code-block:: c++
+
+      to_string(const RpcExchangeFormat&) -> std::string;
+      operator<<(std::ostream& out, const RpcExchangeFormat& dataExchangeFormat) -> std::ostream&;
+
+  - ``IntegrationBus/include/ib/capi/InterfaceIdentifiers.h``
+
+    + old
+    .. code-block:: c++
+
+      #define ib_InterfaceIdentifier_RpcExchangeFormat ...
+
+  - ``IntegrationBus/include/ib/capi/Rpc.h``
+
+    + old
+    .. code-block:: c++
+
+      typedef struct { ... } ib_Rpc_ExchangeFormat;
+
 Added
 ~~~~~
 

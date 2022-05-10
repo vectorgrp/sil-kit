@@ -8,7 +8,6 @@ namespace rpc {
 
 struct FunctionCall;
 struct FunctionCallResponse;
-struct RpcExchangeFormat;
 struct RpcDiscoveryResult;
 
 class IRpcClient;

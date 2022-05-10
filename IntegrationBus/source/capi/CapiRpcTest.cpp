@@ -49,22 +49,24 @@ public:
 
 class MockParticipant : public ib::mw::test::DummyParticipant
 {
-  public:
+public:
     MOCK_METHOD(ib::sim::rpc::IRpcClient*, CreateRpcClient,
-                (const std::string& /*controllerName*/, const std::string& /*rpcChannel*/, const ib::sim::rpc::RpcExchangeFormat /*exchangeFormat*/,
-                 (const std::map<std::string, std::string>& /*labels*/), ib::sim::rpc::CallReturnHandler /*handler*/),
+                (const std::string& /*controllerName*/, const std::string& /*rpcChannel*/,
+                 const std::string& /*mediaType*/, (const std::map<std::string, std::string>& /*labels*/),
+                 ib::sim::rpc::CallReturnHandler /*handler*/),
                 (override));
 
     MOCK_METHOD(ib::sim::rpc::IRpcServer*, CreateRpcServer,
-                (const std::string& /*controllerName*/, const std::string& /*rpcChannel*/, const ib::sim::rpc::RpcExchangeFormat /*rpcExchangeFormat*/,
-                 (const std::map<std::string, std::string>& /*labels*/), ib::sim::rpc::CallProcessor /*handler*/),
+                (const std::string& /*controllerName*/, const std::string& /*rpcChannel*/,
+                 const std::string& /*mediaType*/, (const std::map<std::string, std::string>& /*labels*/),
+                 ib::sim::rpc::CallProcessor /*handler*/),
                 (override));
 
     MOCK_METHOD(void, DiscoverRpcServers,
-                (const std::string& /*rpcChannel*/, const ib::sim::rpc::RpcExchangeFormat& /*exchangeFormat*/,
-                 (const std::map<std::string, std::string>& /*labels*/), ib::sim::rpc::DiscoveryResultHandler /*handler*/),
+                (const std::string& /*rpcChannel*/, const std::string& /*mediaType*/,
+                 (const std::map<std::string, std::string>& /*labels*/),
+                 ib::sim::rpc::DiscoveryResultHandler /*handler*/),
                 (override));
-
 };
 
 void Copy_Label(ib_KeyValuePair* dst, const ib_KeyValuePair* src)
@@ -113,7 +115,7 @@ public:
         ib_KeyValuePair labels[1] = {{"KeyA", "ValA"}};
         Create_Labels(&labelList, labels, numLabels);
 
-        exchangeFormat.mediaType = "A";
+        mediaType = "A";
 
         dummyContext.someInt = 1234;
         dummyContextPtr = (void*)&dummyContext;
@@ -131,7 +133,7 @@ public:
     TransmitContext dummyContext;
     void* dummyContextPtr;
 
-    ib_Rpc_ExchangeFormat exchangeFormat;
+    const char* mediaType;
     ib_KeyValueList* labelList;
 
 };
@@ -153,11 +155,10 @@ TEST_F(CapiRpcTest, rpc_client_function_mapping)
 {
     ib_ReturnCode returnCode;
     ib_Rpc_Client* client;
-    ib_Rpc_ExchangeFormat rpcExchangeFormat;
-    rpcExchangeFormat.mediaType = "A";
+    const char* rpcMediaType = "A";
     EXPECT_CALL(mockParticipant, CreateRpcClient("client", "rpcChannel", testing::_, testing::_, testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_Rpc_Client_Create(&client, (ib_Participant*)&mockParticipant, "client", "rpcChannel",
-                                      &rpcExchangeFormat, labelList, nullptr, &CallResultHandler);
+    returnCode = ib_Rpc_Client_Create(&client, (ib_Participant*)&mockParticipant, "client", "rpcChannel", rpcMediaType,
+                                      labelList, nullptr, &CallResultHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
     ib_ByteVector data = { 0, 0 };
@@ -171,12 +172,11 @@ TEST_F(CapiRpcTest, rpc_server_function_mapping)
     ib_ReturnCode returnCode;
 
     ib_Rpc_Server* server;
-    ib_Rpc_ExchangeFormat rpcExchangeFormat;
-    rpcExchangeFormat.mediaType = "A";
+    const char* rpcMediaType = "A";
     EXPECT_CALL(mockParticipant, CreateRpcServer("server", "rpcChannel", testing::_, testing::_, testing::_))
         .Times(testing::Exactly(1));
-    returnCode = ib_Rpc_Server_Create(&server, (ib_Participant*)&mockParticipant, "server", "rpcChannel",
-                                      &rpcExchangeFormat, labelList, nullptr, &RpcHandler);
+    returnCode = ib_Rpc_Server_Create(&server, (ib_Participant*)&mockParticipant, "server", "rpcChannel", rpcMediaType,
+                                      labelList, nullptr, &RpcHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
     
     ib_ByteVector data = {0, 0};
@@ -190,28 +190,28 @@ TEST_F(CapiRpcTest, rpc_client_bad_parameters)
     ib_ReturnCode returnCode;
     ib_Rpc_Client* client;
 
-    returnCode = ib_Rpc_Client_Create(nullptr, (ib_Participant*)&mockParticipant, "client", "rpcChannel",
-                                      &exchangeFormat, labelList, dummyContextPtr, &CallResultHandler);
+    returnCode = ib_Rpc_Client_Create(nullptr, (ib_Participant*)&mockParticipant, "client", "rpcChannel", mediaType,
+                                      labelList, dummyContextPtr, &CallResultHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Rpc_Client_Create(&client, nullptr, "client", "rpcChannel", &exchangeFormat, labelList, dummyContextPtr,
+    returnCode = ib_Rpc_Client_Create(&client, nullptr, "client", "rpcChannel", mediaType, labelList, dummyContextPtr,
                                       &CallResultHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Rpc_Client_Create(&client, (ib_Participant*)&mockParticipant, nullptr, "rpcChannel",
-                                      &exchangeFormat, labelList, dummyContextPtr, &CallResultHandler);
+    returnCode = ib_Rpc_Client_Create(&client, (ib_Participant*)&mockParticipant, nullptr, "rpcChannel", mediaType,
+                                      labelList, dummyContextPtr, &CallResultHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Rpc_Client_Create(&client, (ib_Participant*)&mockParticipant, "client", nullptr,
-                                      &exchangeFormat, labelList, dummyContextPtr, &CallResultHandler);
+    returnCode = ib_Rpc_Client_Create(&client, (ib_Participant*)&mockParticipant, "client", nullptr, mediaType,
+                                      labelList, dummyContextPtr, &CallResultHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
     returnCode = ib_Rpc_Client_Create(&client, (ib_Participant*)&mockParticipant, "client", "rpcChannel",
                                       nullptr, labelList, dummyContextPtr, &CallResultHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Rpc_Client_Create(&client, (ib_Participant*)&mockParticipant, "client", "rpcChannel",
-                                      &exchangeFormat, labelList, dummyContextPtr, nullptr);
+    returnCode = ib_Rpc_Client_Create(&client, (ib_Participant*)&mockParticipant, "client", "rpcChannel", mediaType,
+                                      labelList, dummyContextPtr, nullptr);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
     ib_ByteVector data = {0, 0};
@@ -228,24 +228,24 @@ TEST_F(CapiRpcTest, rpc_server_bad_parameters)
     ib_ReturnCode returnCode;
     ib_Rpc_Server* server;
 
-    returnCode = ib_Rpc_Server_Create(nullptr, (ib_Participant*)&mockParticipant, "server", "rpcChannel",
-                                      &exchangeFormat, labelList, dummyContextPtr, &RpcHandler);
+    returnCode = ib_Rpc_Server_Create(nullptr, (ib_Participant*)&mockParticipant, "server", "rpcChannel", mediaType,
+                                      labelList, dummyContextPtr, &RpcHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Rpc_Server_Create(&server, nullptr, "server", "rpcChannel", &exchangeFormat, labelList, dummyContextPtr,
+    returnCode = ib_Rpc_Server_Create(&server, nullptr, "server", "rpcChannel", mediaType, labelList, dummyContextPtr,
                                       &RpcHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Rpc_Server_Create(&server, (ib_Participant*)&mockParticipant, "server", nullptr,
-                                      &exchangeFormat, labelList, dummyContextPtr, &RpcHandler);
+    returnCode = ib_Rpc_Server_Create(&server, (ib_Participant*)&mockParticipant, "server", nullptr, mediaType,
+                                      labelList, dummyContextPtr, &RpcHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
     returnCode = ib_Rpc_Server_Create(&server, (ib_Participant*)&mockParticipant, "server", "rpcChannel",
                                       nullptr, labelList, dummyContextPtr, &RpcHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Rpc_Server_Create(&server, (ib_Participant*)&mockParticipant, "server", "rpcChannel",
-                                      &exchangeFormat, labelList, dummyContextPtr, nullptr);
+    returnCode = ib_Rpc_Server_Create(&server, (ib_Participant*)&mockParticipant, "server", "rpcChannel", mediaType,
+                                      labelList, dummyContextPtr, nullptr);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
     ib_ByteVector     data = {0, 0};
@@ -291,20 +291,18 @@ TEST_F(CapiRpcTest, rpc_server_submit)
 TEST_F(CapiRpcTest, rpc_discovery_query)
 {
     ib_ReturnCode returnCode = 0;
-    returnCode = ib_Rpc_DiscoverServers(nullptr, "rpcChannel",
-                                      &exchangeFormat, labelList, dummyContextPtr, &DiscoveryResultHandler);
+    returnCode =
+        ib_Rpc_DiscoverServers(nullptr, "rpcChannel", mediaType, labelList, dummyContextPtr, &DiscoveryResultHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Rpc_DiscoverServers((ib_Participant*)&mockParticipant, "rpcChannel",
-                                        &exchangeFormat, labelList, dummyContextPtr, nullptr);
+    returnCode = ib_Rpc_DiscoverServers((ib_Participant*)&mockParticipant, "rpcChannel", mediaType, labelList,
+                                        dummyContextPtr, nullptr);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
     EXPECT_CALL(mockParticipant, DiscoverRpcServers(testing::_, testing::_, testing::_, testing::_))
         .Times(testing::Exactly(1));
-    returnCode = ib_Rpc_DiscoverServers((ib_Participant*)&mockParticipant, "rpcChannel",
-                                        &exchangeFormat, labelList, dummyContextPtr, &DiscoveryResultHandler);
+    returnCode = ib_Rpc_DiscoverServers((ib_Participant*)&mockParticipant, "rpcChannel", mediaType, labelList,
+                                        dummyContextPtr, &DiscoveryResultHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
-
-
 }
 
 }

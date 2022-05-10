@@ -394,10 +394,10 @@ auto Participant<IbConnectionT>::CreateDataPublisher(const std::string& canonica
 
 template <class IbConnectionT>
 auto Participant<IbConnectionT>::CreateDataSubscriber(const std::string& canonicalName, const std::string& topic,
-                                                     const std::string& mediaType,
-                                                     const std::map<std::string, std::string>& labels,
-                                                     ib::sim::data::DataMessageHandlerT defaultDataHandler,
-                                                     ib::sim::data::NewDataPublisherHandlerT newDataSourceHandler)
+                                                      const std::string& mediaType,
+                                                      const std::map<std::string, std::string>& labels,
+                                                      ib::sim::data::DataMessageHandlerT defaultDataHandler,
+                                                      ib::sim::data::NewDataPublisherHandlerT newDataSourceHandler)
     -> sim::data::IDataSubscriber*
 {
     ib::cfg::DataSubscriber controllerConfig = GetConfigByControllerName(_participantConfig.dataSubscribers, canonicalName);
@@ -424,12 +424,11 @@ auto Participant<IbConnectionT>::CreateDataSubscriber(const std::string& canonic
     return CreateDataSubscriber(canonicalName, canonicalName, { "" }, {}, nullptr, nullptr);
 }
 
-
 template <class IbConnectionT>
 auto Participant<IbConnectionT>::CreateRpcServerInternal(const std::string& rpcChannel, const std::string& clientUUID,
-                                                        const sim::rpc::RpcExchangeFormat exchangeFormat,
-                                                        const std::map<std::string, std::string>& clientLabels,
-                                                        sim::rpc::CallProcessor handler, sim::rpc::IRpcServer* parent)
+                                                         const std::string& mediaType,
+                                                         const std::map<std::string, std::string>& clientLabels,
+                                                         sim::rpc::CallProcessor handler, sim::rpc::IRpcServer* parent)
     -> sim::rpc::RpcServerInternal*
 {
     _logger->Trace("Creating internal server for rpcChannel={}, clientUUID={}", rpcChannel, clientUUID);
@@ -445,15 +444,15 @@ auto Participant<IbConnectionT>::CreateRpcServerInternal(const std::string& rpcC
     supplementalData[ib::mw::service::supplKeyRpcServerInternalClientUUID] = clientUUID;
 
     return CreateController<ib::cfg::RpcServer, sim::rpc::RpcServerInternal>(
-        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), rpcChannel,
-        exchangeFormat, clientLabels, clientUUID, handler, parent);
+        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(),
+        rpcChannel, mediaType, clientLabels, clientUUID, handler, parent);
 }
 
 template <class IbConnectionT>
 auto Participant<IbConnectionT>::CreateRpcClient(const std::string& canonicalName, const std::string& rpcChannel,
-                                                const sim::rpc::RpcExchangeFormat exchangeFormat,
-                                                const std::map<std::string, std::string>& labels,
-                                                sim::rpc::CallReturnHandler handler) -> sim::rpc::IRpcClient*
+                                                 const std::string& mediaType,
+                                                 const std::map<std::string, std::string>& labels,
+                                                 sim::rpc::CallReturnHandler handler) -> sim::rpc::IRpcClient*
 {
     auto network = util::uuid::to_string(util::uuid::generate());
 
@@ -464,14 +463,14 @@ auto Participant<IbConnectionT>::CreateRpcClient(const std::string& canonicalNam
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcClient;
     supplementalData[ib::mw::service::supplKeyRpcClientFunctionName] = controllerConfig.rpcChannel.value();
-    supplementalData[ib::mw::service::supplKeyRpcClientDxf] = exchangeFormat.mediaType;
+    supplementalData[ib::mw::service::supplKeyRpcClientMediaType] = mediaType;
     auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
     supplementalData[ib::mw::service::supplKeyRpcClientLabels] = labelStr;
     supplementalData[ib::mw::service::supplKeyRpcClientUUID] = network;
 
     auto controller = CreateController<ib::cfg::RpcClient, ib::sim::rpc::RpcClient>(
         controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(),
-        controllerConfig.rpcChannel.value(), exchangeFormat, labels, network, handler);
+        controllerConfig.rpcChannel.value(), mediaType, labels, network, handler);
 
     // RpcClient discovers RpcServerInternal and is ready to dispatch calls
     controller->RegisterServiceDiscovery();
@@ -487,9 +486,9 @@ auto Participant<IbConnectionT>::CreateRpcClient(const std::string& canonicalNam
 
 template <class IbConnectionT>
 auto Participant<IbConnectionT>::CreateRpcServer(const std::string& canonicalName, const std::string& rpcChannel,
-                                                const sim::rpc::RpcExchangeFormat exchangeFormat,
-                                                const std::map<std::string, std::string>& labels,
-                                                sim::rpc::CallProcessor handler) -> sim::rpc::IRpcServer*
+                                                 const std::string& mediaType,
+                                                 const std::map<std::string, std::string>& labels,
+                                                 sim::rpc::CallProcessor handler) -> sim::rpc::IRpcServer*
 {
     // Use unique network name that same rpcChannel for multiple RpcServers on one participant works
     std::string network = util::uuid::to_string(util::uuid::generate());
@@ -501,13 +500,13 @@ auto Participant<IbConnectionT>::CreateRpcServer(const std::string& canonicalNam
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcServer;
     supplementalData[ib::mw::service::supplKeyRpcServerFunctionName] = controllerConfig.rpcChannel.value();
-    supplementalData[ib::mw::service::supplKeyRpcServerDxf] = exchangeFormat.mediaType;
+    supplementalData[ib::mw::service::supplKeyRpcServerMediaType] = mediaType;
     auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
     supplementalData[ib::mw::service::supplKeyRpcServerLabels] = labelStr;
 
     auto controller = CreateController<ib::cfg::RpcServer, sim::rpc::RpcServer>(
-        controllerConfig, network, mw::ServiceType::Controller, supplementalData, _timeProvider.get(), controllerConfig.rpcChannel.value(),
-        exchangeFormat, labels, handler);
+        controllerConfig, network, mw::ServiceType::Controller, supplementalData, _timeProvider.get(),
+        controllerConfig.rpcChannel.value(), mediaType, labels, handler);
 
     // RpcServer discovers RpcClient and creates RpcServerInternal on a matching connection
     controller->RegisterServiceDiscovery();
@@ -522,13 +521,12 @@ auto Participant<IbConnectionT>::CreateRpcServer(const std::string& canonicalNam
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::DiscoverRpcServers(const std::string& rpcChannel,
-    const sim::rpc::RpcExchangeFormat& exchangeFormat,
-    const std::map<std::string, std::string>& labels,
-    sim::rpc::DiscoveryResultHandler handler)
+void Participant<IbConnectionT>::DiscoverRpcServers(const std::string& rpcChannel, const std::string& mediaType,
+                                                    const std::map<std::string, std::string>& labels,
+                                                    sim::rpc::DiscoveryResultHandler handler)
 {
-    sim::rpc::RpcDiscoverer rpcDiscoverer{ GetServiceDiscovery() };
-    handler(rpcDiscoverer.GetMatchingRpcServers(rpcChannel, exchangeFormat, labels));
+    sim::rpc::RpcDiscoverer rpcDiscoverer{GetServiceDiscovery()};
+    handler(rpcDiscoverer.GetMatchingRpcServers(rpcChannel, mediaType, labels));
 }
 
 template <class IbConnectionT>

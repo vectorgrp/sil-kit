@@ -37,8 +37,6 @@ The method takes a handler with the discovery results:
 
 Data Structures
 ~~~~~~~~~~~~~~~
-.. doxygenstruct:: ib_Rpc_ExchangeFormat
-   :members:
 .. doxygenstruct:: ib_Rpc_DiscoveryResult
    :members:
 .. doxygenstruct:: ib_Rpc_DiscoveryResultList

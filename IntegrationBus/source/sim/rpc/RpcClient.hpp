@@ -29,7 +29,7 @@ class RpcClient
 {
 public:
     RpcClient(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
-              const std::string& rpcChannel, const sim::rpc::RpcExchangeFormat& exchangeFormat,
+              const std::string& rpcChannel, const std::string& mediaType,
               const std::map<std::string, std::string>& labels, const std::string& clientUUID,
               CallReturnHandler handler);
 
@@ -53,7 +53,7 @@ public:
 
 private:
     std::string _rpcChannel;
-    sim::rpc::RpcExchangeFormat _exchangeFormat;
+    std::string _mediaType;
     std::map<std::string, std::string> _labels;
     std::string _clientUUID;
 

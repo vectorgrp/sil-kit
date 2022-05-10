@@ -28,28 +28,28 @@ protected:
 
     struct RpcClientInfo
     {
-        RpcClientInfo(const std::string& newControllerName, const std::string& newFunctionName, const std::string& newMediaType,
-                      const std::map<std::string, std::string>& newLabels, size_t newMessageSizeInBytes,
-                      uint32_t newNumCalls, uint32_t newNumCallsToReturn)
+        RpcClientInfo(const std::string& newControllerName, const std::string& newFunctionName,
+                      const std::string& newMediaType, const std::map<std::string, std::string>& newLabels,
+                      size_t newMessageSizeInBytes, uint32_t newNumCalls, uint32_t newNumCallsToReturn)
         {
             expectIncreasingData = true;
             controllerName = newControllerName;
             rpcChannel = newFunctionName;
-            dxf.mediaType = newMediaType;
+            mediaType = newMediaType;
             labels = newLabels;
             messageSizeInBytes = newMessageSizeInBytes;
             numCalls = newNumCalls;
             numCallsToReturn = newNumCallsToReturn;
         }
-        RpcClientInfo(const std::string& newControllerName, const std::string& newFunctionName, const std::string& newMediaType,
-                      const std::map<std::string, std::string>& newLabels, size_t newMessageSizeInBytes,
-                      uint32_t newNumCalls, uint32_t newNumCallsToReturn,
+        RpcClientInfo(const std::string& newControllerName, const std::string& newFunctionName,
+                      const std::string& newMediaType, const std::map<std::string, std::string>& newLabels,
+                      size_t newMessageSizeInBytes, uint32_t newNumCalls, uint32_t newNumCallsToReturn,
                       const std::vector<std::vector<uint8_t>>& newExpectedReturnDataUnordered)
         {
             expectIncreasingData = false;
             controllerName = newControllerName;
             rpcChannel = newFunctionName;
-            dxf.mediaType = newMediaType;
+            mediaType = newMediaType;
             labels = newLabels;
             messageSizeInBytes = newMessageSizeInBytes;
             numCalls = newNumCalls;
@@ -59,7 +59,7 @@ protected:
 
         std::string controllerName;
         std::string rpcChannel;
-        RpcExchangeFormat dxf;
+        std::string mediaType;
         std::map<std::string, std::string> labels;
         size_t messageSizeInBytes;
         uint32_t numCalls;
@@ -118,26 +118,27 @@ protected:
 
     struct RpcServerInfo
     {
-        RpcServerInfo(const std::string& newControllerName, const std::string& newFunctionName, const std::string& newMediaType,
-                      const std::map<std::string, std::string>& newLabels, size_t newMessageSizeInBytes,
-                      uint32_t newNumCallsToReceive)
+        RpcServerInfo(const std::string& newControllerName, const std::string& newFunctionName,
+                      const std::string& newMediaType, const std::map<std::string, std::string>& newLabels,
+                      size_t newMessageSizeInBytes, uint32_t newNumCallsToReceive)
         {
             expectIncreasingData = true;
             controllerName = newControllerName;
             rpcChannel = newFunctionName;
-            dxf.mediaType = newMediaType;
+            mediaType = newMediaType;
             labels = newLabels;
             messageSizeInBytes = newMessageSizeInBytes;
             numCallsToReceive = newNumCallsToReceive;
         }
-        RpcServerInfo(const std::string& newControllerName, const std::string& newFunctionName, const std::string& newMediaType,
-                      const std::map<std::string, std::string>& newLabels, size_t newMessageSizeInBytes,
-                      uint32_t newNumCallsToReceive, const std::vector<std::vector<uint8_t>>& newExpectedDataUnordered)
+        RpcServerInfo(const std::string& newControllerName, const std::string& newFunctionName,
+                      const std::string& newMediaType, const std::map<std::string, std::string>& newLabels,
+                      size_t newMessageSizeInBytes, uint32_t newNumCallsToReceive,
+                      const std::vector<std::vector<uint8_t>>& newExpectedDataUnordered)
         {
             expectIncreasingData = false;
             controllerName = newControllerName;
             rpcChannel = newFunctionName;
-            dxf.mediaType = newMediaType;
+            mediaType = newMediaType;
             labels = newLabels;
             messageSizeInBytes = newMessageSizeInBytes;
             numCallsToReceive = newNumCallsToReceive;
@@ -146,7 +147,7 @@ protected:
 
         std::string controllerName;
         std::string rpcChannel;
-        RpcExchangeFormat dxf;
+        std::string mediaType;
         std::map<std::string, std::string> labels;
         size_t messageSizeInBytes;
         uint32_t numCallsToReceive;
@@ -325,10 +326,10 @@ protected:
                     participant.CheckAllCallsReturnedPromise();
                 };
 
-                c.rpcClient =
-                    participant.participant->CreateRpcClient(c.controllerName, c.rpcChannel, c.dxf, c.labels, callReturnHandler);
+                c.rpcClient = participant.participant->CreateRpcClient(c.controllerName, c.rpcChannel, c.mediaType,
+                                                                       c.labels, callReturnHandler);
             }
-           
+
             // Create Servers
             for (auto& s : participant.rpcServers)
             {
@@ -349,7 +350,8 @@ protected:
                     participant.CheckAllCallsReceivedPromise();
                 };
 
-                s.rpcServer = participant.participant->CreateRpcServer(s.controllerName, s.rpcChannel, s.dxf, s.labels, processCalls);
+                s.rpcServer = participant.participant->CreateRpcServer(s.controllerName, s.rpcChannel, s.mediaType,
+                                                                       s.labels, processCalls);
             }
 
             // Check RpcDiscovery after creating the local servers to discover them as well
@@ -362,7 +364,7 @@ protected:
 
                 while (!participant.allDiscovered)
                 {
-                    participant.participant->DiscoverRpcServers("", RpcExchangeFormat{""}, {}, discoveryResultsHandler);
+                    participant.participant->DiscoverRpcServers("", "", {}, discoveryResultsHandler);
                 }
             }
 

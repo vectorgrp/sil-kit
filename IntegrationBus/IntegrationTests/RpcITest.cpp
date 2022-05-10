@@ -184,8 +184,8 @@ TEST_F(RpcITest, test_1client_2server_wrongFunctionName_sync_vasio)
     RunSyncTest(rpcs);
 }
 
-// Wrong rpcExchangeFormat on server2
-TEST_F(RpcITest, test_1client_1server_wrongDataExchangeFormat_sync_vasio)
+// Wrong mediaType on server2
+TEST_F(RpcITest, test_1client_1server_wrongDataMediaType_sync_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls; 
@@ -213,7 +213,7 @@ TEST_F(RpcITest, test_1client_1server_wrongLabels_sync_vasio)
     RunSyncTest(rpcs);
 }
 
-// Wildcard rpcExchangeFormat on server
+// Wildcard mediaType on server
 TEST_F(RpcITest, test_1client_1server_wildcardDxf_sync_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;

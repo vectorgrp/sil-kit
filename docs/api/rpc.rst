@@ -33,22 +33,21 @@ Function name
 RpcClients and RpcServers are linked by a string-based function name. For a server to receive a rpc call, the 
 function name must match the function name of the client triggering the call.
 
-RpcExchangeFormat
-~~~~~~~~~~~~~~~~~
+Media Type
+~~~~~~~~~~
 
-Both RpcClients and RpcServers define a RpcExchangeFormat containing a media type in accordance to 
-`RFC2046 <https://datatracker.ietf.org/doc/html/rfc2046>`_, a meta description of the transmitted data. It can
-be used to provide infomation about the de- / serialization of the underlying user data. Just like the function 
-name, the RpcExchangeFormat has to match between RpcClients / RpcServers for communicaiton to take place. 
-An empty string on a RpcClient will match any other string of that given field of the RpcExchangeFormat for a server. 
-Currently, the RpcExchangeFormat only consists of the field "mediaType".
+Both RpcClients and RpcServers define a media type in accordance with
+`RFC2046 <https://datatracker.ietf.org/doc/html/rfc2046>`_, a meta description of the transmitted data.
+It can be used to provide information about the de- / serialization of the underlying user data.
+Just like the function name, the media type has to match between RpcClients / RpcServers for communication to take place.
+An empty string on a RpcClient will match any other media type on a server.
 
 Labels
 ~~~~~~
 
-RpcClients and RpcServers can be annotated with string-based key-value pairs (labels). Additional to the matching 
-requirements regarding rpcChannel and RpcExchangeFormat, RpcServers will only receive calls by RpcClients if their 
-labels apply the following matching rules:
+RpcClients and RpcServers can be annotated with string-based key-value pairs (labels).
+Additional to the matching  requirements regarding rpcChannel and mediaType, RpcServers will only receive calls by
+RpcClients if their labels conform to the following matching rules:
 
 * A RpcClient without labels matches any other RpcServer.
 * If labels are specified on a RpcClients, all of the labels must be found on a RpcServer.
@@ -57,9 +56,10 @@ labels apply the following matching rules:
 Server Discovery
 ~~~~~~~~~~~~~~~~
 
-The simulation can be queried about available RpcServers with |DiscoverRpcServers|. The method takes filter arguments
-for rpcChannel, RpcExchangeFormat and labels. To obtain the results of the query, a handler is given to the method 
-which carries a vector of RpcDiscoveryResult providing the properties of each discovered RpcServer.
+The simulation can be queried about available RpcServers with |DiscoverRpcServers|.
+The method takes filter arguments for rpcChannel, mediaType and labels.
+To obtain the results of the query, a handler is given to the method  which carries a vector of RpcDiscoveryResult
+providing the properties of each discovered RpcServer.
 
 Usage
 ~~~~~
@@ -97,7 +97,7 @@ The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
     // ------------------
 
     auto participant = ib::CreateParticipant(std::move(config), participant_name, domainId);
-    auto* client = participant->CreateRpcClient("TestFunc", RpcExchangeFormat{"application/octet-stream"}, 
+    auto* client = participant->CreateRpcClient("TestFunc", "application/octet-stream",
         [](IRpcClient* client, const CallHandle callHandle, const CallStatus callStatus, const std::vector<uint8_t>& returnData) {
             // handle returnData
         });
@@ -111,7 +111,7 @@ The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
     // ------------------
 
     auto participant = ib::CreateParticipant(std::move(config), participant_name, domainId);
-    auto* server = participant->CreateRpcServer("TestFunc", RpcExchangeFormat{"application/octet-stream"},
+    auto* server = participant->CreateRpcServer("TestFunc", "application/octet-stream",
         [](IRpcServer* server, const CallHandle callHandle, const std::vector<uint8_t>& argumentData) {
             // handle argumentData
             // define resultData

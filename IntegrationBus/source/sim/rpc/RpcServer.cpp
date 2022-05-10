@@ -13,17 +13,16 @@ namespace sim {
 namespace rpc {
 
 RpcServer::RpcServer(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
-                     const std::string& rpcChannel, const sim::rpc::RpcExchangeFormat& exchangeFormat,
+                     const std::string& rpcChannel, const std::string& mediaType,
                      const std::map<std::string, std::string>& labels, CallProcessor handler)
     : _rpcChannel{rpcChannel}
-    , _exchangeFormat{exchangeFormat}
+    , _mediaType{mediaType}
     , _labels{labels}
     , _handler{std::move(handler)}
     , _logger{participant->GetLogger()}
     , _timeProvider{timeProvider}
     , _participant{participant}
 {
-
 }
 
 void RpcServer::RegisterServiceDiscovery()
@@ -45,18 +44,17 @@ void RpcServer::RegisterServiceDiscovery()
                 };
 
                 auto rpcChannel = getVal(mw::service::supplKeyRpcClientFunctionName);
-                RpcExchangeFormat clientExchangeFormat{getVal(mw::service::supplKeyRpcClientDxf)};
+                auto clientMediaType = getVal(mw::service::supplKeyRpcClientMediaType);
                 auto clientUUID = getVal(mw::service::supplKeyRpcClientUUID);
                 std::string labelsStr = getVal(mw::service::supplKeyRpcClientLabels);
                 std::map<std::string, std::string> clientLabels =
                     ib::cfg::Deserialize<std::map<std::string, std::string>>(labelsStr);
 
-                if (rpcChannel == _rpcChannel && Match(clientExchangeFormat, _exchangeFormat)
+                if (rpcChannel == _rpcChannel && MatchMediaType(clientMediaType, _mediaType)
                     && MatchLabels(clientLabels, _labels))
                 {
-                    AddInternalRpcServer(clientUUID, clientExchangeFormat, clientLabels);
+                    AddInternalRpcServer(clientUUID, clientMediaType, clientLabels);
                 }
-
             }
         }, mw::service::controllerTypeRpcClient, _rpcChannel);
 }
@@ -78,11 +76,11 @@ void RpcServer::SubmitResult(IRpcCallHandle* callHandle, std::vector<uint8_t> re
     }
 }
 
-void RpcServer::AddInternalRpcServer(const std::string& clientUUID, RpcExchangeFormat joinedExchangeFormat,
+void RpcServer::AddInternalRpcServer(const std::string& clientUUID, std::string joinedMediaType,
                                      const std::map<std::string, std::string>& clientLabels)
 {
-    auto internalRpcServer = dynamic_cast<RpcServerInternal*>(_participant->CreateRpcServerInternal(
-         _rpcChannel, clientUUID, joinedExchangeFormat, clientLabels, _handler, this));
+    auto internalRpcServer = dynamic_cast<RpcServerInternal*>(
+        _participant->CreateRpcServerInternal(_rpcChannel, clientUUID, joinedMediaType, clientLabels, _handler, this));
     _internalRpcServers.push_back(internalRpcServer);
 }
 

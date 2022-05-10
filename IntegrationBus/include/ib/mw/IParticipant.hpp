@@ -79,28 +79,25 @@ public:
 
     //! \brief Create a Rpc client at this IB participant.
     virtual auto CreateRpcClient(const std::string& canonicalName, const std::string& channel,
-                                 const sim::rpc::RpcExchangeFormat exchangeFormat,
-                                 const std::map<std::string, std::string>& labels, sim::rpc::CallReturnHandler handler)
-        -> sim::rpc::IRpcClient* = 0;
+                                 const std::string& mediaType, const std::map<std::string, std::string>& labels,
+                                 sim::rpc::CallReturnHandler handler) -> sim::rpc::IRpcClient* = 0;
     //! \brief Create a Rpc client at this IB participant.
     virtual auto CreateRpcClient(const std::string& canonicalName)
         -> sim::rpc::IRpcClient* = 0;
 
     //! \brief Create a Rpc server at this IB participant.
     virtual auto CreateRpcServer(const std::string& canonicalName, const std::string& channel,
-                                 const sim::rpc::RpcExchangeFormat exchangeFormat,
-                                 const std::map<std::string, std::string>& labels, sim::rpc::CallProcessor handler)
-        -> sim::rpc::IRpcServer* = 0;
+                                 const std::string& mediaType, const std::map<std::string, std::string>& labels,
+                                 sim::rpc::CallProcessor handler) -> sim::rpc::IRpcServer* = 0;
 
     //! \brief Create a Rpc server at this IB participant.
     virtual auto CreateRpcServer(const std::string& canonicalName) -> sim::rpc::IRpcServer* = 0;
 
     //! \brief Discover available Rpc servers and their properties.
-    virtual void DiscoverRpcServers(const std::string& rpcChannel, 
-                                   const sim::rpc::RpcExchangeFormat& exchangeFormat,
-                                   const std::map<std::string, std::string>& labels,
-                                   sim::rpc::DiscoveryResultHandler handler) = 0;
-    
+    virtual void DiscoverRpcServers(const std::string& rpcChannel, const std::string& mediaType,
+                                    const std::map<std::string, std::string>& labels,
+                                    sim::rpc::DiscoveryResultHandler handler) = 0;
+
     //! \brief Return the  IParticipantController for the current participant.
     virtual auto GetParticipantController() -> sync::IParticipantController* = 0;
     virtual auto GetSystemMonitor() -> sync::ISystemMonitor* = 0;

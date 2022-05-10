@@ -29,28 +29,14 @@ using CallReturnHandler =
 using CallProcessor = std::function<void(ib::sim::rpc::IRpcServer* server, ib::sim::rpc::IRpcCallHandle* callHandle,
                                          const std::vector<uint8_t>& argumentData)>;
 
-/*! \brief Serialization details.
- *
- * Specification of the format used by individual Rpc Clients and Servers.
- */
-struct RpcExchangeFormat
-{
-    std::string mediaType;
-};
-
 struct RpcDiscoveryResult
 {
     std::string rpcChannel;
-    RpcExchangeFormat exchangeFormat;
+    std::string mediaType;
     std::map<std::string, std::string> labels;
 };
 
 using DiscoveryResultHandler = std::function<void(const std::vector<RpcDiscoveryResult>& discoveryResults)>;
-
-inline bool operator==(const RpcExchangeFormat& lhs, const RpcExchangeFormat& rhs)
-{
-    return lhs.mediaType == rhs.mediaType;
-}
 
 // IbMessages
 //-----------

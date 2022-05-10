@@ -13,20 +13,19 @@ namespace sim {
 namespace rpc {
 
 RpcClient::RpcClient(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
-                     const std::string& rpcChannel, const sim::rpc::RpcExchangeFormat& exchangeFormat,
+                     const std::string& rpcChannel, const std::string& mediaType,
                      const std::map<std::string, std::string>& labels, const std::string& clientUUID,
                      CallReturnHandler handler)
     : _rpcChannel{rpcChannel}
-    , _exchangeFormat{exchangeFormat}
+    , _mediaType{mediaType}
     , _labels{labels}
     , _clientUUID{clientUUID}
     , _handler{std::move(handler)}
     , _logger{participant->GetLogger()}
-    , _timeProvider{timeProvider} 
+    , _timeProvider{timeProvider}
     , _participant{participant}
 {
 }
-
 
 void RpcClient::RegisterServiceDiscovery()
 {

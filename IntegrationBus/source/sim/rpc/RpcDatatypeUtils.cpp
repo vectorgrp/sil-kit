@@ -6,9 +6,9 @@ namespace ib {
 namespace sim {
 namespace rpc {
 
-bool Match(const RpcExchangeFormat& clientRxf, const RpcExchangeFormat& serverRxf)
+bool MatchMediaType(const std::string& clientMediaType, const std::string& serverMediaType)
 {
-    return clientRxf.mediaType == "" || clientRxf.mediaType == serverRxf.mediaType;
+    return clientMediaType == "" || clientMediaType == serverMediaType;
 }
 
 bool MatchLabels(const std::map<std::string, std::string>& clientLabels,

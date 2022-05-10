@@ -109,8 +109,8 @@ void DiscoveryResultHandler(void* context, const ib_Rpc_DiscoveryResultList* dis
 {
     for (uint32_t i = 0; i < discoveryResults->numResults; i++)
     {
-        printf("Discovered RpcServer with rpcChannel=\"%s\", exchangeFormat.mediaType=\"%s\", labels={",
-               discoveryResults->results[i].rpcChannel, discoveryResults->results[i].exchangeFormat->mediaType);
+        printf("Discovered RpcServer with rpcChannel=\"%s\", mediaType=\"%s\", labels={",
+               discoveryResults->results[i].rpcChannel, discoveryResults->results[i].mediaType);
         for (uint32_t j = 0; j < discoveryResults->results[i].labelList->numLabels; j++)
         {
             printf("{\"%s\", \"%s\"}", discoveryResults->results[i].labelList->labels[j].key, discoveryResults->results[i].labelList->labels[j].value);
@@ -174,14 +174,14 @@ int main(int argc, char* argv[])
         printf("Error: cannot open config file %s\n", argv[1]);
         return 1;
     }
-    participantName = argv[2]; 
+    participantName = argv[2];
 
     const char* domainId = "42";
     if (argc >= 4)
     {
-        domainId = argv[3]; 
+        domainId = argv[3];
     }
-    
+
     ib_ReturnCode returnCode;
     returnCode = ib_Participant_Create(&participant, jsonString, participantName, domainId, ib_False);
     if (returnCode) {
@@ -193,21 +193,23 @@ int main(int argc, char* argv[])
     if (strcmp(participantName, "Client") == 0)
     {
         const char* filterFunctionName = "";
-        ib_Rpc_ExchangeFormat filterExchangeFormat = {ib_InterfaceIdentifier_RpcExchangeFormat, ""};
+        const char* filterMediaType = "";
         ib_KeyValueList* filterLabelList;
         size_t numLabels = 1;
         ib_KeyValuePair filterLabels[1] = {{"KeyA", "ValA"}};
         Create_Labels(&filterLabelList, filterLabels, numLabels);
 
-        returnCode = ib_Rpc_DiscoverServers(participant, filterFunctionName, &filterExchangeFormat, filterLabelList, NULL, &DiscoveryResultHandler);
+        returnCode = ib_Rpc_DiscoverServers(participant, filterFunctionName, filterMediaType, filterLabelList, NULL,
+                                            &DiscoveryResultHandler);
 
-        ib_Rpc_ExchangeFormat exchangeFormat = { ib_InterfaceIdentifier_RpcExchangeFormat, "A" };
+        const char* mediaType = "A";
         ib_KeyValueList* labelList;
         numLabels = 1;
         ib_KeyValuePair labels[1] = { {"KeyA", "ValA"} };
         Create_Labels(&labelList, labels, numLabels);
 
-        returnCode = ib_Rpc_Client_Create(&client, participant, "ClientCtrl1", "TestFunc", &exchangeFormat, labelList, NULL, &ResultHandler);
+        returnCode = ib_Rpc_Client_Create(&client, participant, "ClientCtrl1", "TestFunc", mediaType, labelList, NULL,
+                                          &ResultHandler);
 
         for (uint8_t i = 0; i < numCalls; i++)
         {
@@ -224,13 +226,14 @@ int main(int argc, char* argv[])
     }
     else if (strcmp(participantName, "Server") == 0)
     {
-        ib_Rpc_ExchangeFormat exchangeFormat = {ib_InterfaceIdentifier_RpcExchangeFormat, "A"};
+        const char* mediaType = "A";
         ib_KeyValueList* labelList;
         size_t numLabels = 2;
         ib_KeyValuePair labels[2] = {{"KeyA", "ValA"}, {"KeyB", "ValB"}};
         Create_Labels(&labelList, labels, numLabels);
 
-        returnCode = ib_Rpc_Server_Create(&server, participant, "ServerCtrl1", "TestFunc", &exchangeFormat, labelList, NULL, &CallHandler);
+        returnCode = ib_Rpc_Server_Create(&server, participant, "ServerCtrl1", "TestFunc", mediaType, labelList, NULL,
+                                          &CallHandler);
 
         while (receiveCallCount < numCalls)
         {

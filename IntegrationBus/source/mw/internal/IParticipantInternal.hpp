@@ -168,11 +168,9 @@ public:
 
     // Internal Rpc server that is only created on a matching rpc connection
     virtual auto CreateRpcServerInternal(const std::string& rpcChannel, const std::string& linkName,
-                                         const sim::rpc::RpcExchangeFormat exchangeFormat,
-                                         const std::map<std::string, std::string>& labels,
+                                         const std::string& mediaType, const std::map<std::string, std::string>& labels,
                                          sim::rpc::CallProcessor handler, sim::rpc::IRpcServer* parent)
         -> ib::sim::rpc::RpcServerInternal* = 0;
-
 
 protected:
     std::atomic<EndpointId> _localEndpointId{ 0 };

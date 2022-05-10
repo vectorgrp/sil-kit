@@ -11,20 +11,6 @@
 
 IB_BEGIN_DECLS
 
-/*! \brief The ib_Rpc_ExchangeFormat provides meta information for argument and return data of Rpc.
-*   Except for this descriptive purpose, it is used for matching Rpc clients and servers.
-*/
-typedef struct {
-    ib_InterfaceIdentifier interfaceId;
-    /*! \brief The media type of the data as specified by RFC2046
-    * (e.g. "application/xml", "application/vnd.google.protobuf", ...)
-    * A null pointer is considered an invalid value. Only valid RFC2046 values are considered valid.
-    * The only exception to this rule is an empty string.
-    * An empty mediaType string is interpreted as undefined and matches any mediaType.
-    */
-    const char* mediaType;
-} ib_Rpc_ExchangeFormat;
-
 /*! \brief A unique handle of a remote call. */
 typedef struct ib_Rpc_CallHandle ib_Rpc_CallHandle;
 
@@ -36,14 +22,14 @@ typedef struct ib_Rpc_Client ib_Rpc_Client;
 /*! \brief Properties of a discovered Rpc server
 * 
 * \param rpcChannel The name of the function provided the Rpc server.
-* \param exchangeFormat The exchangeFormat of the Rpc server.
+* \param mediaType The mediaType of the Rpc server.
 * \param labelList The labels of the Rpc server.
 */
 typedef struct ib_Rpc_DiscoveryResult
 {
     ib_InterfaceIdentifier interfaceId;
     const char* rpcChannel;
-    ib_Rpc_ExchangeFormat* exchangeFormat;
+    const char* mediaType;
     ib_KeyValueList* labelList;
 } ib_Rpc_DiscoveryResult;
 
@@ -97,7 +83,7 @@ typedef void (*ib_Rpc_DiscoveryResultHandler_t)(void* context, const ib_Rpc_Disc
 * \param participant The simulation participant for which the Rpc server should be created.
 * \param controllerName The name of this controller.
 * \param rpcChannel The name by which Rpc clients identify and connect to this Rpc server.
-* \param exchangeFormat A meta description of the data that will be processed and returned by this Rpc server.
+* \param mediaType A meta description of the data that will be processed and returned by this Rpc server.
 * \param labels A list of key-value pairs of this Rpc server. The labels are relevant for matching Rpc clients and
 * Rpc servers.
 * \param context A user provided context pointer that is passed to the callHandler on call.
@@ -105,22 +91,20 @@ typedef void (*ib_Rpc_DiscoveryResultHandler_t)(void* context, const ib_Rpc_Disc
 */
 IntegrationBusAPI ib_ReturnCode ib_Rpc_Server_Create(ib_Rpc_Server** out, ib_Participant* participant,
                                                      const char* controllerName, const char* rpcChannel,
-                                                     ib_Rpc_ExchangeFormat* exchangeFormat,
-                                                     const ib_KeyValueList* labels, void* context,
-                                                     ib_Rpc_CallHandler_t callHandler);
-
+                                                     const char* mediaType, const ib_KeyValueList* labels,
+                                                     void* context, ib_Rpc_CallHandler_t callHandler);
 
 typedef ib_ReturnCode (*ib_Rpc_Server_Create_t)(ib_Rpc_Server** out, ib_Participant* participant,
                                                 const char* controllerName, const char* rpcChannel,
-                                                ib_Rpc_ExchangeFormat* exchangeFormat, const ib_KeyValueList* labels,
-                                                void* context, ib_Rpc_CallHandler_t callHandler);
+                                                const char* mediaType, const ib_KeyValueList* labels, void* context,
+                                                ib_Rpc_CallHandler_t callHandler);
 
 /*! \brief Create a Rpc client on a simulation participant with the provided properties.
 * \param out Pointer to which the resulting Rpc client reference will be written.
 * \param participant The simulation participant for which the Rpc client should be created.
 * \param controllerName The name of this controller.
 * \param rpcChannel The rpcChannel by which the Rpc server is identified.
-* \param exchangeFormat A meta description of the data that will be provided by this client.
+* \param mediaType A meta description of the data that will be provided by this client.
 * \param labels A list of key-value pairs of this Rpc client. The labels are relevant for matching Rpc clients and 
 * Rpc servers.
 * \param context A user provided context that is reobtained on call result in the resultHandler.
@@ -129,15 +113,13 @@ typedef ib_ReturnCode (*ib_Rpc_Server_Create_t)(ib_Rpc_Server** out, ib_Particip
 */
 IntegrationBusAPI ib_ReturnCode ib_Rpc_Client_Create(ib_Rpc_Client** out, ib_Participant* participant,
                                                      const char* controllerName, const char* rpcChannel,
-                                                     ib_Rpc_ExchangeFormat* exchangeFormat,
-                                                     const ib_KeyValueList* labels, void* context,
-                                                     ib_Rpc_ResultHandler_t resultHandler);
-
+                                                     const char* mediaType, const ib_KeyValueList* labels,
+                                                     void* context, ib_Rpc_ResultHandler_t resultHandler);
 
 typedef ib_ReturnCode (*ib_Rpc_Client_Create_t)(ib_Rpc_Client** out, ib_Participant* participant,
                                                 const char* controllerName, const char* rpcChannel,
-                                                ib_Rpc_ExchangeFormat* exchangeFormat, const ib_KeyValueList* labels,
-                                                void* context, ib_Rpc_ResultHandler_t resultHandler);
+                                                const char* mediaType, const ib_KeyValueList* labels, void* context,
+                                                ib_Rpc_ResultHandler_t resultHandler);
 
 /*! \brief Detach a call to one or multiple corresponding Rpc servers
 * \param self The Rpc Client that should trigger the remote procedure call.
@@ -165,18 +147,17 @@ typedef ib_ReturnCode(*ib_Rpc_Server_SubmitResult_t)(ib_Rpc_Server* self, ib_Rpc
 /*! \brief Query for available Rpc servers and their properties. The results are provided in the resultsHandler.
 * \param participant The simulation participant launching the query.
 * \param rpcChannel Only discover Rpc servers with this rpcChannel. Leave empty for a wildcard.
-* \param exchangeFormat Only discover Rpc servers with this exchangeFormat. Leave empty for a wildcard.
+* \param mediaType Only discover Rpc servers with this mediaType. Leave empty for a wildcard.
 * \param labels Only discover Rpc servers containing these labels. Use NULL to not filter for labels.
 * \param context A user provided context that is reobtained in the resultHandler.
 */
 IntegrationBusAPI ib_ReturnCode ib_Rpc_DiscoverServers(ib_Participant* participant, const char* rpcChannel,
-                                                       ib_Rpc_ExchangeFormat* exchangeFormat,
-                                                       const ib_KeyValueList* labels, void* context,
-                                                       ib_Rpc_DiscoveryResultHandler_t resultHandler);
+                                                       const char* mediaType, const ib_KeyValueList* labels,
+                                                       void* context, ib_Rpc_DiscoveryResultHandler_t resultHandler);
 
-typedef ib_ReturnCode(*ib_Rpc_DiscoverServers_t)(ib_Participant* participant, const char* rpcChannel,
-                                                ib_Rpc_ExchangeFormat* exchangeFormat, const ib_KeyValueList* labels,
-                                                void* context, ib_Rpc_DiscoveryResultHandler_t resultHandler);
+typedef ib_ReturnCode (*ib_Rpc_DiscoverServers_t)(ib_Participant* participant, const char* rpcChannel,
+                                                  const char* mediaType, const ib_KeyValueList* labels, void* context,
+                                                  ib_Rpc_DiscoveryResultHandler_t resultHandler);
 
 IB_END_DECLS
 

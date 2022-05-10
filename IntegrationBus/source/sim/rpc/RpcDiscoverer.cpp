@@ -13,8 +13,7 @@ RpcDiscoverer::RpcDiscoverer(mw::service::IServiceDiscovery* serviceDiscovery) :
 }
 
 std::vector<RpcDiscoveryResult> RpcDiscoverer::GetMatchingRpcServers(
-    const std::string& rpcChannel, const sim::rpc::RpcExchangeFormat& exchangeFormat,
-    const std::map<std::string, std::string>& labels) const
+    const std::string& rpcChannel, const std::string& mediaType, const std::map<std::string, std::string>& labels) const
 {
     std::vector<RpcDiscoveryResult> discoveryResults;
     auto serviceDescriptors = _serviceDiscovery->GetServices();
@@ -35,15 +34,15 @@ std::vector<RpcDiscoveryResult> RpcDiscoverer::GetMatchingRpcServers(
             };
 
             auto rpcServerFunctionName = getVal(mw::service::supplKeyRpcServerFunctionName);
-            RpcExchangeFormat rpcServerExchangeFormat{getVal(mw::service::supplKeyRpcServerDxf)};
+            auto rpcServerMediaType = getVal(mw::service::supplKeyRpcServerMediaType);
             std::string labelsStr = getVal(mw::service::supplKeyRpcServerLabels);
             auto rpcServerLabels =
                 ib::cfg::Deserialize<std::map<std::string, std::string>>(labelsStr);
 
             if ((rpcChannel == "" || rpcChannel == rpcServerFunctionName)
-                && Match(exchangeFormat, rpcServerExchangeFormat) && MatchLabels(labels, rpcServerLabels))
+                && MatchMediaType(mediaType, rpcServerMediaType) && MatchLabels(labels, rpcServerLabels))
             {
-                discoveryResults.push_back({rpcServerFunctionName, rpcServerExchangeFormat, rpcServerLabels});
+                discoveryResults.push_back({rpcServerFunctionName, rpcServerMediaType, rpcServerLabels});
             }
         }
     }

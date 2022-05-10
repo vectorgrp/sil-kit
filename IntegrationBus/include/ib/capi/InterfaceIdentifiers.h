@@ -45,8 +45,7 @@ typedef int32_t ib_InterfaceIdentifier;
 #define ib_InterfaceIdentifier_NewDataPublisherEvent       ((ib_InterfaceIdentifier)5001002)
 
 // Rpc
-#define ib_InterfaceIdentifier_RpcExchangeFormat           ((ib_InterfaceIdentifier)6001001)
-#define ib_InterfaceIdentifier_RpcDiscoveryResult          ((ib_InterfaceIdentifier)6002001)
+#define ib_InterfaceIdentifier_RpcDiscoveryResult          ((ib_InterfaceIdentifier)6001001)
 
 // Participant
 #define ib_InterfaceIdentifier_ParticipantStatus           ((ib_InterfaceIdentifier)7001001)
