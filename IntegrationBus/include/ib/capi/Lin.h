@@ -229,7 +229,7 @@ struct ib_Lin_ControllerConfig
      * \ref ib_Lin_Controller_SetFrameResponse() and
      * \ref ib_Lin_Controller_SetFrameResponses().
      */
-    ib_Lin_FrameResponse  frameResponses[1];
+    ib_Lin_FrameResponse*  frameResponses;
 };
 typedef struct ib_Lin_ControllerConfig ib_Lin_ControllerConfig;
 

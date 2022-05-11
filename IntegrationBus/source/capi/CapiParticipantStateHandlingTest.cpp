@@ -18,20 +18,24 @@ namespace {
     void Create_StringList(ib_StringList** outStringList, const char** strings, uint32_t numStrings)
     {
         ib_StringList* newStrings;
-        size_t stringsSize = numStrings * sizeof(char*);
-        size_t stringListSize = sizeof(ib_StringList) + stringsSize;
-        newStrings = (ib_StringList*)malloc(stringListSize);
-        if (newStrings != nullptr)
+        newStrings = (ib_StringList*)malloc(sizeof(ib_StringList));
+        if (newStrings == nullptr)
         {
-            newStrings->numStrings = numStrings;
-            for (uint32_t i = 0; i < numStrings; i++)
+            throw std::bad_alloc();
+        }
+        newStrings->numStrings = numStrings;
+        newStrings->strings = (char**)malloc(numStrings * sizeof(char*));
+        if (newStrings->strings == nullptr)
+        {
+            throw std::bad_alloc();
+        }
+        for (uint32_t i = 0; i < numStrings; i++)
+        {
+            auto len = strlen(strings[i]) + 1;
+            newStrings->strings[i] = (char*)malloc(len);
+            if (newStrings->strings[i] != nullptr)
             {
-                auto len = strlen(strings[i]) + 1;
-                newStrings->strings[i] = (char*)malloc(len);
-                if (newStrings->strings[i] != nullptr)
-                {
-                    strcpy((char*)newStrings->strings[i], strings[i]);
-                }
+                strcpy((char*)newStrings->strings[i], strings[i]);
             }
         }
         *outStringList = newStrings;

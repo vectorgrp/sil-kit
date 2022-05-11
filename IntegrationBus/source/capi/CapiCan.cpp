@@ -20,7 +20,7 @@ struct PendingTransmits {
 };
 PendingTransmits pendingTransmits;
 
-IntegrationBusAPI ib_ReturnCode ib_Can_Controller_Create(ib_Can_Controller** outController, ib_Participant* participant, const char* cName, const char* cNetwork)
+ib_ReturnCode ib_Can_Controller_Create(ib_Can_Controller** outController, ib_Participant* participant, const char* cName, const char* cNetwork)
 {
   ASSERT_VALID_OUT_PARAMETER(outController);
   ASSERT_VALID_POINTER_PARAMETER(participant);

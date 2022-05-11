@@ -10,7 +10,7 @@
 
 extern "C" {
 
-IntegrationBusAPI ib_ReturnCode ib_Logger_Log(ib_Logger* self, ib_LoggingLevel level, const char* message)
+ib_ReturnCode ib_Logger_Log(ib_Logger* self, ib_LoggingLevel level, const char* message)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(message);

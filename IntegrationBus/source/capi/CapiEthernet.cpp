@@ -29,7 +29,7 @@ PendingEthernetTransmits pendingEthernetTransmits;
 
 #define ETHERNET_MIN_FRAME_SIZE 60
 
-IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_Create(ib_Ethernet_Controller** outController, ib_Participant* participant, const char* name, const char* network)
+ib_ReturnCode ib_Ethernet_Controller_Create(ib_Ethernet_Controller** outController, ib_Participant* participant, const char* name, const char* network)
 {
   ASSERT_VALID_OUT_PARAMETER(outController);
   ASSERT_VALID_POINTER_PARAMETER(participant);

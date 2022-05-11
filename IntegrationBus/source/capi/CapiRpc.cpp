@@ -18,19 +18,24 @@
 static void assign(ib_Rpc_DiscoveryResultList** cResultList, const std::vector<ib::sim::rpc::RpcDiscoveryResult>& cppDiscoveryResults)
 {
     size_t numResults = cppDiscoveryResults.size();
-    size_t resultsMemSize = sizeof(ib_Rpc_DiscoveryResultList) + (numResults * sizeof(ib_Rpc_DiscoveryResult));
-    *cResultList = (ib_Rpc_DiscoveryResultList*)malloc(resultsMemSize);
-    (*cResultList)->numResults = numResults;
-
-    uint32_t i = 0;
-    for (auto&& r : cppDiscoveryResults)
+    *cResultList = (ib_Rpc_DiscoveryResultList*)malloc(sizeof(ib_Rpc_DiscoveryResultList));
+    if (*cResultList != NULL)
     {
-        (*cResultList)->results[i].interfaceId = ib_InterfaceIdentifier_RpcDiscoveryResult;
-        (*cResultList)->results[i].rpcChannel = r.rpcChannel.c_str();
-        (*cResultList)->results[i].mediaType = r.mediaType.c_str();
-        assign(&(*cResultList)->results[i].labelList, r.labels);
-        i++;
-    };
+        (*cResultList)->numResults = numResults;
+        (*cResultList)->results = (ib_Rpc_DiscoveryResult*)malloc(numResults * sizeof(ib_Rpc_DiscoveryResult));
+        if ((*cResultList)->results != NULL)
+        {
+            uint32_t i = 0;
+            for (auto&& r : cppDiscoveryResults)
+            {
+                (*cResultList)->results[i].interfaceId = ib_InterfaceIdentifier_RpcDiscoveryResult;
+                (*cResultList)->results[i].rpcChannel = r.rpcChannel.c_str();
+        		(*cResultList)->results[i].mediaType = r.mediaType.c_str();
+                assign(&(*cResultList)->results[i].labelList, r.labels);
+                i++;
+            };
+        }
+    }
 }
 
 extern "C" {

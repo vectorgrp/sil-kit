@@ -40,7 +40,7 @@ typedef struct ib_Rpc_DiscoveryResult
 typedef struct ib_Rpc_DiscoveryResultList
 {
     size_t numResults;
-    ib_Rpc_DiscoveryResult results[1];
+    ib_Rpc_DiscoveryResult* results;
 } ib_Rpc_DiscoveryResultList;
 
 

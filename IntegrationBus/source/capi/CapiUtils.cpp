@@ -28,7 +28,7 @@ thread_local std::string ib_error_string = "";
 #define ib_ReturnCode_TIMEOUT_str "Operation timed out."
 #define ib_ReturnCode_UNSUPPORTEDSERVICE_str "The requested service is not supported."
 
-IntegrationBusAPI ib_ReturnCode ib_ReturnCodeToString(const char** outString, ib_ReturnCode returnCode)
+ib_ReturnCode ib_ReturnCodeToString(const char** outString, ib_ReturnCode returnCode)
 {
     if (outString == nullptr)
     {
@@ -52,7 +52,7 @@ IntegrationBusAPI ib_ReturnCode ib_ReturnCodeToString(const char** outString, ib
 }
 
 
-IntegrationBusAPI const char* ib_GetLastErrorString() {
+const char* ib_GetLastErrorString() {
     const char* error_string = ib_error_string.c_str();
     return error_string;
 }

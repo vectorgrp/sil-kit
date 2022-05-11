@@ -88,7 +88,7 @@ static void assign(ib::sim::fr::ControllerConfig& cppConfig, const ib_FlexRay_Co
 
 extern "C" {
 
-IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controller** outController, ib_Participant* participant, const char* cName, const char* cNetwork)
+ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controller** outController, ib_Participant* participant, const char* cName, const char* cNetwork)
 {
   ASSERT_VALID_OUT_PARAMETER(outController);
   ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -110,31 +110,6 @@ IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controll
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_FlexRay_Append_TxBufferConfig(ib_FlexRay_ControllerConfig** inOutControllerConfig, const ib_FlexRay_TxBufferConfig* txBufferConfig)
-{
-  ASSERT_VALID_POINTER_TO_POINTER_PARAMETER(inOutControllerConfig);
-  ASSERT_VALID_POINTER_PARAMETER(txBufferConfig);
-  CAPI_ENTER
-  {
-    uint32_t numberOfTxBufferConfigurations = (*inOutControllerConfig)->numBufferConfigs + 1;
-    // NOTE: ib_FlexRay_ControllerConfig already contains one ib_FlexRay_TxBufferConfig,
-    // so add numberOfTxBufferConfigs-1 times sizeof(ib_FlexRay_TxBufferConfig)
-    size_t newSize = sizeof(ib_FlexRay_ControllerConfig)
-                     + ((numberOfTxBufferConfigurations - 1) * sizeof(ib_FlexRay_TxBufferConfig));
-    ib_FlexRay_ControllerConfig* result = (ib_FlexRay_ControllerConfig*)realloc(*inOutControllerConfig, newSize);
-    if (result == nullptr)
-    {
-      ib_error_string = std::string("could not realloc controller config to ") + std::to_string(newSize) + " bytes.";
-      return ib_ReturnCode_UNSPECIFIEDERROR;
-    }
-    memcpy(&result->bufferConfigs[numberOfTxBufferConfigurations-1], txBufferConfig, sizeof(ib_FlexRay_TxBufferConfig));
-    result->numBufferConfigs = numberOfTxBufferConfigurations;
-    *inOutControllerConfig = result;
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
-
 ib_ReturnCode ib_FlexRay_Controller_Configure(ib_FlexRay_Controller* controller, const ib_FlexRay_ControllerConfig* config)
 {
   ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -151,7 +126,7 @@ ib_ReturnCode ib_FlexRay_Controller_Configure(ib_FlexRay_Controller* controller,
   CAPI_LEAVE
 }
 
-IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_ReconfigureTxBuffer(ib_FlexRay_Controller* self, uint16_t txBufferIdx, const ib_FlexRay_TxBufferConfig* config)
+ib_ReturnCode ib_FlexRay_Controller_ReconfigureTxBuffer(ib_FlexRay_Controller* self, uint16_t txBufferIdx, const ib_FlexRay_TxBufferConfig* config)
 {
   ASSERT_VALID_POINTER_PARAMETER(self);
   ASSERT_VALID_POINTER_PARAMETER(config);
@@ -189,7 +164,7 @@ ib_ReturnCode ib_FlexRay_Controller_UpdateTxBuffer(ib_FlexRay_Controller* self, 
 }
 
 
-IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_ExecuteCmd(ib_FlexRay_Controller* self, ib_FlexRay_ChiCommand cmd)
+ib_ReturnCode ib_FlexRay_Controller_ExecuteCmd(ib_FlexRay_Controller* self, ib_FlexRay_ChiCommand cmd)
 {
   ASSERT_VALID_POINTER_PARAMETER(self);
   CAPI_ENTER

@@ -19,6 +19,12 @@
 #define SleepMs(X) usleep((X)*1000)
 #endif
 
+void AbortOnFailedAllocation(const char* failedAllocStrucName)
+{
+    fprintf(stderr, "Error: Allocation of \"%s\" failed, aborting...", failedAllocStrucName);
+    abort();
+}
+
 char* LoadFile(char const* path)
 {
     size_t length = 0;
@@ -127,6 +133,11 @@ void Schedule_Create(Schedule** outSchedule, Task* tasks, uint32_t numTasks)
     Schedule* newSchedule;
     size_t scheduleSize = sizeof(Schedule) + (numTasks * sizeof(Task));
     newSchedule = (Schedule*)malloc(scheduleSize);
+    if (newSchedule == NULL)
+    {
+        AbortOnFailedAllocation("Schedule");
+        return;
+    }
     newSchedule->numTasks = numTasks;
     newSchedule->nextTaskIndex = 0;
     newSchedule->now = 0;
@@ -167,12 +178,17 @@ void Master_InitCallback(void* context, ib_Participant* cbParticipant, struct ib
 {
     printf("Initializing LinMaster\n");
     controllerConfig = (ib_Lin_ControllerConfig*)malloc(sizeof(ib_Lin_ControllerConfig));
+    if (controllerConfig == NULL)
+    {
+        AbortOnFailedAllocation("ib_Lin_ControllerConfig");
+        return;
+    }
     memset(controllerConfig, 0, sizeof(ib_Lin_ControllerConfig));
     controllerConfig->interfaceId = ib_InterfaceIdentifier_LinControllerConfig;
     controllerConfig->controllerMode = ib_Lin_ControllerMode_Master;
     controllerConfig->baudRate = 20000;
     controllerConfig->numFrameResponses = 0;
-    
+
     ib_Lin_Controller_Init(linController, controllerConfig);
 }
 
@@ -371,18 +387,28 @@ void Slave_InitCallback(void* context, ib_Participant* cbParticipant, struct ib_
     response_34.responseMode = ib_Lin_FrameResponseMode_TxUnconditional;
 
     const uint32_t numFrameResponses = 5;
-    size_t   controllerConfigSize = sizeof(ib_Lin_ControllerConfig) + ((numFrameResponses - 1) * sizeof(ib_Lin_FrameResponse));
+    size_t   controllerConfigSize = sizeof(ib_Lin_ControllerConfig);
     controllerConfig = (ib_Lin_ControllerConfig*)malloc(controllerConfigSize);
+    if (controllerConfig == NULL)
+    {
+        AbortOnFailedAllocation("Schedule");
+        return;
+    }
     controllerConfig->interfaceId = ib_InterfaceIdentifier_LinControllerConfig;
     controllerConfig->controllerMode = ib_Lin_ControllerMode_Slave;
     controllerConfig->baudRate = 20000;
     controllerConfig->numFrameResponses = numFrameResponses;
+    controllerConfig->frameResponses = (ib_Lin_FrameResponse*)malloc(numFrameResponses * sizeof(ib_Lin_FrameResponse));
+    if (controllerConfig->frameResponses == NULL)
+    {
+        AbortOnFailedAllocation("ib_Lin_FrameResponse");
+        return;
+    }
     controllerConfig->frameResponses[0] = response_16;
     controllerConfig->frameResponses[1] = response_17;
     controllerConfig->frameResponses[2] = response_18;
     controllerConfig->frameResponses[3] = response_19;
     controllerConfig->frameResponses[4] = response_34;
-
     ib_Lin_Controller_Init(linController, controllerConfig);
 }
 

@@ -278,7 +278,7 @@ struct ib_FlexRay_ControllerConfig
 
   //! FlexRay buffer configs
   uint32_t                     numBufferConfigs;
-  ib_FlexRay_TxBufferConfig    bufferConfigs[1];
+  ib_FlexRay_TxBufferConfig*   bufferConfigs;
 };
 typedef struct ib_FlexRay_ControllerConfig ib_FlexRay_ControllerConfig;
 
@@ -556,14 +556,6 @@ IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Create(ib_FlexRay_Controll
 typedef ib_ReturnCode (*ib_FlexRay_Controller_Create_t)(ib_FlexRay_Controller** outController,
                                                         ib_Participant* participant, const char* name,
                                                         const char* network);
-
-/*! \brief Append a TxBuffer to the given controller configuration.
- *! \note The given controller configuration may get reallocated during this process.
- *  The ib_FlexRay_ControllerConfig returned may be deallocated by calling free().
- */
-IntegrationBusAPI ib_ReturnCode ib_FlexRay_Append_TxBufferConfig(ib_FlexRay_ControllerConfig** inOutControllerConfig, const ib_FlexRay_TxBufferConfig* txBufferConfig);
-
-typedef ib_ReturnCode (*ib_FlexRay_Append_TxBufferConfig_t)(ib_FlexRay_ControllerConfig** controllerConfig, const ib_FlexRay_TxBufferConfig* txBufferConfig);
 
 /*! \brief Apply the given controller configuration to the controller.*/
 IntegrationBusAPI ib_ReturnCode ib_FlexRay_Controller_Configure(ib_FlexRay_Controller* controller, const ib_FlexRay_ControllerConfig* config);

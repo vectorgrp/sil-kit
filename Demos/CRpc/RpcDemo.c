@@ -18,6 +18,12 @@
 #include <string.h>
 #include <ctype.h>
 
+void AbortOnFailedAllocation(const char* failedAllocStrucName)
+{
+    fprintf(stderr, "Error: Allocation of \"%s\" failed, aborting...", failedAllocStrucName);
+    abort();
+}
+
 char* LoadFile(char const* path)
 {
     size_t length = 0;
@@ -79,6 +85,11 @@ void CallHandler(void* context, ib_Rpc_Server* cbServer, ib_Rpc_CallHandle* call
 {
     receiveCallCount += 1;
     uint8_t* tmp = (uint8_t*)malloc(argumentData->size * sizeof(uint8_t));
+    if (tmp == NULL)
+    {
+        AbortOnFailedAllocation("ib_ByteVector");
+        return;
+    }
     printf("[Server] Call received: ");
     PrintByteVector(argumentData);
     for (size_t i = 0; i < argumentData->size; i++)
@@ -133,16 +144,22 @@ void Copy_Label(ib_KeyValuePair* dst, const ib_KeyValuePair* src)
 void Create_Labels(ib_KeyValueList** outLabelList, const ib_KeyValuePair* labels, size_t numLabels)
 {
     ib_KeyValueList* newLabelList;
-    size_t labelsSize = numLabels * sizeof(ib_KeyValuePair);
-    size_t labelListSize = sizeof(ib_KeyValueList) + labelsSize;
-    newLabelList = (ib_KeyValueList*)malloc(labelListSize);
-    if (newLabelList != NULL)
+    newLabelList = (ib_KeyValueList*)malloc(sizeof(ib_KeyValueList));
+    if (newLabelList == NULL)
     {
-        newLabelList->numLabels = numLabels;
-        for (size_t i = 0; i < numLabels; i++)
-        {
-            Copy_Label(&newLabelList->labels[i], &labels[i]);
-        }
+        AbortOnFailedAllocation("ib_KeyValueList");
+        return;
+    }
+    newLabelList->numLabels = numLabels;
+    newLabelList->labels = (ib_KeyValuePair*)malloc(numLabels * sizeof(ib_KeyValuePair));
+    if (newLabelList->labels == NULL)
+    {
+        AbortOnFailedAllocation("ib_KeyValuePair");
+        return;
+    }
+    for (size_t i = 0; i < numLabels; i++)
+    {
+        Copy_Label(&newLabelList->labels[i], &labels[i]);
     }
     *outLabelList = newLabelList;
 }
@@ -218,7 +235,7 @@ int main(int argc, char* argv[])
             buffer[1] = i;
             buffer[2] = i;
             ib_ByteVector argumentData = { &buffer[0], 3 };
-            printf("[Client] Call detached: ");
+            printf("[Client] Call dispatched: ");
             PrintByteVector(&argumentData);
             ib_Rpc_CallHandle* callHandle;
             ib_Rpc_Client_Call(client, &callHandle, &argumentData);

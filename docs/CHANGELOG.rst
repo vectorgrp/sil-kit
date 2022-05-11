@@ -8,8 +8,113 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [3.99.22] - unreleased
 ----------------------
 
+Removed
+~~~~~~~
+        
+  - ``IntegrationBus/include/ib/capi/FlexRay.h``
+      
+      The convenience function in the C-API to append a ``TxBufferConfig`` was removed. 
+
+      + old: 
+      .. code-block:: c++
+
+        typedef ib_ReturnCode (*ib_FlexRay_Append_TxBufferConfig_t)(ib_FlexRay_ControllerConfig** controllerConfig, 
+          const ib_FlexRay_TxBufferConfig* txBufferConfig);
+
+
 Changed
 ~~~~~~~
+
+- Dynamic arrays in C-API changed from *array of size 1 at end of struct* to pointers:
+  
+  - ``IntegrationBus/include/ib/capi/FlexRay.h``
+
+    + old: 
+    .. code-block:: c++
+
+      struct ib_FlexRay_ControllerConfig {
+        ...
+        ib_FlexRay_TxBufferConfig bufferConfigs[1];
+      };
+
+    + new: 
+    .. code-block:: c++
+
+      struct ib_FlexRay_ControllerConfig {
+        ...
+        ib_FlexRay_TxBufferConfig* bufferConfigs;
+      };
+
+  - ``IntegrationBus/include/ib/capi/Lin.h``
+
+    + old: 
+    .. code-block:: c++
+
+      struct ib_Lin_ControllerConfig {
+        ...
+        ib_Lin_FrameResponse frameResponses[1];
+      };
+
+    + new: 
+    .. code-block:: c++
+
+      struct ib_Lin_ControllerConfig {
+        ...
+        ib_Lin_FrameResponse* frameResponses;
+      };
+
+  - ``IntegrationBus/include/ib/capi/Rpc.h``
+
+    + old:
+    .. code-block:: c++
+
+      typedef struct ib_Rpc_DiscoveryResultList
+      {
+        ...
+        ib_Rpc_DiscoveryResult results[1];
+      } ib_Rpc_DiscoveryResultList;
+
+    + new: 
+    .. code-block:: c++
+
+      typedef struct ib_Rpc_DiscoveryResultList
+      {
+        ...
+        ib_Rpc_DiscoveryResult* results;
+      } ib_Rpc_DiscoveryResultList;
+
+
+  - ``IntegrationBus/include/ib/capi/Types.h``
+
+    + old:
+    .. code-block:: c++
+
+      typedef struct ib_KeyValueList
+      {
+        size_t numLabels;
+        ib_KeyValuePair labels[1];
+      } ib_KeyValueList;
+      
+      typedef struct ib_StringList
+      {
+        size_t numStrings;
+        const char* strings[1];
+      } ib_StringList;
+
+    + new:
+    .. code-block:: c++
+
+      typedef struct ib_KeyValueList
+      {
+        size_t numLabels;
+        ib_KeyValuePair* labels;
+      } ib_KeyValueList;
+      
+      typedef struct ib_StringList
+      {
+        size_t numStrings;
+        const char** strings;
+      } ib_StringList;
 
 - Lin
 

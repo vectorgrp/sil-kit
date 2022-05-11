@@ -68,26 +68,31 @@ void Copy_Label(ib_KeyValuePair* dst, const ib_KeyValuePair* src)
     auto lenVal = strlen(src->value) + 1;
     dst->key = (const char*)malloc(lenKey);
     dst->value = (const char*)malloc(lenVal);
-    if (dst->key != nullptr && dst->value != nullptr)
+    if (dst->key == nullptr || dst->value == nullptr)
     {
-        strcpy((char*)dst->key, src->key);
-        strcpy((char*)dst->value, src->value);
+        throw std::bad_alloc();
     }
+    strcpy((char*)dst->key, src->key);
+    strcpy((char*)dst->value, src->value);
 }
 
 void Create_Labels(ib_KeyValueList** outLabels, const ib_KeyValuePair* labels, uint32_t numLabels)
 {
     ib_KeyValueList* newLabels;
-    size_t labelsSize = numLabels * sizeof(ib_KeyValuePair);
-    size_t labelListSize = sizeof(ib_KeyValueList) + labelsSize;
-    newLabels = (ib_KeyValueList*)malloc(labelListSize);
-    if (newLabels != nullptr)
+    newLabels = (ib_KeyValueList*)malloc(sizeof(ib_KeyValueList));
+    if (newLabels == nullptr)
     {
-        newLabels->numLabels = numLabels;
-        for (uint32_t i = 0; i < numLabels; i++)
-        {
-            Copy_Label(&newLabels->labels[i], &labels[i]);
-        }
+        throw std::bad_alloc();
+    }
+    newLabels->numLabels = numLabels;
+    newLabels->labels = (ib_KeyValuePair*)malloc(numLabels * sizeof(ib_KeyValuePair));
+    if (newLabels->labels == nullptr)
+    {
+        throw std::bad_alloc();
+    }
+    for (uint32_t i = 0; i < numLabels; i++)
+    {
+        Copy_Label(&newLabels->labels[i], &labels[i]);
     }
     *outLabels = newLabels;
 }

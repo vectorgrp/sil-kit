@@ -51,14 +51,14 @@ typedef struct ib_KeyValuePair
 typedef struct ib_KeyValueList
 {
     size_t numLabels;
-    ib_KeyValuePair labels[1];
+    ib_KeyValuePair* labels;
 } ib_KeyValueList;
 
 /*! \brief String list */
 typedef struct ib_StringList
 {
     size_t numStrings;
-    const char* strings[1];
+    char** strings;
 } ib_StringList;
 
 typedef uint8_t ib_Bool;

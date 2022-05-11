@@ -20,14 +20,19 @@ inline void assign(std::map<std::string, std::string>& cppLabels, const ib_KeyVa
 inline void assign(ib_KeyValueList** cLabels, const std::map<std::string, std::string>& cppLabels)
 {
     size_t numLabels = cppLabels.size();
-    size_t labelsSize = sizeof(ib_KeyValueList) + (numLabels * sizeof(ib_KeyValuePair));
-    *cLabels = (ib_KeyValueList*)malloc(labelsSize);
-    (*cLabels)->numLabels = numLabels;
-
-    uint32_t i = 0;
-    for (auto&& kv : cppLabels)
+    *cLabels = (ib_KeyValueList*)malloc(sizeof(ib_KeyValueList));
+    if (*cLabels != NULL)
     {
-        (*cLabels)->labels[i++] = {kv.first.c_str(), kv.second.c_str()};
+        (*cLabels)->numLabels = numLabels;
+        (*cLabels)->labels = (ib_KeyValuePair*)malloc(numLabels * sizeof(ib_KeyValuePair));
+        if ((*cLabels)->labels != NULL)
+        {
+            uint32_t i = 0;
+            for (auto&& kv : cppLabels)
+            {
+                (*cLabels)->labels[i++] = { kv.first.c_str(), kv.second.c_str() };
+            }
+        }
     }
 }
 

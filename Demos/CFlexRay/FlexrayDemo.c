@@ -20,6 +20,12 @@
 #define SleepMs(X) usleep((X)*1000)
 #endif
 
+void AbortOnFailedAllocation(const char* failedAllocStrucName)
+{
+    fprintf(stderr, "Error: Allocation of \"%s\" failed, aborting...", failedAllocStrucName);
+    abort();
+}
+
 typedef uint8_t MasterState;
 #define  MasterState_Ignore        ((MasterState)0)
 #define  MasterState_PerformWakeup ((MasterState)1)
@@ -155,9 +161,32 @@ void ReceiveCycleStart(void* context, ib_FlexRay_Controller* controller, const i
   fprintf(stdout, "CycleStart cycleCounter=%d\n", message->cycleCounter);
 }
 
+void AppendTxBufferConfig(ib_FlexRay_ControllerConfig** inOutControllerConfig,
+                          const ib_FlexRay_TxBufferConfig* txBufferConfig)
+{
+    uint32_t newNumTxBufferConfigs = (*inOutControllerConfig)->numBufferConfigs + 1;
+    size_t newSize = newNumTxBufferConfigs * sizeof(ib_FlexRay_TxBufferConfig);
+    ib_FlexRay_TxBufferConfig* result =
+        (ib_FlexRay_TxBufferConfig*)realloc((*inOutControllerConfig)->bufferConfigs, newSize);
+    if (result == NULL)
+    {
+        AbortOnFailedAllocation("ib_FlexRay_TxBufferConfig");
+        return;
+    }
+    memcpy(&result[newNumTxBufferConfigs - 1], txBufferConfig,
+        sizeof(ib_FlexRay_TxBufferConfig));
+    (*inOutControllerConfig)->numBufferConfigs = newNumTxBufferConfigs;
+    (*inOutControllerConfig)->bufferConfigs = result;
+}
+
 FlexRayNode* FlexRayNode_Create(ib_FlexRay_Controller* controller, ib_FlexRay_ControllerConfig* config)
 {
   struct FlexRayNode* flexRayNode = malloc(sizeof(FlexRayNode));
+  if (flexRayNode == NULL)
+  {
+      AbortOnFailedAllocation("FlexRayNode");
+      return NULL;
+  }
   flexRayNode->_controller = controller;
   flexRayNode->_controllerConfig = config;
   flexRayNode->_oldPocStatus.state = ib_FlexRay_PocState_DefaultConfig;
@@ -434,10 +463,14 @@ int main(int argc, char** argv)
   const char* flexrayNetworkName = "FlexRay1";
 
   ib_FlexRay_ControllerConfig* config = (ib_FlexRay_ControllerConfig*)malloc(sizeof(ib_FlexRay_ControllerConfig));
+  if (config == NULL)
+  {
+      AbortOnFailedAllocation("ib_FlexRay_ControllerConfig");
+      return 2;
+  }
   memset(config, 0, sizeof(ib_FlexRay_ControllerConfig));
   config->clusterParams = clusterParams;
   config->nodeParams = nodeParams;
-
 
   if (!strcmp(participantName, "Node0"))
   {
@@ -450,30 +483,16 @@ int main(int argc, char** argv)
     cfg.hasPayloadPreambleIndicator = ib_False;
     cfg.headerCrc = 5;
     cfg.transmissionMode = ib_FlexRay_TransmissionMode_SingleShot;
-    returnCode = ib_FlexRay_Append_TxBufferConfig(&config, &cfg);
-    if (returnCode != ib_ReturnCode_SUCCESS)
-    {
-      printf("ib_FlexRay_Append_TxBufferConfig => %s\n", ib_GetLastErrorString());
-      return 2;
-    }
+    AppendTxBufferConfig(&config, &cfg);
 
     cfg.channels = ib_FlexRay_Channel_A;
     cfg.slotId = 20;
-    returnCode = ib_FlexRay_Append_TxBufferConfig(&config, &cfg);
-    if (returnCode != ib_ReturnCode_SUCCESS)
-    {
-      printf("ib_FlexRay_Append_TxBufferConfig => %s\n", ib_GetLastErrorString());
-      return 2;
-    }
+    AppendTxBufferConfig(&config, &cfg);
 
     cfg.channels = ib_FlexRay_Channel_B;
     cfg.slotId = 30;
-    returnCode = ib_FlexRay_Append_TxBufferConfig(&config, &cfg);
-    if (returnCode != ib_ReturnCode_SUCCESS)
-    {
-      printf("ib_FlexRay_Append_TxBufferConfig => %s\n", ib_GetLastErrorString());
-      return 2;
-    }
+    AppendTxBufferConfig(&config, &cfg);
+
   }
   else if (!strcmp(participantName, "Node1"))
   {
@@ -488,32 +507,16 @@ int main(int argc, char** argv)
     cfg.hasPayloadPreambleIndicator = ib_False;
     cfg.headerCrc = 5;
     cfg.transmissionMode = ib_FlexRay_TransmissionMode_SingleShot;
-    returnCode = ib_FlexRay_Append_TxBufferConfig(&config, &cfg);
-    if (returnCode != ib_ReturnCode_SUCCESS)
-    {
-      printf("ib_FlexRay_Append_TxBufferConfig => %s\n", ib_GetLastErrorString());
-      return 2;
-    }
+    AppendTxBufferConfig(&config, &cfg);
 
     cfg.channels = ib_FlexRay_Channel_A;
     cfg.slotId = 21;
-    returnCode = ib_FlexRay_Append_TxBufferConfig(&config, &cfg);
-    if (returnCode != ib_ReturnCode_SUCCESS)
-    {
-      printf("ib_FlexRay_Append_TxBufferConfig => %s\n", ib_GetLastErrorString());
-      return 2;
-    }
+    AppendTxBufferConfig(&config, &cfg);
 
     cfg.channels = ib_FlexRay_Channel_B;
     cfg.slotId = 31;
-    returnCode = ib_FlexRay_Append_TxBufferConfig(&config, &cfg);
-    if (returnCode != ib_ReturnCode_SUCCESS)
-    {
-      printf("ib_FlexRay_Append_TxBufferConfig => %s\n", ib_GetLastErrorString());
-      return 2;
-    }
-}
-
+    AppendTxBufferConfig(&config, &cfg);
+  }
 
   ib_FlexRay_Controller* controller;
   returnCode = ib_FlexRay_Controller_Create(&controller, participant, flexrayControllerName, flexrayNetworkName);

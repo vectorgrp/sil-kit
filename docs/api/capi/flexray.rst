@@ -23,7 +23,6 @@ To configure these frames, the API provides functions to manipulate TX buffers.
 **The following functions can be used to create a FlexRay controller and manipulate it's configuration:**
 
 .. doxygenfunction:: ib_FlexRay_Controller_Create
-.. doxygenfunction:: ib_FlexRay_Append_TxBufferConfig
 .. doxygenfunction:: ib_FlexRay_Controller_Configure
 .. doxygenfunction:: ib_FlexRay_Controller_ReconfigureTxBuffer
 .. doxygenfunction:: ib_FlexRay_Controller_UpdateTxBuffer
