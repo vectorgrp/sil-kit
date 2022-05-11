@@ -44,6 +44,12 @@ struct ParticipantAnnouncement
 
 struct ParticipantAnnouncementReply
 {
+    enum class Status : uint8_t {
+        Failed = 0,
+        Success = 1
+    };
+    Status status;
+    RegistryMsgHeader remoteHeader;
     std::vector<VAsioMsgSubscriber> subscribers;
 };
 

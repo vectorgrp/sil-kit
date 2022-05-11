@@ -32,16 +32,5 @@ public:
 
 };
 
-//! ProtocolPeer exposes some of the protocol details for testing purposes.
-class IVasioProtocolPeer
-{
-public:
-    virtual ~IVasioProtocolPeer() = default;
-
-    //! Signal the peer that the protocl version is not supported
-    virtual void VersionNotSupported() = 0;
-
-};
-
 } // mw
 } // namespace ib

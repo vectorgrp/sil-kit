@@ -98,12 +98,17 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncement&
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnouncementReply& reply)
 {
-    buffer << reply.subscribers;
+    buffer  << reply.status
+        << reply.remoteHeader
+        << reply.subscribers;
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncementReply& reply)
 {
-    buffer >> reply.subscribers;
+    buffer 
+        >> reply.status
+        >> reply.remoteHeader
+        >> reply.subscribers;
     return buffer;
 }
 

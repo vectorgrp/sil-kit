@@ -22,7 +22,6 @@ public:
     ConfigurationError() : ConfigurationError("Configuration has syntactical or semantical errors.") { }
 };
 
-
 class StateError : public std::logic_error
 {
 public:
@@ -31,6 +30,12 @@ public:
     StateError() : StateError("The requested operation is not valid in the current state.")
     {
     }
+};
+
+class ProtocolError: public std::runtime_error
+{
+public:
+    using std::runtime_error::runtime_error;
 };
 
 } // namespace ib

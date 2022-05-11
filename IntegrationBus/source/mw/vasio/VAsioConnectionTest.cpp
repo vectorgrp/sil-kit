@@ -75,7 +75,6 @@ struct MockIbMessageReceiver
 struct MockVAsioPeer
     : public IVAsioPeer
     , public IIbServiceEndpoint
-    , public IVasioProtocolPeer
 {
     VAsioPeerInfo _peerInfo;
     ServiceDescriptor _serviceDescriptor;
@@ -105,9 +104,6 @@ struct MockVAsioPeer
     //IIbServiceEndpoint
     MOCK_METHOD(void, SetServiceDescriptor, (const ServiceDescriptor& serviceDescriptor), (override));
     MOCK_METHOD(const ServiceDescriptor&, GetServiceDescriptor, (), (override, const));
-
-    //IVasioProtocolPeer
-    MOCK_METHOD(void, VersionNotSupported, (), (override));
 };
 
 // Wire protocol, using the Serdes* methods
@@ -149,6 +145,18 @@ auto Serialize(EndpointId remoteIndex, EndpointAddress address,
     return buffer;
 }
 
+auto Serialize(const ParticipantAnnouncementReply& reply) -> MessageBuffer
+{
+    MessageBuffer buffer;
+    uint32_t msgSizePlaceholder{0u};
+
+    buffer << msgSizePlaceholder
+           << VAsioMsgKind::IbRegistryMessage
+           << RegistryMessageKind::ParticipantAnnouncementReply
+           << reply;
+    return buffer;
+}
+
 template<typename IbMessageT>
 auto Deserialize(MessageBuffer) -> IbMessageT;
 
@@ -184,17 +192,17 @@ void DropMessageSize(MessageBuffer& buffer)
     buffer >> messageSize;
 }
 
+
 //////////////////////////////////////////////////////////////////////
 // Matchers
 //////////////////////////////////////////////////////////////////////
-MATCHER_P(AnnouncementReplyMatcher, announcement,
+MATCHER_P(AnnouncementReplyMatcher, validator,
     "Deserialize the MessageBuffer and check the announcement's reply")
 {
     auto buffer = arg;
     DropMessageSize(buffer);
     auto reply  = Deserialize<ParticipantAnnouncementReply>(buffer);
-    //TODO sensible verification check
-    return true;
+    return validator(reply);
 }
 
 MATCHER_P(SubscriptionAcknowledgeMatcher, subscriber,
@@ -252,9 +260,38 @@ TEST_F(VAsioConnectionTest, unsupported_version_connect)
     auto buffer = Serialize(announcement);
     DropMessageSize(buffer);
 
-    EXPECT_CALL(_from, VersionNotSupported()).Times(1);
+    auto validator = [](const ParticipantAnnouncementReply& reply)
+    {
+        return reply.status == ParticipantAnnouncementReply::Status::Failed;
+    };
+    EXPECT_CALL(_from, SendIbMsg(AnnouncementReplyMatcher(validator))).Times(1);
     _connection.OnSocketData(&_from, std::move(buffer));
 
+}
+
+TEST_F(VAsioConnectionTest, unsupported_version_reply_should_throw)
+{
+    ParticipantAnnouncementReply reply{};
+    reply.remoteHeader.versionHigh = 1;
+    reply.remoteHeader.versionLow = 1;
+    reply.status = ParticipantAnnouncementReply::Status::Failed;
+
+    auto buffer = Serialize(reply);
+    DropMessageSize(buffer);
+    EXPECT_THROW(
+        _connection.OnSocketData(&_from, std::move(buffer)),
+        ib::ProtocolError);
+}
+TEST_F(VAsioConnectionTest, supported_version_reply_must_not_throw)
+{
+    ParticipantAnnouncementReply reply{};
+    reply.status = ParticipantAnnouncementReply::Status::Success;
+
+    auto buffer = Serialize(reply);
+    DropMessageSize(buffer);
+    EXPECT_NO_THROW(
+        _connection.OnSocketData(&_from, std::move(buffer))
+    );
 }
 
 TEST_F(VAsioConnectionTest, current_version_connect)
@@ -265,9 +302,12 @@ TEST_F(VAsioConnectionTest, current_version_connect)
     auto buffer = Serialize(announcement);
     DropMessageSize(buffer);
 
-    EXPECT_CALL(_from, SendIbMsg(AnnouncementReplyMatcher(announcement))).Times(1);
+    auto validator = [](const ParticipantAnnouncementReply& reply)
+    {
+        return reply.status == ParticipantAnnouncementReply::Status::Success;
+    };
+    EXPECT_CALL(_from, SendIbMsg(AnnouncementReplyMatcher(validator))).Times(1);
 
-    EXPECT_CALL(_from, VersionNotSupported()).Times(0);
     _connection.OnSocketData(&_from, std::move(buffer));
 }
 

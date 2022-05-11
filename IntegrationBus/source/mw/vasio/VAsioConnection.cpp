@@ -184,6 +184,19 @@ auto RegistryMsgHeaderToMainVersionRange(const ib::mw::RegistryMsgHeader& regist
     return versionInfo;
 }
 
+// SerDes helpers to reduce boiler plate
+
+auto Serialize(const ib::mw::ParticipantAnnouncementReply& reply) -> ib::mw::MessageBuffer
+{
+    ib::mw::MessageBuffer buffer;
+    uint32_t msgSizePlaceholder{0u};
+
+    buffer << msgSizePlaceholder
+           << ib::mw::VAsioMsgKind::IbRegistryMessage
+           << ib::mw::RegistryMessageKind::ParticipantAnnouncementReply
+           << reply;
+    return buffer;
+}
 } //anonymous namespace
 
 
@@ -393,6 +406,12 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
     if (announcement.messageHeader != reference)
     {
         NotifyNetworkIncompatibility(announcement.messageHeader, announcement.peerInfo.participantName);
+
+        ParticipantAnnouncementReply reply;
+        reply.status = ParticipantAnnouncementReply::Status::Failed;
+        reply.remoteHeader = reference;
+        from->SendIbMsg(Serialize(reply));
+
         return;
     }
 
@@ -460,6 +479,19 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Mess
     ParticipantAnnouncementReply reply;
     buffer >> reply;
 
+    if (reply.status == ParticipantAnnouncementReply::Status::Failed)
+    {
+        _logger->Warn("Received failed participant announcement reply from {}",
+            from->GetInfo().participantName);
+        RegistryMsgHeader reference;
+        // check what went wrong during the handshake
+        if(reply.remoteHeader.preambel != reference.preambel)
+        {
+            throw ProtocolError("VAsioConnection: ParticipantAnnouncement failed: invalid preambel in header. check endianess.");
+        }
+        throw ProtocolError("VAsioConnection: ParticipantAnnouncement failed: version mismatch in header.");
+
+    }
     for (auto& subscriber : reply.subscribers)
     {
         TryAddRemoteSubscriber(from, subscriber);
@@ -484,19 +516,12 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Mess
 void VAsioConnection::SendParticipantAnnoucementReply(IVAsioPeer* peer)
 {
     ParticipantAnnouncementReply reply;
+    reply.status = ParticipantAnnouncementReply::Status::Success;
     std::transform(_vasioReceivers.begin(), _vasioReceivers.end(), std::back_inserter(reply.subscribers),
                    [](const auto& subscriber) { return subscriber->GetDescriptor(); });
 
-    MessageBuffer buffer;
-    uint32_t msgSizePlaceholder{0u};
-
-    buffer << msgSizePlaceholder
-           << VAsioMsgKind::IbRegistryMessage
-           << RegistryMessageKind::ParticipantAnnouncementReply
-           << reply;
-
     _logger->Debug("Sending participant announcement reply to {}", peer->GetInfo().participantName);
-    peer->SendIbMsg(std::move(buffer));
+    peer->SendIbMsg(Serialize(reply));
 }
 
 void VAsioConnection::AddParticipantToLookup(const std::string& participantName)
@@ -527,6 +552,11 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, MessageBuffer&& 
     if (participantsMsg.messageHeader != reference)
     {
         NotifyNetworkIncompatibility(participantsMsg.messageHeader, peer->GetInfo().participantName);
+
+        ParticipantAnnouncementReply reply;
+        reply.status = ParticipantAnnouncementReply::Status::Failed;
+        reply.remoteHeader = reference;
+        peer->SendIbMsg(Serialize(reply));
         return;
     }
 
