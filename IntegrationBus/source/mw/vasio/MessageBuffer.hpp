@@ -386,7 +386,7 @@ MessageBuffer& MessageBuffer::operator<<(std::chrono::duration<Rep, Period> dura
 template <class Rep, class Period>
 MessageBuffer& MessageBuffer::operator>>(std::chrono::duration<Rep, Period>& duration)
 {
-    Rep count = duration.count();
+    Rep count{};
     *this >> count;
     duration = std::chrono::duration<Rep, Period>{count};
     return *this;
