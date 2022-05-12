@@ -43,7 +43,7 @@ target_link_libraries(IbMwVAsio
       IbSimCan
       IbSimEthernet
       IbSimLin
-      IbSimFlexRay
+      IbSimFlexray
       Threads::Threads
       IbFilesystem
       asio

@@ -6,22 +6,24 @@
 #include "IIbSender.hpp"
 #include "IIbServiceEndpoint.hpp"
 
-#include "ib/sim/fr/FrDatatypes.hpp"
+#include "ib/sim/fr/FlexrayDatatypes.hpp"
 
 namespace ib {
 namespace sim {
 namespace fr {
 
-/*! \brief IIbToFrBusSimulator interface
+/*! \brief IIbToFlexrayBusSimulator interface
  *
  *  Used by the Participant
  */
-class IIbToFrBusSimulator
-    : public mw::IIbReceiver<HostCommand, ControllerConfig, TxBufferConfigUpdate, TxBufferUpdate>
-    , public mw::IIbSender<FrMessage, FrMessageAck, FrSymbol, FrSymbolAck, CycleStart, PocStatus>
+class IIbToFlexrayBusSimulator
+    : public mw::IIbReceiver<FlexrayHostCommand, FlexrayControllerConfig, FlexrayTxBufferConfigUpdate,
+                             FlexrayTxBufferUpdate>
+    , public mw::IIbSender<FlexrayFrameEvent, FlexrayFrameTransmitEvent, FlexraySymbolEvent, FlexraySymbolTransmitEvent,
+                           FlexrayCycleStartEvent, FlexrayPocStatusEvent>
 {
 public:
-    ~IIbToFrBusSimulator() = default;
+    ~IIbToFlexrayBusSimulator() = default;
 
     /* NB: There is no setter or getter for an EndpointAddress of the bus
      * simulator, since the Network Simulator manages multiple controllers with

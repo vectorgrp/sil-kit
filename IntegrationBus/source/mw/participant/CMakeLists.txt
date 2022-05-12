@@ -19,7 +19,7 @@ target_link_libraries(IbMwParticipant
         IbMwSync
         IbSimCan
         IbSimEthernet
-        IbSimFlexRay
+        IbSimFlexray
         IbSimLin
         IbSimDataMessage
         IbSimRpc

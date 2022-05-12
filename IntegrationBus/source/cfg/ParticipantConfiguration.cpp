@@ -85,7 +85,7 @@ bool operator==(const EthernetController& lhs, const EthernetController& rhs)
         && lhs.replay == rhs.replay;
 }
 
-bool operator==(const FlexRayController& lhs, const FlexRayController& rhs)
+bool operator==(const FlexrayController& lhs, const FlexrayController& rhs)
 {
     return lhs.name == rhs.name
         && lhs.network == rhs.network
@@ -160,7 +160,7 @@ bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfigurat
         && lhs.canControllers == rhs.canControllers
         && lhs.linControllers == rhs.linControllers
         && lhs.ethernetControllers == rhs.ethernetControllers
-        && lhs.flexRayControllers == rhs.flexRayControllers
+        && lhs.flexrayControllers == rhs.flexrayControllers
         && lhs.dataPublishers == rhs.dataPublishers
         && lhs.dataSubscribers == rhs.dataSubscribers
         && lhs.rpcClients == rhs.rpcClients
@@ -220,7 +220,7 @@ std::istream& from_istream(std::istream& in, std::array<uint8_t, 6>& macAddress)
 constexpr NetworkType CanController::networkType;
 constexpr NetworkType LinController::networkType;
 constexpr NetworkType EthernetController::networkType;
-constexpr NetworkType FlexRayController::networkType;
+constexpr NetworkType FlexrayController::networkType;
 constexpr NetworkType DataPublisher::networkType;
 constexpr NetworkType DataSubscriber::networkType;
 constexpr NetworkType RpcServer::networkType;

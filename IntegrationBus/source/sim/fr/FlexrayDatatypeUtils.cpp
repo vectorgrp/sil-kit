@@ -1,12 +1,12 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "FrDatatypeUtils.hpp"
+#include "FlexrayDatatypeUtils.hpp"
 
 namespace ib {
 namespace sim {
 namespace fr {
 
-bool operator==(const Header& lhs, const Header& rhs)
+bool operator==(const FlexrayHeader& lhs, const FlexrayHeader& rhs)
 {
     return lhs.flags == rhs.flags
         && lhs.frameId == rhs.frameId
@@ -15,57 +15,63 @@ bool operator==(const Header& lhs, const Header& rhs)
         && lhs.payloadLength == rhs.payloadLength;
 }
 
-bool operator==(const Frame& lhs, const Frame& rhs)
+bool operator==(const FlexrayFrame& lhs, const FlexrayFrame& rhs)
 {
     return lhs.header == rhs.header
         && lhs.payload == rhs.payload;
 }
 
-bool operator==(const FrMessage& lhs, const FrMessage& rhs)
+bool operator==(const FlexrayFrameEvent& lhs, const FlexrayFrameEvent& rhs)
 {
     return lhs.channel == rhs.channel
         && lhs.frame == rhs.frame;
 }
 
-bool operator==(const FrMessageAck& lhs, const FrMessageAck& rhs)
+bool operator==(const FlexrayFrameTransmitEvent& lhs, const FlexrayFrameTransmitEvent& rhs)
 {
     return lhs.txBufferIndex == rhs.txBufferIndex
         && lhs.channel == rhs.channel
         && lhs.frame == rhs.frame;
 }
 
-bool operator==(const FrSymbol& lhs, const FrSymbol& rhs)
+bool operator==(const FlexraySymbolEvent& lhs, const FlexraySymbolEvent& rhs)
 {
     return lhs.channel == rhs.channel
         && lhs.pattern == rhs.pattern;
 }
 
-bool operator==(const TxBufferConfigUpdate& lhs, const TxBufferConfigUpdate& rhs)
+bool operator==(const FlexrayWakeupEvent& lhs, const FlexrayWakeupEvent& rhs)
+{
+    return lhs.channel == rhs.channel
+        && lhs.pattern == rhs.pattern;
+}
+
+bool operator==(const FlexrayTxBufferConfigUpdate& lhs, const FlexrayTxBufferConfigUpdate& rhs)
 {
     return lhs.txBufferIndex == rhs.txBufferIndex
         && lhs.txBufferConfig == rhs.txBufferConfig;
 }
 
-bool operator==(const TxBufferUpdate& lhs, const TxBufferUpdate& rhs)
+bool operator==(const FlexrayTxBufferUpdate& lhs, const FlexrayTxBufferUpdate& rhs)
 {
     return lhs.txBufferIndex == rhs.txBufferIndex
         && lhs.payloadDataValid == rhs.payloadDataValid
         && lhs.payload == rhs.payload;
 }
 
-bool operator==(const ControllerConfig& lhs, const ControllerConfig& rhs)
+bool operator==(const FlexrayControllerConfig& lhs, const FlexrayControllerConfig& rhs)
 {
     return lhs.clusterParams == rhs.clusterParams
         && lhs.nodeParams == rhs.nodeParams
         && lhs.bufferConfigs == rhs.bufferConfigs;
 }
 
-bool operator==(const HostCommand& lhs, const HostCommand& rhs)
+bool operator==(const FlexrayHostCommand& lhs, const FlexrayHostCommand& rhs)
 {
     return lhs.command == rhs.command;
 }
 
-bool operator==(const PocStatus& lhs, const PocStatus& rhs)
+bool operator==(const FlexrayPocStatusEvent& lhs, const FlexrayPocStatusEvent& rhs)
 {
     return lhs.state == rhs.state
         && lhs.chiHaltRequest == rhs.chiHaltRequest
@@ -79,12 +85,12 @@ bool operator==(const PocStatus& lhs, const PocStatus& rhs)
     ;
 }
 
-bool operator==(const CycleStart& lhs, const CycleStart& rhs)
+bool operator==(const FlexrayCycleStartEvent& lhs, const FlexrayCycleStartEvent& rhs)
 {
     return lhs.cycleCounter == rhs.cycleCounter
         && lhs.timestamp == rhs.timestamp;
 }
 
-}
-}
-}
+} // namespace fr
+} // namespace sim
+} // namespace ib

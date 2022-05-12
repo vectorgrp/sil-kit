@@ -291,7 +291,7 @@ The following table details which replay and tracing modes are supported by each
      - X
 
    * - FlexRay
-     - ib::sim::fr::FrMessage
+     - ib::sim::fr::FlexrayFrameEvent
      - X
      - 
 
@@ -512,8 +512,8 @@ Registered user callbacks are served with Replay Messages if the configured dire
    * - :cpp:func:`ib::sim::lin::ILinController::SetFrameResponse`
    * - :cpp:func:`ib::sim::eth::IEthernetController::SendMessage`
    * - :cpp:func:`ib::sim::eth::IEthernetController::SendFrame`
-   * - :cpp:func:`ib::sim::fr::IFrController::ReconfigureTxBuffer`
-   * - :cpp:func:`ib::sim::fr::IFrController::UpdateTxBuffer`
+   * - :cpp:func:`ib::sim::fr::IFlexrayController::ReconfigureTxBuffer`
+   * - :cpp:func:`ib::sim::fr::IFlexrayController::UpdateTxBuffer`
    * - :cpp:func:`ib::sim::io::IOutPort::Write`
    * - :cpp:func:`ib::sim::generic::IGenericPublisher::Publish`
 
@@ -529,7 +529,7 @@ Registered user callbacks are served with Replay Messages if the configured dire
    * - :cpp:type:`ib::sim::can::ICanController::ReceiveMessageHandler`
    * - :cpp:type:`ib::sim::lin::ILinController::FrameStatusHandler`
    * - :cpp:type:`ib::sim::eth::IEthernetController::ReceiveMessageHandler`
-   * - :cpp:type:`ib::sim::fr::IFrController::MessageHandler`
+   * - :cpp:type:`ib::sim::fr::IFlexrayController::FrameHandler`
    * - :cpp:type:`ib::sim::io::IInPort::CallbackT`
    * - :cpp:type:`ib::sim::generic::IGenericSubscriber::CallbackT`
 

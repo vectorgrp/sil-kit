@@ -49,7 +49,7 @@ if(IB_BUILD_COMPONENT_TRACING)
             IbInternal
             IbSimEthernet
             IbSimCan
-            IbSimFlexRay
+            IbSimFlexray
             IbSimLin
             IbSimDataMessage
     )

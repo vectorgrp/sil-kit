@@ -8,17 +8,17 @@
 
 using namespace std::chrono_literals;
 
-TEST(MwVAsioSerdes, SimFlexray_FrMessage){
+TEST(MwVAsioSerdes, SimFlexray_FlexrayFrameEvent){
     using namespace ib::sim::fr;
     ib::mw::MessageBuffer buffer;
 
-    FrMessage in;
-    FrMessage out;
+    FlexrayFrameEvent in;
+    FlexrayFrameEvent out;
 
     in.timestamp = 12ns;
-    in.channel = Channel::AB;
+    in.channel = FlexrayChannel::AB;
 
-    Header header;
+    FlexrayHeader header;
 
     header.flags = 1;
     header.frameId = 2;
@@ -46,18 +46,18 @@ TEST(MwVAsioSerdes, SimFlexray_FrMessage){
     EXPECT_EQ(in.frame.payload, out.frame.payload);
 }
 
-TEST(MwVAsioSerdes, SimFlexray_FrMessageAck) {
+TEST(MwVAsioSerdes, SimFlexray_FlexrayFrameTransmitEvent) {
     using namespace ib::sim::fr;
     ib::mw::MessageBuffer buffer;
 
-    FrMessageAck in;
-    FrMessageAck out;
+    FlexrayFrameTransmitEvent in;
+    FlexrayFrameTransmitEvent out;
 
     in.timestamp = 23ns;
     in.txBufferIndex = 20000;
-    in.channel = Channel::B;
+    in.channel = FlexrayChannel::B;
 
-    Header header;
+    FlexrayHeader header;
 
     header.flags = 1;
     header.frameId = 2;
@@ -86,16 +86,16 @@ TEST(MwVAsioSerdes, SimFlexray_FrMessageAck) {
     EXPECT_EQ(in.frame.payload, out.frame.payload);
 }
 
-TEST(MwVAsioSerdes, SimFlexray_FrSymbol) {
+TEST(MwVAsioSerdes, SimFlexray_FlexraySymbolEvent) {
     using namespace ib::sim::fr;
     ib::mw::MessageBuffer buffer;
 
-    FrSymbol in;
-    FrSymbol out;
+    FlexraySymbolEvent in;
+    FlexraySymbolEvent out;
 
     in.timestamp = 23ns;
-    in.channel = Channel::B;
-    in.pattern = SymbolPattern::Wus;
+    in.channel = FlexrayChannel::B;
+    in.pattern = FlexraySymbolPattern::Wus;
 
     buffer << in;
     buffer >> out;
@@ -105,16 +105,16 @@ TEST(MwVAsioSerdes, SimFlexray_FrSymbol) {
     EXPECT_EQ(in.pattern, out.pattern);
 }
 
-TEST(MwVAsioSerdes, SimFlexray_FrSymbolAck) {
+TEST(MwVAsioSerdes, SimFlexray_FlexraySymbolTransmitEvent) {
     using namespace ib::sim::fr;
     ib::mw::MessageBuffer buffer;
 
-    FrSymbolAck in;
-    FrSymbolAck out;
+    FlexraySymbolTransmitEvent in;
+    FlexraySymbolTransmitEvent out;
 
     in.timestamp = 1ns;
-    in.channel = Channel::A;
-    in.pattern = SymbolPattern::Wudop;
+    in.channel = FlexrayChannel::A;
+    in.pattern = FlexraySymbolPattern::Wudop;
 
     buffer << in;
     buffer >> out;
@@ -124,12 +124,12 @@ TEST(MwVAsioSerdes, SimFlexray_FrSymbolAck) {
     EXPECT_EQ(in.pattern, out.pattern);
 }
 
-TEST(MwVAsioSerdes, SimFlexray_CycleStart) {
+TEST(MwVAsioSerdes, SimFlexray_FlexrayCycleStartEvent) {
     using namespace ib::sim::fr;
     ib::mw::MessageBuffer buffer;
 
-    CycleStart in;
-    CycleStart out;
+    FlexrayCycleStartEvent in;
+    FlexrayCycleStartEvent out;
 
     in.timestamp = 1ns;
     in.cycleCounter = 32;
@@ -141,14 +141,14 @@ TEST(MwVAsioSerdes, SimFlexray_CycleStart) {
     EXPECT_EQ(in.cycleCounter, out.cycleCounter);
 }
 
-TEST(MwVAsioSerdes, SimFlexray_HostCommand) {
+TEST(MwVAsioSerdes, SimFlexray_FlexrayHostCommand) {
     using namespace ib::sim::fr;
     ib::mw::MessageBuffer buffer;
 
-    HostCommand in;
-    HostCommand out;
+    FlexrayHostCommand in;
+    FlexrayHostCommand out;
 
-    in.command = ChiCommand::DEFERRED_HALT;
+    in.command = FlexrayChiCommand::DEFERRED_HALT;
 
     buffer << in;
     buffer >> out;
@@ -156,12 +156,12 @@ TEST(MwVAsioSerdes, SimFlexray_HostCommand) {
     EXPECT_EQ(in.command, out.command);
 }
 
-TEST(MwVAsioSerdes, SimFlexray_ControllerConfig) {
+TEST(MwVAsioSerdes, SimFlexray_FlexrayControllerConfig) {
     using namespace ib::sim::fr;
     ib::mw::MessageBuffer buffer;
 
-    ControllerConfig in;
-    ControllerConfig out;
+    FlexrayControllerConfig in;
+    FlexrayControllerConfig out;
 
     in.clusterParams.gColdstartAttempts = 1;
     in.clusterParams.gCycleCountMax = 2;
@@ -186,11 +186,11 @@ TEST(MwVAsioSerdes, SimFlexray_ControllerConfig) {
 
     in.nodeParams.pAllowHaltDueToClock = 7;
     in.nodeParams.pAllowPassiveToActive = 7;
-    in.nodeParams.pChannels = Channel::AB;
+    in.nodeParams.pChannels = FlexrayChannel::AB;
     in.nodeParams.pClusterDriftDamping = 7;
     in.nodeParams.pdAcceptedStartupRange = 7;
     in.nodeParams.pdListenTimeout = 7;
-    in.nodeParams.pdMicrotick = ClockPeriod::T25NS;
+    in.nodeParams.pdMicrotick = FlexrayClockPeriod::T25NS;
     in.nodeParams.pKeySlotId = 7;
     in.nodeParams.pKeySlotOnlyEnabled = 7;
     in.nodeParams.pKeySlotUsedForStartup = 7;
@@ -205,19 +205,19 @@ TEST(MwVAsioSerdes, SimFlexray_ControllerConfig) {
     in.nodeParams.pOffsetCorrectionStart = 7;
     in.nodeParams.pRateCorrectionOut = 7;
     in.nodeParams.pSamplesPerMicrotick = 7;
-    in.nodeParams.pWakeupChannel = Channel::B;
+    in.nodeParams.pWakeupChannel = FlexrayChannel::B;
     in.nodeParams.pWakeupPattern = 7;
 
-    TxBufferConfig conf1;
-    conf1.channels = Channel::A;
+    FlexrayTxBufferConfig conf1;
+    conf1.channels = FlexrayChannel::A;
     conf1.hasPayloadPreambleIndicator = false;
     conf1.headerCrc = 12345;
     conf1.offset = 1;
     conf1.repetition = 1;
     conf1.slotId = 1;
-    conf1.transmissionMode = TransmissionMode::SingleShot;
+    conf1.transmissionMode = FlexrayTransmissionMode::SingleShot;
 
-    in.bufferConfigs = std::vector<TxBufferConfig>{conf1};
+    in.bufferConfigs = std::vector<FlexrayTxBufferConfig>{conf1};
 
     buffer << in;
     buffer >> out;
@@ -281,21 +281,21 @@ TEST(MwVAsioSerdes, SimFlexray_ControllerConfig) {
     }
 }
 
-TEST(MwVAsioSerdes, SimFlexray_TxBufferConfigUpdate) {
+TEST(MwVAsioSerdes, SimFlexray_FlexrayTxBufferConfigUpdate) {
     using namespace ib::sim::fr;
     ib::mw::MessageBuffer buffer;
 
-    TxBufferConfigUpdate in;
-    TxBufferConfigUpdate out;
+    FlexrayTxBufferConfigUpdate in;
+    FlexrayTxBufferConfigUpdate out;
 
     in.txBufferIndex = 23000;
-    in.txBufferConfig.channels = Channel::AB;
+    in.txBufferConfig.channels = FlexrayChannel::AB;
     in.txBufferConfig.hasPayloadPreambleIndicator = true;
     in.txBufferConfig.headerCrc = 1704;
     in.txBufferConfig.offset = 3;
     in.txBufferConfig.repetition = 4;
     in.txBufferConfig.slotId = 7;
-    in.txBufferConfig.transmissionMode = TransmissionMode::Continuous;
+    in.txBufferConfig.transmissionMode = FlexrayTransmissionMode::Continuous;
 
     buffer << in;
     buffer >> out;
@@ -304,12 +304,12 @@ TEST(MwVAsioSerdes, SimFlexray_TxBufferConfigUpdate) {
     EXPECT_EQ(in.txBufferConfig, out.txBufferConfig);
 }
 
-TEST(MwVAsioSerdes, SimFlexray_TxBufferUpdate) {
+TEST(MwVAsioSerdes, SimFlexray_FlexrayTxBufferUpdate) {
     using namespace ib::sim::fr;
     ib::mw::MessageBuffer buffer;
 
-    TxBufferUpdate in;
-    TxBufferUpdate out;
+    FlexrayTxBufferUpdate in;
+    FlexrayTxBufferUpdate out;
 
     in.txBufferIndex = 23000;
     in.payloadDataValid = true;
@@ -323,23 +323,23 @@ TEST(MwVAsioSerdes, SimFlexray_TxBufferUpdate) {
     EXPECT_EQ(in.payload, out.payload);
 }
 
-TEST(MwVAsioSerdes, SimFlexray_POCStatus) {
+TEST(MwVAsioSerdes, SimFlexray_FlexrayPocStatusEvent) {
     using namespace ib::sim::fr;
     ib::mw::MessageBuffer buffer;
 
-    PocStatus in{};
-    PocStatus out{};
+    FlexrayPocStatusEvent in{};
+    FlexrayPocStatusEvent out{};
 
     in.timestamp = 230ns;
-    in.state = PocState::NormalPassive;
+    in.state = FlexrayPocState::NormalPassive;
     in.freeze = true;
-    in.errorMode = ErrorModeType::CommHalt;
-    in.slotMode = SlotModeType::AllPending;
-    in.startupState = StartupStateType::InitializeSchedule;
+    in.errorMode = FlexrayErrorModeType::CommHalt;
+    in.slotMode = FlexraySlotModeType::AllPending;
+    in.startupState = FlexrayStartupStateType::InitializeSchedule;
     in.chiHaltRequest = false;
     in.chiReadyRequest = true;
     in.coldstartNoise = true;
-    in.wakeupStatus = WakeupStatusType::ReceivedHeader;
+    in.wakeupStatus = FlexrayWakeupStatusType::ReceivedHeader;
 
     buffer << in;
     buffer >> out;

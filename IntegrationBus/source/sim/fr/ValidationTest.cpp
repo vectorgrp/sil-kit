@@ -9,30 +9,30 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ib/sim/fr/FrDatatypes.hpp"
+#include "ib/sim/fr/FlexrayDatatypes.hpp"
 #include "ib/exception.hpp"
 
 namespace {
 
 using namespace ib::sim::fr;
 
-TEST(TestSimFrValidation, throw_if_gColdstartAttempts_is_out_of_range)
+TEST(TestSimFlexrayValidation, throw_if_gColdstartAttempts_is_out_of_range)
 {
-    ClusterParameters clusterParams;
+    FlexrayClusterParameters clusterParams;
     clusterParams.gColdstartAttempts = 0;
     EXPECT_THROW(Validate(clusterParams), ib::ConfigurationError);
 }
 
-TEST(TestSimFrValidation, throw_if_pAllowHaltDueToClock_is_not_0_or_1)
+TEST(TestSimFlexrayValidation, throw_if_pAllowHaltDueToClock_is_not_0_or_1)
 {
-    NodeParameters nodeParams;
+    FlexrayNodeParameters nodeParams;
     nodeParams.pAllowHaltDueToClock = 2;
     EXPECT_THROW(Validate(nodeParams), ib::ConfigurationError);
 }
 
-TEST(TestSimFrValidation, valid_cluster_params_lower_boundary_must_not_throw)
+TEST(TestSimFlexrayValidation, valid_cluster_params_lower_boundary_must_not_throw)
 {
-    ClusterParameters clusterParams;
+    FlexrayClusterParameters clusterParams;
     clusterParams.gColdstartAttempts = 2;
     clusterParams.gCycleCountMax = 7;
     clusterParams.gdActionPointOffset = 1;
@@ -57,9 +57,9 @@ TEST(TestSimFrValidation, valid_cluster_params_lower_boundary_must_not_throw)
     EXPECT_NO_THROW(Validate(clusterParams));
 }
 
-TEST(TestSimFrValidation, valid_cluster_params_upper_boundary_must_not_throw)
+TEST(TestSimFlexrayValidation, valid_cluster_params_upper_boundary_must_not_throw)
 {
-    ClusterParameters clusterParams;
+    FlexrayClusterParameters clusterParams;
     clusterParams.gColdstartAttempts = 31;
     clusterParams.gCycleCountMax = 63;
     clusterParams.gdActionPointOffset = 63;
@@ -84,12 +84,12 @@ TEST(TestSimFrValidation, valid_cluster_params_upper_boundary_must_not_throw)
     EXPECT_NO_THROW(Validate(clusterParams));
 }
 
-TEST(TestSimFrValidation, valid_node_parameters_lower_boundary_must_not_throw)
+TEST(TestSimFlexrayValidation, valid_node_parameters_lower_boundary_must_not_throw)
 {
-    NodeParameters nodeParams;
+    FlexrayNodeParameters nodeParams;
     nodeParams.pAllowHaltDueToClock = 0;
     nodeParams.pAllowPassiveToActive = 0;
-    nodeParams.pChannels = Channel::A;
+    nodeParams.pChannels = FlexrayChannel::A;
     nodeParams.pClusterDriftDamping = 0;
     nodeParams.pdAcceptedStartupRange = 29;
     nodeParams.pdListenTimeout = 1926;
@@ -106,21 +106,21 @@ TEST(TestSimFrValidation, valid_node_parameters_lower_boundary_must_not_throw)
     nodeParams.pOffsetCorrectionOut = 15;
     nodeParams.pOffsetCorrectionStart = 7;
     nodeParams.pRateCorrectionOut = 3;
-    nodeParams.pWakeupChannel = Channel::A;
+    nodeParams.pWakeupChannel = FlexrayChannel::A;
     nodeParams.pWakeupPattern = 0;
-    nodeParams.pdMicrotick = ClockPeriod::T12_5NS;
+    nodeParams.pdMicrotick = FlexrayClockPeriod::T12_5NS;
     nodeParams.pSamplesPerMicrotick = 1;
 
     EXPECT_NO_THROW(Validate(nodeParams));
 }
 
 
-TEST(TestSimFrValidation, valid_node_parameters_upper_boundary_must_not_throw)
+TEST(TestSimFlexrayValidation, valid_node_parameters_upper_boundary_must_not_throw)
 {
-    NodeParameters nodeParams;
+    FlexrayNodeParameters nodeParams;
     nodeParams.pAllowHaltDueToClock = 1;
     nodeParams.pAllowPassiveToActive = 31;
-    nodeParams.pChannels = Channel::AB;
+    nodeParams.pChannels = FlexrayChannel::AB;
     nodeParams.pClusterDriftDamping = 10;
     nodeParams.pdAcceptedStartupRange = 2743;
     nodeParams.pdListenTimeout = 2567692;
@@ -137,9 +137,9 @@ TEST(TestSimFrValidation, valid_node_parameters_upper_boundary_must_not_throw)
     nodeParams.pOffsetCorrectionOut = 16082;
     nodeParams.pOffsetCorrectionStart = 15999;
     nodeParams.pRateCorrectionOut = 3846;
-    nodeParams.pWakeupChannel = Channel::B;
+    nodeParams.pWakeupChannel = FlexrayChannel::B;
     nodeParams.pWakeupPattern = 63;
-    nodeParams.pdMicrotick = ClockPeriod::T50NS;
+    nodeParams.pdMicrotick = FlexrayClockPeriod::T50NS;
     nodeParams.pSamplesPerMicrotick = 2;
 
     EXPECT_NO_THROW(Validate(nodeParams));

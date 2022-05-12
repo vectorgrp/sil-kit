@@ -49,9 +49,9 @@ public:
     //! \brief Create an FlexRay controller at this IB participant.
 
     virtual auto CreateFlexrayController(const std::string& canonicalName, const std::string& networkName)
-        -> sim::fr::IFrController* = 0;
+        -> sim::fr::IFlexrayController* = 0;
     //! \brief Create an FlexRay controller at this IB participant.
-    virtual auto CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFrController* = 0;
+    virtual auto CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFlexrayController* = 0;
     //! \brief Create a LIN controller at this IB participant.
 
     virtual auto CreateLinController(const std::string& canonicalName, const std::string& networkName)

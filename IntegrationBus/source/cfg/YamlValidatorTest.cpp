@@ -25,7 +25,7 @@ TEST_F(YamlValidatorTest, yaml_doc_relations)
     EXPECT_TRUE(v.IsRootElement("/CanControllers"));
     EXPECT_TRUE(v.IsRootElement("/LinControllers"));
     EXPECT_TRUE(v.IsRootElement("/EthernetControllers"));
-    EXPECT_TRUE(v.IsRootElement("/FlexRayControllers"));
+    EXPECT_TRUE(v.IsRootElement("/FlexrayControllers"));
     EXPECT_TRUE(v.IsRootElement("/Logging"));
     EXPECT_TRUE(v.IsRootElement("/HealthCheck"));
     EXPECT_TRUE(v.IsRootElement("/Tracing"));

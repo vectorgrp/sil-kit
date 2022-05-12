@@ -5,23 +5,45 @@
   "Description": "Participant which covers most parameters",
 
   "CanControllers": [
-    { "Name": "CAN1" },
-    { "Name": "CAN2" },
-    { "Name": "CAN3" },
-    { "Name": "CAN4" }
-  ],
-  "LinControllers": [
-    { "Name": "LIN1" },
-    { "Name": "LIN2" },
-    { "Name": "LIN3" },
-    { "Name": "LIN4" }
-  ],
-  "FlexRayControllers": [
     {
-      "Name": "FlexRay1"
+      "Name": "CAN1",
+      "Network": "CAN Network 1"
     },
     {
-      "Name": "FlexRay2"
+      "Name": "CAN2",
+      "Network": "CAN Network 2"
+    },
+    {
+      "Name": "CAN3"
+    },
+    {
+      "Name": "CAN4"
+    }
+  ],
+  "LinControllers": [
+    {
+      "Name": "LIN1",
+      "Network": "LIN Network 1"
+    },
+    {
+      "Name": "LIN2",
+      "Network": "LIN Network 2"
+    },
+    {
+      "Name": "LIN3"
+    },
+    {
+      "Name": "LIN4"
+    }
+  ],
+  "FlexrayControllers": [
+    {
+      "Name": "FlexRay1",
+      "Network": "FlexRay Network 1"
+    },
+    {
+      "Name": "FlexRay2",
+      "Network": "FlexRay Network 2"
     },
     {
       "Name": "FlexRay3"
@@ -33,19 +55,21 @@
   "EthernetControllers": [
     {
       "Name": "ETH1",
-      "MacAddr": "F7:04:68:71:AA:A0"
+      "MacAddress": "F7:04:68:71:AA:A0",
+      "Network": "Ethernet Network 1"
     },
     {
       "Name": "ETH2",
-      "MacAddr": "F7:04:68:71:AA:A1"
+      "MacAddress": "F7:04:68:71:AA:A1",
+      "Network": "Ethernet Network 2"
     },
     {
       "Name": "ETH3",
-      "MacAddr": "F7:04:68:71:AA:A2"
+      "MacAddress": "F7:04:68:71:AA:A2"
     },
     {
       "Name": "ETH4",
-      "MacAddr": "F7:04:68:71:AA:A3"
+      "MacAddress": "F7:04:68:71:AA:A3"
     }
   ],
   "DataPublishers": [
@@ -88,28 +112,23 @@
       "RpcChannel": "ReadSensor"
     }
   ],
-  "Logging": [
+  "Logging": {
     "LogFromRemotes": true,
     "FlushLevel": "Info",
     "Sinks": [
       {
         "Type": "File",
         "Level": "Trace",
-        "LogName":  "MyLog"
+        "LogName": "MyLog"
       }
     ]
-
-  ],
-  "HealthCheck": [
-
-  ],
+  },
+  "HealthCheck": {
+  },
   "Tracing": [
-
   ],
-  "Extensions": [
-
-  ],
-  "Middleware": [
-
-  ]
+  "Extensions": {
+  },
+  "Middleware": {
+  }
 }

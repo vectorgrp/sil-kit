@@ -8,254 +8,254 @@
 #include "ib/exception.hpp"
 #include "ib/util/PrintableHexString.hpp"
 
-#include "FrDatatypes.hpp"
+#include "FlexrayDatatypes.hpp"
 
 namespace ib {
 namespace sim {
 namespace fr {
 
-inline std::string to_string(Channel channel);
-inline std::string to_string(ClockPeriod period);
-inline std::string to_string(TransmissionMode mode);
-inline std::string to_string(ChiCommand command);
-inline std::string to_string(SymbolPattern pattern);
-inline std::string to_string(PocState state);
-inline std::string to_string(const Header& header);
-inline std::string to_string(const FrSymbol& symbol);
-inline std::string to_string(const FrSymbolAck& symbol);
-inline std::string to_string(const CycleStart& cycleStart);
-inline std::string to_string(const FrMessage& msg);
-inline std::string to_string(const FrMessageAck& msg);
-inline std::string to_string(const HostCommand& msg);
-inline std::string to_string(const ControllerConfig& msg);
-inline std::string to_string(const TxBufferConfig& msg);
-inline std::string to_string(const TxBufferConfigUpdate& msg);
-inline std::string to_string(const TxBufferUpdate& msg);
-inline std::string to_string(const PocStatus& msg);
-inline std::string to_string(SlotModeType msg);
-inline std::string to_string(ErrorModeType msg);
-inline std::string to_string(StartupStateType msg);
-inline std::string to_string(WakeupStatusType msg);
+inline std::string to_string(FlexrayChannel channel);
+inline std::string to_string(FlexrayClockPeriod period);
+inline std::string to_string(FlexrayTransmissionMode mode);
+inline std::string to_string(FlexrayChiCommand command);
+inline std::string to_string(FlexraySymbolPattern pattern);
+inline std::string to_string(FlexrayPocState state);
+inline std::string to_string(const FlexrayHeader& header);
+inline std::string to_string(const FlexraySymbolEvent& symbol);
+inline std::string to_string(const FlexraySymbolTransmitEvent& symbol);
+inline std::string to_string(const FlexrayCycleStartEvent& cycleStart);
+inline std::string to_string(const FlexrayFrameEvent& msg);
+inline std::string to_string(const FlexrayFrameTransmitEvent& msg);
+inline std::string to_string(const FlexrayHostCommand& msg);
+inline std::string to_string(const FlexrayControllerConfig& msg);
+inline std::string to_string(const FlexrayTxBufferConfig& msg);
+inline std::string to_string(const FlexrayTxBufferConfigUpdate& msg);
+inline std::string to_string(const FlexrayTxBufferUpdate& msg);
+inline std::string to_string(const FlexrayPocStatusEvent& msg);
+inline std::string to_string(FlexraySlotModeType msg);
+inline std::string to_string(FlexrayErrorModeType msg);
+inline std::string to_string(FlexrayStartupStateType msg);
+inline std::string to_string(FlexrayWakeupStatusType msg);
 
 
-inline std::ostream& operator<<(std::ostream& out, Channel channel);
-inline std::ostream& operator<<(std::ostream& out, ClockPeriod period);
-inline std::ostream& operator<<(std::ostream& out, TransmissionMode mode);
-inline std::ostream& operator<<(std::ostream& out, ChiCommand command);
-inline std::ostream& operator<<(std::ostream& out, SymbolPattern pattern);
-inline std::ostream& operator<<(std::ostream& out, PocState state);
+inline std::ostream& operator<<(std::ostream& out, FlexrayChannel channel);
+inline std::ostream& operator<<(std::ostream& out, FlexrayClockPeriod period);
+inline std::ostream& operator<<(std::ostream& out, FlexrayTransmissionMode mode);
+inline std::ostream& operator<<(std::ostream& out, FlexrayChiCommand command);
+inline std::ostream& operator<<(std::ostream& out, FlexraySymbolPattern pattern);
+inline std::ostream& operator<<(std::ostream& out, FlexrayPocState state);
 
-inline std::ostream& operator<<(std::ostream& out, const Header& header);
-inline std::ostream& operator<<(std::ostream& out, const FrSymbol& symbol);
-inline std::ostream& operator<<(std::ostream& out, const FrSymbolAck& symbol);
-inline std::ostream& operator<<(std::ostream& out, const CycleStart& cycleStart);
-inline std::ostream& operator<<(std::ostream& out, const FrMessage& msg);
-inline std::ostream& operator<<(std::ostream& out, const FrMessageAck& msg);
-inline std::ostream& operator<<(std::ostream& out, const HostCommand& msg);
-inline std::ostream& operator<<(std::ostream& out, const ControllerConfig& msg);
-inline std::ostream& operator<<(std::ostream& out, const TxBufferConfig& msg);
-inline std::ostream& operator<<(std::ostream& out, const TxBufferConfigUpdate& msg);
-inline std::ostream& operator<<(std::ostream& out, const TxBufferUpdate& msg);
-inline std::ostream& operator<<(std::ostream& out, const PocStatus& msg);
-inline std::ostream& operator<<(std::ostream& out, SlotModeType msg);
-inline std::ostream& operator<<(std::ostream& out, ErrorModeType msg);
-inline std::ostream& operator<<(std::ostream& out, StartupStateType msg);
-inline std::ostream& operator<<(std::ostream& out, WakeupStatusType msg);
+inline std::ostream& operator<<(std::ostream& out, const FlexrayHeader& header);
+inline std::ostream& operator<<(std::ostream& out, const FlexraySymbolEvent& symbol);
+inline std::ostream& operator<<(std::ostream& out, const FlexraySymbolTransmitEvent& symbol);
+inline std::ostream& operator<<(std::ostream& out, const FlexrayCycleStartEvent& cycleStart);
+inline std::ostream& operator<<(std::ostream& out, const FlexrayFrameEvent& msg);
+inline std::ostream& operator<<(std::ostream& out, const FlexrayFrameTransmitEvent& msg);
+inline std::ostream& operator<<(std::ostream& out, const FlexrayHostCommand& msg);
+inline std::ostream& operator<<(std::ostream& out, const FlexrayControllerConfig& msg);
+inline std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferConfig& msg);
+inline std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferConfigUpdate& msg);
+inline std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferUpdate& msg);
+inline std::ostream& operator<<(std::ostream& out, const FlexrayPocStatusEvent& msg);
+inline std::ostream& operator<<(std::ostream& out, FlexraySlotModeType msg);
+inline std::ostream& operator<<(std::ostream& out, FlexrayErrorModeType msg);
+inline std::ostream& operator<<(std::ostream& out, FlexrayStartupStateType msg);
+inline std::ostream& operator<<(std::ostream& out, FlexrayWakeupStatusType msg);
     
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-std::string to_string(Channel channel)
+std::string to_string(FlexrayChannel channel)
 {
     std::stringstream out;
     out << channel;
     return out.str();
 }
 
-std::string to_string(ClockPeriod period)
+std::string to_string(FlexrayClockPeriod period)
 {
     switch (period)
     {
-    case ClockPeriod::T12_5NS:
+    case FlexrayClockPeriod::T12_5NS:
         return "12.5ns";
-    case ClockPeriod::T25NS:
+    case FlexrayClockPeriod::T25NS:
         return "25ns";
-    case ClockPeriod::T50NS:
+    case FlexrayClockPeriod::T50NS:
         return "50ns";
     };
     throw ib::TypeConversionError{};
 }
 
-std::string to_string(TransmissionMode mode)
+std::string to_string(FlexrayTransmissionMode mode)
 {
     switch (mode)
     {
-    case TransmissionMode::SingleShot:
+    case FlexrayTransmissionMode::SingleShot:
         return "SingleShot";
-    case TransmissionMode::Continuous:
+    case FlexrayTransmissionMode::Continuous:
         return "Continuous";
     };
     throw ib::TypeConversionError{};
 }
     
-std::string to_string(ChiCommand command)
+std::string to_string(FlexrayChiCommand command)
 {
     switch (command)
     {
-    case ChiCommand::RUN:
+    case FlexrayChiCommand::RUN:
         return "RUN";
-    case ChiCommand::DEFERRED_HALT:
+    case FlexrayChiCommand::DEFERRED_HALT:
         return "DEFERRED_HALT";
-    case ChiCommand::FREEZE:
+    case FlexrayChiCommand::FREEZE:
         return "FREEZE";
-    case ChiCommand::ALLOW_COLDSTART:
+    case FlexrayChiCommand::ALLOW_COLDSTART:
         return "ALLOW_COLDSTART";
-    case ChiCommand::ALL_SLOTS:
+    case FlexrayChiCommand::ALL_SLOTS:
         return "ALL_SLOTS";
-    case ChiCommand::WAKEUP:
+    case FlexrayChiCommand::WAKEUP:
         return "WAKEUP";
     };
     throw ib::TypeConversionError{};
 }
     
-std::string to_string(SymbolPattern pattern)
+std::string to_string(FlexraySymbolPattern pattern)
 {
     std::stringstream out;
     out << pattern;
     return out.str();
 }
     
-std::string to_string(PocState state)
+std::string to_string(FlexrayPocState state)
 {
     switch (state)
     {
-    case PocState::DefaultConfig:
+    case FlexrayPocState::DefaultConfig:
         return "DefaultConfig";
-    case PocState::Config:
+    case FlexrayPocState::Config:
         return "Config";
-    case PocState::Ready:
+    case FlexrayPocState::Ready:
         return "Ready";
-    case PocState::Startup:
+    case FlexrayPocState::Startup:
         return "Startup";
-    case PocState::Wakeup:
+    case FlexrayPocState::Wakeup:
         return "Wakeup";
-    case PocState::NormalActive:
+    case FlexrayPocState::NormalActive:
         return "NormalActive";
-    case PocState::NormalPassive:
+    case FlexrayPocState::NormalPassive:
         return "NormalPassive";
-    case PocState::Halt:
+    case FlexrayPocState::Halt:
         return "Halt";
     }
     throw ib::TypeConversionError{};
 }
 
-std::string to_string(const Header& header)
+std::string to_string(const FlexrayHeader& header)
 {
     std::stringstream out;
     out << header;
     return out.str();
 }
     
-std::string to_string(const FrSymbol& symbol)
+std::string to_string(const FlexraySymbolEvent& symbol)
 {
     std::stringstream out;
     out << symbol;
     return out.str();
 }
     
-std::string to_string(const FrSymbolAck& symbol)
+std::string to_string(const FlexraySymbolTransmitEvent& symbol)
 {
     std::stringstream out;
     out << symbol;
     return out.str();
 }
 
-std::string to_string(const CycleStart& cycleStart)
+std::string to_string(const FlexrayCycleStartEvent& cycleStart)
 {
     std::stringstream out;
     out << cycleStart;
     return out.str();
 }
 
-std::string to_string(const FrMessage& msg)
+std::string to_string(const FlexrayFrameEvent& msg)
 {
     std::stringstream out;
     out << msg;
     return out.str();
 }
 
-std::string to_string(const FrMessageAck& msg)
+std::string to_string(const FlexrayFrameTransmitEvent& msg)
 {
     std::stringstream out;
     out << msg;
     return out.str();
 }
 
-std::string to_string(const HostCommand& msg)
+std::string to_string(const FlexrayHostCommand& msg)
 {
     std::stringstream out;
     out << msg;
     return out.str();
 }
 
-std::string to_string(const ControllerConfig& msg)
+std::string to_string(const FlexrayControllerConfig& msg)
 {
     std::stringstream out;
     out << msg;
     return out.str();
 }
 
-std::string to_string(const TxBufferConfig& msg)
+std::string to_string(const FlexrayTxBufferConfig& msg)
 {
     std::stringstream out;
     out << msg;
     return out.str();
 }
 
-std::string to_string(const TxBufferConfigUpdate& msg)
+std::string to_string(const FlexrayTxBufferConfigUpdate& msg)
 {
     std::stringstream out;
     out << msg;
     return out.str();
 }
 
-std::string to_string(const TxBufferUpdate& msg)
+std::string to_string(const FlexrayTxBufferUpdate& msg)
 {
     std::stringstream out;
     out << msg;
     return out.str();
 }
 
-std::string to_string(const PocStatus& msg)
+std::string to_string(const FlexrayPocStatusEvent& msg)
 {
     std::stringstream out;
     out << msg;
     return out.str();
 }
 
-std::string to_string(SlotModeType msg)
+std::string to_string(FlexraySlotModeType msg)
 {
     std::stringstream out;
     out << msg;
     return out.str();
 }
 
-std::string to_string(ErrorModeType msg)
+std::string to_string(FlexrayErrorModeType msg)
 {
     std::stringstream out;
     out << msg;
     return out.str();
 }
 
-std::string to_string(StartupStateType msg)
+std::string to_string(FlexrayStartupStateType msg)
 {
     std::stringstream out;
     out << msg;
     return out.str();
 }
 
-std::string to_string(WakeupStatusType msg)
+std::string to_string(FlexrayWakeupStatusType msg)
 {
     std::stringstream out;
     out << msg;
@@ -264,101 +264,101 @@ std::string to_string(WakeupStatusType msg)
 
 
     
-std::ostream& operator<<(std::ostream& out, Channel channel)
+std::ostream& operator<<(std::ostream& out, FlexrayChannel channel)
 {
     switch (channel)
     {
-    case Channel::A:
+    case FlexrayChannel::A:
         return out << "A";
-    case Channel::B:
+    case FlexrayChannel::B:
         return out << "B";
-    case Channel::AB:
+    case FlexrayChannel::AB:
         return out << "AB";
-    case Channel::None:
+    case FlexrayChannel::None:
         return out << "None";
     default:
-        return out << "Channel=" << static_cast<uint32_t>(channel);
+        return out << "FlexrayChannel=" << static_cast<uint32_t>(channel);
     }
 }
-std::ostream& operator<<(std::ostream& out, ClockPeriod period)
+std::ostream& operator<<(std::ostream& out, FlexrayClockPeriod period)
 {
     return out << to_string(period);
 }
-std::ostream& operator<<(std::ostream& out, TransmissionMode mode)
+std::ostream& operator<<(std::ostream& out, FlexrayTransmissionMode mode)
 {
     return out << to_string(mode);
 }
-std::ostream& operator<<(std::ostream& out, ChiCommand command)
+std::ostream& operator<<(std::ostream& out, FlexrayChiCommand command)
 {
     return out << to_string(command);
 }
-std::ostream& operator<<(std::ostream& out, SymbolPattern pattern)
+std::ostream& operator<<(std::ostream& out, FlexraySymbolPattern pattern)
 {
     switch (pattern)
     {
-    case SymbolPattern::CasMts:
+    case FlexraySymbolPattern::CasMts:
         return out << "CasMts";
-    case SymbolPattern::Wus:
+    case FlexraySymbolPattern::Wus:
         return out << "Wus";
-    case SymbolPattern::Wudop:
+    case FlexraySymbolPattern::Wudop:
         return out << "Wudop";
     default:
-        return out << "SymbolPattern=" << static_cast<uint32_t>(pattern);
+        return out << "FlexraySymbolPattern=" << static_cast<uint32_t>(pattern);
     }
 }
-std::ostream& operator<<(std::ostream& out, PocState state)
+std::ostream& operator<<(std::ostream& out, FlexrayPocState state)
 {
     return out << to_string(state);
 }
-std::ostream& operator<<(std::ostream& out, const Header& header)
+std::ostream& operator<<(std::ostream& out, const FlexrayHeader& header)
 {
     return out
-        << "fr::Header{f=["
-        << (header.IsSet(Header::Flag::SuFIndicator) ? "U" : "-")
-        << (header.IsSet(Header::Flag::SyFIndicator) ? "Y" : "-")
-        << (header.IsSet(Header::Flag::NFIndicator) ? "-" : "N")
-        << (header.IsSet(Header::Flag::PPIndicator) ? "P" : "-")
+        << "fr::FlexrayHeader{f=["
+        << (header.IsSet(FlexrayHeader::Flag::SuFIndicator) ? "U" : "-")
+        << (header.IsSet(FlexrayHeader::Flag::SyFIndicator) ? "Y" : "-")
+        << (header.IsSet(FlexrayHeader::Flag::NFIndicator) ? "-" : "N")
+        << (header.IsSet(FlexrayHeader::Flag::PPIndicator) ? "P" : "-")
         << "],s=" << header.frameId
         << ",l=" << (uint32_t)header.payloadLength
         << ",crc=" << std::hex << header.headerCrc << std::dec
         << ",c=" << (uint32_t)header.cycleCount
         << "}";
 }
-std::ostream& operator<<(std::ostream& out, const FrSymbol& symbol)
+std::ostream& operator<<(std::ostream& out, const FlexraySymbolEvent& symbol)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(symbol.timestamp);
     return out
-        << "fr::FrSymbol{pattern=" << symbol.pattern
+        << "fr::FlexraySymbolEvent{pattern=" << symbol.pattern
         << ", channel=" << symbol.channel
         << " @ " << timestamp.count() << "ms}";
 }
 
-std::ostream& operator<<(std::ostream& out, const FrSymbolAck& symbol)
+std::ostream& operator<<(std::ostream& out, const FlexraySymbolTransmitEvent& symbol)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(symbol.timestamp);
     return out
-        << "fr::FrSymbolAck{pattern=" << symbol.pattern
+        << "fr::FlexraySymbolTransmitEvent{pattern=" << symbol.pattern
         << ", channel=" << symbol.channel
         << " @ " << timestamp.count() << "ms}";
 }
 
-std::ostream& operator<<(std::ostream& out, const CycleStart& cycleStart)
+std::ostream& operator<<(std::ostream& out, const FlexrayCycleStartEvent& cycleStart)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(cycleStart.timestamp);
     return out
-        << "fr::CycleStart{t=" << timestamp.count()
+        << "fr::FlexrayCycleStartEvent{t=" << timestamp.count()
         << "ms, cycleCounter=" << static_cast<uint32_t>(cycleStart.cycleCounter)
         << "}";
 }
 
-std::ostream& operator<<(std::ostream& out, const FrMessage& msg)
+std::ostream& operator<<(std::ostream& out, const FlexrayFrameEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
-    out << "fr::FrMessage{"
+    out << "fr::FlexrayFrameEvent{"
         << "ch=" << msg.channel
         << ", " << msg.frame.header
         << " @" << timestamp.count() << "ms";
-    if (msg.frame.header.IsSet(Header::Flag::NFIndicator))
+    if (msg.frame.header.IsSet(FlexrayHeader::Flag::NFIndicator))
     {
         // if payload is valid, provide it as hex dump
         out << ", payload="
@@ -367,31 +367,31 @@ std::ostream& operator<<(std::ostream& out, const FrMessage& msg)
     return out << "}";
 }
 
-std::ostream& operator<<(std::ostream& out, const FrMessageAck& msg)
+std::ostream& operator<<(std::ostream& out, const FlexrayFrameTransmitEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
-    return out << "fr::FrMessageAck{"
+    return out << "fr::FlexrayFrameTransmitEvent{"
         << msg.frame.header
         << ", ch=" << msg.channel
         << ", txBuffer=" << msg.txBufferIndex
         << " @" << timestamp.count() << "ms}";
 }
 
-std::ostream& operator<<(std::ostream& out, const HostCommand& msg)
+std::ostream& operator<<(std::ostream& out, const FlexrayHostCommand& msg)
 {
-    return out << "fr::HostCommand{"
+    return out << "fr::FlexrayHostCommand{"
         << msg.command
         << "}";
 }
 
-std::ostream& operator<<(std::ostream& out, const ControllerConfig& /*msg*/)
+std::ostream& operator<<(std::ostream& out, const FlexrayControllerConfig& /*msg*/)
 {
-    return out << "fr::ControllerConfig{...}";
+    return out << "fr::FlexrayControllerConfig{...}";
 }
 
-std::ostream& operator<<(std::ostream& out, const TxBufferConfig& msg)
+std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferConfig& msg)
 {
-    return out << "fr::TxBufferConfig{"
+    return out << "fr::FlexrayTxBufferConfig{"
         << "ch=" << msg.channels
         << ", slot=" << msg.slotId
         << (msg.hasPayloadPreambleIndicator ? ", PP" : "")
@@ -402,17 +402,17 @@ std::ostream& operator<<(std::ostream& out, const TxBufferConfig& msg)
         << "}";
 }
 
-std::ostream& operator<<(std::ostream& out, const TxBufferConfigUpdate& msg)
+std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferConfigUpdate& msg)
 {
-    return out << "fr::TxBufferConfigUpdate{"
+    return out << "fr::FlexrayTxBufferConfigUpdate{"
         << "idx=" << msg.txBufferIndex
         << " " << msg.txBufferConfig
         << "}";
 }
 
-std::ostream& operator<<(std::ostream& out, const TxBufferUpdate& msg)
+std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferUpdate& msg)
 {
-    out << "fr::TxBufferUpdate{"
+    out << "fr::FlexrayTxBufferUpdate{"
         << "idx=" << msg.txBufferIndex
         << ", payloadValid=";
 
@@ -429,7 +429,7 @@ std::ostream& operator<<(std::ostream& out, const TxBufferUpdate& msg)
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const PocStatus& msg)
+std::ostream& operator<<(std::ostream& out, const FlexrayPocStatusEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     return out << "fr::POCStatus{"
@@ -438,17 +438,17 @@ std::ostream& operator<<(std::ostream& out, const PocStatus& msg)
         << " @" << timestamp.count() << "ms}";
 }
 
-std::ostream& operator<<(std::ostream& out, SlotModeType msg)
+std::ostream& operator<<(std::ostream& out, FlexraySlotModeType msg)
 {
     switch(msg)
     {
-    case SlotModeType::KeySlot:
+    case FlexraySlotModeType::KeySlot:
         out << "KeySlot"; break;
 
-    case SlotModeType::AllPending:
+    case FlexraySlotModeType::AllPending:
         out << "AllPending"; break;
 
-    case SlotModeType::All:
+    case FlexraySlotModeType::All:
         out << "All"; break;
 
     default:
@@ -457,17 +457,17 @@ std::ostream& operator<<(std::ostream& out, SlotModeType msg)
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, ErrorModeType msg)
+std::ostream& operator<<(std::ostream& out, FlexrayErrorModeType msg)
 {
     switch (msg)
     {
-    case ErrorModeType::Active:
+    case FlexrayErrorModeType::Active:
         out << "Active"; break;
 
-    case ErrorModeType::Passive:
+    case FlexrayErrorModeType::Passive:
         out << "Passive"; break;
 
-    case ErrorModeType::CommHalt:
+    case FlexrayErrorModeType::CommHalt:
         out << "CommHalt"; break;
 
 
@@ -477,41 +477,41 @@ std::ostream& operator<<(std::ostream& out, ErrorModeType msg)
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, StartupStateType msg)
+std::ostream& operator<<(std::ostream& out, FlexrayStartupStateType msg)
 {
     switch (msg)
     {
-    case StartupStateType::Undefined:
+    case FlexrayStartupStateType::Undefined:
         out << "Undefined"; break;
 
-    case StartupStateType::ColdStartListen:
+    case FlexrayStartupStateType::ColdStartListen:
         out << "ColdStartListen"; break;
 
-    case StartupStateType::IntegrationColdstartCheck:
+    case FlexrayStartupStateType::IntegrationColdstartCheck:
         out << "IntegrationColdstartCheck"; break;
 
-    case StartupStateType::ColdStartJoin:
+    case FlexrayStartupStateType::ColdStartJoin:
         out << "ColdStartJoin"; break;
 
-    case StartupStateType::ColdStartCollisionResolution:
+    case FlexrayStartupStateType::ColdStartCollisionResolution:
         out << "ColdStartCollisionResolution"; break;
 
-    case StartupStateType::ColdStartConsistencyCheck:
+    case FlexrayStartupStateType::ColdStartConsistencyCheck:
         out << "ColdStartConsistencyCheck"; break;
 
-    case StartupStateType::IntegrationListen:
+    case FlexrayStartupStateType::IntegrationListen:
         out << "IntegrationListen"; break;
 
-    case StartupStateType::InitializeSchedule:
+    case FlexrayStartupStateType::InitializeSchedule:
         out << "InitializeSchedule"; break;
 
-    case StartupStateType::IntegrationConsistencyCheck:
+    case FlexrayStartupStateType::IntegrationConsistencyCheck:
         out << "IntegrationConsistencyCheck"; break;
 
-    case StartupStateType::ColdStartGap:
+    case FlexrayStartupStateType::ColdStartGap:
         out << "ColdStartGap"; break;
 
-    case StartupStateType::ExternalStartup:
+    case FlexrayStartupStateType::ExternalStartup:
         out << "ExternalStartup"; break;
 
     default:
@@ -521,29 +521,29 @@ std::ostream& operator<<(std::ostream& out, StartupStateType msg)
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, WakeupStatusType msg)
+std::ostream& operator<<(std::ostream& out, FlexrayWakeupStatusType msg)
 {
     switch (msg)
     {
-    case WakeupStatusType::Undefined:
+    case FlexrayWakeupStatusType::Undefined:
         out << "Undefined"; break;
 
-    case WakeupStatusType::ReceivedHeader:
+    case FlexrayWakeupStatusType::ReceivedHeader:
         out << "ReceivedHeader"; break;
 
-    case WakeupStatusType::ReceivedWup:
+    case FlexrayWakeupStatusType::ReceivedWup:
         out << "ReceivedWup"; break;
 
-    case WakeupStatusType::CollisionHeader:
+    case FlexrayWakeupStatusType::CollisionHeader:
         out << "CollisionHeader"; break;
 
-    case WakeupStatusType::CollisionWup:
+    case FlexrayWakeupStatusType::CollisionWup:
         out << "CollisionWup"; break;
 
-    case WakeupStatusType::CollisionUnknown:
+    case FlexrayWakeupStatusType::CollisionUnknown:
         out << "CollisionUnknown"; break;
 
-    case WakeupStatusType::Transmitted:
+    case FlexrayWakeupStatusType::Transmitted:
         out << "Transmitted"; break;
     default:
         throw ib::TypeConversionError{};

@@ -18,7 +18,7 @@ const std::string simulatedControllerOriginalParticipantName =
 // Bus types
 const std::string controllerTypeCan = "CAN";
 const std::string controllerTypeEthernet = "Ethernet";
-const std::string controllerTypeFlexRay = "FlexRay";
+const std::string controllerTypeFlexray = "FlexRay";
 const std::string controllerTypeLin = "LIN";
 
 // PubSub types and supplementalData keys

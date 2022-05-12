@@ -66,7 +66,7 @@ void ValidateTraceSinks(const ib::cfg::v4::ParticipantConfiguration& configurati
     validateController(configuration.ethernetControllers);
     validateController(configuration.canControllers);
     validateController(configuration.linControllers);
-    validateController(configuration.flexRayControllers);
+    validateController(configuration.flexrayControllers);
     validateController(configuration.dataPublishers);
     validateController(configuration.dataSubscribers);
     validateController(configuration.rpcServers);
@@ -123,7 +123,7 @@ void ValidateTraceSources(const ib::cfg::v4::ParticipantConfiguration& configura
     validateController(configuration.ethernetControllers);
     validateController(configuration.canControllers);
     validateController(configuration.linControllers);
-    validateController(configuration.flexRayControllers);
+    validateController(configuration.flexrayControllers);
     validateController(configuration.dataPublishers);
     validateController(configuration.dataSubscribers);
     validateController(configuration.rpcServers);

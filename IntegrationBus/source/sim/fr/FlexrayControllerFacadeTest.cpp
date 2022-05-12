@@ -9,16 +9,16 @@
 
 #include "NullConnectionParticipant.hpp"
 
-#include "FrControllerFacade.hpp"
+#include "FlexrayControllerFacade.hpp"
 
 namespace {
 using namespace ib::mw;
 using namespace ib::sim::fr;
 
-class FlexRayControllerFacadeTest : public testing::Test
+class FlexrayControllerFacadeTest : public testing::Test
 {
 public:
-    FlexRayControllerFacadeTest(){};
+    FlexrayControllerFacadeTest(){};
 };
 
 auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantConfiguration>
@@ -26,19 +26,19 @@ auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantCo
     auto mockConfig =
         std::make_shared<ib::cfg::ParticipantConfiguration>(ib::cfg::ParticipantConfiguration());
 
-    ib::cfg::FlexRayController controllerNoNetworkCfg;
+    ib::cfg::FlexrayController controllerNoNetworkCfg;
     controllerNoNetworkCfg.name = "ControllerWithoutNetwork";
-    mockConfig->flexRayControllers.push_back(controllerNoNetworkCfg);
+    mockConfig->flexrayControllers.push_back(controllerNoNetworkCfg);
 
-    ib::cfg::FlexRayController controllerWithNetworkCfg;
+    ib::cfg::FlexrayController controllerWithNetworkCfg;
     controllerWithNetworkCfg.name = "ControllerWithNetwork";
     controllerWithNetworkCfg.network = "ConfigNet";
-    mockConfig->flexRayControllers.push_back(controllerWithNetworkCfg);
+    mockConfig->flexrayControllers.push_back(controllerWithNetworkCfg);
 
     return mockConfig;
 }
 
-TEST(FlexRayControllerFacadeTest, create_controller_unconfigured)
+TEST(FlexrayControllerFacadeTest, create_controller_unconfigured)
 {
     auto controllerName = "Controller";
     auto expectedNetworkName = "Controller";
@@ -47,13 +47,13 @@ TEST(FlexRayControllerFacadeTest, create_controller_unconfigured)
 
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
-    auto controller = dynamic_cast<FrControllerFacade*>(participant->CreateFlexrayController(controllerName));
+    auto controller = dynamic_cast<FlexrayControllerFacade*>(participant->CreateFlexrayController(controllerName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
 }
 
-TEST(FlexRayControllerFacadeTest, create_controller_configured_no_network)
+TEST(FlexrayControllerFacadeTest, create_controller_configured_no_network)
 {
     auto controllerName = "ControllerWithoutNetwork";
     auto networkName = "TestNetwork";
@@ -64,13 +64,13 @@ TEST(FlexRayControllerFacadeTest, create_controller_configured_no_network)
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
     auto controller =
-        dynamic_cast<FrControllerFacade*>(participant->CreateFlexrayController(controllerName, networkName));
+        dynamic_cast<FlexrayControllerFacade*>(participant->CreateFlexrayController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
 }
 
-TEST(FlexRayControllerFacadeTest, create_controller_configured_with_network)
+TEST(FlexrayControllerFacadeTest, create_controller_configured_with_network)
 {
     auto controllerName = "ControllerWithNetwork";
     auto networkName = "TestNetwork";
@@ -81,7 +81,7 @@ TEST(FlexRayControllerFacadeTest, create_controller_configured_with_network)
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
     auto controller =
-        dynamic_cast<FrControllerFacade*>(participant->CreateFlexrayController(controllerName, networkName));
+        dynamic_cast<FlexrayControllerFacade*>(participant->CreateFlexrayController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);

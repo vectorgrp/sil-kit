@@ -74,7 +74,7 @@
       }
     },
 
-    "FlexRayClusterParameters": {
+    "FlexrayClusterParameters": {
       "type": "object",
       "properties": {
         "gColdstartAttempts": {
@@ -200,7 +200,7 @@
       }
     },
 
-    "FlexRayNodeParameters": {
+    "FlexrayNodeParameters": {
       "type": "object",
       "properties": {
         "pAllowHaltDueToClock": {
@@ -341,7 +341,7 @@
       }
     },
 
-    "FlexRayTxBufferConfigurations": {
+    "FlexrayTxBufferConfigurations": {
       "type": "array",
       "items": {
         "type": "object",
@@ -383,6 +383,30 @@
             "title": "SingleShot or Continuous transmission mode"
           }
         }
+      }
+    },
+
+    "FlexrayController": {
+      "type": "object",
+      "properties": {
+        "Name": { "$ref": "#/definitions/Name" },
+        "Network": { "$ref": "#/definitions/Network" },
+        "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
+        "Replay": { "$ref": "#/definitions/Replay" },
+        "ClusterParameters": { "$ref": "#/definitions/FlexrayClusterParameters" },
+        "NodeParameters": { "$ref": "#/definitions/FlexrayNodeParameters" },
+        "TxBufferConfigurations": { "$ref": "#/definitions/FlexrayTxBufferConfigurations" }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Name"
+      ]
+    },
+
+    "FlexrayControllers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/FlexrayController"
       }
     },
 
@@ -547,24 +571,12 @@
       }
     },
 
+    "FlexrayControllers": {
+      "$ref":  "#/definitions/FlexrayControllers"
+    },
     "FlexRayControllers": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "Name": { "$ref": "#/definitions/Name" },
-          "Network": { "$ref": "#/definitions/Network" },
-          "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
-          "Replay": { "$ref": "#/definitions/Replay" },
-          "ClusterParameters": { "$ref": "#/definitions/FlexRayClusterParameters" },
-          "NodeParameters": { "$ref": "#/definitions/FlexRayNodeParameters" },
-          "TxBufferConfigurations": { "$ref": "#/definitions/FlexRayTxBufferConfigurations" }
-        },
-        "additionalProperties": false,
-        "required": [
-          "Name"
-        ]
-      }
+      "$ref":  "#/definitions/FlexrayControllers",
+      "$comment": "deprecated and replaced by \"FlexrayControllers\""
     },
 
     "EthernetControllers": {

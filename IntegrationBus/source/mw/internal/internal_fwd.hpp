@@ -11,7 +11,7 @@ namespace eth {
 class IIbToEthSimulator;
 } // eth
 namespace fr {
-class IIbToFrBusSimulator;
+class IIbToFlexrayBusSimulator;
 } // fr
 namespace lin {
 class IIbToLinSimulator;

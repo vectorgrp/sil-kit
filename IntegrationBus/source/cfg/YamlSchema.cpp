@@ -111,6 +111,16 @@ auto MakeYamlSchema() -> YamlSchemaElem
             {"transmissionMode"}, 
         }
     );
+    std::initializer_list<YamlSchemaElem> flexrayControllerElements = {
+        {"Name"},
+        {"Network"},
+        {"UseTraceSinks"},
+        clusterParameters,
+        nodeParameters,
+        txBufferConfigurations,
+        replay,
+    };
+
     YamlSchemaElem ethernetControllers("EthernetControllers",
         {
             {"Name"},
@@ -122,6 +132,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
             replay,
         }
     );
+
     // Root element of the YAML schema
     YamlSchemaElem yamlSchema{
         // JSON schema, not interpreted by us:
@@ -143,16 +154,8 @@ auto MakeYamlSchema() -> YamlSchemaElem
                 replay
             }
         },
-        {"FlexRayControllers", {
-                {"Name"},
-                {"Network"},
-                {"UseTraceSinks"},
-                clusterParameters,
-                nodeParameters,
-                txBufferConfigurations,
-                replay
-            }
-        },
+        {"FlexrayControllers", flexrayControllerElements},
+        {"FlexRayControllers", flexrayControllerElements}, // deprecated (renamed to FlexrayControllers)
         ethernetControllers,
         {"DataPublishers", {
                 {"Name"},

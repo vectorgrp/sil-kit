@@ -201,6 +201,139 @@ Changed
 
       typedef struct { ... } ib_Rpc_ExchangeFormat;
 
+- FlexRay
+
+  - Renamed ``IntegrationBus/include/ib/capi/FlexRay.h`` to ``IntegrationBus/include/ib/capi/Flexray.h``
+
+    - Changed ``ib_FlexRay_`` to ``ib_Flexray_`` in all symbols
+
+    - Changed the names of the event and handler types and registration functionsto match the ``...Event``,
+      ``...TransmitEvent`` and ``Add...Handler`` naming scheme
+
+    + old:
+    .. code-block:: c++
+
+      ib_FlexRay_Message
+      ib_FlexRay_MessageAck
+      ib_FlexRay_Symbol
+      ib_FlexRay_SymbolAck
+      ib_FlexRay_CycleStart
+      ib_FlexRay_ControllerStatus
+      ib_FlexRay_PocStatus
+      ib_FlexRay_MessageHandler_t
+      ib_FlexRay_MessageAckHandler_t
+      ib_FlexRay_WakeupHandler_t
+      ib_FlexRay_PocStatusHandler_t
+      ib_FlexRay_SymbolHandler_t
+      ib_FlexRay_SymbolAckHandler_t
+      ib_FlexRay_CycleStartHandler_t
+      ib_FlexRay_Controller_RegisterMessageHandler
+      ib_FlexRay_Controller_RegisterMessageAckHandler
+      ib_FlexRay_Controller_RegisterWakeupHandler
+      ib_FlexRay_Controller_RegisterPocStatusHandler
+      ib_FlexRay_Controller_RegisterSymbolHandler
+      ib_FlexRay_Controller_RegisterSymbolAckHandler
+      ib_FlexRay_Controller_RegisterCycleStartHandler
+
+    + new:
+    .. code-block:: c++
+
+      ib_Flexray_FrameEvent
+      ib_Flexray_FrameTransmitEvent
+      ib_Flexray_SymbolEvent
+      ib_Flexray_SymbolTransmitEvent
+      ib_Flexray_WakeupEvent
+      ib_Flexray_CycleStartEvent
+      ib_Flexray_PocStatusEvent
+      ib_Flexray_FrameHandler_t
+      ib_Flexray_FrameTransmitHandler_t
+      ib_Flexray_WakeupHandler_t
+      ib_Flexray_PocStatusHandler_t
+      ib_Flexray_SymbolHandler_t
+      ib_Flexray_SymbolTransmitHandler_t
+      ib_Flexray_CycleStartHandler_t
+      ib_Flexray_Controller_AddFrameHandler
+      ib_Flexray_Controller_AddFrameTransmitHandler
+      ib_Flexray_Controller_AddWakeupHandler
+      ib_Flexray_Controller_AddPocStatusHandler
+      ib_Flexray_Controller_AddSymbolHandler
+      ib_Flexray_Controller_AddSymbolTransmitHandler
+      ib_Flexray_Controller_AddCycleStartHandler
+
+  - ``IntegrationBus/include/ib/capi/InterfaceIdentifiers.h``
+
+    - Changed ``FlexRay`` to ``Flexray`` in all names
+
+  - ``IntegrationBus/include/ib/mw/IParticipant.hpp``
+
+    - Changed ``Fr`` to ``Flexray`` in all names
+
+  - Renamed ``IntegrationBus/include/ib/sim/fr/FrDatatypes.hpp`` to ``IntegrationBus/include/ib/sim/fr/FlexrayDatatypes.hpp``
+
+    - Changed ``Fr`` to ``Flexray`` in all names
+
+    - Added ``Flexray`` prefix to all names which had no prefix
+
+    - Changed the names of the event and handler types and registration functionsto match the ``...Event``,
+      ``...TransmitEvent`` and ``Add...Handler`` naming scheme
+
+    + old
+    .. code-block:: c++
+
+      FrMessage
+      FrMessageAck
+      FrSymbol
+      FrSymbolAck
+      CycleStart
+      PocStatus
+
+    + new
+    .. code-block:: c++
+
+      FlexrayFrameEvent
+      FlexrayFrameTransmitEvent
+      FlexraySymbolEvent
+      FlexraySymbolTransmitEvent
+      FlexrayCycleStartEvent
+      FlexrayPocStatusEvent
+
+  - Renamed ``IntegrationBus/include/ib/sim/fr/IFrController.hpp`` to ``IntegrationBus/include/ib/sim/fr/IFlexrayController.hpp``
+
+    - Changed ``Fr`` to ``Flexray`` in all names
+
+    - Changed the names of the event and handler types and registration functionsto match the ``...Event``,
+      ``...TransmitEvent`` and ``Add...Handler`` naming scheme
+
+    + old
+    .. code-block:: c++
+
+      class IFrController
+        MessageHandler
+        MessageAckHandler
+        SymbolAckHandler
+        RegisterMessageHandler
+        RegisterMessageAckHandler
+        RegisterWakeupHandler
+        RegisterPocStatusHandler
+        RegisterSymbolHandler
+        RegisterSymbolAckHandler
+        RegisterCycleStartHandler
+
+    + new
+    .. code-block:: c++
+
+      class IFlexrayController
+        FrameHandler
+        FrameTransmitHandler
+        SymbolTransmitHandler
+        AddFrameHandler
+        AddFrameTransmitHandler
+        AddWakeupHandler
+        AddPocStatusHandler
+        AddSymbolHandler
+        AddSymbolTransmitHandler
+        AddCycleStartHandler
+
 Added
 ~~~~~
 
@@ -220,6 +353,25 @@ Added
     ``ib_Lin_Controller_WakeupInternal()`` now return ``ib_ReturnCode_WRONGSTATE`` if issued in wrong 
     ``ib_Lin_ControllerMode``.
 
+- FlexRay
+
+  - ``IntegrationBus/include/ib/capi/InterfaceIdentifiers.h``
+
+    New interface identifier for wakeup events
+
+    + new:
+    .. code-block:: c++
+
+      #define ib_InterfaceIdentifier_FlexrayWakeupEvent ...
+
+  - ``IntegrationBus/include/ib/sim/fr/FlexrayDatatypes.hpp``
+
+    New datatype for wakeup events
+
+    + new
+    .. code-block:: c++
+
+      struct FlexrayWakeupEvent { ... };
 
 Fixed
 ~~~~~

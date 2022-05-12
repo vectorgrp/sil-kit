@@ -8,9 +8,9 @@ namespace ib {
 namespace sim {
 namespace fr {
 
-void Validate(const ClusterParameters& clusterParameters);
+void Validate(const FlexrayClusterParameters& clusterParameters);
 
-void Validate(const NodeParameters& nodeParameters);
+void Validate(const FlexrayNodeParameters& nodeParameters);
 
 } // namespace fr
 } // namespace sim

@@ -11,8 +11,8 @@
 #include "EthControllerProxy.hpp"
 #include "EthControllerFacade.hpp"
 #include "EthControllerReplay.hpp"
-#include "FrControllerProxy.hpp"
-#include "FrControllerFacade.hpp"
+#include "FlexrayControllerProxy.hpp"
+#include "FlexrayControllerFacade.hpp"
 #include "LinController.hpp"
 #include "LinControllerReplay.hpp"
 #include "LinControllerProxy.hpp"
@@ -292,21 +292,21 @@ auto Participant<IbConnectionT>::CreateEthernetController(const std::string& can
 
 template <class IbConnectionT>
 auto Participant<IbConnectionT>::CreateFlexrayController(const std::string& canonicalName, const std::string& networkName)
-    -> sim::fr::IFrController*
+    -> sim::fr::IFlexrayController*
 {
-    ib::cfg::FlexRayController controllerConfig = GetConfigByControllerName(_participantConfig.flexRayControllers, canonicalName);
+    ib::cfg::FlexrayController controllerConfig = GetConfigByControllerName(_participantConfig.flexrayControllers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.network, networkName);
 
     mw::SupplementalData supplementalData;
-    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeFlexRay;
+    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeFlexray;
 
-    return CreateController<ib::cfg::FlexRayController, fr::FrControllerFacade>(
+    return CreateController<ib::cfg::FlexrayController, fr::FlexrayControllerFacade>(
         controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), controllerConfig,
         _timeProvider.get());
 }
 
 template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFrController*
+auto Participant<IbConnectionT>::CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFlexrayController*
 {
     return CreateFlexrayController(canonicalName, canonicalName);
 }
@@ -613,7 +613,7 @@ void Participant<IbConnectionT>::RegisterEthSimulator(sim::eth::IIbToEthSimulato
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* busSim,  const std::vector<std::string>& networkNames)
+void Participant<IbConnectionT>::RegisterFlexraySimulator(sim::fr::IIbToFlexrayBusSimulator* busSim,  const std::vector<std::string>& networkNames)
 {
     RegisterSimulator(busSim, cfg::NetworkType::FlexRay, networkNames);
 }
@@ -691,73 +691,73 @@ void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, c
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FrMessage& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayFrameEvent& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::fr::FrMessage&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::fr::FlexrayFrameEvent&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FrMessageAck& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayFrameTransmitEvent& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::fr::FrMessageAck&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::fr::FlexrayFrameTransmitEvent&& msg)
 {
     SendIbMessageImpl(from, std::move(msg));
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FrSymbol& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexraySymbolEvent& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FrSymbolAck& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexraySymbolTransmitEvent& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::CycleStart& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayCycleStartEvent& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::HostCommand& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayHostCommand& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::ControllerConfig& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayControllerConfig& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::TxBufferConfigUpdate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayTxBufferConfigUpdate& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::TxBufferUpdate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayTxBufferUpdate& msg)
 {
     SendIbMessageImpl(from, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::PocStatus& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayPocStatusEvent& msg)
 {
     SendIbMessageImpl(from, msg);
 }
@@ -971,73 +971,73 @@ void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, c
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FrMessage& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayFrameEvent& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::fr::FrMessage&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::fr::FlexrayFrameEvent&& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FrMessageAck& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayFrameTransmitEvent& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::fr::FrMessageAck&& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::fr::FlexrayFrameTransmitEvent&& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FrSymbol& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexraySymbolEvent& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FrSymbolAck& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexraySymbolTransmitEvent& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::CycleStart& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayCycleStartEvent& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::HostCommand& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayHostCommand& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::ControllerConfig& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayControllerConfig& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::TxBufferConfigUpdate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayTxBufferConfigUpdate& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::TxBufferUpdate& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayTxBufferUpdate& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::PocStatus& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayPocStatusEvent& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }

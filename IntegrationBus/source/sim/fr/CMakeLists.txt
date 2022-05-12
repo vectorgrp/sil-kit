@@ -1,21 +1,21 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_library(IbSimFlexRay STATIC
-    FrControllerProxy.cpp
-    FrControllerProxy.hpp
-    FrDatatypeUtils.cpp
-    FrDatatypeUtils.hpp
+add_library(IbSimFlexray STATIC
+    FlexrayControllerProxy.cpp
+    FlexrayControllerProxy.hpp
+    FlexrayDatatypeUtils.cpp
+    FlexrayDatatypeUtils.hpp
     Validation.cpp
     Validation.hpp
 
-    FrControllerFacade.hpp
-    FrControllerFacade.cpp
+    FlexrayControllerFacade.hpp
+    FlexrayControllerFacade.cpp
 )
 
-target_include_directories(IbSimFlexRay
+target_include_directories(IbSimFlexray
     PUBLIC .
 )
 
-target_link_libraries(IbSimFlexRay
+target_link_libraries(IbSimFlexray
     PRIVATE IbInterface
             IbInternal
             IbMwLogging
@@ -23,13 +23,13 @@ target_link_libraries(IbSimFlexRay
             IbConfiguration
 )
 
-add_vib_test(TestSimFrValidation SOURCES ValidationTest.cpp LIBS IbSimFlexRay)
-add_vib_test(TestSimFrController 
-    SOURCES 
-        FrControllerProxyTest.cpp 
-        FrControllerFacadeTest.cpp 
+add_vib_test(TestSimFlexrayValidation SOURCES ValidationTest.cpp LIBS IbSimFlexray)
+add_vib_test(TestSimFlexrayController
+    SOURCES
+        FlexrayControllerProxyTest.cpp
+        FlexrayControllerFacadeTest.cpp
     LIBS 
-        IbSimFlexRay
+        IbSimFlexray
         IbMwMockParticipant
         IbTracing
         IbConfiguration

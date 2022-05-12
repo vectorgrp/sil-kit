@@ -6,7 +6,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include  <chrono>
+#include <chrono>
 
 namespace {
 
@@ -18,7 +18,7 @@ using namespace ib::cfg;
 using namespace std::chrono_literals;
 
 //!< Yaml config which has almost complete list of config elements.
-const auto completeConfiguration= R"raw(
+const auto completeConfiguration = R"raw(
 Description: Example configuration to test YAML Parser
 CanControllers:
 - Name: CAN1
@@ -66,7 +66,7 @@ EthernetControllers:
       GroupSource: MyTestGroup
   UseTraceSinks:
   - MyTraceSink1
-FlexRayControllers:
+FlexrayControllers:
 - ClusterParameters:
     gColdstartAttempts: 8
     gCycleCountMax: 63
@@ -194,14 +194,14 @@ TEST_F(YamlParserTest, yaml_complete_configuration)
     EXPECT_TRUE(config.linControllers.at(0).name == "SimpleEcu1_LIN1");
     EXPECT_TRUE(config.linControllers.at(0).network.has_value() && config.linControllers.at(0).network.value() == "LIN1");
 
-    EXPECT_TRUE(config.flexRayControllers.size() == 1);
-    EXPECT_TRUE(config.flexRayControllers.at(0).name == "FlexRay1");
-    EXPECT_TRUE(!config.flexRayControllers.at(0).network.has_value());
+    EXPECT_TRUE(config.flexrayControllers.size() == 1);
+    EXPECT_TRUE(config.flexrayControllers.at(0).name == "FlexRay1");
+    EXPECT_TRUE(!config.flexrayControllers.at(0).network.has_value());
 
     EXPECT_TRUE(config.dataPublishers.size() == 1);
     EXPECT_TRUE(config.dataPublishers.at(0).name == "Publisher1");
     EXPECT_TRUE(config.dataPublishers.at(0).topic.has_value() && config.dataPublishers.at(0).topic.value() == "Temperature");
-    
+
     EXPECT_TRUE(config.logging.sinks.size() == 1);
     EXPECT_TRUE(config.logging.sinks.at(0).type == Sink::Type::File);
     EXPECT_TRUE(config.logging.sinks.at(0).level == ib::mw::logging::Level::Critical);
@@ -222,7 +222,7 @@ TEST_F(YamlParserTest, yaml_complete_configuration)
     EXPECT_TRUE(config.extensions.searchPathHints.size() == 2);
     EXPECT_TRUE(config.extensions.searchPathHints.at(0) == "path/to/extensions1");
     EXPECT_TRUE(config.extensions.searchPathHints.at(1) == "path/to/extensions2");
-    
+
     EXPECT_TRUE(config.middleware.registry.connectAttempts == 9);
     EXPECT_TRUE(config.middleware.registry.hostname == "NotLocalhost");
     EXPECT_TRUE(config.middleware.registry.port == 1337);
@@ -297,7 +297,7 @@ TEST_F(YamlParserTest, yaml_native_type_conversions)
         sink.level = ib::mw::logging::Level::Trace;
         sink.logName = "filename";
         logger.sinks.push_back(sink);
-        sink.type=Sink::Type::Stdout;
+        sink.type = Sink::Type::Stdout;
         sink.logName = "";
         logger.sinks.push_back(sink);
         YAML::Node node;
@@ -358,6 +358,37 @@ TEST_F(YamlParserTest, map_serdes)
     auto mapstr = ib::cfg::Serialize<std::map<std::string, std::string>>(mapin);
     auto mapout = ib::cfg::Deserialize<std::map<std::string, std::string>>(mapstr);
     EXPECT_EQ(mapin, mapout);
+}
+
+const auto deprecatedFlexRayControllersConfiguration = R"raw(
+FlexRayControllers:
+- Name: FlexRay1
+- Name: FlexRay2
+)raw";
+
+TEST_F(YamlParserTest, yaml_deprecated_FlexRayControllers_configuration)
+{
+    auto node = YAML::Load(deprecatedFlexRayControllersConfiguration);
+    const auto participantConfiguration = node.as<ParticipantConfiguration>();
+    EXPECT_EQ(participantConfiguration.flexrayControllers.size(), 2);
+    EXPECT_EQ(participantConfiguration.flexrayControllers[0].name, "FlexRay1");
+    EXPECT_EQ(participantConfiguration.flexrayControllers[1].name, "FlexRay2");
+}
+
+const auto bothFlexrayControllersAndDeprecatedFlexRayControllersConfiguration = R"raw(
+FlexRayControllers:
+- Name: FlexRay1
+- Name: FlexRay2
+FlexrayControllers:
+- Name: FlexRay3
+- Name: FlexRay4
+)raw";
+
+// Check that having both the correct "FlexrayControllers" and the deprecated "FlexRayControllers" keys present throws.
+TEST_F(YamlParserTest, yaml_both_FlexrayControllers_and_deprecated_FlexRayControllers_configuration)
+{
+    auto node = YAML::Load(bothFlexrayControllersAndDeprecatedFlexRayControllersConfiguration);
+    EXPECT_THROW({ node.as<ParticipantConfiguration>(); }, ConversionError);
 }
 
 } // anonymous namespace

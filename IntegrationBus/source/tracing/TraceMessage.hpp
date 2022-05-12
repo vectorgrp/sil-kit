@@ -7,7 +7,7 @@
 #include "ib/sim/can/CanDatatypes.hpp"
 #include "ib/sim/data/DataMessageDatatypes.hpp"
 #include "ib/sim/lin/LinDatatypes.hpp"
-#include "ib/sim/fr/FrDatatypes.hpp"
+#include "ib/sim/fr/FlexrayDatatypes.hpp"
 
 namespace ib {
 namespace extensions {
@@ -16,12 +16,12 @@ namespace extensions {
 // helpers  to associate a TraceMessage-Type enum to a C++ type
 enum class TraceMessageType
 {
-    EthernetFrame
-    ,CanFrameEvent
-    ,LinFrame
-    ,FrMessage
-    ,InvalidReplayData
-    //TODO FrSymbol, PocStatus, TxBufferConfigUpdate, TxBufferUpdate ?
+    EthernetFrame,
+    CanFrameEvent,
+    LinFrame,
+    FlexrayFrameEvent,
+    InvalidReplayData,
+    //TODO FlexraySymbolEvent, FlexrayPocStatusEvent, FlexrayTxBufferConfigUpdate, FlexrayTxBufferUpdate ?
 };
 
 template<TraceMessageType id>
@@ -35,7 +35,7 @@ template<class MsgT> struct MessageTrait;
 template<> struct MessageTrait<sim::eth::EthernetFrame> : TypeIdTrait<TraceMessageType::EthernetFrame> {};
 template<> struct MessageTrait<sim::can::CanFrameEvent> : TypeIdTrait<TraceMessageType::CanFrameEvent> {};
 template<> struct MessageTrait<sim::lin::LinFrame> : TypeIdTrait<TraceMessageType::LinFrame> {};
-template<> struct MessageTrait<sim::fr::FrMessage> : TypeIdTrait<TraceMessageType::FrMessage> {};
+template<> struct MessageTrait<sim::fr::FlexrayFrameEvent> : TypeIdTrait<TraceMessageType::FlexrayFrameEvent> {};
 
 class TraceMessage
 {

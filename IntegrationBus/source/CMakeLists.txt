@@ -48,7 +48,7 @@ add_library(IntegrationBus ${ibLibType}
     "capi/CapiParticipant.cpp"
     "capi/CapiCan.cpp"
     "capi/CapiEthernet.cpp"
-    "capi/CapiFlexRay.cpp"
+    "capi/CapiFlexray.cpp"
     "capi/CapiLogger.cpp"
     "capi/CapiLin.cpp"
     "capi/CapiDataPubSub.cpp"

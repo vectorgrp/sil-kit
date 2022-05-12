@@ -2,18 +2,18 @@
 
 #pragma once
 
-#include "ib/sim/fr/IFrController.hpp"
+#include "ib/sim/fr/IFlexrayController.hpp"
 #include "ib/mw/fwd_decl.hpp"
 
 #include <tuple>
 #include <vector>
 
-#include "IIbToFrControllerFacade.hpp"
+#include "IIbToFlexrayControllerFacade.hpp"
 #include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
 #include "ITraceMessageSource.hpp"
 
-#include "FrControllerProxy.hpp"
+#include "FlexrayControllerProxy.hpp"
 #include "ParticipantConfiguration.hpp"
 
 namespace ib {
@@ -25,9 +25,9 @@ namespace fr {
  * Acts as a proxy to the controllers implemented and simulated by the Network Simulator. For operation
  * without a Network Simulator cf. FrController.
  */
-class FrControllerFacade
-    : public IFrController
-    , public IIbToFrControllerFacade
+class FlexrayControllerFacade
+    : public IFlexrayController
+    , public IIbToFlexrayControllerFacade
     , public extensions::ITraceMessageSource
     , public mw::IIbServiceEndpoint
 {
@@ -38,34 +38,34 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    FrControllerFacade() = delete;
-    FrControllerFacade(FrControllerFacade&&) = default;
-    FrControllerFacade(mw::IParticipantInternal* participant, cfg::FlexRayController config, mw::sync::ITimeProvider* timeProvider);
+    FlexrayControllerFacade() = delete;
+    FlexrayControllerFacade(FlexrayControllerFacade&&) = default;
+    FlexrayControllerFacade(mw::IParticipantInternal* participant, cfg::FlexrayController config, mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
     // Operator Implementations
-    FrControllerFacade& operator=(FrControllerFacade&& other) = default;
+    FlexrayControllerFacade& operator=(FlexrayControllerFacade&& other) = default;
 
 public:
     // ----------------------------------------
     // Public interface methods
     //
-    // IFrController
-    void Configure(const ControllerConfig& config) override;
+    // IFlexrayController
+    void Configure(const FlexrayControllerConfig& config) override;
 
-    void ReconfigureTxBuffer(uint16_t txBufferIdx, const TxBufferConfig& config) override;
+    void ReconfigureTxBuffer(uint16_t txBufferIdx, const FlexrayTxBufferConfig& config) override;
 
     /*! \brief Update the content of a previously configured TX buffer.
      *
      * The FlexRay message will be sent immediately and only once.
      * I.e., the configuration according to cycle, repetition, and transmission mode is
-     * ignored. In particular, even with TransmissionMode::Continuous, the message will be
+     * ignored. In particular, even with FlexrayTransmissionMode::Continuous, the message will be
      * sent only once.
      *
-     *  \see IFrController::Configure(const ControllerConfig&)
+     *  \see IFlexrayController::Configure(const FlexrayControllerConfig&)
      */
-    void UpdateTxBuffer(const TxBufferUpdate& update) override;
+    void UpdateTxBuffer(const FlexrayTxBufferUpdate& update) override;
 
     void Run() override;
     void DeferredHalt() override;
@@ -74,21 +74,21 @@ public:
     void AllSlots() override;
     void Wakeup() override;
 
-    void RegisterMessageHandler(MessageHandler handler) override;
-    void RegisterMessageAckHandler(MessageAckHandler handler) override;
-    void RegisterWakeupHandler(WakeupHandler handler) override;
-    void RegisterPocStatusHandler(PocStatusHandler handler) override;
-    void RegisterSymbolHandler(SymbolHandler handler) override;
-    void RegisterSymbolAckHandler(SymbolAckHandler handler) override;
-    void RegisterCycleStartHandler(CycleStartHandler handler) override;
+    void AddFrameHandler(FrameHandler handler) override;
+    void AddFrameTransmitHandler(FrameTransmitHandler handler) override;
+    void AddWakeupHandler(WakeupHandler handler) override;
+    void AddPocStatusHandler(PocStatusHandler handler) override;
+    void AddSymbolHandler(SymbolHandler handler) override;
+    void AddSymbolTransmitHandler(SymbolTransmitHandler handler) override;
+    void AddCycleStartHandler(CycleStartHandler handler) override;
 
-    // IIbToFrController
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessage& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FrMessageAck& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbol& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FrSymbolAck& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const CycleStart& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const PocStatus& msg) override;
+    // IIbToFlexrayControllerFacade
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexrayFrameEvent& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexrayFrameTransmitEvent& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexraySymbolEvent& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexraySymbolTransmitEvent& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexrayCycleStartEvent& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexrayPocStatusEvent& msg) override;
 
     // ITraceMessageSource
     void AddSink(extensions::ITraceMessageSink* sink) override;
@@ -110,13 +110,13 @@ private:
     // private members
     mw::IParticipantInternal* _participant = nullptr;
     mw::ServiceDescriptor _serviceDescriptor;
-    cfg::FlexRayController _config;
+    cfg::FlexrayController _config;
 
     bool _simulatedLinkDetected = false;
     mw::ServiceDescriptor _simulatedLink;
 
-    IFrController* _currentController;
-    std::unique_ptr<FrControllerProxy> _frControllerProxy;
+    IFlexrayController* _currentController;
+    std::unique_ptr<FlexrayControllerProxy> _flexrayControllerProxy;
 
 };
 } // namespace fr

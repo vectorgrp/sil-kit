@@ -33,13 +33,13 @@ DEFINE_VIB_CONVERT(LinController);
 
 DEFINE_VIB_CONVERT(EthernetController);
 
-DEFINE_VIB_CONVERT(ib::sim::fr::ClusterParameters);
-DEFINE_VIB_CONVERT(ib::sim::fr::NodeParameters);
-DEFINE_VIB_CONVERT(ib::sim::fr::TxBufferConfig);
-DEFINE_VIB_CONVERT(ib::sim::fr::Channel);
-DEFINE_VIB_CONVERT(ib::sim::fr::ClockPeriod);
-DEFINE_VIB_CONVERT(ib::sim::fr::TransmissionMode);
-DEFINE_VIB_CONVERT(FlexRayController);
+DEFINE_VIB_CONVERT(ib::sim::fr::FlexrayClusterParameters);
+DEFINE_VIB_CONVERT(ib::sim::fr::FlexrayNodeParameters);
+DEFINE_VIB_CONVERT(ib::sim::fr::FlexrayTxBufferConfig);
+DEFINE_VIB_CONVERT(ib::sim::fr::FlexrayChannel);
+DEFINE_VIB_CONVERT(ib::sim::fr::FlexrayClockPeriod);
+DEFINE_VIB_CONVERT(ib::sim::fr::FlexrayTransmissionMode);
+DEFINE_VIB_CONVERT(FlexrayController);
 
 DEFINE_VIB_CONVERT(DataPublisher);
 DEFINE_VIB_CONVERT(DataSubscriber);

@@ -3,7 +3,7 @@
 This directory contains sample projects that demonstrate how the IntegrationBus
 API can be used:
 
-* **Can, Lin, FlexRay, Ethernet, DataMessage, Rpc **:
+* **CAN, LIN, FlexRay, Ethernet, DataMessage, RPC**:
   Write or read participants that are able to connect to IntegrationBus and use buses of
   all supported protocols including CAN, LIN, FlexRay, Ethernet, DataMessage and the RPC service.
 

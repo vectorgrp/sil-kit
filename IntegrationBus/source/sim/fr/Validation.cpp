@@ -8,7 +8,7 @@ namespace ib {
 namespace sim {
 namespace fr {
 
-void Validate(const ClusterParameters& clusterParameters)
+void Validate(const FlexrayClusterParameters& clusterParameters)
 {
     if (clusterParameters.gColdstartAttempts < 2 || clusterParameters.gColdstartAttempts > 31)
         throw ib::ConfigurationError{"gColdstartAttempts must be in range 2 - 31"};
@@ -74,7 +74,7 @@ void Validate(const ClusterParameters& clusterParameters)
         throw ib::ConfigurationError{"gSyncFrameIDCountMax must be in range 2 - 15"};
 }
 
-void Validate(const NodeParameters& nodeParameters)
+void Validate(const FlexrayNodeParameters& nodeParameters)
 {
     if (nodeParameters.pAllowHaltDueToClock > 1)
         throw ib::ConfigurationError{"pAllowHaltDueToClock must be 0 or 1"};
@@ -130,8 +130,8 @@ void Validate(const NodeParameters& nodeParameters)
     if (nodeParameters.pRateCorrectionOut < 3 || nodeParameters.pRateCorrectionOut > 3846)
         throw ib::ConfigurationError{"pRateCorrectionOut must be in range 3 - 3846"};
 
-    if (nodeParameters.pWakeupChannel != Channel::A && nodeParameters.pWakeupChannel != Channel::B)
-        throw ib::ConfigurationError{"pWakeupChannel must be either Channel A or Channel B"};
+    if (nodeParameters.pWakeupChannel != FlexrayChannel::A && nodeParameters.pWakeupChannel != FlexrayChannel::B)
+        throw ib::ConfigurationError{"pWakeupChannel must be either FlexrayChannel A or FlexrayChannel B"};
 
     if (nodeParameters.pWakeupPattern > 63)
         throw ib::ConfigurationError{"pWakeupPattern must be in range 0 - 63"};

@@ -439,7 +439,7 @@ bool Converter::decode(const Node& node, EthernetController& obj)
 }
 
 template<>
-Node Converter::encode(const sim::fr::ClusterParameters& obj)
+Node Converter::encode(const sim::fr::FlexrayClusterParameters& obj)
 {
     Node node;
     // Parse parameters as an int value; uint8_t would be interpreted as a character
@@ -466,7 +466,7 @@ Node Converter::encode(const sim::fr::ClusterParameters& obj)
     return node;
 }
 template<>
-bool Converter::decode(const Node& node, sim::fr::ClusterParameters& obj)
+bool Converter::decode(const Node& node, sim::fr::FlexrayClusterParameters& obj)
 {
     // Parse parameters as an int value; uint8_t would be interpreted as a character
     auto parseInt = [&node](auto instance, auto name)
@@ -496,7 +496,7 @@ bool Converter::decode(const Node& node, sim::fr::ClusterParameters& obj)
     return true;
 }
 template<>
-Node Converter::encode(const sim::fr::NodeParameters& obj)
+Node Converter::encode(const sim::fr::FlexrayNodeParameters& obj)
 {
     Node node;
     node["pAllowHaltDueToClock"] = static_cast<int>(obj.pAllowHaltDueToClock);
@@ -525,7 +525,7 @@ Node Converter::encode(const sim::fr::NodeParameters& obj)
     return node;
 }
 template<>
-bool Converter::decode(const Node& node, sim::fr::NodeParameters& obj)
+bool Converter::decode(const Node& node, sim::fr::FlexrayNodeParameters& obj)
 {
     auto parseInt = [&node](auto instance, auto name)
     {
@@ -551,14 +551,14 @@ bool Converter::decode(const Node& node, sim::fr::NodeParameters& obj)
     obj.pRateCorrectionOut = parseInt(obj.pRateCorrectionOut, "pRateCorrectionOut");
     obj.pWakeupPattern = parseInt(obj.pWakeupPattern, "pWakeupPattern");
     obj.pSamplesPerMicrotick = parseInt(obj.pSamplesPerMicrotick, "pSamplesPerMicrotick");
-    obj.pWakeupChannel = parse_as<sim::fr::Channel>(node["pWakeupChannel"]);
-    obj.pdMicrotick = parse_as<sim::fr::ClockPeriod>(node["pdMicrotick"]);
-    obj.pChannels = parse_as<sim::fr::Channel>(node["pChannels"]);
+    obj.pWakeupChannel = parse_as<sim::fr::FlexrayChannel>(node["pWakeupChannel"]);
+    obj.pdMicrotick = parse_as<sim::fr::FlexrayClockPeriod>(node["pdMicrotick"]);
+    obj.pChannels = parse_as<sim::fr::FlexrayChannel>(node["pChannels"]);
     return true;
 }
 
 template<>
-Node Converter::encode(const sim::fr::TxBufferConfig& obj)
+Node Converter::encode(const sim::fr::FlexrayTxBufferConfig& obj)
 {
     Node node;
     node["channels"] = obj.channels;
@@ -571,131 +571,131 @@ Node Converter::encode(const sim::fr::TxBufferConfig& obj)
     return node;
 }
 template<>
-bool Converter::decode(const Node& node, sim::fr::TxBufferConfig& obj)
+bool Converter::decode(const Node& node, sim::fr::FlexrayTxBufferConfig& obj)
 {
-    obj.channels = parse_as<sim::fr::Channel>(node["channels"]);
+    obj.channels = parse_as<sim::fr::FlexrayChannel>(node["channels"]);
     obj.slotId = parse_as<uint16_t>(node["slotId"]);
     obj.offset = static_cast<uint8_t>(parse_as<int>(node["offset"]));
     obj.repetition = static_cast<uint8_t>(parse_as<int>(node["repetition"]));
     obj.hasPayloadPreambleIndicator = parse_as<bool>(node["PPindicator"]);
     obj.headerCrc = parse_as<uint16_t>(node["headerCrc"]);
-    obj.transmissionMode = parse_as<sim::fr::TransmissionMode>(node["transmissionMode"]);
+    obj.transmissionMode = parse_as<sim::fr::FlexrayTransmissionMode>(node["transmissionMode"]);
     return true;
 }
 
 template<>
-Node Converter::encode(const sim::fr::Channel& obj)
+Node Converter::encode(const sim::fr::FlexrayChannel& obj)
 {
     Node node;
     switch (obj)
     {
-    case sim::fr::Channel::A:
+    case sim::fr::FlexrayChannel::A:
         node = "A";
         break;
-    case sim::fr::Channel::B:
+    case sim::fr::FlexrayChannel::B:
         node = "B";
         break;
-    case sim::fr::Channel::AB:
+    case sim::fr::FlexrayChannel::AB:
         node =  "AB";
         break;
-    case sim::fr::Channel::None:
+    case sim::fr::FlexrayChannel::None:
         node = "None";
         break;
     }
     return node;
 }
 template<>
-bool Converter::decode(const Node& node, sim::fr::Channel& obj)
+bool Converter::decode(const Node& node, sim::fr::FlexrayChannel& obj)
 {
     auto&& str = parse_as<std::string>(node);
     if (str == "A")
-        obj =  sim::fr::Channel::A;
+        obj =  sim::fr::FlexrayChannel::A;
     else if (str == "B")
-        obj =  sim::fr::Channel::B;
+        obj =  sim::fr::FlexrayChannel::B;
     else if (str == "AB")
-        obj =  sim::fr::Channel::AB;
+        obj =  sim::fr::FlexrayChannel::AB;
     else if (str == "None" || str == "")
-        obj = sim::fr::Channel::None;
+        obj = sim::fr::FlexrayChannel::None;
     else
     {
-        throw ConversionError(node, "Unknown sim::fr::Channel: " + str);
+        throw ConversionError(node, "Unknown sim::fr::FlexrayChannel: " + str);
     }
     return true;
 }
 
 template<>
-Node Converter::encode(const sim::fr::ClockPeriod& obj)
+Node Converter::encode(const sim::fr::FlexrayClockPeriod& obj)
 {
     Node node;
     switch (obj)
     {
-    case sim::fr::ClockPeriod::T12_5NS:
+    case sim::fr::FlexrayClockPeriod::T12_5NS:
         node = "12.5ns";
         break;
-    case sim::fr::ClockPeriod::T25NS:
+    case sim::fr::FlexrayClockPeriod::T25NS:
         node =  "25ns";
         break;
-    case sim::fr::ClockPeriod::T50NS:
+    case sim::fr::FlexrayClockPeriod::T50NS:
         node = "50ns";
         break;
     default:
-        throw ConversionError(node, "Unknown sim::fr::ClockPeriod");
+        throw ConversionError(node, "Unknown sim::fr::FlexrayClockPeriod");
     }
     return node;
 }
 template<>
-bool Converter::decode(const Node& node, sim::fr::ClockPeriod& obj)
+bool Converter::decode(const Node& node, sim::fr::FlexrayClockPeriod& obj)
 {
     auto&& str = parse_as<std::string>(node);
     if (str == "12.5ns")
-        obj = sim::fr::ClockPeriod::T12_5NS;
+        obj = sim::fr::FlexrayClockPeriod::T12_5NS;
     else if (str == "25ns")
-        obj = sim::fr::ClockPeriod::T25NS;
+        obj = sim::fr::FlexrayClockPeriod::T25NS;
     else if (str == "50ns")
-        obj = sim::fr::ClockPeriod::T50NS;
+        obj = sim::fr::FlexrayClockPeriod::T50NS;
     else
     {
-        throw ConversionError(node, "Unknown sim::fr::ClockPeriod: " + str);
+        throw ConversionError(node, "Unknown sim::fr::FlexrayClockPeriod: " + str);
     }
     return true;
 }
 
 template<>
-Node Converter::encode(const sim::fr::TransmissionMode& obj)
+Node Converter::encode(const sim::fr::FlexrayTransmissionMode& obj)
 {
     Node node;
     switch (obj)
     {
-    case sim::fr::TransmissionMode::Continuous:
+    case sim::fr::FlexrayTransmissionMode::Continuous:
         node = "Continuous";
         break;
-    case sim::fr::TransmissionMode::SingleShot:
+    case sim::fr::FlexrayTransmissionMode::SingleShot:
         node = "SingleShot";
         break;
     default:
-        throw ConversionError(node, "Unknown TransmissionMode");
+        throw ConversionError(node, "Unknown FlexrayTransmissionMode");
     }
     return node;
 }
 template<>
-bool Converter::decode(const Node& node, sim::fr::TransmissionMode& obj)
+bool Converter::decode(const Node& node, sim::fr::FlexrayTransmissionMode& obj)
 {
     auto&& str = parse_as<std::string>(node);
     if (str == "Continuous")
-        obj = sim::fr::TransmissionMode::Continuous;
+        obj = sim::fr::FlexrayTransmissionMode::Continuous;
     else if (str == "SingleShot")
-        obj = sim::fr::TransmissionMode::SingleShot;
+        obj = sim::fr::FlexrayTransmissionMode::SingleShot;
     else
     {
-        throw ConversionError(node, "Unknown sim::fr::TransmissionMode: " + str);
+        throw ConversionError(node, "Unknown sim::fr::FlexrayTransmissionMode: " + str);
     }
     return true;
 }
 
 template<>
-Node Converter::encode(const FlexRayController& obj)
+Node Converter::encode(const FlexrayController& obj)
 {
-    static const FlexRayController defaultObj{};
+    static const FlexrayController defaultObj{};
     Node node;
     node["Name"] = obj.name;
     optional_encode(obj.network, node, "Network");
@@ -715,7 +715,7 @@ Node Converter::encode(const FlexRayController& obj)
     return node;
 }
 template<>
-bool Converter::decode(const Node& node, FlexRayController& obj)
+bool Converter::decode(const Node& node, FlexrayController& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
     optional_decode(obj.network, node, "Network");
@@ -1058,7 +1058,7 @@ Node Converter::encode(const ParticipantConfiguration& obj)
     optional_encode(obj.canControllers, node, "CanControllers");
     optional_encode(obj.linControllers, node, "LinControllers");
     optional_encode(obj.ethernetControllers, node, "EthernetControllers");
-    optional_encode(obj.flexRayControllers, node, "FlexRayControllers");
+    optional_encode(obj.flexrayControllers, node, "FlexrayControllers");
     optional_encode(obj.dataPublishers, node, "DataPublishers");
     optional_encode(obj.dataSubscribers, node, "DataSubscribers");
     optional_encode(obj.rpcServers, node, "RpcServers");
@@ -1081,7 +1081,7 @@ bool Converter::decode(const Node& node, ParticipantConfiguration& obj)
     optional_decode(obj.canControllers, node, "CanControllers");
     optional_decode(obj.linControllers, node, "LinControllers");
     optional_decode(obj.ethernetControllers, node, "EthernetControllers");
-    optional_decode(obj.flexRayControllers, node, "FlexRayControllers");
+    optional_decode_deprecated_alternative(obj.flexrayControllers, node, "FlexrayControllers", "FlexRayControllers");
     optional_decode(obj.dataPublishers, node, "DataPublishers");
     optional_decode(obj.dataSubscribers, node, "DataSubscribers");
     optional_decode(obj.rpcServers, node, "RpcServers");

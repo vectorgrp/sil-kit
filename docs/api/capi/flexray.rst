@@ -22,71 +22,71 @@ To configure these frames, the API provides functions to manipulate TX buffers.
 
 **The following functions can be used to create a FlexRay controller and manipulate it's configuration:**
 
-.. doxygenfunction:: ib_FlexRay_Controller_Create
-.. doxygenfunction:: ib_FlexRay_Controller_Configure
-.. doxygenfunction:: ib_FlexRay_Controller_ReconfigureTxBuffer
-.. doxygenfunction:: ib_FlexRay_Controller_UpdateTxBuffer
+.. doxygenfunction:: ib_Flexray_Controller_Create
+.. doxygenfunction:: ib_Flexray_Controller_Configure
+.. doxygenfunction:: ib_Flexray_Controller_ReconfigureTxBuffer
+.. doxygenfunction:: ib_Flexray_Controller_UpdateTxBuffer
 
 **The following function can be used to manipulate the controller's state by triggering chi commands:**
 
-.. doxygenfunction:: ib_FlexRay_Controller_ExecuteCmd
+.. doxygenfunction:: ib_Flexray_Controller_ExecuteCmd
 
 **The following set of functions can be used to register event handlers to the controller:**
 
-.. doxygenfunction:: ib_FlexRay_Controller_RegisterMessageHandler
-.. doxygenfunction:: ib_FlexRay_Controller_RegisterMessageAckHandler
-.. doxygenfunction:: ib_FlexRay_Controller_RegisterWakeupHandler
-.. doxygenfunction:: ib_FlexRay_Controller_RegisterPocStatusHandler
-.. doxygenfunction:: ib_FlexRay_Controller_RegisterSymbolHandler
-.. doxygenfunction:: ib_FlexRay_Controller_RegisterSymbolAckHandler
-.. doxygenfunction:: ib_FlexRay_Controller_RegisterCycleStartHandler
+.. doxygenfunction:: ib_Flexray_Controller_AddFrameHandler
+.. doxygenfunction:: ib_Flexray_Controller_AddFrameTransmitHandler
+.. doxygenfunction:: ib_Flexray_Controller_AddWakeupHandler
+.. doxygenfunction:: ib_Flexray_Controller_AddPocStatusHandler
+.. doxygenfunction:: ib_Flexray_Controller_AddSymbolHandler
+.. doxygenfunction:: ib_Flexray_Controller_AddSymbolTransmitHandler
+.. doxygenfunction:: ib_Flexray_Controller_AddCycleStartHandler
 
 Data Structures
 ~~~~~~~~~~~~~~~
-.. doxygenstruct:: ib_FlexRay_ClusterParameters
+.. doxygenstruct:: ib_Flexray_ClusterParameters
    :members:
-.. doxygenstruct:: ib_FlexRay_NodeParameters
+.. doxygenstruct:: ib_Flexray_NodeParameters
    :members:
-.. doxygenstruct:: ib_FlexRay_TxBufferConfig
+.. doxygenstruct:: ib_Flexray_TxBufferConfig
    :members:
-.. doxygenstruct:: ib_FlexRay_ControllerConfig
+.. doxygenstruct:: ib_Flexray_ControllerConfig
    :members:
-.. doxygenstruct:: ib_FlexRay_TxBufferUpdate
+.. doxygenstruct:: ib_Flexray_TxBufferUpdate
    :members:
-.. doxygenstruct:: ib_FlexRay_HostCommand
+.. doxygenstruct:: ib_Flexray_HostCommand
    :members:
-.. doxygenstruct:: ib_FlexRay_Header
+.. doxygenstruct:: ib_Flexray_Header
    :members:
-.. doxygenstruct:: ib_FlexRay_Frame
+.. doxygenstruct:: ib_Flexray_Frame
    :members:
 
-.. doxygenstruct:: ib_FlexRay_Message
+.. doxygenstruct:: ib_Flexray_FrameEvent
    :members:
-.. doxygenstruct:: ib_FlexRay_MessageAck
+.. doxygenstruct:: ib_Flexray_FrameTransmitEvent
    :members:
-.. doxygenstruct:: ib_FlexRay_Symbol
+.. doxygenstruct:: ib_Flexray_SymbolEvent
    :members:
-.. doxygenstruct:: ib_FlexRay_CycleStart
+.. doxygenstruct:: ib_Flexray_CycleStartEvent
    :members:
-.. doxygenstruct:: ib_FlexRay_ControllerStatus
+.. doxygenstruct:: ib_Flexray_ControllerStatus
    :members:
-.. doxygenstruct:: ib_FlexRay_PocStatus
+.. doxygenstruct:: ib_Flexray_PocStatusEvent
    :members:
 
 Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygentypedef:: ib_FlexRay_MacroTick
-.. doxygentypedef:: ib_FlexRay_MicroTick
-.. doxygentypedef:: ib_FlexRay_ClockPeriod
-.. doxygentypedef:: ib_FlexRay_Channel
-.. doxygentypedef:: ib_FlexRay_SymbolPattern
-.. doxygentypedef:: ib_FlexRay_ChiCommand
-.. doxygentypedef:: ib_FlexRay_TransmissionMode
-.. doxygentypedef:: ib_FlexRay_PocState
-.. doxygentypedef:: ib_FlexRay_SlotModeType
-.. doxygentypedef:: ib_FlexRay_ErrorModeType
-.. doxygentypedef:: ib_FlexRay_StartupStateType
-.. doxygentypedef:: ib_FlexRay_WakeupStatusType
-.. doxygentypedef:: ib_FlexRay_Header_Flag
+.. doxygentypedef:: ib_Flexray_MacroTick
+.. doxygentypedef:: ib_Flexray_MicroTick
+.. doxygentypedef:: ib_Flexray_ClockPeriod
+.. doxygentypedef:: ib_Flexray_Channel
+.. doxygentypedef:: ib_Flexray_SymbolPattern
+.. doxygentypedef:: ib_Flexray_ChiCommand
+.. doxygentypedef:: ib_Flexray_TransmissionMode
+.. doxygentypedef:: ib_Flexray_PocState
+.. doxygentypedef:: ib_Flexray_SlotModeType
+.. doxygentypedef:: ib_Flexray_ErrorModeType
+.. doxygentypedef:: ib_Flexray_StartupStateType
+.. doxygentypedef:: ib_Flexray_WakeupStatusType
+.. doxygentypedef:: ib_Flexray_Header_Flag
 
-.. doxygentypedef:: ib_FlexRay_SymbolAck
+.. doxygentypedef:: ib_Flexray_SymbolTransmitEvent

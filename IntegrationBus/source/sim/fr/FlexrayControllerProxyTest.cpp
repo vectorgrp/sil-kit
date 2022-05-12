@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "FrControllerProxy.hpp"
+#include "FlexrayControllerProxy.hpp"
 
 #include <chrono>
 #include <functional>
@@ -12,7 +12,7 @@
 
 #include "ib/util/functional.hpp"
 
-#include "FrDatatypeUtils.hpp"
+#include "FlexrayDatatypeUtils.hpp"
 
 #include "MockParticipant.hpp"
 
@@ -39,31 +39,31 @@ using ::ib::mw::test::DummyParticipant;
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const HostCommand&));
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const ControllerConfig&));
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const TxBufferConfigUpdate&));
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const TxBufferUpdate&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const FlexrayHostCommand&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const FlexrayControllerConfig&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const FlexrayTxBufferConfigUpdate&));
+    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const FlexrayTxBufferUpdate&));
 };
 
-class FrControllerProxyTest : public testing::Test
+class FlexrayControllerProxyTest : public testing::Test
 {
 protected:
     struct Callbacks
     {
-        MOCK_METHOD2(MessageHandler, void(IFrController*, const FrMessage&));
-        MOCK_METHOD2(MessageAckHandler, void(IFrController*, const FrMessageAck&));
-        MOCK_METHOD2(WakeupHandler, void(IFrController*, const FrSymbol&));
-        MOCK_METHOD2(PocStatusHandler, void(IFrController*, const PocStatus&));
-        MOCK_METHOD2(SymbolHandler, void(IFrController*, const FrSymbol&));
-        MOCK_METHOD2(SymbolAckHandler, void(IFrController*, const FrSymbolAck&));
-        MOCK_METHOD2(CycleStartHandler, void(IFrController*, const CycleStart&));
+        MOCK_METHOD2(MessageHandler, void(IFlexrayController*, const FlexrayFrameEvent &));
+        MOCK_METHOD2(MessageAckHandler, void(IFlexrayController*, const FlexrayFrameTransmitEvent &));
+        MOCK_METHOD2(WakeupHandler, void(IFlexrayController*, const FlexrayWakeupEvent &));
+        MOCK_METHOD2(PocStatusHandler, void(IFlexrayController*, const FlexrayPocStatusEvent &));
+        MOCK_METHOD2(SymbolHandler, void(IFlexrayController*, const FlexraySymbolEvent &));
+        MOCK_METHOD2(SymbolAckHandler, void(IFlexrayController*, const FlexraySymbolTransmitEvent &));
+        MOCK_METHOD2(CycleStartHandler, void(IFlexrayController*, const FlexrayCycleStartEvent &));
     };
 
 protected:
-    FrControllerProxyTest()
-        : proxy(&participant, FrControllerProxyTest::GetDummyConfig())
-        , proxyFrom(&participant, FrControllerProxyTest::GetDummyConfig())
-        , proxyConfigured(&participant, FrControllerProxyTest::GetDummyConfigWithValues())
+    FlexrayControllerProxyTest()
+        : proxy(&participant, FlexrayControllerProxyTest::GetDummyConfig())
+        , proxyFrom(&participant, FlexrayControllerProxyTest::GetDummyConfig())
+        , proxyConfigured(&participant, FlexrayControllerProxyTest::GetDummyConfigWithValues())
     {
         proxy.SetServiceDescriptor(from_endpointAddress(proxyAddress));
 
@@ -77,26 +77,26 @@ protected:
     const EndpointAddress proxyAddress{4, 5};
     const EndpointAddress controllerAddress{9, 5};
 
-    decltype(TxBufferUpdate::payload) referencePayload;
+    decltype(FlexrayTxBufferUpdate::payload) referencePayload;
 
     MockParticipant participant;
-    FrControllerProxy proxy;
-    FrControllerProxy proxyFrom;
-    FrControllerProxy proxyConfigured;
+    FlexrayControllerProxy proxy;
+    FlexrayControllerProxy proxyFrom;
+    FlexrayControllerProxy proxyConfigured;
     Callbacks callbacks;
 
-    ib::cfg::FlexRayController dummyConfig;
+    ib::cfg::FlexrayController dummyConfig;
 
-    auto static GetDummyConfig() -> ib::cfg::FlexRayController 
+    auto static GetDummyConfig() -> ib::cfg::FlexrayController
     {
-        ib::cfg::FlexRayController dummyConfig;
+        ib::cfg::FlexrayController dummyConfig;
         dummyConfig.network = "testNetwork";
         dummyConfig.name = "testController";
         return dummyConfig;
     }
-    auto static GetDummyConfigWithValues() -> ib::cfg::FlexRayController
+    auto static GetDummyConfigWithValues() -> ib::cfg::FlexrayController
     {
-        ib::cfg::FlexRayController dummyConfig;
+        ib::cfg::FlexrayController dummyConfig;
         dummyConfig.network = "testNetwork";
         dummyConfig.name = "testController";
         dummyConfig.clusterParameters = MakeValidClusterParams();
@@ -105,9 +105,9 @@ protected:
         return dummyConfig;
     }
 
-    auto static MakeValidClusterParams() -> ClusterParameters
+    auto static MakeValidClusterParams() -> FlexrayClusterParameters
     {
-        ClusterParameters clusterParams;
+        FlexrayClusterParameters clusterParams;
         clusterParams.gColdstartAttempts = 2;
         clusterParams.gCycleCountMax = 7;
         clusterParams.gdActionPointOffset = 1;
@@ -132,16 +132,16 @@ protected:
         return clusterParams;
     }
 
-    auto static MakeValidNodeParams() -> NodeParameters
+    auto static MakeValidNodeParams() -> FlexrayNodeParameters
     {
-        NodeParameters nodeParams;
+        FlexrayNodeParameters nodeParams;
         nodeParams.pAllowHaltDueToClock = 0;
         nodeParams.pAllowPassiveToActive = 0;
-        nodeParams.pChannels = Channel::A;
+        nodeParams.pChannels = FlexrayChannel::A;
         nodeParams.pClusterDriftDamping = 0;
         nodeParams.pdAcceptedStartupRange = 29;
         nodeParams.pdListenTimeout = 1926;
-        nodeParams.pdMicrotick = ClockPeriod::T12_5NS;
+        nodeParams.pdMicrotick = FlexrayClockPeriod::T12_5NS;
         nodeParams.pKeySlotId = 0;
         nodeParams.pKeySlotOnlyEnabled = 0;
         nodeParams.pKeySlotUsedForStartup = 0;
@@ -156,30 +156,30 @@ protected:
         nodeParams.pOffsetCorrectionStart = 7;
         nodeParams.pRateCorrectionOut = 3;
         nodeParams.pSamplesPerMicrotick = 1;
-        nodeParams.pWakeupChannel = Channel::A;
+        nodeParams.pWakeupChannel = FlexrayChannel::A;
         nodeParams.pWakeupPattern = 0;
 
         return nodeParams;
     }
 
-    auto static MakeValidTxBufferConfig() -> TxBufferConfig 
+    auto static MakeValidTxBufferConfig() -> FlexrayTxBufferConfig
     {
-        TxBufferConfig bufferCfg{};
-        bufferCfg.channels = Channel::AB;
+        FlexrayTxBufferConfig bufferCfg{};
+        bufferCfg.channels = FlexrayChannel::AB;
         bufferCfg.hasPayloadPreambleIndicator = false;
         bufferCfg.offset = 0;
         bufferCfg.repetition = 0;
         bufferCfg.slotId = 17;
-        bufferCfg.transmissionMode = TransmissionMode::SingleShot;
+        bufferCfg.transmissionMode = FlexrayTransmissionMode::SingleShot;
         
         return bufferCfg;
     }
 };
 
-TEST_F(FrControllerProxyTest, send_controller_config)
+TEST_F(FlexrayControllerProxyTest, send_controller_config)
 {
     // Configure Controller
-    ControllerConfig controllerCfg{};
+    FlexrayControllerConfig controllerCfg{};
     controllerCfg.clusterParams = MakeValidClusterParams();
     controllerCfg.nodeParams = MakeValidNodeParams();
 
@@ -190,11 +190,11 @@ TEST_F(FrControllerProxyTest, send_controller_config)
     proxy.Configure(controllerCfg);
 }
 
-TEST_F(FrControllerProxyTest, send_controller_config_override_identical)
+TEST_F(FlexrayControllerProxyTest, send_controller_config_override_identical)
 {
     // Configure Controller
-    ControllerConfig configuredControllerCfg{};
-    ControllerConfig testControllerCfg{};
+    FlexrayControllerConfig configuredControllerCfg{};
+    FlexrayControllerConfig testControllerCfg{};
 
     configuredControllerCfg.clusterParams = MakeValidClusterParams();
     configuredControllerCfg.nodeParams = MakeValidNodeParams();
@@ -208,11 +208,11 @@ TEST_F(FrControllerProxyTest, send_controller_config_override_identical)
     proxyConfigured.Configure(testControllerCfg);
 }
 
-TEST_F(FrControllerProxyTest, send_controller_config_override_cluster_params)
+TEST_F(FlexrayControllerProxyTest, send_controller_config_override_cluster_params)
 {
     // Configure Controller
-    ControllerConfig configuredControllerCfg{};
-    ControllerConfig testControllerCfg{};
+    FlexrayControllerConfig configuredControllerCfg{};
+    FlexrayControllerConfig testControllerCfg{};
 
     configuredControllerCfg.clusterParams = MakeValidClusterParams();
     configuredControllerCfg.nodeParams = MakeValidNodeParams();
@@ -231,11 +231,11 @@ TEST_F(FrControllerProxyTest, send_controller_config_override_cluster_params)
     proxyConfigured.Configure(testControllerCfg);
 }
 
-TEST_F(FrControllerProxyTest, send_controller_config_override_node_params)
+TEST_F(FlexrayControllerProxyTest, send_controller_config_override_node_params)
 {
     // Configure Controller
-    ControllerConfig configuredControllerCfg{};
-    ControllerConfig testControllerCfg{};
+    FlexrayControllerConfig configuredControllerCfg{};
+    FlexrayControllerConfig testControllerCfg{};
 
     configuredControllerCfg.clusterParams = MakeValidClusterParams();
     configuredControllerCfg.nodeParams = MakeValidNodeParams();
@@ -244,7 +244,7 @@ TEST_F(FrControllerProxyTest, send_controller_config_override_node_params)
     // Change clusterParams in tester and make sure they are ignored
     testControllerCfg.nodeParams = MakeValidNodeParams();
     testControllerCfg.nodeParams.pKeySlotId = 42; // was 0
-    testControllerCfg.nodeParams.pChannels = Channel::B; // was A
+    testControllerCfg.nodeParams.pChannels = FlexrayChannel::B; // was A
 
     // default values (not configured)
     testControllerCfg.clusterParams = MakeValidClusterParams();
@@ -254,11 +254,11 @@ TEST_F(FrControllerProxyTest, send_controller_config_override_node_params)
     proxyConfigured.Configure(testControllerCfg);
 }
 
-TEST_F(FrControllerProxyTest, send_controller_config_override_tx_buffer)
+TEST_F(FlexrayControllerProxyTest, send_controller_config_override_tx_buffer)
 {
     // Configure Controller
-    ControllerConfig configuredControllerCfg{};
-    ControllerConfig testControllerCfg{};
+    FlexrayControllerConfig configuredControllerCfg{};
+    FlexrayControllerConfig testControllerCfg{};
 
     configuredControllerCfg.clusterParams = MakeValidClusterParams();
     configuredControllerCfg.nodeParams = MakeValidNodeParams();
@@ -277,17 +277,17 @@ TEST_F(FrControllerProxyTest, send_controller_config_override_tx_buffer)
     proxyConfigured.Configure(testControllerCfg);
 }
 
-TEST_F(FrControllerProxyTest, send_txbuffer_configupdate)
+TEST_F(FlexrayControllerProxyTest, send_txbuffer_configupdate)
 {
-    TxBufferConfig bufferCfg{};
-    bufferCfg.channels = Channel::AB;
+    FlexrayTxBufferConfig bufferCfg{};
+    bufferCfg.channels = FlexrayChannel::AB;
     bufferCfg.hasPayloadPreambleIndicator = false;
     bufferCfg.offset = 0;
     bufferCfg.repetition = 0;
     bufferCfg.slotId = 17;
-    bufferCfg.transmissionMode = TransmissionMode::SingleShot;
+    bufferCfg.transmissionMode = FlexrayTransmissionMode::SingleShot;
 
-    ControllerConfig controllerCfg{};
+    FlexrayControllerConfig controllerCfg{};
     controllerCfg.clusterParams = MakeValidClusterParams();
     controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.push_back(bufferCfg);
@@ -296,14 +296,14 @@ TEST_F(FrControllerProxyTest, send_txbuffer_configupdate)
     proxy.Configure(controllerCfg);
 
     // Reconfigure TxBuffer 0
-    bufferCfg.channels = Channel::A;
+    bufferCfg.channels = FlexrayChannel::A;
     bufferCfg.hasPayloadPreambleIndicator = true;
     bufferCfg.offset = 1;
     bufferCfg.repetition = 3;
     bufferCfg.slotId = 15;
-    bufferCfg.transmissionMode = TransmissionMode::Continuous;
+    bufferCfg.transmissionMode = FlexrayTransmissionMode::Continuous;
 
-    TxBufferConfigUpdate expectedUpdate{};
+    FlexrayTxBufferConfigUpdate expectedUpdate{};
     expectedUpdate.txBufferIndex = 0;
     expectedUpdate.txBufferConfig = bufferCfg;
 
@@ -311,9 +311,9 @@ TEST_F(FrControllerProxyTest, send_txbuffer_configupdate)
     proxy.ReconfigureTxBuffer(0, bufferCfg);
 }
 
-TEST_F(FrControllerProxyTest, throw_on_unconfigured_tx_buffer_configupdate)
+TEST_F(FlexrayControllerProxyTest, throw_on_unconfigured_tx_buffer_configupdate)
 {
-    ControllerConfig controllerCfg;
+    FlexrayControllerConfig controllerCfg;
     controllerCfg.clusterParams = MakeValidClusterParams();
     controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.resize(5);
@@ -322,17 +322,17 @@ TEST_F(FrControllerProxyTest, throw_on_unconfigured_tx_buffer_configupdate)
     proxy.Configure(controllerCfg);
 
     // Attempt to reconfigure TxBuffer 6, which should be out of range
-    TxBufferConfig bufferCfg{};
-    EXPECT_CALL(participant, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const TxBufferConfigUpdate &>())).Times(0);
+    FlexrayTxBufferConfig bufferCfg{};
+    EXPECT_CALL(participant, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const FlexrayTxBufferConfigUpdate &>())).Times(0);
     EXPECT_THROW(proxy.ReconfigureTxBuffer(6, bufferCfg), std::out_of_range);
 }
 
 
-TEST_F(FrControllerProxyTest, send_txbuffer_update)
+TEST_F(FlexrayControllerProxyTest, send_txbuffer_update)
 {
-    TxBufferConfig bufferCfg{};
+    FlexrayTxBufferConfig bufferCfg{};
 
-    ControllerConfig controllerCfg;
+    FlexrayControllerConfig controllerCfg;
     controllerCfg.clusterParams = MakeValidClusterParams();
     controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.push_back(bufferCfg);
@@ -340,7 +340,7 @@ TEST_F(FrControllerProxyTest, send_txbuffer_update)
     EXPECT_CALL(participant, SendIbMessage(&proxy, controllerCfg)).Times(1);
     proxy.Configure(controllerCfg);
 
-    TxBufferUpdate update{};
+    FlexrayTxBufferUpdate update{};
     update.txBufferIndex = 0;
     update.payload = referencePayload;
     update.payloadDataValid = true;
@@ -352,9 +352,9 @@ TEST_F(FrControllerProxyTest, send_txbuffer_update)
 }
 
 
-TEST_F(FrControllerProxyTest, throw_on_unconfigured_tx_buffer_update)
+TEST_F(FlexrayControllerProxyTest, throw_on_unconfigured_tx_buffer_update)
 {
-    ControllerConfig controllerCfg;
+    FlexrayControllerConfig controllerCfg;
     controllerCfg.clusterParams = MakeValidClusterParams();
     controllerCfg.nodeParams = MakeValidNodeParams();
     controllerCfg.bufferConfigs.resize(1);
@@ -362,48 +362,48 @@ TEST_F(FrControllerProxyTest, throw_on_unconfigured_tx_buffer_update)
     EXPECT_CALL(participant, SendIbMessage(&proxy, controllerCfg)).Times(1);
     proxy.Configure(controllerCfg);
 
-    TxBufferUpdate update;
+    FlexrayTxBufferUpdate update;
     update.txBufferIndex = 7; // only txBufferIdx = 0 is configured
-    EXPECT_CALL(participant, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const TxBufferConfigUpdate &>())).Times(0);
+    EXPECT_CALL(participant, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const FlexrayTxBufferConfigUpdate &>())).Times(0);
     EXPECT_THROW(proxy.UpdateTxBuffer(update), std::out_of_range);
 }
 
-TEST_F(FrControllerProxyTest, send_run_command)
+TEST_F(FlexrayControllerProxyTest, send_run_command)
 {
-    EXPECT_CALL(participant, SendIbMessage(&proxy, HostCommand{ChiCommand::RUN}))
+    EXPECT_CALL(participant, SendIbMessage(&proxy, FlexrayHostCommand{FlexrayChiCommand::RUN}))
         .Times(1);
 
     proxy.Run();
 }
 
-TEST_F(FrControllerProxyTest, send_deferred_halt_command)
+TEST_F(FlexrayControllerProxyTest, send_deferred_halt_command)
 {
-    EXPECT_CALL(participant, SendIbMessage(&proxy, HostCommand{ChiCommand::DEFERRED_HALT}))
+    EXPECT_CALL(participant, SendIbMessage(&proxy, FlexrayHostCommand{FlexrayChiCommand::DEFERRED_HALT}))
         .Times(1);
 
     proxy.DeferredHalt();
 }
 
-TEST_F(FrControllerProxyTest, send_freeze_command)
+TEST_F(FlexrayControllerProxyTest, send_freeze_command)
 {
-    EXPECT_CALL(participant, SendIbMessage(&proxy, HostCommand{ChiCommand::FREEZE}))
+    EXPECT_CALL(participant, SendIbMessage(&proxy, FlexrayHostCommand{FlexrayChiCommand::FREEZE}))
         .Times(1);
 
     proxy.Freeze();
 }
 
-TEST_F(FrControllerProxyTest, send_allow_coldstart_command)
+TEST_F(FlexrayControllerProxyTest, send_allow_coldstart_command)
 {
-    EXPECT_CALL(participant, SendIbMessage(&proxy, HostCommand{ChiCommand::ALLOW_COLDSTART}))
+    EXPECT_CALL(participant, SendIbMessage(&proxy, FlexrayHostCommand{FlexrayChiCommand::ALLOW_COLDSTART}))
         .Times(1);
 
     proxy.AllowColdstart();
 }
 
-TEST_F(FrControllerProxyTest, send_all_slots_command)
+TEST_F(FlexrayControllerProxyTest, send_all_slots_command)
 {
-    HostCommand cmd;
-    cmd.command = ChiCommand::ALL_SLOTS;
+    FlexrayHostCommand cmd;
+    cmd.command = FlexrayChiCommand::ALL_SLOTS;
 
     EXPECT_CALL(participant, SendIbMessage(&proxy, cmd))
         .Times(1);
@@ -411,22 +411,22 @@ TEST_F(FrControllerProxyTest, send_all_slots_command)
     proxy.AllSlots();
 }
 
-TEST_F(FrControllerProxyTest, send_wakeup_command)
+TEST_F(FlexrayControllerProxyTest, send_wakeup_command)
 {
-    EXPECT_CALL(participant, SendIbMessage(&proxy, HostCommand{ChiCommand::WAKEUP}))
+    EXPECT_CALL(participant, SendIbMessage(&proxy, FlexrayHostCommand{FlexrayChiCommand::WAKEUP}))
         .Times(1);
 
     proxy.Wakeup();
 }
 
 
-TEST_F(FrControllerProxyTest, call_message_handler)
+TEST_F(FlexrayControllerProxyTest, call_message_handler)
 {
-    proxy.RegisterMessageHandler(bind_method(&callbacks, &Callbacks::MessageHandler));
+    proxy.AddFrameHandler(bind_method(&callbacks, &Callbacks::MessageHandler));
 
-    FrMessage message;
+    FlexrayFrameEvent message;
     message.timestamp = 17ns;
-    message.channel = Channel::A;
+    message.channel = FlexrayChannel::A;
     message.frame.header.frameId = 13;
     message.frame.header.payloadLength = static_cast<uint8_t>(referencePayload.size() / 2);
     message.frame.payload = referencePayload;
@@ -437,13 +437,13 @@ TEST_F(FrControllerProxyTest, call_message_handler)
     proxy.ReceiveIbMessage(&proxyFrom, message);
 }
 
-TEST_F(FrControllerProxyTest, call_message_ack_handler)
+TEST_F(FlexrayControllerProxyTest, call_message_ack_handler)
 {
-    proxy.RegisterMessageAckHandler(bind_method(&callbacks, &Callbacks::MessageAckHandler));
+    proxy.AddFrameTransmitHandler(bind_method(&callbacks, &Callbacks::MessageAckHandler));
 
-    FrMessageAck ack;
+    FlexrayFrameTransmitEvent ack;
     ack.timestamp = 17ns;
-    ack.channel = Channel::A;
+    ack.channel = FlexrayChannel::A;
     ack.frame.header.frameId = 13;
     ack.frame.header.payloadLength = static_cast<uint8_t>(referencePayload.size() / 2);
     ack.frame.payload = referencePayload;
@@ -454,37 +454,40 @@ TEST_F(FrControllerProxyTest, call_message_ack_handler)
     proxy.ReceiveIbMessage(&proxyFrom, ack);
 }
 
-TEST_F(FrControllerProxyTest, call_wakeup_handler)
+TEST_F(FlexrayControllerProxyTest, call_wakeup_handler)
 {
-    proxy.RegisterWakeupHandler(bind_method(&callbacks, &Callbacks::WakeupHandler));
+    proxy.AddWakeupHandler(bind_method(&callbacks, &Callbacks::WakeupHandler));
 
-    FrSymbol wus;
-    wus.pattern = SymbolPattern::Wus;
+    FlexraySymbolEvent wusSymbolEvent = {};
+    wusSymbolEvent.pattern = FlexraySymbolPattern::Wus;
+    auto wus = FlexrayWakeupEvent{wusSymbolEvent};
     EXPECT_CALL(callbacks, WakeupHandler(&proxy, wus))
         .Times(1);
 
-    FrSymbol wudop;
-    wudop.pattern = SymbolPattern::Wudop;
+    FlexraySymbolEvent wudopSymbolEvent = {};
+    wudopSymbolEvent.pattern = FlexraySymbolPattern::Wudop;
+    auto wudop = FlexrayWakeupEvent{wudopSymbolEvent};
     EXPECT_CALL(callbacks, WakeupHandler(&proxy, wudop))
         .Times(1);
 
-    FrSymbol casMts;
-    casMts.pattern = SymbolPattern::CasMts;
+    FlexraySymbolEvent casMtsSymbolEvent = {};
+    casMtsSymbolEvent.pattern = FlexraySymbolPattern::CasMts;
+    auto casMts = FlexrayWakeupEvent{casMtsSymbolEvent};
     EXPECT_CALL(callbacks, WakeupHandler(&proxy, casMts))
         .Times(0);
 
-    proxy.ReceiveIbMessage(&proxyFrom, wus);
-    proxy.ReceiveIbMessage(&proxyFrom, wudop);
-    proxy.ReceiveIbMessage(&proxyFrom, casMts);
+    proxy.ReceiveIbMessage(&proxyFrom, wusSymbolEvent);
+    proxy.ReceiveIbMessage(&proxyFrom, wudopSymbolEvent);
+    proxy.ReceiveIbMessage(&proxyFrom, casMtsSymbolEvent);
 }
 
-TEST_F(FrControllerProxyTest, call_pocstatus_handler)
+TEST_F(FlexrayControllerProxyTest, call_pocstatus_handler)
 {
     // new POC API
-    proxy.RegisterPocStatusHandler(bind_method(&callbacks, &Callbacks::PocStatusHandler));
-    PocStatus poc{};
+    proxy.AddPocStatusHandler(bind_method(&callbacks, &Callbacks::PocStatusHandler));
+    FlexrayPocStatusEvent poc{};
     poc.timestamp = 14ms;
-    poc.state = PocState::Ready;
+    poc.state = FlexrayPocState::Ready;
 
     EXPECT_CALL(callbacks, PocStatusHandler(&proxy, poc))
         .Times(1);
@@ -492,22 +495,22 @@ TEST_F(FrControllerProxyTest, call_pocstatus_handler)
     proxy.ReceiveIbMessage(&proxyFrom, poc);
 }
 
-TEST_F(FrControllerProxyTest, call_symbol_handler)
+TEST_F(FlexrayControllerProxyTest, call_symbol_handler)
 {
-    proxy.RegisterSymbolHandler(bind_method(&callbacks, &Callbacks::SymbolHandler));
+    proxy.AddSymbolHandler(bind_method(&callbacks, &Callbacks::SymbolHandler));
 
-    FrSymbol wus;
-    wus.pattern = SymbolPattern::Wus;
+    FlexraySymbolEvent wus;
+    wus.pattern = FlexraySymbolPattern::Wus;
     EXPECT_CALL(callbacks, SymbolHandler(&proxy, wus))
         .Times(1);
 
-    FrSymbol wudop;
-    wudop.pattern = SymbolPattern::Wudop;
+    FlexraySymbolEvent wudop;
+    wudop.pattern = FlexraySymbolPattern::Wudop;
     EXPECT_CALL(callbacks, SymbolHandler(&proxy, wudop))
         .Times(1);
 
-    FrSymbol casMts;
-    casMts.pattern = SymbolPattern::CasMts;
+    FlexraySymbolEvent casMts;
+    casMts.pattern = FlexraySymbolPattern::CasMts;
     EXPECT_CALL(callbacks, SymbolHandler(&proxy, casMts))
         .Times(1);
 
@@ -516,13 +519,13 @@ TEST_F(FrControllerProxyTest, call_symbol_handler)
     proxy.ReceiveIbMessage(&proxyFrom, casMts);
 }
 
-TEST_F(FrControllerProxyTest, call_symbol_ack_handler)
+TEST_F(FlexrayControllerProxyTest, call_symbol_ack_handler)
 {
-    proxy.RegisterSymbolAckHandler(bind_method(&callbacks, &Callbacks::SymbolAckHandler));
+    proxy.AddSymbolTransmitHandler(bind_method(&callbacks, &Callbacks::SymbolAckHandler));
 
-    FrSymbolAck ack;
-    ack.channel = Channel::B;
-    ack.pattern = SymbolPattern::CasMts;
+    FlexraySymbolTransmitEvent ack;
+    ack.channel = FlexrayChannel::B;
+    ack.pattern = FlexraySymbolPattern::CasMts;
 
     EXPECT_CALL(callbacks, SymbolAckHandler(&proxy, ack))
         .Times(1);
@@ -530,11 +533,11 @@ TEST_F(FrControllerProxyTest, call_symbol_ack_handler)
     proxy.ReceiveIbMessage(&proxyFrom, ack);
 }
 
-TEST_F(FrControllerProxyTest, call_cyclestart_handler)
+TEST_F(FlexrayControllerProxyTest, call_cyclestart_handler)
 {
-    proxy.RegisterCycleStartHandler(bind_method(&callbacks, &Callbacks::CycleStartHandler));
+    proxy.AddCycleStartHandler(bind_method(&callbacks, &Callbacks::CycleStartHandler));
 
-    CycleStart cycleStart;
+    FlexrayCycleStartEvent cycleStart;
     cycleStart.timestamp = 15ns;
     cycleStart.cycleCounter = 5u;
 

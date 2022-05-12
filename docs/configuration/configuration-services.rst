@@ -124,12 +124,12 @@ EthernetControllers
 
 .. _sec:cfg-participant-flexray:
 
-FlexRayControllers
-=============================
+FlexrayControllers
+==================
 
 .. code-block:: javascript
     
-  "FlexRayControllers": [
+  "FlexrayControllers": [
       {
           "Name": "FlexRay1",
           "Network": "PowerTrainCluster1",

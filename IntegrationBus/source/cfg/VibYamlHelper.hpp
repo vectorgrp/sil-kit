@@ -132,5 +132,22 @@ void optional_decode(ConfigT& value, const YAML::Node& node, const std::string& 
     }
 }
 
+template <typename ConfigT>
+void optional_decode_deprecated_alternative(ConfigT& value, const YAML::Node& node, const std::string& fieldName,
+                                            const std::string& deprecatedFieldName)
+{
+    if (node.IsMap())
+    {
+        if (node[fieldName] && node[deprecatedFieldName])
+        {
+            std::ostringstream ss;
+            ss << "Both \"" << fieldName << "\" and deprecated \"" << deprecatedFieldName << "\" keys are present.";
+            throw ConversionError(node, ss.str());
+        }
+        optional_decode(value, node, fieldName);
+        optional_decode(value, node, deprecatedFieldName);
+    }
+}
+
 } // namespace cfg
 } // namespace ib

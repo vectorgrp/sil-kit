@@ -8,29 +8,29 @@ namespace ib {
 namespace sim {
 namespace fr {
 
-struct ClusterParameters;
-struct NodeParameters;
-struct TxBufferConfig;
+struct FlexrayClusterParameters;
+struct FlexrayNodeParameters;
+struct FlexrayTxBufferConfig;
 
-struct ControllerConfig;
-struct TxBufferConfigUpdate;
-struct TxBufferUpdate;
+struct FlexrayControllerConfig;
+struct FlexrayTxBufferConfigUpdate;
+struct FlexrayTxBufferUpdate;
 
-struct Header;
-struct Frame;
+struct FlexrayHeader;
+struct FlexrayFrame;
 
-struct FrMessage;
-struct FrMessageAck;
+struct FlexrayFrameEvent;
+struct FlexrayFrameTransmitEvent;
 
-struct FrSymbol;
-struct FrSymbolAck;
+struct FlexraySymbolEvent;
+struct FlexraySymbolTransmitEvent;
 
-struct CycleStart;
+struct FlexrayCycleStartEvent;
 
-struct HostCommand;
-struct PocStatus;
+struct FlexrayHostCommand;
+struct FlexrayPocStatusEvent;
 
-class IFrController;
+class IFlexrayController;
 
 } // namespace fr
 } // namespace sim

@@ -14,7 +14,7 @@
 #include "ib/sim/fwd_decl.hpp"
 #include "ib/sim/can/CanDatatypes.hpp"
 #include "ib/sim/eth/EthernetDatatypes.hpp"
-#include "ib/sim/fr/FrDatatypes.hpp"
+#include "ib/sim/fr/FlexrayDatatypes.hpp"
 #include "ib/sim/lin/LinDatatypes.hpp"
 #include "ib/sim/data/DataMessageDatatypes.hpp"
 #include "ib/sim/rpc/RpcDatatypes.hpp"
@@ -161,12 +161,12 @@ public:
     {
         return nullptr;
     }
-    auto CreateFlexrayController(const std::string& /*canonicalName*/) -> sim::fr::IFrController* override
+    auto CreateFlexrayController(const std::string& /*canonicalName*/) -> sim::fr::IFlexrayController* override
     {
         return nullptr;
     }
     auto CreateFlexrayController(const std::string& /*canonicalName*/, const std::string & /*networkName*/)
-        -> sim::fr::IFrController* override
+        -> sim::fr::IFlexrayController* override
     {
         return nullptr;
     }
@@ -251,7 +251,7 @@ public:
 
     void RegisterCanSimulator(sim::can::IIbToCanSimulator*, const std::vector<std::string>& ) override {}
     void RegisterEthSimulator(sim::eth::IIbToEthSimulator* , const std::vector<std::string>&) override {}
-    void RegisterFlexraySimulator(sim::fr::IIbToFrBusSimulator* , const std::vector<std::string>&) override {}
+    void RegisterFlexraySimulator(sim::fr::IIbToFlexrayBusSimulator* , const std::vector<std::string>&) override {}
     void RegisterLinSimulator(sim::lin::IIbToLinSimulator*, const std::vector<std::string>&) override {}
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::can::CanFrameEvent&& /*msg*/) override {}
@@ -267,18 +267,18 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::eth::EthernetStatus& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::eth::EthernetSetMode& /*msg*/) override {}
 
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::fr::FrMessage&& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::FrMessage& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::fr::FrMessageAck&& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::FrMessageAck& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::FrSymbol& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::FrSymbolAck& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::CycleStart& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::HostCommand& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::ControllerConfig& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::TxBufferConfigUpdate& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::TxBufferUpdate& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::PocStatus& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::fr::FlexrayFrameEvent&& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::FlexrayFrameEvent& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, sim::fr::FlexrayFrameTransmitEvent&& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::FlexrayFrameTransmitEvent& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::FlexraySymbolEvent& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::FlexraySymbolTransmitEvent& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::FlexrayCycleStartEvent& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::FlexrayHostCommand& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::FlexrayControllerConfig& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::FlexrayTxBufferConfigUpdate& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::FlexrayTxBufferUpdate& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::fr::FlexrayPocStatusEvent& /*msg*/) override {}
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::lin::LinSendFrameRequest& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sim::lin::LinSendFrameHeaderRequest& /*msg*/) override {}
@@ -323,18 +323,18 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::eth::EthernetStatus& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::eth::EthernetSetMode& /*msg*/) override {}
 
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::fr::FrMessage&& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::FrMessage& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::fr::FrMessageAck&& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::FrMessageAck& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::FrSymbol& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::FrSymbolAck& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::CycleStart& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::HostCommand& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::ControllerConfig& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::TxBufferConfigUpdate& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::TxBufferUpdate& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::PocStatus& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::fr::FlexrayFrameEvent&& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::FlexrayFrameEvent& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, sim::fr::FlexrayFrameTransmitEvent&& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::FlexrayFrameTransmitEvent& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::FlexraySymbolEvent& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::FlexraySymbolTransmitEvent& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::FlexrayCycleStartEvent& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::FlexrayHostCommand& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::FlexrayControllerConfig& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::FlexrayTxBufferConfigUpdate& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::FlexrayTxBufferUpdate& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::fr::FlexrayPocStatusEvent& /*msg*/) override {}
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::lin::LinSendFrameRequest& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sim::lin::LinSendFrameHeaderRequest& /*msg*/) override {}

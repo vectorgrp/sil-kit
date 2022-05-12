@@ -57,7 +57,7 @@ Currently, the :ref:`CanController<sec:cfg-participant-can>`,
 :ref:`LinController<sec:cfg-participant-lin>`,
 :ref:`EthernetController<sec:cfg-participant-ethernet>`,
 and
-:ref:`FlexRayController<sec:cfg-participant-flexray>`
+:ref:`FlexrayController<sec:cfg-participant-flexray>`
 support trace sinks.
 
 The :ref:`VIBE MDF4Tracing extension<mdf4tracing>` supports tracing messages of

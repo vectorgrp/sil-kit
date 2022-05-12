@@ -12,24 +12,24 @@ namespace sim {
 //! The FlexRay namespace
 namespace fr {
 
-using FrMicroTick      = int32_t; //!< FlexRay micro tick
-using FrMacroTick      = int32_t; //!< FlexRay macro tick
+using FlexrayMicroTick = int32_t; //!< FlexRay micro tick
+using FlexrayMacroTick = int32_t; //!< FlexRay macro tick
 
 //! \brief Type and constants for the FlexRay channel parameter A, B, or AB
-enum class Channel : uint8_t
+enum class FlexrayChannel : uint8_t
 {
     None = 0, //!< Invalid Channel
     A    = 1, //!< Channel A
     B    = 2, //!< Channel B
-    AB   = 3 //!< Channel AB
+    AB   = 3, //!< Channel AB
 };
 
 //! \brief Period of the clock (used for micro tick period and sample clock period).
-enum class ClockPeriod : uint8_t
+enum class FlexrayClockPeriod : uint8_t
 {
     T12_5NS = 1, //!< 12.5ns / 80MHz
-    T25NS = 2, //!< 25ns   / 40MHz
-    T50NS = 3, //!< 50ns   / 20MHz
+    T25NS   = 2, //!< 25ns   / 40MHz
+    T50NS   = 3, //!< 50ns   / 20MHz
 };
 
 /*!
@@ -37,7 +37,7 @@ enum class ClockPeriod : uint8_t
  *
  *  Cf. 'FlexRay Protocol Specification Version 3.0.1' Appendix B.3.1.1 Parameters.
  */
-struct ClusterParameters
+struct FlexrayClusterParameters
 {
     //! Number of attempts for a cold start before giving up (range 2-31).
     uint8_t gColdstartAttempts;
@@ -123,7 +123,7 @@ struct ClusterParameters
  *
  *  Cf. 'FlexRay Protocol Specification Version 3.0.1' Appendix B.3.2 Parameters.
  */
-struct NodeParameters
+struct FlexrayNodeParameters
 {
     // ----------------------------------------------------------------------
     // Parameters according to B.3.2.1
@@ -134,14 +134,14 @@ struct NodeParameters
     //! Required number of consecutive even / odd cycle pairs for normal passive to normal active (range 0-31).
     uint8_t pAllowPassiveToActive;
 
-    //! Channel(s) to which the controller is connected (values Channel::A, Channel::B, Channel::AB).
-    Channel pChannels;
+    //! Channel(s) to which the controller is connected (values FlexrayChannel::A, FlexrayChannel::B, FlexrayChannel::AB).
+    FlexrayChannel pChannels;
 
     //! Cluster drift damping factor for rate correction in MicroTicks (range 0-10).
     uint8_t pClusterDriftDamping;
 
     //! Allowed deviation for startup frames during integration in MicroTicks (range 29-2743).
-    FrMicroTick pdAcceptedStartupRange;
+    FlexrayMicroTick pdAcceptedStartupRange;
 
     ////! Not used by Network Simulator
     //pDecodingCorrection
@@ -153,7 +153,7 @@ struct NodeParameters
     //pDelayCompensationB
 
     //! Duration of listen phase in MicroTicks (range 1926-2567692).
-    FrMicroTick pdListenTimeout;
+    FlexrayMicroTick pdListenTimeout;
 
     ////! Not used by Network Simulator
     //pExternalSync
@@ -189,22 +189,22 @@ struct NodeParameters
     uint8_t pMacroInitialOffsetB;
 
     //! Offset between secondary time reference and MT boundary (range 0-239 MicroTicks).
-    FrMicroTick pMicroInitialOffsetA;
+    FlexrayMicroTick pMicroInitialOffsetA;
 
     //! Offset between secondary time reference and MT boundary (range 0-239 MicroTicks).
-    FrMicroTick pMicroInitialOffsetB;
+    FlexrayMicroTick pMicroInitialOffsetB;
 
     //! Nominal number of MicroTicks in the communication cycle (range 960-1280000).
-    FrMicroTick pMicroPerCycle;
+    FlexrayMicroTick pMicroPerCycle;
 
     //! Maximum permissible offset correction value (range 15-16082 MicroTicks).
-    FrMicroTick pOffsetCorrectionOut;
+    FlexrayMicroTick pOffsetCorrectionOut;
 
     //! Start of the offset correction phase within the NIT, (7-15999 MT).
     uint16_t pOffsetCorrectionStart;
 
     //! Maximum permissible rate correction value (range 3-3846 MicroTicks).
-    FrMicroTick pRateCorrectionOut;
+    FlexrayMicroTick pRateCorrectionOut;
 
     ////! Not used by Network Simulator
     //pSecondKeySlotID
@@ -212,8 +212,8 @@ struct NodeParameters
     ////! Not used by Network Simulator
     //pTwoKeySlotMode
 
-    //! Channel used by the node to send a wakeup pattern (values Channel::A, Channel::B).
-    Channel pWakeupChannel;
+    //! Channel used by the node to send a wakeup pattern (values FlexrayChannel::A, FlexrayChannel::B).
+    FlexrayChannel pWakeupChannel;
 
     //! Number of repetitions of the wakeup symbol (range 0-63, value 0 or 1 prevents sending of WUP).
     uint8_t pWakeupPattern; 
@@ -222,7 +222,7 @@ struct NodeParameters
     // Parameters according to B.3.2.2
 
     //! Duration of a FlexRay MicroTick (12.5ns, 25ns or 50ns).
-    ClockPeriod pdMicrotick;
+    FlexrayClockPeriod pdMicrotick;
 
     ////! Not used by Network Simulator
     //pNMVectorEarlyUpdate
@@ -235,17 +235,17 @@ struct NodeParameters
 };
 
 //! Transmission mode for FlexRay Tx-Buffer
-enum class TransmissionMode : uint8_t
+enum class FlexrayTransmissionMode : uint8_t
 {
     SingleShot = 0, //!< Send TX Buffer only once
     Continuous = 1 //!< Send TX Buffer repeatedly
 };
 
-//! Configuration of Tx-Buffer, used in struct ControllerConfig
-struct TxBufferConfig
+//! Configuration of Tx-Buffer, used in struct FlexrayControllerConfig
+struct FlexrayTxBufferConfig
 {
-    //! (values Channel::A, Channel::B, Channel::AB)
-    Channel channels;
+    //! (values FlexrayChannel::A, FlexrayChannel::B, FlexrayChannel::AB)
+    FlexrayChannel channels;
 
     //! The slot Id of frame
     uint16_t slotId;
@@ -262,35 +262,35 @@ struct TxBufferConfig
     //! Header CRC, 11 bits
     uint16_t headerCrc;
 
-    //! TransmissionMode::SingleShot or TransmissionMode::Continuous
-    TransmissionMode transmissionMode;
+    //! FlexrayTransmissionMode::SingleShot or FlexrayTransmissionMode::Continuous
+    FlexrayTransmissionMode transmissionMode;
 };
 
 //! Configure the communication parameters of the FlexRay controller.
-struct ControllerConfig
+struct FlexrayControllerConfig
 {
     //! FlexRay cluster parameters
-    ClusterParameters clusterParams;
+    FlexrayClusterParameters clusterParams;
     //! FlexRay node parameters
-    NodeParameters nodeParams;
+    FlexrayNodeParameters nodeParams;
 
     //! FlexRay buffer configs
-    std::vector<TxBufferConfig> bufferConfigs;
+    std::vector<FlexrayTxBufferConfig> bufferConfigs;
 };
 
 //! Update the configuration of a particular FlexRay TX-Buffer
-struct TxBufferConfigUpdate
+struct FlexrayTxBufferConfigUpdate
 {
-    //! Index of the TX-Buffers according to the configured buffers (cf. ControllerConfig).
+    //! Index of the TX-Buffers according to the configured buffers (cf. FlexrayControllerConfig).
     uint16_t txBufferIndex;
     //! The new configuration of the Tx-Buffer
-    TxBufferConfig txBufferConfig;
+    FlexrayTxBufferConfig txBufferConfig;
 };
 
 //! Update the content of a FlexRay TX-Buffer
-struct TxBufferUpdate
+struct FlexrayTxBufferUpdate
 {
-    //! Index of the TX Buffers according to the configured buffers (cf. ControllerConfig).
+    //! Index of the TX Buffers according to the configured buffers (cf. FlexrayControllerConfig).
     uint16_t txBufferIndex;
 
     //! Payload data valid flag
@@ -300,7 +300,7 @@ struct TxBufferUpdate
     std::vector<uint8_t> payload;
 };
 
-enum class ChiCommand : uint8_t
+enum class FlexrayChiCommand : uint8_t
 {
     RUN, //!< ChiCommand RUN
     DEFERRED_HALT, //!< ChiCommand DEFERRED_HALT
@@ -310,12 +310,12 @@ enum class ChiCommand : uint8_t
     WAKEUP //!< ChiCommand WAKEUP
 };
 
-struct HostCommand
+struct FlexrayHostCommand
 {
-    ChiCommand command;
+    FlexrayChiCommand command;
 };
 
-struct Header
+struct FlexrayHeader
 {
     /*!
      * \brief Flags bit map according to FlagMask. Description:
@@ -359,35 +359,35 @@ struct Header
     inline void Set(Flag flag, bool condition);
 };
 
-struct Frame
+struct FlexrayFrame
 {
-    Header header; //!< Header flags, slot, crc, and cycle indidcators
+    FlexrayHeader header; //!< Header flags, slot, crc, and cycle indidcators
     std::vector<uint8_t> payload; //!< Raw payload containing 0 to 254 bytes
 };
 
 // Receive a frame from the Bus.
-struct FrMessage
+struct FlexrayFrameEvent
 {
     std::chrono::nanoseconds timestamp; //!< Time at end of frame transmission
-    Channel channel; //!< FlexRay channel A or B. (Valid values: Channel::A, Channel::B).
-    Frame frame; //!< Received FlexRay frame
+    FlexrayChannel channel; //!< FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
+    FlexrayFrame frame; //!< Received FlexRay frame
 };
 
 /*!
  * \brief Acknowledge for the transmit on the FlexRay bus
  */
-struct FrMessageAck
+struct FlexrayFrameTransmitEvent
 {
     std::chrono::nanoseconds timestamp; //!< Time at end of frame transmission
     uint16_t txBufferIndex; //!< Tx buffer, that was used for the transmission
-    Channel channel; //!< FlexRay channel A or B. (Valid values: Channel::A, Channel::B).
-    Frame frame; //!< Copy of the FlexRay frame that was successfully transmitted
+    FlexrayChannel channel; //!< FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
+    FlexrayFrame frame; //!< Copy of the FlexRay frame that was successfully transmitted
 };
 
 /*!
  * \brief FlexRay symbols patterns.
  */
-enum class SymbolPattern : uint8_t
+enum class FlexraySymbolPattern : uint8_t
 {
     CasMts, //!< Collision avoidance symbol (CAS) OR media access test symbol (MTS).
     Wus,    //!< Wakeup symbol (WUS).
@@ -397,21 +397,35 @@ enum class SymbolPattern : uint8_t
 /*!
  * \brief A FlexRay Symbol as received on the FlexRay bus.
  */
-struct FrSymbol
+struct FlexraySymbolEvent
 {
     std::chrono::nanoseconds timestamp; //!< End time of symbol reception.
-    Channel channel; //!< FlexRay channel A or B (values: Channel::A, Channel::B).
-    SymbolPattern pattern; //!< The received symbol, e.g. wakeup pattern
+    FlexrayChannel channel; //!< FlexRay channel A or B (values: FlexrayChannel::A, FlexrayChannel::B).
+    FlexraySymbolPattern pattern; //!< The received symbol, e.g. wakeup pattern
 };
 
-struct FrSymbolAck : FrSymbol
+/*!
+ * \brief Acknowledges the transmission of a \ref FlexraySymbolPattern on a particular channel.
+ */
+struct FlexraySymbolTransmitEvent : FlexraySymbolEvent
 {
+};
+
+/*!
+ * \brief A FlexRay WUS or WUDOP symbol was received on the FlexRay bus.
+ */
+struct FlexrayWakeupEvent : FlexraySymbolEvent
+{
+    FlexrayWakeupEvent() = default;
+
+    //! \brief Construct a \ref FlexrayWakeupEvent from the \ref FlexraySymbolEvent that triggered the wakeup.
+    explicit FlexrayWakeupEvent(const FlexraySymbolEvent& flexraySymbolEvent);
 };
 
 /*!
  * \brief Indicate the start of a FlexRay cycle.
  */
-struct CycleStart
+struct FlexrayCycleStartEvent
 {
     std::chrono::nanoseconds timestamp; //!< Cycle starting time.
     uint8_t cycleCounter; //!< Counter of FlexRay cycles.
@@ -421,7 +435,7 @@ struct CycleStart
  * \brief Protocol Operation Control (POC) state of the FlexRay communication controller
  * *AUTOSAR Name:* Fr_POCStateType
  */
-enum class PocState : uint8_t
+enum class FlexrayPocState : uint8_t
 {
     DefaultConfig = 0, //!< CC expects configuration. Initial state after reset. 
     Config        = 1, //!< CC is in configuration mode for setting communication parameters
@@ -430,14 +444,14 @@ enum class PocState : uint8_t
     Wakeup        = 4, //!< FlexRay wakeup phase
     NormalActive  = 5, //!< Normal operating mode
     NormalPassive = 6, //!< Operating mode with transient or tolerable errors
-    Halt          = 7  //!< CC is halted (caused by the application (ChiCommand::DEFERRED_HALT) or by a fatal error).
+    Halt          = 7  //!< CC is halted (caused by the application (FlexrayChiCommand::DEFERRED_HALT) or by a fatal error).
 };
 
 /*!
 * \brief Indicates what slot mode the POC is in.
 * *AUTOSAR Name:* Fr_SlotModeType
 */
-enum class SlotModeType : uint8_t
+enum class FlexraySlotModeType : uint8_t
 {
     KeySlot = 0x00,
     AllPending,
@@ -448,7 +462,7 @@ enum class SlotModeType : uint8_t
 * \brief Indicates what error mode the POC is in.
 * *AUTOSAR Name:* Fr_ErrorModeType
 */
-enum class ErrorModeType : uint8_t
+enum class FlexrayErrorModeType : uint8_t
 {
     Active = 0x00,
     Passive,
@@ -460,7 +474,7 @@ enum class ErrorModeType : uint8_t
 * *AUTOSAR Name:* Fr_StartupStateType
 */
 
-enum class StartupStateType : uint8_t
+enum class FlexrayStartupStateType : uint8_t
 {
     Undefined = 0x00,
     ColdStartListen,
@@ -479,7 +493,7 @@ enum class StartupStateType : uint8_t
 * \brief Indicates the outcome of the wake-up mechanism.
 * *AUTOSAR Name:* Fr_WakeupStateType
 */
-enum class WakeupStatusType : uint8_t
+enum class FlexrayWakeupStatusType : uint8_t
 {
     Undefined = 0x00,
     ReceivedHeader,
@@ -499,40 +513,41 @@ enum class WakeupStatusType : uint8_t
  * *AUTOSAR Name:* Fr_POCStatusType
  * 
  */
-struct PocStatus
+struct FlexrayPocStatusEvent
 {
     std::chrono::nanoseconds timestamp; //!< IB timestamp
 
-    PocState state; //!< Status of the Protocol Operation Control (POC).
+    FlexrayPocState state; //!< Status of the Protocol Operation Control (POC).
     bool chiHaltRequest; //!< indicates whether a halt request was received from the CHI
     bool coldstartNoise; //!< indicates noisy channel conditions during coldstart 
     bool freeze; //!< indicates that the POC entered a halt state due to an error condition requiring immediate halt.
     bool chiReadyRequest; //!< indicates that the CHI requested to enter ready state at the end of the communication cycle.
-    ErrorModeType errorMode; //!< indicates the error mode of the POC
-    SlotModeType slotMode; //!< indicates the slot mode of the POC
-    StartupStateType startupState; //!< indicates states within the STARTUP mechanism
-    WakeupStatusType wakeupStatus; //!< outcome of the execution of the WAKEUP mechanism
+    FlexrayErrorModeType errorMode; //!< indicates the error mode of the POC
+    FlexraySlotModeType slotMode; //!< indicates the slot mode of the POC
+    FlexrayStartupStateType startupState; //!< indicates states within the STARTUP mechanism
+    FlexrayWakeupStatusType wakeupStatus; //!< outcome of the execution of the WAKEUP mechanism
 };
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-bool Header::IsSet(Flag flag) const
+
+bool FlexrayHeader::IsSet(Flag flag) const
 {
     return (flags & static_cast<uint8_t>(flag)) > 0;
 }
 
-void Header::Set(Flag flag)
+void FlexrayHeader::Set(Flag flag)
 {
     flags |= static_cast<uint8_t>(flag);
 }
 
-void Header::Clear(Flag flag)
+void FlexrayHeader::Clear(Flag flag)
 {
     flags &= ~static_cast<uint8_t>(flag);
 }
 
-void Header::Set(Flag flag, bool condition)
+void FlexrayHeader::Set(Flag flag, bool condition)
 {
     if (condition)
         Set(flag);
@@ -540,7 +555,7 @@ void Header::Set(Flag flag, bool condition)
         Clear(flag);
 }
 
-inline bool operator==(const ClusterParameters& lhs, const ClusterParameters& rhs)
+inline bool operator==(const FlexrayClusterParameters& lhs, const FlexrayClusterParameters& rhs)
 {
     return lhs.gColdstartAttempts == rhs.gColdstartAttempts
         && lhs.gCycleCountMax == rhs.gCycleCountMax
@@ -564,7 +579,7 @@ inline bool operator==(const ClusterParameters& lhs, const ClusterParameters& rh
         && lhs.gSyncFrameIDCountMax == rhs.gSyncFrameIDCountMax;
 }
 
-inline bool operator==(const NodeParameters& lhs, const NodeParameters& rhs)
+inline bool operator==(const FlexrayNodeParameters& lhs, const FlexrayNodeParameters& rhs)
 {
     return lhs.pAllowHaltDueToClock == rhs.pAllowHaltDueToClock
         && lhs.pAllowPassiveToActive == rhs.pAllowPassiveToActive
@@ -591,7 +606,7 @@ inline bool operator==(const NodeParameters& lhs, const NodeParameters& rhs)
         && lhs.pSamplesPerMicrotick == rhs.pSamplesPerMicrotick;
 }
 
-inline bool operator==(const TxBufferConfig& lhs, const TxBufferConfig& rhs)
+inline bool operator==(const FlexrayTxBufferConfig& lhs, const FlexrayTxBufferConfig& rhs)
 {
     return lhs.channels == rhs.channels
         && lhs.slotId == rhs.slotId
@@ -600,6 +615,11 @@ inline bool operator==(const TxBufferConfig& lhs, const TxBufferConfig& rhs)
         && lhs.hasPayloadPreambleIndicator == rhs.hasPayloadPreambleIndicator
         && lhs.headerCrc == rhs.headerCrc
         && lhs.transmissionMode == rhs.transmissionMode;
+}
+
+inline FlexrayWakeupEvent::FlexrayWakeupEvent(const FlexraySymbolEvent& flexraySymbolEvent)
+    : FlexraySymbolEvent{flexraySymbolEvent}
+{
 }
 
 } // namespace fr

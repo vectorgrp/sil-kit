@@ -49,7 +49,7 @@ The outline of a IbConfig.json file is as follows:
     
         "LinControllers": [...],
     
-        "FlexRayControllers": [...],
+        "FlexrayControllers": [...],
     
         "EthernetControllers": [...],
     
@@ -99,7 +99,7 @@ Configuration Options
 
    * - :doc:`CanControllers<configuration-services>`, 
        :doc:`LinControllers<configuration-services>`,
-       :doc:`FlexRayControllers<configuration-services>`,
+       :doc:`FlexrayControllers<configuration-services>`,
        :doc:`EthernetControllers<configuration-services>`,
        :doc:`DataPublishers<configuration-services>`,
        :doc:`DataSubscribers<configuration-services>`,

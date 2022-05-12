@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "ib/cfg/IParticipantConfiguration.hpp"
-#include "ib/sim/fr/FrDatatypes.hpp"
+#include "ib/sim/fr/FlexrayDatatypes.hpp"
 #include "ib/mw/logging/LoggingDatatypes.hpp"
 #include "ib/sim/data/DataMessageDatatypes.hpp"
 #include "ib/sim/rpc/RpcDatatypes.hpp"
@@ -90,16 +90,16 @@ struct EthernetController
 // ================================================================================
 
 //! \brief FlexRay controller service
-struct FlexRayController
+struct FlexrayController
 {
     static constexpr NetworkType networkType = NetworkType::FlexRay;
 
     std::string name;
     ib::util::Optional<std::string> network;
 
-    ib::util::Optional<sim::fr::ClusterParameters> clusterParameters;
-    ib::util::Optional<sim::fr::NodeParameters> nodeParameters;
-    std::vector<sim::fr::TxBufferConfig> txBufferConfigurations;
+    ib::util::Optional<sim::fr::FlexrayClusterParameters> clusterParameters;
+    ib::util::Optional<sim::fr::FlexrayNodeParameters> nodeParameters;
+    std::vector<sim::fr::FlexrayTxBufferConfig> txBufferConfigurations;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -245,7 +245,7 @@ struct ParticipantConfiguration
     std::vector<CanController> canControllers;
     std::vector<LinController> linControllers;
     std::vector<EthernetController> ethernetControllers;
-    std::vector<FlexRayController> flexRayControllers;
+    std::vector<FlexrayController> flexrayControllers;
 
     std::vector<DataPublisher> dataPublishers;
     std::vector<DataSubscriber> dataSubscribers;
@@ -263,7 +263,7 @@ struct ParticipantConfiguration
 bool operator==(const CanController& lhs, const CanController& rhs);
 bool operator==(const LinController& lhs, const LinController& rhs);
 bool operator==(const EthernetController& lhs, const EthernetController& rhs);
-bool operator==(const FlexRayController& lhs, const FlexRayController& rhs);
+bool operator==(const FlexrayController& lhs, const FlexrayController& rhs);
 bool operator==(const DataPublisher& lhs, const DataPublisher& rhs);
 bool operator==(const DataSubscriber& lhs, const DataSubscriber& rhs);
 bool operator==(const RpcServer& lhs, const RpcServer& rhs);

@@ -31,8 +31,8 @@ public:
         case TraceMessageType::LinFrame:
             Trace(dir, address, timestamp, message.Get<ib::sim::lin::LinFrame>());
             break;
-        case TraceMessageType::FrMessage:
-            Trace(dir, address, timestamp, message.Get<ib::sim::fr::FrMessage>());
+        case TraceMessageType::FlexrayFrameEvent:
+            Trace(dir, address, timestamp, message.Get<ib::sim::fr::FlexrayFrameEvent>());
             break;
         default:
             throw std::runtime_error("Invalid replay data");
@@ -52,7 +52,7 @@ public:
         std::chrono::nanoseconds timestamp, const ib::sim::data::DataMessageEvent& message));
 
     MOCK_METHOD4(Trace, void(ib::sim::TransmitDirection dir, const EndpointAddress& address,
-        std::chrono::nanoseconds timestamp, const ib::sim::fr::FrMessage& message));
+        std::chrono::nanoseconds timestamp, const ib::sim::fr::FlexrayFrameEvent& message));
 
 
     auto GetLogger() const -> logging::ILogger* override
