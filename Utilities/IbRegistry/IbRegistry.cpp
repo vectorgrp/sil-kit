@@ -83,7 +83,7 @@ int main(int argc, char** argv)
         std::cout << "Creating registry at domain " << domainId << std::endl;
         VAsioRegistry registry{ configuration };
         registry.ProvideDomain(domainId);
-
+        
         if (useSignalHandler)
         {
             using namespace ib::registry;

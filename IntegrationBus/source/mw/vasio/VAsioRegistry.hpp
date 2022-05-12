@@ -51,7 +51,6 @@ private:
     std::vector<ConnectedParticipantInfo> _connectedParticipants;
     std::function<void()> _onAllParticipantsConnected;
     std::function<void()> _onAllParticipantsDisconnected;
-
     std::shared_ptr<ib::cfg::ParticipantConfiguration> _vasioConfig;
     VAsioConnection _connection;
 };

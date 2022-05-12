@@ -13,8 +13,8 @@ namespace mw {
 struct RegistryMsgHeader
 {
     std::array<char, 4> preambel{{'V', 'I', 'B', '-'}};
-    uint16_t versionHigh = 2;
-    uint16_t versionLow = 1;
+    uint16_t versionHigh = 3; // If versionHigh/Low changes here, update VIB version range in RegistryMsgHeaderToMainVersionRange
+    uint16_t versionLow = 0;
 };
 
 struct VAsioMsgSubscriber

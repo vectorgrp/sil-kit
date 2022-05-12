@@ -226,12 +226,14 @@ private:
     void UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer);
 
     // Registry related send / receive methods
-    void ReceiveKnownParticpants(MessageBuffer&& buffer);
+    void ReceiveKnownParticpants(IVAsioPeer* peer, MessageBuffer&& buffer);
     void SendParticipantAnnoucement(IVAsioPeer* peer);
     void ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer);
 
     void SendParticipantAnnoucementReply(IVAsioPeer* peer);
     void ReceiveParticipantAnnouncementReply(IVAsioPeer* from, MessageBuffer&& buffer);
+
+    void NotifyNetworkIncompatibility(const RegistryMsgHeader& other, const std::string& otherParticipantName);
 
     void AddParticipantToLookup(const std::string& participantName);
     const std::string& GetParticipantFromLookup(const std::uint64_t participantId) const;

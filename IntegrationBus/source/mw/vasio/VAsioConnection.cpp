@@ -160,6 +160,30 @@ auto printUris(const ib::mw::VAsioPeerUri& info) -> std::string
     return ss.str();
 }
 
+
+auto RegistryMsgHeaderToMainVersionRange(const ib::mw::RegistryMsgHeader& registryMsgHeader) -> std::string
+{
+    std::string versionInfo{"Unknown version range"};
+    if (registryMsgHeader.versionHigh == 1)
+    {
+        versionInfo = "< v2.0.0";
+    }
+    else if (registryMsgHeader.versionHigh == 2 && registryMsgHeader.versionLow == 0)
+    {
+        versionInfo = "v2.0.0 - v3.4.0";
+    }
+    else if (registryMsgHeader.versionHigh == 2 && registryMsgHeader.versionLow == 1)
+    {
+        versionInfo = "v3.4.1 - v3.99.21";
+    }
+    else if (registryMsgHeader.versionHigh == 3 && registryMsgHeader.versionLow == 0)
+    {
+        versionInfo = "v3.99.22 - current";
+    }
+
+    return versionInfo;
+}
+
 } //anonymous namespace
 
 
@@ -348,16 +372,27 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     _logger->Trace("VAsio received announcement replies from all participants.");
 }
 
+void VAsioConnection::NotifyNetworkIncompatibility(const RegistryMsgHeader& other,
+                                                   const std::string& otherParticipantName)
+{
+    std::stringstream s;
+    s << "Network incompatibility between this version range ("
+      << RegistryMsgHeaderToMainVersionRange(RegistryMsgHeader{}) << ") and connecting participant \""
+      << otherParticipantName << "\" (" << RegistryMsgHeaderToMainVersionRange(other) << ").";
+    const auto errorMsg = s.str();
+    _logger->Critical(errorMsg);
+    std::cerr << "ERROR: " << errorMsg << std::endl;
+}
+
 void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer)
 {
     ParticipantAnnouncement announcement;
     buffer >> announcement;
-
     const RegistryMsgHeader reference{};
 
     if (announcement.messageHeader != reference)
     {
-        _logger->Warn("Received participant announcement message with unsupported protocol specification.");
+        NotifyNetworkIncompatibility(announcement.messageHeader, announcement.peerInfo.participantName);
         return;
     }
 
@@ -492,15 +527,15 @@ const std::string& VAsioConnection::GetParticipantFromLookup(const std::uint64_t
   return participantIter->second;
 }
 
-void VAsioConnection::ReceiveKnownParticpants(MessageBuffer&& buffer)
+void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, MessageBuffer&& buffer)
 {
     KnownParticipants participantsMsg;
     buffer >> participantsMsg;
-
     const RegistryMsgHeader reference{};
+
     if (participantsMsg.messageHeader != reference)
     {
-        _logger->Warn("Received known participant message with unsupported protocol specification");
+        NotifyNetworkIncompatibility(participantsMsg.messageHeader, peer->GetInfo().participantName);
         return;
     }
 
@@ -583,6 +618,7 @@ void VAsioConnection::StartIoWorker()
             return -1;
         }
     }};
+
 }
 
 void VAsioConnection::AcceptLocalConnections(uint32_t domainId)
@@ -895,7 +931,7 @@ void VAsioConnection::ReceiveRegistryMessage(IVAsioPeer* from, MessageBuffer&& b
     case RegistryMessageKind::ParticipantAnnouncementReply:
         return ReceiveParticipantAnnouncementReply(from, std::move(buffer));
     case RegistryMessageKind::KnownParticipants:
-        return ReceiveKnownParticpants(std::move(buffer));
+        return ReceiveKnownParticpants(from, std::move(buffer));
     }
 }
 
