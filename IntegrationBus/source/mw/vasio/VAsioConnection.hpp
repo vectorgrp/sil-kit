@@ -235,7 +235,7 @@ private:
 
     // Registry related send / receive methods
     void ReceiveKnownParticpants(IVAsioPeer* peer, MessageBuffer&& buffer);
-    void SendParticipantAnnoucement(IVAsioPeer* peer);
+    void SendParticipantAnnouncement(IVAsioPeer* peer);
     void ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer);
 
     void SendParticipantAnnoucementReply(IVAsioPeer* peer);

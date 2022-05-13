@@ -42,10 +42,10 @@ public:
 
 public:
     // ----------------------------------------
-    // Public methods for format versioning
+    // Public methods for backward compatibility.
 
     uint32_t _formatVersion{0};
-
+    //! Set the format version to use for ser/des.
     void SetFormatVersion(uint32_t version)
     {
         _formatVersion = version;

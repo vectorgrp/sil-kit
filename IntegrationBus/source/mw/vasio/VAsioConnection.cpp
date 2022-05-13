@@ -374,7 +374,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     _logger->Info("Connected to registry {}", printUris(registry->GetInfo()));
     registry->StartAsyncRead();
 
-    SendParticipantAnnoucement(registry.get());
+    SendParticipantAnnouncement(registry.get());
     _registry = std::move(registry);
     
     StartIoWorker();
@@ -431,7 +431,7 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
     SendParticipantAnnoucementReply(from);
 }
 
-void VAsioConnection::SendParticipantAnnoucement(IVAsioPeer* peer)
+void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
 {
     //Legacy Info for interop
     //URI encoded infos
@@ -580,7 +580,7 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, MessageBuffer&& 
 
         // We connected to the other peer. tell him who we are.
         _pendingParticipantReplies.push_back(peer.get());
-        SendParticipantAnnoucement(peer.get());
+        SendParticipantAnnouncement(peer.get());
 
         // The service ID is incomplete at this stage.
         ServiceDescriptor peerId;
