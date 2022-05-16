@@ -29,16 +29,16 @@ class RpcClient
 {
 public:
     RpcClient(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
-              const std::string& rpcChannel, const std::string& mediaType,
+              const std::string& functionName, const std::string& mediaType,
               const std::map<std::string, std::string>& labels, const std::string& clientUUID,
-              CallReturnHandler handler);
+              RpcCallResultHandler handler);
 
     void RegisterServiceDiscovery();
 
     auto Call(std::vector<uint8_t> data) -> IRpcCallHandle* override;
     auto Call(const uint8_t* data, std::size_t size) -> IRpcCallHandle* override;
 
-    void SetCallReturnHandler(CallReturnHandler handler) override;
+    void SetCallResultHandler(RpcCallResultHandler handler) override;
 
     //! \brief Accepts messages originating from IB communications.
     void ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const FunctionCallResponse& msg) override;
@@ -52,12 +52,12 @@ public:
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor& override;
 
 private:
-    std::string _rpcChannel;
+    std::string _functionName;
     std::string _mediaType;
     std::map<std::string, std::string> _labels;
     std::string _clientUUID;
 
-    CallReturnHandler _handler;
+    RpcCallResultHandler _handler;
 
     mw::ServiceDescriptor _serviceDescriptor{};
     uint32_t _numCounterparts{0};

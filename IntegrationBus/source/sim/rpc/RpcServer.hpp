@@ -27,12 +27,12 @@ class RpcServer
 {
 public:
     RpcServer(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
-              const std::string& rpcChannel, const std::string& mediaType,
-              const std::map<std::string, std::string>& labels, CallProcessor handler);
+              const std::string& functionName, const std::string& mediaType,
+              const std::map<std::string, std::string>& labels, RpcCallHandler handler);
 
     void RegisterServiceDiscovery();
 
-    void SetRpcHandler(CallProcessor handler) override;
+    void SetCallHandler(RpcCallHandler handler) override;
 
     void SubmitResult(IRpcCallHandle* callHandle, std::vector<uint8_t> resultData) override;
 
@@ -46,10 +46,10 @@ public:
 private:
     void AddInternalRpcServer(const std::string& clientUUID, std::string joinedMediaType,
                               const std::map<std::string, std::string>& clientLabels);
-    std::string _rpcChannel;
+    std::string _functionName;
     std::string _mediaType;
     std::map<std::string, std::string> _labels;
-    CallProcessor _handler;
+    RpcCallHandler _handler;
 
     mw::ServiceDescriptor _serviceDescriptor{};
     std::vector<RpcServerInternal*> _internalRpcServers;

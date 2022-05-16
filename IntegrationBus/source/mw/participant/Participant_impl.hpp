@@ -117,7 +117,7 @@ void Participant<IbConnectionT>::onIbDomainJoined()
     (void)GetServiceDiscovery();
 
     // Create the participants trace message sinks as declared in the configuration.
-    //_traceSinks = tracing::CreateTraceMessageSinks(GetLogger(), _config, _participant);
+    //_traceSinks = tracing::CreateTraceMessageSinks(GetLogger(), _config, participant);
 
     // NB: Create the participantController directly for synchronized participants.
     if (_isSynchronized)
@@ -425,16 +425,16 @@ auto Participant<IbConnectionT>::CreateDataSubscriber(const std::string& canonic
 }
 
 template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateRpcServerInternal(const std::string& rpcChannel, const std::string& clientUUID,
+auto Participant<IbConnectionT>::CreateRpcServerInternal(const std::string& functionName, const std::string& clientUUID,
                                                          const std::string& mediaType,
                                                          const std::map<std::string, std::string>& clientLabels,
-                                                         sim::rpc::CallProcessor handler, sim::rpc::IRpcServer* parent)
-    -> sim::rpc::RpcServerInternal*
+                                                         sim::rpc::RpcCallHandler handler,
+                                                         sim::rpc::IRpcServer* parent) -> sim::rpc::RpcServerInternal*
 {
-    _logger->Trace("Creating internal server for rpcChannel={}, clientUUID={}", rpcChannel, clientUUID);
+    _logger->Trace("Creating internal server for functionName={}, clientUUID={}", functionName, clientUUID);
 
     ib::cfg::RpcServer controllerConfig;
-    // Use a unique name to avoid collisions of several RpcSevers on same rpcChannel on one participant
+    // Use a unique name to avoid collisions of several RpcSevers on same functionName on one participant
     controllerConfig.name = util::uuid::to_string(util::uuid::generate());
     std::string network = clientUUID;
 
@@ -445,24 +445,24 @@ auto Participant<IbConnectionT>::CreateRpcServerInternal(const std::string& rpcC
 
     return CreateController<ib::cfg::RpcServer, sim::rpc::RpcServerInternal>(
         controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(),
-        rpcChannel, mediaType, clientLabels, clientUUID, handler, parent);
+        functionName, mediaType, clientLabels, clientUUID, handler, parent);
 }
 
 template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateRpcClient(const std::string& canonicalName, const std::string& rpcChannel,
+auto Participant<IbConnectionT>::CreateRpcClient(const std::string& canonicalName, const std::string& functionName,
                                                  const std::string& mediaType,
                                                  const std::map<std::string, std::string>& labels,
-                                                 sim::rpc::CallReturnHandler handler) -> sim::rpc::IRpcClient*
+                                                 sim::rpc::RpcCallResultHandler handler) -> sim::rpc::IRpcClient*
 {
     auto network = util::uuid::to_string(util::uuid::generate());
 
     ib::cfg::RpcClient controllerConfig = GetConfigByControllerName(_participantConfig.rpcClients, canonicalName);
-    UpdateOptionalConfigValue(canonicalName, controllerConfig.rpcChannel, rpcChannel);
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, functionName);
 
     // RpcClient gets discovered by RpcServer which creates RpcServerInternal on a matching connection
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcClient;
-    supplementalData[ib::mw::service::supplKeyRpcClientFunctionName] = controllerConfig.rpcChannel.value();
+    supplementalData[ib::mw::service::supplKeyRpcClientFunctionName] = controllerConfig.functionName.value();
     supplementalData[ib::mw::service::supplKeyRpcClientMediaType] = mediaType;
     auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
     supplementalData[ib::mw::service::supplKeyRpcClientLabels] = labelStr;
@@ -470,7 +470,7 @@ auto Participant<IbConnectionT>::CreateRpcClient(const std::string& canonicalNam
 
     auto controller = CreateController<ib::cfg::RpcClient, ib::sim::rpc::RpcClient>(
         controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(),
-        controllerConfig.rpcChannel.value(), mediaType, labels, network, handler);
+        controllerConfig.functionName.value(), mediaType, labels, network, handler);
 
     // RpcClient discovers RpcServerInternal and is ready to dispatch calls
     controller->RegisterServiceDiscovery();
@@ -485,28 +485,28 @@ auto Participant<IbConnectionT>::CreateRpcClient(const std::string& canonicalNam
 }
 
 template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateRpcServer(const std::string& canonicalName, const std::string& rpcChannel,
+auto Participant<IbConnectionT>::CreateRpcServer(const std::string& canonicalName, const std::string& functionName,
                                                  const std::string& mediaType,
                                                  const std::map<std::string, std::string>& labels,
-                                                 sim::rpc::CallProcessor handler) -> sim::rpc::IRpcServer*
+                                                 sim::rpc::RpcCallHandler handler) -> sim::rpc::IRpcServer*
 {
-    // Use unique network name that same rpcChannel for multiple RpcServers on one participant works
+    // Use unique network name that same functionName for multiple RpcServers on one participant works
     std::string network = util::uuid::to_string(util::uuid::generate());
 
     ib::cfg::RpcServer controllerConfig = GetConfigByControllerName(_participantConfig.rpcServers, canonicalName);
-    UpdateOptionalConfigValue(canonicalName, controllerConfig.rpcChannel, rpcChannel);
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, functionName);
 	
     // RpcServer announces himself to be found by DiscoverRpcServers()
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcServer;
-    supplementalData[ib::mw::service::supplKeyRpcServerFunctionName] = controllerConfig.rpcChannel.value();
+    supplementalData[ib::mw::service::supplKeyRpcServerFunctionName] = controllerConfig.functionName.value();
     supplementalData[ib::mw::service::supplKeyRpcServerMediaType] = mediaType;
     auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
     supplementalData[ib::mw::service::supplKeyRpcServerLabels] = labelStr;
 
     auto controller = CreateController<ib::cfg::RpcServer, sim::rpc::RpcServer>(
         controllerConfig, network, mw::ServiceType::Controller, supplementalData, _timeProvider.get(),
-        controllerConfig.rpcChannel.value(), mediaType, labels, handler);
+        controllerConfig.functionName.value(), mediaType, labels, handler);
 
     // RpcServer discovers RpcClient and creates RpcServerInternal on a matching connection
     controller->RegisterServiceDiscovery();
@@ -521,12 +521,12 @@ auto Participant<IbConnectionT>::CreateRpcServer(const std::string& canonicalNam
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::DiscoverRpcServers(const std::string& rpcChannel, const std::string& mediaType,
+void Participant<IbConnectionT>::DiscoverRpcServers(const std::string& functionName, const std::string& mediaType,
                                                     const std::map<std::string, std::string>& labels,
-                                                    sim::rpc::DiscoveryResultHandler handler)
+                                                    sim::rpc::RpcDiscoveryResultHandler handler)
 {
     sim::rpc::RpcDiscoverer rpcDiscoverer{GetServiceDiscovery()};
-    handler(rpcDiscoverer.GetMatchingRpcServers(rpcChannel, mediaType, labels));
+    handler(rpcDiscoverer.GetMatchingRpcServers(functionName, mediaType, labels));
 }
 
 template <class IbConnectionT>

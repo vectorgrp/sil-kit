@@ -13,10 +13,10 @@ namespace sim {
 namespace rpc {
 
 RpcClient::RpcClient(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
-                     const std::string& rpcChannel, const std::string& mediaType,
+                     const std::string& functionName, const std::string& mediaType,
                      const std::map<std::string, std::string>& labels, const std::string& clientUUID,
-                     CallReturnHandler handler)
-    : _rpcChannel{rpcChannel}
+                     RpcCallResultHandler handler)
+    : _functionName{functionName}
     , _mediaType{mediaType}
     , _labels{labels}
     , _clientUUID{clientUUID}
@@ -33,7 +33,6 @@ void RpcClient::RegisterServiceDiscovery()
     _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(
         [this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType,
                const ib::mw::ServiceDescriptor& serviceDescriptor) {
-
             auto getVal = [serviceDescriptor](std::string key) {
                 std::string tmp;
                 if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
@@ -56,7 +55,8 @@ void RpcClient::RegisterServiceDiscovery()
                     _numCounterparts--;
                 }
             }
-        }, mw::service::controllerTypeRpcServerInternal, _clientUUID);
+        },
+        mw::service::controllerTypeRpcServerInternal, _clientUUID);
 }
 
 IRpcCallHandle* RpcClient::Call(std::vector<uint8_t> data)
@@ -64,7 +64,7 @@ IRpcCallHandle* RpcClient::Call(std::vector<uint8_t> data)
     if (_numCounterparts == 0)
     {
         if (_handler)
-            _handler(this, nullptr, CallStatus::ServerNotReachable, {});
+            _handler(this, RpcCallResultEvent{_timeProvider->Now(), nullptr, RpcCallStatus::ServerNotReachable, {}});
         return nullptr;
     }
     else
@@ -74,7 +74,7 @@ IRpcCallHandle* RpcClient::Call(std::vector<uint8_t> data)
         auto callHandle = std::make_unique<CallHandleImpl>(callUUID);
         auto* callHandlePtr = callHandle.get();
         _detachedCallHandles[to_string(callUUID)] = std::make_pair(_numCounterparts, std::move(callHandle));
-        FunctionCall msg{std::move(callUUID), std::move(data)};
+        FunctionCall msg{_timeProvider->Now(), std::move(callUUID), std::move(data)};
         _participant->SendIbMessage(this, std::move(msg));
         return callHandlePtr;
     }
@@ -85,7 +85,7 @@ IRpcCallHandle* RpcClient::Call(const uint8_t* data, std::size_t size)
     return Call({data, data + size});
 }
 
-void RpcClient::SetCallReturnHandler(CallReturnHandler handler)
+void RpcClient::SetCallResultHandler(RpcCallResultHandler handler)
 {
     _handler = std::move(handler);
 }
@@ -100,8 +100,12 @@ void RpcClient::ReceiveMessage(const FunctionCallResponse& msg)
     auto it = _detachedCallHandles.find(to_string(msg.callUUID));
     if (it != _detachedCallHandles.end())
     {
-        _handler(this, (*it).second.second.get(), CallStatus::Success, msg.data);
-        // NB: Possibly multiple responses are received (e.g. 1 client, 2 servers). 
+        if (_handler)
+        {
+            _handler(this,
+                     RpcCallResultEvent{msg.timestamp, (*it).second.second.get(), RpcCallStatus::Success, msg.data});
+        }
+        // NB: Possibly multiple responses are received (e.g. 1 client, 2 servers).
         // Decrease the count of responses and erase the call handle if all arrived.
         auto* numReceived = &(*it).second.first;
         (*numReceived)--;

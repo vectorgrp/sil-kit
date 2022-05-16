@@ -34,7 +34,7 @@ protected:
         {
             expectIncreasingData = true;
             controllerName = newControllerName;
-            rpcChannel = newFunctionName;
+            functionName = newFunctionName;
             mediaType = newMediaType;
             labels = newLabels;
             messageSizeInBytes = newMessageSizeInBytes;
@@ -48,7 +48,7 @@ protected:
         {
             expectIncreasingData = false;
             controllerName = newControllerName;
-            rpcChannel = newFunctionName;
+            functionName = newFunctionName;
             mediaType = newMediaType;
             labels = newLabels;
             messageSizeInBytes = newMessageSizeInBytes;
@@ -58,7 +58,7 @@ protected:
         }
 
         std::string controllerName;
-        std::string rpcChannel;
+        std::string functionName;
         std::string mediaType;
         std::map<std::string, std::string> labels;
         size_t messageSizeInBytes;
@@ -124,7 +124,7 @@ protected:
         {
             expectIncreasingData = true;
             controllerName = newControllerName;
-            rpcChannel = newFunctionName;
+            functionName = newFunctionName;
             mediaType = newMediaType;
             labels = newLabels;
             messageSizeInBytes = newMessageSizeInBytes;
@@ -137,7 +137,7 @@ protected:
         {
             expectIncreasingData = false;
             controllerName = newControllerName;
-            rpcChannel = newFunctionName;
+            functionName = newFunctionName;
             mediaType = newMediaType;
             labels = newLabels;
             messageSizeInBytes = newMessageSizeInBytes;
@@ -146,7 +146,7 @@ protected:
         }
 
         std::string controllerName;
-        std::string rpcChannel;
+        std::string functionName;
         std::string mediaType;
         std::map<std::string, std::string> labels;
         size_t messageSizeInBytes;
@@ -289,7 +289,7 @@ protected:
             for (const auto& entry : discoveryResults)
             {
                 auto foundFunctionNameIter =
-                    std::find(expectedFunctionNames.begin(), expectedFunctionNames.end(), entry.rpcChannel);
+                    std::find(expectedFunctionNames.begin(), expectedFunctionNames.end(), entry.functionName);
                 if (foundFunctionNameIter != expectedFunctionNames.end())
                 {
                     expectedFunctionNames.erase(foundFunctionNameIter);
@@ -313,20 +313,18 @@ protected:
             // Create Clients
             for (auto& c : participant.rpcClients)
             {
-                auto callReturnHandler = [&participant, &c](
-                                             IRpcClient* /*client*/, IRpcCallHandle* /*callHandle*/,
-                                             const CallStatus callStatus, const std::vector<uint8_t>& returnData) {
+                auto callReturnHandler = [&participant, &c](IRpcClient* /*client*/, RpcCallResultEvent event) {
                     if (!c.allCallsReturned)
                     {
-                        if (callStatus == CallStatus::Success)
+                        if (event.callStatus == RpcCallStatus::Success)
                         {
-                            c.OnCallReturned(returnData);
+                            c.OnCallReturned(event.resultData);
                         }
                     }
                     participant.CheckAllCallsReturnedPromise();
                 };
 
-                c.rpcClient = participant.participant->CreateRpcClient(c.controllerName, c.rpcChannel, c.mediaType,
+                c.rpcClient = participant.participant->CreateRpcClient(c.controllerName, c.functionName, c.mediaType,
                                                                        c.labels, callReturnHandler);
             }
 
@@ -335,29 +333,28 @@ protected:
             {
                 participant.PrepareAllReceivedPromise();
 
-                auto processCalls = [&participant, &s](IRpcServer* server, IRpcCallHandle* callHandle,
-                                                             const std::vector<uint8_t>& argumentData) {
+                auto processCalls = [&participant, &s](IRpcServer* server, RpcCallEvent event) {
                     // Increment data
-                    std::vector<uint8_t> returnData{argumentData};
+                    std::vector<uint8_t> returnData{event.argumentData};
                     for (auto& d : returnData)
                     {
                         d += rpcFuncIncrement;
                     }
-                    server->SubmitResult(callHandle, returnData);
+                    server->SubmitResult(event.callHandle, returnData);
 
                     // Evaluate data and reception count
-                    s.ReceiveCall(argumentData);
+                    s.ReceiveCall(event.argumentData);
                     participant.CheckAllCallsReceivedPromise();
                 };
 
-                s.rpcServer = participant.participant->CreateRpcServer(s.controllerName, s.rpcChannel, s.mediaType,
+                s.rpcServer = participant.participant->CreateRpcServer(s.controllerName, s.functionName, s.mediaType,
                                                                        s.labels, processCalls);
             }
 
             // Check RpcDiscovery after creating the local servers to discover them as well
             if (!participant.expectedFunctionNames.empty())
             {
-                DiscoveryResultHandler discoveryResultsHandler =
+                RpcDiscoveryResultHandler discoveryResultsHandler =
                     [&participant](const std::vector<RpcDiscoveryResult>& discoveryResults) {
                         participant.OnRpcDiscovery(discoveryResults);
                     };

@@ -78,25 +78,23 @@ public:
     virtual auto CreateDataSubscriber(const std::string& canonicalName) -> sim::data::IDataSubscriber* = 0;
 
     //! \brief Create a Rpc client at this IB participant.
-    virtual auto CreateRpcClient(const std::string& canonicalName, const std::string& channel,
+    virtual auto CreateRpcClient(const std::string& canonicalName, const std::string& functionName,
                                  const std::string& mediaType, const std::map<std::string, std::string>& labels,
-                                 sim::rpc::CallReturnHandler handler) -> sim::rpc::IRpcClient* = 0;
+                                 sim::rpc::RpcCallResultHandler handler) -> sim::rpc::IRpcClient* = 0;
     //! \brief Create a Rpc client at this IB participant.
-    virtual auto CreateRpcClient(const std::string& canonicalName)
-        -> sim::rpc::IRpcClient* = 0;
+    virtual auto CreateRpcClient(const std::string& canonicalName) -> sim::rpc::IRpcClient* = 0;
 
     //! \brief Create a Rpc server at this IB participant.
-    virtual auto CreateRpcServer(const std::string& canonicalName, const std::string& channel,
+    virtual auto CreateRpcServer(const std::string& canonicalName, const std::string& functionName,
                                  const std::string& mediaType, const std::map<std::string, std::string>& labels,
-                                 sim::rpc::CallProcessor handler) -> sim::rpc::IRpcServer* = 0;
-
+                                 sim::rpc::RpcCallHandler handler) -> sim::rpc::IRpcServer* = 0;
     //! \brief Create a Rpc server at this IB participant.
     virtual auto CreateRpcServer(const std::string& canonicalName) -> sim::rpc::IRpcServer* = 0;
 
     //! \brief Discover available Rpc servers and their properties.
-    virtual void DiscoverRpcServers(const std::string& rpcChannel, const std::string& mediaType,
+    virtual void DiscoverRpcServers(const std::string& functionName, const std::string& mediaType,
                                     const std::map<std::string, std::string>& labels,
-                                    sim::rpc::DiscoveryResultHandler handler) = 0;
+                                    sim::rpc::RpcDiscoveryResultHandler handler) = 0;
 
     //! \brief Return the  IParticipantController for the current participant.
     virtual auto GetParticipantController() -> sync::IParticipantController* = 0;

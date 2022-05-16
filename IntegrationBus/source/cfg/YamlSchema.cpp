@@ -173,14 +173,14 @@ auto MakeYamlSchema() -> YamlSchemaElem
         },
         {"RpcClients", {
                 {"Name"},
-                {"Channel"},
+                {"FunctionName"},
                 {"UseTraceSinks"},
                 replay,
             }
         },
         {"RpcServers", {
                 {"Name"},
-                {"Channel"},
+                {"FunctionName"},
                 {"UseTraceSinks"},
                 replay,
             }

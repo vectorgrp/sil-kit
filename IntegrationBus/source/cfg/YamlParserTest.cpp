@@ -391,4 +391,108 @@ TEST_F(YamlParserTest, yaml_both_FlexrayControllers_and_deprecated_FlexRayContro
     EXPECT_THROW({ node.as<ParticipantConfiguration>(); }, ConversionError);
 }
 
+const auto rpcClientConfiguration = R"raw(
+RpcClients:
+- Name: TheRpcClient1
+  FunctionName: TheFunction1
+- Name: TheRpcClient2
+  Channel: TheFunction2
+- Name: TheRpcClient3
+  RpcChannel: TheFunction3
+)raw";
+
+TEST_F(YamlParserTest, yaml_deprecated_RpcClient_configuration)
+{
+    auto node = YAML::Load(rpcClientConfiguration);
+    const auto participantConfiguration = node.as<ParticipantConfiguration>();
+
+    ASSERT_EQ(participantConfiguration.rpcClients.size(), 3);
+
+    EXPECT_EQ(participantConfiguration.rpcClients[0].name, "TheRpcClient1");
+    ASSERT_TRUE(participantConfiguration.rpcClients[0].functionName.has_value());
+    EXPECT_EQ(participantConfiguration.rpcClients[0].functionName.value(), "TheFunction1");
+
+    EXPECT_EQ(participantConfiguration.rpcClients[1].name, "TheRpcClient2");
+    ASSERT_TRUE(participantConfiguration.rpcClients[1].functionName.has_value());
+    EXPECT_EQ(participantConfiguration.rpcClients[1].functionName.value(), "TheFunction2");
+
+    EXPECT_EQ(participantConfiguration.rpcClients[2].name, "TheRpcClient3");
+    ASSERT_TRUE(participantConfiguration.rpcClients[2].functionName.has_value());
+    EXPECT_EQ(participantConfiguration.rpcClients[2].functionName.value(), "TheFunction3");
+}
+
+const auto brokenRpcClientConfigurationA = R"raw(
+RpcClients:
+- Name: TheRpcClient
+  FunctionName: TheFunctionName
+  Channel: TheFunctionName
+)raw";
+
+const auto brokenRpcClientConfigurationB = R"raw(
+RpcClients:
+- Name: TheRpcClient
+  FunctionName: TheFunctionName
+  RpcChannel: TheFunctionName
+)raw";
+
+const auto brokenRpcClientConfigurationC = R"raw(
+RpcClients:
+- Name: TheRpcClient
+  Channel: TheFunctionName
+  RpcChannel: TheFunctionName
+)raw";
+
+const auto brokenRpcClientConfigurationD = R"raw(
+RpcClients:
+- Name: TheRpcClient
+  FunctionName: TheFunctionName
+  Channel: TheFunctionName
+  RpcChannel: TheFunctionName
+)raw";
+
+TEST_F(YamlParserTest, yaml_broken_RpcClient_configuration)
+{
+    const std::initializer_list<const char*> brokenConfigurations = {
+        brokenRpcClientConfigurationA,
+        brokenRpcClientConfigurationB,
+        brokenRpcClientConfigurationC,
+        brokenRpcClientConfigurationD,
+    };
+    for (const auto configuration : brokenConfigurations)
+    {
+        auto node = YAML::Load(configuration);
+        EXPECT_THROW({ node.as<ParticipantConfiguration>(); }, ConversionError);
+    }
+}
+
+const auto rpcServerConfiguration = R"raw(
+RpcServers:
+- Name: TheRpcServer1
+  FunctionName: TheFunction1
+- Name: TheRpcServer2
+  Channel: TheFunction2
+- Name: TheRpcServer3
+  RpcChannel: TheFunction3
+)raw";
+
+TEST_F(YamlParserTest, yaml_deprecated_RpcServer_configuration)
+{
+    auto node = YAML::Load(rpcServerConfiguration);
+    const auto participantConfiguration = node.as<ParticipantConfiguration>();
+
+    ASSERT_EQ(participantConfiguration.rpcServers.size(), 3);
+
+    EXPECT_EQ(participantConfiguration.rpcServers[0].name, "TheRpcServer1");
+    ASSERT_TRUE(participantConfiguration.rpcServers[0].functionName.has_value());
+    EXPECT_EQ(participantConfiguration.rpcServers[0].functionName.value(), "TheFunction1");
+
+    EXPECT_EQ(participantConfiguration.rpcServers[1].name, "TheRpcServer2");
+    ASSERT_TRUE(participantConfiguration.rpcServers[1].functionName.has_value());
+    EXPECT_EQ(participantConfiguration.rpcServers[1].functionName.value(), "TheFunction2");
+
+    EXPECT_EQ(participantConfiguration.rpcServers[2].name, "TheRpcServer3");
+    ASSERT_TRUE(participantConfiguration.rpcServers[2].functionName.has_value());
+    EXPECT_EQ(participantConfiguration.rpcServers[2].functionName.value(), "TheFunction3");
+}
+
 } // anonymous namespace

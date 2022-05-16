@@ -8,8 +8,8 @@ Remote procedure call (Rpc) API
 .. |CreateRpcServer| replace:: :cpp:func:`CreateRpcServer<ib::mw::IParticipant::CreateRpcServer()>`
 .. |Call| replace:: :cpp:func:`Call()<ib::sim::rpc::IRpcClient::Call()>`
 .. |SubmitResult| replace:: :cpp:func:`SubmitResult()<ib::sim::rpc::IRpcServer::SubmitResult()>`
-.. |SetRpcHandler| replace:: :cpp:func:`SetRpcHandler()<ib::sim::rpc::IRpcServer::SetRpcHandler()>`
-.. |SetCallReturnHandler| replace:: :cpp:func:`SetCallReturnHandler()<ib::sim::rpc::IRpcClient::SetCallReturnHandler()>`
+.. |SetCallHandler| replace:: :cpp:func:`SetRpcHandler()<ib::sim::rpc::IRpcServer::SetCallHandler()>`
+.. |SetCallResultHandler| replace:: :cpp:func:`SetCallReturnHandler()<ib::sim::rpc::IRpcClient::SetCallResultHandler()>`
 .. |DiscoverRpcServers| replace:: :cpp:func:`DiscoverRpcServers()<ib::mw::IParticipant::DiscoverRpcServers()>`
 .. |IRpcClient| replace:: :cpp:class:`IRpcClient<ib::sim::rpc::IRpcClient>`
 .. |IRpcServer| replace:: :cpp:class:`IRpcClient<ib::sim::rpc::IRpcServer>`
@@ -46,7 +46,7 @@ Labels
 ~~~~~~
 
 RpcClients and RpcServers can be annotated with string-based key-value pairs (labels).
-Additional to the matching  requirements regarding rpcChannel and mediaType, RpcServers will only receive calls by
+Additional to the matching  requirements regarding functionName and mediaType, RpcServers will only receive calls by
 RpcClients if their labels conform to the following matching rules:
 
 * A RpcClient without labels matches any other RpcServer.
@@ -57,7 +57,7 @@ Server Discovery
 ~~~~~~~~~~~~~~~~
 
 The simulation can be queried about available RpcServers with |DiscoverRpcServers|.
-The method takes filter arguments for rpcChannel, mediaType and labels.
+The method takes filter arguments for functionName, mediaType and labels.
 To obtain the results of the query, a handler is given to the method  which carries a vector of RpcDiscoveryResult
 providing the properties of each discovered RpcServer.
 
@@ -71,18 +71,18 @@ is used in the configuration and instantiation of the interfaces.
 The RpcClient can trigger a call using the |Call| method providing argument data as a vector of bytes. The method is
 non-blocking and returns a call handle which can be used later for identification of the call. The call arrives at the 
 RpcServer and is delivered via a callback, which has to be specified on creation of the RpcServer and can be 
-overwritten using the |SetRpcHandler| method. There, the argument data and call handle arrive and can be processed.
+overwritten using the |SetCallHandler| method. There, the argument data and call handle arrive and can be processed.
 The RpcServer can submit the answer to the call at a later point in time with the call handle obtained in the 
 RpcHandler by using the |SubmitResult| method providing the return data for the calling RpcClient. 
 The RpcClient receives the call return in a callback which is also specified on creation and can be overwritten with
-|SetCallReturnHandler|. The callback provides the original call handle, the return data and a call status 
+|SetCallResultHandler|. The callback provides the original call handle, the return data and a call status
 indicating success or an error during the procedure.
 
 Error handling
 ~~~~~~~~~~~~~~
 
 * If using |Call| with no corresponding server available, the CallReturnHandler is triggered immediately with a nullptr
-  call handle and CallStatus::ServerNotReachable. In this case, the call handle returned by |Call| is also nullptr.
+  call handle and RpcCallStatus::ServerNotReachable. In this case, the call handle returned by |Call| is also nullptr.
 * |SubmitResult| must only be used with a valid call handle received in the RpcHandler.
 
 Usage Example
@@ -98,8 +98,8 @@ The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
 
     auto participant = ib::CreateParticipant(std::move(config), participant_name, domainId);
     auto* client = participant->CreateRpcClient("TestFunc", "application/octet-stream",
-        [](IRpcClient* client, const CallHandle callHandle, const CallStatus callStatus, const std::vector<uint8_t>& returnData) {
-            // handle returnData
+        [](IRpcClient* client, const CallHandle callHandle, const RpcCallStatus callStatus, const std::vector<uint8_t>& resultData) {
+            // handle resultData
         });
     );
 

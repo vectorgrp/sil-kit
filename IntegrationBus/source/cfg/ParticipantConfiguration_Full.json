@@ -95,21 +95,21 @@
   "RpcServers": [
     {
       "Name": "RpcServer1",
-      "RpcChannel": "ReadSensor"
+      "FunctionName": "ReadSensor"
     },
     {
       "Name": "RpcServer2",
-      "RpcChannel": "ReadSensor"
+      "FunctionName": "ReadSensor"
     }
   ],
   "RpcClients": [
     {
       "Name": "RpcClient1",
-      "RpcChannel": "ReadSensor"
+      "FunctionName": "ReadSensor"
     },
     {
       "Name": "RpcClient2",
-      "RpcChannel": "ReadSensor"
+      "FunctionName": "ReadSensor"
     }
   ],
   "Logging": {

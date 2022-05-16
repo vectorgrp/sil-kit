@@ -33,12 +33,12 @@ const std::string controllerTypeDataSubscriberInternal = "DataSubscriberInternal
 
 // RPC types
 const std::string controllerTypeRpcServer = "RpcServer";
-const std::string supplKeyRpcServerFunctionName = "rpc::server::rpcChannel";
+const std::string supplKeyRpcServerFunctionName = "rpc::server::functionName";
 const std::string supplKeyRpcServerMediaType = "rpc::server::mediaType";
 const std::string supplKeyRpcServerLabels = "rpc::server::labels";
 
 const std::string controllerTypeRpcClient = "RpcClient";
-const std::string supplKeyRpcClientFunctionName = "rpc::client::rpcChannel";
+const std::string supplKeyRpcClientFunctionName = "rpc::client::functionName";
 const std::string supplKeyRpcClientMediaType = "rpc::client::mediaType";
 const std::string supplKeyRpcClientLabels = "rpc::client::labels";
 const std::string supplKeyRpcClientUUID = "rpc::client::UUID";

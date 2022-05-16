@@ -9,7 +9,6 @@
 #include "TypeConversion.hpp"
 
 #include <string>
-#include <iostream>
 #include <algorithm>
 #include <map>
 #include <mutex>
@@ -29,7 +28,7 @@ static void assign(ib_Rpc_DiscoveryResultList** cResultList, const std::vector<i
             for (auto&& r : cppDiscoveryResults)
             {
                 (*cResultList)->results[i].interfaceId = ib_InterfaceIdentifier_RpcDiscoveryResult;
-                (*cResultList)->results[i].rpcChannel = r.rpcChannel.c_str();
+                (*cResultList)->results[i].functionName = r.functionName.c_str();
         		(*cResultList)->results[i].mediaType = r.mediaType.c_str();
                 assign(&(*cResultList)->results[i].labelList, r.labels);
                 i++;
@@ -38,96 +37,63 @@ static void assign(ib_Rpc_DiscoveryResultList** cResultList, const std::vector<i
     }
 }
 
-extern "C" {
-    ib_ReturnCode ib_Rpc_Client_Create(ib_Rpc_Client** out, ib_Participant* participant, const char* controllerName,
-                                       const char* rpcChannel, const char* mediaType, const ib_KeyValueList* labels,
-                                       void* context, ib_Rpc_ResultHandler_t resultHandler)
+static auto GetDataOrNullptr(const std::vector<std::uint8_t>& vector) -> const std::uint8_t*
+{
+    if (vector.empty())
     {
-    ASSERT_VALID_OUT_PARAMETER(out);
-    ASSERT_VALID_POINTER_PARAMETER(participant);
-    ASSERT_VALID_POINTER_PARAMETER(controllerName);
-    ASSERT_VALID_POINTER_PARAMETER(rpcChannel);
-    ASSERT_VALID_POINTER_PARAMETER(mediaType);
-    ASSERT_VALID_HANDLER_PARAMETER(resultHandler);
-    CAPI_ENTER
-    {
-        auto cppMediaType = std::string{mediaType};
-        auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
-        std::map<std::string, std::string> cppLabels;
-        assign(cppLabels, labels);
-        auto rcpClient = cppParticipant->CreateRpcClient(
-            controllerName, rpcChannel, cppMediaType, cppLabels,
-            [resultHandler, context](ib::sim::rpc::IRpcClient* cppClient, ib::sim::rpc::IRpcCallHandle* callHandle,
-                                     const ib::sim::rpc::CallStatus callStatus,
-                                     const std::vector<uint8_t>& returnData) {
-                auto* cClient = reinterpret_cast<ib_Rpc_Client*>(cppClient);
-                uint8_t* payloadPointer = NULL;
-                if (returnData.size() > 0)
-                {
-                    payloadPointer = (uint8_t*)&(returnData[0]);
-                }
-                const ib_ByteVector cReturnData{payloadPointer, returnData.size()};
-                ib_Rpc_CallHandle* cCallHandle = reinterpret_cast<ib_Rpc_CallHandle*>(callHandle);
-                ib_Rpc_CallStatus cCallStatus = (ib_Rpc_CallStatus)callStatus;
-                resultHandler(context, cClient, cCallHandle, cCallStatus, &cReturnData);
-            });
-
-        *out = reinterpret_cast<ib_Rpc_Client*>(rcpClient);
-        return ib_ReturnCode_SUCCESS;
+        return nullptr;
     }
-    CAPI_LEAVE
+    return vector.data();
 }
 
+static ib::sim::rpc::RpcCallResultHandler MakeRpcCallResultHandler(void* context, ib_Rpc_CallResultHandler_t handler)
+{
+    return [handler, context](ib::sim::rpc::IRpcClient* cppClient, const ib::sim::rpc::RpcCallResultEvent& event) {
+        auto* cClient = reinterpret_cast<ib_Rpc_Client*>(cppClient);
+        ib_Rpc_CallResultEvent cEvent;
+        cEvent.interfaceId = ib_InterfaceIdentifier_RpcCallResultEvent;
+        cEvent.timestamp = event.timestamp.count();
+        cEvent.callHandle = reinterpret_cast<ib_Rpc_CallHandle*>(event.callHandle);
+        cEvent.callStatus = (ib_Rpc_CallStatus)event.callStatus;
+        cEvent.resultData = ib_ByteVector{GetDataOrNullptr(event.resultData), event.resultData.size()};
+        handler(context, cClient, &cEvent);
+    };
+}
+
+static ib::sim::rpc::RpcCallHandler MakeRpcCallHandler(void* context, ib_Rpc_CallHandler_t handler)
+{
+    return [handler, context](ib::sim::rpc::IRpcServer* cppServer, const ib::sim::rpc::RpcCallEvent& event) {
+        auto* cServer = reinterpret_cast<ib_Rpc_Server*>(cppServer);
+        ib_Rpc_CallEvent cEvent;
+        cEvent.interfaceId = ib_InterfaceIdentifier_RpcCallEvent;
+        cEvent.timestamp = event.timestamp.count();
+        cEvent.callHandle = reinterpret_cast<ib_Rpc_CallHandle*>(event.callHandle);
+        cEvent.argumentData = ib_ByteVector{GetDataOrNullptr(event.argumentData), event.argumentData.size()};
+        handler(context, cServer, &cEvent);
+    };
+}
+
+extern "C" {
+
 ib_ReturnCode ib_Rpc_Server_Create(ib_Rpc_Server** out, ib_Participant* participant, const char* controllerName,
-                                   const char* rpcChannel, const char* mediaType, const ib_KeyValueList* labels,
+                                   const char* functionName, const char* mediaType, const ib_KeyValueList* labels,
                                    void* context, ib_Rpc_CallHandler_t callHandler)
 {
     ASSERT_VALID_OUT_PARAMETER(out);
     ASSERT_VALID_POINTER_PARAMETER(participant);
     ASSERT_VALID_POINTER_PARAMETER(controllerName);
-    ASSERT_VALID_POINTER_PARAMETER(rpcChannel);
+    ASSERT_VALID_POINTER_PARAMETER(functionName);
     ASSERT_VALID_POINTER_PARAMETER(mediaType);
     ASSERT_VALID_HANDLER_PARAMETER(callHandler);
     CAPI_ENTER
     {
-        std::string strFunctionName(rpcChannel);
-        auto cppMediaType = std::string{mediaType};
         auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
-        auto rcpServer = cppParticipant->CreateRpcServer(
-            controllerName, rpcChannel, cppMediaType, cppLabels,
-            [callHandler, context](ib::sim::rpc::IRpcServer* cppServer, ib::sim::rpc::IRpcCallHandle* callHandle,
-                  const std::vector<uint8_t>& argumentData)
-            {
-                auto* cServer = reinterpret_cast<ib_Rpc_Server*>(cppServer);
-                uint8_t* payloadPointer = NULL;
-                if (argumentData.size() > 0)
-                {
-                    payloadPointer = (uint8_t*)&(argumentData[0]);
-                }
-                const ib_ByteVector cArgumentData{payloadPointer, argumentData.size()};
-                ib_Rpc_CallHandle* cCallHandle = reinterpret_cast<ib_Rpc_CallHandle*>(callHandle);
-                callHandler(context, cServer, cCallHandle, &cArgumentData);
-            });
+        auto rcpServer = cppParticipant->CreateRpcServer(controllerName, functionName, mediaType, cppLabels,
+                                                         MakeRpcCallHandler(context, callHandler));
 
         *out = reinterpret_cast<ib_Rpc_Server*>(rcpServer);
-        return ib_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
-}
-
-ib_ReturnCode ib_Rpc_Client_Call(ib_Rpc_Client* self, ib_Rpc_CallHandle** outHandle, const ib_ByteVector* argumentData)
-{
-    ASSERT_VALID_POINTER_PARAMETER(self);
-    ASSERT_VALID_OUT_PARAMETER(outHandle);
-    ASSERT_VALID_POINTER_PARAMETER(argumentData);
-    CAPI_ENTER
-    {
-        auto cppClient = reinterpret_cast<ib::sim::rpc::IRpcClient*>(self);
-        auto cppCallHandle = cppClient->Call(
-            std::vector<uint8_t>(&(argumentData->data[0]), &(argumentData->data[0]) + argumentData->size));
-        *outHandle = reinterpret_cast<ib_Rpc_CallHandle*>(cppCallHandle);
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -151,7 +117,73 @@ ib_ReturnCode ib_Rpc_Server_SubmitResult(ib_Rpc_Server* self, ib_Rpc_CallHandle*
     CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Rpc_DiscoverServers(ib_Participant* participant, const char* rpcChannel, const char* mediaType,
+ib_ReturnCode ib_Rpc_Server_SetCallHandler(ib_Rpc_Server* self, void* context, ib_Rpc_CallHandler_t handler)
+        {
+            ASSERT_VALID_POINTER_PARAMETER(self);
+            ASSERT_VALID_POINTER_PARAMETER(handler);
+            CAPI_ENTER
+            {
+                auto cppServer = reinterpret_cast<ib::sim::rpc::IRpcServer*>(self);
+                cppServer->SetCallHandler(MakeRpcCallHandler(context, handler));
+                return ib_ReturnCode_SUCCESS;
+            }
+            CAPI_LEAVE
+        }
+
+ib_ReturnCode ib_Rpc_Client_Create(ib_Rpc_Client** out, ib_Participant* participant, const char* controllerName,
+                                   const char* functionName, const char* mediaType, const ib_KeyValueList* labels,
+                                   void* context, ib_Rpc_CallResultHandler_t resultHandler)
+{
+    ASSERT_VALID_OUT_PARAMETER(out);
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_POINTER_PARAMETER(controllerName);
+    ASSERT_VALID_POINTER_PARAMETER(functionName);
+    ASSERT_VALID_POINTER_PARAMETER(mediaType);
+    ASSERT_VALID_HANDLER_PARAMETER(resultHandler);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
+        std::map<std::string, std::string> cppLabels;
+        assign(cppLabels, labels);
+        auto rcpClient = cppParticipant->CreateRpcClient(controllerName, functionName, mediaType, cppLabels,
+                                                         MakeRpcCallResultHandler(context, resultHandler));
+
+        *out = reinterpret_cast<ib_Rpc_Client*>(rcpClient);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+ib_ReturnCode ib_Rpc_Client_Call(ib_Rpc_Client* self, ib_Rpc_CallHandle** outHandle, const ib_ByteVector* argumentData)
+{
+    ASSERT_VALID_POINTER_PARAMETER(self);
+    ASSERT_VALID_OUT_PARAMETER(outHandle);
+    ASSERT_VALID_POINTER_PARAMETER(argumentData);
+    CAPI_ENTER
+    {
+        auto cppClient = reinterpret_cast<ib::sim::rpc::IRpcClient*>(self);
+        auto cppCallHandle = cppClient->Call(
+            std::vector<uint8_t>(&(argumentData->data[0]), &(argumentData->data[0]) + argumentData->size));
+        *outHandle = reinterpret_cast<ib_Rpc_CallHandle*>(cppCallHandle);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+ib_ReturnCode ib_Rpc_Client_SetCallResultHandler(ib_Rpc_Client* self, void* context, ib_Rpc_CallResultHandler_t handler)
+{
+    ASSERT_VALID_POINTER_PARAMETER(self);
+    ASSERT_VALID_POINTER_PARAMETER(handler);
+    CAPI_ENTER
+    {
+        auto cppClient = reinterpret_cast<ib::sim::rpc::IRpcClient*>(self);
+        cppClient->SetCallResultHandler(MakeRpcCallResultHandler(context, handler));
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+ib_ReturnCode ib_Rpc_DiscoverServers(ib_Participant* participant, const char* functionName, const char* mediaType,
                                      const ib_KeyValueList* labels, void* context,
                                      ib_Rpc_DiscoveryResultHandler_t resultHandler)
 {
@@ -164,7 +196,7 @@ ib_ReturnCode ib_Rpc_DiscoverServers(ib_Participant* participant, const char* rp
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
         cppParticipant->DiscoverRpcServers(
-            rpcChannel, cppMediaType, cppLabels,
+            functionName, cppMediaType, cppLabels,
             [resultHandler, context](const std::vector<ib::sim::rpc::RpcDiscoveryResult>& cppDiscoveryResults) {
                 ib_Rpc_DiscoveryResultList* results;
                 assign(&results, cppDiscoveryResults);
@@ -175,5 +207,4 @@ ib_ReturnCode ib_Rpc_DiscoverServers(ib_Participant* participant, const char* rp
     CAPI_LEAVE
 }
 
-
-}
+} // extern "C"

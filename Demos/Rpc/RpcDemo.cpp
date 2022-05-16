@@ -28,9 +28,9 @@ std::ostream& operator<<(std::ostream& os, const std::vector<uint8_t>& v)
 
 void Call(IRpcClient* client)
 {
-    std::vector<uint8_t> argumentData{ 
-        static_cast<uint8_t>(rand() % 10), 
-        static_cast<uint8_t>(rand() % 10), 
+    std::vector<uint8_t> argumentData{
+        static_cast<uint8_t>(rand() % 10),
+        static_cast<uint8_t>(rand() % 10),
         static_cast<uint8_t>(rand() % 10) };
 
     auto callHandle = client->Call(argumentData);
@@ -40,42 +40,44 @@ void Call(IRpcClient* client)
     }
 }
 
-void CallReturn(IRpcClient* /*cbClient*/, IRpcCallHandle* /*callHandle*/,
-    const CallStatus callStatus, const std::vector<uint8_t>& returnData)
+void CallReturn(IRpcClient* /*cbClient*/, RpcCallResultEvent event)
 {
-    switch (callStatus)
+    switch (event.callStatus)
     {
-    case CallStatus::Success:
-        std::cout << ">> Call returned with returnData=" << returnData << std::endl;
+    case RpcCallStatus::Success:
+        std::cout << ">> Call returned with resultData=" << event.resultData << std::endl;
         break;
-    case CallStatus::ServerNotReachable:
-        std::cout << "Warning: Call failed with CallStatus::ServerNotReachable" << std::endl;
+    case RpcCallStatus::ServerNotReachable:
+        std::cout << "Warning: Call failed with RpcCallStatus::ServerNotReachable" << std::endl;
         break;
-    case CallStatus::UndefinedError:
-        std::cout << "Warning: Call failed with CallStatus::UndefinedError" << std::endl;
+    case RpcCallStatus::UndefinedError:
+        std::cout << "Warning: Call failed with RpcCallStatus::UndefinedError" << std::endl;
         break;
     }
 }
 
-void RemoteFunc_Add100(IRpcServer* server, IRpcCallHandle* callHandle, const std::vector<uint8_t>& argumentData)
+void RemoteFunc_Add100(IRpcServer* server, RpcCallEvent event)
 {
-    auto returnData{ argumentData };
+    auto returnData{event.argumentData};
     for (auto& v : returnData)
+    {
         v += 100;
-    std::cout << ">> Received call with argumentData=" << argumentData
+    }
+
+    std::cout << ">> Received call with argumentData=" << event.argumentData
               << ", returning resultData=" << returnData << std::endl;
 
-    server->SubmitResult(callHandle, returnData);
+    server->SubmitResult(event.callHandle, returnData);
 }
 
-void RemoteFunc_Sort(IRpcServer* server, IRpcCallHandle* callHandle, const std::vector<uint8_t>& argumentData)
+void RemoteFunc_Sort(IRpcServer* server, RpcCallEvent event)
 {
-    auto returnData{argumentData};
+    auto returnData{event.argumentData};
     std::sort(returnData.begin(), returnData.end());
-    std::cout << ">> Received call with argumentData=" << argumentData
+    std::cout << ">> Received call with argumentData=" << event.argumentData
               << ", returning resultData=" << returnData << std::endl;
 
-    server->SubmitResult(callHandle, returnData);
+    server->SubmitResult(event.callHandle, returnData);
 }
 
 int main(int argc, char** argv)
@@ -165,13 +167,14 @@ int main(int argc, char** argv)
         auto futureState = participantController->RunAsync();
 
         initializedPromise.get_future().wait();
-        DiscoveryResultHandler discoveryResultsHandler = [](const std::vector<RpcDiscoveryResult>& discoveryResults) {
-            std::cout << ">> Found remote RpcServers:" << std::endl;
-            for (const auto& entry : discoveryResults)
-            {
-                std::cout << "   " << entry << std::endl;
-            }
-        };
+        RpcDiscoveryResultHandler discoveryResultsHandler =
+            [](const std::vector<RpcDiscoveryResult>& discoveryResults) {
+                std::cout << ">> Found remote RpcServers:" << std::endl;
+                for (const auto& entry : discoveryResults)
+                {
+                    std::cout << "   " << entry << std::endl;
+                }
+            };
         participant->DiscoverRpcServers("", "", {}, discoveryResultsHandler);
 
         auto finalState = futureState.get();

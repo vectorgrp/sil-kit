@@ -13,7 +13,7 @@ RpcDiscoverer::RpcDiscoverer(mw::service::IServiceDiscovery* serviceDiscovery) :
 }
 
 std::vector<RpcDiscoveryResult> RpcDiscoverer::GetMatchingRpcServers(
-    const std::string& rpcChannel, const std::string& mediaType, const std::map<std::string, std::string>& labels) const
+    const std::string& functionName, const std::string& mediaType, const std::map<std::string, std::string>& labels) const
 {
     std::vector<RpcDiscoveryResult> discoveryResults;
     auto serviceDescriptors = _serviceDiscovery->GetServices();
@@ -39,7 +39,7 @@ std::vector<RpcDiscoveryResult> RpcDiscoverer::GetMatchingRpcServers(
             auto rpcServerLabels =
                 ib::cfg::Deserialize<std::map<std::string, std::string>>(labelsStr);
 
-            if ((rpcChannel == "" || rpcChannel == rpcServerFunctionName)
+            if ((functionName == "" || functionName == rpcServerFunctionName)
                 && MatchMediaType(mediaType, rpcServerMediaType) && MatchLabels(labels, rpcServerLabels))
             {
                 discoveryResults.push_back({rpcServerFunctionName, rpcServerMediaType, rpcServerLabels});

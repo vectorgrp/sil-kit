@@ -134,18 +134,45 @@ void optional_decode(ConfigT& value, const YAML::Node& node, const std::string& 
 
 template <typename ConfigT>
 void optional_decode_deprecated_alternative(ConfigT& value, const YAML::Node& node, const std::string& fieldName,
-                                            const std::string& deprecatedFieldName)
+                                            std::initializer_list<std::string> deprecatedFieldNames)
 {
     if (node.IsMap())
     {
-        if (node[fieldName] && node[deprecatedFieldName])
+        std::vector<std::string> presentDeprecatedFieldNames;
+        std::copy_if(deprecatedFieldNames.begin(), deprecatedFieldNames.end(),
+                     std::back_inserter(presentDeprecatedFieldNames), [&node](const auto& deprecatedFieldName) {
+                         return node[deprecatedFieldName];
+                     });
+
+        if (node[fieldName] && presentDeprecatedFieldNames.size() >= 1)
         {
-            std::ostringstream ss;
-            ss << "Both \"" << fieldName << "\" and deprecated \"" << deprecatedFieldName << "\" keys are present.";
-            throw ConversionError(node, ss.str());
+            std::stringstream ss;
+            ss << "The key \"" << fieldName << "\" and the deprected alternatives";
+            for (const auto& deprecatedFieldName : presentDeprecatedFieldNames)
+            {
+                ss << " \"" << deprecatedFieldName << "\"";
+            }
+            ss << " are present.";
+            throw ConversionError{node, ss.str()};
         }
+
+        if (presentDeprecatedFieldNames.size() >= 2)
+        {
+            std::stringstream ss;
+            ss << "The deprecated keys";
+            for (const auto& deprecatedFieldName : presentDeprecatedFieldNames)
+            {
+                ss << " \"" << deprecatedFieldName << "\"";
+            }
+            ss << " are present.";
+            throw ConversionError{node, ss.str()};
+        }
+
         optional_decode(value, node, fieldName);
-        optional_decode(value, node, deprecatedFieldName);
+        for (const auto& deprecatedFieldName : deprecatedFieldNames)
+        {
+            optional_decode(value, node, deprecatedFieldName);
+        }
     }
 }
 

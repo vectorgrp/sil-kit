@@ -334,6 +334,100 @@ Changed
         AddSymbolTransmitHandler
         AddCycleStartHandler
 
+- RPC
+
+  - ``IntegrationBus/include/ib/capi/Rpc.h``
+
+    The individual parameters of the call and call-result handlers were combined into a single event structure.
+    The handler typedefs were renamed to be in line with the corresponding ``C++`` API
+
+    + old
+    .. code-block:: c++
+
+      typedef void (*ib_Rpc_CallHandler_t)(void* context, ib_Rpc_Server* server, ib_Rpc_CallHandle* callHandle, const ib_ByteVector* argumentData);
+      typedef void (*ib_Rpc_ResultHandler_t)(void* context, ib_Rpc_Client* client, ib_Rpc_CallHandle* callHandle, ib_Rpc_CallStatus callStatus, const ib_ByteVector* returnData);
+
+    + new
+    .. code-block:: c++
+
+      typedef void (*ib_Rpc_CallHandler_t)(void* context, ib_Rpc_Server* server, const ib_Rpc_CallEvent* event);
+      typedef void (*ib_Rpc_CallResultHandler_t)(void* context, ib_Rpc_Client* client, const ib_Rpc_CallResultEvent* event);
+
+    The former ``rpcChannel`` was renamed to ``functionName`` which should better reflect it's meaning:
+
+    + old
+    .. code-block:: c++
+
+      typedef struct ib_Rpc_DiscoveryResult
+      {
+          ...
+          const char* rpcChannel;
+          ...
+      } ib_Rpc_DiscoveryResult;
+
+    + new
+    .. code-block:: c++
+
+      typedef struct ib_Rpc_DiscoveryResult
+      {
+          ...
+          const char* functionName;
+          ...
+      } ib_Rpc_DiscoveryResult;
+
+  - ``IntegrationBus/include/ib/sim/rpc/RpcDatatypes.hpp``
+
+    The type ``ib::sim::rpc::CallStatus`` was renamed to ``ib::sim::rpc::RpcCallStatus``.
+
+    The typedef ``CallReturnHandler`` was renamed to ``CallResultHandler`` and the arguments besides the ``IRpcClient*`` were combined into an event structure:
+
+    + old
+    .. code-block:: c++
+
+      using CallReturnHandler = std::function<void(ib::sim::rpc::IRpcClient* client,
+                                                   ib::sim::rpc::IRpcCallHandle* callHandle,
+                                                   const ib::sim::rpc::CallStatus callStatus,
+                                                   const std::vector<uint8_t>& returnData)>;
+
+    + new
+    .. code-block:: c++
+
+      struct RpcCallResultEvent
+      {
+          std::chrono::nanoseconds timestamp;
+          IRpcCallHandle* callHandle;
+          RpcCallStatus callStatus;
+          std::vector<uint8_t> resultData;
+      };
+
+      using RpcCallResultHandler = std::function<void(IRpcClient* client, const RpcCallResultEvent& event)>;
+
+    The typedef ``CallProcessor`` was renamed to ``CallHandler``.
+
+    + old
+    .. code-block:: c++
+
+      using CallProcessor = std::function<void(ib::sim::rpc::IRpcServer* server,
+                                               ib::sim::rpc::IRpcCallHandle* callHandle,
+                                               const std::vector<uint8_t>& argumentData)>;
+
+    + new
+    .. code-block:: c++
+
+      struct RpcCallEvent
+      {
+          std::chrono::nanoseconds timestamp;
+          IRpcCallHandle* callHandle;
+          std::vector<uint8_t> argumentData;
+      };
+
+      using RpcCallHandler = std::function<void(IRpcServer* server, const RpcCallEvent& event)>;
+
+    The typedef ``DiscoveryResultHandler`` was renamed to ``RpcDiscoveryResultHandler``.
+
+  - The ``Channel`` field of the ``RpcClients`` and ``RpcServers`` entries in the participant configuration was renamed
+    to ``FunctionName``.
+
 Added
 ~~~~~
 
@@ -372,6 +466,48 @@ Added
     .. code-block:: c++
 
       struct FlexrayWakeupEvent { ... };
+
+- RPC
+
+  - ``IntegrationBus/include/ib/capi/Rpc.h``
+
+    Functions to set the handler for an existing RPC client and server:
+
+    + new
+    .. code-block:: c++
+
+      ib_ReturnCode ib_Rpc_Server_SetCallHandler(ib_Rpc_Server* self, void* context, ib_Rpc_CallHandler_t handler);
+      ib_ReturnCode ib_Rpc_Client_SetCallResultHandler(ib_Rpc_Client* self, void* context, ib_Rpc_CallResultHandler_t handler);
+
+    Event structures that are used instead of the individual parameters of the handler callbacks:
+
+    + new
+    .. code-block:: c++
+
+      typedef struct {
+          ib_InterfaceIdentifier interfaceId;
+          ib_NanosecondsTime timestamp;
+          ib_Rpc_CallHandle* callHandle;
+          ib_ByteVector argumentData;
+      } ib_Rpc_CallEvent;
+
+      typedef struct {
+          ib_InterfaceIdentifier interfaceId;
+          ib_NanosecondsTime timestamp;
+          ib_Rpc_CallHandle* callHandle;
+          ib_Rpc_CallStatus callStatus;
+          ib_ByteVector resultData;
+      } ib_Rpc_CallResultEvent;
+
+  - ``IntegrationBus/include/ib/capi/InterfaceIdentifiers.h``
+
+    Added interface identifiers for the newly introduced event structures.
+
+    + new
+    .. code-block:: c++
+
+      #define ib_InterfaceIdentifier_RpcCallEvent ...
+      #define ib_InterfaceIdentifier_RpcCallResultEvent ...
 
 Fixed
 ~~~~~

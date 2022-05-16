@@ -6,13 +6,19 @@ namespace ib {
 namespace sim {
 namespace rpc {
 
-struct FunctionCall;
-struct FunctionCallResponse;
+struct RpcCallEvent;
+struct RpcCallResultEvent;
 struct RpcDiscoveryResult;
 
 class IRpcClient;
 class IRpcServer;
 class IRpcCallHandle;
+
+// IbMessages
+//-----------
+
+struct FunctionCall;
+struct FunctionCallResponse;
 
 } // namespace rpc
 } // namespace sim

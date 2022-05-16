@@ -440,9 +440,9 @@
       "title": "Name of the communication channel between DataPublisher and DataSubscribers."
     },
 
-    "RpcChannel": {
+    "RpcFunctionName": {
       "type": "string",
-      "title": "Name of the communication channel between RpcClients and RpcServers."
+      "title": "Name of the RPC function called by RpcClients on RpcServers."
     },
 
     "Logging": {
@@ -640,9 +640,18 @@
         "type": "object",
         "properties": {
           "Name": { "$ref": "#/definitions/Name" },
-          "RpcChannel": { "$ref": "#/definitions/RpcChannel" },
+          "FunctionName": { "$ref": "#/definitions/RpcFunctionName" },
           "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
-          "Replay": { "$ref": "#/definitions/Replay" }
+          "Replay": { "$ref": "#/definitions/Replay" },
+
+          "Channel": {
+            "$ref": "#/definitions/RpcFunctionName",
+            "$comment": "deprecated and replaced by \"FunctionName\""
+          },
+          "RpcChannel": {
+            "$ref": "#/definitions/RpcFunctionName",
+            "$comment": "deprecated and replaced by \"FunctionName\""
+          }
         },
         "additionalProperties": false,
         "required": [
@@ -657,9 +666,18 @@
         "type": "object",
         "properties": {
           "Name": { "$ref": "#/definitions/Name" },
-          "RpcChannel": { "$ref": "#/definitions/RpcChannel" },
+          "FunctionName": { "$ref": "#/definitions/RpcFunctionName" },
           "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
-          "Replay": { "$ref": "#/definitions/Replay" }
+          "Replay": { "$ref": "#/definitions/Replay" },
+
+          "Channel": {
+            "$ref": "#/definitions/RpcFunctionName",
+            "$comment": "deprecated and replaced by \"FunctionName\""
+          },
+          "RpcChannel": {
+            "$ref": "#/definitions/RpcFunctionName",
+            "$comment": "deprecated and replaced by \"FunctionName\""
+          }
         },
         "additionalProperties": false,
         "required": [

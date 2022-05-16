@@ -22,25 +22,25 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CallUUID
 }
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FunctionCall& msg)
 {
-    buffer << msg.callUUID << msg.data;
+    buffer << msg.timestamp << msg.callUUID << msg.data;
     return buffer;
 }
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FunctionCall& msg)
 {
-    buffer >> msg.callUUID >> msg.data;
+    buffer >> msg.timestamp >> msg.callUUID >> msg.data;
     return buffer;
 }
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FunctionCallResponse& msg)
 {
-    buffer << msg.callUUID << msg.data;
+    buffer << msg.timestamp << msg.callUUID << msg.data;
     return buffer;
 }
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FunctionCallResponse& msg)
 {
-    buffer >> msg.callUUID >> msg.data;
+    buffer >> msg.timestamp >> msg.callUUID >> msg.data;
     return buffer;
 }
 
-} // namespace rpc    
+} // namespace rpc
 } // namespace sim
 } // namespace ib

@@ -146,7 +146,7 @@ struct RpcServer
     static constexpr NetworkType networkType = NetworkType::RPC;
 
     std::string name;
-    ib::util::Optional<std::string> rpcChannel;
+    ib::util::Optional<std::string> functionName;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -158,7 +158,7 @@ struct RpcClient
     static constexpr NetworkType networkType = NetworkType::RPC;
 
     std::string name;
-    ib::util::Optional<std::string> rpcChannel;
+    ib::util::Optional<std::string> functionName;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;

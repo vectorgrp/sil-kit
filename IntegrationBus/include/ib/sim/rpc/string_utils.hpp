@@ -93,8 +93,7 @@ std::ostream& operator<<(std::ostream& out, const std::map<std::string, std::str
 std::ostream& operator<<(std::ostream& out, const RpcDiscoveryResult& discoveryResult)
 {
     return out << "rpc::RpcDiscoveryResult{"
-               << "rpcChannel=\"" << discoveryResult.rpcChannel
-               << "\", mediaType=" << discoveryResult.mediaType
+               << "functionName=\"" << discoveryResult.functionName << "\", mediaType=" << discoveryResult.mediaType
                << ", labels=" << discoveryResult.labels
                << "}";
 }

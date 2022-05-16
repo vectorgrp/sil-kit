@@ -167,9 +167,9 @@ public:
         sim::data::IDataSubscriber* parent) -> sim::data::DataSubscriberInternal*  = 0;
 
     // Internal Rpc server that is only created on a matching rpc connection
-    virtual auto CreateRpcServerInternal(const std::string& rpcChannel, const std::string& linkName,
+    virtual auto CreateRpcServerInternal(const std::string& functionName, const std::string& linkName,
                                          const std::string& mediaType, const std::map<std::string, std::string>& labels,
-                                         sim::rpc::CallProcessor handler, sim::rpc::IRpcServer* parent)
+                                         sim::rpc::RpcCallHandler handler, sim::rpc::IRpcServer* parent)
         -> ib::sim::rpc::RpcServerInternal* = 0;
 
 protected:

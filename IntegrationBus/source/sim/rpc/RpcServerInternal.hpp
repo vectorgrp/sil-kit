@@ -19,17 +19,18 @@ namespace ib {
 namespace sim {
 namespace rpc {
 
-class RpcServerInternal : public IIbToRpcServerInternal,
-                  public mw::sync::ITimeConsumer,
-                  public mw::IIbServiceEndpoint
+class RpcServerInternal
+    : public IIbToRpcServerInternal
+    , public mw::sync::ITimeConsumer
+    , public mw::IIbServiceEndpoint
 {
-  public:
+public:
     RpcServerInternal(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
-                      const std::string& rpcChannel, const std::string& mediaType,
+                      const std::string& functionName, const std::string& mediaType,
                       const std::map<std::string, std::string>& labels, const std::string& clientUUID,
-                      ib::sim::rpc::CallProcessor handler, IRpcServer* parent);
+                      ib::sim::rpc::RpcCallHandler handler, IRpcServer* parent);
 
-    void SetRpcHandler(CallProcessor handler);
+    void SetRpcHandler(RpcCallHandler handler);
 
     void SubmitResult(IRpcCallHandle* callHandlePtr, const std::vector<uint8_t>& resultData);
 
@@ -44,12 +45,12 @@ class RpcServerInternal : public IIbToRpcServerInternal,
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor& override;
 
-  private:
-    std::string _rpcChannel;
+private:
+    std::string _functionName;
     std::string _mediaType;
     std::map<std::string, std::string> _labels;
     std::string _clientUUID;
-    CallProcessor _handler;
+    RpcCallHandler _handler;
     IRpcServer* _parent;
 
     mw::ServiceDescriptor _serviceDescriptor{};

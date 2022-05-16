@@ -14,7 +14,7 @@ RpcClients
 .. doxygenfunction:: ib_Rpc_Client_Call
 
 A RpcClient is created with a handler for the call return by RpcServers:
-.. doxygentypedef:: ib_Rpc_ResultHandler_t
+.. doxygentypedef:: ib_Rpc_CallResultHandler_t
 
 RpcServers
 ~~~~~~~~~~

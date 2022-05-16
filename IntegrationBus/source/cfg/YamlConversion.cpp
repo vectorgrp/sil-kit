@@ -777,7 +777,7 @@ Node Converter::encode(const RpcServer& obj)
     static const RpcServer defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    optional_encode(obj.rpcChannel, node, "Channel");
+    optional_encode(obj.functionName, node, "FunctionName");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
     return node;
@@ -786,7 +786,7 @@ template <>
 bool Converter::decode(const Node& node, RpcServer& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
-    optional_decode(obj.rpcChannel, node, "Channel");
+    optional_decode_deprecated_alternative(obj.functionName, node, "FunctionName", {"Channel", "RpcChannel"});
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
     return true;
@@ -798,7 +798,7 @@ Node Converter::encode(const RpcClient& obj)
     static const RpcClient defaultObj{};
     Node node;
     node["Name"] = obj.name;
-    optional_encode(obj.rpcChannel, node, "Channel");
+    optional_encode(obj.functionName, node, "Channel");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
     return node;
@@ -807,7 +807,7 @@ template <>
 bool Converter::decode(const Node& node, RpcClient& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
-    optional_decode(obj.rpcChannel, node, "Channel");
+    optional_decode_deprecated_alternative(obj.functionName, node, "FunctionName", {"Channel", "RpcChannel"});
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
     return true;
@@ -1081,7 +1081,7 @@ bool Converter::decode(const Node& node, ParticipantConfiguration& obj)
     optional_decode(obj.canControllers, node, "CanControllers");
     optional_decode(obj.linControllers, node, "LinControllers");
     optional_decode(obj.ethernetControllers, node, "EthernetControllers");
-    optional_decode_deprecated_alternative(obj.flexrayControllers, node, "FlexrayControllers", "FlexRayControllers");
+    optional_decode_deprecated_alternative(obj.flexrayControllers, node, "FlexrayControllers", {"FlexRayControllers"});
     optional_decode(obj.dataPublishers, node, "DataPublishers");
     optional_decode(obj.dataSubscribers, node, "DataSubscribers");
     optional_decode(obj.rpcServers, node, "RpcServers");

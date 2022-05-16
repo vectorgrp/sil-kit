@@ -23,3 +23,14 @@ target_link_libraries(IbSimRpc
             IbUuid
             IbConfiguration
 )
+
+add_vib_test(TestSimRpc
+    SOURCES
+        RpcClientTest.cpp
+        RpcServerTest.cpp
+    LIBS
+        IbSimRpc
+        IbMwMockParticipant
+        IbInternal
+        IbMwMockNullConnection
+)

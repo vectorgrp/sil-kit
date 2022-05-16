@@ -76,11 +76,11 @@ TEST_F(RpcITest, test_1client_1server_100functions_sync_vasio)
     rpcs.push_back({ "Server1", {}, {}, {} });
     for (int i = 0; i < numFunctions; i++)
     {
-        std::string rpcChannel = std::to_string(i);
+        std::string functionName = std::to_string(i);
         std::string clientControllerName = "ClientCtrl" + std::to_string(i);
         std::string serverControllerName = "ServerCtrl" + std::to_string(i);
-        RpcClientInfo cInfo{ clientControllerName, rpcChannel, "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn};
-        RpcServerInfo sInfo{ serverControllerName, rpcChannel, "A", {}, defaultMsgSize, numCallsToReceive };
+        RpcClientInfo cInfo{clientControllerName, functionName, "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn};
+        RpcServerInfo sInfo{serverControllerName, functionName, "A", {}, defaultMsgSize, numCallsToReceive};
         rpcs[0].rpcClients.push_back(std::move(cInfo));
         rpcs[1].rpcServers.push_back(std::move(sInfo));
     }
@@ -88,7 +88,7 @@ TEST_F(RpcITest, test_1client_1server_100functions_sync_vasio)
     RunSyncTest(rpcs);
 }
 
-// Two clients/servers with same rpcChannel on one participant
+// Two clients/servers with same functionName on one participant
 TEST_F(RpcITest, test_1client_1server_samefunctionname_sync_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls * 2;
@@ -170,7 +170,7 @@ TEST_F(RpcITest, test_Nclient_1server_sync_vasio)
     RunSyncTest(rpcs);
 }
 
-// Wrong rpcChannel on server2
+// Wrong functionName on server2
 TEST_F(RpcITest, test_1client_2server_wrongFunctionName_sync_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
@@ -244,7 +244,7 @@ TEST_F(RpcITest, test_1_participant_selfdelivery)
     RunSyncTest(rpcs);
 }
 
-// 2 servers, 2 clients on a single participant with same rpcChannel
+// 2 servers, 2 clients on a single participant with same functionName
 TEST_F(RpcITest, test_1_participant_selfdelivery_same_functionname)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;

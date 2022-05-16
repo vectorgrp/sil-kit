@@ -9,10 +9,10 @@ namespace sim {
 namespace rpc {
 
 RpcServerInternal::RpcServerInternal(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
-                                     const std::string& rpcChannel, const std::string& mediaType,
+                                     const std::string& functionName, const std::string& mediaType,
                                      const std::map<std::string, std::string>& labels, const std::string& clientUUID,
-                                     CallProcessor handler, IRpcServer* parent)
-    : _rpcChannel{rpcChannel}
+                                     RpcCallHandler handler, IRpcServer* parent)
+    : _functionName{functionName}
     , _mediaType{mediaType}
     , _labels{labels}
     , _clientUUID{clientUUID}
@@ -23,12 +23,12 @@ RpcServerInternal::RpcServerInternal(mw::IParticipantInternal* participant, mw::
 {
 }
 
-void RpcServerInternal::ReceiveIbMessage(const mw::IIbServiceEndpoint* /*from*/, const FunctionCall &msg)
+void RpcServerInternal::ReceiveIbMessage(const mw::IIbServiceEndpoint* /*from*/, const FunctionCall& msg)
 {
     ReceiveMessage(msg);
 }
 
-void RpcServerInternal::ReceiveMessage(const FunctionCall& msg) 
+void RpcServerInternal::ReceiveMessage(const FunctionCall& msg)
 {
     if (_handler)
     {
@@ -36,7 +36,7 @@ void RpcServerInternal::ReceiveMessage(const FunctionCall& msg)
         auto callHandle = std::make_unique<CallHandleImpl>(msg.callUUID);
         auto callHandlePtr = callHandle.get();
         _receivedCallHandles[to_string(msg.callUUID)] = std::move(callHandle);
-        _handler(_parent, callHandlePtr, msg.data);
+        _handler(_parent, RpcCallEvent{msg.timestamp, callHandlePtr, msg.data});
     }
 }
 
@@ -47,12 +47,12 @@ void RpcServerInternal::SubmitResult(IRpcCallHandle* callHandlePtr, const std::v
     auto it = _receivedCallHandles.find(callHandleStr);
     if (it != _receivedCallHandles.end())
     {
-        _participant->SendIbMessage(this, FunctionCallResponse{ callHandle._callUUID, resultData });
+        _participant->SendIbMessage(this, FunctionCallResponse{_timeProvider->Now(), callHandle._callUUID, resultData});
         _receivedCallHandles.erase(callHandleStr);
     }
 }
 
-void RpcServerInternal::SetRpcHandler(CallProcessor handler)
+void RpcServerInternal::SetRpcHandler(RpcCallHandler handler)
 {
     _handler = std::move(handler);
 }

@@ -126,24 +126,24 @@ public:
                                       sim::data::DataMessageHandlerT callback, sim::data::IDataSubscriber* parent)
         -> sim::data::DataSubscriberInternal* override;
 
-    auto CreateRpcClient(const std::string& canonicalName, const std::string& rpcChannel, const std::string& mediaType,
-                         const std::map<std::string, std::string>& labels, sim::rpc::CallReturnHandler handler)
+    auto CreateRpcClient(const std::string& canonicalName, const std::string& functionName, const std::string& mediaType,
+                         const std::map<std::string, std::string>& labels, sim::rpc::RpcCallResultHandler handler)
         -> sim::rpc::IRpcClient* override;
     auto CreateRpcClient(const std::string& canonicalName) -> sim::rpc::IRpcClient* override;
 
-    auto CreateRpcServer(const std::string& canonicalName, const std::string& rpcChannel, const std::string& mediaType,
-                         const std::map<std::string, std::string>& labels, sim::rpc::CallProcessor handler)
+    auto CreateRpcServer(const std::string& canonicalName, const std::string& functionName, const std::string& mediaType,
+                         const std::map<std::string, std::string>& labels, sim::rpc::RpcCallHandler handler)
         -> sim::rpc::IRpcServer* override;
     auto CreateRpcServer(const std::string& canonicalName) -> sim::rpc::IRpcServer* override;
 
-    auto CreateRpcServerInternal(const std::string& rpcChannel, const std::string& linkName,
+    auto CreateRpcServerInternal(const std::string& functionName, const std::string& linkName,
                                  const std::string& mediaType, const std::map<std::string, std::string>& labels,
-                                 sim::rpc::CallProcessor handler, sim::rpc::IRpcServer* parent)
+                                 sim::rpc::RpcCallHandler handler, sim::rpc::IRpcServer* parent)
         -> sim::rpc::RpcServerInternal* override;
 
-    void DiscoverRpcServers(const std::string& rpcChannel, const std::string& mediaType,
+    void DiscoverRpcServers(const std::string& functionName, const std::string& mediaType,
                             const std::map<std::string, std::string>& labels,
-                            sim::rpc::DiscoveryResultHandler handler) override;
+                            sim::rpc::RpcDiscoveryResultHandler handler) override;
 
     auto GetParticipantController() -> sync::IParticipantController* override;
     auto GetSystemMonitor() -> sync::ISystemMonitor* override;

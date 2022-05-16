@@ -14,7 +14,7 @@ class RpcDiscoverer
 public:
     RpcDiscoverer(mw::service::IServiceDiscovery* serviceDiscovery);
 
-    std::vector<RpcDiscoveryResult> GetMatchingRpcServers(const std::string& rpcChannel, const std::string& mediaType,
+    std::vector<RpcDiscoveryResult> GetMatchingRpcServers(const std::string& functionName, const std::string& mediaType,
                                                           const std::map<std::string, std::string>& labels) const;
 
 private:

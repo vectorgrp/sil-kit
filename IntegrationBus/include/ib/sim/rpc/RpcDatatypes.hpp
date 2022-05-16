@@ -2,10 +2,12 @@
 
 #pragma once
 
-#include <cstdint>
 #include <vector>
 #include <functional>
 #include <map>
+#include <chrono>
+
+#include <cstdint>
 
 namespace ib {
 namespace sim {
@@ -15,28 +17,40 @@ class IRpcClient;
 class IRpcServer;
 class IRpcCallHandle;
 
-enum class CallStatus : uint8_t
+enum class RpcCallStatus : uint8_t
 {
     Success,
     ServerNotReachable,
     UndefinedError
 };
 
-using CallReturnHandler =
-    std::function<void(ib::sim::rpc::IRpcClient* client, ib::sim::rpc::IRpcCallHandle* callHandle, const ib::sim::rpc::CallStatus callStatus,
-                       const std::vector<uint8_t>& returnData)>;
+struct RpcCallEvent
+{
+    std::chrono::nanoseconds timestamp;
+    IRpcCallHandle* callHandle;
+    std::vector<uint8_t> argumentData;
+};
 
-using CallProcessor = std::function<void(ib::sim::rpc::IRpcServer* server, ib::sim::rpc::IRpcCallHandle* callHandle,
-                                         const std::vector<uint8_t>& argumentData)>;
+using RpcCallHandler = std::function<void(IRpcServer* server, const RpcCallEvent& event)>;
+
+struct RpcCallResultEvent
+{
+    std::chrono::nanoseconds timestamp;
+    IRpcCallHandle* callHandle;
+    RpcCallStatus callStatus;
+    std::vector<uint8_t> resultData;
+};
+
+using RpcCallResultHandler = std::function<void(IRpcClient* client, const RpcCallResultEvent& event)>;
 
 struct RpcDiscoveryResult
 {
-    std::string rpcChannel;
+    std::string functionName;
     std::string mediaType;
     std::map<std::string, std::string> labels;
 };
 
-using DiscoveryResultHandler = std::function<void(const std::vector<RpcDiscoveryResult>& discoveryResults)>;
+using RpcDiscoveryResultHandler = std::function<void(const std::vector<RpcDiscoveryResult>& discoveryResults)>;
 
 // IbMessages
 //-----------
@@ -53,6 +67,7 @@ struct CallUUID
  */
 struct FunctionCall
 {
+    std::chrono::nanoseconds timestamp;
     CallUUID callUUID;
     std::vector<uint8_t> data;
 };
@@ -63,6 +78,7 @@ struct FunctionCall
  */
 struct FunctionCallResponse
 {
+    std::chrono::nanoseconds timestamp;
     CallUUID callUUID;
     std::vector<uint8_t> data;
 };
@@ -88,4 +104,3 @@ inline bool operator==(const FunctionCallResponse& lhs, const FunctionCallRespon
 } // namespace rpc
 } // namespace sim
 } // namespace ib
-

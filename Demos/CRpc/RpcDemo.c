@@ -80,39 +80,37 @@ void PrintByteVector(const ib_ByteVector* data)
     printf("\n");
 }
 
-void CallHandler(void* context, ib_Rpc_Server* cbServer, ib_Rpc_CallHandle* callHandle,
-                 const ib_ByteVector* argumentData)
+void CallHandler(void* context, ib_Rpc_Server* cbServer, const ib_Rpc_CallEvent* event)
 {
     receiveCallCount += 1;
-    uint8_t* tmp = (uint8_t*)malloc(argumentData->size * sizeof(uint8_t));
+    uint8_t* tmp = (uint8_t*)malloc(event->argumentData.size * sizeof(uint8_t));
     if (tmp == NULL)
     {
         AbortOnFailedAllocation("ib_ByteVector");
         return;
     }
     printf("[Server] Call received: ");
-    PrintByteVector(argumentData);
-    for (size_t i = 0; i < argumentData->size; i++)
+    PrintByteVector(&event->argumentData);
+    for (size_t i = 0; i < event->argumentData.size; i++)
     {
-        tmp[i] = argumentData->data[i] + (uint8_t)100;
+        tmp[i] = event->argumentData.data[i] + (uint8_t)100;
     }
 
-    const ib_ByteVector returnData = { tmp, argumentData->size };
-    ib_Rpc_Server_SubmitResult(cbServer, callHandle, &returnData);
+    const ib_ByteVector returnData = {tmp, event->argumentData.size};
+    ib_Rpc_Server_SubmitResult(cbServer, event->callHandle, &returnData);
     free(tmp);
 }
 
-void ResultHandler(void* context, ib_Rpc_Client* cbClient, ib_Rpc_CallHandle* callHandle,
-                       ib_Rpc_CallStatus callStatus, const ib_ByteVector* returnData)
+void CallReturnHandler(void* context, ib_Rpc_Client* cbClient, const ib_Rpc_CallResultEvent* event)
 {
-    if (callStatus == ib_Rpc_CallStatus_SUCCESS)
+    if (event->callStatus == ib_Rpc_CallStatus_SUCCESS)
     {
         printf("[client] Call returned: ");
-        PrintByteVector(returnData);
+        PrintByteVector(&event->resultData);
     }
     else
     {
-        printf("[client] Call failed with error code %i\n", callStatus);
+        printf("[client] Call failed with error code %i\n", event->callStatus);
     }
 }
 
@@ -120,8 +118,8 @@ void DiscoveryResultHandler(void* context, const ib_Rpc_DiscoveryResultList* dis
 {
     for (uint32_t i = 0; i < discoveryResults->numResults; i++)
     {
-        printf("Discovered RpcServer with rpcChannel=\"%s\", mediaType=\"%s\", labels={",
-               discoveryResults->results[i].rpcChannel, discoveryResults->results[i].mediaType);
+        printf("Discovered RpcServer with functionName=\"%s\", mediaType=\"%s\", labels={",
+               discoveryResults->results[i].functionName, discoveryResults->results[i].mediaType);
         for (uint32_t j = 0; j < discoveryResults->results[i].labelList->numLabels; j++)
         {
             printf("{\"%s\", \"%s\"}", discoveryResults->results[i].labelList->labels[j].key, discoveryResults->results[i].labelList->labels[j].value);
@@ -226,7 +224,7 @@ int main(int argc, char* argv[])
         Create_Labels(&labelList, labels, numLabels);
 
         returnCode = ib_Rpc_Client_Create(&client, participant, "ClientCtrl1", "TestFunc", mediaType, labelList, NULL,
-                                          &ResultHandler);
+                                          &CallReturnHandler);
 
         for (uint8_t i = 0; i < numCalls; i++)
         {
