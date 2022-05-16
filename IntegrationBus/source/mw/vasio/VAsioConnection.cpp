@@ -736,7 +736,7 @@ void VAsioConnection::AcceptNextConnection(AcceptorT& acceptor)
     );
 }
 
-void VAsioConnection::AddPeer(std::shared_ptr<VAsioTcpPeer> newPeer)
+void VAsioConnection::AddPeer(std::shared_ptr<IVAsioPeer> newPeer)
 {
     newPeer->StartAsyncRead();
 

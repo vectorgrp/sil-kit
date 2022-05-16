@@ -51,8 +51,6 @@
 namespace ib {
 namespace mw {
 
-class VAsioTcpPeer;
-
 class VAsioConnection
 {
 public:
@@ -389,7 +387,7 @@ private:
     }
 
     // TCP Related
-    void AddPeer(std::shared_ptr<VAsioTcpPeer> peer);
+    void AddPeer(std::shared_ptr<IVAsioPeer> peer);
     template<typename AcceptorT>
     void AcceptNextConnection(AcceptorT& acceptor);
 

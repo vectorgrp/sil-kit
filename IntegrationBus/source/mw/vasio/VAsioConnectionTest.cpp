@@ -103,6 +103,7 @@ struct MockVAsioPeer
     MOCK_METHOD(void, SetInfo, (VAsioPeerInfo), (override));
     MOCK_METHOD(std::string, GetRemoteAddress, (), (const, override));
     MOCK_METHOD(std::string, GetLocalAddress, (), (const, override));
+    MOCK_METHOD(void, StartAsyncRead, (), (override));
 
     //IIbServiceEndpoint
     MOCK_METHOD(void, SetServiceDescriptor, (const ServiceDescriptor& serviceDescriptor), (override));

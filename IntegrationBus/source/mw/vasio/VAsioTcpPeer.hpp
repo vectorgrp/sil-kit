@@ -57,7 +57,7 @@ public:
 
     inline auto Socket() -> asio::generic::stream_protocol::socket& { return _socket; }
 
-    void StartAsyncRead();
+    void StartAsyncRead() override;
 
     // IIbServiceEndpoint
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;

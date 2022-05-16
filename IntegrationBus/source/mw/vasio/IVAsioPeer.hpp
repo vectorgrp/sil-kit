@@ -29,6 +29,8 @@ public:
     virtual auto GetRemoteAddress() const -> std::string = 0;
     //! Local socket endpoint address.
     virtual auto GetLocalAddress() const -> std::string = 0;
+    //< Start the reading in the IO loop context
+    virtual void StartAsyncRead() = 0;
 
 };
 
