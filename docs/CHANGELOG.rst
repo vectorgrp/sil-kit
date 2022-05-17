@@ -34,6 +34,17 @@ Removed
 
 Changed
 ~~~~~~~
+- The IbRegistry utility changed the configuration parameter from positional parameter to option parameter.
+
+  + old: 
+  .. code-block:: powershell
+
+    ./IbRegistry IbConfig_DemoCan.json
+
+  + new: 
+  .. code-block:: powershell
+
+    ./IbRegistry -c IbConfig_DemoCan.json
 
 - Dynamic arrays in C-API changed from *array of size 1 at end of struct* to pointers:
   

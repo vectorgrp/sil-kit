@@ -23,8 +23,10 @@ int main(int argc, char** argv)
         "-s, --use-signal-handler: Exit this process when a signal is received. If not set, the process runs infinitely.");
     commandlineParser.Add<ib::util::CommandlineParser::Option>("domain", "d", "42", "[--domain <domainId>]",
         "-d, --domain <domainId>: The domain ID that is used by the Integration Bus. Defaults to 42.");
-    commandlineParser.Add<ib::util::CommandlineParser::Positional>("configuration", "[<configuration>]",
-        "<configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.");
+    commandlineParser.Add<ib::util::CommandlineParser::Option>(
+        "configuration", "c", "", "[--configuration <configuration>]",
+        "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the "
+        "format was changed in v3.6.11.");
 
     std::cout << "Vector Integration Bus (VIB) -- Registry of the VAsio Middleware" << std::endl
         << std::endl;
@@ -59,7 +61,7 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    auto&& configurationFilename{ commandlineParser.Get<ib::util::CommandlineParser::Positional>("configuration").Value() };
+    auto&& configurationFilename{ commandlineParser.Get<ib::util::CommandlineParser::Option>("configuration").Value() };
     auto useSignalHandler{ commandlineParser.Get<ib::util::CommandlineParser::Flag>("use-signal-handler").Value() };
     auto domain{ commandlineParser.Get<ib::util::CommandlineParser::Option>("domain").Value() };
     uint32_t domainId;

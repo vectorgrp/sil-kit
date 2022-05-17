@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     commandlineParser.Add<ib::util::CommandlineParser::Option>("name", "n", "SystemMonitor", "[--name <participantName>]",
         "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to 'SystemMonitor'.");
     commandlineParser.Add<ib::util::CommandlineParser::Option>("configuration", "c", "", "[--configuration <configuration>]",
-        "-c, --configuration: Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.");
+        "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.");
 
     std::cout << "Vector Integration Bus (VIB) -- System Monitor" << std::endl
         << std::endl;

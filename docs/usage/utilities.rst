@@ -32,11 +32,11 @@ IbRegistry
    *  - Requirements
       - None
    *  - Parameters
-      - -v, --version               Get version info.
-        -h, --help                  Show the help of the IbRegistry.
-        -s, --use-signal-handler    Exit this process when a signal is received. If not set, the process runs infinitely.
-        -d, --domain <domainId>     The domain ID that is used by the Integration Bus. Defaults to 42.
-        <configuration>             Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
+      - -v, --version                         Get version info.
+        -h, --help                            Show the help of the IbRegistry.
+        -s, --use-signal-handler              Exit this process when a signal is received. If not set, the process runs infinitely.
+        -d, --domain <domainId>               The domain ID that is used by the Integration Bus. Defaults to 42.
+        -c, --configuration <configuration>   Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
 
    *  - Usage Example
       - .. code-block:: powershell
@@ -74,7 +74,7 @@ IbSystemController
          -h, --help                                   Show the help of the IbSystemController.
          -d, --domain <domainId>                      The domain ID which is used by the Integration Bus. Defaults to 42.
          -n, --name <participantName>                 The participant name used to take part in the simulation. Defaults to 'SystemController'.
-         -c, --configuration                          Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
+         -c, --configuration <configuration>          Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
          <participantName1>, <participantName2>, ...  Names of participants to wait for before starting simulation.
 
    *  -  Usage Example
@@ -111,7 +111,7 @@ IbSystemControllerInteractive
          -h, --help                                   Show the help of the IbSystemControllerInteractive.
          -d, --domain <domainId>                      The domain ID which is used by the Integration Bus. Defaults to 42.
          -n, --name <participantName>                 The participant name used to take part in the simulation. Defaults to 'SystemController'.
-         -c, --configuration                          Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
+         -c, --configuration  <configuration>         Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
          <participantName1>, <participantName2>, ...  Names of participants that are required for the simulation (e.g. synchronized paricipants).
    *  -  Usage Example
       -  .. code-block:: powershell
@@ -140,11 +140,11 @@ IbSystemMonitor
    *  -  Requirements
       -  Requires a running IbRegistry to connect to.
    *  -  Parameters
-      -  -v, --version                   Get version info.
-         -h, --help                      Show the help of the IbSystemMonitor.
-         -d, --domain <domainId>         The domain ID that is used by the Integration Bus. Defaults to 42.
-         -n, --name <participantName>    The participant name used to take part in the simulation. Defaults to 'SystemController'.
-         -c, --configuration             Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
+      -  -v, --version                           Get version info.
+         -h, --help                              Show the help of the IbSystemMonitor.
+         -d, --domain <domainId>                 The domain ID that is used by the Integration Bus. Defaults to 42.
+         -n, --name <participantName>            The participant name used to take part in the simulation. Defaults to 'SystemController'.
+         -c, --configuration  <configuration>    Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
 
    *  -  Usage Example
       -  .. code-block:: powershell

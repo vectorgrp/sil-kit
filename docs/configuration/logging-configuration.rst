@@ -41,6 +41,8 @@ logs to a file, the following configuration could be used:
   }
 
 
+.. _sec:cfg-participant-logger:
+
 .. list-table:: Logger Configuration
    :widths: 15 85
    :header-rows: 1

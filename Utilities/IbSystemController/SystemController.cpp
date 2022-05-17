@@ -190,7 +190,7 @@ int main(int argc, char** argv)
     commandlineParser.Add<ib::util::CommandlineParser::Option>("name", "n", "SystemController", "[--name <participantName>]",
         "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to 'SystemController'.");
     commandlineParser.Add<ib::util::CommandlineParser::Option>("configuration", "c", "", "[--configuration <configuration>]",
-        "-c, --configuration: Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.");
+        "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.");
     commandlineParser.Add<ib::util::CommandlineParser::PositionalList>("participantNames", "<participantName1> [<participantName2> ...]",
         "<participantName1>, <participantName2>, ...: Names of participants to wait for before starting simulation.");
 
