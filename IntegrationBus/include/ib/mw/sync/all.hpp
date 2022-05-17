@@ -4,3 +4,5 @@
 #include "ISystemMonitor.hpp"
 #include "SyncDatatypes.hpp"
 #include "ITimeProvider.hpp"
+#include "ILifecycleService.hpp"
+#include "ITimeSyncService.hpp"
