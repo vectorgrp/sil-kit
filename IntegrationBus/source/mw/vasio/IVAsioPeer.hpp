@@ -32,6 +32,29 @@ public:
     //< Start the reading in the IO loop context
     virtual void StartAsyncRead() = 0;
 
+    // TODO cleanup
+    //! Handshake and Version management for backward compatibility on network ser/des level
+    enum class ProtocolState {
+        Invalid,
+        DoHandshake,
+        HandshakeTimeout,
+        HandshakeComplete,
+    };
+    ProtocolState _state{ProtocolState::Invalid};
+    uint32_t _protocolVersion{0};
+    virtual void SetProtocolState(ProtocolState state)  {
+        _state = state;
+    }
+    virtual auto GetProtocolState() const -> ProtocolState {
+        return _state;
+    }
+    virtual void SetProtocolVersion(uint32_t v) {
+        _protocolVersion= v;
+    }
+    virtual auto GetProtocolVersion() -> uint32_t {
+        return _protocolVersion;
+    }
+
 };
 
 } // mw

@@ -16,20 +16,7 @@
 #include "tuple_tools/for_each.hpp"
 #include "tuple_tools/wrapped_tuple.hpp"
 
-#include "MessageBuffer.hpp"
-
-#include "SerdesMw.hpp"
-#include "SerdesMwLogging.hpp"
-#include "SerdesMwSync.hpp"
-#include "SerdesMwVAsio.hpp"
-#include "SerdesSimData.hpp"
-#include "SerdesSimRpc.hpp"
-#include "SerdesSimCan.hpp"
-#include "SerdesSimEthernet.hpp"
-#include "SerdesSimLin.hpp"
-#include "SerdesSimFlexray.hpp"
-#include "SerdesMwService.hpp"
-
+#include "VAsioProtocol.hpp"
 #include "IbLink.hpp"
 #include "IVAsioPeer.hpp"
 #include "VAsioReceiver.hpp"

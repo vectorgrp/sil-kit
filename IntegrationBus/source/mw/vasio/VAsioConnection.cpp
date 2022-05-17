@@ -160,43 +160,6 @@ auto printUris(const ib::mw::VAsioPeerInfo& info) -> std::string
     return ss.str();
 }
 
-
-auto RegistryMsgHeaderToMainVersionRange(const ib::mw::RegistryMsgHeader& registryMsgHeader) -> std::string
-{
-    std::string versionInfo{"Unknown version range"};
-    if (registryMsgHeader.versionHigh == 1)
-    {
-        versionInfo = "< v2.0.0";
-    }
-    else if (registryMsgHeader.versionHigh == 2 && registryMsgHeader.versionLow == 0)
-    {
-        versionInfo = "v2.0.0 - v3.4.0";
-    }
-    else if (registryMsgHeader.versionHigh == 2 && registryMsgHeader.versionLow == 1)
-    {
-        versionInfo = "v3.4.1 - v3.99.21";
-    }
-    else if (registryMsgHeader.versionHigh == 3 && registryMsgHeader.versionLow == 0)
-    {
-        versionInfo = "v3.99.22 - current";
-    }
-
-    return versionInfo;
-}
-
-// SerDes helpers to reduce boiler plate
-
-auto Serialize(const ib::mw::ParticipantAnnouncementReply& reply) -> ib::mw::MessageBuffer
-{
-    ib::mw::MessageBuffer buffer;
-    uint32_t msgSizePlaceholder{0u};
-
-    buffer << msgSizePlaceholder
-           << ib::mw::VAsioMsgKind::IbRegistryMessage
-           << ib::mw::RegistryMessageKind::ParticipantAnnouncementReply
-           << reply;
-    return buffer;
-}
 } //anonymous namespace
 
 
@@ -388,11 +351,11 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
 void VAsioConnection::NotifyNetworkIncompatibility(const RegistryMsgHeader& other,
                                                    const std::string& otherParticipantName)
 {
-    std::stringstream s;
-    s << "Network incompatibility between this version range ("
-      << RegistryMsgHeaderToMainVersionRange(RegistryMsgHeader{}) << ") and connecting participant \""
-      << otherParticipantName << "\" (" << RegistryMsgHeaderToMainVersionRange(other) << ").";
-    const auto errorMsg = s.str();
+    const auto errorMsg = fmt::format("Network incompatibility between this version range ({}) and connecting participant '{}' ({})",
+        ProtocolVersionToString(RegistryMsgHeader{}),
+        otherParticipantName,
+        ProtocolVersionToString(other)
+    );
     _logger->Critical(errorMsg);
     std::cerr << "ERROR: " << errorMsg << std::endl;
 }
@@ -402,7 +365,24 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
     ParticipantAnnouncement announcement;
     buffer >> announcement;
     const RegistryMsgHeader reference{};
+    // check if we support the remote peer's protocol version or signal a handshake failure
+    if(ProtocolVersionSupported(announcement))
+    {
+        const uint32_t version = (announcement.messageHeader.versionHigh << 16)
+            | (announcement.messageHeader.versionLow & 0xFFFF);
+        from->SetProtocolVersion(version);
+    }
+    else
+    {
+        NotifyNetworkIncompatibility(announcement.messageHeader, announcement.peerInfo.participantName);
 
+        ParticipantAnnouncementReply reply;
+        reply.status = ParticipantAnnouncementReply::Status::Failed;
+        reply.remoteHeader = reference;
+        from->SendIbMsg(Serialize(reply));
+
+        return;
+    }
     if (announcement.messageHeader != reference)
     {
         NotifyNetworkIncompatibility(announcement.messageHeader, announcement.peerInfo.participantName);
@@ -461,16 +441,8 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
     ParticipantAnnouncement announcement;
     announcement.peerInfo = std::move(info);
 
-    MessageBuffer buffer;
-    uint32_t msgSizePlaceholder{0u};
-
-    buffer << msgSizePlaceholder
-           << VAsioMsgKind::IbRegistryMessage
-           << RegistryMessageKind::ParticipantAnnouncement
-           << announcement;
-
     _logger->Debug("Sending participant announcement to {}", peer->GetInfo().participantName);
-    peer->SendIbMsg(std::move(buffer));
+    peer->SendIbMsg(Serialize(announcement));
 
 }
 
@@ -487,9 +459,12 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Mess
         // check what went wrong during the handshake
         if(reply.remoteHeader.preambel != reference.preambel)
         {
-            throw ProtocolError("VAsioConnection: ParticipantAnnouncement failed: invalid preambel in header. check endianess.");
+            auto msg = fmt::format("VIB Connection Handshake: ParticipantAnnouncementReply contains invalid preambel in header. check endianess on participant {}.", from->GetInfo().participantName);
         }
-        throw ProtocolError("VAsioConnection: ParticipantAnnouncement failed: version mismatch in header.");
+        auto msg = fmt::format("VIB Connection Handshake: ParticipantAnnouncementReply contains unsupported version."
+                        " participant={} participant-version={}.{}",
+                        from->GetInfo().participantName, reply.remoteHeader.versionHigh, reply.remoteHeader.versionLow);
+        throw ProtocolError(msg);
 
     }
     for (auto& subscriber : reply.subscribers)
@@ -796,6 +771,34 @@ void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
 
 void VAsioConnection::OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer)
 {
+#if IDEA_NETCOMPAT
+    if(from->HandshakeComplete())
+    {
+        auto msgKind = Deserialize<VAsioMsgKind>(from->GetProtocolVersion(), buffer);
+        switch(msgKind)
+        {
+        case VAsioMsgKind::Invalid:
+            _logger->Warn("Received message with VAsioMsgKind::Invalid");
+            break;
+        case VAsioMsgKind::SubscriptionAnnouncement:
+            return ReceiveSubscriptionAnnouncement(from, std::move(buffer));
+        case VAsioMsgKind::SubscriptionAcknowledge:
+            return ReceiveSubscriptionAcknowledge(from, std::move(buffer));
+        case VAsioMsgKind::IbMwMsg:
+            return ReceiveRawIbMessage(from, std::move(buffer));
+        case VAsioMsgKind::IbSimMsg:
+            return ReceiveRawIbMessage(from, std::move(buffer));
+        }
+    }
+    else
+    {
+        // We must complete a handshake for the Protocol Version to be Known
+        // Handshake messages don't have a versioned Deserialize()
+        VAsioMsgKind msgKind;
+        buffer >> msgKind;
+        return ReceiveRegistryMessage(from, std::move(buffer));
+    }
+#endif //IDEA_NETCOMPAT
     VAsioMsgKind msgKind;
     buffer >> msgKind;
     switch (msgKind)
@@ -861,14 +864,7 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageB
         ? SubscriptionAcknowledge::Status::Success
         : SubscriptionAcknowledge::Status::Failed;
 
-    MessageBuffer ackBuffer;
-    uint32_t msgSizePlaceholder{0u};
-    ackBuffer
-        << msgSizePlaceholder
-        << VAsioMsgKind::SubscriptionAcknowledge
-        << ack;
-
-    from->SendIbMsg(std::move(ackBuffer));
+    from->SendIbMsg(Serialize(from->GetProtocolVersion(), ack));
 }
 
 void VAsioConnection::ReceiveSubscriptionAcknowledge(IVAsioPeer* from, MessageBuffer&& buffer)

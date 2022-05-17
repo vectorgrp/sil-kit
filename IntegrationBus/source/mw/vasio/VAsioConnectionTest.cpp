@@ -111,55 +111,7 @@ struct MockVAsioPeer
 };
 
 // Wire protocol, using the Serdes* methods
-auto Serialize(const ParticipantAnnouncement& announcement) -> MessageBuffer
-{
-    MessageBuffer buffer;
-    uint32_t msgSizePlaceholder{0u};
 
-    buffer << msgSizePlaceholder
-           << VAsioMsgKind::IbRegistryMessage
-           << RegistryMessageKind::ParticipantAnnouncement
-           << announcement;
-    return buffer;
-}
-
-auto Serialize(const VAsioMsgSubscriber& subscriber) -> MessageBuffer
-{
-    ib::mw::MessageBuffer buffer;
-    uint32_t rawMsgSize{0};
-    buffer
-        << rawMsgSize
-        << VAsioMsgKind::SubscriptionAnnouncement
-        << subscriber;
-
-    return buffer;
-}
-
-auto Serialize(EndpointId remoteIndex, EndpointAddress address,
-    const test::version1::TestMessage& msg) -> MessageBuffer
-{
-    ib::mw::MessageBuffer buffer;
-    uint32_t msgSizePlaceholder{0u};
-    buffer
-        << msgSizePlaceholder
-        << VAsioMsgKind::IbSimMsg
-        << remoteIndex
-        << address
-        << msg;
-    return buffer;
-}
-
-auto Serialize(const ParticipantAnnouncementReply& reply) -> MessageBuffer
-{
-    MessageBuffer buffer;
-    uint32_t msgSizePlaceholder{0u};
-
-    buffer << msgSizePlaceholder
-           << VAsioMsgKind::IbRegistryMessage
-           << RegistryMessageKind::ParticipantAnnouncementReply
-           << reply;
-    return buffer;
-}
 
 template<typename IbMessageT>
 auto Deserialize(MessageBuffer) -> IbMessageT;
@@ -194,6 +146,20 @@ void DropMessageSize(MessageBuffer& buffer)
     //After receiving we have to strip the message size, modifying the read position in the buffer
     uint32_t messageSize{0u};
     buffer >> messageSize;
+}
+
+inline auto Serialize(EndpointId remoteIndex, EndpointAddress address,
+    const test::version1::TestMessage& msg) -> MessageBuffer
+{
+    ib::mw::MessageBuffer buffer;
+    uint32_t msgSizePlaceholder{0u};
+    buffer
+        << msgSizePlaceholder
+        << VAsioMsgKind::IbSimMsg
+        << remoteIndex
+        << address
+        << msg;
+    return buffer;
 }
 
 

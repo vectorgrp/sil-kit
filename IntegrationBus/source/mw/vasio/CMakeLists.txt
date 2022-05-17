@@ -5,6 +5,8 @@ add_library(IbMwVAsio STATIC
     VAsioConnection.hpp
     VAsioConnection.cpp
     MessageBuffer.hpp
+    VAsioProtocol.hpp
+    VAsioProtocol.cpp
     SerdesMw.hpp
     SerdesMwSync.hpp
     SerdesMwVAsio.hpp
