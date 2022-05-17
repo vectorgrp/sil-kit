@@ -7,7 +7,7 @@
 macro(configure_ib_version project_name)
     set(IB_VERSION_MAJOR 3)
     set(IB_VERSION_MINOR 99)
-    set(IB_VERSION_PATCH 21)
+    set(IB_VERSION_PATCH 22)
     set(IB_BUILD_NUMBER 0 CACHE STRING "The build number")
     set(IB_VERSION_SUFFIX "")
 
