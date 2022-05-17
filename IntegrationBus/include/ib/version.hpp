@@ -19,12 +19,8 @@ auto IntegrationBusAPI Patch() -> uint32_t;
 auto IntegrationBusAPI BuildNumber() -> uint32_t;
 //! \brief Retrieve the API version identifier "<Major>.<Minor>.<Patch>" of this release
 auto IntegrationBusAPI String() -> const char*;
-
-//! \brief Retrieve the sprint number of this release
-auto IntegrationBusAPI SprintNumber() -> uint32_t;
-//! \brief Retrieve the sprint name "Sprint-<SprintNumber>" of this release
-auto IntegrationBusAPI SprintName() -> const char*;
-
+//! \brief Retrieve additional version information of this release
+auto IntegrationBusAPI VersionSuffix() -> const char*;
 //! \brief Retrieve the full git hash of this release
 auto IntegrationBusAPI GitHash() -> const char*;
 

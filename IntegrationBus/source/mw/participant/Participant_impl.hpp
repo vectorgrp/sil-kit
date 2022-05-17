@@ -86,9 +86,8 @@ Participant<IbConnectionT>::Participant(cfg::ParticipantConfiguration participan
     _logger = std::make_unique<logging::Logger>(_participantName, _participantConfig.logging);
     _ibConnection.SetLogger(_logger.get());
     
-    _logger->Info("Creating Participant for Participant {}, IntegrationBus-Version: {} {}, Middleware: {}",
-                  _participantName, version::String(), version::SprintName(),
-                  "VAsio");
+    _logger->Info("Creating Participant for Participant {}, IntegrationBus-Version: {}, Middleware: {}",
+                  _participantName, version::String(), "VAsio");
 
     //set up default time provider used for controller instantiation
     _timeProvider = std::make_shared<sync::WallclockProvider>(1ms);

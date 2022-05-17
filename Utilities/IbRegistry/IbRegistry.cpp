@@ -54,7 +54,7 @@ int main(int argc, char** argv)
         auto ibShortHash = ibHash.substr(0, 7);
         std::cout
             << "Version Info:" << std::endl
-            << " - Vector Integration Bus (VIB): " << ib::version::String() << " (" << ib::version::SprintName() << "), #" << ibShortHash << std::endl;
+            << " - Vector Integration Bus (VIB): " << ib::version::String() << ", #" << ibShortHash << std::endl;
 
         return 0;
     }

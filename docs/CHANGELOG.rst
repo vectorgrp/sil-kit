@@ -10,7 +10,17 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 
 Removed
 ~~~~~~~
-        
+
+  - ``IntegrationBus/include/ib/version.hpp``
+    
+    The function to retreive the Sprint name was removed. The CMake-Variables ``IB_SPRINT_NUMBER`` and
+    ``IB_SPRINT_NAME`` were removed as well.
+
+        + old: 
+      .. code-block:: c++
+          
+          ib::version::SprintName()
+
   - ``IntegrationBus/include/ib/capi/FlexRay.h``
       
       The convenience function in the C-API to append a ``TxBufferConfig`` was removed. 

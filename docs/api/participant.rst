@@ -59,8 +59,6 @@ can be queried using the following functions:
 
     .. doxygenfunction:: ib::version::BuildNumber()
 
-    .. doxygenfunction:: ib::version::SprintNumber()
-
-    .. doxygenfunction:: ib::version::SprintName()
+    .. doxygenfunction:: ib::version::VersionSuffix()
 
     .. doxygenfunction:: ib::version::GitHash()

@@ -31,16 +31,11 @@ auto IntegrationBusAPI String() -> const char*
     return IB_VERSION_STRING;
 }
 
-auto IntegrationBusAPI SprintNumber() -> uint32_t
+auto IntegrationBusAPI VersionSuffix() -> const char*
 {
-    return IB_SPRINT_NUMBER;
+    return IB_VERSION_SUFFIX;
 }
-    
-auto IntegrationBusAPI SprintName() -> const char*
-{
-    return IB_SPRINT_NAME;
-}
-    
+
 auto IntegrationBusAPI GitHash() -> const char*
 {
     return IB_GIT_HASH;

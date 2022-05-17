@@ -8,7 +8,7 @@
 #define ASSEMBLYINFO_COMPANY         "Vector Informatik GmbH"
 #define ASSEMBLYINFO_PRODUCT         "Vector Integration Bus"
 #define ASSEMBLYINFO_COPYRIGHT       "Copyright © 2018 Vector Informatik GmbH. All rights reserved."
-#define ASSEMBLYINFO_FILEDESCRIPTION "Vector Integration Bus " IB_SPRINT_NAME " by Vector Informatik GmbH"
+#define ASSEMBLYINFO_FILEDESCRIPTION "Vector Integration Bus by Vector Informatik GmbH"
 #define ASSEMBLYINFO_VERSIONSTRING   VERSIONSTRING(IB_VERSION_MAJOR,IB_VERSION_MINOR,IB_VERSION_PATCH,IB_BUILD_NUMBER)
 #define ASSEMBLYINFO_VERSIONTOKEN    IB_VERSION_MAJOR,IB_VERSION_MINOR,IB_VERSION_PATCH,IB_BUILD_NUMBER
 
