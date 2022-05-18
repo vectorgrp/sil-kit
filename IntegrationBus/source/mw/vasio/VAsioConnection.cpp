@@ -363,7 +363,8 @@ void VAsioConnection::NotifyNetworkIncompatibility(const RegistryMsgHeader& othe
 void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer)
 {
     ParticipantAnnouncement announcement;
-    buffer >> announcement;
+    Deserialize(buffer, announcement);
+
     const RegistryMsgHeader reference{};
     // check if we support the remote peer's protocol version or signal a handshake failure
     if(ProtocolVersionSupported(announcement))
@@ -449,7 +450,7 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
 void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, MessageBuffer&& buffer)
 {
     ParticipantAnnouncementReply reply;
-    buffer >> reply;
+    Deserialize(buffer, reply);
 
     if (reply.status == ParticipantAnnouncementReply::Status::Failed)
     {
@@ -521,7 +522,7 @@ const std::string& VAsioConnection::GetParticipantFromLookup(const std::uint64_t
 void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, MessageBuffer&& buffer)
 {
     KnownParticipants participantsMsg;
-    buffer >> participantsMsg;
+    Deserialize(buffer, participantsMsg);
     const RegistryMsgHeader reference{};
 
     if (participantsMsg.messageHeader != reference)
@@ -771,37 +772,8 @@ void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
 
 void VAsioConnection::OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer)
 {
-#if IDEA_NETCOMPAT
-    if(from->HandshakeComplete())
-    {
-        auto msgKind = Deserialize<VAsioMsgKind>(from->GetProtocolVersion(), buffer);
-        switch(msgKind)
-        {
-        case VAsioMsgKind::Invalid:
-            _logger->Warn("Received message with VAsioMsgKind::Invalid");
-            break;
-        case VAsioMsgKind::SubscriptionAnnouncement:
-            return ReceiveSubscriptionAnnouncement(from, std::move(buffer));
-        case VAsioMsgKind::SubscriptionAcknowledge:
-            return ReceiveSubscriptionAcknowledge(from, std::move(buffer));
-        case VAsioMsgKind::IbMwMsg:
-            return ReceiveRawIbMessage(from, std::move(buffer));
-        case VAsioMsgKind::IbSimMsg:
-            return ReceiveRawIbMessage(from, std::move(buffer));
-        }
-    }
-    else
-    {
-        // We must complete a handshake for the Protocol Version to be Known
-        // Handshake messages don't have a versioned Deserialize()
-        VAsioMsgKind msgKind;
-        buffer >> msgKind;
-        return ReceiveRegistryMessage(from, std::move(buffer));
-    }
-#endif //IDEA_NETCOMPAT
-    VAsioMsgKind msgKind;
-    buffer >> msgKind;
-    switch (msgKind)
+    auto messageKind = ExtractMessageKind(buffer);
+    switch (messageKind)
     {
     case VAsioMsgKind::Invalid:
         _logger->Warn("Received message with VAsioMsgKind::Invalid");
@@ -842,7 +814,7 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageB
     };
 
     VAsioMsgSubscriber subscriber;
-    buffer >> subscriber;
+    Deserialize(buffer, subscriber); 
     bool wasAdded = TryAddRemoteSubscriber(from, subscriber);
 
     // check our Message version against the remote participant's version
@@ -870,7 +842,7 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageB
 void VAsioConnection::ReceiveSubscriptionAcknowledge(IVAsioPeer* from, MessageBuffer&& buffer)
 {
     SubscriptionAcknowledge ack;
-    buffer >> ack;
+    Deserialize(buffer, ack);
 
     if (ack.status != SubscriptionAcknowledge::Status::Success)
     {
@@ -927,16 +899,14 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
 
 void VAsioConnection::ReceiveRawIbMessage(IVAsioPeer* from, MessageBuffer&& buffer)
 {
-    EndpointId receiverIdx;
-    buffer >> receiverIdx;
+    auto receiverIdx = ExtractEndpointId(buffer);
     if (receiverIdx >= _vasioReceivers.size())
     {
         _logger->Warn("Ignoring RawIbMessage for unknown receiverIdx={}", receiverIdx);
         return;
     }
 
-    EndpointAddress endpoint;
-    buffer >> endpoint;
+    auto endpoint = ExtractEndpointAddress(buffer);
 
     auto* fromService = dynamic_cast<IIbServiceEndpoint*>(from);
     ServiceDescriptor tmpService(fromService->GetServiceDescriptor());
@@ -952,8 +922,7 @@ void VAsioConnection::RegisterMessageReceiver(std::function<void(IVAsioPeer* pee
 
 void VAsioConnection::ReceiveRegistryMessage(IVAsioPeer* from, MessageBuffer&& buffer)
 {
-    RegistryMessageKind kind;
-    buffer >> kind;
+    auto kind = ExtractRegistryMessageKind(buffer);
     switch (kind)
     {
     case RegistryMessageKind::Invalid:

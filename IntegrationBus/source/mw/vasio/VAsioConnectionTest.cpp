@@ -1,4 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
+#include "VAsioProtocol.hpp"
+#include "TestDataTypes.hpp" // must be included before VAsioConnection
 
 #include "IVAsioPeer.hpp"
 #include "IIbMessageReceiver.hpp"
@@ -16,7 +18,6 @@ using namespace ib::mw;
 using testing::Return;
 using testing::ReturnRef;
 using testing::_;
-
 //Printing helpers, required for implicit template usage in VAsioConnection
 namespace ib {
 namespace mw {
@@ -110,57 +111,6 @@ struct MockVAsioPeer
     MOCK_METHOD(const ServiceDescriptor&, GetServiceDescriptor, (), (override, const));
 };
 
-// Wire protocol, using the Serdes* methods
-
-
-template<typename IbMessageT>
-auto Deserialize(MessageBuffer) -> IbMessageT;
-
-template<>
-auto Deserialize(MessageBuffer buffer) -> ParticipantAnnouncementReply
-{
-    VAsioMsgKind msgkind;
-    RegistryMessageKind kind;
-    ParticipantAnnouncementReply reply;
-    buffer
-        >> msgkind
-        >> kind
-        >> reply
-        ;
-    return reply;
-}
-
-template<>
-auto Deserialize(MessageBuffer buffer) -> SubscriptionAcknowledge
-{
-    VAsioMsgKind msgkind;
-    SubscriptionAcknowledge ack;
-    buffer
-        >> msgkind
-        >> ack
-        ;
-    return ack;
-}
-void DropMessageSize(MessageBuffer& buffer)
-{
-    //After receiving we have to strip the message size, modifying the read position in the buffer
-    uint32_t messageSize{0u};
-    buffer >> messageSize;
-}
-
-inline auto Serialize(EndpointId remoteIndex, EndpointAddress address,
-    const test::version1::TestMessage& msg) -> MessageBuffer
-{
-    ib::mw::MessageBuffer buffer;
-    uint32_t msgSizePlaceholder{0u};
-    buffer
-        << msgSizePlaceholder
-        << VAsioMsgKind::IbSimMsg
-        << remoteIndex
-        << address
-        << msg;
-    return buffer;
-}
 
 
 //////////////////////////////////////////////////////////////////////
@@ -170,8 +120,13 @@ MATCHER_P(AnnouncementReplyMatcher, validator,
     "Deserialize the MessageBuffer and check the announcement's reply")
 {
     auto buffer = arg;
-    DropMessageSize(buffer);
-    auto reply  = Deserialize<ParticipantAnnouncementReply>(buffer);
+    //remove the network message header members:
+    (void)ExtractMessageSize(buffer);
+    (void)ExtractMessageKind(buffer);
+    (void)ExtractRegistryMessageKind(buffer);
+
+    ParticipantAnnouncementReply reply;
+    Deserialize(buffer, reply);
     return validator(reply);
 }
 
@@ -179,8 +134,9 @@ MATCHER_P(SubscriptionAcknowledgeMatcher, subscriber,
     "Deserialize the MessageBuffer and check the subscriptions's ack")
 {
     auto buffer = arg;
-    DropMessageSize(buffer);
-    auto reply  = Deserialize<SubscriptionAcknowledge>(buffer);
+    (void)ExtractMessageSize(buffer);
+    SubscriptionAcknowledge reply;
+    Deserialize(buffer, reply);
     return reply.status == SubscriptionAcknowledge::Status::Success
         && reply.subscriber == subscriber
         ;
@@ -228,7 +184,7 @@ TEST_F(VAsioConnectionTest, unsupported_version_connect)
     announcement.messageHeader.versionHigh = 1;
 
     auto buffer = Serialize(announcement);
-    DropMessageSize(buffer);
+    (void)ExtractMessageSize(buffer);
 
     auto validator = [](const ParticipantAnnouncementReply& reply)
     {
@@ -247,7 +203,7 @@ TEST_F(VAsioConnectionTest, unsupported_version_reply_should_throw)
     reply.status = ParticipantAnnouncementReply::Status::Failed;
 
     auto buffer = Serialize(reply);
-    DropMessageSize(buffer);
+    (void)ExtractMessageSize(buffer);
     EXPECT_THROW(
         _connection.OnSocketData(&_from, std::move(buffer)),
         ib::ProtocolError);
@@ -258,7 +214,7 @@ TEST_F(VAsioConnectionTest, supported_version_reply_must_not_throw)
     reply.status = ParticipantAnnouncementReply::Status::Success;
 
     auto buffer = Serialize(reply);
-    DropMessageSize(buffer);
+    (void)ExtractMessageSize(buffer);
     EXPECT_NO_THROW(
         _connection.OnSocketData(&_from, std::move(buffer))
     );
@@ -270,7 +226,7 @@ TEST_F(VAsioConnectionTest, current_version_connect)
     announcement.peerInfo = _from.GetInfo();
 
     auto buffer = Serialize(announcement);
-    DropMessageSize(buffer);
+    (void)ExtractMessageSize(buffer);
 
     auto validator = [](const ParticipantAnnouncementReply& reply)
     {
@@ -306,7 +262,7 @@ TEST_F(VAsioConnectionTest, DISABLED_versioned_send_testmessage)
 
     // ReceiveSubscriptionAnnouncement -> sets internal structures up
     auto subscriberBuffer = Serialize(subscriber);
-    DropMessageSize(subscriberBuffer);
+    (void)ExtractMessageSize(subscriberBuffer);
     EXPECT_CALL(_from, SendIbMsg(SubscriptionAcknowledgeMatcher(subscriber))).Times(1);
     _connection.OnSocketData(&_from, std::move(subscriberBuffer));
 
@@ -315,9 +271,9 @@ TEST_F(VAsioConnectionTest, DISABLED_versioned_send_testmessage)
     RegisterIbMsgReceiver<test::version2::TestMessage,MockIbMessageReceiver>(subscriber.networkName, &mockReceiver);
     //the actual message
 
-    auto buffer = Serialize(subscriber.receiverIdx,
-        _from.GetServiceDescriptor().to_endpointAddress(), message);
-    DropMessageSize(buffer);
+    auto buffer = Serialize(message, _from.GetServiceDescriptor().to_endpointAddress(),
+        subscriber.receiverIdx);
+    (void)ExtractMessageSize(buffer);
 
     _connection.OnSocketData(&_from, std::move(buffer));
 }

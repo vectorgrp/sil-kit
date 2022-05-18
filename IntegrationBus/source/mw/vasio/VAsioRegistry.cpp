@@ -3,6 +3,7 @@
 #include "VAsioRegistry.hpp"
 
 #include "Logger.hpp"
+#include "Uri.hpp"
 
 using asio::ip::tcp;
 
@@ -200,15 +201,7 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
         knownParticipantsMsg.peerInfos.push_back(peerInfo);
     }
 
-    MessageBuffer sendBuffer;
-    uint32_t msgSizePlaceholder{0u};
-    sendBuffer
-        << msgSizePlaceholder
-        << VAsioMsgKind::IbRegistryMessage
-        << RegistryMessageKind::KnownParticipants
-        << knownParticipantsMsg;
-
-    peer->SendIbMsg(std::move(sendBuffer));
+    peer->SendIbMsg(Serialize(knownParticipantsMsg));
 }
 
 void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)

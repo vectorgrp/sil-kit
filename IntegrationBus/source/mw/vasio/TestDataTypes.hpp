@@ -3,6 +3,8 @@
 #include <string>
 
 #include "MessageBuffer.hpp"
+#include "SerdesMw.hpp"
+
 #include "traits/IbMsgTraits.hpp"
 
 //Datatypes for testing versioning and renaming of IB messages.
@@ -96,5 +98,61 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, test::TestFrameEvent& ms
     buffer >> msg.integer >> msg.str;
     return buffer;
 }
+
+inline void Deserialize(MessageBuffer& buffer, test::version1::TestMessage& out)
+{
+    buffer >> out;
+}
+inline void Deserialize(MessageBuffer& buffer, test::version2::TestMessage& out)
+{
+    buffer >> out;
+}
+inline void Deserialize(MessageBuffer& buffer, test::TestFrameEvent& out)
+{
+    buffer >> out;
+}
+
+inline auto Serialize(const test::TestFrameEvent& msg,
+    EndpointAddress address, EndpointId remoteIndex) -> MessageBuffer
+{
+    ib::mw::MessageBuffer buffer;
+    uint32_t msgSizePlaceholder{0u};
+    buffer
+        << msgSizePlaceholder
+        << VAsioMsgKind::IbSimMsg
+        << remoteIndex
+        << address
+        << msg;
+    return buffer;
+}
+
+inline auto Serialize(const test::version2::TestMessage& msg,
+    EndpointAddress address, EndpointId remoteIndex) -> MessageBuffer
+{
+    ib::mw::MessageBuffer buffer;
+    uint32_t msgSizePlaceholder{0u};
+    buffer
+        << msgSizePlaceholder
+        << VAsioMsgKind::IbSimMsg
+        << remoteIndex
+        << address
+        << msg;
+    return buffer;
+}
+
+inline auto Serialize(const test::version1::TestMessage& msg,
+    EndpointAddress address, EndpointId remoteIndex) -> MessageBuffer
+{
+    ib::mw::MessageBuffer buffer;
+    uint32_t msgSizePlaceholder{0u};
+    buffer
+        << msgSizePlaceholder
+        << VAsioMsgKind::IbSimMsg
+        << remoteIndex
+        << address
+        << msg;
+    return buffer;
+}
+
 } // mw
 } // ib

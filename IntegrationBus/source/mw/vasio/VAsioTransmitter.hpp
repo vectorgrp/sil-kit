@@ -4,7 +4,7 @@
 
 #include <sstream>
 
-#include "VAsioMsgKind.hpp"
+#include "VAsioProtocol.hpp"
 #include "IVAsioPeer.hpp"
 #include <type_traits>
 
@@ -46,16 +46,8 @@ template<typename MsgT> struct MessageHistory<MsgT, 1>
     {
         if (!_hasValue || !_hasHistory)
             return;
-        
-        ib::mw::MessageBuffer buffer;
-        uint32_t msgSizePlaceholder{ 0u };
-        buffer
-            << msgSizePlaceholder
-            << VAsioMsgKind::IbSimMsg
-            << remoteIdx
-            << _from
-            << _last
-            ;
+       
+        auto buffer = Serialize(_last, _from, remoteIdx);
         peer->SendIbMsg(std::move(buffer));
     }
 private:
@@ -112,15 +104,8 @@ public:
                 << "', which is not a valid remote receiver.";
             throw std::runtime_error{ss.str()};
         }
-        ib::mw::MessageBuffer buffer;
-        uint32_t msgSizePlaceholder{0u};
-        buffer
-            << msgSizePlaceholder
-            << VAsioMsgKind::IbSimMsg
-            << receiverIter->remoteIdx
-            << to_endpointAddress(from->GetServiceDescriptor())
-            << msg;
-        (*receiverIter).peer->SendIbMsg(std::move(buffer));
+        auto buffer = Serialize(msg, to_endpointAddress(from->GetServiceDescriptor()), receiverIter->remoteIdx);
+        receiverIter->peer->SendIbMsg(std::move(buffer));
     }
 
     void SetHistoryLength(size_t historyLength)
@@ -136,14 +121,7 @@ public:
         _hist.Save(from, msg);
         for (auto& receiver : _remoteReceivers)
         {
-            ib::mw::MessageBuffer buffer;
-            uint32_t msgSizePlaceholder{0u};
-            buffer
-                << msgSizePlaceholder
-                << VAsioMsgKind::IbSimMsg
-                << receiver.remoteIdx
-                << to_endpointAddress(from->GetServiceDescriptor())
-                << msg;
+            auto buffer = Serialize(msg, to_endpointAddress(from->GetServiceDescriptor()), receiver.remoteIdx);
             receiver.peer->SendIbMsg(std::move(buffer));
         }
     }

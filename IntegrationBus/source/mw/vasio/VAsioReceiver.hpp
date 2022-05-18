@@ -101,7 +101,7 @@ template <class MsgT>
 void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* /*from*/, const ServiceDescriptor& descriptor, MessageBuffer&& buffer)
 {
     MsgT msg;
-    buffer >> msg;
+    Deserialize(buffer, msg);
 
     TraceRx(_logger, this, msg);
 

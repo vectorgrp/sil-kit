@@ -389,16 +389,9 @@ void VAsioTcpPeer::WriteSomeAsync()
 
 void VAsioTcpPeer::Subscribe(VAsioMsgSubscriber subscriber)
 {
-    MessageBuffer buffer;
-    uint32_t rawMsgSize{0};
-    buffer
-        << rawMsgSize
-        << VAsioMsgKind::SubscriptionAnnouncement
-        << subscriber;
-
     _logger->Debug("Announcing subscription for [{}] {}", subscriber.networkName, subscriber.msgTypeName);
 
-    SendIbMsg(std::move(buffer));
+    SendIbMsg(Serialize(subscriber));
 }
 
 void VAsioTcpPeer::StartAsyncRead()
@@ -477,6 +470,7 @@ void VAsioTcpPeer::DispatchBuffer()
         auto newBuffer = std::vector<uint8_t>{_msgBuffer.begin() + _currentMsgSize, _msgBuffer.end()};
         auto newWPos = _wPos - _currentMsgSize;
 
+        // manually extract the message size so we can adjust the MessageBuffer size
         uint32_t msgSize{0u};
         if (_msgBuffer.size() < sizeof msgSize)
         {
@@ -486,10 +480,12 @@ void VAsioTcpPeer::DispatchBuffer()
         //ensure buffer does not contain data from contiguous messages
         _msgBuffer.resize(msgSize);
         MessageBuffer msgBuffer{std::move(_msgBuffer)};
-        msgBuffer >> msgSize; //drop message size by adjusting internal read pos
+        //drop message size by adjusting internal read position:
+        (void)ExtractMessageSize(msgBuffer); 
         msgBuffer.SetFormatVersion(GetProtocolVersion());
         _ibConnection->OnSocketData(this, std::move(msgBuffer));
 
+        // keep trailing data in the buffer
         _msgBuffer = std::move(newBuffer);
         _wPos = newWPos;
         _currentMsgSize = 0u;
