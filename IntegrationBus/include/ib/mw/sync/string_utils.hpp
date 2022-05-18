@@ -121,10 +121,10 @@ std::string to_string(ParticipantCommand::Kind command)
     {
     case ParticipantCommand::Kind::Invalid:
         return "Invalid";
-    case ParticipantCommand::Kind::Initialize:
+    case ParticipantCommand::Kind::Initialize: 
         return "Initialize";
-    case ParticipantCommand::Kind::ReInitialize:
-        return "ReInitialize";
+    case ParticipantCommand::Kind::Reinitialize:
+        return "Reinitialize";
     }
     throw ib::TypeConversionError{};
 }

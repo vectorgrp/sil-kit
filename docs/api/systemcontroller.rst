@@ -57,7 +57,7 @@ be reinitialize or the system can be shut down::
 
   // Reinitialize a participant by providing its name.
   auto* systemController = participant->GetSystemController();
-  systemController->ReInitialize(participant.name);
+  systemController->Reinitialize(participant.name);
 
   // Shut down all participants.
   auto* systemController = participant->GetSystemController();

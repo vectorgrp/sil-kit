@@ -19,7 +19,7 @@ struct ParticipantCommand
     enum class Kind : uint8_t {
         Invalid, //!< An invalid command
         Initialize, //!< The initialize command
-        ReInitialize //!< The re-inizialize command
+        Reinitialize //!< The reinitialize command
     };
 
     ParticipantId participant; //!< The specific participant that receives this command.

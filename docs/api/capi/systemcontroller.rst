@@ -9,7 +9,7 @@ The features of the SystemController in the Cpp API are not provided through a S
 in the C API but directly provided through the ib_Participant.
 
 .. doxygenfunction:: ib_Participant_Initialize
-.. doxygenfunction:: ib_Participant_ReInitialize
+.. doxygenfunction:: ib_Participant_Reinitialize
 .. doxygenfunction:: ib_Participant_RunSimulation
 .. doxygenfunction:: ib_Participant_StopSimulation
 .. doxygenfunction:: ib_Participant_Shutdown

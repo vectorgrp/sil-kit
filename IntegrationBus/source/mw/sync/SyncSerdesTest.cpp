@@ -13,7 +13,7 @@ TEST(MwVAsioSerdes, MwSync_ParticipantCommand)
     using namespace ib::mw::sync;
     ib::mw::MessageBuffer buffer;
 
-    ParticipantCommand in{7, ParticipantCommand::Kind::Initialize};
+    ParticipantCommand in{7, ParticipantCommand::Kind::Reinitialize};
     ParticipantCommand out{0, ParticipantCommand::Kind::Invalid};
 
     Serialize(buffer , in);

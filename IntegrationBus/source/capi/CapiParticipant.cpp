@@ -315,7 +315,7 @@ ib_ReturnCode ib_Participant_Initialize(ib_Participant* participant, const char*
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Participant_ReInitialize(ib_Participant* participant, const char* participantName)
+ib_ReturnCode ib_Participant_Reinitialize(ib_Participant* participant, const char* participantName)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);
   ASSERT_VALID_POINTER_PARAMETER(participantName);
@@ -324,7 +324,7 @@ ib_ReturnCode ib_Participant_ReInitialize(ib_Participant* participant, const cha
     auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
     auto* systemController = cppParticipant->GetSystemController();
 
-    systemController->ReInitialize(participantName);
+    systemController->Reinitialize(participantName);
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE

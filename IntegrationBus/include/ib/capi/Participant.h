@@ -17,7 +17,7 @@ IB_BEGIN_DECLS
 typedef int8_t ib_ParticipantCommand_Kind;
 #define ib_ParticipantCommand_Kind_Invalid      ((ib_ParticipantCommand_Kind) 0) //!< An invalid command
 #define ib_ParticipantCommand_Kind_Initialize   ((ib_ParticipantCommand_Kind) 1) //!< The initialize command
-#define ib_ParticipantCommand_Kind_ReInitialize ((ib_ParticipantCommand_Kind) 2) //!< The re-inizialize command
+#define ib_ParticipantCommand_Kind_Reinitialize ((ib_ParticipantCommand_Kind) 2) //!< The re-inizialize command
 
 //!< The numeric participant id.
 typedef int32_t ib_ParticipantId;
@@ -119,7 +119,7 @@ typedef void (*ib_ParticipantInitHandler_t)(void* context, ib_Participant* parti
 /*! \brief Register a callback to perform initialization
  *
  * The handler is called when an \ref ib_ParticipantCommand_Kind_Initialize
- * or \ref ib_ParticipantCommand_Kind_ReInitialize has been received.
+ * or \ref ib_ParticipantCommand_Kind_Reinitialize has been received.
  * The callback is executed in the context of the middleware
  * thread that received the command.
  * After the handler has been processed, the participant
@@ -304,7 +304,7 @@ typedef ib_ReturnCode(*ib_Participant_CompleteSimulationTask_t)(ib_Participant* 
   */
 IntegrationBusAPI ib_ReturnCode ib_Participant_Initialize(ib_Participant* participant, const char* participantName);
 
-/*! \brief Send \ref the ReInitialize command to a specific participant
+/*! \brief Send \ref the Reinitialize command to a specific participant
   *
   *  The command is only allowed if the participant is in the
   *  ib_ParticipantState_Stopped or ib_ParticipantState_Error state.
@@ -313,11 +313,11 @@ IntegrationBusAPI ib_ReturnCode ib_Participant_Initialize(ib_Participant* partic
   *
   *  NB:
   *   - Parametrization is yet to be determined.
-  *   - ReInitialize is still subject to changed! It might be changed to
-  *     a SystemCommand to ReInitialize all participants without sending
+  *   - Reinitialize is still subject to changed! It might be changed to
+  *     a SystemCommand to Reinitialize all participants without sending
   *     new parameters.
   */
-IntegrationBusAPI ib_ReturnCode ib_Participant_ReInitialize(ib_Participant* participant, const char* participantName);
+IntegrationBusAPI ib_ReturnCode ib_Participant_Reinitialize(ib_Participant* participant, const char* participantName);
 
 /*! \brief Send \ref the Run command to all participants
   *

@@ -21,7 +21,7 @@ public:
      */
     virtual void Initialize(const std::string& participantName) const = 0;
 
-    /*! \brief Send \ref ParticipantCommand::Kind::ReInitialize to a specific participant
+    /*! \brief Send \ref ParticipantCommand::Kind::Reinitialize to a specific participant
      *
      *  The command is only allowed if the participant is in the
      *  ParticipantState::Stopped or ParticipantState::Error state.
@@ -30,11 +30,11 @@ public:
      *
      *  NB:
      *   - Parametrization is yet to be determined.
-     *   - ReInitialize is still subject to changed! It might be changed to
-     *     a SystemCommand to ReInitialize all participants without sending
+     *   - Reinitialize is still subject to changed! It might be changed to
+     *     a SystemCommand to Reinitialize all participants without sending
      *     new parameters.
      */
-    virtual void ReInitialize(const std::string& participantName) const = 0;
+    virtual void Reinitialize(const std::string& participantName) const = 0;
 
     /*! \brief Send \ref SystemCommand::Kind::Run to all participants
      *

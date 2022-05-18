@@ -2494,8 +2494,8 @@ Changed
   -ib_ReturnCode ib_SimulationParticipant_Initialize(ib_SimulationParticipant* participant, ...);
   +ib_ReturnCode ib_Participant_Initialize(ib_Participant* participant, ...);
 
-  -ib_ReturnCode ib_SimulationParticipant_ReInitialize(ib_SimulationParticipant* participant, ...);
-  +ib_ReturnCode ib_Participant_ReInitialize(ib_Participant* participant, ...);
+  -ib_ReturnCode ib_SimulationParticipant_Reinitialize(ib_SimulationParticipant* participant, ...);
+  +ib_ReturnCode ib_Participant_Reinitialize(ib_Participant* participant, ...);
 
   -ib_ReturnCode ib_SimulationParticipant_RunSimulation(ib_SimulationParticipant* participant);
   +ib_ReturnCode ib_Participant_RunSimulation(ib_Participant* participant);
@@ -2815,14 +2815,14 @@ Removed
     .. code-block:: c++
         
       void ib::mw::sync::ISystemController::Initialize(ParticipantId) const;
-      void ib::mw::sync::ISystemController::ReInitialize(ParticipantId participantId) const;
+      void ib::mw::sync::ISystemController::Reinitialize(ParticipantId participantId) const;
 
     + new:
 
     .. code-block:: c++
        
        void ib::mw::sync::ISystemController::Initialize(const std::string& participantName) const;
-       void ib::mw::sync::ISystemController::ReInitialize(const std::string& participantName) const;
+       void ib::mw::sync::ISystemController::Reinitialize(const std::string& participantName) const;
 
 
 - Removed the ConfigBuilder from the public API in the `include/ib` directory.

@@ -76,9 +76,9 @@ TEST_F(SystemControllerTest, send_reinitialize)
 {
     std::string name = "Participant";
     auto nameHash = util::hash::Hash(name);
-    ParticipantCommand cmd{ nameHash, ParticipantCommand::Kind::ReInitialize};
+    ParticipantCommand cmd{ nameHash, ParticipantCommand::Kind::Reinitialize};
     EXPECT_CALL(participant, SendIbMessage(&controller, cmd)).Times(1);
-    controller.ReInitialize(name);
+    controller.Reinitialize(name);
 }
 
 TEST_F(SystemControllerTest, send_run)
