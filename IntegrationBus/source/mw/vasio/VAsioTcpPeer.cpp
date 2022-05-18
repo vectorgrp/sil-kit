@@ -487,6 +487,7 @@ void VAsioTcpPeer::DispatchBuffer()
         _msgBuffer.resize(msgSize);
         MessageBuffer msgBuffer{std::move(_msgBuffer)};
         msgBuffer >> msgSize; //drop message size by adjusting internal read pos
+        msgBuffer.SetFormatVersion(GetProtocolVersion());
         _ibConnection->OnSocketData(this, std::move(msgBuffer));
 
         _msgBuffer = std::move(newBuffer);
