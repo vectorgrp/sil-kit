@@ -419,22 +419,6 @@
       ]
     },
 
-    "EthernetPcapFile": {
-      "type": "string",
-      "title": "Name of the file capturing the PCAP trace",
-      "examples": [
-        "EthernetWriter.pcap"
-      ]
-    },
-
-    "EthernetPcapPipe": {
-      "type": "string",
-      "title": "Name of the pipe capturing the PCAP trace",
-      "examples": [
-        "EthernetWriterPipe"
-      ]
-    },
-
     "Topic": {
       "type": "string",
       "title": "Name of the communication channel between DataPublisher and DataSubscribers."
@@ -588,9 +572,7 @@
           "Network": { "$ref": "#/definitions/Network" },
           "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
           "Replay": { "$ref": "#/definitions/Replay" },
-          "MacAddress": { "$ref": "#/definitions/EthernetMacAddress" },
-          "PcapFile": { "$ref": "#/definitions/EthernetPcapFile" },
-          "PcapPipe": { "$ref": "#/definitions/EthernetPcapPipe" }
+          "MacAddress": { "$ref": "#/definitions/EthernetMacAddress" }
         },
         "additionalProperties": false,
         "required": [

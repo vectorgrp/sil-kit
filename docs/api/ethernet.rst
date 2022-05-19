@@ -153,18 +153,6 @@ _________
 To trace all received Ethernet frames in a PCAP file, you have to specify a trace sink of type 'PcapFile' in the 
 configuration of the Ethernet Controller and add an appropriate trace sink to the configuration:
 
-.. deprecated:: 3.0.8
-.. code-block:: javascript
-    
-  "EthernetControllers": [
-      {
-          "Name": "ETH0",
-          "MacAddress": "00:08:15:ab:cd:f0",
-          "PcapFile": "pcap_output_trace.pcap"
-      }
-  ]
-
-.. versionadded:: 3.0.8
 .. code-block:: javascript
 
   "EthernetControllers": [

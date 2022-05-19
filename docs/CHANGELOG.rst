@@ -5,6 +5,14 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.99.23] - unreleased
+----------------------
+
+Removed
+~~~~~~~
+        
+  - Removed deprecated PcapFile and PcapPipe config fields in EthernetControllers section. Use UseTraceSinks instead.
+
 [3.99.22] - 2022-05-17
 ----------------------
 

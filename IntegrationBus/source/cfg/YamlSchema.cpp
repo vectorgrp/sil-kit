@@ -127,8 +127,6 @@ auto MakeYamlSchema() -> YamlSchemaElem
             {"Network"},
             {"UseTraceSinks"},
             {"MacAddress"},
-            {"PcapFile"},
-            {"PcapPipe"},
             replay,
         }
     );

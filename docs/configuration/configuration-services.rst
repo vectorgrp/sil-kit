@@ -113,10 +113,6 @@ EthernetControllers
      - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
        this controller. Trace sinks are referred to by their name and can be used
        by multiple controllers. (optional)
-   * - (PcapFile) 
-     - (deprecated, use *UseTraceSinks* instead)
-   * - (PcapPipe)
-     - (deprecated, use *UseTraceSinks* instead)
    * - Replay
      - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
        by this controller. (optional)
