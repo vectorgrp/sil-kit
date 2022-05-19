@@ -93,7 +93,7 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
 inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncement& announcement)
 {
     //Backward compatibility
-    const auto currentVersion = from_header(RegistryMsgHeader{});
+    const auto currentVersion = CurrentProtocolVersion();
     if (buffer.GetFormatVersion() != currentVersion)
     {
         DeserializeCompat(buffer, announcement);
@@ -111,25 +111,75 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncement&
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnouncementReply& reply)
 {
-    buffer  << reply.status
-        << reply.remoteHeader
-        << reply.subscribers;
+    //Backward compatibility
+    const auto currentVersion = CurrentProtocolVersion();
+    if (buffer.GetFormatVersion() != currentVersion)
+    {
+        SerializeCompat(buffer, reply);
+    }
+    else
+    {
+        buffer  
+            << reply.remoteHeader
+            << reply.status
+            << reply.subscribers;
+    }
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncementReply& reply)
 {
-    buffer 
-        >> reply.status
-        >> reply.remoteHeader
-        >> reply.subscribers;
+    //Backward compatibility
+    const auto currentVersion = CurrentProtocolVersion();
+    if (buffer.GetFormatVersion() != currentVersion)
+    {
+        // Backward compatibiliy here is tricky. When connecting to a VAsioRegistry
+        // we already negotiated a ProtocolVersion via the KnownParticipants message.
+        // In all other cases we do not know the ProtocolVersion a priori here
+        if (buffer.GetFormatVersion() == ProtocolVersion{0,0})
+        {
+            //Ok, uninitialized ProtocolVersion implies that we have a connection between two, non-registry peers
+            //Let's guess the version based on the buffer size
+            auto bufferCopy = buffer;
+            try {
+                // Try the current version, this contains a remoteHeader field which should be more future proof
+                ParticipantAnnouncementReply maybeReply;
+                bufferCopy 
+                    >> maybeReply.remoteHeader
+                    >> maybeReply.status
+                    >> maybeReply.subscribers
+                    ;
+                reply = maybeReply;
+            } catch(...) {
+                //fall through to the backward compatible code
+                buffer.SetFormatVersion({3,0});
+                DeserializeCompat(buffer, reply);
+            }
+        }
+    }
+    else
+    {
+        buffer 
+            >> reply.remoteHeader
+            >> reply.status
+            >> reply.subscribers;
+    }
     return buffer;
 }
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const KnownParticipants& participants)
 {
-    buffer << participants.messageHeader
-        << participants.peerInfos
-        ;
+    //Backward compatibility with legacy peers
+    const auto currentVersion = CurrentProtocolVersion();
+    if (buffer.GetFormatVersion() != currentVersion)
+    {
+        SerializeCompat(buffer, participants);
+    }
+    else
+    {
+        buffer << participants.messageHeader
+            << participants.peerInfos
+            ;
+    }
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, KnownParticipants& participants)

@@ -14,8 +14,9 @@ namespace mw {
 struct RegistryMsgHeader
 {
     std::array<char, 4> preambel{{'V', 'I', 'B', '-'}};
-    // If versionHigh/Low changes here, update VIB version range in VAsioProtocol.cpp:ProtocolVersionToString
-    // Also, ensure backwards compatibility in the Ser/Des code path
+    // If versionHigh/Low changes here, update VIB version range .
+    // Also, ensure backwards compatibility in the Ser/Des code path.
+    // See VAsioProtcolVersion.hpp
     uint16_t versionHigh = 3;
     uint16_t versionLow = 1;
 };
@@ -46,12 +47,12 @@ struct ParticipantAnnouncement
 
 struct ParticipantAnnouncementReply
 {
+    RegistryMsgHeader remoteHeader;
     enum class Status : uint8_t {
         Failed = 0,
         Success = 1
     };
-    Status status;
-    RegistryMsgHeader remoteHeader;
+    Status status{Status::Failed}; //default for failure to deserialize
     std::vector<VAsioMsgSubscriber> subscribers;
 };
 

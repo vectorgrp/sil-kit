@@ -380,14 +380,14 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
         ParticipantAnnouncementReply reply;
         reply.status = ParticipantAnnouncementReply::Status::Failed;
         reply.remoteHeader = reference;
-        from->SendIbMsg(Serialize(reply));
+        from->SendIbMsg(Serialize(from->GetProtocolVersion(), reply));
 
         return;
     }
 
     // after negotiating the Version, we can safely deserialize the remaining message
     ParticipantAnnouncement announcement;
-    // XXX lots of error potential, should be handled transparently in peer->SendIbMessage()
+    // XXX lots of error potential, should be handled transparently in the peer
     buffer.SetFormatVersion(from->GetProtocolVersion());
     Deserialize(buffer, announcement);
 
@@ -422,7 +422,7 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
         );
     }
 
-    if (!_tcp4Acceptor.is_open() && !_tcp4Acceptor.is_open())
+    if (!_tcp4Acceptor.is_open() && !_tcp6Acceptor.is_open())
     {
         throw std::runtime_error{ "VasioConnection: cannot send announcement on TCP: tcp-acceptors for IPv4 and IPv6 are missing" };
     }
@@ -498,7 +498,7 @@ void VAsioConnection::SendParticipantAnnoucementReply(IVAsioPeer* peer)
     _logger->Debug("Sending participant announcement reply to {} with protocol version {}.{}",
         peer->GetInfo().participantName, reply.remoteHeader.versionHigh,
         reply.remoteHeader.versionLow);
-    peer->SendIbMsg(Serialize(reply));
+    peer->SendIbMsg(Serialize(peer->GetProtocolVersion(), reply));
 }
 
 void VAsioConnection::AddParticipantToLookup(const std::string& participantName)
@@ -524,20 +524,27 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, MessageBuffer&& 
 {
     KnownParticipants participantsMsg;
     Deserialize(buffer, participantsMsg);
-    const auto handshakeHeader = to_header(peer->GetProtocolVersion());
 
-    if (participantsMsg.messageHeader != handshakeHeader)
+    //After receiving a ParticipantAnnouncement the Registry will send a KnownParticipants message
+    // check if we support its version here
+    if(ProtocolVersionSupported(participantsMsg.messageHeader))
     {
+        peer->SetProtocolVersion(from_header(participantsMsg.messageHeader));
+    }
+    else
+    {
+        // Not acknowledged
         NotifyNetworkIncompatibility(participantsMsg.messageHeader, peer->GetInfo().participantName);
 
         ParticipantAnnouncementReply reply;
         reply.status = ParticipantAnnouncementReply::Status::Failed;
-        reply.remoteHeader = handshakeHeader;
-        peer->SendIbMsg(Serialize(reply));
+        reply.remoteHeader = RegistryMsgHeader{};
+        peer->SendIbMsg(Serialize(peer->GetProtocolVersion(), reply));
         return;
     }
 
-    _logger->Debug("Received known participants list from IbRegistry");
+    _logger->Debug("Received known participants list from IbRegistry protocol {}.{}",
+        participantsMsg.messageHeader.versionHigh, participantsMsg.messageHeader.versionLow);
 
     auto connectPeer = [this](const auto peerUri) {
         _logger->Debug("Connecting to {} with Id {} on {}",

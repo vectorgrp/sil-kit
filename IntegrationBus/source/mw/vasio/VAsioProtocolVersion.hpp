@@ -11,21 +11,32 @@
 
 namespace ib {
 namespace mw {
-using ProtocolVersion = std::tuple<uint16_t, uint16_t>;
-inline auto from_header(const RegistryMsgHeader& header) -> ProtocolVersion
+using ProtocolVersion = std::tuple<int, int>;
+
+
+inline auto from_header(const RegistryMsgHeader& header) -> ProtocolVersion;
+inline auto to_header(ProtocolVersion version);
+inline auto MapVersionToRelease(const ib::mw::RegistryMsgHeader& registryMsgHeader) -> std::string;
+inline constexpr auto CurrentProtocolVersion() -> ProtocolVersion;
+
+//////////////////////////////////////////////////////////////////////
+//  Inline Implementations
+//////////////////////////////////////////////////////////////////////
+auto from_header(const RegistryMsgHeader& header) -> ProtocolVersion
 {
 	return {header.versionHigh, header.versionLow};
 }
-inline auto to_header(ProtocolVersion version)
+
+auto to_header(ProtocolVersion version)
 {
 	RegistryMsgHeader header;
-	header.versionHigh = std::get<0>(version);
-	header.versionLow = std::get<1>(version);
+	header.versionHigh = static_cast<decltype(header.versionHigh)>(std::get<0>(version));
+	header.versionLow = static_cast<decltype(header.versionLow)>(std::get<1>(version));
 	return header;
 }
 
 //! Map ProtocolVersion ranges to VIB distribution releases
-inline auto MapVersionToRelease(const ib::mw::RegistryMsgHeader& registryMsgHeader) -> std::string
+auto MapVersionToRelease(const ib::mw::RegistryMsgHeader& registryMsgHeader) -> std::string
 {
      const auto version = from_header(registryMsgHeader);
     if (std::get<0>(version) == 1)
@@ -50,6 +61,15 @@ inline auto MapVersionToRelease(const ib::mw::RegistryMsgHeader& registryMsgHead
     }
 
     return {"Unknown version range"};
+}
+
+constexpr auto CurrentProtocolVersion() -> ProtocolVersion
+{
+    //VS2015 does not support proper c++14:
+    //const RegistryMsgHeader header;
+    //return {header.versionHigh, header.versionLow};
+    return {RegistryMsgHeader{}.versionHigh,
+        RegistryMsgHeader{}.versionLow};
 }
 
 } // mw

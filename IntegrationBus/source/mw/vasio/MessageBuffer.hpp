@@ -46,7 +46,7 @@ public:
     // ----------------------------------------
     // Public methods for backward compatibility.
 
-    ProtocolVersion _formatVersion{};
+    ProtocolVersion _formatVersion{CurrentProtocolVersion()};
     //! Set the format version to use for ser/des.
     void SetFormatVersion(ProtocolVersion version)
     {

@@ -48,7 +48,7 @@ auto ExtractEndpointAddress(MessageBuffer& buffer) ->EndpointAddress;
 auto Serialize(const ParticipantAnnouncement& announcement) -> MessageBuffer;
 void Deserialize(MessageBuffer& buffer, ParticipantAnnouncement& out);
 //! Handshake: Serialize ParticipantAnnouncement (contains peer's protocol version)
-auto Serialize(const ParticipantAnnouncementReply& reply) -> MessageBuffer;
+auto Serialize(ProtocolVersion version, const ParticipantAnnouncementReply& reply) -> MessageBuffer;
 void Deserialize(MessageBuffer& buffer,ParticipantAnnouncementReply& out);
 //! Serialize a Service Subscription request
 auto Serialize(const VAsioMsgSubscriber& subscriber) -> MessageBuffer;
@@ -57,7 +57,7 @@ void Deserialize(MessageBuffer&, VAsioMsgSubscriber&);
 auto Serialize(ProtocolVersion protocolVersion, const SubscriptionAcknowledge& ack) ->  MessageBuffer;
 void Deserialize(MessageBuffer&, SubscriptionAcknowledge&);
 
-auto Serialize(const KnownParticipants& reply) -> MessageBuffer;
+auto Serialize(ProtocolVersion protocolVersion ,const KnownParticipants& reply) -> MessageBuffer;
 void Deserialize(MessageBuffer& buffer,KnownParticipants& out);
 
 //! Check if we support ser/des for the given protocol version

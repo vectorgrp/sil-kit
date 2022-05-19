@@ -92,6 +92,8 @@ struct MockVAsioPeer
 
         _serviceDescriptor._serviceId = 1;
         _serviceDescriptor._participantId = 1;
+        
+        _protocolVersion = CurrentProtocolVersion();
 
         ON_CALL(*this, GetLocalAddress()).WillByDefault(Return("127.0.0.1"));
         ON_CALL(*this, GetRemoteAddress()).WillByDefault(Return("127.0.0.1"));
@@ -207,7 +209,7 @@ TEST_F(VAsioConnectionTest, unsupported_version_reply_should_throw)
     reply.remoteHeader.versionLow = 1;
     reply.status = ParticipantAnnouncementReply::Status::Failed;
 
-    auto buffer = Serialize(reply);
+    auto buffer = Serialize(from_header(reply.remoteHeader), reply);
     (void)ExtractMessageSize(buffer);
     EXPECT_THROW(
         _connection.OnSocketData(&_from, std::move(buffer)),
@@ -218,7 +220,7 @@ TEST_F(VAsioConnectionTest, supported_version_reply_must_not_throw)
     ParticipantAnnouncementReply reply{};
     reply.status = ParticipantAnnouncementReply::Status::Success;
 
-    auto buffer = Serialize(reply);
+    auto buffer = Serialize(from_header(reply.remoteHeader), reply);
     (void)ExtractMessageSize(buffer);
     EXPECT_NO_THROW(
         _connection.OnSocketData(&_from, std::move(buffer))

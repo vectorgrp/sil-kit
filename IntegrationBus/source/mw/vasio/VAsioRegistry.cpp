@@ -201,7 +201,7 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
         knownParticipantsMsg.peerInfos.push_back(peerInfo);
     }
 
-    peer->SendIbMsg(Serialize(knownParticipantsMsg));
+    peer->SendIbMsg(Serialize(peer->GetProtocolVersion(), knownParticipantsMsg));
 }
 
 void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)

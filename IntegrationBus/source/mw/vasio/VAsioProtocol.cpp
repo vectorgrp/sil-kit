@@ -102,9 +102,11 @@ auto ExtractEndpointAddress(MessageBuffer& buffer) ->EndpointAddress
 //////////////////////////////////////////////////////////////////////
 //     Serialize
 //////////////////////////////////////////////////////////////////////
-auto Serialize(const ParticipantAnnouncementReply& reply) -> MessageBuffer
+auto Serialize(ProtocolVersion version, const ParticipantAnnouncementReply& reply) -> MessageBuffer
 {
     MessageBuffer buffer;
+    buffer.SetFormatVersion(version);
+
     uint32_t msgSizePlaceholder{0u};
 
     buffer << msgSizePlaceholder
@@ -169,9 +171,12 @@ void Deserialize(MessageBuffer& buffer, SubscriptionAcknowledge& out)
     out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
 }
 
-auto Serialize(const KnownParticipants& knownParticipantsMsg) -> MessageBuffer
+auto Serialize(ProtocolVersion protocolVersion,
+    const KnownParticipants& knownParticipantsMsg) -> MessageBuffer
 {
     MessageBuffer sendBuffer;
+    sendBuffer.SetFormatVersion(protocolVersion);
+
     uint32_t msgSizePlaceholder{0u};
     sendBuffer
         << msgSizePlaceholder

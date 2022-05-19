@@ -190,9 +190,9 @@ std::string ServiceDescriptor::to_string() const
     return ss.str();
 }
 
-mw::EndpointAddress ServiceDescriptor::to_endpointAddress() const
+EndpointAddress ServiceDescriptor::to_endpointAddress() const
 {
-    return mw::EndpointAddress{GetParticipantId(), GetServiceId()};
+    return {GetParticipantId(), GetServiceId()};
 }
 
 inline std::string to_string(const ServiceDescriptor& serviceDescriptor)
