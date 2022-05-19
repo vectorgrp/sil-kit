@@ -9,6 +9,7 @@
 #include "VAsioMsgKind.hpp"
 #include "VAsioDatatypes.hpp"
 #include "MessageBuffer.hpp"
+#include "VAsioProtocolVersion.hpp"
 
 //fowards
 #include "ib/sim/can/fwd_decl.hpp"
@@ -38,6 +39,7 @@ auto ExtractMessageKind(MessageBuffer& buffer) -> VAsioMsgKind;
 // Extract the registry message kind tag (third element for handshake messages)
 auto ExtractRegistryMessageKind(MessageBuffer& buffer) -> RegistryMessageKind;
 
+auto PeekRegistryMessageHeader(const MessageBuffer& buffer) -> RegistryMsgHeader;
 auto ExtractEndpointId(MessageBuffer& buffer) ->EndpointId;
 auto ExtractEndpointAddress(MessageBuffer& buffer) ->EndpointAddress;
 
@@ -52,16 +54,14 @@ void Deserialize(MessageBuffer& buffer,ParticipantAnnouncementReply& out);
 auto Serialize(const VAsioMsgSubscriber& subscriber) -> MessageBuffer;
 void Deserialize(MessageBuffer&, VAsioMsgSubscriber&);
 //! Serialize a Service subscription acknowledgement
-auto Serialize(uint32_t protocolVersion, const SubscriptionAcknowledge& ack) ->  MessageBuffer;
+auto Serialize(ProtocolVersion protocolVersion, const SubscriptionAcknowledge& ack) ->  MessageBuffer;
 void Deserialize(MessageBuffer&, SubscriptionAcknowledge&);
 
 auto Serialize(const KnownParticipants& reply) -> MessageBuffer;
 void Deserialize(MessageBuffer& buffer,KnownParticipants& out);
 
 //! Check if we support ser/des for the given protocol version
-bool ProtocolVersionSupported(const ParticipantAnnouncement& announcement);
-//! Map Protocol Versions to VIB releases
-auto ProtocolVersionToString(const ib::mw::RegistryMsgHeader& registryMsgHeader) -> std::string;
+bool ProtocolVersionSupported(const RegistryMsgHeader& header);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Services for established connections

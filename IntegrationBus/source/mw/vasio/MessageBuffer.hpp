@@ -14,6 +14,8 @@
 
 #include "ib/util/vector_view.hpp"
 
+#include "VAsioProtocolVersion.hpp"
+
 namespace ib {
 namespace mw {
 
@@ -44,13 +46,13 @@ public:
     // ----------------------------------------
     // Public methods for backward compatibility.
 
-    uint32_t _formatVersion{0};
+    ProtocolVersion _formatVersion{};
     //! Set the format version to use for ser/des.
-    void SetFormatVersion(uint32_t version)
+    void SetFormatVersion(ProtocolVersion version)
     {
         _formatVersion = version;
     }
-    auto GetFormatVersion() -> uint32_t
+    auto GetFormatVersion() -> ProtocolVersion
     {
         return _formatVersion;
     }

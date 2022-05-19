@@ -14,8 +14,10 @@ namespace mw {
 struct RegistryMsgHeader
 {
     std::array<char, 4> preambel{{'V', 'I', 'B', '-'}};
-    uint16_t versionHigh = 3; // If versionHigh/Low changes here, update VIB version range in RegistryMsgHeaderToMainVersionRange
-    uint16_t versionLow = 0;
+    // If versionHigh/Low changes here, update VIB version range in VAsioProtocol.cpp:ProtocolVersionToString
+    // Also, ensure backwards compatibility in the Ser/Des code path
+    uint16_t versionHigh = 3;
+    uint16_t versionLow = 1;
 };
 
 struct VAsioMsgSubscriber

@@ -7,6 +7,7 @@
 
 #include "Uri.hpp"
 #include "MessageBuffer.hpp"
+#include "SerdesCompat.hpp"
 
 namespace ib {
 namespace mw {
@@ -88,11 +89,23 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
 
     return buffer;
 }
+
 inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncement& announcement)
 {
-    buffer >> announcement.messageHeader
-        >> announcement.peerInfo
-        ;
+    //Backward compatibility
+    const auto currentVersion = from_header(RegistryMsgHeader{});
+    if (buffer.GetFormatVersion() != currentVersion)
+    {
+        DeserializeCompat(buffer, announcement);
+    }
+    else
+    {
+        //  default
+        buffer
+            >> announcement.messageHeader
+            >> announcement.peerInfo
+            ;
+    }
     return buffer;
 }
 

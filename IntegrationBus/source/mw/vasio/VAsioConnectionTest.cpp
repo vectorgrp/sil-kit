@@ -79,6 +79,8 @@ struct MockVAsioPeer
 {
     VAsioPeerInfo _peerInfo;
     ServiceDescriptor _serviceDescriptor;
+    ProtocolVersion _protocolVersion;
+
     MockVAsioPeer()
     {
         _peerInfo.participantId = 1234;
@@ -95,6 +97,7 @@ struct MockVAsioPeer
         ON_CALL(*this, GetRemoteAddress()).WillByDefault(Return("127.0.0.1"));
         ON_CALL(*this, GetInfo()).WillByDefault(ReturnRef(_peerInfo));
         ON_CALL(*this, GetServiceDescriptor()).WillByDefault(ReturnRef(_serviceDescriptor));
+        ON_CALL(*this, GetProtocolVersion()).WillByDefault(Return(_protocolVersion));
     }
 
     //IVasioPeer
@@ -105,6 +108,8 @@ struct MockVAsioPeer
     MOCK_METHOD(std::string, GetRemoteAddress, (), (const, override));
     MOCK_METHOD(std::string, GetLocalAddress, (), (const, override));
     MOCK_METHOD(void, StartAsyncRead, (), (override));
+    MOCK_METHOD(void, SetProtocolVersion, (ProtocolVersion), (override));
+    MOCK_METHOD(ProtocolVersion, GetProtocolVersion, (), (const, override));
 
     //IIbServiceEndpoint
     MOCK_METHOD(void, SetServiceDescriptor, (const ServiceDescriptor& serviceDescriptor), (override));

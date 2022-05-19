@@ -78,6 +78,15 @@ auto ExtractRegistryMessageKind(MessageBuffer& buffer) -> RegistryMessageKind
     return kind;
 }
 
+auto PeekRegistryMessageHeader(const MessageBuffer& buffer) -> RegistryMsgHeader
+{
+    // we do not want change buffer's internal state, so we copy it, since we do not have dedicated peek methods on it
+    auto bufferCopy = buffer;
+    RegistryMsgHeader header;
+    bufferCopy >> header;
+    return header;
+}
+
 auto ExtractEndpointId(MessageBuffer& buffer) ->EndpointId
 {
     EndpointId endpointId;
@@ -143,7 +152,7 @@ void Deserialize(MessageBuffer& buffer, VAsioMsgSubscriber& out)
 }
 
 // Subscription of services have a negotiated "connection"-version
- auto Serialize(uint32_t protocolVersion, const SubscriptionAcknowledge& ack) ->  MessageBuffer
+ auto Serialize(ProtocolVersion protocolVersion, const SubscriptionAcknowledge& ack) ->  MessageBuffer
 {
     MessageBuffer ackBuffer;
     ackBuffer.SetFormatVersion(protocolVersion);
@@ -180,32 +189,24 @@ void Deserialize(MessageBuffer& buffer,KnownParticipants& out)
 //////////////////////////////////////////////////////////////////////
 //  Protocol Versioning
 //////////////////////////////////////////////////////////////////////
- bool ProtocolVersionSupported(const ParticipantAnnouncement& /*announcement*/)
+bool ProtocolVersionSupported(const RegistryMsgHeader& header)
 {
-    return true;
-}
+    const auto version = from_header(header);
+    if(version == ProtocolVersion{3, 0})
+    {
+        //3.99.21: bumped version to be explicitly incompatible with prior releases (MVP3, CANoe16)
+        return true;
+    }
+    else if (version == ProtocolVersion{3,1})
+    {
+        //3.99.23: bumped version to test backwards compatibility with removed VAsioPeerUri in ParticipantAnnouncement
+        return true;
+    }
+    // NB: Add your explicit backward compatibility here, ensure that Serialize/Deserialize can handle the ProtocolVersion transparently.
 
- auto ProtocolVersionToString(const ib::mw::RegistryMsgHeader& registryMsgHeader) -> std::string
-{
-    if (registryMsgHeader.versionHigh == 1)
-    {
-        return {"< v2.0.0"};
-    }
-    else if (registryMsgHeader.versionHigh == 2 && registryMsgHeader.versionLow == 0)
-    {
-        return {"v2.0.0 - v3.4.0"};
-    }
-    else if (registryMsgHeader.versionHigh == 2 && registryMsgHeader.versionLow == 1)
-    {
-        return {"v3.4.1 - v3.99.21"};
-    }
-    else if (registryMsgHeader.versionHigh == 3 && registryMsgHeader.versionLow == 0)
-    {
-        return {"v3.99.22 - current"};
-    }
+    return false;
+ }
 
-    return {"Unknown version range"};
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Services for established connections

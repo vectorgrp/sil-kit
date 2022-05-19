@@ -62,6 +62,9 @@ public:
     // IIbServiceEndpoint
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+
+    inline void SetProtocolVersion(ProtocolVersion v)  override;
+    inline auto GetProtocolVersion() const -> ProtocolVersion  override;
 private:
     // ----------------------------------------
     // Private Methods
@@ -77,6 +80,7 @@ private:
 private:
     // ----------------------------------------
     // Private Members
+    ProtocolVersion _protocolVersion{};
     asio::generic::stream_protocol::socket _socket;
     VAsioConnection* _ibConnection{nullptr};
     VAsioPeerInfo _info;
@@ -110,6 +114,16 @@ void VAsioTcpPeer::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDesc
 auto VAsioTcpPeer::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 {
     return _serviceDescriptor;
+}
+
+void VAsioTcpPeer::SetProtocolVersion(ProtocolVersion v)
+{
+        _protocolVersion= std::move(v);
+}
+
+auto VAsioTcpPeer::GetProtocolVersion() const -> ProtocolVersion
+{
+    return _protocolVersion;
 }
 
 } // mw

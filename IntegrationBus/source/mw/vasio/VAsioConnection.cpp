@@ -352,9 +352,9 @@ void VAsioConnection::NotifyNetworkIncompatibility(const RegistryMsgHeader& othe
                                                    const std::string& otherParticipantName)
 {
     const auto errorMsg = fmt::format("Network incompatibility between this version range ({}) and connecting participant '{}' ({})",
-        ProtocolVersionToString(RegistryMsgHeader{}),
+        MapVersionToRelease(RegistryMsgHeader{}),
         otherParticipantName,
-        ProtocolVersionToString(other)
+        MapVersionToRelease(other)
     );
     _logger->Critical(errorMsg);
     std::cerr << "ERROR: " << errorMsg << std::endl;
@@ -362,31 +362,20 @@ void VAsioConnection::NotifyNetworkIncompatibility(const RegistryMsgHeader& othe
 
 void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer)
 {
-    ParticipantAnnouncement announcement;
-    Deserialize(buffer, announcement);
+    //It is only Safe to extract the RegistryMsgHeader from this message
+    // in case the peer has a different protocol version than us
+    auto remoteHeader = PeekRegistryMessageHeader(buffer);
 
     const RegistryMsgHeader reference{};
     // check if we support the remote peer's protocol version or signal a handshake failure
-    if(ProtocolVersionSupported(announcement))
+    if(ProtocolVersionSupported(remoteHeader))
     {
-        const uint32_t version = (announcement.messageHeader.versionHigh << 16)
-            | (announcement.messageHeader.versionLow & 0xFFFF);
-        from->SetProtocolVersion(version);
+        from->SetProtocolVersion({remoteHeader.versionHigh, remoteHeader.versionLow});
     }
     else
     {
-        NotifyNetworkIncompatibility(announcement.messageHeader, announcement.peerInfo.participantName);
-
-        ParticipantAnnouncementReply reply;
-        reply.status = ParticipantAnnouncementReply::Status::Failed;
-        reply.remoteHeader = reference;
-        from->SendIbMsg(Serialize(reply));
-
-        return;
-    }
-    if (announcement.messageHeader != reference)
-    {
-        NotifyNetworkIncompatibility(announcement.messageHeader, announcement.peerInfo.participantName);
+        // it is not safe to decode the ParticipantAnnouncement
+        NotifyNetworkIncompatibility(remoteHeader, from->GetRemoteAddress());
 
         ParticipantAnnouncementReply reply;
         reply.status = ParticipantAnnouncementReply::Status::Failed;
@@ -396,7 +385,14 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
         return;
     }
 
-    _logger->Debug("Received participant announcement from {}", announcement.peerInfo.participantName);
+    // after negotiating the Version, we can safely deserialize the remaining message
+    ParticipantAnnouncement announcement;
+    // XXX lots of error potential, should be handled transparently in peer->SendIbMessage()
+    buffer.SetFormatVersion(from->GetProtocolVersion());
+    Deserialize(buffer, announcement);
+
+    _logger->Debug("Received participant announcement from {}, protocol version {}.{}", announcement.peerInfo.participantName, announcement.messageHeader.versionHigh,
+        announcement.messageHeader.versionLow);
 
     from->SetInfo(announcement.peerInfo);
     auto& service = dynamic_cast<IIbServiceEndpoint&>(*from);
@@ -456,9 +452,9 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Mess
     {
         _logger->Warn("Received failed participant announcement reply from {}",
             from->GetInfo().participantName);
-        RegistryMsgHeader reference;
+        const auto handshakeHeader = to_header(from->GetProtocolVersion());
         // check what went wrong during the handshake
-        if(reply.remoteHeader.preambel != reference.preambel)
+        if(reply.remoteHeader.preambel != handshakeHeader.preambel)
         {
             auto msg = fmt::format("VIB Connection Handshake: ParticipantAnnouncementReply contains invalid preambel in header. check endianess on participant {}.", from->GetInfo().participantName);
         }
@@ -496,7 +492,12 @@ void VAsioConnection::SendParticipantAnnoucementReply(IVAsioPeer* peer)
     std::transform(_vasioReceivers.begin(), _vasioReceivers.end(), std::back_inserter(reply.subscribers),
                    [](const auto& subscriber) { return subscriber->GetDescriptor(); });
 
-    _logger->Debug("Sending participant announcement reply to {}", peer->GetInfo().participantName);
+    // tell the remote peer what *our* protocol version is that we
+    // can accept for this peer
+    reply.remoteHeader = to_header(peer->GetProtocolVersion());
+    _logger->Debug("Sending participant announcement reply to {} with protocol version {}.{}",
+        peer->GetInfo().participantName, reply.remoteHeader.versionHigh,
+        reply.remoteHeader.versionLow);
     peer->SendIbMsg(Serialize(reply));
 }
 
@@ -523,15 +524,15 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, MessageBuffer&& 
 {
     KnownParticipants participantsMsg;
     Deserialize(buffer, participantsMsg);
-    const RegistryMsgHeader reference{};
+    const auto handshakeHeader = to_header(peer->GetProtocolVersion());
 
-    if (participantsMsg.messageHeader != reference)
+    if (participantsMsg.messageHeader != handshakeHeader)
     {
         NotifyNetworkIncompatibility(participantsMsg.messageHeader, peer->GetInfo().participantName);
 
         ParticipantAnnouncementReply reply;
         reply.status = ParticipantAnnouncementReply::Status::Failed;
-        reply.remoteHeader = reference;
+        reply.remoteHeader = handshakeHeader;
         peer->SendIbMsg(Serialize(reply));
         return;
     }
