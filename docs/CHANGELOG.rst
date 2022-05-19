@@ -5,8 +5,46 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.99.23] - unreleased
+[3.99.X] - unreleased
 ----------------------
+
+Refactored Bus System and further Service (data message, rpc) APIs
+
+Compatibility with 3.99.22
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): No
+- Application software interface (API): No
+- Middleware network protocol (VAsio): Yes
+
+
+Changed
+~~~~~~~
+
+- ``IntegrationBus/include/ib/sim/can/CanDatatypes.hpp``
+      
+      The two members direction and userContext were moved from the CanFrame to the CanFrameEvent
+
+      + old: 
+      .. code-block:: c++
+
+        struct CanFrame
+            {
+                ...
+                TransmitDirection direction{TransmitDirection::Undefined}; //!< Receive/Transmit direction
+                void* userContext; //!< Optional pointer provided by user when sending the frame
+            };
+
+      + new: 
+      .. code-block:: c++
+
+        struct CanFrameEvent
+            {
+                ...
+                TransmitDirection direction{TransmitDirection::Undefined}; //!< Receive/Transmit direction
+                void* userContext; //!< Optional pointer provided by user when sending the frame
+            };
+
 
 Removed
 ~~~~~~~

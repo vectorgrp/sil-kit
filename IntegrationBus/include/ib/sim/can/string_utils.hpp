@@ -7,6 +7,7 @@
 
 #include "ib/exception.hpp"
 #include "ib/util/PrintableHexString.hpp"
+#include "ib/sim/string_utils.hpp"
 
 #include "CanDatatypes.hpp"
 
@@ -170,7 +171,7 @@ std::ostream& operator<<(std::ostream& out, CanTransmitStatus status)
 std::ostream& operator<<(std::ostream& out, const CanFrame& msg)
 {
     return out
-        << "can::CanFrame{userContext=" << msg.userContext
+        << "can::CanFrame{"
         << ", canId=" << msg.canId
         << ", flags=" << msg.flags
         << ", dlc=" << static_cast<uint32_t>(msg.dlc)
@@ -183,8 +184,9 @@ std::ostream& operator<<(std::ostream& out, const CanFrameEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     return out
-        << "can::CanFrameEvent{txId=" << msg.transmitId
-        << ", userContext=" << msg.frame.userContext
+        << "can::CanFrameEvent{txId=" << msg.transmitId 
+        << ", userContext=" << msg.userContext
+        << ", direction=" << msg.direction
         << ", frame=" << msg.frame
         << " @" << timestamp.count() << "ms}";
 }

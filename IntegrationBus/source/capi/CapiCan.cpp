@@ -66,7 +66,7 @@ ib_ReturnCode ib_Can_Controller_AddFrameHandler(ib_Can_Controller* controller, v
         frameEvent.timestamp = cppCanFrameEvent.timestamp.count();
         frameEvent.interfaceId = ib_InterfaceIdentifier_CanFrameEvent;
         frameEvent.frame = &frame;
-        frameEvent.userContext = cppCanFrameEvent.frame.userContext;
+        frameEvent.userContext = cppCanFrameEvent.userContext;
 
         callback(context, controller, &frameEvent);
       }, directionMask);

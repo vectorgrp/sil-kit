@@ -77,7 +77,7 @@ TEST(CanControllerTest, send_can_message)
     CanFrameEvent testFrameEvent{};
     testFrameEvent.transmitId = 1;
     testFrameEvent.timestamp = 0ns;
-    testFrameEvent.frame.userContext = 0;
+    testFrameEvent.userContext = 0;
 
     EXPECT_CALL(mockParticipant, SendIbMessage(&canController, testFrameEvent))
         .Times(1);
@@ -105,8 +105,8 @@ TEST(CanControllerTest, receive_can_message)
     CanFrameEvent testFrameEvent{};
     testFrameEvent.frame.canId = 16;
     testFrameEvent.transmitId = 321;
-    testFrameEvent.frame.direction = ib::sim::TransmitDirection::RX;
-    testFrameEvent.frame.userContext = (void*)1234;
+    testFrameEvent.direction = ib::sim::TransmitDirection::RX;
+    testFrameEvent.userContext = (void*)1234;
 
     EXPECT_CALL(callbackProvider, FrameHandler(&canController, testFrameEvent))
         .Times(1);
@@ -133,8 +133,8 @@ TEST(CanControllerTest, receive_can_message_rx_filter1)
 
     CanFrameEvent testFrameEvent{};
     testFrameEvent.frame.canId = 16;
-    testFrameEvent.frame.direction = ib::sim::TransmitDirection::RX;
-    testFrameEvent.frame.userContext = (void*)1234;
+    testFrameEvent.direction = ib::sim::TransmitDirection::RX;
+    testFrameEvent.userContext = (void*)1234;
 
     EXPECT_CALL(callbackProvider, FrameHandler(&canController, testFrameEvent))
         .Times(1);
@@ -163,7 +163,7 @@ TEST(CanControllerTest, receive_can_message_rx_filter2)
 
     CanFrameEvent testFrameEvent{};
     testFrameEvent.frame.canId = 16;
-    testFrameEvent.frame.direction = ib::sim::TransmitDirection::RX;
+    testFrameEvent.direction = ib::sim::TransmitDirection::RX;
 
     EXPECT_CALL(callbackProvider, FrameHandler(&canController, testFrameEvent))
         .Times(0);
@@ -191,7 +191,7 @@ TEST(CanControllerTest, receive_can_message_tx_filter1)
     CanFrameEvent testFrameEvent{};
     testFrameEvent.transmitId = 1;
     testFrameEvent.frame.canId = 16;
-    testFrameEvent.frame.direction = ib::sim::TransmitDirection::TX;
+    testFrameEvent.direction = ib::sim::TransmitDirection::TX;
 
     EXPECT_CALL(callbackProvider, FrameHandler(&canController, testFrameEvent))
         .Times(1);
@@ -218,7 +218,7 @@ TEST(CanControllerTest, receive_can_message_tx_filter2)
 
     CanFrameEvent testFrameEvent{};
     testFrameEvent.frame.canId = 16;
-    testFrameEvent.frame.direction = ib::sim::TransmitDirection::TX;
+    testFrameEvent.direction = ib::sim::TransmitDirection::TX;
 
     EXPECT_CALL(callbackProvider, FrameHandler(&canController, testFrameEvent))
         .Times(0);

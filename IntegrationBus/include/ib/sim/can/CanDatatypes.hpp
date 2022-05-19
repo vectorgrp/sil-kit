@@ -33,8 +33,6 @@ struct CanFrame
     } flags; //!< CAN Arbitration and Control Field Flags
     uint8_t dlc : 4; //!< Data Length Code - determined by the Network Simulator
     std::vector<uint8_t> dataField; //!< The raw CAN data field
-    TransmitDirection direction{TransmitDirection::Undefined}; //!< Receive/Transmit direction
-    void* userContext; //!< Optional pointer provided by user when sending the frame
 };
 
 /*! \brief //! \brief The event of an incoming CAN frame including transmit ID, timestamp and the actual frame
@@ -44,6 +42,8 @@ struct CanFrameEvent
     CanTxId transmitId; //!< Set by the CanController, used for acknowledgements
     std::chrono::nanoseconds timestamp; //!< Send time
     CanFrame frame; //!< The incoming CAN Frame
+    TransmitDirection direction{TransmitDirection::Undefined}; //!< Receive/Transmit direction
+    void* userContext; //!< Optional pointer provided by user when sending the frame
 };
 
 /*! \brief CAN Controller state according to AUTOSAR specification AUTOSAR_SWS_CANDriver 4.3.1

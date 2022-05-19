@@ -27,7 +27,7 @@ TEST(MwVAsioSerdes, SimCan_CanMessage)
     in.frame.flags.esi = 1;
     in.frame.dlc = 5;
     in.frame.dataField = std::vector<uint8_t>{payload.begin(), payload.end()};
-    in.frame.userContext = (void*)((size_t)0xcafecafe);
+    in.userContext = (void*)((size_t)0xcafecafe);
 
     buffer << in;
     buffer >> out;
@@ -42,7 +42,7 @@ TEST(MwVAsioSerdes, SimCan_CanMessage)
     EXPECT_EQ(in.frame.flags.esi, out.frame.flags.esi);
     EXPECT_EQ(in.frame.dlc, out.frame.dlc);
     EXPECT_EQ(in.frame.dataField, out.frame.dataField);
-    EXPECT_EQ(in.frame.userContext, out.frame.userContext);
+    EXPECT_EQ(in.userContext, out.userContext);
 }
 
 TEST(MwVAsioSerdes, SimCan_CanTransmitAcknowledge)

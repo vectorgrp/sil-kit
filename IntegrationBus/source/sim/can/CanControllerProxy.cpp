@@ -66,7 +66,7 @@ auto CanControllerProxy::SendFrame(const CanFrame& frame, void* userContext) -> 
     CanFrameEvent canFrameEvent{};
     canFrameEvent.frame = frame;
     canFrameEvent.transmitId = MakeTxId();
-    canFrameEvent.frame.userContext = userContext;
+    canFrameEvent.userContext = userContext;
 
     _participant->SendIbMessage(this, canFrameEvent);
     return canFrameEvent.transmitId;
@@ -75,7 +75,7 @@ auto CanControllerProxy::SendFrame(const CanFrame& frame, void* userContext) -> 
 void CanControllerProxy::AddFrameHandler(FrameHandler handler, DirectionMask directionMask)
 {
     std::function<bool(const CanFrameEvent&)> filter = [directionMask](const CanFrameEvent& frameEvent) {
-        return (((DirectionMask)frameEvent.frame.direction & (DirectionMask)directionMask)) != 0;
+        return (((DirectionMask)frameEvent.direction & (DirectionMask)directionMask)) != 0;
     };
     RegisterHandler(handler, std::move(filter));
 }

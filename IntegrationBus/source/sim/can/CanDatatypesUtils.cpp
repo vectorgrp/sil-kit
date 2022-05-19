@@ -19,17 +19,19 @@ bool operator==(const CanFrame::CanFrameFlags& lhs, const CanFrame::CanFrameFlag
 
 bool operator==(const CanFrame& lhs, const CanFrame& rhs)
 {
-    return lhs.canId == rhs.canId
-        && lhs.flags == rhs.flags
-        && lhs.dlc == rhs.dlc
-        && lhs.dataField == rhs.dataField
-        && lhs.userContext == rhs.userContext;
+    return lhs.canId == rhs.canId 
+        && lhs.flags == rhs.flags 
+        && lhs.dlc == rhs.dlc 
+        && lhs.dataField == rhs.dataField;
 }
 
 bool operator==(const CanFrameEvent& lhs, const CanFrameEvent& rhs)
 {
-    return lhs.transmitId == rhs.transmitId && lhs.timestamp == rhs.timestamp
-        && lhs.frame == rhs.frame;
+    return lhs.transmitId == rhs.transmitId 
+        && lhs.timestamp == rhs.timestamp 
+        && lhs.frame == rhs.frame
+        && lhs.userContext == rhs.userContext;
+    ;
 }
 
 bool operator==(const CanFrameTransmitEvent& lhs, const CanFrameTransmitEvent& rhs)

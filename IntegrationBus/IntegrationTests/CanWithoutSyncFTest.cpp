@@ -32,7 +32,8 @@ bool Matches(const ib::sim::can::CanFrameEvent& lhs, const ib::sim::can::CanFram
         && lhs.frame.flags == rhs.frame.flags
         && lhs.frame.dlc == rhs.frame.dlc
         && lhs.frame.dataField == rhs.frame.dataField
-        && lhs.frame.userContext == rhs.frame.userContext;
+        && lhs.userContext == rhs.userContext 
+        && lhs.direction == rhs.direction;
 }
 
 class CanWithoutSyncFTest : public testing::Test
@@ -61,8 +62,8 @@ protected:
             canmsg.frame.flags = ib::sim::can::CanFrame::CanFrameFlags{ 1,0,1,0,1 };
             canmsg.timestamp = 1s;
             canmsg.transmitId = index + 1;
-            canmsg.frame.direction = ib::sim::TransmitDirection::RX;
-            canmsg.frame.userContext = (void*)((size_t)index+1);
+            canmsg.direction = ib::sim::TransmitDirection::RX;
+            canmsg.userContext = (void*)((size_t)index+1);
 
             auto& canack = _testMessages[index].expectedAck;
             canack.canId = index;

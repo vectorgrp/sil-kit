@@ -19,8 +19,8 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Ca
         << *reinterpret_cast<const uint8_t*>(&msg.frame.flags)
         << msg.frame.dlc
         << msg.frame.dataField
-        << msg.frame.direction
-        << msg.frame.userContext
+        << msg.direction
+        << msg.userContext
         ;
     return buffer;
 }
@@ -34,8 +34,8 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanFrame
         >> flags
         >> dlc
         >> msg.frame.dataField
-        >> msg.frame.direction
-        >> msg.frame.userContext
+        >> msg.direction
+        >> msg.userContext
         ;
     *reinterpret_cast<uint8_t*>(&msg.frame.flags) = flags;
     msg.frame.dlc = dlc;

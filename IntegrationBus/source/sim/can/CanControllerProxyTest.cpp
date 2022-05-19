@@ -79,7 +79,7 @@ TEST(CanControllerProxyTest, receive_can_message)
     canController.AddFrameHandler(std::bind(&CanControllerProxyCallbacks::FrameHandler, &callbackProvider, _1, _2));
 
     CanFrameEvent testFrameEvent{};
-    testFrameEvent.frame.direction = ib::sim::TransmitDirection::RX;
+    testFrameEvent.direction = ib::sim::TransmitDirection::RX;
 
     EXPECT_CALL(callbackProvider, FrameHandler(&canController, testFrameEvent))
         .Times(1);

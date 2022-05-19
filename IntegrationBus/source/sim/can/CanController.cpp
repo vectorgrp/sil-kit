@@ -55,8 +55,8 @@ auto CanController::SendFrame(const CanFrame& frame, void* userContext) -> CanTx
 
     CanFrameEvent canFrameEvent{};
     canFrameEvent.frame = frame;
-    canFrameEvent.frame.userContext = userContext;
-    canFrameEvent.frame.direction = TransmitDirection::TX;
+    canFrameEvent.userContext = userContext;
+    canFrameEvent.direction = TransmitDirection::TX;
     canFrameEvent.transmitId = MakeTxId();
     canFrameEvent.timestamp = now;
 
@@ -81,7 +81,7 @@ auto CanController::SendFrame(const CanFrame& frame, void* userContext) -> CanTx
 void CanController::AddFrameHandler(FrameHandler handler, DirectionMask directionMask)
 {
     std::function<bool(const CanFrameEvent&)> filter = [directionMask](const CanFrameEvent& msg) {
-        return ((DirectionMask)msg.frame.direction & (DirectionMask)directionMask) != 0;
+        return ((DirectionMask)msg.direction & (DirectionMask)directionMask) != 0;
     };
     RegisterHandler(handler, std::move(filter));
 }
@@ -119,7 +119,7 @@ void CanController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const C
     //}
     
     auto msgCopy = canFrameEvent;
-    msgCopy.frame.direction = TransmitDirection::RX;
+    msgCopy.direction = TransmitDirection::RX;
     CallHandlers(msgCopy);
 
     _tracer.Trace(ib::sim::TransmitDirection::RX, _timeProvider->Now(), std::move(msgCopy));
