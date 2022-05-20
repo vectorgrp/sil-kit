@@ -332,7 +332,7 @@ TEST_F(VAsioConnectionTest, DISABLED_versioned_send_testmessage)
     subscriber.version = MessageTrait::Version();
     subscriber.receiverIdx = 0; //the first receiver
 
-    EXPECT_EQ(subscriber.version, 1);
+    EXPECT_TRUE(subscriber.version == 1);
 
     // ReceiveSubscriptionAnnouncement -> sets internal structures up
     auto subscriberBuffer = Serialize(subscriber);
