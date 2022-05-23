@@ -3,6 +3,7 @@
 #include "LifecycleService.hpp"
 #include "TimeSyncService.hpp"
 #include "IServiceDiscovery.hpp"
+#include "LifecycleFSA.hpp"
 
 #include <cassert>
 #include <future>
@@ -23,6 +24,7 @@ LifecycleService::LifecycleService(IParticipantInternal* participant,
     _timeSyncService = _participant->CreateTimeSyncService(this);
 
     _status.participantName = _participant->GetParticipantName();
+    _lifecycleManagement = std::make_shared<LifecycleManagement>(participant->GetLogger(), this);
 
     // TODO healthCheckConfig needed?
     (void)healthCheckConfig;
@@ -57,10 +59,12 @@ auto LifecycleService::ExecuteLifecycle(bool hasCoordinatedSimulationStart, bool
     serviceDiscovery->NotifyServiceCreated(_timeSyncService->GetServiceDescriptor());
 
     _isRunning = true;
-    ChangeState(ParticipantState::Initialized, "LifecycleService::ExecuteLifecycle() was called");
+    _lifecycleManagement->InitLifecycleManagement("LifecycleService::ExecuteLifecycle() was called");
+    //ChangeState(ParticipantState::Initialized, "LifecycleService::ExecuteLifecycle() was called");
     if (!hasCoordinatedSimulationStart)
     {
-        ChangeState(ParticipantState::Running, "LifecycleService::ExecuteLifecycle() was called without start coordination");
+        _lifecycleManagement->Run("LifecycleService::ExecuteLifecycle() was called without start coordination");
+        //ChangeState(ParticipantState::Running, "LifecycleService::ExecuteLifecycle() was called without start coordination");
     }
     return _finalStatePromise.get_future();
 }
@@ -112,7 +116,9 @@ void LifecycleService::ReportError(std::string errorMsg)
                       "transition to ParticipantState::Error is ignored.");
         return;
     }
-    ChangeState(ParticipantState::Error, std::move(errorMsg));
+    // TODO error message lost
+    _lifecycleManagement->Error(std::move(errorMsg));
+    //ChangeState(ParticipantState::Error, std::move(errorMsg));
 }
 
 void LifecycleService::Pause(std::string reason)
@@ -147,7 +153,8 @@ void LifecycleService::Continue()
 
 void LifecycleService::Stop(std::string reason)
 {
-    ChangeState(ParticipantState::Stopping, reason);
+    _lifecycleManagement->Stop(reason);
+    //ChangeState(ParticipantState::Stopping, reason);
 
     if (_stopHandler)
     {
@@ -158,26 +165,35 @@ void LifecycleService::Stop(std::string reason)
             if (State() != ParticipantState::Error)
             {
                 reason += " and StopHandler completed successfully";
-                ChangeState(ParticipantState::Stopped, std::move(reason));
+                _lifecycleManagement->StopHandled(std::move(reason));
+                //ChangeState(ParticipantState::Stopped, std::move(reason));
             }
         }
         catch (const std::exception& e)
         {
             reason += " and StopHandler threw exception: ";
             reason += e.what();
-            ChangeState(ParticipantState::Stopped, std::move(reason));
+            _lifecycleManagement->StopHandled(std::move(reason));
+            //ChangeState(ParticipantState::Stopped, std::move(reason));
         }
     }
     else
     {
         reason += " and no StopHandler registered";
-        ChangeState(ParticipantState::Stopped, reason);
+        _lifecycleManagement->StopHandled(std::move(reason));
+        //ChangeState(ParticipantState::Stopped, reason);
+    }
+
+    if (!_hasCoordinatedSimulationStop) 
+    {
+        Shutdown("Shutdown after LifecycleService::Stop without stop coordination.");
     }
 }
 
 void LifecycleService::Shutdown(std::string reason)
 {
-    ChangeState(ParticipantState::ShuttingDown, reason);
+    _lifecycleManagement->Shutdown(reason);
+    //ChangeState(ParticipantState::ShuttingDown, reason);
 
     if (_shutdownHandler)
     {
@@ -185,19 +201,22 @@ void LifecycleService::Shutdown(std::string reason)
         {
             _shutdownHandler();
             reason += " and ShutdownHandler completed";
-            ChangeState(ParticipantState::Shutdown, std::move(reason));
+            _lifecycleManagement->ShutdownHandled(std::move(reason));
+            //ChangeState(ParticipantState::Shutdown, std::move(reason));
         }
         catch (const std::exception& e)
         {
             reason += " and ShutdownHandler threw exception: ";
             reason += e.what();
-            ChangeState(ParticipantState::Shutdown, std::move(reason));
+            _lifecycleManagement->ShutdownHandled(std::move(reason));
+            //ChangeState(ParticipantState::Shutdown, std::move(reason));
         }
     }
     else
     {
         reason += " and no ShutdownHandler was registered";
-        ChangeState(ParticipantState::Shutdown, std::move(reason));
+        _lifecycleManagement->ShutdownHandled(std::move(reason));
+        //ChangeState(ParticipantState::Shutdown, std::move(reason));
     }
 
     _finalStatePromise.set_value(State());
@@ -205,7 +224,8 @@ void LifecycleService::Shutdown(std::string reason)
 
 void LifecycleService::Reinitialize(std::string reason)
 {
-    ChangeState(ParticipantState::Reinitializing, reason);
+    _lifecycleManagement->Reinitialize(reason);
+    //ChangeState(ParticipantState::Reinitializing, reason);
 
     if (_reinitializeHandler)
     {
@@ -215,19 +235,22 @@ void LifecycleService::Reinitialize(std::string reason)
             _reinitializeHandler();
             reason += " and ReinitializeHandler completed";
             _timeSyncService->ResetTime();
-            ChangeState(ParticipantState::Initialized, std::move(reason));
+            _lifecycleManagement->ReinitializeHandled(std::move(reason));
+            //ChangeState(ParticipantState::Initialized, std::move(reason));
         }
         catch (const std::exception& e)
         {
             reason += " and ReinitializeHandler threw exception: ";
             reason += e.what();
-            ChangeState(ParticipantState::Error, std::move(reason));
+            _lifecycleManagement->Error(std::move(reason));
+            //ChangeState(ParticipantState::Error, std::move(reason));
         }
     }
     else
     {
         reason += " and no ReinitializeHandler was registered";
-        ChangeState(ParticipantState::Initialized, std::move(reason));
+        _lifecycleManagement->ReinitializeHandled(std::move(reason));
+        //ChangeState(ParticipantState::Initialized, std::move(reason));
     }
 
     _timeSyncService->ResetTime();
@@ -291,46 +314,29 @@ void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* from, const Sy
                 "Received SystemCommand::Start, but ignored it because coordinatedSimulationStart was not set.");
             return;
         }
-        if (State() == ParticipantState::Initialized && _hasCoordinatedSimulationStart)
+        else
         {
-            ChangeState(ParticipantState::Running, "Received SystemCommand::Run");
+            _lifecycleManagement->Run("Received SystemCommand::Run");
+            //ChangeState(ParticipantState::Running, "Received SystemCommand::Run");
             return;
         }
         break;
 
     case SystemCommand::Kind::Stop:
-        if (State() == ParticipantState::Stopped)
+
+        if (!_hasCoordinatedSimulationStop)
         {
-            _logger->Warn("Ignored the received SystemCommand::Stop, because the participant state is already ParticipantState::Stopped");
+            _logger->Info(
+                "Received SystemCommand::Stop, but ignored it because coordinatedSimulationStop was not set.");
             return;
         }
-        else if (State() == ParticipantState::Running)
-        {
-            if (_hasCoordinatedSimulationStop)
-            {
-                Stop("Received SystemCommand::Stop");
-                return;
-            }
-            else
-            {
-                _logger->Info(
-                    "Received SystemCommand::Stop, but ignored it because coordinatedSimulationStop was not set.");
-                return;
-            }
-        }
-        break;
+        //_logger->Warn("Ignored the received SystemCommand::Stop, because the participant state is already ParticipantState::Stopped");
+        Stop("Received SystemCommand::Stop");
+        return;
 
     case SystemCommand::Kind::Shutdown:
-        if (State() == ParticipantState::Error || State() == ParticipantState::Stopped)
-        {
-            Shutdown("Received SystemCommand::Shutdown");
-            return;
-        }
-        else if (State() == ParticipantState::Shutdown || State() == ParticipantState::ShuttingDown)
-        {
-            return;
-        }
-        break;
+        Shutdown("Received SystemCommand::Shutdown");
+        return;
         // TODO Remove below ASAP
     case SystemCommand::Kind::PrepareColdswap: 
     case SystemCommand::Kind::ExecuteColdswap: 
@@ -345,11 +351,16 @@ void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* from, const Sy
 void LifecycleService::ChangeState(ParticipantState newState, std::string reason)
 {
     _status.state = newState;
-    _status.enterReason = reason;
+    _status.enterReason = std::move(reason);
     _status.enterTime = std::chrono::system_clock::now();
     _status.refreshTime = _status.enterTime;
 
     SendIbMessage(_status);
+}
+
+void LifecycleService::SetTimeSyncService(TimeSyncService* timeSyncService)
+{
+    _timeSyncService = timeSyncService;
 }
 
 } // namespace sync

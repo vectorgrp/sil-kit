@@ -22,6 +22,7 @@ namespace sync {
 //forward declarations
 struct ParticipantTimeProvider;
 class TimeSyncService;
+class ILifecycleManagement;
 
 class LifecycleService
     : public ILifecycleService
@@ -77,6 +78,8 @@ public:
 
     void ChangeState(ParticipantState newState, std::string reason);
 
+    void SetTimeSyncService(TimeSyncService* timeSyncService);
+
 private:
     // ----------------------------------------
     // private methods
@@ -101,6 +104,7 @@ private:
 
     bool _isRunning{false};
     ParticipantStatus _status;
+    std::shared_ptr<ILifecycleManagement> _lifecycleManagement;
 
     std::promise<ParticipantState> _finalStatePromise;
 

@@ -1,5 +1,7 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_library(IbMwSync
+    LifecycleFSA.hpp
+    LifecycleFSA.cpp
     LifecycleService.hpp
     LifecycleService.cpp
     ParticipantController.hpp
