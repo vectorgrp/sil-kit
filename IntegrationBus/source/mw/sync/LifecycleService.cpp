@@ -58,6 +58,10 @@ auto LifecycleService::ExecuteLifecycle(bool hasCoordinatedSimulationStart, bool
 
     _isRunning = true;
     ChangeState(ParticipantState::Initialized, "LifecycleService::ExecuteLifecycle() was called");
+    if (!hasCoordinatedSimulationStart)
+    {
+        ChangeState(ParticipantState::Running, "LifecycleService::ExecuteLifecycle() was called without start coordination");
+    }
     return _finalStatePromise.get_future();
 }
 
@@ -265,9 +269,6 @@ auto LifecycleService::GetTimeSyncService() const -> ITimeSyncService*
 void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* from, const SystemCommand& command)
 {
     // Ignore messages if the lifecycle is not being executed yet
-    // if !isLifecycleExecuted -> return
-    // if !coordinatedSimulationStart || !coordinatedSimulationStop
-
     if (!_isRunning)
     {
         // TODO this should be handled as a late joining scenario instead of an error...
@@ -284,6 +285,12 @@ void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* from, const Sy
     case SystemCommand::Kind::Invalid: break;
 
     case SystemCommand::Kind::Run:
+        if (!_hasCoordinatedSimulationStart)
+        {
+            _logger->Info(
+                "Received SystemCommand::Start, but ignored it because coordinatedSimulationStart was not set.");
+            return;
+        }
         if (State() == ParticipantState::Initialized && _hasCoordinatedSimulationStart)
         {
             ChangeState(ParticipantState::Running, "Received SystemCommand::Run");
@@ -294,13 +301,22 @@ void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* from, const Sy
     case SystemCommand::Kind::Stop:
         if (State() == ParticipantState::Stopped)
         {
-            _logger->Warn("Received SystemCommand::Stop, but ignored since already ParticipantState::Stopped");
+            _logger->Warn("Ignored the received SystemCommand::Stop, because the participant state is already ParticipantState::Stopped");
             return;
         }
-        else if (State() == ParticipantState::Running && _hasCoordinatedSimulationStop)
+        else if (State() == ParticipantState::Running)
         {
-            Stop("Received SystemCommand::Stop");
-            return;
+            if (_hasCoordinatedSimulationStop)
+            {
+                Stop("Received SystemCommand::Stop");
+                return;
+            }
+            else
+            {
+                _logger->Info(
+                    "Received SystemCommand::Stop, but ignored it because coordinatedSimulationStop was not set.");
+                return;
+            }
         }
         break;
 
