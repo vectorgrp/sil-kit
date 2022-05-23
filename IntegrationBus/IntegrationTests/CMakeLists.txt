@@ -210,3 +210,10 @@ if(MSVC)
         IbMwParticipant
         )
 endif()
+
+
+# ITests based on demos
+
+add_vib_test(ITestLinDemo SOURCES LinDemoITest.cpp LIBS IbSimTestHarness IbMwParticipant ${itest_extra_libs})
+add_vib_test(ITestCanDemo SOURCES CanDemoITest.cpp LIBS IbSimTestHarness IbMwParticipant ${itest_extra_libs})
+add_vib_test(ITestEthernetDemo SOURCES EthernetDemoITest.cpp LIBS IbSimTestHarness IbMwParticipant ${itest_extra_libs})
