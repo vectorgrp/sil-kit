@@ -45,24 +45,39 @@ Sending Ethernet Frames
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 An |EthernetFrame| is sent with |SendFrame| and received as an |EthernetFrameEvent|. The |EthernetFrame| must be setup
-with a source and destination MAC address and the payload to be transmitted::
+according to layer 2 of IEEE 802.3, with
+
+- a source and destination MAC address (6 octets each), 
+- an optional 802.1Q tag (4 octets), 
+- the Ethertype or length (Ethernet II or IEEE 802.3, 2 octets), and
+- the payload to be transmitted (46 octets or more).
+
+.. admonition:: Note
+
+  The frame check sequence (32-bit CRC, 4 octets) is omitted. Thus, the minimum length of a frame is 60 octets.
+
+A valid frame can be setup and sent as follows::
 
   // Prepare an Ethernet frame
-  std::array<uint8_t, 6> sourceAddress{"F6", "04", "68", "71", "AA", "C1"};
-  std::array<uint8_t, 6> destinationAddress{"F6", "04", "68", "71", "AA", "C2"};
+  const std::array<uint8_t, 6> destinationAddress{ 0xf6, 0x04, 0x68, 0x71, 0xaa, 0xc2 };
+  const std::array<uint8_t, 6> sourceAddress{ 0xf6, 0x04, 0x68, 0x71, 0xaa, 0xc1 };
+  const uint16_t etherType{ 0x0800 };
 
-  std::string message("Ensure that the payload is long enough to constitute"
+  const std::string message("Ensure that the payload is long enough to constitute"
                       " a valid Ethernet frame ----------------------------");
-  std::vector<uint8_t> payload{message.begin(), message.end()};
+  const std::vector<uint8_t> payload{ message.begin(), message.end() };
 
-  EthernetFrame ethFrame;
-  ethFrame.SetSourceMac(sourceAddress);
-  ethFrame.SetDestinationMac(destinationAddress);
-  ethFrame.SetPayload(payload);
+  EthernetFrame frame{};
+  std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(frame.raw));
+  std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(frame.raw));
+  auto etherTypeBytes = reinterpret_cast<const uint8_t*>(&etherType);
+  frame.raw.push_back(etherTypeBytes[1]);  // We assume our platform to be little-endian
+  frame.raw.push_back(etherTypeBytes[0]);
+  std::copy(payload.begin(), payload.end(), std::back_inserter(frame.raw));
 
-  ethernetController->SendFrame(ethFrame);
+  ethernetController->SendFrame(frame);
 
-Transmission acknowledgement
+Transmission Acknowledgement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To be notified of the success or failure of the transmission, a ``FrameTransmitHandler`` can be registered using
@@ -110,7 +125,7 @@ An Ethernet controller should be connected to a switch for a valid simulation. F
 :ref:`simulating Ethernet switches<vibes/networksimulator:Ethernet>` and the 
 :ref:`Network Simulator configuration<vibes/networksimulator:Configuration>`.
 
-Receive state change events
+Receive State Change Events
 ___________________________
 
 State changes are only supported when using the VIBE NetworkSimulator. To receive state changes of an Ethernet 
@@ -223,11 +238,9 @@ Ethernet Controller API
 Data Structures
 ~~~~~~~~~~~~~~~
 
-.. doxygenstruct:: ib::sim::eth::EthernetFrameEvent
-   :members:
 .. doxygenclass:: ib::sim::eth::EthernetFrame
    :members:
-.. doxygenstruct:: ib::sim::eth::EthernetTagControlInformation
+.. doxygenstruct:: ib::sim::eth::EthernetFrameEvent
    :members:
 .. doxygenstruct:: ib::sim::eth::EthernetFrameTransmitEvent
    :members:
@@ -239,9 +252,8 @@ Data Structures
 Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. doxygentypedef:: ib::sim::eth::EthernetTxId
 .. doxygentypedef:: ib::sim::eth::EthernetMac
-.. doxygentypedef:: ib::sim::eth::EthernetVid
+.. doxygentypedef:: ib::sim::eth::EthernetTxId
 .. doxygentypedef:: ib::sim::eth::EthernetBitrate
 .. doxygenenum:: ib::sim::eth::EthernetTransmitStatus
 .. doxygenenum:: ib::sim::eth::EthernetState

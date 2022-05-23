@@ -4,13 +4,8 @@ add_library(IbSimEthernet STATIC
     EthController.hpp
     EthControllerProxy.cpp
     EthControllerProxy.hpp
-    EthDatatypeUtils.cpp
-    EthDatatypeUtils.hpp
-    EthFrame.cpp
-    EthFrame.hpp
     EthControllerReplay.hpp
     EthControllerReplay.cpp
-
     EthControllerFacade.cpp
     EthControllerFacade.hpp
 )

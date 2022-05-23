@@ -11,6 +11,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "EthDatatypeUtils.hpp"
+
 namespace {
 
 using namespace std::chrono_literals;
@@ -26,7 +28,6 @@ using testing::AtLeast;
 using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
-
 
 auto MatchTxId(EthernetTxId transmitId) -> testing::Matcher<const EthernetFrameTransmitEvent&>
 {
@@ -76,15 +77,16 @@ protected:
                 if (numSent < testMessages.size())
                 {
                     const auto& message = testMessages.at(numSent);
-                    EthernetFrame frame;
-                    frame.SetDestinationMac(EthernetMac{ 0x12,0x23,0x45,0x67,0x89,0x9a });
-                    frame.SetSourceMac(EthernetMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12});
-                    frame.SetEtherType(0x8100);
-                    frame.SetPayload(reinterpret_cast<const uint8_t*>(message.expectedData.c_str()), message.expectedData.size());
 
-                    std::cout << participant->Name() << " -> SendMesg @" << now.count() << "ns" << std::endl;
+                    std::cout << participant->Name() << " -> sent frame @" << now.count() << "ns" << std::endl;
 
-                    controller->SendFrame(std::move(frame));
+                    EthernetMac destinationMac{ 0x12, 0x23, 0x45, 0x67, 0x89, 0x9a };
+                    EthernetMac sourceMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12 };
+                    EthernetEtherType etherType{ 0x0800 };
+                    EthernetVlanTagControlIdentifier tci{ 0x0000 };
+
+                    auto ethernetFrame = CreateEthernetFrameWithVlanTag(destinationMac, sourceMac, etherType, message.expectedData, tci);
+                    controller->SendFrame(ethernetFrame);
                     numSent++;
                     std::this_thread::sleep_for(100ms);
                 }
@@ -101,15 +103,15 @@ protected:
         });
 
         controller->AddFrameHandler(
-            [this, participant](IEthernetController*, const EthernetFrameEvent& msg) {
-                const auto& pl = msg.ethFrame.GetPayload();
-                std::string message(pl.begin(), pl.end());
+            [this, participant](IEthernetController*, const EthernetFrameEvent& event) {
+                const auto& frame = event.frame;
+                std::string message(frame.raw.begin() + EthernetFrameHeaderSize + EthernetFrameVlanTagSize, frame.raw.end());
                 std::cout << participant->Name() 
-                    <<" <- received message"
-                    << ": ethframe size=" << pl.size()
+                    <<" <- received frame"
+                    << ": frame size=" << frame.raw.size()
                     << ": testMessages size=" << testMessages.size()
                     << ": receiveCount=" << numReceived
-                    << ": " << message
+                    << ": message='" << message << "'"
                     << std::endl;
                 testMessages[numReceived].receivedData = message;
                 numReceived++;
@@ -147,14 +149,12 @@ protected:
         }
         EXPECT_CALL(callbacks, AckHandler(MatchTxId(0))).Times(0);
 
-
         EXPECT_TRUE(testHarness.Run(30s))
             << "TestHarness Timeout occurred!"
             << " numSent=" << numSent
             << " numAcked=" << numAcked
             << " numReceived=" << numReceived
             << " numReceived2=" << numReceived2;
-
 
         EXPECT_EQ(numAcked, numSent);
         EXPECT_EQ(numSent, numReceived);
@@ -163,9 +163,7 @@ protected:
         {
             EXPECT_EQ(message.expectedData, message.receivedData);
         }
-
     }
-
 
 protected:
     uint32_t domainId;

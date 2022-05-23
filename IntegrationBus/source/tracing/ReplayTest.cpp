@@ -53,12 +53,9 @@ auto AService(const IIbServiceEndpoint* service) -> testing::Matcher<const IIbSe
 auto AnEthMessage(const EthernetFrame& msg) -> testing::Matcher<const EthernetFrameEvent&>
 {
     using namespace testing;
-    return Field(&EthernetFrameEvent::ethFrame,
+    return Field(&EthernetFrameEvent::frame,
         AllOf(
-            Property(&EthernetFrame::GetDestinationMac, ElementsAreArray(msg.GetDestinationMac()))
-            , Property(&EthernetFrame::GetSourceMac, ElementsAreArray(msg.GetSourceMac()))
-            , Property(&EthernetFrame::GetEtherType, Eq(msg.GetEtherType()))
-            , Property(&EthernetFrame::GetPayloadSize, Eq(msg.GetPayloadSize()))
+            Field(&EthernetFrame::raw, ContainerEq(msg))
         )
     );
 }

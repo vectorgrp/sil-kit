@@ -44,7 +44,7 @@ auto EthControllerProxy::SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId
     msg.transmitId = txId;
 
     // we keep a copy until the transmission was acknowledged before tracing the message
-    _transmittedMessages[msg.transmitId] = msg.ethFrame;
+    _transmittedMessages[msg.transmitId] = msg.frame;
 
     _participant->SendIbMessage(this, std::move(msg));
 
@@ -54,7 +54,7 @@ auto EthControllerProxy::SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId
 auto EthControllerProxy::SendFrame(EthernetFrame frame) -> EthernetTxId
 {
     EthernetFrameEvent msg{};
-    msg.ethFrame = std::move(frame);
+    msg.frame = std::move(frame);
     return SendFrameEvent(std::move(msg));
 }
 
@@ -82,7 +82,7 @@ void EthControllerProxy::AddBitrateChangeHandler(BitrateChangeHandler handler)
 void EthControllerProxy::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthernetFrameEvent& msg)
 {
     _tracer.Trace(ib::sim::TransmitDirection::RX,
-        msg.timestamp, msg.ethFrame);
+        msg.timestamp, msg.frame);
 
     CallHandlers(msg);
 }

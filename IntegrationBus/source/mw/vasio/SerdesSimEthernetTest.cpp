@@ -6,6 +6,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+#include "EthDatatypeUtils.hpp"
+
 using namespace std::chrono_literals;
 
 TEST(MwVAsioSerdes, SimEthernet_EthMessage)
@@ -16,42 +18,22 @@ TEST(MwVAsioSerdes, SimEthernet_EthMessage)
     EthernetFrameEvent in;
     EthernetFrameEvent out;
 
-    std::string payload{ "Hello from ethernet writer!  msgId = 1 -------------------------------------------------------" };
-    EthernetMac sourceMac{1, 2, 3, 4, 5, 6};
-    EthernetMac destinationMac{6, 5, 4, 3, 2, 1};
-
-    EthernetTagControlInformation tci;
-    tci.pcp = 3;
-    tci.dei = 0;
-    tci.vid = 1;
+    EthernetMac destinationMac{ 0x12, 0x23, 0x45, 0x67, 0x89, 0x9a };
+    EthernetMac sourceMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12 };
+    EthernetEtherType etherType{ 0x0800 };
 
     in.transmitId = 5;
     in.timestamp = 13ns;
-    in.ethFrame.SetSourceMac(sourceMac);
-    in.ethFrame.SetDestinationMac(destinationMac);
-    in.ethFrame.SetVlanTag(tci);
-    in.ethFrame.SetPayload(std::vector<uint8_t>{payload.begin(), payload.end()});
+    in.frame = CreateEthernetFrame(destinationMac, sourceMac, etherType,
+        "Hello from ethernet writer!  msgId = 1 -------------------------------------------------------");
 
     buffer << in;
     buffer >> out;
 
     EXPECT_EQ(in.transmitId, out.transmitId);
     EXPECT_EQ(in.timestamp, out.timestamp);
-    EXPECT_EQ(in.ethFrame.GetSourceMac(), out.ethFrame.GetSourceMac());
-    EXPECT_EQ(in.ethFrame.GetDestinationMac(), out.ethFrame.GetDestinationMac());
-    EXPECT_EQ(in.ethFrame.GetVlanTag().pcp, out.ethFrame.GetVlanTag().pcp);
-    EXPECT_EQ(in.ethFrame.GetVlanTag().dei, out.ethFrame.GetVlanTag().dei);
-    EXPECT_EQ(in.ethFrame.GetVlanTag().vid, out.ethFrame.GetVlanTag().vid);
-
-    std::vector<uint8_t> payloadIn{ in.ethFrame.GetPayload().begin(), in.ethFrame.GetPayload().end() };
-    std::vector<uint8_t> payloadOut{ out.ethFrame.GetPayload().begin(), out.ethFrame.GetPayload().end() };
-
-    ASSERT_THAT(payloadIn, payloadOut);
-
-    EXPECT_EQ(in.ethFrame.RawFrame(), out.ethFrame.RawFrame());
+    ASSERT_THAT(in.frame.raw, testing::ContainerEq(out.frame.raw));
 }
-
-
 
 TEST(MwVAsioSerdes, SimEthernet_EthTransmitAcknowledge)
 {

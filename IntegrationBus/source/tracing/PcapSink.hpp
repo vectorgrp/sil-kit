@@ -9,7 +9,6 @@
 #include "ITraceMessageSink.hpp"
 
 #include "EndpointAddress.hpp"
-#include "EthFrame.hpp"
 #include "detail/NamedPipe.hpp"
 
 namespace ib {

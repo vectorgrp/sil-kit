@@ -46,6 +46,7 @@ add_vib_test(ITestThreeEthController
     LIBS
       IbSimTestHarness
       IbMwParticipant
+      IbSimEthernet
       ${itest_extra_libs}
 )
 

@@ -91,7 +91,6 @@ std::string to_string(const EthernetFrame& msg)
     return out.str();
 }
 
-
 std::string to_string(const EthernetFrameEvent& msg)
 {
     std::stringstream out;
@@ -120,8 +119,6 @@ std::string to_string(const EthernetSetMode& msg)
     return out.str();
 }
 
-
-    
 std::ostream& operator<<(std::ostream& out, EthernetTransmitStatus value)
 {
     return out << to_string(value);
@@ -135,20 +132,32 @@ std::ostream& operator<<(std::ostream& out, EthernetMode value)
     return out << to_string(value);
 }
 
-std::ostream& operator<<(std::ostream& out, const EthernetFrame& msg)
+std::ostream& operator<<(std::ostream& out, const EthernetFrame& frame)
 {
-    if (msg.GetFrameSize() == 0)
+    if (frame.raw.size() == 0)
     {
         return out
             << "EthernetFrame{size=0}";
     }
     else
     {
+        out << "EthernetFrame{size=" << frame.raw.size();
+        if (frame.raw.size() >= 2 * sizeof(EthernetMac))
+        {
+            EthernetMac destinationMac;
+            EthernetMac sourceMac;
+            std::copy(
+                frame.raw.begin(),
+                frame.raw.begin() + sizeof(EthernetMac), destinationMac.begin());
+            std::copy(
+                frame.raw.begin() + sizeof(EthernetMac),
+                frame.raw.begin() + 2 * sizeof(EthernetMac), sourceMac.begin());
+
+            out << ", src = " << util::AsHexString(sourceMac).WithSeparator(":")
+                << ", dst=" << util::AsHexString(destinationMac).WithSeparator(":");
+        }
         return out
-            << "EthernetFrame{src=" << util::AsHexString(msg.GetSourceMac()).WithSeparator(":")
-            << ", dst=" << util::AsHexString(msg.GetDestinationMac()).WithSeparator(":")
-            << ", size=" << msg.GetFrameSize()
-            << ", payload=[" << util::AsHexString(msg.GetPayload()).WithSeparator(" ").WithMaxLength(8)
+            << ", data=[" << util::AsHexString(frame.raw).WithSeparator(" ").WithMaxLength(8)
             << "]}";
     }
 }
@@ -157,8 +166,8 @@ std::ostream& operator<<(std::ostream& out, const EthernetFrameEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     return out
-        << "eth::EthernetFrameEvent{txId=" << msg.transmitId
-        << ", " << msg.ethFrame
+        << "EthernetFrameEvent{txId=" << msg.transmitId
+        << ", " << msg.frame
         << " @" << timestamp.count() << "ms"
         << "}";
 }
@@ -167,7 +176,7 @@ std::ostream& operator<<(std::ostream& out, const EthernetFrameTransmitEvent& ms
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     out
-        << "eth::EthernetFrameTransmitEvent{txId=" << msg.transmitId
+        << "EthernetFrameTransmitEvent{txId=" << msg.transmitId
         << ", src=" << util::AsHexString(msg.sourceMac).WithSeparator(":")
         << ", status=" << msg.status
         << " @" << timestamp.count() << "ms"
@@ -180,7 +189,7 @@ std::ostream& operator<<(std::ostream& out, const EthernetStatus& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     return out
-        << "eth::EthernetStatus{"
+        << "EthernetStatus{"
         << "state=" << msg.state
         << "bitrate=" << msg.bitrate
         << " @" << timestamp.count() << "ms"
@@ -190,9 +199,8 @@ std::ostream& operator<<(std::ostream& out, const EthernetStatus& msg)
 std::ostream& operator<<(std::ostream& out, const EthernetSetMode& msg)
 {
     return out
-        << "eth::EthernetSetMode{" << msg.mode << "}";
+        << "EthernetSetMode{" << msg.mode << "}";
 }
-
 
 } // namespace eth
 } // namespace sim

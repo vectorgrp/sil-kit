@@ -49,7 +49,57 @@ Changed
 Removed
 ~~~~~~~
         
-  - Removed deprecated PcapFile and PcapPipe config fields in EthernetControllers section. Use UseTraceSinks instead.
+- Removed deprecated PcapFile and PcapPipe config fields in EthernetControllers section. Use UseTraceSinks instead.
+
+- API to read, create and modify Ethernet frames at the ``EthernetFrame`` is removed.
+
+  - ``IntegrationBus/include/ib/sim/eth/EthernetDatatypes.hpp``
+
+    + old: 
+    .. code-block:: c++
+
+      struct EthernetTagControlInformation;
+
+      EthernetFrame::EthernetFrame();
+      EthernetFrame::EthernetFrame(const EthernetFrame& other);
+      EthernetFrame(EthernetFrame&& other);
+      auto operator=(const EthernetFrame& other) -> EthernetFrame&;
+      auto operator=(EthernetFrame&& other) -> EthernetFrame&;
+
+      EthernetFrame::EthernetFrame(const std::vector<uint8_t>& rawFrame);
+      EthernetFrame::EthernetFrame(std::vector<uint8_t>&& rawFrame);
+      EthernetFrame::EthernetFrame(const uint8_t* rawFrame, size_t size);
+      
+      auto EthernetFrame::GetDestinationMac() const -> EthernetMac;
+      void EthernetFrame::SetDestinationMac(const EthernetMac& mac);
+      auto EthernetFrame::GetSourceMac() const -> EthernetMac;
+      void EthernetFrame::SetSourceMac(const EthernetMac& mac);
+
+      auto EthernetFrame::GetVlanTag() const -> EthernetTagControlInformation;
+      void EthernetFrame::SetVlanTag(const EthernetTagControlInformation& tci);
+
+      auto EthernetFrame::GetEtherType() const -> uint16_t;
+      void EthernetFrame::SetEtherType(uint16_t etherType);
+
+      auto EthernetFrame::GetFrameSize() const -> size_t;
+      auto EthernetFrame::GetHeaderSize() const -> size_t;
+      auto EthernetFrame::GetPayloadSize() const -> size_t;
+
+      auto EthernetFrame::GetPayload() -> util::vector_view<uint8_t>;
+      auto EthernetFrame::GetPayload() const -> util::vector_view<const uint8_t>;
+      void EthernetFrame::SetPayload(const std::vector<uint8_t>& payload);
+      void EthernetFrame::SetPayload(const uint8_t* payload, size_t size);
+
+      auto EthernetFrame::RawFrame() const -> const std::vector<uint8_t>&;
+      void EthernetFrame::SetRawFrame(const std::vector<uint8_t>&);
+
+    + new:
+    .. code-block:: c++
+
+      struct EthernetFrame
+      {
+          std::vector<uint8_t> raw;
+      };
 
   - Removed MacAddress config fields in EthernetControllers section.
 
@@ -68,26 +118,25 @@ Compatibility with 3.99.21
 Removed
 ~~~~~~~
 
-  - ``IntegrationBus/include/ib/version.hpp``
+- ``IntegrationBus/include/ib/version.hpp``
     
-    The function to retreive the Sprint name was removed. The CMake-Variables ``IB_SPRINT_NUMBER`` and
-    ``IB_SPRINT_NAME`` were removed as well.
-
-        + old: 
-      .. code-block:: c++
-          
-          ib::version::SprintName()
-
-  - ``IntegrationBus/include/ib/capi/FlexRay.h``
-      
-      The convenience function in the C-API to append a ``TxBufferConfig`` was removed. 
+  The function to retreive the Sprint name was removed. The CMake-Variables ``IB_SPRINT_NUMBER`` and
+  ``IB_SPRINT_NAME`` were removed as well.
 
       + old: 
-      .. code-block:: c++
+    .. code-block:: c++
+          
+        ib::version::SprintName()
 
-        typedef ib_ReturnCode (*ib_FlexRay_Append_TxBufferConfig_t)(ib_FlexRay_ControllerConfig** controllerConfig, 
-          const ib_FlexRay_TxBufferConfig* txBufferConfig);
+- ``IntegrationBus/include/ib/capi/FlexRay.h``
+      
+    The convenience function in the C-API to append a ``TxBufferConfig`` was removed. 
 
+    + old: 
+    .. code-block:: c++
+
+      typedef ib_ReturnCode (*ib_FlexRay_Append_TxBufferConfig_t)(ib_FlexRay_ControllerConfig** controllerConfig, 
+        const ib_FlexRay_TxBufferConfig* txBufferConfig);
 
 Changed
 ~~~~~~~

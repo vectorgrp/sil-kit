@@ -18,6 +18,9 @@ using namespace ib::sim;
 
 using namespace std::chrono_literals;
 
+// Field in a frame that can indicate the protocol, payload size, or the start of a VLAN tag
+using EtherType = uint16_t;
+
 std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 {
     auto seconds = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(timestamp);
@@ -25,34 +28,35 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
     return out;
 }
 
-std::vector<uint8_t> CreateRawFrame(const eth::EthernetMac& destinationAddress, const eth::EthernetMac& sourceAddress,
+eth::EthernetFrame CreateFrame(const eth::EthernetMac& destinationAddress, const eth::EthernetMac& sourceAddress,
                                     const std::vector<uint8_t>& payload)
 {
-    const std::vector<uint8_t> etherType = {0x00, 0x00};
-    const std::vector<uint8_t> dummyCrc = {0x0, 0x0, 0x0, 0x0};
+    const uint16_t etherType = 0x86dd;  // IPv6 protocol
 
-    std::vector<uint8_t> rawFrame;
-    rawFrame.insert(rawFrame.end(), destinationAddress.begin(), destinationAddress.end()); // destination
-    rawFrame.insert(rawFrame.end(), sourceAddress.begin(), sourceAddress.end()); // source
-    rawFrame.insert(rawFrame.end(), etherType.begin(), etherType.end()); // EtherType -- no need to check for VLAN-Tag
-    rawFrame.insert(rawFrame.end(), payload.begin(), payload.end()); // payload
-    rawFrame.insert(rawFrame.end(), dummyCrc.begin(), dummyCrc.end()); // dummy CRC
+    eth::EthernetFrame frame{};
+    std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(frame.raw));
+    std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(frame.raw));
+    auto etherTypeBytes = reinterpret_cast<const uint8_t*>(&etherType);
+    frame.raw.push_back(etherTypeBytes[1]);  // We assume our platform to be little-endian
+    frame.raw.push_back(etherTypeBytes[0]);
+    std::copy(payload.begin(), payload.end(), std::back_inserter(frame.raw));
 
     // make sure that the result is a valid Ethernet frame
-    if (rawFrame.size() < 64)
+    if (frame.raw.size() < 64)
     {
-        auto fillSize = static_cast<size_t>(64 - rawFrame.size());
+        auto fillSize = static_cast<size_t>(64 - frame.raw.size());
         std::vector<uint8_t> filler(fillSize, 0);
-        rawFrame.insert(rawFrame.end(), filler.begin(), filler.end()); // expand to valid frame
+        std::copy(filler.begin(), filler.end(), std::back_inserter(frame.raw)); // expand to a valid frame
     }
-    return rawFrame;
+    return frame;
 }
 
-std::string GetPayloadStringFromRawFrame(const std::vector<uint8_t>& rawFrame)
+std::string GetPayloadStringFromFrame(const eth::EthernetFrame& frame)
 {
+    const size_t FrameHeaderSize = 2 * sizeof(eth::EthernetMac) + sizeof(EtherType);
+
     std::vector<uint8_t> payload;
-    payload.insert(payload.end(), rawFrame.begin() + 14 /*destination[6]+source[6]+ethType[2]*/,
-                   rawFrame.end() - 4); // CRC
+    payload.insert(payload.end(), frame.raw.begin() + FrameHeaderSize, frame.raw.end());
     std::string payloadString(payload.begin(), payload.end());
     return payloadString;
 }
@@ -93,8 +97,8 @@ void FrameTransmitHandler(eth::IEthernetController* /*controller*/, const eth::E
 
 void FrameHandler(eth::IEthernetController* /*controller*/, const eth::EthernetFrameEvent& frameEvent)
 {
-    auto rawFrame = frameEvent.ethFrame.RawFrame();
-    auto payload = GetPayloadStringFromRawFrame(rawFrame);
+    auto frame = frameEvent.frame;
+    auto payload = GetPayloadStringFromFrame(frame);
     std::cout << ">> Ethernet frame: \""
               << payload
               << "\"" << std::endl;
@@ -104,18 +108,14 @@ void SendFrame(eth::IEthernetController* controller, const eth::EthernetMac& fro
 {
     static int frameId = 0;
     std::stringstream stream;
-    stream << "Hello from Ethernet writer! (frameId =" << frameId++<< ")"
+    stream << "Hello from Ethernet writer! (frameId =" << frameId++ << ")"
               "----------------------------------------------------"; // ensure that the payload is long enough to constitute a valid Ethernet frame
 
     auto payloadString = stream.str();
     std::vector<uint8_t> payload(payloadString.size() + 1);
     memcpy(payload.data(), payloadString.c_str(), payloadString.size() + 1);
 
-    std::vector<uint8_t> rawFrame = CreateRawFrame(to, from, payload);
-
-    eth::EthernetFrame frame;
-    frame.SetRawFrame(rawFrame);
-    
+    auto frame = CreateFrame(to, from, payload);
     auto transmitId = controller->SendFrame(std::move(frame));
     std::cout << "<< ETH Frame sent with transmitId=" << transmitId << std::endl;
 }

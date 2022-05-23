@@ -48,6 +48,30 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<co
     return testing::Field(&EthernetFrameEvent::timestamp, timestamp);
 }
 
+//void SetDestinationMac(EthernetFrame& frame, const EthernetMac& destination)
+//{
+//    const size_t MinFrameSize = 64;
+//    const size_t DestinationMacStart = 0;
+//    if (frame.empty())
+//    {
+//        frame.resize(MinFrameSize);
+//    }
+//
+//    std::copy(destination.begin(), destination.end(), frame.begin() + DestinationMacStart);
+//}
+
+void SetSourceMac(EthernetFrame& frame, const EthernetMac& source)
+{
+    const size_t MinFrameSize = 64;
+    const size_t SourceMacStart = sizeof(EthernetMac);
+    if (frame.raw.empty())
+    {
+        frame.raw.resize(MinFrameSize);
+    }
+
+    std::copy(source.begin(), source.end(), frame.raw.begin() + SourceMacStart);
+}
+
 class MockParticipant : public DummyParticipant
 {
 public:
@@ -110,7 +134,7 @@ TEST_F(EthernetControllerTest, send_eth_message)
     EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
 
     EthernetFrameEvent msg;
-    msg.ethFrame.SetSourceMac(EthernetMac{ 0,0,0,0,0,0 });
+    SetSourceMac(msg.frame, EthernetMac{ 0, 0, 0, 0, 0, 0 });
     msg.timestamp = now;
     controller.SendFrameEvent(msg);
 }
@@ -127,9 +151,9 @@ TEST_F(EthernetControllerTest, send_eth_frame)
 
     EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(1);
 
-    EthernetFrame ethFrame;
-    ethFrame.SetSourceMac(EthernetMac{ 0,0,0,0,0,0 });
-    controller.SendFrame(ethFrame);
+    EthernetFrame frame{};
+    SetSourceMac(frame, EthernetMac{ 0, 0, 0, 0, 0, 0 });
+    controller.SendFrame(frame);
 }
 
 /*! \brief Passing an EthernetFrameEvent to an EthControllers must trigger the registered callback
@@ -137,7 +161,7 @@ TEST_F(EthernetControllerTest, send_eth_frame)
 TEST_F(EthernetControllerTest, trigger_callback_on_receive_message)
 {
     EthernetFrameEvent msg;
-    msg.ethFrame.SetSourceMac(EthernetMac{ 0,0,0,0,0,0 });
+    SetSourceMac(msg.frame, EthernetMac{ 0, 0, 0, 0, 0, 0 });
 
     EXPECT_CALL(callbacks, ReceiveMessage(&controller, msg))
         .Times(1);
@@ -151,9 +175,9 @@ TEST_F(EthernetControllerTest, trigger_callback_on_receive_message)
 TEST_F(EthernetControllerTest, trigger_callback_on_receive_ack)
 {
     EthernetFrameEvent msg{};
-    msg.ethFrame.SetSourceMac(EthernetMac{1,2,3,4,5,6});
+    SetSourceMac(msg.frame, EthernetMac{ 1, 2, 3, 4, 5, 6 });
 
-    EthernetFrameTransmitEvent ack{ 0, EthernetMac{1,2,3,4,5,6}, 0ms, EthernetTransmitStatus::Transmitted };
+    EthernetFrameTransmitEvent ack{ 0, EthernetMac{ 1, 2, 3, 4, 5, 6 }, 0ms, EthernetTransmitStatus::Transmitted };
     EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(ack)))
         .Times(1);
 
@@ -176,25 +200,25 @@ TEST_F(EthernetControllerTest, DISABLED_ethcontroller_uses_tracing)
     ethController.AddSink(&traceSink);
 
 
-    EthernetFrame ethFrame{};
-    ethFrame.SetDestinationMac(EthernetMac{1,2,3,4,5,6});
-    ethFrame.SetSourceMac(EthernetMac{9,8,7,6,5,4});
+    EthernetFrame frame{};
+    SetDestinationMac(frame, EthernetMac{ 1, 2, 3, 4, 5, 6 });
+    SetSourceMac(frame, EthernetMac{ 9, 8, 7, 6, 5, 4 });
 
     //Send direction
     EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
-        Trace(ib::sim::TransmitDirection::TX, controllerAddress, now, ethFrame))
+        Trace(ib::sim::TransmitDirection::TX, controllerAddress, now, frame))
         .Times(1);
-    ethController.SendFrame(ethFrame);
+    ethController.SendFrame(frame);
 
     // Receive direction
     EXPECT_CALL(traceSink,
-        Trace(ib::sim::TransmitDirection::RX, controllerAddress, now, ethFrame))
+        Trace(ib::sim::TransmitDirection::RX, controllerAddress, now, frame))
         .Times(1);
 
     EthernetFrameEvent ethMsg{};
-    ethMsg.ethFrame = ethFrame;
+    ethMsg.frame = frame;
     ethMsg.timestamp = now;
     ethController.ReceiveIbMessage(&controllerOther, ethMsg);
 #endif // 0

@@ -7,6 +7,16 @@
 
 #include <algorithm>
 
+namespace {
+    auto GetSourceMac(const ib::sim::eth::EthernetFrame& frame) -> ib::sim::eth::EthernetMac
+    {
+        ib::sim::eth::EthernetMac source{};
+        std::copy(frame.raw.begin() + sizeof(ib::sim::eth::EthernetMac), frame.raw.begin() + 2 * sizeof(ib::sim::eth::EthernetMac), source.begin());
+
+        return source;
+    }
+}
+
 namespace ib {
 namespace sim {
 namespace eth {
@@ -36,18 +46,17 @@ void EthController::Deactivate()
 auto EthController::SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId
 {
     auto txId = MakeTxId();
-    _pendingAcks.emplace_back(msg.ethFrame.GetSourceMac(), txId);
 
     msg.transmitId = txId;
 
-    _tracer.Trace(ib::sim::TransmitDirection::TX, msg.timestamp, msg.ethFrame);
+    _tracer.Trace(ib::sim::TransmitDirection::TX, msg.timestamp, msg.frame);
 
     _participant->SendIbMessage(this, std::move(msg));
 
     EthernetFrameTransmitEvent ack;
     ack.timestamp = msg.timestamp;
     ack.transmitId = msg.transmitId;
-    ack.sourceMac = msg.ethFrame.GetSourceMac();
+    ack.sourceMac = GetSourceMac(msg.frame);
     ack.status = EthernetTransmitStatus::Transmitted;
     CallHandlers(ack);
 
@@ -58,8 +67,7 @@ auto EthController::SendFrame(EthernetFrame frame) -> EthernetTxId
 {
     EthernetFrameEvent msg{};
     msg.timestamp = _timeProvider->Now();
-    msg.ethFrame = std::move(frame);
-
+    msg.frame = std::move(frame);
 
     return SendFrameEvent(std::move(msg));
 }
@@ -87,7 +95,7 @@ void EthController::AddBitrateChangeHandler(BitrateChangeHandler /*handler*/)
 
 void EthController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthernetFrameEvent& msg)
 {
-    _tracer.Trace(ib::sim::TransmitDirection::RX, msg.timestamp, msg.ethFrame);
+    _tracer.Trace(ib::sim::TransmitDirection::RX, msg.timestamp, msg.frame);
 
     CallHandlers(msg);
 }

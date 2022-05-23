@@ -13,13 +13,16 @@ using ib::mw::test::DummyParticipant;
 MATCHER_P(EthFrameMatcher, controlFrame, "") 
 {
     *result_listener << "matches ethernet frames by their content and length";
-    auto frame1 = controlFrame.RawFrame();
-    auto frame2 = arg.RawFrame();
-    if (frame1.size() != frame2.size()) {
+    auto frame1 = controlFrame;
+    auto frame2 = arg;
+    if (frame1.raw.size() != frame2.raw.size())
+    {
         return false;
     }
-    for (size_t i = 0; i < frame1.size(); i++) {
-        if (frame1[i] != frame2[i]) {
+    for (size_t i = 0; i < frame1.raw.size(); i++)
+    {
+        if (frame1.raw[i] != frame2.raw[i])
+        {
             return false;
         }
     }
@@ -109,9 +112,9 @@ TEST_F(CapiEthernetTest, ethernet_controller_function_mapping)
     returnCode = ib_Ethernet_Controller_AddBitrateChangeHandler((ib_Ethernet_Controller*)&mockController, NULL, &BitrateChangeHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-    EthernetFrame refFrame{};
-    refFrame.SetRawFrame({ buffer.data(), buffer.data() + buffer.size() });
-    EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(refFrame))).Times(testing::Exactly(1));
+    EthernetFrame referenceFrame{};
+    referenceFrame.raw = { buffer.data(), buffer.data() + buffer.size() };
+    EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(referenceFrame))).Times(testing::Exactly(1));
     returnCode = ib_Ethernet_Controller_SendFrame((ib_Ethernet_Controller*)&mockController, &ef, NULL);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 }
@@ -184,10 +187,9 @@ TEST_F(CapiEthernetTest, ethernet_controller_send_frame)
 
     ib_Ethernet_Frame ef = { (const uint8_t*)buffer, PAYLOAD_OFFSET + payloadSize };
 
-    EthernetFrame refFrame{};
-    std::vector<uint8_t> rawFrame(ef.data, ef.data + ef.size);
-    refFrame.SetRawFrame(rawFrame);
-    EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(refFrame))).Times(testing::Exactly(1));
+    EthernetFrame referenceFrame{};
+    referenceFrame.raw = { ef.data, ef.data + ef.size };
+    EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(referenceFrame))).Times(testing::Exactly(1));
     returnCode = ib_Ethernet_Controller_SendFrame((ib_Ethernet_Controller*)&mockController, &ef, NULL);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 

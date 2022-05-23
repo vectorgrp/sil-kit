@@ -38,22 +38,24 @@ protected:
 
     void SetupTestData()
     {
-        _testMessages.resize(10);
-        for (auto index = 0u; index < _testMessages.size(); index++)
+        _testFrames.resize(10);
+        for (auto index = 0u; index < _testFrames.size(); index++)
         {
             std::stringstream messageBuilder;
             messageBuilder << "Test Message " << index;
             std::string messageString = messageBuilder.str();
-            auto& ethmsg = _testMessages[index].expectedMsg;
-            auto sourceMac = ib::sim::eth::EthernetMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12 };
-            ethmsg.ethFrame.SetDestinationMac(ib::sim::eth::EthernetMac{ 0x12,0x23,0x45,0x67,0x89,0x9a });
-            ethmsg.ethFrame.SetSourceMac(sourceMac);
-            ethmsg.ethFrame.SetEtherType(0x8100);
-            ethmsg.ethFrame.SetPayload(reinterpret_cast<const uint8_t*>(messageString.c_str()), messageString.size());
-            ethmsg.timestamp = 1s;
-            ethmsg.transmitId = index + 1;
+            auto& frameEvent = _testFrames[index].expectedFrameEvent;
 
-            auto& ethack = _testMessages[index].expectedAck;
+            ib::sim::eth::EthernetMac destinationMac{ 0x12, 0x23, 0x45, 0x67, 0x89, 0x9a };
+            ib::sim::eth::EthernetMac sourceMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12 };
+            ib::sim::eth::EthernetEtherType etherType{ 0x0800 };
+            ib::sim::eth::EthernetVlanTagControlIdentifier tci{ 0x0000 };
+
+            frameEvent.frame = ib::sim::eth::CreateEthernetFrameWithVlanTag(destinationMac, sourceMac, etherType, messageString, tci);
+            frameEvent.timestamp = 1s;
+            frameEvent.transmitId = index + 1;
+
+            auto& ethack = _testFrames[index].expectedAck;
             ethack.sourceMac = sourceMac;
             ethack.timestamp = 1s;
             ethack.transmitId = index + 1;
@@ -71,8 +73,8 @@ protected:
 
         controller->AddFrameTransmitHandler(
             [this, &ethWriterAllAcksReceivedPromiseLocal, &numAcks](ib::sim::eth::IEthernetController* /*ctrl*/, const ib::sim::eth::EthernetFrameTransmitEvent& ack) {
-                _testMessages.at(numAcks++).receivedAck = ack;
-                if (numAcks >= _testMessages.size())
+                _testFrames.at(numAcks++).receivedAck = ack;
+                if (numAcks >= _testFrames.size())
                 {
                     std::cout << "All eth acks received" << std::endl;
                     _ethWriterAllAcksReceivedPromise.set_value(); // Promise for ethReader
@@ -82,9 +84,9 @@ protected:
 
         _ethReaderRegisteredPromise.get_future().wait_for(10s);
 
-        while (numSent < _testMessages.size())
+        while (numSent < _testFrames.size())
         {
-            controller->SendFrameEvent(_testMessages.at(numSent++).expectedMsg); // Don't move the msg to test the altered transmitID
+            controller->SendFrameEvent(_testFrames.at(numSent++).expectedFrameEvent); // Don't move the event to test the altered transmitID
         }
         std::cout << "All eth messages sent" << std::endl;
 
@@ -103,8 +105,8 @@ protected:
         controller->AddFrameHandler(
             [this, &ethReaderAllReceivedPromiseLocal, &numReceived](ib::sim::eth::IEthernetController*, const ib::sim::eth::EthernetFrameEvent& msg) {
 
-                _testMessages.at(numReceived++).receivedMsg = msg;
-                if (numReceived >= _testMessages.size())
+                _testFrames.at(numReceived++).receivedFrameEvent = msg;
+                if (numReceived >= _testFrames.size())
                 {
                     std::cout << "All eth messages received" << std::endl;
                     _ethReaderAllReceivedPromise.set_value(); // Promise for ethWriter
@@ -125,23 +127,23 @@ protected:
         std::thread ethWriterThread{ [this] { EthWriter(); } };
         ethReaderThread.join();
         ethWriterThread.join();
-        for (auto&& message : _testMessages)
+        for (auto&& message : _testFrames)
         {
-            EXPECT_EQ(message.expectedMsg, message.receivedMsg);
+            EXPECT_EQ(message.expectedFrameEvent, message.receivedFrameEvent);
             EXPECT_EQ(message.expectedAck, message.receivedAck);
         }
     }
 
-    struct Testmessage
+    struct TestFrame
     {
-        ib::sim::eth::EthernetFrameEvent expectedMsg;
-        ib::sim::eth::EthernetFrameEvent receivedMsg;
+        ib::sim::eth::EthernetFrameEvent expectedFrameEvent;
+        ib::sim::eth::EthernetFrameEvent receivedFrameEvent;
         ib::sim::eth::EthernetFrameTransmitEvent expectedAck;
         ib::sim::eth::EthernetFrameTransmitEvent receivedAck;
     };
 
     uint32_t _domainId;
-    std::vector<Testmessage> _testMessages;
+    std::vector<TestFrame> _testFrames;
     std::promise<void> _ethReaderRegisteredPromise;
     std::promise<void> _ethReaderAllReceivedPromise;
     std::promise<void> _ethWriterAllAcksReceivedPromise;

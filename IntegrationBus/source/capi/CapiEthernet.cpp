@@ -81,16 +81,11 @@ ib_ReturnCode ib_Ethernet_Controller_AddFrameHandler(ib_Ethernet_Controller* con
     cppController->AddFrameHandler(
       [handler, context, controller](ib::sim::eth::IEthernetController* /*ctrl*/, const ib::sim::eth::EthernetFrameEvent& cppFrameEvent)
       {
-        auto rawFrame = cppFrameEvent.ethFrame.RawFrame();
-                
-        uint8_t* dataPointer = 0;
-        if (rawFrame.size() > 0)
-        {
-          dataPointer = &(rawFrame[0]);
-        }
+        auto& cppFrame = cppFrameEvent.frame;
+        auto* dataPointer = !cppFrame.raw.empty() ? cppFrame.raw.data() : nullptr;
 
         ib_Ethernet_FrameEvent frameEvent{};
-        ib_Ethernet_Frame frame{ dataPointer, rawFrame.size() };
+        ib_Ethernet_Frame frame{ dataPointer, cppFrame.raw.size() };
 
         frameEvent.interfaceId = ib_InterfaceIdentifier_EthernetFrameEvent;
         frameEvent.ethernetFrame = &frame;
@@ -208,10 +203,9 @@ ib_ReturnCode ib_Ethernet_Controller_SendFrame(ib_Ethernet_Controller* controlle
     using std::chrono::duration;
     auto cppController = reinterpret_cast<ib::sim::eth::IEthernetController*>(controller);
 
-    ib::sim::eth::EthernetFrame ef;
-    std::vector<uint8_t> rawFrame(frame->data, frame->data + frame->size);
-    ef.SetRawFrame(rawFrame);
-    auto transmitId = cppController->SendFrame(ef);
+    ib::sim::eth::EthernetFrame ethernetFrame{};
+    ethernetFrame.raw = { frame->data, frame->data + frame->size };
+    auto transmitId = cppController->SendFrame(ethernetFrame);
 
     std::unique_lock<std::mutex> lock(pendingEthernetTransmits.mutex);
     pendingEthernetTransmits.userContextById[transmitId] = userContext;

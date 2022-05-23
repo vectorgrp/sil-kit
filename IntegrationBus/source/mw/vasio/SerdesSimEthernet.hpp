@@ -10,23 +10,32 @@ namespace ib {
 namespace sim {
 namespace eth {
 
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthernetFrame& msg)
+{
+    buffer << msg.raw;
+
+    return buffer;
+}
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthernetFrame& msg)
+{
+    buffer >> msg.raw;
+
+    return buffer;
+}
+
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthernetFrameEvent& msg)
 {
     buffer << msg.transmitId
            << msg.timestamp
-           << msg.ethFrame.RawFrame();
+           << msg.frame;
 
     return buffer;
 }
 inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthernetFrameEvent& msg)
 {
-    std::vector<uint8_t> rawFrame;
-
     buffer >> msg.transmitId
            >> msg.timestamp
-           >> rawFrame;
-
-    msg.ethFrame = EthernetFrame{std::move(rawFrame)};
+           >> msg.frame;
 
     return buffer;
 }

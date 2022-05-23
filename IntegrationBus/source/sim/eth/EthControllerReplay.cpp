@@ -120,7 +120,7 @@ void EthControllerReplay::ReplayReceive(const extensions::IReplayMessage* replay
     static tracing::ReplayServiceDescriptor replayService;
     sim::eth::EthernetFrame frame = dynamic_cast<const sim::eth::EthernetFrame&>(*replayMessage);
     sim::eth::EthernetFrameEvent msg{};
-    msg.ethFrame = std::move(frame);
+    msg.frame = std::move(frame);
     msg.timestamp = replayMessage->Timestamp();
     _controller.ReceiveIbMessage(&replayService, msg);
 }

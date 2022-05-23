@@ -105,8 +105,6 @@ private:
     > _callbacks;
 
     extensions::Tracer _tracer;
-
-    std::vector<std::pair<EthernetMac, EthernetTxId>> _pendingAcks;
 };
 
 // ================================================================================

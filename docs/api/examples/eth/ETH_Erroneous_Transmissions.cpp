@@ -12,19 +12,21 @@ ethernetSender->AddFrameTransmitHandler(sender_FrameTransmitHandler);
 
 // ------------------------------------------------------------
 // Erroneous Transmission: EthernetTransmitStatus::ControllerInactive
-std::array<uint8_t, 6> sourceAddress{"F6", "04", "68", "71", "AA", "C1"};
-std::array<uint8_t, 6> destinationAddress{"F6", "04", "68", "71", "AA", "C2"};
+const std::array<uint8_t, 6> sourceAddress{0xf6, 0x04, 0x68, 0x71, 0xaa, 0xc2};
+const std::array<uint8_t, 6> destinationAddress{0xf6, 0x04, 0x68, 0x71, 0xaa, 0xc1};
+const std::array<uint8_t, 2> etherType{0x08, 0x00};
 
-std::string message{"Ensure that the payload is long enough to constitute "
+const std::string message{"Ensure that the payload is at least 46 bytes to constitute "
                     "a valid Ethernet frame ------------------------------"};
-std::vector<uint8_t> payload{message.begin(), message.end()};
+const std::vector<uint8_t> payload{ message.begin(), message.end() };
 
-EthernetFrame ethFrame;
-ethFrame.SetSourceMac(sourceAddress);
-ethFrame.SetDestinationMac(destinationAddress);
-ethFrame.SetPayload(payload);
+EthernetFrame frame;
+std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(frame));
+std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(frame));
+std::copy(etherType.begin(), etherType.end(), std::back_inserter(frame));
+std::copy(payload.begin(), payload.end(), std::back_inserter(frame));
 
-ethernetSender->SendFrame(ethFrame);
+ethernetSender->SendFrame(frame);
 
 // The FrameTransmitHandler callback will be triggered and call the registered handler:
 sender_FrameTransmitHandler(ethernetSender, frameTransmitEvent);
@@ -46,7 +48,7 @@ sender_FrameTransmitHandler(ethernetSender, frameTransmitEvent);
 // Assumption: Ethernet link is already successfully established.
 for (auto i = 0; i < 50; i++)
 {
-    ethernetSender->SendFrame(ethFrame);
+    ethernetSender->SendFrame(ethernetFrame);
 }
 
 // Sending 50 messages directly one after the other will call the registered sender_MessageAckHandler
@@ -56,11 +58,16 @@ for (auto i = 0; i < 50; i++)
 
 // ------------------------------------------------------------
 // Erroneous Transmission: EthernetTransmitStatus::InvalidFrameFormat
-std::string shortMsg{"Short message"};
-std::vector<uint8_t> shortPayload{shortMsg.begin(), shortMsg.end()};
+const std::string shortMessage{"A payload with less than 46 bytes is invalid."};
+const std::vector<uint8_t> shortPayload{shortMessage.begin(), shortMessage.end()};
 
-ethFrame.SetPayload(shortPayload);
-ethernetSender->SendFrame(ethFrame);
+EthernetFrame invalidFrame;
+std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(invalidFrame));
+std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(invalidFrame));
+std::copy(etherType.begin(), etherType.end(), std::back_inserter(invalidFrame));
+std::copy(shortPayload.begin(), shortPayload.end(), std::back_inserter(invalidFrame));
+
+ethernetSender->SendFrame(invalidEthernetFrame);
 
 // The MessageAckHandler callback will be triggered and call the registered handler:
 sender_FrameTransmitHandler(ethernetSender, frameTransmitEvent);
