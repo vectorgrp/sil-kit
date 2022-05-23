@@ -12,27 +12,6 @@ using namespace ib;
 // Local utilities
 namespace {
 
-auto macaddress_encode(const ib::util::Optional<std::array<uint8_t, 6>>& macAddress, YAML::Node& node, const std::string& fieldName)
-{
-    if (macAddress.has_value())
-    {
-        std::stringstream macOut;
-
-        to_ostream(macOut, macAddress.value());
-        node[fieldName] = macOut.str();
-    }
-}
-
-auto macaddress_decode(const YAML::Node& node) -> ib::util::Optional<std::array<uint8_t, 6>>
-{
-    std::array<uint8_t, 6> macAddress;
-
-    std::stringstream macIn(parse_as<std::string>(node));
-    from_istream(macIn, macAddress);
-
-    return macAddress;
-}
-
 //template<typename ConfigT>
 template<typename ConfigT, typename std::enable_if<
     !(std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value), bool>::type = true>
@@ -421,7 +400,6 @@ Node Converter::encode(const EthernetController& obj)
     Node node;
     node["Name"] = obj.name;
     optional_encode(obj.network, node, "Network");
-    macaddress_encode(obj.macAddress, node, "MacAddress");
     optional_encode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_encode(obj.replay, node, "Replay");
 
@@ -432,7 +410,6 @@ bool Converter::decode(const Node& node, EthernetController& obj)
 {
     obj.name = parse_as<std::string>(node["Name"]);
     optional_decode(obj.network, node, "Network");
-    obj.macAddress = macaddress_decode(node["MacAddress"]);
     optional_decode(obj.useTraceSinks, node, "UseTraceSinks");
     optional_decode(obj.replay, node, "Replay");
     return true;

@@ -158,7 +158,6 @@ configuration of the Ethernet Controller and add an appropriate trace sink to th
   "EthernetControllers": [
       {
           "Name": "ETH0",
-          "MacAddress": "00:08:15:ab:cd:f0",
           "UseTraceSinks": ["SinkName"]
       }
   ],
@@ -186,7 +185,6 @@ has to be specified as "PcapPipe" in the configuration:
   "EthernetControllers": [
       {
           "Name": "ETH0",
-          "MacAddress": "00:08:15:ab:cd:f0",
           "UseTraceSinks": ["SinkName"]
       }
   ],

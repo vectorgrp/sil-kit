@@ -87,11 +87,9 @@ EthernetControllers
       {
           "Name": "ETH1",
           "Network": "Ethernet1"
-          "MacAddress": "00:08:15:ab:cd:ef"
       },
       {
           "Name": "ETH2",
-          "MacAddress": "00:08:15:ab:cd:f0",
           "UseTraceSinks": ["MyPcapSink"]
       }
   ]
@@ -105,8 +103,6 @@ EthernetControllers
      - Description
    * - Name
      - The name of the Ethernet Controller
-   * - MacAddress
-     - The colon-separated Ethernet MAC address. 
    * - Network
      - The name of the Ethernet Network to connect to (optional)
    * - UseTraceSinks

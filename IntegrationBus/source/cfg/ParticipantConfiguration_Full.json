@@ -55,21 +55,17 @@
   "EthernetControllers": [
     {
       "Name": "ETH1",
-      "MacAddress": "F7:04:68:71:AA:A0",
       "Network": "Ethernet Network 1"
     },
     {
       "Name": "ETH2",
-      "MacAddress": "F7:04:68:71:AA:A1",
       "Network": "Ethernet Network 2"
     },
     {
-      "Name": "ETH3",
-      "MacAddress": "F7:04:68:71:AA:A2"
+      "Name": "ETH3"
     },
     {
-      "Name": "ETH4",
-      "MacAddress": "F7:04:68:71:AA:A3"
+      "Name": "ETH4"
     }
   ],
   "DataPublishers": [

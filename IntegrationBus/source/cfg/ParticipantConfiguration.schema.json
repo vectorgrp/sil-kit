@@ -410,15 +410,6 @@
       }
     },
 
-    "EthernetMacAddress": {
-      "type": "string",
-      "pattern": "^([0-9A-Z]{2}:){5}[0-9-A-Z]{2}$",
-      "title": "Colon-separated MAC address",
-      "examples": [
-        "F7:04:68:71:AA:A0"
-      ]
-    },
-
     "Topic": {
       "type": "string",
       "title": "Name of the communication channel between DataPublisher and DataSubscribers."
@@ -571,13 +562,11 @@
           "Name": { "$ref": "#/definitions/Name" },
           "Network": { "$ref": "#/definitions/Network" },
           "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
-          "Replay": { "$ref": "#/definitions/Replay" },
-          "MacAddress": { "$ref": "#/definitions/EthernetMacAddress" }
+          "Replay": { "$ref": "#/definitions/Replay" }
         },
         "additionalProperties": false,
         "required": [
-          "Name",
-          "MacAddress"
+          "Name"
         ]
       }
     },

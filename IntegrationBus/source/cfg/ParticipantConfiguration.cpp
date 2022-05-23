@@ -80,7 +80,6 @@ bool operator==(const EthernetController& lhs, const EthernetController& rhs)
 {
     return lhs.name == rhs.name
         && lhs.network == rhs.network
-        && lhs.macAddress == rhs.macAddress
         && lhs.useTraceSinks == rhs.useTraceSinks
         && lhs.replay == rhs.replay;
 }
@@ -171,37 +170,6 @@ bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfigurat
         && lhs.extensions == rhs.extensions;
 }
 
-std::ostream& to_ostream(std::ostream& out, const std::array<uint8_t, 6>& macAddress)
-{
-    //instead of ios::copyfmt (which set badbit) we use a temporary stream 
-    std::stringstream buf;
-    buf.width(2);
-    buf.fill('0');
-
-    auto&& iter = macAddress.begin();
-    out << std::hex << std::uppercase << std::setw(2) << static_cast<uint16_t>(*iter++);
-    for (; iter != macAddress.end(); ++iter)
-    {
-        out << ':' << std::hex << std::uppercase << std::setw(2) << static_cast<uint16_t>(*iter);
-    }
-
-    return out << buf.str();
-}
-
-std::istream& from_istream(std::istream& in, std::array<uint8_t, 6>& macAddress)
-{
-    for (auto&& iter = macAddress.begin();
-        iter != macAddress.end();
-        ++iter)
-    {
-        uint16_t not_a_char;
-        in >> std::hex >> not_a_char;
-        in.ignore(1, ':');
-        *iter = static_cast<uint8_t>(not_a_char);
-    }
-
-    return in;
-}
 
 // ================================================================================
 //  Public API

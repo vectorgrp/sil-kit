@@ -51,6 +51,8 @@ Removed
         
   - Removed deprecated PcapFile and PcapPipe config fields in EthernetControllers section. Use UseTraceSinks instead.
 
+  - Removed MacAddress config fields in EthernetControllers section.
+
 [3.99.22] - 2022-05-17
 ----------------------
 

@@ -52,8 +52,7 @@ LinControllers:
   UseTraceSinks:
   - MyTraceSink1
 EthernetControllers:
-- MacAddress: F6:04:68:71:AA:C2
-  Name: ETH0
+- Name: ETH0
   Replay:
     UseTraceSource: Source1
     Direction: Receive

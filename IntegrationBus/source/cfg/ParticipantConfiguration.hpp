@@ -78,9 +78,6 @@ struct EthernetController
     std::string name;
     ib::util::Optional<std::string> network;
 
-    typedef std::array<uint8_t, 6> MacAddress;
-    ib::util::Optional<MacAddress> macAddress;
-
     std::vector<std::string> useTraceSinks;
     Replay replay;
 };
@@ -274,10 +271,6 @@ bool operator==(const Extensions& lhs, const Extensions& rhs);
 bool operator==(const Registry& lhs, const Registry& rhs);
 bool operator==(const Middleware& lhs, const Middleware& rhs);
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs);
-
-// Note: For better maintainability we do not overload operator<< for std::array.
-std::ostream& to_ostream(std::ostream& out, const std::array<uint8_t, 6>& macAddress);
-std::istream& from_istream(std::istream& in, std::array<uint8_t, 6>& macAddress);
 
 } // namespace v4
 } // namespace cfg

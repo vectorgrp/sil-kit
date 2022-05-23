@@ -126,7 +126,6 @@ auto MakeYamlSchema() -> YamlSchemaElem
             {"Name"},
             {"Network"},
             {"UseTraceSinks"},
-            {"MacAddress"},
             replay,
         }
     );
