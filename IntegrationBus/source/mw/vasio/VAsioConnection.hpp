@@ -34,6 +34,7 @@
 
 #include "asio.hpp"
 
+#include "SerializedMessage.hpp"
 
 namespace ib {
 namespace mw {
@@ -130,7 +131,7 @@ public:
 
     // Temporary Helpers
     void RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)> callback);
-    void OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer);
+    void OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer);
 
     // Listening Sockets (acceptors)
     void AcceptLocalConnections(uint32_t domainId);
@@ -208,10 +209,10 @@ private:
 private:
     // ----------------------------------------
     // private methods
-    void ReceiveRawIbMessage(IVAsioPeer* from, MessageBuffer&& buffer);
-    void ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer);
-    void ReceiveSubscriptionAcknowledge(IVAsioPeer* from, MessageBuffer&& buffer);
-    void ReceiveRegistryMessage(IVAsioPeer* from, MessageBuffer&& buffer);
+    void ReceiveRawIbMessage(IVAsioPeer* from, SerializedMessage&& buffer);
+    void ReceiveSubscriptionAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer);
+    void ReceiveSubscriptionAcknowledge(IVAsioPeer* from, SerializedMessage&& buffer);
+    void ReceiveRegistryMessage(IVAsioPeer* from, SerializedMessage&& buffer);
 
     bool TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSubscriber& subscriber);
 
@@ -219,12 +220,12 @@ private:
     void UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer);
 
     // Registry related send / receive methods
-    void ReceiveKnownParticpants(IVAsioPeer* peer, MessageBuffer&& buffer);
+    void ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessage&& buffer);
     void SendParticipantAnnouncement(IVAsioPeer* peer);
-    void ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer);
+    void ReceiveParticipantAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer);
 
     void SendParticipantAnnoucementReply(IVAsioPeer* peer);
-    void ReceiveParticipantAnnouncementReply(IVAsioPeer* from, MessageBuffer&& buffer);
+    void ReceiveParticipantAnnouncementReply(IVAsioPeer* from, SerializedMessage&& buffer);
 
     void NotifyNetworkIncompatibility(const RegistryMsgHeader& other, const std::string& otherParticipantName);
 

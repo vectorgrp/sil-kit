@@ -337,7 +337,7 @@ void VAsioTcpPeer::SendIbMsg(MessageBuffer buffer)
 
     std::unique_lock<std::mutex> lock{ _sendingQueueLock };
 
-    _sendingQueue.push(std::move(sendBuffer));
+    _sendingQueue.push(buffer.ReleaseStorage());
 
     lock.unlock();
 
@@ -479,11 +479,13 @@ void VAsioTcpPeer::DispatchBuffer()
         memcpy(&msgSize, _msgBuffer.data(), sizeof msgSize);
         //ensure buffer does not contain data from contiguous messages
         _msgBuffer.resize(msgSize);
-        MessageBuffer msgBuffer{std::move(_msgBuffer)};
+        //MessageBuffer msgBuffer{std::move(_msgBuffer)};
+        SerializedMessage message{std::move(_msgBuffer)};
         //drop message size by adjusting internal read position:
-        (void)ExtractMessageSize(msgBuffer); 
-        msgBuffer.SetFormatVersion(GetProtocolVersion());
-        _ibConnection->OnSocketData(this, std::move(msgBuffer));
+        //(void)ExtractMessageSize(msgBuffer); 
+        //msgBuffer.SetFormatVersion(GetProtocolVersion());
+        message.SetProtocolVerison(GetProtocolVersion());
+        _ibConnection->OnSocketData(this, std::move(message));
 
         // keep trailing data in the buffer
         _msgBuffer = std::move(newBuffer);

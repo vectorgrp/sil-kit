@@ -179,7 +179,7 @@ protected:
 };
 } //mw
 } //ib
-
+/*
 //////////////////////////////////////////////////////////////////////
 // Versioned initial handshake
 //////////////////////////////////////////////////////////////////////
@@ -283,4 +283,4 @@ TEST_F(VAsioConnectionTest, DISABLED_versioned_send_testmessage)
     (void)ExtractMessageSize(buffer);
 
     _connection.OnSocketData(&_from, std::move(buffer));
-}
+}*/

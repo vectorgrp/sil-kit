@@ -8,6 +8,7 @@
 
 #include "MessageTracing.hpp"
 #include "IIbServiceEndpoint.hpp"
+#include "SerializedMessage.hpp"
 
 namespace ib {
 namespace mw {
@@ -43,7 +44,7 @@ public:
     // Public interface methods
     virtual ~IVAsioReceiver() = default;
     virtual auto GetDescriptor() const -> const VAsioMsgSubscriber& = 0;
-    virtual void ReceiveRawMsg(IVAsioPeer* from, const ServiceDescriptor& descriptor, MessageBuffer&& buffer) = 0;
+    virtual void ReceiveRawMsg(IVAsioPeer* from, const ServiceDescriptor& descriptor, SerializedMessage&& buffer) = 0;
 };
 
 template <class MsgT>
@@ -60,7 +61,7 @@ public:
     // ----------------------------------------
     // Public interface methods
     auto GetDescriptor() const -> const VAsioMsgSubscriber& override;
-    void ReceiveRawMsg(IVAsioPeer* from, const ServiceDescriptor& descriptor, MessageBuffer&& buffer) override;
+    void ReceiveRawMsg(IVAsioPeer* from, const ServiceDescriptor& descriptor, SerializedMessage&& buffer) override;
     void SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor) override
     {
         _serviceDescriptor = serviceDescriptor;
@@ -98,10 +99,11 @@ auto VAsioReceiver<MsgT>::GetDescriptor() const -> const VAsioMsgSubscriber&
 }
 
 template <class MsgT>
-void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* /*from*/, const ServiceDescriptor& descriptor, MessageBuffer&& buffer)
+void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* /*from*/, const ServiceDescriptor& descriptor, SerializedMessage&& buffer)
 {
-    MsgT msg;
-    Deserialize(buffer, msg);
+    MsgT msg = buffer.Deserialize<MsgT>();
+    //MsgT msg;
+    //Deserialize(buffer, msg);
 
     TraceRx(_logger, this, msg);
 

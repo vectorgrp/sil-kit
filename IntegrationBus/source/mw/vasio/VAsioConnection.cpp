@@ -360,11 +360,12 @@ void VAsioConnection::NotifyNetworkIncompatibility(const RegistryMsgHeader& othe
     std::cerr << "ERROR: " << errorMsg << std::endl;
 }
 
-void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer)
+void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer)
 {
     //It is only Safe to extract the RegistryMsgHeader from this message
     // in case the peer has a different protocol version than us
-    auto remoteHeader = PeekRegistryMessageHeader(buffer);
+    auto remoteHeader = buffer.PeekRegistryMessageHeader();
+
 
     const RegistryMsgHeader reference{};
     // check if we support the remote peer's protocol version or signal a handshake failure
@@ -386,10 +387,12 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, MessageBu
     }
 
     // after negotiating the Version, we can safely deserialize the remaining message
-    ParticipantAnnouncement announcement;
+    //ParticipantAnnouncement announcement;
+    buffer.SetProtocolVerison(from->GetProtocolVersion());
+    auto announcement = buffer.Deserialize<ParticipantAnnouncement>();
     // XXX lots of error potential, should be handled transparently in the peer
-    buffer.SetFormatVersion(from->GetProtocolVersion());
-    Deserialize(buffer, announcement);
+    //buffer.SetFormatVersion(from->GetProtocolVersion());
+    //Deserialize(buffer, announcement);
 
     _logger->Debug("Received participant announcement from {}, protocol version {}.{}", announcement.peerInfo.participantName, announcement.messageHeader.versionHigh,
         announcement.messageHeader.versionLow);
@@ -443,10 +446,12 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
 
 }
 
-void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, MessageBuffer&& buffer)
+void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, SerializedMessage&& buffer)
 {
-    ParticipantAnnouncementReply reply;
-    Deserialize(buffer, reply);
+   // ParticipantAnnouncementReply reply;
+    //Deserialize(buffer, reply);
+    auto reply =  buffer.Deserialize<ParticipantAnnouncementReply>();
+    //from->SetProtocolVersion({reply.remoteHeader.versionHigh, reply.remoteHeader.versionLow});
 
     if (reply.status == ParticipantAnnouncementReply::Status::Failed)
     {
@@ -520,10 +525,11 @@ const std::string& VAsioConnection::GetParticipantFromLookup(const std::uint64_t
   return participantIter->second;
 }
 
-void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, MessageBuffer&& buffer)
+void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessage&& buffer)
 {
-    KnownParticipants participantsMsg;
-    Deserialize(buffer, participantsMsg);
+    //KnownParticipants participantsMsg;
+    //Deserialize(buffer, participantsMsg);
+    auto participantsMsg = buffer.Deserialize<KnownParticipants>();
 
     //After receiving a ParticipantAnnouncement the Registry will send a KnownParticipants message
     // check if we support its version here
@@ -564,6 +570,7 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, MessageBuffer&& 
 
         // We connected to the other peer. tell him who we are.
         _pendingParticipantReplies.push_back(peer.get());
+        //peer->protocolHandshake->DoHandshake()
         SendParticipantAnnouncement(peer.get());
 
         // The service ID is incomplete at this stage.
@@ -586,6 +593,7 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, MessageBuffer&& 
         connectPeer(uri);
     }
 
+    // peer->protocolHandshake->WaitForReply(5s)
     if (_pendingParticipantReplies.empty())
     {
         _receivedAllParticipantReplies.set_value();
@@ -778,9 +786,9 @@ void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
     _logger->Error("Lost connection to participant {}", peerId);
 }
 
-void VAsioConnection::OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer)
+void VAsioConnection::OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer)
 {
-    auto messageKind = ExtractMessageKind(buffer);
+    auto messageKind = buffer.GetMessageKind();
     switch (messageKind)
     {
     case VAsioMsgKind::Invalid:
@@ -790,8 +798,8 @@ void VAsioConnection::OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer)
         return ReceiveSubscriptionAnnouncement(from, std::move(buffer));
     case VAsioMsgKind::SubscriptionAcknowledge:
         return ReceiveSubscriptionAcknowledge(from, std::move(buffer));
-    case VAsioMsgKind::IbMwMsg:
-        return ReceiveRawIbMessage(from, std::move(buffer));
+    //case VAsioMsgKind::IbMwMsg:
+     //   return ReceiveRawIbMessage(from, std::move(buffer));
     case VAsioMsgKind::IbSimMsg:
         return ReceiveRawIbMessage(from, std::move(buffer));
     case VAsioMsgKind::IbRegistryMessage:
@@ -799,7 +807,7 @@ void VAsioConnection::OnSocketData(IVAsioPeer* from, MessageBuffer&& buffer)
     }
 }
 
-void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageBuffer&& buffer)
+void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer)
 {
     //Note: there may be multiple types that match the SerdesName
     // we try to find a version to match it, for backward compatibility.
@@ -821,8 +829,7 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageB
         return subscriptionVersion;
     };
 
-    VAsioMsgSubscriber subscriber;
-    Deserialize(buffer, subscriber); 
+    auto subscriber = buffer.Deserialize<VAsioMsgSubscriber>();
     bool wasAdded = TryAddRemoteSubscriber(from, subscriber);
 
     // check our Message version against the remote participant's version
@@ -847,10 +854,9 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, MessageB
     from->SendIbMsg(Serialize(from->GetProtocolVersion(), ack));
 }
 
-void VAsioConnection::ReceiveSubscriptionAcknowledge(IVAsioPeer* from, MessageBuffer&& buffer)
+void VAsioConnection::ReceiveSubscriptionAcknowledge(IVAsioPeer* from, SerializedMessage&& buffer)
 {
-    SubscriptionAcknowledge ack;
-    Deserialize(buffer, ack);
+    auto ack = buffer.Deserialize<SubscriptionAcknowledge>();
 
     if (ack.status != SubscriptionAcknowledge::Status::Success)
     {
@@ -905,16 +911,16 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
     return wasAdded;
 }
 
-void VAsioConnection::ReceiveRawIbMessage(IVAsioPeer* from, MessageBuffer&& buffer)
+void VAsioConnection::ReceiveRawIbMessage(IVAsioPeer* from, SerializedMessage&& buffer)
 {
-    auto receiverIdx = ExtractEndpointId(buffer);
+    auto receiverIdx =  buffer.GetRemoteIndex();//ExtractEndpointId(buffer);
     if (receiverIdx >= _vasioReceivers.size())
     {
         _logger->Warn("Ignoring RawIbMessage for unknown receiverIdx={}", receiverIdx);
         return;
     }
 
-    auto endpoint = ExtractEndpointAddress(buffer);
+    auto endpoint = buffer.GetEndpointAddress(); //ExtractEndpointAddress(buffer);
 
     auto* fromService = dynamic_cast<IIbServiceEndpoint*>(from);
     ServiceDescriptor tmpService(fromService->GetServiceDescriptor());
@@ -928,15 +934,18 @@ void VAsioConnection::RegisterMessageReceiver(std::function<void(IVAsioPeer* pee
     _participantAnnouncementReceivers.emplace_back(std::move(callback));
 }
 
-void VAsioConnection::ReceiveRegistryMessage(IVAsioPeer* from, MessageBuffer&& buffer)
+void VAsioConnection::ReceiveRegistryMessage(IVAsioPeer* from, SerializedMessage&& buffer)
 {
-    auto kind = ExtractRegistryMessageKind(buffer);
+    // IbSerializedMessage buffer;
+    // auto kind = buffer.DeserializeRegistryMessage();
+    auto kind = buffer.GetRegistryKind(); //ExtractRegistryMessageKind(buffer);
     switch (kind)
     {
     case RegistryMessageKind::Invalid:
         _logger->Warn("Received message with RegistryMessageKind::Invalid");
         return;
     case RegistryMessageKind::ParticipantAnnouncement:
+        //return ReceiveParticipantAnnouncement(from, buffer.Deserialize<ParticipantAnnouncement>());
         return ReceiveParticipantAnnouncement(from, std::move(buffer));
     case RegistryMessageKind::ParticipantAnnouncementReply:
         return ReceiveParticipantAnnouncementReply(from, std::move(buffer));
