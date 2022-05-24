@@ -8,6 +8,8 @@
 #include "VAsioDatatypes.hpp"
 #include "VAsioProtocolVersion.hpp"
 
+#include "SerializedMessage.hpp"
+
 namespace ib {
 namespace mw {
 
@@ -23,7 +25,7 @@ public:
 public:
     // ----------------------------------------
     // Public interface methods
-    virtual void SendIbMsg(MessageBuffer buffer) = 0;
+    virtual void SendIbMsg(SerializedMessage buffer) = 0;
     virtual void Subscribe(VAsioMsgSubscriber subscriber) = 0;
 
     virtual auto GetInfo() const -> const VAsioPeerInfo& = 0;

@@ -47,7 +47,7 @@ template<typename MsgT> struct MessageHistory<MsgT, 1>
         if (!_hasValue || !_hasHistory)
             return;
        
-        auto buffer = Serialize(_last, _from, remoteIdx);
+        auto buffer = SerializedMessage(_last, _from, remoteIdx);
         peer->SendIbMsg(std::move(buffer));
     }
 private:
@@ -104,7 +104,7 @@ public:
                 << "', which is not a valid remote receiver.";
             throw std::runtime_error{ss.str()};
         }
-        auto buffer = Serialize(msg, to_endpointAddress(from->GetServiceDescriptor()), receiverIter->remoteIdx);
+        auto buffer = SerializedMessage(msg, to_endpointAddress(from->GetServiceDescriptor()), receiverIter->remoteIdx);
         receiverIter->peer->SendIbMsg(std::move(buffer));
     }
 
@@ -121,7 +121,7 @@ public:
         _hist.Save(from, msg);
         for (auto& receiver : _remoteReceivers)
         {
-            auto buffer = Serialize(msg, to_endpointAddress(from->GetServiceDescriptor()), receiver.remoteIdx);
+            auto buffer = SerializedMessage(msg, to_endpointAddress(from->GetServiceDescriptor()), receiver.remoteIdx);
             receiver.peer->SendIbMsg(std::move(buffer));
         }
     }

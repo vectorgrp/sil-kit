@@ -103,7 +103,7 @@ struct MockVAsioPeer
     }
 
     //IVasioPeer
-    MOCK_METHOD(void, SendIbMsg, (MessageBuffer), (override));
+    MOCK_METHOD(void, SendIbMsg, (SerializedMessage), (override));
     MOCK_METHOD(void, Subscribe, (VAsioMsgSubscriber), (override));
     MOCK_METHOD(const VAsioPeerInfo&, GetInfo, (), (const, override));
     MOCK_METHOD(void, SetInfo, (VAsioPeerInfo), (override));

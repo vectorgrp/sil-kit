@@ -381,7 +381,7 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, Serialize
         ParticipantAnnouncementReply reply;
         reply.status = ParticipantAnnouncementReply::Status::Failed;
         reply.remoteHeader = reference;
-        from->SendIbMsg(Serialize(from->GetProtocolVersion(), reply));
+        from->SendIbMsg(SerializedMessage{from->GetProtocolVersion(), reply});
 
         return;
     }
@@ -442,7 +442,7 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
     announcement.peerInfo = std::move(info);
 
     _logger->Debug("Sending participant announcement to {}", peer->GetInfo().participantName);
-    peer->SendIbMsg(Serialize(announcement));
+    peer->SendIbMsg(SerializedMessage{announcement});
 
 }
 
@@ -503,7 +503,7 @@ void VAsioConnection::SendParticipantAnnoucementReply(IVAsioPeer* peer)
     _logger->Debug("Sending participant announcement reply to {} with protocol version {}.{}",
         peer->GetInfo().participantName, reply.remoteHeader.versionHigh,
         reply.remoteHeader.versionLow);
-    peer->SendIbMsg(Serialize(peer->GetProtocolVersion(), reply));
+    peer->SendIbMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
 }
 
 void VAsioConnection::AddParticipantToLookup(const std::string& participantName)
@@ -545,7 +545,7 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
         ParticipantAnnouncementReply reply;
         reply.status = ParticipantAnnouncementReply::Status::Failed;
         reply.remoteHeader = RegistryMsgHeader{};
-        peer->SendIbMsg(Serialize(peer->GetProtocolVersion(), reply));
+        peer->SendIbMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
         return;
     }
 
@@ -798,8 +798,8 @@ void VAsioConnection::OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer)
         return ReceiveSubscriptionAnnouncement(from, std::move(buffer));
     case VAsioMsgKind::SubscriptionAcknowledge:
         return ReceiveSubscriptionAcknowledge(from, std::move(buffer));
-    //case VAsioMsgKind::IbMwMsg:
-     //   return ReceiveRawIbMessage(from, std::move(buffer));
+    case VAsioMsgKind::IbMwMsg:
+        return ReceiveRawIbMessage(from, std::move(buffer));
     case VAsioMsgKind::IbSimMsg:
         return ReceiveRawIbMessage(from, std::move(buffer));
     case VAsioMsgKind::IbRegistryMessage:
@@ -851,7 +851,7 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, Serializ
         ? SubscriptionAcknowledge::Status::Success
         : SubscriptionAcknowledge::Status::Failed;
 
-    from->SendIbMsg(Serialize(from->GetProtocolVersion(), ack));
+    from->SendIbMsg(SerializedMessage{from->GetProtocolVersion(), ack});
 }
 
 void VAsioConnection::ReceiveSubscriptionAcknowledge(IVAsioPeer* from, SerializedMessage&& buffer)

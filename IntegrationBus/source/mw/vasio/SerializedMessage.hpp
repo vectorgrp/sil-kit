@@ -4,7 +4,7 @@
 #include "VAsioDatatypes.hpp"
 #include "MessageBuffer.hpp"
 
-#include "TestDataTypes.hpp"
+//#include "TestDataTypes.hpp"
 #include "VAsioProtocol.hpp"
 
 // XXX hackish, should be hidden together wit IbMessage<T> specializations
@@ -24,15 +24,30 @@
 namespace ib {
 namespace mw {
 
+//helpers
+template<typename MessageT>
+inline constexpr auto messageKind() -> VAsioMsgKind { return VAsioMsgKind::IbMwMsg;}
+template<> inline constexpr auto messageKind<ParticipantAnnouncement>() -> VAsioMsgKind { return VAsioMsgKind::IbRegistryMessage;}
+template<> inline constexpr auto messageKind<ParticipantAnnouncementReply>() -> VAsioMsgKind { return VAsioMsgKind::IbRegistryMessage;}
+template<> inline constexpr auto messageKind<KnownParticipants>() -> VAsioMsgKind { return VAsioMsgKind::IbRegistryMessage;}
+template<> inline constexpr auto messageKind<SubscriptionAcknowledge>() -> VAsioMsgKind { return VAsioMsgKind::SubscriptionAcknowledge;}
+template<> inline constexpr auto messageKind<VAsioMsgSubscriber>() -> VAsioMsgKind { return VAsioMsgKind::SubscriptionAnnouncement;}
+
+template<typename MessageT>
+inline constexpr auto registryMessageKind() -> RegistryMessageKind { return RegistryMessageKind::Invalid;}
+template<> inline constexpr auto registryMessageKind<ParticipantAnnouncement>() -> RegistryMessageKind { return RegistryMessageKind::ParticipantAnnouncement;}
+template<> inline constexpr auto registryMessageKind<ParticipantAnnouncementReply>() -> RegistryMessageKind { return RegistryMessageKind::ParticipantAnnouncementReply;}
+template<> inline constexpr auto registryMessageKind<KnownParticipants>() -> RegistryMessageKind { return RegistryMessageKind::KnownParticipants;}
+
 template<typename ApiMessageT>
 struct IbMessage
 	: public ApiMessageT
 {
 	using ApiMessageT::ApiMessageT;
 
-	void Serialize(MessageBuffer& buffer)
+	static void Serialize(const ApiMessageT& message, MessageBuffer& buffer)
 	{
-		buffer << static_cast<ApiMessageT&>(*this);
+		buffer << message;
 	}
 	void Deserialize(MessageBuffer& buffer)
 	{
@@ -47,8 +62,51 @@ public: //defaulted CTors
 	SerializedMessage& operator=(SerializedMessage&&) = default;
 	SerializedMessage(const SerializedMessage&) = delete;
 	SerializedMessage& operator=(const SerializedMessage&) = delete;
-public:
-	SerializedMessage(std::vector<uint8_t>&& blob)
+public: // Sending a SerializedMessage: from T to binary blob
+
+	// Sim messages have additional parameters:
+	template<typename MessageT>
+	explicit SerializedMessage(const MessageT& message , EndpointAddress endpointAddress, EndpointId remoteIndex) 
+	{
+		 _remoteIndex = remoteIndex;
+		 _endpointAddress = endpointAddress;
+		 _messageKind = messageKind<MessageT>();
+		 _registryKind = registryMessageKind<MessageT>();
+		 WriteNetworkHeaders();
+        _buffer << message;
+	}
+
+	template<typename MessageT>
+	explicit SerializedMessage(const MessageT& message)
+	{
+		 _messageKind = messageKind<MessageT>();
+		 _registryKind = registryMessageKind<MessageT>();
+		 WriteNetworkHeaders();
+		 _buffer << message;
+	}
+	template<typename MessageT>
+	explicit SerializedMessage(ProtocolVersion version, const MessageT& message)
+	{
+		 _messageKind = messageKind<MessageT>();
+		 _registryKind = registryMessageKind<MessageT>();
+		_buffer.SetFormatVersion(version);
+		 WriteNetworkHeaders();
+		 _buffer << message;
+	}
+
+	auto ReleaseStorage() -> std::vector<uint8_t>
+	{
+        auto buffer = _buffer.ReleaseStorage();
+        if (buffer.size() > std::numeric_limits<uint32_t>::max())
+            throw std::runtime_error{"SerializedMessage::Serialize: message buffer is too large"};
+
+		//emplace the buffer size as the first element in the byte stream
+		uint32_t bufferSize = static_cast<uint32_t>(buffer.size());
+		memcpy(buffer.data(), &bufferSize, sizeof(uint32_t));
+		return buffer;
+	}
+public: // Receiving a SerializedMessage: from binary blob to IbMessage<T>
+	explicit SerializedMessage(std::vector<uint8_t>&& blob)
 		: _buffer{std::move(blob)}
 	{
 		ReadNetworkHeaders();
@@ -60,18 +118,7 @@ public:
 		value.Deserialize(_buffer);
 		return value;
 	}
-	/* TODO besseres design fuer Serialize<Type>
-	auto Serialize() -> std::vector<uint8_t>
-	{
-        auto buffer = _buffer.ReleaseStorage();
-        if (buffer.size() > std::numeric_limits<uint32_t>::max())
-            throw std::runtime_error{"SerializedMessage::Serialize: message buffer is too large"};
 
-		//emplace the buffer size as the first element in the byte stream
-		uint32_t bufferSize = static_cast<uint32_t>(buffer.size());
-		memcpy(buffer.data(), &bufferSize, sizeof(uint32_t));
-	}
-	*/
 	auto GetMessageKind() const -> VAsioMsgKind
 	{
 		return _messageKind;
@@ -111,6 +158,20 @@ private:
 			|| kind == VAsioMsgKind::IbSimMsg
 			;
 	}
+	void WriteNetworkHeaders()
+	{
+		_buffer << _messageSize; //place holder for finalization via ReleaseStorage()
+		_buffer << _messageKind;
+		if(_messageKind == VAsioMsgKind::IbRegistryMessage)
+		{
+			_buffer << _registryKind; //XXX we need a trait to associate the proper registry Kind with Template argument
+		}
+		if(IsMwOrSim(_messageKind))
+		{
+			_buffer << _remoteIndex
+				<< _endpointAddress;
+		}
+	}
 	void ReadNetworkHeaders()
 	{
 		_messageSize = ExtractMessageSize(_buffer);
@@ -128,12 +189,12 @@ private:
 		}
 	}
 	// network headers, some members are optional depending on messageKind
-	uint32_t _messageSize;
-	VAsioMsgKind _messageKind;
-	RegistryMessageKind _registryKind;
+	uint32_t _messageSize{0};
+	VAsioMsgKind _messageKind{VAsioMsgKind::Invalid};
+	RegistryMessageKind _registryKind{RegistryMessageKind::Invalid};
 	// For simMsg
-	EndpointAddress _endpointAddress;
-	EndpointId _remoteIndex;
+	EndpointAddress _endpointAddress{};
+	EndpointId _remoteIndex{0};
 
 	MessageBuffer _buffer;
 };

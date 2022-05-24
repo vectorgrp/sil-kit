@@ -44,7 +44,7 @@ public:
 public:
     // ----------------------------------------
     // Public Methods
-    void SendIbMsg(MessageBuffer buffer) override;
+    void SendIbMsg(SerializedMessage buffer) override;
     void Subscribe(VAsioMsgSubscriber subscriber) override;
 
     auto GetInfo() const -> const VAsioPeerInfo& override;

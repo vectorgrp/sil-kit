@@ -327,13 +327,13 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
     }
 }
 
-void VAsioTcpPeer::SendIbMsg(MessageBuffer buffer)
+void VAsioTcpPeer::SendIbMsg(SerializedMessage buffer)
 {
-    auto sendBuffer = buffer.ReleaseStorage();
-    if (sendBuffer.size() > std::numeric_limits<uint32_t>::max())
-        throw std::runtime_error{"Message is too large"};
+    //auto sendBuffer = buffer.ReleaseStorage();
+    //if (sendBuffer.size() > std::numeric_limits<uint32_t>::max())
+    //    throw std::runtime_error{"Message is too large"};
 
-    *reinterpret_cast<uint32_t*>(sendBuffer.data()) = static_cast<uint32_t>(sendBuffer.size());
+    //    *reinterpret_cast<uint32_t*>(sendBuffer.data()) = static_cast<uint32_t>(sendBuffer.size());
 
     std::unique_lock<std::mutex> lock{ _sendingQueueLock };
 
@@ -391,7 +391,7 @@ void VAsioTcpPeer::Subscribe(VAsioMsgSubscriber subscriber)
 {
     _logger->Debug("Announcing subscription for [{}] {}", subscriber.networkName, subscriber.msgTypeName);
 
-    SendIbMsg(Serialize(subscriber));
+    SendIbMsg(SerializedMessage{subscriber});
 }
 
 void VAsioTcpPeer::StartAsyncRead()
