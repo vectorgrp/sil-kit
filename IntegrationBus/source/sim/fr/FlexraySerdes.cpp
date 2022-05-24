@@ -1,16 +1,15 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#pragma once
+#include "FlexraySerdes.hpp"
 
-#include "MessageBuffer.hpp"
 
-#include "ib/sim/fr/FlexrayDatatypes.hpp"
 
 namespace ib {
 namespace sim {
 namespace fr {
+using ib::mw::MessageBuffer;
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayHeader& header)
+ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayHeader& header)
 {
     buffer
         << header.flags
@@ -20,7 +19,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Fl
         << header.cycleCount;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayHeader& header)
+ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayHeader& header)
 {
     buffer
         >> header.flags
@@ -31,14 +30,14 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayH
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayFrame& frame)
+ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayFrame& frame)
 {
     buffer
         << frame.header
         << frame.payload;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayFrame& frame)
+ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayFrame& frame)
 {
     buffer
         >> frame.header
@@ -46,7 +45,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayF
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayFrameEvent& msg)
+ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayFrameEvent& msg)
 {
     buffer
         << msg.timestamp
@@ -54,7 +53,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Fl
         << msg.frame;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayFrameEvent& msg)
+ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayFrameEvent& msg)
 {
     buffer
         >> msg.timestamp
@@ -63,7 +62,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayF
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayFrameTransmitEvent& msg)
+ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayFrameTransmitEvent& msg)
 {
     buffer
         << msg.timestamp
@@ -72,7 +71,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Fl
         << msg.frame;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayFrameTransmitEvent& msg)
+ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayFrameTransmitEvent& msg)
 {
     buffer
         >> msg.timestamp
@@ -82,7 +81,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayF
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexraySymbolEvent& symbol)
+ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexraySymbolEvent& symbol)
 {
     buffer
         << symbol.timestamp
@@ -90,7 +89,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Fl
         << symbol.pattern;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexraySymbolEvent& symbol)
+ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexraySymbolEvent& symbol)
 {
     buffer
         >> symbol.timestamp
@@ -99,14 +98,14 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayS
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexraySymbolTransmitEvent& ack)
+ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexraySymbolTransmitEvent& ack)
 {
     auto&& symbol = static_cast<const FlexraySymbolEvent&>(ack);
     buffer
         << symbol;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexraySymbolTransmitEvent& ack)
+ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexraySymbolTransmitEvent& ack)
 {
     auto&& symbol = static_cast<FlexraySymbolEvent&>(ack);
     buffer
@@ -114,7 +113,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayS
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
+ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
                                          const FlexrayCycleStartEvent& flexrayCycleStartEvent)
 {
     buffer
@@ -122,7 +121,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
         << flexrayCycleStartEvent.cycleCounter;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayCycleStartEvent& flexrayCycleStartEvent)
+ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayCycleStartEvent& flexrayCycleStartEvent)
 {
     buffer
         >> flexrayCycleStartEvent.timestamp
@@ -130,20 +129,20 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayC
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayHostCommand& cmd)
+ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayHostCommand& cmd)
 {
     buffer
         << cmd.command;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayHostCommand& cmd)
+ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayHostCommand& cmd)
 {
     buffer
         >> cmd.command;
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayClusterParameters& clusterParam)
+ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayClusterParameters& clusterParam)
 {
     buffer
         << clusterParam.gColdstartAttempts
@@ -168,7 +167,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Fl
         << clusterParam.gSyncFrameIDCountMax;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayClusterParameters& clusterParam)
+ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayClusterParameters& clusterParam)
 {
     buffer
         >> clusterParam.gColdstartAttempts
@@ -194,7 +193,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayC
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayNodeParameters& nodeParams)
+ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayNodeParameters& nodeParams)
 {
     buffer
         << nodeParams.pAllowHaltDueToClock
@@ -222,7 +221,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Fl
         << nodeParams.pSamplesPerMicrotick;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayNodeParameters& nodeParams)
+ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayNodeParameters& nodeParams)
 {
     buffer
         >> nodeParams.pAllowHaltDueToClock
@@ -251,7 +250,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayN
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayTxBufferConfig& config)
+ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayTxBufferConfig& config)
 {
     buffer
         << config.channels
@@ -263,7 +262,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Fl
         << config.transmissionMode;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayTxBufferConfig& config)
+ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayTxBufferConfig& config)
 {
     buffer
         >> config.channels
@@ -276,7 +275,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayT
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayControllerConfig& config)
+ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayControllerConfig& config)
 {
     buffer
         << config.clusterParams
@@ -284,7 +283,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Fl
         << config.bufferConfigs;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayControllerConfig& config)
+ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayControllerConfig& config)
 {
     buffer
         >> config.clusterParams
@@ -293,14 +292,14 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayC
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayTxBufferConfigUpdate& update)
+ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayTxBufferConfigUpdate& update)
 {
     buffer
         << update.txBufferIndex
         << update.txBufferConfig;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayTxBufferConfigUpdate& update)
+ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayTxBufferConfigUpdate& update)
 {
     buffer
         >> update.txBufferIndex
@@ -308,7 +307,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayT
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayTxBufferUpdate& update)
+ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayTxBufferUpdate& update)
 {
     buffer
         << update.txBufferIndex
@@ -316,7 +315,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Fl
         << update.payload;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayTxBufferUpdate& update)
+ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayTxBufferUpdate& update)
 {
     buffer
         >> update.txBufferIndex
@@ -325,7 +324,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayT
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
+ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
                                          const FlexrayPocStatusEvent& flexrayPocStatusEvent)
 {
     buffer
@@ -341,7 +340,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
         << flexrayPocStatusEvent.chiReadyRequest;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayPocStatusEvent& flexrayPocStatusEvent)
+ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayPocStatusEvent& flexrayPocStatusEvent)
 {
     buffer
       >> flexrayPocStatusEvent.timestamp
@@ -355,6 +354,99 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayP
       >> flexrayPocStatusEvent.wakeupStatus
       >> flexrayPocStatusEvent.chiReadyRequest;
     return buffer;
+}
+
+
+void Serialize(MessageBuffer& buffer, const FlexrayFrameEvent& msg)
+{
+    buffer << msg;
+    return;
+}
+void Serialize(MessageBuffer& buffer, const FlexrayFrameTransmitEvent& msg)
+{
+    buffer << msg;
+    return;
+}
+void Serialize(MessageBuffer& buffer, const FlexraySymbolEvent& msg)
+{
+    buffer << msg;
+    return;
+}
+void Serialize(MessageBuffer& buffer, const FlexraySymbolTransmitEvent& msg)
+{
+    buffer << msg;
+    return;
+}
+void Serialize(MessageBuffer& buffer, const FlexrayCycleStartEvent& msg)
+{
+    buffer << msg;
+    return;
+}
+void Serialize(MessageBuffer& buffer, const FlexrayHostCommand& msg)
+{
+    buffer << msg;
+    return;
+}
+void Serialize(MessageBuffer& buffer, const FlexrayControllerConfig& msg)
+{
+    buffer << msg;
+    return;
+}
+void Serialize(MessageBuffer& buffer, const FlexrayTxBufferConfigUpdate& msg)
+{
+    buffer << msg;
+    return;
+}
+void Serialize(MessageBuffer& buffer, const FlexrayTxBufferUpdate& msg)
+{
+    buffer << msg;
+    return;
+}
+void Serialize(MessageBuffer& buffer, const FlexrayPocStatusEvent& msg)
+{
+    buffer << msg;
+    return;
+}
+
+void Deserialize(MessageBuffer& buffer, FlexrayFrameEvent& out)
+{
+    buffer >> out;
+}
+void Deserialize(MessageBuffer& buffer, FlexrayFrameTransmitEvent& out)
+{
+    buffer >> out;
+}
+void Deserialize(MessageBuffer& buffer, FlexraySymbolEvent& out)
+{
+    buffer >> out;
+}
+void Deserialize(MessageBuffer& buffer, FlexraySymbolTransmitEvent& out)
+{
+    buffer >> out;
+}
+void Deserialize(MessageBuffer& buffer, FlexrayCycleStartEvent& out)
+{
+    buffer >> out;
+}
+void Deserialize(MessageBuffer& buffer, FlexrayHostCommand& out)
+{
+    buffer >> out;
+}
+void Deserialize(MessageBuffer& buffer, FlexrayControllerConfig& out)
+{
+    buffer >> out;
+}
+void Deserialize(MessageBuffer& buffer, FlexrayTxBufferConfigUpdate& out)
+{
+    buffer >> out;
+}
+void Deserialize(MessageBuffer& buffer, FlexrayTxBufferUpdate& out)
+{
+    buffer >> out;
+}
+void Deserialize(MessageBuffer& buffer, FlexrayPocStatusEvent& out)
+{
+    buffer >> out;
 }
 } // namespace fr
 } // namespace sim

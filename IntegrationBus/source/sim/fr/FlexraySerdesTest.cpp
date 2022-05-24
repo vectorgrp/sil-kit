@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "SerdesSimFlexray.hpp"
+#include "FlexraySerdes.hpp"
 
 #include <chrono>
 #include "gtest/gtest.h"
@@ -31,8 +31,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayFrameEvent){
     std::string message{"Hello from flexray!  msgId = 1 -------------"};
     in.frame.payload = std::vector<uint8_t>{message.begin(), message.end()};
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.channel, out.channel);
@@ -70,8 +70,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayFrameTransmitEvent) {
     std::string message{"Hello acknowledgement sent!"};
     in.frame.payload = std::vector<uint8_t>{message.begin(), message.end()};
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.txBufferIndex, out.txBufferIndex);
@@ -97,8 +97,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexraySymbolEvent) {
     in.channel = FlexrayChannel::B;
     in.pattern = FlexraySymbolPattern::Wus;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.channel, out.channel);
@@ -116,8 +116,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexraySymbolTransmitEvent) {
     in.channel = FlexrayChannel::A;
     in.pattern = FlexraySymbolPattern::Wudop;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.channel, out.channel);
@@ -134,8 +134,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayCycleStartEvent) {
     in.timestamp = 1ns;
     in.cycleCounter = 32;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.cycleCounter, out.cycleCounter);
@@ -150,8 +150,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayHostCommand) {
 
     in.command = FlexrayChiCommand::DEFERRED_HALT;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in.command, out.command);
 }
@@ -219,8 +219,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayControllerConfig) {
 
     in.bufferConfigs = std::vector<FlexrayTxBufferConfig>{conf1};
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in.clusterParams.gColdstartAttempts, out.clusterParams.gColdstartAttempts);
     EXPECT_EQ(in.clusterParams.gCycleCountMax, out.clusterParams.gCycleCountMax);
@@ -297,8 +297,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayTxBufferConfigUpdate) {
     in.txBufferConfig.slotId = 7;
     in.txBufferConfig.transmissionMode = FlexrayTransmissionMode::Continuous;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in.txBufferIndex, out.txBufferIndex);
     EXPECT_EQ(in.txBufferConfig, out.txBufferConfig);
@@ -315,8 +315,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayTxBufferUpdate) {
     in.payloadDataValid = true;
     in.payload = std::vector<uint8_t>{1, 2, 3};
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in.txBufferIndex, out.txBufferIndex);
     EXPECT_EQ(in.payloadDataValid, out.payloadDataValid);
@@ -341,8 +341,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayPocStatusEvent) {
     in.coldstartNoise = true;
     in.wakeupStatus = FlexrayWakeupStatusType::ReceivedHeader;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.state, out.state);

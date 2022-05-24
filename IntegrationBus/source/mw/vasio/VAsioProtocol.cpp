@@ -20,7 +20,6 @@
 #include "SerdesMwSync.hpp"
 #include "SerdesSimData.hpp"
 #include "SerdesSimRpc.hpp"
-#include "SerdesSimFlexray.hpp"
 #include "SerdesMwService.hpp"
 
 
@@ -197,46 +196,6 @@ void Deserialize(MessageBuffer& buffer, sim::rpc::FunctionCallResponse& out)
 {
     out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
 }
-void Deserialize(MessageBuffer& buffer, sim::fr::FlexrayFrameEvent& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::fr::FlexrayFrameTransmitEvent& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::fr::FlexraySymbolEvent& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::fr::FlexraySymbolTransmitEvent& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::fr::FlexrayCycleStartEvent& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::fr::FlexrayHostCommand& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::fr::FlexrayControllerConfig& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::fr::FlexrayTxBufferConfigUpdate& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::fr::FlexrayTxBufferUpdate& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::fr::FlexrayPocStatusEvent& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
 void Deserialize(MessageBuffer& buffer, mw::service::ParticipantDiscoveryEvent& out)
 {
     out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
@@ -290,56 +249,6 @@ void Serialize(MessageBuffer& buffer, const sim::rpc::FunctionCall& msg)
     return;
 }
 void Serialize(MessageBuffer& buffer, const sim::rpc::FunctionCallResponse& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::fr::FlexrayFrameEvent& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::fr::FlexrayFrameTransmitEvent& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::fr::FlexraySymbolEvent& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::fr::FlexraySymbolTransmitEvent& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::fr::FlexrayCycleStartEvent& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::fr::FlexrayHostCommand& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::fr::FlexrayControllerConfig& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::fr::FlexrayTxBufferConfigUpdate& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::fr::FlexrayTxBufferUpdate& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::fr::FlexrayPocStatusEvent& msg)
 {
     buffer << msg;
     return;

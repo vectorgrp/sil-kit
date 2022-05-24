@@ -9,6 +9,9 @@ add_library(IbSimFlexray STATIC
 
     FlexrayControllerFacade.hpp
     FlexrayControllerFacade.cpp
+
+    FlexraySerdes.hpp
+    FlexraySerdes.cpp
 )
 
 target_include_directories(IbSimFlexray
@@ -35,3 +38,4 @@ add_vib_test(TestSimFlexrayController
         IbConfiguration
         IbMwMockNullConnection
 )
+add_vib_test(Test_FlexraySerdes SOURCES FlexraySerdesTest.cpp LIBS IbInternal IbSimFlexray)
