@@ -90,6 +90,7 @@ struct DistributedTimeQuantumPolicy : ParticipantController::ITimeSyncPolicy
 
     void RequestNextStep() override
     {
+        _currentlyInSimTask = false;
         _controller.SendIbMessage(_myNextTask);
     }
 
@@ -142,14 +143,20 @@ private:
         }
 
         // No other participant has a lower time point: It is our turn
-        _currentTask = _myNextTask;
-        _myNextTask.timePoint = _currentTask.timePoint + _currentTask.duration;
-        _controller.ExecuteSimTask(_currentTask.timePoint, _currentTask.duration);
-        _controller.AwaitNotPaused();
-        if (_blocking)
+        // Check whether no other sim task execution is ongoing
+        bool currentValue = false;
+        if (_currentlyInSimTask.compare_exchange_strong(currentValue, true))
         {
-            //NB: CompleteSimulationTask does invoke this explicitly on the API caller's request:
-            RequestNextStep();
+
+            _currentTask = _myNextTask;
+            _myNextTask.timePoint = _currentTask.timePoint + _currentTask.duration;
+            _controller.ExecuteSimTask(_currentTask.timePoint, _currentTask.duration);
+            _controller.AwaitNotPaused();
+            if (_blocking)
+            {
+                //NB: CompleteSimulationTask does invoke this explicitly on the API caller's request:
+                RequestNextStep();
+            }
         }
 
         for (auto&& otherTask : _otherNextTasks)
@@ -168,6 +175,9 @@ private:
     NextSimTask _myNextTask;
     std::map<std::string, NextSimTask> _otherNextTasks;
     bool _blocking;
+
+    // bool used to track whether a sim task is currently being executed.
+    std::atomic_bool _currentlyInSimTask{false};
 };
 
 //! \brief  A caching time provider: we update its internal state whenever the controller's 

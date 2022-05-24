@@ -101,7 +101,14 @@ Removed
           std::vector<uint8_t> raw;
       };
 
+  - Removed deprecated PcapFile and PcapPipe config fields in EthernetControllers section. Use UseTraceSinks instead.
+  
   - Removed MacAddress config fields in EthernetControllers section.
+
+Fixed
+~~~~~~~
+        
+  - Removed bug that allowed for multiple parallel SimTask-Handle triggers without a call to CompleteSimulationTask when using ParticipantController::RunAsync 
 
 [3.99.22] - 2022-05-17
 ----------------------
