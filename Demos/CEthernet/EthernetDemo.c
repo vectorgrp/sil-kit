@@ -105,16 +105,16 @@ void FrameHandler(void* context, ib_Ethernet_Controller* controller, ib_Ethernet
 
     printf(": ");
 
-    for (i = PAYLOAD_OFFSET; i < frameEvent->ethernetFrame->size; i++)
+    for (i = PAYLOAD_OFFSET; i < frameEvent->ethernetFrame->raw.size; i++)
     {
-        char ch = frameEvent->ethernetFrame->data[i];
+        char ch = frameEvent->ethernetFrame->raw.data[i];
         if (isalnum(ch))
         {
             printf("%c", ch);
         }
         else
         {
-            printf("<%x>", frameEvent->ethernetFrame->data[i]);
+            printf("<%x>", frameEvent->ethernetFrame->raw.data[i]);
         }
     }
     printf("\n");
@@ -145,7 +145,7 @@ void SendFrame()
         exit(-2);
     }
 
-    ib_Ethernet_Frame ef = {(const uint8_t*) buffer, PAYLOAD_OFFSET + payloadSize};
+    ib_Ethernet_Frame ef = {ib_InterfaceIdentifier_EthernetFrame, {(const uint8_t*)buffer, PAYLOAD_OFFSET + payloadSize}};
 
     transmitContext.someInt = ethernetFrameCounter;
     ib_Ethernet_Controller_SendFrame(ethernetController1, &ef, (void*)&transmitContext);

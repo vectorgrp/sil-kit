@@ -113,7 +113,7 @@ ib_ReturnCode ib_Can_Controller_AddStateChangeHandler(ib_Can_Controller* control
         stateChangeEvent.interfaceId = ib_InterfaceIdentifier_CanStateChangeEvent;
         stateChangeEvent.timestamp = cppStateChangeEvent.timestamp.count();
         stateChangeEvent.state = (ib_Can_ControllerState)cppStateChangeEvent.state;
-        callback(context, controller, stateChangeEvent);
+        callback(context, controller, &stateChangeEvent);
       });
     return ib_ReturnCode_SUCCESS;
   }
@@ -135,7 +135,7 @@ ib_ReturnCode ib_Can_Controller_AddErrorStateChangeHandler(ib_Can_Controller* co
         errorStateChangeEvent.interfaceId = ib_InterfaceIdentifier_CanErrorStateChangeEvent;
         errorStateChangeEvent.timestamp = cppErrorStateChangeEvent.timestamp.count();
         errorStateChangeEvent.errorState = (ib_Can_ErrorState)cppErrorStateChangeEvent.errorState;
-        callback(context, controller, errorStateChangeEvent);
+        callback(context, controller, &errorStateChangeEvent);
       });
     return ib_ReturnCode_SUCCESS;
   }

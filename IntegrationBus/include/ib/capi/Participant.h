@@ -401,7 +401,7 @@ IntegrationBusAPI ib_ReturnCode ib_Participant_RegisterSystemStateHandler(ib_Par
 
 
 typedef void (*ib_ParticipantStatusHandler_t)(void* context, ib_Participant* participant,
-    const char* participantName, ib_ParticipantStatus status);
+    const char* participantName, ib_ParticipantStatus* status);
 
 /*! \brief Register a callback for status changes of participants.
   *

@@ -24,6 +24,7 @@ typedef uint32_t ib_Can_FrameFlag;
     */
 struct ib_Can_Frame
 {
+    ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
     uint32_t id; //!< CAN Identifier
     ib_Can_FrameFlag flags; //!< CAN Arbitration and Control Field Flags; see ib_Can_FrameFlag
     uint8_t dlc; //!< Data Length Code - determined by the Network Simulator
@@ -100,7 +101,7 @@ typedef struct ib_Can_StateChangeEvent ib_Can_StateChangeEvent;
 
 /*! \brief Error state of a CAN node according to CAN specification.
 */
-typedef int ib_Can_ErrorState;
+typedef int32_t ib_Can_ErrorState;
 /*! Error State is Not Available, because CAN controller is in state Uninit.
 *
 * *AUTOSAR Doc:* Successful transmission.
@@ -152,7 +153,7 @@ typedef void (*ib_Can_FrameHandler_t)(void* context, ib_Can_Controller* controll
 * \param stateChangeEvent The state change event containing timestamp and new state.
 */
 typedef void (*ib_Can_StateChangeHandler_t)(void* context, ib_Can_Controller* controller,
-                                             ib_Can_StateChangeEvent stateChangeEvent);
+                                             ib_Can_StateChangeEvent* stateChangeEvent);
 
 /*! Callback type to indicate that the controller Can error state has changed.
 * \param context The by the user provided context on registration.
@@ -160,7 +161,7 @@ typedef void (*ib_Can_StateChangeHandler_t)(void* context, ib_Can_Controller* co
 * \param errorStateChangeEvent The error state change event containing timestamp and new error state.
 */
 typedef void (*ib_Can_ErrorStateChangeHandler_t)(void* context, ib_Can_Controller* controller,
-                                                  ib_Can_ErrorStateChangeEvent errorStateChangeEvent);
+                                                  ib_Can_ErrorStateChangeEvent* errorStateChangeEvent);
 
 /*! \brief Create a CAN controller at this IB simulation participant.
  * \param outCanController Pointer that refers to the resulting Can controller (out parameter).

@@ -57,11 +57,11 @@ void FrameHandler(void* /*context*/, ib_Ethernet_Controller* /*controller*/, ib_
 {
 }
 
-void StateChangeHandler(void* /*context*/, ib_Ethernet_Controller* /*controller*/, ib_Ethernet_StateChangeEvent /*stateChangeEvent*/)
+void StateChangeHandler(void* /*context*/, ib_Ethernet_Controller* /*controller*/, ib_Ethernet_StateChangeEvent* /*stateChangeEvent*/)
 {
 }
 
-void BitrateChangeHandler(void* /*context*/, ib_Ethernet_Controller* /*controller*/, ib_Ethernet_BitrateChangeEvent /*bitrateChangeEvent*/)
+void BitrateChangeHandler(void* /*context*/, ib_Ethernet_Controller* /*controller*/, ib_Ethernet_BitrateChangeEvent* /*bitrateChangeEvent*/)
 {
 }
 
@@ -75,7 +75,7 @@ public:
 TEST_F(CapiEthernetTest, ethernet_controller_function_mapping)
 {
     std::array<uint8_t, 60> buffer;
-    ib_Ethernet_Frame ef = { buffer.data(), buffer.size() };
+    ib_Ethernet_Frame ef = {ib_InterfaceIdentifier_EthernetFrame, {buffer.data(), buffer.size()}};
 
     ib_ReturnCode returnCode;
 
@@ -151,7 +151,7 @@ TEST_F(CapiEthernetTest, ethernet_controller_nullptr_error)
     returnCode = ib_Ethernet_Controller_AddBitrateChangeHandler(nullptr, NULL, &BitrateChangeHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-    ib_Ethernet_Frame ef{0,0};
+    ib_Ethernet_Frame ef{ib_InterfaceIdentifier_EthernetFrame, {0, 0}};
     returnCode = ib_Ethernet_Controller_SendFrame((ib_Ethernet_Controller*)&mockController, nullptr, NULL);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
     returnCode = ib_Ethernet_Controller_SendFrame(nullptr, &ef, NULL);
@@ -185,11 +185,13 @@ TEST_F(CapiEthernetTest, ethernet_controller_send_frame)
         "This is the demonstration ethernet frame number %i.",
          ethernetMessageCounter);
 
-    ib_Ethernet_Frame ef = { (const uint8_t*)buffer, PAYLOAD_OFFSET + payloadSize };
+    ib_Ethernet_Frame ef = {ib_InterfaceIdentifier_EthernetFrame,
+                            {(const uint8_t*)buffer, PAYLOAD_OFFSET + payloadSize}};
 
-    EthernetFrame referenceFrame{};
-    referenceFrame.raw = { ef.data, ef.data + ef.size };
-    EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(referenceFrame))).Times(testing::Exactly(1));
+    EthernetFrame refFrame{};
+    std::vector<uint8_t> rawFrame(ef.raw.data, ef.raw.data + ef.raw.size);
+    refFrame.raw = rawFrame;
+    EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(refFrame))).Times(testing::Exactly(1));
     returnCode = ib_Ethernet_Controller_SendFrame((ib_Ethernet_Controller*)&mockController, &ef, NULL);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 

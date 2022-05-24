@@ -75,8 +75,8 @@ static void assign(ib::sim::fr::FlexrayNodeParameters& cppNodeParameters, const 
 
 static void assign(ib::sim::fr::FlexrayControllerConfig& cppConfig, const ib_Flexray_ControllerConfig* config)
 {
-  assign(cppConfig.clusterParams, &config->clusterParams);
-  assign(cppConfig.nodeParams, &config->nodeParams);
+  assign(cppConfig.clusterParams, config->clusterParams);
+  assign(cppConfig.nodeParams, config->nodeParams);
 
   for (uint32_t i = 0;i < config->numBufferConfigs; i++)
   {
@@ -114,6 +114,8 @@ ib_ReturnCode ib_Flexray_Controller_Configure(ib_Flexray_Controller* controller,
 {
   ASSERT_VALID_POINTER_PARAMETER(controller);
   ASSERT_VALID_POINTER_PARAMETER(config);
+  ASSERT_VALID_POINTER_PARAMETER(config->clusterParams);
+  ASSERT_VALID_POINTER_PARAMETER(config->nodeParams);
   CAPI_ENTER
   {
     ib::sim::fr::IFlexrayController* cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
@@ -209,17 +211,23 @@ ib_ReturnCode ib_Flexray_Controller_AddFrameHandler(ib_Flexray_Controller* contr
         [context, handler](ib::sim::fr::IFlexrayController* ctrl, const ib::sim::fr::FlexrayFrameEvent& msg) {
             ib_Flexray_FrameEvent message;
             ib_Flexray_Frame frame;
+            ib_Flexray_Header header;
+
+            header.cycleCount = msg.frame.header.cycleCount;
+            header.frameId = msg.frame.header.frameId;
+            header.flags = msg.frame.header.flags;
+            header.headerCrc = msg.frame.header.headerCrc;
+            header.payloadLength = msg.frame.header.payloadLength;
+
+            frame.header = &header;
+            frame.payload.data = (uint8_t*)msg.frame.payload.data();
+            frame.payload.size = (uint32_t)msg.frame.payload.size();
+
             message.interfaceId = ib_InterfaceIdentifier_FlexrayFrameEvent;
             message.timestamp = msg.timestamp.count();
             message.channel = (ib_Flexray_Channel)msg.channel;
             message.frame = &frame;
-            frame.header.cycleCount = msg.frame.header.cycleCount;
-            frame.header.frameId = msg.frame.header.frameId;
-            frame.header.flags = msg.frame.header.flags;
-            frame.header.headerCrc = msg.frame.header.headerCrc;
-            frame.header.payloadLength = msg.frame.header.payloadLength;
-            frame.payload.data = (uint8_t*)msg.frame.payload.data();
-            frame.payload.size = (uint32_t)msg.frame.payload.size();
+            
             handler(context, ctrl, &message);
         });
     return ib_ReturnCode_SUCCESS;
@@ -239,18 +247,23 @@ ib_ReturnCode ib_Flexray_Controller_AddFrameTransmitHandler(ib_Flexray_Controlle
         [context, handler](ib::sim::fr::IFlexrayController* ctrl, const ib::sim::fr::FlexrayFrameTransmitEvent& msg) {
             ib_Flexray_FrameTransmitEvent message;
             ib_Flexray_Frame frame;
+            ib_Flexray_Header header;
+
+            header.cycleCount = msg.frame.header.cycleCount;
+            header.frameId = msg.frame.header.frameId;
+            header.flags = msg.frame.header.flags;
+            header.headerCrc = msg.frame.header.headerCrc;
+            header.payloadLength = msg.frame.header.payloadLength;
+
+            frame.payload.data = (uint8_t*)msg.frame.payload.data();
+            frame.payload.size = (uint32_t)msg.frame.payload.size();
+            frame.header = &header;
+
             message.interfaceId = ib_InterfaceIdentifier_FlexrayFrameTransmitEvent;
             message.timestamp = msg.timestamp.count();
             message.txBufferIndex = msg.txBufferIndex;
             message.channel = (ib_Flexray_Channel)msg.channel;
             message.frame = &frame;
-            frame.header.cycleCount = msg.frame.header.cycleCount;
-            frame.header.frameId = msg.frame.header.frameId;
-            frame.header.flags = msg.frame.header.flags;
-            frame.header.headerCrc = msg.frame.header.headerCrc;
-            frame.header.payloadLength = msg.frame.header.payloadLength;
-            frame.payload.data = (uint8_t*)msg.frame.payload.data();
-            frame.payload.size = (uint32_t)msg.frame.payload.size();
             handler(context, ctrl, &message);
         });
     return ib_ReturnCode_SUCCESS;

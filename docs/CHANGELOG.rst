@@ -5,21 +5,139 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.99.X] - unreleased
+[3.99.X]
 ----------------------
 
-Refactored Bus System and further Service (data message, rpc) APIs
 
 Compatibility with 3.99.22
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Application binary interface (ABI): No
 - Application software interface (API): No
-- Middleware network protocol (VAsio): Yes
+- Middleware network protocol (VAsio): 
 
 
 Changed
 ~~~~~~~
+- Added ib_InterfaceId to structs of C-API: 
+
+  + ib_Can_Frame
+  + ib_Flexray_ControllerConfig
+  + ib_Flexray_HostCommand
+  + ib_Flexray_Header
+  + ib_Flexray_Frame
+  + ib_Flexray_ClusterParameters
+  + ib_Flexray_NodeParameters
+  + ib_Flexray_TxBufferConfig
+  + ib_Flexray_TxBufferUpdate
+  + ib_Rpc_DiscoveryResultList
+
+- Changed type of ib_CanErrorState:
+  
+  - ``IntegrationBus/include/ib/capi/Can.h``
+
+    + old: 
+    .. code-block:: c++
+
+      typedef int ib_Can_ErrorState;
+
+    + new: 
+    .. code-block:: c++
+
+      typedef int32_t ib_Can_ErrorState;
+
+- Changed pass by value semantic in C-API handlers:
+  
+  - ``IntegrationBus/include/ib/capi/Can.h``
+
+    + old: 
+    .. code-block:: c++
+
+      typedef void (*ib_Can_StateChangeHandler_t)(void* context, ib_Can_Controller* controller,
+                                             ib_Can_StateChangeEvent stateChangeEvent);
+      typedef void (*ib_Can_ErrorStateChangeHandler_t)(void* context, ib_Can_Controller* controller,
+                                                  ib_Can_ErrorStateChangeEvent errorStateChangeEvent);
+
+    + new: 
+    .. code-block:: c++
+
+      typedef void (*ib_Can_StateChangeHandler_t)(void* context, ib_Can_Controller* controller,
+                                             ib_Can_StateChangeEvent* stateChangeEvent);
+      typedef void (*ib_Can_ErrorStateChangeHandler_t)(void* context, ib_Can_Controller* controller,
+                                                  ib_Can_ErrorStateChangeEvent* errorStateChangeEvent);
+
+  - ``IntegrationBus/include/ib/capi/Ethernet.h``
+
+    + old: 
+    .. code-block:: c++
+
+      typedef void (*ib_Ethernet_StateChangeHandler_t)(void* context, ib_Ethernet_Controller* controller,
+        ib_Ethernet_StateChangeEvent stateChangeEvent);
+      typedef void (*ib_Ethernet_BitrateChangeHandler_t)(void* context, ib_Ethernet_Controller* controller,
+        ib_Ethernet_BitrateChangeEvent bitrateChangeEvent);
+
+    + new: 
+    .. code-block:: c++
+
+      typedef void (*ib_Ethernet_StateChangeHandler_t)(void* context, ib_Ethernet_Controller* controller,
+        ib_Ethernet_StateChangeEvent* stateChangeEvent);
+      typedef void (*ib_Ethernet_BitrateChangeHandler_t)(void* context, ib_Ethernet_Controller* controller,
+        ib_Ethernet_BitrateChangeEvent* bitrateChangeEvent);
+
+  - ``IntegrationBus/include/ib/capi/Ethernet.h``
+
+    + old: 
+    .. code-block:: c++
+
+      typedef void (*ib_ParticipantStatusHandler_t)(void* context, ib_Participant* participant,
+        const char* participantName, ib_ParticipantStatus status);
+
+    + new: 
+    .. code-block:: c++
+
+      typedef void (*ib_ParticipantStatusHandler_t)(void* context, ib_Participant* participant,
+        const char* participantName, ib_ParticipantStatus* status);
+
+- Changed ib_Ethernet_Frame C-API:
+  
+  - ``IntegrationBus/include/ib/capi/Ethernet.h``
+
+    + old: 
+    .. code-block:: c++
+
+      typedef ib_ByteVector ib_Ethernet_Frame;
+
+    + new: 
+    .. code-block:: c++
+
+      typedef struct
+        {
+            ib_InterfaceIdentifier interfaceId; //!< The interface id that specifies which version of this struct was obtained
+            ib_ByteVector raw;
+        } ib_Ethernet_Frame;
+
+- Changed ib_Flexray_ControllerConfig C-API:
+  
+  - ``IntegrationBus/include/ib/capi/Flexray.h``
+
+    + old: 
+    .. code-block:: c++
+
+      struct ib_Flexray_ControllerConfig
+        {
+            ib_Flexray_ClusterParameters clusterParams;
+            ib_Flexray_NodeParameters nodeParams;
+            ...
+
+    + new: 
+    .. code-block:: c++
+
+      struct ib_Flexray_ControllerConfig
+        {
+            ib_InterfaceIdentifier interfaceId;
+            ib_Flexray_ClusterParameters* clusterParams;
+            ib_Flexray_NodeParameters* nodeParams;
+            ...
 
 - ``IntegrationBus/include/ib/sim/can/CanDatatypes.hpp``
       

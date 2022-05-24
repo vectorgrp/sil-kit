@@ -40,6 +40,9 @@ typedef uint32_t ib_Flexray_ClockPeriod;
  */
 struct ib_Flexray_ClusterParameters
 {
+  //! The interface id specifying which version of this struct was obtained
+  ib_InterfaceIdentifier interfaceId;
+
   //! Number of attempts for a cold start before giving up (range 2-31).
   uint8_t gColdstartAttempts;
 
@@ -127,6 +130,9 @@ typedef struct ib_Flexray_ClusterParameters ib_Flexray_ClusterParameters;
  */
 struct ib_Flexray_NodeParameters
 {
+  //! The interface id specifying which version of this struct was obtained
+  ib_InterfaceIdentifier interfaceId;
+
   // ----------------------------------------------------------------------
   // Parameters according to B.3.2.1
 
@@ -245,6 +251,9 @@ typedef uint8_t ib_Flexray_TransmissionMode;
 //! Configuration of Tx-Buffer, used in struct FlexrayControllerConfig
 struct ib_Flexray_TxBufferConfig
 {
+  //! The interface id specifying which version of this struct was obtained
+  ib_InterfaceIdentifier interfaceId;
+
   //! (values FlexrayChannel::A, FlexrayChannel::B, FlexrayChannel::AB)
   ib_Flexray_Channel channels;
 
@@ -271,10 +280,12 @@ typedef struct ib_Flexray_TxBufferConfig ib_Flexray_TxBufferConfig;
 //! Configure the communication parameters of the FlexRay controller.
 struct ib_Flexray_ControllerConfig
 {
+  //! The interface id specifying which version of this struct was obtained
+  ib_InterfaceIdentifier interfaceId;
   //! FlexRay cluster parameters
-  ib_Flexray_ClusterParameters clusterParams;
+  ib_Flexray_ClusterParameters* clusterParams;
   //! FlexRay node parameters
-  ib_Flexray_NodeParameters nodeParams;
+  ib_Flexray_NodeParameters* nodeParams;
 
   //! FlexRay buffer configs
   uint32_t                   numBufferConfigs;
@@ -285,6 +296,9 @@ typedef struct ib_Flexray_ControllerConfig ib_Flexray_ControllerConfig;
 //! Update the content of a FlexRay TX-Buffer
 struct ib_Flexray_TxBufferUpdate
 {
+  //! The interface id specifying which version of this struct was obtained
+  ib_InterfaceIdentifier interfaceId;
+
   //! Index of the TX Buffers according to the configured buffers (cf. FlexrayControllerConfig).
   uint16_t txBufferIndex;
 
@@ -307,6 +321,9 @@ typedef uint8_t ib_Flexray_ChiCommand;
 
 struct ib_Flexray_HostCommand
 {
+    //! The interface id specifying which version of this struct was obtained
+    ib_InterfaceIdentifier interfaceId;
+
     ib_Flexray_ChiCommand command;
 };
 
@@ -318,6 +335,7 @@ typedef uint8_t ib_Flexray_Header_Flag;
 
 struct ib_Flexray_Header
 {
+  ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
   /*!
     * \brief Flags bit map according to FlagMask. Description:
     *  - [7-5]: unused
@@ -337,7 +355,8 @@ typedef struct ib_Flexray_Header ib_Flexray_Header;
 
 struct ib_Flexray_Frame
 {
-  ib_Flexray_Header header;  //!< Header flags, slot, crc, and cycle indidcators
+  ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+  ib_Flexray_Header* header;  //!< Header flags, slot, crc, and cycle indidcators
   ib_ByteVector     payload;
 };
 typedef struct ib_Flexray_Frame ib_Flexray_Frame;

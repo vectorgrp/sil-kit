@@ -39,6 +39,7 @@ typedef struct ib_Rpc_DiscoveryResult
 */
 typedef struct ib_Rpc_DiscoveryResultList
 {
+    ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
     size_t numResults;
     ib_Rpc_DiscoveryResult* results;
 } ib_Rpc_DiscoveryResultList;

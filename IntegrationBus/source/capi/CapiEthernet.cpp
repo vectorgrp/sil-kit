@@ -85,7 +85,7 @@ ib_ReturnCode ib_Ethernet_Controller_AddFrameHandler(ib_Ethernet_Controller* con
         auto* dataPointer = !cppFrame.raw.empty() ? cppFrame.raw.data() : nullptr;
 
         ib_Ethernet_FrameEvent frameEvent{};
-        ib_Ethernet_Frame frame{ dataPointer, cppFrame.raw.size() };
+        ib_Ethernet_Frame frame{ib_InterfaceIdentifier_EthernetFrame, {dataPointer, cppFrame.raw.size()}};
 
         frameEvent.interfaceId = ib_InterfaceIdentifier_EthernetFrameEvent;
         frameEvent.ethernetFrame = &frame;
@@ -161,7 +161,7 @@ ib_ReturnCode ib_Ethernet_Controller_AddStateChangeHandler(ib_Ethernet_Controlle
         cStateChangeEvent.interfaceId = ib_InterfaceIdentifier_EthernetStateChangeEvent;
         cStateChangeEvent.timestamp = stateChangeEvent.timestamp.count();
         cStateChangeEvent.state = (ib_Ethernet_State)stateChangeEvent.state;
-        handler(context, controller, cStateChangeEvent);
+        handler(context, controller, &cStateChangeEvent);
       });
     return ib_ReturnCode_SUCCESS;
   }
@@ -183,7 +183,7 @@ ib_ReturnCode ib_Ethernet_Controller_AddBitrateChangeHandler(ib_Ethernet_Control
             cBitrateChangeEvent.timestamp = bitrateChangeEvent.timestamp.count();
             cBitrateChangeEvent.bitrate = (ib_Ethernet_Bitrate)bitrateChangeEvent.bitrate;
 
-          handler(context, controller, cBitrateChangeEvent);
+          handler(context, controller, &cBitrateChangeEvent);
       });
     return ib_ReturnCode_SUCCESS;
   }
@@ -196,16 +196,17 @@ ib_ReturnCode ib_Ethernet_Controller_SendFrame(ib_Ethernet_Controller* controlle
   ASSERT_VALID_POINTER_PARAMETER(frame);
   CAPI_ENTER
   {
-    if (frame->size < ETHERNET_MIN_FRAME_SIZE) {
+    if (frame->raw.size < ETHERNET_MIN_FRAME_SIZE) {
       ib_error_string = "An ethernet frame must be at least 60 bytes in size.";
       return ib_ReturnCode_BADPARAMETER;
     }
     using std::chrono::duration;
     auto cppController = reinterpret_cast<ib::sim::eth::IEthernetController*>(controller);
 
-    ib::sim::eth::EthernetFrame ethernetFrame{};
-    ethernetFrame.raw = { frame->data, frame->data + frame->size };
-    auto transmitId = cppController->SendFrame(ethernetFrame);
+    ib::sim::eth::EthernetFrame ef;
+    std::vector<uint8_t> rawFrame(frame->raw.data, frame->raw.data + frame->raw.size);
+    ef.raw = rawFrame;
+    auto transmitId = cppController->SendFrame(ef);
 
     std::unique_lock<std::mutex> lock(pendingEthernetTransmits.mutex);
     pendingEthernetTransmits.userContextById[transmitId] = userContext;

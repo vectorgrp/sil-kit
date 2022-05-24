@@ -22,6 +22,7 @@ typedef int32_t ib_InterfaceIdentifier;
 #define ib_InterfaceIdentifier_EthernetFrameTransmitEvent  ((ib_InterfaceIdentifier)2002001)
 #define ib_InterfaceIdentifier_EthernetStateChangeEvent    ((ib_InterfaceIdentifier)2003001)
 #define ib_InterfaceIdentifier_EthernetBitrateChangeEvent  ((ib_InterfaceIdentifier)2004001)
+#define ib_InterfaceIdentifier_EthernetFrame               ((ib_InterfaceIdentifier)2005001)
 
 // FlexRay
 #define ib_InterfaceIdentifier_FlexrayFrameEvent           ((ib_InterfaceIdentifier)3001001)
@@ -31,6 +32,14 @@ typedef int32_t ib_InterfaceIdentifier;
 #define ib_InterfaceIdentifier_FlexrayCycleStartEvent      ((ib_InterfaceIdentifier)3005001)
 #define ib_InterfaceIdentifier_FlexrayPocStatusEvent       ((ib_InterfaceIdentifier)3006001)
 #define ib_InterfaceIdentifier_FlexrayWakeupEvent          ((ib_InterfaceIdentifier)3007001)
+#define ib_InterfaceIdentifier_FlexrayControllerConfig     ((ib_InterfaceIdentifier)3008001)
+#define ib_InterfaceIdentifier_FlexrayClusterParameters    ((ib_InterfaceIdentifier)3009001)
+#define ib_InterfaceIdentifier_FlexrayNodeParameters       ((ib_InterfaceIdentifier)3010001)
+#define ib_InterfaceIdentifier_FlexrayHostCommand          ((ib_InterfaceIdentifier)3011001)
+#define ib_InterfaceIdentifier_FlexrayHeader               ((ib_InterfaceIdentifier)3012001)
+#define ib_InterfaceIdentifier_FlexrayFrame                ((ib_InterfaceIdentifier)3013001)
+#define ib_InterfaceIdentifier_FlexrayTxBufferConfig       ((ib_InterfaceIdentifier)3014001)
+#define ib_InterfaceIdentifier_FlexrayTxBufferUpdate       ((ib_InterfaceIdentifier)3015001)
 
 // Lin
 #define ib_InterfaceIdentifier_LinFrame                    ((ib_InterfaceIdentifier)4001001)
@@ -48,6 +57,7 @@ typedef int32_t ib_InterfaceIdentifier;
 #define ib_InterfaceIdentifier_RpcDiscoveryResult          ((ib_InterfaceIdentifier)6001001)
 #define ib_InterfaceIdentifier_RpcCallEvent                ((ib_InterfaceIdentifier)6002001)
 #define ib_InterfaceIdentifier_RpcCallResultEvent          ((ib_InterfaceIdentifier)6003001)
+#define ib_InterfaceIdentifier_RpcDiscoveryResultList      ((ib_InterfaceIdentifier)6004001)
 
 // Participant
 #define ib_InterfaceIdentifier_ParticipantStatus           ((ib_InterfaceIdentifier)7001001)

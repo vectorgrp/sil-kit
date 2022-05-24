@@ -55,7 +55,13 @@ typedef struct
     ib_Ethernet_Bitrate bitrate; //!< New bitrate in kBit/sec
 } ib_Ethernet_BitrateChangeEvent;
 
-typedef ib_ByteVector ib_Ethernet_Frame; //!< A raw Ethernet frame
+//!< A raw Ethernet frame
+typedef struct
+{
+    ib_InterfaceIdentifier interfaceId; //!< The interface id that specifies which version of this struct was obtained
+    ib_ByteVector raw;
+} ib_Ethernet_Frame;
+
 
 typedef struct 
 {
@@ -97,7 +103,7 @@ typedef void (*ib_Ethernet_FrameTransmitHandler_t)(void* context, ib_Ethernet_Co
 * \param stateChangeEvent Contains the new state and the timestamp of the event.
 */
 typedef void (*ib_Ethernet_StateChangeHandler_t)(void* context, ib_Ethernet_Controller* controller,
-  ib_Ethernet_StateChangeEvent stateChangeEvent);
+  ib_Ethernet_StateChangeEvent* stateChangeEvent);
 
 /*! Callback type to indicate that the link bit rate has changed.
 * \param context Context pointer provided by the user on registration.
@@ -105,7 +111,7 @@ typedef void (*ib_Ethernet_StateChangeHandler_t)(void* context, ib_Ethernet_Cont
 * \param bitrateChangeEvent Contains the new bitrate and the timestamp of the event.
 */
 typedef void (*ib_Ethernet_BitrateChangeHandler_t)(void* context, ib_Ethernet_Controller* controller,
-  ib_Ethernet_BitrateChangeEvent bitrateChangeEvent);
+  ib_Ethernet_BitrateChangeEvent* bitrateChangeEvent);
 
 /*! \brief Create an Ethernet controller at this IB simulation participant.
 * 

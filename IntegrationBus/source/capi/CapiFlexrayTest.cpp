@@ -106,8 +106,12 @@ TEST_F(CapiFlexrayTest, make_flexray_controller)
 TEST_F(CapiFlexrayTest, fr_controller_function_mapping)
 {
   ib_ReturnCode returnCode;
+  ib_Flexray_ClusterParameters clusterParameters;
+  ib_Flexray_NodeParameters nodeParameters;
   ib_Flexray_ControllerConfig cfg;
   memset(&cfg, 0, sizeof(cfg));
+  cfg.clusterParams = &clusterParameters;
+  cfg.nodeParams = &nodeParameters;
 
   EXPECT_CALL(mockController, Configure(_)).Times(testing::Exactly(1));
   returnCode = ib_Flexray_Controller_Configure((ib_Flexray_Controller*)&mockController, &cfg);
@@ -170,8 +174,12 @@ TEST_F(CapiFlexrayTest, fr_controller_nullpointer_params)
 {
   auto cMockParticipant = (ib_Participant*)&participant;
   ib_ReturnCode returnCode;
+  ib_Flexray_ClusterParameters clusterParameters;
+  ib_Flexray_NodeParameters nodeParameters;
   ib_Flexray_ControllerConfig cfg;
   memset(&cfg, 0, sizeof(cfg));
+  cfg.clusterParams = &clusterParameters;
+  cfg.nodeParams = &nodeParameters;
 
   ib_Flexray_Controller* cController = (ib_Flexray_Controller*)&mockController;
   ib_Flexray_Controller* cControllerReturn = nullptr;

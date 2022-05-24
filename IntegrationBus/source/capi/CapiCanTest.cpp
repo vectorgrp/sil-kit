@@ -70,11 +70,11 @@ namespace {
     {
     }
 
-    void StateChangeHandler(void* /*context*/, ib_Can_Controller* /*controller*/, ib_Can_StateChangeEvent /*state*/)
+    void StateChangeHandler(void* /*context*/, ib_Can_Controller* /*controller*/, ib_Can_StateChangeEvent* /*state*/)
     {
     }
 
-    void ErrorStateChangeHandler(void* /*context*/, ib_Can_Controller* /*controller*/, ib_Can_ErrorStateChangeEvent /*state*/)
+    void ErrorStateChangeHandler(void* /*context*/, ib_Can_Controller* /*controller*/, ib_Can_ErrorStateChangeEvent* /*state*/)
     {
     }
 
@@ -123,7 +123,7 @@ namespace {
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         EXPECT_CALL(mockController, SendFrame(testing::_, testing::_)).Times(testing::Exactly(1));
-        ib_Can_Frame cf{ 1,0,0,{0,0} };
+        ib_Can_Frame cf{ ib_InterfaceIdentifier_CanFrame, 0,0,0,{0,0} };
         cf.id = 1;
         returnCode = ib_Can_Controller_SendFrame((ib_Can_Controller*)&mockController, &cf, NULL);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
@@ -208,7 +208,7 @@ namespace {
         returnCode = ib_Can_Controller_Sleep(nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        ib_Can_Frame cf{ 1,0,0,{0,0} };
+        ib_Can_Frame cf{ ib_InterfaceIdentifier_CanFrame, 1,0,0,{0,0} };
         cf.id = 1;
         returnCode = ib_Can_Controller_SendFrame(nullptr, &cf, NULL);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);

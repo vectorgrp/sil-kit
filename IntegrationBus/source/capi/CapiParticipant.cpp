@@ -481,7 +481,7 @@ ib_ReturnCode ib_Participant_RegisterParticipantStatusHandler(ib_Participant* pa
             cStatus.participantName = cppStatus.participantName.c_str();
             cStatus.participantState = (ib_ParticipantState)cppStatus.state;
             cStatus.refreshTime = std::chrono::duration_cast<std::chrono::nanoseconds>(cppStatus.refreshTime.time_since_epoch()).count();
-          handler(context, participant, cppStatus.participantName.c_str(), cStatus);
+          handler(context, participant, cppStatus.participantName.c_str(), &cStatus);
       });
     return ib_ReturnCode_SUCCESS;
   }

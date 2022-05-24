@@ -108,8 +108,8 @@ void print_flexrayframeevent(FILE* out, const ib_Flexray_FrameEvent* message)
   fprintf(out, "FlexrayFrameEvent ch=");
   print_channel(out, message->channel);
   fprintf(out, ",");
-  print_header(out, &(message->frame->header));
-  if ((message->frame->header.flags & ib_Flexray_Header_NFIndicator) != 0)
+  print_header(out, message->frame->header);
+  if ((message->frame->header->flags & ib_Flexray_Header_NFIndicator) != 0)
   {
     fprintf(out, ", payload=");
     print_hexbytes(out, message->frame->payload.data, message->frame->payload.size);
@@ -121,7 +121,7 @@ void print_flexrayframeevent(FILE* out, const ib_Flexray_FrameEvent* message)
 void print_flexrayframetransmitevent(FILE* out, const ib_Flexray_FrameTransmitEvent* message)
 {
   fprintf(out, "FlexrayFrameTransmitEvent ch=");print_channel(out, message->channel);fprintf(out, ",");
-  print_header(out, &(message->frame->header));
+  print_header(out, message->frame->header);
   fprintf(out, ", txBuffer=%d  @%" PRIu64 "\n", message->txBufferIndex, message->timestamp);
   fflush(out);
 }
@@ -467,8 +467,8 @@ int main(int argc, char** argv)
       return 2;
   }
   memset(config, 0, sizeof(ib_Flexray_ControllerConfig));
-  config->clusterParams = clusterParams;
-  config->nodeParams = nodeParams;
+  config->clusterParams = &clusterParams;
+  config->nodeParams = &nodeParams;
 
   if (!strcmp(participantName, "Node0"))
   {
@@ -494,7 +494,7 @@ int main(int argc, char** argv)
   }
   else if (!strcmp(participantName, "Node1"))
   {
-    config->nodeParams.pKeySlotId = 11;
+    config->nodeParams->pKeySlotId = 11;
 
     // initialize bufferConfig to send some FrMessages
     ib_Flexray_TxBufferConfig cfg;
