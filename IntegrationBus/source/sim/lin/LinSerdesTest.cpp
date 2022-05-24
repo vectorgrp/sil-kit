@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "SerdesSimLin.hpp"
+#include "LinSerdes.hpp"
 
 #include <chrono>
 #include "gtest/gtest.h"
@@ -21,8 +21,8 @@ TEST(MwVAsioSerdes, SimLin_Frame)
     in.dataLength = 6;
     in.data = std::array<uint8_t, 8>{'V', 'E', 'C', 'T', 'O', 'R', 0, 0};
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in, out);
 }
@@ -41,8 +41,8 @@ TEST(MwVAsioSerdes, SimLin_SendFrameRequest)
     in.frame.data = std::array<uint8_t, 8>{'A', 2, 3, 6, 'c', 'Z', 'K'};
     in.responseType = LinFrameResponseType::SlaveToSlave;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in, out);
 }
@@ -57,8 +57,8 @@ TEST(MwVAsioSerdes, SimLin_SendFrameHeaderRequest)
 
     in.id = 49;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in, out);
 }
@@ -77,8 +77,8 @@ TEST(MwVAsioSerdes, SimLin_Transmission)
     in.frame.data = std::array<uint8_t, 8>{'A', 2, 3, 6, 'c', 'Z', 'K'};
     in.status = LinFrameStatus::LIN_TX_OK;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in, out);
 }
@@ -93,8 +93,8 @@ TEST(MwVAsioSerdes, SimLin_WakeupPulse)
 
     in.timestamp = 13ns;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in, out);
 }
@@ -113,8 +113,8 @@ TEST(MwVAsioSerdes, SimLin_FrameResponse)
     in.frame.data = std::array<uint8_t, 8>{'A', 'B', 'E', 'c', 'A', 'B', 'E', 'c'};
     in.responseMode = LinFrameResponseMode::TxUnconditional;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in, out);
 }
@@ -143,8 +143,8 @@ TEST(MwVAsioSerdes, SimLin_ControllerConfig)
     in.frameResponses.push_back(response1);
     in.frameResponses.push_back(response2);
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in, out);
 }
@@ -160,8 +160,8 @@ TEST(MwVAsioSerdes, SimLin_ControllerStatusUpdate)
     in.timestamp = 10s;
     in.status = LinControllerStatus::Sleep;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in, out);
 }
@@ -189,8 +189,8 @@ TEST(MwVAsioSerdes, SimLin_FrameResponseUpdate)
     in.frameResponses.push_back(response1);
     in.frameResponses.push_back(response2);
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer , out);
 
     EXPECT_EQ(in, out);
 }

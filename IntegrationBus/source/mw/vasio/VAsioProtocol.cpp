@@ -21,7 +21,6 @@
 #include "SerdesSimData.hpp"
 #include "SerdesSimRpc.hpp"
 #include "SerdesSimEthernet.hpp"
-#include "SerdesSimLin.hpp"
 #include "SerdesSimFlexray.hpp"
 #include "SerdesMwService.hpp"
 
@@ -215,34 +214,6 @@ void Deserialize(MessageBuffer& buffer, sim::eth::EthernetSetMode& out)
 {
     out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
 }
-void Deserialize(MessageBuffer& buffer, sim::lin::LinSendFrameRequest& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::lin::LinSendFrameHeaderRequest& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::lin::LinTransmission& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::lin::LinWakeupPulse& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::lin::LinControllerConfig& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::lin::LinControllerStatusUpdate& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::lin::LinFrameResponseUpdate& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
 void Deserialize(MessageBuffer& buffer, sim::fr::FlexrayFrameEvent& out)
 {
     out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
@@ -356,41 +327,6 @@ void Serialize(MessageBuffer& buffer, const sim::eth::EthernetStatus& msg)
     return;
 }
 void Serialize(MessageBuffer& buffer, const sim::eth::EthernetSetMode& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::lin::LinSendFrameRequest& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::lin::LinSendFrameHeaderRequest& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::lin::LinTransmission& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::lin::LinWakeupPulse& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::lin::LinControllerConfig& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::lin::LinControllerStatusUpdate& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::lin::LinFrameResponseUpdate& msg)
 {
     buffer << msg;
     return;

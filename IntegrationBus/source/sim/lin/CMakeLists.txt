@@ -11,6 +11,9 @@ add_library(IbSimLin STATIC
 
     LinControllerFacade.hpp
     LinControllerFacade.cpp
+
+    LinSerdes.hpp
+    LinSerdes.cpp
 )
 
 target_include_directories(IbSimLin
@@ -18,6 +21,7 @@ target_include_directories(IbSimLin
 )
 
 target_link_libraries(IbSimLin
+    PUBLIC  IbInterface
     PRIVATE IbInterface
             IbInternal
             IbMwLogging
@@ -36,3 +40,4 @@ add_vib_test(TestSimLin
         IbTracing
         IbMwMockNullConnection
 )
+add_vib_test(TestLin_Serdes  SOURCES LinSerdesTest.cpp LIBS IbInternal IbSimLin)
