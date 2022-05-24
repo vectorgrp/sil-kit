@@ -20,7 +20,6 @@
 #include "SerdesMwSync.hpp"
 #include "SerdesSimData.hpp"
 #include "SerdesSimRpc.hpp"
-#include "SerdesSimEthernet.hpp"
 #include "SerdesSimFlexray.hpp"
 #include "SerdesMwService.hpp"
 
@@ -198,22 +197,6 @@ void Deserialize(MessageBuffer& buffer, sim::rpc::FunctionCallResponse& out)
 {
     out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
 }
-void Deserialize(MessageBuffer& buffer, sim::eth::EthernetFrameEvent& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::eth::EthernetFrameTransmitEvent& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::eth::EthernetStatus& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::eth::EthernetSetMode& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
 void Deserialize(MessageBuffer& buffer, sim::fr::FlexrayFrameEvent& out)
 {
     out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
@@ -307,26 +290,6 @@ void Serialize(MessageBuffer& buffer, const sim::rpc::FunctionCall& msg)
     return;
 }
 void Serialize(MessageBuffer& buffer, const sim::rpc::FunctionCallResponse& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::eth::EthernetFrameEvent& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::eth::EthernetFrameTransmitEvent& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::eth::EthernetStatus& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::eth::EthernetSetMode& msg)
 {
     buffer << msg;
     return;

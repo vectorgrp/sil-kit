@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "SerdesSimEthernet.hpp"
+#include "EthernetSerdes.hpp"
 
 #include <chrono>
 #include "gtest/gtest.h"
@@ -27,8 +27,8 @@ TEST(MwVAsioSerdes, SimEthernet_EthMessage)
     in.frame = CreateEthernetFrame(destinationMac, sourceMac, etherType,
         "Hello from ethernet writer!  msgId = 1 -------------------------------------------------------");
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.transmitId, out.transmitId);
     EXPECT_EQ(in.timestamp, out.timestamp);
@@ -47,8 +47,8 @@ TEST(MwVAsioSerdes, SimEthernet_EthTransmitAcknowledge)
     in.timestamp = 13ns;
     in.status = EthernetTransmitStatus::Transmitted;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.transmitId, out.transmitId);
     EXPECT_EQ(in.timestamp, out.timestamp);
@@ -67,8 +67,8 @@ TEST(MwVAsioSerdes, SimEthernet_EthStatus)
     in.state = EthernetState::LinkUp;
     in.bitrate = 4294967295;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.state, out.state);
@@ -85,8 +85,8 @@ TEST(MwVAsioSerdes, SimEthernet_EthSetMode)
 
     in.mode = EthernetMode::Active;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.mode, out.mode);
 }

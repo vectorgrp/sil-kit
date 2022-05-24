@@ -8,6 +8,9 @@ add_library(IbSimEthernet STATIC
     EthControllerReplay.cpp
     EthControllerFacade.cpp
     EthControllerFacade.hpp
+
+    EthernetSerdes.hpp
+    EthernetSerdes.cpp
 )
 
 target_link_libraries(IbSimEthernet
@@ -35,3 +38,4 @@ add_vib_test(TestSimEthController
         IbTracing
         IbMwMockNullConnection
 )
+add_vib_test(Test_EthernetSerdes  SOURCES EthernetSerdesTest.cpp LIBS IbSimEthernet)

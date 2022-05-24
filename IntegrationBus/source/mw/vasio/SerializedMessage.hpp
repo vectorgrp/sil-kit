@@ -15,13 +15,13 @@
 #include "SerdesMwSync.hpp"
 #include "SerdesSimData.hpp"
 #include "SerdesSimRpc.hpp"
-#include "SerdesSimEthernet.hpp"
 #include "SerdesSimFlexray.hpp"
 #include "SerdesMwService.hpp"
 
 // Component specific Serialize/Deserialize functions
 #include "CanSerdes.hpp"
 #include "LinSerdes.hpp"
+#include "EthernetSerdes.hpp"
 
 namespace ib {
 namespace mw {
