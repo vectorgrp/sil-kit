@@ -503,6 +503,7 @@ void VAsioConnection::SendParticipantAnnoucementReply(IVAsioPeer* peer)
     _logger->Debug("Sending participant announcement reply to {} with protocol version {}.{}",
         peer->GetInfo().participantName, reply.remoteHeader.versionHigh,
         reply.remoteHeader.versionLow);
+    //peer->SendIbMsg(Serialize(peer->GetProtocolVersion(), reply));
     peer->SendIbMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
 }
 

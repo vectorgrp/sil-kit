@@ -45,19 +45,16 @@ auto ExtractEndpointAddress(MessageBuffer& buffer) ->EndpointAddress;
 
 //! Handshake: Serialize ParticipantAnnouncementReply (contains remote peer's protocol version)
 //  VAsioMsgKind: IbRegistryMessage
-auto Serialize(const ParticipantAnnouncement& announcement) -> MessageBuffer;
-void Deserialize(MessageBuffer& buffer, ParticipantAnnouncement& out);
-//! Handshake: Serialize ParticipantAnnouncement (contains peer's protocol version)
-auto Serialize(ProtocolVersion version, const ParticipantAnnouncementReply& reply) -> MessageBuffer;
-void Deserialize(MessageBuffer& buffer,ParticipantAnnouncementReply& out);
-//! Serialize a Service Subscription request
-auto Serialize(const VAsioMsgSubscriber& subscriber) -> MessageBuffer;
-void Deserialize(MessageBuffer&, VAsioMsgSubscriber&);
-//! Serialize a Service subscription acknowledgement
-auto Serialize(ProtocolVersion protocolVersion, const SubscriptionAcknowledge& ack) ->  MessageBuffer;
-void Deserialize(MessageBuffer&, SubscriptionAcknowledge&);
+void Serialize(MessageBuffer buffer, const ParticipantAnnouncement& announcement);
+void Serialize(MessageBuffer buffer, const ParticipantAnnouncementReply& reply);
+void Serialize(MessageBuffer& buffer, const VAsioMsgSubscriber& subscriber);
+void Serialize(MessageBuffer buffer, const SubscriptionAcknowledge& msg);
+void Serialize(MessageBuffer& buffer, const KnownParticipants& msg);
 
-auto Serialize(ProtocolVersion protocolVersion ,const KnownParticipants& reply) -> MessageBuffer;
+void Deserialize(MessageBuffer& buffer, ParticipantAnnouncement& out);
+void Deserialize(MessageBuffer& buffer,ParticipantAnnouncementReply& out);
+void Deserialize(MessageBuffer&, VAsioMsgSubscriber&);
+void Deserialize(MessageBuffer&, SubscriptionAcknowledge&);
 void Deserialize(MessageBuffer& buffer,KnownParticipants& out);
 
 //! Check if we support ser/des for the given protocol version
@@ -110,43 +107,43 @@ void Deserialize(MessageBuffer& buffer, service::ServiceDiscoveryEvent& out);
 
 // Serializers for complete network packets (including size,type kind and service index members)
 
-auto Serialize( const logging::LogMsg& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sync::ParticipantCommand& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sync::SystemCommand& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sync::ParticipantStatus& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sync::ExpectedParticipants& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sync::NextSimTask& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::data::DataMessageEvent& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::rpc::FunctionCall& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::rpc::FunctionCallResponse& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::can::CanFrameEvent& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::can::CanFrameTransmitEvent& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::can::CanControllerStatus& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::can::CanConfigureBaudrate& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::can::CanSetControllerMode& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::eth::EthernetFrameEvent& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::eth::EthernetFrameTransmitEvent& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::eth::EthernetStatus& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::eth::EthernetSetMode& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::lin::LinSendFrameRequest& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::lin::LinSendFrameHeaderRequest& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::lin::LinTransmission& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::lin::LinWakeupPulse& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::lin::LinControllerConfig& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::lin::LinControllerStatusUpdate& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::lin::LinFrameResponseUpdate& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::fr::FlexrayFrameEvent& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::fr::FlexrayFrameTransmitEvent& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::fr::FlexraySymbolEvent& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::fr::FlexraySymbolTransmitEvent& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::fr::FlexrayCycleStartEvent& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::fr::FlexrayHostCommand& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::fr::FlexrayControllerConfig& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::fr::FlexrayTxBufferConfigUpdate& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::fr::FlexrayTxBufferUpdate& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const sim::fr::FlexrayPocStatusEvent& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const service::ParticipantDiscoveryEvent& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
-auto Serialize( const service::ServiceDiscoveryEvent& msg, const EndpointAddress& epa, EndpointId remoteIndex)-> MessageBuffer;
+void Serialize(MessageBuffer& buffer,const logging::LogMsg& msg);
+void Serialize(MessageBuffer& buffer,const sync::ParticipantCommand& msg);
+void Serialize(MessageBuffer& buffer,const sync::SystemCommand& msg);
+void Serialize(MessageBuffer& buffer,const sync::ParticipantStatus& msg);
+void Serialize(MessageBuffer& buffer,const sync::ExpectedParticipants& msg);
+void Serialize(MessageBuffer& buffer,const sync::NextSimTask& msg);
+void Serialize(MessageBuffer& buffer,const sim::data::DataMessageEvent& msg);
+void Serialize(MessageBuffer& buffer,const sim::rpc::FunctionCall& msg);
+void Serialize(MessageBuffer& buffer,const sim::rpc::FunctionCallResponse& msg);
+void Serialize(MessageBuffer& buffer,const sim::can::CanFrameEvent& msg);
+void Serialize(MessageBuffer& buffer,const sim::can::CanFrameTransmitEvent& msg);
+void Serialize(MessageBuffer& buffer,const sim::can::CanControllerStatus& msg);
+void Serialize(MessageBuffer& buffer,const sim::can::CanConfigureBaudrate& msg);
+void Serialize(MessageBuffer& buffer,const sim::can::CanSetControllerMode& msg);
+void Serialize(MessageBuffer& buffer,const sim::eth::EthernetFrameEvent& msg);
+void Serialize(MessageBuffer& buffer,const sim::eth::EthernetFrameTransmitEvent& msg);
+void Serialize(MessageBuffer& buffer,const sim::eth::EthernetStatus& msg);
+void Serialize(MessageBuffer& buffer,const sim::eth::EthernetSetMode& msg);
+void Serialize(MessageBuffer& buffer,const sim::lin::LinSendFrameRequest& msg);
+void Serialize(MessageBuffer& buffer,const sim::lin::LinSendFrameHeaderRequest& msg);
+void Serialize(MessageBuffer& buffer,const sim::lin::LinTransmission& msg);
+void Serialize(MessageBuffer& buffer,const sim::lin::LinWakeupPulse& msg);
+void Serialize(MessageBuffer& buffer,const sim::lin::LinControllerConfig& msg);
+void Serialize(MessageBuffer& buffer,const sim::lin::LinControllerStatusUpdate& msg);
+void Serialize(MessageBuffer& buffer,const sim::lin::LinFrameResponseUpdate& msg);
+void Serialize(MessageBuffer& buffer,const sim::fr::FlexrayFrameEvent& msg);
+void Serialize(MessageBuffer& buffer,const sim::fr::FlexrayFrameTransmitEvent& msg);
+void Serialize(MessageBuffer& buffer,const sim::fr::FlexraySymbolEvent& msg);
+void Serialize(MessageBuffer& buffer,const sim::fr::FlexraySymbolTransmitEvent& msg);
+void Serialize(MessageBuffer& buffer,const sim::fr::FlexrayCycleStartEvent& msg);
+void Serialize(MessageBuffer& buffer,const sim::fr::FlexrayHostCommand& msg);
+void Serialize(MessageBuffer& buffer,const sim::fr::FlexrayControllerConfig& msg);
+void Serialize(MessageBuffer& buffer,const sim::fr::FlexrayTxBufferConfigUpdate& msg);
+void Serialize(MessageBuffer& buffer,const sim::fr::FlexrayTxBufferUpdate& msg);
+void Serialize(MessageBuffer& buffer,const sim::fr::FlexrayPocStatusEvent& msg);
+void Serialize(MessageBuffer& buffer,const service::ParticipantDiscoveryEvent& msg);
+void Serialize(MessageBuffer& buffer,const service::ServiceDiscoveryEvent& msg);
 
 }//mw
 }//ib

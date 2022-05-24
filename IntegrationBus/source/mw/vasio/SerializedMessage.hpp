@@ -73,7 +73,7 @@ public: // Sending a SerializedMessage: from T to binary blob
 		 _messageKind = messageKind<MessageT>();
 		 _registryKind = registryMessageKind<MessageT>();
 		 WriteNetworkHeaders();
-        _buffer << message;
+		 Serialize(_buffer, message);
 	}
 
 	template<typename MessageT>
@@ -164,7 +164,7 @@ private:
 		_buffer << _messageKind;
 		if(_messageKind == VAsioMsgKind::IbRegistryMessage)
 		{
-			_buffer << _registryKind; //XXX we need a trait to associate the proper registry Kind with Template argument
+			_buffer << _registryKind;
 		}
 		if(IsMwOrSim(_messageKind))
 		{

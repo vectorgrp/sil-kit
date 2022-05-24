@@ -112,46 +112,22 @@ inline void Deserialize(MessageBuffer& buffer, test::TestFrameEvent& out)
     buffer >> out;
 }
 
-inline auto Serialize(const test::TestFrameEvent& msg,
-    EndpointAddress address, EndpointId remoteIndex) -> MessageBuffer
+inline void Serialize(MessageBuffer& buffer, const test::TestFrameEvent& msg)
 {
-    ib::mw::MessageBuffer buffer;
-    uint32_t msgSizePlaceholder{0u};
-    buffer
-        << msgSizePlaceholder
-        << VAsioMsgKind::IbSimMsg
-        << remoteIndex
-        << address
-        << msg;
-    return buffer;
+    buffer << msg;
+    return;
 }
 
-inline auto Serialize(const test::version2::TestMessage& msg,
-    EndpointAddress address, EndpointId remoteIndex) -> MessageBuffer
+inline auto Serialize(MessageBuffer& buffer, const test::version2::TestMessage& msg)
 {
-    ib::mw::MessageBuffer buffer;
-    uint32_t msgSizePlaceholder{0u};
-    buffer
-        << msgSizePlaceholder
-        << VAsioMsgKind::IbSimMsg
-        << remoteIndex
-        << address
-        << msg;
-    return buffer;
+    buffer << msg;
+    return;
 }
 
-inline auto Serialize(const test::version1::TestMessage& msg,
-    EndpointAddress address, EndpointId remoteIndex) -> MessageBuffer
+inline auto Serialize(MessageBuffer& buffer, const test::version1::TestMessage& msg)
 {
-    ib::mw::MessageBuffer buffer;
-    uint32_t msgSizePlaceholder{0u};
-    buffer
-        << msgSizePlaceholder
-        << VAsioMsgKind::IbSimMsg
-        << remoteIndex
-        << address
-        << msg;
-    return buffer;
+    buffer << msg;
+    return;
 }
 
 } // mw
