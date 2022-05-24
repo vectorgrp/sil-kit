@@ -7,6 +7,7 @@
 #include <string>
 
 #include "VAsioPeerInfo.hpp"
+#include "ProtocolVersion.hpp" // for current ProtocolVersion in RegistryMsgHeader
 
 namespace ib {
 namespace mw {
@@ -17,8 +18,13 @@ struct RegistryMsgHeader
     // If versionHigh/Low changes here, update VIB version range .
     // Also, ensure backwards compatibility in the Ser/Des code path.
     // See VAsioProtcolVersion.hpp
-    uint16_t versionHigh = 3;
-    uint16_t versionLow = 1;
+    uint16_t versionHigh;
+    uint16_t versionLow;
+    RegistryMsgHeader()
+        :versionHigh{(uint16_t)std::get<0>(CurrentProtocolVersion())}
+        ,versionLow{(uint16_t)std::get<1>(CurrentProtocolVersion())}
+    {
+    }
 };
 
 struct VAsioMsgSubscriber

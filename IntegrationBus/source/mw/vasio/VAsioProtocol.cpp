@@ -20,7 +20,6 @@
 #include "SerdesMwSync.hpp"
 #include "SerdesSimData.hpp"
 #include "SerdesSimRpc.hpp"
-#include "SerdesSimCan.hpp"
 #include "SerdesSimEthernet.hpp"
 #include "SerdesSimLin.hpp"
 #include "SerdesSimFlexray.hpp"
@@ -200,26 +199,6 @@ void Deserialize(MessageBuffer& buffer, sim::rpc::FunctionCallResponse& out)
 {
     out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
 }
-void Deserialize(MessageBuffer& buffer, sim::can::CanFrameEvent& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::can::CanFrameTransmitEvent& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::can::CanControllerStatus& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::can::CanConfigureBaudrate& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::can::CanSetControllerMode& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
 void Deserialize(MessageBuffer& buffer, sim::eth::EthernetFrameEvent& out)
 {
     out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
@@ -357,31 +336,6 @@ void Serialize(MessageBuffer& buffer, const sim::rpc::FunctionCall& msg)
     return;
 }
 void Serialize(MessageBuffer& buffer, const sim::rpc::FunctionCallResponse& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::can::CanFrameEvent& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::can::CanFrameTransmitEvent& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::can::CanControllerStatus& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::can::CanConfigureBaudrate& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::can::CanSetControllerMode& msg)
 {
     buffer << msg;
     return;

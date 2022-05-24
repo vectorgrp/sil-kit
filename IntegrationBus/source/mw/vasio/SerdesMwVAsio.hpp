@@ -8,6 +8,7 @@
 #include "Uri.hpp"
 #include "MessageBuffer.hpp"
 #include "SerdesCompat.hpp"
+#include "VAsioProtocolVersion.hpp"
 
 namespace ib {
 namespace mw {

@@ -8,10 +8,10 @@
 #include <string>
 
 #include "VAsioDatatypes.hpp" //for RegistryMsgHeader
+#include "MessageBuffer.hpp" //for ProtocolVersion
 
 namespace ib {
 namespace mw {
-using ProtocolVersion = std::tuple<int, int>;
 
 
 inline auto from_header(const RegistryMsgHeader& header) -> ProtocolVersion;
@@ -61,15 +61,6 @@ auto MapVersionToRelease(const ib::mw::RegistryMsgHeader& registryMsgHeader) -> 
     }
 
     return {"Unknown version range"};
-}
-
-constexpr auto CurrentProtocolVersion() -> ProtocolVersion
-{
-    //VS2015 does not support proper c++14:
-    //const RegistryMsgHeader header;
-    //return {header.versionHigh, header.versionLow};
-    return {RegistryMsgHeader{}.versionHigh,
-        RegistryMsgHeader{}.versionLow};
 }
 
 } // mw

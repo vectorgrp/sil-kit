@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "SerdesSimCan.hpp"
+#include "CanSerdes.hpp"
 
 #include <chrono>
 
@@ -29,8 +29,8 @@ TEST(MwVAsioSerdes, SimCan_CanMessage)
     in.frame.dataField = std::vector<uint8_t>{payload.begin(), payload.end()};
     in.userContext = (void*)((size_t)0xcafecafe);
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.transmitId, out.transmitId);
     EXPECT_EQ(in.timestamp, out.timestamp);
@@ -58,8 +58,8 @@ TEST(MwVAsioSerdes, SimCan_CanTransmitAcknowledge)
     in.status = CanTransmitStatus::Transmitted;
     in.userContext = (void*)((size_t) 0xcafecafe );
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.transmitId, out.transmitId);
     EXPECT_EQ(in.timestamp, out.timestamp);
@@ -79,8 +79,8 @@ TEST(MwVAsioSerdes, SimCan_CanControllerStatus)
     in.controllerState = CanControllerState::Started;
     in.errorState = CanErrorState::ErrorActive;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.controllerState, out.controllerState);
@@ -98,8 +98,8 @@ TEST(MwVAsioSerdes, SimCan_CanConfigureBaudrate)
     in.baudRate = 123;
     in.fdBaudRate = 4294967295;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.baudRate, out.baudRate);
     EXPECT_EQ(in.fdBaudRate, out.fdBaudRate);
@@ -117,8 +117,8 @@ TEST(MwVAsioSerdes, SimCan_CanSetControllerMode)
     in.flags.cancelTransmitRequests = 0;
     in.mode = CanControllerState::Started;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in.flags.resetErrorHandling, out.flags.resetErrorHandling);
     EXPECT_EQ(in.flags.cancelTransmitRequests, out.flags.cancelTransmitRequests);

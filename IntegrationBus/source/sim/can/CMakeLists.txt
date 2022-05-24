@@ -11,6 +11,9 @@ add_library(IbSimCan STATIC
     SimBehaviorDetailed.hpp
     SimBehaviorTrivial.cpp
     SimBehaviorTrivial.hpp
+
+    CanSerdes.hpp
+    CanSerdes.cpp
 )
 
 target_include_directories(IbSimCan
@@ -39,3 +42,5 @@ add_vib_test(TestSimCanController
         IbTracing
         IbMwMockNullConnection
 )
+
+add_vib_test(TestCan_CanSerdes  SOURCES CanSerdesTest.cpp LIBS IbInternal IbSimCan)

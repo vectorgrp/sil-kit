@@ -4,7 +4,6 @@ find_package(Threads REQUIRED)
 add_library(IbMwVAsio STATIC
     VAsioConnection.hpp
     VAsioConnection.cpp
-    MessageBuffer.hpp
     VAsioProtocol.hpp
     VAsioProtocol.cpp
     SerdesCompat.hpp
@@ -15,7 +14,6 @@ add_library(IbMwVAsio STATIC
     SerdesMwService.hpp
     SerdesSimData.hpp
     SerdesSimRpc.hpp
-    SerdesSimCan.hpp
     SerdesSimEthernet.hpp
     SerdesSimLin.hpp
     SerdesSimFlexray.hpp
@@ -74,10 +72,8 @@ endif()
 add_vib_test(TestMwVAsioConnection SOURCES VAsioConnectionTest.cpp LIBS IbMwVAsio IbMwMockParticipant)
 
 # XXX linking against IbInternal is required because VAsioProtocolVersion.hpp pulls in EndpointAddress.hpp indirectly
-add_vib_test(TestMwVAsio_MessageBuffer SOURCES MessageBufferTest.cpp LIBS IbInternal)
 add_vib_test(TestMwVAsio_SerdesMw SOURCES SerdesMwTest.cpp LIBS IbInternal)
 add_vib_test(TestMwVAsio_SerdesMwSync SOURCES SerdesMwSyncTest.cpp LIBS IbMwSync)
-add_vib_test(TestMwVAsio_SerdesSimCan SOURCES SerdesSimCanTest.cpp LIBS IbInternal)
 add_vib_test(TestMwVAsio_SerdesSimEthernet SOURCES SerdesSimEthernetTest.cpp LIBS IbSimEthernet)
 add_vib_test(TestMwVAsio_SerdesSimLin SOURCES SerdesSimLinTest.cpp LIBS IbInternal)
 add_vib_test(TestMwVAsio_SerdesSimFlexray SOURCES SerdesSimFlexrayTest.cpp LIBS IbInternal)

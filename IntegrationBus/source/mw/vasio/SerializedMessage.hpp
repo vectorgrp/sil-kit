@@ -15,11 +15,13 @@
 #include "SerdesMwSync.hpp"
 #include "SerdesSimData.hpp"
 #include "SerdesSimRpc.hpp"
-#include "SerdesSimCan.hpp"
 #include "SerdesSimEthernet.hpp"
 #include "SerdesSimLin.hpp"
 #include "SerdesSimFlexray.hpp"
 #include "SerdesMwService.hpp"
+
+// Component specific Serialize/Deserialize functions
+#include "CanSerdes.hpp"
 
 namespace ib {
 namespace mw {
@@ -39,22 +41,12 @@ template<> inline constexpr auto registryMessageKind<ParticipantAnnouncement>() 
 template<> inline constexpr auto registryMessageKind<ParticipantAnnouncementReply>() -> RegistryMessageKind { return RegistryMessageKind::ParticipantAnnouncementReply;}
 template<> inline constexpr auto registryMessageKind<KnownParticipants>() -> RegistryMessageKind { return RegistryMessageKind::KnownParticipants;}
 
-template<typename ApiMessageT>
-struct IbMessage
-	: public ApiMessageT
+
+template<typename... Args>
+auto AdlDeserialize(Args&&... args) -> decltype(auto)
 {
-	using ApiMessageT::ApiMessageT;
-
-	static void Serialize(const ApiMessageT& message, MessageBuffer& buffer)
-	{
-		buffer << message;
-	}
-	void Deserialize(MessageBuffer& buffer)
-	{
-		buffer >> static_cast<ApiMessageT&>(*this);
-	}
-};
-
+	return Deserialize(std::forward<Args>(args)...);
+}
 class SerializedMessage
 {
 public: //defaulted CTors
@@ -112,10 +104,10 @@ public: // Receiving a SerializedMessage: from binary blob to IbMessage<T>
 		ReadNetworkHeaders();
 	}
 	template<typename ApiMessageT>
-	auto Deserialize() -> IbMessage<ApiMessageT>
+	auto Deserialize() -> ApiMessageT
 	{
-		IbMessage<ApiMessageT> value{};
-		value.Deserialize(_buffer);
+		ApiMessageT value{};
+		AdlDeserialize(_buffer, value);
 		return value;
 	}
 

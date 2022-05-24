@@ -14,12 +14,15 @@
 
 #include "ib/util/vector_view.hpp"
 
-#include "VAsioProtocolVersion.hpp"
+#include "ProtocolVersion.hpp"
+
 
 namespace ib {
 namespace mw {
 
+// The protocol version is directly tied to the MessageBuffer for backward compatibility in Ser/Des
 struct end_of_buffer : public std::exception {};    
+
 
 class MessageBuffer
 {
