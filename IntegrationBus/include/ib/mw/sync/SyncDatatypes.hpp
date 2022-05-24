@@ -43,22 +43,22 @@ struct SystemCommand
 };
 
 enum class ParticipantState : uint8_t {
-    Invalid, //!< An invalid participant state
-    Idle, //!< The idle state
-    Initializing, //!< The initializing state
-    Initialized, //!< The initialized state
-    Running, //!< The running state
-    Paused, //!< The paused state
-    Stopping, //!< The stopping state
-    Stopped, //!< The stopped state
-    ColdswapPrepare, //!< The ColdswapPrepare state
-    ColdswapReady, //!< The ColdswapReady state
-    ColdswapShutdown, //!< The ColdswapShutdown state
-    ColdswapIgnored, //!< The ColdswapIgnored state
-    Error, //!< The error state
-    ShuttingDown, //!< The shutting down state
-    Shutdown, //!< The shutdown state
-    Reinitializing  //!< The reinitializing state
+    Invalid = 0, //!< An invalid participant state
+    Idle = 1, //!< The idle state
+    Initializing = 2, //!< The initializing state
+    Initialized = 3, //!< The initialized state
+    Running = 4, //!< The running state
+    Paused = 5, //!< The paused state
+    Stopping = 6, //!< The stopping state
+    Stopped = 7, //!< The stopped state
+    ColdswapPrepare = 8, //!< The ColdswapPrepare state
+    ColdswapReady = 9, //!< The ColdswapReady state
+    ColdswapShutdown = 10, //!< The ColdswapShutdown state
+    ColdswapIgnored = 11, //!< The ColdswapIgnored state
+    Error = 12, //!< The error state
+    ShuttingDown = 13, //!< The shutting down state
+    Shutdown = 14, //!< The shutdown state
+    Reinitializing = 15  //!< The reinitializing state
 };
 
 struct ParticipantStatus
