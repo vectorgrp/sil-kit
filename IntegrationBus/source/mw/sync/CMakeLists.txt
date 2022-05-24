@@ -11,6 +11,9 @@ add_library(IbMwSync
     WatchDog.hpp
     WatchDog.cpp
     TimeProvider.hpp
+
+    SyncSerdes.hpp
+    SyncSerdes.cpp
 )
 
 target_include_directories(IbMwSync
@@ -25,9 +28,11 @@ target_link_libraries(IbMwSync
         IbSetThreadName
         IbInternal
     PRIVATE 
+        IbInternal
         IbMwLogging
         IbConfiguration
     INTERFACE
+        IbInternal
         IbConfiguration
 )
 
@@ -47,3 +52,4 @@ add_vib_test(TestMwWatchDog
     SOURCES WatchDogTest.cpp
     LIBS IbMwSync
 )
+add_vib_test(Test_SyncSerdes SOURCES SyncSerdesTest.cpp LIBS IbMwSync IbInternal)

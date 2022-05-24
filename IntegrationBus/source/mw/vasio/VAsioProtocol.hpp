@@ -68,11 +68,6 @@ bool ProtocolVersionSupported(const RegistryMsgHeader& header);
 // Deserializers which exclude the network trailers: we assume that the 
 // VAsioMsgKind, EndpointId, and EndpointAddress members have been extracted.
 void Deserialize(MessageBuffer& buffer, logging::LogMsg& out);
-void Deserialize(MessageBuffer& buffer, sync::ParticipantCommand& out);
-void Deserialize(MessageBuffer& buffer, sync::SystemCommand& out);
-void Deserialize(MessageBuffer& buffer, sync::ParticipantStatus& out);
-void Deserialize(MessageBuffer& buffer, sync::ExpectedParticipants& out);
-void Deserialize(MessageBuffer& buffer, sync::NextSimTask& out);
 void Deserialize(MessageBuffer& buffer, sim::data::DataMessageEvent& out);
 void Deserialize(MessageBuffer& buffer, sim::rpc::FunctionCall& out);
 void Deserialize(MessageBuffer& buffer, sim::rpc::FunctionCallResponse& out);
@@ -82,11 +77,6 @@ void Deserialize(MessageBuffer& buffer, service::ServiceDiscoveryEvent& out);
 // Serializers for complete network packets (including size,type kind and service index members)
 
 void Serialize(MessageBuffer& buffer,const logging::LogMsg& msg);
-void Serialize(MessageBuffer& buffer,const sync::ParticipantCommand& msg);
-void Serialize(MessageBuffer& buffer,const sync::SystemCommand& msg);
-void Serialize(MessageBuffer& buffer,const sync::ParticipantStatus& msg);
-void Serialize(MessageBuffer& buffer,const sync::ExpectedParticipants& msg);
-void Serialize(MessageBuffer& buffer,const sync::NextSimTask& msg);
 void Serialize(MessageBuffer& buffer,const sim::data::DataMessageEvent& msg);
 void Serialize(MessageBuffer& buffer,const sim::rpc::FunctionCall& msg);
 void Serialize(MessageBuffer& buffer,const sim::rpc::FunctionCallResponse& msg);

@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "SerdesMw.hpp"
+#include "InternalSerdes.hpp"
 
 #include "gtest/gtest.h"
 

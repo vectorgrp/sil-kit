@@ -8,3 +8,4 @@ target_include_directories(IbInternal
 )
 
 add_vib_test(TestMwVAsio_MessageBuffer SOURCES MessageBufferTest.cpp LIBS IbInternal)
+add_vib_test(Test_InternalSerdes  SOURCES InternalSerdesTest.cpp LIBS IbInternal)

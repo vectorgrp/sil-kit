@@ -3,7 +3,7 @@
 #include <string>
 
 #include "MessageBuffer.hpp"
-#include "SerdesMw.hpp"
+#include "InternalSerdes.hpp"
 
 #include "traits/IbMsgTraits.hpp"
 

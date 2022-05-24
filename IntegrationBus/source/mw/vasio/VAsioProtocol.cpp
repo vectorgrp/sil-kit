@@ -13,11 +13,9 @@
 #include "ib/mw/sync/SyncDatatypes.hpp"
 
 // message buffer Serdes
-#include "SerdesMw.hpp"
 #include "SerdesMwVAsio.hpp"
 
 #include "SerdesMwLogging.hpp"
-#include "SerdesMwSync.hpp"
 #include "SerdesSimData.hpp"
 #include "SerdesSimRpc.hpp"
 #include "SerdesMwService.hpp"
@@ -164,26 +162,6 @@ void Deserialize(MessageBuffer& buffer, mw::logging::LogMsg& out)
 {
     out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
 }
-void Deserialize(MessageBuffer& buffer, mw::sync::ParticipantCommand& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, mw::sync::SystemCommand& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, mw::sync::ParticipantStatus& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, mw::sync::ExpectedParticipants& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, mw::sync::NextSimTask& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
 void Deserialize(MessageBuffer& buffer, sim::data::DataMessageEvent& out)
 {
     out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
@@ -209,31 +187,6 @@ void Deserialize(MessageBuffer& buffer, mw::service::ServiceDiscoveryEvent& out)
 // Serializers
 //////////////////////////////////////////////////////////////////////
 void Serialize(MessageBuffer& buffer, const logging::LogMsg& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sync::ParticipantCommand& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sync::SystemCommand& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sync::ParticipantStatus& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sync::ExpectedParticipants& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sync::NextSimTask& msg)
 {
     buffer << msg;
     return;

@@ -32,5 +32,5 @@ add_vib_test(TestSimDataSubscriber
 )
 add_vib_test(TestPubSubMatching
     SOURCES PubSubMatchingTest.cpp 
-    LIBS IbSimDataMessage
+    LIBS IbSimDataMessage IbInternal
 )

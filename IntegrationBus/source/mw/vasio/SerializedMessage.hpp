@@ -8,11 +8,9 @@
 #include "VAsioProtocol.hpp"
 
 // XXX hackish, should be hidden together wit IbMessage<T> specializations
-#include "SerdesMw.hpp"
 #include "SerdesMwVAsio.hpp"
 
 #include "SerdesMwLogging.hpp"
-#include "SerdesMwSync.hpp"
 #include "SerdesSimData.hpp"
 #include "SerdesSimRpc.hpp"
 #include "SerdesMwService.hpp"
@@ -22,6 +20,8 @@
 #include "LinSerdes.hpp"
 #include "EthernetSerdes.hpp"
 #include "FlexraySerdes.hpp"
+#include "InternalSerdes.hpp"
+#include "SyncSerdes.hpp"
 
 namespace ib {
 namespace mw {

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "MessageBuffer.hpp"
-#include "SerdesMw.hpp"
+#include "InternalSerdes.hpp"
 #include "ServiceDescriptor.hpp"
 
 #include "ServiceDatatypes.hpp"

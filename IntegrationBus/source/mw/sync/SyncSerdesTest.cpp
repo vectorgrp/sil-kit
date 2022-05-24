@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "SerdesMwSync.hpp"
+#include "SyncSerdes.hpp"
 
 #include <chrono>
 
@@ -16,8 +16,8 @@ TEST(MwVAsioSerdes, MwSync_ParticipantCommand)
     ParticipantCommand in{7, ParticipantCommand::Kind::Initialize};
     ParticipantCommand out{0, ParticipantCommand::Kind::Invalid};
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer,out);
 
     EXPECT_EQ(in.participant, out.participant);
     EXPECT_EQ(in.kind, out.kind);
@@ -31,8 +31,8 @@ TEST(MwVAsioSerdes, MwSync_SystemCommand)
     SystemCommand in{SystemCommand::Kind::Run};
     SystemCommand out{SystemCommand::Kind::Invalid};
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer,out);
 
     EXPECT_EQ(in.kind, out.kind);
 }
@@ -54,8 +54,8 @@ TEST(MwVAsioSerdes, MwSync_ParticipantStatus)
     in.enterTime = nowUs;
     in.refreshTime = nowUs;
 
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer , in);
+    Deserialize(buffer,out);
 
     EXPECT_EQ(in.participantName, out.participantName);
     EXPECT_EQ(in.state, out.state);
