@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <array>
+#include <cstdint>
 #include <string>
 
 #include "VAsioPeerInfo.hpp"
@@ -14,7 +15,7 @@ namespace mw {
 
 struct RegistryMsgHeader
 {
-    std::array<char, 4> preambel{{'V', 'I', 'B', '-'}};
+    std::array<uint8_t, 4> preambel{{'V', 'I', 'B', '-'}};
     // If versionHigh/Low changes here, update VIB version range .
     // Also, ensure backwards compatibility in the Ser/Des code path.
     // See VAsioProtcolVersion.hpp
