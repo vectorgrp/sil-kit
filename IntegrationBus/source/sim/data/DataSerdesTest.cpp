@@ -1,8 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "SerdesSimData.hpp"
-#include "MessageBuffer.hpp"
-#include "VAsioMsgKind.hpp"
+#include "DataSerdes.hpp"
 
 #include <chrono>
 
@@ -32,8 +30,8 @@ TEST(MwVAsioSerdes, SimData_LargeDataMessage)
     in.data = {1,2,3,4};
     in.timestamp = 0xabcdefns;
         
-    buffer<<  in;
-    buffer>> out;
+    Serialize(buffer,  in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in, out);
 }

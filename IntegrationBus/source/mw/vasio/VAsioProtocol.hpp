@@ -59,11 +59,9 @@ bool ProtocolVersionSupported(const RegistryMsgHeader& header);
 
 // Deserializers which exclude the network trailers: we assume that the 
 // VAsioMsgKind, EndpointId, and EndpointAddress members have been extracted.
-void Deserialize(MessageBuffer& buffer, sim::data::DataMessageEvent& out);
 
 // Serializers for complete network packets (including size,type kind and service index members)
 
-void Serialize(MessageBuffer& buffer,const sim::data::DataMessageEvent& msg);
 
 }//mw
 }//ib

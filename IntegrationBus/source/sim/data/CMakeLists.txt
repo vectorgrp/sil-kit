@@ -9,6 +9,9 @@ add_library(IbSimDataMessage STATIC
 
     DataSubscriberInternal.hpp
     DataSubscriberInternal.cpp
+
+    DataSerdes.hpp
+    DataSerdes.cpp
 )
 
 target_include_directories(IbSimDataMessage
@@ -34,3 +37,4 @@ add_vib_test(TestPubSubMatching
     SOURCES PubSubMatchingTest.cpp 
     LIBS IbSimDataMessage IbInternal
 )
+add_vib_test(Test_DataSerdes SOURCES DataSerdesTest.cpp LIBS IbSimDataMessage IbInternal)

@@ -14,7 +14,6 @@
 
 // message buffer Serdes
 #include "SerdesMwVAsio.hpp"
-#include "SerdesSimData.hpp"
 
 #include "InternalSerdes.hpp"
 
@@ -155,18 +154,9 @@ bool ProtocolVersionSupported(const RegistryMsgHeader& header)
 // Services for established connections
 ////////////////////////////////////////////////////////////////////////////////
 
-void Deserialize(MessageBuffer& buffer, sim::data::DataMessageEvent& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
 
 //////////////////////////////////////////////////////////////////////
 // Serializers
 //////////////////////////////////////////////////////////////////////
-void Serialize(MessageBuffer& buffer, const sim::data::DataMessageEvent& msg)
-{
-    buffer << msg;
-    return;
-}
 } // namespace mw
 } // namespace ib

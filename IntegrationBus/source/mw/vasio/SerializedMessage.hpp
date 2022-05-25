@@ -10,7 +10,6 @@
 // XXX hackish, should be hidden together wit IbMessage<T> specializations
 #include "SerdesMwVAsio.hpp"
 
-#include "SerdesSimData.hpp"
 
 // Component specific Serialize/Deserialize functions
 #include "CanSerdes.hpp"
@@ -22,6 +21,7 @@
 #include "SyncSerdes.hpp"
 #include "ServiceSerdes.hpp"
 #include "LoggingSerdes.hpp"
+#include "DataSerdes.hpp"
 
 namespace ib {
 namespace mw {
